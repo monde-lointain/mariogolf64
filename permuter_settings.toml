@@ -1,0 +1,15 @@
+# tools/permuter prepends compiler_command with the owning C file's profile
+# (`make print-cflags`); run the permuter through that wrapper.
+assembler_command = "mips-linux-gnu-as -EB -march=vr4300 -mtune=vr4300 -Iinclude"
+asm_prelude_file = "tools/claude-decomp-env/prelude.inc"
+
+compiler_type = "gcc"
+
+[preserve_macros]
+"MIN" = "int"
+"MAX" = "int"
+"ABS" = "int"
+"NULL" = "void*"
+
+[decompme.compilers]
+"tools/kmc-cc" = "gcc2.7.2kmc"

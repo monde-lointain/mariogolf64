@@ -1,0 +1,348 @@
+#!/usr/bin/env bash
+
+# Creates nonmatchings/<function>[-N] with the target assembly, a starting
+# base.c, and the matching helpers from tools/claude-decomp-env, then optionally
+# launches an agent CLI inside it.
+
+# Parse arguments
+BOOTSTRAP=false
+BOOTSTRAP_ONLY=false
+ID=""
+ARG=""
+CLI="claude"
+CLI_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --bootstrap)
+            BOOTSTRAP=true
+            shift
+            ;;
+        --bootstrap-only)
+            BOOTSTRAP_ONLY=true
+            BOOTSTRAP=true
+            shift
+            ;;
+        --glaude)
+            CLI="glaude"
+            CLI_ARGS=()
+            shift
+            ;;
+        --codex)
+            CLI="codex"
+            CLI_ARGS=(--yolo)
+            shift
+            ;;
+        --id)
+            ID="$2"
+            shift 2
+            ;;
+        *)
+            ARG="$1"
+            shift
+            ;;
+    esac
+done
+
+CLAUDE_DIR="$(pwd)/tools/claude-decomp-env"
+CLAUDE_CONFIG="$(pwd)/.claude"
+PYTHON=python3
+[ -x .venv/bin/python3 ] && PYTHON=.venv/bin/python3
+M2C=m2c
+[ -x .venv/bin/m2c ] && M2C=.venv/bin/m2c
+
+find_cross_prefix() {
+    if command -v mips-linux-gnu-as >/dev/null 2>&1; then
+        echo "mips-linux-gnu-"
+    elif command -v mips64-linux-gnu-as >/dev/null 2>&1; then
+        echo "mips64-linux-gnu-"
+    elif command -v mips64-elf-as >/dev/null 2>&1; then
+        echo "mips64-elf-"
+    else
+        echo ""
+    fi
+}
+
+create_unique_dir() {
+    mkdir -p nonmatchings
+
+    local base_dir="nonmatchings/$1"
+    local dir="$base_dir"
+    local counter=2
+
+    while [ -d "$dir" ]; do
+        dir="$base_dir-$counter"
+        ((counter++))
+    done
+
+    mkdir -p "$dir"
+    echo "$dir"
+}
+
+run_cli() {
+    "$CLI" "${CLI_ARGS[@]}" "$1"
+}
+
+# find_function_asm <name>: prints the per-function file under asm/nonmatchings,
+# or the extracted assembly file that defines the function.
+find_function_asm() {
+    local name="$1" path
+    path=$(find asm/nonmatchings -name "$name.s" -type f 2>/dev/null | head -1)
+    if [ -z "$path" ]; then
+        path=$(grep -rlE "^glabel $name\$" asm --include='*.s' --exclude-dir=nonmatchings 2>/dev/null | head -1)
+    fi
+    echo "$path"
+}
+
+# Check if argument is provided
+if [ -z "$ARG" ]; then
+    echo "Usage: $0 [--bootstrap] [--bootstrap-only] [--glaude] [--codex] [--id ID] <function_name_or_path_or_scratch_id>"
+    exit 1
+fi
+
+if [ ! -d asm ]; then
+    echo "Error: asm/ does not exist. Run ./tools/build-and-verify.sh first."
+    exit 1
+fi
+
+# A decomp.me scratch ID is alphanumeric. Function names win when both match.
+USE_SCRATCH_SOURCE=false
+if [[ "$ARG" != *.s && "$ARG" != */* ]] && [ -z "$(find_function_asm "$ARG")" ] &&
+    { [[ "$ARG" =~ ^[0-9]+$ ]] || [[ "$ARG" =~ ^[a-zA-Z0-9]+$ && ${#ARG} -ge 5 && ${#ARG} -le 10 ]]; }; then
+    echo "Detected scratch ID: $ARG"
+
+    # Check for invalid --bootstrap + scratch ID combination
+    if [ "$BOOTSTRAP" = true ]; then
+        echo "Error: --bootstrap cannot be used with a scratch ID"
+        echo "Bootstrap mode requires a function name to generate code from m2c"
+        exit 1
+    fi
+
+    # Check for invalid --id + scratch ID combination
+    if [ -n "$ID" ]; then
+        echo "Error: --id cannot be used with a scratch ID"
+        echo "The --id flag is only for use with --bootstrap and a function name"
+        exit 1
+    fi
+
+    echo "Fetching from decomp.me API..."
+
+    # Read user agent from .decomp_dev_secret
+    USER_AGENT=""
+    if [ -f .decomp_dev_secret ]; then
+        USER_AGENT=$(head -n 1 .decomp_dev_secret | tr -d '\n\r')
+    fi
+
+    # Fetch the scratch data from decomp.me API
+    if [ -n "$USER_AGENT" ]; then
+        SCRATCH_DATA=$(curl -s -H "User-Agent: $USER_AGENT" "https://decomp.me/api/scratch/$ARG")
+    else
+        SCRATCH_DATA=$(curl -s "https://decomp.me/api/scratch/$ARG")
+    fi
+
+    if [ $? -ne 0 ] || [ -z "$SCRATCH_DATA" ]; then
+        echo "Error: Failed to fetch scratch data from decomp.me"
+        exit 1
+    fi
+
+    # Check if we got an error response
+    if echo "$SCRATCH_DATA" | grep -q '"error"'; then
+        echo "Error: Scratch not found or API error"
+        echo "$SCRATCH_DATA"
+        exit 1
+    fi
+
+    # Extract diff_label and source_code from JSON response
+    DIFF_LABEL=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('diff_label', ''))" 2>/dev/null)
+    SOURCE_CODE=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('source_code', ''))" 2>/dev/null)
+    SCRATCH_SCORE=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); score = data.get('score', 0); max_score = data.get('max_score', 0); pct = ((max_score - score) / max_score * 100) if max_score > 0 else 0; print(f'{pct:.2f}')" 2>/dev/null)
+    SCRATCH_DIFF_FLAGS=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(' '.join(data.get('diff_flags') or []))" 2>/dev/null)
+
+    if [ -z "$DIFF_LABEL" ] || [ -z "$SOURCE_CODE" ]; then
+        echo "Error: Could not extract diff_label or source_code from API response"
+        echo "$SCRATCH_DATA"
+        exit 1
+    fi
+
+    # Use diff_label as the function name for ASM lookup
+    FUNC_NAME="$DIFF_LABEL"
+    USE_SCRATCH_SOURCE=true
+else
+    # Regular function name or path handling
+    FUNC_NAME="$ARG"
+
+    # Check that --id is used with --bootstrap
+    if [ -n "$ID" ] && [ "$BOOTSTRAP" != true ]; then
+        echo "Error: --id requires --bootstrap"
+        echo "The --id flag is only for use with --bootstrap mode"
+        exit 1
+    fi
+fi
+
+# Resolve the assembly: a path, a per-function file, or a function inside an
+# extracted assembly file.
+if [[ "$FUNC_NAME" == *.s ]]; then
+    ASM_PATH="$FUNC_NAME"
+    FUNC_NAME="$(basename "${FUNC_NAME%.s}")"
+else
+    FUNC_NAME="${FUNC_NAME%.s}"
+    ASM_PATH="$(find_function_asm "$FUNC_NAME")"
+fi
+
+if [ -z "$ASM_PATH" ] || [ ! -f "$ASM_PATH" ]; then
+    echo "Error: Could not find assembly for function: $FUNC_NAME"
+    exit 1
+fi
+
+# Map the assembly to the C translation unit whose compiler profile applies.
+#   asm/nonmatchings/main/func_8002A640/render_frame.s -> src/main/func_8002A640.c
+#   asm/main/func_8002A640.s (full disassembly of a C file) -> src/main/func_8002A640.c
+# Functions in assembly-only segments get the main or overlay default profile.
+case "$ASM_PATH" in
+    asm/nonmatchings/*)
+        C_FILE="src/$(dirname "${ASM_PATH#asm/nonmatchings/}").c"
+        PROFILE_SOURCE="$C_FILE"
+        ;;
+    *)
+        C_FILE="src/${ASM_PATH#asm/}"
+        C_FILE="${C_FILE%.s}.c"
+        PROFILE_SOURCE="$C_FILE"
+        ;;
+esac
+if [ ! -f "$C_FILE" ]; then
+    C_FILE=""
+    VRAM=$(grep -m1 -A3 -E "^glabel $FUNC_NAME\$" "$ASM_PATH" | grep -oE '/\* [0-9A-F]+ [0-9A-F]{8} ' | head -1 | awk '{print $3}')
+    if [ -n "$VRAM" ] && [ $((16#$VRAM)) -lt $((16#80100000)) ]; then
+        PROFILE_SOURCE=src/main/__candidate__.c
+    else
+        PROFILE_SOURCE=src/__candidate__.c
+    fi
+fi
+
+# Setup working directory
+if [ -n "$ID" ]; then
+    # User specified an ID
+    TARGET_DIR="nonmatchings/${FUNC_NAME}-${ID}"
+    if [ -d "$TARGET_DIR" ]; then
+        # Directory already exists, just direct user to it
+        echo "Directory already exists: $TARGET_DIR"
+        if [ "$BOOTSTRAP_ONLY" = true ]; then
+            echo "Bootstrap-only mode: directory ready at $TARGET_DIR"
+        elif command -v $CLI &> /dev/null; then
+            cd "$TARGET_DIR"
+            run_cli "decompile ${FUNC_NAME}. the appropriate claude environment has already been created (do not re-run tools/claude --bootstrap). use ultrathink"
+        else
+            echo "Please navigate to: $TARGET_DIR"
+        fi
+        exit 0
+    fi
+    mkdir -p "$TARGET_DIR"
+    created_dir="$TARGET_DIR"
+else
+    created_dir=$(create_unique_dir "$FUNC_NAME")
+fi
+
+# Isolate the target function from a whole assembly file.
+FUNCTION_ASM="$ASM_PATH"
+if [[ "$ASM_PATH" != asm/nonmatchings/* ]]; then
+    FUNCTION_ASM="$created_dir/function.s"
+    awk -v name="$FUNC_NAME" '
+        $0 ~ "^nonmatching " name "," { emit = 1 }
+        emit { print }
+        $0 ~ "^endlabel " name "$" { exit }
+    ' "$ASM_PATH" > "$FUNCTION_ASM"
+    if [ ! -s "$FUNCTION_ASM" ]; then
+        echo "Error: Could not isolate $FUNC_NAME from $ASM_PATH"
+        exit 1
+    fi
+fi
+echo "$PROFILE_SOURCE" > "$created_dir/.source_file"
+
+# Populate with base / target files
+if [ "$USE_SCRATCH_SOURCE" = true ]; then
+    # Write the source code from the scratch to base.c
+    echo "#include \"common.h\"" > "$created_dir/base.c"
+    echo "" >> "$created_dir/base.c"
+    echo "// Imported from decomp.me scratch $ARG (${SCRATCH_SCORE}% match)" >> "$created_dir/base.c"
+    echo "" >> "$created_dir/base.c"
+    echo "$SOURCE_CODE" >> "$created_dir/base.c"
+    if [[ " $SCRATCH_DIFF_FLAGS " == *" -DIFFlevenshtein "* ]]; then
+        echo "levenshtein" > "$created_dir/.diff_algorithm"
+    fi
+    echo "Using source code from decomp.me scratch (${SCRATCH_SCORE}% match)"
+elif [ "$BOOTSTRAP" = true ]; then
+    # Use m2c to generate initial C code from assembly
+    echo "Generating initial C code using m2c..."
+    if ! command -v "$M2C" &> /dev/null; then
+        echo "Warning: m2c command not found. Creating blank base.c file."
+        echo "#include \"common.h\"" > "$created_dir/base.c"
+        echo "" >> "$created_dir/base.c"
+        echo "// file is blank because m2c is not installed" >> "$created_dir/base.c"
+    else
+        # Generate context file if the C file exists
+        CONTEXT_ARG=""
+        if [ -n "$C_FILE" ]; then
+            echo "Generating m2c context from $C_FILE..."
+            if "$PYTHON" tools/m2ctx.py "$C_FILE" 2>/dev/null && [ -f ctx.c ]; then
+                CONTEXT_ARG="--context ctx.c"
+                echo "Context file generated successfully"
+            else
+                echo "Warning: Failed to generate context file, continuing without context"
+            fi
+        else
+            echo "Note: no C file for $FUNC_NAME, generating without context"
+        fi
+
+        # Generate C code using m2c with optional context
+        M2C_OUTPUT=$("$M2C" --target mips-gcc-c $CONTEXT_ARG "$FUNCTION_ASM" 2>&1)
+        M2C_EXIT_CODE=$?
+
+        if [ $M2C_EXIT_CODE -ne 0 ]; then
+            echo "Warning: m2c failed to generate C code. Creating blank base.c file."
+            echo "$M2C_OUTPUT"
+            echo "#include \"common.h\"" > "$created_dir/base.c"
+            echo "" >> "$created_dir/base.c"
+            echo "// file is blank because m2c failed to decompile function" >> "$created_dir/base.c"
+        else
+            # Write m2c output to base.c
+            echo "#include \"common.h\"" > "$created_dir/base.c"
+            echo "" >> "$created_dir/base.c"
+            echo "// This is a decompilation attempt by the m2c tool." >> "$created_dir/base.c"
+            echo "// Function/type definitions might be missing or incomplete." >> "$created_dir/base.c"
+            echo "// The code will likely not compile without further modification." >> "$created_dir/base.c"
+            echo "" >> "$created_dir/base.c"
+            echo "$M2C_OUTPUT" >> "$created_dir/base.c"
+            echo "Generated initial C code from assembly using m2c"
+        fi
+    fi
+else
+    # Use the decomp.me/permuter scratch source
+    cp src/temp.c "$created_dir/base.c"
+fi
+cat "${CLAUDE_DIR}/prelude.inc" "$FUNCTION_ASM" > "$created_dir/target.s"
+CROSS="$(find_cross_prefix)"
+if [ -z "$CROSS" ]; then
+    echo "Error: Unable to detect a suitable MIPS assembler"
+    exit 1
+fi
+"${CROSS}as" -EB -march=vr4300 -mtune=vr4300 -Iinclude -o "$created_dir/target.o" "$created_dir/target.s"
+
+# Add claude decomp helpers
+ln -sf "${CLAUDE_DIR}"/* "$created_dir/"
+rm "$created_dir/CLAUDE.md" "$created_dir/AGENTS.md"
+sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${CLAUDE_DIR}/CLAUDE.md" > "$created_dir/CLAUDE.md"
+ln -s CLAUDE.md "$created_dir/AGENTS.md"
+ln -sf "${CLAUDE_CONFIG}" "$created_dir/"
+ln -sf "$(pwd)/DECOMPILATION_LEARNINGS.md" "$created_dir/"
+
+if [ "$BOOTSTRAP_ONLY" = true ]; then
+    echo "Bootstrap-only mode: environment ready at $created_dir"
+elif command -v $CLI &> /dev/null; then
+    cd "$created_dir"
+    run_cli "decompile ${FUNC_NAME}. the appropriate claude environment has already been created (do not re-run tools/claude --bootstrap). use ultrathink"
+else
+    echo "Success! Please navigate to the created directory and start your decompilation work:"
+    echo ""
+    echo "  cd $created_dir"
+    echo ""
+fi

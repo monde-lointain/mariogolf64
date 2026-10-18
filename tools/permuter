@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+# Imports a candidate into decomp-permuter with the owning C file's ROM
+# compiler profile, then runs the permuter until it is interrupted or matches.
+
+# Parse arguments
+SOURCE_FILE="src/temp.c"
+PRESERVE_F3DEX=false
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --source-file|-s)
+            SOURCE_FILE="$2"
+            shift 2
+            ;;
+        --preserve-f3dex)
+            PRESERVE_F3DEX=true
+            shift
+            ;;
+        -*)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--source-file <path>] [--preserve-f3dex] <function_name_or_path_or_scratch_id>"
+            exit 1
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Restore positional arguments
+set -- "${POSITIONAL_ARGS[@]}"
+
+# Check if argument is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 [--source-file <path>] [--preserve-f3dex] <function_name_or_path_or_scratch_id>"
+    echo "Options:"
+    echo "  --preserve-f3dex          Preserve gDP* and gSP* macros during import"
+    echo "  --source-file, -s <path>  Use specified source file instead of src/temp.c"
+    exit 1
+fi
+
+ARG="$1"
+PYTHON=python3
+[ -x .venv/bin/python3 ] && PYTHON=.venv/bin/python3
+
+find_function_asm() {
+    find asm/nonmatchings -type f -name "$1.s" 2>/dev/null | head -1
+}
+
+# A decomp.me scratch ID is alphanumeric. Function names win when both match.
+if [[ "$ARG" != *.s && "$ARG" != */* ]] && [ -z "$(find_function_asm "$ARG")" ] &&
+    [ ! -f "$(dirname "$SOURCE_FILE")/function.s" ] &&
+    { [[ "$ARG" =~ ^[0-9]+$ ]] || [[ "$ARG" =~ ^[a-zA-Z0-9]+$ && ${#ARG} -ge 5 && ${#ARG} -le 10 ]]; }; then
+    echo "Detected scratch ID: $ARG"
+    echo "Fetching from decomp.me API..."
+
+    # Read user agent from .decomp_dev_secret
+    USER_AGENT=""
+    if [ -f .decomp_dev_secret ]; then
+        USER_AGENT=$(head -n 1 .decomp_dev_secret | tr -d '\n\r')
+    fi
+
+    # Fetch the scratch data from decomp.me API
+    if [ -n "$USER_AGENT" ]; then
+        SCRATCH_DATA=$(curl -s -H "User-Agent: $USER_AGENT" "https://decomp.me/api/scratch/$ARG")
+    else
+        SCRATCH_DATA=$(curl -s "https://decomp.me/api/scratch/$ARG")
+    fi
+
+    if [ $? -ne 0 ] || [ -z "$SCRATCH_DATA" ]; then
+        echo "Error: Failed to fetch scratch data from decomp.me"
+        exit 1
+    fi
+
+    # Check if we got an error response
+    if echo "$SCRATCH_DATA" | grep -q '"error"'; then
+        echo "Error: Scratch not found or API error"
+        echo "$SCRATCH_DATA"
+        exit 1
+    fi
+
+    # Extract diff_label, source_code, and context from JSON response
+    DIFF_LABEL=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('diff_label', ''))" 2>/dev/null)
+    SOURCE_CODE=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('source_code', ''))" 2>/dev/null)
+    CONTEXT=$(echo "$SCRATCH_DATA" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('context', ''))" 2>/dev/null)
+
+    if [ -z "$DIFF_LABEL" ] || [ -z "$SOURCE_CODE" ]; then
+        echo "Error: Could not extract diff_label or source_code from API response"
+        exit 1
+    fi
+
+    echo "Found function: $DIFF_LABEL"
+
+    FUNC_NAME="$DIFF_LABEL"
+    USE_SCRATCH_SOURCE=true
+else
+    FUNC_NAME="$ARG"
+    USE_SCRATCH_SOURCE=false
+fi
+
+# Resolve the target assembly: an explicit path, the per-function file, or the
+# function isolated by tools/claude next to the source file.
+if [[ "$FUNC_NAME" == *.s ]]; then
+    ASM_PATH="$FUNC_NAME"
+else
+    FUNC_NAME="${FUNC_NAME%.s}"
+    ASM_PATH="$(find_function_asm "$FUNC_NAME")"
+    if [ -z "$ASM_PATH" ] && [ -f "$(dirname "$SOURCE_FILE")/function.s" ]; then
+        ASM_PATH="$(dirname "$SOURCE_FILE")/function.s"
+    fi
+
+    if [ -z "$ASM_PATH" ]; then
+        echo "Error: Could not find assembly file for function: $FUNC_NAME"
+        exit 1
+    fi
+
+    echo "Found: $ASM_PATH"
+fi
+
+# Clean up temp files from previous runs (only if using default temp.c)
+if [ "$SOURCE_FILE" = "src/temp.c" ]; then
+    rm -f src/temp.c src/ctx.c
+fi
+
+# Prepare source code for import
+if [ "$USE_SCRATCH_SOURCE" = true ]; then
+    if [ -n "$CONTEXT" ]; then
+        echo "$CONTEXT" > src/ctx.c
+        echo "Saved context to src/ctx.c"
+        echo '#include "ctx.c"' > src/temp.c
+        echo "$SOURCE_CODE" >> src/temp.c
+    else
+        echo "$SOURCE_CODE" > src/temp.c
+    fi
+    echo "Using source code from decomp.me scratch"
+    SOURCE_FILE="src/temp.c"
+fi
+
+# Check that source file exists
+if [ ! -f "$SOURCE_FILE" ]; then
+    echo "Error: Source file not found: $SOURCE_FILE"
+    exit 1
+fi
+
+# The owning C file selects the compiler profile: a decomp environment records
+# it in .source_file; otherwise derive it from the per-function assembly path.
+PROFILE_SOURCE=src/main/__candidate__.c
+if [ -f "$(dirname "$SOURCE_FILE")/.source_file" ]; then
+    PROFILE_SOURCE="$(tr -d '[:space:]' < "$(dirname "$SOURCE_FILE")/.source_file")"
+elif [[ "$ASM_PATH" == asm/nonmatchings/* ]]; then
+    PROFILE_SOURCE="src/$(dirname "${ASM_PATH#asm/nonmatchings/}").c"
+fi
+CFLAGS="$(make -s --no-print-directory print-cflags SRC="$PROFILE_SOURCE")"
+echo "Compiler profile: $PROFILE_SOURCE"
+
+SETTINGS="$(mktemp "${TMPDIR:-/tmp}/permuter-settings.XXXXXX.toml")"
+trap 'rm -f -- "$SETTINGS"' EXIT
+{
+    printf 'compiler_command = "tools/kmc-cc %s -DPERMUTER"\n' "$CFLAGS"
+    cat permuter_settings.toml
+} > "$SETTINGS"
+
+# Run the import script
+echo "Importing from $SOURCE_FILE..."
+
+IMPORT_ARGS=(--settings "$SETTINGS" "$SOURCE_FILE" "$ASM_PATH")
+if [ "$PRESERVE_F3DEX" = true ]; then
+    # gDPSetCombineMode's G_CC_* arguments are themselves comma-separated
+    # macros. Preserve them too so the importer retains the original
+    # three-argument invocation, plus the mux constants used by the nested
+    # gDPSetCombineLERP implementation. Texture-loading macros token-paste
+    # their G_IM_SIZ_* argument with suffixes such as _TILE_BYTES, so that
+    # argument must also survive preprocessing ("1##_TILE_BYTES" is invalid).
+    # gSPClipRatio similarly token-pastes its FRUSTRATIO_* argument into the
+    # FR_NEG_FRUSTRATIO_* and FR_POS_FRUSTRATIO_* object macros, so retain
+    # those leaf constants for the imported macro's later expansion.
+    IMPORT_ARGS=(--preserve-macros '(?:g[DS]P.*)|(?:G_CC_.*)|(?:G_[CA]CMUX_.*)|(?:G_IM_SIZ_.*)|(?:FR_(?:NEG|POS)_FRUSTRATIO_.*)' "${IMPORT_ARGS[@]}")
+fi
+
+IMPORT_OUTPUT=$("$PYTHON" ./tools/decomp-permuter/import.py "${IMPORT_ARGS[@]}" 2>&1)
+IMPORT_EXIT_CODE=$?
+
+echo "$IMPORT_OUTPUT"
+
+if [ $IMPORT_EXIT_CODE -ne 0 ]; then
+    echo "Error: Import failed"
+    exit 1
+fi
+
+# Extract the actual directory from the import output
+PERMUTER_DIR=$(echo "$IMPORT_OUTPUT" | grep -oP "Done\. Imported into \K.*$")
+
+if [ -z "$PERMUTER_DIR" ]; then
+    echo "Error: Could not determine permuter directory from import output"
+    exit 1
+fi
+
+echo "Permuter directory: $PERMUTER_DIR"
+
+# Set up interrupt handling for permuter run
+INTERRUPTED=0
+trap 'INTERRUPTED=1' INT
+
+# Extract identifier for notification
+if [ "$USE_SCRATCH_SOURCE" = true ]; then
+    IDENTIFIER="$DIFF_LABEL"
+else
+    IDENTIFIER="$FUNC_NAME"
+fi
+START_TIME=$(date +%s)
+
+# Run the permuter
+echo "Running permuter..."
+"$PYTHON" tools/decomp-permuter/permuter.py \
+  -j 16 \
+  --best-only \
+  --stop-on-zero \
+  --stack-diffs \
+  --quiet \
+  --algorithm levenshtein "$PERMUTER_DIR"
+
+PERMUTER_EXIT_CODE=$?
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+# A KeyboardInterrupt is converted to exit code 0 by decomp-permuter. Require
+# the zero-score output produced by an actual match before claiming success.
+MATCH_OUTPUT=$(find "$PERMUTER_DIR" -maxdepth 1 -type d -name 'output-0-*' -print -quit)
+
+# Send push notification if matched and took more than 60 seconds
+if [ $INTERRUPTED -eq 0 ] && [ $PERMUTER_EXIT_CODE -eq 0 ] && [ -n "$MATCH_OUTPUT" ] && [ "$DURATION" -gt 60 ]; then
+  if [ -f .push_secrets ]; then
+    source .push_secrets
+    curl -s \
+      --form-string "token=$PUSH_TOKEN" \
+      --form-string "user=$PUSH_USER" \
+      --form-string "message=Matched $IDENTIFIER" \
+      https://api.pushover.net/1/messages.json
+  fi
+fi
+
+exit $PERMUTER_EXIT_CODE
