@@ -1,0 +1,5 @@
+# Central task-runner (nigel) configuration
+agent: "codex"
+success_command: 'git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"'
+# reset_command is intentionally unset: nigel then refuses to start on a dirty tree instead of discarding work.
+verify_command: "./tools/build-and-verify.sh"

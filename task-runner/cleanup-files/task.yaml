@@ -1,0 +1,4 @@
+candidate_source: ls -1 src/main/func_*.c src/overlay_*/func_*.c 2>/dev/null
+prompt: "Clean up $INPUT. Ensure functions use proper structs/arrays/types instead of random pointer math. Consolidate structs where it makes sense. Give the file a proper name using the rename-file skill (remember to git rm the old file). Do any other cleanup you think is helpful but keep in mind the build must remain green: run ./tools/build-and-verify.sh. Commit your work when you're done."
+success_command: 'git add -A && git commit -m "cleaned up $CANDIDATE"'
+timeout: 30m

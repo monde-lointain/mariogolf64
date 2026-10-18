@@ -1,0 +1,17 @@
+candidate_source: "sed -nE 's/^[[:space:]]*-[[:space:]]*\\[(0x[0-9A-Fa-f]+),[[:space:]]*rodata\\][[:space:]]*$/\\1/p' mariogolf64.yaml"
+prompt: >-
+  Use the match-data-segment skill to match the unnamed rodata subsegment
+  `- [$INPUT, rodata]` in mariogolf64.yaml. Determine which C file owns it by
+  finding the functions that reference its symbols (search asm/ for the
+  rodata labels, e.g. jump tables `jtbl_...` and float constants `D_...`).
+  If the owning functions are all decompiled C, change the entry to
+  `- [$INPUT, .rodata, <dir>/<file>]`, split any trailing range that belongs to
+  another file into its own `rodata` entry, and define the constants in the C
+  file in ROM order (KMC GCC emits a function's switch jump tables and
+  literals into .rodata itself). If the owning file still has INCLUDE_ASM
+  stubs that reference this rodata, use INCLUDE_RODATA for those symbols or
+  leave the candidate unchanged. Follow the skill and repository instructions,
+  including stopping immediately if the build script tells you to stop. Run
+  ./tools/build-and-verify.sh before finishing.
+success_command: 'git add -A && git commit -m "task-runner($TASK_NAME): match rodata segment $CANDIDATE"'
+timeout: 60m

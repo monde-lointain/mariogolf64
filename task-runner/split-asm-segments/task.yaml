@@ -1,0 +1,19 @@
+candidate_source: "sed -nE 's/^[[:space:]]*-[[:space:]]*\\[(0x[0-9A-Fa-f]+),[[:space:]]*asm\\][[:space:]]*$/\\1/p' mariogolf64.yaml"
+prompt: >-
+  Convert the assembly-only subsegment at ROM offset $INPUT in
+  mariogolf64.yaml into a C translation unit whose functions are all
+  INCLUDE_ASM stubs, so its functions can be decompiled one at a time. Find
+  the code segment that contains the subsegment (main, overlay_N, or
+  overlay_gap) and change `- [$INPUT, asm]` to `- [$INPUT, c, <segment>/<name>]`
+  where <name> follows the existing convention (`func_<VRAM of the first
+  function>` unless a better name is evident). Extraction creates
+  src/<segment>/<name>.c with one single-line INCLUDE_ASM per function when the
+  file does not exist yet; run ./tools/build-and-verify.sh to extract and
+  verify. Keep every INCLUDE_ASM on one line. If the C translation unit does not
+  rebuild the ROM byte for byte (for example because of section alignment,
+  rodata, or functions that the original file split differently), find and fix
+  the real boundary or alignment cause in mariogolf64.yaml; if that is not
+  possible, restore the asm subsegment. Do not decompile functions in this task.
+  Finish only when ./tools/build-and-verify.sh succeeds.
+success_command: 'git add -A && git commit -m "split asm segment $CANDIDATE into C"'
+timeout: 60m

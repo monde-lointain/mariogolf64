@@ -1,0 +1,4 @@
+candidate_source: ls -1 src/main/*.c src/mgu/*.c src/overlay_*/*.c
+prompt: "Examine $INPUT, look for instances of duplicate structs and structs that are just local copies of common game structs defined elsewhere in src/ or include/. Consolidate them to use common struct definitions where appropriate. Also take this opportunity to provide useful, descriptive field names rather than just unk0. Try to co-locate struct definitions in the most appropriate header file. Only create a new one if no suitable candidate exists. Run ./tools/build-and-verify.sh before finishing."
+accept_best_effort: true
+timeout: 60m
