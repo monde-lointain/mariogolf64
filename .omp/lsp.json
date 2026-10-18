@@ -1,7 +1,0 @@
-{
-  "servers": {
-    "clangd": {
-      "command": "clangd-23"
-    }
-  }
-}
