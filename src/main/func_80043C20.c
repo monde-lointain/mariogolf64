@@ -228,8 +228,7 @@ void func_800444B8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20",
-            predict_shot_distance_variant);
+INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", predict_shot_distance_variant);
 
 s32 get_club_distance_slot(ClubShot* club_data, s32 distance_index) {
   return club_data->distances[distance_index];

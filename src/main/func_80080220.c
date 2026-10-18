@@ -105,8 +105,7 @@ void init_sky_panels(void) {
  * iterations. Full reconstruction + the register mapping table in
  * docs/wip/init_sky_pool_and_world_state.near-match.md.
  */
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220",
-            init_sky_pool_and_world_state);
+INCLUDE_ASM("asm/nonmatchings/main/func_80080220", init_sky_pool_and_world_state);
 void func_80080564(s32 buffer_index, s32 asset_index, s32 rom_slot_offset) {
   RomAssetLoad asset_load;
   RomLoadSlot rom_slot;

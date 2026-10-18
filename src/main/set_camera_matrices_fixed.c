@@ -5,11 +5,9 @@
    the camera-space depth row. */
 extern f32 view_matrix[4][4];
 
-INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",
-            set_camera_matrices_fixed);
+INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", set_camera_matrices_fixed);
 
-INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",
-            set_camera_matrices_float);
+INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", set_camera_matrices_float);
 
 extern f32 D_800E16EC;
 extern f32 persp_scale_x;
@@ -62,8 +60,7 @@ s32 project_point_view_depth(f32 x, f32 y, f32 z) {
                view_matrix[2][2] * z + view_matrix[3][2]);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed",
-            project_point_to_screen);
+INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", project_point_to_screen);
 
 INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", func_80065898);
 

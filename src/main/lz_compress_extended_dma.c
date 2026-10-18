@@ -60,8 +60,7 @@ extern s32 D_80104E70[];
 extern s32 D_8010CF60[];
 extern s32 D_80106148[];
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma",
-            lz_compress_extended_dma);
+INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", lz_compress_extended_dma);
 
 /*
  * A small LCG scratch RNG (state D_800C3FA0). The two helpers are GCC nested

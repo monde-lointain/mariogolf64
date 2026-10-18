@@ -245,8 +245,7 @@ void format_hole_number(s32 hole_index, char* output_buffer) {
   sprintf(output_buffer, D_800D1238, hole_index + 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            init_per_player_state);
+INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", init_per_player_state);
 
 void initialize_game_setup(s32 setup_mode) {
   if (setup_mode == 1) {
@@ -535,8 +534,7 @@ void setup_terrain_detail_default(void) {
   gen_terrain_detail_texture(0x60, 0xBE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            emit_per_phase_fog_state);
+INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", emit_per_phase_fog_state);
 
 void copy_two_double_values(f64* source_values, f64* destination_values) {
   destination_values[0] = source_values[0];
@@ -577,11 +575,8 @@ void clear_terrain_emit_scratch(void) {
   bzero(g_terrain_tile_cull_exclude, 0x80);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            init_terrain_vertex_texcoords);
+INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", init_terrain_vertex_texcoords);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            emit_terrain_state_prefix_block);
+INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", emit_terrain_state_prefix_block);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom",
-            emit_course_terrain_dl);
+INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", emit_course_terrain_dl);

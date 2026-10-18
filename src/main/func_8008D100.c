@@ -260,8 +260,7 @@ s32 lerp_s32(s32 a0, s32 a1, f32 t) {
   return a0 * (1.0f - t) + a1 * t;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100",
-            per_hole_skybox_palette_load);
+INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", per_hole_skybox_palette_load);
 
 /* The lens-flare emitter and debug editor use distinct fields of the same
  * 0x20-byte FogPreset table record. */

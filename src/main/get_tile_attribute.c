@@ -176,8 +176,7 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_ground_attribute);
 
 f32 func_800407D8(s32 arg) { return (f32)arg; }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute",
-            get_dominant_terrain_attribute);
+INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_dominant_terrain_attribute);
 
 s32 query_terrain_at_position(s32 x, s32 z) {
   return get_dominant_terrain_attribute(x, z, 0);

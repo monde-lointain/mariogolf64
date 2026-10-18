@@ -51,8 +51,7 @@ s32 get_surface_type(s32 tile, f32 x, f32 z) {
   return type;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
-            check_line_cylinder_collision);
+INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", check_line_cylinder_collision);
 
 typedef struct {
   u8 pad0[0x18];
@@ -85,8 +84,7 @@ void clamp_min_distance_from_target(RaycastTarget* target) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
-            calculate_camera_attraction_vector);
+INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", calculate_camera_attraction_vector);
 
 s32 get_triangle_normal_dominant_axis(s32 x0, s32 y0, s32 z0, s32 x1, s32 y1,
                                       s32 z1, s32 x2, s32 y2, s32 z2) {
@@ -179,13 +177,11 @@ s32 func_8003AC80(s16* triangle, f32* plane) {
 
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", find_collision_triangle);
 
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
-            check_ray_triangle_collision);
+INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", check_ray_triangle_collision);
 
 INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", resolve_wall_collision);
 
-INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain",
-            raycast_find_closest_triangle);
+INCLUDE_ASM("asm/nonmatchings/main/raycast_terrain", raycast_find_closest_triangle);
 
 s32 func_8003DE80(s32 tile, f32 x, f32 z) {
   s32 cx;

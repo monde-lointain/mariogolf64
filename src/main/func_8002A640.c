@@ -182,8 +182,7 @@ void emit_sky_horizon_compositor_dl(Gfx** gfxp) {
   *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640",
-            init_rdp_and_draw_sky_background);
+INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", init_rdp_and_draw_sky_background);
 
 void func_8002BD9C(Gfx** gfxp) {}
 
