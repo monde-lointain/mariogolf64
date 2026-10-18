@@ -1,0 +1,23 @@
+name: Mario Golf 64
+repo: https://github.com/monde-lointain/mariogolf64
+platform: n64
+build_system: make
+versions:
+  - name: usa
+    fullname: usa
+    sha1: e2c4e7a905b29529b49a1619a401fe699224829b
+    paths:
+      target: "baserom.z64"
+      build_dir: "build"
+      map: "build/mariogolf64.map"
+      compiled_target: "build/mariogolf64.z64"
+      elf: "build/mariogolf64.elf"
+      expected_dir: "expected/"
+      asm: "asm/nonmatchings"
+      nonmatchings: "asm/nonmatchings"
+tools:
+  mapfile_parser:
+    progress_report:
+      output: report.json
+      check_asm_paths: False
+      report_data: True
