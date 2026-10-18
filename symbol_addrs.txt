@@ -884,7 +884,7 @@ reset_vector_samples = 0x8007654C; // type:func segment:main
 append_vector_sample = 0x80076558; // type:func segment:main
 initialize_save_sram = 0x80099490; // type:func segment:main
 rom_load_slots = 0x800DE8A0;
-rom_asset_directory = 0xE473F0; // absolute:True
+asset_directory_ROM_START = 0xE473F0; // absolute:True
 current_rom_asset_index = 0x8012D3A8;
 hole_handicap_ranks = 0x800C1435;
 course_hole_flags = 0x800C143C;
@@ -935,9 +935,11 @@ ROM_SLOT_UNAVAILABLE_FORMAT = 0x800CCB70;
 ROM_SLOT_ERROR_FORMAT = 0x800CCB7C;
 ROM_READ_TRUNCATED_FORMAT = 0x800CCB9C;
 ROM_ASSET_OPEN_FORMAT = 0x800CCBAC;
-// Pointer-bank end and following wave-table start share a ROM boundary.
-audio_wave_bank_rom_end = 0x18BE00; // absolute:True
-audio_wave_table_rom_start = 0x18BE00; // absolute:True
+// PI ROM starts of asset blobs; the linker script defines these (see mariogolf64.yaml).
+audio_wave_bank_ROM_START = 0x171790; // absolute:True
+audio_wave_table_ROM_START = 0x18BE00; // absolute:True
+sound_effect_bank_ROM_START = 0xD9B9C0; // absolute:True
+assets_D9F450_ROM_START = 0xD9F450; // absolute:True
 clear_fpc_csr = 0x80029C00; // type:func segment:main
 register_scenery_heap_region = 0x80026400; // type:func
 reregister_scenery_heap_region = 0x8002646C; // type:func segment:main

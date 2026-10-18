@@ -301,13 +301,12 @@ void play_bgm_by_id(s32 id, s32 flags) {
   }
 }
 
-extern u8 D_171790[];
-extern u8 audio_wave_table_rom_start[];
-extern u8 audio_wave_bank_rom_end[];
-extern u8 D_D9B9C0[];
-extern u8 D_D9F450[];
+USE_ASSET(audio_wave_bank);
+USE_ASSET(audio_wave_table);
+USE_ASSET(sound_effect_bank);
 extern void audio_system_boot(musConfig* requested_config);
-extern void load_audio_wave_bank(u32 wave_bank_rom_address, s32 wave_bank_size, void* wave_bank_table);
+extern void load_audio_wave_bank(u32 wave_bank_rom_address, s32 wave_bank_size,
+                                 void* wave_bank_table);
 extern void load_sound_effect_bank_from_rom(u32 rom_address, s32 size);
 extern s32 ChangeCustomEffect(s32 index);
 
@@ -320,12 +319,15 @@ void func_80051D8C(void) {
   g_bgm_pending_action = 0;
   g_bgm_active_handle = -1;
   g_bgm_current_id = -1;
-  /* The pointer-bank end and wave-table start are distinct linker roots,
+  /* The pointer-bank end and wave-table start are distinct linker symbols,
    * despite sharing the same ROM address. */
-  load_audio_wave_bank((u32)D_171790,
-                      (u32)audio_wave_bank_rom_end - (u32)D_171790,
-                      audio_wave_table_rom_start);
-  load_sound_effect_bank_from_rom((u32)D_D9B9C0, (u32)D_D9F450 - (u32)D_D9B9C0);
+  load_audio_wave_bank(
+      (u32)audio_wave_bank_ROM_START,
+      (u32)audio_wave_bank_ROM_END - (u32)audio_wave_bank_ROM_START,
+      audio_wave_table_ROM_START);
+  load_sound_effect_bank_from_rom(
+      (u32)sound_effect_bank_ROM_START,
+      (u32)sound_effect_bank_ROM_END - (u32)sound_effect_bank_ROM_START);
   i = 0;
   effect = D_800C0EAC;
   object = object_id_table;

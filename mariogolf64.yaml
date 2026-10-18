@@ -719,9 +719,31 @@ segments:
       - [0x1715C0, data]
       - { start: 0x171770, type: bss, vram: 0x801F8B50 }
 
-  # Assets after overlays
+  # Assets after overlays. Code references the start of each named blob as a
+  # PI ROM address through its linker-generated <name>_ROM_START symbol; a blob
+  # extends to the next referenced start.
   - name: assets
     type: bin
     start: 0x171770
+
+  - name: audio_wave_bank
+    type: bin
+    start: 0x171790
+
+  - name: audio_wave_table
+    type: bin
+    start: 0x18BE00
+
+  - name: sound_effect_bank
+    type: bin
+    start: 0xD9B9C0
+
+  - name: assets_D9F450
+    type: bin
+    start: 0xD9F450
+
+  - name: asset_directory
+    type: bin
+    start: 0xE473F0
 
   - [0x2000000]

@@ -18,7 +18,7 @@ void reset_rom_load_slots(void) {
   }
 }
 
-extern u8 rom_asset_directory[];
+USE_ASSET(asset_directory);
 extern s32 current_rom_asset_index;
 
 /* Read the asset directory's size and relative data offset through aligned
@@ -31,10 +31,12 @@ void initialize_rom_load_slot(s32 asset_index, RomLoadSlot* load_slot) {
   u8* aligned_size = (u8*)(((u32)&size_buffer[0xF]) & ~0xF);
   u32 asset_size;
 
-  nuPiReadRom((u32)(rom_asset_directory + directory_offset), aligned_size, 4);
-  nuPiReadRom((u32)(rom_asset_directory + directory_offset + 4), aligned_offset,
+  nuPiReadRom((u32)(asset_directory_ROM_START + directory_offset), aligned_size,
               4);
-  load_slot->start_address = (u32)(rom_asset_directory + *(u32*)aligned_offset);
+  nuPiReadRom((u32)(asset_directory_ROM_START + directory_offset + 4),
+              aligned_offset, 4);
+  load_slot->start_address =
+      (u32)(asset_directory_ROM_START + *(u32*)aligned_offset);
   load_slot->read_address = load_slot->start_address;
   load_slot->end_address = load_slot->start_address + *(u32*)aligned_size;
   asset_size = *(u32*)aligned_size;
