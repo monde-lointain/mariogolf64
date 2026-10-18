@@ -1,4 +1,49 @@
-# Editor commands come from tools/clangd_config.py and tools/build_profiles.json.
-# Run: uv run --locked python tools/clangd_config.py (also run by CMake configure).
+Diagnostics:
+  UnusedIncludes: Strict
+  Suppress:
+    - unused-includes:*common.h
+
 CompileFlags:
-  CompilationDatabase: .
+  Add:
+    - -Iinclude
+    - -Iinclude/libultra
+    - -Iinclude/libultra/internal
+    - -Iinclude/libkmc
+    - -Iinclude/libnusys
+    - -Iinclude/libmus
+    - -Iinclude/libnualstl
+    - -Iinclude/libnaudio
+    - -DINCLUDE_ASM_USE_MACRO_INC
+    - -D_LANGUAGE_C
+    - -D_FINALROM
+    - -D_MIPS_SZLONG=32
+    - -D_MIPS_SZINT=32
+    - -std=gnu89
+    - -m32
+    - -ffreestanding
+    - -fno-builtin
+---
+If:
+  PathMatch: src/main/.*
+CompileFlags:
+  Add: [-DF3DEX_GBI_2]
+---
+If:
+  PathMatch: src/libultra/.*
+CompileFlags:
+  Add: [-Iinclude/libultra/compiler/gcc, -Iinclude/libultra/PR, -DBUILD_VERSION=VERSION_J, -DF3DEX_GBI_2, -fsigned-char]
+---
+If:
+  PathMatch: src/libnusys/.*
+CompileFlags:
+  Add: [-DUSE_EPI]
+---
+If:
+  PathMatch: src/libnaudio/.*
+CompileFlags:
+  Add: [-Isrc/libnaudio, -Iinclude/libultra/PR, -DN_MICRO=1]
+---
+If:
+  PathMatch: src/libmus/.*
+CompileFlags:
+  Add: [-Isrc/libmus, -Iinclude/libmus/PR, -Iinclude/libultra/PR, -DSUPPORT_NAUDIO, -U_FINALROM]
