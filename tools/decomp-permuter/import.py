@@ -105,7 +105,7 @@ def prune_asm(asm_cont: str) -> Tuple[str, str]:
         line_parts = line.split()
 
         if len(line_parts) >= 2 and line_parts[0] == ".section":
-            cur_section = line_parts[1].split(",", 1)[0]
+            cur_section = line_parts[1]
             changed_section = True
         elif line.strip() in [
             ".text",
@@ -901,7 +901,7 @@ def main(arg_list: List[str]) -> None:
     args = parser.parse_args(arg_list)
 
     root_dir = find_root_dir(
-        args.c_file, SETTINGS_FILES + ["CMakeLists.txt", "Makefile", "makefile", "build.ninja"]
+        args.c_file, SETTINGS_FILES + ["Makefile", "makefile", "build.ninja"]
     )
 
     if not root_dir:
