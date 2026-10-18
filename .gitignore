@@ -1,115 +1,54 @@
-# Python bytecode
-__pycache__/
-*.py[cod]
-*.py.class
-
-# Disposable tooling caches
-.pytest_cache/
-.ruff_cache/
-.cache/clangd/
-/compile_commands.json
-
-# Environments
-.env
-.venv
-env/
-venv
-ENV/
-env.bak/
-venv.bak/
-
-# IDE-specific files
-.vs/
-.vscode/
-.swp
-
-# Private files
-private/
-
-# Build generated folders
-.splat/
-asm/
-bin/
-assets/
-build/
-CMakeUserPresets.json
-_build/
-
-# Object files
-*.o
-
-# Generated dependency files
-*.d
-
-# N64 ROM files
+# ROMs
 *.z64
 *.n64
 *.v64
 
-# M2C files
-ctx.c
-ctx_includes.c
-*.ctx.c
-debug_source.c
+# Extraction and build output (`make extract`, `make`)
+asm/
+assets/
+build/
+mariogolf64.ld
+mariogolf64.d
+undefined_funcs_auto.txt
+undefined_syms_auto.txt
+.splat/
+*.o
+romdiff
+report.json
 
-# Extracted assembly (generated)
-asm_extracted/
+# Toolchain and Python environment (`make setup`, requirements.txt)
+tools/gcc_kmc
+.venv
+__pycache__/
+*.py[cod]
 
-# Permuter + execution-loop scratch dirs
+# Decomp environments, permuter imports, and decomp.me scratch files
 nonmatchings/
+ctx.c
+ctx.c.m2c
+src/temp.c
+src/ctx.c
 
-# Session working scratch (kill-durable bases, permuter logs, mechanism proofs;
-# see docs/hazards.md#pervasive-regalloc-classical-main scratchpad/best_<fn>.c convention)
-scratchpad/
+# task-runner (nigel)
+task-runner/**/*.log
 
-# In-tree spot-check scratch (created and removed during the execution loop's finalize step)
-src/*.c.spotcheck
-build/src/*.spotcheck.o
+# Secrets
+.decomp_dev_secret
+.push_secrets
 
-# Legacy session board, retained as local state only
-SPRINT.md
+# Agent-local settings and worktrees
+.claude/settings.local.json
+.claude/worktrees
 
-
-# Swap
-[._]*.s[a-v][a-z]
-# comment out the next line if you don't need vector files
-!*.svg
+# Editor, clangd, and OS files
+.cache/
+compile_commands.json
+.vscode/
+.idea/
+.DS_Store
 [._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
-
-# Session
-Session.vim
-Sessionx.vim
-
-# Temporary
-.netrwhist
 *~
-# Auto-generated tag files
-tags
-# Persistent undo
-[._]*.un~
 
-# Local Ghidra databases, runtime state, and legacy workspace
-/ghidra/
-
-# Local Claude Code MCP config (machine-specific Ghidra port pin)
-.mcp.json
-
-# S71 coddog cross-ref generated map (local, depends on ultralib/coddog builds)
-tools/coddog/coddog_map.tsv
-# nusys coddog cross-ref map (local, depends on the build/nusys-ref/ reference + coddog)
-tools/coddog/nusys_map.tsv
-# audio coddog cross-ref maps + version pin (local, depend on the build/audio-ref/ matrix + coddog).
-# The scripts (tools/audio_*.sh, tools/audio_pin.py) and the manifest (tools/audio_ref_versions.tsv)
-# stay tracked; only their generated output is ignored.
-tools/coddog/audio/
-tools/coddog/libmus_map.tsv
-tools/coddog/libnaudio_map.tsv
-tools/coddog/nuaulstl_map.tsv
-tools/coddog/audio_pins.tsv
-
-# Compiled-ucode build byproducts that build_audio_refs.sh (make coddog-sweep-audio)
-# leaks into the repo root (e.g. n_csq.u); no .u file is tracked (S146).
-*.u
+# Local research workspaces
+private/
+scratchpad/
