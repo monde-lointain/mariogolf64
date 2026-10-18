@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# kmc-cc [gcc flags...] <input.c> -o <output.o>
+#
+# Compiles C exactly like the ROM build: KMC GCC 2.7.2 emits assembly, KMC
+# binutils 2.6 assembles it, and the inert placeholder symbol KMC GCC leaves
+# behind is stripped. Run from the project root so relative include paths and
+# INCLUDE_ASM paths resolve. Used by the Makefile, the decomp environments, and
+# the permuter.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COMPILER_DIR="$ROOT/tools/gcc_kmc"
+STRIP="${STRIP:-mips-linux-gnu-strip}"
+
+ARGS=()
+OUTPUT=""
+while (($#)); do
+    case "$1" in
+        -o)
+            OUTPUT="$2"
+            shift 2
+            ;;
+        *)
+            ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+if [ -z "$OUTPUT" ]; then
+    echo "Usage: $0 [gcc flags...] <input.c> -o <output.o>" >&2
+    exit 2
+fi
+
+ASSEMBLY="$(mktemp "${TMPDIR:-/tmp}/kmc-cc.XXXXXX.s")"
+trap 'rm -f -- "$ASSEMBLY"' EXIT
+
+COMPILER_PATH="$COMPILER_DIR" "$COMPILER_DIR/gcc" -S "${ARGS[@]}" -o "$ASSEMBLY"
+"$COMPILER_DIR/as" -EB -mips2 -G 0 -I include -o "$OUTPUT" "$ASSEMBLY"
+"$STRIP" "$OUTPUT" -N dummy-symbol-name
