@@ -29,7 +29,7 @@ Hand-written sources live in `src/` and `include/`. The build generates `asm/`, 
 | `asm/data/`, `asm/entry/`, `asm/header.s` | Extracted data, entry and header assembly. |
 | `assets/` | Binary data extracted from the ROM. |
 | `build/` | `build/mariogolf64.elf`, `build/mariogolf64.map`, `build/mariogolf64.z64`, and object files. |
-| `mariogolf64.ld`, `mariogolf64.d`, `undefined_funcs_auto.txt`, `undefined_syms_auto.txt` | Generated linker script, `mariogolf64.d`, and Splat's undefined-symbol lists. |
+| `mariogolf64.ld`, `mariogolf64.d`, `undefined_funcs_auto.txt`, `undefined_syms_auto.txt` | Generated linker script, `mariogolf64.d`, and Splat's undefined-symbol lists, which the Makefile passes to the linker as extra `-T` scripts. |
 | `nonmatchings/<func>[-N]/` | Per-function [decomp environments](/tools/decomp-env.md). |
 | `ctx.c`, `ctx.c.m2c`, `src/temp.c`, `src/ctx.c` | Scratch files for m2c and decomp.me. Agents never read or write them; see [ground rules](/project/ground-rules.md) §2. |
 | `tools/gcc_kmc/`, `tools/scratches.json` | Downloaded KMC toolchain, and scratch data. |

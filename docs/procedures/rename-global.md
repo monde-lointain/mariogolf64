@@ -6,7 +6,7 @@ description: "Update a global variable or function name through its symbol_addrs
 tags: [symbols, rename]
 ---
 
-Global names are bound to addresses in `symbol_addrs.txt` ([format](/reference/symbol-addrs-format.md)). Each symbol appears at most once, unless its entry carries `allow_duplicated:True`; the repo uses that attribute for same-named file-static functions and for some data symbols. A symbol that is absent gets a default name: `func_<VRAM>` / `D_<VRAM>` (`func_ovl<N>_<VRAM>` / `D_ovl<N>_<VRAM>` in overlays).
+Global names are bound to addresses in `symbol_addrs.txt` ([format](/reference/symbol-addrs-format.md)). Each symbol appears at most once, unless both of its entries carry `allow_duplicated:True`; the repo uses that attribute only for same-named file-static functions in different libraries. A symbol that is absent gets a default name: `func_<VRAM>` / `D_<VRAM>` (`func_ovl<N>_<VRAM>` / `D_ovl<N>_<VRAM>` in overlays).
 
 # Steps
 

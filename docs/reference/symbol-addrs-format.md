@@ -6,7 +6,7 @@ tags: [symbols, splat]
 resource: ../../symbol_addrs.txt
 ---
 
-`symbol_addrs.txt` is an input to Splat (`symbol_addrs_path` in `mariogolf64.yaml`), not to the linker. Splat takes names, types and sizes from it when it disassembles, and also writes `undefined_funcs_auto.txt` and `undefined_syms_auto.txt`. Symbols without an entry get default names: `func_<VRAM>` and `D_<VRAM>`, or `func_ovl<N>_<VRAM>` and `D_ovl<N>_<VRAM>` in overlays. Upstream reference: [Splat, Declaring symbols](https://github.com/ethteck/splat/wiki/Adding-Symbols).
+`symbol_addrs.txt` is an input to Splat (`symbol_addrs_path` in `mariogolf64.yaml`), not directly to the linker. Splat takes names, types and sizes from it when it disassembles, and writes `undefined_funcs_auto.txt` and `undefined_syms_auto.txt` with `name = address;` lines for referenced symbols that no extracted segment defines; the Makefile passes both to the linker with `-T` (`LINKER_SCRIPTS`). Symbols without an entry get default names: `func_<VRAM>` and `D_<VRAM>`, or `func_ovl<N>_<VRAM>` and `D_ovl<N>_<VRAM>` in overlays. Upstream reference: [Splat, Declaring symbols](https://github.com/ethteck/splat/wiki/Adding-Symbols).
 
 # Line syntax
 
