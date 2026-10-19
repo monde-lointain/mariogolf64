@@ -10,7 +10,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020EBBC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020ED54);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020EEEC);
+s32 func_ovl0_8020EEEC(s32* arg0) { return *arg0 = *arg0; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020EEF8);
 
