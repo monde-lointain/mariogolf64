@@ -30,7 +30,12 @@ void func_ovl7_80206718(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206800);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_802068B4);
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original; same stand-in as lerp_s32 (func_8008D100.c). */
+f32 func_ovl7_802068B4(f32 x, f32 y, f32 z) {
+    s32 r;
+    volatile s32 unused = r;
+    return sqrtf(x * x + y * y + z * z);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_802068EC);
 
