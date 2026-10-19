@@ -1,4 +1,4 @@
-candidate_source: python3 tools/list_matched_functions.py
+candidate_source: python3 tools/list_matched_functions.py --by-reference-use
 template: template.md
 accept_best_effort: true
 timeout: 60m
