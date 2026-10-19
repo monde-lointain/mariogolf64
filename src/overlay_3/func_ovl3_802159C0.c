@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_802159C0);
 
@@ -63,4 +64,23 @@ void func_ovl3_80217464(Gfx** gfxp, s32 x, s32 y) {
     *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_802177D0);
+extern u8* func_8005AF50(void);
+extern u16 D_ovl3_802308A4[];
+extern s16 D_ovl3_802308C8[][4];
+extern u8 D_ovl3_8023BFF0[];
+extern void* tile_palette_table[];
+
+void func_ovl3_802177D0(void) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s32 i;
+
+    func_8005AF50();
+    for (i = 0; i != 18; i++) {
+        get_rom_asset_allocation_size(D_ovl3_802308A4[i], &asset);
+        load_rom_asset_payload(tile_palette_table[i], &asset);
+        open_rom_asset_slot(D_ovl3_802308C8[i][0], &slot);
+        read_rom_load_slot(&D_ovl3_8023BFF0[i << 9],
+                           get_rom_load_slot_size(&slot), &slot);
+    }
+}
