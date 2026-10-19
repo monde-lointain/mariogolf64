@@ -279,11 +279,6 @@ void set_direct_grid_vertex(s32 col, s32 row, GridVertex* src) {
   *dst = *src;
 }
 
-typedef struct {
-  GridVertex vertices[16];
-} Tile;
-
-extern Tile D_80185220[];
 extern u8 D_800BA9B0[][8];
 extern u8 D_800BA9D0[];
 extern u8 D_800BA9B4[];

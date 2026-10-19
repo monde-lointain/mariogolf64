@@ -249,7 +249,60 @@ next_record:
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802518F0);
+void func_ovl4_802518F0(void) {
+    s8 tag;
+    u16 x;
+    u16 height;
+    u16 z;
+    s32 vertex;
+    s32 offset;
+    s32 index;
+    s8 *dst;
+    u8 *end;
+    u8 *src;
+    u8 byte;
+
+    vertex = 0;
+    offset = 0;
+    for (;;) {
+        src = D_ovl4_80255330;
+        end = src + 1;
+        dst = &tag;
+        if (src != end) {
+            do {
+                byte = *src;
+                src += 1;
+                *dst = (s8) byte;
+                dst += 1;
+            } while (src != end);
+        }
+        D_ovl4_80255330 = end;
+        if (tag == 9) {
+            return;
+        }
+        if (!(tag & 0x40)) {
+            s32 slot;
+
+            func_ovl4_80251A28(&x, (s32) tag);
+            slot = vertex * 16 + offset;
+            ((GridVertex *) ((u8 *) D_80185220 + slot))->x = x;
+            ((GridVertex *) ((u8 *) D_80185220 + slot))->texture_s = ((s32) (x << 0x10) >> 0xE) + 0x20;
+        }
+        func_ovl4_80251B6C(&height, (s32) tag);
+        index = vertex * 16 + offset;
+        ((GridVertex *) ((u8 *) D_80185220 + index))->height = height;
+        if (!(tag & 0x80)) {
+            func_ovl4_80251CB4(&z, (s32) tag);
+            ((GridVertex *) ((u8 *) D_80185220 + index))->z = z;
+            ((GridVertex *) ((u8 *) D_80185220 + index))->texture_t = ((s32) (z << 0x10) >> 0xE) + 0x20;
+        }
+        vertex += 1;
+        if (vertex >= 16) {
+            vertex = 0;
+            offset += 0x100;
+        }
+    }
+}
 
 void func_ovl4_80251A28(u16 *arg0, s32 arg1) {
     u8 *src;

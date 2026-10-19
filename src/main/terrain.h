@@ -50,6 +50,13 @@ typedef struct {
   /* 0x0F */ u8 color_a;
 } GridVertex;
 
+/* LOD terrain tile: 16 grid vertices, 0x100-byte stride. */
+typedef struct {
+  GridVertex vertices[16];
+} Tile;
+
+extern Tile D_80185220[];
+
 enum {
   SCENERY_CYLINDER_COUNT = 0x80,
   SCENERY_SPRITE_COUNT = 46,
