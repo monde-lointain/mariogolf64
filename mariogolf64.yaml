@@ -494,7 +494,7 @@ segments:
       - [0xBBD00, c, overlay_0/func_ovl0_80202A00]
       - [0xC7A40, c, overlay_0/func_ovl0_8020E740]
       - [0xCFE10, c, overlay_0/func_ovl0_80216B10]
-      - [0xD1FC0, asm]
+      - [0xD1FC0, c, overlay_0/func_ovl0_80218CC0]
       - [0xD4330, asm]
       - [0xD71D0, asm]
       - [0xD7850, asm]
