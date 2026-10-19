@@ -59,7 +59,119 @@ extern s32 D_80104E70[];
 extern s32 D_8010CF60[];
 extern s32 D_80106148[];
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", lz_compress_extended_dma);
+typedef struct {
+  u8* source_cursor;
+  u8* output_start;
+  u8* carry_buffer_start;
+  u8* output_cursor;
+  u8* source_end;
+  u16 window_flags;
+  u16 unknown_16;
+  u16* control_ring;
+  u16 ring_index;
+  u16 run_remaining;
+  u16 history_index;
+  u16* history_buffer;
+} LzDecompressState;
+
+s32 lz_decompress_extended(LzDecompressState* state);
+extern OSPiHandle* nuPiCartHandle;
+
+s32 lz_compress_extended_dma(u32 rom_address, void* destination, u32 remaining_bytes) {
+  OSIoMesg dma_messages[2];
+  OSMesgQueue dma_queue;
+  OSMesg message_buffer[2];
+  LzDecompressState state;
+  u8 first_buffer_storage[0x840];
+  u8 second_buffer_storage[0x839];
+  OSMesg* message_array;
+  void* buffers[2];
+  u16 control_ring[0x800];
+  u16 history_buffer[0x100];
+
+  s32 received_count = 0;
+  u32 next_dma_buffer = 0;
+  s32 in_flight_count = 0;
+  u32 receive_index = 0;
+  u8* first_buffer = (u8*)((((u32)first_buffer_storage + 0xF) & ~0xF) + 0x20);
+  u8* second_buffer = (u8*)((((u32)second_buffer_storage + 0xF) & ~0xF) + 0x20);
+
+  buffers[0] = first_buffer;
+  buffers[1] = second_buffer;
+  state.source_cursor = first_buffer;
+  state.carry_buffer_start = second_buffer;
+  state.window_flags = 1;
+  state.control_ring = control_ring;
+  state.history_buffer = history_buffer;
+  state.output_start = (u8*)destination;
+  osCreateMesgQueue(&dma_queue, message_buffer, 2);
+  message_array = message_buffer;
+
+  for (;;) {
+    u32 other_buffer_index;
+
+    if (remaining_bytes != 0) {
+      u32 dma_size = remaining_bytes;
+      OSIoMesg* dma_message;
+      void* dram_address;
+
+      if (dma_size > 0x800) {
+        dma_size = 0x800;
+      }
+      dma_message = &dma_messages[next_dma_buffer];
+      dma_message->hdr.pri = 0;
+      dma_message->hdr.retQueue = &dma_queue;
+      dram_address = buffers[next_dma_buffer];
+      remaining_bytes -= dma_size;
+      dma_message->devAddr = rom_address;
+      rom_address += dma_size;
+      dma_message->size = dma_size;
+      dma_message->dramAddr = dram_address;
+      in_flight_count++;
+      osInvalDCache(buffers[next_dma_buffer], dma_size);
+      next_dma_buffer ^= 1;
+      osEPiStartDma(nuPiCartHandle, dma_message, OS_READ);
+    }
+
+    if (osRecvMesg(&dma_queue, message_array + receive_index,
+                   OS_MESG_NOBLOCK) != -1) {
+      receive_index ^= 1;
+      received_count++;
+      in_flight_count--;
+    }
+
+    if (received_count == 0) {
+      if (in_flight_count == 2 || remaining_bytes == 0) {
+        osRecvMesg(&dma_queue, message_array + receive_index, OS_MESG_BLOCK);
+        receive_index ^= 1;
+        received_count = 1;
+        in_flight_count--;
+      }
+      if (received_count == 0) {
+        continue;
+      }
+    }
+
+    other_buffer_index = receive_index ^ 1;
+    osInvalDCache(buffers[other_buffer_index],
+                  dma_messages[other_buffer_index].size);
+    state.carry_buffer_start = buffers[receive_index];
+    state.source_end = (u8*)buffers[other_buffer_index] + 0x800;
+    if (in_flight_count == 0 && remaining_bytes == 0) {
+      state.window_flags |= 2;
+    }
+    {
+      s32 result = lz_decompress_extended(&state);
+
+      received_count--;
+      if (result >= 0) {
+        osWritebackDCache(destination, result);
+        return result;
+      }
+      state.window_flags &= 0xFFFE;
+    }
+  }
+}
 
 /*
  * A small LCG scratch RNG (state D_800C3FA0). The two helpers are GCC nested
