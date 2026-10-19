@@ -1,6 +1,10 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024D800);
+extern u32 D_ovl4_802542A0;
+
+void func_ovl4_8024D800(u32 seed) {
+    D_ovl4_802542A0 = seed;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024D80C);
 
