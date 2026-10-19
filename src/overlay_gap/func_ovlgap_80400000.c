@@ -203,9 +203,57 @@ void func_ovlgap_80407D64(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80407EC4);
+extern void *heap3_alloc(s32 size);
+extern void heap3_free(void *ptr);
+extern s32 validate_heap_string(char *source_string, s32 allocation_tag);
+extern void __assert(const char *expr, const char *file, int line);
+extern char D_ovlgap_8040C9B0[], D_ovlgap_8040C9B4[];
+extern char D_ovlgap_8040CA80[], D_ovlgap_8040CA88[], D_ovlgap_8040CA90[];
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80407F08);
+void func_ovlgap_80407F08(s32 *arg0, s32 arg1, char *arg2) {
+    char line_buffer[0x100];
+    u8 *buffer_cursor;
+    u8 *buffer_end;
+    u8 *buffer_start;
+    s32 row;
+    s32 col;
+
+    void func_ovlgap_80407EC4(u8 *text) {
+        for (;;) {
+            u8 character = *text++;
+            if (character == 0) {
+                break;
+            }
+            if (buffer_cursor < buffer_end) {
+                *buffer_cursor++ = character;
+            }
+        }
+    }
+
+    buffer_start = heap3_alloc(0x40000);
+    buffer_cursor = buffer_start;
+    buffer_end = buffer_start + 0x40000;
+    if (buffer_start == NULL) {
+        __assert(D_ovlgap_8040C9B0, D_ovlgap_8040C9B4, 0xBD3);
+    }
+    for (row = 0; row < (arg1 + 0xF) / 0x10; row++) {
+        s32 *words = arg0;
+        sprintf(line_buffer, D_ovlgap_8040CA80, row * 0x10);
+        func_ovlgap_80407EC4((u8 *)line_buffer);
+        for (col = 0; col < 4; col++) {
+            sprintf(line_buffer, D_ovlgap_8040CA88, words[row * 4 + col]);
+            func_ovlgap_80407EC4((u8 *)line_buffer);
+        }
+        sprintf(line_buffer, D_ovlgap_8040CA90);
+        func_ovlgap_80407EC4((u8 *)line_buffer);
+    }
+    line_buffer[0] = 0x1A;
+    line_buffer[1] = 0;
+    func_ovlgap_80407EC4((u8 *)line_buffer);
+    sprintf(line_buffer, arg2);
+    validate_heap_string(line_buffer, buffer_cursor - buffer_start);
+    heap3_free(&buffer_start);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80408080);
 
