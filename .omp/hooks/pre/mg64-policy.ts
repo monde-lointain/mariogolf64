@@ -6,7 +6,8 @@
  *   no `ctx.c` / `temp.c` mentions; no shell mutation of `asm/`; no shell writes into vendored
  *   tools (`tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter`, `tools/asm-differ`); every
  *   permuter run (`tools/permuter`, `tools/decomp-permuter/permuter.py`) must sit under a
- *   `timeout` that ends at least 120s before `NIGEL_TIMEOUT_DEADLINE_UNIX`.
+ *   `timeout` that ends at least 120s before `NIGEL_TIMEOUT_DEADLINE_UNIX`. A permuter path that
+ *   is an argument of a read-only command (`cat`, `sed`, `grep`, `git`, ...) is not a run.
  * - read: no `ctx.c` / `temp.c`. Selectors (`:10-20`, `:raw`, `:table`) are stripped first.
  * - write / edit / ast_edit (`write xd://ast_edit`): no `ctx.c`, `temp.c`, `mariogolf64.sha1`;
  *   no paths with an `asm` directory component; no vendored-tool paths. Edit targets come from
@@ -197,6 +198,32 @@ function isSegmentBoundary(token: string): boolean {
 	return /^[;&|]+$/.test(token);
 }
 
+/** Commands that only inspect their path arguments; a permuter path after one of them is not a run. */
+const READ_ONLY_COMMANDS: Record<string, true> = {
+	cat: true,
+	diff: true,
+	file: true,
+	git: true,
+	grep: true,
+	head: true,
+	less: true,
+	ls: true,
+	readlink: true,
+	realpath: true,
+	rg: true,
+	sed: true,
+	stat: true,
+	tail: true,
+	wc: true,
+};
+
+/** First token of the segment after leading `VAR=value` assignments. */
+function commandWord(tokens: string[], start: number, end: number): string | undefined {
+	let i = start;
+	while (i < end && ASSIGNMENT.test(tokens[i])) i++;
+	return i < end ? tokens[i] : undefined;
+}
+
 function segmentStart(tokens: string[], index: number): number {
 	for (let i = index - 1; i >= 0; i--) {
 		if (isSegmentBoundary(tokens[i])) return i + 1;
@@ -248,7 +275,10 @@ function permuterReason(command: string): string | undefined {
 	if (tokens === null) return MSG.permuterParse;
 	for (let index = 0; index < tokens.length; index++) {
 		if (!isPermuterToken(tokens[index])) continue;
-		const seconds = timeoutSeconds(tokens, segmentStart(tokens, index), index);
+		const start = segmentStart(tokens, index);
+		const command = commandWord(tokens, start, index);
+		if (command !== undefined && READ_ONLY_COMMANDS[command] === true) continue;
+		const seconds = timeoutSeconds(tokens, start, index);
 		if (seconds === undefined) return MSG.permuterNoTimeout;
 		const reason = permuterDeadlineReason(seconds);
 		if (reason !== undefined) return reason;
