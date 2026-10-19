@@ -39,6 +39,8 @@ extern s32 D_800C3084;
 extern s32 D_800C3088;
 extern s32 D_800C308C;
 extern s32 D_800C3090;
+extern s32 g_fog_presetA_color_r[5];
+extern s32 g_fog_presetB_color_r[5];
 
 extern ScenarioState D_801B55F0;
 extern GameModeRecord D_800FEDD8[];
@@ -534,7 +536,22 @@ void setup_terrain_detail_default(void) {
   gen_terrain_detail_texture(0x60, 0xBE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", emit_per_phase_fog_state);
+void emit_per_phase_fog_state(Gfx** pgfx) {
+  Gfx* gfx = *pgfx;
+
+  if (flag_is_set(0x2D)) {
+    gSPFogPosition(gfx++, g_fog_presetB_color_r[3],
+                   g_fog_presetB_color_r[4]);
+    gDPSetFogColor(gfx++, g_fog_presetB_color_r[0], g_fog_presetB_color_r[1],
+                   g_fog_presetB_color_r[2], 0);
+  } else {
+    gSPFogPosition(gfx++, g_fog_presetA_color_r[3],
+                   g_fog_presetA_color_r[4]);
+    gDPSetFogColor(gfx++, g_fog_presetA_color_r[0], g_fog_presetA_color_r[1],
+                   g_fog_presetA_color_r[2], 0xFF);
+  }
+  *pgfx = gfx;
+}
 
 void copy_two_double_values(f64* source_values, f64* destination_values) {
   destination_values[0] = source_values[0];
