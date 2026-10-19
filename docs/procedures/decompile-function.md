@@ -31,14 +31,14 @@ Then run `./tools/build-and-verify.sh`. The match is not done until it succeeds.
 # 3. Commit
 
 * **Perfect match:** commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched. Respect the pre-commit hook; a failure means the C change is wrong.
-* **Improved partial match** (better than any recorded one, or none recorded): record it next to the include and keep the include on one line, because Splat reads the function name from it.
+* **Improved partial match** (better than any recorded one, or none recorded): record it next to the include and keep the include on one line, because Splat reads the function name from it. Guard the assembly and C alternatives so a `NON_MATCHING` build emits exactly one definition.
 
 ```c
-// your_function best match: XX%
-INCLUDE_ASM("asm/nonmatchings/main/file", your_function);
-
 #ifdef NON_MATCHING
 // your non-matching function
+#else
+// your_function best match: XX%
+INCLUDE_ASM("asm/nonmatchings/main/file", your_function);
 #endif
 ```
 
@@ -46,7 +46,8 @@ A `NEAR_MISS.md` handoff note in `nonmatchings/<function>/` makes `list_decomp_c
 
 # Harness friction
 
-If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing them edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then continue. A harness fix does not reset or extend the attempt count.
+If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing one edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then continue. A harness fix does not reset or extend the attempt count.
+
 
 # Stop rules
 
