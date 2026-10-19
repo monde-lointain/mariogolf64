@@ -7,7 +7,7 @@ description: Renaming a global variable or function requires additional steps in
 
 ## Instructions
 
-Global variables and function names are mapped to specific addresses in memory through the symbol_addrs.txt file at the root of the project. Each symbol should only appear at most once. If a symbol is not present it will be given a default name (usually starting with `func_` or `D_`). `ghidra_symbols.txt` holds older imported names; `symbol_addrs.txt` loads after it and wins for the same address, so add or change names in `symbol_addrs.txt` and remove a stale duplicate from `ghidra_symbols.txt`.
+Global variables and function names are mapped to specific addresses in memory through the symbol_addrs.txt file at the root of the project. Each symbol should only appear at most once; the only exceptions are same-named file-static functions in different libraries, which both carry `allow_duplicated:True`. If a symbol is not present it will be given a default name (usually starting with `func_` or `D_`).
 
 So at a minimum this file will need to be updated when attempting to rename a variable. However additional steps may also be needed:
 

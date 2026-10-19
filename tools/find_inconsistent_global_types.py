@@ -12,7 +12,7 @@ from typing import Iterable
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SYMBOL_FILES = ("symbol_addrs.txt", "ghidra_symbols.txt")
+SYMBOL_FILES = ("symbol_addrs.txt",)
 VENDORED_SRC_DIRS = ("libkmc", "libmus", "libnaudio", "libnusys", "libultra")
 PROJECT_EXCEPTIONS = (Path("include/common.h"),)
 SYMBOL_LINE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=")

@@ -12,7 +12,7 @@ This is a matching decompilation project for Mario Golf 64 (N64, US revision 0).
 - `asm/<rom offset>.s` assembly-only segments that do not have a C file yet; `asm/<dir>/<file>.s` full disassembly of each C file for reference.
 - `asm/data` extracted data assembly.
 - `assets` binary asset blobs extracted from the ROM.
-- `symbol_addrs.txt` project symbol names and addresses (`ghidra_symbols.txt` holds older imported names; `symbol_addrs.txt` wins).
+- `symbol_addrs.txt` symbol names and addresses for every segment.
 - `mariogolf64.yaml` Splat configuration for ROM extraction and segment layout.
 - `linker_scripts` hand-written linker definitions for hardware registers and fixed OS addresses.
 

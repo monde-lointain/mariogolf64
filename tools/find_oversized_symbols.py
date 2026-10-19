@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SYMBOL_FILES = ("symbol_addrs.txt", "ghidra_symbols.txt")
+DEFAULT_SYMBOL_FILES = ("symbol_addrs.txt",)
 DEFAULT_ELF = ROOT / "build/mariogolf64.elf"
 SYMBOL_LINE = re.compile(
     r"^\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(0x[0-9A-Fa-f]+)\s*;"
@@ -149,7 +149,7 @@ def main() -> int:
         default=None,
         help=(
             "symbol metadata to check; repeatable "
-            "(default: symbol_addrs.txt and ghidra_symbols.txt at the repo root)"
+            "(default: symbol_addrs.txt at the repo root)"
         ),
     )
     parser.add_argument(
