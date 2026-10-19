@@ -33,11 +33,41 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204210)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020439C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204460);
-
 extern s32 D_800C3084;
 extern s8 D_801B55D9;
 extern s32 D_800FBE7C[];
+extern u16 D_801B55CC;
+extern f64 D_ovl0_80224F58;
+extern f64 D_ovl0_80224F60;
+extern f64 D_ovl0_80224F68;
+extern f64 D_ovl0_80224F70;
+extern s32 active_meter_category;
+
+void func_ovl0_80204460(void) {
+    s32 units;
+
+    if (D_800C3084 & 2) {
+        if (active_meter_category == 2) {
+            units = 0xA;
+        } else {
+            units = 0x14;
+            if (active_meter_category == 1) {
+                units = 0xF;
+            }
+        }
+        if (D_801B55CC & 8) {
+            D_800FBE7C[0] = (s32)((f64)D_800FBE7C[0] + (f64)units * D_ovl0_80224F58);
+        } else if (D_801B55CC & 4) {
+            D_800FBE7C[0] = (s32)((f64)D_800FBE7C[0] - (f64)units * D_ovl0_80224F60);
+        }
+    } else {
+        if (D_801B55CC & 8) {
+            D_800FBE7C[0] = (s32)((f64)D_800FBE7C[0] + D_ovl0_80224F68);
+        } else if (D_801B55CC & 4) {
+            D_800FBE7C[0] = (s32)((f64)D_800FBE7C[0] - D_ovl0_80224F70);
+        }
+    }
+}
 
 void func_ovl0_80204568(void) {
     s8 input;
@@ -236,7 +266,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020845C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802087D0);
 
-extern s32 active_meter_category;
 extern s32 active_terrain_index;
 extern s32 D_ovl0_8022715C;
 extern u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3);
