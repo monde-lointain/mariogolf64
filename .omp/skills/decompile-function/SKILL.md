@@ -12,7 +12,7 @@ Use this workflow when decompiling a specified assembly function to matching C o
 First we need to spin up a decomp environment for the function, run:
 
 ```
-./tools/claude --bootstrap-only <function name>
+./tools/decomp-env --bootstrap-only <function name>
 ```
 
 Move to the directory created by the script. This will be `nonmatchings/<function name>-<number (optional)>`.
