@@ -35,7 +35,12 @@ class SyncShardTest(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.repo = Path(tmp.name)
         git(self.repo, 'init', '-q', '-b', 'dev')
-        commit(self.repo, 'a.c', '1\n', 'base')
+        (self.repo / 'tools').mkdir()
+        self.build = self.repo / 'tools' / 'build-and-verify.sh'
+        self.build.write_text('#!/bin/sh\nexit 0\n')
+        self.build.chmod(0o755)
+        git(self.repo, 'add', 'tools')
+        commit(self.repo, 'a.c', 'head\nx\ntail\n', 'base')
         git(self.repo, 'checkout', '-q', '-b', 'shard')
 
     def test_without_sync_branch_nothing_moves(self):
@@ -57,10 +62,11 @@ class SyncShardTest(unittest.TestCase):
         self.assertEqual(git(self.repo, 'log', '--format=%s', 'dev..shard'), 'unmerged match')
         self.assertTrue((self.repo / 'd.c').exists())
 
-    def test_conflict_aborts_and_keeps_the_branch(self):
-        head = commit(self.repo, 'a.c', 'shard\n', 'shard edit')
+    def test_conflict_that_loses_shard_work_keeps_the_branch(self):
+        # Both sides replace the same line: preferring dev would drop the shard's match.
+        head = commit(self.repo, 'a.c', 'head\nshard match\ntail\n', 'shard match')
         git(self.repo, 'checkout', '-q', 'dev')
-        commit(self.repo, 'a.c', 'dev\n', 'dev edit')
+        commit(self.repo, 'a.c', 'head\nother match\ntail\n', 'other match')
         git(self.repo, 'checkout', '-q', 'shard')
 
         proc = run(self.repo, 'dev')
@@ -69,6 +75,34 @@ class SyncShardTest(unittest.TestCase):
         self.assertIn('conflicted', proc.stderr)
         self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
         self.assertEqual(git(self.repo, 'status', '--porcelain'), '')
+
+    def test_commit_integrated_with_a_resolved_conflict_drops_out(self):
+        # The integrator picked the shard's commit after resolving a conflict by hand,
+        # so its patch no longer matches the original and a plain rebase conflicts.
+        commit(self.repo, 'a.c', 'head\nx\nextern a;\ntail\n', 'shard match')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'a.c', 'head\nx\nextern b;\ntail\n', 'other match')
+        commit(self.repo, 'a.c', 'head\nx\nextern b;\nextern a;\ntail\n', 'resolved pick')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        proc = run(self.repo, 'dev')
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), git(self.repo, 'rev-parse', 'dev'))
+
+    def test_failing_build_after_conflict_retry_keeps_the_branch(self):
+        head = commit(self.repo, 'a.c', 'head\nx\nextern a;\ntail\n', 'shard match')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'a.c', 'head\nx\nextern b;\ntail\n', 'other match')
+        commit(self.repo, 'a.c', 'head\nx\nextern b;\nextern a;\ntail\n', 'resolved pick')
+        self.build.write_text('#!/bin/sh\nexit 1\n')
+        commit(self.repo, 'tools/build-and-verify.sh', '#!/bin/sh\nexit 1\n', 'break build')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        proc = run(self.repo, 'dev')
+
+        self.assertIn('conflicted', proc.stderr)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
 
 
 if __name__ == '__main__':
