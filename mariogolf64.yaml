@@ -531,7 +531,7 @@ segments:
     exclusive_ram_id: ovlgap
     symbol_name_format: ovlgap_$VRAM
     subsegments:
-      - [0x11BA50, asm]
+      - [0x11BA50, c, overlay_gap/func_ovlgap_80400000]
       - [0x127FD0, data]
 
   # Overlay 4
