@@ -115,7 +115,12 @@ void func_80043C64(void) {
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", lerp_int_v2);
+/* Integer lerp, truncated: a + (b - a) * t, evaluated in double. The dead 8-byte frame and `sw $v0,0(sp)` are the static-chain home of the nested-function original (child of predict_shot_distance, which sets $v0 = sp+0x18 before its jal); `unused` reproduces them, as in lerp_int. */
+s32 lerp_int_v2(s32 a, s32 b, f32 t) {
+    s32 r;
+    volatile s32 unused = r;
+    return a + (b - a) * (f64)t;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", predict_shot_distance);
 
