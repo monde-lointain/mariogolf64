@@ -137,7 +137,34 @@ s32 ci8_to_rgba5551(s32 index) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_800402F4);
+s32 func_800402F4(s32 color) {
+  s32 palette_index = find_closest_palette_index(color);
+
+  switch (palette_index) {
+    case 0:
+      return 0;
+    case 1:
+      return 6;
+    case 2:
+      return 2;
+    case 3:
+      return 1;
+    case 4:
+      return 3;
+    case 6:
+      return 4;
+    case 7:
+      return 0;
+    case 8:
+      return 8;
+    case 9:
+      return 9;
+    case 10:
+      return 5;
+    default:
+      return 7;
+  }
+}
 
 void load_club_offset_pair(TerrainAttrEntry* terrain, s32* state,
                            s32* out) {
@@ -156,6 +183,8 @@ void load_club_offset_pair(TerrainAttrEntry* terrain, s32* state,
     }
   }
 }
+
+const char D_800CA984[12] = "ratio %f,%x";
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", get_ground_attribute);
 
@@ -524,10 +553,10 @@ extern s32 D_800BB080;
 extern s32 D_800BB084;
 extern s32 D_800BB088;
 extern u16 D_800FED18;
-extern char D_800CAA7C[];
-extern char D_800CAA84[];
-extern char D_800CAA8C[];
-extern char D_800CAA94[];
+const char D_800CAA7C[8] = "ROM :";
+const char D_800CAA84[8] = "SRAM:";
+const char D_800CAA8C[8] = "%x0|";
+const char D_800CAA94[4] = "%X";
 extern char D_801B5588[];
 extern char D_8012F4E8[];
 extern void clear_text_grid(void);
@@ -551,9 +580,9 @@ void func_80041EC0(void) {
   }
 
   clear_text_grid();
-  check_and_print_grid(D_800CAA7C, 3, 4);
+  check_and_print_grid((char*)D_800CAA7C, 3, 4);
   check_and_print_grid(D_801B5588, 8, 4);
-  check_and_print_grid(D_800CAA84, 3, 5);
+  check_and_print_grid((char*)D_800CAA84, 3, 5);
   check_and_print_grid(D_8012F4E8, 8, 5);
   for (row = 0; row < 8; row++) {
     sprintf(buffer, D_800CAA8C, row + D_800BB080);
@@ -743,7 +772,7 @@ s32 func_80042E40(s32 ax, s32 ay, s32 bx, s32 by, s32 cx, s32 cy) {
 
 extern s8 g_terrain_vtx_xform_mode;
 extern s8 D_800BB0EC[];
-extern char D_800CAB9C[];
+const char D_800CAB9C[16] = "GetHeightInfo";
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 
 /* detect_terrain_collision: 4x4-cell quad->2-triangle point location; fills the
@@ -839,7 +868,7 @@ s32 detect_terrain_collision(s32 x, s32 z, s16* out) {
     }
   }
 
-  check_and_print_grid(D_800CAB9C, 0xA, 0xB);
+  check_and_print_grid((char*)D_800CAB9C, 0xA, 0xB);
   return -1;
 }
 
@@ -864,7 +893,9 @@ INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004333C);
 
 extern f32 sqrtf(f32);
 extern s8 g_debug_mode_enabled;
-extern char D_800CABB8[];
+const char D_800CABB8[16] = "NormalFError";
+/* Preserve the original 8-byte zero tail of this C-owned rodata range. */
+const char D_800CABC8[8] = {0};
 
 s32 compute_triangle_plane(s16* triangle, f32* plane) {
   s32 dy1 = triangle[6];
@@ -894,7 +925,7 @@ s32 compute_triangle_plane(s16* triangle, f32* plane) {
 
   if (length == 0.0f) {
     if (g_debug_mode_enabled != 0) {
-      check_and_print_grid(D_800CABB8, 3, 15);
+      check_and_print_grid((char*)D_800CABB8, 3, 15);
     }
     plane[0] = 0.0f;
     plane[1] = 1.0f;
