@@ -24,7 +24,15 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD798)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD8DC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD9C0);
+extern s32 D_ovl0_80223E24;
+extern s32 D_ovl0_80223E30;
+extern s32 D_ovl0_80223E34;
+
+void func_ovl0_801FD9C0(void) {
+    D_ovl0_80223E24 = 1;
+    D_ovl0_80223E30 = 1;
+    D_ovl0_80223E34 = 10;
+}
 
 extern f32 D_ovl0_802270C0[4][4];
 
