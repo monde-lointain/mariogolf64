@@ -14,6 +14,12 @@ extern s32 scenario_mode_id;
 extern s32 D_801B609C;
 extern s32 game_mode;
 extern s32 active_player_count;
+extern f32 D_800C5F24[];
+extern f32 D_800C5F2C[];
+extern f32 D_800C691C;
+extern u16 D_800C6914;
+extern s32 D_800C6918;
+extern u16* nuGfxZBuffer;
 
 extern void flag_set(s32);
 extern void func_80069FBC(void);
@@ -53,7 +59,40 @@ void init_scenario_state(void) {
   set_color_framebuffer_count(2);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
+void func_8008D1DC(void) {
+  u16* zbuf;
+  f32 temp_fv1;
+  u16 temp_v1;
+
+  if ((D_800C5F24[0] >= 16.0f) && (D_800C5F24[0] <= 304.0f) && (D_800C5F2C[0] >= 16.0f) && (D_800C5F2C[0] <= 224.0f)) {
+    zbuf = nuGfxZBuffer;
+    temp_v1 = zbuf[((s32)D_800C5F2C[0] * 0x140) + (s32)D_800C5F24[0]];
+    D_800C6914 = temp_v1;
+    if (temp_v1 <= 0xFFFBU) {
+      temp_fv1 = D_800C691C - 0.1f;
+      D_800C6918 = 0;
+      D_800C691C = temp_fv1;
+      if (temp_fv1 < 0.0f) {
+        D_800C691C = 0.0f;
+      }
+    } else {
+      goto block_11;
+    }
+  } else if ((D_800C5F24[0] > -120.0f) && (D_800C5F24[0] < 440.0f) && (D_800C5F2C[0] > -120.0f) && (D_800C5F2C[0] < 360.0f)) {
+block_11:
+    if (D_800C6918 == 0) {
+      D_800C691C += 0.3f;
+    }
+    if ((D_800C691C > 1.5f) && (D_800C6918 == 0)) {
+      D_800C6918 = 1;
+      D_800C691C = 1.0f;
+    }
+  } else {
+    D_800C6914 = 0;
+    D_800C6918 = 0;
+    D_800C691C = 0.0f;
+  }
+}
 
 /**
  * Emits the sun's lens flare: eight sprites strung along the line from the sun
@@ -75,9 +114,6 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008D1DC);
  *     Gfx* slots run 0x2C, 0x3C, 0x34, 0x54, 0x4C -- each pair inverted.
  */
 extern s32 sky_time_of_day_idx;
-extern f32 D_800C5F24[];
-extern f32 D_800C5F2C[];
-extern f32 D_800C691C;
 extern u32 D_800FE3D4;
 extern s32 D_801B557C;
 extern s32 get_current_course_id(void);
