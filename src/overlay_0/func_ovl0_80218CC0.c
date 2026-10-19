@@ -1,5 +1,9 @@
 #include "common.h"
 
+extern void heap3_free(void** payload_ptr);
+extern void* D_ovl0_8022B534;
+extern void* D_ovl0_8022B53C;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218CC0);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218D1C);
@@ -18,7 +22,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80219C74)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A62C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A690);
+void func_ovl0_8021A690(void) {
+    heap3_free(&D_ovl0_8022B53C);
+    heap3_free(&D_ovl0_8022B534);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A6BC);
 
