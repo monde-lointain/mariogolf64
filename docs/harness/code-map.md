@@ -24,7 +24,7 @@ These decide whether the ROM matches.
 
 * `build.sh <file.c>`: compile with the owning file's profile, normalize, score with `dist.py`, append to `match_log.txt`, print a `STOP:` line at the stall limit.
 * `dist.py`: the score; penalty weights copied from decomp-permuter's scorer.
-* `normalize_asm.py`, `objdump.py`: normalize dumps so symbol-only differences do not count.
+* `normalize_asm.py`, `objdump.py`: normalize dumps so symbol-only differences do not count. Scoring is limited to the target symbol (`--symbol`); branch targets and `.text` offsets are rebased to its start. A `jal` to a nested child prints the child's source name (`name.N` becomes `name`), as the target object does.
 * `diff.sh`, `map_asm_to_c.py`: inspection only.
 * `AGENTS.md`: the per-environment agent brief. `prelude.inc`: assembler prelude for `target.s`.
 * `tools/decomp-env-cleanup`: delete stale environments.
