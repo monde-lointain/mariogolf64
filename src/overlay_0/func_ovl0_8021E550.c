@@ -6,6 +6,8 @@ extern char D_80105118[];
 extern s32 D_ovl0_80224BD0;
 extern char D_ovl0_80225690[];
 extern u16 debug_menu_pad_buttons_c;
+extern u8 D_ovl0_80224B23;
+extern s32 D_ovl0_80224B24;
 
 void func_ovl0_8021E550(void) {
     u16 buttons;
@@ -27,7 +29,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E5F4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E6B8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E710);
+void func_ovl0_8021E710(void) {
+    D_ovl0_80224B24 = 0;
+    D_ovl0_80224B23 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E724);
 
