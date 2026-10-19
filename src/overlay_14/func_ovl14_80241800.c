@@ -1,9 +1,13 @@
 #include "common.h"
 #include "../main/controller.h"
+#include "../main/rom_asset.h"
 
 extern s32 D_ovl14_802457E8;
 extern s32 D_ovl14_802457EC;
 extern void heap3_free(void** payload_address);
+extern void* heap3_alloc(u32 size);
+extern s8 g_terrain_vtx_xform_mode;
+extern s32 func_80051BFC(void);
 extern void play_bgm_by_id(s32 id, s32 flags);
 extern s32 D_ovl14_802457E0;
 extern s32 D_ovl14_80245860;
@@ -56,7 +60,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243E
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80244134);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80245260);
+void func_ovl14_80245260(void) {
+    RomAssetLoad asset;
+    void* payload;
+
+    if (g_terrain_vtx_xform_mode != 0) {
+        payload = heap3_alloc(get_rom_asset_allocation_size(0x96A, &asset));
+        D_ovl14_80245AB0 = payload;
+        load_rom_asset_payload(payload, &asset);
+    } else {
+        payload = heap3_alloc(get_rom_asset_allocation_size(0x92A, &asset));
+        D_ovl14_80245AB0 = payload;
+        load_rom_asset_payload(payload, &asset);
+    }
+    D_ovl14_80245A20 = 0xF0;
+    D_ovl14_802457E0 = 1;
+    D_ovl14_802457E8 = 0;
+    D_ovl14_80245860 = func_80051BFC();
+    play_bgm_by_id(0x17, 0x11);
+}
 
 void func_ovl14_802452E4(void) {
     heap3_free(&D_ovl14_80245AB0);
