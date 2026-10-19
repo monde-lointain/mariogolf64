@@ -48,7 +48,18 @@ extern void heap3_free(void** payload_ptr);
 extern void func_80050DA0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_8006B54C(void);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006A2C0);
+/* Emits a PIPESYNC-bracketed texture rectangle via gSPScisTextureRectangle:
+ * negative origins are clamped to 0, and s/t are offset by the clipped span
+ * (dsdx/dtdy scaled). Advances *pgfx by 5 Gfx. */
+void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile,
+                   s32 s, s32 t, s32 dsdx, s32 dtdy) {
+  Gfx* gfx = *pgfx;
+
+  gDPPipeSync(gfx++);
+  gSPScisTextureRectangle(gfx++, ulx, uly, lrx, lry, tile, s, t, dsdx, dtdy);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
 
 void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr) {
   Gfx* gfx = *pgfx;
