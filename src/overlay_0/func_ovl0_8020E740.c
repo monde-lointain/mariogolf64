@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/session.h"
 
 extern void* heap3_alloc(u32 size_bytes);
 extern void heap3_free(void** payload_ptr);
@@ -74,7 +75,35 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213C78)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213D70);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8021419C);
+extern u8* D_8012D3C0;
+
+s32 func_ovl0_80213C78(PlayerState* player);
+
+void func_ovl0_8021419C(PlayerState* player) {
+  RomAssetLoad asset;
+
+  switch (func_ovl0_80213C78(player)) {
+    case 2:
+    case 10:
+      get_rom_asset_allocation_size(0x6A7, &asset);
+      load_rom_asset_payload(D_8012D3C0 + 0x970, &asset);
+      get_rom_asset_allocation_size(0x6A8, &asset);
+      load_rom_asset_payload(D_8012D3C0 + 0x1578, &asset);
+      break;
+    case 3:
+      get_rom_asset_allocation_size(0x6A6, &asset);
+      load_rom_asset_payload(D_8012D3C0 + 0x970, &asset);
+      break;
+    case 0:
+      get_rom_asset_allocation_size(0x6BE, &asset);
+      load_rom_asset_payload(D_8012D3C0 + 0x970, &asset);
+      break;
+    case 1:
+      get_rom_asset_allocation_size(0x6AE, &asset);
+      load_rom_asset_payload(D_8012D3C0 + 0x970, &asset);
+      break;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80214250);
 
