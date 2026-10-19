@@ -23,6 +23,13 @@ extern u8 D_ovl7_8020E400[];
 extern s32 D_ovl7_80212810[2];
 extern s32 D_ovl7_80212818[2];
 extern s32 D_ovl7_80212820[2];
+extern void* D_801B7EE0;
+extern void* D_ovl7_802259F8[2];
+extern void* D_ovl7_80225A04;
+void heap3_free(void** payload_address);
+void set_clear_color(s32 red, s32 green, s32 blue);
+void func_80029B58(void);
+void func_80078910(void);
 
 void func_ovl7_801F4A40(void) {
     D_ovl7_8020AC4C++;
@@ -37,7 +44,18 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4AEC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5018);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5100);
+void func_ovl7_801F5100(void) {
+    s32 slot_index;
+
+    heap3_free(&D_801B7EE0);
+    for (slot_index = 0; slot_index < 2; slot_index++) {
+        heap3_free(&D_ovl7_802259F8[slot_index]);
+    }
+    func_80029B58();
+    heap3_free(&D_ovl7_80225A04);
+    set_clear_color(0xFF, 0xFF, 0xFF);
+    func_80078910();
+}
 
 void func_ovl7_801F5180(s32 view_state_address, Gfx** cursor) {
     s32 slot_index;
