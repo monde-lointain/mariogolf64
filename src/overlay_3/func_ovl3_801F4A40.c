@@ -3,6 +3,7 @@
 extern Gfx D_ovl3_80232300[];
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s32 D_800C2004;
+extern s32 D_800C2000;
 extern s32 current_game_mode;
 extern s32 game_mode;
 extern s32 func_800959F8(void);
@@ -108,7 +109,50 @@ void func_ovl3_801FA1B8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FA20C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FADBC);
+void func_ovl3_801FADBC(void) {
+  s8 *cursor;
+  s8 new_value;
+
+  if (func_800959F8() == 1) {
+    if (func_8006AD94() != 0) {
+      if (func_8006ADA0() == 0) {
+        current_game_mode = 0x13;
+      }
+    } else {
+      if (D_800C2004 & 0x8000) {
+        play_sound_effect(0x50, 0xF, 0x50);
+        func_8006ADF8(1);
+        return;
+      }
+      if (D_800C2004 & 0x4000) {
+        play_sound_effect(0x5F, 0xF, 0x7F);
+        if ((s8)D_801323A0[0xB] == 5) {
+          current_game_mode = (s8)D_801323A0[0xB];
+          return;
+        }
+        current_game_mode = 6;
+        return;
+      }
+      if (D_800C2000 & 0x800) {
+        cursor = &D_801323B8[1];
+        if (D_801323B8[1] > 0) {
+          play_sound_effect(0x5C, 0xF, 0x64);
+          new_value = (u8)D_801323B8[1] - 1;
+          goto store_cursor;
+        }
+      }
+      if (D_800C2000 & 0x400) {
+        cursor = &D_801323B8[1];
+        if (D_801323B8[1] <= 0) {
+          play_sound_effect(0x5C, 0xF, 0x64);
+          new_value = (u8)D_801323B8[1] + 1;
+store_cursor:
+          *cursor = new_value;
+        }
+      }
+    }
+  }
+}
 
 void func_ovl3_801FAF08(void) {
   if (func_8006AD94() != 0 && D_801B9410 == 0) {
