@@ -101,8 +101,10 @@ The agent-driven workflow follows the Snowboard Kids decompilation projects:
 - `python3 tools/score_functions.py asm/nonmatchings` ranks unmatched functions;
   `python3 tools/project_status.py` reports progress.
 - [task-runner/](task-runner) holds [nigel](https://github.com/cdlewis/nigel) tasks
-  (`nigel --list`, `nigel decompile-similar`). Nigel refuses to start with uncommitted changes
-  (no `reset_command` is configured), so commit or stash your work before running a task.
+  (`nigel --list`, `nigel decompile-similar`). Nigel resets the checkout (`git clean -f; git reset --hard HEAD`)
+  at startup and after every failed candidate, so run it in a dedicated worktree, never in a checkout with
+  uncommitted work. A worktree needs its own ignored inputs: `git worktree add ../mg64-a`, then in `../mg64-a`
+  run `git submodule update --init`, `make setup`, create `.venv` as above, and copy `baserom.z64`.
 
 Generic KMC GCC matching knowledge lives in [DECOMPILATION_LEARNINGS.md](DECOMPILATION_LEARNINGS.md).
 

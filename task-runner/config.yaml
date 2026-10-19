@@ -1,5 +1,7 @@
 # Central task-runner (nigel) configuration
 agent: "omp"
 success_command: 'git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"'
-# reset_command is intentionally unset: nigel then refuses to start on a dirty tree instead of discarding work.
+# reset_command discards a failed candidate's edits before the next one runs (otherwise they leak into the next
+# commit). It also runs at startup and wipes uncommitted, non-ignored changes: run nigel in a dedicated worktree.
+reset_command: "git clean -f; git reset --hard HEAD || true"
 verify_command: "./tools/build-and-verify.sh"
