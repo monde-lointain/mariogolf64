@@ -64,9 +64,30 @@ def parse_relocated_line(line: str) -> tuple[str, str, str]:
     return before, "0" if imm == "0x0" else imm, after
 
 
+AUTO_NAMED_SYMBOL = re.compile(r"^(?:D|func)_([0-9A-Fa-f]{8})$")
+
+
+def auto_named_address(symbol: str, imm: str) -> Optional[int]:
+    """VRAM address encoded by an auto-named symbol plus its addend, or None."""
+    match = AUTO_NAMED_SYMBOL.match(symbol)
+    if match is None:
+        return None
+    try:
+        addend = 0 if imm in ("0", "imm", "addr") else int(imm, 0)
+    except ValueError:
+        return None
+    return int(match.group(1), 16) + addend
+
+
 def process_mips_reloc(reloc_row: str, repl: str, imm: str) -> str:
     if "R_MIPS_JALR" in reloc_row or "R_MIPS_NONE" in reloc_row:
         return repl
+    if "R_MIPS_LO16" in reloc_row or "R_MIPS_HI16" in reloc_row:
+        addr = auto_named_address(repl, imm)
+        if addr is not None:
+            if "R_MIPS_LO16" in reloc_row:
+                return f"%lo(0x{addr & 0xFFFF:x})"
+            return f"%hi(0x{((addr + 0x8000) >> 16) & 0xFFFF:x})"
         
     if imm not in ("0", "imm", "addr"):
         try:
