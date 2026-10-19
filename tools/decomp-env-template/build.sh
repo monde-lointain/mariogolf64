@@ -126,8 +126,14 @@ if ! "$NM" "$OBJECT_OUTPUT" 2>/dev/null | grep -q ' [Tt] '; then
     exit 1
 fi
 
-python3 ./objdump.py target.o > target_object_dump.s
-python3 ./objdump.py "$OBJECT_OUTPUT" > "$OBJECT_DUMP"
+FUNCTION_NAME="$(grep -m1 -oP '^glabel \K[A-Za-z_][A-Za-z0-9_]*$' target.s || true)"
+if [ -z "$FUNCTION_NAME" ]; then
+    echo "ERROR: target.s has no glabel line naming the function"
+    exit 1
+fi
+
+python3 ./objdump.py --symbol "$FUNCTION_NAME" target.o > target_object_dump.s
+python3 ./objdump.py --symbol "$FUNCTION_NAME" "$OBJECT_OUTPUT" > "$OBJECT_DUMP"
 echo "Raw decompiled assembly of $1: $OBJECT_DUMP"
 echo "Decompiled assembly of $1 with C annotations: $ANNOTATED_OUTPUT"
 
@@ -136,7 +142,7 @@ python3 ./normalize_asm.py "$OBJECT_DUMP" > "${1%.c}_object_dump_normalized.s"
 diff -u --suppress-common-lines target_object_dump_normalized.s "${1%.c}_object_dump_normalized.s" > "${1%.c}_diff" || true
 echo "Comparison with target file: ${1%.c}_diff"
 
-SCORE_OUTPUT=$(python3 dist.py target.o "$OBJECT_OUTPUT" --stack-diffs --algorithm "$DIFF_ALGORITHM")
+SCORE_OUTPUT=$(python3 dist.py target.o "$OBJECT_OUTPUT" --stack-diffs --algorithm "$DIFF_ALGORITHM" --symbol "$FUNCTION_NAME")
 echo "$SCORE_OUTPUT"
 
 MATCH_PERCENT=$(echo "$SCORE_OUTPUT" | grep -oP 'Score: \K[0-9.]+' || true)
@@ -203,7 +209,6 @@ if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
 
     if [ -n "$STALL_INFO" ]; then
         read -r SINCE BEST_FILE BEST_SCORE <<< "$STALL_INFO"
-        FUNCTION_NAME="$(grep -m1 -oP '^glabel \K[A-Za-z_][A-Za-z0-9_]*$' target.s || true)"
         echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Do not make another attempt. Record the stop from this directory with: python3 \"$PROJECT_ROOT/tools/difficulty_ledger.py\" record ${FUNCTION_NAME:-<function>} --outcome stalled --reason \"<one line>\", then report the best score and the remaining differences."
     fi
 fi

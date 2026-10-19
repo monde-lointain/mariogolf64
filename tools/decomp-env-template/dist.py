@@ -90,13 +90,13 @@ def check_assertions(target_lines: List[str], base_lines: List[str], assertions:
         print("ASSERTIONS PASSED", len(assertions))
     return not failed
 
-def read_object_file(path: str, preserve_offsets: bool = True) -> List[str]:
-    """Read an object file using objdump"""
+def read_object_file(path: str, preserve_offsets: bool = True, symbol: Optional[str] = None) -> List[str]:
+    """Read an object file using objdump; with `symbol`, keep only that function"""
     import sys
     import os
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from objdump import objdump
-    lines = objdump(path)
+    lines = objdump(path, symbol)
     return lines
 
 class Line:
@@ -350,6 +350,10 @@ def main():
     parser.add_argument("--debug", action="store_true", help="Print debug info")
     parser.add_argument("--stack-diffs", action="store_true", help="Preserve stack differences (for .o files)")
     parser.add_argument(
+        "--symbol",
+        help="Score only this function of object files (the target function)"
+    )
+    parser.add_argument(
         "--algorithm",
         choices=("sequence", "levenshtein"),
         default="sequence",
@@ -360,8 +364,8 @@ def main():
     # Check if we're dealing with object files
     if args.target_file.endswith('.o') and args.cand_file.endswith('.o'):
         # Use objdump to read object files
-        target_lines = read_object_file(args.target_file, preserve_offsets=args.stack_diffs)
-        cand_lines = read_object_file(args.cand_file, preserve_offsets=args.stack_diffs)
+        target_lines = read_object_file(args.target_file, preserve_offsets=args.stack_diffs, symbol=args.symbol)
+        cand_lines = read_object_file(args.cand_file, preserve_offsets=args.stack_diffs, symbol=args.symbol)
     else:
         # Regular text file processing
         target_lines = read_lines(args.target_file)

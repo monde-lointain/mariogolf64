@@ -33,6 +33,28 @@ glabel {FUNCTION}
 # One wrong register: scores below 100% and never matches, so every attempt after the first is a
 # non-improvement.
 CANDIDATE_ASM = TARGET_ASM.replace('$a1', '$a0')
+# A branch makes the target's absolute addresses depend on where it sits in the object.
+BRANCHING_TARGET_ASM = f'''    .macro glabel name
+    .globl \\name
+\\name:
+    .endm
+    .set noreorder
+glabel {FUNCTION}
+    beqz $a0, 1f
+    nop
+    addu $v0, $a0, $a1
+1:
+    jr $ra
+    nop
+'''
+# GCC emits a nested function as a local text symbol placed before its parent. The target object
+# holds only the parent.
+CHILD_ASM = '''    .local child_fn
+child_fn:
+    addu $v0, $a0, $a0
+    jr $ra
+    nop
+'''
 KMC_STUB = '''#!/bin/sh
 # Stand-in for tools/kmc-cc: the candidate is already assembly.
 out=""
@@ -99,6 +121,26 @@ class StallStopTest(unittest.TestCase):
         self.assertEqual(self.stop_lines(runs[1]), [])
         self.assertEqual(len(self.stop_lines(runs[2])), 1)
         self.assertEqual(len(self.stop_lines(runs[3])), 1)
+
+    def use_target(self, asm):
+        (self.env / 'target.s').write_text(asm)
+        subprocess.run(['mips-linux-gnu-as', '-EB', '-march=vr4300', '-o', 'target.o', 'target.s'],
+                       cwd=self.env, check=True)
+
+    def test_local_child_before_target_does_not_count_against_it(self):
+        self.use_target(BRANCHING_TARGET_ASM)
+        candidate = BRANCHING_TARGET_ASM.replace(f'glabel {FUNCTION}', CHILD_ASM + f'glabel {FUNCTION}')
+        proc = self.attempt(name='base_1.c', content=candidate)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn('Verified exact match: yes', proc.stdout)
+
+    def test_child_before_target_still_counts_target_differences(self):
+        self.use_target(BRANCHING_TARGET_ASM)
+        wrong = BRANCHING_TARGET_ASM.replace('$a1', '$a0')
+        candidate = wrong.replace(f'glabel {FUNCTION}', CHILD_ASM + f'glabel {FUNCTION}')
+        proc = self.attempt(name='base_1.c', content=candidate)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn('Verified exact match: no', proc.stdout)
 
     def test_match_log_format_is_unchanged(self):
         self.attempt({'MG64_STALL_LIMIT': '2'})

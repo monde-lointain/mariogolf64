@@ -261,15 +261,31 @@ def process_annotated_dump_lines(lines: List[str], include_source: bool = True) 
     return output_lines
 
 
-def process_objdump_lines(lines: List[str]) -> List[str]:
+# GCC nested functions are local text symbols that can sit before their parent in the object.
+RE_SYMBOL_HEADER = re.compile(r"^([0-9a-f]+) <(.+)>:$")
+RE_SECTION_OFFSET = re.compile(r"\.text\+0x([0-9a-f]+)")
+RE_HEX_ADDRESS = re.compile(r"[0-9a-f]+")
+
+
+def process_objdump_lines(lines: List[str], symbol: Optional[str] = None) -> List[str]:
     output_lines = []
+    base = 0
+    in_symbol = True
+    found = False
 
     for i, line in enumerate(lines):
         if i < SKIP_LINES:
             continue
 
         line = line.rstrip()
-        if ">:" in line or not line:
+        header = RE_SYMBOL_HEADER.match(line)
+        if header:
+            in_symbol = symbol is None or header.group(2) == symbol
+            if in_symbol and symbol is not None:
+                base = int(header.group(1), 16)
+                found = True
+            continue
+        if ">:" in line or not line or not in_symbol:
             continue
 
         # Remove comments and extract instruction part
@@ -309,14 +325,47 @@ def process_objdump_lines(lines: List[str]) -> List[str]:
     while output_lines and output_lines[-1].startswith("nop"):
         output_lines.pop()
 
+    if symbol is not None:
+        if not found:
+            raise ValueError(f"symbol '{symbol}' not found in object")
+        output_lines = [rebase_to_function(line, base) for line in output_lines]
+
     return output_lines
 
 
-def objdump(filename: str) -> List[str]:
+def rebase_to_function(line: str, base: int) -> str:
+    """Make branch targets and .text offsets at or after `base` relative to the function start.
+
+    Earlier offsets (a nested child emitted before the target, or another function) stay as they are.
+    """
+    if base == 0:
+        return line
+    parts = line.split(maxsplit=1)
+    if not parts:
+        return line
+    mnemonic = parts[0]
+    args = parts[1] if len(parts) > 1 else ""
+    if mnemonic in BRANCH_INSTRUCTIONS and args:
+        head, sep, target = args.rpartition(",")
+        if RE_HEX_ADDRESS.fullmatch(target) and int(target, 16) >= base:
+            args = f"{head}{sep}{int(target, 16) - base:x}"
+
+    def rebase_offset(match: re.Match) -> str:
+        offset = int(match.group(1), 16)
+        if offset < base:
+            return match.group(0)
+        relative = offset - base
+        return f".text+0x{relative:x}" if relative else ".text"
+
+    args = RE_SECTION_OFFSET.sub(rebase_offset, args)
+    return f"{mnemonic}    {args}" if args else mnemonic
+
+
+def objdump(filename: str, symbol: Optional[str] = None) -> List[str]:
     executable = find_objdump_executable()
     result = subprocess.check_output([executable] + OBJDUMP_ARGS + [filename])
     lines = result.decode("utf-8").splitlines()
-    return process_objdump_lines(lines)
+    return process_objdump_lines(lines, symbol)
 
 
 if __name__ == "__main__":
@@ -337,6 +386,11 @@ if __name__ == "__main__":
         help="When processing annotated dumps, exclude source file:line and source code comments"
     )
 
+    parser.add_argument(
+        "--symbol",
+        help="Dump only this function symbol, with branch targets and .text offsets relative to its start"
+    )
+
     args = parser.parse_args()
 
     try:
@@ -347,7 +401,7 @@ if __name__ == "__main__":
             output_lines = process_annotated_dump_lines(lines, include_source=not args.no_source)
         else:
             # Process a .o file with objdump
-            output_lines = objdump(args.file)
+            output_lines = objdump(args.file, args.symbol)
 
         for line in output_lines:
             print(line)
