@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern u8* func_8005AF50(void);
 extern u8* func_8005AF74(void);
@@ -35,7 +36,20 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226788)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802267B0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226904);
+extern u16 D_800C2074[];
+extern u8* D_ovl3_80230E7C;
+
+void func_ovl3_80226904(s32 slot) {
+    RomAssetLoad asset;
+    s32 index;
+
+    index = slot & ((s32) ~slot >> 0x1F);
+    if (index >= 0xA) {
+        index = 9;
+    }
+    get_rom_asset_allocation_size(D_800C2074[index], &asset);
+    load_rom_asset_payload(D_ovl3_80230E7C, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226958);
 
