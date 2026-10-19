@@ -105,7 +105,13 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802078C4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802078F4);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207A10);
+extern s32 clear_animation_slot(s32 index);
+extern void func_80095D64(void);
+
+void func_ovl0_80207A10(s32 arg0) {
+    clear_animation_slot(0);
+    func_80095D64();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207A34);
 
