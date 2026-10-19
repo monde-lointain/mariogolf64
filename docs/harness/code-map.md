@@ -47,9 +47,8 @@ These decide whether the ROM matches.
 
 # Agent configuration
 
-* `AGENTS.md`: project instructions loaded into every session; deliberately short, it routes into `docs/`. Environments get a rendered copy of the template brief; the root file also reaches them because omp walks up from the working directory.
-* `.omp/RULES.md`: sticky rules carried on every request ([ground rules](/project/ground-rules.md)). Environments link `.omp`, so they apply there.
-* `.omp/config.yml`, `.omp/skills/*/SKILL.md` (symlinks into `docs/procedures/`).
+* `AGENTS.md`: project instructions loaded into every session, including the short form of the [ground rules](/project/ground-rules.md); deliberately short, it routes into `docs/`. Environments get a rendered copy of the template brief; the root file also reaches them because omp walks up from the working directory.
+* `.omp/config.yml`, `.omp/skills/*/SKILL.md` (symlinks into `docs/procedures/`). Environments link `.omp`, so its settings apply there.
 * `.omp/hooks/pre/mg64-policy.ts`: the tool-call guard ([policy hook](policy-hook.md)).
 * `task-runner/config.yaml`, `task-runner/<task>/task.yaml`: nigel tasks ([task-runner](/tools/task-runner.md)).
 * `docs/`: this bundle.

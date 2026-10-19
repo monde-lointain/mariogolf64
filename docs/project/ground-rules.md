@@ -3,10 +3,9 @@ type: Policy
 title: "Ground rules"
 description: "Non-negotiable project constraints: matches are measured, protected files, harness fixes, commits."
 tags: [policy, project]
-resource: ../../.omp/RULES.md
 ---
 
-These rules apply to every session. `.omp/RULES.md` carries the short form on every request; this concept is the full statement. The [policy hook](/harness/policy-hook.md) and the [git pre-commit hook](/harness/git-hook-and-ci.md) enforce the mechanical parts.
+These rules apply to every session; root `AGENTS.md` carries the short form. The [policy hook](/harness/policy-hook.md) and the [git pre-commit hook](/harness/git-hook-and-ci.md) enforce the mechanical parts.
 
 # 1. Matches are measured, never declared
 

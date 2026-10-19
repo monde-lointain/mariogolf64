@@ -14,16 +14,16 @@ Project knowledge lives in `docs/`, an [OKF](https://github.com/GoogleCloudPlatf
 | KMC GCC behavior, `symbol_addrs.txt`, `mariogolf64.yaml`, F3DEX2 | `docs/reference/` |
 | Build, scoring, policy hook, CI, how to change them | `docs/harness/` |
 
-Matching a function: use the `decompile-function` skill. Its stop rules are mandatory.
+Matching a function: use the `decompile-function` skill and stop at its stop rules.
 
 ## Non-negotiables
 
-Full statement: `docs/project/ground-rules.md` (short form: `.omp/RULES.md`).
+Full statement: `docs/project/ground-rules.md`.
 
 - `./tools/build-and-verify.sh` (ROM SHA1) decides a match; in a decomp environment `./build.sh <file>.c` decides a function. Never declare a match.
 - Never edit `mariogolf64.sha1`, `baserom.z64`, `asm/`, `tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter` or `tools/asm-differ`.
 - Run scripts, not `make` (the policy hook blocks it; `make -s print-cflags SRC=<file>` is allowed).
-- If a tool, script, skill, prompt, doc or the hook is wrong or in your way, fix it generally and commit it separately with the `harness:` prefix. Rules for what a fix needs: `docs/harness/changing-the-harness.md`.
+- If a tool, script, skill, prompt, doc or the hook is wrong or in your way, fix it generally, commit it separately with the `harness:` prefix, then return to your task. Rules for what a fix needs: `docs/harness/changing-the-harness.md`.
 
 ## Code standards
 
