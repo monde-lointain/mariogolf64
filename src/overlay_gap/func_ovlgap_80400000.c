@@ -73,7 +73,51 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804079B8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80407D64);
+extern f64 sin(f64);
+extern f64 cos(f64);
+extern u8 D_80491A60[];
+extern f64 D_ovlgap_8040CA70;
+extern f64 D_ovlgap_8040CA78;
+
+void func_ovlgap_80407D64(void) {
+    s32 texture_index = 0;
+    s32 texture_row = 0;
+    s32 bias = 0xFFFFF;
+    s32 texture_column;
+    s32 sine_phase;
+    u8* texture_pixel;
+    f64 angle_step = D_ovlgap_8040CA70;
+    f64 amplitude = D_ovlgap_8040CA78;
+    f64 cosine;
+    s32 intensity;
+    s32 scaled;
+
+    while (texture_row < 32) {
+        texture_column = 0;
+        sine_phase = texture_row * 4;
+        texture_pixel = &D_80491A60[texture_index];
+        while (texture_column < 32) {
+            cosine = cos((f64) (f32) (texture_column * 4) * angle_step);
+            intensity = (s32) (cosine * sin((f64) (f32) sine_phase * angle_step) * amplitude);
+            intensity = intensity * (intensity * intensity);
+            scaled = intensity;
+            if (intensity < 0) {
+                scaled = intensity + bias;
+            }
+            intensity = scaled >> 0x14;
+            if (intensity <= 0) {
+                intensity = 1;
+            }
+            if (intensity >= 0x10) {
+                intensity = 0xF;
+            }
+            *texture_pixel++ = (intensity << 4) | intensity;
+            texture_column++;
+            texture_index++;
+        }
+        texture_row++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80407EC4);
 
