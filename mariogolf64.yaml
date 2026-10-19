@@ -490,7 +490,7 @@ segments:
     subsegments:
       - [0xADD30, c, overlay_0/func_ovl0_801F4A30]
       - [0xADD40, c, overlay_0/func_ovl0_801F4A40]
-      - [0xB68F0, asm]
+      - [0xB68F0, c, overlay_0/func_ovl0_801FD5F0]
       - [0xBBD00, asm]
       - [0xC7A40, asm]
       - [0xCFE10, asm]
