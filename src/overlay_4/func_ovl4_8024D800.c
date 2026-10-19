@@ -4,6 +4,7 @@
 extern u32 D_ovl4_802542A0;
 extern s16 D_800BAC0C[];
 extern s32 D_800BB00C;
+extern s8 g_terrain_vtx_xform_mode;
 
 void func_ovl4_8024D800(u32 seed) {
     D_ovl4_802542A0 = seed;
@@ -558,7 +559,34 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80253270)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80253620);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80253680);
+void func_ovl4_80253620(s32 arg0, s32 arg1, GridVertex *arg2, GridVertex *arg3);
+
+void func_ovl4_80253680(s32 arg0, s32 arg1, GridVertex *arg2, GridVertex *arg3) {
+    GridVertex *var_a2;
+
+    var_a2 = arg2;
+    if (g_terrain_vtx_xform_mode != 0) {
+        func_ovl4_80253620(arg0, arg1, arg2, arg3);
+        return;
+    }
+    if (var_a2 < arg3) {
+        do {
+            s32 x;
+            s32 z;
+            s32 tex;
+
+            x = var_a2->x;
+            tex = x - (arg0 << 9);
+            tex = (tex << 5) + 0x100;
+            var_a2->texture_s = tex;
+            z = var_a2->z;
+            tex = z - (arg1 << 9);
+            tex = (tex << 5) + 0x100;
+            var_a2->texture_t = tex;
+            var_a2 += 1;
+        } while (var_a2 < arg3);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802536FC);
 
