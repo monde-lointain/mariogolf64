@@ -31,7 +31,9 @@ s32 func_ovl0_8020FFD8(void) { return D_ovl0_80224410 == -1; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020FFEC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8021035C);
+extern s32 D_ovl0_80224418;
+
+s32 func_ovl0_8021035C(void) { return D_ovl0_80224418 >= 0xC; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80210370);
 
