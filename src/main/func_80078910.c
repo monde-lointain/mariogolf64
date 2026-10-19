@@ -20,6 +20,12 @@ typedef struct {
 } Particle; /* size 0x40 */
 
 extern Particle particle_array[40];
+extern s32 frame_counter;
+extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
+                         f32 scale[3]);
+extern void convert_and_pack_floats_to_fixed(f32 matrix[4][4],
+                                             Mtx* fixed_matrix);
+extern Mtx D_800FD8F0[];
 
 extern void* heap3_alloc(u32 need);
 extern void heap3_free(void** payload_ptr);
@@ -182,7 +188,52 @@ void func_80078D94(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078DC0);
+void func_80078DC0(s32 arg0, s32 arg1) {
+  f32 translation[3];
+  f32 rotation[3];
+  f32 scale[3];
+  f32 matrix[4][4];
+  Vec3f spawn_position;
+  s32 i;
+  Particle* p;
+
+  if (func_8005483C(arg0, arg1, &spawn_position) == 0) {
+    D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(
+        (s32)(spawn_position.x * 1024.0f), (s32)(spawn_position.z * 1024.0f));
+
+    for (i = 0; i != 40; i++) {
+      p = &particle_array[i];
+      if (p->effect_kind == -1) {
+        p->position.x = spawn_position.x;
+        p->position.y = spawn_position.y - 1.5f;
+        p->position.z = spawn_position.z;
+        p->velocity.x = 0.0f;
+        p->velocity.y = 0.0f;
+        p->velocity.z = 0.0f;
+        p->opacity = 127.0f;
+        p->opacity_step = -8.0f;
+        p->size = 0.2f;
+        p->size_step = 0.8f;
+        p->effect_kind = 0x13;
+        p->effect_frame = 0;
+        p->matrix_index = (s8)frame_counter;
+        translation[0] = p->position.x;
+        translation[1] = p->position.y;
+        translation[2] = p->position.z;
+        rotation[0] = 0.0f;
+        rotation[1] = 0.0f;
+        rotation[2] = 0.0f;
+        scale[0] = p->size;
+        scale[1] = p->size;
+        frame_counter = (frame_counter + 1) % 40;
+        scale[2] = p->size;
+        mtx_from_rts(matrix, rotation, translation, scale);
+        convert_and_pack_floats_to_fixed(matrix, &D_800FD8F0[p->matrix_index]);
+        break;
+      }
+    }
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_80078FA8);
 
@@ -445,7 +496,6 @@ void func_8007DB08(Gfx** pgfx) {
   *pgfx = gfx;
 }
 
-extern Mtx D_FD8F0[];
 extern Vtx D_800C5338[];
 
 void func_8007DE9C(Gfx** pgfx, Particle* p) {
@@ -453,7 +503,8 @@ void func_8007DE9C(Gfx** pgfx, Particle* p) {
 
   gDPPipeSync(gfx++);
   gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->opacity);
-  gSPMatrix(gfx++, &D_FD8F0[p->matrix_index], G_MTX_PUSH);
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_800FD8F0[p->matrix_index]),
+            G_MTX_PUSH);
   gSPVertex(gfx++, D_800C5338, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
@@ -469,7 +520,8 @@ void func_8007DFD0(Gfx** pgfx, Particle* p) {
 
   gDPPipeSync(gfx++);
   gDPSetPrimColor(gfx++, 0, 0, 0xE6, 0xE6, 0xE6, (u32)p->opacity);
-  gSPMatrix(gfx++, &D_FD8F0[p->matrix_index], G_MTX_PUSH);
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_800FD8F0[p->matrix_index]),
+            G_MTX_PUSH);
   gSPVertex(gfx++, D_800C5378, 4, 0);
   gDPPipeSync(gfx++);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
