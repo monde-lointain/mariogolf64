@@ -36,10 +36,6 @@ task-runner/**/*.log
 .decomp_dev_secret
 .push_secrets
 
-# claude
-**/.claude/settings.local.json
-.claude/worktrees
-
 # IDE, clangd, and OS files
 compile_commands.json
 .cache/*
