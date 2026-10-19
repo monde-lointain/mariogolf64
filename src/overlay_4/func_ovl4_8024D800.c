@@ -94,7 +94,14 @@ void func_ovl4_80250DA0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250DE4);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250EE0);
+extern u8 *D_ovl4_8025D350;
+extern u8 *D_ovl4_8025D354;
+
+void func_ovl4_80250EE0(void) {
+    D_ovl4_8025D354 = (u8 *)0x80315000;
+    D_ovl4_8025D350 = (u8 *)0x80315000;
+    D_ovl4_8025D354 = (u8 *)0x80315000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250F04);
 
