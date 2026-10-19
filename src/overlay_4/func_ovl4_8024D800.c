@@ -84,7 +84,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250EE0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250F04);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250F90);
+extern void bzero(void* address, s32 length);
+extern u8 collision_triangles[];
+
+void func_ovl4_80250F90(void) {
+    bzero(&collision_triangles, 0x3C00);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250FB4);
 
