@@ -8,6 +8,9 @@ extern s32 D_ovl0_80224114;
 extern s32 D_ovl0_80224120;
 extern s32 D_ovl0_80224124;
 extern void* D_ovl0_8022D650;
+extern void func_800772B0(void);
+extern s32 D_ovl0_80224848;
+extern s32 D_ovl0_8022484C;
 
 void func_ovl0_8020E740(void) {
   RomAssetLoad asset;
@@ -192,6 +195,24 @@ void func_ovl0_8021419C(PlayerState* player) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80214250);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80216130);
+void func_ovl0_80216130(s32 arg0) {
+  RomAssetLoad asset;
+
+  if (D_ovl0_80224124 == 1) {
+    if (arg0 == -1) {
+      D_ovl0_80224848 = -1;
+      return;
+    }
+    D_ovl0_80224848 = 0;
+    D_ovl0_8022484C = 0x6CF;
+    get_rom_asset_allocation_size(0x6CF, &asset);
+    load_rom_asset_payload(D_ovl0_8022D650, &asset);
+    get_rom_asset_allocation_size(0x6AF, &asset);
+    load_rom_asset_payload((u8*)D_ovl0_8022D650 + 0x808, &asset);
+    D_ovl0_80224120 = -1;
+    D_ovl0_80224114 = -1;
+    func_800772B0();
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_802161D4);
