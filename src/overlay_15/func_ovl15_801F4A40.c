@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern s32 D_ovl15_801FBB78;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4B20);
@@ -79,7 +81,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA0
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA320);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA35C);
+/* Return the overlay 15 state word: 0 idle, 1 ramping up, 2 ramping down, 3 active. */
+s32 func_ovl15_801FA35C(void) {
+    return D_ovl15_801FBB78;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA368);
 
