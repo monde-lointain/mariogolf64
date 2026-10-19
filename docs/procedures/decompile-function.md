@@ -46,7 +46,7 @@ Stop at the first of these and make no further attempt:
 * **Matched:** `build-and-verify.sh` succeeds after integration (section 2).
 * **Stalled:** `build.sh` prints a line starting `STOP:`. The best score has not improved for the stall limit of `base_<N>.c` attempts (`stall_limit` in `.run.json`, 10 at tier 1; `MG64_STALL_LIMIT` overrides it).
 * **Integration failed:** the environment matches but `build-and-verify.sh` cannot be made to pass. Restore the C file.
-* **Gave up:** you cannot progress without a change this procedure does not allow.
+* **Gave up:** the only change left is one this procedure forbids (editing another function, inline assembly, a dead local). Register allocation, scheduling or a low `Time left` are not reasons: keep attempting until `STOP:`.
 
 `difficulty_ledger.py harvest` records matched, stalled, near-miss and timed-out runs from the environment. Record the other two yourself, from the repository root:
 

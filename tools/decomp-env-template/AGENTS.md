@@ -24,7 +24,7 @@ Delegate these steps to one omp `task` subagent, so the exploration stays out of
 3. Copy the best attempt so far to the next number and edit the copy, e.g. `cp base_3.c base_4.c` and then edit `base_4.c` (the first attempt copies `base.c` to `base_1.c`). Leave scored files unchanged: `match_log.txt` keeps their scores.
 4. Run `./build.sh base_<n>.c`, and note findings worth keeping in `LEARNINGS.md`.
 
-`build.sh` prints `Verified exact match: yes` and a `NEXT:` line on a match, a `STOP:` line once the stall limit is reached, and `Time left` when the run has a deadline. A `NEXT:` or `STOP:` line ends the loop.
+`build.sh` prints `Verified exact match: yes` and a `NEXT:` line on a match, a `STOP:` line once the stall limit is reached, and `Time left` when the run has a deadline. Only a `NEXT:` or `STOP:` line ends the loop; with `Time left` under 5 min, write `NEAR_MISS.md` (the run is killed at the deadline).
 
 Other helpers: `./diff.sh <file>.o` (normalized diff), `./objdump.py <file>.o` (normalized MIPS), `./map_asm_to_c.py <file>.o <line>` (assembly line to C).
 
