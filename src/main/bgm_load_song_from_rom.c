@@ -20,6 +20,7 @@ extern void initialize_hole_handicap_ranks(void);
 extern void init_per_player_state(void);
 extern void init_sky_panels(void);
 extern void func_80054E20(void);
+extern s32 resolve_hole_winners(s8* player_marks);
 void setup_terrain_detail_default(void);
 
 extern u32 scenario_mode_id;
@@ -324,7 +325,45 @@ void func_8005FB58(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FCB8);
 
-INCLUDE_ASM("asm/nonmatchings/main/bgm_load_song_from_rom", func_8005FE8C);
+void func_8005FE8C(void) {
+  s32 places[4];
+  s8 marks[4];
+  s32 i;
+  s32 j;
+
+  if (scenario_state_id.rumble_disabled == 0 && (u32)(scenario_state_id.game_mode - 0xA) < 2U) {
+    if (resolve_hole_winners(marks) != 1) {
+      for (i = 0; i < scenario_state_id.active_player_count; i++) {
+        places[i] = player_records[i].standing;
+      }
+    } else {
+      for (i = 0; i < scenario_state_id.active_player_count; i++) {
+        if (marks[i] != 1) {
+          places[i] = player_records[i].standing + 1;
+        } else {
+          places[i] = 0;
+        }
+      }
+    }
+  } else {
+    for (i = 0; i < scenario_state_id.active_player_count; i++) {
+      places[i] = 0;
+      for (j = 0; j < scenario_state_id.active_player_count; j++) {
+        if (j != i) {
+          if (player_records[i].base_score > player_records[j].base_score) {
+            places[i]++;
+          } else if (player_records[i].base_score == player_records[j].base_score &&
+                     player_records[i].standing > player_records[j].standing) {
+            places[i]++;
+          }
+        }
+      }
+    }
+  }
+  for (i = 0; i < scenario_state_id.active_player_count; i++) {
+    player_records[i].standing = (s8)places[i];
+  }
+}
 
 /* The selector advances eight bytes through auxiliary entries, not whole records.
  * These are address projections: direct array indexing folds the member offset

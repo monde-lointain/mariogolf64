@@ -19,7 +19,8 @@ typedef struct {
   /* 0x1D */ s8 character_index;
   /* 0x1E */ u8 unknown_1E[5];
   /* 0x23 */ s8 base_score;
-  /* 0x24 */ u8 unknown_24[2];
+  /* 0x24 */ u8 unknown_24;
+  /* 0x25 */ s8 standing;
   /* 0x26 */ s8 hole_status;
   /* 0x27 */ u8 unknown_27[2];
   /* 0x29 */ s8 handicap;
