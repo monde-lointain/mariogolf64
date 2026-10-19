@@ -1,10 +1,11 @@
 #include "common.h"
 
 extern void func_ovl8_801F55A0(void);
+extern s8 g_debug_mode_enabled;
 
 void func_ovl8_801F4A40(void) { func_ovl8_801F55A0(); }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_8/func_ovl8_801F4A40", func_ovl8_801F4A5C);
+void func_ovl8_801F4A5C(void) { g_debug_mode_enabled = 1; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_8/func_ovl8_801F4A40", func_ovl8_801F4A6C);
 
