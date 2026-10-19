@@ -155,7 +155,22 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D6F0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D784);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D7C4);
+extern f32 atan2f(f32 y, f32 x);
+extern f32 D_801B54F8;
+extern f32 view_camera_eye_x;
+extern f32 D_801B5500;
+extern f32 view_camera_eye_z;
+
+f32 func_ovl0_8020D7C4(void) {
+    f32 dx = D_801B54F8 - view_camera_eye_x;
+    f32 angle = 0.0f;
+    f32 dz = D_801B5500 - view_camera_eye_z;
+
+    if ((s32)dx != 0 || (s32)dz != 0) {
+        angle = atan2f(dx, dz);
+    }
+    return angle;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D838);
 
