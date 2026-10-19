@@ -298,7 +298,50 @@ s32 func_ovl0_80206CC8(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206CF0);
+extern GameModeRecord D_800FEDD8[];
+extern s32 active_club_id;
+s32 get_hole_score_result_code(s32 hole_score);
+
+typedef struct {
+    u16 unk0;
+    s32 unk4;
+    s32 unk8;
+} MeterDefaults;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} MeterDefaults2;
+
+extern MeterDefaults D_800FBE48;
+extern MeterDefaults2 D_800FBE5C;
+
+void func_ovl0_80206CF0(s32 player_index) {
+    GameModeRecord *record;
+    u32 score_index;
+
+    score_index = player_records[player_index].base_score - 1;
+    if (score_index < 5U) {
+        record = &D_800FEDD8[player_index];
+        record->game_mode = scenario_state_id.game_mode;
+        record->scenario_mode_id = scenario_state_id.scenario_mode_id;
+        record->round_hole_index = scenario_state_id.round_hole_index;
+        record->unknown_3A[0] = get_hole_score_result_code(player_records[player_index].base_score);
+        record->unknown_3A[1] = player_records[player_index].character_index;
+        record->unknown_3A[2] = player_records[player_index].unknown_1E[4];
+        record->unknown_3A[3] = player_records[player_index].asset_variant;
+        record->unknown_3E = player_records[player_index].base_score;
+        record->unknown_40 = player_records[player_index].unknown_88;
+        record->environment = hole_environment;
+        record->mode_aux_fields[score_index].unknown_00 = D_800FBE48.unk0;
+        record->mode_aux_fields[score_index].unknown_02[0] = D_800FBE48.unk4;
+        record->mode_aux_fields[score_index].unknown_02[1] = D_800FBE48.unk8;
+        record->mode_aux_fields[score_index].unknown_02[2] = active_meter_category;
+        record->mode_aux_fields[score_index].unknown_02[3] = active_club_id;
+        record->mode_aux_fields[score_index].unknown_02[4] = D_800FBE5C.unk0;
+        record->mode_aux_fields[score_index].unknown_02[5] = D_800FBE5C.unk4;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206E88);
 

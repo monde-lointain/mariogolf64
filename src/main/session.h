@@ -33,7 +33,8 @@ typedef struct {
   /* 0x7C */ u8 unknown_7C[4];
   /* 0x80 */ s32 unknown_80; /* -2 pending, -1 no result */
   /* 0x84 */ s32 unknown_84; /* -2 pending, -1 no result */
-  /* 0x88 */ u8 unknown_88[0x14];
+  /* 0x88 */ u32 unknown_88;
+  /* 0x8C */ u8 unknown_8C[0x10];
   /* 0x9C */ s8 unknown_9C;
   /* 0x9D */ u8 unknown_9D[3];
   /* 0xA0 */ s32 pending_result;
@@ -108,7 +109,8 @@ typedef struct {
   /* 0x39 */ s8 round_hole_index;
   /* 0x3A */ u8 unknown_3A[4];
   /* 0x3E */ u8 unknown_3E;
-  /* 0x3F */ u8 unknown_3F[5];
+  /* 0x3F */ u8 unknown_3F;
+  /* 0x40 */ u32 unknown_40;
   /* 0x44 */ ModeAuxFields mode_aux_fields[4];
   /* 0x64 */ u8 unknown_64[4];
 } GameModeRecord; /* 0x68 */
