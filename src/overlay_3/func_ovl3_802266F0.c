@@ -131,7 +131,15 @@ s8 func_ovl3_8022BDC4(void) {
     return D_80105DBC[4];
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022BDD0);
+extern u8 D_ovl3_80230F40;
+
+s32 func_ovl3_8022BDD0(void) {
+    if (D_ovl3_80230F40 != 0) {
+        D_ovl3_80230F40 = 0;
+        return 1;
+    }
+    return 0;
+}
 
 void func_ovl3_8022BDF8(void) {
 }
