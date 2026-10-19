@@ -1,9 +1,11 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern void heap3_free(void** payload_ptr);
 extern void func_80051A88(s32 volume);
 extern s32 D_ovl0_80224A7C;
 extern void* D_ovl0_8022B530;
+extern void* heap3_alloc(u32 size);
 extern void* D_ovl0_8022B534;
 extern void* D_ovl0_8022B538;
 extern void* D_ovl0_8022B53C;
@@ -32,7 +34,14 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_802199EC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80219C74);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A62C);
+void func_ovl0_8021A62C(void) {
+    RomAssetLoad asset;
+
+    D_ovl0_8022B53C = heap3_alloc(get_rom_asset_allocation_size(0x70F, &asset));
+    load_rom_asset_payload(D_ovl0_8022B53C, &asset);
+    D_ovl0_8022B534 = heap3_alloc(get_rom_asset_allocation_size(0x71F, &asset));
+    load_rom_asset_payload(D_ovl0_8022B534, &asset);
+}
 
 void func_ovl0_8021A690(void) {
     heap3_free(&D_ovl0_8022B53C);
