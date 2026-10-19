@@ -273,7 +273,47 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207014)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207048);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207080);
+u8* func_8005AF50(void);
+void func_8005DE60(s32);
+extern s32 round_hole_index;
+extern s32 scenario_mode_id;
+
+void func_ovl0_80207080(s32 player_index) {
+    s32 var_a0;
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u8 *temp_v1_2;
+    u8 temp_v0_2;
+    u8 temp_v0_3;
+    u8 *save;
+
+    save = func_8005AF50();
+    temp_v1 = save + ((scenario_mode_id * 6) + 0x1320) + round_hole_index;
+    var_a0 = round_hole_index;
+    temp_v0_2 = *temp_v1 + 1;
+    *temp_v1 = temp_v0_2;
+    if ((s8) temp_v0_2 < 0) {
+        *temp_v1 = 0;
+        goto block_4;
+    }
+    if ((s8) temp_v0_2 >= 0x64) {
+        *temp_v1 = 0x63;
+    }
+block_4:
+    if (player_records[player_index].character_index < 0x12) {
+        temp_v0 = func_8005AF50() + ((scenario_mode_id * 0x6C) + 0x1344);
+        temp_v1_2 = temp_v0 + (round_hole_index * 0x12) + player_records[player_index].character_index;
+        var_a0 = player_records[player_index].character_index;
+        temp_v0_3 = *temp_v1_2 + 1;
+        *temp_v1_2 = temp_v0_3;
+        if ((s8) temp_v0_3 < 0) {
+            *temp_v1_2 = 0;
+        } else if ((s8) temp_v0_3 >= 0x64) {
+            *temp_v1_2 = 0x63;
+        }
+    }
+    func_8005DE60(var_a0);
+}
 
 extern s8 D_800BAA04;
 
