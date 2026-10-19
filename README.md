@@ -89,12 +89,12 @@ Other targets:
 
 The agent-driven workflow follows the Snowboard Kids decompilation projects:
 
-- [CLAUDE.md](CLAUDE.md) (also `AGENTS.md`, `GEMINI.md`) holds the project instructions for agents.
-  `.claude/` holds the skills and tool-use hooks; `.codex`, `.agents`, and `.gemini` point at it.
-- `./tools/claude --bootstrap-only <function>` creates `nonmatchings/<function>/` with the target
+- [AGENTS.md](AGENTS.md) holds the project instructions for agents. `.omp/` holds the omp project
+  config (`config.yml`), skills (`skills/`), and the policy hook (`hooks/pre/mg64-policy.ts`).
+- `./tools/decomp-env --bootstrap-only <function>` creates `nonmatchings/<function>/` with the target
   assembly, an m2c starting point, and `build.sh`, which compiles a candidate with the owning file's
-  compiler profile and scores it against the target. Without `--bootstrap-only` it launches the
-  agent CLI (`--codex` for Codex) inside the environment.
+  compiler profile and scores it against the target. Without `--bootstrap-only` it launches
+  `omp --thinking xhigh` inside the environment.
 - `timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>` runs
   [decomp-permuter](https://github.com/simonlindholm/decomp-permuter) with the same profile.
 - `python3 tools/asm-differ/diff.py --no-pager <function>` diffs a function in the built ROM.
