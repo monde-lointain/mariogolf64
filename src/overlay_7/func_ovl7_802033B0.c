@@ -1,24 +1,6 @@
 #include "common.h"
 #include "../main/vector.h"
 
-extern GolfCamera D_ovl7_8022BE30;
-void func_ovl7_80203620(void);
-void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames);
-
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802033B0);
-
-void func_ovl7_8020356C(f32 eye_x, f32 eye_y, f32 eye_z, f32 target_x, f32 target_y, f32 target_z) {
-    D_ovl7_8022BE30.eye.x = eye_x;
-    D_ovl7_8022BE30.eye.y = eye_y;
-    D_ovl7_8022BE30.eye.z = eye_z;
-    D_ovl7_8022BE30.at.x = target_x;
-    D_ovl7_8022BE30.at.y = target_y;
-    D_ovl7_8022BE30.at.z = target_z;
-    func_ovl7_80203620();
-}
-
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035BC);
-
 typedef union {
   s32 i;
   f32 f;
@@ -56,28 +38,92 @@ typedef struct {
   s32 iB[2];
 } Ovl7Region;
 
+typedef struct {
+  GolfCamera camera;
+  f32 unk18;
+  f32 unk1C;
+  f32 unk20;
+  f32 unk24;
+  Ovl7Region region;
+} Ovl7State;
+
+extern Ovl7State D_ovl7_8022BE30;
+extern f32 D_ovl7_8020AE3C;
+void func_ovl7_80203620(void);
+void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames);
+
+void func_ovl7_802033B0(void) {
+  s32 i;
+
+  D_ovl7_8022BE30.camera.eye.x = 0.0f;
+  D_ovl7_8022BE30.camera.at.x = 0.0f;
+  D_ovl7_8022BE30.camera.at.y = 0.0f;
+  D_ovl7_8022BE30.camera.at.z = 0.0f;
+  D_ovl7_8022BE30.camera.eye.y = -100.0f;
+  D_ovl7_8022BE30.camera.eye.z = 100.0f;
+  D_ovl7_8022BE30.unk24 = 45.0f;
+  i = 0;
+  do {
+    D_ovl7_8022BE30.region.vecA[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecA[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecA[i].z = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].z = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].z = 0.0f;
+    D_ovl7_8022BE30.region.fA[i] = 30.0f;
+    D_ovl7_8022BE30.region.fB[i] = 3.0f;
+    D_ovl7_8022BE30.region.iA[i] = 0;
+    D_ovl7_8022BE30.region.iB[i] = 0;
+    D_ovl7_8022BE30.region.flags[i] = 0;
+    i++;
+  } while (i != 2);
+  D_ovl7_8022BE30.region.fE[0] = 0.0f;
+  D_ovl7_8022BE30.region.fE[1] = 0.0f;
+  D_ovl7_8022BE30.region.fE[2] = 0.0f;
+  D_ovl7_8022BE30.region.fC[0].f = 0.104719758f;
+  D_ovl7_8022BE30.region.fC[1].f = 0.0349065848f;
+  D_ovl7_8022BE30.region.fC[2].f = 0.052359879f;
+  D_ovl7_8022BE30.region.fC[3].f = 0.0174532924f;
+  D_ovl7_8022BE30.region.fD[0].f = 10.0f;
+  D_ovl7_8022BE30.region.fD[1].f = 1.0f;
+  func_ovl7_80203620();
+  D_ovl7_8020AE3C = 1.0f;
+}
+
+void func_ovl7_8020356C(f32 eye_x, f32 eye_y, f32 eye_z, f32 target_x, f32 target_y, f32 target_z) {
+    D_ovl7_8022BE30.camera.eye.x = eye_x;
+    D_ovl7_8022BE30.camera.eye.y = eye_y;
+    D_ovl7_8022BE30.camera.eye.z = eye_z;
+    D_ovl7_8022BE30.camera.at.x = target_x;
+    D_ovl7_8022BE30.camera.at.y = target_y;
+    D_ovl7_8022BE30.camera.at.z = target_z;
+    func_ovl7_80203620();
+}
+
+INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035BC);
+
 extern f64 D_ovl7_8020C098;
 extern f64 D_ovl7_8020C0A0;
-extern f32 D_ovl7_8022BE48;
-extern f32 D_ovl7_8022BE4C;
 extern Ovl7TweenState D_ovl7_8022BE98;
 extern Ovl7TweenStateB D_ovl7_8022BE94;
-extern Ovl7Region D_ovl7_8022BE58;
 extern f32 fabsf(f32);
 
 void func_ovl7_802035E4(s32 unused, s32 arg1, s32 arg2) {
-  D_ovl7_8022BE58.fC[0].i = arg1;
-  D_ovl7_8022BE58.fC[1].i = arg2;
+  D_ovl7_8022BE30.region.fC[0].i = arg1;
+  D_ovl7_8022BE30.region.fC[1].i = arg2;
 }
 
 void func_ovl7_802035F8(s32 unused, s32 arg1, s32 arg2) {
-  D_ovl7_8022BE58.fC[2].i = arg1;
-  D_ovl7_8022BE58.fC[3].i = arg2;
+  D_ovl7_8022BE30.region.fC[2].i = arg1;
+  D_ovl7_8022BE30.region.fC[3].i = arg2;
 }
 
 void func_ovl7_8020360C(s32 unused, s32 arg1, s32 arg2) {
-  D_ovl7_8022BE58.fD[0].i = arg1;
-  D_ovl7_8022BE58.fD[1].i = arg2;
+  D_ovl7_8022BE30.region.fD[0].i = arg1;
+  D_ovl7_8022BE30.region.fD[1].i = arg2;
 }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203620);
@@ -90,7 +136,7 @@ void func_ovl7_80203984(s32 idx, f32 x, f32 y, f32 z, s32 frames) {
   s32 *inactive;
   s32 word;
 
-  flags = D_ovl7_8022BE58.flags;
+  flags = D_ovl7_8022BE30.region.flags;
   active = &flags[idx];
   word = *active;
   if (!(word & 0x80)) {
@@ -130,16 +176,16 @@ void func_ovl7_80203A30(s32 arg0, f32 arg1, s32 arg2) {
     threshold = 0.001f;
   } while (0);
   if (absolute < threshold) {
-    accum = &D_ovl7_8022BE48;
+    accum = &D_ovl7_8022BE30.unk18;
     *accum += arg1;
     return;
   }
   if (arg2 != 0) {
     quarter = arg2 / 4;
     step = arg1 / (f32) (arg2 - quarter);
-    D_ovl7_8022BE58.fE[1] = (f32) ((f64) arg1 * D_ovl7_8020C098);
-    D_ovl7_8022BE58.fC[0].f = step;
-    D_ovl7_8022BE58.fC[1].f = step / (f32) (quarter + 1);
+    D_ovl7_8022BE30.region.fE[1] = (f32) ((f64) arg1 * D_ovl7_8020C098);
+    D_ovl7_8022BE30.region.fC[0].f = step;
+    D_ovl7_8022BE30.region.fC[1].f = step / (f32) (quarter + 1);
   }
   state = &D_ovl7_8022BE98;
   state->value = arg1;
@@ -181,16 +227,16 @@ void func_ovl7_80203B60(s32 arg0, f32 arg1, s32 arg2) {
     threshold = 0.001f;
   } while (0);
   if (absolute < threshold) {
-    accum = &D_ovl7_8022BE4C;
+    accum = &D_ovl7_8022BE30.unk1C;
     *accum += arg1;
     return;
   }
   if (arg2 != 0) {
     quarter = arg2 / 4;
     step = arg1 / (f32) (arg2 - quarter);
-    D_ovl7_8022BE58.fE[0] = (f32) ((f64) arg1 * D_ovl7_8020C0A0);
-    D_ovl7_8022BE58.fC[2].f = step;
-    D_ovl7_8022BE58.fC[3].f = step / (f32) (quarter + 1);
+    D_ovl7_8022BE30.region.fE[0] = (f32) ((f64) arg1 * D_ovl7_8020C0A0);
+    D_ovl7_8022BE30.region.fC[2].f = step;
+    D_ovl7_8022BE30.region.fC[3].f = step / (f32) (quarter + 1);
   }
   state = &D_ovl7_8022BE94;
   state->value = arg1;
@@ -226,31 +272,31 @@ void func_ovl7_80203E14(void) {
 
   i = 0;
   do {
-    D_ovl7_8022BE58.vecA[i].x = 0.0f;
-    D_ovl7_8022BE58.vecA[i].y = 0.0f;
-    D_ovl7_8022BE58.vecA[i].z = 0.0f;
-    D_ovl7_8022BE58.vecB[i].x = 0.0f;
-    D_ovl7_8022BE58.vecB[i].y = 0.0f;
-    D_ovl7_8022BE58.vecB[i].z = 0.0f;
-    D_ovl7_8022BE58.vecB[i].x = 0.0f;
-    D_ovl7_8022BE58.vecB[i].y = 0.0f;
-    D_ovl7_8022BE58.vecB[i].z = 0.0f;
-    D_ovl7_8022BE58.fA[i] = 30.0f;
-    D_ovl7_8022BE58.fB[i] = 3.0f;
-    D_ovl7_8022BE58.iA[i] = 0;
-    D_ovl7_8022BE58.iB[i] = 0;
-    D_ovl7_8022BE58.flags[i] = 0;
+    D_ovl7_8022BE30.region.vecA[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecA[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecA[i].z = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].z = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].x = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].y = 0.0f;
+    D_ovl7_8022BE30.region.vecB[i].z = 0.0f;
+    D_ovl7_8022BE30.region.fA[i] = 30.0f;
+    D_ovl7_8022BE30.region.fB[i] = 3.0f;
+    D_ovl7_8022BE30.region.iA[i] = 0;
+    D_ovl7_8022BE30.region.iB[i] = 0;
+    D_ovl7_8022BE30.region.flags[i] = 0;
     i++;
   } while (i != 2);
-  D_ovl7_8022BE58.fE[0] = 0.0f;
-  D_ovl7_8022BE58.fE[1] = 0.0f;
-  D_ovl7_8022BE58.fE[2] = 0.0f;
-  D_ovl7_8022BE58.fC[0].f = 0.104719758f;
-  D_ovl7_8022BE58.fC[1].f = 0.0349065848f;
-  D_ovl7_8022BE58.fC[2].f = 0.052359879f;
-  D_ovl7_8022BE58.fC[3].f = 0.0174532924f;
-  D_ovl7_8022BE58.fD[0].f = 10.0f;
-  D_ovl7_8022BE58.fD[1].f = 1.0f;
+  D_ovl7_8022BE30.region.fE[0] = 0.0f;
+  D_ovl7_8022BE30.region.fE[1] = 0.0f;
+  D_ovl7_8022BE30.region.fE[2] = 0.0f;
+  D_ovl7_8022BE30.region.fC[0].f = 0.104719758f;
+  D_ovl7_8022BE30.region.fC[1].f = 0.0349065848f;
+  D_ovl7_8022BE30.region.fC[2].f = 0.052359879f;
+  D_ovl7_8022BE30.region.fC[3].f = 0.0174532924f;
+  D_ovl7_8022BE30.region.fD[0].f = 10.0f;
+  D_ovl7_8022BE30.region.fD[1].f = 1.0f;
   func_ovl7_80203620();
 }
 
@@ -259,10 +305,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203F70)
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80204EA8);
 
 void func_ovl7_802065FC(Vec3f* delta) {
-    D_ovl7_8022BE30.at.x += delta->x;
-    D_ovl7_8022BE30.at.y += delta->y;
-    D_ovl7_8022BE30.at.z += delta->z;
-    D_ovl7_8022BE30.eye.x += delta->x;
-    D_ovl7_8022BE30.eye.y += delta->y;
-    D_ovl7_8022BE30.eye.z += delta->z;
+    D_ovl7_8022BE30.camera.at.x += delta->x;
+    D_ovl7_8022BE30.camera.at.y += delta->y;
+    D_ovl7_8022BE30.camera.at.z += delta->z;
+    D_ovl7_8022BE30.camera.eye.x += delta->x;
+    D_ovl7_8022BE30.camera.eye.y += delta->y;
+    D_ovl7_8022BE30.camera.eye.z += delta->z;
 }
