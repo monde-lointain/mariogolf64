@@ -58,7 +58,7 @@ Full standard: `../../docs/project/code-quality.md`. In short:
 
 ## Strategy
 
-Generic KMC GCC behavior is in `../../docs/reference/kmc-gcc/`. It is read-only for you: put function-specific findings in `LEARNINGS.md`.
+Generic KMC GCC behavior is in `../../docs/reference/kmc-gcc/`. It is read-only for you: put every finding in `LEARNINGS.md`, including ones you believe are generic. The `consolidate-learnings` task verifies those with a compile probe and merges them into the reference.
 
 - How to approach a function: phases, plateaus, near-miss triage, large functions, data layout: `../../docs/procedures/matching-method.md`.
 - m2c artefacts (do-while loops, gotos, duplicated temporaries, shifts, false returns) and GCC 2.7.2 codegen to accept: `../../docs/reference/decompilation-artefacts.md`.
