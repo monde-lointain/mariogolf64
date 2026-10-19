@@ -1,8 +1,24 @@
 #include "common.h"
 
+extern f32 D_ovl7_8022BE30;
+extern f32 D_ovl7_8022BE34;
+extern f32 D_ovl7_8022BE38;
+extern f32 D_ovl7_8022BE3C;
+extern f32 D_ovl7_8022BE40;
+extern f32 D_ovl7_8022BE44;
+void func_ovl7_80203620(void);
+
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802033B0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_8020356C);
+void func_ovl7_8020356C(f32 eye_x, f32 eye_y, f32 eye_z, f32 target_x, f32 target_y, f32 target_z) {
+    D_ovl7_8022BE30 = eye_x;
+    D_ovl7_8022BE34 = eye_y;
+    D_ovl7_8022BE38 = eye_z;
+    D_ovl7_8022BE3C = target_x;
+    D_ovl7_8022BE40 = target_y;
+    D_ovl7_8022BE44 = target_z;
+    func_ovl7_80203620();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035BC);
 
