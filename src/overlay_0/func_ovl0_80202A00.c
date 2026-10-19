@@ -85,7 +85,15 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206354)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206BD0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206CC8);
+extern s32 game_mode;
+extern s8 rumble_disable_flag;
+
+s32 func_ovl0_80206CC8(void) {
+    if (rumble_disable_flag == 0) {
+        return game_mode == 9;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206CF0);
 
