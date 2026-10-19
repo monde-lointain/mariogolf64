@@ -681,7 +681,7 @@ segments:
     exclusive_ram_id: ovl14
     symbol_name_format: ovl14_$VRAM
     subsegments:
-      - [0x1619A0, asm]
+      - [0x1619A0, c, overlay_14/func_ovl14_80241800]
       - [0x165970, data]
       - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
 
