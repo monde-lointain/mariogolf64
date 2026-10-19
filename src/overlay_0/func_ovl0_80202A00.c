@@ -4,6 +4,27 @@
 #include "../main/club.h"
 #include "../main/terrain.h"
 
+typedef struct {
+    u16 unk0;
+    s32 unk4;
+    s32 unk8;
+} MeterDefaults;
+
+typedef struct {
+    f32 target_z;
+    f32 angle;
+} CameraLookTarget;
+
+extern s32 D_800C3084;
+extern s32 D_800FBE7C[];
+extern MeterDefaults D_800FBE48;
+extern s32 D_800FBE64[];
+extern f32 D_801B54F0;
+extern f32 D_801B54F8;
+extern f32 D_801B54FC;
+extern CameraLookTarget D_801B5500;
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+
 extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
 
 void func_ovl0_80202A00(void) {
@@ -14,7 +35,44 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80202A20)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80202D04);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802038D0);
+void func_ovl0_802038D0(void) {
+    f32 point[3];
+    f32 angle;
+    f32 cosine;
+    s32 *radius_ptr;
+
+    get_shot_data();
+    if (D_800C3084 & 1) {
+        D_800FBE7C[2] = -0x10E00;
+        D_800FBE7C[0] = -0x10E00;
+    } else {
+        D_800FBE7C[2] = -0x12C00;
+        D_800FBE7C[0] = -0x2D000;
+    }
+    angle = (f32)D_800FBE48.unk0 * 0.0000958738f;
+    point[0] = cosf(angle) * (f32)D_800FBE7C[0] + (f32)D_800FBE64[0];
+    if (point[0] < 0.0f) {
+        point[0] = 0.0f;
+    } else if (point[0] >= 4347904.0f) {
+        point[0] = 4347903.0f;
+    }
+    point[2] = sinf(angle) * (f32)D_800FBE7C[0] + (f32)D_800FBE64[2];
+    if (point[2] < 0.0f) {
+        point[2] = 0.0f;
+    } else if (point[2] >= 8.542208e6f) {
+        point[2] = 8.542207e6f;
+    }
+    cosine = cosf(angle);
+    radius_ptr = &D_800FBE7C[0];
+    point[0] = cosine * (f32)(*radius_ptr + 0x280000) + (f32)D_800FBE64[0];
+    point[2] = sinf(angle) * (f32)(*radius_ptr + 0x280000) + (f32)D_800FBE64[2];
+    point[1] = D_801B54F0;
+    get_interpolated_terrain_height_wrapper((s32)point[0], (s32)point[2]);
+    D_801B5500.angle = angle;
+    D_801B54F8 = point[0] * 0.0009765625f;
+    D_801B5500.target_z = point[2] * 0.0009765625f;
+    D_801B54FC = (point[1] * 0.0009765625f) - ((f32)D_800FBE7C[2] * 0.0009765625f);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203B4C);
 
@@ -22,7 +80,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203DAC)
 
 extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan);
 extern void update_object_group_by_id(s32 index);
-extern s32 D_800C3084;
 extern s32 D_800C3090;
 extern s32 D_ovl0_80227194;
 extern u16 D_801B55CC;
@@ -43,7 +100,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203EEC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203F30);
 
-extern s32 D_800FBE7C[];
 extern f64 D_ovl0_80224EF8;
 extern f64 D_ovl0_80224F00;
 extern f64 D_ovl0_80224F08;
@@ -303,18 +359,12 @@ extern CourseSelectionRecord D_80105F40[];
 extern s32 active_club_id;
 s32 get_hole_score_result_code(s32 hole_score);
 
-typedef struct {
-    u16 unk0;
-    s32 unk4;
-    s32 unk8;
-} MeterDefaults;
 
 typedef struct {
     s32 unk0;
     s32 unk4;
 } MeterDefaults2;
 
-extern MeterDefaults D_800FBE48;
 extern MeterDefaults2 D_800FBE5C;
 extern s32 round_hole_index;
 extern s32 scenario_mode_id;
@@ -658,15 +708,13 @@ void func_ovl0_8020D784(void) {
 }
 
 extern f32 atan2f(f32 y, f32 x);
-extern f32 D_801B54F8;
 extern f32 view_camera_eye_x;
-extern f32 D_801B5500;
 extern f32 view_camera_eye_z;
 
 f32 func_ovl0_8020D7C4(void) {
     f32 dx = D_801B54F8 - view_camera_eye_x;
     f32 angle = 0.0f;
-    f32 dz = D_801B5500 - view_camera_eye_z;
+    f32 dz = D_801B5500.target_z - view_camera_eye_z;
 
     if ((s32)dx != 0 || (s32)dz != 0) {
         angle = atan2f(dx, dz);
