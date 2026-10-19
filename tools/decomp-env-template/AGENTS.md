@@ -41,6 +41,8 @@ After `base.c` builds successfully, repeat the following steps:
 - `./objdump.py <file>.o` dumps normalized MIPS assembly.
 - `./map_asm_to_c.py <file>.o <line>` maps an assembly line back to the C code that produced it.
 
+These tools are symlinks into `../../tools/decomp-env-template/`. If one of them, or any other project tool, is broken or in your way, fix it at the source instead of working around it. Follow the root `AGENTS.md` § Changing the harness, and commit the fix separately.
+
 A symbol-only difference (for example `%lo(D_800B67A5)` against `%lo(array+1)`) is a naming difference in the extracted assembly, not an instruction difference. Note it, but do not distort the C to chase it.
 
 ## Coding Guidelines

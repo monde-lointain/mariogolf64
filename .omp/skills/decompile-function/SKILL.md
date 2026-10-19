@@ -53,6 +53,10 @@ Respect any pre-commit hooks that prevent you from committing your change. A fai
 
 You are done. Do not attempt to find the next closest match.
 
+## Harness friction
+
+If `build.sh`, `tools/decomp-env`, another tool, or the policy hook is wrong or in the way, fix it instead of working around it. Follow `AGENTS.md` § Changing the harness. Files in the environment that come from `tools/decomp-env-template/` are symlinks, so edits to them change the template. Commit the fix by itself (`harness:` prefix, only its paths) before you integrate the function into `src/`, then continue matching. A harness fix does not reset or extend the attempt and stop rules below.
+
 ## When to stop
 
 **These rules are mandatory. Do not override them.**

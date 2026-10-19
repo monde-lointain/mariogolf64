@@ -90,7 +90,14 @@ Other targets:
 The agent-driven workflow follows the Snowboard Kids decompilation projects:
 
 - [AGENTS.md](AGENTS.md) holds the project instructions for agents. `.omp/` holds the omp project
-  config (`config.yml`), skills (`skills/`), and the policy hook (`hooks/pre/mg64-policy.ts`).
+  config (`config.yml`), the sticky rules (`RULES.md`), skills (`skills/`), and the policy hook
+  (`hooks/pre/mg64-policy.ts`).
+- Agents fix harness bugs and friction instead of working around them (AGENTS.md § Changing the
+  harness; code map in [tools/HARNESS.md](tools/HARNESS.md)). Those fixes land as separate `harness:`
+  commits. Changes that affect what counts as a match need a test that fails before the fix. The
+  checksum, `asm/`, and the vendored toolchain stay off-limits. Commits made inside a nigel worktree
+  stay on that worktree's branch, so review and merge `harness:` commits from there
+  (`git log --oneline --grep '^harness:'`).
 - `./tools/decomp-env --bootstrap-only <function>` creates `nonmatchings/<function>/` with the target
   assembly, an m2c starting point, and `build.sh`, which compiles a candidate with the owning file's
   compiler profile and scores it against the target. Without `--bootstrap-only` it launches

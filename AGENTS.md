@@ -33,7 +33,30 @@ This is a matching decompilation project for Mario Golf 64 (N64, US revision 0).
 - `python3 tools/report_nonmatching_matches.py` reports certified 100% local matches and 100% decomp.me scratches (`tools/scratches.json`) not yet integrated into `src/`, plus partial matches.
 - `python3 tools/fix_redundant_externs.py [paths...] [--fix]` finds source-local `extern`s that repeat a project header's prototype; `--fix` removes them and includes the header.
 - `python3 tools/check_pointer_arithmetic.py [paths...] [--strict]` reports `(type *)ptr + offset` casts (see Avoid Pointer Arithmetic).
-- `python3 -m unittest discover -s tools -p 'test_*.py'` runs the tool unit tests.
+- `.venv/bin/python3 -m unittest discover -s tools -p 'test_*.py'` runs the tool unit tests (the tests import the tools' venv dependencies).
+- `bun test ./.omp/hooks/tests/mg64-policy.test.ts` runs the policy hook tests.
+
+## Changing the harness
+
+The harness is everything that builds, scores, selects, or polices the work: `tools/` (except the protected paths below), `tools/decomp-env-template/`, the `Makefile`, `task-runner/`, `.omp/` (config, skills, policy hook), `AGENTS.md`, and `README.md`. [tools/HARNESS.md](tools/HARNESS.md) maps where each job lives and which tests cover it.
+
+The harness is ours to improve. Any session, including a single-function decomp environment or a nigel candidate, may fix a harness bug or remove a friction point, and should do so instead of working around it. Examples: a crash in a tool, a policy-hook false positive, a misleading error message, or a missing flag you needed. Keep the fix general and small, and stay on your original task afterwards.
+
+**Protected, never changed by an agent:** `mariogolf64.sha1`, `baserom.z64`, `asm/`, and the vendored tools (`tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter`, `tools/asm-differ`). These are the ground truth a match is measured against, and the policy hook enforces it. If a fix would need one of them, stop and report it to the user.
+
+Changes come in two classes:
+
+- **Workflow changes** (CLI ergonomics, output, selection and ranking, environment setup, docs, skills, task prompts): make them, keep the tests above green, and update the docs or skill that describe the behaviour.
+- **Comparison changes**: anything that can change what counts as a match or what may be committed. This covers the build, link, and checksum rules in the `Makefile`, `tools/build-and-verify.sh`, `tools/git-hooks/pre-commit`, the scorer (`tools/decomp-env-template/build.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`), match certification (`tools/nonmatching_match_log.py`, `tools/m2c_one_shot.py`), `tools/data-differ/`, the code-quality checkers, and `.omp/hooks/pre/mg64-policy.ts`. These additionally require:
+  1. a test that fails before the change and shows the old behaviour was a real false positive or false negative;
+  2. for scorer or certification changes, the score of at least one existing environment (or a fixture) before and after, quoted in the commit message;
+  3. for policy-hook changes, the guarded action stays blocked. A hook fix may narrow a pattern that blocks legitimate commands (for example, reading a file). It may never remove a rule or a protected path.
+
+A `COMPILER PROFILES` override in the `Makefile` is a source change, not a comparison change: the checksum verifies it.
+
+Never weaken a check to make a specific function pass. If a check is wrong, fix it for every input and add the test above.
+
+**Commits.** Commit a harness change by itself, as soon as it is done, staging only its own paths (`git add <paths>`, never `-A`). Use the subject prefix `harness:`. This keeps comparison changes bisectable. It also matters under nigel: `reset_command` (`git clean -f; git reset --hard HEAD`) wipes uncommitted work after every failed candidate, and `success_command` would otherwise mix the fix into the candidate's commit. The pre-commit hook rebuilds the whole tree, so commit while `src/` still builds. In a decomp environment, that means before you integrate the function into `src/`.
 
 ## Compiler
 
