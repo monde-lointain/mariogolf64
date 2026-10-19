@@ -40,7 +40,32 @@ void func_ovl0_801FD9E4(void) {
     guMtxIdentF(D_ovl0_802270C0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FDA04);
+typedef struct Ovl0Record {
+    f32 unk_00[3];
+    s32 unk_0C;
+    u8 unk_10;
+    u8 pad_11[3];
+    s32 unk_14;
+    u8 pad_18[0x88];
+} Ovl0Record;
+
+extern Ovl0Record D_ovl0_802225F4[32];
+extern s32 D_ovl0_80227100;
+void func_ovl0_801FD8DC(void);
+
+void func_ovl0_801FDA04(void) {
+    s32 i;
+
+    i = 0;
+    do {
+        D_ovl0_802225F4[i].unk_0C = -1;
+        D_ovl0_802225F4[i].unk_14 = 0;
+        i += 1;
+    } while (i < 32);
+    func_ovl0_801FD8DC();
+    func_ovl0_801FD9E4();
+    D_ovl0_80227100 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FDA64);
 
