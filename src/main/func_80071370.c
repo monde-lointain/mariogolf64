@@ -465,7 +465,78 @@ void emit_glyph_string_12px(Gfx** dl, s16 x, s16 y, u8* str) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80073F24);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074230);
+/**
+ * Emits one string of 10x10 glyphs from the I4 font atlas at D_800E1C34
+ * (160 texels wide, 16 glyphs per row), advancing the caller's display-list
+ * cursor. Same layout as emit_glyph_string_12px with 10px cells.
+ */
+void func_80074230(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  c = *str;
+  if (c != 0) {
+    do {
+      s32 code;
+      s32 xpos;
+      s32 ypos;
+      s32 uls;
+      s32 ult;
+
+      if (c == 0x20) {
+        str++;
+        x += 10;
+        continue;
+      }
+      xpos = x;
+      ypos = y;
+      code = c;
+      if ((u32)(code - 0x61) < 0x1A) {
+        code += 0x80;
+      }
+      if (code >= 0xA0) {
+        goto hi;
+      }
+      if (code >= 0x9E) {
+        goto mark;
+      }
+      if (code == 0x2E) {
+        goto period;
+      }
+      goto draw;
+    hi:
+      if (code >= 0xE0) {
+        goto draw;
+      }
+      if (code < 0xDE) {
+        goto draw;
+      }
+    mark:
+      xpos -= 8;
+      ypos -= 7;
+      x -= 10;
+      goto draw;
+    period:
+      xpos -= 5;
+      x -= 8;
+    draw:
+      uls = (code % 16) * 10;
+      ult = (code / 16) * 10;
+      gDPLoadTextureTile_4b(gfx++, ((u32)D_800E1C34 + 8) & ~7, G_IM_FMT_I, 160,
+                            10, uls, ult, uls + 15, ult + 9, 0, 0, 0, 0, 0, 0,
+                            0);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, xpos << 2, ypos << 2, (xpos + 10) << 2,
+                          (ypos + 10) << 2, G_TX_RENDERTILE, uls << 5, ult << 5,
+                          1 << 10, 1 << 10);
+      str++;
+      x += 10;
+    } while ((c = *str) != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074500);
 
@@ -479,10 +550,8 @@ void func_800747B0(Gfx** arg0, s32 arg1, s32 arg2, u8* str) {
   *arg0 = saved;
 }
 
-extern void func_80074230(s32* dst, s16 x, s16 y, u8* str);
-
-void func_80074840(s32* arg0, s32 arg1, s32 arg2, u8* str) {
-  s32 saved = *arg0;
+void func_80074840(Gfx** arg0, s32 arg1, s32 arg2, u8* str) {
+  Gfx* saved = *arg0;
   s32 w = func_800738BC(str, 0xA, 2);
 
   func_80074230(&saved, arg1 - w / 2, arg2, str);

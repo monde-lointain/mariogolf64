@@ -623,7 +623,7 @@ extern s32 func_8003DFD0(s32 x, s32 z);
 extern void func_80071608(Gfx** chain);
 extern void emit_glyph_sprite_dl(Gfx** chain, s32 pass);
 extern void func_80075E48(Gfx** chain);
-extern void func_80074840(s32* chain, s32 x, s32 y, u8* str);
+extern void func_80074840(Gfx** chain, s32 x, s32 y, u8* str);
 extern void mtx_from_rts(f32 mf[4][4], f32 rotate[3], f32 translate[3],
                          f32 scale[3]);
 extern void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
@@ -730,7 +730,7 @@ void emit_rest_distance_panel_dl(Gfx** gfxp) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       func_800747B0(&gfx, 0xA0, 0x60, ent->name_ptr);
       if (D_800C5A10 == 1 && is_special_course_active() == 0) {
-        func_80074840((s32*)&gfx, 0xA0, 0x70, (u8*)D_80105118);
+        func_80074840(&gfx, 0xA0, 0x70, (u8*)D_80105118);
       }
     }
   }
