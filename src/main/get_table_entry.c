@@ -1,22 +1,7 @@
 #include "terrain.h"
 #include "club.h"
 
-/* Per-shot init scratch record, 0xB8 stride, base @ D_800B7868. */
-typedef struct {
-  /* 0x00 */ s32 unknown_00;
-  /* 0x04 */ s32 unknown_04;
-  /* 0x08 */ s32 unknown_08;
-  /* 0x0C */ s32 unknown_0C;
-  /* 0x10 */ s32 unknown_10;
-  /* 0x14 */ s32 unknown_14;
-  /* 0x18 */ s32 unknown_18;
-  /* 0x1C */ u8 pad1C[0x58];
-  /* 0x74 */ s32 unknown_74;
-  /* 0x78 */ u8 pad78[0x40];
-} ShotInitRecord;
-
 extern TerrainAttrEntry D_800B790C[27];
-extern ShotInitRecord D_800B7868[1];
 extern u8 D_800B7C00[];
 extern u8 D_800B7C08[];
 extern u8 D_800B7C2E[];
