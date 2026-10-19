@@ -31,6 +31,14 @@ This is a matching decompilation project for Mario Golf 64 (N64, US revision 0).
 
 All C is compiled with KMC GCC 2.7.2 (assembled by KMC binutils 2.6 through `tools/kmc-cc`). Each directory has its own compiler profile (optimization level, defines, include order), with a few file-specific overrides, in the `COMPILER PROFILES` section of the `Makefile`. Generic KMC GCC behavior is summarized in `DECOMPILATION_LEARNINGS.md`.
 
+## Decompilation Learnings
+
+`DECOMPILATION_LEARNINGS.md` is a curated reference of generic KMC GCC and build behavior, not a work log.
+
+- Add an entry only for a generic, reusable property of the compiler or build that the file does not already cover. Put it in the matching section and keep it short.
+- Never record function or symbol names, ROM/VRAM addresses, match percentages, attempt histories, or one-off layout discoveries.
+- Per-function `tools/decomp-env` sessions treat the file as read-only and keep their findings in the workspace `LEARNINGS.md`.
+
 ## Tasks
 
 ### Decompile assembly to C code

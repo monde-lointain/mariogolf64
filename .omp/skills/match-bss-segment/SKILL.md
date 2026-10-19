@@ -99,4 +99,4 @@ osCreateThread(&audioThread, 9, audioThreadEntry, 0, audioThreadStack + sizeof(a
 - Do not make unclear symbols `void *` when code usage reveals a real type.
 - Keep macro definitions, structs, globals, declarations, and implementations in project order.
 - Search `src/` and `include/` for duplicate or stale declarations before final verification.
-- Update `DECOMPILATION_LEARNINGS.md` only when matching reveals a reusable compiler or project-specific insight.
+- If matching reveals a generic compiler or build lesson, record it under the Decompilation Learnings rule in `AGENTS.md`.

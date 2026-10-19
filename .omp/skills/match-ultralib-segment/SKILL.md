@@ -96,9 +96,7 @@ description: Match a given segment to a libultra ROM segment. Use this when conv
    python3 tools/asm-differ/diff.py --no-pager osPfsNumFiles
    ```
 
-10. Document Learnings:
-
-Update the DECOMPILATION_LEARNINGS.md file in the root of the project with any additional learnings that you gathered as part of matching this segment. Only add **generic, broadly applicable lessons** — things that would help when matching a *different* function in the future. Do not add per-file details such as specific VRAM/ROM addresses, individual symbol names, exact segment split locations, or step-by-step accounts of what happened for one particular function. Ask: "would this lesson help me match an unrelated ultra function tomorrow?" If not, leave it out.
+10. Document learnings: record any generic, reusable lesson under the Decompilation Learnings rule in `AGENTS.md`. Ask: "would this lesson help me match an unrelated libultra function tomorrow?" If not, leave it out.
 
 ## Build Flags
 
