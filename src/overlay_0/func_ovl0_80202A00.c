@@ -449,7 +449,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208354)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020845C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802087D0);
+extern s8 D_801061BF;
+extern s8 D_801061C0;
+extern s8 D_801061C1;
+extern s8 D_801061C2;
+extern s8 D_801061C3;
+extern s8 D_801061C5;
+
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original (parent func_ovl0_802088B0 is not recovered); `unused` reproduces them, as in func_ovl7_802068B4. */
+void func_ovl0_802087D0(s8 arg0) {
+    s32 r;
+    volatile s32 unused = r;
+
+    D_801061BF = arg0;
+    D_801061C0 = arg0;
+    D_801061C1 = arg0;
+    D_801061C2 = arg0;
+    D_801061C3 = arg0;
+    D_801061C5 = arg0;
+}
 
 extern s32 active_terrain_index;
 extern s32 D_ovl0_8022715C;
