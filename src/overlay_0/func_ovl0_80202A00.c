@@ -283,7 +283,39 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020466C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204910);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802054CC);
+extern s8 g_terrain_vtx_xform_mode;
+extern s32 active_terrain_index;
+extern s32 D_800FBE94[];
+
+/* Recomputes the overlay_0 state word D_800C3084 from the current shot flags,
+ * terrain entry, transform mode and meter category. Each condition ORs its
+ * bit in after a fresh reset of the word. */
+void func_ovl0_802054CC(void) {
+    s32 temp_v0;
+    s8* xform_mode;
+
+    temp_v0 = get_shot_data()->flags;
+    D_800C3084 = 0;
+    if (temp_v0 & 1) {
+        D_800C3084 = 2;
+    }
+    xform_mode = &g_terrain_vtx_xform_mode;
+    if (*xform_mode != 0) {
+        D_800C3084 |= 2;
+    }
+    if (get_table_entry((u32) active_terrain_index)->id == 0xBU) {
+        D_800C3084 |= 1;
+    }
+    if (*xform_mode != 0) {
+        D_800C3084 |= 3;
+    }
+    if (active_meter_category == 2) {
+        D_800C3084 |= 4;
+    }
+    if (((f32) D_800FBE94[1] * 0.0006510417f) <= 600.0f) {
+        D_800C3084 |= 8;
+    }
+}
 
 extern u32 D_ovl0_80227198;
 
@@ -305,7 +337,6 @@ extern s8 D_801B71EE;
 extern u8 D_801B727A;
 extern s32 D_ovl0_80223E5C;
 extern const char D_ovl0_80224FC0[];
-extern s8 g_terrain_vtx_xform_mode;
 
 void func_ovl0_80205AE4(s32 arg0, s32 arg1) {
     s32 temp_a0;
@@ -712,7 +743,6 @@ void func_ovl0_802087D0(s8 arg0) {
     D_801061C5 = arg0;
 }
 
-extern s32 active_terrain_index;
 extern s32 D_ovl0_8022715C;
 extern u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3);
 
