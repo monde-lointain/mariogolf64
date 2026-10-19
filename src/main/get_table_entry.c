@@ -37,7 +37,29 @@ INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_at_meter_ratio);
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_for_meter_phase);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", read_meter_stick_normalized);
+typedef struct {
+  u8 pad00[0x18];
+  s32 unk18;
+  u8 pad1C[0x4];
+  s32 unk20;
+} BallObject;
+
+typedef struct {
+  u8 pad00[0x40];
+  BallObject **argSlot;
+} MeterStickFrame;
+
+/* Static-chain home of the nested-function original: $v0 on entry is the parent frame; its 0x40 slot holds &ball slot, and that slot holds the ball object pointer. The volatile frame access keeps `sw $v0,0(sp)` ahead of the chain loads. */
+f32 read_meter_stick_normalized(void) {
+  s32 r;
+  volatile s32 unused = r;
+  BallObject *obj;
+  s32 sum;
+
+  obj = *((volatile MeterStickFrame *) r)->argSlot;
+  sum = (obj->unk18 + obj->unk20) & 0xFF;
+  return ((f32) sum - 127.5f) * 0.007843138f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", update_ball_physics);
 
