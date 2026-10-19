@@ -36,7 +36,10 @@ typedef struct {
   /* 0x9C */ s8 unknown_9C;
   /* 0x9D */ u8 unknown_9D[3];
   /* 0xA0 */ s32 pending_result;
-  /* 0xA4 */ u8 unknown_A4[0x14];
+  /* 0xA4 */ s32 event_total;
+  /* 0xA8 */ u8 unknown_A8[0x2];
+  /* 0xAA */ u8 event_counts[12];
+  /* 0xB6 */ u8 unknown_B6[0x2];
 } PlayerState; /* 0xB8 */
 
 /* The live 0x44-byte scenario block is also copied into continue slots. */

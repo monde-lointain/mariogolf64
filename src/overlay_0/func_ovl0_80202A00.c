@@ -247,7 +247,27 @@ void func_ovl0_80205AE4(s32 arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205BB8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205C78);
+s32 func_ovl0_80205BB8(s32 player_index, s32 event_index);
+
+s32 func_ovl0_80205C78(void) {
+    s32 player_index;
+    s32 event_index;
+    s32 player_total;
+    s32 grand_total;
+
+    grand_total = 0;
+    for (player_index = 0; player_index < scenario_state_id.active_player_count;
+         player_index++) {
+        player_total = 0;
+        for (event_index = 0; event_index < 12; event_index++) {
+            player_total += func_ovl0_80205BB8(player_index, event_index);
+            player_records[player_index].event_counts[event_index] = 0;
+        }
+        player_records[player_index].event_total = player_total;
+        grand_total += player_total;
+    }
+    return grand_total;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205D44);
 
