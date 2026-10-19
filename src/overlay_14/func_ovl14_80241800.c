@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern s32 D_ovl14_802457E8;
+extern s32 D_ovl14_802457EC;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80241800);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_8024186C);
@@ -16,7 +19,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802438
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243898);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802439B0);
+void func_ovl14_802439B0(void) {
+    D_ovl14_802457E8 = 0;
+    D_ovl14_802457EC = 5;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802439C8);
 
