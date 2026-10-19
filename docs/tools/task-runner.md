@@ -43,11 +43,11 @@ Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools
 
 # Task catalog
 
-Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, except `decompile-unmatched`, which has no `sync-shard` step. The five decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
+Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown. The five decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
 
 | Task | Candidate source | Timeout | Notes |
 |---|---|---|---|
-| `decompile-unmatched` | `difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` | 60 min | Tier 1. No `sync-shard`. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT`, then [decompile-function](/procedures/decompile-function.md). |
+| `decompile-unmatched` | `score_functions.py … --json` | 60 min | Tier 1. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT`, then [decompile-function](/procedures/decompile-function.md). |
 | `decompile-similar` | `score_functions.py … --by-similarity --top-n 3` | 60 min | Tier 1. Top three similar matched functions as references. |
 | `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. References from coddog similarity. |
 | `decompile-tier2` | `score_functions.py … --by-similarity --top-n 5 --tier 2` | 120 min | Tier 2. Reads the tier-1 reasons first. Five references. Rewrites from the assembly when progress plateaus. |
