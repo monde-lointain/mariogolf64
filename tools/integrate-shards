@@ -3,14 +3,15 @@
 # onto the current branch, checking the ROM after each one.
 #
 # For each branch in turn, the commits `git cherry` lists as missing, oldest first:
-#   - a "Decompile ..." commit whose functions (the INCLUDE_ASM lines it removes)
-#     are all decompiled here already is skipped: it was integrated before and the
-#     shard has not synced since (tools/sync-shard drops it at its next candidate);
-#   - any other "Decompile ..." commit is cherry-picked, with src/**/*.c conflicts
-#     resolved by tools/merge-decomp-c, and kept if ./tools/build-and-verify.sh passes;
-#   - a commit with another subject (harness, docs), a conflict the merge driver
-#     cannot resolve, or a failed build stops that branch, since its later commits
-#     may depend on it. The commit is left for a person to review and integrate.
+#   - a commit that touches only src/, include/, docs/, symbol_addrs.txt or
+#     mariogolf64.yaml, whose functions (the INCLUDE_ASM lines it removes) are all
+#     decompiled here already, is skipped: it was integrated before and the shard
+#     has not synced since (tools/sync-shard drops it at its next candidate);
+#   - any other such commit is cherry-picked, with src/**/*.c conflicts resolved by
+#     tools/merge-decomp-c, and kept if ./tools/build-and-verify.sh passes;
+#   - a commit that touches anything else (harness code, tasks, hooks), a conflict
+#     the merge driver cannot resolve, or a failed build stops that branch, since its
+#     later commits may depend on it. The commit is left for a person to review.
 # Prints one line per commit. Exits 1 if any branch stopped, 0 otherwise.
 set -u
 [[ $# -gt 0 && $1 != -* ]] || { echo "usage: $0 <branch>..." >&2; exit 2; }
@@ -29,7 +30,7 @@ status=0
 for branch in "$@"; do
     for c in $(git cherry HEAD "$branch" | awk '/^\+/{print $2}'); do
         line="$branch ${c:0:8} $(git log -1 --format=%s "$c")"
-        if [[ $line != "$branch ${c:0:8} Decompile "* ]]; then
+        if [[ -n $(git show --format= --name-only "$c" | grep -vE '^(src/|include/|docs/|symbol_addrs\.txt$|mariogolf64\.yaml$)') ]]; then
             echo "review $line"; status=1; break
         elif integrated "$c"; then
             echo "skipped $line"

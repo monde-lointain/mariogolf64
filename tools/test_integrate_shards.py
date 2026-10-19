@@ -44,7 +44,26 @@ class IntegrateShardsTest(unittest.TestCase):
     def subjects(self):
         return git(self.repo, 'log', '--reverse', '--format=%s').splitlines()
 
-    def test_other_subjects_stop_the_branch_before_later_matches(self):
+    def test_source_only_commit_with_any_subject_is_picked(self):
+        commit(self.repo, 'src/f.c', STUBS.replace('middle', 'typed'), 'Type func_A arg as u16')
+
+        proc = self.run_on_dev()
+
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertEqual(self.subjects(), ['base', 'Type func_A arg as u16'])
+
+    def test_decompile_commit_that_touches_a_tool_stops_the_branch(self):
+        (self.repo / 'tools' / 'extra.py').write_text('x\n')
+        git(self.repo, 'add', 'tools/extra.py')
+        commit(self.repo, 'src/f.c', STUBS.replace('INCLUDE_ASM("asm/f", func_A);', 'void func_A(void) {}'),
+               'Decompile func_A')
+
+        proc = self.run_on_dev()
+
+        self.assertEqual(proc.returncode, 1)
+        self.assertEqual(self.subjects(), ['base'])
+
+    def test_files_outside_the_source_paths_stop_the_branch_before_later_matches(self):
         commit(self.repo, 'src/f.c', STUBS.replace('INCLUDE_ASM("asm/f", func_A);', 'void func_A(void) {}'),
                'Decompile func_A')
         commit(self.repo, 'notes', 'x\n', 'harness: change something')

@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-10-19
+* **Update**: `tools/integrate-shards` decides what needs review by the paths a commit touches (anything outside `src/`, `include/`, `docs/`, `symbol_addrs.txt`, `mariogolf64.yaml`) instead of its subject. Source-only follow-ups such as a type fix and docs commits integrate after the ROM check; a "Decompile" commit that also edits a tool now stops for review. The policy hook ignores shell redirections on `make print-cflags`, and skill docs link with bundle-absolute paths (a sibling link resolved under `.omp/skills/<name>/`).
 * **Update**: `dist.py` normalizes every jump-table reference (`jtbl_\w+`, as `objdump.py` and `normalize_asm.py` already did), not only hex-named ones. Overlay tables such as `jtbl_ovl11_8024C738` were scored as register differences against the candidate's `.rodata`. Before/after on `func_ovl11_802436C8`'s `base_1.o`: 99.655% (10 differences) to 100.000% exact ([decomp-env](/tools/decomp-env.md)).
 * **Update**: `objdump.py` resolves named globals through `symbol_addrs.txt` as well as auto-named `D_`/`func_` symbols, so a relocation against `g_terrain_tile_cache+0x98E` equals `D_80132D4A+0x944`. Before/after on `func_ovl4_80250FB4`'s probe: 98.462% (20 differences) to 100.000% exact ([decomp-env](/tools/decomp-env.md)).
 * **Update**: Overlays (`src/overlay_*`) now compile with `-DF3DEX_GBI_2`, like `src/main`: the overlay display-list builder `func_ovl3_8022A090` matches the ROM only with F3DEX2 opcodes (`E3`/`E1`/`F1`). See [compiler profiles](/project/compiler-profiles.md).
