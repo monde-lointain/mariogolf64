@@ -1,4 +1,5 @@
 #include "common.h"
+#include <nusys.h>
 #include "../main/session.h"
 #include "../main/rom_asset.h"
 
@@ -262,7 +263,24 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F93
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F9688);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F9CEC);
+s32 func_ovl15_801F9D80(s32 contNo, OSGbpakId *info, NUContPakFile *handle);
+
+/* Retries the GB Pak check up to three times, re-registering the GB Pak manager after each failure. Returns 1 on success, otherwise the last failure code. */
+s32 func_ovl15_801F9CEC(s32 arg0, OSGbpakId *arg1, NUContPakFile *arg2) {
+    s32 result;
+    s32 i;
+
+    i = 0;
+    do {
+        result = func_ovl15_801F9D80(arg0, arg1, arg2);
+        if (result == 1) {
+            return 1;
+        }
+        nuContGBPakMgrInit();
+        i++;
+    } while (i != 3);
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F9D80);
 
