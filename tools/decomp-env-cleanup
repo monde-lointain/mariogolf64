@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Removes stale scratch directories under nonmatchings/ for functions that have been matched.
+# A stale directory holding unconsolidated LEARNINGS.md or NEAR_MISS.md notes is kept until
+# the notes are consolidated (tools/list_unconsolidated_learnings.py), unless --force is given.
 
 set -euo pipefail
 
@@ -11,15 +13,18 @@ SYMBOL_ADDRS="$ROOT_DIR/symbol_addrs.txt"
 
 DELETE=false
 VERBOSE=false
+FORCE=false
 
 for arg in "$@"; do
     case "$arg" in
         --delete) DELETE=true ;;
         --verbose) VERBOSE=true ;;
+        --force) FORCE=true ;;
         -h|--help)
-            echo "Usage: $0 [--delete] [--verbose]"
+            echo "Usage: $0 [--delete] [--verbose] [--force]"
             echo "  --delete   Actually remove stale directories (default: dry-run)"
             echo "  --verbose  Show reasoning for each directory"
+            echo "  --force    Also remove stale dirs that hold unconsolidated LEARNINGS.md/NEAR_MISS.md notes"
             exit 0
             ;;
         *) echo "Unknown option: $arg"; exit 1 ;;
@@ -29,6 +34,7 @@ done
 stale_count=0
 keep_count=0
 stale_bytes=0
+learnings_kept=0
 
 is_function_unmatched() {
     local funcname="$1"
@@ -51,6 +57,14 @@ resolve_func_name() {
         fi
     fi
     echo ""
+}
+
+# Notes under nonmatchings/<dir>/ that the consolidation ledger does not cover yet.
+UNCONSOLIDATED="$(python3 "$SCRIPT_DIR/list_unconsolidated_learnings.py")"
+
+has_unconsolidated_learnings() {
+    # The lister prints one repo-relative path per line; match whole-line directory prefixes.
+    [[ $'\n'"$UNCONSOLIDATED"$'\n' == *$'\n'"nonmatchings/$1/"* ]]
 }
 
 for dir in "$SCRATCH_DIR"/*/; do
@@ -83,6 +97,12 @@ for dir in "$SCRATCH_DIR"/*/; do
         fi
     fi
 
+    if $stale && ! $FORCE && has_unconsolidated_learnings "$dirname"; then
+        stale=false
+        reason="unconsolidated learnings in nonmatchings/$dirname (consolidate or pass --force)"
+        learnings_kept=$((learnings_kept + 1))
+    fi
+
     if $stale; then
         dir_size=$(du -sb "$dir" 2>/dev/null | cut -f1)
         stale_bytes=$((stale_bytes + dir_size))
@@ -104,6 +124,10 @@ for dir in "$SCRATCH_DIR"/*/; do
 done
 
 stale_mb=$((stale_bytes / 1048576))
+
+if [[ $learnings_kept -gt 0 ]]; then
+    echo "Kept $learnings_kept dirs holding unconsolidated learnings notes (see tools/list_unconsolidated_learnings.py; --force removes them)."
+fi
 
 if $DELETE; then
     echo "Removed $stale_count dirs (${stale_mb} MB). Kept $keep_count dirs."

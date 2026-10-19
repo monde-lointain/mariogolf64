@@ -17,5 +17,6 @@
 * [pipeline-metrics](pipeline-metrics.md) - nigel pipeline report: match rate, cost per match, attempts to match, ledger tiers and progress trend
 * [quality-checkers](quality-checkers.md) - pointer-arithmetic, low-quality-match, redundant-extern and header-hygiene tools
 * [task-runner](task-runner.md) - nigel tasks that run agents over candidate lists
+* [list-unconsolidated-learnings](list-unconsolidated-learnings.md) - per-function notes not yet merged into `docs/reference/kmc-gcc/`; the consolidate-learnings candidate list
 
 For how these fit together and which ones decide a match, see the [harness code map](/harness/code-map.md).

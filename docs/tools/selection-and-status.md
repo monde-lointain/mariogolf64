@@ -33,6 +33,7 @@ Run with the project venv (`.venv/bin/python3`) when third-party imports fail. A
 | `python3 tools/find_unmatched_nonmatchings.py` | Environments whose best certified logged attempt is below 100% and whose function is not yet in `src/`. |
 | `tools/nonmatching_match_log.py` | Library: parses `match_log.txt`; trusts a 100% entry only when its `.matches/` archive still hashes to the recorded sha256. |
 | `python3 tools/fetch_scratches.py [--update]` | Pull decomp.me scratches into `tools/scratches.json` (git-ignored). |
-| `tools/decomp-env-cleanup [--delete] [--verbose]` | Remove `nonmatchings/` directories for functions that are already matched (dry run unless `--delete`). |
+| `tools/decomp-env-cleanup [--delete] [--verbose] [--force]` | Remove `nonmatchings/` directories for functions that are already matched (dry run unless `--delete`). Stale directories holding unconsolidated `LEARNINGS.md`/`NEAR_MISS.md` notes are kept unless `--force` (see [list-unconsolidated-learnings](list-unconsolidated-learnings.md)). |
+| `python3 tools/difficulty_ledger.py record \| harvest \| show \| write-run` | Per-function difficulty ledger: record an outcome, back-fill harvested outcomes, list tiers, write an environment's `.run.json`. See [difficulty-ledger](difficulty-ledger.md). |
 
 The certification logic and `m2c_one_shot.py`'s inlining decide what counts as a match; treat edits to them as [comparison changes](/harness/changing-the-harness.md).
