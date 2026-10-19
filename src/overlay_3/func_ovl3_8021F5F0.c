@@ -70,7 +70,34 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220DF8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220E28);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220E34);
+extern s32 D_ovl3_8023B678;
+
+void func_ovl3_80220E34(Gfx** gfxp, s32 arg1, s32 arg2, s32 arg3, u8 arg4) {
+    Gfx* gfx = *gfxp;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, (D_ovl3_8023B678 + 8) & ~7);
+    gDPLoadTextureTile_4b(gfx++, (D_ovl3_8023B678 + 0x28) & ~7, G_IM_FMT_CI, 136, 16, 0, 0, 135, 15, 0, 0, 0, 0, 0, 0, 0);
+
+    if ((arg4 & 0xFF) == 1) {
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (arg2 - 5) << 2, arg3 << 2, (arg2 + 0x23) << 2, (arg3 + 0x10) << 2, 0, 0xC00, 0, 0x400, 0x400);
+        gDPPipeSync(gfx++);
+    }
+
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (arg2 + 0x21) << 2, arg3 << 2, (arg2 + 0x31) << 2, (arg3 + 0x10) << 2, 0, arg1 << 9, 0, 0x400, 0x400);
+    gDPPipeSync(gfx++);
+
+    *gfxp = gfx;
+}
 
 void func_ovl3_802213C8(Gfx** arg0, s32 arg1, s32 arg2, s32 arg3) {
     Gfx* gfx;
