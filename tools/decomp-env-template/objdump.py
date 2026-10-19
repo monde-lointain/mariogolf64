@@ -66,7 +66,7 @@ def parse_relocated_line(line: str) -> tuple[str, str, str]:
     return before, "0" if imm == "0x0" else imm, after
 
 
-AUTO_NAMED_SYMBOL = re.compile(r"^(?:D|func)_([0-9A-Fa-f]{8})$")
+AUTO_NAMED_SYMBOL = re.compile(r"^(?:D|func)_(?:ovl\d+_)?([0-9A-Fa-f]{8})$")
 SYMBOL_ADDR_LINE = re.compile(r"^([A-Za-z_]\w*)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
 # This file lives in tools/decomp-env-template/, so the project root is two levels up.
 SYMBOL_ADDRS_PATH = Path(__file__).resolve().parents[2] / "symbol_addrs.txt"

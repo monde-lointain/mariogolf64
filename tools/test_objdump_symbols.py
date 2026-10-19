@@ -49,6 +49,27 @@ class AutoNamedRelocTests(unittest.TestCase):
         )
 
 
+class OverlayAutoNamedRelocTests(unittest.TestCase):
+    def test_overlay_lo16_same_address_different_name_renders_equal(self):
+        # Splat names overlay data D_ovl<N>_<VRAM>; D_ovl0_80227C90+4 is 0x80227C94.
+        self.assertEqual(
+            render('R_MIPS_LO16', 'D_ovl0_80227C94', '0'),
+            render('R_MIPS_LO16', 'D_ovl0_80227C90', '4'),
+        )
+
+    def test_overlay_hi16_same_address_different_name_renders_equal(self):
+        self.assertEqual(
+            render('R_MIPS_HI16', 'D_ovl0_80227C94', '0'),
+            render('R_MIPS_HI16', 'D_ovl0_80227C90', '4'),
+        )
+
+    def test_overlay_func_lo16_different_address_renders_differently(self):
+        self.assertNotEqual(
+            render('R_MIPS_LO16', 'func_ovl0_8020D784', '0'),
+            render('R_MIPS_LO16', 'func_ovl0_8020D788', '0'),
+        )
+
+
 class NamedGlobalRelocTests(unittest.TestCase):
     def test_named_global_same_address_as_auto_name_renders_equal(self):
         # g_terrain_tile_cache+0x98E and D_80132D4A+0x944 are both 0x8013368E.
