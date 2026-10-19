@@ -1,10 +1,20 @@
 #include "common.h"
 
 extern s8 D_ovl5_8025C848;
+extern s32 D_ovl5_80253C64;
+extern OSThread D_ovl5_80254300;
+extern u64 D_ovl5_8025A640[0x2000 / sizeof(u64)];
+void func_ovl5_8024D870(void *);
 
 void func_ovl5_8024D800(void) { D_ovl5_8025C848 = 0; }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D80C);
+void func_ovl5_8024D80C(void) {
+    func_ovl5_8024D800();
+    D_ovl5_80253C64 = 0;
+    osCreateThread(&D_ovl5_80254300, 0xB, func_ovl5_8024D870, NULL,
+                   &D_ovl5_8025A640, 0x14);
+    osStartThread(&D_ovl5_80254300);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D870);
 
