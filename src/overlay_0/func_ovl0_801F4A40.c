@@ -1,6 +1,17 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4A40);
+extern s32 func_8005B0A0(s32);
+
+s32 func_ovl0_801F4A40(s32 arg0) {
+    s32 sum;
+    s32 i;
+
+    sum = 0;
+    for (i = 1; i < arg0 + 1; i++) {
+        sum += func_8005B0A0(i);
+    }
+    return sum;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4AA4);
 
