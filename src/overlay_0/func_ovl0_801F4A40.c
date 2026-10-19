@@ -56,7 +56,18 @@ s32 func_ovl0_801F8B7C(void) {
     return D_ovl0_8021FD94;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F8B88);
+extern s32 D_ovl0_8021FD98;
+extern s32 D_ovl0_8021FD9C;
+extern s32 D_ovl0_8021FDA0;
+
+void func_ovl0_801F8B88(s32 state, s32 sub_state) {
+    D_ovl0_8021FD94 = state;
+    D_ovl0_8021FD98 = sub_state;
+    if (state == 0) {
+        D_ovl0_8021FD9C = 0x140;
+        D_ovl0_8021FDA0 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F8BB8);
 
