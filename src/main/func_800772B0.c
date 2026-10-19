@@ -60,7 +60,7 @@ f32 func_800779A8(f32 x, f32* arg1, f32* arg2, f32* arg3) {
  * evaluates a non-Horner cubic in frac = arg1 - idx. Computing ia0*3 as an
  * explicit temp reproduces the ROM's early hoist of that product, which reaches
  * exact instruction count AND steers local-alloc to the ROM's ia0/ia1/d0/d1 ->
- * $a2/$a0/$a1/$a3 coloring (S272, cracks the S206 FP-regalloc wall). */
+ * $a2/$a0/$a1/$a3 coloring. */
 f32 interp_cubic_finite_diff(f32* arg0, f32 arg1) {
   f32 v[3];
   s32 idx;

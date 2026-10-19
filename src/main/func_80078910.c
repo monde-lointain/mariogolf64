@@ -221,9 +221,8 @@ void func_80079358(s32 arg0, s32 arg1) {
   }
 }
 
-/* func_8007955C: particle-spawn + RTS-matrix builder. Fully RE'd near-match
- * carried on a gcc-2.7.2 sched.c schedule-order coin (~85%, < 0.97). See
- * docs/wip/func_8007955C.near-match.md. */
+/* func_8007955C: particle-spawn + RTS-matrix builder. The remaining mismatch is a
+ * gcc-2.7.2 sched.c schedule-order tie. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800796F8);
@@ -344,14 +343,11 @@ void func_80079EBC(void) {
 
 /* func_8007A10C + func_8007A40C: GCC NESTED functions defined inside
  * func_8007A6C8 (static chain in $v0 = STATIC_CHAIN_REGNUM, mips.h:1310).
- * Both child bodies are fully RE'd BYTE-EXACT in isolation (S279 fan-out;
- * func_8007A40C 175/175, dual-confirmed nested by gcc + binutils subagents),
- * but a nested fn banks ONLY inside its parent's C body -> this is one
- * indivisible 3-fn carve unit (child A10C < child A40C < parent A6C8, gcc
- * emits children first). Struct correction pending at bundle-bank: Particle
- * unk_0C/unk_14 are f32 (ROM swc1), currently s32 (kept s32 so the sibling
- * ordinary fns' `= 0` stores stay `sw $zero`). See
- * docs/wip/func_8007A40C.near-match.md. */
+ * Both child bodies match byte-exact in isolation, but a nested fn banks ONLY
+ * inside its parent's C body -> this is one indivisible 3-fn carve unit (child
+ * A10C < child A40C < parent A6C8, gcc emits children first). Particle
+ * unk_0C/unk_14 are f32 in the ROM (swc1); they stay s32 here so the sibling
+ * ordinary fns' `= 0` stores stay `sw $zero`. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A10C);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A40C);

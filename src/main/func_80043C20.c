@@ -263,8 +263,7 @@ s32 get_shot_progress(void) {
 // `return 1` with the g_terrain `return 1`. Merging them would give g_terrain's
 // return block 2 predecessors, blocking reorg from folding it to the ROM's
 // tight `bnez end`+delay. The three early `if` returns stay direct (they must
-// jump to the true epilogue for that fold). See
-// docs/hazards.md#cross-jump-tail-merge (S185 compiler-source fan-out).
+// jump to the true epilogue for that fold.
 s32 resolve_club_terrain_mask(s32 mapping_selector, TerrainAttrEntry* terrain_entry) {
   s32 terrain_id = terrain_entry->id;
   s32 result_mask;

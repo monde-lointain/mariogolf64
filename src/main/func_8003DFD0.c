@@ -18,20 +18,14 @@ s32 func_8003DFD0(s32 x_coordinate, s32 z_coordinate) {
  * D_800BA888 (drawn by func_8003E314) with a fan of positions computed from the
  * scenery wind angle via sinf/cosf, projected onto terrain height.
  *
- * S318 carry at 196/196 instructions and the ROM's exact -0x140 frame, 88 cmpfn
- * rows. Body: docs/wip/func_8003E004.base.c; measured state, the two angle
- * hoists that closed the 2-instruction deficit, and the residual's three
- * clusters: docs/wip/func_8003E004.near-match.md.
+ * The build matches the ROM's exact -0x140 frame and 196-instruction body once
+ * ang_lo/ang_hi are hoisted out of the sinf() arguments; without that hoist the
+ * body is 194 of 196, short by the two load-use nops after mtc1.
  *
- * S204's move_movables DFmode-hoist wall stays REFUTED (S235). Two inherited
- * claims do not: the body S235 called "structurally 100%" is 194 of 196 (two
- * load-use nops after mtc1, gone once ang_lo/ang_hi are hoisted out of the
- * sinf() arguments), and the 158k-iteration permuter floor was measured on that
- * short body, so it belongs to it and not to the function (the S259 rule). The
- * global.c:587 allocno tie is real and now has numbers: a is 15 refs at live
- * length 80 (5625) against i's 11 at 88 (3750), so i needs 16 refs or a needs
- * 9. All rodata/data refs (D_800CA8E0/E8/F0 pi/2 pool, D_800BA888,
- * g_scenery_wind_angle_a) stay extern in the shared blob. */
+ * The global.c:587 allocno tie is real: a is 15 refs at live length 80 (5625)
+ * against i's 11 at 88 (3750), so i needs 16 refs or a needs 9. All rodata/data
+ * refs (D_800CA8E0/E8/F0 pi/2 pool, D_800BA888, g_scenery_wind_angle_a) stay
+ * extern in the shared blob. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8003DFD0", func_8003E004);
 
 extern Gfx* glistp;

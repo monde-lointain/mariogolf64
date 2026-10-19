@@ -245,7 +245,7 @@ void func_80054E4C(s32 character_id, s32 animation_mode) {
 
 /* KfEntry and KeyframeTrack layouts are shared in animation.h. */
 
-/* collect_keyframe_events_at: CARRIED at 54/54, ONE BIT off (S260). The whole
+/* collect_keyframe_events_at: the whole
  * body is byte-identical to the ROM -- same registers, same annulled `bnel` and
  * `beql`, same frame -- except the loop's back edge: the ROM branches to the
  * loop-top `lh v0,0(v1)` (offset 0xfff1) and the build branches PAST it to the
@@ -277,7 +277,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
  * The walk is a goto loop and the exits are a single `goto done`, both
  * load-bearing: loop.c never sees a goto loop, so it cannot peel the first
  * iteration and let CSE cache `(cs->0)->0x14` in a caller-saved register (that
- * cache is what blocked `result` from a callee-saved register, S213), and a
+ * cache is what blocked `result` from a callee-saved register), and a
  * single `return result` lets reorg replicate the return copy into each guard's
  * delay slot instead of materialising -1 per exit. The advance is written as an
  * out-of-line handler so reorg folds `e++` into the annulled `bnel`, and the

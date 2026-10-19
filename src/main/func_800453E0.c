@@ -263,8 +263,7 @@ void func_80045C00(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
 
-/* func_80046604: CARRIED (S262 near-match, logic fully RE'd, 119 vs 118 instr,
- * one over). Club/terrain sound-effect dispatch:
+/* func_80046604: club/terrain sound-effect dispatch:
  *
  *   club  = get_club_param(*(s16*)(D_801B7222 + D_80250B54*0xB8 +
  * D_80250B40*2)); entry = get_table_entry(active_terrain_index);
@@ -284,8 +283,8 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  *            if (D_800BE62C != 0x13) func_80213D70(3); }
  *
  * The head (index math, both callee scheduling, kind read, kind==0 arm) is
- * byte-exact. Residual = three branch-scheduling coins in the kind-in-{1,2} arm
- * that no source form flips together (#value-select-if-else-vs-branch-likely):
+ * byte-exact. The residual is three branch-scheduling differences in the
+ * kind-in-{1,2} arm that no source form flips together:
  *   1. the `&&` guard chain: ROM fills the plain `beqz/bnez` delay slots with
  *      a0=1/a0=2; every source form emits branch-likely (`beqzl/bnezl`,
  * annulled) instead.
@@ -295,8 +294,8 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  *   3. the ROM shares one `a0=0x54` (set in the id<2 delay slot) across the
  *      id<2, id==2 and default arms via fall/branch-through; an if-chain or
  *      switch each re-materialises 0x54, and a switch lowers 6 instr SHORTER.
- * All three are the same const-select / branch-likely wall class; permuter is
- * blind to internal branch-target/annul bits (see collect_keyframe_events_at).
+ * All three come from gcc's const-select / branch-likely handling. The permuter
+ * cannot see internal branch-target/annul bits (see collect_keyframe_events_at).
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
 
@@ -555,17 +554,16 @@ extern s32 putting_meter_level;
 extern u8 D_801061CE;
 extern f32 D_801B5530;
 
-/* func_800484F8: CARRIED (S263 near-match, 99/102). "Start BGM for game state":
+/* func_800484F8: "Start BGM for game state":
  * sets HUD/flag globals + 45.0f consts, then switch(D_801B608C) over a 12-entry
  * jump table (jtbl_800CC818, indices 0/1/6/8->default) picking a bgm id,
  * tail-calls play_bgm_by_id. Structure/dispatch/cases all match; residual = (1)
  * the default block's `x==D_801B6098 && D_801B6090!=1` -> gcc branch-likely
- * (bnel) where the ROM keeps plain beq+nop+j+li
- * (#value-select-if-else-vs-branch-likely, goto-PROOF, confirmed 3 spellings) +
- * (2) bgm held in a2 (move a0,a2 at the tail) vs the ROM's a0-per-case
- * (#call-result-a0-vs-v0 regalloc). 3-instr count deficit from (1); not
- * permuter-eligible (goto-proof branch-target/count residual). See
- * docs/wip/func_800484F8.near-match.md. Jtbl would also need a rodata carve. */
+ * (bnel) where the ROM keeps plain beq+nop+j+li (three source spellings did not
+ * change this), + (2) bgm held in a2 (move a0,a2 at the tail) vs the ROM's
+ * a0-per-case (call-result register allocation). The 3-instruction count deficit
+ * comes from (1); the branch-target/count residual is not permuter-eligible.
+ * The jump table would also need a rodata carve. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_800484F8);
 
 extern s32 D_800BE694;
@@ -816,14 +814,13 @@ void build_radial_falloff_texture(u8* buf, s32 w, s32 h, s32 arg3) {
 extern s16 D_800BE6C0[];
 extern s16* D_801B56F0;
 extern s32 rand(void);
-/* func_8004C958: CARRIED (S263 near-match, ~248/274). Recursive diamond-square
+/* func_8004C958: Recursive diamond-square
  * cloud/plasma midpoint-displacement (self-calls 4x into quadrants). Residual =
  * ROM spills step (sh/lhu sp+0x1E) + 3 corner values (tr/br/bl) to stack and
  * reloads with sign-extension in each of the 5 midpoint blocks, under the
- * recursion's s-reg pressure; my faithful-C build keeps them in registers (26
- * instr shorter). Not reproducible from source (mine is MORE optimal);
- * #local-alloc-qty-permutation / register-pressure spill class. See
- * docs/wip/func_8004C958.near-match.md. */
+ * recursion's s-reg pressure; a faithful-C build keeps them in registers (26
+ * instr shorter). That C build is strictly more optimal than the ROM, so the
+ * spills are not reproducible from source. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004C958);
 
 extern s32 D_800BE6D4;
@@ -835,13 +832,11 @@ extern u8* sky_cloud_texture_ptr;
 extern s32 flag_is_set(s32 flag);
 extern void func_8004C958(s32 level, s32 x, s32 y);
 
-/* func_8004CDA0: CARRIED (S263 near-match, 227/234, structure exact, tail byte-
- * identical). Cloud-buffer blend driver (calls func_8004C958 diamond-square).
- * Residual = #local-alloc-qty-permutation: register naming (i:t0/a3,
- * base:a1/t0)
- * + ROM extra preserving-copies (buf move a0,v0 x2; abs move a1,v0; dst move
- * v0,t0). Not permuter-eligible (7-instr count deficit, 0 local-alloc-qty
- * cracks). See docs/wip/func_8004CDA0.near-match.md. */
+/* func_8004CDA0: cloud-buffer blend driver (calls func_8004C958 diamond-square).
+ * Structure is exact and the tail is byte-identical. Residual is register naming
+ * (i:t0/a3, base:a1/t0) plus the ROM's extra preserving copies (buf move a0,v0 x2;
+ * abs move a1,v0; dst move v0,t0). Not permuter-eligible: the build is 7
+ * instructions short, and local-alloc quantity permutations have not closed it. */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004CDA0);
 
 void func_8004D148(void) {

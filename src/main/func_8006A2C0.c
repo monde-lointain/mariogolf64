@@ -405,12 +405,11 @@ extern void func_8007399C(s32 arg0, s32 arg1, void* out0, void* out1, s32 arg4);
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 
-/* The loop-top `yc = 0;` is a PLACEHOLDER for an unknown source statement, not
- * RE'd truth: the ROM's loop body carries one more RTL insn than the natural
- * spelling, and it dies in flow after loop, so it produces no instruction. Any
- * single dead assignment at the loop top reproduces the ROM exactly; which one
- * the original source wrote is not recoverable from the asm. See
- * docs/wip/func_8006BC80.near-match.md Finding 1. */
+/* The loop-top `yc = 0;` is a placeholder for a source statement that cannot be
+ * recovered from the asm: the ROM's loop body carries one more RTL insn than the
+ * natural spelling, and it dies in flow after the loop, so it produces no
+ * instruction. Any single dead assignment at the loop top reproduces the ROM
+ * exactly; which one the original source wrote is not recoverable from the asm. */
 void emit_hole_banner_dl(Gfx** pgfx) {
   Gfx* gfx;
   Gfx** gp;
@@ -990,54 +989,49 @@ s32 func_8006D1FC(void) { return D_800C4144; }
 
 void func_8006D208(s32 arg0) { D_800C4144 = arg0; }
 
-/* func_8006D214: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
- * S259). Same shape as func_8006D38C (see its comment for the derivation) plus
- * an FP scale on the compared value. Builds at 94/94 instructions: the
- * func_8006D38C model transferred verbatim, fixing the same two of three access
- * shapes and leaving the same one open — the ROM reaches the count by NEGATIVE
+/* func_8006D214: same shape as func_8006D38C (see its comment for the derivation)
+ * plus an FP scale on the compared value. Builds at 94/94 instructions: the
+ * func_8006D38C model transfers verbatim, fixing the same two of three access
+ * shapes and leaving the same one open -- the ROM reaches the count by NEGATIVE
  * DISPLACEMENT off the held flag base (`lw t0,-0x2A(v1)`). Replacing the
  * array-form guard with a plain scalar read lets everything CSE and comes out
  * 87/94, so the array form is load-bearing.
- * Full reconstruction in docs/wip/func_8006D214.near-match.md.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
 
-/* func_8006D38C: CARRY (S241 terminal #base-register-vs-displacement, DEEPENED
- * S259 to 84/84, THIRD ACCESS SHAPE REACHED S260). Min-search over the
- * 0xB8-stride record array + a weighted u16-table redistribute.
+/* func_8006D38C: min-search over the 0xB8-stride record array + a weighted
+ * u16-table redistribute.
  *
- * TWO of the three access shapes S241 called unreachable were solved in S259:
+ * Two of the three access shapes are reproduced:
  *  - "ROM materializes &D_801B60BB in full and does `lb 0(a0)`" -> hold the
  *    address in a POINTER LOCAL (`s8* flag = &D_801B60BB;`) and read `*flag`;
  *  - "ROM holds &D_801B6090 across the inner loop and re-reads `lw 0(a3)`" ->
  *    read it as an ARRAY element (`extern s32 D_801B6090[]` + `D_801B6090[0]`),
  *    whose MEM_IN_STRUCT_P may-alias defeats the CSE that folded it to one
- * load. The inner loop must also be a `do`-`while`: the ROM has only ONE
- * zero-guard (the `if`), so a top-tested `for` adds a second `beqz` and a `for`
- * over a cached count CSEs the bound away.
+ *    load. The inner loop must also be a `do`-`while`: the ROM has only ONE
+ *    zero-guard (the `if`), so a top-tested `for` adds a second `beqz` and a `for`
+ *    over a cached count CSEs the bound away.
  *
- * S260 REACHED THE THIRD SHAPE, `lw t0,-0x2B(a0)`. It needs the count and the
- * flag to be the SAME SYMBOL, because cse's use_related_value only relates
- * offsets within one symbol -- two distinct `D_` symbols can never produce a
- * negative displacement off each other. Model the region as a struct and view
- * it through the existing array symbol:
+ * The third shape, `lw t0,-0x2B(a0)`, needs the count and the flag to be the
+ * SAME SYMBOL, because cse's use_related_value only relates offsets within one
+ * symbol -- two distinct `D_` symbols can never produce a negative displacement
+ * off each other. Model the region as a struct and view it through the existing
+ * array symbol:
  *
  *   typedef struct { s32 count; u8 pad[0x27]; s8 flag; } RoundState;
  *   #define ROUND (*(RoundState*)D_801B6090)
  *   s8* flag = &ROUND.flag;           // la a0,D_801B60BB + lb 0(a0)
  *   ... ROUND.count ...               // addiu t0,a0,-0x2B / lw 0(t0)
  *
- * REMAINING (2 instructions short, 82/84): with both reads on one symbol, cse
- * merges the loop-bound read into the entry guard's read, so the preheader
+ * Remaining mismatch (2 instructions short, 82/84): with both reads on one symbol,
+ * cse merges the loop-bound read into the entry guard's read, so the preheader
  * `lw t0,-0x2B(a0)` disappears. The ROM keeps both loads with only a
  * constant-address store (`D_800C4144 = -1`) between them, which cannot
  * invalidate the first (cse.c note_mem_written:7564 sets `nonscalar` only for a
  * VARYING store address, and invalidate_memory:7715 purges `in_struct` entries
- * only then). Tried and rejected: array guard + struct bound (same address,
- * still merged), caching the bound in a preheader local (merges into a `move`),
- * and routing the D_800C4144 store through a pointer local to make its address
- * vary (expand still folds it to the symbol before cse records the write). Full
- * reconstruction in docs/wip/func_8006D38C.near-match.md.
+ * only then). Keeping the store address constant (array guard + struct bound,
+ * a preheader-local bound, or a pointer-local store address) merges the two
+ * reads again: the store is folded to the symbol before cse records it.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D38C);
 void func_8006D4DC(void) { D_800C4144 = -1; }
@@ -1389,15 +1383,11 @@ done:
   return player_records[0].pending_result > base[3];
 }
 
-/* func_8006E210 + func_8006DFF0: CARRY (S310). Both reach the ROM's exact
- * instruction count and exact frame; the residual is three register/placement
- * clusters (~20 of 679 instructions). func_8006DFF0 is a GCC NESTED FUNCTION of
- * func_8006E210 -- it takes the static chain in $v0 and shares the parent's
- * `i`/`j` through it -- so the two bank as one slice and the permuter is
- * unavailable for the TU. The full reconstruction, the nine levers that closed
- * 526 of 543 instructions, and the jump.c store-flag analysis are in
- * docs/wip/func_8006E210.near-match.md; the bank-time carve is
- * `- [0xAC860, .rodata, main/func_8006A2C0]`.
+/* func_8006E210 + func_8006DFF0: both reach the ROM's exact instruction count and
+ * exact frame. The residual is three register/placement clusters (~20 of 679
+ * instructions). func_8006DFF0 is a GCC NESTED FUNCTION of func_8006E210 -- it
+ * takes the static chain in $v0 and shares the parent's `i`/`j` through it -- so
+ * the two bank as one slice and the permuter is unavailable for the TU.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006DFF0);
 

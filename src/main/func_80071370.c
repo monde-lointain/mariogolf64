@@ -994,8 +994,7 @@ extern u8 D_80105118[];
  * live_length below i's so str allocates to $s2 and i to $s3 (matching the ROM
  * allocno order WITHOUT a 9th callee-saved reg); the explicit xr/k invariant
  * temps order the preheader hoists ahead of that copy, and the fresh w temp
- * schedules the trailing cursor increment before the final sync stores (S272,
- * cracks the S242 terminal biv-swap wall). */
+ * schedules the trailing cursor increment before the final sync stores. */
 void emit_glyph_string_dl(Gfx** gfxp, s32 y, s32 x, u8* str) {
   Gfx* g;
   Gfx* w;

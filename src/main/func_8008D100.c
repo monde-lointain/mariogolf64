@@ -252,8 +252,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008DDDC);
  * The `volatile s32` local below is a standalone stand-in that reproduces the
  * same bytes (it cannot be written as a real nested fn without its parent,
  * which is undecompiled and would not re-emit this symbol). Move it inside the
- * parent as a nested function if that parent is ever recovered. See the memory
- * dead-frame-dead-v0-store-crack and docs/wip/func_8008E164.nested.md. */
+ * parent as a nested function if that parent is ever recovered. */
 s32 lerp_s32(s32 a0, s32 a1, f32 t) {
   s32 r;
   volatile s32 unused = r;
@@ -556,13 +555,12 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009226C);
 void func_80092324(void) {}
 
 /* Snapshot-replay display-list emitter over a Gfx** parameter, dispatching on
- * D_800C5EE8. S302 carry: reconstructed to 698 instructions against the ROM's
+ * D_800C5EE8. Reconstructed to 698 instructions against the ROM's
  * 697 with an exact -0x38 frame, every DL command word verified against gbi.h.
  * The residual is one register-allocation decision -- loop B hoists 0xF3000000
  * where the ROM materialises it in-body, which costs the callee-saved scratch
  * the ROM spends on spilling `src` to 0xC($sp) -- and it permutes the whole
- * body. Full body, the resolved macro table and the measured lever table are in
- * docs/wip/func_8009232C.near-match.md. */
+ * body. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009232C);
 
 /**
@@ -1073,13 +1071,12 @@ void emit_snapshot_panel_grid_dl(void) {
 }
 
 /* Sky-panel snapshot emitter, sibling of emit_snapshot_panel_grid_dl above.
- * S301 carry: reconstructed to 618/618 instructions with an exact -0x98 frame
+ * Reconstructed to 618/618 instructions with an exact -0x98 frame
  * and six of seven global registers matching. The seventh is a quantified
  * loop.c:1631 movable-selection coin: threshold 122 stepping down by 3 against
  * an inner-loop insn_count of 115 admits exactly three life-1 invariants, and
  * the constant 4 sits behind the gDPSetTile word 0xF5100000 in the movable
- * list. Full arithmetic, dump table and working body in
- * docs/wip/func_800947A8.near-match.md. */
+ * list. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800947A8);
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_80095150);
 

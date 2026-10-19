@@ -9,8 +9,7 @@ extern s32 scenario_mode_id;
  * Read as an array (offset 0) so its load carries MEM_IN_STRUCT_P. In
  * func_80069BCC the nonscalar store `D_80105B20[D_801B6098[0]] = 0` must
  * invalidate the cached value so the guard re-loads it (matches the ROM);
- * a bare scalar survives CSE and forwards. See
- * docs/hazards.md#mem-in-struct-scheduling-lever.
+ * a bare scalar survives CSE and forwards.
  */
 extern s32 round_hole_index[];
 extern const char D_800D1380[]; /* "putter%d:course%d:hole%d\n" */
@@ -67,8 +66,7 @@ INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", lz_compress_extend
  * functions of func_80068F4C: only this parent calls them, and each call site
  * materializes the static chain ($v0 = &frame) before the jal, so they emit
  * with the chain prologue (dead `sw v0,0(sp)`) at 0x80068F00 / 0x80068F18 ahead
- * of the parent (0x80068F4C). See
- * docs/hazards.md#nested-function-static-chain-spill. The parent is called
+ * of the parent (0x80068F4C). The parent is called
  * externally by func_800695F8, so it stays top-level.
  */
 void func_80068F4C(s32 arg0, u32 seed) {

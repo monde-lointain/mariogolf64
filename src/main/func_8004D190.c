@@ -113,13 +113,11 @@ void func_8004D580(char* text, s32 column, s32 row) {
   }
 }
 
-/* func_8004D5F0: framebuffer glyph renderer (double-buffered). CARRIED,
- * TERMINAL (S270): register-COALESCING wall retired-with-citation. The ROM
- * keeps 2 non-coalesced copies of c (frame 0x30/s0-s5); my -O2 coalesces (frame
- * 0x28) and is strictly more optimal. global.c:790-823 set_preferences merges
- * them from any faithful C; cse.c CSEs the sign-extend. Not source-reachable,
- * not flag-gated, permuter-plateaued. Do NOT re-open. Verdict in
- * docs/wip/func_8004D5F0.near-match.c.txt. */
+/* func_8004D5F0: framebuffer glyph renderer (double-buffered). The ROM keeps 2
+ * non-coalesced copies of c (frame 0x30/s0-s5); -O2 coalesces them (frame 0x28),
+ * which is strictly more optimal. global.c:790-823 set_preferences merges them
+ * from any faithful C, and cse.c CSEs the sign-extend. Not source-reachable and
+ * not flag-gated. */
 INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D5F0);
 
 void clear_text_grid(void) {

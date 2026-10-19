@@ -77,33 +77,31 @@ void init_sky_panels(void) {
   per_hole_skybox_palette_load();
 }
 
-/* init_sky_pool_and_world_state: CARRY (S256, rebuilt S258 to the EXACT
- * instruction count). Sky-dome Vtx-grid builder (4x5x6, then a block-2/3
+/* init_sky_pool_and_world_state: sky-dome Vtx-grid builder (4x5x6, then a block-2/3
  * s-texcoord overwrite) + tint fill + guOrtho/2x guPerspective + 14 world-state
  * zeros.
  *
- * S256 carried it at 93 asm-differ rows; it now builds at 161/161 instrs with
- * the instruction shapes aligned 1:1. The rebuild is about WHICH loops
- * gcc-2.7.2 is allowed to discover: loop.c only processes loops that emit
- * NOTE_INSN_LOOP_BEG, which for/while/do-while do and a goto loop does not.
+ * The build is at 161/161 instructions with the instruction shapes aligned 1:1.
+ * The match depends on WHICH loops gcc-2.7.2 is allowed to discover: loop.c only
+ * processes loops that emit NOTE_INSN_LOOP_BEG, which for/while/do-while do and a
+ * goto loop does not.
  *  - the two OUTER grid loops must be GOTO loops: the ROM re-materialises
  *    `li v0,5` / `li v0,4` inline at the exit tests and does not
- * strength-reduce the block base (any structured spelling hoists both and folds
- * the base into a walking pointer, the S256 failure);
+ *    strength-reduce the block base (any structured spelling hoists both and
+ *    folds the base into a walking pointer, which the ROM does not do);
  *  - the INNER col loop must be STRUCTURED: the ROM has the two pointer givs
  *    (`a3` and `a3+0xF`) that only loop.c's SR produces (a goto here is 4
- * short);
+ *    instructions short);
  *  - every constant the ROM keeps in a register across a goto loop must be a
  *    local variable (0xB7 / 6 / 0xC00 / 0x1E / the pool base), one per loop and
  *    assigned where the ROM materialises it, since a goto loop de-hoists
- * literals;
+ *    literals;
  *  - `(Vtx*)(block_off + (u32)pool)` puts the integer operand first, matching
- * the ROM's `addu a3,t6,s0`. RESIDUAL: a systematic local-alloc register
- * permutation of the grid-1 locals (same register set, same quantity order,
- * different priority ranking) plus one 2-instruction swap where loop.c places
- * the giv init after the s/x inits. Permuter plateaued 615 -> 545 in 60k
- * iterations. Full reconstruction + the register mapping table in
- * docs/wip/init_sky_pool_and_world_state.near-match.md.
+ *    the ROM's `addu a3,t6,s0`.
+ * RESIDUAL: a systematic local-alloc register permutation of the grid-1 locals
+ * (same register set, same quantity order, different priority ranking) plus one
+ * 2-instruction swap where loop.c places the giv init after the s/x inits. The
+ * permuter does not close the residual.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", init_sky_pool_and_world_state);
 void func_80080564(s32 buffer_index, s32 asset_index, s32 rom_slot_offset) {
@@ -994,20 +992,18 @@ void emit_ball_trail_dl(Gfx** gfxp, Mtx* proj) {
   *gfxp = gfx;
 }
 
-/* func_800842C0: CARRY (S255) chain-USED GCC nested function, NOT a raw-DL-word
- * regalloc wall. A texrect glyph-string emitter (col,row,char* str): classifies
- * each char (space skip / 'm' special / digits) and emits a G_TEXRECT +
- * RDPHALF1/2 + 0x04000400 DL block per glyph. The glist pointer is a LOCAL of
- * the caller func_80084468, reached through the GCC static chain ($v0): child
- * spills incoming $v0 (`sw v0,0(sp)`), keeps it in t0, and does `lw a1,0(t0)` =
- * *(chain) = parent glistp, advancing it in place. Parent func_80084468:582
- * `addiu $v0,$sp,0x10` sets chain=&(glistp local at sp+0x10), maintains the
- * glistp there, reloads it after each `jal func_800842C0` (:611). Real out-of-
- * line jal (not inlined), so NOT an orphan -> no volatile byte-repro. Bank only
- * by writing it nested inside the decompiled func_80084468 (2644B FP DL
- * builder, its own slice). docs/wip/func_800842C0.near-match.md;
- * docs/hazards.md#nested-function-static-chain-spill;
- * memory [[nested-function-static-chain-spill]].
+/* func_800842C0: GCC nested function that reads its static chain. A texrect
+ * glyph-string emitter (col,row,char* str): classifies each char (space skip /
+ * 'm' special / digits) and emits a G_TEXRECT + RDPHALF1/2 + 0x04000400 DL block
+ * per glyph. The glist pointer is a LOCAL of the caller func_80084468, reached
+ * through the GCC static chain ($v0): child spills incoming $v0 (`sw v0,0(sp)`),
+ * keeps it in t0, and does `lw a1,0(t0)` = *(chain) = parent glistp, advancing it
+ * in place. Parent func_80084468:582 `addiu $v0,$sp,0x10` sets chain=&(glistp
+ * local at sp+0x10), maintains the glistp there, and reloads it after each
+ * `jal func_800842C0` (:611). The call is a real out-of-line jal (not inlined),
+ * so the function is not an orphan and the volatile stand-in used for dead
+ * functions does not apply. Bank only by writing it nested inside the decompiled
+ * func_80084468 (2644B FP DL builder, its own slice).
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_800842C0);
 
@@ -1676,15 +1672,14 @@ void func_80087BE4(s32 x, s32 y) {
   D_800E21A8[0] = -y / 4;
 }
 
-/* func_80087CB0: CARRY (S257, near-match, body 100% RE'd, 1 instruction long:
- * 253 vs 252). Aim-cursor sprite emitter on the global `glistp`:
+/* func_80087CB0: aim-cursor sprite emitter on the global `glistp`:
  * gDPPipeSync + gDPLoadTLUT_pal16(0, (D_800E2184+8)&~7), then the animation
  * frame `D_800C5E24 = (D_800C5E24 + 1) % 11` and
  * `D_800E2134 = (D_80106240[0] & 8) ? D_800C5E24 << 7 : 0x580`, then
  * gDPLoadTextureBlock_4b((D_800E2134+0x28+D_800E2184)&~7, G_IM_FMT_CI, 16, 16)
  * + gDPPipeSync + a gSPScisTextureRectangle.
  *
- * KEY IDENTIFICATION (S257): the branchless coordinate clamp
+ * The branchless coordinate clamp
  * (`sll 18; sra 16; nor; sra 31; and; andi 0xffc`) and the asymmetric s/t
  * clip math (`bgezl` on the s16 x but `bgez` on the s32 y, then
  * `slti 1; negu; and; negu`) are NOT hand-written clamps -- they are the
@@ -1708,25 +1703,22 @@ void func_80087BE4(s32 x, s32 y) {
  *  - the DL-block address wants `(D_800E2134 + 0x28 + (u32)D_800E2184)`
  *    grouping, and the rect coords want `(GLOBAL + CONST) + ARRAY[0]`.
  *
- * S258 UPDATE: the fold reassociation is now SOLVED and the build is at the
- * EXACT instruction count (252), asm-differ 1580 -> 345. gcc-2.7.2's
- * `fold-const.c:3685 associate` decides which operand of a 3-term sum carries
- * the constant by WHICH SIDE it is parenthesised on: the arg0 split (:3722)
- * rewrites `(GLOBAL + C) + elem` to `GLOBAL + (elem + C)` (wrong), while the
- * arg1 split (:3759) rewrites `GLOBAL + (elem + C)` to `(GLOBAL + C) + elem`
- * (the ROM form). So the y coords are spelled
- * `D_800C54C4 + (D_800E21A8[0] + 0xAE) + D_800C5AD0`, and the x coords use a
- * local base temp (`s32 xl = D_800C54C8[0] + 0x108;` then `elem + xl`), which
- * is immune to reassociation AND yields the ROM's shared destructive
- * `addiu t0,t0,0x108`. A temp for the Y base is WRONG: the ROM re-loads the
- * three y globals in the post-`bgezl` t-clip block, so a y temp comes out 3
- * instrs short (249).
- * RESIDUAL: pure register permutation (`D_800C54C4` in a0 vs the ROM's a2,
- * with the clamp scratch swapped) plus one sched1 LUID tie -- the ROM loads
- * `D_800E2190[0]` BEFORE `D_800C54C8`, but the temp initialiser must precede
- * the macro call so my build emits them the other way round. Permuter run at
- * S258. Full reconstruction + measured variants in
- * docs/wip/func_80087CB0.near-match.md.
+ * The fold reassociation is solved, and the build reaches the ROM's exact
+ * instruction count (252). gcc-2.7.2's `fold-const.c:3685 associate` decides
+ * which operand of a 3-term sum carries the constant by WHICH SIDE it is
+ * parenthesised on: the arg0 split (:3722) rewrites `(GLOBAL + C) + elem` to
+ * `GLOBAL + (elem + C)` (wrong), while the arg1 split (:3759) rewrites
+ * `GLOBAL + (elem + C)` to `(GLOBAL + C) + elem` (the ROM form). So the y coords
+ * are spelled `D_800C54C4 + (D_800E21A8[0] + 0xAE) + D_800C5AD0`, and the x coords
+ * use a local base temp (`s32 xl = D_800C54C8[0] + 0x108;` then `elem + xl`),
+ * which is immune to reassociation AND yields the ROM's shared destructive
+ * `addiu t0,t0,0x108`. A temp for the Y base is WRONG: the ROM re-loads the three
+ * y globals in the post-`bgezl` t-clip block, so a y temp comes out 3 instrs
+ * short (249).
+ * RESIDUAL: pure register permutation (`D_800C54C4` in a0 vs the ROM's a2, with
+ * the clamp scratch swapped) plus one sched1 LUID tie -- the ROM loads
+ * `D_800E2190[0]` BEFORE `D_800C54C8`, but the temp initialiser must precede the
+ * macro call so my build emits them the other way round.
  */
 extern s32 D_800C5E24;
 extern u8 D_80106240[];
@@ -1856,19 +1848,17 @@ s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
   return y;
 }
 
-/* func_80088A90: CARRY (S254, re-cracked S258 to the EXACT instruction count).
- * Glyph/units-string DL emitter: renders a measurement string as one
+/* func_80088A90: glyph/units-string DL emitter: renders a measurement string as one
  * gSPTextureRectangle per glyph ('f'->s 0x60 w0x10, '.'->0x70 w4, 'm'->0x50 w8,
  * 'y'->0x58 w8, digit->(c-0x30)<<3 w8, ' '-> advance only), rect x..x+w by
  * row..row+0xC in quarter-pixels, on a caller-supplied Gfx** cursor.
  *
- * The S254 "terminal, not source-leverable" verdict is REFUTED. Writing the
- * 6-word block as gSPTextureRectangle(dl++, ...) instead of raw u32 stores
- * makes the emit block byte-identical (including the -4(a2)/0(a2) store pair
- * and the loop.c preheader hoist of word_hi/word_lo, the 3 constant command
+ * Writing the 6-word block as gSPTextureRectangle(dl++, ...) instead of raw u32
+ * stores makes the emit block byte-identical (including the -4(a2)/0(a2) store
+ * pair and the loop.c preheader hoist of word_hi/word_lo, the 3 constant command
  * words, and the 5 character literals -- the constant hoist is the only reason
- * this leaf has a frame at all). The two features S254 called unreachable both
- * fall out:
+ * this leaf has a frame at all). Two constructs that would otherwise look
+ * unreachable from source both fall out:
  *  - the redundant `andi v1,t0,0xFF` needs the char SPLIT into a `u8` for the
  *    `!= 0` loop test and an `s32` for the compares (`ch = c;` at the loop
  * top): the zero-extend then sits in a different BB from the `lbu` so combine
@@ -1880,9 +1870,9 @@ s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
  * RESIDUAL: one extra callee-saved reg. ROM keeps the 5 hoisted char constants
  * in s1/s0/t9/t8/t7 and REUSES the dead raw-char reg t0 for the glyph value;
  * my build gives the glyph its own t1, so a constant spills to s2 (3 saved
- * regs, bigger frame) and the whole loop renames. #local-alloc-qty-permutation,
- * no longer a reorg/branch-likely wall. asm-differ 913 at 83/83 instrs. Full
- * reconstruction + measured variants in docs/wip/func_80088A90.near-match.md.
+ * regs, bigger frame) and the whole loop renames. This is a local-alloc quantity
+ * permutation, not a reorg or branch-likely constraint. The build is at 83/83
+ * instructions.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088A90);
 
