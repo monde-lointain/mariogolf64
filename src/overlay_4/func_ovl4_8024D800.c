@@ -166,7 +166,74 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802518F0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80251A28);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80251B6C);
+void func_ovl4_80251B6C(u16 *arg0, s32 arg1) {
+    u8 *src;
+    u8 *end;
+    u8 *dst;
+    s32 mode;
+
+    mode = (u32) (arg1 & 0xC) >> 2;
+    *arg0 = 0;
+    switch (mode) {
+    case 1:
+        src = D_ovl4_80255330;
+        end = src + 1;
+        dst = (u8 *) arg0;
+        if (src != end) {
+            do {
+                *dst = *src;
+                src++;
+                dst++;
+            } while (src != end);
+        }
+        D_ovl4_80255330 = end;
+        *arg0 = *arg0 >> 8;
+        break;
+    case 2:
+        src = D_ovl4_80255330;
+        end = src + 1;
+        dst = (u8 *) arg0;
+        if (src != end) {
+            do {
+                *dst = *src;
+                src++;
+                dst++;
+            } while (src != end);
+        }
+        D_ovl4_80255330 = end;
+        *arg0 = (*arg0 >> 8) * 2;
+        break;
+    case 3:
+        src = D_ovl4_80255330;
+        end = src + 1;
+        dst = (u8 *) arg0;
+        if (src != end) {
+            do {
+                *dst = *src;
+                src++;
+                dst++;
+            } while (src != end);
+        }
+        D_ovl4_80255330 = end;
+        *arg0 = (*arg0 >> 8) * 4;
+        break;
+    case 0:
+        {
+            u8 *out = (u8 *) arg0;
+            u8 *cursor = D_ovl4_80255330;
+            u8 *stop = cursor + 2;
+            if (cursor != stop) {
+                do {
+                    *out = *cursor;
+                    cursor++;
+                    out++;
+                } while (cursor != stop);
+            }
+            D_ovl4_80255330 = stop;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80251CB4);
 
