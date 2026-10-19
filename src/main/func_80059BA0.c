@@ -870,29 +870,6 @@ void insert_supershot_record(SupershotRecord* entry) {
   osSyncPrintf(D_800D0928);
 }
 
-
-/* One continue slot: snapshots of the hole environment, scenario, and round
- * statistics, plus the per-player records in a sibling array. */
-typedef struct {
-  s32 valid;             /* 0x00 */
-  s32 unknown_04;        /* 0x04 */
-  HoleEnvironmentState environment; /* 0x08 */
-  ScenarioState state; /* 0x3C */
-  RoundStatistics round_statistics; /* 0x80 */
-  u8 pad9C[4];
-} ContinueSlot; /* 0xA0 */
-
-/* The three continue headers immediately precede their four-player copies. */
-typedef struct {
-  ContinueSlot slots[3];
-  PlayerState players[3][4];
-} SaveContinueData; /* 0xA80, at SRAM offset 0x1FF8 */
-
-/* Projection from the SRAM base; the preceding save regions are not modeled here. */
-typedef struct {
-  u8 unknown_00[0x1FF8];
-  SaveContinueData continue_data;
-} SaveContinueView;
 typedef struct {
   /* 0x00 */ PlayerState players[4];
   /* 0x2E0 */ u8 unknown_2E0[0xD0];

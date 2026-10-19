@@ -1,7 +1,9 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/session.h"
 
 extern u8* func_8005AF50(void);
+extern u8* func_8005AF74(void);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F5F0);
 
@@ -114,7 +116,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222038)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8022209C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222C94);
+typedef struct {
+    u8 unknown_00[0x43];
+    s8 slot_index;
+} ContinueSlotSelection;
+
+s32 func_ovl3_80222C94(void) {
+    SaveContinueView* save = (SaveContinueView*)func_8005AF50();
+    ContinueSlotSelection* selection = (ContinueSlotSelection*)func_8005AF74();
+    ContinueSlot* slot = &save->continue_data.slots[selection->slot_index];
+    return -(slot->valid == 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222CDC);
 
