@@ -65,7 +65,20 @@ void func_ovl0_80204104(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802041C8);
+extern u16 D_800C307A;
+
+void func_ovl0_802041C8(void) {
+    u16 var_v0;
+
+    if (D_801B55CC & 2) {
+        var_v0 = D_800C307A - 0xC8;
+    } else if (D_801B55CC & 1) {
+        var_v0 = D_800C307A + 0xC8;
+    } else {
+        return;
+    }
+    D_800C307A = var_v0;
+}
 
 extern f64 D_ovl0_80224F18;
 extern f64 D_ovl0_80224F20;
