@@ -27,6 +27,11 @@ extern s32 D_800C306C;
 extern void func_800934CC(s32 arg0);
 extern void func_8002A97C(s32 arg0, s32 arg1);
 extern void set_color_framebuffer_count(u32 buffer_count);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C0E60;
+extern s32 D_ovl0_80224A90;
+extern s32 D_ovl0_80224A98;
+extern s32 D_ovl0_80224A9C;
 
 void func_ovl0_80218CC0(void) {
     D_801061BD = 0;
@@ -101,7 +106,19 @@ void func_ovl0_8021A690(void) {
     heap3_free(&D_ovl0_8022B534);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A6BC);
+void func_ovl0_8021A6BC(s32 arg0) {
+    D_ovl0_80224A98 = arg0;
+    if (arg0 == -1) {
+        D_ovl0_80224A90 = arg0;
+        func_ovl0_8021A690();
+        play_sound_effect(0x65, D_800C0E60, 0x64);
+    } else {
+        D_ovl0_80224A9C = 0;
+        D_ovl0_80224A90 = 0;
+        func_ovl0_8021A62C();
+        play_sound_effect(0x64, D_800C0E60, 0x64);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A724);
 
@@ -120,8 +137,6 @@ extern void func_800747B0(Gfx **, s32, s32, u8 *);
 extern void load_texture_block_4b(Gfx **, u32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Ovl0Entry D_ovl0_80224928[];
 extern u8 *D_ovl0_80224978[];
-extern s32 D_ovl0_80224A98;
-extern s32 D_ovl0_80224A9C;
 extern f32 D_ovl0_80224AA0;
 extern f32 D_ovl0_80224AA4;
 extern f64 D_ovl0_802255D0;
