@@ -111,6 +111,7 @@ extern f64 D_ovl7_8020C090;
 extern Ovl7TweenState D_ovl7_8022BE98;
 extern Ovl7TweenStateB D_ovl7_8022BE94;
 extern f32 fabsf(f32);
+extern f32 atan2f(f32, f32);
 
 void func_ovl7_802035E4(s32 unused, s32 arg1, s32 arg2) {
   D_ovl7_8022BE30.region.fC[0].i = arg1;
@@ -127,7 +128,24 @@ void func_ovl7_8020360C(s32 unused, s32 arg1, s32 arg2) {
   D_ovl7_8022BE30.region.fD[1].i = arg2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203620);
+void func_ovl7_80203620(void) {
+    f32 dx;
+    f32 dz;
+
+    dx = D_ovl7_8022BE30.camPos[1].x - D_ovl7_8022BE30.camPos[0].x;
+    D_ovl7_8022BE30.unk1C = atan2f(D_ovl7_8022BE30.camPos[1].y - D_ovl7_8022BE30.camPos[0].y,
+                                   sqrtf((dx * dx) + ((D_ovl7_8022BE30.camPos[1].z - D_ovl7_8022BE30.camPos[0].z) *
+                                                      (D_ovl7_8022BE30.camPos[1].z - D_ovl7_8022BE30.camPos[0].z))));
+    dx = D_ovl7_8022BE30.camPos[1].x - D_ovl7_8022BE30.camPos[0].x;
+    dz = D_ovl7_8022BE30.camPos[1].z - D_ovl7_8022BE30.camPos[0].z;
+    D_ovl7_8022BE30.unk18 = atan2f(dz, dx);
+    D_ovl7_8022BE30.unk20 = sqrtf((((D_ovl7_8022BE30.camPos[1].x - D_ovl7_8022BE30.camPos[0].x) *
+                                    (D_ovl7_8022BE30.camPos[1].x - D_ovl7_8022BE30.camPos[0].x)) +
+                                   ((D_ovl7_8022BE30.camPos[1].y - D_ovl7_8022BE30.camPos[0].y) *
+                                    (D_ovl7_8022BE30.camPos[1].y - D_ovl7_8022BE30.camPos[0].y))) +
+                                  ((D_ovl7_8022BE30.camPos[1].z - D_ovl7_8022BE30.camPos[0].z) *
+                                   (D_ovl7_8022BE30.camPos[1].z - D_ovl7_8022BE30.camPos[0].z)));
+}
 
 void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames) {
   f32 dx;
