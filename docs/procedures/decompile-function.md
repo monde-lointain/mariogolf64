@@ -30,7 +30,7 @@ Then run `./tools/build-and-verify.sh`. The match is not done until it succeeds.
 
 # 3. Commit
 
-* **Perfect match:** commit with a message that says what was matched and how. Respect the pre-commit hook; a failure means the C change is wrong.
+* **Perfect match:** commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched. Respect the pre-commit hook; a failure means the C change is wrong.
 * **Improved partial match** (better than any recorded one, or none recorded): record it next to the include and keep the include on one line, because Splat reads the function name from it.
 
 ```c
@@ -46,7 +46,7 @@ A `NEAR_MISS.md` handoff note in `nonmatchings/<function>/` makes `list_decomp_c
 
 # Harness friction
 
-If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing them edits the template for every environment. Commit the fix by itself with the `harness:` prefix, then continue. A harness fix does not reset or extend the attempt count.
+If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing them edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then continue. A harness fix does not reset or extend the attempt count.
 
 # Stop rules
 
