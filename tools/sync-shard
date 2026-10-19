@@ -16,8 +16,12 @@
 # work was dropped) and ./tools/build-and-verify.sh passes. Otherwise the branch
 # is restored and the shard keeps running unsynced. This never fails the
 # candidate source.
+#
+# It runs only when nigel selects a candidate. After the agent finishes, nigel
+# re-runs the candidate source with NIGEL_CANDIDATE set to judge the result; a
+# moved HEAD there would read as an agent commit, so that run skips the sync.
 set -u
-[[ -n ${MG64_SYNC_BRANCH:-} ]] || exit 0
+[[ -n ${MG64_SYNC_BRANCH:-} && -z ${NIGEL_CANDIDATE:-} ]] || exit 0
 before=$(git rev-parse HEAD)
 base=$(git merge-base "$MG64_SYNC_BRANCH" HEAD)
 git rebase -q "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && exit 0

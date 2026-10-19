@@ -22,10 +22,12 @@ def commit(cwd, path, text, message):
     return git(cwd, 'rev-parse', 'HEAD')
 
 
-def run(cwd, branch=None):
-    env = {k: v for k, v in os.environ.items() if k != 'MG64_SYNC_BRANCH'}
+def run(cwd, branch=None, candidate=None):
+    env = {k: v for k, v in os.environ.items() if k not in ('MG64_SYNC_BRANCH', 'NIGEL_CANDIDATE')}
     if branch:
         env['MG64_SYNC_BRANCH'] = branch
+    if candidate:
+        env['NIGEL_CANDIDATE'] = candidate
     return subprocess.run([str(SCRIPT)], cwd=cwd, env=env, capture_output=True, text=True)
 
 
@@ -46,6 +48,17 @@ class SyncShardTest(unittest.TestCase):
     def test_without_sync_branch_nothing_moves(self):
         head = commit(self.repo, 'b.c', 'shard\n', 'shard work')
         self.assertEqual(run(self.repo).returncode, 0)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
+
+    def test_recheck_of_a_candidate_does_not_move_head(self):
+        # nigel re-runs the candidate source with NIGEL_CANDIDATE set to judge the agent's
+        # work; HEAD moving then would be mistaken for an agent commit.
+        head = commit(self.repo, 'b.c', 'shard\n', 'shard work')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'd.c', 'fix\n', 'fix from another shard')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        self.assertEqual(run(self.repo, 'dev', candidate='["func_A"]').returncode, 0)
         self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
 
     def test_rebases_and_drops_commits_already_integrated(self):
