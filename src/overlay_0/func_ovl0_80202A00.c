@@ -110,7 +110,23 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207048)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207080);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802071B8);
+extern s8 D_800BAA04;
+
+s32 func_ovl0_80207014(PlayerState *player, s32 record_offset);
+void func_ovl0_80207080(s32 player_index);
+
+void func_ovl0_802071B8(s32 arg0) {
+    s32 record_offset;
+
+    if (game_mode == 9) {
+        record_offset = arg0 * sizeof(PlayerState);
+        if (player_records[arg0].base_score <= D_800BAA04 &&
+            (s8)player_records[arg0].unknown_1E[0] == 0 &&
+            func_ovl0_80207014(&player_records[arg0], record_offset) != 0) {
+            func_ovl0_80207080(arg0);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207250);
 
