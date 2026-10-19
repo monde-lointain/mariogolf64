@@ -488,7 +488,7 @@ segments:
     exclusive_ram_id: ovl0
     symbol_name_format: ovl0_$VRAM
     subsegments:
-      - [0xADD30, asm]
+      - [0xADD30, c, overlay_0/func_ovl0_801F4A30]
       - [0xADD40, asm]
       - [0xB68F0, asm]
       - [0xBBD00, asm]
