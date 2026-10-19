@@ -1,5 +1,7 @@
 #include "common.h"
 
+void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
+
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E010);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E0AC);
@@ -28,7 +30,18 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_802104F0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210C18);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210C74);
+void func_ovl3_80210C74(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode) {
+    Gfx* gfx = *gfxp;
+
+    if (value > 9) {
+        value = 9;
+    }
+    if (value < -9) {
+        value = -9;
+    }
+    func_ovl3_80210E3C(&gfx, x, y, value, mode, 1);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210CD4);
 
