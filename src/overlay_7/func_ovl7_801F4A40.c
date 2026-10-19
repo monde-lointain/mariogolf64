@@ -1,5 +1,8 @@
 #include "common.h"
 
+void func_80058D04(s32, s32, s32);
+extern Gfx* glistp;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4A40);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4A6C);
@@ -10,7 +13,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5018)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5100);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5180);
+void func_ovl7_801F5180(s32 view_state_address, Gfx** cursor) {
+    s32 slot_index;
+
+    slot_index = 0;
+    glistp = *cursor;
+    do {
+        func_80058D04(view_state_address, 2, slot_index);
+        slot_index += 1;
+    } while (slot_index < 4);
+    *cursor = glistp;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F51F0);
 
