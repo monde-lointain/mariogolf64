@@ -1,0 +1,6 @@
+candidate_source: python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 5 --tier 2
+prompt: "Use the decompile-function skill to decompile the function: $INPUT[0]. This function already failed at tier 1; check its history with python3 tools/difficulty_ledger.py show and read the recorded reason before retrying. The matched functions most similar to it might provide useful references: $INPUT[1:]. If a function is only available on one worktree, that worktree will be indicated in parentheses, e.g. `myFunction (../mg64-a)`. Use the clean-rewrite-on-plateau strategy: when progress plateaus, rewrite the function from the assembly instead of patching the same attempt. When creating the decomp environment (tools/decomp-env) use --id $TASK_ID. Follow the skill's stop rules, including the difficulty-ledger record step at every stop."
+agent_flags: --model anthropic/claude-haiku-5-5:xhigh
+success_command: 'git add -u && git commit -m "matched $CANDIDATE"'
+verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
+timeout: 120m
