@@ -13,7 +13,12 @@ void func_ovl0_801FD5F8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD624);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD760);
+/* sqrtf is inlined as sqrt.s (-ffast-math). The dead 8-byte frame and `sw $v0,0(sp)` are the static-chain home of the nested-function original; `unused` reproduces them, as in func_ovl7_802068B4. */
+f32 func_ovl0_801FD760(f32 arg0, f32 arg1, f32 arg2) {
+    s32 r;
+    volatile s32 unused = r;
+    return sqrtf(arg0 * arg0 + arg1 * arg1 + arg2 * arg2);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD798);
 
