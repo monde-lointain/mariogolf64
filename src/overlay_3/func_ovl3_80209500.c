@@ -2,6 +2,8 @@
 
 extern s16 g_abRosterUnlockFlags[4];
 extern s32 D_ovl3_8022FF1C[4];
+extern u8* func_8005AF74(void);
+extern s16 D_800C28E4[3][7];
 
 void func_ovl3_80209500(void) {
     D_ovl3_8022FF1C[0] = g_abRosterUnlockFlags[0];
@@ -24,7 +26,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209D50)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020B2C4);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020B3CC);
+void func_ovl3_8020B3CC(void) {
+    u8 *state;
+    s32 row;
+    s32 col;
+
+    state = func_8005AF74();
+    row = 0;
+    do {
+        col = 0;
+        do {
+            if (D_800C28E4[row][col] < -10) {
+                state[4] = col;
+                state[8] = row;
+            }
+            col++;
+        } while (col != 7);
+        row++;
+    } while (row != 2);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020B438);
 
