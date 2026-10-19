@@ -517,7 +517,7 @@ segments:
       - [0xFD310, c, overlay_3/func_ovl3_80213390]
       - [0xFF940, c, overlay_3/func_ovl3_802159C0]
       - [0x101830, c, overlay_3/func_ovl3_802178B0]
-      - [0x109570, asm]
+      - [0x109570, c, overlay_3/func_ovl3_8021F5F0]
       - [0x110670, asm]
       - [0x115D80, data]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
