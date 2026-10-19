@@ -188,7 +188,46 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205624)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802059C0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205AE4);
+extern s32 game_mode;
+extern s8 rumble_disable_flag;
+extern s8 D_801B71EE;
+extern u8 D_801B727A;
+extern s32 D_ovl0_80223E5C;
+extern const char D_ovl0_80224FC0[];
+extern s8 g_terrain_vtx_xform_mode;
+
+void func_ovl0_80205AE4(s32 arg0, s32 arg1) {
+    s32 temp_a0;
+    u8 *temp_v0;
+    u8 *temp_s0;
+
+    temp_a0 = arg0 * 0xB8;
+    if (*(&D_801B71EE + temp_a0) != 0) {
+        return;
+    }
+    if (rumble_disable_flag != 0) {
+        return;
+    }
+    if (game_mode == 3) {
+        return;
+    }
+    if (game_mode == 9) {
+        return;
+    }
+    if (D_ovl0_80223E5C >= 2) {
+        return;
+    }
+    if ((g_terrain_vtx_xform_mode != 0) & (arg1 != 7)) {
+        return;
+    }
+    temp_v0 = &D_801B727A + temp_a0;
+    temp_s0 = temp_v0 + arg1;
+    if ((u8) *temp_s0 >= 0xFFU) {
+        return;
+    }
+    osSyncPrintf(D_ovl0_80224FC0, arg1);
+    *temp_s0 += 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205BB8);
 
@@ -202,8 +241,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206354)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206BD0);
 
-extern s32 game_mode;
-extern s8 rumble_disable_flag;
 
 s32 func_ovl0_80206CC8(void) {
     if (rumble_disable_flag == 0) {
