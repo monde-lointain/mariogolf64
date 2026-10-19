@@ -110,7 +110,18 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FA20C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FADBC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAF08);
+void func_ovl3_801FAF08(void) {
+  if (func_8006AD94() != 0 && D_801B9410 == 0) {
+    if (func_8006ADA0() == 0) {
+      current_game_mode = 0x13;
+    }
+  } else {
+    func_8006AD1C(0);
+    func_8006ADF8(1);
+    D_801052E8 = 0;
+    D_801B9410 = 0;
+  }
+}
 
 void func_ovl3_801FAF78(void) {
   if (func_8006AD94() != 0 && D_801B9410 == 0) {
