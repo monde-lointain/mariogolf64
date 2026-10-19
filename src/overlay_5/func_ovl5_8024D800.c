@@ -9,6 +9,8 @@ extern s32 D_ovl5_8025C874;
 extern s32 D_ovl5_8025C87C;
 extern s8 D_ovl5_80253B52[];
 extern s32 D_ovl5_8025C884;
+extern s8 D_800BAA04;
+extern s32 D_ovl5_8025C640;
 extern s32 camera_position_x;
 extern s32 camera_position_z;
 extern u32 calculate_hypotenuse_safe(s32, s32);
@@ -57,7 +59,10 @@ s8 func_ovl5_8024D958(void) {
                            player_records[D_ovl5_8025C884].character_index];
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D99C);
+s32 func_ovl5_8024D99C(void) {
+    return player_records[D_ovl5_8025C884].base_score >=
+           (D_800BAA04 + D_ovl5_8025C640) - 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D9E8);
 
