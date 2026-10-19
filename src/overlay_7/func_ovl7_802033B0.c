@@ -7,6 +7,7 @@ extern f32 D_ovl7_8022BE3C;
 extern f32 D_ovl7_8022BE40;
 extern f32 D_ovl7_8022BE44;
 void func_ovl7_80203620(void);
+void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802033B0);
 
@@ -49,6 +50,7 @@ extern Ovl7Word D_ovl7_8022BEB0;
 extern Ovl7Word D_ovl7_8022BEB4;
 extern f32 D_ovl7_8022BED4;
 extern f32 D_ovl7_8022BED0;
+extern s32 D_ovl7_8022BEDC[2];
 extern f32 fabsf(f32);
 extern Ovl7Word D_ovl7_8022BEB8;
 extern Ovl7Word D_ovl7_8022BEBC;
@@ -74,7 +76,33 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203620)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_8020370C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203984);
+void func_ovl7_80203984(s32 idx, f32 x, f32 y, f32 z, s32 frames) {
+  s32 *flags;
+  s32 *active;
+  s32 *inactive;
+  s32 word;
+
+  flags = D_ovl7_8022BEDC;
+  active = &flags[idx];
+  word = *active;
+  if (!(word & 0x80)) {
+    *active = word ^ 0x80;
+  }
+  inactive = &flags[idx ^ 1];
+  word = *inactive;
+  if (word & 0x80) {
+    *inactive = word ^ 0x80;
+  }
+  word = *active;
+  if (!(word & 8)) {
+    *active = word ^ 8;
+  }
+  word = *inactive;
+  if (word & 8) {
+    *inactive = word ^ 8;
+  }
+  func_ovl7_8020370C(idx, x, y, z, frames);
+}
 
 void func_ovl7_80203A30(s32 arg0, f32 arg1, s32 arg2) {
   f32 *accum;
