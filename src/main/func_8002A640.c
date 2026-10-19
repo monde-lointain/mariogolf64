@@ -217,7 +217,31 @@ check3:
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002BE78);
+/* Nested child of draw_ground_shadow_decals. On entry $v0 is the static chain,
+ * the caller's frame block at sp+0x10. The chain is an uninitialized stand-in
+ * (repo convention for nested children): it is spilled from $v0 in the prologue,
+ * and the four s32 fields are read and written through a word view of it. */
+void func_8002BE78(void) {
+    s32 *chain;
+    volatile s32 home = (s32) chain;
+    s32 *w = (s32 *) chain;
+
+    if (w[0] < 0) {
+        w[1] = 0;
+    } else {
+        w[1] = w[0];
+    }
+    if (w[0] > 0) {
+        w[2] = 0;
+    } else {
+        w[2] = -w[0] / 7;
+    }
+    if (w[1] > 0) {
+        w[3] = (0xE0 - w[1]) / 7;
+    } else {
+        w[3] = 0x20 - w[2];
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", draw_ground_shadow_decals);
 
