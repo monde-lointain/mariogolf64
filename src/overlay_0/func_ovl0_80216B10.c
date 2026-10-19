@@ -37,7 +37,36 @@ void func_ovl0_80216B10(void) {
     } while (i != 0x1E);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216B74);
+extern void func_80078D94(void);
+extern void func_8008679C(s32 mode);
+extern void func_ovl0_801FD8DC(void);
+extern void func_ovl0_8020D9F0(void);
+extern void func_ovl0_8020E7B4(s32 arg0);
+extern void func_ovl0_8020FFEC(s32 arg0);
+extern void func_ovl0_80213D70(s32 arg0);
+extern void func_ovl0_80216130(s32 arg0);
+extern void func_ovl0_80217F5C(s32 arg0);
+extern s8 D_ovl0_80225410;
+
+void func_ovl0_80216B74(s32 arg0) {
+    osSyncPrintf(&D_ovl0_80225410, arg0);
+    func_ovl0_80216130(-1);
+    func_8008679C(-1);
+    func_80078D94();
+    D_ovl0_80224860 = 0;
+    D_800C1B70 = 0;
+    func_ovl0_8020D9F0();
+    func_ovl0_80213D70(-1);
+    if (arg0 == 2) {
+        func_ovl0_8020E7B4(-2);
+    }
+    if (arg0 == 1) {
+        func_ovl0_8020FFEC(-1);
+        func_ovl0_8020E7B4(-1);
+    }
+    func_ovl0_801FD8DC();
+    func_ovl0_80217F5C(-1);
+}
 
 extern void update_object_group_by_id(s32 index);
 
