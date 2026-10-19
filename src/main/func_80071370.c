@@ -321,6 +321,7 @@ void emit_glyph_sheet_preamble_dl(Gfx** cursor, s32 sel) {
 }
 
 extern u8 D_800C4390[];
+extern u8 D_800C43B0;
 
 /* Font-string pixel-width accumulator. Per glyph (remapping lowercase a-z into
  * the 0xE1-0xFA custom range), width is added unless the glyph is a combining
@@ -495,7 +496,77 @@ void emit_glyph_string_12px(Gfx** dl, s16 x, s16 y, u8* str) {
   *dl = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80073F24);
+/**
+ * Emits one string of 12x12 glyphs from the I4 font atlas at D_800E1C38, the
+ * same per-glyph emit as emit_glyph_string_12px. The advance is D_800C4390[c]
+ * per glyph, D_800C43B0 for space (0x20). Codes 0x9E-0x9F and 0xDE-0xDF take
+ * the mark arm, which nudges the quad by (-6, -4) before drawing.
+ */
+void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  c = *str;
+  if (c != 0) {
+    do {
+      s32 code;
+      s32 xpos;
+      s32 ypos;
+      s32 uls;
+      s32 ult;
+      s32 adv;
+
+      if (c == 0x20) {
+        adv = D_800C43B0;
+        str++;
+        x += adv;
+        continue;
+      }
+      xpos = x;
+      ypos = y;
+      code = c;
+      if ((u32)(code - 0x61) < 0x1A) {
+        code += 0x80;
+      }
+      if (code < 0x9E) {
+        goto draw;
+      }
+      if (code < 0xA0) {
+        goto mark;
+      }
+      if (code >= 0xE0) {
+        goto draw;
+      }
+      if (code < 0xDE) {
+        goto draw;
+      }
+    mark:
+      xpos -= 6;
+      ypos -= 4;
+      x -= 12;
+    draw:
+      uls = (code % 16) * 12;
+      ult = (code / 16) * 12;
+      gDPLoadTextureTile_4b(gfx++, ((u32)D_800E1C38 + 8) & ~7, G_IM_FMT_I, 192,
+                            12, uls, ult, uls + 15, ult + 11, 0, 0, 0, 0, 0, 0,
+                            0);
+      gDPSetTileSize(gfx++, 1, uls << G_TEXTURE_IMAGE_FRAC,
+                     ult << G_TEXTURE_IMAGE_FRAC,
+                     (uls + 16) << G_TEXTURE_IMAGE_FRAC,
+                     (ult + 12) << G_TEXTURE_IMAGE_FRAC);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, xpos << 2, ypos << 2, (xpos + 12) << 2,
+                          (ypos + 12) << 2, G_TX_RENDERTILE, uls << 5, ult << 5,
+                          1 << 10, 1 << 10);
+      adv = D_800C4390[code];
+      str++;
+      x += adv;
+    } while ((c = *str) != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 /**
  * Emits one string of 10x10 glyphs from the I4 font atlas at D_800E1C34
