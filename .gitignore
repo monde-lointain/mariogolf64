@@ -1,54 +1,48 @@
 # ROMs
 *.z64
-*.n64
-*.v64
 
-# Extraction and build output (`make extract`, `make`)
-asm/
-assets/
-build/
-mariogolf64.ld
+# build artefacts
+asm
+assets
+build
 mariogolf64.d
+mariogolf64.ld
 undefined_funcs_auto.txt
 undefined_syms_auto.txt
-.splat/
-*.o
 romdiff
 report.json
 
-# Toolchain and Python environment (`make setup`, requirements.txt)
+# toolchain and python
 tools/gcc_kmc
 .venv
-__pycache__/
-*.py[cod]
+__pycache__
 
-# Decomp environments, permuter imports, and decomp.me scratch files
-nonmatchings/
-ctx.c
-ctx.c.m2c
+# permuter and decomp environments
+nonmatchings
 src/temp.c
 src/ctx.c
 
-# task-runner (nigel)
+# m2c
+ctx.c
+ctx.c.m2c
+
+# local decomp.me data
+tools/scratches.json
+
+# task-runner
 task-runner/**/*.log
 
-# Secrets
+# secrets
 .decomp_dev_secret
 .push_secrets
 
-# Agent-local settings and worktrees
-.claude/settings.local.json
+# claude
+**/.claude/settings.local.json
 .claude/worktrees
 
-# Editor, clangd, and OS files
-.cache/
+# IDE, clangd, and OS files
 compile_commands.json
-.vscode/
-.idea/
+.cache/*
+.vscode
+.idea
 .DS_Store
-[._]*.sw[a-p]
-*~
-
-# Local research workspaces
-private/
-scratchpad/
