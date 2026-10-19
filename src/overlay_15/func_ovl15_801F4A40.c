@@ -8,6 +8,7 @@ typedef struct {
 } GbPakSaveRecord; /* 0x200 */
 
 extern s32 D_ovl15_801FBB78;
+extern void func_ovl15_801F7664(Gfx** dl, s32* arg1);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
 
@@ -87,7 +88,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F71
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F7664);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F77D4);
+void func_ovl15_801F77D4(Gfx** dl, s32* arg1) {
+    Gfx* saved = *dl;
+
+    func_ovl15_801F7664(&saved, arg1);
+    *dl = saved;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F780C);
 
