@@ -713,7 +713,6 @@ extern s8 g_debug_mode_enabled;
 extern char D_80105118[];
 extern char D_800D1448[];
 
-extern int sprintf(char* s, const char* fmt, ...);
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
