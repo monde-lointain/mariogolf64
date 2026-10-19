@@ -83,7 +83,25 @@ void func_ovl3_80226958(s32 slot) {
     load_rom_asset_payload(D_ovl3_80230E80, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802269AC);
+extern u8* D_ovl3_80230E84;
+extern s16 D_ovl3_80230EC4[][4];
+extern u32 get_rom_load_slot_size(RomLoadSlot* load_slot);
+
+void func_ovl3_802269AC(s32 arg0, s32 arg1) {
+    RomLoadSlot slot;
+
+    arg0 = arg0 & ((s32) ~arg0 >> 0x1F);
+    if (arg0 >= 0xF) {
+        arg0 = 0xE;
+    }
+    arg1 = arg1 & ((s32) ~arg1 >> 0x1F);
+    if (arg1 >= 4) {
+        arg1 = 3;
+    }
+    open_rom_asset_slot((s32) D_ovl3_80230EC4[arg0][arg1], &slot);
+    read_rom_load_slot(D_ovl3_80230E84,
+                       (u32) (s16) get_rom_load_slot_size(&slot), &slot);
+}
 
 void func_ovl3_80226A34(void) {
   func_8005AF50();
