@@ -13,6 +13,7 @@
 # Choosing and tracking work
 
 * [selection-and-status](selection-and-status.md) - progress, ranking, similarity, m2c batch, near-miss and cleanup reports
+* [difficulty-ledger](difficulty-ledger.md) - per-function failure record (`outcome`, tier, budget) that decides which functions each nigel tier may pick
 * [quality-checkers](quality-checkers.md) - pointer-arithmetic, low-quality-match, redundant-extern and header-hygiene tools
 * [task-runner](task-runner.md) - nigel tasks that run agents over candidate lists
 

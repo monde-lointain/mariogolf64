@@ -26,7 +26,7 @@ nigel <task> --shard 1/4
 | `success_command` | `git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"` (tasks override it) |
 | `reset_command` | `git clean -f; git reset --hard HEAD || true` |
 
-`task-runner/<task>/task.yaml` keys: `candidate_source`, `prompt` or `template`, `agent_flags`, `accept_best_effort`, `timeout`, `success_command`. Prompt variables: `$INPUT`, `$INPUT[n]`, `$INPUT[n:]`, `$INPUT["key"]` (index and slice need an array candidate, else interpolation fails) and `$TASK_ID`. With a `timeout`, nigel exports `NIGEL_TIMEOUT_SECONDS` and `NIGEL_TIMEOUT_DEADLINE_UNIX`, which the [policy hook](/harness/policy-hook.md) uses to bound permuter runs.
+`task-runner/<task>/task.yaml` keys: `candidate_source`, `prompt` or `template`, `agent_flags`, `accept_best_effort`, `timeout`, `success_command`, `verify_command`. `verify_command` overrides the config's and takes the same `$CANDIDATE` and `$TASK_NAME` variables as `success_command`. Prompt variables: `$INPUT`, `$INPUT[n]`, `$INPUT[n:]`, `$INPUT["key"]` (index and slice need an array candidate, else interpolation fails) and `$TASK_ID`. nigel exports `NIGEL_TASK_NAME`, `NIGEL_CANDIDATE`, `NIGEL_RUN_ID`, `NIGEL_AGENT` and `NIGEL_AGENT_FLAGS` to the agent and to the verify, success and reset commands. With a `timeout`, nigel exports `NIGEL_TIMEOUT_SECONDS` and `NIGEL_TIMEOUT_DEADLINE_UNIX`, which the [policy hook](/harness/policy-hook.md) uses to bound permuter runs.
 
 # Worktree rule
 
@@ -46,10 +46,12 @@ Commits made in a worktree stay on its branch; review and merge `harness:` commi
 
 | Task | Candidate source | Does |
 |---|---|---|
-| `decompile-unmatched` | `score_functions.py asm/nonmatchings --json` | Match one function with [decompile-function](/procedures/decompile-function.md) |
-| `decompile-similar` | `score_functions.py ... --by-similarity --top-n 3` | Same, with similar matched functions as hints |
-| `decompile-coddog-similar` | `score_functions.py ... --by-coddog-similarity` | Same, hints from coddog |
-| `cleanup-matched` | `list_matched_functions.py` | [cleanup-function](/procedures/cleanup-function.md): names and purpose (`template.md`) |
+| `decompile-unmatched` | `difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` | Tier 1. Starts from the top-3 similar matched functions (`score_functions.py --by-similarity --score-func`), then [decompile-function](/procedures/decompile-function.md) |
+| `decompile-similar` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 3` | Tier 1, 60 min. Same, with similar matched functions as hints |
+| `decompile-coddog-similar` | `difficulty_ledger.py harvest && score_functions.py ... --by-coddog-similarity` | Tier 1, 60 min. Hints from coddog |
+| `decompile-tier2` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 5 --tier 2` | Tier 2, 120 min: five references, clean rewrite on plateau |
+| `decompile-tier3` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 5 --tier 3` | Tier 3, 240 min: try all strategies, do not give up |
+| `cleanup-matched` | `list_matched_functions.py --by-reference-use` | [cleanup-function](/procedures/cleanup-function.md): names and purpose (`template.md`), most-referenced functions first |
 | `fix-low-quality` | `detect_low_quality_matches.py src --json` | [cleanup-function](/procedures/cleanup-function.md): artefacts and types (`template.md`, candidates are `[file, function]`) |
 | `cleanup-files` | `src/main/func_*.c`, `src/overlay_*/func_*.c` | Clean and rename a file with [rename-file](/procedures/rename-file.md) |
 | `cleanup-structs`, `deduplicate-structs`, `remove-struct-unions` | struct/header finders | Consolidate and name structs |
@@ -60,3 +62,5 @@ Commits made in a worktree stay on its branch; review and merge `harness:` commi
 | `split-asm-segments` | `asm` entries in `mariogolf64.yaml` | Convert an assembly-only segment to a C file of `INCLUDE_ASM` stubs |
 
 The candidate-source scripts are in [selection](selection-and-status.md) and [quality checkers](quality-checkers.md).
+
+Decompile tasks escalate by [difficulty tier](difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model anthropic/claude-haiku-5-5:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not.

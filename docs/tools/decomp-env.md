@@ -33,6 +33,7 @@ Without `--id`, the directory is `nonmatchings/<function>` or the first free `<f
 | `AGENTS.md` | Rendered from `tools/decomp-env-template/AGENTS.md` with the function name substituted |
 | `build.sh`, `diff.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `map_asm_to_c.py`, `prelude.inc` | Symlinks into `tools/decomp-env-template/`: editing one edits the template for every environment |
 | `.omp` | Symlink to the repository's `.omp` (skills, policy hook, rules) |
+| `.run.json` | Written by `tools/difficulty_ledger.py write-run` on creation: function, task, tier, model, run id, deadline and the `stall_limit` that build.sh reads. See [difficulty-ledger](difficulty-ledger.md). |
 | `match_log.txt`, `.matches/`, `LEARNINGS.md` | Created while working |
 
 `nonmatchings/` is git-ignored. [decomp-env-cleanup](selection-and-status.md) removes environments for functions that are already matched.
