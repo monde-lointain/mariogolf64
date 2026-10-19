@@ -1453,3 +1453,5 @@ stop_spark_animation = 0x80077C0C; // type:func
 load_spark_effect = 0x80077C18; // type:func
 free_spark_effect = 0x80077DEC; // type:func
 load_hole_terrain_assets = 0x802504E8; // type:func segment:overlay_4
+// overlay_8 text-scroller records: 4 x 0xC (text ptr at +0, cursor at +4, on_end at +8).
+D_ovl8_801F5928 = 0x801F5928; // type:Ovl8TextRecord size:0x30 segment:overlay_8
