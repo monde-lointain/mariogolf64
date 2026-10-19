@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""Git merge driver for src/**/*.c: resolves the conflicts parallel decompilation makes.
+
+Usage (git runs it, see .gitattributes and tools/install-git-hooks.sh):
+    merge-decomp-c <base> <ours> <theirs> [<marker-size>]
+
+It runs git's own three-way merge, then resolves each conflict block whose
+two sides hold only top-level declarations (extern variables and prototypes),
+INCLUDE_ASM lines and function definitions, by these rules:
+  - the functions must be the same on both sides and in the same order;
+    a definition beats INCLUDE_ASM of the same function (one side matched it),
+    and identical definitions are kept once;
+  - the declarations in front of each function are the union of both sides',
+    minus any declared earlier in the file;
+  - a symbol declared differently on the two sides (a type clash), two different
+    definitions of a function, or any other line leaves the block conflicted.
+The result is written to <ours>. Exit 0 if no conflict remains, 1 otherwise
+(remaining blocks keep their markers, already-resolved ones stay resolved).
+
+MG64_MERGE_FAVOR=ours|theirs resolves the remaining blocks to that side, like
+`-X ours` does for the built-in driver (git does not pass -X to custom drivers).
+
+The merge says nothing about whether the result matches; build-and-verify does.
+"""
+
+import os
+import re
+import subprocess
+import sys
+
+INCLUDE_ASM = re.compile(r'INCLUDE_ASM\(\s*"[^"]*"\s*,\s*(\w+)\s*\);\s*$')
+DECLARATION = re.compile(r'(?:extern\s+)?[A-Za-z_][\w \t*]*?[\s*](\w+)\s*(?:\([^;{]*\)|(?:\[[^\]]*\])*)\s*;\s*$')
+FUNCTION_POINTER = re.compile(r'extern\s+[\w \t*]+\(\s*\*\s*(\w+)\s*\)\s*\([^;{]*\)\s*;\s*$')
+DEFINITION_START = re.compile(r'[A-Za-z_][\w \t*]*?[\s*](\w+)\s*\([^;]*$')
+
+
+class Unresolvable(Exception):
+    pass
+
+
+def declaration_name(line):
+    """The symbol an extern or prototype line declares, or None (a definition is not one)."""
+    if line[:1].isspace() or line.startswith(('static', 'typedef', 'return', '#')):
+        return None
+    m = FUNCTION_POINTER.match(line) or DECLARATION.match(line)
+    if not m or not (line.startswith('extern') or '(' in line):
+        return None
+    return m.group(1)
+
+
+def items(lines):
+    """Split one side of a block into ('decl', name, text), ('fn', name, text, is_def)."""
+    out = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if not line.strip():
+            i += 1
+            continue
+        m = INCLUDE_ASM.match(line)
+        if m:
+            out.append(('fn', m.group(1), line, False))
+            i += 1
+            continue
+        name = declaration_name(line)
+        if name:
+            out.append(('decl', name, line))
+            i += 1
+            continue
+        m = DEFINITION_START.match(line)
+        if m and not line.startswith(('static', 'typedef', 'extern')):
+            end = next((j for j in range(i, len(lines)) if lines[j].rstrip() == '}'), None)
+            if end is None:
+                raise Unresolvable(line)
+            out.append(('fn', m.group(1), ''.join(lines[i:end + 1]), True))
+            i = end + 1
+            continue
+        raise Unresolvable(line)
+    return out
+
+
+def slots(side):
+    """[(declarations before function, function item)], last function item None."""
+    result, decls = [], []
+    for item in side:
+        if item[0] == 'decl':
+            decls.append(item)
+        else:
+            result.append((decls, item))
+            decls = []
+    result.append((decls, None))
+    return result
+
+
+def declared(lines):
+    names = {}
+    for line in lines:
+        name = declaration_name(line)
+        if name:
+            names.setdefault(name, line.strip())
+    return names
+
+
+def resolve(ours, theirs, before):
+    ours_slots, theirs_slots = slots(items(ours)), slots(items(theirs))
+    if [f and f[1] for _, f in ours_slots] != [f and f[1] for _, f in theirs_slots]:
+        raise Unresolvable('different functions')
+    known = declared(before)
+    parts = []
+    for (ours_decls, ours_fn), (theirs_decls, theirs_fn) in zip(ours_slots, theirs_slots):
+        decls = []
+        for _, name, text in ours_decls + theirs_decls:
+            if name in known:
+                if known[name] != text.strip():
+                    raise Unresolvable(f'{name} declared differently')
+                continue
+            known[name] = text.strip()
+            decls.append(text)
+        if decls:
+            parts.append(''.join(decls))
+        if ours_fn is None:
+            continue
+        if ours_fn[3] and theirs_fn[3] and ours_fn[2] != theirs_fn[2]:
+            raise Unresolvable(f'{ours_fn[1]} defined differently')
+        if not ours_fn[3] and not theirs_fn[3] and ours_fn[2] != theirs_fn[2]:
+            raise Unresolvable(f'{ours_fn[1]} INCLUDE_ASM differs')
+        parts.append((theirs_fn if theirs_fn[3] and not ours_fn[3] else ours_fn)[2])
+    def blank(index):
+        return any(len(side) > 1 and not side[index].strip() for side in (ours, theirs))
+    return (['\n'] if blank(0) else []) + ['\n'.join(parts)] + (['\n'] if blank(-1) else [])
+
+
+def main(base, ours_path, theirs_path, marker_size='7'):
+    n = int(marker_size)
+    merged = subprocess.run(
+        ['git', 'merge-file', '-p', f'--marker-size={n}', '-L', 'ours', '-L', 'base', '-L', 'theirs',
+         ours_path, base, theirs_path],
+        capture_output=True, text=True)
+    if merged.returncode < 0 or merged.returncode > 127:
+        sys.stderr.write(merged.stderr)
+        return 2
+    lines = merged.stdout.splitlines(keepends=True)
+    favor = os.environ.get('MG64_MERGE_FAVOR')
+    start, mid, end = '<' * n + ' ', '=' * n, '>' * n + ' '
+    out, conflicts, i = [], 0, 0
+    while i < len(lines):
+        if not lines[i].startswith(start):
+            out.append(lines[i])
+            i += 1
+            continue
+        j = next(k for k in range(i, len(lines)) if lines[k].rstrip('\n') == mid)
+        k = next(k for k in range(j, len(lines)) if lines[k].startswith(end))
+        ours, theirs = lines[i + 1:j], lines[j + 1:k]
+        try:
+            out.extend(resolve(ours, theirs, out))
+        except Unresolvable:
+            if favor in ('ours', 'theirs'):
+                out.extend(ours if favor == 'ours' else theirs)
+            else:
+                out.extend(lines[i:k + 1])
+                conflicts += 1
+        i = k + 1
+    with open(ours_path, 'w') as f:
+        f.writelines(out)
+    return 1 if conflicts else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(*sys.argv[1:]))

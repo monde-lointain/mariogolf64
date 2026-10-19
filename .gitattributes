@@ -1,0 +1,4 @@
+# Parallel decompilation conflicts are mostly neighbouring matches' extern blocks;
+# tools/merge-decomp-c resolves those. The driver is configured by
+# tools/install-git-hooks.sh; without it git falls back to its own text merge.
+src/**/*.c merge=decomp-c
