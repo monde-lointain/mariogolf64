@@ -161,4 +161,44 @@ void func_ovl3_80212858(Gfx** gfxp, s32 x, s32 y) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80212C54);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80212FEC);
+void func_ovl3_80212FEC(Gfx** gfxp, u8* tex, s32 bank, s32 frame, s32 x, s32 y) {
+    s32 bankIdx = bank;
+    Gfx* gfx = *gfxp;
+    s32 frameIdx;
+    s32 bankOff;
+    s32 left;
+    s32 top;
+    u8* texels;
+
+    bankIdx = MAX(bankIdx, 0);
+    frameIdx = frame;
+    if (bankIdx >= 2) {
+        bankIdx = 1;
+    }
+    frameIdx = MAX(frameIdx, 0);
+    if (frameIdx >= 4) {
+        frameIdx = 3;
+    }
+    left = x - 8;
+    top = y - 8;
+    bankOff = (bankIdx << 9) + 0x28;
+    texels = (u8*)((((u32)tex) + ((frameIdx << 7) + bankOff)) & ~7);
+
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, (u8*)(((u32)tex + 8) & ~7));
+    gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 8, texels);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, 30, 60);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 15 << G_TEXTURE_IMAGE_FRAC,
+                   15 << G_TEXTURE_IMAGE_FRAC);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, left << G_TEXTURE_IMAGE_FRAC, top << G_TEXTURE_IMAGE_FRAC,
+                            (x + 8) << G_TEXTURE_IMAGE_FRAC,
+                            (y + 8) << G_TEXTURE_IMAGE_FRAC, G_TX_RENDERTILE,
+                            0, 0, 0x400, 0x400);
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
