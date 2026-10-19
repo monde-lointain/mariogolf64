@@ -2,6 +2,7 @@
 #include "../main/rom_asset.h"
 #include "../main/session.h"
 #include "../main/club.h"
+#include "../main/terrain.h"
 
 extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
 
@@ -327,7 +328,52 @@ void func_ovl0_80207A10(s32 arg0) {
     func_80095D64();
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207A34);
+extern u32 calculate_hypotenuse_safe(s32 x, s32 z);
+extern s32 func_8003DFD0(s32 x, s32 z);
+extern s8 D_ovl6_80250B60;
+extern s32 D_ovl6_8024DD20;
+extern s32 D_ovl6_8024DD28;
+extern s32 D_ovl6_8024DD2C;
+extern s32 D_ovl6_8024DD34;
+extern s32 camera_position_x;
+extern s32 camera_position_z;
+
+typedef struct {
+    s32 unknown_00;
+} Overlay6Word;
+
+/* Struct-typed: as a plain s32 global, GCC 2.7.2 hoists this load above the pin store. */
+extern Overlay6Word D_ovl6_80250B30;
+
+void func_ovl0_80207A34(s32 player_index) {
+    s32 distance;
+    TerrainAttrEntry* terrain;
+
+    if (player_records[player_index].base_score == 1) {
+        distance = -1;
+        terrain = get_table_entry(D_ovl6_80250B60);
+        switch (terrain->id) {
+            case 0:
+            case 1:
+            case 2:
+            case 0xB:
+            case 0xC:
+                distance = calculate_hypotenuse_safe(D_ovl6_8024DD20 - D_ovl6_8024DD2C,
+                                                     D_ovl6_8024DD28 - D_ovl6_8024DD34);
+                break;
+        }
+        player_records[player_index].unknown_80 = distance;
+
+        distance = -1;
+        if (D_ovl6_80250B30.unknown_00 != 0) {
+            distance = 0;
+        } else if (terrain->id == 0xBU) {
+            distance = func_8003DFD0(camera_position_x - D_ovl6_8024DD2C,
+                                     camera_position_z - D_ovl6_8024DD34);
+        }
+        player_records[player_index].unknown_84 = distance;
+    }
+}
 
 void func_ovl0_80207B8C(s32 player_index) {
     if (player_records[player_index].unknown_80 == -2) {
