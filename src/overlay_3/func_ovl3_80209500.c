@@ -1,6 +1,18 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209500);
+extern s16 g_abRosterUnlockFlags[4];
+extern s32 D_ovl3_8022FF1C[4];
+
+void func_ovl3_80209500(void) {
+    D_ovl3_8022FF1C[0] = g_abRosterUnlockFlags[0];
+    g_abRosterUnlockFlags[0] = -1;
+    D_ovl3_8022FF1C[1] = g_abRosterUnlockFlags[1];
+    g_abRosterUnlockFlags[1] = -1;
+    D_ovl3_8022FF1C[2] = g_abRosterUnlockFlags[2];
+    g_abRosterUnlockFlags[2] = -1;
+    D_ovl3_8022FF1C[3] = g_abRosterUnlockFlags[3];
+    g_abRosterUnlockFlags[3] = -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209568);
 

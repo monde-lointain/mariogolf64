@@ -417,7 +417,7 @@ g_bgm_pending_id = 0x800C11A0; // type:u32 size:0x4
 g_bgm_pending_flags = 0x800C11A4; // type:u32 size:0x4
 g_bgm_action_delay = 0x800C11A8; // type:u32 size:0x4
 g_bgm_current_id = 0x800C11AC; // type:u32 size:0x4
-g_abRosterUnlockFlags = 0x800C2900; // type:s16 size:0x2
+g_abRosterUnlockFlags = 0x800C2900; // type:s16 size:0x8
 g_abRosterUnlockOrder = 0x800C2968; // type:s16 size:0x2
 g_bgm_song_buffer = 0x800C2FF0; // type:u32 size:0x4
 g_terrain_enable_gate = 0x800C3FA8; // type:u32 size:0x4
@@ -1455,3 +1455,5 @@ free_spark_effect = 0x80077DEC; // type:func
 load_hole_terrain_assets = 0x802504E8; // type:func segment:overlay_4
 // overlay_8 text-scroller records: 4 x 0xC (text ptr at +0, cursor at +4, on_end at +8).
 D_ovl8_801F5928 = 0x801F5928; // type:Ovl8TextRecord size:0x30 segment:overlay_8
+// overlay_3 roster backup: 4 x s32, written by func_ovl3_80209500 from g_abRosterUnlockFlags.
+D_ovl3_8022FF1C = 0x8022FF1C; // type:s32 size:0x10 segment:overlay_3

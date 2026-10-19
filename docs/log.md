@@ -5,6 +5,7 @@
 * **Update**: Overlays (`src/overlay_*`) now compile with `-DF3DEX_GBI_2`, like `src/main`: the overlay display-list builder `func_ovl3_8022A090` matches the ROM only with F3DEX2 opcodes (`E3`/`E1`/`F1`). See [compiler profiles](/project/compiler-profiles.md).
 * **Update**: `src/overlay_7/func_ovl7_80206680.c` joined `FAST_MATH_SRCS`: `func_ovl7_802068B4` is a bare `sqrt.s` in the ROM, which only `-ffast-math` emits.
 * **Update**: `src/overlay_0/func_ovl0_801FD5F0.c` joined `FAST_MATH_SRCS`: `func_ovl0_801FD760` is a bare `sqrt.s` in the ROM, which only `-ffast-math` emits.
+* **Update**: `symbol_addrs.txt` gives `g_abRosterUnlockFlags` `size:0x8` (4 x s16 roster slots) and adds the overlay_3 array `D_ovl3_8022FF1C` (`size:0x10`, s32). Splat then emits `symbol + offset` references, which `func_ovl3_80209500` needs for an exact match.
 
 ## 2026-10-18
 * **Initialization**: Converted `AGENTS.md`, `README.md`, `DECOMPILATION_LEARNINGS.md`, `tools/HARNESS.md`, `docker/README.md`, `tools/data-differ/README.md` and the omp skills into this bundle. `AGENTS.md` and `README.md` remain as short entry points that link here; the other files were removed and the skills became symlinks into `procedures/`.
