@@ -264,7 +264,61 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FFC40)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_802008D8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_80200B18);
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+} Ovl7Rec;
+
+typedef struct {
+    f32 unk00;
+    f32 unk04;
+} Ovl7Pair;
+
+extern u8 D_ovl7_80217090[];
+extern u8 D_ovl7_8021BEE0[];
+extern u8 D_ovl7_8021C330[];
+extern u8 D_ovl7_80221640[];
+extern u8 D_ovl7_802247D0[];
+extern Ovl7Rec D_ovl7_80224698[9];
+extern s32 D_ovl7_80224708[9];
+extern f32 D_ovl7_80224730[9];
+extern Ovl7Pair D_ovl7_80224758[9];
+extern s32 D_ovl7_802247A0[9];
+
+void func_ovl7_80200B18(void) {
+    RomAssetLoad sp10;
+    s32 i;
+
+    get_rom_asset_allocation_size(0x945U, &sp10);
+    load_rom_asset_payload(D_ovl7_8021C330, &sp10);
+    get_rom_asset_allocation_size(0x946U, &sp10);
+    load_rom_asset_payload(D_ovl7_80221640, &sp10);
+    for (i = 0; i < 9; i++) {
+        D_ovl7_80224708[i] = 0;
+        D_ovl7_80224730[i] = -14.0f;
+        D_ovl7_80224698[i].unk00 = -0x3E8;
+        D_ovl7_80224698[i].unk04 = -0x3E8;
+        D_ovl7_80224758[i].unk00 = 0.1f;
+        D_ovl7_80224758[i].unk04 = 0.1f;
+        D_ovl7_802247A0[i] = 0;
+    }
+    D_ovl7_80224698[0].unk08 = 8;
+    D_ovl7_80224698[1].unk08 = 0xC;
+    D_ovl7_80224698[2].unk08 = 0x10;
+    D_ovl7_80224698[3].unk08 = 0x14;
+    D_ovl7_80224698[4].unk08 = 0x18;
+    D_ovl7_80224698[5].unk08 = 0x1C;
+    D_ovl7_80224698[6].unk08 = 0x24;
+    D_ovl7_80224698[7].unk08 = 0x28;
+    D_ovl7_80224698[8].unk08 = 0x2C;
+    get_rom_asset_allocation_size(0x94BU, &sp10);
+    load_rom_asset_payload(D_ovl7_8021BEE0, &sp10);
+    get_rom_asset_allocation_size(0x94EU, &sp10);
+    load_rom_asset_payload(D_ovl7_80217090, &sp10);
+    get_rom_asset_allocation_size(0x6A4U, &sp10);
+    load_rom_asset_payload(D_ovl7_802247D0, &sp10);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_80200CBC);
 
