@@ -10,6 +10,7 @@ extern u16 debug_menu_pad_buttons_c;
 extern u8 D_ovl0_80224B23;
 extern s32 D_ovl0_80224B24;
 extern void* heap3_alloc(u32 size);
+extern void heap3_free(void** payload_ptr);
 extern void* D_801B5CD0[];
 extern void* D_ovl0_8022D690;
 extern void* D_ovl0_8022D694;
@@ -58,7 +59,13 @@ void func_ovl0_8021E5F4(void) {
     D_ovl0_80224B2C = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E6B8);
+void func_ovl0_8021E6B8(void) {
+    D_ovl0_80224B2C = -1;
+    heap3_free(&D_ovl0_8022D690);
+    heap3_free(&D_ovl0_8022D694);
+    heap3_free(&D_801B5CD0[12]);
+    heap3_free(&D_801B5CD0[13]);
+}
 
 void func_ovl0_8021E710(void) {
     D_ovl0_80224B24 = 0;
