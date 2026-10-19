@@ -1,5 +1,5 @@
 candidate_source: python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json --by-coddog-similarity
-prompt: "Use the decompile-function skill to decompile the function: $INPUT[0]. There are several similar functions that have been matched, they might provide a useful reference: $INPUT[1]. If a function is only available on one worktree, that worktree will be indicated in parentheses, e.g. `myFunction (../mg64-a)`. When creating the decomp environment (tools/decomp-env) use --id $TASK_ID. Follow the skill's stop rules, including the difficulty-ledger record step at every stop."
+prompt: "Use the decompile-function skill to decompile the function: $INPUT[0]. There are several similar functions that have been matched, they might provide a useful reference: $INPUT[1]. When creating the decomp environment (tools/decomp-env) use --id $TASK_ID. Follow the skill's stop rules, including the difficulty-ledger record step at every stop."
 agent_flags: --model anthropic/claude-haiku-5-5:xhigh
 success_command: 'git add -u && git commit -m "matched $CANDIDATE"'
 verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
