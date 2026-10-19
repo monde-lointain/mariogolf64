@@ -263,7 +263,9 @@ def process_annotated_dump_lines(lines: List[str], include_source: bool = True) 
 
 # GCC nested functions are local text symbols that can sit before their parent in the object.
 RE_SYMBOL_HEADER = re.compile(r"^([0-9a-f]+) <(.+)>:$")
-RE_SECTION_OFFSET = re.compile(r"\.text\+0x([0-9a-f]+)")
+RE_SECTION_OFFSET = re.compile(r"\.text(?:\+0x([0-9a-f]+))?")
+# GCC gives a nested function the label `name.N`; the target object names the same callee `name`.
+RE_NESTED_SUFFIX = re.compile(r"\.\d+$")
 RE_HEX_ADDRESS = re.compile(r"[0-9a-f]+")
 
 
@@ -328,30 +330,36 @@ def process_objdump_lines(lines: List[str], symbol: Optional[str] = None) -> Lis
     if symbol is not None:
         if not found:
             raise ValueError(f"symbol '{symbol}' not found in object")
-        output_lines = [rebase_to_function(line, base) for line in output_lines]
+        nested_names = {}
+        for line in lines[SKIP_LINES:]:
+            header = RE_SYMBOL_HEADER.match(line.rstrip())
+            if header and RE_NESTED_SUFFIX.search(header.group(2)):
+                nested_names.setdefault(int(header.group(1), 16), RE_NESTED_SUFFIX.sub("", header.group(2)))
+        output_lines = [rebase_to_function(line, base, nested_names) for line in output_lines]
 
     return output_lines
 
 
-def rebase_to_function(line: str, base: int) -> str:
+def rebase_to_function(line: str, base: int, nested_names: Dict[int, str]) -> str:
     """Make branch targets and .text offsets at or after `base` relative to the function start.
 
     Earlier offsets (a nested child emitted before the target, or another function) stay as they are.
+    A `jal` to a nested child is written with the child's source name, so it matches the target object.
     """
-    if base == 0:
-        return line
     parts = line.split(maxsplit=1)
     if not parts:
         return line
     mnemonic = parts[0]
     args = parts[1] if len(parts) > 1 else ""
-    if mnemonic in BRANCH_INSTRUCTIONS and args:
+    if base and mnemonic in BRANCH_INSTRUCTIONS and args:
         head, sep, target = args.rpartition(",")
         if RE_HEX_ADDRESS.fullmatch(target) and int(target, 16) >= base:
             args = f"{head}{sep}{int(target, 16) - base:x}"
 
     def rebase_offset(match: re.Match) -> str:
-        offset = int(match.group(1), 16)
+        offset = int(match.group(1) or "0", 16)
+        if mnemonic == "jal" and offset in nested_names:
+            return nested_names[offset]
         if offset < base:
             return match.group(0)
         relative = offset - base

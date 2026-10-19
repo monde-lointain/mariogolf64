@@ -55,6 +55,25 @@ child_fn:
     jr $ra
     nop
 '''
+# The target calls its nested child by name, since the child is undefined in the parent-only object.
+CALLING_TARGET_ASM = f'''    .macro glabel name
+    .globl \\name
+\\name:
+    .endm
+    .set noreorder
+glabel {FUNCTION}
+    jal child_fn
+    nop
+    jr $ra
+    nop
+'''
+# GCC names a nested function `name.N` in the object; the candidate calls it through that symbol.
+NESTED_CHILD_ASM = '''    .local child_fn.2
+child_fn.2:
+    addu $v0, $a0, $a0
+    jr $ra
+    nop
+'''
 KMC_STUB = '''#!/bin/sh
 # Stand-in for tools/kmc-cc: the candidate is already assembly.
 out=""
@@ -138,6 +157,23 @@ class StallStopTest(unittest.TestCase):
         self.use_target(BRANCHING_TARGET_ASM)
         wrong = BRANCHING_TARGET_ASM.replace('$a1', '$a0')
         candidate = wrong.replace(f'glabel {FUNCTION}', CHILD_ASM + f'glabel {FUNCTION}')
+        proc = self.attempt(name='base_1.c', content=candidate)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn('Verified exact match: no', proc.stdout)
+
+    def test_nested_child_call_matches_the_target_callee_name(self):
+        self.use_target(CALLING_TARGET_ASM)
+        candidate = CALLING_TARGET_ASM.replace('jal child_fn', 'jal child_fn.2').replace(
+            f'glabel {FUNCTION}', NESTED_CHILD_ASM + f'glabel {FUNCTION}')
+        proc = self.attempt(name='base_1.c', content=candidate)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn('Verified exact match: yes', proc.stdout)
+
+    def test_nested_child_call_to_another_child_still_differs(self):
+        self.use_target(CALLING_TARGET_ASM)
+        other = NESTED_CHILD_ASM.replace('child_fn.2', 'other_fn.2')
+        candidate = CALLING_TARGET_ASM.replace('jal child_fn', 'jal other_fn.2').replace(
+            f'glabel {FUNCTION}', other + f'glabel {FUNCTION}')
         proc = self.attempt(name='base_1.c', content=candidate)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn('Verified exact match: no', proc.stdout)
