@@ -105,8 +105,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                       help='List each function with coddog matches whose C body is in src/')
     parser.add_argument('--top-n', type=int, default=5, metavar='N',
                         help='Similar functions per entry (default: 5)')
-    parser.add_argument('--include-segments', action='store_true',
-                        help='Include top-level assembly-only segments (asm/*.s)')
     args = parser.parse_args(argv)
 
     root = get_project_root()
@@ -117,7 +115,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Error: path not found: {args.path}", file=sys.stderr)
         return 1
 
-    functions: Dict[str, ParsedFunction] = collect_unmatched(root, target, args.include_segments)
+    functions: Dict[str, ParsedFunction] = collect_unmatched(root, target)
     if args.score_func:
         fn = functions.get(args.score_func)
         if fn is None:

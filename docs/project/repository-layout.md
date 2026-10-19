@@ -21,7 +21,6 @@ tags: [project, layout]
 | Path | Contents |
 |---|---|
 | `asm/nonmatchings/<seg>/<file>/<func>.s` | Unmatched functions, one file each, pulled into C by `INCLUDE_ASM`. |
-| `asm/<rom offset>.s` | Assembly-only segments that have no C file yet. |
 | `asm/<dir>/<file>.s` | Full disassembly of each C file, for reference. |
 | `asm/data/` | Extracted data assembly. |
 | `assets/` | Binary blobs extracted from the ROM. |

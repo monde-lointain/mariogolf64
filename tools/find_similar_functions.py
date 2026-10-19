@@ -10,8 +10,7 @@ detect_low_quality_matches.py, plus a CLI for a single function:
     python3 tools/find_similar_functions.py <function> --json
 
 References are C functions defined in src/ (their full disassembly is
-asm/<dir>/<file>.s). Candidates are unmatched asm/nonmatchings/**/*.s stubs and,
-when requested, top-level assembly-only segments asm/*.s.
+asm/<dir>/<file>.s). Candidates are unmatched asm/nonmatchings/**/*.s stubs.
 """
 
 import argparse
@@ -76,33 +75,26 @@ def get_project_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def unmatched_asm_files(root: Path, include_segments: bool = False) -> List[Path]:
-    """Assembly files that hold unmatched functions.
+def unmatched_asm_files(root: Path) -> List[Path]:
+    """Assembly stubs that hold unmatched functions (asm/nonmatchings/**/*.s).
 
-    asm/nonmatchings/**/*.s always counts. Top-level asm/*.s assembly-only segments
-    (except header.s) count only when include_segments is set. Full disassembly
-    files (asm/<dir>/<file>.s) are matched code and are never included.
+    Full disassembly files (asm/<dir>/<file>.s) are matched code and are never included.
     """
-    asm = root / 'asm'
     files: List[Path] = []
-    nonmatchings = asm / 'nonmatchings'
+    nonmatchings = root / 'asm' / 'nonmatchings'
     if nonmatchings.is_dir():
         files.extend(sorted(nonmatchings.rglob('*.s')))
-    if include_segments and asm.is_dir():
-        files.extend(sorted(p for p in asm.glob('*.s') if p.name != 'header.s'))
     return files
 
 
-def collect_unmatched(root: Path, target: Path, include_segments: bool = False) -> Dict[str, 'ParsedFunction']:
+def collect_unmatched(root: Path, target: Path) -> Dict[str, 'ParsedFunction']:
     """Parse unmatched functions under target (a directory or one .s file)."""
     target = target.resolve()
-    if target == (root / 'asm').resolve():
-        include_segments = True
     if target.is_file():
         files = [target]
     else:
         files = [
-            f for f in unmatched_asm_files(root, include_segments)
+            f for f in unmatched_asm_files(root)
             if target == f.resolve() or target in f.resolve().parents
         ]
     result: Dict[str, ParsedFunction] = {}
@@ -116,7 +108,7 @@ def collect_unmatched(root: Path, target: Path, include_segments: bool = False) 
 
 
 def load_unmatched(root: Path) -> Dict[str, 'ParsedFunction']:
-    return collect_unmatched(root, root / 'asm', include_segments=True)
+    return collect_unmatched(root, root / 'asm')
 
 
 # ---------------------------------------------------------------------------
@@ -547,7 +539,7 @@ def get_coddog_similarity(name: str, root: Path, src_defs: Dict[str, str],
     """coddog matches for name, keeping only references whose C body is in src/.
 
     coddog labels any function without an asm/nonmatchings stub as "(decompiled)",
-    including assembly-only segment functions, so src_defs is the authority here.
+    including hand-written assembly functions (hasm), so src_defs is the authority here.
     """
     if shutil.which('coddog') is None:
         raise CoddogError('coddog is not on PATH (install it with `cargo install coddog`)')
@@ -604,7 +596,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     target = unmatched.get(args.function)
     if target is None:
         print(f"Error: '{args.function}' is not an unmatched function "
-              f"(searched asm/nonmatchings and asm segments)", file=sys.stderr)
+              f"(searched asm/nonmatchings)", file=sys.stderr)
         return 1
 
     breakdowns: Dict[str, Dict[str, float]] = {}

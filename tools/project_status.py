@@ -3,7 +3,7 @@
 
 Progress is weighted by function bytes:
   - matched:   C bodies in src/ (sized from their full disassembly, asm/<dir>/<file>.s)
-  - unmatched: asm/nonmatchings stubs and top-level assembly-only segments
+  - unmatched: asm/nonmatchings stubs
                (sized from their `nonmatching <name>, <size>` headers)
 
 Data segments are not counted. The ROM is not compared, so the report reflects
@@ -40,8 +40,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     unmatched_bytes = sum(fn.size_bytes for fn in unmatched.values())
     total = matched_bytes + unmatched_bytes
     pct = matched_bytes / total * 100 if total else 0.0
-    stub_count = sum(1 for fn in unmatched.values() if fn.file_path.startswith('asm/nonmatchings/'))
-    segment_count = len(unmatched) - stub_count
 
     print(f"\n{'=' * 60}")
     print(f"Project Status: {pct:.2f}% matched (by function bytes)")
@@ -49,8 +47,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"Matching bytes: {matched_bytes:,} / {total:,}")
     print(f"Non-matching bytes: {unmatched_bytes:,}")
     print(f"Matched functions: {len(matched)}")
-    print(f"Unmatched functions: {len(unmatched)} "
-          f"({stub_count} in asm/nonmatchings, {segment_count} in assembly segments)")
+    print(f"Unmatched functions: {len(unmatched)}")
 
     if not unmatched:
         print("\nAll functions are matched.")

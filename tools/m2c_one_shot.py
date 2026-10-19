@@ -11,8 +11,7 @@ INCLUDE_ASM, this script:
      generated C, after confirming the owning file still compiles.
 
 All scratch files live in a temporary directory. A C file is only written when
-a match is verified and --dry-run is not given. Asm-only segments (asm/<rom>.s)
-have no owning C file; they are considered only when named explicitly.
+a match is verified and --dry-run is not given.
 
 Examples (from the repo root):
   .venv/bin/python3 tools/m2c_one_shot.py --dry-run --limit 5
@@ -39,7 +38,6 @@ from find_similar_functions import collect_unmatched  # noqa: E402
 from list_decomp_candidates import IncludeAsm, find_include_asm_in_text  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-ASM_NONMATCHINGS = 'asm/nonmatchings/'
 HELPER_DIR = ROOT / 'tools' / 'decomp-env-template'
 BUILD_SH = HELPER_DIR / 'build.sh'
 PRELUDE_INC = HELPER_DIR / 'prelude.inc'
@@ -115,10 +113,8 @@ def replace_include_asm(
     return '\n'.join(lines), ''
 
 
-def discover(include_segments: bool) -> List[Candidate]:
-    # collect_unmatched forces segments on for the asm/ root, so scope by directory.
-    target = ROOT / 'asm' if include_segments else ROOT / 'asm' / 'nonmatchings'
-    functions = collect_unmatched(ROOT, target, include_segments=include_segments)
+def discover() -> List[Candidate]:
+    functions = collect_unmatched(ROOT, ROOT / 'asm' / 'nonmatchings')
     owners: Dict[Tuple[str, str], List[IncludeAsm]] = defaultdict(list)
     for c_path in sorted((ROOT / 'src').rglob('*.c')):
         rel = c_path.relative_to(ROOT).as_posix()
@@ -127,9 +123,6 @@ def discover(include_segments: bool) -> List[Candidate]:
 
     candidates: List[Candidate] = []
     for fn in functions.values():
-        if not fn.file_path.startswith(ASM_NONMATCHINGS):
-            candidates.append(Candidate(fn.name, fn.file_path, None, 'skip:asm-only-segment'))
-            continue
         hits = owners.get((fn.file_path, fn.name), [])
         if not hits:
             candidates.append(Candidate(fn.name, fn.file_path, None, 'skip:no-c-owner'))
@@ -141,8 +134,8 @@ def discover(include_segments: bool) -> List[Candidate]:
 
 
 def select_candidates(names: List[str]) -> List[Candidate]:
-    """Default: every nonmatchings function. Named: only those, segments included."""
-    candidates = discover(include_segments=bool(names))
+    """Default: every nonmatchings function. Named: only those."""
+    candidates = discover()
     if not names:
         return candidates
 
@@ -332,7 +325,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     parser.add_argument(
         'functions', nargs='*',
-        help='function names or asm/*.s paths (default: all nonmatchings functions)',
+        help='function names or asm/nonmatchings/**/*.s paths (default: all nonmatchings functions)',
     )
     parser.add_argument('--limit', type=int, default=0,
                         help='attempt at most N eligible candidates (0 = all)')

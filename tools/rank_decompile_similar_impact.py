@@ -443,11 +443,6 @@ def parse_args() -> argparse.Namespace:
         help='with --ranking reach, keep candidates that affect no targets',
     )
     parser.add_argument(
-        '--include-segments',
-        action='store_true',
-        help='include top-level assembly-only segments (asm/*.s) as unmatched functions',
-    )
-    parser.add_argument(
         '--json',
         action='store_true',
         help='write complete machine-readable results to stdout',
@@ -472,7 +467,7 @@ def main() -> int:
 
     print(f'Parsing unmatched functions from {args.unmatched_dir}...', file=sys.stderr)
     unmatched = sorted(
-        collect_unmatched(root, unmatched_path, args.include_segments).values(),
+        collect_unmatched(root, unmatched_path).values(),
         key=lambda function: function.name,
     )
     if not unmatched:

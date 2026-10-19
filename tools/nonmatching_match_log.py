@@ -181,8 +181,8 @@ def integrated_function_names(repo_root: Path) -> set[str]:
 
 
 def unmatched_function_names(repo_root: Path) -> set[str]:
-    """Functions still present as unmatched assembly (asm/nonmatchings and assembly-only segments)."""
+    """Functions still present as unmatched assembly (asm/nonmatchings stubs)."""
     names: set[str] = set()
-    for path in unmatched_asm_files(repo_root, include_segments=True):
+    for path in unmatched_asm_files(repo_root):
         names.update(asm_function_names(path))
     return names
