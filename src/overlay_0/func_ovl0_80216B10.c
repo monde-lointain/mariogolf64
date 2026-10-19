@@ -5,7 +5,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216B10)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216B74);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216C18);
+extern void update_object_group_by_id(s32 index);
+
+void func_ovl0_80216C18(void) {
+    s32 i;
+
+    i = 0;
+    do {
+        update_object_group_by_id(i);
+        i += 1;
+    } while (i != 0x10);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216C58);
 
