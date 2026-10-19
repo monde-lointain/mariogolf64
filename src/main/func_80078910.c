@@ -385,7 +385,34 @@ void func_8007CF10(Gfx** pgfx, Particle* particle) {
   *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007D19C);
+extern u8 D_1B9418[];
+extern Vtx D_800C52B8[];
+extern s32 render_buffer_index;
+
+void func_8007D19C(Gfx** pgfx, s32 arg1) {
+  Gfx* gfx;
+
+  gfx = *pgfx;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+  gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xEF, 0xFF);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPLoadTextureBlock_4b(gfx++, ((u32)D_800E1DA8 + 8) & ~7, G_IM_FMT_I, 16, 16, 0,
+                         G_TX_CLAMP, G_TX_CLAMP, 6, 6, 0, 0);
+  gDPPipeSync(gfx++);
+  gSPMatrix(gfx++, (u32)(D_1B9418 + (render_buffer_index << 6)), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+  gSPMatrix(gfx++, (u32)(arg1 + 0x800000C0), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+  gSPVertex(gfx++, D_800C52B8, 4, 0);
+  gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+  gDPPipeSync(gfx++);
+  *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", draw_character_shadow);
 
