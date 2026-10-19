@@ -34,10 +34,10 @@ nigel <task> --shard 1/4
 
 ```bash
 tools/new-worktree mg64-a && cd ../mg64-a
-nigel decompile-similar --shard 1/3
+MG64_SYNC_BRANCH=dev nigel decompile-similar --shard 1/3
 ```
 
-Commits made in a worktree stay on its branch; review and merge `harness:` commits from there (`git log --oneline --grep '^harness:'`).
+Commits made in a worktree stay on its branch until you cherry-pick them onto the integration branch (`git cherry dev mg64-a` lists the ones not yet picked). With `MG64_SYNC_BRANCH` set, the decompile tasks' candidate source first runs `tools/sync-shard`, which rebases the shard onto that branch between candidates. Integrated commits drop out, and fixes merged from other shards (types, headers, harness) reach every shard. A conflicting rebase is aborted and the shard keeps running unsynced.
 
 # Task catalog
 

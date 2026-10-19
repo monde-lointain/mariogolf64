@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# sync-shard: rebase this worktree's branch onto $MG64_SYNC_BRANCH (no-op when unset).
+#
+# The decompile tasks run it first in candidate_source, when nigel has a clean
+# tree between candidates. Commits already integrated into the sync branch drop
+# out, and the shard picks up fixes merged from other shards, so shards stop
+# diverging (for example two shards declaring the same global with different
+# types). On a conflict the rebase is aborted and the shard keeps running
+# unsynced; this never fails the candidate source.
+set -u
+[[ -n ${MG64_SYNC_BRANCH:-} ]] || exit 0
+if ! git rebase -q "$MG64_SYNC_BRANCH" >/dev/null 2>&1; then
+    git rebase --abort >/dev/null 2>&1
+    echo "sync-shard: rebase onto $MG64_SYNC_BRANCH conflicted; continuing unsynced" >&2
+fi
+exit 0
