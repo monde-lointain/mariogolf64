@@ -7,11 +7,13 @@ Basic Usage: `./objdump.py file.o`
 With line numbers: `./objdump.py file_annotated.s --from-dump`
 """
 
+import functools
 import re
 import subprocess
 import sys
 import shutil
 from typing import List, Optional
+from pathlib import Path
 
 # Configuration
 SKIP_LINES = 1
@@ -65,25 +67,49 @@ def parse_relocated_line(line: str) -> tuple[str, str, str]:
 
 
 AUTO_NAMED_SYMBOL = re.compile(r"^(?:D|func)_([0-9A-Fa-f]{8})$")
+SYMBOL_ADDR_LINE = re.compile(r"^([A-Za-z_]\w*)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
+# This file lives in tools/decomp-env-template/, so the project root is two levels up.
+SYMBOL_ADDRS_PATH = Path(__file__).resolve().parents[2] / "symbol_addrs.txt"
 
 
-def auto_named_address(symbol: str, imm: str) -> Optional[int]:
-    """VRAM address encoded by an auto-named symbol plus its addend, or None."""
+@functools.lru_cache(maxsize=None)
+def symbol_addrs() -> dict[str, Optional[int]]:
+    """VRAM of each named symbol in symbol_addrs.txt; None for a name declared twice (ambiguous)."""
+    addrs: dict[str, Optional[int]] = {}
+    for line in SYMBOL_ADDRS_PATH.read_text().splitlines():
+        match = SYMBOL_ADDR_LINE.match(line)
+        if match is None:
+            continue
+        name = match.group(1)
+        addrs[name] = None if name in addrs else int(match.group(2), 16)
+    return addrs
+
+
+def symbol_base_address(symbol: str) -> Optional[int]:
+    """VRAM a symbol is bound to: encoded in an auto-named D_/func_ name, else looked up in symbol_addrs.txt."""
     match = AUTO_NAMED_SYMBOL.match(symbol)
-    if match is None:
+    if match is not None:
+        return int(match.group(1), 16)
+    return symbol_addrs().get(symbol)
+
+
+def resolved_address(symbol: str, imm: str) -> Optional[int]:
+    """VRAM a relocation resolves to (symbol base plus addend), or None if the symbol has no known address."""
+    base = symbol_base_address(symbol)
+    if base is None:
         return None
     try:
         addend = 0 if imm in ("0", "imm", "addr") else int(imm, 0)
     except ValueError:
         return None
-    return int(match.group(1), 16) + addend
+    return base + addend
 
 
 def process_mips_reloc(reloc_row: str, repl: str, imm: str) -> str:
     if "R_MIPS_JALR" in reloc_row or "R_MIPS_NONE" in reloc_row:
         return repl
     if "R_MIPS_LO16" in reloc_row or "R_MIPS_HI16" in reloc_row:
-        addr = auto_named_address(repl, imm)
+        addr = resolved_address(repl, imm)
         if addr is not None:
             if "R_MIPS_LO16" in reloc_row:
                 return f"%lo(0x{addr & 0xFFFF:x})"

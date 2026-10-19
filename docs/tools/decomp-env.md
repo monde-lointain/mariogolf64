@@ -56,6 +56,6 @@ Output files next to the attempt: `<attempt>.o`, `<attempt>_object_dump.s`, `_ob
 | `./objdump.py <attempt>.o` | Normalized MIPS dump |
 | `./map_asm_to_c.py <attempt>.o <line>` | Map an assembly line back to its C |
 
-A symbol-only difference such as `%lo(D_800B67A5)` versus `%lo(array+1)` is naming noise, not an instruction difference.
+Relocations compare by resolved VRAM. An auto-named `D_<VRAM>`/`func_<VRAM>` symbol encodes its address; any other name resolves through `symbol_addrs.txt`. So `%lo(D_800B67A5)` and `%lo(array+1)` compare equal when `array+1` is `0x800B67A5`. A name declared twice in `symbol_addrs.txt` is unresolved and compares by name.
 
 Per-function exact matches are certified from `match_log.txt` by `tools/nonmatching_match_log.py` ([selection-and-status](selection-and-status.md)). If any of these helpers is wrong, fix it at its source ([changing the harness](/harness/changing-the-harness.md)).

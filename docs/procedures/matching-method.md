@@ -12,7 +12,7 @@ Used from inside a [decomp environment](/tools/decomp-env.md) after `base.c` com
 * Think about what the function does in the game and structure the code to fulfill that purpose. Callers and callees are evidence.
 * Control flow and data modeling first. Once opcodes and branches align, treat stack and register differences as evidence about source types, local lifetimes, aliases and expression structure, not as noise.
 * Make one small source-shape change at a time; several at once interact.
-* A symbol-only difference (for example `%lo(D_800B67A5)` against `%lo(array+1)`) is naming in the extracted assembly, not an instruction difference. Note it, but do not distort the C to chase it.
+* A relocation whose name differs but whose resolved VRAM is equal is not an instruction difference ([decomp-env](/tools/decomp-env.md)). Do not distort the C to chase names. If the names still differ after that, the layout in `symbol_addrs.txt` is wrong; fix the layout.
 
 # Phase 1: reconstruct the simplest plausible source
 

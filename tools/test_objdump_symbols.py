@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Tests for relocation rendering in tools/decomp-env-template/objdump.py.
 
-An auto-named symbol (D_<VRAM> or func_<VRAM>) encodes its address. Two relocations that resolve
-to the same address produce the same linked immediate, so they must render identically; the
-name alone is naming noise. Different addresses must still render differently.
+An auto-named symbol (D_<VRAM> or func_<VRAM>) encodes its address, and a named global resolves
+through symbol_addrs.txt. Two relocations that resolve to the same address produce the same
+linked immediate, so they must render identically; the name alone is naming noise. Different
+addresses must still render differently.
 """
 
 import sys
@@ -45,6 +46,27 @@ class AutoNamedRelocTests(unittest.TestCase):
         self.assertNotEqual(
             render('R_MIPS_HI16', 'D_800B8000', '0'),
             render('R_MIPS_HI16', 'D_800B0000', '0'),
+        )
+
+
+class NamedGlobalRelocTests(unittest.TestCase):
+    def test_named_global_same_address_as_auto_name_renders_equal(self):
+        # g_terrain_tile_cache+0x98E and D_80132D4A+0x944 are both 0x8013368E.
+        self.assertEqual(
+            render('R_MIPS_LO16', 'g_terrain_tile_cache', '2446'),
+            render('R_MIPS_LO16', 'D_80132D4A', '2372'),
+        )
+
+    def test_named_global_hi16_same_address_as_auto_name_renders_equal(self):
+        self.assertEqual(
+            render('R_MIPS_HI16', 'g_terrain_tile_cache', '2446'),
+            render('R_MIPS_HI16', 'D_80132D4A', '2372'),
+        )
+
+    def test_named_global_different_address_renders_differently(self):
+        self.assertNotEqual(
+            render('R_MIPS_LO16', 'g_terrain_tile_cache', '2446'),
+            render('R_MIPS_LO16', 'D_80132D4A', '2376'),
         )
 
 
