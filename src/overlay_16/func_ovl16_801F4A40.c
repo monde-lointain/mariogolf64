@@ -2,6 +2,8 @@
 
 extern s32 D_ovl16_801F89C0;
 extern s32 D_ovl16_80223804;
+extern s8 D_ovl16_802237B8;
+extern s8 D_ovl16_802237B9;
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A40);
 
@@ -34,7 +36,10 @@ f32 func_ovl16_801F4F24(f32 near, f32 far, f32 t) {
   return near * (1.0f - t) + far * t;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F7C);
+void func_ovl16_801F4F7C(void) {
+    D_ovl16_802237B8 = 0;
+    D_ovl16_802237B9 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F90);
 
