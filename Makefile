@@ -131,6 +131,9 @@ FAST_MATH_SRCS := \
 	src/main/func_80095A10
 $(foreach src,$(FAST_MATH_SRCS),$(eval $(BUILD_DIR)/$(src).%: PROFILE_APPEND = -DF3DEX_GBI_2 -ffast-math))
 
+# func_ovl7_802068B4 inlines sqrtf() as bare sqrt.s, so this overlay TU is fast-math. Only this file: the rest of overlay_7 stays on the base profile (no F3DEX_GBI_2 here, unlike FAST_MATH_SRCS).
+$(BUILD_DIR)/src/overlay_7/func_ovl7_80206680.%: PROFILE_APPEND = -ffast-math
+
 # libkmc was built with `gcc -O` (genn64.bat).
 $(BUILD_DIR)/src/libkmc/%: OPT_FLAGS = -O
 

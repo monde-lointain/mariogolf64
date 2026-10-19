@@ -24,6 +24,7 @@ make -s print-cflags SRC=src/main/func_80025D30.c
 |---|---|---|
 | `src/main/*` | `-DF3DEX_GBI_2` | Game code builds display lists for F3DEX2. `src/mgu` and `src/overlay_*` use the bare base profile. |
 | Listed `FAST_MATH_SRCS` files | adds `-ffast-math` | These files inline `sqrtf()`/`sqrt()` as bare `sqrt.s`/`sqrt.d`. Without it GCC emits a NaN check and a library call. The flag applies to every function in the file. |
+| `src/overlay_7/func_ovl7_80206680.c` | adds `-ffast-math` | `func_ovl7_802068B4` is a bare `sqrt.s` in the ROM. Only this file: the rest of `overlay_7` stays on the base profile, without `-DF3DEX_GBI_2`, so it is not in `FAST_MATH_SRCS`. |
 | `src/libkmc/*` | `-O` | libkmc was built with `gcc -O`. |
 | `src/libultra/*` | `-O3 -fsigned-char -DBUILD_VERSION=VERSION_J -DF3DEX_GBI_2`, libultra compiler headers first | VERSION_J libultra with signed `char`: byte loads sign-extend (`lb` + shifts, not `lbu`/`andi`). |
 | `src/libnusys/*` | `-DUSE_EPI` | Enables the `nuPi*` bodies. |

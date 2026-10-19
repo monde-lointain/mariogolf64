@@ -1,5 +1,8 @@
 # Docs Update Log
 
+## 2026-10-19
+* **Update**: `src/overlay_7/func_ovl7_80206680.c` builds with `-ffast-math` (a file-specific override in the Makefile, not `FAST_MATH_SRCS`, which would also add `-DF3DEX_GBI_2`). `func_ovl7_802068B4` is a bare `sqrt.s` in the ROM, so the base profile could not match it; [compiler profiles](/project/compiler-profiles.md) lists the row.
+
 ## 2026-10-18
 * **Initialization**: Converted `AGENTS.md`, `README.md`, `DECOMPILATION_LEARNINGS.md`, `tools/HARNESS.md`, `docker/README.md`, `tools/data-differ/README.md` and the omp skills into this bundle. `AGENTS.md` and `README.md` remain as short entry points that link here; the other files were removed and the skills became symlinks into `procedures/`.
 * **Update**: Env scaffolding no longer links `DECOMPILATION_LEARNINGS.md` into `nonmatchings/<function>/`; the env brief reaches this bundle through `../../docs/`.
