@@ -567,9 +567,32 @@ void func_ovl0_802071B8(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207250);
-
 extern s32 func_800544B4(s32 arg0, s32 arg1);
+
+s32 func_ovl0_80207250(s32 arg0, s32 arg1) {
+    s32 kind;
+    s32 anim;
+
+    kind = func_800544B4(arg0, arg1);
+    switch (kind) {
+    case 0:
+        anim = 0;
+        break;
+    case 1:
+        anim = 3;
+        break;
+    case 2:
+        anim = 6;
+        break;
+    case 3:
+        anim = 9;
+        break;
+    default:
+        anim = 0;
+        break;
+    }
+    return anim;
+}
 
 s32 func_ovl0_802072AC(s32 arg0, s32 arg1, s32 arg2) {
     s32 kind;
@@ -597,11 +620,10 @@ s32 func_ovl0_802072AC(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 extern void animation_play(s32 id, s32 animation);
-s32 func_ovl0_80207250(void);
 s32 func_ovl0_802072AC(s32 arg0, s32 arg1, s32 arg2);
 
-void func_ovl0_80207328(s32 arg0) {
-    animation_play(arg0, func_ovl0_80207250());
+void func_ovl0_80207328(s32 arg0, s32 arg1) {
+    animation_play(arg0, func_ovl0_80207250(arg0, arg1));
 }
 
 void func_ovl0_80207358(s32 arg0, s32 arg1, s32 arg2) {
