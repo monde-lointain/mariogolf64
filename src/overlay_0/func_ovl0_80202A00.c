@@ -472,7 +472,20 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D838)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D874);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D9F0);
+typedef struct {
+    u8 unk00[0xA7];
+    u8 kind; /* 0xA7; 0 = unused slot */
+} OverlaySlot; /* size 0xA8 */
+
+extern OverlaySlot D_ovl0_8022B5D0[10];
+
+void func_ovl0_8020D9F0(void) {
+    s32 i;
+
+    for (i = 0; i != 10; i++) {
+        (D_ovl0_8022B5D0 + i)->kind = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020DA18);
 
