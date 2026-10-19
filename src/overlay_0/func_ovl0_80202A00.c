@@ -32,7 +32,24 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020439C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204460);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204568);
+extern s8 D_801B55D9;
+extern s32 D_800FBE7C[];
+
+void func_ovl0_80204568(void) {
+    s8 input;
+    s32 magnitude;
+    s32 *value;
+
+    input = D_801B55D9;
+    magnitude = input;
+    if (input < 0) {
+        magnitude = -input;
+    }
+    if (magnitude >= 9) {
+        value = &D_800FBE7C[2];
+        *value -= (input / 16) * 0x600;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802045BC);
 
