@@ -58,7 +58,7 @@ extern ScenerySpriteDescriptor g_scenery_sprites[SCENERY_SPRITE_COUNT];
 typedef struct {
   /* 0x000 */ u16 colors[34][36];
   /* 0x990 */ s16 unknown_990;
-  /* 0x992 */ u8 unknown_992[2];
+  /* 0x992 */ s16 unknown_992;
   /* 0x994 */ s32 cull_state;
   /* 0x998 */ Vec3f position;
   /* 0x9A4 */ s32 lod_tile_index; /* -1 selects the direct grid */

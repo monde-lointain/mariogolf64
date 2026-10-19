@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/terrain.h"
 
 extern u32 D_ovl4_802542A0;
 
@@ -112,7 +113,14 @@ void func_ovl4_80250F90(void) {
     bzero(&collision_triangles, 0x3C00);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250FB4);
+void func_ovl4_80250FB4(void) {
+    s32 i;
+
+    for (i = 0; i < 0x80; i++) {
+        g_terrain_tile_cache[i].colors[33][35] = 0;
+        g_terrain_tile_cache[i].unknown_992 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250FEC);
 
