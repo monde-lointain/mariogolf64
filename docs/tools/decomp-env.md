@@ -30,9 +30,9 @@ Without `--id`, the directory is `nonmatchings/<function>` or the first free `<f
 | `base.c` | m2c output (with a context built from the owning C file via `tools/m2ctx.py`), the scratch's source, or `src/temp.c` |
 | `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. For hand-written assembly with no owning C file: `src/main/__candidate__.c`, the main profile. |
 | `.diff_algorithm` | Only for scratches that used levenshtein diffing |
-| `AGENTS.md` | Rendered from `tools/decomp-env-template/AGENTS.md` with the function name substituted |
+| `AGENTS.md` | Rendered from `tools/decomp-env-template/AGENTS.md` with `$functionName`, `$root` (repository root) and `$env` (this directory) replaced by the function name and absolute paths |
 | `build.sh`, `diff.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `map_asm_to_c.py`, `prelude.inc` | Symlinks into `tools/decomp-env-template/`: editing one edits the template for every environment |
-| `.omp` | Symlink to the repository's `.omp` (skills, policy hook, rules) |
+| `.omp` | Symlink to the repository's `.omp` (skills, policy hook, settings) |
 | `.run.json` | Written by `tools/difficulty_ledger.py write-run` on creation: function, task, tier, model, run id, deadline and the `stall_limit` that build.sh reads. See [difficulty-ledger](difficulty-ledger.md). |
 | `match_log.txt`, `.matches/`, `LEARNINGS.md` | Created while working |
 
@@ -48,7 +48,7 @@ Run inside the environment. It serializes builds with `flock`, rejects a candida
 
 Output files next to the attempt: `<attempt>.o`, `<attempt>_object_dump.s`, `_object_dump_normalized.s`, `_annotated.s` (objdump with C annotations), and `<attempt>_diff`.
 
-`Verified exact match: yes` requires all three of: scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c`. For attempts named `base_<N>.c` the result is appended to `match_log.txt` (`<file> <score>%`, or `.matches/... 100.000% exact sha256=...`). Once the best entry is `N` or more attempts old, the script prints `STOP: No progress in <attempts> attempts (best: X% at <file>; stall limit N).` and repeats that line on every later attempt. `N` is `MG64_STALL_LIMIT`, else `stall_limit` in `.run.json` (decomp-env writes it from the task's tier), else 20; a bad value fails before compiling. The STOP line is the stop signal: record the outcome with `tools/difficulty_ledger.py record` and report ([stop rules](/procedures/decompile-function.md)).
+`Verified exact match: yes` requires all three of: scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c` and a `NEXT:` line names the C file to integrate into. For attempts named `base_<N>.c` the result is appended to `match_log.txt` (`<file> <score>%`, or `.matches/... 100.000% exact sha256=...`). Once the best entry is `N` or more attempts old, the script prints `STOP: No progress in <attempts> attempts (best: X% at <file>; stall limit N).` and repeats that line on every later attempt. `N` is `MG64_STALL_LIMIT`, else `stall_limit` in `.run.json` (decomp-env writes it from the task's tier), else 20; a bad value fails before compiling. When `.run.json` has a deadline, every build ends with `Time left: <minutes> min`. `STOP:` ends the attempt loop ([stop rules](/procedures/decompile-function.md)); `harvest` records it as `stalled`.
 
 | Helper | Use |
 |---|---|

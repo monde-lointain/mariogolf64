@@ -315,7 +315,8 @@ fi
 # Add decomp helpers
 ln -sf "${TEMPLATE_DIR}"/* "$created_dir/"
 rm "$created_dir/AGENTS.md"
-sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
+sed -e 's|\$functionName|'"${FUNC_NAME}"'|g' -e 's|\$root|'"$(pwd -P)"'|g' -e 's|\$env|'"$(cd "$created_dir" && pwd -P)"'|g' \
+    "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
 ln -s "$OMP_CONFIG" "$created_dir/.omp"
 
 # Record tier, model, and stall limit for build.sh and the difficulty ledger

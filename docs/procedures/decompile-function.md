@@ -2,11 +2,11 @@
 type: Procedure
 name: decompile-function
 title: "Decompile a function"
-description: "Decompile a specified Mario Golf 64 assembly function into matching C, or improve an existing partial match. Use for per-function matching, integration and verification; not general build or tooling changes."
+description: "Decompile one Mario Golf 64 assembly function into matching C, or improve an existing partial match."
 tags: [decompile, workflow]
 ---
 
-Run commands from the repository root unless a step says otherwise. The attempt and stop rules below are mandatory.
+Run commands from the repository root unless a step says otherwise. Work on the one function you were given, and stop at the first stop rule (section 4) that applies.
 
 # 1. Bootstrap and match
 
@@ -14,24 +14,21 @@ Run commands from the repository root unless a step says otherwise. The attempt 
 ./tools/decomp-env --bootstrap-only <function name>
 ```
 
-This creates `nonmatchings/<function name>[-N]/`; pass `--id <ID>` to control the suffix (nigel tasks pass `$TASK_ID`). Details of what the directory contains: [decomp-env](/tools/decomp-env.md). Move into it and read its `AGENTS.md`, which carries the attempt loop.
-
-In that directory run `./build.sh <attempt>.c`. It compiles with the profile of the file that owns the function and scores the object against the target. Put each attempt in a new self-contained file (`base_1.c`, `base_2.c`, ...); only `base_<N>.c` names are counted in `match_log.txt`. How to approach the function: [matching-method](/procedures/matching-method.md). Kinds of mismatch and compiler behavior: [KMC GCC learnings](/reference/kmc-gcc/index.md).
+This creates `nonmatchings/<function name>[-N]/`; `--id <ID>` sets the suffix (nigel tasks pass `$TASK_ID`), and [decomp-env](/tools/decomp-env.md) lists what it contains. Its `AGENTS.md` carries the attempt loop: follow it there. Approach and plateaus: [matching-method](/procedures/matching-method.md); compiler behavior behind a diff you cannot explain: [KMC GCC learnings](/reference/kmc-gcc/index.md).
 
 # 2. Integrate a 100% match
 
-Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function name>);` line in its C file with the real code. Define it under exactly `<function name>`, even when a caller declares the same address under another name; renaming is a separate task (the rename-global skill).
+On a match `build.sh` prints `Verified exact match: yes` and a `NEXT:` line.
 
-* Update the rest of the project to build. If a header declares the function, update it; callers teach the correct argument and return types. Never fall back to `void *`.
-* Search `src/` and `include/` for existing declarations of every function and struct involved; do not add duplicates ([redundant declarations](/project/code-quality.md)).
-* Commit any harness fix first and separately (see below), while `src/` still builds.
+1. Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function name>);` line in its C file with the matching code, defined under exactly `<function name>` even when a caller uses another name; renaming is a separate task (the rename-global skill).
+2. Use the argument and return types the callers pass. Reuse the declarations and structs already in `src/` and `include/`, and update a header that declares the function rather than adding a second declaration ([code quality](/project/code-quality.md)).
+3. Run `./tools/build-and-verify.sh`. If the checksum fails, diff each function in the changed files with `python3 tools/asm-differ/diff.py --no-pager <function>`, starting with those that use structs you changed ([asm-differ](/tools/asm-differ.md)).
 
-Then run `./tools/build-and-verify.sh`. The match is not done until it succeeds. If the checksum fails, rebuild and diff every function in the modified files with `python3 tools/asm-differ/diff.py --no-pager <function>`, focusing on functions that use structs you changed. See [asm-differ](/tools/asm-differ.md).
+`BUILD SUCCEEDED` completes the match. Under nigel, stop there: nigel verifies, commits and records it. In a hand run, commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched; a pre-commit hook failure means the C change is wrong.
 
-# 3. Commit
+# 3. Record a partial match
 
-* **Perfect match:** commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched. Respect the pre-commit hook; a failure means the C change is wrong.
-* **Improved partial match** (better than any recorded one, or none recorded): record it next to the include and keep the include on one line, because Splat reads the function name from it. Guard the assembly and C alternatives so a `NON_MATCHING` build emits exactly one definition.
+When you stop without a match and your best attempt beats the score recorded for the function (or none is recorded), write `NEAR_MISS.md` in the environment: the best file and score, the remaining differences, and what to try next. The note makes [selection tools](/tools/selection-and-status.md) skip the function. In a hand run, also keep the C next to the include, guarded so a `NON_MATCHING` build has exactly one definition; the include stays on one line because Splat reads the function name from it:
 
 ```c
 #ifdef NON_MATCHING
@@ -42,30 +39,23 @@ INCLUDE_ASM("asm/nonmatchings/main/file", your_function);
 #endif
 ```
 
-A `NEAR_MISS.md` handoff note in `nonmatchings/<function>/` makes `list_decomp_candidates.py` skip the function ([selection tools](/tools/selection-and-status.md)). You are then done; do not hunt for the next function.
+# 4. Stop rules
+
+Stop at the first of these and make no further attempt:
+
+* **Matched:** `build-and-verify.sh` succeeds after integration (section 2).
+* **Stalled:** `build.sh` prints a line starting `STOP:`. The best score has not improved for the stall limit of `base_<N>.c` attempts (`stall_limit` in `.run.json`, 10 at tier 1; `MG64_STALL_LIMIT` overrides it).
+* **Integration failed:** the environment matches but `build-and-verify.sh` cannot be made to pass. Restore the C file.
+* **Gave up:** you cannot progress without a change this procedure does not allow.
+
+`difficulty_ledger.py harvest` records matched, stalled, near-miss and timed-out runs from the environment. Record the other two yourself, from the repository root:
+
+```bash
+python3 tools/difficulty_ledger.py record <function> --outcome <integration_failed|gave_up> --reason "<one line>"
+```
+
+Then report in at most 10 lines: best score and file, approaches tried, the remaining differences, and whether they look solvable.
 
 # Harness friction
 
-If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing one edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then continue. A harness fix does not reset or extend the attempt count.
-
-
-# Stop rules
-
-**Mandatory.** Stop at each point below and make no further attempt after it.
-
-* A verified 100% match (`Verified exact match: yes`). Integrate it (section 2) and record it as `matched`.
-* A line starting `STOP:` from `build.sh`. It prints once the best score has not improved for the stall limit of `base_<N>.c` attempts: 20 by default, or the tier's `stall_limit` in `.run.json`; `MG64_STALL_LIMIT` overrides both. It repeats on every later attempt. Record it as `stalled`.
-* The end of your time budget. Do not record it: `difficulty_ledger.py harvest` writes a `timeout` record for an environment that has none.
-* Any other point where you cannot make progress without a change this procedure does not allow. Record it as `gave_up` with the reason.
-
-At every stop, record the outcome with the command the `STOP:` line prints (run from the environment directory). Otherwise run this from the repository root:
-
-```bash
-python3 tools/difficulty_ledger.py record <function> --outcome <outcome> --reason "<one line>"
-```
-
-Outcomes: `matched` (100% and `./tools/build-and-verify.sh` passes after integration); `near_miss` (the best partial match is recorded and `NEAR_MISS.md` written, section 3); `stalled` (the `STOP:` line); `integration_failed` (the environment matches but the integrated build fails); `gave_up` (any other stop above). `timeout` comes from `harvest`.
-
-After a stop, report: best score and which file, approaches tried, analysis of remaining differences, and whether the remainder looks solvable or needs a different strategy.
-
-The permuter is not part of this procedure; it is an offline tool for people, see [decomp-permuter](/procedures/decomp-permuter.md).
+If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing one edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then return to the function. A harness fix does not reset or extend the attempt count.

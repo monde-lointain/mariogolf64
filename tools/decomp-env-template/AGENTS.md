@@ -1,66 +1,37 @@
-# AGENTS.md
+# $functionName
 
-## Your Job
+Decompile `$functionName` from Mario Golf 64 into C that compiles to the target assembly exactly. This directory, `$env`, is its environment; run the commands below from here. The repository root is `$root`. Follow `$root/docs/procedures/decompile-function.md` (the decompile-function skill): it says how to integrate a match and when to stop.
 
-You are decompiling Nintendo 64 assembly from Mario Golf 64. Produce C for `$functionName` that, compiled, matches the target assembly 100%.
+The compiler is KMC GCC 2.7.2 (C89). `./build.sh` compiles with the profile of the C file that owns the function (named in `.source_file`). `base.c` is m2c's draft; `target.s` is the target assembly.
 
-The compiler is KMC GCC 2.7.2 (C89). `./build.sh` applies the exact compiler profile of the C file that owns `$functionName` (recorded in `.source_file`; profiles are in `../../docs/project/compiler-profiles.md`).
+## Foundation
 
-Project knowledge is the OKF bundle in `../../docs/` (start at `../../docs/index.md`; links beginning with `/` are relative to `docs/`). The procedure for this job is `../../docs/procedures/decompile-function.md`; its stop rules are mandatory.
-
-## Laying the Foundation
-
-Before matching attempts, gather context for `$functionName` and make `base.c` compile. MAKE THE MINIMAL SET OF CHANGES NECESSARY TO COMPILE `base.c`, so the baseline score is accurate.
-
-Delegate the following block to an omp `task` subagent:
+Delegate these steps to one omp `task` subagent, so the exploration stays out of your context:
 
 <subagent-instructions>
-1. Open `../../docs/reference/kmc-gcc/index.md` and, using `base.c` and `target.s`, select the concepts it lists that apply to this function. Record a compact digest in `LEARNINGS.md` naming each selected concept, why it applies, and the concrete technique to try. Include the digest in your report. Do not copy unrelated sections or merely say the files were read.
-2. Explore how $functionName is used: `../../src`, `../../include`, and the unmatched code in `../../asm/nonmatchings`. Write a summary of what it is and how it is used to `LEARNINGS.md`.
-3. Make `base.c` build. It may depend only on `"common.h"`; provide any other missing types inline rather than via `#include`. Do not stop until it builds. Report status and findings.
-4. Verify that the signatures `base.c` relies on have the right argument count, argument types and return type; these are frequently hallucinated or mis-decompiled.
-5. Consider the function's purpose. Does the C reflect it? Note logical errors.
-6. Report progress and findings, including the digest from step 1.
+1. Read `$root/docs/reference/kmc-gcc/index.md` and pick the concepts that apply to this function, given `$env/base.c` and `$env/target.s`. Write them to `$env/LEARNINGS.md`, one line each: the concept, why it applies, and the technique to try.
+2. Find how `$functionName` is used: grep `$root/src` and `$root/include` for it and read its callers. Add what it does to `LEARNINGS.md`.
+3. Make the smallest change that lets `./build.sh base.c` compile in `$env`, so its score is a true baseline. Reuse types and prototypes from `$root/src` and `$root/include`; `base.c` may include only `"common.h"`, so define anything else it needs inline.
+4. Check the argument count, argument types and return type of every signature `base.c` relies on; m2c often gets them wrong.
+5. Check that the C does what the function's purpose requires, and note logical errors.
+6. Report in at most 20 lines: build status, baseline score, the LEARNINGS.md digest, and the signature and logic findings.
 </subagent-instructions>
 
-## Build Loop
+## Attempt loop
 
-After `base.c` builds, repeat:
+1. Read `<attempt>_diff` to find the differing instructions; open `target.s` or the object dumps only when you need the surrounding code.
+2. Decide on one change, thinking about what the original programmer wrote.
+3. Copy the best attempt so far to the next number and edit the copy, e.g. `cp base_3.c base_4.c` and then edit `base_4.c` (the first attempt copies `base.c` to `base_1.c`). Leave scored files unchanged: `match_log.txt` keeps their scores.
+4. Run `./build.sh base_<n>.c`, and note findings worth keeping in `LEARNINGS.md`.
 
-1. Run `./build.sh <attempt>.c` to build and diff against the target. 100% with `Verified exact match: yes` is a match.
-2. Inspect `<attempt>_diff`, `target.s` and the object dumps for control-flow and instruction differences.
-3. Plan an improvement, considering what the original developers intended given the function's purpose.
-4. Write a new self-contained file `base_<n>.c` (`n` = attempt number) with changes you expect to help. Never include another mutable candidate: later edits would invalidate its recorded score. Start small and change one thing at a time.
-5. Record useful observations in `LEARNINGS.md`.
-6. Stop at a 100% match (`Verified exact match: yes`), or when `build.sh` prints a line starting `STOP:`. That line is the hard stop after the stall limit of non-improving attempts. Do not make another attempt. Record the stop in the difficulty ledger with the command the line prints and the outcome from `../../docs/procedures/decompile-function.md` ("Stop rules"), then report.
+`build.sh` prints `Verified exact match: yes` and a `NEXT:` line on a match, a `STOP:` line once the stall limit is reached, and `Time left` when the run has a deadline. A `NEXT:` or `STOP:` line ends the loop.
 
-## Tools
+Other helpers: `./diff.sh <file>.o` (normalized diff), `./objdump.py <file>.o` (normalized MIPS), `./map_asm_to_c.py <file>.o <line>` (assembly line to C).
 
-- `./build.sh <file>.c [opt_flag]` compiles an attempt with the owning file's profile and scores it.
-- `./diff.sh <file>.o` shows a normalized diff for a built attempt.
-- `./objdump.py <file>.o` dumps normalized MIPS assembly.
-- `./map_asm_to_c.py <file>.o <line>` maps an assembly line back to its C.
+## Writing the C
 
-These helpers are symlinks into `../../tools/decomp-env-template/`. If one of them or any project tool is broken or in your way, fix it at the source and commit it separately (`../../docs/harness/changing-the-harness.md`).
-
-A symbol-only difference (for example `%lo(D_800B67A5)` against `%lo(array+1)`) is a naming difference in the extracted assembly, not an instruction difference. Note it; do not distort the C to chase it.
-
-## Coding Guidelines
-
-Full standard: `../../docs/project/code-quality.md`. In short:
-
-- Look for existing types, prototypes and globals in `../../src` and `../../include` before adding new ones.
-- Prefer struct fields and array indexing to pointer arithmetic. Declarations go at the start of each block (C89).
-- No comments in candidate C unless project style needs them.
-- Never use `INCLUDE_ASM`, `INCLUDE_RODATA`, inline assembly, empty asm barriers, asm constraints or explicit register bindings as a shortcut.
-- `#define` is for constants only, not for struct-access hacks or permutations.
-- Build display lists with the F3DEX2 macros from `PR/gbi.h` and named constants, never raw command words.
-
-## Strategy
-
-Generic KMC GCC behavior is in `../../docs/reference/kmc-gcc/`. It is read-only for you: put every finding in `LEARNINGS.md`, including ones you believe are generic. The `consolidate-learnings` task verifies those with a compile probe and merges them into the reference.
-
-- How to approach a function: phases, plateaus, near-miss triage, large functions, data layout: `../../docs/procedures/matching-method.md`.
-- m2c artefacts (do-while loops, gotos, duplicated temporaries, shifts, false returns) and GCC 2.7.2 codegen to accept: `../../docs/reference/decompilation-artefacts.md`.
-- Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists: use the `decompile-microcode` skill; never manipulate the cursor by hand.
-- If the symbols a function uses look like one array or struct split into many, update `symbol_addrs.txt` to the true layout, even if that means a wider refactor (`../../docs/reference/symbol-addrs-format.md`).
+- Write the body in C. `INCLUDE_ASM`, `INCLUDE_RODATA`, inline assembly, register bindings and macros that hide struct access do not count as a decompilation.
+- Prefer struct fields and array indexing to pointer arithmetic, and put declarations at the start of each block (C89). Build display lists with the F3DEX2 macros from `PR/gbi.h` (decompile-microcode skill).
+- A symbol-only difference such as `%lo(D_800B67A5)` against `%lo(array+1)` is a naming difference in the extracted assembly; note it and move on.
+- Read `$root/docs/procedures/matching-method.md` after two attempts without improvement, `$root/docs/reference/decompilation-artefacts.md` for m2c artefacts, and `$root/docs/reference/symbol-addrs-format.md` when the function's symbols look like one array or struct split into many.
+- Put KMC GCC findings in `LEARNINGS.md`, not in `$root/docs/`; a separate task verifies and merges them.
