@@ -10,6 +10,8 @@ extern u8 D_800B7C2E[];
 extern s32 rand(void);
 extern f64 D_800CA640;
 extern f64 D_800CA648;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C0E60;
 
 TerrainAttrEntry* get_table_entry(u32 idx) {
   u32 i = (idx < 0x1BU) ? idx : 0;
@@ -36,7 +38,20 @@ INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_at_meter_ratio_g
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", update_rotation_matrix);
 
-INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_at_meter_ratio);
+/* Static-chain home of the nested-function original: $v0 on entry is the parent frame and is never read. The volatile local keeps its `sw $v0` spill in the frame. */
+void play_sound_at_meter_ratio(s32 sfx, f32 arg1, f32 arg2) {
+  s32 r;
+  volatile s32 unused = r;
+  s32 volume;
+
+  volume = (s32) ((arg2 * 127.0f) / arg1);
+  if (volume >= 0xA) {
+    if (volume >= 0x80) {
+      volume = 0x7F;
+    }
+    play_sound_effect(sfx, D_800C0E60, volume);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_for_meter_phase);
 
