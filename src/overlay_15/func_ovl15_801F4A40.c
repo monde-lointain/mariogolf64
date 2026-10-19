@@ -28,6 +28,8 @@ typedef struct {
 } Ovl15AssetBlock; /* 0x58 */
 
 extern s32 D_ovl15_801FBB78;
+extern s32 D_ovl15_801FBB7C;
+extern s32 D_ovl15_801FBB80;
 extern void func_ovl15_801F7664(Gfx** dl, s32* arg1);
 extern s32 D_80105218;
 extern u32 controller_handle_array[];
@@ -266,7 +268,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F9D
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA0BC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA320);
+/* Set the overlay 15 state word. Ramp up (1) restarts the step counter at 0 and records arg1; ramp down (2) starts the counter at 4. */
+void func_ovl15_801FA320(s32 arg0, s32 arg1) {
+    D_ovl15_801FBB78 = arg0;
+    if (arg0 == 1) {
+        D_ovl15_801FBB80 = 0;
+        D_ovl15_801FBB7C = arg1;
+    }
+    if (arg0 == 2) {
+        D_ovl15_801FBB80 = 4;
+    }
+}
 
 /* Return the overlay 15 state word: 0 idle, 1 ramping up, 2 ramping down, 3 active. */
 s32 func_ovl15_801FA35C(void) {
