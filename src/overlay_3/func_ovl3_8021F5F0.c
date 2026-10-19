@@ -67,7 +67,9 @@ s16 func_ovl3_80220D68(s8 arg0, s32 arg1) {
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220DF8);
+s16 func_ovl3_80220DF8(void) {
+    return D_ovl3_8023B684[((s8*)func_8005AF74())[0x42]];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220E28);
 
