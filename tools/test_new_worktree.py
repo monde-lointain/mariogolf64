@@ -114,6 +114,14 @@ class NewWorktreeTest(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn('must match', proc.stderr)
 
+    def test_option_in_name_position_prints_usage(self):
+        main = make_main_checkout(self.root)
+        proc = run_tool(main, main, '--help')
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn('usage:', proc.stderr)
+        self.assertEqual(git(main, 'branch', '--list', '--', '-*'), '')
+        self.assertEqual(len(git(main, 'worktree', 'list').splitlines()), 1)
+
     def test_missing_inputs_warn_but_worktree_is_created(self):
         main = make_main_checkout(self.root, with_inputs=False)
         proc = run_tool(main, main, 'bare')

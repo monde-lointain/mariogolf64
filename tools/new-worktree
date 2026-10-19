@@ -23,7 +23,7 @@ set -euo pipefail
 die() { echo "new-worktree: $*" >&2; exit 1; }
 usage() { echo "usage: $0 <name> [--branch BRANCH] [--base REF] [--no-build]" >&2; exit 2; }
 
-[[ $# -ge 1 ]] || usage
+[[ $# -ge 1 && "$1" != -* ]] || usage
 name="$1"
 shift
 branch="$name"
