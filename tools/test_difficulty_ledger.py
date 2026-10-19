@@ -316,6 +316,22 @@ class HarvestTest(TreeCase):
         added = dl.harvest(self.root, self.ledger, now=NOW, integrated=set())
         self.assertEqual([r['outcome'] for r in added], ['near_miss'])
 
+    def test_stall_in_match_log_is_recorded_as_stalled_before_the_deadline(self):
+        info = self.run_info(NOW + 60)
+        info['stall_limit'] = 2
+        self.make_env('func_A-1', run=info,
+                      match_lines=['base_1.c 80.000%', 'base_2.c 70.000%', 'base_3.c 80.000%'])
+        added = dl.harvest(self.root, self.ledger, now=NOW, integrated=set())
+        self.assertEqual([r['outcome'] for r in added], ['stalled'])
+        self.assertEqual(added[0]['attempts'], 3)
+
+    def test_progress_inside_the_stall_limit_is_left_alone(self):
+        info = self.run_info(NOW + 60)
+        info['stall_limit'] = 2
+        self.make_env('func_A-1', run=info,
+                      match_lines=['base_1.c 80.000%', 'base_2.c 70.000%', 'base_3.c 81.000%'])
+        self.assertEqual(dl.harvest(self.root, self.ledger, now=NOW, integrated=set()), [])
+
 
 class LedgerIoTest(TreeCase):
     def test_append_then_read_round_trips(self):

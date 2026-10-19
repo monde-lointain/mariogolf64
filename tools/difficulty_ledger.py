@@ -57,7 +57,7 @@ class TierBudget:
 
 # Budgets per tier (plan C3). Top-n and strategy are in the task.yaml that serves each tier.
 TIER_BUDGETS = {
-    1: TierBudget(timeout_minutes=60, stall_limit=20),
+    1: TierBudget(timeout_minutes=60, stall_limit=10),
     2: TierBudget(timeout_minutes=120, stall_limit=30),
     3: TierBudget(timeout_minutes=240, stall_limit=40),
 }
@@ -260,6 +260,19 @@ def env_progress(env_dir: Path) -> tuple[int, float]:
     return attempts, best
 
 
+def stalled(env_dir: Path, limit: Optional[int]) -> bool:
+    """True when build.sh has printed STOP: the best score is `limit` or more attempts old."""
+    log = env_dir / MATCH_LOG
+    if not limit or not log.is_file():
+        return False
+    entries = [e for e in map(parse_match_log_line, log.read_text(errors='replace').splitlines()) if e]
+    best, best_at = 0.0, 0
+    for index, entry in enumerate(entries, 1):
+        if entry.percent > best:
+            best, best_at = entry.percent, index
+    return bool(entries) and len(entries) - best_at >= limit
+
+
 def near_miss_records(root: Path, records: Sequence[dict]) -> list[dict]:
     """Implicit failure records for NEAR_MISS.md notes that have no ledger record yet."""
     recorded = {_key(rec) for rec in records}
@@ -367,9 +380,9 @@ def build_record(root: Path, env_dir: Path, function: str, outcome: str, reason:
 def harvest(root: Path, ledger: Path, *, now: float, integrated: Optional[set] = None) -> list[dict]:
     """Record outcomes for finished nigel runs that have no ledger record yet.
 
-    A function now in src/ is recorded as matched. A run past its deadline is recorded as
-    near_miss when it left a NEAR_MISS.md note, else as timeout. Runs still inside their
-    deadline are left alone.
+    A function now in src/ is recorded as matched. A run whose match log reached its stall limit
+    is recorded as stalled. A run past its deadline is recorded as near_miss when it left a
+    NEAR_MISS.md note, else as timeout. Other runs still inside their deadline are left alone.
     """
     records = read_records(ledger)
     if integrated is None:
@@ -388,8 +401,12 @@ def harvest(root: Path, ledger: Path, *, now: float, integrated: Optional[set] =
         past = deadline is not None and now >= deadline
         if function in integrated:
             outcome, reason = 'matched', 'integrated into src/ (harvested)'
-        elif past and (env_dir / NEAR_MISS_NOTE).is_file():
+        elif (env_dir / NEAR_MISS_NOTE).is_file():
+            if not past:
+                continue
             outcome, reason = 'near_miss', 'NEAR_MISS.md note past run deadline (harvested)'
+        elif stalled(env_dir, run.get('stall_limit')):
+            outcome, reason = 'stalled', 'stall limit reached in match_log.txt (harvested)'
         elif past:
             outcome, reason = 'timeout', 'no ledger record before run deadline (harvested)'
         else:

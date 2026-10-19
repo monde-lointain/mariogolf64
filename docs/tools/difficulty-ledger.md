@@ -29,7 +29,7 @@ Only the latest record per (function, worktree, env) counts. A `matched` record 
 
 | Tier | Given to | Budget and strategy | Served by |
 |---|---|---|---|
-| 1 | no failed attempt | 60 min, stall limit 20, top-3 similar references | `decompile-similar`, `decompile-unmatched`, `decompile-coddog-similar` |
+| 1 | no failed attempt | 60 min, stall limit 10, top-3 similar references | `decompile-similar`, `decompile-unmatched`, `decompile-coddog-similar` |
 | 2 | failed tier 1 | 120 min, stall limit 30, top-5 references, clean rewrite on plateau | `decompile-tier2` |
 | 3 | failed tier 2 with best of at least 90% | 240 min, stall limit 40, top-5 references, try all strategies | `decompile-tier3` |
 | `human` | failed tier 3, or failed tier 2 below 90% | no nigel task; stall limit 20 (the build.sh default) | none: `show --tier human` lists them |
@@ -46,7 +46,7 @@ python3 tools/difficulty_ledger.py write-run <env> <function>
 ```
 
 - `record` (run from the repo root, or from the environment directory, which it finds from cwd). It reads attempts and best percent from `match_log.txt`, and task, tier, model and run id from the `NIGEL_*` environment (`NIGEL_TASK_NAME`, `NIGEL_RUN_ID`, `NIGEL_AGENT_FLAGS`) or else from `<env>/.run.json`. Without cwd or `--env`, it uses the newest `nonmatchings/<function>[-*]` directory.
-- `harvest` back-fills records for environments whose run finished without one. A function now in `src/` is recorded as `matched`. A run past its deadline is recorded as `near_miss` if it has a `NEAR_MISS.md` note, else as `timeout`. Runs still inside their deadline are skipped. Progress goes to stderr; stdout stays clean for the candidate lists. Every decompile task runs `harvest` before its candidate source, so an unreadable ledger fails the task.
+- `harvest` back-fills records for environments whose run finished without one. A function now in `src/` is recorded as `matched`. A run whose `match_log.txt` reached its stall limit is recorded as `stalled`. A run past its deadline is recorded as `near_miss` if it has a `NEAR_MISS.md` note, else as `timeout`. Other runs inside their deadline are skipped. Agents therefore record only `gave_up` and `integration_failed`. Progress goes to stderr; stdout stays clean for the candidate lists. Every decompile task runs `harvest` before its candidate source, so an unreadable ledger fails the task.
 - `show` lists functions with failure history: tier, failures, best percent, last outcome and reason.
 - `write-run` writes `<env>/.run.json`. decomp-env calls it when it creates an environment.
 
