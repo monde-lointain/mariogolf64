@@ -40,12 +40,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F60C)
 
 void func_ovl4_8024F60C(char* source_string);
 extern char D_ovl4_802550E8[];
+extern char D_ovl4_802550FC[];
+extern s32 D_ovl4_802543A8;
 
 void func_ovl4_8024F790(void) {
     func_ovl4_8024F60C(D_ovl4_802550E8);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F7B0);
+void func_ovl4_8024F7B0(void) {
+    func_ovl4_8024F60C(D_ovl4_802550FC);
+    D_ovl4_802543A8 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F7DC);
 
