@@ -22,7 +22,7 @@ These decide whether the ROM matches.
 
 `tools/decomp-env` symlinks every file in `tools/decomp-env-template/` into `nonmatchings/<function>[-N]/`, so editing `build.sh` inside an environment edits the template for every environment. `AGENTS.md` is the exception: it is rendered with the function name substituted, so edit the template. It also symlinks `.omp` and writes `target.s`, `target.o`, `base.c` and `.source_file` ([tool](/tools/decomp-env.md)).
 
-* `build.sh <file.c>`: compile with the owning file's profile, normalize, score with `dist.py`, append to `match_log.txt`, warn on stall.
+* `build.sh <file.c>`: compile with the owning file's profile, normalize, score with `dist.py`, append to `match_log.txt`, print a `STOP:` line at the stall limit.
 * `dist.py`: the score; penalty weights copied from decomp-permuter's scorer.
 * `normalize_asm.py`, `objdump.py`: normalize dumps so symbol-only differences do not count.
 * `diff.sh`, `map_asm_to_c.py`: inspection only.

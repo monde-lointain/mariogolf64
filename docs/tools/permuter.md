@@ -6,6 +6,8 @@ tags: [permuter, decompile]
 resource: ../../tools/permuter
 ---
 
+Offline tool for a person. The agent decompile loop does not run it; see [decompile-function](/procedures/decompile-function.md) for the stop rules.
+
 ```bash
 timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>
 ```

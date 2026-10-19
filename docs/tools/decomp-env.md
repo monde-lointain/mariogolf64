@@ -47,7 +47,7 @@ Run inside the environment. It serializes builds with `flock`, rejects a candida
 
 Output files next to the attempt: `<attempt>.o`, `<attempt>_object_dump.s`, `_object_dump_normalized.s`, `_annotated.s` (objdump with C annotations), and `<attempt>_diff`.
 
-`Verified exact match: yes` requires all three of: scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c`. For attempts named `base_<N>.c` the result is appended to `match_log.txt` (`<file> <score>%`, or `.matches/... 100.000% exact sha256=...`), and the script prints `No progress in N attempts (best: X% at <file>)` once the best entry is 20 or more attempts old. That line is the project's stop signal ([stop rules](/procedures/decompile-function.md)).
+`Verified exact match: yes` requires all three of: scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c`. For attempts named `base_<N>.c` the result is appended to `match_log.txt` (`<file> <score>%`, or `.matches/... 100.000% exact sha256=...`). Once the best entry is `N` or more attempts old, the script prints `STOP: No progress in <attempts> attempts (best: X% at <file>; stall limit N).` and repeats that line on every later attempt. `N` is `MG64_STALL_LIMIT`, else `stall_limit` in `.run.json` (decomp-env writes it from the task's tier), else 20; a bad value fails before compiling. The STOP line is the stop signal: record the outcome with `tools/difficulty_ledger.py record` and report ([stop rules](/procedures/decompile-function.md)).
 
 | Helper | Use |
 |---|---|

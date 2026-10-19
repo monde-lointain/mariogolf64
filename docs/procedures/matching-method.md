@@ -40,7 +40,7 @@ Classify every normalized difference before editing:
 * register allocation
 * relocation-label-only noise (ignore)
 
-A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeated target loads favor direct global or field access; a value held in one register may favor a local. If only registers differ, freeze the matched algorithm and map each target register to its logical value and live range. First remove redundant aliases and temporaries, use original parameters or destination fields directly, and inline copied constants or bounds. Test one localized equivalent expression at a time. A bounded run of the [permuter](decomp-permuter.md) is the last resort.
+A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeated target loads favor direct global or field access; a value held in one register may favor a local. If only registers differ, freeze the matched algorithm and map each target register to its logical value and live range. First remove redundant aliases and temporaries, use original parameters or destination fields directly, and inline copied constants or bounds. Test one localized equivalent expression at a time.
 
 # Large functions
 
@@ -50,7 +50,7 @@ A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeat
 
 # Display lists
 
-Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists. Use [decompile-microcode](decompile-microcode.md) and the `gbi.h` macros, and pass `--preserve-f3dex` to the permuter.
+Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists. Use [decompile-microcode](decompile-microcode.md) and the `gbi.h` macros.
 
 # Data layout
 

@@ -51,8 +51,21 @@ If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or i
 
 # Stop rules
 
-**Mandatory.**
+**Mandatory.** Stop at each point below and make no further attempt after it.
 
-* Stop at a verified 100% match (`Verified exact match: yes`).
-* `build.sh` prints `No progress in N attempts (best: X% at <file>)` once the best score is 20 or more `base_<N>.c` attempts old. Treat that line as the stop signal; do not make another attempt. (The script words it as "consider stopping"; the project rule is that you stop.)
-* After the stall line, report: best score and which file, approaches tried, analysis of remaining differences, and whether the remainder looks solvable or needs a different strategy.
+* A verified 100% match (`Verified exact match: yes`). Integrate it (section 2) and record it as `matched`.
+* A line starting `STOP:` from `build.sh`. It prints once the best score has not improved for the stall limit of `base_<N>.c` attempts: 20 by default, or the tier's `stall_limit` in `.run.json`; `MG64_STALL_LIMIT` overrides both. It repeats on every later attempt. Record it as `stalled`.
+* The end of your time budget. Do not record it: `difficulty_ledger.py harvest` writes a `timeout` record for an environment that has none.
+* Any other point where you cannot make progress without a change this procedure does not allow. Record it as `gave_up` with the reason.
+
+At every stop, record the outcome with the command the `STOP:` line prints (run from the environment directory). Otherwise run this from the repository root:
+
+```bash
+python3 tools/difficulty_ledger.py record <function> --outcome <outcome> --reason "<one line>"
+```
+
+Outcomes: `matched` (100% and `./tools/build-and-verify.sh` passes after integration); `near_miss` (the best partial match is recorded and `NEAR_MISS.md` written, section 3); `stalled` (the `STOP:` line); `integration_failed` (the environment matches but the integrated build fails); `gave_up` (any other stop above). `timeout` comes from `harvest`.
+
+After a stop, report: best score and which file, approaches tried, analysis of remaining differences, and whether the remainder looks solvable or needs a different strategy.
+
+The permuter is not part of this procedure; it is an offline tool for people, see [decomp-permuter](decomp-permuter.md).

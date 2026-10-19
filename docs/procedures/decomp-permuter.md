@@ -1,28 +1,31 @@
 ---
 type: Procedure
 name: decomp-permuter
-title: "Run the permuter"
-description: "Decomp-Permuter is a tool that automatically permutes C files to better match a target binary. Use this skill when you are decompiling a function and it is almost matching except for some register differences (i.e. 95%+)."
+title: "Run the permuter (offline, by a person)"
+description: "Offline tool a person runs with decomp-permuter on a 95%+ register-only near match. Not part of the agent decompile loop: agents stop at the build.sh STOP line and never run it."
 tags: [decompile, permuter]
 ---
 
+# Why agents do not run it
+
+The permuter reorders and rewrites expressions. It does not change control flow, so it cannot fix a control-flow mismatch. It also finds local optima and tends to loop: `do { } while (0)` rewrites, reused variables, dropped calls, and `gbi.h` macros expanded into raw words. The agent loop stops at the `STOP:` line from `build.sh` and records the function in the difficulty ledger instead ([decompile-function](decompile-function.md), "Stop rules").
+
 # Sanity check
 
-Stop before running it unless both hold:
+Run it only when both hold:
 
 * No significant control-flow or functional difference remains between your C and the target. The permuter does not change control flow, and trying anyway risks a local optimum.
 * You have already improved the function yourself. A 95%+ match handed to you has probably been permuted already; you were given it *because* the permuter failed.
 
 # Run
 
-From the repository root, compute the time budget first when running under nigel (`NIGEL_TIMEOUT_DEADLINE_UNIX` is set), then run with a **literal numeric** timeout:
+From the repository root, with a **literal numeric** timeout:
 
 ```bash
-printf 'max permuter timeout: %ss\n' "$((NIGEL_TIMEOUT_DEADLINE_UNIX - $(date +%s) - 120))"
 timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>
 ```
 
-* The [policy hook](/harness/policy-hook.md) blocks any permuter run not under `timeout`, and checks the command before shell variables expand, so write `300s`, not `$T`. It also requires the timeout to end at least 120 s before `NIGEL_TIMEOUT_DEADLINE_UNIX`. If the remaining budget is too small for a useful run, do not start it. With no deadline set, choose a bounded value such as 300 s.
+* Write the timeout as a literal such as `300s`, not `$T`: the [policy hook](/harness/policy-hook.md) checks the command before shell variables expand. Under nigel the timeout must also end at least 120 s before `NIGEL_TIMEOUT_DEADLINE_UNIX`; if the remaining budget is too small for a useful run, do not start it. With no deadline set, choose a bounded value such as 300 s.
 * Add `--preserve-f3dex` for functions that build display lists so the importer keeps the `gDP*`/`gSP*` macros.
 * The permuter compiles with the same profile as `./build.sh` (from the environment's `.source_file`). See [permuter](/tools/permuter.md).
 

@@ -32,7 +32,7 @@ After `base.c` builds, repeat:
 3. Plan an improvement, considering what the original developers intended given the function's purpose.
 4. Write a new self-contained file `base_<n>.c` (`n` = attempt number) with changes you expect to help. Never include another mutable candidate: later edits would invalidate its recorded score. Start small and change one thing at a time.
 5. Record useful observations in `LEARNINGS.md`.
-6. Stop at a 100% match, or when `build.sh` prints `No progress in N attempts` (best score 20 or more attempts old). Do not make another attempt after that line.
+6. Stop at a 100% match (`Verified exact match: yes`), or when `build.sh` prints a line starting `STOP:`. That line is the hard stop after the stall limit of non-improving attempts. Do not make another attempt. Record the stop in the difficulty ledger with the command the line prints and the outcome from `../../docs/procedures/decompile-function.md` ("Stop rules"), then report.
 
 ## Tools
 
@@ -40,7 +40,6 @@ After `base.c` builds, repeat:
 - `./diff.sh <file>.o` shows a normalized diff for a built attempt.
 - `./objdump.py <file>.o` dumps normalized MIPS assembly.
 - `./map_asm_to_c.py <file>.o <line>` maps an assembly line back to its C.
-- `timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>` from the repo root: see `../../docs/procedures/decomp-permuter.md`.
 
 These helpers are symlinks into `../../tools/decomp-env-template/`. If one of them or any project tool is broken or in your way, fix it at the source and commit it separately (`../../docs/harness/changing-the-harness.md`).
 
@@ -63,5 +62,5 @@ Generic KMC GCC behavior is in `../../docs/reference/kmc-gcc/`. It is read-only 
 
 - How to approach a function: phases, plateaus, near-miss triage, large functions, data layout: `../../docs/procedures/matching-method.md`.
 - m2c artefacts (do-while loops, gotos, duplicated temporaries, shifts, false returns) and GCC 2.7.2 codegen to accept: `../../docs/reference/decompilation-artefacts.md`.
-- Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists: use the `decompile-microcode` skill; never manipulate the cursor by hand. Pass `--preserve-f3dex` to the permuter.
+- Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists: use the `decompile-microcode` skill; never manipulate the cursor by hand.
 - If the symbols a function uses look like one array or struct split into many, update `symbol_addrs.txt` to the true layout, even if that means a wider refactor (`../../docs/reference/symbol-addrs-format.md`).

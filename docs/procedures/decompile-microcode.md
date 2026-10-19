@@ -57,7 +57,3 @@ Some `gbi.h` macros expand to several commands. Look for these patterns first; u
 * `gDPLoadTLUT` and its `gDPLoadTLUT_*` variants
 * `gDPLoadTextureBlock` and its variants, `gDPLoadTextureTile_4b`
 * `gDPSetCombineMode` with `G_CC_*` presets
-
-# Permuter
-
-The permuter does not know the `gbi.h` macros and tends to expand them. Pass `--preserve-f3dex` and discard results that remove macros ([decomp-permuter](decomp-permuter.md)).

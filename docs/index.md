@@ -18,7 +18,7 @@ An [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format) bundle: m
 
 * Match one function → [decompile-function](procedures/decompile-function.md), then [matching-method](procedures/matching-method.md)
 * Function builds a display list (`Gfx *`) → [decompile-microcode](procedures/decompile-microcode.md)
-* Register-only differences at 95%+ → [decomp-permuter](procedures/decomp-permuter.md)
+* Register-only differences at 95%+ → [matching-method](procedures/matching-method.md)
 * Move data, rodata or bss into C → [match-data-segment](procedures/match-data-segment.md), [match-bss-segment](procedures/match-bss-segment.md)
 * Turn a libultra ROM range into source → [match-ultralib-segment](procedures/match-ultralib-segment.md)
 * Replace raw ROM addresses with symbols → [add-asset](procedures/add-asset.md)

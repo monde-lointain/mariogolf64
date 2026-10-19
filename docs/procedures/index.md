@@ -2,7 +2,7 @@
 
 * [decompile-function](decompile-function.md) - bootstrap an environment, match, integrate, commit, stop rules *(skill)*
 * [matching-method](matching-method.md) - how to approach a function: phases, near-miss triage, large functions, data layout
-* [decomp-permuter](decomp-permuter.md) - run the permuter on a 95%+ near match *(skill)*
+* [decomp-permuter](decomp-permuter.md) - offline tool a person runs on a 95%+ register-only near match; not in the agent loop *(skill)*
 * [decompile-microcode](decompile-microcode.md) - functions that build F3DEX2 display lists *(skill)*
 
 # Data, segments and symbols

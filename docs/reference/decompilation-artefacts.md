@@ -26,7 +26,7 @@ if (i < 10) {
 
 **`goto`s.** Developers rarely write them; branches in assembly represent many kinds of control flow. Assume a `goto` is an artefact.
 
-**Duplicated variables.** A single reused variable is far more likely than many temporaries. Literal decompilation and permuting both create reassignments that hurt the match rate.
+**Duplicated variables.** A single reused variable is far more likely than many temporaries. Literal decompilation and offline permuter output both create reassignments that hurt the match rate.
 
 **Shifts instead of arithmetic.** `x >> 2` is `x / 4`; `x << 2` is `x * 4`.
 
