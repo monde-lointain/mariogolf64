@@ -8,7 +8,28 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80215DC4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_8021640C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_802169CC);
+extern s32 D_ovl3_80230248[][2];
+
+void func_ovl3_802169CC(Gfx **arg0) {
+    Gfx *gfx;
+    s32 i;
+
+    gfx = *arg0;
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != 0x18; i += 2) {
+        gSPScisTextureRectangle(gfx++, D_ovl3_80230248[i][0] * 4,
+                                D_ovl3_80230248[i][1] * 4,
+                                D_ovl3_80230248[i + 1][0] * 4,
+                                D_ovl3_80230248[i + 1][1] * 4,
+                                G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+        gDPPipeSync(gfx++);
+    }
+    *arg0 = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80216C14);
 
