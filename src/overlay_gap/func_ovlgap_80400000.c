@@ -24,6 +24,11 @@ extern Mtx D_40CC98;
 extern Mtx D_8040CC98;
 extern Vtx D_ovlgap_8040C780[];
 extern u16 debug_menu_pad_buttons_a;
+extern char D_80105118[];
+extern s32 D_ovlgap_8040C70C;
+extern u8 D_ovlgap_8040C710[];
+extern char D_ovlgap_8040CAE4[];
+extern u16 *nuGfxCfb_ptr;
 void clear_text_grid(void);
 void func_ovlgap_80405AF4(s32, s32);
 s16 *get_terrain_vertex_pointer(u32, u32);
@@ -319,7 +324,44 @@ void func_ovlgap_8040BFC8(void) {
     D_ovlgap_8040C6D0 += 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C124);
+void func_ovlgap_8040C124(void) {
+  u8 *buffer;
+  volatile u16 *framebuffer;
+  s32 position;
+  s32 row;
+  s32 row_end;
+  s32 row_offset;
+  s32 column;
+  s32 column_end;
+
+  framebuffer = (volatile u16*)((u32)nuGfxCfb_ptr + 0x20000000);
+  buffer = heap3_alloc(0x38436);
+  for (position = 0; position != 0x36; position++) {
+    buffer[position] = D_ovlgap_8040C710[position];
+  }
+  row = 0xEF;
+  column_end = 0x140;
+  row_end = -1;
+  row_offset = 0x12AC0;
+  do {
+    column = 0;
+    do {
+      buffer[position] = (u8)(framebuffer[row_offset + column] * 4) & 0xF8;
+      position++;
+      buffer[position] = (framebuffer[row_offset + column] >> 3) & 0xF8;
+      position++;
+      buffer[position] = (framebuffer[row_offset + column] >> 11) << 3;
+      position++;
+      column++;
+    } while (column != column_end);
+    row--;
+    row_offset -= 0x140;
+  } while (row != row_end);
+  sprintf(D_80105118, D_ovlgap_8040CAE4, D_ovlgap_8040C70C, row_offset);
+  validate_heap_string(D_80105118, 0x38436);
+  heap3_free(&buffer);
+  D_ovlgap_8040C70C++;
+}
 
 void func_ovlgap_8040C260(s32 file_index) {
     volatile u16 *framebuffer;
