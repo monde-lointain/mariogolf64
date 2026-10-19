@@ -2,3 +2,6 @@
 # tools/merge-decomp-c resolves those. The driver is configured by
 # tools/install-git-hooks.sh; without it git falls back to its own text merge.
 src/**/*.c merge=decomp-c
+
+# docs/log.md is an append-only list; every shard adds a line at the same spot. Keep both sides.
+docs/log.md merge=union
