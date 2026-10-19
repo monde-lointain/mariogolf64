@@ -75,6 +75,20 @@ class SyncShardTest(unittest.TestCase):
         self.assertEqual(git(self.repo, 'log', '--format=%s', 'dev..shard'), 'unmerged match')
         self.assertTrue((self.repo / 'd.c').exists())
 
+    def test_clean_rebase_that_does_not_build_keeps_the_branch(self):
+        # Each side builds alone; together they clash (two shards typing one global differently).
+        head = commit(self.repo, 'b.c', 'match\n', 'shard match')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'tools/build-and-verify.sh', '#!/bin/sh\n! { test -f b.c && test -f d.c; }\n', 'clash')
+        commit(self.repo, 'd.c', 'other\n', 'other match')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        proc = run(self.repo, 'dev')
+
+        self.assertEqual(proc.returncode, 0)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
+        self.assertEqual(git(self.repo, 'status', '--porcelain'), '')
+
     def test_conflict_that_loses_shard_work_keeps_the_branch(self):
         # Both sides replace the same line: preferring dev would drop the shard's match.
         head = commit(self.repo, 'a.c', 'head\nshard match\ntail\n', 'shard match')

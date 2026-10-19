@@ -7,16 +7,19 @@
 # diverging (for example two shards declaring the same global with different
 # types).
 #
-# A commit the integrator picked with a hand-resolved conflict no longer matches
-# its original, so a plain rebase conflicts on it. On a conflict the rebase is
-# retried preferring the sync branch's side of each conflicting hunk (-X ours;
-# in a rebase "ours" is the upstream), which turns an already-integrated commit
-# into an empty one that is dropped. That result is kept only if nothing of the
-# shard's own work was dropped and ./tools/build-and-verify.sh passes:
+# Conflicts in src/**/*.c go through tools/merge-decomp-c (see .gitattributes),
+# which resolves the usual ones between neighbouring matches. A commit the
+# integrator picked with a hand-resolved conflict no longer matches its
+# original, so the rebase can still conflict on it. Then it is retried
+# preferring the sync branch's side of each conflicting hunk (-X ours and
+# MG64_MERGE_FAVOR=ours; in a rebase "ours" is the upstream), which turns an
+# already-integrated commit into an empty one that is dropped. That result is
+# kept only if nothing of the shard's own work was dropped:
 #   - in src/ and include/, every function the shard decompiled (each
 #     INCLUDE_ASM line it removed) is still decompiled. Declarations may differ,
 #     because the integrator may have merged them with another shard's;
 #   - elsewhere (harness, docs), every non-blank line the shard added is present.
+# Any rebase that moves HEAD must also pass ./tools/build-and-verify.sh.
 # Otherwise the branch is restored and the shard keeps running unsynced. This
 # never fails the candidate source.
 #
@@ -27,7 +30,13 @@ set -u
 [[ -n ${MG64_SYNC_BRANCH:-} && -z ${NIGEL_CANDIDATE:-} ]] || exit 0
 before=$(git rev-parse HEAD)
 base=$(git merge-base "$MG64_SYNC_BRANCH" HEAD)
-git rebase -q "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && exit 0
+synced() { [[ $(git rev-parse HEAD) == "$before" ]] || ./tools/build-and-verify.sh >/dev/null 2>&1; }
+if git rebase -q "$MG64_SYNC_BRANCH" >/dev/null 2>&1; then
+    synced && exit 0
+    git reset -q --hard "$before"
+    echo "sync-shard: rebase onto $MG64_SYNC_BRANCH does not build; continuing unsynced" >&2
+    exit 0
+fi
 git rebase --abort >/dev/null 2>&1
 
 kept_shard_work() {
@@ -51,8 +60,7 @@ kept_shard_work() {
     done < <(git diff -U0 "$base" "$before")
 }
 
-if git rebase -q -X ours "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && kept_shard_work &&
-    ./tools/build-and-verify.sh >/dev/null 2>&1; then
+if MG64_MERGE_FAVOR=ours git rebase -q -X ours "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && kept_shard_work && synced; then
     echo "sync-shard: rebased onto $MG64_SYNC_BRANCH preferring its side of conflicts" >&2
     exit 0
 fi
