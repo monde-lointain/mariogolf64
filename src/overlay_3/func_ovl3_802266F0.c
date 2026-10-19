@@ -47,6 +47,8 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802267B0)
 
 extern u16 D_800C2074[];
 extern u8* D_ovl3_80230E7C;
+extern u8* D_ovl3_80230E80;
+extern u16 D_ovl3_80230EA4[];
 
 void func_ovl3_80226904(s32 slot) {
     RomAssetLoad asset;
@@ -60,7 +62,17 @@ void func_ovl3_80226904(s32 slot) {
     load_rom_asset_payload(D_ovl3_80230E7C, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226958);
+void func_ovl3_80226958(s32 slot) {
+    RomAssetLoad asset;
+    s32 index;
+
+    index = slot & ((s32) ~slot >> 0x1F);
+    if (index >= 0xF) {
+        index = 0xE;
+    }
+    get_rom_asset_allocation_size(D_ovl3_80230EA4[index], &asset);
+    load_rom_asset_payload(D_ovl3_80230E80, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802269AC);
 
