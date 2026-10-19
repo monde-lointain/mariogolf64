@@ -2,6 +2,18 @@
 #include "../main/terrain.h"
 #include "../main/club.h"
 
+typedef struct {
+    u8 pad00[0x18];
+    s32 unk18;
+    u8 pad1C[0x4];
+    s32 unk20;
+} Ovl7ArgObject;
+
+typedef struct {
+    u8 pad00[0x18];
+    Ovl7ArgObject **argSlot;
+} Ovl7NestFrame;
+
 extern TerrainAttrEntry D_ovl7_8020B564[27];
 extern s32 rand(void);
 extern s32 func_800542A0(s32 index);
@@ -72,7 +84,17 @@ void func_ovl7_80206910(f32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206968);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206A50);
+/* Static-chain home of the nested-function original: the chain word is the parent frame pointer and its 0x18 slot holds &arg0. The volatile frame access keeps `sw $v0,0(sp)` ahead of the chain loads, as in func_8004DE60. */
+f32 func_ovl7_80206A50(void) {
+    s32 r;
+    volatile s32 unused = r;
+    Ovl7ArgObject *obj;
+    s32 sum;
+
+    obj = *((volatile Ovl7NestFrame *) r)->argSlot;
+    sum = (obj->unk18 + obj->unk20) & 0xFF;
+    return ((f32) sum - 127.5f) * 0.007843138f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206AA4);
 
