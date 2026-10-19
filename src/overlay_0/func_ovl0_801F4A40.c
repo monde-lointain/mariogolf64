@@ -32,7 +32,28 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4AEC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F5C24);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F5E9C);
+extern void heap3_free(void** payload_ptr);
+extern void* D_ovl0_802256C8;
+extern void* D_ovl0_802256CC;
+extern void* D_ovl0_802256D0;
+extern void* D_ovl0_8022570C;
+extern void* D_ovl0_80225710;
+extern void* D_ovl0_80225714;
+extern s32 D_ovl0_8022573C;
+
+void func_ovl0_801F5E9C(void) {
+    heap3_free(&D_ovl0_80225710);
+    heap3_free(&D_ovl0_80225714);
+    if (D_ovl0_8022573C == 1) {
+        heap3_free(&D_ovl0_802256C8);
+    }
+    if (D_ovl0_8022573C == 2) {
+        heap3_free(&D_ovl0_8022570C);
+        heap3_free(&D_ovl0_802256CC);
+        heap3_free(&D_ovl0_802256D0);
+    }
+    D_ovl0_8022573C = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F5F2C);
 
@@ -75,7 +96,6 @@ extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern void* D_ovl0_80225704;
-extern s32 D_ovl0_8022573C;
 void func_ovl0_801F7740(Gfx** pgfx);
 void func_ovl0_801F8094(Gfx** pgfx);
 
