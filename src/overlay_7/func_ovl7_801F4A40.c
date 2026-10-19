@@ -5,6 +5,7 @@ void func_80058D04(s32, s32, s32);
 extern Gfx* glistp;
 extern s32 D_ovl7_8020AC4C;
 extern u8 D_ovl7_80213A40[];
+extern u8 D_ovl7_80212830[];
 
 void func_ovl7_801F4A40(void) {
     D_ovl7_8020AC4C++;
@@ -53,7 +54,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FBB10)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FBB94);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FE270);
+void func_ovl7_801FE270(void) {
+    RomAssetLoad asset;
+
+    get_rom_asset_allocation_size(0x908, &asset);
+    load_rom_asset_payload(D_ovl7_80212830, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FE2A0);
 
