@@ -14,4 +14,4 @@ INCLUDE_ASM("asm/nonmatchings/overlay_12/func_ovl12_80241800", func_ovl12_802424
 
 INCLUDE_ASM("asm/nonmatchings/overlay_12/func_ovl12_80241800", func_ovl12_80243E24);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_12/func_ovl12_80241800", func_ovl12_80244E04);
+void func_ovl12_80244E04(void) {}
