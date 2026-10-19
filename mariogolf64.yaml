@@ -655,7 +655,7 @@ segments:
     exclusive_ram_id: ovl12
     symbol_name_format: ovl12_$VRAM
     subsegments:
-      - [0x15BB50, asm]
+      - [0x15BB50, c, overlay_12/func_ovl12_80241800]
       - [0x15F160, data]
       - { start: 0x15F250, type: bss, vram: 0x80244F00 }
 
