@@ -150,6 +150,8 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B46C)
 
 extern s32 D_ovl3_80230F68;
 extern u8 D_ovl3_80230FD4[];
+extern u8 D_ovl3_80230FDC[];
+extern s32 D_ovl3_80230F6C;
 
 s32 func_ovl3_8022B5E0(void) {
     s32 var_a0;
@@ -171,7 +173,34 @@ s32 func_ovl3_8022B5E0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B668);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B75C);
+s32 func_ovl3_8022B75C(void) {
+    s32 i;
+    s32 j;
+    s32 cnt;
+    s32 ret;
+    u8 *row;
+    u8 *p;
+
+    ret = -1;
+    for (i = 0; i != 0x24; i++) {
+        cnt = 0;
+        row = &D_ovl3_80230FDC[i * 8];
+        for (j = 0, p = row; j != 8; j++, p++) {
+            if (D_ovl3_80230FD4[j] != *p) {
+                break;
+            }
+            cnt++;
+        }
+        if (cnt == 8) {
+            ret = i;
+            break;
+        }
+    }
+    if (ret == -1) {
+        D_ovl3_80230F6C = 1;
+    }
+    return ret;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B7E0);
 
