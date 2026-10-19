@@ -395,7 +395,32 @@ s32 func_ovl0_80205C78(void) {
     return grand_total;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205D44);
+extern const char D_ovl0_80225020[];
+extern void check_and_print_grid(char* str, s32 col, s32 row);
+extern s32 active_player_count;
+
+void func_ovl0_80205D44(void) {
+    char buf[0x88];
+    s32 event_index;
+    s32 player_total;
+    s32 player_index;
+
+    player_index = 0;
+    if (active_player_count > 0) {
+        player_total = 0;
+        do {
+            event_index = 0;
+            do {
+                player_total += func_ovl0_80205BB8(player_index, event_index);
+                event_index += 1;
+            } while (event_index < 12);
+            sprintf(buf, D_ovl0_80225020, player_index, player_total);
+            check_and_print_grid(buf, 2, player_index + 3);
+            player_index += 1;
+            player_total = 0;
+        } while (player_index < active_player_count);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205DE8);
 
@@ -665,7 +690,6 @@ typedef struct {
 
 extern RumbleStateBlock D_80105168;
 extern s8 D_801B71F7;
-extern s32 active_player_count;
 extern u32 controller_handle_array[];
 extern s32 nuContRmbCheck(u32 contNo);
 extern void nuContRmbStart(u32 contNo, u16 freq, u16 frame);
