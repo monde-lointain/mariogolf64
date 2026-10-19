@@ -642,7 +642,7 @@ segments:
     symbol_name_format: ovl11_$VRAM
     subsegments:
       - [0x150990, c, overlay_11/func_ovl11_80241800]
-      - [0x153560, asm]
+      - [0x153560, c, overlay_11/func_ovl11_802443D0]
       - [0x15B5E0, data]
       - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
 
