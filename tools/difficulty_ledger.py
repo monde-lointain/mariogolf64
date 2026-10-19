@@ -55,7 +55,8 @@ class TierBudget:
     stall_limit: int
 
 
-# Budgets per tier (plan C3). Top-n and strategy are in the task.yaml that serves each tier.
+# Budgets per tier; each tier's task.yaml timeout must equal timeout_minutes. Top-n and strategy are
+# in the task.yaml that serves each tier.
 TIER_BUDGETS = {
     1: TierBudget(timeout_minutes=60, stall_limit=10),
     2: TierBudget(timeout_minutes=120, stall_limit=30),

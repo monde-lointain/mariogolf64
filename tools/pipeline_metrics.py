@@ -2,10 +2,11 @@
 """Report nigel pipeline metrics for the Mario Golf 64 decompilation.
 
 Inputs (each reported as present or absent; a missing input is never an error):
-  task-runner/*/outcomes.log          nigel outcomes, one JSON object per candidate (contract C2)
-  ~/.omp/agent/sessions/**/*.jsonl    omp session transcripts joined by omp_session_id
+  task-runner/*/outcomes.log          nigel outcomes, one JSON object per candidate (nigel README, "outcomes.log")
+  ~/.omp/agent/sessions/*/*.jsonl     omp session transcripts, joined by omp_session_id; nested
+                                      subagent transcripts under <session>/ are summed in
   nonmatchings/*/match_log.txt        per-environment attempts (certified full matches)
-  $MG64_LEDGER or <common-dir>/mg64/difficulty.jsonl   difficulty ledger (contract C3)
+  $MG64_LEDGER or <common-dir>/mg64/difficulty.jsonl   difficulty ledger (tools/difficulty_ledger.py)
   <common-dir>/mg64/progress.jsonl    project progress snapshots written by --snapshot
 
 Progress figures come from the source tree (matched C functions in src/, unmatched
