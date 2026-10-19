@@ -7,30 +7,36 @@ extern s8 D_ovl16_802237B9;
 extern s32 D_ovl16_802237C0[];
 extern u8 D_801B724B;
 extern s32 rand(void);
+extern s32 flag_is_set(s32 flag);
 extern f32 D_ovl16_801F89C8;
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
 }
 
-/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested swap helper of func_ovl16_801F4A88 (`addiu $v0,$sp,0x10` before its jal); `unused` reproduces them, as in func_ovl7_802068B4. */
-void func_ovl16_801F4A50(s32 arg0, s32 arg1) {
-    s32 r;
-    volatile s32 unused = r;
-    s32 *base;
-    s32 *slot0;
-    s32 *slot1;
-    s32 tmp;
+void func_ovl16_801F4A88(s32 arg0) {
+    void func_ovl16_801F4A50(s32 index0, s32 index1) {
+        s32 tmp;
 
-    base = D_ovl16_802237C0;
-    slot0 = &base[arg0];
-    slot1 = &base[arg1];
-    tmp = *slot0;
-    *slot0 = *slot1;
-    *slot1 = tmp;
+        tmp = D_ovl16_802237C0[index0];
+        D_ovl16_802237C0[index0] = D_ovl16_802237C0[index1];
+        D_ovl16_802237C0[index1] = tmp;
+    }
+    s32 i;
+    s32 s0;
+    s32 s1;
+
+    for (i = 0; i < 17; i++) {
+        D_ovl16_802237C0[i] = (i + arg0 + 2) % 18;
+    }
+    if (!flag_is_set(0x99)) {
+        for (s1 = 0; s1 < 10; s1++) {
+            for (s0 = 0; s0 < 16; s0++) {
+                func_ovl16_801F4A50(s0, (rand() & 0x7FFF) % 16);
+            }
+        }
+    }
 }
-
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A88);
 
 void func_ovl16_801F4B64(s32 arg0) {
     D_ovl16_801F89C0 = -arg0;
