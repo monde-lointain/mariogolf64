@@ -584,7 +584,7 @@ segments:
     subsegments:
       - [0x1370B0, c, overlay_7/func_ovl7_801F4A30]
       - [0x1370C0, c, overlay_7/func_ovl7_801F4A40]
-      - [0x145A30, asm]
+      - [0x145A30, c, overlay_7/func_ovl7_802033B0]
       - [0x148D00, asm]
       - [0x14D2C0, data]
       - { start: 0x14EA70, type: bss, vram: 0x8020C3F0 }
