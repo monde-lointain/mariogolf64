@@ -8,7 +8,8 @@
  *   `--exclude[-dir]=<glob>`, rg `-g '!<glob>'`, find `! -name <x>`, a `git commit -m` message);
  *   no shell mutation of `asm/`; no shell writes into vendored
  *   tools (`tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter`, `tools/asm-differ`); every
- *   permuter run (`tools/permuter`, `tools/decomp-permuter/permuter.py`) must sit under a
+ *   permuter run (`tools/permuter`, `tools/decomp-permuter/permuter.py`, here, in another worktree
+ *   or by absolute path) must sit under a
  *   `timeout` that ends at least 120s before `NIGEL_TIMEOUT_DEADLINE_UNIX`. A permuter path that
  *   is an argument of a read-only command (`cat`, `sed`, `grep`, `git`, ...) is not a run.
  * - read: no `ctx.c` / `temp.c`. Selectors (`:10-20`, `:raw`, `:table`) are stripped first.
@@ -179,7 +180,7 @@ function bashReason(command: string): string | undefined {
 // ---------------------------------------------------------------------------
 
 const RESERVED_SECONDS = 120;
-const PERMUTER_PATHS: Record<string, true> = { "tools/permuter": true, "tools/decomp-permuter/permuter.py": true };
+const PERMUTER_PATHS = ["tools/permuter", "tools/decomp-permuter/permuter.py"];
 const TIMEOUT_NO_ARG: Record<string, true> = { "--foreground": true, "--preserve-status": true, "-v": true };
 const TIMEOUT_ONE_ARG: Record<string, true> = { "-k": true, "--kill-after": true, "-s": true, "--signal": true };
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -254,8 +255,10 @@ function tokenize(input: string): string[] | null {
 	return tokens;
 }
 
+/** A permuter path relative to this repo, another worktree (`../mg64-a/tools/permuter`) or absolute. */
 function isPermuterToken(token: string): boolean {
-	return PERMUTER_PATHS[token.replace(/^[./]+/, "")] === true;
+	const normalized = token.replace(/^[./]+/, "");
+	return PERMUTER_PATHS.some(p => normalized === p || normalized.endsWith(`/${p}`));
 }
 
 function isSegmentBoundary(token: string): boolean {
