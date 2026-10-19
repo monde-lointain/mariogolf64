@@ -9,7 +9,7 @@ tags: [libultra, segments, splat]
 # Rules
 
 * Compile local source under `src/libultra`, preserving the upstream subtree: `../ultralib/src/io/pfsnumfiles.c` becomes `src/libultra/io/pfsnumfiles.c`. Source there uses real libultra names, never `func_...` or `D_...` placeholders.
-* Keep unidentified neighboring libultra functions as separate `asm` segments until each is matched as source.
+* Keep unidentified neighboring libultra functions as separate `hasm` entries until each is matched as source.
 * Add callable ROM symbols to `symbol_addrs.txt` at their runtime VRAM, never as linker-script aliases. Do not patch, generate or post-process linker scripts, and do not add `--allow-multiple-definition`.
 * If a libultra source file emits `.data` or `.bss`, match those sections in `mariogolf64.yaml`. Do not change C definitions to `extern`, delete them, or alias them away; that can change code generation even when it looks equivalent.
 * When asm references a field inside a known struct, annotate the **owning** symbol in `symbol_addrs.txt` with `type:` and `size:` so the output is `%hi(__osPiDevMgr + 0x8)`. Never create a standalone `D_...` or linker alias for a field address.
