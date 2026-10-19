@@ -64,10 +64,34 @@ INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", project_point_to_
 
 INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", func_80065898);
 
-INCLUDE_ASM("asm/nonmatchings/main/set_camera_matrices_fixed", func_80065A1C);
-
 extern f32 sinf(f32);
 extern f32 cosf(f32);
+
+void func_80065A1C(f32 mf[4][4], f32* rot, f32* pos) {
+  f32 sx = sinf(rot[0]);
+  f32 cx = cosf(rot[0]);
+  f32 sy = sinf(rot[1]);
+  f32 cy = cosf(rot[1]);
+  f32 sz = sinf(rot[2]);
+  f32 cz = cosf(rot[2]);
+
+  mf[0][0] = cy * cz;
+  mf[0][1] = cy * sz;
+  mf[0][2] = -sy;
+  mf[0][3] = 0;
+  mf[1][0] = sx * sy * cz - cx * sz;
+  mf[1][1] = sx * sy * sz + cx * cz;
+  mf[1][2] = sx * cy;
+  mf[1][3] = 0;
+  mf[2][0] = cx * sy * cz + sx * sz;
+  mf[2][1] = cx * sy * sz - sx * cz;
+  mf[2][2] = cx * cy;
+  mf[2][3] = 0;
+  mf[3][0] = pos[0];
+  mf[3][1] = pos[1];
+  mf[3][2] = pos[2];
+  mf[3][3] = 1.0f;
+}
 
 void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3],
                   f32 scale[3]) {
