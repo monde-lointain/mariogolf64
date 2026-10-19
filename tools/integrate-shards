@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# integrate-shards <branch>...: cherry-pick the shard branches' unintegrated commits
+# onto the current branch, checking the ROM after each one.
+#
+# For each branch in turn, the commits `git cherry` lists as missing, oldest first:
+#   - a "Decompile ..." commit whose functions (the INCLUDE_ASM lines it removes)
+#     are all decompiled here already is skipped: it was integrated before and the
+#     shard has not synced since (tools/sync-shard drops it at its next candidate);
+#   - any other "Decompile ..." commit is cherry-picked, with src/**/*.c conflicts
+#     resolved by tools/merge-decomp-c, and kept if ./tools/build-and-verify.sh passes;
+#   - a commit with another subject (harness, docs), a conflict the merge driver
+#     cannot resolve, or a failed build stops that branch, since its later commits
+#     may depend on it. The commit is left for a person to review and integrate.
+# Prints one line per commit. Exits 1 if any branch stopped, 0 otherwise.
+set -u
+[[ $# -gt 0 && $1 != -* ]] || { echo "usage: $0 <branch>..." >&2; exit 2; }
+[[ -z $(git status --porcelain --untracked-files=no) ]] || { echo "integrate-shards: uncommitted changes" >&2; exit 2; }
+
+integrated() {
+    local fn found=""
+    for fn in $(git show --format= -U0 "$1" -- src | sed -n 's/^-INCLUDE_ASM(.*, *\([A-Za-z0-9_]*\));.*/\1/p'); do
+        grep -rqF -- ", $fn);" src && return 1
+        found=1
+    done
+    [[ -n $found ]]
+}
+
+status=0
+for branch in "$@"; do
+    for c in $(git cherry HEAD "$branch" | awk '/^\+/{print $2}'); do
+        line="$branch ${c:0:8} $(git log -1 --format=%s "$c")"
+        if [[ $line != "$branch ${c:0:8} Decompile "* ]]; then
+            echo "review $line"; status=1; break
+        elif integrated "$c"; then
+            echo "skipped $line"
+        elif ! git cherry-pick "$c" >/dev/null 2>&1; then
+            git cherry-pick --abort
+            echo "conflict $line"; status=1; break
+        elif ! ./tools/build-and-verify.sh >/dev/null 2>&1; then
+            git reset -q --hard HEAD~1
+            echo "build-failed $line"; status=1; break
+        else
+            echo "picked $line"
+        fi
+    done
+done
+exit $status
