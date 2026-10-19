@@ -8,7 +8,7 @@ tags: [decompile, permuter]
 
 # Why agents do not run it
 
-The permuter reorders and rewrites expressions. It does not change control flow, so it cannot fix a control-flow mismatch. It also finds local optima and tends to loop: `do { } while (0)` rewrites, reused variables, dropped calls, and `gbi.h` macros expanded into raw words. The agent loop stops at the `STOP:` line from `build.sh` and records the function in the difficulty ledger instead ([decompile-function](decompile-function.md), "Stop rules").
+The permuter reorders and rewrites expressions. It does not change control flow, so it cannot fix a control-flow mismatch. It also finds local optima and tends to loop: `do { } while (0)` rewrites, reused variables, dropped calls, and `gbi.h` macros expanded into raw words. The agent loop stops at the `STOP:` line from `build.sh` and records the function in the difficulty ledger instead ([decompile-function](/procedures/decompile-function.md), "Stop rules").
 
 # Sanity check
 

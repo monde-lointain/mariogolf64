@@ -16,7 +16,7 @@ Run commands from the repository root unless a step says otherwise. The attempt 
 
 This creates `nonmatchings/<function name>[-N]/`; pass `--id <ID>` to control the suffix (nigel tasks pass `$TASK_ID`). Details of what the directory contains: [decomp-env](/tools/decomp-env.md). Move into it and read its `AGENTS.md`, which carries the attempt loop.
 
-In that directory run `./build.sh <attempt>.c`. It compiles with the profile of the file that owns the function and scores the object against the target. Put each attempt in a new self-contained file (`base_1.c`, `base_2.c`, ...); only `base_<N>.c` names are counted in `match_log.txt`. How to approach the function: [matching-method](matching-method.md). Kinds of mismatch and compiler behavior: [KMC GCC learnings](/reference/kmc-gcc/index.md).
+In that directory run `./build.sh <attempt>.c`. It compiles with the profile of the file that owns the function and scores the object against the target. Put each attempt in a new self-contained file (`base_1.c`, `base_2.c`, ...); only `base_<N>.c` names are counted in `match_log.txt`. How to approach the function: [matching-method](/procedures/matching-method.md). Kinds of mismatch and compiler behavior: [KMC GCC learnings](/reference/kmc-gcc/index.md).
 
 # 2. Integrate a 100% match
 
@@ -67,4 +67,4 @@ Outcomes: `matched` (100% and `./tools/build-and-verify.sh` passes after integra
 
 After a stop, report: best score and which file, approaches tried, analysis of remaining differences, and whether the remainder looks solvable or needs a different strategy.
 
-The permuter is not part of this procedure; it is an offline tool for people, see [decomp-permuter](decomp-permuter.md).
+The permuter is not part of this procedure; it is an offline tool for people, see [decomp-permuter](/procedures/decomp-permuter.md).

@@ -55,7 +55,7 @@ tags: [libultra, segments, splat]
    - { type: .bss, vram: <vram>, name: libultra/os/initialize }
    ```
 
-   Use [match-data-segment](match-data-segment.md) and [match-bss-segment](match-bss-segment.md). If the object has only `.text`, keep matching instructions first.
+   Use [match-data-segment](/procedures/match-data-segment.md) and [match-bss-segment](/procedures/match-bss-segment.md). If the object has only `.text`, keep matching instructions first.
 
 6. **Name real symbols.** If the new source calls functions or data elsewhere in the ROM, add the real ultralib names to `symbol_addrs.txt` instead of aliasing unlabeled `D_`/`func_` symbols ([format](/reference/symbol-addrs-format.md)):
 

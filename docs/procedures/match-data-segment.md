@@ -36,4 +36,4 @@ Open the labeled data in `asm/data/` (before the split it is in `asm/data/main_d
 
 # 4. Build and fix
 
-Run `./tools/build-and-verify.sh` again and work through errors and checksum mismatches. If the checksum fails and data is suspected, use [data-differ](/tools/data-differ.md) (`--find-first-mismatch`). For bss, see [match-bss-segment](match-bss-segment.md).
+Run `./tools/build-and-verify.sh` again and work through errors and checksum mismatches. If the checksum fails and data is suspected, use [data-differ](/tools/data-differ.md) (`--find-first-mismatch`). For bss, see [match-bss-segment](/procedures/match-bss-segment.md).
