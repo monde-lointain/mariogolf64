@@ -180,14 +180,78 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250FEC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802510D4);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80251288);
+extern u8 *D_ovl4_80255330;
+extern char D_ovl4_8025527C[];
+extern char D_ovl4_80255284[];
+
+void func_ovl4_80251288(void) {
+    s16 count;
+    u8 byte;
+    u8 *src;
+    u8 *end;
+    u8 *next;
+    u8 *out;
+    u16 *dst;
+    u16 *limit;
+    u16 *stop;
+    s32 value;
+
+    dst = (u16 *) D_ovl4_8025D354;
+    limit = dst + 0x10000;
+    for (;;) {
+        src = D_ovl4_80255330;
+        end = src + 2;
+        out = (u8 *) &count;
+        if (src != end) {
+            do {
+                *out = *src;
+                src++;
+                out++;
+            } while (src != end);
+        }
+        D_ovl4_80255330 = end;
+        if (count == 0) {
+            break;
+        }
+        src = end;
+        next = src + 1;
+        out = &byte;
+        if (src != next) {
+            do {
+                *out = *src;
+                src++;
+                out++;
+            } while (src != next);
+        }
+        D_ovl4_80255330 = next;
+        stop = dst + count;
+        if (limit < stop) {
+            osSyncPrintf(D_ovl4_8025527C);
+            break;
+        }
+        value = ((byte & 0xF0) << 4) | (byte & 0xF);
+        if (dst != stop) {
+            do {
+                *dst = value;
+                dst++;
+            } while (dst != stop);
+        }
+    }
+    if (dst != limit) {
+        osSyncPrintf(D_ovl4_80255284);
+    }
+    while (dst < limit) {
+        *dst = 0;
+        dst++;
+    }
+    D_ovl4_8025D354 = D_ovl4_8025D350;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802513B8);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80251610);
 
 extern u8 D_80133692;
-extern u8 *D_ovl4_80255330;
 
 void func_ovl4_8025176C(void) {
     s32 i;
