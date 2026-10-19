@@ -322,7 +322,6 @@ ln -sf "${TEMPLATE_DIR}"/* "$created_dir/"
 rm "$created_dir/AGENTS.md"
 sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
 ln -s "$OMP_CONFIG" "$created_dir/.omp"
-ln -sf "$(pwd)/DECOMPILATION_LEARNINGS.md" "$created_dir/"
 
 if [ "$BOOTSTRAP_ONLY" = true ]; then
     echo "Bootstrap-only mode: environment ready at $created_dir"

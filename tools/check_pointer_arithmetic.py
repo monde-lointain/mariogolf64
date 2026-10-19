@@ -7,8 +7,8 @@ Flagged patterns:
     (SomeStruct*)ptr + index
     *(s32*)((char*)ptr + 0x10)
 
-These should be replaced with proper struct field access; see AGENTS.md,
-"Avoid Pointer Arithmetic".
+These should be replaced with proper struct field access; see
+docs/project/code-quality.md, "Typed access instead of manual offsets".
 
 Each file is preprocessed with the include paths and defines its Makefile
 profile uses (`make print-cflags`), so the parse matches the build.
@@ -264,7 +264,7 @@ def main(argv=None) -> int:
             print(format_violation(filename, violation))
         print()
         print("These patterns should be replaced with proper struct field access.")
-        print('See AGENTS.md, "Avoid Pointer Arithmetic", for examples of correct struct usage.')
+        print('See docs/project/code-quality.md, "Typed access instead of manual offsets", for examples of correct struct usage.')
 
     if args.strict and (total or unparsed):
         return 1

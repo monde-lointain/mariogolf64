@@ -4,7 +4,7 @@
 # package built from it MUST stay PRIVATE. Do not push it to a public registry.
 #
 # Build it locally where baserom.z64 is present (it is gitignored), then push to
-# a private GHCR package. See docker/README.md.
+# a private GHCR package. See docs/harness/git-hook-and-ci.md.
 #
 # REQUIRED baserom SHA-1: e2c4e7a905b29529b49a1619a401fe699224829b (NMFE, rev 0).
 # A wrong region/rev extracts to different asm and the build will not match.

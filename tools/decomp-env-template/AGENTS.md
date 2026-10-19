@@ -2,175 +2,66 @@
 
 ## Your Job
 
-You are decompiling Nintendo 64 assembly code from Mario Golf 64. Your goal is to generate C code for `$functionName` that, when compiled, 100% matches the target assembly code.
+You are decompiling Nintendo 64 assembly from Mario Golf 64. Produce C for `$functionName` that, compiled, matches the target assembly 100%.
 
-The compiler is KMC GCC 2.7.2. Game code builds with `-O2 -mips3`; library code uses its own profile (for example libultra `-O3`, libkmc `-O`). `./build.sh` applies the exact profile of the C file that owns `$functionName` (recorded in `.source_file`). We follow the C89 standard.
+The compiler is KMC GCC 2.7.2 (C89). `./build.sh` applies the exact compiler profile of the C file that owns `$functionName` (recorded in `.source_file`; profiles are in `../../docs/project/compiler-profiles.md`).
 
-### Laying the Foundation
+Project knowledge is the OKF bundle in `../../docs/` (start at `../../docs/index.md`; links beginning with `/` are relative to `docs/`). The procedure for this job is `../../docs/procedures/decompile-function.md`; its stop rules are mandatory.
 
-Before making matching attempts, gather context for `$functionName` and make `base.c` compile.
+## Laying the Foundation
 
-MAKE THE MINIMAL SET OF CHANGES NECESSARY TO COMPILE `base.c`. This is important for getting an accurate baseline match percentage.
+Before matching attempts, gather context for `$functionName` and make `base.c` compile. MAKE THE MINIMAL SET OF CHANGES NECESSARY TO COMPILE `base.c`, so the baseline score is accurate.
 
 Delegate the following block to an omp `task` subagent:
 
 <subagent-instructions>
-1. Consult `DECOMPILATION_LEARNINGS.md`. Use its headings and the patterns visible in `base.c` and `target.s` to select the sections relevant to this function. Record a compact digest in `LEARNINGS.md` that names each relevant section, explains why it applies, and states the concrete matching technique to try. Include this digest in your report. Do not copy unrelated sections or merely say that the file was read.
-2. Explore how $functionName is used in the codebase. Look at ../../src, ../../include as well as the unmatched code (../../asm/nonmatchings). Write a summary of what $functionName is and how it's used to `LEARNINGS.md`.
-3. Ensure that base.c compiles successfully. Ensure that any missing types are present. base.c should only depend on "common.h". Any other missing types should be provided inline rather than via #include statements. Do not stop until base.c can be successfully built. Report status and a brief summary of your findings upon completion.
-4. Verify that the function signatures base.c relies upon have the correct number of arguments and correct types for those arguments as well as for the return type. These are frequently hallucinated or otherwise decompiled incorrectly.
-5. Consider the purpose of the function and what it's trying to do. Does the C code reflect that purpose? Note any logical errors in the code.
-6. Report back on its progress and findings, including the relevant `DECOMPILATION_LEARNINGS.md` guidance selected in step 1.
+1. Open `../../docs/reference/kmc-gcc/index.md` and, using `base.c` and `target.s`, select the concepts it lists that apply to this function. Record a compact digest in `LEARNINGS.md` naming each selected concept, why it applies, and the concrete technique to try. Include the digest in your report. Do not copy unrelated sections or merely say the files were read.
+2. Explore how $functionName is used: `../../src`, `../../include`, and the unmatched code in `../../asm/nonmatchings`. Write a summary of what it is and how it is used to `LEARNINGS.md`.
+3. Make `base.c` build. It may depend only on `"common.h"`; provide any other missing types inline rather than via `#include`. Do not stop until it builds. Report status and findings.
+4. Verify that the signatures `base.c` relies on have the right argument count, argument types and return type; these are frequently hallucinated or mis-decompiled.
+5. Consider the function's purpose. Does the C reflect it? Note logical errors.
+6. Report progress and findings, including the digest from step 1.
 </subagent-instructions>
 
-### Build Loop
+## Build Loop
 
-After `base.c` builds successfully, repeat the following steps:
+After `base.c` builds, repeat:
 
-1. Run `./build.sh <attempt>.c` to build and get a diff against the target assembly. A score of 100% indicates a perfect match.
-2. Inspect `base_diff`, `target.s`, and generated object dumps. Look for areas where the control flow and instructions do not match.
-3. Come up with a plan to improve the match. Consider what the original developers intended to write given the function's broader purpose.
-4. Create a new self-contained file (`base_n.c` where `n` is your attempt number) with changes you expect to improve the match. Do not make an attempt include another mutable candidate file: later edits would invalidate its recorded score and diff. Start small and work incrementally — if you test multiple changes at once they may interact poorly.
+1. Run `./build.sh <attempt>.c` to build and diff against the target. 100% with `Verified exact match: yes` is a match.
+2. Inspect `<attempt>_diff`, `target.s` and the object dumps for control-flow and instruction differences.
+3. Plan an improvement, considering what the original developers intended given the function's purpose.
+4. Write a new self-contained file `base_<n>.c` (`n` = attempt number) with changes you expect to help. Never include another mutable candidate: later edits would invalidate its recorded score. Start small and change one thing at a time.
 5. Record useful observations in `LEARNINGS.md`.
-6. Stop when a 100% match is reached, when the build script tells you to stop, or when you are unable to make progress (20 attempts without any improvement to the match percentage).
+6. Stop at a 100% match, or when `build.sh` prints `No progress in N attempts` (best score 20 or more attempts old). Do not make another attempt after that line.
 
 ## Tools
 
-- `./build.sh <file>.c` compiles an attempt with the owning file's compiler profile and scores it against the target assembly.
-- `./diff.sh <file>.o` shows a normalized diff for a previously built attempt.
+- `./build.sh <file>.c [opt_flag]` compiles an attempt with the owning file's profile and scores it.
+- `./diff.sh <file>.o` shows a normalized diff for a built attempt.
 - `./objdump.py <file>.o` dumps normalized MIPS assembly.
-- `./map_asm_to_c.py <file>.o <line>` maps an assembly line back to the C code that produced it.
+- `./map_asm_to_c.py <file>.o <line>` maps an assembly line back to its C.
+- `timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <function>` from the repo root: see `../../docs/procedures/decomp-permuter.md`.
 
-These tools are symlinks into `../../tools/decomp-env-template/`. If one of them, or any other project tool, is broken or in your way, fix it at the source instead of working around it. Follow the root `AGENTS.md` § Changing the harness, and commit the fix separately.
+These helpers are symlinks into `../../tools/decomp-env-template/`. If one of them or any project tool is broken or in your way, fix it at the source and commit it separately (`../../docs/harness/changing-the-harness.md`).
 
-A symbol-only difference (for example `%lo(D_800B67A5)` against `%lo(array+1)`) is a naming difference in the extracted assembly, not an instruction difference. Note it, but do not distort the C to chase it.
+A symbol-only difference (for example `%lo(D_800B67A5)` against `%lo(array+1)`) is a naming difference in the extracted assembly, not an instruction difference. Note it; do not distort the C to chase it.
 
 ## Coding Guidelines
 
-- Look for existing types, prototypes, and globals in `../../src` and `../../include` before adding new ones.
-- Prefer struct fields and array indexing over manual pointer arithmetic.
-- Keep variable declarations at the start of each function or block as required by C89.
-- Do not add comments to candidate C code unless they are already needed for project style.
-- Do not use `INCLUDE_ASM`, `INCLUDE_RODATA`, inline assembly, empty assembly barriers, assembly constraints, or explicit register bindings as a matching shortcut.
-- Only use #define for constants, do not abuse it to hack around struct access issues or to try different permutations.
+Full standard: `../../docs/project/code-quality.md`. In short:
+
+- Look for existing types, prototypes and globals in `../../src` and `../../include` before adding new ones.
+- Prefer struct fields and array indexing to pointer arithmetic. Declarations go at the start of each block (C89).
+- No comments in candidate C unless project style needs them.
+- Never use `INCLUDE_ASM`, `INCLUDE_RODATA`, inline assembly, empty asm barriers, asm constraints or explicit register bindings as a shortcut.
+- `#define` is for constants only, not for struct-access hacks or permutations.
 - Build display lists with the F3DEX2 macros from `PR/gbi.h` and named constants, never raw command words.
 
-## Decompilation Strategy
+## Strategy
 
-Generic KMC GCC behavior is summarized in `DECOMPILATION_LEARNINGS.md`. Treat it as a read-only reference and do not append function-specific findings to it.
+Generic KMC GCC behavior is in `../../docs/reference/kmc-gcc/`. It is read-only for you: put function-specific findings in `LEARNINGS.md`.
 
-### General Approach
-- Think about what the function is *doing* within the game. What is its purpose? Structure the code to fulfill that purpose — this is the surest path to a 100% match.
-- Prioritize control flow and data modeling early. Once opcodes and branches align, treat stack and register differences as evidence about source types, local lifetimes, aliases, and expression structure rather than as noise.
-- Look for clues in how the function is called and how it calls other functions.
-
-### Matching Phases
-
-#### 1. Reconstruct the Simplest Plausible Source
-
-Before attempting compiler-shaping tricks:
-
-- Resolve every referenced address to its enclosing typed object, including fields inside arrays or larger symbols. Compare relocations and byte offsets against known structs and inspect neighboring users rather than trusting the nearest symbol name.
-- Model repeated fixed-stride data with typed arrays or records. When a callee receives pointers to adjacent stack words, consider whether the source used one array or struct in the observed address order.
-- Inspect structurally paired functions such as In/Out, Open/Close, or Init/Update and identify their shared types and control-flow skeleton.
-- Prefer natural `for` loops, `switch` statements, direct field access, and the fewest live temporaries.
-
-#### 2. Escape Plateaus with a Clean Rewrite
-
-If several consecutive attempts produce the same score or mismatch region, preserve the current best and create an independent attempt directly from the function's behavior.
-
-Remove decompiler-created pointers, copied loop bounds, cached selectors, redundant casts and masks, `volatile` or `register` hints, fake unions, identity arithmetic, and manual unrolling. Re-establish the candidate using canonical typed C before doing more register-allocation tuning. A high score is not evidence that compiler-coercion artifacts are historically plausible source.
-
-#### 3. Classify Very Close Matches
-
-At 99% or better, classify every normalized difference before editing:
-
-- control flow
-- instruction selection
-- memory offset or type
-- stack layout
-- register allocation
-- relocation-label-only noise
-
-Ignore relocation and local-symbol naming differences that do not change emitted instructions. Treat a stack-frame mismatch as evidence of extra locals, spills, or incorrect lifetimes. Use target load/store patterns to decide whether a source value was cached: repeated target loads usually favor direct global or field access, while a value held in one register may favor a local.
-
-If only registers differ, freeze the matched algorithm and map each target register to its logical value and live range. First remove redundant aliases and temporaries, use original parameters or destination fields directly, and inline copied constants or bounds. Test one localized equivalent expression at a time. A bounded permuter run (see the `decomp-permuter` skill) is a last resort.
-
-### Cleaning Up Decompilation Artefacts
-Literal decompilation often produces artefacts. Watch for these common patterns:
-
-<artefact name="for-loops">
-m2c struggles with `for` loops. The compiler often pulls out the condition so it can bail early if it's never met. Note that the comparison operator may also change (e.g. `<` becomes `<=`).
-
-This code:
-```c
-for (i = 0; i < 10; i++) {
-    // stuff
-}
-```
-
-Often decompiles as:
-```c
-i = 0;
-if (i < 10) {
-    do {
-        // stuff
-        i++;
-    } while (i < 10);
-}
-```
-</artefact>
-
-<artefact name="gotos">
-Developers rarely, if ever, write GOTO statements but they show up often in decompilation output because many different kinds of control flow are represented as branches and jumps in assembly. Assume that GOTOs are just a decompilation artefact.
-</artefact>
-
-<artefact name="duplicated-variables">
-It's far more likely that a single variable is being reused rather than many temporary variables. Literal decompilation and permuting often produce unnecessary re-assignments that hurt the match rate.
-</artefact>
-
-<artefact name="shifts-instead-of-arithmetic">
-Arithmetic is often converted to shifts:
-- `x >> 2` → `x / 4`
-- `x << 2` → `x * 4`
-</artefact>
-
-<artefact name="false-returns">
-Explicit returns in assembly might actually be fall-through returns:
-```c
-if (condition) {
-    // main work
-} else {
-    // alternative path
-    return X;
-}
-return Y;  // fall-through from if-branch
-```
-</artefact>
-
-<artefact name="gcc-272-codegen">
-GCC 2.7.2 has specific codegen patterns that show up in the target assembly. Recognise these so you don't fight the compiler:
-
-- **Signed division:** dividing a signed integer by a power of two produces a shift-and-bias pattern (shift right to extract the sign bit, add it, then arithmetic shift). Write the natural division (`x / 4`) and let the compiler emit this pattern — don't try to match the shifts manually.
-- **Branchless operations:** the compiler sometimes generates branchless code (e.g. `slti` + `addu`) for simple conditionals. A ternary or `if/else` in C will often produce the same output.
-- **`do{}while(0)` blocks:** wrapping code in `do{}while(0)` can influence register allocation and instruction scheduling without changing semantics. Use this as a last resort when register assignment won't cooperate.
-- **Dead stores:** GCC 2.7.2 sometimes expects a variable to be written before a branch even if the value is overwritten later. Adding an initialisation (e.g. `result = 0`) before a conditional can fix mismatches.
-- **Bare `sqrt.s`/`sqrt.d`:** files compiled with `-ffast-math` (listed in the project Makefile) inline `sqrtf()` without a NaN guard. A guarded sqrt with a library fallback means the owning file is not fast-math.
-</artefact>
-
-### Large Functions
-Don't be intimidated — these are often straightforward if approached methodically:
-
-1. Get the function to compile first, filling in missing types, undefined functions, etc.
-2. Focus on control flow. Compare `base.c` against `target.s` — m2c's generated control flow can be convoluted and misleading. Make a checklist of problems and work through them one by one.
-3. Large structs are easy. Often there are significant gaps between fields, so just focus on getting the field accesses correct.
-
-### Graphics Microcode (F3DEX2)
-
-Mario Golf 64 runs the F3DEX2 microcode. Functions that write 8-byte command pairs through a `Gfx *` cursor are building display lists: use the `decompile-microcode` skill and the `gbi.h` macros. *Never* manipulate the display list cursor manually.
-
-The permuter is not aware of the macros in gbi.h and will often try to replace them with their underlying commands. Do not use its results if it requires you to remove gbi.h macros. Pass `--preserve-f3dex` to the permuter to keep the macros intact.
-
-### Data Layout
-
-Think carefully about how data is used by your function. The symbols (data/rodata/bss) used by your function may not reflect the true data layout. Often this will show up as many contiguous/adjacent symbols that are accessed sequentially (array). Or data that otherwise looks like it rolls up into a common struct. In such cases, you should update symbol_addrs.txt to reflect the true layout even if this means wider project refactors.
+- How to approach a function: phases, plateaus, near-miss triage, large functions, data layout: `../../docs/procedures/matching-method.md`.
+- m2c artefacts (do-while loops, gotos, duplicated temporaries, shifts, false returns) and GCC 2.7.2 codegen to accept: `../../docs/reference/decompilation-artefacts.md`.
+- Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists: use the `decompile-microcode` skill; never manipulate the cursor by hand. Pass `--preserve-f3dex` to the permuter.
+- If the symbols a function uses look like one array or struct split into many, update `symbol_addrs.txt` to the true layout, even if that means a wider refactor (`../../docs/reference/symbol-addrs-format.md`).
