@@ -4,6 +4,8 @@
 extern void heap3_free(void** payload_ptr);
 extern void func_80051A88(s32 volume);
 extern s32 D_ovl0_80224A7C;
+extern s32 D_ovl0_80224A80;
+extern s32 D_ovl0_8022D678;
 extern void* D_ovl0_8022B530;
 extern void* heap3_alloc(u32 size);
 extern void* D_ovl0_8022B534;
@@ -38,7 +40,14 @@ void func_ovl0_80218CC0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218D1C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218DB0);
+void func_ovl0_80218DB0(s32 arg0, s32 arg1) {
+    if (arg1 == 0) {
+        D_ovl0_80224A80 = 1;
+    } else {
+        D_ovl0_80224A80 = -1;
+    }
+    D_ovl0_8022D678 = arg0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218DD0);
 
