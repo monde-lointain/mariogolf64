@@ -13,6 +13,7 @@ extern s8 D_800E4CC8;
  * keeps the load/store pairs interleaved here and in func_800989C4. */
 extern s32 D_800E4C98[3];
 extern u8 D_800C7464[];
+extern u8 D_800C7460[];
 extern s32 D_800E4C50;
 extern s32 D_800E4C54;
 extern s32 D_800E4C58;
@@ -1196,7 +1197,65 @@ s32 func_80098D70(u8* dst, u8* src, s32 count) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098E48);
+/* Decode an 8-symbol password. func_80098D70 maps each symbol to a base-28
+ * digit; digits 5..7 are offsets for the others and also checksums. On success
+ * writes three bytes to arg0: each byte is XOR-ed with D_800C7460[i] and
+ * bit-reversed by func_80098CA0. Returns -1 on a bad symbol or checksum. */
+s32 func_80098E48(s8* arg0, u8* arg1) {
+  u8 bytes[3];
+  u8 digits[8];
+  u32 value;
+  s32 offset;
+  s32 offset2;
+  s32 offset3;
+  u8* p;
+  u8* src;
+  s8* dst;
+  s32 i;
+
+  if (func_80098D70(digits, arg1, 8) != 0) {
+    return -1;
+  }
+
+  offset = digits[5] - 28;
+  digits[0] = (digits[0] - offset) % 28;
+  offset3 = digits[6] - 28;
+  digits[1] = (digits[1] - offset3) % 28;
+  offset2 = digits[7] - 28;
+  digits[2] = (digits[2] - offset2) % 28;
+  digits[3] = (digits[3] - offset2) % 28;
+  digits[4] = (digits[4] - offset) % 28;
+
+  if (digits[5] != (u32)(digits[4] + digits[0] + digits[1]) % 28) {
+    return -1;
+  }
+  if (digits[6] != (u32)(digits[1] + digits[2] + digits[3]) % 28) {
+    return -1;
+  }
+  if (digits[7] != (u32)(digits[2] + digits[3] + digits[4]) % 28) {
+    return -1;
+  }
+
+  value = 0;
+  i = 4;
+  p = &digits[4];
+  for (; i >= 0; i--) {
+    value = value * 28;
+    value += *p--;
+  }
+
+  bytes[0] = value >> 16;
+  bytes[1] = value >> 8;
+  bytes[2] = value;
+
+  i = 0;
+  dst = arg0;
+  src = bytes;
+  for (; i < 3; i++) {
+    *dst++ = func_80098CA0(*src++ ^ D_800C7460[i]);
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_800990D0);
 
