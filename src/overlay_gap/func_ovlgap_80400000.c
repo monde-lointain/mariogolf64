@@ -209,6 +209,10 @@ extern s32 validate_heap_string(char *source_string, s32 allocation_tag);
 extern void __assert(const char *expr, const char *file, int line);
 extern char D_ovlgap_8040C9B0[], D_ovlgap_8040C9B4[];
 extern char D_ovlgap_8040CA80[], D_ovlgap_8040CA88[], D_ovlgap_8040CA90[];
+extern u8 D_ovlgap_8040C6D4[];
+extern s32 D_ovlgap_8040C6D0;
+extern char D_ovlgap_8040CAC0[];
+void mark_scenery_collision_cells(void);
 
 void func_ovlgap_80407F08(s32 *arg0, s32 arg1, char *arg2) {
     char line_buffer[0x100];
@@ -261,28 +265,54 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804083E0);
 
-/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original, as in func_ovl7_802068B4. */
-u16 func_ovlgap_8040BF64(u32 packed_xz) {
-    s32 r;
-    volatile s32 unused = r;
-    u32 gx;
-    u32 gz;
-    u32 block;
-    u32 sx;
-    u32 sz;
-    u16* base;
+/* 8-byte frame with `sw $v0,0(sp)`: static-chain home of the nested-function original, as in func_ovl7_802068B4. */
+void func_ovlgap_8040BFC8(void) {
+    char file_name[0x80];
+    u8 *buffer;
+    s32 pos;
+    s32 x;
+    s32 z;
 
-    gx = packed_xz & 0xFF;
-    gz = (packed_xz >> 8) & 0x1FF;
-    block = ((gx >> 5) + (gz >> 5) * 8) * sizeof(TerrainTileCache);
-    sx = gx & 0x1F;
-    sz = gz & 0x1F;
-    /* Preserve the retail member-rooted scalar address and 36-halfword stride. */
-    base = &g_terrain_tile_cache[0].colors[1][1];
-    return *(u16*)((u8*)(base + (sx + sz * 36)) + block);
+    u16 func_ovlgap_8040BF64(u32 packed_xz) {
+        u32 gx;
+        u32 gz;
+        u32 block;
+        u32 sx;
+        u32 sz;
+        u16* base;
+
+        gx = packed_xz & 0xFF;
+        gz = (packed_xz >> 8) & 0x1FF;
+        block = ((gx >> 5) + (gz >> 5) * 8) * sizeof(TerrainTileCache);
+        sx = gx & 0x1F;
+        sz = gz & 0x1F;
+        /* Preserve the retail member-rooted scalar address and 36-halfword stride. */
+        base = &g_terrain_tile_cache[0].colors[1][1];
+        return *(u16*)((u8*)(base + (sx + sz * 36)) + block);
+    }
+
+    mark_scenery_collision_cells();
+    buffer = heap3_alloc(0x60036);
+    for (pos = 0; pos != 0x36; pos++) {
+        buffer[pos] = D_ovlgap_8040C6D4[pos];
+    }
+    for (z = 0x1FF; z != -1; z--) {
+        for (x = 0; x != 0x100; x++) {
+            u32 packed_xz = (z << 8) + x;
+
+            buffer[pos] = ((u32)func_ovlgap_8040BF64(packed_xz) << 2) & 0xF8;
+            pos++;
+            buffer[pos] = (func_ovlgap_8040BF64(packed_xz) >> 3) & 0xF8;
+            pos++;
+            buffer[pos] = (func_ovlgap_8040BF64(packed_xz) >> 8) & 0xF8;
+            pos++;
+        }
+    }
+    sprintf(file_name, D_ovlgap_8040CAC0, D_ovlgap_8040C6D0);
+    validate_heap_string(file_name, 0x60036);
+    heap3_free(&buffer);
+    D_ovlgap_8040C6D0 += 1;
 }
-
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040BFC8);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C124);
 
