@@ -191,6 +191,40 @@ const cases: Case[] = [
 	{ name: "bash: make after && is blocked", tool: "bash", input: { command: "cd x && make" }, blocked: MAKE },
 	{ name: "bash: make on a later line is blocked", tool: "bash", input: { command: "echo hi\nmake" }, blocked: MAKE },
 	{
+		name: "bash: make -s print-cflags with SRC is allowed",
+		tool: "bash",
+		input: { command: "make -s print-cflags SRC=src/main/func_80025D30.c" },
+	},
+	{
+		name: "bash: make print-cflags after cd && is allowed",
+		tool: "bash",
+		input: { command: "cd x && make -s --no-print-directory print-cflags SRC=src/libultra/io/foo.c | tr ' ' '\\n'" },
+	},
+	{
+		name: "bash: print-cflags followed by a real make is blocked",
+		tool: "bash",
+		input: { command: "make -s print-cflags SRC=src/main/a.c && make" },
+		blocked: MAKE,
+	},
+	{
+		name: "bash: print-cflags with another target is blocked",
+		tool: "bash",
+		input: { command: "make -s print-cflags clean" },
+		blocked: MAKE,
+	},
+	{
+		name: "bash: print-cflags with extra flags is blocked",
+		tool: "bash",
+		input: { command: "make -j4 print-cflags SRC=src/main/a.c" },
+		blocked: MAKE,
+	},
+	{
+		name: "bash: print-cflags SRC with command substitution is blocked",
+		tool: "bash",
+		input: { command: "make -s print-cflags SRC=$(echo x)" },
+		blocked: MAKE,
+	},
+	{
 		name: "bash: git commit --no-verify is blocked",
 		tool: "bash",
 		input: { command: "git commit --no-verify -m x" },

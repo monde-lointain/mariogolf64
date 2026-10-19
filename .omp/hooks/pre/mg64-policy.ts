@@ -2,7 +2,8 @@
  * mg64-policy: tool-call guard for the Mario Golf 64 decomp repo.
  *
  * Enforces:
- * - bash: no `git commit --no-verify`; no direct `make`; no direct `python3 -m splat split`;
+ * - bash: no `git commit --no-verify`; no direct `make` (only `make [-s] print-cflags [SRC=path]` is
+ *   allowed: it prints compiler flags and builds nothing); no direct `python3 -m splat split`;
  *   no `ctx.c` / `temp.c` mentions; no shell mutation of `asm/`; no shell writes into vendored
  *   tools (`tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter`, `tools/asm-differ`); every
  *   permuter run (`tools/permuter`, `tools/decomp-permuter/permuter.py`) must sit under a
@@ -52,7 +53,7 @@ const MSG = {
 	sha1: "Blocked: mariogolf64.sha1 is a reference checksum file and should not be edited.",
 	vendored:
 		"Blocked: do not modify the KMC toolchain (tools/gcc_kmc), tools/kmc-cc, or the vendored decomp-permuter/asm-differ submodules to change how a file compiles. If an object needs different compiler behavior, add a target-specific profile override in the Makefile's COMPILER PROFILES section instead.",
-	make: "Blocked: Direct 'make' commands are not allowed. Please use the build script provided in the instructions. This will be ./tools/build-and-verify.sh to rebuild the whole project or ./build.sh <file> if you're working on a single function in a decomp environment.",
+	make: "Blocked: Direct 'make' commands are not allowed (only 'make -s print-cflags SRC=<file>' is). Please use the build script provided in the instructions. This will be ./tools/build-and-verify.sh to rebuild the whole project or ./build.sh <file> if you're working on a single function in a decomp environment.",
 	splat:
 		"Blocked: Direct 'python3 -m splat split' commands are not allowed. This command is automatically run by the build scripts when needed. Use ./tools/build-and-verify.sh to build the project properly.",
 	permuterNoTimeout:
@@ -68,7 +69,8 @@ const MSG = {
 // ---------------------------------------------------------------------------
 
 const NO_VERIFY = /git\s+commit\s+--no-verify/i;
-const MAKE = /(^|[;&|]\s*)make(\s|$)/i;
+const MAKE_INVOCATION = /(^|[;&|]\s*)make(?=\s|$)([^;&|]*)/gi;
+const MAKE_PRINT_CFLAGS_ARGS = /^\s+(?:(?:-s|--no-print-directory)\s+)*print-cflags(?:\s+SRC=[\w./-]+)?\s*$/;
 const SPLAT_SPLIT = /(^|[;&|]\s*)python3?\s+-m\s+splat\s+split(\s|$)/i;
 const CTX_MENTION = /ctx\.c/;
 const TEMP_MENTION = /temp\.c/;
@@ -94,6 +96,14 @@ function asmMutation(line: string): boolean {
 	return SCRIPT_RUN.test(line) && ASM_SCRIPT_WRITE.test(line);
 }
 
+/** True when a line runs `make` for anything but the read-only `print-cflags` query. */
+function directMake(line: string): boolean {
+	for (const match of line.matchAll(MAKE_INVOCATION)) {
+		if (!MAKE_PRINT_CFLAGS_ARGS.test(match[2])) return true;
+	}
+	return false;
+}
+
 function bashReason(command: string): string | undefined {
 	if (command === "") return undefined;
 	const lines = command.split("\n");
@@ -101,7 +111,7 @@ function bashReason(command: string): string | undefined {
 	if (anyLine(NO_VERIFY)) {
 		return `Blocked command: matches denied pattern '${NO_VERIFY.source}'. Use a safer alternative or explain why it's necessary.`;
 	}
-	if (anyLine(MAKE)) return MSG.make;
+	if (lines.some(directMake)) return MSG.make;
 	if (anyLine(SPLAT_SPLIT)) return MSG.splat;
 	if (CTX_MENTION.test(command)) return MSG.ctx;
 	if (TEMP_MENTION.test(command)) return MSG.temp;
