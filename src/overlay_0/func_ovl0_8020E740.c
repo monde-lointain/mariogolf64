@@ -46,7 +46,9 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213038)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213634);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213C64);
+extern s32 D_ovl0_802246F8;
+
+s32 func_ovl0_80213C64(void) { return D_ovl0_802246F8 != -1; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_80213C78);
 
