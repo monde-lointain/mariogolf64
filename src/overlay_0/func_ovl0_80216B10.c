@@ -6,6 +6,18 @@ extern s32 D_ovl0_802246F8;
 extern s32 D_ovl0_80224860;
 extern u8 D_ovl0_802291D8;
 extern s8 D_ovl0_80229236;
+extern s32 D_800FBE64;
+extern s32 D_800FBE68;
+extern s32 target_z;
+extern s32 D_800C1B74;
+extern u8 D_ovl0_80229240;
+extern s32 D_ovl0_80228F80[30][2];
+extern f32 D_ovl0_80229070[30][2];
+extern f32 D_ovl0_80229160[30];
+extern u8 D_ovl0_802291F8[30];
+extern u8 D_ovl0_80229218[30];
+extern f64 D_ovl0_80225428;
+extern f64 D_ovl0_80225430;
 
 void func_ovl0_80216B10(void) {
     s32 i;
@@ -41,7 +53,47 @@ void func_ovl0_80216C18(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216C58);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216CAC);
+s32 func_ovl0_80216C58(void);
+
+void func_ovl0_80216CAC(void) {
+    s32 spawned;
+    s32 slot;
+    s32 i;
+    s32 off;
+    f32 speed;
+
+    spawned = 0;
+    D_ovl0_80224860 = 1;
+    slot = func_ovl0_80216C58();
+    if (slot != -1) {
+        off = slot * 12;
+        *(s32 *)(&D_ovl0_80229240 + off) = D_800FBE64;
+        *(s32 *)(&D_ovl0_80229240 + off + 4) = D_800FBE68;
+        *(s32 *)(&D_ovl0_80229240 + off + 8) = target_z;
+        i = 0;
+        do {
+            if (*(&D_ovl0_802291D8 + i) == 0) {
+                D_ovl0_80228F80[i][0] = 0;
+                D_ovl0_80228F80[i][1] = 0;
+                D_ovl0_80229160[i] = (f32)((f64)(f32)spawned * D_ovl0_80225428 +
+                                           (f64)((guRandom() % 20) - 10) * D_ovl0_80225430);
+                D_ovl0_802291F8[i] = 1;
+                speed = (f32)(guRandom() % 16) + 8.0f;
+                D_ovl0_80229070[i][0] = sinf(D_ovl0_80229160[i]) * speed;
+                spawned += 1;
+                D_ovl0_80229070[i][1] = -cosf(D_ovl0_80229160[i]) * speed;
+                *(&D_ovl0_802291D8 + i) = 10;
+                D_ovl0_80229218[i] = slot;
+            }
+            if (spawned == 0x14) {
+                break;
+            }
+            i += 1;
+        } while (i != 0x1E);
+    }
+    D_800C1B70 = 2;
+    D_800C1B74 = 0xFF;
+}
 
 extern void* heap3_alloc(u32 size);
 extern void* D_ovl0_8022927C;
