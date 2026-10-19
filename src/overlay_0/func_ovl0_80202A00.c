@@ -1,6 +1,7 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 #include "../main/session.h"
+#include "../main/club.h"
 
 extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
 
@@ -192,7 +193,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020845C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802087D0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208810);
+extern s32 active_meter_category;
+extern s32 active_terrain_index;
+extern s32 D_ovl0_8022715C;
+extern u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3);
+
+/* Dead `sw $v0,0x10($sp)` in the first jal's delay slot: the `unused` local is the stand-in, as in lerp_s32 (func_8008D100.c). */
+s8 func_ovl0_80208810(void) {
+    s32 r;
+    volatile s32 unused = r;
+    return ((s8 *)func_80037E50(get_shot_data(), active_terrain_index, active_meter_category, D_ovl0_8022715C))[5];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208850);
 
