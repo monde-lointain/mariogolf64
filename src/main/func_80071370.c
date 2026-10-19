@@ -538,7 +538,74 @@ void func_80074230(Gfx** dl, s16 x, s16 y, u8* str) {
   *dl = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074500);
+/**
+ * Draws str with the 8x8 IA4 glyph sheet at D_800E1C30 (16 glyphs per row,
+ * 8 px advance) into *dl. Lowercase ASCII folds to 0xE1-0xFA; 0xB0 draws as
+ * 0x70. Codes 0x9E-0x9F and 0xDE-0xDF are zero-advance marks drawn 6 px up
+ * and left.
+ */
+void func_80074500(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  u8 c;
+
+  gDPPipeSync(gfx++);
+  c = *str;
+  if (c != 0) {
+    do {
+      s32 code;
+      s32 xpos;
+      s32 ypos;
+      s32 uls;
+      s32 ult;
+      s32 keep;
+
+      if (c == 0x20) {
+        str++;
+        x += 8;
+        continue;
+      }
+      xpos = x;
+      ypos = y;
+      code = c;
+      if ((u32)(code - 0x61) < 0x1A) {
+        code += 0x80;
+      }
+      if (code != 0xB0) {
+        if (code < 0xB1) {
+          if (code >= 0xA0) {
+            goto draw;
+          }
+          keep = code < 0x9E;
+        } else {
+          if (code >= 0xE0) {
+            goto draw;
+          }
+          keep = code < 0xDE;
+        }
+        if (!keep) {
+          xpos -= 6;
+          ypos -= 6;
+          x -= 8;
+        }
+      } else {
+        code = 0x70;
+      }
+    draw:
+      uls = (code % 16) * 8;
+      ult = (code / 16) * 8;
+      gDPLoadTextureTile_4b(gfx++, ((u32)D_800E1C30 + 8) & ~7, G_IM_FMT_IA, 128,
+                            8, uls, ult, uls + 7, ult + 7, 0, 0, 0, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      gSPTextureRectangle(gfx++, xpos << 2, ypos << 2, (xpos + 8) << 2,
+                          (ypos + 8) << 2, G_TX_RENDERTILE, uls << 5, ult << 5,
+                          1 << 10, 1 << 10);
+      str++;
+      x += 8;
+    } while ((c = *str) != 0);
+  }
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 extern void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
 
@@ -558,10 +625,8 @@ void func_80074840(Gfx** arg0, s32 arg1, s32 arg2, u8* str) {
   *arg0 = saved;
 }
 
-extern void func_80074500(s32* dst, s16 x, s16 y, u8* str);
-
-void func_800748D0(s32* arg0, s32 arg1, s32 arg2, u8* str) {
-  s32 saved = *arg0;
+void func_800748D0(Gfx** arg0, s32 arg1, s32 arg2, u8* str) {
+  Gfx* saved = *arg0;
   s32 w = func_800738BC(str, 8, 2);
 
   func_80074500(&saved, arg1 - w / 2, arg2, str);
