@@ -75,6 +75,20 @@ class IntegrateShardsTest(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         self.assertEqual(self.subjects(), ['base', 'Decompile func_A'])
 
+    def test_review_commit_picked_by_hand_with_edits_is_skipped(self):
+        commit(self.repo, 'notes', 'x\n', 'harness: change something')
+        shard_commit = git(self.repo, 'rev-parse', 'HEAD')
+        git(self.repo, 'checkout', '-q', 'dev')
+        git(self.repo, 'cherry-pick', '-n', shard_commit)
+        (self.repo / 'notes').write_text('x\nresolved by hand\n')
+        git(self.repo, 'add', 'notes')
+        git(self.repo, 'commit', '-q', '-C', shard_commit)
+
+        proc = self.run_on_dev()
+
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertEqual(self.subjects(), ['base', 'harness: change something'])
+
     def test_match_already_integrated_differently_is_skipped(self):
         commit(self.repo, 'src/f.c', STUBS.replace('INCLUDE_ASM("asm/f", func_A);', 'void func_A(void) {}'),
                'Decompile func_A')

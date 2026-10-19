@@ -11,7 +11,9 @@
 #     tools/merge-decomp-c, and kept if ./tools/build-and-verify.sh passes;
 #   - a commit that touches anything else (harness code, tasks, hooks), a conflict
 #     the merge driver cannot resolve, or a failed build stops that branch, since its
-#     later commits may depend on it. The commit is left for a person to review.
+#     later commits may depend on it. The commit is left for a person to review;
+#     once it is picked by hand (even with edits), `git cherry` still lists it, so a
+#     commit with the same author time and subject already on this branch is skipped.
 # Prints one line per commit. Exits 1 if any branch stopped, 0 otherwise.
 set -u
 [[ $# -gt 0 && $1 != -* ]] || { echo "usage: $0 <branch>..." >&2; exit 2; }
@@ -26,11 +28,17 @@ integrated() {
     [[ -n $found ]]
 }
 
+picked_here() {
+    git log --format='%at %s' HEAD | grep -qxF -- "$(git log -1 --format='%at %s' "$1")"
+}
+
 status=0
 for branch in "$@"; do
     for c in $(git cherry HEAD "$branch" | awk '/^\+/{print $2}'); do
         line="$branch ${c:0:8} $(git log -1 --format=%s "$c")"
-        if [[ -n $(git show --format= --name-only "$c" | grep -vE '^(src/|include/|docs/|symbol_addrs\.txt$|mariogolf64\.yaml$)') ]]; then
+        if picked_here "$c"; then
+            echo "skipped $line"
+        elif [[ -n $(git show --format= --name-only "$c" | grep -vE '^(src/|include/|docs/|symbol_addrs\.txt$|mariogolf64\.yaml$)') ]]; then
             echo "review $line"; status=1; break
         elif integrated "$c"; then
             echo "skipped $line"
