@@ -66,7 +66,7 @@ extern s16 D_800FE33C;
 extern u8 D_800FF4C0;
 extern u8 D_80105268;
 extern u8 D_800FBE08[];
-extern u8 D_801323B8;
+extern s8 D_801323B8[];
 extern s32 round_hole_flags;
 extern u8 D_801323D0;
 extern s32 game_mode;
@@ -1640,7 +1640,7 @@ void func_8005D9A0(void) {
   do {
     D_800FBE08[i] = 0;
   } while (++i != 4);
-  D_801323B8 = 3;
+  D_801323B8[0] = 3;
   round_hole_flags = 0;
   D_801323D0 = 6;
   D_801052E8 = 0;

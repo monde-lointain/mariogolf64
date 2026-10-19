@@ -14,6 +14,13 @@ extern void func_ovl3_801FB54C(Gfx** dl, s32 flags);
 extern void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str);
 extern u8 D_ovl3_80231198[];
 extern u8 D_ovl3_80231284[];
+extern u8 D_801052E8;
+extern u8 D_801B9410;
+extern s8 D_801323B8[];
+extern s32 func_8006AD94(void);
+extern s32 func_8006ADA0(void);
+extern void func_8006AD1C(s32 table_index);
+extern void func_8006ADF8(s32 arg);
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
@@ -105,7 +112,18 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FADBC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAF08);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAF78);
+void func_ovl3_801FAF78(void) {
+  if (func_8006AD94() != 0 && D_801B9410 == 0) {
+    if (func_8006ADA0() == 0) {
+      current_game_mode = 0x13;
+    }
+  } else {
+    func_8006AD1C(D_801323B8[0x17]);
+    func_8006ADF8(1);
+    D_801052E8 = 0;
+    D_801B9410 = 0;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAFEC);
 
