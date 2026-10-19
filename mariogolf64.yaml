@@ -496,7 +496,7 @@ segments:
       - [0xCFE10, c, overlay_0/func_ovl0_80216B10]
       - [0xD1FC0, c, overlay_0/func_ovl0_80218CC0]
       - [0xD4330, c, overlay_0/func_ovl0_8021B030]
-      - [0xD71D0, asm]
+      - [0xD71D0, c, overlay_0/func_ovl0_8021DED0]
       - [0xD7850, asm]
       - [0xD8F70, data]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
