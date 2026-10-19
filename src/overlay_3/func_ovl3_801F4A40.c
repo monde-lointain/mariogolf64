@@ -5,6 +5,9 @@ extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s32 D_800C2004;
 extern s32 current_game_mode;
 extern s32 func_800959F8(void);
+extern void func_800543A4(void);
+extern s32 func_ovl3_801F7660(s32, s32);
+extern u32 player_context_offset;
 extern void func_ovl3_801FB54C(Gfx** dl, s32 flags);
 extern void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str);
 extern u8 D_ovl3_80231198[];
@@ -48,7 +51,16 @@ void func_ovl3_801F75EC(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F7660);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F7CD0);
+void func_ovl3_801F7CD0(void) {
+  s32 ready;
+
+  ready = func_800959F8();
+  if ((ready == 1) && (func_ovl3_801F7660(1, 2) == -1)) {
+    player_context_offset = ready;
+    current_game_mode = 0;
+    func_800543A4();
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F7D28);
 
