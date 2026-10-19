@@ -14,7 +14,38 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220A30)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220BB0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220D68);
+extern s16 D_ovl3_8023B684[];
+
+s16 func_ovl3_80220D68(s8 arg0, s32 arg1) {
+    s32 cur;
+    s32 step;
+    s32 i;
+    s32 idx;
+
+    cur = arg0;
+    if (cur >= 0) {
+        if (cur < 5) {
+            step = ((arg1 & 0xFF) == 0) ? -1 : 1;
+            idx = cur + step;
+            for (i = 0; i != 4; i++) {
+                if (idx >= 5) {
+                    idx = 0;
+                }
+                if (idx < 0) {
+                    idx = 4;
+                }
+                if (D_ovl3_8023B684[idx] != -1) {
+                    break;
+                }
+                idx += step;
+            }
+            if (i != 4) {
+                return idx;
+            }
+        }
+    }
+    return -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220DF8);
 
