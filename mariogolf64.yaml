@@ -515,7 +515,7 @@ segments:
       - [0xF3480, c, overlay_3/func_ovl3_80209500]
       - [0xF7F90, c, overlay_3/func_ovl3_8020E010]
       - [0xFD310, c, overlay_3/func_ovl3_80213390]
-      - [0xFF940, asm]
+      - [0xFF940, c, overlay_3/func_ovl3_802159C0]
       - [0x101830, asm]
       - [0x109570, asm]
       - [0x110670, asm]
