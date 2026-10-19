@@ -10,7 +10,8 @@ tags: [project, layout]
 | Path | Contents |
 |---|---|
 | `src/main/` | Main game code (`-DF3DEX_GBI_2`). Project headers live next to their sources (`src/main/*.h`). |
-| `src/mgu/`, `src/overlay_8/`, `src/overlay_10/`, `src/overlay_15/` | Remaining game code and overlays; base compiler profile. |
+| `src/overlay_*/` | Overlays (`-DF3DEX_GBI_2`, same F3DEX2 microcode as `src/main`). |
+| `src/mgu/` | Remaining game code; base compiler profile. |
 | `src/libultra/` | libultra, mirroring the upstream `ultralib` subtree (`os/`, `io/`, `gu/`, ...). |
 | `src/libnusys/`, `src/libmus/`, `src/libnaudio/`, `src/libkmc/` | Other libraries, each with its own [compiler profile](compiler-profiles.md). |
 | `src/entry/entry.s` | Entry stub, assembled with modern GAS. Other hand-written library assembly sits next to its C (`src/libultra/**/*.s`, `src/libkmc/*.s`). |

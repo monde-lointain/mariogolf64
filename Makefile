@@ -114,6 +114,9 @@ LDFLAGS        := -T $(LD_SCRIPT) -Map $(TARGET).map $(foreach ld,$(LINKER_SCRIP
 
 # Main game code uses the F3DEX2 GBI (MG64 runs gspF3DEX2.fifo).
 $(BUILD_DIR)/src/main/%: PROFILE_APPEND = -DF3DEX_GBI_2
+# Overlays run the same F3DEX2 microcode; their display-list builders (e.g.
+# func_ovl3_8022A090) only match the ROM with F3DEX2 opcodes.
+$(BUILD_DIR)/src/overlay_%: PROFILE_APPEND = -DF3DEX_GBI_2
 
 # These TUs inline sqrtf()/sqrt() as bare sqrt.s/sqrt.d; without -ffast-math
 # KMC GCC adds a NaN guard and a library fallback that the ROM lacks.
