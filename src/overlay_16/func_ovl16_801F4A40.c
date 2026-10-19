@@ -4,8 +4,11 @@ extern s32 D_ovl16_801F89C0;
 extern s32 D_ovl16_80223804;
 extern s8 D_ovl16_802237B8;
 extern s8 D_ovl16_802237B9;
+extern u8 D_801B724B;
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A40);
+s32 func_ovl16_801F4A40(void) {
+    return D_801B724B & 3;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A50);
 
