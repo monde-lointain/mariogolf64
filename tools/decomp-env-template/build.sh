@@ -39,6 +39,30 @@ if grep -q "INCLUDE_ASM\|INCLUDE_RODATA\|GLOBAL_ASM" "$INPUT"; then
     exit 1
 fi
 
+# Stall limit: MG64_STALL_LIMIT, else stall_limit in .run.json (decomp-env writes it from the
+# task's tier), else 20. Checked before compiling so a bad value fails fast.
+STALL_LIMIT=20
+if [ -n "${MG64_STALL_LIMIT:-}" ]; then
+    STALL_LIMIT="$MG64_STALL_LIMIT"
+elif [ -f "$WORKSPACE/.run.json" ]; then
+    STALL_LIMIT="$(python3 -c '
+import json, sys
+path = sys.argv[1]
+try:
+    with open(path) as f:
+        run = json.load(f)
+    if not isinstance(run, dict):
+        raise ValueError("top level is not an object")
+    print(run.get("stall_limit", 20))
+except (OSError, ValueError) as err:
+    sys.exit(f"ERROR: cannot read stall_limit from {path}: {err}")
+' "$WORKSPACE/.run.json")" || exit 1
+fi
+if ! [[ "$STALL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
+    echo "ERROR: stall limit must be a positive integer, got '$STALL_LIMIT' (MG64_STALL_LIMIT or .run.json stall_limit)."
+    exit 1
+fi
+
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_PATH/../.." && pwd)"
 KMC_CC="$PROJECT_ROOT/tools/kmc-cc"
@@ -160,7 +184,7 @@ if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
         echo "$1 ${MATCH_PERCENT}%" >> match_log.txt
     fi
 
-    STALL_INFO=$(awk '
+    STALL_INFO=$(awk -v limit="$STALL_LIMIT" '
     {
         gsub(/%/, "", $2)
         total++
@@ -172,13 +196,14 @@ if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
     }
     END {
         since = total - best_at
-        if (since >= 20) {
+        if (since >= limit) {
             printf "%d %s %.1f\n", since, best_file, best
         }
     }' match_log.txt)
 
     if [ -n "$STALL_INFO" ]; then
         read -r SINCE BEST_FILE BEST_SCORE <<< "$STALL_INFO"
-        echo "No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE). Consider stopping if you have run out of improvement ideas."
+        FUNCTION_NAME="$(grep -m1 -oP '^glabel \K[A-Za-z_][A-Za-z0-9_]*$' target.s || true)"
+        echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Do not make another attempt. Record the stop from this directory with: python3 \"$PROJECT_ROOT/tools/difficulty_ledger.py\" record ${FUNCTION_NAME:-<function>} --outcome stalled --reason \"<one line>\", then report the best score and the remaining differences."
     fi
 fi
