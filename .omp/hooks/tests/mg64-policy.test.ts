@@ -201,6 +201,17 @@ const cases: Case[] = [
 		input: { command: "cd x && make -s --no-print-directory print-cflags SRC=src/libultra/io/foo.c | tr ' ' '\\n'" },
 	},
 	{
+		name: "bash: print-cflags with stderr redirections is allowed",
+		tool: "bash",
+		input: { command: "make -s print-cflags SRC=src/main/a.c 2>&1 | head -5; make -s print-cflags SRC=src/main/b.c 2>/dev/null" },
+	},
+	{
+		name: "bash: a redirection does not hide a real make target",
+		tool: "bash",
+		input: { command: "make clean 2>&1" },
+		blocked: MAKE,
+	},
+	{
 		name: "bash: print-cflags followed by a real make is blocked",
 		tool: "bash",
 		input: { command: "make -s print-cflags SRC=src/main/a.c && make" },

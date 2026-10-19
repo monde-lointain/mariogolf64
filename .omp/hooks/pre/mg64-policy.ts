@@ -98,9 +98,12 @@ function asmMutation(line: string): boolean {
 	return SCRIPT_RUN.test(line) && ASM_SCRIPT_WRITE.test(line);
 }
 
+/** Shell redirections (`2>&1`, `2>/dev/null`, `>out`); their targets are policed by the asm/vendored-write rules. */
+const REDIRECTION = /\s+\d*(?:>&\d+|>>?\s*[^\s;&|]+)/g;
+
 /** True when a line runs `make` for anything but the read-only `print-cflags` query. */
 function directMake(line: string): boolean {
-	for (const match of line.matchAll(MAKE_INVOCATION)) {
+	for (const match of line.replace(REDIRECTION, "").matchAll(MAKE_INVOCATION)) {
 		if (!MAKE_PRINT_CFLAGS_ARGS.test(match[2])) return true;
 	}
 	return false;
