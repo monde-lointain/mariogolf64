@@ -288,7 +288,7 @@ $(TARGET).z64: $(TARGET).elf
 ### Settings
 .SECONDARY:
 .DELETE_ON_ERROR:
-.PHONY: all clean default extract nonmatching verify check print-cflags format format-check tidy \
+.PHONY: all clean extract nonmatching verify check print-cflags format format-check tidy \
 	check-clang-format-version check-clang-tidy-version diff-line install-hooks setup FORCE
 FORCE:
 SHELL = /bin/bash -e -o pipefail
