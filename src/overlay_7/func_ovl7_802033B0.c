@@ -32,14 +32,14 @@ typedef struct {
   f32 fB[2];
   Ovl7Word fC[4];
   Ovl7Word fD[2];
-  s32 iA[2];
+  f32 iA[2];
   f32 fE[3];
   s32 flags[2];
   s32 iB[2];
 } Ovl7Region;
 
 typedef struct {
-  GolfCamera camera;
+  Ovl7Vec3 camPos[2];
   f32 unk18;
   f32 unk1C;
   f32 unk20;
@@ -55,12 +55,12 @@ void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames);
 void func_ovl7_802033B0(void) {
   s32 i;
 
-  D_ovl7_8022BE30.camera.eye.x = 0.0f;
-  D_ovl7_8022BE30.camera.at.x = 0.0f;
-  D_ovl7_8022BE30.camera.at.y = 0.0f;
-  D_ovl7_8022BE30.camera.at.z = 0.0f;
-  D_ovl7_8022BE30.camera.eye.y = -100.0f;
-  D_ovl7_8022BE30.camera.eye.z = 100.0f;
+  D_ovl7_8022BE30.camPos[0].x = 0.0f;
+  D_ovl7_8022BE30.camPos[1].x = 0.0f;
+  D_ovl7_8022BE30.camPos[1].y = 0.0f;
+  D_ovl7_8022BE30.camPos[1].z = 0.0f;
+  D_ovl7_8022BE30.camPos[0].y = -100.0f;
+  D_ovl7_8022BE30.camPos[0].z = 100.0f;
   D_ovl7_8022BE30.unk24 = 45.0f;
   i = 0;
   do {
@@ -94,12 +94,12 @@ void func_ovl7_802033B0(void) {
 }
 
 void func_ovl7_8020356C(f32 eye_x, f32 eye_y, f32 eye_z, f32 target_x, f32 target_y, f32 target_z) {
-    D_ovl7_8022BE30.camera.eye.x = eye_x;
-    D_ovl7_8022BE30.camera.eye.y = eye_y;
-    D_ovl7_8022BE30.camera.eye.z = eye_z;
-    D_ovl7_8022BE30.camera.at.x = target_x;
-    D_ovl7_8022BE30.camera.at.y = target_y;
-    D_ovl7_8022BE30.camera.at.z = target_z;
+    D_ovl7_8022BE30.camPos[0].x = eye_x;
+    D_ovl7_8022BE30.camPos[0].y = eye_y;
+    D_ovl7_8022BE30.camPos[0].z = eye_z;
+    D_ovl7_8022BE30.camPos[1].x = target_x;
+    D_ovl7_8022BE30.camPos[1].y = target_y;
+    D_ovl7_8022BE30.camPos[1].z = target_z;
     func_ovl7_80203620();
 }
 
@@ -107,6 +107,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035BC)
 
 extern f64 D_ovl7_8020C098;
 extern f64 D_ovl7_8020C0A0;
+extern f64 D_ovl7_8020C090;
 extern Ovl7TweenState D_ovl7_8022BE98;
 extern Ovl7TweenStateB D_ovl7_8022BE94;
 extern f32 fabsf(f32);
@@ -128,7 +129,63 @@ void func_ovl7_8020360C(s32 unused, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203620);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_8020370C);
+void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames) {
+  f32 dx;
+  f32 dy;
+  f32 dz;
+  f32 dist;
+  f32 step;
+  s32 quarter;
+
+  dx = x - D_ovl7_8022BE30.camPos[idx].x;
+  dy = y - D_ovl7_8022BE30.camPos[idx].y;
+  dz = z - D_ovl7_8022BE30.camPos[idx].z;
+  dist = sqrtf(dx * dx + dy * dy + dz * dz);
+  if (dist < 0.1f) {
+    D_ovl7_8022BE30.camPos[idx].x = x;
+    D_ovl7_8022BE30.camPos[idx].y = y;
+    D_ovl7_8022BE30.camPos[idx].z = z;
+    return;
+  }
+
+  if (frames != 0) {
+    quarter = frames / 4;
+    step = dist / (f32) (frames - quarter);
+    D_ovl7_8022BE30.region.fA[idx] = step;
+    D_ovl7_8022BE30.region.fB[idx] = step / (f32) (quarter + 1);
+    D_ovl7_8022BE30.region.iA[idx] = (f32) ((f64) dist * D_ovl7_8020C090);
+    if (!(D_ovl7_8022BE30.region.flags[idx] & 0x80)) {
+      if (!(D_ovl7_8022BE30.region.flags[idx] & 2)) {
+        D_ovl7_8022BE30.region.flags[idx] ^= 2;
+      }
+      if (D_ovl7_8022BE30.region.flags[idx] & 4) {
+        D_ovl7_8022BE30.region.flags[idx] ^= 4;
+      }
+    }
+  } else {
+    if (!(D_ovl7_8022BE30.region.flags[idx] & 4)) {
+      D_ovl7_8022BE30.region.flags[idx] ^= 4;
+    }
+    if (D_ovl7_8022BE30.region.flags[idx] & 2) {
+      D_ovl7_8022BE30.region.flags[idx] ^= 2;
+    }
+  }
+
+  D_ovl7_8022BE30.region.vecA[idx].x = x;
+  x = x - D_ovl7_8022BE30.camPos[idx].x;
+  D_ovl7_8022BE30.region.vecA[idx].z = z;
+  z = z - D_ovl7_8022BE30.camPos[idx].z;
+  D_ovl7_8022BE30.region.vecA[idx].y = y;
+  y = y - D_ovl7_8022BE30.camPos[idx].y;
+  D_ovl7_8022BE30.region.iB[idx] = 1;
+  if (fabsf(x) < fabsf(z)) {
+    D_ovl7_8022BE30.region.iB[idx] = 3;
+    x = z;
+  }
+  if (fabsf(x) < fabsf(y)) {
+    D_ovl7_8022BE30.region.iB[idx] = 2;
+  }
+}
 
 void func_ovl7_80203984(s32 idx, f32 x, f32 y, f32 z, s32 frames) {
   s32 *flags;
@@ -305,10 +362,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203F70)
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80204EA8);
 
 void func_ovl7_802065FC(Vec3f* delta) {
-    D_ovl7_8022BE30.camera.at.x += delta->x;
-    D_ovl7_8022BE30.camera.at.y += delta->y;
-    D_ovl7_8022BE30.camera.at.z += delta->z;
-    D_ovl7_8022BE30.camera.eye.x += delta->x;
-    D_ovl7_8022BE30.camera.eye.y += delta->y;
-    D_ovl7_8022BE30.camera.eye.z += delta->z;
+    D_ovl7_8022BE30.camPos[1].x += delta->x;
+    D_ovl7_8022BE30.camPos[1].y += delta->y;
+    D_ovl7_8022BE30.camPos[1].z += delta->z;
+    D_ovl7_8022BE30.camPos[0].x += delta->x;
+    D_ovl7_8022BE30.camPos[0].y += delta->y;
+    D_ovl7_8022BE30.camPos[0].z += delta->z;
 }
