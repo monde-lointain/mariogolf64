@@ -1,5 +1,7 @@
 #include "common.h"
 
+extern u8* func_8005AF50(void);
+
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F5F0);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F6E0);
@@ -22,7 +24,37 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220E34)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_802213C8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8022181C);
+s32 func_ovl3_8022181C(void) {
+    u8* ret = func_8005AF50();
+    s32 count = 0, i = 0, n = 6;
+    u8* base = ret;
+    do {
+        u32 p = (u32)base + 0x1320;
+        u32 end = n + p;
+        do {
+            count += (*(s8*)p > 0);
+            p++;
+        } while (p != end);
+        base += 6;
+        i++;
+    } while (i != n);
+    if (count >= 0x14) {
+        return 6;
+    }
+    if (count >= 0x10) {
+        return 5;
+    }
+    if (count >= 0xC) {
+        return 4;
+    }
+    if (count >= 8) {
+        return 3;
+    }
+    if (count >= 4) {
+        return 2;
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_802218C0);
 
