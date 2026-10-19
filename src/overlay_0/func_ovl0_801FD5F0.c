@@ -15,7 +15,11 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD8DC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD9C0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD9E4);
+extern f32 D_ovl0_802270C0[4][4];
+
+void func_ovl0_801FD9E4(void) {
+    guMtxIdentF(D_ovl0_802270C0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FDA04);
 
