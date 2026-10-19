@@ -26,7 +26,8 @@ import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, time, timedelta
+from functools import partial
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -84,17 +85,24 @@ class _Group:
     candidates: int = 0
     outcomes: Counter = field(default_factory=Counter)
     matches: int = 0
+    matches_unsized: int = 0
+    matched_bytes: int = 0
     durations: list[float] = field(default_factory=list)
     sessions_joined: int = 0
     sessions_missing: int = 0
     cost_usd: float = 0.0
     tokens: int = 0
 
-    def add(self, run: CandidateRun, usage: SessionUsage | None) -> None:
+    def add(self, run: CandidateRun, usage: SessionUsage | None, sizes: Mapping[str, int]) -> None:
         self.candidates += 1
         self.outcomes[run.outcome] += 1
         if run.outcome in MATCH_OUTCOMES:
             self.matches += 1
+            size = sizes.get(candidate_name(run.candidate))
+            if size is None:
+                self.matches_unsized += 1
+            else:
+                self.matched_bytes += size
         if run.duration_s is not None:
             self.durations.append(run.duration_s)
         if usage is None:
@@ -118,19 +126,35 @@ def _int(value: Any) -> int | None:
 
 
 def parse_ts(value: Any) -> datetime | None:
+    """An ISO 8601 timestamp as an aware datetime. A naive timestamp is local time."""
     if not isinstance(value, str) or not value:
         return None
     text = value[:-1] + "+00:00" if value.endswith("Z") else value
     try:
-        return datetime.fromisoformat(text)
+        return datetime.fromisoformat(text).astimezone()
     except ValueError:
         return None
 
 
-def _on_or_after(ts: datetime | None, since: date | None) -> bool:
-    if since is None:
+def candidate_name(candidate: str) -> str:
+    """The function a candidate names: the first element of a JSON array string, else the string itself."""
+    if candidate.startswith("["):
+        try:
+            value = json.loads(candidate)
+        except json.JSONDecodeError:
+            return candidate
+        if isinstance(value, list) and value and isinstance(value[0], str):
+            return value[0]
+    return candidate
+
+
+def _in_window(ts: datetime | None, since: datetime | None, until: datetime | None) -> bool:
+    """True when ts is at or after since and before until. An unset bound is open."""
+    if since is None and until is None:
         return True
-    return ts is not None and ts.date() >= since
+    if ts is None:
+        return False
+    return (since is None or ts >= since) and (until is None or ts < until)
 
 
 def _record_day(record: Mapping[str, Any]) -> date | None:
@@ -166,7 +190,9 @@ def read_jsonl(path: Path) -> tuple[list[dict[str, Any]], int]:
     return records, malformed
 
 
-def read_candidate_runs(worktree: Path, since: date | None) -> tuple[list[CandidateRun], int, int]:
+def read_candidate_runs(
+    worktree: Path, since: datetime | None = None, until: datetime | None = None
+) -> tuple[list[CandidateRun], int, int]:
     runs: list[CandidateRun] = []
     files = 0
     malformed = 0
@@ -179,7 +205,7 @@ def read_candidate_runs(worktree: Path, since: date | None) -> tuple[list[Candid
             if not isinstance(outcome, str):
                 malformed += 1
                 continue
-            if not _on_or_after(parse_ts(record.get("ts_start")), since):
+            if not _in_window(parse_ts(record.get("ts_start")), since, until):
                 continue
             session_id = record.get("omp_session_id")
             runs.append(CandidateRun(
@@ -386,18 +412,18 @@ def _ledger_stats(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
-def read_progress(progress_file: Path, since: date | None = None) -> list[dict[str, Any]]:
-    """Snapshot records in file order; since keeps records dated on or after it."""
-    if not progress_file.is_file():
-        return []
+def read_progress(progress_file: Path) -> list[dict[str, Any]]:
+    """Snapshot records in file order, skipping records without a valid date."""
     records, _ = read_jsonl(progress_file)
-    kept = []
-    for record in records:
-        day = _record_day(record)
-        if day is None or (since is not None and day < since):
-            continue
-        kept.append(record)
-    return kept
+    return [record for record in records if _record_day(record) is not None]
+
+
+def _snapshot_moment(record: Mapping[str, Any]) -> datetime | None:
+    """When a snapshot was taken: its ts, else local midnight of its date."""
+    moment = parse_ts(record.get("ts"))
+    if moment is None and (day := _record_day(record)) is not None:
+        moment = datetime.combine(day, time()).astimezone()
+    return moment
 
 
 def _diff(current: Mapping[str, Any], previous: Mapping[str, Any] | None, key: str) -> float | None:
@@ -425,12 +451,15 @@ def _row(task: str, model: str, group: _Group) -> dict[str, Any]:
     wall_s = sum(group.durations)
     wall_hours = wall_s / 3600 if wall_s else None
     joined = group.sessions_joined
+    kb = group.matched_bytes / 1024
     return {
         "task": task,
         "model": model,
         "candidates": group.candidates,
         "outcomes": dict(sorted(group.outcomes.items())),
         "matches": group.matches,
+        "matches_unsized": group.matches_unsized,
+        "matched_bytes": group.matched_bytes,
         "match_rate": group.matches / group.candidates if group.candidates else None,
         "wall_hours": wall_hours,
         "matches_per_hour": group.matches / wall_hours if wall_hours else None,
@@ -441,6 +470,8 @@ def _row(task: str, model: str, group: _Group) -> dict[str, Any]:
         "cost_usd": group.cost_usd if joined else None,
         "cost_per_run_usd": group.cost_usd / joined if joined else None,
         "cost_per_match_usd": group.cost_usd / group.matches if joined and group.matches else None,
+        "cost_per_kb_usd": group.cost_usd / kb if joined and kb else None,
+        "minutes_per_kb": wall_s / 60 / kb if wall_s and kb else None,
         "tokens": group.tokens if joined else None,
         "tokens_per_run": group.tokens / joined if joined else None,
         "tokens_per_match": group.tokens / group.matches if joined and group.matches else None,
@@ -448,13 +479,14 @@ def _row(task: str, model: str, group: _Group) -> dict[str, Any]:
 
 
 def build_report(worktrees: Sequence[Path], *, sessions_root: Path, ledger_file: Path | None,
-                 progress_file: Path | None, since: date | None = None) -> dict[str, Any]:
+                 progress_file: Path | None, since: datetime | None = None, until: datetime | None = None,
+                 sizes: Mapping[str, int]) -> dict[str, Any]:
     runs: list[CandidateRun] = []
     outcome_files = 0
     outcome_malformed = 0
     env_results: list[EnvResult] = []
     for worktree in worktrees:
-        worktree_runs, files, bad = read_candidate_runs(worktree, since)
+        worktree_runs, files, bad = read_candidate_runs(worktree, since, until)
         runs.extend(worktree_runs)
         outcome_files += files
         outcome_malformed += bad
@@ -472,8 +504,8 @@ def build_report(worktrees: Sequence[Path], *, sessions_root: Path, ledger_file:
                 usage_cache[path] = session_usage(path)
             usage = usage_cache[path]
         model = run_model(usage, run.agent_flags)
-        groups.setdefault((run.task, model), _Group()).add(run, usage)
-        total.add(run, usage)
+        groups.setdefault((run.task, model), _Group()).add(run, usage, sizes)
+        total.add(run, usage, sizes)
 
     joined = total.sessions_joined
     missing = total.sessions_missing
@@ -488,7 +520,7 @@ def build_report(worktrees: Sequence[Path], *, sessions_root: Path, ledger_file:
     if ledger_file is not None and ledger_file.is_file():
         raw, bad = read_jsonl(ledger_file)
         ledger_info.update(status="present", malformed=bad)
-        ledger_records = [r for r in raw if _on_or_after(parse_ts(r.get("ts")), since)]
+        ledger_records = [r for r in raw if _in_window(parse_ts(r.get("ts")), since, until)]
         ledger_info["records"] = len(ledger_records)
 
     matched_envs = [r for r in env_results if r.attempts_to_match is not None]
@@ -501,11 +533,11 @@ def build_report(worktrees: Sequence[Path], *, sessions_root: Path, ledger_file:
     ]
 
     history = read_progress(progress_file) if progress_file is not None else []
-    snapshots = [row for row in _with_trend(history)
-                 if since is None or (_record_day(row) is not None and _record_day(row) >= since)]
+    snapshots = [row for row in _with_trend(history) if _in_window(_snapshot_moment(row), since, until)]
 
     return {
         "since": since.isoformat() if since else None,
+        "until": until.isoformat() if until else None,
         "worktrees": [str(w) for w in worktrees],
         "inputs": {
             "outcomes": {
@@ -551,6 +583,16 @@ def project_figures(root: Path) -> dict[str, Any]:
     )
 
 
+def function_sizes(root: Path) -> dict[str, int]:
+    """Byte size of each function: asm/nonmatchings stubs, plus matched C bodies in src/.
+
+    A matched function's stub is deleted, so its size comes from build_function_index.
+    """
+    sizes = {name: fn.size_bytes for name, fn in load_unmatched(root).items()}
+    sizes.update({name: fn.size_bytes for name, fn in build_function_index(root).items()})
+    return sizes
+
+
 def progress_figures(matched_sizes: Mapping[str, int], unmatched_sizes: Mapping[str, int]) -> dict[str, Any]:
     matched_bytes = sum(matched_sizes.values())
     unmatched_bytes = sum(unmatched_sizes.values())
@@ -590,9 +632,18 @@ def _status_line(label: str, info: Mapping[str, Any], present: str, absent: str)
     return f"  {label:<18}: absent ({absent})"
 
 
+def _span(report: Mapping[str, Any]) -> str:
+    parts = []
+    if report["since"]:
+        parts.append(f"since {report['since']}")
+    if report["until"]:
+        parts.append(f"until {report['until']}")
+    return " ".join(parts) or "all time"
+
+
 def render_text(report: Mapping[str, Any]) -> str:
     inputs = report["inputs"]
-    lines = [f"Pipeline metrics (since {report['since'] or 'all time'}, {len(report['worktrees'])} worktree(s))", ""]
+    lines = [f"Pipeline metrics ({_span(report)}, {len(report['worktrees'])} worktree(s))", ""]
     lines.append("Inputs")
     lines.append(_status_line("outcomes.log", inputs["outcomes"],
                               f"{inputs['outcomes']['runs']} run(s) in {inputs['outcomes']['files']} file(s), "
@@ -615,8 +666,8 @@ def render_text(report: Mapping[str, Any]) -> str:
 
     lines.append("")
     lines.append("Per task and model")
-    header = (f"  {'task':<22}{'model':<34}{'runs':>6}{'match':>7}{'rate':>7}{'m/h':>7}"
-              f"{'med s':>8}{'$/run':>9}{'$/match':>9}{'tok/run':>10}")
+    header = (f"  {'task':<22}{'model':<34}{'runs':>6}{'match':>7}{'rate':>7}{'KB':>8}"
+              f"{'med s':>8}{'$/run':>9}{'$/match':>9}{'$/KB':>9}{'min/KB':>8}")
     lines.append(header)
     rows = list(report["tasks"]) + [report["totals"]]
     for row in rows:
@@ -624,12 +675,16 @@ def render_text(report: Mapping[str, Any]) -> str:
         lines.append(
             f"  {row['task']:<22}{row['model']:<34}{row['candidates']:>6}{row['matches']:>7}"
             f"{rate + '%' if rate != '-' else '-':>7}"
-            f"{_fmt(row['matches_per_hour'], '.2f'):>7}"
+            f"{_fmt(row['matched_bytes'] / 1024, '.1f'):>8}"
             f"{_fmt(row['duration_median_s'], '.0f'):>8}"
             f"{_fmt(row['cost_per_run_usd'], '.3f'):>9}"
             f"{_fmt(row['cost_per_match_usd'], '.3f'):>9}"
-            f"{_fmt(row['tokens_per_run'], '.0f'):>10}"
+            f"{_fmt(row['cost_per_kb_usd'], '.3f'):>9}"
+            f"{_fmt(row['minutes_per_kb'], '.1f'):>8}"
         )
+    if report["totals"]["matches_unsized"]:
+        lines.append(f"  {report['totals']['matches_unsized']} match(es) with no function size: "
+                     "counted as matches, not in KB")
 
     attempts = report["attempts_to_match"]
     lines.append("")
@@ -668,18 +723,31 @@ def render_text(report: Mapping[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _date_arg(text: str) -> date:
+def _bound_arg(text: str, *, end_of_day: bool) -> datetime:
+    """A --since or --until bound as an aware datetime. A naive datetime is local time.
+
+    A date is local midnight. With end_of_day it is the midnight after that date, so --until DATE includes DATE.
+    """
     try:
-        return date.fromisoformat(text)
+        day = date.fromisoformat(text)
+    except ValueError:
+        day = None
+    if day is not None:
+        return datetime.combine(day + timedelta(days=1) if end_of_day else day, time()).astimezone()
+    try:
+        return datetime.fromisoformat(text).astimezone()
     except ValueError as exc:
-        raise argparse.ArgumentTypeError(f"expected YYYY-MM-DD, got {text!r}") from exc
+        raise argparse.ArgumentTypeError(f"expected YYYY-MM-DD or an ISO datetime, got {text!r}") from exc
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Report nigel pipeline metrics: outcomes, cost, attempts, ledger, progress.")
-    parser.add_argument("--since", type=_date_arg, metavar="DATE",
-                        help="only outcomes, ledger records and snapshots dated on or after DATE")
+    parser.add_argument("--since", type=partial(_bound_arg, end_of_day=False), metavar="WHEN",
+                        help="only outcomes, ledger records and snapshots at or after WHEN: a YYYY-MM-DD date "
+                             "(local midnight) or an ISO datetime with offset, e.g. from git log --format=%%cI")
+    parser.add_argument("--until", type=partial(_bound_arg, end_of_day=True), metavar="WHEN",
+                        help="only outcomes, ledger records and snapshots before WHEN; a date includes that whole day")
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     parser.add_argument("--worktree", action="append", type=Path, metavar="PATH",
                         help="worktree to read (repeatable); default: every entry of git worktree list")
@@ -706,6 +774,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         ledger_file=ledger_path(common),
         progress_file=progress_file,
         since=args.since,
+        until=args.until,
+        sizes=function_sizes(root),
     )
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))

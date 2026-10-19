@@ -151,6 +151,8 @@ class FixtureCase(unittest.TestCase):
             "ledger_file": None,
             "progress_file": None,
             "since": None,
+            "until": None,
+            "sizes": {},
         }
         kwargs.update(overrides)
         return pm.build_report([self.worktree], **kwargs)
@@ -323,35 +325,131 @@ class TimingTest(FixtureCase):
         self.assertAlmostEqual(totals["duration_mean_s"], 250.0)
 
 
+def local_iso(*args: int) -> str:
+    """A local wall-clock moment as an ISO string with its UTC offset."""
+    return datetime(*args).astimezone().isoformat()
+
+
 class SinceFilterTest(FixtureCase):
     def test_since_drops_older_outcomes_ledger_and_snapshots(self) -> None:
         self.write_outcomes([
-            outcome_record("FIXED", ts="2026-09-30T23:00:00Z"),
-            outcome_record("NOT_FIXED", ts="2026-10-02T09:00:00Z"),
+            outcome_record("FIXED", ts=local_iso(2026, 9, 29, 12)),
+            outcome_record("NOT_FIXED", ts=local_iso(2026, 10, 2, 9)),
         ])
         ledger = self.root / "difficulty.jsonl"
         write_jsonl(ledger, [
-            ledger_record("stalled", attempts=5, ts="2026-09-30T12:00:00Z"),
-            ledger_record("stalled", attempts=7, ts="2026-10-02T12:00:00Z"),
+            ledger_record("stalled", attempts=5, ts=local_iso(2026, 9, 29, 12)),
+            ledger_record("stalled", attempts=7, ts=local_iso(2026, 10, 2, 12)),
         ])
         progress = self.root / "progress.jsonl"
-        for day, matched in (("2026-09-30", 1), ("2026-10-02", 2)):
+        for day, matched in (("2026-09-29", 1), ("2026-10-02", 2)):
             pm.append_snapshot(progress, pm.progress_figures({"a": matched}, {}),
                                worktree=self.worktree, today=date.fromisoformat(day),
-                               now=datetime(2026, 10, 2, tzinfo=timezone.utc))
+                               now=datetime.fromisoformat(f"{day}T12:00:00+00:00"))
 
-        report = self.report(ledger_file=ledger, progress_file=progress, since=date(2026, 10, 1))
+        report = self.report(ledger_file=ledger, progress_file=progress,
+                             since=pm._bound_arg("2026-10-01", end_of_day=False))
 
         self.assertEqual(report["totals"]["candidates"], 1)
         self.assertEqual(report["ledger"]["records"], 1)
         self.assertEqual([s["date"] for s in report["progress"]["snapshots"]], ["2026-10-02"])
+
+    def test_until_excludes_its_moment_and_a_date_includes_its_day(self) -> None:
+        self.write_outcomes([
+            outcome_record("FIXED", ts=local_iso(2026, 10, 2, 23, 59, 59)),
+            outcome_record("NOT_FIXED", ts=local_iso(2026, 10, 3)),
+        ])
+        ledger = self.root / "difficulty.jsonl"
+        write_jsonl(ledger, [
+            ledger_record("stalled", attempts=5, ts=local_iso(2026, 10, 2, 23, 59, 59)),
+            ledger_record("stalled", attempts=7, ts=local_iso(2026, 10, 3)),
+        ])
+
+        report = self.report(ledger_file=ledger, until=pm._bound_arg("2026-10-02", end_of_day=True))
+
+        self.assertEqual(report["totals"]["candidates"], 1)
+        self.assertEqual(report["totals"]["matches"], 1)
+        self.assertEqual(report["ledger"]["records"], 1)
+
+    def test_since_datetime_is_an_exact_instant(self) -> None:
+        self.write_outcomes([
+            outcome_record("FIXED", ts="2026-10-19T22:40:59Z"),
+            outcome_record("NOT_FIXED", ts="2026-10-19T22:41:00Z"),
+        ])
+
+        report = self.report(since=pm._bound_arg("2026-10-19T17:41:00-05:00", end_of_day=False))
+
+        self.assertEqual(report["totals"]["candidates"], 1)
+        self.assertEqual(report["totals"]["matches"], 0)
+
+    def test_windows_partition_runs_by_day(self) -> None:
+        self.write_outcomes([
+            outcome_record("FIXED", ts=local_iso(2026, 10, 1, 12)),
+            outcome_record("FIXED", ts=local_iso(2026, 10, 2, 12)),
+            outcome_record("FIXED", ts=local_iso(2026, 10, 3, 12)),
+        ])
+
+        before = self.report(until=pm._bound_arg("2026-10-02", end_of_day=False))["totals"]["candidates"]
+        during = self.report(since=pm._bound_arg("2026-10-02", end_of_day=False),
+                             until=pm._bound_arg("2026-10-02", end_of_day=True))["totals"]["candidates"]
+        after = self.report(since=pm._bound_arg("2026-10-03", end_of_day=False))["totals"]["candidates"]
+
+        self.assertEqual((before, during, after), (1, 1, 1))
 
     def test_since_drops_outcomes_without_timestamp(self) -> None:
         record = outcome_record("FIXED")
         record["ts_start"] = None
         self.write_outcomes([record])
 
-        self.assertEqual(self.report(since=date(2026, 10, 1))["totals"]["candidates"], 0)
+        report = self.report(since=pm._bound_arg("2026-10-01", end_of_day=False))
+
+        self.assertEqual(report["totals"]["candidates"], 0)
+
+    def test_bounds_are_local_midnight_or_local_datetime(self) -> None:
+        self.assertEqual(pm._bound_arg("2026-10-02", end_of_day=False), datetime(2026, 10, 2).astimezone())
+        self.assertEqual(pm._bound_arg("2026-10-02", end_of_day=True), datetime(2026, 10, 3).astimezone())
+        self.assertEqual(pm._bound_arg("2026-10-02T12:00:00", end_of_day=False),
+                         datetime(2026, 10, 2, 12).astimezone())
+
+
+class MatchedSizeTest(FixtureCase):
+    def test_matched_bytes_sum_sizes_of_matched_functions(self) -> None:
+        self.write_outcomes([
+            outcome_record("FIXED", candidate="func_a"),
+            outcome_record("FIXED", candidate='["func_b", "ref_1"]'),
+            outcome_record("NOT_FIXED", candidate="func_a"),
+            outcome_record("FIXED", candidate="base_1"),
+        ])
+
+        report = self.report(sizes={"func_a": 100, "func_b": 300})
+
+        totals = report["totals"]
+        self.assertEqual((totals["matches"], totals["matches_unsized"], totals["matched_bytes"]), (3, 1, 400))
+        self.assertIn("1 match(es) with no function size", pm.render_text(report))
+
+    def test_per_kb_figures_divide_cost_and_minutes_by_matched_kib(self) -> None:
+        for session_id, cost in (("sess-a", 2.0), ("sess-b", 1.0)):
+            session_file(self.sessions / "-x" / f"2026-10-02T10-00-00-000Z_{session_id}.jsonl", session_id,
+                         [assistant(cost)])
+        self.write_outcomes([
+            outcome_record("FIXED", candidate="func_a", duration_s=1800.0, session_id="sess-a"),
+            outcome_record("NOT_FIXED", duration_s=1800.0, session_id="sess-b"),
+            outcome_record("NOT_FIXED", duration_s=1200.0),
+        ])
+
+        totals = self.report(sizes={"func_a": 2048})["totals"]
+
+        self.assertEqual(totals["matched_bytes"], 2048)
+        self.assertAlmostEqual(totals["cost_per_kb_usd"], 1.5)
+        self.assertAlmostEqual(totals["minutes_per_kb"], 40.0)
+
+    def test_per_kb_figures_are_none_without_matched_bytes(self) -> None:
+        self.write_outcomes([outcome_record("NOT_FIXED", candidate="func_a", duration_s=600.0)])
+
+        totals = self.report(sizes={"func_a": 2048})["totals"]
+
+        self.assertIsNone(totals["cost_per_kb_usd"])
+        self.assertIsNone(totals["minutes_per_kb"])
 
 
 class AbsentAndMalformedInputTest(FixtureCase):
@@ -570,7 +668,7 @@ class ProgressTest(FixtureCase):
 
         lines = progress.read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(lines), 2)
-        records = pm.read_progress(progress, since=None)
+        records = pm.read_progress(progress)
         self.assertEqual([r["date"] for r in records], ["2026-10-02", "2026-10-03"])
         self.assertAlmostEqual(records[1]["bytes_pct"], 100.0)
         self.assertEqual(records[0]["worktree"], str(self.worktree))
@@ -579,7 +677,7 @@ class ProgressTest(FixtureCase):
         progress = self.root / "progress.jsonl"
         write_jsonl(progress, [{"date": "2026-10-02", "matched_functions": 1}, "garbage"])
 
-        self.assertEqual(len(pm.read_progress(progress, since=None)), 1)
+        self.assertEqual(len(pm.read_progress(progress)), 1)
 
     def test_trend_reports_delta_from_previous_snapshot(self) -> None:
         progress = self.root / "progress.jsonl"
@@ -611,9 +709,10 @@ class CliTest(FixtureCase):
         self.assertEqual(report["inputs"]["ledger"]["path"], str(ledger))
         self.assertEqual(report["tasks"], [])
 
-    def test_since_must_be_a_date(self) -> None:
-        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
-            pm.main(["--since", "2026-13-01"])
+    def test_bounds_must_be_dates_or_datetimes(self) -> None:
+        for flag in ("--since", "--until"):
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                pm.main([flag, "2026-13-01"])
 
 
 if __name__ == "__main__":
