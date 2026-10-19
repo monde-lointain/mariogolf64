@@ -3,7 +3,13 @@
 void func_ovl0_801FD5F0(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD5F8);
+void func_8004D4B8(char* source_text, s32 glyph_count, u16* destination);
+extern char D_ovl0_80224E90[8];
+extern u16 D_ovl0_80227040[64];
+
+void func_ovl0_801FD5F8(void) {
+    func_8004D4B8(D_ovl0_80224E90, 4, D_ovl0_80227040);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD624);
 
