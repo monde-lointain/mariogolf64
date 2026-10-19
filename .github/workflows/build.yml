@@ -48,8 +48,14 @@ jobs:
       - name: Build + verify ROM SHA-1
         run: PATH="$(pwd)/.venv/bin:$PATH" ./tools/build-and-verify.sh
 
-      - name: Generate objdiff report
-        run: PATH="$(pwd)/.venv/bin:$PATH" python3 -m mapfile_parser objdiff_report
+      - name: Report progress
+        shell: bash  # -o pipefail: a failing report must fail the step through tee
+        run: |
+          {
+            echo '```'
+            PATH="$(pwd)/.venv/bin:$PATH" python3 tools/progress.py --segments -o report.json
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Upload progress report artifact
         uses: actions/upload-artifact@v4

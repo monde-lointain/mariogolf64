@@ -4,9 +4,6 @@ spimdisasm==1.42.4
 rabbitizer==1.16.2
 pyyaml
 
-# progress reporting
-mapfile_parser>=2.12.1
-
 # permuter
 toml
 pycparser

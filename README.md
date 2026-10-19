@@ -19,7 +19,7 @@ cp /path/to/baserom.z64 .                    # SHA1 e2c4e7a905b29529b49a1619a401
 ./tools/build-and-verify.sh                  # prints build/mariogolf64.z64: OK and BUILD SUCCEEDED
 ```
 
-The output is `build/mariogolf64.z64`.
+The output is `build/mariogolf64.z64`. `python3 tools/progress.py` then reports how much of its code and data is decompiled ([progress](docs/tools/progress.md)).
 
 ## Documentation
 

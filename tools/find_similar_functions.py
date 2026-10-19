@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Find decompiled (matched) MG64 functions that resemble an unmatched function.
 
-Library module shared by score_functions.py, project_status.py and
+Library module shared by score_functions.py, pipeline_metrics.py and
 detect_low_quality_matches.py, plus a CLI for a single function:
 
     python3 tools/find_similar_functions.py <function>

@@ -43,7 +43,7 @@ Failed records are every record whose `outcome` is not `matched`. The report giv
 
 # Progress trend
 
-The progress figures are composed exactly as [project_status](/tools/selection-and-status.md) composes them: matched and unmatched functions, matched and unmatched bytes, and `bytes_pct` = matched bytes / total bytes. `--snapshot` appends one line `{date, ts, worktree, ...figures}` to `progress.jsonl`. Each row in the trend shows the change from the previous snapshot; `--since` keeps rows dated on or after the given day after the deltas are computed.
+The progress figures come from the source tree, so a snapshot needs no build: matched functions are C functions in `src/`, unmatched ones are `asm/nonmatchings` stubs sized from their `nonmatching <name>, <size>` headers. The figures are matched and unmatched functions, matched and unmatched bytes, and `bytes_pct` = matched bytes / total bytes. Hand-written assembly and data are not counted; [progress](progress.md) measures a build in full. `--snapshot` appends one line `{date, ts, worktree, ...figures}` to `progress.jsonl`. Each row in the trend shows the change from the previous snapshot; `--since` keeps rows dated on or after the given day after the deltas are computed.
 
 # Limits
 

@@ -11,7 +11,7 @@ Run with the project venv (`.venv/bin/python3`) when third-party imports fail. A
 
 | Command | Purpose |
 |---|---|
-| `python3 tools/project_status.py [-v]` | Matched/unmatched progress; `-v` lists unmatched functions largest first. |
+| `python3 tools/progress.py [--segments] [-u] [-o report.json]` | Code and data progress of the last build, by bytes and by functions or data symbols; `-u` lists unmatched functions largest first. See [progress](progress.md). |
 | `python3 tools/score_functions.py [path] [--json] [--by-size \| --by-similarity \| --by-coddog-similarity] [--top-n N] [--tier 1\|2\|3]` | Rank unmatched functions in `asm/nonmatchings` by difficulty, size or similarity. `--tier` keeps only functions in that [difficulty tier](difficulty-ledger.md); the default is tier 1 (no failed attempt). `--by-similarity` and `--by-coddog-similarity` list the most similar already-decompiled functions per entry. It is the `candidate_source` of the nigel decompile tasks. |
 | `python3 tools/find_similar_functions.py <function> [-n N] [-t T] [--coddog-similarity] [-v]` | Matched functions similar to an unmatched one, as references for matching. `--coddog-similarity` needs `coddog` on `PATH` (`cargo install coddog`). |
 | `python3 tools/rank_decompile_similar_impact.py [--limit N] [--ranking overall\|reach] [--json]` | Rank unmatched functions by direct progress plus how much matching them improves other `decompile-similar` targets. Reads `task-runner/decompile-similar/ignored.log`. |

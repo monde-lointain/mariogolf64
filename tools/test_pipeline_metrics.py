@@ -547,7 +547,7 @@ class GitLayoutTest(unittest.TestCase):
 
 
 class ProgressTest(FixtureCase):
-    def test_progress_figures_match_project_status_composition(self) -> None:
+    def test_progress_figures_count_functions_and_bytes(self) -> None:
         figures = pm.progress_figures({"a": 30, "b": 70}, {"c": 100})
 
         self.assertEqual(figures["matched_functions"], 2)

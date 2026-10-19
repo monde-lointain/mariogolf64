@@ -15,9 +15,3 @@ versions:
       expected_dir: "expected/"
       asm: "asm/nonmatchings"
       nonmatchings: "asm/nonmatchings"
-tools:
-  mapfile_parser:
-    progress_report:
-      output: report.json
-      check_asm_paths: False
-      report_data: True

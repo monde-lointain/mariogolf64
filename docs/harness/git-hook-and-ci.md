@@ -17,7 +17,7 @@ Never bypass it (`--no-verify` is blocked by the [policy hook](policy-hook.md)).
 
 # CI
 
-`.github/workflows/build.yml` runs on push and on pull requests **from the same repository only**. The job runs in a private container with the copyrighted ROM at `/orig/baserom.z64`; PR-controlled scripts from a fork could otherwise exfiltrate it, and forks never receive the pull credential anyway. Steps: checkout with submodules, copy the ROM to `baserom.z64`, `make -C tools` (KMC toolchain), create `.venv` and install `requirements.txt`, `./tools/build-and-verify.sh`, `python3 -m mapfile_parser objdiff_report`, upload `report.json` as artifact `us_report`.
+`.github/workflows/build.yml` runs on push and on pull requests **from the same repository only**. The job runs in a private container with the copyrighted ROM at `/orig/baserom.z64`; PR-controlled scripts from a fork could otherwise exfiltrate it, and forks never receive the pull credential anyway. Steps: checkout with submodules, copy the ROM to `baserom.z64`, `make -C tools` (KMC toolchain), create `.venv` and install `requirements.txt`, `./tools/build-and-verify.sh`, `python3 tools/progress.py --segments -o report.json` (table to the job summary, see [progress](/tools/progress.md)), upload `report.json` as artifact `us_report`.
 
 # The build container
 

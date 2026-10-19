@@ -8,7 +8,9 @@ Inputs (each reported as present or absent; a missing input is never an error):
   $MG64_LEDGER or <common-dir>/mg64/difficulty.jsonl   difficulty ledger (contract C3)
   <common-dir>/mg64/progress.jsonl    project progress snapshots written by --snapshot
 
-Progress composition follows tools/project_status.py, which is the source of truth.
+Progress figures come from the source tree (matched C functions in src/, unmatched
+asm/nonmatchings stubs), so a snapshot needs no build. tools/progress.py measures a
+build in full, data included.
 """
 
 from __future__ import annotations
@@ -539,7 +541,7 @@ def build_report(worktrees: Sequence[Path], *, sessions_root: Path, ledger_file:
 
 
 def project_figures(root: Path) -> dict[str, Any]:
-    """Progress figures, composed exactly as tools/project_status.py does."""
+    """Code progress from the source tree: matched C functions and asm/nonmatchings stubs."""
     matched = build_function_index(root)
     unmatched = {name: fn for name, fn in load_unmatched(root).items() if name not in matched}
     return progress_figures(

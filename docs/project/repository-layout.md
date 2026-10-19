@@ -42,10 +42,10 @@ tags: [project, layout]
 | `reloc_addrs.txt` | Splat relocation overrides (entrypoint `main_BSS_START`/`main_BSS_SIZE` relocs). |
 | `linker_scripts/` | Hand-written `hardware_regs.ld` and `n64_os_syms.ld` (hardware registers, fixed OS addresses). |
 | `Makefile` | Build rules and the `COMPILER PROFILES` section. |
-| `requirements.txt` | Python dependencies (Splat, spimdisasm, rabbitizer, mapfile_parser, permuter, asm-differ, m2c). |
+| `requirements.txt` | Python dependencies (Splat, spimdisasm, rabbitizer, permuter, asm-differ, m2c). |
 | `diff_settings.py` | asm-differ configuration (images, map file, source directories). |
 | `permuter_settings.toml` | decomp-permuter configuration; `tools/permuter` supplies the compiler profile. |
-| `decomp.yaml` | Project metadata for mapfile_parser progress reports (`report.json`). |
+| `decomp.yaml` | Project metadata: ROM SHA1 and build paths; [progress](/tools/progress.md) reads the map path from it. |
 | `.clang-format`, `.clang-tidy`, `.clangd` | Formatting, advisory lint, editor settings. |
 | `.envrc` | direnv hook that activates `.venv`. |
 | `mariogolf64.sha1`, `baserom.z64` | Reference checksum and base ROM. Protected. |
