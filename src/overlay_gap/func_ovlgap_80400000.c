@@ -7,7 +7,85 @@ u8* func_ovlgap_80400000(void) {
     return D_80451A60;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040000C);
+extern s32 D_800BB020;
+extern u16 D_800FED18;
+extern u16 D_800FED1E;
+extern f32 D_80105220;
+extern f32 D_80105228;
+extern f32 D_8010525C;
+extern s32 D_ovlgap_8040C5A8;
+extern s32 D_ovlgap_8040C5AC;
+extern s32 D_ovlgap_8040C5B0;
+extern s32 D_ovlgap_8040C5B4;
+extern u16 debug_menu_pad_buttons_a;
+void clear_text_grid(void);
+void func_ovlgap_80405AF4(s32, s32);
+s16 *get_terrain_vertex_pointer(u32, u32);
+
+void func_ovlgap_8040000C(void) {
+    u16 buttons;
+    f32 temp_fv0;
+    f32 temp_fv0_2;
+    GridVertex *temp_s0;
+    GridVertex *temp_v0;
+
+    buttons = D_800FED18;
+    if (buttons & 0x100) {
+        D_ovlgap_8040C5A8 += 1;
+    }
+    if (buttons & 0x200) {
+        D_ovlgap_8040C5A8 -= 1;
+    }
+    if (buttons & 0x400) {
+        D_ovlgap_8040C5AC -= 1;
+    }
+    if (buttons & 0x800) {
+        D_ovlgap_8040C5AC += 1;
+    }
+    if (D_ovlgap_8040C5A8 < 0) {
+        D_ovlgap_8040C5A8 = 0;
+    }
+    if (D_ovlgap_8040C5A8 >= 0x20) {
+        D_ovlgap_8040C5A8 = 0x1F;
+    }
+    if (D_ovlgap_8040C5AC < 0) {
+        D_ovlgap_8040C5AC = 0;
+    }
+    if (D_ovlgap_8040C5AC >= 0x40) {
+        D_ovlgap_8040C5AC = 0x3F;
+    }
+    if (debug_menu_pad_buttons_a & 0x10) {
+        f32 *scale = &D_8010525C;
+        temp_fv0 = *scale * 1.1f;
+        *scale = temp_fv0;
+        if (temp_fv0 >= 10.0f) {
+            *scale = 10.0f;
+        }
+    }
+    if (debug_menu_pad_buttons_a & 0x20) {
+        f32 *scale = &D_8010525C;
+        temp_fv0_2 = *scale * 0.9f;
+        *scale = temp_fv0_2;
+        if (temp_fv0_2 < 0.1f) {
+            *scale = 0.1f;
+        }
+    }
+    if (D_800FED18 & 0x8000) {
+        func_ovlgap_80405AF4(D_ovlgap_8040C5A8, D_ovlgap_8040C5AC);
+    }
+    if (D_800FED1E & 0x2000) {
+        D_ovlgap_8040C5B0 = D_ovlgap_8040C5A8;
+        D_ovlgap_8040C5B4 = D_ovlgap_8040C5AC;
+        clear_text_grid();
+        D_800BB020 = 0xA;
+    }
+    temp_s0 = (GridVertex *) get_terrain_vertex_pointer(D_ovlgap_8040C5A8, D_ovlgap_8040C5AC);
+    temp_v0 = (GridVertex *) get_terrain_vertex_pointer(D_ovlgap_8040C5A8 + 1, D_ovlgap_8040C5AC + 1);
+    D_80105220 = (f32) ((temp_s0->x + temp_v0->x) / 2);
+    do {
+        D_80105228 = (f32) ((temp_s0->z + temp_v0->z) / 2);
+    } while (0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804002C0);
 
