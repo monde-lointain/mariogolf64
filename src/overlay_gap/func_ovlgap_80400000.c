@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/terrain.h"
 
 extern u8 D_80451A60[];
 
@@ -84,7 +85,26 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804083E0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040BF64);
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original, as in func_ovl7_802068B4. */
+u16 func_ovlgap_8040BF64(u32 packed_xz) {
+    s32 r;
+    volatile s32 unused = r;
+    u32 gx;
+    u32 gz;
+    u32 block;
+    u32 sx;
+    u32 sz;
+    u16* base;
+
+    gx = packed_xz & 0xFF;
+    gz = (packed_xz >> 8) & 0x1FF;
+    block = ((gx >> 5) + (gz >> 5) * 8) * sizeof(TerrainTileCache);
+    sx = gx & 0x1F;
+    sz = gz & 0x1F;
+    /* Preserve the retail member-rooted scalar address and 36-halfword stride. */
+    base = &g_terrain_tile_cache[0].colors[1][1];
+    return *(u16*)((u8*)(base + (sx + sz * 36)) + block);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040BFC8);
 
