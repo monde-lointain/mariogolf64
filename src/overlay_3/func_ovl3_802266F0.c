@@ -68,9 +68,11 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B75C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B7E0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022BDB0);
-
 extern s8 D_80105DBC[];
+
+s32 func_ovl3_8022BDB0(void) {
+    return ~D_80105DBC[4] == 0;
+}
 
 s8 func_ovl3_8022BDC4(void) {
     return D_80105DBC[4];
