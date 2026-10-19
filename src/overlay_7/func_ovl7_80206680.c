@@ -1,8 +1,14 @@
 #include "common.h"
+#include "../main/terrain.h"
+
+extern TerrainAttrEntry D_ovl7_8020B564[27];
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206680);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_802066F0);
+TerrainAttrEntry* func_ovl7_802066F0(u32 arg0) {
+  u32 i = (arg0 < 0x1BU) ? arg0 : 0;
+  return &D_ovl7_8020B564[i];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206718);
 
