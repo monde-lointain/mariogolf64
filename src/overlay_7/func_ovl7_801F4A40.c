@@ -18,6 +18,11 @@ extern s32 D_ovl7_8020B210;
 extern f64 D_ovl7_8020C020;
 extern f64 D_ovl7_8020C028;
 extern f64 D_ovl7_8020C030;
+extern u16 D_ovl7_8020AC9A[][14];
+extern u8 D_ovl7_8020E400[];
+extern s32 D_ovl7_80212810[2];
+extern s32 D_ovl7_80212818[2];
+extern s32 D_ovl7_80212820[2];
 
 void func_ovl7_801F4A40(void) {
     D_ovl7_8020AC4C++;
@@ -56,7 +61,15 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F6788)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FA4EC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FA83C);
+void func_ovl7_801FA83C(s32 table_index, s32 slot_index) {
+    RomAssetLoad asset;
+
+    get_rom_asset_allocation_size(D_ovl7_8020AC9A[table_index][0], &asset);
+    load_rom_asset_payload(D_ovl7_8020E400 + slot_index * 0x2208, &asset);
+    D_ovl7_80212810[slot_index] = table_index;
+    D_ovl7_80212818[slot_index] = 0;
+    D_ovl7_80212820[slot_index] = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FA8D8);
 
