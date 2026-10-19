@@ -76,7 +76,21 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802509BC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250C54);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250DA0);
+void func_80041AA8(void);
+void func_ovl4_80250DE4(void);
+void func_ovl4_80250EE0(void);
+void func_ovl4_80250F04(void);
+void func_ovl4_80250F90(void);
+void func_ovl4_80250FB4(void);
+
+void func_ovl4_80250DA0(void) {
+    func_ovl4_80250DE4();
+    func_ovl4_80250FB4();
+    func_80041AA8();
+    func_ovl4_80250F04();
+    func_ovl4_80250F90();
+    func_ovl4_80250EE0();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250DE4);
 
