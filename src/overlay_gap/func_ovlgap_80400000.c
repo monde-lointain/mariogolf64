@@ -213,6 +213,11 @@ extern u8 D_ovlgap_8040C6D4[];
 extern s32 D_ovlgap_8040C6D0;
 extern char D_ovlgap_8040CAC0[];
 void mark_scenery_collision_cells(void);
+extern u8 D_ovlgap_8040C748[];
+extern u16 *nuGfxCfb_ptr;
+extern char D_80105118[];
+extern char D_ovlgap_8040CB04[];
+
 
 void func_ovlgap_80407F08(s32 *arg0, s32 arg1, char *arg2) {
     char line_buffer[0x100];
@@ -316,7 +321,43 @@ void func_ovlgap_8040BFC8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C124);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C260);
+void func_ovlgap_8040C260(s32 file_index) {
+    volatile u16 *framebuffer;
+    u8 *bitmap;
+    u8 *output;
+    s32 position;
+    s32 column;
+    s32 source_row;
+    s32 row;
+    s32 column_end;
+    s32 row_end;
+    s32 pixel_index;
+
+    bitmap = (u8 *)g_terrain_tile_cache;
+    framebuffer = (volatile u16 *)((u32)nuGfxCfb_ptr + 0x20000000);
+    for (position = 0; position != 0x36; position++) {
+        bitmap[position] = D_ovlgap_8040C748[position];
+    }
+    row = 0x7F;
+    column_end = 0x40;
+    row_end = -1;
+    source_row = 0x9EC0;
+    for (; row != row_end; row--) {
+        column = 0;
+        output = (u8 *)((u32)position + (u32)bitmap);
+        do {
+            pixel_index = source_row + column;
+            *output++ = ((u32)framebuffer[pixel_index] << 2) & 0xF8;
+            position += 3;
+            *output++ = (framebuffer[pixel_index] >> 3) & 0xF8;
+            column++;
+            *output++ = (framebuffer[pixel_index] >> 11) << 3;
+        } while (column != column_end);
+        source_row -= 0x140;
+    }
+    sprintf(D_80105118, D_ovlgap_8040CB04, file_index, column);
+    validate_heap_string(D_80105118, 0x38436);
+}
 
 void func_ovlgap_8040C360(s32 unused, Gfx **display_list_cursor) {
     Gfx *gfx = *display_list_cursor;
