@@ -25,7 +25,29 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203EEC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203F30);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204104);
+extern s32 D_800C3084;
+extern s32 D_800FBE7C[];
+extern u16 D_801B55CC;
+extern f64 D_ovl0_80224EF8;
+extern f64 D_ovl0_80224F00;
+extern f64 D_ovl0_80224F08;
+extern f64 D_ovl0_80224F10;
+
+void func_ovl0_80204104(void) {
+    if (D_800C3084 & 2) {
+        if (D_801B55CC & 4) {
+            D_800FBE7C[2] = (s32) ((f64) D_800FBE7C[2] + D_ovl0_80224EF8);
+        } else if (D_801B55CC & 8) {
+            D_800FBE7C[2] = (s32) ((f64) D_800FBE7C[2] - D_ovl0_80224F00);
+        }
+    } else {
+        if (D_801B55CC & 4) {
+            D_800FBE7C[2] = (s32) ((f64) D_800FBE7C[2] + D_ovl0_80224F08);
+        } else if (D_801B55CC & 8) {
+            D_800FBE7C[2] = (s32) ((f64) D_800FBE7C[2] - D_ovl0_80224F10);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802041C8);
 
@@ -33,10 +55,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204210)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020439C);
 
-extern s32 D_800C3084;
 extern s8 D_801B55D9;
-extern s32 D_800FBE7C[];
-extern u16 D_801B55CC;
 extern f64 D_ovl0_80224F58;
 extern f64 D_ovl0_80224F60;
 extern f64 D_ovl0_80224F68;
