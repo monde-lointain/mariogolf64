@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-10-19
+* **Update**: `func_ovl7_80206800` now computes the per-player terrain threshold from the wrapped coordinate sums and `PlayerState.unknown_88`; the function diff is exact and `./tools/build-and-verify.sh` verifies the ROM SHA1.
 * **Update**: `func_800402F4` reverses the `ci8_to_rgba5551` palette-slot mapping through `find_closest_palette_index`; its switch tables and adjacent rodata now belong to `main/get_tile_attribute`. `./tools/build-and-verify.sh` matches the ROM SHA1.
 * **Update**: `tools/integrate-shards` decides what needs review by the paths a commit touches (anything outside `src/`, `include/`, `docs/`, `symbol_addrs.txt`, `mariogolf64.yaml`) instead of its subject. Source-only follow-ups such as a type fix and docs commits integrate after the ROM check; a "Decompile" commit that also edits a tool now stops for review. The policy hook ignores shell redirections on `make print-cflags`, and skill docs link with bundle-absolute paths (a sibling link resolved under `.omp/skills/<name>/`).
 * **Update**: `tools/m2ctx.py` removes GCC nested function definitions from the m2c context. m2c's parser rejected the whole context for any owning file with one (for example `src/main/func_8008D100.c`'s `spiral_step`), so bootstrap wrote a blank `base.c`. Enclosing functions and `if`/`while` blocks are kept. Covered by `tools/test_m2ctx.py`.

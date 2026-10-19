@@ -1,12 +1,15 @@
 #include "common.h"
 #include "../main/terrain.h"
 #include "../main/club.h"
+#include "../main/session.h"
 
 typedef struct {
     u8 pad00[0x18];
     s32 unk18;
     u8 pad1C[0x4];
     s32 unk20;
+    u8 pad24[0x81];
+    s8 unkA5;
 } Ovl7ArgObject;
 
 typedef struct {
@@ -21,6 +24,8 @@ extern s32 clear_animation_slot(s32 index);
 extern void load_character_model(s32 id, s32 model, s32 arg2);
 extern void animation_play(s32 id, s32 animation);
 extern void func_800562F4(s32 id, f32 value);
+extern f64 D_ovl7_8020C250;
+extern f64 D_ovl7_8020C258;
 
 s32 func_ovl7_80206680(s32 arg0, s32 arg1) {
   if (func_800542A0(arg0) != 0) {
@@ -54,7 +59,37 @@ void func_ovl7_80206718(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206800);
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original, as in func_ovl7_802068B4. */
+f32 func_ovl7_80206800(void) {
+    s32 r;
+    volatile s32 unused = r;
+    Ovl7ArgObject *obj;
+    s32 temp_a0;
+    s32 temp_a1;
+    u32 temp_v1;
+    s32 temp_v0_2;
+    s32 temp_v0_3;
+    f64 var_ft0;
+    f64 var_fv1;
+    f32 firstResult;
+
+    obj = *((volatile Ovl7NestFrame *) r)->argSlot;
+    temp_a1 = obj->unk18;
+    temp_a0 = obj->unk20;
+    temp_v1 = player_records[obj->unkA5].unknown_88;
+    temp_v0_2 = (temp_a1 + temp_a0 + temp_v1) & 0xFF;
+    var_ft0 = (f64) temp_v0_2;
+    if (temp_v0_2 < 0) {
+        var_ft0 += D_ovl7_8020C250;
+    }
+    firstResult = (f32) var_ft0 * 0.0019607844f;
+    temp_v0_3 = ((temp_a1 - temp_a0) + temp_v1) & 0xFF;
+    var_fv1 = (f64) temp_v0_3;
+    if (temp_v0_3 < 0) {
+        var_fv1 += D_ovl7_8020C258;
+    }
+    return firstResult + ((f32) var_fv1 * 0.0019607844f);
+}
 
 /* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original; same stand-in as lerp_s32 (func_8008D100.c). */
 f32 func_ovl7_802068B4(f32 x, f32 y, f32 z) {
