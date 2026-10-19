@@ -17,6 +17,8 @@ extern u8 D_ovl0_80224B20;
 extern u8 D_ovl0_80224B21;
 extern u8 D_ovl0_80224B22;
 extern s32 D_ovl0_80224B2C;
+extern s8 D_801061C4;
+void func_ovl0_8021EA58(Gfx** gfxp);
 
 void func_ovl0_8021E550(void) {
     u16 buttons;
@@ -73,4 +75,13 @@ s32 func_ovl0_8021EA48(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021EA58);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021FC20);
+void func_ovl0_8021FC20(Gfx** gfxp) {
+    Gfx* gfx;
+
+    gfx = *gfxp;
+    if (D_801061C4 != 0) {
+        func_ovl0_8021E550();
+        func_ovl0_8021EA58(&gfx);
+        *gfxp = gfx;
+    }
+}
