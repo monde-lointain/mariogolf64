@@ -10,6 +10,14 @@ extern u16 D_ovl7_8020AD8A[];
 extern u8 D_ovl7_80214C50[];
 extern u32 D_ovl7_8020AD70[];
 extern f32 D_ovl7_8020AD80[];
+extern f64 cos(f64);
+extern f64 sin(f64);
+extern s32 D_ovl7_8020ADA0[2];
+extern s32 D_ovl7_8020ADA8;
+extern s32 D_ovl7_8020B210;
+extern f64 D_ovl7_8020C020;
+extern f64 D_ovl7_8020C028;
+extern f64 D_ovl7_8020C030;
 
 void func_ovl7_801F4A40(void) {
     D_ovl7_8020AC4C++;
@@ -78,7 +86,28 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FE7B4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FE8F8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FF5E8);
+void func_ovl7_801FF5E8(void) {
+    f32 angle;
+    s32 phase;
+    s32 scaled_cos;
+    s32 x;
+    s32 y;
+
+    if (D_ovl7_8020ADA8 != 0) {
+        phase = D_ovl7_8020B210;
+        angle = (f64)phase * D_ovl7_8020C020;
+        phase += 0xC;
+        D_ovl7_8020B210 = phase;
+        if (phase >= 0x21D) {
+            D_ovl7_8020ADA8 = 0;
+        }
+        x = D_ovl7_8020ADA0[0] + 8;
+        scaled_cos = (s32)(cos((f64)angle) * D_ovl7_8020C028);
+        y = D_ovl7_8020ADA0[1] - 2;
+        D_ovl7_8020ADA0[0] = x + scaled_cos;
+        D_ovl7_8020ADA0[1] = y - (s32)(sin((f64)angle) * D_ovl7_8020C030);
+    }
+}
 
 void func_ovl7_801FF6DC(void) {
     RomAssetLoad asset;
