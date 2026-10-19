@@ -9,6 +9,9 @@ extern u8 D_801B724B;
 extern s32 rand(void);
 extern s32 flag_is_set(s32 flag);
 extern f32 D_ovl16_801F89C8;
+extern u16 *D_ovl16_80223788;
+extern s32 D_ovl16_8022378C;
+extern u8 D_ovl16_801F89E0[];
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
@@ -108,7 +111,66 @@ INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F75
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F803C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F80B8);
+void func_ovl16_801F803C(s32 index, s32 *out0, s32 *out1);
+
+void func_ovl16_801F80B8(Gfx **gfxp, s32 x, s32 y, s32 index) {
+    Gfx *gfx;
+    s32 stride;
+    s32 start;
+    s32 count;
+    s32 i;
+    s32 code;
+    s32 row;
+    s32 col;
+    s32 row3;
+    s32 col3;
+    s32 texAddr;
+    s32 unused0;
+    s32 unused1;
+
+    gfx = *gfxp;
+    start = D_ovl16_80223788[2 + index * 2];
+    count = D_ovl16_80223788[3 + index * 2];
+    stride = D_ovl16_80223788[1] * 2 + 2;
+    func_ovl16_801F803C(index, &unused0, &unused1);
+
+    gDPPipeSync(gfx++);
+    i = 0;
+    if (count != 0) {
+        do {
+            code = D_ovl16_80223788[start + i + stride];
+            if (code < 0x100) {
+                row = code / 16;
+                col = code - row * 16;
+                col3 = col * 3;
+                row3 = row * 3;
+                texAddr = (D_ovl16_8022378C + 8) & ~7;
+
+                gDPPipeSync(gfx++);
+                gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 96, texAddr);
+                gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+                gDPLoadSync(gfx++);
+                gDPLoadTile(gfx++, G_TX_LOADTILE, col3 * 8, row3 << 4, (col * 12 + 11) * 2, (row * 12 + 11) * 4);
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+                gDPSetTileSize(gfx++, G_TX_RENDERTILE, col * 48, row * 48, (col * 12 + 11) * 4, (row * 12 + 11) * 4);
+                gDPPipeSync(gfx++);
+
+                if ((u32)(code - 0xDE) < 2U) {
+                    gSPTextureRectangle(gfx++, (x - 6) * 4, (y - 4) * 4, (x + 6) * 4, (y + 8) * 4,
+                                        G_TX_RENDERTILE, col * 384, row * 384, 0x400, 0x400);
+                } else {
+                    gSPTextureRectangle(gfx++, x * 4, y * 4, (x + 12) * 4, (y + 12) * 4,
+                                        G_TX_RENDERTILE, col * 384, row * 384, 0x400, 0x400);
+                    x += D_ovl16_801F89E0[code];
+                }
+            }
+            i++;
+        } while (i != count);
+    }
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F8438);
 
