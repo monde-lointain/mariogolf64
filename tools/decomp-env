@@ -323,6 +323,11 @@ rm "$created_dir/AGENTS.md"
 sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
 ln -s "$OMP_CONFIG" "$created_dir/.omp"
 
+# Record tier, model, and stall limit for build.sh and the difficulty ledger
+if ! "$PYTHON" tools/difficulty_ledger.py write-run "$created_dir" "$FUNC_NAME"; then
+    echo "Warning: could not write $created_dir/.run.json; build.sh uses the default stall limit"
+fi
+
 if [ "$BOOTSTRAP_ONLY" = true ]; then
     echo "Bootstrap-only mode: environment ready at $created_dir"
 elif command -v $CLI &> /dev/null; then
