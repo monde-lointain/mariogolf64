@@ -15,7 +15,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802422
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243698);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243880);
+void func_ovl14_80243880(void) {
+    D_ovl14_802457E8 = 0;
+    D_ovl14_802457EC = 5;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243898);
 
