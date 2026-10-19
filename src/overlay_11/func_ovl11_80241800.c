@@ -1,9 +1,12 @@
 #include "common.h"
+#include "overlay_11.h"
 
 extern s32 clear_animation_slot(s32 index);
+extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan);
 extern s32 D_ovl11_8024C4A4;
 extern s32 game_mode;
 extern s32 D_800C4140;
+extern s32 D_800C0E60;
 void func_ovl11_80242FC0(s32 arg0);
 void func_ovl11_80243050(void);
 void func_ovl11_802433B4(u16 arg0);
@@ -17,7 +20,19 @@ INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802423
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80242B74);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80242FC0);
+void func_ovl11_80242FC0(s32 arg0) {
+    if (arg0 == 0) {
+        func_80050DA0(0x47, D_800C0E60, 0x64, 0x14, 0xDF);
+    } else if (arg0 == 1) {
+        func_80050DA0(0x48, D_800C0E60, 0x64, 0x14, 0x20);
+    }
+    if (arg0 == 0) {
+        D_80104FD0.unkC8 = 0x140;
+        D_80104FD0.unkCC = 0;
+    }
+    D_800C4140 = arg0;
+    D_80104FD0.unkD4 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80243050);
 

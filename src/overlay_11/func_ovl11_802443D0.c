@@ -1,12 +1,7 @@
 #include "common.h"
+#include "overlay_11.h"
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_802443D0);
-
-typedef struct Overlay11State {
-    /* 0x00 */ u8 unk_00[0x38];
-    /* 0x38 */ u32 unk38;
-    /* 0x3C */ u8 unk_3C[0xB0];
-} Overlay11State; /* 0xEC */
 
 extern void func_8006A548(Gfx** pgfx, u32 tlut);
 extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
@@ -17,7 +12,6 @@ extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern void* D_801321C8[];
 extern void* D_801B55E0[];
-extern Overlay11State D_80104FD0;
 
 /**
  * Draws the 32x24 CI8 texture block selected by buffer_index at pixel (x, y).
