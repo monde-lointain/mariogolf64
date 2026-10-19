@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/session.h"
+#include "../main/rom_asset.h"
 
 typedef struct {
   /* 0x00 */ u8 unknown_00[0x30];
@@ -7,15 +8,142 @@ typedef struct {
   /* 0x32 */ u8 payload[0x1CE];
 } GbPakSaveRecord; /* 0x200 */
 
+typedef struct {
+    void *unk0;
+    void *unk4;
+    void *unk8;
+    void *unkC[4];
+    void *unk1C[4];
+    void *unk2C;
+    void *unk30;
+    void *unk34;
+    void *unk38;
+    void *unk3C;
+    void *unk40;
+    void *unk44;
+    void *unk48;
+    void *unk4C;
+    void *unk50;
+    void *unk54;
+} Ovl15AssetBlock; /* 0x58 */
+
 extern s32 D_ovl15_801FBB78;
 extern void func_ovl15_801F7664(Gfx** dl, s32* arg1);
 extern s32 D_80105218;
 extern u32 controller_handle_array[];
 extern s32 nuContRmbCheck(u32 contNo);
+extern u16 D_800C5498[];
+extern s16 D_800C54BC[];
+extern Ovl15AssetBlock D_800FE450;
+extern void *heap3_alloc(u32 size_bytes);
+extern void play_bgm_by_id(s32 id, s32 flags);
+extern void nuContRmbForceStop(void);
+extern void func_ovl15_801FB400(u8 *image);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4B20);
+/* Overlay 15 initialize hook: loads asset payloads, then slot buffers. */
+void func_ovl15_801F4B20(void) {
+    RomLoadSlot sp10;
+    RomAssetLoad sp20;
+    s16 *var_s3;
+    void **var_s2;
+    void **var_s4;
+    void *temp_v0;
+    void *temp_v0_10;
+    void *temp_v0_11;
+    void *temp_v0_12;
+    void *temp_v0_13;
+    void *temp_v0_14;
+    void *temp_v0_15;
+    u32 temp_v0_16;
+    void *temp_v0_17;
+    void *temp_v0_2;
+    void *temp_v0_3;
+    void *temp_v0_4;
+    void *temp_v0_5;
+    void *temp_v0_6;
+    void *temp_v0_7;
+    void *temp_v0_8;
+    void *temp_v0_9;
+    s32 var_s5;
+    u16 *var_s1;
+    void *temp_s1;
+    RomAssetLoad *var_s6;
+    s32 var_s7;
+
+    temp_v0 = heap3_alloc(get_rom_asset_allocation_size(0x8FDU, &sp20));
+    temp_s1 = &D_800FE450.unk30;
+    D_800FE450.unk30 = temp_v0;
+    load_rom_asset_payload(temp_v0, &sp20);
+    temp_v0_2 = heap3_alloc(get_rom_asset_allocation_size(0x51EU, &sp20));
+    D_800FE450.unk0 = temp_v0_2;
+    load_rom_asset_payload(temp_v0_2, &sp20);
+    temp_v0_3 = heap3_alloc(get_rom_asset_allocation_size(0x70FU, &sp20));
+    D_800FE450.unk4 = temp_v0_3;
+    load_rom_asset_payload(temp_v0_3, &sp20);
+    temp_v0_4 = heap3_alloc(get_rom_asset_allocation_size(0x720U, &sp20));
+    D_800FE450.unk8 = temp_v0_4;
+    load_rom_asset_payload(temp_v0_4, &sp20);
+    temp_v0_5 = heap3_alloc(get_rom_asset_allocation_size(0x900U, &sp20));
+    D_800FE450.unk34 = temp_v0_5;
+    load_rom_asset_payload(temp_v0_5, &sp20);
+    temp_v0_6 = heap3_alloc(get_rom_asset_allocation_size(0x93FU, &sp20));
+    D_800FE450.unk2C = temp_v0_6;
+    load_rom_asset_payload(temp_v0_6, &sp20);
+    temp_v0_7 = heap3_alloc(get_rom_asset_allocation_size(0x5F7U, &sp20));
+    D_800FE450.unk38 = temp_v0_7;
+    load_rom_asset_payload(temp_v0_7, &sp20);
+    temp_v0_8 = heap3_alloc(get_rom_asset_allocation_size(0x8EEU, &sp20));
+    D_800FE450.unk3C = temp_v0_8;
+    load_rom_asset_payload(temp_v0_8, &sp20);
+    temp_v0_9 = heap3_alloc(get_rom_asset_allocation_size(0x8EBU, &sp20));
+    D_800FE450.unk40 = temp_v0_9;
+    load_rom_asset_payload(temp_v0_9, &sp20);
+    temp_v0_10 = heap3_alloc(get_rom_asset_allocation_size(0x95DU, &sp20));
+    D_800FE450.unk44 = temp_v0_10;
+    load_rom_asset_payload(temp_v0_10, &sp20);
+    temp_v0_11 = heap3_alloc(get_rom_asset_allocation_size(0x979U, &sp20));
+    D_800FE450.unk54 = temp_v0_11;
+    load_rom_asset_payload(temp_v0_11, &sp20);
+    temp_v0_12 = heap3_alloc(get_rom_asset_allocation_size(0x70BU, &sp20));
+    D_800FE450.unk4C = temp_v0_12;
+    load_rom_asset_payload(temp_v0_12, &sp20);
+    temp_v0_13 = heap3_alloc(get_rom_asset_allocation_size(0x96BU, &sp20));
+    D_800FE450.unk50 = temp_v0_13;
+    load_rom_asset_payload(temp_v0_13, &sp20);
+    temp_v0_14 = heap3_alloc(get_rom_asset_allocation_size(0x978U, &sp20));
+    D_800FE450.unk48 = temp_v0_14;
+    load_rom_asset_payload(temp_v0_14, &sp20);
+    var_s5 = 0;
+    var_s6 = &sp20;
+    var_s7 = 4;
+    var_s4 = temp_s1 - 0x24;
+    var_s3 = D_800C54BC;
+    var_s2 = temp_s1 - 0x14;
+    var_s1 = D_800C5498;
+    D_800FEC00.unknown_90 = 0;
+    D_800FEC00.unknown_94 = 0;
+    do {
+        temp_v0_16 = get_rom_asset_allocation_size(*var_s1, var_s6);
+        var_s1 += 1;
+        var_s5 += 1;
+        temp_v0_15 = heap3_alloc(temp_v0_16);
+        *var_s2 = temp_v0_15;
+        load_rom_asset_payload(temp_v0_15, var_s6);
+        open_rom_asset_slot(*var_s3, &sp10);
+        var_s3 += 1;
+        var_s2 += 1;
+        temp_v0_16 = get_rom_load_slot_size(&sp10);
+        temp_v0_17 = heap3_alloc(temp_v0_16);
+        *var_s4 = temp_v0_17;
+        read_rom_load_slot(temp_v0_17, temp_v0_16, &sp10);
+        var_s4 += 1;
+    } while (var_s5 != var_s7);
+    play_bgm_by_id(0x16, 0);
+    func_ovl15_801FB400(D_800FE450.unk38);
+    nuContRmbForceStop();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4E70);
 

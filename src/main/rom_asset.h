@@ -24,6 +24,7 @@ typedef struct {
 void open_rom_asset_slot(s32 asset_index, RomLoadSlot* slot);
 void read_rom_load_slot(void* destination, u32 requested_size,
                         RomLoadSlot* slot);
+u32 get_rom_load_slot_size(RomLoadSlot* load_slot);
 
 u32 get_rom_asset_allocation_size(u16 asset_index, RomAssetLoad* asset);
 void load_rom_asset_payload(void* destination, RomAssetLoad* asset);
