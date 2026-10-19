@@ -72,7 +72,40 @@ void func_800715A0(void) {
   heap3_free((void**)D_800E1C48);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80071608);
+/**
+ * Emits the fixed 23-command RDP/RSP state preamble used by the HUD table
+ * draws: pipe syncs around 1-cycle XLU render mode, point-filtered textures
+ * with perspective off, blend and env colors, and the primitive LERP combine.
+ */
+void func_80071608(Gfx** dl) {
+  Gfx* gfx = *dl;
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gSPLoadGeometryMode(gfx++, 0);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+  gDPSetEnvColor(gfx++, 0x80, 0x80, 0xFF, 0xFF);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0,
+                    0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+  gDPPipeSync(gfx++);
+  *dl = gfx;
+}
 
 typedef struct {
   /* 0x00 */ s32 screen_x;
@@ -178,7 +211,6 @@ void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
       run;
 }
 
-extern void func_80071608(Gfx** dl);
 extern void func_80072A08(Gfx** dl, s32 i);
 extern void func_80071CE4(Gfx** dl, s32 i);
 
