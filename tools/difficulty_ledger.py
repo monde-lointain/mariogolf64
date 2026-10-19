@@ -58,7 +58,7 @@ class TierBudget:
 # Budgets per tier; each tier's task.yaml timeout must equal timeout_minutes. Top-n and strategy are
 # in the task.yaml that serves each tier.
 TIER_BUDGETS = {
-    1: TierBudget(timeout_minutes=60, stall_limit=10),
+    1: TierBudget(timeout_minutes=60, stall_limit=7),
     2: TierBudget(timeout_minutes=120, stall_limit=30),
     3: TierBudget(timeout_minutes=240, stall_limit=40),
 }

@@ -29,7 +29,7 @@ Only the latest record per (function, worktree, env) counts. A `matched` record 
 
 | Tier | Given to | Budget and strategy | Served by |
 |---|---|---|---|
-| 1 | no failed attempt | 60 min, stall limit 10, top-3 similar references | `decompile-similar`, `decompile-unmatched`, `decompile-coddog-similar` |
+| 1 | no failed attempt | 60 min, stall limit 7, top-3 similar references | `decompile-similar`, `decompile-unmatched`, `decompile-coddog-similar` |
 | 2 | failed tier 1 | 120 min, stall limit 30, top-5 references, clean rewrite on plateau | `decompile-tier2` |
 | 3 | failed tier 2 with best of at least 90% | 240 min, stall limit 40, top-5 references, try all strategies | `decompile-tier3` |
 | `human` | failed tier 3, or failed tier 2 below 90% | no nigel task; stall limit 20 (the build.sh default) | none: `show --tier human` lists them |
