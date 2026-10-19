@@ -582,7 +582,7 @@ segments:
     exclusive_ram_id: ovl7
     symbol_name_format: ovl7_$VRAM
     subsegments:
-      - [0x1370B0, asm]
+      - [0x1370B0, c, overlay_7/func_ovl7_801F4A30]
       - [0x1370C0, asm]
       - [0x145A30, asm]
       - [0x148D00, asm]
