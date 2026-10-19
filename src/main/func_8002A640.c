@@ -28,6 +28,8 @@ extern void unload_overlay(s32);
 
 extern Gfx* glistp;
 extern u16* nuGfxCfb_ptr;
+/* Horizon layer, blitted over the sky into the current colour buffer. */
+extern u16* g_auxiliary_framebuffer;
 
 /* Source framebuffer for the re-blit below: seeded from the VI on the first
  * call, then re-pointed each frame at the buffer the previous call drew into.
@@ -36,8 +38,13 @@ extern u32 D_800B7750;
 /* The cfb the current call is drawing into, saved for the next call to read. */
 extern u32 D_800B7754;
 
-void init_rdp_and_draw_sky_background(Gfx** gfxp, s32 view_state_address);
-void func_8002A9C4(Gfx** gfxp, s32 view_state_address);
+typedef struct {
+  /* 0x000 */ u8 unknown_000[0x40];
+  /* 0x040 */ s32 unk40;
+} ViewState;
+
+void init_rdp_and_draw_sky_background(Gfx** gfxp, ViewState* view_state_address);
+void func_8002A9C4(Gfx** gfxp, ViewState* view_state_address);
 void emit_sky_horizon_compositor_dl(Gfx** gfxp);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A640);
@@ -65,15 +72,71 @@ void func_8002A97C(s32 sky_mode, s32 blend_countdown) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", func_8002A9C4);
+void func_8002A9C4(Gfx** gfxp, ViewState* view_state_address) {
+  Gfx* gfx = *gfxp;
+  s32 base;
+  s32 row;
+  s32 i;
+  s32 y;
+  s32 t8;
+
+  if (--D_800B6810 == 0) {
+    view_state_address->unk40 = 1;
+  }
+
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+
+  t8 = 0x4100;
+  for (y = 0; y != 0x4E; y += 0xD) {
+    gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320,
+                       ((u32)g_auxiliary_framebuffer + t8 * 4) & ~7);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 0, G_TX_LOADTILE, 0, 0,
+               0, 0, 0, 7, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadTile(gfx++, G_TX_LOADTILE, 64 << G_TEXTURE_IMAGE_FRAC, 0,
+                191 << G_TEXTURE_IMAGE_FRAC, 15 << G_TEXTURE_IMAGE_FRAC);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 0, G_TX_RENDERTILE, 0, 0,
+               0, 0, 0, 7, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 64 << G_TEXTURE_IMAGE_FRAC, 0,
+                   191 << G_TEXTURE_IMAGE_FRAC, 15 << G_TEXTURE_IMAGE_FRAC);
+
+    t8 += 0xA00;
+    base = y + 8;
+    for (i = 0; i != 4; i++) {
+      row = base + i * 0x48;
+      gSPScisTextureRectangle(gfx++, 8 << G_TEXTURE_IMAGE_FRAC,
+                              row << G_TEXTURE_IMAGE_FRAC,
+                              312 << G_TEXTURE_IMAGE_FRAC,
+                              (row + 13) << G_TEXTURE_IMAGE_FRAC,
+                              G_TX_RENDERTILE, 64 << 5, 0, 0x4EC, 0x4EC);
+    }
+  }
+
+  *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8002A640", emit_sky_dome_dl);
 
 extern u16* nuGfxZBuffer;
 /* Sky layer, blitted into the z-buffer scratch surface. */
 extern u32 D_800B6814;
-/* Horizon layer, blitted over the sky into the current colour buffer. */
-extern u16* g_auxiliary_framebuffer;
 
 /**
  * Composites the two sky layers in copy-cycle mode. Each pass re-blits the
@@ -191,7 +254,8 @@ typedef struct {
   /* 0x1C0 */ Mtx projection_matrix;
 } ViewMatrixBlock; /* 0x200 */
 
-void setup_view_by_camera_mode(ViewMatrixBlock* matrix_block, s32 view_state_address) {
+void setup_view_by_camera_mode(ViewMatrixBlock* matrix_block,
+                               ViewState* view_state_address) {
   if (D_800B680C == 0) {
     init_rdp_and_draw_sky_background(&glistp, view_state_address);
   } else {
