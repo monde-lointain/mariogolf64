@@ -26,7 +26,29 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80404B84);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040582C);
+void func_ovlgap_8040582C(s32 *arg0, s32 arg1) {
+    s32 *var_a0;
+    s32 var_v1;
+    s32 temp_v0;
+    s32 tmp[2];
+    s32 uninit;
+
+    tmp[0] = uninit;
+    var_a0 = arg0;
+    var_v1 = 0;
+    do {
+        temp_v0 = *var_a0;
+        if (temp_v0 == arg1) {
+            return;
+        }
+        var_v1++;
+        if (temp_v0 == -1) {
+            *var_a0 = arg1;
+            return;
+        }
+        var_a0++;
+    } while (var_v1 < 2);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405870);
 
