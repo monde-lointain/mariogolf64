@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
 
@@ -189,11 +190,30 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208850)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802088B0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D6F0);
-
-extern void heap3_free(void** payload_ptr);
+extern void* heap3_alloc(u32 size);
 extern void* D_ovl0_80227C90[2];
 extern void* D_ovl0_80227C98;
+extern s32 D_ovl0_80224034;
+
+void func_ovl0_8020D6F0(void) {
+    RomAssetLoad asset;
+    void* temp_v0;
+    void* temp_v0_2;
+    void* temp_v0_3;
+
+    temp_v0 = heap3_alloc(get_rom_asset_allocation_size(0x6E0, &asset));
+    D_ovl0_80227C90[0] = temp_v0;
+    load_rom_asset_payload(temp_v0, &asset);
+    temp_v0_2 = heap3_alloc(get_rom_asset_allocation_size(0x6E5, &asset));
+    D_ovl0_80227C90[1] = temp_v0_2;
+    load_rom_asset_payload(temp_v0_2, &asset);
+    temp_v0_3 = heap3_alloc(get_rom_asset_allocation_size(0x6F0, &asset));
+    D_ovl0_80227C98 = temp_v0_3;
+    load_rom_asset_payload(temp_v0_3, &asset);
+    D_ovl0_80224034 = 0;
+}
+
+extern void heap3_free(void** payload_ptr);
 
 void func_ovl0_8020D784(void) {
     heap3_free(&D_ovl0_80227C90[0]);
