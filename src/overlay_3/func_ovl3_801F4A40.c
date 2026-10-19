@@ -1,6 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4A40);
+extern Gfx D_ovl3_80232300[];
+
+Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4A4C);
 
