@@ -36,6 +36,20 @@ typedef struct {
   /* 0x0E */ u16 scale_y;
 } SceneryCylinder; /* 0x10 */
 
+/* Direct terrain grid vertex, 0x10-byte stride. */
+typedef struct {
+  /* 0x00 */ s16 x;
+  /* 0x02 */ s16 height;
+  /* 0x04 */ s16 z;
+  /* 0x06 */ s16 vertex_flags;
+  /* 0x08 */ s16 texture_s;
+  /* 0x0A */ s16 texture_t;
+  /* 0x0C */ u8 color_r;
+  /* 0x0D */ u8 color_g;
+  /* 0x0E */ u8 color_b;
+  /* 0x0F */ u8 color_a;
+} GridVertex;
+
 enum {
   SCENERY_CYLINDER_COUNT = 0x80,
   SCENERY_SPRITE_COUNT = 46,
@@ -66,6 +80,7 @@ typedef struct {
 } TerrainTileCache; /* 0xA00 */
 
 extern TerrainTileCache g_terrain_tile_cache[];
+extern s16 g_terrain_grid_verts[];
 
 TerrainAttrEntry* get_table_entry(u32 index);
 s32 resolve_club_terrain_mask(s32 mode, TerrainAttrEntry* terrain);

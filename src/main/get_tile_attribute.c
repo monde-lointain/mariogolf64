@@ -5,21 +5,6 @@ extern s32 get_interpolated_terrain_height(s32, s32);
 extern void load_hole_terrain_assets(void);
 extern TerrainAttrEntry* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
-extern s16 g_terrain_grid_verts[];
-
-/* Grid vertex, 0x10-byte stride. */
-typedef struct {
-  /* 0x00 */ s16 x;
-  /* 0x02 */ s16 height;
-  /* 0x04 */ s16 z;
-  /* 0x06 */ s16 vertex_flags;
-  /* 0x08 */ s16 texture_s;
-  /* 0x0A */ s16 texture_t;
-  /* 0x0C */ u8 color_r;
-  /* 0x0D */ u8 color_g;
-  /* 0x0E */ u8 color_b;
-  /* 0x0F */ u8 color_a;
-} GridVertex;
 
 extern s16 D_800BAC0C[];
 extern u8 D_80191620[];

@@ -192,7 +192,62 @@ void func_ovl4_8025176C(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802517C4);
+extern char D_ovl4_8025529C[];
+
+void func_ovl4_80251A28(u16 *arg0, s32 arg1);
+void func_ovl4_80251B6C(u16 *arg0, s32 arg1);
+void func_ovl4_80251CB4(u16 *arg0, s32 arg1);
+
+/* Decodes the hole terrain vertex stream into g_terrain_grid_verts until tag 9. */
+void func_ovl4_802517C4(void) {
+    s8 tag;
+    u16 x;
+    u16 height;
+    u16 z;
+    s32 offset;
+    s32 count;
+    s8 *dst;
+    u8 *end;
+    u8 *src;
+    u8 byte;
+
+    count = 0;
+    offset = 0;
+next_record:
+    src = D_ovl4_80255330;
+    end = src + 1;
+    dst = &tag;
+    if (src != end) {
+        do {
+            byte = *src;
+            src += 1;
+            *dst = (s8) byte;
+            dst += 1;
+        } while (src != end);
+    }
+    D_ovl4_80255330 = end;
+    if (tag != 9) {
+        if (count >= 0x252) {
+            osSyncPrintf(D_ovl4_8025529C, end, tag);
+            return;
+        }
+        if (!(tag & 0x40)) {
+            func_ovl4_80251A28(&x, (s32) tag);
+            ((GridVertex *) ((u8 *) g_terrain_grid_verts + offset))->x = x;
+            ((GridVertex *) ((u8 *) g_terrain_grid_verts + offset))->texture_s = ((s32) (x << 0x10) >> 0xE) + 0x20;
+        }
+        func_ovl4_80251B6C(&height, (s32) tag);
+        ((GridVertex *) ((u8 *) g_terrain_grid_verts + offset))->height = height;
+        if (!(tag & 0x80)) {
+            func_ovl4_80251CB4(&z, (s32) tag);
+            ((GridVertex *) ((u8 *) g_terrain_grid_verts + offset))->z = z;
+            ((GridVertex *) ((u8 *) g_terrain_grid_verts + offset))->texture_t = ((s32) (z << 0x10) >> 0xE) + 0x20;
+        }
+        offset += 0x10;
+        count += 1;
+        goto next_record;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802518F0);
 
