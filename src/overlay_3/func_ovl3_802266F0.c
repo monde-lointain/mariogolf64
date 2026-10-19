@@ -3,6 +3,9 @@
 
 extern u8* func_8005AF50(void);
 extern u8* func_8005AF74(void);
+void func_80071608(Gfx **dl);
+void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags, u8 red, u8 green, u8 blue, u8 alpha);
+void func_80071CE4(Gfx **dl, s32 i);
 
 extern s32 D_ovl3_80230E88;
 extern f32 D_ovl3_80230E8C;
@@ -270,7 +273,36 @@ s32 func_ovl3_8022B5E0(void) {
     return var_a0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B668);
+void func_ovl3_8022B668(Gfx **gfxp) {
+    Gfx *gfx = *gfxp;
+    s32 x = 0;
+    s32 run;
+    s32 flags;
+
+    switch (D_ovl3_80230F6C) {
+    case 0:
+        run = 0;
+        x = 0x38;
+        flags = (-(func_ovl3_80226764() == 0) & 0x21) | 0x20;
+        break;
+    case 1:
+        run = 1;
+        x = 0x18;
+        flags = 0x21;
+        break;
+    default:
+        run = -1;
+        flags = 0x21;
+        break;
+    }
+    if (run >= 0) {
+        gDPPipeSync(gfx++);
+        func_80071608(&gfx);
+        func_800719A0(x, 0xB4, run + 0x165, 1, 0, flags, 0xFF, 0xFF, 0xFF, 0xFF);
+        func_80071CE4(&gfx, 0);
+    }
+    *gfxp = gfx;
+}
 
 s32 func_ovl3_8022B75C(void) {
     s32 i;
