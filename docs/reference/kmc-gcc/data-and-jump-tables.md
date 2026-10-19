@@ -1,7 +1,7 @@
 ---
 type: Reference
 title: "Data, jump tables and section placement"
-description: "Switch jump-table merging, symbol boundaries, bss and zero-initialized global placement, and section padding under KMC GCC 2.7.2 and KMC as."
+description: "Jump-table merging, symbol boundaries, bss and zero-initialized global placement, and section padding; look here for data or section-layout mismatches."
 tags: [data, bss, jump-tables, kmc-gcc]
 ---
 
@@ -21,4 +21,4 @@ Symbol declarations and object boundaries can affect section layout even when by
 
 # Section padding
 
-KMC `as` pads each object's `.text` to 16 bytes, so keep translation-unit boundaries the same as the original objects when splitting or merging files. A fast-math file applies `-ffast-math` to every function in it ([compiler profiles](/project/compiler-profiles.md)).
+Object padding and translation-unit boundaries are covered in [assembly and object layout](/project/compiler-profiles.md#assembly-and-object-layout).

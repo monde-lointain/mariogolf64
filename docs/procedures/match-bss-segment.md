@@ -2,11 +2,11 @@
 type: Procedure
 name: match-bss-segment
 title: "Match a bss segment"
-description: "Match a segment's bss data by replacing extern declarations with the appropriate definitions. Use when asked to match, add, split, or fix a .bss segment, especially after checksum failures from bss symbol layout, shifted VRAM labels, queue/stack buffers, or unresolved bss externs."
+description: "Replace externs with definitions in expected VRAM order to match a .bss segment; use when asked to match, add, split or fix a .bss segment in mariogolf64.yaml."
 tags: [bss, segments, splat]
 ---
 
-> Status: `mariogolf64.yaml` has no `.bss` subsegment yet (only plain `bss` entries), and no C file defines `.bss` objects. The recipe is Splat's syntax plus the KMC GCC behavior in [data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md); the first split is its first real test, so record anything that differs there ([editing rules](/reference/kmc-gcc/editing-rules.md)).
+> Note: `mariogolf64.yaml` has no `.bss` subsegment: every bss entry is a plain `bss` range, and no C file defines `.bss` objects. The `.bss` forms below are untested in this repo. KMC GCC behavior is in [data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md); check the forms on the first split against [editing rules](/reference/kmc-gcc/editing-rules.md).
 
 Reproduce the original VRAM layout exactly. A local compile is not enough; the full ROM checksum must match. `symbol_addrs.txt` is the layout source; code references give types and sizes; expected VRAM addresses decide ordering, padding, arrays and boundaries.
 
@@ -14,11 +14,11 @@ Reproduce the original VRAM layout exactly. A local compile is not enough; the f
 
 1. **Identify the target range.** Find the target symbols in `symbol_addrs.txt`, note the first symbol, each following address, and the first symbol after the file's range. Check `mariogolf64.yaml` for the unsplit `bss` segment covering it.
 
-2. **Split `mariogolf64.yaml`.** Add a `.bss` subsegment for the C file at the first target VRAM, keep a trailing plain `bss` at the next unclaimed VRAM, and keep later `.bss` entries at their original VRAMs:
+2. **Split `mariogolf64.yaml`.** Split the unsplit raw `bss` range at the C file's first VRAM. Keep a trailing plain `bss` at the next unclaimed VRAM, and keep later `bss` entries at their original VRAMs. The owned `.bss` form is untested in this repo ([splat yaml](/reference/splat-yaml.md)):
 
    ```yaml
-   - { type: .bss, vram: 0x800D2930, name: main/func_80025D30 }
-   - { type: bss, vram: 0x800D2D40 }
+   - { type: .bss, vram: <first VRAM>, name: <dir>/<file> }
+   - { start: <rom>, type: bss, vram: <next unclaimed VRAM> }
    ```
 
 3. **Replace externs with definitions.** Convert only symbols in the target file's `.bss` range.
@@ -38,10 +38,10 @@ Reproduce the original VRAM layout exactly. A local compile is not enough; the f
 
    ```bash
    ./tools/build-and-verify.sh
-   mips-linux-gnu-nm -n build/mariogolf64.elf | rg "symbolA|symbolB|target_file"
+   mips-linux-gnu-nm -n build/mariogolf64.elf
    ```
 
-   Compare to `symbol_addrs.txt`. If one symbol is right and every later one is early or late, the preceding symbol's size is wrong. Symbols reordered by alignment point to tentative definitions without an explicit zero initializer. Re-check array lengths, alignment, struct size and padding before editing YAML addresses. [data-differ](/tools/data-differ.md) finds the first mismatching symbol.
+   Compare the `nm` addresses to `symbol_addrs.txt`. If one symbol is right and every later one is early or late, the preceding symbol's size is wrong. Symbols reordered by alignment point to tentative definitions without an explicit zero initializer. Re-check array lengths, alignment, struct size and padding before editing YAML addresses. [data-differ](/tools/data-differ.md) finds the first mismatching symbol.
 
 7. **Finish** only when `./tools/build-and-verify.sh` prints `build/mariogolf64.z64: OK`. Commit only the scoped YAML and source changes after it passes.
 

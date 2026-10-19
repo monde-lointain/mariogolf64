@@ -2,11 +2,11 @@
 type: Procedure
 name: rename-global
 title: "Rename a global variable or function"
-description: "Renaming a global variable or function requires additional steps in decompilation projects or the build will fail. Use this skill when you want to rename a global variable or function."
+description: "Update a global variable or function name through its symbol_addrs.txt entry and every C reference; use when asked to rename one, since the build fails otherwise."
 tags: [symbols, rename]
 ---
 
-Global names are bound to addresses in `symbol_addrs.txt` ([format](/reference/symbol-addrs-format.md)). Each symbol appears at most once; the only exceptions are same-named file-static functions in different libraries, which both carry `allow_duplicated:True`. A symbol that is absent gets a default name: `func_<VRAM>` / `D_<VRAM>` (`func_ovl<N>_<VRAM>` / `D_ovl<N>_<VRAM>` in overlays).
+Global names are bound to addresses in `symbol_addrs.txt` ([format](/reference/symbol-addrs-format.md)). Each symbol appears at most once, unless its entry carries `allow_duplicated:True`; the repo uses that attribute for same-named file-static functions and for some data symbols. A symbol that is absent gets a default name: `func_<VRAM>` / `D_<VRAM>` (`func_ovl<N>_<VRAM>` / `D_ovl<N>_<VRAM>` in overlays).
 
 # Steps
 

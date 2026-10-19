@@ -3,6 +3,7 @@ type: Tool
 title: "Pipeline metrics report"
 description: "tools/pipeline_metrics.py: nigel outcomes joined with omp session cost, certified attempts to match, the difficulty ledger and a progress trend."
 tags: [metrics, nigel, workflow, status]
+resource: ../../tools/pipeline_metrics.py
 ---
 
 `.venv/bin/python3 tools/pipeline_metrics.py [--since YYYY-MM-DD] [--json] [--worktree PATH]... [--snapshot]`
@@ -15,10 +16,10 @@ Every input is reported as `present` or `absent` with its counts. A missing inpu
 
 | Input | Source | Written by |
 |---|---|---|
-| Candidate outcomes | `task-runner/*/outcomes.log` in each worktree (one JSON object per candidate) | nigel, per [contract C2](/tools/task-runner.md) |
+| Candidate outcomes | `task-runner/*/outcomes.log` in each worktree (one JSON object per candidate) | nigel ([task runner](/tools/task-runner.md)) |
 | Session transcripts | `~/.omp/agent/sessions/*/*.jsonl` (override via `SESSIONS_ROOT` in the module) | omp |
 | Attempts to match | `nonmatchings/<env>/match_log.txt` in each worktree | `build.sh` |
-| Difficulty ledger | `$MG64_LEDGER`, else `<git-common-dir>/mg64/difficulty.jsonl` | `tools/difficulty_ledger.py` record, per contract C3 |
+| Difficulty ledger | `$MG64_LEDGER`, else `<git-common-dir>/mg64/difficulty.jsonl` | `tools/difficulty_ledger.py` record |
 | Progress trend | `<git-common-dir>/mg64/progress.jsonl` | `--snapshot` |
 
 The worktrees are every entry of `git worktree list`, or the paths given with `--worktree`. The ledger is read directly from the JSONL file, so the report does not depend on the ledger CLI.
@@ -43,7 +44,7 @@ Failed records are every record whose `outcome` is not `matched`. The report giv
 
 # Progress trend
 
-The progress figures come from the source tree, so a snapshot needs no build: matched functions are C functions in `src/`, unmatched ones are `asm/nonmatchings` stubs sized from their `nonmatching <name>, <size>` headers. The figures are matched and unmatched functions, matched and unmatched bytes, and `bytes_pct` = matched bytes / total bytes. Hand-written assembly and data are not counted; [progress](progress.md) measures a build in full. `--snapshot` appends one line `{date, ts, worktree, ...figures}` to `progress.jsonl`. Each row in the trend shows the change from the previous snapshot; `--since` keeps rows dated on or after the given day after the deltas are computed.
+The progress figures come from the source tree, so a snapshot needs no build: matched functions are C functions in `src/`, unmatched ones are `asm/nonmatchings` stubs sized from their `nonmatching <name>, <size>` headers. The figures are matched and unmatched functions, matched and unmatched bytes, and `bytes_pct` = matched bytes / total bytes. Hand-written assembly and data are not counted; [progress](/tools/progress.md) measures a build in full. `--snapshot` appends one line `{date, ts, worktree, ...figures}` to `progress.jsonl`. Each row in the trend shows the change from the previous snapshot; `--since` keeps rows dated on or after the given day after the deltas are computed.
 
 # Limits
 
@@ -51,4 +52,4 @@ The progress figures come from the source tree, so a snapshot needs no build: ma
 - `--since` applies to outcomes by `ts_start` date, to ledger records by `ts`, and to snapshots by `date`. It does not apply to match logs.
 - Costs come from omp's own usage fields and are only as complete as those fields. Nested subagent transcripts are included.
 - Each run that joins a session reads that session's files, so a large transcript dominates runtime.
-- Changing how a match is counted, or how a certified attempt is read, changes what this report says. Treat such changes as [comparison changes](/harness/changing-the-harness.md) and see the nigel outcome set in the nigel README.
+- Changing how a match is counted, or how a certified attempt is read, changes what this report says. Treat such changes as [comparison changes](/harness/changing-the-harness.md). Outcome names are written by nigel; see the [task runner](/tools/task-runner.md).

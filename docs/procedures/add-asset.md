@@ -2,7 +2,7 @@
 type: Procedure
 name: add-asset
 title: "Add an asset and convert ROM-address references"
-description: "Replace raw PI ROM addresses (D_<hex> externs below 0x2000000, literal ROM offsets, or arrays of start/end addresses) with linker-generated <name>_ROM_START/<name>_ROM_END symbols by adding named bin segments to mariogolf64.yaml."
+description: "Replace raw ROM addresses and D_<hex> externs with <name>_ROM_START/_ROM_END symbols by adding named bin segments to mariogolf64.yaml; use when code or asm references a ROM asset by address."
 tags: [assets, segments, splat]
 ---
 
@@ -43,12 +43,7 @@ AssetEntry g_asset_table[] = {
 
 # Steps
 
-1. **Check whether the asset exists.**
-
-   ```bash
-   grep -n "0xD9B9C0" mariogolf64.yaml
-   grep -n "_ROM_START" mariogolf64.ld | head
-   ```
+1. **Check whether the asset exists.** Search `mariogolf64.yaml` for the address (for example `0xD9B9C0`) and search `mariogolf64.ld` for `_ROM_START`.
 
    For an array, collect every start and end address and sort the unique ones.
 
@@ -84,13 +79,15 @@ AssetEntry g_asset_table[] = {
 
    ```bash
    ./tools/build-and-verify.sh
-   python3 tools/data-differ/data_diff.py g_asset_table
+   python3 tools/data-differ/data_diff.py <symbol>
    ```
+
+   `<symbol>` is a data symbol listed in `symbol_addrs.txt`.
 
 # Common mistakes
 
 * Out-of-order segments: Splat stops with `segments out of order`.
 * Zero-size segment: two segments with the same start.
-* Wrong `_ROM_END`: it is the next segment's start. Check boundaries with `grep <name> build/mariogolf64.map`.
+* Wrong `_ROM_END`: it is the next segment's start. Check boundaries in `build/mariogolf64.map`.
 * `undefined reference to <name>_ROM_START`: missing segment or `USE_ASSET`.
 * Data mismatch in an array: an end symbol resolves to the wrong address.

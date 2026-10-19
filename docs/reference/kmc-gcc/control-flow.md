@@ -1,7 +1,7 @@
 ---
 type: Reference
-title: "KMC GCC control-flow shape"
-description: "How equivalent C constructs lay out blocks, calls, loops and conditional assignments differently under KMC GCC 2.7.2."
+title: "Control-flow shape"
+description: "How equivalent C lays out blocks, calls, loops and conditional assignments under KMC GCC 2.7.2; look here when blocks, delay slots or branch-likely choice differ."
 tags: [kmc-gcc, control-flow]
 ---
 

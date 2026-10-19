@@ -2,7 +2,7 @@
 type: Procedure
 name: decompile-microcode
 title: "Decompile F3DEX2 display-list code"
-description: "Use this skill if you need to decompile a function that builds an F3DEX2 display list. A `Gfx *`/`Gfx **` parameter or 8-byte command pairs written through a cursor are strongly indicative of display-list construction."
+description: "Decompile a function that builds an F3DEX2 display list into gSP/gDP macros; use when a Gfx * or Gfx ** parameter or 8-byte command pairs written through a cursor show display-list construction."
 tags: [decompile, graphics, f3dex2]
 ---
 
@@ -32,11 +32,13 @@ temp_v1->words.w0 = 0xDA380003;
 temp_v1->words.w1 = temp_a1;
 ```
 
-That is one F3DEX2 command: the opcode word `0xDA380003` with `temp_a1` as its argument. `gfxdis.f3dex2` (external tool) names it:
+`gfxdis.f3dex2` (not in the repo; it must be on `PATH`) names the command:
 
 ```
 gfxdis.f3dex2 -d DA38000300000000
-→ gsSPMatrix(0x00000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+{
+    gsSPMatrix(0x00000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW),
+}
 ```
 
 Then:

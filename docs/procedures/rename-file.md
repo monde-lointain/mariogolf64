@@ -2,7 +2,7 @@
 type: Procedure
 name: rename-file
 title: "Rename a C file or header"
-description: "Renaming a C file or associated header (.h) file requires additional steps in decompilation projects or the build will fail. Use this skill when you want to rename a C file and/or a header file."
+description: "Rename a C file and its header, updating Splat segments, INCLUDE_ASM paths and Makefile rules; use when asked to rename a C file or header (.h) in src/ or include/."
 tags: [rename, segments]
 ---
 

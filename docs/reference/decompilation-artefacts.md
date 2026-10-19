@@ -28,7 +28,7 @@ if (i < 10) {
 
 **Duplicated variables.** A single reused variable is far more likely than many temporaries. Literal decompilation and offline permuter output both create reassignments that hurt the match rate.
 
-**Shifts instead of arithmetic.** `x >> 2` is `x / 4`; `x << 2` is `x * 4`.
+**Shifts instead of arithmetic.** For unsigned values, `x >> 2` is `x / 4` and `x << 2` is `x * 4`. For negative signed values, `>>` rounds toward negative infinity and `/` rounds toward zero, so write `/` and let GCC emit the bias ([expressions and instruction selection](/reference/kmc-gcc/expressions-and-instruction-selection.md)).
 
 **False returns.** An explicit return in assembly may be a fall-through:
 
@@ -43,8 +43,7 @@ return Y;          /* fall-through from the if branch */
 
 # GCC 2.7.2 codegen to recognize, not fight
 
-* **Signed division** by a power of two compiles to shift-and-bias; write `x / 4` ([details](kmc-gcc/expressions-and-instruction-selection.md)).
+* **Signed division** by a power of two compiles to shift-and-bias; write `x / 4` ([details](/reference/kmc-gcc/expressions-and-instruction-selection.md)).
 * **Branchless operations** (`slti` + `addu`) often come from an ordinary ternary or `if`/`else`.
-* **`do { } while (0)`** can influence allocation and scheduling without changing semantics; a last resort when registers will not cooperate.
 * **Dead stores.** GCC 2.7.2 sometimes expects a variable written before a branch even if overwritten later; an initialization such as `result = 0` before a conditional can fix a mismatch.
-* **Bare `sqrt.s`/`sqrt.d`.** Files built with `-ffast-math` (the `FAST_MATH_SRCS` list) inline `sqrtf()` without a NaN guard. A guarded sqrt with a library fallback means the owning file is not fast-math ([profiles](/project/compiler-profiles.md)).
+* **Bare `sqrt.s`/`sqrt.d`.** Files built with `-ffast-math` inline `sqrtf()` without a NaN guard ([overrides](/project/compiler-profiles.md#overrides)). A guarded sqrt with a library fallback means the owning file is not fast-math.

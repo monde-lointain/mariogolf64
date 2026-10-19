@@ -31,4 +31,4 @@ Full list and validation checklist: `docs/project/code-quality.md`. Never use in
 
 ## Docs maintenance
 
-Add or move a concept: update its directory's `index.md` (one-line description per entry) and, for notable changes, `docs/log.md`. Skills in `.omp/skills/` are symlinks into `docs/procedures/`; edit the concept. Generic compiler lessons go in `docs/reference/kmc-gcc/` only under `editing-rules.md`; per-function sessions keep findings in their workspace `LEARNINGS.md`.
+Rules: `docs/harness/changing-the-harness.md` ("Docs are part of the harness"). In short: a concept's frontmatter `description` is copied verbatim into its directory's `index.md`; add, move or retitle a concept and update that index. `docs/log.md` records notable docs and harness changes, never individual function matches. Skills in `.omp/skills/` are symlinks into `docs/procedures/`; edit the concept. Generic compiler lessons go in `docs/reference/kmc-gcc/` only under `editing-rules.md`; per-function sessions keep findings in their workspace `LEARNINGS.md`.

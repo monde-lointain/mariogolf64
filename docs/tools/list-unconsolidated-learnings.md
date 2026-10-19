@@ -22,4 +22,4 @@ A note is consolidated when its exact content hash is recorded in `$(git rev-par
 
 # Interaction with cleanup
 
-[decomp-env-cleanup](selection-and-status.md) keeps a stale environment that still holds an unconsolidated note, so the lesson is not lost before it reaches `docs/`. `--force` removes such environments anyway.
+[decomp-env-cleanup](/tools/selection-and-status.md) keeps a stale environment that still holds an unconsolidated note, so the lesson is not lost before it reaches `docs/`. `--force` removes such environments anyway.

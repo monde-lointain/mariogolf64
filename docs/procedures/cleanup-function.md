@@ -5,13 +5,13 @@ description: "Improve names, types and structure of already-matching code withou
 tags: [cleanup, quality]
 ---
 
-The ROM already matches. Your job is to make the code read like what the original developers wrote, while keeping it matching. Maintaining the match is essential: if the build or function looked non-matching at the start, it was matching and you must keep it so.
+The ROM already matches, so every change must keep the build matching. Your job is to make the code read like what the original developers wrote.
 
 # Steps
 
 1. Read the target function and think about its purpose in the game, and how it relates to callers and callees.
-2. List its problems: placeholder names, `unk` fields, pointer arithmetic, shift-for-arithmetic, copied locals, decompilation artefacts ([list](/reference/decompilation-artefacts.md)), non-typed access.
-3. Fix them while preserving the match. Expect several iterations, and expect to refactor nearby code when shared structs or declarations are wrong or incomplete; do not stop at a file boundary.
+2. Make a problems list: placeholder names, `unk` fields, pointer arithmetic, shift-for-arithmetic, copied locals, decompilation artefacts ([list](/reference/decompilation-artefacts.md)), untyped access.
+3. Fix them while preserving the match. Expect several iterations. Cross-file refactors are in scope: when shared structs or declarations are wrong or incomplete, refactor the nearby code, and do not stop at a file boundary.
 4. Verify with `./tools/build-and-verify.sh`. If it fails, fix it while preserving the cleanup.
 5. Commit with a suitable message.
 
@@ -26,7 +26,7 @@ The ROM already matches. Your job is to make the code read like what the origina
 
 # Rename correctly
 
-Renaming a function or global is a `symbol_addrs.txt` change: follow [rename-global](rename-global.md). If the function name in C is not the name the task gave you, the C function was renamed without updating `symbol_addrs.txt`; fix the entry. If the task input starts with `func_`, the entry is missing or wrong.
+Renaming a function or global is a `symbol_addrs.txt` change: follow [rename-global](/procedures/rename-global.md). If the function name in C is not the name the task gave you, the C function was renamed without updating `symbol_addrs.txt`; fix the entry. If the task input starts with `func_`, the entry is missing or wrong.
 
 # Safe refactoring
 

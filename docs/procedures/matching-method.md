@@ -1,11 +1,11 @@
 ---
-type: Playbook
+type: Guide
 title: "Matching method"
 description: "How to approach a function that will not match: reconstruct plausible source first, escape plateaus with a clean rewrite, classify near misses, handle large functions and data layout."
 tags: [decompile, strategy]
 ---
 
-Used from inside a [decomp environment](/tools/decomp-env.md) after `base.c` compiles. The attempt loop and stop rules live in [decompile-function](decompile-function.md); compiler behavior in [KMC GCC learnings](/reference/kmc-gcc/index.md); cleanup of m2c output in [decompilation artefacts](/reference/decompilation-artefacts.md).
+Used from inside a [decomp environment](/tools/decomp-env.md) after `base.c` compiles. The attempt loop and stop rules live in [decompile-function](/procedures/decompile-function.md); compiler behavior in [KMC GCC learnings](/reference/kmc-gcc/index.md); cleanup of m2c output in [decompilation artefacts](/reference/decompilation-artefacts.md).
 
 # General approach
 
@@ -50,7 +50,7 @@ A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeat
 
 # Display lists
 
-Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists. Use [decompile-microcode](decompile-microcode.md) and the `gbi.h` macros.
+Functions that write 8-byte command pairs through a `Gfx *` cursor build F3DEX2 display lists. Use [decompile-microcode](/procedures/decompile-microcode.md) and the `gbi.h` macros.
 
 # Data layout
 

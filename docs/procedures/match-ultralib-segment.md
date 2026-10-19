@@ -2,7 +2,7 @@
 type: Procedure
 name: match-ultralib-segment
 title: "Match a libultra segment"
-description: "Match a given segment to a libultra ROM segment. Use this when converting unidentified asm libultra ranges such as osRecvMesg to matching C source."
+description: "Match a given segment to a libultra ROM segment; use when converting unidentified asm libultra ranges such as osRecvMesg to matching C source."
 tags: [libultra, segments, splat]
 ---
 
@@ -22,11 +22,7 @@ tags: [libultra, segments, splat]
    python3 tools/asm-differ/diff.py --no-pager osPfsNumFiles
    ```
 
-2. **Find upstream source and headers** in the decompals ultralib checkout next to this repo (`git clone https://github.com/decompals/ultralib ../ultralib` if missing):
-
-   ```sh
-   rg -n "osPfsNumFiles" ../ultralib/src ../ultralib/include
-   ```
+2. **Find upstream source and headers** in the decompals ultralib checkout next to this repo (`git clone https://github.com/decompals/ultralib ../ultralib` if missing). Search `../ultralib/src` and `../ultralib/include` for the function name.
 
 3. **Port the file** into `src/libultra`, preserving the subtree. Project copies of the headers are in `include/libultra` (`PR/`, `internal/`, `compiler/gcc/`). Verify macro values locally before using semantic names (for example `CONT_CMD_NOP` may be `0xff` while the target wants a literal `0`). Treat upstream as a starting point; build early and let the diff guide you. Hand-written upstream assembly (`.s`) becomes a `hasm` subsegment with its source at `src/libultra/<subdir>/<name>.s`, assembled through the KMC driver.
 
@@ -52,19 +48,18 @@ tags: [libultra, segments, splat]
    - [0xA3590, .data, libultra/io/controller]
    - [0xA35A0, .data, libultra/gu/align]
    - [<rom>, .rodata, libultra/gu/sinf]
-   - { type: .bss, vram: <vram>, name: libultra/os/initialize }
    ```
 
-   Use [match-data-segment](/procedures/match-data-segment.md) and [match-bss-segment](/procedures/match-bss-segment.md). If the object has only `.text`, keep matching instructions first.
+   Use [match-data-segment](/procedures/match-data-segment.md) for `.data` and `.rodata`, and [match-bss-segment](/procedures/match-bss-segment.md) for `.bss`. If the object has only `.text`, keep matching instructions first.
 
-6. **Name real symbols.** If the new source calls functions or data elsewhere in the ROM, add the real ultralib names to `symbol_addrs.txt` instead of aliasing unlabeled `D_`/`func_` symbols ([format](/reference/symbol-addrs-format.md)):
+6. **Name real symbols.** If the new source calls functions or data elsewhere in the ROM, instead of aliasing unlabeled `D_`/`func_` symbols, add the real ultralib names to `symbol_addrs.txt` ([format](/reference/symbol-addrs-format.md)). Entries use this form; add a line only when the name is absent:
 
    ```text
-   __osDisableInt = 0x800A61B0; // type:func
-   __osPiDevMgr = 0x800DF2F0; // type:OSDevMgr size:0x1C
+   __osDisableInt = 0x800B0500; // type:func
+   __osPiDevMgr = 0x800C7E70; // size:0x1C
    ```
 
-   Check that nothing in the segment still uses placeholders: `rg -n "func_800[0-9A-Fa-f]+|D_800[0-9A-Fa-f]+" src/libultra`. Fix only the symbols involved; do not rename unrelated ones blindly.
+   Check that nothing in the segment still uses placeholders: search `src/libultra` for `func_800<hex>` and `D_800<hex>` names. Fix only the symbols involved; do not rename unrelated ones blindly.
 
 7. **Build and verify**, then diff every function the new source emits before looking at linker or data issues:
 
@@ -77,10 +72,10 @@ tags: [libultra, segments, splat]
 
 # Build flags and VERSION_J
 
-`src/libultra` uses the libultra profile (`-O3 -DBUILD_VERSION=VERSION_J -DF3DEX_GBI_2 -fsigned-char`, see [compiler profiles](/project/compiler-profiles.md)). Print the effective flags with `make -s print-cflags SRC=src/libultra/io/pfsnumfiles.c`. If one file needs different flags, add a file-specific override beside the libultra profile in the Makefile (`$(BUILD_DIR)/src/libultra/io/pfsnumfiles.%: OPT_FLAGS = -O2`).
+`src/libultra` builds with the libultra profile; [compiler profiles](/project/compiler-profiles.md) lists its flags. Print the effective flags with `make -s print-cflags SRC=src/libultra/io/pfsnumfiles.c`. If one file needs different flags, add a file-specific override as that page describes (`$(BUILD_DIR)/src/libultra/io/pfsnumfiles.%: OPT_FLAGS = -O2`).
 
 When porting upstream:
 
 * Keep only the `BUILD_VERSION >= VERSION_J` side of version conditionals.
-* `char` is signed: `strchr`/`strlen`-style code sign-extends (`lb` + shifts, not `lbu`/`andi`).
+* `char` is signed (`-fsigned-char` in the profile). Compare the emitted loads and shifts against the assembly before changing types.
 * Trust the assembly over upstream: if upstream has a call the target lacks, omit it.

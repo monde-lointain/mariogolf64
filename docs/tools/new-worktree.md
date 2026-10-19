@@ -18,4 +18,4 @@ Git runs hooks only from the shared hooks directory, so the script does not inst
 
 Last, it runs `./tools/build-and-verify.sh` in the new worktree. That extracts `asm/`, which candidate sources such as `score_functions.py asm/nonmatchings` need, and proves the worktree builds the matching ROM. A failed build exits nonzero and keeps the worktree for inspection. The build is skipped with a warning when an input is missing, and skipped entirely with `--no-build`.
 
-Use this for every [nigel](task-runner.md#worktree-rule) worktree.
+Use this for every [nigel](/tools/task-runner.md#worktree-rule) worktree.

@@ -1,42 +1,59 @@
 ---
 type: Tool
 title: "decomp-env and per-function scoring"
-description: "tools/decomp-env creates nonmatchings/<function>/ with target assembly, an m2c starting point and build.sh, which compiles an attempt with the owning file's profile and scores it."
+description: "tools/decomp-env creates nonmatchings/<function>/ with the target assembly, a starting base.c and build.sh, which compiles an attempt with the owning file's profile and scores it."
 tags: [decompile, build, comparison]
 resource: ../../tools/decomp-env
 ---
 
+`tools/decomp-env` creates a working directory for one function under `nonmatchings/`. The directory's `build.sh` compiles and scores each attempt. The per-function workflow and stop rules are in [decompile-function](/procedures/decompile-function.md); selection and cleanup are in [selection-and-status](/tools/selection-and-status.md).
+
 # Bootstrap
 
 ```bash
-./tools/decomp-env --bootstrap-only <function> [--id <ID>]
+./tools/decomp-env [--bootstrap] [--bootstrap-only] [--id ID] <function_name_or_path_or_scratch_id>
 ```
 
-Needs `asm/` (run [build-and-verify](build-and-verify.md) first). `<function>` may be a function name, a `.s` path, or a decomp.me scratch ID (alphanumeric, 5-10 chars; function names win when both match). Flags:
+The argument is a function name, a `.s` path, or a decomp.me scratch ID. It is a scratch ID when it contains no `/`, does not end in `.s`, names no assembly function under `asm/`, and is either all digits or 5–10 alphanumeric characters. Function names win.
 
 | Flag | Effect |
 |---|---|
-| `--bootstrap` | Generate `base.c` with m2c. Without it, `base.c` is copied from `src/temp.c`. Not allowed with a scratch ID. |
-| `--bootstrap-only` | Implies `--bootstrap`; create the directory and exit. Without it, the script launches `omp --thinking xhigh` inside the directory. |
-| `--id ID` | Directory is `nonmatchings/<function>-<ID>` and is only created if absent. Requires `--bootstrap`; not allowed with a scratch ID. |
+| `--bootstrap` | Generate `base.c` with m2c from the function's assembly. Without it, `base.c` is a copy of `src/temp.c`, or the imported source for a scratch ID. Not allowed with a scratch ID. |
+| `--bootstrap-only` | Implies `--bootstrap`. Create the directory and exit. Without it, the script launches `omp --thinking xhigh` inside the directory. |
+| `--id ID` | Use the directory `nonmatchings/<function>-<ID>`. Requires `--bootstrap`; not allowed with a scratch ID. If the directory exists, the script prints `Directory already exists: <dir>`, launches `omp` there unless `--bootstrap-only`, and exits 0 without re-creating it. |
 
-Without `--id`, the directory is `nonmatchings/<function>` or the first free `<function>-2`, `-3`, ...
+Without `--id`, the directory is `nonmatchings/<function>`, or the first free `<function>-2`, `-3`, ….
+
+Run [build-and-verify](/tools/build-and-verify.md) first. Without `asm/`, the script exits with `asm/ does not exist. Run ./tools/build-and-verify.sh first.`
+
+# Requirements
+
+| Requirement | Used for |
+|---|---|
+| `asm/` | Source of the target assembly |
+| `mips-linux-gnu-as`, `mips64-linux-gnu-as` or `mips64-elf-as` | Assembling `target.o`; the first one found is used |
+| `make` | `make -s print-cflags` in `build.sh` |
+| `flock` | Serializing builds in `build.sh` |
+| `.venv/bin/m2c` when present, else `m2c` | `--bootstrap`. A missing or failing m2c leaves a blank `base.c` with a warning. |
+| `.venv/bin/python3` when present, else `python3` | `tools/m2ctx.py` and `tools/difficulty_ledger.py write-run` |
+| `omp` | Launched in the environment. When absent, the script prints the directory to open. |
+| `curl` and `.decomp_dev_secret` | Fetching scratches. The first line of `.decomp_dev_secret` is the User-Agent header. The file is git-ignored. |
 
 # What the directory contains
 
 | File | Source |
 |---|---|
-| `target.s`, `target.o` | `prelude.inc` plus the function's assembly, assembled with the VR4300 settings |
-| `base.c` | m2c output (with a context built from the owning C file via `tools/m2ctx.py`), the scratch's source, or `src/temp.c` |
-| `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. For hand-written assembly with no owning C file: `src/main/__candidate__.c`, the main profile. |
-| `.diff_algorithm` | Only for scratches that used levenshtein diffing |
-| `AGENTS.md` | Rendered from `tools/decomp-env-template/AGENTS.md` with `$functionName`, `$root` (repository root) and `$env` (this directory) replaced by the function name and absolute paths |
-| `build.sh`, `diff.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `map_asm_to_c.py`, `prelude.inc` | Symlinks into `tools/decomp-env-template/`: editing one edits the template for every environment |
-| `.omp` | Symlink to the repository's `.omp` (skills, policy hook, settings) |
-| `.run.json` | Written by `tools/difficulty_ledger.py write-run` on creation: function, task, tier, model, run id, deadline and the `stall_limit` that build.sh reads. See [difficulty-ledger](difficulty-ledger.md). |
-| `match_log.txt`, `.matches/`, `LEARNINGS.md` | Created while working |
+| `target.s`, `target.o` | `prelude.inc` plus the function's assembly, assembled with `-EB -march=vr4300 -mtune=vr4300` |
+| `base.c` | With `--bootstrap`: m2c output, with a context from `tools/m2ctx.py` when the owning C file exists. For a scratch ID: the imported scratch source. Otherwise: a copy of `src/temp.c`. |
+| `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. Hand-written assembly with no owning C file uses `src/main/__candidate__.c`. |
+| `.diff_algorithm` | `levenshtein`, only for a scratch whose diff flags include `-DIFFlevenshtein` |
+| `AGENTS.md` | Rendered from the template with `$functionName`, `$root` and `$env` replaced by the function name, the absolute repository root and the absolute environment directory |
+| Template files | Symlinks to every file in `tools/decomp-env-template/` (`build.sh`, `diff.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `map_asm_to_c.py`, `prelude.inc`, `__pycache__`). Editing one edits the template for every environment. |
+| `.omp` | Symlink to the repository's `.omp` configuration |
+| `.run.json` | Written by `tools/difficulty_ledger.py write-run`: function, task, tier, model, run id, deadline and `stall_limit`. See [difficulty-ledger](/tools/difficulty-ledger.md). If the write fails, the script warns and `build.sh` uses the default stall limit. |
+| `.build.lock`, `match_log.txt`, `.matches/`, `LEARNINGS.md`, `NEAR_MISS.md` | Created during work: the build lock, per-attempt scores, archived exact matches and notes |
 
-`nonmatchings/` is git-ignored. [decomp-env-cleanup](selection-and-status.md) removes environments for functions that are already matched.
+`nonmatchings/` is git-ignored. [decomp-env-cleanup](/tools/selection-and-status.md) removes environments for functions that are already matched.
 
 # Scoring an attempt
 
@@ -44,18 +61,37 @@ Without `--id`, the directory is `nonmatchings/<function>` or the first free `<f
 ./build.sh base_3.c [opt_flag]
 ```
 
-Run inside the environment. It serializes builds with `flock`, rejects a candidate that contains `INCLUDE_ASM`, `INCLUDE_RODATA` or `GLOBAL_ASM`, reads the profile flags from `make print-cflags` for `.source_file`, compiles, dumps and normalizes both objects, and scores them with `dist.py` (penalty weights copied from decomp-permuter's scorer). An optional second argument replaces the `-O` level.
+Run inside the environment. `build.sh`:
 
-Output files next to the attempt: `<attempt>.o`, `<attempt>_object_dump.s`, `_object_dump_normalized.s`, `_annotated.s` (objdump with C annotations), and `<attempt>_diff`.
+- rejects a candidate that contains `INCLUDE_ASM`, `INCLUDE_RODATA` or `GLOBAL_ASM` (`ERROR: The C file contains an assembly include.`);
+- serializes builds with `flock` on `.build.lock`;
+- reads the profile flags from `make -s print-cflags SRC=<.source_file>`; an optional second argument replaces the `-O` level;
+- compiles with `tools/kmc-cc` ([build-and-verify](/tools/build-and-verify.md)), dumps and normalizes both objects, and scores them with `dist.py` using `.diff_algorithm` (default `sequence`). The penalty weights are copied from decomp-permuter's scorer.
 
-`Verified exact match: yes` requires all three of: scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c` and a `NEXT:` line names the C file to integrate into. For attempts named `base_<N>.c` the result is appended to `match_log.txt` (`<file> <score>%`, or `.matches/... 100.000% exact sha256=...`). Once the best entry is `N` or more attempts old, the script prints `STOP: No progress in <attempts> attempts (best: X% at <file>; stall limit N).` and repeats that line on every later attempt. `N` is `MG64_STALL_LIMIT`, else `stall_limit` in `.run.json` (decomp-env writes it from the task's tier), else 20; a bad value fails before compiling. When `.run.json` has a deadline, every build ends with `Time left: <minutes> min`. `STOP:` ends the attempt loop ([stop rules](/procedures/decompile-function.md)); `harvest` records it as `stalled`.
+| Output | Content |
+|---|---|
+| `<attempt>.o` | Object file |
+| `<attempt>_annotated.s` | Disassembly with C line annotations |
+| `<attempt>_object_dump.s`, `<attempt>_object_dump_normalized.s` | Dump and normalized dump |
+| `<attempt>_diff` | Unified diff of the normalized dump against `target_object_dump_normalized.s` |
+
+`Verified exact match: yes` requires all three of: the scorer reports an exact match, zero differences, and byte-identical normalized dumps. On a match the source is archived as `.matches/<stem>-<sha256>.c`, and a `NEXT:` line names the integration step ([decompile-function](/procedures/decompile-function.md)).
+
+For attempts named `base_<N>.c`, the result is appended to `match_log.txt`: `<file> <score>%`, or `.matches/... 100.000% exact sha256=...` for a match. Once the best entry is `N` or more attempts old, the script prints `STOP: No progress in <attempts> attempts (best: X% at <file>; stall limit N).` and repeats that line on every later attempt. `N` is `MG64_STALL_LIMIT` if set, else `stall_limit` from `.run.json`, else 20. A value that is not a positive integer fails before compiling. When `.run.json` has a deadline, every build ends with `Time left: <minutes> min`. The stop rules that act on `STOP:` are in [decompile-function](/procedures/decompile-function.md).
+
+# Helpers
 
 | Helper | Use |
 |---|---|
-| `./diff.sh <attempt>.o` | Normalized diff of a built attempt |
-| `./objdump.py <attempt>.o` | Normalized MIPS dump |
-| `./map_asm_to_c.py <attempt>.o <line>` | Map an assembly line back to its C |
+| `./build.sh <file.c> [opt_flag]` | Compile, score and archive one attempt |
+| `./diff.sh <attempt>.o` | Diff a built attempt's normalized dump against `target_object_dump_normalized.s` |
+| `./dist.py <target.o> <attempt.o> [--stack-diffs] [--symbol SYMBOL] [--algorithm {sequence,levenshtein}] [--debug]` | Score two objects. Prints `Score: X% (N differences)`, `Algorithm`, and `Exact match: yes\|no`. |
+| `./objdump.py <file> [--from-dump] [--no-source] [--symbol SYMBOL]` | Normalized MIPS dump of an object, or of an annotated listing with `--from-dump`. `--no-source` omits C annotations. |
+| `./normalize_asm.py <file>` | Normalized dump to stdout; `jtbl_*` labels are rewritten to `.rodata` |
+| `./map_asm_to_c.py <attempt>.o <n>` | Print the source location and C code for the n-th instruction (decimal, counted from 1 within its function) |
 
-Relocations compare by resolved VRAM. An auto-named `D_<VRAM>`/`func_<VRAM>` symbol encodes its address; any other name resolves through `symbol_addrs.txt`. So `%lo(D_800B67A5)` and `%lo(array+1)` compare equal when `array+1` is `0x800B67A5`. A name declared twice in `symbol_addrs.txt` is unresolved and compares by name.
+`prelude.inc` sets `noat`, `noreorder` and `gp=64`, includes `macro.inc`, and redefines `jlabel` as a local label.
 
-Per-function exact matches are certified from `match_log.txt` by `tools/nonmatching_match_log.py` ([selection-and-status](selection-and-status.md)). If any of these helpers is wrong, fix it at its source ([changing the harness](/harness/changing-the-harness.md)).
+Relocations compare by resolved VRAM. An auto-named `D_<VRAM>` or `func_<VRAM>` symbol encodes its address; any other name resolves through `symbol_addrs.txt`. So `%lo(D_800B67A5)` and `%lo(array+1)` compare equal when `array+1` is `0x800B67A5`. A name declared twice in `symbol_addrs.txt` is unresolved and compares by name.
+
+Per-function exact matches are certified from `match_log.txt` by `tools/nonmatching_match_log.py` ([selection-and-status](/tools/selection-and-status.md)). If any of these helpers is wrong, fix it at its source ([changing the harness](/harness/changing-the-harness.md)).

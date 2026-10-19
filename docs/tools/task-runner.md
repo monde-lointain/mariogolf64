@@ -22,7 +22,7 @@ nigel <task> --shard 1/4
 | Key | Value here |
 |---|---|
 | `agent` | `omp` (nigel adds `-p --mode json --approval-mode yolo`) |
-| `verify_command` | `./tools/verify-candidate` ([gate](verify-candidate.md): protected paths, baserom hash, then `build-and-verify.sh`) |
+| `verify_command` | `./tools/verify-candidate` ([gate](/tools/verify-candidate.md): protected paths, baserom hash, then `build-and-verify.sh`) |
 | `success_command` | `git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"` (tasks override it) |
 | `reset_command` | `git clean -f; git reset --hard HEAD || true` |
 
@@ -30,7 +30,7 @@ nigel <task> --shard 1/4
 
 # Worktree rule
 
-`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
+`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](/tools/new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
 
 ```bash
 tools/new-worktree mg64-a && cd ../mg64-a
@@ -39,29 +39,33 @@ PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev nigel decompile-similar --shard
 
 `difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a tier-1 failure. Stop a shard between candidates (after its `outcomes.log` grows).
 
-Commits made in a worktree stay on its branch until they are integrated. `tools/integrate-shards mg64-a mg64-b …`, run in the main checkout on `dev`, cherry-picks each shard's commits that `git cherry` lists as missing and keeps each one only if `build-and-verify.sh` passes. It skips matches already integrated, and stops a shard at any commit that touches a path outside `src/`, `include/`, `docs/`, `symbol_addrs.txt` and `mariogolf64.yaml` (harness code, tasks, hooks), at a conflict it cannot resolve, or at a failed build, leaving that commit for review. It exits 1 when it stopped somewhere, so a loop such as `while tools/integrate-shards mg64-a mg64-b mg64-c mg64-d; do sleep 600; done` only needs a person when it ends. Conflicts in `src/**/*.c` go through the `tools/merge-decomp-c` merge driver (`.gitattributes`; configured by `tools/install-git-hooks.sh`). It resolves the usual conflict between neighbouring matches: a definition replaces the other side's `INCLUDE_ASM` of the same function, and both sides' `extern` declarations are combined without repeating earlier ones. It leaves a conflict for a person when one symbol is declared with two types, a function is defined two ways, or the block holds anything else.
-
-With `MG64_SYNC_BRANCH` set, the decompile tasks' candidate source first runs `tools/sync-shard`, which rebases the shard onto that branch when nigel selects a candidate (not in the re-check after the agent, where `NIGEL_CANDIDATE` is set). Integrated commits drop out, and fixes merged from other shards (types, headers, harness) reach every shard. If the rebase conflicts, for example on a commit you picked with a hand-resolved conflict, it is retried preferring the integration branch's side. The result is kept only if every function the shard decompiled is still decompiled, every line it added outside `src/` and `include/` survives, and `build-and-verify.sh` passes; any other rebase that moves the shard must pass `build-and-verify.sh` too. Otherwise the shard keeps running unsynced.
+Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools/integrate-shards` and the `decomp-c` merge driver; see [shard integration](/tools/shard-integration.md).
 
 # Task catalog
 
-| Task | Candidate source | Does |
-|---|---|---|
-| `decompile-unmatched` | `difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` | Tier 1. Starts from the top-3 similar matched functions (`score_functions.py --by-similarity --score-func`), then [decompile-function](/procedures/decompile-function.md) |
-| `decompile-similar` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 3` | Tier 1, 60 min. Same, with similar matched functions as hints |
-| `decompile-coddog-similar` | `difficulty_ledger.py harvest && score_functions.py ... --by-coddog-similarity` | Tier 1, 60 min. Hints from coddog |
-| `decompile-tier2` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 5 --tier 2` | Tier 2, 120 min: five references, clean rewrite on plateau |
-| `decompile-tier3` | `difficulty_ledger.py harvest && score_functions.py ... --by-similarity --top-n 5 --tier 3` | Tier 3, 240 min: try all strategies, do not give up |
-| `cleanup-matched` | `list_matched_functions.py --by-reference-use` | [cleanup-function](/procedures/cleanup-function.md): names and purpose (`template.md`), most-referenced functions first |
-| `fix-low-quality` | `detect_low_quality_matches.py src --json` | [cleanup-function](/procedures/cleanup-function.md): artefacts and types (`template.md`, candidates are `[file, function]`) |
-| `cleanup-files` | `src/main/func_*.c`, `src/overlay_*/func_*.c` | Clean and rename a file with [rename-file](/procedures/rename-file.md) |
-| `cleanup-structs`, `deduplicate-structs`, `remove-struct-unions` | struct/header finders | Consolidate and name structs |
-| `clean-headers`, `introduce-headers` | header finders / source files | Header ownership and new headers |
-| `consolidate-global-types`, `fix-symbol-footprints` | global-type / oversized-symbol finders | Fix global types and symbol sizes |
-| `name-functions-and-symbols` | source files | Rename with [rename-global](/procedures/rename-global.md) and [rename-file](/procedures/rename-file.md) |
-| `match-rodata-segments` | unnamed `rodata` entries in `mariogolf64.yaml` | [match-data-segment](/procedures/match-data-segment.md) |
-| `consolidate-learnings` | `list_unconsolidated_learnings.py --json` | Merge verified KMC GCC lessons from `nonmatchings/*/LEARNINGS.md` and `NEAR_MISS.md` into `docs/reference/kmc-gcc/`, then `--mark` the note consolidated. Commits only `docs/reference/kmc-gcc` |
+Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, except `decompile-unmatched`, which has no `sync-shard` step. The five decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
 
-The candidate-source scripts are in [selection](selection-and-status.md) and [quality checkers](quality-checkers.md).
+| Task | Candidate source | Timeout | Notes |
+|---|---|---|---|
+| `decompile-unmatched` | `difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` | 60 min | Tier 1. No `sync-shard`. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT`, then [decompile-function](/procedures/decompile-function.md). |
+| `decompile-similar` | `score_functions.py … --by-similarity --top-n 3` | 60 min | Tier 1. Top three similar matched functions as references. |
+| `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. References from coddog similarity. |
+| `decompile-tier2` | `score_functions.py … --by-similarity --top-n 5 --tier 2` | 120 min | Tier 2. Reads the tier-1 reasons first. Five references. Rewrites from the assembly when progress plateaus. |
+| `decompile-tier3` | `score_functions.py … --by-similarity --top-n 5 --tier 3` | 240 min | Tier 3. Reads the tier-2 reasons first. Five references. Tries every approach in the matching method that earlier attempts did not. |
+| `cleanup-matched` | `python3 tools/list_matched_functions.py --by-reference-use` | 60 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`, most-referenced functions first. Config success command. |
+| `fix-low-quality` | `python3 tools/detect_low_quality_matches.py src --json` | 30 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`. Config success command. |
+| `cleanup-files` | `ls -1 src/main/func_*.c src/overlay_*/func_*.c 2>/dev/null` | 30 min | Cleans and renames each file with [rename-file](/procedures/rename-file.md). Commits `cleaned up $CANDIDATE`. |
+| `cleanup-structs` | `python3 tools/find_source_header_pairs.py --json` | 60 min | Consolidates and names structs. Commits `clean up structs: $CANDIDATE`. |
+| `deduplicate-structs` | `ls -1 src/main/*.c src/mgu/*.c src/overlay_*/*.c` | 60 min | Deduplicates structs. `accept_best_effort`. Config success command. |
+| `remove-struct-unions` | `python3 tools/find_struct_unions.py --json` | 60 min | Removes unnecessary struct unions. `--thinking xhigh`. Commits `remove unnecessary struct unions from $CANDIDATE`. |
+| `clean-headers` | `python3 tools/find_header_hygiene_candidates.py --json` | 60 min | Header ownership. `--thinking xhigh`. Commits `clean header ownership: $CANDIDATE`. |
+| `introduce-headers` | `ls -1 src/main/*.c src/mgu/*.c src/overlay_*/*.c` | 30 min | Adds a header for the candidate's source file. Commits `Added header for $CANDIDATE`. |
+| `consolidate-global-types` | `python3 tools/find_inconsistent_global_types.py` | 30 min | Makes a global's type consistent across files. Commits `consolidate global type: $CANDIDATE`. |
+| `fix-symbol-footprints` | `python3 tools/find_oversized_symbols.py` | 60 min | Fixes oversized symbols. Commits `fix symbol footprint: $CANDIDATE`. |
+| `name-functions-and-symbols` | `ls -1 src/main/*.c src/mgu/*.c src/overlay_*/*.c` | none | Renames with [rename-global](/procedures/rename-global.md) and [rename-file](/procedures/rename-file.md). Commits `name-functions-and-symbols: $CANDIDATE`. |
+| `match-rodata-segments` | `sed -nE` over the unnamed `rodata` entries in `mariogolf64.yaml` | 60 min | [match-data-segment](/procedures/match-data-segment.md). Commits `task-runner($TASK_NAME): match rodata segment $CANDIDATE`. |
+| `consolidate-learnings` | `python3 tools/list_unconsolidated_learnings.py --json` | 30 min | Merges verified KMC GCC lessons from `nonmatchings/*/LEARNINGS.md` and `NEAR_MISS.md` into `docs/reference/kmc-gcc/`, then `--mark`s the note. `accept_best_effort`. Commits only `docs/reference/kmc-gcc`. |
 
-Decompile tasks escalate by [difficulty tier](difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model anthropic/claude-haiku-5-5:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not. In this session's runs Haiku cost about $0.18 per match against $1.25 for `openai-codex/gpt-6-luna` (21 luna runs).
+The candidate-source scripts are in [selection](/tools/selection-and-status.md) and [quality checkers](/tools/quality-checkers.md).
+
+Decompile tasks escalate by [difficulty tier](/tools/difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model anthropic/claude-haiku-5-5:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not.

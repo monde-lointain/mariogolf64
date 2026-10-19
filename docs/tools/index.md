@@ -1,24 +1,28 @@
 # Build and verify
 
-* [build-and-verify](build-and-verify.md) - the full clean rebuild and SHA1 check; the final arbiter of every match
-* [verify-candidate](verify-candidate.md) - the gate nigel runs before committing: protected paths, baserom hash, optional decompiled-in-src check, then build-and-verify
-* [asm-differ](asm-differ.md) - diff a function in the built ROM against the target
-* [new-worktree](new-worktree.md) - create a sibling worktree on a new branch with the build inputs copied or linked from the main checkout
+* [build-and-verify](build-and-verify.md) - Clean re-extract, rebuild and SHA1 check of the whole ROM; the only command that decides a project-wide match.
+* [asm-differ](asm-differ.md) - Diff a function in the built ROM against the target assembly; vendored submodule, protected.
+* [data-differ](data-differ.md) - Byte-compare data symbols between the built ROM and baserom.z64; find the first mismatching symbol after a checksum failure.
 
 # Per-function work
 
-* [decomp-env](decomp-env.md) - bootstrap `nonmatchings/<function>/` and score attempts with `build.sh`
-* [permuter](permuter.md) - decomp-permuter wrapper with the owning file's compiler profile
-* [data-differ](data-differ.md) - byte-compare data symbols between built and target ROM
+* [decomp-env and per-function scoring](decomp-env.md) - tools/decomp-env creates nonmatchings/<function>/ with the target assembly, a starting base.c and build.sh, which compiles an attempt with the owning file's profile and scores it.
+* [permuter wrapper](permuter.md) - tools/permuter imports a candidate into decomp-permuter with the owning file's compiler profile and runs it until interrupted or matched.
 
 # Choosing and tracking work
 
-* [progress](progress.md) - code and data matched in the last build, by bytes and by functions or symbols; writes the decomp.dev report
-* [selection-and-status](selection-and-status.md) - progress, ranking, similarity, m2c batch, near-miss and cleanup reports
-* [difficulty-ledger](difficulty-ledger.md) - per-function failure record (`outcome`, tier, budget) that decides which functions each nigel tier may pick
-* [pipeline-metrics](pipeline-metrics.md) - nigel pipeline report: match rate, cost per match, attempts to match, ledger tiers and progress trend
-* [quality-checkers](quality-checkers.md) - pointer-arithmetic, low-quality-match, redundant-extern and header-hygiene tools
-* [task-runner](task-runner.md) - nigel tasks that run agents over candidate lists, and integrating shard worktrees
-* [list-unconsolidated-learnings](list-unconsolidated-learnings.md) - per-function notes not yet merged into `docs/reference/kmc-gcc/`; the consolidate-learnings candidate list
+* [Progress report](progress.md) - tools/progress.py: code and data matched in the last build, by bytes and by functions or data symbols, per category or segment; writes the objdiff report.json that decomp.dev reads.
+* [Selection, ranking and status tools](selection-and-status.md) - Scripts that report progress, rank unmatched functions, find similar matched code, batch-run m2c, and report or clean per-function environments.
+* [Code-quality checkers](quality-checkers.md) - Scripts that find pointer arithmetic, low-quality matches, redundant externs, header-ownership problems, struct unions and oversized symbols.
 
-For how these fit together and which ones decide a match, see the [harness code map](/harness/code-map.md).
+# Automation (nigel)
+
+* [task-runner (nigel)](task-runner.md) - nigel tasks that run an omp agent over candidate lists with verify, commit and reset handling; layout, task catalog, worktree rules.
+* [verify-candidate](verify-candidate.md) - The gate nigel runs before committing a candidate: protected paths, baserom hash, optional decompiled-in-src check, then build-and-verify.
+* [Difficulty ledger and tiers](difficulty-ledger.md) - Shared record of each decompilation attempt's outcome, the difficulty tier that follows from a function's failure history, and the per-environment .run.json that sets the stall limit.
+* [new-worktree](new-worktree.md) - Create a sibling git worktree on a new branch with the gitignored build inputs (baserom, gcc_kmc, .venv, submodules) copied or linked from the main checkout, then build it.
+* [Shard integration (sync-shard, integrate-shards, merge-decomp-c)](shard-integration.md) - Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c resolves src conflicts.
+* [Pipeline metrics report](pipeline-metrics.md) - tools/pipeline_metrics.py: nigel outcomes joined with omp session cost, certified attempts to match, the difficulty ledger and a progress trend.
+* [list-unconsolidated-learnings](list-unconsolidated-learnings.md) - Lists per-function LEARNINGS.md and NEAR_MISS.md notes that have not been merged into docs/reference/kmc-gcc/, and records consolidated notes in a ledger shared by all worktrees.
+
+How these fit together, and which of them decide a match: [harness code map](/harness/code-map.md).

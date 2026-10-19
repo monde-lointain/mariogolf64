@@ -1,7 +1,7 @@
 ---
 type: Reference
-title: "KMC GCC expressions and instruction selection"
-description: "Signed division, constant multiplication, commutative operand order, and packed or overlapping values under KMC GCC 2.7.2."
+title: "Expressions and instruction selection"
+description: "Signed division, constant multiplication, commutative operand order, and packed or overlapping values under KMC GCC 2.7.2; look here when single instructions differ."
 tags: [kmc-gcc, instruction-selection]
 ---
 

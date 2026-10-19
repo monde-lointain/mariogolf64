@@ -161,7 +161,7 @@ Renders one quad according to the vertices inside the vertex buffer
 Example: Render a quad using the vertex data specified at the vertex buffer positions 0, 1 (2/2), 2 (4/2), 0, 2 (4/2) and 3 (6/2).
 
 `07 00 02 04 00 00 04 06`
-Note: This opcode is functionally equivalent to opcode 06. The macro for this opcode (and thus presumably also the opcode itself) is labeled as no longer supported in Oct 1999 SDK documentation.
+Note: This opcode is functionally equivalent to opcode 06. The October 1999 SDK documentation labels the macro for this opcode as unsupported, so the opcode itself is presumably unsupported too.
 
 ## D3: G_SPECIAL_3
 

@@ -2,7 +2,7 @@
 type: Procedure
 name: decompile-function
 title: "Decompile a function"
-description: "Decompile one Mario Golf 64 assembly function into matching C, or improve an existing partial match."
+description: "Decompile one Mario Golf 64 assembly function into matching C, or improve an existing partial match; use when asked to decompile, match or improve a function."
 tags: [decompile, workflow]
 ---
 
@@ -44,7 +44,7 @@ INCLUDE_ASM("asm/nonmatchings/main/file", your_function);
 Stop at the first of these and make no further attempt:
 
 * **Matched:** `build-and-verify.sh` succeeds after integration (section 2).
-* **Stalled:** `build.sh` prints a line starting `STOP:`. The best score has not improved for the stall limit of `base_<N>.c` attempts (`stall_limit` in `.run.json`, 10 at tier 1; `MG64_STALL_LIMIT` overrides it).
+* **Stalled:** `build.sh` prints a line starting `STOP:`. The best score has not improved for the stall limit of `base_<N>.c` attempts. `MG64_STALL_LIMIT` overrides the limit; otherwise it is `stall_limit` in `.run.json`, default 20 ([difficulty ledger](/tools/difficulty-ledger.md) has tiers and fields).
 * **Integration failed:** the environment matches but `build-and-verify.sh` cannot be made to pass. Restore the C file.
 * **Gave up:** the only change left is one this procedure forbids (editing another function, inline assembly, a dead local). Register allocation, scheduling or a low `Time left` are not reasons: keep attempting until `STOP:`.
 
@@ -58,4 +58,4 @@ Then report in at most 10 lines: best score and file, approaches tried, the rema
 
 # Harness friction
 
-If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it ([changing the harness](/harness/changing-the-harness.md)). Files in the environment that come from `tools/decomp-env-template/` are symlinks, so editing one edits the template for every environment. Commit the fix by itself with a subject of at most 50 characters starting `harness: ` (lowercase, present tense), then return to the function. A harness fix does not reset or extend the attempt count.
+If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it, commit the fix on its own as [changing the harness](/harness/changing-the-harness.md) describes, then return to the function. Files in the environment that come from `tools/decomp-env-template/` are symlinks, except `AGENTS.md`, which is rendered per environment; editing a symlink edits the template for every environment. A harness fix does not reset or extend the attempt count.

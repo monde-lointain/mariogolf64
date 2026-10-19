@@ -3,7 +3,7 @@ Mario Golf 64
 
 A matching decompilation of [Mario Golf](https://en.wikipedia.org/wiki/Mario_Golf_(video_game)) for Nintendo 64 (North America, revision 0).
 
-**This repository does not contain any game assets or assembly whatsoever. An existing copy of the game is required. This project is not a port, to PC or any other platform. It takes a Nintendo 64 rom, extracts assets from it, and combines them with C code we reverse-engineered from the rom, to produce an identical rom. It is explicitly a non-goal for this project to be used for any commercial purpose.**
+**This repository does not contain any game assets or ROM disassembly; the only committed assembly is the entry stub and the library routines that were written in assembly (`src/**/*.s`). An existing copy of the game is required. This project is not a port, to PC or any other platform. It takes a Nintendo 64 rom, extracts assets from it, and combines them with C code we reverse-engineered from the rom, to produce an identical rom. It is explicitly a non-goal for this project to be used for any commercial purpose.**
 
 ## Quick start
 

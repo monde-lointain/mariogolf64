@@ -10,7 +10,7 @@ resource: ../../tools/verify-candidate
 ./tools/verify-candidate [--decompiled FUNCTION]
 ```
 
-Run from the repo root. Exit 0 prints `verify-candidate: OK`. Any other failure exits 1 and prints one line on stderr: `verify-candidate: FAILED: <reason>`.
+Run from the repo root. Exit 0 prints `verify-candidate: OK`. A failed check or build, or a `--decompiled` value that names no function, exits 1 and prints one line on stderr: `verify-candidate: FAILED: <reason>`. Unknown options exit 2 (argparse).
 
 `--decompiled` takes a function name, an asm path (`asm/nonmatchings/main/func_x.s`), or nigel's candidate key: a JSON array whose first element is the function (decompile-similar keys look like `["func_x","ref1",...]`). A trailing ` (worktree)` annotation is accepted.
 
@@ -35,4 +35,4 @@ A candidate that leaves the function as `INCLUDE_ASM` still produces a matching 
 
 # Use
 
-`verify_command` in `task-runner/config.yaml` is `./tools/verify-candidate`. Decompile tasks pass `--decompiled $CANDIDATE` in their own `verify_command` ([task-runner](task-runner.md)). Global tasks run the gate without the flag.
+`verify_command` in `task-runner/config.yaml` is `./tools/verify-candidate`. Decompile tasks pass `--decompiled $CANDIDATE` in their own `verify_command` ([task-runner](/tools/task-runner.md)). Global tasks run the gate without the flag.

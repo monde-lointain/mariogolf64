@@ -18,7 +18,7 @@ Each decompile environment that ends without a match leaves one JSON line in a s
 |---|---|
 | `ts` | UTC time, ISO 8601 |
 | `function`, `env`, `worktree` | function name, environment path relative to the repo, repo root |
-| `task`, `tier`, `model`, `run_id` | nigel task, its tier (1, 2, 3 or `human`), model from the agent flags, `$TASK_ID` |
+| `task`, `tier`, `model`, `run_id` | nigel task, its tier (1, 2, 3 or `human`), model from the agent flags, nigel run id |
 | `attempts`, `best_pct` | attempts and best certified percent in the environment's `match_log.txt` |
 | `outcome` | `matched`, `near_miss`, `stalled`, `timeout`, `integration_failed` or `gave_up` |
 | `reason` | one line |
@@ -45,8 +45,8 @@ python3 tools/difficulty_ledger.py show [--tier 1|2|3|human] [--json]
 python3 tools/difficulty_ledger.py write-run <env> <function>
 ```
 
-- `record` (run from the repo root, or from the environment directory, which it finds from cwd). It reads attempts and best percent from `match_log.txt`, and task, tier, model and run id from the `NIGEL_*` environment (`NIGEL_TASK_NAME`, `NIGEL_RUN_ID`, `NIGEL_AGENT_FLAGS`) or else from `<env>/.run.json`. Without cwd or `--env`, it uses the newest `nonmatchings/<function>[-*]` directory.
-- `harvest` back-fills records for environments whose run finished without one. A function now in `src/` is recorded as `matched`. A run whose `match_log.txt` reached its stall limit is recorded as `stalled`. A run past its deadline is recorded as `near_miss` if it has a `NEAR_MISS.md` note, else as `timeout`. Other runs inside their deadline are skipped. Agents therefore record only `gave_up` and `integration_failed`. Progress goes to stderr; stdout stays clean for the candidate lists. Every decompile task runs `harvest` before its candidate source, so an unreadable ledger fails the task.
+- `record` (run from the repo root, or from the environment directory). `--env <dir>` names the environment. Without it, the environment is the cwd if it holds `target.s`, else the newest `nonmatchings/<function>[-*]` directory holding `target.s`. It reads attempts and best percent from the environment's `match_log.txt`, and task, tier, model and run id from the `NIGEL_*` variables (`NIGEL_TASK_NAME`, `NIGEL_RUN_ID`, `NIGEL_AGENT_FLAGS`) or else from `<env>/.run.json`.
+- `harvest` back-fills records for environments whose run finished without one. A function now in `src/` is recorded as `matched`. A run whose `match_log.txt` reached its stall limit is recorded as `stalled`. A run past its deadline is recorded as `near_miss` if it has a `NEAR_MISS.md` note, else as `timeout`. Other runs inside their deadline are skipped. Agents therefore record only `gave_up` and `integration_failed`. Progress goes to stderr; stdout stays clean for the candidate lists. Every decompile task runs `harvest` in its candidate source, so an unreadable ledger fails the task.
 - `show` lists functions with failure history: tier, failures, best percent, last outcome and reason.
 - `write-run` writes `<env>/.run.json`. decomp-env calls it when it creates an environment.
 

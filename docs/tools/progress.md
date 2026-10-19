@@ -6,14 +6,21 @@ tags: [status, workflow, ci]
 resource: ../../tools/progress.py
 ---
 
-`tools/progress.py` measures the last build: it reads the linker map named in `decomp.yaml` (`build/mariogolf64.map`) and each object file the map links. Run `./tools/build-and-verify.sh` first; the figures describe whatever `build/` holds.
+`tools/progress.py` measures the last build. It reads the linker map and every object file the map links. Run [build-and-verify](/tools/build-and-verify.md) first; the figures describe whatever `build/` holds.
 
 ```bash
 python3 tools/progress.py                  # Game, Libraries and Total rows
 python3 tools/progress.py --segments       # plus one row per ROM segment
 python3 tools/progress.py -u               # plus unmatched functions, largest first
-python3 tools/progress.py -o report.json   # plus the decomp.dev report
+python3 tools/progress.py -o report.json   # writes the decomp.dev report
 ```
+
+| Flag | Effect |
+|---|---|
+| `--map MAP` | Linker map to measure. Default: the map of the first version in `decomp.yaml` (`build/mariogolf64.map`). |
+| `--segments` | Add one row per ROM segment. |
+| `-u`, `--unmatched` | List unmatched functions, largest first. |
+| `-o PATH`, `--report PATH` | Write an objdiff progress report (`report.json`) for decomp.dev. See [decomp.dev report](/tools/progress.md#decompdev-report). |
 
 # Measures
 
@@ -31,7 +38,7 @@ A function or data object is one address, however many aliases name it. A symbol
 | Object source | Matched |
 |---|---|
 | `src/**/*.c` | everything except symbols with a `<name>.NON_MATCHING` marker: `INCLUDE_ASM` functions and the rodata included with them |
-| `src/**/*.s` | everything: original hand-written assembly (`hasm` in `mariogolf64.yaml`), including `entry.s` |
+| `src/**/*.s` | everything: original hand-written assembly (`hasm` segments in `mariogolf64.yaml`), including `src/entry/entry.s` |
 | `asm/**/*.s` | nothing: splat data not yet moved into C |
 
 Binary blobs are neither code nor data to decompile, so they are listed on the `Not counted` line and left out of every total: `build/assets/`, `asm/` sources that `.incbin` a binary (the RSP microcode), and the ROM header `asm/header.s`.
@@ -46,4 +53,4 @@ CI (`.github/workflows/build.yml`) runs `progress.py --segments -o report.json` 
 
 # Relation to other figures
 
-The [pipeline-metrics](pipeline-metrics.md) progress trend counts code from the source tree, so it needs no build. It leaves out hand-written assembly and data, which makes its function and byte totals smaller than these. Its unmatched figures equal this report's.
+The [pipeline-metrics](/tools/pipeline-metrics.md) progress trend counts code from the source tree, so it needs no build. It leaves out hand-written assembly and data, which makes its function and byte totals smaller than these. Its unmatched figures equal this report's.
