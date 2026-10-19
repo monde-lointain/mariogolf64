@@ -65,7 +65,9 @@ void func_ovl0_802055F8(void) {
     D_ovl0_80227198 = osGetCount();
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020561C);
+s32 func_ovl0_8020561C(s32 arg0) {
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205624);
 
