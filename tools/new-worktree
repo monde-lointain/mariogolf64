@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# new-worktree <name> [--branch BRANCH] [--base REF]
+# new-worktree <name> [--branch BRANCH] [--base REF] [--no-build]
 #
 # Creates a linked git worktree at ../<name> (a sibling of the main checkout) on
 # a new branch (default: <name>, based on HEAD of the invoking checkout), then
@@ -13,20 +13,27 @@
 #
 # Git runs hooks from the common hooks directory only, so this script does not
 # touch hooks: linked worktrees share the main checkout's hooks.
+#
+# Finally it runs ./tools/build-and-verify.sh in the new worktree (unless
+# --no-build or a build input is missing). That extracts asm/, which candidate
+# sources such as score_functions.py need, and proves the worktree builds the
+# matching ROM before nigel is pointed at it.
 set -euo pipefail
 
 die() { echo "new-worktree: $*" >&2; exit 1; }
-usage() { echo "usage: $0 <name> [--branch BRANCH] [--base REF]" >&2; exit 2; }
+usage() { echo "usage: $0 <name> [--branch BRANCH] [--base REF] [--no-build]" >&2; exit 2; }
 
 [[ $# -ge 1 ]] || usage
 name="$1"
 shift
 branch="$name"
 base="HEAD"
+build=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --branch) branch="${2:?--branch needs a value}"; shift 2 ;;
         --base) base="${2:?--base needs a value}"; shift 2 ;;
+        --no-build) build=0; shift ;;
         *) usage ;;
     esac
 done
@@ -72,3 +79,16 @@ echo "created $target on branch $branch (base $base)"
 for w in "${warnings[@]+"${warnings[@]}"}"; do
     echo "warning: $w" >&2
 done
+
+if [[ $build -eq 0 ]]; then
+    exit 0
+fi
+if [[ ${#warnings[@]} -gt 0 ]]; then
+    echo "warning: skipped build: build inputs are missing; run ./tools/build-and-verify.sh in $target once they exist" >&2
+    exit 0
+fi
+if [[ ! -x "$target/tools/build-and-verify.sh" ]]; then
+    echo "warning: skipped build: $target has no tools/build-and-verify.sh" >&2
+    exit 0
+fi
+(cd "$target" && ./tools/build-and-verify.sh) || die "build-and-verify failed in $target; the worktree is kept for inspection"

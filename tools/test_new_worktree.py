@@ -15,12 +15,16 @@ def git(cwd, *args):
     return subprocess.run(['git', *args], cwd=cwd, check=True, capture_output=True, text=True).stdout.strip()
 
 
-def make_main_checkout(root, with_inputs=True):
+def make_main_checkout(root, with_inputs=True, build_script=None):
     main = root / 'mainrepo'
     (main / 'tools').mkdir(parents=True)
     shutil.copy2(SCRIPT, main / 'tools' / 'new-worktree')
     (main / '.gitignore').write_text('*.z64\ntools/gcc_kmc/\n.venv/\n')
     (main / 'README.md').write_text('main\n')
+    if build_script is not None:
+        script = main / 'tools' / 'build-and-verify.sh'
+        script.write_text(build_script)
+        script.chmod(0o755)
     git(main, 'init', '-q', '-b', 'dev')
     git(main, 'config', 'user.email', 'test@example.com')
     git(main, 'config', 'user.name', 'Test')
@@ -119,6 +123,35 @@ class NewWorktreeTest(unittest.TestCase):
         self.assertIn('no baserom.z64', proc.stderr)
         self.assertIn('no tools/gcc_kmc', proc.stderr)
         self.assertIn('no .venv', proc.stderr)
+
+    def test_builds_the_new_worktree(self):
+        main = make_main_checkout(self.root, build_script='#!/bin/sh\npwd > built.txt\n')
+        proc = run_tool(main, main, 'ready')
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        built = self.root / 'ready' / 'built.txt'
+        self.assertTrue(built.exists(), 'build-and-verify did not run in the new worktree')
+        self.assertEqual(os.path.realpath(built.read_text().strip()), os.path.realpath(self.root / 'ready'))
+        self.assertFalse((main / 'built.txt').exists())
+
+    def test_failed_build_fails_but_keeps_the_worktree(self):
+        main = make_main_checkout(self.root, build_script='#!/bin/sh\nexit 3\n')
+        proc = run_tool(main, main, 'broken')
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn('build-and-verify failed', proc.stderr)
+        self.assertTrue((self.root / 'broken').is_dir())
+
+    def test_no_build_skips_the_build(self):
+        main = make_main_checkout(self.root, build_script='#!/bin/sh\npwd > built.txt\n')
+        proc = run_tool(main, main, 'quick', '--no-build')
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertFalse((self.root / 'quick' / 'built.txt').exists())
+
+    def test_missing_inputs_skip_the_build(self):
+        main = make_main_checkout(self.root, with_inputs=False, build_script='#!/bin/sh\npwd > built.txt\n')
+        proc = run_tool(main, main, 'bare')
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertFalse((self.root / 'bare' / 'built.txt').exists())
+        self.assertIn('skipped build', proc.stderr)
 
 
 if __name__ == '__main__':
