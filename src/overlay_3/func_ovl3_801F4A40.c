@@ -61,7 +61,12 @@ void func_ovl3_801FB11C(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB15C);
+void func_ovl3_801FB15C(void) {
+  if (D_800C2004 & 0x8000) {
+    play_sound_effect(0x5D, 0xF, 0x50);
+    current_game_mode = 0;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB198);
 
