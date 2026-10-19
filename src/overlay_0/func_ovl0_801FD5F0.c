@@ -69,6 +69,21 @@ void func_ovl0_801FDA04(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FDA64);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FE31C);
+/* Returns 1 when any of the 32 records has its flag (unk_10) set to 1 and a
+ * bound object id (unk_0C) other than -1. */
+s32 func_ovl0_801FE31C(void) {
+    s32 found;
+    s32 i;
+
+    found = 0;
+    i = 0;
+    do {
+        if (D_ovl0_802225F4[i].unk_10 == 1 && D_ovl0_802225F4[i].unk_0C != -1) {
+            found = 1;
+        }
+        i += 1;
+    } while (i != 32);
+    return found;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FE370);
