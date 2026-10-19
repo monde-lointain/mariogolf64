@@ -117,6 +117,41 @@ class SyncShardTest(unittest.TestCase):
         self.assertIn('conflicted', proc.stderr)
         self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
 
+    def src_base(self):
+        (self.repo / 'src').mkdir()
+        commit(self.repo, 'src/x.c', 'head\nINCLUDE_ASM("p", func_A);\ntail\n', 'stubs')
+        git(self.repo, 'checkout', '-q', 'shard')
+        git(self.repo, 'rebase', '-q', 'dev')
+
+    def test_integrated_match_with_retyped_declaration_drops_out(self):
+        # The integrator merged the shard's match with another shard's and kept the
+        # other declaration type: the shard's exact extern line is gone, its match is not.
+        git(self.repo, 'checkout', '-q', 'dev')
+        self.src_base()
+        commit(self.repo, 'src/x.c', 'head\nextern void* d;\nvoid func_A(void) {}\ntail\n', 'shard match')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'src/x.c', 'head\nextern u8* d;\nINCLUDE_ASM("p", func_A);\ntail\n', 'other match')
+        commit(self.repo, 'src/x.c', 'head\nextern u8* d;\nvoid func_A(void) {}\ntail\n', 'resolved pick')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        proc = run(self.repo, 'dev')
+
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), git(self.repo, 'rev-parse', 'dev'))
+
+    def test_sync_that_restores_an_include_asm_keeps_the_branch(self):
+        git(self.repo, 'checkout', '-q', 'dev')
+        self.src_base()
+        head = commit(self.repo, 'src/x.c', 'head\nvoid func_A(void) {}\ntail\n', 'shard match')
+        git(self.repo, 'checkout', '-q', 'dev')
+        commit(self.repo, 'src/x.c', 'head\nINCLUDE_ASM("p", func_A); /* note */\ntail\n', 'dev edit')
+        git(self.repo, 'checkout', '-q', 'shard')
+
+        proc = run(self.repo, 'dev')
+
+        self.assertIn('conflicted', proc.stderr)
+        self.assertEqual(git(self.repo, 'rev-parse', 'HEAD'), head)
+
 
 if __name__ == '__main__':
     unittest.main()

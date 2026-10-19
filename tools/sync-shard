@@ -11,11 +11,14 @@
 # its original, so a plain rebase conflicts on it. On a conflict the rebase is
 # retried preferring the sync branch's side of each conflicting hunk (-X ours;
 # in a rebase "ours" is the upstream), which turns an already-integrated commit
-# into an empty one that is dropped. That result is kept only if every line the
-# shard added since its merge base is still present (nothing of the shard's own
-# work was dropped) and ./tools/build-and-verify.sh passes. Otherwise the branch
-# is restored and the shard keeps running unsynced. This never fails the
-# candidate source.
+# into an empty one that is dropped. That result is kept only if nothing of the
+# shard's own work was dropped and ./tools/build-and-verify.sh passes:
+#   - in src/ and include/, every function the shard decompiled (each
+#     INCLUDE_ASM line it removed) is still decompiled. Declarations may differ,
+#     because the integrator may have merged them with another shard's;
+#   - elsewhere (harness, docs), every non-blank line the shard added is present.
+# Otherwise the branch is restored and the shard keeps running unsynced. This
+# never fails the candidate source.
 #
 # It runs only when nigel selects a candidate. After the agent finishes, nigel
 # re-runs the candidate source with NIGEL_CANDIDATE set to judge the result; a
@@ -27,23 +30,28 @@ base=$(git merge-base "$MG64_SYNC_BRANCH" HEAD)
 git rebase -q "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && exit 0
 git rebase --abort >/dev/null 2>&1
 
-# Every non-blank line the shard added must survive the retried rebase.
-kept_shard_lines() {
-    local path="" line
+kept_shard_work() {
+    local path="" line fn
     while IFS= read -r line; do
         case "$line" in
             '+++ b/'*) path=${line#+++ b/} ;;
             '+++ '*) path="" ;;
+            '-'*INCLUDE_ASM\(*)
+                # A match: the function must not be INCLUDE_ASM anywhere after the sync.
+                fn=${line##*, }; fn=${fn%%)*}
+                ! grep -rqF -- ", $fn);" src 2>/dev/null || return 1
+                ;;
             '+'*)
                 line=${line#+}
                 [[ -z $path || -z ${line//[[:space:]]/} ]] && continue
+                [[ $path == src/* || $path == include/* ]] && continue
                 grep -Fxq -- "$line" "$path" 2>/dev/null || return 1
                 ;;
         esac
     done < <(git diff -U0 "$base" "$before")
 }
 
-if git rebase -q -X ours "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && kept_shard_lines &&
+if git rebase -q -X ours "$MG64_SYNC_BRANCH" >/dev/null 2>&1 && kept_shard_work &&
     ./tools/build-and-verify.sh >/dev/null 2>&1; then
     echo "sync-shard: rebased onto $MG64_SYNC_BRANCH preferring its side of conflicts" >&2
     exit 0
