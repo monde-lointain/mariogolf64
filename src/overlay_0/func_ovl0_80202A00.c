@@ -35,6 +35,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020439C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204460);
 
+extern s32 D_800C3084;
 extern s8 D_801B55D9;
 extern s32 D_800FBE7C[];
 
@@ -54,7 +55,33 @@ void func_ovl0_80204568(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802045BC);
+void func_ovl0_802045BC(void) {
+    if (D_800C3084 & 2) {
+        s8 input;
+        s32 magnitude;
+
+        input = D_801B55D9;
+        magnitude = input;
+        if (input < 0) {
+            magnitude = -input;
+        }
+        if (magnitude >= 9) {
+            D_800FBE7C[0] += (input / 4) * 0x180;
+        }
+    } else {
+        s8 input;
+        s32 magnitude;
+
+        input = D_801B55D9;
+        magnitude = input;
+        if (input < 0) {
+            magnitude = -input;
+        }
+        if (magnitude >= 9) {
+            D_800FBE7C[0] += (input / 4) * 0xF00;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020466C);
 
