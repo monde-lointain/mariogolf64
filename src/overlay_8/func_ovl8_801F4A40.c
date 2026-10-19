@@ -1,6 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_8/func_ovl8_801F4A40", func_ovl8_801F4A40);
+extern void func_ovl8_801F55A0(void);
+
+void func_ovl8_801F4A40(void) { func_ovl8_801F55A0(); }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_8/func_ovl8_801F4A40", func_ovl8_801F4A5C);
 
