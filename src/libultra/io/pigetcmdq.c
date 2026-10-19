@@ -5,7 +5,7 @@
  * brought the manager up.
  */
 #include "PR/os_internal.h"
-#include "PRinternal/piint.h"
+#include "piint.h"
 
 /* Return the PI device manager's command queue, or NULL if the manager has not
  * been started yet (no queue to post to). */

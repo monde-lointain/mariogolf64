@@ -6,7 +6,7 @@
  * without waiting for completion. No locking, so the caller must already hold
  * PI access and ensure the PI is idle.
  */
-#include "PRinternal/piint.h"
+#include "piint.h"
 #include "PR/ultraerror.h"
 #ident "$Revision: 1.17 $"
 
