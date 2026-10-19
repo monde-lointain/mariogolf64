@@ -1,2 +1,10 @@
 memory:
   backend: off
+tools:
+  artifactSpillThreshold: 5
+  artifactHeadBytes: 2.5
+  artifactTailBytes: 2.5
+web_search:
+  enabled: false
+todo:
+  enabled: false
