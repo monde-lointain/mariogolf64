@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""Verify a candidate before it is committed. nigel runs this as verify_command.
+
+Checks run in order; the first failure ends the run with one line on stderr:
+  1. Protected paths (mariogolf64.sha1, tools/kmc-cc, tools/decomp-permuter,
+     tools/asm-differ) have no changes against HEAD, submodule content included.
+  2. baserom.z64 hashes to the sha1 recorded in mariogolf64.sha1.
+  3. With --decompiled FUNCTION: FUNCTION is defined in src/**/*.c and no
+     INCLUDE_ASM("...", FUNCTION) line remains.
+  4. ./tools/build-and-verify.sh passes (the full ROM SHA1 check).
+
+Not checked: asm/ (build-and-verify regenerates it from baserom.z64) and
+tools/gcc_kmc (gitignored; make setup downloads the latest unpinned release,
+and the repo holds no reference digest for it).
+
+Examples (from the repo root):
+  ./tools/verify-candidate
+  ./tools/verify-candidate --decompiled func_8005FB58
+  ./tools/verify-candidate --decompiled '["func_8005FB58","func_8005FB60"]'
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Callable, Optional, Sequence
+
+PROTECTED_PATHS = (
+    "mariogolf64.sha1",
+    "tools/kmc-cc",
+    "tools/decomp-permuter",
+    "tools/asm-differ",
+)
+
+BUILD_AND_VERIFY = "./tools/build-and-verify.sh"
+
+# One alternation, so a string literal is consumed before a comment marker
+# inside it can be taken as a comment, and vice versa.
+C_TOKEN = re.compile(
+    r'"(?:\\.|[^"\\\n])*"'
+    r"|'(?:\\.|[^'\\\n])*'"
+    r"|//[^\n]*"
+    r"|/\*.*?\*/",
+    re.DOTALL,
+)
+
+
+def strip_comments(text: str) -> str:
+    """Blank out comments, keeping newlines so line numbers still line up."""
+
+    def blank(match: re.Match) -> str:
+        token = match.group(0)
+        if token.startswith(("//", "/*")):
+            return re.sub(r"[^\n]", " ", token)
+        return token
+
+    return C_TOKEN.sub(blank, text)
+
+
+def function_from_candidate(value: str) -> str:
+    """Return the function name that a --decompiled value refers to.
+
+    Accepts a bare name, an asm path (asm/nonmatchings/main/func_x.s), a
+    "name (worktree)" annotation, a JSON string, or nigel's candidate key: a
+    JSON array whose first element is the function (decompile-similar keys look
+    like ["func_x","ref1",...]).
+    """
+    text = value.strip()
+    if text[:1] in ("[", '"'):
+        try:
+            decoded = json.loads(text)
+        except ValueError as exc:
+            raise ValueError(f"cannot read a function name from candidate {value!r}") from exc
+        if isinstance(decoded, list) and decoded:
+            decoded = decoded[0]
+        if not isinstance(decoded, str):
+            raise ValueError(f"cannot read a function name from candidate {value!r}")
+        text = decoded.strip()
+    text = re.sub(r"\s+\([^)]*\)$", "", text)
+    name = text.rsplit("/", 1)[-1]
+    if name.endswith(".s"):
+        name = name[:-2]
+    if not re.fullmatch(r"[A-Za-z_]\w*", name):
+        raise ValueError(f"cannot read a function name from candidate {value!r}")
+    return name
+
+
+def matching_paren(text: str, open_index: int) -> Optional[int]:
+    depth = 0
+    for index in range(open_index, len(text)):
+        char = text[index]
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def defines_function(stripped: str, function: str) -> bool:
+    """True if `function(...) {` occurs as a definition in comment-free C.
+
+    The name must follow an identifier or '*' (a return type), which rules out
+    call sites such as `if (func(x)) {`. Preprocessor lines are skipped.
+    """
+    for match in re.finditer(r"\b" + re.escape(function) + r"\s*\(", stripped):
+        start = match.start()
+        line_start = stripped.rfind("\n", 0, start) + 1
+        if stripped[line_start:start].lstrip().startswith("#"):
+            continue
+        before = stripped[:start].rstrip()
+        if not before or not (before[-1].isalnum() or before[-1] in "_*"):
+            continue
+        end = matching_paren(stripped, match.end() - 1)
+        if end is not None and stripped[end + 1:].lstrip().startswith("{"):
+            return True
+    return False
+
+
+def check_protected_paths(root: Path) -> Optional[str]:
+    result = subprocess.run(
+        ["git", "status", "--porcelain", "--ignore-submodules=none", "--", *PROTECTED_PATHS],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return f"git status failed: {result.stderr.strip()}"
+    changed = [line[3:] for line in result.stdout.splitlines() if line]
+    if changed:
+        return (
+            "protected paths differ from HEAD: " + ", ".join(changed)
+            + "; revert those edits, a candidate never changes them"
+        )
+    return None
+
+
+def check_baserom(root: Path) -> Optional[str]:
+    baserom = root / "baserom.z64"
+    if not baserom.is_file():
+        return "baserom.z64 is missing from the repo root; copy the reference ROM there"
+    sha1_file = root / "mariogolf64.sha1"
+    if not sha1_file.is_file():
+        return "mariogolf64.sha1 is missing from the repo root"
+    recorded = re.match(r"[0-9a-fA-F]{40}\b", sha1_file.read_text())
+    if recorded is None:
+        return "mariogolf64.sha1 does not start with a 40-digit sha1"
+    digest = hashlib.sha1()
+    with baserom.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    if digest.hexdigest() != recorded.group(0).lower():
+        return (
+            f"baserom.z64 sha1 {digest.hexdigest()} does not match mariogolf64.sha1 "
+            f"({recorded.group(0).lower()}); the ROM is not the reference dump"
+        )
+    return None
+
+
+def check_decompiled(root: Path, function: str) -> Optional[str]:
+    include_asm = re.compile(
+        r'\bINCLUDE_ASM\s*\(\s*"[^"]*"\s*,\s*' + re.escape(function) + r"\s*\)"
+    )
+    defined = False
+    for path in sorted((root / "src").rglob("*.c")):
+        stripped = strip_comments(path.read_text(encoding="utf-8", errors="replace"))
+        hit = include_asm.search(stripped)
+        if hit is not None:
+            line = stripped.count("\n", 0, hit.start()) + 1
+            where = f"{path.relative_to(root).as_posix()}:{line}"
+            return (
+                f"{function} is still INCLUDE_ASM at {where}; "
+                "write the C function and delete that INCLUDE_ASM line"
+            )
+        if not defined:
+            defined = defines_function(stripped, function)
+    if not defined:
+        return f"{function} is not defined in any src/**/*.c; decompile it into src/ first"
+    return None
+
+
+def run_build(root: Path) -> int:
+    return subprocess.run([BUILD_AND_VERIFY], cwd=root).returncode
+
+
+def fail(reason: str) -> int:
+    print(f"verify-candidate: FAILED: {reason}", file=sys.stderr)
+    return 1
+
+
+def main(
+    argv: Optional[Sequence[str]] = None,
+    *,
+    root: Optional[Path] = None,
+    build: Callable[[Path], int] = run_build,
+) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
+    parser.add_argument(
+        "--decompiled",
+        metavar="FUNCTION",
+        help=(
+            "also require FUNCTION to be decompiled into src/: a name, an asm path, "
+            "or nigel's candidate key (JSON array whose first element is the function)"
+        ),
+    )
+    args = parser.parse_args(argv)
+    if root is None:
+        root = Path(__file__).resolve().parent.parent
+
+    function = None
+    if args.decompiled is not None:
+        try:
+            function = function_from_candidate(args.decompiled)
+        except ValueError as exc:
+            return fail(str(exc))
+
+    reason = check_protected_paths(root) or check_baserom(root)
+    if reason is None and function is not None:
+        reason = check_decompiled(root, function)
+    if reason is not None:
+        return fail(reason)
+
+    code = build(root)
+    if code != 0:
+        return fail(
+            f"{BUILD_AND_VERIFY} failed (exit {code}); the rebuilt ROM does not match mariogolf64.sha1"
+        )
+    print("verify-candidate: OK")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
