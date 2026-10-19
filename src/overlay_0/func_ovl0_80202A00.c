@@ -201,7 +201,26 @@ void func_ovl0_80204210(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020439C);
+extern f64 D_ovl0_80224F38;
+extern f64 D_ovl0_80224F40;
+extern f64 D_ovl0_80224F48;
+extern f64 D_ovl0_80224F50;
+
+void func_ovl0_8020439C(void) {
+    if (D_800C3084 & 2) {
+        if (D_801B55CC & 1) {
+            D_800FBE7C[0] = (s32) ((f64) D_800FBE7C[0] + D_ovl0_80224F38);
+        } else if (D_801B55CC & 2) {
+            D_800FBE7C[0] = (s32) ((f64) D_800FBE7C[0] - D_ovl0_80224F40);
+        }
+    } else {
+        if (D_801B55CC & 1) {
+            D_800FBE7C[0] = (s32) ((f64) D_800FBE7C[0] + D_ovl0_80224F48);
+        } else if (D_801B55CC & 2) {
+            D_800FBE7C[0] = (s32) ((f64) D_800FBE7C[0] - D_ovl0_80224F50);
+        }
+    }
+}
 
 extern s8 D_801B55D9;
 extern f64 D_ovl0_80224F58;
