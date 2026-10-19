@@ -38,10 +38,8 @@ learnings_kept=0
 
 is_function_unmatched() {
     local funcname="$1"
-    # Unmatched functions have a per-function file under asm/nonmatchings/ or
-    # still live in an assembly-only segment (asm/<rom offset>.s).
-    find "$ASM_NONMATCHINGS" -name "${funcname}.s" -print -quit 2>/dev/null | grep -q . ||
-        grep -qE "^glabel ${funcname}\$" "$ROOT_DIR"/asm/*.s 2>/dev/null
+    # Unmatched functions have a per-function file under asm/nonmatchings/.
+    find "$ASM_NONMATCHINGS" -name "${funcname}.s" -print -quit 2>/dev/null | grep -q .
 }
 
 resolve_func_name() {

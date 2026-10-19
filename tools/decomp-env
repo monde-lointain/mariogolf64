@@ -187,7 +187,7 @@ fi
 # Map the assembly to the C translation unit whose compiler profile applies.
 #   asm/nonmatchings/main/func_8002A640/render_frame.s -> src/main/func_8002A640.c
 #   asm/main/func_8002A640.s (full disassembly of a C file) -> src/main/func_8002A640.c
-# Functions in assembly-only segments get the main or overlay default profile.
+# Hand-written assembly with no owning C file gets the main profile (below).
 case "$ASM_PATH" in
     asm/nonmatchings/*)
         C_FILE="src/$(dirname "${ASM_PATH#asm/nonmatchings/}").c"
@@ -201,12 +201,7 @@ case "$ASM_PATH" in
 esac
 if [ ! -f "$C_FILE" ]; then
     C_FILE=""
-    VRAM=$(grep -m1 -A3 -E "^glabel $FUNC_NAME\$" "$ASM_PATH" | grep -oE '/\* [0-9A-F]+ [0-9A-F]{8} ' | head -1 | awk '{print $3}')
-    if [ -n "$VRAM" ] && [ $((16#$VRAM)) -lt $((16#80100000)) ]; then
-        PROFILE_SOURCE=src/main/__candidate__.c
-    else
-        PROFILE_SOURCE=src/__candidate__.c
-    fi
+    PROFILE_SOURCE=src/main/__candidate__.c
 fi
 
 # Setup working directory

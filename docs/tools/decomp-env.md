@@ -28,7 +28,7 @@ Without `--id`, the directory is `nonmatchings/<function>` or the first free `<f
 |---|---|
 | `target.s`, `target.o` | `prelude.inc` plus the function's assembly, assembled with the VR4300 settings |
 | `base.c` | m2c output (with a context built from the owning C file via `tools/m2ctx.py`), the scratch's source, or `src/temp.c` |
-| `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. For assembly-only segments: `src/main/__candidate__.c` below VRAM `0x80100000`, else `src/__candidate__.c`. |
+| `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. For hand-written assembly with no owning C file: `src/main/__candidate__.c`, the main profile. |
 | `.diff_algorithm` | Only for scratches that used levenshtein diffing |
 | `AGENTS.md` | Rendered from `tools/decomp-env-template/AGENTS.md` with the function name substituted |
 | `build.sh`, `diff.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `map_asm_to_c.py`, `prelude.inc` | Symlinks into `tools/decomp-env-template/`: editing one edits the template for every environment |
