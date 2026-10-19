@@ -158,4 +158,19 @@ typedef struct {
 extern PlayerState player_records[];
 extern ScenarioState scenario_state_id;
 
+/* Zeroed by func_8006F24C in both branches and by the overlay_15 reset
+ * func_ovl15_801F67F4. Only the words those resets touch are named; the rest
+ * of the 0x98-byte block is not yet recovered. */
+typedef struct {
+  /* 0x00 */ s32 unknown_00;
+  /* 0x04 */ s32 unknown_04;
+  /* 0x08 */ s32 unknown_08;
+  /* 0x0C */ u8 unknown_0C[0x80];
+  /* 0x8C */ s32 unknown_8C;
+  /* 0x90 */ s32 unknown_90;
+  /* 0x94 */ s32 unknown_94;
+} SessionAuxState; /* 0x98 */
+
+extern SessionAuxState D_800FEC00;
+
 #endif /* SESSION_H */

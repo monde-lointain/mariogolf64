@@ -1,6 +1,7 @@
 #include "common.h"
 #include <nusys.h>
 #include "rom_asset.h"
+#include "session.h"
 
 extern s32 D_800FE4A8;
 extern s32 D_800C42D4;
@@ -21,7 +22,6 @@ extern s32 D_800FE4AC;
 extern s32 D_800FE4B0;
 extern s32 D_800FE4B4;
 extern s32 D_800FE4B8;
-extern s32 D_800FEC00;
 extern char D_800D1540[];
 extern s32 D_80105218;
 extern u32 controller_handle_array[];
@@ -64,11 +64,11 @@ void func_8006F24C(s32 arg0) {
       i++;
     } while (i != bound);
     D_800FE4B4 = 0;
-    D_800FEC00 = 0;
+    D_800FEC00.unknown_00 = 0;
     D_800FE4B8 = 0;
   } else {
     D_800FE4B4 = 0;
-    D_800FEC00 = 0;
+    D_800FEC00.unknown_00 = 0;
   }
 }
 

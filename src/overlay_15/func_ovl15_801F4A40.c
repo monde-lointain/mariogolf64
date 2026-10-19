@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/session.h"
 
 extern s32 D_ovl15_801FBB78;
 
@@ -31,7 +32,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F66
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F66EC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F67F4);
+void func_ovl15_801F67F4(void) {
+  D_800FEC00.unknown_00 = 0;
+  D_800FEC00.unknown_04 = 0;
+  D_800FEC00.unknown_08 = 0;
+  D_800FEC00.unknown_8C = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6818);
 
