@@ -69,7 +69,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FE8F8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FF5E8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FF6DC);
+void func_ovl7_801FF6DC(void) {
+    RomAssetLoad asset;
+
+    get_rom_asset_allocation_size(0x93D, &asset);
+    load_rom_asset_payload(D_ovl7_80212830, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FF70C);
 
