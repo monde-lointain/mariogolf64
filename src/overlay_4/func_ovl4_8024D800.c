@@ -624,9 +624,28 @@ void func_ovl4_80253234(s32 mode) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80253270);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80253620);
+void func_ovl4_80253620(s32 arg0, s32 arg1, GridVertex *arg2, GridVertex *arg3) {
+    GridVertex *var_a2;
 
-void func_ovl4_80253620(s32 arg0, s32 arg1, GridVertex *arg2, GridVertex *arg3);
+    var_a2 = arg2;
+    if (var_a2 < arg3) {
+        do {
+            s32 x;
+            s32 z;
+            s32 tex;
+
+            x = var_a2->x;
+            tex = x * 4 - (arg0 << 9);
+            tex = (tex << 5) + 0x100;
+            var_a2->texture_s = tex;
+            z = var_a2->z;
+            tex = z * 8 - (arg1 << 9);
+            tex = (tex << 5) + 0x100;
+            var_a2->texture_t = tex;
+            var_a2 += 1;
+        } while (var_a2 < arg3);
+    }
+}
 
 void func_ovl4_80253680(s32 arg0, s32 arg1, GridVertex *arg2, GridVertex *arg3) {
     GridVertex *var_a2;
