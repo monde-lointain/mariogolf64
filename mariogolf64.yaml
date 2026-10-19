@@ -614,7 +614,7 @@ segments:
     exclusive_ram_id: ovl9
     symbol_name_format: ovl9_$VRAM
     subsegments:
-      - [0x14FB50, asm]
+      - [0x14FB50, c, overlay_9/func_ovl9_801F4A30]
       - [0x14FB60, asm]
       - [0x150890, data]
       - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
