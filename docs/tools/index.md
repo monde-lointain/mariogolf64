@@ -14,6 +14,7 @@
 
 * [selection-and-status](selection-and-status.md) - progress, ranking, similarity, m2c batch, near-miss and cleanup reports
 * [difficulty-ledger](difficulty-ledger.md) - per-function failure record (`outcome`, tier, budget) that decides which functions each nigel tier may pick
+* [pipeline-metrics](pipeline-metrics.md) - nigel pipeline report: match rate, cost per match, attempts to match, ledger tiers and progress trend
 * [quality-checkers](quality-checkers.md) - pointer-arithmetic, low-quality-match, redundant-extern and header-hygiene tools
 * [task-runner](task-runner.md) - nigel tasks that run agents over candidate lists
 
