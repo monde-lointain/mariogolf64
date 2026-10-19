@@ -156,7 +156,18 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207E88)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207F70);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802080B4);
+/* Returns whether bit 0x4000 of D_80104990 is set. The dead 8-byte frame with
+ * the never-reloaded `sw $v0,0(sp)` is the same nested-function stand-in as
+ * lerp_s32 (func_8008D100.c); parent func_ovl0_802088B0 is not recovered. */
+extern u16 D_80104990;
+
+s32 func_ovl0_802080B4(void) {
+  s32 r;
+  volatile s32 unused = r;
+  r = D_80104990;
+  r &= 0x4000;
+  return r != 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802080D4);
 
