@@ -1,5 +1,6 @@
 #include "terrain.h"
 #include "club.h"
+#include "session.h"
 
 extern TerrainAttrEntry D_800B790C[27];
 extern u8 D_800B7C00[];
@@ -7,6 +8,8 @@ extern u8 D_800B7C08[];
 extern u8 D_800B7C2E[];
 
 extern s32 rand(void);
+extern f64 D_800CA640;
+extern f64 D_800CA648;
 
 TerrainAttrEntry* get_table_entry(u32 idx) {
   u32 i = (idx < 0x1BU) ? idx : 0;
@@ -42,6 +45,8 @@ typedef struct {
   s32 unk18;
   u8 pad1C[0x4];
   s32 unk20;
+  u8 pad24[0x81];
+  s8 unkA5;
 } BallObject;
 
 typedef struct {
@@ -82,6 +87,41 @@ u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3) {
   return D_800B7C08;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", calc_stick_offset_with_noise);
+/* Static-chain home of the nested-function original: $v0 on entry is the parent frame; its 0x8 slot holds &ball slot, and that slot holds the ball object pointer. The volatile frame access keeps `sw $v0,0(sp)` ahead of the chain loads. */
+typedef struct {
+  u8 pad00[0x8];
+  BallObject **argSlot;
+} StickNestFrame;
+
+f32 calc_stick_offset_with_noise(void) {
+  s32 r;
+  volatile s32 unused = r;
+  BallObject *obj;
+  s32 temp_a0;
+  s32 temp_a1;
+  u32 temp_v1;
+  s32 temp_v0_2;
+  s32 temp_v0_3;
+  f64 var_ft0;
+  f64 var_fv1;
+  f32 firstResult;
+
+  obj = *((volatile StickNestFrame *) r)->argSlot;
+  temp_a1 = obj->unk18;
+  temp_a0 = obj->unk20;
+  temp_v1 = player_records[obj->unkA5].unknown_88;
+  temp_v0_2 = (temp_a1 + temp_a0 + temp_v1) & 0xFF;
+  var_ft0 = (f64) temp_v0_2;
+  if (temp_v0_2 < 0) {
+    var_ft0 += D_800CA640;
+  }
+  firstResult = (f32) var_ft0 * 0.0019607844f;
+  temp_v0_3 = ((temp_a1 - temp_a0) + temp_v1) & 0xFF;
+  var_fv1 = (f64) temp_v0_3;
+  if (temp_v0_3 < 0) {
+    var_fv1 += D_800CA648;
+  }
+  return firstResult + ((f32) var_fv1 * 0.0019607844f);
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", init_ball_for_shot);
