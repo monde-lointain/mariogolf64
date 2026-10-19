@@ -142,7 +142,20 @@ void func_ovlgap_8040582C(s32 *arg0, s32 arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405870);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405AF4);
+/* Toggles one cell of the 32x64 grid at (x, y); cells outside 0..0x1F x 0..0x3F are ignored.
+ * Each 4x4 block is one terrain tile, and its 16-bit mask is unknown_992. */
+void func_ovlgap_80405AF4(s32 x, s32 y) {
+    s32 tile;
+    u16 mask;
+
+    if ((((u32) x >= 0x20U) | (y >= 0x40)) == 0) {
+        if (y >= 0) {
+            tile = (y >> 2) * 8 + x / 4;
+            mask = g_terrain_tile_cache[tile].unknown_992;
+            g_terrain_tile_cache[tile].unknown_992 = mask ^ (1 << (((y & 3) * 4) + (x & 3)));
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405B80);
 
