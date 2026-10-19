@@ -1,6 +1,7 @@
 #include "common.h"
 #include "../main/session.h"
 #include "../main/club.h"
+#include "../main/vector.h"
 
 extern s8 D_ovl5_8025C848;
 extern s32 D_ovl5_80253C64;
@@ -24,6 +25,7 @@ typedef struct {
 extern OverlayRecord58 D_ovl5_802544B0;
 
 s32 func_ovl5_8024DBF8(OverlayRecord58 *);
+s32 func_ovl5_80251378(Vec3i *from, Vec3i *to, Vec3i *out);
 
 void func_ovl5_8024D800(void) { D_ovl5_8025C848 = 0; }
 
@@ -129,7 +131,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251198)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251378);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251570);
+s32 func_ovl5_80251570(Vec3i *arg0, Vec3i *arg1) {
+    Vec3i out;
+    s32 dist;
+
+    if (func_ovl5_80251378(arg0, arg1, &out) != 1) {
+        dist = calculate_hypotenuse_safe(arg1->x - arg0->x, arg1->z - arg0->z);
+    } else {
+        dist = calculate_hypotenuse_safe(out.x - arg0->x, out.z - arg0->z);
+    }
+    return dist;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802515DC);
 
