@@ -1,6 +1,8 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D800);
+extern s8 D_ovl5_8025C848;
+
+void func_ovl5_8024D800(void) { D_ovl5_8025C848 = 0; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D80C);
 
