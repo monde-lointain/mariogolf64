@@ -62,4 +62,4 @@ With `MG64_SYNC_BRANCH` set, the decompile tasks' candidate source first runs `t
 
 The candidate-source scripts are in [selection](selection-and-status.md) and [quality checkers](quality-checkers.md).
 
-Decompile tasks escalate by [difficulty tier](difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model anthropic/claude-haiku-5-5:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not.
+Decompile tasks escalate by [difficulty tier](difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model openai-codex/gpt-6-luna:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not.
