@@ -578,7 +578,7 @@ def _describe(fn: ParsedFunction) -> str:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description='Find decompiled functions similar to an unmatched MG64 function.')
-    parser.add_argument('function', help='Unmatched function name (asm/nonmatchings or assembly segment)')
+    parser.add_argument('function', help='Unmatched function name (asm/nonmatchings)')
     parser.add_argument('--top', '-n', type=int, default=10, metavar='N',
                         help='Number of similar functions to show (default: 10)')
     parser.add_argument('--threshold', '-t', type=float, default=0.0, metavar='T',
