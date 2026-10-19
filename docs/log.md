@@ -1,7 +1,8 @@
 # Docs Update Log
 
 ## 2026-10-19
-* **Update**: `src/overlay_7/func_ovl7_80206680.c` builds with `-ffast-math` (a file-specific override in the Makefile, not `FAST_MATH_SRCS`, which would also add `-DF3DEX_GBI_2`). `func_ovl7_802068B4` is a bare `sqrt.s` in the ROM, so the base profile could not match it; [compiler profiles](/project/compiler-profiles.md) lists the row.
+* **Update**: Overlays (`src/overlay_*`) now compile with `-DF3DEX_GBI_2`, like `src/main`: the overlay display-list builder `func_ovl3_8022A090` matches the ROM only with F3DEX2 opcodes (`E3`/`E1`/`F1`). See [compiler profiles](/project/compiler-profiles.md).
+* **Update**: `src/overlay_7/func_ovl7_80206680.c` joined `FAST_MATH_SRCS`: `func_ovl7_802068B4` is a bare `sqrt.s` in the ROM, which only `-ffast-math` emits.
 
 ## 2026-10-18
 * **Initialization**: Converted `AGENTS.md`, `README.md`, `DECOMPILATION_LEARNINGS.md`, `tools/HARNESS.md`, `docker/README.md`, `tools/data-differ/README.md` and the omp skills into this bundle. `AGENTS.md` and `README.md` remain as short entry points that link here; the other files were removed and the skills became symlinks into `procedures/`.
@@ -19,4 +20,3 @@
 * **Update**: [decompile-function](/procedures/decompile-function.md) fixes the definition name (the `INCLUDE_ASM` name, not a caller's alias) and the commit subjects agents write.
 * **Update**: `objdump.py` renders `%lo`/`%hi` for relocations against auto-named `D_<VRAM>`/`func_<VRAM>` symbols by resolved address, so two names for one address compare equal. Before/after on `func_ovl7_80206718`: 98.793% (70 differences) to 100.000% exact ([decomp-env](/tools/decomp-env.md)).
 * **Added**: `tools/sync-shard`, which rebases nigel shard worktrees onto `MG64_SYNC_BRANCH` between candidates ([task-runner](/tools/task-runner.md)).
-* **Update**: Overlays (`src/overlay_*`) now compile with `-DF3DEX_GBI_2`, like `src/main`: the overlay display-list builder `func_ovl3_8022A090` matches the ROM only with F3DEX2 opcodes (`E3`/`E1`/`F1`). See [compiler profiles](/project/compiler-profiles.md).
