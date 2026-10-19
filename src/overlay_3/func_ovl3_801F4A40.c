@@ -7,6 +7,7 @@ extern s32 current_game_mode;
 extern void func_ovl3_801FB54C(Gfx** dl, s32 flags);
 extern void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str);
 extern u8 D_ovl3_80231198[];
+extern u8 D_ovl3_80231284[];
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
@@ -143,6 +144,11 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_8020879C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80208F8C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80209430);
+void func_ovl3_80209430(Gfx** arg0) {
+  Gfx* saved = *arg0;
+
+  func_80074D0C(&saved, 0x40, 0x20, D_ovl3_80231284);
+  *arg0 = saved;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80209478);
