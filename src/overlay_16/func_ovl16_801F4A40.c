@@ -16,7 +16,15 @@ INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4B
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4E54);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F24);
+f32 func_ovl16_801F4F24(f32 near, f32 far, f32 t) {
+  if (t < 0.0f) {
+    t = 0.0f;
+  }
+  if (t > 1.0f) {
+    t = 1.0f;
+  }
+  return near * (1.0f - t) + far * t;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F7C);
 
