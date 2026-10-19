@@ -211,7 +211,9 @@ void func_ovl15_801F6834(void) {
   D_800FEC00.unknown_8C = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6858);
+s32 func_ovl15_801F6858(GbPakSaveRecord *record) {
+  return record->checksum[0] | (record->checksum[1] << 8);
+}
 
 s32 func_ovl15_801F686C(GbPakSaveRecord *record) {
   s32 sum;
