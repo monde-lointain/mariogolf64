@@ -13,7 +13,20 @@ s32 func_ovl0_801F4A40(s32 arg0) {
     return sum;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4AA4);
+extern s32 D_ovl0_8021FC74;
+extern s32 D_ovl0_8021FC80;
+void func_ovl0_801F4AEC(void);
+void func_ovl0_801F618C(void);
+
+void func_ovl0_801F4AA4(s32 arg0) {
+    if (arg0 == -1) {
+        func_ovl0_801F618C();
+        return;
+    }
+    func_ovl0_801F4AEC();
+    D_ovl0_8021FC80 = 0x140;
+    D_ovl0_8021FC74 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4AEC);
 
