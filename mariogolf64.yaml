@@ -510,7 +510,7 @@ segments:
     exclusive_ram_id: ovl3
     symbol_name_format: ovl3_$VRAM
     subsegments:
-      - [0xDE9B0, asm]
+      - [0xDE9B0, c, overlay_3/func_ovl3_801F4A30]
       - [0xDE9C0, asm]
       - [0xF3480, asm]
       - [0xF7F90, asm]
