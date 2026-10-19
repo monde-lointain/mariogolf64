@@ -182,8 +182,12 @@ nonmatching: $(TARGET).z64
 	$(V)$(N64CRC) $(TARGET).z64
 	$(PRINTF) "[$(YELLOW) nonmatch $(NO_COL)]  Built $(TARGET).z64 (SHA1 verification skipped)\n"
 
+# splat skips textbin .s files that already exist, and then never marks their
+# symbols as defined, so they leak into undefined_syms_auto.txt. Start from an
+# empty asm/ so re-extracting gives the same output as a clean tree.
 extract: check
 	$(PRINTF) "[$(CYAN) splat  $(NO_COL)]  Extracting $(CONFIG)\n"
+	$(V)rm -rf asm
 	$(V)$(SPLAT) $(CONFIG) --make-full-disasm-for-code
 
 verify: $(TARGET).z64
