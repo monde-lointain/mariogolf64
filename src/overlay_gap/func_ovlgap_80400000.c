@@ -12,11 +12,17 @@ extern u16 D_800FED18;
 extern u16 D_800FED1E;
 extern f32 D_80105220;
 extern f32 D_80105228;
+extern f32 D_8010522C;
+extern f32 D_80105230;
+extern f32 D_80105234;
 extern f32 D_8010525C;
 extern s32 D_ovlgap_8040C5A8;
 extern s32 D_ovlgap_8040C5AC;
 extern s32 D_ovlgap_8040C5B0;
 extern s32 D_ovlgap_8040C5B4;
+extern Mtx D_40CC98;
+extern Mtx D_8040CC98;
+extern Vtx D_ovlgap_8040C780[];
 extern u16 debug_menu_pad_buttons_a;
 void clear_text_grid(void);
 void func_ovlgap_80405AF4(s32, s32);
@@ -234,4 +240,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C260);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_8040C360);
+void func_ovlgap_8040C360(s32 unused, Gfx **display_list_cursor) {
+    Gfx *gfx = *display_list_cursor;
+
+    guTranslate(&D_8040CC98, D_8010522C, D_80105230, D_80105234);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gSPMatrix(gfx++, &D_40CC98, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, D_ovlgap_8040C780, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
+    gSPVertex(gfx++, &D_ovlgap_8040C780[4], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+
+    *display_list_cursor = gfx;
+}
