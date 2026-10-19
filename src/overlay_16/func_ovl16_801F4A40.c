@@ -38,7 +38,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F51
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5194);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5210);
+extern void animation_play(s32 id, s32 animation);
+s32 func_ovl16_801F5138(s32 arg0, s32 arg1);
+
+void func_ovl16_801F5210(s32 arg0, s32 arg1) {
+    animation_play(arg0, func_ovl16_801F5138(arg0, arg1));
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5240);
 
