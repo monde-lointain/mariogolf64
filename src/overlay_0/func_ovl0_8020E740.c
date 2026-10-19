@@ -2,7 +2,14 @@
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020E740);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020E78C);
+extern void heap3_free(void** payload_ptr);
+extern s32 D_ovl0_80224124;
+extern void* D_ovl0_8022D650;
+
+void func_ovl0_8020E78C(void) {
+  D_ovl0_80224124 = 0;
+  heap3_free(&D_ovl0_8022D650);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020E7B4);
 
