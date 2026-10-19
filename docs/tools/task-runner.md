@@ -22,11 +22,11 @@ nigel <task> --shard 1/4
 | Key | Value here |
 |---|---|
 | `agent` | `omp` (nigel adds `-p --mode json --approval-mode yolo`) |
-| `verify_command` | `./tools/build-and-verify.sh` |
+| `verify_command` | `./tools/verify-candidate` ([gate](verify-candidate.md): protected paths, baserom hash, then `build-and-verify.sh`) |
 | `success_command` | `git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"` (tasks override it) |
 | `reset_command` | `git clean -f; git reset --hard HEAD || true` |
 
-`task-runner/<task>/task.yaml` keys: `candidate_source`, `prompt` or `template`, `agent_flags`, `accept_best_effort`, `timeout`, `success_command`, `verify_command`. `verify_command` overrides the config's and takes the same `$CANDIDATE` and `$TASK_NAME` variables as `success_command`. Prompt variables: `$INPUT`, `$INPUT[n]`, `$INPUT[n:]`, `$INPUT["key"]` (index and slice need an array candidate, else interpolation fails) and `$TASK_ID`. nigel exports `NIGEL_TASK_NAME`, `NIGEL_CANDIDATE`, `NIGEL_RUN_ID`, `NIGEL_AGENT` and `NIGEL_AGENT_FLAGS` to the agent and to the verify, success and reset commands. With a `timeout`, nigel exports `NIGEL_TIMEOUT_SECONDS` and `NIGEL_TIMEOUT_DEADLINE_UNIX`, which the [policy hook](/harness/policy-hook.md) uses to bound permuter runs.
+`task-runner/<task>/task.yaml` keys: `candidate_source`, `prompt` or `template`, `agent_flags`, `accept_best_effort`, `timeout`, `success_command`, `verify_command`. A task's `verify_command` replaces the config's when nigel checks a candidate's changes, and takes the same `$CANDIDATE` and `$TASK_NAME` variables as `success_command`; the decompile tasks use it for `verify-candidate --decompiled $CANDIDATE`. Build checks after a reset (startup, or a discarded candidate) always use the config's command, because the clean tree would fail a candidate gate. Prompt variables: `$INPUT`, `$INPUT[n]`, `$INPUT[n:]`, `$INPUT["key"]` (index and slice need an array candidate, else interpolation fails) and `$TASK_ID`. nigel exports `NIGEL_TASK_NAME`, `NIGEL_CANDIDATE`, `NIGEL_RUN_ID`, `NIGEL_AGENT` and `NIGEL_AGENT_FLAGS` to the agent and to the verify, success and reset commands. With a `timeout`, nigel exports `NIGEL_TIMEOUT_SECONDS` and `NIGEL_TIMEOUT_DEADLINE_UNIX`, which the [policy hook](/harness/policy-hook.md) uses to bound permuter runs.
 
 # Worktree rule
 
