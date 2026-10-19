@@ -35,7 +35,92 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020EEF8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020FAE8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8020E740", func_ovl0_8020FC10);
+extern Mtx D_227CA0[];
+extern Mtx D_ovl0_80227CA0[];
+extern Vtx D_ovl0_802243C8[];
+extern s32 D_ovl0_802243B4;
+extern s32 D_ovl0_802243B8;
+extern s32 D_ovl0_802243C0;
+extern f64 D_ovl0_802252A8;
+extern f64 D_ovl0_802252B0;
+extern u32 sky_panel_bank_index;
+void convert_and_pack_floats_to_fixed(f32 mf[4][4], Mtx* m);
+void emit_glyph_sprite_dl(Gfx** dl, s32 tag);
+void func_80071608(Gfx** dl);
+void func_80071CE4(Gfx** dl, s32 i);
+void func_80075E48(Gfx** gfxp);
+void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3], f32 scale[3]);
+
+void func_ovl0_8020FC10(Gfx** glistp) {
+    f32 scale[3];
+    f32 pos[3];
+    f32 rot[3];
+    f32 model[4][4];
+    f32 view[4][4];
+    Gfx* gfx = *glistp;
+    f32 temp_ft2;
+    f32 var_ft0;
+    f32 var_ft1;
+
+    if (D_ovl0_802243B8 != -1) {
+        if (D_ovl0_802243B4 == 0) {
+            if (D_ovl0_802243B8 < 0xA) {
+                D_ovl0_802243B8 = D_ovl0_802243B8 + 1;
+            }
+        } else {
+            if (D_ovl0_802243B8 > 0) {
+                D_ovl0_802243B8 = D_ovl0_802243B8 - 1;
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 0x9F);
+        gDPPipeSync(gfx++);
+
+        temp_ft2 = (f32) D_ovl0_802243B8;
+        var_ft1 = (f32) ((f64) ((temp_ft2 * 18.0f) + 180.0f) * D_ovl0_802252A8);
+        if (D_ovl0_802252B0 < (f64) var_ft1) {
+            var_ft1 = 6.2831855f;
+        }
+        var_ft0 = temp_ft2 * 0.1f;
+        if (var_ft0 > 1.0f) {
+            var_ft0 = 1.0f;
+        }
+        scale[0] = var_ft0;
+        scale[1] = var_ft0;
+        scale[2] = var_ft0;
+        rot[0] = 0;
+        rot[1] = 0;
+        rot[2] = -var_ft1;
+        pos[0] = (f32) -D_ovl0_802243C0;
+        pos[1] = 20.0f;
+        pos[2] = -300.0f;
+        mtx_from_rts(model, rot, pos, scale);
+        guTranslateF(view, (f32) D_ovl0_802243C0, -20.0f, 0.0f);
+        guMtxCatF(view, model, model);
+        convert_and_pack_floats_to_fixed(model, &D_ovl0_80227CA0[sky_panel_bank_index]);
+        gSPMatrix(gfx++, &D_227CA0[sky_panel_bank_index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, D_ovl0_802243C8, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        if (D_ovl0_802243B8 == 0xA) {
+            func_80071608(&gfx);
+            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xF0, 0xFF);
+            func_80071CE4(&gfx, 0);
+        } else {
+            func_80075E48(&gfx);
+            emit_glyph_sprite_dl(&gfx, 0);
+        }
+    }
+    *glistp = gfx;
+}
 
 extern s32 D_ovl0_80224410;
 
