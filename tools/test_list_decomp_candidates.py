@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from list_decomp_candidates import collect_candidates, find_include_asm_in_text  # noqa: E402
+from difficulty_ledger import failed_tiers  # noqa: E402
 
 
 class FindIncludeAsmTest(unittest.TestCase):
@@ -53,6 +54,7 @@ class CollectCandidatesTest(unittest.TestCase):
         self.write('asm/nonmatchings/main/a/small.s', 'x' * 10)
         self.write('asm/nonmatchings/main/a/parked.s', 'x' * 50)
         self.write('nonmatchings/parked/NEAR_MISS.md', 'close but no cigar\n')
+        self.tiers = failed_tiers(self.root, [])
 
     def write(self, rel, text):
         path = self.root / rel
@@ -61,27 +63,27 @@ class CollectCandidatesTest(unittest.TestCase):
         return path
 
     def test_orders_by_size_with_missing_asm_last(self):
-        rows, total, near_miss_skipped = collect_candidates(
-            [self.src], include_near_misses=True, root=self.root
+        rows, total, failed_skipped = collect_candidates(
+            [self.src], include_failed=True, root=self.root, tiers=self.tiers
         )
         self.assertEqual(total, 4)
-        self.assertEqual(near_miss_skipped, 0)
+        self.assertEqual(failed_skipped, 0)
         self.assertEqual(
-            [(r['func'], r['asm_size'], r['near_miss']) for r in rows],
+            [(r['func'], r['asm_size'], r['tier']) for r in rows],
             [
-                ('small', 10, False),
-                ('parked', 50, True),
-                ('big', 300, False),
-                ('missing_asm', -1, False),
+                ('small', 10, 1),
+                ('parked', 50, 2),
+                ('big', 300, 1),
+                ('missing_asm', -1, 1),
             ],
         )
 
-    def test_skips_near_misses_by_default(self):
-        rows, total, near_miss_skipped = collect_candidates(
-            [self.src], include_near_misses=False, root=self.root
+    def test_skips_failed_functions_by_default(self):
+        rows, total, failed_skipped = collect_candidates(
+            [self.src], include_failed=False, root=self.root, tiers=self.tiers
         )
         self.assertEqual(total, 4)
-        self.assertEqual(near_miss_skipped, 1)
+        self.assertEqual(failed_skipped, 1)
         self.assertNotIn('parked', [r['func'] for r in rows])
 
 

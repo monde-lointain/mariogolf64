@@ -7,6 +7,10 @@ Modes:
   --by-similarity           each function with its top-N similar decompiled functions
   --by-coddog-similarity    each function with coddog matches whose C body is in src/
 
+Tiers (--tier 1|2|3, default 1) select by difficulty-ledger tier: tier 1 is every
+function with no failure history; tiers 2 and 3 are functions that failed at the lower
+tiers. See docs/tools/difficulty-ledger.md.
+
 Examples (from the repo root):
   python3 tools/score_functions.py asm/nonmatchings --json
   python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 3
@@ -18,7 +22,7 @@ import json
 import math
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -31,6 +35,13 @@ from find_similar_functions import (  # noqa: E402
     get_coddog_similarity,
     get_project_root,
     scan_src_definitions,
+)
+from difficulty_ledger import (  # noqa: E402
+    LedgerError,
+    failed_tiers,
+    ledger_path,
+    read_records,
+    tier_of,
 )
 
 # Logistic model over standardized features [instructions, branches, jumps, labels].
@@ -64,6 +75,16 @@ def _ordered(scored: List[Tuple[ParsedFunction, float]], by_size: bool) -> List[
     return sorted(scored, key=lambda item: (item[1], item[0].name))
 
 
+def select_tier(
+    scored: List[Tuple[ParsedFunction, float]],
+    tiers: Mapping[str, object],
+    tier: int,
+) -> Tuple[List[Tuple[ParsedFunction, float]], int]:
+    """Keep the functions at difficulty-ledger tier `tier`; return (kept, excluded_count)."""
+    kept = [item for item in scored if tier_of(item[0].name, tiers) == tier]
+    return kept, len(scored) - len(kept)
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description='Rank unmatched Mario Golf 64 functions by difficulty, size, or similarity.')
@@ -73,6 +94,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument('--score-func', metavar='FUNCTION_NAME', help='Only consider this function')
     parser.add_argument('--min-score', type=float, metavar='MIN', help='Minimum difficulty score (0-1)')
     parser.add_argument('--max-score', type=float, metavar='MAX', help='Maximum difficulty score (0-1)')
+    parser.add_argument('--tier', type=int, choices=(1, 2, 3), default=1,
+                        help='Only functions at this difficulty-ledger tier (default: 1)')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--by-size', action='store_true',
                       help='Order by instruction count, smallest first')
@@ -107,6 +130,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         scored = [item for item in scored if item[1] >= args.min_score]
     if args.max_score is not None:
         scored = [item for item in scored if item[1] <= args.max_score]
+
+    try:
+        tiers = failed_tiers(root, read_records(ledger_path(cwd=root)))
+    except LedgerError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    scored, excluded = select_tier(scored, tiers, args.tier)
+    if args.score_func and excluded:
+        print(f"note: {args.score_func} is tier {tier_of(args.score_func, tiers)}, "
+              f"so --tier {args.tier} excludes it", file=sys.stderr)
 
     if args.by_similarity:
         index = build_function_index(root)

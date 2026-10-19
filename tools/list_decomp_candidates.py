@@ -3,8 +3,8 @@
 
 Each `INCLUDE_ASM("<dir>", <name>);` statement in the given files is one
 candidate; its assembly is `<dir>/<name>.s`. Commented-out statements are
-ignored. Functions with a NEAR_MISS.md note under nonmatchings/<name>/ are
-skipped unless --include-near-misses is given.
+ignored. Functions with failure history in the difficulty ledger (tier 2 or higher) are
+skipped unless --include-failed is given; each row shows its tier.
 
 Output is sorted smallest assembly first (ties by source and line), one row per
 candidate, followed by a `# total_include_asm=...` trailer line.
@@ -20,16 +20,22 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from find_similar_functions import clean_c_source  # noqa: E402
+from difficulty_ledger import (  # noqa: E402
+    LedgerError,
+    failed_tiers,
+    ledger_path,
+    read_records,
+    tier_of,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 
 INCLUDE_ASM_RE = re.compile(r'INCLUDE_ASM\s*\(\s*"([^"]+)"\s*,\s*([A-Za-z_]\w*)\s*\)')
-NEAR_MISS_NOTE = 'NEAR_MISS.md'
 
 
 @dataclass(frozen=True)
@@ -60,46 +66,48 @@ def find_include_asm(source_file: Path, root: Path = ROOT) -> List[IncludeAsm]:
     return find_include_asm_in_text(source_file.read_text(errors='replace'), rel)
 
 
-def near_miss_path(func: str, root: Path = ROOT) -> Path:
-    return root / 'nonmatchings' / func / NEAR_MISS_NOTE
-
 
 def collect_candidates(
     files: List[Path],
-    include_near_misses: bool,
-    root: Path = ROOT,
+    include_failed: bool,
+    root: Path,
+    tiers: Mapping[str, object],
 ) -> Tuple[List[dict], int, int]:
-    """Return (rows, total_statements, near_miss_skipped) for the given C files."""
+    """Return (rows, total_statements, failed_skipped) for the given C files.
+
+    tiers maps function name -> difficulty tier (difficulty_ledger.failed_tiers).
+    Functions above tier 1 are skipped unless include_failed is set; rows carry the tier.
+    """
     rows: List[dict] = []
     total = 0
-    near_miss_skipped = 0
+    failed_skipped = 0
     for source_file in files:
         for item in find_include_asm(source_file, root):
             total += 1
-            asm_path = root / item.asm_rel
-            has_near_miss = near_miss_path(item.func, root).exists()
-            if has_near_miss and not include_near_misses:
-                near_miss_skipped += 1
+            tier = tier_of(item.func, tiers)
+            if tier != 1 and not include_failed:
+                failed_skipped += 1
                 continue
+            asm_path = root / item.asm_rel
             rows.append({
                 'func': item.func,
                 'source': item.source,
                 'line': item.line,
                 'asm': item.asm_rel,
                 'asm_size': asm_path.stat().st_size if asm_path.is_file() else -1,
-                'near_miss': has_near_miss,
+                'tier': tier,
             })
     rows.sort(key=lambda r: (r['asm_size'] < 0, r['asm_size'], r['source'], r['line']))
-    return rows, total, near_miss_skipped
+    return rows, total, failed_skipped
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     parser.add_argument('files', nargs='+', type=Path, help='C files to scan for INCLUDE_ASM')
     parser.add_argument(
-        '--include-near-misses',
+        '--include-failed',
         action='store_true',
-        help='include functions that have a NEAR_MISS.md note',
+        help='include functions with failure history (tier 2 and up), with their tier',
     )
     parser.add_argument(
         '--summary',
@@ -113,18 +121,20 @@ def main(argv: Optional[List[str]] = None) -> int:
             print(f'error: cannot read {path}', file=sys.stderr)
             return 1
 
-    rows, total, near_miss_skipped = collect_candidates(
-        args.files, args.include_near_misses
-    )
+    try:
+        tiers = failed_tiers(ROOT, read_records(ledger_path(cwd=ROOT)))
+    except LedgerError as exc:
+        print(f'error: {exc}', file=sys.stderr)
+        return 1
+
+    rows, total, failed_skipped = collect_candidates(args.files, args.include_failed, ROOT, tiers)
     eligible = len(rows)
     if not args.summary:
-        print('func\tsource:line\tasm_size\tnear_miss\tasm')
+        print('func\tsource:line\tasm_size\ttier\tasm')
         for r in rows:
             size = str(r['asm_size']) if r['asm_size'] >= 0 else 'missing'
-            print(f"{r['func']}\t{r['source']}:{r['line']}\t{size}\t"
-                  f"{'yes' if r['near_miss'] else 'no'}\t{r['asm']}")
-    print(f'# total_include_asm={total} eligible={eligible} '
-          f'near_miss_skipped={near_miss_skipped}')
+            print(f"{r['func']}\t{r['source']}:{r['line']}\t{size}\t{r['tier']}\t{r['asm']}")
+    print(f'# total_include_asm={total} eligible={eligible} failed_skipped={failed_skipped}')
     return 0
 
 
