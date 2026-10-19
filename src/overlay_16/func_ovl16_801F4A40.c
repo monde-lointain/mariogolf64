@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern s32 D_ovl16_801F89C0;
 extern s32 D_ovl16_80223804;
@@ -25,6 +26,54 @@ extern void func_800543A4(void);
 extern void func_80078910(void);
 extern void heap3_free(void **payload_address);
 extern void set_clear_color(s32 red, s32 green, s32 blue);
+
+extern s8 D_801B71ED;
+extern u8 D_152A680[];
+extern s32 D_80105E10[][3];
+extern s32 D_80105E44;
+extern s32 D_800BA9E4;
+extern s32 D_800BA9E8;
+extern s32 D_800BA9EC;
+extern s32 D_800BA9FC;
+extern s32 D_801B609C;
+extern void *D_801B7EE0;
+extern s32 D_ovl16_801F89A8;
+extern s32 D_ovl16_801F89AC;
+extern s32 D_ovl16_801F89B0;
+extern s32 D_ovl16_801F89B4;
+extern u8 D_ovl16_801F8B80[];
+extern void *D_ovl16_80223790;
+extern void *D_ovl16_80223794[];
+extern s32 active_player_count;
+extern s32 camera_position_x;
+extern s32 camera_position_y;
+extern s32 camera_position_z;
+extern s32 camera_preset_lookat_y;
+extern s32 camera_preset_lookat_z;
+extern s32 camera_preset_table_y;
+extern s32 camera_preset_table_z;
+extern s16 g_scenery_wind_angle_a;
+extern s16 g_scenery_wind_angle_b;
+extern s32 game_mode;
+extern s32 putter_mode_flag;
+extern s32 round_hole_index;
+extern s32 scenario_mode_id;
+extern u8 scenario_state_id[];
+extern s16 wind_angle_bam;
+extern s32 wind_magnitude;
+extern void flag_set(s32 flag);
+extern void func_800543A4(void);
+extern s32 func_800577D0(void);
+extern void func_800577DC(s32 index, void *arg1);
+extern void func_80069F38(void);
+extern void func_80069FBC(void);
+extern void func_800789C8(void);
+extern void *heap3_alloc(u32 size_bytes);
+extern void heap3_free(void **payload_address);
+extern void *memset(void *dest, s32 value, u32 size);
+extern void nuPiReadRom(u32 rom_addr, void *buf_ptr, u32 size);
+extern void register_scenery_heap_region(u8 *heap_region_start, s32 heap_region_size);
+extern void set_color_framebuffer_count(u32 buffer_count);
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
@@ -68,7 +117,75 @@ void func_ovl16_801F4B90(void) {
     D_ovl16_801F89C0 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4B9C);
+void func_ovl16_801F4B9C(void) {
+    RomAssetLoad sp10;
+    RomAssetLoad sp30;
+    void *sp50;
+    s32 temp_s0;
+    void *temp_v0;
+    void *temp_v0_2;
+    void *temp_v0_3;
+    u16 *temp_v0_4;
+    void *temp_v0_5;
+    void *temp_v0_6;
+    s32 var_s0;
+
+    D_ovl16_801F89B4 = 0xB;
+    var_s0 = 0;
+    func_ovl16_801F4A88((s32) D_801B71ED);
+    func_800543A4();
+    do {
+        temp_v0 = heap3_alloc(func_800577D0());
+        D_ovl16_80223794[var_s0] = temp_v0;
+        func_800577DC(var_s0 + 1, temp_v0);
+        var_s0 += 1;
+    } while (var_s0 <= 0);
+    get_rom_asset_allocation_size(0x959, &sp10);
+    load_rom_asset_payload(&D_ovl16_801F8B80, &sp10);
+    temp_v0_2 = heap3_alloc(get_rom_asset_allocation_size(0x94C, &sp10));
+    D_ovl16_8022378C = (s32) temp_v0_2;
+    load_rom_asset_payload(temp_v0_2, &sp10);
+    temp_v0_3 = heap3_alloc(8);
+    sp50 = temp_v0_3;
+    nuPiReadRom((u32) D_152A680, temp_v0_3, 8);
+    temp_s0 = (((u8 *) sp50)[0] << 8) | ((u8 *) sp50)[1];
+    heap3_free(&sp50);
+    temp_v0_4 = heap3_alloc(temp_s0);
+    D_ovl16_80223788 = temp_v0_4;
+    nuPiReadRom((u32) D_152A680, temp_v0_4, temp_s0);
+    temp_v0_5 = heap3_alloc(get_rom_asset_allocation_size(0x4C3, &sp30));
+    D_801B7EE0 = temp_v0_5;
+    load_rom_asset_payload(temp_v0_5, &sp30);
+    temp_v0_6 = heap3_alloc(0x7038);
+    D_ovl16_80223790 = temp_v0_6;
+    register_scenery_heap_region(temp_v0_6, 0x7038);
+    memset(&scenario_state_id, 0, 0x44);
+    scenario_mode_id = 3;
+    round_hole_index = 6;
+    D_801B609C = 0;
+    game_mode = 0xD;
+    putter_mode_flag = 0;
+    wind_magnitude = (rand() & 0x3F) * 0x1770;
+    wind_angle_bam = rand();
+    D_800BA9FC = 9;
+    g_scenery_wind_angle_b = 0x1000;
+    g_scenery_wind_angle_a = 0x5800;
+    camera_position_x = D_80105E10[0][0];
+    camera_position_y = camera_preset_table_y;
+    camera_position_z = camera_preset_table_z;
+    D_800BA9E4 = camera_preset_lookat_y;
+    D_800BA9E8 = D_80105E44;
+    D_800BA9EC = camera_preset_lookat_z;
+    flag_set(7);
+    active_player_count = 1;
+    func_80069FBC();
+    func_80069F38();
+    set_color_framebuffer_count(3);
+    D_ovl16_801F89A8 = 0;
+    D_ovl16_801F89AC = 0;
+    D_ovl16_801F89B0 = -0xA;
+    func_800789C8();
+}
 
 void func_ovl16_801F4E54(void) {
     s32 i;
