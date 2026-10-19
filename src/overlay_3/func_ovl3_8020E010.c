@@ -1,8 +1,23 @@
 #include "common.h"
+#include "../main/rom_asset.h"
+
+extern u16 D_800C2064[];
+extern void** D_ovl3_8023A820;
 
 void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E010);
+void func_ovl3_8020E010(void** destinations) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s16 i;
+
+    D_ovl3_8023A820 = destinations;
+    for (i = 0; i != 7; i++) {
+        get_rom_asset_allocation_size(D_800C2064[i], &asset);
+        load_rom_asset_payload(D_ovl3_8023A820[i], &asset);
+    }
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E0AC);
 
