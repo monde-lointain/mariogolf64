@@ -249,7 +249,27 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022A8F4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022ADE8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B360);
+void func_80074CA8(Gfx **pgfx, s32 r, s32 g, s32 b);
+void func_8007624C(Gfx **chain, s32 x, s32 y, char *str, u32 fg, u32 bg, s32 arg6);
+extern char D_80105118[];
+extern char D_ovl3_80231AA8[];
+
+void func_ovl3_8022B360(Gfx **gfxp) {
+    Gfx *gfx = *gfxp;
+    s32 i;
+
+    gDPPipeSync(gfx++);
+    func_80071608(&gfx);
+    func_80074CA8(&gfx, 0xFF, 0xFF, 0xFF);
+    for (i = 0; i != 8; i++) {
+        if (D_ovl3_80230FD4[i] != 0xFF) {
+            sprintf(D_80105118, D_ovl3_80231AA8, D_ovl3_80230FD4[i]);
+            func_8007624C(&gfx, i * 0x18 + 0x61, 0x96, D_80105118, -1, -1, 0);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B46C);
 
