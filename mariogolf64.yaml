@@ -710,7 +710,7 @@ segments:
     exclusive_ram_id: ovl16
     symbol_name_format: ovl16_$VRAM
     subsegments:
-      - [0x16D650, asm]
+      - [0x16D650, c, overlay_16/func_ovl16_801F4A30]
       - [0x16D660, asm]
       - [0x1715C0, data]
       - { start: 0x171770, type: bss, vram: 0x801F8B50 }
