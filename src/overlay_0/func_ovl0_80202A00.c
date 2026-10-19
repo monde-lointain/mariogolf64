@@ -19,15 +19,30 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203B4C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203DAC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203E58);
+extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan);
+extern void update_object_group_by_id(s32 index);
+extern s32 D_800C3084;
+extern s32 D_800C3090;
+extern s32 D_ovl0_80227194;
+extern u16 D_801B55CC;
+
+void func_ovl0_80203E58(void) {
+    if ((D_801B55CC & 0x2020) && !(D_800C3084 & 2)) {
+        if ((D_800C3090 == 0) && (D_ovl0_80227194 == 0)) {
+            func_80050DA0(0x26, 8, 0x3C, 0x14, 0xE6);
+        }
+        D_800C3090 = 1;
+        return;
+    }
+    update_object_group_by_id(8);
+    D_800C3090 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203EEC);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203F30);
 
-extern s32 D_800C3084;
 extern s32 D_800FBE7C[];
-extern u16 D_801B55CC;
 extern f64 D_ovl0_80224EF8;
 extern f64 D_ovl0_80224F00;
 extern f64 D_ovl0_80224F08;
