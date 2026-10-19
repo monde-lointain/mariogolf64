@@ -104,7 +104,68 @@ void func_ovl3_801F9BCC(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9C58);
+void func_ovl3_801F9C58(void) {
+    s32 ret;
+    s32 next_mode;
+
+    ret = func_800959F8();
+    if (ret != 1) {
+        return;
+    }
+    if (D_800C2004 & 0x8000) {
+        switch ((s8)D_801323B8[3]) {
+        case 0:
+            next_mode = 9;
+            break;
+        case 2:
+            func_8009226C(8);
+            func_ovl3_80228B60();
+            next_mode = 0x1B;
+            break;
+        case 1:
+            func_8009226C(8);
+            current_game_mode = 0x11;
+            if (flag_is_set(0x56) != 0) {
+                game_mode = 4;
+                active_player_count = 2;
+                D_800FF4C0 = 1;
+                D_80105268 = 2;
+                D_801B5634 = 0;
+                func_ovl3_80217B88(0xA);
+            }
+            goto sound;
+        case 3:
+            func_8009226C(8);
+            next_mode = 4;
+            break;
+        default:
+            goto sound;
+        }
+        current_game_mode = next_mode;
+sound:
+        play_sound_effect(0x5D, 0xF, 0x50);
+    } else {
+        if (D_800C2004 & 0x4000) {
+            play_sound_effect(0x5F, 0xF, 0x7F);
+            current_game_mode = 0;
+            play_bgm_by_id(0x27, 0);
+            return;
+        }
+        if (D_800C2000 & 0x800) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            D_801323B8[3] = (u8)D_801323B8[3] - 1;
+        } else if (D_800C2000 & 0x400) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            D_801323B8[3] = (u8)D_801323B8[3] + 1;
+        }
+        if (D_801323B8[3] >= 4) {
+            D_801323B8[3] = 0;
+        }
+        if (D_801323B8[3] < 0) {
+            D_801323B8[3] = 3;
+        }
+    }
+}
 
 void func_ovl3_801F9E38(void) {
     s32 ret;
