@@ -3,11 +3,21 @@
 extern u8* func_8005AF50(void);
 extern u8* func_8005AF74(void);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802266F0);
+extern s32 D_ovl3_80230E88;
+extern f32 D_ovl3_80230E8C;
+extern f32 D_ovl3_80230E90;
+extern s32 D_ovl3_80230E9C;
+extern s32 D_ovl3_80230EA0;
+
+void func_ovl3_802266F0(void) {
+    D_ovl3_80230E88 = 0;
+    D_ovl3_80230E8C = 0.0f;
+    D_ovl3_80230E90 = 0.0f;
+    D_ovl3_80230E9C = 0;
+    D_ovl3_80230EA0 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022671C);
-
-extern s32 D_ovl3_80230E88;
 
 void func_ovl3_80226754(void) {
     D_ovl3_80230E88 = 2;
