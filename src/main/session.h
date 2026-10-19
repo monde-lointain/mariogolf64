@@ -121,7 +121,8 @@ typedef struct {
   /* 0x35 */ s8 round_hole_index;
   /* 0x36 */ u8 unknown_36[4];
   /* 0x3A */ u8 unknown_3A;
-  /* 0x3B */ u8 unknown_3B[5];
+  /* 0x3B */ u8 unknown_3B;
+  /* 0x3C */ s32 unknown_3C;
   /* 0x40 */ ModeAuxFields mode_aux_fields[4];
   /* 0x60 */ u8 unknown_60[8];
 } CourseSelectionRecord; /* 0x68 */

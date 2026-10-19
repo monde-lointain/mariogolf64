@@ -299,6 +299,7 @@ s32 func_ovl0_80206CC8(void) {
 }
 
 extern GameModeRecord D_800FEDD8[];
+extern CourseSelectionRecord D_80105F40[];
 extern s32 active_club_id;
 s32 get_hole_score_result_code(s32 hole_score);
 
@@ -315,6 +316,8 @@ typedef struct {
 
 extern MeterDefaults D_800FBE48;
 extern MeterDefaults2 D_800FBE5C;
+extern s32 round_hole_index;
+extern s32 scenario_mode_id;
 
 void func_ovl0_80206CF0(s32 player_index) {
     GameModeRecord *record;
@@ -343,7 +346,32 @@ void func_ovl0_80206CF0(s32 player_index) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206E88);
+void func_ovl0_80206E88(s32 player_index) {
+    CourseSelectionRecord *record;
+    u32 score_index;
+
+    score_index = player_records[player_index].base_score - 1;
+    if (score_index < 6U) {
+        record = &D_80105F40[player_index];
+        record->scenario_mode_id = scenario_mode_id;
+        record->round_hole_index = round_hole_index;
+        record->unknown_36[0] =
+            get_hole_score_result_code(player_records[player_index].base_score);
+        record->unknown_36[1] = player_records[player_index].character_index;
+        record->unknown_36[2] = player_records[player_index].unknown_1E[4];
+        record->unknown_36[3] = player_records[player_index].asset_variant;
+        record->unknown_3A = player_records[player_index].base_score;
+        record->unknown_3C = player_records[player_index].unknown_88;
+        record->environment = hole_environment;
+        record->mode_aux_fields[score_index].unknown_00 = D_800FBE48.unk0;
+        record->mode_aux_fields[score_index].unknown_02[0] = D_800FBE48.unk4;
+        record->mode_aux_fields[score_index].unknown_02[1] = D_800FBE48.unk8;
+        record->mode_aux_fields[score_index].unknown_02[2] = active_meter_category;
+        record->mode_aux_fields[score_index].unknown_02[3] = active_club_id;
+        record->mode_aux_fields[score_index].unknown_02[4] = D_800FBE5C.unk0;
+        record->mode_aux_fields[score_index].unknown_02[5] = D_800FBE5C.unk4;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207014);
 
@@ -351,8 +379,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207048)
 
 u8* func_8005AF50(void);
 void func_8005DE60(s32);
-extern s32 round_hole_index;
-extern s32 scenario_mode_id;
 
 void func_ovl0_80207080(s32 player_index) {
     s32 var_a0;
