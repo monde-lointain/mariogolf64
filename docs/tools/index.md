@@ -1,6 +1,7 @@
 # Build and verify
 
 * [build-and-verify](build-and-verify.md) - the full clean rebuild and SHA1 check; the final arbiter of every match
+* [verify-candidate](verify-candidate.md) - the gate nigel runs before committing: protected paths, baserom hash, optional decompiled-in-src check, then build-and-verify
 * [asm-differ](asm-differ.md) - diff a function in the built ROM against the target
 
 # Per-function work

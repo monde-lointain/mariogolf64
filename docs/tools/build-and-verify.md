@@ -30,4 +30,4 @@ On a checksum failure, find the cause in this order:
 2. [data-differ](data-differ.md) `--find-first-mismatch` when data may be responsible.
 3. `make diff-line` (human use) writes a byte diff of base and built ROM to `romdiff`.
 
-It is also the `verify_command` for [nigel](task-runner.md) and the body of the [git pre-commit hook](/harness/git-hook-and-ci.md). Agents must call this script rather than `make` ([policy hook](/harness/policy-hook.md)).
+It is the last step of [verify-candidate](verify-candidate.md), which is nigel's `verify_command`, and the body of the [git pre-commit hook](/harness/git-hook-and-ci.md). Agents must call this script rather than `make` ([policy hook](/harness/policy-hook.md)).
