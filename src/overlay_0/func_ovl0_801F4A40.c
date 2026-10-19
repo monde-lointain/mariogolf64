@@ -49,6 +49,9 @@ extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern void* D_ovl0_80225704;
+extern s32 D_ovl0_8022573C;
+void func_ovl0_801F7740(Gfx** pgfx);
+void func_ovl0_801F8094(Gfx** pgfx);
 
 /**
  * Loads the shared palette at block+8 and the index-th 32x32 CI8 texture at
@@ -144,4 +147,19 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FC3D4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FCC48);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FD578);
+void func_ovl0_801FD578(Gfx** pgfx) {
+    Gfx* gfx;
+
+    gfx = *pgfx;
+    switch (D_ovl0_8022573C) {
+    case 0:
+        break;
+    case 1:
+        func_ovl0_801F7740(&gfx);
+        break;
+    case 2:
+        func_ovl0_801F8094(&gfx);
+        break;
+    }
+    *pgfx = gfx;
+}
