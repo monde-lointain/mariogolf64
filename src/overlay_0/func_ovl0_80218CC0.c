@@ -10,7 +10,31 @@ extern void* D_ovl0_8022B534;
 extern void* D_ovl0_8022B538;
 extern void* D_ovl0_8022B53C;
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218CC0);
+extern s8 D_801061BD;
+extern s8 D_801061BF;
+extern s8 D_801061C0;
+extern s8 D_801061C1;
+extern s8 D_801061C2;
+extern s8 D_801061C3;
+extern s8 D_801061C4;
+extern s8 D_801061C5;
+extern u8 D_80106241;
+extern u8 D_80106242;
+extern u8 D_80106243;
+
+void func_ovl0_80218CC0(void) {
+    D_801061BD = 0;
+    D_801061C4 = 0;
+    D_801061BF = 0;
+    D_80106241 = 0;
+    D_80106242 = 0;
+    D_80106243 = 0;
+    D_801061C0 = 0;
+    D_801061C1 = 0;
+    D_801061C2 = 0;
+    D_801061C3 = 0;
+    D_801061C5 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218D1C);
 
