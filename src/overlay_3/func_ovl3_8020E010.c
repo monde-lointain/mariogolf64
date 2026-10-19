@@ -5,11 +5,18 @@ extern u16 D_800C2064[];
 extern void** D_ovl3_8023A820;
 extern u8 D_80105118[];
 extern char D_ovl3_802318E0[];
+extern s16 D_ovl3_802300A0;
+extern char* D_ovl3_802300B4[];
+extern char D_ovl3_802318A8[];
 
 void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
 void func_80071608(Gfx** dl);
 void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
 void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b);
+u8* func_8005AF50(void);
+u8* func_8005AF74(void);
+void func_ovl3_80209478(void);
+void func_ovl3_8020F9B8(Gfx** gfxp, s16 idx, u8 mode);
 
 void func_ovl3_8020E010(void** destinations) {
     RomAssetLoad asset;
@@ -34,7 +41,41 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E898)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F2D0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F794);
+void func_ovl3_8020F794(Gfx** gfxp) {
+    Gfx* gfx = *gfxp;
+    s16 i;
+    s16 next;
+    s32 row;
+
+    row = 0;
+    func_8005AF50();
+    func_8005AF74();
+    func_ovl3_80209478();
+    gDPSetPrimColor(gfx++, 0, 0, 0x40, 0x40, 0x40, 0xBF);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, 0x60, 0x228, 0x4B8, 0x398, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+    gDPPipeSync(gfx++);
+
+    i = D_ovl3_802300A0;
+    if (i != D_ovl3_802300A0 + 4) {
+        do {
+            func_80071608(&gfx);
+            func_80074CA8(&gfx, 0xFF, 0xFF, 0xFF);
+            sprintf((char*)D_80105118, D_ovl3_802318A8, D_ovl3_802300B4[i]);
+            func_80073F24(&gfx, 0x1E, (s16)(((s32)(row << 16) >> 12) + 0x9A), D_80105118);
+            func_ovl3_8020F9B8(&gfx, i, (u8)row);
+            next = i + 1;
+            i = next;
+            row++;
+        } while (next != D_ovl3_802300A0 + 4);
+    }
+
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F9B8);
 
