@@ -6,7 +6,13 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_8020356C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035BC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035E4);
+extern s32 D_ovl7_8022BEB0;
+extern s32 D_ovl7_8022BEB4;
+
+void func_ovl7_802035E4(s32 unused, s32 arg1, s32 arg2) {
+  D_ovl7_8022BEB0 = arg1;
+  D_ovl7_8022BEB4 = arg2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802035F8);
 
