@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern s32 clear_animation_slot(s32 index);
+extern s32 D_ovl11_8024C4A4;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80241800);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80242074);
@@ -26,7 +29,11 @@ INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802438
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80243C48);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_8024407C);
+void func_ovl11_8024407C(void) {
+    clear_animation_slot(0);
+    clear_animation_slot(1);
+    D_ovl11_8024C4A4 = -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802440AC);
 
