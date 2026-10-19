@@ -513,7 +513,32 @@ void func_ovl0_802071B8(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207250);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802072AC);
+extern s32 func_800544B4(s32 arg0, s32 arg1);
+
+s32 func_ovl0_802072AC(s32 arg0, s32 arg1, s32 arg2) {
+    s32 kind;
+    s32 base;
+
+    kind = func_800544B4(arg0, arg1);
+    switch (kind) {
+    case 0:
+        base = 1;
+        break;
+    case 1:
+        base = 4;
+        break;
+    case 2:
+        base = 7;
+        break;
+    case 3:
+        base = 10;
+        break;
+    default:
+        base = 0;
+        break;
+    }
+    return base + (arg2 == 2);
+}
 
 extern void animation_play(s32 id, s32 animation);
 s32 func_ovl0_80207250(void);
