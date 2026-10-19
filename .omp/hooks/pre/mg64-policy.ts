@@ -4,9 +4,9 @@
  * Enforces:
  * - bash: no `git commit --no-verify`; no direct `make` (only `make [-s] print-cflags [SRC=path]` is
  *   allowed: it prints compiler flags and builds nothing); no direct `python3 -m splat split`;
- *   no `ctx.c` / `temp.c` mentions, except the ctx.c exclusion arguments (`grep -v <pattern>`,
- *   `--exclude[-dir]=<glob>`, rg `-g '!<glob>'`, find `! -name <x>`); no shell mutation of `asm/`;
- *   no shell writes into vendored
+ *   no `ctx.c` / `temp.c` mentions, except words that name ctx.c without reading it (a grep pattern,
+ *   `--exclude[-dir]=<glob>`, rg `-g '!<glob>'`, find `! -name <x>`, a `git commit -m` message);
+ *   no shell mutation of `asm/`; no shell writes into vendored
  *   tools (`tools/gcc_kmc`, `tools/kmc-cc`, `tools/decomp-permuter`, `tools/asm-differ`); every
  *   permuter run (`tools/permuter`, `tools/decomp-permuter/permuter.py`) must sit under a
  *   `timeout` that ends at least 120s before `NIGEL_TIMEOUT_DEADLINE_UNIX`. A permuter path that
@@ -80,10 +80,12 @@ const TEMP_MENTION = /temp\.c/;
 // A shell word: a quoted literal without expansion, or a bare word free of expansion and grouping characters.
 // `"$(cat ctx.c)"`, `{a,ctx.c}` and `<ctx.c` do not match, so those still count as reads.
 const SHELL_WORD = String.raw`(?:'[^']*'|"[^"$\x60\\]*"|[^\s'"$\x60(){}<>;&|\\]+)`;
-/** Forms that name ctx.c only to skip it. Each removes the excluded word; a ctx.c left over still blocks. */
+/** Words that name ctx.c without reading it. Each removes the word; a ctx.c left over still blocks. */
 const CTX_EXCLUSIONS: readonly RegExp[] = [
-	// grep -v / --invert-match: the word after the flag is the pattern, not a file. Only when just options precede the flag and no -e/-f is given (then the word is a file).
-	new RegExp(String.raw`\bgrep\b(?![^|;&\n]*[ \t]-(?:[a-zA-Z]*[ef]|-(?:regexp|file)\b))(?:[ \t]+-[^\s|;&]*)*?[ \t]+(?:-[a-zA-Z]*v[a-zA-Z]*|--invert-match)[ \t]+${SHELL_WORD}`, "g"),
+	// grep's first non-option word is its pattern, not a file. Only without -e/-f, which make every word a file.
+	new RegExp(String.raw`\bgrep\b(?![^|;&\n]*[ \t]-(?:[a-zA-Z]*[ef]|-(?:regexp|file)\b))(?:[ \t]+-[^\s|;&]*)*[ \t]+(?!-)${SHELL_WORD}`, "g"),
+	// git commit -m / --message text.
+	new RegExp(String.raw`(?<=\bgit\s+commit\b[\s\S]*)\s(?:-m|--message)(?:=|\s+)${SHELL_WORD}`, "g"),
 	// grep --exclude=<glob> and --exclude-dir=<glob>, with `=` or a space.
 	new RegExp(String.raw`(?:^|\s)--exclude(?:-dir)?(?:=|\s+)${SHELL_WORD}`, "g"),
 	// rg -g '!<glob>' and --glob '!<glob>'.
