@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/session.h"
+#include "../main/club.h"
 
 extern s8 D_ovl5_8025C848;
 extern s32 D_ovl5_80253C64;
@@ -138,7 +139,16 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251AC0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251B20);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80252EE4);
+s32 func_ovl5_80252EE4(s32 arg0, s32 arg1) {
+    s32 slot_index;
+
+    for (slot_index = 0; slot_index < 16; slot_index++) {
+        if (get_club_param(player_records[D_ovl5_8025C884].club_ids[slot_index])->club_index == arg1) {
+            return slot_index;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80252F70);
 
