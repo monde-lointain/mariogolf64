@@ -30,12 +30,14 @@ nigel <task> --shard 1/4
 
 # Worktree rule
 
-`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees:
+`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
 
 ```bash
 tools/new-worktree mg64-a && cd ../mg64-a
-MG64_SYNC_BRANCH=dev nigel decompile-similar --shard 1/3
+PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev nigel decompile-similar --shard 1/3
 ```
+
+`difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a tier-1 failure. Stop a shard between candidates (after its `outcomes.log` grows).
 
 Commits made in a worktree stay on its branch until they are integrated. `tools/integrate-shards mg64-a mg64-b …`, run in the main checkout on `dev`, cherry-picks each shard's commits that `git cherry` lists as missing and keeps each one only if `build-and-verify.sh` passes. It skips matches already integrated, and stops a shard at any commit that touches a path outside `src/`, `include/`, `docs/`, `symbol_addrs.txt` and `mariogolf64.yaml` (harness code, tasks, hooks), at a conflict it cannot resolve, or at a failed build, leaving that commit for review. It exits 1 when it stopped somewhere, so a loop such as `while tools/integrate-shards mg64-a mg64-b mg64-c mg64-d; do sleep 600; done` only needs a person when it ends. Conflicts in `src/**/*.c` go through the `tools/merge-decomp-c` merge driver (`.gitattributes`; configured by `tools/install-git-hooks.sh`). It resolves the usual conflict between neighbouring matches: a definition replaces the other side's `INCLUDE_ASM` of the same function, and both sides' `extern` declarations are combined without repeating earlier ones. It leaves a conflict for a person when one symbol is declared with two types, a function is defined two ways, or the block holds anything else.
 
