@@ -16,6 +16,8 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80219948)
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80219BD4);
 
 extern u8* D_ovl3_8023B364;
+extern u8* func_8005AF74(void);
+extern s16 D_ovl3_8023B640[4][5];
 
 void func_ovl3_8021B1E0(Gfx** gfxp, s32 x, s32 y, u8 idx) {
     Gfx* gfx = *gfxp;
@@ -87,7 +89,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021E01C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021E340);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021E468);
+s16 func_ovl3_8021E468(void) {
+    s8* temp_v0;
+
+    temp_v0 = (s8*)func_8005AF74();
+    return D_ovl3_8023B640[temp_v0[0x3A]][temp_v0[0x39]];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021E4B0);
 
