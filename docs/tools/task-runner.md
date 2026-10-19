@@ -30,14 +30,11 @@ nigel <task> --shard 1/4
 
 # Worktree rule
 
-`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. A new worktree needs its own ignored inputs:
+`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees:
 
 ```bash
-git worktree add ../mg64-a && cd ../mg64-a
-git submodule update --init
-make setup
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cp <main checkout>/baserom.z64 .
+tools/new-worktree mg64-a && cd ../mg64-a
+nigel decompile-similar --shard 1/3
 ```
 
 Commits made in a worktree stay on its branch; review and merge `harness:` commits from there (`git log --oneline --grep '^harness:'`).
@@ -59,7 +56,7 @@ Commits made in a worktree stay on its branch; review and merge `harness:` commi
 | `consolidate-global-types`, `fix-symbol-footprints` | global-type / oversized-symbol finders | Fix global types and symbol sizes |
 | `name-functions-and-symbols` | source files | Rename with [rename-global](/procedures/rename-global.md) and [rename-file](/procedures/rename-file.md) |
 | `match-rodata-segments` | unnamed `rodata` entries in `mariogolf64.yaml` | [match-data-segment](/procedures/match-data-segment.md) |
-| `split-asm-segments` | `asm` entries in `mariogolf64.yaml` | Convert an assembly-only segment to a C file of `INCLUDE_ASM` stubs |
+| `split-asm-segments` | `asm` entries in `mariogolf64.yaml` | Run [split-asm-segments](split-asm-segments.md) on the offset; fix the boundary by hand only if it prints FAILED |
 | `consolidate-learnings` | `list_unconsolidated_learnings.py --json` | Merge verified KMC GCC lessons from `nonmatchings/*/LEARNINGS.md` and `NEAR_MISS.md` into `docs/reference/kmc-gcc/`, then `--mark` the note consolidated. Commits only `docs/reference/kmc-gcc` |
 
 The candidate-source scripts are in [selection](selection-and-status.md) and [quality checkers](quality-checkers.md).
