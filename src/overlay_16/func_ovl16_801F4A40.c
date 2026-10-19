@@ -4,13 +4,29 @@ extern s32 D_ovl16_801F89C0;
 extern s32 D_ovl16_80223804;
 extern s8 D_ovl16_802237B8;
 extern s8 D_ovl16_802237B9;
+extern s32 D_ovl16_802237C0[];
 extern u8 D_801B724B;
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A50);
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested swap helper of func_ovl16_801F4A88 (`addiu $v0,$sp,0x10` before its jal); `unused` reproduces them, as in func_ovl7_802068B4. */
+void func_ovl16_801F4A50(s32 arg0, s32 arg1) {
+    s32 r;
+    volatile s32 unused = r;
+    s32 *base;
+    s32 *slot0;
+    s32 *slot1;
+    s32 tmp;
+
+    base = D_ovl16_802237C0;
+    slot0 = &base[arg0];
+    slot1 = &base[arg1];
+    tmp = *slot0;
+    *slot0 = *slot1;
+    *slot1 = tmp;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A88);
 
