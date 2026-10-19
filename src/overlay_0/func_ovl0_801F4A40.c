@@ -35,7 +35,20 @@ void func_ovl0_801F63CC(s32 arg0, s32 arg1) {
     D_ovl0_802257F8[arg1] = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F63F8);
+extern s32 D_800C0E60;
+extern s32 D_ovl0_8021FC88;
+extern s32 D_ovl0_8021FDB8;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+
+void func_ovl0_801F63F8(void) {
+    s32 tick_count;
+
+    tick_count = D_ovl0_8021FDB8 + 1;
+    D_ovl0_8021FDB8 = tick_count;
+    if ((D_ovl0_8021FC88 != 1) || !(tick_count & 3)) {
+        play_sound_effect(0x20, D_800C0E60, 0x7F);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6450);
 
