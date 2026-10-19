@@ -128,6 +128,20 @@ typedef struct {
 } CourseSelectionRecord; /* 0x68 */
 
 typedef struct {
+  /* 0x00 */ s32 unknown_00[11];
+  /* 0x2C */ s8 unknown_2C;
+  /* 0x2D */ u8 unknown_2D[7];
+  /* 0x34 */ u8 unknown_34;
+  /* 0x35 */ u8 unknown_35;
+  /* 0x36 */ u8 validation_flags;
+  /* 0x37 */ u8 character_index;
+  /* 0x38 */ u8 unknown_38;
+  /* 0x39 */ u8 asset_variant;
+  /* 0x3A */ u8 flags;
+  /* 0x3B */ u8 unknown_3B[0x2D];
+} SupershotRecord; /* 0x68 */
+
+typedef struct {
   /* 0x00 */ s8 par;
   /* 0x01 */ u8 unknown_01[9];
 } CourseHoleDefinition; /* 0x0A */

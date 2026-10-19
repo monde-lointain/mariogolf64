@@ -71,7 +71,9 @@ s16 func_ovl3_80220DF8(void) {
     return D_ovl3_8023B684[((s8*)func_8005AF74())[0x42]];
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220E28);
+s32 func_ovl3_80220E28(SupershotRecord* record) {
+    return record->validation_flags >> 7;
+}
 
 extern s32 D_ovl3_8023B678;
 
