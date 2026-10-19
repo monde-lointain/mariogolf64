@@ -5,6 +5,9 @@ extern u32 D_ovl4_802542A0;
 extern s16 D_800BAC0C[];
 extern s32 D_800BB00C;
 extern s8 g_terrain_vtx_xform_mode;
+extern u8 D_8019D620;
+void func_ovl4_802537EC(s32, s32, void **, void **);
+s32 report_div_error(void);
 
 void func_ovl4_8024D800(u32 seed) {
     D_ovl4_802542A0 = seed;
@@ -656,4 +659,26 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802536FC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802537EC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802541E8);
+void func_ovl4_802541E8(void) {
+    void *sp10;
+    void *sp14;
+    s32 var_s0;
+    s32 var_s1;
+
+    var_s1 = 0;
+    sp10 = &D_8019D620 + 0x4000;
+    sp14 = &D_8019D620 + 0xD600;
+    do {
+        var_s0 = 0;
+loop_2:
+        func_ovl4_802537EC(var_s0, var_s1, &sp10, &sp14);
+        var_s0 += 1;
+        if (var_s0 < 8) {
+            goto loop_2;
+        }
+        var_s1 += 1;
+    } while (var_s1 < 0x10);
+    if (((u32) (&D_8019D620 + 0xD400) < (u32) sp10) || ((u32) (&D_8019D620 + 0x17E00) < (u32) sp14)) {
+        report_div_error();
+    }
+}
