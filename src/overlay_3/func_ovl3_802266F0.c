@@ -17,7 +17,13 @@ void func_ovl3_802266F0(void) {
     D_ovl3_80230EA0 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022671C);
+void func_ovl3_8022671C(void) {
+    D_ovl3_80230E9C = 0;
+    D_ovl3_80230EA0 = 0;
+    D_ovl3_80230E88 = 1;
+    D_ovl3_80230E8C = 1.0f;
+    D_ovl3_80230E90 = 1.0f;
+}
 
 void func_ovl3_80226754(void) {
     D_ovl3_80230E88 = 2;
