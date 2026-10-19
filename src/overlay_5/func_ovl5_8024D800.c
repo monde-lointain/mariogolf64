@@ -11,6 +11,12 @@ extern s32 camera_position_z;
 extern u32 calculate_hypotenuse_safe(s32, s32);
 void func_ovl5_8024D870(void *);
 
+typedef struct {
+    s32 unknown_00[22];
+} OverlayRecord58;
+
+extern OverlayRecord58 D_ovl5_802544B0;
+
 void func_ovl5_8024D800(void) { D_ovl5_8025C848 = 0; }
 
 void func_ovl5_8024D80C(void) {
@@ -23,7 +29,17 @@ void func_ovl5_8024D80C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D870);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D8B4);
+s32 func_ovl5_8024D8B4(OverlayRecord58 *arg0) {
+    if (D_ovl5_80253C64 != 0) {
+        *arg0 = D_ovl5_802544B0;
+        if (D_ovl5_80253C64 == 2) {
+            osDestroyThread(&D_ovl5_80254300);
+            D_ovl5_80253C64 = 1;
+        }
+        return 0;
+    }
+    return -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D958);
 
