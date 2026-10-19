@@ -2,6 +2,7 @@
 #include "../main/rom_asset.h"
 
 void func_80058D04(s32, s32, s32);
+void func_80050DA0(s32, s32, s32, s32, s32);
 extern Gfx* glistp;
 extern s32 D_ovl7_8020AC4C;
 extern u8 D_ovl7_80213A40[];
@@ -27,6 +28,9 @@ extern void* D_801B7EE0;
 extern void* D_ovl7_802259F8[2];
 extern void* D_ovl7_80225A04;
 extern s32 D_ovl7_8020AC64;
+extern s32 D_ovl7_8020AC50;
+extern f32 D_ovl7_8020AC5C;
+extern s32 D_ovl7_8020AC60;
 extern s8 D_ovl7_8020BA70;
 extern s32 D_ovl7_8022BFA8;
 extern u16* g_auxiliary_framebuffer;
@@ -48,7 +52,11 @@ void func_ovl7_801F4A40(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4A6C);
+void func_ovl7_801F4A6C(void) {
+    if (D_ovl7_8020AC60 != 0) {
+        func_80050DA0(0x51, 0xC, 0x30 - (s32) (D_ovl7_8020AC5C * 0.2f), 0, 0x7F - ((s32) (D_ovl7_8020AC50 - 0xA0) / 2));
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4AEC);
 
