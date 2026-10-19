@@ -91,7 +91,76 @@ void func_ovl7_801FA83C(s32 table_index, s32 slot_index) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FA8D8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FB864);
+typedef struct {
+    s32 max_a;
+    s32 max_b;
+    s32 unk08;
+    s32 unk0C;
+    s32 cur_a;
+    s32 cur_b;
+    s32 unk18;
+} MeterRec;
+
+extern MeterRec D_ovl7_8020AC9C[];
+
+void func_ovl7_801FB864(void) {
+    s32 *temp_a1;
+    s32 temp_v1;
+    s32 var_a3;
+    s32 var_v1;
+
+    var_a3 = 0;
+    do {
+        if (D_ovl7_80212820[var_a3] != 0) {
+            temp_a1 = &D_ovl7_80212818[var_a3];
+            temp_v1 = *temp_a1;
+            if (temp_v1 < 0xA) {
+                var_v1 = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_a;
+                if (var_v1 < 0) {
+                    var_v1 += 7;
+                }
+                D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_a += var_v1 >> 3;
+                *temp_a1 += 1;
+                if (D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_a > D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_a) {
+                    D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_a = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_a;
+                }
+                if (*temp_a1 == 8) {
+                    *temp_a1 = 0xA;
+                }
+            } else if (temp_v1 < 0x14) {
+                var_v1 = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_b;
+                if (var_v1 < 0) {
+                    var_v1 += 3;
+                }
+                D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b -= var_v1 >> 2;
+                *temp_a1 += 1;
+                if (D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b <= 0) {
+                    D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b = 1;
+                }
+                if (*temp_a1 == 0xE) {
+                    *temp_a1 = 0x14;
+                }
+            } else if (temp_v1 < 0x1E) {
+                var_v1 = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_b;
+                if (var_v1 < 0) {
+                    var_v1 += 3;
+                }
+                D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b += var_v1 >> 2;
+                *temp_a1 += 1;
+                if (D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b > D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_b) {
+                    D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_b;
+                }
+                if (*temp_a1 == 0x18) {
+                    *temp_a1 = 0x1E;
+                }
+            } else {
+                D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_a = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_a;
+                D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].cur_b = D_ovl7_8020AC9C[D_ovl7_80212810[var_a3]].max_b;
+            }
+        }
+        var_a3 += 1;
+    } while (var_a3 != 2);
+}
 
 void func_ovl7_801FBB10(s32 arg0, s32 arg1) {
     RomAssetLoad asset;
