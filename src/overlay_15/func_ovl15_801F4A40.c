@@ -39,9 +39,18 @@ void func_ovl15_801F67F4(void) {
   D_800FEC00.unknown_8C = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6818);
+void func_ovl15_801F6818(void) {
+  D_800FEC00.unknown_34 = 0;
+  D_800FEC00.unknown_38 = 0;
+  D_800FEC00.unknown_8C = 0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6834);
+void func_ovl15_801F6834(void) {
+  D_800FEC00.unknown_34 = 0;
+  D_800FEC00.unknown_04 = 0;
+  D_800FEC00.unknown_38 = 0;
+  D_800FEC00.unknown_8C = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6858);
 

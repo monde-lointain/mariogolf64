@@ -165,7 +165,10 @@ typedef struct {
   /* 0x00 */ s32 unknown_00;
   /* 0x04 */ s32 unknown_04;
   /* 0x08 */ s32 unknown_08;
-  /* 0x0C */ u8 unknown_0C[0x80];
+  /* 0x0C */ u8 unknown_0C[0x28];
+  /* 0x34 */ s32 unknown_34;
+  /* 0x38 */ s32 unknown_38;
+  /* 0x3C */ u8 unknown_3C[0x50];
   /* 0x8C */ s32 unknown_8C;
   /* 0x90 */ s32 unknown_90;
   /* 0x94 */ s32 unknown_94;
