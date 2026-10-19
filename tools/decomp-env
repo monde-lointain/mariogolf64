@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 # Creates nonmatchings/<function>[-N] with the target assembly, a starting
-# base.c, and the matching helpers from tools/claude-decomp-env, then optionally
-# launches an agent CLI inside it.
+# base.c, and the matching helpers from tools/decomp-env-template, then optionally
+# launches omp inside it.
 
 # Parse arguments
 BOOTSTRAP=false
 BOOTSTRAP_ONLY=false
 ID=""
 ARG=""
-CLI="claude"
-CLI_ARGS=()
+CLI="omp"
+CLI_ARGS=(--thinking xhigh)
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -21,16 +21,6 @@ while [[ $# -gt 0 ]]; do
         --bootstrap-only)
             BOOTSTRAP_ONLY=true
             BOOTSTRAP=true
-            shift
-            ;;
-        --glaude)
-            CLI="glaude"
-            CLI_ARGS=()
-            shift
-            ;;
-        --codex)
-            CLI="codex"
-            CLI_ARGS=(--yolo)
             shift
             ;;
         --id)
@@ -44,8 +34,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-CLAUDE_DIR="$(pwd)/tools/claude-decomp-env"
-CLAUDE_CONFIG="$(pwd)/.claude"
+TEMPLATE_DIR="$(pwd)/tools/decomp-env-template"
+OMP_CONFIG="$(pwd)/.omp"
 PYTHON=python3
 [ -x .venv/bin/python3 ] && PYTHON=.venv/bin/python3
 M2C=m2c
@@ -96,7 +86,7 @@ find_function_asm() {
 
 # Check if argument is provided
 if [ -z "$ARG" ]; then
-    echo "Usage: $0 [--bootstrap] [--bootstrap-only] [--glaude] [--codex] [--id ID] <function_name_or_path_or_scratch_id>"
+    echo "Usage: $0 [--bootstrap] [--bootstrap-only] [--id ID] <function_name_or_path_or_scratch_id>"
     exit 1
 fi
 
@@ -230,7 +220,7 @@ if [ -n "$ID" ]; then
             echo "Bootstrap-only mode: directory ready at $TARGET_DIR"
         elif command -v $CLI &> /dev/null; then
             cd "$TARGET_DIR"
-            run_cli "decompile ${FUNC_NAME}. the appropriate claude environment has already been created (do not re-run tools/claude --bootstrap). use ultrathink"
+            run_cli "decompile ${FUNC_NAME}. the decomp environment has already been created (do not re-run tools/decomp-env --bootstrap)."
         else
             echo "Please navigate to: $TARGET_DIR"
         fi
@@ -319,7 +309,7 @@ else
     # Use the decomp.me/permuter scratch source
     cp src/temp.c "$created_dir/base.c"
 fi
-cat "${CLAUDE_DIR}/prelude.inc" "$FUNCTION_ASM" > "$created_dir/target.s"
+cat "${TEMPLATE_DIR}/prelude.inc" "$FUNCTION_ASM" > "$created_dir/target.s"
 CROSS="$(find_cross_prefix)"
 if [ -z "$CROSS" ]; then
     echo "Error: Unable to detect a suitable MIPS assembler"
@@ -327,19 +317,18 @@ if [ -z "$CROSS" ]; then
 fi
 "${CROSS}as" -EB -march=vr4300 -mtune=vr4300 -Iinclude -o "$created_dir/target.o" "$created_dir/target.s"
 
-# Add claude decomp helpers
-ln -sf "${CLAUDE_DIR}"/* "$created_dir/"
-rm "$created_dir/CLAUDE.md" "$created_dir/AGENTS.md"
-sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${CLAUDE_DIR}/CLAUDE.md" > "$created_dir/CLAUDE.md"
-ln -s CLAUDE.md "$created_dir/AGENTS.md"
-ln -sf "${CLAUDE_CONFIG}" "$created_dir/"
+# Add decomp helpers
+ln -sf "${TEMPLATE_DIR}"/* "$created_dir/"
+rm "$created_dir/AGENTS.md"
+sed 's/\$functionName/'"${FUNC_NAME}"'/g' "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
+ln -s "$OMP_CONFIG" "$created_dir/.omp"
 ln -sf "$(pwd)/DECOMPILATION_LEARNINGS.md" "$created_dir/"
 
 if [ "$BOOTSTRAP_ONLY" = true ]; then
     echo "Bootstrap-only mode: environment ready at $created_dir"
 elif command -v $CLI &> /dev/null; then
     cd "$created_dir"
-    run_cli "decompile ${FUNC_NAME}. the appropriate claude environment has already been created (do not re-run tools/claude --bootstrap). use ultrathink"
+    run_cli "decompile ${FUNC_NAME}. the decomp environment has already been created (do not re-run tools/decomp-env --bootstrap)."
 else
     echo "Success! Please navigate to the created directory and start your decompilation work:"
     echo ""

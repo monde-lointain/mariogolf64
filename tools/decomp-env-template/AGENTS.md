@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Your Job
 
@@ -12,7 +12,7 @@ Before making matching attempts, gather context for `$functionName` and make `ba
 
 MAKE THE MINIMAL SET OF CHANGES NECESSARY TO COMPILE `base.c`. This is important for getting an accurate baseline match percentage.
 
-Specifically, the subagent should:
+Delegate the following block to an omp `task` subagent:
 
 <subagent-instructions>
 1. Consult `DECOMPILATION_LEARNINGS.md`. Use its headings and the patterns visible in `base.c` and `target.s` to select the sections relevant to this function. Record a compact digest in `LEARNINGS.md` that names each relevant section, explains why it applies, and states the concrete matching technique to try. Include this digest in your report. Do not copy unrelated sections or merely say that the file was read.

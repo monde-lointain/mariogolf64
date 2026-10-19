@@ -102,7 +102,7 @@ else
 fi
 
 # Resolve the target assembly: an explicit path, the per-function file, or the
-# function isolated by tools/claude next to the source file.
+# function isolated by tools/decomp-env next to the source file.
 if [[ "$FUNC_NAME" == *.s ]]; then
     ASM_PATH="$FUNC_NAME"
 else
