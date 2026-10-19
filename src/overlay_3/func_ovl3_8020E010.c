@@ -3,8 +3,13 @@
 
 extern u16 D_800C2064[];
 extern void** D_ovl3_8023A820;
+extern u8 D_80105118[];
+extern char D_ovl3_802318E0[];
 
 void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
+void func_80071608(Gfx** dl);
+void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
+void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b);
 
 void func_ovl3_8020E010(void** destinations) {
     RomAssetLoad asset;
@@ -35,7 +40,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F9B8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020FD48);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020FE20);
+void func_ovl3_8020FE20(Gfx** gfxp, s16 x, s16 y) {
+    Gfx* gfx = *gfxp;
+
+    func_80071608(&gfx);
+    func_80074CA8(&gfx, 0xFF, 0x40, 0xC0);
+    sprintf(D_80105118, D_ovl3_802318E0, 0x25);
+    func_80073F24(&gfx, x, y, D_80105118);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020FEF8);
 
