@@ -7,7 +7,8 @@
 typedef struct {
   Vec3f position; /* 0x00 */
   Vec3f velocity; /* 0x0C */
-  u8 reserved_18[0x10];
+  u8 reserved_18[0xC];
+  f32 unknown_24; /* 0x24 */
   f32 opacity;
   f32 opacity_step;
   f32 size;
@@ -276,7 +277,62 @@ void func_80079358(s32 arg0, s32 arg1) {
  * gcc-2.7.2 sched.c schedule-order tie. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_800796F8);
+extern f64 D_800D1978;
+extern f64 D_800D1980;
+extern u8 D_801B9418[];
+extern s32 render_buffer_index;
+
+void func_800796F8(s32* arg0) {
+  f32 translation[3];
+  f32 scale[3];
+  f32 rotation[3];
+  f32 matrix[4][4];
+  s32 i;
+  s32 idx;
+  s32 step;
+  f32 radius;
+  f32 angle;
+  f32 sin_part;
+  f32 vel_y;
+  Particle* p;
+
+  D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(arg0[0], arg0[2]);
+  for (i = 0; i < 40; i++) {
+    p = &particle_array[i];
+    if (p->effect_kind == -1) {
+      p->position.x = (f32)arg0[0] * 0.0009765625f;
+      p->position.y = (f32)arg0[1] * 0.0009765625f;
+      p->position.z = (f32)arg0[2] * 0.0009765625f;
+      idx = guRandom() % 32;
+      step = idx * 20;
+      radius = (f32)(step + 0xC8);
+      angle = (f32)((f64)(f32)((f64)idx * D_800D1978) - D_800D1980);
+      p->velocity.x = (f32)(cosf(angle) * radius * 0.0009765625f);
+      sin_part = sinf(angle) * radius;
+      vel_y = (f32)(-2.6367188f - ((f32)step * 0.0009765625f));
+      p->unknown_24 = 0.0f;
+      p->effect_kind = 5;
+      p->opacity_step = 0.0f;
+      p->size_step = 0.0f;
+      p->opacity = 255.0f;
+      p->size = 0.5f;
+      p->velocity.y = vel_y;
+      p->velocity.z = (f32)(sin_part * 0.0009765625f);
+      translation[0] = p->position.x;
+      translation[1] = p->position.y;
+      translation[2] = p->position.z;
+      rotation[0] = p->unknown_24;
+      rotation[1] = 0.0f;
+      rotation[2] = p->unknown_24;
+      scale[0] = p->size;
+      scale[1] = p->size;
+      scale[2] = p->size;
+      mtx_from_rts(matrix, rotation, translation, scale);
+      convert_and_pack_floats_to_fixed(matrix, &((Mtx*)D_801B9418)[render_buffer_index]);
+      return;
+    }
+  }
+}
 
 void func_80079940(s32* arg0) {
   s32 i;
