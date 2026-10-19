@@ -26,6 +26,14 @@ This is a matching decompilation project for Mario Golf 64 (N64, US revision 0).
 - `python3 tools/find_similar_functions.py <function name>` returns a list of similar matched functions. This can provide a useful reference when trying to match code.
 - `python3 tools/data-differ/data_diff.py <symbol>` or `./tools/diff-data <symbol>` compares binary data between the target ROM and compiled output for a specific data symbol.
 - `python3 tools/data-differ/data_diff.py --find-first-mismatch` scans data symbols in ROM order and shows the first mismatch. Use this after checksum failures when a data variable may be responsible.
+- `python3 tools/list_decomp_candidates.py [--summary] <c files...>` lists the `INCLUDE_ASM` functions in the given C files, smallest first, skipping functions with a `nonmatchings/<func>/NEAR_MISS.md` handoff note.
+- `python3 tools/rank_decompile_similar_impact.py [--limit N] [--json]` ranks unmatched functions by direct progress plus how much matching them would improve the reference hints for other `decompile-similar` targets.
+- `python3 tools/m2c_one_shot.py --dry-run [--limit N] [function...]` runs m2c on unmatched functions and scores each result with the decomp environment's `build.sh`; without `--dry-run` it inlines exact matches into the owning C file.
+- `python3 tools/find_unmatched_nonmatchings.py` lists `nonmatchings/` workspaces whose best logged attempt is below 100% and whose function is not yet in `src/`.
+- `python3 tools/report_nonmatching_matches.py` reports certified 100% local matches and 100% decomp.me scratches (`tools/scratches.json`) not yet integrated into `src/`, plus partial matches.
+- `python3 tools/fix_redundant_externs.py [paths...] [--fix]` finds source-local `extern`s that repeat a project header's prototype; `--fix` removes them and includes the header.
+- `python3 tools/check_pointer_arithmetic.py [paths...] [--strict]` reports `(type *)ptr + offset` casts (see Avoid Pointer Arithmetic).
+- `python3 -m unittest discover -s tools -p 'test_*.py'` runs the tool unit tests.
 
 ## Compiler
 
