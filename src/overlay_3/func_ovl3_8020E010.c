@@ -108,7 +108,12 @@ void func_ovl3_80210D94(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode) {
     *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210DF4);
+void func_ovl3_80210DF4(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode) {
+    Gfx* gfx = *gfxp;
+
+    func_ovl3_80210E3C(&gfx, x, y, value, mode, 5);
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210E3C);
 
