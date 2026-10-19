@@ -338,7 +338,15 @@ void func_ovl7_80203B60(s32 arg0, f32 arg1, s32 arg2) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203C90);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203DC4);
+extern s32 D_ovl7_8022BEDC;
+extern s32 D_ovl7_8022BEE0;
+
+s32 func_ovl7_80203DC4(void) {
+  if (D_ovl7_8022BEDC == 0 && D_ovl7_8022BEE0 == 0) {
+    return 1;
+  }
+  return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203DE8);
 
