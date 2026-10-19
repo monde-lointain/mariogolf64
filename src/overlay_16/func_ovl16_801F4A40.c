@@ -12,6 +12,19 @@ extern f32 D_ovl16_801F89C8;
 extern u16 *D_ovl16_80223788;
 extern s32 D_ovl16_8022378C;
 extern u8 D_ovl16_801F89E0[];
+extern void *D_ovl16_80223790;
+extern void *D_ovl16_80223794[];
+extern void *D_801B7EE0;
+extern f32 D_801B5528;
+extern s32 gameplay_viewport_x;
+extern s32 gameplay_viewport_y;
+extern s32 gameplay_viewport_w;
+extern s32 gameplay_viewport_h;
+extern void func_80029B58(void);
+extern void func_800543A4(void);
+extern void func_80078910(void);
+extern void heap3_free(void **payload_address);
+extern void set_clear_color(s32 red, s32 green, s32 blue);
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
@@ -57,7 +70,26 @@ void func_ovl16_801F4B90(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4B9C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4E54);
+void func_ovl16_801F4E54(void) {
+    s32 i;
+
+    func_80078910();
+    gameplay_viewport_x = 8;
+    gameplay_viewport_y = 8;
+    gameplay_viewport_w = 0x130;
+    gameplay_viewport_h = 0xE0;
+    D_801B5528 = 1.0f;
+    func_800543A4();
+    for (i = 0; i < 1; i++) {
+        heap3_free(&D_ovl16_80223794[i]);
+    }
+    func_80029B58();
+    set_clear_color(0, 0, 0);
+    heap3_free(&D_ovl16_80223790);
+    heap3_free((void **)&D_ovl16_80223788);
+    heap3_free((void **)&D_ovl16_8022378C);
+    heap3_free(&D_801B7EE0);
+}
 
 f32 func_ovl16_801F4F24(f32 near, f32 far, f32 t) {
   if (t < 0.0f) {
