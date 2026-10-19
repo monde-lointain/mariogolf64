@@ -56,7 +56,6 @@ Commits made in a worktree stay on its branch; review and merge `harness:` commi
 | `consolidate-global-types`, `fix-symbol-footprints` | global-type / oversized-symbol finders | Fix global types and symbol sizes |
 | `name-functions-and-symbols` | source files | Rename with [rename-global](/procedures/rename-global.md) and [rename-file](/procedures/rename-file.md) |
 | `match-rodata-segments` | unnamed `rodata` entries in `mariogolf64.yaml` | [match-data-segment](/procedures/match-data-segment.md) |
-| `split-asm-segments` | `asm` entries in `mariogolf64.yaml` | Run [split-asm-segments](split-asm-segments.md) on the offset; fix the boundary by hand only if it prints FAILED |
 | `consolidate-learnings` | `list_unconsolidated_learnings.py --json` | Merge verified KMC GCC lessons from `nonmatchings/*/LEARNINGS.md` and `NEAR_MISS.md` into `docs/reference/kmc-gcc/`, then `--mark` the note consolidated. Commits only `docs/reference/kmc-gcc` |
 
 The candidate-source scripts are in [selection](selection-and-status.md) and [quality checkers](quality-checkers.md).

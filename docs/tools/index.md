@@ -4,7 +4,6 @@
 * [verify-candidate](verify-candidate.md) - the gate nigel runs before committing: protected paths, baserom hash, optional decompiled-in-src check, then build-and-verify
 * [asm-differ](asm-differ.md) - diff a function in the built ROM against the target
 * [new-worktree](new-worktree.md) - create a sibling worktree on a new branch with the build inputs copied or linked from the main checkout
-* [split-asm-segments](split-asm-segments.md) - turn one assembly-only subsegment into a C file of `INCLUDE_ASM` stubs, verified by build-and-verify, and commit that split alone
 
 # Per-function work
 

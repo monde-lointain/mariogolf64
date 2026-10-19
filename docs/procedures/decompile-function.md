@@ -24,7 +24,6 @@ Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function n
 
 * Update the rest of the project to build. If a header declares the function, update it; callers teach the correct argument and return types. Never fall back to `void *`.
 * Search `src/` and `include/` for existing declarations of every function and struct involved; do not add duplicates ([redundant declarations](/project/code-quality.md)).
-* If the function lives in an assembly-only segment (`asm/<rom offset>.s`, no C file), first split that segment into a C subsegment in `mariogolf64.yaml` and keep the other functions as `INCLUDE_ASM` stubs ([segment kinds](/reference/splat-yaml.md)).
 * Commit any harness fix first and separately (see below), while `src/` still builds.
 
 Then run `./tools/build-and-verify.sh`. The match is not done until it succeeds. If the checksum fails, rebuild and diff every function in the modified files with `python3 tools/asm-differ/diff.py --no-pager <function>`, focusing on functions that use structs you changed. See [asm-differ](/tools/asm-differ.md).
