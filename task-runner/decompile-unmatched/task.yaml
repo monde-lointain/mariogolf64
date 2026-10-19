@@ -1,6 +1,6 @@
 candidate_source: python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json
 prompt: "Use the decompile-function skill to decompile the function: $INPUT. Start from similarity: run python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 3 --score-func $INPUT and use the matched functions it lists as references. When creating the decomp environment (tools/decomp-env) use --id $TASK_ID. Follow the skill's stop rules, including the difficulty-ledger record step at every stop."
 agent_flags: --model anthropic/claude-haiku-5-5:xhigh
-success_command: 'git add -u && git commit -m "matched $CANDIDATE"'
+success_command: 'f=${NIGEL_CANDIDATE#\[\"}; git add -u && git commit -m "Decompile ${f%%\"*}"'
 verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
 timeout: 60m
