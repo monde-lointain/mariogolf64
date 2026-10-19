@@ -28,10 +28,14 @@ extern void func_800934CC(s32 arg0);
 extern void func_8002A97C(s32 arg0, s32 arg1);
 extern void set_color_framebuffer_count(u32 buffer_count);
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern void func_8006A2C0(Gfx **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_8006A4A0(Gfx **, u32, u32);
+extern void load_texture_block_4b(Gfx **, u32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800C0E60;
 extern s32 D_ovl0_80224A90;
 extern s32 D_ovl0_80224A98;
 extern s32 D_ovl0_80224A9C;
+extern s32 D_ovl0_80224A84;
 
 void func_ovl0_80218CC0(void) {
     D_801061BD = 0;
@@ -88,7 +92,48 @@ void func_ovl0_80218FDC(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80219034);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_802199EC);
+void func_ovl0_802199EC(Gfx **pgfx, s32 x, s32 y, s32 width) {
+    Gfx *gfx;
+    s32 phase;
+    s32 frame;
+    s32 half;
+    s32 left;
+    s32 right;
+    s32 top;
+    s32 bottom;
+
+    gfx = *pgfx;
+    phase = D_ovl0_80224A84 + 1;
+    D_ovl0_80224A84 = phase % 8;
+
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+    func_8006A4A0(&gfx, 0, (u32) (D_ovl0_8022B538 + 8));
+    frame = D_ovl0_80224A84;
+    if (frame < 0) {
+        frame += 3;
+    }
+    load_texture_block_4b(&gfx, (u32) (D_ovl0_8022B538 + (((frame >> 2) << 9) + 0x28)), 2, 0x10, 0x40, 0, 0, 0, 0, 0, 0, 0);
+
+    half = width / 2;
+    left = x - half;
+    top = (y - 8) * 4;
+    bottom = (y + 8) * 4;
+    gDPPipeSync(gfx++);
+    func_8006A2C0(&gfx, (left - 8) * 4, top, (left + 8) * 4, bottom, 0, 0, 0x600, 0x400, 0x400);
+    right = x + half;
+    func_8006A2C0(&gfx, (right - 8) * 4, top, (right + 8) * 4, bottom, 0, 0, 0x400, 0x400, 0x400);
+
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80219C74);
 
@@ -129,12 +174,9 @@ typedef struct Ovl0Entry {
     u8 unkC[8];
 } Ovl0Entry;
 
-extern void func_8006A2C0(Gfx **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
-extern void func_8006A4A0(Gfx **, u32, u32);
 extern void func_80071608(Gfx **);
 extern s32 func_800738BC(u8 *, s32, s32);
 extern void func_800747B0(Gfx **, s32, s32, u8 *);
-extern void load_texture_block_4b(Gfx **, u32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 extern Ovl0Entry D_ovl0_80224928[];
 extern u8 *D_ovl0_80224978[];
 extern f32 D_ovl0_80224AA0;
