@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# new-worktree <name> [--branch BRANCH] [--base REF]
+#
+# Creates a linked git worktree at ../<name> (a sibling of the main checkout) on
+# a new branch (default: <name>, based on HEAD of the invoking checkout), then
+# copies the gitignored inputs a build needs from the main checkout so that
+# ./tools/build-and-verify.sh runs there without a fresh toolchain download:
+#   - baserom.z64        (copied; the worktree keeps its own copy)
+#   - tools/gcc_kmc      (copied; skipped if the worktree already has it)
+#   - .venv              (symlinked to the main checkout's virtualenv)
+# Submodules are initialised with `git submodule update --init`; git reuses the
+# module clones already stored under the main checkout's .git/modules.
+#
+# Git runs hooks from the common hooks directory only, so this script does not
+# touch hooks: linked worktrees share the main checkout's hooks.
+set -euo pipefail
+
+die() { echo "new-worktree: $*" >&2; exit 1; }
+usage() { echo "usage: $0 <name> [--branch BRANCH] [--base REF]" >&2; exit 2; }
+
+[[ $# -ge 1 ]] || usage
+name="$1"
+shift
+branch="$name"
+base="HEAD"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --branch) branch="${2:?--branch needs a value}"; shift 2 ;;
+        --base) base="${2:?--base needs a value}"; shift 2 ;;
+        *) usage ;;
+    esac
+done
+
+[[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || die "name must match [A-Za-z0-9._-]+: $name"
+
+# The main checkout is the parent of the shared .git directory, so the new
+# worktree is always a sibling of the main checkout, whatever checkout runs this.
+common_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+main="$(dirname "$common_dir")"
+target="$(dirname "$main")/$name"
+
+[[ ! -e "$target" ]] || die "$target already exists"
+if git show-ref --verify --quiet "refs/heads/$branch"; then
+    die "branch $branch already exists"
+fi
+
+git worktree add -b "$branch" "$target" "$base"
+
+warnings=()
+
+if [[ -f "$main/baserom.z64" ]]; then
+    cp --reflink=auto "$main/baserom.z64" "$target/baserom.z64"
+else
+    warnings+=("no baserom.z64 in $main; the build needs one")
+fi
+
+if [[ -d "$main/tools/gcc_kmc" && ! -e "$target/tools/gcc_kmc" ]]; then
+    cp -a --reflink=auto "$main/tools/gcc_kmc" "$target/tools/gcc_kmc"
+elif [[ ! -d "$main/tools/gcc_kmc" && ! -d "$target/tools/gcc_kmc" ]]; then
+    warnings+=("no tools/gcc_kmc in $main; run make setup there first")
+fi
+
+if [[ -d "$main/.venv" && ! -e "$target/.venv" ]]; then
+    ln -s "$main/.venv" "$target/.venv"
+elif [[ ! -d "$main/.venv" ]]; then
+    warnings+=("no .venv in $main; the Makefile falls back to python3")
+fi
+
+git -C "$target" submodule update --init
+
+echo "created $target on branch $branch (base $base)"
+for w in "${warnings[@]+"${warnings[@]}"}"; do
+    echo "warning: $w" >&2
+done
