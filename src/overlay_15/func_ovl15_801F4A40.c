@@ -1,6 +1,12 @@
 #include "common.h"
 #include "../main/session.h"
 
+typedef struct {
+  /* 0x00 */ u8 unknown_00[0x30];
+  /* 0x30 */ u8 checksum[2];
+  /* 0x32 */ u8 payload[0x1CE];
+} GbPakSaveRecord; /* 0x200 */
+
 extern s32 D_ovl15_801FBB78;
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
@@ -54,7 +60,18 @@ void func_ovl15_801F6834(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6858);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F686C);
+s32 func_ovl15_801F686C(GbPakSaveRecord *record) {
+  s32 sum;
+  u8 *cursor;
+
+  sum = 0;
+  cursor = record->payload;
+  do {
+    sum += *cursor;
+    cursor++;
+  } while (cursor != (u8 *)(record + 1));
+  return sum;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6890);
 
