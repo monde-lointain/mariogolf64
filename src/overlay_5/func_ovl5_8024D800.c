@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/session.h"
 
 extern s8 D_ovl5_8025C848;
 extern s32 D_ovl5_80253C64;
@@ -6,6 +7,8 @@ extern OSThread D_ovl5_80254300;
 extern u64 D_ovl5_8025A640[0x2000 / sizeof(u64)];
 extern s32 D_ovl5_8025C874;
 extern s32 D_ovl5_8025C87C;
+extern s8 D_ovl5_80253B52[];
+extern s32 D_ovl5_8025C884;
 extern s32 camera_position_x;
 extern s32 camera_position_z;
 extern u32 calculate_hypotenuse_safe(s32, s32);
@@ -49,7 +52,10 @@ s32 func_ovl5_8024D8B4(OverlayRecord58 *arg0) {
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D958);
+s8 func_ovl5_8024D958(void) {
+    return D_ovl5_80253B52[14 *
+                           player_records[D_ovl5_8025C884].character_index];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D99C);
 
