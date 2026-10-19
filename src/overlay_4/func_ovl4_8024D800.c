@@ -121,7 +121,22 @@ void func_ovl4_80250EE0(void) {
     D_ovl4_8025D354 = (u8 *)0x80315000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250F04);
+extern SceneryCylinder collision_cylinders[];
+
+void func_ovl4_80250F04(void) {
+    s32 i;
+
+    for (i = 0; i < SCENERY_CYLINDER_COUNT; i++) {
+        collision_cylinders[i].x = 0;
+        collision_cylinders[i].terrain_y = 0;
+        collision_cylinders[i].z = 0;
+        collision_cylinders[i].sprite_index = -1;
+        collision_cylinders[i].unknown_08[0] = 0;
+        collision_cylinders[i].cull_state = 1;
+        collision_cylinders[i].radius = 0x40;
+        collision_cylinders[i].scale_y = 0x100;
+    }
+}
 
 extern void bzero(void* address, s32 length);
 extern u8 collision_triangles[];
