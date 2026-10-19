@@ -38,7 +38,17 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F794)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020F9B8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020FD48);
+void func_ovl3_8020FD48(Gfx** gfxp, s16 x, s16 y) {
+    Gfx* gfx = *gfxp;
+
+    func_80071608(&gfx);
+    func_80074CA8(&gfx, 0x3F, 0xFF, 0x3F);
+    sprintf(D_80105118, D_ovl3_802318E0, 0x59);
+    func_80073F24(&gfx, x, y, D_80105118);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 void func_ovl3_8020FE20(Gfx** gfxp, s16 x, s16 y) {
     Gfx* gfx = *gfxp;
