@@ -44,6 +44,8 @@ extern volatile u32 nuScRetraceCounter;
 void nuScEventHandler(void);
 void nuScExecuteAudio(void);
 void nuScExecuteGraphics(void);
+void nuScEventBroadcast(NUScMsg* msg);
+void nuScWaitTaskReady(NUScTask* task);
 
 // Game callbacks run after a buffer-swapping graphics task completes.
 extern void func_8008D1DC(void);
