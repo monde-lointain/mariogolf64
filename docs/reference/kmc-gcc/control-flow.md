@@ -13,13 +13,13 @@ For a few sparse constant cases a `switch` gives more control over comparison an
 
 # Shared versus duplicated calls
 
-Merging two branches into one call with a selected argument is not codegen-neutral. If the target repeats call setup in each branch, keep the calls in the branches. If the target shares call setup, compute the differing value first and use one call.
+Merging two branches into one call with a selected argument is not codegen-neutral. If the target repeats call setup in each branch, keep the calls in the branches. If the target shares call setup, compute the differing value first and use one call. A `case` label may sit inside an `else` arm: the switch jumps into the arm, and a call there is emitted once and shared by the other path rather than duplicated (in one probe).
 
 # Loop form
 
 `for`, `while` and guarded post-test loops can differ in entry test, back edge and delay slot even when semantically equivalent. Preserve explicit zero-trip guards when they are visible in the target. Moving an increment between loop header and body can change scheduling.
 
-A `continue` targets the compiler-generated continuation point, while a `goto` targets a source label; this can affect branch-likely selection and delay-slot filling. (A `goto` in m2c output is usually an artefact; see [artefacts](/reference/decompilation-artefacts.md).)
+A `continue` targets the compiler-generated continuation point, while a `goto` targets a source label. In one probe, a `for` loop with `continue` and a `while` loop with a `goto` to a label before the increment compiled to the same branch-likely (`beql`) with the increment in the delay slot, so the goto form did not change branch selection. (A `goto` in m2c output is usually an artefact; see [artefacts](/reference/decompilation-artefacts.md).)
 
 # Simple conditional assignments
 

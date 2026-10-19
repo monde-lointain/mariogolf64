@@ -11,7 +11,7 @@ Consecutive switch cases with identical bodies may be merged into one target. An
 
 # Symbols and boundaries
 
-Symbol declarations and object boundaries can affect section layout even when bytes look equivalent. Preserve the owning symbol and storage width unless there is strong evidence for a structural change. For bss mismatches, inspect adjacent symbols and alignment: several apparent globals may be one aggregate, and one apparent buffer may need explicit alignment or padding.
+Symbol declarations and object boundaries can affect section layout even when bytes look equivalent. Preserve the owning symbol and storage width unless there is strong evidence for a structural change. For bss mismatches, inspect adjacent symbols and alignment: several apparent globals may be one aggregate, and one apparent buffer may need explicit alignment or padding. A constant subtracted from an index folds into the displacement of the table's own symbol: `table[id - 0x80]` on an `s32` table compiled to a shift of `id` and a load with a negative displacement from `table`, so a disassembler can show the table relative to a neighbouring symbol. Keep the real table symbol.
 
 # Where globals land
 
