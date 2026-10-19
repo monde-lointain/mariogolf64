@@ -1,6 +1,9 @@
 #include "common.h"
 
 extern Gfx D_ovl3_80232300[];
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C2004;
+extern s32 current_game_mode;
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
@@ -51,7 +54,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAF78)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FAFEC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB11C);
+void func_ovl3_801FB11C(void) {
+  if (D_800C2004 & 0x4000) {
+    play_sound_effect(0x5F, 0xF, 0x7F);
+    current_game_mode = 2;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB15C);
 
