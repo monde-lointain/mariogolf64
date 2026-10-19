@@ -20,7 +20,7 @@ In that directory run `./build.sh <attempt>.c`. It compiles with the profile of 
 
 # 2. Integrate a 100% match
 
-Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function name>);` line in its C file with the real code.
+Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function name>);` line in its C file with the real code. Define it under exactly `<function name>`, even when a caller declares the same address under another name; renaming is a separate task (the rename-global skill).
 
 * Update the rest of the project to build. If a header declares the function, update it; callers teach the correct argument and return types. Never fall back to `void *`.
 * Search `src/` and `include/` for existing declarations of every function and struct involved; do not add duplicates ([redundant declarations](/project/code-quality.md)).
