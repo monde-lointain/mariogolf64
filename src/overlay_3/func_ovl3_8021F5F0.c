@@ -182,7 +182,23 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80221CC0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80221EBC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222038);
+extern void* D_ovl3_8023BD78;
+extern void* D_ovl3_8023BD7C;
+
+void func_ovl3_80222038(void* arg0, u8 arg1) {
+    RomAssetLoad asset;
+
+    switch (arg1) {
+    case 1:
+        D_ovl3_8023BD78 = arg0;
+        return;
+    case 2:
+        D_ovl3_8023BD7C = arg0;
+        get_rom_asset_allocation_size(0x528, &asset);
+        load_rom_asset_payload(D_ovl3_8023BD7C, &asset);
+        return;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8022209C);
 
