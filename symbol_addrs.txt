@@ -742,8 +742,8 @@ __osIntOffTable = 0x800D25F0; // size:0x20
 __osIntTable = 0x800D2610; // size:0x30
 __osThreadSave = 0x800FC6A8; // size:0x1B0
 
-// Unattributed libultra read-only data (atan/libm constants @ 0x8E110/0x8E660 asm TUs);
-// left unattributed, RO_ naming per drmario64 convention (curated cordic_atan_divisor_2_60 / __libm_qnan_f kept)
+// libultra/libkmc read-only data in the atan/libm asm units (0x8E110, 0x8E660).
+// Unnamed constants use the RO_ prefix, as in drmario64.
 _atbl = 0x800C9690; // size:0x200  CORDIC atan(2^-i) table (libkmc atbl.c), extern from atan.c/sin.c
 RO_800D2848 = 0x800D2848; //
 RO_800D2850 = 0x800D2850; //
@@ -811,7 +811,7 @@ rspbootTextStart = 0x800B3E50; // rom:0x8F250 size:0xD0
 rspbootTextEnd = 0x800B3F20; // rom:0x8F320 size:0xC60 -- == n_aspMainTextStart, audio ucode text
 gspF3DEX2_fifoTextStart = 0x800B4B80; // rom:0x8FF80 size:0x1390 -- == n_aspMainTextEnd, nuGfxUcode target
 gspF3DEX2_fifoTextEnd = 0x800B5F10; // rom:0x91310 -- main_data start
-n_aspMainDataStart = 0x800C9890; // rom:0xA4C90 size:0x2B0 -- mus_audio_thread target
+n_aspMainDataStart = 0x800C9890; // rom:0xA4C90 size:0x2B0 -- __MusIntThreadProcess target
 gspF3DEX2_fifoDataStart = 0x800C9B40; // rom:0xA4F40 size:0x420 -- == n_aspMainDataEnd
 gspF3DEX2_fifoDataEnd = 0x800C9F60; // rom:0xA5360
 nuGfxTask = 0x801B5D08; // size:0x370
@@ -831,13 +831,12 @@ nuScGraphicsStack = 0x800D6970; // size:0x2000
 nuContRmbForceStopEnd = 0x800A2090; // type:func
 nuContRmbSearchTime = 0x800C7DD0; // size:0x4
 nuContRmbCallBack = 0x800C7DF0; // size:0xC
-// nualstl3 audio-manager fns embedded in game audio TU (src/main/audio_mgr.c) -- S128. audio_config_init@
-// 0x8005EDD0 is the WRONG ghidra name (#wrong-ghidra-name-override): the rom: qualifier overrides it to nuAuStlMgrInit.
+// NuSystem nualstl audio-manager functions embedded in the game audio unit (src/main/audio_mgr.c).
 nuAuStlMgrInit = 0x8005EDD0; // rom:0x3A1D0 type:func
 nuAuStlSchedInstall = 0x8005EE94; // type:func
 nuAuStlSchedWaitFrame = 0x8005EEF8; // type:func
 nuAuStlSchedDoTask = 0x8005EF88; // type:func
-// Refined names for the BGM helpers in the mixed audio_mgr.c subsegment.
+// BGM helpers in the mixed audio_mgr.c subsegment.
 bgm_allocate_song_buffer = 0x8005F048; // rom:0x3A448 type:func
 bgm_start_current_song = 0x8005F06C; // rom:0x3A46C type:func
 allocate_sound_effect_bank_buffer = 0x8005F0BC; // type:func
@@ -859,7 +858,7 @@ get_mode_flags_mask = 0x800603A8; // type:func
 save_scenario_state_snapshot = 0x80060434; // type:func
 copy_two_double_values = 0x800627F8; // type:func
 exclude_terrain_tiles_near_position = 0x8006280C; // type:func
-// nuaustlmgr.c file-scope data/bss, drop-def externs (S128)
+// nuaustlmgr.c file-scope data and bss.
 nuAuTaskStop = 0x800C2FFC; // size:0x1
 nuAuPreNMI = 0x800C2FFD; // size:0x1
 nuAuPreNMIFunc = 0x800C3000; // size:0x4
@@ -870,15 +869,11 @@ nuAuClient = 0x800E129C; // size:0xC
 nuAuRtnMesgQ = 0x800FC8C0; // size:0x18
 nuAuTask = 0x800FF188; // size:0x58
 nuAuMesgQ = 0x80132198; // size:0x18
-// libmus callees, UPSTREAM public names (S128). MusInitialize/MusStartSong override the WRONG ghidra
-// mus_initialize/mus_play_song_ptr via rom: qualifier (#wrong-ghidra-name-override); MusSetScheduler +
-// __MusIntMemMalloc are uncurated func_ adds.
+// libmus public functions called from game code, under their SDK names.
 MusInitialize = 0x8009973C; // rom:0x74B3C type:func
 MusStartSong = 0x800999F0; // rom:0x74DF0 type:func
 MusSetScheduler = 0x8009A53C; // type:func
-// libmus lib_memory.c, UPSTREAM names (S141 header-enabler sprint, libmus v3.12 sdk40v312_naudio).
-// __MusIntMemInit overrides the WRONG ghidra mus_heap_init via rom: qualifier (#wrong-ghidra-name-override);
-// audio_heap is the dropped file-static (drop-static-mirror:1bss -> extern at placed main_bss vram).
+// libmus lib_memory.c (libmus SDK names). audio_heap is the file-static heap descriptor.
 __MusIntMemInit = 0x8009E240; // rom:0x79640 type:func
 __MusIntMemMalloc = 0x8009E28C; // type:func
 __MusIntMemRemaining = 0x8009E2BC; // type:func
@@ -886,19 +881,14 @@ __MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
 __MusIntMemSet = 0x8009E2E0; // type:func
 __MusIntMemMove = 0x8009E30C; // type:func
 audio_heap = 0x800E72B0; // size:0x10
-// libmus aud_samples.c, UPSTREAM names (S142, libmus v3.12 sdk40v312_naudio). __MusIntSamplesInit/
-// __MusIntSamplesCurrent override the WRONG ghidra mus_samples_init/mus_samples_current via rom:
-// qualifier (#wrong-ghidra-name-override). frame_samples{,_min,_max}/extra_samples are the dropped
-// file-statics (drop-static-mirror:4bss -> extern at placed main_bss vrams, recovered at exec).
+// libmus aud_samples.c (libmus SDK names). frame_samples, frame_samples_min, frame_samples_max,
+// and extra_samples are its file-statics.
 __MusIntSamplesInit = 0x8009E380; // rom:0x79780 type:func
 __MusIntSamplesCurrent = 0x8009E424; // rom:0x79824 type:func
-// libmus aud_thread.c, UPSTREAM names (S143, libmus v3.14 n64sdkmod = game rev; bodies match 3.14,
-// EXTRA_SAMPLES_N=20). __MusIntAudManInit/__MusIntThreadProcess override the WRONG ghidra
-// mus_thread_create/mus_audio_thread via rom: (#wrong-ghidra-name-override). __MusIntThreadProcess
-// is CARRIED as INCLUDE_ASM (MG64-custom pause/mute block not in the 3.14 source). __MusIntDmaInit
-// (aud_dma.c, still asm) + CustomInit (player_fx.c bundled n_alInit, ghidra mis-named al_init; the
-// n_libaudio_sn_sc.h alInit->n_alInit then player_fx.h n_alInit->CustomInit chain) are recover-extern
-// callees. thread (UPSTREAM name)/__libmus_alglobals are the dropped statics/global (drop-static/drop-def).
+// libmus aud_thread.c (libmus 3.14 SDK names; bodies match 3.14 with EXTRA_SAMPLES_N=20).
+// __MusIntThreadProcess carries an MG64-specific pause/mute block that the 3.14 source lacks.
+// CustomInit is player_fx.c's renamed n_alInit (n_libaudio_sn_sc.h maps alInit to n_alInit,
+// player_fx.h maps n_alInit to CustomInit). thread is a file-static; __libmus_alglobals a global.
 __MusIntAudManInit = 0x8009DF70; // rom:0x79370 type:func
 __MusIntThreadProcess = 0x8009E0A8; // rom:0x794A8 type:func
 __MusIntDmaInit = 0x8009D910; // rom:0x78D10 type:func
@@ -906,29 +896,26 @@ __MusIntDmaProcess = 0x8009DA8C; // rom:0x78E8C type:func
 CustomInit = 0x8009CF30; // rom:0x78330 type:func
 thread = 0x800E70F0; // size:0x1B0
 __libmus_alglobals = 0x801B56A0; // size:0x50
-// S144 __MusIntThreadProcess recover-externs (drop-static @ 0x800C7Axx main_bss block).
-// __libmus_current_sched is the stock aud_sched.c global (still asm); last_task is the
-// stock func-static (UPSTREAM name); g_mus_audio_paused + g_mus_audio_silence_buffer are the MG64
-// pause/mute feature (a silence DMA on a flag, not in stock libmus 3.14). MICROCODE_CODE references
-// the already-placed rspbootTextEnd (== n_aspMainTextStart @ 0x800B3F20).
+// Globals referenced by __MusIntThreadProcess. __libmus_current_sched is the stock aud_sched.c
+// global and last_task the stock function-static. g_mus_audio_paused and
+// g_mus_audio_silence_buffer implement MG64's pause/mute feature (a silence DMA gated on a flag),
+// which stock libmus 3.14 lacks. MICROCODE_CODE refers to rspbootTextEnd (== n_aspMainTextStart).
 __libmus_current_sched = 0x800C7ADC; // size:0x4
 g_mus_audio_paused = 0x800C7AE0; // size:0x1
 last_task = 0x800C7AE4; // size:0x4
 g_mus_audio_silence_buffer = 0x800C7AE8; // size:0x10
-// libmus aud_sched.c, UPSTREAM names (S145, libmus v3.14 n64sdkmod = game rev; STOCK scheduler fns).
-// __MusIntSchedInit (the one external fn) overrides the WRONG ghidra mus_set_sched via rom:
-// (#wrong-ghidra-name-override; caller MusInitialize jal's it). The 3 __OsSched{Install,WaitFrame,
-// DoTask} are file-statics: left scaffold-named (mus_sched_install/func_) so the verbatim mirror
-// defines them static and default_sched references the locals after the .data carve (exec-time).
-// default_sched (musSched vtable) + __libmus_current_sched (=&default_sched, already placed S144 @
-// 0x800C7ADC) are the .data-carve at rom 0xA2ED0 (0x10B, before the aud_samples carve @ 0xA2F00).
+// libmus aud_sched.c (libmus 3.14 SDK names, stock scheduler). __MusIntSchedInit is the only
+// external function; MusInitialize calls it. The three __OsSched{Install,WaitFrame,DoTask}
+// functions are file-statics. default_sched (the musSched vtable) and __libmus_current_sched
+// (= &default_sched) live in the .data at rom 0xA2ED0 (0x10B bytes, before aud_samples' .data
+// at 0xA2F00).
 __MusIntSchedInit = 0x8009DDC0; // rom:0x791C0 type:func
 sched_mem = 0x800E70E4; // size:0x4
-// libmus aud_dma.c, UPSTREAM names (S146, libmus v3.14 n64sdkmod = game rev; GAME-MODIFIED cart-only).
-// Drop-static block @ 0x800E70A0 (the file-statics: list ptrs, dma message buffers, sizes, msgQ, cart
-// handle). g_mus_dma_buffer_count @ 0x800C7AC0 is the MG64-added persisted buffer count (DmaInit stores
-// it, DmaProcess ages the flat dma_buffer_list[] under it). diskrom_handle @ 0x800E70DC is the dead
-// non-static N64DD global (cart-only rev strips its only ref) -> left unnamed/unreferenced.
+// libmus aud_dma.c (libmus 3.14 SDK names; MG64 ships a cartridge-only variant). The file-statics
+// start at 0x800E70A0 (list pointers, DMA message buffers, sizes, message queue, cart handle).
+// g_mus_dma_buffer_count is an MG64 addition: DmaInit stores the buffer count, and DmaProcess ages
+// the flat dma_buffer_list[] against it. diskrom_handle at 0x800E70DC is the N64DD global; the
+// cartridge-only build has no reference to it, so it stays unnamed.
 dma_buffer_head = 0x800E70A0; // size:0x4
 dma_buffer_free = 0x800E70A4; // size:0x4
 dma_buffer_list = 0x800E70A8; // size:0x4
@@ -940,14 +927,11 @@ audDMAMessageQ = 0x800E70C0; // size:0x18
 cartrom_handle = 0x800E70D8; // size:0x4
 g_mus_dma_buffer_count = 0x800C7AC0; // size:0x4
 // ============================================================================
-// libmus UPSTREAM-name pass: rename the decomp-curated g_mus_*/D_*/mus_* symbols
-// to the libmus 3.14 SDK names (n64sdkmod = game rev; matches drmario64 +
-// puzzleleague64 verbatim mirrors). These OVERRIDE the ghidra g_mus_*/mus_*
-// names (#wrong-ghidra-name-override; make sync-names drops the ghidra entries,
-// keeping the two files disjoint). The 5 MG64-added globals with no upstream
-// equivalent (g_mus_pan_enabled, g_mus_frame_counter, g_mus_dma_buffer_count,
-// g_mus_audio_paused, g_mus_audio_silence_buffer) keep their g_mus_ names.
-// --- player.c globals (ghidra -> upstream; 0x800C76 .data + 0x800E70 bss) ---
+// libmus symbols under the libmus 3.14 SDK names (the game's revision; the same names as the
+// drmario64 and puzzleleague64 decomps). The five MG64-added globals with no SDK counterpart
+// (g_mus_pan_enabled, g_mus_frame_counter, g_mus_dma_buffer_count, g_mus_audio_paused,
+// g_mus_audio_silence_buffer) keep g_mus_ names.
+// --- player.c globals (0x800C76xx .data, 0x800E70xx bss) ---
 _mus_cpu_last = 0x800C76B0; // size:0x4
 _mus_cpu_worst = 0x800C76B4; // size:0x4
 jumptable = 0x800C76BC; // size:0xB4
@@ -973,7 +957,7 @@ fifo_current = 0x800E7088; // size:0x4
 fifo_limit = 0x800E708C; // size:0x4
 fifo_addr = 0x800E7090; // size:0x4
 __muscontrol_flag = 0x80132368; // size:0x4
-// --- aud_sched / aud_thread / aud_samples globals (ghidra -> upstream) ---
+// --- aud_sched / aud_thread / aud_samples globals ---
 audio_sched = 0x800E70E0; // size:0x4
 stack_addr = 0x800E72A0; // size:0x4
 audio_tasks = 0x800E72A4; // size:0x4
@@ -982,7 +966,7 @@ frame_samples = 0x800E72C0; // size:0x4
 frame_samples_min = 0x800E72C4; // size:0x4
 frame_samples_max = 0x800E72C8; // size:0x4
 extra_samples = 0x800E72CC; // size:0x4
-// --- libmus functions (ghidra decomp-name -> upstream) ---
+// --- libmus functions ---
 MusPtrBankInitialize = 0x8009A2B4; // type:func
 MusFxBankInitialize = 0x8009A47C; // type:func
 MusSetMasterVolume = 0x800999C4; // type:func
@@ -995,7 +979,6 @@ __MusIntFifoAddCommand = 0x8009A730; // type:func
 __MusIntHandleSetFlag = 0x8009C4EC; // type:func
 __MusIntRemapPtrBank = 0x8009BAC0; // type:func
 __MusIntFindChannelAndStart = 0x8009C0D8; // type:func
-// --- libmus functions (auto func_ -> upstream) ---
 __MusIntFifoOpen = 0x8009A64C; // type:func
 __MusIntFlushPending = 0x8009B060; // type:func
 __MusIntInitEnvelope = 0x8009B360; // type:func
@@ -1007,8 +990,8 @@ __MusIntRandom = 0x8009BC58; // type:func
 __MusIntRemapPtrs = 0x8009BFF0; // type:func
 __MusIntStartEffect = 0x8009C028; // type:func
 ChangeCustomEffect = 0x8009D8A8; // type:func
-// --- libmus bytecode command handlers: jumptable[] Fxxx (decomp mus_cmd_* ->
-//     upstream Fxxx; positional match vs n64sdkmod player_commands.inc.c) ---
+// --- libmus bytecode command handlers: jumptable[] entries, in the order of the SDK's
+//     player_commands.inc.c ---
 Fstop = 0x8009C540; // type:func
 Fwave = 0x8009C560; // type:func
 Fport = 0x8009C590; // type:func
@@ -1054,7 +1037,7 @@ Fsweep = 0x8009CE54; // type:func
 Fchangefx = 0x8009CE64; // type:func
 Fmarker = 0x8009CEA8; // type:func
 Flength0 = 0x8009CF18; // type:func
-// --- libmus public API + internal helpers (decomp mus_*/func_ -> upstream) ---
+// --- libmus public API and internal helpers ---
 MusAsk = 0x80099ED4; // type:func
 MusStop = 0x80099E08; // type:func
 MusStartSongFromMarker = 0x80099A20; // type:func
@@ -1090,43 +1073,42 @@ __MusIntProcessEnvelope = 0x8009B3D0; // type:func
 __MusIntProcessSweep = 0x8009B5E0; // type:func
 __MusIntProcessWobble = 0x8009B698; // type:func
 __MusIntProcessVibrato = 0x8009B6F0; // type:func
-// libnaudio n_audio_sc n_syn* setter family, UPSTREAM names (S129 header-enabler sprint).
+// libnaudio n_audio_sc synthesizer functions (SDK names).
 n_alSynSetPan = 0x800A0A90; // type:func
 n_alSynSetPitch = 0x800A0B20; // type:func
 n_alSynStartVoice = 0x800A0C60; // type:func
 n_alSynStopVoice = 0x800A0CF0; // type:func
-// S130: n_synaddplayer.c + n_synsetvol.c mirrors.
+// n_synaddplayer.c and n_synsetvol.c.
 n_alSynAddPlayer = 0x800A07B0; // type:func
 n_alSynSetVol = 0x800A0BB0; // type:func
-// S131: n_syndelete.c + n_synsetfxmix.c mirrors (split from the 0x7BDE0 2-file pack).
+// n_syndelete.c and n_synsetfxmix.c.
 n_alSynDelete = 0x800A09E0; // type:func
 n_alSynSetFXMix = 0x800A09F0; // type:func
-// shared n_syn* callees/global, recovered from the n_alSynSetPan asm (still-asm siblings + n_sl.c global).
+// Shared n_syn* callees and the n_sl.c synthesizer global.
 __n_allocParam = 0x800A1148; // type:func
 n_alEnvmixerParam = 0x8009EFE8; // type:func
 n_syn = 0x800C7DB4; // size:0x4
-// S130: n_alSynSetVol callee, recovered from func_800A0BB0 jal (in still-asm n_synthesizer.c subseg).
+// n_alSynSetVol callee.
 _n_timeToSamples = 0x800A1274; // type:func
-// S132: n_synallocvoice.c (single-file-pack, _allocatePVoice static internal) + n_sl.c (drop-def).
+// n_synallocvoice.c (_allocatePVoice is its static helper) and n_sl.c.
 n_alSynAllocVoice = 0x800A0800; // type:func
 _allocatePVoice = 0x800A0918; // type:func
 n_alInit = 0x800A0730; // type:func
 n_alClose = 0x800A0774; // type:func
-// n_sl.c callee (head of still-asm n_synthesizer.c) + its drop-def global (adjacent to n_syn).
+// n_sl.c's n_alSynNew callee and the n_alGlobals global (adjacent to n_syn).
 n_alSynNew = 0x800A0D70; // type:func
 n_alGlobals = 0x800C7DB0; // size:0x4
-// S133: n_save.c (n_alSavePull) + its calls-unplaced callee n_alMainBusPull (stays asm @0x7C720).
+// n_save.c (n_alSavePull) and n_mainbus.c (n_alMainBusPull).
 n_alSavePull = 0x800A12D0; // type:func
 n_alMainBusPull = 0x800A1370; // type:func
-// S134: n_resample.c (n_alResamplePull + n_alResampleParam) + its 2 calls-unplaced callees
-// n_alAdpcmPull/n_alLoadParam (n_load.c fns, stay asm @0x7A840 until that file is mirrored).
+// n_resample.c (n_alResamplePull, n_alResampleParam) and its n_load.c callees
+// n_alAdpcmPull and n_alLoadParam.
 n_alResamplePull = 0x8009FB60; // type:func
 n_alResampleParam = 0x8009FD1C; // type:func
 n_alAdpcmPull = 0x8009F440; // type:func
 n_alLoadParam = 0x8009F888; // type:func
-// S136: n_synthesizer.c single-file-pack mirror. 4 member fns (static _n_timeToSamplesNoRound
-// @0x800A1224 stays file-local, no add). Plus its cross-file refs derived from the n_alSynNew asm:
-// 2 calls-unplaced jal callees + 2 handler address-of refs (the n_reverb/n_auxbus pack leaders).
+// n_synthesizer.c functions (its static _n_timeToSamplesNoRound at 0x800A1224 stays unnamed),
+// plus the callees and handler addresses n_alSynNew references.
 n_alAudioFrame = 0x800A0FE0; // type:func
 _n_freeParam = 0x800A1174; // type:func
 _n_collectPVoices = 0x800A118C; // type:func
@@ -1135,24 +1117,18 @@ alN_PVoiceNew = 0x8009E93C; // type:func
 n_alSynAllocFX = 0x800A1320; // type:func
 n_alFxPull = 0x8009FD40; // type:func
 n_alAuxBusPull = 0x8009E4B0; // type:func
-// S138: n_reverb.c (n_alFxPull single-file-pack) curated names. n_-prefixed static helpers stay
-// disjoint from the libultra reverb.c helpers (_loadOutputBuffer etc. @0x800A67xx).
+// n_reverb.c (n_alFxPull). The n_-prefixed static helpers are distinct from the libultra
+// reverb.c helpers (_loadOutputBuffer and friends at 0x800A67xx).
 n_alFxParamHdl = 0x800A0050; // type:func
 _n_loadOutputBuffer = 0x800A0240; // type:func
 _n_loadBuffer = 0x800A0450; // type:func
 _n_saveBuffer = 0x800A0578; // type:func
 _n_filterBuffer = 0x800A0690; // type:func
-// S137: n_synallocfx.c (n_alSynAllocFX) + n_mainbus.c (n_alMainBusPull, named S133) split from
-// [0x7C720,asm]. n_synallocfx's lone calls-unplaced callee n_alFxNew (jal 0x8009e550, confirmed at
-// gate) is an n_auxbus/func_8009E4B0-pack member, stays asm until that pack is mirrored.
+// n_synallocfx.c's callee n_alFxNew (an n_auxbus.c function).
 n_alFxNew = 0x8009E550; // type:func
-// S139: decompose the func_8009E4B0 pack at the file boundary -> n_auxbus.c [0x798B0] +
-// n_drvrNew.c [0x79950] mirrors. n_alEnvmixerPull (func_8009EA70) is n_auxbus's lone callee
-// and the n_env.c leader; placed so the n_auxbus body resolves. n_env.c [0x79E70] stays asm (carry).
+// n_env.c's n_alEnvmixerPull, called from n_auxbus.c.
 n_alEnvmixerPull = 0x8009EA70; // type:func
-// S147 (master libnaudio publish): inverse-nm backport of the n_drvrNew / n_env reverb+fx
-// param tables -- object-defined .data globals that were un-tabled. ROM-neutral (the objects
-// define them); tabling them keeps the name files complete for coddog / cross-ref.
+// n_drvrNew.c / n_env.c reverb and effect parameter tables (.data globals the objects define).
 SMALLROOM_PARAMS_N = 0x800C7B10; // size:0x68
 BIGROOM_PARAMS_N = 0x800C7B78; // size:0x88
 ECHO_PARAMS_N = 0x800C7C00; // size:0x28
