@@ -36,7 +36,11 @@ void func_ovl0_8021E710(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021E724);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021EA48);
+extern u8 D_ovl0_80224B23;
+
+s32 func_ovl0_8021EA48(void) {
+    return D_ovl0_80224B23 == 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021E550", func_ovl0_8021EA58);
 
