@@ -40,12 +40,12 @@ if grep -q "INCLUDE_ASM\|INCLUDE_RODATA\|GLOBAL_ASM" "$INPUT"; then
 fi
 
 # Stall limit: MG64_STALL_LIMIT, else stall_limit in .run.json (decomp-env writes it from the
-# task's tier), else 20. Checked before compiling so a bad value fails fast.
+# task's tier), else 20. Checked before compiling so a bad value fails fast. .run.json also
+# carries the run deadline, reported as minutes left after each attempt.
 STALL_LIMIT=20
-if [ -n "${MG64_STALL_LIMIT:-}" ]; then
-    STALL_LIMIT="$MG64_STALL_LIMIT"
-elif [ -f "$WORKSPACE/.run.json" ]; then
-    STALL_LIMIT="$(python3 -c '
+DEADLINE=""
+if [ -f "$WORKSPACE/.run.json" ]; then
+    read -r RUN_STALL_LIMIT DEADLINE < <(python3 -c '
 import json, sys
 path = sys.argv[1]
 try:
@@ -53,10 +53,15 @@ try:
         run = json.load(f)
     if not isinstance(run, dict):
         raise ValueError("top level is not an object")
-    print(run.get("stall_limit", 20))
+    limit = run.get("stall_limit")
+    print(20 if limit is None else limit, int(run.get("deadline_unix") or 0) or "")
 except (OSError, ValueError) as err:
-    sys.exit(f"ERROR: cannot read stall_limit from {path}: {err}")
-' "$WORKSPACE/.run.json")" || exit 1
+    sys.exit(f"ERROR: cannot read {path}: {err}")
+' "$WORKSPACE/.run.json") || exit 1
+    STALL_LIMIT="$RUN_STALL_LIMIT"
+fi
+if [ -n "${MG64_STALL_LIMIT:-}" ]; then
+    STALL_LIMIT="$MG64_STALL_LIMIT"
 fi
 if ! [[ "$STALL_LIMIT" =~ ^[1-9][0-9]*$ ]]; then
     echo "ERROR: stall limit must be a positive integer, got '$STALL_LIMIT' (MG64_STALL_LIMIT or .run.json stall_limit)."
@@ -181,6 +186,7 @@ if [ "$TRUE_MATCH" = yes ]; then
     fi
 
     echo "Exact-match source archived: $MATCH_BACKUP_REL"
+    echo "NEXT: replace the INCLUDE_ASM line for $FUNCTION_NAME in $PROJECT_ROOT/$SOURCE_FILE with the function from $1 and run ./tools/build-and-verify.sh from $PROJECT_ROOT until it succeeds (decompile-function, section 2)."
 fi
 
 if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
@@ -209,6 +215,10 @@ if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
 
     if [ -n "$STALL_INFO" ]; then
         read -r SINCE BEST_FILE BEST_SCORE <<< "$STALL_INFO"
-        echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Do not make another attempt. Record the stop from this directory with: python3 \"$PROJECT_ROOT/tools/difficulty_ledger.py\" record ${FUNCTION_NAME:-<function>} --outcome stalled --reason \"<one line>\", then report the best score and the remaining differences."
+        echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Make no further attempt; finish as the decompile-function stop rules say."
     fi
+fi
+
+if [ -n "$DEADLINE" ]; then
+    echo "Time left: $(( (DEADLINE - $(date +%s)) / 60 )) min"
 fi

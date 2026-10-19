@@ -7,10 +7,12 @@ scoring is real but needs no KMC toolchain. Needs the mips-linux-gnu binutils, m
 the tests are skipped without them.
 """
 
+import json
 import os
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -202,12 +204,16 @@ class StallStopTest(unittest.TestCase):
         runs = [self.attempt() for _ in range(21)]
         self.assertEqual([i for i, proc in enumerate(runs, 1) if self.stop_lines(proc)], [21])
 
-    def test_stop_line_names_the_ledger_record_step(self):
-        runs = [self.attempt({'MG64_STALL_LIMIT': '1'}) for _ in range(2)]
-        (line,) = self.stop_lines(runs[1])
-        self.assertIn(f'difficulty_ledger.py" record {FUNCTION} --outcome stalled --reason', line)
-        self.assertIn('Do not make another attempt', line)
-        self.assertNotIn('Consider stopping', line)
+    def test_reports_minutes_left_before_the_run_deadline(self):
+        deadline = int(time.time()) + 10 * 60 + 30
+        (self.env / '.run.json').write_text(json.dumps({'stall_limit': 5, 'deadline_unix': deadline}))
+        proc = self.attempt()
+        self.assertIn('Time left: 10 min', proc.stdout.splitlines())
+        self.assertEqual(self.stop_lines(proc), [])
+
+    def test_no_deadline_no_time_line(self):
+        proc = self.attempt()
+        self.assertFalse([line for line in proc.stdout.splitlines() if line.startswith('Time left')])
 
     def test_invalid_env_limits_are_errors_before_scoring(self):
         for value in ('soon', '0', '-3', '2.5'):
