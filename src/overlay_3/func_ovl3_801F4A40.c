@@ -12,6 +12,10 @@ extern void func_800543A4(void);
 extern s32 func_ovl3_801F7660(s32, s32);
 extern u32 player_context_offset;
 extern void func_ovl3_801FB54C(Gfx** dl, s32 flags);
+extern void func_ovl3_801FC754(Gfx** gfxp);
+extern void func_ovl3_801FCB74(Gfx** gfxp);
+extern void func_ovl3_801FD4F0(Gfx** gfxp);
+extern void func_ovl3_801FD7B0(Gfx** gfxp);
 extern void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str);
 extern u8 D_ovl3_80231198[];
 extern u8 D_ovl3_80231284[];
@@ -399,7 +403,32 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB198)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FB54C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FC60C);
+void func_ovl3_801FC60C(Gfx** gfxp, s32 flags) {
+  Gfx* gfx;
+
+  gfx = *gfxp;
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  if (flags & 1) {
+    func_ovl3_801FC754(&gfx);
+  }
+  if (flags & 4) {
+    func_ovl3_801FCB74(&gfx);
+  }
+  if (flags & 0x10) {
+    func_ovl3_801FD4F0(&gfx);
+  }
+  if (flags & 8) {
+    func_ovl3_801FD7B0(&gfx);
+  }
+  gDPPipeSync(gfx++);
+  *gfxp = gfx;
+}
 
 extern void* D_801F4A20;
 
