@@ -23,7 +23,7 @@ Run with the project venv (`.venv/bin/python3`) when third-party imports fail. A
 | Command | Purpose |
 |---|---|
 | `python3 tools/m2c_one_shot.py [--dry-run] [--limit N] [function...]` | Run m2c on unmatched functions and score each through the environment's `build.sh`. Without `--dry-run` it inlines exact matches into the owning C file. |
-| `python3 tools/m2ctx.py <file.c>` | Write `ctx.c`, a preprocessed context for m2c or decomp.me, using the file's [compiler profile](/project/compiler-profiles.md). |
+| `python3 tools/m2ctx.py <file.c>` | Write `ctx.c`, a preprocessed context for m2c or decomp.me, using the file's [compiler profile](/project/compiler-profiles.md). GCC nested function definitions are removed from the context, since m2c's parser rejects them. |
 
 # Environments and scratches
 

@@ -7,6 +7,7 @@ The include paths and defines come from the C file's ROM compiler profile
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -36,6 +37,103 @@ def profile_flags(rel_file: str) -> list[str]:
         elif token.startswith(("-I", "-D", "-U")):
             flags.append(token)
     return flags
+
+
+C_TOKEN = re.compile(
+    r"#[^\n]*"  # preprocessor lines, removed before scanning
+    r'|"(?:\\.|[^"\\\n])*"'  # string literal
+    r"|'(?:\\.|[^'\\\n])*'"  # character literal
+    r"|[A-Za-z_]\w*|\d\w*|\S"  # identifiers, numbers, punctuation
+)
+C_IDENTIFIER = re.compile(r"[A-Za-z_]\w*")
+C_STATEMENT_KEYWORDS = frozenset(
+    {"case", "do", "else", "for", "if", "return", "sizeof", "switch", "while"}
+)
+
+
+def strip_nested_functions(text: str) -> str:
+    """Remove GCC nested function definitions, which m2c's parser (pycparser) rejects.
+
+    A nested definition is `<specifiers> name(params) {` inside a function body. The removed span
+    runs from its first specifier through the matching `}`. Control statements such as `if (x) {`
+    are not definitions and stay.
+    """
+    tokens = [match for match in C_TOKEN.finditer(text) if not match.group().startswith("#")]
+    spans = []
+    depth = 0
+    index = 0
+    while index < len(tokens):
+        token = tokens[index].group()
+        if token == "{":
+            start = _nested_definition_start(tokens, index) if depth > 0 else None
+            if start is not None:
+                end = _matching_brace(tokens, index)
+                spans.append((tokens[start].start(), tokens[end].end()))
+                index = end + 1
+                continue
+            depth += 1
+        elif token == "}":
+            depth -= 1
+        index += 1
+    pieces = []
+    position = 0
+    for start, end in spans:
+        pieces.append(text[position:start])
+        position = end
+    pieces.append(text[position:])
+    return "".join(pieces)
+
+
+def _is_name(word: str) -> bool:
+    return C_IDENTIFIER.fullmatch(word) is not None and word not in C_STATEMENT_KEYWORDS
+
+
+def _is_specifier(word: str) -> bool:
+    return word == "*" or _is_name(word)
+
+
+def _nested_definition_start(tokens: list, brace: int) -> "int | None":
+    """Index of the first specifier of the nested function whose body opens at `brace`."""
+    if tokens[brace - 1].group() != ")":
+        return None
+    open_paren = _matching_open_paren(tokens, brace - 1)
+    if open_paren is None or open_paren < 2:
+        return None
+    if not _is_name(tokens[open_paren - 1].group()):
+        return None
+    if not _is_specifier(tokens[open_paren - 2].group()):
+        return None
+    start = open_paren - 1
+    while start > 0 and _is_specifier(tokens[start - 1].group()):
+        start -= 1
+    return start
+
+
+def _matching_open_paren(tokens: list, close: int) -> "int | None":
+    level = 0
+    for index in range(close, -1, -1):
+        token = tokens[index].group()
+        if token == ")":
+            level += 1
+        elif token == "(":
+            level -= 1
+            if level == 0:
+                return index
+    return None
+
+
+def _matching_brace(tokens: list, brace: int) -> int:
+    level = 0
+    for index in range(brace, len(tokens)):
+        token = tokens[index].group()
+        if token == "{":
+            level += 1
+        elif token == "}":
+            level -= 1
+            if level == 0:
+                return index
+    raise ValueError("unbalanced braces in preprocessed context")
+
 
 
 def import_c_file(in_file: str) -> str:
@@ -68,7 +166,7 @@ def import_c_file(in_file: str) -> str:
 
     for line in stock_macros.strip().splitlines():
         out_text = out_text.replace(line + "\n", "")
-    return out_text
+    return strip_nested_functions(out_text)
 
 
 def main():
