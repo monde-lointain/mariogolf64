@@ -26,10 +26,20 @@ extern s32 D_ovl7_80212820[2];
 extern void* D_801B7EE0;
 extern void* D_ovl7_802259F8[2];
 extern void* D_ovl7_80225A04;
+extern s32 D_ovl7_8020AC64;
+extern s8 D_ovl7_8020BA70;
+extern s32 D_ovl7_8022BFA8;
+extern u16* g_auxiliary_framebuffer;
 void heap3_free(void** payload_address);
 void set_clear_color(s32 red, s32 green, s32 blue);
 void func_80029B58(void);
 void func_80078910(void);
+void *heap3_alloc(s32 size);
+s32 func_800577D0(void);
+void func_800577DC(s32, void *);
+void func_800789C8(void);
+void func_ovl7_80200B18(void);
+void register_scenery_heap_region(u8 *heap_region_start, s32 heap_region_size);
 
 void func_ovl7_801F4A40(void) {
     D_ovl7_8020AC4C++;
@@ -42,7 +52,32 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4A6C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4AEC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F5018);
+void func_ovl7_801F5018(void) {
+    RomAssetLoad sp10;
+    s32 var_s0;
+    void *temp_v0;
+    void *temp_v0_2;
+    void *temp_v0_3;
+
+    osSyncPrintf(&D_ovl7_8020BA70);
+    temp_v0 = heap3_alloc(0x7038U);
+    D_ovl7_80225A04 = temp_v0;
+    register_scenery_heap_region(temp_v0, 0x7038);
+    var_s0 = 0;
+    D_ovl7_8022BFA8 = 0x1F;
+    for (var_s0 = 0; var_s0 < 2; var_s0++) {
+        temp_v0_2 = heap3_alloc(func_800577D0());
+        D_ovl7_802259F8[var_s0] = temp_v0_2;
+        func_800577DC(var_s0 + 1, temp_v0_2);
+    }
+    func_800577DC(3, g_auxiliary_framebuffer);
+    temp_v0_3 = heap3_alloc(get_rom_asset_allocation_size(0x4C3U, &sp10));
+    D_801B7EE0 = temp_v0_3;
+    load_rom_asset_payload(temp_v0_3, &sp10);
+    D_ovl7_8020AC64 = 0;
+    func_800789C8();
+    func_ovl7_80200B18();
+}
 
 void func_ovl7_801F5100(void) {
     s32 slot_index;
