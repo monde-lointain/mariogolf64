@@ -37,7 +37,7 @@ tools/new-worktree mg64-a && cd ../mg64-a
 PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev nigel decompile-similar --shard 1/3
 ```
 
-`difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a tier-1 failure. Stop a shard between candidates (after its `outcomes.log` grows).
+`difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a failure. `kill -QUIT <nigel pid>` stops it after the current candidate; `SIGINT` and `SIGTERM` kill the candidate. Keep nigel's output in a log file (`>> task-runner/<task>/nigel-run.log 2>&1`); `agent.log` holds only the agent stream.
 
 Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools/integrate-shards` and the `decomp-c` merge driver; see [shard integration](/tools/shard-integration.md).
 
