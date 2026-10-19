@@ -4,8 +4,22 @@
 
 extern TerrainAttrEntry D_ovl7_8020B564[27];
 extern s32 rand(void);
+extern s32 func_800542A0(s32 index);
+extern s32 clear_animation_slot(s32 index);
+extern void load_character_model(s32 id, s32 model, s32 arg2);
+extern void animation_play(s32 id, s32 animation);
+extern void func_800562F4(s32 id, f32 value);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_80206680", func_ovl7_80206680);
+s32 func_ovl7_80206680(s32 arg0, s32 arg1) {
+  if (func_800542A0(arg0) != 0) {
+    clear_animation_slot(arg0);
+    return 0;
+  }
+  load_character_model(arg0, arg1, 4);
+  animation_play(arg0, 0xD);
+  func_800562F4(arg0, 1.0f);
+  return 1;
+}
 
 TerrainAttrEntry* func_ovl7_802066F0(u32 arg0) {
   u32 i = (arg0 < 0x1BU) ? arg0 : 0;
