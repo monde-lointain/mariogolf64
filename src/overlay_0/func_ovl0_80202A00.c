@@ -1,6 +1,10 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80202A00);
+extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
+
+void func_ovl0_80202A00(void) {
+    nuSiSendMesg(0x305, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80202A20);
 
