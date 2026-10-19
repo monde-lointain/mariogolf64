@@ -825,7 +825,24 @@ void func_80074D0C(Gfx** dl, s16 x, s16 y, u8* str) {
   *dl = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80071370", func_80074E5C);
+void func_80074E5C(Gfx** dl, s16 x, s16 y, u8* str) {
+  Gfx* gfx = *dl;
+  s16 end = x;
+  s32 center = x;
+  s32 i;
+
+  if (*str != 0) {
+    for (i = 0; str[i] != 0; i++) {
+      if (str[i] == 0x2E) {
+        end += 2;
+      } else {
+        end += 8;
+      }
+    }
+  }
+  func_80074D0C(&gfx, center - (end - center) / 2, y, str);
+  *dl = gfx;
+}
 
 void func_80074EFC(Gfx** dl, s16 x, s16 y, u8* str) {
   Gfx* gfx = *dl;
