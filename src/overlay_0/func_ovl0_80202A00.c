@@ -338,7 +338,39 @@ void func_ovl0_80207B8C(s32 player_index) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207BEC);
+typedef struct {
+    u8 pad_00[0x88];
+    s32 unk_88;
+} RumbleStateBlock;
+
+extern RumbleStateBlock D_80105168;
+extern s8 D_801B71F7;
+extern s32 active_player_count;
+extern u32 controller_handle_array[];
+extern s32 nuContRmbCheck(u32 contNo);
+extern void nuContRmbStart(u32 contNo, u16 freq, u16 frame);
+
+void func_ovl0_80207BEC(s32 arg0) {
+    s32 temp_s1;
+    s32 temp_v0;
+    s32 temp_s0;
+
+    temp_s1 = D_80105168.unk_88;
+    if ((temp_s1 == 1) && (active_player_count >= 2)) {
+        temp_s0 = *(&D_801B71F7 + (arg0 * 0xB8));
+        func_ovl0_80202A00();
+        if (((u32) temp_s0 < 4U) && (rumble_disable_flag == 0)) {
+            temp_v0 = nuContRmbCheck(controller_handle_array[temp_s0]);
+            if (temp_v0 != temp_s1) {
+                if (temp_v0 < 2) {
+                    if (temp_v0 == 0) {
+                        nuContRmbStart(controller_handle_array[temp_s0], 0x100, 8);
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207CAC);
 
