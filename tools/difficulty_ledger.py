@@ -344,6 +344,10 @@ def build_record(root: Path, env_dir: Path, function: str, outcome: str, reason:
     if tier is None:
         tier = tier_of(function, failed_tiers(root, records))
     attempts, best = env_progress(env_dir)
+    if outcome == 'matched':
+        # matched is only recorded after integration verified the ROM, and build.sh does not
+        # log the base.c baseline, so a baseline match would otherwise read as 0%.
+        best = 100.0
     return {
         'ts': _iso(now),
         'function': function,

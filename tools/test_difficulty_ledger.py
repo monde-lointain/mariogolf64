@@ -222,6 +222,20 @@ class RecordTest(TreeCase):
         with self.assertRaises(dl.LedgerError):
             dl.build_record(self.root, env, 'func_A', 'done', 'x', records=[], environ={}, now=NOW)
 
+    def test_matched_without_match_log_records_full_score(self):
+        # build.sh logs base_N attempts only; a function matched by the m2c
+        # baseline (base.c) has no match_log.txt but is a verified 100% match.
+        env = self.make_env('func_A-1')
+        rec = dl.build_record(self.root, env, 'func_A', 'matched', 'baseline matched',
+                              records=[], environ={}, now=NOW)
+        self.assertEqual((rec['attempts'], rec['best_pct']), (0, 100.0))
+
+    def test_failure_keeps_logged_best(self):
+        env = self.make_env('func_A-1')
+        rec = dl.build_record(self.root, env, 'func_A', 'stalled', 'plateau',
+                              records=[], environ={}, now=NOW)
+        self.assertEqual(rec['best_pct'], 0.0)
+
 
 class WriteRunTest(TreeCase):
     def test_task_maps_to_budget_and_deadline_comes_from_nigel(self):
