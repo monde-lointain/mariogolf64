@@ -26,6 +26,12 @@ extern void func_8009226C(s32 arg0);
 extern void play_bgm_by_id(s32 id, s32 flags);
 extern u8 D_801323E5[];
 extern s16 D_ovl3_8022BF1C[];
+extern s32 flag_is_set(s32 flag);
+extern void func_ovl3_80217B88(s32 arg0);
+extern s32 active_player_count;
+extern u8 D_800FF4C0;
+extern u8 D_80105268;
+extern u8 D_801B5634;
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
@@ -100,7 +106,75 @@ void func_ovl3_801F9BCC(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9C58);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9E38);
+void func_ovl3_801F9E38(void) {
+    s32 ret;
+    s32 mode;
+    s8 *cursor;
+    s8 new_value;
+
+    ret = func_800959F8();
+    if (ret == 1) {
+        if (D_800C2004 & 0x8000) {
+            if (D_801323B8[4] != ret) {
+                if (D_801323B8[4] < 2) {
+                    mode = 9;
+                    if (D_801323B8[4] == 0) {
+                        goto store_mode;
+                    }
+                } else if (D_801323B8[4] == 2) {
+                    goto cursor_two;
+                }
+                goto play_sound;
+            } else {
+                func_8009226C(8);
+                current_game_mode = 0x11;
+                if (flag_is_set(0x56) != 0) {
+                    game_mode = 4;
+                    active_player_count = 2;
+                    D_800FF4C0 = 1;
+                    D_80105268 = 2;
+                    D_801B5634 = 0;
+                    func_ovl3_80217B88(0xA);
+                }
+                goto play_sound;
+            }
+cursor_two:
+            func_8009226C(8);
+            mode = 4;
+store_mode:
+            current_game_mode = mode;
+play_sound:
+            play_sound_effect(0x5D, 0xF, 0x50);
+        } else {
+            if (D_800C2004 & 0x4000) {
+                play_sound_effect(0x5F, 0xF, 0x7F);
+                current_game_mode = 0;
+                play_bgm_by_id(0x27, 0);
+                return;
+            }
+            if (D_800C2000 & 0x800) {
+                play_sound_effect(0x5C, 0xF, 0x64);
+                cursor = &D_801323B8[4];
+                new_value = (u8)*cursor - 1;
+                goto store_cursor;
+            }
+            if (D_800C2000 & 0x400) {
+                play_sound_effect(0x5C, 0xF, 0x64);
+                cursor = &D_801323B8[4];
+                new_value = (u8)*cursor + 1;
+store_cursor:
+                *cursor = new_value;
+            }
+            cursor = &D_801323B8[4];
+            if (*cursor >= 3) {
+                *cursor = 0;
+            }
+            if (*cursor < 0) {
+                *cursor = 2;
+            }
+        }
+    }
+}
 
 void func_ovl3_801F9FF8(void) {
     s32 ret;
