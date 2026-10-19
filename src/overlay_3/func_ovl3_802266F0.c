@@ -30,7 +30,16 @@ void func_ovl3_80226754(void) {
     D_ovl3_80230E88 = 2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226764);
+s32 func_ovl3_80226764(void) {
+    s32 ret;
+
+    if (D_ovl3_80230E88 == 0) {
+        ret = -1;
+    } else {
+        ret = D_ovl3_80230E88 == 1;
+    }
+    return ret;
+}
 
 s32 func_ovl3_80226788(void) {
     s32 ret;
