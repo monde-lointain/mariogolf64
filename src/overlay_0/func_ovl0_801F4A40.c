@@ -140,7 +140,43 @@ void func_ovl0_801F7418(Gfx** pgfx, s32 x, s32 y, s32 player_index, s32 flip) {
     *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7518);
+extern s32 D_ovl0_80225748;
+extern s32 D_ovl0_8022574C;
+extern s32 D_ovl0_80225750;
+extern s32 D_ovl0_80225754;
+extern f32 D_ovl0_80225758;
+extern s32 D_ovl0_8022575C;
+extern s32 D_ovl0_80225760;
+extern s32 D_ovl0_80225764;
+extern s32 D_ovl0_80225768;
+extern s32 D_ovl0_8022576C;
+
+/**
+ * Sets the overlay_0 mode D_ovl0_8022573C. Mode 1 resets the mode-1 state
+ * (0x80225748..0x80225758), mode 2 zeroes the mode-2 state
+ * (0x8022575C..0x8022576C); other values only store the mode.
+ */
+void func_ovl0_801F7518(s32 arg0) {
+    D_ovl0_8022573C = arg0;
+    switch (arg0) {
+    case 0:
+        break;
+    case 1:
+        D_ovl0_80225748 = 0;
+        D_ovl0_8022574C = 0;
+        D_ovl0_80225750 = 0x140;
+        D_ovl0_80225754 = 0;
+        D_ovl0_80225758 = -1.57f;
+        break;
+    case 2:
+        D_ovl0_8022575C = 0;
+        D_ovl0_80225760 = 0;
+        D_ovl0_80225764 = 0;
+        D_ovl0_80225768 = 0;
+        D_ovl0_8022576C = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F75B0);
 
