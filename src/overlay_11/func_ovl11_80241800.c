@@ -25,7 +25,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802433
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802434A0);
 
-void func_ovl11_80243634(u16 arg0, s32 arg1) {
+void func_ovl11_80243634(u16 arg0, u16 arg1) {
     func_ovl11_80243050();
     if (D_800C4140 == 2) {
         if (arg1 & 0xC000) {
