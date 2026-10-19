@@ -21,7 +21,7 @@ This creates `nonmatchings/<function name>[-N]/`; `--id <ID>` sets the suffix (n
 On a match `build.sh` prints `Verified exact match: yes` and a `NEXT:` line.
 
 1. Replace the function's `INCLUDE_ASM("asm/nonmatchings/<seg>/<file>", <function name>);` line in its C file with the matching code, defined under exactly `<function name>` even when a caller uses another name; renaming is a separate task (the rename-global skill).
-2. Use the argument and return types the callers pass. Reuse the declarations and structs already in `src/` and `include/`, and update a header that declares the function rather than adding a second declaration ([code quality](/project/code-quality.md)).
+2. Use the argument and return types the assembly shows. A prototype or a caller's call that disagrees (often a guessed `(void)`) is wrong: correct it, and `build-and-verify.sh` proves the callers still match. Reuse the declarations and structs already in `src/` and `include/`, and update a header that declares the function rather than adding a second declaration ([code quality](/project/code-quality.md)).
 3. Run `./tools/build-and-verify.sh`. If the checksum fails, diff each function in the changed files with `python3 tools/asm-differ/diff.py --no-pager <function>`, starting with those that use structs you changed ([asm-differ](/tools/asm-differ.md)).
 
 `BUILD SUCCEEDED` completes the match. Under nigel, stop there: nigel verifies, commits and records it. In a hand run, commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched; a pre-commit hook failure means the C change is wrong.
@@ -46,7 +46,7 @@ Stop at the first of these and make no further attempt:
 * **Matched:** `build-and-verify.sh` succeeds after integration (section 2).
 * **Stalled:** `build.sh` prints a line starting `STOP:`. The best score has not improved for the stall limit of `base_<N>.c` attempts. `MG64_STALL_LIMIT` overrides the limit; otherwise it is `stall_limit` in `.run.json`, default 20 ([difficulty ledger](/tools/difficulty-ledger.md) has tiers and fields).
 * **Integration failed:** the environment matches but `build-and-verify.sh` cannot be made to pass. Restore the C file.
-* **Gave up:** the only change left is one this procedure forbids (editing another function, inline assembly, a dead local). Register allocation, scheduling or a low `Time left` are not reasons: keep attempting until `STOP:`.
+* **Gave up:** the only change left is one this procedure forbids (decompiling another function, inline assembly, a dead local). Register allocation, scheduling or a low `Time left` are not reasons: keep attempting until `STOP:`.
 
 `difficulty_ledger.py harvest` records matched, stalled, near-miss and timed-out runs from the environment. Record the other two yourself, from the repository root:
 
