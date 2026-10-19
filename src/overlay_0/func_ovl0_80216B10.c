@@ -1,7 +1,29 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216B10);
+extern s32 D_800C1B70;
+extern s32 D_ovl0_802246F8;
+extern s32 D_ovl0_80224860;
+extern u8 D_ovl0_802291D8;
+extern s8 D_ovl0_80229236;
+
+void func_ovl0_80216B10(void) {
+    s32 i;
+
+    i = 0;
+    D_ovl0_80224860 = 0;
+    D_800C1B70 = 0;
+    D_ovl0_802246F8 = -1;
+    do {
+        *(&D_ovl0_80229236 + i) = -1;
+        i += 1;
+    } while (i != 5);
+    i = 0;
+    do {
+        *(&D_ovl0_802291D8 + i) = 0;
+        i += 1;
+    } while (i != 0x1E);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216B74);
 
