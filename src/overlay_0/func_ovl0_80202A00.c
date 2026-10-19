@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/session.h"
 
 extern s32 nuSiSendMesg(s16 mesg, void* dataPtr);
 
@@ -147,7 +148,14 @@ void func_ovl0_80207A10(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207A34);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207B8C);
+void func_ovl0_80207B8C(s32 player_index) {
+    if (player_records[player_index].unknown_80 == -2) {
+        player_records[player_index].unknown_80 = -1;
+    }
+    if (player_records[player_index].unknown_84 == -2) {
+        player_records[player_index].unknown_84 = -1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207BEC);
 
