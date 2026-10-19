@@ -543,7 +543,7 @@ segments:
     exclusive_ram_id: ovl4
     symbol_name_format: ovl4_$VRAM
     subsegments:
-      - [0x128580, asm]
+      - [0x128580, c, overlay_4/func_ovl4_8024D800]
       - [0x12F020, data]
       - { start: 0x1300A0, type: bss, vram: 0x80255320 }
 
