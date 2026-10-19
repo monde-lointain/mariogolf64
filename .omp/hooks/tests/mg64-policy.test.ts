@@ -271,6 +271,28 @@ const cases: Case[] = [
 	{ name: "bash: rm of tools/gcc_kmc is blocked", tool: "bash", input: { command: "rm -rf tools/gcc_kmc" }, blocked: VENDORED },
 	{ name: "bash: cat of vendored tool is allowed", tool: "bash", input: { command: "cat tools/kmc-cc" } },
 	{
+		name: "bash: copy then run of kmc-cc in a later segment is allowed",
+		tool: "bash",
+		input: { command: "cp src/a.c /tmp/a.c && ./tools/kmc-cc -c /tmp/a.c -o /tmp/a.o" },
+	},
+	{
+		name: "bash: copy then read of vendored tool in a later segment is allowed",
+		tool: "bash",
+		input: { command: "cp src/a.c /tmp/a.c; cat tools/kmc-cc" },
+	},
+	{
+		name: "bash: cp into vendored tool in a later segment is blocked",
+		tool: "bash",
+		input: { command: "cd /tmp && cp src/a.c tools/kmc-cc" },
+		blocked: VENDORED,
+	},
+	{
+		name: "bash: cp with fd duplication before a vendored target is blocked",
+		tool: "bash",
+		input: { command: "cp src/a.c 2>&1 tools/kmc-cc" },
+		blocked: VENDORED,
+	},
+	{
 		name: "bash: stderr redirect before a vendored argument is allowed",
 		tool: "bash",
 		input: { command: "ls 2>/dev/null tools/kmc-cc" },

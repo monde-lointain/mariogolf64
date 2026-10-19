@@ -86,8 +86,10 @@ const GIT_TREE_WRITE = /(^|[;&|\s])git\s+(checkout|restore|clean|apply)(\s[^;&|]
 const SCRIPT_RUN = /(^|[;&|\s])(python3?|ruby|node)\s+(-c|-e)(\s|$)/;
 const ASM_SCRIPT_WRITE = /(^|[\s"'=/>])asm\/.*(write|unlink|remove|rename|replace|open\([^)]*,\s*["']?[wax+])/;
 
+// The write command and the vendored path must share a shell segment: `cp a b && ./tools/kmc-cc ...` is a build, not a write.
+// `&` after `<` or `>` is fd duplication (`2>&1`), not a separator.
 const VENDORED_BASH =
-	/(tee |sed -i|perl -[0-9A-Za-z]*i|apply_patch|rm |mv |cp |chmod |git checkout|git restore).*(tools\/gcc_kmc|tools\/kmc-cc|tools\/decomp-permuter|tools\/asm-differ)/;
+	/(tee |sed -i|perl -[0-9A-Za-z]*i|apply_patch|rm |mv |cp |chmod |git checkout|git restore)(?:[^;|&]|(?<=[<>])&)*(tools\/gcc_kmc|tools\/kmc-cc|tools\/decomp-permuter|tools\/asm-differ)/;
 
 function asmMutation(line: string): boolean {
 	if (ASM_MUTATIONS.some(re => re.test(line))) return true;
