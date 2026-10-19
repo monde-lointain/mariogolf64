@@ -41,12 +41,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6450)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6718);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6D0C);
-
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6DFC);
-
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7294);
-
 extern void func_8006A548(Gfx** pgfx, u32 tlut);
 extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
                                s32 width, s32 height, s32 pal, s32 cms,
@@ -54,6 +48,29 @@ extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
                                s32 shiftt);
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+extern void* D_ovl0_80225704;
+
+/**
+ * Loads the shared palette at block+8 and the index-th 32x32 CI8 texture at
+ * block+0x208 + index * 0x400, then draws it at pixel (x, y).
+ */
+void func_ovl0_801F6D0C(Gfx** pgfx, s32 x, s32 y, s32 index) {
+    Gfx* gfx = *pgfx;
+    s32 offset;
+
+    func_8006A548(&gfx, (u32)D_ovl0_80225704 + 8);
+    offset = (index << 0xA) + 0x208;
+    load_texture_block(&gfx, (u32)D_ovl0_80225704 + offset, G_IM_FMT_CI,
+                       G_IM_SIZ_8b, 0x20, 0x20, 0, 0, 0, 0, 0, 0, 0);
+    func_8006A2C0(&gfx, x * 4, y * 4, (x + 0x20) * 4, (y + 0x20) * 4, 0, 0, 0,
+                  0x400, 0x400);
+    *pgfx = gfx;
+}
+
+INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6DFC);
+
+INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7294);
+
 extern void* D_ovl0_802256D8[];
 extern void* D_ovl0_802256E8[];
 
