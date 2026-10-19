@@ -313,4 +313,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA8
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA990);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FB348);
+/* Returns x rounded to one decimal place (half up on the hundredths digit), truncated to an
+ * integer. The clamp to 999 applies only when that rounding carries into the integer part. */
+s32 func_ovl15_801FB348(f32 arg0) {
+    f32 temp_fa0;
+    s32 var_a0;
+    s32 var_a1;
+
+    var_a1 = (s32) arg0;
+    temp_fa0 = (arg0 - (f32) var_a1) * 100.0f;
+    var_a0 = (s32) temp_fa0;
+    if (((s32) temp_fa0 % 10) >= 5) {
+        var_a0 += 0xA;
+    }
+    var_a0 = var_a0 / 10;
+    if (var_a0 >= 0xA) {
+        var_a1 += 1;
+        if (var_a1 >= 0x3E8) {
+            var_a1 = 0x3E7;
+        }
+    }
+    return var_a1;
+}
