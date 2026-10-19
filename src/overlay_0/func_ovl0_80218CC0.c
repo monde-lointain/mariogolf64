@@ -105,4 +105,117 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A6BC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A724);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A940);
+typedef struct Ovl0Entry {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    u8 unkC[8];
+} Ovl0Entry;
+
+extern void func_8006A2C0(Gfx **, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern void func_8006A4A0(Gfx **, u32, u32);
+extern void func_80071608(Gfx **);
+extern s32 func_800738BC(u8 *, s32, s32);
+extern void func_800747B0(Gfx **, s32, s32, u8 *);
+extern void load_texture_block_4b(Gfx **, u32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern Ovl0Entry D_ovl0_80224928[];
+extern u8 *D_ovl0_80224978[];
+extern s32 D_ovl0_80224A98;
+extern s32 D_ovl0_80224A9C;
+extern f32 D_ovl0_80224AA0;
+extern f32 D_ovl0_80224AA4;
+extern f64 D_ovl0_802255D0;
+extern f64 D_ovl0_802255D8;
+extern f64 D_ovl0_802255E0;
+extern f64 D_ovl0_802255E8;
+extern f64 D_ovl0_802255F0;
+
+void func_ovl0_8021A940(Gfx **arg0) {
+    Gfx *gfx;
+    Ovl0Entry *entry;
+    s32 count;
+    s32 half_w;
+    s32 max_w;
+    s32 w;
+    s32 width;
+    s32 i;
+    s32 tint_r;
+    s32 tint_g;
+    s32 tint_b;
+    s32 x;
+    s32 y0;
+    s16 y;
+
+    gfx = *arg0;
+    entry = &D_ovl0_80224928[D_ovl0_80224A98];
+    half_w = entry->unk4 + 0x20;
+    D_ovl0_80224AA0 = (f32)(D_ovl0_80224AA0 + D_ovl0_802255D0);
+    tint_r = (s32)(sinf(D_ovl0_80224AA0) * 127.0f) + 0x7F;
+    tint_b = (s32)(sinf((f32)(D_ovl0_80224AA0 + D_ovl0_802255D8)) * 127.0f) + 0x7F;
+    tint_g = (s32)(sinf((f32)(D_ovl0_80224AA0 + D_ovl0_802255E0)) * 127.0f) + 0x7F;
+    max_w = 0;
+
+    if (D_ovl0_80224A98 != -1) {
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 0x1F, 0x1F, 0x1F, 0xBF);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xBF);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+
+        for (i = 0; i != entry->unk0; i++) {
+            w = func_800738BC(D_ovl0_80224978[entry->unkC[i]], 0xC, 2);
+            if (max_w < w) {
+                max_w = w;
+            }
+            half_w = (max_w / 2) + 0x20;
+        }
+
+        for (i = 0; i != 1; i++) {
+            load_texture_block_4b(&gfx, (u32)D_ovl0_8022B534 + 8 + i * 0x1000, G_IM_FMT_I, 128, 64, 0, 0, 0, 0, 0, 0, 0);
+            func_8006A2C0(&gfx, (0xA0 - half_w) * 4, 0x120, (half_w + 0xA0) * 4, 0x290, 0, 0, 0, 0x10000 / half_w, 0x2C8);
+        }
+        gDPPipeSync(gfx++);
+        func_80071608(&gfx);
+
+        if (entry->unk8 != 0) {
+            count = entry->unk0;
+            y0 = 0x71 - ((count - 1) * 8);
+            for (i = 0; i != entry->unk0; i++) {
+                if (i == D_ovl0_80224A9C) {
+                    gDPPipeSync(gfx++);
+                    gDPSetPrimColor(gfx++, 0, 0, tint_r, tint_g, tint_b, 0xFF);
+                    gDPPipeSync(gfx++);
+                } else {
+                    gDPPipeSync(gfx++);
+                    gDPSetPrimColor(gfx++, 0, 0, 0x5F, 0x3F, 0xFF, 0xFF);
+                    gDPPipeSync(gfx++);
+                }
+                y = y0 + (i * 0x10);
+                func_800747B0(&gfx, 0xA0, y, D_ovl0_80224978[entry->unkC[i]]);
+            }
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+            D_ovl0_80224AA4 = (f32)(D_ovl0_80224AA4 + D_ovl0_802255E8);
+            if (D_ovl0_802255F0 < D_ovl0_80224AA4) {
+                D_ovl0_80224AA4 = (f32)(D_ovl0_80224AA4 - D_ovl0_802255F0);
+            }
+            width = func_800738BC(D_ovl0_80224978[entry->unkC[D_ovl0_80224A9C]], 0xC, 2);
+            x = (s32)(sinf(D_ovl0_80224AA4) * 8.0f);
+            x += 0x7C;
+            width /= 2;
+            x -= width;
+            func_8006A4A0(&gfx, 0, (u32)D_ovl0_8022B53C + 8);
+
+            gDPLoadTextureTile_4b(gfx++, ((u32)D_ovl0_8022B53C + 0x28) & ~7, G_IM_FMT_CI, 24, 76, 0, 0, 23, 75, 0, 0, 0, 0, 0, 0, 0);
+            func_8006A2C0(&gfx, x * 4, ((y0 + (D_ovl0_80224A9C * 0x10)) - 2) * 4, (x + 0x18) * 4, ((y0 + (D_ovl0_80224A9C * 0x10)) + 0x16) * 4, 0, 0, 0, 0x400, 0x400);
+        }
+    }
+    *arg0 = gfx;
+}
