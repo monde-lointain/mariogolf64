@@ -42,6 +42,11 @@ extern void *heap3_alloc(u32 size_bytes);
 extern void play_bgm_by_id(s32 id, s32 flags);
 extern void nuContRmbForceStop(void);
 extern void func_ovl15_801FB400(u8 *image);
+extern void func_8006A548(Gfx **pgfx, u32 tlut);
+extern void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width, s32 height,
+                               s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+extern void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t,
+                          s32 dsdx, s32 dtdy);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
 
@@ -307,7 +312,19 @@ s32 func_ovl15_801FA35C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA368);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA720);
+/* Draw ten 216x9 CI8 texture strips from asset block unk50, stacked in 9-pixel rows. */
+void func_ovl15_801FA720(Gfx **gfxp) {
+    Gfx *gfx;
+    s32 i;
+
+    gfx = *gfxp;
+    func_8006A548(&gfx, (u32)D_800FE450.unk50 + 8);
+    for (i = 0; i != 10; i++) {
+        load_texture_block(&gfx, (u32)D_800FE450.unk50 + 0x208 + i * 0x798, 2, 1, 0xD8, 9, 0, 0, 0, 0, 0, 0, 0);
+        func_8006A2C0(&gfx, 0xD0, 0x100 + i * 0x24, 0x430, 0x124 + i * 0x24, 0, 0, 0, 0x400, 0x400);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801FA844);
 
