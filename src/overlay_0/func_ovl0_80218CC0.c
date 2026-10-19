@@ -23,6 +23,10 @@ extern s8 D_801061C5;
 extern u8 D_80106241;
 extern u8 D_80106242;
 extern u8 D_80106243;
+extern s32 D_800C306C;
+extern void func_800934CC(s32 arg0);
+extern void func_8002A97C(s32 arg0, s32 arg1);
+extern void set_color_framebuffer_count(u32 buffer_count);
 
 void func_ovl0_80218CC0(void) {
     D_801061BD = 0;
@@ -38,7 +42,23 @@ void func_ovl0_80218CC0(void) {
     D_801061C5 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218D1C);
+void func_ovl0_80218D1C(void) {
+    D_801061BD = 1;
+    D_801061C4 = 1;
+    D_801061BF = 1;
+    D_80106241 = 0;
+    D_80106242 = 0;
+    D_80106243 = 0;
+    D_801061C0 = 1;
+    D_801061C1 = 1;
+    D_801061C2 = 1;
+    D_801061C3 = 1;
+    D_801061C5 = 1;
+    func_800934CC(-1);
+    D_800C306C = 0;
+    set_color_framebuffer_count(3);
+    func_8002A97C(4, 0);
+}
 
 void func_ovl0_80218DB0(s32 arg0, s32 arg1) {
     if (arg1 == 0) {
