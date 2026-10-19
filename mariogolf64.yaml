@@ -556,7 +556,7 @@ segments:
     exclusive_ram_id: ovl5
     symbol_name_format: ovl5_$VRAM
     subsegments:
-      - [0x1300A0, asm]
+      - [0x1300A0, c, overlay_5/func_ovl5_8024D800]
       - [0x1363F0, data]
       - { start: 0x136BA0, type: bss, vram: 0x80254300 }
 
