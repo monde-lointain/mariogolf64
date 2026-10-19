@@ -6,6 +6,8 @@ extern s8 D_ovl16_802237B8;
 extern s8 D_ovl16_802237B9;
 extern s32 D_ovl16_802237C0[];
 extern u8 D_801B724B;
+extern s32 rand(void);
+extern f32 D_ovl16_801F89C8;
 
 s32 func_ovl16_801F4A40(void) {
     return D_801B724B & 3;
@@ -84,7 +86,13 @@ void func_ovl16_801F5240(s32 arg0, s32 arg1, s32 arg2) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5270);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F53F0);
+/* Dead 8-byte frame and `sw $v0,0x10(sp)` before `jal rand`: static-chain home of the nested-function original (callers set `addiu $v0,$sp,0x10` in the jal delay slot); `unused` reproduces them, as in func_ovl7_802068B4. */
+void func_ovl16_801F53F0(void) {
+    s32 r;
+    volatile s32 unused = r;
+
+    D_ovl16_801F89C8 = (f32) (((rand() & 0x7F) - 0x20) * 0x46) * 0.0001374275f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F544C);
 
