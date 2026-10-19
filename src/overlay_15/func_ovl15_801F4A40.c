@@ -9,6 +9,9 @@ typedef struct {
 
 extern s32 D_ovl15_801FBB78;
 extern void func_ovl15_801F7664(Gfx** dl, s32* arg1);
+extern s32 D_80105218;
+extern u32 controller_handle_array[];
+extern s32 nuContRmbCheck(u32 contNo);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
 
@@ -26,7 +29,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F56
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5AF0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5EA8);
+s32 func_ovl15_801F5EA8(void) {
+    u32 *handle_slot;
+    u32 handle;
+    s32 checked;
+    s32 all_ready;
+
+    all_ready = 1;
+    checked = 0;
+    if (D_80105218 != 0) {
+        handle_slot = controller_handle_array;
+        do {
+            handle = *handle_slot;
+            handle_slot += 1;
+            checked += 1;
+            all_ready &= -(nuContRmbCheck(handle) == 0);
+        } while (checked != D_80105218);
+    }
+    return all_ready;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5F1C);
 
