@@ -26,7 +26,24 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F6B28)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F70F0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F75EC);
+extern s32 D_800FBD40[];
+extern u8 D_801323A0[];
+extern s32 D_ovl3_8022BE0C;
+
+void func_ovl3_801F75EC(void) {
+    u8 temp_v0;
+
+    D_801323A0[2] = 0U;
+    if (D_800FBD40[2] == 1) {
+        do {
+            temp_v0 = D_801323A0[2] + 1;
+            D_801323A0[2] = temp_v0;
+            if ((D_ovl3_8022BE0C - 1) < (s8) temp_v0) {
+                D_801323A0[2] = 0U;
+            }
+        } while (*(&D_800FBD40[2] + (s8) D_801323A0[2]) == 1);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F7660);
 
