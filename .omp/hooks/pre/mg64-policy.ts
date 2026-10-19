@@ -87,7 +87,7 @@ const SCRIPT_RUN = /(^|[;&|\s])(python3?|ruby|node)\s+(-c|-e)(\s|$)/;
 const ASM_SCRIPT_WRITE = /(^|[\s"'=/>])asm\/.*(write|unlink|remove|rename|replace|open\([^)]*,\s*["']?[wax+])/;
 
 const VENDORED_BASH =
-	/(>|>>|tee |sed -i|perl -[0-9A-Za-z]*i|apply_patch|rm |mv |cp |chmod |git checkout|git restore).*(tools\/gcc_kmc|tools\/kmc-cc|tools\/decomp-permuter|tools\/asm-differ)/;
+	/(tee |sed -i|perl -[0-9A-Za-z]*i|apply_patch|rm |mv |cp |chmod |git checkout|git restore).*(tools\/gcc_kmc|tools\/kmc-cc|tools\/decomp-permuter|tools\/asm-differ)/;
 
 function asmMutation(line: string): boolean {
 	if (ASM_MUTATIONS.some(re => re.test(line))) return true;
@@ -104,6 +104,35 @@ function directMake(line: string): boolean {
 	return false;
 }
 
+/** True when a line redirects output into a vendored path. Only the word after a redirect operator counts, so `2>/dev/null` does not make a later argument a write. */
+const REDIRECT_WORD = /^\d*>>?\|?(.*)$/;
+const SUBSTITUTION = /\$\(|`|\$\{/;
+
+function mentionsVendored(text: string): boolean {
+	return VENDORED_PATHS.some(p => text.includes(p));
+}
+
+function vendoredRedirect(line: string): boolean {
+	const tokens = tokenize(line);
+	if (tokens === null) return line.includes(">") && mentionsVendored(line);
+	for (let i = 0; i < tokens.length; i++) {
+		const match = REDIRECT_WORD.exec(tokens[i]);
+		if (match === null) continue;
+		const attached = match[1] !== "";
+		const targetIndex = attached ? i : i + 1;
+		const target = attached ? match[1] : (tokens[targetIndex] ?? "");
+		if (SUBSTITUTION.test(target)) {
+			// The shell computes the target: check through the end of the segment.
+			let end = targetIndex;
+			while (end < tokens.length && !isSegmentBoundary(tokens[end])) end++;
+			if (mentionsVendored(tokens.slice(targetIndex, end).join(" "))) return true;
+		} else if (mentionsVendored(target)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function bashReason(command: string): string | undefined {
 	if (command === "") return undefined;
 	const lines = command.split("\n");
@@ -116,7 +145,7 @@ function bashReason(command: string): string | undefined {
 	if (CTX_MENTION.test(command)) return MSG.ctx;
 	if (TEMP_MENTION.test(command)) return MSG.temp;
 	if (lines.some(asmMutation)) return MSG.asmBash;
-	if (anyLine(VENDORED_BASH)) return MSG.vendored;
+	if (anyLine(VENDORED_BASH) || lines.some(vendoredRedirect)) return MSG.vendored;
 	return permuterReason(command);
 }
 

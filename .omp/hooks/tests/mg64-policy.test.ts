@@ -270,6 +270,46 @@ const cases: Case[] = [
 	},
 	{ name: "bash: rm of tools/gcc_kmc is blocked", tool: "bash", input: { command: "rm -rf tools/gcc_kmc" }, blocked: VENDORED },
 	{ name: "bash: cat of vendored tool is allowed", tool: "bash", input: { command: "cat tools/kmc-cc" } },
+	{
+		name: "bash: stderr redirect before a vendored argument is allowed",
+		tool: "bash",
+		input: { command: "ls 2>/dev/null tools/kmc-cc" },
+	},
+	{
+		name: "bash: /dev/null redirect does not make a later vendored read a write",
+		tool: "bash",
+		input: { command: "cat src/a.c 2>/dev/null; cat tools/kmc-cc" },
+	},
+	{
+		name: "bash: fd duplication before a pipe into grep is allowed",
+		tool: "bash",
+		input: { command: "ls 2>&1 | grep tools/gcc_kmc" },
+	},
+	{
+		name: "bash: vendored file read with stderr to /dev/null is allowed",
+		tool: "bash",
+		input: { command: "grep -n foo tools/gcc_kmc/x.c 2>/dev/null" },
+	},
+	{ name: "bash: redirect into tools/kmc-cc is blocked", tool: "bash", input: { command: "echo x > tools/kmc-cc" }, blocked: VENDORED },
+	{ name: "bash: attached append into tools/gcc_kmc is blocked", tool: "bash", input: { command: "echo x >>tools/gcc_kmc/x.c" }, blocked: VENDORED },
+	{
+		name: "bash: redirect after a benign redirect into tools/asm-differ is blocked",
+		tool: "bash",
+		input: { command: "echo x 2>/dev/null > tools/asm-differ/x.py" },
+		blocked: VENDORED,
+	},
+	{
+		name: "bash: quoted redirect target into tools/decomp-permuter is blocked",
+		tool: "bash",
+		input: { command: "echo x > \"tools/decomp-permuter/permuter.py\"" },
+		blocked: VENDORED,
+	},
+	{
+		name: "bash: redirect target built by command substitution is blocked",
+		tool: "bash",
+		input: { command: "echo x > $(echo tools/kmc-cc)" },
+		blocked: VENDORED,
+	},
 	{ name: "bash: bare permuter is blocked", tool: "bash", input: { command: "./tools/permuter foo" }, blocked: NO_TIMEOUT },
 	{
 		name: "bash: timeout-wrapped permuter is allowed",
