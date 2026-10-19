@@ -76,11 +76,39 @@ void func_ovl0_802038D0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203B4C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203DAC);
+extern void func_800934CC(s32 arg0);
+extern void set_color_framebuffer_count(u32 buffer_count);
+extern void func_8002A97C(s32 arg0, s32 arg1);
+extern void update_object_group_by_id(s32 index);
+extern s32 D_800B680C;
+extern s32 D_800C306C;
+extern s32 D_800C3070;
+extern s32 D_800C308C;
+extern s8 D_801061BD;
+extern s8 D_801061C4;
+extern u8 D_80106240[];
+extern u16 D_800C307A;
+extern s32 D_800C3090;
+
+void func_ovl0_80203DAC(void) {
+    *D_800FBE7C = -0x12C00;
+    D_800C308C = 1;
+    D_800C3070 = 0;
+    D_800C3090 = 0;
+    D_80106240[0] = 0x47;
+    D_800C307A = D_800FBE48.unk0;
+    func_800934CC(3);
+    D_800C306C = 4;
+    D_801061BD = 0;
+    D_801061C4 = 0;
+    if (D_800B680C == 3) {
+        set_color_framebuffer_count(3);
+        func_8002A97C(4, 0);
+    }
+    update_object_group_by_id(8);
+}
 
 extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan);
-extern void update_object_group_by_id(s32 index);
-extern s32 D_800C3090;
 extern s32 D_ovl0_80227194;
 extern u16 D_801B55CC;
 
@@ -120,8 +148,6 @@ void func_ovl0_80204104(void) {
         }
     }
 }
-
-extern u16 D_800C307A;
 
 void func_ovl0_802041C8(void) {
     u16 var_v0;
