@@ -120,7 +120,7 @@ kmc_compile "$INPUT" "$OBJECT_OUTPUT"
 } >/dev/null 2>&1 || true
 popd >/dev/null
 
-if ! "$NM" "$OBJECT_OUTPUT" 2>/dev/null | grep -q ' T '; then
+if ! "$NM" "$OBJECT_OUTPUT" 2>/dev/null | grep -q ' [Tt] '; then
     echo "ERROR: Compiled object has no text symbols. Check for type conflicts or include issues."
     "$NM" "$OBJECT_OUTPUT" 2>/dev/null || true
     exit 1

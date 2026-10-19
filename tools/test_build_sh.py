@@ -69,12 +69,12 @@ class StallStopTest(unittest.TestCase):
                        cwd=self.env, check=True)
         self.attempts = 0
 
-    def attempt(self, env=None, name=None):
-        """Score the next base_<N>.c attempt (or `name`); the content is always the same."""
+    def attempt(self, env=None, name=None, content=CANDIDATE_ASM):
+        """Score the next base_<N>.c attempt (or `name`) with `content`."""
         if name is None:
             self.attempts += 1
             name = f'base_{self.attempts}.c'
-        (self.env / name).write_text(CANDIDATE_ASM)
+        (self.env / name).write_text(content)
         run_env = {key: value for key, value in os.environ.items() if key != 'MG64_STALL_LIMIT'}
         run_env.update(env or {})
         return subprocess.run(['bash', './build.sh', name], cwd=self.env, env=run_env,
@@ -83,6 +83,13 @@ class StallStopTest(unittest.TestCase):
     @staticmethod
     def stop_lines(proc):
         return [line for line in proc.stdout.splitlines() if line.startswith('STOP:')]
+
+    def test_local_text_symbol_is_scored_like_a_global_one(self):
+        # GCC nested functions are emitted as local symbols (nm `t`), not global `T`.
+        local_asm = TARGET_ASM.replace('    .globl \\name\n', '')
+        proc = self.attempt(name='base_1.c', content=local_asm)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn('Verified exact match: yes', proc.stdout)
 
     def test_stop_line_once_env_limit_is_reached_and_repeats(self):
         runs = [self.attempt({'MG64_STALL_LIMIT': '2'}) for _ in range(4)]
