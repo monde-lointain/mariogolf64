@@ -147,12 +147,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802515DC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802517F0);
 
+/* Dead 8-byte frame and `sw $v0,0(sp)`: static-chain home of the nested-function original (caller sets $v0 = sp+0x20 before its jal, func_ovl5_80251B20.s:909); `unused` reproduces them, as in lerp_s32 (func_8008D100.c). */
 s32 func_ovl5_80251AC0(s32 arg0) {
-    s32 scratch[2];
-    s32 uninit_v0;
+    s32 r;
+    volatile s32 unused = r;
     s32 var_v1;
 
-    scratch[0] = uninit_v0;
     var_v1 = (s32) (((f32) arg0 * 0.1171875f) + 0.5f);
     if (var_v1 < 3) {
         var_v1 = 3;
