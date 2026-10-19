@@ -89,4 +89,51 @@ void func_ovl3_802149A8(Gfx** gfxp, s32 arg1, s32 arg2, s32 arg3) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_8021508C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_8021585C);
+/* Save block: s32[6][3] asset row (-1 = empty) and column, indexed [group][slot]. */
+typedef struct {
+    u8 padding[0xE08];
+    s32 table_row[6][3];
+    s32 table_col[6][3];
+} SaveSlotKeys;
+
+extern u8* func_8005AF50(void);
+extern u16 D_ovl3_802308A4[];
+extern s16 D_ovl3_802308C8[][4];
+extern u8 D_ovl3_8023BFF0[];
+extern void* tile_palette_table[];
+
+void func_ovl3_8021585C(void) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    SaveSlotKeys* save;
+    s32 i;
+    s32 g;
+    s32 j;
+    s32 key;
+    s32 row;
+    s32 col;
+
+    save = (SaveSlotKeys*)func_8005AF50();
+    for (i = 0; i != 18; i++) {
+        get_rom_asset_allocation_size(D_ovl3_802308A4[i], &asset);
+        load_rom_asset_payload(tile_palette_table[i], &asset);
+    }
+    for (g = 0; g != 6; g++) {
+        for (j = 0; j != 3; j++) {
+            key = save->table_row[g][j];
+            if (key != -1) {
+                row = key & ((s32) ~key >> 0x1F);
+                if (row >= 18) {
+                    row = 17;
+                }
+                col = save->table_col[g][j];
+            } else {
+                row = 0;
+                col = 0;
+            }
+            open_rom_asset_slot(D_ovl3_802308C8[row][col], &slot);
+            read_rom_load_slot(&D_ovl3_8023BFF0[(g * 3 + j) << 9],
+                               get_rom_load_slot_size(&slot), &slot);
+        }
+    }
+}
