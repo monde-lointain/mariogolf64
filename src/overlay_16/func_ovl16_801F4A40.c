@@ -1,6 +1,7 @@
 #include "common.h"
 
 extern s32 D_ovl16_801F89C0;
+extern s32 D_ovl16_80223804;
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A40);
 
@@ -10,7 +11,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4A
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4B64);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4B7C);
+void func_ovl16_801F4B7C(s32 arg0) {
+    D_ovl16_801F89C0 = arg0;
+    D_ovl16_80223804 = arg0;
+}
 
 void func_ovl16_801F4B90(void) {
     D_ovl16_801F89C0 = 0;
