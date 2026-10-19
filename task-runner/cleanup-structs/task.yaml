@@ -25,6 +25,5 @@ prompt: >-
   or layout change, then run ./tools/build-and-verify.sh. If an improvement
   cannot be made to match exactly, revert that improvement and leave the pair in
   a fully matching state.
-agent: codex
 success_command: 'git add -A && git commit -m "clean up structs: $CANDIDATE"'
 timeout: 60m

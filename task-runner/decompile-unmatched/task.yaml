@@ -1,5 +1,5 @@
 candidate_source: python3 tools/score_functions.py asm/nonmatchings --json
-prompt: "Use the decompile-function skill to decompile the function: $INPUT. When creating your claude environment use --id $TASK_ID. Try all strategies and follow the skill's stop rules."
-agent_flags: --config model_reasoning_effort='"xhigh"'
+prompt: "Use the decompile-function skill to decompile the function: $INPUT. When creating the decomp environment (tools/decomp-env) use --id $TASK_ID. Try all strategies and follow the skill's stop rules."
+agent_flags: --thinking xhigh
 success_command: 'git add -u && git commit -m "matched $CANDIDATE"'
 timeout: 120m

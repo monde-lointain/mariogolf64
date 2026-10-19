@@ -37,7 +37,6 @@ prompt: >-
   a type or signature change, and finish only when
   `./tools/build-and-verify.sh` succeeds. Re-run the candidate detector and
   confirm the reported problems for this candidate are gone.
-agent: codex
-agent_flags: --config model_reasoning_effort='"xhigh"'
+agent_flags: --thinking xhigh
 success_command: 'git add -A && git commit -m "clean header ownership: $CANDIDATE"'
 timeout: 60m
