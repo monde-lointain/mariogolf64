@@ -82,7 +82,12 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207250)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802072AC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207328);
+extern void animation_play(s32 id, s32 animation);
+s32 func_ovl0_80207250(void);
+
+void func_ovl0_80207328(s32 arg0) {
+    animation_play(arg0, func_ovl0_80207250());
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207358);
 
