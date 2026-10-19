@@ -108,9 +108,32 @@ void func_ovl16_801F4F7C(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F90);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5138);
-
 extern s32 func_800544B4(s32 arg0, s32 arg1);
+
+s32 func_ovl16_801F5138(s32 arg0, s32 arg1) {
+    s32 kind;
+    s32 anim;
+
+    kind = func_800544B4(arg0, arg1);
+    switch (kind) {
+    case 0:
+        anim = 0;
+        break;
+    case 1:
+        anim = 3;
+        break;
+    case 2:
+        anim = 6;
+        break;
+    case 3:
+        anim = 9;
+        break;
+    default:
+        anim = 0;
+        break;
+    }
+    return anim;
+}
 
 s32 func_ovl16_801F5194(s32 arg0, s32 arg1, s32 arg2) {
     s32 kind;
