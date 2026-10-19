@@ -2,6 +2,8 @@
 #include "../main/terrain.h"
 
 extern u32 D_ovl4_802542A0;
+extern s16 D_800BAC0C[];
+extern s32 D_800BB00C;
 
 void func_ovl4_8024D800(u32 seed) {
     D_ovl4_802542A0 = seed;
@@ -13,7 +15,26 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024DA78)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024E02C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024E288);
+void func_ovl4_8024E288(void) {
+    s32 var_a0;
+    s32 var_v0;
+    s32 var_v1;
+
+    D_800BB00C = 0;
+    var_a0 = 0;
+    do {
+        var_v1 = 0xF;
+        var_v0 = (var_a0 << 5) + 0x1E;
+loop_2:
+        *(s16*)((u8*)D_800BAC0C + var_v0) = -1;
+        var_v1 -= 1;
+        var_v0 -= 2;
+        if (var_v1 >= 0) {
+            goto loop_2;
+        }
+        var_a0 += 1;
+    } while (var_a0 < 0x20);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024E2D4);
 
