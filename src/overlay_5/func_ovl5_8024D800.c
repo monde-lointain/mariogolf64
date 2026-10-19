@@ -77,7 +77,40 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F0B0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F320);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F688);
+/* Unused local: reserves the 8-byte stack frame the original code uses. */
+void func_ovl5_8024F688(s32 count, s32 *parallel_a, s32 *parallel_b, s32 *keys, s32 descending) {
+    s32 reserved_frame[1];
+    s32 i;
+    s32 j;
+    s32 best;
+    s32 temp;
+
+    for (i = 0; i < count - 1; i++) {
+        best = i;
+        for (j = i + 1; j < count; j++) {
+            if (descending == 1) {
+                if (keys[j] > keys[best]) {
+                    best = j;
+                }
+            } else if (keys[j] < keys[best]) {
+                best = j;
+            }
+        }
+        if (parallel_a != NULL) {
+            temp = parallel_a[i];
+            parallel_a[i] = parallel_a[best];
+            parallel_a[best] = temp;
+        }
+        if (parallel_b != NULL) {
+            temp = parallel_b[i];
+            parallel_b[i] = parallel_b[best];
+            parallel_b[best] = temp;
+        }
+        temp = keys[i];
+        keys[i] = keys[best];
+        keys[best] = temp;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F790);
 
