@@ -9,6 +9,12 @@ typedef struct {
   /* 0x08 */ f32 z;
 } Vec3f; /* 0x0C */
 
+/* Camera record: the eye position followed by the point it looks at. */
+typedef struct {
+  /* 0x00 */ Vec3f eye;
+  /* 0x0C */ Vec3f at;
+} GolfCamera; /* 0x18 */
+
 typedef struct {
   /* 0x00 */ s32 x;
   /* 0x04 */ s32 y;

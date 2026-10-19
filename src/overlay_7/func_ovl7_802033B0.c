@@ -1,23 +1,19 @@
 #include "common.h"
+#include "../main/vector.h"
 
-extern f32 D_ovl7_8022BE30;
-extern f32 D_ovl7_8022BE34;
-extern f32 D_ovl7_8022BE38;
-extern f32 D_ovl7_8022BE3C;
-extern f32 D_ovl7_8022BE40;
-extern f32 D_ovl7_8022BE44;
+extern GolfCamera D_ovl7_8022BE30;
 void func_ovl7_80203620(void);
 void func_ovl7_8020370C(s32 idx, f32 x, f32 y, f32 z, s32 frames);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802033B0);
 
 void func_ovl7_8020356C(f32 eye_x, f32 eye_y, f32 eye_z, f32 target_x, f32 target_y, f32 target_z) {
-    D_ovl7_8022BE30 = eye_x;
-    D_ovl7_8022BE34 = eye_y;
-    D_ovl7_8022BE38 = eye_z;
-    D_ovl7_8022BE3C = target_x;
-    D_ovl7_8022BE40 = target_y;
-    D_ovl7_8022BE44 = target_z;
+    D_ovl7_8022BE30.eye.x = eye_x;
+    D_ovl7_8022BE30.eye.y = eye_y;
+    D_ovl7_8022BE30.eye.z = eye_z;
+    D_ovl7_8022BE30.at.x = target_x;
+    D_ovl7_8022BE30.at.y = target_y;
+    D_ovl7_8022BE30.at.z = target_z;
     func_ovl7_80203620();
 }
 
@@ -219,4 +215,11 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80203F70)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_80204EA8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_802033B0", func_ovl7_802065FC);
+void func_ovl7_802065FC(Vec3f* delta) {
+    D_ovl7_8022BE30.at.x += delta->x;
+    D_ovl7_8022BE30.at.y += delta->y;
+    D_ovl7_8022BE30.at.z += delta->z;
+    D_ovl7_8022BE30.eye.x += delta->x;
+    D_ovl7_8022BE30.eye.y += delta->y;
+    D_ovl7_8022BE30.eye.z += delta->z;
+}

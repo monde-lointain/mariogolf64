@@ -28,14 +28,6 @@ extern s32 D_800E4CA4;
 /* Scenery cylinder records share their canonical layout with terrain code. */
 extern SceneryCylinder collision_cylinders[];
 
-/* The camera record the shot-view builders fill in: the eye position followed
- * by the point it looks at. func_80095A68 takes both, so the two vectors are
- * one record rather than two globals. */
-typedef struct {
-  /* 0x00 */ Vec3f eye;
-  /* 0x0C */ Vec3f at;
-} GolfCamera; /* 0x18 */
-
 extern s32 D_800BB020;
 extern s32 D_801B60A0;
 
