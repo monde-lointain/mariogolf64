@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern u8* func_8005AF50(void);
+extern u8* func_8005AF74(void);
+
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802266F0);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022671C);
@@ -18,7 +21,10 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226958)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802269AC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226A34);
+void func_ovl3_80226A34(void) {
+  func_8005AF50();
+  func_8005AF74();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226A58);
 
