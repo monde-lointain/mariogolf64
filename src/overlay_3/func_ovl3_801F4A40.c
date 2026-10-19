@@ -22,6 +22,10 @@ extern s32 func_8006AD94(void);
 extern s32 func_8006ADA0(void);
 extern void func_8006AD1C(s32 table_index);
 extern void func_8006ADF8(s32 arg);
+extern void func_8009226C(s32 arg0);
+extern void play_bgm_by_id(s32 id, s32 flags);
+extern u8 D_801323E5[];
+extern s16 D_ovl3_8022BF1C[];
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
@@ -98,7 +102,67 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9C58)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9E38);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F9FF8);
+void func_ovl3_801F9FF8(void) {
+    s32 ret;
+
+    ret = func_800959F8();
+    if (ret != 1) {
+        return;
+    }
+    if (D_800C2004 & 0x8000) {
+        switch (D_ovl3_8022BF1C[D_801323B8[5]]) {
+        case 0:
+            func_8009226C(8);
+            current_game_mode = 0xB;
+            break;
+        case 1:
+            func_8009226C(8);
+            current_game_mode = 0xC;
+            break;
+        case 2:
+            func_8009226C(8);
+            current_game_mode = 0xD;
+            break;
+        case 3:
+            func_8009226C(8);
+            current_game_mode = 0xE;
+            break;
+        case 4:
+            func_8009226C(8);
+            current_game_mode = 0xF;
+            break;
+        case 5:
+            func_8009226C(8);
+            current_game_mode = 7;
+            break;
+        }
+        play_sound_effect(0x5D, 0xF, 0x50);
+        return;
+    }
+    if (D_800C2004 & 0x4000) {
+        play_sound_effect(0x5F, 0xF, 0x7F);
+        if (D_801323E5[1] == ret) {
+            current_game_mode = 2;
+        } else {
+            current_game_mode = 0x1C;
+        }
+        play_bgm_by_id(0x27, 0);
+        return;
+    }
+    if (D_800C2000 & 0x800) {
+        play_sound_effect(0x5C, 0xF, 0x64);
+        D_801323B8[5] = (u8)D_801323B8[5] - 1;
+    } else if (D_800C2000 & 0x400) {
+        play_sound_effect(0x5C, 0xF, 0x64);
+        D_801323B8[5] = (u8)D_801323B8[5] + 1;
+    }
+    if (D_801323B8[5] >= 5) {
+        D_801323B8[5] = 0;
+    }
+    if (D_801323B8[5] < 0) {
+        D_801323B8[5] = 4;
+    }
+}
 
 void func_ovl3_801FA1B8(void) {
   if (func_800959F8() == 1 && (D_800C2004 & 0x4000)) {
