@@ -7,7 +7,7 @@ extern s8 D_ovl5_8025C848;
 extern s32 D_ovl5_80253C64;
 extern OSThread D_ovl5_80254300;
 extern u64 D_ovl5_8025A640[0x2000 / sizeof(u64)];
-extern s32 D_ovl5_8025C874;
+extern Vec3i D_ovl5_8025C874;
 extern s32 D_ovl5_8025C87C;
 extern s8 D_ovl5_80253B52[];
 extern s32 D_ovl5_8025C884;
@@ -16,6 +16,9 @@ extern s32 D_ovl5_8025C640;
 extern s32 camera_position_x;
 extern s32 camera_position_z;
 extern u32 calculate_hypotenuse_safe(s32, s32);
+extern s32 get_interpolated_terrain_height_wrapper(s32, s32);
+extern f32 hypotf_2d(f32, f32);
+extern void vec3f_normalize(f32 *, f32 *, f32 *);
 void func_ovl5_8024D870(void *);
 
 typedef struct {
@@ -67,12 +70,72 @@ s32 func_ovl5_8024D99C(void) {
            (D_800BAA04 + D_ovl5_8025C640) - 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024D9E8);
+s32 func_ovl5_8024D9E8(void) {
+    Vec3i *ref;
+    s32 var_s2;
+    f32 sp10;
+    f32 sp14;
+    f32 sp18;
+    f32 temp_fa0;
+    f32 temp_fa1;
+    f32 temp_ft0;
+    f32 temp_fv0;
+    s32 temp_ft0_2;
+    s32 temp_ft1;
+    s32 temp_fv0_2;
+    s32 temp_fv0_3;
+    s32 temp_fv0_4;
+    s32 temp_s0;
+    s32 temp_v0;
+    s32 var_s3;
+    s32 var_n;
+
+    sp14 = 0.0f;
+    temp_fa0 = (f32) (camera_position_x - D_ovl5_8025C874.x);
+    temp_fa1 = (f32) (camera_position_z - D_ovl5_8025C87C);
+    sp10 = temp_fa0;
+    sp18 = temp_fa1;
+    temp_fv0 = hypotf_2d(temp_fa0, temp_fa1);
+    var_s2 = 0;
+    if (temp_fv0 < 15360.0f) {
+        return 0;
+    }
+    vec3f_normalize(&sp10, &sp14, &sp18);
+    var_s3 = 1;
+    temp_ft1 = (s32) (2.0f * (-sp18 * 1536.0f));
+    temp_fv0_2 = (s32) (2.0f * (sp10 * 1536.0f));
+    temp_fv0_3 = (s32) (temp_fv0 * 0.00013020834f);
+    if (var_s3 < temp_fv0_3) {
+        ref = &D_ovl5_8025C874;
+        do {
+            temp_ft0 = (f32) var_s3 * 7680.0f;
+            var_n = temp_fv0_3;
+            temp_ft0_2 = (s32) ((f32) ref->x + (temp_ft0 * sp10));
+            temp_fv0_4 = (s32) ((f32) ref->z + (temp_ft0 * sp18));
+            temp_s0 = get_interpolated_terrain_height_wrapper(temp_ft0_2 + temp_ft1, temp_fv0_4 + temp_fv0_2);
+            temp_v0 = get_interpolated_terrain_height_wrapper(temp_ft0_2 - temp_ft1, temp_fv0_4 - temp_fv0_2);
+            if (temp_v0 < temp_s0) {
+                var_s2 -= 1;
+            } else {
+                var_s2 += temp_s0 < temp_v0;
+            }
+            var_s3 += 1;
+        } while (var_s3 < var_n);
+    }
+    var_s2 <<= 6;
+    if (var_s2 < -0x200) {
+        var_s2 = -0x200;
+    }
+    if (var_s2 >= 0x201) {
+        var_s2 = 0x200;
+    }
+    return var_s2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024DBF8);
 
 s32 func_ovl5_8024F070(void) {
-    return calculate_hypotenuse_safe(D_ovl5_8025C874 - camera_position_x,
+    return calculate_hypotenuse_safe(D_ovl5_8025C874.x - camera_position_x,
                                      D_ovl5_8025C87C - camera_position_z);
 }
 
