@@ -33,9 +33,11 @@ void func_ovl0_801F4AA4(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F4AEC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F5C24);
-
-extern void heap3_free(void** payload_ptr);
+extern void* heap3_alloc(u32 size);
+extern u16 D_800C547C[];
+extern s16 D_800C54A0[];
+extern u16 D_ovl0_8021FDA6[][2];
+extern s32 D_ovl0_80225744;
 extern void* D_ovl0_802256C8;
 extern void* D_ovl0_802256CC;
 extern void* D_ovl0_802256D0;
@@ -43,6 +45,79 @@ extern void* D_ovl0_8022570C;
 extern void* D_ovl0_80225710;
 extern void* D_ovl0_80225714;
 extern s32 D_ovl0_8022573C;
+extern s32 D_ovl0_80225748;
+extern s32 D_ovl0_8022574C;
+extern s32 D_ovl0_80225750;
+extern s32 D_ovl0_80225754;
+extern f32 D_ovl0_80225758;
+extern s32 D_ovl0_8022575C;
+extern s32 D_ovl0_80225760;
+extern s32 D_ovl0_80225764;
+extern s32 D_ovl0_80225768;
+extern s32 D_ovl0_8022576C;
+
+/**
+ * Zeroes 0x80225748..0x8022576C, then sets the overlay_0 mode D_ovl0_8022573C
+ * and loads its ROM assets. arg0 0, 1 or 2 selects mode 2 with asset index
+ * 0xB, 2 or 0xD; any other arg0 selects mode 1 with D_ovl0_8021FDA6 row arg0 - 3.
+ */
+void func_ovl0_801F5C24(s32 arg0) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s32 table_index;
+    u32 size;
+
+    func_8005AF50();
+    D_ovl0_8022575C = 0;
+    D_ovl0_80225760 = 0;
+    D_ovl0_80225764 = 0;
+    D_ovl0_80225768 = 0;
+    D_ovl0_8022576C = 0;
+    D_ovl0_8022574C = 0;
+    D_ovl0_80225748 = 0;
+    D_ovl0_80225750 = 0;
+    D_ovl0_80225754 = 0;
+    D_ovl0_80225758 = 0.0f;
+
+    table_index = 0;
+    if (arg0 == 0) {
+        D_ovl0_80225744 = 0xB;
+        D_ovl0_8022573C = 2;
+    } else if (arg0 == 1) {
+        D_ovl0_80225744 = 2;
+        D_ovl0_8022573C = 2;
+    } else if (arg0 == 2) {
+        D_ovl0_80225744 = 0xD;
+        D_ovl0_8022573C = arg0;
+    } else {
+        table_index = arg0 - 3;
+        D_ovl0_8022573C = 1;
+    }
+
+    D_ovl0_80225714 = heap3_alloc(get_rom_asset_allocation_size(0x6A4, &asset));
+    load_rom_asset_payload(D_ovl0_80225714, &asset);
+
+    if (D_ovl0_8022573C == 1) {
+        D_ovl0_80225710 = heap3_alloc(get_rom_asset_allocation_size(0x55F, &asset));
+        load_rom_asset_payload(D_ovl0_80225710, &asset);
+        D_ovl0_802256C8 = heap3_alloc(get_rom_asset_allocation_size(D_ovl0_8021FDA6[table_index][0], &asset));
+        load_rom_asset_payload(D_ovl0_802256C8, &asset);
+    }
+    if (D_ovl0_8022573C == 2) {
+        D_ovl0_80225710 = heap3_alloc(get_rom_asset_allocation_size(0x560, &asset));
+        load_rom_asset_payload(D_ovl0_80225710, &asset);
+        D_ovl0_8022570C = heap3_alloc(get_rom_asset_allocation_size(0x832, &asset));
+        load_rom_asset_payload(D_ovl0_8022570C, &asset);
+        D_ovl0_802256CC = heap3_alloc(get_rom_asset_allocation_size(D_800C547C[D_ovl0_80225744], &asset));
+        load_rom_asset_payload(D_ovl0_802256CC, &asset);
+        open_rom_asset_slot(D_800C54A0[D_ovl0_80225744], &slot);
+        size = get_rom_load_slot_size(&slot);
+        D_ovl0_802256D0 = heap3_alloc(size);
+        read_rom_load_slot(D_ovl0_802256D0, size, &slot);
+    }
+}
+
+extern void heap3_free(void** payload_ptr);
 
 void func_ovl0_801F5E9C(void) {
     heap3_free(&D_ovl0_80225710);
@@ -158,17 +233,6 @@ void func_ovl0_801F7418(Gfx** pgfx, s32 x, s32 y, s32 player_index, s32 flip) {
     *pgfx = gfx;
 }
 
-extern s32 D_ovl0_80225748;
-extern s32 D_ovl0_8022574C;
-extern s32 D_ovl0_80225750;
-extern s32 D_ovl0_80225754;
-extern f32 D_ovl0_80225758;
-extern s32 D_ovl0_8022575C;
-extern s32 D_ovl0_80225760;
-extern s32 D_ovl0_80225764;
-extern s32 D_ovl0_80225768;
-extern s32 D_ovl0_8022576C;
-
 /**
  * Sets the overlay_0 mode D_ovl0_8022573C. Mode 1 resets the mode-1 state
  * (0x80225748..0x80225758), mode 2 zeroes the mode-2 state
@@ -200,7 +264,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F75B0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7740);
 
-extern u16 D_800C547C[];
 extern s8 D_801B72A5;
 
 /**
