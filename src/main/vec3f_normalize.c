@@ -1,6 +1,8 @@
 #include "common.h"
 #include "controller.h"
 #include <nusys.h>
+#undef nuGfxInit
+#include "heap.h"
 
 extern u8 D_801052F8[];
 extern u16* D_800B67D8[];
@@ -117,7 +119,117 @@ __asm__(
     ".set at\n"
 );
 
-INCLUDE_ASM("asm/nonmatchings/main/vec3f_normalize", mainproc);
+USE_ASSET(audio_wave_bank);
+
+extern char D_800CA1D4[];
+extern char D_800CA1E0[];
+extern char D_800CA1EC[];
+extern char D_171770[];
+extern u8 D_801B5588[];
+extern u8 D_801F4A30[];
+extern char D_8012F4E8[];
+extern s32 D_800B67C4;
+extern ControllerState D_800FBDC0[];
+extern u32 controller_handle_array[];
+extern s32 D_80105218;
+extern volatile s32 D_801052CC;
+extern u8 D_801052B8;
+extern u16* D_800BFEE0;
+extern volatile u8 D_800B67C8;
+extern volatile s32 g_frame_counter;
+
+extern void bzero(void* address, s32 length);
+extern void clear_fpc_csr(void);
+extern void fault_monitor_noop(void);
+extern void func_8002A640(void);
+extern void func_80032E88(void);
+extern void func_80041AA8(void);
+extern void func_800444B8(void);
+extern void func_80051D8C(void);
+extern void func_800543A4(void);
+extern void func_800578AC(void);
+extern void func_8005B03C(void);
+extern void func_8006F404(void);
+extern void func_8009B0DC(int mode);
+extern void func_80069F28(void);
+extern void init_overlay_manager(void);
+extern s32 load_overlay(s32 overlay_id);
+extern s32 overlay_id_from_segment(s32 segment_id);
+extern void reset_rom_load_slots(void);
+extern void setup_terrain_detail_default(void);
+extern void tlb_refill(s32 vaddr);
+extern void game_draw_callback(u32 task_count);
+extern void* memset(void* dst, int value, size_t size);
+
+void mainproc(void* arg) {
+  s32 i;
+  u32 size;
+
+  osAiSetFrequency(0x7D00);
+  bzero(D_801F4A30, 0x80400000 - (u32)D_801F4A30);
+  osWritebackDCacheAll();
+  clear_fpc_csr();
+  fault_monitor_noop();
+  osSyncPrintf(D_800CA1D4);
+  size = (u32)audio_wave_bank_ROM_START - (u32)D_171770;
+  if (size >= 0x3F) {
+    size = 0x3F;
+  }
+  nuPiReadRom((u32)D_171770, D_801B5588, size);
+  D_801B5588[size] = 0;
+  D_8012F4E8[0] = 0;
+  nuGfxInit();
+  g_frame_counter = 0;
+  heap3_init(D_800B67C4);
+  heap_init(1);
+  reset_rom_load_slots();
+  flag_clear_all();
+  init_overlay_manager();
+  load_overlay(overlay_id_from_segment(0xC));
+  load_overlay(overlay_id_from_segment(6));
+  osSyncPrintf(D_800CA1E0);
+  func_8005B03C();
+  osSyncPrintf(D_800CA1EC);
+  func_800299D0();
+  D_801052B8 = nuContInit();
+  D_80105218 = 0;
+  for (i = 0; i < 4; i++) {
+    if ((D_801052B8 >> i) & 1) {
+      controller_handle_array[D_80105218++] = i;
+    }
+    memset(&D_800FBDC0[i], 0, 0x38);
+  }
+  func_8006F404();
+  osUnmapTLBAll();
+  func_80051D8C();
+  func_8009B0DC(1);
+  func_800543A4();
+  func_80041AA8();
+  setup_terrain_detail_default();
+  func_80069F28();
+  func_80032E88();
+  func_800578AC();
+  func_80029B58();
+  func_800444B8();
+  D_801052CC = 0;
+  for (;;) {
+    if (D_801052CC == 0) {
+      D_801052CC = -1;
+      func_8002A640();
+      nuGfxFuncSet(game_draw_callback);
+      nuPreNMIFuncSet(pause_audio);
+    }
+    while (D_801052CC == -1) {
+      if (D_800BFEE0 != NULL) {
+        osViSwapBuffer(D_800BFEE0);
+      }
+      if (D_800B67C8 == 2) {
+        tlb_refill(0x64);
+      }
+    }
+    nuGfxDisplayOff();
+  }
+}
 
 s32 func_80029EEC(s32 arg0, s32 arg1, u32 arg2, u32 arg3) {
   u32 mag = (arg0 <= -1) ? (-arg0) : (arg0);
@@ -210,11 +322,9 @@ void func_80029F6C(NUContData* input, s32 unused, s32 index) {
 }
 
 
-extern u8 D_801052B8;
 extern NUContData debug_menu_pad_buttons_a[];
 extern NUContData D_800FEDA8[];
 extern NUContData D_801060E0[];
-extern ControllerState D_800FBDC0[];
 extern void func_8002A144(NUContData* input, ControllerState* state);
 
 void func_8002A144(NUContData* input, ControllerState* state) {
@@ -321,8 +431,6 @@ void func_8002A310(void) {
 extern s32 D_800B67F4;
 extern s8 D_800B6800;
 extern s8 D_800B67EC;
-extern volatile u8 D_800B67C8;
-extern volatile s32 g_frame_counter;
 extern s32 D_800B67E8;
 extern s32 D_800B67E4;
 extern s32 D_800B67D0;

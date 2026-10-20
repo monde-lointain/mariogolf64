@@ -67,6 +67,7 @@ extern HeapBlock heap_slots[];
  * for a block header. region_end is the exclusive bound of the same region. */
 void heap_init(s32 slot_index);
 void heap_add_region(s32 slot_index, HeapBlock* region_start, void* region_end);
+void heap3_init(s32 has_expansion_pak);
 
 void* heap_alloc(s32 slot_index, u32 size_bytes);
 
