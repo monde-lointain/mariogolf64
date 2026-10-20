@@ -4,7 +4,9 @@
 #include "common.h"
 
 typedef struct Overlay11State {
-    /* 0x00 */ u8 unk_00[0x38];
+    /* 0x00 */ u8 unk_00[0x20];
+    /* 0x20 */ u32 unk20;
+    /* 0x24 */ u8 unk_24[0x14];
     /* 0x38 */ u32 unk38;
     /* 0x3C */ u8 unk_3C[0x60];
     /* 0x9C */ u32 unk9C[4];

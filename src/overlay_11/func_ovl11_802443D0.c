@@ -2,6 +2,7 @@
 #include "overlay_11.h"
 
 extern void func_8006A548(Gfx** pgfx, u32 tlut);
+extern void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr);
 extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
                                s32 width, s32 height, s32 pal, s32 cms,
                                s32 cmt, s32 masks, s32 maskt, s32 shifts,
@@ -64,7 +65,23 @@ void func_ovl11_802445C0(Gfx** pgfx, s32 x, s32 y, s32 index) {
     *pgfx = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_80244748);
+/**
+ * Loads the palette at unk20 + 8, then the 80x18 4-bit texture at
+ * unk20 + index * 0x2D0 + 0x28 (8-byte aligned), and draws a 54x18 rect at (x, y).
+ */
+void func_ovl11_80244748(Gfx** pgfx, s32 x, s32 y, s32 index) {
+    Gfx* gfx;
+    s32 offset;
+
+    gfx = *pgfx;
+    func_8006A4A0(&gfx, 0, D_80104FD0.unk20 + 8);
+    offset = (index * 0x2D0) + 0x28;
+    gDPLoadTextureTile_4b(gfx++, (D_80104FD0.unk20 + offset) & ~7,
+                          G_IM_FMT_CI, 80, 18, 0, 0, 79, 17, 0, 0, 0, 0, 0, 0, 0);
+    func_8006A2C0(&gfx, x * 4, y * 4, (x + 0x36) * 4, (y + 0x12) * 4, 0, 0, 0,
+                  0x400, 0x400);
+    *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_802448D4);
 
