@@ -1028,15 +1028,29 @@ void func_ovl0_802087D0(s8 arg0) {
 
 extern s32 D_ovl0_8022715C;
 extern u8* func_80037E50(ClubShot* club, s32 arg1, s32 arg2, s32 arg3);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C0E60;
 
 /* Dead `sw $v0,0x10($sp)` in the first jal's delay slot: the `unused` local is the stand-in, as in lerp_s32 (func_8008D100.c). */
-s8 func_ovl0_80208810(void) {
+s32 func_ovl0_80208810(void) {
     s32 r;
     volatile s32 unused = r;
     return ((s8 *)func_80037E50(get_shot_data(), active_terrain_index, active_meter_category, D_ovl0_8022715C))[5];
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208850);
+/* Dead `sw $v0,0x10($sp)` in the first jal's delay slot: the `unused` local is the stand-in, as in func_ovl0_80208810 above. */
+void func_ovl0_80208850(void) {
+    s32 r;
+    volatile s32 unused = r;
+
+    if (func_ovl0_80208810() != 0) {
+        play_sound_effect(0x63, D_800C0E60, 0x64);
+    } else if (D_ovl0_8022715C == 0) {
+        play_sound_effect(0x62, D_800C0E60, 0x64);
+    } else {
+        play_sound_effect(0x6E, D_800C0E60, 0x64);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802088B0);
 
