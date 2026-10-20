@@ -25,6 +25,13 @@ extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s8 D_801061B8;
 extern const f64 D_ovl11_8024C6F8;
 extern const f64 D_ovl11_8024C700;
+extern void func_8006A548(Gfx** pgfx, u32 tlut);
+extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
+                               s32 width, s32 height, s32 pal, s32 cms,
+                               s32 cmt, s32 masks, s32 maskt, s32 shifts,
+                               s32 shiftt);
+extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
+                          s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80241800);
 
@@ -140,7 +147,40 @@ s32 func_ovl11_802436C8(u16 arg0) {
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_8024373C);
+void func_ovl11_8024373C(Gfx** gfxp, u8* data, s32 x, s32 y) {
+    Gfx* gfx;
+    s32 width;
+    s32 height;
+    s32 strips;
+    s32 right;
+    s32 acc;
+    s32 count;
+    s32 scale;
+
+    gfx = *gfxp;
+    width = (data[2] << 8) | data[3];
+    height = (data[4] << 8) | data[5];
+    strips = 1;
+    if (width >= 0x61) {
+        strips = 2;
+    }
+    func_8006A548(&gfx, (u32)(data + 8));
+    height = height / strips;
+    count = 0;
+    if (strips != 0) {
+        right = x + width;
+        scale = 0x400;
+        acc = 0;
+        do {
+            load_texture_block(&gfx, (u32)(data + (acc * height + 0x208)), G_IM_FMT_CI, G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
+            acc += width;
+            count += 1;
+            func_8006A2C0(&gfx, x * 4, y * 4, right * 4, (y + height) * 4, 0, 0, 0, scale, scale);
+            y += height;
+        } while (count != strips);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802438D0);
 
