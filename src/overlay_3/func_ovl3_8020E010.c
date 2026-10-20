@@ -15,7 +15,7 @@ void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
 void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b);
 u8* func_8005AF50(void);
 u8* func_8005AF74(void);
-void func_ovl3_80209478(void);
+s32 func_ovl3_80209478(void);
 void func_ovl3_8020F9B8(Gfx** gfxp, s16 idx, u8 mode);
 
 void func_ovl3_8020E010(void** destinations) {

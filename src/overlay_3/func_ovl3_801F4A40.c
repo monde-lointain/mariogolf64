@@ -1,6 +1,11 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 
+typedef struct {
+  /* 0x00 */ u8 padding[0x15CC];
+  /* 0x15CC */ s32 unknown_15CC;
+} SaveCounterView;
+
 extern Gfx D_ovl3_80232300[];
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s32 D_800C2004;
@@ -34,6 +39,8 @@ extern void play_bgm_by_id(s32 id, s32 flags);
 extern u8 D_801323E5[];
 extern s16 D_ovl3_8022BF1C[];
 extern s32 flag_is_set(s32 flag);
+extern u8* func_8005AF50(void);
+extern s32 func_8005B070(s32 arg0);
 extern void func_ovl3_80217B88(s32 arg0);
 extern s32 active_player_count;
 extern u8 D_800FF4C0;
@@ -791,4 +798,23 @@ void func_ovl3_80209430(Gfx** arg0) {
   *arg0 = saved;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80209478);
+s32 func_ovl3_80209478(void) {
+    s32 counter = ((SaveCounterView*)func_8005AF50())->unknown_15CC;
+
+    if (flag_is_set(0x5C)) {
+        return 6;
+    }
+    if (flag_is_set(0x5B)) {
+        return 5;
+    }
+    if (flag_is_set(0x5A)) {
+        return 4;
+    }
+    if (flag_is_set(0x59)) {
+        return 3;
+    }
+    if (flag_is_set(0x58)) {
+        return 2;
+    }
+    return func_8005B070(counter);
+}
