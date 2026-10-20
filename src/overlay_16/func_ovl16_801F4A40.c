@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/vector.h"
 
 extern s32 D_ovl16_801F89C0;
 extern s32 D_ovl16_80223804;
@@ -290,7 +291,54 @@ void func_ovl16_801F5240(s32 arg0, s32 arg1, s32 arg2) {
     animation_play(arg0, func_ovl16_801F5194(arg0, arg1, arg2));
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F5270);
+extern void func_80076640(f32 pitch, f32 yaw);
+extern void func_8007680C(f32 arg);
+extern void copy_reference_vectors(Vec3f *first_destination, Vec3f *second_destination);
+extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
+
+void func_ovl16_801F5270(f32 arg0, f32 arg1, f32 arg2) {
+    Vec3f first;
+    Vec3f second;
+    Vec3i pos;
+    u8 unused[0x10]; /* unused: original frame space */
+    f32 pitch;
+    f32 clear_pitch;
+    f32 blocked_pitch;
+    s32 iter;
+    f32 yaw;
+
+    pitch = arg0;
+    blocked_pitch = -1.5707964f;
+    yaw = arg1;
+    iter = 0;
+    clear_pitch = pitch;
+    do {
+        func_80076640(pitch, yaw);
+        func_8007680C(arg2);
+        copy_reference_vectors(&first, &second);
+        pos.x = (s32) (first.x * 1024.0f);
+        pos.y = (s32) (first.y * 1024.0f);
+        pos.z = (s32) (first.z * 1024.0f);
+        if (pos.y - get_interpolated_terrain_height_wrapper(pos.x, pos.z) < -0xBFF) {
+            blocked_pitch = pitch;
+            if (iter == 0) {
+                break;
+            }
+        } else {
+            clear_pitch = pitch;
+        }
+        pitch = (clear_pitch + blocked_pitch) * 0.5f;
+        iter++;
+    } while (iter < 10);
+
+    func_80076640(blocked_pitch, yaw);
+    func_8007680C(arg2);
+    copy_reference_vectors(&first, &second);
+    pos.x = (s32) (first.x * 1024.0f);
+    pos.y = (s32) (first.y * 1024.0f);
+    pos.z = (s32) (first.z * 1024.0f);
+    get_interpolated_terrain_height_wrapper(pos.x, pos.z);
+}
 
 /* Dead 8-byte frame and `sw $v0,0x10(sp)` before `jal rand`: static-chain home of the nested-function original (callers set `addiu $v0,$sp,0x10` in the jal delay slot); `unused` reproduces them, as in func_ovl7_802068B4. */
 void func_ovl16_801F53F0(void) {
