@@ -1,4 +1,6 @@
 #include "common.h"
+#include "../main/heap.h"
+#include "../main/rom_asset.h"
 
 void func_ovl0_801FD5F0(void) {
 }
@@ -11,7 +13,43 @@ void func_ovl0_801FD5F8(void) {
     func_8004D4B8(D_ovl0_80224E90, 4, D_ovl0_80227040);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD624);
+extern HeapBlock D_ovl0_80225840[0x1800 / sizeof(HeapBlock)];
+extern char D_ovl0_80224E98[];
+extern void* D_ovl0_8022581C;
+extern void* D_ovl0_80225820;
+extern void* D_ovl0_80225824;
+extern void* D_ovl0_80225828;
+extern void* D_ovl0_8022582C;
+void func_ovl0_801FD9E4(void);
+void func_ovl0_801FDA04(void);
+
+void func_ovl0_801FD624(void) {
+    RomAssetLoad asset;
+    void* payload;
+
+    heap_init(2);
+    heap_add_region(2, D_ovl0_80225840,
+                    D_ovl0_80225840 + 0x1800 / sizeof(HeapBlock));
+    payload = heap_alloc(2, get_rom_asset_allocation_size(0x4C7, &asset));
+    D_ovl0_8022581C = payload;
+    load_rom_asset_payload(payload, &asset);
+    payload = heap_alloc(2, get_rom_asset_allocation_size(0x4C8, &asset));
+    D_ovl0_80225820 = payload;
+    load_rom_asset_payload(payload, &asset);
+    payload = heap_alloc(2, get_rom_asset_allocation_size(0x4DA, &asset));
+    D_ovl0_80225824 = payload;
+    load_rom_asset_payload(payload, &asset);
+    payload = heap_alloc(2, get_rom_asset_allocation_size(0x4C6, &asset));
+    D_ovl0_80225828 = payload;
+    load_rom_asset_payload(payload, &asset);
+    payload = heap_alloc(2, get_rom_asset_allocation_size(0x6BB, &asset));
+    D_ovl0_8022582C = payload;
+    load_rom_asset_payload(payload, &asset);
+    osSyncPrintf(D_ovl0_80224E98, heap_get_total_free(2));
+    func_ovl0_801FD5F8();
+    func_ovl0_801FDA04();
+    func_ovl0_801FD9E4();
+}
 
 /* sqrtf is inlined as sqrt.s (-ffast-math). The dead 8-byte frame and `sw $v0,0(sp)` are the static-chain home of the nested-function original; `unused` reproduces them, as in func_ovl7_802068B4. */
 f32 func_ovl0_801FD760(f32 arg0, f32 arg1, f32 arg2) {
