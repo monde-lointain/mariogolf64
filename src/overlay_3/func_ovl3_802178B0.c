@@ -112,7 +112,61 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021B618)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021B87C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021BE88);
+extern s16 D_ovl3_802303A6;
+extern s16 D_ovl3_802303A8;
+extern u8* D_ovl3_8023B35C;
+
+void func_ovl3_8021BE88(Gfx** gfxp) {
+    Gfx* gfx = *gfxp;
+    s32 i;
+    s32 left;
+    s32 flag;
+
+    if (++D_ovl3_802303A8 >= 3) {
+        if (++D_ovl3_802303A6 >= 8) {
+            D_ovl3_802303A6 = 0;
+        }
+        D_ovl3_802303A8 = 0;
+    }
+
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, (u8*)(((u32)D_ovl3_8023B35C + 8) & ~7));
+    gDPPipeSync(gfx++);
+    for (i = 0; i != 2; i++) {
+        if (i == 1) {
+            gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 16,
+                               (u8*)((u32)(D_ovl3_8023B35C + ((D_ovl3_802303A6 << 9) + 0x28)) & ~7));
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_LOADTILE, 0, G_TX_MIRROR, 5, 0,
+                       G_TX_MIRROR, 5, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, 62, 124);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0, G_TX_RENDERTILE, 0, G_TX_MIRROR, 5, 0,
+                       G_TX_MIRROR, 5, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC,
+                           31 << G_TEXTURE_IMAGE_FRAC);
+            left = 212;
+        } else {
+            gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 16,
+                               (u8*)((u32)(D_ovl3_8023B35C + ((D_ovl3_802303A6 << 9) + 0x28)) & ~7));
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, 62, 124);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, 2, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC,
+                           31 << G_TEXTURE_IMAGE_FRAC);
+            left = 76;
+        }
+        flag = (i == 1);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << G_TEXTURE_IMAGE_FRAC, 122 << G_TEXTURE_IMAGE_FRAC,
+                                (left + 32) << G_TEXTURE_IMAGE_FRAC, 154 << G_TEXTURE_IMAGE_FRAC,
+                                G_TX_RENDERTILE, flag << 10, 0, 0x400, 0x400);
+        gDPPipeSync(gfx++);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021C200);
 
