@@ -1,11 +1,32 @@
 #include "common.h"
 #include "../main/terrain.h"
 
+typedef struct CameraPresetVec {
+    s32 x;
+    s32 y;
+    s32 z;
+} CameraPresetVec;
+
+typedef struct CameraPresetTable {
+    CameraPresetVec table[4];
+    CameraPresetVec lookat[4];
+    CameraPresetVec unknown_60[8];
+    CameraPresetVec unknown_c0[8];
+} CameraPresetTable;
+
 extern u32 D_ovl4_802542A0;
 extern s16 D_800BAC0C[];
 extern s32 D_800BB00C;
 extern s8 g_terrain_vtx_xform_mode;
 extern u8 D_8019D620;
+extern s8 D_801B60B8;
+extern s32 D_800BA9E4;
+extern s32 D_800BA9E8;
+extern s32 D_800BA9EC;
+extern s32 camera_position_x;
+extern s32 camera_position_y;
+extern s32 camera_position_z;
+extern CameraPresetTable D_80105E10;
 void func_ovl4_802537EC(s32, s32, void **, void **);
 s32 report_div_error(void);
 
@@ -135,7 +156,38 @@ void func_ovl4_80250DA0(void) {
     func_ovl4_80250EE0();
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250DE4);
+/* Zeroes the preset table; the live camera is zeroed only when D_801B60B8 == 0. */
+void func_ovl4_80250DE4(void) {
+    CameraPresetVec *row;
+    s32 i;
+
+    if (D_801B60B8 == 0) {
+        camera_position_x = 0;
+        camera_position_y = 0;
+        camera_position_z = 0;
+        D_800BA9E4 = 0;
+        D_800BA9E8 = 0;
+        D_800BA9EC = 0;
+    }
+    for (i = 0; i < 4; i++) {
+        D_80105E10.table[i].x = 0;
+        D_80105E10.table[i].y = 0;
+        D_80105E10.table[i].z = 0;
+        D_80105E10.lookat[i].x = 0;
+        D_80105E10.lookat[i].y = 0;
+        D_80105E10.lookat[i].z = 0;
+    }
+    i = 0;
+    row = &D_80105E10.unknown_c0[0];
+    for (; i < 8; i++) {
+        D_80105E10.unknown_60[i].x = 0;
+        D_80105E10.unknown_60[i].y = 0;
+        D_80105E10.unknown_60[i].z = 0;
+        row->x = 0;
+        row++;
+        D_80105E10.unknown_c0[i].z = 0;
+    }
+}
 
 extern u8 *D_ovl4_8025D350;
 extern u8 *D_ovl4_8025D354;
