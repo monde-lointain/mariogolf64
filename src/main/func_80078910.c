@@ -494,7 +494,68 @@ void func_80079EBC(void) {
  * ordinary fns' `= 0` stores stay `sw $zero`. */
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A10C);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A40C);
+/* Parent frame the nested child reads through the static chain. */
+typedef struct {
+  u8 pad00[0x70];
+  s32 spawned;    /* 0x70 */
+  s32 slot;       /* 0x74 */
+  s32 **pos_src;  /* 0x78 */
+  f32 vel_x;      /* 0x7C */
+  f32 vel_y;      /* 0x80 */
+  f32 vel_z;      /* 0x84 */
+  s32 bend;       /* 0x88 */
+  f32 size_scale; /* 0x8C */
+} NestFrame;
+
+s32 func_8007A40C(s32 arg0, s32 arg1, s32 arg2) {
+  s32 r;
+  volatile s32 unused = r;
+  NestFrame *frame = (NestFrame *) r;
+  Particle *p;
+  s32 speed;
+  f32 ft;
+  f32 size_step;
+
+  frame->spawned = 0;
+  frame->slot = 0;
+  do {
+    p = &particle_array[frame->slot];
+    guRandom();
+    if (frame->spawned == arg1) {
+      break;
+    }
+    frame->spawned++;
+    arg0++;
+    if (p->effect_kind == -1) {
+      p->position.x = (f32)(*frame->pos_src)[0] * 0.0009765625f;
+      p->position.y = (f32)(*frame->pos_src)[1] * 0.0009765625f;
+      p->position.z = (f32)(*frame->pos_src)[2] * 0.0009765625f;
+      if (frame->spawned * 3 != 0) {
+        speed = ((guRandom() % (frame->spawned * 3)) + 5) * 0x600;
+      } else {
+        speed = 0x1E00;
+      }
+      ft = (f32)speed;
+      p->velocity.x = frame->vel_x * ft * 0.000029296874f;
+      p->velocity.y = frame->vel_y * ft * 0.00014648438f;
+      p->velocity.z = frame->vel_z * ft * 0.000029296874f;
+      p->unknown_38 = (s16)frame->bend;
+      if (arg2 == 0) {
+        p->opacity = (f32)((guRandom() % 32) + 0xBF);
+      } else {
+        p->opacity = (f32)((guRandom() % 32) + 0x9F);
+      }
+      p->opacity_step = -2.0f;
+      p->size = (f32)(guRandom() % 32) * 0.2f;
+      size_step = (frame->size_scale * 0.01f) + 0.4f;
+      p->effect_kind = arg2;
+      p->effect_frame = 0;
+      p->size_step = size_step;
+    }
+    frame->slot++;
+  } while (frame->slot < 40);
+  return arg0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007A6C8);
 
