@@ -1,6 +1,7 @@
 #include "common.h"
 #include "../main/session.h"
 #include "../main/club.h"
+#include "../main/terrain.h"
 #include "../main/vector.h"
 
 extern s8 D_ovl5_8025C848;
@@ -19,6 +20,8 @@ extern u32 calculate_hypotenuse_safe(s32, s32);
 extern s32 get_interpolated_terrain_height_wrapper(s32, s32);
 extern f32 hypotf_2d(f32, f32);
 extern void vec3f_normalize(f32 *, f32 *, f32 *);
+extern double atan2(double, double);
+extern void *func_80040E3C(s32 x, s32 z);
 void func_ovl5_8024D870(void *);
 
 typedef struct {
@@ -214,7 +217,24 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802507D8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802510D0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251198);
+s32 func_ovl5_80251198(Vec3i *from, Vec3i *to) {
+    s32 dist;
+    f32 angle;
+    s32 i;
+    s32 x;
+    u32 id;
+
+    dist = calculate_hypotenuse_safe(to->x - from->x, to->z - from->z);
+    angle = atan2((f32)(to->z - from->z), (f32)(to->x - from->x));
+    for (i = 0; (f32)i < dist * (1.0f / 14045.184f); i++) {
+        x = (f32)i * (cosf(angle) * 14045.184f) + from->x;
+        id = ((TerrainAttrEntry *)func_80040E3C(x, (f32)i * (sinf(angle) * 14045.184f) + from->z))->id;
+        if (id != 0 && id != 1 && id != 2 && id != 0x11 && id != 0xB && id != 0xC) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80251378);
 
