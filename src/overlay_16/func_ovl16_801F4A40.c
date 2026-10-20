@@ -41,6 +41,8 @@ extern s32 D_ovl16_801F89A8;
 extern s32 D_ovl16_801F89AC;
 extern s32 D_ovl16_801F89B0;
 extern s32 D_ovl16_801F89B4;
+extern u8 D_ovl16_801F89A0;
+extern s32 D_ovl16_801F89A4;
 extern u8 D_ovl16_801F8B80[];
 extern void *D_ovl16_80223790;
 extern void *D_ovl16_80223794[];
@@ -387,6 +389,87 @@ void func_ovl16_801F80B8(Gfx **gfxp, s32 x, s32 y, s32 index) {
     *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F8438);
+/* Fades in a 304-pixel-wide CI8 image (palette at D_ovl16_801F8B80 + 8,
+ * texels at + 0x208) as 38 strips of 6 lines, scrolled vertically by
+ * D_ovl16_801F89A4 - 0x3C (clamped to 0..0xE4). Past frame 0x118 the image
+ * fades out by 4 alpha per frame; at zero alpha D_ovl16_801F89A0 is cleared.
+ * `image` holds the texel offset in a local: written as a literal, fold
+ * moves 0x208 into the strip induction variable. */
+void func_ovl16_801F8438(Gfx** gfxp) {
+    Gfx* gfx = *gfxp;
+    s32 alpha;
+    s32 i;
+    s32 row;
+    s32 image = 0x208;
+
+    if (D_ovl16_801F89A4 > 0x118) {
+        alpha = 255 - (D_ovl16_801F89A4 - 0x118) * 4;
+        if (alpha < 0) {
+            D_ovl16_801F89A0 = 0;
+            alpha = 0;
+        }
+    } else {
+        alpha = 255;
+    }
+    gDPPipeSync(gfx++);
+    if (alpha > 0) {
+        if (alpha == 255) {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            if (D_ovl16_801F89A4 < 0x40) {
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, D_ovl16_801F89A4 * 4);
+                gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1, TEXEL0, 0, PRIMITIVE_ALPHA, 0,
+                                  0, 0, 0, 1);
+            }
+        } else {
+            if (alpha < 0xB4) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+            } else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            }
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE);
+        }
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal256(gfx++, (u32)D_ovl16_801F8B80 + 8 & ~7);
+        for (i = 0; i != 38; i++) {
+            s32 lines;
+
+            row = D_ovl16_801F89A4 - 0x3C;
+            if (row > 0xE4) {
+                row = 0xE4;
+            }
+            if (row < 0) {
+                row = 0;
+            }
+            gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 304,
+                               ((u32)D_ovl16_801F8B80 + (i * 6 * 304 + (row * 304 + image))) & ~7);
+            lines = (i != 37) ? 6 : 2;
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 38, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, 303 << G_TEXTURE_IMAGE_FRAC,
+                        (lines - 1) << G_TEXTURE_IMAGE_FRAC);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 38, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 303 << G_TEXTURE_IMAGE_FRAC,
+                           (lines - 1) << G_TEXTURE_IMAGE_FRAC);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, 8 << 2, (8 + i * 6) << 2, 312 << 2, (8 + i * 6 + lines) << 2,
+                                    G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+        }
+        gDPPipeSync(gfx++);
+    }
+    *gfxp = gfx;
+}
 
 void func_ovl16_801F898C(void) {}
