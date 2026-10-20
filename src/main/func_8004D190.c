@@ -102,7 +102,7 @@ void func_8004D4B8(char* source_text, s32 glyph_count, u16* destination) {
   }
 }
 
-void func_8004D5F0(s32 character_code, s32 column, s32 row);
+void func_8004D5F0(char character_code, s32 column, s32 row);
 
 void func_8004D580(char* text, s32 column, s32 row) {
   print_string_at_grid(text, column, row);
@@ -113,12 +113,42 @@ void func_8004D580(char* text, s32 column, s32 row) {
   }
 }
 
-/* func_8004D5F0: framebuffer glyph renderer (double-buffered). The ROM keeps 2
- * non-coalesced copies of c (frame 0x30/s0-s5); -O2 coalesces them (frame 0x28),
- * which is strictly more optimal. global.c:790-823 set_preferences merges them
- * from any faithful C, and cse.c CSEs the sign-extend. Not source-reachable and
- * not flag-gated. */
-INCLUDE_ASM("asm/nonmatchings/main/func_8004D190", func_8004D5F0);
+/* func_8004D5F0: draws one 8x8 glyph from the 4bpp D_800BE6E0 font sheet
+ * (32 glyphs per row, ASCII 0x20-0x7A, others drawn as space) straight into
+ * both the current and next framebuffers through KSEG1, then unblanks the VI.
+ * The char parameter is what gives the ROM its two copies of the code (s0/s2):
+ * assign_parms keeps the incoming int and the QImode parm in separate pseudos. */
+void func_8004D5F0(char character_code, s32 column, s32 row) {
+  u16* current_fb;
+  u16* next_fb;
+  s8 glyph;
+  s32 glyph_offset;
+  s32 x;
+  s32 y;
+
+  current_fb = (u16*)(osVirtualToPhysical(osViGetCurrentFramebuffer()) + 0xA0000000);
+  next_fb = (u16*)(osVirtualToPhysical(osViGetNextFramebuffer()) + 0xA0000000);
+  D_800BFEE0 = current_fb;
+  if (character_code < 0x20) {
+    character_code = 0x20;
+  }
+  if (character_code >= 0x7B) {
+    character_code = 0x20;
+  }
+  glyph = character_code - 0x20;
+  glyph_offset = (glyph & 0x1F) * 2 + (glyph / 32) * 512;
+  if ((u32)column >= 40 || (u32)row >= 30) {
+    return;
+  }
+  for (y = 0; y < 8; y++) {
+    for (x = 0; x < 8; x++) {
+      u16 pixel = (-(((D_800BE6E0[glyph_offset + y * 64 + x / 4] >> ((3 - (x & 3)) * 4)) & 0xF) == 0xF) & 0xFFF) | 1;
+      current_fb[(row * 8 + y) * 320 + (column * 8 + x)] = pixel;
+      next_fb[(row * 8 + y) * 320 + (column * 8 + x)] = pixel;
+    }
+  }
+  osViBlack(0);
+}
 
 void clear_text_grid(void) {
   s32 byte_index = 0x4AF;
