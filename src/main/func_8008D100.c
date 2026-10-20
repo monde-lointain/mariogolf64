@@ -8,6 +8,10 @@ extern s32 D_800C5EE4;
 extern u16* D_800C5EE0;
 extern s32 D_800C7304;
 extern s32 D_800C730C;
+extern s32 D_800C5EE8;
+extern s32 D_800C72F8;
+extern s32 D_800C72FC;
+extern s32 D_800C7300;
 
 extern s32 round_hole_index;
 extern s32 scenario_mode_id;
@@ -582,11 +586,59 @@ INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", update_sky_panel_verts);
 
 void set_sky_panel_cycle_mode_sel(u32 arg0) { sky_panel_cycle_mode_sel = arg0; }
 
+const f64 sky_panel_c200 = 200.0;
+const f64 sky_panel_2_over_pi = 0.6366197723675814;
+const f64 sky_panel_c160 = 160.0;
+const f64 sky_panel_c640 = 640.0;
+const f64 sky_panel_recip320 = 0.003125;
+
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", emit_sky_bg_panel_dl);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", emit_sky_panorama_strips_dl);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8009226C);
+void func_8009226C(s32 arg0) {
+  if (arg0 == -1) {
+    D_800C72F8 = 0;
+    D_800C5EE4 = 0;
+  } else {
+    if (arg0 != 4 && arg0 != 5) {
+      D_800C7300 = 0;
+    }
+    switch (arg0) {
+      case 0:
+        D_800C5EE4 = 0x160;
+        break;
+      case 1:
+      case 9:
+        D_800C5EE4 = 0xFF;
+        break;
+      case 2:
+        D_800C5EE4 = 0xFF;
+        break;
+      case 8:
+        D_800C5EE4 = 0xA0;
+        break;
+      case 10:
+        D_800C5EE4 = 0x48;
+        break;
+      case 3:
+        D_800C5EE4 = 0xFF;
+        break;
+      case 5:
+        D_800C5EE4 = 0x40;
+        break;
+      case 6:
+      case 7:
+        D_800C5EE4 = 0x20;
+        break;
+      case 4:
+        break;
+    }
+    D_800C5EE8 = arg0;
+    D_800C72F8 = 1;
+    D_800C72FC = 0;
+  }
+}
 
 void func_80092324(void) {}
 
