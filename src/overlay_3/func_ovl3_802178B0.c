@@ -19,6 +19,11 @@ typedef struct {
     u8 unk1;
 } AssetSelector;
 
+typedef struct {
+    s8 unk00;
+    u8 unk01[0x67];
+} Ovl3ModeRecord; /* 0x68 */
+
 extern u8* func_8005AF74(void);
 extern u8 D_801B5634;
 extern s32 D_ovl3_8022F8C0;
@@ -31,6 +36,26 @@ extern char D_ovl3_802319E0[];
 extern char D_ovl3_8022BF70[];
 extern s32 D_ovl3_80230A48[];
 extern char D_80105118[];
+extern u8* func_8005AF50(void);
+extern s32 func_800959F8(void);
+extern s32 func_8006AD94(void);
+extern s32 func_8006ADA0(void);
+extern void func_8006AD1C(s32 table_index);
+extern void func_8006ADF8(s32 arg);
+extern void func_8009226C(s32 arg0);
+extern void flag_set(s32 flag);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
+extern s16 func_ovl3_8021E340(s8 x, s8 y, s32 dir);
+extern s16 func_ovl3_8021E468(void);
+extern s32 D_800C2000;
+extern s32 D_800C2004;
+extern s32 D_800FE334;
+extern s8 rumble_disable_flag;
+extern u8 D_801B9410;
+extern u8 D_801052E8;
+extern s32 current_game_mode;
 
 void func_80071608(Gfx** dl);
 void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
@@ -296,7 +321,88 @@ void func_ovl3_8021CFAC(Ovl3AssetBlock* arg0, s16 arg1) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021D0B8);
+void func_ovl3_8021D0B8(void) {
+    u8* save;
+    s8* state;
+    s32 i;
+    s16 idx;
+    s16 ret;
+    s32 dir;
+    s32 col;
+    Ovl3ModeRecord* rec;
+
+    save = func_8005AF50();
+    state = (s8*)func_8005AF74();
+    if (func_800959F8() == 1) {
+        if (func_8006AD94() != 0 && D_801B9410 == 0) {
+            if (func_8006ADA0() == 0) {
+                current_game_mode = 0x13;
+                D_800FE334 = 0;
+                rumble_disable_flag = 1;
+                flag_set(0x1E);
+                i = 0;
+                do {
+                    func_800719A0(0, 0, -1, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                    i++;
+                } while (i != 4);
+            }
+        } else if (func_8006AD94() == 0 || D_801B9410 != 1) {
+            if (D_800C2004 & 0x8000) {
+                if (func_ovl3_8021E468() != -1) {
+                    play_sound_effect(0x5D, 0xF, 0x50);
+                    D_801B9410 = 0;
+                    col = state[0x39];
+                    idx = D_ovl3_8023B640[state[0x3A]][col];
+                    rec = (Ovl3ModeRecord*)(save + 0x1608);
+                    func_8006AD1C(rec[idx].unk00);
+                    func_8006ADF8(1);
+                    D_801052E8 = 0;
+                }
+            } else if (D_800C2004 & 0x4000) {
+                func_8009226C(9);
+                play_sound_effect(0x5F, 0xF, 0x7F);
+                func_8009226C(9);
+                current_game_mode = 9;
+                i = 0;
+                do {
+                    func_800719A0(0, 0, -1, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                    i++;
+                } while (i != 4);
+                return;
+            } else {
+                if (D_800C2000 & 0x800) {
+                    dir = 2;
+                    ret = func_ovl3_8021E340(state[0x39], state[0x3A], dir);
+                    if (ret != -1) {
+                        play_sound_effect(0x5C, 0xF, 0x64);
+                        state[0x3A] = (s8)ret;
+                    }
+                } else if (D_800C2000 & 0x400) {
+                    dir = 3;
+                    ret = func_ovl3_8021E340(state[0x39], state[0x3A], dir);
+                    if (ret != -1) {
+                        play_sound_effect(0x5C, 0xF, 0x64);
+                        state[0x3A] = (s8)ret;
+                    }
+                } else if (D_800C2000 & 0x200) {
+                    dir = 0;
+                    ret = func_ovl3_8021E340(state[0x39], state[0x3A], dir);
+                    if (ret != -1) {
+                        play_sound_effect(0x5C, 0xF, 0x64);
+                        state[0x39] = (s8)ret;
+                    }
+                } else if (D_800C2000 & 0x100) {
+                    dir = 1;
+                    ret = func_ovl3_8021E340(state[0x39], state[0x3A], dir);
+                    if (ret != -1) {
+                        play_sound_effect(0x5C, 0xF, 0x64);
+                        state[0x39] = (s8)ret;
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021D3AC);
 
