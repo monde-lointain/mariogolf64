@@ -1,3 +1,4 @@
+#include "club.h"
 #include "terrain.h"
 #include "session.h"
 
@@ -263,41 +264,78 @@ void func_80045C00(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
 
-/* func_80046604: club/terrain sound-effect dispatch:
- *
- *   club  = get_club_param(*(s16*)(D_801B7222 + D_80250B54*0xB8 +
- * D_80250B40*2)); entry = get_table_entry(active_terrain_index);
- * // club held in $s0
- * across this call, kind  = *(s16*)((u8*)club + 0x24);     // read AFTER so $s0
- * reuses to entry if (kind == 0) { if (D_80250B58 == 0 && D_80250B34 != 0) {
- * play_sound_effect(0x50,2,0x7F); func_80213D70(0); } else { id = *(s32*)entry;
- * func_80213D70(2); play_sound_effect(id == 0x16 ? 0x50 : 0x52, 2, 0x7F); }
- *     func_80216CAC();
- *   } else if ((u16)(kind - 1) < 2) {          // kind in {1,2}
- *     a = 2; if (D_80250B58==0 && D_80250B34!=0 && active_club_id<6) a = 1;
- *     func_80213D70(a);
- *     id = *(s32*)entry;                        // -> 0x53/0x54/0x56 by id
- *     switch(id){0x16:0x53; {0,1,2}:0x54; {6,7,8}:0x56; default:0x54}
- *     play_sound_effect(a, 2, 0x7F);
- *   } else { play_sound_effect(0x57,2,0x7F);
- *            if (D_800BE62C != 0x13) func_80213D70(3); }
- *
- * The head (index math, both callee scheduling, kind read, kind==0 arm) is
- * byte-exact. The residual is three branch-scheduling differences in the
- * kind-in-{1,2} arm that no source form flips together:
- *   1. the `&&` guard chain: ROM fills the plain `beqz/bnez` delay slots with
- *      a0=1/a0=2; every source form emits branch-likely (`beqzl/bnezl`,
- * annulled) instead.
- *   2. the terminal `id==8 ? 0x56 : 0x54`: gcc if-converts to a branchless
- *      xori/sltiu/negu/andi/ori select; the ROM keeps `bne v1,8` + two `li a0`.
- *      A goto to a shared label does NOT stop the merge (jump-opt rejoins it).
- *   3. the ROM shares one `a0=0x54` (set in the id<2 delay slot) across the
- *      id<2, id==2 and default arms via fall/branch-through; an if-chain or
- *      switch each re-materialises 0x54, and a switch lowers 6 instr SHORTER.
- * All three come from gcc's const-select / branch-likely handling. The permuter
- * cannot see internal branch-target/annul bits.
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
+extern s32 D_80250B34;
+extern s32 D_80250B40;
+extern s32 D_80250B54;
+extern s32 D_80250B58;
+extern s32 active_club_id;
+extern s32 active_terrain_index;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern void func_80213D70(s32 arg0);
+extern void func_80216CAC(void);
+
+/* Plays the shot sound for the active club on the active terrain. Club kind 0
+ * uses one sound pair; kinds 1 and 2 pick the sound from the terrain id; any
+ * other kind plays the fallback sound. */
+void func_80046604(void) {
+  ClubShot* club;
+  TerrainAttrEntry* terrain;
+  s16 kind;
+  s32 mode;
+  s32 sound;
+
+  club = get_club_param(player_records[D_80250B54].club_ids[D_80250B40]);
+  terrain = get_table_entry(active_terrain_index);
+  kind = club->kind;
+  if (kind == 0) {
+    if (D_80250B58 == 0 && D_80250B34 != 0) {
+      play_sound_effect(0x50, 2, 0x7F);
+      func_80213D70(0);
+    } else {
+      if (terrain->id == 0x16) {
+        func_80213D70(2);
+        sound = 0x50;
+      } else {
+        func_80213D70(2);
+        sound = 0x52;
+      }
+      play_sound_effect(sound, 2, 0x7F);
+    }
+    func_80216CAC();
+    return;
+  }
+  if ((u16)(kind - 1) < 2U) {
+    if (D_80250B58 == 0 && D_80250B34 != 0) {
+      if (active_club_id >= 6) {
+        mode = 2;
+      } else {
+        mode = 1;
+      }
+    } else {
+      mode = 2;
+    }
+    func_80213D70(mode);
+    if (terrain->id == 0x16) {
+      sound = 0x53;
+    } else {
+      if (terrain->id < 2U) {
+        sound = 0x54;
+      } else if (terrain->id == 2) {
+        sound = 0x54;
+      } else if ((u32)(terrain->id - 6) < 2U || terrain->id == 8) {
+        sound = 0x56;
+      } else {
+        sound = 0x54;
+      }
+    }
+    play_sound_effect(sound, 2, 0x7F);
+    return;
+  }
+  play_sound_effect(0x57, 2, 0x7F);
+  if (D_800BE62C != 0x13) {
+    func_80213D70(3);
+  }
+}
 
 s32 random_bounded_index(s32 bound) {
   if (bound == 0) {
@@ -335,9 +373,7 @@ extern s32* D_800DAF4C;
 extern s32 D_800BE640;
 extern s32 D_800BE644;
 extern s32 D_800BE648;
-extern s32 D_80250B34;
 extern s32 D_80250B20;
-extern s32 D_80250B58;
 extern s32 get_shot_param(void);
 
 /* Shot-strength tier: 0 when the shot is unavailable or already at full power,
