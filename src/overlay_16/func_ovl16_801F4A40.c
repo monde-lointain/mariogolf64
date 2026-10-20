@@ -226,7 +226,53 @@ void func_ovl16_801F4F7C(void) {
     D_ovl16_802237B9 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F4F90);
+typedef struct {
+    Vec3f eye;
+    Vec3f at;
+    s8 eye_init;
+    s8 at_init;
+} CameraSmoothState;
+
+extern CameraSmoothState D_ovl16_802237A0;
+
+void func_ovl16_801F4F90(Vec3f* eye, Vec3f* at, f32 t, s32 flags) {
+    f32 temp;
+
+    if (flags & 2) {
+        if (D_ovl16_802237A0.eye_init == 0) {
+            D_ovl16_802237A0.eye.x = eye->x;
+            D_ovl16_802237A0.eye.y = eye->y;
+            D_ovl16_802237A0.eye.z = eye->z;
+            D_ovl16_802237A0.eye_init = 1;
+        }
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.eye.x, eye->x, t);
+        eye->x = temp;
+        D_ovl16_802237A0.eye.x = temp;
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.eye.y, eye->y, t);
+        eye->y = temp;
+        D_ovl16_802237A0.eye.y = temp;
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.eye.z, eye->z, t);
+        eye->z = temp;
+        D_ovl16_802237A0.eye.z = temp;
+    }
+    if (flags & 1) {
+        if (D_ovl16_802237A0.at_init == 0) {
+            D_ovl16_802237A0.at.x = at->x;
+            D_ovl16_802237A0.at.y = at->y;
+            D_ovl16_802237A0.at.z = at->z;
+            D_ovl16_802237A0.at_init = 1;
+        }
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.at.x, at->x, t);
+        at->x = temp;
+        D_ovl16_802237A0.at.x = temp;
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.at.y, at->y, t);
+        at->y = temp;
+        D_ovl16_802237A0.at.y = temp;
+        temp = func_ovl16_801F4F24(D_ovl16_802237A0.at.z, at->z, t);
+        at->z = temp;
+        D_ovl16_802237A0.at.z = temp;
+    }
+}
 
 extern s32 func_800544B4(s32 arg0, s32 arg1);
 
