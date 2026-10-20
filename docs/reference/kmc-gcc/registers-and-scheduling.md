@@ -11,6 +11,8 @@ Block-scoped temporaries have shorter live ranges and are less likely to take ca
 
 Declaration order and expression decomposition affect allocation: an otherwise unnecessary temporary can change which values are reloaded, retained, or placed in argument and temporary registers. Use such changes only when they leave readable, meaningful C.
 
+A load from a `const`-qualified global is treated as loop-invariant: GCC hoists it out of a loop that stores to memory and emits it before the loop in order of first use. A load from a non-`const` global that the loop also writes stays inside the loop and is reloaded each iteration. Declaring the global `const` is the way to get the hoisted form; a local copy made before the loop gave a different load order in one probe.
+
 # Statement order
 
 The scheduler fills load-use and branch-delay slots with independent instructions. Source statement order decides which instructions are available in a scheduling region, so splitting a compound expression or moving a pointer load can change emitted order without changing behavior.

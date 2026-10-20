@@ -38,3 +38,4 @@
 * **Update**: [decompile-function](/procedures/decompile-function.md) fixes the definition name (the `INCLUDE_ASM` name, not a caller's alias) and the commit subjects agents write.
 * **Update**: `objdump.py` renders `%lo`/`%hi` for relocations against auto-named `D_<VRAM>`/`func_<VRAM>` symbols by resolved address, so two names for one address compare equal. Before/after on `func_ovl7_80206718`: 98.793% (70 differences) to 100.000% exact ([decomp-env](/tools/decomp-env.md)).
 * **Added**: `tools/sync-shard`, which rebases nigel shard worktrees onto `MG64_SYNC_BRANCH` between candidates ([task-runner](/tools/task-runner.md)).
+* **Update**: [KMC GCC reference](/reference/kmc-gcc/index.md) adds the `const`-global loop-hoisting rule to [registers and scheduling](/reference/kmc-gcc/registers-and-scheduling.md).
