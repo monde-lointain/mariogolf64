@@ -83,7 +83,49 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024EB98)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024EDD8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F014);
+s32 func_ovl4_8024F014(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    u32 seed;
+    s32 rnd;
+
+    switch (arg0) {
+    case 3:
+        seed = D_ovl4_802542A0 * 0x5D588B65 + 1;
+        D_ovl4_802542A0 = seed;
+        rnd = seed >> 16;
+        arg0 = (((rnd & 7) + 4) << 11) | ((4 - ((rnd >> 5) & 3)) << 6);
+        arg2 = 3;
+        break;
+    case 6:
+        if ((arg1 ^ 6) != 0) {
+            if (arg2 < 2) {
+                arg0 = 0x650B;
+                arg2 = 6;
+                break;
+            }
+        }
+        if (arg1 == 6 || arg2 >= 2) {
+            if (arg4 & 8) {
+                arg0 = (arg3 & 4) ? 0xCE72 : 0x650B;
+            } else {
+                arg0 = (arg3 & 4) ? 0x650B : 0xCE72;
+            }
+            arg2 = 6;
+        } else {
+            arg0 = 0x2689;
+            arg2 = 0;
+        }
+        break;
+    case 7:
+        arg0 = 0x3CC;
+        arg2 = 7;
+        break;
+    default:
+        arg0 = 0xFFFF;
+        arg2 = 7;
+        break;
+    }
+    return (arg0 << 16) | arg2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F118);
 
