@@ -526,7 +526,17 @@ void func_ovl0_80206E88(s32 player_index) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207014);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207048);
+/* Returns 0 if any of PlayerState bytes 0x78..0x7A equals 1, else 1. */
+s32 func_ovl0_80207048(PlayerState *player) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (*((s8 *)player + i + 0x78) == 1) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 u8* func_8005AF50(void);
 void func_8005DE60(s32);
