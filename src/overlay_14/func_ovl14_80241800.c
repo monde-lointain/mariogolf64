@@ -13,7 +13,7 @@ extern void play_bgm_by_id(s32 id, s32 flags);
 extern s32 D_ovl14_802457E0;
 extern s32 D_ovl14_80245860;
 extern void* D_ovl14_80245AB0;
-extern s32 D_ovl14_80245A20;
+extern s32 D_ovl14_80245A20[4];
 extern s32 D_800C0E60;
 extern s32 D_800C306C;
 extern s8 D_801061BD;
@@ -51,6 +51,8 @@ extern void func_8005DE60(void);
 extern void func_8005CF78(void);
 extern s32 transfer_continue_slot(s32 id, s32 restore);
 extern void func_ovl14_80242050(s32 arg0);
+extern s32 func_8006BA10(void);
+extern void func_8006BA24(s32 dialog_index);
 
 typedef struct {
     /* 0x00 */ u8 unknown_00[4];
@@ -205,7 +207,98 @@ void func_ovl14_802439B0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802439C8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243E28);
+s32 func_ovl14_80243E28(ControllerState *input) {
+    u8 *save = func_8005AF50();
+    s32 frame = D_ovl14_802457E8 + 1;
+    SupershotRecord *record;
+    s32 end;
+    s32 i;
+    s32 v;
+    D_ovl14_802457E8 = frame;
+
+    switch (D_ovl14_802457EC) {
+    case 0:
+        i = 0;
+        end = frame;
+        for (; i != 4; i++) {
+            if (i < end) {
+                v = D_ovl14_80245A20[i];
+                if (v > 0) {
+                    if (v == 1) {
+                        D_ovl14_80245A20[i] = 0;
+                    } else {
+                        D_ovl14_80245A20[i] = v + (s32) -v / 2;
+                    }
+                }
+            }
+        }
+        if (D_ovl14_802457E8 == 0xE) {
+            D_ovl14_802457EC = 1;
+        }
+        return 0;
+    case 1:
+        if (func_8006BA10() == 0) {
+            return 0;
+        }
+        if (input->pressed & 0x8000) {
+            if ((u32) D_ovl14_802457E4 < 5) {
+                record = &((SupershotRecord *) (save + 0x1DF0))[D_ovl14_802457E4];
+                if ((s8) record->validation_flags & 0x80) {
+                    D_800C306C = 6;
+                    func_8006BA24(2);
+                    play_sound_effect(0x5D, 0xF, 0x64);
+                    return 2;
+                }
+                func_ovl14_80243898();
+                play_sound_effect(0x3B, 0xF, 0x64);
+            } else {
+                D_800C306C = 6;
+                func_8006BA24(5);
+                return 2;
+            }
+        } else if (input->pressed & 0x4000) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            D_ovl14_802457E4 = 5;
+        } else if (input->repeated & 0x800) {
+            D_ovl14_802457E4 -= 1;
+            play_sound_effect(0x5C, 0xF, 0x64);
+        } else if (input->repeated & 0x400) {
+            D_ovl14_802457E4 += 1;
+            play_sound_effect(0x5C, 0xF, 0x64);
+        }
+        if (D_ovl14_802457E4 < 0) {
+            D_ovl14_802457E4 = 5;
+        }
+        if (D_ovl14_802457E4 >= 6) {
+            D_ovl14_802457E4 = 0;
+        }
+        return 0;
+    case 4:
+        if (frame == 0xF) {
+            D_ovl14_802457EC = 5;
+            D_ovl14_802457E8 = 0;
+        }
+        return 0;
+    case 5:
+        for (i = 0; i != 4; i++) {
+            if (i < frame) {
+                v = D_ovl14_80245A20[i];
+                if (v >= -1) {
+                    D_ovl14_80245A20[i] = v - 4;
+                } else {
+                    D_ovl14_80245A20[i] = v + v / 2;
+                }
+            }
+        }
+        if (D_ovl14_802457E8 == 0xF) {
+            func_ovl14_80241E54();
+            return 1;
+        }
+        return 0;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80244134);
 
@@ -222,7 +315,7 @@ void func_ovl14_80245260(void) {
         D_ovl14_80245AB0 = payload;
         load_rom_asset_payload(payload, &asset);
     }
-    D_ovl14_80245A20 = 0xF0;
+    D_ovl14_80245A20[0] = 0xF0;
     D_ovl14_802457E0 = 1;
     D_ovl14_802457E8 = 0;
     D_ovl14_80245860 = func_80051BFC();
@@ -241,7 +334,7 @@ void func_ovl14_80245598(ControllerState *input) {
     D_ovl14_802457E8 += 1;
     switch (D_ovl14_802457EC) {
     case 0: {
-        s32 *a20 = &D_ovl14_80245A20;
+        s32 *a20 = D_ovl14_80245A20;
 
         if (*a20 > 0) {
             if (*a20 == 1) {
@@ -268,7 +361,7 @@ void func_ovl14_80245598(ControllerState *input) {
         }
         break;
     case 2: {
-        s32 *a20 = &D_ovl14_80245A20;
+        s32 *a20 = D_ovl14_80245A20;
 
         if (*a20 >= -1) {
             *a20 = *a20 - 4;
