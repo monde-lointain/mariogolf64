@@ -443,7 +443,80 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FA684)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FAD2C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FB02C);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags, u8 red, u8 green, u8 blue, u8 alpha);
+extern void func_ovl0_801F6450(Gfx** pgfx, s32 x, s32 y, s32 index);
+extern void load_texture_block_4b(Gfx** pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms,
+                                  s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+extern void emit_glyph_sheet_preamble_dl(Gfx** chain, s32 arg1);
+extern void emit_glyph_string_dl(Gfx** gfxp, s32 y, s32 x, char* str);
+extern void func_8007624C(Gfx** chain, s32 x, s32 y, char* str, u32 fg, u32 bg, s32 arg6);
+extern s32 D_ovl0_8021FC84;
+extern s32 D_ovl0_80225798;
+extern s32 D_ovl0_802257C8;
+extern s32 D_ovl0_802257D0;
+extern void* D_ovl0_80225700;
+extern char D_80105118[];
+extern char D_ovl0_80224DD4[];
+extern char D_ovl0_80224DD8[];
+extern char D_ovl0_80224DE0[];
+extern char D_ovl0_80224DE4[];
+extern char D_ovl0_80224DF4[];
+extern char D_ovl0_80224DFC[];
+
+void func_ovl0_801FB02C(Gfx** pgfx) {
+    Gfx* gfx;
+    s32 secs;
+    s32 mins;
+    s32 frames;
+
+    gfx = *pgfx;
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+
+    func_ovl0_801F7418(&gfx, D_ovl0_8021FC80 + 0x28, D_ovl0_8021FC84 + 0x58, 0, 0);
+    func_ovl0_801F7294(&gfx, D_ovl0_8021FC80 + 0x52, D_ovl0_8021FC84 + 0x38, 2);
+    func_ovl0_801F7294(&gfx, D_ovl0_8021FC80 + 0xE8, D_ovl0_8021FC84 + 0x38, 5);
+    if (D_ovl0_8021FD40 == 6) {
+        func_800719A0(D_ovl0_8021FC80 + 0x20, D_ovl0_8021FC84 + 0xC0, 0x47, 1, 0, 0, 0xE6, 0xE6, 0xFF, 0xFF);
+    } else {
+        func_ovl0_801F6450(&gfx, D_ovl0_8021FC80 + 0x1D, 0xC9,
+                           D_ovl0_8021FD48 + D_ovl0_802257C8 + D_ovl0_802257D0);
+        func_800719A0(D_ovl0_8021FC80 + 0x40, D_ovl0_8021FC84 + 0xC8, 0x46, 1, 0, 0, 0xE6, 0xE6, 0xFF, 0xFF);
+    }
+    func_8006A4A0(&gfx, 0, (u32)D_ovl0_80225700 + 8);
+    load_texture_block_4b(&gfx, (u32)D_ovl0_80225700 + 0x28, 2, 0x10, 0x100, 0, 0, 0, 0, 0, 0, 0);
+
+    if (D_ovl0_80225788 == 0) {
+        sprintf(D_80105118, D_ovl0_80224DD4, 0);
+    } else {
+        sprintf(D_80105118, D_ovl0_80224DD8, D_ovl0_80225788);
+    }
+    emit_glyph_string_dl(&gfx, D_ovl0_8021FC80 + 0x5A, D_ovl0_8021FC84 + 0x84, D_80105118);
+
+    frames = (s32)((f32)D_801B60B0 * 3.3333335f) % 100;
+    secs = D_801B60B0 / 30;
+    mins = (secs / 60) % 99;
+    sprintf(D_80105118, D_ovl0_80224DE4, mins, secs % 60, frames);
+    emit_glyph_string_dl(&gfx, D_ovl0_8021FC80 + 0x5A, D_ovl0_8021FC84 + 0x5E, D_80105118);
+
+    sprintf(D_80105118, D_ovl0_80224DE0, D_ovl0_80225798);
+    emit_glyph_string_dl(&gfx, D_ovl0_8021FC80 + 0xE4, D_ovl0_8021FC84 + 0x58, D_80105118);
+
+    emit_glyph_sheet_preamble_dl(&gfx, 0);
+    sprintf(D_80105118, D_ovl0_80224DF4);
+    func_8007624C(&gfx, D_ovl0_8021FC80 + 0x56, D_ovl0_8021FC84 + 0x4C, D_80105118, 0xFFFF0000, 0x30FF0000, 0);
+    sprintf(D_80105118, D_ovl0_80224DFC);
+    func_8007624C(&gfx, D_ovl0_8021FC80 + 0x56, D_ovl0_8021FC84 + 0x72, D_80105118, 0xFFFF0000, 0x30FF0000, 0);
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+
+    *pgfx = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FB500);
 
