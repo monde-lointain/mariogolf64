@@ -60,6 +60,6 @@ tags: [project, layout]
 |---|---|
 | `tools/` | Scripts, the decomp environment template (`decomp-env-template/`), and the `decomp-permuter` and `asm-differ` submodules. See [tools](/tools/) and the [harness code map](/harness/code-map.md). |
 | `task-runner/` | [nigel](/tools/task-runner.md) task definitions and configuration. |
-| `.omp/` | omp configuration (`config.yml`); `skills/<name>/SKILL.md` symlinks into `docs/procedures/`; the policy hook at `hooks/pre/mg64-policy.ts`, with tests in `hooks/tests/`. |
+| `.omp/` | omp configuration (`config.yml`); `skills/<name>/SKILL.md` symlinks into `docs/procedures/`; hooks in `hooks/pre/` (the policy hook `mg64-policy.ts`, with tests in `hooks/tests/`, and `mg64-unfinished-run.ts`). |
 | `docs/` | This bundle. |
 | `docker/`, `.github/workflows/build.yml` | Docker image and [CI](/harness/git-hook-and-ci.md). |

@@ -55,6 +55,7 @@ Read [changing the harness](/harness/changing-the-harness.md) before editing any
 * `docs/`: this bundle. Its authoring rules are in [docs conventions](/harness/docs-conventions.md).
 * `.omp/config.yml`, `.omp/skills/*/SKILL.md` (symlinks into `docs/procedures/`). Environments link `.omp`, so its settings apply there.
 * `.omp/hooks/pre/mg64-policy.ts`: the tool-call guard ([policy hook](/harness/policy-hook.md)).
+* `.omp/hooks/pre/mg64-unfinished-run.ts`: continues a nigel decompile session that stops before its run has an outcome ([`pending`](/tools/difficulty-ledger.md#pending)).
 * `task-runner/config.yaml`, `task-runner/<task>/task.yaml`: nigel tasks ([task-runner](/tools/task-runner.md)).
 
 # Tests

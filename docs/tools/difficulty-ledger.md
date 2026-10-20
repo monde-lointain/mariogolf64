@@ -56,6 +56,7 @@ python3 tools/difficulty_ledger.py record <function> --outcome <outcome> --reaso
 python3 tools/difficulty_ledger.py harvest
 python3 tools/difficulty_ledger.py show [--tier 1|2|3|human] [--json]
 python3 tools/difficulty_ledger.py write-run <env> <function>
+python3 tools/difficulty_ledger.py pending <env>
 ```
 
 ## `record`
@@ -106,6 +107,12 @@ Text output is tab-separated with the header `function	tier	failures	best_pct	la
 ## `write-run`
 
 Writes `<env>/.run.json` and prints nothing. `decomp-env` calls it when it creates an environment (`tools/decomp-env`). If the call fails, `decomp-env` prints a warning and build.sh falls back to its default stall limit.
+
+## `pending`
+
+Prints `pending` while the run in `<env>` has no outcome, else `finished`. A run is finished once its (function, worktree, env) has a ledger record, the function is in `src/`, `NEAR_MISS.md` is present, or `match_log.txt` reached `stall_limit`.
+
+`.omp/hooks/pre/mg64-unfinished-run.ts` calls it from omp's `session_stop` event when `NIGEL_TASK_NAME` starts with `decompile-` and more than 5 minutes remain before `NIGEL_TIMEOUT_DEADLINE_UNIX`, for `nonmatchings/$NIGEL_CANDIDATE-$NIGEL_RUN_ID`. On `pending` it continues the session with a reminder to resume the brief; omp allows 8 such continuations per prompt.
 
 # `.run.json`
 

@@ -15,6 +15,7 @@ worktree). Commands:
   harvest                                    back-fill outcomes for finished nigel runs
   show [--tier 1|2|3|human] [--json]         list functions with failure history
   write-run <env> <function>                 write <env>/.run.json (called by decomp-env)
+  pending <env>                              'pending' while a run has no outcome, else 'finished'
 See docs/tools/difficulty-ledger.md.
 """
 
@@ -421,6 +422,17 @@ def harvest(root: Path, ledger: Path, *, now: float, integrated: Optional[set] =
     return added
 
 
+def run_finished(root: Path, env_dir: Path, records: Sequence[dict], integrated: set) -> bool:
+    """True once a run has an outcome: a ledger record, a C definition in src/, a NEAR_MISS.md
+    note, or a match log at its stall limit."""
+    run = read_run(env_dir) or {}
+    function = run.get('function') or _function_of_env(env_dir)
+    if (function, str(root.resolve()), _env_rel(root, env_dir)) in {_key(r) for r in records}:
+        return True
+    return (function in integrated or (env_dir / NEAR_MISS_NOTE).is_file()
+            or stalled(env_dir, run.get('stall_limit')))
+
+
 def shown_rows(root: Path, records: Sequence[dict], tier=None) -> list[dict]:
     """One row per function with failure history, optionally only those at `tier`."""
     history = failure_history(list(records) + near_miss_records(root, records))
@@ -508,6 +520,15 @@ def _cmd_write_run(args) -> int:
     return 0
 
 
+def _cmd_pending(args) -> int:
+    env_dir = Path(args.env).resolve()
+    root = _repo_root(cwd=env_dir)
+    finished = run_finished(root, env_dir, read_records(ledger_path(cwd=root)),
+                            integrated_function_names(root))
+    print('finished' if finished else 'pending')
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     sub = parser.add_subparsers(dest='command', required=True)
@@ -532,6 +553,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     wr.add_argument('env')
     wr.add_argument('function')
     wr.set_defaults(run=_cmd_write_run)
+
+    pend = sub.add_parser('pending', help="print 'pending' while a run has no outcome, else 'finished'")
+    pend.add_argument('env')
+    pend.set_defaults(run=_cmd_pending)
 
     args = parser.parse_args(argv)
     try:

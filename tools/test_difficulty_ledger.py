@@ -336,6 +336,26 @@ class HarvestTest(TreeCase):
         self.assertEqual(dl.harvest(self.root, self.ledger, now=NOW, integrated=set()), [])
 
 
+class RunFinishedTest(TreeCase):
+    def env(self, match_lines):
+        return self.make_env('func_A-1', run={'function': 'func_A', 'stall_limit': 2},
+                             match_lines=match_lines)
+
+    def test_progress_inside_the_stall_limit_is_pending(self):
+        env = self.env(['base_1.c 80.000%', 'base_2.c 70.000%', 'base_3.c 81.000%'])
+        self.assertFalse(dl.run_finished(self.root, env, [], set()))
+
+    def test_stall_note_record_or_integration_finishes_the_run(self):
+        env = self.env(['base_1.c 80.000%', 'base_2.c 70.000%', 'base_3.c 80.000%'])
+        self.assertTrue(dl.run_finished(self.root, env, [], set()))
+        (env / 'match_log.txt').unlink()
+        self.assertTrue(dl.run_finished(self.root, env, [], {'func_A'}))
+        ledger = [record('func_A', 'nonmatchings/func_A-1', 1, worktree=str(self.root))]
+        self.assertTrue(dl.run_finished(self.root, env, ledger, set()))
+        (env / dl.NEAR_MISS_NOTE).write_text('note\n')
+        self.assertTrue(dl.run_finished(self.root, env, [], set()))
+
+
 class LedgerIoTest(TreeCase):
     def test_append_then_read_round_trips(self):
         rec = record('func_A', 'nonmatchings/func_A-1', 1)
