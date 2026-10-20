@@ -22,6 +22,8 @@ The third field of a `.data`/`.rodata` entry names the owning source file (`main
 
 An unowned `- [<rom>, rodata]` entry: find which functions reference its labels (jump tables `jtbl_...`, float constants `D_...`; search `asm/`). If they are all C, change it to `- [<rom>, .rodata, <dir>/<file>]`, split any trailing range that belongs to another file into its own `rodata` entry, and define the constants in the C file in ROM order. KMC GCC places a function's jump tables and literals in `.rodata` itself ([data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md)). The generated linker script places every `.data` input of a segment before every `.rodata` input (`<seg>_DATA_START` … `<seg>_RODATA_START` in `mariogolf64.ld`), so a carved `.rodata` table lands at its ROM offset only when every raw entry after it in the segment is also `rodata`-typed; a `data` entry after the table moves it to the wrong VRAM (overlay_11's `- [0x15B8F8, rodata]` stays `rodata`-typed for this reason). If the owning file still has `INCLUDE_ASM` stubs that reference this rodata, use `INCLUDE_RODATA("asm/...", symbol)` for those symbols or leave the entry alone.
 
+Overlays share VRAM, so before widening a `.rodata` entry, grep `asm/data/` for `.word .L<prefix>_…` entries pointing into the new range. Splat moves an asm-only jump table into its function's `.s`, where its labels become local. Any other overlay's raw data that splat named with those labels then fails to link (`undefined reference to .Lovl9_801F5548` from `16CCB0.data.o`). Such a table has to stay raw, so it ends the owned range.
+
 # 2. Rebuild and read the failures
 
 ```bash
