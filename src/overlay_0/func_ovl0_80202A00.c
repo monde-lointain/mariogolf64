@@ -666,7 +666,16 @@ void func_ovl0_80207660(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207668);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802078C4);
+/* Clamps the three signed flag bytes at PlayerState 0x78..0x7A: values >= 2 become 0. */
+void func_ovl0_802078C4(PlayerState *player) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if ((s8)player->unknown_72[i + 6] >= 2) {
+            player->unknown_72[i + 6] = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802078F4);
 
