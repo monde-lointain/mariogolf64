@@ -30,7 +30,34 @@ extern void func_800934CC(s32 arg0);
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern void set_color_framebuffer_count(u32 buffer_count);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80241800);
+typedef struct {
+    /* 0x00 */ u8 unknown_00[4];
+    /* 0x04 */ s32 kind;
+    /* 0x08 */ u8 unknown_08[0x32];
+    /* 0x3A */ s8 flag;
+} Overlay14Entry;
+
+s32 func_ovl14_80241800(Overlay14Entry *entry) {
+    if (entry->flag != 0) {
+        return 5;
+    }
+    switch (entry->kind) {
+    case 5:
+        return 0;
+    case 4:
+        return 1;
+    case 0:
+        return 2;
+    case 2:
+        return 6;
+    case 10:
+        return 7;
+    case 11:
+        return 10;
+    default:
+        return -1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_8024186C);
 

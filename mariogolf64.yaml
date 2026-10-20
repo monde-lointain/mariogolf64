@@ -691,6 +691,8 @@ segments:
     subsegments:
       - [0x1619A0, c, overlay_14/func_ovl14_80241800]
       - [0x165970, data]
+      - [0x165A88, .rodata, overlay_14/func_ovl14_80241800]
+      - [0x165AB8, rodata]
       - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
 
   # Overlay 15
