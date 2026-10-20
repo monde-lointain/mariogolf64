@@ -89,6 +89,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6450)
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6718);
 
 extern void func_8006A548(Gfx** pgfx, u32 tlut);
+extern void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr);
 extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
                                s32 width, s32 height, s32 pal, s32 cms,
                                s32 cmt, s32 masks, s32 maskt, s32 shifts,
@@ -96,6 +97,7 @@ extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz,
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern void* D_ovl0_80225704;
+extern void* D_ovl0_802256FC;
 void func_ovl0_801F7740(Gfx** pgfx);
 void func_ovl0_801F8094(Gfx** pgfx);
 
@@ -118,7 +120,20 @@ void func_ovl0_801F6D0C(Gfx** pgfx, s32 x, s32 y, s32 index) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F6DFC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7294);
+/**
+ * Loads the palette at block+8 and the 72x18 CI4 texture (rows 40 bytes, at
+ * block+0x28 + index * 0x2D0), then draws it at pixel (x, y).
+ */
+void func_ovl0_801F7294(Gfx** pgfx, s32 x, s32 y, s32 index) {
+    Gfx* gfx = *pgfx;
+    s32 offset;
+
+    func_8006A4A0(&gfx, 0, (u32)D_ovl0_802256FC + 8);
+    offset = (index * 0x2D0) + 0x28;
+    gDPLoadTextureTile_4b(gfx++, ((u32)D_ovl0_802256FC + offset) & ~7, G_IM_FMT_CI, 80, 18, 0, 0, 71, 17, 0, 0, 0, 0, 0, 0, 0);
+    func_8006A2C0(&gfx, x * 4, y * 4, (x + 0x48) * 4, (y + 0x12) * 4, 0, 0, 0, 0x400, 0x400);
+    *pgfx = gfx;
+}
 
 extern void* D_ovl0_802256D8[];
 extern void* D_ovl0_802256E8[];
