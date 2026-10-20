@@ -534,6 +534,7 @@ segments:
       - [0x11B800, .rodata, overlay_3/func_ovl3_8020E010]
       - [0x11B820, rodata]
       - [0x11B9D0, .rodata, overlay_3/func_ovl3_802266F0]
+      - [0x11B9F0, .rodata, overlay_3/func_ovl3_802266F0]
       - [0x11BA10, rodata]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
 
