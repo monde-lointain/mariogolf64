@@ -25,9 +25,9 @@ typedef struct {
   /* 0x24 */ u8 unknown_24;
   /* 0x25 */ s8 standing;
   /* 0x26 */ s8 hole_status;
-  /* 0x27 */ u8 unknown_27[2];
+  /* 0x27 */ s8 unknown_27[2];
   /* 0x29 */ s8 handicap;
-  /* 0x2A */ u8 unknown_2A;
+  /* 0x2A */ s8 unknown_2A;
   /* 0x2B */ PlayerHoleScore hole_scores[18];
   /* 0x4F */ u8 unknown_4F[3];
   /* 0x52 */ s16 club_ids[16];

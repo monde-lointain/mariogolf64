@@ -4,6 +4,7 @@
 #include "../main/club.h"
 #include "../main/ball.h"
 #include "../main/terrain.h"
+#include "../main/controller.h"
 
 typedef struct {
     u16 unk0;
@@ -1037,6 +1038,46 @@ void func_ovl0_80207BEC(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207CAC);
+extern s32 D_801B60A8;
+extern ControllerState D_800FBDC0[];
+extern void func_80067A60(s32 bank, s32 channel, s32 entry, s32 volume, s32 pan);
+
+void func_ovl0_80207CAC(void) {
+    s32 i;
+    s32 state;
+    s8 port;
+    u16 buttons;
+
+    if (D_80105168.unk_88 == 1) {
+        for (i = 0; i < active_player_count; i++) {
+            state = player_records[i].state_code;
+            if (((state == 0x11) | (state == 0x14)) != 0) {
+                port = player_records[i].unknown_27[0];
+                if (port != player_records[D_801B60A8].unknown_27[0]) {
+                    if (port < 4) {
+                        buttons = D_800FBDC0[port].pressed;
+                        if (buttons & 0x800) {
+                            func_80067A60(player_records[i].character_index, i, 0, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x400) {
+                            func_80067A60(player_records[i].character_index, i, 2, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x200) {
+                            func_80067A60(player_records[i].character_index, i, 4, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x100) {
+                            func_80067A60(player_records[i].character_index, i, 6, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x8) {
+                            func_80067A60(player_records[i].character_index, i, 8, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x4) {
+                            func_80067A60(player_records[i].character_index, i, 0xA, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x2) {
+                            func_80067A60(player_records[i].character_index, i, 0xC, 0x7F, player_records[i].unknown_2A);
+                        } else if (buttons & 0x1) {
+                            func_80067A60(player_records[i].character_index, i, 0xE, 0x7F, player_records[i].unknown_2A);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207E88);
