@@ -4,6 +4,8 @@
 
 extern u8* func_8005AF50(void);
 extern u8* func_8005AF74(void);
+extern void func_8005DF54(u8*, s32);
+extern void initialize_save_sram(void);
 extern void flag_set(s32 flag);
 extern s8 D_801B60B8;
 extern GameModeRecord D_800FEDD8[];
@@ -66,8 +68,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F79C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021FC5C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220A30);
-
 /* Save block view: supershot records start at 0x1DF0 (see insert_supershot_record). */
 typedef struct {
     u8 unknown_0000[0x1DF0];
@@ -80,6 +80,42 @@ extern u8 D_ovl3_8023BFF0[];
 extern u8 D_ovl3_8023E3F0[];
 extern void* tile_palette_table[];
 extern s16 D_ovl3_8023B684[];
+
+typedef struct {
+    u8 unknown_00[0x42];
+    s8 unknown_42;
+    s8 slot_index;
+} ContinueSlotSelection;
+
+s16 func_ovl3_80220E28(SupershotRecord* record);
+
+void func_ovl3_80220A30(void) {
+    SaveSupershotView* save;
+    ContinueSlotSelection* selection;
+    s8 i;
+
+    save = (SaveSupershotView*)func_8005AF50();
+    selection = (ContinueSlotSelection*)func_8005AF74();
+    initialize_save_sram();
+    func_8005DF54((u8*)save, 0);
+    for (i = 0; i != 5; i++) {
+        D_ovl3_8023B684[i] = -1;
+    }
+    for (i = 0; i != 5; i++) {
+        if (func_ovl3_80220E28(&save->records[i]) != 0) {
+            D_ovl3_8023B684[i] = i;
+        } else {
+            D_ovl3_8023B684[i] = -1;
+        }
+    }
+    if (D_ovl3_8023B684[selection->unknown_42] == -1) {
+        for (i = 0; i != 5; i++) {
+            if (D_ovl3_8023B684[i] != -1) {
+                selection->unknown_42 = i;
+            }
+        }
+    }
+}
 
 void func_ovl3_80220BB0(void) {
     RomAssetLoad asset;
@@ -160,7 +196,7 @@ s16 func_ovl3_80220DF8(void) {
     return D_ovl3_8023B684[((s8*)func_8005AF74())[0x42]];
 }
 
-s32 func_ovl3_80220E28(SupershotRecord* record) {
+s16 func_ovl3_80220E28(SupershotRecord* record) {
     return record->validation_flags >> 7;
 }
 
@@ -290,11 +326,6 @@ void func_ovl3_80222038(void* arg0, u8 arg1) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8022209C);
-
-typedef struct {
-    u8 unknown_00[0x43];
-    s8 slot_index;
-} ContinueSlotSelection;
 
 s32 func_ovl3_80222C94(void) {
     SaveContinueView* save = (SaveContinueView*)func_8005AF50();
