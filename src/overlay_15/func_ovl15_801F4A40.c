@@ -103,7 +103,10 @@ typedef struct {
     s32 unk7B4;
     u8 unk7B8[0x20];
     s8 unk7D8[12]; /* 0x7D8 */
-} Ovl15AssetBlock; /* known extent 0x7E4 */
+    s32 unk7E4;
+    s32 unk7E8;
+    s32 unk7EC[1]; /* 0x7EC; indexed 0..unk7E8-1 */
+} Ovl15AssetBlock; /* known extent 0x7EC */
 
 typedef struct {
   /* 0x00 */ u8 unknown_00[0x7A8];
@@ -120,7 +123,7 @@ typedef struct {
 extern s32 D_ovl15_801FBB78;
 extern s32 D_ovl15_801FBB7C;
 extern s32 D_ovl15_801FBB80;
-extern void func_ovl15_801F7664(Gfx** dl, s32* arg1);
+extern void func_ovl15_801F7664(Gfx** dl, Ovl15AssetBlock* arg1);
 extern s32 D_80105218;
 extern u32 controller_handle_array[];
 extern s32 nuContRmbCheck(u32 contNo);
@@ -157,6 +160,9 @@ extern void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width
                                s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 extern void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t,
                           s32 dsdx, s32 dtdy);
+extern void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr);
+extern void load_texture_block_4b(Gfx **pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+extern void func_ovl15_801FB510(Gfx **dl, s32 a, s32 b);
 extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
                           u8 red, u8 green, u8 blue, u8 alpha);
 extern void func_80071CE4(Gfx **dl, s32 i);
@@ -609,7 +615,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F71
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F7664);
 
-void func_ovl15_801F77D4(Gfx** dl, s32* arg1) {
+void func_ovl15_801F77D4(Gfx** dl, Ovl15AssetBlock* arg1) {
     Gfx* saved = *dl;
 
     func_ovl15_801F7664(&saved, arg1);
@@ -618,7 +624,38 @@ void func_ovl15_801F77D4(Gfx** dl, s32* arg1) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F780C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F7ED4);
+void func_ovl15_801F7ED4(Gfx **dl, Ovl15AssetBlock *blk) {
+    Gfx *gfx = *dl;
+    s32 i;
+    s32 j;
+
+    func_ovl15_801F7664(&gfx, blk);
+    if (blk->unk7A8 == 0) {
+        func_ovl15_801FB510(&gfx, blk->unk7B4 * 0x28 + 0xF, 0x7F);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    }
+    func_8006A4A0(&gfx, 0, (u32)blk->unk34 + 8);
+    load_texture_block_4b(&gfx, (u32)blk->unk34 + 0x28, G_IM_FMT_CI, 0x20, 0x80, 0, 0, 0, 0, 0, 0, 0);
+    j = 0;
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    i = 0;
+    if (blk->unk7E8 != 0) {
+        do {
+            if (blk->unk7A8 == 3 && j != blk->unk7E4) {
+                gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
+            } else {
+                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+            func_8006A2C0(&gfx, 0xF0 + j * 0xE0, 0x120, 0x170 + j * 0xE0, 0x1A0, 0, 0, blk->unk7EC[i] << 10, 0x400, 0x400);
+            j++;
+            i++;
+        } while (i != blk->unk7E8);
+    }
+    *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F8110);
 
