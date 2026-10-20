@@ -48,6 +48,9 @@ extern u8* func_8005AF50(void);
 extern void func_8005B28C(s32 idx, SupershotRecord* src);
 extern void func_8005D0D8(void);
 extern void func_8005DE60(void);
+extern void func_8005CF78(void);
+extern s32 transfer_continue_slot(s32 id, s32 restore);
+extern void func_ovl14_80242050(s32 arg0);
 
 typedef struct {
     /* 0x00 */ u8 unknown_00[4];
@@ -115,7 +118,48 @@ INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_802420
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80242294);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243698);
+void func_ovl14_80243698(void) {
+    RomAssetLoad asset_load;
+    RomLoadSlot rom_slot;
+    SaveContinueView* save;
+    ContinueSlot* slot;
+    ScenarioState* state;
+    PlayerState* player;
+    s32 i;
+
+    save = (SaveContinueView*)func_8005AF50();
+    slot = &save->continue_data.slots[D_ovl14_802457E4];
+    transfer_continue_slot(D_ovl14_802457E4, 0);
+    D_ovl14_802457E8 = 0;
+    state = &slot->state;
+    func_8005CF78();
+    if (save->continue_data.slots[D_ovl14_802457E4].valid != 0) {
+        D_ovl14_802457EC = 4;
+        func_ovl14_80242050(1);
+        i = 0;
+        if (slot->state.active_player_count != 0) {
+            do {
+                player = &save->continue_data.players[D_ovl14_802457E4][i];
+                get_rom_asset_allocation_size(
+                    (D_800C547C[player->character_index] + 9) & 0xFFFF,
+                    &asset_load);
+                load_rom_asset_payload(
+                    D_ovl14_80245A68[D_ovl14_802457E4 * 4 + i], &asset_load);
+                open_rom_asset_slot(
+                    D_800C54A0[player->character_index] +
+                        (s8)player->asset_variant,
+                    &rom_slot);
+                read_rom_load_slot(D_ovl14_80245A38[D_ovl14_802457E4 * 4 + i],
+                                   get_rom_load_slot_size(&rom_slot),
+                                   &rom_slot);
+                i += 1;
+            } while (i != state->active_player_count);
+        }
+    } else {
+        D_ovl14_802457EC = 1;
+    }
+    func_8005DE60();
+}
 
 void func_ovl14_80243880(void) {
     D_ovl14_802457E8 = 0;
