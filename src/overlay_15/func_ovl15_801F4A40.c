@@ -10,6 +10,11 @@ typedef struct {
 } GbPakSaveRecord; /* 0x200 */
 
 typedef struct {
+    u8 unk00;
+    u8 unk01[0x8B];
+} Ovl15Entry; /* 0x8C */
+
+typedef struct {
     void *unk0;
     void *unk4;
     void *unk8;
@@ -29,7 +34,10 @@ typedef struct {
     u8 unk58[0x14];
     NUContPakFile gbpakFile; /* 0x6C */
     OSGbpakId gbpakId; /* 0x7C */
-} Ovl15AssetBlock; /* known extent 0xCC */
+    Ovl15Entry unkCC[12]; /* 0xCC */
+    u8 unk75C[0x7C];
+    s8 unk7D8[12]; /* 0x7D8 */
+} Ovl15AssetBlock; /* known extent 0x7E4 */
 
 extern s32 D_ovl15_801FBB78;
 extern s32 D_ovl15_801FBB7C;
@@ -327,7 +335,28 @@ s32 func_ovl15_801F686C(GbPakSaveRecord *record) {
   return sum;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6890);
+void func_ovl15_801F6890(void) {
+    Ovl15AssetBlock *base;
+    s32 var_v1;
+    s32 var_a0;
+
+    base = &D_800FE450;
+    var_v1 = 0;
+    var_a0 = 0;
+    do {
+        if (base->unkCC[var_a0].unk00 == 1) {
+            base->unk7D8[var_v1] = var_a0;
+            var_v1 += 1;
+        }
+        var_a0 += 1;
+    } while (var_a0 != 0xC);
+    if (var_v1 != 0xC) {
+        do {
+            base->unk7D8[var_v1] = -1;
+            var_v1 += 1;
+        } while (var_v1 != 0xC);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F68FC);
 
