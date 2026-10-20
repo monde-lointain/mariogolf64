@@ -1,14 +1,44 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_8021B030", func_ovl0_8021B030);
-
-extern void* D_80132360;
-
 /* Frame of func_ovl0_8021B79C as seen through the static chain ($v0 = parent sp+0x10). */
 typedef struct {
     u8 pad[0x28];
     Gfx* gfx;
 } Ovl0Func8021B79CFrame;
+
+/* Nested function of func_ovl0_8021B79C (see its frame typedef above). Emits one scissored
+ * 16x8 texture rectangle around (x, y); `mode` selects the corner offsets, wrapped in pipe syncs. */
+void func_ovl0_8021B030(s32 x, s32 y, s32 mode) {
+    Ovl0Func8021B79CFrame* r;
+    struct { Ovl0Func8021B79CFrame* p; } volatile unused;
+    Ovl0Func8021B79CFrame* chain;
+
+    unused.p = r;
+    chain = r;
+
+    gDPPipeSync(chain->gfx++);
+    switch (mode) {
+    case 0:
+        gSPScisTextureRectangle(chain->gfx++, (x - 22) << 2, (y - 12) << 2, (x - 6) << 2,
+                                (y - 4) << 2, 0, 0, 0, 0x400, 0x400);
+        break;
+    case 1:
+        gSPScisTextureRectangle(chain->gfx++, (x + 6) << 2, (y - 12) << 2, (x + 22) << 2,
+                                (y - 4) << 2, 0, 0x200, 0, 0x400, 0x400);
+        break;
+    case 2:
+        gSPScisTextureRectangle(chain->gfx++, (x + 6) << 2, (y + 4) << 2, (x + 22) << 2,
+                                (y + 12) << 2, 0, 0x200, 0x100, 0x400, 0x400);
+        break;
+    case 3:
+        gSPScisTextureRectangle(chain->gfx++, (x - 22) << 2, (y + 4) << 2, (x - 6) << 2,
+                                (y + 12) << 2, 0, 0, 0x100, 0x400, 0x400);
+        break;
+    }
+    gDPPipeSync(chain->gfx++);
+}
+
+extern void* D_80132360;
 
 /* Nested-function original (parent func_ovl0_8021B79C not recovered): the
  * uninitialized `r` stands in for the static chain in $v0, saved by the dead
