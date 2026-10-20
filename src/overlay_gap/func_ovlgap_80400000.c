@@ -260,7 +260,115 @@ s32 func_ovlgap_804066C8(s32 col, s32 row) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80406818);
+extern s32 D_ovlgap_8040C67C;
+extern s32 D_ovlgap_8040C680;
+extern s32 D_ovlgap_8040C684;
+extern s32 D_ovlgap_8040C688;
+extern s32 D_ovlgap_8040C68C;
+extern char D_ovlgap_8040C9CC[];
+extern char D_ovlgap_8040C9D0[];
+extern char D_ovlgap_8040C9F4[];
+extern char D_ovlgap_8040CA04[];
+extern char D_ovlgap_8040CA14[];
+extern char D_ovlgap_8040CA20[];
+extern char D_ovlgap_8040CA24[];
+void check_and_print_grid(char *str, s32 col, s32 row);
+void set_flag_based_on_param(s32 param);
+void func_ovl4_80253270(void);
+void func_ovl4_802509BC(s32 arg0, s32 arg1);
+void load_hole_terrain_assets(s32 arg0, s32 arg1);
+
+void func_ovlgap_80406818(void) {
+    char hole_text_a[0x80];
+    char hole_text_b[0x80];
+
+    clear_text_grid();
+    if (D_ovlgap_8040C680 == 0) {
+        if (D_800FED18 & 0xC00) {
+            D_ovlgap_8040C67C ^= 1;
+        }
+        if (D_800FED18 & 0x8000) {
+            D_ovlgap_8040C680 = 1;
+        }
+        if (D_ovlgap_8040C67C == 0) {
+            set_flag_based_on_param(1);
+            check_and_print_grid(D_ovlgap_8040C9CC, 7, 0xA);
+        }
+        if (D_ovlgap_8040C67C != 0) {
+            set_flag_based_on_param(1);
+            check_and_print_grid(D_ovlgap_8040C9CC, 7, 0xB);
+        }
+    } else if (D_ovlgap_8040C680 == 1) {
+        if (D_800FED18 & 0x600) {
+            D_ovlgap_8040C688 -= 1;
+        }
+        if (D_800FED18 & 0x900) {
+            D_ovlgap_8040C688 += 1;
+        }
+        D_ovlgap_8040C688 = ((D_ovlgap_8040C688 + 8) % 9) + 1;
+        if (D_800FED1E & 0x8000) {
+            D_ovlgap_8040C680 = 2;
+        }
+        if (D_800FED1E & 0x4000) {
+            D_ovlgap_8040C680 = 0;
+        }
+    } else if (D_ovlgap_8040C680 == 2) {
+        if (D_800FED18 & 0x600) {
+            D_ovlgap_8040C684 -= 1;
+        }
+        if (D_800FED18 & 0x900) {
+            D_ovlgap_8040C684 += 1;
+        }
+        D_ovlgap_8040C684 = ((D_ovlgap_8040C684 + 0x11) % 18) + 1;
+        if (D_800FED1E & 0x8000) {
+            D_ovlgap_8040C680 = 3;
+        }
+        if (D_800FED1E & 0x4000) {
+            D_ovlgap_8040C680 = 1;
+        }
+    } else if (D_ovlgap_8040C680 == 3) {
+        if (D_ovlgap_8040C68C & 4) {
+            set_flag_based_on_param(1);
+        }
+        check_and_print_grid(D_ovlgap_8040C9D0, 5, 0x12);
+        D_ovlgap_8040C68C += 1;
+        if (D_800FED1E & 0x8000) {
+            if (D_ovlgap_8040C67C != 0) {
+                if (g_terrain_tile_cache[0].colors[33][35] != 0) {
+                    func_ovl4_80253270();
+                }
+                func_ovl4_802509BC(D_ovlgap_8040C688, D_ovlgap_8040C684);
+            } else {
+                load_hole_terrain_assets(D_ovlgap_8040C688, D_ovlgap_8040C684);
+            }
+            D_ovlgap_8040C680 = 0;
+        }
+        if (D_800FED1E & 0x4000) {
+            D_ovlgap_8040C680 = 2;
+        }
+        if (D_800FED1E & 0x1000) {
+            D_ovlgap_8040C680 = 0;
+        }
+    }
+    if (D_ovlgap_8040C67C == 0) {
+        set_flag_based_on_param(1);
+    }
+    check_and_print_grid(D_ovlgap_8040C9F4, 0xA, 0xA);
+    if (D_ovlgap_8040C67C != 0) {
+        set_flag_based_on_param(1);
+    }
+    check_and_print_grid(D_ovlgap_8040CA04, 0xA, 0xB);
+    if (D_ovlgap_8040C680 > 0) {
+        check_and_print_grid(D_ovlgap_8040CA14, 7, 0xF);
+        sprintf(hole_text_a, D_ovlgap_8040CA20, D_ovlgap_8040C688);
+        check_and_print_grid(hole_text_a, 0x10, 0xF);
+    }
+    if (D_ovlgap_8040C680 >= 2) {
+        check_and_print_grid(D_ovlgap_8040CA24, 7, 0x10);
+        sprintf(hole_text_b, D_ovlgap_8040CA20, D_ovlgap_8040C684);
+        check_and_print_grid(hole_text_b, 0x10, 0x10);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80406C3C);
 
