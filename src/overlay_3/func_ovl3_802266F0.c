@@ -534,7 +534,56 @@ void func_ovl3_8022B360(Gfx **gfxp) {
     *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022B46C);
+extern u8 D_ovl3_80230F84[][10];
+extern u8 D_ovl3_80230FD3[];
+
+s32 func_ovl3_8022B46C(void) {
+    u8 *state;
+    u8 ch;
+    s32 ret;
+    s32 row;
+    s32 col;
+
+    state = func_8005AF74();
+    row = (s8)state[0x48];
+    col = (s8)state[0x47];
+    ch = D_ovl3_80230F84[row][col];
+    ret = 0;
+    switch (ch) {
+    case 0xFE:
+        if (D_ovl3_80230F68 > 0) {
+            if (D_ovl3_80230F68 == 8) {
+                D_ovl3_80230F68 = 7;
+            }
+            D_ovl3_80230FD4[D_ovl3_80230F68] = 0xFF;
+            D_ovl3_80230F68 -= 1;
+        } else {
+            D_ovl3_80230FD4[0] = 0xFF;
+        }
+        break;
+    case 0xFD:
+        break;
+    case 0xFF:
+        if (D_ovl3_80230F68 < 8) {
+            return -1;
+        }
+        ret = 1;
+        break;
+    default:
+        if (D_ovl3_80230F68 < 8) {
+            D_ovl3_80230FD4[D_ovl3_80230F68] = ch;
+            D_ovl3_80230F68 = D_ovl3_80230F68 + 1;
+            if (D_ovl3_80230F68 == 8) {
+                state[0x47] = 9;
+                state[0x48] = 3;
+            }
+        } else {
+            D_ovl3_80230FD3[D_ovl3_80230F68] = ch;
+        }
+        break;
+    }
+    return ret;
+}
 
 extern u8 D_ovl3_80230FDC[];
 
