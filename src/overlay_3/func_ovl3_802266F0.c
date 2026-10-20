@@ -264,7 +264,44 @@ void func_ovl3_80226A58(Gfx **gfxp, s32 width, s32 height, s32 x, s32 y, s32 lab
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022747C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802287EC);
+void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t, s32 dsdx,
+                  s32 dtdy);
+void load_texture_block_4b(Gfx **pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms,
+                           s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+extern u8 *D_ovl3_80230E70;
+
+/* Draws two stacked 256x32 I4 texture strips centred at (x, y): half-width halfw, strip height hgt,
+ * texture scaled to w x h pixels. Note: never writes the advanced cursor back to *pgfx. */
+void func_ovl3_802287EC(Gfx **pgfx, s32 x, s32 y, s32 halfw, s32 hgt, s32 w, s32 h) {
+  Gfx *gfx;
+  s32 i;
+  s32 off;
+  s32 uly;
+
+  gfx = *pgfx;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+
+  for (i = 0; i != 2; i++) {
+    off = i * 0x1000 + 8;
+    uly = (y - hgt) + i * hgt;
+    load_texture_block_4b(&gfx, (u32)D_ovl3_80230E70 + off, G_IM_FMT_I, 256, 32, 0, 0, 0, 0, 0, 0,
+                          0);
+    func_8006A2C0(&gfx, (x - halfw) << 2, uly << 2, (x + halfw) << 2, (uly + hgt) << 2, 0, 0, 0,
+                  0x40000 / w, 0x8000 / h);
+    gDPPipeSync(gfx++);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80228A80);
 
