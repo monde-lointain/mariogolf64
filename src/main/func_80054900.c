@@ -254,31 +254,38 @@ void func_80054E4C(s32 character_id, s32 animation_mode) {
 
 /* KfEntry and KeyframeTrack layouts are shared in animation.h. */
 
-/* collect_keyframe_events_at: the whole
- * body is byte-identical to the ROM -- same registers, same annulled `bnel` and
- * `beql`, same frame -- except the loop's back edge: the ROM branches to the
- * loop-top `lh v0,0(v1)` (offset 0xfff1) and the build branches PAST it to the
- * `bnel` (0xfff2), because the bottom sentinel load leaves the same value in
- * the same register and gcc redirects the edge over the redundant re-load.
- * Reproduce with (KfEntry as below, same shape as find_keyframe_offset_by_tag):
- *
- *   CharacterState* cs = get_character_state(id);
- *   count = 0;  // AFTER the call, to keep it caller-saved.
- *   if (cs == NULL) goto done;
- *   if (track >= cs->keyframe_track_count) goto done;
- *   KeyframeTrack* tracks = cs->model_resource->keyframe_tracks;
- *   KfEntry* e = tracks[track].entries;
- *   if (e == NULL || e->value == -1) goto done;
- *   q = e; p = out;
- *   ... read q->value/tag/reserved_03; advance q and test its -1 sentinel ...
- *
- * Tried for the back edge: raw `*(s16*)q` on either side (MEM_IN_STRUCT_P is
- * not part of the identity test), separate v/w locals, and reading the sentinel
- * as `q[1].val` BEFORE the increment -- the last one does fix the edge but
- * costs both annulled delay slots (the advance handler stops being one
- * instruction). The two loads have to differ AFTER register allocation, which
- * no source spelling reached. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", collect_keyframe_events_at);
+/* Copies the tag and reserved_03 bytes of each entry in track `track` whose
+ * value equals `frame` into out, two bytes per entry, at most 16 entries.
+ * Returns the number of entries copied. */
+s32 collect_keyframe_events_at(s32 id, s32 track, s32 frame, u8* out) {
+  CharacterState* cs;
+  KfEntry* entries;
+  s32 count;
+  s32 k;
+  s32 i;
+
+  cs = get_character_state(id);
+  count = 0;
+  if (cs != NULL && track < cs->keyframe_track_count) {
+    entries = cs->model_resource->keyframe_tracks[track].entries;
+    if (entries != NULL && entries[0].value != -1) {
+      k = 0;
+      i = 0;
+      do {
+        if (entries[i].value == frame) {
+          if (count < 16) {
+            out[k] = entries[i].tag;
+            out[k + 1] = entries[i].reserved_03;
+            k += 2;
+            count++;
+          }
+        }
+        i++;
+      } while (entries[i].value != -1);
+    }
+  }
+  return count;
+}
 
 /* Search track `track` of character `id` for the first keyframe tagged `tag`
  * and return its offset relative to the track's base offset, or -1.

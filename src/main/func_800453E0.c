@@ -295,7 +295,7 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80045CE0);
  *      id<2, id==2 and default arms via fall/branch-through; an if-chain or
  *      switch each re-materialises 0x54, and a switch lowers 6 instr SHORTER.
  * All three come from gcc's const-select / branch-likely handling. The permuter
- * cannot see internal branch-target/annul bits (see collect_keyframe_events_at).
+ * cannot see internal branch-target/annul bits.
  */
 INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_80046604);
 
