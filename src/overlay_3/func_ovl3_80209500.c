@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern s16 g_abRosterUnlockFlags[4];
 extern s32 D_ovl3_8022FF1C[4];
@@ -11,6 +12,20 @@ extern void load_texture_block_4b(Gfx** pgfx, u32 timg, s32 fmt, s32 width, s32 
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern Gfx* func_ovl3_801F4A40(void);
 extern u8 D_800FBDCC;
+
+typedef struct {
+    /* 0x00 */ u16 asset_index;
+    /* 0x02 */ u16 unknown_02;
+} RomAssetEntry; /* 0x04 */
+
+extern RomAssetEntry D_ovl3_8022FF2E[];
+extern u8 D_ovl3_8022FF01;
+extern s32 D_ovl3_8023A568;
+extern s32 D_ovl3_8023A570;
+extern s32 D_ovl3_8023A574;
+extern s32 D_ovl3_8023A578;
+extern s32 D_ovl3_8023A57C;
+extern s32 D_ovl3_8023A580;
 extern u8 D_800FBDCD;
 extern u8 D_800FBDD6[];
 extern u8 D_800FBDEE[];
@@ -86,7 +101,46 @@ s32 func_ovl3_80209BE0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209D50);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020B2C4);
+void func_ovl3_8020B2C4(u8* block, s16 slot_index) {
+    RomAssetLoad asset;
+    s16 index;
+    u8* dest;
+
+    dest = block;
+    index = slot_index - 1;
+    switch (index) {
+    case 0:
+        D_ovl3_8023A570 = (s32)block;
+        break;
+    case 1:
+        D_ovl3_8023A568 = (s32)block;
+        break;
+    case 4:
+        D_ovl3_8023A574 = (s32)block;
+        break;
+    case 5:
+        D_ovl3_8023A57C = (s32)block;
+        break;
+    case 6:
+        D_ovl3_8023A580 = (s32)block;
+        break;
+    case 7:
+        D_ovl3_8023A584 = (s32)block;
+        break;
+    case 9:
+        D_ovl3_8023A578 = (s32)block;
+        break;
+    default:
+        D_ovl3_8023A570 = (s32)block;
+        slot_index = 10;
+        break;
+    }
+    if (slot_index != 10) {
+        get_rom_asset_allocation_size(D_ovl3_8022FF2E[slot_index].asset_index, &asset);
+        load_rom_asset_payload(dest, &asset);
+    }
+    D_ovl3_8022FF01 = 0;
+}
 
 void func_ovl3_8020B3CC(void) {
     u8 *state;
