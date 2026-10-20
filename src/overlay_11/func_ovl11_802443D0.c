@@ -11,6 +11,19 @@ extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern void* D_801321C8[];
 extern void* D_801B55E0[];
+extern const char D_ovl11_8024C8A8[];
+extern const char D_ovl11_8024C8B8[];
+extern const char D_ovl11_8024C8C8[];
+extern const char D_ovl11_8024C8D4[];
+extern const char D_ovl11_8024C8E0[];
+extern const char D_ovl11_8024C8E4[];
+
+typedef struct Ovl11Record {
+    /* 0x00 */ u8 unk_00[2];
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s8 unk4;
+    /* 0x05 */ u8 unk5;
+} Ovl11Record;
 
 /**
  * Loads the index-th 32x32 CI8 texture (palette in unkAC, image in unk9C) and
@@ -95,7 +108,43 @@ INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_802468
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_802478B0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_80247D80);
+/**
+ * Formats the record into arg0: unk5 selects the "%2dT" form when bit 7 is set,
+ * unk2 is printed at arg0 + 0xC, unk4 at arg0 + 0x12.
+ */
+void func_ovl11_80247D80(char *arg0, Ovl11Record *arg1) {
+    s32 var_a2_2;
+    const char *var_a1;
+    const char *var_a1_2;
+    char *var_a0_2;
+    char *var_a0;
+    u8 var_a2;
+
+    var_a2 = arg1->unk5;
+    if (var_a2 & 0x80) {
+        var_a0 = arg0;
+        var_a1 = D_ovl11_8024C8A8;
+        var_a2 &= 0x7F;
+    } else {
+        var_a0 = arg0;
+        var_a1 = D_ovl11_8024C8B8;
+    }
+    sprintf(var_a0, var_a1, var_a2);
+    var_a0_2 = arg0 + 0xC;
+    if (arg1->unk2 == 0) {
+        var_a1_2 = D_ovl11_8024C8C8;
+        var_a2_2 = 0;
+    } else {
+        var_a1_2 = D_ovl11_8024C8D4;
+        var_a2_2 = arg1->unk2;
+    }
+    sprintf(var_a0_2, var_a1_2, var_a2_2);
+    if (arg1->unk4 == 0) {
+        sprintf(arg0 + 0x12, D_ovl11_8024C8E0);
+    } else {
+        sprintf(arg0 + 0x12, D_ovl11_8024C8E4, arg1->unk4);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_802443D0", func_ovl11_80247E3C);
 
