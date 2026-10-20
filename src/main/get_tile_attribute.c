@@ -2,7 +2,7 @@
 
 extern s32 get_dominant_terrain_attribute(s32, s32, s32);
 extern s32 get_interpolated_terrain_height(s32, s32);
-extern void load_hole_terrain_assets(void);
+extern void load_hole_terrain_assets(s32, s32);
 extern TerrainAttrEntry* get_table_entry(u32);
 extern s16* get_direct_grid_vertex(s32, s32);
 

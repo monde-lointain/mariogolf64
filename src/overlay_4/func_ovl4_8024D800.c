@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/terrain.h"
+#include "../main/rom_asset.h"
 
 typedef struct CameraPresetVec {
     s32 x;
@@ -216,10 +217,162 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250194)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250474);
 
-void func_ovl4_802504E0(void) {
+extern s32 D_800BB020;
+extern s32 game_mode;
+extern s32 scenario_mode_id;
+extern s32 flag_is_set(s32 flag);
+extern void flag_clear(s32 flag);
+extern void gen_terrain_detail_texture(s32 arg0, s32 arg1);
+extern void update_scenery_cylinder_transforms(void);
+extern void open_rom_asset_slot(s32 asset_index, RomLoadSlot *slot);
+extern u32 get_rom_load_slot_size(RomLoadSlot *slot);
+extern void read_rom_load_slot(void *destination, u32 size, RomLoadSlot *slot);
+extern s32 D_ovl4_80254C4C[][18];
+extern u16 D_ovl4_802543B2[][18][7];
+extern u16 D_ovl4_802543B4[][18][7];
+extern s32 D_ovl4_80255320;
+extern char D_ovl4_80255144[];
+extern char D_ovl4_80255154[];
+extern char D_ovl4_80255158[];
+extern char D_ovl4_80255160[];
+extern char D_ovl4_80255168[];
+extern char D_ovl4_80255188[];
+extern char D_ovl4_802551A8[];
+extern char D_ovl4_802551C8[];
+extern char D_ovl4_802551E8[];
+extern char D_ovl4_80255208[];
+extern char D_ovl4_80255228[];
+extern char D_ovl4_80255248[];
+extern char D_ovl4_8025524C[];
+void func_ovl4_80250DA0(void);
+void func_ovl4_80250C54(void);
+void func_ovl4_80251DFC(s32 arg0, s32 arg1, s32 arg2);
+void func_ovl4_802513B8(void);
+void func_ovl4_802517C4(void);
+void func_ovl4_802518F0(void);
+void func_ovl4_80251610(void);
+void func_800425C8(void);
+s32 func_ovl4_80250474(s32 arg0);
+void func_ovl4_802504E0(s32 arg0, s32 arg1) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", load_hole_terrain_assets);
+void load_hole_terrain_assets(s32 arg0, s32 arg1) {
+    RomLoadSlot slot;
+    char name[0x80];
+    s32 name_size;
+    s32 var_s3;
+    s32 var_v0;
+    u16 var_a0;
+    u32 size;
+
+    var_s3 = arg1;
+
+    if (arg0 == 2) {
+        gen_terrain_detail_texture(0x60, 0xC8);
+    } else if (arg0 == 3) {
+        gen_terrain_detail_texture(0x60, 0xC8);
+    } else {
+        gen_terrain_detail_texture(0x60, 0xBE);
+    }
+
+    if (g_terrain_vtx_xform_mode != 0) {
+        D_ovl4_80255320 = scenario_mode_id;
+        if (scenario_mode_id >= 0xC) {
+            D_ovl4_80255320 = 0xB;
+        }
+        gen_terrain_detail_texture(0x40, 0xD2);
+    } else if (flag_is_set(0x50) != 0) {
+        D_ovl4_80255320 = D_ovl4_80254C4C[arg0][var_s3 - 1];
+        if (flag_is_set(0x6A) != 0) {
+            D_ovl4_80255320 += 1;
+        }
+        if (flag_is_set(0x6B) != 0) {
+            var_v0 = D_ovl4_80255320 + 1;
+            goto block_15;
+        }
+    } else {
+        var_v0 = func_ovl4_80250474(arg0);
+block_15:
+        D_ovl4_80255320 = var_v0;
+    }
+
+    osSyncPrintf(D_ovl4_80255144, D_ovl4_80255320);
+
+    if (flag_is_set(0x50) == 0) {
+        if (flag_is_set(0x51) != 0 && var_s3 == 0) {
+            var_s3 = 0x12;
+        }
+        func_ovl4_80250DA0();
+        func_ovl4_80251DFC(arg0, var_s3, 1);
+        func_ovl4_802517C4();
+        func_ovl4_80251DFC(arg0, var_s3, 2);
+        func_ovl4_802518F0();
+        func_ovl4_80251DFC(arg0, var_s3, 3);
+        func_ovl4_802513B8();
+
+        if (D_801B60B8 == 0 && D_800BB020 != 0x1E) {
+            if (game_mode == 0xC) {
+                var_a0 = 0x3F3;
+            } else {
+                var_a0 = D_ovl4_802543B2[arg0][var_s3][0];
+            }
+            open_rom_asset_slot(var_a0, &slot);
+            read_rom_load_slot(&camera_position_x, get_rom_load_slot_size(&slot), &slot);
+        }
+
+        if (game_mode == 0xC) {
+            var_a0 = 0x3F4;
+        } else {
+            var_a0 = D_ovl4_802543B4[arg0][var_s3][0];
+        }
+        open_rom_asset_slot(var_a0, &slot);
+        size = get_rom_load_slot_size(&slot);
+        read_rom_load_slot(&D_80105E10, size, &slot);
+        osSyncPrintf(D_ovl4_80255154, size);
+
+        func_ovl4_802504E0(arg0, var_s3);
+        func_ovl4_80251DFC(arg0, var_s3, 4);
+        func_ovl4_80251610();
+        func_ovl4_80251DFC(arg0, var_s3, 5);
+        func_ovl4_8024FF74();
+        func_800425C8();
+        D_ovl4_802543A8 = 1;
+        osSyncPrintf(D_ovl4_80255158);
+        func_ovl4_8024FAA0();
+        osSyncPrintf(D_ovl4_80255160);
+        update_scenery_cylinder_transforms();
+        return;
+    }
+
+    func_ovl4_80250DA0();
+    if (flag_is_set(0x52) != 0) {
+        flag_clear(0x52);
+    } else {
+        sprintf(name, D_ovl4_80255168, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+        sprintf(name, D_ovl4_80255188, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+        sprintf(name, D_ovl4_802551A8, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+        sprintf(name, D_ovl4_802551C8, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+        sprintf(name, D_ovl4_802551E8, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+        sprintf(name, D_ovl4_80255208, arg0, arg0, var_s3);
+        if (validate_heap_string_with_output(name, &name_size) == 0) {
+            func_ovl4_80250C54();
+        }
+        sprintf(name, D_ovl4_80255228, arg0, arg0, var_s3);
+        validate_heap_string_with_output(name, &name_size);
+    }
+
+    osSyncPrintf(D_ovl4_80255248);
+    func_ovl4_8024FF74();
+    D_ovl4_802543A8 = 1;
+    func_ovl4_8024FAA0();
+    update_scenery_cylinder_transforms();
+    osSyncPrintf(D_ovl4_8025524C);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802509BC);
 
