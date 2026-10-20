@@ -11,7 +11,8 @@ typedef struct Overlay11State {
     /* 0x3C */ u8 unk_3C[0x60];
     /* 0x9C */ u32 unk9C[4];
     /* 0xAC */ u32 unkAC[4];
-    /* 0xBC */ u8 unk_BC[0xC];
+    /* 0xBC */ u8 unk_BC[8];
+    /* 0xC4 */ s32 unkC4;
     /* 0xC8 */ s32 unkC8;
     /* 0xCC */ s32 unkCC;
     /* 0xD0 */ u8 unk_D0[0x4];

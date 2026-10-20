@@ -12,6 +12,20 @@ void func_ovl11_80243050(void);
 void func_ovl11_802433B4(u16 arg0);
 void func_ovl11_802434A0(u16 arg0);
 
+typedef struct SlotTimerState {
+    /* 0x00 */ u8 unk_00[8];
+    /* 0x08 */ f32 timer[10];
+    /* 0x30 */ s8 active[10];
+    /* 0x3A */ u8 unk_3A[2];
+    /* 0x3C */ s32 frame_count;
+} SlotTimerState;
+
+extern SlotTimerState D_801050BC;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s8 D_801061B8;
+extern const f64 D_ovl11_8024C6F8;
+extern const f64 D_ovl11_8024C700;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80241800);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80242074);
@@ -38,7 +52,39 @@ INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802430
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802433B4);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802434A0);
+void func_ovl11_802434A0(u16 arg0) {
+    s32 i;
+    f32 temp_fv0;
+
+    if (D_801050BC.frame_count < 0x28) {
+        D_801050BC.frame_count = D_801050BC.frame_count + 1;
+    }
+    i = 0;
+    do {
+        if (((i * 4) < D_801050BC.frame_count) && (D_801050BC.active[i] == 1)) {
+            temp_fv0 = (f32) ((f64) D_801050BC.timer[i] + D_ovl11_8024C6F8);
+            D_801050BC.timer[i] = temp_fv0;
+            if (D_ovl11_8024C700 < (f64) temp_fv0) {
+                D_801050BC.timer[i] = 0.0f;
+                D_801050BC.active[i] = 0;
+                play_sound_effect(0x5B, 0xD, 0x64);
+            }
+        }
+        i += 1;
+    } while (i != 10);
+    if (D_801061B8 == 0) {
+        if (arg0 & 0x800) {
+            if (D_80104FD0.unkC4 > 0) {
+                D_80104FD0.unkC4 = D_80104FD0.unkC4 - 1;
+                play_sound_effect(0x5C, D_800C0E60, 0x64);
+            }
+        }
+        if ((arg0 & 0x400) && (D_80104FD0.unkC4 < 0x14)) {
+            D_80104FD0.unkC4 = D_80104FD0.unkC4 + 1;
+            play_sound_effect(0x5C, D_800C0E60, 0x64);
+        }
+    }
+}
 
 void func_ovl11_80243634(u16 arg0, u16 arg1) {
     func_ovl11_80243050();
