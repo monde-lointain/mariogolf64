@@ -11,8 +11,9 @@ extern void func_8006A548(Gfx** pgfx, u32 arg1);
 extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width,
                                s32 height, s32 pal, s32 cms, s32 cmt, s32 masks,
                                s32 maskt, s32 shifts, s32 shiftt);
-extern s32 D_ovl13_80243F50;
+extern void* D_ovl13_80243F50;
 extern void* heap3_alloc(s32 size);
+extern void heap3_free(void** payload_ptr);
 
 extern u16 D_ovl13_80243E60[13];
 extern u16 D_ovl13_80243E7C[];
@@ -27,16 +28,13 @@ extern s32 D_ovl13_80243EB8;
 extern s32 D_ovl13_80243EBC;
 extern u8 D_ovl13_80243EC0;
 extern char D_ovl13_80243EF0[];
+extern char D_ovl13_80243F04[];
 extern void* D_ovl13_80243F58[13];
 extern void* D_ovl13_80243F8C;
 extern void* D_ovl13_80243F90;
 extern void* D_ovl13_80243F94;
-extern void* D_ovl13_80243F98;
-extern void* D_ovl13_80243F9C;
-extern void* D_ovl13_80243FA0;
-extern void* D_ovl13_80243FA4;
-extern void* D_ovl13_80243FA8;
-extern void* D_ovl13_80243FAC;
+extern void* D_ovl13_80243F98[3];
+extern void* D_ovl13_80243FA4[3];
 extern void* D_ovl13_80243FB0;
 extern s32 scenario_mode_id;
 
@@ -88,27 +86,27 @@ void func_ovl13_802418B8(s32 arg0) {
     D_ovl13_80243EC0 = 0;
     if (arg0 == 0) {
         D_ovl13_80243EA8 = 1;
-        D_ovl13_80243F50 = (s32)heap3_alloc(get_rom_asset_allocation_size(0x521, &asset));
-        load_rom_asset_payload((void*)D_ovl13_80243F50, &asset);
-        D_ovl13_80243F98 = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
-        load_rom_asset_payload(D_ovl13_80243F98, &asset);
-        D_ovl13_80243F9C = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
-        load_rom_asset_payload(D_ovl13_80243F9C, &asset);
-        D_ovl13_80243FA0 = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
-        load_rom_asset_payload(D_ovl13_80243FA0, &asset);
-        D_ovl13_80243FA4 = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
-        load_rom_asset_payload(D_ovl13_80243FA4, &asset);
-        D_ovl13_80243FA8 = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
-        load_rom_asset_payload(D_ovl13_80243FA8, &asset);
-        D_ovl13_80243FAC = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
-        load_rom_asset_payload(D_ovl13_80243FAC, &asset);
+        D_ovl13_80243F50 = heap3_alloc(get_rom_asset_allocation_size(0x521, &asset));
+        load_rom_asset_payload(D_ovl13_80243F50, &asset);
+        D_ovl13_80243F98[0] = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243F98[0], &asset);
+        D_ovl13_80243F98[1] = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243F98[1], &asset);
+        D_ovl13_80243F98[2] = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243F98[2], &asset);
+        D_ovl13_80243FA4[0] = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA4[0], &asset);
+        D_ovl13_80243FA4[1] = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA4[1], &asset);
+        D_ovl13_80243FA4[2] = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA4[2], &asset);
         D_ovl13_80243FB0 = heap3_alloc(get_rom_asset_allocation_size(0x8ED, &asset));
         load_rom_asset_payload(D_ovl13_80243FB0, &asset);
     } else {
         D_ovl13_80243EA8 = 2;
         D_ovl13_80243EAC = 0x40;
-        D_ovl13_80243F50 = (s32)heap3_alloc(get_rom_asset_allocation_size(0x739, &asset));
-        load_rom_asset_payload((void*)D_ovl13_80243F50, &asset);
+        D_ovl13_80243F50 = heap3_alloc(get_rom_asset_allocation_size(0x739, &asset));
+        load_rom_asset_payload(D_ovl13_80243F50, &asset);
     }
     D_ovl13_80243EB8 = 0;
     D_ovl13_80243EBC = 0;
@@ -133,7 +131,31 @@ void func_ovl13_802418B8(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241BD8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241CE8);
+void func_ovl13_80241CE8(void) {
+    s32 i;
+
+    if (D_ovl13_80243EA8 == 0) {
+        osSyncPrintf(D_ovl13_80243F04);
+        return;
+    }
+    heap3_free(&D_ovl13_80243F50);
+    for (i = 0; i != 13; i++) {
+        heap3_free(&D_ovl13_80243F58[i]);
+    }
+    heap3_free(&D_ovl13_80243F8C);
+    heap3_free(&D_ovl13_80243F90);
+    heap3_free(&D_ovl13_80243F94);
+    if (D_ovl13_80243EA8 == 1) {
+        heap3_free(&D_ovl13_80243F98[0]);
+        heap3_free(&D_ovl13_80243F98[1]);
+        heap3_free(&D_ovl13_80243F98[2]);
+        heap3_free(&D_ovl13_80243FA4[0]);
+        heap3_free(&D_ovl13_80243FA4[1]);
+        heap3_free(&D_ovl13_80243FA4[2]);
+        heap3_free(&D_ovl13_80243FB0);
+    }
+    D_ovl13_80243EA8 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241DF0);
 
