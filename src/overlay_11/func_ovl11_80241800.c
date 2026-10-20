@@ -7,10 +7,22 @@ extern s32 D_ovl11_8024C4A4;
 extern s32 game_mode;
 extern s32 D_800C4140;
 extern s32 D_800C0E60;
+extern s32 active_player_count;
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
 void func_ovl11_80242FC0(s32 arg0);
 void func_ovl11_80243050(void);
 void func_ovl11_802433B4(u16 arg0);
 void func_ovl11_802434A0(u16 arg0);
+void func_ovl11_802448D4(Gfx** gfxp);
+void func_ovl11_80243C48(Gfx** gfxp, s32 count, s32 sel);
+void func_ovl11_80247E3C(Gfx** gfxp);
+void func_ovl11_802478B0(Gfx** gfxp);
+void func_ovl11_802460F8(Gfx** gfxp);
+void func_ovl11_80245184(Gfx** gfxp);
+void func_ovl11_80244CA0(Gfx** gfxp);
+void func_ovl11_802493DC(Gfx** gfxp);
+void func_ovl11_80246804(Gfx** gfxp);
 
 typedef struct SlotTimerState {
     /* 0x00 */ u8 unk_00[8];
@@ -182,7 +194,98 @@ void func_ovl11_8024373C(Gfx** gfxp, u8* data, s32 x, s32 y) {
     *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_802438D0);
+void func_ovl11_802438D0(Gfx** gfxp) {
+    Gfx* gfx;
+    s32 i;
+    s32 hl;
+
+    gfx = *gfxp;
+    if (D_800C4140 == 5) {
+        func_ovl11_802448D4(&gfx);
+    } else if (D_800C4140 != 6) {
+        if (D_800C4140 != 4) {
+            func_ovl11_80243C48(&gfx, D_80104FD0.unkE4, D_801061B8);
+            gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+            for (i = 0; i != D_80104FD0.unkE4; i++) {
+                if (i == D_801061B8) {
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    hl = 0;
+                } else {
+                    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
+                    hl = 1;
+                }
+                gDPPipeSync(gfx++);
+                if (D_80104FD0.unkE4 == 3) {
+                    s32 x = D_80104FD0.unkC8 + 0x1D;
+                    func_ovl11_8024373C(&gfx, D_80104FD0.unk24[i], i * 0x68 + x, D_80104FD0.unkCC + 0x15 + hl);
+                } else {
+                    s32 x = D_80104FD0.unkC8 + 0x20;
+                    func_ovl11_8024373C(&gfx, D_80104FD0.unk24[i], i * 0x88 + x, D_80104FD0.unkCC + 0x15 + hl);
+                }
+            }
+            switch (game_mode) {
+                case 5:
+                    if (D_801061B8 == 0) {
+                        func_ovl11_80247E3C(&gfx);
+                    } else {
+                        func_ovl11_802493DC(&gfx);
+                    }
+                    break;
+                case 7:
+                    if (D_801061B8 == 0) {
+                        func_ovl11_802478B0(&gfx);
+                    } else {
+                        func_ovl11_802493DC(&gfx);
+                    }
+                    break;
+                case 10:
+                case 11:
+                    if (D_801061B8 == 0) {
+                        func_ovl11_802460F8(&gfx);
+                    } else if (D_801061B8 == 1) {
+                        func_ovl11_802493DC(&gfx);
+                    } else {
+                        func_ovl11_80246804(&gfx);
+                    }
+                    break;
+                case 2:
+                case 4:
+                    func_800719A0(0, 0, -1, 1, 0, 1, 0, 0, 0, 0);
+                    func_800719A0(0, 0, -1, 1, 1, 1, 0, 0, 0, 0);
+                    if (D_801061B8 == 0) {
+                        func_ovl11_80245184(&gfx);
+                    } else if (D_801061B8 == 1) {
+                        func_ovl11_802493DC(&gfx);
+                    } else {
+                        func_ovl11_80246804(&gfx);
+                    }
+                    break;
+                case 0:
+                case 1:
+                case 3:
+                case 6:
+                case 8:
+                case 9:
+                    if (active_player_count == 1) {
+                        if (D_801061B8 == 0) {
+                            func_ovl11_802493DC(&gfx);
+                        } else {
+                            func_ovl11_80246804(&gfx);
+                        }
+                    } else if (D_801061B8 == 0) {
+                        func_ovl11_80244CA0(&gfx);
+                    } else if (D_801061B8 == 1) {
+                        func_ovl11_802493DC(&gfx);
+                    } else {
+                        func_ovl11_80246804(&gfx);
+                    }
+                    break;
+            }
+        }
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_11/func_ovl11_80241800", func_ovl11_80243C48);
 
