@@ -3,7 +3,57 @@
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_802178B0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80217B88);
+typedef struct {
+    u8 pad_00[0xD];
+    u8 unk_0D;
+    s8 slots[8];
+    u8 pad_16[0x29 - 0x16];
+    u8 unk_29;
+    u8 unk_2A;
+} Ovl3State;
+
+extern u8* func_8005AF74(void);
+extern s32 D_80105B68;
+extern s8 D_801B60BA[8];
+extern u8 D_ovl3_802304BC[8][8];
+extern u8 D_ovl3_802304F4[];
+extern s16 D_ovl3_8023BFDC[4];
+
+void func_ovl3_80217B88(s32 arg0) {
+    s8 mode = arg0;
+    Ovl3State* state = (Ovl3State*)func_8005AF74();
+    s16 i;
+
+    if ((u8)arg0 < 7) {
+        if ((arg0 << 24) == 0) {
+            if (D_80105B68 == 4) {
+                mode = 1;
+            }
+        }
+        if ((s8)mode == 5) {
+            if (D_80105B68 == 4) {
+                mode = 6;
+            }
+        }
+        for (i = 0; i != 8; i++) {
+            u8 v = D_ovl3_802304BC[(s8)mode][i];
+            state->slots[i] = v;
+            D_801B60BA[i] = D_ovl3_802304F4[(s8)v];
+        }
+    } else {
+        for (i = 0; i != 8; i++) {
+            state->slots[i] = -1;
+            D_801B60BA[i] = -1;
+        }
+    }
+
+    state->unk_0D = 0;
+    for (i = 0; i != 4; i++) {
+        D_ovl3_8023BFDC[i] = -(i >= D_80105B68);
+    }
+    state->unk_29 = 0;
+    state->unk_2A = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80217D20);
 
@@ -24,7 +74,6 @@ typedef struct {
     u8 unk01[0x67];
 } Ovl3ModeRecord; /* 0x68 */
 
-extern u8* func_8005AF74(void);
 extern u8 D_801B5634;
 extern s32 D_ovl3_8022F8C0;
 extern u8 D_ovl3_8022F8C4;
