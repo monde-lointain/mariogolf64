@@ -46,7 +46,7 @@ Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools
 
 # Task catalog
 
-Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, which lists function names, easiest first. The four decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
+Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, which lists function names, easiest first. The four decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that stages tracked changes plus new files under `src/` and `include/` (a header or a split-off C file the match needs) and commits `Decompile <function>` only when something is staged.
 
 | Task | Candidate source | Timeout | Notes |
 |---|---|---|---|

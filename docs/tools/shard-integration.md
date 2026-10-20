@@ -1,23 +1,24 @@
 ---
 type: Tool
-title: "Shard integration (sync-shard, integrate-shards, merge-decomp-c)"
-description: "Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c resolves src conflicts."
+title: "Shard integration (sync-shard, integrate-shards, merge drivers)"
+description: "Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c and merge-splat-yaml resolve src and yaml conflicts."
 tags: [nigel, worktree, merge, workflow]
 resource: ../../tools/integrate-shards
 ---
 
-Shard worktrees decompile in parallel and send their commits back to `dev`. `sync-shard` brings a shard up to date, `integrate-shards` cherry-picks shard commits into the checkout behind a build check, and `merge-decomp-c` resolves conflicts in `src/**/*.c`.
+Shard worktrees decompile in parallel and send their commits back to `dev`. `sync-shard` brings a shard up to date, `integrate-shards` cherry-picks shard commits into the checkout behind a build check, and two merge drivers resolve the conflicts parallel matches make in `src/**/*.c` and `mariogolf64.yaml`.
 
-# Merge driver
+# Merge drivers
 
-`.gitattributes` assigns two merge rules:
+`.gitattributes` assigns three merge rules:
 
 | Path | Merge |
 |---|---|
 | `src/**/*.c` | `decomp-c`, the driver `tools/merge-decomp-c` |
+| `mariogolf64.yaml` | `splat-yaml`, the driver `tools/merge-splat-yaml` |
 | `docs/log.md` | `union` |
 
-`tools/install-git-hooks.sh` registers the `decomp-c` driver on every run (`merge.decomp-c.driver "tools/merge-decomp-c %O %A %B %L"`). Without the driver, git falls back to a plain text merge for `src/**/*.c`.
+`tools/install-git-hooks.sh` registers both drivers on every run (`merge.<name>.driver "tools/<driver> %O %A %B %L"`). Without a driver, git falls back to a plain text merge for its path.
 
 `merge-decomp-c <base> <ours> <theirs> [<marker-size>]` runs git's three-way merge, then resolves each conflict block whose two sides hold only extern variables, prototypes, `INCLUDE_ASM` lines and function definitions:
 
@@ -26,7 +27,9 @@ Shard worktrees decompile in parallel and send their commits back to `dev`. `syn
 3. Declarations are the union of both sides, minus any already declared identically earlier in the file.
 4. A block stays conflicted on a symbol declared differently on the two sides or differently from an earlier declaration in the file, two different definitions of one function, differing `INCLUDE_ASM` lines, or any other line.
 
-`MG64_MERGE_FAVOR=ours|theirs` resolves the remaining blocks to that side. The merge does not check that the result matches; `./tools/build-and-verify.sh` does.
+`merge-splat-yaml <base> <ours> <theirs> [<marker-size>]` runs git's three-way merge, then resolves each conflict block whose base and two sides hold only `- [0xOFFSET, ...]` subsegment lines at one indent. That is the conflict two shards make when each splits data or rodata out of the same segment. Entries are keyed by offset: a side's change to an offset wins over the unchanged other side, and the result is sorted by offset. An offset both sides changed differently, or any other line, leaves the block conflicted. Two `.rodata` ranges for one C file still merge and then fail the build; their bytes in between have to move into that C file by hand.
+
+`MG64_MERGE_FAVOR=ours|theirs` resolves the remaining blocks of either driver to that side. Neither merge checks that the result matches; `./tools/build-and-verify.sh` does.
 
 | Exit | Meaning |
 |---|---|

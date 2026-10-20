@@ -21,7 +21,7 @@
 * [verify-candidate](verify-candidate.md) - The gate nigel runs before committing a candidate: protected paths, baserom hash, optional decompiled-in-src check, new pointer arithmetic on changed lines, then build-and-verify.
 * [Difficulty ledger and tiers](difficulty-ledger.md) - Shared record of each decompilation attempt's outcome, the difficulty tier that follows from a function's failure history, and the per-environment .run.json that sets the stall limit.
 * [new-worktree](new-worktree.md) - Create a sibling git worktree on a new branch with the gitignored build inputs (baserom, gcc_kmc, .venv, submodules) copied or linked from the main checkout, then build it.
-* [Shard integration (sync-shard, integrate-shards, merge-decomp-c)](shard-integration.md) - Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c resolves src conflicts.
+* [Shard integration (sync-shard, integrate-shards, merge drivers)](shard-integration.md) - Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c and merge-splat-yaml resolve src and yaml conflicts.
 * [Pipeline metrics report](pipeline-metrics.md) - tools/pipeline_metrics.py: nigel outcomes joined with omp session cost, certified attempts to match, the difficulty ledger and a progress trend.
 * [list-unconsolidated-learnings](list-unconsolidated-learnings.md) - Lists per-function LEARNINGS.md and NEAR_MISS.md notes that have not been merged into docs/reference/kmc-gcc/, and records consolidated notes in a ledger shared by all worktrees.
 

@@ -36,7 +36,7 @@ These decide whether the ROM matches.
 * `tools/report_nonmatching_matches.py`, `tools/find_unmatched_nonmatchings.py`: reports built on it.
 * `tools/m2c_one_shot.py`: m2c plus `build.sh` scoring; inlines exact matches into `src/` (comparison: it writes source on a match decision).
 * Workflow: `progress.py` ([tool](/tools/progress.md)), `score_functions.py` (nigel `candidate_source`), `list_decomp_candidates.py`, `find_similar_functions.py`, `list_matched_functions.py`, `fetch_scratches.py` ([catalog](/tools/selection-and-status.md)).
-* Shard tools: `tools/sync-shard`, `tools/integrate-shards`, and the `merge-decomp-c` merge driver ([shard integration](/tools/shard-integration.md)).
+* Shard tools: `tools/sync-shard`, `tools/integrate-shards`, and the `merge-decomp-c` and `merge-splat-yaml` merge drivers ([shard integration](/tools/shard-integration.md)).
 
 # Data matching and quality checkers (comparison)
 
@@ -82,6 +82,7 @@ bun test ./.omp/hooks/tests/mg64-policy.test.ts
 | `test_m2c_one_shot.py` | `m2c_one_shot.py` |
 | `test_m2ctx.py` | `m2ctx.py` |
 | `test_merge_decomp_c.py` | `merge-decomp-c` |
+| `test_merge_splat_yaml.py` | `merge-splat-yaml` |
 | `test_new_worktree.py` | `new-worktree` |
 | `test_nonmatching_match_log.py` | `nonmatching_match_log.py` |
 | `test_objdump_symbols.py` | `decomp-env-template/objdump.py` |

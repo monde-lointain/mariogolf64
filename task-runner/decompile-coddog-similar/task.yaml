@@ -1,6 +1,6 @@
 candidate_source: tools/sync-shard && python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json --by-coddog-similarity
 prompt: "Decompile $INPUT[0]. Create its environment with `tools/decomp-env --bootstrap-only --id $TASK_ID --refs '$INPUT[1]' $INPUT[0]` (the references are matched functions similar to it), then read nonmatchings/$INPUT[0]-$TASK_ID/AGENTS.md and follow it to the end."
 agent_flags: --model anthropic/claude-haiku-5-5:high
-success_command: 'f=${NIGEL_CANDIDATE#\[\"}; git add -u && { git diff --cached --quiet || git commit -m "Decompile ${f%%\"*}"; }'
+success_command: 'f=${NIGEL_CANDIDATE#\[\"}; git add -u && git add src include && { git diff --cached --quiet || git commit -m "Decompile ${f%%\"*}"; }'
 verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
 timeout: 60m

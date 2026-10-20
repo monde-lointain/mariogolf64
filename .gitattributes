@@ -3,5 +3,9 @@
 # tools/install-git-hooks.sh; without it git falls back to its own text merge.
 src/**/*.c merge=decomp-c
 
+# Shards that split data or rodata out of the same segment change neighbouring subsegment
+# lines; tools/merge-splat-yaml merges those by offset.
+mariogolf64.yaml merge=splat-yaml
+
 # docs/log.md is an append-only list; every shard adds a line at the same spot. Keep both sides.
 docs/log.md merge=union

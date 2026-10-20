@@ -7,10 +7,12 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
   exit 1
 fi
 
-# Merge driver for src/**/*.c (.gitattributes). Git runs it from the worktree's
-# top level, so every linked worktree uses its own checked-out copy.
+# Merge drivers for src/**/*.c and mariogolf64.yaml (.gitattributes). Git runs them from
+# the worktree's top level, so every linked worktree uses its own checked-out copy.
 git config merge.decomp-c.name "decompilation C merge (tools/merge-decomp-c)"
 git config merge.decomp-c.driver "tools/merge-decomp-c %O %A %B %L"
+git config merge.splat-yaml.name "splat subsegment merge (tools/merge-splat-yaml)"
+git config merge.splat-yaml.driver "tools/merge-splat-yaml %O %A %B %L"
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 GIT_DIR="$(git rev-parse --git-dir)"

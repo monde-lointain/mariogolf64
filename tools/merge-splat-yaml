@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""Git merge driver for mariogolf64.yaml: resolves neighbouring subsegment splits.
+
+Usage (git runs it, see .gitattributes and tools/install-git-hooks.sh):
+    merge-splat-yaml <base> <ours> <theirs> [<marker-size>]
+
+Two shards that each split data or rodata out of the same segment change adjacent
+subsegment lines, which git's text merge reports as a conflict. It runs git's own
+three-way merge, then resolves each conflict block whose base, ours and theirs hold
+only `- [0xOFFSET, ...]` subsegment lines: entries are keyed by offset, a side's
+change to an offset wins over the unchanged other side, and the result is sorted by
+offset. An offset that both sides changed differently, or any other line, leaves the
+block conflicted. The result is written to <ours>. Exit 0 if no conflict remains, 1
+otherwise, 2 if git merge-file failed.
+
+MG64_MERGE_FAVOR=ours|theirs resolves the remaining blocks to that side, like
+`-X ours` does for the built-in driver (git does not pass -X to custom drivers).
+
+The merge says nothing about whether the result builds; build-and-verify does.
+"""
+
+import os
+import re
+import subprocess
+import sys
+
+SUBSEGMENT = re.compile(r'^(\s*)- \[(0x[0-9A-Fa-f]+|\d+)\s*,')
+
+
+class Unresolvable(Exception):
+    pass
+
+
+def by_offset(lines, indent):
+    entries = {}
+    for line in lines:
+        m = SUBSEGMENT.match(line)
+        if not m or m.group(1) != indent:
+            raise Unresolvable(line)
+        offset = int(m.group(2), 0)
+        if offset in entries:
+            raise Unresolvable(line)
+        entries[offset] = line
+    return entries
+
+
+def resolve(base, ours, theirs):
+    m = SUBSEGMENT.match(next(iter(ours + theirs + base), ''))
+    if not m:
+        raise Unresolvable('not a subsegment list')
+    indent = m.group(1)
+    b, o, t = (by_offset(side, indent) for side in (base, ours, theirs))
+    out = []
+    for offset in sorted(b.keys() | o.keys() | t.keys()):
+        old, mine, other = b.get(offset), o.get(offset), t.get(offset)
+        if mine == other or other == old:
+            line = mine
+        elif mine == old:
+            line = other
+        else:
+            raise Unresolvable(f'offset {offset:#x} changed on both sides')
+        if line is not None:
+            out.append(line)
+    return out
+
+
+def main(base, ours_path, theirs_path, marker_size='7'):
+    n = int(marker_size)
+    merged = subprocess.run(
+        ['git', 'merge-file', '-p', '--diff3', f'--marker-size={n}', '-L', 'ours', '-L', 'base', '-L', 'theirs',
+         ours_path, base, theirs_path],
+        capture_output=True, text=True)
+    if merged.returncode < 0 or merged.returncode > 127:
+        sys.stderr.write(merged.stderr)
+        return 2
+    lines = merged.stdout.splitlines(keepends=True)
+    favor = os.environ.get('MG64_MERGE_FAVOR')
+    start, sep, mid, end = '<' * n + ' ', '|' * n + ' ', '=' * n, '>' * n + ' '
+    out, conflicts, i = [], 0, 0
+    while i < len(lines):
+        if not lines[i].startswith(start):
+            out.append(lines[i])
+            i += 1
+            continue
+        s = next(k for k in range(i, len(lines)) if lines[k].startswith(sep))
+        j = next(k for k in range(s, len(lines)) if lines[k].rstrip('\n') == mid)
+        k = next(k for k in range(j, len(lines)) if lines[k].startswith(end))
+        ours, base_lines, theirs = lines[i + 1:s], lines[s + 1:j], lines[j + 1:k]
+        try:
+            out.extend(resolve(base_lines, ours, theirs))
+        except Unresolvable:
+            if favor in ('ours', 'theirs'):
+                out.extend(ours if favor == 'ours' else theirs)
+            else:
+                out.extend(lines[i:s] + lines[j:k + 1])
+                conflicts += 1
+        i = k + 1
+    with open(ours_path, 'w') as f:
+        f.writelines(out)
+    return 1 if conflicts else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(*sys.argv[1:]))
