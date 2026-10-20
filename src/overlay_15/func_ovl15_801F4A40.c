@@ -97,7 +97,7 @@ typedef struct {
     NUContPakFile gbpakFile; /* 0x6C */
     OSGbpakId gbpakId; /* 0x7C */
     Ovl15Entry unkCC[12]; /* 0xCC */
-    u8 unk75C[0x10];
+    s32 unk75C[4];
     s32 unk76C[12];
     s32 unk79C;
     s32 unk7A0;
@@ -689,7 +689,18 @@ s32 func_ovl15_801F662C(Ovl15PhaseRecord *record, u8 *key) {
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F66EC);
+void func_ovl15_801F66EC(s32 arg0, s32 arg1) {
+    Ovl15AssetBlock *blk;
+    s8 idx = (s8)D_800FEC00.unknown_0C[0x1C + arg0];
+    u8 unused[8]; /* unused: original frame space */
+
+    blk = &D_800FE450;
+    /* Ovl15Entry is this overlay's view of a PlayerResultRecord. */
+    D_800FF1E8[arg1] = *(PlayerResultRecord *)&blk->unkCC[idx];
+    D_800FF1E8[arg1].is_active = 1;
+    blk->unkCC[blk->unk7D8[arg0]].state = 2;
+    blk->unk75C[arg1] = blk->unk7D8[arg0];
+}
 
 void func_ovl15_801F67F4(void) {
   D_800FEC00.unknown_00 = 0;
