@@ -143,7 +143,157 @@ INCLUDE_ASM("asm/nonmatchings/main/func_80026400", emit_scenery_billboard);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_80026400", draw_scenery_opaque_pass);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80026400", draw_scenery_alpha_pass);
+typedef union {
+  u32 words[3];
+  struct {
+    /* 0x00 */ u8 pad_00[3];
+    /* 0x03 */ u8 r;
+    /* 0x04 */ u8 pad_04[3];
+    /* 0x07 */ u8 g;
+    /* 0x08 */ u8 pad_08[3];
+    /* 0x0B */ u8 b;
+  } bytes;
+} SceneryColorRecord; /* 0x0C */
+
+typedef struct {
+  /* 0x00 */ s32 state;
+  /* 0x04 */ u8 unknown_04[0x4C];
+} SceneryAlphaSlot; /* 0x50 */
+
+extern SceneryAlphaSlot D_801B5534[];
+extern SceneryColorRecord D_800CA100;
+extern SceneryColorRecord D_800CA10C;
+extern s32 D_800FBE64;
+extern s32 D_800FBE68;
+extern s32 target_z;
+extern s32 g_last_billboard_sprite_id;
+extern Gfx* glistp;
+extern s32 flag_is_set(s32 flag);
+extern s32 func_80045AC0(void);
+extern void emit_scenery_billboard(Gfx** gfx, SceneryCylinder* cylinder,
+                                   SceneryTransform* transform, s32 sprite_index,
+                                   s32 arg0);
+
+void draw_scenery_alpha_pass(s32 arg0, s32 arg1) {
+  Gfx* gfx;
+  SceneryColorRecord unused_record;
+  SceneryColorRecord fill_color;
+  s32 i;
+  s32 first;
+  s32 threshold;
+
+  gfx = glistp;
+  unused_record = D_800CA100;
+  fill_color = D_800CA10C;
+  if (flag_is_set(0xE) == 0 && g_scenery_heap_ready != 0 &&
+      func_80045AC0() == 0) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, fill_color.bytes.r, fill_color.bytes.g,
+                   fill_color.bytes.b, 0x20);
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+
+    if (D_801B5534[arg1].state == 1) {
+      threshold = project_point_view_depth(
+          (f32)D_800FBE64 * 0.0009765625f, (f32)D_800FBE68 * 0.0009765625f,
+          (f32)target_z * 0.0009765625f);
+      if (threshold > 0) {
+        threshold = -0xFFFF;
+      }
+    } else {
+      threshold = -0xFFFF;
+    }
+    g_last_billboard_sprite_id = -1;
+
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0, 0xFF);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    first = 0;
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
+            G_RM_FOG_SHADE_A,
+        Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL |
+            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+
+    for (i = 0x7F; i >= 0; i--) {
+      s32 cylinder_index = g_scenery_sort_indices[i];
+
+      if (collision_cylinders[cylinder_index].cull_state == 0) {
+        s32 sprite_index = collision_cylinders[cylinder_index].sprite_index;
+
+        if (sprite_index >= 0) {
+          s32 depth = g_scenery_transform_pool[cylinder_index].depth;
+
+          if (depth < -0x800) {
+            continue;
+          }
+          if (depth >= 0) {
+            continue;
+          }
+          {
+            s32 alpha = -depth;
+
+            if (alpha >= 0x100) {
+              alpha = 0xFF;
+            }
+            if (alpha < 0x80) {
+              alpha = 0x80;
+            }
+            if (depth < threshold) {
+              alpha = 0xFF;
+            }
+            if (alpha != 0xFF) {
+              if ((first == 0) && (alpha < 0xFF)) {
+                first = 1;
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
+              }
+              if (alpha < 0xFF) {
+                gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0, alpha);
+              }
+              emit_scenery_billboard(
+                  &gfx, &collision_cylinders[cylinder_index],
+                  &g_scenery_transform_pool[cylinder_index], sprite_index,
+                  arg0);
+            }
+          }
+        }
+      }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    glistp = gfx;
+  }
+}
 
 /* Probe whether the rounded string copy fits in the slot-3 heap. Returns 1 for
  * a zero allocation tag, 2 for an empty string, 3 for a rounded length of at
