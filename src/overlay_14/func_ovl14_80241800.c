@@ -1,6 +1,7 @@
 #include "common.h"
 #include "../main/controller.h"
 #include "../main/rom_asset.h"
+#include "../main/session.h"
 
 extern s32 D_ovl14_802457E8;
 extern s32 D_ovl14_802457EC;
@@ -29,6 +30,16 @@ extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan)
 extern void func_800934CC(s32 arg0);
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern void set_color_framebuffer_count(u32 buffer_count);
+extern s32 D_ovl14_802457E4;
+extern void* D_ovl14_80245A38[];
+extern void* D_ovl14_80245A68[];
+extern u16 D_800C547C[];
+extern s16 D_800C54A0[];
+extern SupershotRecord D_80105F40[];
+extern u8* func_8005AF50(void);
+extern void func_8005B28C(s32 idx, SupershotRecord* src);
+extern void func_8005D0D8(void);
+extern void func_8005DE60(void);
 
 typedef struct {
     /* 0x00 */ u8 unknown_00[4];
@@ -74,7 +85,37 @@ void func_ovl14_80243880(void) {
     D_ovl14_802457EC = 5;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80243898);
+/* Selects the supershot entry at D_ovl14_802457E4. When its bit 7 validation
+ * flag is set, loads that entry's asset payload and reads its ROM slot. */
+void func_ovl14_80243898(void) {
+    RomAssetLoad asset_load;
+    RomLoadSlot rom_slot;
+    SupershotRecord* record;
+    u8* base;
+    u32 size;
+    s32 state;
+
+    base = func_8005AF50();
+    record = &((SupershotRecord*)(base + 0x1DF0))[D_ovl14_802457E4];
+    func_8005B28C(D_ovl14_802457E4, D_80105F40);
+    D_ovl14_802457E8 = 0;
+    func_8005D0D8();
+    if ((s8)record->validation_flags & 0x80) {
+        get_rom_asset_allocation_size(
+            D_800C547C[(s8)record->character_index] + 9, &asset_load);
+        load_rom_asset_payload(D_ovl14_80245A68[D_ovl14_802457E4], &asset_load);
+        open_rom_asset_slot(
+            D_800C54A0[(s8)record->character_index] + (s8)record->asset_variant,
+            &rom_slot);
+        size = get_rom_load_slot_size(&rom_slot);
+        read_rom_load_slot(D_ovl14_80245A38[D_ovl14_802457E4], size, &rom_slot);
+        state = 4;
+    } else {
+        state = 1;
+    }
+    D_ovl14_802457EC = state;
+    func_8005DE60();
+}
 
 void func_ovl14_802439B0(void) {
     D_ovl14_802457E8 = 0;
