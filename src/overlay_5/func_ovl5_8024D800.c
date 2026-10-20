@@ -11,6 +11,7 @@ extern u64 D_ovl5_8025A640[0x2000 / sizeof(u64)];
 extern Vec3i D_ovl5_8025C874;
 extern s32 D_ovl5_8025C87C;
 extern s8 D_ovl5_80253B52[];
+extern s8 D_ovl5_802542C0;
 extern s32 D_ovl5_8025C884;
 extern s8 D_800BAA04;
 extern s32 D_ovl5_8025C640;
@@ -299,6 +300,34 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8025319C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80253574);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80253754);
+s32 func_ovl5_80253754(Vec3i *from, Vec3i *to) {
+    s32 dist;
+    f32 angle;
+    s32 i;
+    s32 samples;
+    s32 hits;
+    s32 x;
+    s32 z;
+    u32 id;
+
+    dist = calculate_hypotenuse_safe(to->x - from->x, to->z - from->z);
+    angle = atan2((f32)(to->z - from->z), (f32)(to->x - from->x));
+    samples = 0;
+    hits = 0;
+    for (i = 1; (f32)i < dist * 0.000007119878f; i++) {
+        x = (f32)i * (cosf(angle) * 14045.184f) + from->x;
+        z = (f32)i * (sinf(angle) * 14045.184f) + from->z;
+        id = ((TerrainAttrEntry *)func_80040E3C(x, z))->id;
+        if (id == 0xA || id == 0xD || id == 0x15) {
+            hits++;
+        }
+        samples++;
+    }
+    if ((f32)hits / (f32)samples > 0.5f) {
+        osSyncPrintf(&D_ovl5_802542C0);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80253978);
