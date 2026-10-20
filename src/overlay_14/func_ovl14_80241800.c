@@ -30,9 +30,17 @@ extern void func_80050DA0(s32 sfx, s32 channel, s32 volume, s32 reverb, s32 pan)
 extern void func_800934CC(s32 arg0);
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern void set_color_framebuffer_count(u32 buffer_count);
+extern void func_80051A88(s32 volume);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
 extern s32 D_ovl14_802457E4;
+extern s32 D_ovl14_802457DC;
 extern void* D_ovl14_80245A38[];
 extern void* D_ovl14_80245A68[];
+extern void* D_ovl14_80245A98[3][2];
+extern void* D_ovl14_80245AB8[6];
+extern void* D_ovl14_80245AD0;
+extern void* D_ovl14_80245AD4;
 extern u16 D_800C547C[];
 extern s16 D_800C54A0[];
 extern SupershotRecord D_80105F40[];
@@ -72,7 +80,36 @@ s32 func_ovl14_80241800(Overlay14Entry *entry) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_8024186C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80241E54);
+void func_ovl14_80241E54(void) {
+    s32 i;
+
+    func_80051A88(0x7F);
+    heap3_free(&D_ovl14_80245AB0);
+    heap3_free(&D_ovl14_80245AD4);
+    if (D_ovl14_802457DC == 1) {
+        for (i = 0; i != 3; i++) {
+            heap3_free(&D_ovl14_80245A98[i][0]);
+            heap3_free(&D_ovl14_80245A98[i][1]);
+        }
+        i = 0;
+    } else {
+        for (i = 0; i != 6; i++) {
+            heap3_free(&D_ovl14_80245AB8[i]);
+        }
+        heap3_free(&D_ovl14_80245AD0);
+        i = 0;
+    }
+    for (i = 0; i != 12; i++) {
+        heap3_free(&D_ovl14_80245A68[i]);
+        heap3_free(&D_ovl14_80245A38[i]);
+    }
+    D_ovl14_802457DC = 0;
+    func_800719A0(0xA0, 0x72, -1, 1, 0, 0, 0, 0, 0, 0);
+    func_800719A0(0xA0, 0x72, -1, 1, 1, 0, 0, 0, 0, 0);
+    func_800719A0(0xA0, 0x72, -1, 1, 2, 0, 0, 0, 0, 0);
+    func_800719A0(0xA0, 0x72, -1, 1, 3, 0, 0, 0, 0, 0);
+    func_800719A0(0xA0, 0x72, -1, 1, 4, 0, 0, 0, 0, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_14/func_ovl14_80241800", func_ovl14_80242050);
 
