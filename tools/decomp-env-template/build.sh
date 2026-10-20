@@ -186,7 +186,7 @@ if [ "$TRUE_MATCH" = yes ]; then
     fi
 
     echo "Exact-match source archived: $MATCH_BACKUP_REL"
-    echo "NEXT: replace the INCLUDE_ASM line for $FUNCTION_NAME in $PROJECT_ROOT/$SOURCE_FILE with the function from $1 and run ./tools/build-and-verify.sh from $PROJECT_ROOT until it succeeds (decompile-function, section 2)."
+    echo "NEXT: replace the INCLUDE_ASM line for $FUNCTION_NAME in $PROJECT_ROOT/$SOURCE_FILE with the function from $1 and run ./tools/build-and-verify.sh from $PROJECT_ROOT until it succeeds (AGENTS.md, \"Integrate a match\")."
 fi
 
 if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
@@ -215,7 +215,7 @@ if [[ $1 =~ base_[0-9]+ ]] && [ -n "$MATCH_PERCENT" ]; then
 
     if [ -n "$STALL_INFO" ]; then
         read -r SINCE BEST_FILE BEST_SCORE <<< "$STALL_INFO"
-        echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Make no further attempt; finish as the decompile-function stop rules say."
+        echo "STOP: No progress in $SINCE attempts (best: ${BEST_SCORE}% at $BEST_FILE; stall limit $STALL_LIMIT). Make no further attempt; finish as AGENTS.md, \"Finish without a match\", says."
     fi
 fi
 

@@ -5,7 +5,7 @@ description: "How to approach a function that will not match: reconstruct plausi
 tags: [decompile, strategy]
 ---
 
-Used from inside a [decomp environment](/tools/decomp-env.md) after `base.c` compiles. The attempt loop and stop rules live in [decompile-function](/procedures/decompile-function.md); compiler behavior in [KMC GCC learnings](/reference/kmc-gcc/index.md); cleanup of m2c output in [decompilation artefacts](/reference/decompilation-artefacts.md).
+Used from inside a [decomp environment](/tools/decomp-env.md) after `base.c` compiles. The attempt loop and stop rules live in the environment's `AGENTS.md` ([decompile-function](/procedures/decompile-function.md)); compiler behavior in [KMC GCC learnings](/reference/kmc-gcc/index.md); cleanup of m2c output in [decompilation artefacts](/reference/decompilation-artefacts.md).
 
 # General approach
 

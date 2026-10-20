@@ -12,6 +12,8 @@ ARG=""
 CLI="omp"
 CLI_ARGS=(--thinking xhigh)
 
+REFS=""
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --bootstrap)
@@ -25,6 +27,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --id)
             ID="$2"
+            shift 2
+            ;;
+        --refs)
+            if [[ $# -lt 2 ]]; then
+                echo "Error: --refs requires a value"
+                exit 1
+            fi
+            REFS="$2"
             shift 2
             ;;
         *)
@@ -315,14 +325,31 @@ fi
 # Add decomp helpers
 ln -sf "${TEMPLATE_DIR}"/* "$created_dir/"
 rm "$created_dir/AGENTS.md"
-sed -e 's|\$functionName|'"${FUNC_NAME}"'|g' -e 's|\$root|'"$(pwd -P)"'|g' -e 's|\$env|'"$(cd "$created_dir" && pwd -P)"'|g' \
-    "${TEMPLATE_DIR}/AGENTS.md" > "$created_dir/AGENTS.md"
 ln -s "$OMP_CONFIG" "$created_dir/.omp"
 
 # Record tier, model, and stall limit for build.sh and the difficulty ledger
 if ! "$PYTHON" tools/difficulty_ledger.py write-run "$created_dir" "$FUNC_NAME"; then
     echo "Warning: could not write $created_dir/.run.json; build.sh uses the default stall limit"
 fi
+
+# Render AGENTS.md now that the environment is populated: the $context line becomes the
+# output of tools/decomp_env_context.py, or stays empty if that script fails.
+render_agents_md() {
+    local context_file
+    context_file="$(mktemp)"
+    if ! "$PYTHON" tools/decomp_env_context.py --env "$created_dir" --function "$FUNC_NAME" --refs "$REFS" > "$context_file"; then
+        echo "Warning: could not build the context block; AGENTS.md gets an empty context"
+        : > "$context_file"
+    fi
+    sed -e 's|\$functionName|'"${FUNC_NAME}"'|g' -e 's|\$root|'"$(pwd -P)"'|g' -e 's|\$env|'"$(cd "$created_dir" && pwd -P)"'|g' \
+        "${TEMPLATE_DIR}/AGENTS.md" \
+        | CONTEXT_FILE="$context_file" awk '
+            $0 == "$context" { while ((getline line < ENVIRON["CONTEXT_FILE"]) > 0) print line; next }
+            { print }
+        ' > "$created_dir/AGENTS.md"
+    rm -f "$context_file"
+}
+render_agents_md
 
 if [ "$BOOTSTRAP_ONLY" = true ]; then
     echo "Bootstrap-only mode: environment ready at $created_dir"

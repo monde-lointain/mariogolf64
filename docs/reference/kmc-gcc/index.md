@@ -10,7 +10,7 @@ Pick the concepts that match the mismatch you see in the diff; each states a gen
 
 # Adding to this reference
 
-* [Editing rules for the KMC GCC reference](editing-rules.md) - What may be added to the KMC GCC learnings: generic reusable compiler and build properties only; per-function findings go to the workspace LEARNINGS.md.
+* [Editing rules for the KMC GCC reference](editing-rules.md) - What may be added to the KMC GCC learnings: generic reusable compiler and build properties only; per-function findings go to the workspace NEAR_MISS.md.
 
 # Related
 

@@ -47,11 +47,11 @@ Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py h
 
 | Task | Candidate source | Timeout | Notes |
 |---|---|---|---|
-| `decompile-unmatched` | `score_functions.py … --json` | 60 min | Tier 1. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT`, then [decompile-function](/procedures/decompile-function.md). |
+| `decompile-unmatched` | `score_functions.py … --json` | 60 min | Tier 1. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT` and passes them to `decomp-env --refs`. |
 | `decompile-similar` | `score_functions.py … --by-similarity --top-n 3` | 60 min | Tier 1. Top three similar matched functions as references. |
 | `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. References from coddog similarity. |
-| `decompile-tier2` | `score_functions.py … --by-similarity --top-n 5 --tier 2` | 120 min | Tier 2. Reads the tier-1 reasons first. Five references. Rewrites from the assembly when progress plateaus. |
-| `decompile-tier3` | `score_functions.py … --by-similarity --top-n 5 --tier 3` | 240 min | Tier 3. Reads the tier-2 reasons first. Five references. Tries every approach in the matching method that earlier attempts did not. |
+| `decompile-tier2` | `score_functions.py … --by-similarity --top-n 5 --tier 2` | 120 min | Tier 2. The tier-1 reasons are in the brief's `<prior_attempts>`. Five references. Rewrites from the assembly when progress plateaus. |
+| `decompile-tier3` | `score_functions.py … --by-similarity --top-n 5 --tier 3` | 240 min | Tier 3. The tier-2 reasons are in the brief's `<prior_attempts>`. Five references. Tries every approach in the matching method that earlier attempts did not. |
 | `cleanup-matched` | `python3 tools/list_matched_functions.py --by-reference-use` | 60 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`, most-referenced functions first. Config success command. |
 | `fix-low-quality` | `python3 tools/detect_low_quality_matches.py src --json` | 30 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`. Config success command. |
 | `cleanup-files` | `ls -1 src/main/func_*.c src/overlay_*/func_*.c 2>/dev/null` | 30 min | Cleans and renames each file with [rename-file](/procedures/rename-file.md). Commits `cleaned up $CANDIDATE`. |
@@ -68,4 +68,4 @@ Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py h
 
 The candidate-source scripts are in [selection](/tools/selection-and-status.md) and [quality checkers](/tools/quality-checkers.md).
 
-Decompile tasks escalate by [difficulty tier](/tools/difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs `--model anthropic/claude-haiku-5-5:xhigh` (`agent_flags`); the budget and strategy change between tiers, the model does not.
+Decompile tasks escalate by [difficulty tier](/tools/difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs Haiku (`agent_flags`): tier-1 tasks at `:high` effort, tiers 2 and 3 at `:xhigh`. Each prompt runs `tools/decomp-env --bootstrap-only --id $TASK_ID --refs <references> <function>` and points the agent at the rendered `AGENTS.md`, which is the whole per-function brief ([decompile-function](/procedures/decompile-function.md)).
