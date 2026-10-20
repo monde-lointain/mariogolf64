@@ -1461,3 +1461,5 @@ D_ovl8_801F5928 = 0x801F5928; // type:Ovl8TextRecord size:0x30 segment:overlay_8
 D_ovl3_8022FF1C = 0x8022FF1C; // type:s32 size:0x10 segment:overlay_3
 // overlay_9 jtbl_ovl9_801F5798 entries 2 and 4 jump to 0x801F5548, inside overlay_9 func_ovl9_801F4FF4. Bind a label to overlay_9 so the table names it there, not overlay_15's leaked jlabel of the same VRAM.
 ovl9_801F5548 = 0x801F5548; // type:label segment:overlay_9
+// overlay_7 jtbl_ovl7_8020BA80 entry 2 jumps to 0x801F5A2C, inside overlay_7 func_ovl7_801F58EC. Bind a label to overlay_7 so the table names it there, not overlay_15's jlabel of the same VRAM (overlay_15 func_ovl15_801F5644 is C now and no longer defines it).
+ovl7_801F5A2C = 0x801F5A2C; // type:label segment:overlay_7

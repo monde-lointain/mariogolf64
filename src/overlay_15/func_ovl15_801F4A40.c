@@ -2,6 +2,7 @@
 #include <nusys.h>
 #include "../main/session.h"
 #include "../main/rom_asset.h"
+#include "../main/controller.h"
 
 typedef struct {
   /* 0x00 */ u8 unknown_00[0x30];
@@ -90,7 +91,9 @@ typedef struct {
     void *unk4C;
     void *unk50;
     void *unk54;
-    u8 unk58[0x14];
+    u8 unk58[4];
+    s32 unk5C;
+    u8 unk60[0xC];
     NUContPakFile gbpakFile; /* 0x6C */
     OSGbpakId gbpakId; /* 0x7C */
     Ovl15Entry unkCC[12]; /* 0xCC */
@@ -98,7 +101,7 @@ typedef struct {
     s32 unk76C[12];
     s32 unk79C;
     s32 unk7A0;
-    u8 unk7A4[4];
+    s32 unk7A4;
     s32 unk7A8;
     u8 unk7AC[4];
     s32 unk7B0;
@@ -108,7 +111,11 @@ typedef struct {
     s32 unk7E4;
     s32 unk7E8;
     s32 unk7EC[1]; /* 0x7EC; indexed 0..unk7E8-1 */
-} Ovl15AssetBlock; /* known extent 0x7EC */
+    u8 unk7F0[0x83C - 0x7F0];
+    s32 unk83C;
+    s32 unk840;
+    s32 unk844;
+} Ovl15AssetBlock; /* known extent 0x848 */
 
 typedef struct {
   /* 0x00 */ u8 unknown_00[0x7A8];
@@ -169,6 +176,16 @@ extern void func_ovl15_801FB510(Gfx **dl, s32 a, s32 b);
 extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
                           u8 red, u8 green, u8 blue, u8 alpha);
 extern void func_80071CE4(Gfx **dl, s32 i);
+extern ControllerState D_ovl15_801FC5C0;
+extern s32 D_800C0E60;
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern void func_8006BA24(s32 dialog_index);
+extern s32 func_8006BA94(ControllerState *input);
+extern s32 func_ovl15_801FA35C(void);
+extern s32 func_ovl15_801FA0BC(void);
+extern void func_ovl15_801F6818(void);
+extern s32 func_ovl15_801F91E4(s32 a0);
+extern s32 func_ovl15_801F93DC(s32 a0);
 
 void func_ovl15_801F4A40(void) {
     Ovl15AssetBlock *blk;
@@ -395,7 +412,170 @@ void func_ovl15_801F5570(s32 a0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5644);
+/* Overlay 15 state machine: dispatches on D_800FE4B8[0x1D0] and updates the asset block from the controller state in D_ovl15_801FC5C0. */
+void func_ovl15_801F5644(void) {
+    Ovl15AssetBlock *blk = &D_800FE450;
+    s32 r;
+
+    switch (D_800FE4B8[0x1D0]) {
+    case 0:
+        switch (func_ovl15_801FA35C()) {
+        case 0:
+            blk->unk5C = 0;
+            break;
+        case 2:
+            break;
+        case 3:
+            blk->unk844 = 0;
+            blk->unk840 = 2;
+            if (D_ovl15_801FC5C0.pressed & 0x8000) {
+                blk->unk840 = 0;
+                func_ovl15_801FA320(2, 0x147);
+                play_sound_effect(0x5D, D_800C0E60, 0x7F);
+            }
+            break;
+        }
+        break;
+    case 9:
+        blk->unk7A8 = 10;
+        func_ovl15_801F6818();
+        func_ovl15_801FA320(1, 0x147);
+        break;
+    case 10:
+        switch (func_ovl15_801FA35C()) {
+        case 0:
+            blk->unk840 = 0;
+            if (blk->unk83C == 0) {
+                blk->unk844 = 1;
+                blk->unk7A8 = 0xB;
+            } else {
+                blk->unk844 = 0;
+                blk->unk5C = 0;
+            }
+            break;
+        case 2:
+            break;
+        case 3:
+            blk->unk840 = 2;
+            if (D_ovl15_801FC5C0.pressed & 0x8000) {
+                blk->unk840 = 0;
+                blk->unk83C = 0;
+                func_ovl15_801FA320(2, 0x147);
+                play_sound_effect(0x5D, D_800C0E60, 0x7F);
+            } else if (D_ovl15_801FC5C0.pressed & 0x4000) {
+                blk->unk840 = 0;
+                blk->unk83C = 1;
+                func_ovl15_801FA320(2, 0x147);
+                play_sound_effect(0x5F, D_800C0E60, 0x7F);
+            }
+            break;
+        }
+        break;
+    case 11:
+        r = func_ovl15_801FA0BC();
+        if (r == 1) {
+            blk->unk844 = 0;
+            blk->unk7A8 = r;
+        } else {
+            func_ovl15_801F5570(r);
+            blk->unk844 = 0;
+            blk->unk7A8 = 0;
+        }
+        break;
+    case 1:
+        if (D_ovl15_801FC5C0.pressed & 0x8000) {
+            play_sound_effect(0x5D, D_800C0E60, 0x7F);
+            blk->unk7A8 = 3;
+            break;
+        }
+        if (D_ovl15_801FC5C0.pressed & 0x4000) {
+            play_sound_effect(0x5F, D_800C0E60, 0x7F);
+            blk->unk5C = 0;
+            break;
+        }
+        if ((D_ovl15_801FC5C0.repeated & 0x200) && blk->unk7E4 > 0) {
+            play_sound_effect(0x5C, D_800C0E60, 0x7F);
+            blk->unk7E4 = blk->unk7E4 - 1;
+            break;
+        }
+        if (D_ovl15_801FC5C0.repeated & 0x100) {
+            if (blk->unk7E4 < blk->unk7E8 - 1) {
+                play_sound_effect(0x5C, D_800C0E60, 0x7F);
+                blk->unk7E4 = blk->unk7E4 + 1;
+            }
+        }
+        break;
+    case 3:
+        blk->unk840 = 1;
+        if (D_ovl15_801FC5C0.pressed & 0x8000) {
+            blk->unk840 = 0;
+            blk->unk844 = 1;
+            play_sound_effect(0x5D, D_800C0E60, 0x7F);
+            blk->unk7A8 = 4;
+        } else if (D_ovl15_801FC5C0.pressed & 0x4000) {
+            blk->unk840 = 0;
+            play_sound_effect(0x5F, D_800C0E60, 0x7F);
+            blk->unk7A8 = 1;
+        }
+        break;
+    case 4:
+        switch (func_ovl15_801F91E4(blk->unk7E4)) {
+        case 0:
+            blk->unk844 = 0;
+            blk->unk7A8 = 0xC;
+            break;
+        case 2:
+            blk->unk844 = 0;
+            blk->unk7A8 = 8;
+            func_8006BA24(0xA);
+            break;
+        case 1:
+            blk->unk844 = 0;
+            func_ovl15_801F5570(blk->unk7A4);
+            blk->unk7A8 = 0;
+            break;
+        }
+        break;
+    case 8:
+        switch (func_8006BA94(&D_ovl15_801FC5C0)) {
+        case 10:
+            blk->unk844 = 1;
+            blk->unk7A8 = 0xC;
+            break;
+        case 11:
+            blk->unk7A8 = 1;
+            break;
+        }
+        break;
+    case 12:
+        r = func_ovl15_801F93DC(blk->unk7E4);
+        blk->unk844 = 0;
+        switch (r) {
+        case 0:
+        case 2:
+            if (blk->unk7A4 == 1) {
+                blk->unk7A8 = 5;
+            } else {
+                func_ovl15_801F5570(blk->unk7A4);
+                blk->unk7A8 = 0;
+            }
+            break;
+        case 1:
+            func_ovl15_801F54F8(blk->unk7A4);
+            blk->unk7A8 = 0;
+            break;
+        }
+        break;
+    case 5:
+        blk->unk840 = 1;
+        if (D_ovl15_801FC5C0.pressed & 0x8000) {
+            play_sound_effect(0x5D, D_800C0E60, 0x7F);
+            blk->unk840 = 0;
+            blk->unk5C = 0;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5AF0);
 
