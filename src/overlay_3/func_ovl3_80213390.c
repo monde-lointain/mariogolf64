@@ -16,6 +16,14 @@ extern s32 D_ovl3_8023013C[];
 extern char D_ovl3_8022BF70[];
 extern char D_ovl3_802318F8[];
 extern char D_80105118[];
+extern u8* func_8005AF74(void);
+extern s32 func_ovl3_80209478(void);
+extern s32 func_800959F8(void);
+extern void func_8009226C(s32 arg0);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C2000;
+extern s32 D_800C2004;
+extern s32 current_game_mode;
 
 void func_80071608(Gfx** dl);
 void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
@@ -68,7 +76,64 @@ void func_ovl3_80213464(u8* destination, s16 mode) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_80213558);
+void func_ovl3_80213558(void) {
+    u8* state;
+    s32 count;
+    s32 value;
+    s32 shifted;
+    s32 dir;
+    s32 step;
+
+    state = func_8005AF74();
+    count = func_ovl3_80209478();
+    if (func_800959F8() == 1) {
+        if (D_800C2004 & 0x4000) {
+            func_8009226C(9);
+            play_sound_effect(0x5F, 0xF, 0x7F);
+            func_8009226C(9);
+            current_game_mode = 9;
+            return;
+        }
+        if (((s8*)state)[0x34] == 0) {
+            if (D_800C2000 & 0x100) {
+                if (count >= 2) {
+                    play_sound_effect(0x5C, 0xF, 0x64);
+                    state[0x33]++;
+                    if (count - 1 < (s8)state[0x33]) {
+                        state[0x33] = 0;
+                    }
+                    state[0x34] = (s8)(-90 / count);
+                }
+            } else if (D_800C2000 & 0x200) {
+                if (count >= 2) {
+                    play_sound_effect(0x5C, 0xF, 0x64);
+                    state[0x33]--;
+                    if ((s8)state[0x33] < 0) {
+                        state[0x33] = count - 1;
+                    }
+                    state[0x34] = (s8)(90 / count);
+                }
+            }
+        }
+        shifted = state[0x34] << 24;
+        value = shifted >> 24;
+        if (value < 0) {
+            value = -value;
+        }
+        if (value != 0) {
+            dir = (shifted < 0) ? -1 : 1;
+            step = 0x12 / count;
+            if (step == 0) {
+                step = 1;
+            }
+            value = state[0x34] - dir * step;
+            state[0x34] = value;
+            if (((s8)value < 0 ? -1 : 1) != dir) {
+                state[0x34] = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_80213748);
 
