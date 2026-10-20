@@ -8,14 +8,14 @@ tags: [decompile, permuter]
 
 # Why agents do not run it
 
-The permuter reorders and rewrites expressions. It does not change control flow, so it cannot fix a control-flow mismatch. It also finds local optima and tends to loop: `do { } while (0)` rewrites, reused variables, dropped calls, and `gbi.h` macros expanded into raw words. The agent loop stops at the `STOP:` line from `build.sh` and records the function in the [difficulty ledger](/tools/difficulty-ledger.md) instead ([decompile-function](/procedures/decompile-function.md), "Stop rules").
+The permuter reorders and rewrites expressions. It does not change control flow, so it cannot fix a control-flow mismatch. It also finds local optima and tends to loop: `do { } while (0)` rewrites, reused variables, dropped calls, and `gbi.h` macros expanded into raw words. The agent loop stops at the `STOP:` line from `build.sh` and records the function in the [difficulty ledger](/tools/difficulty-ledger.md) instead; the loop and its stop rules are in [decompile-function](/procedures/decompile-function.md).
 
 # Sanity check
 
 Run it only when both hold:
 
-* No significant control-flow or functional difference remains between your C and the target. The permuter does not change control flow, and trying anyway risks a local optimum.
-* You have already improved the function yourself. A 95%+ match handed to you has probably been permuted already; you were given it *because* the permuter failed.
+* No significant control-flow or functional difference remains between your C and the target.
+* You have already improved the function yourself. A 95%+ match handed to you has probably been permuted already.
 
 # Run
 
@@ -29,9 +29,9 @@ timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <fu
 * Add `--preserve-f3dex` for functions that build display lists so the importer keeps the `gDP*`/`gSP*` macros.
 * The permuter compiles with the same profile as `./build.sh` (from the environment's `.source_file`). See [permuter](/tools/permuter.md).
 
-The source file must compile, should already be 95%+, may implement only one function body (externs for others are fine), and must include its headers.
+The source file must compile and should already be 95%+. The importer keeps everything outside the target function, including its `#include`s, as context.
 
-Improvements appear in `nonmatchings/<function>[-N]/output-<score>[-N]/`: full code in `source.c`, changes in `diff.txt`.
+Improvements appear in `nonmatchings/<function>[-N]/output-<score>-<n>/`: full code in `source.c`, changes in `diff.txt`. An `output-0-*` directory is a match; [permuter](/tools/permuter.md) checks for it.
 
 # Iterating
 

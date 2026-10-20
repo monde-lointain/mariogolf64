@@ -13,14 +13,13 @@ python3 tools/data-differ/data_diff.py [--find-first-mismatch | <symbol>] [flags
 ./tools/diff-data <symbol>
 ```
 
-The script changes to the repository root before it resolves paths, so the default paths below are relative to that root. It needs a completed build ([build-and-verify](/tools/build-and-verify.md)): the built ROM, ELF and linker map.
+The script changes to the repository root before it resolves paths, so the default paths below are relative to that root. It needs `baserom.z64` and a completed build ([build-and-verify](/tools/build-and-verify.md)): the built ROM, ELF and linker map.
 
 # Common uses
 
 ```bash
-# One symbol; override the size, or show matching bytes too
+# One symbol; override the size
 python3 tools/data-differ/data_diff.py <symbol> --size 0x10
-python3 tools/data-differ/data_diff.py <symbol> --show-all
 
 # After a checksum failure: scan symbols in ROM order, stop at the first mismatch
 python3 tools/data-differ/data_diff.py --find-first-mismatch
@@ -35,9 +34,9 @@ Use `--find-first-mismatch` after a failed build, after changing a data structur
 |---|---|---|
 | `symbol` | none | Symbol name from `symbol_addrs.txt`. Required unless `--find-first-mismatch` is given. |
 | `--find-first-mismatch` | off | Scan all symbols in ROM address order and report the first mismatch. Ignores `symbol`, with a warning. Needs the map and ELF, not `symbol_addrs.txt`. |
-| `--filter PATTERN` | none | With `--find-first-mismatch`, check only symbols matching `PATTERN`. |
+| `--filter PATTERN` | none | With `--find-first-mismatch`, check only symbols whose name contains `PATTERN`, case-insensitively. |
 | `--size SIZE` | from the symbol | Override the size. Accepts `0x10`, `16` or `0b10000`. |
-| `--show-all` | off | Show all bytes, not only the differences. |
+| `--show-all` | off | Has no visible effect: identical data prints only the match line. |
 | `--target-rom` | `baserom.z64` | Target ROM. |
 | `--compiled-rom` | `build/mariogolf64.z64` | Built ROM. |
 | `--elf` | `build/mariogolf64.elf` | ELF, used for symbol sizes and object types. |
@@ -51,7 +50,8 @@ The exit code is 0 when the data matches and 1 when it differs or the lookup fai
 * Each `symbol_addrs.txt` line has the form `name = 0xVRAM; // rom:0xROM size:0xSIZE type:TYPE` ([format](/reference/symbol-addrs-format.md)). `rom:` is optional.
 * ROM address: `rom:` from `symbol_addrs.txt`; otherwise the VRAM is mapped to a ROM address through the linker map.
 * Size, in priority order: `--size`, then `size:` in `symbol_addrs.txt`, then the ELF symbol size read with `readelf`, then a `.size` directive in `asm/data/`. If none of these gives a size, the script stops with an error.
-* Output shows the VRAM, ROM address, size and where the size came from, the target and compiled bytes, and each differing offset.
+* Output shows the VRAM, ROM address and size (with the size's source in single-symbol mode), then both byte dumps and each differing offset. Dumps longer than 32 bytes show only their first and last 16 bytes. At most 64 differing offsets are listed. Identical data prints `✓ Data matches perfectly!` and no dump.
+* `--find-first-mismatch` takes symbols from the ELF `OBJECT` symbols, with their VRAM and size, not from `symbol_addrs.txt`. It maps each one to ROM through the linker map, skips symbols the map does not cover, and checks the rest in ROM address order.
 
 # Failure modes
 
@@ -61,6 +61,7 @@ The exit code is 0 when the data matches and 1 when it differs or the lookup fai
 | `Symbol addresses file not found` | Single-symbol mode needs `--symbol-addrs`, which defaults to `symbol_addrs.txt`. |
 | `Symbol '<name>' not found in symbol_addrs.txt` | Not in the table. If partial name matches exist, the script lists up to 10 as "Did you mean" on stdout instead. |
 | `Could not determine ROM address` | No `rom:` and the linker map has no section covering the VRAM. Add `rom:0x...` to the symbol. |
+| `No ROM address specified` | No `rom:` and the linker map file is missing. Add `rom:0x...` to the symbol. |
 | `No size specified` | No `size:`, no ELF size and no `.size` directive. Add `size:0x...`, pass `--size`, or make sure the symbol is in the ELF. |
 | `Map file not found` / `ELF file not found` | Required by `--find-first-mismatch`. |
 | `Warning: '<name>' appears to be a function (FUNC)` | The name refers to code, not data. Use [asm-differ](/tools/asm-differ.md). |

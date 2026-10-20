@@ -18,6 +18,8 @@ tags: [libultra, segments, splat]
 
 1. **Inspect the target before trusting upstream.** This ROM's libultra can differ from the checked-in upstream copy (extra init loops, literal stores, changed command or status values).
 
+   Diff the function with [asm-differ](/tools/asm-differ.md):
+
    ```sh
    python3 tools/asm-differ/diff.py --no-pager osPfsNumFiles
    ```
@@ -35,7 +37,7 @@ tags: [libultra, segments, splat]
 
    Adjust start and end offsets and the segment name if the range does not match the upstream file.
 
-5. **Match emitted `.data`, `.rodata` and `.bss`.** First check whether the object emits any. KMC objects always carry empty `.data`/`.bss` plus `.reginfo`, `.comment` and `.note`, so check section sizes, not names:
+5. **Match emitted `.data`, `.rodata` and `.bss`.** First check whether the object emits any. KMC objects always carry `.reginfo`, `.comment` and `.note`; `.data`, `.rodata` and `.bss` may or may not be present, so check section sizes, not names:
 
    ```sh
    mips-linux-gnu-objdump -h build/src/libultra/os/initialize.o
@@ -61,7 +63,7 @@ tags: [libultra, segments, splat]
 
    Check that nothing in the segment still uses placeholders: search `src/libultra` for `func_800<hex>` and `D_800<hex>` names. Fix only the symbols involved; do not rename unrelated ones blindly.
 
-7. **Build and verify**, then diff every function the new source emits before looking at linker or data issues:
+7. **Build and verify**, then diff every function the new source emits ([asm-differ](/tools/asm-differ.md)) before looking at linker or data issues:
 
    ```sh
    ./tools/build-and-verify.sh

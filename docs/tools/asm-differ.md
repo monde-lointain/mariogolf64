@@ -16,7 +16,7 @@ python3 tools/asm-differ/diff.py --no-pager <function name>
 
 # Configuration
 
-`diff_settings.py` at the repository root sets the images, map and source directories. `diff.py` imports it from the current directory, so run it from the repository root.
+`diff_settings.py` at the repository root sets the images, map and source directories. `diff.py` imports it from the current directory, so run it from the repository root with the project venv active (see [setup-and-build](/project/setup-and-build.md)).
 
 | Setting | Value |
 |---|---|
@@ -33,17 +33,17 @@ The positional `start [end]` gives a function name or start address and an optio
 
 | Flag | Effect |
 |---|---|
-| `-o` | Diff `.o` files instead of the whole binary. Recommended: symbol names are visible. |
-| `-f, --file FILE` | Diff this file. The map file is not searched for the function. Useful for dynamically linked libraries. |
+| `-o` | Diff `.o` files instead of the whole binary. Recommended: symbol names are visible. `start` must be a function name; `end` and `-S` are not supported. |
+| `-f, --file FILE` | Diff this file instead of the object or binary the map file names; the map file is not searched for the function. Without `-o`, `start` must be a numeric address. |
 | `-F, --ref-file REF_FILE` | File to diff against. Default `expected/<diffed file>`. |
 | `-e, --elf SYMBOL` | Diff a function in two ELFs, one stripped and one not. Requires binutils 2.33+ `objdump`. |
 | `-c, --source` | Show source code. Only with `-o` or `-e`. |
 | `-C, --source-old-binutils` | Source handling for binutils older than 2.33. Implies `--source`. |
-| `-j, --section SECTION` | Restrict the diff to one output section. |
-| `-L, --line-numbers` / `--no-line-numbers` | Show or hide source line numbers. |
+| `-j, --section SECTION` | Restrict the diff to one output section. Default `.text`. |
+| `-L, --line-numbers` / `--no-line-numbers` | Show or hide source line numbers. Shown by default. |
 | `--inlines` | Show inline function calls. Only with `-o` or `-e`. |
 | `--base-asm FILE` | Read the target assembly from `FILE` instead of `baseimg`. |
-| `--write-asm FILE` | Write the current assembly to `FILE`, for use with `--base-asm`. |
+| `--write-asm FILE` | Write the current assembly to `FILE` and exit, for use with `--base-asm`. |
 | `-m, --make` | Run `make` on the object or binary before diffing. |
 | `-l, --skip-lines LINES` | Skip the first `LINES` lines of output. |
 | `-s, --stop-at-ret` | Stop at the first return instruction. `-ss` stops at the second, and so on. |
@@ -52,19 +52,19 @@ The positional `start [end]` gives a function name or start address and an optio
 | `-B, --no-show-branches` | Do not draw branches and branch targets. |
 | `-R, --no-show-rodata-refs` | Hide `.rodata` to `.text` references (typically jump tables). |
 | `-S, --base-shift N` | Compare position N in the built image with N + shift in the target. Arithmetic is allowed. Not supported with `-o`. |
-| `-w, --watch` | Rebuild and redo the diff when source or object files change. Use with `-m`. |
-| `-y, --yes` | Answer yes to prompts. Useful for `-w` without `-m`. |
+| `-w, --watch` | Redo the diff when a watched file changes. With `-m`, the watched files are under `source_directories` and `make` runs on each change. Without `-m`, the target object or binary is watched and nothing is built. |
+| `-y, --yes` | Skip the confirmation prompt for `-w` without `-m`. |
 | `-0, --diff_mode=single_base` | Show the target assembly only. |
 | `-1, --diff_mode=single` | Show the current assembly only. |
 | `-3, --threeway=prev` | Three-way diff of target, current and the assembly before the last `-w` rebuild. Requires `-w`. |
 | `-b, --threeway=base` | Three-way diff of target, current and the assembly when `diff.py` started. Requires `-w`. |
-| `--width COLS` | Width of each column. |
+| `--width COLS` | Width of each column. Default 50. |
 | `--algorithm {levenshtein,difflib}` | Diff algorithm. Default `levenshtein`, which gives the smallest diff; `difflib` keeps long runs of equal opcodes together. |
-| `--max-size, --max-lines LINES` | Maximum diff length, in lines. |
-| `--no-pager` | Write to stdout and exit. Incompatible with `--watch`. |
+| `--max-size, --max-lines LINES` | Maximum diff length, in lines. Default 1024. In binary mode, a `start` without `end` disassembles `LINES` × 4 bytes. |
+| `--no-pager` | Write the diff to stdout and exit. With `--watch`, the diff prints once and does not watch. |
 | `--format {color,plain,html,json}` | Output format; default `color`. `html` and `json` imply `--no-pager`. |
 | `-U, --compress-matching N` | Collapse runs of matching lines, leaving `N` lines of context around differences. |
 | `-V, --compress-sameinstr N` | Collapse runs of identical instructions with possibly different register allocation, leaving `N` lines of context. |
 | `-d, --diff-function-symbols` | Include and diff function symbols. |
 
-`-m` runs `make NON_MATCHING=0` (the `makeflags` setting) on the object or binary before diffing. With `-w`, `-m` also rebuilds on each source change. `-w` without `-m` asks for confirmation (skipped by `-y`) and does not run make.
+`-m` runs `make NON_MATCHING=0` (the `makeflags` setting) on the object or binary before diffing. With `-w`, `-m` runs `make` when a file under `source_directories` changes. `-w` without `-m` asks for confirmation (skipped by `-y`) and does not run make.

@@ -8,16 +8,23 @@ resource: ../../.github/workflows/build.yml
 
 # Pre-commit hook
 
-`tools/git-hooks/pre-commit` is symlinked to `.git/hooks/pre-commit` by `tools/install-git-hooks.sh` (run by `make setup`; an existing different hook is backed up to `pre-commit.bak.<timestamp>`). The same script registers the `merge.decomp-c` merge driver on every run; `.gitattributes` assigns it to `src/**/*.c` ([shard integration](/tools/shard-integration.md)). On every commit it:
+`tools/install-git-hooks.sh` runs from `make setup` and `make install-hooks` ([setup](/project/setup-and-build.md)). On every run it:
 
-1. rejects staged changes to `mariogolf64.sha1`;
-2. runs `tools/build-and-verify.sh`, a full clean rebuild and SHA1 check.
+1. registers the merge drivers `merge.decomp-c` and `merge.splat-yaml` in the repo config; `.gitattributes` assigns them to `src/**/*.c` and `mariogolf64.yaml` ([shard integration](/tools/shard-integration.md#merge-drivers));
+2. symlinks `.git/hooks/pre-commit` to `tools/git-hooks/pre-commit`. An existing different hook is moved to `pre-commit.bak.<unix time>`.
 
-Never bypass it (`--no-verify` is blocked by the [policy hook](/harness/policy-hook.md)). A failing hook means the change does not match.
+On every commit the hook:
+
+1. rejects any staged change to `mariogolf64.sha1`;
+2. runs `tools/build-and-verify.sh`, a full clean rebuild and SHA1 check ([tool](/tools/build-and-verify.md)).
+
+Never bypass it. The [policy hook](/harness/policy-hook.md) blocks only the literal `git commit --no-verify` form; other spellings pass it. A failing hook means the change does not match: fix the change.
 
 # CI
 
-`.github/workflows/build.yml` runs on push and on pull requests **from the same repository only**. The job runs in a private container with the copyrighted ROM at `/orig/baserom.z64`; PR-controlled scripts from a fork could otherwise exfiltrate it, and forks never receive the pull credential anyway. Steps: checkout with submodules, copy the ROM to `baserom.z64`, `make -C tools` (KMC toolchain), create `.venv` and install `requirements.txt`, `./tools/build-and-verify.sh`, `python3 tools/progress.py --segments -o report.json` (table to the job summary, see [progress](/tools/progress.md)), upload `report.json` as artifact `us_report`.
+`.github/workflows/build.yml` runs on `push` and `pull_request`. The job runs only for pushes and for pull requests from the same repository. It runs in a private container with the copyrighted ROM at `/orig/baserom.z64`; PR-controlled scripts from a fork could otherwise exfiltrate it, and forks never receive the pull credential.
+
+Steps: checkout with submodules; copy the ROM to `baserom.z64`; `make -C tools` (KMC toolchain); create `.venv` and install `requirements.txt`; `./tools/build-and-verify.sh`; `python3 tools/progress.py --segments -o report.json` (table to the job summary, see [progress](/tools/progress.md)); upload `report.json` as artifact `us_report`.
 
 No step runs the unit tests; see the [code map](/harness/code-map.md#tests).
 
@@ -44,5 +51,5 @@ docker run --rm -v "$PWD":/repo -w /repo mg64-ci-test bash -c \
   'cp /orig/baserom.z64 baserom.z64 && make -C tools &&
    python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -r requirements.txt &&
    PATH=/tmp/venv/bin:$PATH ./tools/build-and-verify.sh'
-# expect: build/mariogolf64.z64: OK
+# expect: BUILD SUCCEEDED, and the rebuilt ROM matches mariogolf64.sha1
 ```

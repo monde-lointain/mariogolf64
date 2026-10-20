@@ -7,3 +7,4 @@
 # Change it
 
 * [Changing the harness](changing-the-harness.md) - Workflow changes are free; comparison changes need a failing-first test and before/after evidence; protected paths never change; commit harness changes separately.
+* [Docs conventions](docs-conventions.md) - How the docs bundle is authored: frontmatter, directory indexes, bundle-absolute links, one owner per fact, current-behaviour-only text and the log; read before adding or moving a concept.

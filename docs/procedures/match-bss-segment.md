@@ -6,7 +6,7 @@ description: "Replace externs with definitions in expected VRAM order to match a
 tags: [bss, segments, splat]
 ---
 
-> Note: `mariogolf64.yaml` has no `.bss` subsegment: every bss entry is a plain `bss` range, and no C file defines `.bss` objects. The `.bss` forms below are untested in this repo. KMC GCC behavior is in [data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md); check the forms on the first split against [editing rules](/reference/kmc-gcc/editing-rules.md).
+> Note: every `bss` entry in `mariogolf64.yaml` is raw, and no source file uses `section(".bss")` yet, so the `.bss` forms below are untested here. KMC GCC behavior is in [data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md); check the forms on the first split against [editing rules](/reference/kmc-gcc/editing-rules.md).
 
 Reproduce the original VRAM layout exactly. A local compile is not enough; the full ROM checksum must match. `symbol_addrs.txt` is the layout source; code references give types and sizes; expected VRAM addresses decide ordering, padding, arrays and boundaries.
 
@@ -22,7 +22,7 @@ Reproduce the original VRAM layout exactly. A local compile is not enough; the f
    ```
 
 3. **Replace externs with definitions.** Convert only symbols in the target file's `.bss` range.
-   * Give each definition `__attribute__((section(".bss")))` **and** an explicit zero initializer: `s32 foo __attribute__((section(".bss"))) = 0;`, `u8 buffer[0x10] __attribute__((section(".bss"))) = { 0 };`. KMC GCC ignores the section attribute on an uninitialized variable (it stays a reorderable `.comm`) and places a bare `= 0` definition in `.data`; only attribute plus initializer lands in `.bss` in source order. Arrays of 8 bytes or more are 8-byte aligned.
+   * Give each definition `__attribute__((section(".bss")))` **and** an explicit zero initializer: `s32 foo __attribute__((section(".bss"))) = 0;`, `u8 buffer[0x10] __attribute__((section(".bss"))) = { 0 };`. Without both, KMC GCC does not keep the symbol in `.bss` in source order ([data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md)).
    * Order definitions by expected VRAM, not by where the old externs appeared.
    * Use `static` only for file-local symbols nothing else references. Leave unrelated externs alone.
 
@@ -41,7 +41,7 @@ Reproduce the original VRAM layout exactly. A local compile is not enough; the f
    mips-linux-gnu-nm -n build/mariogolf64.elf
    ```
 
-   Compare the `nm` addresses to `symbol_addrs.txt`. If one symbol is right and every later one is early or late, the preceding symbol's size is wrong. Symbols reordered by alignment point to tentative definitions without an explicit zero initializer. Re-check array lengths, alignment, struct size and padding before editing YAML addresses. [data-differ](/tools/data-differ.md) finds the first mismatching symbol.
+   Compare the `nm` addresses to `symbol_addrs.txt`. If one symbol is right and every later one is early or late, the preceding symbol's size is wrong. Symbols the linker reorders are tentative `.comm` definitions ([data and jump tables](/reference/kmc-gcc/data-and-jump-tables.md)). Re-check array lengths, alignment, struct size and padding before editing YAML addresses. [data-differ](/tools/data-differ.md) finds the first mismatching symbol.
 
 7. **Finish** only when `./tools/build-and-verify.sh` prints `build/mariogolf64.z64: OK`. Commit only the scoped YAML and source changes after it passes.
 

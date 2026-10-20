@@ -22,21 +22,21 @@ timeout 300s ./tools/permuter --source-file nonmatchings/<function>/base_N.c <fu
 
 With the default `src/temp.c`, the wrapper deletes `src/temp.c` and `src/ctx.c` before importing. It recreates them only for a scratch ID. For a function name with the default, the wrapper exits with `Error: Source file not found: src/temp.c`. Pass `--source-file` explicitly; the [policy hook](/harness/policy-hook.md) keeps agents away from `src/temp.c`.
 
-A scratch ID is all digits, or 5–10 alphanumeric characters. It must contain no `/`, must not end in `.s`, must have no `asm/nonmatchings/**/<name>.s`, and must have no `function.s` beside the source file. For a scratch, the wrapper fetches the scratch from decomp.me (User-Agent from the first line of `.decomp_dev_secret`), writes its context to `src/ctx.c` when present, writes its source to `src/temp.c`, and imports that. The scratch's `diff_label` names the function.
+A scratch ID is all digits, or 5–10 alphanumeric characters. It must contain no `/`, must not end in `.s`, must have no `asm/nonmatchings/**/<name>.s`, and must have no `function.s` beside the source file. For a scratch, the wrapper fetches the scratch from decomp.me (User-Agent from the first line of `.decomp_dev_secret`), writes its context to `src/ctx.c` when present, writes its source to `src/temp.c`, and imports that. The scratch's `diff_label` names the function. The scratch source overrides `--source-file`.
 
 # How it works
 
 1. Finds the function's assembly under `asm/nonmatchings`, or `function.s` beside the source file.
 2. Takes the compiler profile from `.source_file` beside the source file, else from the owning C file (`asm/nonmatchings/<dir>/<function>.s` maps to `src/<dir>.c`), else `src/main/__candidate__.c`. Flags come from `make -s --no-print-directory print-cflags SRC=<profile>`.
 3. Writes a temporary settings file (removed on exit). Its first line is `compiler_command = "tools/kmc-cc <flags> -DPERMUTER"`, followed by the repository's `permuter_settings.toml`.
-4. Runs `tools/decomp-permuter/import.py --settings <file> [--preserve-macros <regex>] <source> <asm>`. It creates `nonmatchings/<function>[-N]` and reports `Done. Imported into <dir>`.
+4. Runs `tools/decomp-permuter/import.py [--preserve-macros <regex>] --settings <file> <source> <asm>`. It creates `nonmatchings/<function>[-N]` and reports `Done. Imported into <dir>`.
 5. Runs `tools/decomp-permuter/permuter.py -j 16 --best-only --stop-on-zero --stack-diffs --quiet --algorithm levenshtein <dir>`.
 
-The wrapper exits with the permuter's exit code. Ctrl-C only sets an interrupt flag, and decomp-permuter turns the interrupt into exit code 0. Exit code 0 therefore does not mean a match.
+The wrapper exits with the permuter's exit code. Ctrl-C sets the wrapper's interrupt flag, which suppresses the match notification. decomp-permuter exits 0 on the interrupt, so exit code 0 does not mean a match.
 
 # Results
 
-Results land in `<dir>/output-<score>-<n>/` with `source.c` and `diff.txt`. A match is an `output-0-*` directory.
+Results land in `<dir>/output-<score>-<n>/` with `source.c`, `score.txt` and `diff.txt`. A match is an `output-0-*` directory.
 
 Match notification: when the run is not interrupted, the permuter exits 0, an `output-0-*` directory exists, the run took more than 60 seconds, and `.push_secrets` exists (`PUSH_TOKEN` and `PUSH_USER`, git-ignored), the wrapper sends a Pushover message `Matched <function>` (the scratch's `diff_label` for a scratch ID).
 

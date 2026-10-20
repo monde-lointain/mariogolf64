@@ -11,7 +11,7 @@ resource: ../../task-runner/config.yaml
 ```bash
 nigel --list
 nigel decompile-similar
-nigel <task> --limit 10 --dry-run --verbose
+nigel <task> --dry-run --verbose
 nigel <task> --claims "$(git rev-parse --git-common-dir)/mg64/claims/<task>"
 ```
 
@@ -30,7 +30,7 @@ nigel <task> --claims "$(git rev-parse --git-common-dir)/mg64/claims/<task>"
 
 # Worktree rule
 
-`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](/tools/new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and run one worker per worktree. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
+`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](/tools/new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and run one worker per worktree. Agents do not run direnv, so put `.venv/bin` on `PATH` as described in [Python environment](/project/setup-and-build.md#python-environment):
 
 ```bash
 tools/new-worktree mg64-a && cd ../mg64-a
@@ -38,22 +38,24 @@ PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev \
   nigel decompile-similar --claims "$(git rev-parse --git-common-dir)/mg64/claims/decompile-similar"
 ```
 
+`MG64_SYNC_BRANCH` is the branch that each decompile candidate source's `tools/sync-shard` rebases onto; when it is unset, sync-shard does nothing.
+
 Workers of one task share its claims directory: each takes the first candidate that no other worker has claimed, so a candidate runs once across the worktrees. A claim is never released; a restarted worker keeps its own, and deleting a claim file reruns that candidate. A claim is keyed by the whole candidate, which is why the decompile candidates are bare function names: with the references in the candidate, two worktrees whose matched sets differ would claim the same function under two keys.
 
-`difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a failure. `kill -QUIT <nigel pid>` stops it after the current candidate; `SIGINT` and `SIGTERM` kill the candidate. Keep nigel's output in a log file (`>> task-runner/<task>/nigel-run.log 2>&1`); `agent.log` holds only the agent stream.
+The decompile candidate sources run `difficulty_ledger.py harvest`, which records a run as `timeout` once its deadline has passed, so killing nigel mid-candidate counts that function as a failure at the next harvest. `kill -QUIT <nigel pid>` stops nigel after the current candidate; `SIGINT` and `SIGTERM` kill the current candidate. nigel writes `agent.log`, `outcomes.log` and `ignored.log` in each task directory; `.gitignore` ignores `task-runner/**/*.log`.
 
-Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools/integrate-shards` and the `decomp-c` merge driver; see [shard integration](/tools/shard-integration.md).
+Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools/integrate-shards` and the `decomp-c` and `splat-yaml` merge drivers; see [shard integration](/tools/shard-integration.md).
 
 # Task catalog
 
-Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, which lists function names, easiest first. The four decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that stages tracked changes plus new files under `src/` and `include/` (a header or a split-off C file the match needs) and commits `Decompile <function>` only when something is staged.
+Each decompile candidate source runs `tools/sync-shard && python3 tools/difficulty_ledger.py harvest`, then `python3 tools/score_functions.py asm/nonmatchings --json` with the flags in the table. Candidates are function names, easiest first, except for `decompile-coddog-similar`. The four decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE`. Their success commands stage tracked changes plus new files under `src/` and `include/` (a header or split-off C file the match needs), then commit `Decompile <function>` only when something is staged.
 
 | Task | Candidate source | Timeout | Notes |
 |---|---|---|---|
-| `decompile-similar` | `score_functions.py … --json` | 60 min | Tier 1. |
-| `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. Candidates are `[function, coddog matches…]`; the first match is passed as `--refs`. |
-| `decompile-tier2` | `score_functions.py … --tier 2` | 120 min | Tier 2. The tier-1 reasons are in the brief's `<prior_attempts>`. Rewrites from the assembly when progress plateaus. |
-| `decompile-tier3` | `score_functions.py … --tier 3` | 240 min | Tier 3. The tier-2 reasons are in the brief's `<prior_attempts>`. Tries every approach in the matching method that earlier attempts did not. |
+| `decompile-similar` | `score_functions.py … --json` | 60 min | Tier 1. Model `anthropic/claude-haiku-5-5:high`. |
+| `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. Model `anthropic/claude-haiku-5-5:high`. Candidates are `[function, coddog matches…]`; the prompt passes the first match as `--refs`. |
+| `decompile-tier2` | `score_functions.py … --tier 2` | 120 min | Tier 2. Model `anthropic/claude-haiku-5-5:xhigh`. The brief's `<prior_attempts>` lists the earlier attempts. Rewrites from the assembly when progress plateaus. |
+| `decompile-tier3` | `score_functions.py … --tier 3` | 240 min | Tier 3: functions that failed tier 2 with a best match of at least 90%. Model `anthropic/claude-haiku-5-5:xhigh`. The brief's `<prior_attempts>` lists the earlier attempts. Tries [matching method](/procedures/matching-method.md) approaches that the earlier attempts did not. |
 | `cleanup-matched` | `python3 tools/list_matched_functions.py --by-reference-use` | 60 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`, most-referenced functions first. Config success command. |
 | `fix-low-quality` | `python3 tools/detect_low_quality_matches.py src --json` | 30 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`. Config success command. |
 | `cleanup-files` | `ls -1 src/main/func_*.c src/overlay_*/func_*.c 2>/dev/null` | 30 min | Cleans and renames each file with [rename-file](/procedures/rename-file.md). Commits `cleaned up $CANDIDATE`. |
@@ -67,6 +69,8 @@ Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py h
 | `name-functions-and-symbols` | `ls -1 src/main/*.c src/mgu/*.c src/overlay_*/*.c` | none | Renames with [rename-global](/procedures/rename-global.md) and [rename-file](/procedures/rename-file.md). Commits `name-functions-and-symbols: $CANDIDATE`. |
 | `match-rodata-segments` | `sed -nE` over the unnamed `rodata` entries in `mariogolf64.yaml` | 60 min | [match-data-segment](/procedures/match-data-segment.md). Commits `task-runner($TASK_NAME): match rodata segment $CANDIDATE`. |
 | `consolidate-learnings` | `python3 tools/list_unconsolidated_learnings.py --json` | 30 min | Merges verified KMC GCC lessons from `nonmatchings/*/LEARNINGS.md` and `NEAR_MISS.md` into `docs/reference/kmc-gcc/`, then `--mark`s the note. `accept_best_effort`. Commits only `docs/reference/kmc-gcc`. |
+
+Only the decompile tasks and `consolidate-learnings` guard their commit with `git diff --cached --quiet`. `cleanup-matched`, `fix-low-quality` and `deduplicate-structs` use the config `success_command`, which commits without that guard. `cleanup-matched` and `fix-low-quality` prompts also ask the agent to commit; if it has already committed, the config command finds nothing to commit.
 
 The candidate-source scripts are in [selection](/tools/selection-and-status.md) and [quality checkers](/tools/quality-checkers.md).
 

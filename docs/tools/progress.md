@@ -1,56 +1,78 @@
 ---
 type: Tool
 title: "Progress report"
-description: "tools/progress.py: code and data matched in the last build, by bytes and by functions or data symbols, per category or segment; writes the objdiff report.json that decomp.dev reads."
+description: "tools/progress.py: code and data matched in the last build, by bytes, functions and data symbols, per category or segment; `-o` writes the objdiff report.json."
 tags: [status, workflow, ci]
 resource: ../../tools/progress.py
 ---
-
-`tools/progress.py` measures the last build. It reads the linker map and every object file the map links. Run [build-and-verify](/tools/build-and-verify.md) first; the figures describe whatever `build/` holds.
 
 ```bash
 python3 tools/progress.py                  # Game, Libraries and Total rows
 python3 tools/progress.py --segments       # plus one row per ROM segment
 python3 tools/progress.py -u               # plus unmatched functions, largest first
-python3 tools/progress.py -o report.json   # writes the decomp.dev report
+python3 tools/progress.py -o report.json   # writes the objdiff report
 ```
+
+Reads the linker map and each object the map links. The figures describe whatever `build/` holds, so run [build-and-verify](/tools/build-and-verify.md) first.
 
 | Flag | Effect |
 |---|---|
-| `--map MAP` | Linker map to measure. Default: the map of the first version in `decomp.yaml` (`build/mariogolf64.map`). |
-| `--segments` | Add one row per ROM segment. |
-| `-u`, `--unmatched` | List unmatched functions, largest first. |
-| `-o PATH`, `--report PATH` | Write an objdiff progress report (`report.json`) for decomp.dev. See [decomp.dev report](/tools/progress.md#decompdev-report). |
+| `--map MAP` | Linker map to measure. Default: the `versions[0]` map in `decomp.yaml` (`build/mariogolf64.map`). |
+| `--segments` | One row per ROM segment, in link order, above the category rows. |
+| `-u`, `--unmatched` | Print the unmatched functions, largest first. See [Unmatched functions](#unmatched-functions). |
+| `-o PATH`, `--report PATH` | Write the objdiff progress report. See [decomp.dev report](#decompdev-report). |
+
+Exit `1` with `error: <map> not found; run ./tools/build-and-verify.sh first` when the map is missing.
 
 # Measures
 
 | Column | Matched / total |
 |---|---|
-| Code bytes | `.text` bytes of matched functions / all `.text` bytes |
-| Functions | matched functions / all functions |
-| Data bytes | matched `.data`, `.rodata` and `.bss` bytes / all of them (objdiff counts `.bss` as data too) |
+| Code bytes | matched bytes / bytes of executable input sections (`.text`) |
+| Functions | matched functions / all functions in those sections |
+| Data bytes | matched bytes / bytes of every other input section (`.data`, `.rodata`, `.bss`) |
 | Data symbols | matched data objects / all data objects |
 
-A function or data object is one address, however many aliases name it. A symbol without a `.size` runs to the next one. Data symbols are named objects only: string literals in C have no symbol, so the count drops a little as `asm/data` strings move into C.
+Rows are Game, Libraries and Total, plus one per segment with `--segments`.
 
-# What counts as matched
+## Counting
+
+- A function or data object is one address, however many symbols name it. A symbol with no `.size` runs to the next symbol, or to the section end.
+- Functions are `STT_FUNC` symbols. In hand-written assembly, global untyped or `OBJECT` labels also count as entry points.
+- Data objects are `STT_OBJECT` symbols only. C string literals have no symbol, so they are not counted.
+- In a C object, code bytes are the section size minus the sizes of its unmatched items. Bytes no symbol covers count as matched.
+- A hand-written assembly section counts in full as matched; an `asm/` section counts zero.
+
+## What counts as matched
 
 | Object source | Matched |
 |---|---|
 | `src/**/*.c` | everything except symbols with a `<name>.NON_MATCHING` marker: `INCLUDE_ASM` functions and the rodata included with them |
-| `src/**/*.s` | everything: original hand-written assembly (`hasm` segments in `mariogolf64.yaml`), including `src/entry/entry.s` |
-| `asm/**/*.s` | nothing: splat data not yet moved into C |
+| `src/**/*.s` | everything: hand-written assembly (the `hasm` subsegments in `mariogolf64.yaml`, such as `entry/entry`) |
+| `asm/**/*.s` | nothing: splat output not yet in C |
 
-Binary blobs are neither code nor data to decompile, so they are listed on the `Not counted` line and left out of every total: `build/assets/`, `asm/` sources that `.incbin` a binary (the RSP microcode), and the ROM header `asm/header.s`.
+Binary objects are neither code nor data to decompile. They are left out of every total and summarised on the `Not counted` line: `build/assets/`, `asm/` sources that `.incbin` a binary (the RSP microcode), and the ROM header object `asm/header.o`.
 
-**Libraries** are units under `src/libultra`, `libnusys`, `libnaudio`, `libmus`, `libkmc` and `mgu`. **Game** is everything else, including `asm/data` files: they have no owning source file, so library data still in `asm/data` counts as game data.
+**Libraries** are objects built from `src/libultra`, `src/libnusys`, `src/libnaudio`, `src/libmus`, `src/libkmc` and `src/mgu`. **Game** is everything else, including every `asm/` object, so library code and data still in `asm/` count as Game.
+
+# Unmatched functions
+
+`-u` lists every unmatched function item in an executable section: `NON_MATCHING`-marked C functions and every function in an `asm/` object. Data is not listed.
+
+- Header `Unmatched functions, largest first (N):`, then one row per function: `0x<size hex>  <name>  (<source>)`.
+- Sorted by size, then name. Prints `All functions are matched.` when there are none.
 
 # decomp.dev report
 
-`-o PATH` writes an [objdiff](https://github.com/encounter/objdiff) progress report (`report.proto`, version 2, proto3 JSON). There is one unit per object, named by its source path without the extension (`src/main/audio_mgr`), with its segment as `module_name`. A unit is `complete` when all its code and data are matched. The `game` and `libs` categories match the table rows. The report has no field for data symbol counts, so they appear only in the table.
+`-o PATH` writes an [objdiff](https://github.com/encounter/objdiff) progress report (`report.proto`, version 2, proto3 JSON).
 
-CI (`.github/workflows/build.yml`) runs `progress.py --segments -o report.json` after the ROM verifies. It writes the table to the job summary and uploads `report.json` as the artifact `us_report`, the name [decomp.dev](https://decomp.dev) looks for to read version `us`.
+- Top level: `version`, `measures` (whole build), `categories` (`game` and `libs`) and `units`.
+- One unit per linked object, named by its path under `build/` without the extension (`src/main/audio_mgr`). Its `metadata` holds `complete` (every code and data byte matched), `module_name` (ROM segment), `module_id` (the segment's index in link order), `source_path` (the `.c` or `.s` source) and `progress_categories` (`[game]` or `[libs]`).
+- A unit's `sections` give the size and byte match percent of each section. Its `functions` cover code items only; `fuzzy_match_percent` is `100.0` when matched and `0.0` otherwise, since no fuzzy comparison is made.
+- The report has no data-symbol counts, so they appear only in the table. Binary objects are not units.
+
+CI (`.github/workflows/build.yml`) runs `progress.py --segments -o report.json`, writes the table to the job summary, and uploads `report.json` as the artifact `us_report`.
 
 # Relation to other figures
 
-The [pipeline-metrics](/tools/pipeline-metrics.md) progress trend counts code from the source tree, so it needs no build. It leaves out hand-written assembly and data, which makes its function and byte totals smaller than these. Its unmatched figures equal this report's.
+[Pipeline metrics](/tools/pipeline-metrics.md) keeps its own progress trend, computed from the source tree, so it needs no build. It counts only `src/` C functions and `asm/nonmatchings` stubs and skips hand-written assembly and data. Its totals therefore differ from this report's.

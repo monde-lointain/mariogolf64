@@ -26,7 +26,7 @@ The ROM already matches, so every change must keep the build matching. Your job 
 
 # Rename correctly
 
-Renaming a function or global is a `symbol_addrs.txt` change: follow [rename-global](/procedures/rename-global.md). If the function name in C is not the name the task gave you, the C function was renamed without updating `symbol_addrs.txt`; fix the entry. If the task input starts with `func_`, the entry is missing or wrong.
+Renames are `symbol_addrs.txt` changes: follow [rename-global](/procedures/rename-global.md), including its rule for C and asm names that disagree.
 
 # Safe refactoring
 
@@ -34,9 +34,9 @@ Renaming a function or global is a `symbol_addrs.txt` change: follow [rename-glo
 
 ```c
 *(s16 *)((u8 *)arg0 + 0x28) -= 1;      →   arg0->unk28 -= 1;
-temp_a0 = (s8 *)(offset + (s32)arg0->entries);   →   temp_a0 = arg0->entries[i];
+temp_a0 = (u8 *)arg0->entries + offset;   →   temp_a0 = (u8 *)&arg0->entries[i];
 ```
 
 If `offset` is `0x10 * i`, the elements are likely 0x10-byte structs.
 
-**New or changed structs.** A shared struct may be reused where it is wrong, which can be what blocks cleanup. When you create or modify one, verify that nearby functions using the same data still compile and match ([struct changes](/project/code-quality.md)). Never replace a real type with `void *` to satisfy the compiler.
+**New or changed structs.** A shared struct may be reused where it is wrong, which can be what blocks cleanup. When you create or modify one, verify that nearby functions using the same data still compile and match ([struct changes](/project/code-quality.md#changing-structs)). Never replace a real type with `void *` to satisfy the compiler.

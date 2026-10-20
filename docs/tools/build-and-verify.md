@@ -6,7 +6,7 @@ tags: [build, verify, comparison]
 resource: ../../tools/build-and-verify.sh
 ---
 
-`tools/build-and-verify.sh` re-extracts the ROM, rebuilds it from scratch and checks the SHA-1. It is the only command that decides a project-wide match.
+Runs the steps below in order and stops at the first failing one. Its final SHA-1 check is what decides whether the ROM matches.
 
 ```bash
 ./tools/build-and-verify.sh
@@ -16,9 +16,9 @@ It takes no arguments and exits 2 when given any. Environment: `JOBS` (parallel 
 
 # What it does
 
-1. `make clean` removes `asm/`, `assets/`, `build/`, the generated linker script and the undefined-symbol lists.
+1. `make clean` removes `asm/`, `assets/`, `build/`, the generated linker script, the `.d` dependency files and the undefined-symbol lists.
 2. `make extract` runs Splat to re-extract `baserom.z64`. Its output is discarded.
-3. `make -j<JOBS> all` with `BUILD_AND_VERIFY=1`: compiles, links, then runs `shasum --check mariogolf64.sha1`.
+3. `make -j<JOBS> all`: compiles and links. The `verify` target then runs `shasum --check mariogolf64.sha1`, unless `NON_MATCHING=1`.
 
 The Make targets and their dependencies are described in [setup-and-build](/project/setup-and-build.md).
 
@@ -34,7 +34,7 @@ On a checksum failure, find the cause in this order:
 2. [data-differ](/tools/data-differ.md) `--find-first-mismatch` when data may be responsible.
 3. `make diff-line` (human use) writes a byte diff of the base and built ROM to `romdiff`.
 
-This script is the last step of [verify-candidate](/tools/verify-candidate.md), which is nigel's `verify_command`, and the body of the [git pre-commit hook](/harness/git-hook-and-ci.md). Agents must call this script rather than `make` ([policy hook](/harness/policy-hook.md)).
+This script is the last step of [verify-candidate](/tools/verify-candidate.md), which is nigel's `verify_command`. The [git pre-commit hook and CI](/harness/git-hook-and-ci.md) also run it. Agents must call this script rather than `make` ([policy hook](/harness/policy-hook.md)).
 
 # Build helpers
 

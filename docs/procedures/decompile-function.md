@@ -20,14 +20,14 @@ This creates `nonmatchings/<function name>[-N]/` ([decomp-env](/tools/decomp-env
 
 The environment's `AGENTS.md` is the whole per-function procedure: the attempt loop, how to integrate a match, and the stop rules. nigel runs rely on it alone; approach and plateaus are in [matching-method](/procedures/matching-method.md), compiler behavior behind a diff in [KMC GCC learnings](/reference/kmc-gcc/index.md).
 
-The stall limit is `MG64_STALL_LIMIT`, else `stall_limit` in `.run.json`, else 20 ([difficulty ledger](/tools/difficulty-ledger.md) has the tiers). `difficulty_ledger.py harvest` records matched, stalled, near-miss and timed-out runs from the environment, so the agent records only `integration_failed` and `gave_up`. A `NEAR_MISS.md` note makes [selection tools](/tools/selection-and-status.md) skip the function.
+The brief's stop rule uses the environment's [stall limit](/tools/difficulty-ledger.md#stall-limit). `difficulty_ledger.py harvest` records matched, stalled, near-miss and timed-out runs from the environment, so the agent records only `integration_failed` and `gave_up`. A `NEAR_MISS.md` note makes [selection tools](/tools/selection-and-status.md) skip the function.
 
 # 3. Hand runs
 
-Under nigel the run ends at `BUILD SUCCEEDED` with the change uncommitted: `tools/verify-candidate` checks it, then the task's `success_command` commits it. In a hand run:
+Under nigel the run ends at `BUILD SUCCEEDED` with the change uncommitted: [verify-candidate](/tools/verify-candidate.md) checks it, then the task's `success_command` commits it. In a hand run:
 
-* After `BUILD SUCCEEDED`, commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched; a pre-commit hook failure means the C change is wrong.
-* With a near miss, keep the C next to the include, guarded so a `NON_MATCHING` build has exactly one definition; the include stays on one line because Splat reads the function name from it:
+* After `BUILD SUCCEEDED`, commit with the subject `Decompile <function name>` and a body saying what the function does and how it was matched. A failing pre-commit hook means the change does not match ([git hook and CI](/harness/git-hook-and-ci.md)).
+* With a near miss, keep the C next to the include, guarded so a `NON_MATCHING` build has exactly one definition; the include stays on one line ([code-quality](/project/code-quality.md#file-structure)):
 
 ```c
 #ifdef NON_MATCHING
@@ -38,8 +38,8 @@ INCLUDE_ASM("asm/nonmatchings/main/file", your_function);
 #endif
 ```
 
-The function keeps its asm name even when a caller uses another; renaming is a separate task (the rename-global skill).
+The function keeps its asm name even when a caller uses another; renaming is a separate task ([rename-global](/procedures/rename-global.md)).
 
 # Harness friction
 
-If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it, commit the fix on its own as [changing the harness](/harness/changing-the-harness.md) describes, then return to the function. Files in the environment that come from `tools/decomp-env-template/` are symlinks, except `AGENTS.md`, which is rendered per environment; editing a symlink edits the template for every environment. A harness fix does not reset or extend the attempt count.
+If `build.sh`, `tools/decomp-env`, another tool or the policy hook is wrong or in the way, fix it instead of working around it, commit the fix on its own as [changing the harness](/harness/changing-the-harness.md) describes, then return to the function. Files in the environment that come from `tools/decomp-env-template/` are symlinks, except `AGENTS.md`, which is rendered per environment; editing a symlink edits the template for every environment.

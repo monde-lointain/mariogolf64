@@ -1,15 +1,77 @@
 ---
 type: Reference
 title: "F3DEX2 display list commands"
-description: "Third-party byte-level description of every F3DEX2 command (opcode, field layout, parameters); use gbi.h macros in source and this file to identify raw words."
+description: "Third-party byte-level description of the F3DEX2 display list commands (opcode, field layout, parameters); use gbi.h macros in source and this file to identify raw words."
 tags: [f3dex2, graphics, microcode]
 ---
 
 Verify against `include/libultra/PR/gbi.h`, which is the authority for macros used in source. Mapping raw words to macros: [decompile-microcode](/procedures/decompile-microcode.md).
 
+Two names differ from `gbi.h`: this file heads opcode `00` as `G_SPNOOP` and `E0` as `G_NOOP`, while `gbi.h` (F3DEX2) defines `G_NOOP` as `0x00` (emitted by `gDPNoOp`) and `G_SPNOOP` as `0xe0` (emitted by `gSPNoOp`). In source, pick the macro by the opcode byte, as `gbi.h` defines it.
+
 # Fast3DEX2 Display List Commands
 
 The Fast3DEX2 display list commands are microcode that are passed to the RSP for rendering. They are all 8 bytes long.
+
+## Opcode index
+
+| Opcode | Command |
+|---|---|
+| `00` | [G_SPNOOP](#00-g_spnoop) |
+| `01` | [G_VTX](#01-g_vtx) |
+| `02` | [G_MODIFYVTX](#02-g_modifyvtx) |
+| `03` | [G_CULLDL](#03-g_culldl) |
+| `04` | [G_BRANCH_Z](#04-g_branch_z) |
+| `05` | [G_TRI1](#05-g_tri1) |
+| `06` | [G_TRI2](#06-g_tri2) |
+| `07` | [G_QUAD](#07-g_quad) |
+| `D3` | [G_SPECIAL_3](#d3-g_special_3) |
+| `D4` | [G_SPECIAL_2](#d4-g_special_2) |
+| `D5` | [G_SPECIAL_1](#d5-g_special_1) |
+| `D6` | [G_DMA_IO](#d6-g_dma_io) |
+| `D7` | [G_TEXTURE](#d7-g_texture) |
+| `D8` | [G_POPMTX](#d8-g_popmtx) |
+| `D9` | [G_GEOMETRYMODE](#d9-g_geometrymode) |
+| `DA` | [G_MTX](#da-g_mtx) |
+| `DB` | [G_MOVEWORD](#db-g_moveword) |
+| `DC` | [G_MOVEMEM](#dc-g_movemem) |
+| `DD` | [G_LOAD_UCODE](#dd-g_load_ucode) |
+| `DE` | [G_DL](#de-g_dl) |
+| `DF` | [G_ENDDL](#df-g_enddl) |
+| `E0` | [G_NOOP](#e0-g_noop) |
+| `E1` | [G_RDPHALF_1](#e1-g_rdphalf_1) |
+| `E2` | [G_SetOtherMode_L](#e2-g_setothermode_l) |
+| `E3` | [G_SetOtherMode_H](#e3-g_setothermode_h) |
+| `E4` | [G_TEXRECT](#e4-g_texrect) |
+| `E5` | [G_TEXRECTFLIP](#e5-g_texrectflip) |
+| `E6` | [G_RDPLOADSYNC](#e6-g_rdploadsync) |
+| `E7` | [G_RDPPIPESYNC](#e7-g_rdppipesync) |
+| `E8` | [G_RDPTILESYNC](#e8-g_rdptilesync) |
+| `E9` | [G_RDPFULLSYNC](#e9-g_rdpfullsync) |
+| `EA` | [G_SETKEYGB](#ea-g_setkeygb) |
+| `EB` | [G_SETKEYR](#eb-g_setkeyr) |
+| `EC` | [G_SETCONVERT](#ec-g_setconvert) |
+| `ED` | [G_SETSCISSOR](#ed-g_setscissor) |
+| `EE` | [G_SETPRIMDEPTH](#ee-g_setprimdepth) |
+| `EF` | [G_RDPSetOtherMode](#ef-g_rdpsetothermode) |
+| `F0` | [G_LOADTLUT](#f0-g_loadtlut) |
+| `F1` | [G_RDPHALF_2](#f1-g_rdphalf_2) |
+| `F2` | [G_SETTILESIZE](#f2-g_settilesize) |
+| `F3` | [G_LOADBLOCK](#f3-g_loadblock) |
+| `F4` | [G_LOADTILE](#f4-g_loadtile) |
+| `F5` | [G_SETTILE](#f5-g_settile) |
+| `F6` | [G_FILLRECT](#f6-g_fillrect) |
+| `F7` | [G_SETFILLCOLOR](#f7-g_setfillcolor) |
+| `F8` | [G_SETFOGCOLOR](#f8-g_setfogcolor) |
+| `F9` | [G_SETBLENDCOLOR](#f9-g_setblendcolor) |
+| `FA` | [G_SETPRIMCOLOR](#fa-g_setprimcolor) |
+| `FB` | [G_SETENVCOLOR](#fb-g_setenvcolor) |
+| `FC` | [G_SETCOMBINE](#fc-g_setcombine) |
+| `FD` | [G_SETTIMG](#fd-g_settimg) |
+| `FE` | [G_SETZIMG](#fe-g_setzimg) |
+| `FF` | [G_SETCIMG](#ff-g_setcimg) |
+
+`0x08` (`G_LINE3D`, F3DEX_GBI_2 block of `include/libultra/PR/gbi.h`) has no section below.
 
 ## 00: G_SPNOOP
 

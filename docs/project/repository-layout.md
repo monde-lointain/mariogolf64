@@ -5,19 +5,16 @@ description: "Directories and root files, which are hand-written, which are gene
 tags: [project, layout]
 ---
 
-Hand-written sources live in `src/` and `include/`. The build generates `asm/`, `assets/` and `build/`, which git ignores. Configuration and tooling sit at the root and in `tools/`, `task-runner/` and `.omp/`.
-
 # Source and headers
 
 | Path | Contents |
 |---|---|
 | `src/main/` | Main game code. Project headers sit next to their sources (`src/main/*.h`). Compile flags: [compiler profiles](/project/compiler-profiles.md). |
 | `src/overlay_*/` | Overlays, one directory each (`overlay_0`, `overlay_3` to `overlay_16`, and `overlay_gap`). Compile flags: [compiler profiles](/project/compiler-profiles.md). |
-| `src/mgu/` | Remaining game code, built with the base profile. |
+| `src/mgu/` | Game math helpers, built with the base profile. |
 | `src/libultra/` | libultra, mirroring the upstream `ultralib` subtree (`audio/`, `debug/`, `gu/`, `io/`, `libc/`, `os/`, `sched/`, `vimodes/`). |
 | `src/libnusys/`, `src/libmus/`, `src/libnaudio/`, `src/libkmc/` | Libraries, each with its own [compiler profile](/project/compiler-profiles.md). |
-| `src/entry/entry.s` | Hand-written entry stub. Assembled as described in [compiler profiles](/project/compiler-profiles.md#assembly-and-object-layout). |
-| `src/libultra/**/*.s`, `src/libkmc/*.s` | Hand-written library assembly, next to its C. Assembled by KMC; see [compiler profiles](/project/compiler-profiles.md#assembly-and-object-layout). |
+| `src/**/*.s` | Hand-written assembly: the entry stub `src/entry/entry.s` and the libultra and libkmc routines that were written in assembly, next to their C. Assemblers per directory: [compiler profiles](/project/compiler-profiles.md#assembly-and-object-layout). |
 | `include/` | Hand-maintained `common.h`, `include_asm.h`, `macro.inc` and `labels.inc`. Splat does not regenerate them ([splat config](/reference/splat-yaml.md)). Also `assert.h`, `dbgdefs.h`, `dbgproto.h`, `macros.h`, `stdarg.h`, `ultra64.h`, `ultrahost.h`, `sys/`, and the SDK header trees `libkmc/`, `libmus/`, `libnaudio/`, `libnualstl/`, `libnusys/` and `libultra/`. |
 
 # Extracted and generated (git-ignored)
@@ -31,12 +28,12 @@ Hand-written sources live in `src/` and `include/`. The build generates `asm/`, 
 | `build/` | `build/mariogolf64.elf`, `build/mariogolf64.map`, `build/mariogolf64.z64`, and object files. |
 | `mariogolf64.ld`, `mariogolf64.d`, `undefined_funcs_auto.txt`, `undefined_syms_auto.txt` | Generated linker script, `mariogolf64.d`, and Splat's undefined-symbol lists, which the Makefile passes to the linker as extra `-T` scripts. |
 | `nonmatchings/<func>[-N]/` | Per-function [decomp environments](/tools/decomp-env.md). |
-| `ctx.c`, `ctx.c.m2c`, `src/temp.c`, `src/ctx.c` | Scratch files for m2c and decomp.me. Agents never read or write them; see [ground rules](/project/ground-rules.md) §2. |
-| `tools/gcc_kmc/`, `tools/scratches.json` | Downloaded KMC toolchain, and scratch data. |
-| `romdiff`, `report.json`, `__pycache__/`, `.venv/` | Output of `make diff-line`, progress output from `tools/progress.py`, the Python bytecode cache, and the virtualenv. |
+| `ctx.c`, `ctx.c.m2c`, `src/temp.c`, `src/ctx.c` | Scratch files for m2c and decomp.me. Agents never read or write them ([ground rules](/project/ground-rules.md) §2). |
+| `tools/gcc_kmc/`, `tools/scratches.json` | Downloaded KMC toolchain; local decomp.me scratch data. |
+| `romdiff`, `report.json`, `__pycache__/`, `.venv/` | Output of `make diff-line`; the objdiff report written by [progress](/tools/progress.md); the Python bytecode cache; the virtualenv. |
+| `task-runner/**/*.log`, `compile_commands.json`, `.decomp_dev_secret`, `.push_secrets` | nigel logs; clangd database; local secrets. |
 | `private/`, `scratchpad/` | Local-only research workspaces (`private/ghidra` holds Ghidra project data). Excluded through `.git/info/exclude`, not `.gitignore`. |
 
-`make extract` deletes and regenerates `asm/`. Never edit it.
 
 # Configuration
 
@@ -55,7 +52,7 @@ Hand-written sources live in `src/` and `include/`. The build generates `asm/`, 
 | `.envrc` | direnv hook that activates `.venv`. |
 | `mariogolf64.sha1`, `baserom.z64` | Reference checksum and base ROM. Protected; see [ground rules](/project/ground-rules.md) §2. |
 | `README.md`, `AGENTS.md`, `LICENSE` | Project front page, short agent rules, and the MIT license. |
-| `.gitignore`, `.gitattributes`, `.gitmodules`, `.dockerignore` | Ignore rules; merge drivers (`src/**/*.c` uses `decomp-c`, `docs/log.md` uses `union`); the two submodules; the Docker build context, which contains only `baserom.z64`. |
+| `.gitignore`, `.gitattributes`, `.gitmodules`, `.dockerignore` | Ignore rules; merge drivers (`decomp-c` for `src/**/*.c`, `splat-yaml` for `mariogolf64.yaml`, `union` for `docs/log.md`); the two submodules; the Docker build context, which admits only `baserom.z64`. |
 
 # Tooling and automation
 

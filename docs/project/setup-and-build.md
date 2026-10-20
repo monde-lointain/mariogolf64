@@ -6,7 +6,7 @@ tags: [project, build]
 resource: ../../Makefile
 ---
 
-This page builds the ROM from a fresh clone and lists the make targets. Agents run the scripts named here rather than `make` directly; see [ground rules](/project/ground-rules.md) §5.
+Agents run the scripts named here, not `make` ([ground rules](/project/ground-rules.md) §5); the targets table is for people and for reading the build.
 
 # Clone
 
@@ -14,13 +14,13 @@ This page builds the ROM from a fresh clone and lists the make targets. Agents r
 git clone --recurse-submodules -j8 https://github.com/monde-lointain/mariogolf64.git
 ```
 
-Submodules: `tools/decomp-permuter`, `tools/asm-differ`.
+Submodules: `tools/decomp-permuter`, `tools/asm-differ` (both protected).
 
 # Dependencies
 
 | Needed for | Packages |
 |---|---|
-| Build | `make`, `git`, `python3` with `venv`, `cpp`, `curl` and `tar` (for `make setup`), `perl` (provides `shasum` for `make verify`), `xxd` (for `make diff-line`), and a MIPS cross binutils (below) |
+| Build | `make`, `git`, `python3` with `venv`, `cpp`, `curl` and `tar` (for `make setup`), `perl` (provides `shasum` for `make verify`), `xxd` (for `make diff-line`), and MIPS cross binutils (below) |
 | Decomp environments | `flock` (used by `tools/decomp-env-template/build.sh`) |
 | Format and lint (optional) | `clang-format-23`, `clang-tidy-23` (for `make format`, `make format-check`, `make tidy`) |
 | `--by-coddog-similarity` rankings (optional) | `coddog` (`cargo install coddog`), used by `tools/score_functions.py` |
@@ -41,7 +41,7 @@ The KMC toolchain download in `tools/Makefile` supports Linux and macOS.
 make setup
 ```
 
-`make setup` runs `make install-hooks`, then `make -C tools`, which downloads the KMC toolchain into `tools/gcc_kmc`. `install-hooks` links the pre-commit hook into `.git/hooks/` and registers the `decomp-c` merge driver used for `src/**/*.c`. An existing hook is backed up first.
+`make setup` runs `make install-hooks`, then `make -C tools`, which downloads the KMC toolchain into `tools/gcc_kmc`. `install-hooks` registers the merge drivers and links the pre-commit hook ([git hook and CI](/harness/git-hook-and-ci.md)).
 
 ## Python environment
 
@@ -51,7 +51,7 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-`requirements.txt` provides the Splat tooling and the packages for the permuter and asm-differ tools. `.envrc` activates `.venv` through direnv, and the Makefile uses `.venv/bin/python3` when it exists.
+`requirements.txt` pins Splat (`splat64`, `spimdisasm`, `rabbitizer`, `pyyaml`), the permuter and asm-differ dependencies, and `m2c`. `.envrc` activates `.venv` through direnv, and the Makefile uses `.venv/bin/python3` when it exists.
 
 # Build and verify
 
@@ -61,13 +61,13 @@ Place the North America (revision 0) ROM in the repository root as `baserom.z64`
 ./tools/build-and-verify.sh
 ```
 
-The script runs `make clean`, `make extract`, then `make -j$JOBS all`. It takes no arguments. `JOBS` sets the parallel job count (default: `nproc`), and `MAKE` selects the make binary. Success prints `build/mariogolf64.z64: OK` followed by `BUILD SUCCEEDED`. See [build-and-verify](/tools/build-and-verify.md).
+Success prints `build/mariogolf64.z64: OK` followed by `BUILD SUCCEEDED`. The script always re-extracts from scratch; options and failure output are in [build-and-verify](/tools/build-and-verify.md).
 
-For a manual build outside agent sessions, run `make extract` only after changing `mariogolf64.yaml` or the ROM, because it deletes and regenerates `asm/`. Then run `make -j8`.
+For a manual build outside agent sessions, `make -j8` rebuilds incrementally. Run `make extract` first only after changing `mariogolf64.yaml` or the ROM: it deletes and regenerates `asm/`.
 
 # Make targets
 
-Agents cannot run most of these directly; see [ground rules](/project/ground-rules.md) §5.
+Variables: `NON_MATCHING=1` defines `NON_MATCHING` for every C file and skips `verify`; `PYTHON` overrides the interpreter; `CLANG_FORMAT`/`CLANG_TIDY` override the LLVM 23 tools.
 
 | Target | Purpose |
 |---|---|
@@ -78,14 +78,12 @@ Agents cannot run most of these directly; see [ground rules](/project/ground-rul
 | `make check` | Fail unless `baserom.z64` exists. `extract` depends on it. |
 | `make print-cflags SRC=<file>` | Print the effective compiler flags for a C file. See [compiler profiles](/project/compiler-profiles.md). |
 | `make print-<VAR>` | Print the value of a Makefile variable, for debugging. |
-| `make format` | Run clang-format-23 in place over `FORMAT_FILES`: the tracked `src/*.c` and `src/*.h`. |
+| `make format` | Run clang-format-23 in place over `FORMAT_FILES`: every tracked `.c` and `.h` under `src/` (`include/` holds vendored SDK headers and is excluded). |
 | `make format-check` | Dry-run clang-format-23 over the same files; fails on any change. |
-| `make tidy` | clang-tidy-23 diagnostics with `-std=gnu89 -m32`. Diagnostic only; applies no fixes. |
+| `make tidy` | clang-tidy-23 syntax-only diagnostics over the tracked `src/` C files, with `-std=gnu89 -m32 -DF3DEX_GBI_2`. Advisory: applies no fixes and is not a gate for a match. |
 | `make diff-line` | Write `romdiff`, a diff of `xxd` dumps of the base and built ROMs. |
-| `make install-hooks` | Run `tools/install-git-hooks.sh`: link the pre-commit hook and register the merge driver. |
+| `make install-hooks` | Run `tools/install-git-hooks.sh`: register the merge drivers and link the pre-commit hook. |
 | `make setup` | Run `install-hooks`, then `make -C tools`. |
 | `make clean` | Remove `asm/`, `assets/`, `build/`, `mariogolf64.ld`, `mariogolf64.d`, `undefined_funcs_auto.txt` and `undefined_syms_auto.txt`. |
 
 Internal prerequisites, not for direct use: `check-clang-format-version`, `check-clang-tidy-version` (prerequisites of `format`, `format-check` and `tidy`), and `FORCE`.
-
-`tidy` is advisory: its clang-tidy output reports problems without changing files, and it is not a gate for a match.

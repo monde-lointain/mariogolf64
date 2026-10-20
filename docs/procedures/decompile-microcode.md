@@ -6,7 +6,7 @@ description: "Decompile a function that builds an F3DEX2 display list into gSP/g
 tags: [decompile, graphics, f3dex2]
 ---
 
-Mario Golf 64 runs the F3DEX2 microcode (`gspF3DEX2.fifo`); `src/main` and libultra compile with `-DF3DEX_GBI_2` ([profiles](/project/compiler-profiles.md)). Display-list commands are 8 bytes each. Use the macros in `include/libultra/PR/gbi.h`; raw command words are prohibited ([code quality](/project/code-quality.md)).
+Mario Golf 64 runs the F3DEX2 microcode (`gspF3DEX2.fifo`); `src/main`, `src/overlay_*` and libultra compile with `-DF3DEX_GBI_2` ([profiles](/project/compiler-profiles.md)). Display-list commands are 8 bytes each. Use the macros in `include/libultra/PR/gbi.h`; raw command words are prohibited ([code quality](/project/code-quality.md)).
 
 Display lists are usually built through a local cursor loaded from a `Gfx **` argument and stored back at the end:
 
@@ -54,7 +54,7 @@ Advance the cursor inline with `gfx++`; never manipulate it by hand. F3DEX (matr
 
 # Aggregate macros
 
-Some `gbi.h` macros expand to several commands. Look for these patterns first; using them usually raises the match score considerably:
+Some `gbi.h` macros expand to several commands. Look for these patterns first:
 
 * `gDPLoadTLUT` and its `gDPLoadTLUT_*` variants
 * `gDPLoadTextureBlock` and its variants, `gDPLoadTextureTile_4b`

@@ -40,7 +40,7 @@ Classify every normalized difference before editing:
 * register allocation
 * relocation-label-only noise (ignore)
 
-A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeated target loads favor direct global or field access; a value held in one register may favor a local. If only registers differ, freeze the matched algorithm and map each target register to its logical value and live range. First remove redundant aliases and temporaries, use original parameters or destination fields directly, and inline copied constants or bounds. Test one localized equivalent expression at a time.
+A stack-frame mismatch points to extra locals, spills or wrong lifetimes. Repeated target loads favor direct global or field access; a value held in one register may favor a local. If only registers differ, freeze the matched algorithm and map each target register to its logical value and live range. First remove redundant aliases and temporaries, use original parameters or destination fields directly, and inline copied constants or bounds. Test one localized equivalent expression at a time. The compiler behavior behind these classes is in [registers and scheduling](/reference/kmc-gcc/registers-and-scheduling.md).
 
 # Large functions
 

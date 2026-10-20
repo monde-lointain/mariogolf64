@@ -24,7 +24,7 @@ After `NEXT:`, from `$root`:
 
 1. Replace the function's `INCLUDE_ASM(...)` line in the C file the `NEXT:` line names with the matching code, named exactly `$functionName` even when a caller uses another name.
 2. Use the argument and return types the assembly shows. A prototype or a caller's call that disagrees (often a guessed `(void)`) is wrong: correct it. Reuse the declarations and structs in `src/` and `include/`, and update the header that declares the function rather than adding a second declaration.
-3. Run `./tools/build-and-verify.sh`. If the checksum fails, diff the functions in the changed files with `python3 tools/asm-differ/diff.py --no-pager <function>`, starting with those that use structs you changed.
+3. Run `./tools/build-and-verify.sh`. If the checksum fails, diff the functions in the changed files with `python3 tools/asm-differ/diff.py --no-pager <function>` (options: `$root/docs/tools/asm-differ.md`), starting with those that use structs you changed.
 
 `BUILD SUCCEEDED` ends the run: stop and leave the changes uncommitted. nigel then checks the candidate (new pointer arithmetic is rejected), commits it and records the match, so further checks, commits or ledger records from you only cost time.
 
@@ -34,9 +34,9 @@ Stop at the first of these that applies:
 
 * **`STOP:` printed:** if your best score beats every score in `<prior_attempts>` (or there are none), write `NEAR_MISS.md` here: the best file and score, the remaining differences, and what to try next.
 * **Integration cannot pass `build-and-verify.sh`:** restore the C file with `git checkout -- <file>`, then from `$root` run `python3 tools/difficulty_ledger.py record $functionName --outcome integration_failed --reason "<one line>"`.
-* **The only change left is one the code standards forbid:** inline assembly, or an unused or `volatile` local other than a nested function's static-chain stand-in or unused frame space (`$root/docs/reference/kmc-gcc/registers-and-scheduling.md`, "Stack frames"). Record it the same way with `--outcome gave_up`.
+* **The only change left is one the code standards forbid:** inline assembly, an unused local (except the two that `$root/docs/project/code-quality.md` allows), or a `volatile`/`register` added only to change codegen. Record it the same way with `--outcome gave_up`.
 
-With `Time left` under 5 min, write `NEAR_MISS.md`: the run is killed at the deadline.
+With `Time left` under 5 min, write `NEAR_MISS.md` before the deadline.
 
 # Reply
 

@@ -19,7 +19,7 @@ The argument is a function name, a `.s` path, or a decomp.me scratch ID. It is a
 | Flag | Effect |
 |---|---|
 | `--bootstrap` | Generate `base.c` with m2c from the function's assembly. Without it, `base.c` is a copy of `src/temp.c`, or the imported source for a scratch ID. Not allowed with a scratch ID. |
-| `--bootstrap-only` | Implies `--bootstrap`. Create the directory and exit. Without it, the script launches `omp --thinking xhigh` inside the directory. |
+| `--bootstrap-only` | Implies `--bootstrap`. Create the directory and exit, printing `Bootstrap-only mode: environment ready at <dir>`. Without it, the script launches `omp --thinking xhigh` inside the directory. |
 | `--id ID` | Use the directory `nonmatchings/<function>-<ID>`. Requires `--bootstrap`; not allowed with a scratch ID. If the directory exists, the script prints `Directory already exists: <dir>`, launches `omp` there unless `--bootstrap-only`, and exits 0 without re-creating it. |
 | `--refs LIST` | Function names whose C definitions go into the context block. A JSON array (`'["func_a", "func_b"]'`) or comma or space separated names; an empty value gives no references. Absent: the five matched functions most similar to the target's assembly (`find_similar_functions.py`). Works with `--bootstrap-only --id ID`. See Context block below. |
 
@@ -44,7 +44,8 @@ Run [build-and-verify](/tools/build-and-verify.md) first. Without `asm/`, the sc
 
 | File | Source |
 |---|---|
-| `target.s`, `target.o` | `prelude.inc` plus the function's assembly, assembled with `-EB -march=vr4300 -mtune=vr4300` |
+| `function.s` | Whole-file assembly targets only (an `asm/` file outside `asm/nonmatchings/`): the lines from `nonmatching <name>,` through `endlabel <name>`. Fails with `Error: Could not isolate <name> from <file>` when that range is empty. |
+| `target.s`, `target.o` | `prelude.inc` plus the function's assembly (`function.s` for a whole-file target, else the file under `asm/nonmatchings/`), assembled with `-EB -march=vr4300 -mtune=vr4300 -Iinclude` |
 | `base.c` | With `--bootstrap`: m2c output, with a context from `tools/m2ctx.py` when the owning C file exists. For a scratch ID: the imported scratch source. Otherwise: a copy of `src/temp.c`. |
 | `.source_file` | The C file whose [compiler profile](/project/compiler-profiles.md) applies. Hand-written assembly with no owning C file uses `src/main/__candidate__.c`. |
 | `.diff_algorithm` | `levenshtein`, only for a scratch whose diff flags include `-DIFFlevenshtein` |
@@ -54,7 +55,7 @@ Run [build-and-verify](/tools/build-and-verify.md) first. Without `asm/`, the sc
 | `.run.json` | Written by `tools/difficulty_ledger.py write-run`: function, task, tier, model, run id, deadline and `stall_limit`. See [difficulty-ledger](/tools/difficulty-ledger.md). If the write fails, the script warns and `build.sh` uses the default stall limit. |
 | `.build.lock`, `match_log.txt`, `.matches/`, `NEAR_MISS.md` | Created during work: the build lock, per-attempt scores, archived exact matches and notes |
 
-`nonmatchings/` is git-ignored. [decomp-env-cleanup](/tools/selection-and-status.md) removes environments for functions that are already matched.
+`nonmatchings/` is git-ignored. `tools/decomp-env-cleanup` removes environments for functions that are already matched; see [selection-and-status](/tools/selection-and-status.md).
 
 # Context block
 

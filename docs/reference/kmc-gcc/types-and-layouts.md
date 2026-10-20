@@ -2,25 +2,40 @@
 type: Reference
 title: "Types and layouts"
 description: "Reusing canonical types, inferring layouts from all consumers, and the blast radius of shared-struct changes; look here when offsets or access widths differ."
-tags: [types, structs, layout]
+tags: [kmc-gcc, types, layout]
 ---
 
-# Reuse canonical types
+# A payload embeds a partial copy of the owning type
 
-Task payloads and allocation records often embed a complete renderer, transform, model or session type even when one callback touches only a few fields; [changing structs](/project/code-quality.md#changing-structs) states the reuse rule.
+**Cause:** task payloads and allocation records often embed a complete renderer, transform, model or session type, even when one callback touches only a few fields.
 
-Prefer one canonical owning type across allocation, initialization, rendering and cleanup. A callback-specific prefix type is right only when the payload really is a prefix or alternate view, not merely because the callback uses fewer fields.
+**Try:**
+* Use one canonical owning type across allocation, initialisation, rendering and cleanup.
+* Use a callback-specific prefix type only when the payload is really a prefix or an alternate view. Using fewer fields alone is not a reason.
+* For the steps when a shared struct changes, see [changing structs](/project/code-quality.md#changing-structs).
 
-# Infer layouts from all consumers
+# Access widths or offsets differ between modes or consumers
 
-Use allocation sizes, element strides, field widths, nearby offsets, callers, callbacks and cleanup paths together. A plausible field name is not evidence that two unrelated allocations share a type. Overlay game modes can reuse one address for different layouts.
+**Cause:** a plausible field name is not evidence that two allocations share a type. Overlay game modes can reuse one address for different layouts. When several meanings occupy the same bytes, the bytes need a union or distinct types.
 
-When several meanings occupy the same bytes in different modes, use an offset-preserving union or distinct mode-owned types. Do not borrow an unrelated common type just because one accessed offset agrees.
+**Try:**
+* Infer the layout from all consumers together: allocation sizes, element strides, field widths, nearby offsets, callers, callbacks and cleanup paths.
+* For several meanings in the same bytes, use an offset-preserving union or distinct mode-owned types.
+* Do not borrow an unrelated common type just because one accessed offset agrees.
 
-# Avoid manual offsets
+# Offsets or sizes are hand-written
 
-Verify `sizeof` and field offsets against the assembly; the procedure is in [typed access](/project/code-quality.md#typed-access-instead-of-manual-offsets).
+**Cause:** hand-written offsets are not checked against the declared type.
 
-# Shared-type changes have broad effects
+**Try:** use typed access, and check `sizeof` and the field offsets against the assembly. Procedure: [typed access](/project/code-quality.md#typed-access-instead-of-manual-offsets).
 
-The steps for a shared struct are in [changing structs](/project/code-quality.md#changing-structs). Parameter signedness is codegen too: at a call site a `short` argument is sign-extended (`sll` then `sra`), while an `unsigned short` argument is masked (`andi`), so keep each prototype's signedness as the original declares it. A `volatile` qualifier on a shared global is semantic as well: in one probe, two stores through a `volatile` pointer global remained two stores, while the same stores through a non-volatile global reduced to one, so a shared declaration should keep the qualifier each translation unit needs.
+# A shared struct, prototype or global change moves other code
+
+**Cause:**
+* Parameter signedness is codegen. A `short` argument is sign-extended at the call site (`sll` then `sra`), while an `unsigned short` argument is masked (`andi`).
+* A `volatile` qualifier on a shared global is semantic. In one probe, two stores through a `volatile` pointer global stayed two stores, and the same stores through a non-`volatile` global reduced to one.
+
+**Try:**
+* Keep each prototype's signedness as the original declares it.
+* Give a shared declaration the `volatile` qualifier that each translation unit needs.
+* For the change steps, see [changing structs](/project/code-quality.md#changing-structs).

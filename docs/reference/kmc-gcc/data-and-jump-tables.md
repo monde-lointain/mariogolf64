@@ -2,23 +2,39 @@
 type: Reference
 title: "Data, jump tables and section placement"
 description: "Jump-table merging, symbol boundaries, bss and zero-initialized global placement, and section padding; look here for data or section-layout mismatches."
-tags: [data, bss, jump-tables, kmc-gcc]
+tags: [kmc-gcc, data, bss, jump-tables]
 ---
 
-# Switch tables
+# Jump-table entries merge or point past the switch
 
-Consecutive switch cases with identical bodies may be merged into one target. An empty case can instead point directly after the switch. Inspect the jump-table data to tell them apart. KMC GCC emits a function's jump tables and literals into `.rodata` itself.
+**Cause:** consecutive switch cases with identical bodies can merge into one target. An empty case can point directly after the switch. KMC GCC emits a function's jump tables and literals into `.rodata` itself.
 
-# Symbols and boundaries
+**Try:** inspect the jump-table data to tell the two shapes apart, and match the one the target shows.
 
-Symbol declarations and object boundaries can affect section layout even when bytes look equivalent. Preserve the owning symbol and storage width unless there is strong evidence for a structural change. For bss mismatches, inspect adjacent symbols and alignment: several apparent globals may be one aggregate, and one apparent buffer may need explicit alignment or padding. A constant subtracted from an index folds into the displacement of the table's own symbol: `table[id - 0x80]` on an `s32` table compiled to a shift of `id` and a load with a negative displacement from `table`, so a disassembler can show the table relative to a neighbouring symbol. Keep the real table symbol.
+# A table or buffer looks like part of a neighbour
 
-# Where globals land
+**Cause:** a constant subtracted from an index folds into the displacement of the table's own symbol. `table[id - 0x80]` on an `s32` table compiled to a shift of `id` and a load with a negative displacement from `table`, so a disassembler can show the table relative to a neighbouring symbol.
 
-* An explicitly zero-initialized global (`= 0`) goes to `.data`.
-* An uninitialized global becomes a `.comm` symbol, which the linker may reorder; the section attribute is ignored.
-* `.bss` in source order requires `__attribute__((section(".bss")))` **plus** an initializer. Arrays of 8 bytes or more are 8-byte aligned. Procedure: [match-bss-segment](/procedures/match-bss-segment.md).
+**Try:** keep the real table symbol rather than a neighbour's.
 
-# Section padding
+# Bss or data boundaries differ from the target
 
-Object padding and translation-unit boundaries are covered in [assembly and object layout](/project/compiler-profiles.md#assembly-and-object-layout).
+**Cause:** symbol declarations and object boundaries affect section layout even when the bytes look equivalent. Several apparent globals may be one aggregate, and one apparent buffer may need explicit alignment or padding.
+
+**Try:**
+* Preserve the owning symbol and storage width unless there is strong evidence for a structural change.
+* For bss mismatches, inspect adjacent symbols and their alignment. Procedure: [match-bss-segment](/procedures/match-bss-segment.md).
+
+# A global lands in the wrong section
+
+**Cause:**
+* A global explicitly initialised to `= 0` goes to `.data`.
+* An uninitialised global becomes a `.comm` symbol, which the linker may reorder. The section attribute is ignored.
+* `.bss` in source order needs `__attribute__((section(".bss")))` **and** an initializer.
+* Arrays of 8 bytes or more are 8-byte aligned.
+
+**Try:** choose the declaration form that gives the target's section, as described above.
+
+# Section padding differs at a translation-unit boundary
+
+**Cause and fix:** object padding and translation-unit boundaries are covered in [assembly and object layout](/project/compiler-profiles.md#assembly-and-object-layout).

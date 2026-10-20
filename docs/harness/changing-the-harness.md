@@ -22,6 +22,7 @@ The [protected paths](/project/ground-rules.md#2-protected-paths) are the ground
 * build, link and checksum rules: `Makefile`, `tools/build-and-verify.sh`, `tools/git-hooks/pre-commit`
 * the scorer: `tools/decomp-env-template/build.sh`, `dist.py`, `normalize_asm.py`, `objdump.py`, `prelude.inc`
 * match certification: `tools/nonmatching_match_log.py`, `tools/m2c_one_shot.py`
+* the candidate gate: [verify-candidate](/tools/verify-candidate.md)
 * `tools/data-differ/`, the [code-quality checkers](/tools/quality-checkers.md), `.omp/hooks/pre/mg64-policy.ts`
 
 These additionally require:
@@ -36,15 +37,8 @@ Never weaken a check to make a specific function pass. If a check is wrong, fix 
 
 # Commits
 
-Commit a harness change by itself, as soon as it is done, staging only its own paths (`git add <paths>`, never `-A`), with the subject prefix `harness:`. This keeps comparison changes bisectable. Under [nigel](/tools/task-runner.md), `reset_command` (`git clean -f; git reset --hard HEAD || true`) wipes uncommitted work after every failed candidate and at startup, and `success_command` (`git add -A && git commit`) would mix an uncommitted fix into the candidate's commit. The pre-commit hook rebuilds the whole tree, so commit while `src/` still builds; in a decomp environment that means before integrating the function into `src/`.
+Commit a harness change by itself, as soon as it is done, staging only its own paths (`git add <paths>`, never `-A`), with the subject prefix `harness:`. This keeps comparison changes bisectable. Under [nigel](/tools/task-runner.md), `reset_command` wipes uncommitted work after every failed candidate and at startup, while the default `success_command` runs `git add -A`, so an uncommitted fix would be swept into the candidate's commit. The [pre-commit hook](/harness/git-hook-and-ci.md) rebuilds the whole tree, so commit while `src/` still builds; in a decomp environment that means before integrating the function into `src/`.
 
 # Docs are part of the harness
 
-This bundle follows [OKF](https://github.com/GoogleCloudPlatform/open-knowledge-format) and is read top-down: `docs/index.md`, a section `index.md`, then single concepts.
-
-* Frontmatter, in this order: `type` (`Overview`, `Policy`, `Guide`, `Procedure`, `Tool` or `Reference`), `name` (skills only, equal to the file name), `title`, `description`, `tags`, and `resource` when the concept documents one repo file (path relative to the concept).
-* `description` is one sentence of at most 200 characters that tells a reader whether to open the concept; for skills it is also the omp trigger, so keep it task-shaped ("…; use when …"). Each directory's `index.md` lists every concept and subdirectory as `* [<title>](<file>) - <description>`, with title and description copied verbatim.
-* One owner per fact: state a rule, format or flag in one concept and link to it from the others.
-* Links between concepts are bundle-absolute (`/tools/decomp-env.md`): skills are read through `.omp/skills/<name>/SKILL.md`, where relative links break. Repo files outside `docs/` are written as code paths, not links.
-* Concepts describe current behaviour only. Dates, changes, before/after figures and costs go to `docs/log.md`, newest date first. The log records notable docs and harness changes, never individual function matches.
-* Skills are symlinks into `docs/procedures/`; edit the concept, not the symlink. A new skill needs both the concept (with `name:`) and the symlink.
+The authoring rules for this bundle (frontmatter, directory indexes, links, the log and skill symlinks) are in [docs conventions](/harness/docs-conventions.md). Read them before editing any concept.

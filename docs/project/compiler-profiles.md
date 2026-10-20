@@ -31,8 +31,8 @@ Code is written C89-style with declarations at the start of blocks. `make tidy` 
 | Scope | Changes | Why |
 |---|---|---|
 | `src/main/*` | `-DF3DEX_GBI_2` | Game code builds F3DEX2 display lists. `src/mgu/` has no override and uses the base profile. |
-| `src/overlay_*/*` | `-DF3DEX_GBI_2` | Overlays run the same F3DEX2 microcode; their display-list builders only match with F3DEX2 opcodes. |
-| Files in `FAST_MATH_SRCS` (Makefile) | appends `-ffast-math` | These files inline `sqrtf()`/`sqrt()` as bare `sqrt.s`/`sqrt.d`. Without the flag KMC GCC adds a NaN guard and a library fallback the ROM lacks. The flag applies to every function in the file. |
+| `src/overlay_*/*` (including `overlay_gap`) | `-DF3DEX_GBI_2` | Overlays run the same F3DEX2 microcode; their display-list builders only match with F3DEX2 opcodes. |
+| Files in `FAST_MATH_SRCS` (Makefile; `src/main` and overlay files) | `-DF3DEX_GBI_2 -ffast-math` | These files inline `sqrtf()`/`sqrt()` as bare `sqrt.s`/`sqrt.d`. Without the flag KMC GCC adds a NaN guard and a library fallback the ROM lacks. The flag applies to every function in the file. |
 | `src/libkmc/*` | `-O` | libkmc was built with `gcc -O`. |
 | `src/libultra/*` | `-O3`; `-I include/libultra/compiler/gcc` before the base flags; appends `-fsigned-char -DBUILD_VERSION=VERSION_J -DF3DEX_GBI_2 -I include/libultra/PR` | VERSION_J libultra was built with signed `char`: byte loads sign-extend (`lb` plus shifts, not `lbu`/`andi`). Its compiler headers come before `include/libkmc`, so `stdlib.h` resolves to libultra's copy. |
 | `src/libnusys/*` | appends `-DUSE_EPI` | Enables the `nuPi*` bodies. |

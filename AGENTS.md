@@ -27,8 +27,8 @@ Full statement: `docs/project/ground-rules.md`.
 
 ## Code standards
 
-Full list and validation checklist: `docs/project/code-quality.md`. Never use inline assembly (including empty barriers and register bindings), raw display-list words, manual pointer arithmetic, or `void *` for types you can determine. Keep every `INCLUDE_ASM(...)` on one line. Verify with `./tools/build-and-verify.sh` before declaring C changes complete.
+Full list and validation checklist: `docs/project/code-quality.md`. Never use inline assembly (including empty barriers and register bindings), unused locals or codegen-only `volatile`/`register` (two narrow exceptions are listed there), raw display-list words, manual pointer arithmetic, or `void *` for types you can determine. Keep every `INCLUDE_ASM(...)` on one line. Verify with `./tools/build-and-verify.sh` before declaring C changes complete.
 
 ## Docs maintenance
 
-Rules: `docs/harness/changing-the-harness.md` ("Docs are part of the harness"). In short: a concept's frontmatter `description` is copied verbatim into its directory's `index.md`; add, move or retitle a concept and update that index. `docs/log.md` records notable docs and harness changes, never individual function matches. Skills in `.omp/skills/` are symlinks into `docs/procedures/`; edit the concept. Generic compiler lessons go in `docs/reference/kmc-gcc/` only under `editing-rules.md`; per-function sessions keep findings in their workspace `NEAR_MISS.md`.
+Rules: `docs/harness/docs-conventions.md`. In short: a concept's frontmatter `description` is copied verbatim into its directory's `index.md`; add, move or retitle a concept and update that index. Concepts state current behaviour only, one owner per fact; `docs/log.md` records notable docs and harness changes, never individual function matches. Skills in `.omp/skills/` are symlinks into `docs/procedures/`; edit the concept. Generic compiler lessons go in `docs/reference/kmc-gcc/` only under `editing-rules.md`; per-function sessions keep findings in their workspace `NEAR_MISS.md`.

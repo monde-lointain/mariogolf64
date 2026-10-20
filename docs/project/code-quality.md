@@ -1,15 +1,16 @@
 ---
 type: Policy
 title: "Code-quality standards"
-description: "What counts as an acceptable match: no inline asm or raw display-list words, typed structs not pointer math, no redundant externs, file structure, validation checklist."
+description: "What counts as an acceptable match: no inline asm, codegen-only locals or raw display-list words; typed structs, not pointer math; no redundant externs; file structure; validation checklist."
 tags: [policy, quality]
 ---
 
-A matching checksum does not make an implementation complete if it violates these rules. Resolve differences through C types, control flow and the proper macros. Checkers: [quality checkers](/tools/quality-checkers.md).
+A matching checksum does not make an implementation acceptable if it violates these rules. Resolve differences through C types, control flow and the proper macros. Checkers: [quality checkers](/tools/quality-checkers.md).
 
 # Prohibited
 
 * Inline assembly: `asm`/`__asm__`, empty barriers, constraints, register bindings. `INCLUDE_ASM`, `INCLUDE_RODATA` and `GLOBAL_ASM` are not allowed in candidate files; the decomp environment `build.sh` rejects them.
+* Unused locals, and `volatile` or `register` qualifiers added only to change codegen. Two unused locals are allowed, each only where [stack frames](/reference/kmc-gcc/registers-and-scheduling.md#stack-frames) describes it: a GCC nested function's static-chain stand-in, and an array filling otherwise unexplained frame space, commented `/* unused: original frame space */`. A `volatile` the original source needs stays.
 * Raw display-list words. Use the F3DEX2 macros from `PR/gbi.h` (look for `gDPLoadTLUT_pal16`, `gDPLoadTextureTile_4b`). Never advance a `Gfx *` by hand; see [decompile-microcode](/procedures/decompile-microcode.md).
 * `#define` abuse.
 * `void *` where the real type is knowable.
@@ -35,7 +36,7 @@ After adding or moving a function, check that every `extern` you used is not alr
 
 # File structure
 
-C files are ordered: macro definitions, struct definitions, global variables, function declarations, function implementations. Reorganize toward this proactively. Keep every `INCLUDE_ASM(...)` on one line; [Splat reads the function name from it](/reference/splat-yaml.md).
+C files are ordered: macro definitions, struct definitions, global variables, function declarations, function implementations. Reorganize toward this proactively. Keep every `INCLUDE_ASM(...)` on one line: `tools/m2c_one_shot.py`, the `decomp-c` merge driver, `tools/sync-shard` and `tools/integrate-shards` recognize stubs line by line (Splat itself does not need it).
 
 # Validation checklist
 
@@ -46,6 +47,7 @@ Before declaring C changes complete:
 - [ ] No `void *` parameters that should be typed.
 - [ ] Struct sizes match the strides and offsets in the assembly.
 - [ ] Every `INCLUDE_ASM(...)` is on a single line.
+- [ ] No unused locals or codegen-only `volatile`/`register`, apart from the two allowed unused locals.
 - [ ] No redundant externs.
-- [ ] Every affected function is diffed after a fresh build: `python3 tools/asm-differ/diff.py --no-pager <function>`.
+- [ ] Every affected function is diffed after a fresh build with [asm-differ](/tools/asm-differ.md).
 - [ ] The full ROM verifies; see [ground rules](/project/ground-rules.md) §1.

@@ -39,7 +39,7 @@ AssetEntry g_asset_table[] = {
 // segments also start at 0x226BA0 and 0x240520 so the two _ROM_END symbols land there
 ```
 
-`USE_ASSET(name)` (from `common.h`) declares `name_ROM_START[]` and `name_ROM_END[]`. Code-segment (overlay) addresses already have symbols (`overlay_4_ROM_START`, `_ROM_END`, `_VRAM`, `_VRAM_END`, `_BSS_START`, ...) in the generated `mariogolf64.ld`; use those. Never convert null pointers (`0x00000000`).
+`USE_ASSET(name)` (from `common.h`) declares `name_ROM_START[]` and `name_ROM_END[]`. Code-segment (overlay) addresses already have symbols (`overlay_4_ROM_START`, `_ROM_END`, `_VRAM`, `_VRAM_END`, `_BSS_START`, ...) in the generated `mariogolf64.ld`; use those. A `0x00000000` entry is a null pointer, not an asset address: do not convert it.
 
 # Steps
 
@@ -71,7 +71,7 @@ AssetEntry g_asset_table[] = {
    sound_effect_bank_ROM_START = 0xD9B9C0; // absolute:True
    ```
 
-   One name per address. When two linker symbols share an address (`audio_wave_bank_ROM_END` and `audio_wave_table_ROM_START`), declare one; C can use both through `USE_ASSET`. Keep two distinct C symbols when the original materialized them separately: merging can let GCC reuse a register and change codegen. See [format](/reference/symbol-addrs-format.md).
+   One `symbol_addrs.txt` name per address. When two linker symbols share an address (`audio_wave_bank_ROM_END` and `audio_wave_table_ROM_START`), `USE_ASSET` both in C. Keep them as separate C symbols when the original code materialized them separately: merging them can change the emitted code. See [format](/reference/symbol-addrs-format.md).
 
 4. **Update the code.** Add `USE_ASSET(...)` declarations (sorted by address) after the includes and replace raw addresses or `D_<hex>` externs with the `_ROM_START`/`_ROM_END` symbols. Leave size fields unchanged.
 
@@ -86,7 +86,7 @@ AssetEntry g_asset_table[] = {
 
 # Common mistakes
 
-* Out-of-order segments: Splat stops with `segments out of order`.
+* Out-of-order segments: Splat fails; the rule is in [splat yaml](/reference/splat-yaml.md#rules).
 * Zero-size segment: two segments with the same start.
 * Wrong `_ROM_END`: it is the next segment's start. Check boundaries in `build/mariogolf64.map`.
 * `undefined reference to <name>_ROM_START`: missing segment or `USE_ASSET`.
