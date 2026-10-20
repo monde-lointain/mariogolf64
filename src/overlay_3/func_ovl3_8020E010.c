@@ -8,6 +8,13 @@ extern char D_ovl3_802318E0[];
 extern s16 D_ovl3_802300A0;
 extern char* D_ovl3_802300B4[];
 extern char D_ovl3_802318A8[];
+extern u8* D_ovl3_8023A810;
+extern u8* D_ovl3_8023A824;
+extern u8* D_ovl3_8023A828;
+extern u8* D_ovl3_8023A82C;
+extern u8* D_ovl3_8023A830;
+extern s32 D_ovl3_802300A8;
+extern s32 D_ovl3_802300AC;
 
 void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
 void func_80071608(Gfx** dl);
@@ -33,7 +40,48 @@ void func_ovl3_8020E010(void** destinations) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E0AC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E26C);
+void func_ovl3_8020E26C(u8* block, s32 slot_index) {
+    RomAssetLoad asset;
+    s16 index;
+
+    index = slot_index - 1;
+    switch (index) {
+    case 0:
+        break;
+    case 1:
+        D_ovl3_8023A810 = block;
+        get_rom_asset_allocation_size(0x8EA, &asset);
+        load_rom_asset_payload(D_ovl3_8023A810, &asset);
+        break;
+    case 2:
+        D_ovl3_8023A824 = block;
+        get_rom_asset_allocation_size(0x521, &asset);
+        load_rom_asset_payload(D_ovl3_8023A824, &asset);
+        break;
+    case 3:
+        D_ovl3_8023A810 = block;
+        get_rom_asset_allocation_size(0x663, &asset);
+        load_rom_asset_payload(D_ovl3_8023A810, &asset);
+        break;
+    case 4:
+        D_ovl3_8023A828 = block;
+        get_rom_asset_allocation_size(0x5A5, &asset);
+        load_rom_asset_payload(D_ovl3_8023A828, &asset);
+        break;
+    case 5:
+        D_ovl3_8023A82C = block;
+        get_rom_asset_allocation_size(0x689, &asset);
+        load_rom_asset_payload(D_ovl3_8023A82C, &asset);
+        break;
+    case 6:
+        D_ovl3_8023A830 = block;
+        get_rom_asset_allocation_size(0x720, &asset);
+        load_rom_asset_payload(D_ovl3_8023A830, &asset);
+        D_ovl3_802300A8 = 0;
+        D_ovl3_802300AC = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E390);
 
@@ -184,8 +232,6 @@ void func_ovl3_80210DF4(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode) {
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80210E3C);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_80211A5C);
-
-extern u8* D_ovl3_8023A82C;
 
 void func_ovl3_802123E0(Gfx** gfxp, s32 x, s32 y, u8 mode) {
     Gfx* gfx = *gfxp;
