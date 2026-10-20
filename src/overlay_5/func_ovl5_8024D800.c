@@ -33,6 +33,8 @@ extern OverlayRecord58 D_ovl5_802544B0;
 
 s32 func_ovl5_8024DBF8(OverlayRecord58 *);
 s32 func_ovl5_80251378(Vec3i *from, Vec3i *to, Vec3i *out);
+s32 func_ovl5_8024F0B0(s32);
+s32 func_ovl5_80252F70(s32);
 
 void func_ovl5_8024D800(void) { D_ovl5_8025C848 = 0; }
 
@@ -216,7 +218,23 @@ INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_80250768)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802507D8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_802510D0);
+void func_ovl5_802510D0(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
+    u8 unused_frame[0xB0]; /* unused: original frame space */
+    s32 flags[16];
+    s32 i;
+    s32 base_score;
+    s32 value;
+
+    value = 1;
+    for (i = 15; i >= 0; i--) {
+        flags[i] = value;
+    }
+    base_score = player_records[D_ovl5_8025C884].base_score;
+    *arg1 = func_ovl5_80252F70(func_ovl5_8024F0B0(value));
+    *arg2 = camera_position_x;
+    *arg3 = camera_position_z;
+    *arg4 = flags[base_score];
+}
 
 s32 func_ovl5_80251198(Vec3i *from, Vec3i *to) {
     s32 dist;
