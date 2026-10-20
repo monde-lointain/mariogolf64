@@ -503,6 +503,8 @@ segments:
       - [0xDE320, rodata]
       - [0xDE6D8, .rodata, overlay_0/func_ovl0_8020E740]
       - [0xDE708, rodata]
+      - [0xDE7A8, .rodata, overlay_0/func_ovl0_80218CC0]
+      - [0xDE7D8, rodata]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
 
   # Overlay 3

@@ -12,6 +12,16 @@ extern void* heap3_alloc(u32 size);
 extern void* D_ovl0_8022B534;
 extern void* D_ovl0_8022B538;
 extern void* D_ovl0_8022B53C;
+extern s32 D_ovl0_80224924;
+extern s32 D_ovl0_80224A78;
+extern s8 D_801B60C3;
+extern s32 D_800C42D0;
+extern f32 D_ovl0_8022D67C;
+extern f32 D_ovl0_8022D684;
+extern f32 D_ovl0_8022D688;
+extern s32 game_mode;
+extern s8 g_terrain_vtx_xform_mode;
+extern s32 get_current_course_id(void);
 
 extern s8 D_801061BD;
 extern s8 D_801061BF;
@@ -79,7 +89,83 @@ void func_ovl0_80218DB0(s32 arg0, s32 arg1) {
     D_ovl0_8022D678 = arg0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_80218DD0);
+void func_ovl0_80218DD0(void) {
+    RomAssetLoad asset;
+
+    if (D_ovl0_80224A7C != 0) {
+        return;
+    }
+    D_ovl0_80224A7C = 1;
+    D_ovl0_80224924 = 0;
+
+    if (D_801B60C3 != 0) {
+        if (game_mode == 7) {
+            D_ovl0_80224A78 = 9;
+        } else {
+            D_ovl0_80224A78 = 10;
+        }
+    } else if (D_800C42D0 != 0) {
+        if (game_mode == 7) {
+            D_ovl0_80224A78 = 7;
+        } else if (game_mode == 9) {
+            D_ovl0_80224A78 = 1;
+        } else if (game_mode == 3) {
+            if (g_terrain_vtx_xform_mode == 1) {
+                D_ovl0_80224A78 = 3;
+            } else if (get_current_course_id() == 8) {
+                D_ovl0_80224A78 = 4;
+            } else {
+                D_ovl0_80224A78 = 2;
+            }
+        } else {
+            D_ovl0_80224A78 = 8;
+        }
+    } else {
+        switch (game_mode) {
+        case 7:
+            D_ovl0_80224A78 = 0;
+            break;
+        case 3:
+            if (g_terrain_vtx_xform_mode == 1) {
+                D_ovl0_80224A78 = 3;
+            } else if (get_current_course_id() == 8) {
+                D_ovl0_80224A78 = 4;
+            } else {
+                D_ovl0_80224A78 = 2;
+            }
+            break;
+        case 9:
+            D_ovl0_80224A78 = 1;
+            break;
+        case 2:
+        case 4:
+        case 10:
+        case 11:
+            D_ovl0_80224A78 = 5;
+            break;
+        case 8:
+            D_ovl0_80224A78 = -1;
+            break;
+        case 0:
+        case 1:
+        case 5:
+        case 6:
+            D_ovl0_80224A78 = 6;
+            break;
+        }
+    }
+
+    D_ovl0_8022B530 = heap3_alloc(get_rom_asset_allocation_size(0x70F, &asset));
+    load_rom_asset_payload(D_ovl0_8022B530, &asset);
+    D_ovl0_8022B534 = heap3_alloc(get_rom_asset_allocation_size(0x70B, &asset));
+    load_rom_asset_payload(D_ovl0_8022B534, &asset);
+    D_ovl0_8022D684 = 320.0f;
+    D_ovl0_8022D688 = 240.0f;
+    D_ovl0_8022D67C = 240.0f;
+    D_ovl0_8022B538 = heap3_alloc(get_rom_asset_allocation_size(0x71E, &asset));
+    load_rom_asset_payload(D_ovl0_8022B538, &asset);
+    func_80051A88(0x60);
+}
 
 void func_ovl0_80218FDC(void) {
     if (D_ovl0_80224A7C == 1) {
