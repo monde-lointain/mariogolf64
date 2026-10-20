@@ -1158,27 +1158,7 @@ s32 func_80098CA0(s32 arg0) {
   return result & 0xFF;
 }
 
-s32 func_80098CD8(u8* src, u8* dst, s32 count, s32 arg3) {
-  s32 i;
-  u8** t;
-
-  for (i = 0; i < count; i++) {
-    if (src[i] >= 28) {
-      return -1;
-    }
-    /* Identical arms are codegen-load-bearing: they are cross-jumped only
-       after register allocation, so arg3 stays live in $a3 through the loop
-       (matches ROM). */
-    if (arg3) {
-      t = &D_800C73F0[(src[i] + i) % 28];
-      dst[i] = **t;
-    } else {
-      t = &D_800C73F0[(src[i] + i) % 28];
-      dst[i] = **t;
-    }
-  }
-  return 0;
-}
+INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80098CD8);
 
 s32 func_80098D70(u8* dst, u8* src, s32 count) {
   s32 offset;
