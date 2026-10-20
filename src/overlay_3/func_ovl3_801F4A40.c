@@ -23,6 +23,8 @@ extern u8 D_ovl3_80231284[];
 extern u8 D_801052E8;
 extern u8 D_801B9410;
 extern s8 D_801323B8[];
+extern s8 g_terrain_vtx_xform_mode;
+extern u8 D_801323A0[];
 extern s32 func_8006AD94(void);
 extern s32 func_8006ADA0(void);
 extern void func_8006AD1C(s32 table_index);
@@ -42,7 +44,14 @@ Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4A4C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4C34);
+s32 func_ovl3_801F4C34(void) {
+    if (g_terrain_vtx_xform_mode != 0) {
+        s32 t;
+        t = (D_801323B8[0x13] * 3) + 6;
+        return D_801323B8[0x14] + t;
+    }
+    return (s8)D_801323A0[0x16];
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4C78);
 
@@ -56,7 +65,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F6B28)
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F70F0);
 
 extern s32 D_800FBD40[];
-extern u8 D_801323A0[];
 extern s32 D_ovl3_8022BE0C;
 
 void func_ovl3_801F75EC(void) {
