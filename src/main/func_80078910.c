@@ -699,9 +699,36 @@ typedef struct {
   u8 unknown_2E[2];
 } WindParticle; /* 0x30 */
 
-extern void func_8007E438(WindParticle* p);
+extern s32 rand(void);
+extern f32 D_801B54F0;
+extern f32 D_801049FC;
+extern f32 D_800FE380;
+/* Member-sized views retain the separate retail address roots of this step. */
+extern f32 D_80104F44[];
+extern f32 D_80104F48[];
+extern f32 D_80104F4C[];
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007E438);
+void func_8007E438(WindParticle* p) {
+  f32 t;
+
+  p->position.x =
+      (f32)((rand() % 200 - 100) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF418;
+  p->position.y = (f32)(-0x1A400 - (rand() % 200) * 1536) * (1.0f / 1024.0f);
+  p->position.z =
+      (f32)((rand() % 200 - 100) * 1536) * (1.0f / 1024.0f) + (f32)D_800FF41C;
+  t = p->position.y / D_80104F48[0];
+  p->position.y += D_801B54F0 + 15.0f;
+  p->position.x += D_80104F44[0] * t;
+  p->position.z += D_80104F4C[0] * t;
+  p->unknown_18 = 0;
+  p->target_position.z = p->position.z + D_800FE380 * 90.0f;
+  p->target_position.y = p->position.y + 90.0f;
+  p->target_position.x = p->position.x + D_801049FC * 90.0f;
+  p->unknown_2C = -1;
+  p->unknown_2D = 0;
+  p->unknown_2A = 0;
+  p->unknown_1C = 1.0f;
+}
 
 typedef struct {
   Vec3f position; /* y is sampled terrain height */
@@ -711,8 +738,6 @@ typedef struct {
   u8 unknown_17;
   s8 unknown_18;
 } TerrainScatterPoint;
-
-extern s32 rand(void);
 
 void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
   p->position.x =
@@ -727,12 +752,6 @@ void randomize_terrain_scatter_point(TerrainScatterPoint* p) {
 }
 
 extern s32 D_80104AC0;
-extern f32 D_801049FC;
-extern f32 D_800FE380;
-/* Member-sized views retain the separate retail address roots of this step. */
-extern f32 D_80104F44[];
-extern f32 D_80104F48[];
-extern f32 D_80104F4C[];
 extern f32 cosf(f32 angle);
 extern f32 sinf(f32 angle);
 
