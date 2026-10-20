@@ -1,8 +1,14 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/terrain.h"
 
 extern u8* D_ovl3_8023AA44;
 extern u8* D_ovl3_8023AA4C;
+extern u8* D_ovl3_8023AA48;
+extern u8* D_ovl3_8023AA50;
+extern s32 D_ovl3_80230130;
+extern s32 D_ovl3_80230134;
+extern s32 D_ovl3_80230138;
 
 extern u16 D_800C2064[];
 extern void** D_ovl3_8023AA40;
@@ -34,7 +40,33 @@ void func_ovl3_8021342C(u8* destination) {
     load_rom_asset_payload(D_ovl3_8023AA44, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_80213464);
+void func_ovl3_80213464(u8* destination, s16 mode) {
+    RomAssetLoad asset;
+
+    switch (mode) {
+    case 1:
+        D_ovl3_8023AA44 = (u8*)g_terrain_tile_cache;
+        get_rom_asset_allocation_size(0x8E9, &asset);
+        load_rom_asset_payload(D_ovl3_8023AA44, &asset);
+        break;
+    case 2:
+        D_ovl3_8023AA48 = destination;
+        break;
+    case 3:
+        D_ovl3_8023AA4C = destination;
+        get_rom_asset_allocation_size(0x688, &asset);
+        load_rom_asset_payload(D_ovl3_8023AA4C, &asset);
+        break;
+    case 4:
+        D_ovl3_8023AA50 = destination;
+        get_rom_asset_allocation_size(0x720, &asset);
+        load_rom_asset_payload(D_ovl3_8023AA50, &asset);
+        D_ovl3_80230130 = 0;
+        D_ovl3_80230134 = 0;
+        D_ovl3_80230138 = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80213390", func_ovl3_80213558);
 
