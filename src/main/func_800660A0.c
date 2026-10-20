@@ -15,6 +15,8 @@ extern void func_800674B8(void);
 extern s32 func_80067730(void);
 extern s8 D_801B60B8;
 extern u8 D_801B7248[];
+extern void vec3f_normalize(f32* x, f32* y, f32* z);
+extern Vtx_tn D_800E1850[32];
 
 void update_rumble_intensity_table(void);
 
@@ -24,7 +26,40 @@ INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", draw_course_decal_triangles);
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", emit_aim_target_ring);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800660A0", func_800674B8);
+void func_800674B8(void) {
+  s32 i;
+  s32 outer;
+  s32 side;
+  f32 angle;
+  f32 pos_x;
+  f32 pos_y;
+  f32 ring_x;
+  f32 ring_y;
+  f32 ring_z;
+  Vtx_tn* v;
+
+  for (i = 0; i < 32; i++) {
+    v = &D_800E1850[i];
+    outer = (i & 2) >> 1;
+    side = (i & 1) ^ outer;
+    angle = (f32)(i / 4) * 0.7853982f;
+
+    ring_x = cosf(angle) * ((f32)outer - 0.5f) * 16.0f;
+    ring_y = sinf(angle) * ((f32)outer - 0.5f) * 16.0f;
+    pos_x = cosf(angle) * 128.0f + ring_x;
+    pos_y = sinf(angle) * 128.0f + ring_y;
+    ring_z = ((f32)side - 0.5f) * 16.0f;
+    v->ob[0] = (s16)pos_x;
+    v->ob[1] = (s16)pos_y;
+    v->ob[2] = (s16)ring_z;
+
+    vec3f_normalize(&ring_x, &ring_z, &ring_y);
+    v->n[0] = (s8)(s32)(ring_x * 127.0f);
+    v->n[1] = (s8)(s32)(ring_y * 127.0f);
+    v->n[2] = (s8)(s32)(ring_z * 127.0f);
+    v->a = 0x80;
+  }
+}
 
 void func_800676B0(void) {
   collision_triangles = 1;
