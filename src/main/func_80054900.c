@@ -32,6 +32,15 @@ extern void check_and_print_grid(char* text, s32 column, s32 row);
 extern s32 D_800D04A0[][5];
 extern char D_800D0608[], D_800D0618[], D_800D061C[];
 extern f32 sqrtf(f32 value);
+extern s32 collect_keyframe_events_at(s32 id, s32 track, s32 frame, u8* out);
+extern void calculate_bone_matrices(s32 id, s32 segment);
+extern void animation_play(s32 id, s32 animation);
+extern void activate_texture_anim_slot(s32 id, s32 slot);
+extern f32 D_800FBDF8;
+extern s32 D_800FE430;
+extern s32 D_80104B80;
+extern void* D_800C1DF4;
+extern Mtx* D_80105210;
 
 s32 func_80054938(s32 id, s32 mode, s32 direct, s32 variant) {
   f32 position[3];
@@ -411,7 +420,7 @@ void update_vertex_texture_coords(s32 id) {
  * `dl + 0x10`, the same seven-command block `update_vertex_texture_coords`
  * writes. The tail pass then steps each running slot's counter and retires it
  * to state 3 once it reaches the length its play-order entry declares. */
-void update_vertex_texture_coords_per_frame(s32 id) {
+void update_vertex_texture_coords_per_frame(s32 id, s32 arg1, s32 frame_mod) {
   f32 unused[16];
   CharacterState* cs;
   TexturedFace* face;
@@ -848,7 +857,94 @@ s32 func_80056520(s32 id) {
   return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80054900", animation_step);
+const char D_800D07CC[0x1C] = "[PC%d Frame%d]         ";
+
+void animation_step(s32 index) {
+    CharacterState* cs;
+    u8 events[0x20];
+    char line[0x80];
+    s32 count;
+    s32 i;
+    s32 has_jump;
+    s32 off;
+
+    cs = get_character_state(index);
+    if (cs == NULL) {
+        return;
+    }
+
+    kSetMultiTLB(0, 0, 0x20, 0x2000000, osVirtualToPhysical(cs->segment_data));
+
+    count = collect_keyframe_events_at(index, cs->keyframe_track_index, (s32)cs->current_frame, events);
+    has_jump = 0;
+    for (i = 0; i < count; i++) {
+        switch (events[i * 2]) {
+        case 0:
+            break;
+        case 1:
+            if (cs->loop_enabled) {
+                off = find_keyframe_offset_by_tag(index, cs->keyframe_track_index, 0);
+                cs->current_frame = (f32)(off + cs->model_resource->keyframe_tracks[cs->keyframe_track_index].start_frame);
+                has_jump = 1;
+            }
+            break;
+        case 0xFE:
+            if (events[i * 2 + 1] == 0) {
+                cs->auto_slot_zero_enabled = 1;
+            } else if (events[i * 2 + 1] == 2) {
+                cs->auto_slot_zero_enabled = 0;
+            } else {
+                activate_texture_anim_slot(index, events[i * 2 + 1]);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (!has_jump) {
+        cs->current_frame += cs->frame_step;
+    }
+    if ((f32)cs->end_frame < cs->current_frame) {
+        if (cs->next_animation_id != -1) {
+            animation_play(index, cs->next_animation_id);
+            cs->next_animation_id = -1;
+        } else {
+            cs->current_frame = (f32)cs->end_frame;
+        }
+    }
+    if (cs->current_frame < (f32)cs->start_frame) {
+        cs->current_frame = (f32)cs->start_frame;
+    }
+
+    D_800C1DEC = cs->resource_index;
+    D_800FBDF8 = cs->current_frame;
+    D_800FE430 = cs->end_frame;
+    D_80104B80 = cs->start_frame;
+
+    if (flag_is_set(0x38)) {
+        sprintf(line, D_800D07CC, index, (s32)(D_800FBDF8 - (f32)cs->start_frame));
+        check_and_print_grid(line, 10, index + 5);
+    }
+
+    if (cs->auto_slot_zero_enabled) {
+        if (cs->auto_slot_zero_delay == 0) {
+            activate_texture_anim_slot(index, 0);
+            cs->auto_slot_zero_delay = (rand() & 0x1F) + 0x1E;
+        } else {
+            cs->auto_slot_zero_delay--;
+        }
+    }
+
+    update_vertex_texture_coords_per_frame(index, 0, (s32)D_800FBDF8 % 10);
+
+    D_80105210 = (Mtx*)cs->segment_bases[cs->segment_index];
+    D_800C1DF4 = cs->segment_data;
+    cs->segment_index = (cs->segment_index + 1) % 3;
+
+    calculate_bone_matrices(index, cs->segment_index);
+    cs->bone_matrices = D_80105210;
+}
 const u32 D_800D07E8 = 0x3FF00000;
 const u32 D_800D07EC = 0;
 

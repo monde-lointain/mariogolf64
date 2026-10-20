@@ -67,9 +67,9 @@ typedef struct {
   u8 unknown_61;                        /* 0x61 */
   u8 unknown_62[0x20];                  /* 0x62 */
   u8 unknown_82;                        /* 0x82 */
-  u8 loop_enabled;                      /* 0x83; permits the loop-marker event */
+  s8 loop_enabled;                      /* 0x83; permits the loop-marker event */
   s8 next_animation_id;                 /* 0x84; -1 means no queued animation */
-  u8 auto_slot_zero_enabled;            /* 0x85 */
+  s8 auto_slot_zero_enabled;            /* 0x85 */
   s8 auto_slot_zero_delay;              /* 0x86; updates until slot zero activates */
   u8 unknown_87;                        /* 0x87 */
   TextureAnimSlot texture_slots[0x20];  /* 0x88 */
