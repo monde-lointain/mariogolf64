@@ -22,6 +22,22 @@ extern s32 D_801B5524;
 extern f32 D_801B5528;
 extern s32 D_801B552C;
 extern f32 D_801B5530;
+extern s32 func_8006F1F0(void);
+extern s32 func_8006F2F4(void);
+extern void func_8006F2E8(void);
+extern void func_8006F24C(s32 arg0);
+extern void func_8006ADF8(s32 arg);
+extern void func_80069FBC(void);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
+extern s32 D_800B6808;
+extern s32 D_800BB020;
+extern s32 D_800BB024;
+extern s32 D_800BB02C;
+extern s32 D_800BB030;
+extern s32 D_80105218;
+extern s32 D_ovl9_801F577C;
+extern s32 g_terrain_enable_gate;
 
 /* Overlay 9 init hook, called through OverlayDescriptor.initialize after DMA and bss clear. */
 void func_ovl9_801F4A40(void) {
@@ -53,7 +69,37 @@ void func_ovl9_801F4A40(void) {
   D_801B5530 = 45.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_9/func_ovl9_801F4A40", func_ovl9_801F4B68);
+void func_ovl9_801F4B68(void) {
+  D_800B6808 = 2;
+  if ((func_8006F1F0() != 0) && (func_8006F2F4() != 0)) {
+    func_8006F2E8();
+    D_800BB020 = 0x19;
+    D_800BB02C = 0xC;
+    D_800BB024 = 0x1D;
+    D_800BB030 = 0x1B;
+    func_8006F24C(0);
+    func_8006ADF8(2);
+  } else {
+    if ((D_ovl9_801F577C != 0) && (g_terrain_enable_gate == 1) && (D_80105218 != 0)) {
+      D_800BB020 = 0x19;
+      D_800BB02C = 0xC;
+      D_800BB024 = 0x13;
+      D_800BB030 = 3;
+    } else {
+      func_80069FBC();
+      D_800BB020 = 0x19;
+      D_800BB02C = 0xC;
+      D_800BB024 = 0x15;
+      D_800BB030 = 4;
+    }
+  }
+  func_800719A0(0xA0, 0x72, -1, 1, 0, 0, 0, 0, 0, 0);
+  func_800719A0(0xA0, 0x72, -1, 1, 1, 0, 0, 0, 0, 0);
+  func_800719A0(0xA0, 0x72, -1, 1, 2, 0, 0, 0, 0, 0);
+  func_800719A0(0xA0, 0x72, -1, 1, 3, 0, 0, 0, 0, 0);
+  func_800719A0(0xA0, 0x72, -1, 1, 4, 0, 0, 0, 0, 0);
+  func_800719A0(0xA0, 0x72, -1, 1, 5, 0, 0, 0, 0, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_9/func_ovl9_801F4A40", func_ovl9_801F4DA0);
 
