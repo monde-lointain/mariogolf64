@@ -74,7 +74,7 @@ typedef struct {
   /* 0x2C */ s32 roster_random_seed;
   /* 0x30 */ u8 unknown_30;
   /* 0x31 */ s8 rumble_disabled;
-  /* 0x32 */ u8 unknown_32[8];
+  /* 0x32 */ s8 unknown_32[8];
   /* 0x3A */ s8 terrain_transform_mode; /* g_terrain_vtx_xform_mode interior label */
   /* 0x3B */ u8 unknown_3B[2];
   /* 0x3D */ s8 continue_count;

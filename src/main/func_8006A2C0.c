@@ -1000,15 +1000,43 @@ s32 func_8006D1FC(void) { return D_800C4144; }
 
 void func_8006D208(s32 arg0) { D_800C4144 = arg0; }
 
-/* func_8006D214: same shape as func_8006D38C (see its comment for the derivation)
- * plus an FP scale on the compared value. Builds at 94/94 instructions: the
- * func_8006D38C model transfers verbatim, fixing the same two of three access
- * shapes and leaving the same one open -- the ROM reaches the count by NEGATIVE
- * DISPLACEMENT off the held flag base (`lw t0,-0x2A(v1)`). Replacing the
- * array-form guard with a plain scalar read lets everything CSE and comes out
- * 87/94, so the array form is load-bearing.
- */
-INCLUDE_ASM("asm/nonmatchings/main/func_8006A2C0", func_8006D214);
+/* Hole pot settlement. The highest scaled score wins: the winner gains
+ * pot * (count - 1) and every other player loses pot. A tie clears the winner.
+ * With no winner the base adds into the pot; otherwise the pot resets to base. */
+void func_8006D214(void) {
+  s32 i;
+  s32 best;
+  s32 scaled;
+  s32 score;
+
+  if (scenario_state_id.unknown_32[0] > 0) {
+    best = -1;
+    D_800C4144 = -1;
+    for (i = 0; i != scenario_state_id.active_player_count; i++) {
+      score = player_records[i].unknown_80;
+      if (score != -1) {
+        scaled = (s32)((f32)score * 0.00007119878f);
+        if (best < scaled) {
+          D_800C4144 = i;
+          best = scaled;
+        } else if (scaled == best) {
+          D_800C4144 = -1;
+        }
+      }
+    }
+    if (D_800C4144 == -1) {
+      D_800C4130 = D_800C4130 + scenario_state_id.unknown_32[0];
+    } else {
+      D_8012D3C8[D_800C4144][0] += D_800C4130 * (scenario_state_id.active_player_count - 1);
+      for (i = 0; i != scenario_state_id.active_player_count; i++) {
+        if (i != D_800C4144) {
+          D_8012D3C8[i][0] -= D_800C4130;
+        }
+      }
+      D_800C4130 = scenario_state_id.unknown_32[0];
+    }
+  }
+}
 
 /* func_8006D38C: min-search over the 0xB8-stride record array + a weighted
  * u16-table redistribute.
