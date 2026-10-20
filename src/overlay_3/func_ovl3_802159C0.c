@@ -3,7 +3,73 @@
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_802159C0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80215B84);
+extern u8* func_8005AF74(void);
+extern s32 func_800959F8(void);
+extern void func_8009226C(s32 arg0);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
+extern s32 D_800C2000;
+extern s32 D_800C2004;
+extern s32 current_game_mode;
+
+void func_ovl3_80215B84(void) {
+    u8* state;
+    u8 unk35;
+    u8 unk36;
+    u8 unk37;
+    u8 unk38;
+
+    state = func_8005AF74();
+    if (func_800959F8() == 1) {
+        if (D_800C2004 & 0x4000) {
+            func_8009226C(9);
+            play_sound_effect(0x5F, 0xF, 0x7F);
+            func_8009226C(9);
+            current_game_mode = 9;
+            return;
+        }
+        unk37 = state[0x37];
+        unk38 = state[0x38];
+        unk35 = state[0x35];
+        unk36 = state[0x36];
+        if (D_800C2000 & 0x100) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            if (((s8)unk35 == 6) && ((s8)unk37 < 7)) {
+                state[0x37]++;
+            }
+            state[0x35]++;
+            if ((s8)state[0x35] >= 7) {
+                state[0x35] = 6;
+            }
+        } else if (D_800C2000 & 0x200) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            if ((unk35 == 0) && ((s8)unk37 > 0)) {
+                state[0x37]--;
+            }
+            state[0x35]--;
+            if ((s8)state[0x35] < 0) {
+                state[0x35] = 0;
+            }
+        } else if (D_800C2000 & 0x400) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            if (((s8)unk36 == 4) && ((s8)unk38 < 0xD)) {
+                state[0x38]++;
+            }
+            state[0x36]++;
+            if ((s8)state[0x36] >= 5) {
+                state[0x36] = 4;
+            }
+        } else if (D_800C2000 & 0x800) {
+            play_sound_effect(0x5C, 0xF, 0x64);
+            if ((unk36 == 0) && ((s8)unk38 > 0)) {
+                state[0x38]--;
+            }
+            state[0x36]--;
+            if ((s8)state[0x36] < 0) {
+                state[0x36] = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80215DC4);
 
