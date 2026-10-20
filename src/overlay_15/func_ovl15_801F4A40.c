@@ -50,6 +50,7 @@ extern void check_and_print_grid(char *str, s32 col, s32 row);
 extern s32 validate_heap_string(char *source_string, s32 allocation_tag);
 s32 func_ovl15_801F9CEC(s32 arg0, OSGbpakId *arg1, NUContPakFile *arg2);
 extern void *heap3_alloc(u32 size_bytes);
+extern void heap3_free(void **payload_ptr);
 extern void play_bgm_by_id(s32 id, s32 flags);
 extern void nuContRmbForceStop(void);
 extern void func_ovl15_801FB400(u8 *image);
@@ -182,7 +183,28 @@ void func_ovl15_801F4B20(void) {
     nuContRmbForceStop();
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4E70);
+void func_ovl15_801F4E70(void) {
+    s32 i;
+
+    heap3_free(&D_800FE450.unk30);
+    heap3_free(&D_800FE450.unk0);
+    heap3_free(&D_800FE450.unk4);
+    heap3_free(&D_800FE450.unk8);
+    heap3_free(&D_800FE450.unk34);
+    heap3_free(&D_800FE450.unk2C);
+    heap3_free(&D_800FE450.unk38);
+    heap3_free(&D_800FE450.unk3C);
+    heap3_free(&D_800FE450.unk40);
+    heap3_free(&D_800FE450.unk44);
+    heap3_free(&D_800FE450.unk54);
+    heap3_free(&D_800FE450.unk48);
+    heap3_free(&D_800FE450.unk4C);
+    heap3_free(&D_800FE450.unk50);
+    for (i = 0; i != 4; i++) {
+        heap3_free(&D_800FE450.unk1C[i]);
+        heap3_free(&D_800FE450.unkC[i]);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4F50);
 
