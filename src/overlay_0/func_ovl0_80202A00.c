@@ -390,9 +390,49 @@ void func_ovl0_80205AE4(s32 arg0, s32 arg1) {
     *temp_s0 += 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205BB8);
+extern const char D_ovl0_80224FD4[];
 
-s32 func_ovl0_80205BB8(s32 player_index, s32 event_index);
+s32 func_ovl0_80205BB8(s32 player_index, s32 event_index) {
+    s32 count;
+    s32 points;
+
+    count = player_records[player_index].event_counts[event_index];
+    switch (event_index) {
+        case 0:
+        case 1:
+            points = 2;
+            break;
+        case 4:
+            points = 8;
+            break;
+        case 2:
+        case 5:
+            points = 4;
+            break;
+        case 7:
+            points = 20;
+            if (g_terrain_vtx_xform_mode == 0) {
+                break;
+            }
+        case 6:
+        case 9:
+        case 11:
+            points = 10;
+            break;
+        case 8:
+            points = 16;
+            break;
+        case 3:
+        case 10:
+            points = 6;
+            break;
+        default:
+            osSyncPrintf(D_ovl0_80224FD4);
+            points = 0;
+            break;
+    }
+    return count * points;
+}
 
 s32 func_ovl0_80205C78(void) {
     s32 player_index;

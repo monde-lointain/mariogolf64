@@ -499,6 +499,8 @@ segments:
       - [0xD71D0, c, overlay_0/func_ovl0_8021DED0]
       - [0xD7850, c, overlay_0/func_ovl0_8021E550]
       - [0xD8F70, data]
+      - [0xDE2F0, .rodata, overlay_0/func_ovl0_80202A00]
+      - [0xDE320, rodata]
       - [0xDE6D8, .rodata, overlay_0/func_ovl0_8020E740]
       - [0xDE708, rodata]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
