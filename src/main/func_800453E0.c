@@ -574,7 +574,7 @@ extern s32 D_801B5534;
 extern s32 D_801B5584;
 extern f32 D_801B5530;
 extern void func_800326FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
-extern void func_8004887C(void);
+extern s32 func_8004887C(void);
 
 void func_80048690(void) {
   D_800BE694 = 0;
@@ -625,7 +625,96 @@ void func_800487E4(void) {
   func_80216130(1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800453E0", func_8004887C);
+extern s32 get_current_course_id(void);
+extern s32 get_current_hole_index(void);
+extern s32 get_hole_camera_distance(s32 course, s32 hole);
+extern f64 D_800CC848;
+extern f64 D_800CC850;
+extern f64 D_800CC858;
+extern s32 camera_position_x;
+extern s32 camera_position_y;
+extern s32 camera_position_z;
+extern s32 D_800BA9E4;
+extern s32 D_800BA9E8;
+extern s32 D_800BA9EC;
+extern s32 D_801B7F78;
+extern s32 D_801B7F7C;
+extern f32 view_camera_eye_x;
+extern f32 D_801B54F0;
+extern f32 view_camera_eye_z;
+extern f32 D_801B54F8;
+extern f32 D_801B54FC;
+extern f32 D_801B5500;
+extern f32 D_801B553C;
+extern f32 D_801B5540;
+extern f32 D_801B5544;
+extern f32 D_801B5548;
+extern f32 D_801B554C;
+extern f32 D_801B5550;
+
+/* Putting-view camera intro: per frame, eases the look-at point from the
+ * camera toward its target and swings the eye around it, sets the meter
+ * state at frames 94 and 162, and returns nonzero when the frame counter
+ * reaches 185. The first meter-state store goes through a pointer: the ROM
+ * re-loads the counter after it, which a direct store does not reproduce. */
+s32 func_8004887C(void) {
+  f32 v[3];
+  f32 t;
+  f32 near;
+  f32 grow;
+  f32 angle;
+  f32 dist;
+  s32 d;
+  f32* look;
+
+  t = D_800BE694 * (1.0f / 90.0f);
+  if (D_800BE694 > 90) {
+    grow = 0.0f;
+    near = 1.0f - sinf(D_800BE694 * D_800CC848);
+  } else {
+    near = (1.0f - sinf(D_800BE694 * D_800CC850)) * 0.5f;
+    grow = (90 - D_800BE694) * (1.0f / 90.0f);
+  }
+  if (t > 2.0f) {
+    t = 2.0f;
+  }
+  if (g_terrain_vtx_xform_mode == 0) {
+    if (D_800BE694 == 94) {
+      s32* meter_state = &D_801B7F70;
+      *meter_state = 1;
+    }
+    if (D_800BE694 == 162) {
+      D_801B7F70 = 2;
+    }
+  }
+  v[0] = D_800BA9E4 - camera_position_x;
+  v[1] = D_800BA9E8 - camera_position_y;
+  v[2] = D_800BA9EC - camera_position_z;
+  D_801B7F78 = 100;
+  D_801B7F7C = 101;
+  look = &D_801B54F8;
+  *look = (camera_position_x + v[0] * near) * (1.0f / 1024.0f);
+  D_801B54FC = (camera_position_y + v[1] * near) * (1.0f / 1024.0f);
+  D_801B5500 = (camera_position_z + v[2] * near) * (1.0f / 1024.0f);
+  angle = atan2(v[0], v[2]) + t * D_800CC858;
+  d = get_hole_camera_distance(get_current_course_id(), get_current_hole_index());
+  v[0] = sinf(angle) * (dist = ((d - near * 15.0f) + d * grow) * 1536.0f);
+  v[2] = cosf(angle) * dist;
+  view_camera_eye_x = *look + v[0] * (1.0f / 1024.0f);
+  D_801B54F0 = D_801B54FC - (d / 2 + near * 200.0f) * 1.5f;
+  view_camera_eye_z = D_801B5500 + v[2] * (1.0f / 1024.0f);
+  D_801B5548 = camera_position_x * (1.0f / 1024.0f);
+  D_801B554C = (camera_position_y - 15360.0f) * (1.0f / 1024.0f);
+  D_801B5550 = camera_position_z * (1.0f / 1024.0f);
+  angle *= 2.0f;
+  v[0] = sinf(angle) * 184320.0f;
+  v[2] = cosf(angle) * 184320.0f;
+  D_800BE694++;
+  D_801B553C = D_801B5548 + v[0] * (1.0f / 1024.0f);
+  D_801B5540 = D_801B554C - 75.0f;
+  D_801B5544 = D_801B5550 + v[2] * (1.0f / 1024.0f);
+  return D_800BE694 == 185;
+}
 
 extern f32 D_800BE654;
 extern f64 D_800CC860;
