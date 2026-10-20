@@ -27,6 +27,14 @@ extern u8 D_ovl3_8022F8C5;
 extern s32 D_ovl3_8023B350[2];
 extern AssetEntry D_ovl3_802303CC[][2];
 extern AssetSelector D_ovl3_80230400[][6];
+extern char D_ovl3_802319E0[];
+extern char D_ovl3_8022BF70[];
+extern s32 D_ovl3_80230A48[];
+extern char D_80105118[];
+
+void func_80071608(Gfx** dl);
+void func_80073F24(Gfx** dl, s16 x, s16 y, u8* str);
+void func_80074CA8(Gfx** pgfx, s32 r, s32 g, s32 b);
 
 void func_ovl3_80219460(Gfx** gfxp, s32 x, s32 y, s32 width, s32 scale) {
     RomAssetLoad asset;
@@ -211,4 +219,50 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021E97C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021EF64);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021F124);
+void func_ovl3_8021F124(Gfx** gfxp, u8* image, u8* tlut, s32 x, s32 y, s16 index, u8 mode) {
+    Gfx* gfx = *gfxp;
+
+    if (index < 0) {
+        index = 0;
+    }
+    if (index >= 0x12) {
+        index = 0x11;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (mode == 0xA) {
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, 255);
+    } else {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    }
+    gDPLoadTLUT_pal256(gfx++, (u8*)((u32)tlut & ~7));
+    gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, (u8*)((u32)image & ~7));
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x17F, 0x200);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 4, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 31 << G_TEXTURE_IMAGE_FRAC, 23 << G_TEXTURE_IMAGE_FRAC);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + 0x20) << 2, (y + 0x18) << 2, 0, 0, 0, 0x400, 0x400);
+    gDPPipeSync(gfx++);
+
+    if (mode == 0) {
+        if (index < 0xE) {
+            func_80071608(&gfx);
+            func_80074CA8(&gfx, 0xFF, 0xFF, 0xFF);
+            sprintf(D_80105118, D_ovl3_802319E0, D_ovl3_8022BF70 + D_ovl3_80230A48[index] * 12);
+            func_80073F24(&gfx, x + 0x18, y + 0xC, D_80105118);
+            gDPPipeSync(gfx++);
+        }
+    }
+
+    *gfxp = gfx;
+}
