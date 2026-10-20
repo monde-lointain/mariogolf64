@@ -304,9 +304,29 @@ INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F71
 
 INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F7554);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_16/func_ovl16_801F4A40", func_ovl16_801F803C);
+void func_ovl16_801F803C(s32 index, s32 *out0, s32 *out1) {
+    s32 width;
+    s32 i;
+    s32 start;
+    s32 count;
+    s32 stride;
+    s32 code;
 
-void func_ovl16_801F803C(s32 index, s32 *out0, s32 *out1);
+    width = 0;
+    start = D_ovl16_80223788[2 + index * 2];
+    count = D_ovl16_80223788[3 + index * 2];
+    stride = D_ovl16_80223788[1] * 2 + 2;
+    for (i = 0; i != count; i++) {
+        code = D_ovl16_80223788[stride + start + i];
+        if (code < 0x100) {
+            if ((u32)(code - 0xDE) >= 2U) {
+                width += 12;
+            }
+        }
+    }
+    *out0 = width;
+    *out1 = 0;
+}
 
 void func_ovl16_801F80B8(Gfx **gfxp, s32 x, s32 y, s32 index) {
     Gfx *gfx;
