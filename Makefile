@@ -134,7 +134,8 @@ FAST_MATH_SRCS := \
 	src/main/func_80095A10 \
 	src/overlay_7/func_ovl7_80206680 \
 	src/overlay_7/func_ovl7_802033B0 \
-	src/overlay_0/func_ovl0_801FD5F0
+	src/overlay_0/func_ovl0_801FD5F0 \
+	src/overlay_4/func_ovl4_8024D800
 $(foreach src,$(FAST_MATH_SRCS),$(eval $(BUILD_DIR)/$(src).%: PROFILE_APPEND = -DF3DEX_GBI_2 -ffast-math))
 
 # libkmc was built with `gcc -O` (genn64.bat).
