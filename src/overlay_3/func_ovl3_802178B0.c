@@ -118,7 +118,75 @@ void func_ovl3_8021B1E0(Gfx** gfxp, s32 x, s32 y, u8 idx) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021B618);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021B87C);
+extern u8* D_ovl3_8023B36C;
+extern s32 D_ovl3_8023073C[];
+extern s32 D_ovl3_80230760[];
+extern s32 D_ovl3_80230784[];
+
+/* Draws nine 152x13 CI8 strips and slides each one horizontally: a strip
+ * whose delay timer has run out moves by its speed toward the edge `mode`
+ * selects (1/2 toward 0, 3/4 toward +-320). */
+void func_ovl3_8021B87C(Gfx** gfxp, u8 mode) {
+    Gfx* gfx = *gfxp;
+    s32 i;
+    s32 w;
+    s32 h;
+    s32* xp;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, (u8*)(((u32)D_ovl3_8023B36C + 8) & ~7));
+    w = 152;
+    h = 13;
+    for (i = 0; i != 9; i++) {
+        xp = &D_ovl3_80230784[i];
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock(gfx++, (u8*)(((u32)D_ovl3_8023B36C + 0x208 + h * (i * w)) & ~7),
+                            G_IM_FMT_CI, G_IM_SIZ_8b, 152, h, 0, 0, 0, 0, 0, 0, 0);
+        gDPPipeSync(gfx++);
+        if (D_ovl3_8023073C[i] > 0) {
+            D_ovl3_8023073C[i]--;
+        } else {
+            switch (mode) {
+            case 1:
+                *xp -= D_ovl3_80230760[i];
+                if (*xp <= 0) {
+                    *xp = 0;
+                }
+                break;
+            case 2:
+                *xp += D_ovl3_80230760[i];
+                if (*xp > 0) {
+                    *xp = 0;
+                }
+                break;
+            case 3:
+                *xp += D_ovl3_80230760[i];
+                if (*xp > 320) {
+                    *xp = 320;
+                }
+                break;
+            case 4:
+                *xp -= D_ovl3_80230760[i];
+                if (*xp < -320) {
+                    *xp = -320;
+                }
+                break;
+            }
+        }
+        gSPScisTextureRectangle(gfx++, D_ovl3_80230784[i] << 2, (i * 27) << 2,
+                                (D_ovl3_80230784[i] + 320) << 2, (i * 27 + 27) << 2,
+                                G_TX_RENDERTILE, 0, 0, 0x1E6, (h << 10) / 27);
+    }
+    gDPPipeSync(gfx++);
+    *gfxp = gfx;
+}
 
 extern s16 D_ovl3_802303A6;
 extern s16 D_ovl3_802303A8;
