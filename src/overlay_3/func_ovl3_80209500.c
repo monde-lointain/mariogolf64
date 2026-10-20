@@ -10,6 +10,14 @@ extern void func_8006A4A0(Gfx** pgfx, u32 pal, u32 addr);
 extern void load_texture_block_4b(Gfx** pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 extern Gfx* func_ovl3_801F4A40(void);
+extern u8 D_800FBDCC;
+extern u8 D_800FBDCD;
+extern u8 D_800FBDD6[];
+extern u8 D_800FBDEE[];
+extern s32 D_ovl3_8022FFA0;
+extern s32 D_ovl3_8022FFA4;
+extern s32 D_ovl3_8023BFD4;
+extern s32 D_ovl3_8023BFD8;
 
 void func_ovl3_80209500(void) {
     D_ovl3_8022FF1C[0] = g_abRosterUnlockFlags[0];
@@ -26,7 +34,55 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209568)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209894);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209BE0);
+s32 func_ovl3_80209BE0(void) {
+    s8 bits;
+    s32 x;
+    s32 y;
+    s32 hits;
+
+    func_8005AF74();
+    bits = D_800FBDEE[8] | (D_800FBDD6[0x12] | (D_800FBDCC | D_800FBDD6[4]));
+    x = D_ovl3_8023BFD4 ^ bits;
+    x &= bits;
+    if (D_ovl3_8023BFD4 == x) {
+        hits = D_ovl3_8022FFA0 + 1;
+        D_ovl3_8022FFA0 = hits;
+        if (hits >= 4) {
+            D_ovl3_8022FFA0 = 0;
+            D_ovl3_8023BFD4 = 0;
+        }
+    } else {
+        D_ovl3_8023BFD4 = x;
+    }
+
+    bits = D_800FBDEE[9] | (D_800FBDD6[0x13] | (D_800FBDCD | D_800FBDD6[5]));
+    y = D_ovl3_8023BFD8 ^ bits;
+    y &= bits;
+    if (D_ovl3_8023BFD8 == y) {
+        hits = D_ovl3_8022FFA4 + 1;
+        D_ovl3_8022FFA4 = hits;
+        if (hits >= 4) {
+            D_ovl3_8022FFA4 = 0;
+            D_ovl3_8023BFD8 = 0;
+        }
+    } else {
+        D_ovl3_8023BFD8 = y;
+    }
+
+    if (x < -20 && y >= 21) {
+        return 1;
+    }
+    if (x >= 21 && y >= 21) {
+        return 2;
+    }
+    if (x < -20 && y < -20) {
+        return 3;
+    }
+    if (x >= 21 && y < -20) {
+        return 4;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_80209D50);
 
