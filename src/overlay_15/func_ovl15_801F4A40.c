@@ -39,6 +39,11 @@ typedef struct {
     s8 unk7D8[12]; /* 0x7D8 */
 } Ovl15AssetBlock; /* known extent 0x7E4 */
 
+typedef struct {
+  /* 0x00 */ u8 unknown_00[0x7A8];
+  /* 0x7A8 */ s32 unknown_7A8;
+} Ovl15State;
+
 extern s32 D_ovl15_801FBB78;
 extern s32 D_ovl15_801FBB7C;
 extern s32 D_ovl15_801FBB80;
@@ -67,6 +72,9 @@ extern void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width
                                s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 extern void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t,
                           s32 dsdx, s32 dtdy);
+extern void func_800719A0(s32 x, s32 y, s32 run, s32 size, s32 index, s32 flags,
+                          u8 red, u8 green, u8 blue, u8 alpha);
+extern void func_80071CE4(Gfx **dl, s32 i);
 
 void func_ovl15_801F4A40(void) {
     Ovl15AssetBlock *blk;
@@ -358,7 +366,27 @@ void func_ovl15_801F6890(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F68FC);
+void func_ovl15_801F68FC(Gfx **dl, Ovl15State *state) {
+    Gfx *gfx = *dl;
+    s32 run = -1;
+
+    switch (state->unknown_7A8) {
+    case 1:
+        run = 0x160;
+        break;
+    case 3:
+        run = 0x161;
+        break;
+    case 5:
+        run = 0x162;
+        break;
+    }
+    if (run != -1) {
+        func_800719A0(0x1C, 0xBA, run, 1, 3, 0x20, 0xFF, 0xFF, 0xFF, 0xFF);
+        func_80071CE4(&gfx, 3);
+    }
+    *dl = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F69B8);
 
