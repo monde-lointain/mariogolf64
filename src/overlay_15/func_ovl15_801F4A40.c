@@ -26,7 +26,10 @@ typedef struct {
     void *unk4C;
     void *unk50;
     void *unk54;
-} Ovl15AssetBlock; /* 0x58 */
+    u8 unk58[0x14];
+    NUContPakFile gbpakFile; /* 0x6C */
+    OSGbpakId gbpakId; /* 0x7C */
+} Ovl15AssetBlock; /* known extent 0xCC */
 
 extern s32 D_ovl15_801FBB78;
 extern s32 D_ovl15_801FBB7C;
@@ -38,6 +41,14 @@ extern s32 nuContRmbCheck(u32 contNo);
 extern u16 D_800C5498[];
 extern s16 D_800C54BC[];
 extern Ovl15AssetBlock D_800FE450;
+extern char D_ovl15_801FBC40[];
+extern char D_ovl15_801FBC4C[];
+extern char D_ovl15_801FBC54[];
+extern char D_ovl15_801FBC5C[];
+extern char D_ovl15_801FBC78[];
+extern void check_and_print_grid(char *str, s32 col, s32 row);
+extern s32 validate_heap_string(char *source_string, s32 allocation_tag);
+s32 func_ovl15_801F9CEC(s32 arg0, OSGbpakId *arg1, NUContPakFile *arg2);
 extern void *heap3_alloc(u32 size_bytes);
 extern void play_bgm_by_id(s32 id, s32 flags);
 extern void nuContRmbForceStop(void);
@@ -48,7 +59,25 @@ extern void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width
 extern void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t,
                           s32 dsdx, s32 dtdy);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4A40);
+void func_ovl15_801F4A40(void) {
+    Ovl15AssetBlock *blk;
+    u8 buf[0x2000];
+
+    nuContGBPakMgrInit();
+    check_and_print_grid(D_ovl15_801FBC40, 0xA, 3);
+    check_and_print_grid(D_ovl15_801FBC40, 0xA, 4);
+    check_and_print_grid(D_ovl15_801FBC40, 0xA, 5);
+    blk = &D_800FE450;
+    if (func_ovl15_801F9CEC(0, &blk->gbpakId, &blk->gbpakFile) == 0) {
+        check_and_print_grid(D_ovl15_801FBC4C, 0xA, 3);
+        if (nuContGBPakFread(&blk->gbpakFile, 0xA000, buf, 0x2000) == 0) {
+            check_and_print_grid(D_ovl15_801FBC54, 0xA, 4);
+            if (validate_heap_string(D_ovl15_801FBC5C, 0x2000) == 0) {
+                check_and_print_grid(D_ovl15_801FBC78, 0xA, 5);
+            }
+        }
+    }
+}
 
 /* Overlay 15 initialize hook: loads asset payloads, then slot buffers. */
 void func_ovl15_801F4B20(void) {
