@@ -49,10 +49,75 @@ extern u8 D_801B5634;
 extern s32 D_800FE334;
 extern s8 rumble_disable_flag;
 extern s32 D_ovl3_8022BE18;
+extern s32 scenario_mode_id;
+extern s32 round_hole_index;
+extern s32 D_801B609C;
+extern s32 putter_mode_flag;
+extern s32 wind_magnitude;
+extern s16 wind_angle_bam;
+extern s32 D_800BA9FC;
+extern s16 g_scenery_wind_angle_a;
+extern s16 g_scenery_wind_angle_b;
+extern u8* func_8005AF74(void);
+extern s32 func_800542A0(s32 index);
+extern void clear_animation_slot(s32 index);
+extern s32 func_8005D23C(void);
+extern s32 get_round_first_hole(void);
+extern void flag_set(s32 flag);
+extern void func_80069F38(void);
+extern void func_80069FBC(void);
+extern s32 rand(void);
 
 Gfx* func_ovl3_801F4A40(void) { return D_ovl3_80232300; }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801F4A4C);
+void func_ovl3_801F4A4C(void) {
+    s32 i;
+    s32 var_a0;
+    s32 temp_v0;
+
+    func_8005AF50();
+    func_8005AF74();
+    for (i = 0; i != 4; i++) {
+        if (func_800542A0(i) != 0) {
+            clear_animation_slot(i);
+        }
+    }
+    var_a0 = current_game_mode;
+    D_800FE334 = 1;
+    if (var_a0 == 0x17 || var_a0 == 0xD) {
+        scenario_mode_id = D_801323B8[0x17];
+        round_hole_index = D_801323B8[0x16];
+    } else if (var_a0 == 0x1B) {
+        temp_v0 = func_8005D23C();
+        scenario_mode_id = temp_v0;
+        g_terrain_vtx_xform_mode = temp_v0 >= 6;
+        round_hole_index = 0;
+    } else if (game_mode == 3) {
+        scenario_mode_id = 0;
+        round_hole_index = 0;
+    } else {
+        if (g_terrain_vtx_xform_mode != 0) {
+            s32 t;
+            var_a0 = D_801323B8[0x13];
+            t = var_a0 * 3 + 6;
+            scenario_mode_id = D_801323B8[0x14] + t;
+        } else {
+            scenario_mode_id = (s8)D_801323A0[0x16];
+        }
+        round_hole_index = get_round_first_hole();
+    }
+    D_801B609C = 0;
+    putter_mode_flag = 0;
+    wind_magnitude = (rand() & 0x3F) * 0x1770;
+    wind_angle_bam = rand();
+    D_800BA9FC = 6;
+    g_scenery_wind_angle_b = 0x1000;
+    g_scenery_wind_angle_a = 0x2000;
+    flag_set(7);
+    active_player_count = 1;
+    func_80069FBC();
+    func_80069F38();
+}
 
 s32 func_ovl3_801F4C34(void) {
     if (g_terrain_vtx_xform_mode != 0) {
