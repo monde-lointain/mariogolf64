@@ -55,11 +55,58 @@ s32 func_ovl3_80226788(void) {
     return ret;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802267B0);
-
 extern u16 D_800C2074[];
+extern u8* D_ovl3_80230E70;
+extern u8* D_ovl3_80230E74;
+extern u8* D_ovl3_80230E78;
 extern u8* D_ovl3_80230E7C;
 extern u8* D_ovl3_80230E80;
+extern u8* D_ovl3_80230E84;
+extern u16 D_ovl3_80230EC0;
+extern s16 D_ovl3_80230F34;
+
+void func_ovl3_802267B0(u8* block, s32 slot_index) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s16 index;
+
+    func_8005AF74();
+    index = slot_index - 1;
+    switch (index) {
+    case 0:
+        D_ovl3_80230E70 = block;
+        get_rom_asset_allocation_size(0x70B, &asset);
+        load_rom_asset_payload(D_ovl3_80230E70, &asset);
+        break;
+    case 1:
+        D_ovl3_80230E74 = block;
+        get_rom_asset_allocation_size(0x70C, &asset);
+        load_rom_asset_payload(D_ovl3_80230E74, &asset);
+        break;
+    case 2:
+        D_ovl3_80230E78 = block;
+        get_rom_asset_allocation_size(0x949, &asset);
+        load_rom_asset_payload(D_ovl3_80230E78, &asset);
+        break;
+    case 3:
+        D_ovl3_80230E7C = block;
+        get_rom_asset_allocation_size(D_800C2074[0], &asset);
+        load_rom_asset_payload(D_ovl3_80230E7C, &asset);
+        break;
+    case 4:
+        D_ovl3_80230E80 = block;
+        get_rom_asset_allocation_size(D_ovl3_80230EC0, &asset);
+        load_rom_asset_payload(D_ovl3_80230E80, &asset);
+        break;
+    case 5:
+        D_ovl3_80230E84 = block;
+        open_rom_asset_slot(D_ovl3_80230F34, &slot);
+        read_rom_load_slot(D_ovl3_80230E84, (u32) (s16) get_rom_load_slot_size(&slot), &slot);
+        break;
+    }
+    func_ovl3_802266F0();
+}
+
 extern u16 D_ovl3_80230EA4[];
 
 void func_ovl3_80226904(s32 slot) {
@@ -86,7 +133,6 @@ void func_ovl3_80226958(s32 slot) {
     load_rom_asset_payload(D_ovl3_80230E80, &asset);
 }
 
-extern u8* D_ovl3_80230E84;
 extern s16 D_ovl3_80230EC4[][4];
 extern u32 get_rom_load_slot_size(RomLoadSlot* load_slot);
 
@@ -115,8 +161,6 @@ void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32
 void func_8006A548(Gfx **pgfx, u32 arg1);
 void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 void load_texture_block_4b(Gfx **pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
-extern u8 *D_ovl3_80230E70;
-extern u8 *D_ovl3_80230E74;
 
 void func_ovl3_80226A58(Gfx **gfxp, s32 width, s32 height, s32 x, s32 y, s32 label, s32 selected) {
     Gfx *gfx;
@@ -268,7 +312,6 @@ void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32
                   s32 dtdy);
 void load_texture_block_4b(Gfx **pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms,
                            s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
-extern u8 *D_ovl3_80230E70;
 
 /* Draws two stacked 256x32 I4 texture strips centred at (x, y): half-width halfw, strip height hgt,
  * texture scaled to w x h pixels. Note: never writes the advanced cursor back to *pgfx. */
