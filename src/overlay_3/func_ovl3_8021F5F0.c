@@ -35,9 +35,62 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021FC5C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220A30);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80220BB0);
+/* Save block view: supershot records start at 0x1DF0 (see insert_supershot_record). */
+typedef struct {
+    u8 unknown_0000[0x1DF0];
+    SupershotRecord records[20];
+} SaveSupershotView;
 
+extern u16 D_ovl3_802308A4[];
+extern s16 D_ovl3_802308C8[][4];
+extern u8 D_ovl3_8023BFF0[];
+extern u8 D_ovl3_8023E3F0[];
+extern void* tile_palette_table[];
 extern s16 D_ovl3_8023B684[];
+
+void func_ovl3_80220BB0(void) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s32 i;
+    SaveSupershotView* save;
+    s16 record_index;
+    s32 row;
+    s32 col;
+
+    save = (SaveSupershotView*)func_8005AF50();
+    for (i = 0; i != 18; i++) {
+        get_rom_asset_allocation_size(D_ovl3_802308A4[i], &asset);
+        load_rom_asset_payload(tile_palette_table[i], &asset);
+        open_rom_asset_slot(D_ovl3_802308C8[i][0], &slot);
+        read_rom_load_slot(&D_ovl3_8023BFF0[i << 9],
+                           get_rom_load_slot_size(&slot), &slot);
+    }
+    for (i = 0; i != 5; i++) {
+        record_index = D_ovl3_8023B684[i];
+        if (record_index != -1) {
+            row = (s8)save->records[record_index].character_index;
+            col = (s8)save->records[record_index].asset_variant;
+            if (row < 0) {
+                row = 0;
+            }
+            if (row >= 0x12) {
+                row = 0x11;
+            }
+            if (col < 0) {
+                col = 0;
+            }
+            if (col >= 4) {
+                col = 3;
+            }
+        } else {
+            col = 0;
+            row = 0;
+        }
+        open_rom_asset_slot(D_ovl3_802308C8[row][col], &slot);
+        read_rom_load_slot(&D_ovl3_8023E3F0[i << 9],
+                           get_rom_load_slot_size(&slot), &slot);
+    }
+}
 
 s16 func_ovl3_80220D68(s8 arg0, s32 arg1) {
     s32 cur;
