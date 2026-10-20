@@ -1,6 +1,0 @@
-candidate_source: tools/sync-shard && python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json
-prompt: "Decompile $INPUT. List the most similar matched functions with `python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 3 --score-func $INPUT`, create its environment with `tools/decomp-env --bootstrap-only --id $TASK_ID --refs '<their names, comma-separated>' $INPUT`, then read nonmatchings/$INPUT-$TASK_ID/AGENTS.md and follow it to the end."
-agent_flags: --model anthropic/claude-haiku-5-5:high
-success_command: 'f=${NIGEL_CANDIDATE#\[\"}; git add -u && { git diff --cached --quiet || git commit -m "Decompile ${f%%\"*}"; }'
-verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
-timeout: 60m

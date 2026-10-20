@@ -21,7 +21,7 @@ The argument is a function name, a `.s` path, or a decomp.me scratch ID. It is a
 | `--bootstrap` | Generate `base.c` with m2c from the function's assembly. Without it, `base.c` is a copy of `src/temp.c`, or the imported source for a scratch ID. Not allowed with a scratch ID. |
 | `--bootstrap-only` | Implies `--bootstrap`. Create the directory and exit. Without it, the script launches `omp --thinking xhigh` inside the directory. |
 | `--id ID` | Use the directory `nonmatchings/<function>-<ID>`. Requires `--bootstrap`; not allowed with a scratch ID. If the directory exists, the script prints `Directory already exists: <dir>`, launches `omp` there unless `--bootstrap-only`, and exits 0 without re-creating it. |
-| `--refs LIST` | Function names whose C definitions go into the context block. A JSON array (`'["func_a", "func_b"]'`) or comma or space separated names. Empty or absent: no references. Works with `--bootstrap-only --id ID`. See Context block below. |
+| `--refs LIST` | Function names whose C definitions go into the context block. A JSON array (`'["func_a", "func_b"]'`) or comma or space separated names; an empty value gives no references. Absent: the five matched functions most similar to the target's assembly (`find_similar_functions.py`). Works with `--bootstrap-only --id ID`. See Context block below. |
 
 Without `--id`, the directory is `nonmatchings/<function>`, or the first free `<function>-2`, `-3`, ….
 
@@ -71,7 +71,7 @@ The sections appear in this order. Each is omitted when empty.
 | `<prior_attempts>` | This function's records in the [difficulty ledger](/tools/difficulty-ledger.md), newest first, at most 5: `tier <n> <outcome> best <pct>%: <reason>`. The ledger is `$MG64_LEDGER` if set, else `$(git rev-parse --git-common-dir)/mg64/difficulty.jsonl`. |
 | `<callers>` | `path:line: text` for each C caller in `src/` and `include/`, sorted by path and line, at most 12, then `(N more)`. Skipped: comments, `INCLUDE_ASM`, `INCLUDE_RODATA` and `GLOBAL_ASM` lines, the function's own definition, declarations, and files under `nonmatchings/` or named `ctx.c` or `temp.c`. `Undecompiled callers (asm):` names the `asm/nonmatchings` stubs that `jal` the function and have no C body, at most 8. |
 | `<declarations>` | Prototypes and externs of the function, at most 5. |
-| `<references>` | The C definition of each `--refs` name that has one. Bodies over 80 lines are `<reference ... />` elements with the path and line range only. Unknown names are skipped. |
+| `<references>` | The C definition of each reference (`--refs`, else the five most similar matched functions) that has one. Bodies over 80 lines are `<reference ... />` elements with the path and line range only. Unknown names are skipped. |
 | `<baseline>` | `./build.sh base.c` run in the environment: its `Score:` line and any `NEXT:` line, or, when it fails, its first 15 output lines with errors before warnings. Times out after 120 s. Omitted when there is no `build.sh`. |
 
 `base.c` is not a `base_<N>.c` attempt. Its result is not appended to `match_log.txt` and does not count toward the stall limit.

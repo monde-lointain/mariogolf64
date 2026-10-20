@@ -14,7 +14,7 @@ Run commands from the repository root. Work on the one function you were given.
 ./tools/decomp-env --bootstrap-only [--id <ID>] [--refs '<names>'] <function name>
 ```
 
-This creates `nonmatchings/<function name>[-N]/` ([decomp-env](/tools/decomp-env.md) lists its contents); `--id` sets the suffix (nigel tasks pass `$TASK_ID`) and `--refs` names matched functions to use as references. It renders the environment's `AGENTS.md` from `tools/decomp-env-template/AGENTS.md`, with the function's callers, declarations, reference functions, earlier ledger attempts and `base.c`'s compile result already filled in.
+This creates `nonmatchings/<function name>[-N]/` ([decomp-env](/tools/decomp-env.md) lists its contents); `--id` sets the suffix (nigel tasks pass `$TASK_ID`) and `--refs` overrides the reference functions, which default to the five most similar matched ones. It renders the environment's `AGENTS.md` from `tools/decomp-env-template/AGENTS.md`, with the function's callers, declarations, reference functions, earlier ledger attempts and `base.c`'s compile result already filled in.
 
 # 2. Follow the brief
 

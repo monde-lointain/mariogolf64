@@ -55,8 +55,8 @@ class TierBudget:
     stall_limit: int
 
 
-# Budgets per tier; each tier's task.yaml timeout must equal timeout_minutes. Top-n and strategy are
-# in the task.yaml that serves each tier.
+# Budgets per tier; each tier's task.yaml timeout must equal timeout_minutes. The strategy is in the
+# task.yaml that serves each tier.
 TIER_BUDGETS = {
     1: TierBudget(timeout_minutes=60, stall_limit=7),
     2: TierBudget(timeout_minutes=120, stall_limit=12),
@@ -66,7 +66,6 @@ TIER_BUDGETS = {
 # Which nigel task runs at which tier. Unmapped tasks fall back to the run file or ledger.
 TASK_TIERS = {
     'decompile-similar': 1,
-    'decompile-unmatched': 1,
     'decompile-coddog-similar': 1,
     'decompile-tier2': 2,
     'decompile-tier3': 3,

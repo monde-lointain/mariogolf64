@@ -35,7 +35,7 @@ These decide whether the ROM matches.
 * `tools/nonmatching_match_log.py`: parses `match_log.txt` and certifies exact matches (comparison: it defines what "100%" means to the reporters).
 * `tools/report_nonmatching_matches.py`, `tools/find_unmatched_nonmatchings.py`: reports built on it.
 * `tools/m2c_one_shot.py`: m2c plus `build.sh` scoring; inlines exact matches into `src/` (comparison: it writes source on a match decision).
-* Workflow: `progress.py` ([tool](/tools/progress.md)), `score_functions.py` (nigel `candidate_source`), `list_decomp_candidates.py`, `rank_decompile_similar_impact.py`, `find_similar_functions.py`, `list_matched_functions.py`, `fetch_scratches.py` ([catalog](/tools/selection-and-status.md)).
+* Workflow: `progress.py` ([tool](/tools/progress.md)), `score_functions.py` (nigel `candidate_source`), `list_decomp_candidates.py`, `find_similar_functions.py`, `list_matched_functions.py`, `fetch_scratches.py` ([catalog](/tools/selection-and-status.md)).
 * Shard tools: `tools/sync-shard`, `tools/integrate-shards`, and the `merge-decomp-c` merge driver ([shard integration](/tools/shard-integration.md)).
 
 # Data matching and quality checkers (comparison)
@@ -87,7 +87,6 @@ bun test ./.omp/hooks/tests/mg64-policy.test.ts
 | `test_objdump_symbols.py` | `decomp-env-template/objdump.py` |
 | `test_pipeline_metrics.py` | `pipeline_metrics.py` |
 | `test_progress.py` | `progress.py` |
-| `test_rank_decompile_similar_impact.py` | `rank_decompile_similar_impact.py` and `find_similar_functions.py` |
 | `test_report_nonmatching_matches.py` | `report_nonmatching_matches.py` |
 | `test_selection_tiers.py` | `score_functions.py`, `list_decomp_candidates.py`, and difficulty ledger tier selection |
 | `test_sync_shard.py` | `sync-shard` |

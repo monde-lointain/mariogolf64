@@ -1,6 +1,6 @@
-candidate_source: tools/sync-shard && python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 5 --tier 3
-prompt: "Decompile $INPUT[0]. It failed at tier 2 with a best match of at least 90 percent; its brief lists those attempts under <prior_attempts>. Create its environment with `tools/decomp-env --bootstrap-only --id $TASK_ID --refs '$INPUT[1:]' $INPUT[0]` (the references are matched functions similar to it), then read nonmatchings/$INPUT[0]-$TASK_ID/AGENTS.md and follow it to the end. Try the approaches in docs/procedures/matching-method.md that the earlier attempts did not."
+candidate_source: tools/sync-shard && python3 tools/difficulty_ledger.py harvest && python3 tools/score_functions.py asm/nonmatchings --json --tier 3
+prompt: "Decompile $INPUT. It failed at tier 2 with a best match of at least 90 percent; its brief lists those attempts under <prior_attempts>. Create its environment with `tools/decomp-env --bootstrap-only --id $TASK_ID $INPUT`, then read nonmatchings/$INPUT-$TASK_ID/AGENTS.md and follow it to the end. Try the approaches in docs/procedures/matching-method.md that the earlier attempts did not."
 agent_flags: --model anthropic/claude-haiku-5-5:xhigh
-success_command: 'f=${NIGEL_CANDIDATE#\[\"}; git add -u && { git diff --cached --quiet || git commit -m "Decompile ${f%%\"*}"; }'
+success_command: 'git add -u && { git diff --cached --quiet || git commit -m "Decompile $NIGEL_CANDIDATE"; }'
 verify_command: "./tools/verify-candidate --decompiled $CANDIDATE"
 timeout: 240m

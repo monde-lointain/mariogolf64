@@ -5,13 +5,16 @@ Sections, in order (each omitted when empty):
   <prior_attempts>  this function's difficulty-ledger records, newest first (max 5)
   <callers>         C callers in src/ and include/, then undecompiled asm callers
   <declarations>    prototypes and externs of the function
-  <references>      C definitions of the --refs names; bodies over 80 lines are path-only
+  <references>      C definitions of the --refs names (default: the most similar matched
+                    functions); bodies over 80 lines are path-only
   <baseline>        score of `./build.sh base.c` run in the workspace, or its first error lines
 
 Run from the repository root:
   tools/decomp_env_context.py --env nonmatchings/<name> --function <name> [--refs LIST]
 
---refs takes a JSON array of names, or comma/space separated names. decomp-env renders
+--refs takes a JSON array of names, or comma/space separated names; an empty value gives no
+references. Without --refs, the references are the SIMILAR_REFS matched functions most
+similar to the function's assembly. decomp-env renders
 AGENTS.md with this output in place of the `$context` line. Output stays within
 BUDGET_BYTES: reference bodies are dropped largest-first to fit.
 Stdlib only; reuses tools/difficulty_ledger.py and tools/find_similar_functions.py.
@@ -31,7 +34,14 @@ from pathlib import Path
 from typing import Mapping, Optional, Sequence
 
 import difficulty_ledger as dl
-from find_similar_functions import clean_c_source, scan_c_functions, unmatched_asm_files
+from find_similar_functions import (
+    build_function_index,
+    clean_c_source,
+    collect_unmatched,
+    find_similar_functions,
+    scan_c_functions,
+    unmatched_asm_files,
+)
 
 BUDGET_BYTES = 10_000
 CALLER_LINES_MAX = 12
@@ -41,6 +51,7 @@ PRIOR_ATTEMPTS_MAX = 5
 REFERENCE_BODY_MAX_LINES = 80
 BASELINE_ERROR_LINES = 15
 BASELINE_TIMEOUT_S = 120
+SIMILAR_REFS = 5
 LINE_TEXT_MAX = 200
 # decomp.me export and scratch copy: not project source.
 SKIPPED_BASENAMES = frozenset({'ctx.c', 'temp.c'})
@@ -333,11 +344,21 @@ def build_context(
     return _fit(prior, caller_lines, decl_lines, references, baseline)
 
 
+def similar_refs(root: Path, function: str) -> list[str]:
+    """The SIMILAR_REFS matched functions most similar to `function`'s assembly, best first."""
+    asm = root / 'asm' / 'nonmatchings'
+    target = collect_unmatched(root, asm).get(function) if asm.is_dir() else None
+    if target is None:
+        return []
+    return [name for name, _ in find_similar_functions(target, build_function_index(root), top_n=SIMILAR_REFS)]
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description='Print the $context block for a decomp-env workspace.')
     parser.add_argument('--env', required=True, help='workspace directory (relative to the repo root or absolute)')
     parser.add_argument('--function', required=True, help='function name')
-    parser.add_argument('--refs', default='', help='JSON array or comma/space separated function names')
+    parser.add_argument('--refs', help='JSON array or comma/space separated function names '
+                        '(default: the most similar matched functions)')
     args = parser.parse_args(argv)
 
     root = Path.cwd()
@@ -347,7 +368,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not env.is_dir():
         print(f'error: no workspace directory {args.env}', file=sys.stderr)
         return 1
-    text = build_context(root, env, args.function, parse_refs(args.refs))
+    refs = similar_refs(root, args.function) if args.refs is None else parse_refs(args.refs)
+    text = build_context(root, env, args.function, refs)
     sys.stdout.buffer.write(text.encode('utf-8'))
     return 0
 

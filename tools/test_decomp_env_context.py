@@ -343,13 +343,21 @@ class ContextTest(unittest.TestCase):
         self.assertTrue(result.stdout.startswith('<callers>\n'))
         self.assertIn('<reference name="ref_small"', result.stdout)
 
-    def test_cli_without_refs_still_succeeds(self):
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT), '--env', 'nonmatchings/target_fn-x', '--function', 'target_fn'],
+    def test_cli_without_refs_uses_most_similar_matched_functions(self):
+        body = ('    /* 0 80000000 27BDFFE8 */  addiu      $sp, $sp, -0x18\n'
+                '    /* 4 80000004 03E00008 */  jr         $ra\n'
+                '    /* 8 80000008 00000000 */  nop\n')
+        write(self.root / 'asm/nonmatchings/main/target_fn.s', f'glabel target_fn\n{body}endlabel target_fn\n')
+        write(self.root / 'asm/main/ref_small.s', f'glabel ref_small\n{body}endlabel ref_small\n')
+        run = lambda *extra: subprocess.run(  # noqa: E731
+            [sys.executable, str(SCRIPT), '--env', 'nonmatchings/target_fn-x', '--function', 'target_fn', *extra],
             cwd=self.root, env=self.cli_env(), capture_output=True, text=True, timeout=120,
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertNotIn('<references>', result.stdout)
+        default, empty = run(), run('--refs', '')
+        self.assertEqual(default.returncode, 0, default.stderr)
+        self.assertIn('<reference name="ref_small"', default.stdout)
+        self.assertEqual(empty.returncode, 0, empty.stderr)
+        self.assertNotIn('<references>', empty.stdout)
 
     def test_cli_missing_env_directory_fails(self):
         result = subprocess.run(

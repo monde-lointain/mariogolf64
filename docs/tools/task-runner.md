@@ -12,7 +12,7 @@ resource: ../../task-runner/config.yaml
 nigel --list
 nigel decompile-similar
 nigel <task> --limit 10 --dry-run --verbose
-nigel <task> --shard 1/4
+nigel <task> --claims "$(git rev-parse --git-common-dir)/mg64/claims/<task>"
 ```
 
 # Configuration
@@ -30,12 +30,15 @@ nigel <task> --shard 1/4
 
 # Worktree rule
 
-`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](/tools/new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and shard candidates across worktrees. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
+`reset_command` runs at startup and after every failed candidate and wipes uncommitted, non-ignored changes. Run nigel in a dedicated worktree, never in a checkout with uncommitted work. Create one with [new-worktree](/tools/new-worktree.md), which brings the ignored inputs (baserom, toolchain, `.venv`, submodules) along, and run one worker per worktree. Agents inherit nigel's environment and do not run direnv, so put `.venv/bin` on `PATH`; otherwise `python3 tools/asm-differ/diff.py` and the pycparser checkers fail on missing modules:
 
 ```bash
 tools/new-worktree mg64-a && cd ../mg64-a
-PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev nigel decompile-similar --shard 1/3
+PATH="$PWD/.venv/bin:$PATH" MG64_SYNC_BRANCH=dev \
+  nigel decompile-similar --claims "$(git rev-parse --git-common-dir)/mg64/claims/decompile-similar"
 ```
+
+Workers of one task share its claims directory: each takes the first candidate that no other worker has claimed, so a candidate runs once across the worktrees. A claim is never released; a restarted worker keeps its own, and deleting a claim file reruns that candidate. A claim is keyed by the whole candidate, which is why the decompile candidates are bare function names: with the references in the candidate, two worktrees whose matched sets differ would claim the same function under two keys.
 
 `difficulty_ledger.py harvest` records a run as `timeout` once its deadline passes, so killing nigel mid-candidate counts that function as a failure. `kill -QUIT <nigel pid>` stops it after the current candidate; `SIGINT` and `SIGTERM` kill the candidate. Keep nigel's output in a log file (`>> task-runner/<task>/nigel-run.log 2>&1`); `agent.log` holds only the agent stream.
 
@@ -43,15 +46,14 @@ Shard worktrees sync and integrate their commits with `tools/sync-shard`, `tools
 
 # Task catalog
 
-Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown. The five decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
+Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py harvest && score_functions.py asm/nonmatchings --json` with the flags shown, which lists function names, easiest first. The four decompile tasks share `verify_command` `./tools/verify-candidate --decompiled $CANDIDATE` and a success command that runs `git add -u` and commits `Decompile <function>` only when something is staged.
 
 | Task | Candidate source | Timeout | Notes |
 |---|---|---|---|
-| `decompile-unmatched` | `score_functions.py … --json` | 60 min | Tier 1. The prompt looks up references with `--by-similarity --top-n 3 --score-func $INPUT` and passes them to `decomp-env --refs`. |
-| `decompile-similar` | `score_functions.py … --by-similarity --top-n 3` | 60 min | Tier 1. Top three similar matched functions as references. |
-| `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. References from coddog similarity. |
-| `decompile-tier2` | `score_functions.py … --by-similarity --top-n 5 --tier 2` | 120 min | Tier 2. The tier-1 reasons are in the brief's `<prior_attempts>`. Five references. Rewrites from the assembly when progress plateaus. |
-| `decompile-tier3` | `score_functions.py … --by-similarity --top-n 5 --tier 3` | 240 min | Tier 3. The tier-2 reasons are in the brief's `<prior_attempts>`. Five references. Tries every approach in the matching method that earlier attempts did not. |
+| `decompile-similar` | `score_functions.py … --json` | 60 min | Tier 1. |
+| `decompile-coddog-similar` | `score_functions.py … --by-coddog-similarity` | 60 min | Tier 1. Candidates are `[function, coddog matches…]`; the first match is passed as `--refs`. |
+| `decompile-tier2` | `score_functions.py … --tier 2` | 120 min | Tier 2. The tier-1 reasons are in the brief's `<prior_attempts>`. Rewrites from the assembly when progress plateaus. |
+| `decompile-tier3` | `score_functions.py … --tier 3` | 240 min | Tier 3. The tier-2 reasons are in the brief's `<prior_attempts>`. Tries every approach in the matching method that earlier attempts did not. |
 | `cleanup-matched` | `python3 tools/list_matched_functions.py --by-reference-use` | 60 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`, most-referenced functions first. Config success command. |
 | `fix-low-quality` | `python3 tools/detect_low_quality_matches.py src --json` | 30 min | [cleanup-function](/procedures/cleanup-function.md) with `template.md`. Config success command. |
 | `cleanup-files` | `ls -1 src/main/func_*.c src/overlay_*/func_*.c 2>/dev/null` | 30 min | Cleans and renames each file with [rename-file](/procedures/rename-file.md). Commits `cleaned up $CANDIDATE`. |
@@ -68,4 +70,4 @@ Each decompile candidate source runs `tools/sync-shard && difficulty_ledger.py h
 
 The candidate-source scripts are in [selection](/tools/selection-and-status.md) and [quality checkers](/tools/quality-checkers.md).
 
-Decompile tasks escalate by [difficulty tier](/tools/difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs Haiku (`agent_flags`): tier-1 tasks at `:high` effort, tiers 2 and 3 at `:xhigh`. Each prompt runs `tools/decomp-env --bootstrap-only --id $TASK_ID --refs <references> <function>` and points the agent at the rendered `AGENTS.md`, which is the whole per-function brief ([decompile-function](/procedures/decompile-function.md)).
+Decompile tasks escalate by [difficulty tier](/tools/difficulty-ledger.md): a function is offered to tier 2 or 3 only after failing the tier below. Every decompile task runs Haiku (`agent_flags`): tier-1 tasks at `:high` effort, tiers 2 and 3 at `:xhigh`. Each prompt runs `tools/decomp-env --bootstrap-only --id $TASK_ID <function>`, whose brief carries the five most similar matched functions as references, and points the agent at the rendered `AGENTS.md`, which is the whole per-function brief ([decompile-function](/procedures/decompile-function.md)).

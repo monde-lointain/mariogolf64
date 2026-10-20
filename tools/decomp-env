@@ -12,7 +12,7 @@ ARG=""
 CLI="omp"
 CLI_ARGS=(--thinking xhigh)
 
-REFS=""
+REFS_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -34,7 +34,7 @@ while [[ $# -gt 0 ]]; do
                 echo "Error: --refs requires a value"
                 exit 1
             fi
-            REFS="$2"
+            REFS_ARGS=(--refs "$2")
             shift 2
             ;;
         *)
@@ -337,7 +337,7 @@ fi
 render_agents_md() {
     local context_file
     context_file="$(mktemp)"
-    if ! "$PYTHON" tools/decomp_env_context.py --env "$created_dir" --function "$FUNC_NAME" --refs "$REFS" > "$context_file"; then
+    if ! "$PYTHON" tools/decomp_env_context.py --env "$created_dir" --function "$FUNC_NAME" "${REFS_ARGS[@]}" > "$context_file"; then
         echo "Warning: could not build the context block; AGENTS.md gets an empty context"
         : > "$context_file"
     fi
