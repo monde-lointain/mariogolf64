@@ -3,6 +3,7 @@
 
 void func_80058D04(s32, s32, s32);
 void func_80050DA0(s32, s32, s32, s32, s32);
+extern s32 rand(void);
 extern Gfx* glistp;
 extern s32 D_ovl7_8020AC4C;
 extern u8 D_ovl7_80213A40[];
@@ -31,8 +32,19 @@ extern s32 D_ovl7_8020AC64;
 extern s32 D_ovl7_8020AC50;
 extern f32 D_ovl7_8020AC5C;
 extern s32 D_ovl7_8020AC60;
+extern s32 D_ovl7_8020AC68;
+extern s32 D_ovl7_8020AC6C;
+extern s32 D_ovl7_8020AC70;
+extern s32 D_ovl7_8020AC74;
+extern s32 D_ovl7_8020AC78;
+extern s32 D_ovl7_8020AC7C;
+extern s32 D_ovl7_8020AC80;
+extern s32 D_ovl7_8020AC84;
+extern s32 D_ovl7_8020AC88;
+extern s32 D_ovl7_8020AC8C;
 extern s8 D_ovl7_8020BA70;
 extern s32 D_ovl7_8022BFA8;
+extern f32 D_ovl7_8022BE50;
 extern u16* g_auxiliary_framebuffer;
 extern f32 D_ovl7_8020AE3C;
 extern s32 D_ovl7_8020AE40;
@@ -79,7 +91,63 @@ void func_ovl7_801F4A6C(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F4AEC);
+void func_ovl7_801F4AEC(void) {
+    if (D_ovl7_8020AC64 == 1) {
+        if ((u32) (D_ovl7_8022BE50 * 0.5f) < 0x7F) {
+            if (D_ovl7_8020AC68 == 0 && (rand() & 0x64) < 0x50) {
+                if (D_ovl7_8020AC74 == 2) {
+                    D_ovl7_8020AC74 = 1;
+                    D_ovl7_8020AC68 = D_ovl7_8020AC7C;
+                } else {
+                    D_ovl7_8020AC74 = 2;
+                    D_ovl7_8020AC68 = D_ovl7_8020AC80;
+                }
+            }
+            if (D_ovl7_8020AC6C == 0 && (rand() & 0x64) < 0x50) {
+                D_ovl7_8020AC6C = D_ovl7_8020AC84;
+            }
+            if (D_ovl7_8020AC70 == 0 && (rand() & 0x64) < 0x50) {
+                switch (rand() & 3) {
+                case 0:
+                    D_ovl7_8020AC78 = 1;
+                    D_ovl7_8020AC70 = D_ovl7_8020AC88;
+                    break;
+                case 1:
+                    D_ovl7_8020AC78 = 2;
+                    D_ovl7_8020AC70 = D_ovl7_8020AC8C;
+                    break;
+                }
+            }
+        }
+        if (D_ovl7_8020AC68 != 0) {
+            if (D_ovl7_8020AC74 == 1 && D_ovl7_8020AC68 == D_ovl7_8020AC7C) {
+                func_80050DA0(0x184, 0xD, 0x7F - (u32) (D_ovl7_8022BE50 * 0.5f), 0, 0x9D);
+            }
+            if (D_ovl7_8020AC74 == 2 && D_ovl7_8020AC68 == D_ovl7_8020AC80) {
+                func_80050DA0(0x185, 0xD, 0x7F - (u32) (D_ovl7_8022BE50 * 0.5f), 0, 0x9D);
+            }
+            D_ovl7_8020AC68 -= 1;
+        }
+        if (D_ovl7_8020AC6C != 0) {
+            if (D_ovl7_8020AC6C == D_ovl7_8020AC84) {
+                func_80050DA0(0x18B, 0xE, 0x7F - (u32) (D_ovl7_8022BE50 * 0.5f), 0, 0x75);
+            }
+            D_ovl7_8020AC6C -= 1;
+        }
+        if (D_ovl7_8020AC70 != 0) {
+            if (D_ovl7_8020AC78 == 1 && D_ovl7_8020AC70 == D_ovl7_8020AC88) {
+                func_80050DA0(0x1A3, 0xF, 0x7F - (u32) (D_ovl7_8022BE50 * 0.5f), 0, 0x61);
+            }
+            if (D_ovl7_8020AC78 == 2 && D_ovl7_8020AC70 == D_ovl7_8020AC8C) {
+                func_80050DA0(0x1BA, 0xF, 0x7F - (u32) (D_ovl7_8022BE50 * 0.5f), 0, 0x61);
+            }
+            D_ovl7_8020AC70 -= 1;
+            if (D_ovl7_8020AC70 == 0) {
+                D_ovl7_8020AC78 = 0;
+            }
+        }
+    }
+}
 
 void func_ovl7_801F5018(void) {
     RomAssetLoad sp10;
