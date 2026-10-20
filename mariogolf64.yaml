@@ -641,6 +641,8 @@ segments:
       - [0x14FB50, c, overlay_9/func_ovl9_801F4A30]
       - [0x14FB60, c, overlay_9/func_ovl9_801F4A40]
       - [0x150890, data]
+      - [0x1508A0, .rodata, overlay_9/func_ovl9_801F4A40]
+      - [0x1508B8, rodata]
       - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
 
   # Overlay 10
