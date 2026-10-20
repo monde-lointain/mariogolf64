@@ -20,6 +20,7 @@ extern s32 D_ovlgap_8040C5A8;
 extern s32 D_ovlgap_8040C5AC;
 extern s32 D_ovlgap_8040C5B0;
 extern s32 D_ovlgap_8040C5B4;
+extern u8 D_ovlgap_8040C580[];
 extern Mtx D_40CC98;
 extern Mtx D_8040CC98;
 extern Vtx D_ovlgap_8040C780[];
@@ -32,6 +33,7 @@ extern u16 *nuGfxCfb_ptr;
 void clear_text_grid(void);
 void func_ovlgap_80405AF4(s32, s32);
 s16 *get_terrain_vertex_pointer(u32, u32);
+s16 *get_direct_grid_vertex(s32, s32);
 
 void func_ovlgap_8040000C(void) {
     u16 buttons;
@@ -157,7 +159,35 @@ void func_ovlgap_80405AF4(s32 x, s32 y) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405B80);
+/* Blends grid vertices (col, row) and (col + 1, row) by t/16 into the five edge slots of out.
+ * Only the x and texture_s fields are written; slot indices come from D_ovlgap_8040C580. */
+void func_ovlgap_80405B80(GridVertex *out, s32 col, s32 row, s32 t) {
+    GridVertex *edge[2];
+    s32 inv_t;
+    s32 value;
+    s32 i;
+    s32 parity_off;
+    u8 *entry;
+    GridVertex *slot;
+
+    inv_t = 0x10 - t;
+    edge[0] = (GridVertex *) get_direct_grid_vertex(col, row);
+    edge[1] = (GridVertex *) get_direct_grid_vertex(col + 1, row);
+    i = 0;
+    parity_off = (col & 1) * 2;
+    entry = D_ovlgap_8040C580;
+    do {
+        value = (edge[0]->x * inv_t) + (edge[1]->x * t);
+        slot = &out[entry[1 + parity_off]];
+        if (value < 0) {
+            value += 0xF;
+        }
+        slot->x = (s16) (value >> 4);
+        slot->texture_s = (s16) (((edge[0]->texture_s * inv_t) + (edge[1]->texture_s * t)) / 16);
+        i += 1;
+        entry += 5;
+    } while (i < 5);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405C94);
 
