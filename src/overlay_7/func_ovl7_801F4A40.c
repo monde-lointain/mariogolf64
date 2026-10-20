@@ -34,6 +34,27 @@ extern s32 D_ovl7_8020AC60;
 extern s8 D_ovl7_8020BA70;
 extern s32 D_ovl7_8022BFA8;
 extern u16* g_auxiliary_framebuffer;
+extern f32 D_ovl7_8020AE3C;
+extern s32 D_ovl7_8020AE40;
+extern s32 D_ovl7_8020AEC4;
+extern Vtx D_ovl7_8020AEC8[];
+extern f32 D_801B54F8;
+extern f32 D_801B54FC;
+extern f32 D_801B5500;
+extern Mtx D_20C490;
+extern Mtx D_20C4D0;
+extern Mtx D_ovl7_8020C490;
+extern Mtx D_ovl7_8020C4D0;
+void emit_lens_flare_dl(Gfx** gfxp);
+void func_ovl7_801F5454(s32 view_state_address);
+void func_ovl7_801FA8D8(Gfx** cursor);
+void func_ovl7_801FBB94(Gfx** cursor, s32 view_state_address);
+void func_ovl7_801FE2A0(Gfx** cursor);
+void func_ovl7_801FE8F8(Gfx** cursor);
+void func_ovl7_801FF70C(Gfx** cursor);
+void func_ovl7_801FFC40(Gfx** cursor);
+void func_ovl7_80200CBC(Gfx** cursor, s32 flag);
+void func_ovl7_80202D34(Gfx** cursor);
 void heap3_free(void** payload_address);
 void set_clear_color(s32 red, s32 green, s32 blue);
 void func_80029B58(void);
@@ -100,7 +121,7 @@ void func_ovl7_801F5100(void) {
     func_80078910();
 }
 
-void func_ovl7_801F5180(s32 view_state_address, Gfx** cursor) {
+void func_ovl7_801F5180(s32 view_state_address, Gfx** cursor, s32 flag) {
     s32 slot_index;
 
     slot_index = 0;
@@ -120,7 +141,56 @@ INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F58EC)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801F6788);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_7/func_ovl7_801F4A40", func_ovl7_801FA4EC);
+void func_ovl7_801FA4EC(s32 arg0, Gfx **arg1) {
+    Gfx *gfx;
+    Mtx mtx_a;
+    s32 pad_b[12];
+
+    gfx = *arg1;
+    D_ovl7_8020AEC4 ^= 1;
+    if (D_ovl7_8020AE40 != 0) {
+        guTranslate(&D_ovl7_8020C490, D_801B54F8, D_801B54FC, D_801B5500);
+        guScale(&D_ovl7_8020C4D0, D_ovl7_8020AE3C, D_ovl7_8020AE3C, D_ovl7_8020AE3C);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_ZBUFFER | G_SHADING_SMOOTH);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        gSPMatrix(gfx++, &D_20C490, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, &D_20C4D0, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[0], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[4], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[8], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[12], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[16], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPVertex(gfx++, &D_ovl7_8020AEC8[20], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+    }
+    func_ovl7_801F5180(arg0, &gfx, D_ovl7_8020AEC4);
+    glistp = gfx;
+    func_ovl7_801F5454(arg0);
+    gfx = glistp;
+    emit_lens_flare_dl(&gfx);
+    func_ovl7_801FE2A0(&gfx);
+    func_ovl7_801FF70C(&gfx);
+    func_ovl7_801FE8F8(&gfx);
+    func_ovl7_801FBB94(&gfx, arg0);
+    func_ovl7_801FFC40(&gfx);
+    func_ovl7_80202D34(&gfx);
+    func_ovl7_801FA8D8(&gfx);
+    func_ovl7_80200CBC(&gfx, 0);
+    *arg1 = gfx;
+}
 
 void func_ovl7_801FA83C(s32 table_index, s32 slot_index) {
     RomAssetLoad asset;
