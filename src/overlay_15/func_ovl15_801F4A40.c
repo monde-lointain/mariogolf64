@@ -315,9 +315,39 @@ void func_ovl15_801F4E70(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4F50);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F54F8);
-
 void func_ovl15_801FA320(s32 arg0, s32 arg1);
+
+/* For indices 1, 4, 11, 12 and 13, start a ramp-up (state 1) with a per-index value. Other indices do nothing. */
+void func_ovl15_801F54F8(s32 a0) {
+    s32 mode;
+    s32 value;
+
+    switch (a0) {
+        case 1:
+            mode = 1;
+            value = 0x149;
+            break;
+        case 11:
+            mode = 1;
+            value = 0x148;
+            break;
+        case 4:
+            mode = 1;
+            value = 0x151;
+            break;
+        case 12:
+            mode = 1;
+            value = 0x14C;
+            break;
+        case 13:
+            mode = 1;
+            value = 0x14F;
+            break;
+        default:
+            return;
+    }
+    func_ovl15_801FA320(mode, value);
+}
 
 /* Set the aux flag to 2, then for indices 0 and 2..12 start a ramp-up (state 1) recording a per-index value. Other indices do nothing. */
 void func_ovl15_801F5570(s32 a0) {

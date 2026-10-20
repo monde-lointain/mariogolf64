@@ -721,7 +721,7 @@ segments:
       - [0x16C590, c, overlay_15/func_ovl15_801FB400]
       - [0x16C6A0, c, overlay_15/func_ovl15_801FB510]
       - [0x16CCB0, data]
-      - [0x16CE98, .rodata, overlay_15/func_ovl15_801F4A40]
+      - [0x16CE60, .rodata, overlay_15/func_ovl15_801F4A40]
       - [0x16CED0, rodata]
       - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
 

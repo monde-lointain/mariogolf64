@@ -1459,3 +1459,5 @@ load_hole_terrain_assets = 0x802504E8; // type:func segment:overlay_4
 D_ovl8_801F5928 = 0x801F5928; // type:Ovl8TextRecord size:0x30 segment:overlay_8
 // overlay_3 roster backup: 4 x s32, written by func_ovl3_80209500 from g_abRosterUnlockFlags.
 D_ovl3_8022FF1C = 0x8022FF1C; // type:s32 size:0x10 segment:overlay_3
+// overlay_9 jtbl_ovl9_801F5798 entries 2 and 4 jump to 0x801F5548, inside overlay_9 func_ovl9_801F4FF4. Bind a label to overlay_9 so the table names it there, not overlay_15's leaked jlabel of the same VRAM.
+ovl9_801F5548 = 0x801F5548; // type:label segment:overlay_9
