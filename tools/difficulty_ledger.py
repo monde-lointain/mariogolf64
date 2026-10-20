@@ -6,8 +6,8 @@ one JSON record in a shared ledger. A function's tier follows from its failure h
 score_functions.py --tier and list_decomp_candidates.py both use failed_tiers() for it.
 
 Tiers: 1 = no failures; 2 = failed tier 1; 3 = failed tier 2 with best_pct >= 90;
-'human' = failed tier 3, or failed tier 2 below 90. A NEAR_MISS.md note in an environment
-with no ledger record counts as a failure too.
+'human' = failed tier 3, failed tier 2 below 90, or any integration_failed. A NEAR_MISS.md note
+in an environment with no ledger record counts as a failure too.
 
 Ledger path: $MG64_LEDGER, else <git common dir>/mg64/difficulty.jsonl (shared by every
 worktree). Commands:
@@ -315,6 +315,8 @@ def tier_from_failures(failures: Sequence[dict]) -> object:
     """The tier a function belongs to, given its failure records (see module docstring)."""
     if not failures:
         return 1
+    if any(f['outcome'] == 'integration_failed' for f in failures):
+        return HUMAN
     worst = max(_rank(f['tier']) for f in failures)
     if worst == 1:
         return 2

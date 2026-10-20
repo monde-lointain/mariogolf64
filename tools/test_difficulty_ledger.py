@@ -74,6 +74,9 @@ class TierFromFailuresTest(unittest.TestCase):
     def test_human_stays_human(self):
         self.assertEqual(dl.tier_from_failures([failure('human', 0.0)]), 'human')
 
+    def test_integration_failure_at_any_tier_goes_to_human(self):
+        self.assertEqual(dl.tier_from_failures([failure(1, 100.0, 'integration_failed')]), 'human')
+
 
 class FailureHistoryTest(TreeCase):
     def test_matched_record_clears_history(self):

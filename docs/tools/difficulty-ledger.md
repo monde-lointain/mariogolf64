@@ -35,10 +35,11 @@ Each finished decompile attempt adds one JSON line to a shared ledger. A functio
 | 1 | no failure | 60 min, stall limit 7 | [`decompile-similar`, `decompile-coddog-similar`](/tools/task-runner.md#task-catalog) |
 | 2 | a tier-1 failure | 120 min, stall limit 12; rewrite from the assembly when progress plateaus | `decompile-tier2` |
 | 3 | a tier-2 failure with a best of at least 90% | 240 min, stall limit 40; try [matching-method](/procedures/matching-method.md) approaches that earlier attempts did not | `decompile-tier3` |
-| `human` | a tier-3 failure, or a tier-2 failure below 90% | no nigel task; stall limit 20 (the build.sh default) | none: `show --tier human` lists them |
+| `human` | a tier-3 failure, a tier-2 failure below 90%, or any `integration_failed` | no nigel task; stall limit 20 (the build.sh default) | none: `show --tier human` lists them |
 
-`tier_from_failures` sets the tier from the highest tier among a function's failure records:
+`tier_from_failures` sets the tier from a function's failure records, first rule that applies:
 
+- any `integration_failed`: `human`. The C already matches; what blocks it is rodata or data ownership, which a larger matching budget does not fix.
 - none: tier 1.
 - highest is 1: tier 2.
 - highest is 2: tier 3 if the best percent among its tier-2 failures is at least 90 (`TIER3_MIN_BEST_PCT`), else `human`.
