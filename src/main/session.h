@@ -15,7 +15,10 @@ typedef struct {
 typedef struct {
   /* 0x00 */ u8 unknown_00[0x0C];
   /* 0x0C */ s32 state_code;
-  /* 0x10 */ u8 unknown_10[0x0D];
+  /* 0x10 */ s32 unknown_10;
+  /* 0x14 */ s32 unknown_14;
+  /* 0x18 */ s32 unknown_18;
+  /* 0x1C */ u8 unknown_1C;
   /* 0x1D */ s8 character_index;
   /* 0x1E */ u8 unknown_1E[5];
   /* 0x23 */ s8 base_score;
@@ -39,7 +42,7 @@ typedef struct {
   /* 0x9D */ u8 unknown_9D[3];
   /* 0xA0 */ s32 pending_result;
   /* 0xA4 */ s32 event_total;
-  /* 0xA8 */ u8 unknown_A8[0x2];
+  /* 0xA8 */ u16 unknown_A8;
   /* 0xAA */ u8 event_counts[12];
   /* 0xB6 */ u8 unknown_B6[0x2];
 } PlayerState; /* 0xB8 */

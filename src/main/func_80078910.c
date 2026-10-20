@@ -3,6 +3,7 @@
 #include "rom_asset.h"
 #include "terrain.h"
 #include "session.h"
+#include "ball.h"
 
 typedef struct {
   Vec3f position; /* 0x00 */
@@ -115,7 +116,7 @@ extern s32 D_800FC8B8;
 extern void func_80216B10(void);
 extern s32 get_interpolated_terrain_height_wrapper(s32 x, s32 z);
 
-void reload_scene_assets(s8* arg0) {
+void reload_scene_assets(BallObject *arg0) {
   RomAssetLoad sp10;
   s32 i;
 
@@ -137,7 +138,7 @@ void reload_scene_assets(s8* arg0) {
   D_800FC8B8 = (s32)(f32)get_interpolated_terrain_height_wrapper(D_800FBE64[0],
                                                                  target_z);
 
-  if (arg0[0xA3] == 23) {
+  if (arg0->unkA3 == 23) {
     D_800C52B0 = 1;
     get_rom_asset_allocation_size(0x6B6, &sp10);
     load_rom_asset_payload(D_800E1DBC, &sp10);

@@ -251,7 +251,7 @@ void unload_overlay(s32 overlay_id) {
   }
 }
 
-s32 report_inactive_overlay_module(void) {
+s32 report_inactive_overlay_module(s32 module_id) {
   /* Preserve the retail diagnostic's duplicate calls and missing %d argument. */
   if (!flag_is_set(FLAG_SUPPRESS_OVERLAY_MESSAGES)) {
     osSyncPrintf(OVERLAY_INACTIVE_MODULE_MESSAGE);

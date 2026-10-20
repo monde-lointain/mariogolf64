@@ -1,6 +1,7 @@
 #include "terrain.h"
 #include "club.h"
 #include "session.h"
+#include "ball.h"
 
 extern TerrainAttrEntry D_800B790C[27];
 extern u8 D_800B7C00[];
@@ -54,15 +55,6 @@ void play_sound_at_meter_ratio(s32 sfx, f32 arg1, f32 arg2) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/main/get_table_entry", play_sound_for_meter_phase);
-
-typedef struct {
-  u8 pad00[0x18];
-  s32 unk18;
-  u8 pad1C[0x4];
-  s32 unk20;
-  u8 pad24[0x81];
-  s8 unkA5;
-} BallObject;
 
 typedef struct {
   u8 pad00[0x40];

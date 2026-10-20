@@ -2,6 +2,7 @@
 #include "../main/rom_asset.h"
 #include "../main/session.h"
 #include "../main/club.h"
+#include "../main/ball.h"
 #include "../main/terrain.h"
 
 typedef struct {
@@ -458,7 +459,45 @@ s32 func_ovl0_8020561C(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205624);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802059C0);
+extern s8 D_800FC859;
+extern void func_8006034C(u8 value);
+extern void func_ovl0_801FD8DC(void);
+extern void reload_scene_assets(BallObject *arg0);
+extern s32 report_inactive_overlay_module(s32 module_id);
+
+void func_ovl0_802059C0(s32 arg0, BallObject *arg1) {
+    PlayerState *player;
+    s32 i;
+    s32 terrain_height;
+
+    player = &player_records[arg0];
+    update_object_group_by_id(8);
+    for (i = 0; i < 3; i++) {
+        if ((s8) player->unknown_72[6 + i] != 0) {
+            player->unknown_72[6 + i] = 1;
+        }
+        func_8006034C(0);
+    }
+    player->unknown_A8 = 0;
+    arg1->unk18 = player->unknown_10;
+    arg1->unk1C = player->unknown_14;
+    arg1->unk20 = player->unknown_18;
+    arg1->unkA5 = arg0;
+    arg1->unkA0 = 0;
+    arg1->unk8C = 0;
+    terrain_height =
+        get_interpolated_terrain_height_wrapper(arg1->unk18, arg1->unk20);
+    if (terrain_height < arg1->unk1C) {
+        arg1->unk1C = terrain_height;
+    }
+    arg1->unkA3 = player->unknown_1C;
+    arg1->unk90 = 3;
+    arg1->unkA1 = 0;
+    reload_scene_assets(arg1);
+    if (D_800FC859 != 0 || report_inactive_overlay_module(1) != 0) {
+        func_ovl0_801FD8DC();
+    }
+}
 
 extern s32 game_mode;
 extern s8 rumble_disable_flag;
