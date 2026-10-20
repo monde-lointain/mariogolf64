@@ -58,9 +58,59 @@ f32 func_ovl0_801FD760(f32 arg0, f32 arg1, f32 arg2) {
     return sqrtf(arg0 * arg0 + arg1 * arg1 + arg2 * arg2);
 }
 
+typedef struct Ovl0Record {
+    f32 unk_00[3];
+    s32 unk_0C;
+    u8 unk_10;
+    u8 pad_11[3];
+    s32 unk_14;
+    u8 pad_18[4];
+    f32 unk_1C;
+    f32 unk_20;
+    f32 unk_24;
+    u8 pad_28[0x30];
+    f32 unk_58[3];
+    u8 pad_64[0x3C];
+} Ovl0Record;
+
+typedef struct Ovl0Slot {
+    s32 unk_00;
+    s32 unk_04;
+    u8 pad_08[12];
+} Ovl0Slot;
+
+extern s32 D_801B60A8;
+extern Ovl0Slot D_ovl0_8022397C[60];
+extern Ovl0Record D_ovl0_802225F4[40];
+extern s32 D_ovl0_80223E20;
+extern s32 D_ovl0_80223E24;
+extern s32 D_ovl0_80223E28;
+extern s32 D_ovl0_80223E2C;
+
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD798);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801FD5F0", func_ovl0_801FD8DC);
+void func_ovl0_801FD8DC(void) {
+    s32 i;
+    s32 idx;
+
+    i = 0;
+    do {
+        D_ovl0_8022397C[i].unk_00 = -1;
+        D_ovl0_8022397C[i].unk_04 = 0;
+        i++;
+    } while (i != 60);
+    idx = D_801B60A8;
+    D_ovl0_802225F4[31].unk_1C = D_ovl0_802225F4[idx].unk_00[0];
+    D_ovl0_802225F4[31].unk_20 = D_ovl0_802225F4[idx].unk_00[1];
+    D_ovl0_802225F4[31].unk_24 = D_ovl0_802225F4[idx].unk_00[2];
+    D_ovl0_802225F4[38].unk_58[0] = D_ovl0_802225F4[idx].unk_00[0];
+    D_ovl0_802225F4[38].unk_58[1] = D_ovl0_802225F4[idx].unk_00[1];
+    D_ovl0_80223E20 = 0;
+    D_ovl0_80223E24 = 0;
+    D_ovl0_80223E28 = 0;
+    D_ovl0_80223E2C = 0;
+    D_ovl0_802225F4[38].unk_58[2] = D_ovl0_802225F4[idx].unk_00[2];
+}
 
 extern s32 D_ovl0_80223E24;
 extern s32 D_ovl0_80223E30;
@@ -78,16 +128,7 @@ void func_ovl0_801FD9E4(void) {
     guMtxIdentF(D_ovl0_802270C0);
 }
 
-typedef struct Ovl0Record {
-    f32 unk_00[3];
-    s32 unk_0C;
-    u8 unk_10;
-    u8 pad_11[3];
-    s32 unk_14;
-    u8 pad_18[0x88];
-} Ovl0Record;
 
-extern Ovl0Record D_ovl0_802225F4[32];
 extern s32 D_ovl0_80227100;
 void func_ovl0_801FD8DC(void);
 
