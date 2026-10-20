@@ -111,7 +111,156 @@ void func_ovl3_80226A34(void) {
   func_8005AF74();
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80226A58);
+void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+void func_8006A548(Gfx **pgfx, u32 arg1);
+void load_texture_block(Gfx **pgfx, u32 timg, s32 fmt, s32 siz, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+void load_texture_block_4b(Gfx **pgfx, u32 timg, s32 fmt, s32 width, s32 height, s32 pal, s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+extern u8 *D_ovl3_80230E70;
+extern u8 *D_ovl3_80230E74;
+
+void func_ovl3_80226A58(Gfx **gfxp, s32 width, s32 height, s32 x, s32 y, s32 label, s32 selected) {
+    Gfx *gfx;
+    f32 w;
+    f32 h;
+    f32 bw;
+    f32 bh;
+    s32 hw;
+    s32 hh;
+    s32 hbw;
+    s32 hbh;
+    s32 top;
+    s32 row;
+    s32 bx;
+    s32 by;
+    s32 grow;
+    s32 pulse;
+    s16 i;
+
+    gfx = *gfxp;
+    func_8005AF74();
+    switch (D_ovl3_80230E88) {
+    case 0:
+        D_ovl3_80230E8C += 0.4f;
+        D_ovl3_80230E90 += 0.4f;
+        if (D_ovl3_80230E8C > 1.0f) {
+            D_ovl3_80230E8C = 1.0f;
+        }
+        if (D_ovl3_80230E90 > 1.0f) {
+            D_ovl3_80230E90 = 1.0f;
+        }
+        w = width * D_ovl3_80230E8C;
+        h = (height / 2) * D_ovl3_80230E90;
+        bw = D_ovl3_80230E8C * 48.0f;
+        bh = D_ovl3_80230E90 * 16.0f;
+        if (D_ovl3_80230E8C == 1.0f && D_ovl3_80230E90 == 1.0f) {
+            D_ovl3_80230E88 = 1;
+        }
+        break;
+    case 1:
+        w = width;
+        h = height / 2;
+        bw = 48.0f;
+        bh = 16.0f;
+        break;
+    case 2:
+        D_ovl3_80230E8C -= 0.4f;
+        D_ovl3_80230E90 -= 0.4f;
+        if (D_ovl3_80230E8C < 0.4f) {
+            D_ovl3_80230E8C = 0.1f;
+        }
+        if (D_ovl3_80230E90 < 0.4f) {
+            D_ovl3_80230E90 = 0.1f;
+        }
+        w = width * D_ovl3_80230E8C;
+        h = (height / 2) * D_ovl3_80230E90;
+        bw = D_ovl3_80230E8C * 48.0f;
+        bh = D_ovl3_80230E90 * 16.0f;
+        if (D_ovl3_80230E8C <= 0.1f && D_ovl3_80230E90 <= 0.1f) {
+            D_ovl3_80230E88 = 3;
+        }
+        break;
+    default:
+        return;
+    }
+
+    hw = (s32) w / 2;
+    hh = (s32) h;
+    hbw = (s32) bw / 2;
+    hbh = (s32) bh / 2;
+    hw = (hw <= 0) ? 1 : hw;
+    hh = (hh <= 0) ? 1 : hh;
+    hbw = (hbw <= 0) ? 1 : hbw;
+    hbh = (hbh <= 0) ? 1 : hbh;
+    w = (w <= 0.0f) ? 1.0f : w;
+    h = (h <= 0.0f) ? 1.0f : h;
+    bw = (bw <= 0.0f) ? 1.0f : bw;
+    bh = (bh <= 0.0f) ? 1.0f : bh;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, TEXEL0,
+                      PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, TEXEL0);
+    for (i = 0; i != 2; i++) {
+        load_texture_block_4b(&gfx, (u32) &D_ovl3_80230E70[i * 0x1000 + 8], G_IM_FMT_I, 256, 32, 0, 0, 0, 0, 0, 0, 0);
+        row = y - hh + i * hh;
+        func_8006A2C0(&gfx, (x - hw) * 4, row * 4, (x + hw) * 4, (row + hh) * 4, 0, 0, 0,
+                      0x40000 / (s32) w, 0x8000 / (s32) h);
+        gDPPipeSync(gfx++);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    func_8006A548(&gfx, (u32) &D_ovl3_80230E74[8]);
+    for (i = 0; i != 2; i++) {
+        load_texture_block(&gfx, (u32) &D_ovl3_80230E74[i * 0x6C0 + 0x208], G_IM_FMT_CI, G_IM_SIZ_8b, 72, 24, 0, 0, 0, 0, 0, 0, 0);
+        if (i == 0) {
+            bx = x - (s32) (D_ovl3_80230E8C * 30.0f);
+        } else {
+            bx = x + (s32) (D_ovl3_80230E8C * 30.0f);
+        }
+        by = (s32) ((y + h) - (s32) (D_ovl3_80230E90 * 30.0f));
+        grow = 0;
+        if (i == selected) {
+            pulse = D_ovl3_80230E9C;
+            grow = pulse / 2;
+        } else {
+            pulse = 0;
+        }
+        func_8006A2C0(&gfx, (bx - hbw - grow) * 4, (by - hbh - grow) * 4, (bx + hbw + grow) * 4,
+                      (by + hbh + grow) * 4, 0, 0, 0, 0x12000 / (s32) (bw + pulse),
+                      0x6000 / (s32) (bh + pulse));
+        gDPPipeSync(gfx++);
+    }
+
+    if (D_ovl3_80230EA0 == 0) {
+        D_ovl3_80230E9C += 2;
+    }
+    if (D_ovl3_80230EA0 == 1) {
+        D_ovl3_80230E9C -= 2;
+    }
+    if (D_ovl3_80230E9C == 16) {
+        D_ovl3_80230EA0 = 1;
+    }
+    if (D_ovl3_80230E9C == 0) {
+        D_ovl3_80230EA0 = 0;
+    }
+    if (label != -1 && func_ovl3_80226764() != 0) {
+        func_800719A0(x + 8, by - 30, 363, 1, 10, 16, 95, 63, 255, 255);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022747C);
 
