@@ -1,6 +1,8 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern s32 func_8005B0A0(s32);
+extern u8* func_8005AF50(void);
 
 s32 func_ovl0_801F4A40(s32 arg0) {
     s32 sum;
@@ -197,7 +199,44 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F75B0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7740);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F7F7C);
+extern u16 D_800C547C[];
+extern s8 D_801B72A5;
+
+/**
+ * Per-call update of the mode-2 phase. Every call increments D_ovl0_80225760.
+ * While D_ovl0_8022575C is zero, the counts 12, 16 and 20 (from mode-2 entry)
+ * each stream one ROM asset into D_ovl0_802256CC; D_ovl0_80225764 counts the
+ * loads and caps them at three. From count 0x33 on, D_ovl0_80225768 decays, and
+ * it drops the overlay to mode 0 via func_ovl0_801F7518(0) below -0xC8.
+ */
+void func_ovl0_801F7F7C(void) {
+    RomAssetLoad asset;
+    s32 count;
+    s32 asset_step;
+
+    func_8005AF50();
+    count = D_ovl0_80225760 + 1;
+    D_ovl0_80225760 = count;
+    if (D_ovl0_8022575C == 0) {
+        if ((count >= 0xB) && !(count & 3) && (D_ovl0_80225764 < 3)) {
+            asset_step = D_ovl0_80225764 + 1;
+            D_ovl0_80225764 = asset_step;
+            get_rom_asset_allocation_size((D_800C547C[D_801B72A5] + asset_step) & 0xFFFF,
+                                          &asset);
+            load_rom_asset_payload(D_ovl0_802256CC, &asset);
+        }
+        if (D_ovl0_80225760 >= 0x33) {
+            if (D_ovl0_80225768 >= -1) {
+                D_ovl0_80225768 = D_ovl0_80225768 - 8;
+            } else {
+                D_ovl0_80225768 = D_ovl0_80225768 + ((D_ovl0_80225768 * 2) / 3);
+            }
+            if (D_ovl0_80225768 < -0xC8) {
+                func_ovl0_801F7518(0);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F8094);
 
