@@ -35,7 +35,14 @@ typedef struct {
     NUContPakFile gbpakFile; /* 0x6C */
     OSGbpakId gbpakId; /* 0x7C */
     Ovl15Entry unkCC[12]; /* 0xCC */
-    u8 unk75C[0x7C];
+    u8 unk75C[0x44];
+    s32 unk7A0;
+    u8 unk7A4[4];
+    s32 unk7A8;
+    u8 unk7AC[4];
+    s32 unk7B0;
+    s32 unk7B4;
+    u8 unk7B8[0x20];
     s8 unk7D8[12]; /* 0x7D8 */
 } Ovl15AssetBlock; /* known extent 0x7E4 */
 
@@ -61,6 +68,11 @@ extern s32 nuContRmbCheck(u32 contNo);
 extern u16 D_800C5498[];
 extern s16 D_800C54BC[];
 extern Ovl15AssetBlock D_800FE450;
+extern s32 D_800FE4B8[];
+extern char D_80105118[];
+extern char D_ovl15_801FBE4C[];
+extern void func_80071608(Gfx **dl);
+extern void func_ovl15_801F69B8(Gfx **dl, void *entry, Ovl15AssetBlock *blk);
 extern char D_ovl15_801FBC40[];
 extern char D_ovl15_801FBC4C[];
 extern char D_ovl15_801FBC54[];
@@ -419,7 +431,52 @@ void func_ovl15_801F68FC(Gfx **dl, Ovl15State *state) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F69B8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6E94);
+void func_ovl15_801F6E94(Gfx **arg0, Ovl15AssetBlock *arg1) {
+    Gfx *sp28;
+    void *var_s2;
+    s32 var_s0;
+    s32 var_a2;
+
+    var_s2 = &D_800FF1E8;
+    sp28 = *arg0;
+    func_80071608(&sp28);
+    gDPSetPrimColor(sp28++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    var_s0 = 0;
+    sprintf(D_80105118, D_ovl15_801FBE4C, arg1->unk7A8);
+    check_and_print_grid(D_80105118, 0x14, 2);
+    if (arg1->unk7A8 == 8) {
+        var_s0 = 1;
+        var_s2 = &D_800FF1E8[arg1->unk7B4];
+    }
+    /* unk7B0 holds a byte offset to another asset block; the block is reached through that offset. */
+    if (((u32)(arg1->unk7A8 - 2) < 2U) && (D_800FE4B8[0x1CD] > 0)) {
+        var_s0 = 1;
+        var_s2 = &arg1->unkCC[((Ovl15AssetBlock *)&((u8 *)arg1)[arg1->unk7B0])->unk7D8[0]];
+    }
+    if (var_s0 != 0) {
+        func_ovl15_801F69B8(&sp28, var_s2, arg1);
+    }
+    func_80071608(&sp28);
+    if (arg1->unk7A0 == ((D_80105218 * 4) - 1)) {
+        var_a2 = -1;
+        switch (arg1->unk7A8) {
+        case 2:
+            var_a2 = 0x15C;
+            break;
+        case 8:
+            var_a2 = 0x15E;
+            break;
+        case 7:
+            var_a2 = 0x15D;
+            break;
+        }
+        if (var_a2 != -1) {
+            func_800719A0(0x1C, 0xBA, var_a2, 1, 3, 0x20, 0xFF, 0xFF, 0xFF, 0xFF);
+            func_80071CE4(&sp28, 3);
+        }
+    }
+    *arg0 = sp28;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F7074);
 

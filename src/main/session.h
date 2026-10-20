@@ -44,6 +44,19 @@ typedef struct {
   /* 0xB6 */ u8 unknown_B6[0x2];
 } PlayerState; /* 0xB8 */
 
+/* Four 0x8C-byte result records; D_800FF1E9/210/21C/220 are fields within them. */
+typedef struct {
+  /* 0x00 */ u8 is_active;
+  /* 0x01 */ u8 unknown_01[0x27];
+  /* 0x28 */ s32 score_total;
+  /* 0x2C */ u8 unknown_2C[8];
+  /* 0x34 */ s32 unknown_34;
+  /* 0x38 */ s32 unknown_38;
+  /* 0x3C */ u8 unknown_3C[0x50];
+} PlayerResultRecord; /* 0x8C */
+
+extern PlayerResultRecord D_800FF1E8[4];
+
 /* The live 0x44-byte scenario block is also copied into continue slots. */
 typedef struct {
   /* 0x00 */ s32 state_id;

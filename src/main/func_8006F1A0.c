@@ -5,18 +5,6 @@
 
 extern s32 D_800FE4A8;
 extern s32 D_800C42D4;
-/* D_800FF1E9/210/21C/220 are fields within these four records. */
-typedef struct {
-  /* 0x00 */ u8 is_active;
-  /* 0x01 */ u8 unknown_01[0x27];
-  /* 0x28 */ s32 score_total;
-  /* 0x2C */ u8 unknown_2C[8];
-  /* 0x34 */ s32 unknown_34;
-  /* 0x38 */ s32 unknown_38;
-  /* 0x3C */ u8 unknown_3C[0x50];
-} PlayerResultRecord; /* 0x8C */
-
-extern PlayerResultRecord D_800FF1E8[4];
 extern s32 D_800FE450[];
 extern s32 D_800FE4AC;
 extern s32 D_800FE4B0;
