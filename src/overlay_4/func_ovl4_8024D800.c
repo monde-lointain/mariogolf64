@@ -15,6 +15,15 @@ typedef struct CameraPresetTable {
     CameraPresetVec unknown_c0[8];
 } CameraPresetTable;
 
+typedef struct CameraState {
+    s32 position_x;
+    s32 position_y;
+    s32 position_z;
+    s32 lookat_x;
+    s32 lookat_y;
+    s32 lookat_z;
+} CameraState;
+
 extern u32 D_ovl4_802542A0;
 extern s16 D_800BAC0C[];
 extern s32 D_800BB00C;
@@ -24,10 +33,10 @@ extern s8 D_801B60B8;
 extern s32 D_800BA9E4;
 extern s32 D_800BA9E8;
 extern s32 D_800BA9EC;
-extern s32 camera_position_x;
-extern s32 camera_position_y;
-extern s32 camera_position_z;
+extern CameraState camera_position_x;
 extern CameraPresetTable D_80105E10;
+extern Vec3f D_ovl4_80254C88;
+extern SceneryCylinder collision_cylinders[];
 void func_ovl4_802537EC(s32, s32, void **, void **);
 s32 report_div_error(void);
 
@@ -256,7 +265,39 @@ void func_ovl4_8024FF14(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024FF74);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250194);
+void func_ovl4_80250194(void) {
+    GridVertex vertex;
+    s32 row;
+    s32 col;
+    s32 i;
+
+    for (row = 0; row < 0x41; row++) {
+        for (col = 0; col < 0x21; col++) {
+            vertex = *(GridVertex *) get_terrain_vertex_pointer(col, row);
+            vertex.x = (s16) (vertex.x * D_ovl4_80254C88.x);
+            vertex.height = (s16) (vertex.height * D_ovl4_80254C88.y);
+            vertex.z = (s16) (vertex.z * D_ovl4_80254C88.z);
+            set_lod_grid_vertex(col, row, &vertex);
+        }
+    }
+    for (i = 0; i < 0x80; i++) {
+        g_terrain_tile_cache[i].position.x *= D_ovl4_80254C88.x;
+        g_terrain_tile_cache[i].position.y *= D_ovl4_80254C88.y;
+        g_terrain_tile_cache[i].position.z *= D_ovl4_80254C88.z;
+    }
+    for (i = 0; i < 0x80; i++) {
+        if (collision_cylinders[i].sprite_index >= 0) {
+            collision_cylinders[i].x = (s16) (s32) ((f32) collision_cylinders[i].x * D_ovl4_80254C88.x);
+            collision_cylinders[i].z = (s16) (s32) ((f32) collision_cylinders[i].z * D_ovl4_80254C88.z);
+        }
+    }
+    camera_position_x.lookat_x = (s32) ((f32) camera_position_x.lookat_x * D_ovl4_80254C88.x);
+    camera_position_x.lookat_y = (s32) ((f32) camera_position_x.lookat_y * D_ovl4_80254C88.y);
+    camera_position_x.lookat_z = (s32) ((f32) camera_position_x.lookat_z * D_ovl4_80254C88.z);
+    camera_position_x.position_x = (s32) ((f32) camera_position_x.position_x * D_ovl4_80254C88.x);
+    camera_position_x.position_y = (s32) ((f32) camera_position_x.position_y * D_ovl4_80254C88.y);
+    camera_position_x.position_z = (s32) ((f32) camera_position_x.position_z * D_ovl4_80254C88.z);
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250474);
 
@@ -473,9 +514,9 @@ void func_ovl4_80250DE4(void) {
     s32 i;
 
     if (D_801B60B8 == 0) {
-        camera_position_x = 0;
-        camera_position_y = 0;
-        camera_position_z = 0;
+        camera_position_x.position_x = 0;
+        camera_position_x.position_y = 0;
+        camera_position_x.position_z = 0;
         D_800BA9E4 = 0;
         D_800BA9E8 = 0;
         D_800BA9EC = 0;
@@ -505,8 +546,6 @@ void func_ovl4_80250EE0(void) {
     D_ovl4_8025D350 = (u8 *)0x80315000;
     D_ovl4_8025D354 = (u8 *)0x80315000;
 }
-
-extern SceneryCylinder collision_cylinders[];
 
 void func_ovl4_80250F04(void) {
     s32 i;

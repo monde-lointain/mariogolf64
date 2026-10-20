@@ -89,6 +89,9 @@ typedef struct {
 extern TerrainTileCache g_terrain_tile_cache[];
 extern s16 g_terrain_grid_verts[];
 
+s16* get_terrain_vertex_pointer(u32 col, u32 row);
+s32 set_lod_grid_vertex(s32 col, s32 row, GridVertex* src);
+
 TerrainAttrEntry* get_table_entry(u32 index);
 s32 resolve_club_terrain_mask(s32 mode, TerrainAttrEntry* terrain);
 
