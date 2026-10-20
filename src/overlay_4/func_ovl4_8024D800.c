@@ -138,7 +138,37 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", load_hole_terrain_a
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802509BC);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_80250C54);
+typedef struct CollisionTriangle {
+    s32 active;
+    u8 unk_04[0x5C];
+} CollisionTriangle;
+
+extern void check_and_print_grid(char *str, s32 col, s32 row);
+extern void bzero(void *address, s32 length);
+extern char D_80105118[];
+extern char D_ovl4_80255254[];
+extern char D_ovl4_80255264[];
+extern char D_ovl4_80255270[];
+extern CollisionTriangle collision_triangles[];
+
+void func_ovl4_80250C54(void) {
+    s32 i;
+    s32 j;
+
+    check_and_print_grid(D_ovl4_80255254, 19, 19);
+    for (i = 0; i != 157; i++) {
+        if (collision_triangles[i].active == 1) {
+            for (j = 157; j != 160; j++, i++) {
+                sprintf(D_80105118, D_ovl4_80255264, j, i);
+                check_and_print_grid(D_80105118, 4, -141);
+                collision_triangles[j] = collision_triangles[i];
+                bzero(&collision_triangles[i], sizeof(CollisionTriangle));
+            }
+            check_and_print_grid(D_ovl4_80255270, 19, 19);
+            return;
+        }
+    }
+}
 
 void func_80041AA8(void);
 void func_ovl4_80250DE4(void);
@@ -215,11 +245,8 @@ void func_ovl4_80250F04(void) {
     }
 }
 
-extern void bzero(void* address, s32 length);
-extern u8 collision_triangles[];
-
 void func_ovl4_80250F90(void) {
-    bzero(&collision_triangles, 0x3C00);
+    bzero(collision_triangles, sizeof(CollisionTriangle) * 160);
 }
 
 void func_ovl4_80250FB4(void) {
