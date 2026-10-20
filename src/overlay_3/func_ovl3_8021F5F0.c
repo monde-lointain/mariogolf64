@@ -7,8 +7,41 @@ extern u8* func_8005AF74(void);
 extern void flag_set(s32 flag);
 extern s8 D_801B60B8;
 extern GameModeRecord D_800FEDD8[];
+extern void* D_ovl3_8023B670;
+extern void* D_ovl3_8023B674;
+extern s32 D_ovl3_8023B678;
+extern void* D_ovl3_8023B67C;
+extern s32 D_ovl3_80230A90;
+extern s32 D_ovl3_80230A94;
+extern s32 D_ovl3_80230A98;
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F5F0);
+void func_ovl3_8021F5F0(void* arg0, s16 arg1) {
+    RomAssetLoad slot;
+
+    switch (arg1) {
+    case 1:
+        D_ovl3_8023B670 = arg0;
+        return;
+    case 2:
+        D_ovl3_8023B674 = arg0;
+        get_rom_asset_allocation_size(0x5F7, &slot);
+        load_rom_asset_payload(D_ovl3_8023B674, &slot);
+        return;
+    case 3:
+        D_ovl3_8023B678 = (s32) arg0;
+        get_rom_asset_allocation_size(0x70E, &slot);
+        load_rom_asset_payload((void*) D_ovl3_8023B678, &slot);
+        return;
+    case 4:
+        D_ovl3_8023B67C = arg0;
+        get_rom_asset_allocation_size(0x720, &slot);
+        load_rom_asset_payload(D_ovl3_8023B67C, &slot);
+        D_ovl3_80230A90 = 0;
+        D_ovl3_80230A94 = 0;
+        D_ovl3_80230A98 = 0;
+        return;
+    }
+}
 
 extern u16 D_800C2064[];
 extern void** D_ovl3_8023B680;
@@ -130,8 +163,6 @@ s16 func_ovl3_80220DF8(void) {
 s32 func_ovl3_80220E28(SupershotRecord* record) {
     return record->validation_flags >> 7;
 }
-
-extern s32 D_ovl3_8023B678;
 
 void func_ovl3_80220E34(Gfx** gfxp, s32 arg1, s32 arg2, s32 arg3, u8 arg4) {
     Gfx* gfx = *gfxp;
