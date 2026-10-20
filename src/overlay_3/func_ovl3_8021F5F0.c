@@ -17,6 +17,16 @@ extern s32 D_ovl3_80230A90;
 extern s32 D_ovl3_80230A94;
 extern s32 D_ovl3_80230A98;
 
+typedef struct {
+    u16 unknown_00;
+    u16 asset_index;
+} OverlayAssetEntry;
+
+extern void** D_ovl3_8023BD70;
+extern void** D_ovl3_8023BD74;
+extern s32 D_ovl3_80230B50[];
+extern OverlayAssetEntry D_ovl3_80230B5C[];
+
 void func_ovl3_8021F5F0(void* arg0, s16 arg1) {
     RomAssetLoad slot;
 
@@ -305,7 +315,49 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80221B20)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80221CC0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80221EBC);
+void func_ovl3_80221EBC(void** arg0, u8 arg1) {
+    RomAssetLoad asset;
+    u8* save;
+    s32* slots;
+    s32 i;
+    s32 idx;
+
+    save = func_8005AF74();
+    switch (arg1) {
+    case 1:
+        D_ovl3_8023BD70 = arg0;
+        i = 0;
+        {
+            OverlayAssetEntry* table = D_ovl3_80230B5C;
+            for (; i != 3; i++) {
+                idx = D_ovl3_80230B50[i];
+                if (idx == -1) {
+                    idx = 0;
+                }
+                get_rom_asset_allocation_size(table[idx].asset_index, &asset);
+                load_rom_asset_payload(D_ovl3_8023BD70[i], &asset);
+            }
+        }
+        get_rom_asset_allocation_size(0x70D, &asset);
+        load_rom_asset_payload(D_ovl3_8023BD70[3], &asset);
+        return;
+    case 2:
+        D_ovl3_8023BD74 = arg0;
+        slots = D_ovl3_80230B50;
+        {
+            OverlayAssetEntry* table = D_ovl3_80230B5C;
+            for (i = 0; i != 2; i++) {
+                idx = slots[(s8)save[0x43]];
+                if (idx == -1) {
+                    idx = 0;
+                }
+                get_rom_asset_allocation_size(table[idx].asset_index, &asset);
+                load_rom_asset_payload(D_ovl3_8023BD74[i], &asset);
+            }
+        }
+        return;
+    }
+}
 
 extern void* D_ovl3_8023BD78;
 extern void* D_ovl3_8023BD7C;
