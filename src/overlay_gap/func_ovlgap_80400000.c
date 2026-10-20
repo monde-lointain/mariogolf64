@@ -21,6 +21,7 @@ extern s32 D_ovlgap_8040C5AC;
 extern s32 D_ovlgap_8040C5B0;
 extern s32 D_ovlgap_8040C5B4;
 extern u8 D_ovlgap_8040C580[];
+extern u8 D_ovlgap_8040C585[];
 extern Mtx D_40CC98;
 extern Mtx D_8040CC98;
 extern Vtx D_ovlgap_8040C780[];
@@ -189,7 +190,38 @@ void func_ovlgap_80405B80(GridVertex *out, s32 col, s32 row, s32 t) {
     } while (i < 5);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405C94);
+/* Blends grid vertices (col, row) and (col, row + 1) by t/16 into the five edge slots of out.
+ * Only the z and texture_t fields are written; slot indices come from D_ovlgap_8040C585 at (row & 1) * 10. */
+void func_ovlgap_80405C94(GridVertex *out, s32 col, s32 row, s32 t) {
+    GridVertex *pair[2];
+    s32 inv_t;
+    s32 i;
+    s32 value;
+    GridVertex *slot;
+    s32 parity;
+    s32 off_lo;
+    s32 off_hi;
+    u8 *base;
+    u8 *table;
+
+    inv_t = 0x10 - t;
+    pair[0] = (GridVertex *) get_direct_grid_vertex(col, row);
+    pair[1] = (GridVertex *) get_direct_grid_vertex(col, row + 1);
+    parity = row & 1;
+    base = D_ovlgap_8040C585;
+    off_lo = parity << 1;
+    off_hi = parity << 3;
+    table = (off_hi + off_lo) + base;
+    for (i = 0; i < 5; i++) {
+        value = (pair[0]->z * inv_t) + (pair[1]->z * t);
+        slot = &out[table[i]];
+        if (value < 0) {
+            value += 0xF;
+        }
+        slot->z = value >> 4;
+        slot->texture_t = ((pair[0]->texture_t * inv_t) + (pair[1]->texture_t * t)) / 16;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80405DB0);
 
