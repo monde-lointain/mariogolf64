@@ -178,7 +178,31 @@ void func_ovl5_8024F688(s32 count, s32 *parallel_a, s32 *parallel_b, s32 *keys, 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F790);
+/* Strokes over par across the holes played so far; a hole scoring more than
+ * double par plus one counts as par - 1, and non-positive scores are skipped. */
+s32 func_ovl5_8024F790(s32 player) {
+    s32 i;
+    s32 over = 0;
+    s32 par_total = 0;
+    s32 par;
+    s32 score;
+
+    if (scenario_state_id.round_hole_index == 0) {
+        return 0;
+    }
+    for (i = 0; i < scenario_state_id.round_hole_index; i++) {
+        score = player_records[player].hole_scores[i].score;
+        par = D_800C1420[scenario_state_id.scenario_mode_id].holes[i].par;
+        if (par * 2 + 1 < score) {
+            score = par - 1;
+        }
+        if (score > 0) {
+            over += score;
+            par_total += par;
+        }
+    }
+    return over - par_total;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_5/func_ovl5_8024D800", func_ovl5_8024F844);
 
