@@ -264,7 +264,37 @@ void func_ovl3_8021CF10(void** destinations) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021CFAC);
+typedef u8 Ovl3AssetBlock[0x258];
+
+extern Ovl3AssetBlock* D_ovl3_8023B634;
+extern Ovl3AssetBlock* D_ovl3_8023B638;
+extern Ovl3AssetBlock* D_ovl3_8023B63C;
+
+void func_ovl3_8021CFAC(Ovl3AssetBlock* arg0, s16 arg1) {
+    RomAssetLoad asset;
+
+    switch (arg1) {
+    case 1:
+        D_ovl3_8023B634 = arg0;
+        break;
+    case 2:
+        D_ovl3_8023B638 = arg0;
+        get_rom_asset_allocation_size(0x6EF, &asset);
+        load_rom_asset_payload(D_ovl3_8023B638, &asset);
+        break;
+    case 3:
+        D_ovl3_8023B63C = arg0;
+        get_rom_asset_allocation_size(0x82D, &asset);
+        load_rom_asset_payload(D_ovl3_8023B63C[0], &asset);
+        get_rom_asset_allocation_size(0x82F, &asset);
+        load_rom_asset_payload(D_ovl3_8023B63C[1], &asset);
+        get_rom_asset_allocation_size(0x82E, &asset);
+        load_rom_asset_payload(D_ovl3_8023B63C[2], &asset);
+        get_rom_asset_allocation_size(0x830, &asset);
+        load_rom_asset_payload(D_ovl3_8023B63C[3], &asset);
+        break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021D0B8);
 
