@@ -944,7 +944,81 @@ s32 func_800432E4(s16* a, s16* b) {
   return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_8004333C);
+const char D_800CABAC[12] = "NormalError";
+
+double sqrt(double);
+
+s32 func_8004333C(s16* triangle, s32* plane) {
+  s32 dy1 = triangle[6];
+  s32 dz2 = triangle[10];
+  s32 dy2;
+  s32 dz1;
+  s32 dx1;
+  s32 dx2;
+  s32 nx;
+  s32 ny;
+  s32 nz;
+  s32 d;
+  s32 mag;
+  s32 len;
+
+  dy1 -= triangle[5];
+  dz2 -= triangle[8];
+  dy2 = triangle[7] - triangle[5];
+  dz1 = triangle[9] - triangle[8];
+  dx1 = triangle[3] - triangle[2];
+  dx2 = triangle[4] - triangle[2];
+  nx = dy1 * dz2 - dy2 * dz1;
+  ny = -dx1 * dz2 + dx2 * dz1;
+  nz = -dy1 * dx2 + dy2 * dx1;
+  d = -(nx * triangle[2] + ny * triangle[5] + nz * triangle[8]);
+
+  for (;;) {
+    mag = nx;
+    if (nx < 0) {
+      mag = -nx;
+    }
+    if (mag < 0x4001) {
+      mag = ny;
+      if (ny < 0) {
+        mag = -ny;
+      }
+      if (mag < 0x4001) {
+        mag = nz;
+        if (nz < 0) {
+          mag = -nz;
+        }
+        if (mag < 0x4001) {
+          break;
+        }
+      }
+    }
+    nx /= 256;
+    ny /= 256;
+    nz /= 256;
+    d /= 256;
+  }
+
+  len = (s32) sqrt((f64) (nx * nx + ny * ny + nz * nz));
+  if (len == 0) {
+    check_and_print_grid((char*)D_800CABAC, 3, 0xF);
+    plane[0] = 0;
+    plane[1] = 0x100;
+    plane[2] = 0;
+    plane[3] = 0;
+    plane[4] = 0x100;
+    return -1;
+  }
+  if (ny < 0) {
+    len = -len;
+  }
+  plane[0] = (nx << 8) / len;
+  plane[1] = (ny << 8) / len;
+  plane[2] = (nz << 8) / len;
+  plane[3] = (d << 8) / len;
+  plane[4] = 0x100;
+  return 0;
+}
 
 extern f32 sqrtf(f32);
 extern s8 g_debug_mode_enabled;
