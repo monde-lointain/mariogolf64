@@ -8,3 +8,5 @@ web_search:
   enabled: false
 todo:
   enabled: false
+providers:
+  cacheRetention: short
