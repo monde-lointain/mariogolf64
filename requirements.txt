@@ -2,17 +2,17 @@
 splat64[mips]==0.50.1
 spimdisasm==1.42.4
 rabbitizer==1.16.2
-pyyaml
+pyyaml==6.0.3
 
 # permuter
-toml
-pycparser
+toml==0.10.2
+pycparser==3.11
 
 # asm-differ
-colorama
-watchdog
-levenshtein
-cxxfilt
+colorama==0.4.6
+watchdog==6.0.0
+levenshtein==0.27.5
+cxxfilt==0.3.0
 
 # mips2c
 m2c @ git+https://github.com/matt-kempster/m2c.git@708d2d2cb2698f091a92492b328f73b24209f72d

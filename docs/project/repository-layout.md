@@ -47,7 +47,7 @@ Hand-written sources live in `src/` and `include/`. The build generates `asm/`, 
 | `symbol_addrs.txt` | Symbol names, types and addresses ([format reference](/reference/symbol-addrs-format.md)). |
 | `reloc_addrs.txt` | Splat entrypoint relocations. |
 | `linker_scripts/` | `hardware_regs.ld` and `n64_os_syms.ld`, linked with the generated script. |
-| `requirements.txt` | Python packages: Splat (`splat64`) with `spimdisasm`, `rabbitizer` and `pyyaml`; `toml` and `pycparser` for the permuter; `colorama`, `watchdog`, `levenshtein` and `cxxfilt` for asm-differ; `m2c`, pinned to a git commit. |
+| `requirements.txt` | Python packages, each pinned to one version: Splat (`splat64`) with `spimdisasm`, `rabbitizer` and `pyyaml`; `toml` and `pycparser` for the permuter; `colorama`, `watchdog`, `levenshtein` and `cxxfilt` for asm-differ; `m2c`, pinned to a git commit. |
 | `diff_settings.py` | asm-differ configuration: map file `build/mariogolf64.map`, source directories `src`, `include` and `asm`. |
 | `permuter_settings.toml` | decomp-permuter configuration. `tools/permuter` reads flags from `make print-cflags`. |
 | `decomp.yaml` | Project metadata: ROM SHA1 and build paths. [Progress](/tools/progress.md) reads the map path from it. |
