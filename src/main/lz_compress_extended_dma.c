@@ -2,7 +2,7 @@
 #include "session.h"
 
 /* Terrain/hole-loader module state. */
-extern s32 g_terrain_enable_gate;
+extern volatile s32 g_terrain_enable_gate;
 extern s8 g_terrain_vtx_xform_mode;
 extern s32 scenario_mode_id;
 /*
@@ -58,6 +58,22 @@ extern s32 D_80105B20[];
 extern s32 D_80104E70[];
 extern s32 D_8010CF60[];
 extern s32 D_80106148[];
+
+/* func_80069D08 deps (hole-terrain loader thread). */
+extern volatile s32 g_frame_counter;
+extern s32 D_80105318;
+extern const char D_800D13C0[];
+extern const char D_800D13CC[];
+extern const char D_800D13E4[];
+extern const char D_800D13EC[];
+extern const char D_800D13F4[];
+extern const char D_800D13FC[];
+extern const char D_800D1404[];
+extern void flag_set(s32 flag);
+extern void flag_clear(s32 flag);
+extern s32 func_80054310(void);
+extern void func_802541E8(void);
+extern void init_sky_pool_and_world_state(void);
 
 typedef struct {
   u8* source_cursor;
@@ -295,7 +311,68 @@ void func_80069CE4(void) {
   func_80069BCC();
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/lz_compress_extended_dma", func_80069D08);
+void func_80069D08(void *arg0) {
+  s32 course_id;
+  const char *msg;
+
+  for (;;) {
+    do {
+    } while (g_terrain_enable_gate != 0);
+    course_id = get_current_course_id();
+    if ((u32)(g_frame_counter - D_80105318) < 3) {
+      do {
+      } while ((u32)(g_frame_counter - D_80105318) < 3);
+    }
+    msg = D_800D13C0;
+    for (;;) {
+      osSyncPrintf(msg);
+      if (func_80054310() == 0) {
+        break;
+      }
+      msg = D_800D13CC;
+    }
+    if (flag_is_set(0x51) != 0 && round_hole_index[0] == 0) {
+      flag_set(0x12);
+    } else {
+      flag_clear(0x12);
+    }
+    flag_clear(7);
+    if (course_id == 4) {
+      flag_set(0x12);
+      flag_set(0x60);
+    } else {
+      if ((u32)course_id < 2 || course_id == 3 || course_id == 5) {
+        flag_set(0x12);
+      } else {
+        flag_clear(0x12);
+      }
+      flag_clear(0x60);
+    }
+    if (course_id == 1 && round_hole_index[0] == 7) {
+      flag_set(0x69);
+    } else {
+      flag_clear(0x69);
+    }
+    osSyncPrintf(D_800D13E4);
+    func_800690C0();
+    osSyncPrintf(D_800D13EC);
+    func_800695F8();
+    osSyncPrintf(D_800D13F4);
+    func_8006955C();
+    func_80069BCC();
+    osSyncPrintf(D_800D13FC);
+    func_802541E8();
+    osSyncPrintf(D_800D1404);
+    init_sky_pool_and_world_state();
+    flag_set(7);
+    if (flag_is_set(0x43) != 0) {
+      for (;;) {
+      }
+    }
+    g_terrain_enable_gate = 1;
+    osDestroyThread(&D_800E1A50);
+  }
+}
 
 void func_80069F28(void) { g_terrain_enable_gate = 1; }
 
