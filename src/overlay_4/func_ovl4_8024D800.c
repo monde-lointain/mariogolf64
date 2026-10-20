@@ -367,6 +367,7 @@ void func_ovl4_8024F4DC(void) {
 }
 
 s32 validate_heap_string_with_output(char* source_string, s32* result_out);
+s32 validate_heap_string(char* source_string, s32 allocation_tag);
 s32 ci8_to_rgba5551(s32 index);
 
 /* Stores color at pixel (x, y) of the 256x512 terrain map; ignores pixels outside it. */
@@ -646,7 +647,40 @@ block_15:
     osSyncPrintf(D_ovl4_8025524C);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_802509BC);
+void func_ovl4_802509BC(s32 arg0, s32 arg1) {
+    char buf[0x80];
+    s32 x;
+    s32 y;
+
+    sprintf(buf, D_ovl4_80255168, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x2520);
+    sprintf(buf, D_ovl4_80255188, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x8000);
+    sprintf(buf, D_ovl4_802551A8, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x800);
+    sprintf(buf, D_ovl4_802551C8, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x34);
+    sprintf(buf, D_ovl4_802551E8, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x120);
+    sprintf(buf, D_ovl4_80255208, arg0, arg0, arg1);
+    validate_heap_string(buf, 0x3C00);
+    if (D_ovl4_802543A8 != 0) {
+        func_ovl4_8024F790();
+        D_ovl4_802543A8 = 0;
+    }
+    D_ovl4_8025D354 = (u8 *)0x8030F800;
+    D_ovl4_8025D350 = (u8 *)0x8030F800;
+    for (y = 0; y < 0x200; y++) {
+        for (x = 0; x < 0x100; x++) {
+            D_ovl4_8025D354 = &D_ovl4_8025D350[y * 0x100 + x];
+            *D_ovl4_8025D354 = func_800402F4(get_tile_color(x, y));
+        }
+    }
+    sprintf(buf, D_ovl4_80255228, arg0, arg0, arg1);
+    if (validate_heap_string(buf, 0x20000) == 0) {
+        D_ovl4_8025D354 = D_ovl4_8025D350;
+    }
+}
 
 typedef struct CollisionTriangle {
     s32 active;
