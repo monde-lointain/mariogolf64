@@ -282,23 +282,7 @@ void func_ovlgap_80407F08(s32 *arg0, s32 arg1, char *arg2) {
     heap3_free(&buffer_start);
 }
 
-/* Writes the midpoint of two grid vertices to ov; the flags halfword is cleared. */
-void func_ovlgap_80408080(GridVertex* av, GridVertex* bv, GridVertex* ov) {
-    s32 tmp[2];
-    s32 uninit;
-
-    tmp[0] = uninit;
-    ov->x = (av->x + bv->x) / 2;
-    ov->height = (av->height + bv->height) / 2;
-    ov->z = (av->z + bv->z) / 2;
-    ov->vertex_flags = 0;
-    ov->texture_s = (av->texture_s + bv->texture_s) / 2;
-    ov->texture_t = (av->texture_t + bv->texture_t) / 2;
-    ov->color_r = (av->color_r + bv->color_r) / 2;
-    ov->color_g = (av->color_g + bv->color_g) / 2;
-    ov->color_b = (av->color_b + bv->color_b) / 2;
-    ov->color_a = (av->color_a + bv->color_a) / 2;
-}
+INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80408080);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80408170);
 
