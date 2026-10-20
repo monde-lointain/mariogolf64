@@ -12,6 +12,11 @@ extern s32 D_800C5EE8;
 extern s32 D_800C72F8;
 extern s32 D_800C72FC;
 extern s32 D_800C7300;
+extern s32 D_800C5EEC;
+extern s32 D_800C5EF4;
+extern s32 D_800C5EF8;
+extern s32 putter_mode_flag;
+extern s32 g_fog_presetA_color_r[5];
 
 extern s32 round_hole_index;
 extern s32 scenario_mode_id;
@@ -278,7 +283,37 @@ void emit_lens_flare_dl(Gfx** gfxp) {
   *gfxp = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_8008DDDC);
+void func_8008DDDC(void) {
+    FogPreset* cur;
+    FogPreset* next;
+    s32* pflag;
+    s32 i;
+    s32 j;
+
+    if (D_800C5EF4 < D_800C5EF8) {
+        D_800C5EF4 += 1;
+    }
+    pflag = &putter_mode_flag;
+    cur = &D_800C6014[get_current_course_id()][(*pflag * 4) + D_800C5EEC];
+    next = &D_800C6014[get_current_course_id()][(*pflag * 4) + D_800C5EEC + 1];
+
+    for (i = 0; i != 4; i++) {
+        for (j = 0; j != 3; j++) {
+            D_800C69CC[i][0].rgb[j] = cur->color_set_t[j] + (((next->color_set_t[j] - cur->color_set_t[j]) * D_800C5EF4) / 1000);
+            D_800C69CC[i][1].rgb[j] = cur->color_set_b[j] + (((next->color_set_b[j] - cur->color_set_b[j]) * D_800C5EF4) / 1000);
+            D_800C69CC[i][2].rgb[j] = cur->color_set_b[j] + (((next->color_set_b[j] - cur->color_set_b[j]) * D_800C5EF4) / 1000);
+            D_800C69CC[i][3].rgb[j] = cur->color_set_t[j] + (((next->color_set_t[j] - cur->color_set_t[j]) * D_800C5EF4) / 1000);
+            D_800C69CC[i][4].rgb[j] = cur->color_set_t[j] + (((next->color_set_t[j] - cur->color_set_t[j]) * D_800C5EF4) / 1000);
+        }
+    }
+
+    for (j = 0; j != 3; j++) {
+        g_fog_presetA_color_r[j] = cur->fog_color_rgb[j] + (((next->fog_color_rgb[j] - cur->fog_color_rgb[j]) * D_800C5EF4) / 1000);
+    }
+
+    g_fog_presetA_color_r[3] = cur->fog_z_min + (((next->fog_z_min - cur->fog_z_min) * D_800C5EF4) / 1000);
+    g_fog_presetA_color_r[4] = cur->fog_z_max + (((next->fog_z_max - cur->fog_z_max) * D_800C5EF4) / 1000);
+}
 
 /* Integer lerp, truncated: a0*(1-t) + a1*t, t in $a2 (o32 GPR).
  *
