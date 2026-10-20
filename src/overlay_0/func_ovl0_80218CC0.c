@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/controller.h"
 #include "../main/rom_asset.h"
 
 extern void heap3_free(void** payload_ptr);
@@ -165,8 +166,6 @@ void func_ovl0_8021A6BC(s32 arg0) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80218CC0", func_ovl0_8021A724);
-
 typedef struct Ovl0Entry {
     s32 unk0;
     s32 unk4;
@@ -174,10 +173,62 @@ typedef struct Ovl0Entry {
     u8 unkC[8];
 } Ovl0Entry;
 
+extern Ovl0Entry D_ovl0_80224928[];
+
+s32 func_ovl0_8021A724(ControllerState *input) {
+    Ovl0Entry *temp_s1;
+
+    temp_s1 = &D_ovl0_80224928[D_ovl0_80224A98];
+    if (D_ovl0_80224A98 != -1) {
+        switch (D_ovl0_80224A90) {
+        case 1:
+            D_ovl0_80224A90 = 2;
+            return -1;
+        case 2:
+            func_ovl0_8021A6BC(-1);
+            return temp_s1->unkC[4 + D_ovl0_80224A9C];
+        case 0:
+            if (input->pressed == 0x8000) {
+                play_sound_effect(0x5D, D_800C0E60, 0x64);
+                D_ovl0_80224A90 = 1;
+                return -1;
+            }
+            if (temp_s1->unk8 == 0) {
+                if (input->repeated & 0x200) {
+                    D_ovl0_80224A9C -= 1;
+                    play_sound_effect(0x5C, D_800C0E60, 0x64);
+                }
+                if (input->repeated & 0x100) {
+                    D_ovl0_80224A9C += 1;
+                    play_sound_effect(0x5C, D_800C0E60, 0x64);
+                }
+            } else {
+                if (input->repeated & 0x800) {
+                    play_sound_effect(0x5C, D_800C0E60, 0x64);
+                    D_ovl0_80224A9C -= 1;
+                }
+                if (input->repeated & 0x400) {
+                    play_sound_effect(0x5C, D_800C0E60, 0x64);
+                    D_ovl0_80224A9C += 1;
+                }
+            }
+            if ((temp_s1->unk0 - 1) < D_ovl0_80224A9C) {
+                D_ovl0_80224A9C = 0;
+            }
+            if (D_ovl0_80224A9C < 0) {
+                D_ovl0_80224A9C = temp_s1->unk0 - 1;
+            }
+            return -1;
+        default:
+            return -1;
+        }
+    }
+    return -1;
+}
+
 extern void func_80071608(Gfx **);
 extern s32 func_800738BC(u8 *, s32, s32);
 extern void func_800747B0(Gfx **, s32, s32, u8 *);
-extern Ovl0Entry D_ovl0_80224928[];
 extern u8 *D_ovl0_80224978[];
 extern f32 D_ovl0_80224AA0;
 extern f32 D_ovl0_80224AA4;
