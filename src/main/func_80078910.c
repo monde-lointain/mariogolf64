@@ -273,9 +273,46 @@ void func_80079358(s32 arg0, s32 arg1) {
   }
 }
 
-/* func_8007955C: particle-spawn + RTS-matrix builder. The remaining mismatch is a
- * gcc-2.7.2 sched.c schedule-order tie. */
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", func_8007955C);
+void func_8007955C(s32* arg0) {
+  f32 translation[3];
+  f32 rotation[3];
+  f32 scale[3];
+  f32 matrix[4][4];
+  s32 i;
+  Particle* p;
+
+  for (i = 0; i != 40; i++) {
+    p = &particle_array[i];
+    if (p->effect_kind == -1) {
+      p->position.x = (f32)arg0[0] * (1.0f / 1024.0f);
+      p->position.y = (f32)arg0[1] * (1.0f / 1024.0f);
+      p->position.z = (f32)arg0[2] * (1.0f / 1024.0f);
+      p->velocity.x = 0.0f;
+      p->velocity.y = 0.0f;
+      p->velocity.z = 0.0f;
+      p->opacity = 95.0f;
+      p->opacity_step = -2.0f;
+      p->size = 1.0f;
+      p->size_step = 0.1f;
+      p->effect_kind = 0xC;
+      p->effect_frame = 0;
+      p->matrix_index = (s8)frame_counter;
+      translation[0] = p->position.x;
+      translation[1] = p->position.y;
+      translation[2] = p->position.z;
+      rotation[0] = 0.0f;
+      rotation[1] = 0.0f;
+      rotation[2] = 0.0f;
+      scale[0] = p->size;
+      scale[1] = p->size;
+      frame_counter = (frame_counter + 1) % 40;
+      scale[2] = p->size;
+      mtx_from_rts(matrix, rotation, translation, scale);
+      convert_and_pack_floats_to_fixed(matrix, &D_800FD8F0[p->matrix_index]);
+      return;
+    }
+  }
+}
 
 extern f64 D_800D1978;
 extern f64 D_800D1980;
