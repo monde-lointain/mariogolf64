@@ -124,7 +124,28 @@ void func_ovl0_80203E58(void) {
     D_800C3090 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203EEC);
+extern s32 D_800C3080;
+extern void func_ovl0_80203B4C(void);
+
+static inline void func_ovl0_80203EEC_set_radius(s32 index) {
+    if (index != 0) {
+        s32 radius[3];
+
+        radius[0] = -0xF000;
+        radius[2] = -0x4E00;
+        D_800FBE7C[0] = radius[index];
+    } else {
+        D_800FBE7C[0] = -0xF000;
+        D_800FBE7C[2] = -0x4E00;
+    }
+}
+
+void func_ovl0_80203EEC(void) {
+    func_ovl0_80203EEC_set_radius(0);
+    D_800C3070 = 0;
+    D_800C3080 = 0;
+    func_ovl0_80203B4C();
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80203F30);
 
