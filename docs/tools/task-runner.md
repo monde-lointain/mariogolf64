@@ -22,7 +22,7 @@ nigel <task> --shard 1/4
 | Key | Value here |
 |---|---|
 | `agent` | `omp` (nigel adds `-p --mode json --approval-mode yolo`) |
-| `verify_command` | `./tools/verify-candidate` ([gate](/tools/verify-candidate.md): protected paths, baserom hash, then `build-and-verify.sh`) |
+| `verify_command` | `./tools/verify-candidate` ([gate](/tools/verify-candidate.md): protected paths, baserom hash, new pointer arithmetic on changed lines, then `build-and-verify.sh`) |
 | `success_command` | `git add -A && git commit -m "task-runner($TASK_NAME): fix $CANDIDATE"` (tasks override it) |
 | `reset_command` | `git clean -f; git reset --hard HEAD || true` |
 

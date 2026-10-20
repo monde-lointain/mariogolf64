@@ -7,7 +7,10 @@ Checks run in order; the first failure ends the run with one line on stderr:
   2. baserom.z64 hashes to the sha1 recorded in mariogolf64.sha1.
   3. With --decompiled FUNCTION: FUNCTION is defined in src/**/*.c and no
      INCLUDE_ASM("...", FUNCTION) line remains.
-  4. ./tools/build-and-verify.sh passes (the full ROM SHA1 check).
+  4. Pointer arithmetic on casts (tools/check_pointer_arithmetic.py) on lines that
+     project C files add or change relative to HEAD. Existing violations on other
+     lines do not fail; a file the checker cannot parse only warns.
+  5. ./tools/build-and-verify.sh passes (the full ROM SHA1 check).
 
 Not checked: asm/ (build-and-verify regenerates it from baserom.z64) and
 tools/gcc_kmc (gitignored; make setup downloads the latest unpinned release,
@@ -23,7 +26,9 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -185,6 +190,133 @@ def check_decompiled(root: Path, function: str) -> Optional[str]:
     return None
 
 
+POINTER_ARITHMETIC_FIX = (
+    "use the struct or array type (field access or arr[i]) instead of casting to an "
+    "integer or byte pointer"
+)
+HUNK_HEADER = re.compile(r"^@@ -\d+(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+
+def added_lines(diff: str) -> dict[str, set[int]]:
+    """Map each file in a `git diff -U0 --no-prefix` to the new-side lines it adds or changes.
+
+    Hunk bodies are read by their line counts, because a removed or added line can
+    itself begin with "--- " or "+++ ".
+    """
+    changed: dict[str, set[int]] = {}
+    name: Optional[str] = None
+    removed = added = new_line = 0
+    for text in diff.splitlines():
+        if removed or added:
+            if removed and text.startswith("-"):
+                removed -= 1
+            elif added and text.startswith("+"):
+                if name is not None:
+                    changed[name].add(new_line)
+                new_line += 1
+                added -= 1
+            continue
+        if text.startswith("+++ "):
+            path = text[4:].rstrip("\t")
+            name = None if path == "/dev/null" else path
+            if name is not None:
+                changed.setdefault(name, set())
+        elif text.startswith("@@"):
+            match = HUNK_HEADER.match(text)
+            removed = int(match.group(1) or 1)
+            new_line = int(match.group(2))
+            added = int(match.group(3) or 1)
+    return changed
+
+
+def expression_at(line: str, column: int) -> str:
+    """The expression starting at a 1-based column: up to an unmatched ')' or ']', or a ',' or ';' outside brackets."""
+    text = line[column - 1:] if 0 < column <= len(line) else line
+    depth = 0
+    for index, char in enumerate(text):
+        if char in "([":
+            depth += 1
+        elif char in ")]":
+            if depth == 0:
+                return text[:index].strip()
+            depth -= 1
+        elif char in ",;" and depth == 0:
+            return text[:index].strip()
+    return text.strip()
+
+
+def check_new_pointer_arithmetic(root: Path) -> Optional[str]:
+    """Reject pointer arithmetic on casts in lines a candidate adds or changes in project C files.
+
+    The diff base is HEAD, so staged and unstaged edits count and a new file counts in
+    full. Violations on other lines are existing debt and pass. A file the checker cannot
+    parse is warned about by the checker and passes.
+    """
+    try:
+        import check_pointer_arithmetic as checker
+    except ImportError as exc:
+        return (
+            f"cannot import tools/check_pointer_arithmetic.py ({exc}); "
+            "install requirements.txt into .venv"
+        )
+    diff = subprocess.run(
+        ["git", "-c", "core.quotePath=false", "diff", "-U0", "--no-color", "--no-ext-diff",
+         "--no-prefix", "HEAD", "--", "*.c"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "-z", "--", "*.c"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    if diff.returncode != 0 or untracked.returncode != 0:
+        return f"git diff failed: {(diff.stderr or untracked.stderr).strip()}"
+    changed = added_lines(diff.stdout)
+    for name in filter(None, untracked.stdout.split("\0")):
+        text = (root / name).read_text(encoding="utf-8", errors="replace")
+        changed.setdefault(name, set()).update(range(1, len(text.splitlines()) + 1))
+
+    failures = []
+    for name in sorted(changed):
+        path = (root / name).resolve()
+        if not checker.is_project_owned(path, checker.ROOT):
+            continue
+        violations = checker.check_file(path)
+        if violations is None:
+            continue
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        for violation in violations:
+            if violation["line"] not in changed[name] or not violation["file"]:
+                continue
+            if Path(violation["file"]).resolve() != path:
+                continue
+            expression = expression_at(lines[violation["line"] - 1], violation["column"])
+            failures.append(f'{name}:{violation["line"]} "{expression}"')
+    if failures:
+        return (
+            "pointer arithmetic on lines this candidate adds or changes: "
+            + "; ".join(failures) + "; " + POINTER_ARITHMETIC_FIX
+        )
+    return None
+
+
+def rerun_under_project_venv(root: Path) -> None:
+    """Re-run this script under .venv/bin/python3 when this interpreter lacks pycparser.
+
+    The pointer-arithmetic check needs pycparser from requirements.txt, and nigel starts
+    this file with `#!/usr/bin/env python3`, which may be a Python without it. With no
+    venv, nothing is re-run and the check reports the missing import.
+    """
+    if importlib.util.find_spec("pycparser") is not None:
+        return
+    venv_python = root / ".venv" / "bin" / "python3"
+    if venv_python.exists() and Path(sys.executable).absolute() != venv_python.absolute():
+        os.execv(str(venv_python), [str(venv_python), str(Path(__file__).resolve()), *sys.argv[1:]])
+
+
 def run_build(root: Path) -> int:
     return subprocess.run([BUILD_AND_VERIFY], cwd=root).returncode
 
@@ -223,6 +355,8 @@ def main(
     reason = check_protected_paths(root) or check_baserom(root)
     if reason is None and function is not None:
         reason = check_decompiled(root, function)
+    if reason is None:
+        reason = check_new_pointer_arithmetic(root)
     if reason is not None:
         return fail(reason)
 
@@ -236,4 +370,5 @@ def main(
 
 
 if __name__ == "__main__":
+    rerun_under_project_venv(Path(__file__).resolve().parent.parent)
     sys.exit(main())

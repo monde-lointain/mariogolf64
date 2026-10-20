@@ -13,7 +13,7 @@ These decide whether the ROM matches.
 
 * `Makefile`: extraction (`make extract`), compile, link, and the SHA1 check. The `COMPILER PROFILES` section holds per-directory and per-file flags ([profiles](/project/compiler-profiles.md)).
 * `tools/build-and-verify.sh`: re-extract, rebuild, check `mariogolf64.sha1` ([tool](/tools/build-and-verify.md)). It is the body of the verify gate and of the pre-commit hook.
-* `tools/verify-candidate`: nigel's `verify_command`. Checks protected paths, the baserom hash and (with `--decompiled`) that the function is in `src/` without `INCLUDE_ASM`, then runs build-and-verify ([tool](/tools/verify-candidate.md)). Its test is `tools/test_verify_candidate.py`.
+* `tools/verify-candidate`: nigel's `verify_command`. Checks protected paths, the baserom hash, (with `--decompiled`) that the function is in `src/` without `INCLUDE_ASM`, and new pointer arithmetic on changed lines, then runs build-and-verify ([tool](/tools/verify-candidate.md)). Its test is `tools/test_verify_candidate.py`.
 * `tools/git-hooks/pre-commit`, installed by `tools/install-git-hooks.sh` during `make setup` ([hook](/harness/git-hook-and-ci.md)).
 * `tools/n64crc.py`: fixes the ROM header CRC for `make nonmatching`.
 * `tools/kmc-cc`, `tools/gcc_kmc/`: the pinned KMC GCC 2.7.2 toolchain. **Protected.**
@@ -90,4 +90,4 @@ bun test ./.omp/hooks/tests/mg64-policy.test.ts
 | `test_selection_tiers.py` | `score_functions.py`, `list_decomp_candidates.py`, and difficulty ledger tier selection |
 | `test_sync_shard.py` | `sync-shard` |
 | `test_target_prelude.py` | `decomp-env-template/prelude.inc` |
-| `test_verify_candidate.py` | `verify-candidate` (includes INCLUDE_ASM checks) |
+| `test_verify_candidate.py` | `verify-candidate` (includes INCLUDE_ASM and pointer-arithmetic checks) |

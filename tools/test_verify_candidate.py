@@ -8,16 +8,23 @@ import importlib.util
 import io
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 TOOLS_DIR = Path(__file__).resolve().parent
 SCRIPT = TOOLS_DIR / "verify-candidate"
+sys.path.insert(0, str(TOOLS_DIR))
+import check_pointer_arithmetic as checker  # noqa: E402  (tools/ is not on sys.path under unittest)
 
 BASEROM = b"reference rom bytes for the fixture\n"
 BASEROM_SHA1 = hashlib.sha1(BASEROM).hexdigest()
+
+# Pointer arithmetic on a cast; the checker reports this as a violation.
+CAST_OFFSET = "char g(void *p) { return *((char*)p + 4); }\n"
 
 
 def load_gate():
@@ -257,6 +264,76 @@ class BuildTest(GateTestCase):
 
     def test_script_is_executable(self):
         self.assertTrue(os.access(SCRIPT, os.X_OK))
+
+
+class PointerArithmeticTest(GateTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        for patcher in (
+            mock.patch.object(checker, "ROOT", self.root),
+            # Skips `make print-cflags`, which the fixture repo cannot run.
+            mock.patch.object(checker, "profile_flags", return_value=[]),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def commit_file(self, rel: str) -> None:
+        git(self.root, "add", rel)
+        git(self.root, "commit", "-qm", f"commit {rel}")
+
+    def test_violation_on_added_line_is_rejected_before_build(self):
+        write(self.root, "src/main/done.c", "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET)
+        code, err, build = self.gate_run([])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(build.calls, 0)
+        self.assertIn('src/main/done.c:4 "(char*)p + 4"', err)
+        self.assertEqual(len(err.strip().splitlines()), 1)
+
+    def test_violation_on_untouched_line_passes(self):
+        # Prepending a line moves the committed violation to line 5; only line 1 changed.
+        write(self.root, "src/main/done.c", "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET)
+        self.commit_file("src/main/done.c")
+        write(self.root, "src/main/done.c", "/* note */\n" + "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET)
+        code, err, build = self.gate_run([])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(build.calls, 1)
+
+    def test_edited_violating_line_is_rejected(self):
+        write(self.root, "src/main/done.c", "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET)
+        self.commit_file("src/main/done.c")
+        write(self.root, "src/main/done.c", "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET.replace("+ 4", "+ 8"))
+        code, err, build = self.gate_run([])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(build.calls, 0)
+        self.assertIn('src/main/done.c:4 "(char*)p + 8"', err)
+
+    def test_staged_violation_counts_against_head(self):
+        write(self.root, "src/main/done.c", "void func_a(void) {\n    return;\n}\n" + CAST_OFFSET)
+        git(self.root, "add", "src/main/done.c")
+        code, err, build = self.gate_run([])
+        self.assertNotEqual(code, 0)
+        self.assertIn('src/main/done.c:4 "(char*)p + 4"', err)
+
+    def test_new_untracked_file_is_checked_in_full(self):
+        write(self.root, "src/main/new.c", CAST_OFFSET)
+        code, err, build = self.gate_run([])
+        self.assertNotEqual(code, 0)
+        self.assertEqual(build.calls, 0)
+        self.assertIn('src/main/new.c:1 "(char*)p + 4"', err)
+
+    def test_unparsable_changed_file_warns_and_passes(self):
+        write(self.root, "src/main/broken.c", "int func_x( {\n")
+        code, err, build = self.gate_run([])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(build.calls, 1)
+        self.assertIn("Warning", err)
+        self.assertIn("broken.c", err)
+
+    def test_vendored_source_is_not_checked(self):
+        write(self.root, "src/libultra/x.c", CAST_OFFSET)
+        code, err, build = self.gate_run([])
+        self.assertEqual(code, 0, err)
+        self.assertEqual(build.calls, 1)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-10-19
+* **Update**: [verify-candidate](/tools/verify-candidate.md) rejects pointer arithmetic on lines the candidate adds or changes, before the build; 13 of 34 audited tier-2 matches used it. Existing violations on untouched lines do not block.
 * **Update**: Tier 2's stall limit drops from 30 to 12 ([difficulty ledger](/tools/difficulty-ledger.md)). In 40 matched Opus tier-2 runs the longest non-improving gap before a match was 10 attempts, and failed runs past 12 attempts were 16% of failed tier-2 spend.
 * **Update**: `.omp/config.yml` sets `providers.cacheRetention: short`. Every run had written cache at the 1-hour price (2× input, 41% of Haiku spend) although the median gap between turns is 5 s and 0.34% of gaps exceed 5 minutes; the 5-minute price is 1.25× input.
 * **Update**: An unused local array may fill unexplained frame space when the frame size is the only remaining difference, commented `/* unused: original frame space */` ([registers and scheduling](/reference/kmc-gcc/registers-and-scheduling.md#stack-frames)). On 2026-10-19 six functions at 96 to 99.5% (for example `func_ovl4_80251610` at 99.48%) were given up for this alone.

@@ -18,7 +18,7 @@
 # Automation (nigel)
 
 * [task-runner (nigel)](task-runner.md) - nigel tasks that run an omp agent over candidate lists with verify, commit and reset handling; layout, task catalog, worktree rules.
-* [verify-candidate](verify-candidate.md) - The gate nigel runs before committing a candidate: protected paths, baserom hash, optional decompiled-in-src check, then build-and-verify.
+* [verify-candidate](verify-candidate.md) - The gate nigel runs before committing a candidate: protected paths, baserom hash, optional decompiled-in-src check, new pointer arithmetic on changed lines, then build-and-verify.
 * [Difficulty ledger and tiers](difficulty-ledger.md) - Shared record of each decompilation attempt's outcome, the difficulty tier that follows from a function's failure history, and the per-environment .run.json that sets the stall limit.
 * [new-worktree](new-worktree.md) - Create a sibling git worktree on a new branch with the gitignored build inputs (baserom, gcc_kmc, .venv, submodules) copied or linked from the main checkout, then build it.
 * [Shard integration (sync-shard, integrate-shards, merge-decomp-c)](shard-integration.md) - Shard worktrees: sync-shard rebases a shard before each candidate, integrate-shards cherry-picks shard commits behind a build gate, merge-decomp-c resolves src conflicts.
