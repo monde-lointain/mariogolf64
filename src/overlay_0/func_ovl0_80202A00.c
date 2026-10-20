@@ -780,26 +780,7 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802080D4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80208120);
 
-extern void func_8005637C(s32 id, u8 value);
-
-/* Nested-function original (parent func_ovl0_802088B0 not recovered): the
- * uninitialized `chain` stands in for the static chain in $v0, saved by the
- * dead `unused` store and dereferenced for the parent's player index. Reusing
- * `chain` for the flag test ties it to $v0. Sets the active player's
- * character unknown_60 flag from the club's flag bit 0 unless D_800C308C is 4. */
-void func_ovl0_8020816C(void) {
-    s32 *chain;
-    s32 * volatile unused = chain;
-    s32 flags;
-
-    flags = get_club_param(player_records[*chain].club_ids[active_club_id])->flags;
-    chain = (s32 *)(flags & 1);
-    if (chain && (D_800C308C != 4)) {
-        func_8005637C(0, 1);
-    } else {
-        func_8005637C(0, 0);
-    }
-}
+INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020816C);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802081F8);
 
