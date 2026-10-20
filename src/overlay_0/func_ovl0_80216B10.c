@@ -5,7 +5,8 @@ extern s32 D_800C1B70;
 extern s32 D_ovl0_802246F8;
 extern s32 D_ovl0_80224860;
 extern u8 D_ovl0_802291D8;
-extern s8 D_ovl0_80229236;
+extern s8 D_ovl0_80229236[5];
+extern u8 D_ovl0_8022923B[5];
 extern s32 D_800FBE64;
 extern s32 D_800FBE68;
 extern s32 target_z;
@@ -27,7 +28,7 @@ void func_ovl0_80216B10(void) {
     D_800C1B70 = 0;
     D_ovl0_802246F8 = -1;
     do {
-        *(&D_ovl0_80229236 + i) = -1;
+        D_ovl0_80229236[i] = -1;
         i += 1;
     } while (i != 5);
     i = 0;
@@ -80,9 +81,21 @@ void func_ovl0_80216C18(void) {
     } while (i != 0x10);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80216B10", func_ovl0_80216C58);
+s32 func_ovl0_80216C58(void) {
+    s32 i;
+    s32 idx;
 
-s32 func_ovl0_80216C58(void);
+    idx = -1;
+    for (i = 0; i != 5; i++) {
+        if (D_ovl0_80229236[i] == -1) {
+            idx = i;
+            D_ovl0_80229236[i] = 1;
+            D_ovl0_8022923B[i] = 0x14;
+            break;
+        }
+    }
+    return idx;
+}
 
 void func_ovl0_80216CAC(void) {
     s32 spawned;
