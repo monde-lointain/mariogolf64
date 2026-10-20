@@ -314,8 +314,8 @@ void func_8007955C(s32* arg0) {
   }
 }
 
-extern f64 D_800D1978;
-extern f64 D_800D1980;
+const f64 D_800D1978 = 0.0490873852123405174;
+const f64 D_800D1980 = 0.785398163397448279;
 extern u8 D_801B9418[];
 extern s32 render_buffer_index;
 
@@ -399,7 +399,7 @@ void func_80079940(s32* arg0) {
   }
 }
 
-extern f64 D_800D1988;
+const f64 D_800D1988 = -0.150000000000000022;
 
 void func_80079A08(s32 arg0, s32 arg1) {
   s32 sp10[28]; /* reserved stack (unaccessed in this fn) */
@@ -443,7 +443,137 @@ void func_80079A08(s32 arg0, s32 arg1) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80078910", spawn_terrain_effect);
+typedef struct {
+  u8 pad00[0x18];
+  s32 unk18;
+  u8 pad1C[0x4];
+  s32 unk20;
+  u8 pad24[0x7F];
+  s8 terrain_index; /* 0xA3 */
+} TerrainSpawnSource;
+
+extern s32 effect_spawn_pos[];
+extern s32 D_80104AE8[];
+extern s32 blend_terrain_color(s32 x, s32 z, s32 terrain_index);
+
+void spawn_terrain_effect(TerrainSpawnSource* src) {
+  s32 color;
+  s32 n;
+  s32 i;
+  Particle* p;
+  f32 trans[3];
+  f32 rot[3];
+  f32 scale[3];
+  f32 mf[4][4];
+
+  color = blend_terrain_color(src->unk18, src->unk20, src->terrain_index);
+  n = 1;
+  switch (get_table_entry(src->terrain_index)->id) {
+  case 0:
+  case 1:
+  case 2:
+  case 17:
+    for (i = 0; i != 40; i++) {
+      p = &particle_array[i];
+      if (p->effect_kind == -1) {
+        p->position.x = (f32)effect_spawn_pos[0] * 0.0009765625f;
+        p->position.y = (f32)effect_spawn_pos[1] * 0.0009765625f;
+        p->position.z = (f32)effect_spawn_pos[2] * 0.0009765625f;
+        p->velocity.x = 0.0f;
+        p->velocity.y = (f32)(-(n * 0x600)) * 0.0001953125f;
+        p->velocity.z = 0.0f;
+        p->unknown_38 = (s16)color;
+        p->opacity = 230.0f;
+        p->opacity_step = -2.0f;
+        p->size = 1.0f;
+        p->size_step = 0.04f;
+        p->effect_kind = 0;
+        p->effect_frame = 0;
+        n++;
+        if (n == 4) {
+          break;
+        }
+      }
+    }
+    break;
+
+  case 6:
+  case 7:
+  case 8:
+  case 9:
+  case 18:
+    for (i = 0; i != 40; i++) {
+      p = &particle_array[i];
+      if (p->effect_kind == -1) {
+        p->position.x = (f32)effect_spawn_pos[0] * 0.0009765625f;
+        p->position.y = (f32)effect_spawn_pos[1] * 0.0009765625f;
+        p->position.z = (f32)effect_spawn_pos[2] * 0.0009765625f;
+        p->velocity.x = 0.0f;
+        p->velocity.y = (f32)(-(n * 0x600)) * 0.00068359375f;
+        p->velocity.z = 0.0f;
+        p->unknown_38 = (s16)color;
+        p->opacity = 230.0f;
+        p->opacity_step = -2.0f;
+        p->size = 2.0f;
+        p->size_step = 0.1f;
+        p->effect_kind = 0;
+        p->effect_frame = 0;
+        n++;
+        if (n == 4) {
+          break;
+        }
+      }
+    }
+    break;
+
+  case 10:
+    for (i = 0; i != 40; i++) {
+      p = &particle_array[i];
+      if (p->effect_kind == -1) {
+        p->position.x = (f32)effect_spawn_pos[0] * 0.0009765625f;
+        p->position.y = (f32)effect_spawn_pos[1] * 0.0009765625f;
+        p->position.z = (f32)D_80104AE8[0] * 0.0009765625f;
+        p->velocity.x = 0.0f;
+        p->velocity.y = 0.0f;
+        p->velocity.z = 0.0f;
+        p->opacity = 95.0f;
+        p->opacity_step = -2.0f;
+        p->size = 1.0f;
+        p->size_step = 0.1f;
+        p->effect_kind = 12;
+        p->effect_frame = 0;
+        p->matrix_index = frame_counter;
+        frame_counter = (frame_counter + 1) % 40;
+
+        trans[0] = p->position.x;
+        trans[1] = p->position.y;
+        trans[2] = p->position.z;
+        rot[0] = 0.0f;
+        rot[1] = 0.0f;
+        rot[2] = 0.0f;
+        scale[0] = p->size;
+        scale[1] = p->size;
+        scale[2] = p->size;
+        mtx_from_rts(mf, rot, trans, scale);
+        convert_and_pack_floats_to_fixed(mf, &D_800FD8F0[p->matrix_index]);
+        break;
+      }
+    }
+    break;
+
+  case 3:
+  case 4:
+  case 5:
+  case 11:
+  case 12:
+  case 13:
+  case 14:
+  case 15:
+  case 16:
+  case 19:
+    break;
+  }
+}
 
 extern f64 D_800D19E0;
 
