@@ -1101,8 +1101,20 @@ f32 func_ovl0_8020D7C4(void) {
 }
 
 typedef struct {
-    u8 unk00[0xA7];
-    u8 kind; /* 0xA7; 0 = unused slot */
+    Mtx matrix_a; /* 0x00 */
+    Mtx matrix_b; /* 0x40 */
+    s32 unk80;
+    s32 unk84;
+    s32 unk88;
+    u8 unk8C[4];
+    s32 unk90;
+    u8 unk94[8];
+    f32 unk9C;
+    u8 unkA0[4];
+    u8 unkA4;
+    u8 unkA5;
+    u8 unkA6;
+    u8 kind; /* 0xA7; 0 = unused slot, 2 = set by func_ovl0_8020D874 */
 } OverlaySlot; /* size 0xA8 */
 
 extern OverlaySlot D_ovl0_8022B5D0[10];
@@ -1118,7 +1130,52 @@ s32 func_ovl0_8020D838(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020D874);
+extern void convert_and_pack_floats_to_fixed(f32 matrix[4][4], Mtx* fixed_matrix);
+extern void mtx_from_rts(f32 matrix[4][4], f32 rotation[3], f32 translation[3], f32 scale[3]);
+extern u16 D_ovl0_8022402C;
+extern f64 D_ovl0_80225270;
+
+void func_ovl0_8020D874(f32 arg0) {
+    RomAssetLoad asset;
+    f32 translation[3];
+    f32 rotation[3];
+    f32 scale[3];
+    f32 matrix[4][4];
+    s32 i;
+    OverlaySlot* slot;
+
+    if (func_ovl0_8020D838() == 0) {
+        get_rom_asset_allocation_size(D_ovl0_8022402C, &asset);
+        load_rom_asset_payload(D_ovl0_80227C98, &asset);
+        for (i = 0; i != 10; i++) {
+            slot = &D_ovl0_8022B5D0[i];
+            if (slot->kind == 0) {
+                slot->kind = 2;
+                slot->unkA6 = 0;
+                slot->unkA5 = 0;
+                slot->unkA4 = 0;
+                slot->unk90 = 0;
+                slot->unk80 = hole_environment.pin_position.x;
+                slot->unk84 = hole_environment.pin_position.y - 0x9600;
+                slot->unk88 = hole_environment.pin_position.z;
+                slot->unk9C = (f32)((f64)-arg0 + D_ovl0_80225270);
+                translation[0] = (f32)slot->unk80 * 0.0009765625f;
+                translation[1] = (f32)slot->unk84 * 0.0009765625f;
+                translation[2] = (f32)slot->unk88 * 0.0009765625f;
+                rotation[0] = 0.0f;
+                rotation[1] = slot->unk9C;
+                rotation[2] = 0.0f;
+                scale[0] = 1.0f;
+                scale[1] = 1.0f;
+                scale[2] = 1.0f;
+                mtx_from_rts(matrix, rotation, translation, scale);
+                convert_and_pack_floats_to_fixed(matrix, &slot->matrix_a);
+                convert_and_pack_floats_to_fixed(matrix, &slot->matrix_b);
+                return;
+            }
+        }
+    }
+}
 
 void func_ovl0_8020D9F0(void) {
     s32 i;
