@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern Gfx D_ovl3_80232300[];
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
@@ -652,7 +653,58 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_801FE4D0)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_802004A0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80200A40);
+extern void* D_8010526C[];
+extern s32 D_80105B68;
+extern u8 D_ovl3_8022BEB0[][12];
+extern s16 D_800C229C[][27];
+extern s32 D_ovl3_8022F8C0;
+extern u8 D_ovl3_8022F8C4;
+extern s8 D_ovl3_8022F8C5;
+
+/* Draws a double-buffered CI animation frame (two 64x32 CI8 strips from
+ * D_8010526C[D_ovl3_8022F8C4]) as a (2*size)x(2*size) rectangle at (x, y).
+ * Every fourth call advances D_ovl3_8022F8C0 through the frame table selected
+ * by D_80105B68 and D_801323A0[0xB], flips the buffer and loads the next frame
+ * asset into it. */
+void func_ovl3_80200A40(Gfx** gfxp, s32 x, s32 y, s32 size, s32 scale) {
+    RomAssetLoad asset;
+    Gfx* gfx;
+    s32 i;
+    u8 idx;
+    u32 tex;
+
+    gfx = *gfxp;
+    gDPPipeSync(gfx++);
+    tex = (u32)D_8010526C[D_ovl3_8022F8C4];
+    gDPLoadTLUT_pal256(gfx++, (u8*)((tex + 8) & ~7));
+    for (i = 0; i != 2; i++) {
+        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, (u8*)((tex + 0x208 + i * 0x800) & ~7));
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x3FF, 0x100);
+        gDPPipeSync(gfx++);
+        gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 8, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+        gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 63 << G_TEXTURE_IMAGE_FRAC, 31 << G_TEXTURE_IMAGE_FRAC);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, x << 2, (y + i * size) << 2, (x + size + size) << 2,
+                                (y + size + i * size) << 2, G_TX_RENDERTILE, 0, 0, scale, scale);
+        gDPPipeSync(gfx++);
+    }
+    if (++D_ovl3_8022F8C5 == 4) {
+        idx = D_ovl3_8022BEB0[D_80105B68][(s8)D_801323A0[0xB]];
+        D_ovl3_8022F8C5 = 0;
+        if (++D_ovl3_8022F8C0 >= 27) {
+            D_ovl3_8022F8C0 = 0;
+        }
+        if (D_800C229C[idx][D_ovl3_8022F8C0] == -1) {
+            D_ovl3_8022F8C0 = 0;
+        }
+        D_ovl3_8022F8C4 = !D_ovl3_8022F8C4;
+        get_rom_asset_allocation_size(D_800C229C[idx][D_ovl3_8022F8C0], &asset);
+        load_rom_asset_payload(D_8010526C[D_ovl3_8022F8C4], &asset);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_801F4A40", func_ovl3_80200EF0);
 
