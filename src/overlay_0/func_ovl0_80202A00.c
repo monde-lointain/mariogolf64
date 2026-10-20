@@ -836,7 +836,28 @@ void func_ovl0_802078C4(PlayerState *player) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_802078F4);
+extern s32 get_current_course_id(void);
+extern s32 D_ovl0_80223EF0[9][7];
+extern s32 D_ovl0_80223FEC;
+
+void func_ovl0_802078F4(void) {
+    s32 *sfx_ptr;
+    s32 *course_row;
+    s32 frame_count;
+    s32 sfx_index;
+
+    frame_count = D_ovl0_80223FEC + 1;
+    D_ovl0_80223FEC = frame_count;
+    if (frame_count == 0xF0) {
+        sfx_index = guRandom() % 7;
+        D_ovl0_80223FEC = 0;
+        if (D_ovl0_80223EF0[get_current_course_id()][sfx_index] != -1) {
+            course_row = D_ovl0_80223EF0[get_current_course_id()];
+            sfx_ptr = (s32 *) (sfx_index * 4 + (s32) course_row);
+            func_80050DA0(*sfx_ptr, 0xA, 0x5F, 0xF, guRandom() % 255);
+        }
+    }
+}
 
 extern s32 clear_animation_slot(s32 index);
 extern void func_80095D64(void);
