@@ -88,6 +88,24 @@ void func_B(void) {
 INCLUDE_ASM("asm/f", func_C);
 ''')
 
+    def test_neighbouring_matches_keep_both_sides_typedefs(self):
+        dev, shard = self.conflicted('typedef struct {\n    s8 a;\n} RecA; /* 0x1 */\nextern RecA* D_1;',
+                                     'typedef s32 Id;\ntypedef struct {\n    u8 b[2];\n} RecB;')
+
+        proc = self.pick(dev, shard)
+
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        text = self.file.read_text()
+        self.assertNotIn('<<<<<<<', text)
+        for decl in ('} RecA; /* 0x1 */\n', 'extern RecA* D_1;\n', 'typedef s32 Id;\n', '} RecB;\n'):
+            self.assertEqual(text.count(decl), 1, decl)
+
+    def test_typedef_with_two_bodies_stays_conflicted(self):
+        proc = self.pick(*self.conflicted('typedef struct {\n    s8 a;\n} Rec;', 'typedef struct {\n    u8 a;\n} Rec;'))
+
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn('<<<<<<<', self.file.read_text())
+
     def conflicted(self, dev_extern, shard_extern):
         dev = BASE.replace('INCLUDE_ASM("asm/f", func_A);\n', f'{dev_extern}\n\nvoid func_A(void) {{\n}}\n')
         shard = BASE.replace('INCLUDE_ASM("asm/f", func_A);\n',

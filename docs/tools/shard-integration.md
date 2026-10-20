@@ -20,7 +20,7 @@ Shard worktrees decompile in parallel and send their commits back to `dev`. `syn
 
 `tools/install-git-hooks.sh` registers both drivers on every run (`merge.<name>.driver "tools/<driver> %O %A %B %L"`). Without a driver, git falls back to a plain text merge for its path.
 
-`merge-decomp-c <base> <ours> <theirs> [<marker-size>]` runs git's three-way merge, then resolves each conflict block whose two sides hold only extern variables, prototypes, `INCLUDE_ASM` lines and function definitions:
+`merge-decomp-c <base> <ours> <theirs> [<marker-size>]` runs git's three-way merge, then resolves each conflict block whose two sides hold only extern variables, prototypes, typedefs (one line, or a braced block ending `} Name;`), `INCLUDE_ASM` lines and function definitions:
 
 1. The functions must be the same on both sides, in the same order.
 2. A definition beats the `INCLUDE_ASM` of the same function. Identical definitions are kept once.

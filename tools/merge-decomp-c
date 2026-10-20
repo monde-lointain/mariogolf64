@@ -5,7 +5,7 @@ Usage (git runs it, see .gitattributes and tools/install-git-hooks.sh):
     merge-decomp-c <base> <ours> <theirs> [<marker-size>]
 
 It runs git's own three-way merge, then resolves each conflict block whose
-two sides hold only top-level declarations (extern variables and prototypes),
+two sides hold only top-level declarations (extern variables, prototypes and typedefs),
 INCLUDE_ASM lines and function definitions, by these rules:
   - the functions must be the same on both sides and in the same order;
     a definition beats INCLUDE_ASM of the same function (one side matched it),
@@ -32,6 +32,7 @@ INCLUDE_ASM = re.compile(r'INCLUDE_ASM\(\s*"[^"]*"\s*,\s*(\w+)\s*\);\s*$')
 DECLARATION = re.compile(r'(?:extern\s+)?[A-Za-z_][\w \t*]*?[\s*](\w+)\s*(?:\([^;{]*\)|(?:\[[^\]]*\])*)\s*;\s*$')
 FUNCTION_POINTER = re.compile(r'extern\s+[\w \t*]+\(\s*\*\s*(\w+)\s*\)\s*\([^;{]*\)\s*;\s*$')
 DEFINITION_START = re.compile(r'[A-Za-z_][\w \t*]*?[\s*](\w+)\s*\([^;]*$')
+TYPEDEF_END = re.compile(r'\}\s*(\w+)\s*;')
 
 
 class Unresolvable(Exception):
@@ -61,6 +62,18 @@ def items(lines):
         if m:
             out.append(('fn', m.group(1), line, False))
             i += 1
+            continue
+        if line.startswith('typedef'):
+            # one line (`typedef s32 Id;`) or a braced block ending `} Name;`
+            if '{' in line:
+                end = next((j for j in range(i + 1, len(lines)) if TYPEDEF_END.match(lines[j])), None)
+                m = end is not None and TYPEDEF_END.match(lines[end])
+            else:
+                end, m = i, re.search(r'(\w+)\s*(?:\[[^\]]*\])*\s*;', line)
+            if not m:
+                raise Unresolvable(line)
+            out.append(('decl', m.group(1), ''.join(lines[i:end + 1])))
+            i = end + 1
             continue
         name = declaration_name(line)
         if name:
