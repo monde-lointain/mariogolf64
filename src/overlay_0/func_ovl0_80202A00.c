@@ -564,7 +564,7 @@ s32 func_ovl0_80205C78(void) {
     return grand_total;
 }
 
-extern const char D_ovl0_80225020[];
+const char D_ovl0_80225020[0x14] = "Player%d EXP %d\n";
 extern void check_and_print_grid(char* str, s32 col, s32 row);
 extern s32 active_player_count;
 
@@ -595,7 +595,49 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80205DE8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206354);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80206BD0);
+s32 func_ovl0_80206BD0(s32 player_index) {
+    if (rumble_disable_flag != 0) {
+        return 0;
+    }
+    if (!flag_is_set(0x3B)) {
+        if (*(&D_801B71EE + player_index * 0xB8) != 0) {
+            return 0;
+        }
+        if (game_mode == 3) {
+            return 0;
+        }
+    }
+    if (player_records[player_index].base_score >= 5) {
+        return 0;
+    }
+    if (player_records[player_index].character_index >= 14) {
+        return 0;
+    }
+    if (g_terrain_vtx_xform_mode != 0) {
+        return 0;
+    }
+    switch (game_mode) {
+    case 0:
+    case 1:
+        return 1;
+    case 2:
+        return 0;
+    case 3:
+    case 4:
+    case 5:
+        return 1;
+    case 6:
+        return 0;
+    case 7:
+        return 1;
+    case 8:
+    case 9:
+    case 10:
+        return 0;
+    default:
+        return 0;
+    }
+}
 
 
 s32 func_ovl0_80206CC8(void) {

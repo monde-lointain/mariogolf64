@@ -500,7 +500,7 @@ segments:
       - [0xD7850, c, overlay_0/func_ovl0_8021E550]
       - [0xD8F70, data]
       - [0xDE2F0, .rodata, overlay_0/func_ovl0_80202A00]
-      - [0xDE320, rodata]
+      - [0xDE380, rodata]
       - [0xDE6D8, .rodata, overlay_0/func_ovl0_8020E740]
       - [0xDE708, rodata]
       - [0xDE7A8, .rodata, overlay_0/func_ovl0_80218CC0]
