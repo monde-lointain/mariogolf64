@@ -26,6 +26,13 @@ extern void** D_ovl3_8023BD70;
 extern void** D_ovl3_8023BD74;
 extern s32 D_ovl3_80230B50[];
 extern OverlayAssetEntry D_ovl3_80230B5C[];
+extern u16 D_ovl3_80230B40[];
+extern char D_ovl3_80231A3C[];
+extern s8 D_800C1FF4[];
+extern s32 D_8012F480[];
+extern s32 transfer_continue_slot(s32 id, s32 restore);
+extern s32 flag_is_set(s32 flag);
+extern void func_80080564(s32 buffer_index, s32 asset_index, s32 rom_slot_offset);
 
 void func_ovl3_8021F5F0(void* arg0, s16 arg1) {
     RomAssetLoad slot;
@@ -438,7 +445,40 @@ s32 func_ovl3_80222CDC(void) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222F2C);
+s32 func_ovl3_80222F2C(void) {
+    SaveContinueView* save;
+    ContinueSlotSelection* selection;
+    PlayerState* src;
+    s32 i;
+    u16 val;
+    s32 char_index;
+
+    save = (SaveContinueView*)func_8005AF50();
+    selection = (ContinueSlotSelection*)func_8005AF74();
+    if (D_ovl3_80230B50[selection->slot_index] == -1) {
+        return -1;
+    }
+    if (transfer_continue_slot(selection->slot_index, 1) == -1) {
+        return -1;
+    }
+    src = save->continue_data.players[selection->slot_index];
+    i = 0;
+    do {
+        val = D_ovl3_80230B40[i];
+        D_800C1FF4[i] = (s8)val;
+        player_records[i].unknown_27[0] = (s8)val;
+        sprintf((char*)&player_records[i], D_ovl3_80231A3C, &src[i]);
+        char_index = src[i].character_index;
+        D_8012F480[i] = char_index;
+        player_records[i].character_index = char_index;
+        func_80080564(i, char_index, (s8)player_records[i].asset_variant);
+        i++;
+    } while (i != 4);
+    if (flag_is_set(0x5D) == 0) {
+        memset(&save->continue_data.slots[selection->slot_index], 0, sizeof(ContinueSlot));
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_802230C0);
 
