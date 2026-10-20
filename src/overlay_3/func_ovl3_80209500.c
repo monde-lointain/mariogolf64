@@ -33,6 +33,20 @@ extern s32 D_ovl3_8022FFA0;
 extern s32 D_ovl3_8022FFA4;
 extern s32 D_ovl3_8023BFD4;
 extern s32 D_ovl3_8023BFD8;
+extern s32 render_buffer_index;
+extern f32 D_ovl3_80230080[4];
+extern f64 D_ovl3_802317F0;
+extern f64 D_ovl3_802317F8;
+extern f64 D_ovl3_80231800;
+extern Vtx D_ovl3_80230038[4];
+extern Mtx D_ovl3_8023A3A0;
+extern Mtx D_ovl3_8023A3E0[];
+extern Mtx D_ovl3_8023A460[];
+extern Mtx D_ovl3_8023A4E0[];
+extern Mtx D_23A3A0[];
+extern Mtx D_23A3E0[];
+extern Mtx D_23A460[];
+extern Mtx D_23A4E0[];
 
 void func_ovl3_80209500(void) {
     D_ovl3_8022FF1C[0] = g_abRosterUnlockFlags[0];
@@ -174,7 +188,77 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020C3B8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020C6D8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_80209500", func_ovl3_8020CD20);
+void func_ovl3_8020CD20(Gfx** arg0, s32 arg1, s32 arg2) {
+    Gfx* gfx;
+    s32 i;
+    s32 s1;
+    s32 s0;
+    s32 v;
+    f32 fv0;
+    f64 c0;
+    f64 c1;
+    f64 c2;
+    f32 k;
+    f32 y;
+
+    gfx = *arg0;
+    i = 0;
+    c0 = D_ovl3_802317F0;
+    k = 127.0f;
+    c1 = D_ovl3_802317F8;
+    c2 = D_ovl3_80231800;
+
+    for (; i != 4; i++) {
+        D_ovl3_80230080[i] = (f32)((f64)D_ovl3_80230080[i] + c0);
+        s1 = (s32)(sinf(D_ovl3_80230080[i]) * k) + 0x7F;
+        s0 = (s32)(sinf((f32)((f64)D_ovl3_80230080[i] + c1)) * k) + 0x7F;
+        fv0 = sinf((f32)((f64)D_ovl3_80230080[i] + c2)) * k;
+        v = (s32)fv0 + 0x7F;
+        D_ovl3_80230038[i].v.cn[0] = s1;
+        D_ovl3_80230038[i].v.cn[1] = v;
+        D_ovl3_80230038[i].v.cn[2] = s0;
+    }
+
+    guOrtho(&D_ovl3_8023A3A0, -160.0f, 160.0f, -120.0f, 120.0f, 10.0f, 2000.0f, 1.0f);
+    y = (f32)(0x60 - arg2) + 0.5f;
+    guTranslate(&D_ovl3_8023A3E0[render_buffer_index], (f32)(arg1 - 0x8C) - 0.5f, y, -100.0f);
+    guRotate(&D_ovl3_8023A460[render_buffer_index], 0.0f, 0.0f, 1.0f, 0.0f);
+    guScale(&D_ovl3_8023A4E0[render_buffer_index], 1.0f, 1.0f, 1.0f);
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 1,
+                       (void*)((D_ovl3_8023A574 + 8) & ~7));
+    gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, 0x23F, 0x2AB);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_4b, 3, 0, G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, 0xBC, 0xBC);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetCombineMode(gfx++, G_CC_SHADEDECALA, G_CC_SHADEDECALA);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, 0x00200004);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, D_23A3A0, G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, &D_23A3E0[render_buffer_index], G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &D_23A460[render_buffer_index], G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, &D_23A4E0[render_buffer_index], G_MTX_MUL | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, D_ovl3_80230038, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+
+    *arg0 = gfx;
+}
 
 extern void *D_801B69EC;
 
