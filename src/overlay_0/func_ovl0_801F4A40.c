@@ -1,5 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
+#include "../main/controller.h"
 
 extern s32 func_8005B0A0(s32);
 extern u8* func_8005AF50(void);
@@ -265,7 +266,72 @@ INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F8BB8)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801F9AD0);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FA098);
+/* Request block passed to func_800990D0; bytes 0..2 come from func_8005D2B8. */
+typedef struct {
+    /* 0x00 */ u8 bytes[3];
+    /* 0x03 */ u8 unk3;
+    /* 0x04 */ s16 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 unkD[0xB];
+} Ovl0Request; /* 0x18 */
+
+extern void func_8005D2B8(u8* arg0);
+extern void func_8006BA24(s32 dialog_index);
+extern s32 func_8006BA94(ControllerState* input);
+extern void func_800990D0(Ovl0Request* req, void* arg1);
+extern u8 D_800FF201[][0x8C];
+extern s32 D_801B60B0;
+extern u8 D_801B71ED;
+extern s8 D_801B724B[];
+extern s32 D_ovl0_8021FC78;
+extern s32 D_ovl0_8021FC7C;
+extern s32 D_ovl0_8021FC8C;
+extern u8 D_ovl0_80225770[];
+extern s32 D_ovl0_80225788;
+
+s32 func_ovl0_801FA098(ControllerState* input) {
+    Ovl0Request req;
+
+    func_8005AF50();
+    D_ovl0_8021FC7C++;
+    switch (D_ovl0_8021FC78) {
+    case 0:
+        D_ovl0_8021FC78 = 1;
+        func_ovl0_801F63CC(1, 0);
+        func_8005D2B8(req.bytes);
+        req.unk3 = D_801B71ED;
+        req.unk4 = D_ovl0_80225788;
+        req.unk8 = D_801B60B0;
+        req.unkC = D_800FF201[D_801B724B[1]][2];
+        func_800990D0(&req, D_ovl0_80225770);
+        D_ovl0_8021FC8C = 1;
+        break;
+    case 1:
+        if (input->buttons & 0x8000) {
+            D_ovl0_8021FC8C = 0;
+            D_ovl0_8021FC78 = 2;
+            func_8006BA24(9);
+            play_sound_effect(0x5D, 0xF, 0x64);
+        }
+        break;
+    case 2:
+        switch (func_8006BA94(input)) {
+        case 10:
+            D_ovl0_8021FC78 = 3;
+            break;
+        case 11:
+            D_ovl0_8021FC78 = 1;
+            D_ovl0_8021FC8C = 1;
+            break;
+        }
+        break;
+    case 3:
+        D_ovl0_8021FC8C = 0;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_801F4A40", func_ovl0_801FA248);
 
