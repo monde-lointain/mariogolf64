@@ -306,6 +306,8 @@ void func_ovl3_80226A58(Gfx **gfxp, s32 width, s32 height, s32 x, s32 y, s32 lab
     *gfxp = gfx;
 }
 
+const u32 D_ovl3_80231A68[2] = { 0, 0 };
+
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_8022747C);
 
 void func_8006A2C0(Gfx **pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 tile, s32 s, s32 t, s32 dsdx,
@@ -346,7 +348,43 @@ void func_ovl3_802287EC(Gfx **pgfx, s32 x, s32 y, s32 halfw, s32 hgt, s32 w, s32
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80228A80);
+extern u8* D_ovl3_80230F44;
+extern u8* D_ovl3_80230F48;
+extern u8* D_ovl3_80230F4C;
+extern u8* D_ovl3_80230F50;
+extern u8* D_ovl3_80230F54;
+
+void func_ovl3_80228A80(u8* arg0, s32 arg1) {
+    RomAssetLoad asset;
+
+    switch (arg1) {
+    case 1:
+        D_ovl3_80230F44 = arg0;
+        get_rom_asset_allocation_size(0x521, &asset);
+        load_rom_asset_payload(D_ovl3_80230F44, &asset);
+        break;
+    case 2:
+        D_ovl3_80230F48 = arg0;
+        get_rom_asset_allocation_size(0x93E, &asset);
+        load_rom_asset_payload(D_ovl3_80230F48, &asset);
+        break;
+    case 3:
+        D_ovl3_80230F4C = arg0;
+        get_rom_asset_allocation_size(0x942, &asset);
+        load_rom_asset_payload(D_ovl3_80230F4C, &asset);
+        break;
+    case 4:
+        D_ovl3_80230F50 = arg0;
+        get_rom_asset_allocation_size(0x70F, &asset);
+        load_rom_asset_payload(D_ovl3_80230F50, &asset);
+        break;
+    case 5:
+        D_ovl3_80230F54 = arg0;
+        get_rom_asset_allocation_size(0x6EF, &asset);
+        load_rom_asset_payload(D_ovl3_80230F54, &asset);
+        break;
+    }
+}
 
 extern s32 D_ovl3_80230F5C;
 extern s32 D_ovl3_80230F60;
@@ -394,8 +432,6 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_802296C4)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802266F0", func_ovl3_80229CB0);
 
-extern u8* D_ovl3_80230F48;
-
 void func_ovl3_8022A090(Gfx** gfxp) {
     Gfx* gfx = *gfxp;
     s32 i;
@@ -432,8 +468,6 @@ void func_ovl3_8022A090(Gfx** gfxp) {
     }
     *gfxp = gfx;
 }
-
-extern u8* D_ovl3_80230F44;
 
 void func_ovl3_8022A43C(Gfx** gfxp) {
     Gfx* gfx = *gfxp;
