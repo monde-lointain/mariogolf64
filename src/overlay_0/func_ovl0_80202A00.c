@@ -524,7 +524,17 @@ void func_ovl0_80206E88(s32 player_index) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80207014);
+/* Returns 1 if PlayerState bytes 0x78..0x7A are all zero, else 0. */
+s32 func_ovl0_80207014(PlayerState *player, s32 record_offset) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if ((s8) player->unknown_72[6 + i] != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 /* Returns 0 if any of PlayerState bytes 0x78..0x7A equals 1, else 1. */
 s32 func_ovl0_80207048(PlayerState *player) {
@@ -580,7 +590,6 @@ block_4:
 
 extern s8 D_800BAA04;
 
-s32 func_ovl0_80207014(PlayerState *player, s32 record_offset);
 void func_ovl0_80207080(s32 player_index);
 
 void func_ovl0_802071B8(s32 arg0) {
