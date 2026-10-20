@@ -125,9 +125,53 @@ void func_ovl4_8024F4DC(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F60C);
+s32 validate_heap_string_with_output(char* source_string, s32* result_out);
+s32 ci8_to_rgba5551(s32 index);
 
-void func_ovl4_8024F60C(char* source_string);
+/* Stores color at pixel (x, y) of the 256x512 terrain map; ignores pixels outside it. */
+static inline void set_tile_color(s32 x, s32 y, u16 color) {
+    if (x < 0) {
+        return;
+    }
+    if (x >= 0x100) {
+        return;
+    }
+    if (y < 0) {
+        return;
+    }
+    if (y >= 0x200) {
+        return;
+    }
+    g_terrain_tile_cache[get_tile_index(x, y)].colors[0][(y & 0x1F) * 32 + (x & 0x1F)] = color;
+}
+
+/* Loads a 256x512 palette-index image from source_string into 0x8030F800 and
+ * rebuilds the terrain tile colors from it. */
+void func_ovl4_8024F60C(char* source_string) {
+    s32 size;
+    s32 i;
+    u32 j;
+    s32 y;
+    s32 x;
+
+    D_ovl4_8025D354 = (u8 *)0x8030F800;
+    D_ovl4_8025D350 = (u8 *)0x8030F800;
+    if (validate_heap_string_with_output(source_string, &size) == 0 && size == 0x20000) {
+        D_ovl4_8025D354 = D_ovl4_8025D350;
+    }
+    for (i = 0; i < 0x80; i++) {
+        for (j = 0; j < 0x4C8; j++) {
+            g_terrain_tile_cache[i].colors[0][j] = 0;
+        }
+    }
+    for (y = 0; y < 0x200; y++) {
+        for (x = 0; x < 0x100; x++) {
+            D_ovl4_8025D354 = &D_ovl4_8025D350[y * 0x100 + x];
+            set_tile_color(x, y, ci8_to_rgba5551(*D_ovl4_8025D354));
+        }
+    }
+}
+
 extern char D_ovl4_802550E8[];
 extern char D_ovl4_802550FC[];
 extern s32 D_ovl4_802543A8;
