@@ -652,7 +652,62 @@ void func_80041EC0(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042228);
+const char D_800CAA98[8] = "FLAGS ";
+const char D_800CAAA0[8] = "ABOUT ";
+const char D_800CAAA8[8] = " VIEW ";
+const char D_800CAAB0[8] = " PLAY ";
+const char D_800CAAB8[8] = "HEIGHT";
+const char D_800CAAC0[8] = " TREE ";
+const char D_800CAAC8[8] = " PIN  ";
+const char D_800CAAD0[8] = "DIVINF";
+const char D_800CAAD8[8] = "TRIANG";
+const char D_800CAAE0[8] = "MENU";
+const char D_800CAAE8[8] = "XZ-DIV";
+const char D_800CAAF0[8] = " FILE ";
+const char D_800CAAF8[8] = "STROKE";
+const char D_800CAB00[8] = "S-SHOT";
+const char D_800CAB08[8] = "RING  ";
+const char D_800CAB10[8] = "WALL  ";
+const char D_800CAB18[8] = "      ";
+
+const char* func_80042228(u32 arg0) {
+  switch (arg0) {
+    case 8:
+      return D_800CAA98;
+    case 0:
+      return D_800CAAA0;
+    case 2:
+      return D_800CAAA8;
+    case 7:
+      return D_800CAAB0;
+    case 1:
+      return D_800CAAB8;
+    case 3:
+      return D_800CAAC0;
+    case 5:
+      return D_800CAAC8;
+    case 9:
+      return D_800CAAD0;
+    case 15:
+      return D_800CAAD8;
+    case 14:
+      return D_800CAAE0;
+    case 10:
+      return D_800CAAE8;
+    case 11:
+      return D_800CAAF0;
+    case 12:
+      return D_800CAAF8;
+    case 13:
+      return D_800CAB00;
+    case 16:
+      return D_800CAB08;
+    case 28:
+      return D_800CAB10;
+    default:
+      return D_800CAB18;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/main/get_tile_attribute", func_80042318);
 
