@@ -1,6 +1,7 @@
 # Docs Update Log
 
 ## 2026-10-19
+* **Update**: Tier 2's stall limit drops from 30 to 12 ([difficulty ledger](/tools/difficulty-ledger.md)). In 40 matched Opus tier-2 runs the longest non-improving gap before a match was 10 attempts, and failed runs past 12 attempts were 16% of failed tier-2 spend.
 * **Update**: `.omp/config.yml` sets `providers.cacheRetention: short`. Every run had written cache at the 1-hour price (2× input, 41% of Haiku spend) although the median gap between turns is 5 s and 0.34% of gaps exceed 5 minutes; the 5-minute price is 1.25× input.
 * **Update**: An unused local array may fill unexplained frame space when the frame size is the only remaining difference, commented `/* unused: original frame space */` ([registers and scheduling](/reference/kmc-gcc/registers-and-scheduling.md#stack-frames)). On 2026-10-19 six functions at 96 to 99.5% (for example `func_ovl4_80251610` at 99.48%) were given up for this alone.
 * **Update**: A GCC nested function whose parent is not decompiled yet is matched standalone with the uninitialized static-chain stand-in (`s32 r; volatile s32 unused = r;` or a chain-pointer variant), documented in [registers and scheduling](/reference/kmc-gcc/registers-and-scheduling.md#stack-frames); 18 functions on `dev` already used it with no rule behind it. [decompile-function](/procedures/decompile-function.md) no longer lists the undecompiled parent as a reason to give up: on 2026-10-19, 9 tier-1 failures over 8 functions (`gave_up`, `integration_failed`, `near_miss`) gave it as the reason.

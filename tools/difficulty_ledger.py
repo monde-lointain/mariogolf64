@@ -59,7 +59,7 @@ class TierBudget:
 # in the task.yaml that serves each tier.
 TIER_BUDGETS = {
     1: TierBudget(timeout_minutes=60, stall_limit=7),
-    2: TierBudget(timeout_minutes=120, stall_limit=30),
+    2: TierBudget(timeout_minutes=120, stall_limit=12),
     3: TierBudget(timeout_minutes=240, stall_limit=40),
 }
 

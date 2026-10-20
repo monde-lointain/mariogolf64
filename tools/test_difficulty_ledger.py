@@ -248,7 +248,7 @@ class WriteRunTest(TreeCase):
         }
         run = dl.write_run(env, 'func_A', environ, fallback_tier=1, now=NOW)
         self.assertEqual(run['tier'], 2)
-        self.assertEqual(run['stall_limit'], 30)
+        self.assertEqual(run['stall_limit'], dl.TIER_BUDGETS[2].stall_limit)
         self.assertEqual(run['deadline_unix'], 1700007200.0)
         self.assertEqual(run['model'], 'anthropic/claude-haiku-5-5:xhigh')
         self.assertEqual(dl.read_run(env)['tier'], 2)
@@ -258,14 +258,14 @@ class WriteRunTest(TreeCase):
         environ = {'NIGEL_TASK_NAME': 'decompile-tier3', 'NIGEL_RUN_ID': 'run-2'}
         run = dl.write_run(env, 'func_A', environ, fallback_tier=1, now=NOW)
         self.assertEqual(run['tier'], 3)
-        self.assertEqual(run['stall_limit'], 40)
+        self.assertEqual(run['stall_limit'], dl.TIER_BUDGETS[3].stall_limit)
         self.assertEqual(run['deadline_unix'], NOW + 240 * 60)
 
     def test_unmapped_task_uses_fallback_tier_and_no_deadline_without_run_id(self):
         env = self.make_env('func_A-1')
         run = dl.write_run(env, 'func_A', {}, fallback_tier=2, now=NOW)
         self.assertEqual(run['tier'], 2)
-        self.assertEqual(run['stall_limit'], 30)
+        self.assertEqual(run['stall_limit'], dl.TIER_BUDGETS[2].stall_limit)
         self.assertIsNone(run['deadline_unix'])
         self.assertIsNone(run['run_id'])
 
