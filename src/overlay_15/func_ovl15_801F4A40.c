@@ -44,6 +44,13 @@ typedef struct {
   /* 0x7A8 */ s32 unknown_7A8;
 } Ovl15State;
 
+typedef struct {
+    /* 0x00 */ u8 unk00[0xD];
+    /* 0x0D */ u8 unkD[0xB];
+    /* 0x18 */ u8 unk18[0x16];
+    /* 0x2E */ u8 unk2E[5];
+} Ovl15PhaseRecord; /* known extent 0x33 */
+
 extern s32 D_ovl15_801FBB78;
 extern s32 D_ovl15_801FBB7C;
 extern s32 D_ovl15_801FBB80;
@@ -59,6 +66,10 @@ extern char D_ovl15_801FBC4C[];
 extern char D_ovl15_801FBC54[];
 extern char D_ovl15_801FBC5C[];
 extern char D_ovl15_801FBC78[];
+extern char D_ovl15_801FBDE4[];
+extern char D_ovl15_801FBDFC[];
+extern char D_ovl15_801FBE08[];
+extern char D_ovl15_801FBE14[];
 extern void check_and_print_grid(char *str, s32 col, s32 row);
 extern s32 validate_heap_string(char *source_string, s32 allocation_tag);
 s32 func_ovl15_801F9CEC(s32 arg0, OSGbpakId *arg1, NUContPakFile *arg2);
@@ -302,7 +313,25 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F63
 void func_ovl15_801F6624(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F662C);
+s32 func_ovl15_801F662C(Ovl15PhaseRecord *record, u8 *key) {
+    s32 i;
+
+    osSyncPrintf(D_ovl15_801FBDE4);
+    for (i = 0; i != 11; i++) {
+        if (record->unkD[i] != key[i]) {
+            return 0;
+        }
+    }
+    osSyncPrintf(D_ovl15_801FBDFC);
+    for (i = 0; i != 5; i++) {
+        if (record->unk2E[i] != key[i + 0xB]) {
+            osSyncPrintf(D_ovl15_801FBE08);
+            return 0;
+        }
+    }
+    osSyncPrintf(D_ovl15_801FBE14);
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F66EC);
 
