@@ -78,7 +78,50 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F014)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F118);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F21C);
+s32 func_ovl4_8024F21C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 hi;
+    s32 lo;
+    u32 seed_hi;
+    u32 seed;
+
+    switch (arg0) {
+    case 3:
+        lo = 3;
+        seed = (D_ovl4_802542A0 * 0x5D588B65) + 1;
+        seed_hi = seed >> 0x10;
+        D_ovl4_802542A0 = seed;
+        hi = (((seed_hi & 4) + 2) << 0xB) | ((4 - (((s32) seed_hi >> 5) & 3)) << 6) | 1;
+        break;
+    case 6:
+        if ((arg1 != 6) & (arg2 < 2)) {
+            hi = 0xDC61;
+            lo = 4;
+            break;
+        }
+        if (arg4 & 8) {
+            hi = 0xCE72;
+            if ((arg3 & 4) != 0) {
+                hi = 0xDC60;
+            }
+        } else {
+            hi = 0xDC60;
+            if ((arg3 & 4) != 0) {
+                hi = 0xCE72;
+            }
+        }
+        lo = 4;
+        break;
+    case 7:
+        hi = 0x7B80;
+        lo = 7;
+        break;
+    default:
+        hi = 0xF801;
+        lo = 7;
+        break;
+    }
+    return (hi << 0x10) | lo;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F308);
 
