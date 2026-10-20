@@ -34,6 +34,7 @@ extern u16 *nuGfxCfb_ptr;
 void clear_text_grid(void);
 void func_ovlgap_80405AF4(s32, s32);
 s16 *get_terrain_vertex_pointer(u32, u32);
+s32 func_80042E40(s32, s32, s32, s32, s32, s32);
 s16 *get_direct_grid_vertex(s32, s32);
 
 void func_ovlgap_8040000C(void) {
@@ -227,7 +228,37 @@ INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80406570);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_804066C8);
+s32 func_ovlgap_804066C8(s32 col, s32 row) {
+    s32 dy;
+    s32 dx;
+    s32 x0;
+    s32 x1;
+    s32 y0;
+    s32 y1;
+    GridVertex *corner[4];
+
+    for (dy = -1; dy <= 0; dy++) {
+        dx = -1;
+        y0 = row + dy;
+        y1 = y0 + 1;
+        while (dx <= 0) {
+            x0 = col + dx;
+            corner[0] = (GridVertex *) get_terrain_vertex_pointer(x0, y0);
+            x1 = x0 + 1;
+            corner[1] = (GridVertex *) get_terrain_vertex_pointer(x1, y0);
+            corner[2] = (GridVertex *) get_terrain_vertex_pointer(x0, y1);
+            corner[3] = (GridVertex *) get_terrain_vertex_pointer(x1, y1);
+            if (func_80042E40(corner[0]->x, corner[0]->z, corner[1]->x, corner[1]->z, corner[2]->x, corner[2]->z) < 0x10) {
+                return -1;
+            }
+            if (func_80042E40(corner[1]->x, corner[1]->z, corner[3]->x, corner[3]->z, corner[2]->x, corner[2]->z) < 0x10) {
+                return -1;
+            }
+            dx++;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_gap/func_ovlgap_80400000", func_ovlgap_80406818);
 
