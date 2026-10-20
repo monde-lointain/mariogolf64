@@ -17,8 +17,15 @@ extern u8 D_800C7460[];
 extern s32 D_800E4C50;
 extern s32 D_800E4C54;
 extern s32 D_800E4C58;
-extern u8 D_800E4C90;
-extern u8 D_800E4C91;
+/* Camera smoothing state: last eye and at positions, each with an init flag.
+ * One aggregate, like D_800E4C98, keeps the load/store pairs interleaved. */
+typedef struct {
+  Vec3f eye;
+  Vec3f at;
+  s8 eye_init;
+  s8 at_init;
+} CameraSmoothState;
+extern CameraSmoothState D_800E4C78;
 extern s32 D_800C73A0;
 extern s32 D_800C73E0;
 extern u8* D_800C73F0[];
@@ -64,7 +71,44 @@ f32 clamped_lerp_f32(f32 near, f32 far, f32 t) {
   return near * (1.0f - t) + far * t;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80095A10", func_80095A68);
+void func_80095A68(GolfCamera* cam, Vec3f* at, f32 arg2, s32 arg3) {
+  f32 temp;
+
+  if (arg3 & 2) {
+    if (D_800E4C78.eye_init == 0) {
+      D_800E4C78.eye.x = cam->eye.x;
+      D_800E4C78.eye.y = cam->eye.y;
+      D_800E4C78.eye.z = cam->eye.z;
+      D_800E4C78.eye_init = 1;
+    }
+    temp = clamped_lerp_f32(D_800E4C78.eye.x, cam->eye.x, arg2);
+    cam->eye.x = temp;
+    D_800E4C78.eye.x = temp;
+    temp = clamped_lerp_f32(D_800E4C78.eye.y, cam->eye.y, arg2);
+    cam->eye.y = temp;
+    D_800E4C78.eye.y = temp;
+    temp = clamped_lerp_f32(D_800E4C78.eye.z, cam->eye.z, arg2);
+    cam->eye.z = temp;
+    D_800E4C78.eye.z = temp;
+  }
+  if (arg3 & 1) {
+    if (D_800E4C78.at_init == 0) {
+      D_800E4C78.at.x = at->x;
+      D_800E4C78.at.y = at->y;
+      D_800E4C78.at.z = at->z;
+      D_800E4C78.at_init = 1;
+    }
+    temp = clamped_lerp_f32(D_800E4C78.at.x, at->x, arg2);
+    at->x = temp;
+    D_800E4C78.at.x = temp;
+    temp = clamped_lerp_f32(D_800E4C78.at.y, at->y, arg2);
+    at->y = temp;
+    D_800E4C78.at.y = temp;
+    temp = clamped_lerp_f32(D_800E4C78.at.z, at->z, arg2);
+    at->z = temp;
+    D_800E4C78.at.z = temp;
+  }
+}
 
 s32 func_80095C10(Gfx** gdlp, Lights3* src) {
   Gfx* gdl = *gdlp;
@@ -87,8 +131,8 @@ void func_80095D10(s32 arg0, s32 arg1, s32 arg2) {
   D_800E4C50 = arg1;
   D_800E4C5C = 0;
   D_800C73A0 = 0;
-  D_800E4C90 = 0;
-  D_800E4C91 = 0;
+  D_800E4C78.eye_init = 0;
+  D_800E4C78.at_init = 0;
   D_800E4C54 = arg2;
   D_800E4C58 = func_80056494(arg0, arg2);
 }
