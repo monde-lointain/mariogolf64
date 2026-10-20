@@ -81,7 +81,49 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F21C)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F308);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F4DC);
+extern u8 *D_ovl4_8025D350;
+extern u8 *D_ovl4_8025D354;
+s32 func_800402F4(s32 color);
+
+/* Terrain tile covering 32x32 pixel block (x, y); tiles form an 8-wide grid. */
+static inline s32 get_tile_index(s32 x, s32 y) {
+    x /= 32;
+    y >>= 5;
+    return x + y * 8;
+}
+
+/* Color at pixel (x, y) of the 256x512 terrain map, read from its tile's
+ * colors as a flat 32-wide grid; 0 outside the map. */
+static inline u16 get_tile_color(s32 x, s32 y) {
+    if (x < 0) {
+        return 0;
+    }
+    if (x >= 0x100) {
+        return 0;
+    }
+    if (y < 0) {
+        return 0;
+    }
+    if (y >= 0x200) {
+        return 0;
+    }
+    return g_terrain_tile_cache[get_tile_index(x, y)].colors[0][(y & 0x1F) * 32 + (x & 0x1F)];
+}
+
+/* Converts the terrain colors into a 256x512 palette-index image at 0x8030F800. */
+void func_ovl4_8024F4DC(void) {
+    s32 y;
+    s32 x;
+
+    D_ovl4_8025D354 = (u8 *)0x8030F800;
+    D_ovl4_8025D350 = (u8 *)0x8030F800;
+    for (y = 0; y < 0x200; y++) {
+        for (x = 0; x < 0x100; x++) {
+            D_ovl4_8025D354 = &D_ovl4_8025D350[y * 0x100 + x];
+            *D_ovl4_8025D354 = func_800402F4(get_tile_color(x, y));
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024F60C);
 
@@ -106,7 +148,6 @@ void func_ovl4_8024FA98(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024FAA0);
 
-void func_ovl4_8024F4DC(void);
 void func_ovl4_8024F7DC(void);
 void func_ovl4_8024FAA0(void);
 
@@ -218,9 +259,6 @@ void func_ovl4_80250DE4(void) {
         D_80105E10.unknown_c0[i].z = 0;
     }
 }
-
-extern u8 *D_ovl4_8025D350;
-extern u8 *D_ovl4_8025D354;
 
 void func_ovl4_80250EE0(void) {
     D_ovl4_8025D354 = (u8 *)0x80315000;
