@@ -4,6 +4,13 @@ extern s32 D_ovl13_80243EE0;
 extern s32 D_ovl13_80243EE4;
 extern u8* func_8005AF50(void);
 extern s32 flag_is_set(s32 flag);
+extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
+                          s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
+extern void func_8006A548(Gfx** pgfx, u32 arg1);
+extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width,
+                               s32 height, s32 pal, s32 cms, s32 cmt, s32 masks,
+                               s32 maskt, s32 shifts, s32 shiftt);
+extern s32 D_ovl13_80243F50;
 
 s32 func_ovl13_80241800(void) {
     u8* ret = func_8005AF50();
@@ -66,6 +73,23 @@ INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_802427
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80242D40);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80243610);
+void func_ovl13_80243610(Gfx** gfxp, s32 x, s32 y) {
+    Gfx* gfx;
+    s32 i;
+    s32 yy;
+
+    gfx = *gfxp;
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    func_8006A548(&gfx, D_ovl13_80243F50 + 8);
+    for (i = 0; i != 3; i++) {
+        load_texture_block(&gfx, D_ovl13_80243F50 + 0x208 + i * 0x7D0, G_IM_FMT_CI, G_IM_SIZ_8b, 0xC8, 0xA, 0, 0, 0, 0, 0, 0, 0);
+        gDPPipeSync(gfx++);
+        yy = y + i * 10;
+        func_8006A2C0(&gfx, (x - 0x68) * 4, (yy - 0xF) * 4, (x + 0x68) * 4, (yy - 5) * 4, 0, 0, 0, 0x3D8, 0x400);
+        gDPPipeSync(gfx++);
+    }
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80243784);
