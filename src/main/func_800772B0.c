@@ -10,7 +10,54 @@ void func_800772B0(void) {
 
 INCLUDE_ASM("asm/nonmatchings/main/func_800772B0", func_800772C4);
 
-INCLUDE_ASM("asm/nonmatchings/main/func_800772B0", func_8007775C);
+/* Periodic cubic spline solver over 11 knots x[0..10] with values y[0..10];
+ * x[10] wraps to x[0]. Writes out[0..10] in the layout func_800779A8 reads as
+ * arg3. out[10] is read on entry and must hold the wrap-row RHS. */
+void func_8007775C(f32* x, f32* y, f32* out) {
+  f32 h[12];
+  f32 d[12];
+  f32 e[11];
+  f32 r;
+  s32 i;
+
+  for (i = 0; i != 10; i++) {
+    h[i] = x[i + 1] - x[i];
+    e[i] = (y[i + 1] - y[i]) / h[i];
+  }
+  e[10] = e[0];
+  for (i = 1; i != 10; i++) {
+    d[i] = (x[i + 1] - x[i - 1]) + (x[i + 1] - x[i - 1]);
+  }
+  d[10] = (h[9] + h[0]) + (h[9] + h[0]);
+  for (i = 1; i != 10; i++) {
+    out[i] = e[i] - e[i - 1];
+  }
+  e[1] = h[0];
+  e[9] = h[9];
+  e[10] = d[10];
+  for (i = 2; i != 9; i++) {
+    e[i] = 0.0f;
+  }
+  for (i = 1; i != 10; i++) {
+    r = h[i] / d[i];
+    out[i + 1] = out[i + 1] - out[i] * r;
+    d[i + 1] = d[i + 1] - h[i] * r;
+    e[i + 1] = e[i + 1] - e[i] * r;
+  }
+  e[0] = e[10];
+  out[0] = out[10];
+  for (i = 8; i >= 0; i--) {
+    r = h[i] / d[i + 1];
+    out[i] = out[i] - out[i + 1] * r;
+    e[i] = e[i] - e[i + 1] * r;
+  }
+  r = out[0] / e[0];
+  out[0] = r;
+  out[10] = r;
+  for (i = 1; i != 10; i++) {
+    out[i] = (out[i] - e[i] * r) / d[i];
+  }
+}
 
 f32 func_800779A8(f32 x, f32* arg1, f32* arg2, f32* arg3) {
   s32 mid;
