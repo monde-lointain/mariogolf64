@@ -448,7 +448,82 @@ void func_80044C7C(ClubShot* club_data, s32 terrain_index, s32* quality_bounds, 
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80043C20", func_80044CCC);
+extern s32 D_800BE61C;
+
+/* Request for func_80044CCC: meter category and target club id. */
+typedef struct {
+  /* 0x00 */ u8 unknown_00[0x0C];
+  /* 0x0C */ s32 meter_category;
+  /* 0x10 */ s32 target_club_id;
+} ClubSelectRequest;
+
+/* Returns 1 when nothing changed: category and club already match the request. */
+s32 func_80044CCC(ClubSelectRequest* arg0) {
+  s32 changed = 0;
+  s32 i;
+  s32* sel;
+
+  if (active_meter_category == arg0->meter_category &&
+      active_club_id == arg0->target_club_id) {
+    return 1;
+  }
+  if (D_800BE61C >= 4) {
+    D_800BE61C = 3;
+  }
+  if (D_800BE61C != 0) {
+    D_800BE61C -= 1;
+    return 0;
+  }
+  D_800BE61C = 3;
+  if (!changed) {
+    sel = &active_meter_category;
+    if (*sel != arg0->meter_category) {
+      play_sound_effect(0x5B, 0xF, 0x7F);
+      changed = 1;
+      *sel = arg0->meter_category;
+    }
+  }
+  if (!changed) {
+    if (arg0->target_club_id > active_club_id) {
+      play_sound_effect(0x5B, 0xF, 0x7F);
+      i = active_club_id + 1;
+      if (i < 0x10) {
+        s32* pidx = sel + 8;
+        for (; i < 0x10; i++) {
+          if (player_records[*pidx].club_ids[i] != -1 &&
+              (D_800BB258[player_records[*pidx].club_ids[i]].flags &
+               resolve_active_terrain_club_mask(0))) {
+            pidx[-7] = i;
+            changed = 1;
+            break;
+          }
+        }
+      }
+      if (!changed || active_club_id > arg0->target_club_id) {
+        active_club_id = arg0->target_club_id;
+      }
+    } else if (arg0->target_club_id < active_club_id) {
+      play_sound_effect(0x5B, 0xF, 0x7F);
+      i = active_club_id - 1;
+      if (i >= 0) {
+        s32* pidx = sel + 8;
+        for (; i >= 0; i--) {
+          if (player_records[*pidx].club_ids[i] != -1 &&
+              (D_800BB258[player_records[*pidx].club_ids[i]].flags &
+               resolve_active_terrain_club_mask(0))) {
+            pidx[-7] = i;
+            changed = 1;
+            break;
+          }
+        }
+      }
+      if (!changed || active_club_id < arg0->target_club_id) {
+        active_club_id = arg0->target_club_id;
+      }
+    }
+  }
+  return changed ^ 1;
+}
 
 void func_80044FDC(void) {
   s32 club_index;
