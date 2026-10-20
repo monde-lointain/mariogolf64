@@ -1848,33 +1848,70 @@ s32 draw_letterbox_bars(Gfx** dl_ptr, s32 y) {
   return y;
 }
 
-/* func_80088A90: glyph/units-string DL emitter: renders a measurement string as one
- * gSPTextureRectangle per glyph ('f'->s 0x60 w0x10, '.'->0x70 w4, 'm'->0x50 w8,
- * 'y'->0x58 w8, digit->(c-0x30)<<3 w8, ' '-> advance only), rect x..x+w by
- * row..row+0xC in quarter-pixels, on a caller-supplied Gfx** cursor.
- *
- * Writing the 6-word block as gSPTextureRectangle(dl++, ...) instead of raw u32
- * stores makes the emit block byte-identical (including the -4(a2)/0(a2) store
- * pair and the loop.c preheader hoist of word_hi/word_lo, the 3 constant command
- * words, and the 5 character literals -- the constant hoist is the only reason
- * this leaf has a frame at all). Two constructs that would otherwise look
- * unreachable from source both fall out:
- *  - the redundant `andi v1,t0,0xFF` needs the char SPLIT into a `u8` for the
- *    `!= 0` loop test and an `s32` for the compares (`ch = c;` at the loop
- * top): the zero-extend then sits in a different BB from the `lbu` so combine
- *    cannot fold it, and the s32 keeps the range test signed (`slti`; a plain
- *    `u8 ch` gives `sltiu` and 86 instrs).
- *  - the `beql`+annulled `str++` on the space case needs the space handler
- *    OUT OF LINE (`goto skip_char;` with the label down among the glyph stubs);
- *    as an inline if-body gcc emits `bne`+`nop`+`j`+`addiu` instead.
- * RESIDUAL: one extra callee-saved reg. ROM keeps the 5 hoisted char constants
- * in s1/s0/t9/t8/t7 and REUSES the dead raw-char reg t0 for the glyph value;
- * my build gives the glyph its own t1, so a constant spills to s2 (3 saved
- * regs, bigger frame) and the whole loop renames. This is a local-alloc quantity
- * permutation, not a reorg or branch-likely constraint. The build is at 83/83
- * instructions.
+/* func_80088A90: emits one gSPTextureRectangle per glyph of a measurement string,
+ * rect x..x+w by row..row+0xC in quarter-pixels, on a caller-supplied Gfx** cursor.
+ * Glyph table: 'f' -> 0x60 w0x10, '.' -> 0x70 w4, 'm' -> 0x50 w8, 'y' -> 0x58 w8,
+ * digit -> (c - 0x30) << 3 w8; ' ' emits nothing and does not advance x.
  */
-INCLUDE_ASM("asm/nonmatchings/main/func_80080220", func_80088A90);
+void func_80088A90(Gfx** chain, s32 x, s32 row, u8* str) {
+    Gfx* dl;
+    u8 c;
+    s32 ch;
+    s32 width;
+    s32 glyph;
+
+    dl = *chain;
+    c = *str;
+    while (c != 0) {
+        ch = c;
+        if (ch == 0x66) {
+            goto glyph_f;
+        }
+        if (ch < 0x67) {
+            if (ch == 0x20) {
+                goto skip_char;
+            }
+            if (ch == 0x2E) {
+                goto glyph_dot;
+            }
+            goto glyph_digit;
+        }
+        if (ch == 0x6D) {
+            goto glyph_m;
+        }
+        if (ch == 0x79) {
+            goto glyph_y;
+        }
+        goto glyph_digit;
+glyph_dot:
+        width = 4;
+        glyph = 0x70;
+        goto emit;
+glyph_m:
+        width = 8;
+        glyph = 0x50;
+        goto emit;
+glyph_y:
+        width = 8;
+        glyph = 0x58;
+        goto emit;
+glyph_f:
+        width = 0x10;
+        glyph = 0x60;
+        goto emit;
+glyph_digit:
+        width = 8;
+        glyph = (*str - 0x30) << 3;
+emit:
+        gSPTextureRectangle(dl++, x << 2, row << 2, (x + width) << 2,
+                            (row + 12) << 2, 0, glyph << 5, 0, 1 << 10, 1 << 10);
+        x += width;
+skip_char:
+        str++;
+        c = *str;
+    }
+    *chain = dl;
+}
 
 extern s32 D_800C5E6C[2][3];
 extern s32 D_800C5E84;
