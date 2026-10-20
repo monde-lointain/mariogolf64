@@ -220,6 +220,12 @@ typedef struct {
   SaveContinueData continue_data;
 } SaveContinueView;
 
+/* Projection from the SRAM base to the counter at 0x15CC; the regions between are not modeled. */
+typedef struct {
+  u8 unknown_00[0x15CC];
+  s32 unknown_15CC;
+} SaveCounterView;
+
 typedef struct {
   /* 0x00 */ PlayerState players[4];
   /* 0x2E0 */ u8 unknown_2E0[0xD0];

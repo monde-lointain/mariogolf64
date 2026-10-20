@@ -1,10 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
-
-typedef struct {
-  /* 0x00 */ u8 padding[0x15CC];
-  /* 0x15CC */ s32 unknown_15CC;
-} SaveCounterView;
+#include "../main/session.h"
 
 extern Gfx D_ovl3_80232300[];
 extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
