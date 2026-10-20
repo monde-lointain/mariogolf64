@@ -4,6 +4,9 @@
 
 extern u8* func_8005AF50(void);
 extern u8* func_8005AF74(void);
+extern void flag_set(s32 flag);
+extern s8 D_801B60B8;
+extern GameModeRecord D_800FEDD8[];
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_8021F5F0);
 
@@ -216,7 +219,57 @@ s32 func_ovl3_80222C94(void) {
     return -(slot->valid == 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222CDC);
+s32 func_ovl3_80222CDC(void) {
+    ContinueSlot* slot;
+    GameModeRecord* modes;
+    PlayerState* recs;
+    u8* save;
+    s32 mode;
+    s32 count;
+    s32 i;
+
+    save = func_8005AF50();
+    mode = (s8)func_8005AF74()[0x43];
+    count = 0;
+    switch (mode) {
+    case 0:
+        slot = (ContinueSlot*)(save + 0xD8);
+        modes = ((SessionStorage1*)(save + 0x388))->mode_records;
+        recs = ((SessionStorage1*)(save + 0x388))->players;
+        count = 1;
+        break;
+    case 1:
+        slot = (ContinueSlot*)(save + 0x38);
+        modes = ((SessionStorage2*)(save + 0x218))->mode_records;
+        recs = ((SessionStorage2*)(save + 0x218))->players;
+        count = 2;
+        break;
+    case 2:
+        slot = (ContinueSlot*)(save + 0x178);
+        modes = ((SessionStorage4*)(save + 0x440))->mode_records;
+        recs = ((SessionStorage4*)(save + 0x440))->players;
+        count = 4;
+        break;
+    }
+
+    if (slot->valid == 0) {
+        return -1;
+    }
+    if (count < slot->state.active_player_count) {
+        return -1;
+    }
+    count = slot->state.active_player_count;
+    for (i = 0; i != count; i++) {
+        player_records[i] = recs[i];
+        D_800FEDD8[i] = modes[i];
+    }
+    scenario_state_id = slot->state;
+    scenario_state_id.state_id = 1;
+    flag_set(0x1E);
+    hole_environment = slot->environment;
+    D_801B60B8 = 2;
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8021F5F0", func_ovl3_80222F2C);
 

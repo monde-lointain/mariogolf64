@@ -220,4 +220,22 @@ typedef struct {
   SaveContinueData continue_data;
 } SaveContinueView;
 
+typedef struct {
+  /* 0x00 */ PlayerState players[4];
+  /* 0x2E0 */ u8 unknown_2E0[0xD0];
+  /* 0x3B0 */ GameModeRecord mode_records[4];
+} SessionStorage4; /* 0x550 */
+
+typedef struct {
+  /* 0x00 */ PlayerState players[1];
+  /* 0x0B8 */ u8 unknown_B8[0x348];
+  /* 0x400 */ GameModeRecord mode_records[1];
+} SessionStorage1; /* 0x468 */
+
+typedef struct {
+  /* 0x00 */ PlayerState players[2];
+  /* 0x170 */ u8 unknown_170[0x398];
+  /* 0x508 */ GameModeRecord mode_records[2];
+} SessionStorage2; /* 0x5D8 */
+
 #endif /* SESSION_H */
