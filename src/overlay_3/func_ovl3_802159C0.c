@@ -136,7 +136,142 @@ void func_ovl3_80215B84(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80215DC4);
+typedef struct {
+    u8 unkAF0;
+    u8 unkAF1;
+} Ovl3Cell;
+
+typedef struct {
+    u8 pad[0xAF0];
+    Ovl3Cell cells[18][18];
+} Ovl3Save;
+
+typedef struct {
+    u8 pad[0x35];
+    s8 unk35;
+    s8 unk36;
+    u8 unk37;
+    u8 unk38;
+} Ovl3State;
+
+extern u8* func_8005AF50(void);
+extern void func_ovl3_801FB54C(Gfx **, s32);
+extern void func_ovl3_802169CC(Gfx **);
+extern void func_ovl3_80216C14(Gfx **);
+extern void func_ovl3_8021640C(Gfx **, s32, s32);
+extern void func_ovl3_80217464(Gfx **, s32, s32);
+extern void func_ovl3_802123E0(Gfx **, s32, s32, u8);
+extern void func_ovl3_80212FEC(Gfx **, u8 *, s32, s32, s32, s32);
+extern void func_ovl3_8021F124(Gfx **, u8 *, u8 *, s32, s32, s16, u8);
+
+extern void *tile_palette_table[];
+extern u8 D_ovl3_8023BFF0[];
+extern s32 D_ovl3_802301A8[];
+extern s32 D_ovl3_8023AC78[];
+
+void func_ovl3_80215DC4(Gfx **arg0) {
+    Gfx *gfx;
+    Ovl3Save *save;
+    Ovl3State *state;
+    s16 fp;
+    s16 s1;
+    s16 s3;
+    s16 s5;
+    s16 s0;
+    s16 s0b;
+    s32 a1;
+
+    gfx = *arg0;
+    save = (Ovl3Save *)func_8005AF50();
+    state = (Ovl3State *)func_8005AF74();
+
+    func_ovl3_801FB54C(&gfx, 0xB);
+
+    gDPSetPrimColor(gfx++, 0, 0, 0x40, 0x40, 0x40, 0xBF);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, 24 << 2, 50 << 2, 302 << 2, 230 << 2, G_TX_RENDERTILE, 0, 0, 0x400, 0x400);
+    gDPPipeSync(gfx++);
+
+    func_ovl3_802169CC(&gfx);
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
+    fp = 0;
+    s5 = (s8)state->unk38;
+    do {
+        s0 = D_ovl3_802301A8[s5];
+        a1 = (D_ovl3_8023AC78[s5] == 1) ? 1 : 0xA;
+        func_ovl3_8021F124(&gfx, tile_palette_table[s0], D_ovl3_8023BFF0 + (s0 << 9), 0x1C,
+                           fp * 0x1E + 0x52, s0, a1);
+        s1 = 0;
+        s3 = (s8)state->unk37;
+        do {
+            s32 g0;
+            s32 g1;
+            s0b = D_ovl3_802301A8[s3];
+            a1 = (D_ovl3_8023AC78[s3] != -1) ? 1 : 0xA;
+            if (fp == 0) {
+                func_ovl3_8021F124(&gfx, tile_palette_table[s0b], D_ovl3_8023BFF0 + (s0b << 9),
+                                   s1 * 0x23 + 0x3E, 0x34, s0b, a1);
+            }
+            g0 = save->cells[s0][s0b].unkAF0 & 0x7F;
+            g1 = save->cells[s0][s0b].unkAF1 & 0x7F;
+            if (save->cells[s0][s0b].unkAF1 & 0x80) {
+                func_ovl3_80217464(&gfx, s1 * 0x23 + 0x3E, fp * 0x1E + 0x55);
+            } else {
+                if (g0) {
+                    func_ovl3_802123E0(&gfx, s1 * 0x23 + 0x43, fp * 0x1E + 0x56, 1);
+                } else if (g1) {
+                    func_ovl3_802123E0(&gfx, s1 * 0x23 + 0x43, fp * 0x1E + 0x56, 2);
+                } else {
+                    func_ovl3_802123E0(&gfx, s1 * 0x23 + 0x43, fp * 0x1E + 0x58, 0);
+                }
+            }
+            s1++;
+            s3++;
+        } while (s1 != 7);
+        s5++;
+        fp++;
+    } while (fp != 5);
+
+    if ((s8)state->unk38 > 0) {
+        func_ovl3_80212FEC(&gfx, D_ovl3_8023AC6C, D_ovl3_8023019C, 0, 0x28, 0x58);
+    }
+    if ((s8)state->unk38 < 0xD) {
+        func_ovl3_80212FEC(&gfx, D_ovl3_8023AC6C, D_ovl3_8023019C, 1, 0x28, 0xDE);
+    }
+    if ((s8)state->unk37 > 0) {
+        func_ovl3_80212FEC(&gfx, D_ovl3_8023AC6C, D_ovl3_8023019C, 3, 0x40, 0x44);
+    }
+    if ((s8)state->unk37 < 7) {
+        func_ovl3_80212FEC(&gfx, D_ovl3_8023AC6C, D_ovl3_8023019C, 2, 0x128, 0x44);
+    }
+
+    D_ovl3_802301A0 = D_ovl3_802301A0 + 1;
+    if (D_ovl3_802301A0 == 4) {
+        D_ovl3_802301A0 = 0;
+        D_ovl3_8023019C = (D_ovl3_8023019C == 0);
+    }
+
+    func_ovl3_80216C14(&gfx);
+    func_ovl3_8021640C(&gfx, state->unk35 * 0x23 + 0x4A, state->unk36 * 0x1E + 0x5D);
+
+    gDPPipeSync(gfx++);
+    *arg0 = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_8021640C);
 
