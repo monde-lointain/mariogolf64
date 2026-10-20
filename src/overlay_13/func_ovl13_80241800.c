@@ -1,9 +1,17 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 
+typedef struct {
+    u8 unknown_00[0x2E];
+    s8 round_hole_index;
+    s8 scenario_mode_id;
+} HoleSelectionState;
+
 extern s32 D_ovl13_80243EE0;
 extern s32 D_ovl13_80243EE4;
 extern u8* func_8005AF50(void);
+extern u8* func_8005AF74(void);
+extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s32 flag_is_set(s32 flag);
 extern void func_8006A2C0(Gfx** pgfx, s32 ulx, s32 uly, s32 lrx, s32 lry,
                           s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
@@ -27,6 +35,9 @@ extern s32 D_ovl13_80243EB4;
 extern s32 D_ovl13_80243EB8;
 extern s32 D_ovl13_80243EBC;
 extern u8 D_ovl13_80243EC0;
+extern s32 D_ovl13_80243FB4;
+extern u32 D_ovl13_80243FB8;
+extern s32 round_hole_index;
 extern char D_ovl13_80243EF0[];
 extern char D_ovl13_80243F04[];
 extern void* D_ovl13_80243F58[13];
@@ -157,7 +168,71 @@ void func_ovl13_80241CE8(void) {
     D_ovl13_80243EA8 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241DF0);
+s32 func_ovl13_80241DF0(s32 arg0, u32 arg1) {
+    HoleSelectionState* sel;
+    s32 count;
+    s32 ret;
+    s32 last;
+    s8 mode_id;
+
+    sel = (HoleSelectionState*)func_8005AF74();
+    count = func_ovl13_80241800();
+    ret = 0;
+    D_ovl13_80243FB4 = arg0;
+    D_ovl13_80243FB8 = arg1;
+    D_ovl13_80243EC0 = 0;
+    if (D_ovl13_80243EBC == 0 && !(arg0 & 0x8000)) {
+        if (arg0 & 0x4000) {
+            ret = 2;
+        } else {
+            if ((arg1 >> 11) & 1 & (count >= 2)) {
+                play_sound_effect(0x5C, 0xF, 0x7F);
+                ret = 1;
+                sel->round_hole_index = 0;
+                sel->scenario_mode_id = sel->scenario_mode_id - 1;
+                D_ovl13_80243EBC = 1;
+                D_ovl13_80243EB8 = 1;
+                D_ovl13_80243EC0 = 1;
+            } else if ((arg1 >> 10) & 1 & (count >= 2)) {
+                play_sound_effect(0x5C, 0xF, 0x7F);
+                ret = 1;
+                sel->round_hole_index = 0;
+                sel->scenario_mode_id = sel->scenario_mode_id + 1;
+                D_ovl13_80243EBC = -1;
+                D_ovl13_80243EB8 = 5;
+                D_ovl13_80243EC0 = 2;
+            } else if (arg1 & 0x200) {
+                play_sound_effect(0x5C, 0xF, 0x7F);
+                ret = 1;
+                sel->round_hole_index = sel->round_hole_index - 1;
+                D_ovl13_80243EC0 = 4;
+            } else if (arg1 & 0x100) {
+                play_sound_effect(0x5C, 0xF, 0x7F);
+                ret = 1;
+                sel->round_hole_index = sel->round_hole_index + 1;
+                D_ovl13_80243EC0 = 8;
+            }
+        }
+    }
+    if (sel->scenario_mode_id < 0) {
+        sel->scenario_mode_id = count - 1;
+    }
+    last = count - 1;
+    if (last < sel->scenario_mode_id) {
+        sel->scenario_mode_id = 0;
+    }
+    if (sel->round_hole_index < 0) {
+        sel->round_hole_index = 5;
+    }
+    if (sel->round_hole_index >= 6) {
+        sel->round_hole_index = 0;
+    }
+    round_hole_index = sel->round_hole_index;
+    mode_id = sel->scenario_mode_id;
+    scenario_mode_id = mode_id;
+    D_ovl13_80243EB4 = mode_id;
+    return ret;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241FF0);
 
