@@ -21,6 +21,7 @@ extern void func_8009226C(s32 arg0);
 extern s32 func_800959F8(void);
 extern void play_sound_effect(s32 arg0, s32 arg1, s32 arg2);
 extern u8 D_800FBDC4[];
+extern u16 debug_menu_pad_buttons_a;
 extern s32 D_800B6808;
 extern s32 D_800BB020;
 extern s32 D_800BB024;
@@ -55,7 +56,85 @@ void func_ovl8_801F4A90(void) {
   } while (i < 4U);
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_8/func_ovl8_801F4A40", func_ovl8_801F4ABC);
+void func_ovl8_801F4ABC(void) {
+  u32 i;
+  s32 flag;
+  s32 cursor;
+
+  for (i = 0; i < 4; i++) {
+    cursor = D_ovl8_801F5928[i].cursor;
+    flag = 0;
+    if (cursor == -1) {
+      continue;
+    }
+    if ((debug_menu_pad_buttons_a & 0x2030) != 0x2030) {
+      if (i == 3) {
+        continue;
+      }
+    }
+    switch (D_ovl8_801F5928[i].text[cursor]) {
+    case 'A':
+      if (*(u16 *)D_800FBDC4 & 0x4000) {
+        flag = 1;
+      }
+      break;
+    case 'B':
+      if (*(u16 *)D_800FBDC4 & 0x4000) {
+        flag = 1;
+      }
+      break;
+    case 'L':
+      if (*(u16 *)D_800FBDC4 & 0x200) {
+        flag = 1;
+      }
+      break;
+    case 'R':
+      if (*(u16 *)D_800FBDC4 & 0x100) {
+        flag = 1;
+      }
+      break;
+    case 'U':
+      if (*(u16 *)D_800FBDC4 & 0x800) {
+        flag = 1;
+      }
+      break;
+    case 'D':
+      if (*(u16 *)D_800FBDC4 & 0x400) {
+        flag = 1;
+      }
+      break;
+    case 'l':
+      if (*(u16 *)D_800FBDC4 & 0x2) {
+        flag = 1;
+      }
+      break;
+    case 'r':
+      if (*(u16 *)D_800FBDC4 & 0x1) {
+        flag = 1;
+      }
+      break;
+    case 'u':
+      if (*(u16 *)D_800FBDC4 & 0x8) {
+        flag = 1;
+      }
+      break;
+    case 'd':
+      if (*(u16 *)D_800FBDC4 & 0x4) {
+        flag = 1;
+      }
+      break;
+    }
+    if (*(u16 *)D_800FBDC4 != 0 && flag == 0) {
+      cursor = 0;
+    }
+    cursor += flag;
+    if (D_ovl8_801F5928[i].text[cursor] == 0) {
+      cursor = -1;
+      D_ovl8_801F5928[i].on_end();
+    }
+    D_ovl8_801F5928[i].cursor = cursor;
+  }
+}
 
 void func_ovl8_801F4C84(void) {
   RomAssetLoad asset;
