@@ -81,7 +81,101 @@ INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024E958)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024EB98);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_4/func_ovl4_8024D800", func_ovl4_8024EDD8);
+s32 func_ovl4_8024EDD8(s32 code, s32 a1, s32 count, s32 a3, s32 a4) {
+    u32 k;
+    s32 r;
+    s32 t;
+
+    switch (code) {
+    case 5:
+        code = 0x4481;
+        count = 5;
+        break;
+    case 9:
+        code = 0x4983;
+        count = 9;
+        break;
+    case 0:
+        if (count >= 2 || a1 == 6) {
+            goto rng0;
+        }
+        code = 0x4605;
+        if (a1 != 0) {
+            goto cnt_b;
+        }
+    rng0:
+        D_ovl4_802542A0 = D_ovl4_802542A0 * 0x5D588B65 + 1;
+        r = D_ovl4_802542A0 >> 16;
+        if (((a3 + 2) & 4) != 0) {
+            code = (((r & 3) + 9) << 11) | 0x4C4;
+        } else {
+            code = (((r & 3) + 7) << 11) | 0x584;
+        }
+        count = 0;
+        break;
+    cnt_b:
+        count = 0xB;
+        break;
+    case 1:
+        if (a1 != 0 || count > 0) {
+            count = 1;
+            D_ovl4_802542A0 = D_ovl4_802542A0 * 0x5D588B65 + 1;
+            k = (D_ovl4_802542A0 >> 16) & 7;
+            t = 16 - (k >> 1);
+            code = ((k << 11) | (t << 6)) | 1;
+        } else {
+            count = 1;
+            code = 0xC81;
+        }
+        break;
+    case 2:
+        code = 0xE739;
+        count = 2;
+        break;
+    case 3:
+        D_ovl4_802542A0 = D_ovl4_802542A0 * 0x5D588B65 + 1;
+        r = D_ovl4_802542A0 >> 16;
+        code = (((r & 7) + 4) << 11) | ((4 - ((r >> 5) & 3)) << 6);
+        count = 3;
+        break;
+    case 6:
+        if (code == 6 && code != a1 && count < 2) {
+            code = 0x2587;
+            count = 0xA;
+            break;
+        }
+        if (a1 == 6 || count >= 2) {
+            if (a4 & 2) {
+                code = (a3 & 2) ? 0x2F84 : 0x4580;
+            } else {
+                code = (a3 & 2) ? 0x3E42 : 0x3704;
+            }
+            count = 6;
+        } else {
+            code = 0x2689;
+            count = 0;
+        }
+        break;
+    case 4:
+        code = 0x7BDF;
+        count = 4;
+        break;
+    case 7:
+        code = 0x2A41;
+        goto set7;
+    case 8:
+        code = 0x2688;
+        count = 8;
+        break;
+    default:
+        code = 0xFFFF;
+    set7:
+        count = 7;
+        break;
+    }
+
+    return (code << 16) | count;
+}
 
 s32 func_ovl4_8024F014(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u32 seed;

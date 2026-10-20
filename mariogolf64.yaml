@@ -565,6 +565,8 @@ segments:
     subsegments:
       - [0x128580, c, overlay_4/func_ovl4_8024D800]
       - [0x12F020, data]
+      - [0x12FE18, .rodata, overlay_4/func_ovl4_8024D800]
+      - [0x12FE40, rodata]
       - { start: 0x1300A0, type: bss, vram: 0x80255320 }
 
   # Overlay 5
