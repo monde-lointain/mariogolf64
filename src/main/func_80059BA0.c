@@ -60,7 +60,7 @@ extern u8 D_801B5634;
 extern u8 D_800C2BD5;
 
 u8* func_8005AF74(void);
-void func_8005DF54(u8*, s32);
+void func_8005DF54(u8* save, u8 load);
 void initialize_save_sram(void);
 void flag_clear(s32);
 void func_8005D9A0(void);
@@ -865,7 +865,6 @@ extern ScenarioState scenario_state_id;
 extern s32 active_player_count;
 extern s8 D_801B60B8;
 extern void flag_set(s32 flag);
-extern void func_8005DF54(u8* save, s32 arg1);
 extern const char D_800D092C[];
 extern const char D_800D0944[];
 extern const char D_800D0958[];
@@ -1779,7 +1778,24 @@ void func_8005DE88(s8* state, s32 restore, s32 enabled) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_80059BA0", func_8005DF54);
+s32 func_8005DFE8(u8* buf, s32 flag_arg);
+s32 func_8005E180(u8* buf, s32 save_flag);
+
+void func_8005DF54(u8* save, u8 load) {
+  s32 enabled;
+  u8 no_flag;
+  u8 save_flag;
+
+  no_flag = flag_is_set(0x53) == 0;
+  save_flag = no_flag;
+  if (load == 0) {
+    enabled = func_8005DFE8(save, no_flag);
+    func_8005DE88((s8*)save, 0, enabled);
+  } else {
+    func_8005DE88((s8*)save, 1, enabled);
+    func_8005E180(save, save_flag);
+  }
+}
 
 typedef struct {
   char* data_file;
