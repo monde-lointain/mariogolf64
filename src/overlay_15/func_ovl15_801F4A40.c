@@ -210,7 +210,50 @@ INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F4F
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F54F8);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5570);
+void func_ovl15_801FA320(s32 arg0, s32 arg1);
+
+/* Set the aux flag to 2, then for indices 0 and 2..12 start a ramp-up (state 1) recording a per-index value. Other indices do nothing. */
+void func_ovl15_801F5570(s32 a0) {
+    D_800FEC00.unknown_90 = 2;
+    switch (a0) {
+        case 2:
+            func_ovl15_801FA320(1, 0x15F);
+            break;
+        case 3:
+            func_ovl15_801FA320(1, 0x149);
+            break;
+        case 4:
+            func_ovl15_801FA320(1, 0x14C);
+            break;
+        case 5:
+            func_ovl15_801FA320(1, 0x14D);
+            break;
+        case 6:
+            func_ovl15_801FA320(1, 0x148);
+            break;
+        case 7:
+            func_ovl15_801FA320(1, 0x14A);
+            break;
+        case 8:
+            func_ovl15_801FA320(1, 0x14F);
+            break;
+        case 9:
+            func_ovl15_801FA320(1, 0x14E);
+            break;
+        case 0:
+            func_ovl15_801FA320(1, 0x151);
+            break;
+        case 10:
+            func_ovl15_801FA320(1, 0x152);
+            break;
+        case 11:
+            func_ovl15_801FA320(1, 0x156);
+            break;
+        case 12:
+            func_ovl15_801FA320(1, 0x153);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5644);
 
