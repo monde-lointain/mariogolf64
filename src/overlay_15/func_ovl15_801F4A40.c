@@ -10,9 +10,68 @@ typedef struct {
 } GbPakSaveRecord; /* 0x200 */
 
 typedef struct {
-    u8 unk00;
-    u8 unk01[0x8B];
+    u16 a;
+    u16 b;
+    u8 c;
+    u8 d;
+} Ovl15EntryRec; /* 6 bytes */
+
+typedef struct {
+    u8 state;               /* 0x00 */
+    u8 name[10];            /* 0x01 */
+    u8 unk0B;               /* 0x0B */
+    u8 unk0C;               /* 0x0C */
+    u8 key[11];             /* 0x0D */
+    u8 unk18;               /* 0x18 */
+    u8 priority;            /* 0x19 */
+    u8 unk1A;               /* 0x1A */
+    u8 unk1B;               /* 0x1B */
+    u8 unk1C;               /* 0x1C */
+    u8 unk1D;               /* 0x1D */
+    u8 unk1E;               /* 0x1E */
+    u8 unk1F;               /* 0x1F */
+    u8 mode;                /* 0x20 */
+    u8 unk21[3];            /* 0x21 */
+    s32 unk24;              /* 0x24 */
+    s32 unk28;              /* 0x28 */
+    s16 unk2C;              /* 0x2C */
+    u8 unk2E[5];            /* 0x2E */
+    u8 unk33;               /* 0x33 */
+    s32 unk34;              /* 0x34 */
+    s32 unk38;              /* 0x38 */
+    Ovl15EntryRec recs[13]; /* 0x3C */
+    u8 unk8A[2];            /* 0x8A */
 } Ovl15Entry; /* 0x8C */
+
+typedef struct {
+    u8 a[2];
+    u8 b[2];
+    u8 c;
+    u8 d;
+} Ovl15SourceRec; /* 6 bytes, u16 fields stored little-endian */
+
+typedef struct {
+    u8 name[10];            /* 0x00 */
+    u8 unk0A;               /* 0x0A */
+    u8 key2[5];             /* 0x0B */
+    u8 priority;            /* 0x10 */
+    u8 unk11;               /* 0x11 */
+    u8 unk12;               /* 0x12 */
+    u8 unk13[7];            /* 0x13 */
+    u8 unk1A[2];            /* 0x1A, little-endian u16 */
+    u8 unk1C;               /* 0x1C */
+    u8 unk1D;               /* 0x1D */
+    u8 unk1E;               /* 0x1E */
+    u8 unk1F;               /* 0x1F */
+    u8 unk20[6];            /* 0x20 */
+    u8 unk26;               /* 0x26 */
+    u8 unk27;               /* 0x27 */
+    u8 unk28;               /* 0x28 */
+    u8 unk29[0x15];         /* 0x29 */
+    u8 unk3E;               /* 0x3E */
+    u8 unk3F[0xC1];         /* 0x3F */
+    Ovl15SourceRec recs[13]; /* 0x100 */
+} Ovl15Source; /* known extent 0x17E */
 
 typedef struct {
     void *unk0;
@@ -79,6 +138,9 @@ extern char D_ovl15_801FBC54[];
 extern char D_ovl15_801FBC5C[];
 extern char D_ovl15_801FBC78[];
 extern char D_ovl15_801FBDE4[];
+extern char D_ovl15_801FBDC8[];
+extern char D_ovl15_801FBDD8[];
+extern s32 flag_is_set(s32 flag);
 extern char D_ovl15_801FBDFC[];
 extern char D_ovl15_801FBE08[];
 extern char D_ovl15_801FBE14[];
@@ -320,7 +382,70 @@ s32 func_ovl15_801F5EA8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F5F1C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F6388);
+void func_ovl15_801F6388(Ovl15Source *src, s32 arg1, s32 arg2, s32 arg3) {
+    Ovl15Entry *entry;
+    s32 i;
+
+    entry = &D_800FE450.unkCC[arg1 * 3 + arg2];
+    entry->state = 1;
+    for (i = 0; i != 10; i++) {
+        entry->name[i] = src->name[i];
+        entry->key[i] = src->name[i];
+        if ((u32)(entry->name[i] - 0x61) < 0x1A) {
+            entry->name[i] = entry->name[i] + 0x80;
+        }
+    }
+    entry->unk0B = 0;
+    entry->key[10] = 0;
+    for (i = 0; i != 5; i++) {
+        entry->unk2E[i] = i[src->key2];
+    }
+    entry->priority = src->priority;
+    if (entry->priority >= 4) {
+        entry->priority = 3;
+    }
+    if (flag_is_set(0x6F)) {
+        entry->unk1A = 1;
+    } else {
+        entry->unk1A = src->unk11;
+    }
+    entry->unk1B = src->unk12;
+    entry->unk1C = src->unk1C;
+    entry->unk1D = src->unk1D;
+    entry->unk1E = src->unk1E;
+    entry->unk1F = src->unk1F;
+    if (flag_is_set(0x88)) {
+        entry->mode = 1;
+    } else if (flag_is_set(0x89)) {
+        entry->mode = 2;
+    } else if (flag_is_set(0x8A)) {
+        entry->mode = 3;
+    } else if (flag_is_set(0x8B)) {
+        entry->mode = 4;
+    } else if (flag_is_set(0x8C)) {
+        entry->mode = 5;
+    } else if (flag_is_set(0x8D)) {
+        entry->mode = 6;
+    } else if (flag_is_set(0x8E)) {
+        entry->mode = 7;
+    } else {
+        entry->mode = src->unk3E;
+    }
+    osSyncPrintf(D_ovl15_801FBDC8, (s8)entry->mode);
+    entry->unk24 = (src->unk28 << 16) | (src->unk27 << 8) | src->unk26;
+    entry->unk28 = 0;
+    entry->unk2C = (s16)(src->unk1A[0] | (src->unk1A[1] << 8));
+    osSyncPrintf(D_ovl15_801FBDD8, entry->unk28, (s8)entry->unk1C, (s8)entry->unk1D);
+    for (i = 0; i != 13; i++) {
+        entry->recs[i].a = src->recs[i].a[0] | (src->recs[i].a[1] << 8);
+        entry->recs[i].b = src->recs[i].b[0] | (src->recs[i].b[1] << 8);
+        entry->recs[i].c = src->recs[i].c;
+        entry->recs[i].d = src->recs[i].d;
+        osSyncPrintf(D_ovl15_801FBDD8, i, entry->recs[i].a, entry->recs[i].b);
+    }
+    entry->unk34 = arg3;
+    entry->unk38 = arg2;
+}
 
 void func_ovl15_801F6624(void) {
 }
@@ -393,7 +518,7 @@ void func_ovl15_801F6890(void) {
     var_v1 = 0;
     var_a0 = 0;
     do {
-        if (base->unkCC[var_a0].unk00 == 1) {
+        if (base->unkCC[var_a0].state == 1) {
             base->unk7D8[var_v1] = var_a0;
             var_v1 += 1;
         }
