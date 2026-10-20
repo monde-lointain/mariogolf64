@@ -40,8 +40,6 @@ Results land in `<dir>/output-<score>-<n>/` with `source.c` and `diff.txt`. A ma
 
 Match notification: when the run is not interrupted, the permuter exits 0, an `output-0-*` directory exists, the run took more than 60 seconds, and `.push_secrets` exists (`PUSH_TOKEN` and `PUSH_USER`, git-ignored), the wrapper sends a Pushover message `Matched <function>` (the scratch's `diff_label` for a scratch ID).
 
-`tools/notify.sh <message>` sends the same Pushover message by hand. Nothing in the repository calls it. It exits 1 without a message or without `.push_secrets`.
-
 # --preserve-f3dex
 
 Passes `--preserve-macros` to `import.py` with this regex, so the importer keeps these macros as written:

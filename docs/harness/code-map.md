@@ -33,7 +33,7 @@ These decide whether the ROM matches.
 # Match bookkeeping and selection
 
 * `tools/nonmatching_match_log.py`: parses `match_log.txt` and certifies exact matches (comparison: it defines what "100%" means to the reporters).
-* `tools/report_nonmatching_matches.py`, `tools/find_unmatched_nonmatchings.py`: reports built on it.
+* `tools/report_nonmatching_matches.py`: report built on it.
 * `tools/m2c_one_shot.py`: m2c plus `build.sh` scoring; inlines exact matches into `src/` (comparison: it writes source on a match decision).
 * Workflow: `progress.py` ([tool](/tools/progress.md)), `score_functions.py` (nigel `candidate_source`), `list_decomp_candidates.py`, `find_similar_functions.py`, `list_matched_functions.py`, `fetch_scratches.py` ([catalog](/tools/selection-and-status.md)).
 * Shard tools: `tools/sync-shard`, `tools/integrate-shards`, and the `merge-decomp-c` and `merge-splat-yaml` merge drivers ([shard integration](/tools/shard-integration.md)).

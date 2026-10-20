@@ -7,7 +7,7 @@ archive still hashes to the sha256 recorded in the entry.
 
 Also maps workspace and assembly names to functions, and decides which functions
 are integrated (defined in src/) or still unmatched (present as assembly). Used by
-find_unmatched_nonmatchings.py and report_nonmatching_matches.py.
+report_nonmatching_matches.py, difficulty_ledger.py and pipeline_metrics.py.
 """
 
 from __future__ import annotations

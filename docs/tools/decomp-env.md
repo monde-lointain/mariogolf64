@@ -111,7 +111,7 @@ For attempts named `base_<N>.c`, the result is appended to `match_log.txt`: `<fi
 | `./build.sh <file.c> [opt_flag]` | Compile, score and archive one attempt |
 | `./diff.sh <attempt>.o` | Diff a built attempt's normalized dump against `target_object_dump_normalized.s` |
 | `./dist.py <target.o> <attempt.o> [--stack-diffs] [--symbol SYMBOL] [--algorithm {sequence,levenshtein}] [--debug]` | Score two objects. Prints `Score: X% (N differences)`, `Algorithm`, and `Exact match: yes\|no`. |
-| `./objdump.py <file> [--from-dump] [--no-source] [--symbol SYMBOL]` | Normalized MIPS dump of an object, or of an annotated listing with `--from-dump`. `--no-source` omits C annotations. |
+| `./objdump.py <file.o> [--symbol SYMBOL]` | Normalized MIPS dump of an object |
 | `./normalize_asm.py <file>` | Normalized dump to stdout; `jtbl_*` labels are rewritten to `.rodata` |
 | `./map_asm_to_c.py <attempt>.o <n>` | Print the source location and C code for the n-th instruction (decimal, counted from 1 within its function) |
 

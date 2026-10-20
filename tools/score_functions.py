@@ -4,7 +4,6 @@
 Modes:
   (default)                 easiest first by difficulty score
   --by-size                 fewest instructions first
-  --by-similarity           each function with its top-N similar decompiled functions
   --by-coddog-similarity    each function with coddog matches whose C body is in src/
 
 Tiers (--tier 1|2|3, default 1) select by difficulty-ledger tier: tier 1 is every
@@ -13,7 +12,6 @@ tiers. See docs/tools/difficulty-ledger.md.
 
 Examples (from the repo root):
   python3 tools/score_functions.py asm/nonmatchings --json
-  python3 tools/score_functions.py asm/nonmatchings --json --by-similarity --top-n 3
   python3 tools/score_functions.py asm/nonmatchings --json --by-coddog-similarity
 """
 
@@ -29,9 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from find_similar_functions import (  # noqa: E402
     CoddogError,
     ParsedFunction,
-    build_function_index,
     collect_unmatched,
-    find_similar_functions,
     get_coddog_similarity,
     get_project_root,
     scan_src_definitions,
@@ -79,10 +75,9 @@ def select_tier(
     scored: List[Tuple[ParsedFunction, float]],
     tiers: Mapping[str, object],
     tier: int,
-) -> Tuple[List[Tuple[ParsedFunction, float]], int]:
-    """Keep the functions at difficulty-ledger tier `tier`; return (kept, excluded_count)."""
-    kept = [item for item in scored if tier_of(item[0].name, tiers) == tier]
-    return kept, len(scored) - len(kept)
+) -> List[Tuple[ParsedFunction, float]]:
+    """Keep the functions at difficulty-ledger tier `tier`."""
+    return [item for item in scored if tier_of(item[0].name, tiers) == tier]
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -91,7 +86,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument('path', nargs='?', default='asm/nonmatchings',
                         help='Unmatched .s file or directory (default: asm/nonmatchings)')
     parser.add_argument('--json', action='store_true', help='Print JSON to stdout')
-    parser.add_argument('--score-func', metavar='FUNCTION_NAME', help='Only consider this function')
     parser.add_argument('--min-score', type=float, metavar='MIN', help='Minimum difficulty score (0-1)')
     parser.add_argument('--max-score', type=float, metavar='MAX', help='Maximum difficulty score (0-1)')
     parser.add_argument('--tier', type=int, choices=(1, 2, 3), default=1,
@@ -99,12 +93,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--by-size', action='store_true',
                       help='Order by instruction count, smallest first')
-    mode.add_argument('--by-similarity', action='store_true',
-                      help='List each function with its most similar decompiled functions')
     mode.add_argument('--by-coddog-similarity', action='store_true',
                       help='List each function with coddog matches whose C body is in src/')
     parser.add_argument('--top-n', type=int, default=5, metavar='N',
-                        help='Similar functions per entry (default: 5)')
+                        help='Coddog matches per entry (default: 5)')
     args = parser.parse_args(argv)
 
     root = get_project_root()
@@ -116,13 +108,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     functions: Dict[str, ParsedFunction] = collect_unmatched(root, target)
-    if args.score_func:
-        fn = functions.get(args.score_func)
-        if fn is None:
-            print(f"Error: '{args.score_func}' not found under {args.path}", file=sys.stderr)
-            return 1
-        functions = {fn.name: fn}
-
     scored = [(fn, difficulty(fn)) for fn in functions.values()]
     if args.min_score is not None:
         scored = [item for item in scored if item[1] >= args.min_score]
@@ -134,27 +119,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except LedgerError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
-    scored, excluded = select_tier(scored, tiers, args.tier)
-    if args.score_func and excluded:
-        print(f"note: {args.score_func} is tier {tier_of(args.score_func, tiers)}, "
-              f"so --tier {args.tier} excludes it", file=sys.stderr)
-
-    if args.by_similarity:
-        index = build_function_index(root)
-        rows = []
-        for fn, _ in _ordered(scored, args.by_size):
-            ranked = find_similar_functions(fn, index, top_n=args.top_n)
-            best = ranked[0][1] if ranked else 0.0
-            rows.append((best, fn.name, ranked))
-        rows.sort(key=lambda row: (-row[0], row[1]))
-        if args.json:
-            print(json.dumps([[name] + [ref for ref, _ in ranked] for _, name, ranked in rows]))
-        else:
-            for _, name, ranked in rows:
-                print(name)
-                for ref, score in ranked:
-                    print(f"    {score:.4f}  {ref}  ({index[ref].file_path})")
-        return 0
+    scored = select_tier(scored, tiers, args.tier)
 
     if args.by_coddog_similarity:
         src_defs = scan_src_definitions(root)

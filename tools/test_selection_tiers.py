@@ -23,20 +23,19 @@ class SelectTierTest(unittest.TestCase):
     tiers = {'func_B': 2, 'func_C': 'human'}
 
     def test_tier_one_drops_every_function_with_a_failure(self):
-        kept, excluded = sf.select_tier(self.scored, self.tiers, 1)
+        kept = sf.select_tier(self.scored, self.tiers, 1)
         self.assertEqual([f.name for f, _ in kept], ['func_A', 'func_D'])
-        self.assertEqual(excluded, 2)
 
     def test_tier_two_keeps_only_tier_two(self):
-        kept, _ = sf.select_tier(self.scored, self.tiers, 2)
+        kept = sf.select_tier(self.scored, self.tiers, 2)
         self.assertEqual([f.name for f, _ in kept], ['func_B'])
 
     def test_tier_three_is_empty_when_nothing_qualifies(self):
-        kept, _ = sf.select_tier(self.scored, self.tiers, 3)
+        kept = sf.select_tier(self.scored, self.tiers, 3)
         self.assertEqual(kept, [])
 
     def test_order_and_scores_are_preserved(self):
-        kept, _ = sf.select_tier(self.scored, {}, 1)
+        kept = sf.select_tier(self.scored, {}, 1)
         self.assertEqual(kept, self.scored)
 
 
@@ -80,7 +79,7 @@ class ListCandidatesAgreementTest(unittest.TestCase):
     def test_score_functions_tier_one_matches_the_list_default(self):
         tiers = self.tiers()
         scored = [(fn(n), 0.0) for n in self.names]
-        kept, _ = sf.select_tier(scored, tiers, 1)
+        kept = sf.select_tier(scored, tiers, 1)
         rows, _, _ = ldc.collect_candidates([self.source], False, self.root, tiers)
         self.assertEqual({f.name for f, _ in kept}, {r['func'] for r in rows})
 
