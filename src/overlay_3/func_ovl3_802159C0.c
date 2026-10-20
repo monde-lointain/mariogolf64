@@ -1,8 +1,6 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_802159C0);
-
 extern u8* func_8005AF74(void);
 extern s32 func_800959F8(void);
 extern void func_8009226C(s32 arg0);
@@ -10,6 +8,73 @@ extern void play_sound_effect(s32 sfx, s32 channel, s32 volume);
 extern s32 D_800C2000;
 extern s32 D_800C2004;
 extern s32 current_game_mode;
+
+extern u8* D_ovl3_8023AC64;
+extern u8* D_ovl3_8023AC68;
+extern u8* D_ovl3_8023AC6C;
+extern u8* D_ovl3_8023AC70;
+extern s32 D_ovl3_80230190;
+extern s32 D_ovl3_80230194;
+extern s32 D_ovl3_80230198;
+extern s32 D_ovl3_8023019C;
+extern s32 D_ovl3_802301A0;
+extern s32 D_ovl3_802301A4;
+
+void func_ovl3_802159C0(u8* arg0, s16 arg1) {
+    RomAssetLoad asset;
+    u8* state;
+    s32 next_a0;
+    s32 next_v1;
+
+    state = func_8005AF74();
+    switch (arg1) {
+    case 1:
+        D_ovl3_8023AC64 = arg0;
+        get_rom_asset_allocation_size(0x6EF, &asset);
+        load_rom_asset_payload(D_ovl3_8023AC64, &asset);
+        break;
+    case 2:
+        D_ovl3_8023AC68 = arg0;
+        break;
+    case 3:
+        D_ovl3_8023AC6C = arg0;
+        get_rom_asset_allocation_size(0x94A, &asset);
+        load_rom_asset_payload(D_ovl3_8023AC6C, &asset);
+        D_ovl3_8023019C = 0;
+        D_ovl3_802301A0 = 0;
+        D_ovl3_802301A4 = 0;
+        break;
+    case 4:
+        D_ovl3_8023AC70 = arg0;
+        get_rom_asset_allocation_size(0x5BE, &asset);
+        load_rom_asset_payload(D_ovl3_8023AC70, &asset);
+        break;
+    }
+
+    if ((s8)state[0x35] < 4 && ((next_a0 = 0xA4), (s8)state[0x36] < 2)) {
+        D_ovl3_80230198 = 3;
+        next_v1 = 0xAA;
+    } else if ((s8)state[0x35] >= 3 && ((next_a0 = 0x44), (s8)state[0x36] < 2)) {
+        next_v1 = 0xAA;
+        D_ovl3_80230198 = 2;
+    } else {
+        next_a0 = 0x44;
+        if ((s8)state[0x35] < 4) {
+            next_v1 = 0x54;
+            if ((s8)state[0x36] >= 3) {
+                next_a0 = 0xA4;
+                D_ovl3_80230198 = 1;
+            } else {
+                D_ovl3_80230198 = 0;
+            }
+        } else {
+            next_v1 = 0x54;
+            D_ovl3_80230198 = 0;
+        }
+    }
+    D_ovl3_80230190 = next_a0;
+    D_ovl3_80230194 = next_v1;
+}
 
 void func_ovl3_80215B84(void) {
     u8* state;
@@ -101,8 +166,6 @@ void func_ovl3_802169CC(Gfx **arg0) {
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80216C14);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_8021730C);
-
-extern u8* D_ovl3_8023AC70;
 
 void func_ovl3_80217464(Gfx** gfxp, s32 x, s32 y) {
     Gfx* gfx = *gfxp;
