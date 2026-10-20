@@ -1,4 +1,5 @@
 #include "common.h"
+#include "../main/rom_asset.h"
 
 extern s32 D_ovl13_80243EE0;
 extern s32 D_ovl13_80243EE4;
@@ -11,6 +12,33 @@ extern void load_texture_block(Gfx** pgfx, u32 timg, s32 fmt, s32 siz, s32 width
                                s32 height, s32 pal, s32 cms, s32 cmt, s32 masks,
                                s32 maskt, s32 shifts, s32 shiftt);
 extern s32 D_ovl13_80243F50;
+extern void* heap3_alloc(s32 size);
+
+extern u16 D_ovl13_80243E60[13];
+extern u16 D_ovl13_80243E7C[];
+extern s32 D_ovl13_80243E98;
+extern u8 D_ovl13_80243E9C;
+extern u8 D_ovl13_80243E9D;
+extern s32 D_ovl13_80243EA8;
+extern s32 D_ovl13_80243EAC;
+extern s32 D_ovl13_80243EB0;
+extern s32 D_ovl13_80243EB4;
+extern s32 D_ovl13_80243EB8;
+extern s32 D_ovl13_80243EBC;
+extern u8 D_ovl13_80243EC0;
+extern char D_ovl13_80243EF0[];
+extern void* D_ovl13_80243F58[13];
+extern void* D_ovl13_80243F8C;
+extern void* D_ovl13_80243F90;
+extern void* D_ovl13_80243F94;
+extern void* D_ovl13_80243F98;
+extern void* D_ovl13_80243F9C;
+extern void* D_ovl13_80243FA0;
+extern void* D_ovl13_80243FA4;
+extern void* D_ovl13_80243FA8;
+extern void* D_ovl13_80243FAC;
+extern void* D_ovl13_80243FB0;
+extern s32 scenario_mode_id;
 
 s32 func_ovl13_80241800(void) {
     u8* ret = func_8005AF50();
@@ -47,7 +75,61 @@ s32 func_ovl13_80241800(void) {
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_802418B8);
+void func_ovl13_802418B8(s32 arg0) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    s32 i;
+    u32 size;
+
+    if (D_ovl13_80243EA8 != 0) {
+        osSyncPrintf(D_ovl13_80243EF0);
+        return;
+    }
+    D_ovl13_80243EC0 = 0;
+    if (arg0 == 0) {
+        D_ovl13_80243EA8 = 1;
+        D_ovl13_80243F50 = (s32)heap3_alloc(get_rom_asset_allocation_size(0x521, &asset));
+        load_rom_asset_payload((void*)D_ovl13_80243F50, &asset);
+        D_ovl13_80243F98 = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243F98, &asset);
+        D_ovl13_80243F9C = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243F9C, &asset);
+        D_ovl13_80243FA0 = heap3_alloc(get_rom_asset_allocation_size(0x5BE, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA0, &asset);
+        D_ovl13_80243FA4 = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA4, &asset);
+        D_ovl13_80243FA8 = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FA8, &asset);
+        D_ovl13_80243FAC = heap3_alloc(get_rom_asset_allocation_size(0x5E5, &asset));
+        load_rom_asset_payload(D_ovl13_80243FAC, &asset);
+        D_ovl13_80243FB0 = heap3_alloc(get_rom_asset_allocation_size(0x8ED, &asset));
+        load_rom_asset_payload(D_ovl13_80243FB0, &asset);
+    } else {
+        D_ovl13_80243EA8 = 2;
+        D_ovl13_80243EAC = 0x40;
+        D_ovl13_80243F50 = (s32)heap3_alloc(get_rom_asset_allocation_size(0x739, &asset));
+        load_rom_asset_payload((void*)D_ovl13_80243F50, &asset);
+    }
+    D_ovl13_80243EB8 = 0;
+    D_ovl13_80243EBC = 0;
+    D_ovl13_80243EB0 = scenario_mode_id;
+    D_ovl13_80243EB4 = scenario_mode_id;
+    for (i = 0; i != 13; i++) {
+        D_ovl13_80243F58[i] = heap3_alloc(get_rom_asset_allocation_size(D_ovl13_80243E60[i], &asset));
+        load_rom_asset_payload(D_ovl13_80243F58[i], &asset);
+    }
+    D_ovl13_80243F8C = heap3_alloc(get_rom_asset_allocation_size(D_ovl13_80243E7C[scenario_mode_id] + 2, &asset));
+    load_rom_asset_payload(D_ovl13_80243F8C, &asset);
+    open_rom_asset_slot(0x876, &slot);
+    size = get_rom_load_slot_size(&slot);
+    D_ovl13_80243F90 = heap3_alloc(size);
+    read_rom_load_slot(D_ovl13_80243F90, size, &slot);
+    D_ovl13_80243F94 = heap3_alloc(get_rom_asset_allocation_size(0x71E, &asset));
+    load_rom_asset_payload(D_ovl13_80243F94, &asset);
+    D_ovl13_80243E98 = 0;
+    D_ovl13_80243E9C = 0;
+    D_ovl13_80243E9D = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_13/func_ovl13_80241800", func_ovl13_80241BD8);
 
