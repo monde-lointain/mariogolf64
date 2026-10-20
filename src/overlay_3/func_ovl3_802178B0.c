@@ -9,14 +9,69 @@ INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80217D20)
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_8021826C);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80219460);
+typedef struct {
+    u16 unk0;
+    u16 unk2;
+} AssetEntry;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+} AssetSelector;
+
+extern u8* func_8005AF74(void);
+extern u8 D_801B5634;
+extern s32 D_ovl3_8022F8C0;
+extern u8 D_ovl3_8022F8C4;
+extern u8 D_ovl3_8022F8C5;
+extern s32 D_ovl3_8023B350[2];
+extern AssetEntry D_ovl3_802303CC[][2];
+extern AssetSelector D_ovl3_80230400[][6];
+
+void func_ovl3_80219460(Gfx** gfxp, s32 x, s32 y, s32 width, s32 scale) {
+    RomAssetLoad asset;
+    Gfx* gfx = *gfxp;
+    u8* state = func_8005AF74();
+    u8 set_index;
+    AssetSelector* selectors;
+    AssetEntry* entries;
+    s32 buf;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    buf = D_ovl3_8023B350[D_ovl3_8022F8C4];
+    gDPLoadTLUT_pal16(gfx++, 0, (u8*)((buf + 8) & ~7));
+    gDPLoadTextureTile_4b(gfx++, (u8*)((buf + 0x28) & ~7), G_IM_FMT_CI, 24, 24,
+                          0, 0, 23, 23, 0, 0, 0, 0, 0, 0, 0);
+    gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2,
+                            (y + width) << 2, 0, 0, 0, scale, scale);
+    gDPPipeSync(gfx++);
+
+    D_ovl3_8022F8C5 = D_ovl3_8022F8C5 + 1;
+    if ((s8) D_ovl3_8022F8C5 == 4) {
+        D_ovl3_8022F8C5 = 0;
+        D_ovl3_8022F8C0 = D_ovl3_8022F8C0 + 1;
+        if (D_ovl3_8022F8C0 >= 2) {
+            D_ovl3_8022F8C0 = 0;
+        }
+        D_ovl3_8022F8C4 = D_ovl3_8022F8C4 == 0;
+        selectors = D_ovl3_80230400[D_801B5634];
+        set_index = selectors[(s8) state[0xD]].unk1;
+        entries = D_ovl3_802303CC[set_index];
+        get_rom_asset_allocation_size(entries[D_ovl3_8022F8C0].unk2, &asset);
+        load_rom_asset_payload((void*)D_ovl3_8023B350[D_ovl3_8022F8C4],
+                               &asset);
+    }
+
+    *gfxp = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80219948);
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802178B0", func_ovl3_80219BD4);
 
 extern u8* D_ovl3_8023B364;
-extern u8* func_8005AF74(void);
 extern s16 D_ovl3_8023B640[4][5];
 
 void func_ovl3_8021B1E0(Gfx** gfxp, s32 x, s32 y, u8 idx) {
