@@ -147,6 +147,15 @@ typedef struct {
 } Ovl3Save;
 
 typedef struct {
+    s32 col;
+    s32 row;
+} Ovl3Coord;
+
+typedef struct {
+    Ovl3Coord coords[17];
+} Ovl3CoordTable;
+
+typedef struct {
     u8 pad[0x35];
     s8 unk35;
     s8 unk36;
@@ -168,6 +177,10 @@ extern void *tile_palette_table[];
 extern u8 D_ovl3_8023BFF0[];
 extern s32 D_ovl3_802301A8[];
 extern s32 D_ovl3_8023AC78[];
+extern Ovl3CoordTable D_ovl3_80231918;
+extern s16 D_800C28E4[3][7];
+extern s32 D_ovl3_8023ACA8[];
+extern void build_roster_grid(s32 arg0, u8 arg1);
 
 void func_ovl3_80215DC4(Gfx **arg0) {
     Gfx *gfx;
@@ -300,7 +313,36 @@ void func_ovl3_802169CC(Gfx **arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_80216C14);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_802159C0", func_ovl3_8021730C);
+void func_ovl3_8021730C(void) {
+    Ovl3Save *save;
+    Ovl3CoordTable table;
+    s32 i;
+    s32 row;
+    s32 col;
+    s32 count;
+
+    save = (Ovl3Save *)func_8005AF50();
+    table = D_ovl3_80231918;
+    build_roster_grid(1, 0);
+    for (i = 0; i != 18; i++) {
+        D_ovl3_8023AC78[i] = -1;
+    }
+    for (i = 0; i != 13; i++) {
+        row = table.coords[i].row;
+        col = table.coords[i].col;
+        if (D_800C28E4[row][col] >= 0) {
+            D_ovl3_8023AC78[i] = 1;
+        }
+    }
+    for (row = 13; row != 18; row++) {
+        for (col = 0, count = 0; col != 18; col++) {
+            count += (save->cells[row][col].unkAF1 & 0x7F) != 0;
+        }
+        if (count > 0) {
+            D_ovl3_8023ACA8[row - 13] = 1;
+        }
+    }
+}
 
 void func_ovl3_80217464(Gfx** gfxp, s32 x, s32 y) {
     Gfx* gfx = *gfxp;
