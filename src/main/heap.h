@@ -73,5 +73,7 @@ void* heap_alloc(s32 slot_index, u32 size_bytes);
 
 /* Cached free bytes, including free-block headers, not total heap capacity. */
 s32 heap_get_total_free(s32 slot_index);
+s32 heap3_get_total(void);
+s32 heap3_get_largest_free(void);
 
 #endif /* HEAP_H */
