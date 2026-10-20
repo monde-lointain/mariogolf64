@@ -1,6 +1,16 @@
 #include "common.h"
 #include "../main/rom_asset.h"
 
+typedef struct {
+    /* 0x00 */ u16 asset_index;
+    /* 0x02 */ u8 unknown_02[0x1E];
+} RomAssetSelection; /* 0x20 */
+
+typedef struct {
+    /* 0x00 */ u8 unknown_00[0x30];
+    /* 0x30 */ s8 unknown_30;
+} LiveSessionBlock;
+
 extern u16 D_800C2064[];
 extern void** D_ovl3_8023A820;
 extern u8 D_80105118[];
@@ -15,6 +25,12 @@ extern u8* D_ovl3_8023A82C;
 extern u8* D_ovl3_8023A830;
 extern s32 D_ovl3_802300A8;
 extern s32 D_ovl3_802300AC;
+extern RomAssetSelection D_800C21B8[];
+extern s16 D_800C2278[][3];
+extern void* D_800FBE38[];
+extern void** D_ovl3_8023A814;
+extern void** D_ovl3_8023A818;
+extern void** D_ovl3_8023A81C;
 
 void func_ovl3_80210E3C(Gfx** gfxp, s32 x, s32 y, s32 value, u8 mode, u8 flag);
 void func_80071608(Gfx** dl);
@@ -38,7 +54,41 @@ void func_ovl3_8020E010(void** destinations) {
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/overlay_3/func_ovl3_8020E010", func_ovl3_8020E0AC);
+void func_ovl3_8020E0AC(void** destinations, s8 bank) {
+    RomAssetLoad asset;
+    RomLoadSlot slot;
+    LiveSessionBlock* live;
+    s16 i;
+
+    live = (LiveSessionBlock*)func_8005AF74();
+    if (bank < 0) {
+        bank = 1;
+    }
+    if (bank >= 4) {
+        bank = 3;
+    }
+    switch (bank) {
+    case 1:
+        D_ovl3_8023A814 = destinations;
+        break;
+    case 2:
+        D_ovl3_8023A818 = destinations;
+        break;
+    case 3:
+        D_ovl3_8023A81C = destinations;
+        break;
+    }
+    if (live->unknown_30 != 6) {
+        for (i = 0; i != 2; i++) {
+            get_rom_asset_allocation_size(D_800C21B8[live->unknown_30].asset_index, &asset);
+            load_rom_asset_payload(destinations[i], &asset);
+        }
+        for (i = 0; i != 3; i++) {
+            open_rom_asset_slot(D_800C2278[live->unknown_30][i], &slot);
+            read_rom_load_slot(D_800FBE38[i], get_rom_load_slot_size(&slot), &slot);
+        }
+    }
+}
 
 void func_ovl3_8020E26C(u8* block, s32 slot_index) {
     RomAssetLoad asset;
