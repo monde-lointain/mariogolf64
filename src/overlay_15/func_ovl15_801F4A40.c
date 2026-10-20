@@ -94,7 +94,9 @@ typedef struct {
     NUContPakFile gbpakFile; /* 0x6C */
     OSGbpakId gbpakId; /* 0x7C */
     Ovl15Entry unkCC[12]; /* 0xCC */
-    u8 unk75C[0x44];
+    u8 unk75C[0x10];
+    s32 unk76C[12];
+    s32 unk79C;
     s32 unk7A0;
     u8 unk7A4[4];
     s32 unk7A8;
@@ -131,6 +133,7 @@ extern u16 D_800C5498[];
 extern s16 D_800C54BC[];
 extern Ovl15AssetBlock D_800FE450;
 extern s32 D_800FE4B8[];
+extern s32 D_800FE4AC;
 extern char D_80105118[];
 extern char D_ovl15_801FBE4C[];
 extern void func_80071608(Gfx **dl);
@@ -689,7 +692,34 @@ void func_ovl15_801F7ED4(Gfx **dl, Ovl15AssetBlock *blk) {
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F8110);
 
-INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F8BC8);
+void func_ovl15_801F8BC8(void) {
+    Ovl15AssetBlock *blk = &D_800FE450;
+    s32 i;
+    s32 j;
+    s32 base;
+    s32 idx;
+
+    if (D_800FE4AC == 2) {
+        /* D_800FE4B8 + 0x738 is blk->unk7A0. Written through the D_800FE4B8
+         * symbol: the D_800FE450.unk7A0 form compiles to a different base
+         * register and does not match. */
+        D_800FE4B8[0x1CE] = 0;
+        func_ovl15_801F67F4();
+        i = 0;
+        do {
+            base = i * 3;
+            j = 0;
+            do {
+                idx = base + j;
+                j++;
+                blk->unk76C[idx] = 0;
+                blk->unkCC[idx].state = 0;
+            } while (j != 3);
+            i++;
+        } while (i != 4);
+        blk->unk79C = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_15/func_ovl15_801F4A40", func_ovl15_801F8C60);
 
