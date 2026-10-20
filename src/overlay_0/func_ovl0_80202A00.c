@@ -319,7 +319,96 @@ void func_ovl0_802045BC(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_8020466C);
+extern s8 D_801B55D8;
+extern s16 D_800C3078;
+extern s32 D_ovl0_80223E50;
+extern s32 flag_is_set(s32 flag);
+extern s32 rand(void);
+
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+
+/* Turns the meter angle by the stick input: half the input, scaled by |input / 4| when non-zero. */
+static inline void func_ovl0_8020466C_turn_angle(MeterDefaults *meter, s16 old, s32 stick) {
+    u16 *angle = &meter->unk0;
+    s32 half = stick / 2;
+    s32 scale;
+    s32 result;
+
+    result = old - (((scale = ABS(stick / 4)) != 0) ? half * scale : half);
+    *angle = result;
+}
+
+void func_ovl0_8020466C(s32 arg0) {
+    s32 stick;
+    s32 half;
+    s16 old;
+    s32 scale;
+    s32 buttons;
+    s32 *hold;
+    s32 speed;
+    MeterDefaults *meter;
+
+    stick = D_801B55D8;
+    meter = &D_800FBE48;
+    old = meter->unk0;
+    if (D_800C3090 != 0) {
+        return;
+    }
+    if (arg0 == 0) {
+        func_ovl0_8020466C_turn_angle(meter, old, stick);
+    } else {
+        half = stick / 2;
+        D_800C3078 -= ((scale = ABS(stick / 6)) != 0) ? half * scale : half;
+    }
+    buttons = D_801B55CC & 0x300;
+    if (buttons == 0 || buttons == 0x300) {
+        D_ovl0_80223E50 = 0;
+    } else if (buttons & 0x200) {
+        hold = &D_ovl0_80223E50;
+        if (*hold < 0) {
+            *hold = 0;
+        }
+        if (++*hold > 60) {
+            *hold = 60;
+        }
+    } else {
+        hold = &D_ovl0_80223E50;
+        if (*hold > 0) {
+            *hold = 0;
+        }
+        if (--*hold < -60) {
+            *hold = -60;
+        }
+    }
+    speed = D_ovl0_80223E50;
+    scale = speed;
+    if (speed < 0) {
+        scale = -speed;
+    }
+    D_800FBE48.unk0 += speed * (scale / 6 + 3);
+    if (!flag_is_set(0x9F)) {
+        if (D_800C308C == 0 || D_800C308C == 5) {
+            if (old == (s16)D_800FBE48.unk0) {
+                if (D_800B680C != 3) {
+                    func_8002A97C(3, 2);
+                    set_color_framebuffer_count(2);
+                }
+            } else if (D_800B680C == 3) {
+                set_color_framebuffer_count(3);
+                func_8002A97C(4, 0);
+            }
+        } else {
+            set_color_framebuffer_count(3);
+        }
+    }
+    if (flag_is_set(0x9F)) {
+        if (!(rand() & 1)) {
+            set_color_framebuffer_count(2);
+        } else {
+            set_color_framebuffer_count(3);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/overlay_0/func_ovl0_80202A00", func_ovl0_80204910);
 
