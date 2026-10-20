@@ -29,6 +29,9 @@ extern void flag_set(s32);
 extern void func_80069FBC(void);
 extern void func_80069F38(void);
 extern void set_color_framebuffer_count(u32 buffer_count);
+extern void func_80095150(void);
+extern void func_800947A8(void);
+extern void func_8009232C(Gfx** gfxp);
 
 extern Gfx* glistp;
 
@@ -1158,6 +1161,12 @@ void emit_snapshot_panel_grid_dl(void) {
   D_800C5EE4 -= 10;
 }
 
+/* Sky-panel constants: M_PI/2 and (M_PI/2)/255. Defined here so their rodata
+ * follows the panel-grid literals; D_800D1E48 and D_800D1E50 come from the
+ * func_800947A8 asm file, which splat emits directly after these two. */
+const f64 D_800D1E38 = 0.00615998559527410408;
+const f64 D_800D1E40 = 1.57079632679489656;
+
 /* Sky-panel snapshot emitter, sibling of emit_snapshot_panel_grid_dl above.
  * Reconstructed to 618/618 instructions with an exact -0x98 frame
  * and six of seven global registers matching. The seventh is a quantified
@@ -1261,7 +1270,39 @@ void emit_snapshot_tile_wipe_dl(void) {
   D_800C5EE4--;
 }
 
-INCLUDE_ASM("asm/nonmatchings/main/func_8008D100", func_800957F0);
+/* Snapshot dispatch keyed on D_800C5EE8 (set by func_8009226C; index is
+ * value - 1). Every call begins with a pipe sync and gDPSetColorDither off,
+ * then emits the selected snapshot emitter and latches the colour buffer. */
+void func_800957F0(void) {
+  s32 idx;
+
+  func_80095150();
+  gDPPipeSync(glistp++);
+  gDPSetColorDither(glistp++, G_CD_DISABLE);
+  idx = D_800C5EE8 - 1;
+  switch (idx) {
+    case 0:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      func_8009232C(&glistp);
+      break;
+    case 1:
+      func_800947A8();
+      break;
+    case 2:
+      emit_snapshot_panel_grid_dl();
+      break;
+    case 4:
+      emit_snapshot_tile_wipe_dl();
+      break;
+    case 9:
+      emit_snapshot_spiral_wipe_dl(&glistp);
+      break;
+  }
+  D_800FED10 = (u32)nuGfxCfb_ptr;
+}
 
 /* gsDPPipeSync + gsDPSetScissor emitter for the full 320x240 (0x140 x 0xF0)
  * screen. Coords come from a persistent 4x s16 rect at D_801B7F30; the scissor
