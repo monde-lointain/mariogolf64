@@ -115,11 +115,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         scored = [item for item in scored if item[1] <= args.max_score]
 
     try:
-        tiers = failed_tiers(root, read_records(ledger_path(cwd=root)))
+        records = read_records(ledger_path(cwd=root))
+        tiers = failed_tiers(root, records)
     except LedgerError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
-    scored = select_tier(scored, tiers, args.tier)
+    # A function matched in another worktree is still unmatched here until sync-shard brings it in.
+    matched = {rec['function'] for rec in records if rec['outcome'] == 'matched'}
+    scored = [item for item in select_tier(scored, tiers, args.tier) if item[0].name not in matched]
 
     if args.by_coddog_similarity:
         src_defs = scan_src_definitions(root)

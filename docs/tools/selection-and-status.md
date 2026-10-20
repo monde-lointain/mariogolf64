@@ -11,7 +11,7 @@ Scripts print their options with `--help`. Run them from the repository root, wi
 
 `python3 tools/score_functions.py [PATH] [--json] [--min-score MIN] [--max-score MAX] [--tier {1,2,3}] [--by-size | --by-coddog-similarity] [--top-n N]`
 
-Ranks unmatched functions. The default score is a logistic difficulty in (0, 1) from instruction, branch, jump and label counts; higher is harder.
+Ranks unmatched functions. The default score is a logistic difficulty in (0, 1) from instruction, branch, jump and label counts; higher is harder. A function with a `matched` record in the [difficulty ledger](/tools/difficulty-ledger.md) is left out at every tier: another shard matched it, and this worktree has not synced the commit yet.
 
 | Flag | Effect |
 |---|---|
