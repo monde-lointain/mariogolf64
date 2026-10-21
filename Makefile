@@ -56,6 +56,14 @@ ULTRALIB_CFLAGS   := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3
 ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -P \
                      -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
 
+# libmus, the n_audio build of the Software Creations music library, as its
+# makefile built libn_gmus. The assembler option lays out statics the way the
+# KMC assembler did, giving 8-byte alignment to anything of 8 bytes or more.
+LIBMUS_DIR        := lib/libmus
+LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCLUDES)
+LIBMUS_DEFINES    := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
+LIBMUS_CFLAGS     := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3 -Wa,--force-n64align
+
 # Per-directory compiler flags
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
 
@@ -117,6 +125,10 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
 $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+
+$(BUILD_DIR)/$(LIBMUS_DIR)/%.c.o: $(LIBMUS_DIR)/%.c
+	@mkdir -p $(dir $@)
+	VR4300MUL=ON $(CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
 
 # splat names data-only objects as if they were C, so assembly files that
 # only hold data (such as gu/libm_vals.s) are found under a .c.o name

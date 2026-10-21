@@ -2,6 +2,7 @@
 EntryPoint = 0x80025C00; // type:func
 Boot = 0x800994B0; // type:func
 g_BootStackTop = 0x8010C2D0;
+g_IdleStackTop = 0x800E7030;
 
 // Cross-overlay references
 D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04
@@ -302,12 +303,15 @@ MusSetScheduler = 0x8009A53C; // type:func
 MusHandleWaveCount = 0x8009A548; // type:func
 MusHandleWaveAddress = 0x8009A5AC; // type:func
 MusSetMarkerCallback = 0x8009A624; // type:func
+MusPrintDmaUsage = 0x8009A630; // type:func
 __MusIntFifoOpen = 0x8009A64C; // type:func
 __MusIntFifoProcessCommand = 0x8009A6B0; // type:func
 __MusIntFifoAddCommand = 0x8009A730; // type:func
+MusGetFrameCount = 0x8009A7C8; // type:func
 __MusIntMain = 0x8009A7D4; // type:func
 __MusIntGetNewNote = 0x8009AB18; // type:func
 __MusIntFlushPending = 0x8009B060; // type:func
+MusSetStereo = 0x8009B0DC; // type:func
 __MusIntSetVolumeAndPan = 0x8009B0F0; // type:func
 __MusIntSetPitch = 0x8009B254; // type:func
 __MusIntInitEnvelope = 0x8009B360; // type:func
@@ -373,11 +377,15 @@ Fchangefx = 0x8009CE64; // type:func
 Fmarker = 0x8009CEA8; // type:func
 Flength0 = 0x8009CF18; // type:func
 CustomInit = 0x8009CF30; // type:func
+CustomInitWithEffect = 0x8009CF98; // type:func
 CustomSynNew = 0x8009D004; // type:func
 CustomAllocFX = 0x8009D274; // type:func
 CustomFxNew = 0x8009D2C4; // type:func
 CustomFxSet = 0x8009D40C; // type:func
+GetCustomEffectParam = 0x8009D6EC; // type:func
+SetCustomEffectParam = 0x8009D774; // type:func
 SetForCustom = 0x8009D7E8; // type:func
+SetForEffect = 0x8009D800; // type:func
 GetFxMostSections = 0x8009D820; // type:func
 GetFxLongest = 0x8009D864; // type:func
 ChangeCustomEffect = 0x8009D8A8; // type:func
@@ -385,6 +393,7 @@ __MusIntDmaInit = 0x8009D910; // type:func
 __MusIntDmaProcess = 0x8009DA8C; // type:func
 __CallBackDmaNew = 0x8009DB28; // type:func
 __CallBackDmaProcess = 0x8009DB34; // type:func
+__MusIntDmaPrintUsage = 0x8009DBA0; // type:func
 __MusIntDmaSample = 0x8009DBA8; // type:func
 __MusIntSchedInit = 0x8009DDC0; // type:func
 __OsSchedInstall = 0x8009DDCC; // type:func
@@ -398,6 +407,26 @@ __MusIntMemRemaining = 0x8009E2BC; // type:func
 __MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
 __MusIntMemSet = 0x8009E2E0; // type:func
 __MusIntMemMove = 0x8009E30C; // type:func
+
+// libmus data, placed by tools/locate_object_sections.py
+_mus_cpu_last = 0x800C76B0; // size:0x4
+_mus_cpu_worst = 0x800C76B4; // size:0x4
+jumptable = 0x800C76BC; // size:0xB4
+__libmus_current_sched = 0x800C7ADC; // size:0x4
+__libmus_output_muted = 0x800C7AE0; // size:0x1
+diskrom_handle = 0x800FEF78; // size:0x4
+__muscontrol_flag = 0x80132368; // size:0x4
+__libmus_alglobals = 0x801B56A0; // size:0x50
+gReverbFx = 0x801B74B0; // size:0x28
+
+// n_audio globals, as referenced by libmus
+n_alGlobals = 0x800C7DB0; // size:0x4
+n_syn = 0x800C7DB4; // size:0x4
+
+// RSP microcode, from the addresses libmus hands the scheduler
+rspbootTextStart = 0x800B3E50;
+n_aspMainTextStart = 0x800B3F20;
+n_aspMainDataStart = 0x800C9890;
 
 // libultra data, placed by tools/locate_object_sections.py
 __osPiDevMgr = 0x800C7E70; // size:0x1C

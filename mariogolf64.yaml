@@ -116,13 +116,13 @@ segments:
       - [0x70E10, asm]
       - [0x74890, asm]
       - [0x748B0, asm]
-      - [0x749F0, asm, libmus/player]
-      - [0x78330, asm, libmus/player_fx]
-      - [0x78D10, asm, libmus/aud_dma]
-      - [0x791C0, asm, libmus/aud_sched]
-      - [0x79370, asm, libmus/aud_thread]
-      - [0x79640, asm, libmus/lib_memory]
-      - [0x79780, asm]
+      - [0x749F0, c, ../lib/libmus/src/player]
+      - [0x78330, c, ../lib/libmus/src/player_fx]
+      - [0x78D10, c, ../lib/libmus/src/aud_dma]
+      - [0x791C0, c, ../lib/libmus/src/aud_sched]
+      - [0x79370, c, ../lib/libmus/src/aud_thread]
+      - [0x79640, c, ../lib/libmus/src/lib_memory]
+      - [0x79780, c, ../lib/libmus/src/aud_samples]
       - [0x798B0, asm]
       - [0x7A840, asm]
       - [0x7AF60, asm]
@@ -323,6 +323,13 @@ segments:
       - [0x8F240, asm]
       - [0x8F250, textbin, rsp_text]
       - [0x91310, data]
+      - [0xA2AB0, .data, ../lib/libmus/src/player]
+      - [0xA2B80, .data, ../lib/libmus/src/player_fx]
+      - [0xA2EC0, .data, ../lib/libmus/src/aud_dma]
+      - [0xA2ED0, .data, ../lib/libmus/src/aud_sched]
+      - [0xA2EE0, .data, ../lib/libmus/src/aud_thread]
+      - [0xA2F00, .data, ../lib/libmus/src/aud_samples]
+      - [0xA2F10, data]
       - [0xA3270, .data, ../lib/ultralib/src/io/pimgr]
       - [0xA32A0, .data, ../lib/ultralib/src/io/cartrominit]
       - [0xA32B0, .data, ../lib/ultralib/src/io/piacs]
@@ -356,6 +363,9 @@ segments:
       - [0xA4A10, .data, ../lib/ultralib/src/vimodes/vimodempallan1]
       - [0xA4A60, .data, ../lib/ultralib/src/libc/xlitob]
       - [0xA4A90, data]
+      - [0xAD3B0, .rodata, ../lib/libmus/src/player]
+      - [0xAD490, .rodata, ../lib/libmus/src/player_fx]
+      - [0xAD4F0, rodata]
       - [0xAD600, .rodata, ../lib/ultralib/src/os/setintmask]
       - [0xAD680, .rodata, ../lib/ultralib/src/io/devmgr]
       - [0xAD6A0, .rodata, ../lib/ultralib/src/io/aisetfreq]
@@ -377,6 +387,13 @@ segments:
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
       - [0xADC40, rodata]
       - { start: 0xADD30, type: bss, vram: 0x800D2930, name: bss_800D2930 }
+      - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
+      - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }
+      - { type: .bss, vram: 0x800E70E0, name: ../lib/libmus/src/aud_sched }
+      - { type: .bss, vram: 0x800E70F0, name: ../lib/libmus/src/aud_thread }
+      - { type: .bss, vram: 0x800E72B0, name: ../lib/libmus/src/lib_memory }
+      - { type: .bss, vram: 0x800E72C0, name: ../lib/libmus/src/aud_samples }
+      - { type: bss, vram: 0x800E72D0, name: bss_800E72D0 }
       - { type: .bss, vram: 0x800F97E0, name: ../lib/ultralib/src/io/pimgr }
       - { type: .bss, vram: 0x800FA9B0, name: ../lib/ultralib/src/io/piacs }
       - { type: .bss, vram: 0x800FA9C0, name: ../lib/ultralib/src/io/sptask }

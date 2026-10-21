@@ -1,0 +1,9 @@
+/* Symbols that splat names in the asm but leaves for the linker to define */
+
+/* rspboot ends where the n_audio microcode begins, an address splat already
+   gives to n_aspMainTextStart */
+rspbootTextEnd = 0x800B3F20;
+
+/* NuSystem's idle thread stack ends where libmus's bss begins, so splat
+   treats the address as belonging to a C object */
+g_IdleStackTop = 0x800E7030;
