@@ -1,0 +1,7 @@
+// Main segment
+EntryPoint = 0x80025C00; // type:func
+Boot = 0x800994B0; // type:func
+g_BootStackTop = 0x8010C2D0;
+
+// Cross-overlay references
+D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04

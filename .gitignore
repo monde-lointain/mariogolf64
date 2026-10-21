@@ -1,2 +1,18 @@
 # Swap
 [._]*.s[a-v][a-z]
+
+# Copyrighted material: never commit ROMs, extracted assets or asm dumps
+*.z64
+*.n64
+*.v64
+asm/
+assets/
+
+# Build outputs and local tooling
+build/
+.venv/
+tools/gcc_kmc/
+__pycache__/
+*.pyc
+.splat/
+nonmatchings/

@@ -1,0 +1,11 @@
+splat64[mips]>=0.50.1,<1.0.0
+spimdisasm>=1.42.4
+rabbitizer
+ipl3checksum
+mapfile-parser
+# m2c and diff.py dependencies
+pycparser
+colorama
+watchdog
+levenshtein
+cxxfilt

@@ -1,0 +1,275 @@
+name: Mario Golf (North America)
+sha1: e2c4e7a905b29529b49a1619a401fe699224829b
+options:
+  basename: mariogolf64
+  target_path: baserom.us.z64
+  elf_path: build/mariogolf64.elf
+  base_path: .
+  platform: n64
+  compiler: KMC
+
+  find_file_boundaries: True
+  header_encoding: ASCII
+
+  ld_script_path: build/splat/mariogolf64.ld
+  ld_dependencies: True
+  reloc_addrs_path:
+    - reloc_addrs.txt
+  symbol_addrs_path:
+    - symbol_addrs.txt
+  undefined_funcs_auto_path: build/splat/undefined_funcs_auto.txt
+  undefined_syms_auto_path: build/splat/undefined_syms_auto.txt
+
+  asm_path: asm
+  src_path: src
+  build_path: build
+  asset_path: assets
+  extensions_path: tools/splat_ext
+  cache_path: build/splat/splat_cache.pickle
+
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+
+  subalign: null
+  section_order: [".text", ".data", ".rodata", ".bss"]
+  auto_link_sections: [".data", ".rodata", ".bss"]
+  migrate_rodata_to_functions: True
+  string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+
+  asm_inc_header: ""
+  use_legacy_include_asm: False
+  asm_function_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_data_macro: dlabel
+  asm_end_label: endlabel
+  mips_abi_float_regs: o32
+  gp_value: 0x0
+  disasm_unknown: True
+  named_regs_for_c_funcs: False
+  hasm_in_src_path: True
+  ld_bss_is_noload: True
+  ld_align_section_vram_end: False
+  ld_align_segment_vram_end: False
+  ld_generate_symbol_per_data_segment: True
+
+segments:
+  - name: header
+    type: header
+    start: 0x0
+
+  - name: ipl3
+    type: bin
+    start: 0x40
+
+  - name: main
+    type: code
+    start: 0x1000
+    vram: 0x80025C00
+    bss_size: 0x122100
+    subsegments:
+      - [0x1000, hasm, entry]
+      - [0x1050, asm]
+      - [0x8F250, textbin, rsp_text]
+      - [0x91310, data]
+      - { start: 0xADD30, type: bss, vram: 0x800D2930 }
+
+  - name: ovl_00
+    type: code
+    start: 0xADD30
+    vram: 0x801F4A30
+    bss_size: 0x7FF0
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0xADD30, asm]
+      - [0xD8F70, data]
+      - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
+
+  - name: ovl_01
+    type: code
+    start: 0xDE9B0
+    vram: 0x801F4A30
+    bss_size: 0xD320
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0xDE9B0, asm]
+      - [0x115D80, data]
+      - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
+
+  - name: hole_editor
+    type: code
+    start: 0x11BA50
+    vram: 0x80400000
+    exclusive_ram_id: debug
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x11BA50, asm]
+      - [0x127FD0, data]
+
+  - name: ovl_02
+    type: code
+    start: 0x128580
+    vram: 0x8024D800
+    bss_size: 0x8040
+    exclusive_ram_id: overlay_8024D800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x128580, asm]
+      - [0x12F020, data]
+      - { start: 0x1300A0, type: bss, vram: 0x80255320 }
+
+  - name: ovl_03
+    type: code
+    start: 0x1300A0
+    vram: 0x8024D800
+    bss_size: 0x85B0
+    exclusive_ram_id: overlay_8024D800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x1300A0, asm]
+      - [0x1363F0, data]
+      - { start: 0x136BA0, type: bss, vram: 0x80254300 }
+
+  - name: ovl_04
+    type: code
+    start: 0x136BA0
+    vram: 0x8024D800
+    bss_size: 0x2E60
+    exclusive_ram_id: overlay_8024D800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x136BA0, asm]
+      - [0x137090, data]
+      - { start: 0x1370B0, type: bss, vram: 0x8024DD10 }
+
+  - name: ovl_05
+    type: code
+    start: 0x1370B0
+    vram: 0x801F4A30
+    bss_size: 0x1FEC0
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x1370B0, asm]
+      - [0x14D2C0, data]
+      - { start: 0x14EA70, type: bss, vram: 0x8020C3F0 }
+
+  - name: ovl_06
+    type: code
+    start: 0x14EA70
+    vram: 0x801F4A30
+    bss_size: 0x36320
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x14EA70, asm]
+      - [0x14F960, data]
+      - { start: 0x14FB50, type: bss, vram: 0x801F5B10 }
+
+  - name: ovl_07
+    type: code
+    start: 0x14FB50
+    vram: 0x801F4A30
+    bss_size: 0xA590
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x14FB50, asm]
+      - [0x150890, data]
+      - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
+
+  - name: ovl_08
+    type: code
+    start: 0x1508D0
+    vram: 0x801F4A30
+    bss_size: 0x10
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x1508D0, asm]
+      - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
+
+  - name: ovl_09
+    type: code
+    start: 0x150990
+    vram: 0x80241800
+    bss_size: 0x580
+    exclusive_ram_id: overlay_80241800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x150990, asm]
+      - [0x15B5E0, data]
+      - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
+
+  - name: ovl_10
+    type: code
+    start: 0x15BB50
+    vram: 0x80241800
+    bss_size: 0x5E00
+    exclusive_ram_id: overlay_80241800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x15BB50, asm]
+      - [0x15F160, data]
+      - { start: 0x15F250, type: bss, vram: 0x80244F00 }
+
+  - name: ovl_11
+    type: code
+    start: 0x15F250
+    vram: 0x80241800
+    bss_size: 0xB0
+    exclusive_ram_id: overlay_80241800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x15F250, asm]
+      - [0x161870, data]
+      - { start: 0x1619A0, type: bss, vram: 0x80243F50 }
+
+  - name: ovl_12
+    type: code
+    start: 0x1619A0
+    vram: 0x80241800
+    bss_size: 0xD0
+    exclusive_ram_id: overlay_80241800
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x1619A0, asm]
+      - [0x165970, data]
+      - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
+
+  - name: ovl_13
+    type: code
+    start: 0x165BC0
+    vram: 0x801F4A30
+    bss_size: 0x110
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x165BC0, asm]
+      - [0x16CCB0, data]
+      - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
+
+  - name: ovl_14
+    type: code
+    start: 0x16D650
+    vram: 0x801F4A30
+    bss_size: 0x2ACC0
+    exclusive_ram_id: overlay_801F4A30
+    symbol_name_format: $VRAM_$SEG
+    subsegments:
+      - [0x16D650, asm]
+      - [0x1715C0, data]
+      - { start: 0x171770, type: bss, vram: 0x801F8B50 }
+
+  - name: assets
+    type: bin
+    start: 0x171770
+
+  - name: padding
+    type: bin
+    start: 0x1720000
+
+  - [0x2000000]

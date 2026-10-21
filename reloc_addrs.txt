@@ -1,0 +1,5 @@
+// ovl_00 reads a variable in ovl_04's bss; disambiguate from same-vram overlays' labels
+rom:0xC0DC4 reloc:MIPS_HI16 symbol:D_8024DD34_ovl_04
+rom:0xC0DC8 reloc:MIPS_LO16 symbol:D_8024DD34_ovl_04
+rom:0xC0E3C reloc:MIPS_HI16 symbol:D_8024DD34_ovl_04
+rom:0xC0E40 reloc:MIPS_LO16 symbol:D_8024DD34_ovl_04
