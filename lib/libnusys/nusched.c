@@ -72,10 +72,21 @@ static u64	nuScGraphicsStack[NU_SC_STACK_SIZE/sizeof(u64)];/*gfx thread stack */
 NUSched		nusched;		/* Scheduler structure  	*/
 NUScPreNMIFunc	nuScPreNMIFunc = NULL;	/* PRE NMI callback function ptr */
 
-u8		nuVersion[] = "NuSystem"NU_VERSION; /* Please do not delete this */
-u32		nuScRetraceCounter = (u32)nuVersion;/* Retrace counter */
-						/* Dummy is initialized */
+/* Volatile only here: the header's declaration stays plain, as the rest */
+/* of the library was built with it.					 */
+volatile u32	nuScRetraceCounter;	/* Retrace counter */
+volatile u32	nuScRetraceTotal;	/* Retraces since the scheduler started */
 u8		nuScPreNMIFlag;
+
+/* Graphics task watchdog */
+NUScTask*	nuScWatchdogGfxTask = NULL;	/* Task the RSP or RDP is running */
+volatile u32	nuScGfxTaskStartRetrace;	/* Retrace count when it started */
+#define WATCHDOG_SWAP_RETRACE		32	/* Show the task's frame buffer */
+#define WATCHDOG_DISPLAY_OFF_RETRACE	54	/* Give up and blank the display */
+
+extern s8	g_IsDebugEnabled;
+extern void	UpdateZBufferVisibility(void);
+extern void	HandleFrameBufferSwap(void* frameBuffer);
 
 
 #ifdef NU_DEBUG
@@ -84,13 +95,13 @@ u8		nuScPreNMIFlag;
 /*------------------------------*/
 NUDebTaskPerf		nuDebTaskPerf[NU_DEB_PERF_BUF_NUM];
 NUDebTaskPerf*		nuDebTaskPerfPtr;
-u32			nuDebTaskPerfInterval = 1;
 volatile u32		nuDebTaskPerfCnt = 0;
 volatile u32		nuDebTaskPerfEnd = NU_DEB_PERF_STOP;
-
 static NUDebTaskPerf*	debTaskPerfPtr;
-static u32		debFrameSwapCnt;
 #endif /* NU_DEBUG */
+
+/* Set by nuScCreateScheduler from osTvType */
+u32		nuScTvTypeIndex = 0;
 
 /*----------------------------------------------------------------------*/
 /* nuScCreateScheduler() -- Creates the Scheduler				*/
@@ -111,6 +122,28 @@ void nuScCreateScheduler(u8 videoMode, u8 numFields)
     nusched.prenmiMsg       = NU_SC_PRENMI_MSG;
     nusched.retraceCount    = numFields;
     nusched.frameBufferNum  = 2;
+
+    /* Hang on consoles that are neither NTSC nor MPAL. */
+    if(osTvType != OS_TV_NTSC && osTvType != OS_TV_MPAL){
+	while(1);
+    }
+    if(osTvType == OS_TV_MPAL){
+	videoMode = OS_VI_MPAL_LAN1;
+    }
+    switch(osTvType){
+    case OS_TV_MPAL:
+	nuScTvTypeIndex = 1;
+	break;
+    case OS_TV_PAL:
+	nuScTvTypeIndex = 2;
+	break;
+    case OS_TV_NTSC:
+	nuScTvTypeIndex = 3;
+	break;
+    default:
+	nuScTvTypeIndex = 4;
+	break;
+    }
     
     /* Distinguish between NTSC and PAL and set frame rate accordingly.	*/
     if(osTvType == OS_TV_PAL){
@@ -208,6 +241,7 @@ static void nuScEventHandler(void)
     s32		beforeResetFrame;
 
     nuScRetraceCounter = 0;
+    nuScRetraceTotal = 0;
     
     while(1) {
 	/* Wait for RETRACE and PRENMI events. */
@@ -217,13 +251,30 @@ static void nuScEventHandler(void)
 	switch ( (int)msg ) {
 	case VIDEO_MSG:		/* Process the retrace signal. */
 	    nuScRetraceCounter++;
+	    nuScRetraceTotal++;
 #ifdef NU_DEBUG
-	    if(nuDebTaskPerfEnd == NU_DEB_PERF_START){
+	    if(nuDebTaskPerfEnd){
 		debTaskPerfPtr->retraceTime = OS_CYCLES_TO_USEC(osGetTime());
-		nuDebTaskPerfEnd = NU_DEB_PERF_RUNNING;
-		debTaskPerfPtr->auTaskCnt = 0;		
+		nuDebTaskPerf[nuDebTaskPerfCnt].auTaskCnt = 0;
+		nuDebTaskPerfEnd = 0;
 	    }
 #endif /* NU_DEBUG */
+
+	    /* If a graphics task hangs, show its frame buffer, and later */
+	    /* turn the display off unless debugging.			  */
+	    if(nuScRetraceCounter - nuScGfxTaskStartRetrace >= WATCHDOG_SWAP_RETRACE - 1){
+		u32 retraceCount = nuScRetraceCounter - nuScGfxTaskStartRetrace;
+
+		if(nuScWatchdogGfxTask != NULL){
+		    if(retraceCount == WATCHDOG_SWAP_RETRACE){
+			osViSwapBuffer(nuScWatchdogGfxTask->framebuffer);
+		    } else if(retraceCount == WATCHDOG_DISPLAY_OFF_RETRACE
+			      && !g_IsDebugEnabled){
+			nuGfxDisplayOff();
+			nuScWatchdogGfxTask = NULL;
+		    }
+		}
+	    }
 
 	    nuScEventBroadcast(&nusched.retraceMsg );
 
@@ -460,6 +511,11 @@ static void nuScExecuteAudio(void)
     }
 }
 
+s32 nuScReturnTrue(void)
+{
+    return TRUE;
+}
+
 /*----------------------------------------------------------------------*/
 /*  nuScExecuteGrapchics() -- Executes a graphics task			*/
 /*									*/
@@ -490,36 +546,31 @@ static void nuScExecuteGraphics(void)
 	/* Check whether an audio task is being executed. */
 	/*  If so, wait for message that execution has finished. */
 	mask = osSetIntMask(OS_IM_NONE);
-	if( nusched.curAudioTask ) {
+	while( nusched.curAudioTask ) {
 	    nusched.graphicsTaskSuspended = gfxTask;
 	    osSetIntMask(mask);
 	    osRecvMesg( &nusched.waitMQ, &msg, OS_MESG_BLOCK );
 	    mask = osSetIntMask(OS_IM_NONE);
 	    nusched.graphicsTaskSuspended = (NUScTask *)NULL;
 	}
-	osSetIntMask(mask);
 
-	
 #ifdef NU_DEBUG
-	mask = osSetIntMask(OS_IM_NONE);
 	if(debTaskPerfPtr->gfxTaskCnt < NU_DEB_PERF_GFXTASK_CNT){
 	    debTaskPerfPtr->gfxTaskTime[debTaskPerfPtr->gfxTaskCnt].rspStart =
 		OS_CYCLES_TO_USEC(osGetTime());
 	}
-	osSetIntMask(mask);
 #endif /* NU_DEBUG */
 	    
 	/* Execute the graphics task.  */
-	mask = osSetIntMask(OS_IM_NONE);
 	nusched.curGraphicsTask = gfxTask;
-	osSetIntMask(mask);
-	
+	nuScGfxTaskStartRetrace = nuScRetraceCounter;
+	nuScWatchdogGfxTask = gfxTask;
 	osSpTaskStart(&gfxTask->list);        /* Execute task.*/
+	osSetIntMask(mask);
 
 	/* Wait for end of RSP task.*/
-	osRecvMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
-
 	mask = osSetIntMask(OS_IM_NONE);
+	osRecvMesg(&nusched.rspMQ, &msg, OS_MESG_BLOCK);
 	nusched.curGraphicsTask = (NUScTask *)NULL;
 	osSetIntMask(mask);
 
@@ -537,6 +588,7 @@ static void nuScExecuteGraphics(void)
 	    /* Wait for end of RDPTask. */
 	    osRecvMesg(&nusched.rdpMQ, &msg, OS_MESG_BLOCK);
 	}
+	nuScWatchdogGfxTask = NULL;
 
 #ifdef NU_DEBUG
 	mask = osSetIntMask(OS_IM_NONE);
@@ -557,29 +609,21 @@ static void nuScExecuteGraphics(void)
 	}
 
 	if(gfxTask->flags & NU_SC_SWAPBUFFER){
-	    s32 cnt;	    	    
-	    nuDebTaskPerfEnd = NU_DEB_PERF_START;
-	    
-	    debFrameSwapCnt++;
-	    if(debFrameSwapCnt >= nuDebTaskPerfInterval){
-		nuDebTaskPerfPtr = debTaskPerfPtr;
-		nuDebTaskPerfCnt++;
-		nuDebTaskPerfCnt %= NU_DEB_PERF_BUF_NUM;
-		debTaskPerfPtr = &nuDebTaskPerf[nuDebTaskPerfCnt];
-		debFrameSwapCnt = 0;
-	    }
-
-	    debTaskPerfPtr->retraceTime = 0;	
-	    debTaskPerfPtr->gfxTaskCnt = 0;
-
-	    for(cnt = 0 ; cnt < NU_DEB_MARKER_NUM; cnt++){
-		debTaskPerfPtr->markerTime[cnt] = 0;
-	    }
-
+	    nuDebTaskPerfPtr = debTaskPerfPtr;
+	    nuDebTaskPerfCnt++;
+	    nuDebTaskPerfCnt %= NU_DEB_PERF_BUF_NUM;
+	    nuDebTaskPerf[nuDebTaskPerfCnt].gfxTaskCnt = 0;
+	    nuDebTaskPerf[nuDebTaskPerfCnt].retraceTime = 0;
+	    debTaskPerfPtr = &nuDebTaskPerf[nuDebTaskPerfCnt];
+	    nuDebTaskPerfEnd++;
 	}
-	
 	osSetIntMask(mask);
 #endif /* NU_DEBUG */
+
+	if(gfxTask->flags & NU_SC_SWAPBUFFER){
+	    UpdateZBufferVisibility();
+	    HandleFrameBufferSwap(gfxTask->framebuffer);
+	}
 
 	/* Notify that thread that started the graphics task that the task has finished. */
  
@@ -600,14 +644,14 @@ void nuScWaitTaskReady(NUScTask *task)
     /* Wait unnecessary if the number of frame buffers is 1. */
     if(nusched.frameBufferNum == 1) return;
     
+    nuScAddClient(&client, &nusched.waitMQ , NU_SC_RETRACE_MSG);
 
     /* Wait till next retrace if frame buffer is not free. */
     while( osViGetCurrentFramebuffer() == fb
 	   || osViGetNextFramebuffer() == fb ){
-	nuScAddClient(&client, &nusched.waitMQ , NU_SC_RETRACE_MSG);	
 	osRecvMesg( &nusched.waitMQ, NULL, OS_MESG_BLOCK );
-	nuScRemoveClient(&client );
     }
+    nuScRemoveClient(&client );
 
 }
 

@@ -627,7 +627,6 @@ typedef struct st_GfxTaskTime {
 
 typedef struct st_DebTaskPerf {
     s64		retraceTime;		/* retrace event time*/
-    s64		markerTime[NU_DEB_MARKER_NUM];
     u8		gfxTaskCnt;		/* Number of graphics tasks */
     u8		auTaskCnt;		/* Number of audio tasks */
     u8		gfxTaskStart;
