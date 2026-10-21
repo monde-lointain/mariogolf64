@@ -64,6 +64,13 @@ LIBMUS_INCLUDES   := -I$(LIBMUS_DIR)/src -I$(LIBMUS_DIR)/include $(ULTRALIB_INCL
 LIBMUS_DEFINES    := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DSUPPORT_NAUDIO
 LIBMUS_CFLAGS     := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3 -Wa,--force-n64align
 
+# n_audio, built from the SDK's n_audio_sc sources for the n_aspMain
+# microcode as other games of the time built it
+LIBNAUDIO_DIR      := lib/libnaudio
+LIBNAUDIO_INCLUDES := -I$(LIBNAUDIO_DIR)/src -I$(LIBNAUDIO_DIR)/include $(ULTRALIB_INCLUDES)
+LIBNAUDIO_DEFINES  := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
+LIBNAUDIO_CFLAGS   := $(LIBMUS_CFLAGS)
+
 # Per-directory compiler flags
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
 
@@ -129,6 +136,10 @@ $(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
 $(BUILD_DIR)/$(LIBMUS_DIR)/%.c.o: $(LIBMUS_DIR)/%.c
 	@mkdir -p $(dir $@)
 	VR4300MUL=ON $(CC) -c $(LIBMUS_CFLAGS) $(LIBMUS_INCLUDES) $(LIBMUS_DEFINES) -o $@ $<
+
+$(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.c.o: $(LIBNAUDIO_DIR)/%.c
+	@mkdir -p $(dir $@)
+	VR4300MUL=ON $(CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
 
 # splat names data-only objects as if they were C, so assembly files that
 # only hold data (such as gu/libm_vals.s) are found under a .c.o name
