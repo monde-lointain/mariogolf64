@@ -30,22 +30,79 @@ from pathlib import Path
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
 
+R_MIPS_26 = 4
 R_MIPS_HI16 = 5
 R_MIPS_LO16 = 6
 DATA_SECTION_NAMES = (".data", ".rodata", ".sdata", ".bss")
 SHN_COMMON = "SHN_COMMON"
 SCOMMON_SECTION_NAME = ".scommon"
+# How far past the previous match to look for a function, in bytes
+SEARCH_WINDOW = 0x800
 
 
 def sign_extend_16(value):
     return value - 0x10000 if value & 0x8000 else value
 
 
-def section_addresses(elf, romBytes, textRom):
-    """Return {sectionName or "COMMON:symbol": Counter(address)} for one object."""
+def mask_for_relocation(relocationType):
+    if relocationType == R_MIPS_26:
+        return 0x03FFFFFF
+    if relocationType in (R_MIPS_HI16, R_MIPS_LO16):
+        return 0x0000FFFF
+    return 0xFFFFFFFF
+
+
+def masked_words(data, maskByOffset):
+    words = []
+    for offset in range(0, len(data) - 3, 4):
+        word = struct.unpack(">I", data[offset:offset + 4])[0]
+        words.append(word & ~maskByOffset.get(offset, 0) & 0xFFFFFFFF)
+    return words
+
+
+def function_rom_offsets(elf, romBytes, textRom, relocations):
+    """Map each function in .text to the ROM offset where its code appears.
+
+    A game may link a slightly different revision of a library, in which
+    functions are added, removed or resized. Each function is searched for
+    from the end of the previous match, comparing with relocated fields
+    masked out. Functions that are not found are left out, so their
+    relocations do not cast misleading votes.
+    """
     text = elf.get_section_by_name(".text")
     textData = text.data()
-    romText = romBytes[textRom:textRom + len(textData)]
+    maskByOffset = {relocation["r_offset"]: mask_for_relocation(relocation["r_info_type"])
+                    for relocation in relocations}
+    textIndex = text_section_index(elf)
+    functions = sorted((symbol["st_value"], symbol["st_size"])
+                       for symbol in elf.get_section_by_name(".symtab").iter_symbols()
+                       if symbol["st_info"]["type"] == "STT_FUNC" and symbol["st_size"] > 0
+                       and symbol["st_shndx"] == textIndex)
+    offsets = {}
+    searchStart = textRom
+    for start, size in functions:
+        functionMask = {offset - start: mask for offset, mask in maskByOffset.items()
+                        if start <= offset < start + size}
+        objectWords = masked_words(textData[start:start + size], functionMask)
+        for candidate in range(searchStart, searchStart + SEARCH_WINDOW, 4):
+            romWords = masked_words(romBytes[candidate:candidate + size], functionMask)
+            if romWords == objectWords:
+                offsets[start] = (candidate, size)
+                searchStart = candidate + size
+                break
+    return offsets
+
+
+def text_section_index(elf):
+    for index, section in enumerate(elf.iter_sections()):
+        if section.name == ".text":
+            return index
+    return None
+
+
+def section_addresses(elf, romBytes, textRom):
+    """Return {sectionName or "COMMON:symbol": Counter(address)} for one object."""
+    textData = elf.get_section_by_name(".text").data()
     symbolTable = elf.get_section_by_name(".symtab")
     sectionNames = {index: section.name for index, section in enumerate(elf.iter_sections())}
     votes = collections.defaultdict(collections.Counter)
@@ -54,6 +111,14 @@ def section_addresses(elf, romBytes, textRom):
     if not isinstance(relocationSection, RelocationSection):
         return votes
     relocations = list(relocationSection.iter_relocations())
+    functionOffsets = function_rom_offsets(elf, romBytes, textRom, relocations)
+
+    def rom_offset_of(objectOffset):
+        for start, (romStart, size) in functionOffsets.items():
+            if start <= objectOffset < start + size:
+                return romStart + objectOffset - start
+        return None
+
     for position, hiRelocation in enumerate(relocations):
         if hiRelocation["r_info_type"] != R_MIPS_HI16:
             continue
@@ -69,10 +134,14 @@ def section_addresses(elf, romBytes, textRom):
             continue
         hiOffset = hiRelocation["r_offset"]
         loOffset = loRelocation["r_offset"]
+        romHiOffset = rom_offset_of(hiOffset)
+        romLoOffset = rom_offset_of(loOffset)
+        if romHiOffset is None or romLoOffset is None:
+            continue
         objectHi = struct.unpack(">I", textData[hiOffset:hiOffset + 4])[0] & 0xFFFF
         objectLo = struct.unpack(">I", textData[loOffset:loOffset + 4])[0] & 0xFFFF
-        romHi = struct.unpack(">I", romText[hiOffset:hiOffset + 4])[0] & 0xFFFF
-        romLo = struct.unpack(">I", romText[loOffset:loOffset + 4])[0] & 0xFFFF
+        romHi = struct.unpack(">I", romBytes[romHiOffset:romHiOffset + 4])[0] & 0xFFFF
+        romLo = struct.unpack(">I", romBytes[romLoOffset:romLoOffset + 4])[0] & 0xFFFF
         romAddress = ((romHi << 16) + sign_extend_16(romLo)) & 0xFFFFFFFF
         addend = (objectHi << 16) + sign_extend_16(objectLo)
         if isCommon:
