@@ -1,0 +1,403 @@
+#include "common.h"
+#include "billboard.h"
+#include "camera.h"
+#include "debug_flags.h"
+#include "functions.h"
+#include "variables.h"
+#include "asset.h"
+#include "heap.h"
+#include "libc.h"
+
+/* Textures of this type are read from the asset archive when first drawn */
+#define TEXTURE_LOADED_ON_DEMAND 2
+
+/* Every billboard texture file starts with a header before its texels */
+#define TEXTURE_HEADER_SIZE 8
+
+/* Vertices per billboard shape, of which the first four form its quad */
+#define SHAPE_VERTEX_COUNT 8
+
+typedef struct BillboardTexture {
+    /* 0x0 */ s32 assetId;
+    /* 0x4 */ s16 type;
+    /* 0x6 */ s16 width;
+    /* 0x8 */ s16 height;
+    /* 0xC */ u16 *pixels;
+} BillboardTexture; /* size = 0x10 */
+
+extern BillboardTexture sBillboardTextures[BILLBOARD_TEXTURE_COUNT];
+extern Vtx sBillboardVertices[][SHAPE_VERTEX_COUNT];
+extern s32 sLoadedTextureIndex;
+extern s8 sIsHeapReady;
+extern u8 *sHeapStart;
+extern u8 *sHeapEnd;
+extern u16 sDrawOrder[BILLBOARD_COUNT];
+extern s8 g_ShowsBillboardsAtEdge;
+s32 GetGroundHeight(s32 x, s32 z);
+s32 GetViewDepth(f32 x, f32 y, f32 z);
+
+/* Billboards this close to the course's edges are hidden */
+#define COURSE_EDGE_MIN_X 256.0f
+#define COURSE_EDGE_MIN_Z 256.0f
+#define COURSE_EDGE_MAX_X 3840.0f
+#define COURSE_EDGE_MAX_Z 7936.0f
+
+/* GetGroundHeight works in fixed point with 10 fraction bits */
+#define GROUND_HEIGHT_SCALE 1024
+
+/* GetViewDepth gives billboards closer than this to the camera a depth
+   between it and 0 */
+#define VIEW_DEPTH_NEAR (-0x800)
+
+/* Depth given to the ball when no billboard needs to stay out of its way */
+#define VIEW_DEPTH_BALL_HIDDEN (-0xFFFF)
+
+/* Converts the fixed-point positions of objects on the course to floats */
+#define POSITION_TO_FLOAT (1.0f / 1024.0f)
+
+/* The least opacity of a billboard close to the camera */
+#define NEAR_BILLBOARD_ALPHA_MIN 0x80
+
+/* Depth of unused billboards, behind every used one */
+#define VIEW_DEPTH_FAR 0x40000000
+
+void DestroyBillboardManager(void) {
+    u32 offset;
+
+    osSyncPrintf("DestBillMan\n");
+    for (offset = 0; offset < sizeof(sBillboardTextures); offset += sizeof(BillboardTexture)) {
+        ((BillboardTexture *)((u8 *)sBillboardTextures + offset))->pixels = NULL;
+    }
+    ResetHeap(HEAP_BILLBOARD);
+    sIsHeapReady = FALSE;
+}
+
+void InitBillboardManager(void *heapStart, s32 heapSize) {
+    u8 *heapEnd;
+
+    osSyncPrintf("InitBillMan\n");
+    heapEnd = (u8 *)heapStart + heapSize;
+    DestroyBillboardManager();
+    sHeapStart = heapStart;
+    sHeapEnd = heapEnd;
+    AddHeapRegion(HEAP_BILLBOARD, heapStart, heapEnd);
+    sIsHeapReady = TRUE;
+}
+
+void RevertBillboardManager(void) {
+    osSyncPrintf("RevertBillMan\n");
+    DestroyBillboardManager();
+    AddHeapRegion(HEAP_BILLBOARD, sHeapStart, sHeapEnd);
+    sIsHeapReady = TRUE;
+}
+
+#ifndef NON_MATCHING
+/*
+ * The initial values of the color arrays local to DrawBillboards and
+ * DrawFadingBillboards, which their asm reads by name
+ */
+const s32 g_BillboardLightColor[3] = { 255, 220, 160 };
+const s32 g_BillboardEnvColor[3] = { 128, 64, 32 };
+#endif
+
+void PlaceBillboards(void) {
+    s32 i;
+    f32 x;
+    f32 z;
+    f32 y;
+
+    for (i = 0; i != BILLBOARD_COUNT; i++) {
+        sDrawOrder[i] = i;
+    }
+    for (i = 0; i < BILLBOARD_COUNT; i++) {
+        if (g_Billboards[i].textureIndex >= 0) {
+            x = g_Billboards[i].x;
+            z = g_Billboards[i].z;
+            if (!g_ShowsBillboardsAtEdge
+                && (x <= COURSE_EDGE_MIN_X || z <= COURSE_EDGE_MIN_Z
+                    || x >= COURSE_EDGE_MAX_X || z >= COURSE_EDGE_MAX_Z)) {
+                g_Billboards[i].isNearCourseEdge = TRUE;
+            } else {
+                g_Billboards[i].isNearCourseEdge = FALSE;
+            }
+            y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) / GROUND_HEIGHT_SCALE;
+            g_Billboards[i].y = y;
+            guTranslate(&g_BillboardTransforms[i].translation, x, y, z);
+            guScale(&g_BillboardTransforms[i].scale, g_Billboards[i].width, g_Billboards[i].height, 1.0f);
+        }
+    }
+}
+
+#ifdef NON_MATCHING
+void SortBillboardsByDepth(void) {
+    BillboardTransform *transform;
+    s32 i;
+    s32 sortedIndex;
+    u16 insertedIndex;
+
+    i = 0;
+    transform = g_BillboardTransforms;
+    do {
+        if (g_Billboards[i].textureIndex < 0) {
+            transform->viewDepth = VIEW_DEPTH_FAR;
+        } else {
+            transform->viewDepth = GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
+        }
+        transform++;
+        i++;
+    } while (transform != &g_BillboardTransforms[BILLBOARD_COUNT]);
+
+    /* Insertion sort, farthest first */
+    for (i = 1; i != BILLBOARD_COUNT; i++) {
+        insertedIndex = sDrawOrder[i];
+        for (sortedIndex = i - 1;
+             sortedIndex >= 0
+             && g_BillboardTransforms[sDrawOrder[sortedIndex]].viewDepth
+                    < g_BillboardTransforms[insertedIndex].viewDepth;
+             sortedIndex--) {
+            sDrawOrder[sortedIndex + 1] = sDrawOrder[sortedIndex];
+        }
+        sDrawOrder[sortedIndex + 1] = insertedIndex;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/billboard", SortBillboardsByDepth);
+#endif
+
+void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *transform, s32 textureIndex,
+                   Mtx *cameraMatrices) {
+    Gfx *gfx = *gfxPtr;
+    AssetFile file;
+    s32 texelSize;
+
+    if (sBillboardTextures[textureIndex].pixels == NULL
+        && sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
+        texelSize = sBillboardTextures[textureIndex].width * sBillboardTextures[textureIndex].height * sizeof(u16);
+        sBillboardTextures[textureIndex].pixels = AllocFromHeap(HEAP_BILLBOARD, texelSize + TEXTURE_HEADER_SIZE);
+        if (sBillboardTextures[textureIndex].pixels != NULL) {
+            OpenAssetFile(sBillboardTextures[textureIndex].assetId, &file);
+            ReadAssetFile(sBillboardTextures[textureIndex].pixels, TEXTURE_HEADER_SIZE, &file);
+            ReadAssetFile(sBillboardTextures[textureIndex].pixels, texelSize, &file);
+        }
+    }
+    if (billboard->textureIndex != sLoadedTextureIndex
+        && sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND
+        && sBillboardTextures[textureIndex].pixels != NULL) {
+        gDPLoadTextureBlock(gfx++, (u32)sBillboardTextures[textureIndex].pixels & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                            sBillboardTextures[textureIndex].width, sBillboardTextures[textureIndex].height, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 5, 6, 2, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineLERP(gfx++, ENVIRONMENT, TEXEL0, ENV_ALPHA, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, COMBINED,
+                          0, 0, 0, 0, COMBINED);
+    }
+    gSPMatrix(gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPMatrix(gfx++, &cameraMatrices[3], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, sBillboardVertices[billboard->shapeIndex], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    sLoadedTextureIndex = billboard->textureIndex;
+    *gfxPtr = gfx;
+}
+
+INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
+
+/*
+ * Draws the billboards close to the camera, translucent so that the camera
+ * can see through them, from the farthest to the nearest. Those farther
+ * than the ball stay opaque.
+ */
+#ifdef NON_MATCHING
+void DrawFadingBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
+    Gfx *gfx = g_DisplayListHead;
+    s32 lightColor[3] = { 255, 220, 160 };
+    s32 envColor[3] = { 128, 64, 32 };
+    s32 hasTranslucentMode;
+    s32 ballDepth;
+    s32 orderIndex;
+    s32 billboardIndex;
+    s32 textureIndex;
+    s32 viewDepth;
+    s32 alpha;
+
+    if (IsDebugFlagSet(DEBUG_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || IsDebugBButtonView()) {
+        return;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, envColor[0], envColor[1], envColor[2], 0x20);
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+
+    if (g_Cameras[cameraIndex].mode != CAMERA_MODE_BEHIND_GOLFER
+        || (ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
+                                     g_BallPosition[2] * POSITION_TO_FLOAT)) > 0) {
+        ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+    }
+
+    sLoadedTextureIndex = -1;
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL
+                                                  | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+
+    hasTranslucentMode = FALSE;
+    for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
+        billboardIndex = sDrawOrder[orderIndex];
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (textureIndex < 0) {
+            continue;
+        }
+        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        if (viewDepth < VIEW_DEPTH_NEAR) {
+            continue;
+        }
+        if (viewDepth >= 0) {
+            continue;
+        }
+        alpha = -viewDepth;
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
+            alpha = NEAR_BILLBOARD_ALPHA_MIN;
+        }
+        if (viewDepth < ballDepth) {
+            alpha = 0xFF;
+        }
+        if (alpha == 0xFF) {
+            continue;
+        }
+        if (!hasTranslucentMode && alpha < 0xFF) {
+            hasTranslucentMode = TRUE;
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
+        }
+        if (alpha < 0xFF) {
+            gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, alpha);
+        }
+        DrawBillboard(&gfx, &g_Billboards[billboardIndex], &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/billboard", DrawFadingBillboards);
+#endif
+
+/*
+ * Development hardware could pass files to the host computer. These two
+ * routines remain from that, but send their commands nowhere.
+ */
+
+#define HOST_COMMAND_WRITE_FILE 10
+#define HOST_COMMAND_READ_FILE 11
+
+/* Room for the file name in a host command, including padding */
+#define HOST_FILE_NAME_SIZE_MAX 0x100
+
+#define HOST_FILE_OK 0
+#define HOST_FILE_SIZE_TOO_SMALL 1
+#define HOST_FILE_NAME_TOO_SHORT 2
+#define HOST_FILE_NAME_TOO_LONG 3
+
+s32 WriteHostFile(char *fileName, u32 size) {
+    u32 *command;
+    char *nameBuffer;
+    u32 nameSize;
+    s32 result;
+
+    if (size == 0) {
+        /* "The transfer size is too small." */
+        osSyncPrintf("\223\135\221\227\203\124\203\103\203\131\202\252\217\254\202\263\202\242\202\305\202\267\201\102");
+        return HOST_FILE_SIZE_TOO_SMALL;
+    }
+    nameSize = strlen(fileName);
+    if (nameSize == 0) {
+        /* "The file name is too short" */
+        osSyncPrintf("\203\164\203\100\203\103\203\213\226\274\202\252\222\132\202\267\202\254\202\334\202\267");
+        return HOST_FILE_NAME_TOO_SHORT;
+    }
+    nameSize = (nameSize + 3) & ~3;
+    if (nameSize < HOST_FILE_NAME_SIZE_MAX) {
+        command = AllocMemory(sizeof(u32));
+        nameBuffer = AllocMemory(nameSize);
+        memcpy(nameBuffer, fileName, nameSize);
+        *command = HOST_COMMAND_WRITE_FILE;
+        *command = nameSize;
+        *command = size;
+        FreeMemory(&command);
+        FreeMemory(&nameBuffer);
+        result = HOST_FILE_OK;
+    } else {
+        /* "The file name is too long" */
+        osSyncPrintf("\203\164\203\100\203\103\203\213\226\274\202\252\222\267\202\267\202\254\202\334\202\267");
+        result = HOST_FILE_NAME_TOO_LONG;
+    }
+    return result;
+}
+
+s32 ReadHostFile(char *fileName, u32 *size) {
+    u32 *command;
+    char *nameBuffer;
+    u32 nameSize;
+
+    nameSize = strlen(fileName);
+    if (nameSize == 0) {
+        osSyncPrintf("\203\164\203\100\203\103\203\213\226\274\202\252\222\132\202\267\202\254\202\334\202\267");
+        return HOST_FILE_NAME_TOO_SHORT;
+    }
+    nameSize = (nameSize + 3) & ~3;
+    if (nameSize >= HOST_FILE_NAME_SIZE_MAX) {
+        osSyncPrintf("\203\164\203\100\203\103\203\213\226\274\202\252\222\267\202\267\202\254\202\334\202\267");
+        return HOST_FILE_NAME_TOO_LONG;
+    }
+    command = AllocMemory(sizeof(u32));
+    nameBuffer = AllocMemory(nameSize);
+    memcpy(nameBuffer, fileName, nameSize);
+    *command = HOST_COMMAND_READ_FILE;
+    *command = nameSize;
+    if (*command == 0) {
+        *size = 0;
+        /* "The file has no data." */
+        osSyncPrintf("\203\164\203\100\203\103\203\213\202\311\203\146\201\133\203\136\202\252\202\240\202\350\202\334\202\271\202\361\201\102");
+    }
+    FreeMemory(&command);
+    FreeMemory(&nameBuffer);
+    return 1;
+}

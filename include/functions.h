@@ -13,6 +13,8 @@ void func_8005A580(void);
 void func_8005ACF8(void);
 void func_80080DCC(void);
 void func_80080E14(void);
+/* Whether the view mode that the B button picks in debug builds is on */
+s32 IsDebugBButtonView(void);
 
 /* ovl_00 */
 void func_801FD624_ovl_00(void);

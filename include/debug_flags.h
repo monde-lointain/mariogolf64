@@ -7,6 +7,9 @@
 
 #define DEBUG_FLAG_COUNT 256
 
+/* Hides the billboards */
+#define DEBUG_FLAG_HIDE_BILLBOARDS 0x0E
+
 /* Silences the overlay manager's log */
 #define DEBUG_FLAG_QUIET_OVERLAY_LOG 0x4D
 
