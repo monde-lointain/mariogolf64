@@ -434,6 +434,11 @@ rspbootTextStart = 0x800B3E50;
 n_aspMainTextStart = 0x800B3F20;
 n_aspMainDataStart = 0x800C9890;
 
+// The graphics microcode, F3DEX2 fifo 2.08 by its version string, from the
+// table in nuGfxInitEX2
+gspF3DEX2_fifoTextStart = 0x800B4B80;
+gspF3DEX2_fifoDataStart = 0x800C9B40;
+
 // libultra data, placed by tools/locate_object_sections.py
 __osPiDevMgr = 0x800C7E70; // size:0x1C
 __osPiTable = 0x800C7E8C; // size:0x4
@@ -568,6 +573,7 @@ nuScEventBroadcast = 0x80028A68; // type:func
 nuScGetFrameRate = 0x80029240; // type:func
 
 // NuSystem 2.05, revised as the game's copy, built from lib/libnusys
+nuGfxInitEX2 = 0x80028300; // type:func
 nuBoot = 0x800994B0; // type:func
 nuPreNMIFuncSet = 0x800A13F0; // type:func
 nuGfxThreadStart = 0x800A1500; // type:func
@@ -624,11 +630,17 @@ nuSiCallBackList = 0x800C7E30; // size:0x4
 nuContReadFunc = 0x800C7E40; // size:0x4
 nuContCallBack = 0x800C7E58; // size:0xC
 
-// NuSystem variables of the scheduler and graphics task manager, which are
-// still assembly
+// NuSystem's frame buffer setup and graphics task manager, which the game
+// rewrote, and variables of those and the scheduler, which are still assembly
+nuGfxSetCfb = 0x80029250; // type:func
+nuGfxTaskMgr = 0x80029440; // type:func
+nuGfxTaskMgrInit = 0x800295BC; // type:func
+nuGfxTaskStart = 0x80029774; // type:func
 nuScPreNMIFunc = 0x800B6780; // size:0x4
 nuGfxSwapCfbFunc = 0x800B67B4; // size:0x4
+nuGfxZBuffer = 0x800FED14; // size:0x4
 nuGfxDisplay = 0x80104E6C; // size:0x4
+nuGfxUcode = 0x801061B0; // size:0x4
 nuGfxTaskSpool = 0x8012D478; // size:0x4
 
 // NuSystem common symbols, which the linker scattered through the bss
