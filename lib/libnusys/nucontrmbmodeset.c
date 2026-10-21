@@ -22,9 +22,7 @@
 void nuContRmbModeSet(u32 contNo, u8 mode)
 {
     u32		forceStop;
-    OSIntMask	mask;
     
-    mask = osSetIntMask(OS_IM_NONE);
     
     /* Fetch the flag of the forced stop mode  */
     forceStop = nuContRmbCtl[contNo].mode & NU_CONT_RMB_MODE_PAUSE;
@@ -50,5 +48,4 @@ void nuContRmbModeSet(u32 contNo, u8 mode)
 	    nuContRmbCtl[contNo].autorun = NU_CONT_RMB_AUTO_SEARCH;
 	}
     }
-     osSetIntMask(mask);    
 }

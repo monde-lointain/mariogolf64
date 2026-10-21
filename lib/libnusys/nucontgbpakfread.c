@@ -36,11 +36,6 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size)
     u8		data[32];
     u8    	status;
         
-    /* Check for poor contact. 				      	*/
-    /* Supports MBC1,2,3 and cases of no memory controller.       */
-    rtn =  nuContGBPakCheckConnector(handle, &status);
-    if(rtn) return rtn;
-
 
     /* Disables MBC1,2,3 RAM protection.	*/
     ram = 0;
@@ -51,6 +46,11 @@ s32 nuContGBPakFread(NUContPakFile* handle, u16 address, u8* buffer, u16 size)
 	if(rtn) return rtn;
 	ram++;
     }
+
+    /* Check for poor contact. 				      	*/
+    /* Supports MBC1,2,3 and cases of no memory controller.       */
+    rtn =  nuContGBPakCheckConnector(handle, &status);
+    if(rtn) return rtn;
 
 
     /* Check while reading whether GB Game Pak and read size are */

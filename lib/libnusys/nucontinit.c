@@ -26,9 +26,6 @@ u8 nuContInit(void)
     /* Initialize and register Controller manager */
     nuContMgrInit();
 
-    /* Initialize and register the controller pack manager */
-    nuContPakMgrInit();
-    
     /* Initialize and register the oscillating pack manager */
     nuContRmbMgrInit();
 

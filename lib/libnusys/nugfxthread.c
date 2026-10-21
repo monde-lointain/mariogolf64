@@ -12,8 +12,8 @@
 NUGfxFunc	nuGfxFunc = NULL;
 NUGfxPreNMIFunc	nuGfxPreNMIFunc = NULL;
 OSMesgQueue	nuGfxMesgQ;
-OSThread	nuGfxThread;			/* graphic thread */
 static OSMesg	nuGfxMesgBuf[NU_GFX_MESGS];
+static OSThread	GfxThread;			/* graphic thread */
 
 static u64	GfxStack[NU_GFX_STACK_SIZE/8];	/* gfx thread stack  */
 
@@ -66,7 +66,7 @@ static void gfxThread(void *arg)
 void nuGfxThreadStart(void)
 {
     /* Activate the graphic thread */
-    osCreateThread(&nuGfxThread, NU_GFX_THREAD_ID, gfxThread, (void*)NULL,
+    osCreateThread(&GfxThread, NU_GFX_THREAD_ID, gfxThread, (void*)NULL,
 		   (GfxStack + NU_GFX_STACK_SIZE/8), NU_GFX_THREAD_PRI);
-    osStartThread(&nuGfxThread);
+    osStartThread(&GfxThread);
 }

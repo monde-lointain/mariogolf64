@@ -107,9 +107,11 @@ static s32 contRmbControl(NUContRmbCtl* rmbCtl, u32 contNo)
 	rtn = osMotorInit(&nuSiMesgQ, &nuContPfs[contNo], contNo);
 	if(!rtn){
 	    osMotorStop(&nuContPfs[contNo]);
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPING;
+	    rmbCtl->counter = 2;
+	} else {
+	    rmbCtl->state = NU_CONT_RMB_STATE_STOPPED;
 	}
-	rmbCtl->state = NU_CONT_RMB_STATE_STOPPING;
-	rmbCtl->counter = 2;
 	break;
     default:
 	break;

@@ -44,11 +44,6 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer, u16 size)
 	return 0;
     }
 
-    /* Check for poor contact. 				         	*/
-    /* Supports MBC1,2,3 and the case of no memory controller. 	*/
-    rtn =  nuContGBPakCheckConnector(handle, &status);
-    if(rtn) return rtn;
-
 
     /* Disable MBC1,2,3 SRAM write protection	*/
     ram = 0;
@@ -59,6 +54,11 @@ s32 nuContGBPakFwrite(NUContPakFile* handle, u16 address, u8* buffer, u16 size)
 	if(rtn) return rtn;
 	ram++;
     }
+
+    /* Check for poor contact. 				         	*/
+    /* Supports MBC1,2,3 and the case of no memory controller. 	*/
+    rtn =  nuContGBPakCheckConnector(handle, &status);
+    if(rtn) return rtn;
     
     while(size){
 	/* Check whether address is a multiple of 32         */

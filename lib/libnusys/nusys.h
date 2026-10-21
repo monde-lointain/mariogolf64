@@ -102,7 +102,7 @@ extern "C" {
 /*----------------------------------------------------------------------*/
 #define NU_GFX_THREAD_ID	4	
 #define NU_GFX_TASKMGR_THREAD_ID 5
-#define NU_GFX_STACK_SIZE	0x2000			/* Thread stack size */
+#define NU_GFX_STACK_SIZE	0x10000			/* Thread stack size */
 #define	NU_GFX_MESGS		8		/* GFX message queue*/
 #define NU_GFX_TASKMGR_STACK_SIZE 0x2000	/* Stack size */
 #define	NU_GFX_TASKMGR_MESGS	8		/*Task Manager queue*/
@@ -209,7 +209,7 @@ extern "C" {
 #define NU_CONT_MAXCONTROLLERS		MAXCONTROLLERS
 #define	NU_CONT_STACK_SIZE		0x2000
 #define	NU_CONT_MESG_MAX		8
-#define NU_CONT_THREAD_ID		6
+#define NU_CONT_THREAD_ID		5
 #define NU_CONT_THREAD_PRI		115
 #define	NU_CONT_DATA_UNLOCK		0
 #define	NU_CONT_DATA_LOCK		1
@@ -677,7 +677,6 @@ extern volatile u32	nuGfxTaskSpool; /* Number of tasks in queue */
 extern u32		nuGfxDisplay;	/* Display on/off flag  */
 extern u32		nuGfxCfbCounter; /* For frame buffer swapping */
 extern OSMesgQueue	nuGfxMesgQ;
-extern OSThread		nuGfxThread;			/* graphic thread */
 
 /*--------------------------------------*/
 /*  controller  Manager variables 	*/
@@ -900,6 +899,7 @@ extern void nuPiReadRomOverlay(NUPiOverlaySegment* segment);
 /* si functions				*/
 /*--------------------------------------*/
 extern u8 nuSiMgrInit(void);
+extern u64* nuSiMgrGetStack(void);
 extern void nuSiCallBackAdd(NUCallBackList* list);
 extern void nuSiCallBackRemove(NUCallBackList* list);
 extern s32 nuSiSendMesg(NUScMsg mesg, void* dataPtr);

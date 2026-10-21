@@ -19,6 +19,16 @@ OSMesgQueue	nuSiMgrMesgQ;		/* SI Manager queue */
 NUCallBackList*	nuSiCallBackList = NULL;/* Callback function list */
 
 static void nuSiMgrThread(void* arg);
+
+/*----------------------------------------------------------------------*/
+/*	nuSiMgrGetStack - Gets the SI Manager thread's stack		*/
+/*	IN:	nothing							*/
+/*	RET:	Bottom of the stack					*/
+/*----------------------------------------------------------------------*/
+u64* nuSiMgrGetStack(void)
+{
+    return siMgrStack;
+}
     
 /*----------------------------------------------------------------------*/
 /*	nuSiMgrInit - Initializes the SI Manager				*/

@@ -23,19 +23,16 @@ s32 nuContRmbCheck(u32 contNo)
 {
     NUContRmbMesg	checkMesg;
     s32			rtn;
-    OSIntMask	mask;
     
 
     checkMesg.contNo   = contNo;
     rtn = nuSiSendMesg(NU_CONT_RMB_CHECK_MSG, (void*)&checkMesg);
     
-    mask = osSetIntMask(OS_IM_NONE); 
     /* Check errors; if there are no errors, it is the oscillating pack. */
     if(!rtn){
 	nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_RUMBLE;
     } else {
 	nuContRmbCtl[contNo].type = NU_CONT_PAK_TYPE_NONE;
     }
-    osSetIntMask(mask);    
     return rtn;
 }
