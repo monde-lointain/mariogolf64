@@ -121,7 +121,7 @@ def disassemble(word):
     return rabbitizer.Instruction(word).disassemble()
 
 
-MAX_DIFF_HUNKS = 4
+MAX_DIFF_HUNKS = int(os.environ.get("MAX_DIFF_HUNKS", 4))
 
 
 def print_diff(target, compiled):
