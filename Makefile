@@ -130,7 +130,9 @@ $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O elf32-tradbigmips -B mips $< $@
 
-$(BUILD_DIR)/%.c.o: %.c
+# A C file is rebuilt whenever the assembly it includes with INCLUDE_ASM changes
+.SECONDEXPANSION:
+$(BUILD_DIR)/%.c.o: %.c $$(wildcard asm/nonmatchings/$$(subst src/,,$$*)/*.s)
 	@mkdir -p $(dir $@)
 ifneq ($(RUN_CC_CHECK),0)
 	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<
