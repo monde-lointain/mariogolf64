@@ -7,3 +7,7 @@ rspbootTextEnd = 0x800B3F20;
 /* NuSystem's idle thread stack ends where libmus's bss begins, so splat
    treats the address as belonging to a C object */
 g_IdleStackTop = 0x800E7030;
+
+/* The boot stack ends where NuSystem's nuContNum is, which symbol_addrs.txt
+   names instead */
+g_BootStackTop = 0x8010C2D0;

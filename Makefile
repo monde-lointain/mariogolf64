@@ -71,6 +71,15 @@ LIBNAUDIO_INCLUDES := -I$(LIBNAUDIO_DIR)/src -I$(LIBNAUDIO_DIR)/include $(ULTRAL
 LIBNAUDIO_DEFINES  := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -DN_MICRO
 LIBNAUDIO_CFLAGS   := $(LIBMUS_CFLAGS)
 
+# NuSystem, with the defines of the SDK makefile's ROM library but at -O2,
+# the level the game's copy was built at. The sources keep the SDK's CRLF line
+# endings, and KMC's preprocessor doesn't join lines that end in a backslash
+# and a carriage return, so they're compiled from copies without the CRs.
+LIBNUSYS_DIR       := lib/libnusys
+LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
+LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
+LIBNUSYS_CFLAGS    := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O2 -Wa,--force-n64align
+
 # Per-directory compiler flags
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
 
@@ -140,6 +149,15 @@ $(BUILD_DIR)/$(LIBMUS_DIR)/%.c.o: $(LIBMUS_DIR)/%.c
 $(BUILD_DIR)/$(LIBNAUDIO_DIR)/%.c.o: $(LIBNAUDIO_DIR)/%.c
 	@mkdir -p $(dir $@)
 	VR4300MUL=ON $(CC) -c $(LIBNAUDIO_CFLAGS) $(LIBNAUDIO_INCLUDES) $(LIBNAUDIO_DEFINES) -o $@ $<
+
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
+	@mkdir -p $(dir $@)
+	tr -d '\r' < $< > $(@:.o=)
+	VR4300MUL=ON $(CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
+
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h: $(LIBNUSYS_DIR)/nusys.h
+	@mkdir -p $(dir $@)
+	tr -d '\r' < $< > $@
 
 # splat names data-only objects as if they were C, so assembly files that
 # only hold data (such as gu/libm_vals.s) are found under a .c.o name
