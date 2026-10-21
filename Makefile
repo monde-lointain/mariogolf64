@@ -73,7 +73,8 @@ LIBNAUDIO_CFLAGS   := $(LIBMUS_CFLAGS)
 
 # NuSystem, with the defines of the SDK makefile's ROM library but at -O2,
 # the level the game's copy was built at. Like the SDK's nusys.o, the boot
-# code is built without optimization. The sources keep the SDK's CRLF line
+# code is built without optimization. The scheduler is built with NU_DEBUG,
+# which keeps its task performance measurements. The sources keep the SDK's CRLF line
 # endings, and KMC's preprocessor doesn't join lines that end in a backslash
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
@@ -85,6 +86,7 @@ LIBNUSYS_CFLAGS     = -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C $(LIB
 # Per-directory compiler flags
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
 .PHONY: all extract clean distclean setup tools
 

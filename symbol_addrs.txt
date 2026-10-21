@@ -564,13 +564,38 @@ n_alSynAllocFX = 0x800A1320; // type:func
 n_alMainBusPull = 0x800A1370; // type:func
 n_alSynFreeFX = 0x800A2090; // type:func
 
-// NuSystem scheduler, identified by comparison with NuSystem 2.07 source
+// NuSystem scheduler, revised as the game's copy, built from lib/libnusys
 nuScCreateScheduler = 0x800283B0; // type:func
+nuScGetAudioMQ = 0x800286B4; // type:func
+nuScGetGfxMQ = 0x800286C0; // type:func
+nuScEventHandler = 0x800286CC; // type:func
 nuScAddClient = 0x8002891C; // type:func
 nuScResetClientMesgType = 0x800289AC; // type:func
 nuScRemoveClient = 0x800289EC; // type:func
 nuScEventBroadcast = 0x80028A68; // type:func
+nuScExecuteAudio = 0x80028AC8; // type:func
+nuScReturnTrue = 0x80028D28; // type:func
+nuScExecuteGraphics = 0x80028D30; // type:func
+nuScWaitTaskReady = 0x800291AC; // type:func
+nuScSetFrameBufferNum = 0x80029234; // type:func
 nuScGetFrameRate = 0x80029240; // type:func
+nuScPreNMIFunc = 0x800B6780; // size:0x4
+nuScWatchdogGfxTask = 0x800B6784; // size:0x4
+nuDebTaskPerfCnt = 0x800B6788; // size:0x4
+nuDebTaskPerfEnd = 0x800B678C; // size:0x4
+nuScTvTypeIndex = 0x800B6790; // size:0x4
+nuScPreNMIFlag = 0x800FBD94; // size:0x1
+nuDebTaskPerfPtr = 0x800FBE10; // size:0x4
+nuScRetraceCounter = 0x80104E68; // size:0x4
+nuScGfxTaskStartRetrace = 0x8012F4D4; // size:0x4
+nuDebTaskPerf = 0x801B5700; // size:0x5D0
+nuScRetraceTotal = 0x801B68E0; // size:0x4
+nusched = 0x801B8380; // size:0x680
+
+// Game routines and variables that NuSystem's scheduler refers to
+UpdateZBufferVisibility = 0x8008D1DC; // type:func
+HandleFrameBufferSwap = 0x80092324; // type:func
+g_IsDebugEnabled = 0x800B67C0; // size:0x1
 
 // NuSystem 2.05, revised as the game's copy, built from lib/libnusys
 nuGfxInitEX2 = 0x80028300; // type:func
@@ -631,12 +656,11 @@ nuContReadFunc = 0x800C7E40; // size:0x4
 nuContCallBack = 0x800C7E58; // size:0xC
 
 // NuSystem's frame buffer setup and graphics task manager, which the game
-// rewrote, and variables of those and the scheduler, which are still assembly
+// rewrote and which are still assembly
 nuGfxSetCfb = 0x80029250; // type:func
 nuGfxTaskMgr = 0x80029440; // type:func
 nuGfxTaskMgrInit = 0x800295BC; // type:func
 nuGfxTaskStart = 0x80029774; // type:func
-nuScPreNMIFunc = 0x800B6780; // size:0x4
 nuGfxSwapCfbFunc = 0x800B67B4; // size:0x4
 nuGfxZBuffer = 0x800FED14; // size:0x4
 nuGfxDisplay = 0x80104E6C; // size:0x4

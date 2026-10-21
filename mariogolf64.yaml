@@ -74,7 +74,7 @@ segments:
       - [0x1130, asm]
       - [0x17B0, asm]
       - [0x3700, c, ../lib/libnusys/nugfxinit_ex2]
-      - [0x37B0, asm]
+      - [0x37B0, c, ../lib/libnusys/nusched]
       - [0x4650, asm]
       - [0x4840, asm]
       - [0x4CE0, asm]
@@ -336,7 +336,8 @@ segments:
       - [0x8F250, textbin, rsp_text]
       - [0x91310, data]
       - [0x91A80, .data, ../lib/libnusys/nugfxinit_ex2]
-      - [0x91B80, data]
+      - [0x91B80, .data, ../lib/libnusys/nusched]
+      - [0x91BA0, data]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
       - [0xA2B80, .data, ../lib/libmus/src/player_fx]
       - [0xA2EC0, .data, ../lib/libmus/src/aud_dma]
@@ -413,6 +414,8 @@ segments:
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
       - [0xADC40, rodata]
       - { start: 0xADD30, type: bss, vram: 0x800D2930, name: bss_800D2930 }
+      - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
+      - { type: bss, vram: 0x800D8980, name: bss_800D8980 }
       - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }
