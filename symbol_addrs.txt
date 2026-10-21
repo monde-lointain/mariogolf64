@@ -1,7 +1,6 @@
 // Main segment
 EntryPoint = 0x80025C00; // type:func
-Boot = 0x800994B0; // type:func
-g_IdleStackTop = 0x800E7030;
+mainproc = 0x80029C34; // type:func
 
 // Cross-overlay references
 D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04
@@ -561,6 +560,7 @@ n_alMainBusPull = 0x800A1370; // type:func
 n_alSynFreeFX = 0x800A2090; // type:func
 
 // NuSystem scheduler, identified by comparison with NuSystem 2.07 source
+nuScCreateScheduler = 0x800283B0; // type:func
 nuScAddClient = 0x8002891C; // type:func
 nuScResetClientMesgType = 0x800289AC; // type:func
 nuScRemoveClient = 0x800289EC; // type:func
@@ -568,6 +568,7 @@ nuScEventBroadcast = 0x80028A68; // type:func
 nuScGetFrameRate = 0x80029240; // type:func
 
 // NuSystem 2.05, revised as the game's copy, built from lib/libnusys
+nuBoot = 0x800994B0; // type:func
 nuPreNMIFuncSet = 0x800A13F0; // type:func
 nuGfxThreadStart = 0x800A1500; // type:func
 nuGfxFuncSet = 0x800A1560; // type:func
@@ -637,8 +638,10 @@ nuContStatus = 0x800FEDC8; // size:0x10
 nuContRmbCtl = 0x80104F50; // size:0x28
 nuContData = 0x801051F8; // size:0x18
 nuGfxMesgQ = 0x801052D0; // size:0x18
+nuMainStack = 0x8010A2D0; // size:0x2000
 nuContNum = 0x8010C2D0; // size:0x4
 nuSiMgrMesgQ = 0x8012D408; // size:0x18
+nuIdleFunc = 0x80132398; // size:0x4
 nuPiSramHandle = 0x8012F4D8; // size:0x4
 nuPiCartHandle = 0x801B55C8; // size:0x4
 nuContPfs = 0x801B8A18; // size:0x1A0

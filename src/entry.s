@@ -1,6 +1,7 @@
 # Cartridge entry point. IPL3 copies the first megabyte of the ROM to
 # 0x80025C00 and jumps here; we clear the main segment's .bss, switch to the
-# boot stack and hand off to Boot().
+# boot stack and hand off to NuSystem's nuBoot(). The boot stack is the top of
+# nuMainStack, which NuSystem calls NU_SPEC_BOOT_STACK.
 
 .include "macro.inc"
 
@@ -22,11 +23,11 @@ glabel EntryPoint
     addi    $t1, $t1, -8
     bnez    $t1, .LclearBss
      nop
-    lui     $t2, %hi(Boot)
-    addiu   $t2, $t2, %lo(Boot)
-    lui     $sp, %hi(g_BootStackTop)
+    lui     $t2, %hi(nuBoot)
+    addiu   $t2, $t2, %lo(nuBoot)
+    lui     $sp, %hi(nuMainStack + 0x2000)
     jr      $t2
-     addiu  $sp, $sp, %lo(g_BootStackTop)
+     addiu  $sp, $sp, %lo(nuMainStack + 0x2000)
 endlabel EntryPoint
 
     .fill 0x14

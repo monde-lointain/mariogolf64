@@ -72,16 +72,19 @@ LIBNAUDIO_DEFINES  := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI -DNDEBUG -D
 LIBNAUDIO_CFLAGS   := $(LIBMUS_CFLAGS)
 
 # NuSystem, with the defines of the SDK makefile's ROM library but at -O2,
-# the level the game's copy was built at. The sources keep the SDK's CRLF line
+# the level the game's copy was built at. Like the SDK's nusys.o, the boot
+# code is built without optimization. The sources keep the SDK's CRLF line
 # endings, and KMC's preprocessor doesn't join lines that end in a backslash
 # and a carriage return, so they're compiled from copies without the CRs.
 LIBNUSYS_DIR       := lib/libnusys
 LIBNUSYS_INCLUDES  := -I$(BUILD_DIR)/$(LIBNUSYS_DIR) $(ULTRALIB_INCLUDES)
 LIBNUSYS_DEFINES   := -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DUSE_EPI -DBUILD_VERSION=VERSION_J -D_FINALROM
-LIBNUSYS_CFLAGS    := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O2 -Wa,--force-n64align
+LIBNUSYS_OPTFLAGS  := -O2
+LIBNUSYS_CFLAGS     = -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) -Wa,--force-n64align
 
 # Per-directory compiler flags
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
+$(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 
 .PHONY: all extract clean distclean setup tools
 

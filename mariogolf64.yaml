@@ -115,7 +115,7 @@ segments:
       - [0x68500, asm]
       - [0x70E10, asm]
       - [0x74890, asm]
-      - [0x748B0, asm]
+      - [0x748B0, c, ../lib/libnusys/nuboot]
       - [0x749F0, c, ../lib/libmus/src/player]
       - [0x78330, c, ../lib/libmus/src/player_fx]
       - [0x78D10, c, ../lib/libmus/src/aud_dma]
@@ -411,6 +411,7 @@ segments:
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
       - [0xADC40, rodata]
       - { start: 0xADD30, type: bss, vram: 0x800D2930, name: bss_800D2930 }
+      - { type: .bss, vram: 0x800E4CD0, name: ../lib/libnusys/nuboot }
       - { type: .bss, vram: 0x800E7030, name: ../lib/libmus/src/player }
       - { type: .bss, vram: 0x800E70A0, name: ../lib/libmus/src/aud_dma }
       - { type: .bss, vram: 0x800E70E0, name: ../lib/libmus/src/aud_sched }
