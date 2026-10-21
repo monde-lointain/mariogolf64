@@ -121,17 +121,21 @@ def disassemble(word):
     return rabbitizer.Instruction(word).disassemble()
 
 
+MAX_DIFF_HUNKS = 4
+
+
 def print_diff(target, compiled):
-    """Prints the differing instructions, with one line of context."""
+    """Prints the first few runs of instructions that differ."""
     matcher = difflib.SequenceMatcher(None, target, compiled, autojunk=False)
-    for tag, t1, t2, c1, c2 in matcher.get_opcodes():
-        if tag == "equal":
-            continue
+    hunks = [opcode for opcode in matcher.get_opcodes() if opcode[0] != "equal"]
+    for tag, t1, t2, c1, c2 in hunks[:MAX_DIFF_HUNKS]:
         for index in range(t1, t2):
             print(f"  -{index:4} {disassemble(target[index])}")
         for index in range(c1, c2):
             print(f"  +{index:4} {disassemble(compiled[index])}")
         print("  --")
+    if len(hunks) > MAX_DIFF_HUNKS:
+        print(f"  ({len(hunks) - MAX_DIFF_HUNKS} more)")
 
 
 def main():
