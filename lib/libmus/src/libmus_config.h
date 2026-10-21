@@ -51,7 +51,7 @@
    should not be used in a standard version of the library.
 */
 
-/*#define SUPPORT_PROFILER*/
+#define SUPPORT_PROFILER
 /*
    This enables CPU performance monitoring for the main driver
    code. The variables "_mus_cpu_last" and "_mus_cpu_worst"

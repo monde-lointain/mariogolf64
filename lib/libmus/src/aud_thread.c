@@ -39,7 +39,7 @@
 /* internal macros */
 #define AUDIO_STACKSIZE    0x2000     /* size of stack for thread (in bytes) */
 #define EXTRA_SAMPLES      30         /* ratio[%] of extra samples per frame */
-#define EXTRA_SAMPLES_N    15         /* ratio[%] of extra eamples (if n_audio) */
+#define EXTRA_SAMPLES_N    20         /* ratio[%] of extra samples (if n_audio) */
 #define NUM_OUTPUT_BUFFERS 3          /* number of output buffers */
 
 #ifndef SUPPORT_NAUDIO
@@ -66,6 +66,7 @@ static Acmd *audio_command_list;
 
 /* global workspace */
 ALGlobals   __libmus_alglobals;
+u8          __libmus_output_muted = FALSE;   /* play silence instead of the driver output */
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   [EXTERNAL FUNCTION]
@@ -144,11 +145,12 @@ void   __MusIntAudManInit(musConfig *config, int vsyncs_per_second, int fx_type)
 static void __MusIntThreadProcess(void *ignored)
 {
    static audio_task_t *last_task=NULL;
+   static u64 silent_output[2] = { 0 };
    Acmd *cmdp;
    s32 commands;
    u32 task_count;
    u32 samples;
-   u32 status;
+   s32 status;
    audio_task_t *task;
    musTask sched_task;
 #ifdef _AUDIODEBUG
@@ -169,6 +171,13 @@ static void __MusIntThreadProcess(void *ignored)
    {
       /* wait for frame sync message */
       __MusIntSched_waitframe();
+
+      /* output silence while muted */
+      if (__libmus_output_muted)
+      {
+         osAiSetNextBuffer(silent_output, sizeof(silent_output));
+         continue;
+      }
 
       /* get AI parameters */
       status = osAiGetStatus();

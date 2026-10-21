@@ -31,8 +31,8 @@
 
 /* internal macros */
 #define SAMPLE_ALIGNMENT      2			/* must be power of two */
-#define FRAME_LAG				   1			/* number of frames before buffer is purged */
 #define DDROM_WAVEDATA_START	0x00140000	/* address of N64DD ROM samples - from <leo.h> */
+#define KEEP_COUNT_LAST_USED	0x20000001	/* keep_count of the buffer used most recently */
 
 extern unsigned long __muscontrol_flag;
 
@@ -57,6 +57,7 @@ static OSMesg     *audio_mess_buf;
 
 static int        audio_dma_size;
 static int        audio_dma_count;
+static int        dma_buffer_count = 0;  /* number of DMA buffer descriptors */
 
 /* internal function prototypes */
 static ALDMAproc __CallBackDmaNew(void *ignored);
@@ -74,10 +75,10 @@ static OSPiHandle *cartrom_handle;
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   [EXTERNAL FUNCTION]
-  __MusIntDmaInit(dma_buffer_count, dma_buffer_size)
+  __MusIntDmaInit(buffer_count, dma_buffer_size)
 
   [Parameters]
-  dma_buffer_count	number of DMA buffers
+  buffer_count		number of DMA buffers
   dma_buffer_size	size of each DMA buffer
 
   [Explanation]
@@ -87,7 +88,7 @@ static OSPiHandle *cartrom_handle;
   Address of audio library DMA initialisation function
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
-ALDMANew __MusIntDmaInit(int dma_buffer_count, int dma_buffer_size)
+ALDMANew __MusIntDmaInit(int buffer_count, int dma_buffer_size)
 {
 	int i;
 
@@ -97,14 +98,15 @@ ALDMANew __MusIntDmaInit(int dma_buffer_count, int dma_buffer_size)
 //	diskrom_handle = osDriveRomInit();
 
 	/* allocate memory for DMA messages */
-	audio_IO_mess_buf = __MusIntMemMalloc(dma_buffer_count*2*sizeof(OSIoMesg));
-	audio_mess_buf = __MusIntMemMalloc(dma_buffer_count*2*sizeof(OSMesg));
+	audio_IO_mess_buf = __MusIntMemMalloc(buffer_count*2*sizeof(OSIoMesg));
+	audio_mess_buf = __MusIntMemMalloc(buffer_count*2*sizeof(OSMesg));
 	/* allocate memory for DMA buffer descriptor list */
-	dma_buffer_list = __MusIntMemMalloc(dma_buffer_count*sizeof(dma_list_t));
-	__MusIntMemSet(dma_buffer_list, 0, dma_buffer_count*sizeof(dma_list_t));
+	dma_buffer_list = __MusIntMemMalloc(buffer_count*sizeof(dma_list_t));
+	__MusIntMemSet(dma_buffer_list, 0, buffer_count*sizeof(dma_list_t));
+	dma_buffer_count = buffer_count;
 
 	/* initialise descriptor list and allocate DMA buffers */
-	for (i=0; i<dma_buffer_count-1; i++)
+	for (i=0; i<buffer_count-1; i++)
 	{
 		dma_buffer_list[i].next = dma_buffer_list+i+1;
 		dma_buffer_list[i+1].prev = dma_buffer_list+i;
@@ -122,7 +124,7 @@ ALDMANew __MusIntDmaInit(int dma_buffer_count, int dma_buffer_size)
 	dma_buffer_free = dma_buffer_list;
 
 	/* create DMA message queue */
-	osCreateMesgQueue(&audDMAMessageQ, audio_mess_buf, dma_buffer_count*2);
+	osCreateMesgQueue(&audDMAMessageQ, audio_mess_buf, buffer_count*2);
 
 	/* return address of audio library DMA new function */
 	return (__CallBackDmaNew);
@@ -133,8 +135,8 @@ ALDMANew __MusIntDmaInit(int dma_buffer_count, int dma_buffer_size)
   __MusIntDmaProcess()
 
   [Explanation]
-  Process the DMA buffers. The DMA message queue is emptied, DMA buffers are aged
-  and if necessary freed.
+  Process the DMA buffers. The DMA message queue is emptied and DMA buffers are
+  aged.
 
   [Return value]
   NONE
@@ -143,46 +145,23 @@ ALDMANew __MusIntDmaInit(int dma_buffer_count, int dma_buffer_size)
 void __MusIntDmaProcess(void)
 {
    OSIoMesg     *iomsg;
-	dma_list_t *current_dma_buffer;
-    
+	OSIntMask	saved_mask;
+	int			i;
+
 	/* empty message queue */
    while (audio_dma_count)
     {
-#ifndef _AUDIODEBUG
         osRecvMesg(&audDMAMessageQ,(OSMesg *)&iomsg,OS_MESG_NOBLOCK);
-#else
-        if (osRecvMesg(&audDMAMessageQ,(OSMesg *)&iomsg,OS_MESG_NOBLOCK) == -1)
-            osSyncPrintf("AUD_DMA.C: Audio DMA not completed.\n");
-#endif
     	audio_dma_count--;
     }
-    /* free any DMA buffers not in use */
-	current_dma_buffer = dma_buffer_head;
-	while(current_dma_buffer)
+	/* age every DMA buffer, so the least recently used one can be reclaimed */
+	saved_mask = osSetIntMask(OS_IM_NONE);
+	for (i=0; i<dma_buffer_count; i++)
 	{
-		current_dma_buffer->keep_count--;
-		if (!current_dma_buffer->keep_count)
-		{
-			dma_list_t *next_buffer;
-
-			next_buffer = current_dma_buffer->next;
-			if (current_dma_buffer->next)
-				current_dma_buffer->next->prev = current_dma_buffer->prev;
-			if (current_dma_buffer->prev)
-				current_dma_buffer->prev->next = current_dma_buffer->next;
-			else
-				dma_buffer_head = current_dma_buffer->next;
-
-			current_dma_buffer->prev = NULL;
-			current_dma_buffer->next = dma_buffer_free;
-			dma_buffer_free = current_dma_buffer;
-			current_dma_buffer=next_buffer;
-		}
-		else
-		{
-			current_dma_buffer=current_dma_buffer->next;
-		}
+		if (dma_buffer_list[i].keep_count)
+			dma_buffer_list[i].keep_count--;
 	}
+	osSetIntMask(saved_mask);
 }
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -242,6 +221,21 @@ static s32 __CallBackDmaProcess(s32 addr, s32 len, void *ignored)
 }
 
 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  [EXTERNAL FUNCTION]
+  __MusIntDmaPrintUsage()
+
+  [Explanation]
+  Report DMA buffer usage. The report is compiled out of this build.
+
+  [Return value]
+  NONE
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+
+void __MusIntDmaPrintUsage(void)
+{
+}
+
+/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
   [INTERNAL FUNCTION]
   __MusIntDmaSample(sample_addr, sample_length)
 
@@ -264,19 +258,9 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 	OSPiHandle	*pi_handle;
 	OSIoMesg	*io_msg;
 
-	/* test if sample is coming from the N64DD ROM */
-	if ((sample_addr&0xff000000)==0xff000000)
-	{
-		pi_handle = diskrom_handle;
-		sample_addr &= 0xffffff;
-		sample_addr += DDROM_WAVEDATA_START;
-	}
-	else
-	{
-		if (__muscontrol_flag&MUSCONTROL_RAM)
-		    return (NULL);
-		pi_handle = cartrom_handle;
-	}
+	if (__muscontrol_flag&MUSCONTROL_RAM)
+		return (NULL);
+	pi_handle = cartrom_handle;
 
 	/* get address of sample end */
 	sample_addr_end = sample_addr+sample_length;
@@ -290,8 +274,7 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 		/* is it contained in this buffer? */
 		if(sample_addr_end<=current_dma_buffer->sample_addr+audio_dma_size)
 		{
-			/* modification 99.01.12 from Yutaka Murakami v3.13 */
-			current_dma_buffer->keep_count = 1+FRAME_LAG;
+			current_dma_buffer->keep_count = KEEP_COUNT_LAST_USED;
 			return (current_dma_buffer);
 		}
 
@@ -301,10 +284,31 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 	free_buffer = dma_buffer_free;
 	if (!free_buffer)
 	{
-#ifdef _AUDIODEBUG
-		osSyncPrintf("AUD_DMA.C: Cannot find free DMA buffer.\n");
-#endif
-		return (dma_buffer_head);
+		/* reclaim the least recently used buffer */
+		free_buffer = dma_buffer_head;
+		for (current_dma_buffer=dma_buffer_head; current_dma_buffer; current_dma_buffer=current_dma_buffer->next)
+		{
+			if (free_buffer->keep_count>current_dma_buffer->keep_count)
+				free_buffer = current_dma_buffer;
+		}
+		if (free_buffer)
+		{
+			if (free_buffer==last_buffer)
+				last_buffer = free_buffer->prev;
+
+			if (free_buffer->next)
+				free_buffer->next->prev = free_buffer->prev;
+			if (free_buffer->prev)
+				free_buffer->prev->next = free_buffer->next;
+			else
+				dma_buffer_head = free_buffer->next;
+
+			free_buffer->prev = NULL;
+			free_buffer->next = dma_buffer_free;
+			dma_buffer_free = free_buffer;
+		}
+		else
+			return (dma_buffer_head);
 	}
 	/* free buffer is to be used so move it along */
 	dma_buffer_free = free_buffer->next;
@@ -331,7 +335,7 @@ static dma_list_t *__MusIntDmaSample(unsigned long sample_addr, int sample_lengt
 
 	/* DMA sample to buffer */
 	free_buffer->sample_addr = sample_addr&(~(SAMPLE_ALIGNMENT-1));
-	free_buffer->keep_count = 1+FRAME_LAG;
+	free_buffer->keep_count = KEEP_COUNT_LAST_USED;
 
 	io_msg = &audio_IO_mess_buf[audio_dma_count++];
 	io_msg->hdr.pri = OS_MESG_PRI_NORMAL;

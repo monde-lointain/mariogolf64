@@ -1279,5 +1279,21 @@ void MusSetMarkerCallback(void *callback)
 	marker_callback = (LIBMUScb_marker)callback;
 }
 
+/*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*
+  [API FUNCTION]
+  MusPrintDmaUsage()
+
+  [Explanation]
+  Report how the DMA buffers are being used.
+
+  [Return value]
+  NONE
+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*+*/
+
+void MusPrintDmaUsage(void)
+{
+	__MusIntDmaPrintUsage();
+}
+
 
 /* end of file */

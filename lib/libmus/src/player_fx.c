@@ -44,6 +44,7 @@ REVERB_MEM gReverbFx;
 static s32 GetFxMostSections(void);
 static s32 GetFxLongest(void);
 static void SetForCustom(ALSynConfig *c);
+static void SetForEffect(ALSynConfig *c, s32 type);
 
 #ifdef SUPPORT_NAUDIO
 #define alGlobals n_alGlobals
@@ -67,6 +68,21 @@ void CustomInit(ALGlobals *g, ALSynConfig *c)
       CustomSynNew(c);
     }
 #endif
+  }
+}
+
+/* same as CustomInit(), but starts with an effect from the list */
+void CustomInitWithEffect(ALGlobals *g, ALSynConfig *c, s32 type)
+{
+  if (!alGlobals)	/* already initialized? */
+  {
+    alGlobals = g;
+    if(!n_syn)
+    {
+      SetForEffect(c, type);
+      n_syn = gReverbFx.synth = &alGlobals -> drvr;	// we'll need it later
+      CustomSynNew(c);
+    }
   }
 }
 /* same as alSynNew(), but passes to CustomSynAllocFx() */
@@ -468,6 +484,36 @@ static s32 NoFxParams[10] = {
 	   0,   5 ms,      0, 0,0,    0,   0,      0
 };
 
+/* copies of the SGI effects whose parameters can be edited */
+static s32 EditableEchoParams[10] = {
+    /* sections	   length */
+          1,       200 ms,
+                                      /*       chorus  chorus   filter
+       input  output  fbcoef  ffcoef   gain     rate   depth     coef   */
+           0,  179 ms, 12000,      0, 0x7fff,      0,      0,      0,
+};
+
+static s32 EditableSmallRoomParams[26] = {
+    /* sections	   length */
+          3,        100 ms,
+                                      /*       chorus  chorus   filter
+       input  output  fbcoef  ffcoef   gain     rate   depth     coef  */
+           0,   54 ms,  9830,  -9830,      0,      0,      0,      0,
+       19 ms,   38 ms,  3276,  -3276, 0x3fff,      0,      0,      0,
+           0,   60 ms,  5000,      0,      0,      0,      0, 0x5000,
+};
+
+static s32 EditableBigRoomParams[34] = {
+    /* sections	   length */
+          4,        100 ms,
+                                      /*       chorus  chorus   filter
+       input  output  fbcoef  ffcoef   gain     rate   depth     coef  */
+           0,   66 ms,  9830,  -9830,      0,      0,      0,      0,
+       22 ms,   54 ms,  3276,  -3276, 0x3fff,      0,      0,      0,
+       66 ms,   91 ms,  3276,  -3276, 0x3fff,      0,      0,      0,
+           0,   94 ms,  8000,      0,      0,      0,      0, 0x5000
+};
+
 
 /*
  *	this will be temporary, until we have editable effects - TW
@@ -476,7 +522,7 @@ static s32 NoFxParams[10] = {
 // a list of all available effects
 // will eventually be part of a project (oh please, NOT part of a song)
 
-static s32 EffectCount = 6;		/* number of effects in the list */
+static s32 EffectCount = 8;		/* index of the last effect in the list */
 
 static s32 *EffectList[] = {
 	NoFxParams,
@@ -485,8 +531,72 @@ static s32 *EffectList[] = {
 	ChorusParams,
     FlangeParams,
 	EchoParams,
+	EditableEchoParams,
+	EditableSmallRoomParams,
+	EditableBigRoomParams,
 	NULL
 };
+
+/*
+ *	get or set one parameter of an effect in the list
+ *	the parameter counts are as the game's library had them, and do not all
+ *	match the lengths of the parameter arrays
+ */
+
+s32 GetCustomEffectParam(s32 type, s32 index)
+{
+	s32 param_count;
+
+	switch (type)
+	{
+		case 0:
+		case 7:
+			param_count = 26;
+			break;
+		case 1:
+		case 3:
+		case 8:
+			param_count = 32;
+			break;
+		default:
+			param_count = 10;
+			break;
+	}
+	if (index < 0)
+		index = 0;
+	if (type > EffectCount)
+		type = 0;
+	if (index > param_count-1)
+		index = param_count-1;
+
+	return EffectList[type][index];
+}
+
+int SetCustomEffectParam(s32 type, s32 index, s32 value)
+{
+	s32 param_count;
+
+	switch (type)
+	{
+		case 0:
+		case 7:
+			param_count = 26;
+			break;
+		case 1:
+		case 3:
+		case 8:
+			param_count = 32;
+			break;
+		default:
+			param_count = 10;
+			break;
+	}
+	if (index < 0 || index > param_count-1)
+		return(1);		/* index is outside the effect */
+
+	EffectList[type][index] = value;
+	return(0);
+}
 
 /*
  *	find the most sections used by an effect
@@ -498,6 +608,12 @@ static void SetForCustom(ALSynConfig *c)
 {
   c->fxType = AL_FX_CUSTOM;
   c->params = BigRoomParams;
+}
+
+static void SetForEffect(ALSynConfig *c, s32 type)
+{
+  c->fxType = AL_FX_CUSTOM;
+  c->params = EffectList[type];
 }
 
 static s32 GetFxMostSections(void)

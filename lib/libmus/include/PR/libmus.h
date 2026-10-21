@@ -152,6 +152,11 @@ extern void MusSetScheduler			(musSched *sched_list);
 /* marker callback support */
 extern void MusSetMarkerCallback	(void *callback);
 
+/* output mode, frame count and DMA usage report */
+extern void MusSetStereo		(musBool stereo);
+extern unsigned long MusGetFrameCount	(void);
+extern void MusPrintDmaUsage		(void);
+
 /* wave list lookup in song header */
 extern int    			MusHandleWaveCount	(musHandle handle);
 extern unsigned short	*MusHandleWaveAddress(musHandle handle);

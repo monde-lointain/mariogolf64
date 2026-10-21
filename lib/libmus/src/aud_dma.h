@@ -14,8 +14,9 @@
 #define _LIBMUS_AUD_DMA_H_
 
 
-ALDMANew	__MusIntDmaInit		(int dma_buffer_count, int dma_buffer_size);
+ALDMANew	__MusIntDmaInit		(int buffer_count, int dma_buffer_size);
 void		__MusIntDmaProcess	(void);
+void		__MusIntDmaPrintUsage	(void);
 
 
 #endif /* _LIBMUS_AUD_DMA_H_ */

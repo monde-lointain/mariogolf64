@@ -27,6 +27,7 @@
 #include "lib_memory.h"
 #include "aud_sched.h"
 #include "aud_thread.h"
+#include "aud_dma.h"
 
 /* include current header files */
 #include "player.h"
@@ -103,6 +104,7 @@ unsigned long __muscontrol_flag;                /* music player control flag */
 unsigned long _mus_cpu_last = 0;                /* driver CPU usage for last frame */
 unsigned long _mus_cpu_worst = 0;               /* driver CPU usage for worst case */
 #endif
+static musBool         mus_stereo_enabled = MUSBOOL_ON; /* pan voices, or play all centred */
 
 
 /* C files included directly (to avoid lots of global variables in the library)*/
@@ -155,6 +157,14 @@ void __MusExtPlayerDelete(ALPlayer *player)
   amount of time before next callback
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
+static unsigned long   mus_frame_count = 0;       /* frames processed by the driver */
+
+/* number of frames the driver has processed since it was initialised */
+unsigned long MusGetFrameCount(void)
+{
+  return (mus_frame_count);
+}
+
 static ALMicroTime __MusIntMain(void *node)
 {
   int	x;
@@ -162,6 +172,8 @@ static ALMicroTime __MusIntMain(void *node)
 #ifdef SUPPORT_PROFILER
   unsigned long start=osGetCount();
 #endif
+
+  mus_frame_count++;
 
   /* process any fifo commands */
   __MusIntFifoProcess();
@@ -291,20 +303,14 @@ static void __MusIntGetNewNote(channel_t *cp,  int x)
 
     if(cp->velocity_on)
     {
-        /* modified 98.12.15 TW */
-        /* rests' velocities are not now stored, allowing previous notes to release or whatever */
-        /* this was only a problem if the first note in the loop was a rest, */
-        /* and the last note was a quiet note using low velocity */
-        u8 vel = *cp->pdata++;
-        if(vel >= 0x80)
+        /* this revision predates the 98.12.15 TW change, so rests still store their velocity */
+        cp->velocity = *cp->pdata++;
+        if(cp->velocity >= 0x80)
         {
-            vel &= 0x7F;
+            cp->velocity &= 0x7F;
             cp->velocity_on = 0;
-            cp->default_velocity = vel;
+            cp->default_velocity = cp->velocity;
         }
-
-        if(note != REST)
-            cp->velocity = vel;
     }
     else
       cp->velocity = cp->default_velocity;
@@ -488,6 +494,25 @@ static void __MusIntFlushPending(channel_t *cp, int x)
   NONE
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
 
+/*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  [EXTERNAL FUNCTION]
+  MusSetStereo(stereo)
+
+  [Parameters]
+  stereo	MUSBOOL_ON to pan voices, MUSBOOL_OFF to play every voice centred
+
+  [Explanation]
+  Select stereo or mono output.
+
+  [Return value]
+  NONE
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+
+void MusSetStereo(musBool stereo)
+{
+  mus_stereo_enabled = stereo == MUSBOOL_ON;
+}
+
 static void __MusIntSetVolumeAndPan(channel_t *cp, int x)
 {
   u32	volume;
@@ -514,7 +539,9 @@ static void __MusIntSetVolumeAndPan(channel_t *cp, int x)
   }
 
   /* process pan */
-  volume = ((cp->pan*cp->panscale)>>7)&0x7f;
+  volume = 0x40;
+  if (mus_stereo_enabled)
+    volume = ((cp->pan*cp->panscale)>>7)&0x7f;
   if (volume!=cp->old_pan)
   {
     cp->old_pan = volume;
@@ -640,11 +667,9 @@ static void __MusIntProcessEnvelope(channel_t *cp)
     cp->release_start_vol = cp->env_current;
   }
 
-  /* 99.01.29 - Removed this decrement and check of env_count - TW */
-  /* It looks like this should have been remived at the time env_speed_calc was introduced */
-  /* assuming it works ok, env_count can be removed from the channel structure */
-  /* cp->env_count--; *.
-  /* if(!cp->env_count) */
+  /* this revision predates the 99.01.29 TW change, so env_count is still checked */
+  cp->env_count--;
+  if(!cp->env_count)
   {
     cp->env_count = cp->env_speed;
 
