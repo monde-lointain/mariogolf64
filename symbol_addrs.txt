@@ -2,6 +2,30 @@
 EntryPoint = 0x80025C00; // type:func
 mainproc = 0x80029C34; // type:func
 
+// Overlay manager
+OnLoadModuleSet2 = 0x80025D30; // type:func
+OnLoadModuleSet7 = 0x80025D54; // type:func
+GetModuleSetOfModule = 0x80025D78; // type:func
+InitOverlayManager = 0x80025D8C; // type:func
+GetModuleSetIndex = 0x80025EC8; // type:func
+CanLoadModuleSet = 0x80025F18; // type:func
+LoadModuleSet = 0x800260C4; // type:func
+UnloadModuleSet = 0x80026230; // type:func
+ReportModuleNotAlive = 0x80026358; // type:func
+g_ModuleSets = 0x800B5F58; // size:0x2A8
+g_IsModuleAlive = 0x800FC858; // size:0x40
+g_ModuleRdpRequestFrames = 0x8012CFC0; // size:0x100
+
+// Debug flags
+IsDebugFlagSet = 0x800299F4; // type:func
+SetDebugFlag = 0x80029A30; // type:func
+ClearDebugFlag = 0x80029A6C; // type:func
+ToggleDebugFlag = 0x80029AA8; // type:func
+ClearAllDebugFlags = 0x80029AE4; // type:func
+
+// Globals of files not decompiled yet
+g_FrameCount = 0x800B67F0; // size:0x4
+
 // Cross-overlay references
 D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04
 
