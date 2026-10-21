@@ -46,8 +46,17 @@ RUN_CC_CHECK   ?= 0
 # Every object the linker script asks for
 O_FILES := $(shell test -f $(LD_SCRIPT) && grep -oE '$(BUILD_DIR)/[A-Za-z0-9_./-]+\.o' $(LD_SCRIPT) | sort -u)
 
+# libultra 2.0J, built the way ultralib builds libgultra_rom except that the
+# game's copy was compiled with signed chars
+ULTRALIB_DIR      := lib/ultralib
+ULTRALIB_INCLUDES := -I$(ULTRALIB_DIR)/include -I$(ULTRALIB_DIR)/include/compiler/gcc -I$(ULTRALIB_DIR)/include/PR
+ULTRALIB_DEFINES  := -D_MIPS_SZLONG=32 -D__USE_ISOC99 -DF3DEX_GBI -DBUILD_VERSION=VERSION_J \
+                     -DBUILD_VERSION_STRING=\"2.0J\" -DNDEBUG -D_FINALROM
+ULTRALIB_CFLAGS   := -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C -O3
+ULTRALIB_ASFLAGS  := -x assembler-with-cpp -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -P \
+                     -DMIPSEB -D_LANGUAGE_ASSEMBLY -D_MIPS_SIM=1 -D_ULTRA64
+
 # Per-directory compiler flags
-$(BUILD_DIR)/lib/ultralib/%.o: OPTFLAGS := -O3
 $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
 
 .PHONY: all extract clean distclean setup tools
@@ -98,5 +107,21 @@ ifneq ($(RUN_CC_CHECK),0)
 	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<
 endif
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) -o $@ $<
+
+# KMC GCC reads VR4300MUL from the environment to work around the VR4300
+# multiplication bug, as ultralib's build does
+$(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.c
+	@mkdir -p $(dir $@)
+	VR4300MUL=ON $(CC) -c $(ULTRALIB_CFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+
+$(BUILD_DIR)/$(ULTRALIB_DIR)/%.s.o: $(ULTRALIB_DIR)/%.s
+	@mkdir -p $(dir $@)
+	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
+
+# splat names data-only objects as if they were C, so assembly files that
+# only hold data (such as gu/libm_vals.s) are found under a .c.o name
+$(BUILD_DIR)/$(ULTRALIB_DIR)/%.c.o: $(ULTRALIB_DIR)/%.s
+	@mkdir -p $(dir $@)
+	$(CC) -c $(ULTRALIB_ASFLAGS) $(ULTRALIB_INCLUDES) $(ULTRALIB_DEFINES) -o $@ $<
 
 -include $(BUILD_DIR)/splat/$(TARGET).d

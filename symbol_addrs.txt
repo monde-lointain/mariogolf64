@@ -7,8 +7,6 @@ g_BootStackTop = 0x8010C2D0;
 D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04
 
 // libultra (2.0J) and libaudio, identified by comparison with ultralib
-__allocParam = 0x800A1148; // type:func
-__freeParam = 0x800A1174; // type:func
 osCreatePiManager = 0x800A3000; // type:func
 __osEPiRawStartDma = 0x800A3190; // type:func
 osEPiStartDma = 0x800A3380; // type:func
@@ -203,8 +201,8 @@ __osSpGetStatus = 0x800B16A0; // type:func
 __osSpSetStatus = 0x800B16B0; // type:func
 __osSpSetPc = 0x800B16C0; // type:func
 __osSpRawStartDma = 0x800B16F0; // type:func
-__osSpRawReadIo = 0x800B1780; // type:func
-__osSpRawWriteIo = 0x800B17D0; // type:func
+__osSiRawReadIo = 0x800B1780; // type:func
+__osSiRawWriteIo = 0x800B17D0; // type:func
 __osContAddressCrc = 0x800B1820; // type:func
 __osContDataCrc = 0x800B188C; // type:func
 __osViInit = 0x800B1970; // type:func
@@ -400,3 +398,83 @@ __MusIntMemRemaining = 0x8009E2BC; // type:func
 __MusIntMemGetHeapAddr = 0x8009E2D4; // type:func
 __MusIntMemSet = 0x8009E2E0; // type:func
 __MusIntMemMove = 0x8009E30C; // type:func
+
+// libultra data, placed by tools/locate_object_sections.py
+__osPiDevMgr = 0x800C7E70; // size:0x1C
+__osPiTable = 0x800C7E8C; // size:0x4
+__osCurrentHandle = 0x800C7E90; // size:0x8
+__osPiAccessQueueEnabled = 0x800C7EB0; // size:0x4
+alGlobals = 0x800C8180; // size:0x4
+__osContinitialized = 0x800C8190; // size:0x4
+__osPreNMI = 0x800C81F0; // size:0x4
+__osSiAccessQueueEnabled = 0x800C8210; // size:0x4
+__osThreadTail = 0x800C8220; // size:0x8
+__osRunQueue = 0x800C8228; // size:0x4
+__osActiveQueue = 0x800C822C; // size:0x4
+__osRunningThread = 0x800C8230; // size:0x4
+__osFaultedThread = 0x800C8234; // size:0x4
+__osTimerList = 0x800C8240; // size:0x4
+__osViDevMgr = 0x800C8250; // size:0x1C
+__additional_scanline = 0x800C826C; // size:0x4
+osViModeTable = 0x800C8270; // size:0x1180
+__osPfsInodeCacheChannel = 0x800C9440; // size:0x4
+__osPfsInodeCacheBank = 0x800C9444; // size:0x1
+__osPfsLastChannel = 0x800C9450; // size:0x4
+osClockRate = 0x800C9460; // size:0x8
+osViClock = 0x800C9468; // size:0x4
+__osShutdown = 0x800C946C; // size:0x4
+__OSGlobalIntMask = 0x800C9470; // size:0x4
+__osHwIntTable = 0x800C9480;
+__osPiIntTable = 0x800C94A8;
+__osViCurr = 0x800C9560; // size:0x4
+__osViNext = 0x800C9564; // size:0x4
+osViModeNtscLan1 = 0x800C9570; // size:0x50
+osViModePalLan1 = 0x800C95C0; // size:0x50
+osViModeMpalLan1 = 0x800C9610; // size:0x50
+__libm_qnan_f = 0x800D2640;
+
+// libultra common symbols, which the linker scattered through the end of bss
+__osBaseCounter = 0x800FBE04; // size:0x4
+__osContPifRam = 0x800FE340; // size:0x40
+__Dom2SpeedParam = 0x800FEC98; // size:0x74
+__osViIntrCount = 0x800FF1E0; // size:0x4
+__osGbpakTimerMsg = 0x800FF4AC; // size:0x4
+__osMaxControllers = 0x80105274; // size:0x1
+__osCurrentTime = 0x801052F0; // size:0x8
+__CartRomHandle = 0x80105BC0; // size:0x74
+__osPiAccessQueue = 0x80106198; // size:0x18
+__Dom1SpeedParam = 0x80106248; // size:0x74
+__osGbpakTimer = 0x8012F490; // size:0x20
+__osContLastCmd = 0x8012F4CC; // size:0x1
+__osEepromTimerMsg = 0x8012F4DC; // size:0x4
+__osBaseTimer = 0x801321D8; // size:0x20
+__osTimerCounter = 0x80132364; // size:0x4
+__osPfsInodeCache = 0x801B68E8; // size:0x100
+__osEventStateTab = 0x801B7078; // size:0x78
+__osGbpakTimerQ = 0x801B70F8; // size:0x18
+__osFinalrom = 0x801B74D8; // size:0x4
+__osPfsPifRam = 0x801B7EF0; // size:0x40
+__osEepromTimerQ = 0x801B8A00; // size:0x18
+__osSiAccessQueue = 0x801EFFB0; // size:0x18
+
+// Library routines whose callers in libultra pin down their addresses
+osSetIntMask = 0x800A2F60; // type:func
+guNormalize = 0x80029900; // type:func
+guMtxF2L = 0x80067B00; // type:func
+guMtxL2F = 0x80067C0C; // type:func
+guMtxIdentF = 0x80067CB4; // type:func
+guMtxIdent = 0x80067D04; // type:func
+alSynNew = 0x80051E34; // type:func
+alSynDelete = 0x80051E54; // type:func
+__freeParam = 0x80051E74; // type:func
+_freePVoice = 0x80051E7C; // type:func
+__osThreadSave = 0x800FC6A8; // size:0x1B0
+
+// Globals that IPL3 leaves in low RDRAM
+osTvType = 0x80000300;
+osRomBase = 0x80000308;
+osResetType = 0x8000030C;
+osCicId = 0x80000310;
+osVersion = 0x80000314;
+osMemSize = 0x80000318;
+osAppNMIBuffer = 0x8000031C;
