@@ -319,7 +319,7 @@ extern "C" {
 /* PI DEFINE								*/
 /*----------------------------------------------------------------------*/
 #define	NU_PI_MESG_NUM			50	/* PI message buffer size */
-#define	NU_PI_CART_BLOCK_READ_SIZE	0x4000	/* cart read block size	*/
+#define	NU_PI_CART_BLOCK_READ_SIZE	0x2000	/* cart read block size	*/
 
 /*----------------------------------------------------------------------*/
 /* DEBUG 								*/

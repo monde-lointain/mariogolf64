@@ -598,6 +598,7 @@ HandleFrameBufferSwap = 0x80092324; // type:func
 g_IsDebugEnabled = 0x800B67C0; // size:0x1
 
 // NuSystem 2.05, revised as the game's copy, built from lib/libnusys
+nuPiReadRom = 0x80025C50; // type:func
 nuGfxInitEX2 = 0x80028300; // type:func
 nuBoot = 0x800994B0; // type:func
 nuPreNMIFuncSet = 0x800A13F0; // type:func

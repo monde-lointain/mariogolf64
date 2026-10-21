@@ -36,11 +36,6 @@ void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size)
 
     /* Create message queue */
     osCreateMesgQueue(&dmaMesgQ, &dmaMesgBuf, 1);
-    dmaIoMesgBuf.hdr.pri      = OS_MESG_PRI_NORMAL;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMesgQ;
-    
-    /* Disable the CPU cache. */
-    osInvalDCache((void*)buf_ptr, (s32)size);
 
     while(size){
 	if(size > NU_PI_CART_BLOCK_READ_SIZE){
@@ -48,18 +43,25 @@ void nuPiReadRom(u32 rom_addr, void* buf_ptr, u32 size)
 	} else {
 	    readSize = size;
 	}
+	dmaIoMesgBuf.hdr.pri      = OS_MESG_PRI_NORMAL;
+	dmaIoMesgBuf.hdr.retQueue = &dmaMesgQ;
 	dmaIoMesgBuf.dramAddr     = buf_ptr;
 	dmaIoMesgBuf.devAddr      = (u32)rom_addr;
 	dmaIoMesgBuf.size         = readSize;
 
+	/* Disable the CPU cache. */
+	osInvalDCache((void*)buf_ptr, (s32)readSize);
+
 	osEPiStartDma(nuPiCartHandle, &dmaIoMesgBuf, OS_READ);
+	rom_addr += readSize;
+	size -= readSize;
 
 	/* Wait for end. */
 	(void)osRecvMesg(&dmaMesgQ, &dmaMesgBuf, OS_MESG_BLOCK);
-	
-	rom_addr += readSize;
+
+	/* Discard what the CPU fetched while the DMA ran. */
+	osInvalDCache((void*)buf_ptr, (s32)readSize);
 	buf_ptr = (void*)((u8*)buf_ptr + readSize);
-	size -= readSize;
     }
 #else
 
