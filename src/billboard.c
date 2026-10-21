@@ -128,24 +128,18 @@ void PlaceBillboards(void) {
     }
 }
 
-#ifdef NON_MATCHING
 void SortBillboardsByDepth(void) {
-    BillboardTransform *transform;
     s32 i;
     s32 sortedIndex;
     u16 insertedIndex;
 
-    i = 0;
-    transform = g_BillboardTransforms;
-    do {
+    for (i = 0; i != BILLBOARD_COUNT; i++) {
         if (g_Billboards[i].textureIndex < 0) {
-            transform->viewDepth = VIEW_DEPTH_FAR;
+            g_BillboardTransforms[i].viewDepth = VIEW_DEPTH_FAR;
         } else {
-            transform->viewDepth = GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
+            g_BillboardTransforms[i].viewDepth = GetViewDepth(g_Billboards[i].x, g_Billboards[i].y, g_Billboards[i].z);
         }
-        transform++;
-        i++;
-    } while (transform != &g_BillboardTransforms[BILLBOARD_COUNT]);
+    }
 
     /* Insertion sort, farthest first */
     for (i = 1; i != BILLBOARD_COUNT; i++) {
@@ -160,9 +154,6 @@ void SortBillboardsByDepth(void) {
         sDrawOrder[sortedIndex + 1] = insertedIndex;
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/billboard", SortBillboardsByDepth);
-#endif
 
 void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *transform, s32 textureIndex,
                    Mtx *cameraMatrices) {
