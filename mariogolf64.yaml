@@ -178,7 +178,7 @@ segments:
       - [0x7DF90, c, ../lib/libnusys/nucontmgr]
       - [0x7E2D0, c, ../lib/libnusys/nucontdatalock]
       - [0x7E330, c, ../lib/libnusys/nucontqueryread]
-      - [0x7E350, asm]
+      - [0x7E350, c, ../lib/ultralib/src/os/getcurrfaultthread]
       - [0x7E360, hasm, ../lib/ultralib/src/os/setintmask]
       - [0x7E400, c, ../lib/ultralib/src/io/pimgr]
       - [0x7E590, c, ../lib/ultralib/src/io/epirawdma]

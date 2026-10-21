@@ -219,6 +219,7 @@ __osDpDeviceBusy = 0x800B2B10; // type:func
 __osSiDeviceBusy = 0x800B2B30; // type:func
 ldiv = 0x800B2B50; // type:func
 lldiv = 0x800B2BD4; // type:func
+__osGetCurrFaultedThread = 0x800A2F50; // type:func
 
 // libultra handwritten assembly, identified by structure
 osInvalDCache = 0x800A6FB0; // type:func
@@ -646,4 +647,3 @@ nuContDataMutexQ = 0x801F43D0; // size:0x18
 
 __MusIntSamplesInit = 0x8009E380; // type:func
 __MusIntSamplesCurrent = 0x8009E424; // type:func
-__osGetActiveQueue = 0x800A2F50; // type:func
