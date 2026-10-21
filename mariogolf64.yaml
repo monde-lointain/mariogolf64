@@ -47,7 +47,7 @@ options:
   mips_abi_float_regs: o32
   gp_value: 0x0
   disasm_unknown: True
-  named_regs_for_c_funcs: False
+  named_regs_for_c_funcs: True
   hasm_in_src_path: True
   ld_bss_is_noload: True
   ld_align_section_vram_end: False
