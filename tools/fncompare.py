@@ -29,7 +29,7 @@ CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC",
           "-nostdinc", "-funsigned-char", "-w", "-O2"]
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
             "-Ilib/ultralib/include/PR", "-Isrc", "-Ibuild"]
-DEFINES = ["-D_LANGUAGE_C", "-D_MIPS_SZLONG=32", "-D_MIPS_SZINT=32", "-DF3DEX_GBI",
+DEFINES = ["-D_LANGUAGE_C", "-D_MIPS_SZLONG=32", "-D_MIPS_SZINT=32", "-DF3DEX_GBI_2",
            "-DNDEBUG", "-D_FINALROM", "-DBUILD_VERSION=VERSION_J", "-D__IS_KMC__=1",
            "-DNON_MATCHING"]
 
