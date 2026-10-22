@@ -13,6 +13,7 @@
 #define CHARACTER_MODEL_CHOSEN_DISPLAY_LIST 1 /* A command calling one of the display list choices */
 #define CHARACTER_MODEL_DISPLAY_LIST_CHOICES 2 /* Ended by END_OF_DISPLAY_LIST_CHOICES */
 #define CHARACTER_MODEL_POINTS 4 /* CharacterPoints, ended by one with no joint path */
+#define CHARACTER_MODEL_JOINTS 5 /* JointAnimations, ended by END_OF_JOINT_ANIMATIONS */
 
 #define END_OF_DISPLAY_LIST_CHOICES -1
 /* The display list choice that draws nothing */
@@ -50,6 +51,32 @@ typedef struct CharacterPoint {
 
 #define END_OF_JOINT_PATH -1
 
+/* The keys around the current frame, kept from frame to frame */
+typedef struct KeyframeSpan {
+    /* 0x0 */ s16 startFrame;
+    /* 0x2 */ s16 endFrame;
+    /* 0x4 */ s16 index; /* Of the key at startFrame */
+} KeyframeSpan; /* size = 0x6 */
+
+/* A joint's keyed translation, rotation and scale */
+typedef struct JointAnimation {
+    /* 0x00 */ s16 translationKeyCount;
+    /* 0x02 */ s16 rotationKeyCount;
+    /* 0x04 */ s16 scaleKeyCount;
+    /* 0x08 */ s16 *translationFrames;
+    /* 0x0C */ s16 *rotationFrames;
+    /* 0x10 */ s16 *scaleFrames;
+    /* 0x14 */ f32 (*translations)[3];
+    /* 0x18 */ s16 (*rotations)[4]; /* Quaternions (x, y, z, w) */
+    /* 0x1C */ f32 (*scales)[3];
+    /* 0x20 */ KeyframeSpan translationSpan;
+    /* 0x26 */ KeyframeSpan rotationSpan;
+    /* 0x2C */ KeyframeSpan scaleSpan;
+} JointAnimation; /* size = 0x34 */
+
+/* The translation key count of the joint ending a model's list */
+#define END_OF_JOINT_ANIMATIONS -1
+
 /* A character loaded for drawing */
 typedef struct CharacterSlot {
     /* 0x000 */ const CharacterModel *model;
@@ -72,12 +99,19 @@ extern Gfx g_CharacterRenderModeDisplayList[3];
 extern Gfx g_CharacterCombineDisplayList[2];
 extern Gfx g_CharacterHiliteDisplayList[3];
 
+/* The animation state AnimateCharacterJoints works on, copied from a slot */
+extern f32 g_CurrentAnimationFrame;
+extern s32 g_CurrentAnimationStartFrame;
+extern s32 g_CurrentAnimationEndFrame;
+extern Mtx *g_CurrentJointMatrices;
+
 /* The model index of the slot last set up or asked about */
 extern s32 g_CharacterModelIndex;
 
 extern const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MODELS_PER_KIND];
 extern const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT];
 
+void AnimateCharacterJoints(u32 slotIndex);
 s32 FreeCharacterSlot(u32 slotIndex);
 s32 IsCharacterSlotBusy(u32 slotIndex);
 s32 IsAnyCharacterSlotBusy(void);

@@ -18,4 +18,10 @@ f32 Length3D(f32 x, f32 y, f32 z);
 u16 ComputeCrc16(u8 *data, u32 size);
 s32 ReportDivisionError(void);
 
+/* float_math.c */
+float fabsf(float x);
+float acosf(float x);
+float atan2f(float y, float x);
+float atanf(float x);
+
 #endif

@@ -34,6 +34,12 @@
 
 #define CHARACTER_POINT_UNK2 2
 
+/* Rotation keys are quaternions in units of QUATERNION_SCALE */
+#define QUATERNION_SCALE (1.0f / 16384)
+#define QUATERNION_PRODUCT_SCALE (1.0f / (16384 * 16384))
+/* The least 1 - cos of the angle between rotations that are slerped */
+#define SLERP_THRESHOLD 1e-06
+
 #define MODEL_TO_WORLD_SCALE 0.01f
 #define SLOT_POSITION_SCALE (1.0f / 1024)
 
@@ -1163,17 +1169,280 @@ const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT] = {
     },
 };
 
-/* The double 1.0, which func_80053604 loads as two words */
+/*
+ * Builds the slot's joint matrices for g_CurrentAnimationFrame into
+ * g_CurrentJointMatrices. Each joint's translation, rotation and scale is
+ * interpolated between the keys around the frame, or held at the nearest key
+ * outside them or past g_CurrentAnimationEndFrame.
+ */
+#ifdef NON_MATCHING
+void AnimateCharacterJoints(u32 slotIndex) {
+    f32 unusedMatrices[3][4][4];
+    f32 translationMatrix[4][4];
+    f32 jointMatrix[4][4];
+    f32 scaleMatrix[4][4];
+    f32 rotation[4];
+    f32 (*rotationMatrix)[4];
+    JointAnimation *joint;
+    Mtx *matrix;
+    f32 *key;
+    f32 frame;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 progress;
+    f32 remaining;
+    f32 dot;
+    f32 angle;
+    f32 nextWeight;
+    f32 spanWeight;
+    f32 sinAngle;
+    f32 lengthSquared;
+    f32 scale;
+    f32 xs;
+    f32 ys;
+    f32 zs;
+    f32 wx;
+    f32 wy;
+    f32 wz;
+    f32 xx;
+    f32 yy;
+    f32 zz;
+    f32 xy;
+    f32 yz;
+    f32 xz;
+    s16 isInterpolated;
+    s32 keyIndex;
+    s16 spanIndex;
+    s16 nextSpanIndex;
+
+    joint = (JointAnimation *)GetUsedCharacterSlot(slotIndex)->model->segmentAddresses[CHARACTER_MODEL_JOINTS];
+    matrix = g_CurrentJointMatrices;
+    if (joint->translationKeyCount == END_OF_JOINT_ANIMATIONS) {
+        return;
+    }
+    do {
+        frame = g_CurrentAnimationFrame;
+        isInterpolated = TRUE;
+        if (joint->translationSpan.endFrame < frame ||
+            frame < joint->translationSpan.startFrame) {
+            keyIndex = 1;
+            if (frame < joint->translationFrames[0]) {
+                isInterpolated = FALSE;
+                key = joint->translations[0];
+                x = key[0];
+                y = key[1];
+                z = key[2];
+            } else {
+                for (; keyIndex < joint->translationKeyCount; keyIndex++) {
+                    if (frame < joint->translationFrames[keyIndex]) {
+                        joint->translationSpan.index = keyIndex - 1;
+                        joint->translationSpan.startFrame = joint->translationFrames[keyIndex - 1];
+                        joint->translationSpan.endFrame = joint->translationFrames[keyIndex];
+                        break;
+                    }
+                }
+                if (keyIndex == joint->translationKeyCount) {
+                    keyIndex--;
+                    isInterpolated = FALSE;
+                    key = joint->translations[keyIndex];
+                    x = key[0];
+                    y = key[1];
+                    z = key[2];
+                }
+            }
+        }
+        if (isInterpolated) {
+            if (g_CurrentAnimationEndFrame < joint->translationSpan.endFrame) {
+                x = joint->translations[joint->translationSpan.index][0];
+                y = joint->translations[joint->translationSpan.index][1];
+                z = joint->translations[joint->translationSpan.index][2];
+            } else {
+                progress = (frame - joint->translationSpan.startFrame) /
+                           (joint->translationSpan.endFrame - joint->translationSpan.startFrame);
+                spanIndex = joint->translationSpan.index;
+                nextSpanIndex = spanIndex + 1;
+                remaining = 1.0 - progress;
+                x = remaining * joint->translations[spanIndex][0] + progress * joint->translations[nextSpanIndex][0];
+                y = remaining * joint->translations[spanIndex][1] + progress * joint->translations[nextSpanIndex][1];
+                z = remaining * joint->translations[spanIndex][2] + progress * joint->translations[nextSpanIndex][2];
+            }
+        }
+        guTranslateF(translationMatrix, x, y, z);
+
+        frame = g_CurrentAnimationFrame;
+        isInterpolated = TRUE;
+        if (joint->rotationSpan.endFrame < frame ||
+            frame < joint->rotationSpan.startFrame) {
+            keyIndex = 1;
+            if (frame < joint->rotationFrames[0]) {
+                isInterpolated = FALSE;
+                rotation[0] = joint->rotations[0][0] * QUATERNION_SCALE;
+                rotation[1] = joint->rotations[0][1] * QUATERNION_SCALE;
+                rotation[2] = joint->rotations[0][2] * QUATERNION_SCALE;
+                rotation[3] = joint->rotations[0][3] * QUATERNION_SCALE;
+            } else {
+                for (; keyIndex < joint->rotationKeyCount; keyIndex++) {
+                    if (frame < joint->rotationFrames[keyIndex]) {
+                        joint->rotationSpan.index = keyIndex - 1;
+                        joint->rotationSpan.startFrame = joint->rotationFrames[keyIndex - 1];
+                        joint->rotationSpan.endFrame = joint->rotationFrames[keyIndex];
+                        break;
+                    }
+                }
+                if (keyIndex == joint->rotationKeyCount) {
+                    keyIndex--;
+                    isInterpolated = FALSE;
+                    rotation[0] = joint->rotations[keyIndex][0] * QUATERNION_SCALE;
+                    rotation[1] = joint->rotations[keyIndex][1] * QUATERNION_SCALE;
+                    rotation[2] = joint->rotations[keyIndex][2] * QUATERNION_SCALE;
+                    rotation[3] = joint->rotations[keyIndex][3] * QUATERNION_SCALE;
+                }
+            }
+        }
+        if (isInterpolated) {
+            if (g_CurrentAnimationEndFrame < joint->rotationSpan.endFrame) {
+                rotation[0] = joint->rotations[joint->rotationSpan.index][0] * QUATERNION_SCALE;
+                rotation[1] = joint->rotations[joint->rotationSpan.index][1] * QUATERNION_SCALE;
+                rotation[2] = joint->rotations[joint->rotationSpan.index][2] * QUATERNION_SCALE;
+                rotation[3] = joint->rotations[joint->rotationSpan.index][3] * QUATERNION_SCALE;
+            } else {
+                spanIndex = joint->rotationSpan.index;
+                nextSpanIndex = spanIndex + 1;
+                dot = (joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) * joint->rotations[spanIndex][0] +
+                      (joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) * joint->rotations[spanIndex][1] +
+                      (joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) * joint->rotations[spanIndex][2] +
+                      (joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) * joint->rotations[spanIndex][3];
+                progress = (frame - joint->rotationSpan.startFrame) /
+                           (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
+                /* Nearly equal rotations are blended linearly, where the sines below would be near zero */
+                if (1.0 - dot < SLERP_THRESHOLD) {
+                    nextWeight = progress;
+                    spanWeight = 1.0 - nextWeight;
+                } else {
+                    angle = acosf(dot);
+                    progress *= angle;
+                    sinAngle = sinf(angle);
+                    nextWeight = sinf(progress) / sinAngle;
+                    spanWeight = sinf(angle - progress) / sinAngle;
+                }
+                spanWeight *= QUATERNION_SCALE;
+                nextWeight *= QUATERNION_SCALE;
+                rotation[0] =
+                    spanWeight * joint->rotations[spanIndex][0] + nextWeight * joint->rotations[nextSpanIndex][0];
+                rotation[1] =
+                    spanWeight * joint->rotations[spanIndex][1] + nextWeight * joint->rotations[nextSpanIndex][1];
+                rotation[2] =
+                    spanWeight * joint->rotations[spanIndex][2] + nextWeight * joint->rotations[nextSpanIndex][2];
+                rotation[3] =
+                    spanWeight * joint->rotations[spanIndex][3] + nextWeight * joint->rotations[nextSpanIndex][3];
+            }
+        }
+
+        /* The rotation quaternion (x, y, z, w) as a matrix */
+        lengthSquared = rotation[0] * rotation[0] + rotation[1] * rotation[1] + rotation[2] * rotation[2] +
+                        rotation[3] * rotation[3];
+        if (lengthSquared > 0.0f) {
+            scale = 2.0f / lengthSquared;
+        } else {
+            scale = 0.0f;
+        }
+        rotationMatrix = jointMatrix;
+        xs = rotation[0] * scale;
+        ys = rotation[1] * scale;
+        zs = rotation[2] * scale;
+        wx = rotation[3] * xs;
+        wy = rotation[3] * ys;
+        wz = rotation[3] * zs;
+        xx = rotation[0] * xs;
+        yy = rotation[1] * ys;
+        zz = rotation[2] * zs;
+        xy = rotation[0] * ys;
+        yz = rotation[1] * zs;
+        xz = rotation[0] * zs;
+        rotationMatrix[0][0] = 1.0f - (yy + zz);
+        rotationMatrix[0][1] = xy + wz;
+        rotationMatrix[0][2] = xz - wy;
+        rotationMatrix[0][3] = 0.0f;
+        rotationMatrix[1][0] = xy - wz;
+        rotationMatrix[1][1] = 1.0f - (xx + zz);
+        rotationMatrix[1][2] = yz + wx;
+        rotationMatrix[1][3] = 0.0f;
+        rotationMatrix[2][0] = xz + wy;
+        rotationMatrix[2][1] = yz - wx;
+        rotationMatrix[2][2] = 1.0f - (xx + yy);
+        rotationMatrix[2][3] = 0.0f;
+        rotationMatrix[3][0] = 0.0f;
+        rotationMatrix[3][1] = 0.0f;
+        rotationMatrix[3][2] = 0.0f;
+        rotationMatrix[3][3] = 1.0f;
+
+        frame = g_CurrentAnimationFrame;
+        isInterpolated = TRUE;
+        if (joint->scaleSpan.endFrame < frame || frame < joint->scaleSpan.startFrame) {
+            keyIndex = 1;
+            if (frame < joint->scaleFrames[0]) {
+                isInterpolated = FALSE;
+                key = joint->scales[0];
+                x = key[0];
+                y = key[1];
+                z = key[2];
+            } else {
+                for (; keyIndex < joint->scaleKeyCount; keyIndex++) {
+                    if (frame < joint->scaleFrames[keyIndex]) {
+                        joint->scaleSpan.index = keyIndex - 1;
+                        joint->scaleSpan.startFrame = joint->scaleFrames[keyIndex - 1];
+                        joint->scaleSpan.endFrame = joint->scaleFrames[keyIndex];
+                        break;
+                    }
+                }
+                if (keyIndex == joint->scaleKeyCount) {
+                    keyIndex--;
+                    isInterpolated = FALSE;
+                    key = joint->scales[keyIndex];
+                    x = key[0];
+                    y = key[1];
+                    z = key[2];
+                }
+            }
+        }
+        if (isInterpolated) {
+            if (g_CurrentAnimationEndFrame < joint->scaleSpan.endFrame) {
+                x = joint->scales[joint->scaleSpan.index][0];
+                y = joint->scales[joint->scaleSpan.index][1];
+                z = joint->scales[joint->scaleSpan.index][2];
+            } else {
+                progress = (frame - joint->scaleSpan.startFrame) /
+                           (joint->scaleSpan.endFrame - joint->scaleSpan.startFrame);
+                spanIndex = joint->scaleSpan.index;
+                nextSpanIndex = spanIndex + 1;
+                remaining = 1.0 - progress;
+                x = remaining * joint->scales[spanIndex][0] + progress * joint->scales[nextSpanIndex][0];
+                y = remaining * joint->scales[spanIndex][1] + progress * joint->scales[nextSpanIndex][1];
+                z = remaining * joint->scales[spanIndex][2] + progress * joint->scales[nextSpanIndex][2];
+            }
+        }
+        guScaleF(scaleMatrix, x, y, z);
+        guMtxCatF(scaleMatrix, jointMatrix, jointMatrix);
+        guMtxCatF(jointMatrix, translationMatrix, jointMatrix);
+        guMtxF2L(jointMatrix, matrix++);
+        joint++;
+    } while (joint->translationKeyCount != END_OF_JOINT_ANIMATIONS);
+}
+
+#else
+/* The double 1.0, which AnimateCharacterJoints loads as two words */
 const u32 D_800D0478 = 0x3FF00000;
 const u32 D_800D047C = 0;
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_80053604);
+INCLUDE_ASM("asm/nonmatchings/character_slot", AnimateCharacterJoints);
 /*
  * GCC last wrote the constants above, so it thinks the assembler is still in
  * .rodata, but INCLUDE_ASM left it in .text. Agree with GCC so the string below
  * lands in .rodata.
  */
 __asm__(".section .rodata");
+#endif
 
 /* Returns no value, but is declared s32 because that matches */
 s32 FreeCharacterSlot(u32 slotIndex) {
