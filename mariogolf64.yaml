@@ -327,7 +327,7 @@ segments:
       - [0x8DF50, c, ../lib/ultralib/src/libc/ldiv]
       - [0x8E110, c, libkmc/atan]
       - [0x8E550, asm, libkmc/memset]
-      - [0x8E620, asm, libkmc/rand]
+      - [0x8E620, c, libkmc/rand]
       - [0x8E660, c, libkmc/trig]
       - [0x8EAD0, asm, libkmc/strcmp]
       - [0x8EBE0, c, libkmc/matherror]

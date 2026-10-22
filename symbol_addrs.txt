@@ -933,3 +933,4 @@ CordicSineCosine = 0x800B3260; // type:func
 sin = 0x800B3480; // type:func
 cos = 0x800B3560; // type:func
 tan = 0x800B35F8; // type:func
+sRandomState = 0x800FBD30; // size:0x4
