@@ -2,6 +2,7 @@
 #include <lib/libnusys/nusys.h>
 #include "debug_flags.h"
 #include "asset.h"
+#include "course.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
@@ -126,8 +127,6 @@ extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
 extern s8 D_801323B8;
 extern s8 D_801323D0;
-extern s32 g_CourseIndex;
-extern s32 g_HoleIndex;
 extern s32 D_801B60AC;
 extern s8 D_801B60B9;
 extern s32 D_801B7070;

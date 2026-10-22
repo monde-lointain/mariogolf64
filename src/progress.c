@@ -1,4 +1,5 @@
 #include "common.h"
+#include "course.h"
 #include "save.h"
 #include "scene.h"
 
@@ -23,8 +24,6 @@ typedef struct Unk801B7118 {
 } Unk801B7118; /* size = 0x6 */
 
 extern s8 D_801B60C5;
-extern s32 g_CourseIndex;
-extern s32 g_HoleIndex;
 extern s32 D_801B60B4;
 extern Unk801B7118 D_801B7118[TOURNAMENT_CONTESTANT_COUNT];
 

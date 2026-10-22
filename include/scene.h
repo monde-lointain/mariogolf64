@@ -36,6 +36,8 @@ extern s32 g_SubModuleState;
  * with birdie badges and 30 contestants
  */
 #define GAME_MODE_TOURNAMENT 5
+/* The mode whose holes GetCourseRecordIndex takes from g_RingShotHoles */
+#define GAME_MODE_RING_SHOT 9
 
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;
