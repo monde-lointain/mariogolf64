@@ -19,6 +19,8 @@
 #define CHARACTER_MODEL_TEXTURE_ANIMATIONS 6 /* TextureAnimations, ended by a negative index */
 #define CHARACTER_MODEL_ANIMATED_TRIANGLES 7 /* AnimatedTriangle pointers, ended by NULL */
 #define CHARACTER_MODEL_TEXTURES 8 /* AnimatedTextures */
+#define CHARACTER_MODEL_UNK68 9 /* Six f32 values, one in each segment address from here, copied to a slot's unk68 */
+#define UNK68_COUNT 6
 #define CHARACTER_MODEL_UNK9 9 /* The first of six f32 pointers, copied to a slot's unk68 */
 
 #define END_OF_DISPLAY_LIST_CHOICES -1
@@ -206,7 +208,7 @@ typedef struct CharacterSlot {
     /* 0x060 */ s8 isTranslucent;
     /* 0x061 */ u8 alpha;
     /* 0x064 */ Gfx *displayList;
-    /* 0x068 */ f32 unk68[6];
+    /* 0x068 */ f32 unk68[UNK68_COUNT];
     /* 0x080 */ s16 unk80;
     /* 0x082 */ s8 lighting;
     /* 0x083 */ s8 isLooping;

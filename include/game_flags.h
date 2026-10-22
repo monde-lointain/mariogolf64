@@ -44,6 +44,8 @@
 
 /* Cuts every round to two holes */
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
+/* Logs LoadCharacter's progress */
+#define GAME_FLAG_LOG_CHARACTER_SETUP 0x41
 /* Measures ball distances from the character models instead of reading them from a table */
 #define GAME_FLAG_GENERATE_BALL_DISTANCES 0x36
 /* Prints each character slot's animation frame */

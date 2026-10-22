@@ -10,4 +10,8 @@ void ResetLoaderThread(void);
 void StartLoaderThread(void);
 void StopLoaderThread(void);
 
+/* Decompress the size bytes at romAddress into destination, returning the decompressed size */
+s32 LoadLzData(u32 romAddress, void *destination, u32 size);
+s32 LoadPatchedLzData(u32 romAddress, void *destination, u32 size);
+
 #endif

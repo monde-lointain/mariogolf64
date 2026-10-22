@@ -7,6 +7,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "hole_loader.h"
 #include "host_file.h"
 #include "libc.h"
 #include "main.h"
@@ -119,6 +120,12 @@ void AdvanceTextureAnimations(u32 slotIndex, s32 unused, s32 frameLastDigit, s32
 
 /* Set to the model buffer of the slot last set up or animated */
 extern void *D_800C1DF4;
+/* The animation LoadCharacter starts */
+extern s32 D_800C1DF0;
+
+/* How a slot starts out when LoadCharacter loads it */
+#define LOADED_ALPHA 0x60
+#define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27
 
 /* The size of a line of debug text */
 #define DEBUG_LINE_SIZE 0x80
@@ -592,7 +599,131 @@ void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
 INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
 #endif
 
+/*
+ * Loads the model of the character of the kind into the slot, sets up its
+ * frame data copies, and starts its first animation
+ */
+#ifdef NON_MATCHING
+/* As above, so the data below lands in .rodata */
+__asm__(".section .rodata");
+
+static const char sNotDisposedFormat[] = "Polychara slot %d not disposed yet!!!!!!!\n";
+/* Unreferenced; left by debug output that LoadCharacter no longer has */
+static const char sUnusedReadRomFormat[] = "nuPiReadRom(%x, %x, %x) [bufsiz %x]\n";
+static const char sUnusedCompleteText[] = "complete\n";
+
+void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
+    s32 isPatched = FALSE;
+    CharacterSlot *slot = &g_CharacterSlots[slotIndex];
+    JointAnimation *joint;
+    CharacterAnimation *animation;
+    u32 frameDataSize;
+    s32 count;
+
+    if (kind < CHARACTER_MODEL_KIND_COUNT) {
+        g_CharacterModelIndex = (kind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND +
+                                character % CHARACTER_MODELS_PER_KIND;
+        slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
+    } else {
+        g_CharacterModelIndex = (u32)character % OTHER_CHARACTER_MODEL_COUNT;
+        slot->model = &g_OtherCharacterModels[g_CharacterModelIndex];
+    }
+    if (IsCharacterSlotBusy(slotIndex)) {
+        /* Printed five times, so it stands out */
+        osSyncPrintf(sNotDisposedFormat, slotIndex);
+        osSyncPrintf(sNotDisposedFormat, slotIndex);
+        osSyncPrintf(sNotDisposedFormat, slotIndex);
+        osSyncPrintf(sNotDisposedFormat, slotIndex);
+        osSyncPrintf(sNotDisposedFormat, slotIndex);
+    } else if (slot->modelBuffer != NULL) {
+        if (slot->model->romStart != slot->model->baseRomStart) {
+            isPatched = TRUE;
+        }
+        slot->modelIndex = g_CharacterModelIndex;
+        slot->alpha = LOADED_ALPHA;
+        slot->nextAnimationId = NO_NEXT_ANIMATION;
+        slot->frameDataIndex = 0;
+        slot->animationIndex = 0;
+        slot->isTranslucent = FALSE;
+        slot->lighting = 0;
+        slot->isLooping = TRUE;
+        slot->playsRandomTextureAnimation = TRUE;
+        slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
+        slot->unk188 = 0;
+        slot->unk189 = 0;
+        D_800C1DF4 = slot->modelBuffer;
+        if (isPatched) {
+            LoadLzData(slot->model->baseRomStart, D_800C1DF4, slot->model->baseRomEnd - slot->model->baseRomStart);
+            LoadPatchedLzData(slot->model->romStart, D_800C1DF4, slot->model->romEnd - slot->model->romStart);
+        } else {
+            LoadLzData(slot->model->romStart, D_800C1DF4, slot->model->romEnd - slot->model->romStart);
+        }
+        SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, CHARACTER_MODEL_ADDRESS,
+                    osVirtualToPhysical(D_800C1DF4));
+        frameDataSize = slot->model->frameDataEnd - slot->model->frameDataStart;
+        if (frameDataSize < FRAME_DATA_COPY_SIZE) {
+            frameDataSize = FRAME_DATA_COPY_SIZE;
+        }
+        slot->frameData[0] = OS_PHYSICAL_TO_K0(osVirtualToPhysical((void *)slot->model->frameDataStart));
+        slot->frameData[1] = (u8 *)slot->frameData[0] + frameDataSize;
+        slot->frameData[2] = (u8 *)slot->frameData[1] + frameDataSize;
+        memcpy(slot->frameData[1], slot->frameData[0], frameDataSize);
+        memcpy(slot->frameData[2], slot->frameData[0], frameDataSize);
+        g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
+        D_800C1DF0 = slot->animationIndex;
+        if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
+            osSyncPrintf("complete2 anims_addr %x\n", ANIMATIONS(slot->model));
+        }
+        slot->animationFrame = slot->animationStartFrame = ANIMATIONS(slot->model)[D_800C1DF0].startFrame;
+        slot->animationEndFrame = slot->animationStartFrame + ANIMATIONS(slot->model)[D_800C1DF0].frameCount;
+        g_CurrentAnimationFrame = slot->animationFrame;
+        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        g_CurrentAnimationEndFrame = slot->animationEndFrame;
+        if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
+            osSyncPrintf("loop %d, loop_min = %d, loop_max = %d\n", D_800C1DF0, g_CurrentAnimationStartFrame,
+                         g_CurrentAnimationEndFrame);
+        }
+        ResetTriangleTextures(slotIndex);
+        slot->frameDataIndex = 1;
+        ResetTriangleTextures(slotIndex);
+        slot->frameDataIndex = 2;
+        ResetTriangleTextures(slotIndex);
+        slot->frameDataIndex = 0;
+        StopTextureAnimations(slotIndex);
+        AnimateCharacterJoints(slotIndex);
+        joint = JOINT_ANIMATIONS(slot->model);
+        for (; joint->translationKeyCount != END_OF_JOINT_ANIMATIONS; joint++) {
+            joint->translationSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->translationSpan.startFrame = UNSET_KEYFRAME_SPAN;
+            joint->rotationSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->rotationSpan.startFrame = UNSET_KEYFRAME_SPAN;
+            joint->scaleSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->scaleSpan.startFrame = UNSET_KEYFRAME_SPAN;
+        }
+        slot->jointMatrices = g_CurrentJointMatrices;
+        slot->displayList = (Gfx *)slot->model->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST];
+        slot->unk68[0] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68];
+        slot->unk68[1] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 1];
+        slot->unk68[2] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 2];
+        slot->unk68[3] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 3];
+        slot->unk68[4] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 4];
+        slot->unk68[5] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 5];
+        slot->unk80 = slot->model->unk44;
+        count = 0;
+        for (animation = ANIMATIONS(slot->model); animation->events != NULL; animation++) {
+            count++;
+        }
+        slot->animationCount = count;
+        slot->animationSpeed = 1.0f;
+        if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
+            osSyncPrintf("stage01 inited, char %d.\n", g_CharacterModelIndex);
+        }
+    }
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/character", LoadCharacter);
+#endif
 
 s32 GetAnimationIndex(u32 slotIndex, s32 id) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
