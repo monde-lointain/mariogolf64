@@ -29,7 +29,10 @@ from elftools.elf.relocation import RelocationSection
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KMC_DIR = os.path.join(ROOT, "tools", "gcc_kmc")
 CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ffast-math",
-          "-nostdinc", "-funsigned-char", "-w", "-O2"]
+          "-nostdinc", "-funsigned-char", "-w"]
+# Optimization levels by directory, as the Makefile sets them
+OPTFLAGS_BY_DIR = {os.path.join("src", "libkmc"): "-O1 -fno-fast-math"}
+DEFAULT_OPTFLAGS = "-O2"
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
             "-Ilib/ultralib/include/PR", "-Ilib/libmus/include", "-Isrc",
             "-Ibuild"]
@@ -101,11 +104,13 @@ def get_work_dir():
 def compile_functions(c_path):
     """Compiles C_PATH; returns ({name: [masked words]}, error text)."""
     c_path = os.path.abspath(c_path)
+    c_dir = os.path.relpath(os.path.dirname(c_path), ROOT)
+    optflags = OPTFLAGS_BY_DIR.get(c_dir, DEFAULT_OPTFLAGS)
     with tempfile.TemporaryDirectory() as tmp:
         obj_path = os.path.join(tmp, "out.o")
         env = dict(os.environ, COMPILER_PATH=KMC_DIR)
         result = subprocess.run(
-            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *INCLUDES, *DEFINES,
+            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *optflags.split(), *INCLUDES, *DEFINES,
              "-o", obj_path, c_path],
             cwd=get_work_dir(), env=env, capture_output=True, text=True)
         if result.returncode != 0:
