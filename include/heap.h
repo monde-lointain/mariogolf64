@@ -13,8 +13,13 @@
 void AddHeapRegion(s32 heapIndex, void *start, void *end);
 void ResetHeap(s32 heapIndex);
 s32 GetHeapFreeSize(s32 heapIndex);
+s32 GetHeapLargestFreeSize(s32 heapIndex);
 void *AllocFromHeap(s32 heapIndex, s32 size);
+void FreeFromHeap(s32 heapIndex, void *pointerToBlock);
 
+void InitHeapRegions(s32 hasExpansionPak);
+u32 GetFreeMemorySize(void);
+u32 FindLargestFreeMemorySize(void);
 void *AllocMemory(u32 size);
 void FreeMemory(void *pointerToBlock);
 

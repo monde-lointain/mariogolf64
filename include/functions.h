@@ -10,7 +10,6 @@ void nuPiReadRom(u32 romAddr, void *buffer, u32 size);
 
 /* Main segment */
 void RunBootHook(void);
-void InitHeapRegions(s32 hasExpansionPak);
 void InitAssetFiles(void);
 void InitRumblePaks(void);
 void StopAllRumble(void);
