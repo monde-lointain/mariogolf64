@@ -329,7 +329,7 @@ segments:
       - [0x8E550, c, libkmc/memset]
       - [0x8E620, c, libkmc/rand]
       - [0x8E660, c, libkmc/trig]
-      - [0x8EAD0, asm, libkmc/strcmp]
+      - [0x8EAD0, c, libkmc/strcmp]
       - [0x8EBE0, c, libkmc/matherror]
       - [0x8EC50, hasm, libkmc/longlong]
       - [0x8F140, hasm, libkmc/floatdidf]
