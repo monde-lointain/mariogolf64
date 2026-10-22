@@ -114,15 +114,15 @@ void RecordTournamentPlace(void) {
         }
         switch (place) {
             case 1:
-                placeFlag = &stats->hasFirstPlace;
+                placeFlag = &stats->hasPlace[FIRST_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
             case 2:
-                placeFlag = &stats->hasSecondPlace;
+                placeFlag = &stats->hasPlace[SECOND_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
             case 3:
-                placeFlag = &stats->hasThirdPlace;
+                placeFlag = &stats->hasPlace[THIRD_PLACE_INDEX];
                 hasPlace = TRUE;
                 break;
         }

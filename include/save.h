@@ -93,6 +93,12 @@ typedef struct Unk800FF4D0 {
     /* 0x00 */ s32 unk0[0x1C / 4];
 } Unk800FF4D0; /* size = 0x1C */
 
+/* Indices of UnkE98.hasPlace */
+#define THIRD_PLACE_INDEX 0
+#define SECOND_PLACE_INDEX 1
+#define FIRST_PLACE_INDEX 2
+#define TOURNAMENT_PLACE_COUNT 3
+
 typedef struct UnkE98 {
     /* 0x00 */ s32 roundCount;
     /* 0x04 */ s32 unk4;
@@ -106,9 +112,7 @@ typedef struct UnkE98 {
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 hasThirdPlace; /* In a tournament on the course */
-    /* 0x34 */ s32 hasSecondPlace;
-    /* 0x38 */ s32 hasFirstPlace;
+    /* 0x30 */ s32 hasPlace[TOURNAMENT_PLACE_COUNT]; /* In a tournament on the course */
     /* 0x3C */ u8 unk3C[0x74 - 0x3C];
 } UnkE98; /* size = 0x74 */
 

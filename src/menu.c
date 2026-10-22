@@ -1474,9 +1474,9 @@ void ComputeRoundStatistics(void) {
             } else {
                 D_80105C38[courseIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
             }
-            D_80105C38[courseIndex].hasThirdPlace = entry->hasThirdPlace;
-            D_80105C38[courseIndex].hasSecondPlace = entry->hasSecondPlace;
-            D_80105C38[courseIndex].hasFirstPlace = entry->hasFirstPlace;
+            D_80105C38[courseIndex].hasThirdPlace = entry->hasPlace[THIRD_PLACE_INDEX];
+            D_80105C38[courseIndex].hasSecondPlace = entry->hasPlace[SECOND_PLACE_INDEX];
+            D_80105C38[courseIndex].hasFirstPlace = entry->hasPlace[FIRST_PLACE_INDEX];
         }
     }
 
