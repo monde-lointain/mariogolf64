@@ -10,23 +10,29 @@
 #define CAMERA_DRAW_SCENE (1 << 0)
 #define CAMERA_DRAW_SCREEN_EFFECT (1 << 1)
 
+/* What a camera sees and where on the screen it draws */
+typedef struct CameraView {
+    /* 0x00 */ f32 eye[3];
+    /* 0x0C */ f32 lookAt[3];
+    /* 0x18 */ s32 unreadValue;
+    /* 0x1C */ s32 scissorX;
+    /* 0x20 */ s32 scissorY;
+    /* 0x24 */ s32 scissorWidth;
+    /* 0x28 */ s32 scissorHeight;
+    /* 0x2C */ s32 unreadSettings[4]; /* Set by StartGame, never read */
+    /* 0x3C */ f32 zoom;
+    /* 0x40 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
+    /* 0x44 */ f32 fieldOfView; /* In degrees */
+    /* 0x48 */ s32 mode;
+} CameraView; /* size = 0x4C */
+
 typedef struct Camera {
     /* 0x00 */ s32 unk0;
-    /* 0x04 */ f32 eye[3];
-    /* 0x10 */ f32 lookAt[3];
-    /* 0x1C */ s32 unreadValue;
-    /* 0x20 */ s32 scissorX;
-    /* 0x24 */ s32 scissorY;
-    /* 0x28 */ s32 scissorWidth;
-    /* 0x2C */ s32 scissorHeight;
-    /* 0x30 */ s32 unreadSettings[4]; /* Set by StartGame, never read */
-    /* 0x40 */ f32 zoom;
-    /* 0x44 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
-    /* 0x48 */ f32 fieldOfView; /* In degrees */
-    /* 0x4C */ s32 mode;
+    /* 0x04 */ CameraView view;
 } Camera; /* size = 0x50 */
 
 extern Camera g_Cameras[];
+
 
 /* The camera of the inset view, a window over the main view */
 #define INSET_CAMERA 1

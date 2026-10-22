@@ -241,9 +241,9 @@ void DrawBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
 
     lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
     lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
-    viewDir[0] = g_Cameras[0].lookAt[0] - g_Cameras[0].eye[0];
+    viewDir[0] = g_Cameras[0].view.lookAt[0] - g_Cameras[0].view.eye[0];
     viewDir[1] = 0.0f;
-    viewDir[2] = g_Cameras[0].lookAt[2] - g_Cameras[0].eye[2];
+    viewDir[2] = g_Cameras[0].view.lookAt[2] - g_Cameras[0].view.eye[2];
     lightDir[0] = cosf(lightPitch) * cosf(lightYaw);
     lightDir[2] = cosf(lightPitch) * sinf(lightYaw);
     lightDir[1] = sinf(lightPitch);
@@ -298,7 +298,7 @@ void DrawBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
 
-    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+    if (g_Cameras[cameraIndex].view.mode == CAMERA_MODE_BEHIND_GOLFER) {
         ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
                                  g_BallPosition[2] * POSITION_TO_FLOAT);
         if (ballDepth > 0) {
@@ -433,7 +433,7 @@ void DrawFadingBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
 
-    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+    if (g_Cameras[cameraIndex].view.mode == CAMERA_MODE_BEHIND_GOLFER) {
         ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
                                  g_BallPosition[2] * POSITION_TO_FLOAT);
         if (ballDepth > 0) {
