@@ -1,15 +1,180 @@
 #include "common.h"
+#include "camera.h"
 #include "character_slot.h"
+#include "club.h"
+#include "math_util.h"
 #include "variables.h"
 
 /* How many frames a drawn slot stays busy */
 #define BUSY_FRAME_COUNT 2
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_80052FE0);
+#define ENV_COLOR_COUNT 10
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_800530FC);
+/* Like G_RM_AA_ZB_XLU_SURF, but also updating the depth buffer */
+#define CHARACTER_RENDER_MODE_TRANSLUCENT \
+    (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | G_RM_PASS)
+#define CHARACTER_RENDER_MODE_TRANSLUCENT2                                                    \
+    (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | \
+     GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_8005342C);
+/* The sides, in texels, of the hilite textures */
+#define HILITE_TEXTURE_SIZE 32
+#define HILITE_SECOND_TILE 1
+
+#define LIGHT_DIRECTION_SCALE 127.0f
+
+#define CHOSEN_DISPLAY_LIST(model) ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
+#define DISPLAY_LIST_CHOICES(model) ((u32 *)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
+
+#define SMALLEST_PAGE_SIZE 0x1000
+/* osMapTLB's physical address for a page left unmapped */
+#define NO_PHYSICAL_PAGE -1
+/* osMapTLB's address space id for a global mapping */
+#define NO_TLB_ASID -1
+
+#define CHARACTER_POINT_UNK2 2
+
+#define MODEL_TO_WORLD_SCALE 0.01f
+#define SLOT_POSITION_SCALE (1.0f / 1024)
+
+/* The slot's first rotation is taken away from this roll */
+#define ROLL_ORIGIN_DEGREES 180
+
+/* Data still in the unsplit data and bss files */
+extern u8 sEnvColors[ENV_COLOR_COUNT][3];
+extern Gfx sEnvColorDisplayLists[ENV_COLOR_COUNT][2];
+extern LookAt sHiliteLookAts[DRAW_BUFFER_COUNT];
+extern Hilite sHilites[DRAW_BUFFER_COUNT];
+
+/* Sets the characters' alpha, drawing them translucent below 0xFF, and their combiner for the weather */
+void SetCharacterAlpha(s32 alpha) {
+    Gfx *gfx;
+    s32 i;
+
+    gfx = &sEnvColorDisplayLists[0][0];
+    for (i = 0; i != ENV_COLOR_COUNT; i++) {
+        gDPSetEnvColor(gfx++, sEnvColors[i][0], sEnvColors[i][1], sEnvColors[i][2], alpha);
+        gSPEndDisplayList(gfx++);
+    }
+    gfx = g_CharacterRenderModeDisplayList;
+    if ((alpha & 0xFF) == 0xFF) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, CHARACTER_RENDER_MODE_TRANSLUCENT, CHARACTER_RENDER_MODE_TRANSLUCENT2);
+    }
+    gfx = g_CharacterCombineDisplayList;
+    if (g_HoleConditions.isRaining) {
+        gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0,
+                          ENVIRONMENT, 0, SHADE, 0);
+    } else {
+        gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0, ENVIRONMENT, COMBINED, TEXEL0,
+                          COMBINED, 0, 0, 0, COMBINED);
+    }
+}
+
+/*
+ * Points the characters' highlights at the scene light, as seen from the main
+ * camera. The matrices are unused.
+ */
+void SetCharacterHilite(CameraMatrices *matrices) {
+    f32 lookAtMatrix[4][4];
+    f32 lightDirection[3];
+    f32 lightPitch;
+    f32 lightYaw;
+    Gfx *gfx;
+
+    lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
+    lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+    lightDirection[0] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
+    lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    guLookAtHiliteF(lookAtMatrix, &sHiliteLookAts[g_DrawBufferIndex], &sHilites[g_DrawBufferIndex],
+                    g_Cameras[0].view.eye[0], g_Cameras[0].view.eye[1], g_Cameras[0].view.eye[2],
+                    g_Cameras[0].view.lookAt[0], g_Cameras[0].view.lookAt[1], g_Cameras[0].view.lookAt[2], 0.0f,
+                    -1.0f, 0.0f, (s8)lightDirection[0], (s8)lightDirection[1], (s8)lightDirection[2],
+                    (s8)lightDirection[0], (s8)lightDirection[1], (s8)lightDirection[2], HILITE_TEXTURE_SIZE,
+                    HILITE_TEXTURE_SIZE);
+    gfx = g_CharacterHiliteDisplayList;
+    gDPSetHilite1Tile(gfx++, G_TX_RENDERTILE, &sHilites[g_DrawBufferIndex], HILITE_TEXTURE_SIZE, HILITE_TEXTURE_SIZE);
+    gDPSetHilite2Tile(gfx++, HILITE_SECOND_TILE, &sHilites[g_DrawBufferIndex], HILITE_TEXTURE_SIZE,
+                      HILITE_TEXTURE_SIZE);
+    gSPEndDisplayList(gfx++);
+}
+
+/*
+ * Maps pageCount pages from virtualAddress to physicalAddress, starting at TLB
+ * entry firstTlbIndex. The pages are SMALLEST_PAGE_SIZE << pageMode bytes; odd page
+ * modes map each page as two TLB pages of half that size. Returns the next free
+ * TLB entry, or -1 if the addresses aren't page-aligned or the mode is invalid.
+ */
+s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount, u32 virtualAddress, u32 physicalAddress) {
+    s32 tlbIndex;
+    u32 pageSize;
+    OSPageMask pageMask;
+
+    tlbIndex = firstTlbIndex;
+    pageSize = SMALLEST_PAGE_SIZE << pageMode;
+    if ((virtualAddress | physicalAddress) & (pageSize - 1)) {
+        osSyncPrintf("kSetMultiTLB : Invalid Virtual or Physical Address\n");
+        return -1;
+    }
+    switch (pageMode) {
+        case 1:
+            pageSize >>= 1;
+            pageCount *= 2;
+            /* fallthrough */
+        case 0:
+            pageMask = OS_PM_4K;
+            break;
+        case 3:
+            pageSize >>= 1;
+            pageCount *= 2;
+            /* fallthrough */
+        case 2:
+            pageMask = OS_PM_16K;
+            break;
+        case 5:
+            pageSize >>= 1;
+            pageCount *= 2;
+            /* fallthrough */
+        case 4:
+            pageMask = OS_PM_64K;
+            break;
+        case 7:
+            pageSize >>= 1;
+            pageCount *= 2;
+            /* fallthrough */
+        case 6:
+            pageMask = OS_PM_256K;
+            break;
+        default:
+            osSyncPrintf("kSetMultiTLB : Invalid Page Mode\n");
+            return -1;
+    }
+    /* A TLB entry maps an even and odd page pair, so a lone odd page goes first */
+    if (virtualAddress & pageSize) {
+        osUnmapTLB(tlbIndex);
+        osMapTLB(tlbIndex++, pageMask, (void *)virtualAddress, NO_PHYSICAL_PAGE, physicalAddress, NO_TLB_ASID);
+        virtualAddress += pageSize;
+        physicalAddress += pageSize;
+        pageCount--;
+    }
+    while (pageCount >= 2) {
+        osUnmapTLB(tlbIndex);
+        osMapTLB(tlbIndex++, pageMask, (void *)virtualAddress, physicalAddress, physicalAddress + pageSize,
+                 NO_TLB_ASID);
+        virtualAddress += pageSize * 2;
+        pageCount -= 2;
+        physicalAddress += pageSize * 2;
+    }
+    if (pageCount != 0) {
+        osUnmapTLB(tlbIndex);
+        osMapTLB(tlbIndex++, pageMask, (void *)virtualAddress, physicalAddress, NO_PHYSICAL_PAGE, NO_TLB_ASID);
+    }
+    return tlbIndex;
+}
 
 const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MODELS_PER_KIND] = {
     {
@@ -1060,15 +1225,144 @@ void FreeAllCharacterSlots(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_800543DC);
+/*
+ * Points the model's chosen display list at one of its display list choices.
+ * The slot's model buffer must already be mapped. Returns 0, or -1 if the slot
+ * is empty or the model has no such choice.
+ */
+s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
+    CharacterSlot *slot;
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_800544B4);
+    slot = GetUsedCharacterSlot(slotIndex);
+    if (slot != NULL) {
+        i = 0;
+        if (choiceIndex == NO_DISPLAY_LIST_CHOICE) {
+            CHOSEN_DISPLAY_LIST(slot->model)->words.w0 = G_ENDDL << 24;
+            CHOSEN_DISPLAY_LIST(slot->model)->words.w1 = 0;
+            return 0;
+        }
+        for (; i < choiceIndex; i++) {
+            if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+                return -1;
+            }
+        }
+        if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
+            return -1;
+        }
+        CHOSEN_DISPLAY_LIST(slot->model)->words.w0 = G_DL << 24;
+        CHOSEN_DISPLAY_LIST(slot->model)->words.w1 = DISPLAY_LIST_CHOICES(slot->model)[i];
+        return 0;
+    }
+    return -1;
+}
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_80054550);
+/* Returns the club's CLUB_KIND, or -1 if the slot is empty */
+s32 GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
+    CharacterSlot *slot;
+    s32 kind;
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_8005470C);
+    kind = -1;
+    slot = GetUsedCharacterSlot(slotIndex);
+    if (slot != NULL) {
+        g_CharacterModelIndex = slot->modelIndex;
+        switch (GetClub(clubIndex)->kind) {
+            case CLUB_KIND_WOOD:
+                kind = CLUB_KIND_WOOD;
+                break;
+            case CLUB_KIND_IRON:
+                kind = CLUB_KIND_IRON;
+                break;
+            case CLUB_KIND_WEDGE:
+                kind = CLUB_KIND_WEDGE;
+                break;
+            case CLUB_KIND_PUTTER:
+                kind = CLUB_KIND_PUTTER;
+                break;
+            default:
+                kind = -1;
+                break;
+        }
+    }
+    return kind;
+}
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_8005483C);
+/*
+ * Finds the point's position on the model, before the slot's own transform.
+ * Returns 0, or 1 if the model has no such point, or -1 if the slot is empty.
+ * Leaves the position zero if not found.
+ */
+s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position) {
+    Mtx pointMatrix;
+    Mtx offsetMatrix;
+    CharacterSlot *slot;
+    CharacterPoint *point;
+    s16 *jointPath;
 
-INCLUDE_ASM("asm/nonmatchings/character_slot", func_800548DC);
+    slot = GetUsedCharacterSlot(slotIndex);
+    if (slot != NULL) {
+        SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, CHARACTER_MODEL_ADDRESS,
+                    osVirtualToPhysical(slot->modelBuffer));
+        point = (CharacterPoint *)slot->model->segmentAddresses[CHARACTER_MODEL_POINTS];
+        while (point->jointPath != NULL) {
+            if (point->id == pointId) {
+                break;
+            }
+            point++;
+        }
+        if (point->jointPath != NULL) {
+            jointPath = point->jointPath;
+            guMtxIdent(&pointMatrix);
+            for (; *jointPath != END_OF_JOINT_PATH; jointPath++) {
+                guMtxCatL(&slot->jointMatrices[*jointPath], &pointMatrix, &pointMatrix);
+            }
+            guMtxIdent(&offsetMatrix);
+            guTranslate(&offsetMatrix, point->offset[0], point->offset[1], point->offset[2]);
+            guMtxCatL(&offsetMatrix, &pointMatrix, &pointMatrix);
+            guMtxXFML(&pointMatrix, 0.0f, 0.0f, 0.0f, &position[0], &position[1], &position[2]);
+            position[0] *= MODEL_TO_WORLD_SCALE;
+            position[1] *= MODEL_TO_WORLD_SCALE;
+            position[2] *= MODEL_TO_WORLD_SCALE;
+            return 0;
+        }
+        position[0] = position[1] = position[2] = 0.0f;
+        return 1;
+    }
+    position[0] = position[1] = position[2] = 0.0f;
+    return -1;
+}
+
+void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix) {
+    Mat4 translation;
+    Mat4 transform;
+
+    guTranslateF(translation, slot->position[0] * SLOT_POSITION_SCALE, slot->position[1] * SLOT_POSITION_SCALE,
+                 slot->position[2] * SLOT_POSITION_SCALE);
+    guRotateRPYF(transform, (s32)(ROLL_ORIGIN_DEGREES - (s32)(slot->rotation[0] * RADIANS_TO_DEGREES)),
+                 (s32)(slot->rotation[1] * RADIANS_TO_DEGREES), (s32)(slot->rotation[2] * RADIANS_TO_DEGREES));
+    guMtxCatF(transform, translation, translation);
+    guScaleF(transform, slot->scale[0], slot->scale[1], slot->scale[2]);
+    guMtxCatF(transform, translation, matrix);
+}
+
+/* Like GetCharacterPointModelPosition, but in the world */
+s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
+    Mat4 matrix;
+    f32 modelPosition[3];
+    s32 result;
+
+    result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
+    if (result < 0) {
+        position[0] = position[1] = position[2] = 0.0f;
+    } else {
+        GetCharacterSlotMatrix(GetUsedCharacterSlot(slotIndex), matrix);
+        guMtxXFMF(matrix, modelPosition[0], modelPosition[1], modelPosition[2], &position[0], &position[1],
+                  &position[2]);
+    }
+    return result;
+}
+
+void func_800548DC(u32 slotIndex, f32 *position) {
+    GetCharacterPointModelPosition(slotIndex, CHARACTER_POINT_UNK2, position);
+}
 

@@ -10,6 +10,7 @@
 #include "libc.h"
 #include "main.h"
 #include "camera.h"
+#include "character_slot.h"
 #include "functions.h"
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
@@ -918,7 +919,6 @@ void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 s32 func_80042720(void);
 void func_800427E8(void);
 void func_8005029C(void);
-void func_800530FC(CameraMatrices *matrices);
 void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
 void func_800625FC(Gfx **displayListHead);
 void func_80062A8C(CameraMatrices *matrices, s32);
@@ -1284,7 +1284,7 @@ s32 DrawGame(void) {
                     g_Cameras[0].view.lookAt[2] = 0.0f;
                     g_Cameras[0].view.eye[1] = 10.0f;
                     g_Cameras[0].view.eye[2] = 60.0f;
-                    func_800530FC(matrices);
+                    SetCharacterHilite(matrices);
                 } else if (D_8022BE08 != 0 && g_HasLoaderFinished == 1) {
                     usesFloatMatrices = TRUE;
                     guPerspectiveF(matrices->perspectiveF, &insetPerspNorm, g_Cameras[viewIndex].view.fieldOfView,
@@ -1355,7 +1355,7 @@ s32 DrawGame(void) {
                                          courseView->lookAt[0], courseView->lookAt[1],
                                          courseView->lookAt[2], 0.0f, -1.0f, 0.0f);
                         gSPLookAt(g_DisplayListHead++, &matrices->lookAt);
-                        func_800530FC(matrices);
+                        SetCharacterHilite(matrices);
                         ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
                         target = courseView->lookAt;
                         if (g_ShowsBillboardsAtEdge) {
