@@ -4,6 +4,7 @@
 #include "character_slot.h"
 #include "controller.h"
 #include "hole_loader.h"
+#include "math_util.h"
 #include "sound.h"
 #include "transfer_pak.h"
 
@@ -52,19 +53,10 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 #define ARROW_FRAME_TIME 4
 #define LIST_LEFT 160
 
-#define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
-
 /* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
 #define TEXEL_STEP_ONE (1 << 10)
 
-/* Encoded images start with a header, then a CI palette, then texels */
-#define IMAGE_HEADER_SIZE 8
-/* Each palette colour is one RGBA16 value */
-#define PALETTE_COLOR_SIZE 2
-#define SMALL_PALETTE_COLOR_COUNT 16
 #define LARGE_PALETTE_COLOR_COUNT 256
-/* Where a four-bit image's texels start, after its header and palette */
-#define PALETTED_TEXELS_OFFSET (IMAGE_HEADER_SIZE + SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
 #define CHALKBOARD_PALETTE_SIZE (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
 #define CHALKBOARD_TEXELS_OFFSET (IMAGE_HEADER_SIZE + CHALKBOARD_PALETTE_SIZE)
 #define CHALKBOARD_WIDTH 256

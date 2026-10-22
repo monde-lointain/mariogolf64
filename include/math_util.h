@@ -11,6 +11,7 @@
 #define BINARY_ANGLE_TURN 0x10000
 
 /* The radians to degrees factor of rotations */
+#define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
 
 u32 IntLength3D(s32 x, s32 y, s32 z);

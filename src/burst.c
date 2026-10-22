@@ -3,6 +3,7 @@
 #include "cpu_projection.h"
 #include "functions.h"
 #include "heap.h"
+#include "math_util.h"
 #include "sound.h"
 
 /* How many bursts sBursts has room for */
@@ -20,8 +21,6 @@
 
 /* Below this life, a particle's life runs out five times as fast */
 #define PARTICLE_FADE_LIFE 128
-
-#define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 
 /* An image whose zero cells each become a particle of a burst */
 typedef struct BurstShape {
