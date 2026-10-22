@@ -1077,3 +1077,4 @@ sFramingYaw = 0x800E1CD8; // size:0x4
 sFramingRotation = 0x800E1CE0; // size:0x40
 sFramedEye = 0x80105B6C; // size:0xC
 sFramedLookAt = 0x80105F30; // size:0xC
+g_GameState = 0x801B6088;

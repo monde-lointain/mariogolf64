@@ -57,19 +57,33 @@ typedef struct Unk68 {
     /* 0x3B */ u8 unk3B[0x68 - 0x3B];
 } Unk68; /* size = 0x68 */
 
-/* The globals from D_801B6088 on, which the game is continued with */
-typedef struct Unk801B6088 {
+/* GameState.holeSelection values; code tests the nines as bits */
+#define HOLE_SELECTION_ALL 0
+#define HOLE_SELECTION_BACK_NINE (1 << 1)
+#define HOLE_SELECTION_FRONT_NINE (1 << 2)
+
+/*
+ * The current game's settings and place, which a saved game keeps for it
+ * to be continued with. Code that reads one field alone also names some
+ * of them on their own, such as g_GameMode, g_CourseIndex and g_HoleIndex.
+ */
+typedef struct GameState {
     /* 0x00 */ s32 unk0;
     /* 0x04 */ s32 gameMode;
     /* 0x08 */ s32 playerCount;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ u8 unk14[0x3A - 0x14];
+    /* 0x0C */ s32 courseIndex;
+    /* 0x10 */ s32 holeIndex;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
+    /* 0x28 */ u8 unk28[0x3A - 0x28];
     /* 0x3A */ s8 unk3A;
     /* 0x3B */ u8 unk3B[0x3D - 0x3B];
     /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
     /* 0x3E */ u8 unk3E[0x44 - 0x3E];
-} Unk801B6088; /* size = 0x44 */
+} GameState; /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
     /* 0x00 */ s32 unk0[0x34 / 4];
@@ -102,7 +116,7 @@ typedef struct SavedGame {
     /* 0x00 */ s32 isValid;
     /* 0x04 */ u8 unk4[4];
     /* 0x08 */ Unk800BA9D8 unk8;
-    /* 0x3C */ Unk801B6088 unk3C;
+    /* 0x3C */ GameState state;
     /* 0x80 */ Unk800FF4D0 unk80;
     /* 0x9C */ u8 unk9C[4];
 } SavedGame; /* size = 0xA0 */
@@ -181,6 +195,8 @@ typedef struct SaveCopyLocation {
 } SaveCopyLocation;
 
 extern SaveData g_SaveData;
+
+extern GameState g_GameState;
 
 /* The current game's, which a saved game is loaded into and stored from */
 extern UnkB8 g_Players[MAX_PLAYER_COUNT];

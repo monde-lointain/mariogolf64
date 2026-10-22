@@ -100,8 +100,7 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
-extern Unk801B6088 D_801B6088;
-extern Unk801B6088 D_801B55F0;
+extern GameState D_801B55F0;
 extern Unk800BA9D8 D_800BA9D8;
 extern Unk800FF4D0 D_800FF4D0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
@@ -126,7 +125,6 @@ extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
 extern s8 D_801323B8;
 extern s8 D_801323D0;
-extern s32 D_801B60AC;
 extern s8 D_801B60B9;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
@@ -677,11 +675,11 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
     }
     if (!isContinuing) {
         hasIllegalState = FALSE;
-        if (D_801B6088.playerCount > playerCount) {
+        if (g_GameState.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
             return -1;
         }
-        playerCount = D_801B6088.playerCount;
+        playerCount = g_GameState.playerCount;
         game->isValid = FALSE;
         for (index = 0; index < playerCount; index++) {
             players[index] = g_Players[index];
@@ -702,7 +700,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
             }
             records[index] = D_800FEDD8[index];
         }
-        game->unk3C = D_801B6088;
+        game->state = g_GameState;
         game->unk8 = D_800BA9D8;
         if (!hasIllegalState) {
             game->isValid = TRUE;
@@ -711,17 +709,17 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
         return -1;
     }
     if (game->isValid == TRUE) {
-        if (game->unk3C.playerCount > playerCount) {
+        if (game->state.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
             return -1;
         }
-        playerCount = game->unk3C.playerCount;
+        playerCount = game->state.playerCount;
         for (index = 0; index < playerCount; index++) {
             g_Players[index] = players[index];
             D_800FEDD8[index] = records[index];
         }
-        D_801B6088 = game->unk3C;
-        D_801B6088.unk0 = 1;
+        g_GameState = game->state;
+        g_GameState.unk0 = 1;
         SetDebugFlag(DEBUG_FLAG_UNK1E);
         D_800BA9D8 = game->unk8;
     }
@@ -744,11 +742,11 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
     game = &g_SaveData.savedGames[slotIndex];
     if (!isContinuing) {
         hasIllegalState = FALSE;
-        if (D_801B6088.playerCount > playerCount) {
+        if (g_GameState.playerCount > playerCount) {
             osSyncPrintf("Too Many Players\n");
             return -1;
         }
-        playerCount = D_801B6088.playerCount;
+        playerCount = g_GameState.playerCount;
         game->isValid = FALSE;
         for (index = 0; index < playerCount; index++) {
             players[index] = D_8012D0C8[index];
@@ -768,9 +766,9 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
                     break;
             }
         }
-        game->unk3C = D_801B55F0;
-        if (game->unk3C.saveCount < MAX_SAVE_COUNT) {
-            game->unk3C.saveCount++;
+        game->state = D_801B55F0;
+        if (game->state.saveCount < MAX_SAVE_COUNT) {
+            game->state.saveCount++;
         }
         game->unk8 = D_800BA9D8;
         game->unk80 = D_800FF4D0;
@@ -780,16 +778,16 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
         game->isValid = TRUE;
     } else {
         if (game->isValid == TRUE) {
-            if (game->unk3C.playerCount > playerCount) {
+            if (game->state.playerCount > playerCount) {
                 osSyncPrintf("Too Many Players\n");
                 return -1;
             }
-            playerCount = game->unk3C.playerCount;
+            playerCount = game->state.playerCount;
             for (index = 0; index < playerCount; index++) {
                 g_Players[index] = players[index];
             }
-            D_801B6088 = game->unk3C;
-            D_801B6088.unk0 = 1;
+            g_GameState = game->state;
+            g_GameState.unk0 = 1;
             SetDebugFlag(DEBUG_FLAG_UNK1E);
             D_800BA9D8 = game->unk8;
             D_800FF4D0 = game->unk80;
@@ -1179,7 +1177,7 @@ void InvalidateBrokenSavedGames(void) {
     s32 index;
     s32 entryIndex;
     SavedGame *unk;
-    Unk801B6088 *sub;
+    GameState *sub;
     UnkB8 *player;
 
     save = GetSaveData();
@@ -1191,7 +1189,7 @@ void InvalidateBrokenSavedGames(void) {
             continue;
         }
         unk = &save->savedGames[index];
-        sub = &unk->unk3C;
+        sub = &unk->state;
         if (sub->unk3A == 0) {
             switch (sub->gameMode) {
                 case 0:
@@ -1209,10 +1207,10 @@ void InvalidateBrokenSavedGames(void) {
         if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
             isInvalid[index] = TRUE;
         }
-        if (sub->unkC < 0 || sub->unkC >= 12) {
+        if (sub->courseIndex < 0 || sub->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
             isInvalid[index] = TRUE;
         }
-        if (sub->unk10 < 0 || sub->unk10 >= COURSE_HOLE_COUNT) {
+        if (sub->holeIndex < 0 || sub->holeIndex >= COURSE_HOLE_COUNT) {
             isInvalid[index] = TRUE;
         }
         for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
@@ -1591,7 +1589,7 @@ void func_8005D9A0(void) {
         D_800FBE08[index] = 0;
     }
     D_801323B8 = 3;
-    D_801B60AC = 0;
+    g_GameState.holeSelection = HOLE_SELECTION_ALL;
     D_801323D0 = 6;
     D_801052E8 = 0;
     D_800C2BD4 = 0;

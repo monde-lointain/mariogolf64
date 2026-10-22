@@ -9,6 +9,7 @@
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
 #include "save.h"
+#include "save.h"
 #include "scene.h"
 #include "variables.h"
 
@@ -585,7 +586,6 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     }
 }
 
-extern s32 D_801B6088;
 extern volatile s32 D_800FBE74;
 extern s32 D_800C306C;
 
@@ -627,7 +627,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         return;
     }
     stripTop = g_HorizonRow - HORIZON_STRIP_RISE;
-    mode = D_801B6088;
+    mode = g_GameState.unk0;
     if (mode == 3 || mode == 4) {
         sourceTop = 0;
         destOffset = 0;
@@ -1575,7 +1575,7 @@ s32 DrawGame(void) {
                             func_800625FC(&g_DisplayListHead);
                             DrawFadingBillboards(matrices, viewIndex);
                         }
-                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                        if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             mode = g_Cameras[viewIndex].view.mode;
                             if (mode != 8 && mode != 2) {
                                 if (!IsDebugFlagSet(0x18) && g_IsModuleAlive[1]) {
@@ -1596,7 +1596,7 @@ s32 DrawGame(void) {
                                 }
                             }
                         }
-                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                        if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             if (g_IsModuleAlive[23] && !IsDebugFlagSet(0x2D)) {
                                 func_8021C6B4(matrices);
                             }
@@ -1609,7 +1609,7 @@ s32 DrawGame(void) {
                             }
                         }
                         func_8007EF0C(&g_DisplayListHead, matrices);
-                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                        if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             if (viewIndex == 0) {
                                 func_80083AC8(&g_DisplayListHead, matrices);
                                 func_80086864(&g_DisplayListHead);
