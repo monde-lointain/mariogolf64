@@ -11,6 +11,9 @@ typedef struct AssetFile {
     /* 0xC */ u32 romEnd;
 } AssetFile; /* size = 0x10 */
 
+/* EncodedAsset methods; any other is read as halfword runs */
+#define ENCODING_BYTE_RUNS 1
+
 /*
  * An asset whose first word holds how the rest is encoded (top byte) and
  * its size once decoded (the other 24 bits)
@@ -23,6 +26,8 @@ typedef struct EncodedAsset {
 } EncodedAsset; /* size = 0x20 */
 
 void OpenAssetFile(s32 assetId, AssetFile *file);
+AssetFile *OpenPooledAssetFile(s32 assetId);
+void CloseAssetFile(AssetFile *file);
 s32 GetAssetFileSize(AssetFile *file);
 void ReadAssetFile(void *buffer, u32 size, AssetFile *file);
 s32 OpenEncodedAsset(u16 assetId, EncodedAsset *asset);

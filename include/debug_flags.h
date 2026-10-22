@@ -25,6 +25,9 @@
 /* Set when a saved game is continued, among other places */
 #define DEBUG_FLAG_UNK1E 0x1E
 
+/* Logs the ID of each encoded asset that is opened */
+#define DEBUG_FLAG_LOG_ENCODED_ASSETS 0x49
+
 s32 IsDebugFlagSet(u32 flag);
 void SetDebugFlag(u32 flag);
 void ClearDebugFlag(u32 flag);
