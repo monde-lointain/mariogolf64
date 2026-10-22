@@ -131,7 +131,7 @@ extern s32 sHasUnloadedSubModule;
 /* GetGroundHeight's units per world unit */
 #define GROUND_UNITS_PER_UNIT 1024
 
-/* g_WindDirection's units per radian */
+/* HoleConditions.windDirection's units per radian */
 #define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
 
 /*
@@ -1994,7 +1994,7 @@ void UpdateGame(void) {
     }
     if (g_Scene == 19) {
         func_8004CDA0();
-        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_WindDirection, &g_Cameras[0].view);
+        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
         if (g_ViewedWindAngles[0] > 2 * M_PI) {
             g_ViewedWindAngles[0] -= 2 * M_PI;
         }
@@ -2024,7 +2024,7 @@ void UpdateGame(void) {
         UpdateInsetView();
         func_8007B054();
         func_800605EC();
-        windDirection = &g_WindDirection;
+        windDirection = &g_HoleConditions.windDirection;
         g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
         g_ViewedWindAngles[1] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
         if (g_ViewedWindAngles[0] > 2 * M_PI) {

@@ -17,8 +17,6 @@ typedef struct Unk100 {
     /* 0x0D */ u8 unkD[0x100 - 0xD];
 } Unk100; /* size = 0x100 */
 
-extern s32 D_800BA9F8;
-extern s32 D_800BA9FC;
 extern Vtx g_TexturePlaneVertices[6];
 extern Vtx g_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
 extern s32 sPlaneTextureScroll;
@@ -36,7 +34,7 @@ void func_800625FC(Gfx **displayListHead);
 
 /*
  * Sets the shaded quads of g_ShadedVertices and two color globals from
- * the colors of the D_800C6014 entry that D_800BA9F8 and D_800BA9FC select
+ * the colors of the D_800C6014 entry that g_HoleConditions selects
  */
 void DeriveSceneColors(void) {
     Unk100 *entry;
@@ -45,7 +43,7 @@ void DeriveSceneColors(void) {
 
     D_800E1C10 = 0;
     D_800E1C14 = 0;
-    entry = &D_800C6014[D_800BA9F8 * 3 + D_800BA9FC];
+    entry = &D_800C6014[g_HoleConditions.isRaining * 3 + g_HoleConditions.sceneColorIndex];
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
         for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
             g_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =

@@ -32,9 +32,17 @@ extern Mtx g_ScreenEffectProjection;
 #define DISPLAY_LIST_LENGTH 14000
 extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
-/* The wind, as the ball's flight feels it. A full turn is 0x10000. */
-extern s32 g_WindSpeed;
-extern u16 g_WindDirection;
+/* The weather and light that a hole is played in */
+typedef struct HoleConditions {
+    /* 0x00 */ s32 windSpeed;      /* As the ball's flight feels it */
+    /* 0x04 */ u16 windDirection;  /* A full turn is 0x10000 */
+    /* 0x08 */ s32 isRaining;      /* Shortens shots and changes the scene's colors */
+    /* 0x0C */ u32 sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
+    /* 0x10 */ u16 unk10;
+    /* 0x12 */ u16 unk12;
+} HoleConditions; /* size = 0x14 */
+
+extern HoleConditions g_HoleConditions;
 
 /* The wind's direction as each camera sees it, in radians, for its arrow */
 extern f32 g_ViewedWindAngles[2];
