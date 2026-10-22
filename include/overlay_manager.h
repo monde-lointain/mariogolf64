@@ -5,21 +5,22 @@
 
 /*
  * The game's code outside the main segment is split into modules, each
- * identified by a number below MODULE_COUNT. A module set is an overlay:
- * one segment of the ROM holding the code and data of several modules,
- * loaded to a fixed address on demand. Sets that share an address
- * exclude one another.
+ * identified by a number below MODULE_COUNT. Modules reach memory inside
+ * overlays: segments of the ROM, each holding the code and data of several
+ * modules, that are loaded on demand to fixed addresses. Overlays whose
+ * address ranges overlap exclude one another. The first three entries of
+ * the overlay table all load segment ovl_00, each with its own state.
  *
- * Callers name a module set by its "absolute" number, the set's index
- * plus MODULE_SET_NUMBER_BASE.
+ * Callers name an overlay by its ID, which is its index in the table plus
+ * OVERLAY_ID_BASE.
  */
 
 #define MODULE_COUNT 64
-#define MODULE_SET_COUNT 17
-#define MODULE_SET_NUMBER_BASE 0x100
+#define OVERLAY_COUNT 17
+#define OVERLAY_ID_BASE 0x100
 #define MODULE_ID_END (-1)
 
-typedef struct ModuleSet {
+typedef struct Overlay {
     /* 0x00 */ s8 isLoaded;
     /* 0x04 */ s8 *moduleIds; /* Terminated by MODULE_ID_END */
     /* 0x08 */ u32 romStart;
@@ -30,19 +31,19 @@ typedef struct ModuleSet {
     /* 0x1C */ u8 *bssEnd;
     /* 0x20 */ void (*onLoad)(void);
     /* 0x24 */ void (*onUnload)(void);
-} ModuleSet; /* size = 0x28 */
+} Overlay; /* size = 0x28 */
 
-void OnLoadModuleSet2(void);
-void OnLoadModuleSet7(void);
-s32 GetModuleSetOfModule(s32 moduleId);
+void OnLoadOverlay2(void);
+void OnLoadOverlay7(void);
+s32 GetOverlayOfModule(s32 moduleId);
 void InitOverlayManager(void);
-s32 GetModuleSetIndex(s32 moduleSetNumber);
-s32 CanLoadModuleSet(s32 moduleSetNumber);
-s32 LoadModuleSet(s32 moduleSetNumber);
-void UnloadModuleSet(s32 moduleSetNumber);
+s32 GetOverlayIndex(s32 overlayId);
+s32 CanLoadOverlay(s32 overlayId);
+s32 LoadOverlay(s32 overlayId);
+void UnloadOverlay(s32 overlayId);
 s32 ReportModuleNotAlive(void);
 
-extern ModuleSet g_ModuleSets[MODULE_SET_COUNT];
+extern Overlay g_Overlays[OVERLAY_COUNT];
 extern u8 g_IsModuleAlive[MODULE_COUNT];
 extern s32 g_ModuleRdpRequestFrames[MODULE_COUNT];
 

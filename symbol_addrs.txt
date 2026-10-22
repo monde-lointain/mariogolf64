@@ -3,16 +3,16 @@ EntryPoint = 0x80025C00; // type:func
 mainproc = 0x80029C34; // type:func
 
 // Overlay manager
-OnLoadModuleSet2 = 0x80025D30; // type:func
-OnLoadModuleSet7 = 0x80025D54; // type:func
-GetModuleSetOfModule = 0x80025D78; // type:func
+OnLoadOverlay2 = 0x80025D30; // type:func
+OnLoadOverlay7 = 0x80025D54; // type:func
+GetOverlayOfModule = 0x80025D78; // type:func
 InitOverlayManager = 0x80025D8C; // type:func
-GetModuleSetIndex = 0x80025EC8; // type:func
-CanLoadModuleSet = 0x80025F18; // type:func
-LoadModuleSet = 0x800260C4; // type:func
-UnloadModuleSet = 0x80026230; // type:func
+GetOverlayIndex = 0x80025EC8; // type:func
+CanLoadOverlay = 0x80025F18; // type:func
+LoadOverlay = 0x800260C4; // type:func
+UnloadOverlay = 0x80026230; // type:func
 ReportModuleNotAlive = 0x80026358; // type:func
-g_ModuleSets = 0x800B5F58; // size:0x2A8
+g_Overlays = 0x800B5F58; // size:0x2A8
 g_IsModuleAlive = 0x800FC858; // size:0x40
 g_ModuleRdpRequestFrames = 0x8012CFC0; // size:0x100
 
