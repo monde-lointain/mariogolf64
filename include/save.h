@@ -2,6 +2,7 @@
 #define SAVE_H
 
 #include <ultra64.h>
+#include "club.h"
 
 /* Marks save data that has been written at least once */
 #define SAVE_MAGIC 0x12345678
@@ -87,8 +88,11 @@ typedef struct GameState {
 } GameState; /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
-    /* 0x00 */ s32 unk0[0x34 / 4];
+    /* 0x00 */ s32 cupPosition[3];
+    /* 0x0C */ s32 unkC[(0x34 - 0xC) / 4];
 } Unk800BA9D8; /* size = 0x34 */
+
+extern Unk800BA9D8 D_800BA9D8;
 
 typedef struct Unk800FF4D0 {
     /* 0x00 */ s32 unk0[0x1C / 4];
@@ -146,7 +150,8 @@ typedef struct UnkB8 {
     /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
     /* 0x2A */ PlayerHole holes[COURSE_HOLE_COUNT];
     /* 0x4E */ u8 unk4E[0x52 - 0x4E];
-    /* 0x52 */ s16 unk52[(0x7A - 0x52) / 2];
+    /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
+    /* 0x72 */ u8 unk72[0x7A - 0x72];
     /* 0x7A */ u8 unk7A;
     /* 0x7B */ u8 unk7B;
     /* 0x7C */ u8 unk7C[0xB8 - 0x7C];

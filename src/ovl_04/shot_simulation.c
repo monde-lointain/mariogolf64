@@ -1,5 +1,7 @@
 #include "common.h"
+#include "ball_simulation.h"
 #include "billboard.h"
+#include "club.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"
@@ -18,33 +20,6 @@
 #define STEP_FLAG_UNK40 0x40
 
 #define NO_STEP (-1)
-
-typedef struct Unk20 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-} Unk20; /* size = 0x20 */
-
-typedef struct BallSimulation {
-    /* 0x00 */ u8 unk0[0x18];
-    /* 0x18 */ s32 position[3];
-    /* 0x24 */ u8 unk24[0x8C - 0x24];
-    /* 0x8C */ s32 isRunning;
-    /* 0x90 */ u8 unk90[0xA0 - 0x90];
-    /* 0xA0 */ s8 unkA0;
-    /* 0xA1 */ u8 unkA1[2];
-    /* 0xA3 */ s8 surface;
-    /* 0xA4 */ u8 unkA4[3];
-    /* 0xA7 */ s8 unkA7;
-    /* 0xA8 */ u8 unkA8[0xB0 - 0xA8];
-    /* 0xB0 */ s8 unkB0;
-    /* 0xB1 */ u8 unkB1[0xB8 - 0xB1];
-} BallSimulation; /* size = 0xB8; the frame has room for no more */
 
 typedef struct SimulatedShot {
     /* 0x0000 */ s32 startPosition[3];
@@ -70,19 +45,9 @@ typedef struct SimulatedShot {
     /* 0x2E42 */ u8 unk2E42;
 } SimulatedShot; /* size = 0x2E44 */
 
-typedef struct Unk800448E0 {
-    /* 0x0 */ u8 unk0[5];
-    /* 0x5 */ u8 unk5;
-    /* 0x6 */ u8 unk6[2];
-    /* 0x8 */ s32 unk8;
-} Unk800448E0;
-
 extern SimulatedShot g_SimulatedShot;
 
-s32 func_8003327C(BallSimulation *simulation);
-Unk800448E0 *func_80037E50(Unk800448E0 *, s32, s32, s32);
-void func_80037F94(BallSimulation *simulation, s32, Unk20 *shot);
-Unk800448E0 *func_800448E0(s32);
+Club *func_80037E50(Club *, s32, s32, s32);
 
 /* Simulates the shot from the ball's position and records its path */
 void SimulateShot(Unk20 *shot) {
@@ -117,10 +82,11 @@ void SimulateShot(Unk20 *shot) {
     simulation->surface = g_CurrentShot.surface;
     hasUnk1Flag = FALSE;
     hasUnk40Flag = FALSE;
-    g_SimulatedShot.unk2E0C = func_800448E0(shot->unk4)->unk8 & 1;
-    g_SimulatedShot.unk2E14 = shot->unkC == 0 && shot->unk8 >= 0x100 && !(func_800448E0(shot->unk4)->unk8 & 1);
+    g_SimulatedShot.unk2E0C = GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
+    g_SimulatedShot.unk2E14 =
+        shot->unkC == 0 && shot->unk8 >= 0x100 && !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
     g_SimulatedShot.unk2E42 =
-        func_80037E50(func_800448E0(g_Players[g_CurrentShot.playerIndex].unk52[g_CurrentShot.clubSlot]), g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
+        func_80037E50(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]), g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
             ->unk5;
     func_80037F94(simulation, 2, shot);
     g_SimulatedShot.unk2E08 = g_ShowsBillboardsAtEdge || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;

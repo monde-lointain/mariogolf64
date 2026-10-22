@@ -22,7 +22,6 @@ void InitTerrainTextures(void);
 void InitExpansionPakFeatures(void);
 void ResetLoaderThread(void);
 void InitEffectTable(void);
-void LoadCourseObjects(void);
 void StartGame(void);
 void UpdateGame(void);
 s32 DrawGame(void);

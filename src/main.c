@@ -1,4 +1,5 @@
 #include "common.h"
+#include "club.h"
 #include "controller.h"
 #include "game_flags.h"
 #include "functions.h"
@@ -259,7 +260,7 @@ void mainproc(void *arg) {
     InitEffectTable();
     ResetCharacterSlots();
     AssignCharacterBuffers();
-    LoadCourseObjects();
+    InitClubs();
 
     g_MainLoopState = MAIN_LOOP_START;
     while (TRUE) {

@@ -2,6 +2,7 @@
 #include <lib/libnusys/nusys.h>
 #include "game_flags.h"
 #include "asset.h"
+#include "club.h"
 #include "course.h"
 #include "heap.h"
 #include "host_file.h"
@@ -61,16 +62,6 @@ typedef struct Unk800FF1E8 {
     /* 0x1A */ u8 unk1A[0x8C - 0x1A];
 } Unk800FF1E8; /* size = 0x8C */
 
-typedef struct Unk2D8 {
-    /* 0x000 */ u8 unk0[4];
-    /* 0x004 */ s16 unk4;
-    /* 0x006 */ u8 unk6[4];
-    /* 0x00A */ s16 unkA;
-    /* 0x00C */ u8 unkC[0x1E - 0xC];
-    /* 0x01E */ s16 unk1E;
-    /* 0x020 */ u8 unk20[0x2D8 - 0x20];
-} Unk2D8; /* size = 0x2D8 */
-
 typedef struct Unk800C2B90 {
     /* 0x0 */ s16 unk0;
     /* 0x2 */ s16 column;
@@ -79,7 +70,6 @@ typedef struct Unk800C2B90 {
 } Unk800C2B90; /* size = 0x8 */
 
 extern Unk800FF1E8 D_800FF1E8[IMPORTED_CHARACTER_COUNT];
-extern Unk2D8 D_800BB260[];
 extern Unk800C2B90 D_800C2B90[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800C2AA8[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 /* The imported characters that debug flag 0x54 adds */
@@ -103,7 +93,6 @@ extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
 extern GameState D_801B55F0;
-extern Unk800BA9D8 D_800BA9D8;
 extern Unk800FF4D0 D_800FF4D0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
@@ -1139,14 +1128,14 @@ void func_8005CA48(void) {
                 g_ImportedCharacters[index].unk2 = D_800C2B48[index];
                 g_ImportedCharacters[index].unk4 = D_800C2B50[index];
                 g_ImportedCharacters[index].unk6 = D_800C2B58[index];
-                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk4 = D_800C2B48[index];
-                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unkA = D_800C2B50[index];
-                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk1E = D_800C2B58[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance = D_800C2B48[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12 = D_800C2B50[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26 = D_800C2B58[index];
             } else {
                 g_ImportedCharacters[index].character = D_800FF1E8[index].unk19 + FIRST_IMPORTED_CHARACTER;
-                g_ImportedCharacters[index].unk2 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk4;
-                g_ImportedCharacters[index].unk4 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unkA;
-                g_ImportedCharacters[index].unk6 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk1E;
+                g_ImportedCharacters[index].unk2 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance;
+                g_ImportedCharacters[index].unk4 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12;
+                g_ImportedCharacters[index].unk6 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26;
             }
         }
     }
