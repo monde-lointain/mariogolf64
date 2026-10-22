@@ -110,7 +110,7 @@ segments:
       - [0x4C770, asm]
       - [0x51900, asm]
       - [0x526B0, c, curve]
-      - [0x52FF0, asm]
+      - [0x52FF0, c, burst]
       - [0x53D10, asm]
       - [0x5B620, asm]
       - [0x68500, asm]
