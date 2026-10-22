@@ -2,6 +2,7 @@
 #include "course.h"
 #include "save.h"
 #include "scene.h"
+#include "tournament.h"
 
 /* Counts in the save stop here */
 #define MAX_SAVED_COUNT 99
@@ -10,27 +11,15 @@
 #define WIN_COUNT_MASK 0x7F
 #define UNKAF0_FLAG 0x80
 
-#define TOURNAMENT_CONTESTANT_COUNT 30
-/* The contestant entry whose unk0 holds this is taken to be the player's */
-#define PLAYER_CONTESTANT (-1)
 /* Any place past third, which no flag records */
 #define PLACE_UNPLACED 4
-#define PLACE_MASK 0x7F
-
-typedef struct Unk801B7118 {
-    /* 0x0 */ s8 unk0;
-    /* 0x1 */ u8 unk1[4];
-    /* 0x5 */ u8 unk5; /* PLACE_MASK holds the place */
-} Unk801B7118; /* size = 0x6 */
 
 extern s8 D_801B60C5;
 extern s32 D_801B60B4;
-extern Unk801B7118 D_801B7118[TOURNAMENT_CONTESTANT_COUNT];
 
 void TransferSaveData(SaveData *save, u8 isWrite);
 s32 func_80052220(void);
 s32 func_8006CD50(s32, s32);
-void func_800680FC(s32, s32, s32, s32);
 void func_8007FE44(s32 badgeCount);
 
 /*
@@ -114,17 +103,17 @@ void RecordTournamentPlace(void) {
     s32 hasPlace;
     s32 place;
     s32 index;
-    Unk801B7118 *entry;
+    TournamentStanding *standing;
 
     stats = &GetSaveData()->unkE98[g_CourseIndex];
     hasPlace = FALSE;
     if (g_GameMode == GAME_MODE_TOURNAMENT) {
-        func_800680FC(func_80052220() + 1, 0, func_8006CD50(func_80052220() + 1, 0), D_801B60B4);
+        RankTournament(func_80052220() + 1, 0, func_8006CD50(func_80052220() + 1, 0), D_801B60B4);
         place = PLACE_UNPLACED;
         for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
-            entry = &D_801B7118[index];
-            if (entry->unk0 == PLAYER_CONTESTANT) {
-                place = entry->unk5 & PLACE_MASK;
+            standing = &g_TournamentStandings[index];
+            if (standing->contestantId == PLAYER_CONTESTANT) {
+                place = standing->place & PLACE_MASK;
                 break;
             }
         }

@@ -180,6 +180,9 @@ typedef struct SaveCopyLocation {
 
 extern SaveData g_SaveData;
 
+/* The current game's, which a saved game is loaded into and stored from */
+extern UnkB8 g_Players[MAX_PLAYER_COUNT];
+
 SaveData *GetSaveData(void);
 void ResetSaveData(void);
 void InitSaveData(void);

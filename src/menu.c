@@ -105,7 +105,6 @@ extern Unk801B6088 D_801B55F0;
 extern Unk800BA9D8 D_800BA9D8;
 extern Unk800FF4D0 D_800FF4D0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
-extern UnkB8 D_801B71D0[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
@@ -685,7 +684,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
         playerCount = D_801B6088.playerCount;
         game->isValid = FALSE;
         for (index = 0; index < playerCount; index++) {
-            players[index] = D_801B71D0[index];
+            players[index] = g_Players[index];
             switch (players[index].unkC) {
                 case PLAYER_STATE_UNK0:
                 case PLAYER_STATE_UNK2:
@@ -718,7 +717,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
         }
         playerCount = game->unk3C.playerCount;
         for (index = 0; index < playerCount; index++) {
-            D_801B71D0[index] = players[index];
+            g_Players[index] = players[index];
             D_800FEDD8[index] = records[index];
         }
         D_801B6088 = game->unk3C;
@@ -787,7 +786,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
             }
             playerCount = game->unk3C.playerCount;
             for (index = 0; index < playerCount; index++) {
-                D_801B71D0[index] = players[index];
+                g_Players[index] = players[index];
             }
             D_801B6088 = game->unk3C;
             D_801B6088.unk0 = 1;
