@@ -33,6 +33,8 @@ extern u8 *sHeapStart;
 extern u8 *sHeapEnd;
 extern u16 sDrawOrder[BILLBOARD_COUNT];
 extern s8 g_ShowsBillboardsAtEdge;
+extern u16 g_LightYaw;
+extern u16 g_LightPitch;
 s32 GetGroundHeight(s32 x, s32 z);
 s32 GetViewDepth(f32 x, f32 y, f32 z);
 
@@ -57,6 +59,16 @@ s32 GetViewDepth(f32 x, f32 y, f32 z);
 
 /* The least opacity of a billboard close to the camera */
 #define NEAR_BILLBOARD_ALPHA_MIN 0x80
+
+/* Billboards are only lit from a light at least this high */
+#define LIGHT_HEIGHT_MIN 0.1f
+
+/* Converts binary angles, where 0x10000 is a turn, to radians */
+#define BINARY_ANGLE_TO_RADIANS (3.1415927f / 32768.0f)
+
+/* In the debug view, near billboards this close in front of the ball are
+   not drawn */
+#define BALL_CLEARANCE_DEPTH 100
 
 /* Depth of unused billboards, behind every used one */
 #define VIEW_DEPTH_FAR 0x40000000
@@ -194,7 +206,190 @@ void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *trans
     *gfxPtr = gfx;
 }
 
+#ifdef NON_MATCHING
+/*
+ * Draws the billboards. Those far from the camera are drawn first, from
+ * the nearest to the farthest; DrawFadingBillboards draws the close ones
+ * that need to stay see-through. Here, the close ones are only drawn when
+ * they stay opaque.
+ */
+void DrawBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
+    Gfx *gfx = g_DisplayListHead;
+    s32 lightColor[3] = { 255, 220, 160 };
+    s32 envColor[3] = { 128, 64, 32 };
+    f32 viewDir[3];
+    f32 lightDir[3];
+    f32 unusedVector[3];
+    f32 lightPitch;
+    f32 lightYaw;
+    f32 alignment;
+    f32 lightHeight;
+    f32 leftAlignment;
+    f32 rightAlignment;
+    s32 ballDepth;
+    s32 orderIndex;
+    s32 billboardIndex;
+
+    if (IsDebugFlagSet(DEBUG_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady) {
+        return;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, envColor[0], envColor[1], envColor[2], 0x20);
+
+    lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
+    lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+    viewDir[0] = g_Cameras[0].lookAt[0] - g_Cameras[0].eye[0];
+    viewDir[1] = 0.0f;
+    viewDir[2] = g_Cameras[0].lookAt[2] - g_Cameras[0].eye[2];
+    lightDir[0] = cosf(lightPitch) * cosf(lightYaw);
+    lightDir[2] = cosf(lightPitch) * sinf(lightYaw);
+    lightDir[1] = sinf(lightPitch);
+    if ((f32)fabs(viewDir[0]) + (f32)fabs(viewDir[2]) >= 1.0f) {
+        guNormalize(&viewDir[0], &viewDir[1], &viewDir[2]);
+        guNormalize(&lightDir[0], &lightDir[1], &lightDir[2]);
+        alignment = viewDir[0] * lightDir[0] + viewDir[2] * lightDir[2];
+        lightHeight = cosf(lightPitch);
+        if (lightHeight >= LIGHT_HEIGHT_MIN) {
+            leftAlignment = alignment;
+            if (leftAlignment > lightHeight) {
+                leftAlignment = lightHeight;
+            }
+            if (leftAlignment < -lightHeight) {
+                leftAlignment = -lightHeight;
+            }
+            rightAlignment = alignment;
+            if (rightAlignment > lightHeight) {
+                rightAlignment = lightHeight;
+            }
+            if (rightAlignment < -lightHeight) {
+                rightAlignment = -lightHeight;
+            }
+            sBillboardVertices[0][0].v.cn[0] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][0].v.cn[1] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][0].v.cn[2] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][1].v.cn[0] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][1].v.cn[1] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][1].v.cn[2] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+            sBillboardVertices[0][2].v.cn[0] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+            sBillboardVertices[0][2].v.cn[1] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+            sBillboardVertices[0][2].v.cn[2] = (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+            sBillboardVertices[0][3].v.cn[0] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+            sBillboardVertices[0][3].v.cn[1] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+            sBillboardVertices[0][3].v.cn[2] = (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+        }
+    }
+
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+
+    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+        ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
+                                 g_BallPosition[2] * POSITION_TO_FLOAT);
+        if (ballDepth > 0) {
+            ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+        }
+    } else {
+        ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+    }
+    SortBillboardsByDepth();
+
+    sLoadedTextureIndex = -1;
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
+        s32 textureIndex;
+
+        billboardIndex = sDrawOrder[orderIndex];
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+        if (textureIndex < 0) {
+            continue;
+        }
+        if (g_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
+            DrawBillboard(&gfx, &g_Billboards[billboardIndex], &g_BillboardTransforms[billboardIndex], textureIndex,
+                          cameraMatrices);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL
+                                                  | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x3F);
+    for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
+        s32 textureIndex;
+        s32 viewDepth;
+        s32 alpha;
+
+        billboardIndex = sDrawOrder[orderIndex];
+        if (g_Billboards[billboardIndex].isNearCourseEdge) {
+            continue;
+        }
+        textureIndex = g_Billboards[billboardIndex].textureIndex;
+        if (textureIndex < 0) {
+            continue;
+        }
+        viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
+        if (viewDepth < VIEW_DEPTH_NEAR) {
+            continue;
+        }
+        if (viewDepth >= 0) {
+            continue;
+        }
+        alpha = -viewDepth;
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
+            alpha = NEAR_BILLBOARD_ALPHA_MIN;
+        }
+        if (viewDepth < ballDepth) {
+            alpha = 0xFF;
+        }
+        if (IsDebugBButtonView() && g_BillboardTransforms[billboardIndex].viewDepth > ballDepth - BALL_CLEARANCE_DEPTH) {
+            continue;
+        }
+        if (alpha < 0xFF) {
+            continue;
+        }
+        DrawBillboard(&gfx, &g_Billboards[billboardIndex], &g_BillboardTransforms[billboardIndex], textureIndex,
+                      cameraMatrices);
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
+#endif
 
 /*
  * Draws the billboards close to the camera, translucent so that the camera
@@ -238,9 +433,13 @@ void DrawFadingBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
     gDPSetAlphaDither(gfx++, G_AD_PATTERN);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
 
-    if (g_Cameras[cameraIndex].mode != CAMERA_MODE_BEHIND_GOLFER
-        || (ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
-                                     g_BallPosition[2] * POSITION_TO_FLOAT)) > 0) {
+    if (g_Cameras[cameraIndex].mode == CAMERA_MODE_BEHIND_GOLFER) {
+        ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
+                                 g_BallPosition[2] * POSITION_TO_FLOAT);
+        if (ballDepth > 0) {
+            ballDepth = VIEW_DEPTH_BALL_HIDDEN;
+        }
+    } else {
         ballDepth = VIEW_DEPTH_BALL_HIDDEN;
     }
 
