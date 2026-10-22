@@ -13,12 +13,15 @@ fraction of equal words) and whether it matches exactly. With -v, also
 prints the instructions that differ.
 """
 
+import atexit
 import difflib
 import os
 import re
 import subprocess
 import sys
+import shutil
 import tempfile
+import threading
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
@@ -72,15 +75,39 @@ def read_target_functions(asm_path):
     return functions
 
 
+_work_dir = None
+_work_dir_lock = threading.Lock()
+
+
+def get_work_dir():
+    """Returns a directory in /tmp that mirrors the repo through symlinks.
+
+    The KMC assembler writes its temporary files to the current directory
+    and fsyncs them. Concurrent fsyncs on the repo's disk wait on each
+    other, which made parallel compiles slower than serial ones, so the
+    compiler runs from here, where the files stay in memory.
+    """
+    global _work_dir
+    with _work_dir_lock:
+        if _work_dir is None:
+            work_dir = tempfile.mkdtemp(prefix="fncompare-")
+            atexit.register(shutil.rmtree, work_dir, True)
+            for entry in os.listdir(ROOT):
+                os.symlink(os.path.join(ROOT, entry), os.path.join(work_dir, entry))
+            _work_dir = work_dir
+    return _work_dir
+
+
 def compile_functions(c_path):
     """Compiles C_PATH; returns ({name: [masked words]}, error text)."""
+    c_path = os.path.abspath(c_path)
     with tempfile.TemporaryDirectory() as tmp:
         obj_path = os.path.join(tmp, "out.o")
         env = dict(os.environ, COMPILER_PATH=KMC_DIR)
         result = subprocess.run(
             [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *INCLUDES, *DEFINES,
              "-o", obj_path, c_path],
-            cwd=ROOT, env=env, capture_output=True, text=True)
+            cwd=get_work_dir(), env=env, capture_output=True, text=True)
         if result.returncode != 0:
             return None, result.stderr
         with open(obj_path, "rb") as obj_file:
