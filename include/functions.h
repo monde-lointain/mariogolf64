@@ -65,14 +65,6 @@ void func_801F4E70_ovl_13(void);
 void func_801F4B9C_ovl_14(void);
 void func_801F4E54_ovl_14(void);
 
-/*
- * From NuSystem. Its own header has CRLF line endings, which only the
- * library build converts, so game code declares what it uses here.
- */
-#define NU_GFX_UCODE_F3DEX 0
-#define NU_SC_SWAPBUFFER 0x0001
-void nuGfxTaskStart(Gfx *gfxList_ptr, u32 gfxListSize, u32 ucode, u32 flag);
-
 /* RCP setup, in the file at 0xDCE0 */
 #define BUFFER_CLEAR_DEPTH_ONLY 0 /* Clears the depth buffer and keeps the frame */
 #define BUFFER_CLEAR_BY_LINE 1    /* Also fills the frame black, a line at a time */

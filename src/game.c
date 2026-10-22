@@ -1,6 +1,7 @@
 #include "common.h"
 #include "camera.h"
 #include "functions.h"
+#include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
 #include "scene.h"
 #include "variables.h"
