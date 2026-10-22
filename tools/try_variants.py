@@ -6,14 +6,32 @@
 VARIANTS_FILE holds blocks separated by lines of "====". Each block is the
 text to replace, a line of "----", and the replacement. Prints the score of
 each variant, so that several guesses cost one compile each.
+
+The target assembly is read once, and the variants compile in parallel,
+one per CPU, since each compile is an independent process.
 """
 
 import os
-import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import fncompare
+
+
+def score_variant(source, c_dir, target, function):
+    with tempfile.NamedTemporaryFile("w", suffix=".c", dir=c_dir, delete=False) as variant:
+        variant.write(source)
+    try:
+        compiled, error = fncompare.compile_functions(variant.name)
+    finally:
+        os.remove(variant.name)
+    if compiled is None:
+        return error.strip()[-300:]
+    if function not in compiled:
+        return f"{function} missing"
+    value = fncompare.score(target, compiled[function])
+    return f"{function} {value:.3f} {'OK' if value == 1.0 else ''}".rstrip()
 
 
 def main():
@@ -22,17 +40,19 @@ def main():
         source = c_file.read()
     with open(variants_path) as variants_file:
         blocks = variants_file.read().split("\n====\n")
-    for number, block in enumerate(blocks):
-        old, new = block.split("\n----\n")
-        if old not in source:
-            print(f"{number}: text not found")
-            continue
-        with tempfile.NamedTemporaryFile("w", suffix=".c", dir=os.path.dirname(c_path), delete=False) as variant:
-            variant.write(source.replace(old, new, 1))
-        result = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "fncompare.py"), asm_path, variant.name, function],
-                                capture_output=True, text=True, cwd=ROOT)
-        os.remove(variant.name)
-        print(f"{number}: {result.stdout.strip() or result.stderr.strip()[-300:]}")
+    target = fncompare.read_target_functions(asm_path)[function]
+    c_dir = os.path.dirname(os.path.abspath(c_path))
+
+    with ThreadPoolExecutor(max_workers=os.cpu_count()) as pool:
+        results = []
+        for block in blocks:
+            old, new = block.split("\n----\n")
+            if old not in source:
+                results.append(None)
+            else:
+                results.append(pool.submit(score_variant, source.replace(old, new, 1), c_dir, target, function))
+        for number, result in enumerate(results):
+            print(f"{number}: {result.result() if result else 'text not found'}")
 
 
 if __name__ == "__main__":
