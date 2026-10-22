@@ -477,7 +477,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
     if (nuScPreNMIFlag & NU_SC_PRENMI_GET) {
         sIsOddRetrace ^= 1;
         if (!sIsOddRetrace) {
-            DrawBlankFrame();
+            DrawResetFade();
         }
         return;
     }

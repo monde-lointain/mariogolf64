@@ -30,7 +30,7 @@ void LoadCourseObjects(void);
 void StartGame(void);
 void UpdateGame(void);
 void DrawGame(void);
-void DrawBlankFrame(void);
+void DrawResetFade(void);
 void UpdateOverlays(void);
 
 /* The development debugger's entry, outside the game's code */
@@ -64,6 +64,21 @@ void func_801F4E70_ovl_13(void);
 /* ovl_14 */
 void func_801F4B9C_ovl_14(void);
 void func_801F4E54_ovl_14(void);
+
+/*
+ * From NuSystem. Its own header has CRLF line endings, which only the
+ * library build converts, so game code declares what it uses here.
+ */
+#define NU_GFX_UCODE_F3DEX 0
+#define NU_SC_SWAPBUFFER 0x0001
+void nuGfxTaskStart(Gfx *gfxList_ptr, u32 gfxListSize, u32 ucode, u32 flag);
+
+/* RCP setup, in the file at 0xDCE0 */
+#define BUFFER_CLEAR_DEPTH_ONLY 0 /* Clears the depth buffer and keeps the frame */
+#define BUFFER_CLEAR_BY_LINE 1    /* Also fills the frame black, a line at a time */
+#define BUFFER_CLEAR_WHOLE 2      /* Also fills the frame black at once */
+void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead);
+void AppendBufferClear(s32 clearMode, Gfx **displayListHead);
 
 void BuildTransformMatrix(f32 matrix[4][4], f32 *rotation, f32 *translation, f32 *scale);
 void ConvertMatrixToFixed(f32 matrix[4][4], Mtx *fixedMatrix);

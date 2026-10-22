@@ -34,4 +34,8 @@ extern s32 g_DrawBufferIndex;
 /* A 45-degree perspective projection for the screen effects */
 extern Mtx g_ScreenEffectProjection;
 
+/* The display lists, one per draw buffer */
+#define DISPLAY_LIST_LENGTH 14000
+extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
+
 #endif

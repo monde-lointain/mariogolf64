@@ -38,6 +38,13 @@ extern Mtx sSpinMatrices[];
 
 extern f32 sSpinAngle; /* In radians */
 
+/* The frame CopyPreviousFrame copies, and the one shown last */
+extern u16 *sCopySourceFrame;
+extern u16 *sPreviousFrame;
+
+/* When the last graphics task started, in microseconds */
+extern u32 sGfxTaskStartTime;
+
 extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
@@ -78,6 +85,8 @@ extern s32 sHasUnloadedSubModule;
 #define SPIN_MESH_DISTANCE -290.0f
 #define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
     (((batchIndex) == SPIN_BATCH_COUNT - 1) & ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))
+
+#define RESET_FADE_ALPHA 0x40
 
 /* sScreenEffect values */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
@@ -491,9 +500,94 @@ INCLUDE_ASM("asm/nonmatchings/game", func_8002DAC0);
 
 INCLUDE_ASM("asm/nonmatchings/game", DrawGame);
 
-INCLUDE_ASM("asm/nonmatchings/game", func_80031450);
+/*
+ * Copies the frame shown last onto the frame being drawn, so a frame can be
+ * built over the previous one without redrawing the scene
+ */
+void CopyPreviousFrame(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s16 stripHeight;
 
-INCLUDE_ASM("asm/nonmatchings/game", DrawBlankFrame);
+    if (sCopySourceFrame == NULL) {
+        sCopySourceFrame = osViGetNextFramebuffer();
+    } else {
+        sCopySourceFrame = sPreviousFrame;
+    }
+    sPreviousFrame = nuGfxCfb_ptr;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != SAVED_FRAME_STRIP_COUNT; stripIndex++) {
+        stripHeight = (stripIndex == SAVED_FRAME_STRIP_COUNT - 1) ? SAVED_FRAME_LAST_STRIP_HEIGHT
+                                                                  : SAVED_FRAME_STRIP_HEIGHT;
+        gDPLoadTextureTile(gfx++, (u32)(sCopySourceFrame + stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) & ~7,
+                           G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER, SCREEN_BORDER,
+                           SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_BORDER + stripHeight - 1, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+                                (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
+                                (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight - 1) << 2,
+                                G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/*
+ * Darkens the last frame while the reset button is held. Each frame lays a
+ * translucent dark blue over the one before, so the screen fades out.
+ */
+void DrawResetFade(void) {
+    Gfx *gfx;
+    Gfx *displayList;
+    s32 passIndex;
+
+    displayList = gfx = g_DisplayLists[g_DrawBufferIndex];
+    /* The original builds the frame in a loop that runs once */
+    for (passIndex = 0; passIndex != 1; passIndex++) {
+        AppendRcpInit(g_DrawBufferIndex, &gfx);
+        AppendBufferClear(BUFFER_CLEAR_DEPTH_ONLY, &gfx);
+        gDPPipeSync(gfx++);
+        gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        CopyPreviousFrame(&gfx);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 0x00, 0x00, 0x10, RESET_FADE_ALPHA);
+        gDPSetCombineLERP(gfx++, 1, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, 1, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gSPTextureRectangle(gfx++, 0, 0, SCREEN_WIDTH << 2, SCREEN_HEIGHT << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                            1 << 10);
+        gDPFullSync(gfx++);
+        gSPEndDisplayList(gfx++);
+        nuGfxTaskStart(displayList, (s32)(gfx - displayList) * sizeof(Gfx), NU_GFX_UCODE_F3DEX, NU_SC_SWAPBUFFER);
+        sGfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
+    }
+    g_DrawBufferIndex ^= 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game", UpdateGame);
 
