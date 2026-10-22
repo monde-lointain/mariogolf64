@@ -32,7 +32,6 @@ extern s8 sIsHeapReady;
 extern u8 *sHeapStart;
 extern u8 *sHeapEnd;
 extern u16 sDrawOrder[BILLBOARD_COUNT];
-extern s8 g_ShowsBillboardsAtEdge;
 extern u16 g_LightYaw;
 extern u16 g_LightPitch;
 s32 GetGroundHeight(s32 x, s32 z);
