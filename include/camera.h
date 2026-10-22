@@ -37,10 +37,17 @@ extern Camera g_Cameras[];
 
 /* The matrices that DrawGame builds for one camera in one frame */
 typedef struct CameraMatrices {
-    /* 0x000 */ u8 unk0[0x1C0];
-    /* 0x1C0 */ Mtx projection;
-    /* 0x200 */ u8 unk200[0x50];
-} CameraMatrices; /* size = 0x250 */
+    /* 0x000 */ Mtx perspective;
+    /* 0x040 */ Mtx viewing;
+    /* 0x080 */ Mtx placement;     /* Between the projection and the view */
+    /* 0x0C0 */ Mtx billboard;     /* Turns billboards to face the camera */
+    /* 0x100 */ Mtx antiBillboard; /* The opposite turn */
+    /* 0x140 */ f32 perspectiveF[4][4];
+    /* 0x180 */ f32 viewingF[4][4];
+    /* 0x1C0 */ Mtx projection; /* perspectiveF and viewingF combined */
+    /* 0x200 */ LookAt lookAt;
+    /* 0x220 */ u8 unk220[0x10];
+} CameraMatrices; /* size = 0x230 */
 
 /* The camera of the inset view, a window over the main view */
 #define INSET_CAMERA 1

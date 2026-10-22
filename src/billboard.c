@@ -168,7 +168,7 @@ void SortBillboardsByDepth(void) {
 }
 
 void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *transform, s32 textureIndex,
-                   Mtx *cameraMatrices) {
+                   CameraMatrices *cameraMatrices) {
     Gfx *gfx = *gfxPtr;
     AssetFile file;
     s32 texelSize;
@@ -195,7 +195,7 @@ void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *trans
                           0, 0, 0, 0, COMBINED);
     }
     gSPMatrix(gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPMatrix(gfx++, &cameraMatrices[3], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &cameraMatrices->billboard, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gSPMatrix(gfx++, &transform->scale, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
     gDPPipeSync(gfx++);
     gSPVertex(gfx++, sBillboardVertices[billboard->shapeIndex], 4, 0);
@@ -213,7 +213,7 @@ void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *trans
  * that need to stay see-through. Here, the close ones are only drawn when
  * they stay opaque.
  */
-void DrawBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
+void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     s32 lightColor[3] = { 255, 220, 160 };
     s32 envColor[3] = { 128, 64, 32 };
@@ -397,7 +397,7 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  * than the ball stay opaque.
  */
 #ifdef NON_MATCHING
-void DrawFadingBillboards(Mtx *cameraMatrices, s32 cameraIndex) {
+void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     s32 lightColor[3] = { 255, 220, 160 };
     s32 envColor[3] = { 128, 64, 32 };
