@@ -25,14 +25,23 @@
 #define SAVE_READ_FIRST_COPY 1
 #define SAVE_READ_SECOND_COPY 2
 
+#define COURSE_COUNT 6
+#define COURSE_HOLE_COUNT 18
+#define RING_SHOT_COURSE_COUNT 6
+#define RING_SHOT_HOLE_COUNT 6
+
 typedef struct SaveData {
     /* 0x0000 */ u32 magic;
     /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
     /* 0x0008 */ u8 invertedBuildDate[0x20];   /* The writing build's date, with each bit inverted */
     /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
-    /* 0x002C */ u8 unk2C[0xDC0 - 0x2C];
+    /* 0x002C */ u8 unk2C[0xA84 - 0x2C];
+    /* 0x0A84 */ s8 hasBirdieBadge[COURSE_COUNT][COURSE_HOLE_COUNT];
+    /* 0x0AF0 */ u8 unkAF0[0xDC0 - 0xAF0];
     /* 0x0DC0 */ s32 unkDC0[6][3];
-    /* 0x0E08 */ u8 unkE08[0x2A78 - 0xE08];
+    /* 0x0E08 */ u8 unkE08[0x1320 - 0xE08];
+    /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+    /* 0x1344 */ u8 unk1344[0x2A78 - 0x1344];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */

@@ -15,6 +15,13 @@
 #define DMA_ALIGNMENT 0x10
 #define ALIGN_FOR_DMA(address) (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
+/* The records that unlock two of the characters */
+#define DONKEY_KONG_STAR_COUNT 30
+#define MAPLE_BADGE_COUNT 50
+
+/* Each Ring Shot course after the first opens after this many more stars */
+#define STARS_PER_RING_SHOT_COURSE 4
+
 /* Mirrors of the save data's options */
 extern u8 g_OptionBits;
 /* A copy of g_OptionBits, from which the music code reads OPTION_BIT_MONO */
@@ -88,15 +95,97 @@ void RecordDisplayListLength(u32 commandCount) {
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005C038);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C458);
+s32 HasEveryRingShotStar(void) {
+    SaveData *save;
+    s32 starCount;
+    s32 courseIndex;
+    s32 holeIndex;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C4B4);
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
+    }
+    return starCount == RING_SHOT_COURSE_COUNT * RING_SHOT_HOLE_COUNT;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C510);
+s32 IsDonkeyKongUnlocked(void) {
+    SaveData *save;
+    s32 starCount;
+    s32 courseIndex;
+    s32 holeIndex;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C5B4);
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
+    }
+    return starCount >= DONKEY_KONG_STAR_COUNT;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C614);
+/* The Ring Shot course that opens at exactly the stars earned so far, or 0 for none */
+s32 GetRingShotCourseOpenedAtStarCount(void) {
+    SaveData *save;
+    s32 starCount;
+    s32 courseIndex;
+    s32 holeIndex;
+
+    save = GetSaveData();
+    starCount = 0;
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
+        }
+    }
+    if (starCount == STARS_PER_RING_SHOT_COURSE * 1) {
+        return 1;
+    } else if (starCount == STARS_PER_RING_SHOT_COURSE * 2) {
+        return 2;
+    } else if (starCount == STARS_PER_RING_SHOT_COURSE * 3) {
+        return 3;
+    } else if (starCount == STARS_PER_RING_SHOT_COURSE * 4) {
+        return 4;
+    } else if (starCount == STARS_PER_RING_SHOT_COURSE * 5) {
+        return 5;
+    }
+    return 0;
+}
+
+s32 IsMapleUnlocked(void) {
+    SaveData *save;
+    s32 badgeCount;
+    s32 courseIndex;
+    s32 holeIndex;
+
+    save = GetSaveData();
+    badgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+            badgeCount += save->hasBirdieBadge[courseIndex][holeIndex] != FALSE;
+        }
+    }
+    return badgeCount >= MAPLE_BADGE_COUNT;
+}
+
+s32 IsMetalMarioUnlocked(void) {
+    SaveData *save;
+    s32 badgeCount;
+    s32 courseIndex;
+    s32 holeIndex;
+
+    save = GetSaveData();
+    badgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+            badgeCount += save->hasBirdieBadge[courseIndex][holeIndex] != FALSE;
+        }
+    }
+    return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005C674);
 
