@@ -183,9 +183,6 @@ extern s32 sHasUnloadedSubModule;
 #define HORIZON_ROW_SPACING 7
 #define HORIZON_STRIP_BOTTOM 224
 
-/* The texture memory that the second texture of a two-texture blend uses */
-#define SECOND_TEXTURE_TMEM 0x100
-
 /* sScreenEffect values */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
 #define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */

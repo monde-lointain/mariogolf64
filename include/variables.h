@@ -54,6 +54,9 @@ extern u16 g_MirrorTexture[];  /* Part of the frame, upside down */
 extern u16 g_FlameTexture[];   /* Noise scrolling over a flame gradient */
 extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
 
+/* The texture memory that the second texture of a two-texture blend uses */
+#define SECOND_TEXTURE_TMEM 0x100
+
 /* The loaded textures that g_BlendedTexture blends, after 8-byte headers */
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
