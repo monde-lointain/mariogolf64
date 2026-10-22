@@ -12,6 +12,14 @@
 #define SAVED_GAME_COUNT 3
 #define MAX_PLAYER_COUNT 4
 
+/*
+ * The games kept for continuing by game mode rather than by slot, and the
+ * players and records kept with them
+ */
+#define MODE_GAME_COUNT 3
+#define MODE_PLAYER_COUNT 7
+#define MODE_RECORD_COUNT 6
+
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
@@ -106,7 +114,11 @@ typedef struct SaveData {
     /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
     /* 0x0008 */ u8 invertedBuildDate[0x20];   /* The writing build's date, with each bit inverted */
     /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
-    /* 0x002C */ u8 unk2C[0xA84 - 0x2C];
+    /* 0x002C */ u8 unk2C[0x38 - 0x2C];
+    /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
+    /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
+    /* 0x0720 */ Unk68 modeRecords[MODE_RECORD_COUNT];
+    /* 0x0990 */ u8 unk990[0xA84 - 0x990];
     /* 0x0A84 */ s8 hasBirdieBadge[COURSE_COUNT][COURSE_HOLE_COUNT];
     /* 0x0AF0 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
     /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];

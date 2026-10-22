@@ -99,19 +99,13 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
-/*
- * SaveOrContinueGame's messages, which the rodata of func_8005B7BC holds
- * until that is in C
- */
-extern char D_800D0944[]; /* "Too Many Players\n" */
-extern char D_800D0958[]; /* "Illegal PlayerState\n" */
-extern char D_800D0970[]; /* "Go Continue\n" */
 extern Unk801B6088 D_801B6088;
 extern Unk801B6088 D_801B55F0;
 extern Unk800BA9D8 D_800BA9D8;
 extern Unk800FF4D0 D_800FF4D0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern UnkB8 D_801B71D0[MAX_PLAYER_COUNT];
+extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800FF4C0;
@@ -410,8 +404,6 @@ void func_8005B28C(s32 recordIndex, Unk68 *record) {
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005B314);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B7BC);
-
 /* Player states that a saved game may hold; the first group restarts as 0 */
 #define PLAYER_STATE_UNK0 0
 #define PLAYER_STATE_UNK2 2
@@ -419,6 +411,110 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005B7BC);
 #define PLAYER_STATE_UNK17 17
 #define PLAYER_STATE_UNK20 20
 #define PLAYER_STATE_UNK21 21
+
+/*
+ * Where each game mode keeps its game in the save's mode tables. Mode 4's
+ * two records overlap mode 5's one.
+ */
+#define MODE4_GAME_INDEX 0
+#define MODE4_PLAYER_INDEX 0
+#define MODE4_RECORD_INDEX 0
+#define MODE4_PLAYER_COUNT 2
+#define MODE5_GAME_INDEX 1
+#define MODE5_PLAYER_INDEX 2
+#define MODE5_RECORD_INDEX 1
+#define MODE5_PLAYER_COUNT 1
+#define MODE0_GAME_INDEX 2
+#define MODE0_PLAYER_INDEX 3
+#define MODE0_RECORD_INDEX 2
+#define MODE0_PLAYER_COUNT 4
+
+s32 SaveOrContinueGameByMode(s32 isContinuing) {
+    UnkB8 *players;
+    Unk68 *records;
+    SavedGame *game;
+    s32 playerCount;
+    s32 hasIllegalState;
+    s32 index;
+
+    playerCount = 0;
+    switch (g_GameMode) {
+        case 0:
+        case 6:
+        case 10:
+            players = &g_SaveData.modePlayers[MODE0_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE0_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE0_GAME_INDEX];
+            playerCount = MODE0_PLAYER_COUNT;
+            break;
+        case 5:
+            players = &g_SaveData.modePlayers[MODE5_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE5_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE5_GAME_INDEX];
+            osSyncPrintf("Record/Play -Tour-/\n");
+            playerCount = MODE5_PLAYER_COUNT;
+            break;
+        case 4:
+            players = &g_SaveData.modePlayers[MODE4_PLAYER_INDEX];
+            records = &g_SaveData.modeRecords[MODE4_RECORD_INDEX];
+            game = &g_SaveData.modeGames[MODE4_GAME_INDEX];
+            playerCount = MODE4_PLAYER_COUNT;
+            break;
+    }
+    if (!isContinuing) {
+        hasIllegalState = FALSE;
+        if (D_801B6088.playerCount > playerCount) {
+            osSyncPrintf("Too Many Players\n");
+            return -1;
+        }
+        playerCount = D_801B6088.playerCount;
+        game->isValid = FALSE;
+        for (index = 0; index < playerCount; index++) {
+            players[index] = D_801B71D0[index];
+            switch (players[index].unkC) {
+                case PLAYER_STATE_UNK0:
+                case PLAYER_STATE_UNK2:
+                case PLAYER_STATE_UNK3:
+                case PLAYER_STATE_UNK21:
+                    players[index].unkC = PLAYER_STATE_UNK0;
+                    break;
+                default:
+                    osSyncPrintf("Illegal PlayerState\n");
+                    hasIllegalState = TRUE;
+                    break;
+                case PLAYER_STATE_UNK17:
+                case PLAYER_STATE_UNK20:
+                    break;
+            }
+            records[index] = D_800FEDD8[index];
+        }
+        game->unk3C = D_801B6088;
+        game->unk8 = D_800BA9D8;
+        if (!hasIllegalState) {
+            game->isValid = TRUE;
+            return 0;
+        }
+        return -1;
+    }
+    if (game->isValid == TRUE) {
+        if (game->unk3C.playerCount > playerCount) {
+            osSyncPrintf("Too Many Players\n");
+            return -1;
+        }
+        playerCount = game->unk3C.playerCount;
+        for (index = 0; index < playerCount; index++) {
+            D_801B71D0[index] = players[index];
+            D_800FEDD8[index] = records[index];
+        }
+        D_801B6088 = game->unk3C;
+        D_801B6088.unk0 = 1;
+        SetDebugFlag(DEBUG_FLAG_UNK1E);
+        D_800BA9D8 = game->unk8;
+    }
+    D_801B60B8 = 2;
+    osSyncPrintf("Go Continue\n");
+    return 0;
+}
 
 #define MAX_SAVE_COUNT 99
 
@@ -435,7 +531,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
     if (!isContinuing) {
         hasIllegalState = FALSE;
         if (D_801B6088.playerCount > playerCount) {
-            osSyncPrintf(D_800D0944);
+            osSyncPrintf("Too Many Players\n");
             return -1;
         }
         playerCount = D_801B6088.playerCount;
@@ -450,7 +546,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
                     players[index].unkC = PLAYER_STATE_UNK0;
                     break;
                 default:
-                    osSyncPrintf(D_800D0958);
+                    osSyncPrintf("Illegal PlayerState\n");
                     hasIllegalState = TRUE;
                     break;
                 case PLAYER_STATE_UNK17:
@@ -471,7 +567,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
     } else {
         if (game->isValid == TRUE) {
             if (game->unk3C.playerCount > playerCount) {
-                osSyncPrintf(D_800D0944);
+                osSyncPrintf("Too Many Players\n");
                 return -1;
             }
             playerCount = game->unk3C.playerCount;
@@ -485,7 +581,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
             D_800FF4D0 = game->unk80;
         }
         D_801B60B8 = 2;
-        osSyncPrintf(D_800D0970);
+        osSyncPrintf("Go Continue\n");
     }
     if (!isContinuing) {
         TransferSaveData(GetSaveData(), TRUE);
