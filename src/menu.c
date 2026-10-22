@@ -30,7 +30,61 @@ extern u8 g_SoundOptionBits;
 extern SaveCopyLocation g_SaveCopyLocations[];
 extern char g_RomBuildDate[];
 
+typedef struct Unk800FE3D8 {
+    /* 0x00 */ s16 unk0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ s16 unk4;
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ s8 unk8[12];
+    /* 0x14 */ s8 unk14;
+} Unk800FE3D8; /* size = 0x16 */
+
+extern s8 D_800C1FF4;
+extern s8 D_800C1FF5;
+extern s8 D_800C1FF6;
+extern s8 D_800C1FF7;
+extern s32 D_800C2BD0;
+extern s8 D_800C2BD4;
+extern s16 D_800FBD40;
+extern s8 D_800FBDB9;
+extern s8 D_800FBE08[4];
+extern s16 D_800FBE2C;
+extern s32 D_800FE334;
+extern s16 D_800FE33C;
+extern Unk800FE3D8 D_800FE3D8[4];
+extern s8 D_800FF4C0;
+extern s8 D_801052E8;
+extern s32 D_80105B68;
+extern s8 D_80105DC1;
+extern s8 D_80105DC2;
+extern s32 D_80105DC4;
+extern s32 D_80105DC8;
+extern s32 D_80105DCC;
+extern u8 D_8012D400[3];
+extern s32 D_8012F480;
+extern s32 D_8012F484;
+extern s32 D_8012F488;
+extern s32 D_8012F48C;
+extern u8 D_801323A0[0x49];
+extern s8 D_801323B8;
+extern s8 D_801323D0;
+extern s32 D_801B6094;
+extern s32 D_801B6098;
+extern s32 D_801B60AC;
+extern s8 D_801B60B9;
+extern s32 D_801B7070;
+extern s8 D_801B70F0;
+extern s8 D_801B70F1;
+extern s8 D_801B70F2;
+extern s8 D_801B70F3;
+extern s16 D_801B71CC;
+extern s8 D_801B9410;
+extern s32 D_801EFFA0;
+extern u8 g_MapCamera[];
+
 void *func_8005AF74(void);
+s32 func_8005D23C(void);
+void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData *save, u8 isInSram);
 s32 WriteSaveCopies(SaveData *save, u8 isInSram);
 void SyncSaveOptions(SaveData *save, s32 isWrite, s32 readResult);
@@ -45,7 +99,9 @@ SaveData *GetSaveData(void) {
     return &g_SaveData;
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005AF74);
+void *func_8005AF74(void) {
+    return D_801323A0;
+}
 
 void ResetSaveData(void) {
     SaveData *save;
@@ -197,53 +253,238 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005CF78);
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005D0D8);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D1E4);
+void func_8005D1E4(void) {
+    u8 *unk;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D218);
+    unk = func_8005AF74();
+    unk[0x2E] = D_801B6098;
+    unk[0x2F] = D_801B6094;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D23C);
+s32 func_8005D218(void) {
+    s32 value;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D248);
+    switch (D_80105DC1) {
+        case 0:
+        default:
+            value = 0;
+            break;
+        case 1:
+            value = 7;
+            break;
+    }
+    return value;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D258);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D274);
+s32 func_8005D23C(void) {
+    return D_80105DC2;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D2A0);
+s32 func_8005D248(void) {
+    return D_80105DC4 != 0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D2B8);
+s32 func_8005D258(void) {
+    s32 value;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D2E4);
+    value = D_80105DC8;
+    if (value < 0) {
+        value = 0;
+    }
+    return value + 0x16F;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D308);
+s32 func_8005D274(void) {
+    s32 value;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D334);
+    value = func_8005D23C();
+    if (value < 0) {
+        value = 0;
+    }
+    return value + 0x1EB;
+}
+
+s32 func_8005D2A0(void) {
+    s32 value;
+
+    value = D_80105DCC;
+    if (value <= 0) {
+        value = 1;
+    }
+    return value;
+}
+
+void func_8005D2B8(u8 *destination) {
+    s32 index;
+
+    for (index = 0; index != ARRAY_COUNT(D_8012D400); index++) {
+        *destination++ = D_8012D400[index];
+    }
+}
+
+s32 func_8005D2E4(void) {
+    s32 value;
+
+    switch (D_80105DC1) {
+        case 0:
+        default:
+            value = 0x9E;
+            break;
+        case 1:
+            value = 0x9D;
+            break;
+    }
+    return value;
+}
+
+
+s32 func_8005D308(void) {
+    s32 value;
+
+    if (D_80105DC2 >= 6) {
+        value = 0xC7;
+        if (D_80105DC2 >= 9) {
+            value = 0xC8;
+        }
+    } else {
+        value = D_80105DC2 + 0x1EB;
+    }
+    return value;
+}
+
+
+void func_8005D334(void) {
+    s32 index;
+    s32 byteIndex;
+
+    for (index = 0; index != ARRAY_COUNT(D_800FE3D8); index++) {
+        D_800FE3D8[index].unk0 = 0;
+        D_800FE3D8[index].unk2 = 0;
+        D_800FE3D8[index].unk4 = 0;
+        D_800FE3D8[index].unk6 = 0;
+        for (byteIndex = 0; byteIndex != ARRAY_COUNT(D_800FE3D8[index].unk8); byteIndex++) {
+            D_800FE3D8[index].unk8[byteIndex] = 0;
+        }
+        D_800FE3D8[index].unk14 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005D3B8);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D9A0);
+void func_8005D9A0(void) {
+    s8 index;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DAD4);
+    D_800C2BD0 = 6;
+    D_800FE334 = 0;
+    D_801EFFA0 = 0;
+    D_80105B68 = 0;
+    D_801B7070 = 0;
+    D_8012F480 = -1;
+    D_8012F484 = -1;
+    D_8012F488 = -1;
+    D_8012F48C = -1;
+    D_801B70F0 = 0;
+    D_801B70F1 = 0;
+    D_801B70F2 = 0;
+    D_801B70F3 = 0;
+    memset(D_801323A0, 0, sizeof(D_801323A0));
+    D_800FBD40 = 0;
+    D_801B71CC = 0;
+    D_800FBE2C = 0;
+    D_800FBDB9 = 0;
+    D_800FE33C = 0;
+    D_800FF4C0 = 0;
+    g_MapCamera[0x4C] = 0;
+    for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {
+        D_800FBE08[index] = 0;
+    }
+    D_801323B8 = 3;
+    D_801B60AC = 0;
+    D_801323D0 = 6;
+    D_801052E8 = 0;
+    D_800C2BD4 = 0;
+}
+
+void func_8005DAD4(void) {
+    D_800FE334 = 0;
+    D_801052E8 = 1;
+    D_801B9410 = 0;
+    D_800C2BD4 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005DAFC);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DC50);
+void func_8005DC50(void) {
+    func_8005D9A0();
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_800FE3D8[0].unk14 = 0;
+    D_800FE3D8[1].unk14 = 0;
+    D_800FE3D8[2].unk14 = 0;
+    D_800FE3D8[3].unk14 = 0;
+    D_800C1FF4 = -1;
+    D_800C1FF5 = -1;
+    D_800C1FF6 = -1;
+    D_800C1FF7 = -1;
+    D_801EFFA0 = 0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DCDC);
+void func_8005DCDC(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_801EFFA0 = 0x17;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DD10);
+void func_8005DD10(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_801EFFA0 = 5;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DD44);
+void func_8005DD44(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_801EFFA0 = 0x12;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DD78);
+void func_8005DD78(void) {
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_801EFFA0 = 0xD;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DDAC);
+void func_8005DDAC(void) {
+    D_800FE334 = 0;
+    D_801052E8 = 1;
+    D_800C2BD4 = 0;
+    D_801B9410 = 1;
+    D_801B60B9 = 0;
+    ClearDebugFlag(0x1E);
+    D_801EFFA0 = 0xC;
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DE00);
+s8 func_8005DE00(void) {
+    return GetSaveData()->options[SAVE_OPTION_UNK0];
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DE20);
+s8 func_8005DE20(void) {
+    return GetSaveData()->options[SAVE_OPTION_MONO];
+}
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DE40);
+s8 func_8005DE40(void) {
+    return GetSaveData()->options[SAVE_OPTION_UNK3];
+}
 
 void WriteSaveData(void) {
     TransferSaveData(GetSaveData(), TRUE);
