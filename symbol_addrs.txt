@@ -1385,3 +1385,7 @@ sHoleSeed = 0x800C3FA0; // size:0x4
 g_HasLoaderFinished = 0x800C3FA8; // size:0x4
 sLoaderThread = 0x800E1A50; // size:0x1B0
 g_MiniGolfScale = 0x80254C88; // size:0xC segment:ovl_02
+sClubHeadDistances = 0x800D04A0; // size:0x168
+sAssertionExpression = 0x800D0620; // size:0x4
+sFileName = 0x800D0624; // size:0x20
+sUnusedFrameFormat = 0x800D06F4; // size:0x18
