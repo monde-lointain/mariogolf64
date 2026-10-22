@@ -144,7 +144,48 @@ s32 GetCoursePointsNeeded(s32 courseIndex) {
     return g_CoursePointsNeeded[courseIndex];
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B0B4);
+s32 func_8005B0B4(Unk68 *record) {
+    s32 value;
+    s32 bits;
+    s32 unk2C;
+    s32 kind;
+    s32 maxValue;
+
+    bits = record->unk3A;
+    kind = bits & 0xF;
+    value = 0;
+    unk2C = record->unk2C;
+    maxValue = 0x64;
+    if (bits & 0x80) {
+        switch (kind) {
+            case 3:
+                value = 0x32;
+                if (bits & 0x40) {
+                    value = 0x3C;
+                }
+                break;
+            case 2:
+                value = 0x3C;
+                if (bits & 0x40) {
+                    value = 0x46;
+                }
+                if (unk2C < 5) {
+                    value += 0xA;
+                }
+                break;
+            case 0:
+                value = 0x5A;
+                if (unk2C < 4) {
+                    break;
+                }
+                /* fallthrough */
+            case 1:
+                value = maxValue;
+                break;
+        }
+    }
+    return value;
+}
 
 /* Fills order with the indices of values from the largest value down, keeping ties in order */
 void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
@@ -180,7 +221,10 @@ void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B28C);
+void func_8005B28C(s32 recordIndex, Unk68 *record) {
+    g_SaveData.unk1DF0[recordIndex] = *record;
+    TransferSaveData(GetSaveData(), TRUE);
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005B314);
 

@@ -30,6 +30,14 @@
 #define RING_SHOT_COURSE_COUNT 6
 #define RING_SHOT_HOLE_COUNT 6
 
+typedef struct Unk68 {
+    /* 0x00 */ s32 unk0[0x2C / 4];
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D[0x3A - 0x2D];
+    /* 0x3A */ u8 unk3A;
+    /* 0x3B */ u8 unk3B[0x68 - 0x3B];
+} Unk68; /* size = 0x68 */
+
 typedef struct SaveData {
     /* 0x0000 */ u32 magic;
     /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
@@ -43,7 +51,9 @@ typedef struct SaveData {
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
     /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
-    /* 0x15D0 */ u8 unk15D0[0x2A78 - 0x15D0];
+    /* 0x15D0 */ u8 unk15D0[0x1DF0 - 0x15D0];
+    /* 0x1DF0 */ Unk68 unk1DF0[5];
+    /* 0x1FF8 */ u8 unk1FF8[0x2A78 - 0x1FF8];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */
