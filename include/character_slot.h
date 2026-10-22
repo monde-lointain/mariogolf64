@@ -213,7 +213,7 @@ typedef struct CharacterSlot {
     /* 0x064 */ Gfx *displayList;
     /* 0x068 */ f32 unk68[UNK68_COUNT];
     /* 0x080 */ s16 unk80;
-    /* 0x082 */ s8 lighting;
+    /* 0x082 */ s8 lighting; /* A CHARACTER_LIGHTING value */
     /* 0x083 */ s8 isLooping;
     /* 0x084 */ s8 nextAnimationId; /* NO_NEXT_ANIMATION, or the one to play after this one ends */
     /* 0x085 */ s8 playsRandomTextureAnimation;
@@ -225,12 +225,21 @@ typedef struct CharacterSlot {
 
 #define NO_NEXT_ANIMATION -1
 
+/* CharacterSlot.lighting values: the lights the slot's character is drawn with */
+#define CHARACTER_LIGHTING_FIXED 0 /* Lights that don't follow the scene's light direction */
+#define CHARACTER_LIGHTING_SCENE 1 /* Lit along the scene's light direction, in the weather's colors */
+#define CHARACTER_LIGHTING_SCENE_THIRD 2 /* As above, with func_80095C10's third light when it adds one */
+#define CHARACTER_LIGHTING_BLACK 3
+
 extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];
 
 /* Display lists drawn before the characters, rebuilt by SetCharacterAlpha and SetCharacterHilite */
 extern Gfx g_CharacterRenderModeDisplayList[3];
 extern Gfx g_CharacterCombineDisplayList[2];
 extern Gfx g_CharacterHiliteDisplayList[3];
+#define ENV_COLOR_COUNT 10
+/* One env color and an end, for each of sEnvColors, at the alpha of SetCharacterAlpha */
+extern Gfx g_CharacterEnvColorDisplayLists[ENV_COLOR_COUNT][2];
 
 /* The animation state AnimateCharacterJoints works on, copied from a slot */
 extern f32 g_CurrentAnimationFrame;
@@ -244,6 +253,7 @@ extern s32 g_CharacterModelIndex;
 extern const CharacterModel g_CharacterModels[CHARACTER_MODEL_KIND_COUNT][CHARACTER_MODELS_PER_KIND];
 extern const CharacterModel g_OtherCharacterModels[OTHER_CHARACTER_MODEL_COUNT];
 
+void SetCharacterAlpha(s32 alpha);
 void AnimateCharacterJoints(u32 slotIndex);
 s32 FreeCharacterSlot(u32 slotIndex);
 s32 IsCharacterSlotBusy(u32 slotIndex);
@@ -266,5 +276,6 @@ void SetAnimationSpeed(u32 slotIndex, f32 speed);
 void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
+void DrawCharacter(u32 slotIndex);
 
 #endif

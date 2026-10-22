@@ -83,6 +83,9 @@ s32 GetGroundHeight(s32 x, s32 z);
 void func_800453E0(Vec3 position, Vec3 rotation, Vec3 scale);
 void func_800989EC(Vec3 position, Vec3 rotation, Vec3 scale);
 
+/* Sets the two lights and a third when that is enabled, returning whether it set them */
+s32 func_80095C10(Gfx **displayListHead, Lights2 *lights);
+
 /* Draws the textures the course model reads through RSP segments */
 void BuildDynamicTextures(Gfx **displayListHead);
 

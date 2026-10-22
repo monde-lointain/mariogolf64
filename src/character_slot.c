@@ -8,8 +8,6 @@
 /* How many frames a drawn slot stays busy */
 #define BUSY_FRAME_COUNT 2
 
-#define ENV_COLOR_COUNT 10
-
 /* Like G_RM_AA_ZB_XLU_SURF, but also updating the depth buffer */
 #define CHARACTER_RENDER_MODE_TRANSLUCENT \
     (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | FORCE_BL | G_RM_PASS)
@@ -45,7 +43,6 @@
 
 /* Data still in the unsplit data and bss files */
 extern u8 sEnvColors[ENV_COLOR_COUNT][3];
-extern Gfx sEnvColorDisplayLists[ENV_COLOR_COUNT][2];
 extern LookAt sHiliteLookAts[DRAW_BUFFER_COUNT];
 extern Hilite sHilites[DRAW_BUFFER_COUNT];
 
@@ -54,7 +51,7 @@ void SetCharacterAlpha(s32 alpha) {
     Gfx *gfx;
     s32 i;
 
-    gfx = &sEnvColorDisplayLists[0][0];
+    gfx = &g_CharacterEnvColorDisplayLists[0][0];
     for (i = 0; i != ENV_COLOR_COUNT; i++) {
         gDPSetEnvColor(gfx++, sEnvColors[i][0], sEnvColors[i][1], sEnvColors[i][2], alpha);
         gSPEndDisplayList(gfx++);

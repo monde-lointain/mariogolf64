@@ -128,33 +128,74 @@ extern s32 D_800C1DF0;
 #define LOADED_ALPHA 0x60
 #define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27
 
-/* Lit along the scene's light direction, in colors that change near the end of the round */
-extern Lights2 g_RoundCharacterLights[DRAW_BUFFER_COUNT];
-/* Lit along the scene's light direction, in colors that never change */
-extern Lights2 g_FixedCharacterLights[DRAW_BUFFER_COUNT];
+/* For CHARACTER_LIGHTING_FIXED and CHARACTER_LIGHTING_BLACK */
+extern Lights2 sFixedLights;
+extern Lights2 sBlackLights;
+/* SetCharacterLights' lights, in colors for rain that never change */
+extern Lights2 sRainLights[DRAW_BUFFER_COUNT];
+/* SetCharacterLights' lights, in dry weather colors that change near the end of the round */
+extern Lights2 sDryLights[DRAW_BUFFER_COUNT];
+/* The ambient and first light last drawn with, used instead while D_800C1B70 is set */
+extern Lights2 sSavedLights[DRAW_BUFFER_COUNT];
 /* The direction of each set's second light */
 extern s32 D_800C1F90;
 extern s32 D_800C1F94;
 extern s32 D_800C1F98;
 
-/* SetCharacterLights' colors near the end of the round */
+/* SetCharacterLights' dry colors near the end of the round */
 #define LATE_AMBIENT_LEVEL 120
 #define LATE_LIGHT_RED 200
 #define LATE_LIGHT_GREEN 80
 #define LATE_LIGHT_BLUE 10
-/* SetCharacterLights' colors through the rest of the round */
+/* SetCharacterLights' dry colors through the rest of the round */
 #define DAY_AMBIENT_RED 130
 #define DAY_AMBIENT_GREEN 130
 #define DAY_AMBIENT_BLUE 120
 #define DAY_LIGHT_RED 130
 #define DAY_LIGHT_GREEN 120
 #define DAY_LIGHT_BLUE 110
-/* The colors of the lights that never change */
-#define FIXED_AMBIENT_LEVEL 100
-#define FIXED_LIGHT_RED 155
-#define FIXED_LIGHT_GREEN 120
-#define FIXED_LIGHT_BLUE 120
-#define FIXED_SECOND_LIGHT_LEVEL 150
+/* SetCharacterLights' colors in the rain */
+#define RAIN_AMBIENT_LEVEL 100
+#define RAIN_LIGHT_RED 155
+#define RAIN_LIGHT_GREEN 120
+#define RAIN_LIGHT_BLUE 120
+#define RAIN_SECOND_LIGHT_LEVEL 150
+
+/* Set to draw with sSavedLights */
+extern s32 D_800C1B70;
+/* Set until the first draw sets up the matrices */
+extern s32 sIsMatrixSetupPending;
+/* Flips between 0 and 1 on each draw */
+extern s32 sDrawParity;
+/* The characters are drawn at this scale; the rotations are set up but never drawn */
+extern Mtx sModelScaleMatrix;
+extern Mtx sRollMatrix;
+extern Mtx sHeadingMatrix;
+/* Segment branch tables to the render modes; the opaque ones, and the translucent ones */
+extern Gfx sOpaqueRenderModes[];
+extern Gfx sTranslucentRenderModes[];
+/* Segment tables that clear or set face culling; front-face culling, and back-face culling */
+extern Gfx sFrontCulling[];
+extern Gfx sBackCulling[];
+
+#define MODEL_SCALE 0.01f
+#define HALF_TURN_DEGREES 180
+#define FULL_TURN_DEGREES 360
+#define BLEND_ALPHA 0x80
+#define OPAQUE_ALPHA 0xFF
+
+/* The segments the character display lists use */
+#define MODEL_BUFFER_SEGMENT 0x02
+#define JOINT_MATRICES_SEGMENT 0x03
+#define RENDER_MODES_SEGMENT 0x04
+#define CULLING_SEGMENT 0x05
+#define ENV_COLOR_SEGMENT 0x08
+#define HILITE_SEGMENT 0x09
+#define RENDER_MODE_SEGMENT 0x0A
+#define COMBINE_SEGMENT 0x0B
+#define MIRROR_TEXTURE_SEGMENT 0x0C
+#define FLAME_TEXTURE_SEGMENT 0x0D
+#define BLENDED_TEXTURE_SEGMENT 0x0E
 
 /* The size of a line of debug text */
 #define DEBUG_LINE_SIZE 0x80
@@ -674,7 +715,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
         slot->frameDataIndex = 0;
         slot->animationIndex = 0;
         slot->isTranslucent = FALSE;
-        slot->lighting = 0;
+        slot->lighting = CHARACTER_LIGHTING_FIXED;
         slot->isLooping = TRUE;
         slot->playsRandomTextureAnimation = TRUE;
         slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
@@ -1159,9 +1200,9 @@ void ResetCharacterSlots(void) {
 }
 
 /*
- * Sets the two sets of character lights for the frame being drawn, both lit
- * along the scene's light direction: one whose colors change near the end of
- * the round, and one whose colors never change
+ * Sets the dry and rain character lights for the frame being drawn, both lit
+ * along the scene's light direction. The dry colors change near the end of
+ * the round.
  */
 void SetCharacterLights(void) {
     u8 ambientColor[3];
@@ -1194,17 +1235,113 @@ void SetCharacterLights(void) {
     lightDirection[0] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
     lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
     lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
-    g_RoundCharacterLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
+    sDryLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
         ambientColor[0], ambientColor[1], ambientColor[2], lightColor[0], lightColor[1], lightColor[2],
         lightDirection[0], lightDirection[1], lightDirection[2], lightColor[0], lightColor[1], lightColor[2],
         D_800C1F90, D_800C1F94, D_800C1F98);
-    g_FixedCharacterLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
-        FIXED_AMBIENT_LEVEL, FIXED_AMBIENT_LEVEL, FIXED_AMBIENT_LEVEL, FIXED_LIGHT_RED, FIXED_LIGHT_GREEN,
-        FIXED_LIGHT_BLUE, lightDirection[0], lightDirection[1], lightDirection[2], FIXED_SECOND_LIGHT_LEVEL,
-        FIXED_SECOND_LIGHT_LEVEL, FIXED_SECOND_LIGHT_LEVEL, D_800C1F90, D_800C1F94, D_800C1F98);
+    sRainLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
+        RAIN_AMBIENT_LEVEL, RAIN_AMBIENT_LEVEL, RAIN_AMBIENT_LEVEL, RAIN_LIGHT_RED, RAIN_LIGHT_GREEN,
+        RAIN_LIGHT_BLUE, lightDirection[0], lightDirection[1], lightDirection[2], RAIN_SECOND_LIGHT_LEVEL,
+        RAIN_SECOND_LIGHT_LEVEL, RAIN_SECOND_LIGHT_LEVEL, D_800C1F90, D_800C1F94, D_800C1F98);
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80057FFC);
+/* Copies the ambient and first light into both of sSavedLights */
+#define SAVE_LIGHTS(lights)                       \
+    sSavedLights[0].l[0].l = (lights).l[0].l; \
+    sSavedLights[1].l[0].l = (lights).l[0].l; \
+    sSavedLights[0].a.l = (lights).a.l;       \
+    sSavedLights[1].a.l = (lights).a.l
+
+/* Draws the character in the slot with its lights, alpha and culling */
+#ifdef NON_MATCHING
+void DrawCharacter(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    Gfx *gfx = g_DisplayListHead;
+    Lights2 *lights;
+    Gfx *renderModes;
+
+    sDrawParity ^= 1;
+    if (sIsMatrixSetupPending) {
+        sIsMatrixSetupPending = FALSE;
+        guScale(&sModelScaleMatrix, MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+        guRotate(&sRollMatrix, HALF_TURN_DEGREES, 0.0f, 0.0f, 1.0f);
+        guRotate(&sHeadingMatrix, sDrawParity * FULL_TURN_DEGREES / BINARY_ANGLE_TURN + HALF_TURN_DEGREES, 0.0f, 1.0f,
+                 0.0f);
+    }
+    if (slot != NULL) {
+        if (D_800C1B70 == 0) {
+            switch (slot->lighting) {
+                case CHARACTER_LIGHTING_FIXED:
+                    gSPSetLights2(gfx++, sFixedLights);
+                    SAVE_LIGHTS(sFixedLights);
+                    break;
+                default:
+                case CHARACTER_LIGHTING_SCENE:
+                    if (g_HoleConditions.isRaining) {
+                        gSPSetLights2(gfx++, sRainLights[g_DrawBufferIndex]);
+                        SAVE_LIGHTS(sRainLights[g_DrawBufferIndex]);
+                    } else {
+                        gSPSetLights2(gfx++, sDryLights[g_DrawBufferIndex]);
+                        SAVE_LIGHTS(sDryLights[g_DrawBufferIndex]);
+                    }
+                    break;
+                case CHARACTER_LIGHTING_SCENE_THIRD:
+                    lights = g_HoleConditions.isRaining ? sRainLights : sDryLights;
+                    if (!func_80095C10(&gfx, &lights[g_DrawBufferIndex])) {
+                        gSPSetLights2(gfx++, lights[g_DrawBufferIndex]);
+                        SAVE_LIGHTS(lights[g_DrawBufferIndex]);
+                    }
+                    break;
+                case CHARACTER_LIGHTING_BLACK:
+                    gSPSetLights2(gfx++, sBlackLights);
+                    SAVE_LIGHTS(sBlackLights);
+                    break;
+            }
+        } else {
+            gSPSetLights2(gfx++, sSavedLights[g_DrawBufferIndex]);
+        }
+        MAP_MODEL_BUFFER(slot);
+        gSPMatrix(gfx++, &sModelScaleMatrix, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+        gSPSegment(gfx++, MODEL_BUFFER_SEGMENT, osVirtualToPhysical(slot->modelBuffer));
+        gSPSegment(gfx++, JOINT_MATRICES_SEGMENT, osVirtualToPhysical(slot->jointMatrices));
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+        gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BLEND_ALPHA);
+        gSPSegment(gfx++, ENV_COLOR_SEGMENT, osVirtualToPhysical(g_CharacterEnvColorDisplayLists));
+        gSPSegment(gfx++, HILITE_SEGMENT, osVirtualToPhysical(g_CharacterHiliteDisplayList));
+        gSPSegment(gfx++, RENDER_MODE_SEGMENT, osVirtualToPhysical(g_CharacterRenderModeDisplayList));
+        gSPSegment(gfx++, COMBINE_SEGMENT, osVirtualToPhysical(g_CharacterCombineDisplayList));
+        gSPSegment(gfx++, MIRROR_TEXTURE_SEGMENT, osVirtualToPhysical(g_MirrorTexture));
+        gSPSegment(gfx++, FLAME_TEXTURE_SEGMENT, osVirtualToPhysical(g_FlameTexture));
+        gSPSegment(gfx++, BLENDED_TEXTURE_SEGMENT, osVirtualToPhysical(g_BlendedTexture));
+        if (slot->isTranslucent) {
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, slot->alpha);
+            SetCharacterAlpha(slot->alpha);
+            renderModes = sTranslucentRenderModes;
+        } else {
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, BLEND_ALPHA);
+            SetCharacterAlpha(OPAQUE_ALPHA);
+            renderModes = sOpaqueRenderModes;
+        }
+        gSPSegment(gfx++, RENDER_MODES_SEGMENT, osVirtualToPhysical(renderModes));
+        gSPSegment(gfx++, CULLING_SEGMENT, osVirtualToPhysical(slot->unk188 ? sFrontCulling : sBackCulling));
+        gSPDisplayList(gfx++, slot->displayList);
+        slot->lastDrawnFrame = g_FrameCount;
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+    }
+    g_DisplayListHead = gfx;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", DrawCharacter);
+#endif
 
 /* Places the character in the slot with func_800453E0, turned to the current shot's direction */
 void PlaceCharacterForShot(u32 slotIndex) {
