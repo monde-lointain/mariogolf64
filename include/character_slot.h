@@ -259,5 +259,6 @@ void SetCharacterAnimation(u32 slotIndex, s32 id);
 void SkipToAnimationEnd(u32 slotIndex);
 void SetAnimationSpeed(u32 slotIndex, f32 speed);
 void AnimateCharacter(u32 slotIndex);
+void AnimateCharacterInSameCopy(u32 slotIndex);
 
 #endif

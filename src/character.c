@@ -883,7 +883,79 @@ const u32 D_800D07EC = 0;
 
 INCLUDE_ASM("asm/nonmatchings/character", func_800568CC);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800574A8);
+/*
+ * Steps the slot's animation as AnimateCharacter does, without the debug text,
+ * but poses the joints into the frame data copy the next frame writes, without
+ * moving on from it
+ */
+void AnimateCharacterInSameCopy(u32 slotIndex) {
+    AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 i = 0;
+    s32 actionCount;
+    s32 hasLooped;
+
+    if (slot != NULL) {
+        hasLooped = FALSE;
+        MAP_MODEL_BUFFER(slot);
+        actionCount = GetAnimationEventActions(slotIndex, slot->animationIndex, slot->animationFrame, actions);
+        for (; i < actionCount; i++) {
+            switch (actions[i].kind) {
+                case ANIMATION_EVENT_LOOP_START:
+                    break;
+                case ANIMATION_EVENT_LOOP_END:
+                    if (slot->isLooping) {
+                        hasLooped = TRUE;
+                        slot->animationFrame =
+                            GetAnimationEventFrame(slotIndex, slot->animationIndex, ANIMATION_EVENT_LOOP_START) +
+                            ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+                    }
+                    break;
+                case ANIMATION_EVENT_TEXTURE_ANIMATION:
+                    if (actions[i].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
+                        slot->playsRandomTextureAnimation = TRUE;
+                    } else if (actions[i].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
+                        slot->playsRandomTextureAnimation = FALSE;
+                    } else {
+                        PlayTextureAnimation(slotIndex, actions[i].value);
+                    }
+                    break;
+            }
+        }
+        if (!hasLooped) {
+            slot->animationFrame += slot->animationSpeed;
+        }
+        if (slot->animationFrame > slot->animationEndFrame) {
+            if (slot->nextAnimationId != NO_NEXT_ANIMATION) {
+                SetCharacterAnimation(slotIndex, slot->nextAnimationId);
+                slot->nextAnimationId = NO_NEXT_ANIMATION;
+            } else {
+                slot->animationFrame = slot->animationEndFrame;
+            }
+        }
+        if (slot->animationFrame < slot->animationStartFrame) {
+            slot->animationFrame = slot->animationStartFrame;
+        }
+        g_CharacterModelIndex = slot->modelIndex;
+        g_CurrentAnimationFrame = slot->animationFrame;
+        g_CurrentAnimationEndFrame = slot->animationEndFrame;
+        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        if (slot->playsRandomTextureAnimation) {
+            if (slot->randomTextureAnimationDelay == 0) {
+                PlayTextureAnimation(slotIndex, RANDOM_TEXTURE_ANIMATION);
+                slot->randomTextureAnimationDelay =
+                    (rand() & RANDOM_TEXTURE_ANIMATION_DELAY_MASK) + RANDOM_TEXTURE_ANIMATION_DELAY_MIN;
+            } else {
+                slot->randomTextureAnimationDelay--;
+            }
+        }
+        AdvanceTextureAnimations(slotIndex, 0, (s32)g_CurrentAnimationFrame % 10, g_CurrentAnimationFrame);
+        g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
+        D_800C1DF4 = slot->modelBuffer;
+        AnimateCharacterJoints(slotIndex);
+        slot->jointMatrices = g_CurrentJointMatrices;
+    }
+}
 
 void AnimateAllCharacters(void) {
     s32 i;
