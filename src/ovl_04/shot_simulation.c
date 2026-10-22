@@ -1,5 +1,6 @@
 #include "common.h"
 #include "billboard.h"
+#include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"
 #include "save.h"
@@ -76,10 +77,6 @@ typedef struct Unk800448E0 {
     /* 0x8 */ s32 unk8;
 } Unk800448E0;
 
-extern s32 D_800FBE54;
-extern s32 D_800FBE58;
-extern s32 D_800FBE70;
-extern s32 D_800FBE74;
 extern SimulatedShot g_SimulatedShot;
 
 s32 func_8003327C(BallSimulation *simulation);
@@ -109,24 +106,24 @@ void SimulateShot(Unk20 *shot) {
     g_SimulatedShot.minPositionStep[2] = 0;
     g_SimulatedShot.unkB0Step = NO_STEP;
     g_SimulatedShot.maxPosition[0] = g_SimulatedShot.minPosition[0] = g_SimulatedShot.startPosition[0] =
-        g_BallPosition[0];
+        g_CurrentShot.ballPosition[0];
     g_SimulatedShot.maxPosition[1] = g_SimulatedShot.minPosition[1] = g_SimulatedShot.startPosition[1] =
-        g_BallPosition[1];
+        g_CurrentShot.ballPosition[1];
     g_SimulatedShot.maxPosition[2] = g_SimulatedShot.minPosition[2] = g_SimulatedShot.startPosition[2] =
-        g_BallPosition[2];
-    simulation->position[0] = g_BallPosition[0];
-    simulation->position[1] = g_BallPosition[1];
-    simulation->position[2] = g_BallPosition[2];
-    simulation->surface = D_800FBE70;
+        g_CurrentShot.ballPosition[2];
+    simulation->position[0] = g_CurrentShot.ballPosition[0];
+    simulation->position[1] = g_CurrentShot.ballPosition[1];
+    simulation->position[2] = g_CurrentShot.ballPosition[2];
+    simulation->surface = g_CurrentShot.surface;
     hasUnk1Flag = FALSE;
     hasUnk40Flag = FALSE;
     g_SimulatedShot.unk2E0C = func_800448E0(shot->unk4)->unk8 & 1;
     g_SimulatedShot.unk2E14 = shot->unkC == 0 && shot->unk8 >= 0x100 && !(func_800448E0(shot->unk4)->unk8 & 1);
     g_SimulatedShot.unk2E42 =
-        func_80037E50(func_800448E0(g_Players[D_800FBE74].unk52[D_800FBE58]), D_800FBE70, D_800FBE54, shot->unkC)
+        func_80037E50(func_800448E0(g_Players[g_CurrentShot.playerIndex].unk52[g_CurrentShot.clubSlot]), g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
             ->unk5;
     func_80037F94(simulation, 2, shot);
-    g_SimulatedShot.unk2E08 = g_ShowsBillboardsAtEdge || GetSurfaceInfo(D_800FBE70)->kind == SURFACE_KIND_GREEN;
+    g_SimulatedShot.unk2E08 = g_ShowsBillboardsAtEdge || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->isRunning) {
         flags = func_8003327C(simulation);

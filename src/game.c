@@ -2,6 +2,7 @@
 #include "billboard.h"
 #include "controller.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
 #include "libc.h"
@@ -576,7 +577,6 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     }
 }
 
-extern volatile s32 D_800FBE74;
 extern s32 D_800C306C;
 
 /*
@@ -625,7 +625,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     } else {
         /* The value read here is never used */
         if (mode == 6) {
-            mode = D_800FBE74;
+            mode = *(volatile s32 *)&g_CurrentShot.playerIndex;
         }
         FitStripToScreen();
     }

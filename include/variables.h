@@ -15,9 +15,6 @@ extern u8 __libmus_output_muted;
 /* The next free command of the display list being built this frame */
 extern Gfx *g_DisplayListHead;
 
-/* The ball's position, in units of 1/1024 */
-extern s32 g_BallPosition[3];
-
 /* The depth buffer, which the screen effects also use to hold a saved frame */
 extern u16 *g_DepthBuffer;
 

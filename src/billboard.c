@@ -2,6 +2,7 @@
 #include "billboard.h"
 #include "camera.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "game_flags.h"
 #include "functions.h"
 #include "variables.h"
@@ -299,8 +300,8 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
 
     if (g_Cameras[cameraIndex].view.mode == CAMERA_MODE_BEHIND_GOLFER) {
-        ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
-                                 g_BallPosition[2] * POSITION_TO_FLOAT);
+        ballDepth = GetViewDepth(g_CurrentShot.ballPosition[0] * POSITION_TO_FLOAT, g_CurrentShot.ballPosition[1] * POSITION_TO_FLOAT,
+                                 g_CurrentShot.ballPosition[2] * POSITION_TO_FLOAT);
         if (ballDepth > 0) {
             ballDepth = VIEW_DEPTH_BALL_HIDDEN;
         }
@@ -434,8 +435,8 @@ void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
 
     if (g_Cameras[cameraIndex].view.mode == CAMERA_MODE_BEHIND_GOLFER) {
-        ballDepth = GetViewDepth(g_BallPosition[0] * POSITION_TO_FLOAT, g_BallPosition[1] * POSITION_TO_FLOAT,
-                                 g_BallPosition[2] * POSITION_TO_FLOAT);
+        ballDepth = GetViewDepth(g_CurrentShot.ballPosition[0] * POSITION_TO_FLOAT, g_CurrentShot.ballPosition[1] * POSITION_TO_FLOAT,
+                                 g_CurrentShot.ballPosition[2] * POSITION_TO_FLOAT);
         if (ballDepth > 0) {
             ballDepth = VIEW_DEPTH_BALL_HIDDEN;
         }
