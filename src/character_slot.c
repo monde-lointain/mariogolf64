@@ -26,7 +26,6 @@
 #define CHOSEN_DISPLAY_LIST(model) ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
 #define DISPLAY_LIST_CHOICES(model) ((u32 *)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
 
-#define SMALLEST_PAGE_SIZE 0x1000
 /* osMapTLB's physical address for a page left unmapped */
 #define NO_PHYSICAL_PAGE -1
 /* osMapTLB's address space id for a global mapping */

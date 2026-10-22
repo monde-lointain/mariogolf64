@@ -1,16 +1,81 @@
 #include "common.h"
+#include "character_slot.h"
+#include "club.h"
+#include "debug_text.h"
+#include "functions.h"
+#include "game_flags.h"
+#include "heap.h"
+#include "host_file.h"
 #include "main.h"
 
-/* The models with a row of sClubHeadDistances */
-#define CLUB_HEAD_DISTANCE_CHARACTER_COUNT 18
-#define CLUB_HEAD_DISTANCE_COUNT 5
+/* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
+#define CHARACTER_BUFFER_SIZE 0x23680
+#define FRAME_DATA_OFFSET 0x20000
+#define FRAME_DATA_COPY_SIZE 0x780
+/* The buffer each slot is given before AssignCharacterBuffers gives it its own */
+#define DEFAULT_CHARACTER_BUFFER 0x8030F800
+/* SetCharacterBuffer's warning is printed this many times, so it stands out */
+#define WARNING_REPEAT_COUNT 10
+/* Long enough ago that IsCharacterSlotBusy finds a slot not busy */
+#define LONG_AGO_FRAME -4
+
+#define ANIMATIONS(model) ((CharacterAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATIONS])
+#define JOINT_ANIMATIONS(model) ((JointAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
+
+/* Makes a slot's model readable at CHARACTER_MODEL_ADDRESS, where its segment addresses point */
+#define MAP_MODEL_BUFFER(slot)                                                                     \
+    SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, CHARACTER_MODEL_ADDRESS,         \
+                osVirtualToPhysical((slot)->modelBuffer))
+
+/* The models with a row of sBallDistances, the playable characters */
+#define PLAYABLE_CHARACTER_COUNT 18
+/* sBallDistances columns: one per club kind, then this one */
+#define BALL_DISTANCE_WOOD_APPROACH 4
+#define BALL_DISTANCE_COUNT 5
+
+/* The default ball distance for each club kind */
+#define WOOD_BALL_DISTANCE 0x3600
+#define IRON_BALL_DISTANCE 0x2400
+#define PUTTER_BALL_DISTANCE 0x1800
+
+/* The character points whose depth gives the ball distance for each club kind */
+#define WOOD_DISTANCE_POINT 3
+#define IRON_DISTANCE_POINT 4
+#define WEDGE_DISTANCE_POINT 5
+#define PUTTER_DISTANCE_POINT 6
+
+/* A ball distance is this times the point's depth in world units */
+#define POINT_DEPTH_TO_BALL_DISTANCE 1228.8f
+
+/* The animations whose last frame WriteBallDistances measures for each club kind */
+#define WOOD_DISTANCE_ANIMATION 0
+#define IRON_DISTANCE_ANIMATION 3
+#define WEDGE_DISTANCE_ANIMATION 6
+#define PUTTER_DISTANCE_ANIMATION 9
+/* The animation whose first frame it measures for the approach column */
+#define WOOD_APPROACH_DISTANCE_ANIMATION 2
+
+/* Where GetBallDistance shows the measured point position */
+#define POINT_POSITION_TEXT_COLUMN 2
+#define POINT_POSITION_TEXT_ROW 13
+
+#define BALL_DISTANCE_SOURCE_SIZE 0x8000
+#define BALL_DISTANCE_LINE_SIZE 0x100
+/* The slot that WriteBallDistances loads each character into */
+#define MEASURED_SLOT 0
+/* The shot mode that WriteBallDistances measures every column with */
+#define MEASURED_SHOT_MODE SHOT_MODE_NORMAL
+
+/* The source lines of pcsub.c that ReportFailedAssertion reports */
+#define BALL_DISTANCE_SOURCE_ASSERT_LINE 1525
+#define TEXTURE_ANIMATION_ASSERT_LINE 1956
 
 /*
- * How far a character's club head sits from them at the ball, by model (the
- * model index modulo 36, when below 18) and by club kind: wood, iron, wedge,
- * putter, then the wood again when func_80054938's last argument is 2
+ * How far to the side of the ball each playable character stands, in course
+ * units, for each club kind and then for an approach shot with a wood.
+ * WriteBallDistances measures the models and writes a table like this as pcdist.c.
  */
-static const s32 sClubHeadDistances[CLUB_HEAD_DISTANCE_CHARACTER_COUNT][CLUB_HEAD_DISTANCE_COUNT] = {
+static const s32 sBallDistances[PLAYABLE_CHARACTER_COUNT][BALL_DISTANCE_COUNT] = {
     { 0x2BDD, 0x2070, 0x1903, 0x114D, 0x28F4 },
     { 0x3502, 0x2910, 0x21DD, 0x1A86, 0x2DAA },
     { 0x2B74, 0x1EDA, 0x17DA, 0x10B1, 0x287A },
@@ -31,24 +96,181 @@ static const s32 sClubHeadDistances[CLUB_HEAD_DISTANCE_CHARACTER_COUNT][CLUB_HEA
     { 0x3295, 0x2776, 0x1FD8, 0x1931, 0x2BC9 },
 };
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054900);
+/*
+ * Returns how far to the side of the ball the character in the slot stands
+ * for the club and shot mode. Playable characters' distances come from
+ * sBallDistances unless GAME_FLAG_GENERATE_BALL_DISTANCES is set; otherwise the
+ * model is measured, with a default for the club kind if that fails.
+ * GetVectorLength is an unused nested function, a GNU C extension.
+ */
+#ifdef NON_MATCHING
+s32 GetBallDistance(u32 slotIndex, s32 club, s32 isClubKind, s32 shotMode) {
+    f32 position[3];
+    char text[0x80];
+    s32 distance;
+    s32 pointId = WOOD_DISTANCE_POINT;
+    s32 column;
+    s32 modelIndex;
+    CharacterSlot *slot;
+    s32 kind;
+    f32 depth;
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054938);
+    f32 GetVectorLength(f32 x, f32 y, f32 z) {
+        return sqrtf(x * x + y * y + z * z);
+    }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054B7C);
+    slot = GetUsedCharacterSlot(slotIndex);
+    column = CLUB_KIND_WOOD;
+    if (!isClubKind) {
+        kind = GetCharacterClubKind(slotIndex, club);
+    } else {
+        kind = club;
+    }
+    switch (kind) {
+        case CLUB_KIND_WOOD:
+            distance = WOOD_BALL_DISTANCE;
+            pointId = WOOD_DISTANCE_POINT;
+            column = (shotMode == SHOT_MODE_APPROACH) * BALL_DISTANCE_WOOD_APPROACH;
+            break;
+        case CLUB_KIND_IRON:
+            distance = IRON_BALL_DISTANCE;
+            pointId = IRON_DISTANCE_POINT;
+            column = CLUB_KIND_IRON;
+            break;
+        case CLUB_KIND_WEDGE:
+            distance = IRON_BALL_DISTANCE;
+            pointId = WEDGE_DISTANCE_POINT;
+            column = CLUB_KIND_WEDGE;
+            break;
+        case CLUB_KIND_PUTTER:
+            distance = PUTTER_BALL_DISTANCE;
+            pointId = PUTTER_DISTANCE_POINT;
+            column = CLUB_KIND_PUTTER;
+            break;
+    }
+    if (!IsGameFlagSet(GAME_FLAG_GENERATE_BALL_DISTANCES) && slot != NULL && (modelIndex = slot->modelIndex) >= 0 &&
+        (modelIndex %= CHARACTER_MODELS_PER_KIND) < PLAYABLE_CHARACTER_COUNT) {
+        distance = sBallDistances[modelIndex][column];
+    } else if (GetCharacterPointModelPosition(slotIndex, pointId, position) == 0) {
+        sprintf(text, "pres %f,%f,%f", position[0], position[1], position[2]);
+        PrintDebugText(text, POINT_POSITION_TEXT_COLUMN, POINT_POSITION_TEXT_ROW);
+        depth = position[2] * POINT_DEPTH_TO_BALL_DISTANCE;
+        if (depth < 0.0f) {
+            depth = -depth;
+        }
+        distance = depth;
+        osSyncPrintf(":");
+    } else {
+        osSyncPrintf("]");
+    }
+    return distance;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", GetVectorLength);
+INCLUDE_ASM("asm/nonmatchings/character", GetBallDistance);
+#endif
 
 /*
- * GCC last wrote sClubHeadDistances, so it thinks the assembler is still in
+ * GCC last wrote sBallDistances, so it thinks the assembler is still in
  * .rodata, but INCLUDE_ASM left it in .text. Agree with GCC so the data below
  * lands in .rodata.
  */
 __asm__(".section .rodata");
 
-/* Assertion strings that func_80054BC0 and func_800557BC share */
+/* Assertion strings that WriteBallDistances and PlayTextureAnimation share */
 static const char sAssertionExpression[] = "EX";
 static const char sFileName[] = "c:/usgolf64/polychara/pcsub.c";
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054BC0);
+/*
+ * Loads each playable character, measures its ball distance in each column of
+ * sBallDistances and writes the source of that table to the host as pcdist.c.
+ * AppendDistanceText is a nested function, a GNU C extension.
+ */
+void WriteBallDistances(void) {
+    char line[BALL_DISTANCE_LINE_SIZE];
+    char *cursor;
+    char *end;
+    char *source;
+    s32 modelIndex;
+    s32 column;
+    s32 animationId;
+    s32 kind;
+
+    void AppendDistanceText(char *text) {
+        char character;
+
+        while (TRUE) {
+            character = *text++;
+            if (character == '\0') {
+                break;
+            }
+            if (cursor < end) {
+                *cursor++ = character;
+            }
+        }
+    }
+
+    cursor = source = AllocMemory(BALL_DISTANCE_SOURCE_SIZE);
+    end = source + BALL_DISTANCE_SOURCE_SIZE;
+    if (source == NULL) {
+        ReportFailedAssertion(sAssertionExpression, sFileName, BALL_DISTANCE_SOURCE_ASSERT_LINE);
+    }
+    sprintf(line, "/* Caution! This file is automatically generated by pcsub.c*/\n"
+                  "static const DISTPARA distp[PLAYABLE_NUM][5] = {\n");
+    AppendDistanceText(line);
+    for (modelIndex = 0; modelIndex < PLAYABLE_CHARACTER_COUNT; modelIndex++) {
+        s32 distances[BALL_DISTANCE_COUNT];
+
+        LoadCharacter(MEASURED_SLOT, modelIndex, 0);
+        g_CharacterModelIndex = g_CharacterSlots[MEASURED_SLOT].modelIndex;
+        for (column = 0; column < BALL_DISTANCE_COUNT; column++) {
+            switch (column) {
+                case CLUB_KIND_WOOD:
+                    animationId = WOOD_DISTANCE_ANIMATION;
+                    kind = CLUB_KIND_WOOD;
+                    break;
+                case CLUB_KIND_IRON:
+                    animationId = IRON_DISTANCE_ANIMATION;
+                    kind = CLUB_KIND_IRON;
+                    break;
+                case CLUB_KIND_WEDGE:
+                    animationId = WEDGE_DISTANCE_ANIMATION;
+                    kind = CLUB_KIND_WEDGE;
+                    break;
+                case CLUB_KIND_PUTTER:
+                    animationId = PUTTER_DISTANCE_ANIMATION;
+                    kind = CLUB_KIND_PUTTER;
+                    break;
+                case BALL_DISTANCE_WOOD_APPROACH:
+                    animationId = WOOD_APPROACH_DISTANCE_ANIMATION;
+                    kind = CLUB_KIND_WOOD;
+                    break;
+            }
+            SetAnimationSpeed(MEASURED_SLOT, 0.0f);
+            SetCharacterAnimation(MEASURED_SLOT, animationId);
+            if (column < BALL_DISTANCE_WOOD_APPROACH) {
+                SkipToAnimationEnd(MEASURED_SLOT);
+            }
+            AnimateCharacter(MEASURED_SLOT);
+            distances[column] = GetBallDistance(MEASURED_SLOT, kind, TRUE, MEASURED_SHOT_MODE);
+        }
+        osSyncPrintf("\n");
+        sprintf(line, "{%d, %d, %d, %d, %d},\n", distances[0], distances[1], distances[2], distances[3],
+                distances[4]);
+        osSyncPrintf(line);
+        AppendDistanceText(line);
+        FreeCharacterSlot(MEASURED_SLOT);
+    }
+    sprintf(line, "};\n");
+    AppendDistanceText(line);
+    line[0] = END_OF_FILE_CHARACTER;
+    line[1] = '\0';
+    AppendDistanceText(line);
+    sprintf(line, "pcdist.c");
+    WriteHostFile(line, cursor - source);
+    FreeMemory(&source);
+}
 
 /* As above, so the data below lands in .rodata */
 __asm__(".section .rodata");
@@ -70,55 +292,241 @@ INCLUDE_ASM("asm/nonmatchings/character", func_800550D8);
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80055368);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055738);
+s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055788);
+    if (slot != NULL) {
+        slot->textureAnimations[index].frame = frame;
+        slot->textureAnimations[index].pendingCopyCount = FRAME_DATA_COPY_COUNT;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800557BC);
+void StopTextureAnimations(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 i;
+
+    for (i = TEXTURE_ANIMATION_COUNT - 1; i >= 0; i--) {
+        slot->textureAnimations[i].pendingCopyCount = 0;
+    }
+}
+
+s32 PlayTextureAnimation(u32 slotIndex, s32 index) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (index >= TEXTURE_ANIMATION_COUNT) {
+        ReportFailedAssertion(sAssertionExpression, sFileName, TEXTURE_ANIMATION_ASSERT_LINE);
+    }
+    if (slot != NULL) {
+        slot->textureAnimations[index].pendingCopyCount = TEXTURE_ANIMATION_PLAYING;
+        slot->textureAnimations[index].frame = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80055828);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055AF4);
+INCLUDE_ASM("asm/nonmatchings/character", LoadCharacter);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055FFC);
+s32 GetAnimationIndex(u32 slotIndex, s32 id) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 foundIndex = 0;
+    CharacterAnimation *animation;
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056060);
+    if (slot != NULL) {
+        animation = ANIMATIONS(slot->model);
+        for (i = 0; animation->events != NULL; i++, animation++) {
+            if (animation->id == id) {
+                foundIndex = i;
+                break;
+            }
+        }
+    }
+    return foundIndex;
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800560FC);
+#ifdef NON_MATCHING
+CharacterAnimation *FindAnimation(u32 slotIndex, s32 id) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056238);
+    if (slot == NULL) {
+        return NULL;
+    }
+    MAP_MODEL_BUFFER(slot);
+    id = GetAnimationIndex(slotIndex, id);
+    if (ANIMATIONS(slot->model)[id].events == NULL) {
+        return NULL;
+    }
+    return &ANIMATIONS(slot->model)[id];
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056264);
+#else
+INCLUDE_ASM("asm/nonmatchings/character", FindAnimation);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056294);
+void SetCharacterAnimation(u32 slotIndex, s32 id) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    JointAnimation *joint;
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800562F4);
+    if (slot != NULL) {
+        MAP_MODEL_BUFFER(slot);
+        slot->animationIndex = GetAnimationIndex(slotIndex, id);
+        if (ANIMATIONS(slot->model)[slot->animationIndex].events == NULL) {
+            slot->animationIndex = 0;
+        }
+        slot->animationFrame = slot->animationStartFrame = ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+        slot->animationEndFrame =
+            slot->animationStartFrame + ANIMATIONS(slot->model)[slot->animationIndex].frameCount;
+        joint = JOINT_ANIMATIONS(slot->model);
+        for (; joint->translationKeyCount != END_OF_JOINT_ANIMATIONS; joint++) {
+            joint->translationSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->translationSpan.startFrame = UNSET_KEYFRAME_SPAN;
+            joint->rotationSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->rotationSpan.startFrame = UNSET_KEYFRAME_SPAN;
+            joint->scaleSpan.endFrame = UNSET_KEYFRAME_SPAN;
+            joint->scaleSpan.startFrame = UNSET_KEYFRAME_SPAN;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056324);
+void SetPlaysRandomTextureAnimation(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056350);
+    if (slot != NULL) {
+        slot->playsRandomTextureAnimation = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_8005637C);
+void SkipToAnimationEnd(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800563A8);
+    if (slot != NULL) {
+        slot->animationFrame = slot->animationEndFrame;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800563D4);
+void AdvanceAnimation(u32 slotIndex, s32 frameCount) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056400);
+    if (slot != NULL) {
+        slot->animationFrame += frameCount;
+        if (slot->animationEndFrame <= slot->animationFrame) {
+            slot->animationFrame = slot->animationEndFrame;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_8005642C);
+void SetAnimationSpeed(u32 slotIndex, f32 speed) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056464);
+    if (slot != NULL) {
+        slot->animationSpeed = speed;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056494);
+void SetAnimationLooping(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800564C4);
+    if (slot != NULL) {
+        slot->isLooping = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800564F0);
+void SetNextAnimation(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056520);
+    if (slot != NULL) {
+        slot->nextAnimationId = value;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80056558);
+void SetCharacterTranslucent(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->isTranslucent = value;
+    }
+}
+
+void SetCharacterLighting(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->lighting = value;
+    }
+}
+
+void SetCharacterSlotAlpha(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->alpha = value;
+    }
+}
+
+s32 GetCurrentAnimationEndFrame(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 endFrame = -1;
+
+    if (slot != NULL) {
+        endFrame = slot->animationEndFrame;
+    }
+    return endFrame;
+}
+
+s32 GetAnimationEndFrame(u32 slotIndex, s32 id) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+
+    if (animation != NULL) {
+        return animation->startFrame + animation->frameCount;
+    }
+    return -1;
+}
+
+s32 GetAnimationStartFrame(u32 slotIndex, s32 id) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+
+    if (animation != NULL) {
+        return animation->startFrame;
+    }
+    return -1;
+}
+
+s32 GetAnimationFrameCount(u32 slotIndex, s32 id) {
+    CharacterAnimation *animation = FindAnimation(slotIndex, id);
+
+    if (animation != NULL) {
+        return animation->frameCount;
+    }
+    return -1;
+}
+
+void SetCharacterUnk188(u32 slotIndex, s32 value) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->unk188 = value;
+    }
+}
+
+s32 SetCharacterUnk189(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->unk189 = TRUE;
+    }
+}
+
+s32 GetAnimationFrame(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 frame = -1;
+
+    if (slot != NULL) {
+        frame = slot->animationFrame;
+    }
+    return frame;
+}
+
+INCLUDE_ASM("asm/nonmatchings/character", AnimateCharacter);
 
 /* As above, so the data below lands in .rodata */
 __asm__(".section .rodata");
@@ -131,13 +539,46 @@ INCLUDE_ASM("asm/nonmatchings/character", func_800568CC);
 
 INCLUDE_ASM("asm/nonmatchings/character", func_800574A8);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80057798);
+void AnimateAllCharacters(void) {
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/character", GetCharacterBufferSize);
+    for (i = 0; i < CHARACTER_SLOT_COUNT; i++) {
+        AnimateCharacter(i);
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", SetCharacterBuffer);
+s32 GetCharacterBufferSize(void) {
+    return CHARACTER_BUFFER_SIZE;
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", ResetCharacterSlots);
+void SetCharacterBuffer(s32 slotIndex, u8 *buffer) {
+    /* Aligned for SetMultiTlb */
+    u32 alignedBuffer = ((u32)buffer + SMALLEST_PAGE_SIZE - 1) & ~(SMALLEST_PAGE_SIZE - 1);
+    s32 warningCount;
+    s32 i;
+
+    if (g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
+        for (warningCount = 0; warningCount < WARNING_REPEAT_COUNT; warningCount++) {
+            osSyncPrintf("Polychara %d still alive. You can't change buffer.\n", slotIndex);
+        }
+    } else {
+        g_CharacterSlots[slotIndex].modelBuffer = (void *)alignedBuffer;
+        for (i = 0; i < FRAME_DATA_COPY_COUNT; i++) {
+            g_CharacterSlots[slotIndex].frameData[i] =
+                (u8 *)g_CharacterSlots[slotIndex].modelBuffer + FRAME_DATA_OFFSET + i * FRAME_DATA_COPY_SIZE;
+        }
+    }
+}
+
+void ResetCharacterSlots(void) {
+    s32 i;
+
+    FreeAllCharacterSlots();
+    for (i = 0; i < CHARACTER_SLOT_COUNT; i++) {
+        g_CharacterSlots[i].lastDrawnFrame = LONG_AGO_FRAME;
+        SetCharacterBuffer(i, (u8 *)DEFAULT_CHARACTER_BUFFER);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80057914);
 
