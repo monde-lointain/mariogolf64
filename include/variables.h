@@ -24,4 +24,8 @@ extern s32 g_NextSoundChannel;
 /* The depth buffer, which the screen effects also use to hold a saved frame */
 extern u16 *g_DepthBuffer;
 
+/* NuSystem's buffers, declared in lib/libnusys/nusys.h */
+extern u16 *nuGfxCfb_ptr;
+extern u16 *nuGfxZBuffer;
+
 #endif

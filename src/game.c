@@ -28,6 +28,8 @@ void DrawSpinEffect(Gfx **displayListHead, CameraView *view);
 void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view);
 
 extern s32 sScreenEffect;
+/* Holds a frame for the saved-frame effect */
+extern u16 *sSavedFrameBuffer;
 /* The effect's length in frames; the tiled image counts it down */
 extern s32 sScreenEffectFrameCount;
 /* Set when the effects stop, never read */
@@ -41,6 +43,11 @@ extern s32 sHasUnloadedSubModule;
 
 /* The border around the main camera's scissor rectangle, in pixels */
 #define SCREEN_BORDER 8
+
+/* How the saved-frame effect splits the screen into strips, in rows */
+#define SAVED_FRAME_STRIP_HEIGHT 6
+#define SAVED_FRAME_STRIP_COUNT 38
+#define SAVED_FRAME_LAST_STRIP_HEIGHT 2
 
 /* sScreenEffect values */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
@@ -221,7 +228,71 @@ void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
 
 INCLUDE_ASM("asm/nonmatchings/game", func_8002ADD4);
 
-INCLUDE_ASM("asm/nonmatchings/game", DrawSavedFrameEffect);
+/*
+ * Copies the frame kept in sSavedFrameBuffer to the screen, through the
+ * depth buffer's memory, a strip at a time in copy mode
+ */
+void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s16 stripHeight;
+
+    sScreenEffectFrameCount = 1;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, (u32)nuGfxZBuffer & ~7);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != SAVED_FRAME_STRIP_COUNT; stripIndex++) {
+        stripHeight = (stripIndex == SAVED_FRAME_STRIP_COUNT - 1) ? SAVED_FRAME_LAST_STRIP_HEIGHT
+                                                                  : SAVED_FRAME_STRIP_HEIGHT;
+        gDPLoadTextureTile(gfx++, (u32)(sSavedFrameBuffer + stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) & ~7,
+                           G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER, SCREEN_BORDER,
+                           SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_BORDER + stripHeight - 1, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+                                (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
+                                (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight - 1) << 2,
+                                G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != SAVED_FRAME_STRIP_COUNT; stripIndex++) {
+        stripHeight = (stripIndex == SAVED_FRAME_STRIP_COUNT - 1) ? SAVED_FRAME_LAST_STRIP_HEIGHT
+                                                                  : SAVED_FRAME_STRIP_HEIGHT;
+        gDPLoadTextureTile(gfx++, (u32)(g_DepthBuffer + stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) & ~7,
+                           G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER, SCREEN_BORDER,
+                           SCREEN_WIDTH - SCREEN_BORDER - 1, SCREEN_BORDER + stripHeight - 1, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+                                (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
+                                (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight - 1) << 2,
+                                G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game", DrawSpinEffect);
 
