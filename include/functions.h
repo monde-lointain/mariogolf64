@@ -65,4 +65,10 @@ void func_801F4E70_ovl_13(void);
 void func_801F4B9C_ovl_14(void);
 void func_801F4E54_ovl_14(void);
 
+void func_80050DA0(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
+void func_8004D794(void);
+void func_80071370(void);
+void func_80081284(void);
+void func_8003E400(void);
+
 #endif
