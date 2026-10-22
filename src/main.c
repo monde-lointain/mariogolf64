@@ -7,6 +7,7 @@
 #include "main.h"
 #include <PR/libmus.h>
 #include "overlay_manager.h"
+#include "save.h"
 #include "segment_symbols.h"
 #include "variables.h"
 

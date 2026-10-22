@@ -8,6 +8,7 @@
 #include "functions.h"
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
+#include "save.h"
 #include "scene.h"
 #include "variables.h"
 
@@ -939,7 +940,6 @@ void func_80050BF0(s32, s32, s32);
 void func_80051A60(void);
 void func_800530FC(CameraMatrices *matrices);
 void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
-void func_8005C018(s32 commandCount);
 void func_800625FC(Gfx **displayListHead);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void func_800660B0(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera);
@@ -1855,7 +1855,7 @@ s32 DrawGame(void) {
                                   VERTEX_BUFFER_LENGTH) {
         ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2637);
     }
-    func_8005C018(commandCount);
+    RecordDisplayListLength(commandCount);
 
     if (g_IsDebugEnabled) {
         if ((g_ControllerData[1].button & START_BUTTON) && !(g_PreviousControllerData[1].button & START_BUTTON)) {
