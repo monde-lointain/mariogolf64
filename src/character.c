@@ -1,12 +1,15 @@
 #include "common.h"
+#include "camera.h"
 #include "character_slot.h"
 #include "club.h"
+#include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
 #include "main.h"
+#include "math_util.h"
 
 /* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
 #define CHARACTER_BUFFER_SIZE 0x23680
@@ -69,6 +72,15 @@
 
 /* The animation whose ANIMATION_EVENT_UNK6 frame GetUnk6EventFrame returns */
 #define UNK6_EVENT_ANIMATION_INDEX 2
+
+/*
+ * How far PlaceAndViewCharacter puts the camera from the character, and how
+ * far below it the view sits, in course units
+ */
+#define VIEW_DISTANCE 61440.0f
+#define VIEW_DROP 15360.0f
+#define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
+#define QUARTER_TURN_RADIANS 1.5707964f
 
 /* The slot that WriteBallDistances loads each character into */
 #define MEASURED_SLOT 0
@@ -678,11 +690,54 @@ const u8 D_800D0838[8] = { 0x96, 0x96, 0x96, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80057FFC);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80058ACC);
+/* Places the character in the slot with func_800453E0, turned to the current shot's direction */
+void PlaceCharacterForShot(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80058B34);
+    if (slot != NULL) {
+        func_800453E0(slot->position, slot->rotation, slot->scale);
+        slot->rotation[AXIS_Y] = ((-g_CurrentShot.unk0) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80058C58);
+/*
+ * Places the character in the slot with func_800989EC, then points the first
+ * camera at it from VIEW_DISTANCE away along its facing
+ */
+void PlaceAndViewCharacter(u32 slotIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        func_800989EC(slot->position, slot->rotation, slot->scale);
+        g_Cameras[0].view.lookAt[AXIS_X] = slot->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.lookAt[AXIS_Y] = (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.lookAt[AXIS_Z] = slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_X] =
+            (slot->position[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * VIEW_DISTANCE) *
+            COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Y] = (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Z] =
+            (slot->position[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * VIEW_DISTANCE) *
+            COURSE_TO_WORLD_SCALE;
+    }
+}
+
+/* Stands the character in the slot on the ground at the point, facing the heading, at full size */
+void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+
+    if (slot != NULL) {
+        slot->position[AXIS_X] = point[AXIS_X];
+        slot->position[AXIS_Z] = point[AXIS_Z];
+        slot->position[AXIS_Y] = GetGroundHeight(slot->position[AXIS_X], slot->position[AXIS_Z]);
+        slot->rotation[AXIS_X] = 0.0f;
+        slot->rotation[AXIS_Z] = 0.0f;
+        slot->rotation[AXIS_Y] = -heading;
+        slot->scale[AXIS_X] = 1.0f;
+        slot->scale[AXIS_Y] = 1.0f;
+        slot->scale[AXIS_Z] = 1.0f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80058D04);
 

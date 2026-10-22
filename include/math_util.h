@@ -5,6 +5,8 @@
 
 /* Converts binary angles, where 0x10000 is a turn, to radians */
 #define BINARY_ANGLE_TO_RADIANS (3.1415927f / 32768.0f)
+/* Keeps a binary angle within one turn */
+#define BINARY_ANGLE_MASK 0xFFFF
 
 /* The radians to degrees factor of rotations */
 #define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))

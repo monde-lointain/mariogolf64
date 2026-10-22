@@ -79,6 +79,10 @@ void ClearBuffers(s32 clearMode);
  */
 s32 GetGroundHeight(s32 x, s32 z);
 
+/* Set a character's position, rotation and scale for a shot */
+void func_800453E0(Vec3 position, Vec3 rotation, Vec3 scale);
+void func_800989EC(Vec3 position, Vec3 rotation, Vec3 scale);
+
 /* Draws the textures the course model reads through RSP segments */
 void BuildDynamicTextures(Gfx **displayListHead);
 
