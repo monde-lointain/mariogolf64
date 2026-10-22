@@ -949,3 +949,7 @@ QueueAnimatedBox = 0x80050274; // type:func
 DrawAnimatedBoxes = 0x8005029C; // type:func
 sQueuedBoxCount = 0x800C0E50; // size:0x4
 sQueuedBoxes = 0x80132370; // size:0x28
+fabsf = 0x80059BA0; // type:func
+acosf = 0x80059BC0; // type:func
+atan2f = 0x80059FAC; // type:func
+atanf = 0x8005A2AC; // type:func
