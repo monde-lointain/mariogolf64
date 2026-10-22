@@ -919,8 +919,6 @@ void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 s32 func_80042720(void);
 void func_800427E8(void);
 void func_8005029C(void);
-void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
-void func_800625FC(Gfx **displayListHead);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void func_8006AEA4(Gfx **displayListHead);
 void func_8006B5D8(Gfx **displayListHead);
@@ -1564,7 +1562,7 @@ s32 DrawGame(void) {
                                 }
                                 if (!IsGameFlagSet(0x19)) {
                                     for (playerIndex = 0; playerIndex < 4; playerIndex++) {
-                                        func_80058D04(matrices, viewIndex, playerIndex);
+                                        DrawCharacterAndShadow(matrices, viewIndex, playerIndex);
                                         if (g_Scene != 30) {
                                             break;
                                         }

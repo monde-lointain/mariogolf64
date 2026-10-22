@@ -41,7 +41,7 @@ typedef struct CharacterModel {
     /* 0x00 */ u32 romStart;
     /* 0x04 */ u32 romEnd;
     /* 0x08 */ u32 segmentAddresses[CHARACTER_MODEL_SEGMENT_ADDRESS_COUNT];
-    /* 0x44 */ s16 unk44;
+    /* 0x44 */ s16 shadowScale; /* Copied to CharacterSlot.shadowScale */
     /* 0x46 */ s16 unk46;
     /* The model loads this file first, then patches it with romStart's when the two differ */
     /* 0x48 */ u32 baseRomStart;
@@ -63,6 +63,12 @@ typedef struct CharacterPoint {
 } CharacterPoint; /* size = 0x14 */
 
 #define END_OF_JOINT_PATH -1
+
+/* The CharacterPoint.id of the point the shadow lies under */
+#define CHARACTER_POINT_SHADOW 2
+
+/* guRotateRPYF's roll for a slot with no roll */
+#define ROLL_ORIGIN_DEGREES 180
 
 /* The keys around the current frame, kept from frame to frame */
 typedef struct KeyframeSpan {
@@ -218,7 +224,7 @@ typedef struct CharacterSlot {
     /* 0x061 */ u8 alpha;
     /* 0x064 */ Gfx *displayList;
     /* 0x068 */ f32 unk68[UNK68_COUNT];
-    /* 0x080 */ s16 unk80;
+    /* 0x080 */ s16 shadowScale; /* In units of 1/10000 */
     /* 0x082 */ s8 lighting; /* A CHARACTER_LIGHTING value */
     /* 0x083 */ s8 isLooping;
     /* 0x084 */ s8 nextAnimationId; /* NO_NEXT_ANIMATION, or the one to play after this one ends */
@@ -226,7 +232,7 @@ typedef struct CharacterSlot {
     /* 0x086 */ s8 randomTextureAnimationDelay; /* In steps */
     /* 0x088 */ TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
     /* 0x188 */ s8 unk188;
-    /* 0x189 */ s8 unk189;
+    /* 0x189 */ s8 reusesLastMatrices; /* For the next draw, which clears it */
 } CharacterSlot; /* size = 0x18C */
 
 #define NO_NEXT_ANIMATION -1
@@ -272,6 +278,7 @@ s32 GetCharacterClubKind(u32 slotIndex, s32 clubIndex);
 s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32 *position);
 void GetCharacterSlotMatrix(CharacterSlot *slot, Mat4 matrix);
 s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position);
+void GetCharacterShadowPoint(u32 slotIndex, f32 *position);
 
 /* Defined in character.c */
 s32 GetBallDistance(u32 slotIndex, s32 club, s32 isClubKind, s32 shotMode);
@@ -283,5 +290,6 @@ void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
 void DrawCharacter(u32 slotIndex);
+void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex);
 
 #endif

@@ -79,6 +79,26 @@ void ClearBuffers(s32 clearMode);
  */
 s32 GetGroundHeight(s32 x, s32 z);
 
+#define TRIANGLE_CORNER_COUNT 3
+
+/* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner */
+typedef struct PlaneTriangle {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
+} PlaneTriangle; /* size = 0x18 */
+
+/* The plane through a triangle: normal . point + distance = 0, with the normal's y at least 0 */
+typedef struct TrianglePlane {
+    /* 0x00 */ f32 normal[AXIS_COUNT];
+    /* 0x0C */ f32 distance;
+    /* 0x10 */ f32 unk10; /* Always 1 */
+} TrianglePlane; /* size = 0x14 */
+
+/* Returns 0, or -1 for a triangle without area, whose plane is then level */
+s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
+/* Sets the fog factor and fog color */
+void func_800625FC(Gfx **displayListHead);
+
 /* Set a character's position, rotation and scale for a shot */
 void func_800453E0(Vec3 position, Vec3 rotation, Vec3 scale);
 void func_800989EC(Vec3 position, Vec3 rotation, Vec3 scale);

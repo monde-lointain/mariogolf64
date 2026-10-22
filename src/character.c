@@ -12,6 +12,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "save.h"
 #include "variables.h"
 
 /* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
@@ -135,12 +136,15 @@ extern Lights2 sBlackLights;
 extern Lights2 sRainLights[DRAW_BUFFER_COUNT];
 /* SetCharacterLights' lights, in dry weather colors that change near the end of the round */
 extern Lights2 sDryLights[DRAW_BUFFER_COUNT];
-/* The ambient and first light last drawn with, used instead while D_800C1B70 is set */
+/*
+ * The ambient and first light last drawn with, used instead while D_800C1B70
+ * is set; DrawCharacterAndShadow then sets their second light
+ */
 extern Lights2 sSavedLights[DRAW_BUFFER_COUNT];
-/* The direction of each set's second light */
-extern s32 D_800C1F90;
-extern s32 D_800C1F94;
-extern s32 D_800C1F98;
+/* The direction of each set's second light, across the main camera's view */
+extern s32 sSecondLightDirectionX;
+extern s32 sSecondLightDirectionY;
+extern s32 sSecondLightDirectionZ;
 
 /* SetCharacterLights' dry colors near the end of the round */
 #define LATE_AMBIENT_LEVEL 120
@@ -183,6 +187,37 @@ extern Gfx sBackCulling[];
 #define FULL_TURN_DEGREES 360
 #define BLEND_ALPHA 0x80
 #define OPAQUE_ALPHA 0xFF
+
+/* Written elsewhere; D_800C1B74 is the level of sSavedLights' second light while D_800C1B70 is set */
+extern s32 D_800BE698;
+extern s32 D_800C1B74;
+/* Each slot's matrices, for each draw buffer */
+extern Mtx sModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx sShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx sShadowProjections[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
+/* A square, textured with g_ShadowTexture, laid on the ground plane by sShadowMatrices */
+extern Vtx sShadowVertices[4];
+/* A header, then the 32 by 32 intensity texture of shadows */
+extern u8 *g_ShadowTexture;
+
+#define SHADOW_TEXTURE_SIZE 32
+#define SHADOW_TEXTURE_SIZE_LOG2 5
+#define SHADOW_TEXTURE_PIXELS(texture) (((u32)(texture) + 8) & ~7)
+/* The camera index DrawCharacterAndShadow always draws for */
+#define CAMERA_UNK2 2
+#define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
+#define WORLD_TO_COURSE_SCALE 1024.0f
+/* How far from the shadow point, in model units, the ground is sampled */
+#define SHADOW_CORNER_DISTANCE 30.0f
+/* CharacterSlot.shadowScale is in these units */
+#define SHADOW_SCALE_UNIT 0.0001f
+#define SHADOW_DEPTH_SCALE 0.01f
+#define SHADOW_DEPTH_OFFSET 6.0f
+#define SHADOW_ALPHA 0x80
+#define SHADOW_ALPHA_THRESHOLD 0x10
+/* Ground whose normal is nearer vertical than this counts as level */
+#define LEVEL_GROUND_NORMAL_Y 0.999f
+#define QUARTER_TURN_DEGREES 90.0f
 
 /* The segments the character display lists use */
 #define MODEL_BUFFER_SEGMENT 0x02
@@ -720,7 +755,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
         slot->playsRandomTextureAnimation = TRUE;
         slot->randomTextureAnimationDelay = LOADED_RANDOM_TEXTURE_ANIMATION_DELAY;
         slot->unk188 = 0;
-        slot->unk189 = 0;
+        slot->reusesLastMatrices = 0;
         D_800C1DF4 = slot->modelBuffer;
         if (isPatched) {
             LoadLzData(slot->model->baseRomStart, D_800C1DF4, slot->model->baseRomEnd - slot->model->baseRomStart);
@@ -778,7 +813,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
         slot->unk68[3] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 3];
         slot->unk68[4] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 4];
         slot->unk68[5] = *(f32 *)slot->model->segmentAddresses[CHARACTER_MODEL_UNK68 + 5];
-        slot->unk80 = slot->model->unk44;
+        slot->shadowScale = slot->model->shadowScale;
         count = 0;
         for (animation = ANIMATIONS(slot->model); animation->events != NULL; animation++) {
             count++;
@@ -977,11 +1012,11 @@ void SetCharacterUnk188(u32 slotIndex, s32 value) {
     }
 }
 
-s32 SetCharacterUnk189(u32 slotIndex) {
+s32 ReuseLastCharacterMatrices(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        slot->unk189 = TRUE;
+        slot->reusesLastMatrices = TRUE;
     }
 }
 
@@ -1493,11 +1528,12 @@ void SetCharacterLights(void) {
     sDryLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
         ambientColor[0], ambientColor[1], ambientColor[2], lightColor[0], lightColor[1], lightColor[2],
         lightDirection[0], lightDirection[1], lightDirection[2], lightColor[0], lightColor[1], lightColor[2],
-        D_800C1F90, D_800C1F94, D_800C1F98);
+        sSecondLightDirectionX, sSecondLightDirectionY, sSecondLightDirectionZ);
     sRainLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
         RAIN_AMBIENT_LEVEL, RAIN_AMBIENT_LEVEL, RAIN_AMBIENT_LEVEL, RAIN_LIGHT_RED, RAIN_LIGHT_GREEN,
         RAIN_LIGHT_BLUE, lightDirection[0], lightDirection[1], lightDirection[2], RAIN_SECOND_LIGHT_LEVEL,
-        RAIN_SECOND_LIGHT_LEVEL, RAIN_SECOND_LIGHT_LEVEL, D_800C1F90, D_800C1F94, D_800C1F98);
+        RAIN_SECOND_LIGHT_LEVEL, RAIN_SECOND_LIGHT_LEVEL, sSecondLightDirectionX, sSecondLightDirectionY,
+        sSecondLightDirectionZ);
 }
 
 /* Copies the ambient and first light into both of sSavedLights */
@@ -1647,5 +1683,180 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80058D04);
+/*
+ * Draws the character in the slot and its shadow, for cameraIndex's view.
+ * The shadow lies on the ground plane under three points around the
+ * character's shadow point.
+ */
+#ifdef NON_MATCHING
+void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex) {
+    f32 shadowPoint[3];
+    f32 corners[TRIANGLE_CORNER_COUNT][3];
+    f32 viewDirection[3];
+    s32 lightDirection[3];
+    Mat4 transform;
+    Mat4 rotation;
+    Mat4 translation;
+    Mat4 alignment;
+    Mat4 shadow;
+    PlaneTriangle triangle;
+    TrianglePlane plane;
+    Mat4 projection;
+    Mat4 unusedMatrix;
+    Gfx *gfx;
+    CharacterSlot *slot;
+    f32 shadowScale;
+
+    gfx = g_DisplayListHead;
+    if (cameraIndex == CAMERA_UNK2 || (cameraIndex != INSET_CAMERA && D_800BE698 != 0)) {
+        slot = GetUsedCharacterSlot(slotIndex);
+        if (slot == NULL) {
+            return;
+        }
+        viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+        viewDirection[AXIS_Y] = 0.0f;
+        viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+        if (fabsf(viewDirection[AXIS_X]) + fabsf(viewDirection[AXIS_Z]) >= 1.0f) {
+            guNormalize(&viewDirection[AXIS_X], &viewDirection[AXIS_Y], &viewDirection[AXIS_Z]);
+            viewDirection[AXIS_X] *= SECOND_LIGHT_DIRECTION_LENGTH;
+            viewDirection[AXIS_Y] *= SECOND_LIGHT_DIRECTION_LENGTH;
+            viewDirection[AXIS_Z] *= SECOND_LIGHT_DIRECTION_LENGTH;
+            sSecondLightDirectionX = lightDirection[AXIS_X] = -viewDirection[AXIS_Z];
+            sSecondLightDirectionY = 0;
+            sSecondLightDirectionZ = lightDirection[AXIS_Z] = viewDirection[AXIS_X];
+            SetCharacterLights();
+        }
+        if (D_800C1B70 != 0) {
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[0] = D_800C1B74;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[1] = D_800C1B74;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[2] = D_800C1B74 / 2;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[0] = D_800C1B74;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = D_800C1B74;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = D_800C1B74 / 2;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[0] =
+                sinf(g_Players[g_CurrentShot.playerIndex].unk22 ? slot->rotation[1] : -slot->rotation[1]) *
+                LIGHT_DIRECTION_SCALE;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[1] = 0;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[2] =
+                -cosf(g_Players[g_CurrentShot.playerIndex].unk22 ? slot->rotation[1] : -slot->rotation[1]) *
+                LIGHT_DIRECTION_SCALE;
+        }
+        if (slot->reusesLastMatrices) {
+            sModelMatrices[slotIndex][g_DrawBufferIndex] = sModelMatrices[slotIndex][g_DrawBufferIndex ^ 1];
+        } else {
+            guTranslateF(transform, slot->position[0] * COURSE_TO_WORLD_SCALE,
+                         slot->position[1] * COURSE_TO_WORLD_SCALE, slot->position[2] * COURSE_TO_WORLD_SCALE);
+            guRotateRPYF(rotation, (s32)(ROLL_ORIGIN_DEGREES - (s32)(slot->rotation[0] * RADIANS_TO_DEGREES)),
+                         (s32)(slot->rotation[1] * RADIANS_TO_DEGREES), (s32)(slot->rotation[2] * RADIANS_TO_DEGREES));
+            guMtxCatF(rotation, transform, transform);
+            guScaleF(rotation, slot->scale[0], slot->scale[1], slot->scale[2]);
+            guMtxCatF(rotation, transform, transform);
+            guMtxF2L(transform, &sModelMatrices[slotIndex][g_DrawBufferIndex]);
+            GetCharacterShadowPoint(slotIndex, shadowPoint);
+            guMtxXFMF(transform, shadowPoint[AXIS_X] + SHADOW_CORNER_DISTANCE, 0.0f, shadowPoint[AXIS_Z],
+                      &corners[0][AXIS_X], &corners[0][AXIS_Y], &corners[0][AXIS_Z]);
+            guMtxXFMF(transform, shadowPoint[AXIS_X] - SHADOW_CORNER_DISTANCE, 0.0f,
+                      shadowPoint[AXIS_Z] - SHADOW_CORNER_DISTANCE, &corners[1][AXIS_X], &corners[1][AXIS_Y],
+                      &corners[1][AXIS_Z]);
+            guMtxXFMF(transform, shadowPoint[AXIS_X] - SHADOW_CORNER_DISTANCE, 0.0f,
+                      shadowPoint[AXIS_Z] + SHADOW_CORNER_DISTANCE, &corners[2][AXIS_X], &corners[2][AXIS_Y],
+                      &corners[2][AXIS_Z]);
+            guMtxXFMF(transform, shadowPoint[AXIS_X], 0.0f, shadowPoint[AXIS_Z], &shadowPoint[AXIS_X],
+                      &shadowPoint[AXIS_Y], &shadowPoint[AXIS_Z]);
+        }
+        if (slot->reusesLastMatrices) {
+            sShadowMatrices[slotIndex][g_DrawBufferIndex] = sShadowMatrices[slotIndex][g_DrawBufferIndex ^ 1];
+        } else {
+            shadowPoint[AXIS_X] *= WORLD_TO_COURSE_SCALE;
+            shadowPoint[AXIS_Z] *= WORLD_TO_COURSE_SCALE;
+            shadowPoint[AXIS_Y] = GetGroundHeight(shadowPoint[AXIS_X], shadowPoint[AXIS_Z]);
+            shadowScale = slot->shadowScale * SHADOW_SCALE_UNIT;
+            triangle.corners[AXIS_X][0] = corners[0][AXIS_X];
+            triangle.corners[AXIS_Y][0] = GetGroundHeight(corners[0][AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                                          corners[0][AXIS_Z] * WORLD_TO_COURSE_SCALE) *
+                                          COURSE_TO_WORLD_SCALE;
+            triangle.corners[AXIS_Z][0] = corners[0][AXIS_Z];
+            triangle.corners[AXIS_X][1] = corners[1][AXIS_X];
+            triangle.corners[AXIS_Y][1] = GetGroundHeight(corners[1][AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                                          corners[1][AXIS_Z] * WORLD_TO_COURSE_SCALE) *
+                                          COURSE_TO_WORLD_SCALE;
+            triangle.corners[AXIS_Z][1] = corners[1][AXIS_Z];
+            triangle.corners[AXIS_X][2] = corners[2][AXIS_X];
+            triangle.corners[AXIS_Y][2] = GetGroundHeight(corners[2][AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                                          corners[2][AXIS_Z] * WORLD_TO_COURSE_SCALE) *
+                                          COURSE_TO_WORLD_SCALE;
+            triangle.corners[AXIS_Z][2] = corners[2][AXIS_Z];
+            GetTrianglePlane(&triangle, &plane);
+            guTranslateF(translation, shadowPoint[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                         shadowPoint[AXIS_Y] * COURSE_TO_WORLD_SCALE, shadowPoint[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+            /* guAlignF leaves the identity matrix for a vertical direction */
+            if (fabsf(plane.normal[AXIS_Y]) > LEVEL_GROUND_NORMAL_Y) {
+                guRotateF(alignment, QUARTER_TURN_DEGREES, 1.0f, 0.0f, 0.0f);
+            } else {
+                guAlignF(alignment, 0.0f, plane.normal[AXIS_X], plane.normal[AXIS_Y], plane.normal[AXIS_Z]);
+            }
+            MultiplyMatrices(alignment, translation, shadow);
+            guScaleF(alignment, shadowScale, shadowScale, SHADOW_DEPTH_SCALE);
+            MultiplyMatrices(alignment, shadow, shadow);
+            ConvertMatrixToFixed(shadow, &sShadowMatrices[slotIndex][g_DrawBufferIndex]);
+        }
+        /* Draws the shadow a little nearer the camera than the ground */
+        guMtxL2F(projection, &matrices->projection);
+        projection[3][2] -= SHADOW_DEPTH_OFFSET;
+        guMtxF2L(projection, &sShadowProjections[slotIndex][g_DrawBufferIndex]);
+        gSPMatrix(gfx++, &sShadowProjections[slotIndex][g_DrawBufferIndex],
+                  G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SHADOW_ALPHA_THRESHOLD);
+        func_800625FC(&gfx);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_ZB_CLD_SURF2);
+        gDPSetEnvColor(gfx++, 0, 0, 0, SHADOW_ALPHA);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+        gDPLoadTextureBlock(gfx++, SHADOW_TEXTURE_PIXELS(g_ShadowTexture), G_IM_FMT_I, G_IM_SIZ_8b,
+                            SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP,
+                            G_TX_MIRROR | G_TX_WRAP, SHADOW_TEXTURE_SIZE_LOG2, SHADOW_TEXTURE_SIZE_LOG2,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, 0, ENVIRONMENT, 0, TEXEL0, 0, 0, 0, 0, 0, 0, 0, 0, COMBINED);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLOD(gfx++, G_TL_TILE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gSPMatrix(gfx++, &sShadowMatrices[slotIndex][g_DrawBufferIndex], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+        gSPVertex(gfx++, sShadowVertices, ARRAY_COUNT(sShadowVertices), 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gSPMatrix(gfx++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++, &sModelMatrices[slotIndex][g_DrawBufferIndex], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+        g_DisplayListHead = gfx;
+        DrawCharacter(slotIndex);
+        gfx = g_DisplayListHead;
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        slot->reusesLastMatrices = FALSE;
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        g_DisplayListHead = gfx;
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", DrawCharacterAndShadow);
+#endif
 

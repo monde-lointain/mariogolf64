@@ -1,4 +1,5 @@
 #include "common.h"
+#include "functions.h"
 #include "variables.h"
 
 /* Each half of g_ShadedVertices is two quads; the second takes the derived color */
@@ -30,7 +31,6 @@ extern u8 D_800E1C1B;
 extern u8 D_800E1C1C;
 extern u8 D_800E1C1D;
 
-void func_800625FC(Gfx **displayListHead);
 
 /*
  * Sets the shaded quads of g_ShadedVertices and two color globals from

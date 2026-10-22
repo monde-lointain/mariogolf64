@@ -27,14 +27,10 @@
 /* osMapTLB's address space id for a global mapping */
 #define NO_TLB_ASID -1
 
-#define CHARACTER_POINT_UNK2 2
-
 #define MODEL_TO_WORLD_SCALE 0.01f
 #define SLOT_POSITION_SCALE (1.0f / 1024)
 
 /* The slot's first rotation is taken away from this roll */
-#define ROLL_ORIGIN_DEGREES 180
-
 /* Data still in the unsplit data and bss files */
 extern u8 sEnvColors[ENV_COLOR_COUNT][3];
 extern LookAt sHiliteLookAts[DRAW_BUFFER_COUNT];
@@ -1619,7 +1615,8 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32 *position) {
     return result;
 }
 
-void func_800548DC(u32 slotIndex, f32 *position) {
-    GetCharacterPointModelPosition(slotIndex, CHARACTER_POINT_UNK2, position);
+/* The model position of the point the character's shadow lies under */
+void GetCharacterShadowPoint(u32 slotIndex, f32 *position) {
+    GetCharacterPointModelPosition(slotIndex, CHARACTER_POINT_SHADOW, position);
 }
 

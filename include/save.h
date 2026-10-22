@@ -148,7 +148,8 @@ typedef struct UnkB8 {
     /* 0x10 */ s32 unk10[(0x1C - 0x10) / 4];
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E[0x23 - 0x1E];
+    /* 0x1E */ u8 unk1E[0x22 - 0x1E];
+    /* 0x22 */ s8 unk22;
     /* 0x23 */ s8 unk23;
     /* 0x24 */ u8 unk24[2];
     /* 0x26 */ s8 unk26;
