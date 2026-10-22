@@ -33,6 +33,9 @@
 /* Set when a saved game is continued, among other places */
 #define GAME_FLAG_UNK1E 0x1E
 
+/* Makes InitClubs generate every club's parameters, then call WriteClubParameters */
+#define GAME_FLAG_GENERATE_CLUBS 0x1F
+
 /* Logs the ID of each encoded asset that is opened */
 #define GAME_FLAG_LOG_ENCODED_ASSETS 0x49
 
@@ -41,6 +44,9 @@
 
 /* Turns the character sound queue into a delay editor, among other uses */
 #define GAME_FLAG_UNK5F 0x5F
+
+/* Makes every club usable on every surface */
+#define GAME_FLAG_ANY_CLUB_ANYWHERE 0x98
 
 /* Keeps sound effects from starting */
 #define GAME_FLAG_SILENCE_SOUND_EFFECTS 0x9C
