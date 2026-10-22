@@ -982,3 +982,4 @@ g_EveryCharacterGrid = 0x800C2910; // size:0x1C
 g_StartingCharacterGrid = 0x800C298C; // size:0x2A
 g_ImportedCharacters = 0x800FE3D8; // size:0x58
 D_800C2B90 = 0x800C2B90; // size:0x20
+SaveOrContinueGame = 0x8005BC10; // type:func

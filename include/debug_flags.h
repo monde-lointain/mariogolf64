@@ -22,6 +22,9 @@
 /* Makes every character selectable */
 #define DEBUG_FLAG_ALL_CHARACTERS 0x54
 
+/* Set when a saved game is continued, among other places */
+#define DEBUG_FLAG_UNK1E 0x1E
+
 s32 IsDebugFlagSet(u32 flag);
 void SetDebugFlag(u32 flag);
 void ClearDebugFlag(u32 flag);

@@ -8,7 +8,9 @@
 
 #define SAVE_COPY_COUNT 2
 #define SAVE_RECORD_COUNT 5
-#define SAVE_UNKA0_COUNT 3
+/* The games saved partway through, to continue later */
+#define SAVED_GAME_COUNT 3
+#define MAX_PLAYER_COUNT 4
 
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
@@ -46,25 +48,41 @@ typedef struct Unk68 {
     /* 0x3B */ u8 unk3B[0x68 - 0x3B];
 } Unk68; /* size = 0x68 */
 
-typedef struct UnkA0Sub3C {
+/* The globals from D_801B6088 on, which the game is continued with */
+typedef struct Unk801B6088 {
     /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
+    /* 0x04 */ s32 gameMode;
+    /* 0x08 */ s32 playerCount;
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10;
-} UnkA0Sub3C; /* size = 0x14 */
+    /* 0x14 */ u8 unk14[0x3A - 0x14];
+    /* 0x3A */ s8 unk3A;
+    /* 0x3B */ u8 unk3B[0x3D - 0x3B];
+    /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
+    /* 0x3E */ u8 unk3E[0x44 - 0x3E];
+} Unk801B6088; /* size = 0x44 */
 
-typedef struct UnkA0 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ u8 unk4[0x3C - 0x4];
-    /* 0x3C */ UnkA0Sub3C unk3C;
-    /* 0x50 */ u8 unk50[0x76 - 0x50];
-    /* 0x76 */ s8 unk76;
-    /* 0x77 */ u8 unk77[0xA0 - 0x77];
-} UnkA0; /* size = 0xA0 */
+typedef struct Unk800BA9D8 {
+    /* 0x00 */ s32 unk0[0x34 / 4];
+} Unk800BA9D8; /* size = 0x34 */
+
+typedef struct Unk800FF4D0 {
+    /* 0x00 */ s32 unk0[0x1C / 4];
+} Unk800FF4D0; /* size = 0x1C */
+
+typedef struct SavedGame {
+    /* 0x00 */ s32 isValid;
+    /* 0x04 */ u8 unk4[4];
+    /* 0x08 */ Unk800BA9D8 unk8;
+    /* 0x3C */ Unk801B6088 unk3C;
+    /* 0x80 */ Unk800FF4D0 unk80;
+    /* 0x9C */ u8 unk9C[4];
+} SavedGame; /* size = 0xA0 */
 
 typedef struct UnkB8 {
-    /* 0x00 */ s32 unk0[0x1C / 4];
+    /* 0x00 */ s32 unk0[0xC / 4];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10[(0x1C - 0x10) / 4];
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 unk1D;
     /* 0x1E */ u8 unk1E[0x7B - 0x1E];
@@ -96,8 +114,8 @@ typedef struct SaveData {
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
     /* 0x15D0 */ u8 unk15D0[0x1DF0 - 0x15D0];
     /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];
-    /* 0x1FF8 */ UnkA0 unk1FF8[SAVE_UNKA0_COUNT];
-    /* 0x21D8 */ UnkB8 unk21D8[SAVE_UNKA0_COUNT][4];
+    /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
+    /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */

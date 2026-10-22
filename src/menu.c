@@ -99,6 +99,20 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
+/*
+ * SaveOrContinueGame's messages, which the rodata of func_8005B7BC holds
+ * until that is in C
+ */
+extern char D_800D0944[]; /* "Too Many Players\n" */
+extern char D_800D0958[]; /* "Illegal PlayerState\n" */
+extern char D_800D0970[]; /* "Go Continue\n" */
+extern Unk801B6088 D_801B6088;
+extern Unk801B6088 D_801B55F0;
+extern Unk800BA9D8 D_800BA9D8;
+extern Unk800FF4D0 D_800FF4D0;
+extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
+extern UnkB8 D_801B71D0[MAX_PLAYER_COUNT];
+extern s8 D_801B60B8;
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800FF4C0;
 extern s8 D_801B5634;
@@ -398,7 +412,86 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005B314);
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005B7BC);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005BC10);
+/* Player states that a saved game may hold; the first group restarts as 0 */
+#define PLAYER_STATE_UNK0 0
+#define PLAYER_STATE_UNK2 2
+#define PLAYER_STATE_UNK3 3
+#define PLAYER_STATE_UNK17 17
+#define PLAYER_STATE_UNK20 20
+#define PLAYER_STATE_UNK21 21
+
+#define MAX_SAVE_COUNT 99
+
+s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
+    UnkB8 *players;
+    SavedGame *game;
+    s32 playerCount;
+    s32 hasIllegalState;
+    s32 index;
+
+    playerCount = MAX_PLAYER_COUNT; /* The limit, until the count is known */
+    players = g_SaveData.savedPlayers[slotIndex];
+    game = &g_SaveData.savedGames[slotIndex];
+    if (!isContinuing) {
+        hasIllegalState = FALSE;
+        if (D_801B6088.playerCount > playerCount) {
+            osSyncPrintf(D_800D0944);
+            return -1;
+        }
+        playerCount = D_801B6088.playerCount;
+        game->isValid = FALSE;
+        for (index = 0; index < playerCount; index++) {
+            players[index] = D_8012D0C8[index];
+            switch (players[index].unkC) {
+                case PLAYER_STATE_UNK0:
+                case PLAYER_STATE_UNK2:
+                case PLAYER_STATE_UNK3:
+                case PLAYER_STATE_UNK21:
+                    players[index].unkC = PLAYER_STATE_UNK0;
+                    break;
+                default:
+                    osSyncPrintf(D_800D0958);
+                    hasIllegalState = TRUE;
+                    break;
+                case PLAYER_STATE_UNK17:
+                case PLAYER_STATE_UNK20:
+                    break;
+            }
+        }
+        game->unk3C = D_801B55F0;
+        if (game->unk3C.saveCount < MAX_SAVE_COUNT) {
+            game->unk3C.saveCount++;
+        }
+        game->unk8 = D_800BA9D8;
+        game->unk80 = D_800FF4D0;
+        if (hasIllegalState) {
+            return -1;
+        }
+        game->isValid = TRUE;
+    } else {
+        if (game->isValid == TRUE) {
+            if (game->unk3C.playerCount > playerCount) {
+                osSyncPrintf(D_800D0944);
+                return -1;
+            }
+            playerCount = game->unk3C.playerCount;
+            for (index = 0; index < playerCount; index++) {
+                D_801B71D0[index] = players[index];
+            }
+            D_801B6088 = game->unk3C;
+            D_801B6088.unk0 = 1;
+            SetDebugFlag(DEBUG_FLAG_UNK1E);
+            D_800BA9D8 = game->unk8;
+            D_800FF4D0 = game->unk80;
+        }
+        D_801B60B8 = 2;
+        osSyncPrintf(D_800D0970);
+    }
+    if (!isContinuing) {
+        TransferSaveData(GetSaveData(), TRUE);
+    }
+    return 0;
+}
 
 void RecordDisplayListLength(u32 commandCount) {
     if (g_SaveData.longestDisplayListLength < commandCount) {
@@ -407,6 +500,7 @@ void RecordDisplayListLength(u32 commandCount) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005C038);
+
 
 s32 HasEveryRingShotStar(void) {
     SaveData *save;
@@ -674,25 +768,25 @@ s32 func_8005CEE0(s32 index) {
 #ifdef NON_MATCHING
 void func_8005CF78(void) {
     SaveData *save;
-    s32 isInvalid[SAVE_UNKA0_COUNT];
+    s32 isInvalid[SAVED_GAME_COUNT];
     s32 index;
     s32 entryIndex;
-    UnkA0 *unk;
-    UnkA0Sub3C *sub;
+    SavedGame *unk;
+    Unk801B6088 *sub;
     UnkB8 *entries;
 
     save = GetSaveData();
-    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
         isInvalid[index] = FALSE;
     }
-    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
-        if (save->unk1FF8[index].unk0 == 0) {
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
+        if (!save->savedGames[index].isValid) {
             continue;
         }
-        unk = &save->unk1FF8[index];
+        unk = &save->savedGames[index];
         sub = &unk->unk3C;
-        if (unk->unk76 == 0) {
-            switch (sub->unk4) {
+        if (sub->unk3A == 0) {
+            switch (sub->gameMode) {
                 case 0:
                 case 2:
                 case 4:
@@ -705,7 +799,7 @@ void func_8005CF78(void) {
                     break;
             }
         }
-        if (sub->unk8 < 1 || sub->unk8 > 4) {
+        if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
             isInvalid[index] = TRUE;
         }
         if (sub->unkC < 0 || sub->unkC >= 12) {
@@ -714,8 +808,8 @@ void func_8005CF78(void) {
         if (sub->unk10 < 0 || sub->unk10 >= COURSE_HOLE_COUNT) {
             isInvalid[index] = TRUE;
         }
-        entries = save->unk21D8[index];
-        for (entryIndex = 0; entryIndex != sub->unk8; entryIndex++) {
+        entries = save->savedPlayers[index];
+        for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
             if (entries[entryIndex].unk1D >= COURSE_HOLE_COUNT) {
                 isInvalid[index] = TRUE;
             }
@@ -724,9 +818,9 @@ void func_8005CF78(void) {
             }
         }
     }
-    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
+    for (index = 0; index != SAVED_GAME_COUNT; index++) {
         if (isInvalid[index] == TRUE) {
-            save->unk1FF8[index].unk0 = 0;
+            save->savedGames[index].isValid = FALSE;
         }
     }
 }
@@ -1043,7 +1137,7 @@ void func_8005DDAC(void) {
     D_800C2BD4 = 0;
     D_801B9410 = 1;
     D_801B60B9 = 0;
-    ClearDebugFlag(0x1E);
+    ClearDebugFlag(DEBUG_FLAG_UNK1E);
     D_801EFFA0 = 0xC;
 }
 
