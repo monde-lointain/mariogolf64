@@ -12,6 +12,9 @@
 
 #define GAME_FLAG_COUNT 256
 
+/* Adds a ring at a fixed place, once each time the flag is set */
+#define GAME_FLAG_TEST_RING 0x25
+
 /* Hides the billboards */
 #define GAME_FLAG_HIDE_BILLBOARDS 0x0E
 

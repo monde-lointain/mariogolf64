@@ -5,6 +5,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
 #include "camera.h"
@@ -920,8 +921,6 @@ void func_800530FC(CameraMatrices *matrices);
 void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
 void func_800625FC(Gfx **displayListHead);
 void func_80062A8C(CameraMatrices *matrices, s32);
-void func_800660B0(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera);
-void func_80066B50(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera);
 void func_8006AEA4(Gfx **displayListHead);
 void func_8006B5D8(Gfx **displayListHead);
 void func_8006BC80(Gfx **displayListHead);
@@ -1519,12 +1518,12 @@ s32 DrawGame(void) {
                         }
                         DrawBillboards(matrices, viewIndex);
                         if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
-                            func_80066B50(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
                                 func_80082534(&g_DisplayListHead, matrices);
                             }
-                            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             func_800625FC(&g_DisplayListHead);
                             DrawFadingBillboards(matrices, viewIndex);
                         }
@@ -1547,12 +1546,12 @@ s32 DrawGame(void) {
                             func_8003E6C0(matrices, &camera->view, viewIndex);
                         }
                         if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
-                            func_80066B50(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
                                 func_80082534(&g_DisplayListHead, matrices);
                             }
-                            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             func_800625FC(&g_DisplayListHead);
                             DrawFadingBillboards(matrices, viewIndex);
                         }
@@ -1631,7 +1630,7 @@ s32 DrawGame(void) {
                 if (!IsGameFlagSet(0x17)) {
                     func_8003E6C0(matrices, &camera->view, viewIndex);
                 }
-                func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                 gDPPipeSync(g_DisplayListHead++);
                 SET_CAMERA_SCISSOR(g_Cameras[0].view);
             }
@@ -1639,7 +1638,7 @@ s32 DrawGame(void) {
             if (!IsGameFlagSet(6)) {
                 func_80062A8C(matrices, terrainStyle);
             }
-            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+            DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
             func_8003E6C0(matrices, &g_MapCamera.view, viewIndex);
             if (drawMode != DRAW_MODE_MAP_MINIATURE && drawMode != DRAW_MODE_MAP_TOP_DOWN) {
                 DrawBillboards(matrices, viewIndex);

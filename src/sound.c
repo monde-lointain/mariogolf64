@@ -101,7 +101,6 @@ extern s32 sSongId;
 extern u32 sSongRomBounds[(LAST_SONG_ID + 1) * 2];
 extern u32 sLastAudioFrame;
 
-void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan);
 musHandle StartSoundEffect(s32 soundId);
 musHandle StartLoadedSong(void);
 void LoadSong(u32 romAddress, u32 size);

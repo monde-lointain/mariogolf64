@@ -14,6 +14,9 @@
 #define SAVED_GAME_COUNT 3
 #define MAX_PLAYER_COUNT 4
 
+/* The most rings that a hole of Ring Shot has */
+#define RING_COUNT 3
+
 /*
  * The games kept for continuing by game mode rather than by slot, and the
  * players and records kept with them
@@ -80,7 +83,9 @@ typedef struct GameState {
     /* 0x1C */ s32 unk1C;
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
-    /* 0x28 */ u8 unk28[0x3A - 0x28];
+    /* 0x28 */ u8 unk28[0x30 - 0x28];
+    /* 0x30 */ s8 unk30;
+    /* 0x31 */ u8 unk31[0x3A - 0x31];
     /* 0x3A */ s8 unk3A;
     /* 0x3B */ u8 unk3B[0x3D - 0x3B];
     /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
@@ -151,8 +156,8 @@ typedef struct UnkB8 {
     /* 0x2A */ PlayerHole holes[COURSE_HOLE_COUNT];
     /* 0x4E */ u8 unk4E[0x52 - 0x4E];
     /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
-    /* 0x72 */ u8 unk72[0x7A - 0x72];
-    /* 0x7A */ u8 unk7A;
+    /* 0x72 */ u8 unk72[0x78 - 0x72];
+    /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
     /* 0x7B */ u8 unk7B;
     /* 0x7C */ u8 unk7C[0xB8 - 0x7C];
 } UnkB8; /* size = 0xB8 */
