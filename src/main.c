@@ -4,6 +4,7 @@
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "main.h"
 #include <PR/libmus.h>
 #include "overlay_manager.h"
 #include "segment_symbols.h"
@@ -25,9 +26,6 @@
 #define RESIDENT_MODULE_ID 0x0C
 #define STARTUP_MODULE_ID 0x06
 
-/* Bytes in g_WorkArea, part of which holds the characters' buffers */
-#define WORK_AREA_SIZE 0x827E0
-
 /* Character slots that get a buffer in g_WorkArea */
 #define CHARACTER_SLOT_PARTNER 1
 #define CHARACTER_SLOT_CADDIE 2
@@ -46,12 +44,6 @@
 #define HALT_STATE_ALLOWED 1
 #define HALT_STATE_HALTED 2
 #define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
-
-/* Values of g_FrameStepState, with which the second controller pauses
-   the game (L on the control pad) and steps it a frame at a time */
-#define FRAME_STEP_RUNNING 0
-#define FRAME_STEP_ONE_FRAME 1
-#define FRAME_STEP_PAUSED 2
 
 /* Graphics tasks that may wait for the RDP before a frame is skipped,
    depending on g_FramePacingMode */
@@ -86,22 +78,17 @@ typedef struct MenuRepeatState {
     /* 0x4 */ u16 previousButtons;
 } MenuRepeatState; /* size = 0x6 */
 
-extern s32 g_HasExpansionPak;
 extern volatile u8 g_DebugHaltState;
-extern s32 g_FramesPerSecond;
 extern u16 *sFramebuffers[FRAMEBUFFER_COUNT];
 extern s32 sRetraceCount;
 extern s32 sFramesThisSecond;
-extern s8 g_FrameStepState;
 extern s32 sIsOddRetrace;
-extern s8 g_FramePacingMode;
 extern volatile s32 g_MainLoopState;
 extern u8 sDebugFlagBits[DEBUG_FLAG_COUNT / 8];
 extern MenuRepeatState sMenuRepeatStates[MAXCONTROLLERS];
 extern u16 *g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
-extern u8 g_WorkArea[WORK_AREA_SIZE];
 
 void HandleGfxRetrace(s32 pendingTaskCount);
 
