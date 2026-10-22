@@ -320,7 +320,7 @@ s32 GetCoursePointsNeeded(s32 courseIndex) {
     return g_CoursePointsNeeded[courseIndex];
 }
 
-s32 func_8005B0B4(Unk68 *record) {
+s32 GetRecordPriority(Unk68 *record) {
     s32 value;
     s32 bits;
     s32 unk2C;
@@ -402,7 +402,86 @@ void func_8005B28C(s32 recordIndex, Unk68 *record) {
     TransferSaveData(GetSaveData(), TRUE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B314);
+/* The save keeps the highest-priority records of each kind, this many each */
+#define RANKED_GROUP_LENGTH 5
+
+void InsertRankedRecord(Unk68 *record) {
+    s32 priorities[RANKED_RECORD_COUNT];
+    s32 order[RANKED_RECORD_COUNT];
+    Unk68 copies[RANKED_RECORD_COUNT];
+    s32 newPriority;
+    Unk68 *records;
+    s32 firstIndex;
+    s32 lowestPriority;
+    s32 lowestIndex;
+    s32 index;
+    s32 groupLength;
+
+    osSyncPrintf("Checking SuperShot");
+    if ((s8)record->unk3A & 0x80) {
+        records = g_SaveData.rankedRecords;
+        newPriority = GetRecordPriority(record);
+        lowestPriority = 0x40000000; /* Above any priority */
+        lowestIndex = 0;
+        /* Every case sets the length, which the original needs to match */
+        switch (record->unk3A & 0xF) {
+            case 3:
+                firstIndex = 0 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case 2:
+                firstIndex = 1 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case 0:
+                firstIndex = 2 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+            case 1:
+            default:
+                firstIndex = 3 * RANKED_GROUP_LENGTH;
+                groupLength = RANKED_GROUP_LENGTH;
+                break;
+        }
+        osSyncPrintf("1:prior=%d:", newPriority);
+        for (index = 0; index < groupLength; index++) {
+            priorities[index] = GetRecordPriority(&records[firstIndex + index]);
+        }
+        for (index = 0; index < groupLength; index++) {
+            if (lowestPriority >= priorities[index]) {
+                lowestIndex = index;
+                lowestPriority = priorities[index];
+            }
+        }
+        if (newPriority >= lowestPriority) {
+            /*
+             * Rank the group with its lowest entry dropped into slots 1 on,
+             * put the new record in slot 0, then rank all of them again
+             */
+            osSyncPrintf("2");
+            priorities[lowestIndex] = 0;
+            SortIndicesDescending(priorities, order, groupLength);
+            for (index = 0; index < groupLength; index++) {
+                copies[index] = records[firstIndex + index];
+            }
+            for (index = 0; index < groupLength - 1; index++) {
+                records[firstIndex + index + 1] = copies[order[index]];
+                priorities[index + 1] = GetRecordPriority(&records[firstIndex + index + 1]);
+            }
+            priorities[0] = newPriority;
+            records[firstIndex] = *record;
+            SortIndicesDescending(priorities, order, groupLength);
+            for (index = 0; index < groupLength; index++) {
+                copies[index] = records[firstIndex + index];
+            }
+            for (index = 0; index < groupLength; index++) {
+                records[firstIndex + index] = copies[order[index]];
+            }
+            TransferSaveData(GetSaveData(), TRUE);
+        }
+    }
+    osSyncPrintf("\n");
+}
 
 /* Player states that a saved game may hold; the first group restarts as 0 */
 #define PLAYER_STATE_UNK0 0

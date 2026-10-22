@@ -982,3 +982,5 @@ D_800C2B90 = 0x800C2B90; // size:0x20
 InsertBestTime = 0x8005C038; // type:func
 SaveOrContinueGame = 0x8005BC10; // type:func
 SaveOrContinueGameByMode = 0x8005B7BC; // type:func
+InsertRankedRecord = 0x8005B314; // type:func
+GetRecordPriority = 0x8005B0B4; // type:func
