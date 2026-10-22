@@ -8,6 +8,7 @@
 #include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
+#include "libc.h"
 #include "main.h"
 #include "math_util.h"
 
@@ -114,6 +115,22 @@
 #define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
 #define QUARTER_TURN_RADIANS 1.5707964f
 
+void AdvanceTextureAnimations(u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame);
+
+/* Set to the model buffer of the slot last set up or animated */
+extern void *D_800C1DF4;
+
+/* The size of a line of debug text */
+#define DEBUG_LINE_SIZE 0x80
+
+/* Where AnimateCharacter prints a slot's frame when GAME_FLAG_SHOW_ANIMATION_FRAMES is set */
+#define ANIMATION_FRAME_TEXT_COLUMN 10
+#define ANIMATION_FRAME_TEXT_FIRST_ROW 5
+
+/* How many steps go by between plays of a slot's random texture animation */
+#define RANDOM_TEXTURE_ANIMATION_DELAY_MIN 30
+#define RANDOM_TEXTURE_ANIMATION_DELAY_MASK 0x1F
+
 /* The slot that WriteBallDistances loads each character into */
 #define MEASURED_SLOT 0
 /* The shot mode that WriteBallDistances measures every column with */
@@ -159,7 +176,7 @@ static const s32 sBallDistances[PLAYABLE_CHARACTER_COUNT][BALL_DISTANCE_COUNT] =
 #ifdef NON_MATCHING
 s32 GetBallDistance(u32 slotIndex, s32 club, s32 isClubKind, s32 shotMode) {
     f32 position[3];
-    char text[0x80];
+    char text[DEBUG_LINE_SIZE];
     s32 distance;
     s32 pointId = WOOD_DISTANCE_POINT;
     s32 column;
@@ -450,10 +467,10 @@ INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
 
 /*
  * Shows the keyed textures of the slot's playing texture animations, then
- * advances each one a frame
+ * advances each one a frame. The arguments after the slot are unused.
  */
 #ifdef NON_MATCHING
-void AdvanceTextureAnimations(u32 slotIndex) {
+void AdvanceTextureAnimations(u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame) {
     s32 triangleIndex = 0;
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
     AnimatedTriangle *triangle;
@@ -777,13 +794,91 @@ s32 GetAnimationFrame(u32 slotIndex) {
     return frame;
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", AnimateCharacter);
+/*
+ * Steps the slot's animation: carries out the events of the frame, advances
+ * the frame, and poses the joints into the next frame data copy
+ */
+void AnimateCharacter(u32 slotIndex) {
+    AnimationEventAction actions[EVENT_ACTION_COUNT_MAX];
+    char text[DEBUG_LINE_SIZE];
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 i = 0;
+    s32 actionCount;
+    s32 hasLooped;
+
+    if (slot != NULL) {
+        hasLooped = FALSE;
+        MAP_MODEL_BUFFER(slot);
+        actionCount = GetAnimationEventActions(slotIndex, slot->animationIndex, slot->animationFrame, actions);
+        for (; i < actionCount; i++) {
+            switch (actions[i].kind) {
+                case ANIMATION_EVENT_LOOP_START:
+                    break;
+                case ANIMATION_EVENT_LOOP_END:
+                    if (slot->isLooping) {
+                        hasLooped = TRUE;
+                        slot->animationFrame =
+                            GetAnimationEventFrame(slotIndex, slot->animationIndex, ANIMATION_EVENT_LOOP_START) +
+                            ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+                    }
+                    break;
+                case ANIMATION_EVENT_TEXTURE_ANIMATION:
+                    if (actions[i].value == TEXTURE_ANIMATION_EVENT_START_RANDOM) {
+                        slot->playsRandomTextureAnimation = TRUE;
+                    } else if (actions[i].value == TEXTURE_ANIMATION_EVENT_STOP_RANDOM) {
+                        slot->playsRandomTextureAnimation = FALSE;
+                    } else {
+                        PlayTextureAnimation(slotIndex, actions[i].value);
+                    }
+                    break;
+            }
+        }
+        if (!hasLooped) {
+            slot->animationFrame += slot->animationSpeed;
+        }
+        if (slot->animationFrame > slot->animationEndFrame) {
+            if (slot->nextAnimationId != NO_NEXT_ANIMATION) {
+                SetCharacterAnimation(slotIndex, slot->nextAnimationId);
+                slot->nextAnimationId = NO_NEXT_ANIMATION;
+            } else {
+                slot->animationFrame = slot->animationEndFrame;
+            }
+        }
+        if (slot->animationFrame < slot->animationStartFrame) {
+            slot->animationFrame = slot->animationStartFrame;
+        }
+        g_CharacterModelIndex = slot->modelIndex;
+        g_CurrentAnimationFrame = slot->animationFrame;
+        g_CurrentAnimationEndFrame = slot->animationEndFrame;
+        g_CurrentAnimationStartFrame = slot->animationStartFrame;
+        if (IsGameFlagSet(GAME_FLAG_SHOW_ANIMATION_FRAMES)) {
+            sprintf(text, "[PC%d Frame%d]         ", slotIndex,
+                    (s32)(g_CurrentAnimationFrame - slot->animationStartFrame));
+            PrintDebugText(text, ANIMATION_FRAME_TEXT_COLUMN, slotIndex + ANIMATION_FRAME_TEXT_FIRST_ROW);
+        }
+        if (slot->playsRandomTextureAnimation) {
+            if (slot->randomTextureAnimationDelay == 0) {
+                PlayTextureAnimation(slotIndex, RANDOM_TEXTURE_ANIMATION);
+                slot->randomTextureAnimationDelay =
+                    (rand() & RANDOM_TEXTURE_ANIMATION_DELAY_MASK) + RANDOM_TEXTURE_ANIMATION_DELAY_MIN;
+            } else {
+                slot->randomTextureAnimationDelay--;
+            }
+        }
+        AdvanceTextureAnimations(slotIndex, 0, (s32)g_CurrentAnimationFrame % 10, g_CurrentAnimationFrame);
+        g_CurrentJointMatrices = slot->frameData[slot->frameDataIndex];
+        D_800C1DF4 = slot->modelBuffer;
+        slot->frameDataIndex = (slot->frameDataIndex + 1) % FRAME_DATA_COPY_COUNT;
+        AnimateCharacterJoints(slotIndex);
+        slot->jointMatrices = g_CurrentJointMatrices;
+    }
+}
 
 /* As above, so the data below lands in .rodata */
 __asm__(".section .rodata");
 
-/* The double 1.0, which func_800568CC loads as two words */
-const u32 D_800D07E8 = 0x3FF00000;
+/* The double 1.0, which func_800568CC loads as two words, aligned as a double is */
+const u32 D_800D07E8 __attribute__((aligned(8))) = 0x3FF00000;
 const u32 D_800D07EC = 0;
 
 INCLUDE_ASM("asm/nonmatchings/character", func_800568CC);

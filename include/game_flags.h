@@ -46,6 +46,8 @@
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
 /* Measures ball distances from the character models instead of reading them from a table */
 #define GAME_FLAG_GENERATE_BALL_DISTANCES 0x36
+/* Prints each character slot's animation frame */
+#define GAME_FLAG_SHOW_ANIMATION_FRAMES 0x38
 
 /* Turns the character sound queue into a delay editor, among other uses */
 #define GAME_FLAG_UNK5F 0x5F
