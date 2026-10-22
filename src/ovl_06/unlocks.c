@@ -1,6 +1,7 @@
 #include "common.h"
 #include "controller.h"
 #include "save.h"
+#include "sound.h"
 #include "sram.h"
 #include "unlocks.h"
 
@@ -24,7 +25,6 @@
 /* ovl_01 sets this to the held buttons of each player's menu reading, ORed together */
 extern s32 D_800C2000;
 
-void func_80050BF0(s32, s32, s32);
 void func_8005C674(s32, s32);
 
 void GrantWinsStarsAndBadges(void);
@@ -43,7 +43,7 @@ static s32 sUnusedCodeLength = 0;
 void UnlockEverything(void) {
     SaveData *save = GetSaveData();
 
-    func_80050BF0(0x69, 0xD, 0x50);
+    PlaySound(0x69, 0xD, 0x50);
     InitSram();
     TransferSaveData(save, FALSE);
     GrantWinsStarsAndBadges();
@@ -137,7 +137,7 @@ void UpdateUnusedButtonCode(void) {
                 for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
                     sUnusedCodeEntered[index] = NO_BUTTONS;
                 }
-                func_80050BF0(0x69, 0xD, 0x50);
+                PlaySound(0x69, 0xD, 0x50);
                 UnlockEverything();
             }
         } else {

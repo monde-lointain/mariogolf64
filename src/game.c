@@ -12,6 +12,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "variables.h"
 
 /* Sub-modules that RequestSubModule loads for some game modes */
@@ -918,8 +919,6 @@ void func_8004DC44(void);
 void func_8004E924(s32, s32, u32, u32, s32, s32);
 void func_8004FDB4(s32, s32);
 void func_8005029C(void);
-void func_80050BF0(s32, s32, s32);
-void func_80051A60(void);
 void func_800530FC(CameraMatrices *matrices);
 void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
 void func_800625FC(Gfx **displayListHead);
@@ -1045,13 +1044,13 @@ s32 DrawGame(void) {
         func_8004DA9C(__MusIntMemRemaining(), 20, 10);
         trigger = &g_ControllerData[1].trigger;
         if (*trigger & B_BUTTON) {
-            func_80051A60();
+            RequestSongStop();
             _mus_cpu_worst = 0;
         }
         if (*trigger & A_BUTTON) {
-            func_80050BF0(0x87, 3, 0x60);
-            func_80050BF0(400, 4, 0x60);
-            func_80050BF0(0x76, 11, 0x60);
+            PlaySound(0x87, 3, 0x60);
+            PlaySound(400, 4, 0x60);
+            PlaySound(0x76, 11, 0x60);
         }
     }
 
@@ -2192,7 +2191,7 @@ void UpdateInsetView(void) {
 
     if (*animation == INSET_VIEW_OPENING) {
         if (g_InsetViewStep == 1) {
-            func_80050DA0(SOUND_INSET_VIEW_OPEN, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
+            PlaySoundWithEffects(SOUND_INSET_VIEW_OPEN, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
                           INSET_VIEW_SOUND_PAN);
         }
         g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
@@ -2203,7 +2202,7 @@ void UpdateInsetView(void) {
         }
     } else if (*animation == INSET_VIEW_CLOSING) {
         if (g_InsetViewStep == INSET_VIEW_STEP_COUNT - 1) {
-            func_80050DA0(SOUND_INSET_VIEW_CLOSE, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
+            PlaySoundWithEffects(SOUND_INSET_VIEW_CLOSE, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
                           INSET_VIEW_SOUND_PAN);
         }
         g_InsetViewStep--;

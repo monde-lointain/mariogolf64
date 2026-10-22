@@ -1,12 +1,12 @@
 #include "common.h"
 #include "controller.h"
 #include "scene.h"
+#include "sound.h"
 
 /* Given this image, func_800719A0 stores it in the slot and sets up nothing else */
 #define NO_IMAGE (-1)
 
 void func_8009226C(s32);
-void func_80050BF0(s32, s32, s32);
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 
 /*
@@ -21,7 +21,7 @@ void WaitForConfirmButton(void) {
         g_NextScene = 27;
         g_SceneModuleToUnload = 0x0D;
         g_SceneModuleToLoad = 0x0C;
-        func_80050BF0(0x5D, 0xF, 0x7F);
+        PlaySound(0x5D, 0xF, 0x7F);
         /* The position goes unused with NO_IMAGE */
         func_800719A0(160, 114, NO_IMAGE, 1, 0, 0, 0, 0, 0, 0);
     }

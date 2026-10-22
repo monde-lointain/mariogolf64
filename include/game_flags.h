@@ -36,6 +36,15 @@
 /* Cuts every round to two holes */
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
 
+/* Turns the character sound queue into a delay editor, among other uses */
+#define GAME_FLAG_UNK5F 0x5F
+
+/* Keeps sound effects from starting */
+#define GAME_FLAG_SILENCE_SOUND_EFFECTS 0x9C
+
+/* Keeps songs from starting */
+#define GAME_FLAG_SILENCE_SONGS 0x9D
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

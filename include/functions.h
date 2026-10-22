@@ -14,8 +14,6 @@ void InitHeapRegions(s32 hasExpansionPak);
 void InitAssetFiles(void);
 void InitRumblePaks(void);
 void StopAllRumble(void);
-void InitAudio(void);
-void UpdateAudio(void);
 void FreeCharacterSlot(s32 slotIndex);
 void FreeAllCharacterSlots(void);
 void ResetCharacterSlots(void);
@@ -103,7 +101,6 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void func_801F7148(void);
 
-void func_80050DA0(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
 void func_8004D794(void);
 void func_80071370(void);
 void func_80081284(void);

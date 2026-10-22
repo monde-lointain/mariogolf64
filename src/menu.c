@@ -10,6 +10,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "sram.h"
 #include "variables.h"
 
@@ -169,7 +170,6 @@ extern u16 D_800C20E0[][12];
 extern u16 D_800C21B8[1];
 extern s16 D_800C2278[3];
 extern u16 D_800C28B0[1];
-void func_80051C08(s32, s32);
 void SetFramebufferCount(s32 count);
 #define CHARACTER_GRID_ROW_COUNT 3
 #define CHARACTER_GRID_COLUMN_COUNT 7
@@ -346,7 +346,7 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(D_800FC6A0, &asset);
     D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
     ReadEncodedAsset(D_801B69EC, &asset);
-    func_80051C08(0x27, 0);
+    PlaySong(0x27, 0);
     SetFramebufferCount(3);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     D_801323D0 = 6;

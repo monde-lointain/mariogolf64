@@ -9,6 +9,7 @@
 #include "overlay_manager.h"
 #include "save.h"
 #include "segment_symbols.h"
+#include "sound.h"
 #include "variables.h"
 
 /* The audio interface's sample rate, in Hz */

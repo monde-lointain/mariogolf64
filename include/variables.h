@@ -18,9 +18,6 @@ extern Gfx *g_DisplayListHead;
 /* The ball's position, in units of 1/1024 */
 extern s32 g_BallPosition[3];
 
-/* The audio channel for the next sound effect, alternating between two */
-extern s32 g_NextSoundChannel;
-
 /* The depth buffer, which the screen effects also use to hold a saved frame */
 extern u16 *g_DepthBuffer;
 

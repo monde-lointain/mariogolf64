@@ -5,6 +5,7 @@
 #include "functions.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "variables.h"
 
 /*
@@ -98,8 +99,6 @@ extern N64Logo sN64Logo;
 extern s32 D_800B6808;
 extern s32 D_800C3FA8;
 
-void func_80050BF0(s32, s32, s32);
-void func_80051A60(void);
 s32 func_800542A0(s32);
 void func_80069FBC(void);
 void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
@@ -134,7 +133,7 @@ void LoadBootLogos(void) {
     ReadEncodedAsset(&sNintendoLogo, &asset);
     OpenEncodedAsset(N64_LOGO_ASSET, &asset);
     ReadEncodedAsset(&sN64Logo, &asset);
-    func_80051A60();
+    RequestSongStop();
     g_Cameras[0].view.scissorX = SCREEN_BORDER;
     g_Cameras[0].view.scissorY = SCREEN_BORDER;
     g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
@@ -207,7 +206,7 @@ void UpdateBootLogos(void) {
             sBootLogoFrame++;
             pressedButtons = 0;
             if (sBootLogoFrame == NINTENDO_SOUND_FRAME) {
-                func_80050BF0(0x62, 0xF, 0x7F);
+                PlaySound(0x62, 0xF, 0x7F);
             }
             for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
                 pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;

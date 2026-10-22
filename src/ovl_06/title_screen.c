@@ -5,6 +5,7 @@
 #include "game_flags.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "unlocks.h"
 #include "variables.h"
 
@@ -98,8 +99,6 @@ extern PressStartText sPressStartText;
 
 extern s32 D_800B6808;
 
-void func_80050BF0(s32, s32, s32);
-void func_80051C08(s32, s32);
 void func_8005DC50(void);
 void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
                    s32 dtdy);
@@ -243,11 +242,11 @@ void LoadTitleScreen(void) {
     if (g_ControllerCount == 0) {
         OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
         ReadEncodedAsset(&sTitleImage, &asset);
-        func_80051C08(5, 0x80);
+        PlaySong(5, SONG_FLAG_RESTART);
     } else {
         OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
         ReadEncodedAsset(&sTitleImage, &asset);
-        func_80051C08(0x2A, 0x80);
+        PlaySong(0x2A, SONG_FLAG_RESTART);
     }
     OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
     ReadEncodedAsset(&sJapaneseLogo, &asset);
@@ -294,7 +293,7 @@ void UpdateTitleScreen(void) {
                     g_SceneModuleToLoad = 0x02;
                     sTitleFrame = 0;
                     sTitleStage = TITLE_SWAPPING_MODULES;
-                    func_80050BF0(0x5D, 0xF, 0x7F);
+                    PlaySound(0x5D, 0xF, 0x7F);
                 } else if (((pressedButtons & B_BUTTON) && g_IsDebugEnabled)
                            || sTitleFrame == TITLE_IDLE_FRAME_COUNT) {
                     sTitleStage = TITLE_GOING_TO_LOGOS;

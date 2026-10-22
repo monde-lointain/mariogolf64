@@ -3,6 +3,7 @@
 #include "cpu_projection.h"
 #include "functions.h"
 #include "heap.h"
+#include "sound.h"
 
 /* How many bursts sBursts has room for */
 #define BURST_CAPACITY 4
@@ -63,7 +64,6 @@ extern Burst sBursts[BURST_CAPACITY];
 extern s32 g_MatrixBufferIndex;
 extern Mtx g_ScreenOrthoMatrix;
 
-void func_80050BF0(s32, s32, s32);
 
 /* Makes the first burst launch in 70 frames */
 void StartBursts(void) {
@@ -217,11 +217,11 @@ void UpdateAndDrawBursts(Gfx **displayListHead) {
             timer = sBursts[burstIndex].timer + 1;
             sBursts[burstIndex].timer = timer;
             if (timer == BURST_SOUND_FRAME) {
-                func_80050BF0(0x31, 8, 0x7F);
+                PlaySound(0x31, 8, 0x7F);
             } else if (timer == BURST_LAUNCH_FRAME) {
                 sBursts[burstIndex].timer = 0;
                 LaunchBurst(&sBursts[burstIndex], burstIndex);
-                func_80050BF0(0x32, 8, 0x7F);
+                PlaySound(0x32, 8, 0x7F);
             }
         }
     }
