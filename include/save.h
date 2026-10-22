@@ -90,6 +90,9 @@ typedef struct UnkB8 {
     /* 0x7C */ u8 unk7C[0xB8 - 0x7C];
 } UnkB8; /* size = 0xB8 */
 
+/* The best times kept for each course, with what was recorded alongside */
+#define BEST_TIME_COUNT 3
+
 #define SAVE_UNKAF0_ROW_COUNT 18
 #define SAVE_UNKAF0_COLUMN_COUNT 18
 
@@ -106,9 +109,11 @@ typedef struct SaveData {
     /* 0x002C */ u8 unk2C[0xA84 - 0x2C];
     /* 0x0A84 */ s8 hasBirdieBadge[COURSE_COUNT][COURSE_HOLE_COUNT];
     /* 0x0AF0 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
-    /* 0x0D78 */ u8 unkD78[0xDC0 - 0xD78];
-    /* 0x0DC0 */ s32 unkDC0[6][3];
-    /* 0x0E08 */ u8 unkE08[0x1320 - 0xE08];
+    /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
+    /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
+    /* 0x0E98 */ u8 unkE98[0x1320 - 0xE98];
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
     /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */

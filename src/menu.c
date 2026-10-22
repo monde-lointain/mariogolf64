@@ -295,9 +295,9 @@ void ResetSaveData(void) {
     save = GetSaveData();
     memset(save, 0, sizeof(SaveData));
     save->magic = SAVE_MAGIC;
-    for (row = 0; row != ARRAY_COUNT(save->unkDC0); row++) {
-        for (column = 0; column != ARRAY_COUNT(save->unkDC0[0]); column++) {
-            save->unkDC0[row][column] = -1;
+    for (row = 0; row != ARRAY_COUNT(save->bestTimes); row++) {
+        for (column = 0; column != ARRAY_COUNT(save->bestTimes[0]); column++) {
+            save->bestTimes[row][column] = -1;
         }
     }
     TransferSaveData(save, TRUE);
@@ -499,7 +499,105 @@ void RecordDisplayListLength(u32 commandCount) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C038);
+/*
+ * The longest time accepted. The overlay at ADD30 adds 18000 to the time
+ * that is passed in here (D_801B60B0) and caps it at this.
+ */
+#define MAX_TIME 108000
+#define UNKE50_MAX 3
+
+void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
+    SaveData *save;
+    s32 count;
+    s32 index;
+    s32 runIndex;
+    s32 scanIndex;
+    s32 otherIndex;
+    s32 unused[4]; /* The original frame has room for this */
+
+    save = GetSaveData();
+    if (courseIndex < 0) {
+        courseIndex = 0;
+    }
+    if (courseIndex >= COURSE_COUNT) {
+        courseIndex = COURSE_COUNT - 1;
+    }
+    if (time >= 0) {
+        if (time <= MAX_TIME) {
+            if (arg4 < 0) {
+                arg4 = 0;
+            }
+            if (arg4 > UNKE50_MAX) {
+                arg4 = UNKE50_MAX;
+            }
+            count = 0;
+            for (index = 0; index != BEST_TIME_COUNT; index++) {
+                count += save->bestTimes[courseIndex][index] > 0;
+            }
+            /*
+             * Both sorts copy the smaller entry over the larger one instead
+             * of swapping them, so the larger one is lost.
+             */
+            for (index = 0; index != count; index++) {
+                for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
+                    if (save->bestTimes[courseIndex][index] > save->bestTimes[courseIndex][scanIndex]) {
+                        save->bestTimes[courseIndex][index] = save->bestTimes[courseIndex][scanIndex];
+                        save->unkE08[courseIndex][index] = save->unkE08[courseIndex][scanIndex];
+                        save->unkD78[courseIndex][index] = save->unkD78[courseIndex][scanIndex];
+                        save->unkE50[courseIndex][index] = save->unkE50[courseIndex][scanIndex];
+                    }
+                }
+            }
+            for (index = 0; index != count; index++) {
+                for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
+                    if (save->unkD78[courseIndex][index] != save->unkD78[courseIndex][scanIndex]) {
+                        break;
+                    }
+                }
+                if (index + 1 < scanIndex) {
+                    for (runIndex = index; runIndex != scanIndex; runIndex++) {
+                        for (otherIndex = runIndex + 1; otherIndex != scanIndex; otherIndex++) {
+                            if (save->unkD78[courseIndex][runIndex] > save->unkD78[courseIndex][otherIndex]) {
+                                save->bestTimes[courseIndex][runIndex] = save->bestTimes[courseIndex][otherIndex];
+                                save->unkE08[courseIndex][runIndex] = save->unkE08[courseIndex][otherIndex];
+                                save->unkD78[courseIndex][runIndex] = save->unkD78[courseIndex][otherIndex];
+                                save->unkE50[courseIndex][runIndex] = save->unkE50[courseIndex][otherIndex];
+                            }
+                        }
+                    }
+                }
+            }
+            if (count > 0) {
+                for (index = 0; index != count; index++) {
+                    if (time < save->bestTimes[courseIndex][index]) {
+                        break;
+                    }
+                    if (time == save->bestTimes[courseIndex][index] && arg2 <= save->unkD78[courseIndex][index]) {
+                        break;
+                    }
+                }
+                if (index < BEST_TIME_COUNT) {
+                    for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex; scanIndex--) {
+                        save->bestTimes[courseIndex][scanIndex] = save->bestTimes[courseIndex][scanIndex - 1];
+                        save->unkE08[courseIndex][scanIndex] = save->unkE08[courseIndex][scanIndex - 1];
+                        save->unkD78[courseIndex][scanIndex] = save->unkD78[courseIndex][scanIndex - 1];
+                        save->unkE50[courseIndex][scanIndex] = save->unkE50[courseIndex][scanIndex - 1];
+                    }
+                    save->bestTimes[courseIndex][index] = time;
+                    save->unkE08[courseIndex][index] = arg3;
+                    save->unkD78[courseIndex][index] = arg2;
+                    save->unkE50[courseIndex][index] = arg4;
+                }
+            } else {
+                save->bestTimes[courseIndex][0] = time;
+                save->unkE08[courseIndex][0] = arg3;
+                save->unkD78[courseIndex][0] = arg2;
+                save->unkE50[courseIndex][0] = arg4;
+            }
+            TransferSaveData(save, TRUE);
+        }
+    }
+}
 
 
 s32 HasEveryRingShotStar(void) {
