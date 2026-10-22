@@ -11,6 +11,7 @@ words and score (-1 when m2c or the compiler failed).
 
 import multiprocessing
 import os
+import re
 import subprocess
 import sys
 
@@ -21,6 +22,18 @@ ROOT = fncompare.ROOT
 M2C = os.path.join(ROOT, ".venv", "bin", "m2c")
 DATA_FILES = [p for p in os.environ.get("SURVEY_DATA", "").split(":") if p]
 PRELUDE = '#include "common.h"\n#include "m2c_macros.h"\n\n'
+# m2c guesses each callee's prototype from one call, which other calls then
+# contradict; declaring the callees without parameter lists avoids that
+GUESSED_PROTOTYPE_RE = re.compile(r"^(.*?\b(\w+))\(.*\);( +/\* (?:extern|static) \*/)$", re.MULTILINE)
+CALLEE_RE = re.compile(r"\b(func_[0-9A-F]{8}\w*)\b")
+
+
+def declare_callees(text, name):
+    """Unprototypes m2c's guessed declarations and declares callees it left out."""
+    text = GUESSED_PROTOTYPE_RE.sub(r"\1();\3", text)
+    declared = set(re.findall(r"\b(\w+)\(\);", text)) | {name}
+    missing = sorted(set(CALLEE_RE.findall(text)) - declared)
+    return "".join(f"s32 {callee}();\n" for callee in missing) + text
 
 
 def survey_function(job):
@@ -32,7 +45,7 @@ def survey_function(job):
     if result.returncode != 0:
         return asm_path, name, len(target), -1.0
     with open(c_path, "w") as c_file:
-        c_file.write(PRELUDE + result.stdout)
+        c_file.write(PRELUDE + declare_callees(result.stdout, name))
     compiled, _ = fncompare.compile_functions(c_path)
     if not compiled or name not in compiled:
         return asm_path, name, len(target), -1.0
