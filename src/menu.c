@@ -1241,6 +1241,7 @@ void func_8005D0D8(void) {
     s32 recordIndex;
     Unk68 *record;
     s32 kind;
+    s32 unused[2]; /* The original frame has room for this */
 
     save = GetSaveData();
     for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
@@ -1248,8 +1249,10 @@ void func_8005D0D8(void) {
     }
     for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
         record = &save->unk1DF0[recordIndex];
+        kind = record->unk36;
         if (record->unk36 & 0x80) {
-            if ((record->unk36 & 0xF) >= 5 || (record->unk36 & 0xF) < 0) {
+            kind &= 0xF;
+            if (kind >= 5 || kind < 0) {
                 isInvalid[recordIndex] = TRUE;
             }
         }
@@ -1268,8 +1271,9 @@ void func_8005D0D8(void) {
     }
     /* Toggling rather than clearing sets the flag on records that fail with it clear */
     for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
+        record = &save->unk1DF0[recordIndex];
         if (isInvalid[recordIndex] == TRUE) {
-            save->unk1DF0[recordIndex].unk36 ^= 0x80;
+            record->unk36 ^= 0x80;
         }
     }
 }
