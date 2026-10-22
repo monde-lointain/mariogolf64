@@ -24,6 +24,14 @@ extern s32 sInsetViewCenterX;
 extern s32 sInsetViewCenterY;
 extern s32 sInsetViewWidth;
 extern s32 sInsetViewHeight;
+void DrawSpinEffect(Gfx **displayListHead, CameraView *view);
+void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view);
+
+extern s32 sScreenEffect;
+/* The effect's length in frames; the tiled image counts it down */
+extern s32 sScreenEffectFrameCount;
+/* Set when the effects stop, never read */
+extern s32 sUnreadEffectSetting;
 extern s32 sHasUnloadedSceneModule;
 extern s32 sHasUnloadedSubModule;
 
@@ -33,6 +41,27 @@ extern s32 sHasUnloadedSubModule;
 
 /* The border around the main camera's scissor rectangle, in pixels */
 #define SCREEN_BORDER 8
+
+/* sScreenEffect values */
+#define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
+#define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */
+#define SCREEN_EFFECT_TILED_IMAGE 2 /* Repeats part of the saved frame */
+#define SCREEN_EFFECT_SAVED_FRAME 3 /* Draws a frame saved elsewhere */
+#define SCREEN_EFFECT_NONE 4
+
+/* The window of the saved image that the tiled-image effect repeats */
+#define TILED_IMAGE_LEFT 64
+#define TILED_IMAGE_RIGHT 191
+#define TILED_IMAGE_TOP 104
+#define TILED_IMAGE_STRIP_HEIGHT 16
+#define TILED_IMAGE_STRIP_COUNT 6
+#define TILED_IMAGE_MASK_S 7 /* Wraps s every 2^7 = 128 texels, the window's width */
+
+/* How the tiled-image effect lays the window out on the screen */
+#define TILED_IMAGE_STRIP_SCREEN_HEIGHT 13
+#define TILED_IMAGE_COPY_COUNT 4
+#define TILED_IMAGE_COPY_SPACING 72
+#define TILED_IMAGE_SCALE 0x04EC /* Texels per pixel, s5.10: about 1.23 */
 
 /* Turns gamma correction off and gamma dithering and the dither filter on */
 #define VI_FEATURES (OS_VI_GAMMA_OFF | OS_VI_GAMMA_DITHER_ON | OS_VI_DITHER_FILTER_ON)
@@ -128,19 +157,94 @@ void ScaleMatrix(Mtx *matrix, f32 x, f32 y, f32 z) {
     guMtxCatL(matrix, &scale, matrix);
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002A97C);
+void SetScreenEffect(s32 effect, s32 frameCount) {
+    sScreenEffect = effect;
+    sScreenEffectFrameCount = frameCount;
+    if (effect == SCREEN_EFFECT_NONE) {
+        g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
+        sUnreadEffectSetting = -640;
+    } else {
+        g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002A9C4);
+/*
+ * Draws a 128 by 96 window of the image saved in the depth buffer, shrunk
+ * and repeated across the screen, for a number of frames
+ */
+void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
+    Gfx *gfx = *displayListHead;
+    s32 stripTop;
+    s32 texelPairOffset;
+    s32 copyIndex;
+
+    sScreenEffectFrameCount--;
+    if (sScreenEffectFrameCount == 0) {
+        view->drawFlags = CAMERA_DRAW_SCENE;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    texelPairOffset = TILED_IMAGE_TOP * SCREEN_WIDTH / 2;
+    for (stripTop = 0; stripTop != TILED_IMAGE_STRIP_COUNT * TILED_IMAGE_STRIP_SCREEN_HEIGHT;
+         stripTop += TILED_IMAGE_STRIP_SCREEN_HEIGHT) {
+        /* Each 32-bit step of texelPairOffset covers two 16-bit texels */
+        gDPLoadTextureTile(gfx++, (u32)((u32 *)g_DepthBuffer + texelPairOffset) & ~7, G_IM_FMT_RGBA,
+                           G_IM_SIZ_16b, SCREEN_WIDTH, 0, TILED_IMAGE_LEFT, 0, TILED_IMAGE_RIGHT,
+                           TILED_IMAGE_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                           TILED_IMAGE_MASK_S, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        texelPairOffset += TILED_IMAGE_STRIP_HEIGHT * SCREEN_WIDTH / 2;
+        for (copyIndex = 0; copyIndex != TILED_IMAGE_COPY_COUNT; copyIndex++) {
+            gSPScisTextureRectangle(
+                gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + copyIndex * TILED_IMAGE_COPY_SPACING + stripTop) << 2,
+                (SCREEN_WIDTH - SCREEN_BORDER) << 2,
+                (SCREEN_BORDER + copyIndex * TILED_IMAGE_COPY_SPACING + stripTop + TILED_IMAGE_STRIP_SCREEN_HEIGHT) << 2,
+                G_TX_RENDERTILE, TILED_IMAGE_LEFT << 5, 0, TILED_IMAGE_SCALE, TILED_IMAGE_SCALE);
+        }
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/game", func_8002ADD4);
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002B280);
+INCLUDE_ASM("asm/nonmatchings/game", DrawSavedFrameEffect);
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002B924);
+INCLUDE_ASM("asm/nonmatchings/game", DrawSpinEffect);
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002BD9C);
+void DrawEmptyEffect(Gfx **displayListHead, CameraView *view) {
+}
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002BDA4);
+void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
+    /* The spin effect pushes a modelview matrix and changes the projection */
+    if (sScreenEffect == SCREEN_EFFECT_SPIN) {
+        DrawSpinEffect(&g_DisplayListHead, view);
+        gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
+        gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    } else if (sScreenEffect == SCREEN_EFFECT_TILED_IMAGE) {
+        DrawTiledImageEffect(&g_DisplayListHead, view);
+    } else if (sScreenEffect == SCREEN_EFFECT_EMPTY) {
+        DrawEmptyEffect(&g_DisplayListHead, view);
+        /* Pops although DrawEmptyEffect pushed nothing, as if it once spun too */
+        gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
+        gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    } else if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+        DrawSavedFrameEffect(&g_DisplayListHead, view);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/game", func_8002BE78);
 

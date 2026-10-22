@@ -33,6 +33,12 @@ typedef struct Camera {
 
 extern Camera g_Cameras[];
 
+/* The matrices that DrawGame builds for one camera in one frame */
+typedef struct CameraMatrices {
+    /* 0x000 */ u8 unk0[0x1C0];
+    /* 0x1C0 */ Mtx projection;
+    /* 0x200 */ u8 unk200[0x50];
+} CameraMatrices; /* size = 0x250 */
 
 /* The camera of the inset view, a window over the main view */
 #define INSET_CAMERA 1
