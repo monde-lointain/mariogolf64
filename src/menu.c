@@ -1263,7 +1263,171 @@ void func_8005D334(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005D3B8);
+/* The figures D_80105C38 holds for each of the save's sets, then for all of them */
+typedef struct Unk80105C38 {
+    /* 0x00 */ f32 roundCount;
+    /* 0x04 */ f32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ f32 unk14;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ f32 unk20;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ f32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s32 unk34;
+} Unk80105C38; /* size = 0x38 */
+
+extern Unk80105C38 D_80105C38[STATISTICS_SET_COUNT + 1];
+
+#define HOLES_PER_ROUND 18.0f
+
+/* Applied to the save's 0x0C and 0x10 figures; what it converts is unknown */
+#define UNK_SCALE 0.00007119878f
+
+void ComputeRoundStatistics(void) {
+    UnkE98 *saved;
+    UnkE98 *entry;
+    f32 reciprocal;
+    s32 sum;
+    s32 setIndex;
+    s32 hasPlayedSet;
+    f32 sum8;
+    f32 sum18;
+    f32 sum1C;
+    f32 sum20;
+    f32 sum24;
+    f32 sum28;
+    f32 sum28And2C;
+    f32 sum10;
+    s32 sum14;
+    f32 zero;
+    f32 emptyCount; /* Only ever zero */
+    f32 holeCount;
+
+    saved = GetSaveData()->unkE98;
+    for (setIndex = 0; setIndex != STATISTICS_SET_COUNT; setIndex++) {
+        entry = &saved[setIndex];
+        D_80105C38[setIndex].roundCount = entry->roundCount;
+        if (D_80105C38[setIndex].roundCount == 0.0f) {
+            D_80105C38[setIndex].unk4 = 0.0f;
+            D_80105C38[setIndex].unk8 = 0.0f;
+            D_80105C38[setIndex].unkC = 0.0f;
+            D_80105C38[setIndex].unk10 = 0.0f;
+            D_80105C38[setIndex].unk14 = 0.0f;
+            D_80105C38[setIndex].unk18 = 0.0f;
+            D_80105C38[setIndex].unk1C = 0.0f;
+            D_80105C38[setIndex].unk24 = 0.0f;
+            D_80105C38[setIndex].unk20 = 0.0f;
+            D_80105C38[setIndex].unk2C = 0;
+            D_80105C38[setIndex].unk30 = 0;
+            D_80105C38[setIndex].unk34 = 0;
+        } else {
+            /* unk14 is left as it was */
+            reciprocal = 1.0f / entry->roundCount;
+            D_80105C38[setIndex].unk4 = entry->unk4;
+            D_80105C38[setIndex].unk8 = entry->unk8 * reciprocal;
+            D_80105C38[setIndex].unkC = entry->unkC * UNK_SCALE;
+            D_80105C38[setIndex].unk10 = entry->unk10 * UNK_SCALE;
+            D_80105C38[setIndex].unk18 = entry->unk18 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[setIndex].unk1C = entry->unk1C * reciprocal * (1.0f / HOLES_PER_ROUND);
+            D_80105C38[setIndex].unk20 = entry->unk20 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[setIndex].unk24 = entry->unk24 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            sum = entry->unk28 + entry->unk2C;
+            if (sum <= 0) {
+                D_80105C38[setIndex].unk28 = 0.0f;
+            } else {
+                D_80105C38[setIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
+            }
+            D_80105C38[setIndex].unk2C = entry->unk30;
+            D_80105C38[setIndex].unk30 = entry->unk34;
+            D_80105C38[setIndex].unk34 = entry->unk38;
+        }
+    }
+
+    setIndex = 0; /* Zeroed this early to match */
+    hasPlayedSet = FALSE;
+    D_80105C38[STATISTICS_SET_COUNT].roundCount = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk4 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk8 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unkC = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk10 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk18 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk1C = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk20 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk24 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk28 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk2C = 0;
+    D_80105C38[STATISTICS_SET_COUNT].unk30 = 0;
+    D_80105C38[STATISTICS_SET_COUNT].unk34 = 0;
+    D_80105C38[STATISTICS_SET_COUNT].unk4 = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unkC = 0.0f;
+    D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[0].unk4;
+    D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[0].unkC;
+    zero = D_80105C38[STATISTICS_SET_COUNT].roundCount; /* Read back after being zeroed */
+    for (; setIndex != STATISTICS_SET_COUNT; setIndex++) {
+        if (zero < D_80105C38[setIndex].roundCount) {
+            if (!hasPlayedSet) {
+                D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[setIndex].unk4;
+                hasPlayedSet = TRUE;
+                D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[setIndex].unkC;
+            }
+            if (D_80105C38[STATISTICS_SET_COUNT].unk4 > D_80105C38[setIndex].unk4) {
+                D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[setIndex].unk4;
+            }
+            if (D_80105C38[STATISTICS_SET_COUNT].unkC < D_80105C38[setIndex].unkC) {
+                D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[setIndex].unkC;
+            }
+            D_80105C38[STATISTICS_SET_COUNT].roundCount += D_80105C38[setIndex].roundCount;
+        }
+    }
+
+    sum14 = 0;
+    sum28 = 0.0f;
+    sum28And2C = 0.0f;
+    sum20 = 0.0f;
+    sum18 = 0.0f;
+    sum24 = 0.0f;
+    sum1C = 0.0f;
+    sum10 = 0.0f;
+    sum8 = 0.0f;
+    emptyCount = 0.0f;
+    for (setIndex = 0; setIndex != STATISTICS_SET_COUNT; setIndex++) {
+        entry = &saved[setIndex];
+        if (emptyCount < D_80105C38[setIndex].roundCount) {
+            sum18 += entry->unk18;
+            sum1C += entry->unk1C;
+            sum20 += entry->unk20;
+            sum24 += entry->unk24;
+            sum8 += entry->unk8;
+            sum28 += entry->unk28;
+            sum28And2C += entry->unk28 + entry->unk2C;
+            sum14 += entry->unk14;
+            sum10 += entry->unk10 * UNK_SCALE * entry->unk14;
+        }
+    }
+    if (D_80105C38[STATISTICS_SET_COUNT].roundCount > 0.0f) {
+        if (sum28And2C <= 0.0f) {
+            D_80105C38[STATISTICS_SET_COUNT].unk28 = 0.0f;
+        } else {
+            D_80105C38[STATISTICS_SET_COUNT].unk28 = (sum28 / sum28And2C) * 100.0f;
+        }
+        holeCount = D_80105C38[STATISTICS_SET_COUNT].roundCount * HOLES_PER_ROUND;
+        D_80105C38[STATISTICS_SET_COUNT].unk1C = sum1C / holeCount;
+        D_80105C38[STATISTICS_SET_COUNT].unk18 = (sum18 / holeCount) * 100.0f;
+        D_80105C38[STATISTICS_SET_COUNT].unk20 = (sum20 / holeCount) * 100.0f;
+        D_80105C38[STATISTICS_SET_COUNT].unk24 = (sum24 / holeCount) * 100.0f;
+        D_80105C38[STATISTICS_SET_COUNT].unk8 = sum8 / D_80105C38[STATISTICS_SET_COUNT].roundCount;
+        if (sum10 > 0.0f && sum14 > 0) {
+            D_80105C38[STATISTICS_SET_COUNT].unk10 = sum10 / sum14;
+        } else {
+            D_80105C38[STATISTICS_SET_COUNT].unk10 = 0.0f;
+        }
+    }
+}
 
 void func_8005D9A0(void) {
     s8 index;

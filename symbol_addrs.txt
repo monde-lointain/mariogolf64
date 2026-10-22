@@ -984,3 +984,4 @@ SaveOrContinueGame = 0x8005BC10; // type:func
 SaveOrContinueGameByMode = 0x8005B7BC; // type:func
 InsertRankedRecord = 0x8005B314; // type:func
 GetRecordPriority = 0x8005B0B4; // type:func
+ComputeRoundStatistics = 0x8005D3B8; // type:func

@@ -9,6 +9,8 @@
 #define SAVE_COPY_COUNT 2
 #define SAVE_RECORD_COUNT 5
 #define RANKED_RECORD_COUNT 20
+/* The sets of round statistics kept; what each set is for is unknown */
+#define STATISTICS_SET_COUNT 6
 /* The games saved partway through, to continue later */
 #define SAVED_GAME_COUNT 3
 #define MAX_PLAYER_COUNT 4
@@ -79,6 +81,25 @@ typedef struct Unk800FF4D0 {
     /* 0x00 */ s32 unk0[0x1C / 4];
 } Unk800FF4D0; /* size = 0x1C */
 
+typedef struct UnkE98 {
+    /* 0x00 */ s32 roundCount;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
+    /* 0x1C */ s32 unk1C;
+    /* 0x20 */ s32 unk20;
+    /* 0x24 */ s32 unk24;
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ s32 unk2C;
+    /* 0x30 */ s32 unk30;
+    /* 0x34 */ s32 unk34;
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ u8 unk3C[0x74 - 0x3C];
+} UnkE98; /* size = 0x74 */
+
 typedef struct SavedGame {
     /* 0x00 */ s32 isValid;
     /* 0x04 */ u8 unk4[4];
@@ -126,7 +147,8 @@ typedef struct SaveData {
     /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
     /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
     /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-    /* 0x0E98 */ u8 unkE98[0x1320 - 0xE98];
+    /* 0x0E98 */ UnkE98 unkE98[STATISTICS_SET_COUNT];
+    /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
     /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
