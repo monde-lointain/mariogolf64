@@ -66,7 +66,10 @@ void UpdateInsetView(void);
 /* Looks down on the course for the map views */
 extern Camera g_MapCamera;
 
-/* Set up by StartGame; no code in the main segment draws with it */
+/*
+ * Set up by StartGame; no code in the main segment draws with it. Only its
+ * fields up to zoom are used, and libc's errno sits where its mode would be
+ */
 extern Camera g_SpareCamera;
 
 #endif
