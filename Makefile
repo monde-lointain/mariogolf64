@@ -25,7 +25,7 @@ PYTHON      := .venv/bin/python3
 KMC_DIR     := tools/gcc_kmc
 CC          := COMPILER_PATH=$(KMC_DIR) $(KMC_DIR)/gcc
 
-INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Isrc -I$(BUILD_DIR)
+INCLUDES    := -Iinclude -Iinclude/libc -Ilib/ultralib/include -Ilib/ultralib/include/PR -Ilib/libmus/include -Isrc -I$(BUILD_DIR)
 DEFINES     := -D_LANGUAGE_C -D_MIPS_SZLONG=32 -D_MIPS_SZINT=32 -DF3DEX_GBI_2 -DNDEBUG -D_FINALROM -DBUILD_VERSION=VERSION_J -D__IS_KMC__=1
 ifneq ($(NON_MATCHING),0)
 DEFINES     += -DNON_MATCHING
@@ -161,6 +161,9 @@ $(BUILD_DIR)/$(LIBNUSYS_DIR)/%.c.o: $(LIBNUSYS_DIR)/%.c $(BUILD_DIR)/$(LIBNUSYS_
 	@mkdir -p $(dir $@)
 	tr -d '\r' < $< > $(@:.o=)
 	VR4300MUL=ON $(CC) -c $(LIBNUSYS_CFLAGS) $(LIBNUSYS_INCLUDES) $(LIBNUSYS_DEFINES) -o $@ $(@:.o=)
+
+# Game code that includes NuSystem's header needs its converted copy
+$(BUILD_DIR)/src/main.c.o: $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h
 
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusys.h: $(LIBNUSYS_DIR)/nusys.h
 	@mkdir -p $(dir $@)

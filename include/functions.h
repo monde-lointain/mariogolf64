@@ -9,6 +9,32 @@
 void nuPiReadRom(u32 romAddr, void *buffer, u32 size);
 
 /* Main segment */
+void RunBootHook(void);
+void InitHeapRegions(s32 hasExpansionPak);
+void InitAssetFiles(void);
+void InitSaveData(void);
+void InitRumblePaks(void);
+void StopAllRumble(void);
+void InitAudio(void);
+void UpdateAudio(void);
+void FreeCharacterSlot(s32 slotIndex);
+void FreeAllCharacterSlots(void);
+void ResetCharacterSlots(void);
+s32 GetCharacterBufferSize(void);
+void SetCharacterBuffer(s32 slotIndex, u8 *buffer);
+void InitTerrainTextures(void);
+void InitExpansionPakFeatures(void);
+void ResetLoaderThread(void);
+void InitEffectTable(void);
+void LoadCourseObjects(void);
+void StartGame(void);
+void UpdateGame(void);
+void DrawGame(void);
+void DrawBlankFrame(void);
+void UpdateOverlays(void);
+
+/* The development debugger's entry, outside the game's code */
+void EnterDevelopmentDebugger(s32 argument);
 void func_8005A580(void);
 void func_8005ACF8(void);
 void func_80080DCC(void);

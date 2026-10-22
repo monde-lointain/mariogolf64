@@ -1,0 +1,526 @@
+#include "common.h"
+#include "controller.h"
+#include "debug_flags.h"
+#include "functions.h"
+#include "heap.h"
+#include "libc.h"
+#include <PR/libmus.h>
+#include "overlay_manager.h"
+#include "segment_symbols.h"
+#include "variables.h"
+
+/* The audio interface's sample rate, in Hz */
+#define AUDIO_FREQUENCY 32000
+
+/* End of the RDRAM that every console has, without the Expansion Pak */
+#define BASE_RDRAM_END 0x80400000
+
+/* Frame buffers that the game swaps between */
+#define FRAMEBUFFER_COUNT 3
+
+/* The longest build date that fits g_RomBuildDate with its terminator */
+#define BUILD_DATE_LENGTH_MAX 63
+
+/* Modules whose overlays are loaded at boot and stay loaded */
+#define RESIDENT_MODULE_ID 0x0C
+#define STARTUP_MODULE_ID 0x06
+
+/* Bytes in g_WorkArea, part of which holds the characters' buffers */
+#define WORK_AREA_SIZE 0x827E0
+
+/* Character slots that get a buffer in g_WorkArea */
+#define CHARACTER_SLOT_PARTNER 1
+#define CHARACTER_SLOT_CADDIE 2
+#define CHARACTER_SLOT_GOLFER 3
+
+/* Iterations of the busy loop between two reports of RunHeartbeatLoop */
+#define HEARTBEAT_LOOP_COUNT 100000000
+
+/* Values of g_MainLoopState */
+#define MAIN_LOOP_START 0
+#define MAIN_LOOP_RUNNING (-1)
+
+/* Values of g_DebugHaltState. Holding HALT_BUTTONS on the first controller
+   while halting is allowed halts the game and hands the console over to
+   the development debugger. */
+#define HALT_STATE_ALLOWED 1
+#define HALT_STATE_HALTED 2
+#define HALT_BUTTONS (A_BUTTON | B_BUTTON | L_TRIG | R_TRIG)
+
+/* Values of g_FrameStepState, with which the second controller pauses
+   the game (L on the control pad) and steps it a frame at a time */
+#define FRAME_STEP_RUNNING 0
+#define FRAME_STEP_ONE_FRAME 1
+#define FRAME_STEP_PAUSED 2
+
+/* Graphics tasks that may wait for the RDP before a frame is skipped,
+   depending on g_FramePacingMode */
+#define PENDING_TASK_MAX 2
+#define PENDING_TASK_MAX_RELAXED 4
+
+/* Retraces between two updates of g_FramesPerSecond */
+#define RETRACES_PER_SECOND 60
+
+/* The stick reads as a direction once it is pushed past
+   STICK_PRESS_THRESHOLD, and keeps doing so until it falls back below
+   STICK_RELEASE_THRESHOLD */
+#define STICK_PRESS_THRESHOLD 56
+#define STICK_RELEASE_THRESHOLD 20
+
+/* Stick readings this close to the centre count as 0 */
+#define STICK_DEAD_ZONE 16
+
+/* The largest stick magnitude in menu readings */
+#define MENU_STICK_MAX 64
+
+/* The largest stick magnitude in a ControllerState, after the dead zone */
+#define STATE_STICK_MAX 44
+
+/* A ControllerState counts the stick as pressing a direction past this */
+#define STATE_STICK_DIRECTION_MIN 30
+
+typedef struct MenuRepeatState {
+    /* 0x0 */ s16 repeatDelay;       /* Frames until the buttons repeat */
+    /* 0x2 */ s8 stickDirectionX;    /* -1, 0 or 1 */
+    /* 0x3 */ s8 stickDirectionY;
+    /* 0x4 */ u16 previousButtons;
+} MenuRepeatState; /* size = 0x6 */
+
+extern s32 g_HasExpansionPak;
+extern volatile u8 g_DebugHaltState;
+extern s32 g_FramesPerSecond;
+extern u16 *sFramebuffers[FRAMEBUFFER_COUNT];
+extern s32 sRetraceCount;
+extern s32 sFramesThisSecond;
+extern s8 g_FrameStepState;
+extern s32 sIsOddRetrace;
+extern s8 g_FramePacingMode;
+extern volatile s32 g_MainLoopState;
+extern u8 sDebugFlagBits[DEBUG_FLAG_COUNT / 8];
+extern MenuRepeatState sMenuRepeatStates[MAXCONTROLLERS];
+extern u16 *g_MessageFramebuffer;
+extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
+extern char g_SaveBuildDate[];
+extern u8 g_WorkArea[WORK_AREA_SIZE];
+
+void HandleGfxRetrace(s32 pendingTaskCount);
+
+void ReportFailedAssertion(const char *expression, const char *fileName, s32 lineNumber) {
+    osSyncPrintf("Assertion Fault : File %s Line %d\n", fileName, lineNumber);
+}
+
+void guNormalize(f32 *x, f32 *y, f32 *z) {
+    f32 xValue = *x;
+    f32 yValue = *y;
+    f32 zValue = *z;
+    /* The squared length, and then the inverse of the length */
+    f32 length = xValue * xValue + yValue * yValue + zValue * zValue;
+
+    if (length < 0.0f) {
+        osSyncPrintf("NormalizeError\n");
+        *x = 0.0f;
+        *y = 1.0f;
+        *z = 0.0f;
+    } else {
+        length = 1.0f / sqrtf(length);
+        *x = xValue * length;
+        *y = yValue * length;
+        *z = zValue * length;
+    }
+}
+
+void InitFramebuffers(void) {
+    nuGfxSetCfb(sFramebuffers, FRAMEBUFFER_COUNT);
+}
+
+s32 IsDebugFlagSet(u32 flag) {
+    if (flag < DEBUG_FLAG_COUNT) {
+        if (sDebugFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
+            return TRUE;
+        }
+        return FALSE;
+    }
+    return FALSE;
+}
+
+void SetDebugFlag(u32 flag) {
+    if (flag < DEBUG_FLAG_COUNT) {
+        sDebugFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
+    }
+}
+
+void ClearDebugFlag(u32 flag) {
+    if (flag < DEBUG_FLAG_COUNT) {
+        sDebugFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
+    }
+}
+
+void ToggleDebugFlag(u32 flag) {
+    if (flag < DEBUG_FLAG_COUNT) {
+        sDebugFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
+    }
+}
+
+void ClearAllDebugFlags(void) {
+    s32 byteIndex;
+
+    for (byteIndex = 0; byteIndex < DEBUG_FLAG_COUNT / 8; byteIndex++) {
+        sDebugFlagBits[byteIndex] = 0;
+    }
+}
+
+void RunHeartbeatLoop(void) {
+    s32 iteration;
+
+    while (TRUE) {
+        for (iteration = 0; iteration != HEARTBEAT_LOOP_COUNT; iteration++) {
+        }
+        osSyncPrintf("thread %d\n", HEARTBEAT_LOOP_COUNT);
+    }
+}
+
+void AssignCharacterBuffers(void) {
+    s32 bufferSize = GetCharacterBufferSize();
+
+    SetCharacterBuffer(CHARACTER_SLOT_PARTNER, g_WorkArea);
+    SetCharacterBuffer(CHARACTER_SLOT_GOLFER, g_WorkArea + bufferSize);
+    SetCharacterBuffer(CHARACTER_SLOT_CADDIE, g_WorkArea + bufferSize * 2);
+    osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - bufferSize * 3);
+}
+
+void PrepareForReset(void) {
+    StopAllRumble();
+    __libmus_output_muted = TRUE;
+}
+
+/* Clears the exception enables of the floating-point control and status
+   register, so that float errors give IEEE results instead of trapping.
+   The first mask clears bits 8 to 12 and 28 to 31, the second the enables
+   in bits 7 to 11, and nothing is set again. */
+void DisableFloatExceptions(void) {
+    __asm__ volatile(
+        "cfc1 $4, $31\n"
+        "nop\n"
+        "li $5, 0x0FFFE0FF\n"
+        "and $4, $4, $5\n"
+        "li $5, -0xF81\n"
+        "and $4, $4, $5\n"
+        "li $5, 0\n"
+        "or $4, $4, $5\n"
+        "ctc1 $4, $31\n"
+        "nop\n"
+        "nop\n"
+        :
+        :
+        : "$4", "$5");
+}
+
+void mainproc(void *arg) {
+    u32 buildDateSize;
+    s32 portIndex;
+
+    osAiSetFrequency(AUDIO_FREQUENCY);
+    bzero(main_BSS_END, (u8 *)BASE_RDRAM_END - main_BSS_END);
+    osWritebackDCacheAll();
+    DisableFloatExceptions();
+    RunBootHook();
+    osSyncPrintf("MainEntry\n");
+
+    buildDateSize = build_date_ROM_END - build_date_ROM_START;
+    if (buildDateSize >= BUILD_DATE_LENGTH_MAX) {
+        buildDateSize = BUILD_DATE_LENGTH_MAX;
+    }
+    nuPiReadRom((u32)build_date_ROM_START, g_RomBuildDate, buildDateSize);
+    g_RomBuildDate[buildDateSize] = '\0';
+    g_SaveBuildDate[0] = '\0';
+
+    nuGfxInitEX2();
+    g_FrameCount = 0;
+    InitHeapRegions(g_HasExpansionPak);
+    ResetHeap(1);
+    InitAssetFiles();
+    ClearAllDebugFlags();
+    InitOverlayManager();
+    LoadOverlay(GetOverlayOfModule(RESIDENT_MODULE_ID));
+    LoadOverlay(GetOverlayOfModule(STARTUP_MODULE_ID));
+    osSyncPrintf("S-InitSRAM\n");
+    InitSaveData();
+    osSyncPrintf("E-InitSRAM\n");
+    InitFramebuffers();
+
+    g_ConnectedControllerBits = nuContInit();
+    g_ControllerCount = 0;
+    for (portIndex = 0; portIndex < MAXCONTROLLERS; portIndex++) {
+        if ((g_ConnectedControllerBits >> portIndex) & 1) {
+            g_PlayerControllerPorts[g_ControllerCount++] = portIndex;
+        }
+        /* This clears the size of the whole array at each state, which
+           runs past the end of the array for every port but the first */
+        memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates));
+    }
+
+    InitRumblePaks();
+    osUnmapTLBAll();
+    InitAudio();
+    MusSetStereo(TRUE);
+    FreeAllCharacterSlots();
+    InitTerrainTextures();
+    InitExpansionPakFeatures();
+    ResetLoaderThread();
+    InitEffectTable();
+    ResetCharacterSlots();
+    AssignCharacterBuffers();
+    LoadCourseObjects();
+
+    g_MainLoopState = MAIN_LOOP_START;
+    while (TRUE) {
+        if (g_MainLoopState == MAIN_LOOP_START) {
+            g_MainLoopState = MAIN_LOOP_RUNNING;
+            StartGame();
+            nuGfxFuncSet((NUGfxFunc)HandleGfxRetrace);
+            nuPreNMIFuncSet(PrepareForReset);
+        }
+        while (g_MainLoopState == MAIN_LOOP_RUNNING) {
+            if (g_MessageFramebuffer != NULL) {
+                osViSwapBuffer(g_MessageFramebuffer);
+            }
+            if (g_DebugHaltState == HALT_STATE_HALTED) {
+                EnterDevelopmentDebugger(100);
+            }
+        }
+        nuGfxDisplayOff();
+    }
+}
+
+s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold, u32 releaseThreshold) {
+    u32 magnitude = stick;
+
+    if (stick < 0) {
+        magnitude = -stick;
+    }
+    if (magnitude > releaseThreshold) {
+        if (magnitude < pressThreshold) {
+            stick = previousDirection;
+        }
+        if (stick != 0) {
+            goto hasDirection;
+        }
+    }
+    return 0;
+hasDirection:
+    return (stick >> 31) | 1;
+}
+
+/* PREVIOUSMENUPAD is unused; the caller has already saved the last reading there */
+void UpdateMenuController(NUContData *pad, NUContData *previousMenuPad, s32 portIndex) {
+    s32 ApplyStickDeadZone(s32 stick) {
+        s32 magnitude = ABS(stick);
+
+        if (magnitude < STICK_DEAD_ZONE) {
+            return 0;
+        }
+        if (magnitude > MENU_STICK_MAX) {
+            magnitude = MENU_STICK_MAX;
+        }
+        return (stick < 0) ? -magnitude : magnitude;
+    }
+    s32 repeatDelay = sMenuRepeatStates[portIndex].repeatDelay;
+    NUContData *menuPad = &g_MenuControllerData[portIndex];
+
+    menuPad->stick_x = ApplyStickDeadZone(pad->stick_x);
+    menuPad->stick_y = ApplyStickDeadZone(pad->stick_y);
+    sMenuRepeatStates[portIndex].stickDirectionX =
+        GetStickDirection(pad->stick_x, sMenuRepeatStates[portIndex].stickDirectionX, STICK_PRESS_THRESHOLD,
+                          STICK_RELEASE_THRESHOLD);
+    sMenuRepeatStates[portIndex].stickDirectionY =
+        GetStickDirection(pad->stick_y, sMenuRepeatStates[portIndex].stickDirectionY, STICK_PRESS_THRESHOLD,
+                          STICK_RELEASE_THRESHOLD);
+
+    menuPad->button = pad->button;
+    if (sMenuRepeatStates[portIndex].stickDirectionX == 1) {
+        menuPad->button |= R_JPAD;
+    } else if (sMenuRepeatStates[portIndex].stickDirectionX == -1) {
+        menuPad->button |= L_JPAD;
+    }
+    if (sMenuRepeatStates[portIndex].stickDirectionY == 1) {
+        menuPad->button |= U_JPAD;
+    } else if (sMenuRepeatStates[portIndex].stickDirectionY == -1) {
+        menuPad->button |= D_JPAD;
+    }
+    menuPad->trigger = pad->trigger;
+
+    if (menuPad->button == sMenuRepeatStates[portIndex].previousButtons) {
+        sMenuRepeatStates[portIndex].previousButtons = menuPad->button;
+        if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
+            repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
+        }
+        if (repeatDelay == 0) {
+            repeatDelay = BUTTON_REPEAT_DELAY_NEXT;
+        } else {
+            repeatDelay--;
+            menuPad->button = 0;
+        }
+    } else {
+        sMenuRepeatStates[portIndex].previousButtons = menuPad->button;
+        repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
+    }
+    sMenuRepeatStates[portIndex].repeatDelay = repeatDelay;
+}
+
+void UpdateControllerState(NUContData *pad, ControllerState *state) {
+    s32 repeatDelay = state->repeatDelay;
+
+    state->buttons = pad->button;
+    state->stickX = pad->stick_x;
+    state->stickY = pad->stick_y;
+
+    if (state->stickX < 0) {
+        state->stickX += STICK_DEAD_ZONE;
+        if (state->stickX > 0) {
+            state->stickX = 0;
+        } else {
+            if (state->stickX < -STATE_STICK_MAX) {
+                state->stickX = -STATE_STICK_MAX;
+            }
+            if (state->stickX < -STATE_STICK_DIRECTION_MIN) {
+                state->buttons |= L_JPAD;
+            }
+        }
+    } else {
+        state->stickX -= STICK_DEAD_ZONE;
+        if (state->stickX < 0) {
+            state->stickX = 0;
+        } else {
+            if (state->stickX > STATE_STICK_MAX) {
+                state->stickX = STATE_STICK_MAX;
+            }
+            if (state->stickX > STATE_STICK_DIRECTION_MIN) {
+                state->buttons |= R_JPAD;
+            }
+        }
+    }
+
+    if (state->stickY < 0) {
+        state->stickY += STICK_DEAD_ZONE;
+        if (state->stickY > 0) {
+            state->stickY = 0;
+        } else {
+            if (state->stickY < -STATE_STICK_MAX) {
+                state->stickY = -STATE_STICK_MAX;
+            }
+            if (state->stickY < -STATE_STICK_DIRECTION_MIN) {
+                state->buttons |= D_JPAD;
+            }
+        }
+    } else {
+        state->stickY -= STICK_DEAD_ZONE;
+        if (state->stickY < 0) {
+            state->stickY = 0;
+        } else {
+            if (state->stickY > STATE_STICK_MAX) {
+                state->stickY = STATE_STICK_MAX;
+            }
+            if (state->stickY > STATE_STICK_DIRECTION_MIN) {
+                state->buttons |= U_JPAD;
+            }
+        }
+    }
+
+    state->pressedButtons = pad->button & (state->previousButtons ^ pad->button);
+    state->repeatedButtons = state->buttons;
+    if (state->buttons == state->previousButtons) {
+        if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
+            repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
+        }
+        if (repeatDelay == 0) {
+            repeatDelay = BUTTON_REPEAT_DELAY_NEXT;
+        } else {
+            repeatDelay--;
+            state->repeatedButtons = 0;
+        }
+    } else {
+        repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
+    }
+    state->repeatDelay = repeatDelay;
+    state->previousButtons = state->buttons;
+    state->heldButtons = state->buttons;
+    state->buttons = pad->button;
+}
+
+void ReadControllers(void) {
+    s32 playerIndex = 0;
+    s32 portIndex = 0;
+    ControllerState *state = g_ControllerStates;
+    NUContData *previousMenuPad = g_PreviousMenuControllerData;
+    NUContData *menuPad = g_MenuControllerData;
+    NUContData *previousPad = g_PreviousControllerData;
+    NUContData *pad = g_ControllerData;
+
+    for (; portIndex < MAXCONTROLLERS; portIndex++) {
+        if ((g_ConnectedControllerBits >> portIndex) & 1) {
+            *previousPad = *pad;
+            *previousMenuPad = *menuPad;
+            nuContDataGetEx(pad, portIndex);
+            UpdateMenuController(pad, previousMenuPad, playerIndex);
+            UpdateControllerState(pad, state);
+            state++;
+            previousMenuPad++;
+            menuPad++;
+            previousPad++;
+            pad++;
+            playerIndex++;
+        }
+    }
+}
+
+void HandleGfxRetrace(s32 pendingTaskCount) {
+    if (nuScPreNMIFlag & NU_SC_PRENMI_GET) {
+        sIsOddRetrace ^= 1;
+        if (!sIsOddRetrace) {
+            DrawBlankFrame();
+        }
+        return;
+    }
+
+    sIsOddRetrace ^= 1;
+    if (!sIsOddRetrace) {
+        if ((g_FramePacingMode != 0) ? pendingTaskCount < PENDING_TASK_MAX_RELAXED
+                                      : pendingTaskCount < PENDING_TASK_MAX) {
+            UpdateAudio();
+            if (g_FrameStepState < FRAME_STEP_PAUSED) {
+                ReadControllers();
+                if (g_DebugHaltState != HALT_STATE_HALTED) {
+                    UpdateGame();
+                    DrawGame();
+                    UpdateOverlays();
+                    if (g_DebugHaltState == HALT_STATE_ALLOWED &&
+                        (g_MenuControllerData[0].button & HALT_BUTTONS) == HALT_BUTTONS) {
+                        g_DebugHaltState = HALT_STATE_HALTED;
+                    }
+                }
+                g_FrameCount++;
+                sFramesThisSecond++;
+                if (g_FrameStepState == FRAME_STEP_ONE_FRAME) {
+                    g_FrameStepState = FRAME_STEP_PAUSED;
+                }
+            } else {
+                ReadControllers();
+                if (g_MenuControllerData[1].trigger & L_JPAD) {
+                    g_FrameStepState = FRAME_STEP_ONE_FRAME;
+                }
+                if (g_FrameStepState != FRAME_STEP_ONE_FRAME && (g_MenuControllerData[1].trigger & R_JPAD)) {
+                    g_FrameStepState = FRAME_STEP_RUNNING;
+                }
+            }
+        } else {
+            /* Skip this frame and try again on the next retrace */
+            sIsOddRetrace ^= 1;
+        }
+    }
+
+    if (++sRetraceCount >= RETRACES_PER_SECOND) {
+        g_FramesPerSecond = sFramesThisSecond;
+        sRetraceCount = 0;
+        sFramesThisSecond = 0;
+    }
+}

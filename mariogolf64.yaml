@@ -77,7 +77,7 @@ segments:
       - [0x37B0, c, ../lib/libnusys/nusched]
       - [0x4650, c, ../lib/libnusys/nugfxsetcfb]
       - [0x4840, c, ../lib/libnusys/nugfxtaskmgr]
-      - [0x4CE0, asm]
+      - [0x4CE0, c, main]
       - [0x5A40, asm]
       - [0xDCE0, asm]
       - [0xE260, asm]
@@ -391,8 +391,8 @@ segments:
       - [0xA4A90, data]
       - [0xA5360, .rodata, overlay_manager]
       - [0xA54D0, .rodata, billboard]
-      - [0xA5584, rodata]
-      - [0xA5600, rodata]
+      - [0xA5584, .rodata, main]
+      - [0xA55F8, rodata]
       - [0xAD3B0, .rodata, ../lib/libmus/src/player]
       - [0xAD490, .rodata, ../lib/libmus/src/player_fx]
       - [0xAD4F0, .rodata, ../lib/libnaudio/src/n_drvrNew]
@@ -633,9 +633,13 @@ segments:
       - [0x1715C0, data]
       - { start: 0x171770, type: bss, vram: 0x801F8B50 }
 
-  - name: assets
+  - name: build_date
     type: bin
     start: 0x171770
+
+  - name: assets
+    type: bin
+    start: 0x171790
 
   - name: padding
     type: bin

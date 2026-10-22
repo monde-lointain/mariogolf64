@@ -3,3 +3,8 @@
 /* rspboot ends where the n_audio microcode begins, an address splat already
    gives to n_aspMainTextStart */
 rspbootTextEnd = 0x800B3F20;
+
+/* Called while the game is halted for debugging. The retail build
+   doesn't link it: its calls have a jump target of 0, which is
+   0x80000000 for code in KSEG0. */
+EnterDevelopmentDebugger = 0x80000000;

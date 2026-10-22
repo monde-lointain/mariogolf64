@@ -11,6 +11,8 @@
     extern u8 name##_BSS_START[];      \
     extern u8 name##_BSS_END[]
 
+DECLARE_SEGMENT(main);
+DECLARE_SEGMENT(build_date);
 DECLARE_SEGMENT(ovl_00);
 DECLARE_SEGMENT(ovl_01);
 DECLARE_SEGMENT(ovl_02);
