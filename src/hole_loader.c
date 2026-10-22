@@ -36,8 +36,9 @@
 #define MIN_WIND_SPEED 0x18000
 #define DRIVING_RANGE_WIND_DIRECTION 0x4000
 
-#define HOLE_CONDITIONS_UNK10_STEP 0x5000
-#define HOLE_CONDITIONS_UNK12 0x3000
+/* The light turns this far, in binary angles, from each hole to the next */
+#define LIGHT_YAW_STEP_PER_HOLE 0x5000
+#define HOLE_LIGHT_PITCH 0x3000
 
 /* g_Scene and g_GameMode values whose purpose is not yet known */
 #define SCENE_UNK13 13
@@ -762,12 +763,12 @@ s32 ChooseHoleConditions(void) {
         if (g_GameState.unk3A) {
             g_HoleConditions.windSpeed = 0;
         }
-        g_HoleConditions.unk12 = HOLE_CONDITIONS_UNK12;
+        g_HoleConditions.lightPitch = HOLE_LIGHT_PITCH;
         if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
             g_HoleConditions.windDirection = DRIVING_RANGE_WIND_DIRECTION;
             g_HoleConditions.windSpeed = 0;
             g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
-            g_HoleConditions.unk10 = rand() * 4;
+            g_HoleConditions.lightYaw = rand() * 4;
         } else {
             if (g_GameState.holeIndex == 0) {
                 g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
@@ -780,7 +781,7 @@ s32 ChooseHoleConditions(void) {
                     colorIndex = SCENE_COLOR_INDEX_ROUND_END;
                 }
                 g_HoleConditions.sceneColorIndex = colorIndex;
-                g_HoleConditions.unk10 += g_GameState.holeIndex * HOLE_CONDITIONS_UNK10_STEP;
+                g_HoleConditions.lightYaw += g_GameState.holeIndex * LIGHT_YAW_STEP_PER_HOLE;
             }
             if (g_ShowsBillboardsAtEdge) {
                 g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;

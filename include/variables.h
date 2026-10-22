@@ -44,8 +44,8 @@ typedef struct HoleConditions {
     /* 0x04 */ u16 windDirection;  /* A full turn is 0x10000 */
     /* 0x08 */ s32 isRaining;      /* Shortens shots and changes the scene's colors */
     /* 0x0C */ u32 sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
-    /* 0x10 */ u16 unk10;
-    /* 0x12 */ u16 unk12;
+    /* 0x10 */ u16 lightYaw;   /* g_LightYaw */
+    /* 0x12 */ u16 lightPitch; /* g_LightPitch */
 } HoleConditions; /* size = 0x14 */
 
 /* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
