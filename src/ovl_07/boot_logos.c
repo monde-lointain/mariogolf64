@@ -7,6 +7,7 @@
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
+#include "transfer_pak.h"
 #include "variables.h"
 
 /*
@@ -108,10 +109,6 @@ void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s3
 void func_8006ADF8(s32);
 s32 func_8006B55C(void);
 void func_8006B56C(s32, s32, s32, s32);
-s32 func_8006F1F0(void);
-void func_8006F24C(s32);
-void func_8006F2E8(void);
-s32 func_8006F2F4(void);
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_8008D100(void);
 
@@ -155,13 +152,13 @@ void LoadBootLogos(void) {
 /* Swaps this module for the next scene's and clears the image slots */
 void LeaveBootLogos(void) {
     D_800B6808 = 2;
-    if (func_8006F1F0() && func_8006F2F4()) {
-        func_8006F2E8();
+    if (HasGameBoyPak() && IsBootTransmitPending()) {
+        ClearBootTransmitPending();
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = 0x0C;
         g_NextScene = 29;
         g_SceneModuleToLoad = 0x1B;
-        func_8006F24C(0);
+        ResetGameBoyTransfer(0);
         func_8006ADF8(2);
     } else if (sHasResetGameState && g_HasLoaderFinished == 1 && g_ControllerCount != 0) {
         g_Scene = SCENE_SWAPPING_MODULES;

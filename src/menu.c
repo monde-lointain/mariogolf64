@@ -13,6 +13,7 @@
 #include "screen.h"
 #include "sound.h"
 #include "sram.h"
+#include "transfer_pak.h"
 #include "variables.h"
 
 /* Keeps the save data on the development host instead of in SRAM */
@@ -54,14 +55,6 @@ typedef struct ImportedCharacter {
     /* 0x14 */ s8 unk14;
 } ImportedCharacter; /* size = 0x16 */
 
-typedef struct Unk800FF1E8 {
-    /* 0x00 */ u8 unk0;
-    /* 0x01 */ u8 name[IMPORTED_CHARACTER_NAME_LENGTH];
-    /* 0x0D */ u8 unkD[0x19 - 0xD];
-    /* 0x19 */ u8 unk19;
-    /* 0x1A */ u8 unk1A[0x8C - 0x1A];
-} Unk800FF1E8; /* size = 0x8C */
-
 typedef struct Unk800C2B90 {
     /* 0x0 */ s16 unk0;
     /* 0x2 */ s16 column;
@@ -69,7 +62,6 @@ typedef struct Unk800C2B90 {
     /* 0x6 */ s16 row;
 } Unk800C2B90; /* size = 0x8 */
 
-extern Unk800FF1E8 D_800FF1E8[IMPORTED_CHARACTER_COUNT];
 extern Unk800C2B90 D_800C2B90[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800C2AA8[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 /* The imported characters that debug flag 0x54 adds */
@@ -1100,7 +1092,7 @@ void func_8005CA48(void) {
     }
     count = 0;
     for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
-        if (D_800FF1E8[index].unk0 == 1) {
+        if (g_GameBoyCharacters[index].status == GAME_BOY_CHARACTER_STATUS_PRESENT) {
             count++;
         }
     }
@@ -1115,7 +1107,7 @@ void func_8005CA48(void) {
             if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
                 name = D_800C2B60[index];
             } else {
-                name = D_800FF1E8[index].name;
+                name = g_GameBoyCharacters[index].name;
             }
             for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH; byteIndex++) {
                 letter = *name++;
@@ -1132,7 +1124,7 @@ void func_8005CA48(void) {
                 g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12 = D_800C2B50[index];
                 g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26 = D_800C2B58[index];
             } else {
-                g_ImportedCharacters[index].character = D_800FF1E8[index].unk19 + FIRST_IMPORTED_CHARACTER;
+                g_ImportedCharacters[index].character = g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
                 g_ImportedCharacters[index].unk2 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance;
                 g_ImportedCharacters[index].unk4 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12;
                 g_ImportedCharacters[index].unk6 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26;

@@ -6,6 +6,7 @@
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
+#include "transfer_pak.h"
 #include "unlocks.h"
 #include "variables.h"
 
@@ -105,7 +106,6 @@ void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 ti
 s32 func_8006B55C(void);
 void func_8006B56C(s32, s32, s32, s32);
 void func_8006B5A0(s32, s32, s32, s32);
-void func_8006F50C(void);
 void func_8009226C(s32);
 s32 func_800959F8(void);
 
@@ -237,7 +237,7 @@ void LoadTitleScreen(void) {
     EncodedAsset asset;
 
     ResetButtonCodes();
-    func_8006F50C();
+    ForceStopRumble();
     func_8005DC50();
     if (g_ControllerCount == 0) {
         OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
@@ -256,7 +256,7 @@ void LoadTitleScreen(void) {
 }
 
 void UnloadTitleScreen(void) {
-    func_8006F50C();
+    ForceStopRumble();
     SetFillColor(0, 0, 0);
 }
 
