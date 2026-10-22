@@ -902,3 +902,7 @@ g_BlendedTextureStillLayer = 0x80132CEC; // size:0x4
 sNoiseTexture = 0x800B6B28; // size:0x400
 sFlameGradientTexture = 0x800B6F28; // size:0x800
 sDynamicTextureScroll = 0x800B7730; // size:0x4
+BuildHorizonDynamicTextures = 0x8002BF1C; // type:func
+FitStripToScreen = 0x8002BE78; // type:func
+g_HorizonRow = 0x800B7728; // size:0x4
+sHorizonTextureScroll = 0x800B772C; // size:0x4

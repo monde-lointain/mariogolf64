@@ -58,6 +58,12 @@ extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
 
+/*
+ * The screen row of the horizon in the main view, from its pitch and zoom.
+ * The background drawer sets it.
+ */
+extern s32 g_HorizonRow;
+
 /* Formatted text on its way to the screen */
 extern char g_PrintBuffer[];
 

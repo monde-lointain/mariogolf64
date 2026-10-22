@@ -66,6 +66,9 @@ extern u16 sFlameGradientTexture[];
 /* How far BuildDynamicTextures has scrolled its textures */
 extern s32 sDynamicTextureScroll;
 
+/* How far BuildHorizonDynamicTextures has scrolled its textures */
+extern s32 sHorizonTextureScroll;
+
 extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
@@ -166,6 +169,16 @@ extern s32 sHasUnloadedSubModule;
 #define MIRROR_NOISE_ALPHA 0x9F
 #define FLAME_NOISE_ALPHA 0x30
 #define BLENDED_TEXTURE_ALPHA 0x7F
+
+/*
+ * BuildHorizonDynamicTextures copies every HORIZON_ROW_SPACING-th row of
+ * a strip of the frame that starts HORIZON_STRIP_RISE rows above the
+ * horizon and ends at HORIZON_STRIP_BOTTOM
+ */
+#define HORIZON_STRIP_RISE 70
+#define HORIZON_FIRST_ROW 8
+#define HORIZON_ROW_SPACING 7
+#define HORIZON_STRIP_BOTTOM 224
 
 /* The texture memory that the second texture of a two-texture blend uses */
 #define SECOND_TEXTURE_TMEM 0x100
@@ -572,9 +585,156 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002BE78);
+extern s32 D_801B6088;
+extern volatile s32 D_800FBE74;
+extern s32 D_800C306C;
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002BF1C);
+/*
+ * Draws the dynamic textures, filling g_MirrorTexture from a strip of the
+ * frame above the horizon. Only scenes 12 and 14 use it.
+ */
+void BuildHorizonDynamicTextures(Gfx **displayListHead) {
+    s32 stripTop;
+    s32 sourceTop;
+    s32 destOffset;
+    s32 rowCount;
+    Gfx *gfx = *displayListHead;
+    u32 frame = osVirtualToPhysical(nuGfxCfb_ptr);
+    s32 mode;
+    s32 rowIndex;
+    s32 blockIndex;
+
+    /* Keeps the strip's rows on the screen */
+    void FitStripToScreen(void) {
+        if (stripTop < 0) {
+            sourceTop = 0;
+        } else {
+            sourceTop = stripTop;
+        }
+        if (stripTop > 0) {
+            destOffset = 0;
+        } else {
+            destOffset = -stripTop / HORIZON_ROW_SPACING;
+        }
+        if (sourceTop > 0) {
+            rowCount = (HORIZON_STRIP_BOTTOM - sourceTop) / HORIZON_ROW_SPACING;
+        } else {
+            rowCount = DYNAMIC_TEXTURE_SIZE - destOffset;
+        }
+    }
+
+    if ((g_Scene != 12) & (g_Scene != 14)) {
+        return;
+    }
+    stripTop = g_HorizonRow - HORIZON_STRIP_RISE;
+    mode = D_801B6088;
+    if (mode == 3 || mode == 4) {
+        sourceTop = 0;
+        destOffset = 0;
+        rowCount = DYNAMIC_TEXTURE_SIZE;
+    } else {
+        /* The value read here is never used */
+        if (mode == 6) {
+            mode = D_800FBE74;
+        }
+        FitStripToScreen();
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL0, 0, 0, 0, 0, 1, TEXEL0, 0, TEXEL0, 0, 0, 0, 0, 1);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_TINT_ALPHA);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
+                     osVirtualToPhysical(g_MirrorTexture) & ~7);
+    gDPPipeSync(gfx++);
+    if (g_Cameras[1].view.drawFlags != CAMERA_DRAW_SCENE && D_800C306C != 4 &&
+        sourceTop <= HORIZON_STRIP_BOTTOM && destOffset < DYNAMIC_TEXTURE_SIZE) {
+        for (rowIndex = 0; rowIndex != rowCount; rowIndex++) {
+            for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
+                gDPLoadTextureTile(gfx++, frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0,
+                                   MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING,
+                                   sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING,
+                                   MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING + MIRROR_BLOCK_WIDTH - 1,
+                                   sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gSPScisTextureRectangle(gfx++, (blockIndex * MIRROR_BLOCK_WIDTH) << 2,
+                                        (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset) << 2,
+                                        (blockIndex * MIRROR_BLOCK_WIDTH + MIRROR_BLOCK_WIDTH) << 2,
+                                        (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1) << 2,
+                                        G_TX_RENDERTILE,
+                                        (MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING) << 5,
+                                        (sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING) << 5, 1 << 10, 1 << 10);
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, COMBINED, 0,
+                      0, 0, 0, COMBINED);
+    sHorizonTextureScroll++;
+    gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b, DYNAMIC_TEXTURE_SIZE,
+                        DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock(gfx++, (u32)g_MirrorTexture & ~7, SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                      DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, MIRROR_NOISE_ALPHA);
+    if (rowCount > 0) {
+        gSPScisTextureRectangle(gfx++, 0, (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 2, DYNAMIC_TEXTURE_SIZE << 2, (DYNAMIC_TEXTURE_SIZE - destOffset) << 2,
+                                G_TX_RENDERTILE, 0, (DYNAMIC_TEXTURE_SIZE - destOffset - rowCount) << 5, 1 << 10, 1 << 10);
+    }
+    gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, COMBINED, 0,
+                      0, 0, 0, COMBINED);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
+                     osVirtualToPhysical(g_FlameTexture) & ~7);
+    gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b, DYNAMIC_TEXTURE_SIZE,
+                        DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock(gfx++, (u32)sFlameGradientTexture & ~7, SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA,
+                      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, FLAME_NOISE_ALPHA);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, sHorizonTextureScroll, 32, sHorizonTextureScroll + 32);
+    gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
+    gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2, DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0,
+                        0, 1 << 10, 1 << 10);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
+                     osVirtualToPhysical(g_BlendedTexture) & ~7);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
+    gDPLoadTextureBlock(gfx++, (u32)(g_BlendedTextureScrollingLayer + 8) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                        DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock(gfx++, (u32)(g_BlendedTextureStillLayer + 8) & ~7, SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA,
+                      G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE, sHorizonTextureScroll, sHorizonTextureScroll, sHorizonTextureScroll + 32, sHorizonTextureScroll + 32);
+    gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
+    gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2, DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0,
+                        0, 1 << 10, 1 << 10);
+    gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, SCREEN_BORDER, SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER,
+                  SCREEN_HEIGHT - SCREEN_BORDER);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Draws the dynamic textures from a fixed strip of the frame. Restores
