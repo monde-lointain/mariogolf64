@@ -49,14 +49,6 @@
 /* Given this image, func_800719A0 stores it in the slot and sets up nothing else */
 #define NO_IMAGE (-1)
 
-/* Each logo image is stored with this header before its texels */
-typedef struct LogoHeader {
-    /* 0x0 */ u16 unk0;
-    /* 0x2 */ u16 width;
-    /* 0x4 */ u16 height;
-    /* 0x6 */ u16 unk6;
-} LogoHeader; /* size = 0x8 */
-
 /* 192 by 42 four-bit texels, read as 96-byte rows */
 #define CAMELOT_LOGO_WIDTH 192
 #define CAMELOT_LOGO_STRIP_HEIGHT 21
@@ -65,7 +57,7 @@ typedef struct LogoHeader {
 #define CAMELOT_LOGO_TOP 98
 
 typedef struct CamelotLogo {
-    /* 0x00 */ LogoHeader header;
+    /* 0x00 */ ImageHeader header;
     /* 0x08 */ u16 palette[16];
     /* 0x28 */ u8 texels[0x11E8];
 } CamelotLogo; /* size = 0x1210 */
@@ -78,7 +70,7 @@ typedef struct CamelotLogo {
 #define NINTENDO_LOGO_TOP 96
 
 typedef struct NintendoLogo {
-    /* 0x0 */ LogoHeader header;
+    /* 0x0 */ ImageHeader header;
     /* 0x8 */ u8 texels[0x2348];
 } NintendoLogo; /* size = 0x2350 */
 
@@ -90,7 +82,7 @@ typedef struct NintendoLogo {
 #define N64_LOGO_TOP 64
 
 typedef struct N64Logo {
-    /* 0x0 */ LogoHeader header;
+    /* 0x0 */ ImageHeader header;
     /* 0x8 */ u16 texels[0x7008 / 2];
 } N64Logo; /* size = 0x7010 */
 

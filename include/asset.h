@@ -25,6 +25,14 @@ typedef struct EncodedAsset {
     /* 0x10 */ AssetFile file;
 } EncodedAsset; /* size = 0x20 */
 
+/* The boot logos, among other image assets, begin with this before their texels */
+typedef struct ImageHeader {
+    /* 0x0 */ u16 unk0;
+    /* 0x2 */ u16 width;
+    /* 0x4 */ u16 height;
+    /* 0x6 */ u16 unk6;
+} ImageHeader; /* size = 0x8 */
+
 void OpenAssetFile(s32 assetId, AssetFile *file);
 AssetFile *OpenPooledAssetFile(s32 assetId);
 void CloseAssetFile(AssetFile *file);
