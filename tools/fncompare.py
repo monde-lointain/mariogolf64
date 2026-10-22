@@ -30,8 +30,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KMC_DIR = os.path.join(ROOT, "tools", "gcc_kmc")
 CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ffast-math",
           "-nostdinc", "-funsigned-char", "-w"]
-# Optimization levels by directory, as the Makefile sets them
-OPTFLAGS_BY_DIR = {os.path.join("src", "libkmc"): "-O1 -fno-fast-math"}
+# Optimization levels by file or directory, as the Makefile sets them
+OPTFLAGS_BY_PATH = {os.path.join("src", "libkmc"): "-O1 -fno-fast-math"}
 DEFAULT_OPTFLAGS = "-O2"
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
             "-Ilib/ultralib/include/PR", "-Ilib/libmus/include", "-Isrc",
@@ -103,8 +103,11 @@ def get_work_dir():
 
 def get_optflags(c_path):
     """Returns the optimization flags the Makefile builds C_PATH with."""
-    c_dir = os.path.relpath(os.path.dirname(os.path.abspath(c_path)), ROOT)
-    return OPTFLAGS_BY_DIR.get(c_dir, DEFAULT_OPTFLAGS).split()
+    path = os.path.relpath(os.path.abspath(c_path), ROOT)
+    for key in (path, os.path.dirname(path)):
+        if key in OPTFLAGS_BY_PATH:
+            return OPTFLAGS_BY_PATH[key].split()
+    return DEFAULT_OPTFLAGS.split()
 
 
 def compile_functions(c_path):
