@@ -7,6 +7,8 @@
 #define SAVE_MAGIC 0x12345678
 
 #define SAVE_COPY_COUNT 2
+#define SAVE_RECORD_COUNT 5
+#define SAVE_UNKA0_COUNT 3
 
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
@@ -33,10 +35,42 @@
 typedef struct Unk68 {
     /* 0x00 */ s32 unk0[0x2C / 4];
     /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D[0x3A - 0x2D];
+    /* 0x2D */ u8 unk2D[0x34 - 0x2D];
+    /* 0x34 */ u8 unk34;
+    /* 0x35 */ u8 unk35;
+    /* 0x36 */ s8 unk36;
+    /* 0x37 */ u8 unk37;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 unk39;
     /* 0x3A */ u8 unk3A;
     /* 0x3B */ u8 unk3B[0x68 - 0x3B];
 } Unk68; /* size = 0x68 */
+
+typedef struct UnkA0Sub3C {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+} UnkA0Sub3C; /* size = 0x14 */
+
+typedef struct UnkA0 {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ u8 unk4[0x3C - 0x4];
+    /* 0x3C */ UnkA0Sub3C unk3C;
+    /* 0x50 */ u8 unk50[0x76 - 0x50];
+    /* 0x76 */ s8 unk76;
+    /* 0x77 */ u8 unk77[0xA0 - 0x77];
+} UnkA0; /* size = 0xA0 */
+
+typedef struct UnkB8 {
+    /* 0x00 */ s32 unk0[0x1C / 4];
+    /* 0x1C */ u8 unk1C;
+    /* 0x1D */ u8 unk1D;
+    /* 0x1E */ u8 unk1E[0x7B - 0x1E];
+    /* 0x7B */ u8 unk7B;
+    /* 0x7C */ u8 unk7C[0xB8 - 0x7C];
+} UnkB8; /* size = 0xB8 */
 
 typedef struct SaveData {
     /* 0x0000 */ u32 magic;
@@ -52,8 +86,9 @@ typedef struct SaveData {
     /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
     /* 0x15D0 */ u8 unk15D0[0x1DF0 - 0x15D0];
-    /* 0x1DF0 */ Unk68 unk1DF0[5];
-    /* 0x1FF8 */ u8 unk1FF8[0x2A78 - 0x1FF8];
+    /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];
+    /* 0x1FF8 */ UnkA0 unk1FF8[SAVE_UNKA0_COUNT];
+    /* 0x21D8 */ UnkB8 unk21D8[SAVE_UNKA0_COUNT][4];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */

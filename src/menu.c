@@ -1,10 +1,12 @@
 #include "common.h"
 #include <lib/libnusys/nusys.h>
 #include "debug_flags.h"
+#include "heap.h"
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "scene.h"
 #include "sram.h"
 #include "variables.h"
 
@@ -41,6 +43,7 @@ typedef struct Unk800FE3D8 {
     /* 0x14 */ s8 unk14;
 } Unk800FE3D8; /* size = 0x16 */
 
+extern s8 D_800C1FF0;
 extern s8 D_800C1FF4;
 extern s8 D_800C1FF5;
 extern s8 D_800C1FF6;
@@ -55,6 +58,8 @@ extern s32 D_800FE334;
 extern s16 D_800FE33C;
 extern Unk800FE3D8 D_800FE3D8[4];
 extern s8 D_800FF4C0;
+extern s8 D_801B5634;
+extern s8 D_800C2BD5;
 extern s8 D_801052E8;
 extern s32 D_80105B68;
 extern s8 D_80105DC1;
@@ -83,6 +88,36 @@ extern s16 D_801B71CC;
 extern s8 D_801B9410;
 extern s32 D_801EFFA0;
 extern u8 g_MapCamera[];
+extern void *D_801F4A20;
+extern void *D_8012D3AC;
+extern void *D_8012F4B0[7];
+extern void *D_801049A0[7];
+extern void *D_801052C4[2];
+extern void *D_800FF420[2];
+extern void *D_801B60D0;
+extern void *D_8012D420[2];
+extern void *D_801B5CD0[2];
+extern void *D_801052BC[2];
+extern void *D_800FBDFC[2];
+extern void *D_800FF4C4[2];
+extern void *D_800FBE38[3];
+extern void *D_801B93E0[5];
+extern void *D_8010526C[2];
+extern void *D_800FF180[2];
+extern void *D_80106100;
+extern void *D_800FC898;
+extern void *D_8012D430[18];
+extern void *D_80105B78[18];
+extern void *D_800FBE30[2];
+extern void *D_800FC6A0;
+extern void *D_801B69EC;
+extern s16 D_800C28E4[15][7];
+typedef struct Unk800C29B8 {
+    /* 0x0 */ s16 column;
+    /* 0x2 */ s16 row;
+} Unk800C29B8; /* size = 0x4 */
+extern Unk800C29B8 D_800C29B8[];
+extern s16 D_800C2BB0[15];
 
 void *func_8005AF74(void);
 s32 func_8005D23C(void);
@@ -94,7 +129,55 @@ void TransferSaveData(SaveData *save, u8 isWrite);
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005A580);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005ACF8);
+void func_8005ACF8(void) {
+    s32 index;
+
+    D_800C1FF0 = -1;
+    FreeMemory(&D_801F4A20);
+    FreeMemory(&D_8012D3AC);
+    for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
+        FreeMemory(&D_801049A0[index]);
+        FreeMemory(&D_8012F4B0[index]);
+    }
+    FreeMemory(&D_801052C4[0]);
+    FreeMemory(&D_801052C4[1]);
+    FreeMemory(&D_800FF420[0]);
+    FreeMemory(&D_800FF420[1]);
+    FreeMemory(&D_801B60D0);
+    FreeMemory(&D_8012D420[0]);
+    FreeMemory(&D_801B5CD0[0]);
+    FreeMemory(&D_8012D420[1]);
+    FreeMemory(&D_801B5CD0[1]);
+    FreeMemory(&D_801052BC[0]);
+    FreeMemory(&D_801052BC[1]);
+    FreeMemory(&D_800FBDFC[0]);
+    FreeMemory(&D_800FBDFC[1]);
+    for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
+        FreeMemory(&D_800FF4C4[index]);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
+        FreeMemory(&D_800FBE38[index]);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
+        FreeMemory(&D_801B93E0[index]);
+    }
+    FreeMemory(&D_8010526C[0]);
+    FreeMemory(&D_8010526C[1]);
+    FreeMemory(&D_800FF180[0]);
+    FreeMemory(&D_800FF180[1]);
+    FreeMemory(&D_80106100);
+    FreeMemory(&D_800FC898);
+    for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
+        FreeMemory(&D_8012D430[index]);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
+        FreeMemory(&D_80105B78[index]);
+    }
+    FreeMemory(&D_800FBE30[0]);
+    FreeMemory(&D_800FBE30[1]);
+    FreeMemory(&D_800FC6A0);
+    FreeMemory(&D_801B69EC);
+}
 
 SaveData *GetSaveData(void) {
     func_8005AF74();
@@ -336,11 +419,132 @@ INCLUDE_ASM("asm/nonmatchings/menu", func_8005C674);
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005CA48);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005CEE0);
+s32 func_8005CEE0(s32 index) {
+    s32 slot;
+    s32 row;
+    s32 column;
 
+    if (index < 0) {
+        return -1;
+    }
+    if (index >= ARRAY_COUNT(D_800C2BB0)) {
+        return -1;
+    }
+    func_8005C674(1, 1);
+    slot = D_800C2BB0[index];
+    row = D_800C29B8[slot].row;
+    column = D_800C29B8[slot].column;
+    return D_800C28E4[row][column] < 0 ? -1 : 0;
+}
+
+
+#ifdef NON_MATCHING
+void func_8005CF78(void) {
+    SaveData *save;
+    s32 isInvalid[SAVE_UNKA0_COUNT];
+    s32 index;
+    s32 entryIndex;
+    UnkA0 *unk;
+    UnkA0Sub3C *sub;
+    UnkB8 *entries;
+
+    save = GetSaveData();
+    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
+        isInvalid[index] = FALSE;
+    }
+    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
+        if (save->unk1FF8[index].unk0 == 0) {
+            continue;
+        }
+        unk = &save->unk1FF8[index];
+        sub = &unk->unk3C;
+        if (unk->unk76 == 0) {
+            switch (sub->unk4) {
+                case 0:
+                case 2:
+                case 4:
+                case 5:
+                case 10:
+                case 11:
+                    break;
+                default:
+                    isInvalid[index] = TRUE;
+                    break;
+            }
+        }
+        if (sub->unk8 < 1 || sub->unk8 > 4) {
+            isInvalid[index] = TRUE;
+        }
+        if (sub->unkC < 0 || sub->unkC >= 12) {
+            isInvalid[index] = TRUE;
+        }
+        if (sub->unk10 < 0 || sub->unk10 >= COURSE_HOLE_COUNT) {
+            isInvalid[index] = TRUE;
+        }
+        entries = save->unk21D8[index];
+        for (entryIndex = 0; entryIndex != sub->unk8; entryIndex++) {
+            if (entries[entryIndex].unk1D >= COURSE_HOLE_COUNT) {
+                isInvalid[index] = TRUE;
+            }
+            if (entries[entryIndex].unk7B >= 4) {
+                isInvalid[index] = TRUE;
+            }
+        }
+    }
+    for (index = 0; index != SAVE_UNKA0_COUNT; index++) {
+        if (isInvalid[index] == TRUE) {
+            save->unk1FF8[index].unk0 = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005CF78);
+#endif
 
+
+#ifdef NON_MATCHING
+void func_8005D0D8(void) {
+    SaveData *save;
+    s32 isInvalid[SAVE_RECORD_COUNT];
+    s32 recordIndex;
+    Unk68 *record;
+    s32 kind;
+
+    save = GetSaveData();
+    for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
+        isInvalid[recordIndex] = FALSE;
+    }
+    for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
+        record = &save->unk1DF0[recordIndex];
+        if (record->unk36 & 0x80) {
+            if ((record->unk36 & 0xF) >= 5 || (record->unk36 & 0xF) < 0) {
+                isInvalid[recordIndex] = TRUE;
+            }
+        }
+        if (record->unk37 >= COURSE_HOLE_COUNT) {
+            isInvalid[recordIndex] = TRUE;
+        }
+        if (record->unk39 >= 4) {
+            isInvalid[recordIndex] = TRUE;
+        }
+        if (record->unk34 >= 6) {
+            isInvalid[recordIndex] = TRUE;
+        }
+        if (record->unk35 >= 6) {
+            isInvalid[recordIndex] = TRUE;
+        }
+    }
+    /* Toggling rather than clearing sets the flag on records that fail with it clear */
+    for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
+        if (isInvalid[recordIndex] == TRUE) {
+            save->unk1DF0[recordIndex].unk36 ^= 0x80;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005D0D8);
+#endif
+
 
 void func_8005D1E4(void) {
     u8 *unk;
@@ -502,7 +706,54 @@ void func_8005DAD4(void) {
     D_800C2BD4 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005DAFC);
+void func_8005DAFC(void) {
+    switch (g_GameMode) {
+        case 5:
+            D_800FF4C0 = 2;
+            g_MapCamera[0x4C] = 0;
+            D_801B5634 = 0;
+            break;
+        case 0:
+            D_800FF4C0 = 1;
+            g_MapCamera[0x4C] = 1;
+            if (D_80105B68 == 4) {
+                D_801B5634 = 2;
+            } else {
+                D_801B5634 = 1;
+            }
+            D_800C2BD5 = 1;
+            break;
+        case 2:
+            D_800FF4C0 = 1;
+            g_MapCamera[0x4C] = 1;
+            D_801B5634 = 3;
+            break;
+        case 10:
+            D_800FF4C0 = 1;
+            g_MapCamera[0x4C] = 1;
+            D_801B5634 = 4;
+            break;
+        case 3:
+        case 4:
+        case 6:
+        case 7:
+        case 9:
+            D_800FF4C0 = 1;
+            g_MapCamera[0x4C] = 2;
+            D_801B5634 = 0;
+            break;
+        case 11:
+            D_800FF4C0 = 1;
+            g_MapCamera[0x4C] = 1;
+            D_801B5634 = 5;
+            break;
+    }
+    D_801052E8 = 1;
+    D_801B9410 = 1;
+    D_800FE334 = 0;
+    D_800C2BD4 = 0;
+    D_801EFFA0 = 6;
+}
 
 void func_8005DC50(void) {
     func_8005D9A0();
