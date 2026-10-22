@@ -20,6 +20,12 @@
 #define CLUB_COUNT (CLUB_SET_SIZE * CLUB_SET_COUNT)
 #define CLUB_TYPE_PUTTER 13
 
+/* What a club is, from the clubs' initial data */
+#define CLUB_KIND_WOOD 0   /* 1W, 3W and 4W */
+#define CLUB_KIND_IRON 1   /* 2I to 9I */
+#define CLUB_KIND_WEDGE 2  /* PW and SW */
+#define CLUB_KIND_PUTTER 3
+
 /* A player's bag has this many slots; empty ones hold NO_CLUB */
 #define CLUB_SLOT_COUNT 16
 #define NO_CLUB (-1)
@@ -55,7 +61,7 @@ typedef struct Club {
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 type; /* The club's place in its set */
     /* 0x18 */ s32 power[SHOT_MODE_COUNT];
-    /* 0x24 */ u8 unk24[2];
+    /* 0x24 */ s16 kind;
     /* 0x26 */ s16 unk26;
     /* 0x28 */ s16 deflection[SHOT_MODE_COUNT]; /* 0x1000 less the test shot's landing direction */
     /* 0x2E */ u8 unk2E[2];
