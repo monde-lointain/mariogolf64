@@ -14,6 +14,7 @@ decomp-permuter is expected at $PERMUTER_DIR (default ~/src/decomp-permuter).
 """
 
 import os
+import re
 import subprocess
 import sys
 
@@ -46,6 +47,13 @@ def main():
         base_file.write(preprocessed)
     subprocess.run([sys.executable, os.path.join(PERMUTER_DIR, "strip_other_fns.py"), base_path, function],
                    check=True)
+    # Nothing calls the function once the others are stripped, so a static
+    # one would not be emitted at all
+    with open(base_path) as base_file:
+        base = base_file.read()
+    base = re.sub(r"^static\s+(.*\b%s\s*\()" % re.escape(function), r"\1", base, flags=re.MULTILINE)
+    with open(base_path, "w") as base_file:
+        base_file.write(base)
 
     target_s = os.path.join(out_dir, "target.s")
     header = ".set noat\n.set noreorder\n.set gp=64\n"
@@ -58,7 +66,7 @@ def main():
 
     compile_sh = os.path.join(out_dir, "compile.sh")
     with open(compile_sh, "w") as script:
-        flags = " ".join(fncompare.CFLAGS)
+        flags = " ".join(fncompare.CFLAGS + fncompare.get_optflags(c_path))
         script.write(COMPILE_SH.format(kmc=os.path.join(ROOT, "tools", "gcc_kmc"), flags=flags))
     os.chmod(compile_sh, 0o755)
 

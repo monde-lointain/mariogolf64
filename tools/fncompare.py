@@ -101,16 +101,20 @@ def get_work_dir():
     return _work_dir
 
 
+def get_optflags(c_path):
+    """Returns the optimization flags the Makefile builds C_PATH with."""
+    c_dir = os.path.relpath(os.path.dirname(os.path.abspath(c_path)), ROOT)
+    return OPTFLAGS_BY_DIR.get(c_dir, DEFAULT_OPTFLAGS).split()
+
+
 def compile_functions(c_path):
     """Compiles C_PATH; returns ({name: [masked words]}, error text)."""
     c_path = os.path.abspath(c_path)
-    c_dir = os.path.relpath(os.path.dirname(c_path), ROOT)
-    optflags = OPTFLAGS_BY_DIR.get(c_dir, DEFAULT_OPTFLAGS)
     with tempfile.TemporaryDirectory() as tmp:
         obj_path = os.path.join(tmp, "out.o")
         env = dict(os.environ, COMPILER_PATH=KMC_DIR)
         result = subprocess.run(
-            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *optflags.split(), *INCLUDES, *DEFINES,
+            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *get_optflags(c_path), *INCLUDES, *DEFINES,
              "-o", obj_path, c_path],
             cwd=get_work_dir(), env=env, capture_output=True, text=True)
         if result.returncode != 0:
