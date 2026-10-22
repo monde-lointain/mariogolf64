@@ -3,6 +3,12 @@
 
 #include <ultra64.h>
 
+/* Converts binary angles, where 0x10000 is a turn, to radians */
+#define BINARY_ANGLE_TO_RADIANS (3.1415927f / 32768.0f)
+
+/* The radians to degrees factor of rotations */
+#define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
+
 u32 IntLength3D(s32 x, s32 y, s32 z);
 u32 IntLength2D(s32 x, s32 y);
 void SetRandomSeed(s32 seed);

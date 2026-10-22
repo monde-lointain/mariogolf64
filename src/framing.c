@@ -2,6 +2,7 @@
 #include "camera.h"
 #include "controller.h"
 #include "functions.h"
+#include "math_util.h"
 
 /* How many spheres sFramedSphereCenters has room for */
 #define FRAMED_SPHERE_CAPACITY 8
@@ -12,9 +13,6 @@
 /* The pi of these angles' conversions, rounded to six places */
 #define FRAMING_PI 3.141593f
 #define FRAMING_DEGREES_TO_RADIANS(degrees) ((degrees) * (FRAMING_PI / 180))
-
-/* The radians to degrees factor of the rotations */
-#define RADIANS_TO_DEGREES (1.0 / ((f32)M_PI / 180.0))
 
 /* The starting x and y bounds */
 #define FAR_EXTENT 30000.0f

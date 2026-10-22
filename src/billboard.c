@@ -10,6 +10,7 @@
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
+#include "math_util.h"
 
 /* Textures of this type are read from the asset archive when first drawn */
 #define TEXTURE_LOADED_ON_DEMAND 2
@@ -35,8 +36,6 @@ extern s8 sIsHeapReady;
 extern u8 *sHeapStart;
 extern u8 *sHeapEnd;
 extern u16 sDrawOrder[BILLBOARD_COUNT];
-extern u16 g_LightYaw;
-extern u16 g_LightPitch;
 s32 GetGroundHeight(s32 x, s32 z);
 
 /* Billboards this close to the course's edges are hidden */
@@ -63,9 +62,6 @@ s32 GetGroundHeight(s32 x, s32 z);
 
 /* Billboards are only lit from a light at least this high */
 #define LIGHT_HEIGHT_MIN 0.1f
-
-/* Converts binary angles, where 0x10000 is a turn, to radians */
-#define BINARY_ANGLE_TO_RADIANS (3.1415927f / 32768.0f)
 
 /* In the debug view, near billboards this close in front of the ball are
    not drawn */
