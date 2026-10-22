@@ -328,7 +328,7 @@ segments:
       - [0x8E110, c, libkmc/atan]
       - [0x8E550, asm, libkmc/memset]
       - [0x8E620, asm, libkmc/rand]
-      - [0x8E660, asm]
+      - [0x8E660, c, libkmc/trig]
       - [0x8EAD0, asm, libkmc/strcmp]
       - [0x8EBE0, c, libkmc/matherror]
       - [0x8EC50, hasm, libkmc/longlong]
@@ -424,7 +424,7 @@ segments:
       - [0xADA50, .rodata, ../lib/ultralib/src/libc/xprintf]
       - [0xADBD0, .rodata, ../lib/ultralib/src/libc/xldtob]
       - [0xADC40, .rodata, libkmc/atan]
-      - [0xADCA0, rodata]
+      - [0xADCA0, .rodata, libkmc/trig]
       - { start: 0xADD30, type: .bss, vram: 0x800D2930, name: overlay_manager }
       - { type: .bss, vram: 0x800D2970, name: ../lib/libnusys/nusched }
       - { type: .bss, vram: 0x800D8980, name: ../lib/libnusys/nugfxtaskmgr }

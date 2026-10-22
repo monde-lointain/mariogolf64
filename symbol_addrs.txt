@@ -929,3 +929,7 @@ errno = 0x800FE3D0; // size:0x4
 InitSram = 0x80099490; // type:func
 CordicAngle = 0x800B2D10; // type:func
 g_CordicAngles = 0x800C9690; // size:0x200
+CordicSineCosine = 0x800B3260; // type:func
+sin = 0x800B3480; // type:func
+cos = 0x800B3560; // type:func
+tan = 0x800B35F8; // type:func
