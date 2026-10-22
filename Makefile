@@ -84,7 +84,8 @@ LIBNUSYS_OPTFLAGS  := -O2
 LIBNUSYS_CFLAGS     = -w -nostdinc -G 0 -mgp32 -mfp32 -mips3 -D_LANGUAGE_C $(LIBNUSYS_OPTFLAGS) -Wa,--force-n64align
 
 # Per-directory compiler flags
-$(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1
+# libkmc was built without -ffast-math, which turns divisions by constants into multiplications
+$(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1 -fno-fast-math
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 

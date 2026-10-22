@@ -927,3 +927,5 @@ __floatdidf = 0x800B3D40; // type:func
 matherr = 0x800B3E40; // type:func
 errno = 0x800FE3D0; // size:0x4
 InitSram = 0x80099490; // type:func
+CordicAngle = 0x800B2D10; // type:func
+g_CordicAngles = 0x800C9690; // size:0x200
