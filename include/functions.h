@@ -34,8 +34,8 @@ void UpdateOverlays(void);
 
 /* The development debugger's entry, outside the game's code */
 void EnterDevelopmentDebugger(s32 argument);
-void func_8005A580(void);
-void func_8005ACF8(void);
+void LoadMenuResources(void);
+void FreeMenuResources(void);
 void func_80080DCC(void);
 void func_80080E14(void);
 /* Whether the view mode that the B button picks in debug builds is on */

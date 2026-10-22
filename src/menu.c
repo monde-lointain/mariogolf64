@@ -162,6 +162,18 @@ extern void *D_80105B78[18];
 extern void *D_800FBE30[2];
 extern void *D_800FC6A0;
 extern void *D_801B69EC;
+extern void *D_8012D424; /* D_8012D420[1], named apart to match */
+extern u16 D_800C2014[1];
+extern u16 D_800C2016;
+extern u16 D_800C2028[1];
+extern u16 D_800C2064[7];
+extern s16 D_800C20D4[2];
+extern u16 D_800C20E0[][12];
+extern u16 D_800C21B8[1];
+extern s16 D_800C2278[3];
+extern u16 D_800C28B0[1];
+void func_80051C08(s32, s32);
+void SetFramebufferCount(s32 count);
 #define CHARACTER_GRID_ROW_COUNT 3
 #define CHARACTER_GRID_COLUMN_COUNT 7
 /* The rows of the grid that hold the characters to choose from */
@@ -217,9 +229,137 @@ s32 WriteSaveCopies(SaveData *save, u8 isInSram);
 void SyncSaveOptions(SaveData *save, s32 isWrite, s32 readResult);
 void TransferSaveData(SaveData *save, u8 isWrite);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005A580);
+/*
+ * Allocates and reads the menu's assets, then reads the save. Overlay 3
+ * calls this as it loads.
+ */
+void LoadMenuResources(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    s32 unused[4]; /* The original frame has room for this */
+    SaveData *save;
+    s32 index;
+    s32 size;
 
-void func_8005ACF8(void) {
+    save = GetSaveData();
+    if (D_800C1FF0 != -1) {
+        osSyncPrintf("menu const error");
+        return;
+    }
+    D_801F4A20 = AllocMemory(OpenEncodedAsset(0x51E, &asset));
+    ReadEncodedAsset(D_801F4A20, &asset);
+    D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
+    ReadEncodedAsset(D_8012D3AC, &asset);
+    D_800FF420[0] = AllocMemory(OpenEncodedAsset(0x520, &asset));
+    ReadEncodedAsset(D_800FF420[0], &asset);
+    D_800FF420[1] = AllocMemory(OpenEncodedAsset(0x520, &asset));
+    ReadEncodedAsset(D_800FF420[1], &asset);
+    D_801B60D0 = AllocMemory(OpenEncodedAsset(0x521, &asset));
+    ReadEncodedAsset(D_801B60D0, &asset);
+    D_8012D420[0] = AllocMemory(0x70A8);
+    D_801B5CD0[0] = AllocMemory(0x70A8);
+    D_8012D424 = AllocMemory(0x70A8);
+    D_801B5CD0[1] = AllocMemory(0x70A8);
+    OpenEncodedAsset(*D_800C2014, &asset);
+    ReadEncodedAsset(D_8012D420[0], &asset);
+    OpenEncodedAsset(*D_800C2014, &asset);
+    ReadEncodedAsset(D_8012D424, &asset);
+    if (D_801EFFA0 == 5) {
+        OpenEncodedAsset(0x528, &asset);
+        ReadEncodedAsset(D_801B5CD0[0], &asset);
+        OpenEncodedAsset(0x528, &asset);
+        ReadEncodedAsset(D_801B5CD0[1], &asset);
+    } else {
+        OpenEncodedAsset(D_800C2016, &asset);
+        ReadEncodedAsset(D_801B5CD0[0], &asset);
+        OpenEncodedAsset(D_800C2016, &asset);
+        ReadEncodedAsset(D_801B5CD0[1], &asset);
+    }
+    D_801052BC[0] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
+    ReadEncodedAsset(D_801052BC[0], &asset);
+    D_801052BC[1] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
+    ReadEncodedAsset(D_801052BC[1], &asset);
+    for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
+        if (D_801EFFA0 == 5) {
+            size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
+        } else {
+            size = OpenEncodedAsset(D_800C2064[index], &asset);
+        }
+        D_801049A0[index] = AllocMemory(size);
+        ReadEncodedAsset(D_801049A0[index], &asset);
+        if (D_801EFFA0 == 5) {
+            size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
+        } else {
+            size = OpenEncodedAsset(D_800C2064[index], &asset);
+        }
+        D_8012F4B0[index] = AllocMemory(size);
+        ReadEncodedAsset(D_8012F4B0[index], &asset);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
+        OpenAssetFile(D_800C20D4[index], &file);
+        size = GetAssetFileSize(&file);
+        D_801052C4[index] = AllocMemory(size);
+        ReadAssetFile(D_801052C4[index], size, &file);
+    }
+    OpenEncodedAsset(*D_800C21B8, &asset);
+    D_800FBDFC[0] = AllocMemory(0xFA0);
+    ReadEncodedAsset(D_800FBDFC[0], &asset);
+    OpenEncodedAsset(*D_800C21B8, &asset);
+    D_800FBDFC[1] = AllocMemory(0xFA0);
+    ReadEncodedAsset(D_800FBDFC[1], &asset);
+    for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
+        OpenEncodedAsset(*D_800C21B8, &asset);
+        D_800FF4C4[index] = AllocMemory(0x125C);
+        ReadEncodedAsset(D_800FF4C4[index], &asset);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
+        D_801B93E0[index] = AllocMemory(OpenEncodedAsset(0x720, &asset));
+        ReadEncodedAsset(D_801B93E0[index], &asset);
+    }
+    size = OpenEncodedAsset(0x623, &asset);
+    D_8010526C[0] = AllocMemory(size);
+    D_8010526C[1] = AllocMemory(size);
+    D_800FF180[0] = AllocMemory(size);
+    D_800FF180[1] = AllocMemory(size);
+    ReadEncodedAsset(D_8010526C[0], &asset);
+    D_80106100 = AllocMemory(OpenEncodedAsset(0x65D, &asset));
+    ReadEncodedAsset(D_80106100, &asset);
+    D_800FC898 = AllocMemory(OpenEncodedAsset(0x663, &asset));
+    ReadEncodedAsset(D_800FC898, &asset);
+    for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
+        D_8012D430[index] = AllocMemory(OpenEncodedAsset(D_800C2650[index].assetId, &asset));
+        ReadEncodedAsset(D_8012D430[index], &asset);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
+        OpenAssetFile(D_800C2590[index].assetId, &file);
+        size = GetAssetFileSize(&file);
+        D_80105B78[index] = AllocMemory(size);
+        ReadAssetFile(D_80105B78[index], size, &file);
+    }
+    for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
+        OpenAssetFile(D_800C2278[index], &file);
+        size = GetAssetFileSize(&file);
+        D_800FBE38[index] = AllocMemory(size);
+        ReadAssetFile(D_800FBE38[index], size, &file);
+    }
+    D_800FBE30[0] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
+    ReadEncodedAsset(D_800FBE30[0], &asset);
+    D_800FBE30[1] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
+    ReadEncodedAsset(D_800FBE30[1], &asset);
+    D_800FC6A0 = AllocMemory(OpenEncodedAsset(0x6F7, &asset) * 2);
+    ReadEncodedAsset(D_800FC6A0, &asset);
+    D_801B69EC = AllocMemory(OpenEncodedAsset(0x709, &asset));
+    ReadEncodedAsset(D_801B69EC, &asset);
+    func_80051C08(0x27, 0);
+    SetFramebufferCount(3);
+    SetScreenEffect(4, 0);
+    D_801323D0 = 6;
+    InitSram();
+    TransferSaveData(save, FALSE);
+}
+
+/* Frees what LoadMenuResources allocated, as overlay 3 unloads */
+void FreeMenuResources(void) {
     s32 index;
 
     D_800C1FF0 = -1;

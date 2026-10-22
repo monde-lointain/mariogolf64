@@ -42,7 +42,7 @@ Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, OnLoadOverlay2, func_80080E14),
-    OVERLAY_ENTRY(ovl_01, sModuleIdsOfOverlay03, func_8005A580, func_8005ACF8),
+    OVERLAY_ENTRY(ovl_01, sModuleIdsOfOverlay03, LoadMenuResources, FreeMenuResources),
     OVERLAY_ENTRY(ovl_02, sModuleIdsOfOverlay04, NULL, NULL),
     OVERLAY_ENTRY(ovl_03, sModuleIdsOfOverlay05, NULL, NULL),
     OVERLAY_ENTRY(ovl_04, sModuleIdsOfOverlay06, NULL, NULL),

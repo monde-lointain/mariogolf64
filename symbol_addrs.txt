@@ -988,3 +988,5 @@ ComputeRoundStatistics = 0x8005D3B8; // type:func
 GetAssetFileSize = 0x80050598; // type:func
 OpenEncodedAsset = 0x8005062C; // type:func
 ReadEncodedAsset = 0x800506D4; // type:func
+LoadMenuResources = 0x8005A580; // type:func
+FreeMenuResources = 0x8005ACF8; // type:func
