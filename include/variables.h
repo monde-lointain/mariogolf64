@@ -45,6 +45,19 @@ extern u16 g_WindDirection;
 /* The wind's direction as each camera sees it, in radians, for its arrow */
 extern f32 g_ViewedWindAngles[2];
 
+/*
+ * Textures that are drawn every frame and that the course model reads
+ * through RSP segments, each DYNAMIC_TEXTURE_SIZE pixels square
+ */
+#define DYNAMIC_TEXTURE_SIZE 32
+extern u16 g_MirrorTexture[];  /* Part of the frame, upside down */
+extern u16 g_FlameTexture[];   /* Noise scrolling over a flame gradient */
+extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
+
+/* The loaded textures that g_BlendedTexture blends, after 8-byte headers */
+extern u8 *g_BlendedTextureScrollingLayer;
+extern u8 *g_BlendedTextureStillLayer;
+
 /* Formatted text on its way to the screen */
 extern char g_PrintBuffer[];
 

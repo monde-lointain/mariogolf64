@@ -88,6 +88,9 @@ void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
  */
 s32 GetGroundHeight(s32 x, s32 z);
 
+/* Draws the textures the course model reads through RSP segments */
+void BuildDynamicTextures(Gfx **displayListHead);
+
 void func_8004CDA0(void);
 void func_8004DA24(char *text, s32 column, s32 row);
 void func_8007B054(void);
