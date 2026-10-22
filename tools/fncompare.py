@@ -110,14 +110,16 @@ def get_optflags(c_path):
     return DEFAULT_OPTFLAGS.split()
 
 
-def compile_functions(c_path):
-    """Compiles C_PATH; returns ({name: [masked words]}, error text)."""
+def compile_functions(c_path, optflags=None):
+    """Compiles C_PATH with OPTFLAGS, by default its own; returns ({name: [masked words]}, error text)."""
+    if optflags is None:
+        optflags = get_optflags(c_path)
     c_path = os.path.abspath(c_path)
     with tempfile.TemporaryDirectory() as tmp:
         obj_path = os.path.join(tmp, "out.o")
         env = dict(os.environ, COMPILER_PATH=KMC_DIR)
         result = subprocess.run(
-            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *get_optflags(c_path), *INCLUDES, *DEFINES,
+            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *optflags, *INCLUDES, *DEFINES,
              "-o", obj_path, c_path],
             cwd=get_work_dir(), env=env, capture_output=True, text=True)
         if result.returncode != 0:

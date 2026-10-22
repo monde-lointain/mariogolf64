@@ -19,11 +19,11 @@ from concurrent.futures import ProcessPoolExecutor
 import fncompare
 
 
-def score_variant(source, c_dir, target, function):
+def score_variant(source, c_dir, optflags, target, function):
     with tempfile.NamedTemporaryFile("w", suffix=".c", dir=c_dir, delete=False) as variant:
         variant.write(source)
     try:
-        compiled, error = fncompare.compile_functions(variant.name)
+        compiled, error = fncompare.compile_functions(variant.name, optflags)
     finally:
         os.remove(variant.name)
     if compiled is None:
@@ -42,6 +42,8 @@ def main():
         blocks = variants_file.read().split("\n====\n")
     target = fncompare.read_target_functions(asm_path)[function]
     c_dir = os.path.dirname(os.path.abspath(c_path))
+    # The variants have their own names, so they take the flags of the file they vary
+    optflags = fncompare.get_optflags(c_path)
 
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as pool:
         results = []
@@ -50,7 +52,7 @@ def main():
             if old not in source:
                 results.append(None)
             else:
-                results.append(pool.submit(score_variant, source.replace(old, new, 1), c_dir, target, function))
+                results.append(pool.submit(score_variant, source.replace(old, new, 1), c_dir, optflags, target, function))
         for number, result in enumerate(results):
             print(f"{number}: {result.result() if result else 'text not found'}")
 
