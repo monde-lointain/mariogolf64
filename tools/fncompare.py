@@ -25,7 +25,7 @@ from elftools.elf.relocation import RelocationSection
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KMC_DIR = os.path.join(ROOT, "tools", "gcc_kmc")
-CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC",
+CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ffast-math",
           "-nostdinc", "-funsigned-char", "-w", "-O2"]
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
             "-Ilib/ultralib/include/PR", "-Isrc", "-Ibuild"]
