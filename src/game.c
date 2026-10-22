@@ -10,6 +10,7 @@
 #include "functions.h"
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
+#include "performance_meter.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -914,8 +915,6 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 s32 func_80042720(void);
 void func_800427E8(void);
-void func_8004E924(s32, s32, u32, u32, s32, s32);
-void func_8004FDB4(s32, s32);
 void func_8005029C(void);
 void func_800530FC(CameraMatrices *matrices);
 void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
@@ -1856,13 +1855,13 @@ s32 DrawGame(void) {
         nuGfxTaskStart(g_DisplayLists[g_DrawBufferIndex],
                        (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
                        NU_GFX_UCODE_F3DEX, NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER);
-        func_8004E924(2, 200, sDrawStartTime, sGfxTaskStartTime + (sUpdateEndTime - sUpdateStartTime),
-                      GFX_TASK_FLAGS, 8);
+        DrawPerformanceMeter(2, 200, sDrawStartTime, sGfxTaskStartTime + (sUpdateEndTime - sUpdateStartTime),
+                             GFX_TASK_FLAGS, METER_READOUT_FREE_MEMORY);
     } else {
         nuGfxTaskStart(g_DisplayLists[g_DrawBufferIndex],
                        (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
                        NU_GFX_UCODE_F3DEX, NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER);
-        func_8004FDB4(0xC0, GFX_TASK_FLAGS);
+        DrawMemoryMeter(192, GFX_TASK_FLAGS);
     }
     g_DrawBufferIndex ^= 1;
     nuGfxDisplayOn();
