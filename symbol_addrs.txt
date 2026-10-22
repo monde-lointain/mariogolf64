@@ -990,3 +990,4 @@ OpenEncodedAsset = 0x8005062C; // type:func
 ReadEncodedAsset = 0x800506D4; // type:func
 LoadMenuResources = 0x8005A580; // type:func
 FreeMenuResources = 0x8005ACF8; // type:func
+InvalidateBrokenSavedGames = 0x8005CF78; // type:func

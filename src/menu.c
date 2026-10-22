@@ -1174,16 +1174,15 @@ s32 func_8005CEE0(s32 index) {
     return g_CharacterGrid[row][column] < 0 ? -1 : 0;
 }
 
-
-#ifdef NON_MATCHING
-void func_8005CF78(void) {
+/* Marks saved games whose settings or players are out of range as no longer valid */
+void InvalidateBrokenSavedGames(void) {
     SaveData *save;
     s32 isInvalid[SAVED_GAME_COUNT];
     s32 index;
     s32 entryIndex;
     SavedGame *unk;
     Unk801B6088 *sub;
-    UnkB8 *entries;
+    UnkB8 *player;
 
     save = GetSaveData();
     for (index = 0; index != SAVED_GAME_COUNT; index++) {
@@ -1218,12 +1217,12 @@ void func_8005CF78(void) {
         if (sub->unk10 < 0 || sub->unk10 >= COURSE_HOLE_COUNT) {
             isInvalid[index] = TRUE;
         }
-        entries = save->savedPlayers[index];
         for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
-            if (entries[entryIndex].unk1D >= COURSE_HOLE_COUNT) {
+            player = &save->savedPlayers[index][entryIndex];
+            if (player->unk1D >= COURSE_HOLE_COUNT) {
                 isInvalid[index] = TRUE;
             }
-            if (entries[entryIndex].unk7B >= 4) {
+            if (player->unk7B >= 4) {
                 isInvalid[index] = TRUE;
             }
         }
@@ -1234,10 +1233,6 @@ void func_8005CF78(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005CF78);
-#endif
-
 
 #ifdef NON_MATCHING
 void func_8005D0D8(void) {
