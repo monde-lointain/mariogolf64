@@ -42,6 +42,7 @@
 #define COURSE_HOLE_COUNT 18
 #define RING_SHOT_COURSE_COUNT 6
 #define RING_SHOT_HOLE_COUNT 6
+#define SAVE_UNK1344_ENTRY_COUNT 18
 
 typedef struct Unk68 {
     /* 0x00 */ s32 unk0[0x2C / 4];
@@ -193,7 +194,7 @@ typedef struct SaveData {
     /* 0x0E98 */ UnkE98 unkE98[COURSE_COUNT];
     /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
-    /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
+    /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT][SAVE_UNK1344_ENTRY_COUNT];
     /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
     /* 0x15D0 */ Unk68 rankedRecords[RANKED_RECORD_COUNT];
     /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];

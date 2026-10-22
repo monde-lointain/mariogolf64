@@ -50,8 +50,8 @@ void func_801F5100_ovl_05(void);
 void func_802033B0_ovl_05(void);
 
 /* ovl_06 */
-void func_801F4C84_ovl_06(void);
-void func_801F4D48_ovl_06(void);
+void LoadTitleScreen(void);
+void UnloadTitleScreen(void);
 
 /* ovl_07 */
 void LoadBootLogos(void);
@@ -98,7 +98,7 @@ void func_800605EC(void);
 /* Scene modules' update routines, in overlays */
 void func_801F4A40(void);
 void func_801F4C78(void);
-void func_801F4D74(void);
+void UpdateTitleScreen(void);
 void UpdateBootLogos(void);
 void func_801F5F1C(void);
 void func_801F6788(void);
