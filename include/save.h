@@ -72,6 +72,14 @@ typedef struct UnkB8 {
     /* 0x7C */ u8 unk7C[0xB8 - 0x7C];
 } UnkB8; /* size = 0xB8 */
 
+#define SAVE_UNKAF0_ROW_COUNT 18
+#define SAVE_UNKAF0_COLUMN_COUNT 18
+
+typedef struct UnkAF0 {
+    /* 0x0 */ u8 unk0;
+    /* 0x1 */ u8 unk1;
+} UnkAF0; /* size = 0x2 */
+
 typedef struct SaveData {
     /* 0x0000 */ u32 magic;
     /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
@@ -79,7 +87,8 @@ typedef struct SaveData {
     /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
     /* 0x002C */ u8 unk2C[0xA84 - 0x2C];
     /* 0x0A84 */ s8 hasBirdieBadge[COURSE_COUNT][COURSE_HOLE_COUNT];
-    /* 0x0AF0 */ u8 unkAF0[0xDC0 - 0xAF0];
+    /* 0x0AF0 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
+    /* 0x0D78 */ u8 unkD78[0xDC0 - 0xD78];
     /* 0x0DC0 */ s32 unkDC0[6][3];
     /* 0x0E08 */ u8 unkE08[0x1320 - 0xE08];
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];

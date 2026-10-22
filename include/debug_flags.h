@@ -19,6 +19,9 @@
 /* Shows and edits UpdateGame's sDebugMenuValues in one scene */
 #define DEBUG_FLAG_DEBUG_MENU_VALUES 0x57
 
+/* Makes every character selectable */
+#define DEBUG_FLAG_ALL_CHARACTERS 0x54
+
 s32 IsDebugFlagSet(u32 flag);
 void SetDebugFlag(u32 flag);
 void ClearDebugFlag(u32 flag);

@@ -1,6 +1,7 @@
 #include "common.h"
 #include <lib/libnusys/nusys.h>
 #include "debug_flags.h"
+#include "asset.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
@@ -34,14 +35,56 @@ extern SaveCopyLocation g_SaveCopyLocations[];
 extern s32 g_CoursePointsNeeded[COURSE_COUNT];
 extern char g_RomBuildDate[];
 
-typedef struct Unk800FE3D8 {
-    /* 0x00 */ s16 unk0;
+#define IMPORTED_CHARACTER_COUNT 4
+#define IMPORTED_CHARACTER_NAME_LENGTH 12
+/* The character ids that stand for the imported characters in the grid */
+#define FIRST_IMPORTED_CHARACTER 14
+
+/* A character imported from the Game Boy Color version */
+typedef struct ImportedCharacter {
+    /* 0x00 */ s16 character;
     /* 0x02 */ s16 unk2;
     /* 0x04 */ s16 unk4;
     /* 0x06 */ s16 unk6;
-    /* 0x08 */ s8 unk8[12];
+    /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
     /* 0x14 */ s8 unk14;
-} Unk800FE3D8; /* size = 0x16 */
+} ImportedCharacter; /* size = 0x16 */
+
+typedef struct Unk800FF1E8 {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 name[IMPORTED_CHARACTER_NAME_LENGTH];
+    /* 0x0D */ u8 unkD[0x19 - 0xD];
+    /* 0x19 */ u8 unk19;
+    /* 0x1A */ u8 unk1A[0x8C - 0x1A];
+} Unk800FF1E8; /* size = 0x8C */
+
+typedef struct Unk2D8 {
+    /* 0x000 */ u8 unk0[4];
+    /* 0x004 */ s16 unk4;
+    /* 0x006 */ u8 unk6[4];
+    /* 0x00A */ s16 unkA;
+    /* 0x00C */ u8 unkC[0x1E - 0xC];
+    /* 0x01E */ s16 unk1E;
+    /* 0x020 */ u8 unk20[0x2D8 - 0x20];
+} Unk2D8; /* size = 0x2D8 */
+
+typedef struct Unk800C2B90 {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 column;
+    /* 0x4 */ s16 unk4;
+    /* 0x6 */ s16 row;
+} Unk800C2B90; /* size = 0x8 */
+
+extern Unk800FF1E8 D_800FF1E8[IMPORTED_CHARACTER_COUNT];
+extern Unk2D8 D_800BB260[];
+extern Unk800C2B90 D_800C2B90[IMPORTED_CHARACTER_COUNT];
+extern s8 D_800C2AA8[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
+/* The imported characters that debug flag 0x54 adds */
+extern s16 D_800C2B40[IMPORTED_CHARACTER_COUNT];
+extern s16 D_800C2B48[IMPORTED_CHARACTER_COUNT];
+extern s16 D_800C2B50[IMPORTED_CHARACTER_COUNT];
+extern s16 D_800C2B58[IMPORTED_CHARACTER_COUNT];
+extern u8 D_800C2B60[IMPORTED_CHARACTER_COUNT][IMPORTED_CHARACTER_NAME_LENGTH];
 
 extern s8 D_800C1FF0;
 extern s8 D_800C1FF4;
@@ -56,7 +99,7 @@ extern s8 D_800FBE08[4];
 extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
-extern Unk800FE3D8 D_800FE3D8[4];
+extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 extern s8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_800C2BD5;
@@ -111,7 +154,49 @@ extern void *D_80105B78[18];
 extern void *D_800FBE30[2];
 extern void *D_800FC6A0;
 extern void *D_801B69EC;
-extern s16 D_800C28E4[15][7];
+#define CHARACTER_GRID_ROW_COUNT 3
+#define CHARACTER_GRID_COLUMN_COUNT 7
+/* The rows of the grid that hold the characters to choose from */
+#define CHARACTER_CHOICE_ROW_COUNT 2
+
+/*
+ * The first empty slot gets a negative mark: the id of the character that
+ * slot holds in g_EveryCharacterGrid, less this offset. What reads it is
+ * unknown.
+ */
+#define MARKED_CHARACTER_OFFSET 50
+/* D_800C29B8 lists slots in id order up to this count */
+#define MARKABLE_CHARACTER_COUNT 10
+
+#define CHARACTER_MAPLE 10
+#define CHARACTER_DONKEY_KONG 11
+#define CHARACTER_UNK12 12
+#define CHARACTER_METAL_MARIO 13
+
+typedef struct Unk800C2590 {
+    /* 0x0 */ s16 assetId;
+    /* 0x2 */ u8 unk2[6];
+} Unk800C2590; /* size = 0x8 */
+
+typedef struct Unk800C2650 {
+    /* 0x0 */ u16 assetId;
+    /* 0x2 */ u8 unk2[0xE];
+} Unk800C2650; /* size = 0x10 */
+
+extern Unk800C2590 D_800C2590[];
+extern Unk800C2650 D_800C2650[];
+extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+extern s16 g_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+extern s16 D_800C293C[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+extern s16 D_800C2968[13];
+extern s16 g_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+extern void *D_80105BB0[4];
+extern void *D_8012D468[4];
+
+s32 func_80050598(AssetFile *file);
+void func_8005062C(u16 assetId, void *unk);
+void func_800506D4(void *unk, void *unk2);
+void func_8005CA48(void);
 typedef struct Unk800C29B8 {
     /* 0x0 */ s16 column;
     /* 0x2 */ s16 row;
@@ -415,9 +500,157 @@ s32 IsMetalMarioUnlocked(void) {
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005C674);
+/* arg0 is reused below as a record count and a character id, to match */
+void func_8005C674(s32 arg0, s32 arg1) {
+    u8 unk[0x20];
+    AssetFile file;
+    SaveData *save;
+    s32 row;
+    s32 column;
+    s32 index;
+    s32 recordIndex; /* Also holds a grid entry at the end, to match */
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005CA48);
+    save = GetSaveData();
+    for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
+        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+            g_CharacterGrid[row][column] = g_StartingCharacterGrid[row][column];
+        }
+    }
+    if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+        for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+            for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+                g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
+            }
+        }
+        func_8005CA48();
+        return;
+    }
+    if (arg0 >= 2) {
+        for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+            for (column = 0; column != 5; column++) {
+                g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
+            }
+        }
+    }
+    for (index = 0; index != ARRAY_COUNT(D_800C2968); index++) {
+        recordIndex = 0;
+        arg0 = 0;
+        for (; recordIndex != SAVE_UNKAF0_ROW_COUNT; recordIndex++) {
+            if (save->unkAF0[recordIndex][index].unk1 & 0x7F) {
+                arg0++;
+                break;
+            }
+        }
+        if (arg0 > 0) {
+            for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+                for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+                    if (D_800C293C[row][column] == index) {
+                        g_CharacterGrid[row][column] = D_800C2968[index];
+                    }
+                }
+            }
+        }
+    }
+    if (IsMapleUnlocked()) {
+        g_CharacterGrid[0][5] = CHARACTER_MAPLE;
+    }
+    if (IsDonkeyKongUnlocked()) {
+        g_CharacterGrid[1][5] = CHARACTER_DONKEY_KONG;
+    }
+    if (IsMetalMarioUnlocked()) {
+        g_CharacterGrid[1][6] = CHARACTER_METAL_MARIO;
+    }
+    func_8005CA48();
+    for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
+        row = D_800C29B8[index].row;
+        column = D_800C29B8[index].column;
+        if (g_CharacterGrid[row][column] < 0) {
+            g_CharacterGrid[row][column] = index - MARKED_CHARACTER_OFFSET;
+            break;
+        }
+    }
+    if (index == MARKABLE_CHARACTER_COUNT) {
+        if (g_CharacterGrid[0][6] != CHARACTER_UNK12) {
+            g_CharacterGrid[0][6] = CHARACTER_UNK12 - MARKED_CHARACTER_OFFSET;
+        }
+    }
+    if ((u8)arg1 != 1) {
+        for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
+            recordIndex = g_CharacterGrid[2][index];
+            if (recordIndex >= 0) {
+                arg0 = g_ImportedCharacters[index].character;
+                func_8005062C(D_800C2650[arg0].assetId, unk);
+                func_800506D4(D_8012D468[index], unk);
+                OpenAssetFile(D_800C2590[arg0].assetId, &file);
+                ReadAssetFile(D_80105BB0[index], func_80050598(&file), &file);
+            }
+        }
+    }
+}
+
+void func_8005CA48(void) {
+    s16 index;
+    s16 byteIndex;
+    s16 count; /* Also the byte index of the first loops, to match */
+    u8 *name;
+    u8 letter;
+
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].unk2 = 0;
+        g_ImportedCharacters[index].unk4 = 0;
+        g_ImportedCharacters[index].unk6 = 0;
+        for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
+            g_ImportedCharacters[index].name[count] = 0;
+        }
+    }
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
+            D_800C2AA8[index][count] = 0;
+        }
+    }
+    count = 0;
+    for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
+        if (D_800FF1E8[index].unk0 == 1) {
+            count++;
+        }
+    }
+    if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+        count = IMPORTED_CHARACTER_COUNT;
+    }
+    if (count > 0) {
+        if (count > IMPORTED_CHARACTER_COUNT) {
+            count = IMPORTED_CHARACTER_COUNT;
+        }
+        for (index = 0; index != count; index++) {
+            if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+                name = D_800C2B60[index];
+            } else {
+                name = D_800FF1E8[index].name;
+            }
+            for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH; byteIndex++) {
+                letter = *name++;
+                D_800C2AA8[index][byteIndex] = letter;
+                g_ImportedCharacters[index].name[byteIndex] = letter;
+            }
+            g_CharacterGrid[D_800C2B90[index].row][D_800C2B90[index].column] = FIRST_IMPORTED_CHARACTER + index;
+            if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+                g_ImportedCharacters[index].character = D_800C2B40[index];
+                g_ImportedCharacters[index].unk2 = D_800C2B48[index];
+                g_ImportedCharacters[index].unk4 = D_800C2B50[index];
+                g_ImportedCharacters[index].unk6 = D_800C2B58[index];
+                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk4 = D_800C2B48[index];
+                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unkA = D_800C2B50[index];
+                D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk1E = D_800C2B58[index];
+            } else {
+                g_ImportedCharacters[index].character = D_800FF1E8[index].unk19 + FIRST_IMPORTED_CHARACTER;
+                g_ImportedCharacters[index].unk2 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk4;
+                g_ImportedCharacters[index].unk4 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unkA;
+                g_ImportedCharacters[index].unk6 = D_800BB260[FIRST_IMPORTED_CHARACTER + index].unk1E;
+            }
+        }
+    }
+}
 
 s32 func_8005CEE0(s32 index) {
     s32 slot;
@@ -434,7 +667,7 @@ s32 func_8005CEE0(s32 index) {
     slot = D_800C2BB0[index];
     row = D_800C29B8[slot].row;
     column = D_800C29B8[slot].column;
-    return D_800C28E4[row][column] < 0 ? -1 : 0;
+    return g_CharacterGrid[row][column] < 0 ? -1 : 0;
 }
 
 
@@ -651,15 +884,15 @@ void func_8005D334(void) {
     s32 index;
     s32 byteIndex;
 
-    for (index = 0; index != ARRAY_COUNT(D_800FE3D8); index++) {
-        D_800FE3D8[index].unk0 = 0;
-        D_800FE3D8[index].unk2 = 0;
-        D_800FE3D8[index].unk4 = 0;
-        D_800FE3D8[index].unk6 = 0;
-        for (byteIndex = 0; byteIndex != ARRAY_COUNT(D_800FE3D8[index].unk8); byteIndex++) {
-            D_800FE3D8[index].unk8[byteIndex] = 0;
+    for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
+        g_ImportedCharacters[index].character = 0;
+        g_ImportedCharacters[index].unk2 = 0;
+        g_ImportedCharacters[index].unk4 = 0;
+        g_ImportedCharacters[index].unk6 = 0;
+        for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH; byteIndex++) {
+            g_ImportedCharacters[index].name[byteIndex] = 0;
         }
-        D_800FE3D8[index].unk14 = 0;
+        g_ImportedCharacters[index].unk14 = 0;
     }
 }
 
@@ -761,10 +994,10 @@ void func_8005DC50(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_800FE3D8[0].unk14 = 0;
-    D_800FE3D8[1].unk14 = 0;
-    D_800FE3D8[2].unk14 = 0;
-    D_800FE3D8[3].unk14 = 0;
+    g_ImportedCharacters[0].unk14 = 0;
+    g_ImportedCharacters[1].unk14 = 0;
+    g_ImportedCharacters[2].unk14 = 0;
+    g_ImportedCharacters[3].unk14 = 0;
     D_800C1FF4 = -1;
     D_800C1FF5 = -1;
     D_800C1FF6 = -1;
