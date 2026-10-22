@@ -527,8 +527,9 @@ segments:
     exclusive_ram_id: overlay_8024D800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x136BA0, asm]
-      - [0x137090, data]
+      - [0x136BA0, c, ovl_04/shot_simulation]
+      - [0x137090, .rodata, ovl_04/shot_simulation]
+      - [0x1370AC, rodata]
       - { start: 0x1370B0, type: bss, vram: 0x8024DD10 }
 
   - name: ovl_05

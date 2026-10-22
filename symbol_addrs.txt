@@ -27,7 +27,7 @@ ClearAllDebugFlags = 0x80029AE4; // type:func
 g_FrameCount = 0x800B67F0; // size:0x4
 
 // Cross-overlay references
-D_8024DD34_ovl_04 = 0x8024DD34; // type:s32 segment:ovl_04
+g_SimulatedShot = 0x8024DD20; // size:0x2E44 segment:ovl_04
 
 // libultra (2.0J) and libaudio, identified by comparison with ultralib
 osCreatePiManager = 0x800A3000; // type:func
@@ -1016,3 +1016,6 @@ sContestantProfiles = 0x800C3604; // size:0x74
 g_ContestantNames = 0x800C3678; // size:0x924
 g_ContestantNameIndices = 0x80132CB0; // size:0x3A
 g_Players = 0x801B71D0; // size:0x2E0
+GetSurfaceInfo = 0x80032E60; // type:func
+g_SurfaceInfo = 0x800B790C; // size:0x2F4
+SimulateShot = 0x8024D800; // type:func segment:ovl_04
