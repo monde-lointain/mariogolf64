@@ -1,6 +1,6 @@
 #include "common.h"
 #include "controller.h"
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
@@ -85,7 +85,7 @@ extern s32 sRetraceCount;
 extern s32 sFramesThisSecond;
 extern s32 sIsOddRetrace;
 extern volatile s32 g_MainLoopState;
-extern u8 sDebugFlagBits[DEBUG_FLAG_COUNT / 8];
+extern u8 sGameFlagBits[GAME_FLAG_COUNT / 8];
 extern MenuRepeatState sMenuRepeatStates[MAXCONTROLLERS];
 extern u16 *g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
@@ -121,9 +121,9 @@ void InitFramebuffers(void) {
     nuGfxSetCfb(sFramebuffers, FRAMEBUFFER_COUNT);
 }
 
-s32 IsDebugFlagSet(u32 flag) {
-    if (flag < DEBUG_FLAG_COUNT) {
-        if (sDebugFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
+s32 IsGameFlagSet(u32 flag) {
+    if (flag < GAME_FLAG_COUNT) {
+        if (sGameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
             return TRUE;
         }
         return FALSE;
@@ -131,29 +131,29 @@ s32 IsDebugFlagSet(u32 flag) {
     return FALSE;
 }
 
-void SetDebugFlag(u32 flag) {
-    if (flag < DEBUG_FLAG_COUNT) {
-        sDebugFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
+void SetGameFlag(u32 flag) {
+    if (flag < GAME_FLAG_COUNT) {
+        sGameFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
     }
 }
 
-void ClearDebugFlag(u32 flag) {
-    if (flag < DEBUG_FLAG_COUNT) {
-        sDebugFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
+void ClearGameFlag(u32 flag) {
+    if (flag < GAME_FLAG_COUNT) {
+        sGameFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
     }
 }
 
-void ToggleDebugFlag(u32 flag) {
-    if (flag < DEBUG_FLAG_COUNT) {
-        sDebugFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
+void ToggleGameFlag(u32 flag) {
+    if (flag < GAME_FLAG_COUNT) {
+        sGameFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
     }
 }
 
-void ClearAllDebugFlags(void) {
+void ClearAllGameFlags(void) {
     s32 byteIndex;
 
-    for (byteIndex = 0; byteIndex < DEBUG_FLAG_COUNT / 8; byteIndex++) {
-        sDebugFlagBits[byteIndex] = 0;
+    for (byteIndex = 0; byteIndex < GAME_FLAG_COUNT / 8; byteIndex++) {
+        sGameFlagBits[byteIndex] = 0;
     }
 }
 
@@ -227,7 +227,7 @@ void mainproc(void *arg) {
     InitHeapRegions(g_HasExpansionPak);
     ResetHeap(1);
     InitAssetFiles();
-    ClearAllDebugFlags();
+    ClearAllGameFlags();
     InitOverlayManager();
     LoadOverlay(GetOverlayOfModule(RESIDENT_MODULE_ID));
     LoadOverlay(GetOverlayOfModule(STARTUP_MODULE_ID));

@@ -17,11 +17,11 @@ g_IsModuleAlive = 0x800FC858; // size:0x40
 g_ModuleRdpRequestFrames = 0x8012CFC0; // size:0x100
 
 // Debug flags
-IsDebugFlagSet = 0x800299F4; // type:func
-SetDebugFlag = 0x80029A30; // type:func
-ClearDebugFlag = 0x80029A6C; // type:func
-ToggleDebugFlag = 0x80029AA8; // type:func
-ClearAllDebugFlags = 0x80029AE4; // type:func
+IsGameFlagSet = 0x800299F4; // type:func
+SetGameFlag = 0x80029A30; // type:func
+ClearGameFlag = 0x80029A6C; // type:func
+ToggleGameFlag = 0x80029AA8; // type:func
+ClearAllGameFlags = 0x80029AE4; // type:func
 
 // Globals of files not decompiled yet
 g_FrameCount = 0x800B67F0; // size:0x4
@@ -821,7 +821,7 @@ g_FrameStepState = 0x800B67EC; // size:0x1
 sIsOddRetrace = 0x800B67F4; // size:0x4
 g_FramePacingMode = 0x800B6800; // size:0x1
 g_MainLoopState = 0x801052CC; // size:0x4
-sDebugFlagBits = 0x801052F8; // size:0x20
+sGameFlagBits = 0x801052F8; // size:0x20
 sMenuRepeatStates = 0x800FF518; // size:0x18
 g_MessageFramebuffer = 0x800BFEE0; // size:0x4
 g_RomBuildDate = 0x801B5588; // size:0x40

@@ -1,5 +1,5 @@
 #include "common.h"
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "functions.h"
 #include "overlay_manager.h"
 #include "segment_symbols.h"
@@ -90,7 +90,7 @@ void InitOverlayManager(void) {
         moduleIds = g_Overlays[i].moduleIds;
         moduleIndex = 0;
         while (moduleIds[moduleIndex] != MODULE_ID_END) {
-            if (sOverlayIndexOfModule[moduleIds[moduleIndex]] != -1 && !IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+            if (sOverlayIndexOfModule[moduleIds[moduleIndex]] != -1 && !IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
                 osSyncPrintf("OverlayManager\n");
             }
             sOverlayIndexOfModule[moduleIds[moduleIndex++]] = i;
@@ -106,7 +106,7 @@ void InitOverlayManager(void) {
 
 s32 GetOverlayIndex(s32 overlayId) {
     if (overlayId < OVERLAY_ID_BASE || (u32)overlayId > OVERLAY_ID_BASE + OVERLAY_COUNT - 1) {
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Illegal ModuleSetNo.\n");
         }
         return 0;
@@ -121,7 +121,7 @@ s32 CanLoadOverlay(s32 overlayId) {
     s8 *moduleIds;
 
     if (g_Overlays[overlayIndex].isLoaded) {
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Already Loaded\n");
         }
         return TRUE;
@@ -138,7 +138,7 @@ s32 CanLoadOverlay(s32 overlayId) {
             continue;
         }
         if (g_Overlays[otherOverlayIndex].isLoaded) {
-            if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+            if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
                 osSyncPrintf("Conflicting %d m.s. and other moduleset[%x] is alive\n", overlayIndex, otherOverlayIndex);
             }
             return FALSE;
@@ -147,7 +147,7 @@ s32 CanLoadOverlay(s32 overlayId) {
         moduleIndex = 0;
         while (moduleIds[moduleIndex] != MODULE_ID_END) {
             if ((u32)(g_FrameCount - g_ModuleRdpRequestFrames[moduleIds[moduleIndex]]) < RDP_REQUEST_FRAMES_IN_USE) {
-                if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+                if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
                     osSyncPrintf("Conflicting %d m.s. and other module[%x-%x]'s RDP request\n", overlayIndex,
                                  otherOverlayIndex, moduleIndex);
                 }
@@ -166,7 +166,7 @@ s32 LoadOverlay(s32 overlayId) {
 
     if (CanLoadOverlay(overlayId)) {
         overlayId = GetOverlayIndex(overlayId);
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Load ModuleSet %x (absolute No.)\n", overlayId);
         }
         overlay = &g_Overlays[overlayId];
@@ -184,12 +184,12 @@ s32 LoadOverlay(s32 overlayId) {
             g_IsModuleAlive[moduleIds[moduleIndex++]] = TRUE;
         }
         overlay->isLoaded = TRUE;
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Complete Load ModuleSet %x (absolute No.)\n", overlayId);
         }
         return TRUE;
     } else {
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Can't Load ModuleSet %x (logical No.)\n", overlayId);
         }
         return FALSE;
@@ -209,7 +209,7 @@ void UnloadOverlay(s32 overlayId) {
         }
         moduleIds = overlay->moduleIds;
         overlay->isLoaded = FALSE;
-        if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+        if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
             osSyncPrintf("Moduleset %x Disposed\n", overlayId);
         }
         moduleIndex = 0;
@@ -228,10 +228,10 @@ void UnloadOverlay(s32 overlayId) {
 
 /* The module number is missing from the format's arguments in the original */
 s32 ReportModuleNotAlive(void) {
-    if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+    if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }
-    if (!IsDebugFlagSet(DEBUG_FLAG_QUIET_OVERLAY_LOG)) {
+    if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }
     return 0;

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "camera.h"
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "functions.h"
 #include "variables.h"
 #include "asset.h"
@@ -230,7 +230,7 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     s32 orderIndex;
     s32 billboardIndex;
 
-    if (IsDebugFlagSet(DEBUG_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady) {
+    if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady) {
         return;
     }
     gDPPipeSync(gfx++);
@@ -409,7 +409,7 @@ void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     s32 viewDepth;
     s32 alpha;
 
-    if (IsDebugFlagSet(DEBUG_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || IsDebugBButtonView()) {
+    if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || IsDebugBButtonView()) {
         return;
     }
     gDPPipeSync(gfx++);

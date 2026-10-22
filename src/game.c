@@ -1,7 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "controller.h"
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "libc.h"
 #include "main.h"
 #include "camera.h"
@@ -1051,12 +1051,12 @@ s32 DrawGame(void) {
     }
 
     sDrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
-    if (IsDebugFlagSet(0x28)) {
+    if (IsGameFlagSet(0x28)) {
         func_8004DA9C(_mus_cpu_last, 20, 10);
         func_8004DA9C(_mus_cpu_worst, 20, 11);
         MusPrintDmaUsage();
     }
-    if (IsDebugFlagSet(0x29)) {
+    if (IsGameFlagSet(0x29)) {
         func_8004DA9C(__MusIntMemRemaining(), 20, 10);
         trigger = &g_ControllerData[1].trigger;
         if (*trigger & B_BUTTON) {
@@ -1100,7 +1100,7 @@ s32 DrawGame(void) {
             drawMode = 10;
             break;
         case 30:
-            drawMode = IsDebugFlagSet(0x9A) ? DRAW_MODE_COURSE : 11;
+            drawMode = IsGameFlagSet(0x9A) ? DRAW_MODE_COURSE : 11;
             break;
         case 29:
             drawMode = 12;
@@ -1436,7 +1436,7 @@ s32 DrawGame(void) {
                              sScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
                             D_800C306C != 4) {
                             func_8008FF14(0);
-                            if (!IsDebugFlagSet(0x15)) {
+                            if (!IsGameFlagSet(0x15)) {
                                 func_80091110(&g_DisplayListHead, &g_Cameras[0].view, 0);
                             }
                             LoadProjection();
@@ -1533,7 +1533,7 @@ s32 DrawGame(void) {
                         gDPPipeSync(g_DisplayListHead++);
                     } else {
                         func_800625FC(&g_DisplayListHead);
-                        if (!IsDebugFlagSet(6)) {
+                        if (!IsGameFlagSet(6)) {
                             func_80062A8C(matrices, terrainStyle);
                         }
                         DrawBillboards(matrices, viewIndex);
@@ -1562,7 +1562,7 @@ s32 DrawGame(void) {
                         func_801FA4EC(matrices, &g_DisplayListHead);
                         func_8007B994(matrices, &g_DisplayListHead);
                     } else {
-                        if (!IsDebugFlagSet(0x17)) {
+                        if (!IsGameFlagSet(0x17)) {
                             func_8003E6C0(matrices, &camera->view, viewIndex);
                         }
                         if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
@@ -1578,10 +1578,10 @@ s32 DrawGame(void) {
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             mode = g_Cameras[viewIndex].view.mode;
                             if (mode != 8 && mode != 2) {
-                                if (!IsDebugFlagSet(0x18) && g_IsModuleAlive[1]) {
+                                if (!IsGameFlagSet(0x18) && g_IsModuleAlive[1]) {
                                     func_801FE370(matrices);
                                 }
-                                if (!IsDebugFlagSet(0x19)) {
+                                if (!IsGameFlagSet(0x19)) {
                                     for (playerIndex = 0; playerIndex < 4; playerIndex++) {
                                         func_80058D04(matrices, viewIndex, playerIndex);
                                         if (g_Scene != 30) {
@@ -1597,7 +1597,7 @@ s32 DrawGame(void) {
                             }
                         }
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
-                            if (g_IsModuleAlive[23] && !IsDebugFlagSet(0x2D)) {
+                            if (g_IsModuleAlive[23] && !IsGameFlagSet(0x2D)) {
                                 func_8021C6B4(matrices);
                             }
                             if (g_IsModuleAlive[17]) {
@@ -1647,7 +1647,7 @@ s32 DrawGame(void) {
                 func_800625FC(&g_DisplayListHead);
                 func_80062A8C(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
-                if (!IsDebugFlagSet(0x17)) {
+                if (!IsGameFlagSet(0x17)) {
                     func_8003E6C0(matrices, &camera->view, viewIndex);
                 }
                 func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
@@ -1655,7 +1655,7 @@ s32 DrawGame(void) {
                 SET_CAMERA_SCISSOR(g_Cameras[0].view);
             }
         } else if (drawsScene && func_80042720()) {
-            if (!IsDebugFlagSet(6)) {
+            if (!IsGameFlagSet(6)) {
                 func_80062A8C(matrices, terrainStyle);
             }
             func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
@@ -1666,7 +1666,7 @@ s32 DrawGame(void) {
             if (g_IsModuleAlive[1]) {
                 func_801FE370(matrices);
             }
-            if (IsDebugFlagSet(0x50) && g_Scene != 8) {
+            if (IsGameFlagSet(0x50) && g_Scene != 8) {
                 func_8040C360(matrices, &g_DisplayListHead);
             }
         }
@@ -1684,7 +1684,7 @@ s32 DrawGame(void) {
         if (g_IsModuleAlive[20]) {
             func_80219C74(&g_DisplayListHead);
         }
-        if (D_800C3FA8 == 1 && !IsDebugFlagSet(0x13) && !IsDebugFlagSet(0x2D)) {
+        if (D_800C3FA8 == 1 && !IsGameFlagSet(0x13) && !IsGameFlagSet(0x2D)) {
             func_80089094(&g_Cameras[0].view);
         }
         if (g_IsModuleAlive[17]) {
@@ -1759,7 +1759,7 @@ s32 DrawGame(void) {
     if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & L_TRIG)) {
         g_FrameStepState = FRAME_STEP_PAUSED;
     }
-    if (IsDebugFlagSet(0x2F)) {
+    if (IsGameFlagSet(0x2F)) {
         if (g_ControllerStates[1].buttons & D_CBUTTONS) {
             SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
         }
@@ -1806,7 +1806,7 @@ s32 DrawGame(void) {
     func_8006AEA4(&g_DisplayListHead);
     func_8006B5D8(&g_DisplayListHead);
     func_8008CD30(&g_DisplayListHead);
-    if (IsDebugFlagSet(0x46)) {
+    if (IsGameFlagSet(0x46)) {
         func_80088BDC(&g_DisplayListHead);
     }
     func_800957F0();
@@ -1816,23 +1816,23 @@ s32 DrawGame(void) {
     if (g_Scene == 30 && g_IsModuleAlive[31]) {
         func_801F7554(&g_DisplayListHead);
     }
-    if (IsDebugFlagSet(1)) {
+    if (IsGameFlagSet(1)) {
         func_8004DA24(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
         sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
         func_8004DA24(g_PrintBuffer, 3, 5);
     }
-    if (IsDebugFlagSet(0x39)) {
+    if (IsGameFlagSet(0x39)) {
         func_8004DC44();
     }
     func_8004D7B8(&g_DisplayListHead);
-    if (IsDebugFlagSet(0x1B) && (g_ControllerData[1].trigger & Z_TRIG)) {
-        if (IsDebugFlagSet(0x1D)) {
-            ClearDebugFlag(0x1D);
+    if (IsGameFlagSet(0x1B) && (g_ControllerData[1].trigger & Z_TRIG)) {
+        if (IsGameFlagSet(0x1D)) {
+            ClearGameFlag(0x1D);
         } else {
-            SetDebugFlag(0x1D);
+            SetGameFlag(0x1D);
         }
     }
-    if (IsDebugFlagSet(0x2F)) {
+    if (IsGameFlagSet(0x2F)) {
         if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
             func_8040C124();
         }
@@ -2026,7 +2026,7 @@ void UpdateGame(void) {
         if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
             func_8004CDA0();
         }
-        if (IsDebugFlagSet(DEBUG_FLAG_INSET_VIEW_BUTTONS)) {
+        if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
             if ((g_ControllerStates[1].pressedButtons & L_JPAD) && g_InsetViewStep < INSET_VIEW_STEP_COUNT) {
                 g_InsetViewAnimation = INSET_VIEW_OPENING;
             }
@@ -2084,7 +2084,7 @@ void UpdateGame(void) {
             LARGE_INSET_VIEW_CENTER_Y - g_InsetViewStep * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
         g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
         func_801F4C78();
-        if (IsDebugFlagSet(DEBUG_FLAG_DEBUG_MENU_VALUES)) {
+        if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
             sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[0]);
             func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
             sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[1]);

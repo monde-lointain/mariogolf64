@@ -1,6 +1,6 @@
 #include "common.h"
 #include <lib/libnusys/nusys.h>
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "asset.h"
 #include "course.h"
 #include "heap.h"
@@ -13,7 +13,7 @@
 #include "variables.h"
 
 /* Keeps the save data on the development host instead of in SRAM */
-#define DEBUG_FLAG_SAVE_TO_HOST 0x53
+#define GAME_FLAG_SAVE_TO_HOST 0x53
 
 /* The SRAM check buffer is read and written by DMA, so it starts on a cache line */
 #define DMA_ALIGNMENT 0x10
@@ -720,7 +720,7 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
         }
         g_GameState = game->state;
         g_GameState.unk0 = 1;
-        SetDebugFlag(DEBUG_FLAG_UNK1E);
+        SetGameFlag(GAME_FLAG_UNK1E);
         D_800BA9D8 = game->unk8;
     }
     D_801B60B8 = 2;
@@ -788,7 +788,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
             }
             g_GameState = game->state;
             g_GameState.unk0 = 1;
-            SetDebugFlag(DEBUG_FLAG_UNK1E);
+            SetGameFlag(GAME_FLAG_UNK1E);
             D_800BA9D8 = game->unk8;
             D_800FF4D0 = game->unk80;
         }
@@ -1016,7 +1016,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
             g_CharacterGrid[row][column] = g_StartingCharacterGrid[row][column];
         }
     }
-    if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+    if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
         for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
             for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
                 g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
@@ -1115,7 +1115,7 @@ void func_8005CA48(void) {
             count++;
         }
     }
-    if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+    if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
         count = IMPORTED_CHARACTER_COUNT;
     }
     if (count > 0) {
@@ -1123,7 +1123,7 @@ void func_8005CA48(void) {
             count = IMPORTED_CHARACTER_COUNT;
         }
         for (index = 0; index != count; index++) {
-            if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+            if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
                 name = D_800C2B60[index];
             } else {
                 name = D_800FF1E8[index].name;
@@ -1134,7 +1134,7 @@ void func_8005CA48(void) {
                 g_ImportedCharacters[index].name[byteIndex] = letter;
             }
             g_CharacterGrid[D_800C2B90[index].row][D_800C2B90[index].column] = FIRST_IMPORTED_CHARACTER + index;
-            if (IsDebugFlagSet(DEBUG_FLAG_ALL_CHARACTERS)) {
+            if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
                 g_ImportedCharacters[index].character = D_800C2B40[index];
                 g_ImportedCharacters[index].unk2 = D_800C2B48[index];
                 g_ImportedCharacters[index].unk4 = D_800C2B50[index];
@@ -1706,7 +1706,7 @@ void func_8005DDAC(void) {
     D_800C2BD4 = 0;
     D_801B9410 = 1;
     D_801B60B9 = 0;
-    ClearDebugFlag(DEBUG_FLAG_UNK1E);
+    ClearGameFlag(GAME_FLAG_UNK1E);
     D_801EFFA0 = 0xC;
 }
 
@@ -1771,7 +1771,7 @@ void TransferSaveData(SaveData *save, u8 isWrite) {
     u8 isInSram;
     s32 readResult;
 
-    isSramSelected = !IsDebugFlagSet(DEBUG_FLAG_SAVE_TO_HOST);
+    isSramSelected = !IsGameFlagSet(GAME_FLAG_SAVE_TO_HOST);
     isInSram = isSramSelected;
     if (!isWrite) {
         readResult = ReadSaveCopies(save, isInSram);

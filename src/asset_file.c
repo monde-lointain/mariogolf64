@@ -1,6 +1,6 @@
 #include "common.h"
 #include "asset.h"
-#include "debug_flags.h"
+#include "game_flags.h"
 #include "functions.h"
 
 /* How many files OpenPooledAssetFile can keep open at once */
@@ -95,7 +95,7 @@ s32 OpenEncodedAsset(u16 assetId, EncodedAsset *asset) {
     u8 rawHeader[0x80];
     u32 *header = ALIGN_BUFFER(rawHeader);
 
-    if (IsDebugFlagSet(DEBUG_FLAG_LOG_ENCODED_ASSETS)) {
+    if (IsGameFlagSet(GAME_FLAG_LOG_ENCODED_ASSETS)) {
         osSyncPrintf("OP:%d\n", assetId);
     }
     OpenAssetFile(assetId, &asset->file);
