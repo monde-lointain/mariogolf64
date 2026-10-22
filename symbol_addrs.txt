@@ -953,3 +953,6 @@ fabsf = 0x80059BA0; // type:func
 acosf = 0x80059BC0; // type:func
 atan2f = 0x80059FAC; // type:func
 atanf = 0x8005A2AC; // type:func
+D_800D0944 = 0x800D0944; // force_migration:True
+D_800D0958 = 0x800D0958; // force_migration:True
+D_800D0970 = 0x800D0970; // force_migration:True
