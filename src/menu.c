@@ -9,6 +9,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "sram.h"
 #include "variables.h"
 
@@ -348,7 +349,7 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(D_801B69EC, &asset);
     func_80051C08(0x27, 0);
     SetFramebufferCount(3);
-    SetScreenEffect(4, 0);
+    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     D_801323D0 = 6;
     InitSram();
     TransferSaveData(save, FALSE);

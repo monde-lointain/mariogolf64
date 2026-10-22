@@ -1,13 +1,7 @@
 #include "common.h"
 #include "functions.h"
+#include "screen.h"
 #include "variables.h"
-
-/* Screen sizes, in pixels */
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-
-/* The border around the main camera's scissor rectangle, in pixels */
-#define SCREEN_BORDER 8
 
 /* The farthest depth the 14-bit depth buffer holds */
 #define MAX_DEPTH 0x3FFF

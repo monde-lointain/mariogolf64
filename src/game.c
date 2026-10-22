@@ -9,8 +9,8 @@
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
 #include "save.h"
-#include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "variables.h"
 
 /* Sub-modules that RequestSubModule loads for some game modes */
@@ -82,13 +82,6 @@ extern s32 sScreenEffectFrameCount;
 extern s32 sUnreadEffectSetting;
 extern s32 sHasUnloadedSceneModule;
 extern s32 sHasUnloadedSubModule;
-
-/* Screen sizes, in pixels */
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-
-/* The border around the main camera's scissor rectangle, in pixels */
-#define SCREEN_BORDER 8
 
 /* How the saved-frame effect splits the screen into strips, in rows */
 #define SAVED_FRAME_STRIP_HEIGHT 6
@@ -183,13 +176,6 @@ extern s32 sHasUnloadedSubModule;
 #define HORIZON_FIRST_ROW 8
 #define HORIZON_ROW_SPACING 7
 #define HORIZON_STRIP_BOTTOM 224
-
-/* sScreenEffect values */
-#define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
-#define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */
-#define SCREEN_EFFECT_TILED_IMAGE 2 /* Repeats part of the saved frame */
-#define SCREEN_EFFECT_SAVED_FRAME 3 /* Draws a frame saved elsewhere */
-#define SCREEN_EFFECT_NONE 4
 
 /* The window of the saved image that the tiled-image effect repeats */
 #define TILED_IMAGE_LEFT 64
