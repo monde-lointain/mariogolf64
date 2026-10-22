@@ -1,4 +1,5 @@
 #include "common.h"
+#include "cpu_projection.h"
 #include "functions.h"
 #include "screen.h"
 #include "variables.h"

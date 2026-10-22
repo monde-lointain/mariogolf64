@@ -1,6 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "controller.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "main.h"
@@ -906,8 +907,6 @@ extern s32 _mus_cpu_worst;
 
 void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
-void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product);
-void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);

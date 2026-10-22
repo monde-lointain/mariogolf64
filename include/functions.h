@@ -79,7 +79,6 @@ void ClearBuffers(s32 clearMode);
  * Records the projection, viewing matrix and viewport, so the CPU can
  * project points as the RSP does. A NULL argument keeps the current one.
  */
-void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
 
 /*
  * Returns the height of the ground under a point. Coordinates are in
@@ -104,8 +103,6 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void func_801F7148(void);
 
-void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale);
-void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix);
 void func_80050DA0(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
 void func_8004D794(void);
 void func_80071370(void);

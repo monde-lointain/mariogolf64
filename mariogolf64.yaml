@@ -98,7 +98,7 @@ segments:
       - [0x34FA0, c, float_math]
       - [0x35980, c, menu]
       - [0x396C0, asm]
-      - [0x40180, asm]
+      - [0x40180, c, cpu_projection]
       - [0x414A0, asm]
       - [0x43140, c, tournament]
       - [0x43810, asm]

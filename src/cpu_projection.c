@@ -1,0 +1,389 @@
+#include "common.h"
+#include "cpu_projection.h"
+#include "screen.h"
+
+/*
+ * A copy of the camera's projection and viewing matrices kept on the CPU,
+ * so the game can work out where points land on the screen without asking
+ * the RSP
+ */
+
+/* The screen depth of the far plane over two, in a viewport's depth units */
+#define SCREEN_DEPTH_SCALE 16352.0f
+/* Screen coordinates are clamped to this either side of the centre */
+#define SCREEN_COORDINATE_LIMIT 0x400
+
+extern Mat4 g_CpuProjectionMatrix;
+extern Mat4 g_CpuViewingMatrix;
+/* What a unit at a view depth of one spans on the screen */
+extern f32 g_CpuScreenScaleX;
+extern f32 g_CpuScreenScaleY;
+extern s32 g_CpuViewportCenterX;
+extern s32 g_CpuViewportCenterY;
+/* The viewport's size over the screen's */
+extern f32 g_CpuViewportWidthRatio;
+extern f32 g_CpuViewportHeightRatio;
+
+void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport) {
+    f32 reciprocal;
+
+    if (projection != NULL) {
+        guMtxL2F(g_CpuProjectionMatrix, projection);
+    }
+    if (viewing != NULL) {
+        guMtxL2F(g_CpuViewingMatrix, viewing);
+    }
+    if (viewport != NULL) {
+        g_CpuViewportWidthRatio = (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
+        g_CpuViewportHeightRatio = (viewport->vp.vscale[1] >> 1) * (1.0f / SCREEN_HEIGHT);
+        g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
+        g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
+    }
+    if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
+        reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
+        g_CpuProjectionMatrix[0][0] *= reciprocal;
+        g_CpuProjectionMatrix[0][1] *= reciprocal;
+        g_CpuProjectionMatrix[0][2] *= reciprocal;
+        g_CpuProjectionMatrix[0][3] *= reciprocal;
+        g_CpuProjectionMatrix[1][0] *= reciprocal;
+        g_CpuProjectionMatrix[1][1] *= reciprocal;
+        g_CpuProjectionMatrix[1][2] *= reciprocal;
+        g_CpuProjectionMatrix[1][3] *= reciprocal;
+        g_CpuProjectionMatrix[2][0] *= reciprocal;
+        g_CpuProjectionMatrix[2][1] *= reciprocal;
+        g_CpuProjectionMatrix[2][2] *= reciprocal;
+        g_CpuProjectionMatrix[2][3] *= reciprocal;
+        g_CpuProjectionMatrix[3][0] *= reciprocal;
+        g_CpuProjectionMatrix[3][1] *= reciprocal;
+        g_CpuProjectionMatrix[3][2] *= reciprocal;
+        g_CpuProjectionMatrix[3][3] *= reciprocal;
+        g_CpuScreenScaleX = 1.0f;
+        g_CpuScreenScaleY = -1.0f;
+    } else {
+        g_CpuScreenScaleX = g_CpuProjectionMatrix[0][0] * -(SCREEN_WIDTH / 2.0f);
+        g_CpuScreenScaleY = g_CpuProjectionMatrix[1][1] * (SCREEN_HEIGHT / 2.0f);
+    }
+}
+
+void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport) {
+    s32 row;
+    s32 column;
+    f32 reciprocal;
+
+    for (row = 0; row != 4; row++) {
+        for (column = 0; column != 4; column++) {
+            g_CpuProjectionMatrix[row][column] = projection[row][column];
+            g_CpuViewingMatrix[row][column] = viewing[row][column];
+        }
+    }
+    if (viewport != NULL) {
+        g_CpuViewportWidthRatio = (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
+        g_CpuViewportHeightRatio = (viewport->vp.vscale[1] >> 1) * (1.0f / SCREEN_HEIGHT);
+        g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
+        g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
+    }
+    if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
+        reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
+        g_CpuProjectionMatrix[0][0] *= reciprocal;
+        g_CpuProjectionMatrix[0][1] *= reciprocal;
+        g_CpuProjectionMatrix[0][2] *= reciprocal;
+        g_CpuProjectionMatrix[0][3] *= reciprocal;
+        g_CpuProjectionMatrix[1][0] *= reciprocal;
+        g_CpuProjectionMatrix[1][1] *= reciprocal;
+        g_CpuProjectionMatrix[1][2] *= reciprocal;
+        g_CpuProjectionMatrix[1][3] *= reciprocal;
+        g_CpuProjectionMatrix[2][0] *= reciprocal;
+        g_CpuProjectionMatrix[2][1] *= reciprocal;
+        g_CpuProjectionMatrix[2][2] *= reciprocal;
+        g_CpuProjectionMatrix[2][3] *= reciprocal;
+        g_CpuProjectionMatrix[3][0] *= reciprocal;
+        g_CpuProjectionMatrix[3][1] *= reciprocal;
+        g_CpuProjectionMatrix[3][2] *= reciprocal;
+        g_CpuProjectionMatrix[3][3] *= reciprocal;
+        g_CpuScreenScaleX = 1.0f;
+        g_CpuScreenScaleY = -1.0f;
+    } else {
+        /* Overwritten at once; the stores are kept to match */
+        g_CpuScreenScaleX = -g_CpuViewportCenterX * g_CpuProjectionMatrix[0][0];
+        g_CpuScreenScaleY = g_CpuViewportCenterY * g_CpuProjectionMatrix[1][1];
+        g_CpuScreenScaleX = g_CpuProjectionMatrix[0][0] * (SCREEN_WIDTH / 2.0f) / g_CpuProjectionMatrix[2][3];
+        g_CpuScreenScaleY = g_CpuProjectionMatrix[1][1] * -(SCREEN_HEIGHT / 2.0f) / g_CpuProjectionMatrix[2][3];
+    }
+}
+
+/*
+ * Returns 0 if the sphere is not in front of the camera, 1 if it is off the
+ * left or right of the screen, 2 if it is off the top or bottom, or else its
+ * view depth, which is negative
+ */
+#ifdef NON_MATCHING
+s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
+    f32 depth;
+    f32 viewX;
+    f32 viewY;
+    f32 perspective;
+
+    depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y + g_CpuViewingMatrix[2][2] * z
+            + g_CpuViewingMatrix[3][2] - radius;
+    if ((s32)depth >= 0) {
+        return 0;
+    }
+    viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[1][0] * y + g_CpuViewingMatrix[2][0] * z
+            + g_CpuViewingMatrix[3][0];
+    if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
+        perspective = 1.0f;
+    } else {
+        perspective = 1.0f / depth;
+    }
+    if ((viewX > 0.0f) ? g_CpuViewportCenterX < g_CpuScreenScaleX * (viewX - radius) * perspective
+                       : g_CpuScreenScaleX * (viewX + radius) * perspective < -g_CpuViewportCenterX) {
+        return 1;
+    }
+    viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y + g_CpuViewingMatrix[2][1] * z
+            + g_CpuViewingMatrix[3][1];
+    if ((viewY > 0.0f) ? g_CpuScreenScaleY * (viewY - radius) * perspective < -g_CpuViewportCenterY
+                       : g_CpuViewportCenterY < g_CpuScreenScaleY * (viewY + radius) * perspective) {
+        return 2;
+    }
+    return depth;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/cpu_projection", GetSphereVisibility);
+#endif
+
+s32 GetViewDepth(f32 x, f32 y, f32 z) {
+    return g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y + g_CpuViewingMatrix[2][2] * z
+           + g_CpuViewingMatrix[3][2];
+}
+
+/* Returns the view depth, which is negative when the point is in front of the camera */
+#ifdef NON_MATCHING
+s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint *point) {
+    f32 viewX;
+    f32 viewY;
+    f32 viewZ;
+    f32 perspective;
+    s32 depth;
+
+    guMtxXFMF(g_CpuViewingMatrix, x, y, z, &viewX, &viewY, &viewZ);
+    if ((s32)viewZ >= 0) {
+        return viewZ;
+    }
+    perspective = 1.0f / viewZ;
+    point->scaleX = g_CpuScreenScaleX * perspective;
+    point->scaleY = g_CpuScreenScaleY * perspective;
+    if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
+        point->x = (s32)viewX + g_CpuViewportCenterX;
+        point->y = (s32)-viewY + g_CpuViewportCenterY;
+    } else {
+        point->x = (s32)(point->scaleX * viewX * g_CpuViewportWidthRatio) + g_CpuViewportCenterX;
+        point->y = (s32)(point->scaleY * viewY * g_CpuViewportHeightRatio) + g_CpuViewportCenterY;
+    }
+    if (point->x < -SCREEN_COORDINATE_LIMIT) {
+        point->x = -SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->x > SCREEN_COORDINATE_LIMIT) {
+        point->x = SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->y < -SCREEN_COORDINATE_LIMIT) {
+        point->y = -SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->y > SCREEN_COORDINATE_LIMIT) {
+        point->y = SCREEN_COORDINATE_LIMIT;
+    }
+    depth = (-g_CpuProjectionMatrix[2][2] - g_CpuProjectionMatrix[3][2] / viewZ) * SCREEN_DEPTH_SCALE
+            + SCREEN_DEPTH_SCALE;
+    point->depth = depth;
+    point->depthStep = fabsf(((g_CpuProjectionMatrix[2][2] * (viewZ - 1.0f) + g_CpuProjectionMatrix[3][2])
+                              / (1.0f - viewZ)) * SCREEN_DEPTH_SCALE + SCREEN_DEPTH_SCALE - depth);
+    return viewZ;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPoint);
+#endif
+
+/*
+ * Like ProjectPoint, without the screen depth. The viewing matrix's [1][0]
+ * is left out of x, unlike in y.
+ */
+#ifdef NON_MATCHING
+s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint *point) {
+    f32 depth;
+    f32 viewX;
+    f32 viewY;
+    f32 perspective;
+
+    depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y + g_CpuViewingMatrix[2][2] * z
+            + g_CpuViewingMatrix[3][2];
+    if ((s32)depth == 0) {
+        return 0;
+    }
+    viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[2][0] * z + g_CpuViewingMatrix[3][0];
+    viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y + g_CpuViewingMatrix[2][1] * z
+            + g_CpuViewingMatrix[3][1];
+    perspective = 1.0f / depth;
+    point->scaleX = g_CpuScreenScaleX * perspective;
+    point->scaleY = g_CpuScreenScaleY * perspective;
+    point->x = (s32)(point->scaleX * viewX) + g_CpuViewportCenterX;
+    point->y = (s32)(point->scaleY * viewY) + g_CpuViewportCenterY;
+    if (point->x < -SCREEN_COORDINATE_LIMIT) {
+        point->x = -SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->x > SCREEN_COORDINATE_LIMIT) {
+        point->x = SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->y < -SCREEN_COORDINATE_LIMIT) {
+        point->y = -SCREEN_COORDINATE_LIMIT;
+    }
+    if (point->y > SCREEN_COORDINATE_LIMIT) {
+        point->y = SCREEN_COORDINATE_LIMIT;
+    }
+    return depth;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/cpu_projection", ProjectPointToScreen);
+#endif
+
+/* Like BuildTransformMatrix, without a scale */
+void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
+    f32 sinX = sinf(rotation[0]);
+    f32 cosX = cosf(rotation[0]);
+    f32 sinY = sinf(rotation[1]);
+    f32 cosY = cosf(rotation[1]);
+    f32 sinZ = sinf(rotation[2]);
+    f32 cosZ = cosf(rotation[2]);
+
+    matrix[0][0] = cosY * cosZ;
+    matrix[0][1] = cosY * sinZ;
+    matrix[0][2] = -sinY;
+    matrix[0][3] = 0;
+    matrix[1][0] = sinX * sinY * cosZ - cosX * sinZ;
+    matrix[1][1] = sinX * sinY * sinZ + cosX * cosZ;
+    matrix[1][2] = sinX * cosY;
+    matrix[1][3] = 0;
+    matrix[2][0] = cosX * sinY * cosZ + sinX * sinZ;
+    matrix[2][1] = cosX * sinY * sinZ - sinX * cosZ;
+    matrix[2][2] = cosX * cosY;
+    matrix[2][3] = 0;
+    matrix[3][0] = translation[0];
+    matrix[3][1] = translation[1];
+    matrix[3][2] = translation[2];
+    matrix[3][3] = 1.0f;
+}
+
+void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale) {
+    f32 sinX = sinf(rotation[0]);
+    f32 cosX = cosf(rotation[0]);
+    f32 sinY = sinf(rotation[1]);
+    f32 cosY = cosf(rotation[1]);
+    f32 sinZ = sinf(rotation[2]);
+    f32 cosZ = cosf(rotation[2]);
+
+    matrix[0][0] = cosY * cosZ * scale[0];
+    matrix[0][1] = cosY * sinZ * scale[0];
+    matrix[0][2] = -sinY * scale[0];
+    matrix[0][3] = 0;
+    matrix[1][0] = (sinX * sinY * cosZ - cosX * sinZ) * scale[1];
+    matrix[1][1] = (sinX * sinY * sinZ + cosX * cosZ) * scale[1];
+    matrix[1][2] = sinX * cosY * scale[1];
+    matrix[1][3] = 0;
+    matrix[2][0] = (cosX * sinY * cosZ + sinX * sinZ) * scale[2];
+    matrix[2][1] = (cosX * sinY * sinZ - sinX * cosZ) * scale[2];
+    matrix[2][2] = cosX * cosY * scale[2];
+    matrix[2][3] = 0;
+    matrix[3][0] = translation[0];
+    matrix[3][1] = translation[1];
+    matrix[3][2] = translation[2];
+    matrix[3][3] = 1.0f;
+}
+
+void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product) {
+    s32 row;
+    s32 column;
+
+    for (row = 0; row != 4; row++) {
+        for (column = 0; column != 4; column++) {
+            product[row][column] = a[row][0] * b[0][column] + a[row][1] * b[1][column] + a[row][2] * b[2][column]
+                                   + a[row][3] * b[3][column];
+        }
+    }
+}
+
+/* Mtx keeps the integer halves of all sixteen elements before the fractions */
+void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix) {
+    s32 *integerPart = (s32 *)fixedMatrix;
+    s32 *fractionPart = integerPart + 8;
+    s32 row;
+    s32 pairIndex;
+    s32 first;
+    s32 second;
+
+    for (row = 0; row != 4; row++) {
+        for (pairIndex = 0; pairIndex != 2; pairIndex++) {
+            first = matrix[row][pairIndex * 2] * 65536.0f;
+            second = matrix[row][pairIndex * 2 + 1] * 65536.0f;
+            *integerPart++ = (first & 0xFFFF0000) | ((u32)second >> 16);
+            *fractionPart++ = (first << 16) | (second & 0xFFFF);
+        }
+    }
+}
+
+/* No code calls this */
+#ifdef NON_MATCHING
+void SetTriangleNormal(Vtx *vertices, s32 firstIndex, s32 secondIndex, s32 thirdIndex, s32 target) {
+    Vtx_tn *first = (Vtx_tn *)(firstIndex * sizeof(Vtx) + (u32)vertices);
+    Vtx_tn *second = (Vtx_tn *)(secondIndex * sizeof(Vtx) + (u32)vertices);
+    Vtx_tn *third = (Vtx_tn *)(thirdIndex * sizeof(Vtx) + (u32)vertices);
+    s32 firstEdgeX = second->ob[0] - first->ob[0];
+    s32 firstEdgeY = second->ob[1] - first->ob[1];
+    s32 firstEdgeZ = second->ob[2] - first->ob[2];
+    s32 secondEdgeX = third->ob[0] - second->ob[0];
+    s32 secondEdgeY = third->ob[1] - second->ob[1];
+    s32 secondEdgeZ = third->ob[2] - second->ob[2];
+    f32 normalX = firstEdgeY * secondEdgeZ - firstEdgeZ * secondEdgeY;
+    f32 normalY = firstEdgeZ * secondEdgeX - firstEdgeX * secondEdgeZ;
+    f32 normalZ = firstEdgeX * secondEdgeY - secondEdgeX * firstEdgeY;
+    f32 scale = NORMAL_LENGTH / sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
+    s8 scaledX;
+    s8 scaledY;
+    s8 scaledZ;
+
+    switch (target) {
+        case NORMAL_ON_FIRST:
+            first->n[0] = normalX * scale;
+            first->n[1] = normalY * scale;
+            first->n[2] = normalZ * scale;
+            break;
+        case NORMAL_ON_SECOND:
+            second->n[0] = normalX * scale;
+            second->n[1] = normalY * scale;
+            second->n[2] = normalZ * scale;
+            break;
+        case NORMAL_ON_THIRD:
+            third->n[0] = normalX * scale;
+            third->n[1] = normalY * scale;
+            third->n[2] = normalZ * scale;
+            break;
+        case NORMAL_ON_ALL:
+            scaledX = normalX * scale;
+            scaledY = normalY * scale;
+            scaledZ = normalZ * scale;
+            first->n[0] = scaledX;
+            first->n[1] = scaledY;
+            first->n[2] = scaledZ;
+            second->n[0] = scaledX;
+            second->n[1] = scaledY;
+            second->n[2] = scaledZ;
+            third->n[0] = scaledX;
+            third->n[1] = scaledY;
+            third->n[2] = scaledZ;
+            break;
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/cpu_projection", SetTriangleNormal);
+#endif

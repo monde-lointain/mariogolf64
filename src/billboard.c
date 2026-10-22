@@ -1,6 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "camera.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "functions.h"
 #include "variables.h"
@@ -36,7 +37,6 @@ extern u16 sDrawOrder[BILLBOARD_COUNT];
 extern u16 g_LightYaw;
 extern u16 g_LightPitch;
 s32 GetGroundHeight(s32 x, s32 z);
-s32 GetViewDepth(f32 x, f32 y, f32 z);
 
 /* Billboards this close to the course's edges are hidden */
 #define COURSE_EDGE_MIN_X 256.0f
