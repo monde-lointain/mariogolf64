@@ -11,7 +11,13 @@
 /*======================================================================*/
 #include <nusys.h>
 
+extern u8 g_NextFramebuffer[];
 
+
+/* Mario Golf: fewest retraces between two frame buffer swaps */
+#define SWAP_RETRACE_MIN 2
+
+static u32	lastSwapRetrace;	/* nuScRetraceCounter at the last swap */
 static NUScTask* nuGfxTask_ptr;
 
 static short	taskDoneMsg;
@@ -64,31 +70,44 @@ void nuGfxTaskMgr(void *arg)
 	/* Branch the processing depending on the message.*/
 	switch(*mesg_type){
 	case NU_SC_SWAPBUFFER_MSG:/* Task completed and frame buffer swapped. */
-	    
+
+	    /* Mario Golf: swap at most once every SWAP_RETRACE_MIN retraces */
+	    /* so that frames stay on screen equally long.			*/
+	    while(1){
+		mask = osSetIntMask(OS_IM_NONE);
+		if(nuScRetraceCounter - lastSwapRetrace >= SWAP_RETRACE_MIN){
+		    break;
+		}
+		osSetIntMask(mask);
+		nuGfxRetraceWait(1);
+	    }
+	    lastSwapRetrace = nuScRetraceCounter;
+	    osSetIntMask(mask);
+
 	/*Call application function with message indicating frame buffer swap.*/	    /* The frame buffer swap function is registered by default.	*/
 	    if(nuGfxSwapCfbFunc != NULL){
 		(*nuGfxSwapCfbFunc)((void*)gfxTask);
 	    }
+	    mask = osSetIntMask(OS_IM_NONE);
+	    nuGfxTaskSpool--;
+	    osSetIntMask(mask);
 
 	    if(nuGfxDisplay & NU_GFX_DISPLAY_ON_TRIGGER){
 		osViBlack(FALSE);
 		nuGfxDisplay = NU_GFX_DISPLAY_ON;
 	    }
-	    mask = osSetIntMask(OS_IM_NONE);
-	    nuGfxTaskSpool--;
-	    osSetIntMask(mask);
 	    break;
 	    
 	case NU_SC_GTASKEND_MSG:	/* Task ended. */
+	    mask = osSetIntMask(OS_IM_NONE);
+	    nuGfxTaskSpool--;
+	    osSetIntMask(mask);
 
 	    /* Use the message indicating the end of the graphics task to call the application function.*/
 	    /* Default is NULL.				*/
 	    if(nuGfxTaskEndFunc != NULL){
 		(*nuGfxTaskEndFunc)((void*)gfxTask);
 	    }
-	    mask = osSetIntMask(OS_IM_NONE);
-	    nuGfxTaskSpool--;
-	    osSetIntMask(mask);
 	    break;
 	}
 
@@ -137,7 +156,8 @@ void nuGfxTaskMgrInit(void)
 	 nuGfxTask[cnt].list.t.output_buff_size =
 	     (u64 *)(nuRDPOutputBuf + NU_GFX_RDP_OUTPUTBUFF_SIZE);
 	 nuGfxTask[cnt].list.t.yield_data_ptr	= (u64 *) nuYieldBuf;
-	 nuGfxTask[cnt].list.t.yield_data_size	= NU_GFX_YIELD_BUF_SIZE;
+	 nuGfxTask[cnt].list.t.yield_data_size	= OS_YIELD_DATA_SIZE; /* Mario Golf: no padding */
+	 nuGfxTask[cnt].msgQ			= &nuGfxTaskMgrMesgQ;
      }
      nuGfxTask[NU_GFX_TASK_NUM-1].next = &nuGfxTask[0];
      nuGfxTask_ptr	= &nuGfxTask[0];
@@ -206,7 +226,8 @@ void nuGfxTaskMgrInit(void)
 	 /* When 1 screen of the task has been completed */
 	 nuGfxTask_ptr->msg         	= (OSMesg)&swapBufMsg;
 	 
-	 nuGfxCfbCounter = (nuGfxCfbCounter+1) % nuGfxCfbNum;
+	 /* Mario Golf: follow the ring of frame buffers in use. */
+	 nuGfxCfbCounter = g_NextFramebuffer[nuGfxCfbCounter];
 	 nuGfxCfb_ptr = nuGfxCfb[nuGfxCfbCounter];
      } else {
 	 /* When 1 screen of the task has not been completed */
