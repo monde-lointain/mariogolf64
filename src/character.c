@@ -24,6 +24,37 @@
 
 #define ANIMATIONS(model) ((CharacterAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATIONS])
 #define JOINT_ANIMATIONS(model) ((JointAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
+#define ANIMATED_TRIANGLES(model) ((AnimatedTriangle **)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATED_TRIANGLES])
+#define ANIMATED_TEXTURES(model) ((AnimatedTexture *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
+
+/* Where a segment address into the frame data points in the slot's copy being written */
+#define FRAME_DATA_POINTER(slot, address) \
+    ((u8 *)(slot)->frameData[(slot)->frameDataIndex] + SEGMENT_OFFSET(address))
+
+/*
+ * Patches the slot's frame data copy being written so the triangle shows the
+ * texture with the texture coordinates. Uses the locals gfx, vertex and i.
+ */
+#define SET_TRIANGLE_TEXTURE(slot, triangle, texture, sCoordinates, tCoordinates)                              \
+    gfx = (Gfx *)FRAME_DATA_POINTER(slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET);          \
+    gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1), G_IM_FMT_RGBA, G_IM_SIZ_16b,     \
+                        (texture)->width, (texture)->height, 0, G_TX_NOMIRROR | G_TX_CLAMP,                    \
+                        G_TX_NOMIRROR | G_TX_CLAMP, ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD,  \
+                        G_TX_NOLOD);                                                                           \
+    for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) {                                                              \
+        vertex = (Vtx *)FRAME_DATA_POINTER(slot, (triangle)->vertices + i * VTX_SIZE);                         \
+        vertex->v.tc[0] = (sCoordinates)[i];                                                                   \
+        vertex->v.tc[1] = (tCoordinates)[i];                                                                   \
+    }
+
+/* The size of a Vtx */
+#define VTX_SIZE 0x10
+/* From AnimatedTriangle.loadTextureBlock to the gDPLoadTextureBlock */
+#define LOAD_TEXTURE_BLOCK_OFFSET 0x10
+/* The alignment the RDP needs of a texture's address */
+#define TEXTURE_ALIGNMENT 8
+/* The texture coordinate mask of an animated triangle's tiles, 64 texels each way */
+#define ANIMATED_TEXTURE_MASK 6
 
 /* Makes a slot's model readable at CHARACTER_MODEL_ADDRESS, where its segment addresses point */
 #define MAP_MODEL_BUFFER(slot)                                                                     \
@@ -388,7 +419,33 @@ s32 GetUnk6EventFrame(u32 slotIndex) {
     return GetAnimationEventFrame(slotIndex, UNK6_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_UNK6);
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800550D8);
+/* Gives each of the slot's animated triangles its default texture */
+#ifdef NON_MATCHING
+void ResetTriangleTextures(u32 slotIndex) {
+    s32 triangleIndex = 0;
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    AnimatedTriangle *triangle;
+    AnimatedTexture *texture;
+    Gfx *gfx;
+    Vtx *vertex;
+    s32 i;
+
+    if (slot != NULL) {
+        MAP_MODEL_BUFFER(slot);
+        for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
+             triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
+            texture = ANIMATED_TEXTURES(slot->model);
+            if (triangle->textureIndex >= 0) {
+                texture += triangle->textureIndex;
+            }
+            SET_TRIANGLE_TEXTURE(slot, triangle, texture, triangle->s, triangle->t);
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80055368);
 
@@ -422,7 +479,38 @@ s32 PlayTextureAnimation(u32 slotIndex, s32 index) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055828);
+/*
+ * Gives the slot's triangles that the texture animation changes their default
+ * texture. Nothing calls it.
+ */
+#ifdef NON_MATCHING
+void ResetAnimationTriangleTextures(u32 slotIndex, s32 textureAnimationIndex) {
+    s32 triangleIndex = 0;
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    AnimatedTriangle *triangle;
+    AnimatedTexture *texture;
+    Gfx *gfx;
+    Vtx *vertex;
+    s32 keySetIndex;
+    s32 i;
+
+    if (slot != NULL) {
+        MAP_MODEL_BUFFER(slot);
+        for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
+             triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
+            texture = &ANIMATED_TEXTURES(slot->model)[triangle->textureIndex];
+            for (keySetIndex = 0; keySetIndex < triangle->keySetCount; keySetIndex++) {
+                if (triangle->keySets[keySetIndex].textureAnimationIndex == textureAnimationIndex) {
+                    SET_TRIANGLE_TEXTURE(slot, triangle, texture, triangle->s, triangle->t);
+                }
+            }
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", ResetAnimationTriangleTextures);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/character", LoadCharacter);
 
