@@ -27,7 +27,7 @@
 
 typedef struct HoleRecord {
     /* 0x0 */ u8 par;
-    /* 0x1 */ u8 handicap; /* Ranks a course's holes from 1 to 18 */
+    /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
     /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
     /* 0x8 */ u8 flags;
     /* 0x9 */ u8 unk9;
@@ -49,7 +49,11 @@ extern s32 g_HoleIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
 
 s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex);
-s32 GetCourseRecordIndex(void);
+/*
+ * Takes no parameters, but is left unprototyped because GetHandicapOffset
+ * passes it a course index, which is not used
+ */
+s32 GetCourseRecordIndex();
 s32 GetHoleRecordIndex(void);
 s32 GetHoleIndexInRecord(void);
 s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex);

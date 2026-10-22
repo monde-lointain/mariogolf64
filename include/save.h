@@ -121,13 +121,26 @@ typedef struct SavedGame {
     /* 0x9C */ u8 unk9C[4];
 } SavedGame; /* size = 0xA0 */
 
+/* A player's results on one hole */
+typedef struct PlayerHole {
+    /* 0x0 */ u8 unk0;
+    /* 0x1 */ s8 strokes;
+} PlayerHole; /* size = 0x2 */
+
 typedef struct UnkB8 {
     /* 0x00 */ s32 unk0[0xC / 4];
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10[(0x1C - 0x10) / 4];
     /* 0x1C */ u8 unk1C;
     /* 0x1D */ u8 unk1D;
-    /* 0x1E */ u8 unk1E[0x52 - 0x1E];
+    /* 0x1E */ u8 unk1E[0x23 - 0x1E];
+    /* 0x23 */ s8 unk23;
+    /* 0x24 */ u8 unk24[2];
+    /* 0x26 */ s8 unk26;
+    /* 0x27 */ u8 unk27[2];
+    /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
+    /* 0x2A */ PlayerHole holes[COURSE_HOLE_COUNT];
+    /* 0x4E */ u8 unk4E[0x52 - 0x4E];
     /* 0x52 */ s16 unk52[(0x7A - 0x52) / 2];
     /* 0x7A */ u8 unk7A;
     /* 0x7B */ u8 unk7B;

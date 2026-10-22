@@ -33,6 +33,9 @@
 /* Logs the ID of each encoded asset that is opened */
 #define GAME_FLAG_LOG_ENCODED_ASSETS 0x49
 
+/* Cuts every round to two holes */
+#define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

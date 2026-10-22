@@ -92,7 +92,7 @@ segments:
       - [0x2B800, c, asset_file]
       - [0x2BFF0, asm]
       - [0x2D290, c, course_info]
-      - [0x2D5C0, asm]
+      - [0x2D5C0, c, scoring]
       - [0x2E3E0, asm]
       - [0x2FD00, asm]
       - [0x34FA0, c, float_math]
