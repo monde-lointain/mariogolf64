@@ -114,7 +114,7 @@ segments:
       - [0x5B620, asm]
       - [0x68500, asm]
       - [0x70E10, asm]
-      - [0x74890, asm]
+      - [0x74890, c, sram]
       - [0x748B0, c, ../lib/libnusys/nuboot]
       - [0x749F0, c, ../lib/libmus/src/player]
       - [0x78330, c, ../lib/libmus/src/player_fx]
