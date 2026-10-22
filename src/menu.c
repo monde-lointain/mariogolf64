@@ -224,7 +224,6 @@ void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData *save, u8 isInSram);
 s32 WriteSaveCopies(SaveData *save, u8 isInSram);
 void SyncSaveOptions(SaveData *save, s32 isWrite, s32 readResult);
-void TransferSaveData(SaveData *save, u8 isWrite);
 
 /*
  * Allocates and reads the menu's assets, then reads the save. Overlay 3

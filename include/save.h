@@ -153,6 +153,10 @@ typedef struct UnkB8 {
 #define SAVE_UNKAF0_ROW_COUNT 18
 #define SAVE_UNKAF0_COLUMN_COUNT 18
 
+/* UnkAF0.unk1 keeps a count of wins in these bits, and a flag in the top one */
+#define WIN_COUNT_MASK 0x7F
+#define UNKAF0_FLAG 0x80
+
 typedef struct UnkAF0 {
     /* 0x0 */ u8 unk0;
     /* 0x1 */ u8 unk1;
@@ -215,6 +219,7 @@ extern GameState g_GameState;
 extern UnkB8 g_Players[MAX_PLAYER_COUNT];
 
 SaveData *GetSaveData(void);
+void TransferSaveData(SaveData *save, u8 isWrite);
 void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);

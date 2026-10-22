@@ -8,17 +8,12 @@
 /* Counts in the save stop here */
 #define MAX_SAVED_COUNT 99
 
-/* UnkAF0.unk1 keeps a count of wins in these bits, and a flag in the top one */
-#define WIN_COUNT_MASK 0x7F
-#define UNKAF0_FLAG 0x80
-
 /* Any place past third, which no flag records */
 #define PLACE_UNPLACED 4
 
 extern s8 D_801B60C5;
 extern s32 D_801B60B4;
 
-void TransferSaveData(SaveData *save, u8 isWrite);
 s32 func_8006CD50(s32, s32);
 void func_8007FE44(s32 badgeCount);
 
