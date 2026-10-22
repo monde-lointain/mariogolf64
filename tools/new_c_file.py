@@ -45,9 +45,9 @@ def main():
     subprocess.run(["make", "extract"], cwd=ROOT, check=True, capture_output=True)
     os.remove(asm_path)
 
-    expected_dir = os.path.join(ROOT, "expected")
-    os.makedirs(expected_dir, exist_ok=True)
-    with open(os.path.join(expected_dir, f"{name}.s"), "w") as expected:
+    expected_path = os.path.join(ROOT, "expected", f"{name}.s")
+    os.makedirs(os.path.dirname(expected_path), exist_ok=True)
+    with open(expected_path, "w") as expected:
         for function in functions:
             path = os.path.join(ROOT, "asm", "nonmatchings", name, f"{function}.s")
             with open(path) as function_file:
