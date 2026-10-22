@@ -25,6 +25,7 @@
 #define ANIMATIONS(model) ((CharacterAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATIONS])
 #define JOINT_ANIMATIONS(model) ((JointAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
 #define ANIMATED_TRIANGLES(model) ((AnimatedTriangle **)(model)->segmentAddresses[CHARACTER_MODEL_ANIMATED_TRIANGLES])
+#define TEXTURE_ANIMATIONS(model) ((TextureAnimation *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURE_ANIMATIONS])
 #define ANIMATED_TEXTURES(model) ((AnimatedTexture *)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
 
 /* Where a segment address into the frame data points in the slot's copy being written */
@@ -447,7 +448,69 @@ void ResetTriangleTextures(u32 slotIndex) {
 INCLUDE_ASM("asm/nonmatchings/character", ResetTriangleTextures);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80055368);
+/*
+ * Shows the keyed textures of the slot's playing texture animations, then
+ * advances each one a frame
+ */
+#ifdef NON_MATCHING
+void AdvanceTextureAnimations(u32 slotIndex) {
+    s32 triangleIndex = 0;
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    AnimatedTriangle *triangle;
+    TriangleTextureKeys *keySet;
+    TriangleTextureKey *key;
+    TextureAnimationState *state;
+    AnimatedTexture *texture;
+    TextureAnimation *animation;
+    Gfx *gfx;
+    Vtx *vertex;
+    s32 keySetIndex;
+    s32 keyIndex;
+    s32 i;
+
+    if (slot != NULL) {
+        MAP_MODEL_BUFFER(slot);
+        for (triangle = ANIMATED_TRIANGLES(slot->model)[0]; triangle != NULL;
+             triangle = ANIMATED_TRIANGLES(slot->model)[++triangleIndex]) {
+            for (keySetIndex = 0; keySetIndex < triangle->keySetCount; keySetIndex++) {
+                keySet = &triangle->keySets[keySetIndex];
+                state = &slot->textureAnimations[keySet->textureAnimationIndex];
+                if (state->pendingCopyCount != 0) {
+                    for (keyIndex = 0; keyIndex < keySet->count; keyIndex++) {
+                        key = &keySet->keys[keyIndex];
+                        if (state->frame >= key->frame) {
+                            texture = &ANIMATED_TEXTURES(slot->model)[key->textureIndex];
+                            SET_TRIANGLE_TEXTURE(slot, triangle, texture, key->s, key->t);
+                        }
+                    }
+                }
+            }
+        }
+        for (i = 0; i < TEXTURE_ANIMATION_COUNT; i++) {
+            animation = &TEXTURE_ANIMATIONS(slot->model)[i];
+            if (animation->index < 0) {
+                break;
+            }
+            state = &slot->textureAnimations[animation->index];
+            if (state->pendingCopyCount >= TEXTURE_ANIMATION_PLAYING) {
+                if (++state->frame >= animation->frameCount) {
+                    state->pendingCopyCount = FRAME_DATA_COPY_COUNT;
+                    if (animation->index == RANDOM_TEXTURE_ANIMATION) {
+                        slot->textureAnimations[RANDOM_TEXTURE_ANIMATION].frame = 0;
+                    } else {
+                        state->frame = animation->frameCount;
+                    }
+                }
+            } else if (state->pendingCopyCount != 0) {
+                state->pendingCopyCount--;
+            }
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/character", AdvanceTextureAnimations);
+#endif
 
 s32 SetTextureAnimationFrame(u32 slotIndex, s32 index, s32 frame) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);

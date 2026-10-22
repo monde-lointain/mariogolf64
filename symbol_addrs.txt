@@ -869,6 +869,7 @@ GetAnimationEventActions = 0x80054F1C; // type:func
 GetAnimationEventFrame = 0x80054FF4; // type:func
 GetUnk6EventFrame = 0x800550B8; // type:func
 ResetTriangleTextures = 0x800550D8; // type:func
+AdvanceTextureAnimations = 0x80055368; // type:func
 SetTextureAnimationFrame = 0x80055738; // type:func
 StopTextureAnimations = 0x80055788; // type:func
 PlayTextureAnimation = 0x800557BC; // type:func
