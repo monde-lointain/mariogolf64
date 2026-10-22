@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "controller.h"
 #include "functions.h"
+#include "hole_loader.h"
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
@@ -39,7 +40,7 @@
 #define CAMELOT_FRAME_LIMIT 60
 /* With g_IsDebugEnabled set, A skips the Camelot logo before this frame */
 #define CAMELOT_SKIP_FRAME_LIMIT 9
-/* The Camelot logo leaves from this frame, once D_800C3FA8 is 1 */
+/* The Camelot logo leaves from this frame, once g_HasLoaderFinished is set */
 #define CAMELOT_LEAVE_FRAME 26
 /* The count given to func_8006B56C; the stage ends once func_8006B55C sees it below 2 */
 #define LEAVING_COUNTDOWN 16
@@ -97,10 +98,8 @@ extern NintendoLogo sNintendoLogo;
 extern N64Logo sN64Logo;
 
 extern s32 D_800B6808;
-extern s32 D_800C3FA8;
 
 s32 func_800542A0(s32);
-void func_80069FBC(void);
 void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
                    s32 dtdy);
 void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
@@ -164,13 +163,13 @@ void LeaveBootLogos(void) {
         g_SceneModuleToLoad = 0x1B;
         func_8006F24C(0);
         func_8006ADF8(2);
-    } else if (sHasResetGameState && D_800C3FA8 == 1 && g_ControllerCount != 0) {
+    } else if (sHasResetGameState && g_HasLoaderFinished == 1 && g_ControllerCount != 0) {
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = 0x0C;
         g_NextScene = 19;
         g_SceneModuleToLoad = 0x03;
     } else {
-        func_80069FBC();
+        StopLoaderThread();
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = 0x0C;
         g_NextScene = 21;
@@ -235,7 +234,7 @@ void UpdateBootLogos(void) {
                 && sBootLogoFrame < CAMELOT_SKIP_FRAME_LIMIT) {
                 sBootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
                 sBootLogoFrame = 0;
-            } else if (D_800C3FA8 == 1 && sBootLogoFrame >= CAMELOT_LEAVE_FRAME) {
+            } else if (g_HasLoaderFinished == 1 && sBootLogoFrame >= CAMELOT_LEAVE_FRAME) {
                 if (sBootLogoFrame > 0) {
                     sBootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
                     sBootLogoFrame = 0;

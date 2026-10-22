@@ -57,6 +57,21 @@
 /* Keeps songs from starting */
 #define GAME_FLAG_SILENCE_SONGS 0x9D
 
+/* Cleared while the loader thread loads a hole, and set once it is done */
+#define GAME_FLAG_HOLE_LOADED 0x07
+
+/* Halts the loader thread after it sets up the hole's state */
+#define GAME_FLAG_HALT_HOLE_LOADER 0x43
+
+/* Flags that the hole loader reads or sets, whose purpose is not yet known */
+#define GAME_FLAG_UNK11 0x11
+#define GAME_FLAG_UNK12 0x12
+#define GAME_FLAG_UNK51 0x51
+#define GAME_FLAG_UNK60 0x60
+#define GAME_FLAG_UNK69 0x69
+#define GAME_FLAG_UNK7C 0x7C
+#define GAME_FLAG_UNK7D 0x7D
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

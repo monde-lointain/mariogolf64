@@ -4,6 +4,7 @@
 #include "game_flags.h"
 #include "functions.h"
 #include "heap.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "main.h"
 #include <PR/libmus.h>

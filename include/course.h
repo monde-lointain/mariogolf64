@@ -8,6 +8,11 @@
  * have one each, as do the two mini-golf courses and the driving range.
  */
 #define COURSE_RECORD_COUNT 9
+#define COURSE_RECORD_TOAD_HIGHLANDS 0
+#define COURSE_RECORD_KOOPA_PARK 1
+#define COURSE_RECORD_YOSHIS_ISLAND 3
+#define COURSE_RECORD_BOO_VALLEY 4
+#define COURSE_RECORD_MARIOS_STAR 5
 #define COURSE_RECORD_LUIGIS_GARDEN 6
 #define COURSE_RECORD_PEACHS_CASTLE 7
 #define COURSE_RECORD_DRIVING_RANGE 8
@@ -20,6 +25,8 @@
 #define MINI_GOLF_COURSE_INDEX 6
 #define MINI_GOLF_COURSES_PER_RECORD 3
 #define DRIVING_RANGE_COURSE_INDEX 12
+/* The main courses keep their records' order */
+#define COURSE_SHY_GUY_DESERT 2
 
 /* HoleRecord.flags; the main courses mark three or four par 5s and every par 3 */
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
@@ -47,6 +54,8 @@ typedef struct RingShotHole {
 extern s32 g_CourseIndex;
 extern s32 g_HoleIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
+/* The par of the hole being played */
+extern s8 g_HolePar;
 
 s32 GetHoleRadius(s32 courseRecordIndex, s32 holeIndex);
 /*

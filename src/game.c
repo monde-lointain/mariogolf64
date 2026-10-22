@@ -5,6 +5,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "hole_loader.h"
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
@@ -904,7 +905,6 @@ extern s32 sFadeColor;
 extern s32 sUnreadDebugSwitch;
 extern s32 D_800BE694;
 extern f32 D_800C30D4;
-extern s32 D_800C3FA8;
 extern s32 D_800C7304;
 extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
@@ -1285,7 +1285,7 @@ s32 DrawGame(void) {
                     g_Cameras[0].view.eye[1] = 10.0f;
                     g_Cameras[0].view.eye[2] = 60.0f;
                     func_800530FC(matrices);
-                } else if (D_8022BE08 != 0 && D_800C3FA8 == 1) {
+                } else if (D_8022BE08 != 0 && g_HasLoaderFinished == 1) {
                     usesFloatMatrices = TRUE;
                     guPerspectiveF(matrices->perspectiveF, &insetPerspNorm, g_Cameras[viewIndex].view.fieldOfView,
 
@@ -1320,7 +1320,7 @@ s32 DrawGame(void) {
             case DRAW_MODE_COURSE:
                 if (D_800C7304 != 0 && D_800C306C != 4) {
                     ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
-                } else if (D_800C3FA8 == 0) {
+                } else if (g_HasLoaderFinished == 0) {
                     if (viewIndex == 0) {
                         ClearBuffers(BUFFER_CLEAR_WHOLE);
                     }
@@ -1504,7 +1504,7 @@ s32 DrawGame(void) {
         }
 
         if (drawMode == DRAW_MODE_COURSE) {
-            if (D_800C3FA8 == 1 && (D_800C7304 == 0 || D_800C306C == 4)) {
+            if (g_HasLoaderFinished == 1 && (D_800C7304 == 0 || D_800C306C == 4)) {
                 if (g_Cameras[viewIndex].view.drawFlags != 0) {
                     if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                         gDPPipeSync(g_DisplayListHead++);
@@ -1624,7 +1624,7 @@ s32 DrawGame(void) {
                 }
             }
         } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
-            if (D_8022BE08 != 0 && viewIndex == 1 && D_800C3FA8 == 1) {
+            if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == 1) {
                 func_800625FC(&g_DisplayListHead);
                 func_80062A8C(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
@@ -1665,7 +1665,7 @@ s32 DrawGame(void) {
         if (g_IsModuleAlive[20]) {
             func_80219C74(&g_DisplayListHead);
         }
-        if (D_800C3FA8 == 1 && !IsGameFlagSet(0x13) && !IsGameFlagSet(0x2D)) {
+        if (g_HasLoaderFinished == 1 && !IsGameFlagSet(0x13) && !IsGameFlagSet(0x2D)) {
             func_80089094(&g_Cameras[0].view);
         }
         if (g_IsModuleAlive[17]) {
