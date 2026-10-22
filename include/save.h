@@ -93,8 +93,9 @@ typedef struct GameState {
 } GameState; /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
-    /* 0x00 */ s32 cupPosition[3];
-    /* 0x0C */ s32 unkC[(0x34 - 0xC) / 4];
+    /* 0x00 */ CoursePoint cupPosition;
+    /* 0x0C */ CoursePoint unkC;
+    /* 0x18 */ s32 unk18[(0x34 - 0x18) / 4];
 } Unk800BA9D8; /* size = 0x34 */
 
 extern Unk800BA9D8 D_800BA9D8;
