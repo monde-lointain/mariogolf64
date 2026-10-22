@@ -995,3 +995,5 @@ RecordComCharacterResult = 0x80070FD0; // type:func
 AddBirdieBadge = 0x800710C4; // type:func
 ReportBirdieBadgeCount = 0x8007117C; // type:func
 RecordTournamentPlace = 0x80071220; // type:func
+g_CourseIndex = 0x801B6094; // size:0x4
+g_HoleIndex = 0x801B6098; // size:0x4

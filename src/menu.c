@@ -126,8 +126,8 @@ extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
 extern s8 D_801323B8;
 extern s8 D_801323D0;
-extern s32 D_801B6094;
-extern s32 D_801B6098;
+extern s32 g_CourseIndex;
+extern s32 g_HoleIndex;
 extern s32 D_801B60AC;
 extern s8 D_801B60B9;
 extern s32 D_801B7070;
@@ -1286,8 +1286,8 @@ void func_8005D1E4(void) {
     u8 *unk;
 
     unk = func_8005AF74();
-    unk[0x2E] = D_801B6098;
-    unk[0x2F] = D_801B6094;
+    unk[0x2E] = g_HoleIndex;
+    unk[0x2F] = g_CourseIndex;
 }
 
 s32 func_8005D218(void) {
@@ -1399,7 +1399,7 @@ void func_8005D334(void) {
     }
 }
 
-/* The figures D_80105C38 holds for each of the save's sets, then for all of them */
+/* The figures D_80105C38 holds for each course, then for all of them */
 typedef struct Unk80105C38 {
     /* 0x00 */ f32 roundCount;
     /* 0x04 */ f32 unk4;
@@ -1417,7 +1417,7 @@ typedef struct Unk80105C38 {
     /* 0x34 */ s32 hasFirstPlace;
 } Unk80105C38; /* size = 0x38 */
 
-extern Unk80105C38 D_80105C38[STATISTICS_SET_COUNT + 1];
+extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
 
 #define HOLES_PER_ROUND 18.0f
 
@@ -1429,8 +1429,8 @@ void ComputeRoundStatistics(void) {
     UnkE98 *entry;
     f32 reciprocal;
     s32 sum;
-    s32 setIndex;
-    s32 hasPlayedSet;
+    s32 courseIndex;
+    s32 hasPlayedCourse;
     f32 sum8;
     f32 sum18;
     f32 sum1C;
@@ -1445,79 +1445,79 @@ void ComputeRoundStatistics(void) {
     f32 holeCount;
 
     saved = GetSaveData()->unkE98;
-    for (setIndex = 0; setIndex != STATISTICS_SET_COUNT; setIndex++) {
-        entry = &saved[setIndex];
-        D_80105C38[setIndex].roundCount = entry->roundCount;
-        if (D_80105C38[setIndex].roundCount == 0.0f) {
-            D_80105C38[setIndex].unk4 = 0.0f;
-            D_80105C38[setIndex].unk8 = 0.0f;
-            D_80105C38[setIndex].unkC = 0.0f;
-            D_80105C38[setIndex].unk10 = 0.0f;
-            D_80105C38[setIndex].unk14 = 0.0f;
-            D_80105C38[setIndex].unk18 = 0.0f;
-            D_80105C38[setIndex].unk1C = 0.0f;
-            D_80105C38[setIndex].unk24 = 0.0f;
-            D_80105C38[setIndex].unk20 = 0.0f;
-            D_80105C38[setIndex].hasThirdPlace = FALSE;
-            D_80105C38[setIndex].hasSecondPlace = FALSE;
-            D_80105C38[setIndex].hasFirstPlace = FALSE;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        entry = &saved[courseIndex];
+        D_80105C38[courseIndex].roundCount = entry->roundCount;
+        if (D_80105C38[courseIndex].roundCount == 0.0f) {
+            D_80105C38[courseIndex].unk4 = 0.0f;
+            D_80105C38[courseIndex].unk8 = 0.0f;
+            D_80105C38[courseIndex].unkC = 0.0f;
+            D_80105C38[courseIndex].unk10 = 0.0f;
+            D_80105C38[courseIndex].unk14 = 0.0f;
+            D_80105C38[courseIndex].unk18 = 0.0f;
+            D_80105C38[courseIndex].unk1C = 0.0f;
+            D_80105C38[courseIndex].unk24 = 0.0f;
+            D_80105C38[courseIndex].unk20 = 0.0f;
+            D_80105C38[courseIndex].hasThirdPlace = FALSE;
+            D_80105C38[courseIndex].hasSecondPlace = FALSE;
+            D_80105C38[courseIndex].hasFirstPlace = FALSE;
         } else {
             /* unk14 is left as it was */
             reciprocal = 1.0f / entry->roundCount;
-            D_80105C38[setIndex].unk4 = entry->unk4;
-            D_80105C38[setIndex].unk8 = entry->unk8 * reciprocal;
-            D_80105C38[setIndex].unkC = entry->unkC * UNK_SCALE;
-            D_80105C38[setIndex].unk10 = entry->unk10 * UNK_SCALE;
-            D_80105C38[setIndex].unk18 = entry->unk18 * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[setIndex].unk1C = entry->unk1C * reciprocal * (1.0f / HOLES_PER_ROUND);
-            D_80105C38[setIndex].unk20 = entry->unk20 * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[setIndex].unk24 = entry->unk24 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk4 = entry->unk4;
+            D_80105C38[courseIndex].unk8 = entry->unk8 * reciprocal;
+            D_80105C38[courseIndex].unkC = entry->unkC * UNK_SCALE;
+            D_80105C38[courseIndex].unk10 = entry->unk10 * UNK_SCALE;
+            D_80105C38[courseIndex].unk18 = entry->unk18 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk1C = entry->unk1C * reciprocal * (1.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk20 = entry->unk20 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk24 = entry->unk24 * reciprocal * (100.0f / HOLES_PER_ROUND);
             sum = entry->unk28 + entry->unk2C;
             if (sum <= 0) {
-                D_80105C38[setIndex].unk28 = 0.0f;
+                D_80105C38[courseIndex].unk28 = 0.0f;
             } else {
-                D_80105C38[setIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
+                D_80105C38[courseIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
             }
-            D_80105C38[setIndex].hasThirdPlace = entry->hasThirdPlace;
-            D_80105C38[setIndex].hasSecondPlace = entry->hasSecondPlace;
-            D_80105C38[setIndex].hasFirstPlace = entry->hasFirstPlace;
+            D_80105C38[courseIndex].hasThirdPlace = entry->hasThirdPlace;
+            D_80105C38[courseIndex].hasSecondPlace = entry->hasSecondPlace;
+            D_80105C38[courseIndex].hasFirstPlace = entry->hasFirstPlace;
         }
     }
 
-    setIndex = 0; /* Zeroed this early to match */
-    hasPlayedSet = FALSE;
-    D_80105C38[STATISTICS_SET_COUNT].roundCount = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk4 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk8 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unkC = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk10 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk18 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk1C = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk20 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk24 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk28 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].hasThirdPlace = FALSE;
-    D_80105C38[STATISTICS_SET_COUNT].hasSecondPlace = FALSE;
-    D_80105C38[STATISTICS_SET_COUNT].hasFirstPlace = FALSE;
-    D_80105C38[STATISTICS_SET_COUNT].unk4 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unkC = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[0].unk4;
-    D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[0].unkC;
-    zero = D_80105C38[STATISTICS_SET_COUNT].roundCount; /* Read back after being zeroed */
-    for (; setIndex != STATISTICS_SET_COUNT; setIndex++) {
-        if (zero < D_80105C38[setIndex].roundCount) {
-            if (!hasPlayedSet) {
-                D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[setIndex].unk4;
-                hasPlayedSet = TRUE;
-                D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[setIndex].unkC;
+    courseIndex = 0; /* Zeroed this early to match */
+    hasPlayedCourse = FALSE;
+    D_80105C38[COURSE_COUNT].roundCount = 0.0f;
+    D_80105C38[COURSE_COUNT].unk4 = 0.0f;
+    D_80105C38[COURSE_COUNT].unk8 = 0.0f;
+    D_80105C38[COURSE_COUNT].unkC = 0.0f;
+    D_80105C38[COURSE_COUNT].unk10 = 0.0f;
+    D_80105C38[COURSE_COUNT].unk18 = 0.0f;
+    D_80105C38[COURSE_COUNT].unk1C = 0.0f;
+    D_80105C38[COURSE_COUNT].unk20 = 0.0f;
+    D_80105C38[COURSE_COUNT].unk24 = 0.0f;
+    D_80105C38[COURSE_COUNT].unk28 = 0.0f;
+    D_80105C38[COURSE_COUNT].hasThirdPlace = FALSE;
+    D_80105C38[COURSE_COUNT].hasSecondPlace = FALSE;
+    D_80105C38[COURSE_COUNT].hasFirstPlace = FALSE;
+    D_80105C38[COURSE_COUNT].unk4 = 0.0f;
+    D_80105C38[COURSE_COUNT].unkC = 0.0f;
+    D_80105C38[COURSE_COUNT].unk4 = D_80105C38[0].unk4;
+    D_80105C38[COURSE_COUNT].unkC = D_80105C38[0].unkC;
+    zero = D_80105C38[COURSE_COUNT].roundCount; /* Read back after being zeroed */
+    for (; courseIndex != COURSE_COUNT; courseIndex++) {
+        if (zero < D_80105C38[courseIndex].roundCount) {
+            if (!hasPlayedCourse) {
+                D_80105C38[COURSE_COUNT].unk4 = D_80105C38[courseIndex].unk4;
+                hasPlayedCourse = TRUE;
+                D_80105C38[COURSE_COUNT].unkC = D_80105C38[courseIndex].unkC;
             }
-            if (D_80105C38[STATISTICS_SET_COUNT].unk4 > D_80105C38[setIndex].unk4) {
-                D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[setIndex].unk4;
+            if (D_80105C38[COURSE_COUNT].unk4 > D_80105C38[courseIndex].unk4) {
+                D_80105C38[COURSE_COUNT].unk4 = D_80105C38[courseIndex].unk4;
             }
-            if (D_80105C38[STATISTICS_SET_COUNT].unkC < D_80105C38[setIndex].unkC) {
-                D_80105C38[STATISTICS_SET_COUNT].unkC = D_80105C38[setIndex].unkC;
+            if (D_80105C38[COURSE_COUNT].unkC < D_80105C38[courseIndex].unkC) {
+                D_80105C38[COURSE_COUNT].unkC = D_80105C38[courseIndex].unkC;
             }
-            D_80105C38[STATISTICS_SET_COUNT].roundCount += D_80105C38[setIndex].roundCount;
+            D_80105C38[COURSE_COUNT].roundCount += D_80105C38[courseIndex].roundCount;
         }
     }
 
@@ -1531,9 +1531,9 @@ void ComputeRoundStatistics(void) {
     sum10 = 0.0f;
     sum8 = 0.0f;
     emptyCount = 0.0f;
-    for (setIndex = 0; setIndex != STATISTICS_SET_COUNT; setIndex++) {
-        entry = &saved[setIndex];
-        if (emptyCount < D_80105C38[setIndex].roundCount) {
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        entry = &saved[courseIndex];
+        if (emptyCount < D_80105C38[courseIndex].roundCount) {
             sum18 += entry->unk18;
             sum1C += entry->unk1C;
             sum20 += entry->unk20;
@@ -1545,22 +1545,22 @@ void ComputeRoundStatistics(void) {
             sum10 += entry->unk10 * UNK_SCALE * entry->unk14;
         }
     }
-    if (D_80105C38[STATISTICS_SET_COUNT].roundCount > 0.0f) {
+    if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {
         if (sum28And2C <= 0.0f) {
-            D_80105C38[STATISTICS_SET_COUNT].unk28 = 0.0f;
+            D_80105C38[COURSE_COUNT].unk28 = 0.0f;
         } else {
-            D_80105C38[STATISTICS_SET_COUNT].unk28 = (sum28 / sum28And2C) * 100.0f;
+            D_80105C38[COURSE_COUNT].unk28 = (sum28 / sum28And2C) * 100.0f;
         }
-        holeCount = D_80105C38[STATISTICS_SET_COUNT].roundCount * HOLES_PER_ROUND;
-        D_80105C38[STATISTICS_SET_COUNT].unk1C = sum1C / holeCount;
-        D_80105C38[STATISTICS_SET_COUNT].unk18 = (sum18 / holeCount) * 100.0f;
-        D_80105C38[STATISTICS_SET_COUNT].unk20 = (sum20 / holeCount) * 100.0f;
-        D_80105C38[STATISTICS_SET_COUNT].unk24 = (sum24 / holeCount) * 100.0f;
-        D_80105C38[STATISTICS_SET_COUNT].unk8 = sum8 / D_80105C38[STATISTICS_SET_COUNT].roundCount;
+        holeCount = D_80105C38[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
+        D_80105C38[COURSE_COUNT].unk1C = sum1C / holeCount;
+        D_80105C38[COURSE_COUNT].unk18 = (sum18 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].unk20 = (sum20 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].unk24 = (sum24 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].unk8 = sum8 / D_80105C38[COURSE_COUNT].roundCount;
         if (sum10 > 0.0f && sum14 > 0) {
-            D_80105C38[STATISTICS_SET_COUNT].unk10 = sum10 / sum14;
+            D_80105C38[COURSE_COUNT].unk10 = sum10 / sum14;
         } else {
-            D_80105C38[STATISTICS_SET_COUNT].unk10 = 0.0f;
+            D_80105C38[COURSE_COUNT].unk10 = 0.0f;
         }
     }
 }

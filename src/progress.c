@@ -23,8 +23,8 @@ typedef struct Unk801B7118 {
 } Unk801B7118; /* size = 0x6 */
 
 extern s8 D_801B60C5;
-extern s32 D_801B6094;
-extern s32 D_801B6098;
+extern s32 g_CourseIndex;
+extern s32 g_HoleIndex;
 extern s32 D_801B60B4;
 extern Unk801B7118 D_801B7118[TOURNAMENT_CONTESTANT_COUNT];
 
@@ -77,9 +77,9 @@ void AddBirdieBadge(void) {
 
     unk990 = &GetSaveData()->unk990;
     if (g_GameMode == GAME_MODE_TOURNAMENT) {
-        unk990->birdieBadgeCounts[D_801B6094][D_801B6098]++;
-        if (unk990->birdieBadgeCounts[D_801B6094][D_801B6098] > MAX_SAVED_COUNT) {
-            unk990->birdieBadgeCounts[D_801B6094][D_801B6098] = MAX_SAVED_COUNT;
+        unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex]++;
+        if (unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] > MAX_SAVED_COUNT) {
+            unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] = MAX_SAVED_COUNT;
         }
         TransferSaveData(GetSaveData(), TRUE);
     }
@@ -96,7 +96,7 @@ void ReportBirdieBadgeCount(void) {
     s32 holeIndex;
 
     unk990 = &GetSaveData()->unk990;
-    if (g_GameMode == GAME_MODE_TOURNAMENT && unk990->birdieBadgeCounts[D_801B6094][D_801B6098] == 0) {
+    if (g_GameMode == GAME_MODE_TOURNAMENT && unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] == 0) {
         badgeCount = 0;
         for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
             for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
@@ -117,7 +117,7 @@ void RecordTournamentPlace(void) {
     s32 index;
     Unk801B7118 *entry;
 
-    stats = &GetSaveData()->unkE98[D_801B6094];
+    stats = &GetSaveData()->unkE98[g_CourseIndex];
     hasPlace = FALSE;
     if (g_GameMode == GAME_MODE_TOURNAMENT) {
         func_800680FC(func_80052220() + 1, 0, func_8006CD50(func_80052220() + 1, 0), D_801B60B4);
