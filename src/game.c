@@ -15,6 +15,7 @@
 #include <lib/libnusys/nusys.h>
 #include "overlay_manager.h"
 #include "performance_meter.h"
+#include "pin.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -276,7 +277,7 @@ void StartGame(void) {
     ClearDebugText();
     func_80071370();
     func_80081284();
-    func_8003E400();
+    LoadPinTextures();
 
 }
 
@@ -915,7 +916,6 @@ void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
-void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 s32 func_80042720(void);
 void func_800427E8(void);
 void func_8005029C(void);
@@ -1542,7 +1542,7 @@ s32 DrawGame(void) {
                         func_8007B994(matrices, &g_DisplayListHead);
                     } else {
                         if (!IsGameFlagSet(0x17)) {
-                            func_8003E6C0(matrices, &camera->view, viewIndex);
+                            DrawPin(matrices, &camera->view, viewIndex);
                         }
                         if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                             DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
@@ -1627,7 +1627,7 @@ s32 DrawGame(void) {
                 func_80062A8C(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
                 if (!IsGameFlagSet(0x17)) {
-                    func_8003E6C0(matrices, &camera->view, viewIndex);
+                    DrawPin(matrices, &camera->view, viewIndex);
                 }
                 DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                 gDPPipeSync(g_DisplayListHead++);
@@ -1638,7 +1638,7 @@ s32 DrawGame(void) {
                 func_80062A8C(matrices, terrainStyle);
             }
             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
-            func_8003E6C0(matrices, &g_MapCamera.view, viewIndex);
+            DrawPin(matrices, &g_MapCamera.view, viewIndex);
             if (drawMode != DRAW_MODE_MAP_MINIATURE && drawMode != DRAW_MODE_MAP_TOP_DOWN) {
                 DrawBillboards(matrices, viewIndex);
             }

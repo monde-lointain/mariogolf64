@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "club.h"
+#include "variables.h"
 
 /* Marks save data that has been written at least once */
 #define SAVE_MAGIC 0x12345678
@@ -95,7 +96,10 @@ typedef struct GameState {
 typedef struct Unk800BA9D8 {
     /* 0x00 */ CoursePoint cupPosition;
     /* 0x0C */ CoursePoint unkC;
-    /* 0x18 */ s32 unk18[(0x34 - 0x18) / 4];
+    /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
+    /* 0x2C */ s8 par;                     /* g_HolePar */
+    /* 0x2D */ s8 nextCupIndex;            /* sNextCupIndex */
+    /* 0x2E */ u8 unk2E[0x34 - 0x2E];
 } Unk800BA9D8; /* size = 0x34 */
 
 extern Unk800BA9D8 D_800BA9D8;

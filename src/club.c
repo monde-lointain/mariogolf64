@@ -9,6 +9,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "pin.h"
 #include "save.h"
 #include "sound.h"
 #include "surface.h"
@@ -105,7 +106,6 @@ extern Unk20 sPutterTestShot;
 extern s32 sClubChoiceDelay;
 extern s8 g_ShowsBillboardsAtEdge;
 
-s32 func_8003DFD0(s32 x, s32 z);
 s32 func_8021EA48(void);
 
 /*
@@ -1097,7 +1097,7 @@ void HandleClubInput(void) {
 #ifdef NON_MATCHING
 void HandleShotModeInput(void) {
     Club *club = GetSelectedClub();
-    s32 cupDistance = func_8003DFD0(g_CurrentShot.ballPosition[0] - D_800BA9D8.cupPosition[0],
+    s32 cupDistance = GetCupDistance(g_CurrentShot.ballPosition[0] - D_800BA9D8.cupPosition[0],
                                     g_CurrentShot.ballPosition[2] - D_800BA9D8.cupPosition[2]) *
                       YARDS_PER_UNIT;
     s32 sound;

@@ -124,6 +124,5 @@ void func_801F7148(void);
 
 void func_80071370(void);
 void func_80081284(void);
-void func_8003E400(void);
 
 #endif
