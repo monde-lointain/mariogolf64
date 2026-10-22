@@ -1,6 +1,7 @@
 #include "common.h"
 #include "sound.h"
 #include "controller.h"
+#include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "save.h"
@@ -320,7 +321,7 @@ static void UpdateCharacterSounds(void) {
         PreviewCharacterSound((sDelayEditorCharacter + 2) % CHARACTER_COUNT, sDelayEditorKind);
         PreviewCharacterSound((sDelayEditorCharacter + 3) % CHARACTER_COUNT, sDelayEditorKind);
     }
-    func_8004DA24(" ", DELAY_EDITOR_COLUMN, sDelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
+    PrintDebugText(" ", DELAY_EDITOR_COLUMN, sDelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
     if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & U_JPAD) && sDelayEditorCharacter > 0) {
         sDelayEditorCharacter--;
     }
@@ -339,12 +340,12 @@ static void UpdateCharacterSounds(void) {
         }
     }
     sprintf(g_PrintBuffer, "NO %3d ", sDelayEditorKind);
-    func_8004DA24(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
+    PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
     for (index = 0; index != CHARACTER_COUNT; index++) {
         sprintf(g_PrintBuffer, "%3d ", sCharacterSoundDelays[sDelayEditorKind][index]);
-        func_8004DA24(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, index + DELAY_EDITOR_FIRST_ROW);
+        PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, index + DELAY_EDITOR_FIRST_ROW);
     }
-    func_8004DA24(">", DELAY_EDITOR_COLUMN, sDelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
+    PrintDebugText(">", DELAY_EDITOR_COLUMN, sDelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
 }
 
 void SetSoundFrequencyOffset(s32 channel, f32 offset) {

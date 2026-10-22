@@ -27,6 +27,9 @@
 /* Makes every character selectable */
 #define GAME_FLAG_ALL_CHARACTERS 0x54
 
+/* Stops the debug text grid from being drawn */
+#define GAME_FLAG_HIDE_DEBUG_TEXT 0x1D
+
 /* Set when a saved game is continued, among other places */
 #define GAME_FLAG_UNK1E 0x1E
 

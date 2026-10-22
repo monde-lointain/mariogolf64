@@ -2,6 +2,7 @@
 #include "billboard.h"
 #include "controller.h"
 #include "cpu_projection.h"
+#include "debug_text.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "main.h"
@@ -266,7 +267,7 @@ void StartGame(void) {
     g_Cameras[1].view.drawFlags = 0;
     g_Cameras[1].view.fieldOfView = 60.0f;
     osViSetSpecialFeatures(VI_FEATURES);
-    func_8004D794();
+    ClearDebugText();
     func_80071370();
     func_80081284();
     func_8003E400();
@@ -913,9 +914,6 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
 s32 func_80042720(void);
 void func_800427E8(void);
-void func_8004D7B8(Gfx **displayListHead);
-void func_8004DA9C(s32 number, s32 column, s32 row);
-void func_8004DC44(void);
 void func_8004E924(s32, s32, u32, u32, s32, s32);
 void func_8004FDB4(s32, s32);
 void func_8005029C(void);
@@ -1036,12 +1034,12 @@ s32 DrawGame(void) {
 
     sDrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
     if (IsGameFlagSet(0x28)) {
-        func_8004DA9C(_mus_cpu_last, 20, 10);
-        func_8004DA9C(_mus_cpu_worst, 20, 11);
+        PrintDebugPaddedHex(_mus_cpu_last, 20, 10);
+        PrintDebugPaddedHex(_mus_cpu_worst, 20, 11);
         MusPrintDmaUsage();
     }
     if (IsGameFlagSet(0x29)) {
-        func_8004DA9C(__MusIntMemRemaining(), 20, 10);
+        PrintDebugPaddedHex(__MusIntMemRemaining(), 20, 10);
         trigger = &g_ControllerData[1].trigger;
         if (*trigger & B_BUTTON) {
             RequestSongStop();
@@ -1801,14 +1799,14 @@ s32 DrawGame(void) {
         func_801F7554(&g_DisplayListHead);
     }
     if (IsGameFlagSet(1)) {
-        func_8004DA24(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
+        PrintDebugText(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
         sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
-        func_8004DA24(g_PrintBuffer, 3, 5);
+        PrintDebugText(g_PrintBuffer, 3, 5);
     }
     if (IsGameFlagSet(0x39)) {
-        func_8004DC44();
+        ShowDebugLog();
     }
-    func_8004D7B8(&g_DisplayListHead);
+    DrawDebugText(&g_DisplayListHead);
     if (IsGameFlagSet(0x1B) && (g_ControllerData[1].trigger & Z_TRIG)) {
         if (IsGameFlagSet(0x1D)) {
             ClearGameFlag(0x1D);
@@ -2070,15 +2068,15 @@ void UpdateGame(void) {
         func_801F4C78();
         if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
             sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[0]);
-            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
+            PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
             sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[1]);
-            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 1);
+            PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 1);
             sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[2]);
-            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 2);
-            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW);
-            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);
-            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 2);
-            func_8004DA24(">", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + sDebugMenuValueIndex);
+            PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 2);
+            PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW);
+            PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);
+            PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 2);
+            PrintDebugText(">", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + sDebugMenuValueIndex);
             if ((g_ControllerStates[0].repeatedButtons & U_CBUTTONS) && sDebugMenuValueIndex > 0) {
                 sDebugMenuValueIndex--;
             }

@@ -87,7 +87,6 @@ s32 GetGroundHeight(s32 x, s32 z);
 void BuildDynamicTextures(Gfx **displayListHead);
 
 void func_8004CDA0(void);
-void func_8004DA24(char *text, s32 column, s32 row);
 void func_8007B054(void);
 void func_800605EC(void);
 
@@ -100,7 +99,6 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void func_801F7148(void);
 
-void func_8004D794(void);
 void func_80071370(void);
 void func_80081284(void);
 void func_8003E400(void);

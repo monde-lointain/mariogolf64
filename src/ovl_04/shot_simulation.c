@@ -1,5 +1,6 @@
 #include "common.h"
 #include "billboard.h"
+#include "debug_text.h"
 #include "functions.h"
 #include "save.h"
 #include "surface.h"
@@ -85,7 +86,6 @@ s32 func_8003327C(BallSimulation *simulation);
 Unk800448E0 *func_80037E50(Unk800448E0 *, s32, s32, s32);
 void func_80037F94(BallSimulation *simulation, s32, Unk20 *shot);
 Unk800448E0 *func_800448E0(s32);
-void func_8004D99C(s32);
 
 /* Simulates the shot from the ball's position and records its path */
 void SimulateShot(Unk20 *shot) {
@@ -173,8 +173,8 @@ void SimulateShot(Unk20 *shot) {
         }
         step++;
         if (step >= MAX_STEP_COUNT) {
-            func_8004D99C(1);
-            func_8004DA24("Sim Fault!", 10, 12);
+            SetDebugTextHighlight(1);
+            PrintDebugText("Sim Fault!", 10, 12);
             break;
         }
     }

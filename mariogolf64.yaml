@@ -86,7 +86,7 @@ segments:
       - [0x1B4A0, asm]
       - [0x1EEF0, asm]
       - [0x207E0, asm]
-      - [0x28590, asm]
+      - [0x28590, c, debug_text]
       - [0x29170, c, heap]
       - [0x299A0, asm]
       - [0x2B4E0, c, animated_box]
