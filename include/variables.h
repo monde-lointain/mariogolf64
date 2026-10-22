@@ -28,4 +28,10 @@ extern u16 *g_DepthBuffer;
 extern u16 *nuGfxCfb_ptr;
 extern u16 *nuGfxZBuffer;
 
+/* Which of two sets of per-frame matrices and vertices the frame builds */
+extern s32 g_DrawBufferIndex;
+
+/* A 45-degree perspective projection for the screen effects */
+extern Mtx g_ScreenEffectProjection;
+
 #endif

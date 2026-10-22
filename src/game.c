@@ -27,6 +27,15 @@ extern s32 sInsetViewHeight;
 void DrawSpinEffect(Gfx **displayListHead, CameraView *view);
 void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view);
 
+/*
+ * The spin effect's mesh and its rotation, one per draw buffer. Each draw
+ * buffer's vertices start one vertex after the other's, so most are shared,
+ * and sSpinVertices runs on over sSpinMatrices, so a frame's vertex updates
+ * overwrite parts of the matrices.
+ */
+extern Vtx sSpinVertices[];
+extern Mtx sSpinMatrices[];
+
 extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
@@ -48,6 +57,17 @@ extern s32 sHasUnloadedSubModule;
 #define SAVED_FRAME_STRIP_HEIGHT 6
 #define SAVED_FRAME_STRIP_COUNT 38
 #define SAVED_FRAME_LAST_STRIP_HEIGHT 2
+
+/*
+ * The spin effect's mesh holds two vertices per row, loaded in batches of
+ * up to SPIN_BATCH_VERTEX_COUNT
+ */
+#define SPIN_BATCH_COUNT 3
+#define SPIN_BATCH_VERTEX_COUNT 32
+#define SPIN_LAST_BATCH_VERTEX_COUNT 18
+#define SPIN_LAST_BATCH_STRIP_COUNT 8
+#define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
+    (((batchIndex) == SPIN_BATCH_COUNT - 1) & ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))
 
 /* sScreenEffect values */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
@@ -226,7 +246,68 @@ void DrawTiledImageEffect(Gfx **displayListHead, CameraView *view) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002ADD4);
+/*
+ * Draws the frame saved in the depth buffer on the spin effect's mesh: one
+ * strip of the frame between each pair of rows of vertices
+ */
+void DrawSpinMesh(Gfx **displayListHead) {
+    s32 isTileSetUp = FALSE;
+    Gfx *gfx = *displayListHead;
+    s32 texelPairOffset = SCREEN_BORDER * SCREEN_WIDTH / 2;
+    s32 batchIndex;
+    s32 stripIndex;
+    s32 stripHeight;
+    u8 isLastStrip;
+
+    gSPMatrix(gfx++, &g_ScreenEffectProjection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, &sSpinMatrices[g_DrawBufferIndex], G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+    for (batchIndex = 0; batchIndex != SPIN_BATCH_COUNT; batchIndex++) {
+        if (batchIndex == SPIN_BATCH_COUNT - 1) {
+            gSPVertex(gfx++, &sSpinVertices[g_DrawBufferIndex] + batchIndex * SPIN_BATCH_VERTEX_COUNT,
+                      SPIN_LAST_BATCH_VERTEX_COUNT, 0);
+        } else {
+            gSPVertex(gfx++, &sSpinVertices[g_DrawBufferIndex] + batchIndex * SPIN_BATCH_VERTEX_COUNT,
+                      SPIN_BATCH_VERTEX_COUNT, 0);
+        }
+        for (stripIndex = 0; stripIndex != SPIN_BATCH_VERTEX_COUNT / 2 - 1; stripIndex++) {
+            isLastStrip = IS_LAST_SPIN_STRIP(batchIndex, stripIndex);
+            stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT : SAVED_FRAME_STRIP_HEIGHT;
+            if (!isTileSetUp) {
+                gDPLoadTextureBlock(gfx++, (u32)((u32 *)g_DepthBuffer + texelPairOffset) & ~7, G_IM_FMT_RGBA,
+                                    G_IM_SIZ_16b, SCREEN_WIDTH, stripHeight, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                isTileSetUp = TRUE;
+            } else {
+                gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
+                                   (u32)((u32 *)g_DepthBuffer + texelPairOffset) & ~7);
+                gDPLoadSync(gfx++);
+                gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, SCREEN_WIDTH * stripHeight - 1,
+                             CALC_DXT(SCREEN_WIDTH, G_IM_SIZ_16b_BYTES));
+                gDPPipeSync(gfx++);
+            }
+            gDPLoadTextureTile(gfx++, (u32)((u32 *)g_DepthBuffer + texelPairOffset) & ~7, G_IM_FMT_RGBA,
+                               G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER, 0, SCREEN_WIDTH - SCREEN_BORDER - 1,
+                               stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            /* The original tests again here; the build depends on it */
+            isLastStrip = IS_LAST_SPIN_STRIP(batchIndex, stripIndex);
+            stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT : SAVED_FRAME_STRIP_HEIGHT;
+            gSPModifyVertex(gfx++, stripIndex * 2, G_MWO_POINT_ST, SCREEN_BORDER << 21);
+            gSPModifyVertex(gfx++, stripIndex * 2 + 1, G_MWO_POINT_ST, (SCREEN_WIDTH - SCREEN_BORDER) << 21);
+            gSPModifyVertex(gfx++, stripIndex * 2 + 2, G_MWO_POINT_ST, (SCREEN_BORDER << 21) + (stripHeight << 5));
+            gSPModifyVertex(gfx++, stripIndex * 2 + 3, G_MWO_POINT_ST,
+                            ((SCREEN_WIDTH - SCREEN_BORDER) << 21) + (stripHeight << 5));
+            gSP2Triangles(gfx++, stripIndex * 2, stripIndex * 2 + 2, stripIndex * 2 + 1, 0, stripIndex * 2 + 1,
+                          stripIndex * 2 + 2, stripIndex * 2 + 3, 0);
+            gDPPipeSync(gfx++);
+            if (isLastStrip) {
+                break;
+            }
+            texelPairOffset += SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH / 2;
+        }
+    }
+    *displayListHead = gfx;
+}
 
 /*
  * Copies the frame kept in sSavedFrameBuffer to the screen, through the
