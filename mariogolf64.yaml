@@ -571,7 +571,8 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1508D0, asm]
+      - [0x1508D0, hasm, ovl_08/padding]
+      - [0x1508E0, c, ovl_08/confirm_wait]
       - { start: 0x150990, type: bss, vram: 0x801F4AF0 }
 
   - name: ovl_09
