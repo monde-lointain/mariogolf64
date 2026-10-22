@@ -12,5 +12,7 @@ s32 strcmp(const char *left, const char *right);
 s32 rand(void);
 void srand(u32 seed);
 double fabs(double value);
+double atan(double value);
+double atan2(double y, double x);
 
 #endif

@@ -14,12 +14,14 @@
 typedef struct CameraView {
     /* 0x00 */ f32 eye[3];
     /* 0x0C */ f32 lookAt[3];
-    /* 0x18 */ s32 unreadValue;
+    /* 0x18 */ f32 heading; /* In radians; the map camera turns by it */
     /* 0x1C */ s32 scissorX;
     /* 0x20 */ s32 scissorY;
     /* 0x24 */ s32 scissorWidth;
     /* 0x28 */ s32 scissorHeight;
-    /* 0x2C */ s32 unreadSettings[4]; /* Set by StartGame, never read */
+    /* 0x2C */ s32 unreadSettings[2]; /* Set by StartGame, never read */
+    /* 0x34 */ s32 viewportCenterX;   /* In half pixels */
+    /* 0x38 */ s32 viewportCenterY;
     /* 0x3C */ f32 zoom;
     /* 0x40 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
     /* 0x44 */ f32 fieldOfView; /* In degrees */

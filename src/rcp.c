@@ -12,12 +12,6 @@
 /* The farthest depth the 14-bit depth buffer holds */
 #define MAX_DEPTH 0x3FFF
 
-/*
- * Two full-screen viewports, one per draw buffer, then one for each
- * quarter of the screen
- */
-extern Vp sViewports[];
-
 /* Set up the RDP and the RSP for a frame */
 extern Gfx sRdpInitList[];
 extern Gfx sRspInitList[];
@@ -30,8 +24,8 @@ void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gSPSegment(gfx++, 0, 0);
-    gSPViewport(gfx++, &sViewports[viewportIndex]);
-    SetCpuProjection(NULL, NULL, &sViewports[viewportIndex]);
+    gSPViewport(gfx++, &g_Viewports[viewportIndex]);
+    SetCpuProjection(NULL, NULL, &g_Viewports[viewportIndex]);
     gSPDisplayList(gfx++, sRdpInitList);
     gSPDisplayList(gfx++, sRspInitList);
     gDPPipeSync(gfx++);

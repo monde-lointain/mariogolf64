@@ -82,6 +82,26 @@ void ClearBuffers(s32 clearMode);
  */
 void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
 
+/*
+ * Returns the height of the ground under a point. Coordinates are in
+ * 1/1024ths of a unit.
+ */
+s32 GetGroundHeight(s32 x, s32 z);
+
+void func_8004CDA0(void);
+void func_8004DA24(char *text, s32 column, s32 row);
+void func_8007B054(void);
+void func_800605EC(void);
+
+/* Scene modules' update routines, in overlays */
+void func_801F4A40(void);
+void func_801F4C78(void);
+void func_801F4D74(void);
+void func_801F4DA0(void);
+void func_801F5F1C(void);
+void func_801F6788(void);
+void func_801F7148(void);
+
 void BuildTransformMatrix(f32 matrix[4][4], f32 *rotation, f32 *translation, f32 *scale);
 void ConvertMatrixToFixed(f32 matrix[4][4], Mtx *fixedMatrix);
 void func_80050DA0(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);

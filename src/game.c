@@ -1,4 +1,7 @@
 #include "common.h"
+#include "controller.h"
+#include "debug_flags.h"
+#include "libc.h"
 #include "camera.h"
 #include "functions.h"
 #include <lib/libnusys/nusys.h>
@@ -46,6 +49,16 @@ extern u16 *sPreviousFrame;
 /* When the last graphics task started, in microseconds */
 extern u32 sGfxTaskStartTime;
 
+/* When UpdateGame last started and finished, in microseconds */
+extern u32 sUpdateStartTime;
+extern u32 sUpdateEndTime;
+
+/* Values a debug menu edits; nothing reads them */
+#define DEBUG_MENU_VALUE_COUNT 3
+#define DEBUG_MENU_VALUE_MAX 128
+extern s32 sDebugMenuValues[DEBUG_MENU_VALUE_COUNT];
+extern s32 sDebugMenuValueIndex;
+
 extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
@@ -89,6 +102,46 @@ extern s32 sHasUnloadedSubModule;
 
 #define RESET_FADE_ALPHA 0x40
 
+/* The scenes are still known only by number */
+
+/*
+ * In scene 2, the C buttons move the map camera, the stick turns and raises
+ * it, and it looks ahead along the ground
+ */
+#define MAP_CAMERA_STEP 10.0f
+#define MAP_CAMERA_HEIGHT 120.0f
+#define MAP_CAMERA_LIFT_PER_STICK 32
+#define MAP_CAMERA_TURN_PER_STICK 1024.0
+#define MAP_CAMERA_LOOK_DISTANCE 1000.0f
+
+/* GetGroundHeight's units per world unit */
+#define GROUND_UNITS_PER_UNIT 1024
+
+/* g_WindDirection's units per radian */
+#define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
+
+/*
+ * The wind's direction as seen from a camera: the arrow turns with the
+ * camera's direction of view
+ */
+#define VIEWED_WIND_ANGLE(windDirection, view)            \
+    ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
+     atan2((view)->eye[2] - (view)->lookAt[2], (view)->eye[0] - (view)->lookAt[0]))
+
+/*
+ * Scene 14 opens a larger, square inset view, in more steps and without
+ * sounds. Each step adds this many pixels to its sides.
+ */
+#define LARGE_INSET_VIEW_STEP_COUNT 32
+#define LARGE_INSET_VIEW_GROWTH_PER_STEP 4
+#define LARGE_INSET_VIEW_CENTER_X 160
+#define LARGE_INSET_VIEW_CENTER_Y 140
+
+/* Where the debug menu draws its values, in text cells */
+#define DEBUG_MENU_COLUMN 34
+#define DEBUG_MENU_CURSOR_COLUMN 33
+#define DEBUG_MENU_ROW 3
+
 /* sScreenEffect values */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
 #define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */
@@ -120,15 +173,15 @@ void StartGame(void) {
     g_MapCamera.view.lookAt[0] = 0.0f;
     g_MapCamera.view.lookAt[1] = 0.0f;
     g_MapCamera.view.lookAt[2] = 1.0f;
-    g_MapCamera.view.unreadValue = 0;
+    g_MapCamera.view.heading = 0.0f;
     g_MapCamera.view.scissorX = SCREEN_BORDER;
     g_MapCamera.view.scissorY = SCREEN_BORDER;
     g_MapCamera.view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
     g_MapCamera.view.scissorHeight = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
     g_MapCamera.view.unreadSettings[0] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
     g_MapCamera.view.unreadSettings[1] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-    g_MapCamera.view.unreadSettings[2] = SCREEN_WIDTH;
-    g_MapCamera.view.unreadSettings[3] = SCREEN_HEIGHT;
+    g_MapCamera.view.viewportCenterX = SCREEN_WIDTH;
+    g_MapCamera.view.viewportCenterY = SCREEN_HEIGHT;
     g_MapCamera.view.zoom = 1.0f;
     g_SpareCamera.view.eye[0] = 0.0f;
     g_SpareCamera.view.eye[1] = 0.0f;
@@ -136,15 +189,15 @@ void StartGame(void) {
     g_SpareCamera.view.lookAt[0] = 0.0f;
     g_SpareCamera.view.lookAt[1] = 0.0f;
     g_SpareCamera.view.lookAt[2] = 1.0f;
-    g_SpareCamera.view.unreadValue = 0;
+    g_SpareCamera.view.heading = 0.0f;
     g_SpareCamera.view.scissorX = 128;
     g_SpareCamera.view.scissorY = 64;
     g_SpareCamera.view.scissorWidth = 160;
     g_SpareCamera.view.scissorHeight = 120;
     g_SpareCamera.view.unreadSettings[0] = 0;
     g_SpareCamera.view.unreadSettings[1] = 30;
-    g_SpareCamera.view.unreadSettings[2] = 416;
-    g_SpareCamera.view.unreadSettings[3] = 248;
+    g_SpareCamera.view.viewportCenterX = 416;
+    g_SpareCamera.view.viewportCenterY = 248;
     g_SpareCamera.view.zoom = 0.5f;
     g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
     g_Cameras[0].view.eye[0] = 0.0f;
@@ -160,8 +213,8 @@ void StartGame(void) {
     g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
     g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
     g_Cameras[0].view.zoom = 1.0f;
-    g_Cameras[0].view.unreadSettings[2] = SCREEN_WIDTH;
-    g_Cameras[0].view.unreadSettings[3] = SCREEN_HEIGHT;
+    g_Cameras[0].view.viewportCenterX = SCREEN_WIDTH;
+    g_Cameras[0].view.viewportCenterY = SCREEN_HEIGHT;
     g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
     g_Cameras[0].view.fieldOfView = 45.0f;
     g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
@@ -178,8 +231,8 @@ void StartGame(void) {
     g_Cameras[1].view.unreadSettings[0] = 0;
     g_Cameras[1].view.unreadSettings[1] = 0;
     g_Cameras[1].view.zoom = 0.9f;
-    g_Cameras[1].view.unreadSettings[2] = 256;
-    g_Cameras[1].view.unreadSettings[3] = 256;
+    g_Cameras[1].view.viewportCenterX = 256;
+    g_Cameras[1].view.viewportCenterY = 256;
     g_Cameras[1].view.drawFlags = 0;
     g_Cameras[1].view.fieldOfView = 60.0f;
     osViSetSpecialFeatures(VI_FEATURES);
@@ -590,7 +643,167 @@ void DrawResetFade(void) {
     g_DrawBufferIndex ^= 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", UpdateGame);
+/*
+ * Runs the parts of a frame's update that depend on the scene, then fits
+ * the inset view's viewport to its window
+ */
+void UpdateGame(void) {
+    s32 *animation;
+    u16 *windDirection;
+
+    sUpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
+    if (g_Scene == 2) {
+        if (g_ControllerData[0].button & U_CBUTTONS) {
+            g_MapCamera.view.eye[2] += MAP_CAMERA_STEP;
+        }
+        if (g_ControllerData[0].button & D_CBUTTONS) {
+            g_MapCamera.view.eye[2] -= MAP_CAMERA_STEP;
+        }
+        if (g_ControllerData[0].button & L_CBUTTONS) {
+            g_MapCamera.view.eye[0] -= MAP_CAMERA_STEP;
+        }
+        if (g_ControllerData[0].button & R_CBUTTONS) {
+            g_MapCamera.view.eye[0] += MAP_CAMERA_STEP;
+        }
+        g_MapCamera.view.heading -= g_ControllerData[0].stick_x / MAP_CAMERA_TURN_PER_STICK;
+        g_MapCamera.view.eye[1] =
+            (f32)(-g_ControllerData[0].stick_y * MAP_CAMERA_LIFT_PER_STICK) - MAP_CAMERA_HEIGHT +
+            (f32)GetGroundHeight(g_MapCamera.view.eye[0] * GROUND_UNITS_PER_UNIT,
+                                 g_MapCamera.view.eye[2] * GROUND_UNITS_PER_UNIT) / GROUND_UNITS_PER_UNIT;
+        g_MapCamera.view.lookAt[0] = g_MapCamera.view.eye[0] + cosf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
+        g_MapCamera.view.lookAt[1] = 0.0f;
+        g_MapCamera.view.lookAt[2] = g_MapCamera.view.eye[2] + sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
+    }
+    if (g_Scene == 19) {
+        func_8004CDA0();
+        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_WindDirection, &g_Cameras[0].view);
+        if (g_ViewedWindAngles[0] > 2 * M_PI) {
+            g_ViewedWindAngles[0] -= 2 * M_PI;
+        }
+        if (g_ViewedWindAngles[0] < 0.0f) {
+            g_ViewedWindAngles[0] += 2 * M_PI;
+        }
+        func_801F6788();
+        func_8007B054();
+    } else if (g_Scene == 7 || g_Scene == 12 || g_Scene == 13) {
+        if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+            func_8004CDA0();
+        }
+        if (IsDebugFlagSet(DEBUG_FLAG_INSET_VIEW_BUTTONS)) {
+            if ((g_ControllerStates[1].pressedButtons & L_JPAD) && g_InsetViewStep < INSET_VIEW_STEP_COUNT) {
+                g_InsetViewAnimation = INSET_VIEW_OPENING;
+            }
+            if ((g_ControllerStates[1].pressedButtons & R_JPAD) && g_InsetViewStep > 0) {
+                g_InsetViewAnimation = INSET_VIEW_CLOSING;
+            }
+            if ((g_ControllerStates[3].pressedButtons & L_JPAD) && g_InsetViewStep < INSET_VIEW_STEP_COUNT) {
+                g_InsetViewAnimation = INSET_VIEW_OPENING;
+            }
+            if ((g_ControllerStates[3].pressedButtons & R_JPAD) && g_InsetViewStep > 0) {
+                g_InsetViewAnimation = INSET_VIEW_CLOSING;
+            }
+        }
+        UpdateInsetView();
+        func_8007B054();
+        func_800605EC();
+        windDirection = &g_WindDirection;
+        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
+        g_ViewedWindAngles[1] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
+        if (g_ViewedWindAngles[0] > 2 * M_PI) {
+            g_ViewedWindAngles[0] -= 2 * M_PI;
+        }
+        if (g_ViewedWindAngles[0] < 0.0f) {
+            g_ViewedWindAngles[0] += 2 * M_PI;
+        }
+        if (g_ViewedWindAngles[1] > 2 * M_PI) {
+            g_ViewedWindAngles[1] -= 2 * M_PI;
+        }
+        if (g_ViewedWindAngles[1] < 0.0f) {
+            g_ViewedWindAngles[1] += 2 * M_PI;
+        }
+    } else if (g_Scene == 14) {
+        func_8004CDA0();
+        animation = &g_InsetViewAnimation;
+        if (*animation == INSET_VIEW_OPENING) {
+            g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
+            g_InsetViewStep++;
+            if (g_InsetViewStep >= LARGE_INSET_VIEW_STEP_COUNT) {
+                g_InsetViewStep = LARGE_INSET_VIEW_STEP_COUNT;
+                *animation = INSET_VIEW_STILL;
+            }
+        } else if (*animation == INSET_VIEW_CLOSING) {
+            g_InsetViewStep--;
+            if (g_InsetViewStep <= 0) {
+                g_InsetViewStep = 0;
+                *animation = INSET_VIEW_STILL;
+                g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+            }
+        }
+        g_Cameras[INSET_CAMERA].view.scissorWidth = g_InsetViewStep * LARGE_INSET_VIEW_GROWTH_PER_STEP;
+        g_Cameras[INSET_CAMERA].view.scissorHeight = g_InsetViewStep * LARGE_INSET_VIEW_GROWTH_PER_STEP;
+        g_Cameras[INSET_CAMERA].view.scissorX =
+            LARGE_INSET_VIEW_CENTER_X - g_InsetViewStep * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+        g_Cameras[INSET_CAMERA].view.scissorY =
+            LARGE_INSET_VIEW_CENTER_Y - g_InsetViewStep * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+        g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
+        func_801F4C78();
+        if (IsDebugFlagSet(DEBUG_FLAG_DEBUG_MENU_VALUES)) {
+            sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[0]);
+            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
+            sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[1]);
+            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 1);
+            sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[2]);
+            func_8004DA24(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 2);
+            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW);
+            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);
+            func_8004DA24(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 2);
+            func_8004DA24(">", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + sDebugMenuValueIndex);
+            if ((g_ControllerStates[0].repeatedButtons & U_CBUTTONS) && sDebugMenuValueIndex > 0) {
+                sDebugMenuValueIndex--;
+            }
+            if ((g_ControllerStates[0].repeatedButtons & D_CBUTTONS) &&
+                sDebugMenuValueIndex < DEBUG_MENU_VALUE_COUNT - 1) {
+                sDebugMenuValueIndex++;
+            }
+            if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
+                if (sDebugMenuValues[sDebugMenuValueIndex] > 0) {
+                    sDebugMenuValues[sDebugMenuValueIndex]--;
+                }
+            }
+            if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
+                if (sDebugMenuValues[sDebugMenuValueIndex] < DEBUG_MENU_VALUE_MAX) {
+                    sDebugMenuValues[sDebugMenuValueIndex]++;
+                }
+            }
+        }
+    } else if (g_Scene == 2) {
+        g_Cameras[INSET_CAMERA].view.scissorX = SCREEN_WIDTH / 2;
+        g_Cameras[INSET_CAMERA].view.scissorY = SCREEN_HEIGHT / 2;
+        g_Cameras[INSET_CAMERA].view.scissorWidth = SCREEN_WIDTH / 2;
+        g_Cameras[INSET_CAMERA].view.scissorHeight = SCREEN_HEIGHT / 2;
+    } else if (g_Scene == 27) {
+        func_801F4DA0();
+    } else if (g_Scene == 26) {
+        func_801F4A40();
+    } else if (g_Scene == 21) {
+        func_801F4D74();
+    } else if (g_Scene == 30) {
+        func_801F7148();
+    } else if (g_Scene == 29) {
+        func_801F5F1C();
+    }
+    g_Cameras[INSET_CAMERA].view.viewportCenterX =
+        g_Cameras[INSET_CAMERA].view.scissorX * 2 + g_Cameras[INSET_CAMERA].view.scissorWidth;
+    g_Cameras[INSET_CAMERA].view.viewportCenterY =
+        g_Cameras[INSET_CAMERA].view.scissorY * 2 + g_Cameras[INSET_CAMERA].view.scissorHeight;
+    g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vscale[0] =
+        2.0f * (g_Cameras[INSET_CAMERA].view.zoom * SCREEN_WIDTH);
+    g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vscale[1] =
+        2.0f * (g_Cameras[INSET_CAMERA].view.zoom * SCREEN_HEIGHT);
+    g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vtrans[0] = g_Cameras[INSET_CAMERA].view.viewportCenterX * 2;
+    g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vtrans[1] = g_Cameras[INSET_CAMERA].view.viewportCenterY * 2;
+    sUpdateEndTime = OS_CYCLES_TO_USEC(osGetTime());
+}
 
 void UpdateOverlays(void) {
     if (g_Scene == SCENE_SWAPPING_MODULES) {
