@@ -12,6 +12,7 @@
 #include "segment_symbols.h"
 #include "sound.h"
 #include "variables.h"
+#include "work_area.h"
 
 /* The audio interface's sample rate, in Hz */
 #define AUDIO_FREQUENCY 32000
@@ -172,9 +173,9 @@ void RunHeartbeatLoop(void) {
 void AssignCharacterBuffers(void) {
     s32 bufferSize = GetCharacterBufferSize();
 
-    SetCharacterBuffer(CHARACTER_SLOT_PARTNER, g_WorkArea);
-    SetCharacterBuffer(CHARACTER_SLOT_GOLFER, g_WorkArea + bufferSize);
-    SetCharacterBuffer(CHARACTER_SLOT_CADDIE, g_WorkArea + bufferSize * 2);
+    SetCharacterBuffer(CHARACTER_SLOT_PARTNER, g_WorkArea.bytes);
+    SetCharacterBuffer(CHARACTER_SLOT_GOLFER, g_WorkArea.bytes + bufferSize);
+    SetCharacterBuffer(CHARACTER_SLOT_CADDIE, g_WorkArea.bytes + bufferSize * 2);
     osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - bufferSize * 3);
 }
 

@@ -18,6 +18,7 @@
 #include "screen.h"
 #include "sound.h"
 #include "variables.h"
+#include "work_area.h"
 
 /* Sub-modules that RequestSubModule loads for some game modes */
 #define SUB_MODULE_DEFAULT 0x05
@@ -1106,7 +1107,7 @@ s32 DrawGame(void) {
     if (g_HasExpansionPak) {
         g_VertexListHead = g_ExpansionVertexBuffers[g_DrawBufferIndex];
     } else {
-        g_VertexListHead = (Vtx *)&g_WorkArea[WORK_AREA_VERTEX_OFFSET] + g_DrawBufferIndex * VERTEX_BUFFER_LENGTH;
+        g_VertexListHead = (Vtx *)&g_WorkArea.bytes[WORK_AREA_VERTEX_OFFSET] + g_DrawBufferIndex * VERTEX_BUFFER_LENGTH;
     }
 
     for (viewIndex = 0, camera = g_Cameras; viewIndex < 2; viewIndex++, camera++) {
@@ -1827,7 +1828,7 @@ s32 DrawGame(void) {
     if ((u32)commandCount >= DISPLAY_LIST_LENGTH) {
         ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2636);
     }
-    if (!g_HasExpansionPak && g_VertexListHead - ((Vtx *)&g_WorkArea[WORK_AREA_VERTEX_OFFSET] +
+    if (!g_HasExpansionPak && g_VertexListHead - ((Vtx *)&g_WorkArea.bytes[WORK_AREA_VERTEX_OFFSET] +
                                                   g_DrawBufferIndex * VERTEX_BUFFER_LENGTH) >=
                                   VERTEX_BUFFER_LENGTH) {
         ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2637);
