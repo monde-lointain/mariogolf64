@@ -36,6 +36,8 @@ void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view);
 extern Vtx sSpinVertices[];
 extern Mtx sSpinMatrices[];
 
+extern f32 sSpinAngle; /* In radians */
+
 extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
@@ -66,6 +68,14 @@ extern s32 sHasUnloadedSubModule;
 #define SPIN_BATCH_VERTEX_COUNT 32
 #define SPIN_LAST_BATCH_VERTEX_COUNT 18
 #define SPIN_LAST_BATCH_STRIP_COUNT 8
+/*
+ * The mesh's model is scaled down by SPIN_MESH_SCALE, so it spans the screen
+ * inside its border at SPIN_MESH_DISTANCE from the camera
+ */
+#define SPIN_MESH_ROW_COUNT 42
+#define SPIN_MESH_HALF_WIDTH ((SCREEN_WIDTH / 2 - SCREEN_BORDER) * 10)
+#define SPIN_MESH_SCALE 0.1f
+#define SPIN_MESH_DISTANCE -290.0f
 #define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
     (((batchIndex) == SPIN_BATCH_COUNT - 1) & ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))
 
@@ -375,7 +385,80 @@ void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", DrawSpinEffect);
+/*
+ * Turns the frame saved in the depth buffer about the vertical axis, a half
+ * turn over sScreenEffectFrameCount frames, then shows the scene again
+ */
+void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
+    f32 transform[4][4];
+    f32 translation[3];
+    f32 rotation[3];
+    f32 scale[3];
+    Gfx *gfx = *displayListHead;
+    f32 angleStep;
+    Vtx *vertex;
+    s32 rowIndex;
+
+    rotation[0] = 0.0f;
+    rotation[1] = sSpinAngle;
+    rotation[2] = 0.0f;
+    translation[0] = 0.0f;
+    translation[1] = 0.0f;
+    translation[2] = SPIN_MESH_DISTANCE;
+    scale[0] = SPIN_MESH_SCALE;
+    scale[1] = SPIN_MESH_SCALE;
+    scale[2] = SPIN_MESH_SCALE;
+    BuildTransformMatrix(transform, rotation, translation, scale);
+    ConvertMatrixToFixed(transform, &sSpinMatrices[g_DrawBufferIndex]);
+
+    angleStep = M_PI / sScreenEffectFrameCount;
+    sSpinAngle += angleStep;
+    /* Skips the half turn in which the frame's back would face the camera */
+    if (sSpinAngle > M_PI / 2 && sSpinAngle < angleStep + M_PI / 2) {
+        sSpinAngle += M_PI;
+    }
+    if (sSpinAngle > 2 * M_PI) {
+        sSpinAngle = 0.0f;
+        view->drawFlags = CAMERA_DRAW_SCENE;
+    }
+
+    vertex = &sSpinVertices[g_DrawBufferIndex];
+    for (rowIndex = 0; rowIndex != SPIN_MESH_ROW_COUNT; rowIndex++) {
+        vertex[0].v.ob[0] = -SPIN_MESH_HALF_WIDTH;
+        vertex[1].v.ob[0] = SPIN_MESH_HALF_WIDTH;
+        vertex += 2;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_FILL);
+    gDPSetFillColor(gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+    gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, view->scissorX, view->scissorY, view->scissorX + view->scissorWidth,
+                  view->scissorY + view->scissorHeight);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    DrawSpinMesh(&gfx);
+    *displayListHead = gfx;
+}
 
 void DrawEmptyEffect(Gfx **displayListHead, CameraView *view) {
 }

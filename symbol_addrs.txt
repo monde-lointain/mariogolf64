@@ -864,3 +864,6 @@ sSpinVertices = 0x800DABA0;
 sSpinMatrices = 0x800DABB0;
 g_DrawBufferIndex = 0x800B7780; // size:0x4
 g_ScreenEffectProjection = 0x800FE2F0; // size:0x40
+sSpinAngle = 0x800B681C; // size:0x4
+BuildTransformMatrix = 0x80065B98; // type:func
+ConvertMatrixToFixed = 0x80065DD8; // type:func
