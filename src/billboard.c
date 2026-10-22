@@ -217,9 +217,9 @@ void DrawBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     Gfx *gfx = g_DisplayListHead;
     s32 lightColor[3] = { 255, 220, 160 };
     s32 envColor[3] = { 128, 64, 32 };
-    f32 viewDir[3];
-    f32 lightDir[3];
-    f32 unusedVector[3];
+    Vec3 viewDir;
+    Vec3 lightDir;
+    Vec3 unusedVector;
     f32 lightPitch;
     f32 lightYaw;
     f32 alignment;

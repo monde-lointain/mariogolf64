@@ -12,8 +12,8 @@
 
 /* What a camera sees and where on the screen it draws */
 typedef struct CameraView {
-    /* 0x00 */ f32 eye[3];
-    /* 0x0C */ f32 lookAt[3];
+    /* 0x00 */ Vec3 eye;
+    /* 0x0C */ Vec3 lookAt;
     /* 0x18 */ f32 heading; /* In radians; the map camera turns by it */
     /* 0x1C */ s32 scissorX;
     /* 0x20 */ s32 scissorY;
@@ -42,8 +42,8 @@ typedef struct CameraMatrices {
     /* 0x080 */ Mtx placement;     /* Between the projection and the view */
     /* 0x0C0 */ Mtx billboard;     /* Turns billboards to face the camera */
     /* 0x100 */ Mtx antiBillboard; /* The opposite turn */
-    /* 0x140 */ f32 perspectiveF[4][4];
-    /* 0x180 */ f32 viewingF[4][4];
+    /* 0x140 */ Mat4 perspectiveF;
+    /* 0x180 */ Mat4 viewingF;
     /* 0x1C0 */ Mtx projection; /* perspectiveF and viewingF combined */
     /* 0x200 */ LookAt lookAt;
     /* 0x220 */ u8 unk220[0x10];

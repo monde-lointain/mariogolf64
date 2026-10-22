@@ -190,7 +190,7 @@ INCLUDE_ASM("asm/nonmatchings/burst", LaunchBurst);
 void UpdateAndDrawBursts(Gfx **displayListHead) {
     Gfx *gfx;
     s32 unused[12]; /* The original frame has room for this */
-    f32 transform[4][4];
+    Mat4 transform;
     s32 unusedAfter[6]; /* The original frame has room for this too */
     s32 burstIndex;
     s32 index;

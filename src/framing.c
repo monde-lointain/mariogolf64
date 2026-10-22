@@ -30,15 +30,15 @@ extern f32 sFramedSphereRadii[FRAMED_SPHERE_CAPACITY];
 extern s32 sFramedSphereCount;
 extern f32 sFramingPitch;
 extern f32 sFramingYaw;
-extern f32 sFramingRotation[4][4];
-extern f32 sFramedEye[3];
-extern f32 sFramedLookAt[3];
+extern Mat4 sFramingRotation;
+extern Vec3 sFramedEye;
+extern Vec3 sFramedLookAt;
 
-void TransformPoint(f32 mf[4][4], f32 point[3], f32 result[3]);
+void TransformPoint(Mat4 mf, Vec3 point, Vec3 result);
 float fabsf(float x);
 double tan(double x);
 
-void GetFramedView(f32 eye[3], f32 lookAt[3]) {
+void GetFramedView(Vec3 eye, Vec3 lookAt) {
     eye[0] = sFramedEye[0];
     eye[1] = sFramedEye[1];
     eye[2] = sFramedEye[2];
@@ -52,7 +52,7 @@ void ClearFramedSpheres(void) {
 }
 
 /* Adds a sphere for FrameSpheres to keep in view; extra spheres are ignored */
-void AddFramedSphere(f32 center[3], f32 radius) {
+void AddFramedSphere(Vec3 center, f32 radius) {
     if (sFramedSphereCount < FRAMED_SPHERE_CAPACITY) {
         sFramedSphereCenters[sFramedSphereCount][0] = center[0];
         sFramedSphereCenters[sFramedSphereCount][1] = center[1];
@@ -70,8 +70,8 @@ void AddFramedSphere(f32 center[3], f32 radius) {
 /* Sets the direction, in radians, from which FrameSpheres looks */
 #ifdef NON_MATCHING
 void SetFramingAngles(f32 pitch, f32 yaw) {
-    f32 pitchRotation[4][4];
-    f32 yawRotation[4][4];
+    Mat4 pitchRotation;
+    Mat4 yawRotation;
 
     if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
         pitch += FRAMING_DEGREES_TO_RADIANS(20);
@@ -87,7 +87,7 @@ void SetFramingAngles(f32 pitch, f32 yaw) {
 INCLUDE_ASM("asm/nonmatchings/framing", SetFramingAngles);
 #endif
 
-void TransformPoint(f32 mf[4][4], f32 point[3], f32 result[3]) {
+void TransformPoint(Mat4 mf, Vec3 point, Vec3 result) {
     f32 x = point[0];
     f32 y = point[1];
     f32 z = point[2];
@@ -103,11 +103,11 @@ void TransformPoint(f32 mf[4][4], f32 point[3], f32 result[3]) {
  */
 #ifdef NON_MATCHING
 void FrameSpheres(f32 depthOffset) {
-    f32 point[3];
-    f32 rotation[4][4];
-    f32 pitchRotation[4][4];
-    f32 yawRotation[4][4];
-    f32 orientation[4][4];
+    Vec3 point;
+    Mat4 rotation;
+    Mat4 pitchRotation;
+    Mat4 yawRotation;
+    Mat4 orientation;
     f32 horizontalEyeZ;
     f32 rightAngle;
     f32 leftAngle;

@@ -481,10 +481,10 @@ void DrawSavedFrameEffect(Gfx **displayListHead, CameraView *view) {
  * turn over sScreenEffectFrameCount frames, then shows the scene again
  */
 void DrawSpinEffect(Gfx **displayListHead, CameraView *view) {
-    f32 transform[4][4];
-    f32 translation[3];
-    f32 rotation[3];
-    f32 scale[3];
+    Mat4 transform;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
     Gfx *gfx = *displayListHead;
     f32 angleStep;
     Vtx *vertex;
@@ -906,8 +906,8 @@ extern s32 _mus_cpu_worst;
 
 void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
-void MultiplyMatrices(f32 a[4][4], f32 b[4][4], f32 product[4][4]);
-void SetCpuProjectionF(f32 projection[4][4], f32 viewing[4][4], Vp *viewport);
+void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product);
+void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp *viewport);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
@@ -1017,9 +1017,9 @@ s32 DrawGame(void) {
 
     /* Loads the projection of the camera being drawn */
     void LoadProjection(void) {
-        f32 projection[4][4];
-        f32 translation[4][4];
-        f32 unusedMatrix[4][4];
+        Mat4 projection;
+        Mat4 translation;
+        Mat4 unusedMatrix;
 
         if (usesFloatMatrices) {
             guTranslateF(translation, 0.0f, 0.0f, 0.0f);

@@ -104,8 +104,8 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void func_801F7148(void);
 
-void BuildTransformMatrix(f32 matrix[4][4], f32 *rotation, f32 *translation, f32 *scale);
-void ConvertMatrixToFixed(f32 matrix[4][4], Mtx *fixedMatrix);
+void BuildTransformMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation, Vec3 scale);
+void ConvertMatrixToFixed(Mat4 matrix, Mtx *fixedMatrix);
 void func_80050DA0(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
 void func_8004D794(void);
 void func_80071370(void);
