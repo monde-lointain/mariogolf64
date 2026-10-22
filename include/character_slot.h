@@ -33,6 +33,9 @@
 #define TLB_PAGE_MODE_4K 0
 #define SMALLEST_PAGE_SIZE 0x1000
 
+/* Scales a unit light direction to the s8 range the lights take */
+#define LIGHT_DIRECTION_SCALE 127.0f
+
 /* Where a character model's files are in ROM and where its parts are in segment 2 */
 typedef struct CharacterModel {
     /* 0x00 */ u32 romStart;
@@ -262,5 +265,6 @@ void SkipToAnimationEnd(u32 slotIndex);
 void SetAnimationSpeed(u32 slotIndex, f32 speed);
 void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
+void SetCharacterLights(void);
 
 #endif

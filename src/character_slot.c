@@ -21,8 +21,6 @@
 #define HILITE_TEXTURE_SIZE 32
 #define HILITE_SECOND_TILE 1
 
-#define LIGHT_DIRECTION_SCALE 127.0f
-
 #define CHOSEN_DISPLAY_LIST(model) ((Gfx *)(model)->segmentAddresses[CHARACTER_MODEL_CHOSEN_DISPLAY_LIST])
 #define DISPLAY_LIST_CHOICES(model) ((u32 *)(model)->segmentAddresses[CHARACTER_MODEL_DISPLAY_LIST_CHOICES])
 

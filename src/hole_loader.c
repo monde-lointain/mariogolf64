@@ -36,12 +36,6 @@
 #define MIN_WIND_SPEED 0x18000
 #define DRIVING_RANGE_WIND_DIRECTION 0x4000
 
-/* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
-#define SCENE_COLOR_INDEX_ROUND_START 0
-#define SCENE_COLOR_INDEX_DRIVING_RANGE 6
-#define SCENE_COLOR_INDEX_ROUND_END 10
-#define SCENE_COLOR_INDEX_UNK11 11
-
 #define HOLE_CONDITIONS_UNK10_STEP 0x5000
 #define HOLE_CONDITIONS_UNK12 0x3000
 
@@ -165,7 +159,6 @@ extern Unk800BA9D8 D_80105F40;
 extern Unk800BA9D8 D_800FEDD8;
 
 void func_8004D148(void);
-void func_80057914(void);
 void func_8005F1C8(void);
 void func_8005F964(void);
 void func_80080220(void);
@@ -715,7 +708,7 @@ void PrepareHoleScene(void) {
     }
     D_800BB0E8 = 0;
     func_80253270();
-    func_80057914();
+    SetCharacterLights();
     ShrinkMiniGolfHole();
 }
 

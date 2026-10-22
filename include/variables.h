@@ -48,6 +48,13 @@ typedef struct HoleConditions {
     /* 0x12 */ u16 unk12;
 } HoleConditions; /* size = 0x14 */
 
+/* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
+#define SCENE_COLOR_INDEX_ROUND_START 0
+#define SCENE_COLOR_INDEX_DRIVING_RANGE 6
+#define SCENE_COLOR_INDEX_ROUND_LATE 9
+#define SCENE_COLOR_INDEX_ROUND_END 10
+#define SCENE_COLOR_INDEX_UNK11 11
+
 extern HoleConditions g_HoleConditions;
 
 /* The wind's direction as each camera sees it, in radians, for its arrow */

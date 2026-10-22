@@ -12,6 +12,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "variables.h"
 
 /* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
 #define CHARACTER_BUFFER_SIZE 0x23680
@@ -126,6 +127,34 @@ extern s32 D_800C1DF0;
 /* How a slot starts out when LoadCharacter loads it */
 #define LOADED_ALPHA 0x60
 #define LOADED_RANDOM_TEXTURE_ANIMATION_DELAY 27
+
+/* Lit along the scene's light direction, in colors that change near the end of the round */
+extern Lights2 g_RoundCharacterLights[DRAW_BUFFER_COUNT];
+/* Lit along the scene's light direction, in colors that never change */
+extern Lights2 g_FixedCharacterLights[DRAW_BUFFER_COUNT];
+/* The direction of each set's second light */
+extern s32 D_800C1F90;
+extern s32 D_800C1F94;
+extern s32 D_800C1F98;
+
+/* SetCharacterLights' colors near the end of the round */
+#define LATE_AMBIENT_LEVEL 120
+#define LATE_LIGHT_RED 200
+#define LATE_LIGHT_GREEN 80
+#define LATE_LIGHT_BLUE 10
+/* SetCharacterLights' colors through the rest of the round */
+#define DAY_AMBIENT_RED 130
+#define DAY_AMBIENT_GREEN 130
+#define DAY_AMBIENT_BLUE 120
+#define DAY_LIGHT_RED 130
+#define DAY_LIGHT_GREEN 120
+#define DAY_LIGHT_BLUE 110
+/* The colors of the lights that never change */
+#define FIXED_AMBIENT_LEVEL 100
+#define FIXED_LIGHT_RED 155
+#define FIXED_LIGHT_GREEN 120
+#define FIXED_LIGHT_BLUE 120
+#define FIXED_SECOND_LIGHT_LEVEL 150
 
 /* The size of a line of debug text */
 #define DEBUG_LINE_SIZE 0x80
@@ -1129,13 +1158,51 @@ void ResetCharacterSlots(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80057914);
+/*
+ * Sets the two sets of character lights for the frame being drawn, both lit
+ * along the scene's light direction: one whose colors change near the end of
+ * the round, and one whose colors never change
+ */
+void SetCharacterLights(void) {
+    u8 ambientColor[3];
+    u8 lightColor[3];
+    s8 lightDirection[3];
+    f32 lightPitch;
+    f32 lightYaw;
 
-/* As above, so the data below lands in .rodata */
-__asm__(".section .rodata");
-
-const u8 D_800D0834[4] = { 0x9B, 0x78, 0x78, 0x00 };
-const u8 D_800D0838[8] = { 0x96, 0x96, 0x96, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    switch (g_HoleConditions.sceneColorIndex) {
+        case SCENE_COLOR_INDEX_ROUND_LATE:
+        case SCENE_COLOR_INDEX_ROUND_END:
+            ambientColor[0] = LATE_AMBIENT_LEVEL;
+            ambientColor[1] = LATE_AMBIENT_LEVEL;
+            ambientColor[2] = LATE_AMBIENT_LEVEL;
+            lightColor[0] = LATE_LIGHT_RED;
+            lightColor[1] = LATE_LIGHT_GREEN;
+            lightColor[2] = LATE_LIGHT_BLUE;
+            break;
+        default:
+            ambientColor[0] = DAY_AMBIENT_RED;
+            ambientColor[1] = DAY_AMBIENT_GREEN;
+            ambientColor[2] = DAY_AMBIENT_BLUE;
+            lightColor[0] = DAY_LIGHT_RED;
+            lightColor[1] = DAY_LIGHT_GREEN;
+            lightColor[2] = DAY_LIGHT_BLUE;
+            break;
+    }
+    lightPitch = g_LightPitch * BINARY_ANGLE_TO_RADIANS;
+    lightYaw = g_LightYaw * BINARY_ANGLE_TO_RADIANS;
+    lightDirection[0] = -sinf(lightPitch) * cosf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
+    lightDirection[2] = -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
+    g_RoundCharacterLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
+        ambientColor[0], ambientColor[1], ambientColor[2], lightColor[0], lightColor[1], lightColor[2],
+        lightDirection[0], lightDirection[1], lightDirection[2], lightColor[0], lightColor[1], lightColor[2],
+        D_800C1F90, D_800C1F94, D_800C1F98);
+    g_FixedCharacterLights[g_DrawBufferIndex] = (Lights2)gdSPDefLights2(
+        FIXED_AMBIENT_LEVEL, FIXED_AMBIENT_LEVEL, FIXED_AMBIENT_LEVEL, FIXED_LIGHT_RED, FIXED_LIGHT_GREEN,
+        FIXED_LIGHT_BLUE, lightDirection[0], lightDirection[1], lightDirection[2], FIXED_SECOND_LIGHT_LEVEL,
+        FIXED_SECOND_LIGHT_LEVEL, FIXED_SECOND_LIGHT_LEVEL, D_800C1F90, D_800C1F94, D_800C1F98);
+}
 
 INCLUDE_ASM("asm/nonmatchings/character", func_80057FFC);
 
