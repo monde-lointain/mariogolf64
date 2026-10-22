@@ -6,6 +6,7 @@
 #include "variables.h"
 #include "asset.h"
 #include "heap.h"
+#include "host_file.h"
 #include "libc.h"
 
 /* Textures of this type are read from the asset archive when first drawn */
@@ -519,11 +520,6 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawFadingBillboards);
 
 /* Room for the file name in a host command, including padding */
 #define HOST_FILE_NAME_SIZE_MAX 0x100
-
-#define HOST_FILE_OK 0
-#define HOST_FILE_SIZE_TOO_SMALL 1
-#define HOST_FILE_NAME_TOO_SHORT 2
-#define HOST_FILE_NAME_TOO_LONG 3
 
 s32 WriteHostFile(char *fileName, u32 size) {
     u32 *command;
