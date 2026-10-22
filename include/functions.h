@@ -79,6 +79,16 @@ void nuGfxTaskStart(Gfx *gfxList_ptr, u32 gfxListSize, u32 ucode, u32 flag);
 #define BUFFER_CLEAR_WHOLE 2      /* Also fills the frame black at once */
 void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead);
 void AppendBufferClear(s32 clearMode, Gfx **displayListHead);
+void InitRcp(s32 viewportIndex);
+void SetFillColor(s32 red, s32 green, s32 blue);
+void FillScreen(void);
+void ClearBuffers(s32 clearMode);
+
+/*
+ * Records the projection, viewing matrix and viewport, so the CPU can
+ * project points as the RSP does. A NULL argument keeps the current one.
+ */
+void SetCpuProjection(Mtx *projection, Mtx *viewing, Vp *viewport);
 
 void BuildTransformMatrix(f32 matrix[4][4], f32 *rotation, f32 *translation, f32 *scale);
 void ConvertMatrixToFixed(f32 matrix[4][4], Mtx *fixedMatrix);
