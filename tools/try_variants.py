@@ -8,13 +8,13 @@ text to replace, a line of "----", and the replacement. Prints the score of
 each variant, so that several guesses cost one compile each.
 
 The target assembly is read once, and the variants compile in parallel,
-one per CPU, since each compile is an independent process.
+one process per CPU, since parsing the objects holds the interpreter lock.
 """
 
 import os
 import sys
 import tempfile
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 
 import fncompare
 
@@ -43,7 +43,7 @@ def main():
     target = fncompare.read_target_functions(asm_path)[function]
     c_dir = os.path.dirname(os.path.abspath(c_path))
 
-    with ThreadPoolExecutor(max_workers=os.cpu_count()) as pool:
+    with ProcessPoolExecutor(max_workers=os.cpu_count()) as pool:
         results = []
         for block in blocks:
             old, new = block.split("\n----\n")
