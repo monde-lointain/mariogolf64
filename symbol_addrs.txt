@@ -985,3 +985,6 @@ SaveOrContinueGameByMode = 0x8005B7BC; // type:func
 InsertRankedRecord = 0x8005B314; // type:func
 GetRecordPriority = 0x8005B0B4; // type:func
 ComputeRoundStatistics = 0x8005D3B8; // type:func
+GetAssetFileSize = 0x80050598; // type:func
+OpenEncodedAsset = 0x8005062C; // type:func
+ReadEncodedAsset = 0x800506D4; // type:func

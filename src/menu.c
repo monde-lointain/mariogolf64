@@ -201,9 +201,6 @@ extern s16 g_StartingCharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLU
 extern void *D_80105BB0[4];
 extern void *D_8012D468[4];
 
-s32 func_80050598(AssetFile *file);
-void func_8005062C(u16 assetId, void *unk);
-void func_800506D4(void *unk, void *unk2);
 void func_8005CA48(void);
 typedef struct Unk800C29B8 {
     /* 0x0 */ s16 column;
@@ -869,7 +866,7 @@ s32 IsMetalMarioUnlocked(void) {
 
 /* arg0 is reused below as a record count and a character id, to match */
 void func_8005C674(s32 arg0, s32 arg1) {
-    u8 unk[0x20];
+    EncodedAsset asset;
     AssetFile file;
     SaveData *save;
     s32 row;
@@ -946,10 +943,10 @@ void func_8005C674(s32 arg0, s32 arg1) {
             recordIndex = g_CharacterGrid[2][index];
             if (recordIndex >= 0) {
                 arg0 = g_ImportedCharacters[index].character;
-                func_8005062C(D_800C2650[arg0].assetId, unk);
-                func_800506D4(D_8012D468[index], unk);
+                OpenEncodedAsset(D_800C2650[arg0].assetId, &asset);
+                ReadEncodedAsset(D_8012D468[index], &asset);
                 OpenAssetFile(D_800C2590[arg0].assetId, &file);
-                ReadAssetFile(D_80105BB0[index], func_80050598(&file), &file);
+                ReadAssetFile(D_80105BB0[index], GetAssetFileSize(&file), &file);
             }
         }
     }
