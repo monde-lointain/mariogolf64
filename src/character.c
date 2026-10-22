@@ -61,6 +61,15 @@
 
 #define BALL_DISTANCE_SOURCE_SIZE 0x8000
 #define BALL_DISTANCE_LINE_SIZE 0x100
+/* The display list choices that hold each kind of club */
+#define WOOD_DISPLAY_LIST_CHOICE 0
+#define IRON_DISPLAY_LIST_CHOICE 1
+#define WEDGE_DISPLAY_LIST_CHOICE 2
+#define PUTTER_DISPLAY_LIST_CHOICE 3
+
+/* The animation whose ANIMATION_EVENT_UNK6 frame GetUnk6EventFrame returns */
+#define UNK6_EVENT_ANIMATION_INDEX 2
+
 /* The slot that WriteBallDistances loads each character into */
 #define MEASURED_SLOT 0
 /* The shot mode that WriteBallDistances measures every column with */
@@ -278,15 +287,94 @@ __asm__(".section .rodata");
 /* Unreferenced; left by debug output that the routines below no longer have */
 static const char sUnusedFrameFormat[] = "TA %d : FRAME %d    ";
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054E20);
+void WriteBallDistancesIfEnabled(void) {
+    if (IsGameFlagSet(GAME_FLAG_GENERATE_BALL_DISTANCES)) {
+        WriteBallDistances();
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054E4C);
+/* Has the character in the slot hold the club, by choosing the display list for its kind */
+void SetCharacterClub(u32 slotIndex, s32 clubIndex) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 choice;
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054F1C);
+    if (slot != NULL) {
+        g_CharacterModelIndex = slot->modelIndex;
+        switch (GetCharacterClubKind(slotIndex, clubIndex)) {
+            case CLUB_KIND_WOOD:
+                choice = WOOD_DISPLAY_LIST_CHOICE;
+                break;
+            case CLUB_KIND_IRON:
+                choice = IRON_DISPLAY_LIST_CHOICE;
+                break;
+            case CLUB_KIND_WEDGE:
+                choice = WEDGE_DISPLAY_LIST_CHOICE;
+                break;
+            case CLUB_KIND_PUTTER:
+                choice = PUTTER_DISPLAY_LIST_CHOICE;
+                break;
+            default:
+                choice = NO_DISPLAY_LIST_CHOICE;
+                break;
+        }
+        MAP_MODEL_BUFFER(slot);
+        SelectCharacterDisplayList(slotIndex, choice);
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/character", func_80054FF4);
+/*
+ * Copies the kind and value of up to EVENT_ACTION_COUNT_MAX of the
+ * animation's events on the frame into actions, and returns how many it
+ * copied
+ */
+s32 GetAnimationEventActions(u32 slotIndex, s32 animationIndex, s32 frame, AnimationEventAction *actions) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    s32 count = 0;
+    AnimationEvent *event;
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/character", func_800550B8);
+    if (slot != NULL && animationIndex < slot->animationCount) {
+        event = ANIMATIONS(slot->model)[animationIndex].events;
+        if (event != NULL) {
+            for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
+                if (event[i].frame == frame) {
+                    if (count < EVENT_ACTION_COUNT_MAX) {
+                        actions[count].kind = event[i].kind;
+                        actions[count].value = event[i].value;
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+    return count;
+}
+
+/* Returns the frame of the animation's first event of the kind, from its start, or -1 if none */
+s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind) {
+    s32 frame = -1;
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    AnimationEvent *event;
+    s32 i;
+
+    if (slot != NULL && animationIndex < slot->animationCount) {
+        event = ANIMATIONS(slot->model)[animationIndex].events;
+        if (event != NULL) {
+            for (i = 0; event[i].frame != END_OF_ANIMATION_EVENTS; i++) {
+                if (event[i].kind == kind) {
+                    frame = event[i].frame - ANIMATIONS(slot->model)[animationIndex].startFrame;
+                    break;
+                }
+            }
+        }
+    }
+    return frame;
+}
+
+/* Unreferenced */
+s32 GetUnk6EventFrame(u32 slotIndex) {
+    return GetAnimationEventFrame(slotIndex, UNK6_EVENT_ANIMATION_INDEX, ANIMATION_EVENT_UNK6);
+}
 
 INCLUDE_ASM("asm/nonmatchings/character", func_800550D8);
 

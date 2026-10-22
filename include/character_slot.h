@@ -100,7 +100,17 @@ typedef struct AnimationEvent {
 /* AnimationEvent kinds */
 #define ANIMATION_EVENT_LOOP_START 0
 #define ANIMATION_EVENT_LOOP_END 1 /* Jumps back to the loop start when the slot is looping */
+#define ANIMATION_EVENT_UNK6 6
 #define ANIMATION_EVENT_TEXTURE_ANIMATION 0xFE /* Starts the TextureAnimation that value names */
+
+/* What an AnimationEvent does, as gathered for its frame */
+typedef struct AnimationEventAction {
+    /* 0x0 */ u8 kind;
+    /* 0x1 */ u8 value;
+} AnimationEventAction; /* size = 0x2 */
+
+/* The most AnimationEventActions gathered for one frame */
+#define EVENT_ACTION_COUNT_MAX 16
 
 /* Values of an ANIMATION_EVENT_TEXTURE_ANIMATION event that do something else instead */
 #define TEXTURE_ANIMATION_EVENT_START_RANDOM 0 /* Starts playing RANDOM_TEXTURE_ANIMATION now and then */
