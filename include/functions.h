@@ -29,7 +29,7 @@ void InitEffectTable(void);
 void LoadCourseObjects(void);
 void StartGame(void);
 void UpdateGame(void);
-void DrawGame(void);
+s32 DrawGame(void);
 void DrawResetFade(void);
 void UpdateOverlays(void);
 

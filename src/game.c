@@ -1,7 +1,9 @@
 #include "common.h"
+#include "billboard.h"
 #include "controller.h"
 #include "debug_flags.h"
 #include "libc.h"
+#include "main.h"
 #include "camera.h"
 #include "functions.h"
 #include <lib/libnusys/nusys.h>
@@ -842,9 +844,1055 @@ void BuildDynamicTextures(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/game", func_8002DAC0);
+/*
+ * How DrawGame draws a frame, chosen by scene. The scene modules' own
+ * screens are still known only by number.
+ */
+#define DRAW_MODE_INSET_SCREEN 0 /* A module's screen, with the course in the inset view */
+#define DRAW_MODE_COURSE 1
+#define DRAW_MODE_MAP_PERSPECTIVE 3
+#define DRAW_MODE_MAP_ISOMETRIC 4
+#define DRAW_MODE_MAP_MINIATURE 5
+#define DRAW_MODE_MAP_TOP_DOWN 6
+#define DRAW_MODE_NOTHING 13
+#define DRAW_MODE_BLANK 14
 
+/* The map cameras' views, in world units */
+#define MAP_NEAR_CLIP 10.0f
+#define MAP_FAR_CLIP 8000.0f
+#define MAP_ORTHO_HALF_WIDTH 160.0f
+#define MAP_ORTHO_HALF_HEIGHT 120.0f
+#define MAP_ORTHO_FAR_CLIP 20000.0f
+#define MAP_ISOMETRIC_OFFSET_X 5000.0f
+#define MAP_ISOMETRIC_OFFSET_Y 4000.0f
+#define MAP_TOP_DOWN_HEIGHT 4000.0f
+#define MAP_TOP_DOWN_TILT 50.0f
+#define MAP_MINIATURE_SCALE 0.07f
+
+#define ASPECT_RATIO (4.0f / 3.0f)
+
+/* The course camera's clip planes, in world units */
+#define COURSE_NEAR_CLIP 10.0f
+#define COURSE_FAR_CLIP 32000.0f
+#define CLOSE_UP_NEAR_CLIP 200.0f
+#define SHORT_FAR_CLIP 500.0f
+
+/* Values of sFadeColor */
+#define FADE_COLOR_NONE 0
+#define FADE_COLOR_WHITE 1
+#define FADE_COLOR_NOISE 2
+#define FADE_COLOR_BLACK 3
+#define FADE_NOISE_GREY 0xBF
+
+/* Values of g_FramePacingMode, which the second controller's Start cycles */
+#define PACING_MODE_NORMAL 0
+#define PACING_MODE_PERFORMANCE_METER 1 /* The other modes print debug text */
+#define PACING_MODE_COUNT 4
+
+/* Vertices that the course drawers may add to a frame */
+#define VERTEX_BUFFER_LENGTH 512
+#define EXPANSION_VERTEX_BUFFER_LENGTH 5000
+#define WORK_AREA_VERTEX_OFFSET 0x6A920
+
+#define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
+
+/* When DrawGame last started, in microseconds */
+extern u32 sDrawStartTime;
+extern f32 sMapFieldOfView; /* In degrees */
+extern s8 sNeedsIdentityMatrix;
+extern Mtx sIdentityMatrix;
+/* Indexed by view, then by draw buffer */
+extern CameraMatrices sCameraMatrices[2 * 2];
+extern s32 g_PerspectiveNormalization;
+/* The next free vertex of the frame's vertex buffer */
+extern Vtx *g_VertexListHead;
+extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
+extern s32 sHasThreeFrameBuffers;
+extern s32 sFadeAlpha;
+extern s32 sFadeColor;
+/* Toggled by a debug button; nothing reads it */
+extern s32 sUnreadDebugSwitch;
+extern s32 D_800BE694;
+extern f32 D_800C30D4;
+extern s32 D_800C3FA8;
+extern s32 D_800C7304;
+extern s32 D_8022BE08;
+extern s32 _mus_cpu_last;
+extern s32 _mus_cpu_worst;
+
+void MusPrintDmaUsage(void);
+s32 __MusIntMemRemaining(void);
+void MultiplyMatrices(f32 a[4][4], f32 b[4][4], f32 product[4][4]);
+void SetCpuProjectionF(f32 projection[4][4], f32 viewing[4][4], Vp *viewport);
+void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
+void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
+void func_8003E6C0(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
+s32 func_80042720(void);
+void func_800427E8(void);
+void func_8004D7B8(Gfx **displayListHead);
+void func_8004DA9C(s32 number, s32 column, s32 row);
+void func_8004DC44(void);
+void func_8004E924(s32, s32, u32, u32, s32, s32);
+void func_8004FDB4(s32, s32);
+void func_8005029C(void);
+void func_80050BF0(s32, s32, s32);
+void func_80051A60(void);
+void func_800530FC(CameraMatrices *matrices);
+void func_80058D04(CameraMatrices *matrices, s32 cameraIndex, s32);
+void func_8005C018(s32 commandCount);
+void func_800625FC(Gfx **displayListHead);
+void func_80062A8C(CameraMatrices *matrices, s32);
+void func_800660B0(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera);
+void func_80066B50(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera);
+void func_8006AEA4(Gfx **displayListHead);
+void func_8006B5D8(Gfx **displayListHead);
+void func_8006BC80(Gfx **displayListHead);
+void func_8006C918(Gfx **displayListHead);
+void func_80071B34(Gfx **displayListHead);
+void func_8007B994(CameraMatrices *matrices, Gfx **displayListHead);
+void func_8007EF0C(Gfx **displayListHead, CameraMatrices *matrices);
+void func_8008156C(void);
+void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
+void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
+void func_80086864(Gfx **displayListHead);
+void func_80088BDC(Gfx **displayListHead);
+void func_80089094(CameraView *view);
+void func_8008C6B0(Gfx **displayListHead);
+void func_8008CD30(Gfx **displayListHead);
+void func_8008D0DC(void);
+void func_8008D3F4(Gfx **displayListHead);
+void func_8008FF14(s32);
+void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
+void func_8009351C(Gfx **displayListHead, s32);
+void func_800939E8(Gfx **displayListHead);
+void func_800957F0(void);
+void func_801F4AD8(Gfx **displayListHead);
+void func_801F4F80(Gfx **displayListHead);
+void func_801F4FF4(Gfx **displayListHead);
+void func_801F7554(Gfx **displayListHead);
+void func_801F8110(Gfx **displayListHead);
+void func_801FA4EC(CameraMatrices *matrices, Gfx **displayListHead);
+void func_801FB198(Gfx **displayListHead);
+void func_801FCC48(Gfx **displayListHead);
+void func_801FD578(Gfx **displayListHead);
+void func_801FE370(CameraMatrices *matrices);
+void func_80200CBC(Gfx **displayListHead, s32);
+void func_8020DCA4(Gfx **displayListHead);
+void func_8020EEF8(Gfx **displayListHead);
+void func_8020FC10(Gfx **displayListHead);
+void func_80210370(Gfx **displayListHead);
+void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
+void func_802161D4(Gfx **displayListHead);
+void func_80217164(Gfx **displayListHead);
+void func_8021857C(Gfx **displayListHead, CameraMatrices *matrices);
+void func_80219C74(Gfx **displayListHead);
+void func_8021A940(Gfx **displayListHead);
+void func_8021C6B4(CameraMatrices *matrices);
+void func_80242294(Gfx **displayListHead);
+void func_802438D0(Gfx **displayListHead);
+void func_80244134(Gfx **displayListHead);
+void func_80245320(Gfx **displayListHead);
+void func_8040BFC8(void);
+void func_8040C124(void);
+void func_8040C360(CameraMatrices *matrices, Gfx **displayListHead);
+
+#define SET_CAMERA_SCISSOR(view) \
+    gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, (view).scissorY, \
+                  (view).scissorX + (view).scissorWidth, (view).scissorY + (view).scissorHeight)
+
+#ifdef NON_MATCHING
+/* Returns the frame count, which the caller ignores */
+s32 DrawGame(void) {
+    s32 usesFloatMatrices;
+    CameraMatrices *matrices;
+    u16 mapPerspNorm;
+    u16 insetPerspNorm;
+    u16 perspNorm;
+    s32 drawsScene;
+    s32 terrainStyle;
+    u32 drawMode;
+    s32 viewIndex;
+    s32 playerIndex;
+    s32 commandCount;
+    f32 nearZ;
+    f32 farClip;
+    f32 billboardRise;
+    f32 eyeX;
+    f32 eyeY;
+    f32 eyeZ;
+    f32 topDownEyeX;
+    f32 topDownEyeY;
+    f32 topDownEyeZ;
+    f32 lookAtX;
+    f32 lookAtY;
+    f32 lookAtZ;
+    s32 mode;
+    Camera *camera;
+    CameraView *courseView;
+    f32 *target;
+    u16 *trigger;
+
+    /* Loads the projection of the camera being drawn */
+    void LoadProjection(void) {
+        f32 projection[4][4];
+        f32 translation[4][4];
+        f32 unusedMatrix[4][4];
+
+        if (usesFloatMatrices) {
+            guTranslateF(translation, 0.0f, 0.0f, 0.0f);
+            guMtxCatF(matrices->viewingF, translation, matrices->viewingF);
+            MultiplyMatrices(matrices->viewingF, matrices->perspectiveF, projection);
+            ConvertMatrixToFixed(projection, &matrices->projection);
+            gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+            SetCpuProjectionF(matrices->perspectiveF, matrices->viewingF, NULL);
+        } else {
+            gSPMatrix(g_DisplayListHead++, &matrices->perspective, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+            gSPMatrix(g_DisplayListHead++, &matrices->placement, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+            gSPMatrix(g_DisplayListHead++, &matrices->viewing, G_MTX_PROJECTION | G_MTX_MUL | G_MTX_NOPUSH);
+            SetCpuProjection(&matrices->perspective, &matrices->viewing, NULL);
+        }
+    }
+
+    sDrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
+    if (IsDebugFlagSet(0x28)) {
+        func_8004DA9C(_mus_cpu_last, 20, 10);
+        func_8004DA9C(_mus_cpu_worst, 20, 11);
+        MusPrintDmaUsage();
+    }
+    if (IsDebugFlagSet(0x29)) {
+        func_8004DA9C(__MusIntMemRemaining(), 20, 10);
+        trigger = &g_ControllerData[1].trigger;
+        if (*trigger & B_BUTTON) {
+            func_80051A60();
+            _mus_cpu_worst = 0;
+        }
+        if (*trigger & A_BUTTON) {
+            func_80050BF0(0x87, 3, 0x60);
+            func_80050BF0(400, 4, 0x60);
+            func_80050BF0(0x76, 11, 0x60);
+        }
+    }
+
+    switch (g_Scene) {
+        case 1:
+        case 3:
+        case 5:
+        case 15:
+        case 16:
+        case 28:
+            drawMode = DRAW_MODE_MAP_PERSPECTIVE;
+            break;
+        case 9:
+        case 10:
+            drawMode = DRAW_MODE_MAP_TOP_DOWN;
+            break;
+        case 0:
+        case 2:
+            drawMode = DRAW_MODE_MAP_MINIATURE;
+            break;
+        case 14:
+            drawMode = DRAW_MODE_INSET_SCREEN;
+            break;
+        case 27:
+            drawMode = 9;
+            break;
+        case 26:
+            drawMode = 8;
+            break;
+        case 21:
+            drawMode = 10;
+            break;
+        case 30:
+            drawMode = IsDebugFlagSet(0x9A) ? DRAW_MODE_COURSE : 11;
+            break;
+        case 29:
+            drawMode = 12;
+            break;
+        case 20:
+        case 22:
+            drawMode = DRAW_MODE_NOTHING;
+            break;
+        case 8:
+        case 17:
+        case 18:
+        case SCENE_SWAPPING_MODULES:
+            drawMode = DRAW_MODE_BLANK;
+            break;
+        default:
+            drawMode = DRAW_MODE_COURSE;
+            break;
+    }
+
+    g_DisplayListHead = g_DisplayLists[g_DrawBufferIndex];
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipelineMode(g_DisplayListHead++, G_PM_1PRIMITIVE);
+    if (g_HasExpansionPak) {
+        g_VertexListHead = g_ExpansionVertexBuffers[g_DrawBufferIndex];
+    } else {
+        g_VertexListHead = (Vtx *)&g_WorkArea[WORK_AREA_VERTEX_OFFSET] + g_DrawBufferIndex * VERTEX_BUFFER_LENGTH;
+    }
+
+    for (viewIndex = 0, camera = g_Cameras; viewIndex < 2; viewIndex++, camera++) {
+        drawsScene = TRUE;
+        terrainStyle = 0;
+        usesFloatMatrices = FALSE;
+        if (g_Scene == 30) {
+            InitRcp(g_DrawBufferIndex + 4);
+            if (viewIndex == 1) {
+                break;
+            }
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, SCREEN_BORDER, SCREEN_BORDER,
+                          SCREEN_WIDTH - SCREEN_BORDER, SCREEN_HEIGHT - SCREEN_BORDER);
+        } else if (drawMode == 2) {
+            InitRcp(viewIndex * 2 + g_DrawBufferIndex);
+        } else if (drawMode < 2) {
+            InitRcp(viewIndex * 2 + g_DrawBufferIndex);
+        } else {
+            if (viewIndex == 1) {
+                break;
+            }
+            InitRcp(g_DrawBufferIndex);
+        }
+        matrices = &sCameraMatrices[viewIndex * 2 + g_DrawBufferIndex];
+
+        switch (drawMode) {
+            case DRAW_MODE_BLANK:
+                ClearBuffers(BUFFER_CLEAR_WHOLE);
+                FillScreen();
+                break;
+            case DRAW_MODE_MAP_PERSPECTIVE:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_BY_LINE);
+                }
+                guLookAt(&matrices->viewing, g_MapCamera.view.eye[0], g_MapCamera.view.eye[1],
+                         g_MapCamera.view.eye[2], g_MapCamera.view.lookAt[0], g_MapCamera.view.lookAt[1],
+                         g_MapCamera.view.lookAt[2], 0.0f, -1.0f, 0.0f);
+                guAlign(&matrices->billboard, 0.0f, g_MapCamera.view.lookAt[0] - g_MapCamera.view.eye[0],
+                        g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1],
+                        g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]);
+                guAlign(&matrices->antiBillboard, M_PI, -(g_MapCamera.view.lookAt[0] - g_MapCamera.view.eye[0]),
+                        -(g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1]),
+                        -(g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]));
+                terrainStyle = 2;
+                guPerspective(&matrices->perspective, &mapPerspNorm, sMapFieldOfView, ASPECT_RATIO, MAP_NEAR_CLIP,
+                              MAP_FAR_CLIP, 1.0f);
+                gSPPerspNormalize(g_DisplayListHead++, mapPerspNorm);
+                guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
+                LoadProjection();
+                break;
+            case DRAW_MODE_MAP_ISOMETRIC:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_BY_LINE);
+                }
+                eyeX = g_MapCamera.view.eye[0] - MAP_ISOMETRIC_OFFSET_X;
+                eyeY = g_MapCamera.view.eye[1] - MAP_ISOMETRIC_OFFSET_Y;
+                eyeZ = g_MapCamera.view.eye[2] - MAP_ISOMETRIC_OFFSET_X;
+                guLookAt(&matrices->viewing, eyeX, eyeY, eyeZ, g_MapCamera.view.eye[0], g_MapCamera.view.eye[1],
+                         g_MapCamera.view.eye[2], 0.0f, -1.0f, 0.0f);
+                guAlign(&matrices->billboard, 0.0f, g_MapCamera.view.eye[0] - eyeX, g_MapCamera.view.eye[1] - eyeY,
+                        g_MapCamera.view.eye[2] - eyeZ);
+                guAlign(&matrices->antiBillboard, M_PI, eyeX - g_MapCamera.view.eye[0],
+                        eyeY - g_MapCamera.view.eye[1], eyeZ - g_MapCamera.view.eye[2]);
+                guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH, MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT,
+                        MAP_ORTHO_HALF_HEIGHT, 10.0f, MAP_ORTHO_FAR_CLIP, 8.0f);
+                guTranslate(&matrices->placement, 0.0f, 0.0f, -1000.0f);
+                terrainStyle = 2;
+                ScaleMatrix(&matrices->viewing, g_MapCamera.view.zoom, g_MapCamera.view.zoom, 1.0f);
+                LoadProjection();
+                break;
+            case DRAW_MODE_MAP_TOP_DOWN:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_BY_LINE);
+                }
+                topDownEyeX = g_MapCamera.view.eye[0];
+                topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
+                topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
+                terrainStyle = (g_Scene == 9) ? 3 : 2;
+                guLookAt(&matrices->viewing, topDownEyeX, topDownEyeY, topDownEyeZ, topDownEyeX, g_MapCamera.view.eye[1], g_MapCamera.view.eye[2],
+                         0.0f, -1.0f, 0.0f);
+                guAlign(&matrices->billboard, 0.0f, g_MapCamera.view.eye[0] - topDownEyeX, g_MapCamera.view.eye[1] - topDownEyeY,
+                        g_MapCamera.view.eye[2] - topDownEyeZ);
+                guAlign(&matrices->antiBillboard, M_PI, topDownEyeX - g_MapCamera.view.eye[0],
+                        topDownEyeY - g_MapCamera.view.eye[1], topDownEyeZ - g_MapCamera.view.eye[2]);
+                guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH, MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT,
+                        MAP_ORTHO_HALF_HEIGHT, 10.0f, MAP_ORTHO_FAR_CLIP, 8.0f);
+                guTranslate(&matrices->placement, 0.0f, 0.0f, -1000.0f);
+                ScaleMatrix(&matrices->viewing, g_MapCamera.view.zoom, g_MapCamera.view.zoom, 1.0f);
+                LoadProjection();
+                break;
+            case DRAW_MODE_MAP_MINIATURE:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_BY_LINE);
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    FillScreen();
+                }
+                lookAtY = g_MapCamera.view.eye[1];
+                lookAtY += 1000.0f;
+                lookAtX = g_MapCamera.view.eye[0] + 10.0f;
+                lookAtZ = g_MapCamera.view.eye[2];
+                guLookAt(&matrices->viewing, g_MapCamera.view.eye[0], g_MapCamera.view.eye[1],
+                         g_MapCamera.view.eye[2], lookAtX, lookAtY, lookAtZ, 0.0f, -1.0f, 0.0f);
+                guAlign(&matrices->billboard, 0.0f, lookAtX - g_MapCamera.view.eye[0], lookAtY - g_MapCamera.view.eye[1],
+                        lookAtZ - g_MapCamera.view.eye[2]);
+                guAlign(&matrices->antiBillboard, M_PI, g_MapCamera.view.eye[0] - lookAtX,
+                        g_MapCamera.view.eye[1] - lookAtY, g_MapCamera.view.eye[2] - lookAtZ);
+                guOrtho(&matrices->perspective, -MAP_ORTHO_HALF_WIDTH, MAP_ORTHO_HALF_WIDTH, -MAP_ORTHO_HALF_HEIGHT,
+                        MAP_ORTHO_HALF_HEIGHT, 1.0f, 30000.0f, 8.0f);
+                guTranslate(&matrices->placement, 0.0f, 0.0f, -100.0f);
+                ScaleMatrix(&matrices->viewing, MAP_MINIATURE_SCALE, MAP_MINIATURE_SCALE, MAP_MINIATURE_SCALE);
+                LoadProjection();
+                break;
+            case 2:
+            case 8:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801F4AD8(&g_DisplayListHead);
+                }
+                break;
+            case 9:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801F4FF4(&g_DisplayListHead);
+                }
+                break;
+            case 7:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801FA4EC(matrices, &g_DisplayListHead);
+                }
+                break;
+            case 10:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    FillScreen();
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801F4F80(&g_DisplayListHead);
+                }
+                break;
+            case 11:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    FillScreen();
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801F7554(&g_DisplayListHead);
+                }
+                break;
+            case 12:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801F8110(&g_DisplayListHead);
+                }
+                break;
+            case DRAW_MODE_INSET_SCREEN:
+                if (viewIndex == 0) {
+                    ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                    func_801FB198(&g_DisplayListHead);
+                    g_Cameras[0].view.eye[0] = 0.0f;
+                    g_Cameras[0].view.lookAt[0] = 0.0f;
+                    g_Cameras[0].view.lookAt[1] = 0.0f;
+                    g_Cameras[0].view.lookAt[2] = 0.0f;
+                    g_Cameras[0].view.eye[1] = 10.0f;
+                    g_Cameras[0].view.eye[2] = 60.0f;
+                    func_800530FC(matrices);
+                } else if (D_8022BE08 != 0 && D_800C3FA8 == 1) {
+                    usesFloatMatrices = TRUE;
+                    guPerspectiveF(matrices->perspectiveF, &insetPerspNorm, g_Cameras[viewIndex].view.fieldOfView,
+
+                                   ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
+                    ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
+                    guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
+                    guLookAtF(matrices->viewingF, camera->view.eye[0], camera->view.eye[1],
+                              camera->view.eye[2], camera->view.lookAt[0],
+                              camera->view.lookAt[1], camera->view.lookAt[2], 0.0f, -1.0f,
+                              0.0f);
+                    ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
+                    guAlign(&matrices->billboard, 0.0f,
+                            camera->view.lookAt[0] - camera->view.eye[0],
+                            camera->view.lookAt[1] - camera->view.eye[1],
+                            camera->view.lookAt[2] - camera->view.eye[2]);
+                    guAlign(&matrices->antiBillboard, 0.0f,
+                            -(camera->view.lookAt[0] - camera->view.eye[0]),
+                            -(camera->view.lookAt[1] - camera->view.eye[1]),
+                            -(camera->view.lookAt[2] - camera->view.eye[2]));
+                    LoadProjection();
+                    gSPPerspNormalize(g_DisplayListHead++, insetPerspNorm);
+                    gDPPipeSync(g_DisplayListHead++);
+                    SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
+                    gDPPipeSync(g_DisplayListHead++);
+                    gDPPipeSync(g_DisplayListHead++);
+                    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+                    func_8008FF14(1);
+                    func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
+                    LoadProjection();
+                }
+                break;
+            case DRAW_MODE_COURSE:
+                if (D_800C7304 != 0 && D_800C306C != 4) {
+                    ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
+                } else if (D_800C3FA8 == 0) {
+                    if (viewIndex == 0) {
+                        ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    }
+                } else {
+                    if (g_Scene == 30) {
+                        ClearBuffers(BUFFER_CLEAR_WHOLE);
+                    } else if (viewIndex == 0) {
+                        ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
+                    }
+                    usesFloatMatrices = TRUE;
+                    if (g_Cameras[viewIndex].view.drawFlags != 0) {
+                        nearZ = -COURSE_NEAR_CLIP;
+                        farClip = -D_800C30D4 * 1.2f;
+                        if (g_Cameras[viewIndex].view.mode == 8 || g_Cameras[viewIndex].view.mode == 2) {
+                            nearZ = -CLOSE_UP_NEAR_CLIP;
+                        }
+                        /* Only chooses between two fixed planes; the computed distance itself is dropped */
+                        if (farClip < SHORT_FAR_CLIP) {
+                            farClip = SHORT_FAR_CLIP;
+                        } else {
+                            farClip = COURSE_FAR_CLIP;
+                        }
+                        guPerspectiveF(matrices->perspectiveF, &perspNorm, g_Cameras[viewIndex].view.fieldOfView,
+                                       ASPECT_RATIO, -nearZ, farClip, 1.0f);
+                        ConvertMatrixToFixed(matrices->perspectiveF, &matrices->perspective);
+                        g_PerspectiveNormalization = perspNorm;
+                        gSPPerspNormalize(g_DisplayListHead++, perspNorm);
+                        guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
+                        courseView = &g_Cameras[viewIndex].view;
+                        guLookAtReflectF(matrices->viewingF, &matrices->lookAt, courseView->eye[0],
+                                         courseView->eye[1], courseView->eye[2],
+                                         courseView->lookAt[0], courseView->lookAt[1],
+                                         courseView->lookAt[2], 0.0f, -1.0f, 0.0f);
+                        gSPLookAt(g_DisplayListHead++, &matrices->lookAt);
+                        func_800530FC(matrices);
+                        ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
+                        target = courseView->lookAt;
+                        if (g_ShowsBillboardsAtEdge) {
+                            billboardRise =
+                                (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
+                        } else {
+                            billboardRise =
+                                (courseView->lookAt[1] - courseView->eye[1]) * 0.5f;
+                        }
+                        guAlign(&matrices->billboard, 0.0f,
+                                courseView->lookAt[0] - courseView->eye[0], billboardRise,
+                                courseView->lookAt[2] - courseView->eye[2]);
+                        guAlign(&matrices->antiBillboard, 0.0f,
+                                -(target[0] - courseView->eye[0]), -(target[1] - courseView->eye[1]),
+                                -(target[2] - courseView->eye[2]));
+                        LoadProjection();
+                    }
+                    if (viewIndex == 0) {
+                        if (g_Cameras[0].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT)) {
+                            if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 2) {
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
+                                gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                                 (u32)sSavedFrameBuffer & ~7);
+                                gDPSetFillColor(g_DisplayListHead++,
+                                                GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
+                                gDPFillRectangle(g_DisplayListHead++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+                                gDPPipeSync(g_DisplayListHead++);
+                            }
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             osVirtualToPhysical(g_DepthBuffer) & ~7);
+                            gDPPipeSync(g_DisplayListHead++);
+                            if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+                                gDPSetDepthImage(g_DisplayListHead++, (u32)sSavedFrameBuffer & ~7);
+                            }
+                        } else {
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
+                            gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             (u32)nuGfxZBuffer & ~7);
+                            gDPSetFillColor(g_DisplayListHead++,
+                                            GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
+                            gDPFillRectangle(g_DisplayListHead++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                        }
+                        gDPPipeSync(g_DisplayListHead++);
+                        SET_CAMERA_SCISSOR(g_Cameras[0].view);
+                        if ((g_Cameras[0].view.drawFlags != (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
+                             sScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
+                            D_800C306C != 4) {
+                            func_8008FF14(0);
+                            if (!IsDebugFlagSet(0x15)) {
+                                func_80091110(&g_DisplayListHead, &g_Cameras[0].view, 0);
+                            }
+                            LoadProjection();
+                            /* Keeps the main view out of the inset view, which clears it again */
+                            if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
+                                gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                                 (u32)nuGfxZBuffer & ~7);
+                                gDPSetFillColor(g_DisplayListHead++, GPACK_ZDZ(0, 0) << 16 | GPACK_ZDZ(0, 0));
+                                gDPFillRectangle(
+                                    g_DisplayListHead++, g_Cameras[INSET_CAMERA].view.scissorX,
+                                    g_Cameras[INSET_CAMERA].view.scissorY,
+                                    g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth - 1,
+                                    g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight - 1);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                                 osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                                gDPSetFillColor(g_DisplayListHead++, 0xFFFFFFFF);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPPipeSync(g_DisplayListHead++);
+                                gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+                                gDPPipeSync(g_DisplayListHead++);
+                            }
+                        }
+                    } else {
+                        if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             (u32)nuGfxZBuffer & ~7);
+                            gDPSetFillColor(g_DisplayListHead++,
+                                            GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
+                            gDPFillRectangle(
+                                g_DisplayListHead++, g_Cameras[INSET_CAMERA].view.scissorX,
+                                g_Cameras[INSET_CAMERA].view.scissorY,
+                                g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth - 1,
+                                g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight - 1);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetFillColor(g_DisplayListHead++, 0xFFFFFFFF);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                        } else if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCREEN_EFFECT) {
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             osVirtualToPhysical(g_DepthBuffer) & ~7);
+                        }
+                        if (g_Cameras[INSET_CAMERA].view.drawFlags != 0) {
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPPipeSync(g_DisplayListHead++);
+                            gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+                            gDPPipeSync(g_DisplayListHead++);
+                            SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
+                            func_8008FF14(0);
+                            func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
+                            LoadProjection();
+                        }
+                    }
+                }
+                break;
+            case DRAW_MODE_NOTHING:
+                break;
+            default:
+                drawsScene = FALSE;
+                break;
+        }
+
+        if (sNeedsIdentityMatrix) {
+            sNeedsIdentityMatrix = FALSE;
+            guTranslate(&sIdentityMatrix, 0.0f, 0.0f, 0.0f);
+        }
+        gSPMatrix(g_DisplayListHead++, &sIdentityMatrix, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        if (D_800C7304 != 0) {
+            if (viewIndex == 0) {
+                func_8009351C(&g_DisplayListHead, D_800C7304);
+                func_800939E8(&g_DisplayListHead);
+            }
+        }
+
+        if (drawMode == DRAW_MODE_COURSE) {
+            if (D_800C3FA8 == 1 && (D_800C7304 == 0 || D_800C306C == 4)) {
+                if (g_Cameras[viewIndex].view.drawFlags != 0) {
+                    if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
+                        gDPPipeSync(g_DisplayListHead++);
+                        gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                         osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                        gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
+                        gDPPipeSync(g_DisplayListHead++);
+                    } else {
+                        func_800625FC(&g_DisplayListHead);
+                        if (!IsDebugFlagSet(6)) {
+                            func_80062A8C(matrices, terrainStyle);
+                        }
+                        DrawBillboards(matrices, viewIndex);
+                        if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+                            func_80066B50(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            if (viewIndex == 0) {
+                                BuildHorizonDynamicTextures(&g_DisplayListHead);
+                                func_80082534(&g_DisplayListHead, matrices);
+                            }
+                            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            func_800625FC(&g_DisplayListHead);
+                            DrawFadingBillboards(matrices, viewIndex);
+                        }
+                    }
+                    if (g_Cameras[viewIndex].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) &&
+                        sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+                        gDPPipeSync(g_DisplayListHead++);
+                        gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                         osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                        gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
+                        gDPPipeSync(g_DisplayListHead++);
+                        DrawScreenEffect(matrices, &g_Cameras[viewIndex].view);
+                    }
+                    func_800625FC(&g_DisplayListHead);
+                    if (g_Scene == 19) {
+                        func_801FA4EC(matrices, &g_DisplayListHead);
+                        func_8007B994(matrices, &g_DisplayListHead);
+                    } else {
+                        if (!IsDebugFlagSet(0x17)) {
+                            func_8003E6C0(matrices, &camera->view, viewIndex);
+                        }
+                        if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
+                            func_80066B50(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            if (viewIndex == 0) {
+                                BuildHorizonDynamicTextures(&g_DisplayListHead);
+                                func_80082534(&g_DisplayListHead, matrices);
+                            }
+                            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                            func_800625FC(&g_DisplayListHead);
+                            DrawFadingBillboards(matrices, viewIndex);
+                        }
+                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                            mode = g_Cameras[viewIndex].view.mode;
+                            if (mode != 8 && mode != 2) {
+                                if (!IsDebugFlagSet(0x18) && g_IsModuleAlive[1]) {
+                                    func_801FE370(matrices);
+                                }
+                                if (!IsDebugFlagSet(0x19)) {
+                                    for (playerIndex = 0; playerIndex < 4; playerIndex++) {
+                                        func_80058D04(matrices, viewIndex, playerIndex);
+                                        if (g_Scene != 30) {
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (g_IsModuleAlive[11]) {
+                                    if (viewIndex == 0) {
+                                        func_8020DCA4(&g_DisplayListHead);
+                                    }
+                                }
+                            }
+                        }
+                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                            if (g_IsModuleAlive[23] && !IsDebugFlagSet(0x2D)) {
+                                func_8021C6B4(matrices);
+                            }
+                            if (g_IsModuleAlive[17]) {
+                                func_80214250(&g_DisplayListHead, matrices);
+                            }
+                            func_8007B994(matrices, &g_DisplayListHead);
+                            if (viewIndex == 0 && g_IsModuleAlive[18]) {
+                                func_8021857C(&g_DisplayListHead, matrices);
+                            }
+                        }
+                        func_8007EF0C(&g_DisplayListHead, matrices);
+                        if (D_801B6088 != 3 && D_801B6088 != 4) {
+                            if (viewIndex == 0) {
+                                func_80083AC8(&g_DisplayListHead, matrices);
+                                func_80086864(&g_DisplayListHead);
+                                if (g_IsModuleAlive[18]) {
+                                    func_80217164(&g_DisplayListHead);
+                                }
+                            }
+                            if (D_800C306C != 4) {
+                                if (viewIndex == 0) {
+                                    func_8008D3F4(&g_DisplayListHead);
+                                }
+                            }
+                        }
+                        if (g_Cameras[viewIndex].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) &&
+                            (sScreenEffect == SCREEN_EFFECT_SPIN || sScreenEffect == SCREEN_EFFECT_TILED_IMAGE ||
+                             sScreenEffect == SCREEN_EFFECT_EMPTY)) {
+                            gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                             osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                            gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
+                            gDPPipeSync(g_DisplayListHead++);
+                            DrawScreenEffect(matrices, &g_Cameras[viewIndex].view);
+                        }
+                    }
+                }
+                if (g_Cameras[viewIndex].view.drawFlags == CAMERA_DRAW_SCREEN_EFFECT) {
+                    if (viewIndex == 1) {
+                        gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
+                                         osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
+                        gDPPipeSync(g_DisplayListHead++);
+                    }
+                }
+            }
+        } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
+            if (D_8022BE08 != 0 && viewIndex == 1 && D_800C3FA8 == 1) {
+                func_800625FC(&g_DisplayListHead);
+                func_80062A8C(matrices, terrainStyle);
+                DrawBillboards(matrices, viewIndex);
+                if (!IsDebugFlagSet(0x17)) {
+                    func_8003E6C0(matrices, &camera->view, viewIndex);
+                }
+                func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+                gDPPipeSync(g_DisplayListHead++);
+                SET_CAMERA_SCISSOR(g_Cameras[0].view);
+            }
+        } else if (drawsScene && func_80042720()) {
+            if (!IsDebugFlagSet(6)) {
+                func_80062A8C(matrices, terrainStyle);
+            }
+            func_800660B0(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
+            func_8003E6C0(matrices, &g_MapCamera.view, viewIndex);
+            if (drawMode != DRAW_MODE_MAP_MINIATURE && drawMode != DRAW_MODE_MAP_TOP_DOWN) {
+                DrawBillboards(matrices, viewIndex);
+            }
+            if (g_IsModuleAlive[1]) {
+                func_801FE370(matrices);
+            }
+            if (IsDebugFlagSet(0x50) && g_Scene != 8) {
+                func_8040C360(matrices, &g_DisplayListHead);
+            }
+        }
+    }
+
+    func_800427E8();
+    if (drawMode == DRAW_MODE_COURSE) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPPipeSync(g_DisplayListHead++);
+        SET_CAMERA_SCISSOR(g_Cameras[0].view);
+        gSPViewport(g_DisplayListHead++, &g_Viewports[g_DrawBufferIndex]);
+        if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
+            func_8008156C();
+        }
+        if (g_IsModuleAlive[20]) {
+            func_80219C74(&g_DisplayListHead);
+        }
+        if (D_800C3FA8 == 1 && !IsDebugFlagSet(0x13) && !IsDebugFlagSet(0x2D)) {
+            func_80089094(&g_Cameras[0].view);
+        }
+        if (g_IsModuleAlive[17]) {
+            func_80210370(&g_DisplayListHead);
+        }
+        if (g_IsModuleAlive[17]) {
+            func_8020EEF8(&g_DisplayListHead);
+        }
+        if (g_IsModuleAlive[17]) {
+            func_802161D4(&g_DisplayListHead);
+        }
+        func_8008C6B0(&g_DisplayListHead);
+        if (g_IsModuleAlive[5]) {
+            func_802438D0(&g_DisplayListHead);
+        }
+        if (g_IsModuleAlive[15]) {
+            func_801FCC48(&g_DisplayListHead);
+            func_801FD578(&g_DisplayListHead);
+        }
+        func_8006C918(&g_DisplayListHead);
+        if (g_IsModuleAlive[22]) {
+            func_80242294(&g_DisplayListHead);
+            func_80244134(&g_DisplayListHead);
+            func_80245320(&g_DisplayListHead);
+        }
+    }
+    func_8008D0DC();
+    func_8005029C();
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+
+    if (D_800BE694 > 0xAA) {
+        sFadeAlpha = (D_800BE694 - 0xAA) * 16;
+        if (sFadeColor == FADE_COLOR_NONE) {
+            SetScreenEffect(SCREEN_EFFECT_SPIN, 30);
+        }
+    } else if (D_800BE694 == -1) {
+        sFadeAlpha -= 32;
+        if (sFadeAlpha < 0) {
+            sFadeAlpha = 0;
+            D_800BE694 = 0;
+        }
+    } else {
+        sFadeAlpha = 0;
+    }
+    if (sFadeAlpha != 0) {
+        if (sFadeColor == FADE_COLOR_BLACK) {
+            gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 0, sFadeAlpha);
+            gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        } else if (sFadeColor == FADE_COLOR_WHITE) {
+            gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, sFadeAlpha);
+            gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        } else if (sFadeColor == FADE_COLOR_NOISE) {
+            gDPSetPrimColor(g_DisplayListHead++, 0, 0, FADE_NOISE_GREY, FADE_NOISE_GREY, FADE_NOISE_GREY,
+                            sFadeAlpha);
+            gDPSetCombineLERP(g_DisplayListHead++, NOISE, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, NOISE, 0, PRIMITIVE,
+                              0, 0, 0, 0, PRIMITIVE);
+        }
+        if (sFadeColor != FADE_COLOR_NONE) {
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+            gSPTextureRectangle(g_DisplayListHead++, g_Cameras[0].view.scissorX << 2,
+                                g_Cameras[0].view.scissorY << 2,
+                                (g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth) << 2,
+                                (g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        }
+    }
+
+    if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & L_TRIG)) {
+        g_FrameStepState = FRAME_STEP_PAUSED;
+    }
+    if (IsDebugFlagSet(0x2F)) {
+        if (g_ControllerStates[1].buttons & D_CBUTTONS) {
+            SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
+        }
+        if (g_ControllerStates[1].buttons & U_CBUTTONS) {
+            SetScreenEffect(SCREEN_EFFECT_SPIN, 16);
+        }
+        if (g_ControllerStates[1].buttons & L_CBUTTONS) {
+            SetScreenEffect(SCREEN_EFFECT_TILED_IMAGE, 64);
+        }
+        if (g_ControllerStates[1].buttons & R_CBUTTONS) {
+            SetScreenEffect(SCREEN_EFFECT_EMPTY, 64);
+        }
+        if (g_ControllerStates[1].buttons & D_CBUTTONS) {
+            sFadeAlpha -= 8;
+        }
+        if (g_ControllerStates[1].buttons & U_CBUTTONS) {
+            sFadeAlpha += 8;
+        }
+        if (sFadeAlpha > 0xFF) {
+            sFadeAlpha = 0xFF;
+        }
+        if (sFadeAlpha < 0) {
+            sFadeAlpha = 0;
+        }
+        if (g_ControllerStates[1].pressedButtons & B_BUTTON) {
+            g_FrameStepState = FRAME_STEP_PAUSED;
+        }
+        if (g_ControllerStates[1].pressedButtons & D_JPAD) {
+            sUnreadDebugSwitch ^= 1;
+        }
+        if (g_ControllerStates[1].pressedButtons & U_JPAD) {
+            g_Cameras[INSET_CAMERA].view.drawFlags ^= CAMERA_DRAW_SCENE;
+        }
+    }
+
+    func_8006BC80(&g_DisplayListHead);
+    if (g_IsModuleAlive[20]) {
+        func_8021A940(&g_DisplayListHead);
+    }
+    func_80071B34(&g_DisplayListHead);
+    if (g_IsModuleAlive[17]) {
+        func_8020FC10(&g_DisplayListHead);
+    }
+    func_8006AEA4(&g_DisplayListHead);
+    func_8006B5D8(&g_DisplayListHead);
+    func_8008CD30(&g_DisplayListHead);
+    if (IsDebugFlagSet(0x46)) {
+        func_80088BDC(&g_DisplayListHead);
+    }
+    func_800957F0();
+    if (g_IsModuleAlive[3]) {
+        func_80200CBC(&g_DisplayListHead, 1);
+    }
+    if (g_Scene == 30 && g_IsModuleAlive[31]) {
+        func_801F7554(&g_DisplayListHead);
+    }
+    if (IsDebugFlagSet(1)) {
+        func_8004DA24(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
+        sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
+        func_8004DA24(g_PrintBuffer, 3, 5);
+    }
+    if (IsDebugFlagSet(0x39)) {
+        func_8004DC44();
+    }
+    func_8004D7B8(&g_DisplayListHead);
+    if (IsDebugFlagSet(0x1B) && (g_ControllerData[1].trigger & Z_TRIG)) {
+        if (IsDebugFlagSet(0x1D)) {
+            ClearDebugFlag(0x1D);
+        } else {
+            SetDebugFlag(0x1D);
+        }
+    }
+    if (IsDebugFlagSet(0x2F)) {
+        if (g_ControllerStates[1].pressedButtons & Z_TRIG) {
+            func_8040C124();
+        }
+        if (g_ControllerStates[1].pressedButtons & R_JPAD) {
+            func_8040BFC8();
+        }
+    }
+
+    gDPFullSync(g_DisplayListHead++);
+    gSPEndDisplayList(g_DisplayListHead++);
+    commandCount = g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex];
+    if ((u32)commandCount >= DISPLAY_LIST_LENGTH) {
+        ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2636);
+    }
+    if (!g_HasExpansionPak && g_VertexListHead - ((Vtx *)&g_WorkArea[WORK_AREA_VERTEX_OFFSET] +
+                                                  g_DrawBufferIndex * VERTEX_BUFFER_LENGTH) >=
+                                  VERTEX_BUFFER_LENGTH) {
+        ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2637);
+    }
+    func_8005C018(commandCount);
+
+    if (g_IsDebugEnabled) {
+        if ((g_ControllerData[1].button & START_BUTTON) && !(g_PreviousControllerData[1].button & START_BUTTON)) {
+            g_FramePacingMode = (g_FramePacingMode + 1) % PACING_MODE_COUNT;
+        }
+        /* Reads the second controller's last state for the third's */
+        if (g_IsDebugEnabled && (g_ControllerData[2].button & START_BUTTON) &&
+            !(g_PreviousControllerData[1].button & START_BUTTON)) {
+            g_FramePacingMode = (g_FramePacingMode + 2) % PACING_MODE_COUNT;
+        }
+    }
+
+    sGfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
+    if (g_FramePacingMode == PACING_MODE_NORMAL) {
+        nuGfxTaskStart(g_DisplayLists[g_DrawBufferIndex],
+                       (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+                       NU_GFX_UCODE_F3DEX, GFX_TASK_FLAGS);
+    } else if (g_FramePacingMode == PACING_MODE_PERFORMANCE_METER) {
+        nuGfxTaskStart(g_DisplayLists[g_DrawBufferIndex],
+                       (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+                       NU_GFX_UCODE_F3DEX, NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER);
+        func_8004E924(2, 200, sDrawStartTime, sGfxTaskStartTime + (sUpdateEndTime - sUpdateStartTime),
+                      GFX_TASK_FLAGS, 8);
+    } else {
+        nuGfxTaskStart(g_DisplayLists[g_DrawBufferIndex],
+                       (s32)(g_DisplayListHead - g_DisplayLists[g_DrawBufferIndex]) * sizeof(Gfx),
+                       NU_GFX_UCODE_F3DEX, NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER);
+        func_8004FDB4(0xC0, GFX_TASK_FLAGS);
+    }
+    g_DrawBufferIndex ^= 1;
+    nuGfxDisplayOn();
+    return g_FrameCount;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/game", LoadProjection);
 INCLUDE_ASM("asm/nonmatchings/game", DrawGame);
+#endif
 
 /*
  * Copies the frame shown last onto the frame being drawn, so a frame can be
