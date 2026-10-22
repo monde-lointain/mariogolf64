@@ -23,6 +23,7 @@ CPP_FLAGS = [
     "-Ilib/ultralib/include",
     "-Ilib/ultralib/include/gcc",
     "-Ilib/ultralib/include/PR",
+    "-Ilib/libmus/include",
     "-Ilib/ultralib/src",
     "-Ilib/libmus/src",
     "-Ilib/libmus/include",

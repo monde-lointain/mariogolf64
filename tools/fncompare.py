@@ -28,7 +28,8 @@ KMC_DIR = os.path.join(ROOT, "tools", "gcc_kmc")
 CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ffast-math",
           "-nostdinc", "-funsigned-char", "-w", "-O2"]
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
-            "-Ilib/ultralib/include/PR", "-Isrc", "-Ibuild"]
+            "-Ilib/ultralib/include/PR", "-Ilib/libmus/include", "-Isrc",
+            "-Ibuild"]
 DEFINES = ["-D_LANGUAGE_C", "-D_MIPS_SZLONG=32", "-D_MIPS_SZINT=32", "-DF3DEX_GBI_2",
            "-DNDEBUG", "-D_FINALROM", "-DBUILD_VERSION=VERSION_J", "-D__IS_KMC__=1",
            "-DNON_MATCHING"]
@@ -105,7 +106,9 @@ def read_object_functions(elf):
     for symbol in symbols.iter_symbols():
         if symbol["st_info"]["type"] == "STT_FUNC" and symbol["st_shndx"] == text_index:
             start = symbol["st_value"] // 4
-            functions[symbol.name] = words[start:start + symbol["st_size"] // 4]
+            # GCC names a nested function NAME.N, after its label number
+            name = symbol.name.split(".")[0]
+            functions[name] = words[start:start + symbol["st_size"] // 4]
     return functions
 
 
