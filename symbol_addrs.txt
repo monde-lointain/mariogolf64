@@ -909,6 +909,7 @@ SetCharacterUnk188 = 0x800564C4; // type:func
 SetCharacterUnk189 = 0x800564F0; // type:func
 GetAnimationFrame = 0x80056520; // type:func
 AnimateCharacter = 0x80056558; // type:func
+UpdateJointKeyframeSpans = 0x800568CC; // type:func
 AnimateCharacterInSameCopy = 0x800574A8; // type:func
 AnimateAllCharacters = 0x80057798; // type:func
 PlaceCharacterForShot = 0x80058ACC; // type:func

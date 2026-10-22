@@ -93,6 +93,12 @@ typedef struct JointAnimation {
 /* The translation key count of the joint ending a model's list */
 #define END_OF_JOINT_ANIMATIONS -1
 
+/* Rotation keys are quaternions in units of QUATERNION_SCALE */
+#define QUATERNION_SCALE (1.0f / 16384)
+#define QUATERNION_PRODUCT_SCALE (1.0f / (16384 * 16384))
+/* The least 1 - cos of the angle between rotations that are slerped */
+#define SLERP_THRESHOLD 1e-06
+
 /* Something that happens on a frame of a CharacterAnimation */
 typedef struct AnimationEvent {
     /* 0x0 */ s16 frame; /* END_OF_ANIMATION_EVENTS ends the list */

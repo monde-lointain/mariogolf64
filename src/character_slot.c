@@ -29,12 +29,6 @@
 
 #define CHARACTER_POINT_UNK2 2
 
-/* Rotation keys are quaternions in units of QUATERNION_SCALE */
-#define QUATERNION_SCALE (1.0f / 16384)
-#define QUATERNION_PRODUCT_SCALE (1.0f / (16384 * 16384))
-/* The least 1 - cos of the angle between rotations that are slerped */
-#define SLERP_THRESHOLD 1e-06
-
 #define MODEL_TO_WORLD_SCALE 0.01f
 #define SLOT_POSITION_SCALE (1.0f / 1024)
 
