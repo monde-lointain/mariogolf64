@@ -951,7 +951,7 @@ void func_800939E8(Gfx **displayListHead);
 void func_800957F0(void);
 void func_801F4AD8(Gfx **displayListHead);
 void func_801F4F80(Gfx **displayListHead);
-void func_801F4FF4(Gfx **displayListHead);
+void DrawBootLogos(Gfx **displayListHead);
 void func_801F7554(Gfx **displayListHead);
 void func_801F8110(Gfx **displayListHead);
 void func_801FA4EC(CameraMatrices *matrices, Gfx **displayListHead);
@@ -1240,7 +1240,7 @@ s32 DrawGame(void) {
                     ClearBuffers(BUFFER_CLEAR_WHOLE);
                     gDPPipeSync(g_DisplayListHead++);
                     SET_CAMERA_SCISSOR(g_Cameras[0].view);
-                    func_801F4FF4(&g_DisplayListHead);
+                    DrawBootLogos(&g_DisplayListHead);
                 }
                 break;
             case 7:
@@ -2105,7 +2105,7 @@ void UpdateGame(void) {
         g_Cameras[INSET_CAMERA].view.scissorWidth = SCREEN_WIDTH / 2;
         g_Cameras[INSET_CAMERA].view.scissorHeight = SCREEN_HEIGHT / 2;
     } else if (g_Scene == 27) {
-        func_801F4DA0();
+        UpdateBootLogos();
     } else if (g_Scene == 26) {
         func_801F4A40();
     } else if (g_Scene == 21) {

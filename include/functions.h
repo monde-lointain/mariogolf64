@@ -54,7 +54,7 @@ void func_801F4C84_ovl_06(void);
 void func_801F4D48_ovl_06(void);
 
 /* ovl_07 */
-void func_801F4A40_ovl_07(void);
+void LoadBootLogos(void);
 
 /* ovl_13 */
 void func_801F4B20_ovl_13(void);
@@ -99,7 +99,7 @@ void func_800605EC(void);
 void func_801F4A40(void);
 void func_801F4C78(void);
 void func_801F4D74(void);
-void func_801F4DA0(void);
+void UpdateBootLogos(void);
 void func_801F5F1C(void);
 void func_801F6788(void);
 void func_801F7148(void);

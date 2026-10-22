@@ -570,8 +570,10 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x14FB50, asm]
-      - [0x150890, data]
+      - [0x14FB50, hasm, ovl_07/padding]
+      - [0x14FB60, c, ovl_07/boot_logos]
+      - [0x150890, .data, ovl_07/boot_logos]
+      - [0x1508A0, .rodata, ovl_07/boot_logos]
       - { start: 0x1508D0, type: bss, vram: 0x801F57B0 }
 
   - name: ovl_08
