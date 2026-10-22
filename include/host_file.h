@@ -14,6 +14,9 @@
 #define HOST_FILE_NAME_TOO_SHORT 2
 #define HOST_FILE_NAME_TOO_LONG 3
 
+/* Ends the text files written to the host */
+#define END_OF_FILE_CHARACTER 0x1A
+
 s32 WriteHostFile(char *fileName, u32 size);
 s32 ReadHostFile(char *fileName, u32 *size);
 

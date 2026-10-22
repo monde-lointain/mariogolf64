@@ -53,7 +53,6 @@
 /* The size of WriteClubParameters' text */
 #define CLUB_SOURCE_SIZE 0x8000
 #define CLUB_SOURCE_LINE_SIZE 256
-#define END_OF_FILE_CHARACTER 0x1A
 
 #define CLUB_ASSERT_LINE 543
 
