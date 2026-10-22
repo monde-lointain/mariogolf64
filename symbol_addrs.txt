@@ -991,3 +991,7 @@ ReadEncodedAsset = 0x800506D4; // type:func
 LoadMenuResources = 0x8005A580; // type:func
 FreeMenuResources = 0x8005ACF8; // type:func
 InvalidateBrokenSavedGames = 0x8005CF78; // type:func
+RecordComCharacterResult = 0x80070FD0; // type:func
+AddBirdieBadge = 0x800710C4; // type:func
+ReportBirdieBadgeCount = 0x8007117C; // type:func
+RecordTournamentPlace = 0x80071220; // type:func

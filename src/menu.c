@@ -982,7 +982,7 @@ s32 IsMapleUnlocked(void) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-            badgeCount += save->hasBirdieBadge[courseIndex][holeIndex] != FALSE;
+            badgeCount += save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
         }
     }
     return badgeCount >= MAPLE_BADGE_COUNT;
@@ -998,7 +998,7 @@ s32 IsMetalMarioUnlocked(void) {
     badgeCount = 0;
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
-            badgeCount += save->hasBirdieBadge[courseIndex][holeIndex] != FALSE;
+            badgeCount += save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
         }
     }
     return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
@@ -1040,7 +1040,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
         recordIndex = 0;
         arg0 = 0;
         for (; recordIndex != SAVE_UNKAF0_ROW_COUNT; recordIndex++) {
-            if (save->unkAF0[recordIndex][index].unk1 & 0x7F) {
+            if (save->unk990.unkAF0[recordIndex][index].unk1 & 0x7F) {
                 arg0++;
                 break;
             }
@@ -1412,9 +1412,9 @@ typedef struct Unk80105C38 {
     /* 0x20 */ f32 unk20;
     /* 0x24 */ f32 unk24;
     /* 0x28 */ f32 unk28;
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
+    /* 0x2C */ s32 hasThirdPlace;
+    /* 0x30 */ s32 hasSecondPlace;
+    /* 0x34 */ s32 hasFirstPlace;
 } Unk80105C38; /* size = 0x38 */
 
 extern Unk80105C38 D_80105C38[STATISTICS_SET_COUNT + 1];
@@ -1458,9 +1458,9 @@ void ComputeRoundStatistics(void) {
             D_80105C38[setIndex].unk1C = 0.0f;
             D_80105C38[setIndex].unk24 = 0.0f;
             D_80105C38[setIndex].unk20 = 0.0f;
-            D_80105C38[setIndex].unk2C = 0;
-            D_80105C38[setIndex].unk30 = 0;
-            D_80105C38[setIndex].unk34 = 0;
+            D_80105C38[setIndex].hasThirdPlace = FALSE;
+            D_80105C38[setIndex].hasSecondPlace = FALSE;
+            D_80105C38[setIndex].hasFirstPlace = FALSE;
         } else {
             /* unk14 is left as it was */
             reciprocal = 1.0f / entry->roundCount;
@@ -1478,9 +1478,9 @@ void ComputeRoundStatistics(void) {
             } else {
                 D_80105C38[setIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
             }
-            D_80105C38[setIndex].unk2C = entry->unk30;
-            D_80105C38[setIndex].unk30 = entry->unk34;
-            D_80105C38[setIndex].unk34 = entry->unk38;
+            D_80105C38[setIndex].hasThirdPlace = entry->hasThirdPlace;
+            D_80105C38[setIndex].hasSecondPlace = entry->hasSecondPlace;
+            D_80105C38[setIndex].hasFirstPlace = entry->hasFirstPlace;
         }
     }
 
@@ -1496,9 +1496,9 @@ void ComputeRoundStatistics(void) {
     D_80105C38[STATISTICS_SET_COUNT].unk20 = 0.0f;
     D_80105C38[STATISTICS_SET_COUNT].unk24 = 0.0f;
     D_80105C38[STATISTICS_SET_COUNT].unk28 = 0.0f;
-    D_80105C38[STATISTICS_SET_COUNT].unk2C = 0;
-    D_80105C38[STATISTICS_SET_COUNT].unk30 = 0;
-    D_80105C38[STATISTICS_SET_COUNT].unk34 = 0;
+    D_80105C38[STATISTICS_SET_COUNT].hasThirdPlace = FALSE;
+    D_80105C38[STATISTICS_SET_COUNT].hasSecondPlace = FALSE;
+    D_80105C38[STATISTICS_SET_COUNT].hasFirstPlace = FALSE;
     D_80105C38[STATISTICS_SET_COUNT].unk4 = 0.0f;
     D_80105C38[STATISTICS_SET_COUNT].unkC = 0.0f;
     D_80105C38[STATISTICS_SET_COUNT].unk4 = D_80105C38[0].unk4;

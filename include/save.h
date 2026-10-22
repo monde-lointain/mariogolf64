@@ -94,9 +94,9 @@ typedef struct UnkE98 {
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 unk28;
     /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s32 unk30;
-    /* 0x34 */ s32 unk34;
-    /* 0x38 */ s32 unk38;
+    /* 0x30 */ s32 hasThirdPlace; /* In a tournament on the course */
+    /* 0x34 */ s32 hasSecondPlace;
+    /* 0x38 */ s32 hasFirstPlace;
     /* 0x3C */ u8 unk3C[0x74 - 0x3C];
 } UnkE98; /* size = 0x74 */
 
@@ -131,6 +131,16 @@ typedef struct UnkAF0 {
     /* 0x1 */ u8 unk1;
 } UnkAF0; /* size = 0x2 */
 
+/*
+ * Routines that update the birdie badges reach them through a pointer to
+ * this; where it ends is unknown
+ */
+typedef struct Unk990 {
+    /* 0x000 */ u8 unk0[0xF4];
+    /* 0x0F4 */ s8 birdieBadgeCounts[COURSE_COUNT][COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
+    /* 0x160 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
+} Unk990; /* size = 0x3E8 */
+
 typedef struct SaveData {
     /* 0x0000 */ u32 magic;
     /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
@@ -140,9 +150,7 @@ typedef struct SaveData {
     /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
     /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
     /* 0x0720 */ Unk68 modeRecords[MODE_RECORD_COUNT];
-    /* 0x0990 */ u8 unk990[0xA84 - 0x990];
-    /* 0x0A84 */ s8 hasBirdieBadge[COURSE_COUNT][COURSE_HOLE_COUNT];
-    /* 0x0AF0 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
+    /* 0x0990 */ Unk990 unk990;
     /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
     /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
     /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];

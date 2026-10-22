@@ -31,6 +31,13 @@ extern s32 g_PendingSubModuleId;
 extern s32 g_SubModuleState;
 
 /* The kind of game the player chose, such as a tournament or a match */
+/*
+ * The mode in which AddBirdieBadge counts badges and RecordTournamentPlace
+ * reads the 30 contestants; the walkthrough's Tournament is the one mode
+ * with birdie badges and 30 contestants
+ */
+#define GAME_MODE_TOURNAMENT 5
+
 extern u32 g_GameMode;
 
 void UpdateOverlays(void);
