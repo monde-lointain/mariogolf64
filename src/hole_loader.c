@@ -1,5 +1,6 @@
 #include "common.h"
 #include "billboard.h"
+#include "character_slot.h"
 #include "course.h"
 #include "current_shot.h"
 #include "functions.h"
@@ -167,7 +168,6 @@ void func_8004D148(void);
 void func_80057914(void);
 void func_8005F1C8(void);
 void func_8005F964(void);
-s32 func_80054310(void);
 void func_80080220(void);
 void func_800802E0(void);
 void func_80253234(s32);
@@ -900,7 +900,7 @@ void RunLoaderThread(void) {
         courseRecordIndex = GetCourseRecordIndex();
         while (g_FrameCount - D_80105318 < LOADER_FRAME_DELAY) {}
         osSyncPrintf("MPSTART\n");
-        while (func_80054310()) {
+        while (IsAnyCharacterSlotBusy()) {
             osSyncPrintf("Wow! Polychar is alive\n");
         }
         if (IsGameFlagSet(GAME_FLAG_UNK51) && g_HoleIndex == 0) {

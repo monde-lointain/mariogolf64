@@ -1,6 +1,7 @@
 #include "common.h"
 #include <lib/libnusys/nusys.h>
 #include "asset.h"
+#include "character_slot.h"
 #include "controller.h"
 #include "hole_loader.h"
 #include "sound.h"
@@ -107,7 +108,6 @@ void func_800718F4(s32 red, s32 green, s32 blue, s32 colorIndex);
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_80071C74(s32 slot);
 s32 func_80071C9C(s32 slot);
-void FreeAllCharacterSlots(void);
 
 extern s32 D_800C2000;
 extern s32 D_800FE334;

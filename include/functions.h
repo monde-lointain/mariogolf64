@@ -13,8 +13,6 @@ void RunBootHook(void);
 void InitAssetFiles(void);
 void InitRumblePaks(void);
 void StopAllRumble(void);
-void FreeCharacterSlot(s32 slotIndex);
-void FreeAllCharacterSlots(void);
 void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer);

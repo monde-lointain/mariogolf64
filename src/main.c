@@ -1,4 +1,5 @@
 #include "common.h"
+#include "character_slot.h"
 #include "club.h"
 #include "controller.h"
 #include "game_flags.h"

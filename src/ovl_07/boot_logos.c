@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "camera.h"
+#include "character_slot.h"
 #include "controller.h"
 #include "functions.h"
 #include "hole_loader.h"
@@ -100,7 +101,6 @@ extern N64Logo sN64Logo;
 
 extern s32 D_800B6808;
 
-s32 func_800542A0(s32);
 void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
                    s32 dtdy);
 void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
@@ -217,7 +217,7 @@ void UpdateBootLogos(void) {
             break;
         case BOOT_LOGO_CAMELOT:
             if (sBootLogoFrame == 0) {
-                if (func_800542A0(0)) {
+                if (IsCharacterSlotBusy(0)) {
                     FreeCharacterSlot(0);
                 } else {
                     func_8008D100();
