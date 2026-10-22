@@ -28,6 +28,8 @@ extern u8 g_OptionBits;
 extern u8 g_SoundOptionBits;
 
 extern SaveCopyLocation g_SaveCopyLocations[];
+/* The course points needed in total to open each course */
+extern s32 g_CoursePointsNeeded[COURSE_COUNT];
 extern char g_RomBuildDate[];
 
 typedef struct Unk800FE3D8 {
@@ -127,13 +129,56 @@ void InitSaveData(void) {
     TransferSaveData(save, FALSE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B070);
+s32 CountOpenCourses(s32 coursePoints) {
+    s32 courseIndex;
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B0A0);
+    for (courseIndex = COURSE_COUNT - 1; courseIndex != 0; courseIndex--) {
+        if (coursePoints >= g_CoursePointsNeeded[courseIndex]) {
+            break;
+        }
+    }
+    return courseIndex + 1;
+}
+
+s32 GetCoursePointsNeeded(s32 courseIndex) {
+    return g_CoursePointsNeeded[courseIndex];
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005B0B4);
 
-INCLUDE_ASM("asm/nonmatchings/menu", func_8005B150);
+/* Fills order with the indices of values from the largest value down, keeping ties in order */
+void SortIndicesDescending(s32 *values, s32 *order, s32 count) {
+    s32 sortedValues[count];
+    s32 index;
+    s32 searchIndex;
+    s32 shiftIndex;
+    s32 value;
+    s32 valueIndex;
+
+    for (index = 0; index < count; index++) {
+        order[index] = index;
+    }
+    for (index = 0; index < count; index++) {
+        sortedValues[index] = values[index];
+    }
+    for (index = 0; index < count; index++) {
+        value = sortedValues[index];
+        valueIndex = order[index];
+        for (searchIndex = index - 1; searchIndex >= 0; searchIndex--) {
+            if (sortedValues[searchIndex] >= value) {
+                break;
+            }
+        }
+        if (searchIndex < index - 1) {
+            for (shiftIndex = index; searchIndex + 1 < shiftIndex; shiftIndex--) {
+                sortedValues[shiftIndex] = sortedValues[shiftIndex - 1];
+                order[shiftIndex] = order[shiftIndex - 1];
+            }
+            sortedValues[shiftIndex] = value;
+            order[shiftIndex] = valueIndex;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/menu", func_8005B28C);
 

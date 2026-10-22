@@ -41,7 +41,9 @@ typedef struct SaveData {
     /* 0x0DC0 */ s32 unkDC0[6][3];
     /* 0x0E08 */ u8 unkE08[0x1320 - 0xE08];
     /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
-    /* 0x1344 */ u8 unk1344[0x2A78 - 0x1344];
+    /* 0x1344 */ u8 unk1344[0x15CC - 0x1344];
+    /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
+    /* 0x15D0 */ u8 unk15D0[0x2A78 - 0x15D0];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */
@@ -65,5 +67,7 @@ void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);
 void WriteSaveData(void);
+s32 CountOpenCourses(s32 coursePoints);
+s32 GetCoursePointsNeeded(s32 courseIndex);
 
 #endif

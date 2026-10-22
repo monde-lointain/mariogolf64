@@ -973,3 +973,7 @@ IsDonkeyKongUnlocked = 0x8005C4B4; // type:func
 GetRingShotCourseOpenedAtStarCount = 0x8005C510; // type:func
 IsMapleUnlocked = 0x8005C5B4; // type:func
 IsMetalMarioUnlocked = 0x8005C614; // type:func
+SortIndicesDescending = 0x8005B150; // type:func
+CountOpenCourses = 0x8005B070; // type:func
+GetCoursePointsNeeded = 0x8005B0A0; // type:func
+g_CoursePointsNeeded = 0x800C2B28; // size:0x18
