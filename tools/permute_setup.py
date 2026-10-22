@@ -39,7 +39,7 @@ def main():
     base_path = os.path.join(out_dir, "base.c")
     preprocessed = subprocess.run(
         ["mips-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-DPERMUTER", *fncompare.INCLUDES,
-         *[d for d in fncompare.DEFINES if d != "-DNON_MATCHING"], "-D__GNUC__=2", "-D__mips__",
+         *fncompare.DEFINES, "-D__GNUC__=2", "-D__mips__",
          c_path],
         cwd=ROOT, check=True, capture_output=True, text=True).stdout
     with open(base_path, "w") as base_file:
