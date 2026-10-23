@@ -806,6 +806,7 @@ InitPlay = 0x8005F838; // type:func
 LoadSuperShotReplay = 0x80060210; // type:func
 LoadRingShotRecord = 0x800602B4; // type:func
 BackUpPlayState = 0x80060434; // type:func
+HasWonFinalChallenge = 0x800604F4; // type:func
 FillRandomGrid = 0x800624F0; // type:func
 CopyDoublePair = 0x800627F8; // type:func
 MarkNearbyCells = 0x8006280C; // type:func

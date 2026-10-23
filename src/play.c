@@ -1,12 +1,16 @@
 #include "common.h"
+#include "character.h"
 #include "club.h"
 #include "course.h"
 #include "current_shot.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "main.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
+#include "scoring.h"
+#include "tournament.h"
 
 /* D_80104EB8 divides the main courses into cells of 1 << CELL_SIZE_SHIFT units */
 #define CELL_SIZE_SHIFT 19
@@ -75,6 +79,7 @@ extern s32 D_80104F88;
 extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
+extern s32 D_801B60B4;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern s8 g_IsMiniGolf;
@@ -310,7 +315,35 @@ void BackUpPlayState(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800604F4);
+/*
+ * Whether the player has beaten Bowser in a Get Character match, or has
+ * won first place in a Boo Valley or Mario's Star tournament
+ */
+s32 HasWonFinalChallenge(void) {
+    s32 firstHole;
+    TournamentStanding *standing;
+    s32 i;
+
+    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+        if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
+            if ((s8)g_Players[1].characterIndex == CHARACTER_BOWSER) {
+                return TRUE;
+            }
+        }
+    } else if (g_GameMode == GAME_MODE_TOURNAMENT) {
+        if (g_CourseIndex == COURSE_RECORD_BOO_VALLEY || g_CourseIndex == COURSE_RECORD_MARIOS_STAR) {
+            firstHole = GetFirstHoleIndex();
+            RankTournament(COURSE_HOLE_COUNT, 0, GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0), D_801B60B4);
+            for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
+                standing = &g_TournamentStandings[i];
+                if (standing->contestantId == PLAYER_CONTESTANT && (standing->place & PLACE_MASK) == 1) {
+                    return TRUE;
+                }
+            }
+        }
+    }
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/play", func_800605EC);
 
