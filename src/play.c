@@ -87,6 +87,10 @@ extern u8 D_800FE330;
 extern s32 D_801B60B4;
 extern s8 D_801B60B9;
 extern s8 D_800FBDB8;
+extern s8 D_801B60B8;
+extern PlayRecord D_800FED40[];
+extern s8 D_800FEE10;
+extern s8 D_800FEE11;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern s8 g_IsMiniGolf;
@@ -97,6 +101,10 @@ void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void func_8005F540(void);
+void func_80080220(void);
+void WriteBallDistancesIfEnabled(void);
+void InitExpansionPakFeatures(void);
+void LoadSuperShotReplay(PlayRecord *record);
 void StartMovie(s32 movie);
 s32 IsMovieFinished(void);
 
@@ -222,7 +230,34 @@ void FormatDefaultPlayerName(s32 index, char *name) {
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005F540);
 
-INCLUDE_ASM("asm/nonmatchings/play", InitPlay);
+void InitPlay(s32 kind) {
+    if (kind == 1) {
+        func_8005F360();
+    } else if (kind == 0) {
+        func_8005F4AC();
+    } else if (kind == 2) {
+        LoadSuperShotReplay(D_800FED40);
+        g_GameState.unk14 = 0;
+        g_GameState.playerCount = 1;
+        g_GameState.unk0 = 0;
+        g_GameState.gameMode = GAME_MODE_STROKE;
+        g_GameState.courseIndex = D_800FEE10;
+        g_GameState.holeIndex = D_800FEE11;
+    }
+    RenumberHoleHandicaps();
+    if (!D_801B60B8) {
+        func_8005F540();
+    }
+    if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
+        g_Players[1].unk1E[0] = 1;
+    }
+    InitExpansionPakFeatures();
+    if (kind != 3) {
+        func_80080220();
+    }
+    WriteBallDistancesIfEnabled();
+    osSyncPrintf("PlayInitComplete\n");
+}
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005F964);
 
@@ -450,7 +485,50 @@ void func_800628A0(void) {
     bzero(D_80104EB8, sizeof(D_80104EB8));
 }
 
+static inline s32 GetMirroredOffset(s32 coordinate) {
+    s32 tile = coordinate / 512;
+    s32 offset;
+
+    offset = coordinate - tile * 512;
+    if (tile % 2) {
+        offset = 512 - offset;
+    }
+    return offset;
+}
+
+#ifdef NON_MATCHING
+void func_800628C4(void) {
+    Vtx_t point;
+    s32 row;
+    s32 column;
+    s32 offset;
+
+    ClearGameFlag(7);
+    for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+            point = GetGroundPoint(column, row)->v;
+            offset = GetMirroredOffset(point.ob[0]);
+            if (offset != 512) {
+                point.tc[0] = offset << 5;
+            } else {
+                point.tc[0] = 0x4000;
+            }
+            point.tc[0] += 0x100;
+            offset = GetMirroredOffset(point.ob[2]);
+            if (offset != 512) {
+                point.tc[1] = offset << 5;
+            } else {
+                point.tc[1] = 0x4000;
+            }
+            point.tc[1] += 0x100;
+            SetGroundPoint(column, row, &point);
+        }
+    }
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/play", func_80062A24);
 
