@@ -1817,3 +1817,6 @@ g_SkinsCarryover = 0x801050BC; // size:0x3
 SettleNassau = 0x8006DFF0; // type:func
 SettleHoleBets = 0x8006E210; // type:func
 RecordCourseRound = 0x8006D6D0; // type:func
+MeasureMessage = 0x8007399C; // type:func
+sChoiceBobAngle = 0x800C412C; // size:0x4
+MarkHalfTurnCircle = 0x8006C484; // type:func

@@ -1,10 +1,13 @@
 #include "common.h"
 #include "asset.h"
 #include "controller.h"
+#include "debug_text.h"
 #include "heap.h"
+#include "math_util.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "variables.h"
 
 /* The wipe's shapes are 64 by 64 intensity masks */
 #define DEFAULT_WIPE_SHAPE 0x63F
@@ -35,6 +38,72 @@
 
 #define HALF_TURN_IMAGE 0x955
 #define HALF_TURN_FRAMES 144
+#define HALF_TURN_WIDTH 304
+#define HALF_TURN_CENTER_COLUMN (HALF_TURN_PAIRS_PER_ROW / 2)
+#define HALF_TURN_CENTER_ROW 112
+/* Circles marked per frame */
+#define HALF_TURN_SHOW_STEPS 8
+#define HALF_TURN_HIDE_STEPS 12
+#define HALF_TURN_SHOW_SOUND_RADIUS 96
+#define HALF_TURN_HIDE_SOUND_RADIUS 48
+/* Frames after the picture is fully shown before it can be dismissed */
+#define HALF_TURN_WAIT_FRAMES 150
+#define HALF_TURN_DEBUG_COLUMN 20
+#define HALF_TURN_DEBUG_ROW 5
+/* The picture is loaded six rows at a time; the last strip has two */
+#define HALF_TURN_STRIP_COUNT 38
+#define HALF_TURN_STRIP_ROWS 6
+#define HALF_TURN_LAST_STRIP_ROWS 2
+/* RGBA16 texels are two bytes */
+#define HALF_TURN_STRIP_SIZE (HALF_TURN_WIDTH * HALF_TURN_STRIP_ROWS * 2)
+/* The Half Turn picture is RGBA16, so each u32 holds a pair of texels */
+#define HALF_TURN_PAIRS_PER_ROW 152
+#define HALF_TURN_ALPHA_BITS 0x10001
+#define HALF_TURN_LAST_COLUMN_OFFSET 75
+#define HALF_TURN_LAST_ROW_OFFSET 111
+#define HALF_TURN_PAIR(column, row) texelPairs[(row) * HALF_TURN_PAIRS_PER_ROW + (column)]
+/*
+ * Marks the eight octants' points two rows deep, then steps the circle.
+ * The offsets are clamped to keep the points on the picture.
+ */
+#define MARK_CIRCLE_POINTS(operation)                                                                                \
+    do {                                                                                                             \
+        radiusOffset = radius;                                                                                       \
+        stepOffset = step;                                                                                           \
+        if (radius > HALF_TURN_LAST_COLUMN_OFFSET) {                                                                 \
+            radiusOffset = HALF_TURN_LAST_COLUMN_OFFSET;                                                             \
+        }                                                                                                            \
+        if (step > HALF_TURN_LAST_ROW_OFFSET) {                                                                      \
+            stepOffset = HALF_TURN_LAST_ROW_OFFSET;                                                                  \
+        }                                                                                                            \
+        MARK_OCTANT_POINTS(radiusOffset, stepOffset, operation);                                                     \
+        stepOffset = step;                                                                                           \
+        radiusOffset = radius;                                                                                       \
+        if (radius > HALF_TURN_LAST_ROW_OFFSET - 1) {                                                                \
+            radiusOffset = HALF_TURN_LAST_ROW_OFFSET - 1;                                                            \
+        }                                                                                                            \
+        if (step > HALF_TURN_LAST_COLUMN_OFFSET) {                                                                   \
+            stepOffset = HALF_TURN_LAST_COLUMN_OFFSET;                                                               \
+        }                                                                                                            \
+        MARK_OCTANT_POINTS(stepOffset, radiusOffset, operation);                                                     \
+        error = error - 1 - step * 2;                                                                                \
+        if (error < 0) {                                                                                             \
+            error += (radius - 1) * 2;                                                                               \
+            radius--;                                                                                                \
+        }                                                                                                            \
+        step++;                                                                                                      \
+    } while (0)
+#define MARK_OCTANT_POINTS(column, row, operation)                                                                   \
+    do {                                                                                                             \
+        HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation;                                        \
+        HALF_TURN_PAIR(centerColumn + (column), centerRow - (row)) operation;                                        \
+        HALF_TURN_PAIR(centerColumn + (column), centerRow + (row) + 1) operation;                                    \
+        HALF_TURN_PAIR(centerColumn + (column), centerRow - (row) + 1) operation;                                    \
+        HALF_TURN_PAIR(centerColumn - (column), centerRow + (row)) operation;                                        \
+        HALF_TURN_PAIR(centerColumn - (column), centerRow - (row)) operation;                                        \
+        HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation;                                    \
+        HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation;                                    \
+    } while (0)
 #define HALF_TURN_STATE_SHOWING 0
 #define HALF_TURN_STATE_UNK1 1
 #define HALF_TURN_STATE_LEAVING 2
@@ -68,6 +137,34 @@
 #define SOUND_PROMPT_MOVE 0x5C
 #define SOUND_PROMPT_CONFIRM 0x5D
 #define SOUND_PROMPT_CLOSE 0x65
+#define PROMPT_CHOICE_YES 0
+#define PROMPT_FONT_SIZE 12
+#define PROMPT_GROWTH_FRAMES 4
+/* The cloud is 256 by 64; each half is stretched over cloudHeight */
+#define PROMPT_CLOUD_WIDTH 256
+#define PROMPT_CLOUD_HALF_TEXELS 32
+#define PROMPT_CLOUD_HALF_WIDTH 136
+#define PROMPT_CLOUD_MARGIN 24
+#define PROMPT_CLOUD_SMALLEST_HEIGHT 48
+#define PROMPT_CENTER_X (SCREEN_WIDTH / 2)
+#define PROMPT_CLOUD_MIDDLE_Y 116
+/* Yes and No are 72 by 24 images, one after the other */
+#define CHOICE_IMAGE_WIDTH 72
+#define CHOICE_IMAGE_HEIGHT 24
+#define YES_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
+#define NO_TEXELS_OFFSET (YES_TEXELS_OFFSET + CHOICE_IMAGE_WIDTH * CHOICE_IMAGE_HEIGHT)
+#define YES_CENTER_X 128
+#define NO_CENTER_X 192
+/* Below the cloud's middle by a quarter of its height more than this */
+#define CHOICES_MIDDLE_Y 134
+#define CHOICE_HALF_WIDTH 24
+#define CHOICE_HALF_HEIGHT 8
+/* The chosen answer is drawn larger, and its size swings by these */
+#define CHOSEN_HALF_WIDTH 32.0f
+#define CHOSEN_HALF_HEIGHT 12.0f
+#define CHOSEN_WIDTH_BOB 6.0f
+#define CHOSEN_HEIGHT_BOB 2.0f
+#define CHOICE_BOB_STEP_DEGREES 20
 #define SOUND_PROMPT_OPEN 0x64
 #define PROMPT_SOUND_VOLUME 0x64
 
@@ -99,8 +196,11 @@ extern void *sYesNoImage;
 extern s32 sScreenFadeRed;
 extern s32 sScreenFadeGreen;
 extern s32 sScreenFadeBlue;
+extern f32 sChoiceBobAngle;
+extern Gfx D_800C3FC0[];
 
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
+void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32);
 
 /* The RDP loads textures from 8-byte boundaries */
 #define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
@@ -471,7 +571,124 @@ s32 UpdatePrompt(ControllerState *controller) {
     return NO_PROMPT_RESULT;
 }
 
+/*
+ * Draws the open prompt: a cloud that grows in and shrinks away, with Yes
+ * and No under its message once it has opened. The chosen answer bobs.
+ */
+#ifdef NON_MATCHING
+void DrawPrompt(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Prompt *prompt = &sPrompts[sPromptIndex];
+    s32 textWidth;
+    s32 textHeight;
+    s32 cloudHeight;
+    s32 halfHeight;
+    s32 halfWidth;
+    s32 half;
+    s32 texelOffset;
+
+    if (sPromptState == PROMPT_STATE_CLOSED) {
+        return;
+    }
+    MeasureMessage(prompt->messageId, PROMPT_FONT_SIZE, &textWidth, &textHeight, 0);
+    cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
+    if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
+        cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;
+    }
+    if (sPromptState == PROMPT_STATE_OPENING) {
+        sPromptFrame++;
+        if (sPromptFrame == PROMPT_GROWTH_FRAMES) {
+            sPromptState = PROMPT_STATE_CHOOSING;
+        }
+    } else if (sPromptState == PROMPT_STATE_CLOSING) {
+        sPromptFrame--;
+        if (sPromptFrame == 0) {
+            sPromptState = PROMPT_STATE_CLOSED_AFTER_CHOICE;
+            return;
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+
+    /* The cloud image's top and bottom halves are drawn above and below its middle */
+    half = 0;
+    texelOffset = IMAGE_HEADER_SIZE;
+    do {
+        halfHeight = cloudHeight;
+        if (sPromptState == PROMPT_STATE_CHOOSING) {
+            halfWidth = PROMPT_CLOUD_HALF_WIDTH;
+        } else {
+            halfWidth = sPromptFrame * (PROMPT_CLOUD_HALF_WIDTH / PROMPT_GROWTH_FRAMES);
+            halfHeight = cloudHeight * sPromptFrame / PROMPT_GROWTH_FRAMES;
+        }
+        LoadNibbleTextureBlock(&gfx, (u8 *)sPromptCloudImage + texelOffset, G_IM_FMT_I, PROMPT_CLOUD_WIDTH,
+                               PROMPT_CLOUD_HALF_TEXELS, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
+        DrawTextureRect(&gfx, (PROMPT_CENTER_X - halfWidth) << 2,
+                        (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight - halfHeight) << 2,
+                        (PROMPT_CENTER_X + halfWidth) << 2, (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight) << 2,
+                        G_TX_RENDERTILE, 0, 0, PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+                        PROMPT_CLOUD_HALF_TEXELS * TEXEL_STEP_ONE / halfHeight);
+        half++;
+    } while (half != 2);
+
+    if (sPromptState == PROMPT_STATE_CHOOSING) {
+        s32 unused[2]; /* Unused; it is there to match */
+
+        sChoiceBobAngle += DEGREES_TO_RADIANS(CHOICE_BOB_STEP_DEGREES);
+        if (sPromptChoice == PROMPT_CHOICE_YES) {
+            halfWidth = sinf(sChoiceBobAngle) * CHOSEN_WIDTH_BOB + CHOSEN_HALF_WIDTH;
+            halfHeight = CHOSEN_HEIGHT_BOB * sinf(sChoiceBobAngle) + CHOSEN_HALF_HEIGHT;
+        } else {
+            halfWidth = CHOICE_HALF_WIDTH;
+            halfHeight = CHOICE_HALF_HEIGHT;
+        }
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        LoadLargePalette(&gfx, (u8 *)sYesNoImage + IMAGE_HEADER_SIZE);
+        LoadTextureBlock(&gfx, (u8 *)sYesNoImage + YES_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH,
+                         CHOICE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, (YES_CENTER_X - halfWidth) << 2, (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+                        (YES_CENTER_X + halfWidth) << 2, (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2,
+                        G_TX_RENDERTILE, 0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+                        CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
+        if (sPromptChoice == PROMPT_CHOICE_NO) {
+            halfWidth = sinf(sChoiceBobAngle) * CHOSEN_WIDTH_BOB + CHOSEN_HALF_WIDTH;
+            halfHeight = CHOSEN_HEIGHT_BOB * sinf(sChoiceBobAngle) + CHOSEN_HALF_HEIGHT;
+        } else {
+            halfWidth = CHOICE_HALF_WIDTH;
+            halfHeight = CHOICE_HALF_HEIGHT;
+        }
+        LoadTextureBlock(&gfx, (u8 *)sYesNoImage + NO_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH,
+                         CHOICE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, (NO_CENTER_X - halfWidth) << 2, (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+                        (NO_CENTER_X + halfWidth) << 2, (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2,
+                        G_TX_RENDERTILE, 0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+                        CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
+    }
+    *displayListHead = gfx;
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawPrompt);
+#endif
 
 void ShowHalfTurn(void) {
     EncodedAsset asset;
@@ -492,7 +709,34 @@ void HideHalfTurn(void) {
     sIsHalfTurnShown = FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/screen_layers", func_8006C484);
+/*
+ * Changes the alpha bits of the Half Turn picture's texels on a circle
+ * around the given texel pair, using the midpoint circle algorithm. Each
+ * point covers two texels across and two rows down. While the picture is
+ * showing the bits are cleared, which reveals the texels; otherwise they
+ * are set, which hides them again.
+ */
+#ifdef NON_MATCHING
+void MarkHalfTurnCircle(u32 *texelPairs, s32 centerColumn, s32 centerRow, s32 radius) {
+    s32 step = 0;
+    s32 error = radius;
+    s32 radiusOffset;
+    s32 stepOffset;
+
+    if (sHalfTurnState == HALF_TURN_STATE_SHOWING) {
+        while (radius >= step) {
+            MARK_CIRCLE_POINTS(&= ~HALF_TURN_ALPHA_BITS);
+        }
+    } else {
+        while (radius >= step) {
+            MARK_CIRCLE_POINTS(|= HALF_TURN_ALPHA_BITS);
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/screen_layers", MarkHalfTurnCircle);
+#endif
 
 /* The picture can be dismissed with A once its time is up */
 s32 IsHalfTurnDismissed(ControllerState *controller) {
@@ -503,4 +747,82 @@ s32 IsHalfTurnDismissed(ControllerState *controller) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawHalfTurn);
+/*
+ * Draws the Half Turn picture in strips. While it is showing, a shrinking
+ * circle reveals it from the edges inwards; once it has been dismissed, a
+ * growing circle hides it again from the middle outwards, and then the
+ * picture is freed.
+ */
+void DrawHalfTurn(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 stripRows;
+
+    if (!sIsHalfTurnShown) {
+        return;
+    }
+    if (sHalfTurnState == HALF_TURN_STATE_SHOWING) {
+        if (sHalfTurnTimer > 0) {
+            for (i = 0; i != HALF_TURN_SHOW_STEPS; i++) {
+                MarkHalfTurnCircle((u32 *)((u8 *)sHalfTurnImage + IMAGE_HEADER_SIZE), HALF_TURN_CENTER_COLUMN,
+                                   HALF_TURN_CENTER_ROW, sHalfTurnTimer);
+                sHalfTurnTimer--;
+            }
+            if (sHalfTurnTimer == HALF_TURN_SHOW_SOUND_RADIUS) {
+                PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL, WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
+                                     WIPE_SOUND_PAN);
+            }
+        } else if (sHalfTurnTimer > -HALF_TURN_WAIT_FRAMES) {
+            sHalfTurnTimer--;
+        } else {
+            sHalfTurnState = HALF_TURN_STATE_UNK1;
+        }
+    }
+    if (sHalfTurnState == HALF_TURN_STATE_LEAVING) {
+        if (sHalfTurnTimer < 0) {
+            sHalfTurnTimer++;
+        } else if (sHalfTurnTimer < HALF_TURN_FRAMES) {
+            for (i = 0; i != HALF_TURN_HIDE_STEPS; i++) {
+                MarkHalfTurnCircle((u32 *)((u8 *)sHalfTurnImage + IMAGE_HEADER_SIZE), HALF_TURN_CENTER_COLUMN,
+                                   HALF_TURN_CENTER_ROW, sHalfTurnTimer);
+                sHalfTurnTimer++;
+            }
+            if (sHalfTurnTimer == HALF_TURN_HIDE_SOUND_RADIUS) {
+                PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL, WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB,
+                                     WIPE_SOUND_PAN);
+            }
+        } else {
+            sHalfTurnState = HALF_TURN_STATE_DONE;
+            /* Any nonzero value makes HideHalfTurn free the picture; the state's value is there to match */
+            sIsHalfTurnShown = HALF_TURN_STATE_LEAVING;
+            HideHalfTurn();
+            return;
+        }
+    }
+    if (g_IsDebugEnabled) {
+        sprintf(g_PrintBuffer, "%3d", sHalfTurnTimer);
+        PrintDebugText(g_PrintBuffer, HALF_TURN_DEBUG_COLUMN, HALF_TURN_DEBUG_ROW);
+    }
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    /* The texels' alpha is inverted, so texels whose alpha bit is clear are drawn */
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    for (i = 0; i != HALF_TURN_STRIP_COUNT; i++) {
+        stripRows = (i == HALF_TURN_STRIP_COUNT - 1) ? HALF_TURN_LAST_STRIP_ROWS : HALF_TURN_STRIP_ROWS;
+        gDPLoadTextureTile(gfx++, TEXTURE_ADDRESS((u8 *)sHalfTurnImage + IMAGE_HEADER_SIZE + i * HALF_TURN_STRIP_SIZE),
+                           G_IM_FMT_RGBA, G_IM_SIZ_16b, HALF_TURN_WIDTH, stripRows, 0, 0, HALF_TURN_WIDTH - 1,
+                           stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, SCREEN_BORDER << 2, (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS) << 2,
+                        (SCREEN_BORDER + HALF_TURN_WIDTH) << 2,
+                        (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS + stripRows) << 2, G_TX_RENDERTILE, 0, 0,
+                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    *displayListHead = gfx;
+}
