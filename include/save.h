@@ -118,7 +118,7 @@ typedef struct GameState {
 
 typedef struct Unk800BA9D8 {
     /* 0x00 */ CoursePoint cupPosition;
-    /* 0x0C */ CoursePoint unkC;
+    /* 0x0C */ CoursePoint teePosition;    /* Where each player starts the hole */
     /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
     /* 0x2C */ s8 par;                     /* g_HolePar */
     /* 0x2D */ s8 nextCupIndex;            /* sNextCupIndex */

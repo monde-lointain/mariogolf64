@@ -820,16 +820,16 @@ s32 ChooseHoleConditions(void) {
         D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[cupIndex][AXIS_X];
         D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[cupIndex][AXIS_Y];
         D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[cupIndex][AXIS_Z];
-        D_800BA9D8.unkC[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
-        D_800BA9D8.unkC[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
-        D_800BA9D8.unkC[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
+        D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
+        D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
+        D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
         attemptCount++;
         cupIndex = (cupIndex + 1) & (CUP_POSITION_COUNT - 1);
         if (attemptCount >= MAX_CUP_ATTEMPT_COUNT) {
             break;
         }
         if (D_800BA9D8.cupPosition[AXIS_X] != 0 && D_800BA9D8.cupPosition[AXIS_Z] != 0 &&
-            D_800BA9D8.unkC[AXIS_X] != 0 && D_800BA9D8.unkC[AXIS_Z] != 0) {
+            D_800BA9D8.teePosition[AXIS_X] != 0 && D_800BA9D8.teePosition[AXIS_Z] != 0) {
             break;
         }
     }

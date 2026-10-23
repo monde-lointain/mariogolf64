@@ -433,9 +433,9 @@ void LoadStaffRoll(void) {
     D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
     D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
     D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-    D_800BA9D8.unkC[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
-    D_800BA9D8.unkC[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
-    D_800BA9D8.unkC[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
+    D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
+    D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
+    D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
     SetGameFlag(GAME_FLAG_HOLE_LOADED);
     g_PlayerCount = 1;
     StopLoaderThread();
@@ -665,9 +665,9 @@ void RunStaffRollTimeline(s32 frame) {
         SetCharacterLighting(0, CHARACTER_LIGHTING_SCENE);
         SetCharacterClub(0, TEE_CLUB);
         SetStanceAnimation(0, TEE_CLUB, SHOT_MODE_NORMAL);
-        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
-        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
-        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
         PlaceCharacter(0, point, GOLFER_HEADING);
         sCastSlot = 0;
     }
@@ -691,9 +691,9 @@ void RunStaffRollTimeline(s32 frame) {
         swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL));
         AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
                                    CAST_SWING_LEAD_FRAMES);
-        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
-        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
-        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
         PlaceCharacter(slot, point, GOLFER_HEADING);
         sCastSlot = slot;
     }
@@ -712,12 +712,12 @@ void RunStaffRollTimeline(s32 frame) {
         GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
                                ANIMATION_EVENT_UNK6);
         ClearReactionSpot();
-        ConsiderReactionSpot(D_800BA9D8.unkC);
+        ConsiderReactionSpot(D_800BA9D8.teePosition);
         StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
         sIsReactionShown = TRUE;
-        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
-        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
-        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
         PlaceCharacter(slot, point, DEGREES_TO_RADIANS(-(sCastIndex * CAST_YAW_STEP)));
         sCastSlot = slot;
         sCastIndex++;
@@ -921,9 +921,9 @@ void RunStaffRollTimeline(s32 frame) {
         SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
         GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
                                ANIMATION_EVENT_UNK6);
-        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
-        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
-        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
         PlaceCharacter(slot, point, GOLFER_HEADING);
         sCastSlot = slot;
     }
@@ -938,12 +938,12 @@ void RunStaffRollTimeline(s32 frame) {
         GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
                                ANIMATION_EVENT_UNK6);
         ClearReactionSpot();
-        ConsiderReactionSpot(D_800BA9D8.unkC);
+        ConsiderReactionSpot(D_800BA9D8.teePosition);
         StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
         sIsReactionShown = TRUE;
-        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
-        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
-        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
         PlaceCharacter(slot, point, GOLFER_HEADING);
         sCastSlot = slot;
     }
