@@ -12,6 +12,9 @@
 
 #define GAME_FLAG_COUNT 256
 
+/* Prints the paths that the collision tests are given */
+#define GAME_FLAG_UNK0 0x00
+
 /* Adds a ring at a fixed place, once each time the flag is set */
 #define GAME_FLAG_TEST_RING 0x25
 
@@ -20,6 +23,9 @@
 
 /* Makes every cell of the billboards' hit masks read as 1 */
 #define GAME_FLAG_FILL_BILLBOARD_MASKS 0x0A
+
+/* Lets a rising ball, whose course y falls, hit the flag */
+#define GAME_FLAG_RISING_FLAG_HITS 0x4E
 
 /* Silences the overlay manager's log */
 #define GAME_FLAG_QUIET_OVERLAY_LOG 0x4D

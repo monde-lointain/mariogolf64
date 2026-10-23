@@ -1829,3 +1829,6 @@ g_BillboardMasks = 0x800B7DB0; // size:0x2900
 g_BillboardMaskIndices = 0x800BA6B0; // size:0x40
 g_CupPositionY = 0x800BA9DC; // size:0x4
 g_CupPositionZ = 0x800BA9E0; // size:0x4
+FindBillboardHit = 0x8003A078; // type:func
+FindPinHit = 0x8003A4EC; // type:func
+FindRingHit = 0x8003D8EC; // type:func

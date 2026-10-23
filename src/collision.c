@@ -1,10 +1,15 @@
 #include "ball_simulation.h"
+#include "billboard.h"
 #include "common.h"
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_triangles.h"
+#include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "terrain.h"
+#include "work_area.h"
 
 /*
  * Each billboard texture has a hit mask: BILLBOARD_MASK_SIZE rows of
@@ -23,8 +28,47 @@
 /* The centre cell counts this many times as much as each neighbour */
 #define BILLBOARD_CENTER_CELL_WEIGHT 4
 
+/* Shifting a course point's coordinate right by this gives whole units, as billboards are placed in */
+#define COURSE_UNIT_SHIFT 10
+/* The fraction along a path that the hit tests return when nothing is hit: past its end */
+#define NO_HIT_FRACTION 1.1f
+
 /* Balls nearer the cup than this, in 1/1024ths of a unit, are moved out to it */
 #define CUP_EDGE_DISTANCE 614.4f
+
+/* The flagstick and flag, in 1/1024ths of a unit */
+#define PIN_COUNT 1
+#define FLAGSTICK_RADIUS 614.4f
+#define FLAGSTICK_RADIUS_SQUARED 377487.38f
+#define FLAG_REACH 1228.8f
+#define FLAGSTICK_HEIGHT 46080.0f
+#define FLAG_BOTTOM_HEIGHT 39936.0f
+/* A ball that hits the flag keeps only this speed along y, which points down */
+#define FLAG_HIT_SPEED_Y -524
+/* A ball bounces off the flagstick with between these fractions of its speed */
+#define FLAGSTICK_MOST_BOUNCE 0.8f
+#define FLAGSTICK_LEAST_BOUNCE 0.2f
+
+/* What FindPinHit returns */
+#define PIN_HIT_NONE 0
+#define PIN_HIT_FLAGSTICK 1
+#define PIN_HIT_FLAG 2
+
+/* FindRingHit's use of a ring's corners */
+#define RING_CENTER 0
+#define RING_FACING 1
+#define RING_SCALE 2 /* Only its x is used */
+/* A ring's hit radius in units for each unit of its scale's x, which is 1024 at full size */
+#define RING_HIT_RADIUS_PER_SCALE 0.1274414f
+#define NO_RING_NUMBER -1
+/* FindRingHit's fraction when nothing is hit: past the path's end */
+#define NO_RING_HIT_FRACTION 2.0f
+#define COURSE_UNITS_PER_UNIT 1024.0f
+#define UNITS_PER_COURSE_UNIT (1.0f / 1024.0f)
+#define RING_DEBUG_COLUMN 2
+#define RING_DEBUG_ROW 8
+#define RING_DEBUG_CLEAR_COLUMN 25
+#define RING_DEBUG_CLEAR_ROW 3
 
 /* Which plane a triangle faces most, as GetTriangleFacing returns it */
 #define TRIANGLE_FACING_NONE -1
@@ -84,7 +128,109 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
     return cell;
 }
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_8003A078);
+/*
+ * Finds the nearest billboard that a ball moving from one point to another
+ * hits, treating each billboard as standing across the ball's path. It
+ * sets the hit mask cell there and the fraction of the way along the path,
+ * which stays above 1 when nothing is hit, and returns whether something is.
+ */
+#ifdef NON_MATCHING
+s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, s32 *cell, f32 *fraction) {
+    s32 fromY = startY >> COURSE_UNIT_SHIFT;
+    f32 nearestFraction = NO_HIT_FRACTION;
+    s32 fromX = startX >> COURSE_UNIT_SHIFT;
+    s32 toX = endX >> COURSE_UNIT_SHIFT;
+    s32 deltaX = toX - fromX;
+    s32 i = 0;
+    s32 fromZ = startZ >> COURSE_UNIT_SHIFT;
+    s32 toZ = endZ >> COURSE_UNIT_SHIFT;
+    s32 toY = endY >> COURSE_UNIT_SHIFT;
+    s32 isHit = FALSE;
+    s32 deltaZ = toZ - fromZ;
+    Billboard *billboard;
+    s32 startSide;
+    s32 endSide;
+    f32 hitFraction;
+    s32 hitX;
+    s32 hitY;
+    s32 hitZ;
+    s32 depth;
+    s32 distance;
+    s32 hitCell;
+
+    for (; i < BILLBOARD_COUNT; i++) {
+        billboard = &g_Billboards[i];
+        if (billboard->textureIndex < 0) {
+            continue;
+        }
+        if (fromX < billboard->x - billboard->width) {
+            if (toX < billboard->x - billboard->width) {
+                continue;
+            }
+        }
+        if (billboard->x + billboard->width < fromX) {
+            if (billboard->x + billboard->width < toX) {
+                continue;
+            }
+        }
+        if (fromZ < billboard->z - billboard->width) {
+            if (toZ < billboard->z - billboard->width) {
+                continue;
+            }
+        }
+        if (billboard->z + billboard->width < fromZ) {
+            if (billboard->z + billboard->width < toZ) {
+                continue;
+            }
+        }
+        if (billboard->width == 0) {
+            continue;
+        }
+        if (billboard->height == 0) {
+            continue;
+        }
+        startSide = deltaX * (billboard->x - fromX) + deltaZ * (billboard->z - fromZ);
+        endSide = deltaX * (billboard->x - toX) + deltaZ * (billboard->z - toZ);
+        if ((startSide ^ endSide) >= 0) {
+            continue;
+        }
+        if (ABS(endSide) + ABS(startSide) != 0) {
+            hitFraction = fabsf(startSide) / (ABS(endSide) + ABS(startSide));
+        } else {
+            hitFraction = 0.0f;
+        }
+        if (hitFraction > nearestFraction) {
+            continue;
+        }
+        hitX = fromX + deltaX * hitFraction;
+        hitY = fromY + (toY - fromY) * hitFraction;
+        hitZ = fromZ + deltaZ * hitFraction;
+        depth = billboard->y - hitY;
+        if (depth < 0) {
+            continue;
+        }
+        if (depth > billboard->height) {
+            continue;
+        }
+        distance = IntLength2D(billboard->x - hitX, billboard->z - hitZ);
+        if (distance > billboard->width) {
+            continue;
+        }
+        hitCell = GetBillboardCell(billboard->textureIndex, (f32)distance / billboard->width,
+                                   (f32)depth / billboard->height);
+        if (hitCell != BILLBOARD_CELL_EMPTY) {
+            nearestFraction = hitFraction;
+            isHit = TRUE;
+            *cell = hitCell;
+        }
+    }
+    *fraction = nearestFraction;
+    return isHit;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", FindBillboardHit);
+#endif
 
 /* Moves a ball that is nearer the cup than CUP_EDGE_DISTANCE out to that distance */
 void MoveBallToCupEdge(BallSimulation *simulation) {
@@ -115,7 +261,157 @@ void MoveBallToCupEdge(BallSimulation *simulation) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_8003A4EC);
+/*
+ * Finds whether a ball moving from one point to another hits the
+ * flagstick or the flag. It sets the ball's new velocity and the fraction
+ * of the way along the path, and returns which it hits as a PIN_HIT_*.
+ */
+#ifdef NON_MATCHING
+s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, CoursePoint velocity, f32 *fraction,
+               s32 unkB0, BallSimulation *simulation) {
+    s32 i = 0;
+    s32 deltaX = endX - startX;
+    f32 nearestFraction = NO_HIT_FRACTION;
+    s32 deltaZ = endZ - startZ;
+    s32 hitKind = PIN_HIT_NONE;
+    s32 deltaY = endY - startY;
+    s32 startSide;
+    s32 endSide;
+    s32 endToCupX;
+    s32 endToCupZ;
+    f32 hitFraction;
+    f32 height;
+    s32 hitX;
+    s32 hitZ;
+    s32 isFlagHit;
+    s32 distance;
+    s32 speed;
+    f32 chordSquared;
+    f32 halfChord;
+    Vec3 direction;
+    s32 contactX;
+    s32 contactZ;
+    f32 angle;
+    f32 bounceSpeed;
+    s32 unused[2];
+
+    for (; i < PIN_COUNT; i++) {
+        if (startX < (s32)(D_800BA9D8.cupPosition[AXIS_X] - FLAG_REACH)) {
+            if (endX < (s32)(D_800BA9D8.cupPosition[AXIS_X] - FLAG_REACH)) {
+                continue;
+            }
+        }
+        if ((s32)(D_800BA9D8.cupPosition[AXIS_X] + FLAG_REACH) < startX) {
+            if ((s32)(D_800BA9D8.cupPosition[AXIS_X] + FLAG_REACH) < endX) {
+                continue;
+            }
+        }
+        if (startZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
+            if (endZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
+                continue;
+            }
+        }
+        if ((s32)(g_CupPositionZ + FLAG_REACH) < startZ) {
+            if ((s32)(g_CupPositionZ + FLAG_REACH) < endZ) {
+                continue;
+            }
+        }
+        endToCupX = D_800BA9D8.cupPosition[AXIS_X] - endX;
+        endToCupZ = g_CupPositionZ - endZ;
+        startSide = deltaX * (D_800BA9D8.cupPosition[AXIS_X] - startX) + deltaZ * (g_CupPositionZ - startZ);
+        endSide = deltaX * endToCupX + deltaZ * endToCupZ;
+        if ((startSide >= 0 && endSide >= 0) || (startSide < 0 && endSide < 0)) {
+            if ((s32)IntLength2D(endToCupX, endToCupZ) <= FLAGSTICK_RADIUS) {
+                hitFraction = 1.0f;
+            } else {
+                continue;
+            }
+        } else {
+            if (ABS(endSide) + ABS(startSide) != 0) {
+                hitFraction = fabsf(startSide) / (ABS(endSide) + ABS(startSide));
+            } else {
+                hitFraction = 0.0f;
+            }
+            if (hitFraction > nearestFraction) {
+                continue;
+            }
+        }
+        height = g_CupPositionY - (s32)(startY + deltaY * hitFraction);
+        hitX = startX + deltaX * hitFraction;
+        hitZ = startZ + deltaZ * hitFraction;
+        isFlagHit = FALSE;
+        if (height > FLAGSTICK_HEIGHT) {
+            continue;
+        }
+        if (unkB0 == 0) {
+            if (height > FLAG_BOTTOM_HEIGHT) {
+                isFlagHit = TRUE;
+            }
+        }
+        if (deltaY < 0) {
+            isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
+        }
+        distance = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - hitX, g_CupPositionZ - hitZ);
+        if (distance > FLAG_REACH) {
+            continue;
+        }
+        if ((distance > FLAGSTICK_RADIUS) & !isFlagHit) {
+            continue;
+        }
+        nearestFraction = hitFraction;
+        speed = IntLength2D(deltaX, deltaZ);
+        hitKind = PIN_HIT_FLAGSTICK;
+        if (isFlagHit) {
+            hitKind = PIN_HIT_FLAG;
+        }
+        chordSquared = FLAGSTICK_RADIUS_SQUARED - distance * distance;
+        if (chordSquared >= 0.0f) {
+            halfChord = sqrtf(chordSquared);
+        } else {
+            halfChord = FLAGSTICK_RADIUS;
+        }
+        direction[AXIS_X] = startX - hitX;
+        direction[AXIS_Y] = 0.0f;
+        direction[AXIS_Z] = startZ - hitZ;
+        if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
+            guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
+        }
+        direction[AXIS_X] *= halfChord;
+        direction[AXIS_Y] *= halfChord;
+        direction[AXIS_Z] *= halfChord;
+        contactZ = (s32)(hitZ + direction[AXIS_Z]) - g_CupPositionZ;
+        contactX = (s32)(hitX + direction[AXIS_X]) - D_800BA9D8.cupPosition[AXIS_X];
+        angle = 0.0f;
+        if (contactX != 0 || contactZ != 0) {
+            angle = atan2(contactZ, contactX);
+        }
+        if (isFlagHit) {
+            velocity[AXIS_X] = 0;
+            velocity[AXIS_Y] = FLAG_HIT_SPEED_Y;
+            velocity[AXIS_Z] = 0;
+        } else {
+            bounceSpeed = speed * FLAGSTICK_MOST_BOUNCE - ABS(deltaY) * 2;
+            if (simulation->isRunning == 1) {
+                bounceSpeed *= 0.5f;
+            }
+            if (bounceSpeed > speed * FLAGSTICK_MOST_BOUNCE) {
+                bounceSpeed = speed * FLAGSTICK_MOST_BOUNCE;
+            }
+            if (bounceSpeed < speed * FLAGSTICK_LEAST_BOUNCE) {
+                bounceSpeed = speed * FLAGSTICK_LEAST_BOUNCE;
+            }
+            velocity[AXIS_Y] = deltaY;
+            velocity[AXIS_X] = cosf(angle) * bounceSpeed;
+            velocity[AXIS_Z] = sinf(angle) * bounceSpeed;
+        }
+    }
+    *fraction = nearestFraction;
+    return hitKind;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", FindPinHit);
+#endif
 
 /*
  * Returns which plane a triangle faces most: the one its normal's largest
@@ -224,7 +520,108 @@ INCLUDE_ASM("asm/nonmatchings/collision", func_8003B584);
 
 INCLUDE_ASM("asm/nonmatchings/collision", func_8003D1A8);
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_8003D8EC);
+/*
+ * Finds the nearest ring that a ball moving from one point to another
+ * passes through. It sets a copy of the last ring's corners, holding the
+ * hit ring's index, and the fraction of the way along the path. It returns
+ * 1 for a hit, 0 for none and -1 for a start or end off the ground.
+ */
+#ifdef NON_MATCHING
+s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hitRing,
+                f32 *fraction) {
+    PlaneTriangle ring;
+    TrianglePlane plane;
+    s32 hitNumber = NO_RING_NUMBER;
+    s32 ringNumber;
+    s32 i;
+    HoleTriangle *triangle;
+    f32 nearestFraction;
+    f32 startSide;
+    f32 endSide;
+    f32 sideChange;
+    f32 hitFraction;
+    s32 unused[4];
+
+    if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+        PrintDebugPaddedHex(startX, RING_DEBUG_COLUMN, RING_DEBUG_ROW);
+        PrintDebugPaddedHex(startY, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 1);
+        PrintDebugPaddedHex(startZ, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 2);
+        PrintDebugPaddedHex(endX, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 3);
+        PrintDebugPaddedHex(endY, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 4);
+        PrintDebugPaddedHex(endZ, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 5);
+        PrintDebugText("          ", RING_DEBUG_CLEAR_COLUMN, RING_DEBUG_CLEAR_ROW);
+    }
+    if (startX < 0 || startX >= GROUND_WIDTH || startZ < 0 || startZ >= GROUND_LENGTH) {
+        return -1;
+    }
+    if (endX < 0 || endX >= GROUND_WIDTH || endZ < 0 || endZ >= GROUND_LENGTH) {
+        return -1;
+    }
+    ringNumber = 0;
+    nearestFraction = NO_RING_HIT_FRACTION;
+    for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
+        triangle = &g_WorkArea.hole.triangles[i];
+        if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
+            continue;
+        }
+        ring.corners[AXIS_X][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_X];
+        ring.corners[AXIS_X][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_X];
+        ring.corners[AXIS_X][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_X];
+        ring.corners[AXIS_Y][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_Y];
+        ring.corners[AXIS_Y][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_Y];
+        ring.corners[AXIS_Y][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_Y];
+        ring.corners[AXIS_Z][RING_CENTER] = triangle->vertices[RING_CENTER].v.ob[AXIS_Z];
+        ring.corners[AXIS_Z][RING_FACING] = triangle->vertices[RING_FACING].v.ob[AXIS_Z];
+        ring.corners[AXIS_Z][RING_SCALE] = triangle->vertices[RING_SCALE].v.ob[AXIS_Z];
+        plane.normal[AXIS_X] = ring.corners[AXIS_X][RING_FACING];
+        plane.normal[AXIS_Y] = ring.corners[AXIS_Y][RING_FACING];
+        plane.normal[AXIS_Z] = ring.corners[AXIS_Z][RING_FACING];
+        guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y], &plane.normal[AXIS_Z]);
+        plane.distance = -(plane.normal[AXIS_X] * ring.corners[AXIS_X][RING_CENTER] +
+                           plane.normal[AXIS_Y] * ring.corners[AXIS_Y][RING_CENTER] +
+                           plane.normal[AXIS_Z] * ring.corners[AXIS_Z][RING_CENTER]);
+        ringNumber++;
+        startSide = plane.normal[AXIS_X] * startX + plane.normal[AXIS_Y] * startY + plane.normal[AXIS_Z] * startZ +
+                    plane.distance * COURSE_UNITS_PER_UNIT;
+        endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
+                  plane.distance * COURSE_UNITS_PER_UNIT;
+        if (endSide == 0.0f || (startSide > 0.0f && endSide < 0.0f) || (startSide < 0.0f && endSide > 0.0f)) {
+            sideChange = startSide - endSide;
+            if (fabsf(sideChange) > 1.0f) {
+                if (sideChange < 0.0f) {
+                    sideChange = -sideChange;
+                }
+                startSide = fabsf(startSide);
+                hitFraction = startSide / sideChange;
+            } else {
+                hitFraction = 1.0f;
+            }
+            if (hitFraction < nearestFraction) {
+                if (Length3D((s32)((endX - startX) * hitFraction + startX) * UNITS_PER_COURSE_UNIT -
+                                 ring.corners[AXIS_X][RING_CENTER],
+                             (s32)((endY - startY) * hitFraction + startY) * UNITS_PER_COURSE_UNIT -
+                                 ring.corners[AXIS_Y][RING_CENTER],
+                             (s32)((endZ - startZ) * hitFraction + startZ) * UNITS_PER_COURSE_UNIT -
+                                 ring.corners[AXIS_Z][RING_CENTER]) <
+                    ring.corners[AXIS_X][RING_SCALE] * RING_HIT_RADIUS_PER_SCALE) {
+                    nearestFraction = hitFraction;
+                    hitNumber = ringNumber;
+                }
+            }
+        }
+    }
+    if (hitNumber >= 0) {
+        *hitRing = ring;
+        hitRing->unk0 = hitNumber - 1;
+        *fraction = nearestFraction;
+        return 1;
+    }
+    return 0;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", FindRingHit);
+#endif
 
 /*
  * Returns how solid a billboard's hit mask is around a point: the cell

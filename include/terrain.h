@@ -17,6 +17,10 @@
 #define GROUND_TILE_COLUMN_COUNT 8
 #define GROUND_TILE_ROW_COUNT 16
 #define GROUND_TILE_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_ROW_COUNT)
+/* A ground tile spans 1 << GROUND_TILE_SHIFT course units */
+#define GROUND_TILE_SHIFT 19
+#define GROUND_WIDTH (GROUND_TILE_COLUMN_COUNT << GROUND_TILE_SHIFT)
+#define GROUND_LENGTH (GROUND_TILE_ROW_COUNT << GROUND_TILE_SHIFT)
 /* Each tile's midpoints: the odd points of its top-left 4 by 4 */
 #define TILE_MIDPOINT_COUNT 16
 /* Grid vertices kept, with room for one more column and row than the grid has */

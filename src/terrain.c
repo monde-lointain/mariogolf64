@@ -1454,8 +1454,8 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
         slotColumn = (x >> 15) & 3;
         slotRow = (z >> 14) & 3;
     } else {
-        baseColumn = (x >> 19) * 4;
-        baseRow = (z >> 19) * 4;
+        baseColumn = (x >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
+        baseRow = (z >> GROUND_TILE_SHIFT) * GROUND_TILE_POINT_SPAN;
         slotColumn = (x >> 17) & 3;
         slotRow = (z >> 17) & 3;
     }
