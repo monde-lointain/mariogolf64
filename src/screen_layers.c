@@ -43,6 +43,8 @@
 #define FADE_NONE -1
 #define FADE_OUT 0
 #define FADE_IN 1
+/* The fade's opacity runs over this many steps */
+#define FADE_ALPHA_RANGE 256
 
 #define PROMPT_CLOUD_IMAGE 0x70B
 #define YES_NO_IMAGE 0x70C
@@ -326,7 +328,53 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
     sScreenFadeBlue = blue;
 }
 
+/* Covers the screen with the fade's colour, at the opacity it has reached */
+#ifdef NON_MATCHING
+void DrawScreenFade(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 alpha;
+
+    if (sScreenFadeKind != FADE_NONE) {
+        if (sScreenFadeKind == FADE_OUT) {
+            alpha = FADE_ALPHA_RANGE - (sScreenFadeFramesLeft * FADE_ALPHA_RANGE) / sScreenFadeDuration;
+        } else {
+            alpha = (sScreenFadeFramesLeft * FADE_ALPHA_RANGE) / sScreenFadeDuration;
+        }
+        if (alpha >= FADE_ALPHA_RANGE) {
+            alpha = FADE_ALPHA_RANGE - 1;
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPSetPrimColor(gfx++, 0, 0, sScreenFadeRed, sScreenFadeGreen, sScreenFadeBlue, alpha);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2, (SCREEN_WIDTH - SCREEN_BORDER) << 2,
+                            (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+        sScreenFadeFramesLeft--;
+        if (sScreenFadeFramesLeft == 0) {
+            sScreenFadeKind = FADE_NONE;
+        }
+        *displayListHead = gfx;
+    }
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawScreenFade);
+#endif
 
 void LoadPromptImages(void) {
     EncodedAsset asset;
