@@ -253,6 +253,14 @@ void UnloadTitleScreen(void) {
     SetFillColor(0, 0, 0);
 }
 
+/*
+ * Whether the title screen goes back to the logos: on B with debugging
+ * on, or once it has idled long enough. It is a macro, as an inline
+ * function compiles differently from the original.
+ */
+#define IsLeavingForLogos(pressedButtons)                                                                             \
+    ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || (sTitleFrame == TITLE_IDLE_FRAME_COUNT))
+
 /* With g_IsDebugEnabled set, B also starts going back to the logos */
 void UpdateTitleScreen(void) {
     s32 pressedButtons;
@@ -287,8 +295,7 @@ void UpdateTitleScreen(void) {
                     sTitleFrame = 0;
                     sTitleStage = TITLE_SWAPPING_MODULES;
                     PlaySound(0x5D, 0xF, 0x7F);
-                } else if (((pressedButtons & B_BUTTON) && g_IsDebugEnabled)
-                           || sTitleFrame == TITLE_IDLE_FRAME_COUNT) {
+                } else if (IsLeavingForLogos(pressedButtons)) {
                     sTitleStage = TITLE_GOING_TO_LOGOS;
                     StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
                 }
