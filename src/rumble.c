@@ -112,8 +112,8 @@ typedef struct TextListLayout {
 extern TextListLayout sHelpListLayout;
 
 void func_801FB54C(Gfx **displayListHead, s32);
-void func_80074968(Gfx **displayListHead);
-void func_80074CA8(Gfx **displayListHead, s32 red, s32 green, s32 blue);
+void BeginShadowedText(Gfx **displayListHead);
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void DrawChalkboard(Gfx **displayListHead);
 /* Indexed by topic; each topic's pages are the messages that follow its title */
 extern s8 sTopicPageCounts[];
@@ -508,8 +508,8 @@ void DrawHelpBoard(Gfx **displayListHead) {
         }
     }
     gDPPipeSync(gfx++);
-    func_80074968(&gfx);
-    func_80074CA8(&gfx, 0xFF, 0xFF, 0xFF);
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
     if (sOpenTopic == 0) {
         for (index = 0, topic = sFirstListedTopic; index != LISTED_TOPIC_COUNT; index++, topic++) {
             sListColorPhase += DEGREES_TO_RADIANS(5);

@@ -154,7 +154,7 @@
 void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
-void func_80074CA8(Gfx **displayListHead, s32 red, s32 green, s32 blue);
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -659,7 +659,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         DrawRingShotStars(&gfx, SCREEN_WIDTH / 2, 150);
         gDPPipeSync(gfx++);
         func_80071608(&gfx);
-        func_80074CA8(&gfx, 255, 255, 255);
+        SetTextColor(&gfx, 255, 255, 255);
         SetTextSlot(SCREEN_WIDTH / 2, 42,
                     memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,
                     RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
@@ -770,7 +770,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         }
         gDPPipeSync(gfx++);
         func_800734F0(&gfx, 0);
-        func_80074CA8(&gfx, 255, 255, 255);
+        SetTextColor(&gfx, 255, 255, 255);
         colorIndex = g_CourseIndex;
         if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
             colorIndex -= MINI_GOLF_COURSES_PER_RECORD;

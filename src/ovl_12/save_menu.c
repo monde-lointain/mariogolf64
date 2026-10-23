@@ -303,14 +303,14 @@ void CloseControlsScreen(void);
 void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
-void func_800747B0(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
 /*
  * The call leaves out MeasureText's flags, so this file declares its text
  * routines itself rather than including text.h; it is there to match.
  */
 s32 MeasureText(char *text, s32 fontSize);
-void func_80073F24(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names hold 0 or 3 */
 s8 sModeIcons[GAME_MODE_ICON_COUNT] = {
@@ -872,14 +872,14 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
                 gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                 sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
-                func_80073F24(&gfx, sSlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
+                DrawLargeText(&gfx, sSlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
                               GAME_HOLE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
             } else {
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
                 gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
                 sprintf(g_PrintBuffer, "%s", sNoSavedGameText);
-                func_800747B0(&gfx, sSlideOffsets[row] + SCREEN_WIDTH / 2, EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING,
-                              g_PrintBuffer);
+                DrawCenteredLargeText(&gfx, sSlideOffsets[row] + SCREEN_WIDTH / 2,
+                                      EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
             }
         }
         gDPPipeSync(gfx++);
@@ -1443,8 +1443,8 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
                 /* The saved-game message is printed but never drawn */
                 sprintf(g_PrintBuffer, "%s", sNoSavedGameText);
-                func_800747B0(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2, EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING,
-                              sNoReplayText);
+                DrawCenteredLargeText(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2,
+                                      EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING, sNoReplayText);
             } else {
                 text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
                 func_80071608(&gfx);

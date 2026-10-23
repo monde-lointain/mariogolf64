@@ -71,7 +71,7 @@ extern char g_TextName[TEXT_NAME_SIZE];
 /* The width of each character of the large font */
 extern u8 g_LargeFontWidths[];
 
-void func_8007512C(void);
+void ClearGlyphSprites(void);
 s32 GetTextLength(char *text);
 
 const char g_TextStringFormat[] = "%s";
@@ -119,7 +119,7 @@ void LoadTextAssets(void) {
     /* The halfwords of the table's header and its entries come first */
     g_MessageCodesStart = g_Messages->messageCount * 2 + 2;
     ClearTextSlots();
-    func_8007512C();
+    ClearGlyphSprites();
 }
 
 /* Frees what LoadTextAssets loaded, except the two images at D_800E1C3C */
@@ -372,33 +372,33 @@ s32 GetTextLength(char *text) {
 
 INCLUDE_ASM("asm/nonmatchings/text", func_80073C14);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80073F24);
+INCLUDE_ASM("asm/nonmatchings/text", DrawLargeText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074230);
+INCLUDE_ASM("asm/nonmatchings/text", DrawMediumText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074500);
+INCLUDE_ASM("asm/nonmatchings/text", DrawSmallText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_800747B0);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredLargeText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074840);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredMediumText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_800748D0);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredSmallText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074960);
+INCLUDE_ASM("asm/nonmatchings/text", DrawTextStub);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074968);
+INCLUDE_ASM("asm/nonmatchings/text", BeginShadowedText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074CA8);
+INCLUDE_ASM("asm/nonmatchings/text", SetTextColor);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074D0C);
+INCLUDE_ASM("asm/nonmatchings/text", DrawShadowedText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074E5C);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredShadowedText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80074EFC);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredNarrowText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80075010);
+INCLUDE_ASM("asm/nonmatchings/text", DrawCondensedShadowedText);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_8007512C);
+INCLUDE_ASM("asm/nonmatchings/text", ClearGlyphSprites);
 
 INCLUDE_ASM("asm/nonmatchings/text", func_8007515C);
 
