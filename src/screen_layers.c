@@ -2,6 +2,7 @@
 #include "asset.h"
 #include "controller.h"
 #include "heap.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 
@@ -17,6 +18,20 @@
 #define WIPE_SOUND_VOLUME 0x28
 #define WIPE_SOUND_REVERB 0x14
 #define WIPE_SOUND_PAN 0x7F
+/* The shape grows by this many pixels with each step of progress */
+#define WIPE_SHAPE_GROWTH 38.0f
+#define WIPE_SHAPE_TEXELS 64
+/* The progress at which the shape's texels start at the square's corner */
+#define WIPE_ALIGNED_PROGRESS 8.0f
+/* Opening wipes fade out over their last steps */
+#define WIPE_FADE_START_PROGRESS 10.0f
+#define WIPE_FADE_ALPHA_STEP 25.4f
+/* A shape smaller than this, in pixels, is drawn as a covered screen */
+#define WIPE_SMALLEST_SHAPE 2
+/* The square that the shape is stretched over, centred on the screen */
+#define WIPE_SQUARE_SIZE 304
+#define WIPE_SQUARE_LEFT SCREEN_BORDER
+#define WIPE_SQUARE_TOP (SCREEN_HEIGHT / 2 - WIPE_SQUARE_SIZE / 2)
 
 #define HALF_TURN_IMAGE 0x955
 #define HALF_TURN_FRAMES 144
@@ -207,7 +222,84 @@ void StartWipe(s32 kind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawWipe);
+/*
+ * Advances the wipe and draws it: a black screen seen through the wipe's
+ * shape, which grows as the wipe opens and shrinks as it closes
+ */
+void DrawWipe(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 shapeSize;
+    s32 shapeOffset;
+    s32 alpha;
+    s32 texelOffset;
+    f32 alignment;
+
+    if (sWipeKind == WIPE_NONE) {
+        return;
+    }
+    if (sWipeKind == WIPE_CLOSING) {
+        sWipeProgress -= 1.0f;
+        if (sWipeProgress < 0.0f) {
+            sWipeProgress = 0.0f;
+        }
+    } else if (sWipeKind == WIPE_OPENING || sWipeKind == WIPE_OPENING_FAST) {
+        sWipeProgress += (sWipeKind == WIPE_OPENING_FAST) ? 2.0f : 1.0f;
+        if (sWipeProgress > WIPE_OPEN_PROGRESS) {
+            sWipeProgress = WIPE_OPEN_PROGRESS;
+            sWipeKind = WIPE_NONE;
+        }
+    }
+
+    shapeSize = sWipeProgress * WIPE_SHAPE_GROWTH;
+    alignment = (WIPE_ALIGNED_PROGRESS - sWipeProgress) / WIPE_ALIGNED_PROGRESS;
+    shapeOffset = alignment * -(WIPE_SQUARE_SIZE / 2);
+    if (sWipeProgress < WIPE_FADE_START_PROGRESS) {
+        alpha = 255;
+    } else {
+        alpha = (WIPE_OPEN_PROGRESS - sWipeProgress) * WIPE_FADE_ALPHA_STEP;
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, alpha);
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    if (shapeSize < WIPE_SMALLEST_SHAPE) {
+        gDPPipeSync(gfx++);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, SCREEN_BORDER << 2, (SCREEN_WIDTH - SCREEN_BORDER) << 2,
+                            (SCREEN_HEIGHT - SCREEN_BORDER) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    } else {
+        texelOffset = (shapeOffset * WIPE_SHAPE_TEXELS << 5) / shapeSize;
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS((u8 *)sWipeShapeImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+                               WIPE_SHAPE_TEXELS, WIPE_SHAPE_TEXELS, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+                               G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, WIPE_SQUARE_LEFT << 2, WIPE_SQUARE_TOP << 2,
+                                (WIPE_SQUARE_LEFT + WIPE_SQUARE_SIZE) << 2, (WIPE_SQUARE_TOP + WIPE_SQUARE_SIZE) << 2,
+                                G_TX_RENDERTILE, texelOffset, texelOffset,
+                                WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize,
+                                WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 void StopScreenFade(void) {
     sScreenFadeKind = FADE_NONE;
