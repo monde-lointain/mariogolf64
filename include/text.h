@@ -23,9 +23,13 @@
 #define NO_MESSAGE (-1)
 
 /* Flags of a text slot */
+/* The message appears one code more each time the slot is drawn */
+#define TEXT_FLAG_TYPED 0x01
 #define TEXT_FLAG_CENTERED 0x10
 /* DrawTextSlots skips a slot with this flag */
 #define TEXT_FLAG_UNK20 0x20
+/* The medium font advances by FONT_SIZE_LARGE rather than its own size */
+#define TEXT_FLAG_WIDE_SPACING 0x40
 /* Each glyph of the large font takes the same width */
 #define TEXT_FLAG_FIXED_WIDTH 0x80
 

@@ -1,8 +1,11 @@
 #include "asset.h"
 #include "common.h"
+#include "current_shot.h"
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "round_stats.h"
+#include "scene.h"
 #include "screen_layers.h"
 #include "text.h"
 #include "variables.h"
@@ -47,6 +50,7 @@ typedef struct MessageTable {
 #define MESSAGE_CODE_CONTROL 0x8000
 #define MESSAGE_CODE_NAME 0x800F
 #define MESSAGE_CODE_VALUE 0x8014 /* Then one for each of the slot's values */
+#define MESSAGE_CODE_SCORE 0x8018 /* The current player's score, as the game mode counts it */
 #define MESSAGE_CODE_LINE_BREAK 0x8019
 /*
  * Marks drawn over the character before them take no room. In JIS X 0201,
@@ -59,6 +63,11 @@ typedef struct MessageTable {
 #define LOWERCASE_CODE_OFFSET 0x80
 /* The pixels between lines, over the font size */
 #define LINE_SPACING 6
+/* The gap between the lines of a slot drawn in the medium font */
+#define MEDIUM_SLOT_LINE_SPACING 4
+/* How far left of and above the next glyph a slot's medium font marks go */
+#define SLOT_MARK_BACKSPACE 6
+#define SLOT_MARK_RISE 4
 #define MESSAGE_LINE_COUNT 3
 /* The width of an icon, in pixels; icons are square */
 #define ICON_WIDTH 12
@@ -191,7 +200,7 @@ extern u8 g_GlyphGroupSizes[];
 extern u8 g_LargeFontWidths[];
 
 void func_80071CE4(Gfx **displayListHead, s32 slot);
-void func_80072A08(Gfx **displayListHead, s32 slot);
+void DrawMediumTextSlot(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
@@ -390,7 +399,7 @@ void DrawTextSlots(Gfx **displayListHead) {
             gDPSetPrimColor(gfx++, 0, 0, g_TextSlots[slot].red, g_TextSlots[slot].green, g_TextSlots[slot].blue,
                             g_TextSlots[slot].alpha);
             if (g_TextSlots[slot].fontSize == FONT_SIZE_MEDIUM) {
-                func_80072A08(&gfx, slot);
+                DrawMediumTextSlot(&gfx, slot);
             } else {
                 func_80071CE4(&gfx, slot);
             }
@@ -413,7 +422,229 @@ s32 IsTextSlotRevealed(s32 slot) {
 
 INCLUDE_ASM("asm/nonmatchings/text", func_80071CE4);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80072A08);
+/*
+ * Draws a slot's message in the medium font, with its icons, the name, the
+ * slot's values and the player's score written into it
+ */
+void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
+    Gfx *gfx = *displayListHead;
+    TextSlot *textSlot = &g_TextSlots[slot];
+    s32 i;
+    s32 start;
+    s32 length;
+    s32 isIconLoaded;
+    s32 x;
+    s32 y;
+    s32 advance;
+    s32 code;
+    s32 isPrinted;
+    s32 iconOffset;
+    s32 score;
+    s32 index;
+    s32 glyphLeft;
+    s32 glyphTop;
+    s32 characterLeft;
+    s32 characterTop;
+
+    isIconLoaded = FALSE;
+    x = textSlot->x;
+    y = textSlot->y;
+    /* The operand order is there to match */
+    length = (textSlot->messageId + g_Messages->messages)->length;
+    start = (textSlot->messageId + g_Messages->messages)->start;
+    if (textSlot->flags & TEXT_FLAG_TYPED) {
+        if (textSlot->shownCount < length) {
+            length = textSlot->shownCount;
+            textSlot->shownCount++;
+        }
+    }
+    advance = FONT_SIZE_MEDIUM;
+    if (textSlot->flags & TEXT_FLAG_WIDE_SPACING) {
+        advance = FONT_SIZE_LARGE;
+    }
+    gDPPipeSync(gfx++);
+    for (i = 0; i != length; i++) {
+        code = ((u16 *)g_Messages)[start + i + g_MessageCodesStart];
+        if (isIconLoaded == TRUE) {
+            gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0,
+                              TEXEL0, 0);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_NONE);
+            isIconLoaded = FALSE;
+        }
+        if (code < MESSAGE_CODE_GLYPH) {
+            glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+            glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+            gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_MEDIUM * FONT_GLYPHS_PER_ROW / 2,
+                               ((u32)g_MediumFontImage + IMAGE_HEADER_SIZE) & ~7);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                       G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2, (glyphLeft + FONT_SIZE_LARGE - 1) << 1,
+                        (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
+                           (glyphLeft + FONT_SIZE_LARGE - 1) << 2, (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+            gDPPipeSync(gfx++);
+            if (code >= CHARACTER_CODE_MARK_FIRST && code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
+                gSPTextureRectangle(gfx++, (x - SLOT_MARK_BACKSPACE) << 2, (y - SLOT_MARK_RISE) << 2,
+                                    (x - SLOT_MARK_BACKSPACE + FONT_SIZE_MEDIUM) << 2,
+                                    (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE, glyphLeft << 5,
+                                    glyphTop << 5, 1 << 10, 1 << 10);
+            } else {
+                gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2, (y + FONT_SIZE_MEDIUM) << 2,
+                                    G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+                x += advance;
+            }
+            gDPPipeSync(gfx++);
+        } else if (code < MESSAGE_CODE_CONTROL) {
+            gDPPipeSync(gfx++);
+            x += advance;
+        } else {
+            isPrinted = FALSE;
+            iconOffset = NO_ICON;
+            switch (code) {
+                case MESSAGE_CODE_LINE_BREAK:
+                    x = textSlot->x;
+                    y += MEDIUM_SLOT_LINE_SPACING + advance;
+                    break;
+                case 0x8000:
+                    iconOffset = 0 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x8001:
+                    iconOffset = 1 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x8002:
+                case 0x8003:
+                case 0x8004:
+                case 0x8005:
+                case 0x8006:
+                    iconOffset = 3 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x8007:
+                    iconOffset = 6 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x8008:
+                    iconOffset = 7 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x8009:
+                    iconOffset = 8 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x800A:
+                    iconOffset = 9 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x800C:
+                    iconOffset = 2 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x800D:
+                    iconOffset = 4 * ICON_TEXEL_COUNT;
+                    break;
+                case 0x800E:
+                    iconOffset = 5 * ICON_TEXEL_COUNT;
+                    break;
+                case MESSAGE_CODE_NAME:
+                    isPrinted = TRUE;
+                    sprintf(g_PrintBuffer, g_TextStringFormat, g_TextName);
+                    break;
+                case MESSAGE_CODE_VALUE:
+                    isPrinted = TRUE;
+                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[0]);
+                    break;
+                case MESSAGE_CODE_VALUE + 1:
+                    isPrinted = TRUE;
+                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[1]);
+                    break;
+                case MESSAGE_CODE_VALUE + 2:
+                    isPrinted = TRUE;
+                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[2]);
+                    break;
+                case MESSAGE_CODE_VALUE + 3:
+                    isPrinted = TRUE;
+                    sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
+                    break;
+                case MESSAGE_CODE_SCORE:
+                    score = (s16)g_SkinsTotals[g_CurrentShot.playerIndex];
+                    isPrinted = TRUE;
+                    if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
+                        if (score == 0) {
+                            sprintf(g_PrintBuffer, g_MatchScoreEvenText);
+                        } else if (score < 0) {
+                            sprintf(g_PrintBuffer, g_MatchScoreUpFormat, score);
+                        } else {
+                            sprintf(g_PrintBuffer, g_MatchScoreDownFormat, score);
+                        }
+                    } else if (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
+                        sprintf(g_PrintBuffer, g_SkinsScoreFormat, score);
+                    } else if (score == 0) {
+                        sprintf(g_PrintBuffer, g_ParScoreEvenText);
+                    } else {
+                        sprintf(g_PrintBuffer, g_ParScoreFormat, score);
+                    }
+                    break;
+            }
+            if (isPrinted == TRUE) {
+                for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
+                    characterLeft = (u8)g_PrintBuffer[index] % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+                    characterTop = (u8)g_PrintBuffer[index] / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_MEDIUM * FONT_GLYPHS_PER_ROW / 2,
+                                       ((u32)g_MediumFontImage + IMAGE_HEADER_SIZE) & ~7);
+                    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                    gDPLoadSync(gfx++);
+                    gDPLoadTile(gfx++, G_TX_LOADTILE, characterLeft << 1, characterTop << 2,
+                                (characterLeft + GLYPH_TILE_WIDTH - 1) << 1, (characterTop + FONT_SIZE_LARGE - 1) << 2);
+                    gDPPipeSync(gfx++);
+                    gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                    gDPSetTileSize(gfx++, G_TX_RENDERTILE, characterLeft << 2, characterTop << 2,
+                                   (characterLeft + GLYPH_TILE_WIDTH - 1) << 2,
+                                   (characterTop + FONT_SIZE_LARGE - 1) << 2);
+                    gDPPipeSync(gfx++);
+                    if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
+                        (u8)g_PrintBuffer[index] < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
+                        gSPTextureRectangle(gfx++, (x - FONT_SIZE_MEDIUM / 2) << 2, (y - SLOT_MARK_RISE) << 2,
+                                            (x + FONT_SIZE_MEDIUM / 2) << 2,
+                                            (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
+                                            characterLeft << 5, characterTop << 5, 1 << 10, 1 << 10);
+                    } else {
+                        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2,
+                                            (y + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE, characterLeft << 5,
+                                            characterTop << 5, 1 << 10, 1 << 10);
+                        x += advance;
+                    }
+                }
+            }
+            if (iconOffset != NO_ICON) {
+                if (isIconLoaded == FALSE) {
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                    gDPLoadTLUT_pal256(gfx++, ((u32)g_TextIconImage + IMAGE_HEADER_SIZE) & ~7);
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    isIconLoaded = TRUE;
+                }
+                gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, ICON_WIDTH,
+                                   ((u32)g_TextIconImage + LARGE_PALETTED_TEXELS_OFFSET + iconOffset) & ~7);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPLoadSync(gfx++);
+                gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, (ICON_WIDTH - 1) << 2, (ICON_WIDTH - 1) << 2);
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2, (ICON_WIDTH - 1) << 2);
+                gDPPipeSync(gfx++);
+                gSPTextureRectangle(gfx++, x << 2, y << 2, (x + FONT_SIZE_MEDIUM) << 2, (y + FONT_SIZE_MEDIUM) << 2,
+                                    G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                gDPPipeSync(gfx++);
+                x += advance;
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Sets up the RDP to draw text shaded between the primitive colour, where
