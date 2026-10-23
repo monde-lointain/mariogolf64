@@ -196,7 +196,8 @@ typedef struct UnkB8 {
     /* 0x1E */ u8 unk1E[0x22 - 0x1E];
     /* 0x22 */ s8 unk22;
     /* 0x23 */ s8 unk23;
-    /* 0x24 */ u8 unk24[2];
+    /* 0x24 */ s8 unk24;
+    /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
     /* 0x26 */ s8 unk26;
     /* 0x27 */ u8 unk27;
     /* 0x28 */ s8 unk28;

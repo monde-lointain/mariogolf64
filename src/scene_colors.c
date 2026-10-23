@@ -85,7 +85,7 @@ void DrawTexturePlane(Gfx **displayListHead) {
                       0, 0, 0, COMBINED);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xBF);
     gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
-    func_800625FC(&gfx);
+    SetSceneFog(&gfx);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
     gDPLoadTextureBlock(gfx++, (u32)(g_BlendedTextureScrollingLayer + 8) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,

@@ -104,7 +104,7 @@ s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
                         f32 *fraction);
 /* Sets the fog factor and fog color */
-void func_800625FC(Gfx **displayListHead);
+void SetSceneFog(Gfx **displayListHead);
 
 /* Set a character's position, rotation and scale for a shot */
 void func_800453E0(Vec3 position, Vec3 rotation, Vec3 scale);

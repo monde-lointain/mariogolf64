@@ -22,6 +22,13 @@
 #define PLAYER_STATE_UNK11 0x11
 #define PLAYER_STATE_UNK14 0x14
 
+/* A fog color and the range over which the fog thickens */
+typedef struct Fog {
+    /* 0x00 */ s32 color[3];
+    /* 0x0C */ s32 near;
+    /* 0x10 */ s32 far;
+} Fog; /* size = 0x14 */
+
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
 
@@ -92,6 +99,8 @@ extern u8 D_800FE330;
 extern s32 D_801B60B4;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
+extern Fog g_SceneFog;
+extern Fog g_DebugFog;
 extern s8 D_800C3098;
 extern PlayRecord D_800FED40[];
 extern s8 D_800FEE10;
@@ -283,7 +292,7 @@ void PlacePlayersOnTee(void) {
             g_Players[i].ballPosition[AXIS_Y] = !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
             g_Players[i].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
             g_Players[i].unk23 = 0;
-            g_Players[i].unk24[0] = 0;
+            g_Players[i].unk24 = 0;
             g_Players[i].unk26 = 0;
             g_Players[i].ballSurface = SURFACE_TEE_UP;
             if (g_GameState.isMiniGolf) {
@@ -386,7 +395,57 @@ s32 func_8005FCB8(void) {
 INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/play", func_8005FE8C);
+/*
+ * Whether the first player tees off after the second on the next hole.
+ * It is a macro, as an inline function compiles differently from the
+ * original.
+ */
+#define TeesAfter(player, other)                                                                                      \
+    (g_Players[player].unk23 > g_Players[other].unk23 ||                                                              \
+     (g_Players[player].unk23 == g_Players[other].unk23 && g_Players[player].teeOrder > g_Players[other].teeOrder))
+
+/*
+ * Sets each player's teeOrder for the next hole. In the group modes a
+ * hole's winner goes first and the others move down one; otherwise the
+ * players go in order of unk23, ties keeping their previous order.
+ */
+void SetNextTeeOrder(void) {
+    s32 orders[MAX_PLAYER_COUNT];
+    s8 results[MAX_PLAYER_COUNT];
+    s32 i;
+    s32 j;
+
+    if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+        if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                orders[i] = g_Players[i].teeOrder;
+            }
+        } else {
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                if (results[i] != GROUP_PLAYER_WINNER) {
+                    orders[i] = g_Players[i].teeOrder + 1;
+                } else {
+                    orders[i] = 0;
+                }
+            }
+        }
+    } else {
+        for (i = 0; i < g_GameState.playerCount; i++) {
+            orders[i] = 0;
+            for (j = 0; j < g_GameState.playerCount; j++) {
+                if (j != i && TeesAfter(i, j)) {
+                    orders[i]++;
+                }
+            }
+        }
+    }
+    /* The do-while is there to match */
+    do {
+        for (i = 0; i < g_GameState.playerCount; i++) {
+            g_Players[i].teeOrder = orders[i];
+        }
+    } while (0);
+}
 
 void func_800600C0(s32 index) {
 
@@ -537,7 +596,22 @@ void InitExpansionPakFeatures(void) {
     FillRandomGrid(0x60, 0xBE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800625FC);
+/*
+ * Sets the fog range and color from g_SceneFog, or from g_DebugFog,
+ * with no fog alpha, while game flag 0x2D is set
+ */
+void SetSceneFog(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    if (IsGameFlagSet(0x2D)) {
+        gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
+        gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1], g_DebugFog.color[2], 0);
+    } else {
+        gSPFogPosition(gfx++, g_SceneFog.near, g_SceneFog.far);
+        gDPSetFogColor(gfx++, g_SceneFog.color[0], g_SceneFog.color[1], g_SceneFog.color[2], 0xFF);
+    }
+    *displayListHead = gfx;
+}
 
 void CopyDoublePair(f64 *from, f64 *to) {
     to[0] = from[0];

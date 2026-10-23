@@ -1495,7 +1495,7 @@ s32 DrawGame(void) {
                         gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
                         gDPPipeSync(g_DisplayListHead++);
                     } else {
-                        func_800625FC(&g_DisplayListHead);
+                        SetSceneFog(&g_DisplayListHead);
                         if (!IsGameFlagSet(6)) {
                             func_80062A8C(matrices, terrainStyle);
                         }
@@ -1507,7 +1507,7 @@ s32 DrawGame(void) {
                                 func_80082534(&g_DisplayListHead, matrices);
                             }
                             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
-                            func_800625FC(&g_DisplayListHead);
+                            SetSceneFog(&g_DisplayListHead);
                             DrawFadingBillboards(matrices, viewIndex);
                         }
                     }
@@ -1520,7 +1520,7 @@ s32 DrawGame(void) {
                         gDPPipeSync(g_DisplayListHead++);
                         DrawScreenEffect(matrices, &g_Cameras[viewIndex].view);
                     }
-                    func_800625FC(&g_DisplayListHead);
+                    SetSceneFog(&g_DisplayListHead);
                     if (g_Scene == 19) {
                         func_801FA4EC(matrices, &g_DisplayListHead);
                         func_8007B994(matrices, &g_DisplayListHead);
@@ -1535,7 +1535,7 @@ s32 DrawGame(void) {
                                 func_80082534(&g_DisplayListHead, matrices);
                             }
                             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
-                            func_800625FC(&g_DisplayListHead);
+                            SetSceneFog(&g_DisplayListHead);
                             DrawFadingBillboards(matrices, viewIndex);
                         }
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
@@ -1607,7 +1607,7 @@ s32 DrawGame(void) {
             }
         } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
             if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == 1) {
-                func_800625FC(&g_DisplayListHead);
+                SetSceneFog(&g_DisplayListHead);
                 func_80062A8C(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
                 if (!IsGameFlagSet(0x17)) {

@@ -1821,7 +1821,7 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
         gDPPipeSync(gfx++);
         gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
         gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SHADOW_ALPHA_THRESHOLD);
-        func_800625FC(&gfx);
+        SetSceneFog(&gfx);
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_2CYCLE);
