@@ -998,7 +998,6 @@ void ClearGlyphSprites(void) {
  * are placed over the glyph before them. Without GLYPH_FLAG_LEFT_ALIGNED
  * the text is centred on x.
  */
-#ifdef NON_MATCHING
 void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *text) {
     s32 i;
     s32 halfWidth;
@@ -1027,11 +1026,9 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *tex
             g_GlyphSprites[i].group = NO_GLYPH_GROUP;
         }
     }
-    advance = 0;
-    placedCount = 0;
-    for (i = 0; placedCount != g_GlyphGroupSizes[group] && i != GLYPH_SPRITE_COUNT; i++) {
+    for (i = 0, placedCount = 0, advance = 0; placedCount != g_GlyphGroupSizes[group] && i != GLYPH_SPRITE_COUNT; i++) {
         if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
-            switch (*text) {
+            switch (text[placedCount]) {
                 case CHARACTER_CODE_OTHER_MARK_FIRST:
                 case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
                 case CHARACTER_CODE_MARK_FIRST:
@@ -1052,26 +1049,21 @@ void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *tex
                         if (flags & TEXT_FLAG_FIXED_WIDTH) {
                             advance += FONT_SIZE_LARGE;
                         } else {
-                            advance += g_LargeFontWidths[*text];
+                            advance += g_LargeFontWidths[text[placedCount]];
                         }
                     } else {
                         advance += fontSize;
                     }
                     break;
             }
-            g_GlyphSprites[i].code = *text;
-            placedCount++;
+            g_GlyphSprites[i].code = text[placedCount];
             g_GlyphSprites[i].fontSize = fontSize;
-            text++;
             g_GlyphSprites[i].flags = flags;
             g_GlyphSprites[i].group = group;
+            placedCount++;
         }
     }
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/text", PlaceGlyphGroup);
-#endif
 
 /*
  * Places the glyphs and icons of a message as sprites of a group, centred
