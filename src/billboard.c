@@ -109,6 +109,15 @@ const s32 g_BillboardLightColor[3] = { 255, 220, 160 };
 const s32 g_BillboardEnvColor[3] = { 128, 64, 32 };
 #endif
 
+/*
+ * Whether a point is near the edge of a course; no point of the
+ * mini-golf course is. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define IsNearCourseEdge(x, z)                                                                                        \
+    (!g_IsMiniGolf && (((x) <= COURSE_EDGE_MIN_X) || ((z) <= COURSE_EDGE_MIN_Z) || ((x) >= COURSE_EDGE_MAX_X) ||      \
+                       ((z) >= COURSE_EDGE_MAX_Z)))
+
 void PlaceBillboards(void) {
     s32 i;
     f32 x;
@@ -122,9 +131,7 @@ void PlaceBillboards(void) {
         if (g_Billboards[i].textureIndex >= 0) {
             x = g_Billboards[i].x;
             z = g_Billboards[i].z;
-            if (!g_IsMiniGolf
-                && (x <= COURSE_EDGE_MIN_X || z <= COURSE_EDGE_MIN_Z
-                    || x >= COURSE_EDGE_MAX_X || z >= COURSE_EDGE_MAX_Z)) {
+            if (IsNearCourseEdge(x, z)) {
                 g_Billboards[i].isNearCourseEdge = TRUE;
             } else {
                 g_Billboards[i].isNearCourseEdge = FALSE;
@@ -164,6 +171,16 @@ void SortBillboardsByDepth(void) {
     }
 }
 
+/*
+ * Whether a billboard's texture is one read in on demand, has been read
+ * and is not the one loaded for drawing. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define NeedsTextureLoad(billboard, textureIndex)                                                                     \
+    (((billboard)->textureIndex != sLoadedTextureIndex) &&                                                            \
+     (sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) &&                                           \
+     (sBillboardTextures[textureIndex].pixels != NULL))
+
 void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *transform, s32 textureIndex,
                    CameraMatrices *cameraMatrices) {
     Gfx *gfx = *gfxPtr;
@@ -180,9 +197,7 @@ void DrawBillboard(Gfx **gfxPtr, Billboard *billboard, BillboardTransform *trans
             ReadAssetFile(sBillboardTextures[textureIndex].pixels, texelSize, &file);
         }
     }
-    if (billboard->textureIndex != sLoadedTextureIndex
-        && sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND
-        && sBillboardTextures[textureIndex].pixels != NULL) {
+    if (NeedsTextureLoad(billboard, textureIndex)) {
         gDPLoadTextureBlock(gfx++, (u32)sBillboardTextures[textureIndex].pixels & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                             sBillboardTextures[textureIndex].width, sBillboardTextures[textureIndex].height, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 5, 6, 2, G_TX_NOLOD);
@@ -389,6 +404,13 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
 #endif
 
 /*
+ * Whether the billboards are hidden: by the game flag, while their heap
+ * is not ready, or by the debug view. It is a macro, as an inline
+ * function compiles differently from the original.
+ */
+#define AreBillboardsHidden() (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || IsDebugBButtonView())
+
+/*
  * Draws the billboards close to the camera, translucent so that the camera
  * can see through them, from the farthest to the nearest. Those farther
  * than the ball stay opaque.
@@ -406,7 +428,7 @@ void DrawFadingBillboards(CameraMatrices *cameraMatrices, s32 cameraIndex) {
     s32 viewDepth;
     s32 alpha;
 
-    if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || IsDebugBButtonView()) {
+    if (AreBillboardsHidden()) {
         return;
     }
     gDPPipeSync(gfx++);
