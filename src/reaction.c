@@ -53,6 +53,29 @@
  */
 #define SPOT_SMOOTH_ENOUGH_ROUGHNESS 0xB400
 
+/* The framings look at this point of the character */
+#define REACTION_FOCUS_POINT 1
+#define QUARTER_TURN_RADIANS 1.5707964f
+/* The camera closes in from the start distance to the end one over the frames */
+#define REACTION_START_DISTANCE 76800.0f
+#define REACTION_END_DISTANCE 30720.0f
+#define REACTION_ZOOM_RATE 0.025f
+#define REACTION_EASE_RATE 0.1f
+/* Kid's camera turns this far a frame, a sixty-fourth of a turn */
+#define KID_TURN_STEP 0.049087387f
+/* Sherry's eagle effects run for this many frames from this one */
+#define SHERRY_EFFECT_START_FRAME 15
+#define SHERRY_EFFECT_FRAME_COUNT 37
+/* Baby Mario's camera keeps higher above the ground, and his bogey effects start at this frame */
+#define BABY_MARIO_GROUND_CLEARANCE 0x2400
+#define BABY_MARIO_EFFECT_START_FRAME 44
+#define WARIO_EFFECT_START_FRAME 20
+#define MARIO_EFFECT_START_FRAME 10
+/* The length of a light direction, the largest an s8 holds */
+#define LIGHT_DIRECTION_LENGTH 127.0f
+/* The eye is this much below the focus, where heights grow downward */
+#define REACTION_EYE_DROP 1.5f
+
 /* PlaceAtReactionSpot stands the character this far from the spot */
 #define SPOT_PLACE_DISTANCE 13824.0f
 #define PITCH_REFINEMENT_COUNT 2
@@ -107,6 +130,9 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view);
 void FrameSherryReaction(u32 slotIndex, CameraView *view);
 void FrameKidReaction(u32 slotIndex, CameraView *view);
 void SetCharacterLighting(u32 slotIndex, s32 value);
+void func_80079358(u32 slotIndex, s32 pointId);
+void func_80078DC0(u32 slotIndex, s32 pointId);
+void func_80078FA8(u32 slotIndex, s32 pointId, f32 heading);
 
 /* Blends from one value to another by the weight, limited to 0 to 1 */
 f32 BlendClamped(f32 from, f32 to, f32 weight) {
@@ -527,27 +553,488 @@ void KeepAboveGround(f32 *point) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameMarioReaction);
+/*
+ * Frames Mario from farther away and, late in the eagle animation, lights
+ * him in yellow along the line from his focus point to his third point
+ */
+void FrameMarioReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance;
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 lightDirection[AXIS_COUNT];
+    f32 lightOrigin[AXIS_COUNT];
+    f32 length;
+    f32 highestHeight;
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameWarioReaction);
+    if (sReactionAnimation == REACTION_ANIMATION_PAR) {
+        distance = BlendClamped(107520.0f, 30720.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    } else {
+        distance = BlendClamped(107520.0f, 38400.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    }
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+        if (sReactionFrame >= MARIO_EFFECT_START_FRAME) {
+            func_80079358(slotIndex, 3);
+            GetCharacterPointPosition(0, 3, lightDirection);
+            GetCharacterPointPosition(0, REACTION_FOCUS_POINT, lightOrigin);
+            lightDirection[AXIS_X] -= lightOrigin[AXIS_X];
+            lightDirection[AXIS_Y] -= lightOrigin[AXIS_Y];
+            lightDirection[AXIS_Z] -= lightOrigin[AXIS_Z];
+            length = sqrtf(lightDirection[AXIS_X] * lightDirection[AXIS_X]
+                           + lightDirection[AXIS_Y] * lightDirection[AXIS_Y]
+                           + lightDirection[AXIS_Z] * lightDirection[AXIS_Z]);
+            if (length > 1.0f) {
+                length = LIGHT_DIRECTION_LENGTH / length;
+                lightDirection[AXIS_X] *= length;
+                lightDirection[AXIS_Y] *= length;
+                lightDirection[AXIS_Z] *= length;
+                sHasReactionLight = TRUE;
+                SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE_THIRD);
+                sReactionLights.l[2].l.col[0] = 0xFF;
+                sReactionLights.l[2].l.col[1] = 0xFF;
+                sReactionLights.l[2].l.col[2] = 0x7F;
+                sReactionLights.l[2].l.colc[0] = 0xFF;
+                sReactionLights.l[2].l.colc[1] = 0xFF;
+                sReactionLights.l[2].l.colc[2] = 0x7F;
+                sReactionLights.l[2].l.dir[0] = lightDirection[AXIS_X];
+                sReactionLights.l[2].l.dir[1] = lightDirection[AXIS_Y];
+                sReactionLights.l[2].l.dir[2] = lightDirection[AXIS_Z];
+            }
+        }
+    }
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+        focus[AXIS_Y] -= 4.5f;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + (-1.5f);
+    if (sReactionAnimation == REACTION_ANIMATION_PAR) {
+        view->eye[AXIS_Y] = focus[AXIS_Y] + (-7.5f);
+    }
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameBabyMarioReaction);
+/*
+ * Frames Wario from a point above where his shadow lies, with distances
+ * that depend on the animation and an effect late in the eagle animation
+ */
+void FrameWarioReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance;
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameMapleReaction);
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+        distance = BlendClamped(107520.0f, 46080.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    } else if (sReactionAnimation == REACTION_ANIMATION_BIRDIE) {
+        distance = BlendClamped(107520.0f, 23040.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    } else {
+        distance = BlendClamped(92160.0f, 38400.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    }
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+        if (sReactionFrame >= WARIO_EFFECT_START_FRAME) {
+            func_80079358(slotIndex, 3);
+        }
+    }
+    GetCharacterPointPosition(slotIndex, CHARACTER_POINT_SHADOW, focus);
+    focus[AXIS_Y] -= 15.0f;
+    if (sReactionAnimation == REACTION_ANIMATION_BIRDIE) {
+        focus[AXIS_Y] += 1.5f;
+    }
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    switch (sReactionAnimation) {
+        case REACTION_ANIMATION_EAGLE:
+            view->eye[AXIS_Y] = focus[AXIS_Y];
+            break;
+        case REACTION_ANIMATION_BIRDIE:
+            view->eye[AXIS_Y] = focus[AXIS_Y] + (-9.0f);
+            break;
+        default:
+            view->eye[AXIS_Y] = focus[AXIS_Y] + (-4.5f);
+            break;
+    }
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
 
+/*
+ * Frames Baby Mario level with him, closing in slowly, with effects on
+ * alternate sides late in the bogey animation
+ */
+void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(61440.0f, REACTION_END_DISTANCE, sReactionFrame * 0.0125f);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 eastward;
+    f32 southward;
+    f32 heading;
+    f32 highestHeight;
+
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - BABY_MARIO_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y];
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (sReactionAnimation == REACTION_ANIMATION_BOGEY && sReactionFrame >= BABY_MARIO_EFFECT_START_FRAME) {
+        eastward = view->lookAt[AXIS_X] - view->eye[AXIS_X];
+        southward = view->lookAt[AXIS_Z] - view->eye[AXIS_Z];
+        if ((s32)eastward != 0 || (s32)southward != 0) {
+            heading = atan2f(southward, eastward);
+        } else {
+            heading = 0.0f;
+        }
+        if (!(sReactionFrame & 1)) {
+            func_80078FA8(slotIndex, 3, heading + M_PI / 2);
+        } else {
+            func_80078FA8(slotIndex, 4, heading - M_PI / 2);
+        }
+    }
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
+
+/* Frames Maple from farther away, with an effect every third frame of the eagle animation */
+void FrameMapleReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
+
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+        if (sReactionFrame % 3 == 0) {
+            func_80079358(slotIndex, 3);
+        }
+    }
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
+        view->eye[AXIS_Y] = focus[AXIS_Y];
+    } else {
+        view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
+    }
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
+            view->lookAt[AXIS_Y] -= 4.5f;
+            view->eye[AXIS_Y] += 3.0f;
+        } else {
+            view->lookAt[AXIS_Y] -= 7.5f;
+            view->eye[AXIS_Y] += 7.5f;
+        }
+    }
+}
+
+/* Frames Bowser from farther away, with effects at three frames of the bogey animation */
+#ifdef NON_MATCHING
+void FrameBowserReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
+
+    if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
+        if (sReactionFrame == 10 || sReactionFrame == 24 || sReactionFrame == 33) {
+            func_80078DC0(0, 3);
+        }
+    }
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    switch (sReactionAnimation) {
+        case REACTION_ANIMATION_EAGLE:
+            view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
+            break;
+        case REACTION_ANIMATION_BIRDIE:
+            view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+            KeepAboveGround(view->eye);
+            EaseReactionView(view->eye, view->lookAt, 1.0f, EASE_EYE | EASE_LOOK_AT);
+            /* fallthrough */
+        default:
+            view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+            break;
+    }
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+            view->lookAt[AXIS_Y] -= 7.5f;
+            view->eye[AXIS_Y] += 9.0f;
+        } else {
+            view->lookAt[AXIS_Y] -= 3.0f;
+            view->eye[AXIS_Y] += 3.0f;
+        }
+    }
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/reaction", FrameBowserReaction);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameAzaleaReaction);
+/* Frames Azalea from farther away and from above */
+void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameDonkeyKongReaction);
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    focus[AXIS_Y] += 3.0f;
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + (-7.5f);
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameReaction);
+/* Frames Donkey Kong, easing the camera more slowly */
+void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameYoshiReaction);
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, 0.08f, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameSherryReaction);
+/* Frames the reaction of a character with no framing of its own */
+void FrameReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
 
-INCLUDE_ASM("asm/nonmatchings/reaction", FrameKidReaction);
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 3.0f;
+    }
+}
+
+/* Frames Yoshi, looking lower except after a bogey */
+void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
+
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    if (sReactionAnimation != REACTION_ANIMATION_BOGEY) {
+        focus[AXIS_Y] += 4.5f;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
+
+/* Frames Sherry, with effects at her points through the eagle animation */
+void FrameSherryReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(REACTION_START_DISTANCE, 46080.0f, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 highestHeight;
+
+    if (sReactionAnimation == REACTION_ANIMATION_EAGLE
+        && (u32)(sReactionFrame - SHERRY_EFFECT_START_FRAME) < SHERRY_EFFECT_FRAME_COUNT) {
+        func_80079358(slotIndex, sReactionFrame % 3 + 3);
+        func_80079358(slotIndex, sReactionFrame % 3 + 6);
+    }
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 3.0f;
+    }
+}
+
+/* Frames Kid, swinging the camera round to the front as the animation ends */
+void FrameKidReaction(u32 slotIndex, CameraView *view) {
+    CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
+    f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE, sReactionFrame * REACTION_ZOOM_RATE);
+    f32 focus[AXIS_COUNT];
+    u8 unusedBuffer[0x40]; /* Unused; it is there to match */
+    f32 turn = (sReactionFrame - sReactionFrameCount) * KID_TURN_STEP;
+    f32 highestHeight;
+
+    if (turn > 0.0f) {
+        turn = 0.0f;
+    }
+    GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
+    highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                     - CAMERA_GROUND_CLEARANCE) * COURSE_TO_WORLD_SCALE;
+    if (highestHeight < focus[AXIS_Y]) {
+        focus[AXIS_Y] = highestHeight;
+    }
+    view->lookAt[AXIS_X] = focus[AXIS_X];
+    view->lookAt[AXIS_Y] = focus[AXIS_Y];
+    view->lookAt[AXIS_Z] = focus[AXIS_Z];
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        turn = 0.0f;
+    }
+    view->eye[AXIS_X] =
+        focus[AXIS_X] + cosf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
+    view->eye[AXIS_Z] =
+        focus[AXIS_Z] + sinf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
+    KeepAboveGround(view->eye);
+    EaseReactionView(view->eye, view->lookAt, 0.3f, EASE_EYE | EASE_LOOK_AT);
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+        view->lookAt[AXIS_Y] -= 4.5f;
+        view->eye[AXIS_Y] += 4.5f;
+    }
+}
 
 /*
  * Advances the reaction in the slot by a frame, and frames it with the
