@@ -3,6 +3,7 @@
 #include "character.h"
 #include "common.h"
 #include "controller.h"
+#include "course.h"
 #include "heap.h"
 #include "math_util.h"
 #include "save.h"
@@ -124,21 +125,89 @@
 /* The frames that the menu waits after saving before it slides out */
 #define SAVED_WAIT_FRAMES 15
 
+/* The game menu's rows: the saved games, then End Game */
+#define GAME_ROW_COUNT (SAVED_GAME_COUNT + 1)
+#define FIRST_GAME_ROW_TOP 50
+#define GAME_ROW_SPACING 47
+#define GAME_PANEL_STRIP_HEIGHT 15
+/*
+ * The panels' middles, less their rows' offsets; each panel reaches half
+ * its height above and below its middle
+ */
+#define GAME_PANEL_MIDDLE 72
+#define END_GAME_PANEL_MIDDLE 64
+#define END_GAME_PANEL_STRIP_HEIGHT 9
+/*
+ * The title image is drawn in strips that each overlap the next by two
+ * rows, as it sways in a figure eight around its resting place
+ */
+#define TITLE_IMAGE_WIDTH 160
+#define TITLE_STRIP_COUNT 3
+#define TITLE_STRIP_HEIGHT 10
+#define TITLE_STRIP_SIZE (TITLE_IMAGE_WIDTH * TITLE_STRIP_HEIGHT)
+#define TITLE_STRIP_DRAWN_HEIGHT 12
+#define TITLE_LAST_STRIP_HEIGHT 7
+#define TITLE_IMAGE_LEFT 70
+#define TITLE_SWAY_LEFT 10.0f
+#define TITLE_SWAY_TOP 18.0f
+#define TITLE_SWAY_DISTANCE 5.0f
+/* Texture coordinates have five fraction bits, so a texel is 32 */
+#define TEXEL_COORDINATE_ONE 32
+#define HALF_TEXEL_COORDINATE 16.0f
+#define SWAY_DEGREES_PER_FRAME 10
+/* The mode icons are drawn at half size, in two halves */
+#define MODE_ICON_SIZE 64
+#define MODE_ICON_PART_HEIGHT 32
+#define MODE_ICON_PART_COUNT 2
+#define MODE_ICON_LEFT 26
+#define MODE_ICON_TOP 54
+#define HALF_SIZE_TEXEL_STEP (2 << 10)
+#define GOLFERS_LEFT 240
+#define GOLFER_SPACING 26
+#define GOLFER_TOP 52
+#define MODE_TEXT_LEFT 62
+#define MODE_TEXT_TOP 57
+#define COURSE_TEXT_TOP 74
+#define GAME_HOLE_TEXT_LEFT 240
+#define GAME_HOLE_TEXT_TOP 78
+#define EMPTY_GAME_TEXT_TOP 64
+#define END_GAME_TEXT_LEFT 116
+#define END_GAME_TEXT_TOP 199
+/* The cursor's frame pulses between these alphas */
+#define CURSOR_ALPHA_MIDDLE 127
+#define CURSOR_ALPHA_SWING 64.0f
+/* func_800738BC's font size for the course names */
+#define COURSE_NAME_FONT_SIZE 12
+/* Each mini-golf course record has three courses */
+#define MINI_GOLF_GREEN 0
+#define MINI_GOLF_SLOW 1
+#define MINI_GOLF_FAST 2
+#define LUIGIS_GARDEN_COURSE_INDEX MINI_GOLF_COURSE_INDEX
+#define PEACHS_CASTLE_COURSE_INDEX (MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD)
+/* Indices of sModeNames */
+#define MODE_NAME_TOURNAMENT 0
+#define MODE_NAME_GET_CHARACTER 1
+#define MODE_NAME_STROKE 2
+#define MODE_NAME_MATCH_GAME 3
+#define MODE_NAME_SKINS_MATCH 4
+#define MODE_NAME_CLUB_SLOTS 5
+#define MODE_NAME_MINI_GOLF 6
+
 /* The replay menu's rows: the records, then Hole Out */
 #define REPLAY_ROW_COUNT (SAVE_RECORD_COUNT + 1)
-#define FIRST_ROW_TOP 36
-#define ROW_SPACING 34
+#define FIRST_REPLAY_ROW_TOP 36
+#define REPLAY_ROW_SPACING 34
 /* The panel image is stretched over each row a strip at a time */
 #define PANEL_IMAGE_WIDTH 200
 #define PANEL_IMAGE_HEIGHT 30
 #define PANEL_STRIP_COUNT 3
 #define PANEL_STRIP_HEIGHT (PANEL_IMAGE_HEIGHT / PANEL_STRIP_COUNT)
 #define PANEL_STRIP_SIZE (PANEL_IMAGE_WIDTH * PANEL_STRIP_HEIGHT)
-#define RECORD_PANEL_LEFT 24
-#define RECORD_PANEL_WIDTH 272
+#define WIDE_PANEL_LEFT 24
+#define WIDE_PANEL_WIDTH 272
 #define RECORD_PANEL_STRIP_HEIGHT 11
-#define HOLE_OUT_PANEL_LEFT 80
-#define HOLE_OUT_PANEL_WIDTH 160
+#define NARROW_PANEL_LEFT 80
+#define NARROW_PANEL_WIDTH 160
 #define HOLE_OUT_PANEL_STRIP_HEIGHT 8
 #define TITLE_PANEL_LEFT 96
 #define TITLE_PANEL_TOP 13
@@ -248,6 +317,8 @@ void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void func_800747B0(Gfx **displayListHead, s16 x, s16 y, char *text);
 void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
+s32 func_800738BC(char *text, s32 fontSize);
+void func_80073F24(Gfx **displayListHead, s16 x, s16 y, char *text);
 void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
                    s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 
@@ -265,18 +336,18 @@ s32 sMenuState = SAVE_MENU_STATE_OPENING;
 char *sModeNames[MODE_NAME_COUNT] = {
     "Tournament", "Get Character", "Stroke", "Match Game", "Skins Match", "Club Slots", "Mini-Golf",
 };
-char D_8024580C_ovl_12[] = "There is no saved data.";
-char D_80245824_ovl_12[] = "There is no replay data.";
-char D_80245840_ovl_12[] = "End Game";
-char D_8024584C_ovl_12[] = "Save Menu";
+char sNoSavedGameText[] = "There is no saved data.";
+char sNoReplayText[] = "There is no replay data.";
+char sEndGameText[] = "End Game";
+char sSaveMenuText[] = "Save Menu";
 s32 sIconImageIndex = 0;
 s32 sUnusedSaveMenuWord = 0;
 s32 sResumedSongId = NO_SONG;
 s16 sReplayLabelIds[REPLAY_LABEL_COUNT] = { 0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C };
 s32 sIconFrameTimer = 0;
-f32 D_80245874_ovl_12 = 0.0f;
-f32 D_80245878_ovl_12 = 0.0f;
-f32 D_8024587C_ovl_12 = 0.0f;
+f32 sPanelWaveAngle = 0.0f;
+f32 sTitleSwayAngle = 0.0f;
+f32 sCursorPulseAngle = 0.0f;
 f32 sReplayTitleBobAngle = 0.0f;
 
 /* Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON */
@@ -518,12 +589,322 @@ void AnimateModeIcons(s32 isImmediate) {
 INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", AnimateModeIcons);
 #endif
 
-__asm__(".section .rodata");
-const s32 D_80245918_ovl_12[4] = { 0x2A, 0x2A, 0x2A, 0x19 };
-const s32 D_80245928_ovl_12[4] = { 0x88, 0x88, 0x88, 0x50 };
-const char D_80245938_ovl_12[] = "%s";
+/*
+ * Draws the saved games: each row's panel, mode icon, golfers, mode,
+ * course and hole, the End Game row, the swaying title and the cursor's
+ * pulsing frame, all slid by sSlideOffsets.
+ */
+void DrawGameSaveMenu(Gfx **displayListHead) {
+    Gfx *gfx;
+    SaveData *save;
+    s32 row;
+    /* Counts rows, icon halves or golfers; sharing one variable is there to match */
+    s32 index;
+    s32 strip;
+    s32 stripHeight;
+    f32 titleLeftExact;
+    f32 titleTopExact;
+    s32 titleLeft;
+    s32 titleTop;
+    s32 titleTexelLeft;
+    s32 titleTexelTop;
+    s32 drawnHeight;
+    s32 imageLeft;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", DrawGameSaveMenu);
+    save = GetSaveData();
+    gfx = *displayListHead;
+    if (sMenuKind == SAVE_MENU_GAMES) {
+        AnimateModeIcons(FALSE);
+
+        /* The panels, stretched from the panel image a strip at a time */
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        /* The wave's height is never used */
+        sinf(sPanelWaveAngle);
+        sPanelWaveAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
+            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + strip * PANEL_STRIP_SIZE,
+                          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
+                          G_TX_MIRROR, 0, 0, 0, 0);
+            for (index = 0; index != SAVED_GAME_COUNT; index++) {
+                if (index == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                                    CHOSEN_PANEL_SHADE);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                stripHeight = GAME_PANEL_STRIP_HEIGHT;
+                func_8006A2C0(&gfx, (sSlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
+                              (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
+                               stripHeight * PANEL_STRIP_COUNT / 2) << 2,
+                              (sSlideOffsets[index] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
+                              (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
+                               stripHeight * PANEL_STRIP_COUNT / 2 + stripHeight) << 2,
+                              G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
+                              (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+            }
+            if (sCursorIndex == index) {
+                gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                                CHOSEN_PANEL_SHADE);
+            } else {
+                gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+            }
+            stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
+            func_8006A2C0(&gfx, (sSlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
+                          (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
+                               stripHeight * PANEL_STRIP_COUNT / 2) << 2,
+                          (sSlideOffsets[index] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
+                          (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
+                               stripHeight * PANEL_STRIP_COUNT / 2 + stripHeight) << 2,
+                          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
+                          (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+            gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                            CHOSEN_PANEL_SHADE);
+        }
+
+        /* The title, swaying to a fraction of a pixel */
+        titleLeftExact = cosf(sTitleSwayAngle * 0.5f) * TITLE_SWAY_DISTANCE + TITLE_SWAY_LEFT;
+        titleTopExact = sinf(sTitleSwayAngle) * TITLE_SWAY_DISTANCE + TITLE_SWAY_TOP;
+        titleLeft = titleLeftExact < 0.0f ? titleLeftExact + 0.5f : titleLeftExact - 0.5f;
+        titleTop = titleTopExact < 0.0f ? titleTopExact + 0.5f : titleTopExact - 0.5f;
+        titleTexelLeft = (s32)(HALF_TEXEL_COORDINATE - (titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE);
+        titleTexelTop = (s32)(HALF_TEXEL_COORDINATE - (titleTopExact - titleTop) * HALF_TEXEL_COORDINATE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+        sTitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+        func_8006A548(&gfx, (u8 *)sSaveMenuTitleImage + IMAGE_HEADER_SIZE);
+        imageLeft = TITLE_IMAGE_LEFT;
+        /* The strips are counted with row; reusing it is there to match */
+        for (row = 0; row != TITLE_STRIP_COUNT; row++) {
+            drawnHeight = TITLE_STRIP_DRAWN_HEIGHT;
+            if (row == TITLE_STRIP_COUNT - 1) {
+                drawnHeight = TITLE_LAST_STRIP_HEIGHT;
+            }
+            gDPLoadTextureTile(gfx++,
+                               ((u32)sSaveMenuTitleImage + LARGE_PALETTED_TEXELS_OFFSET + row * TITLE_STRIP_SIZE) &
+                                   ~7,
+                               G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT, 0, 0,
+                               TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+            gSPTextureRectangle(gfx++, (titleLeft + imageLeft - sSlideOffsets[1]) << 2,
+                                (titleTop + row * TITLE_STRIP_HEIGHT) << 2,
+                                (titleLeft + (imageLeft + TITLE_IMAGE_WIDTH) - sSlideOffsets[1]) << 2,
+                                (row * TITLE_STRIP_HEIGHT + drawnHeight + titleTop) << 2, G_TX_RENDERTILE,
+                                titleTexelLeft + TEXEL_COORDINATE_ONE,
+                                titleTexelTop + TEXEL_COORDINATE_ONE, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+
+        /* Each saved game's mode icon, from the image not being loaded into */
+        for (row = 0; row != SAVED_GAME_COUNT; row++) {
+            func_8006A548(&gfx, (u8 *)sModeIconImages[row][sIconImageIndex ^ 1] + IMAGE_HEADER_SIZE);
+            if (save->savedGames[row].isValid) {
+                gDPPipeSync(gfx++);
+                if (row == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                                    CHOSEN_PANEL_SHADE);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                gDPPipeSync(gfx++);
+                for (index = 0; index != MODE_ICON_PART_COUNT; index++) {
+                    func_8006A84C(&gfx,
+                                  (u8 *)sModeIconImages[row][sIconImageIndex ^ 1] + LARGE_PALETTED_TEXELS_OFFSET +
+                                      index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE,
+                                  G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT, 0, G_TX_MIRROR,
+                                  G_TX_MIRROR, 0, 0, 0, 0);
+                    func_8006A2C0(&gfx, (sSlideOffsets[row] + MODE_ICON_LEFT) << 2,
+                                  (MODE_ICON_TOP + row * GAME_ROW_SPACING + index * (MODE_ICON_PART_HEIGHT / 2)) << 2,
+                                  (sSlideOffsets[row] + MODE_ICON_LEFT + MODE_ICON_SIZE / 2) << 2,
+                                  (MODE_ICON_TOP + row * GAME_ROW_SPACING + index * (MODE_ICON_PART_HEIGHT / 2) +
+                                   MODE_ICON_PART_HEIGHT / 2) << 2,
+                                  G_TX_RENDERTILE, 0, 0, HALF_SIZE_TEXEL_STEP, HALF_SIZE_TEXEL_STEP);
+                }
+            }
+        }
+
+        /* Each saved game's golfers, side by side about GOLFERS_LEFT */
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        for (row = 0; row != SAVED_GAME_COUNT; row++) {
+            if (save->savedGames[row].isValid) {
+                GameState *state;
+                s32 golfersLeft;
+                s32 golfersRight;
+
+                gDPPipeSync(gfx++);
+                golfersLeft = GOLFERS_LEFT;
+                golfersRight = GOLFERS_LEFT + CHARACTER_IMAGE_WIDTH;
+                state = &save->savedGames[row].state;
+                if (row == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                gDPPipeSync(gfx++);
+                for (index = 0; index != state->playerCount; index++) {
+                    func_8006A548(&gfx, sCharacterFiles[row * MAX_PLAYER_COUNT + index]);
+                    func_8006A84C(&gfx, sCharacterImages[row * MAX_PLAYER_COUNT + index], G_IM_FMT_CI,
+                                  G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0,
+                                  0);
+                    func_8006A2C0(&gfx,
+                                  (index * GOLFER_SPACING + (sSlideOffsets[row] + golfersLeft) -
+                                   state->playerCount * (GOLFER_SPACING / 2)) << 2,
+                                  (GOLFER_TOP + row * GAME_ROW_SPACING) << 2,
+                                  (index * GOLFER_SPACING + (sSlideOffsets[row] + golfersRight) -
+                                   state->playerCount * (GOLFER_SPACING / 2)) << 2,
+                                  (GOLFER_TOP + row * GAME_ROW_SPACING + CHARACTER_IMAGE_HEIGHT) << 2,
+                                  G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                }
+            }
+        }
+
+        /* The cursor's frame around the chosen row, pulsing */
+        {
+            s32 rowHeights[GAME_ROW_COUNT] = { 42, 42, 42, 25 };
+            s32 rowHalfWidths[GAME_ROW_COUNT] = { 136, 136, 136, 80 };
+            s32 centerX;
+            s32 rowTop;
+
+            sCursorPulseAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
+            centerX = SCREEN_WIDTH / 2;
+            rowTop = FIRST_GAME_ROW_TOP;
+            gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF,
+                            (s32)(sinf(sCursorPulseAngle) * CURSOR_ALPHA_SWING) + CURSOR_ALPHA_MIDDLE);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+                          (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
+                          (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX)) << 2,
+                          (rowTop + sCursorIndex * GAME_ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+                          (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING)) << 2,
+                          (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX)) << 2,
+                          (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING) +
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+                          (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
+                          (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex] +
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING) +
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx,
+                          (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX) -
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
+                          (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX)) << 2,
+                          (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING) +
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+
+        /* Each saved game's mode, course and hole, or that the slot is empty */
+        func_800734F0(&gfx, 0);
+        for (row = 0; row != SAVED_GAME_COUNT; row++) {
+            gDPPipeSync(gfx++);
+            if (row == sCursorIndex) {
+                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            } else {
+                gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+            }
+            gDPPipeSync(gfx++);
+            if (save->savedGames[row].isValid) {
+                GameState *state = &save->savedGames[row].state;
+
+                if (state->isMiniGolf) {
+                    sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_MINI_GOLF]);
+                } else {
+                    switch (state->gameMode) {
+                        case GAME_MODE_TOURNAMENT:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_TOURNAMENT]);
+                            break;
+                        case GAME_MODE_GET_CHARACTER:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_GET_CHARACTER]);
+                            break;
+                        case GAME_MODE_STROKE:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_STROKE]);
+                            break;
+                        case GAME_MODE_MATCH_GAME:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_MATCH_GAME]);
+                            break;
+                        case GAME_MODE_SKINS_MATCH:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_SKINS_MATCH]);
+                            break;
+                        case GAME_MODE_CLUB_SLOTS:
+                            sprintf(g_PrintBuffer, "%s", sModeNames[MODE_NAME_CLUB_SLOTS]);
+                            break;
+                    }
+                }
+                func_8007624C(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT, MODE_TEXT_TOP + row * GAME_ROW_SPACING,
+                              g_PrintBuffer, 0xFFFF9300, 0x44FF0000, 0);
+                if (state->isMiniGolf) {
+                    if (state->courseIndex == LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_GREEN) {
+                        sprintf(g_PrintBuffer, "%s GREEN", g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                    }
+                    if (state->courseIndex == LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_SLOW) {
+                        sprintf(g_PrintBuffer, "%s SLOW", g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                    }
+                    if (state->courseIndex == LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_FAST) {
+                        sprintf(g_PrintBuffer, "%s FAST", g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
+                    }
+                    if (state->courseIndex == PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_GREEN) {
+                        sprintf(g_PrintBuffer, "%s GREEN", g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                    }
+                    if (state->courseIndex == PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_SLOW) {
+                        sprintf(g_PrintBuffer, "%s SLOW", g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                    }
+                    if (state->courseIndex == PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_FAST) {
+                        sprintf(g_PrintBuffer, "%s FAST", g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
+                    }
+                } else if (state->gameMode == GAME_MODE_TOURNAMENT) {
+                    sprintf(g_PrintBuffer, "%s", g_TournamentNames[state->courseIndex]);
+                } else {
+                    sprintf(g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
+                }
+                func_800738BC(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
+                func_8007624C(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT, COURSE_TEXT_TOP + row * GAME_ROW_SPACING,
+                              g_PrintBuffer, 0x00FFFF00, 0xFFFFFF00, 0);
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
+                func_80073F24(&gfx, sSlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
+                              GAME_HOLE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
+            } else {
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
+                gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
+                sprintf(g_PrintBuffer, "%s", sNoSavedGameText);
+                func_800747B0(&gfx, sSlideOffsets[row] + SCREEN_WIDTH / 2, EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING,
+                              g_PrintBuffer);
+            }
+        }
+        gDPPipeSync(gfx++);
+        func_8007624C(&gfx, sSlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP, sEndGameText,
+                      0xFF571300, 0xFFDB4C00, 0);
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
+        gDPSetEnvColor(gfx++, 0xFF, 0x68, 0x00, 0xFF);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        *displayListHead = gfx;
+    }
+}
 
 /* Saves the current game in the chosen slot and loads its players' images */
 void SaveGameToSlot(void) {
@@ -867,11 +1248,11 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 } else {
                     gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
                 }
-                func_8006A2C0(&gfx, (rowOffsets[row] + RECORD_PANEL_LEFT) << 2,
-                              (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight) << 2,
-                              (rowOffsets[row] + RECORD_PANEL_LEFT + RECORD_PANEL_WIDTH) << 2,
-                              (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight + stripHeight) << 2,
-                              G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / RECORD_PANEL_WIDTH,
+                func_8006A2C0(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
+                              (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight) << 2,
+                              (rowOffsets[row] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
+                              (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight + stripHeight) << 2,
+                              G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
                               (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
             }
             stripHeight = HOLE_OUT_PANEL_STRIP_HEIGHT;
@@ -882,11 +1263,11 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             } else {
                 gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
             }
-            func_8006A2C0(&gfx, (rowOffsets[row] + HOLE_OUT_PANEL_LEFT) << 2,
-                          (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight) << 2,
-                          (rowOffsets[row] + HOLE_OUT_PANEL_LEFT + HOLE_OUT_PANEL_WIDTH) << 2,
-                          (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight + stripHeight) << 2,
-                          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / HOLE_OUT_PANEL_WIDTH,
+            func_8006A2C0(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
+                          (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight) << 2,
+                          (rowOffsets[row] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
+                          (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight + stripHeight) << 2,
+                          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
                           (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
         }
 
@@ -910,14 +1291,14 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 }
                 gDPPipeSync(gfx++);
                 func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
-                              (COURSE_TOP + index * ROW_SPACING) << 2,
+                              (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
-                              (COURSE_TOP + index * ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
+                              (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
                               COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
                 func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
-                              (COURSE_TOP + index * ROW_SPACING) << 2,
+                              (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH + COURSE_DIGIT_WIDTH) << 2,
-                              (COURSE_TOP + index * ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
+                              (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
                               ((s8)record->unk34 * COURSE_DIGIT_WIDTH) << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
                 switch (record->unk36 & RECORD_KIND_MASK) {
                     case RECORD_KIND_ALBATROSS:
@@ -956,9 +1337,9 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 func_8006A4A0(&gfx, 0, (u8 *)sReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
                 func_8006A5E4(&gfx, (u8 *)sReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
                               labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
-                func_8006A2C0(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2, (LABEL_TOP + index * ROW_SPACING) << 2,
+                func_8006A2C0(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2, (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
-                              (LABEL_TOP + index * ROW_SPACING + labelHeight) << 2, G_TX_RENDERTILE, 0, 0,
+                              (LABEL_TOP + index * REPLAY_ROW_SPACING + labelHeight) << 2, G_TX_RENDERTILE, 0, 0,
                               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             }
         }
@@ -983,9 +1364,9 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 func_8006A84C(&gfx, sCharacterImages[index], G_IM_FMT_CI, G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
                               CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
                 func_8006A2C0(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
-                              (CHARACTER_TOP + index * ROW_SPACING) << 2,
+                              (CHARACTER_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH) << 2,
-                              (CHARACTER_TOP + index * ROW_SPACING + CHARACTER_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                              (CHARACTER_TOP + index * REPLAY_ROW_SPACING + CHARACTER_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
                               0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             }
         }
@@ -1002,28 +1383,28 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
             func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex] -
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex] -
                            CURSOR_FRAME_THICKNESS) << 2,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex]) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
                           (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX) +
                            CURSOR_FRAME_THICKNESS) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex]) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             func_8006A2C0(&gfx,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX) -
                            CURSOR_FRAME_THICKNESS) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
-                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex]) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
 
@@ -1071,13 +1452,13 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
                 gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
                 /* The saved-game message is printed but never drawn */
-                sprintf(g_PrintBuffer, D_80245938_ovl_12, D_8024580C_ovl_12);
-                func_800747B0(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2, EMPTY_TEXT_TOP + index * ROW_SPACING,
-                              D_80245824_ovl_12);
+                sprintf(g_PrintBuffer, "%s", sNoSavedGameText);
+                func_800747B0(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2, EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING,
+                              sNoReplayText);
             } else {
                 text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
                 func_80071608(&gfx);
-                func_800719A0(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * ROW_SPACING,
+                func_800719A0(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
                               text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
                               0xFF, 0xFF);
                 func_80071CE4(&gfx, FIRST_RECORD_TEXT_SLOT + index);
@@ -1087,7 +1468,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         func_8007624C(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT, HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
                       0xFFDB4C00, 0);
         gDPPipeSync(gfx++);
-        func_8007624C(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT, titleBob + TITLE_TEXT_TOP, D_8024584C_ovl_12,
+        func_8007624C(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT, titleBob + TITLE_TEXT_TOP, sSaveMenuText,
                       0xFF000000, 0xFFFFFF00, 0);
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);

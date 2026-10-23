@@ -34,6 +34,10 @@
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
 #define HOLE_FLAG_PAR_THREE (1 << 1)
 
+/* Each main course's tournament, then the tournaments' total */
+#define TOURNAMENT_NAME_COUNT 7
+#define TOURNAMENT_NAME_SIZE 25
+
 typedef struct HoleRecord {
     /* 0x0 */ u8 par;
     /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
@@ -56,6 +60,7 @@ typedef struct RingShotHole {
 extern s32 g_CourseIndex;
 extern s32 g_HoleIndex;
 extern CourseRecord g_CourseRecords[COURSE_RECORD_COUNT];
+extern char g_TournamentNames[TOURNAMENT_NAME_COUNT][TOURNAMENT_NAME_SIZE];
 /* The par of the hole being played */
 extern s8 g_HolePar;
 

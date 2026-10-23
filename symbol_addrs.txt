@@ -1178,6 +1178,7 @@ GetHoleRecordIndex = 0x80052070; // type:func
 GetHoleIndexInRecord = 0x800520DC; // type:func
 IsMarkedParFive = 0x80052100; // type:func
 IsParThree = 0x80052168; // type:func
+g_TournamentNames = 0x800C1370; // size:0xAF
 g_CourseRecords = 0x800C1420; // size:0x708
 g_RingShotHoles = 0x800C1B28; // size:0x48
 SeedTournamentRandom = 0x80067D40; // type:func
