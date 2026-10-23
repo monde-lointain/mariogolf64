@@ -951,10 +951,10 @@ void func_8021857C(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80219C74(Gfx **displayListHead);
 void func_8021A940(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
-void func_80242294(Gfx **displayListHead);
+void DrawGameSaveMenu(Gfx **displayListHead);
 void func_802438D0(Gfx **displayListHead);
-void func_80244134(Gfx **displayListHead);
-void func_80245320(Gfx **displayListHead);
+void DrawReplaySaveMenu(Gfx **displayListHead);
+void DrawControlsScreen(Gfx **displayListHead);
 void func_8040BFC8(void);
 void func_8040C124(void);
 void func_8040C360(CameraMatrices *matrices, Gfx **displayListHead);
@@ -1672,9 +1672,9 @@ s32 DrawGame(void) {
         }
         func_8006C918(&g_DisplayListHead);
         if (g_IsModuleAlive[22]) {
-            func_80242294(&g_DisplayListHead);
-            func_80244134(&g_DisplayListHead);
-            func_80245320(&g_DisplayListHead);
+            DrawGameSaveMenu(&g_DisplayListHead);
+            DrawReplaySaveMenu(&g_DisplayListHead);
+            DrawControlsScreen(&g_DisplayListHead);
         }
     }
     func_8008D0DC();
