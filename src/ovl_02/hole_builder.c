@@ -3,6 +3,7 @@
 #include "common.h"
 #include "functions.h"
 #include "hole_loader.h"
+#include "hole_triangles.h"
 #include "save.h"
 #include "scene.h"
 #include "terrain.h"
@@ -385,9 +386,53 @@ void ReadAttributeRuns(void) {
     sBuildCursor = sBuildBuffer;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802513B8_ovl_02);
+/* Reads the billboards from the hole's tree file */
+void ReadBillboards(void) {
+    u8 count;
+    u8 i;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251610_ovl_02);
+    ReadFileBytes(&count, sizeof(count));
+    for (i = 0; i < count; i++) {
+        if (i >= BILLBOARD_COUNT) {
+            osSyncPrintf("ER2\n");
+            return;
+        }
+        ReadFileBytes(&g_Billboards[i].x, sizeof(s16));
+        ReadFileBytes(&g_Billboards[i].y, sizeof(s16));
+        ReadFileBytes(&g_Billboards[i].z, sizeof(s16));
+        ReadFileBytes(&g_Billboards[i].textureIndex, sizeof(s8));
+        g_Billboards[i].shapeIndex = 0;
+        ReadFileBytes(&g_Billboards[i].unk8, sizeof(s8));
+        g_Billboards[i].isNearCourseEdge = FALSE;
+        ReadFileBytes(&g_Billboards[i].width, sizeof(u16));
+        ReadFileBytes(&g_Billboards[i].height, sizeof(u16));
+    }
+}
+
+/* Reads the hole triangles' kinds and corner positions from the hole's triangle file */
+void ReadHoleTriangles(void) {
+    /* Unused; it is there to match */
+    u8 unused[0x10];
+    u8 count;
+    s8 kind;
+    u8 i;
+    HoleTriangle *triangle;
+
+    ReadFileBytes(&count, sizeof(count));
+    for (i = 0; i < count; i++) {
+        /* It tests the count, not the index, on every triangle */
+        if (count >= HOLE_TRIANGLE_COUNT) {
+            osSyncPrintf("ER3\n");
+            return;
+        }
+        triangle = &g_WorkArea.hole.triangles[i];
+        ReadFileBytes(&kind, sizeof(kind));
+        triangle->kind = kind;
+        ReadFileBytes(triangle->vertices[0].v.ob, sizeof(s16) * AXIS_COUNT);
+        ReadFileBytes(triangle->vertices[1].v.ob, sizeof(s16) * AXIS_COUNT);
+        ReadFileBytes(triangle->vertices[2].v.ob, sizeof(s16) * AXIS_COUNT);
+    }
+}
 
 /* Reads each ground tile's unk992 from the file */
 void ReadTileUnk992s(void) {
