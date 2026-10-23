@@ -15,7 +15,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FUNCTION_RE = re.compile(r"^glabel (\w+)\n(?:.*\n)*?\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ", re.MULTILINE)
-SYMBOL_RE = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]{8});.*type:func", re.MULTILINE)
+SYMBOL_RE = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]{8});.*type:func(?:.*segment:(\w+))?", re.MULTILINE)
 
 
 def main():
@@ -25,7 +25,13 @@ def main():
     with open(expected_path) as expected_file:
         addresses = [address for _, address in FUNCTION_RE.findall(expected_file.read())]
     with open(os.path.join(ROOT, "symbol_addrs.txt")) as symbol_file:
-        names_by_address = {address.upper(): symbol for symbol, address in SYMBOL_RE.findall(symbol_file.read())}
+        symbols = SYMBOL_RE.findall(symbol_file.read())
+    # Overlays share addresses, so a symbol of this file's segment wins
+    segment = name.split("/")[0]
+    names_by_address = {}
+    for symbol, address, symbol_segment in symbols:
+        if symbol_segment in ("", segment):
+            names_by_address.setdefault(address.upper(), symbol)
     functions = [names_by_address.get(address, f"func_{address}") for address in addresses]
 
     backup_path = c_path + ".refresh_backup"
@@ -37,11 +43,13 @@ def main():
                 c_file.write(f'INCLUDE_ASM("asm/nonmatchings/{name}", {function});\n\n')
         subprocess.run(["rm", "-rf", "asm"], cwd=ROOT, check=True)
         subprocess.run(["make", "extract"], cwd=ROOT, check=True, capture_output=True)
+        texts = []
+        for function in functions:
+            path = os.path.join(ROOT, "asm", "nonmatchings", name, f"{function}.s")
+            with open(path) as function_file:
+                texts.append(function_file.read())
         with open(expected_path, "w") as expected_file:
-            for function in functions:
-                path = os.path.join(ROOT, "asm", "nonmatchings", name, f"{function}.s")
-                with open(path) as function_file:
-                    expected_file.write(function_file.read())
+            expected_file.write("".join(texts))
     finally:
         shutil.move(backup_path, c_path)
     print(f"{len(functions)} functions")
