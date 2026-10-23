@@ -4,6 +4,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "hole_loader.h"
+#include "host_file.h"
 #include "hole_triangles.h"
 #include "math_util.h"
 #include "save.h"
@@ -65,6 +66,16 @@ typedef struct GroundLightColor {
     /* 0x2 */ u16 green;
     /* 0x4 */ u16 blue;
 } GroundLightColor; /* size = 0x6 */
+
+/*
+ * While a hole is built, each ground tile holds a map image of
+ * GROUND_TILE_TEXEL_SPAN rows of that many texels, with no border
+ */
+#define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
+#define MAP_ROW_COUNT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
+/* Splits a map column or row into a tile and a texel within it */
+#define MAP_TILE_SHIFT 5
+#define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
 
 /* The work-area buffers that the ground tiles' display lists and vertices are built in */
 #define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
@@ -842,9 +853,86 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
     return (color << 16) | paintedCode;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
+/* Returns the map texel at a column and row of the whole hole's map */
+static inline u16 *GetMapTexel(s32 column, s32 row) {
+    u16 *texels = (u16 *)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+                                                (row >> MAP_TILE_SHIFT) * GROUND_TILE_COLUMN_COUNT];
 
+    return &texels[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN + (column & MAP_TILE_MASK)];
+}
+
+/* Whether a column and row lie on the map */
+static inline s32 IsOnMap(s32 column, s32 row) {
+    return column >= 0 && column < MAP_COLUMN_COUNT && row >= 0 && row < MAP_ROW_COUNT;
+}
+
+/* Returns the map texel at a column and row, or 0 off the map */
+static inline u16 ReadMapTexel(s32 column, s32 row) {
+    if (IsOnMap(column, row)) {
+        return *GetMapTexel(column, row);
+    }
+    return 0;
+}
+
+/*
+ * Encodes the map's texels as terrain codes, a byte each, in the hole file
+ * buffer. It does not match: the original computes the row's tile offset
+ * inside the column loop, where this hoists it out.
+ */
+#ifdef NON_MATCHING
+void EncodeCodeMap(void) {
+    s32 column;
+    s32 row;
+
+    sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+    for (row = 0; row < MAP_ROW_COUNT; row++) {
+        for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+            sBuildCursor = sBuildBuffer + row * MAP_COLUMN_COUNT + column;
+            *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
+#endif
+
+/*
+ * Clears the map, reads a code map from the host and paints the map's texels
+ * with the colours of its terrain codes. It does not match, for the same
+ * reason as EncodeCodeMap.
+ */
+#ifdef NON_MATCHING
+void LoadCodeMap(char *path) {
+    u32 size;
+    s32 tileIndex;
+    u32 texelIndex;
+    s32 column;
+    s32 row;
+    u16 color;
+
+    sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+    if (ReadHostFile(path, &size) == HOST_FILE_OK && size == MAP_COLUMN_COUNT * MAP_ROW_COUNT) {
+        sBuildCursor = sBuildBuffer;
+    }
+    for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
+        for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH; texelIndex++) {
+            g_WorkArea.hole.tiles[tileIndex].texels[0][texelIndex] = 0;
+        }
+    }
+    for (row = 0; row < MAP_ROW_COUNT; row++) {
+        for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+            sBuildCursor = sBuildBuffer + row * MAP_COLUMN_COUNT + column;
+            color = GetTerrainCodeColor(*sBuildCursor);
+            if (IsOnMap(column, row)) {
+                *GetMapTexel(column, row) = color;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", LoadCodeMap);
+#endif
 
 /* Repaints the ground tiles from the code map saved before the last clean-up */
 void LoadBackupCodeMap(void) {

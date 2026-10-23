@@ -88,5 +88,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);
 void PrepareHoleTriangles(void);
 s32 IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
+s32 GetTerrainCodeColor(s32 code);
+s32 GetColorTerrainCode(s32 color);
 
 #endif
