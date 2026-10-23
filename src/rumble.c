@@ -398,6 +398,15 @@ void UpdateHelpBoard(void) {
     }
 }
 
+/*
+ * Whether a topic list arrow is shown: up while topics are above the
+ * list, down while some are below. It is a macro, as an inline function
+ * compiles differently from the original.
+ */
+#define IsTopicArrowShown(index)                                                                                      \
+    ((((index) == ARROW_UP) && (sFirstListedTopic > 0)) ||                                                            \
+     (((index) == ARROW_DOWN) && (sFirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
+
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text */
 #ifdef NON_MATCHING
 void DrawHelpBoard(Gfx **displayListHead) {
@@ -477,8 +486,7 @@ void DrawHelpBoard(Gfx **displayListHead) {
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
         gDPLoadTLUT_pal16(gfx++, 0, ((u32)sArrowImages + IMAGE_HEADER_SIZE) & ~7);
         for (index = 0; index != ARROW_COUNT; index++) {
-            if ((index == ARROW_UP && sFirstListedTopic > 0) ||
-                (index == ARROW_DOWN && sFirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)) {
+            if (IsTopicArrowShown(index)) {
                 gDPLoadTextureTile_4b(gfx++,
                                       (u32)((u8 *)sArrowImages + (index * ARROW_IMAGE_SIZE +
                                                                   sArrowFrame * ARROW_FRAME_SIZE +
