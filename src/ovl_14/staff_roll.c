@@ -90,26 +90,43 @@
 #define EARLIER_SONG_FADE_FRAMES 40
 #define STAFF_SONG_FADE_FRAMES 200
 
+/* The staff text's left edge; its shadow is a pixel right of and below it */
+#define STAFF_TEXT_LEFT 32
+#define STAFF_ROW_COUNT 11
+#define TEXT_SHADOW_PASS 0
+#define TEXT_PASS_COUNT 2
+
+/* The fade covers only this rectangle */
+#define FADE_RIGHT 312
+#define FADE_BOTTOM 160
+
+/* Where DrawStaffRoll prints the closing picture's alpha and the frame */
+#define ALPHA_TEXT_COLUMN 5
+#define ALPHA_TEXT_ROW 13
+#define FRAME_TEXT_COLUMN 15
+#define FRAME_TEXT_ROW 5
+
 /* Where UpdateStaffRoll prints the line count */
 #define LINE_COUNT_TEXT_COLUMN 5
 #define LINE_COUNT_TEXT_ROW 12
 
 /*
- * The painting is drawn in strips PAINTING_STRIP_STEP rows apart, each
- * PAINTING_STRIP_OVERLAP rows taller so that the next strip overlaps it.
- * The last strip is only the overlap, which ends the painting at the
- * screen's bottom border.
+ * The painting and the closing picture are drawn in strips
+ * IMAGE_STRIP_STEP rows apart, each IMAGE_STRIP_OVERLAP rows taller so
+ * that the next strip overlaps it. The last strip is only the overlap,
+ * which ends the image at the screen's bottom border.
  */
-#define PAINTING_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
-#define PAINTING_STRIP_COUNT 38
-#define PAINTING_STRIP_STEP 6
-#define PAINTING_STRIP_OVERLAP 2
+#define STAFF_ROLL_IMAGE_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
+#define IMAGE_STRIP_COUNT 38
+#define IMAGE_STRIP_STEP 6
+#define IMAGE_STRIP_OVERLAP 2
 #define PAINTING_SCROLL_FRAME 60
 #define PAINTING_SCROLL_LIMIT 228 /* Rows scrolled when the painting's bottom is shown */
-#define PAINTING_OPAQUE_ALPHA 255
+#define OPAQUE_ALPHA 255
+#define CLOSING_FADE_RATE 2 /* Alpha per frame */
 #define PAINTING_FADE_RATE 4      /* Alpha per frame */
 #define PAINTING_FADE_IN_FRAMES 64
-#define PAINTING_CLOUD_ALPHA 180  /* Below this the painting is drawn with G_RM_CLD_SURF */
+#define CLOUD_ALPHA 180  /* Below this an image is drawn with G_RM_CLD_SURF */
 
 /* GetGroundHeight's units, 1024 to a world unit */
 #define COURSE_UNITS_PER_UNIT 1024.0f
@@ -169,6 +186,8 @@ extern s32 sFadeFramesLeft;
 void AssignCharacterBuffers(void);
 void SetFramebufferCount(s32 count);
 void func_80078910(void);
+void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex);
+void DrawStaffRollPainting(Gfx **displayListHead);
 void func_800789C8(void);
 
 u8 sIsPaintingShown = TRUE;
@@ -582,7 +601,177 @@ void UpdateStaffRoll(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", func_801F7554_ovl_14);
+/*
+ * Module 0x1F's draw. It draws the fade, the painting, the staff text
+ * with its shadow, which scrolls up once the painting has faded out, and
+ * the closing picture, which fades in from CLOSING_FRAME.
+ */
+void DrawStaffRoll(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 lineCount = sStaffText->lineCount;
+    s32 fadeAlpha;
+    s32 closingAlpha;
+    s32 pass;
+    s32 index; /* Counts the rows, then the strips; sharing it is there to match */
+    s32 lineIndex;
+    s32 stripHeight;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, SCREEN_BORDER, SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER,
+                  SCREEN_HEIGHT - SCREEN_BORDER);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    gDPPipeSync(gfx++);
+    if (sFadeLength != 0) {
+        if (sFadeFramesLeft != 0) {
+            sFadeFramesLeft--;
+        }
+        fadeAlpha = (sFadeFramesLeft << 8) / sFadeLength;
+        if (sFadeLength < 0) {
+            fadeAlpha += 0x100;
+        }
+        if (fadeAlpha > 255) {
+            fadeAlpha = 255;
+        }
+        if (fadeAlpha < 0) {
+            fadeAlpha = 0;
+        }
+        if (fadeAlpha == 0) {
+            sFadeLength = 0;
+        }
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fadeAlpha);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gSPTextureRectangle(gfx++, 0, 0, FADE_RIGHT << 2, FADE_BOTTOM << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gSPLoadGeometryMode(gfx++, 0);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPSetEnvColor(gfx++, 0x80, 0x80, 0xFF, 0xFF);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    if (sIsPaintingShown) {
+        DrawStaffRollPainting(&gfx);
+    }
+    if (sStaffRollFrame < CLOSING_FRAME) {
+        closingAlpha = 0;
+        if (!sIsPaintingShown && sIsTextScrolling) {
+            if (--sTextScrollOffset == -STAFF_LINE_HEIGHT) {
+                sTextScrollOffset = 0;
+                sTopLineIndex++;
+            }
+        }
+    } else {
+        closingAlpha = (sStaffRollFrame - CLOSING_FRAME) * CLOSING_FADE_RATE;
+        if (closingAlpha > 255) {
+            closingAlpha = 255;
+        }
+    }
+    sprintf(g_PrintBuffer, "alpha:%d    ", closingAlpha);
+    PrintDebugText(g_PrintBuffer, ALPHA_TEXT_COLUMN, ALPHA_TEXT_ROW);
+    if (!sIsPaintingShown) {
+        for (pass = 0; pass < TEXT_PASS_COUNT; pass++) {
+            if (pass == TEXT_SHADOW_PASS) {
+                gDPSetCombineLERP(gfx++, 0, 0, 0, 0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, 0, PRIMITIVE, 0, TEXEL0, 0);
+            } else {
+                gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0,
+                                  TEXEL0, 0);
+            }
+            for (index = 0; index != STAFF_ROW_COUNT; index++) {
+                lineIndex = index + sTopLineIndex;
+                if (lineIndex >= 0) {
+                    if (lineIndex < lineCount) {
+                        DrawStaffLine(&gfx, STAFF_TEXT_LEFT - pass,
+                                      index * STAFF_LINE_HEIGHT + sTextScrollOffset - pass, lineIndex);
+                    }
+                }
+            }
+        }
+    }
+    if (g_IsDebugEnabled) {
+        sprintf(g_PrintBuffer, "%5d", sStaffRollFrame);
+        PrintDebugText(g_PrintBuffer, FRAME_TEXT_COLUMN, FRAME_TEXT_ROW);
+    }
+    gDPPipeSync(gfx++);
+    if (closingAlpha > 0) {
+        if (closingAlpha == OPAQUE_ALPHA) {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        } else {
+            if (closingAlpha < CLOUD_ALPHA) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+            } else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            }
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, closingAlpha);
+            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE);
+        }
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+        gDPPipeSync(gfx++);
+        for (index = 0; index != IMAGE_STRIP_COUNT; index++) {
+            stripHeight = ((index != IMAGE_STRIP_COUNT - 1) ? IMAGE_STRIP_STEP : 0) | IMAGE_STRIP_OVERLAP;
+            gDPLoadTextureTile(gfx++,
+                               (u32)&((u16 *)sStaffRollImage.texels)[index * IMAGE_STRIP_STEP
+                                                                     * STAFF_ROLL_IMAGE_WIDTH] & ~7,
+                               G_IM_FMT_RGBA, G_IM_SIZ_16b, STAFF_ROLL_IMAGE_WIDTH, 0, 0, 0,
+                               STAFF_ROLL_IMAGE_WIDTH - 1, stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + index * IMAGE_STRIP_STEP) << 2,
+                                    (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
+                                    (SCREEN_BORDER + index * IMAGE_STRIP_STEP + stripHeight) << 2,
+                                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+        }
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 /* Gives the width of the staff text's line; every line is given no height */
 #ifdef NON_MATCHING
@@ -598,7 +787,8 @@ void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
     length = text->lines[lineIndex].length;
     for (; index != length; index++) {
         character = ((u16 *)text)[start + index];
-        if (character < STAFF_CHARACTER_LIMIT && (u32)(character - FIRST_OVERLAID_CHARACTER) >= OVERLAID_CHARACTER_COUNT) {
+        if (character < STAFF_CHARACTER_LIMIT
+            && (u32)(character - FIRST_OVERLAID_CHARACTER) >= OVERLAID_CHARACTER_COUNT) {
             lineWidth += STAFF_GLYPH_WIDTH;
         }
     }
@@ -674,17 +864,17 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
     s32 texelOffset;
 
     if (sStaffRollFrame > TIMELINE_START_FRAME) {
-        alpha = PAINTING_OPAQUE_ALPHA - (sStaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE;
+        alpha = OPAQUE_ALPHA - (sStaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE;
         if (alpha < 0) {
             sIsPaintingShown = FALSE;
             alpha = 0;
         }
     } else {
-        alpha = PAINTING_OPAQUE_ALPHA;
+        alpha = OPAQUE_ALPHA;
     }
     gDPPipeSync(gfx++);
     if (alpha > 0) {
-        if (alpha == PAINTING_OPAQUE_ALPHA) {
+        if (alpha == OPAQUE_ALPHA) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
             gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -694,7 +884,7 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
                                   0, 1);
             }
         } else {
-            if (alpha < PAINTING_CLOUD_ALPHA) {
+            if (alpha < CLOUD_ALPHA) {
                 gDPPipeSync(gfx++);
                 gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
             } else {
@@ -712,7 +902,7 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         gDPLoadTLUT_pal256(gfx++, (u32)sStaffRollImage.texels & ~7);
-        for (stripIndex = 0; stripIndex != PAINTING_STRIP_COUNT; stripIndex++) {
+        for (stripIndex = 0; stripIndex != IMAGE_STRIP_COUNT; stripIndex++) {
             scrolledRows = sStaffRollFrame - PAINTING_SCROLL_FRAME;
             if (scrolledRows > PAINTING_SCROLL_LIMIT) {
                 scrolledRows = PAINTING_SCROLL_LIMIT;
@@ -720,18 +910,18 @@ void DrawStaffRollPainting(Gfx **displayListHead) {
             if (scrolledRows < 0) {
                 scrolledRows = 0;
             }
-            texelOffset = scrolledRows * PAINTING_WIDTH + LARGE_PALETTED_TEXELS_OFFSET;
-            stripHeight = ((stripIndex != PAINTING_STRIP_COUNT - 1) ? PAINTING_STRIP_STEP : 0) | PAINTING_STRIP_OVERLAP;
+            texelOffset = scrolledRows * STAFF_ROLL_IMAGE_WIDTH + LARGE_PALETTED_TEXELS_OFFSET;
+            stripHeight = ((stripIndex != IMAGE_STRIP_COUNT - 1) ? IMAGE_STRIP_STEP : 0) | IMAGE_STRIP_OVERLAP;
             gDPLoadTextureTile(gfx++,
-                               (u32)&((u8 *)&sStaffRollImage)[stripIndex * PAINTING_STRIP_STEP * PAINTING_WIDTH
+                               (u32)&((u8 *)&sStaffRollImage)[stripIndex * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH
                                                               + texelOffset] & ~7,
-                               G_IM_FMT_CI, G_IM_SIZ_8b, PAINTING_WIDTH, 0, 0, 0, PAINTING_WIDTH - 1, stripHeight - 1, 0,
-                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                               G_TX_NOLOD, G_TX_NOLOD);
+                               G_IM_FMT_CI, G_IM_SIZ_8b, STAFF_ROLL_IMAGE_WIDTH, 0, 0, 0, STAFF_ROLL_IMAGE_WIDTH - 1,
+                               stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
             gDPPipeSync(gfx++);
-            gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + stripIndex * PAINTING_STRIP_STEP) << 2,
-                                    (SCREEN_BORDER + PAINTING_WIDTH) << 2,
-                                    (SCREEN_BORDER + stripIndex * PAINTING_STRIP_STEP + stripHeight) << 2,
+            gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + stripIndex * IMAGE_STRIP_STEP) << 2,
+                                    (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
+                                    (SCREEN_BORDER + stripIndex * IMAGE_STRIP_STEP + stripHeight) << 2,
                                     G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             gDPPipeSync(gfx++);
         }

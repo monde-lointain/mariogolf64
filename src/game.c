@@ -932,7 +932,7 @@ void func_800957F0(void);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
 void DrawBootLogos(Gfx **displayListHead);
-void func_801F7554(Gfx **displayListHead);
+void DrawStaffRoll(Gfx **displayListHead);
 void func_801F8110(Gfx **displayListHead);
 void func_801FA4EC(CameraMatrices *matrices, Gfx **displayListHead);
 void func_801FB198(Gfx **displayListHead);
@@ -1246,7 +1246,7 @@ s32 DrawGame(void) {
                     FillScreen();
                     gDPPipeSync(g_DisplayListHead++);
                     SET_CAMERA_SCISSOR(g_Cameras[0].view);
-                    func_801F7554(&g_DisplayListHead);
+                    DrawStaffRoll(&g_DisplayListHead);
                 }
                 break;
             case 12:
@@ -1780,7 +1780,7 @@ s32 DrawGame(void) {
         func_80200CBC(&g_DisplayListHead, 1);
     }
     if (g_Scene == 30 && g_IsModuleAlive[31]) {
-        func_801F7554(&g_DisplayListHead);
+        DrawStaffRoll(&g_DisplayListHead);
     }
     if (IsGameFlagSet(1)) {
         PrintDebugText(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
