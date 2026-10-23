@@ -61,6 +61,13 @@
 /* A path that ends this near a triangle's plane, in course units, touches it */
 #define PLANE_TOUCH_DISTANCE 15.36f
 #define NO_HOLE_TRIANGLE -1
+/* The triangles in a ground tile: two for each cell */
+#define GROUND_TILE_TRIANGLE_COUNT (GROUND_TILE_POINT_SPAN * GROUND_TILE_POINT_SPAN * 2)
+/* FindGroundHit's halvings of the search for where a path enters the next tile */
+#define TILE_SEARCH_STEP_COUNT 10
+/* The length of the sides of the level triangle that FindGroundHit gives for a path off the ground */
+#define LEVEL_TRIANGLE_SIZE 0x100
+
 /* PushBallOutOfWalls' distances from a wall, in course units */
 #define WALL_TOUCH_DISTANCE 460.80002f
 #define WALL_PUSH_DISTANCE 476.16f
@@ -110,7 +117,213 @@ INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA710);
 
 INCLUDE_ASM("asm/nonmatchings/collision", func_80038EB0);
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_80039748);
+/*
+ * Finds the nearest ground triangle that a ball moving from one point to
+ * another hits, walking the ground tiles along the path from its start.
+ * It sets the triangle, whose unk0 is HOLE_TRIANGLE_KIND_FLAT, and the
+ * fraction of the way along the path, and returns whether one is hit. A
+ * path that starts or ends off the ground hits a level triangle at its end
+ * if it ends below the ground there, and nothing otherwise.
+ */
+#ifdef NON_MATCHING
+s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
+                  f32 *fraction) {
+    Vtx *points[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
+    s8 isBelowPath[GROUND_TILE_POINT_SPAN + 1][GROUND_TILE_POINT_SPAN + 1];
+    PlaneTriangle triangles[GROUND_TILE_TRIANGLE_COUNT];
+    TrianglePlane plane;
+    s32 tileX;
+    s32 tileZ;
+    s32 endTileX;
+    s32 endTileZ;
+    s32 nextTileX;
+    s32 nextTileZ;
+    s32 tileDistance;
+    s32 deltaX;
+    s32 deltaZ;
+    s32 pathBottomY;
+    s32 row;
+    s32 column;
+    s32 triangleCount;
+    s32 i;
+    s32 hitIndex;
+    s32 steps;
+    s32 startSide;
+    s32 endSide;
+    s32 hitX;
+    s32 hitZ;
+    f32 planeOffset;
+    f32 nearestFraction;
+    f32 hitFraction;
+    f32 tileFraction;
+    f32 step;
+
+    if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+        PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
+        PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
+        PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
+        PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
+        PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
+        PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+    }
+    if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH || (u32)endX >= GROUND_WIDTH ||
+        (u32)endZ >= GROUND_LENGTH) {
+        if (endY >= GetGroundHeight(endX, endZ)) {
+            *fraction = 1.0f;
+            hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+            hit->corners[AXIS_X][0] = 0;
+            hit->corners[AXIS_Y][0] = 0;
+            hit->corners[AXIS_Z][0] = 0;
+            hit->corners[AXIS_X][1] = LEVEL_TRIANGLE_SIZE;
+            hit->corners[AXIS_Y][1] = 0;
+            hit->corners[AXIS_Z][1] = 0;
+            hit->corners[AXIS_X][2] = 0;
+            hit->corners[AXIS_Y][2] = 0;
+            hit->corners[AXIS_Z][2] = LEVEL_TRIANGLE_SIZE;
+            return TRUE;
+        }
+        return FALSE;
+    }
+    tileX = startX >> GROUND_TILE_SHIFT;
+    tileZ = startZ >> GROUND_TILE_SHIFT;
+    endTileX = endX >> GROUND_TILE_SHIFT;
+    endTileZ = endZ >> GROUND_TILE_SHIFT;
+    deltaX = endX - startX;
+    deltaZ = endZ - startZ;
+    tileFraction = 0.0f;
+    while (TRUE) {
+        hitIndex = NO_HOLE_TRIANGLE;
+        if (endY < startY) {
+            pathBottomY = startY / WHOLE_UNIT_SIZE;
+        } else {
+            pathBottomY = endY / WHOLE_UNIT_SIZE;
+        }
+        for (row = 0; row < GROUND_TILE_POINT_SPAN + 1; row++) {
+            for (column = 0; column < GROUND_TILE_POINT_SPAN + 1; column++) {
+                points[row][column] = GetGroundPoint(tileX * GROUND_TILE_POINT_SPAN + column,
+                                                     tileZ * GROUND_TILE_POINT_SPAN + row);
+                if (pathBottomY < points[row][column]->v.ob[AXIS_Y]) {
+                    isBelowPath[row][column] = TRUE;
+                } else {
+                    isBelowPath[row][column] = FALSE;
+                }
+            }
+        }
+        /* Each cell has two triangles; those whose corners are all below the path are left out */
+        triangleCount = 0;
+        for (row = 0; row < GROUND_TILE_POINT_SPAN; row++) {
+            for (column = 0; column < GROUND_TILE_POINT_SPAN; column++) {
+                if (!isBelowPath[row][column] || !isBelowPath[row][column + 1] || !isBelowPath[row + 1][column]) {
+                    triangles[triangleCount].corners[AXIS_X][0] = points[row][column]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][0] = points[row][column]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][0] = points[row][column]->v.ob[AXIS_Z];
+                    triangles[triangleCount].corners[AXIS_X][1] = points[row][column + 1]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][1] = points[row][column + 1]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][1] = points[row][column + 1]->v.ob[AXIS_Z];
+                    triangles[triangleCount].corners[AXIS_X][2] = points[row + 1][column]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][2] = points[row + 1][column]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][2] = points[row + 1][column]->v.ob[AXIS_Z];
+                    triangleCount++;
+                }
+                if (!isBelowPath[row][column + 1] || !isBelowPath[row + 1][column + 1] ||
+                    !isBelowPath[row + 1][column]) {
+                    triangles[triangleCount].corners[AXIS_X][0] = points[row][column + 1]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][0] = points[row][column + 1]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][0] = points[row][column + 1]->v.ob[AXIS_Z];
+                    triangles[triangleCount].corners[AXIS_X][1] = points[row + 1][column + 1]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][1] = points[row + 1][column + 1]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][1] = points[row + 1][column + 1]->v.ob[AXIS_Z];
+                    triangles[triangleCount].corners[AXIS_X][2] = points[row + 1][column]->v.ob[AXIS_X];
+                    triangles[triangleCount].corners[AXIS_Y][2] = points[row + 1][column]->v.ob[AXIS_Y];
+                    triangles[triangleCount].corners[AXIS_Z][2] = points[row + 1][column]->v.ob[AXIS_Z];
+                    triangleCount++;
+                }
+            }
+        }
+        nearestFraction = NO_PLANE_HIT_FRACTION;
+        for (i = 0; i < triangleCount; i++) {
+            GetTrianglePlane(&triangles[i], &plane);
+            planeOffset = plane.distance * COURSE_UNITS_PER_UNIT;
+            endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
+                      planeOffset;
+            if (endSide >= 0) {
+                startSide = plane.normal[AXIS_X] * startX + plane.normal[AXIS_Y] * startY +
+                            plane.normal[AXIS_Z] * startZ + planeOffset;
+                if (startSide != endSide) {
+                    hitFraction = fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
+                } else {
+                    hitFraction = 0.0f;
+                }
+                if (hitFraction < nearestFraction) {
+                    hitZ = deltaZ * hitFraction + startZ;
+                    hitX = deltaX * hitFraction + startX;
+                    if ((triangles[i].corners[AXIS_X][1] - triangles[i].corners[AXIS_X][0]) *
+                                (hitZ - (triangles[i].corners[AXIS_Z][0] << COURSE_UNIT_SHIFT)) -
+                            (triangles[i].corners[AXIS_Z][1] - triangles[i].corners[AXIS_Z][0]) *
+                                (hitX - (triangles[i].corners[AXIS_X][0] << COURSE_UNIT_SHIFT)) >=
+                        0) {
+                        if ((triangles[i].corners[AXIS_X][2] - triangles[i].corners[AXIS_X][1]) *
+                                    (hitZ - (triangles[i].corners[AXIS_Z][1] << COURSE_UNIT_SHIFT)) -
+                                (triangles[i].corners[AXIS_Z][2] - triangles[i].corners[AXIS_Z][1]) *
+                                    (hitX - (triangles[i].corners[AXIS_X][1] << COURSE_UNIT_SHIFT)) >=
+                            0) {
+                            if ((triangles[i].corners[AXIS_X][0] - triangles[i].corners[AXIS_X][2]) *
+                                        (hitZ - (triangles[i].corners[AXIS_Z][2] << COURSE_UNIT_SHIFT)) -
+                                    (triangles[i].corners[AXIS_Z][0] - triangles[i].corners[AXIS_Z][2]) *
+                                        (hitX - (triangles[i].corners[AXIS_X][2] << COURSE_UNIT_SHIFT)) >=
+                                0) {
+                                nearestFraction = hitFraction;
+                                hitIndex = i;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (hitIndex >= 0) {
+            break;
+        }
+        if ((tileX == endTileX) & (tileZ == endTileZ)) {
+            return FALSE;
+        }
+        /* Finds where the path enters a neighboring tile */
+        if ((tileX != endTileX) | (tileZ != endTileZ)) {
+            step = (1.0f - tileFraction) * 0.5f;
+            hitFraction = tileFraction + step;
+            for (steps = 0; steps < TILE_SEARCH_STEP_COUNT; steps++) {
+                nextTileX = (s32)(deltaX * hitFraction + startX) >> GROUND_TILE_SHIFT;
+                nextTileZ = (s32)(deltaZ * hitFraction + startZ) >> GROUND_TILE_SHIFT;
+                tileDistance = ABS(nextTileX - tileX) + ABS(nextTileZ - tileZ);
+                if (tileDistance == 1) {
+                    break;
+                }
+                step *= 0.5f;
+                if (tileDistance == 0) {
+                    hitFraction += step;
+                } else {
+                    hitFraction -= step;
+                }
+            }
+            tileX = nextTileX;
+            if (steps != TILE_SEARCH_STEP_COUNT) {
+                tileZ = nextTileZ;
+                tileFraction = hitFraction;
+            } else {
+                tileX = endTileX;
+                tileZ = endTileZ;
+            }
+        }
+    }
+    *hit = triangles[hitIndex];
+    hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
+    *fraction = nearestFraction;
+    return TRUE;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", FindGroundHit);
+#endif
 
 /*
  * Returns the cell of a billboard texture's hit mask at fractions of the

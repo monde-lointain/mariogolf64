@@ -1834,3 +1834,4 @@ FindPinHit = 0x8003A4EC; // type:func
 FindRingHit = 0x8003D8EC; // type:func
 FindHoleTriangleHit = 0x8003AE50; // type:func
 PushBallOutOfWalls = 0x8003D1A8; // type:func
+FindGroundHit = 0x80039748; // type:func
