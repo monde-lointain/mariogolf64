@@ -26,6 +26,11 @@
 
 /* MeasureText flag: use each character's own width rather than the font size */
 #define MEASURE_TEXT_PROPORTIONAL 0x02
+/*
+ * MeasureText only tests for MEASURE_TEXT_PROPORTIONAL, so this
+ * measures each character at the font size
+ */
+#define MEASURE_TEXT_FIXED_WIDTH 0x01
 
 #define TEXT_NAME_SIZE 20
 #define TEXT_PALETTE_COLOR_COUNT 4

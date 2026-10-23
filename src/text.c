@@ -119,11 +119,26 @@ typedef struct GlyphSprite {
     /* 0x40 */ s16 code;
     /* 0x42 */ u8 fontSize;
     /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
-    /* 0x44 */ u8 unk44;
+    /* 0x44 */ u8 flags;
 } GlyphSprite; /* size = 0x48 */
 
 #define GLYPH_SPRITE_COUNT 300
 #define NO_GLYPH_GROUP (-1)
+/* Given this as its font size, PlaceGlyphGroup only frees the group */
+#define NO_FONT_SIZE (-1)
+/* Without this flag, PlaceGlyphGroup centres the text on its x */
+#define GLYPH_FLAG_LEFT_ALIGNED 0x10
+/*
+ * How far a glyph sprite of a mark is moved back over the glyph before it,
+ * and up, in each font. Sprites are placed with y rising up the screen.
+ */
+#define LARGE_MARK_BACKSPACE 6.0f
+#define LARGE_MARK_RISE 8.0f
+#define MEDIUM_MARK_BACKSPACE 8.0f
+#define MEDIUM_MARK_RISE 7.0f
+#define SMALL_MARK_RISE 8.0f
+/* PlaceMessageGlyphGroup moves marks back as in the large font, but less far up */
+#define MESSAGE_MARK_RISE 4.0f
 
 extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* How many glyphs each group has */
@@ -667,9 +682,174 @@ void ClearGlyphSprites(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", func_8007515C);
+/*
+ * Places the glyphs of text as sprites of a group, replacing the group's
+ * old sprites, or only frees them if the font size is NO_FONT_SIZE. Marks
+ * are placed over the glyph before them. Without GLYPH_FLAG_LEFT_ALIGNED
+ * the text is centred on x.
+ */
+#ifdef NON_MATCHING
+void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *text) {
+    s32 i;
+    s32 halfWidth;
+    s32 advance;
+    s32 placedCount;
 
-INCLUDE_ASM("asm/nonmatchings/text", func_800754BC);
+    if (fontSize == NO_FONT_SIZE) {
+        for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+            if (g_GlyphSprites[i].group == group) {
+                g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+            }
+        }
+        return;
+    }
+    halfWidth = 0;
+    if (!(flags & GLYPH_FLAG_LEFT_ALIGNED)) {
+        if (flags & TEXT_FLAG_FIXED_WIDTH) {
+            halfWidth = MeasureText(text, fontSize, MEASURE_TEXT_FIXED_WIDTH) / 2;
+        } else {
+            halfWidth = MeasureText(text, fontSize, MEASURE_TEXT_PROPORTIONAL) / 2;
+        }
+    }
+    g_GlyphGroupSizes[group] = GetTextLength(text);
+    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+        if (g_GlyphSprites[i].group == group) {
+            g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+        }
+    }
+    advance = 0;
+    placedCount = 0;
+    for (i = 0; placedCount != g_GlyphGroupSizes[group] && i != GLYPH_SPRITE_COUNT; i++) {
+        if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
+            switch (*text) {
+                case CHARACTER_CODE_OTHER_MARK_FIRST:
+                case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
+                case CHARACTER_CODE_MARK_FIRST:
+                case CHARACTER_CODE_MARK_FIRST + 1:
+                    if (fontSize == FONT_SIZE_LARGE) {
+                        guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x - LARGE_MARK_BACKSPACE,
+                                    y + LARGE_MARK_RISE, 0);
+                    } else if (fontSize == FONT_SIZE_MEDIUM) {
+                        guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x - MEDIUM_MARK_BACKSPACE,
+                                    y + MEDIUM_MARK_RISE, 0);
+                    } else {
+                        guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x, y + SMALL_MARK_RISE, 0);
+                    }
+                    break;
+                default:
+                    guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x, y, 0);
+                    if (fontSize == FONT_SIZE_LARGE) {
+                        if (flags & TEXT_FLAG_FIXED_WIDTH) {
+                            advance += FONT_SIZE_LARGE;
+                        } else {
+                            advance += g_LargeFontWidths[*text];
+                        }
+                    } else {
+                        advance += fontSize;
+                    }
+                    break;
+            }
+            g_GlyphSprites[i].code = *text;
+            placedCount++;
+            g_GlyphSprites[i].fontSize = fontSize;
+            text++;
+            g_GlyphSprites[i].flags = flags;
+            g_GlyphSprites[i].group = group;
+        }
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/text", PlaceGlyphGroup);
+#endif
+
+/*
+ * Places the glyphs and icons of a message as sprites of a group, centred
+ * on x and y, replacing the group's old sprites. Every glyph advances by
+ * its width in the large font. Returns half the message's width in the
+ * high halfword and half its height in the low one.
+ */
+s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, s32 messageId) {
+    s32 width;
+    s32 height;
+    s32 i;
+    s32 start;
+    s32 length;
+    s32 codeIndex;
+    s32 advance;
+    s32 code;
+
+    if (fontSize == NO_FONT_SIZE) {
+        for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+            if (g_GlyphSprites[i].group == group) {
+                g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+            }
+        }
+        /* It returns no value here; the plain return is there to match */
+        return;
+    }
+    /* The operand order is there to match */
+    start = (messageId + g_Messages->messages)->start;
+    length = (messageId + g_Messages->messages)->length;
+    MeasureMessage(messageId, fontSize, &width, &height, 0);
+    width /= 2;
+    height /= 2;
+    y += height;
+    g_GlyphGroupSizes[group] = length;
+    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+        if (g_GlyphSprites[i].group == group) {
+            g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+        }
+    }
+    codeIndex = 0;
+    advance = 0;
+    for (i = 0; codeIndex != length; i++) {
+        if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
+            code = ((u16 *)g_Messages)[g_MessageCodesStart + start + codeIndex];
+            if (code < MESSAGE_CODE_GLYPH) {
+                if (code >= CHARACTER_CODE_MARK_FIRST && code < CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
+                    guTranslate(&g_GlyphSprites[i].matrix, advance - width + x - LARGE_MARK_BACKSPACE,
+                                y + MESSAGE_MARK_RISE, 0);
+                } else {
+                    guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
+                    advance += g_LargeFontWidths[code];
+                }
+                g_GlyphSprites[i].code = code;
+                g_GlyphSprites[i].fontSize = fontSize;
+                g_GlyphSprites[i].group = group;
+            } else if (code >= MESSAGE_CODE_CONTROL) {
+                switch (code) {
+                    case MESSAGE_CODE_LINE_BREAK:
+                        advance = 0;
+                        y -= LINE_SPACING + fontSize;
+                        break;
+                    case 0x8000:
+                    case 0x8001:
+                    case 0x8002:
+                    case 0x8003:
+                    case 0x8004:
+                    case 0x8005:
+                    case 0x8006:
+                    case 0x8007:
+                    case 0x8008:
+                    case 0x8009:
+                    case 0x800A:
+                    case 0x800C:
+                    case 0x800D:
+                    case 0x800E:
+                        guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
+                        advance += fontSize;
+                        g_GlyphSprites[i].code = code;
+                        g_GlyphSprites[i].fontSize = fontSize;
+                        g_GlyphSprites[i].group = group;
+                        break;
+                }
+            }
+            codeIndex++;
+        }
+    }
+    return (width << 16) | height;
+}
 
 INCLUDE_ASM("asm/nonmatchings/text", func_8007580C);
 
