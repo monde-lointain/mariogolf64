@@ -784,6 +784,14 @@ INCLUDE_ASM("asm/nonmatchings/terrain", GetGroundPoint);
 #endif
 
 /*
+ * Whether a midpoint on a tile's first row, or first column, is also kept
+ * by the tile before it. They are macros, as inline functions compile
+ * differently from the original.
+ */
+#define IsSharedWithPreviousTileRow(column, row) (((column) & 1) && !((row) & 3) && ((row) / 4 > 0))
+#define IsSharedWithPreviousTileColumn(column, row) (((row) & 1) && !((column) & 3) && ((column) / 4 > 0))
+
+/*
  * Copies a point into the ground point, and into every tile that keeps a
  * copy of it. It returns no value; the s32 is there to match.
  */
@@ -803,7 +811,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point) {
                 midpoint->v = *point;
             }
         }
-        if ((column & 1) && !(row & 3) && row / 4 > 0) {
+        if (IsSharedWithPreviousTileRow(column, row)) {
             tileIndex = (row / 4 - 1) * 8 + column / 4;
             blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
             if (blockIndex >= 0) {
@@ -812,7 +820,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point) {
                 midpoint->v = *point;
             }
         }
-        if ((row & 1) && !(column & 3) && column / 4 > 0) {
+        if (IsSharedWithPreviousTileColumn(column, row)) {
             tileIndex = (row / 4) * 8 + (column / 4 - 1);
             blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
             if (blockIndex >= 0) {
@@ -844,7 +852,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
                 point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
             }
         }
-        if ((column & 1) && !(row & 3) && row / 4 > 0) {
+        if (IsSharedWithPreviousTileRow(column, row)) {
             tileIndex = (row / 4 - 1) * 8 + column / 4;
             blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
             if (blockIndex >= 0) {
@@ -854,7 +862,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
                 point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
             }
         }
-        if ((row & 1) && !(column & 3) && column / 4 > 0) {
+        if (IsSharedWithPreviousTileColumn(column, row)) {
             tileIndex = (row / 4) * 8 + (column / 4 - 1);
             blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
             if (blockIndex >= 0) {
@@ -1223,6 +1231,15 @@ void MarkBillboardsOnMap(void) {
     }
 }
 
+/*
+ * Whether, with debugging on, the first controller asks for the scene
+ * menu. It is a macro, as an inline function compiles differently from
+ * the original.
+ */
+#define IsSceneMenuRequested()                                                                                        \
+    (g_IsDebugEnabled && (g_MenuControllerData[0].button & START_BUTTON) &&                                           \
+     ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == (START_BUTTON | L_TRIG)))
+
 /* Runs the debug scene menu and the update routine of the current debug scene */
 void UpdateDebugScenes(void) {
     s32 openState = BOX_OPEN; /* A local, rather than the constant, to match */
@@ -1244,8 +1261,7 @@ void UpdateDebugScenes(void) {
         QueueAnimatedBox(&sSceneMenuBox);
         return;
     }
-    if (g_IsDebugEnabled && (g_MenuControllerData[0].button & START_BUTTON) &&
-        (g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == (START_BUTTON | L_TRIG)) {
+    if (IsSceneMenuRequested()) {
         if (IsOverlayInExpansionMemory()) {
             sIsSceneMenuOpen = TRUE;
             ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
@@ -1408,16 +1424,14 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     s32 column;
     s32 row;
 
+    /* Whether x and z are on the outer side of a triangle's edge from start to end */
+    inline s32 IsOutsideEdge(Vtx *start, Vtx *end) {
+        return (end->v.ob[0] - start->v.ob[0]) * (z - (start->v.ob[2] << 10)) -
+                   (end->v.ob[2] - start->v.ob[2]) * (x - (start->v.ob[0] << 10)) < 0;
+    }
+
     inline s32 ContainsPoint(Vtx *first, Vtx *second, Vtx *third) {
-        if ((second->v.ob[0] - first->v.ob[0]) * (z - (first->v.ob[2] << 10)) -
-                    (second->v.ob[2] - first->v.ob[2]) * (x - (first->v.ob[0] << 10)) <
-                0 ||
-            (third->v.ob[0] - second->v.ob[0]) * (z - (second->v.ob[2] << 10)) -
-                    (third->v.ob[2] - second->v.ob[2]) * (x - (second->v.ob[0] << 10)) <
-                0 ||
-            (first->v.ob[0] - third->v.ob[0]) * (z - (third->v.ob[2] << 10)) -
-                    (first->v.ob[2] - third->v.ob[2]) * (x - (third->v.ob[0] << 10)) <
-                0) {
+        if (IsOutsideEdge(first, second) || IsOutsideEdge(second, third) || IsOutsideEdge(third, first)) {
             return FALSE;
         }
         triangle->corners[AXIS_X][0] = first->v.ob[0];
@@ -1499,6 +1513,14 @@ typedef struct IntegerPlane {
     /* 0x10 */ s32 unk10; /* Always 256 */
 } IntegerPlane; /* size = 0x14 */
 
+/*
+ * Whether any of a normal's parts is longer than an integer plane's
+ * normals may be. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define IsNormalTooLong(normalX, normalY, normalZ)                                                                    \
+    ((ABS(normalX) > 0x4000) || (ABS(normalY) > 0x4000) || (ABS(normalZ) > 0x4000))
+
 /* Integer GetTrianglePlane. Returns 0, or -1 for a degenerate triangle. */
 
 s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
@@ -1526,7 +1548,7 @@ s32 GetTriangleIntegerPlane(PlaneTriangle *triangle, IntegerPlane *plane) {
     normalZ = -firstY * secondX + secondY * firstX;
     distance = -(normalX * triangle->corners[AXIS_X][0] + normalY * triangle->corners[AXIS_Y][0] +
                  normalZ * triangle->corners[AXIS_Z][0]);
-    while (ABS(normalX) > 0x4000 || ABS(normalY) > 0x4000 || ABS(normalZ) > 0x4000) {
+    while (IsNormalTooLong(normalX, normalY, normalZ)) {
         normalX /= 256;
         normalY /= 256;
         normalZ /= 256;
