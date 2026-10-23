@@ -67,7 +67,6 @@ typedef struct MapOverviewControls {
 
 extern u8 sPointSlots[GROUND_TILE_POINT_SPAN + 1][8];
 extern f32 D_800BAA0C[GROUND_TILE_COUNT];
-extern s16 sTerrainCodeCells[32][16];
 extern TerrainColor sTerrainColors[11];
 extern u16 g_TerrainCodeColors[];
 extern s8 sCellSearchOffsets[4];
@@ -139,7 +138,7 @@ s32 GetTerrainCode(s32 column, s32 row) {
     } else if (row >= 512) {
         row = 511;
     }
-    block = (sTerrainCodeCells[0] + column / 16)[(row / 16) * 16];
+    block = (g_TerrainCodeCells[0] + column / 16)[(row / 16) * 16];
     if (block == -1) {
         return -1;
     }

@@ -74,6 +74,13 @@ typedef struct GroundTile {
 /* Each terrain code's map colour, which the hole loader sets */
 extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 
+/*
+ * The hole's terrain codes, by 16-texel cell: -1 when the cell has none,
+ * the code itself when the whole cell has one, or else 0x8000 plus the
+ * index of the cell's block of packed codes in g_WorkArea.hole.terrainCodes
+ */
+extern s16 g_TerrainCodeCells[32][16];
+
 Vtx *GetGroundPoint(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);
 void PrepareHoleTriangles(void);
