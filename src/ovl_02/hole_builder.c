@@ -73,6 +73,10 @@ typedef struct GroundLightColor {
  */
 #define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_ROW_COUNT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
+/* The points of a tile's grid, edges included, that MeasureGroundTiles averages */
+#define GROUND_TILE_AVERAGED_POINT_COUNT ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
+#define MIN_GROUND_TILE_HEIGHT_RANGE 32
+#define FLAT_GROUND_TILE_HEIGHT_RANGE 30
 /* Splits a map column or row into a tile and a texel within it */
 #define MAP_TILE_SHIFT 5
 #define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
@@ -1076,7 +1080,65 @@ void ToggleCodeMapCleanup(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024FF74_ovl_02);
+/*
+ * Sets each ground tile's centre to the average of its ground points and its
+ * height range to the spread of their heights, at least
+ * MIN_GROUND_TILE_HEIGHT_RANGE, or FLAT_GROUND_TILE_HEIGHT_RANGE for a flat
+ * tile. It returns the tile count as a float, which no caller uses.
+ */
+f32 MeasureGroundTiles(void) {
+    s32 tileRow;
+    s32 tileColumn;
+    s32 tileIndex;
+    s32 pointRow;
+    s32 pointColumn;
+    s32 sumX;
+    s32 sumY;
+    s32 sumZ;
+    s32 lowest;
+    s32 highest;
+    s32 heightRange;
+    Vtx *point;
+
+    tileIndex = 0;
+    for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+        for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
+            sumX = 0;
+            sumY = 0;
+            sumZ = 0;
+            lowest = 0x40000000;
+            highest = -0x40000000;
+            for (pointRow = 0; pointRow <= GROUND_TILE_POINT_SPAN; pointRow++) {
+                for (pointColumn = 0; pointColumn <= GROUND_TILE_POINT_SPAN; pointColumn++) {
+                    point = GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + pointColumn,
+                                           tileRow * GROUND_TILE_POINT_SPAN + pointRow);
+                    sumX += point->v.ob[0];
+                    sumY += point->v.ob[1];
+                    sumZ += point->v.ob[2];
+                    if (point->v.ob[1] < lowest) {
+                        lowest = point->v.ob[1];
+                    }
+                    if (point->v.ob[1] > highest) {
+                        highest = point->v.ob[1];
+                    }
+                }
+            }
+            heightRange = highest - lowest;
+            if (heightRange != 0 && heightRange < MIN_GROUND_TILE_HEIGHT_RANGE) {
+                heightRange = MIN_GROUND_TILE_HEIGHT_RANGE;
+            }
+            if (heightRange == 0) {
+                heightRange = FLAT_GROUND_TILE_HEIGHT_RANGE;
+            }
+            g_GroundTileHeightRanges[tileIndex] = heightRange;
+            g_WorkArea.hole.tiles[tileIndex].center[0] = sumX / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[1] = sumY / GROUND_TILE_AVERAGED_POINT_COUNT;
+            g_WorkArea.hole.tiles[tileIndex].center[2] = sumZ / GROUND_TILE_AVERAGED_POINT_COUNT;
+            tileIndex++;
+        }
+    }
+    return tileIndex;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250194_ovl_02);
 
