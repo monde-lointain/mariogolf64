@@ -2,6 +2,7 @@
 #include <lib/libnusys/nusys.h>
 #include "game_flags.h"
 #include "asset.h"
+#include "character.h"
 #include "club.h"
 #include "course.h"
 #include "heap.h"
@@ -165,11 +166,6 @@ void SetFramebufferCount(s32 count);
 #define MARKED_CHARACTER_OFFSET 50
 /* D_800C29B8 lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
-
-#define CHARACTER_MAPLE 10
-#define CHARACTER_DONKEY_KONG 11
-#define CHARACTER_UNK12 12
-#define CHARACTER_METAL_MARIO 13
 
 typedef struct Unk800C2590 {
     /* 0x0 */ s16 assetId;
@@ -1051,8 +1047,8 @@ void func_8005C674(s32 arg0, s32 arg1) {
         }
     }
     if (index == MARKABLE_CHARACTER_COUNT) {
-        if (g_CharacterGrid[0][6] != CHARACTER_UNK12) {
-            g_CharacterGrid[0][6] = CHARACTER_UNK12 - MARKED_CHARACTER_OFFSET;
+        if (g_CharacterGrid[0][6] != CHARACTER_BOWSER) {
+            g_CharacterGrid[0][6] = CHARACTER_BOWSER - MARKED_CHARACTER_OFFSET;
         }
     }
     if ((u8)arg1 != 1) {
