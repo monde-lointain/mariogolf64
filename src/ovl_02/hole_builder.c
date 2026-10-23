@@ -1,8 +1,10 @@
+#include "asset.h"
 #include "billboard.h"
 #include "common.h"
 #include "functions.h"
 #include "hole_loader.h"
 #include "save.h"
+#include "scene.h"
 #include "terrain.h"
 #include "work_area.h"
 
@@ -34,6 +36,36 @@
 /* Where the build buffer starts */
 #define BUILD_BUFFER_START ((u8 *)0x80315000)
 
+/* The hole files that OpenHoleAsset opens, in the order of their asset ids */
+#define HOLE_ASSET_VERTICES 1
+#define HOLE_ASSET_MIDPOINTS 2
+#define HOLE_ASSET_TREES 3
+#define HOLE_ASSET_TRIANGLES 4
+#define HOLE_ASSET_ATTRIBUTES 5
+/* The asset ids of the one hole built in GAME_MODE_UNK12 */
+#define UNK12_VERTICES_ASSET 0x3F0
+#define UNK12_MIDPOINTS_ASSET 0x3F1
+#define UNK12_TREES_ASSET 0x3F2
+#define UNK12_TRIANGLES_ASSET 0x3F5
+#define UNK12_ATTRIBUTES_ASSET 0x3F6
+/* Where hole files are read to */
+#define HOLE_FILE_BUFFER ((u8 *)0x8030F800)
+/* The table of hole asset ids has a row for each course and then some */
+#define HOLE_ASSET_COURSE_COUNT 9
+
+/* The asset ids of a hole's files */
+typedef struct HoleAssetIds {
+    /* 0x0 */ u16 vertices;
+    /* 0x2 */ u16 midpoints;
+    /* 0x4 */ u16 trees;
+    /* 0x6 */ u16 unk6;
+    /* 0x8 */ u16 points;
+    /* 0xA */ u16 triangles;
+    /* 0xC */ u16 attributes;
+} HoleAssetIds; /* size = 0xE */
+
+extern HoleAssetIds sHoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
+extern AssetFile sHoleAsset;
 extern u32 sPaintSeed;
 extern s32 sIsCodeMapCleaned;
 extern u8 *sReadCursor;
@@ -474,7 +506,53 @@ void ReadVertexZ(s16 *coord, s32 flags) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251DFC_ovl_02);
+/*
+ * Opens one of a hole's files and reads it to the hole file buffer, or
+ * unpacks the attributes into the build buffer
+ */
+void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
+    sReadCursor = HOLE_FILE_BUFFER;
+    switch (kind) {
+        case HOLE_ASSET_VERTICES:
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_VERTICES_ASSET, &sHoleAsset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].vertices, &sHoleAsset);
+            }
+            break;
+        case HOLE_ASSET_MIDPOINTS:
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_MIDPOINTS_ASSET, &sHoleAsset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].midpoints, &sHoleAsset);
+            }
+            break;
+        case HOLE_ASSET_TREES:
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_TREES_ASSET, &sHoleAsset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].trees, &sHoleAsset);
+            }
+            break;
+        case HOLE_ASSET_TRIANGLES:
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_TRIANGLES_ASSET, &sHoleAsset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].triangles, &sHoleAsset);
+            }
+            break;
+        case HOLE_ASSET_ATTRIBUTES:
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_ATTRIBUTES_ASSET, &sHoleAsset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].attributes, &sHoleAsset);
+            }
+            GetAssetFileSize(&sHoleAsset);
+            LoadLzData(sHoleAsset.romStart, sBuildCursor, sHoleAsset.size);
+            return;
+    }
+    ReadAssetFile(sReadCursor, GetAssetFileSize(&sHoleAsset), &sHoleAsset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
 

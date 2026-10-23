@@ -43,8 +43,6 @@
 
 /* g_GameMode values whose purpose is not yet known */
 #define GAME_MODE_UNK3 3
-#define GAME_MODE_UNK8 8
-#define GAME_MODE_UNK12 12
 #define GAME_MODE_UNK13 13
 
 /* GetHoleRandom's generator, a linear congruential one */

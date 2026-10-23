@@ -83,6 +83,9 @@ extern s32 g_SubModuleState;
 /* A mode in which SetUpPlayers sets up the players from a record */
 #define GAME_MODE_UNK8 8
 
+/* A mode in which every hole is built from the same hole assets */
+#define GAME_MODE_UNK12 12
+
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;
 
