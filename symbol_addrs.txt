@@ -803,6 +803,7 @@ StartSoundEffectWith = 0x8005F0FC; // type:func
 MarkUsableClubs = 0x8005F290; // type:func
 FormatDefaultPlayerName = 0x8005F518; // type:func
 InitPlay = 0x8005F838; // type:func
+PlacePlayersOnTee = 0x8005F964; // type:func
 PlayContestMovies = 0x8005FB58; // type:func
 LoadSuperShotReplay = 0x80060210; // type:func
 LoadRingShotRecord = 0x800602B4; // type:func

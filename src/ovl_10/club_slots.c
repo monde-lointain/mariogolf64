@@ -428,10 +428,10 @@ s32 UpdateClubSlots(void) {
             }
             break;
         case CLUB_SLOTS_STOPPING:
-            if ((s8)player->unk27[0] == UNK27_FIRST_CONTROLLER) {
+            if ((s8)player->unk27 == UNK27_FIRST_CONTROLLER) {
                 controllerIndex = 0;
             } else {
-                controllerIndex = (s8)player->unk27[0];
+                controllerIndex = (s8)player->unk27;
             }
             sStopWaitTime++;
             if (sSlots->pressCount < REEL_COUNT) {

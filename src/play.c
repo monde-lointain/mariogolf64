@@ -4,21 +4,26 @@
 #include "course.h"
 #include "current_shot.h"
 #include "game_flags.h"
+#include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "surface.h"
 #include "terrain.h"
 #include "tournament.h"
 
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
 
-/* UnkB8.unkC values that count as having finished the hole */
+/* UnkB8.unkC values; PlayContestMovies waits for every player to have one */
 #define PLAYER_STATE_UNK11 0x11
 #define PLAYER_STATE_UNK14 0x14
+
+/* How far above the tee a ball starts on the main courses */
+#define TEE_HEIGHT 307.2f
 
 /* Movies that StartMovie plays */
 #define MOVIE_LONGEST_DRIVE 12 /* A longest drive contest's winner */
@@ -85,15 +90,14 @@ extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
 extern s32 D_801B60B4;
-extern s8 D_801B60B9;
 extern s8 D_800FBDB8;
-extern s8 D_801B60B8;
+extern s32 D_800C3094;
+extern s8 D_800C3098;
 extern PlayRecord D_800FED40[];
 extern s8 D_800FEE10;
 extern s8 D_800FEE11;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
-extern s8 g_IsMiniGolf;
 
 s32 GetGroundOrWaterHeight(s32 x, s32 z);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
@@ -101,6 +105,7 @@ void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void func_8005F540(void);
+s32 GetSurface(s32 x, s32 z);
 void func_80080220(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
@@ -163,7 +168,7 @@ s32 func_8005F30C(s32 x, s32 z) {
     s32 height = GetGroundOrWaterHeight(x, z);
     s32 ballHeight;
 
-    if (!g_IsMiniGolf & (height > 0)) {
+    if (!g_GameState.isMiniGolf & (height > 0)) {
         ballHeight = g_CurrentShot.ballPosition[AXIS_Y];
         if (ballHeight <= 0) {
             ballHeight = 0;
@@ -245,7 +250,7 @@ void InitPlay(s32 kind) {
         g_GameState.holeIndex = D_800FEE11;
     }
     RenumberHoleHandicaps();
-    if (!D_801B60B8) {
+    if (!g_GameState.unk30) {
         func_8005F540();
     }
     if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
@@ -259,7 +264,47 @@ void InitPlay(s32 kind) {
     osSyncPrintf("PlayInitComplete\n");
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_8005F964);
+/*
+ * Unless g_GameState.unk30 is 2, starts each player's ball on the tee,
+ * with the hole's per-player state cleared
+ */
+void PlacePlayersOnTee(void) {
+    s32 i;
+    s32 ring;
+    f32 teeHeight;
+
+    D_800C3094 = 0;
+    D_800C3098 = 0;
+    if (g_GameState.unk30 != 2) {
+        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+            g_Players[i].unkC = PLAYER_STATE_UNK11;
+            g_Players[i].ballPosition[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+            teeHeight = D_800BA9D8.teePosition[AXIS_Y];
+            g_Players[i].ballPosition[AXIS_Y] = !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
+            g_Players[i].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+            g_Players[i].unk23 = 0;
+            g_Players[i].unk24[0] = 0;
+            g_Players[i].unk26 = 0;
+            g_Players[i].ballSurface = SURFACE_TEE_UP;
+            if (g_GameState.isMiniGolf) {
+                g_Players[i].ballSurface =
+                    GetSurface(g_Players[i].ballPosition[AXIS_X], g_Players[i].ballPosition[AXIS_Z]);
+            }
+            g_Players[i].driveDistance = UNMEASURED_DISTANCE;
+            g_Players[i].pinDistance = UNMEASURED_DISTANCE;
+            g_Players[i].unk9C = 0;
+            for (ring = RING_COUNT - 1; ring >= 0; ring--) {
+                g_Players[i].ringStates[ring] = 0;
+            }
+            if (g_GameMode == GAME_MODE_RING_SHOT) {
+                g_Players[i].unk28 = 1;
+            }
+        }
+    }
+    if (g_GameMode == GAME_MODE_RING_SHOT) {
+        InitRings();
+    }
+}
 
 /*
  * Once every player has finished the hole, plays the movies for the
@@ -277,7 +322,7 @@ void PlayContestMovies(void) {
                 break;
             }
         }
-        if (!D_801B60B9 && i == g_GameState.playerCount) {
+        if (!g_GameState.unk31 && i == g_GameState.playerCount) {
             if (IsMarkedParFive(g_CourseIndex, g_HoleIndex) && GetContestWinner() != NO_CONTEST_WINNER) {
                 StartMovie(MOVIE_LONGEST_DRIVE);
             }
@@ -294,7 +339,52 @@ void PlayContestMovies(void) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_8005FCB8(void) {
+    s32 isDone = FALSE;
+    s32 i;
+
+    if (D_800FBDB8 == 60) {
+        return FALSE;
+    }
+    if (!g_GameState.unk31) {
+        if (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
+            if (!GetGroupHoleResult(NULL)) {
+                return FALSE;
+            }
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                if (g_Players[i].unkC != PLAYER_STATE_UNK14 && g_Players[i].unkC != PLAYER_STATE_UNK11) {
+                    break;
+                }
+            }
+            return i == g_GameState.playerCount;
+        }
+        if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
+            if (!GetMatchHoleResult(0, 1)) {
+                return FALSE;
+            }
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                if (g_Players[i].unkC != PLAYER_STATE_UNK14 && g_Players[i].unkC != PLAYER_STATE_UNK11) {
+                    break;
+                }
+            }
+            return i == g_GameState.playerCount;
+        }
+    }
+    for (i = 0; i < g_GameState.playerCount; i++) {
+        if (g_Players[i].unkC != PLAYER_STATE_UNK14) {
+            break;
+        }
+    }
+    if (i == g_GameState.playerCount) {
+        isDone = TRUE;
+    }
+    return isDone;
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005FE8C);
 
@@ -464,7 +554,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
     s32 i;
     s32 j;
 
-    if (!g_IsMiniGolf) {
+    if (!g_GameState.isMiniGolf) {
         column = x >> GROUND_TILE_SHIFT;
         row = z >> GROUND_TILE_SHIFT;
         if (column < GROUND_TILE_COLUMN_COUNT) {

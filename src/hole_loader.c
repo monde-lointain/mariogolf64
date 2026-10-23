@@ -145,7 +145,7 @@ extern Unk800BA9D8 D_800FEDD8;
 
 void func_8004D148(void);
 void func_8005F1C8(void);
-void func_8005F964(void);
+void PlacePlayersOnTee(void);
 void func_80080220(void);
 void func_800802E0(void);
 void func_80253234(s32);
@@ -847,7 +847,7 @@ void InitHoleState(void) {
     if (IsGameFlagSet(GAME_FLAG_HALT_HOLE_LOADER)) {
         while (TRUE) {}
     }
-    func_8005F964();
+    PlacePlayersOnTee();
     g_CurrentShot.surface = 0;
     osSyncPrintf("mp2sub1\n");
     func_80080220();

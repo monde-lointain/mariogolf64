@@ -107,7 +107,7 @@ typedef struct GameState {
     /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
     /* 0x28 */ u8 unk28[0x30 - 0x28];
     /* 0x30 */ s8 unk30;
-    /* 0x31 */ u8 unk31;
+    /* 0x31 */ s8 unk31;
     /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
     /* 0x39 */ u8 unk39;
     /* 0x3A */ s8 isMiniGolf;
@@ -190,15 +190,16 @@ typedef struct PlayerHole {
 typedef struct UnkB8 {
     /* 0x00 */ s32 unk0[0xC / 4];
     /* 0x0C */ s32 unkC;
-    /* 0x10 */ s32 unk10[(0x1C - 0x10) / 4];
-    /* 0x1C */ u8 unk1C;
+    /* 0x10 */ CoursePoint ballPosition;
+    /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
     /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
     /* 0x1E */ u8 unk1E[0x22 - 0x1E];
     /* 0x22 */ s8 unk22;
     /* 0x23 */ s8 unk23;
     /* 0x24 */ u8 unk24[2];
     /* 0x26 */ s8 unk26;
-    /* 0x27 */ u8 unk27[2];
+    /* 0x27 */ u8 unk27;
+    /* 0x28 */ s8 unk28;
     /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
     /* 0x2A */ u8 unk2A;
     /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
