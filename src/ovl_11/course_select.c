@@ -149,13 +149,11 @@
 /* Ring Shot hole descriptions are text images from this one */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_TEXT_SLOT 2
-#define TEXT_FONT_SIZE 16
 
 void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
-void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -776,12 +774,12 @@ void DrawHoleSelect(Gfx **displayListHead) {
             colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
         }
         sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-        func_8007624C(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
-                      D_800C2B00[colorIndex], TEXT_FONT_SIZE);
+        DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
+                                D_800C2B00[colorIndex], TEXT_FLAG_CENTERED);
         if (!IsOnDrivingRange()) {
             sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
-            func_8007624C(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
-                          D_800C2B00[colorIndex], TEXT_FONT_SIZE);
+            DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
+                                    D_800C2B00[colorIndex], TEXT_FLAG_CENTERED);
         }
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);

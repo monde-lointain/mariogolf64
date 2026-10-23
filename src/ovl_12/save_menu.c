@@ -304,7 +304,8 @@ void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
+void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
+                             s32 flags);
 /*
  * The call leaves out MeasureText's flags, so this file declares its text
  * routines itself rather than including text.h; it is there to match.
@@ -840,8 +841,9 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                             break;
                     }
                 }
-                func_8007624C(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT, MODE_TEXT_TOP + row * GAME_ROW_SPACING,
-                              g_PrintBuffer, 0xFFFF9300, 0x44FF0000, 0);
+                DrawLargeTextWithShadow(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT,
+                                        MODE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer,
+                                        0xFFFF9300, 0x44FF0000, 0);
                 if (state->isMiniGolf) {
                     if (state->courseIndex == LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_GREEN) {
                         sprintf(g_PrintBuffer, "%s GREEN", g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
@@ -867,8 +869,9 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                     sprintf(g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
                 }
                 MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
-                func_8007624C(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT, COURSE_TEXT_TOP + row * GAME_ROW_SPACING,
-                              g_PrintBuffer, 0x00FFFF00, 0xFFFFFF00, 0);
+                DrawLargeTextWithShadow(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT,
+                                        COURSE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer,
+                                        0x00FFFF00, 0xFFFFFF00, 0);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
                 gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                 sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
@@ -883,8 +886,8 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             }
         }
         gDPPipeSync(gfx++);
-        func_8007624C(&gfx, sSlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP, sEndGameText,
-                      0xFF571300, 0xFFDB4C00, 0);
+        DrawLargeTextWithShadow(&gfx, sSlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP, sEndGameText,
+                                0xFF571300, 0xFFDB4C00, 0);
         gDPPipeSync(gfx++);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
         gDPSetEnvColor(gfx++, 0xFF, 0x68, 0x00, 0xFF);
@@ -1455,11 +1458,11 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             }
         }
         func_800734F0(&gfx, 0);
-        func_8007624C(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT, HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
-                      0xFFDB4C00, 0);
+        DrawLargeTextWithShadow(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT, HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
+                                0xFFDB4C00, 0);
         gDPPipeSync(gfx++);
-        func_8007624C(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT, titleBob + TITLE_TEXT_TOP, sSaveMenuText,
-                      0xFF000000, 0xFFFFFF00, 0);
+        DrawLargeTextWithShadow(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT, titleBob + TITLE_TEXT_TOP, sSaveMenuText,
+                                0xFF000000, 0xFFFFFF00, 0);
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);

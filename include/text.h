@@ -18,6 +18,8 @@
 #define TEXT_FLAG_CENTERED 0x10
 /* DrawTextSlots skips a slot with this flag */
 #define TEXT_FLAG_UNK20 0x20
+/* Each glyph of the large font takes the same width */
+#define TEXT_FLAG_FIXED_WIDTH 0x80
 
 /* The font size, in pixels, of the font whose characters differ in width */
 #define FONT_SIZE_LARGE 12
@@ -55,5 +57,7 @@ void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char *text, s32 fontSize, s32 flags);
 void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
+void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
+                             s32 flags);
 
 #endif

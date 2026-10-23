@@ -75,6 +75,10 @@ typedef struct MessageTable {
 #define NARROW_GLYPH_SIZE 7
 #define NARROW_GLYPH_WIDTH 6
 
+/* How far a text shadow is drawn from its text, and how much darker */
+#define SHADOW_OFFSET 1
+#define SHADOW_DIMMING_SHIFT 2
+
 /*
  * The digit font's glyphs are 16 pixels square, one to a row of its image,
  * and drawn 14 pixels apart. The digits start at the second row, after the
@@ -132,6 +136,8 @@ void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_80072A08(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
@@ -463,7 +469,7 @@ s32 GetTextLength(char *text) {
     return length;
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80073C14);
+INCLUDE_ASM("asm/nonmatchings/text", DrawFixedWidthLargeText);
 
 INCLUDE_ASM("asm/nonmatchings/text", DrawLargeText);
 
@@ -472,7 +478,7 @@ INCLUDE_ASM("asm/nonmatchings/text", DrawMediumText);
 INCLUDE_ASM("asm/nonmatchings/text", DrawSmallText);
 
 /* Draws text in the large font, centred on x */
-void DrawCenteredLargeText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     Gfx *gfx = *displayListHead;
 
     DrawLargeText(&gfx, x - MeasureText(text, FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
@@ -480,7 +486,7 @@ void DrawCenteredLargeText(Gfx **displayListHead, s32 x, s32 y, char *text) {
 }
 
 /* Draws text in the medium font, centred on x */
-void DrawCenteredMediumText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     Gfx *gfx = *displayListHead;
 
     DrawMediumText(&gfx, x - MeasureText(text, FONT_SIZE_MEDIUM, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
@@ -488,7 +494,7 @@ void DrawCenteredMediumText(Gfx **displayListHead, s32 x, s32 y, char *text) {
 }
 
 /* Draws text in the small font, centred on x */
-void DrawCenteredSmallText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     Gfx *gfx = *displayListHead;
 
     DrawSmallText(&gfx, x - MeasureText(text, FONT_SIZE_SMALL, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
@@ -676,5 +682,44 @@ void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", func_8007624C);
+/*
+ * Draws text in the large font over a shadow a quarter as bright, one pixel
+ * down and to the right. The colours are packed as RGBA, but the alpha is
+ * ignored.
+ */
+void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor, s32 flags) {
+    Gfx *gfx = *displayListHead;
+    u8 env[3];
+    u8 prim[3];
+
+    env[0] = envColor >> 24;
+    env[1] = envColor >> 16;
+    env[2] = envColor >> 8;
+    prim[0] = primColor >> 24;
+    prim[1] = primColor >> 16;
+    prim[2] = primColor >> 8;
+    gDPPipeSync(gfx++);
+    gDPSetEnvColor(gfx++, env[0] >> SHADOW_DIMMING_SHIFT, env[1] >> SHADOW_DIMMING_SHIFT,
+                   env[2] >> SHADOW_DIMMING_SHIFT, 255);
+    gDPSetPrimColor(gfx++, 0, 0, prim[0] >> SHADOW_DIMMING_SHIFT, prim[1] >> SHADOW_DIMMING_SHIFT,
+                    prim[2] >> SHADOW_DIMMING_SHIFT, 255);
+    if (flags & TEXT_FLAG_CENTERED) {
+        DrawCenteredLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
+    } else if (flags & TEXT_FLAG_FIXED_WIDTH) {
+        DrawFixedWidthLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
+    } else {
+        DrawLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
+    }
+    gDPSetEnvColor(gfx++, env[0], env[1], env[2], 255);
+    gDPSetPrimColor(gfx++, 0, 0, prim[0], prim[1], prim[2], 255);
+    if (flags & TEXT_FLAG_CENTERED) {
+        DrawCenteredLargeText(&gfx, x, y, text);
+    } else if (flags & TEXT_FLAG_FIXED_WIDTH) {
+        DrawFixedWidthLargeText(&gfx, x, y, text);
+    } else {
+        DrawLargeText(&gfx, x, y, text);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
