@@ -9,6 +9,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -86,7 +87,6 @@ extern s16 D_800FBE2C;
 extern s32 D_800FE334;
 extern s16 D_800FE33C;
 extern GameState D_801B55F0;
-extern Unk800FF4D0 D_800FF4D0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
 extern s8 D_801B60B8;
@@ -748,7 +748,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
             game->state.saveCount++;
         }
         game->unk8 = D_800BA9D8;
-        game->unk80 = D_800FF4D0;
+        game->roundStats = g_RoundStats;
         if (hasIllegalState) {
             return -1;
         }
@@ -767,7 +767,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
             g_GameState.unk0 = 1;
             SetGameFlag(GAME_FLAG_UNK1E);
             D_800BA9D8 = game->unk8;
-            D_800FF4D0 = game->unk80;
+            g_RoundStats = game->roundStats;
         }
         D_801B60B8 = 2;
         osSyncPrintf("Go Continue\n");
@@ -1439,7 +1439,7 @@ void ComputeRoundStatistics(void) {
             reciprocal = 1.0f / entry->roundCount;
             D_80105C38[courseIndex].unk4 = entry->unk4;
             D_80105C38[courseIndex].unk8 = entry->unk8 * reciprocal;
-            D_80105C38[courseIndex].unkC = entry->unkC * UNK_SCALE;
+            D_80105C38[courseIndex].unkC = entry->longestDrive * UNK_SCALE;
             D_80105C38[courseIndex].unk10 = entry->unk10 * UNK_SCALE;
             D_80105C38[courseIndex].unk18 = entry->unk18 * reciprocal * (100.0f / HOLES_PER_ROUND);
             D_80105C38[courseIndex].unk1C = entry->unk1C * reciprocal * (1.0f / HOLES_PER_ROUND);

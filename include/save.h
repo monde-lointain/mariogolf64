@@ -68,6 +68,26 @@ typedef struct Unk68 {
 #define HOLE_SELECTION_BACK_NINE (1 << 1)
 #define HOLE_SELECTION_FRONT_NINE (1 << 2)
 
+/* The bets of a game, indexing GameState.betRates and UnkB8.betTallies */
+#define BET_LONGEST_DRIVE 0 /* On marked par 5 holes */
+#define BET_NEAREST_PIN 1   /* On par 3 holes */
+#define BET_STROKES 2       /* Paid per stroke, between each pair of players */
+#define BET_NASSAU 3        /* Paid on the front nine, the back nine and the round */
+#define BET_UNK4 4          /* Settled on each hole; a tie carries the pot over */
+#define BET_UNK5 5          /* Settled as BET_UNK4, when that bet is not set */
+#define BET_LAS_VEGAS 6     /* Paid per stroke, between the two teams of two */
+#define BET_COUNT 7
+
+/* The contest distances that are not measured yet, or do not count */
+#define UNCOUNTED_DISTANCE -1
+#define UNMEASURED_DISTANCE -2
+
+/* Indices of GameState.carriedPots */
+#define CARRIED_POT_LONGEST_DRIVE 0
+#define CARRIED_POT_NEAREST_PIN 1
+#define CARRIED_POT_HOLE 2
+#define CARRIED_POT_COUNT 3
+
 /*
  * The current game's settings and place, which a saved game keeps for it
  * to be continued with. Code that reads one field alone also names some
@@ -86,11 +106,13 @@ typedef struct GameState {
     /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
     /* 0x28 */ u8 unk28[0x30 - 0x28];
     /* 0x30 */ s8 unk30;
-    /* 0x31 */ u8 unk31[0x3A - 0x31];
+    /* 0x31 */ u8 unk31;
+    /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
+    /* 0x39 */ u8 unk39;
     /* 0x3A */ s8 isMiniGolf;
     /* 0x3B */ u8 unk3B[0x3D - 0x3B];
     /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
-    /* 0x3E */ u8 unk3E[0x44 - 0x3E];
+    /* 0x3E */ s16 carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */
 } GameState; /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
@@ -104,9 +126,16 @@ typedef struct Unk800BA9D8 {
 
 extern Unk800BA9D8 D_800BA9D8;
 
-typedef struct Unk800FF4D0 {
-    /* 0x00 */ s32 unk0[0x1C / 4];
-} Unk800FF4D0; /* size = 0x1C */
+/* The current round's statistics, for the course's records */
+typedef struct RoundStats {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ s32 measuredDriveCount;
+    /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
+    /* 0x10 */ s32 averagedDriveTotal;
+    /* 0x14 */ s32 averagedDriveCount;
+    /* 0x18 */ s32 isDriveAveraged; /* Whether the drive was hit with the 1W */
+} RoundStats; /* size = 0x1C */
 
 /* Indices of UnkE98.hasPlace */
 #define THIRD_PLACE_INDEX 0
@@ -118,7 +147,7 @@ typedef struct UnkE98 {
     /* 0x00 */ s32 roundCount;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
+    /* 0x0C */ s32 longestDrive;
     /* 0x10 */ s32 unk10;
     /* 0x14 */ s32 unk14;
     /* 0x18 */ s32 unk18;
@@ -136,7 +165,7 @@ typedef struct SavedGame {
     /* 0x04 */ u8 unk4[4];
     /* 0x08 */ Unk800BA9D8 unk8;
     /* 0x3C */ GameState state;
-    /* 0x80 */ Unk800FF4D0 unk80;
+    /* 0x80 */ RoundStats roundStats;
     /* 0x9C */ u8 unk9C[4];
 } SavedGame; /* size = 0xA0 */
 
@@ -165,7 +194,15 @@ typedef struct UnkB8 {
     /* 0x72 */ u8 unk72[0x78 - 0x72];
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
     /* 0x7B */ u8 unk7B;
-    /* 0x7C */ u8 unk7C[0xB8 - 0x7C];
+    /* 0x7C */ u8 unk7C[4];
+    /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
+    /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
+    /* 0x88 */ u8 unk88[0x8E - 0x88];
+    /* 0x8E */ s16 betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
+    /* 0x9C */ s8 unk9C;
+    /* 0x9D */ u8 unk9D[3];
+    /* 0xA0 */ s32 lastDriveDistance; /* The driveDistance that RecordDrive took */
+    /* 0xA4 */ u8 unkA4[0xB8 - 0xA4];
 } UnkB8; /* size = 0xB8 */
 
 /* The best times kept for each course, with what was recorded alongside */

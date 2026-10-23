@@ -18,6 +18,7 @@
 #define CLUB_SET_SIZE 14
 #define CLUB_SET_COUNT 18
 #define CLUB_COUNT (CLUB_SET_SIZE * CLUB_SET_COUNT)
+#define CLUB_TYPE_DRIVER 0
 #define CLUB_TYPE_PUTTER 13
 
 /* What a club is, from the clubs' initial data */
