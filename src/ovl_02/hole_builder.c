@@ -233,13 +233,376 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E514_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E71C_ovl_02);
+/*
+ * The paint logic of Shy Guy Desert: like PaintMainCourse with other
+ * colours, except that deep rough is painted as waste area and rough away
+ * from fairway is mottled with other random colours
+ */
+s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 fairwayRandom;
+    s32 green;
+    u32 red;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E958_ovl_02);
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0xE5D2;
+            paintedCode = TERRAIN_CODE_WASTE_AREA;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 19) << 11) | 0x688;
+                } else {
+                    color = (((fairwayRandom & 3) + 14) << 11) | 0x5C6;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x9E89;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = ((sPaintSeed >> 16) & 3) + 10;
+                green = red + 3;
+                color = (red << 11) | (green << 6) | 5;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE721;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x7E4B;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x7E4A : 0x7746;
+                } else {
+                    color = (x & 2) ? 0x8E88 : 0x8606;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0xD6A6;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x7E4A;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EB98_ovl_02);
+/* The paint logic of Boo Valley: PaintMainCourse with other bunker and out-of-bounds colours */
+s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 fairwayRandom;
+    s32 green;
+    u32 red;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EDD8_ovl_02);
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x4481;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+                } else {
+                    color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x4605;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = (sPaintSeed >> 16) & 7;
+                green = 16 - (red >> 1);
+                color = (red << 11) | (green << 6) | 1;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE721;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x2587;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2F84 : 0x4580;
+                } else {
+                    color = (x & 2) ? 0x3E42 : 0x3704;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x2A40;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x2688;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
+
+/* The paint logic of Yoshi's Island: PaintMainCourse with other colours */
+s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 fairwayRandom;
+    s32 green;
+    u32 red;
+
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x448F;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 7) << 11) | 0x4D4;
+                } else {
+                    color = (((fairwayRandom & 3) + 7) << 11) | 0x590;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x4591;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = (sPaintSeed >> 16) & 7;
+                green = 16 - (red >> 1);
+                color = (red << 11) | (green << 6) | 0xD;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xEF37;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x3C04;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2E04 : 0x4480;
+                } else {
+                    color = (x & 2) ? 0x3CC2 : 0x3584;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x26AF;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x2A49;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x269C;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
+
+/*
+ * PaintMainCourse with PaintFirstMiniGolfCourse's mottling of
+ * TERRAIN_CODE_UNK3. Neither the paint-logic table nor any code refers to it.
+ */
+s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 fairwayRandom;
+    s32 green;
+    u32 red;
+
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x4481;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+                } else {
+                    color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x4605;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = (sPaintSeed >> 16) & 7;
+                green = 16 - (red >> 1);
+                color = (red << 11) | (green << 6) | 1;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE739;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x2587;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2F84 : 0x4580;
+                } else {
+                    color = (x & 2) ? 0x3E42 : 0x3704;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x2A41;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x2688;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
 
 /*
  * The paint logic of the first course of each mini-golf set. It returns a
@@ -1045,6 +1408,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
+
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802527FC_ovl_02);
 
