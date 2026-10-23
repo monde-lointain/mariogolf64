@@ -8,6 +8,7 @@
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
 extern RoundStats g_RoundStats;
 
+s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);
 void StartBets(void);
 void ResumeBets(void);
 s32 GetContestWinner(void);

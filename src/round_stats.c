@@ -3,6 +3,7 @@
 #include "course.h"
 #include "round_stats.h"
 #include "save.h"
+#include "scoring.h"
 
 #define NO_CONTEST_WINNER -1
 #define UNSET_BET_RATE -1
@@ -22,7 +23,26 @@ extern s32 sIsContestDecided;
  */
 extern s32 sContestWinner;
 
-INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006CD50);
+/*
+ * Sums the player's net strokes over par from the round's first hole to
+ * endHole, leaving endHole out. The current hole is put in when the
+ * player's unk26 is set
+ */
+s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
+    s32 score = 0;
+    CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
+    s32 hole;
+
+    if (g_HoleIndex == endHole) {
+        endHole += g_Players[playerIndex].unk26 != 0;
+    }
+    for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
+        /* The par's cast is there to match */
+        score += g_Players[playerIndex].holes[hole].strokes - (s8)course->holes[hole].par +
+                 GetHandicapOffset(g_CourseIndex, hole, g_Players[playerIndex].handicap);
+    }
+    return score;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006CE88);
 

@@ -1810,3 +1810,4 @@ RestartRoundStats = 0x8006DE44; // type:func
 RecordHoleStats = 0x8006DEB4; // type:func
 RecordDrive = 0x8006DF84; // type:func
 g_RoundStats = 0x800FF4D0; // size:0x1C
+GetNetScoreToPar = 0x8006CD50; // type:func

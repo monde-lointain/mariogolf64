@@ -1,5 +1,6 @@
 #include "common.h"
 #include "course.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scoring.h"
 #include "scene.h"
@@ -14,7 +15,6 @@
 extern s8 D_801B60C5;
 extern s32 D_801B60B4;
 
-s32 func_8006CD50(s32, s32);
 void func_8007FE44(s32 badgeCount);
 
 /*
@@ -103,7 +103,7 @@ void RecordTournamentPlace(void) {
     stats = &GetSaveData()->unkE98[g_CourseIndex];
     hasPlace = FALSE;
     if (g_GameMode == GAME_MODE_TOURNAMENT) {
-        RankTournament(GetLastHoleIndex() + 1, 0, func_8006CD50(GetLastHoleIndex() + 1, 0), D_801B60B4);
+        RankTournament(GetLastHoleIndex() + 1, 0, GetNetScoreToPar(GetLastHoleIndex() + 1, 0), D_801B60B4);
         place = PLACE_UNPLACED;
         for (index = 0; index != TOURNAMENT_CONTESTANT_COUNT; index++) {
             standing = &g_TournamentStandings[index];
