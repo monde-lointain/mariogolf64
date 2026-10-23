@@ -48,6 +48,8 @@
 #define UNK12_TREES_ASSET 0x3F2
 #define UNK12_TRIANGLES_ASSET 0x3F5
 #define UNK12_ATTRIBUTES_ASSET 0x3F6
+/* The size of the attributes unpacked into the build buffer */
+#define ATTRIBUTE_BUFFER_SIZE 0x20000
 /* Where hole files are read to */
 #define HOLE_FILE_BUFFER ((u8 *)0x8030F800)
 /* The table of hole asset ids has a row for each course and then some */
@@ -343,7 +345,45 @@ void InitGridVertices(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802510D4_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251288_ovl_02);
+/*
+ * Unpacks runs of attributes from the hole file into the build buffer, each
+ * a count and a byte whose two nibbles go to the two bytes of an attribute,
+ * then clears the rest of the buffer. Nothing calls it.
+ */
+void ReadAttributeRuns(void) {
+    s16 count;
+    u8 packed;
+    u16 *attribute;
+    u16 *end;
+    u16 *runEnd;
+    s32 value;
+
+    attribute = (u16 *)sBuildCursor;
+    end = (u16 *)(sBuildCursor + ATTRIBUTE_BUFFER_SIZE);
+    while (TRUE) {
+        ReadFileBytes(&count, sizeof(count));
+        if (count == 0) {
+            break;
+        }
+        ReadFileBytes(&packed, sizeof(packed));
+        runEnd = attribute + count;
+        if (runEnd > end) {
+            osSyncPrintf("ER1\n");
+            break;
+        }
+        value = ((packed & 0xF0) << 4) | (packed & 0xF);
+        while (attribute != runEnd) {
+            *attribute++ = value;
+        }
+    }
+    if (attribute != end) {
+        osSyncPrintf("Whats?\n");
+    }
+    while (attribute < end) {
+        *attribute++ = 0;
+    }
+    sBuildCursor = sBuildBuffer;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802513B8_ovl_02);
 
