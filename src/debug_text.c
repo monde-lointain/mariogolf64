@@ -2,6 +2,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "text.h"
 #include "variables.h"
 
 /*
@@ -38,11 +39,6 @@
 
 #define HEX_DIGIT_COUNT 8
 
-/* Blends the text over the frame by its coverage */
-#define TEXT_RENDER_MODE(cycle) \
-    (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \
-     GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
-
 extern u16 sDebugFont[];
 extern s8 sDebugTextHighlight;
 extern s32 sDebugLogShownLineCount;
@@ -58,7 +54,7 @@ void SetUpDebugTextDrawing(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, TEXT_RENDER_MODE(1), TEXT_RENDER_MODE(2));
+    gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
     gDPSetCombineMode(gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
