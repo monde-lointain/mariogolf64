@@ -802,6 +802,7 @@ AllocSoundEffectBuffer = 0x8005F0BC; // type:func
 StartSoundEffectWith = 0x8005F0FC; // type:func
 MarkUsableClubs = 0x8005F290; // type:func
 FormatDefaultPlayerName = 0x8005F518; // type:func
+SetUpPlayers = 0x8005F540; // type:func
 InitPlay = 0x8005F838; // type:func
 PlacePlayersOnTee = 0x8005F964; // type:func
 PlayContestMovies = 0x8005FB58; // type:func

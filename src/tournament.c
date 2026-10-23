@@ -176,7 +176,7 @@ void NameContestants(void) {
     nameIndex = &g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 2];
     lastName = (g_CourseIndex + 1) * NAMES_PER_COURSE - 2;
     for (index = TOURNAMENT_CONTESTANT_COUNT - 2; index >= 0; index--, nameIndex--) {
-        if (!hasSkipped && strcmp((char *)g_Players[0].unk0, g_ContestantNames[lastName - nameOffset]) == 0) {
+        if (!hasSkipped && strcmp(g_Players[0].name, g_ContestantNames[lastName - nameOffset]) == 0) {
             hasSkipped = TRUE;
             nameOffset--;
         }

@@ -7,6 +7,7 @@
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
+#include "math_util.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
@@ -52,9 +53,13 @@ typedef struct PlayRecord {
     /* 0x34 */ s32 gameMode;
     /* 0x38 */ s8 courseIndex;
     /* 0x39 */ s8 holeIndex;
-    /* 0x3A */ u8 unk3A[0x3E - 0x3A];
+    /* 0x3A */ u8 unk3A;
+    /* 0x3B */ u8 characterIndex;
+    /* 0x3C */ u8 unk3C;
+    /* 0x3D */ u8 unk3D;
     /* 0x3E */ u8 unk3E;
-    /* 0x3F */ u8 unk3F[0x44 - 0x3F];
+    /* 0x3F */ u8 unk3F;
+    /* 0x40 */ s32 unk40;
     /* 0x44 */ PlayUnk8 unk44[4];
     /* 0x64 */ u8 unk64[0x68 - 0x64];
 } PlayRecord; /* size = 0x68 */
@@ -63,9 +68,13 @@ typedef struct RingShotRecord {
     /* 0x00 */ Unk800BA9D8 hole;
     /* 0x34 */ s8 courseIndex;
     /* 0x35 */ s8 holeIndex;
-    /* 0x36 */ u8 unk36[0x3A - 0x36];
+    /* 0x36 */ u8 unk36;
+    /* 0x37 */ u8 characterIndex;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 unk39;
     /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B[0x40 - 0x3B];
+    /* 0x3B */ u8 unk3B;
+    /* 0x3C */ s32 unk3C;
     /* 0x40 */ PlayUnk8 unk40[4];
     /* 0x60 */ u8 unk60[0x68 - 0x60];
 } RingShotRecord; /* size = 0x68 */
@@ -113,7 +122,8 @@ s32 SaveOrContinueGameByMode(s32 isContinuing);
 void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
-void func_8005F540(void);
+void SetUpPlayers(void);
+void func_80080564(s32 playerIndex, s32 characterIndex, s32 arg2);
 s32 GetSurface(s32 x, s32 z);
 void func_80080220(void);
 void WriteBallDistancesIfEnabled(void);
@@ -242,7 +252,79 @@ void FormatDefaultPlayerName(s32 index, char *name) {
     sprintf(name, "MARIO%d", index + 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_8005F540);
+/*
+ * Sets up the players for a round. In SCENE_PLAY_UNK13, in
+ * GAME_MODE_UNK8 or when g_GameState.unk31 is set, only the first player
+ * is set up, from the Ring Shot record or the super shot replay record;
+ * otherwise all four get default names, their own character's clubs and
+ * cleared scores.
+ */
+void SetUpPlayers(void) {
+    s32 i;
+    s32 hole;
+    s32 slot;
+
+    if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
+        if (g_GameMode == GAME_MODE_RING_SHOT) {
+            g_Players[0].unk1E[0] = 0;
+            g_Players[0].teeOrder = 0;
+            g_Players[0].characterIndex = D_80105F40->characterIndex;
+            g_Players[0].unk22 = D_80105F40->unk38;
+            g_Players[0].unk7B = D_80105F40->unk39;
+            g_Players[0].unk88 = D_80105F40->unk3C;
+        } else {
+            g_Players[0].unk1E[0] = 0;
+            g_Players[0].teeOrder = 0;
+            g_Players[0].characterIndex = D_800FEDD8->characterIndex;
+            g_Players[0].unk22 = D_800FEDD8->unk3C;
+            g_Players[0].unk7B = D_800FEDD8->unk3D;
+            g_Players[0].unk88 = D_800FEDD8->unk40;
+        }
+        for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
+            g_Players[0].holes[hole].strokes = 0;
+            g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
+        }
+        g_Players[0].unk28 = -1;
+        func_80080564(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].unk7B);
+        for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+            if (slot >= CLUB_SET_SIZE) {
+                g_Players[0].clubs[slot] = NO_CLUB;
+            } else {
+                g_Players[0].clubs[slot] = slot + (s8)g_Players[0].characterIndex * CLUB_SET_SIZE;
+            }
+        }
+        /* The index variable is there to match */
+        i = 0;
+        for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
+            g_Players[i].unkAA[slot] = 0;
+        }
+    } else {
+        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+            FormatDefaultPlayerName(i, g_Players[i].name);
+            g_Players[i].characterIndex = i;
+            g_Players[i].unk22 = 0;
+            g_Players[i].unk1E[0] = 0;
+            g_Players[i].teeOrder = 0;
+            g_Players[i].unk8C = GetSaveData()->options[SAVE_OPTION_UNK2];
+            for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
+                g_Players[i].holes[hole].strokes = 0;
+                g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;
+            }
+            for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
+                g_Players[i].unkAA[slot] = 0;
+            }
+            for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+                if (slot >= CLUB_SET_SIZE) {
+                    g_Players[i].clubs[slot] = NO_CLUB;
+                } else {
+                    g_Players[i].clubs[slot] = slot + (s8)g_Players[i].characterIndex * CLUB_SET_SIZE;
+                }
+            }
+            g_Players[i].unk74 = 0;
+            g_Players[i].unk88 = NextRandom();
+        }
+    }
+}
 
 void InitPlay(s32 kind) {
     if (kind == 1) {
@@ -260,7 +342,7 @@ void InitPlay(s32 kind) {
     }
     RenumberHoleHandicaps();
     if (!g_GameState.unk30) {
-        func_8005F540();
+        SetUpPlayers();
     }
     if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
         g_Players[1].unk1E[0] = 1;
@@ -497,7 +579,7 @@ void LoadSuperShotReplay(PlayRecord *record) {
     g_CourseIndex = record->courseIndex;
     g_HoleIndex = record->holeIndex;
     D_800FE330 = record->unk3E;
-    func_8005F540();
+    SetUpPlayers();
     osSyncPrintf("SetSuperShotReplay\n");
 }
 
@@ -508,7 +590,7 @@ void LoadRingShotRecord(RingShotRecord *record) {
     g_CourseIndex = record->courseIndex;
     g_HoleIndex = record->holeIndex;
     D_800FE330 = record->unk3A;
-    func_8005F540();
+    SetUpPlayers();
 }
 
 void func_8006034C(s8 value) {

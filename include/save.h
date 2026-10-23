@@ -30,6 +30,7 @@
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
+#define SAVE_OPTION_UNK2 2 /* Copied into each player's UnkB8.unk8C */
 #define SAVE_OPTION_UNK3 3
 #define SAVE_OPTION_COUNT 4
 
@@ -187,8 +188,13 @@ typedef struct PlayerHole {
     /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
 } PlayerHole; /* size = 0x2 */
 
+/* The size of UnkB8.name, with its terminator */
+#define PLAYER_NAME_SIZE 12
+
+#define PLAYER_UNKAA_COUNT 12
+
 typedef struct UnkB8 {
-    /* 0x00 */ s32 unk0[0xC / 4];
+    /* 0x00 */ char name[PLAYER_NAME_SIZE];
     /* 0x0C */ s32 unkC;
     /* 0x10 */ CoursePoint ballPosition;
     /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
@@ -206,18 +212,23 @@ typedef struct UnkB8 {
     /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
     /* 0x4F */ u8 unk4F[0x52 - 0x4F];
     /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
-    /* 0x72 */ u8 unk72[0x78 - 0x72];
+    /* 0x72 */ u8 unk72[0x74 - 0x72];
+    /* 0x74 */ s32 unk74;
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
     /* 0x7B */ u8 unk7B;
     /* 0x7C */ u8 unk7C[4];
     /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
-    /* 0x88 */ u8 unk88[0x8E - 0x88];
+    /* 0x88 */ s32 unk88;
+    /* 0x8C */ u8 unk8C;
+    /* 0x8D */ u8 unk8D;
     /* 0x8E */ s16 betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
     /* 0x9C */ s8 unk9C;
     /* 0x9D */ u8 unk9D[3];
     /* 0xA0 */ s32 lastDriveDistance; /* The driveDistance that RecordDrive took */
-    /* 0xA4 */ u8 unkA4[0xB8 - 0xA4];
+    /* 0xA4 */ u8 unkA4[0xAA - 0xA4];
+    /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
+    /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
 } UnkB8; /* size = 0xB8 */
 
 /* The best times kept for each course, with what was recorded alongside */

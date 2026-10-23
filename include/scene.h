@@ -80,6 +80,9 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK1 1
 #define GAME_MODE_UNK6 6
 
+/* A mode in which SetUpPlayers sets up the players from a record */
+#define GAME_MODE_UNK8 8
+
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;
 
