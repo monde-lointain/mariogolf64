@@ -10,6 +10,7 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "terrain.h"
 #include "variables.h"
 #include "work_area.h"
 
@@ -40,8 +41,7 @@
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
 
-/* g_Scene and g_GameMode values whose purpose is not yet known */
-#define SCENE_UNK13 13
+/* g_GameMode values whose purpose is not yet known */
 #define GAME_MODE_UNK3 3
 #define GAME_MODE_UNK8 8
 #define GAME_MODE_UNK12 12
@@ -51,9 +51,6 @@
 #define HOLE_RANDOM_MULTIPLIER 0x5D588B65
 #define HOLE_RANDOM_INCREMENT 1
 
-/* The ground's grid of cells, which func_80041524 and func_800415C4 read and write */
-#define GROUND_ROW_COUNT 65
-#define GROUND_COLUMN_COUNT 33
 
 /* A mini-golf course is a main course's hole shrunk by these, by axis */
 #define MINI_GOLF_SHRINK_X 4
@@ -125,10 +122,6 @@ typedef struct LzStream {
     /* 0x24 */ u16 *history;
 } LzStream; /* size = 0x28 */
 
-typedef struct Unk80041524 {
-    /* 0x0 */ s16 unk0[3];
-    /* 0x6 */ s16 unk6[5];
-} Unk80041524; /* size = 0x10 */
 /* How ShrinkMiniGolfHole scales a course down to mini-golf size, by axis */
 extern Vec3 g_MiniGolfScale;
 extern OSPiHandle *nuPiCartHandle;
@@ -169,9 +162,6 @@ void func_80253270(void);
 void func_802504E8(s32 courseRecordIndex, s32 holeRecordIndex);
 void func_802541E8(void);
 void ShrinkMiniGolfHolePoints(void);
-Unk80041524 *func_80041524(s32 column, s32 row);
-void func_800415C4(s32 column, s32 row, Unk80041524 *cell);
-void func_800425C8(void);
 void func_8024FF74(void);
 s32 ChooseHoleConditions(void);
 
@@ -639,7 +629,7 @@ void LoadHole(void) {
  * down with g_MiniGolfScale
  */
 void ShrinkMiniGolfHole(void) {
-    Unk80041524 cell;
+    Vtx_t point;
     s32 row;
     s32 column;
     s32 index;
@@ -650,13 +640,13 @@ void ShrinkMiniGolfHole(void) {
         g_MiniGolfScale[AXIS_X] = 1.0f / MINI_GOLF_SHRINK_X;
         g_MiniGolfScale[AXIS_Y] = 1.0f / MINI_GOLF_SHRINK_Y;
         g_MiniGolfScale[AXIS_Z] = 1.0f / MINI_GOLF_SHRINK_Z;
-        for (row = 0; row < GROUND_ROW_COUNT; row++) {
-            for (column = 0; column < GROUND_COLUMN_COUNT; column++) {
-                cell = *func_80041524(column, row);
-                cell.unk0[AXIS_X] /= MINI_GOLF_SHRINK_X;
-                cell.unk0[AXIS_Y] /= MINI_GOLF_SHRINK_Y;
-                cell.unk0[AXIS_Z] /= MINI_GOLF_SHRINK_Z;
-                func_800415C4(column, row, &cell);
+        for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+            for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+                point = GetGroundPoint(column, row)->v;
+                point.ob[AXIS_X] /= MINI_GOLF_SHRINK_X;
+                point.ob[AXIS_Y] /= MINI_GOLF_SHRINK_Y;
+                point.ob[AXIS_Z] /= MINI_GOLF_SHRINK_Z;
+                SetGroundPoint(column, row, &point);
             }
         }
         func_8024FF74();
@@ -684,7 +674,7 @@ void ShrinkMiniGolfHole(void) {
                 }
             }
         }
-        func_800425C8();
+        PrepareHoleTriangles();
         PlaceBillboards();
     }
 }
@@ -727,7 +717,7 @@ s32 ChooseHoleConditions(void) {
     s32 courseRecordIndex;
 
     D_80104B6D = -1;
-    if (g_Scene == SCENE_UNK13 || g_GameMode == GAME_MODE_UNK8 || D_801B60B9 != 0) {
+    if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 || D_801B60B9 != 0) {
         if (g_GameMode == GAME_MODE_RING_SHOT) {
             D_800BA9D8 = D_80105F40;
         } else {

@@ -19,9 +19,7 @@ typedef struct CurrentShot {
     /* 0x34 */ f32 unk34[2];
     /* 0x3C */ f32 unk3C;
     /* 0x40 */ s32 unk40;
-    /* 0x44 */ f32 unk44;
-    /* 0x48 */ s32 unk48;
-    /* 0x4C */ f32 unk4C;
+    /* 0x44 */ CoursePoint unk44;
     /* 0x50 */ s32 unk50;
     /* 0x54 */ s8 unk54;
 } CurrentShot; /* size = 0x58 */

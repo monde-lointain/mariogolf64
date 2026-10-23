@@ -3,6 +3,35 @@
 
 #include <ultra64.h>
 
+/* Indexes into the surface table. Names with UNKNN share another's kind or name. */
+#define SURFACE_OUT_OF_BOUNDS 0
+#define SURFACE_FAIRWAY 1
+#define SURFACE_ROUGH 2
+#define SURFACE_BUNKER 3
+#define SURFACE_GREEN 4
+#define SURFACE_WATER_HAZARD 5
+#define SURFACE_CART_WAY 6
+#define SURFACE_TEE_GROUND 7
+#define SURFACE_ROCK 8
+#define SURFACE_GREEN_EDGE 9
+#define SURFACE_SEMI_ROUGH 10
+#define SURFACE_BARE_GROUND 11
+#define SURFACE_DEEP_ROUGH 12
+#define SURFACE_BARE_GROUND_UNK13 13
+#define SURFACE_WASTE_AREA 14
+#define SURFACE_UNK15 15 /* A nameless rock */
+#define SURFACE_BUNKER_FAIR_LIE 16
+#define SURFACE_BUNKER_POOR_LIE 17
+#define SURFACE_BUNKER_UNK18 18
+#define SURFACE_FAIRWAY_FAIR_LIE 19
+#define SURFACE_FAIRWAY_POOR_LIE 20
+#define SURFACE_ROUGH_POOR_LIE 21
+#define SURFACE_OUT_OF_COURSE 22
+#define SURFACE_TEE_UP 23
+/* The surfaces a mini-golf course has in place of the green, fairway and cart way */
+#define SURFACE_MINI_GOLF_GREEN 24
+#define SURFACE_MINI_GOLF_FAIRWAY 25
+#define SURFACE_MINI_GOLF_CART_WAY 26
 /* Surfaces past the last are looked up as the first */
 #define SURFACE_COUNT 27
 
@@ -39,7 +68,10 @@
 typedef struct SurfaceInfo {
     /* 0x00 */ s32 kind;
     /* 0x04 */ char *name; /* As the lie is shown */
-    /* 0x08 */ u8 unk8[0x1C - 0x8];
+    /* 0x08 */ s8 minPercent;
+    /* 0x09 */ s8 maxPercent;
+    /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not meant for the surface */
+    /* 0x0B */ u8 unkB[0x1C - 0xB];
 } SurfaceInfo; /* size = 0x1C */
 
 SurfaceInfo *GetSurfaceInfo(s32 surface);

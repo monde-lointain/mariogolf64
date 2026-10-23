@@ -14,6 +14,30 @@
  * through RequestSubModule.
  */
 
+/*
+ * Scenes the debug scene menu offers. The map scenes each run one routine
+ * in the hole_editor overlay, and the hole-editor names below follow the
+ * menu's labels until those routines are decompiled.
+ */
+#define SCENE_MAP_OVERVIEW 0    /* Moves the camera over the miniature map */
+#define SCENE_HEIGHTS 1
+#define SCENE_GROUND_CAMERA 2   /* Flies the camera just above the ground */
+#define SCENE_TREES 3
+#define SCENE_PIN 5
+#define SCENE_PLAY_HOLE 7       /* Picks the conditions and starts a hole */
+#define SCENE_FLAG_PANEL 8
+#define SCENE_UNK9 9            /* A top-down map scene */
+#define SCENE_UNK10 10          /* A top-down map scene */
+#define SCENE_UNK11 11
+#define SCENE_PLAY_UNK12 12     /* Updates like SCENE_PLAY_HOLE */
+#define SCENE_PLAY_UNK13 13     /* Updates like SCENE_PLAY_HOLE */
+#define SCENE_MENU 14
+#define SCENE_TITLE_SCREEN 21
+#define SCENE_TRIANGLES 15
+#define SCENE_RINGS 16
+#define SCENE_BOOT_LOGOS 27
+#define SCENE_WALLS 28
+
 /* The current scene while UpdateOverlays swaps the scene's modules */
 #define SCENE_SWAPPING_MODULES 0x19
 

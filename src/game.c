@@ -916,8 +916,6 @@ void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
-s32 func_80042720(void);
-void func_800427E8(void);
 void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void func_8006AEA4(Gfx **displayListHead);
@@ -1633,7 +1631,7 @@ s32 DrawGame(void) {
                 gDPPipeSync(g_DisplayListHead++);
                 SET_CAMERA_SCISSOR(g_Cameras[0].view);
             }
-        } else if (drawsScene && func_80042720()) {
+        } else if (drawsScene && IsOverlayInExpansionMemory()) {
             if (!IsGameFlagSet(6)) {
                 func_80062A8C(matrices, terrainStyle);
             }
@@ -1651,7 +1649,7 @@ s32 DrawGame(void) {
         }
     }
 
-    func_800427E8();
+    UpdateDebugScenes();
     if (drawMode == DRAW_MODE_COURSE) {
         gDPPipeSync(g_DisplayListHead++);
         gDPPipeSync(g_DisplayListHead++);

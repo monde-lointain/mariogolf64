@@ -24,7 +24,7 @@ typedef struct HoleTriangle {
     /* 0x00 */ u32 kind;
     /* 0x04 */ s32 unk4;
     /* 0x08 */ Vtx vertices[HOLE_TRIANGLE_VERTEX_COUNT];
-    /* 0x38 */ u8 unk38[0x44 - 0x38];
+    /* 0x38 */ s16 bounds[3][2]; /* Each axis's lowest and highest corner coordinate */
     /* 0x44 */ f32 center[3]; /* For a ring, the mean of its corners */
     /* 0x50 */ u8 unk50[0x60 - 0x50];
 } HoleTriangle; /* size = 0x60 */
