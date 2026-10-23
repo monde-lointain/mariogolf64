@@ -8,6 +8,7 @@
 #include "menu_memory.h"
 #include "screen.h"
 #include "sound.h"
+#include "text.h"
 #include "transfer_pak.h"
 
 typedef struct Unk800FE450 {
@@ -75,8 +76,6 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 #define HELP_TEXT_SLOT_COUNT 7
 #define HELP_TEXT_SLOT_TITLE 0
 #define HELP_TEXT_SLOT_PAGE 1
-/* Given this as its text, func_800719A0 clears the slot */
-#define NO_TEXT (-1)
 #define TOPIC_TITLE_X 48
 #define TOPIC_TITLE_Y 72
 #define TOPIC_PAGE_X 52
@@ -85,11 +84,6 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 
 s32 func_800959F8(void);
 void func_8009226C(s32);
-void func_800718C4(void);
-void func_800718F4(s32 red, s32 green, s32 blue, s32 colorIndex);
-void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
-void func_80071C74(s32 slot);
-s32 func_80071C9C(s32 slot);
 
 extern s32 D_800C2000;
 extern s32 D_800FE334;
@@ -290,31 +284,31 @@ void LoadHelpBoardImage(void *buffer, s32 image) {
     } else {
         sFirstListedTopic = HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT;
     }
-    func_800718C4();
+    ClearTextSlots();
 }
 
 /* Clears every text slot of the help board */
 #define CLEAR_HELP_TEXT(index)                                                                       \
     for (index = 0; index != HELP_TEXT_SLOT_COUNT; index++) {                                      \
-        func_800719A0(0, 0, NO_TEXT, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);                         \
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);                          \
     }
 
 #define SET_HELP_TEXT_COLORS()                                                                       \
-    func_800718F4(0xFF, 0xFF, 0, 0);                                                                 \
-    func_800718F4(0xFF, 0xFF, 0, 1);                                                                 \
-    func_800718F4(0xFF, 0x7F, 0x7F, 2);                                                              \
-    func_800718F4(0x3F, 0xFF, 0x3F, 3)
+    SetTextPaletteColor(0xFF, 0xFF, 0, 0);                                                           \
+    SetTextPaletteColor(0xFF, 0xFF, 0, 1);                                                           \
+    SetTextPaletteColor(0xFF, 0x7F, 0x7F, 2);                                                        \
+    SetTextPaletteColor(0x3F, 0xFF, 0x3F, 3)
 
 /* Shows the open topic's title and its current page */
 #define SHOW_TOPIC_PAGE()                                                                            \
-    func_800719A0(0, 0, NO_TEXT, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);               \
-    func_800719A0(0, 0, NO_TEXT, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);                \
+    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);               \
+    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);                \
     SET_HELP_TEXT_COLORS();                                                                          \
-    func_800719A0(TOPIC_TITLE_X, TOPIC_TITLE_Y, sTopicTitleMessages[sOpenTopic], 1, HELP_TEXT_SLOT_TITLE, 2, \
-                  0xFF, 0xFF, 0xFF, 0xFF);                                                           \
+    SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, sTopicTitleMessages[sOpenTopic], 1, HELP_TEXT_SLOT_TITLE, 2, \
+                0xFF, 0xFF, 0xFF, 0xFF);                                                             \
     SET_HELP_TEXT_COLORS();                                                                          \
-    func_800719A0(TOPIC_PAGE_X, TOPIC_PAGE_Y, sTopicTitleMessages[sOpenTopic] + sTopicPage, 1,       \
-                  HELP_TEXT_SLOT_PAGE, 3, 0xFF, 0xFF, 0xFF, 0xFF)
+    SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y, sTopicTitleMessages[sOpenTopic] + sTopicPage, 1,         \
+                HELP_TEXT_SLOT_PAGE, 3, 0xFF, 0xFF, 0xFF, 0xFF)
 
 /* Opens and pages through topics with A, closes them or leaves with B, and moves through the list */
 void UpdateHelpBoard(void) {
@@ -332,21 +326,21 @@ void UpdateHelpBoard(void) {
             sTopicPage++;
             SHOW_TOPIC_PAGE();
         } else if (sTopicPage < sTopicPageCounts[sOpenTopic]) {
-            if (func_80071C9C(HELP_TEXT_SLOT_PAGE)) {
+            if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
                 PlaySound(0x5D, 0xF, 0x50);
                 sTopicPage++;
                 SHOW_TOPIC_PAGE();
             } else {
-                func_80071C74(HELP_TEXT_SLOT_TITLE);
-                func_80071C74(HELP_TEXT_SLOT_PAGE);
+                RevealTextSlot(HELP_TEXT_SLOT_TITLE);
+                RevealTextSlot(HELP_TEXT_SLOT_PAGE);
             }
-        } else if (func_80071C9C(HELP_TEXT_SLOT_PAGE)) {
+        } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
             CLEAR_HELP_TEXT(index);
             sOpenTopic = 0;
             sTopicPage = 0;
         } else {
-            func_80071C74(HELP_TEXT_SLOT_TITLE);
-            func_80071C74(HELP_TEXT_SLOT_PAGE);
+            RevealTextSlot(HELP_TEXT_SLOT_TITLE);
+            RevealTextSlot(HELP_TEXT_SLOT_PAGE);
         }
     } else if (D_800C2000 & B_BUTTON) {
         PlaySound(0x5F, 0xF, 0x7F);
@@ -362,13 +356,13 @@ void UpdateHelpBoard(void) {
             D_800FE334 = 0;
             sOpenTopic = 0;
             CLEAR_HELP_TEXT(index);
-        } else if (func_80071C9C(HELP_TEXT_SLOT_TITLE) && func_80071C9C(HELP_TEXT_SLOT_PAGE)) {
+        } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) && IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
             sOpenTopic = 0;
             sTopicPage = 0;
             CLEAR_HELP_TEXT(index);
         } else {
-            func_80071C74(HELP_TEXT_SLOT_TITLE);
-            func_80071C74(HELP_TEXT_SLOT_PAGE);
+            RevealTextSlot(HELP_TEXT_SLOT_TITLE);
+            RevealTextSlot(HELP_TEXT_SLOT_PAGE);
         }
     } else if (D_800C2000 & U_JPAD) {
         if (sOpenTopic == 0) {
@@ -510,11 +504,11 @@ void DrawHelpBoard(Gfx **displayListHead) {
             blue = (s32)(sinf(sListColorPhase + M_PI / 2) * 127.0f) + 127;
             green = (s32)(sinf(sListColorPhase + M_PI) * 127.0f) + 127;
             if (topic == memory->helpTopicIndex) {
-                func_800719A0(LIST_LEFT, sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
-                              sTopicTitleMessages[0] + topic, 1, index, 0x10, red, green, blue, 0xFF);
+                SetTextSlot(LIST_LEFT, sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
+                            sTopicTitleMessages[0] + topic, 1, index, 0x10, red, green, blue, 0xFF);
             } else {
-                func_800719A0(LIST_LEFT, sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
-                              sTopicTitleMessages[sOpenTopic] + topic, 1, index, 0x10, 0xFF, 0xFF, 0xFF, 0xFF);
+                SetTextSlot(LIST_LEFT, sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
+                            sTopicTitleMessages[sOpenTopic] + topic, 1, index, 0x10, 0xFF, 0xFF, 0xFF, 0xFF);
             }
         }
     }

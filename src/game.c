@@ -21,6 +21,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "variables.h"
 #include "work_area.h"
 
@@ -265,7 +266,7 @@ void StartGame(void) {
     g_Cameras[1].view.fieldOfView = 60.0f;
     osViSetSpecialFeatures(VI_FEATURES);
     ClearDebugText();
-    func_80071370();
+    LoadTextAssets();
     func_80081284();
     LoadPinTextures();
 

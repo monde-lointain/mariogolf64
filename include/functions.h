@@ -131,7 +131,6 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void UpdateStaffRoll(void);
 
-void func_80071370(void);
 void func_80081284(void);
 
 #endif

@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "transfer_pak.h"
 #include "variables.h"
 
@@ -47,9 +48,6 @@
 #define CAMELOT_LEAVE_FRAME 26
 /* The count given to StartScreenFadeOut; the stage ends once HasScreenFadeEnded sees it below 2 */
 #define LEAVING_COUNTDOWN 16
-
-/* Given this image, func_800719A0 stores it in the slot and sets up nothing else */
-#define NO_IMAGE (-1)
 
 /* 192 by 42 four-bit texels, read as 96-byte rows */
 #define CAMELOT_LOGO_WIDTH 192
@@ -99,7 +97,6 @@ extern N64Logo sN64Logo;
 
 extern s32 D_800B6808;
 
-void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_8008D100(void);
 
 /* The frames since the stage began */
@@ -162,13 +159,13 @@ void LeaveBootLogos(void) {
         g_NextScene = 21;
         g_SceneModuleToLoad = 0x04;
     }
-    /* The position goes unused with NO_IMAGE */
-    func_800719A0(160, 114, NO_IMAGE, 1, 0, 0, 0, 0, 0, 0);
-    func_800719A0(160, 114, NO_IMAGE, 1, 1, 0, 0, 0, 0, 0);
-    func_800719A0(160, 114, NO_IMAGE, 1, 2, 0, 0, 0, 0, 0);
-    func_800719A0(160, 114, NO_IMAGE, 1, 3, 0, 0, 0, 0, 0);
-    func_800719A0(160, 114, NO_IMAGE, 1, 4, 0, 0, 0, 0, 0);
-    func_800719A0(160, 114, NO_IMAGE, 1, 5, 0, 0, 0, 0, 0);
+    /* The position goes unused with NO_MESSAGE */
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 1, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 2, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 3, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 4, 0, 0, 0, 0, 0);
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 5, 0, 0, 0, 0, 0);
 }
 
 /*

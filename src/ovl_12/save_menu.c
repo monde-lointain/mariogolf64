@@ -98,10 +98,10 @@
 #define SAVE_MENU_PANEL_IMAGE 0x521
 #define SAVE_MENU_TITLE_IMAGE 0x6A5
 #define COURSE_NUMBERS_IMAGE 0x70E
-/* Where func_800719A0 is told to put the cleared messages */
+/* Where SetTextSlot is told to put the cleared messages */
 #define MESSAGE_CENTER_X 160
 #define MESSAGE_CENTER_Y 114
-/* Given this as its text, func_800719A0 clears the slot */
+/* Given this as its text, SetTextSlot clears the slot */
 #define NO_TEXT -1
 
 /* D_800C306C's value while no pause screen is shown */
@@ -172,7 +172,7 @@
 /* The cursor's frame pulses between these alphas */
 #define CURSOR_ALPHA_MIDDLE 127
 #define CURSOR_ALPHA_SWING 64.0f
-/* func_800738BC's font size for the course names */
+/* MeasureText's font size for the course names */
 #define COURSE_NAME_FONT_SIZE 12
 /* Each mini-golf course record has three courses */
 #define MINI_GOLF_GREEN 0
@@ -237,7 +237,7 @@
 #define EMPTY_TEXT_TOP 47
 #define HOLE_OUT_TEXT_LEFT 128
 #define HOLE_OUT_TEXT_TOP 212
-/* The text slots of func_800719A0 that the records' hole texts use */
+/* The text slots of SetTextSlot that the records' hole texts use */
 #define FIRST_RECORD_TEXT_SLOT 2
 /* The same hole texts that the course select shows for Ring Shot */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
@@ -293,7 +293,7 @@ extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 
 void func_8005B28C(s32 recordIndex, Unk68 *record);
 void func_8005D0D8(void);
-void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
+void SetTextSlot(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
 void func_800934CC(s32);
@@ -305,7 +305,11 @@ void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void func_800747B0(Gfx **displayListHead, s16 x, s16 y, char *text);
 void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
-s32 func_800738BC(char *text, s32 fontSize);
+/*
+ * The call leaves out MeasureText's flags, so this file declares its text
+ * routines itself rather than including text.h; it is there to match.
+ */
+s32 MeasureText(char *text, s32 fontSize);
 void func_80073F24(Gfx **displayListHead, s16 x, s16 y, char *text);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names hold 0 or 3 */
@@ -519,11 +523,11 @@ void CloseSaveMenu(void) {
         FreeMemory(&sCharacterFiles[index]);
     }
     sMenuKind = SAVE_MENU_CLOSED;
-    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 0, 0, 0, 0, 0, 0);
-    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 1, 0, 0, 0, 0, 0);
-    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 2, 0, 0, 0, 0, 0);
-    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 3, 0, 0, 0, 0, 0);
-    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 4, 0, 0, 0, 0, 0);
+    SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 0, 0, 0, 0, 0, 0);
+    SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 1, 0, 0, 0, 0, 0);
+    SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 2, 0, 0, 0, 0, 0);
+    SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 3, 0, 0, 0, 0, 0);
+    SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 4, 0, 0, 0, 0, 0);
 }
 
 /*
@@ -862,7 +866,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 } else {
                     sprintf(g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
                 }
-                func_800738BC(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
+                MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
                 func_8007624C(&gfx, sSlideOffsets[row] + MODE_TEXT_LEFT, COURSE_TEXT_TOP + row * GAME_ROW_SPACING,
                               g_PrintBuffer, 0x00FFFF00, 0xFFFFFF00, 0);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -1444,9 +1448,9 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             } else {
                 text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
                 func_80071608(&gfx);
-                func_800719A0(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
-                              text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
-                              0xFF, 0xFF);
+                SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
+                            text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
+                            0xFF, 0xFF);
                 func_80071CE4(&gfx, FIRST_RECORD_TEXT_SLOT + index);
             }
         }

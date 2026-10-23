@@ -7,6 +7,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "variables.h"
 
 /* The wipe's shapes are 64 by 64 intensity masks */
@@ -116,7 +117,7 @@
 #define FADE_ALPHA_RANGE 256
 
 #define PROMPT_CLOUD_IMAGE 0x70B
-#define YES_NO_IMAGE 0x70C
+#define YES_NO_MESSAGE 0x70C
 #define PROMPT_STATE_CLOSED -1
 #define PROMPT_STATE_OPENING 0
 #define PROMPT_STATE_CHOOSING 1
@@ -130,8 +131,6 @@
 #define PROMPT_TEXT_X 160
 #define PROMPT_TEXT_Y 108
 #define PROMPT_TEXT_SLOT 0
-/* Given this as its text, func_800719A0 clears the slot */
-#define NO_TEXT -1
 #define SOUND_PROMPT_SAVE 0x3B
 #define SAVE_SOUND_CHANNEL 15
 #define SOUND_PROMPT_MOVE 0x5C
@@ -198,9 +197,6 @@ extern s32 sScreenFadeGreen;
 extern s32 sScreenFadeBlue;
 extern f32 sChoiceBobAngle;
 extern Gfx D_800C3FC0[];
-
-void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
-void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32);
 
 /* The RDP loads textures from 8-byte boundaries */
 #define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
@@ -501,7 +497,7 @@ void LoadPromptImages(void) {
 
     sPromptCloudImage = AllocMemory(OpenEncodedAsset(PROMPT_CLOUD_IMAGE, &asset));
     ReadEncodedAsset(sPromptCloudImage, &asset);
-    sYesNoImage = AllocMemory(OpenEncodedAsset(YES_NO_IMAGE, &asset));
+    sYesNoImage = AllocMemory(OpenEncodedAsset(YES_NO_MESSAGE, &asset));
     ReadEncodedAsset(sYesNoImage, &asset);
 }
 
@@ -537,8 +533,8 @@ s32 UpdatePrompt(ControllerState *controller) {
     Prompt *prompt = &sPrompts[sPromptIndex];
 
     if (sPromptState == PROMPT_STATE_CHOOSING) {
-        func_800719A0(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId, 1, PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF,
-                      0xFF);
+        SetTextSlot(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId, 1, PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF,
+                    0xFF);
         if (controller->pressedButtons == A_BUTTON) {
             sPromptState = PROMPT_STATE_CHOSEN;
             if (prompt->results[sPromptChoice] >= 0 && prompt->results[sPromptChoice] < SAVING_RESULT_COUNT) {
@@ -562,7 +558,7 @@ s32 UpdatePrompt(ControllerState *controller) {
     } else if (sPromptState == PROMPT_STATE_CHOSEN) {
         sPromptState = PROMPT_STATE_CLOSING;
         PlaySound(SOUND_PROMPT_CLOSE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
-        func_800719A0(0, 0, NO_TEXT, 1, PROMPT_TEXT_SLOT, 1, 0, 0, 0, 0);
+        SetTextSlot(0, 0, NO_MESSAGE, 1, PROMPT_TEXT_SLOT, 1, 0, 0, 0, 0);
     } else if (sPromptState == PROMPT_STATE_CLOSED_AFTER_CHOICE) {
         sPromptState = PROMPT_STATE_CLOSED;
         FreePromptImages();

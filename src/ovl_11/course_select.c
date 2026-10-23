@@ -11,6 +11,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "variables.h"
 /*
  * Two screens for choosing where to play, which share the course image
@@ -151,7 +152,6 @@
 #define TEXT_FONT_SIZE 16
 
 void func_80071608(Gfx **displayListHead);
-void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void func_80074CA8(Gfx **displayListHead, s32 red, s32 green, s32 blue);
@@ -660,9 +660,9 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         func_80071608(&gfx);
         func_80074CA8(&gfx, 255, 255, 255);
-        func_800719A0(SCREEN_WIDTH / 2, 42,
-                      memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,
-                      RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
+        SetTextSlot(SCREEN_WIDTH / 2, 42,
+                    memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,
+                    RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
         func_80071CE4(&gfx, RING_SHOT_TEXT_SLOT);
         *displayListHead = gfx;
     }
