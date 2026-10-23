@@ -390,6 +390,15 @@ void GiveSlotClubs(s32 playerIndex) {
     }
 }
 
+/*
+ * Whether the next reel stops: on A, once the wait is too long, when the
+ * player's unk1E is set, or while GAME_FLAG_UNK32 is. It is a macro, as
+ * an inline function compiles differently from the original.
+ */
+#define IsReelStopping(controllerIndex, player)                                                                       \
+    ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || (sStopWaitTime > REEL_STOP_WAIT_TIME) ||      \
+     ((s8)(player)->unk1E[0] != 0) || IsGameFlagSet(GAME_FLAG_UNK32))
+
 /* Returns TRUE once every player has spun */
 s32 UpdateClubSlots(void) {
     UnkB8 *player;
@@ -426,9 +435,7 @@ s32 UpdateClubSlots(void) {
             }
             sStopWaitTime++;
             if (sSlots->pressCount < REEL_COUNT) {
-                if ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON)
-                    || sStopWaitTime > REEL_STOP_WAIT_TIME || (s8)player->unk1E[0] != 0
-                    || IsGameFlagSet(GAME_FLAG_UNK32)) {
+                if (IsReelStopping(controllerIndex, player)) {
                     sStopWaitTime = 0;
                     PlaySoundWithEffects(SOUND_REEL_STOP, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME, 0,
                                          sSlots->pressCount++ * REEL_STOP_PAN_STEP);
