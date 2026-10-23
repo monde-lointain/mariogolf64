@@ -15,6 +15,14 @@
 /* How much mini golf vertices are scaled along x and z for their textures */
 #define MINI_GOLF_TEXTURE_SCALE_X 4
 #define MINI_GOLF_TEXTURE_SCALE_Z 8
+/* Grid vertices lie on tile corners and halfway between them */
+#define TILE_SPAN (1 << TILE_ORIGIN_SHIFT)
+#define HALF_TILE_SPAN (TILE_SPAN / 2)
+#define GRID_ROW_VERTEX_COUNT (GROUND_TILE_COLUMN_COUNT * 2 + 1)
+#define GRID_VERTEX_COUNT (GRID_ROW_VERTEX_COUNT * (GROUND_TILE_ROW_COUNT * 2 + 1))
+/* Grid texture coordinates: four per unit, starting one texel in */
+#define GRID_TEXTURE_SCALE 4
+#define GRID_TEXTURE_BORDER (1 << TEXTURE_COORD_FRACTION_BITS)
 /* The size cleared billboards are given */
 #define CLEARED_BILLBOARD_WIDTH 64
 #define CLEARED_BILLBOARD_HEIGHT 256
@@ -267,7 +275,38 @@ void ClearTileBorders(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250FEC_ovl_02);
+/*
+ * Lays the grid vertices out in rows, each row of corners followed by the
+ * points between them, with texture coordinates from their positions
+ */
+void InitGridVertices(void) {
+    s16 x;
+    s16 z;
+    s32 i;
+
+    x = 0;
+    z = 0;
+    for (i = 0; i < GRID_VERTEX_COUNT; i++) {
+        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
+        g_WorkArea.hole.gridVertices[i].v.tc[0] = x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = 0;
+        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
+        g_WorkArea.hole.gridVertices[i].v.flag = 0;
+        g_WorkArea.hole.gridVertices[i].v.tc[1] = z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        g_WorkArea.hole.gridVertices[i].v.cn[0] = 0;
+        g_WorkArea.hole.gridVertices[i].v.cn[1] = 0;
+        g_WorkArea.hole.gridVertices[i].v.cn[2] = 0;
+        g_WorkArea.hole.gridVertices[i].v.cn[3] = 0;
+        x += TILE_SPAN;
+        if (x == (GROUND_TILE_COLUMN_COUNT + 1) * TILE_SPAN) {
+            x = HALF_TILE_SPAN;
+        }
+        if (x == GROUND_TILE_COLUMN_COUNT * TILE_SPAN + HALF_TILE_SPAN) {
+            x = 0;
+            z += HALF_TILE_SPAN;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802510D4_ovl_02);
 

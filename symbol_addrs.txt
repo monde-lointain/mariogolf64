@@ -1582,6 +1582,7 @@ ResetBuildBuffer = 0x80250EE0; // type:func segment:ovl_02
 ClearBillboards = 0x80250F04; // type:func segment:ovl_02
 ClearHoleTriangles = 0x80250F90; // type:func segment:ovl_02
 ClearTileBorders = 0x80250FB4; // type:func segment:ovl_02
+InitGridVertices = 0x80250FEC; // type:func segment:ovl_02
 ReadTileUnk992s = 0x8025176C; // type:func segment:ovl_02
 CastBillboardShadows = 0x80252014; // type:func segment:ovl_02
 ShadeGroundTiles = 0x80252B24; // type:func segment:ovl_02
