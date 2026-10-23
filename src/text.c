@@ -150,6 +150,14 @@ typedef struct GlyphSprite {
 #define SMALL_MARK_RISE 8.0f
 /* PlaceMessageGlyphGroup moves marks back as in the large font, but less far up */
 #define MESSAGE_MARK_RISE 4.0f
+/* How far back and up the text drawing routines draw a mark, where y points down */
+#define LARGE_TEXT_MARK_BACKSPACE 6
+#define LARGE_TEXT_MARK_RISE 4
+#define MEDIUM_TEXT_MARK_BACKSPACE 8
+#define MEDIUM_TEXT_MARK_RISE 7
+/* How far a full stop of the medium font is drawn back, and how far it advances */
+#define MEDIUM_POINT_INSET 5
+#define MEDIUM_POINT_WIDTH 2
 
 extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* The quads glyph sprites are drawn with, centred on the sprite */
@@ -534,9 +542,135 @@ s32 GetTextLength(char *text) {
 
 INCLUDE_ASM("asm/nonmatchings/text", DrawFixedWidthLargeText);
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawLargeText);
+/*
+ * Draws text in the large font, each glyph advancing by its own width. A
+ * mark is drawn over the glyph before it.
+ */
+void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 code;
+    s32 character;
+    s32 left;
+    s32 top;
+    s32 glyphLeft;
+    s32 glyphTop;
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawMediumText);
+    gDPPipeSync(gfx++);
+    while (*text != '\0') {
+        character = *text;
+        if (character == ' ') {
+            text++;
+            x += g_LargeFontWidths[' '];
+        } else {
+            left = x;
+            top = y;
+            code = character;
+            if (code >= 'a' && code <= 'z') {
+                code += LOWERCASE_CODE_OFFSET;
+            }
+            switch (code) {
+                case CHARACTER_CODE_OTHER_MARK_FIRST:
+                case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
+                case CHARACTER_CODE_MARK_FIRST:
+                case CHARACTER_CODE_MARK_FIRST + 1:
+                    left -= LARGE_TEXT_MARK_BACKSPACE;
+                    top -= LARGE_TEXT_MARK_RISE;
+                    x -= FONT_SIZE_LARGE;
+                    break;
+            }
+            glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
+            glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
+            gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_LARGE * FONT_GLYPHS_PER_ROW / 2,
+                               ((u32)g_LargeFontImage + IMAGE_HEADER_SIZE) & ~7);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                       G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2, (glyphLeft + GLYPH_TILE_WIDTH - 1) << 1,
+                        (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
+                           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2, (glyphTop + FONT_SIZE_LARGE - 1) << 2);
+            gDPSetTileSize(gfx++, 1, glyphLeft << 2, glyphTop << 2, (glyphLeft + GLYPH_TILE_WIDTH) << 2,
+                           (glyphTop + FONT_SIZE_LARGE) << 2);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, left << 2, top << 2, (left + FONT_SIZE_LARGE) << 2, (top + FONT_SIZE_LARGE) << 2,
+                                G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+            text++;
+            x += g_LargeFontWidths[code];
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/*
+ * Draws text in the medium font, each glyph advancing by the font size
+ * but a full stop, which is drawn back and advances less. A mark is drawn
+ * over the glyph before it.
+ */
+void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 character;
+    s32 code;
+    s32 left;
+    s32 top;
+    s32 glyphLeft;
+    s32 glyphTop;
+
+    gDPPipeSync(gfx++);
+    while (*text != '\0') {
+        character = *text;
+        if (character == ' ') {
+            text++;
+            x += FONT_SIZE_MEDIUM;
+        } else {
+            left = x;
+            top = y;
+            code = character;
+            if (code >= 'a' && code <= 'z') {
+                code += LOWERCASE_CODE_OFFSET;
+            }
+            switch (code) {
+                case CHARACTER_CODE_OTHER_MARK_FIRST:
+                case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
+                case CHARACTER_CODE_MARK_FIRST:
+                case CHARACTER_CODE_MARK_FIRST + 1:
+                    left -= MEDIUM_TEXT_MARK_BACKSPACE;
+                    top -= MEDIUM_TEXT_MARK_RISE;
+                    x -= FONT_SIZE_MEDIUM;
+                    break;
+                case '.':
+                    left -= MEDIUM_POINT_INSET;
+                    x -= FONT_SIZE_MEDIUM - MEDIUM_POINT_WIDTH;
+                    break;
+            }
+            glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+            glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
+            gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_MEDIUM * FONT_GLYPHS_PER_ROW / 2,
+                               ((u32)g_MediumFontImage + IMAGE_HEADER_SIZE) & ~7);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                       G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2, (glyphLeft + GLYPH_TILE_WIDTH - 1) << 1,
+                        (glyphTop + FONT_SIZE_MEDIUM - 1) << 2);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
+                           (glyphLeft + GLYPH_TILE_WIDTH - 1) << 2, (glyphTop + FONT_SIZE_MEDIUM - 1) << 2);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, left << 2, top << 2, (left + FONT_SIZE_MEDIUM) << 2,
+                                (top + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10,
+                                1 << 10);
+            text++;
+            x += FONT_SIZE_MEDIUM;
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/text", DrawSmallText);
 
