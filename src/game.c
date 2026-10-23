@@ -909,7 +909,6 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
-void func_80071B34(Gfx **displayListHead);
 void func_8007B994(CameraMatrices *matrices, Gfx **displayListHead);
 void func_8007EF0C(Gfx **displayListHead, CameraMatrices *matrices);
 void func_8008156C(void);
@@ -1763,7 +1762,7 @@ s32 DrawGame(void) {
     if (g_IsModuleAlive[20]) {
         func_8021A940(&g_DisplayListHead);
     }
-    func_80071B34(&g_DisplayListHead);
+    DrawTextSlots(&g_DisplayListHead);
     if (g_IsModuleAlive[17]) {
         func_8020FC10(&g_DisplayListHead);
     }

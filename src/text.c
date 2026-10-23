@@ -3,6 +3,7 @@
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "screen_layers.h"
 #include "text.h"
 #include "variables.h"
 
@@ -74,6 +75,21 @@ typedef struct MessageTable {
 #define NARROW_GLYPH_SIZE 7
 #define NARROW_GLYPH_WIDTH 6
 
+/*
+ * The digit font's glyphs are 16 pixels square, one to a row of its image,
+ * and drawn 14 pixels apart. The digits start at the second row, after the
+ * star.
+ */
+#define DIGIT_GLYPH_SIZE 16
+#define DIGIT_GLYPH_WIDTH 14
+#define DIGIT_GLYPH_STAR 0
+#define DIGIT_GLYPH_ZERO 1
+#define DIGIT_GLYPH_COLON 11
+#define DIGIT_GLYPH_PLUS 12
+#define DIGIT_GLYPH_MINUS 13
+#define DIGIT_GLYPH_HASH 14
+#define DIGIT_GLYPH_EXCLAMATION 15
+
 /* Where the glyph and message files are in the ROM */
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];
@@ -111,6 +127,9 @@ extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
 extern u8 g_LargeFontWidths[];
 
+void func_80071608(Gfx **displayListHead);
+void func_80071CE4(Gfx **displayListHead, s32 slot);
+void func_80072A08(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
@@ -259,7 +278,28 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
 INCLUDE_ASM("asm/nonmatchings/text", SetTextSlot);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80071B34);
+/*
+ * Draws the message of every text slot that has one, in the slot's colour,
+ * in the medium font or the font of the slot's size
+ */
+void DrawTextSlots(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 slot;
+
+    func_80071608(&gfx);
+    for (slot = 0; slot != TEXT_SLOT_COUNT; slot++) {
+        if (g_TextSlots[slot].messageId != NO_MESSAGE && !(g_TextSlots[slot].flags & TEXT_FLAG_UNK20)) {
+            gDPSetPrimColor(gfx++, 0, 0, g_TextSlots[slot].red, g_TextSlots[slot].green, g_TextSlots[slot].blue,
+                            g_TextSlots[slot].alpha);
+            if (g_TextSlots[slot].fontSize == FONT_SIZE_MEDIUM) {
+                func_80072A08(&gfx, slot);
+            } else {
+                func_80071CE4(&gfx, slot);
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
 
 /* Shows the whole of a slot's message at once */
 void RevealTextSlot(s32 slot) {
@@ -598,9 +638,43 @@ INCLUDE_ASM("asm/nonmatchings/text", func_8007580C);
 
 INCLUDE_ASM("asm/nonmatchings/text", func_80075E48);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_800760CC);
+/* Where a character's glyph is in the digit font's image, in pixels from the top */
+s32 GetDigitGlyphTop(char code) {
+    switch (code) {
+        case ':':
+            return DIGIT_GLYPH_COLON * DIGIT_GLYPH_SIZE;
+        case '*':
+            return DIGIT_GLYPH_STAR * DIGIT_GLYPH_SIZE;
+        case '+':
+            return DIGIT_GLYPH_PLUS * DIGIT_GLYPH_SIZE;
+        case '-':
+            return DIGIT_GLYPH_MINUS * DIGIT_GLYPH_SIZE;
+        case '#':
+            return DIGIT_GLYPH_HASH * DIGIT_GLYPH_SIZE;
+        case '!':
+            return DIGIT_GLYPH_EXCLAMATION * DIGIT_GLYPH_SIZE;
+        default:
+            return (code - '0' + DIGIT_GLYPH_ZERO) * DIGIT_GLYPH_SIZE;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80076138);
+/* Unused; it is there to match */
+const s32 g_UnusedTextData[2] = { 0, 0 };
+
+/* Draws text in the digit font, as long as g_PrintBuffer holds a string at least as long */
+void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 index;
+
+    gDPPipeSync(gfx++);
+    for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
+        DrawTextureRect(&gfx, x << 2, y << 2, (x + DIGIT_GLYPH_SIZE) << 2, (y + DIGIT_GLYPH_SIZE) << 2,
+                        G_TX_RENDERTILE, 0, GetDigitGlyphTop(text[index]) << 5, 1 << 10, 1 << 10);
+        x += DIGIT_GLYPH_WIDTH;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/text", func_8007624C);
 

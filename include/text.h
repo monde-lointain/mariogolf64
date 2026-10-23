@@ -16,6 +16,8 @@
 
 /* Flags of a text slot */
 #define TEXT_FLAG_CENTERED 0x10
+/* DrawTextSlots skips a slot with this flag */
+#define TEXT_FLAG_UNK20 0x20
 
 /* The font size, in pixels, of the font whose characters differ in width */
 #define FONT_SIZE_LARGE 12
