@@ -84,10 +84,6 @@
 #define CORNER_LEAST_DISTANCE 1.536f
 #define CORNER_DEFAULT_PUSH_X 0.2f
 
-/* How far a point is from a plane's front, in course units */
-#define GET_PLANE_SIDE(plane, x, y, z)                                                                                \
-    ((plane).normal[AXIS_X] * (x) + (plane).normal[AXIS_Y] * (y) + (plane).normal[AXIS_Z] * (z) +                     \
-     (plane).distance * COURSE_UNITS_PER_UNIT)
 /* FindWallHit's distances from a wall, in course units */
 #define WALL_REACH_DISTANCE 384.0f
 #define WALL_HIT_DISTANCE 399.36f
@@ -127,14 +123,96 @@
 #define TRIANGLE_FACING_X 1
 #define TRIANGLE_FACING_Z 2
 
-/* The hit mask cell of a billboard texture */
-#define BILLBOARD_MASK_CELL(textureIndex, row, column)                                                               \
-    g_BillboardMasks[g_BillboardMaskIndices[(textureIndex) & (BILLBOARD_MASK_INDEX_COUNT - 1)]]                      \
-                    [((row) * BILLBOARD_MASK_SIZE) | (column)]
+/*
+ * How far a point is from a plane's front, in course units. It is a
+ * macro, as an inline function compiles differently from the original.
+ */
+#define GetPlaneSide(plane, x, y, z)                                                                                  \
+    ((plane).normal[AXIS_X] * (x) + (plane).normal[AXIS_Y] * (y) + (plane).normal[AXIS_Z] * (z) +                     \
+     (plane).distance * COURSE_UNITS_PER_UNIT)
+
+/* Whether a point is off the ground; a negative x or z is too, as an unsigned one is big */
+static inline s32 IsOffGround(s32 x, s32 z) {
+    return ((u32)x >= GROUND_WIDTH) || ((u32)z >= GROUND_LENGTH);
+}
+
+/* Whether a point is off the mini-golf ground, in the same way */
+static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
+    return ((u32)x >= MINI_GOLF_GROUND_SIZE) || ((u32)z >= MINI_GOLF_GROUND_SIZE);
+}
+
+/*
+ * Whether all three of a triangle's corners are below the path. It is a
+ * macro, as an inline function allocates registers differently from the
+ * original.
+ */
+#define IsTriangleBelowPath(isFirstBelow, isSecondBelow, isThirdBelow)                                                \
+    ((isFirstBelow) && (isSecondBelow) && (isThirdBelow))
+
+/*
+ * Whether two values are both negative or both not. It is a macro, as
+ * an inline function compiles differently from the original.
+ */
+#define HaveSameSign(first, second) ((((first) >= 0) && ((second) >= 0)) || (((first) < 0) && ((second) < 0)))
+
+/*
+ * Whether a path ends touching a plane or crosses it, from its ends'
+ * sides of it. It is a macro, as an inline function compiles differently
+ * from the original.
+ */
+#define DoesPathMeetPlane(startSide, endSide)                                                                         \
+    ((fabsf(endSide) < PLANE_TOUCH_DISTANCE) || (((startSide) > 0.0f) & ((endSide) < 0.0f)) ||                        \
+     (((startSide) < 0.0f) & ((endSide) > 0.0f)))
+
+/*
+ * Whether a path ends within reach of a wall or crosses it, from its
+ * ends' sides of it. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define DoesPathReachWall(startSide, endSide)                                                                         \
+    ((fabsf(endSide) < WALL_REACH_DISTANCE) || (((startSide) >= 0.0f) & ((endSide) < 0.0f)) ||                        \
+     (((startSide) < 0.0f) & ((endSide) > 0.0f)))
+
+/*
+ * Whether a path ends on a ring's plane or crosses it, from its ends'
+ * sides of it. It is a macro, as an inline function compiles differently
+ * from the original.
+ */
+#define DoesPathMeetRingPlane(startSide, endSide)                                                                     \
+    (((endSide) == 0.0f) || (((startSide) > 0.0f) && ((endSide) < 0.0f)) ||                                           \
+     (((startSide) < 0.0f) && ((endSide) > 0.0f)))
+
+/*
+ * Whether, in the mini-golf ground hit test, a path barely crosses a
+ * plane. It is a macro, as an inline function compiles differently from
+ * the original.
+ */
+#define IsBareCrossing(simulation, startSide, endSide)                                                                \
+    (((simulation)->isRunning == BALL_STATE_UNK2) && (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
+
+/*
+ * Whether a value is less than, or more than, every corner's, which are
+ * in units. They are macros, as inline functions allocate registers
+ * differently from the original.
+ */
+#define IsLessThanCorners(value, corners)                                                                             \
+    (((value) < (corners)[0] * COURSE_UNITS_PER_UNIT) &&                                                              \
+     ((value) < (corners)[1] * COURSE_UNITS_PER_UNIT) &&                                                              \
+     ((value) < (corners)[2] * COURSE_UNITS_PER_UNIT))
+#define IsMoreThanCorners(value, corners)                                                                             \
+    (((corners)[0] * COURSE_UNITS_PER_UNIT < (value)) &&                                                              \
+     ((corners)[1] * COURSE_UNITS_PER_UNIT < (value)) &&                                                              \
+     ((corners)[2] * COURSE_UNITS_PER_UNIT < (value)))
 
 /* The hit masks, and which mask each billboard texture has */
 extern s8 g_BillboardMasks[BILLBOARD_MASK_COUNT][BILLBOARD_MASK_SIZE * BILLBOARD_MASK_SIZE];
 extern u8 g_BillboardMaskIndices[BILLBOARD_MASK_INDEX_COUNT];
+
+/* The hit mask cell of a billboard texture */
+static inline s8 GetBillboardMaskCell(s32 textureIndex, s32 row, s32 column) {
+    return g_BillboardMasks[g_BillboardMaskIndices[textureIndex & (BILLBOARD_MASK_INDEX_COUNT - 1)]]
+                           [(row * BILLBOARD_MASK_SIZE) | column];
+}
 
 /* It is global so that the routines still in asm can reach it */
 const char g_PathDebugBlankText[] = "          ";
@@ -189,8 +267,7 @@ s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s3
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
         PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
-    if ((u32)startX >= MINI_GOLF_GROUND_SIZE || (u32)startZ >= MINI_GOLF_GROUND_SIZE ||
-        (u32)endX >= MINI_GOLF_GROUND_SIZE || (u32)endZ >= MINI_GOLF_GROUND_SIZE) {
+    if (IsOffMiniGolfGround(startX, startZ) || IsOffMiniGolfGround(endX, endZ)) {
         if (endY >= GetGroundHeight(endX, endZ)) {
             *fraction = 1.0f;
             hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
@@ -236,7 +313,8 @@ s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s3
         triangleCount = 0;
         for (row = 0; row < GROUND_TILE_POINT_SPAN; row++) {
             for (column = 0; column < GROUND_TILE_POINT_SPAN; column++) {
-                if (!isBelowPath[row][column] || !isBelowPath[row][column + 1] || !isBelowPath[row + 1][column]) {
+                if (!IsTriangleBelowPath(isBelowPath[row][column], isBelowPath[row][column + 1],
+                                         isBelowPath[row + 1][column])) {
                     triangles[triangleCount].corners[AXIS_X][0] = points[row][column]->v.ob[AXIS_X];
                     triangles[triangleCount].corners[AXIS_Y][0] = points[row][column]->v.ob[AXIS_Y];
                     triangles[triangleCount].corners[AXIS_Z][0] = points[row][column]->v.ob[AXIS_Z];
@@ -248,8 +326,8 @@ s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s3
                     triangles[triangleCount].corners[AXIS_Z][2] = points[row + 1][column]->v.ob[AXIS_Z];
                     triangleCount++;
                 }
-                if (!isBelowPath[row][column + 1] || !isBelowPath[row + 1][column + 1] ||
-                    !isBelowPath[row + 1][column]) {
+                if (!IsTriangleBelowPath(isBelowPath[row][column + 1], isBelowPath[row + 1][column + 1],
+                                         isBelowPath[row + 1][column])) {
                     triangles[triangleCount].corners[AXIS_X][0] = points[row][column + 1]->v.ob[AXIS_X];
                     triangles[triangleCount].corners[AXIS_Y][0] = points[row][column + 1]->v.ob[AXIS_Y];
                     triangles[triangleCount].corners[AXIS_Z][0] = points[row][column + 1]->v.ob[AXIS_Z];
@@ -272,10 +350,7 @@ s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s3
             endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
                       planeOffset;
             if ((endSide >= 0) & (startSide <= 0)) {
-                if (startSide < 0 &&
-                    !(simulation->isRunning == BALL_STATE_UNK2 &&
-                      fabsf((f32)(startSide - endSide)) < BARE_CROSSING_DISTANCE) &&
-                    startSide != endSide) {
+                if (startSide < 0 && !IsBareCrossing(simulation, startSide, endSide) && startSide != endSide) {
                     hitFraction = fabsf((f32)startSide) / fabsf((f32)(startSide - endSide));
                 } else {
                     hitFraction = 1.0f;
@@ -401,8 +476,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 en
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
         PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
-    if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH || (u32)endX >= GROUND_WIDTH ||
-        (u32)endZ >= GROUND_LENGTH) {
+    if (IsOffGround(startX, startZ) || IsOffGround(endX, endZ)) {
         if (endY >= GetGroundHeight(endX, endZ)) {
             *fraction = 1.0f;
             hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
@@ -448,7 +522,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 en
         triangleCount = 0;
         for (row = 0; row < GROUND_TILE_POINT_SPAN; row++) {
             for (column = 0; column < GROUND_TILE_POINT_SPAN; column++) {
-                if (!isBelowPath[row][column] || !isBelowPath[row][column + 1] || !isBelowPath[row + 1][column]) {
+                if (!IsTriangleBelowPath(isBelowPath[row][column], isBelowPath[row][column + 1],
+                                         isBelowPath[row + 1][column])) {
                     triangles[triangleCount].corners[AXIS_X][0] = points[row][column]->v.ob[AXIS_X];
                     triangles[triangleCount].corners[AXIS_Y][0] = points[row][column]->v.ob[AXIS_Y];
                     triangles[triangleCount].corners[AXIS_Z][0] = points[row][column]->v.ob[AXIS_Z];
@@ -460,8 +535,8 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 en
                     triangles[triangleCount].corners[AXIS_Z][2] = points[row + 1][column]->v.ob[AXIS_Z];
                     triangleCount++;
                 }
-                if (!isBelowPath[row][column + 1] || !isBelowPath[row + 1][column + 1] ||
-                    !isBelowPath[row + 1][column]) {
+                if (!IsTriangleBelowPath(isBelowPath[row][column + 1], isBelowPath[row + 1][column + 1],
+                                         isBelowPath[row + 1][column])) {
                     triangles[triangleCount].corners[AXIS_X][0] = points[row][column + 1]->v.ob[AXIS_X];
                     triangles[triangleCount].corners[AXIS_Y][0] = points[row][column + 1]->v.ob[AXIS_Y];
                     triangles[triangleCount].corners[AXIS_Z][0] = points[row][column + 1]->v.ob[AXIS_Z];
@@ -579,7 +654,7 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
         row = BILLBOARD_MASK_SIZE - 1;
     }
     row = BILLBOARD_MASK_SIZE - 1 - row;
-    cell = BILLBOARD_MASK_CELL(textureIndex, row, column);
+    cell = GetBillboardMaskCell(textureIndex, row, column);
     cell -= '0';
     if (cell < 0) {
         cell = 0;
@@ -788,7 +863,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
         endToCupZ = g_CupPositionZ - endZ;
         startSide = deltaX * (D_800BA9D8.cupPosition[AXIS_X] - startX) + deltaZ * (g_CupPositionZ - startZ);
         endSide = deltaX * endToCupX + deltaZ * endToCupZ;
-        if ((startSide >= 0 && endSide >= 0) || (startSide < 0 && endSide < 0)) {
+        if (HaveSameSign(startSide, endSide)) {
             if ((s32)IntLength2D(endToCupX, endToCupZ) <= FLAGSTICK_RADIUS) {
                 hitFraction = 1.0f;
             } else {
@@ -1085,8 +1160,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, 
                     plane.distance * COURSE_UNITS_PER_UNIT;
         endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
                   plane.distance * COURSE_UNITS_PER_UNIT;
-        if (fabsf(endSide) < PLANE_TOUCH_DISTANCE || ((startSide > 0.0f) & (endSide < 0.0f)) ||
-            ((startSide < 0.0f) & (endSide > 0.0f))) {
+        if (DoesPathMeetPlane(startSide, endSide)) {
             sideChange = startSide - endSide;
             if ((s32)sideChange != 0) {
                 hitFraction = fabsf(startSide) / fabsf(sideChange);
@@ -1278,10 +1352,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
         triangle.corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
         triangle.corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
         GetTrianglePlane(&triangle, &plane);
-        startSide = GET_PLANE_SIDE(plane, startX, startY, startZ);
-        endSide = GET_PLANE_SIDE(plane, endX, endY, endZ);
-        if (!(fabsf(endSide) < WALL_REACH_DISTANCE) && !((startSide >= 0.0f) & (endSide < 0.0f)) &&
-            !((startSide < 0.0f) & (endSide > 0.0f))) {
+        startSide = GetPlaneSide(plane, startX, startY, startZ);
+        endSide = GetPlaneSide(plane, endX, endY, endZ);
+        if (!DoesPathReachWall(startSide, endSide)) {
             continue;
         }
         sideChange = startSide - endSide;
@@ -1343,8 +1416,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                     osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
                 }
                 if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-                    if (fabsf(GET_PLANE_SIDE(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
-                                             deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+                    if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
+                                           deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
                         osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
                         hitFraction = endFraction;
                         hitPointU = deltaX * endFraction + startX;
@@ -1392,8 +1465,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                     osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
                 }
                 if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-                    if (fabsf(GET_PLANE_SIDE(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
-                                             deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+                    if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
+                                           deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
                         osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
                         hitFraction = endFraction;
                         hitPointU = deltaX * endFraction + startX;
@@ -1439,12 +1512,10 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                          cornersV[2] * COURSE_UNITS_PER_UNIT);
             osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
             hitU = hitPointU;
-            if (hitU < cornersU[0] * COURSE_UNITS_PER_UNIT && hitU < cornersU[1] * COURSE_UNITS_PER_UNIT &&
-                hitU < cornersU[2] * COURSE_UNITS_PER_UNIT) {
+            if (IsLessThanCorners(hitU, cornersU)) {
                 continue;
             }
-            if (cornersU[0] * COURSE_UNITS_PER_UNIT < hitU && cornersU[1] * COURSE_UNITS_PER_UNIT < hitU &&
-                cornersU[2] * COURSE_UNITS_PER_UNIT < hitU) {
+            if (IsMoreThanCorners(hitU, cornersU)) {
                 continue;
             }
         } else if (facing == TRIANGLE_FACING_X) {
@@ -1480,8 +1551,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                     osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
                 }
                 if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-                    if (fabsf(GET_PLANE_SIDE(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
-                                             deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+                    if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
+                                           deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
                         osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
                         hitFraction = endFraction;
                         hitPointU = deltaY * endFraction + startY;
@@ -1524,8 +1595,8 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                     osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
                 }
                 if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-                    if (fabsf(GET_PLANE_SIDE(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
-                                             deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+                    if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX, deltaY * endFraction + startY,
+                                           deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
                         osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
                         hitFraction = endFraction;
                         hitPointU = deltaY * endFraction + startY;
@@ -1564,12 +1635,10 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                          cornersU[2] * COURSE_UNITS_PER_UNIT);
             osSyncPrintf("xxc[%d]zzc[%d]\n", hitPointU, hitPointV);
             hitU = hitPointV;
-            if (hitU < cornersV[0] * COURSE_UNITS_PER_UNIT && hitU < cornersV[1] * COURSE_UNITS_PER_UNIT &&
-                hitU < cornersV[2] * COURSE_UNITS_PER_UNIT) {
+            if (IsLessThanCorners(hitU, cornersV)) {
                 continue;
             }
-            if (cornersV[0] * COURSE_UNITS_PER_UNIT < hitU && cornersV[1] * COURSE_UNITS_PER_UNIT < hitU &&
-                cornersV[2] * COURSE_UNITS_PER_UNIT < hitU) {
+            if (IsMoreThanCorners(hitU, cornersV)) {
                 continue;
             }
         } else {
@@ -1681,8 +1750,7 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
     z = simulation->position[AXIS_Z];
     y = simulation->position[AXIS_Y];
     isPushed = TRUE;
-    if ((u32)x >= GROUND_WIDTH || (u32)z >= GROUND_LENGTH ||
-        (checksHeight == TRUE && y + WALL_HEIGHT_SLACK < GetGroundHeight(x, z))) {
+    if (IsOffGround(x, z) || (checksHeight == TRUE && y + WALL_HEIGHT_SLACK < GetGroundHeight(x, z))) {
         return FALSE;
     }
     while (isPushed) {
@@ -1767,24 +1835,20 @@ s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
                 cornerXs[0] = wall.corners[AXIS_X][0];
                 cornerXs[1] = wall.corners[AXIS_X][1];
                 cornerXs[2] = wall.corners[AXIS_X][2];
-                if ((f32)x < cornerXs[0] * COURSE_UNITS_PER_UNIT && (f32)x < cornerXs[1] * COURSE_UNITS_PER_UNIT &&
-                    (f32)x < cornerXs[2] * COURSE_UNITS_PER_UNIT) {
+                if (IsLessThanCorners((f32)x, cornerXs)) {
                     continue;
                 }
-                if (cornerXs[0] * COURSE_UNITS_PER_UNIT < (f32)x && cornerXs[1] * COURSE_UNITS_PER_UNIT < (f32)x &&
-                    cornerXs[2] * COURSE_UNITS_PER_UNIT < (f32)x) {
+                if (IsMoreThanCorners((f32)x, cornerXs)) {
                     continue;
                 }
             } else {
                 cornerZs[0] = wall.corners[AXIS_Z][0];
                 cornerZs[1] = wall.corners[AXIS_Z][1];
                 cornerZs[2] = wall.corners[AXIS_Z][2];
-                if ((f32)z < cornerZs[0] * COURSE_UNITS_PER_UNIT && (f32)z < cornerZs[1] * COURSE_UNITS_PER_UNIT &&
-                    (f32)z < cornerZs[2] * COURSE_UNITS_PER_UNIT) {
+                if (IsLessThanCorners((f32)z, cornerZs)) {
                     continue;
                 }
-                if (cornerZs[0] * COURSE_UNITS_PER_UNIT < (f32)z && cornerZs[1] * COURSE_UNITS_PER_UNIT < (f32)z &&
-                    cornerZs[2] * COURSE_UNITS_PER_UNIT < (f32)z) {
+                if (IsMoreThanCorners((f32)z, cornerZs)) {
                     continue;
                 }
             }
@@ -1850,6 +1914,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
         PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
         PrintDebugText(g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
+    /* IsOffGround's tests, written out with signed bounds; they are there to match */
     if (startX < 0 || startX >= GROUND_WIDTH || startZ < 0 || startZ >= GROUND_LENGTH) {
         return -1;
     }
@@ -1884,7 +1949,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
                     plane.distance * COURSE_UNITS_PER_UNIT;
         endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
                   plane.distance * COURSE_UNITS_PER_UNIT;
-        if (endSide == 0.0f || (startSide > 0.0f && endSide < 0.0f) || (startSide < 0.0f && endSide > 0.0f)) {
+        if (DoesPathMeetRingPlane(startSide, endSide)) {
             sideChange = startSide - endSide;
             if (fabsf(sideChange) > 1.0f) {
                 if (sideChange < 0.0f) {
@@ -1943,18 +2008,18 @@ s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down) {
         row = BILLBOARD_MASK_SIZE - 1;
     }
     row = BILLBOARD_MASK_SIZE - 1 - row;
-    solidity = (BILLBOARD_MASK_CELL(textureIndex, row, column) != '0') * BILLBOARD_CENTER_CELL_WEIGHT;
+    solidity = (GetBillboardMaskCell(textureIndex, row, column) != '0') * BILLBOARD_CENTER_CELL_WEIGHT;
     if (row > 0) {
-        solidity += BILLBOARD_MASK_CELL(textureIndex, row - 1, column) != '0';
+        solidity += GetBillboardMaskCell(textureIndex, row - 1, column) != '0';
     }
     if (row < BILLBOARD_MASK_SIZE - 1) {
-        solidity += BILLBOARD_MASK_CELL(textureIndex, row + 1, column) != '0';
+        solidity += GetBillboardMaskCell(textureIndex, row + 1, column) != '0';
     }
     if (column > 0) {
-        solidity += BILLBOARD_MASK_CELL(textureIndex, row, column - 1) != '0';
+        solidity += GetBillboardMaskCell(textureIndex, row, column - 1) != '0';
     }
     if (column < BILLBOARD_MASK_SIZE - 1) {
-        solidity += BILLBOARD_MASK_CELL(textureIndex, row, column + 1) != '0';
+        solidity += GetBillboardMaskCell(textureIndex, row, column + 1) != '0';
     }
     return solidity;
 }
