@@ -1684,6 +1684,14 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading) {
 }
 
 /*
+ * Whether DrawCharacterAndShadow draws for a camera: CAMERA_UNK2, or any
+ * but the inset while D_800BE698 is set. It is a macro, as an inline
+ * function compiles differently from the original.
+ */
+#define IsCharacterDrawnForCamera(cameraIndex)                                                                        \
+    (((cameraIndex) == CAMERA_UNK2) || (((cameraIndex) != INSET_CAMERA) && (D_800BE698 != 0)))
+
+/*
  * Draws the character in the slot and its shadow, for cameraIndex's view.
  * The shadow lies on the ground plane under three points around the
  * character's shadow point.
@@ -1708,7 +1716,7 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
     f32 shadowScale;
 
     gfx = g_DisplayListHead;
-    if (cameraIndex == CAMERA_UNK2 || (cameraIndex != INSET_CAMERA && D_800BE698 != 0)) {
+    if (IsCharacterDrawnForCamera(cameraIndex)) {
         slot = GetUsedCharacterSlot(slotIndex);
         if (slot == NULL) {
             return;
