@@ -1,11 +1,56 @@
 #include "common.h"
 #include "club.h"
+#include "course.h"
 #include "current_shot.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "main.h"
 #include "save.h"
+#include "scene.h"
 
+/* D_80104EB8 divides the main courses into cells of 1 << CELL_SIZE_SHIFT units */
+#define CELL_SIZE_SHIFT 19
+#define CELL_COLUMN_COUNT 8
+#define CELL_ROW_COUNT 16
+
+/* D_800E12B0 is a square of random bytes this many on a side */
+#define RANDOM_GRID_SIZE 32
+
+typedef struct PlayUnk8 {
+    /* 0x0 */ u16 unk0;
+    /* 0x2 */ s8 unk2;
+    /* 0x3 */ s8 unk3;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 unk5;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ s8 unk7;
+} PlayUnk8; /* size = 0x8 */
+
+typedef struct PlayRecord {
+    /* 0x00 */ Unk800BA9D8 hole;
+    /* 0x34 */ s32 gameMode;
+    /* 0x38 */ s8 courseIndex;
+    /* 0x39 */ s8 holeIndex;
+    /* 0x3A */ u8 unk3A[0x3E - 0x3A];
+    /* 0x3E */ u8 unk3E;
+    /* 0x3F */ u8 unk3F[0x44 - 0x3F];
+    /* 0x44 */ PlayUnk8 unk44[4];
+    /* 0x64 */ u8 unk64[0x68 - 0x64];
+} PlayRecord; /* size = 0x68 */
+
+typedef struct RingShotRecord {
+    /* 0x00 */ Unk800BA9D8 hole;
+    /* 0x34 */ s8 courseIndex;
+    /* 0x35 */ s8 holeIndex;
+    /* 0x36 */ u8 unk36[0x3A - 0x36];
+    /* 0x3A */ u8 unk3A;
+    /* 0x3B */ u8 unk3B[0x40 - 0x3B];
+    /* 0x40 */ PlayUnk8 unk40[4];
+    /* 0x60 */ u8 unk60[0x68 - 0x60];
+} RingShotRecord; /* size = 0x68 */
+
+extern PlayRecord D_800FEDD8[];
+extern RingShotRecord D_80105F40[];
 extern s32 D_800C306C;
 extern s32 D_800C3070;
 extern s32 D_800C3074;
@@ -20,14 +65,26 @@ extern s32 D_800C3090;
 extern s8 D_800C30A4;
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
-extern u8 D_80104EB8[0x80];
+extern u8 D_80104EB8[CELL_ROW_COUNT * CELL_COLUMN_COUNT];
+extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
+extern s16 D_80104F78;
+extern s32 D_80104F7C;
+extern s32 D_80104F80;
+extern s32 D_80104F84;
+extern s32 D_80104F88;
+extern s32 D_80104F8C;
+extern s32 D_80104F90;
+extern u8 D_800FE330;
+extern GameState D_801B55F0;
+extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern s8 g_IsMiniGolf;
 
 s32 GetGroundOrWaterHeight(s32 x, s32 z);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 void func_80216B74(s32);
 void func_80407D64(void);
-void func_800624F0(s32 range, s32 base);
+void FillRandomGrid(s32 range, s32 base);
+void func_8005F540(void);
 
 s32 func_8005F180(void) {
     return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
@@ -161,15 +218,69 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005FE8C);
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800600C0);
+void func_800600C0(s32 index) {
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80060128);
+    D_80104F78 = D_800FEDD8->unk44[index].unk0;
+    D_80104F7C = D_800FEDD8->unk44[index].unk2;
+    D_80104F80 = D_800FEDD8->unk44[index].unk3;
+    D_80104F84 = D_800FEDD8->unk44[index].unk4;
+    D_80104F88 = D_800FEDD8->unk44[index].unk5;
+    D_80104F8C = D_800FEDD8->unk44[index].unk6;
+    D_80104F90 = D_800FEDD8->unk44[index].unk7;
+}
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80060190);
+void func_80060128(s32 index) {
+    D_80104F78 = D_80105F40->unk40[index].unk0;
+    D_80104F7C = D_80105F40->unk40[index].unk2;
+    D_80104F80 = D_80105F40->unk40[index].unk3;
+    D_80104F84 = D_80105F40->unk40[index].unk4;
+    D_80104F88 = D_80105F40->unk40[index].unk5;
+    D_80104F8C = D_80105F40->unk40[index].unk6;
+    D_80104F90 = D_80105F40->unk40[index].unk7;
+}
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80060210);
+s32 func_80060190(s32 strokes) {
+    s32 toPar = strokes - g_HolePar;
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800602B4);
+    if (strokes == 1) {
+        return 0x80;
+    }
+    switch (toPar) {
+        case -3:
+            return 0x81;
+        case -2:
+            return 0x82;
+        case -1:
+            return 0x83;
+        case 0:
+            if (g_GameMode == GAME_MODE_RING_SHOT) {
+                return 0x84;
+            }
+            break;
+    }
+    return 0;
+}
+
+/* Sets play up to replay a super shot record */
+void LoadSuperShotReplay(PlayRecord *record) {
+    D_800FEDD8[0] = *record;
+    g_GameMode = record->gameMode;
+    g_CourseIndex = record->courseIndex;
+    g_HoleIndex = record->holeIndex;
+    D_800FE330 = record->unk3E;
+    func_8005F540();
+    osSyncPrintf("SetSuperShotReplay\n");
+}
+
+/* Sets play up for the Ring Shot hole of a record */
+void LoadRingShotRecord(RingShotRecord *record) {
+    D_80105F40[0] = *record;
+    g_GameMode = GAME_MODE_RING_SHOT;
+    g_CourseIndex = record->courseIndex;
+    g_HoleIndex = record->holeIndex;
+    D_800FE330 = record->unk3A;
+    func_8005F540();
+}
 
 void func_8006034C(s8 value) {
     D_800C30A4 = value;
@@ -189,26 +300,78 @@ s32 func_800603A8(void) {
            (IsGameFlagSet(0x85) << 1) | IsGameFlagSet(0x86);
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80060434);
+/* Copies the game state and players to D_801B55F0 and D_8012D0C8 */
+void BackUpPlayState(void) {
+    s32 i;
+
+    D_801B55F0 = g_GameState;
+    for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+        D_8012D0C8[i] = g_Players[i];
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/play", func_800604F4);
 
 INCLUDE_ASM("asm/nonmatchings/play", func_800605EC);
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800624F0);
+/* Fills D_800E12B0 with random values from base up, capped at 255 */
+void FillRandomGrid(s32 range, s32 base) {
+    s32 cell = 0;
+    s32 row;
+    s32 column;
+    s32 value;
+
+    for (row = 0; row < RANDOM_GRID_SIZE; row++) {
+        for (column = 0; column < RANDOM_GRID_SIZE; column++) {
+            value = rand() % range + base;
+            if (value >= 256) {
+                value = 255;
+            }
+            D_800E12B0[cell++] = value;
+        }
+    }
+}
 
 void InitExpansionPakFeatures(void) {
     if (g_HasExpansionPak) {
         func_80407D64();
     }
-    func_800624F0(0x60, 0xBE);
+    FillRandomGrid(0x60, 0xBE);
 }
 
 INCLUDE_ASM("asm/nonmatchings/play", func_800625FC);
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800627F8);
+void CopyDoublePair(f64 *from, f64 *to) {
+    to[0] = from[0];
+    to[1] = from[1];
+}
 
-INCLUDE_ASM("asm/nonmatchings/play", func_8006280C);
+/*
+ * Unless on a mini-golf course, marks the cell holding a point and the
+ * cells around it in D_80104EB8
+ */
+void MarkNearbyCells(u32 x, u32 z) {
+    u32 column;
+    u32 row;
+    s32 i;
+    s32 j;
+
+    if (!g_IsMiniGolf) {
+        column = x >> CELL_SIZE_SHIFT;
+        row = z >> CELL_SIZE_SHIFT;
+        if (column < CELL_COLUMN_COUNT) {
+            if (row < CELL_ROW_COUNT) {
+                for (i = -1; i < 2; i++) {
+                    for (j = -1; j < 2; j++) {
+                        if (column + j < CELL_COLUMN_COUNT && row + i < CELL_ROW_COUNT) {
+                            D_80104EB8[(row + i) * CELL_COLUMN_COUNT + (column + j)] = TRUE;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 void func_800628A0(void) {
     bzero(D_80104EB8, sizeof(D_80104EB8));
