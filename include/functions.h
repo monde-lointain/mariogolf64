@@ -54,8 +54,8 @@ void func_801F4B20_ovl_13(void);
 void func_801F4E70_ovl_13(void);
 
 /* ovl_14 */
-void func_801F4B9C_ovl_14(void);
-void func_801F4E54_ovl_14(void);
+void LoadStaffRoll(void);
+void UnloadStaffRoll(void);
 
 /* RCP setup, in the file at 0xDCE0 */
 #define BUFFER_CLEAR_DEPTH_ONLY 0 /* Clears the depth buffer and keeps the frame */
@@ -120,7 +120,7 @@ void UpdateTitleScreen(void);
 void UpdateBootLogos(void);
 void func_801F5F1C(void);
 void func_801F6788(void);
-void func_801F7148(void);
+void UpdateStaffRoll(void);
 
 void func_80071370(void);
 void func_80081284(void);

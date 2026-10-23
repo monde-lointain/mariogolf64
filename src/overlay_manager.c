@@ -55,7 +55,7 @@ Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_11, sModuleIdsOfOverlay13, NULL, NULL),
     OVERLAY_ENTRY(ovl_12, sModuleIdsOfOverlay14, NULL, NULL),
     OVERLAY_ENTRY(ovl_13, sModuleIdsOfOverlay15, func_801F4B20_ovl_13, func_801F4E70_ovl_13),
-    OVERLAY_ENTRY(ovl_14, sModuleIdsOfOverlay16, func_801F4B9C_ovl_14, func_801F4E54_ovl_14),
+    OVERLAY_ENTRY(ovl_14, sModuleIdsOfOverlay16, LoadStaffRoll, UnloadStaffRoll),
 };
 
 /* The index of the overlay that holds each module, or -1 for none */

@@ -37,7 +37,7 @@
 #define SCENE_RINGS 16
 #define SCENE_BOOT_LOGOS 27
 #define SCENE_WALLS 28
-#define SCENE_UNK30 30
+#define SCENE_STAFF_ROLL 30
 
 /* The current scene while UpdateOverlays swaps the scene's modules */
 #define SCENE_SWAPPING_MODULES 0x19
@@ -63,6 +63,8 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_TOURNAMENT 5
 /* The mode whose holes GetCourseRecordIndex takes from g_RingShotHoles */
 #define GAME_MODE_RING_SHOT 9
+/* Set by the staff roll for the hole its cast plays */
+#define GAME_MODE_STAFF_ROLL 13
 
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;

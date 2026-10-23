@@ -5,6 +5,7 @@
 #include "current_shot.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "overlay_manager.h"
 #include "save.h"
@@ -14,7 +15,6 @@
 #include "variables.h"
 #include "work_area.h"
 
-#define CUP_POSITION_COUNT 4
 /* ChooseHoleConditions gives up on finding a set cup position after these */
 #define MAX_CUP_ATTEMPT_COUNT 120
 /*
@@ -71,15 +71,6 @@
 
 /* The Koopa Park hole that sets GAME_FLAG_UNK69 */
 #define KOOPA_PARK_UNK69_HOLE_INDEX 7
-
-typedef struct HolePoints {
-    /* 0x00 */ CoursePoint cupPositions[CUP_POSITION_COUNT]; /* Zero where a hole has fewer */
-    /* 0x30 */ CoursePoint unk30[CUP_POSITION_COUNT];
-    /* 0x60 */ CoursePoint unk60[8];
-    /* 0xC0 */ CoursePoint unkC0[8];
-} HolePoints; /* size = 0x120 */
-
-extern HolePoints g_HolePoints;
 
 #define LZ_STREAM_FLAG_FIRST (1 << 0)
 #define LZ_STREAM_FLAG_LAST (1 << 1)

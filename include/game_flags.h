@@ -87,6 +87,9 @@
 /* Read by the reaction framing, whose purpose is not yet known */
 #define GAME_FLAG_UNK7F 0x7F
 
+/* Keeps the staff roll from shuffling its cast */
+#define GAME_FLAG_UNK99 0x99
+
 /* Flags that Club Slots reads, whose purpose is not yet known */
 #define GAME_FLAG_UNK32 0x32
 #define GAME_FLAG_UNK55 0x55

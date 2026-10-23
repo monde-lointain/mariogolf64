@@ -1,6 +1,7 @@
 #include "common.h"
 #include "camera.h"
 #include "controller.h"
+#include "framing.h"
 #include "functions.h"
 #include "math_util.h"
 

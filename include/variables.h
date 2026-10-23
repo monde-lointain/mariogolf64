@@ -60,6 +60,17 @@ extern HoleConditions g_HoleConditions;
 /* The wind's direction as each camera sees it, in radians, for its arrow */
 extern f32 g_ViewedWindAngles[2];
 
+/* HoleConditions.windDirection's units per radian */
+#define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
+
+/*
+ * The wind's direction as seen from a camera: the arrow turns with the
+ * camera's direction of view
+ */
+#define VIEWED_WIND_ANGLE(windDirection, view)            \
+    ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
+     atan2((view)->eye[2] - (view)->lookAt[2], (view)->eye[0] - (view)->lookAt[0]))
+
 /*
  * Textures that are drawn every frame and that the course model reads
  * through RSP segments, each DYNAMIC_TEXTURE_SIZE pixels square

@@ -2,6 +2,18 @@
 #define HOLE_LOADER_H
 
 #include <ultra64.h>
+#include "common.h"
+
+#define CUP_POSITION_COUNT 4
+
+typedef struct HolePoints {
+    /* 0x00 */ CoursePoint cupPositions[CUP_POSITION_COUNT]; /* Zero where a hole has fewer */
+    /* 0x30 */ CoursePoint unk30[CUP_POSITION_COUNT];
+    /* 0x60 */ CoursePoint unk60[8];
+    /* 0xC0 */ CoursePoint unkC0[8];
+} HolePoints; /* size = 0x120 */
+
+extern HolePoints g_HolePoints;
 
 /* Cleared while the loader thread loads a hole; set once it is done or stopped */
 extern s32 g_HasLoaderFinished;

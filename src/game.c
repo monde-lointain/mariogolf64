@@ -134,17 +134,6 @@ extern s32 sHasUnloadedSubModule;
 /* GetGroundHeight's units per world unit */
 #define GROUND_UNITS_PER_UNIT 1024
 
-/* HoleConditions.windDirection's units per radian */
-#define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
-
-/*
- * The wind's direction as seen from a camera: the arrow turns with the
- * camera's direction of view
- */
-#define VIEWED_WIND_ANGLE(windDirection, view)            \
-    ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
-     atan2((view)->eye[2] - (view)->lookAt[2], (view)->eye[0] - (view)->lookAt[0]))
-
 /*
  * Scene 14 opens a larger, square inset view, in more steps and without
  * sounds. Each step adds this many pixels to its sides.
@@ -2102,7 +2091,7 @@ void UpdateGame(void) {
     } else if (g_Scene == SCENE_TITLE_SCREEN) {
         UpdateTitleScreen();
     } else if (g_Scene == 30) {
-        func_801F7148();
+        UpdateStaffRoll();
     } else if (g_Scene == 29) {
         func_801F5F1C();
     }

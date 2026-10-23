@@ -678,8 +678,10 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x16D650, asm]
-      - [0x1715C0, data]
+      - [0x16D650, hasm, ovl_14/padding]
+      - [0x16D660, c, ovl_14/staff_roll]
+      - [0x1715C0, .data, ovl_14/staff_roll]
+      - [0x171700, .rodata, ovl_14/staff_roll]
       - { start: 0x171770, type: bss, vram: 0x801F8B50 }
 
   - name: build_date

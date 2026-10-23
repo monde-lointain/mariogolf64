@@ -224,7 +224,7 @@ void CueReactionSound(s32 frame, s32 soundId) {
  * no value; the s32 is there to match.
  */
 s32 PlayReactionSounds(void) {
-    if (g_Scene == SCENE_UNK30) {
+    if (g_Scene == SCENE_STAFF_ROLL) {
         return;
     }
     switch (sReactionCharacter) {
@@ -624,7 +624,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -683,7 +683,7 @@ void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     }
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -733,7 +733,7 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
             func_80078FA8(slotIndex, 4, heading - M_PI / 2);
         }
     }
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -772,7 +772,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
             view->lookAt[AXIS_Y] -= 4.5f;
             view->eye[AXIS_Y] += 3.0f;
@@ -825,7 +825,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
     }
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
             view->lookAt[AXIS_Y] -= 7.5f;
             view->eye[AXIS_Y] += 9.0f;
@@ -865,7 +865,7 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -895,7 +895,7 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, 0.08f, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -925,7 +925,7 @@ void FrameReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 3.0f;
     }
@@ -958,7 +958,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -993,7 +993,7 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 3.0f;
     }
@@ -1020,7 +1020,7 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
     view->lookAt[AXIS_X] = focus[AXIS_X];
     view->lookAt[AXIS_Y] = focus[AXIS_Y];
     view->lookAt[AXIS_Z] = focus[AXIS_Z];
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         turn = 0.0f;
     }
     view->eye[AXIS_X] =
@@ -1030,7 +1030,7 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, 0.3f, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_UNK30 && D_801B60A0 == 1)) {
+    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
