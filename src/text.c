@@ -50,8 +50,14 @@ typedef struct MessageTable {
 /* The pixels between lines, over the font size */
 #define LINE_SPACING 6
 #define MESSAGE_LINE_COUNT 3
-/* The width of an icon, in pixels */
+/* The width of an icon, in pixels; icons are square */
 #define ICON_WIDTH 12
+#define ICON_TEXEL_COUNT (ICON_WIDTH * ICON_WIDTH)
+/* Given as the icon of a code that has none */
+#define NO_ICON (-1)
+/* The fonts' images have 16 glyphs to a row, and a glyph is loaded 16 texels wide */
+#define FONT_GLYPHS_PER_ROW 16
+#define GLYPH_TILE_WIDTH 16
 
 #define FONT_SIZE_MEDIUM 10
 #define FONT_SIZE_SMALL 8
@@ -116,7 +122,7 @@ extern char g_TextName[TEXT_NAME_SIZE];
  */
 typedef struct GlyphSprite {
     /* 0x00 */ Mtx matrix;
-    /* 0x40 */ s16 code;
+    /* 0x40 */ u16 code;
     /* 0x42 */ u8 fontSize;
     /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
     /* 0x44 */ u8 flags;
@@ -128,6 +134,11 @@ typedef struct GlyphSprite {
 #define NO_FONT_SIZE (-1)
 /* Without this flag, PlaceGlyphGroup centres the text on its x */
 #define GLYPH_FLAG_LEFT_ALIGNED 0x10
+/* Only the top or the bottom part of a large glyph is drawn */
+#define GLYPH_FLAG_TOP_PART 0x01
+#define GLYPH_FLAG_BOTTOM_PART 0x02
+/* The texel row where a large glyph's bottom part starts */
+#define LARGE_GLYPH_PART_ROW 7
 /*
  * How far a glyph sprite of a mark is moved back over the glyph before it,
  * and up, in each font. Sprites are placed with y rising up the screen.
@@ -141,6 +152,12 @@ typedef struct GlyphSprite {
 #define MESSAGE_MARK_RISE 4.0f
 
 extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+/* The quads glyph sprites are drawn with, centred on the sprite */
+extern Vtx sLargeGlyphVertices[4];
+extern Vtx sLargeGlyphTopVertices[4];
+extern Vtx sLargeGlyphBottomVertices[4];
+extern Vtx sMediumGlyphVertices[4];
+extern Vtx sSmallGlyphVertices[4];
 /* How many glyphs each group has */
 extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
@@ -851,7 +868,158 @@ s32 PlaceMessageGlyphGroup(s32 group, s32 fontSize, s32 x, s32 y, s32 messageId)
     return (width << 16) | height;
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", func_8007580C);
+/*
+ * Packs texel coordinates into a vertex's texture coordinates. It is a
+ * macro, as an inline function compiles differently from the original.
+ */
+#define PackTextureCoords(s, t) (((s) << 21) | ((t) << 5))
+
+/*
+ * Draws the sprites of a group of glyphs. The fonts are four-bit images
+ * with 16 glyphs to a row, loaded a glyph at a time as eight-bit texels;
+ * icons are eight-bit images that share one palette.
+ */
+void DrawGlyphGroup(Gfx **displayListHead, s32 group) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 isIconLoaded;
+    s32 iconOffset;
+    u32 code;
+    s32 fontSize;
+    s32 s;
+    s32 t;
+    s32 left;
+    s32 top;
+    s32 bottom;
+
+    isIconLoaded = FALSE;
+    gDPPipeSync(gfx++);
+    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+        if (g_GlyphSprites[i].group == group) {
+            iconOffset = NO_ICON;
+            if (isIconLoaded == TRUE) {
+                gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE,
+                                  0, TEXEL0, 0);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLUT(gfx++, G_TT_NONE);
+                isIconLoaded = FALSE;
+            }
+            code = g_GlyphSprites[i].code;
+            if (code < MESSAGE_CODE_GLYPH) {
+                s = (code % FONT_GLYPHS_PER_ROW) * g_GlyphSprites[i].fontSize;
+                t = (code / FONT_GLYPHS_PER_ROW) * g_GlyphSprites[i].fontSize;
+                gDPPipeSync(gfx++);
+                if (g_GlyphSprites[i].fontSize == FONT_SIZE_LARGE) {
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_LARGE * FONT_GLYPHS_PER_ROW / 2,
+                                       ((u32)g_LargeFontImage + IMAGE_HEADER_SIZE) & ~7);
+                } else if (g_GlyphSprites[i].fontSize == FONT_SIZE_MEDIUM) {
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_MEDIUM * FONT_GLYPHS_PER_ROW / 2,
+                                       ((u32)g_MediumFontImage + IMAGE_HEADER_SIZE) & ~7);
+                } else {
+                    gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, FONT_SIZE_SMALL * FONT_GLYPHS_PER_ROW / 2,
+                                       ((u32)g_SmallFontImage + IMAGE_HEADER_SIZE) & ~7);
+                }
+                gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPLoadSync(gfx++);
+                gDPLoadTile(gfx++, G_TX_LOADTILE, s << 1, t << 2, (s + GLYPH_TILE_WIDTH - 1) << 1,
+                            (t + FONT_SIZE_LARGE - 1) << 2);
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPSetTileSize(gfx++, G_TX_RENDERTILE, s << 2, t << 2, (s + GLYPH_TILE_WIDTH - 1) << 2,
+                               (t + GLYPH_TILE_WIDTH - 1) << 2);
+            } else if (code >= MESSAGE_CODE_CONTROL) {
+                switch (code) {
+                    case 0x8000:
+                        iconOffset = 0 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x8001:
+                        iconOffset = 1 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x8002:
+                    case 0x8003:
+                    case 0x8004:
+                    case 0x8005:
+                    case 0x8006:
+                        iconOffset = 3 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x8007:
+                        iconOffset = 6 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x8008:
+                        iconOffset = 7 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x8009:
+                        iconOffset = 8 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x800A:
+                        iconOffset = 9 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x800C:
+                        iconOffset = 2 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x800D:
+                        iconOffset = 4 * ICON_TEXEL_COUNT;
+                        break;
+                    case 0x800E:
+                        iconOffset = 5 * ICON_TEXEL_COUNT;
+                        break;
+                }
+                if (isIconLoaded == FALSE) {
+                    gDPPipeSync(gfx++);
+                    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                    gDPLoadTLUT_pal256(gfx++, ((u32)g_TextIconImage + IMAGE_HEADER_SIZE) & ~7);
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    isIconLoaded = TRUE;
+                }
+                gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, ICON_WIDTH,
+                                   ((u32)g_TextIconImage + LARGE_PALETTED_TEXELS_OFFSET + iconOffset) & ~7);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPLoadSync(gfx++);
+                gDPLoadTile(gfx++, G_TX_LOADTILE, 0, 0, (ICON_WIDTH - 1) << 2, (ICON_WIDTH - 1) << 2);
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, 2, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+                gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (ICON_WIDTH - 1) << 2, (ICON_WIDTH - 1) << 2);
+                s = 0;
+                t = 0;
+            }
+            gDPPipeSync(gfx++);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_GlyphSprites[i].matrix), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            fontSize = g_GlyphSprites[i].fontSize;
+            top = 0;
+            left = 0;
+            bottom = fontSize;
+            if (fontSize == FONT_SIZE_LARGE) {
+                if (g_GlyphSprites[i].flags & GLYPH_FLAG_TOP_PART) {
+                    gSPVertex(gfx++, sLargeGlyphTopVertices, 4, 0);
+                    bottom = LARGE_GLYPH_PART_ROW;
+                } else if (g_GlyphSprites[i].flags & GLYPH_FLAG_BOTTOM_PART) {
+                    gSPVertex(gfx++, sLargeGlyphBottomVertices, 4, 0);
+                    bottom = g_GlyphSprites[i].fontSize;
+                    top = LARGE_GLYPH_PART_ROW;
+                } else {
+                    gSPVertex(gfx++, sLargeGlyphVertices, 4, 0);
+                }
+            } else if (fontSize == FONT_SIZE_MEDIUM) {
+                gSPVertex(gfx++, sMediumGlyphVertices, 4, 0);
+            } else {
+                gSPVertex(gfx++, sSmallGlyphVertices, 4, 0);
+            }
+            gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, PackTextureCoords(left + s, top + t));
+            gSPModifyVertex(gfx++, 1, G_MWO_POINT_ST, PackTextureCoords(left + s, bottom + t));
+            gSPModifyVertex(gfx++, 2, G_MWO_POINT_ST, PackTextureCoords(fontSize + s, bottom + t));
+            gSPModifyVertex(gfx++, 3, G_MWO_POINT_ST, PackTextureCoords(fontSize + s, top + t));
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gDPPipeSync(gfx++);
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Sets up the RDP to draw translucent text in the primitive colour, with
