@@ -300,7 +300,7 @@ void func_800934CC(s32);
 void func_80060358(void);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
-void func_80071608(Gfx **displayListHead);
+void SetUpTextDrawing(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
@@ -1213,7 +1213,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         }
     }
     if (sMenuKind == SAVE_MENU_REPLAYS) {
-        func_80071608(&gfx);
+        SetUpTextDrawing(&gfx);
 
         /* The panels, stretched from the panel image a strip at a time */
         gDPPipeSync(gfx++);
@@ -1450,7 +1450,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                                       EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING, sNoReplayText);
             } else {
                 text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
-                func_80071608(&gfx);
+                SetUpTextDrawing(&gfx);
                 SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
                             text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
                             0xFF, 0xFF);

@@ -150,7 +150,6 @@
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_TEXT_SLOT 2
 
-void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
@@ -656,7 +655,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         }
         DrawRingShotStars(&gfx, SCREEN_WIDTH / 2, 150);
         gDPPipeSync(gfx++);
-        func_80071608(&gfx);
+        SetUpTextDrawing(&gfx);
         SetTextColor(&gfx, 255, 255, 255);
         SetTextSlot(SCREEN_WIDTH / 2, 42,
                     memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,

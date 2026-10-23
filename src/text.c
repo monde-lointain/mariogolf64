@@ -131,7 +131,6 @@ extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
 extern u8 g_LargeFontWidths[];
 
-void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_80072A08(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
@@ -211,7 +210,39 @@ void FreeTextAssets(void) {
     FreeMemory(&g_Messages);
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80071608);
+/*
+ * Sets up the RDP to draw translucent text in the primitive colour, with
+ * the glyphs' alpha scaled by the primitive alpha
+ */
+void SetUpTextDrawing(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gSPLoadGeometryMode(gfx++, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPSetEnvColor(gfx++, 128, 128, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void ClearTextSlots(void) {
     s32 slot;
@@ -292,7 +323,7 @@ void DrawTextSlots(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 slot;
 
-    func_80071608(&gfx);
+    SetUpTextDrawing(&gfx);
     for (slot = 0; slot != TEXT_SLOT_COUNT; slot++) {
         if (g_TextSlots[slot].messageId != NO_MESSAGE && !(g_TextSlots[slot].flags & TEXT_FLAG_UNK20)) {
             gDPSetPrimColor(gfx++, 0, 0, g_TextSlots[slot].red, g_TextSlots[slot].green, g_TextSlots[slot].blue,
@@ -642,7 +673,36 @@ INCLUDE_ASM("asm/nonmatchings/text", func_800754BC);
 
 INCLUDE_ASM("asm/nonmatchings/text", func_8007580C);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_80075E48);
+/*
+ * Sets up the RDP to draw translucent text in the primitive colour, with
+ * perspective-correct textures
+ */
+void SetUpPerspectiveTextDrawing(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /* Where a character's glyph is in the digit font's image, in pixels from the top */
 s32 GetDigitGlyphTop(char code) {
