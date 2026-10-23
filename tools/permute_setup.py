@@ -59,6 +59,9 @@ def main():
     header = ".set noat\n.set noreorder\n.set gp=64\n"
     with open(asm_path) as asm:
         body = asm.read()
+    # Splat writes some low parts as %lo(SYMBOL + (OFFSET & 0xFFFF)), which
+    # leaves the assembler unable to pair them with their %hi parts
+    body = re.sub(r"(%lo\([\w.]+ \+ )\((0x[0-9A-Fa-f]+) & 0xFFFF\)\)", r"\1\2)", body)
     with open(target_s, "w") as target:
         target.write(header + '.include "macro.inc"\n' + body)
     subprocess.run(["mips-linux-gnu-as", "-march=vr4300", "-mabi=32", "-G0", "-EB", "-Iinclude",
