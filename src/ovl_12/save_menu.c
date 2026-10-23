@@ -4,10 +4,12 @@
 #include "common.h"
 #include "controller.h"
 #include "heap.h"
+#include "math_util.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
+#include "variables.h"
 
 /*
  * The pause screens kept in this overlay: the save menu, which lists either
@@ -122,6 +124,78 @@
 /* The frames that the menu waits after saving before it slides out */
 #define SAVED_WAIT_FRAMES 15
 
+/* The replay menu's rows: the records, then Hole Out */
+#define REPLAY_ROW_COUNT (SAVE_RECORD_COUNT + 1)
+#define FIRST_ROW_TOP 36
+#define ROW_SPACING 34
+/* The panel image is stretched over each row a strip at a time */
+#define PANEL_IMAGE_WIDTH 200
+#define PANEL_IMAGE_HEIGHT 30
+#define PANEL_STRIP_COUNT 3
+#define PANEL_STRIP_HEIGHT (PANEL_IMAGE_HEIGHT / PANEL_STRIP_COUNT)
+#define PANEL_STRIP_SIZE (PANEL_IMAGE_WIDTH * PANEL_STRIP_HEIGHT)
+#define RECORD_PANEL_LEFT 24
+#define RECORD_PANEL_WIDTH 272
+#define RECORD_PANEL_STRIP_HEIGHT 11
+#define HOLE_OUT_PANEL_LEFT 80
+#define HOLE_OUT_PANEL_WIDTH 160
+#define HOLE_OUT_PANEL_STRIP_HEIGHT 8
+#define TITLE_PANEL_LEFT 96
+#define TITLE_PANEL_TOP 13
+#define TITLE_PANEL_WIDTH 128
+#define TITLE_PANEL_STRIP_HEIGHT 9
+#define TITLE_TEXT_LEFT 120
+#define TITLE_TEXT_TOP 18
+#define TITLE_BOB_HEIGHT 4.0f
+#define TITLE_BOB_DEGREES_PER_FRAME 10
+/* The rows' shades; the chosen one is brighter */
+#define CHOSEN_PANEL_SHADE 0xEF
+#define OTHER_PANEL_SHADE 0xBF
+#define CURSOR_FRAME_THICKNESS 2
+/* The course numbers image holds the digits 1 to 6, then the word COURSE */
+#define COURSE_NUMBERS_WIDTH 136
+#define COURSE_NUMBERS_HEIGHT 16
+#define COURSE_DIGIT_WIDTH 16
+#define COURSE_DIGIT_COUNT 6
+#define COURSE_WORD_TEXEL_LEFT (COURSE_DIGIT_COUNT * COURSE_DIGIT_WIDTH)
+#define COURSE_WORD_WIDTH 40
+#define COURSE_WORD_LEFT 64
+#define COURSE_TOP 36
+#define LABEL_LEFT 128
+#define LABEL_TOP 38
+#define CHARACTER_IMAGE_WIDTH 32
+#define CHARACTER_IMAGE_HEIGHT 24
+#define CHARACTER_LEFT 32
+#define CHARACTER_TOP 40
+#define HOLE_TEXT_LEFT 64
+#define HOLE_TEXT_TOP 53
+#define EMPTY_TEXT_TOP 47
+#define HOLE_OUT_TEXT_LEFT 128
+#define HOLE_OUT_TEXT_TOP 212
+/* The text slots of func_800719A0 that the records' hole texts use */
+#define FIRST_RECORD_TEXT_SLOT 2
+/* The same hole texts that the course select shows for Ring Shot */
+#define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
+#define RING_SHOT_HOLE_COUNT 6
+/* An image header's width and height are halfwords; these are their low bytes */
+#define IMAGE_WIDTH_LOW_BYTE 3
+#define IMAGE_HEIGHT_LOW_BYTE 5
+
+/* Unk68.unk36's low bits: the kind of shot the record replays */
+#define RECORD_KIND_MASK 0xF
+#define RECORD_KIND_HOLE_IN_ONE 0
+#define RECORD_KIND_ALBATROSS 1
+#define RECORD_KIND_EAGLE 2
+#define RECORD_KIND_BIRDIE 3
+#define RECORD_KIND_PAR 4
+/* Indices of sReplayLabelImages */
+#define REPLAY_LABEL_ALBATROSS 0
+#define REPLAY_LABEL_HOLE_IN_ONE 1
+#define REPLAY_LABEL_EAGLE 2
+#define REPLAY_LABEL_BIRDIE 3
+#define REPLAY_LABEL_PAR 4
+#define NO_REPLAY_LABEL -1
+
 /*
  * This overlay reads the characters and variants of saved players and
  * records as signed, though UnkB8 and Unk68 keep them unsigned; the casts
@@ -165,7 +239,15 @@ void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
 void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
                    s32 dtdy);
+void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
 void func_8006A548(Gfx **displayListHead, void *tlut);
+void func_8006A5E4(Gfx **displayListHead, void *texels, s32 format, s32 width, s32 height, s32 palette, s32 cms,
+                   s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
+void func_80071608(Gfx **displayListHead);
+void func_80071CE4(Gfx **displayListHead, s32 slot);
+void func_800734F0(Gfx **displayListHead, s32);
+void func_800747B0(Gfx **displayListHead, s16 x, s16 y, char *text);
+void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
 void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
                    s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 
@@ -195,7 +277,7 @@ s32 sIconFrameTimer = 0;
 f32 D_80245874_ovl_12 = 0.0f;
 f32 D_80245878_ovl_12 = 0.0f;
 f32 D_8024587C_ovl_12 = 0.0f;
-f32 D_80245880_ovl_12[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+f32 sReplayTitleBobAngle = 0.0f;
 
 /* Returns the MODE_ICON_* index of a saved game's mode, or NO_MODE_ICON */
 s32 GetModeIconIndex(GameState *state) {
@@ -724,11 +806,296 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
     return REPLAY_MENU_OPEN;
 }
 
-__asm__(".section .rodata");
-const s32 D_802459C0_ovl_12[6] = { 0x21, 0x21, 0x21, 0x21, 0x21, 0x18 };
-const s32 D_802459D8_ovl_12[6] = { 0x88, 0x88, 0x88, 0x88, 0x88, 0x50 };
+/*
+ * Draws the replay records: each row's panel, course number, label,
+ * golfer and hole text, the Hole Out row, the cursor's frame and the
+ * bobbing Save Menu title, all slid by sSlideOffsets.
+ */
+void DrawReplaySaveMenu(Gfx **displayListHead) {
+    s32 rowLabels[REPLAY_ROW_COUNT];
+    s32 rowOffsets[REPLAY_ROW_COUNT];
+    Gfx *gfx;
+    SaveData *save;
+    s32 row;
+    /* Counts strips or records; sharing one variable is there to match */
+    s32 index;
+    s32 stripHeight;
+    s32 titleBob;
+    s32 titleHeight;
+    s32 slideOffset;
+    u8 *labelImage;
+    s32 labelWidth;
+    s32 labelHeight;
+    s32 text;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", DrawReplaySaveMenu);
+    save = GetSaveData();
+    gfx = *displayListHead;
+    /* Rows slide in pairs, the first of each pair from the left */
+    for (row = 0; row != REPLAY_ROW_COUNT; row++) {
+        slideOffset = sSlideOffsets[row / 2];
+        rowOffsets[row] = slideOffset;
+        if (!(row & 1)) {
+            rowOffsets[row] = -slideOffset;
+        }
+    }
+    if (sMenuKind == SAVE_MENU_REPLAYS) {
+        func_80071608(&gfx);
+
+        /* The panels, stretched from the panel image a strip at a time */
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        for (index = 0; index != PANEL_STRIP_COUNT; index++) {
+            stripHeight = RECORD_PANEL_STRIP_HEIGHT;
+            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
+                          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
+                          G_TX_MIRROR, 0, 0, 0, 0);
+            gDPPipeSync(gfx++);
+            for (row = 0; row != SAVE_RECORD_COUNT; row++) {
+                if (row == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                                    CHOSEN_PANEL_SHADE);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                func_8006A2C0(&gfx, (rowOffsets[row] + RECORD_PANEL_LEFT) << 2,
+                              (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight) << 2,
+                              (rowOffsets[row] + RECORD_PANEL_LEFT + RECORD_PANEL_WIDTH) << 2,
+                              (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight + stripHeight) << 2,
+                              G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / RECORD_PANEL_WIDTH,
+                              (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+            }
+            stripHeight = HOLE_OUT_PANEL_STRIP_HEIGHT;
+            gDPPipeSync(gfx++);
+            if (sCursorIndex == row) {
+                gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
+                                CHOSEN_PANEL_SHADE);
+            } else {
+                gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+            }
+            func_8006A2C0(&gfx, (rowOffsets[row] + HOLE_OUT_PANEL_LEFT) << 2,
+                          (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight) << 2,
+                          (rowOffsets[row] + HOLE_OUT_PANEL_LEFT + HOLE_OUT_PANEL_WIDTH) << 2,
+                          (FIRST_ROW_TOP + row * ROW_SPACING + index * stripHeight + stripHeight) << 2,
+                          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / HOLE_OUT_PANEL_WIDTH,
+                          (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
+        }
+
+        /* Each record's "COURSE" and course number */
+        func_8006A4A0(&gfx, 0, (u8 *)sCourseNumbersImage + IMAGE_HEADER_SIZE);
+        gDPLoadTextureTile_4b(gfx++, ((u32)sCourseNumbersImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                              COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0, COURSE_NUMBERS_WIDTH - 1,
+                              COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK,
+                              G_TX_NOLOD, G_TX_NOLOD);
+        for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+            Unk68 *record = &save->unk1DF0[index];
+
+            if (!(record->unk36 & RECORD_IN_USE)) {
+                rowLabels[index] = NO_REPLAY_LABEL;
+            } else {
+                gDPPipeSync(gfx++);
+                if (index == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                gDPPipeSync(gfx++);
+                func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
+                              (COURSE_TOP + index * ROW_SPACING) << 2,
+                              (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
+                              (COURSE_TOP + index * ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
+                              COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
+                              (COURSE_TOP + index * ROW_SPACING) << 2,
+                              (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH + COURSE_DIGIT_WIDTH) << 2,
+                              (COURSE_TOP + index * ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
+                              ((s8)record->unk34 * COURSE_DIGIT_WIDTH) << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                switch (record->unk36 & RECORD_KIND_MASK) {
+                    case RECORD_KIND_ALBATROSS:
+                        rowLabels[index] = REPLAY_LABEL_ALBATROSS;
+                        break;
+                    case RECORD_KIND_HOLE_IN_ONE:
+                        rowLabels[index] = REPLAY_LABEL_HOLE_IN_ONE;
+                        break;
+                    case RECORD_KIND_EAGLE:
+                        rowLabels[index] = REPLAY_LABEL_EAGLE;
+                        break;
+                    case RECORD_KIND_BIRDIE:
+                        rowLabels[index] = REPLAY_LABEL_BIRDIE;
+                        break;
+                    case RECORD_KIND_PAR:
+                        rowLabels[index] = REPLAY_LABEL_PAR;
+                        break;
+                }
+            }
+        }
+
+        /* Each record's label */
+        gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+            if (rowLabels[index] != NO_REPLAY_LABEL) {
+                labelImage = sReplayLabelImages[rowLabels[index]];
+                labelWidth = labelImage[IMAGE_WIDTH_LOW_BYTE];
+                labelHeight = labelImage[IMAGE_HEIGHT_LOW_BYTE];
+                gDPPipeSync(gfx++);
+                if (index == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                gDPPipeSync(gfx++);
+                func_8006A4A0(&gfx, 0, (u8 *)sReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
+                func_8006A5E4(&gfx, (u8 *)sReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                              labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
+                func_8006A2C0(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2, (LABEL_TOP + index * ROW_SPACING) << 2,
+                              (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
+                              (LABEL_TOP + index * ROW_SPACING + labelHeight) << 2, G_TX_RENDERTILE, 0, 0,
+                              TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            }
+        }
+
+        /* Each record's golfer */
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+            Unk68 *record = &save->unk1DF0[index];
+
+            if (record->unk36 & RECORD_IN_USE) {
+                gDPPipeSync(gfx++);
+                if (index == sCursorIndex) {
+                    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                } else {
+                    gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+                }
+                gDPPipeSync(gfx++);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                func_8006A548(&gfx, sCharacterFiles[index]);
+                func_8006A84C(&gfx, sCharacterImages[index], G_IM_FMT_CI, G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
+                              CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+                func_8006A2C0(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
+                              (CHARACTER_TOP + index * ROW_SPACING) << 2,
+                              (rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH) << 2,
+                              (CHARACTER_TOP + index * ROW_SPACING + CHARACTER_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                              0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            }
+        }
+
+        /* The cursor's frame around the chosen row */
+        {
+            s32 rowHeights[REPLAY_ROW_COUNT] = { 33, 33, 33, 33, 33, 24 };
+            s32 rowHalfWidths[REPLAY_ROW_COUNT] = { 136, 136, 136, 136, 136, 80 };
+            s32 centerX;
+
+            centerX = SCREEN_WIDTH / 2;
+            gDPSetPrimColor(gfx++, 0, 0, 0x00, 0xBF, 0xFF, 0xFF);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex] -
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX) +
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            func_8006A2C0(&gfx,
+                          (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX) -
+                           CURSOR_FRAME_THICKNESS) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING) << 2,
+                          (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
+                          (FIRST_ROW_TOP + sCursorIndex * ROW_SPACING + rowHeights[sCursorIndex]) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+
+        /* The title's panel, bobbing up and down */
+        titleBob = sinf(sReplayTitleBobAngle) * TITLE_BOB_HEIGHT;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        sReplayTitleBobAngle += DEGREES_TO_RADIANS(TITLE_BOB_DEGREES_PER_FRAME);
+        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        for (index = 0; index != PANEL_STRIP_COUNT; index++) {
+            /* Unused; it is there to match */
+            stripHeight = TITLE_PANEL_STRIP_HEIGHT;
+            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
+                          G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
+                          G_TX_MIRROR, 0, 0, 0, 0);
+            titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
+            func_8006A2C0(&gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
+                          (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT) << 2,
+                          (rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH) << 2,
+                          (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT +
+                           TITLE_PANEL_STRIP_HEIGHT) << 2,
+                          G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / TITLE_PANEL_WIDTH,
+                          (PANEL_IMAGE_HEIGHT << 10) / titleHeight);
+        }
+
+        /* Each record's hole text, or that the row is empty */
+        func_800734F0(&gfx, 0);
+        for (index = 0; index != SAVE_RECORD_COUNT; index++) {
+            Unk68 *record;
+
+            gDPPipeSync(gfx++);
+            record = &save->unk1DF0[index];
+            if (index == sCursorIndex) {
+                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            } else {
+                gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
+            }
+            gDPPipeSync(gfx++);
+            if (!(record->unk36 & RECORD_IN_USE)) {
+                func_800734F0(&gfx, 0);
+                gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
+                gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
+                /* The saved-game message is printed but never drawn */
+                sprintf(g_PrintBuffer, D_80245938_ovl_12, D_8024580C_ovl_12);
+                func_800747B0(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2, EMPTY_TEXT_TOP + index * ROW_SPACING,
+                              D_80245824_ovl_12);
+            } else {
+                text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
+                func_80071608(&gfx);
+                func_800719A0(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * ROW_SPACING,
+                              text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
+                              0xFF, 0xFF);
+                func_80071CE4(&gfx, FIRST_RECORD_TEXT_SLOT + index);
+            }
+        }
+        func_800734F0(&gfx, 0);
+        func_8007624C(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT, HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
+                      0xFFDB4C00, 0);
+        gDPPipeSync(gfx++);
+        func_8007624C(&gfx, rowOffsets[1] + TITLE_TEXT_LEFT, titleBob + TITLE_TEXT_TOP, D_8024584C_ovl_12,
+                      0xFF000000, 0xFFFFFF00, 0);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        *displayListHead = gfx;
+    }
+}
 
 void OpenControlsScreen(void) {
     EncodedAsset encodedAsset;
