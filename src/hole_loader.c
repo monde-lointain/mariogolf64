@@ -616,6 +616,15 @@ void LoadHole(void) {
 }
 
 /*
+ * Whether ShrinkMiniGolfHole raises a shaded triangle's vertex, rather
+ * than drops it. An odd triangle's last two vertices are raised, and an
+ * even triangle's last one. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define IsRaisedShadedVertex(index, vertexIndex)                                                                      \
+    ((((index) & 1) && (((vertexIndex) == 1) || ((vertexIndex) == 2))) || (!((index) & 1) && ((vertexIndex) == 2)))
+
+/*
  * On a mini-golf course, scales the hole's ground, billboards and triangles
  * down with g_MiniGolfScale
  */
@@ -657,7 +666,7 @@ void ShrinkMiniGolfHole(void) {
                 vertex[vertexIndex].v.ob[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
                 vertex[vertexIndex].v.ob[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
                 if (g_WorkArea.hole.triangles[index].kind == HOLE_TRIANGLE_KIND_SHADED) {
-                    if (((index & 1) && (vertexIndex == 1 || vertexIndex == 2)) || (!(index & 1) && vertexIndex == 2)) {
+                    if (IsRaisedShadedVertex(index, vertexIndex)) {
                         vertex[vertexIndex].v.ob[AXIS_Y] += MINI_GOLF_SHADED_RAISE;
                     } else {
                         vertex[vertexIndex].v.ob[AXIS_Y] -= MINI_GOLF_SHADED_DROP;
