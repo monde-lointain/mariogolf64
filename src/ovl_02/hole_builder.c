@@ -27,10 +27,6 @@ extern u8 *sReadCursor;
 extern u8 *sBuildBuffer;
 extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
-extern char sBackupCodeMapPath[];
-extern char sToolCodeMapPath[];
-extern char sShadingProgressMessage[];
-extern char sShadingDoneMessage[];
 
 void LoadCodeMap(char *path);
 void EncodeCodeMap(void);
@@ -110,12 +106,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", LoadCodeMap);
 
 /* Repaints the ground tiles from the code map saved before the last clean-up */
 void LoadBackupCodeMap(void) {
-    LoadCodeMap(sBackupCodeMapPath);
+    LoadCodeMap("c:/golf64/attr.tmp");
 }
 
 /* Repaints the ground tiles from the tool's code map */
 void LoadToolCodeMap(void) {
-    LoadCodeMap(sToolCodeMapPath);
+    LoadCodeMap("tool/golf64.att");
     sIsCodeMapCleaned = FALSE;
 }
 
@@ -151,13 +147,45 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024FF74_ovl_02);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250194_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250474_ovl_02);
+/* Returns the paint logic that a course's terrain is painted with */
+s32 GetCoursePaintLogic(s32 course) {
+    switch (course) {
+        case 0:
+            return 0;
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+            return 3;
+        case 4:
+            return 4;
+        case 5:
+            return 5;
+        case 6:
+            return 6;
+        case 7:
+            return 7;
+        case 8:
+            return 12;
+    }
+    return 0;
+}
 
 /* Does nothing; the course and hole are not read */
 void FinishHolePoints(s32 course, s32 hole) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802504E8_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255168_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255188_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551A8_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551C8_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551E8_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255208_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255228_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255248_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_8025524C_ovl_02);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802509BC_ovl_02);
 
@@ -275,15 +303,24 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802527FC_ovl_02);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8025283C_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552BC_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552C4_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552CC_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552D4_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552DC_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552E4_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552EC_ovl_02);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552F4_ovl_02);
 
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552FC_ovl_02);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
 
 /* Shades the ground tiles, then darkens them under the billboards' shadows */
 void ShadeGround(void) {
     ShadeGroundTiles();
-    osSyncPrintf(sShadingProgressMessage);
+    osSyncPrintf("TR");
     CastBillboardShadows();
-    osSyncPrintf(sShadingDoneMessage);
+    osSyncPrintf("EE\n");
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80253270_ovl_02);
