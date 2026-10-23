@@ -186,9 +186,94 @@ s32 PaintMiniGolfTerrain(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
     return (color << 16) | paintedCode;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F118_ovl_02);
+/*
+ * The paint logic of the second course of each mini-golf set: like
+ * PaintMiniGolfTerrain with other colours, except that greens are painted as
+ * fairway
+ */
+s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 isOtherNearest;
+    s32 random;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F21C_ovl_02);
+    switch (code) {
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            /* The assignment in the test is there to match */
+            if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) && nearestDistance < 2) {
+                color = 0x4C73;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 8) {
+                    color = (x & 4) ? 0x4C72 : 0xBEB4;
+                } else {
+                    color = (x & 4) ? 0xBEB4 : 0x4C72;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x55E;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
+
+/*
+ * The paint logic of the third course of each mini-golf set: like
+ * PaintMiniGolfTerrain with other colours, except that greens are painted as
+ * cart way and other terrain is painted red
+ */
+s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+
+    switch (code) {
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (nearestCode != TERRAIN_CODE_GREEN && nearestDistance < 2) {
+                color = 0xDC61;
+                paintedCode = TERRAIN_CODE_CART_WAY;
+            } else {
+                if (z & 8) {
+                    color = (x & 4) ? 0xDC60 : 0xCE72;
+                } else {
+                    color = (x & 4) ? 0xCE72 : 0xDC60;
+                }
+                paintedCode = TERRAIN_CODE_CART_WAY;
+            }
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x7B80;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        default:
+            color = 0xF801;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F308_ovl_02);
 
