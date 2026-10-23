@@ -155,9 +155,14 @@ typedef struct GlyphSprite {
 #define LARGE_TEXT_MARK_RISE 4
 #define MEDIUM_TEXT_MARK_BACKSPACE 8
 #define MEDIUM_TEXT_MARK_RISE 7
+#define SMALL_TEXT_MARK_BACKSPACE 6
+#define SMALL_TEXT_MARK_RISE 6
 /* How far a full stop of the medium font is drawn back, and how far it advances */
 #define MEDIUM_POINT_INSET 5
 #define MEDIUM_POINT_WIDTH 2
+/* The small font draws this character code with the glyph at another code */
+#define SMALL_FONT_MOVED_CODE 0xB0
+#define SMALL_FONT_MOVED_GLYPH 0x70
 
 extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* The quads glyph sprites are drawn with, centred on the sprite */
@@ -672,7 +677,69 @@ void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawSmallText);
+/*
+ * Draws text in the small font, each glyph advancing by the font size. A
+ * mark is drawn over the glyph before it.
+ */
+void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 character;
+    s32 code;
+    s32 left;
+    s32 top;
+    s32 glyphLeft;
+    s32 glyphTop;
+
+    gDPPipeSync(gfx++);
+    while (*text != '\0') {
+        character = *text;
+        if (character == ' ') {
+            text++;
+            x += FONT_SIZE_SMALL;
+        } else {
+            code = character;
+            left = x;
+            top = y;
+            if (code >= 'a' && code <= 'z') {
+                code += LOWERCASE_CODE_OFFSET;
+            }
+            switch (code) {
+                case CHARACTER_CODE_OTHER_MARK_FIRST:
+                case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
+                case CHARACTER_CODE_MARK_FIRST:
+                case CHARACTER_CODE_MARK_FIRST + 1:
+                    left -= SMALL_TEXT_MARK_BACKSPACE;
+                    top -= SMALL_TEXT_MARK_RISE;
+                    x -= FONT_SIZE_SMALL;
+                    break;
+                case SMALL_FONT_MOVED_CODE:
+                    code = SMALL_FONT_MOVED_GLYPH;
+                    break;
+            }
+            glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_SMALL;
+            glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_SMALL;
+            gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, FONT_SIZE_SMALL * FONT_GLYPHS_PER_ROW / 2,
+                               ((u32)g_SmallFontImage + IMAGE_HEADER_SIZE) & ~7);
+            gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                       G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPLoadSync(gfx++);
+            gDPLoadTile(gfx++, G_TX_LOADTILE, glyphLeft << 1, glyphTop << 2, (glyphLeft + FONT_SIZE_SMALL - 1) << 1,
+                        (glyphTop + FONT_SIZE_SMALL - 1) << 2);
+            gDPPipeSync(gfx++);
+            gDPSetTile(gfx++, G_IM_FMT_IA, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, glyphLeft << 2, glyphTop << 2,
+                           (glyphLeft + FONT_SIZE_SMALL - 1) << 2, (glyphTop + FONT_SIZE_SMALL - 1) << 2);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, left << 2, top << 2, (left + FONT_SIZE_SMALL) << 2, (top + FONT_SIZE_SMALL) << 2,
+                                G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+            text++;
+            x += FONT_SIZE_SMALL;
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /* Draws text in the large font, centred on x */
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text) {
