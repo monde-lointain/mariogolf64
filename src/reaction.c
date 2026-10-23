@@ -133,6 +133,23 @@ void func_80079358(u32 slotIndex, s32 pointId);
 void func_80078DC0(u32 slotIndex, s32 pointId);
 void func_80078FA8(u32 slotIndex, s32 pointId, f32 heading);
 
+/*
+ * Whether the reaction views drop the eye and raise what they look at.
+ * It is a macro, as an inline function compiles differently from the
+ * original.
+ */
+#define IsReactionViewLow() (IsGameFlagSet(GAME_FLAG_UNK7F) || ((g_Scene != SCENE_STAFF_ROLL) && (D_801B60A0 == 1)))
+
+/*
+ * Whether a spot this rough should become the reaction spot: it does when
+ * there is none yet, or when it is less than half as rough as one that is
+ * not smooth enough. It is a macro, as an inline function compiles
+ * differently from the original.
+ */
+#define IsBetterReactionSpot(roughness)                                                                               \
+    (!sHasReactionSpot ||                                                                                             \
+     (((roughness) * 2 < sReactionSpotRoughness) && (sReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)))
+
 /* Blends from one value to another by the weight, limited to 0 to 1 */
 f32 BlendClamped(f32 from, f32 to, f32 weight) {
     if (weight < 0.0f) {
@@ -623,7 +640,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -682,7 +699,7 @@ void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     }
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -732,7 +749,7 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
             func_80078FA8(slotIndex, 4, heading - M_PI / 2);
         }
     }
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -771,7 +788,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
             view->lookAt[AXIS_Y] -= 4.5f;
             view->eye[AXIS_Y] += 3.0f;
@@ -824,7 +841,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
     }
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
             view->lookAt[AXIS_Y] -= 7.5f;
             view->eye[AXIS_Y] += 9.0f;
@@ -864,7 +881,7 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -894,7 +911,7 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, 0.08f, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -924,7 +941,7 @@ void FrameReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 3.0f;
     }
@@ -957,7 +974,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -992,7 +1009,7 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 3.0f;
     }
@@ -1019,7 +1036,7 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
     view->lookAt[AXIS_X] = focus[AXIS_X];
     view->lookAt[AXIS_Y] = focus[AXIS_Y];
     view->lookAt[AXIS_Z] = focus[AXIS_Z];
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         turn = 0.0f;
     }
     view->eye[AXIS_X] =
@@ -1029,7 +1046,7 @@ void FrameKidReaction(u32 slotIndex, CameraView *view) {
         focus[AXIS_Z] + sinf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance * COURSE_TO_WORLD_SCALE;
     KeepAboveGround(view->eye);
     EaseReactionView(view->eye, view->lookAt, 0.3f, EASE_EYE | EASE_LOOK_AT);
-    if (IsGameFlagSet(GAME_FLAG_UNK7F) || (g_Scene != SCENE_STAFF_ROLL && D_801B60A0 == 1)) {
+    if (IsReactionViewLow()) {
         view->lookAt[AXIS_Y] -= 4.5f;
         view->eye[AXIS_Y] += 4.5f;
     }
@@ -1151,8 +1168,7 @@ s32 ConsiderReactionSpot(CoursePoint point) {
             roughness = NEAR_BILLBOARD_ROUGHNESS;
         }
     }
-    if (!sHasReactionSpot
-        || (roughness * 2 < sReactionSpotRoughness && sReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)) {
+    if (IsBetterReactionSpot(roughness)) {
         sReactionSpotRoughness = roughness;
         sReactionSpot[AXIS_X] = point[AXIS_X];
         sReactionSpot[AXIS_Y] = point[AXIS_Y];
