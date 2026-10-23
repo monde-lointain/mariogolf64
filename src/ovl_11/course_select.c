@@ -150,7 +150,6 @@
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_TEXT_SLOT 2
 
-void func_80071CE4(Gfx **displayListHead, s32 slot);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -659,7 +658,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         SetTextSlot(SCREEN_WIDTH / 2, 42,
                     memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,
                     RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
-        func_80071CE4(&gfx, RING_SHOT_TEXT_SLOT);
+        DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
         *displayListHead = gfx;
     }
 }

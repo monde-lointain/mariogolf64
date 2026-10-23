@@ -301,7 +301,7 @@ void func_80060358(void);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx **displayListHead);
-void func_80071CE4(Gfx **displayListHead, s32 slot);
+void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
 void SetUpGradientTextDrawing(Gfx **displayListHead, s32);
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
@@ -1454,7 +1454,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT, HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
                             text + RING_SHOT_TEXT_FIRST_IMAGE, 1, FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF,
                             0xFF, 0xFF);
-                func_80071CE4(&gfx, FIRST_RECORD_TEXT_SLOT + index);
+                DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
             }
         }
         SetUpGradientTextDrawing(&gfx, 0);

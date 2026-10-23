@@ -25,10 +25,12 @@
 /* Flags of a text slot */
 /* The message appears one code more each time the slot is drawn */
 #define TEXT_FLAG_TYPED 0x01
+/* A typed message plays a sound every few codes */
+#define TEXT_FLAG_TYPING_SOUND 0x02
 #define TEXT_FLAG_CENTERED 0x10
 /* DrawTextSlots skips a slot with this flag */
 #define TEXT_FLAG_UNK20 0x20
-/* The medium font advances by FONT_SIZE_LARGE rather than its own size */
+/* Widens the advance of the fonts drawn in text slots */
 #define TEXT_FLAG_WIDE_SPACING 0x40
 /* Each glyph of the large font takes the same width */
 #define TEXT_FLAG_FIXED_WIDTH 0x80
@@ -72,6 +74,7 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
 void SetUpTextDrawing(Gfx **displayListHead);
 void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
 void DrawTextSlots(Gfx **displayListHead);
+void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
 void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char *text, s32 fontSize, s32 flags);

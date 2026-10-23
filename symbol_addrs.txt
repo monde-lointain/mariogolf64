@@ -1880,6 +1880,7 @@ g_UnusedTextData = 0x800D1848; // size:0x8
 DrawLargeTextWithShadow = 0x8007624C; // type:func
 DrawFixedWidthLargeText = 0x80073C14; // type:func
 SetUpTextDrawing = 0x80071608; // type:func
+DrawLargeTextSlot = 0x80071CE4; // type:func
 DrawMediumTextSlot = 0x80072A08; // type:func
 SetUpGradientTextDrawing = 0x800734F0; // type:func
 PlaceGlyphGroup = 0x8007515C; // type:func
