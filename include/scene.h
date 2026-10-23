@@ -76,6 +76,10 @@ extern s32 g_SubModuleState;
 /* Set by the staff roll for the hole its cast plays */
 #define GAME_MODE_STAFF_ROLL 13
 
+/* Modes whose hole bets SettleHoleBets settles like Stroke's */
+#define GAME_MODE_UNK1 1
+#define GAME_MODE_UNK6 6
+
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;
 

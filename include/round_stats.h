@@ -8,7 +8,22 @@
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
 extern RoundStats g_RoundStats;
 
+/* The skins each player has won, as TallySkins counts them */
+extern u16 g_SkinsTotals[MAX_PLAYER_COUNT];
+
+#define NO_LAST_HOLE_SKINS -1
+
+/* How TallySkins left the skins at the last tallied hole */
+typedef struct SkinsCarryover {
+    /* 0x0 */ s8 intoLastHole; /* The skins carried into it, or NO_LAST_HOLE_SKINS */
+    /* 0x1 */ s8 onLastHole;   /* The skins at stake on it */
+    /* 0x2 */ s8 fromLastHole; /* The skins carried over from it */
+} SkinsCarryover; /* size = 0x3 */
+
+extern SkinsCarryover g_SkinsCarryover;
+
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);
+void TallySkins(s32 endHole);
 void StartBets(void);
 void ResumeBets(void);
 s32 GetContestWinner(void);

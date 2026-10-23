@@ -1,12 +1,22 @@
 #include "common.h"
 #include "club.h"
 #include "course.h"
+#include "debug_text.h"
 #include "round_stats.h"
 #include "save.h"
+#include "scene.h"
 #include "scoring.h"
+#include "variables.h"
 
 #define NO_CONTEST_WINNER -1
 #define UNSET_BET_RATE -1
+#define NO_SKINS_WINNER -1
+/* Every hole score is lower */
+#define WORST_HOLE_SCORE 16
+#define FRONT_NINE_END 9
+#define BACK_NINE_END 18
+#define SKINS_DEBUG_COLUMN 17
+#define SKINS_DEBUG_ROW 5
 
 /* Drives are compared at this scale, so those nearly as long tie */
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
@@ -44,7 +54,62 @@ s32 GetNetScoreToPar(s32 endHole, s32 playerIndex) {
     return score;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006CE88);
+/*
+ * In the skins modes a hole's strokes are the skins that its winner took,
+ * and zero for the other players. A hole with no winner carries its skins
+ * over to the next. The holes from the round's first to endHole are
+ * tallied, with endHole itself once every player's unk26 is set
+ */
+#ifdef NON_MATCHING
+void TallySkins(s32 endHole) {
+    s32 player;
+    s32 isAnyUnk26Clear;
+    s32 hole;
+    s32 winner;
+    s32 skins;
+
+    for (player = 0; player != g_GameState.playerCount; player++) {
+        g_SkinsTotals[player] = 0;
+    }
+    isAnyUnk26Clear = FALSE;
+    for (player = 0; player != g_GameState.playerCount; player++) {
+        if (g_Players[player].unk26 == 0) {
+            isAnyUnk26Clear = TRUE;
+        }
+    }
+    endHole += !isAnyUnk26Clear;
+    g_SkinsCarryover.intoLastHole = NO_LAST_HOLE_SKINS;
+    g_SkinsCarryover.onLastHole = 0;
+    g_SkinsCarryover.fromLastHole = 0;
+    skins = 1;
+    for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
+        winner = NO_SKINS_WINNER;
+        for (player = 0; player != g_GameState.playerCount; player++) {
+            if (g_Players[player].holes[hole].strokes != 0) {
+                winner = player;
+                g_Players[player].holes[hole].strokes = skins;
+            }
+        }
+        if (hole == endHole - 1) {
+            g_SkinsCarryover.intoLastHole = skins - 1;
+            g_SkinsCarryover.onLastHole = skins;
+        }
+        if (winner == NO_SKINS_WINNER) {
+            skins++;
+            g_SkinsCarryover.fromLastHole = skins - 1;
+        } else {
+            g_SkinsTotals[winner] += skins;
+            skins = 1;
+            g_SkinsCarryover.fromLastHole = 0;
+        }
+    }
+    sprintf(g_PrintBuffer, "%2d %d    ", g_SkinsCarryover.intoLastHole, g_SkinsCarryover.onLastHole);
+    PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/round_stats", TallySkins);
+#endif
 
 void StartBets(void) {
     s32 player;
@@ -289,6 +354,186 @@ s32 RecordDrive(void) {
     return g_Players[0].lastDriveDistance > stats->longestDrive;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006DFF0);
+/*
+ * Settles the bets on the hole just played and keeps the tallies and pots
+ * in the game state, for the game to be continued. SettleNassau is a
+ * nested function, a GNU C extension.
+ */
+#ifdef NON_MATCHING
+void SettleHoleBets(void) {
+    s32 i;
+    s32 j;
+    s32 lastHole = g_GameState.holeIndex - 1;
+    s32 teamScore;
+    s32 rivalTeamScore;
+    s32 bet;
+    s32 best;
+    s32 count;
+    s32 score;
+    /* The Las Vegas pointers are there to match */
+    s8 *lasVegasRate;
+    s16 *lasVegasTally;
 
-INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006E210);
+    /* The lower net score over the holes wins the bet from each other player */
+    void SettleNassau(s32 startHole, s32 endHole) {
+        s32 totals[MAX_PLAYER_COUNT];
+
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            totals[i] = 0;
+            for (j = startHole; j != endHole; j++) {
+                totals[i] += g_Players[i].holes[j].strokes +
+                             GetHandicapOffset(GetCourseRecordIndex(), j, g_Players[i].handicap);
+            }
+        }
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                if (i != j) {
+                    if (totals[i] < totals[j]) {
+                        g_BetTallies[i][BET_NASSAU] += g_GameState.betRates[BET_NASSAU];
+                    } else if (totals[j] < totals[i]) {
+                        g_BetTallies[i][BET_NASSAU] -= g_GameState.betRates[BET_NASSAU];
+                    }
+                }
+            }
+        }
+    }
+
+    /* Declared after SettleNassau to match the stack layout */
+    s32 scores[MAX_PLAYER_COUNT];
+    s32 unused[8]; /* Unused; it is there to match */
+
+    if (g_GameState.betRates[BET_STROKES] > 0) {
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            for (j = 0; j != g_GameState.playerCount; j++) {
+                if (j != i) {
+                    score = g_Players[i].unk23 +
+                            GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
+                    g_BetTallies[i][BET_STROKES] +=
+                        (g_Players[j].unk23 +
+                         GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[j].handicap) - score) *
+                        g_GameState.betRates[BET_STROKES];
+                }
+            }
+        }
+    }
+    lasVegasRate = &g_GameState.betRates[BET_LAS_VEGAS];
+    if (*lasVegasRate > 0) {
+        lasVegasTally = &g_BetTallies[0][BET_LAS_VEGAS];
+        teamScore = g_Players[0].unk23 + g_Players[1].unk23 +
+                    GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[0].handicap) +
+                    GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[1].handicap);
+        rivalTeamScore = g_Players[2].unk23 + g_Players[3].unk23 +
+                         GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[2].handicap) +
+                         GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[3].handicap);
+        *lasVegasTally += (rivalTeamScore - teamScore) * *lasVegasRate;
+        g_BetTallies[1][BET_LAS_VEGAS] += (rivalTeamScore - teamScore) * *lasVegasRate;
+        g_BetTallies[2][BET_LAS_VEGAS] += (teamScore - rivalTeamScore) * *lasVegasRate;
+        g_BetTallies[3][BET_LAS_VEGAS] += (teamScore - rivalTeamScore) * *lasVegasRate;
+    }
+    if (g_GameState.betRates[BET_NASSAU] > 0) {
+        if (g_GameState.holeIndex == FRONT_NINE_END && !(g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE)) {
+            SettleNassau(0, FRONT_NINE_END);
+        }
+        if (g_GameState.holeIndex == BACK_NINE_END) {
+            if (!(g_GameState.holeSelection & HOLE_SELECTION_FRONT_NINE)) {
+                SettleNassau(FRONT_NINE_END, BACK_NINE_END);
+            }
+            if (!(g_GameState.holeSelection & (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE))) {
+                SettleNassau(0, BACK_NINE_END);
+            }
+        }
+    }
+    if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE || g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
+        bet = BET_UNK5;
+        if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE) {
+            bet = BET_UNK4;
+        } else {
+            /* The store is dead; it is there to match */
+            count = 0;
+        }
+        switch (g_GameState.gameMode) {
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                /* A hole's strokes are zero for the players who did not win it */
+                count = 0;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    count += g_Players[i].holes[g_GameState.holeIndex - 1].strokes == 0;
+                }
+                if (count != g_GameState.playerCount) {
+                    for (i = 0; i != g_GameState.playerCount; i++) {
+                        if (g_Players[i].holes[g_GameState.holeIndex - 1].strokes != 0) {
+                            g_BetTallies[i][bet] += sHolePot * (g_GameState.playerCount - 1);
+                        } else {
+                            g_BetTallies[i][bet] -= sHolePot;
+                        }
+                    }
+                    sHolePot = g_GameState.betRates[bet];
+                } else {
+                    sHolePot += g_GameState.betRates[bet];
+                }
+                break;
+            case GAME_MODE_MATCH_GAME:
+                if (g_Players[0].holes[g_GameState.holeIndex - 1].strokes <
+                    g_Players[1].holes[g_GameState.holeIndex - 1].strokes) {
+                    g_BetTallies[0][bet] += sHolePot;
+                    g_BetTallies[1][bet] -= sHolePot;
+                    sHolePot = g_GameState.betRates[bet];
+                } else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
+                           g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
+                    g_BetTallies[0][bet] -= sHolePot;
+                    g_BetTallies[1][bet] += sHolePot;
+                    sHolePot = g_GameState.betRates[bet];
+                } else {
+                    sHolePot += g_GameState.betRates[bet];
+                }
+                break;
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNK1:
+            case GAME_MODE_UNK6: {
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    scores[i] = g_Players[i].unk23 + GetHandicapOffset(g_GameState.courseIndex,
+                                                                      g_GameState.holeIndex - 1,
+                                                                      g_Players[i].handicap);
+                }
+                best = WORST_HOLE_SCORE;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    if (scores[i] < best) {
+                        best = scores[i];
+                    }
+                }
+                count = 0;
+                for (i = 0; i != g_GameState.playerCount; i++) {
+                    count += best == scores[i];
+                }
+                if (count == 1) {
+                    for (i = 0; i != g_GameState.playerCount; i++) {
+                        if (best == scores[i]) {
+                            g_BetTallies[i][bet] += sHolePot * (g_GameState.playerCount - 1);
+                        } else {
+                            g_BetTallies[i][bet] -= sHolePot;
+                        }
+                    }
+                    sHolePot = g_GameState.betRates[bet];
+                } else {
+                    sHolePot += g_GameState.betRates[bet];
+                }
+                break;
+            }
+        }
+    }
+    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = sLongestDrivePot;
+    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = sNearestPinPot;
+    g_GameState.carriedPots[CARRIED_POT_HOLE] = sHolePot;
+    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+        for (j = 0; j != BET_COUNT; j++) {
+            g_Players[i].betTallies[j] = g_BetTallies[i][j];
+        }
+    }
+    sIsContestDecided = FALSE;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/round_stats", SettleNassau);
+
+INCLUDE_ASM("asm/nonmatchings/round_stats", SettleHoleBets);
+#endif
