@@ -20,6 +20,15 @@
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
 
+/* UnkB8.unkC values that count as having finished the hole */
+#define PLAYER_STATE_UNK11 0x11
+#define PLAYER_STATE_UNK14 0x14
+
+/* Movies that StartMovie plays */
+#define MOVIE_LONGEST_DRIVE 12 /* A longest drive contest's winner */
+#define MOVIE_NEAREST_PIN 13   /* A nearest pin contest's winner */
+#define MOVIE_DRIVE_RECORD 14  /* A tournament's longest drive yet */
+
 typedef struct PlayUnk8 {
     /* 0x0 */ u16 unk0;
     /* 0x2 */ s8 unk2;
@@ -80,6 +89,8 @@ extern s32 D_80104F8C;
 extern s32 D_80104F90;
 extern u8 D_800FE330;
 extern s32 D_801B60B4;
+extern s8 D_801B60B9;
+extern s8 D_800FBDB8;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 extern s8 g_IsMiniGolf;
@@ -90,6 +101,8 @@ void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void func_8005F540(void);
+void StartMovie(s32 movie);
+s32 IsMovieFinished(void);
 
 s32 func_8005F180(void) {
     return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
@@ -217,7 +230,38 @@ INCLUDE_ASM("asm/nonmatchings/play", InitPlay);
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005F964);
 
-INCLUDE_ASM("asm/nonmatchings/play", func_8005FB58);
+/*
+ * Once every player has finished the hole, plays the movies for the
+ * contests won on it, then waits for them to finish
+ */
+void PlayContestMovies(void) {
+    s32 i;
+
+    if (D_800FBDB8 == 0) {
+        for (i = 0; i < g_GameState.playerCount; i++) {
+            if (g_Players[i].unk23 == 0) {
+                break;
+            }
+            if (g_Players[i].unkC != PLAYER_STATE_UNK11 && g_Players[i].unkC != PLAYER_STATE_UNK14) {
+                break;
+            }
+        }
+        if (!D_801B60B9 && i == g_GameState.playerCount) {
+            if (IsMarkedParFive(g_CourseIndex, g_HoleIndex) && GetContestWinner() != NO_CONTEST_WINNER) {
+                StartMovie(MOVIE_LONGEST_DRIVE);
+            }
+            if (IsParThree(g_CourseIndex, g_HoleIndex) && GetContestWinner() != NO_CONTEST_WINNER) {
+                StartMovie(MOVIE_NEAREST_PIN);
+            }
+            if (g_GameMode == GAME_MODE_TOURNAMENT && RecordDrive()) {
+                StartMovie(MOVIE_DRIVE_RECORD);
+            }
+            D_800FBDB8 = 60;
+        }
+    } else if (IsMovieFinished()) {
+        D_800FBDB8 = -1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
 

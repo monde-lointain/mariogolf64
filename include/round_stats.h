@@ -13,6 +13,9 @@ extern u16 g_SkinsTotals[MAX_PLAYER_COUNT];
 
 #define NO_LAST_HOLE_SKINS -1
 
+/* What GetContestWinner returns when nobody won the contest outright */
+#define NO_CONTEST_WINNER -1
+
 /* How TallySkins left the skins at the last tallied hole */
 typedef struct SkinsCarryover {
     /* 0x0 */ s8 intoLastHole; /* The skins carried into it, or NO_LAST_HOLE_SKINS */

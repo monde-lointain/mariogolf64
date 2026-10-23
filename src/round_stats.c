@@ -8,7 +8,6 @@
 #include "scoring.h"
 #include "variables.h"
 
-#define NO_CONTEST_WINNER -1
 #define UNSET_BET_RATE -1
 #define NO_SKINS_WINNER -1
 /* The course records' totals stop here */
