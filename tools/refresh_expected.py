@@ -32,7 +32,8 @@ def main():
     for symbol, address, symbol_segment in symbols:
         if symbol_segment in ("", segment):
             names_by_address.setdefault(address.upper(), symbol)
-    functions = [names_by_address.get(address, f"func_{address}") for address in addresses]
+    suffix = f"_{segment}" if segment.startswith("ovl_") else ""
+    functions = [names_by_address.get(address, f"func_{address}{suffix}") for address in addresses]
 
     backup_path = c_path + ".refresh_backup"
     shutil.copyfile(c_path, backup_path)
