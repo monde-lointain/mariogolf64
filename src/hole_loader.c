@@ -149,9 +149,9 @@ void func_800802E0(void);
 void func_80253234(s32);
 void func_80253270(void);
 void func_802504E8(s32 courseRecordIndex, s32 holeRecordIndex);
-void func_802541E8(void);
+void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
-void func_8024FF74(void);
+f32 MeasureGroundTiles(void);
 s32 ChooseHoleConditions(void);
 
 /*
@@ -647,7 +647,7 @@ void ShrinkMiniGolfHole(void) {
                 SetGroundPoint(column, row, &point);
             }
         }
-        func_8024FF74();
+        MeasureGroundTiles();
         for (index = 0; index < BILLBOARD_COUNT; index++) {
             if (g_Billboards[index].textureIndex >= 0) {
                 g_Billboards[index].x *= g_MiniGolfScale[AXIS_X];
@@ -916,7 +916,7 @@ void RunLoaderThread(void) {
         PrepareHoleScene();
         InitHoleState();
         osSyncPrintf("MP4\n");
-        func_802541E8();
+        BuildGroundDisplayLists();
         osSyncPrintf("MP5\n");
         func_800802E0();
         SetGameFlag(GAME_FLAG_HOLE_LOADED);
