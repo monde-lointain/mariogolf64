@@ -81,6 +81,10 @@
 #define GAME_FLAG_UNK7C 0x7C
 #define GAME_FLAG_UNK7D 0x7D
 
+/* Flags that Club Slots reads, whose purpose is not yet known */
+#define GAME_FLAG_UNK32 0x32
+#define GAME_FLAG_UNK55 0x55
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

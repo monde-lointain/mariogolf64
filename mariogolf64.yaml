@@ -623,8 +623,9 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x15BB50, asm]
-      - [0x15F160, data]
+      - [0x15BB50, c, ovl_10/club_slots]
+      - [0x15F160, .data, ovl_10/club_slots]
+      - [0x15F210, .rodata, ovl_10/club_slots]
       - { start: 0x15F250, type: bss, vram: 0x80244F00 }
 
   - name: ovl_11
