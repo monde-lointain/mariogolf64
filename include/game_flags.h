@@ -30,6 +30,9 @@
 /* Makes every character selectable */
 #define GAME_FLAG_ALL_CHARACTERS 0x54
 
+/* Opens every course on the hole and Ring Shot selects */
+#define GAME_FLAG_ALL_COURSES 0x5E
+
 /* Stops the debug text grid from being drawn */
 #define GAME_FLAG_HIDE_DEBUG_TEXT 0x1D
 

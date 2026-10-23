@@ -25,6 +25,7 @@
 #define MINI_GOLF_COURSE_INDEX 6
 #define MINI_GOLF_COURSES_PER_RECORD 3
 #define DRIVING_RANGE_COURSE_INDEX 12
+#define COURSE_INDEX_COUNT (DRIVING_RANGE_COURSE_INDEX + 1)
 /* The main courses keep their records' order */
 #define COURSE_SHY_GUY_DESERT 2
 

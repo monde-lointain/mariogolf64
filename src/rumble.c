@@ -5,6 +5,7 @@
 #include "controller.h"
 #include "hole_loader.h"
 #include "math_util.h"
+#include "menu_memory.h"
 #include "screen.h"
 #include "sound.h"
 #include "transfer_pak.h"
@@ -82,14 +83,6 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 #define TOPIC_PAGE_Y 105
 #define LISTED_TOPIC_COUNT 5
 
-typedef struct MenuMemory {
-    /* 0x00 */ u8 unk0[0x20];
-    /* 0x20 */ s8 helpTopicIndex;
-    /* 0x21 */ u8 unk21[0x46 - 0x21];
-    /* 0x46 */ u8 unk46;
-} MenuMemory;
-
-MenuMemory *func_8005AF74(void);
 s32 func_800959F8(void);
 void func_8009226C(s32);
 void func_800718C4(void);

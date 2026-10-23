@@ -635,8 +635,9 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x15F250, asm]
-      - [0x161870, data]
+      - [0x15F250, c, ovl_11/course_select]
+      - [0x161870, .data, ovl_11/course_select]
+      - [0x161940, .rodata, ovl_11/course_select]
       - { start: 0x1619A0, type: bss, vram: 0x80243F50 }
 
   - name: ovl_12
