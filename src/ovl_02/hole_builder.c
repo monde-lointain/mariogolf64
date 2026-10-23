@@ -139,12 +139,13 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EB98_ovl_02);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EDD8_ovl_02);
 
 /*
- * The paint logic of the mini-golf course. It returns a cell's colour in
- * the upper half and its painted terrain code in the lower: greens are
- * striped and edged, TERRAIN_CODE_UNK3 is mottled with random colours, and
- * anything other than out of bounds is painted white as out of bounds.
+ * The paint logic of the first course of each mini-golf set. It returns a
+ * cell's colour in the upper half and its painted terrain code in the
+ * lower: greens are striped and edged, TERRAIN_CODE_UNK3 is mottled with
+ * random colours, and anything other than out of bounds is painted white as
+ * out of bounds.
  */
-s32 PaintMiniGolfTerrain(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
     u32 color;
     s32 paintedCode;
     s32 isOtherNearest;
@@ -188,7 +189,7 @@ s32 PaintMiniGolfTerrain(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, 
 
 /*
  * The paint logic of the second course of each mini-golf set: like
- * PaintMiniGolfTerrain with other colours, except that greens are painted as
+ * PaintFirstMiniGolfCourse with other colours, except that greens are painted as
  * fairway
  */
 s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
@@ -235,7 +236,7 @@ s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s3
 
 /*
  * The paint logic of the third course of each mini-golf set: like
- * PaintMiniGolfTerrain with other colours, except that greens are painted as
+ * PaintFirstMiniGolfCourse with other colours, except that greens are painted as
  * cart way and other terrain is painted red
  */
 s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
