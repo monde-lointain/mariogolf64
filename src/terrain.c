@@ -17,11 +17,6 @@
 #include "variables.h"
 #include "work_area.h"
 
-typedef struct Unk8003AE50 {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4[5];
-} Unk8003AE50; /* size = 0x18 */
-
 /* The debug scene menu lists SCENE_MENU_LENGTH scenes from text row SCENE_MENU_TOP_ROW */
 #define SCENE_MENU_LENGTH 16
 #define SCENE_MENU_TOP_ROW 5
@@ -109,7 +104,6 @@ void func_80406818(void);
 void func_80406C3C(void);
 
 void func_802504E8(s32 courseRecordIndex, s32 holeRecordIndex);
-s32 func_8003AE50(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, Unk8003AE50 *hit, f32 *fraction);
 s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
 s32 GetSurface(s32 x, s32 z);
 Vtx *GetGridVertex(u32 column, u32 row);
@@ -288,7 +282,7 @@ void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range) {
 s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     s8 surfaces[4];
     f32 weights[4];
-    Unk8003AE50 hit;
+    PlaneTriangle hit;
     f32 fraction;
     s32 shiftedX;
     s32 shiftedZ;
@@ -308,7 +302,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     if ((u32)(shiftedX - 0x3C00) > 0xF87FF || (u32)(shiftedZ - 0x3C00) > 0xF87FF) {
         return SURFACE_OUT_OF_COURSE;
     }
-    if (func_8003AE50(shiftedX, -MINI_GOLF_WATER_PROBE_REACH, shiftedZ, shiftedX, MINI_GOLF_WATER_PROBE_REACH,
+    if (FindHoleTriangleHit(shiftedX, -MINI_GOLF_WATER_PROBE_REACH, shiftedZ, shiftedX, MINI_GOLF_WATER_PROBE_REACH,
                       shiftedZ, &hit, &fraction)) {
         waterBias = WATER_BIAS;
         if (lowersWaterLevel) {
@@ -321,7 +315,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
                     (s32)(WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias));
             PrintDebugText(text, 10, 11);
         }
-        if (hit.unk0 == 0) {
+        if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
             /* Reuses i as the water height to match */
             i = WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
             if (i < GetTerrainHeight(x, z)) {
@@ -415,7 +409,7 @@ f32 ConvertToFloat(s32 value) {
 s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     s8 surfaces[4];
     f32 weights[4];
-    Unk8003AE50 hit;
+    PlaneTriangle hit;
     f32 fraction;
     s32 waterBias;
     s32 i;
@@ -441,7 +435,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     if ((u32)(z - 0x3C00) > 0x7F87FF) {
         return SURFACE_OUT_OF_COURSE;
     }
-    if (func_8003AE50(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+    if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
         char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as the original */
 
         waterBias = WATER_BIAS;
@@ -1688,12 +1682,12 @@ s32 GetGroundHeight(s32 x, s32 z) {
 
 /* Returns the lower of the ground's height and the water's */
 s32 GetGroundOrWaterHeight(s32 x, s32 z) {
-    Unk8003AE50 hit;
+    PlaneTriangle hit;
     f32 fraction;
     s32 height = GetTerrainHeight(x, z);
     s32 waterHeight;
 
-    if (func_8003AE50(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
+    if (FindHoleTriangleHit(x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
         char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as the original */
 
         waterHeight = WATER_PROBE_HEIGHT(fraction, WATER_PROBE_REACH);

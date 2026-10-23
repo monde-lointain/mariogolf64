@@ -96,6 +96,13 @@ typedef struct TrianglePlane {
 
 /* Returns 0, or -1 for a triangle without area, whose plane is then level */
 s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
+/*
+ * Finds the nearest hole triangle that a path hits. It sets the triangle,
+ * whose unk0 then holds the HOLE_TRIANGLE_KIND_*, and the fraction along
+ * the path, and returns whether one is hit.
+ */
+s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
+                        f32 *fraction);
 /* Sets the fog factor and fog color */
 void func_800625FC(Gfx **displayListHead);
 

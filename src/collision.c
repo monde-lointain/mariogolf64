@@ -54,6 +54,18 @@
 #define PIN_HIT_FLAGSTICK 1
 #define PIN_HIT_FLAG 2
 
+/* Course units in a whole unit */
+#define WHOLE_UNIT_SIZE (1 << COURSE_UNIT_SHIFT)
+/* FindHoleTriangleHit's paths that rise by more than this many course units hit nothing */
+#define PATH_MOST_RISE 153.6f
+/* A path that ends this near a triangle's plane, in course units, touches it */
+#define PLANE_TOUCH_DISTANCE 15.36f
+#define NO_HOLE_TRIANGLE -1
+/* Which sides of a triangle's edge a point is on, seen from above */
+#define EDGE_SIDE_POSITIVE 1
+#define EDGE_SIDE_NEGATIVE 2
+#define EDGE_SIDE_ON (EDGE_SIDE_POSITIVE | EDGE_SIDE_NEGATIVE)
+
 /* FindRingHit's use of a ring's corners */
 #define RING_CENTER 0
 #define RING_FACING 1
@@ -61,14 +73,14 @@
 /* A ring's hit radius in units for each unit of its scale's x, which is 1024 at full size */
 #define RING_HIT_RADIUS_PER_SCALE 0.1274414f
 #define NO_RING_NUMBER -1
-/* FindRingHit's fraction when nothing is hit: past the path's end */
-#define NO_RING_HIT_FRACTION 2.0f
+/* The fraction along a path that the plane hit tests return when nothing is hit */
+#define NO_PLANE_HIT_FRACTION 2.0f
 #define COURSE_UNITS_PER_UNIT 1024.0f
 #define UNITS_PER_COURSE_UNIT (1.0f / 1024.0f)
-#define RING_DEBUG_COLUMN 2
-#define RING_DEBUG_ROW 8
-#define RING_DEBUG_CLEAR_COLUMN 25
-#define RING_DEBUG_CLEAR_ROW 3
+#define PATH_DEBUG_COLUMN 2
+#define PATH_DEBUG_ROW 8
+#define PATH_DEBUG_CLEAR_COLUMN 25
+#define PATH_DEBUG_CLEAR_ROW 3
 
 /* Which plane a triangle faces most, as GetTriangleFacing returns it */
 #define TRIANGLE_FACING_NONE -1
@@ -514,7 +526,188 @@ s32 GetTrianglePlaneCopy(PlaneTriangle *triangle, TrianglePlane *plane) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_8003AE50);
+/*
+ * Finds the nearest hole triangle, other than the rings and the shaded
+ * triangles, that a ball moving from one point to another hits. It sets
+ * a copy of the triangle's corners, holding its kind, and the fraction of
+ * the way along the path, and returns whether one is hit. Paths that rise
+ * by more than PATH_MOST_RISE, as course y points down, or that start or
+ * end off the ground hit nothing.
+ */
+#ifdef NON_MATCHING
+s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
+                        f32 *fraction) {
+    PlaneTriangle triangle;
+    TrianglePlane plane;
+    s32 edgeCrosses[TRIANGLE_CORNER_COUNT];
+    s32 lowestX;
+    s32 highestX;
+    s32 lowestY;
+    s32 highestY;
+    s32 lowestZ;
+    s32 highestZ;
+    s32 hitIndex = NO_HOLE_TRIANGLE;
+    s32 i;
+    HoleTriangle *candidate;
+    f32 nearestFraction;
+    f32 startSide;
+    f32 endSide;
+    f32 sideChange;
+    f32 hitFraction;
+    s32 hitX;
+    s32 hitZ;
+    s32 sides;
+
+    if (IsGameFlagSet(GAME_FLAG_UNK0)) {
+        PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
+        PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
+        PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
+        PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
+        PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
+        PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
+    }
+    if (endY + PATH_MOST_RISE < startY) {
+        return FALSE;
+    }
+    if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH) {
+        return FALSE;
+    }
+    if ((u32)endX >= GROUND_WIDTH || (u32)endZ >= GROUND_LENGTH) {
+        return FALSE;
+    }
+    if (startX < endX) {
+        lowestX = startX / WHOLE_UNIT_SIZE;
+        highestX = endX / WHOLE_UNIT_SIZE;
+    } else {
+        lowestX = endX / WHOLE_UNIT_SIZE;
+        highestX = startX / WHOLE_UNIT_SIZE;
+    }
+    if (startY < endY) {
+        lowestY = startY / WHOLE_UNIT_SIZE;
+        highestY = endY / WHOLE_UNIT_SIZE;
+    } else {
+        lowestY = endY / WHOLE_UNIT_SIZE;
+        highestY = startY / WHOLE_UNIT_SIZE;
+    }
+    if (startZ < endZ) {
+        lowestZ = startZ / WHOLE_UNIT_SIZE;
+        highestZ = endZ / WHOLE_UNIT_SIZE;
+    } else {
+        lowestZ = endZ / WHOLE_UNIT_SIZE;
+        highestZ = startZ / WHOLE_UNIT_SIZE;
+    }
+    nearestFraction = NO_PLANE_HIT_FRACTION;
+    for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
+        candidate = &g_WorkArea.hole.triangles[i];
+        if (candidate->kind == HOLE_TRIANGLE_KIND_RING) {
+            continue;
+        }
+        if (candidate->kind == HOLE_TRIANGLE_KIND_SHADED) {
+            continue;
+        }
+        if (highestY < candidate->bounds[AXIS_Y][0] || candidate->bounds[AXIS_Y][1] < lowestY) {
+            continue;
+        }
+        if (highestX < candidate->bounds[AXIS_X][0] || candidate->bounds[AXIS_X][1] < lowestX) {
+            continue;
+        }
+        if (highestZ < candidate->bounds[AXIS_Z][0] || candidate->bounds[AXIS_Z][1] < lowestZ) {
+            continue;
+        }
+        triangle.corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
+        triangle.corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
+        triangle.corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];
+        triangle.corners[AXIS_Y][0] = candidate->vertices[0].v.ob[AXIS_Y];
+        triangle.corners[AXIS_Y][1] = candidate->vertices[1].v.ob[AXIS_Y];
+        triangle.corners[AXIS_Y][2] = candidate->vertices[2].v.ob[AXIS_Y];
+        triangle.corners[AXIS_Z][0] = candidate->vertices[0].v.ob[AXIS_Z];
+        triangle.corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
+        triangle.corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
+        GetTrianglePlane(&triangle, &plane);
+        startSide = plane.normal[AXIS_X] * startX + plane.normal[AXIS_Y] * startY + plane.normal[AXIS_Z] * startZ +
+                    plane.distance * COURSE_UNITS_PER_UNIT;
+        endSide = plane.normal[AXIS_X] * endX + plane.normal[AXIS_Y] * endY + plane.normal[AXIS_Z] * endZ +
+                  plane.distance * COURSE_UNITS_PER_UNIT;
+        if (fabsf(endSide) < PLANE_TOUCH_DISTANCE || ((startSide > 0.0f) & (endSide < 0.0f)) ||
+            ((startSide < 0.0f) & (endSide > 0.0f))) {
+            sideChange = startSide - endSide;
+            if ((s32)sideChange != 0) {
+                hitFraction = fabsf(startSide) / fabsf(sideChange);
+            } else {
+                hitFraction = 0.0f;
+            }
+            if (hitFraction < nearestFraction) {
+                hitZ = (endZ - startZ) * hitFraction + startZ;
+                hitX = (endX - startX) * hitFraction + startX;
+                /*
+                 * Each cross product tells which side of an edge the hit is on,
+                 * seen from above. The third repeats the first edge, so the edge
+                 * from the third corner back to the first is never tested.
+                 */
+                edgeCrosses[0] =
+                    (triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
+                        (hitZ - (triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT)) -
+                    (triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
+                        (hitX - (triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT));
+                if (edgeCrosses[0] < 0) {
+                    sides = EDGE_SIDE_NEGATIVE;
+                } else {
+                    sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
+                }
+                edgeCrosses[1] =
+                    (triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
+                        (hitZ - (triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT)) -
+                    (triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][1]) *
+                        (hitX - (triangle.corners[AXIS_X][1] << COURSE_UNIT_SHIFT));
+                if (edgeCrosses[1] < 0) {
+                    sides &= EDGE_SIDE_NEGATIVE;
+                } else if (edgeCrosses[1] == 0) {
+                    sides &= EDGE_SIDE_ON;
+                } else {
+                    sides &= EDGE_SIDE_POSITIVE;
+                }
+                if (sides != 0) {
+                    edgeCrosses[2] =
+                        (triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
+                            (hitZ - (triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT)) -
+                        (triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0]) *
+                            (hitX - (triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT));
+                    if (edgeCrosses[2] < 0) {
+                        sides &= EDGE_SIDE_NEGATIVE;
+                    } else if (edgeCrosses[2] == 0) {
+                        sides &= EDGE_SIDE_ON;
+                    } else {
+                        sides &= EDGE_SIDE_POSITIVE;
+                    }
+                    if (sides != 0) {
+                        nearestFraction = hitFraction;
+                        hitIndex = i;
+                    }
+                }
+            }
+        }
+    }
+    if (hitIndex >= 0) {
+        hit->corners[AXIS_X][0] = g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_X];
+        hit->corners[AXIS_X][1] = g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_X];
+        hit->corners[AXIS_X][2] = g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_X];
+        hit->corners[AXIS_Y][0] = g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_Y];
+        hit->corners[AXIS_Y][1] = g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_Y];
+        hit->corners[AXIS_Y][2] = g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_Y];
+        hit->corners[AXIS_Z][0] = g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_Z];
+        hit->corners[AXIS_Z][1] = g_WorkArea.hole.triangles[hitIndex].vertices[1].v.ob[AXIS_Z];
+        hit->corners[AXIS_Z][2] = g_WorkArea.hole.triangles[hitIndex].vertices[2].v.ob[AXIS_Z];
+        hit->unk0 = g_WorkArea.hole.triangles[hitIndex].kind;
+        *fraction = nearestFraction;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/collision", func_8003B584);
 
@@ -543,13 +736,13 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
     s32 unused[4];
 
     if (IsGameFlagSet(GAME_FLAG_UNK0)) {
-        PrintDebugPaddedHex(startX, RING_DEBUG_COLUMN, RING_DEBUG_ROW);
-        PrintDebugPaddedHex(startY, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 1);
-        PrintDebugPaddedHex(startZ, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 2);
-        PrintDebugPaddedHex(endX, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 3);
-        PrintDebugPaddedHex(endY, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 4);
-        PrintDebugPaddedHex(endZ, RING_DEBUG_COLUMN, RING_DEBUG_ROW + 5);
-        PrintDebugText("          ", RING_DEBUG_CLEAR_COLUMN, RING_DEBUG_CLEAR_ROW);
+        PrintDebugPaddedHex(startX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW);
+        PrintDebugPaddedHex(startY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 1);
+        PrintDebugPaddedHex(startZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 2);
+        PrintDebugPaddedHex(endX, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 3);
+        PrintDebugPaddedHex(endY, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 4);
+        PrintDebugPaddedHex(endZ, PATH_DEBUG_COLUMN, PATH_DEBUG_ROW + 5);
+        PrintDebugText("          ", PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
     }
     if (startX < 0 || startX >= GROUND_WIDTH || startZ < 0 || startZ >= GROUND_LENGTH) {
         return -1;
@@ -558,7 +751,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ
         return -1;
     }
     ringNumber = 0;
-    nearestFraction = NO_RING_HIT_FRACTION;
+    nearestFraction = NO_PLANE_HIT_FRACTION;
     for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
         triangle = &g_WorkArea.hole.triangles[i];
         if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
