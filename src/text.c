@@ -30,6 +30,12 @@ typedef struct MessageTable {
  */
 #define TEXT_ASSET_BANDED_GRADIENT 0x4B8
 #define TEXT_ASSET_FADING_GRADIENT 0x4B9
+#define GRADIENT_WIDTH 16
+#define GRADIENT_HEIGHT 12
+/* The gradient repeats every 16 rows */
+#define GRADIENT_HEIGHT_MASK 4
+/* Where in texture memory the gradient goes, past the glyphs */
+#define GRADIENT_TMEM_ADDRESS 0x100
 /*
  * A glyph file's header holds the glyph count at 2 and each glyph's size
  * at 4; a message file's holds the file's size at 0. Both are big-endian.
@@ -409,7 +415,44 @@ INCLUDE_ASM("asm/nonmatchings/text", func_80071CE4);
 
 INCLUDE_ASM("asm/nonmatchings/text", func_80072A08);
 
-INCLUDE_ASM("asm/nonmatchings/text", SetUpGradientTextDrawing);
+/*
+ * Sets up the RDP to draw text shaded between the primitive colour, where
+ * the gradient is dark, and the environment colour, where it is bright.
+ * The glyphs' alpha comes from the first texel and the gradient, chosen by
+ * the low bit of gradient, is loaded as the second.
+ */
+void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gSPLoadGeometryMode(gfx++, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL1, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, COMBINED, 0, 0, 0,
+                      COMBINED);
+    gDPSetEnvColor(gfx++, 128, 128, 255, 255);
+    gDPSetBlendColor(gfx++, 0, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPLoadMultiBlock_4b(gfx++, ((u32)g_TextGradientImages[gradient & 1] + IMAGE_HEADER_SIZE) & ~7,
+                         GRADIENT_TMEM_ADDRESS, 1, G_IM_FMT_I, GRADIENT_WIDTH, GRADIENT_HEIGHT, 0,
+                         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, GRADIENT_HEIGHT_MASK,
+                         G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Measures a string of character codes, at the font size. Only the large
