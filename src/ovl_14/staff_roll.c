@@ -50,9 +50,20 @@
 /* The staff text's first bytes hold its size, big-endian */
 #define STAFF_TEXT_HEADER_SIZE 8
 #define STAFF_GLYPH_WIDTH 12
-/* MeasureStaffLine gives these characters no width */
-#define FIRST_UNMEASURED_CHARACTER 0xDE
-#define UNMEASURED_CHARACTER_COUNT 2
+#define STAFF_GLYPH_HEIGHT 12
+/* The staff font is a 4-bit intensity image of 12 by 12 glyphs, 16 to a row */
+#define STAFF_FONT_WIDTH (STAFF_FONT_COLUMN_COUNT * STAFF_GLYPH_WIDTH)
+#define STAFF_FONT_COLUMN_COUNT 16
+/* Only characters below this are drawn */
+#define STAFF_CHARACTER_LIMIT 0x100
+/*
+ * These characters are drawn half a glyph to the left and 4 pixels up,
+ * over the character before, and have no width
+ */
+#define FIRST_OVERLAID_CHARACTER 0xDE
+#define OVERLAID_CHARACTER_COUNT 2
+#define OVERLAID_CHARACTER_SHIFT_X (STAFF_GLYPH_WIDTH / 2)
+#define OVERLAID_CHARACTER_SHIFT_Y 4
 
 #define STAFF_ROLL_HOLE_INDEX 6
 #define STAFF_ROLL_WIND_STEP 6000
@@ -176,7 +187,8 @@ s32 D_801F89CC_ovl_14 = 0;
 s32 D_801F89D0_ovl_14 = 0;
 f32 D_801F89D4_ovl_14 = 0.0f;
 s32 D_801F89D8_ovl_14[2] = { 0x100000, 0 };
-u8 D_801F89E0_ovl_14[256] = {
+/* How far right each character moves the next one */
+u8 sStaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 6, 12, 6, 12,
     8, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
@@ -586,7 +598,7 @@ void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
     length = text->lines[lineIndex].length;
     for (; index != length; index++) {
         character = ((u16 *)text)[start + index];
-        if (character < 0x100 && (u32)(character - FIRST_UNMEASURED_CHARACTER) >= UNMEASURED_CHARACTER_COUNT) {
+        if (character < STAFF_CHARACTER_LIMIT && (u32)(character - FIRST_OVERLAID_CHARACTER) >= OVERLAID_CHARACTER_COUNT) {
             lineWidth += STAFF_GLYPH_WIDTH;
         }
     }
@@ -597,7 +609,56 @@ void MeasureStaffLine(s32 lineIndex, s32 *width, s32 *height) {
 INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", MeasureStaffLine);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", func_801F80B8_ovl_14);
+/* Draws a line of the staff text from left and top, a glyph per character */
+void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex) {
+    Gfx *gfx = *displayListHead;
+    s32 start = (sStaffText->lines + lineIndex)->start;
+    s32 length = (sStaffText->lines + lineIndex)->length;
+    /* In u16s, past the size, the line count and the lines */
+    s32 firstCharacter = sStaffText->lineCount * 2 + 2;
+    s32 width;  /* Unused; it is there to match */
+    s32 height; /* Unused; it is there to match */
+    s32 index;
+    s32 character;
+    s32 row;
+    s32 column;
+    s32 glyphLeft;
+    s32 glyphTop;
+
+    MeasureStaffLine(lineIndex, &width, &height);
+    gDPPipeSync(gfx++);
+    for (index = 0; index != length; index++) {
+        character = ((u16 *)sStaffText)[start + index + firstCharacter];
+        if (character < STAFF_CHARACTER_LIMIT) {
+            row = character / STAFF_FONT_COLUMN_COUNT;
+            column = character - row * STAFF_FONT_COLUMN_COUNT;
+            glyphLeft = column * STAFF_GLYPH_WIDTH;
+            glyphTop = row * STAFF_GLYPH_HEIGHT;
+            gDPPipeSync(gfx++);
+            gDPLoadTextureTile_4b(gfx++, (u32)(sStaffFont + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, STAFF_FONT_WIDTH, 0,
+                                  glyphLeft, glyphTop, glyphLeft + STAFF_GLYPH_WIDTH - 1,
+                                  glyphTop + STAFF_GLYPH_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            if ((u32)(character - FIRST_OVERLAID_CHARACTER) < OVERLAID_CHARACTER_COUNT) {
+                gSPTextureRectangle(gfx++, (left - OVERLAID_CHARACTER_SHIFT_X) << 2,
+                                    (top - OVERLAID_CHARACTER_SHIFT_Y) << 2,
+                                    (left + OVERLAID_CHARACTER_SHIFT_X) << 2,
+                                    (top - OVERLAID_CHARACTER_SHIFT_Y + STAFF_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+                                    (glyphLeft) << 5, (glyphTop) << 5,
+                                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            } else {
+                gSPTextureRectangle(gfx++, left << 2, top << 2, (left + STAFF_GLYPH_WIDTH) << 2,
+                                    (top + STAFF_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+                                    (glyphLeft) << 5, (glyphTop) << 5,
+                                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                left += sStaffGlyphAdvances[character];
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Draws the painting in strips, scrolled down it by a row a frame from
