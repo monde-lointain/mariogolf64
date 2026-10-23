@@ -44,21 +44,17 @@ void ClearHolePoints(void);
 void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
 
-/*
- * Copies size bytes from the file being read to destination. It is a
- * macro, as an inline function compiles differently from the original.
- */
-#define ReadFileBytes(destination, size)                                                                              \
-    do {                                                                                                              \
-        u8 *source = sReadCursor;                                                                                     \
-        u8 *end = source + (size);                                                                                    \
-        u8 *byte = (u8 *)(destination);                                                                               \
-                                                                                                                      \
-        while (source != end) {                                                                                       \
-            *byte++ = *source++;                                                                                      \
-        }                                                                                                             \
-        sReadCursor = end;                                                                                            \
-    } while (0)
+/* Copies bytes from the read cursor and advances it past them */
+static inline void ReadFileBytes(void *destination, s32 size) {
+    u8 *byte = destination;
+    u8 *source = sReadCursor;
+    u8 *end = sReadCursor + size;
+
+    while (source != end) {
+        *byte++ = *source++;
+    }
+    sReadCursor = end;
+}
 
 /* Seeds the random numbers that paint logic draws */
 void SetPaintSeed(u32 seed) {
