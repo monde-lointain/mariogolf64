@@ -151,6 +151,16 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
 }
 
 /*
+ * Whether the hole is halved for the side that the standing says is
+ * dormie: it is when that side's unk26 is set and its net score is no
+ * more than one over the other side's. It is a macro, as an inline
+ * function compiles differently from the original.
+ */
+#define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex)                                          \
+    (((standing) == (dormieStanding)) && (g_Players[dormieIndex].unk26 != 0) &&                                       \
+     !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
+
+/*
  * Scores a player whose unk26 is 0 as if they need at least one more
  * stroke. When a dormie lead means a halve wins the match, the hole counts
  * as halved once the trailing player can't win it.
@@ -175,12 +185,10 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
             return MATCH_SIDE_OPPONENT;
         }
         standing = GetMatchStanding(playerIndex, opponentIndex);
-        if (standing == MATCH_STANDING_PLAYER_DORMIE && g_Players[playerIndex].unk26 != 0
-            && !(GetNetScore(playerIndex) > GetNetScore(opponentIndex) + 1)) {
+        if (IsHalvedForDormie(standing, MATCH_STANDING_PLAYER_DORMIE, playerIndex, opponentIndex)) {
             return MATCH_HOLE_HALVED;
         }
-        if (standing == MATCH_STANDING_OPPONENT_DORMIE && g_Players[opponentIndex].unk26 != 0
-            && !(GetNetScore(opponentIndex) > GetNetScore(playerIndex) + 1)) {
+        if (IsHalvedForDormie(standing, MATCH_STANDING_OPPONENT_DORMIE, opponentIndex, playerIndex)) {
             return MATCH_HOLE_HALVED;
         }
     }
