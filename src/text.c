@@ -75,6 +75,8 @@ typedef struct MessageTable {
 #define SHADOWED_GLYPH_SIZE 8
 #define SHADOWED_GLYPHS_PER_ROW 31
 #define SHADOWED_GLYPH_FIRST ' '
+#define SHADOWED_FONT_IMAGE_WIDTH 256
+#define SHADOWED_FONT_IMAGE_HEIGHT 32
 /* Its last row has narrower glyphs, from the apostrophe on */
 #define NARROW_GLYPH_ROW 3
 #define NARROW_GLYPH_FIRST '\''
@@ -840,7 +842,38 @@ void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, char *text) {
 void DrawTextStub(Gfx **displayListHead, s16 x, s16 y, char *text) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/text", BeginShadowedText);
+/*
+ * Sets up the RDP to draw shadowed text, modulating the font's intensity
+ * by the primitive colour, and loads the shadowed font image
+ */
+void BeginShadowedText(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gSPLoadGeometryMode(gfx++, 0);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, TextRenderMode(1), TextRenderMode(2));
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)g_ShadowedFontImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA,
+                           SHADOWED_FONT_IMAGE_WIDTH, SHADOWED_FONT_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /* Sets the colour, fully opaque, of the text drawn after it */
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue) {
