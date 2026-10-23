@@ -1,0 +1,338 @@
+#include "billboard.h"
+#include "common.h"
+#include "functions.h"
+#include "hole_loader.h"
+#include "save.h"
+#include "terrain.h"
+#include "work_area.h"
+
+/* A ground tile's vertices start at its column and row shifted by this */
+#define TILE_ORIGIN_SHIFT 9
+/* Texture coordinates are S10.5 fixed point */
+#define TEXTURE_COORD_FRACTION_BITS 5
+/* Where texture coordinates start at a tile's origin */
+#define TILE_TEXTURE_ORIGIN 0x100
+/* How much mini golf vertices are scaled along x and z for their textures */
+#define MINI_GOLF_TEXTURE_SCALE_X 4
+#define MINI_GOLF_TEXTURE_SCALE_Z 8
+/* The size cleared billboards are given */
+#define CLEARED_BILLBOARD_WIDTH 64
+#define CLEARED_BILLBOARD_HEIGHT 256
+/* Where the build buffer starts */
+#define BUILD_BUFFER_START ((u8 *)0x80315000)
+
+extern u32 sPaintSeed;
+extern s32 sIsCodeMapCleaned;
+extern u8 *sReadCursor;
+extern u8 *sBuildBuffer;
+extern u8 *sBuildCursor;
+extern s32 g_TerrainCodeBlockCount;
+extern char sBackupCodeMapPath[];
+extern char sToolCodeMapPath[];
+extern char sShadingProgressMessage[];
+extern char sShadingDoneMessage[];
+
+void LoadCodeMap(char *path);
+void EncodeCodeMap(void);
+void CleanCodeMap(void);
+void PaintGroundTiles(void);
+void ClearHolePoints(void);
+void ShadeGroundTiles(void);
+void CastBillboardShadows(void);
+
+/*
+ * Copies size bytes from the file being read to destination. It is a
+ * macro, as an inline function compiles differently from the original.
+ */
+#define ReadFileBytes(destination, size)                                                                              \
+    do {                                                                                                              \
+        u8 *source = sReadCursor;                                                                                     \
+        u8 *end = source + (size);                                                                                    \
+        u8 *byte = (u8 *)(destination);                                                                               \
+                                                                                                                      \
+        while (source != end) {                                                                                       \
+            *byte++ = *source++;                                                                                      \
+        }                                                                                                             \
+        sReadCursor = end;                                                                                            \
+    } while (0)
+
+/* Seeds the random numbers that paint logic draws */
+void SetPaintSeed(u32 seed) {
+    sPaintSeed = seed;
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024D80C_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024DA78_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E02C_ovl_02);
+
+/* Empties every terrain code cell and frees the packed code blocks */
+#ifdef NON_MATCHING
+void ResetTerrainCodeCells(void) {
+    s32 row;
+    s32 column;
+
+    g_TerrainCodeBlockCount = 0;
+    for (row = 0; row < TERRAIN_CODE_CELL_ROW_COUNT; row++) {
+        for (column = TERRAIN_CODE_CELL_COLUMN_COUNT - 1; column >= 0; column--) {
+            g_TerrainCodeCells[row][column] = -1;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
+#endif
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E2D4_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E514_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E71C_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E958_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EB98_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EDD8_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F014_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F118_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F21C_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F308_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", LoadCodeMap);
+
+/* Repaints the ground tiles from the code map saved before the last clean-up */
+void LoadBackupCodeMap(void) {
+    LoadCodeMap(sBackupCodeMapPath);
+}
+
+/* Repaints the ground tiles from the tool's code map */
+void LoadToolCodeMap(void) {
+    LoadCodeMap(sToolCodeMapPath);
+    sIsCodeMapCleaned = FALSE;
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CleanCodeMap);
+
+/* Does nothing */
+void FinishCodeMapCleanup(void) {
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
+
+/*
+ * Cleans up the terrain code map and repaints the ground tiles from it,
+ * or, if that was done last, restores the code map from before
+ */
+void ToggleCodeMapCleanup(void) {
+    /* Unused; it is there to match */
+    u8 unused[0x640];
+
+    if (!sIsCodeMapCleaned) {
+        EncodeCodeMap();
+        sIsCodeMapCleaned = TRUE;
+        CleanCodeMap();
+        PaintGroundTiles();
+        FinishCodeMapCleanup();
+    } else {
+        LoadBackupCodeMap();
+        sIsCodeMapCleaned = FALSE;
+    }
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024FF74_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250194_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250474_ovl_02);
+
+/* Does nothing; the course and hole are not read */
+void FinishHolePoints(s32 course, s32 hole) {
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802504E8_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802509BC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250C54_ovl_02);
+
+/* Clears everything a hole is built into */
+void ClearHoleBuild(void) {
+    ClearHolePoints();
+    ClearTileBorders();
+    InitTerrainTextures();
+    ClearBillboards();
+    ClearHoleTriangles();
+    ResetBuildBuffer();
+}
+
+/* Clears the hole's points and, unless g_GameState.unk30 is set, its cup and tee */
+void ClearHolePoints(void) {
+    s32 i;
+
+    if (!g_GameState.unk30) {
+        D_800BA9D8.cupPosition[AXIS_X] = 0;
+        g_CupPositionY = 0;
+        g_CupPositionZ = 0;
+        D_800BA9D8.teePosition[AXIS_X] = 0;
+        D_800BA9D8.teePosition[AXIS_Y] = 0;
+        D_800BA9D8.teePosition[AXIS_Z] = 0;
+    }
+    for (i = 0; i < CUP_POSITION_COUNT; i++) {
+        g_HolePoints.cupPositions[i][AXIS_X] = 0;
+        g_HolePoints.cupPositions[i][AXIS_Y] = 0;
+        g_HolePoints.cupPositions[i][AXIS_Z] = 0;
+        g_HolePoints.unk30[i][AXIS_X] = 0;
+        g_HolePoints.unk30[i][AXIS_Y] = 0;
+        g_HolePoints.unk30[i][AXIS_Z] = 0;
+    }
+    for (i = 0; i < ARRAY_COUNT(g_HolePoints.unk60); i++) {
+        g_HolePoints.unk60[i][AXIS_X] = 0;
+        g_HolePoints.unk60[i][AXIS_Y] = 0;
+        g_HolePoints.unk60[i][AXIS_Z] = 0;
+        /* The dereference is there to match */
+        *g_HolePoints.unkC0[i] = 0;
+        g_HolePoints.unkC0[i][AXIS_Z] = 0;
+    }
+}
+
+/* Points the build buffer and its cursor at the start of the file area */
+void ResetBuildBuffer(void) {
+    sBuildCursor = sBuildBuffer = sBuildCursor = BUILD_BUFFER_START;
+}
+
+/* Marks every billboard unused */
+void ClearBillboards(void) {
+    s32 i;
+
+    for (i = 0; i < BILLBOARD_COUNT; i++) {
+        g_Billboards[i].x = 0;
+        g_Billboards[i].y = 0;
+        g_Billboards[i].z = 0;
+        g_Billboards[i].textureIndex = -1;
+        g_Billboards[i].unk8 = 0;
+        g_Billboards[i].isNearCourseEdge = TRUE;
+        g_Billboards[i].width = CLEARED_BILLBOARD_WIDTH;
+        g_Billboards[i].height = CLEARED_BILLBOARD_HEIGHT;
+    }
+}
+
+/* Clears the hole's triangles */
+void ClearHoleTriangles(void) {
+    bzero(g_WorkArea.hole.triangles, sizeof(g_WorkArea.hole.triangles));
+}
+
+/* Clears each ground tile's last texel and unk992 */
+void ClearTileBorders(void) {
+    s32 i;
+
+    for (i = 0; i < GROUND_TILE_COUNT; i++) {
+        g_WorkArea.hole.tiles[i].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
+        g_WorkArea.hole.tiles[i].unk992 = 0;
+    }
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250FEC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802510D4_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251288_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802513B8_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251610_ovl_02);
+
+/* Reads each ground tile's unk992 from the file */
+void ReadTileUnk992s(void) {
+    s32 i;
+
+    for (i = 0; i < GROUND_TILE_COUNT; i++) {
+        ReadFileBytes(&g_WorkArea.hole.tiles[i].unk992, sizeof(u16));
+    }
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802517C4_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802518F0_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251A28_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251B6C_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251CB4_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251DFC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802527FC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8025283C_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
+
+/* Shades the ground tiles, then darkens them under the billboards' shadows */
+void ShadeGround(void) {
+    ShadeGroundTiles();
+    osSyncPrintf(sShadingProgressMessage);
+    CastBillboardShadows();
+    osSyncPrintf(sShadingDoneMessage);
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80253270_ovl_02);
+
+/*
+ * Gives the vertices from start up to end texture coordinates on the
+ * mini golf ground tile at column and row
+ */
+void SetMiniGolfTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
+    Vtx_t *vertex;
+    s32 coord;
+
+    for (vertex = start; vertex < end; vertex++) {
+        coord = ((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X - (column << TILE_ORIGIN_SHIFT))
+                << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+        vertex->tc[0] = coord;
+        /* The second coordinate's two steps are there to match */
+        coord = vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z - (row << TILE_ORIGIN_SHIFT);
+        coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+        vertex->tc[1] = coord;
+    }
+}
+
+/*
+ * Gives the vertices from start up to end texture coordinates on the
+ * ground tile at column and row
+ */
+void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
+    Vtx_t *vertex;
+    s32 coord;
+
+    if (g_GameState.isMiniGolf) {
+        SetMiniGolfTileTextureCoords(column, row, start, end);
+        return;
+    }
+    for (vertex = start; vertex < end; vertex++) {
+        coord = ((vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT))
+                << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+        vertex->tc[0] = coord;
+        /* The second coordinate's two steps are there to match */
+        coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
+        coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
+        vertex->tc[1] = coord;
+    }
+}
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802536FC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802537EC_ovl_02);
+
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802541E8_ovl_02);
+

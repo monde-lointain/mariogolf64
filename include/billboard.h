@@ -17,7 +17,8 @@ typedef struct Billboard {
     /* 0x4 */ s16 z;
     /* 0x6 */ s8 textureIndex; /* Negative when the billboard is unused */
     /* 0x7 */ u8 shapeIndex;
-    /* 0x8 */ s16 unk8;
+    /* 0x8 */ s8 unk8;
+    /* 0x9 */ u8 unk9;
     /* 0xA */ u16 isNearCourseEdge;
     /* 0xC */ u16 width;
     /* 0xE */ u16 height;
