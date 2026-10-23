@@ -70,9 +70,6 @@ typedef struct PressStartText {
     /* 0x8 */ u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
 } PressStartText; /* size = 0x2E0 */
 
-/* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
-#define TEXEL_STEP_ONE (1 << 10)
-
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 
 /* ButtonCode.progress once the code has been entered, after which it is ignored */

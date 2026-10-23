@@ -10,6 +10,9 @@
 /* The border around the main camera's scissor rectangle, in pixels */
 #define SCREEN_BORDER 8
 
+/* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
+#define TEXEL_STEP_ONE (1 << 10)
+
 /* SetScreenEffect's effects */
 #define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
 #define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */

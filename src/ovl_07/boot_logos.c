@@ -47,9 +47,6 @@
 /* The count given to func_8006B56C; the stage ends once func_8006B55C sees it below 2 */
 #define LEAVING_COUNTDOWN 16
 
-/* A texture rectangle step of one texel per pixel, in 5.10 fixed point */
-#define TEXEL_STEP_ONE (1 << 10)
-
 /* Given this image, func_800719A0 stores it in the slot and sets up nothing else */
 #define NO_IMAGE (-1)
 
