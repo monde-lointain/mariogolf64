@@ -240,7 +240,7 @@ typedef struct CharacterSlot {
 /* CharacterSlot.lighting values: the lights the slot's character is drawn with */
 #define CHARACTER_LIGHTING_FIXED 0 /* Lights that don't follow the scene's light direction */
 #define CHARACTER_LIGHTING_SCENE 1 /* Lit along the scene's light direction, in the weather's colors */
-#define CHARACTER_LIGHTING_SCENE_THIRD 2 /* As above, with func_80095C10's third light when it adds one */
+#define CHARACTER_LIGHTING_SCENE_THIRD 2 /* As above, with AddReactionLight's third light when it adds one */
 #define CHARACTER_LIGHTING_BLACK 3
 
 extern CharacterSlot g_CharacterSlots[CHARACTER_SLOT_COUNT];

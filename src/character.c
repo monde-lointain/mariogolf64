@@ -1578,7 +1578,7 @@ void DrawCharacter(u32 slotIndex) {
                     break;
                 case CHARACTER_LIGHTING_SCENE_THIRD:
                     lights = g_HoleConditions.isRaining ? sRainLights : sDryLights;
-                    if (!func_80095C10(&gfx, &lights[g_DrawBufferIndex])) {
+                    if (!AddReactionLight(&gfx, &lights[g_DrawBufferIndex])) {
                         gSPSetLights2(gfx++, lights[g_DrawBufferIndex]);
                         SAVE_LIGHTS(lights[g_DrawBufferIndex]);
                     }
@@ -1645,14 +1645,14 @@ void PlaceCharacterForShot(u32 slotIndex) {
 }
 
 /*
- * Places the character in the slot with func_800989EC, then points the first
+ * Places the character in the slot with PlaceAtReactionSpot, then points the first
  * camera at it from VIEW_DISTANCE away along its facing
  */
 void PlaceAndViewCharacter(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        func_800989EC(slot->position, slot->rotation, slot->scale);
+        PlaceAtReactionSpot(slot->position, slot->rotation, slot->scale);
         g_Cameras[0].view.lookAt[AXIS_X] = slot->position[AXIS_X] * COURSE_TO_WORLD_SCALE;
         g_Cameras[0].view.lookAt[AXIS_Y] = (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
         g_Cameras[0].view.lookAt[AXIS_Z] = slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;

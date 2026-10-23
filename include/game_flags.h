@@ -81,6 +81,9 @@
 #define GAME_FLAG_UNK7C 0x7C
 #define GAME_FLAG_UNK7D 0x7D
 
+/* Prints the frame number of the golfer's reaction */
+#define GAME_FLAG_SHOW_REACTION_FRAME 0x3E
+
 /* Flags that Club Slots reads, whose purpose is not yet known */
 #define GAME_FLAG_UNK32 0x32
 #define GAME_FLAG_UNK55 0x55

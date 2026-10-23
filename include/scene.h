@@ -37,6 +37,7 @@
 #define SCENE_RINGS 16
 #define SCENE_BOOT_LOGOS 27
 #define SCENE_WALLS 28
+#define SCENE_UNK30 30
 
 /* The current scene while UpdateOverlays swaps the scene's modules */
 #define SCENE_SWAPPING_MODULES 0x19
