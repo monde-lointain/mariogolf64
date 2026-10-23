@@ -258,7 +258,110 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E514_ovl_02);
+/*
+ * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
+ * painted 0xBEEF, and TERRAIN_CODE_UNK3 painted as cart way away from more of
+ * it. Neither the paint-logic table nor any code refers to it. It does not
+ * match: the original keeps the test between the two equal cart-way colours
+ * and has no stack frame.
+ */
+#ifdef NON_MATCHING
+s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 fairwayRandom;
+
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x4481;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 14) << 11) | 0x4CE;
+                } else {
+                    color = ((fairwayRandom & 3) << 11) | 0x658E;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x8615;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                /* The random value is unused */
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                color = 0xDFB7;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xCE33;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE739;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            if (nearestCode == TERRAIN_CODE_UNK3 || nearestDistance >= 2) {
+                color = 0x3E;
+                paintedCode = TERRAIN_CODE_UNK3;
+            } else {
+                /* Both colours are the same in the original */
+                if (nearestDistance == 1) {
+                    color = 0x94A5;
+                } else {
+                    color = 0x94A5;
+                }
+                paintedCode = TERRAIN_CODE_CART_WAY;
+            }
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x2587;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2F84 : 0x4680;
+                } else {
+                    color = (x & 2) ? 0x3F02 : 0x3704;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0xBEEF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x2688;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintPaleRoughCourse);
+#endif
 
 /*
  * The paint logic of Shy Guy Desert: like PaintMainCourse with other
