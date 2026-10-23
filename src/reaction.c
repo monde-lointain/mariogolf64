@@ -129,7 +129,6 @@ void FrameReaction(u32 slotIndex, CameraView *view);
 void FrameYoshiReaction(u32 slotIndex, CameraView *view);
 void FrameSherryReaction(u32 slotIndex, CameraView *view);
 void FrameKidReaction(u32 slotIndex, CameraView *view);
-void SetCharacterLighting(u32 slotIndex, s32 value);
 void func_80079358(u32 slotIndex, s32 pointId);
 void func_80078DC0(u32 slotIndex, s32 pointId);
 void func_80078FA8(u32 slotIndex, s32 pointId, f32 heading);

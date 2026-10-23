@@ -7,6 +7,7 @@
 #include "club.h"
 #include "controller.h"
 #include "course.h"
+#include "current_shot.h"
 #include "debug_text.h"
 #include "framing.h"
 #include "functions.h"
@@ -15,6 +16,8 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
+#include "pin.h"
+#include "reaction.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -141,6 +144,108 @@
 #define PUTTER_ANIMATIONS 9
 #define SWING_ANIMATION 1
 
+/*
+ * The cast's timeline; its frames count from TIMELINE_START_FRAME. Only
+ * each stage's first frames are named; the later shots and reactions
+ * keep literal frames, since names would only repeat the numbers.
+ */
+#define FIRST_SWING_FRAME 60
+#define VIEW_SHRINK_FRAME 150 /* Also the tee's second shot */
+#define TEE_REACTIONS_FRAME 300
+#define FAIRWAY_FADE_OUT_FRAME 560
+#define FAIRWAY_SHOTS_FRAME 600
+#define FAIRWAY_SWING_FRAME 650
+#define FAIRWAY_REACTIONS_FRAME 940
+#define APPROACH_FADE_OUT_FRAME 1200
+#define APPROACH_SHOTS_FRAME 1240
+#define APPROACH_SWING_FRAME 1300
+#define APPROACH_REACTIONS_FRAME 1600
+#define PUTT_FADE_OUT_FRAME 1920
+#define PUTT_SHOTS_FRAME 1960
+#define PUTT_SWING_FRAME 2000
+#define PUTT_REACTIONS_FRAME 2200
+#define FINALE_FADE_OUT_FRAME 2590
+#define FINALE_FRAME 2630 /* The last of the cast takes all four shots */
+#define LAST_FADE_OUT_FRAME 3360
+#define NEVER_FRAME 0x100000
+#define CAST_FADE_FRAMES 40
+#define LAST_FADE_FRAMES 80
+#define SHOTS_PER_STAGE 4
+#define TEE_CLUB 0
+#define FAIRWAY_CLUB 3
+#define APPROACH_CLUB 8
+/* How many frames before its ANIMATION_EVENT_UNK6 frame a swing is joined */
+#define CAST_SWING_LEAD_FRAMES 15
+#define FINAL_PUTT_LEAD_FRAMES 10
+/* Degrees between the framing yaws of a stage's shots, and between its reactors' headings */
+#define CAST_YAW_STEP 30
+/* The putts are framed from three steps to the left of straight on */
+#define PUTT_YAW_OFFSET 15
+#define DEGREES_TO_RADIANS_F ((f32)M_PI / 180)
+#define RADIANS_TO_BINARY_ANGLE 10430.378060218739
+#define GOLFER_HEADING ((f32)DEGREES_TO_RADIANS(-30))
+/* The putts are taken from this far along the x axis from the cup */
+#define NEAR_CUP_DISTANCE (150 * 1024)
+
+/* A random framing pitch, in 127ths of a degree; controller 2's stick tilts it */
+#define RANDOM_PITCH_MASK 0x7F
+#define RANDOM_PITCH_BIAS 0x20
+#define RANDOM_PITCH_SCALE 70
+#define PITCH_UNIT_TO_RADIANS ((f32)DEGREES_TO_RADIANS(1.0 / 127))
+#define PITCH_CONTROLLER 1
+#define PITCH_STICK_RATE 0.002f
+
+#define STAFF_ROLL_FIELD_OF_VIEW 65.0f
+#define CAST_FOCUS_POINT 1
+#define SHADOW_SCALE_TO_RADIUS 0.105000004f
+#define DEFAULT_FRAMED_RADIUS 15.0f
+#define CAST_EASE_RATE 0.1f
+/* Camera 0's view shrinks from the whole screen to its upper right */
+#define VIEW_SHRINK_FRAMES 30
+/* The scissor box's size before the shrink, and its changes per frame of it */
+#define FULL_VIEW_WIDTH 303.0f
+#define FULL_VIEW_HEIGHT 223.0f
+#define SHRINK_LEFT_STEP 5.0000005f
+#define SHRINK_TOP_STEP 0.5f
+#define SHRINK_WIDTH_STEP 5.3333335f
+#define SHRINK_HEIGHT_STEP 4.0f
+/* The scissor height that gives a zoom of 2 */
+#define UNIT_ZOOM_HEIGHT 224
+
+/* Sets frames to count clamped to 0 through limit; its do-while is there to match */
+#define CLAMP_FRAMES(frames, count, limit) \
+    do {                                   \
+        (frames) = (count);                \
+        if ((frames) < 0) {                \
+            (frames) = 0;                  \
+        }                                  \
+        if ((frames) > (limit)) {          \
+            (frames) = (limit);            \
+        }                                  \
+    } while (0)
+
+/*
+ * Sets a view's scissor box, viewport center and zoom for a frame of
+ * its shrink to the screen's upper right. Its do-while is there to
+ * match.
+ */
+#define SHRINK_VIEW(view, frames)                                             \
+    do {                                                                      \
+        f32 progress = (frames);                                              \
+        s32 left = progress * SHRINK_LEFT_STEP;                               \
+        s32 top = progress * SHRINK_TOP_STEP;                                 \
+        s32 height = FULL_VIEW_HEIGHT - progress * SHRINK_HEIGHT_STEP;        \
+        s32 width = FULL_VIEW_WIDTH - progress * SHRINK_WIDTH_STEP;           \
+                                                                              \
+        (view).scissorX = left;                                               \
+        (view).scissorY = top;                                                \
+        (view).scissorWidth = width;                                          \
+        (view).scissorHeight = height;                                        \
+        (view).viewportCenterX = left * 2 + width;                            \
+        (view).viewportCenterY = top * 2 + height;                            \
+        (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT);              \
+    } while (0)
+
 /* EaseStaffRollView's easedParts bits */
 #define EASE_LOOK_AT (1 << 0)
 #define EASE_EYE (1 << 1)
@@ -182,6 +287,8 @@ extern u8 *sCastBuffers[CAST_BUFFER_CAPACITY];
 extern StaffRollEasedView sStaffRollEasedView;
 extern s32 sCastOrder[CAST_MEMBER_COUNT];
 extern s32 sFadeFramesLeft;
+extern s32 sCastSlot; /* The slot of the character shown, 0 or 1 */
+extern CoursePoint sNearCupPoint;
 
 void AssignCharacterBuffers(void);
 void SetFramebufferCount(s32 count);
@@ -195,17 +302,18 @@ s32 sStaffRollFrame = 0;
 s32 sIsLeavingStaffRoll = FALSE;
 s32 sTextScrollOffset = 0;
 s32 sTopLineIndex = 0;
-s32 D_801F89B4_ovl_14 = -1;
+s32 sShownSceneColorIndex = -1;
 s32 sIsTextScrolling = TRUE;
 s32 sDebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
 s32 sFadeLength = 0;
-f32 D_801F89C4_ovl_14 = 0.0f;
-f32 D_801F89C8_ovl_14 = 0.0f;
-s32 D_801F89CC_ovl_14 = 0;
-s32 D_801F89D0_ovl_14 = 0;
-f32 D_801F89D4_ovl_14 = 0.0f;
-s32 D_801F89D8_ovl_14[2] = { 0x100000, 0 };
+f32 sCastFramingYaw = 0.0f;
+f32 sCastFramingPitch = 0.0f;
+s32 sCastIndex = 0;
+s32 sIsReactionShown = 0;
+f32 sUnreadValue = 0.0f;
+s32 sViewShrinkStartFrame = NEVER_FRAME;
+s32 sUnusedWord = 0; /* Unused */
 /* How far right each character moves the next one */
 u8 sStaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
@@ -290,7 +398,7 @@ void LoadStaffRoll(void) {
     s32 index;
     s32 textSize;
 
-    D_801F89B4_ovl_14 = 11;
+    sShownSceneColorIndex = 11;
     ShuffleCastOrder((s8)g_Players[0].unk1D);
     FreeAllCharacterSlots();
     for (index = 0; index < CAST_BUFFER_COUNT; index++) {
@@ -510,9 +618,497 @@ void BisectFramingPitch(f32 pitch, f32 yaw, f32 depthOffset) {
     GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", func_801F53F0_ovl_14);
+/*
+ * The cast's timeline, from TIMELINE_START_FRAME. In four stages, at the
+ * tee, on the fairway, on the approach and on the green, four of the cast
+ * take a shot, and then the same four react with a par, a bogey, a birdie
+ * and an eagle respectively. The last of the cast then takes all four
+ * shots. Swings are framed by the camera; reactions are framed by
+ * UpdateReaction. Camera 0's view shrinks into the screen's upper right
+ * over VIEW_SHRINK_FRAMES frames from VIEW_SHRINK_FRAME.
+ */
+void RunStaffRollTimeline(s32 frame) {
+    CoursePoint point;
+    Vec3 focus;
+    CharacterSlot *character;
+    s32 slot;
+    s32 shrink;
+    f32 radius;
+    s32 swingAnimation;
+    CameraView *view;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", func_801F544C_ovl_14);
+    void PickFramingPitch(void) {
+        sCastFramingPitch =
+            ((rand() & RANDOM_PITCH_MASK) - RANDOM_PITCH_BIAS) * RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
+    }
+
+    /* The GetAnimationEventFrame calls whose results are dropped are there to match */
+    sCastFramingPitch += g_ControllerStates[PITCH_CONTROLLER].stickY * PITCH_STICK_RATE;
+    SetCharacterLights();
+    if (frame == 0) {
+        SetGameFlag(GAME_FLAG_UNK9A);
+        StopFade();
+        sNearCupPoint[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
+        sNearCupPoint[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+        sNearCupPoint[AXIS_Y] = GetGroundHeight(sNearCupPoint[AXIS_X], sNearCupPoint[AXIS_Z]);
+        func_80078D94();
+        sViewShrinkStartFrame = NEVER_FRAME;
+        sUnreadValue = 0.0f;
+        sCastFramingPitch = 0.0f;
+        sIsReactionShown = FALSE;
+        sCastIndex = 0;
+        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
+        FreeAllCharacterSlots();
+        ResetStaffRollEase();
+        sCastSlot = 0;
+        LoadCharacter(0, sCastOrder[0], GetCastModelKind());
+        SetCharacterLighting(0, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(0, TEE_CLUB);
+        SetStanceAnimation(0, TEE_CLUB, SHOT_MODE_NORMAL);
+        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        PlaceCharacter(0, point, GOLFER_HEADING);
+        sCastSlot = 0;
+    }
+    if (frame == FIRST_SWING_FRAME) {
+        SetSwingAnimation(sCastSlot, TEE_CLUB, SHOT_MODE_NORMAL);
+        sCastIndex = 1;
+    }
+    if (frame == VIEW_SHRINK_FRAME) {
+        sViewShrinkStartFrame = frame;
+    }
+    if (frame == VIEW_SHRINK_FRAME || frame == 190 || frame == 240) {
+        PickFramingPitch();
+        sCastFramingYaw = (sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, TEE_CLUB);
+        SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
+        swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL));
+        AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                   CAST_SWING_LEAD_FRAMES);
+        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == TEE_REACTIONS_FRAME || frame == 360 || frame == 420 || frame == 480) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
+        if (frame == TEE_REACTIONS_FRAME) {
+            sCastIndex -= SHOTS_PER_STAGE;
+        }
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(D_800BA9D8.unkC);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        PlaceCharacter(slot, point, DEGREES_TO_RADIANS(-(sCastIndex * CAST_YAW_STEP)));
+        sCastSlot = slot;
+        sCastIndex++;
+    }
+    if (frame == FAIRWAY_FADE_OUT_FRAME) {
+        StartFadeOut(CAST_FADE_FRAMES);
+    }
+    if (frame == FAIRWAY_SHOTS_FRAME) {
+        StartFadeIn(CAST_FADE_FRAMES);
+    }
+    if (frame == FAIRWAY_SHOTS_FRAME || frame == 770 || frame == 810 || frame == 850) {
+        func_80078D94();
+        PickFramingPitch();
+        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
+        sCastFramingYaw = ((sCastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, FAIRWAY_CLUB);
+        if (frame == FAIRWAY_SHOTS_FRAME) {
+            SetStanceAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+        } else {
+            SetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+            swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL));
+            AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                       CAST_SWING_LEAD_FRAMES);
+        }
+        point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == FAIRWAY_SWING_FRAME) {
+        SetSwingAnimation(sCastSlot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+    }
+    if (frame == FAIRWAY_REACTIONS_FRAME || frame == 1000 || frame == 1060 || frame == 1120) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
+        if (frame == FAIRWAY_REACTIONS_FRAME) {
+            sCastIndex -= SHOTS_PER_STAGE;
+        }
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(g_HolePoints.unk60[0]);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BOGEY);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
+        PlaceCharacter(slot, point, -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+        sCastSlot = slot;
+        sCastIndex++;
+    }
+    if (frame == APPROACH_FADE_OUT_FRAME) {
+        StartFadeOut(CAST_FADE_FRAMES);
+    }
+    if (frame == APPROACH_SHOTS_FRAME) {
+        StartFadeIn(CAST_FADE_FRAMES);
+    }
+    if (frame == APPROACH_SHOTS_FRAME || frame == 1420 || frame == 1460 || frame == 1500) {
+        func_80078D94();
+        PickFramingPitch();
+        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
+        sCastFramingYaw = ((sCastIndex - 2 * SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, APPROACH_CLUB);
+        if (frame == APPROACH_SHOTS_FRAME) {
+            SetStanceAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+        } else {
+            SetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+            swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
+            AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                       CAST_SWING_LEAD_FRAMES);
+        }
+        point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == APPROACH_SWING_FRAME) {
+        SetSwingAnimation(sCastSlot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+    }
+    if (frame == APPROACH_REACTIONS_FRAME || frame == 1680 || frame == 1760 || frame == 1840) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
+        if (frame == APPROACH_REACTIONS_FRAME) {
+            sCastIndex -= SHOTS_PER_STAGE;
+        }
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(g_HolePoints.unk60[1]);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BIRDIE);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
+        PlaceCharacter(slot, point, -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+        sCastSlot = slot;
+        sCastIndex++;
+    }
+    if (frame == PUTT_FADE_OUT_FRAME) {
+        StartFadeOut(CAST_FADE_FRAMES);
+    }
+    if (frame == PUTT_SHOTS_FRAME) {
+        StartFadeIn(CAST_FADE_FRAMES);
+    }
+    if (frame == PUTT_SHOTS_FRAME || frame == 2060 || frame == 2100 || frame == 2150) {
+        func_80078D94();
+        sCastFramingYaw = ((sCastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+        PickFramingPitch();
+        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
+        sUnreadValue = 15.0f;
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, CLUB_TYPE_PUTTER);
+        if (frame == PUTT_SHOTS_FRAME) {
+            SetStanceAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+        } else {
+            SetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+            swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL));
+            AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                       CAST_SWING_LEAD_FRAMES);
+        }
+        point[AXIS_X] = sNearCupPoint[AXIS_X];
+        point[AXIS_Y] = sNearCupPoint[AXIS_Y];
+        point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == PUTT_SWING_FRAME) {
+        SetSwingAnimation(sCastSlot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+    }
+    if (frame == PUTT_REACTIONS_FRAME || frame == 2300 || frame == 2400 || frame == 2500) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F * RADIANS_TO_BINARY_ANGLE;
+        if (frame == PUTT_REACTIONS_FRAME) {
+            sCastIndex -= SHOTS_PER_STAGE;
+        }
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(sNearCupPoint);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_EAGLE);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = sNearCupPoint[AXIS_X];
+        point[AXIS_Y] = sNearCupPoint[AXIS_Y];
+        point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+        PlaceCharacter(slot, point, DEGREES_TO_RADIANS(-(sCastIndex * CAST_YAW_STEP)));
+        sCastSlot = slot;
+        sCastIndex++;
+    }
+    if (frame == FINALE_FADE_OUT_FRAME) {
+        StartFadeOut(CAST_FADE_FRAMES);
+    }
+    if (frame == FINALE_FRAME) {
+        StartFadeIn(CAST_FADE_FRAMES);
+        sCastFramingYaw = 0.0f;
+        func_80078D94();
+        PickFramingPitch();
+        sIsReactionShown = FALSE;
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, TEE_CLUB);
+        SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 2740) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(D_800BA9D8.unkC);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = D_800BA9D8.unkC[AXIS_X];
+        point[AXIS_Y] = D_800BA9D8.unkC[AXIS_Y];
+        point[AXIS_Z] = D_800BA9D8.unkC[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 2800) {
+        func_80078D94();
+        sCastFramingYaw = 0.0f;
+        PickFramingPitch();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, FAIRWAY_CLUB);
+        SetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 2950) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(g_HolePoints.unk60[0]);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BOGEY);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 3030) {
+        sCastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
+        func_80078D94();
+        PickFramingPitch();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, APPROACH_CLUB);
+        SetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+        swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
+        AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                   2 * CAST_SWING_LEAD_FRAMES);
+        point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 3100) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(g_HolePoints.unk60[1]);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BIRDIE);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
+        point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
+        point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 3180) {
+        func_80078D94();
+        PickFramingPitch();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        sIsReactionShown = FALSE;
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterClub(slot, CLUB_TYPE_PUTTER);
+        SetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+        swingAnimation = GetAnimationIndex(slot, GetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL));
+        AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
+                                   FINAL_PUTT_LEAD_FRAMES);
+        point[AXIS_X] = sNearCupPoint[AXIS_X];
+        point[AXIS_Y] = sNearCupPoint[AXIS_Y];
+        point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == 3240) {
+        func_80078D94();
+        FreeCharacterSlot(sCastSlot);
+        ResetStaffRollEase();
+        slot = sCastSlot ^ 1;
+        LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT, GetCastModelKind());
+        SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
+        SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
+        GetAnimationEventFrame(slot, GetAnimationIndex(slot, GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
+                               ANIMATION_EVENT_UNK6);
+        ClearReactionSpot();
+        ConsiderReactionSpot(sNearCupPoint);
+        StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_EAGLE);
+        sIsReactionShown = TRUE;
+        point[AXIS_X] = sNearCupPoint[AXIS_X];
+        point[AXIS_Y] = sNearCupPoint[AXIS_Y];
+        point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+        PlaceCharacter(slot, point, GOLFER_HEADING);
+        sCastSlot = slot;
+    }
+    if (frame == LAST_FADE_OUT_FRAME) {
+        StartFadeOut(LAST_FADE_FRAMES);
+    }
+    TakePinOut();
+    func_8007B054();
+    if (sShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
+        func_8008E1B4();
+        sShownSceneColorIndex = g_HoleConditions.sceneColorIndex;
+    }
+    g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
+    AnimateAllCharacters();
+    if (sIsReactionShown) {
+        PlaceAndViewCharacter(sCastSlot);
+        UpdateReaction(sCastSlot);
+    } else {
+        character = GetUsedCharacterSlot(sCastSlot);
+        ClearFramedSpheres();
+        SetFramingAngles(sCastFramingPitch, sCastFramingYaw);
+        GetCharacterPointPosition(sCastSlot, CAST_FOCUS_POINT, focus);
+        if (character != NULL) {
+            radius = character->shadowScale * SHADOW_SCALE_TO_RADIUS;
+        } else {
+            radius = DEFAULT_FRAMED_RADIUS;
+        }
+        AddFramedSphere(focus, radius);
+        FrameSpheres(0.0f);
+        BisectFramingPitch(sCastFramingPitch, sCastFramingYaw, 0.0f);
+        view = &g_Cameras[0].view;
+        GetFramedView(view->eye, view->lookAt);
+        EaseStaffRollView(view->eye, view->lookAt, CAST_EASE_RATE, EASE_LOOK_AT | EASE_EYE);
+    }
+    g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
+    CLAMP_FRAMES(shrink, frame - sViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
+    SHRINK_VIEW(g_Cameras[0].view, shrink);
+    g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[0] = g_Cameras[0].view.scissorWidth * 4;
+    g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[1] = g_Cameras[0].view.scissorHeight * 4;
+    g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[0] =
+        (g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth / 2) * 4;
+    g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[1] =
+        (g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight / 2) * 4;
+}
 
 /*
  * Runs while the loader thread has finished the hole and a controller is
@@ -583,7 +1179,7 @@ void UpdateStaffRoll(void) {
             }
         }
         if (sStaffRollFrame >= TIMELINE_START_FRAME) {
-            func_801F544C_ovl_14(sStaffRollFrame - TIMELINE_START_FRAME);
+            RunStaffRollTimeline(sStaffRollFrame - TIMELINE_START_FRAME);
         }
         if (sStaffRollFrame < MAX_STAFF_ROLL_FRAME) {
             sStaffRollFrame++;

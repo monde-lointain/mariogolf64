@@ -289,6 +289,14 @@ void SetAnimationSpeed(u32 slotIndex, f32 speed);
 void AnimateCharacter(u32 slotIndex);
 void AnimateCharacterInSameCopy(u32 slotIndex);
 void SetCharacterLights(void);
+void SetCharacterClub(u32 slotIndex, s32 clubIndex);
+s32 GetAnimationEventFrame(u32 slotIndex, s32 animationIndex, s32 kind);
+s32 GetAnimationIndex(u32 slotIndex, s32 id);
+void AdvanceAnimation(u32 slotIndex, s32 frameCount);
+void SetCharacterLighting(u32 slotIndex, s32 value);
+void AnimateAllCharacters(void);
+void PlaceAndViewCharacter(u32 slotIndex);
+void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading);
 void DrawCharacter(u32 slotIndex);
 void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotIndex);
 

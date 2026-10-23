@@ -51,6 +51,7 @@ typedef struct HoleConditions {
 /* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
 #define SCENE_COLOR_INDEX_ROUND_START 0
 #define SCENE_COLOR_INDEX_DRIVING_RANGE 6
+#define SCENE_COLOR_INDEX_UNK8 8
 #define SCENE_COLOR_INDEX_ROUND_LATE 9
 #define SCENE_COLOR_INDEX_ROUND_END 10
 #define SCENE_COLOR_INDEX_UNK11 11
@@ -103,6 +104,7 @@ extern char g_PrintBuffer[];
  */
 #define VIEWPORT_FULL_SCREEN 0
 #define VIEWPORT_INSET 2
+#define VIEWPORT_STAFF_ROLL 4
 extern Vp g_Viewports[];
 
 #endif

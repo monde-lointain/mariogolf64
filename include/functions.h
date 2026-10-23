@@ -111,6 +111,8 @@ void BuildDynamicTextures(Gfx **displayListHead);
 
 void func_8004CDA0(void);
 void func_8007B054(void);
+void func_80078D94(void);
+void func_8008E1B4(void);
 void func_800605EC(void);
 
 /* Scene modules' update routines, in overlays */
