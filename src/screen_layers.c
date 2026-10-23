@@ -50,6 +50,24 @@
 #define YES_NO_IMAGE 0x70C
 #define PROMPT_STATE_CLOSED -1
 #define PROMPT_STATE_OPENING 0
+#define PROMPT_STATE_CHOOSING 1
+#define PROMPT_STATE_CHOSEN 2
+#define PROMPT_STATE_CLOSING 3
+#define PROMPT_STATE_CLOSED_AFTER_CHOICE 4
+#define PROMPT_CHOICE_NO 1
+#define NO_PROMPT_RESULT -1
+/* The results of answers that overwrite a save; they get the save's sound */
+#define SAVING_RESULT_COUNT 2
+#define PROMPT_TEXT_X 160
+#define PROMPT_TEXT_Y 108
+#define PROMPT_TEXT_SLOT 0
+/* Given this as its text, func_800719A0 clears the slot */
+#define NO_TEXT -1
+#define SOUND_PROMPT_SAVE 0x3B
+#define SAVE_SOUND_CHANNEL 15
+#define SOUND_PROMPT_MOVE 0x5C
+#define SOUND_PROMPT_CONFIRM 0x5D
+#define SOUND_PROMPT_CLOSE 0x65
 #define SOUND_PROMPT_OPEN 0x64
 #define PROMPT_SOUND_VOLUME 0x64
 
@@ -81,6 +99,8 @@ extern void *sYesNoImage;
 extern s32 sScreenFadeRed;
 extern s32 sScreenFadeGreen;
 extern s32 sScreenFadeBlue;
+
+void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 
 /* The RDP loads textures from 8-byte boundaries */
 #define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
@@ -408,7 +428,48 @@ void OpenPrompt(s32 prompt) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/screen_layers", UpdatePrompt);
+/*
+ * Takes the player's answer to the open prompt. It returns the result of
+ * the chosen answer once the prompt has closed, and NO_PROMPT_RESULT
+ * until then.
+ */
+s32 UpdatePrompt(ControllerState *controller) {
+    Prompt *prompt = &sPrompts[sPromptIndex];
+
+    if (sPromptState == PROMPT_STATE_CHOOSING) {
+        func_800719A0(PROMPT_TEXT_X, PROMPT_TEXT_Y, prompt->messageId, 1, PROMPT_TEXT_SLOT, 0x10, 0x5F, 0x3F, 0xFF,
+                      0xFF);
+        if (controller->pressedButtons == A_BUTTON) {
+            sPromptState = PROMPT_STATE_CHOSEN;
+            if (prompt->results[sPromptChoice] >= 0 && prompt->results[sPromptChoice] < SAVING_RESULT_COUNT) {
+                PlaySound(SOUND_PROMPT_SAVE, SAVE_SOUND_CHANNEL, PROMPT_SOUND_VOLUME);
+            } else {
+                PlaySound(SOUND_PROMPT_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+            }
+            return NO_PROMPT_RESULT;
+        }
+        if (controller->pressedButtons == B_BUTTON) {
+            sPromptChoice = PROMPT_CHOICE_NO;
+            sPromptState = PROMPT_STATE_CHOSEN;
+            PlaySound(SOUND_PROMPT_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+            return NO_PROMPT_RESULT;
+        }
+        if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
+            sPromptChoice ^= 1;
+            PlaySound(SOUND_PROMPT_MOVE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+            return NO_PROMPT_RESULT;
+        }
+    } else if (sPromptState == PROMPT_STATE_CHOSEN) {
+        sPromptState = PROMPT_STATE_CLOSING;
+        PlaySound(SOUND_PROMPT_CLOSE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+        func_800719A0(0, 0, NO_TEXT, 1, PROMPT_TEXT_SLOT, 1, 0, 0, 0, 0);
+    } else if (sPromptState == PROMPT_STATE_CLOSED_AFTER_CHOICE) {
+        sPromptState = PROMPT_STATE_CLOSED;
+        FreePromptImages();
+        return prompt->results[sPromptChoice];
+    }
+    return NO_PROMPT_RESULT;
+}
 
 INCLUDE_ASM("asm/nonmatchings/screen_layers", DrawPrompt);
 

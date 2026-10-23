@@ -39,6 +39,7 @@ void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount);
 void DrawScreenFade(Gfx **displayListHead);
 s32 IsPromptClosed(void);
 void OpenPrompt(s32 prompt);
+s32 UpdatePrompt(ControllerState *controller);
 void DrawPrompt(Gfx **displayListHead);
 void ShowHalfTurn(void);
 void HideHalfTurn(void);
