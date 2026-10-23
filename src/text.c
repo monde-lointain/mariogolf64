@@ -333,11 +333,13 @@ void SetTextName(char *name) {
  * Shows a message in a slot at x and y, or around them when it is
  * centered. A new message starts unrevealed.
  */
-#ifdef NON_MATCHING
 void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags, u8 red, u8 green, u8 blue,
                  u8 alpha) {
+    TextSlot *textSlot;
     s32 width;
     s32 height;
+    s32 halfWidth;
+    s32 halfHeight;
 
     if (messageId != NO_MESSAGE) {
         width = 0;
@@ -345,24 +347,24 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
         if (flags & TEXT_FLAG_CENTERED) {
             MeasureMessage(messageId, FONT_SIZE_LARGE, &width, &height, slot);
         }
+        /* The pointer, used only for the message comparison, is there to match */
+        textSlot = &g_TextSlots[slot];
+        halfWidth = width / 2;
+        halfHeight = height / 2;
         g_TextSlots[slot].red = red;
         g_TextSlots[slot].green = green;
         g_TextSlots[slot].blue = blue;
         g_TextSlots[slot].alpha = alpha;
         g_TextSlots[slot].fontSize = fontSize;
         g_TextSlots[slot].flags = flags;
-        g_TextSlots[slot].x = x - width / 2;
-        g_TextSlots[slot].y = y - height / 2;
-        if (g_TextSlots[slot].messageId != messageId) {
+        g_TextSlots[slot].x = x - halfWidth;
+        g_TextSlots[slot].y = y - halfHeight;
+        if (textSlot->messageId != messageId) {
             g_TextSlots[slot].shownCount = 0;
         }
     }
     g_TextSlots[slot].messageId = messageId;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/text", SetTextSlot);
-#endif
 
 /*
  * Draws the message of every text slot that has one, in the slot's colour,
