@@ -104,7 +104,7 @@ musHandle StartLoadedSong(void);
 void LoadSong(u32 romAddress, u32 size);
 void LoadSampleBank(u8 *pointerBankRom, u32 pointerBankSize, u8 *waveBankRom);
 void LoadSoundEffectBank(u8 *rom, u32 size);
-void func_8005ED8C(s32);
+void InitMusic(musConfig *config);
 s32 func_8005DE00(void);
 s32 ChangeCustomEffect(s32 type);
 
@@ -512,7 +512,7 @@ void PlaySong(s32 songId, s32 flags) {
 void InitAudio(void) {
     s32 channel;
 
-    func_8005ED8C(0);
+    InitMusic(NULL);
     sPendingSongChange.state = SONG_CHANGE_NONE;
     sSongHandle = NO_HANDLE;
     sSongId = NO_SONG;
