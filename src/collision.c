@@ -61,6 +61,15 @@
 /* A path that ends this near a triangle's plane, in course units, touches it */
 #define PLANE_TOUCH_DISTANCE 15.36f
 #define NO_HOLE_TRIANGLE -1
+/* PushBallOutOfWalls' distances from a wall, in course units */
+#define WALL_TOUCH_DISTANCE 460.80002f
+#define WALL_PUSH_DISTANCE 476.16f
+/* PushBallOutOfWalls may leave alone a ball this many course units above the ground */
+#define WALL_HEIGHT_SLACK 0xC00
+/* A ball this near a wall's corner is pushed along x, as it has no direction from the corner */
+#define CORNER_LEAST_DISTANCE 1.536f
+#define CORNER_DEFAULT_PUSH_X 0.2f
+
 /* Which sides of a triangle's edge a point is on, seen from above */
 #define EDGE_SIDE_POSITIVE 1
 #define EDGE_SIDE_NEGATIVE 2
@@ -711,7 +720,180 @@ INCLUDE_ASM("asm/nonmatchings/collision", FindHoleTriangleHit);
 
 INCLUDE_ASM("asm/nonmatchings/collision", func_8003B584);
 
-INCLUDE_ASM("asm/nonmatchings/collision", func_8003D1A8);
+/*
+ * Pushes a ball that is inside a wall, a shaded hole triangle, back out
+ * to WALL_PUSH_DISTANCE from it, and repeats until no wall holds it. A
+ * ball near a wall's corner is pushed straight away from the corner. With
+ * checksHeight, only walls at the ball's height count, and a ball high
+ * above the ground, where course y points down, is left alone. It returns
+ * a value only for a ball off the ground; the s32 is there to match.
+ */
+#ifdef NON_MATCHING
+s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight) {
+    PlaneTriangle wall;
+    TrianglePlane plane;
+    f32 cornerXs[TRIANGLE_CORNER_COUNT];
+    f32 cornerZs[TRIANGLE_CORNER_COUNT];
+    f32 push[3];
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 isPushed;
+    s32 lowestX;
+    s32 highestX;
+    s32 lowestY;
+    s32 highestY;
+    s32 lowestZ;
+    s32 highestZ;
+    s32 i;
+    s32 corner;
+    HoleTriangle *candidate;
+    f32 side;
+    f32 cornerDistance;
+    f32 pushDistance;
+
+    IsGameFlagSet(GAME_FLAG_UNK0);
+    x = simulation->position[AXIS_X];
+    z = simulation->position[AXIS_Z];
+    y = simulation->position[AXIS_Y];
+    isPushed = TRUE;
+    if ((u32)x >= GROUND_WIDTH || (u32)z >= GROUND_LENGTH ||
+        (checksHeight == TRUE && y + WALL_HEIGHT_SLACK < GetGroundHeight(x, z))) {
+        return FALSE;
+    }
+    while (isPushed) {
+        isPushed = FALSE;
+        lowestX = x / WHOLE_UNIT_SIZE - 1;
+        highestX = x / WHOLE_UNIT_SIZE + 1;
+        lowestY = y / WHOLE_UNIT_SIZE - 1;
+        highestY = y / WHOLE_UNIT_SIZE + 1;
+        lowestZ = z / WHOLE_UNIT_SIZE - 1;
+        highestZ = z / WHOLE_UNIT_SIZE + 1;
+        for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
+            candidate = &g_WorkArea.hole.triangles[i];
+            if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
+                continue;
+            }
+            if (checksHeight == TRUE) {
+                if (highestY < candidate->bounds[AXIS_Y][0]) {
+                    continue;
+                }
+                if (candidate->bounds[AXIS_Y][1] < lowestY) {
+                    continue;
+                }
+            }
+            if (highestX < candidate->bounds[AXIS_X][0]) {
+                continue;
+            }
+            if (candidate->bounds[AXIS_X][1] < lowestX) {
+                continue;
+            }
+            if (highestZ < candidate->bounds[AXIS_Z][0]) {
+                continue;
+            }
+            if (candidate->bounds[AXIS_Z][1] < lowestZ) {
+                continue;
+            }
+            wall.corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
+            wall.corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
+            wall.corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];
+            wall.corners[AXIS_Y][0] = candidate->vertices[0].v.ob[AXIS_Y];
+            wall.corners[AXIS_Y][1] = candidate->vertices[1].v.ob[AXIS_Y];
+            wall.corners[AXIS_Y][2] = candidate->vertices[2].v.ob[AXIS_Y];
+            wall.corners[AXIS_Z][0] = candidate->vertices[0].v.ob[AXIS_Z];
+            wall.corners[AXIS_Z][1] = candidate->vertices[1].v.ob[AXIS_Z];
+            wall.corners[AXIS_Z][2] = candidate->vertices[2].v.ob[AXIS_Z];
+            GetTrianglePlane(&wall, &plane);
+            side = plane.normal[AXIS_X] * x + plane.normal[AXIS_Y] * y + plane.normal[AXIS_Z] * z +
+                   plane.distance * COURSE_UNITS_PER_UNIT;
+            osSyncPrintf("?");
+            if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
+                continue;
+            }
+            osSyncPrintf("\x82\xA4\x82\xC1\n"); /* "Ugh" */
+            for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
+                cornerDistance = Length2D((wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT) - x,
+                                          (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT) - z);
+                if (cornerDistance < WALL_TOUCH_DISTANCE) {
+                    push[AXIS_Y] = 0.0f;
+                    push[AXIS_X] = x - (wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT);
+                    push[AXIS_Z] = z - (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT);
+                    if (cornerDistance > CORNER_LEAST_DISTANCE) {
+                        guNormalize(&push[AXIS_X], &push[AXIS_Y], &push[AXIS_Z]);
+                    } else {
+                        push[AXIS_X] = CORNER_DEFAULT_PUSH_X;
+                    }
+                    push[AXIS_X] *= WALL_PUSH_DISTANCE;
+                    push[AXIS_Z] *= WALL_PUSH_DISTANCE;
+                    x = push[AXIS_X] + (wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT);
+                    z = push[AXIS_Z] + (wall.corners[AXIS_Z][corner] << COURSE_UNIT_SHIFT);
+                    isPushed = TRUE;
+                    osSyncPrintf("WallInsideOutCorner!\n");
+                    break;
+                }
+            }
+            if (isPushed) {
+                break;
+            }
+            /* A ball past every corner along the wall is beside it, not in it */
+            if (GetTriangleFacing(wall.corners[AXIS_X][0], wall.corners[AXIS_Y][0], wall.corners[AXIS_Z][0],
+                                  wall.corners[AXIS_X][1], wall.corners[AXIS_Y][1], wall.corners[AXIS_Z][1],
+                                  wall.corners[AXIS_X][2], wall.corners[AXIS_Y][2],
+                                  wall.corners[AXIS_Z][2]) == TRIANGLE_FACING_Z) {
+                cornerXs[0] = wall.corners[AXIS_X][0];
+                cornerXs[1] = wall.corners[AXIS_X][1];
+                cornerXs[2] = wall.corners[AXIS_X][2];
+                if ((f32)x < cornerXs[0] * COURSE_UNITS_PER_UNIT && (f32)x < cornerXs[1] * COURSE_UNITS_PER_UNIT &&
+                    (f32)x < cornerXs[2] * COURSE_UNITS_PER_UNIT) {
+                    continue;
+                }
+                if (cornerXs[0] * COURSE_UNITS_PER_UNIT < (f32)x && cornerXs[1] * COURSE_UNITS_PER_UNIT < (f32)x &&
+                    cornerXs[2] * COURSE_UNITS_PER_UNIT < (f32)x) {
+                    continue;
+                }
+            } else {
+                cornerZs[0] = wall.corners[AXIS_Z][0];
+                cornerZs[1] = wall.corners[AXIS_Z][1];
+                cornerZs[2] = wall.corners[AXIS_Z][2];
+                if ((f32)z < cornerZs[0] * COURSE_UNITS_PER_UNIT && (f32)z < cornerZs[1] * COURSE_UNITS_PER_UNIT &&
+                    (f32)z < cornerZs[2] * COURSE_UNITS_PER_UNIT) {
+                    continue;
+                }
+                if (cornerZs[0] * COURSE_UNITS_PER_UNIT < (f32)z && cornerZs[1] * COURSE_UNITS_PER_UNIT < (f32)z &&
+                    cornerZs[2] * COURSE_UNITS_PER_UNIT < (f32)z) {
+                    continue;
+                }
+            }
+            isPushed = TRUE;
+            if (side < 0.0f) {
+                pushDistance = -WALL_PUSH_DISTANCE - side;
+                x = x + plane.normal[AXIS_X] * pushDistance;
+                z = z + plane.normal[AXIS_Z] * pushDistance;
+            } else {
+                pushDistance = WALL_PUSH_DISTANCE - side;
+                x = x + plane.normal[AXIS_X] * pushDistance;
+                z = z + plane.normal[AXIS_Z] * pushDistance;
+            }
+            if (isPushed) {
+                osSyncPrintf("WallInsideOut2!\n");
+                break;
+            }
+        }
+        if (isPushed) {
+            osSyncPrintf("WallInsideOut!\n");
+        }
+        simulation->position[AXIS_X] = x;
+        simulation->position[AXIS_Z] = z;
+    }
+}
+
+#else
+INCLUDE_ASM("asm/nonmatchings/collision", PushBallOutOfWalls);
+INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA890);
+INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA898);
+INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8B0);
+INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8C4);
+#endif
 
 /*
  * Finds the nearest ring that a ball moving from one point to another
@@ -852,11 +1034,3 @@ s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down) {
     }
     return solidity;
 }
-
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA890);
-
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA898);
-
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8B0);
-
-INCLUDE_RODATA("asm/nonmatchings/collision", D_800CA8C4);
