@@ -23,7 +23,7 @@ typedef struct MessageTable {
 #define TEXT_ASSET_MEDIUM_FONT 0x4B5
 #define TEXT_ASSET_LARGE_FONT 0x4B6
 #define TEXT_ASSET_ICONS 0x4B0
-#define TEXT_ASSET_UNK4B2 0x4B2
+#define TEXT_ASSET_SHADOWED_FONT 0x4B2
 #define TEXT_ASSET_UNK4B8 0x4B8
 #define TEXT_ASSET_UNK4B9 0x4B9
 /*
@@ -107,7 +107,7 @@ extern void *g_SmallFontImage;
 extern void *g_MediumFontImage;
 extern void *g_LargeFontImage;
 extern void *g_TextIconImage;
-extern void *D_8012F4E0;
+extern void *g_ShadowedFontImage;
 extern void *D_800E1C3C[2];
 extern void *g_MessageGlyphs;
 extern MessageTable *g_Messages;
@@ -216,8 +216,8 @@ void LoadTextAssets(void) {
     u8 *header;
     s32 size;
 
-    D_8012F4E0 = AllocMemory(OpenEncodedAsset(TEXT_ASSET_UNK4B2, &asset));
-    ReadEncodedAsset(D_8012F4E0, &asset);
+    g_ShadowedFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_SHADOWED_FONT, &asset));
+    ReadEncodedAsset(g_ShadowedFontImage, &asset);
     g_SmallFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_SMALL_FONT, &asset));
     ReadEncodedAsset(g_SmallFontImage, &asset);
     g_MediumFontImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_MEDIUM_FONT, &asset));
@@ -248,7 +248,7 @@ void LoadTextAssets(void) {
 
 /* Frees what LoadTextAssets loaded, except the two images at D_800E1C3C */
 void FreeTextAssets(void) {
-    FreeMemory(&D_8012F4E0);
+    FreeMemory(&g_ShadowedFontImage);
     FreeMemory(&g_SmallFontImage);
     FreeMemory(&g_MediumFontImage);
     FreeMemory(&g_LargeFontImage);

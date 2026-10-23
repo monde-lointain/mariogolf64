@@ -1849,6 +1849,7 @@ RevealTextSlot = 0x80071C74; // type:func
 IsTextSlotRevealed = 0x80071C9C; // type:func
 GetTextLength = 0x80073BF0; // type:func
 g_SmallFontImage = 0x800E1C30; // size:0x4
+g_ShadowedFontImage = 0x8012F4E0; // size:0x4
 g_MediumFontImage = 0x800E1C34; // size:0x4
 g_LargeFontImage = 0x800E1C38; // size:0x4
 g_MessageGlyphs = 0x800E1C44; // size:0x4
