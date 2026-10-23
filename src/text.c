@@ -917,42 +917,37 @@ void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
 }
 
 /* Draws text in the shadowed font, centred on x */
-#ifdef NON_MATCHING
 void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     Gfx *gfx = *displayListHead;
+    /* The copy of x and the s16 are there to match */
+    s32 left = x;
     s16 right = x;
-    char *character;
+    s32 i;
 
-    for (character = text; *character != '\0'; character++) {
-        if (*character == '.') {
+    for (i = 0; text[i] != '\0'; i++) {
+        if (text[i] == '.') {
             right += SHADOWED_POINT_WIDTH;
         } else {
             right += SHADOWED_GLYPH_WIDTH;
         }
     }
-    DrawShadowedText(&gfx, x - (right - x) / 2, y, text);
+    DrawShadowedText(&gfx, left - (right - left) / 2, y, text);
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredShadowedText);
-#endif
 
 /*
  * Draws text centred on x in the narrow glyphs of the shadowed font's last
  * row, which start at the apostrophe
  */
-#ifdef NON_MATCHING
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     Gfx *gfx = *displayListHead;
     s32 length;
-    char *character;
     s32 code;
     s16 glyphLeft;
 
     gDPPipeSync(gfx++);
     length = 0;
-    for (character = text; *character != '\0'; character++) {
+    while (text[length] != '\0') {
         length++;
     }
     x -= length * NARROW_GLYPH_WIDTH / 2;
@@ -967,10 +962,6 @@ void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, char *text) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
 }
-
-#else
-INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredNarrowText);
-#endif
 
 /* Draws text in the shadowed font with its glyphs closer together */
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
