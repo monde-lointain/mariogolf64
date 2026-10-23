@@ -16,8 +16,6 @@
 
 /* A channel's or the song's handle when there is nothing to control */
 #define NO_HANDLE -1
-/* sSongId when no song is playing */
-#define NO_SONG -1
 /* Sound IDs are below this */
 #define SOUND_COUNT 0x215
 /* Song IDs above this play the last song */

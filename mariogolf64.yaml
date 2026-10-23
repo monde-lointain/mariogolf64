@@ -654,8 +654,9 @@ segments:
     exclusive_ram_id: overlay_80241800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1619A0, asm]
-      - [0x165970, data]
+      - [0x1619A0, c, ovl_12/save_menu]
+      - [0x165970, .data, ovl_12/save_menu]
+      - [0x165A30, .rodata, ovl_12/save_menu]
       - { start: 0x165BC0, type: bss, vram: 0x80245A20 }
 
   - name: ovl_13

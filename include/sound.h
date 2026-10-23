@@ -7,8 +7,12 @@
 #define SOUND_CHANNEL_COUNT 16
 
 /* PlaySong's flags */
+#define SONG_FLAG_UNREAD 0x01  /* Passed by some callers, but PlaySong never tests it */
 #define SONG_FLAG_UNK10 0x10   /* Stops the song instead when SAVE_OPTION_UNK0 is set */
 #define SONG_FLAG_RESTART 0x80 /* Restarts the song if it is already playing */
+
+/* The song id when no song is playing */
+#define NO_SONG -1
 
 /* The audio channel for the next sound effect, alternating between two */
 extern s32 g_NextSoundChannel;

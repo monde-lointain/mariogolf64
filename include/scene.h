@@ -56,6 +56,16 @@ extern s32 g_PendingSubModuleId;
 extern s32 g_SubModuleState;
 
 /*
+ * The modes that the save menu names for a saved game. Mini-Golf is not one
+ * of them; GameState.isMiniGolf marks it.
+ */
+#define GAME_MODE_STROKE 0
+#define GAME_MODE_MATCH_GAME 2
+#define GAME_MODE_GET_CHARACTER 4
+#define GAME_MODE_SKINS_MATCH 10
+#define GAME_MODE_CLUB_SLOTS 11
+
+/*
  * The mode in which AddBirdieBadge counts badges and RecordTournamentPlace
  * reads the 30 contestants; the walkthrough's Tournament is the one mode
  * with birdie badges and 30 contestants

@@ -1167,14 +1167,14 @@ void InvalidateBrokenSavedGames(void) {
         }
         unk = &save->savedGames[index];
         sub = &unk->state;
-        if (sub->isMiniGolf == 0) {
+        if (sub->isMiniGolf == FALSE) {
             switch (sub->gameMode) {
-                case 0:
-                case 2:
-                case 4:
-                case 5:
-                case 10:
-                case 11:
+                case GAME_MODE_STROKE:
+                case GAME_MODE_MATCH_GAME:
+                case GAME_MODE_GET_CHARACTER:
+                case GAME_MODE_TOURNAMENT:
+                case GAME_MODE_SKINS_MATCH:
+                case GAME_MODE_CLUB_SLOTS:
                     break;
                 default:
                     isInvalid[index] = TRUE;
