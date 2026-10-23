@@ -23,6 +23,11 @@
 /* Grid texture coordinates: four per unit, starting one texel in */
 #define GRID_TEXTURE_SCALE 4
 #define GRID_TEXTURE_BORDER (1 << TEXTURE_COORD_FRACTION_BITS)
+/* Vertex flags in the hole's vertex file */
+#define VERTEX_FLAG_SAME_X 0x40
+#define VERTEX_FLAG_SAME_Z 0x80
+/* Flags that end a list of vertices */
+#define VERTEX_LIST_END 9
 /* The size cleared billboards are given */
 #define CLEARED_BILLBOARD_WIDTH 64
 #define CLEARED_BILLBOARD_HEIGHT 256
@@ -321,15 +326,153 @@ void ReadTileUnk992s(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802517C4_ovl_02);
+/*
+ * Reads the grid vertices from the hole's vertex file. A vertex flagged
+ * with the same x or z as the one before keeps the one already there.
+ */
+void ReadGridVertices(void) {
+    s8 flags;
+    s16 x;
+    s16 y;
+    s16 z;
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802518F0_ovl_02);
+    for (i = 0;; i++) {
+        ReadFileBytes(&flags, sizeof(flags));
+        if (flags == VERTEX_LIST_END) {
+            break;
+        }
+        if (i >= GROUND_GRID_VERTEX_SLOT_COUNT) {
+            osSyncPrintf("ER4\n");
+            break;
+        }
+        if (!(flags & VERTEX_FLAG_SAME_X)) {
+            ReadVertexX(&x, flags);
+            g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
+            g_WorkArea.hole.gridVertices[i].v.tc[0] = x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        }
+        ReadVertexY(&y, flags);
+        g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = y;
+        if (!(flags & VERTEX_FLAG_SAME_Z)) {
+            ReadVertexZ(&z, flags);
+            g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
+            g_WorkArea.hole.gridVertices[i].v.tc[1] = z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251A28_ovl_02);
+/* Reads the midpoints of the ground tiles from the hole's vertex file, like ReadGridVertices */
+void ReadTileMidpoints(void) {
+    s8 flags;
+    s16 x;
+    s16 y;
+    s16 z;
+    s32 midpoint;
+    s32 tile;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251B6C_ovl_02);
+    midpoint = 0;
+    tile = 0;
+    while (TRUE) {
+        ReadFileBytes(&flags, sizeof(flags));
+        if (flags == VERTEX_LIST_END) {
+            break;
+        }
+        if (!(flags & VERTEX_FLAG_SAME_X)) {
+            ReadVertexX(&x, flags);
+            g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_X] = x;
+            g_WorkArea.hole.midpoints[tile][midpoint].v.tc[0] = x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        }
+        ReadVertexY(&y, flags);
+        g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Y] = y;
+        if (!(flags & VERTEX_FLAG_SAME_Z)) {
+            ReadVertexZ(&z, flags);
+            g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Z] = z;
+            g_WorkArea.hole.midpoints[tile][midpoint].v.tc[1] = z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        }
+        midpoint++;
+        if (midpoint >= TILE_MIDPOINT_COUNT) {
+            midpoint = 0;
+            tile++;
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251CB4_ovl_02);
+/*
+ * Reads a vertex's x coordinate, whose encoding the flags select: two
+ * bytes, or one byte scaled up by one of three shifts
+ */
+void ReadVertexX(s16 *coord, s32 flags) {
+    *coord = 0;
+    switch (flags & 3) {
+        case 1:
+            ReadFileBytes(coord, 1);
+            *coord = (u16)*coord >> 8;
+            break;
+        case 2:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 5;
+            break;
+        case 3:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 6;
+            break;
+        case 0:
+            ReadFileBytes(coord, 2);
+            break;
+    }
+}
+
+/*
+ * Reads a vertex's y coordinate, whose encoding the flags select: two
+ * bytes, or one byte scaled up by one of three shifts
+ */
+void ReadVertexY(s16 *coord, s32 flags) {
+    *coord = 0;
+    /* The u8 cast is there to match */
+    switch ((u8)(flags & 0xC) >> 2) {
+        case 1:
+            ReadFileBytes(coord, 1);
+            *coord = (u16)*coord >> 8;
+            break;
+        case 2:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 1;
+            break;
+        case 3:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 2;
+            break;
+        case 0:
+            ReadFileBytes(coord, 2);
+            break;
+    }
+}
+
+/*
+ * Reads a vertex's z coordinate, whose encoding the flags select: two
+ * bytes, or one byte scaled up by one of three shifts
+ */
+void ReadVertexZ(s16 *coord, s32 flags) {
+    *coord = 0;
+    /* The u8 cast is there to match */
+    switch ((u8)(flags & 0x30) >> 4) {
+        case 1:
+            ReadFileBytes(coord, 1);
+            *coord = (u16)*coord >> 8;
+            break;
+        case 2:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 5;
+            break;
+        case 3:
+            ReadFileBytes(coord, 1);
+            *coord = ((u16)*coord >> 8) << 6;
+            break;
+        case 0:
+            ReadFileBytes(coord, 2);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80251DFC_ovl_02);
 
