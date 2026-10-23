@@ -1884,3 +1884,5 @@ DrawTextStub = 0x80074960; // type:func
 SetTextColor = 0x80074CA8; // type:func
 DrawShadowedText = 0x80074D0C; // type:func
 DrawCenteredShadowedText = 0x80074E5C; // type:func
+g_GlyphSprites = 0x800FF530; // size:0x5460
+g_GlyphGroupSizes = 0x800FBE18; // size:0x14

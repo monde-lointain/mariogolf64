@@ -52,6 +52,28 @@ typedef struct MessageTable {
 /* The width of an icon, in pixels */
 #define ICON_WIDTH 12
 
+#define FONT_SIZE_MEDIUM 10
+#define FONT_SIZE_SMALL 8
+
+/* How far the shadowed font advances for a glyph, and for a full stop */
+#define SHADOWED_GLYPH_WIDTH 8
+#define SHADOWED_POINT_WIDTH 2
+/* How far a full stop of the shadowed font is drawn back over the glyph before it */
+#define SHADOWED_POINT_INSET 3
+#define CONDENSED_GLYPH_WIDTH 7
+/*
+ * The shadowed font's glyphs are 8 pixels square, 31 to a row of its
+ * image, from the space on
+ */
+#define SHADOWED_GLYPH_SIZE 8
+#define SHADOWED_GLYPHS_PER_ROW 31
+#define SHADOWED_GLYPH_FIRST ' '
+/* Its last row has narrower glyphs, from the apostrophe on */
+#define NARROW_GLYPH_ROW 3
+#define NARROW_GLYPH_FIRST '\''
+#define NARROW_GLYPH_SIZE 7
+#define NARROW_GLYPH_WIDTH 6
+
 /* Where the glyph and message files are in the ROM */
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];
@@ -68,10 +90,32 @@ extern s32 g_MessageCodesStart;
 extern TextSlot g_TextSlots[TEXT_SLOT_COUNT];
 extern u8 g_TextPalette[TEXT_PALETTE_COLOR_COUNT][3];
 extern char g_TextName[TEXT_NAME_SIZE];
+/*
+ * A glyph drawn with its own matrix, so text can be moved a glyph at a
+ * time. Glyphs are placed in groups.
+ */
+typedef struct GlyphSprite {
+    /* 0x00 */ Mtx matrix;
+    /* 0x40 */ s16 code;
+    /* 0x42 */ u8 fontSize;
+    /* 0x43 */ s8 group; /* NO_GLYPH_GROUP when the sprite is free */
+    /* 0x44 */ u8 unk44;
+} GlyphSprite; /* size = 0x48 */
+
+#define GLYPH_SPRITE_COUNT 300
+#define NO_GLYPH_GROUP (-1)
+
+extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
+/* How many glyphs each group has */
+extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
 extern u8 g_LargeFontWidths[];
 
 void ClearGlyphSprites(void);
+void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 s32 GetTextLength(char *text);
 
 const char g_TextStringFormat[] = "%s";
@@ -82,6 +126,15 @@ const char g_MatchScoreDownFormat[] = "%dDOWN";
 const char g_SkinsScoreFormat[] = "%dP";
 const char g_ParScoreEvenText[] = "#0";
 const char g_ParScoreFormat[] = "%+d";
+
+/* Where a character's glyph is in the shadowed font's image, in pixels */
+static inline s16 GetShadowedGlyphLeft(s32 code) {
+    return (code - SHADOWED_GLYPH_FIRST) % SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
+}
+
+static inline s16 GetShadowedGlyphTop(s32 code) {
+    return (code - SHADOWED_GLYPH_FIRST) / SHADOWED_GLYPHS_PER_ROW * SHADOWED_GLYPH_SIZE;
+}
 
 /*
  * Loads the fonts, the icons and the message table, and clears the text
@@ -378,27 +431,164 @@ INCLUDE_ASM("asm/nonmatchings/text", DrawMediumText);
 
 INCLUDE_ASM("asm/nonmatchings/text", DrawSmallText);
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredLargeText);
+/* Draws text in the large font, centred on x */
+void DrawCenteredLargeText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredMediumText);
+    DrawLargeText(&gfx, x - MeasureText(text, FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
+    *displayListHead = gfx;
+}
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredSmallText);
+/* Draws text in the medium font, centred on x */
+void DrawCenteredMediumText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawTextStub);
+    DrawMediumText(&gfx, x - MeasureText(text, FONT_SIZE_MEDIUM, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
+    *displayListHead = gfx;
+}
+
+/* Draws text in the small font, centred on x */
+void DrawCenteredSmallText(Gfx **displayListHead, s32 x, s32 y, char *text) {
+    Gfx *gfx = *displayListHead;
+
+    DrawSmallText(&gfx, x - MeasureText(text, FONT_SIZE_SMALL, MEASURE_TEXT_PROPORTIONAL) / 2, y, text);
+    *displayListHead = gfx;
+}
+
+/*
+ * Draws nothing. Its callers pass it a display list, a position and text,
+ * as they would to the other text drawing routines.
+ */
+void DrawTextStub(Gfx **displayListHead, s16 x, s16 y, char *text) {
+}
 
 INCLUDE_ASM("asm/nonmatchings/text", BeginShadowedText);
 
-INCLUDE_ASM("asm/nonmatchings/text", SetTextColor);
+/* Sets the colour, fully opaque, of the text drawn after it */
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawShadowedText);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 255);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
+/*
+ * Draws text in the shadowed font, which BeginShadowedText loads. A full
+ * stop is drawn narrower, over the end of the glyph before it.
+ */
+void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 code;
+    s16 glyphLeft;
+    s16 glyphTop;
+
+    gDPPipeSync(gfx++);
+    while (*text != '\0') {
+        code = *text;
+        if (code == '.') {
+            x -= SHADOWED_POINT_INSET;
+        }
+        glyphLeft = GetShadowedGlyphLeft(code);
+        glyphTop = GetShadowedGlyphTop(code);
+        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2, (y + SHADOWED_GLYPH_SIZE) << 2,
+                            G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+        if (*text == '.') {
+            x += SHADOWED_POINT_INSET + SHADOWED_POINT_WIDTH;
+        } else {
+            x += SHADOWED_GLYPH_WIDTH;
+        }
+        text++;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Draws text in the shadowed font, centred on x */
+#ifdef NON_MATCHING
+void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s16 right = x;
+    char *character;
+
+    for (character = text; *character != '\0'; character++) {
+        if (*character == '.') {
+            right += SHADOWED_POINT_WIDTH;
+        } else {
+            right += SHADOWED_GLYPH_WIDTH;
+        }
+    }
+    DrawShadowedText(&gfx, x - (right - x) / 2, y, text);
+    *displayListHead = gfx;
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredShadowedText);
+#endif
 
+/*
+ * Draws text centred on x in the narrow glyphs of the shadowed font's last
+ * row, which start at the apostrophe
+ */
+#ifdef NON_MATCHING
+void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 length;
+    char *character;
+    s32 code;
+    s16 glyphLeft;
+
+    gDPPipeSync(gfx++);
+    length = 0;
+    for (character = text; *character != '\0'; character++) {
+        length++;
+    }
+    x -= length * NARROW_GLYPH_WIDTH / 2;
+    while ((code = *text) != '\0') {
+        glyphLeft = (code - NARROW_GLYPH_FIRST) * SHADOWED_GLYPH_SIZE;
+        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + NARROW_GLYPH_SIZE) << 2, (y + SHADOWED_GLYPH_SIZE) << 2,
+                            G_TX_RENDERTILE, glyphLeft << 5, (NARROW_GLYPH_ROW * SHADOWED_GLYPH_SIZE) << 5, 1 << 10,
+                            1 << 10);
+        text++;
+        x += NARROW_GLYPH_WIDTH;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/text", DrawCenteredNarrowText);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/text", DrawCondensedShadowedText);
+/* Draws text in the shadowed font with its glyphs closer together */
+void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text) {
+    Gfx *gfx = *displayListHead;
+    s32 code;
+    s16 glyphLeft;
+    s16 glyphTop;
 
-INCLUDE_ASM("asm/nonmatchings/text", ClearGlyphSprites);
+    gDPPipeSync(gfx++);
+    while ((code = *text) != '\0') {
+        glyphLeft = GetShadowedGlyphLeft(code);
+        glyphTop = GetShadowedGlyphTop(code);
+        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2, (y + SHADOWED_GLYPH_SIZE) << 2,
+                            G_TX_RENDERTILE, glyphLeft << 5, glyphTop << 5, 1 << 10, 1 << 10);
+        text++;
+        x += CONDENSED_GLYPH_WIDTH;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Frees every glyph sprite */
+void ClearGlyphSprites(void) {
+    s32 i;
+
+    for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
+        g_GlyphSprites[i].group = NO_GLYPH_GROUP;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/text", func_8007515C);
 
