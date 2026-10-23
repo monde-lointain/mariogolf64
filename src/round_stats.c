@@ -11,6 +11,14 @@
 #define NO_CONTEST_WINNER -1
 #define UNSET_BET_RATE -1
 #define NO_SKINS_WINNER -1
+/* The course records' totals stop here */
+#define RECORD_TOTAL_LIMIT 0x7FFFFFFF
+#define NO_BEST_SCORE RECORD_TOTAL_LIMIT
+#define ROUND_COUNT_LIMIT 9999
+/* Three under par on every hole */
+#define LOWEST_SCORE_TO_PAR -54
+/* A green reached in regulation leaves two strokes of par for putting */
+#define PAR_ON_SPARE_STROKES 2
 /* Every hole score is lower */
 #define WORST_HOLE_SCORE 16
 #define FRONT_NINE_END 9
@@ -285,7 +293,152 @@ void UpdateContest(s32 isHoleOver) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_stats", func_8006D6D0);
+/*
+ * Adds the round that player 0 has just finished to the course's records
+ * and saves them. Once the round count reaches ROUND_COUNT_LIMIT the totals
+ * are scaled down by a round's share each time, so that the averages keep
+ * moving.
+ */
+void RecordCourseRound(void) {
+    UnkE98 *record = &GetSaveData()->unkE98[g_CourseIndex];
+    RoundStats *stats = &g_RoundStats;
+    CourseRecord *course = &g_CourseRecords[g_CourseIndex];
+    s32 isAtRoundLimit;
+    s32 hole;
+    s64 score;
+    s64 total;
+    s32 sum;
+    s32 shotsToGreen;
+
+    if (record->roundCount <= 0) {
+        record->roundCount = 0;
+        record->bestScore = NO_BEST_SCORE;
+        record->strokeTotal = 0;
+        record->longestDrive = 0;
+        record->averageDrive = 0;
+        record->averagedDriveCount = 0;
+        record->measuredDriveTotal = 0;
+        record->puttTotal = 0;
+        record->parOrBetterCount = 0;
+        record->parOnCount = 0;
+        record->unk28 = 0;
+        record->unk2C = 0;
+    }
+    isAtRoundLimit = FALSE;
+    if (record->roundCount < ROUND_COUNT_LIMIT) {
+        record->roundCount++;
+    } else {
+        isAtRoundLimit = TRUE;
+    }
+
+    g_Players[0].unk26 = 0;
+    score = GetNetScoreToPar(COURSE_HOLE_COUNT, 0);
+    if (score < record->bestScore) {
+        record->bestScore = score;
+    }
+    if (record->bestScore < LOWEST_SCORE_TO_PAR) {
+        record->bestScore = LOWEST_SCORE_TO_PAR;
+    }
+    if (score < record->characterBestScores[(s8)g_Players[0].characterIndex]) {
+        record->characterBestScores[(s8)g_Players[0].characterIndex] = score;
+        record->hasCharacterBestScore[(s8)g_Players[0].characterIndex] = TRUE;
+        if (record->characterBestScores[(s8)g_Players[0].characterIndex] < LOWEST_SCORE_TO_PAR) {
+            record->characterBestScores[(s8)g_Players[0].characterIndex] = LOWEST_SCORE_TO_PAR;
+        }
+    }
+
+    total = 0;
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        total += g_Players[0].holes[hole].strokes;
+    }
+    total += record->strokeTotal;
+    if (isAtRoundLimit == TRUE) {
+        total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+    if (total > RECORD_TOTAL_LIMIT) {
+        total = RECORD_TOTAL_LIMIT;
+    }
+    record->strokeTotal = total;
+
+    if (record->longestDrive < stats->longestDrive) {
+        record->longestDrive = stats->longestDrive;
+    }
+    if (record->averagedDriveCount == 0) {
+        if (stats->averagedDriveCount == 0) {
+            record->averageDrive = 0;
+        } else if (stats->averagedDriveCount > 0) {
+            record->averageDrive = stats->averagedDriveTotal / stats->averagedDriveCount;
+            record->averagedDriveCount = 1;
+        } else {
+            record->averageDrive = 0;
+        }
+    } else if (stats->averagedDriveCount > 0) {
+        record->averageDrive = (record->averageDrive * record->averagedDriveCount + stats->averagedDriveTotal) /
+                               (record->averagedDriveCount + stats->averagedDriveCount);
+        record->averagedDriveCount += stats->averagedDriveCount;
+    }
+
+    sum = record->measuredDriveTotal + stats->measuredDriveCount;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->measuredDriveTotal = RECORD_TOTAL_LIMIT;
+    } else {
+        record->measuredDriveTotal = sum;
+    }
+    if (isAtRoundLimit == TRUE) {
+        record->measuredDriveTotal = record->measuredDriveTotal * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+
+    total = 0;
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        if (g_Players[0].holes[hole].putts != UNCOUNTED_PUTTS) {
+            total += g_Players[0].holes[hole].putts;
+        }
+    }
+    total += record->puttTotal;
+    if (isAtRoundLimit == TRUE) {
+        total = total * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+    }
+    if (total > RECORD_TOTAL_LIMIT) {
+        total = RECORD_TOTAL_LIMIT;
+    }
+    record->puttTotal = total;
+
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        if (g_Players[0].holes[hole].strokes <= (s8)course->holes[hole].par) {
+            if (record->parOrBetterCount < RECORD_TOTAL_LIMIT) {
+                record->parOrBetterCount++;
+            }
+            if (isAtRoundLimit == TRUE) {
+                record->parOrBetterCount = record->parOrBetterCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+            }
+        }
+    }
+    for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
+        shotsToGreen = g_Players[0].holes[hole].strokes - g_Players[0].holes[hole].putts;
+        if ((s8)course->holes[hole].par - shotsToGreen >= PAR_ON_SPARE_STROKES) {
+            if (record->parOnCount < RECORD_TOTAL_LIMIT) {
+                record->parOnCount++;
+            }
+            if (isAtRoundLimit == TRUE) {
+                record->parOnCount = record->parOnCount * ROUND_COUNT_LIMIT / (ROUND_COUNT_LIMIT + 1);
+            }
+        }
+    }
+
+    sum = record->unk28 + stats->unk0;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->unk28 = RECORD_TOTAL_LIMIT;
+    } else {
+        record->unk28 = sum;
+    }
+    sum = record->unk2C + stats->unk4;
+    if (sum > RECORD_TOTAL_LIMIT) {
+        record->unk2C = RECORD_TOTAL_LIMIT;
+    } else {
+        record->unk2C = sum;
+    }
+    WriteSaveData();
+}
 
 void StartRoundStats(void) {
     SaveData *save;

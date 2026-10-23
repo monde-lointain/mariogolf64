@@ -1192,7 +1192,7 @@ void InvalidateBrokenSavedGames(void) {
         }
         for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
             player = &save->savedPlayers[index][entryIndex];
-            if (player->unk1D >= COURSE_HOLE_COUNT) {
+            if (player->characterIndex >= CHARACTER_COUNT) {
                 isInvalid[index] = TRUE;
             }
             if (player->unk7B >= 4) {
@@ -1437,14 +1437,14 @@ void ComputeRoundStatistics(void) {
         } else {
             /* unk14 is left as it was */
             reciprocal = 1.0f / entry->roundCount;
-            D_80105C38[courseIndex].unk4 = entry->unk4;
-            D_80105C38[courseIndex].unk8 = entry->unk8 * reciprocal;
+            D_80105C38[courseIndex].unk4 = entry->bestScore;
+            D_80105C38[courseIndex].unk8 = entry->strokeTotal * reciprocal;
             D_80105C38[courseIndex].unkC = entry->longestDrive * UNK_SCALE;
-            D_80105C38[courseIndex].unk10 = entry->unk10 * UNK_SCALE;
-            D_80105C38[courseIndex].unk18 = entry->unk18 * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk1C = entry->unk1C * reciprocal * (1.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk20 = entry->unk20 * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk24 = entry->unk24 * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk10 = entry->averageDrive * UNK_SCALE;
+            D_80105C38[courseIndex].unk18 = entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk1C = entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk20 = entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].unk24 = entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
             sum = entry->unk28 + entry->unk2C;
             if (sum <= 0) {
                 D_80105C38[courseIndex].unk28 = 0.0f;
@@ -1507,15 +1507,15 @@ void ComputeRoundStatistics(void) {
     for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
         entry = &saved[courseIndex];
         if (emptyCount < D_80105C38[courseIndex].roundCount) {
-            sum18 += entry->unk18;
-            sum1C += entry->unk1C;
-            sum20 += entry->unk20;
-            sum24 += entry->unk24;
-            sum8 += entry->unk8;
+            sum18 += entry->measuredDriveTotal;
+            sum1C += entry->puttTotal;
+            sum20 += entry->parOrBetterCount;
+            sum24 += entry->parOnCount;
+            sum8 += entry->strokeTotal;
             sum28 += entry->unk28;
             sum28And2C += entry->unk28 + entry->unk2C;
-            sum14 += entry->unk14;
-            sum10 += entry->unk10 * UNK_SCALE * entry->unk14;
+            sum14 += entry->averagedDriveCount;
+            sum10 += entry->averageDrive * UNK_SCALE * entry->averagedDriveCount;
         }
     }
     if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {

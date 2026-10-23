@@ -1816,3 +1816,4 @@ g_SkinsTotals = 0x80106230; // size:0x8
 g_SkinsCarryover = 0x801050BC; // size:0x3
 SettleNassau = 0x8006DFF0; // type:func
 SettleHoleBets = 0x8006E210; // type:func
+RecordCourseRound = 0x8006D6D0; // type:func

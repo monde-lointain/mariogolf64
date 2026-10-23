@@ -2,6 +2,7 @@
 #define SAVE_H
 
 #include <ultra64.h>
+#include "character.h"
 #include "club.h"
 #include "variables.h"
 
@@ -145,19 +146,21 @@ typedef struct RoundStats {
 
 typedef struct UnkE98 {
     /* 0x00 */ s32 roundCount;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 unk8;
+    /* 0x04 */ s32 bestScore;          /* The lowest net score to par over a round */
+    /* 0x08 */ s32 strokeTotal;
     /* 0x0C */ s32 longestDrive;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 unk24;
-    /* 0x28 */ s32 unk28;
-    /* 0x2C */ s32 unk2C;
+    /* 0x10 */ s32 averageDrive;
+    /* 0x14 */ s32 averagedDriveCount;
+    /* 0x18 */ s32 measuredDriveTotal; /* The sum of RoundStats.measuredDriveCount */
+    /* 0x1C */ s32 puttTotal;
+    /* 0x20 */ s32 parOrBetterCount;   /* Holes played in par or fewer strokes */
+    /* 0x24 */ s32 parOnCount;         /* Holes whose green was reached with two strokes to spare */
+    /* 0x28 */ s32 unk28;              /* The sum of RoundStats.unk0 */
+    /* 0x2C */ s32 unk2C;              /* The sum of RoundStats.unk4 */
     /* 0x30 */ s32 hasPlace[TOURNAMENT_PLACE_COUNT]; /* In a tournament on the course */
-    /* 0x3C */ u8 unk3C[0x74 - 0x3C];
+    /* 0x3C */ s16 characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
+    /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
+    /* 0x72 */ u8 unk72[0x74 - 0x72];
 } UnkE98; /* size = 0x74 */
 
 typedef struct SavedGame {
@@ -169,10 +172,13 @@ typedef struct SavedGame {
     /* 0x9C */ u8 unk9C[4];
 } SavedGame; /* size = 0xA0 */
 
+/* PlayerHole.putts when they were not counted */
+#define UNCOUNTED_PUTTS -1
+
 /* A player's results on one hole */
 typedef struct PlayerHole {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ s8 strokes;
+    /* 0x0 */ s8 strokes;
+    /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
 } PlayerHole; /* size = 0x2 */
 
 typedef struct UnkB8 {
@@ -180,7 +186,7 @@ typedef struct UnkB8 {
     /* 0x0C */ s32 unkC;
     /* 0x10 */ s32 unk10[(0x1C - 0x10) / 4];
     /* 0x1C */ u8 unk1C;
-    /* 0x1D */ u8 unk1D;
+    /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
     /* 0x1E */ u8 unk1E[0x22 - 0x1E];
     /* 0x22 */ s8 unk22;
     /* 0x23 */ s8 unk23;
@@ -188,8 +194,9 @@ typedef struct UnkB8 {
     /* 0x26 */ s8 unk26;
     /* 0x27 */ u8 unk27[2];
     /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
-    /* 0x2A */ PlayerHole holes[COURSE_HOLE_COUNT];
-    /* 0x4E */ u8 unk4E[0x52 - 0x4E];
+    /* 0x2A */ u8 unk2A;
+    /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
+    /* 0x4F */ u8 unk4F[0x52 - 0x4F];
     /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
     /* 0x72 */ u8 unk72[0x78 - 0x72];
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */

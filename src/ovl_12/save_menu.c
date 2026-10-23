@@ -444,9 +444,9 @@ void OpenSaveMenu(s32 kind) {
                 state = &save->savedGames[slot].state;
                 for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
                     player = &save->savedPlayers[slot][playerIndex];
-                    OpenEncodedAsset(D_800C547C[(s8)player->unk1D] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+                    OpenEncodedAsset(D_800C547C[(s8)player->characterIndex] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
                     ReadEncodedAsset(sCharacterImages[slot * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
-                    OpenAssetFile(D_800C54A0[(s8)player->unk1D] + (s8)player->unk7B, &file);
+                    OpenAssetFile(D_800C54A0[(s8)player->characterIndex] + (s8)player->unk7B, &file);
                     ReadAssetFile(sCharacterFiles[slot * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
                                   &file);
                 }
@@ -913,9 +913,9 @@ void SaveGameToSlot(void) {
         AnimateModeIcons(TRUE);
         for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
             player = &save->savedPlayers[sCursorIndex][playerIndex];
-            OpenEncodedAsset(D_800C547C[(s8)player->unk1D] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+            OpenEncodedAsset(D_800C547C[(s8)player->characterIndex] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
             ReadEncodedAsset(sCharacterImages[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
-            OpenAssetFile(D_800C54A0[(s8)player->unk1D] + (s8)player->unk7B, &file);
+            OpenAssetFile(D_800C54A0[(s8)player->characterIndex] + (s8)player->unk7B, &file);
             ReadAssetFile(sCharacterFiles[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
                           &file);
         }
