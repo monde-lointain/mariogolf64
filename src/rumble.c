@@ -288,27 +288,32 @@ void LoadHelpBoardImage(void *buffer, s32 image) {
 }
 
 /* Clears every text slot of the help board */
-#define CLEAR_HELP_TEXT(index)                                                                       \
-    for (index = 0; index != HELP_TEXT_SLOT_COUNT; index++) {                                      \
-        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);                          \
-    }
+static inline void ClearHelpText(void) {
+    s32 index;
 
-#define SET_HELP_TEXT_COLORS()                                                                       \
-    SetTextPaletteColor(0xFF, 0xFF, 0, 0);                                                           \
-    SetTextPaletteColor(0xFF, 0xFF, 0, 1);                                                           \
-    SetTextPaletteColor(0xFF, 0x7F, 0x7F, 2);                                                        \
-    SetTextPaletteColor(0x3F, 0xFF, 0x3F, 3)
+    for (index = 0; index != HELP_TEXT_SLOT_COUNT; index++) {
+        SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+    }
+}
+
+static inline void SetHelpTextColors(void) {
+    SetTextPaletteColor(0xFF, 0xFF, 0, 0);
+    SetTextPaletteColor(0xFF, 0xFF, 0, 1);
+    SetTextPaletteColor(0xFF, 0x7F, 0x7F, 2);
+    SetTextPaletteColor(0x3F, 0xFF, 0x3F, 3);
+}
 
 /* Shows the open topic's title and its current page */
-#define SHOW_TOPIC_PAGE()                                                                            \
-    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);               \
-    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);                \
-    SET_HELP_TEXT_COLORS();                                                                          \
-    SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, sTopicTitleMessages[sOpenTopic], 1, HELP_TEXT_SLOT_TITLE, 2, \
-                0xFF, 0xFF, 0xFF, 0xFF);                                                             \
-    SET_HELP_TEXT_COLORS();                                                                          \
-    SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y, sTopicTitleMessages[sOpenTopic] + sTopicPage, 1,         \
-                HELP_TEXT_SLOT_PAGE, 3, 0xFF, 0xFF, 0xFF, 0xFF)
+static inline void ShowTopicPage(void) {
+    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_TITLE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+    SetHelpTextColors();
+    SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, sTopicTitleMessages[sOpenTopic], 1, HELP_TEXT_SLOT_TITLE, 2, 0xFF,
+                0xFF, 0xFF, 0xFF);
+    SetHelpTextColors();
+    SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y, sTopicTitleMessages[sOpenTopic] + sTopicPage, 1, HELP_TEXT_SLOT_PAGE, 3,
+                0xFF, 0xFF, 0xFF, 0xFF);
+}
 
 /* Opens and pages through topics with A, closes them or leaves with B, and moves through the list */
 void UpdateHelpBoard(void) {
@@ -321,21 +326,21 @@ void UpdateHelpBoard(void) {
     if (D_800C2000 & A_BUTTON) {
         if (sOpenTopic == 0) {
             sOpenTopic = memory->helpTopicIndex + 1;
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
             PlaySound(0x5D, 0xF, 0x50);
             sTopicPage++;
-            SHOW_TOPIC_PAGE();
+            ShowTopicPage();
         } else if (sTopicPage < sTopicPageCounts[sOpenTopic]) {
             if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
                 PlaySound(0x5D, 0xF, 0x50);
                 sTopicPage++;
-                SHOW_TOPIC_PAGE();
+                ShowTopicPage();
             } else {
                 RevealTextSlot(HELP_TEXT_SLOT_TITLE);
                 RevealTextSlot(HELP_TEXT_SLOT_PAGE);
             }
         } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
             sOpenTopic = 0;
             sTopicPage = 0;
         } else {
@@ -355,11 +360,11 @@ void UpdateHelpBoard(void) {
             FreeAllCharacterSlots();
             D_800FE334 = 0;
             sOpenTopic = 0;
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
         } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) && IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
             sOpenTopic = 0;
             sTopicPage = 0;
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
         } else {
             RevealTextSlot(HELP_TEXT_SLOT_TITLE);
             RevealTextSlot(HELP_TEXT_SLOT_PAGE);
@@ -375,7 +380,7 @@ void UpdateHelpBoard(void) {
             } else {
                 memory->helpTopicIndex--;
             }
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
         }
     } else if (D_800C2000 & D_JPAD) {
         if (sOpenTopic == 0) {
@@ -388,7 +393,7 @@ void UpdateHelpBoard(void) {
             } else {
                 memory->helpTopicIndex++;
             }
-            CLEAR_HELP_TEXT(index);
+            ClearHelpText();
         }
     }
 }
