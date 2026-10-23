@@ -1,12 +1,14 @@
 #include "asset.h"
 #include "billboard.h"
 #include "common.h"
+#include "debug_text.h"
 #include "functions.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "save.h"
 #include "scene.h"
 #include "terrain.h"
+#include "variables.h"
 #include "work_area.h"
 
 /* A ground tile's vertices start at its column and row shifted by this */
@@ -136,7 +138,53 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EB98_ovl_02);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024EDD8_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F014_ovl_02);
+/*
+ * The paint logic of the mini-golf course. It returns a cell's colour in
+ * the upper half and its painted terrain code in the lower: greens are
+ * striped and edged, TERRAIN_CODE_UNK3 is mottled with random colours, and
+ * anything other than out of bounds is painted white as out of bounds.
+ */
+s32 PaintMiniGolfTerrain(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 isOtherNearest;
+    s32 random;
+
+    switch (code) {
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
+            break;
+        case TERRAIN_CODE_GREEN:
+            /* The assignment in the test is there to match */
+            if ((isOtherNearest = nearestCode != TERRAIN_CODE_GREEN) && nearestDistance < 2) {
+                color = 0x650B;
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 8) {
+                    color = (x & 4) ? 0xCE72 : 0x650B;
+                } else {
+                    color = (x & 4) ? 0x650B : 0xCE72;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x3CC;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F118_ovl_02);
 
@@ -233,7 +281,28 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_8025524C_ovl_02);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802509BC_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250C54_ovl_02);
+/*
+ * Moves the rings, from the first triangle that is one, to the last
+ * triangle slots
+ */
+void MoveRingsToEnd(void) {
+    s32 i;
+    s32 slot;
+
+    PrintDebugText("Change Start", 19, 19);
+    for (i = 0; i != HOLE_TRIANGLE_COUNT - RING_COUNT; i++) {
+        if (g_WorkArea.hole.triangles[i].kind == HOLE_TRIANGLE_KIND_RING) {
+            for (slot = HOLE_TRIANGLE_COUNT - RING_COUNT; slot != HOLE_TRIANGLE_COUNT; slot++, i++) {
+                sprintf(g_PrintBuffer, "%d <-- %d", slot, i);
+                PrintDebugText(g_PrintBuffer, 4, -141);
+                g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
+                bzero(&g_WorkArea.hole.triangles[i], sizeof(HoleTriangle));
+            }
+            PrintDebugText("Change End", 19, 19);
+            return;
+        }
+    }
+}
 
 /* Clears everything a hole is built into */
 void ClearHoleBuild(void) {
@@ -344,7 +413,72 @@ void InitGridVertices(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802510D4_ovl_02);
+/*
+ * Places each ground tile's midpoints at fixed quarter and half steps
+ * across the tile, with texture coordinates from their positions
+ */
+void InitTileMidpoints(void) {
+    /* Each midpoint's x and z offsets from its tile's origin */
+    s16 offsets[TILE_MIDPOINT_COUNT][2];
+    s16 x;
+    s16 z;
+    s32 tile;
+    s32 i;
+
+    offsets[0][0] = 0x80;
+    offsets[0][1] = 0;
+    offsets[1][0] = 0x180;
+    offsets[1][1] = 0;
+    offsets[2][0] = 0;
+    offsets[2][1] = 0x80;
+    offsets[3][0] = 0x200;
+    offsets[3][1] = 0x80;
+    offsets[4][0] = 0;
+    offsets[4][1] = 0x180;
+    offsets[5][0] = 0x200;
+    offsets[5][1] = 0x180;
+    offsets[6][0] = 0x80;
+    offsets[6][1] = 0x200;
+    offsets[7][0] = 0x180;
+    offsets[7][1] = 0x200;
+    offsets[8][0] = 0x80;
+    offsets[8][1] = 0x80;
+    offsets[9][0] = 0x100;
+    offsets[9][1] = 0x80;
+    offsets[10][0] = 0x180;
+    offsets[10][1] = 0x80;
+    offsets[11][0] = 0x80;
+    offsets[11][1] = 0x100;
+    offsets[12][0] = 0x180;
+    offsets[12][1] = 0x100;
+    offsets[13][0] = 0x80;
+    offsets[13][1] = 0x180;
+    offsets[14][0] = 0x100;
+    offsets[14][1] = 0x180;
+    offsets[15][0] = 0x180;
+    offsets[15][1] = 0x180;
+    x = 0;
+    z = 0;
+    for (tile = 0; tile < GROUND_TILE_COUNT; tile++) {
+        for (i = 0; i < TILE_MIDPOINT_COUNT; i++) {
+            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_X] = x + offsets[i][0];
+            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Y] = 0;
+            g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Z] = z + offsets[i][1];
+            g_WorkArea.hole.midpoints[tile][i].v.flag = 0;
+            g_WorkArea.hole.midpoints[tile][i].v.tc[0] = (x + offsets[i][0]) * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+            g_WorkArea.hole.midpoints[tile][i].v.tc[1] = (z + offsets[i][1]) * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+            g_WorkArea.hole.midpoints[tile][i].v.cn[0] = 0;
+            g_WorkArea.hole.midpoints[tile][i].v.cn[1] = 0;
+            g_WorkArea.hole.midpoints[tile][i].v.cn[2] = 0;
+            g_WorkArea.hole.midpoints[tile][i].v.cn[3] = 0;
+        }
+        x += TILE_SPAN;
+        if (x == GROUND_TILE_COLUMN_COUNT * TILE_SPAN) {
+            x = 0;
+            z += TILE_SPAN;
+        }
+    }
+}
 
 /*
  * Unpacks runs of attributes from the hole file into the build buffer, each
