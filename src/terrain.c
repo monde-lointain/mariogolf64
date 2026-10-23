@@ -86,7 +86,7 @@ extern s32 sSceneMenuSelection;
 extern s8 D_800C30D1;
 
 void func_8005D9A0(void);
-void func_8005F838(s32);
+void InitPlay(s32);
 void func_800802E0(void);
 void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
@@ -1145,18 +1145,18 @@ s32 UpdateDebugSceneMenu(void) {
         }
         switch ((u32)g_Scene) {
             case SCENE_PLAY_HOLE:
-                func_8005F838(0);
+                InitPlay(0);
                 ChooseConditionsAndInitHole();
                 func_800802E0();
                 break;
             case SCENE_UNK9:
                 break;
             case SCENE_PLAY_UNK12:
-                func_8005F838(1);
+                InitPlay(1);
                 func_800802E0();
                 break;
             case SCENE_PLAY_UNK13:
-                func_8005F838(2);
+                InitPlay(2);
                 func_800802E0();
                 break;
         }
