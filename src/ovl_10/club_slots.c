@@ -8,6 +8,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
 /*
@@ -180,11 +181,6 @@ typedef struct ClubSlots {
 
 void func_800934CC(s32);
 void SetFramebufferCount(s32 count);
-void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
-                   s32 dtdy);
-void func_8006A548(Gfx **displayListHead, void *tlut);
-void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
-                   s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
 
 extern s32 g_MatrixBufferIndex;
@@ -595,7 +591,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
     gDPPipeSync(gfx++);
-    func_8006A2C0(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+    DrawTextureRect(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
                   TEXEL_STEP_ONE);
 
     /* The reels */
@@ -621,7 +617,7 @@ void DrawClubSlots(Gfx **displayListHead) {
             if (symbolIndex < 0) {
                 symbolIndex += REEL_SYMBOL_COUNT;
             }
-            func_8006A84C(&gfx,
+            LoadTextureBlock(&gfx,
                           sSlots->symbolImages + sReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE
                               + IMAGE_HEADER_SIZE,
                           G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0, 0, 0);
@@ -650,7 +646,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
     gDPPipeSync(gfx++);
-    func_8006A2C0(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+    DrawTextureRect(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
                   TEXEL_STEP_ONE);
 
     /* The slot machine */
@@ -670,13 +666,13 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    func_8006A548(&gfx, sSlots->machineImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, sSlots->machineImage + IMAGE_HEADER_SIZE);
     for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER; top < MACHINE_BOTTOM;
          top += MACHINE_STRIP_HEIGHT, texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
         stripHeight = (top + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM) ? MACHINE_STRIP_HEIGHT : MACHINE_LAST_STRIP_HEIGHT;
         if (!isStripLoaded) {
             isStripLoaded = TRUE;
-            func_8006A84C(&gfx, sSlots->machineImage + texelOffset, G_IM_FMT_CI, G_IM_SIZ_8b, MACHINE_WIDTH,
+            LoadTextureBlock(&gfx, sSlots->machineImage + texelOffset, G_IM_FMT_CI, G_IM_SIZ_8b, MACHINE_WIDTH,
                           stripHeight, 0, 0, 0, 0, 0, 0, 0);
         } else {
             /* The tiles stay as the first strip set them */
@@ -687,25 +683,25 @@ void DrawClubSlots(Gfx **displayListHead) {
                          CALC_DXT(MACHINE_WIDTH, G_IM_SIZ_8b_BYTES));
         }
         gDPPipeSync(gfx++);
-        func_8006A2C0(&gfx, SCREEN_BORDER << 2, top << 2, (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2,
+        DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2, (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2,
                       (top + stripHeight - 1) << 2, G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
     }
 
     /* The stop buttons pushed so far */
-    func_8006A548(&gfx, sSlots->buttonsImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, sSlots->buttonsImage + IMAGE_HEADER_SIZE);
     for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
         if (buttonIndex > sSlots->pressCount - 1) {
             break;
         }
         for (stripIndex = 0; stripIndex != BUTTON_STRIP_COUNT; stripIndex++) {
-            func_8006A84C(&gfx,
+            LoadTextureBlock(&gfx,
                           sSlots->buttonsImage
                               + (LARGE_PALETTED_TEXELS_OFFSET + buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH
                                  + stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH),
                           G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
-            func_8006A2C0(&gfx, (buttonIndex * BUTTON_WIDTH + BUTTON_LEFT) << 2,
+            DrawTextureRect(&gfx, (buttonIndex * BUTTON_WIDTH + BUTTON_LEFT) << 2,
                           (BUTTON_TOP + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
                           (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + buttonIndex * BUTTON_WIDTH) << 2,
                           (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
@@ -739,7 +735,7 @@ void DrawClubSlots(Gfx **displayListHead) {
             sStartAngle = START_MAX_ANGLE;
         }
         gDPPipeSync(gfx++);
-        func_8006A548(&gfx, sSlots->startImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, sSlots->startImage + IMAGE_HEADER_SIZE);
         for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0; stripIndex != START_STRIP_COUNT;
              stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
             stripHeight = (stripIndex != START_STRIP_COUNT - 1) ? START_STRIP_HEIGHT : START_LAST_STRIP_HEIGHT;
@@ -771,13 +767,13 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        func_8006A548(&gfx, D_801321C8[playerIndex]);
+        LoadLargePalette(&gfx, D_801321C8[playerIndex]);
         if (playerIndex == sSlots->playerIndex) {
-            func_8006A84C(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex], G_IM_FMT_CI, G_IM_SIZ_8b,
+            LoadTextureBlock(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex], G_IM_FMT_CI, G_IM_SIZ_8b,
                           FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-            func_8006A2C0(&gfx, FACE_LEFT << 2, (FACE_TOP + playerIndex * FACE_SPACING) << 2,
+            DrawTextureRect(&gfx, FACE_LEFT << 2, (FACE_TOP + playerIndex * FACE_SPACING) << 2,
                           (FACE_LEFT + FACE_SIZE) << 2, (FACE_TOP + FACE_SIZE + playerIndex * FACE_SPACING) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             if (sIsShowingResult == TRUE && ++sFaceFrameTime >= FACE_FRAME_TIME) {
@@ -814,10 +810,10 @@ void DrawClubSlots(Gfx **displayListHead) {
                 }
             }
         } else {
-            func_8006A84C(&gfx, D_801B55E0[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0,
+            LoadTextureBlock(&gfx, D_801B55E0[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0,
                           0, 0, 0);
             gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
-            func_8006A2C0(&gfx, OTHER_FACE_LEFT << 2, (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,
+            DrawTextureRect(&gfx, OTHER_FACE_LEFT << 2, (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,
                           (OTHER_FACE_LEFT + FACE_SIZE) << 2,
                           (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + playerIndex * FACE_SPACING) << 2, G_TX_RENDERTILE, 0,
                           0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -966,7 +962,7 @@ void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scal
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    func_8006A84C(&gfx, sShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0,
+    LoadTextureBlock(&gfx, sShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0,
                   0, 0, 0);
     gDPPipeSync(gfx++);
     shineTime = sShineTime++;

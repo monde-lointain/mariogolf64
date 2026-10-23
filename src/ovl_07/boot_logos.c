@@ -7,6 +7,7 @@
 #include "hole_loader.h"
 #include "scene.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "transfer_pak.h"
 #include "variables.h"
@@ -44,7 +45,7 @@
 #define CAMELOT_SKIP_FRAME_LIMIT 9
 /* The Camelot logo leaves from this frame, once g_HasLoaderFinished is set */
 #define CAMELOT_LEAVE_FRAME 26
-/* The count given to func_8006B56C; the stage ends once func_8006B55C sees it below 2 */
+/* The count given to StartScreenFadeOut; the stage ends once HasScreenFadeEnded sees it below 2 */
 #define LEAVING_COUNTDOWN 16
 
 /* Given this image, func_800719A0 stores it in the slot and sets up nothing else */
@@ -98,14 +99,6 @@ extern N64Logo sN64Logo;
 
 extern s32 D_800B6808;
 
-void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
-                   s32 dtdy);
-void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
-void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
-                   s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
-void func_8006ADF8(s32);
-s32 func_8006B55C(void);
-void func_8006B56C(s32, s32, s32, s32);
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_8008D100(void);
 
@@ -156,7 +149,7 @@ void LeaveBootLogos(void) {
         g_NextScene = 29;
         g_SceneModuleToLoad = 0x1B;
         ResetGameBoyTransfer(0);
-        func_8006ADF8(2);
+        StartWipe(WIPE_OPENING);
     } else if (sHasResetGameState && g_HasLoaderFinished == 1 && g_ControllerCount != 0) {
         g_Scene = SCENE_SWAPPING_MODULES;
         g_SceneModuleToUnload = 0x0C;
@@ -238,9 +231,9 @@ void UpdateBootLogos(void) {
         case BOOT_LOGO_LEAVING_NINTENDO:
         case BOOT_LOGO_LEAVING_CAMELOT:
             if (sBootLogoFrame == 0) {
-                func_8006B56C(0, 0, 0, LEAVING_COUNTDOWN);
+                StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
             }
-            if (func_8006B55C()) {
+            if (HasScreenFadeEnded()) {
                 sBootLogoStage = BOOT_LOGO_N64;
                 sBootLogoFrame = 0;
                 SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -295,9 +288,9 @@ void DrawBootLogos(Gfx **displayListHead) {
             top = N64_LOGO_TOP << 2;
             bottom = (N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT) << 2;
             for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
-                func_8006A84C(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b, N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0,
+                LoadTextureBlock(&gfx, n64Texels, G_IM_FMT_RGBA, G_IM_SIZ_16b, N64_LOGO_WIDTH, N64_LOGO_STRIP_HEIGHT, 0,
                               0, 0, 0, 0, 0, 0);
-                func_8006A2C0(&gfx, N64_LOGO_LEFT << 2, top, (N64_LOGO_LEFT + N64_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
+                DrawTextureRect(&gfx, N64_LOGO_LEFT << 2, top, (N64_LOGO_LEFT + N64_LOGO_WIDTH) << 2, bottom, 0, 0, 0,
                               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
                 bottom += N64_LOGO_STRIP_HEIGHT << 2;
                 top += N64_LOGO_STRIP_HEIGHT << 2;
@@ -327,7 +320,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                                    NINTENDO_LOGO_WIDTH, NINTENDO_LOGO_STRIP_HEIGHT, 0, 0, NINTENDO_LOGO_WIDTH - 1,
                                    NINTENDO_LOGO_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-                func_8006A2C0(&gfx, NINTENDO_LOGO_LEFT << 2, top, (NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH) << 2,
+                DrawTextureRect(&gfx, NINTENDO_LOGO_LEFT << 2, top, (NINTENDO_LOGO_LEFT + NINTENDO_LOGO_WIDTH) << 2,
                               bottom, 0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
                 bottom += NINTENDO_LOGO_STRIP_HEIGHT << 2;
                 top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
@@ -347,7 +340,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                               0);
             gDPPipeSync(gfx++);
             gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-            func_8006A4A0(&gfx, 0, sCamelotLogo.palette);
+            LoadSmallPalette(&gfx, 0, sCamelotLogo.palette);
             texelOffset = 0;
             top = CAMELOT_LOGO_TOP << 2;
             bottom = (CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT) << 2;
@@ -356,7 +349,7 @@ void DrawBootLogos(Gfx **displayListHead) {
                                       CAMELOT_LOGO_WIDTH, CAMELOT_LOGO_STRIP_HEIGHT, 0, 0, CAMELOT_LOGO_WIDTH - 1,
                                       CAMELOT_LOGO_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
                                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-                func_8006A2C0(&gfx, CAMELOT_LOGO_LEFT << 2, top, (CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH) << 2,
+                DrawTextureRect(&gfx, CAMELOT_LOGO_LEFT << 2, top, (CAMELOT_LOGO_LEFT + CAMELOT_LOGO_WIDTH) << 2,
                               bottom, 0, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
                 bottom += CAMELOT_LOGO_STRIP_HEIGHT << 2;
                 top += CAMELOT_LOGO_STRIP_HEIGHT << 2;

@@ -9,6 +9,7 @@
 #include "save.h"
 #include "scoring.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
 /*
@@ -149,14 +150,6 @@
 #define RING_SHOT_TEXT_SLOT 2
 #define TEXT_FONT_SIZE 16
 
-void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
-                   s32 dtdy);
-void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
-void func_8006A548(Gfx **displayListHead, void *tlut);
-void func_8006A5E4(Gfx **displayListHead, void *texels, s32 format, s32 width, s32 height, s32 palette, s32 cms,
-                   s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
-void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
-                   s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 void func_80071608(Gfx **displayListHead);
 void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
@@ -549,7 +542,7 @@ void DrawPlanks(Gfx **displayListHead) {
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    func_8006A548(&gfx, sPlanksImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, sPlanksImage + IMAGE_HEADER_SIZE);
     switch (sPlankMotion) {
         case PLANKS_SHUT:
             break;
@@ -588,14 +581,14 @@ void DrawPlanks(Gfx **displayListHead) {
             }
         }
         gDPPipeSync(gfx++);
-        func_8006A84C(&gfx,
+        LoadTextureBlock(&gfx,
                       sPlanksImage + LARGE_PALETTED_TEXELS_OFFSET + stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
                       G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0, 0);
         top = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT) << 2;
         bottom = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT + stripHeight) << 2;
-        func_8006A2C0(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom, G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5,
+        DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom, G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5,
                       1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        func_8006A2C0(&gfx, (SCREEN_WIDTH - slide) << 2, top, (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom,
+        DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top, (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom,
                       G_TX_RENDERTILE, (PLANKS_WIDTH / 2) << 5, 1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
     *displayListHead = gfx;
@@ -623,12 +616,12 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_POINT);
-        func_8006A548(&gfx, sCourseImagePalette);
+        LoadLargePalette(&gfx, sCourseImagePalette);
         for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
-            func_8006A84C(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
+            LoadTextureBlock(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
                           COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
-            func_8006A2C0(&gfx, COURSE_IMAGE_LEFT << 2,
+            DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
                           (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + RING_SHOT_COURSE_IMAGE_TOP) << 2,
                           (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
                           (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + RING_SHOT_COURSE_IMAGE_TOP +
@@ -643,20 +636,20 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        func_8006A4A0(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+        LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
         if (D_801B60B9 == 0 && CountOpenRingShotCourses() >= 2) {
             arrowFrame = sCourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
-            func_8006A5E4(&gfx, sArrowsImage + PALETTED_TEXELS_OFFSET + arrowFrame * ARROWS_FRAME_SIZE,
+            LoadNibbleTextureBlock(&gfx, sArrowsImage + PALETTED_TEXELS_OFFSET + arrowFrame * ARROWS_FRAME_SIZE,
                           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
             push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-            func_8006A2C0(&gfx, ARROW_LEFT << 2,
+            DrawTextureRect(&gfx, ARROW_LEFT << 2,
                           (sPressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
                           (ARROW_LEFT + ARROW_SIZE) << 2,
                           (sPressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2, G_TX_RENDERTILE, 0, 0,
                           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-            func_8006A2C0(&gfx, ARROW_LEFT << 2,
+            DrawTextureRect(&gfx, ARROW_LEFT << 2,
                           (sPressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
                           (ARROW_LEFT + ARROW_SIZE) << 2,
                           (sPressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2, G_TX_RENDERTILE, 0,
@@ -703,7 +696,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        func_8006A548(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
         for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
             gDPLoadTextureTile(gfx++,
                                sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
@@ -712,7 +705,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
                                HOLE_SIGN_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
             gDPPipeSync(gfx++);
-            func_8006A2C0(&gfx, HOLE_SIGN_LEFT << 2,
+            DrawTextureRect(&gfx, HOLE_SIGN_LEFT << 2,
                           (stripIndex * HOLE_SIGN_STRIP_HEIGHT - (sSlideOffset - HOLE_SIGN_TOP)) << 2,
                           (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
                           (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
@@ -721,12 +714,12 @@ void DrawHoleSelect(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
         }
         TurnCourseImage();
-        func_8006A548(&gfx, sCourseImagePalette);
+        LoadLargePalette(&gfx, sCourseImagePalette);
         for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
-            func_8006A84C(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
+            LoadTextureBlock(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
                           COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
-            func_8006A2C0(&gfx, COURSE_IMAGE_LEFT << 2,
+            DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
                           (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + HOLE_COURSE_IMAGE_TOP) << 2,
                           (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
                           (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + HOLE_COURSE_IMAGE_TOP +
@@ -742,14 +735,14 @@ void DrawHoleSelect(Gfx **displayListHead) {
         gDPSetTextureFilter(gfx++, G_TF_BILERP);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        func_8006A4A0(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
-        func_8006A5E4(&gfx,
+        LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx,
                       sArrowsImage + PALETTED_TEXELS_OFFSET +
                           ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) * ARROWS_FRAME_SIZE),
                       G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         gDPPipeSync(gfx++);
         push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-        func_8006A2C0(&gfx, ARROW_LEFT << 2,
+        DrawTextureRect(&gfx, ARROW_LEFT << 2,
                       (sPressedDirection != DIRECTION_UP ? push + 140 + sSlideOffset
                                                          : push + 140 + sSlideOffset - ARROW_STEP) << 2,
                       (ARROW_LEFT + ARROW_SIZE) << 2,
@@ -757,7 +750,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
                                                          : push + 156 + sSlideOffset - ARROW_STEP) << 2,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-        func_8006A2C0(&gfx, ARROW_LEFT << 2,
+        DrawTextureRect(&gfx, ARROW_LEFT << 2,
                       (sPressedDirection != DIRECTION_DOWN ? push + 212 + sSlideOffset
                                                            : push + 212 + sSlideOffset + ARROW_STEP) << 2,
                       (ARROW_LEFT + ARROW_SIZE) << 2,
@@ -766,11 +759,11 @@ void DrawHoleSelect(Gfx **displayListHead) {
                       G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         gDPPipeSync(gfx++);
         if (!IsOnDrivingRange()) {
-            func_8006A2C0(&gfx, (sPressedDirection == DIRECTION_LEFT ? 100 : 104) << 2, (44 - sSlideOffset) << 2,
+            DrawTextureRect(&gfx, (sPressedDirection == DIRECTION_LEFT ? 100 : 104) << 2, (44 - sSlideOffset) << 2,
                           (sPressedDirection == DIRECTION_LEFT ? 116 : 120) << 2, (60 - sSlideOffset) << 2,
                           G_TX_RENDERTILE, 0, 3 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             gDPPipeSync(gfx++);
-            func_8006A2C0(&gfx, (sPressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2, (44 - sSlideOffset) << 2,
+            DrawTextureRect(&gfx, (sPressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2, (44 - sSlideOffset) << 2,
                           (sPressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2, (60 - sSlideOffset) << 2,
                           G_TX_RENDERTILE, 0, 2 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
             gDPPipeSync(gfx++);
@@ -810,13 +803,13 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    func_8006A548(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
     for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
-        func_8006A84C(&gfx, sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+        LoadTextureBlock(&gfx, sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
                                 stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
                       G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         gDPPipeSync(gfx++);
-        func_8006A2C0(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2, (top - 15) << 2,
+        DrawTextureRect(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2, (top - 15) << 2,
                       (centerX + NAME_PLATE_HALF_WIDTH) << 2, (top - 5) << 2, G_TX_RENDERTILE, 0, 0,
                       NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
         top += NAME_PLATE_STRIP_HEIGHT;
@@ -848,24 +841,24 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
     u8 *starImage = sStarImages[sStarBufferIndex];
     u8 *emptyStarImage;
 
-    func_8006A4A0(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
     gDPLoadTextureBlock_4b(gfx++, starImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT,
                            TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
                            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     emptyStarImage = sEmptyStarImages[sStarBufferIndex];
-    func_8006A4A0(&gfx, TILE_SPINNING_EMPTY_STAR, emptyStarImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, emptyStarImage + IMAGE_HEADER_SIZE);
     gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
                          STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR,
                          TILE_SPINNING_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                          G_TX_NOLOD);
-    func_8006A4A0(&gfx, TILE_STILL_STAR, sStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, TILE_STILL_STAR, sStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
     gDPLoadMultiBlock_4b(gfx++, sStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
                          STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT,
                          TILE_STILL_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
                          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    func_8006A4A0(&gfx, TILE_STILL_EMPTY_STAR, sEmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR, sEmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
     gDPLoadMultiBlock_4b(gfx++, sEmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
                          STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH,
                          STAR_HEIGHT, TILE_STILL_EMPTY_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -887,7 +880,7 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
             tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0) ? TILE_STILL_EMPTY_STAR
                                                                            : TILE_STILL_STAR;
         }
-        func_8006A2C0(&gfx, (left - width / 2) << 2, (STARS_TOP - height / 2) << 2,
+        DrawTextureRect(&gfx, (left - width / 2) << 2, (STARS_TOP - height / 2) << 2,
                       (left + width / 2 + STAR_WIDTH) << 2, (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
                       (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
                       (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));

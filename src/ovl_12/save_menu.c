@@ -9,6 +9,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
 
@@ -107,11 +108,6 @@
 #define PAUSE_SCREEN_NONE 0
 #define PAUSE_SCREEN_UNK6 6
 
-/* The prompts that func_8006BA24 opens */
-#define PROMPT_OVERWRITE_GAME 0
-#define PROMPT_END_GAME 1
-#define PROMPT_OVERWRITE_REPLAY 2
-#define PROMPT_SKIP_REPLAY 5
 
 /* What UpdateReplaySaveMenu returns */
 #define REPLAY_MENU_OPEN 0
@@ -302,16 +298,8 @@ void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
 void func_800934CC(s32);
 void func_80060358(void);
-s32 func_8006BA10(void);
-void func_8006BA24(s32 prompt);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
-void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
-                   s32 dtdy);
-void func_8006A4A0(Gfx **displayListHead, s32 palette, void *tlut);
-void func_8006A548(Gfx **displayListHead, void *tlut);
-void func_8006A5E4(Gfx **displayListHead, void *texels, s32 format, s32 width, s32 height, s32 palette, s32 cms,
-                   s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 void func_80071608(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
 void func_800734F0(Gfx **displayListHead, s32);
@@ -319,8 +307,6 @@ void func_800747B0(Gfx **displayListHead, s16 x, s16 y, char *text);
 void func_8007624C(Gfx **displayListHead, s32 x, s32 y, char *text, s32, s32, s32 fontSize);
 s32 func_800738BC(char *text, s32 fontSize);
 void func_80073F24(Gfx **displayListHead, s16 x, s16 y, char *text);
-void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
-                   s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names hold 0 or 3 */
 s8 sModeIcons[GAME_MODE_ICON_COUNT] = {
@@ -633,9 +619,9 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         /* The wave's height is never used */
         sinf(sPanelWaveAngle);
         sPanelWaveAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
-        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
         for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
-            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + strip * PANEL_STRIP_SIZE,
+            LoadTextureBlock(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + strip * PANEL_STRIP_SIZE,
                           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
                           G_TX_MIRROR, 0, 0, 0, 0);
             for (index = 0; index != SAVED_GAME_COUNT; index++) {
@@ -646,7 +632,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                     gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
                 }
                 stripHeight = GAME_PANEL_STRIP_HEIGHT;
-                func_8006A2C0(&gfx, (sSlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
+                DrawTextureRect(&gfx, (sSlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
                               (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
                                stripHeight * PANEL_STRIP_COUNT / 2) << 2,
                               (sSlideOffsets[index] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
@@ -662,7 +648,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
             }
             stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
-            func_8006A2C0(&gfx, (sSlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
+            DrawTextureRect(&gfx, (sSlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
                           (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING + strip * stripHeight -
                                stripHeight * PANEL_STRIP_COUNT / 2) << 2,
                           (sSlideOffsets[index] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
@@ -684,7 +670,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
         sTitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
-        func_8006A548(&gfx, (u8 *)sSaveMenuTitleImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, (u8 *)sSaveMenuTitleImage + IMAGE_HEADER_SIZE);
         imageLeft = TITLE_IMAGE_LEFT;
         /* The strips are counted with row; reusing it is there to match */
         for (row = 0; row != TITLE_STRIP_COUNT; row++) {
@@ -708,7 +694,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
 
         /* Each saved game's mode icon, from the image not being loaded into */
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
-            func_8006A548(&gfx, (u8 *)sModeIconImages[row][sIconImageIndex ^ 1] + IMAGE_HEADER_SIZE);
+            LoadLargePalette(&gfx, (u8 *)sModeIconImages[row][sIconImageIndex ^ 1] + IMAGE_HEADER_SIZE);
             if (save->savedGames[row].isValid) {
                 gDPPipeSync(gfx++);
                 if (row == sCursorIndex) {
@@ -719,12 +705,12 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 }
                 gDPPipeSync(gfx++);
                 for (index = 0; index != MODE_ICON_PART_COUNT; index++) {
-                    func_8006A84C(&gfx,
+                    LoadTextureBlock(&gfx,
                                   (u8 *)sModeIconImages[row][sIconImageIndex ^ 1] + LARGE_PALETTED_TEXELS_OFFSET +
                                       index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE,
                                   G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT, 0, G_TX_MIRROR,
                                   G_TX_MIRROR, 0, 0, 0, 0);
-                    func_8006A2C0(&gfx, (sSlideOffsets[row] + MODE_ICON_LEFT) << 2,
+                    DrawTextureRect(&gfx, (sSlideOffsets[row] + MODE_ICON_LEFT) << 2,
                                   (MODE_ICON_TOP + row * GAME_ROW_SPACING + index * (MODE_ICON_PART_HEIGHT / 2)) << 2,
                                   (sSlideOffsets[row] + MODE_ICON_LEFT + MODE_ICON_SIZE / 2) << 2,
                                   (MODE_ICON_TOP + row * GAME_ROW_SPACING + index * (MODE_ICON_PART_HEIGHT / 2) +
@@ -754,11 +740,11 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
                 }
                 gDPPipeSync(gfx++);
                 for (index = 0; index != state->playerCount; index++) {
-                    func_8006A548(&gfx, sCharacterFiles[row * MAX_PLAYER_COUNT + index]);
-                    func_8006A84C(&gfx, sCharacterImages[row * MAX_PLAYER_COUNT + index], G_IM_FMT_CI,
+                    LoadLargePalette(&gfx, sCharacterFiles[row * MAX_PLAYER_COUNT + index]);
+                    LoadTextureBlock(&gfx, sCharacterImages[row * MAX_PLAYER_COUNT + index], G_IM_FMT_CI,
                                   G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0,
                                   0);
-                    func_8006A2C0(&gfx,
+                    DrawTextureRect(&gfx,
                                   (index * GOLFER_SPACING + (sSlideOffsets[row] + golfersLeft) -
                                    state->playerCount * (GOLFER_SPACING / 2)) << 2,
                                   (GOLFER_TOP + row * GAME_ROW_SPACING) << 2,
@@ -785,25 +771,25 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+            DrawTextureRect(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
                           (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
                           (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX)) << 2,
                           (rowTop + sCursorIndex * GAME_ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+            DrawTextureRect(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
                           (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING)) << 2,
                           (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX)) << 2,
                           (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING) +
                            CURSOR_FRAME_THICKNESS) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
+            DrawTextureRect(&gfx, (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex]) << 2,
                           (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
                           (sSlideOffsets[sCursorIndex] + centerX - rowHalfWidths[sCursorIndex] +
                            CURSOR_FRAME_THICKNESS) << 2,
                           (rowHeights[sCursorIndex] + (rowTop + sCursorIndex * GAME_ROW_SPACING) +
                            CURSOR_FRAME_THICKNESS) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx,
+            DrawTextureRect(&gfx,
                           (rowHalfWidths[sCursorIndex] + (sSlideOffsets[sCursorIndex] + centerX) -
                            CURSOR_FRAME_THICKNESS) << 2,
                           (rowTop + sCursorIndex * GAME_ROW_SPACING) << 2,
@@ -994,7 +980,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             }
             break;
         case SAVE_MENU_STATE_CHOOSING:
-            if (!func_8006BA10()) {
+            if (!IsPromptClosed()) {
                 break;
             }
             if (controller->pressedButtons & B_BUTTON) {
@@ -1009,7 +995,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                 if (sCursorIndex >= 0 && sCursorIndex < SAVED_GAME_COUNT) {
                     if (save->savedGames[sCursorIndex].isValid) {
                         D_800C306C = PAUSE_SCREEN_UNK6;
-                        func_8006BA24(PROMPT_OVERWRITE_GAME);
+                        OpenPrompt(PROMPT_OVERWRITE_GAME);
                         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                     } else {
                         SaveGameToSlot();
@@ -1017,7 +1003,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                     }
                 } else {
                     D_800C306C = PAUSE_SCREEN_UNK6;
-                    func_8006BA24(PROMPT_END_GAME);
+                    OpenPrompt(PROMPT_END_GAME);
                 }
                 break;
             }
@@ -1126,7 +1112,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
             }
             break;
         case SAVE_MENU_STATE_CHOOSING:
-            if (!func_8006BA10()) {
+            if (!IsPromptClosed()) {
                 break;
             }
             if (controller->pressedButtons & A_BUTTON) {
@@ -1134,7 +1120,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                     /* The pointer arithmetic is there to match */
                     if ((save->unk1DF0 + sCursorIndex)->unk36 & RECORD_IN_USE) {
                         D_800C306C = PAUSE_SCREEN_UNK6;
-                        func_8006BA24(PROMPT_OVERWRITE_REPLAY);
+                        OpenPrompt(PROMPT_OVERWRITE_REPLAY);
                         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                         return REPLAY_MENU_PROMPTING;
                     }
@@ -1142,7 +1128,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                     PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                 } else {
                     D_800C306C = PAUSE_SCREEN_UNK6;
-                    func_8006BA24(PROMPT_SKIP_REPLAY);
+                    OpenPrompt(PROMPT_SKIP_REPLAY);
                     return REPLAY_MENU_PROMPTING;
                 }
             } else if (controller->pressedButtons & B_BUTTON) {
@@ -1234,10 +1220,10 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
         for (index = 0; index != PANEL_STRIP_COUNT; index++) {
             stripHeight = RECORD_PANEL_STRIP_HEIGHT;
-            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
+            LoadTextureBlock(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
                           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
                           G_TX_MIRROR, 0, 0, 0, 0);
             gDPPipeSync(gfx++);
@@ -1248,7 +1234,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 } else {
                     gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
                 }
-                func_8006A2C0(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
+                DrawTextureRect(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
                               (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight) << 2,
                               (rowOffsets[row] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
                               (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight + stripHeight) << 2,
@@ -1263,7 +1249,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             } else {
                 gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
             }
-            func_8006A2C0(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
+            DrawTextureRect(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
                           (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight) << 2,
                           (rowOffsets[row] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
                           (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING + index * stripHeight + stripHeight) << 2,
@@ -1272,7 +1258,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         }
 
         /* Each record's "COURSE" and course number */
-        func_8006A4A0(&gfx, 0, (u8 *)sCourseNumbersImage + IMAGE_HEADER_SIZE);
+        LoadSmallPalette(&gfx, 0, (u8 *)sCourseNumbersImage + IMAGE_HEADER_SIZE);
         gDPLoadTextureTile_4b(gfx++, ((u32)sCourseNumbersImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
                               COURSE_NUMBERS_WIDTH, COURSE_NUMBERS_HEIGHT, 0, 0, COURSE_NUMBERS_WIDTH - 1,
                               COURSE_NUMBERS_HEIGHT - 1, 0, G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK,
@@ -1290,12 +1276,12 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
                 }
                 gDPPipeSync(gfx++);
-                func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
+                DrawTextureRect(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
                               (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
                               (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
                               COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-                func_8006A2C0(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
+                DrawTextureRect(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
                               (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH + COURSE_DIGIT_WIDTH) << 2,
                               (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT) << 2, G_TX_RENDERTILE,
@@ -1334,10 +1320,10 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                     gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE, 0xFF);
                 }
                 gDPPipeSync(gfx++);
-                func_8006A4A0(&gfx, 0, (u8 *)sReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
-                func_8006A5E4(&gfx, (u8 *)sReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                LoadSmallPalette(&gfx, 0, (u8 *)sReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
+                LoadNibbleTextureBlock(&gfx, (u8 *)sReplayLabelImages[rowLabels[index]] + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
                               labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
-                func_8006A2C0(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2, (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
+                DrawTextureRect(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2, (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
                               (LABEL_TOP + index * REPLAY_ROW_SPACING + labelHeight) << 2, G_TX_RENDERTILE, 0, 0,
                               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1360,10 +1346,10 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 gDPPipeSync(gfx++);
                 gDPPipeSync(gfx++);
                 gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-                func_8006A548(&gfx, sCharacterFiles[index]);
-                func_8006A84C(&gfx, sCharacterImages[index], G_IM_FMT_CI, G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
+                LoadLargePalette(&gfx, sCharacterFiles[index]);
+                LoadTextureBlock(&gfx, sCharacterImages[index], G_IM_FMT_CI, G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH,
                               CHARACTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-                func_8006A2C0(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
+                DrawTextureRect(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
                               (CHARACTER_TOP + index * REPLAY_ROW_SPACING) << 2,
                               (rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH) << 2,
                               (CHARACTER_TOP + index * REPLAY_ROW_SPACING + CHARACTER_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
@@ -1382,24 +1368,24 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+            DrawTextureRect(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + CURSOR_FRAME_THICKNESS) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+            DrawTextureRect(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex] -
                            CURSOR_FRAME_THICKNESS) << 2,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX)) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex]) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
+            DrawTextureRect(&gfx, (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX)) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
                           (rowOffsets[sCursorIndex] - (rowHalfWidths[sCursorIndex] - centerX) +
                            CURSOR_FRAME_THICKNESS) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING + rowHeights[sCursorIndex]) << 2,
                           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            func_8006A2C0(&gfx,
+            DrawTextureRect(&gfx,
                           (rowOffsets[sCursorIndex] + (rowHalfWidths[sCursorIndex] + centerX) -
                            CURSOR_FRAME_THICKNESS) << 2,
                           (FIRST_REPLAY_ROW_TOP + sCursorIndex * REPLAY_ROW_SPACING) << 2,
@@ -1417,15 +1403,15 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         sReplayTitleBobAngle += DEGREES_TO_RADIANS(TITLE_BOB_DEGREES_PER_FRAME);
-        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
         for (index = 0; index != PANEL_STRIP_COUNT; index++) {
             /* Unused; it is there to match */
             stripHeight = TITLE_PANEL_STRIP_HEIGHT;
-            func_8006A84C(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
+            LoadTextureBlock(&gfx, (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET + index * PANEL_STRIP_SIZE,
                           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0, G_TX_MIRROR,
                           G_TX_MIRROR, 0, 0, 0, 0);
             titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
-            func_8006A2C0(&gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
+            DrawTextureRect(&gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
                           (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT) << 2,
                           (rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH) << 2,
                           (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT +
@@ -1523,9 +1509,9 @@ void DrawControlsScreen(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        LoadLargePalette(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
         for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
-            func_8006A84C(&gfx,
+            LoadTextureBlock(&gfx,
                           (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET +
                               strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH,
                           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH, CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR,
@@ -1533,7 +1519,7 @@ void DrawControlsScreen(Gfx **displayListHead) {
             /* How far above the screen top the first strip's top and bottom edges sit */
             topRaise = sSlideOffsets[0] - SCREEN_BORDER;
             bottomRaise = sSlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
-            func_8006A2C0(&gfx, CONTROLS_PICTURE_LEFT << 2,
+            DrawTextureRect(&gfx, CONTROLS_PICTURE_LEFT << 2,
                           (strip * CONTROLS_STRIP_HEIGHT - topRaise) << 2,
                           (CONTROLS_PICTURE_LEFT + CONTROLS_PICTURE_WIDTH) << 2,
                           (strip * CONTROLS_STRIP_HEIGHT - bottomRaise) << 2,

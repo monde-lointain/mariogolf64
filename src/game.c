@@ -19,6 +19,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
 #include "work_area.h"
@@ -907,10 +908,6 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
-void func_8006AEA4(Gfx **displayListHead);
-void func_8006B5D8(Gfx **displayListHead);
-void func_8006BC80(Gfx **displayListHead);
-void func_8006C918(Gfx **displayListHead);
 void func_80071B34(Gfx **displayListHead);
 void func_8007B994(CameraMatrices *matrices, Gfx **displayListHead);
 void func_8007EF0C(Gfx **displayListHead, CameraMatrices *matrices);
@@ -1670,7 +1667,7 @@ s32 DrawGame(void) {
             func_801FCC48(&g_DisplayListHead);
             func_801FD578(&g_DisplayListHead);
         }
-        func_8006C918(&g_DisplayListHead);
+        DrawHalfTurn(&g_DisplayListHead);
         if (g_IsModuleAlive[22]) {
             DrawGameSaveMenu(&g_DisplayListHead);
             DrawReplaySaveMenu(&g_DisplayListHead);
@@ -1761,7 +1758,7 @@ s32 DrawGame(void) {
         }
     }
 
-    func_8006BC80(&g_DisplayListHead);
+    DrawPrompt(&g_DisplayListHead);
     if (g_IsModuleAlive[20]) {
         func_8021A940(&g_DisplayListHead);
     }
@@ -1769,8 +1766,8 @@ s32 DrawGame(void) {
     if (g_IsModuleAlive[17]) {
         func_8020FC10(&g_DisplayListHead);
     }
-    func_8006AEA4(&g_DisplayListHead);
-    func_8006B5D8(&g_DisplayListHead);
+    DrawWipe(&g_DisplayListHead);
+    DrawScreenFade(&g_DisplayListHead);
     func_8008CD30(&g_DisplayListHead);
     if (IsGameFlagSet(0x46)) {
         func_80088BDC(&g_DisplayListHead);

@@ -5,6 +5,7 @@
 #include "game_flags.h"
 #include "scene.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "transfer_pak.h"
 #include "unlocks.h"
@@ -27,9 +28,9 @@
 #define TITLE_IDLE_FRAME_COUNT 630
 /* sTitleFrame stops rising at this */
 #define TITLE_FRAME_LIMIT 900
-/* The count given to func_8006B5A0 as the screen first appears */
+/* The count given to StartScreenFadeIn as the screen first appears */
 #define TITLE_ENTERING_COUNTDOWN 8
-/* The count given to func_8006B56C; the stage ends once func_8006B55C sees it below 2 */
+/* The count given to StartScreenFadeOut; the stage ends once HasScreenFadeEnded sees it below 2 */
 #define LEAVING_COUNTDOWN 16
 
 /* The asset IDs of the images */
@@ -98,11 +99,6 @@ extern PressStartText sPressStartText;
 extern s32 D_800B6808;
 
 void func_8005DC50(void);
-void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
-                   s32 dtdy);
-s32 func_8006B55C(void);
-void func_8006B56C(s32, s32, s32, s32);
-void func_8006B5A0(s32, s32, s32, s32);
 void func_8009226C(s32);
 s32 func_800959F8(void);
 
@@ -267,17 +263,17 @@ void UpdateTitleScreen(void) {
     }
     UpdateButtonCodes();
     if (sTitleFrame == 0) {
-        /* func_8006B5A0 is given white when D_800B6808 is 1, else black */
+        /* StartScreenFadeIn is given white when D_800B6808 is 1, else black */
         if (D_800B6808 == 1) {
-            func_8006B5A0(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
+            StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
         } else {
-            func_8006B5A0(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
+            StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
         }
         D_800B6808 = 3;
     }
     switch (sTitleStage) {
         case TITLE_SHOWING:
-            if (func_8006B55C() && func_800959F8()) {
+            if (HasScreenFadeEnded() && func_800959F8()) {
                 pressedButtons = 0;
                 for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
                     pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
@@ -294,12 +290,12 @@ void UpdateTitleScreen(void) {
                 } else if (((pressedButtons & B_BUTTON) && g_IsDebugEnabled)
                            || sTitleFrame == TITLE_IDLE_FRAME_COUNT) {
                     sTitleStage = TITLE_GOING_TO_LOGOS;
-                    func_8006B56C(0, 0, 0, LEAVING_COUNTDOWN);
+                    StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
                 }
             }
             break;
         case TITLE_GOING_TO_LOGOS:
-            if (func_8006B55C()) {
+            if (HasScreenFadeEnded()) {
                 g_Scene = SCENE_SWAPPING_MODULES;
                 g_NextScene = 27;
                 g_SceneModuleToUnload = 0x04;
@@ -369,7 +365,7 @@ void DrawTitleScreen(Gfx **displayListHead) {
                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                               G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        func_8006A2C0(&gfx, PRESS_START_LEFT << 2, PRESS_START_TOP << 2, (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,
+        DrawTextureRect(&gfx, PRESS_START_LEFT << 2, PRESS_START_TOP << 2, (PRESS_START_LEFT + PRESS_START_WIDTH) << 2,
                       (PRESS_START_TOP + PRESS_START_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
                       TEXEL_STEP_ONE);
     }
