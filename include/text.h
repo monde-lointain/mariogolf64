@@ -66,6 +66,7 @@ void SetTextName(char *name);
 void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags, u8 red, u8 green, u8 blue,
                  u8 alpha);
 void SetUpTextDrawing(Gfx **displayListHead);
+void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
 void DrawTextSlots(Gfx **displayListHead);
 void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);

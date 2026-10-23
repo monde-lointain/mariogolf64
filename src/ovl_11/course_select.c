@@ -151,7 +151,6 @@
 #define RING_SHOT_TEXT_SLOT 2
 
 void func_80071CE4(Gfx **displayListHead, s32 slot);
-void func_800734F0(Gfx **displayListHead, s32);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
@@ -766,7 +765,7 @@ void DrawHoleSelect(Gfx **displayListHead) {
             gDPPipeSync(gfx++);
         }
         gDPPipeSync(gfx++);
-        func_800734F0(&gfx, 0);
+        SetUpGradientTextDrawing(&gfx, 0);
         SetTextColor(&gfx, 255, 255, 255);
         colorIndex = g_CourseIndex;
         if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {

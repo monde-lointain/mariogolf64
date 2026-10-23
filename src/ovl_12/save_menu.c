@@ -302,7 +302,7 @@ void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
 void SetUpTextDrawing(Gfx **displayListHead);
 void func_80071CE4(Gfx **displayListHead, s32 slot);
-void func_800734F0(Gfx **displayListHead, s32);
+void SetUpGradientTextDrawing(Gfx **displayListHead, s32);
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
                              s32 flags);
@@ -805,7 +805,7 @@ void DrawGameSaveMenu(Gfx **displayListHead) {
         }
 
         /* Each saved game's mode, course and hole, or that the slot is empty */
-        func_800734F0(&gfx, 0);
+        SetUpGradientTextDrawing(&gfx, 0);
         for (row = 0; row != SAVED_GAME_COUNT; row++) {
             gDPPipeSync(gfx++);
             if (row == sCursorIndex) {
@@ -1428,7 +1428,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
         }
 
         /* Each record's hole text, or that the row is empty */
-        func_800734F0(&gfx, 0);
+        SetUpGradientTextDrawing(&gfx, 0);
         for (index = 0; index != SAVE_RECORD_COUNT; index++) {
             Unk68 *record;
 
@@ -1441,7 +1441,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
             }
             gDPPipeSync(gfx++);
             if (!(record->unk36 & RECORD_IN_USE)) {
-                func_800734F0(&gfx, 0);
+                SetUpGradientTextDrawing(&gfx, 0);
                 gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
                 gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
                 /* The saved-game message is printed but never drawn */
@@ -1457,7 +1457,7 @@ void DrawReplaySaveMenu(Gfx **displayListHead) {
                 func_80071CE4(&gfx, FIRST_RECORD_TEXT_SLOT + index);
             }
         }
-        func_800734F0(&gfx, 0);
+        SetUpGradientTextDrawing(&gfx, 0);
         DrawLargeTextWithShadow(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT, HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300,
                                 0xFFDB4C00, 0);
         gDPPipeSync(gfx++);

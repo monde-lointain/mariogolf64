@@ -24,8 +24,12 @@ typedef struct MessageTable {
 #define TEXT_ASSET_LARGE_FONT 0x4B6
 #define TEXT_ASSET_ICONS 0x4B0
 #define TEXT_ASSET_SHADOWED_FONT 0x4B2
-#define TEXT_ASSET_UNK4B8 0x4B8
-#define TEXT_ASSET_UNK4B9 0x4B9
+/*
+ * Gradients for shading text, one intensity per row of a large glyph:
+ * one is brightest across the middle, the other fades from the top down
+ */
+#define TEXT_ASSET_BANDED_GRADIENT 0x4B8
+#define TEXT_ASSET_FADING_GRADIENT 0x4B9
 /*
  * A glyph file's header holds the glyph count at 2 and each glyph's size
  * at 4; a message file's holds the file's size at 0. Both are big-endian.
@@ -110,7 +114,7 @@ extern void *g_MediumFontImage;
 extern void *g_LargeFontImage;
 extern void *g_TextIconImage;
 extern void *g_ShadowedFontImage;
-extern void *D_800E1C3C[2];
+extern void *g_TextGradientImages[2];
 extern void *g_MessageGlyphs;
 extern MessageTable *g_Messages;
 /* The index of the first character code in the message table, in halfwords */
@@ -228,10 +232,10 @@ void LoadTextAssets(void) {
     ReadEncodedAsset(g_LargeFontImage, &asset);
     g_TextIconImage = AllocMemory(OpenEncodedAsset(TEXT_ASSET_ICONS, &asset));
     ReadEncodedAsset(g_TextIconImage, &asset);
-    D_800E1C3C[0] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_UNK4B9, &asset));
-    ReadEncodedAsset(D_800E1C3C[0], &asset);
-    D_800E1C3C[1] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_UNK4B8, &asset));
-    ReadEncodedAsset(D_800E1C3C[1], &asset);
+    g_TextGradientImages[0] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_FADING_GRADIENT, &asset));
+    ReadEncodedAsset(g_TextGradientImages[0], &asset);
+    g_TextGradientImages[1] = AllocMemory(OpenEncodedAsset(TEXT_ASSET_BANDED_GRADIENT, &asset));
+    ReadEncodedAsset(g_TextGradientImages[1], &asset);
     header = AllocMemory(FILE_HEADER_SIZE);
     nuPiReadRom((u32)g_GlyphFileRomStart, header, FILE_HEADER_SIZE);
     size = ((header[2] << 8) | header[3]) * ((header[4] << 8) | header[5]) + FILE_HEADER_SIZE;
@@ -248,7 +252,7 @@ void LoadTextAssets(void) {
     ClearGlyphSprites();
 }
 
-/* Frees what LoadTextAssets loaded, except the two images at D_800E1C3C */
+/* Frees what LoadTextAssets loaded, except the two images at g_TextGradientImages */
 void FreeTextAssets(void) {
     FreeMemory(&g_ShadowedFontImage);
     FreeMemory(&g_SmallFontImage);
@@ -405,7 +409,7 @@ INCLUDE_ASM("asm/nonmatchings/text", func_80071CE4);
 
 INCLUDE_ASM("asm/nonmatchings/text", func_80072A08);
 
-INCLUDE_ASM("asm/nonmatchings/text", func_800734F0);
+INCLUDE_ASM("asm/nonmatchings/text", SetUpGradientTextDrawing);
 
 /*
  * Measures a string of character codes, at the font size. Only the large
