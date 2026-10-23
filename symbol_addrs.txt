@@ -1693,6 +1693,7 @@ AreTrianglesDifferent = 0x800432E4; // type:func
 GetTriangleIntegerPlane = 0x8004333C; // type:func
 GetTerrainHeight = 0x800437FC; // type:func
 GetGroundOrWaterHeight = 0x80043A20; // type:func
+g_GroundTileHeightRanges = 0x800BAA0C; // size:0x200
 g_TerrainCodeCells = 0x800BAC0C; // size:0x400
 sTerrainColors = 0x800BB040; // size:0x2C
 g_TerrainCodeColors = 0x800FF4F8; // size:0x20

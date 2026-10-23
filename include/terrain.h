@@ -83,6 +83,9 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
 #define TERRAIN_CODE_CELL_COLUMN_COUNT 16
 extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COLUMN_COUNT];
 
+/* Each ground tile's height range, which also serves as the radius of its bounding sphere */
+extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
+
 Vtx *GetGroundPoint(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);
 void PrepareHoleTriangles(void);

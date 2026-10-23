@@ -66,7 +66,6 @@ typedef struct MapOverviewControls {
 #define LOWERED_WATER_BIAS (-0x600)
 
 extern u8 sPointSlots[GROUND_TILE_POINT_SPAN + 1][8];
-extern f32 D_800BAA0C[GROUND_TILE_COUNT];
 extern TerrainColor sTerrainColors[11];
 extern u16 g_TerrainCodeColors[];
 extern s8 sCellSearchOffsets[4];
@@ -886,7 +885,7 @@ void InitTerrainTextures(void) {
 
     for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
         tile = &g_WorkArea.hole.tiles[tileIndex];
-        D_800BAA0C[tileIndex] = 1.0f;
+        g_GroundTileHeightRanges[tileIndex] = 1.0f;
         tile->unk994 = 1;
         tile->midpointBlockIndex = -1;
         tile->unk990 = 0;
