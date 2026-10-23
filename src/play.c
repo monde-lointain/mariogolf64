@@ -10,12 +10,8 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "terrain.h"
 #include "tournament.h"
-
-/* D_80104EB8 divides the main courses into cells of 1 << CELL_SIZE_SHIFT units */
-#define CELL_SIZE_SHIFT 19
-#define CELL_COLUMN_COUNT 8
-#define CELL_ROW_COUNT 16
 
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
@@ -78,7 +74,7 @@ extern s32 D_800C3090;
 extern s8 D_800C30A4;
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
-extern u8 D_80104EB8[CELL_ROW_COUNT * CELL_COLUMN_COUNT];
+extern u8 D_80104EB8[GROUND_TILE_COUNT];
 extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
@@ -424,24 +420,24 @@ void CopyDoublePair(f64 *from, f64 *to) {
 }
 
 /*
- * Unless on a mini-golf course, marks the cell holding a point and the
- * cells around it in D_80104EB8
+ * Unless on a mini-golf course, marks the ground tile holding a point
+ * and the tiles around it in D_80104EB8
  */
-void MarkNearbyCells(u32 x, u32 z) {
+void MarkNearbyGroundTiles(u32 x, u32 z) {
     u32 column;
     u32 row;
     s32 i;
     s32 j;
 
     if (!g_IsMiniGolf) {
-        column = x >> CELL_SIZE_SHIFT;
-        row = z >> CELL_SIZE_SHIFT;
-        if (column < CELL_COLUMN_COUNT) {
-            if (row < CELL_ROW_COUNT) {
+        column = x >> GROUND_TILE_SHIFT;
+        row = z >> GROUND_TILE_SHIFT;
+        if (column < GROUND_TILE_COLUMN_COUNT) {
+            if (row < GROUND_TILE_ROW_COUNT) {
                 for (i = -1; i < 2; i++) {
                     for (j = -1; j < 2; j++) {
-                        if (column + j < CELL_COLUMN_COUNT && row + i < CELL_ROW_COUNT) {
-                            D_80104EB8[(row + i) * CELL_COLUMN_COUNT + (column + j)] = TRUE;
+                        if (column + j < GROUND_TILE_COLUMN_COUNT && row + i < GROUND_TILE_ROW_COUNT) {
+                            D_80104EB8[(row + i) * GROUND_TILE_COLUMN_COUNT + (column + j)] = TRUE;
                         }
                     }
                 }
