@@ -18,6 +18,9 @@
 /* Hides the billboards */
 #define GAME_FLAG_HIDE_BILLBOARDS 0x0E
 
+/* Makes every cell of the billboards' hit masks read as 1 */
+#define GAME_FLAG_FILL_BILLBOARD_MASKS 0x0A
+
 /* Silences the overlay manager's log */
 #define GAME_FLAG_QUIET_OVERLAY_LOG 0x4D
 

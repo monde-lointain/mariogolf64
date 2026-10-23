@@ -126,6 +126,12 @@ typedef struct Unk800BA9D8 {
 } Unk800BA9D8; /* size = 0x34 */
 
 extern Unk800BA9D8 D_800BA9D8;
+/*
+ * D_800BA9D8.cupPosition's y and z. Some code reads them under symbols of
+ * their own, which GCC does not address from D_800BA9D8's base.
+ */
+extern s32 g_CupPositionY;
+extern s32 g_CupPositionZ;
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
