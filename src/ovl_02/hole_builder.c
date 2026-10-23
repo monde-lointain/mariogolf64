@@ -126,7 +126,110 @@ void ResetTerrainCodeCells(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E2D4_ovl_02);
+/*
+ * Whether a green cell lies within one cell of other terrain. It is a macro,
+ * as an inline function compiles differently from the original.
+ */
+#define IsGreenEdge(code, nearestCode, nearestDistance) \
+    ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && (nearestDistance) < 2)
+
+/*
+ * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
+ * a cell's colour in the upper half and its painted terrain code in the
+ * lower: fairway near other terrain is painted as semi-rough, fairway and
+ * greens are striped, rough away from fairway and TERRAIN_CODE_UNK3 are
+ * mottled with random colours, and greens are edged as green edge.
+ */
+s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 fairwayRandom;
+    s32 green;
+    u32 red;
+
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x4481;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN || nearestCode == TERRAIN_CODE_FAIRWAY) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                fairwayRandom = sPaintSeed >> 16;
+                if ((x + 2) & 4) {
+                    color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
+                } else {
+                    color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
+                }
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            } else {
+                color = 0x4605;
+                paintedCode = TERRAIN_CODE_SEMI_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = (sPaintSeed >> 16) & 7;
+                green = 16 - (red >> 1);
+                color = (red << 11) | (green << 6) | 1;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE739;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x2587;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2F84 : 0x4580;
+                } else {
+                    color = (x & 2) ? 0x3E42 : 0x3704;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x2A41;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x2688;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E514_ovl_02);
 
@@ -276,7 +379,89 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32
     return (color << 16) | paintedCode;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024F308_ovl_02);
+/*
+ * The paint logic of the driving range. It returns a cell's colour in the
+ * upper half and its painted terrain code in the lower: fairway and greens
+ * are striped, rough away from fairway and TERRAIN_CODE_UNK3 are mottled
+ * with random colours, and greens are edged as green edge.
+ */
+s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z) {
+    u32 color;
+    s32 paintedCode;
+    s32 random;
+    s32 green;
+    u32 red;
+
+    switch (code) {
+        case TERRAIN_CODE_DEEP_ROUGH:
+            color = 0x4481;
+            paintedCode = TERRAIN_CODE_DEEP_ROUGH;
+            break;
+        case TERRAIN_CODE_ROCK:
+            color = 0x4983;
+            paintedCode = TERRAIN_CODE_ROCK;
+            break;
+        case TERRAIN_CODE_FAIRWAY:
+            color = ((x + 2) & 4) ? 0x5CC4 : 0x4584;
+            paintedCode = TERRAIN_CODE_FAIRWAY;
+            break;
+        case TERRAIN_CODE_ROUGH:
+            if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
+                sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+                red = (sPaintSeed >> 16) & 7;
+                green = 16 - (red >> 1);
+                color = (red << 11) | (green << 6) | 1;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            } else {
+                color = 0xC81;
+                paintedCode = TERRAIN_CODE_ROUGH;
+            }
+            break;
+        case TERRAIN_CODE_BUNKER:
+            color = 0xE739;
+            paintedCode = TERRAIN_CODE_BUNKER;
+            break;
+        case TERRAIN_CODE_UNK3:
+            paintedCode = TERRAIN_CODE_UNK3;
+            sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+            random = sPaintSeed >> 16;
+            color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
+            break;
+        case TERRAIN_CODE_GREEN:
+            if (IsGreenEdge(code, nearestCode, nearestDistance)) {
+                color = 0x2587;
+                paintedCode = TERRAIN_CODE_GREEN_EDGE;
+            } else if (nearestCode == TERRAIN_CODE_GREEN || nearestDistance >= 2) {
+                if (z & 2) {
+                    color = (x & 2) ? 0x2F84 : 0x4580;
+                } else {
+                    color = (x & 2) ? 0x3E42 : 0x3704;
+                }
+                paintedCode = TERRAIN_CODE_GREEN;
+            } else {
+                color = 0x2689;
+                paintedCode = TERRAIN_CODE_FAIRWAY;
+            }
+            break;
+        case TERRAIN_CODE_CART_WAY:
+            color = 0x7BDF;
+            paintedCode = TERRAIN_CODE_CART_WAY;
+            break;
+        case TERRAIN_CODE_OUT_OF_BOUNDS:
+            color = 0x2A41;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+        case TERRAIN_CODE_TEE_GROUND:
+            color = 0x2688;
+            paintedCode = TERRAIN_CODE_TEE_GROUND;
+            break;
+        default:
+            color = 0xFFFF;
+            paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
+            break;
+    }
+    return (color << 16) | paintedCode;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
 
