@@ -1,5 +1,6 @@
 #include "asset.h"
 #include "billboard.h"
+#include "character.h"
 #include "common.h"
 #include "controller.h"
 #include "heap.h"
@@ -36,6 +37,12 @@
 #define MODE_ICON_SKINS_MATCH 7
 #define MODE_ICON_CLUB_SLOTS 10
 #define NO_MODE_ICON -1
+#define MODE_ICON_COUNT 11
+/* Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES */
+#define MODE_ICON_FRAME_COUNT 27
+#define END_OF_ICON_FRAMES -1
+/* The frames that each frame of the chosen icon shows for */
+#define ICON_FRAME_PERIOD 5
 
 /* The game modes that sModeIcons covers */
 #define GAME_MODE_ICON_COUNT 12
@@ -44,11 +51,21 @@
 /* Asset ids of the Controls screen's picture */
 #define CONTROLS_PICTURE 0x92A
 #define MINI_GOLF_CONTROLS_PICTURE 0x96A
+#define CONTROLS_PICTURE_WIDTH 288
+#define CONTROLS_PICTURE_LEFT ((SCREEN_WIDTH - CONTROLS_PICTURE_WIDTH) / 2)
+/* The picture is loaded into texture memory a few rows at a time */
+#define CONTROLS_STRIP_HEIGHT 7
+#define CONTROLS_STRIP_COUNT 32
 #define CONTROLS_SONG 0x17
 
 #define SOUND_CONTROLS_OPEN 0x72
 #define SOUND_CONTROLS_CLOSE 0x73
 #define SOUND_MENU_CONFIRM 0x5D
+#define SOUND_MENU_MOVE 0x5C
+#define SOUND_SAVE_MENU_OPEN 0x47
+#define SOUND_SAVE_MENU_CLOSE 0x48
+#define SOUND_SAVED 0x3B
+#define MENU_SOUND_CHANNEL 15
 #define MENU_SOUND_VOLUME 0x64
 #define MENU_SOUND_REVERB 0x14
 #define CONTROLS_SOUND_PAN 0x7F
@@ -64,10 +81,52 @@
 #define RECORD_IN_USE 0x80
 /* Added to a character's D_800C547C entry for the image shown in the menu */
 #define CHARACTER_IMAGE_OFFSET 9
+/* A character image for each player of each saved game, or for each replay record */
+#define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * MAX_PLAYER_COUNT)
+/* Albatross, Hole in One, Eagle, Birdie, Par and Chip In */
+#define REPLAY_LABEL_COUNT 6
+
+#define FULL_SONG_VOLUME 0x7F
+/* How loud the song plays behind the saved games */
+#define SAVE_MENU_SONG_VOLUME 0x60
+#define SAVE_MENU_SOUND_PAN 0xFF
+
+#define SAVE_MENU_PANEL_IMAGE 0x521
+#define SAVE_MENU_TITLE_IMAGE 0x6A5
+#define COURSE_NUMBERS_IMAGE 0x70E
+/* Where func_800719A0 is told to put the cleared messages */
+#define MESSAGE_CENTER_X 160
+#define MESSAGE_CENTER_Y 114
+/* Given this as its text, func_800719A0 clears the slot */
+#define NO_TEXT -1
 
 /* D_800C306C's value while no pause screen is shown */
 #define PAUSE_SCREEN_NONE 0
+#define PAUSE_SCREEN_UNK6 6
 
+/* The prompts that func_8006BA24 opens */
+#define PROMPT_OVERWRITE_GAME 0
+#define PROMPT_END_GAME 1
+#define PROMPT_OVERWRITE_REPLAY 2
+#define PROMPT_SKIP_REPLAY 5
+
+/* What UpdateReplaySaveMenu returns */
+#define REPLAY_MENU_OPEN 0
+#define REPLAY_MENU_CLOSED 1
+#define REPLAY_MENU_PROMPTING 2
+
+/* The rows below the saved games and the replay records */
+#define END_GAME_ROW SAVED_GAME_COUNT
+#define SKIP_REPLAY_ROW SAVE_RECORD_COUNT
+#define SLIDE_ROW_COUNT 4
+/* The frames that the menu waits after saving before it slides out */
+#define SAVED_WAIT_FRAMES 15
+
+/*
+ * This overlay reads the characters and variants of saved players and
+ * records as signed, though UnkB8 and Unk68 keep them unsigned; the casts
+ * are there to match.
+ */
 extern s32 D_800C306C;
 extern u16 D_800C547C[];
 extern s16 D_800C54A0[];
@@ -83,18 +142,35 @@ extern s8 D_801061C4;
 extern s8 D_801061C5;
 
 extern s32 sSlideOffsets[4];
-extern void *sCharacterFiles[12];
-extern void *sCharacterImages[12];
+extern void *sCharacterFiles[CHARACTER_IMAGE_COUNT];
+extern void *sCharacterImages[CHARACTER_IMAGE_COUNT];
 extern void *sPanelImage;
+extern void *sModeIconImages[SAVED_GAME_COUNT][2];
+extern void *sReplayLabelImages[REPLAY_LABEL_COUNT];
+extern void *sCourseNumbersImage;
+extern void *sSaveMenuTitleImage;
+extern s32 sIconFrames[SAVED_GAME_COUNT];
+extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 
 void func_8005B28C(s32 recordIndex, Unk68 *record);
 void func_8005D0D8(void);
+void func_800719A0(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
+void InvalidateBrokenSavedGames(void);
+s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
 void func_800934CC(s32);
+void func_80060358(void);
+s32 func_8006BA10(void);
+void func_8006BA24(s32 prompt);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
+void func_8006A2C0(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
+                   s32 dtdy);
+void func_8006A548(Gfx **displayListHead, void *tlut);
+void func_8006A84C(Gfx **displayListHead, void *texels, s32 format, s32 size, s32 width, s32 height, s32 palette,
+                   s32 cms, s32 cmt, s32 masks, s32 maskt, s32 shifts, s32 shiftt);
 
 /* The MODE_ICON_* index by GameState.gameMode; modes that the menu never names hold 0 or 3 */
-u8 sModeIcons[GAME_MODE_ICON_COUNT] = {
+s8 sModeIcons[GAME_MODE_ICON_COUNT] = {
     MODE_ICON_STROKE,      0, MODE_ICON_MATCH_GAME,  0, MODE_ICON_GET_CHARACTER, MODE_ICON_TOURNAMENT,
     MODE_ICON_MINI_GOLF,   3, 0,                     0, MODE_ICON_SKINS_MATCH,   MODE_ICON_CLUB_SLOTS,
 };
@@ -111,10 +187,11 @@ char D_8024580C_ovl_12[] = "There is no saved data.";
 char D_80245824_ovl_12[] = "There is no replay data.";
 char D_80245840_ovl_12[] = "End Game";
 char D_8024584C_ovl_12[] = "Save Menu";
-s32 D_80245858_ovl_12[2] = { 0, 0 };
+s32 sIconImageIndex = 0;
+s32 sUnusedSaveMenuWord = 0;
 s32 sResumedSongId = NO_SONG;
-s16 D_80245864_ovl_12[6] = { 0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C };
-s32 D_80245870_ovl_12 = 0;
+s16 sReplayLabelIds[REPLAY_LABEL_COUNT] = { 0x697, 0x698, 0x699, 0x69A, 0x69B, 0x69C };
+s32 sIconFrameTimer = 0;
 f32 D_80245874_ovl_12 = 0.0f;
 f32 D_80245878_ovl_12 = 0.0f;
 f32 D_8024587C_ovl_12 = 0.0f;
@@ -154,11 +231,210 @@ s32 GetModeIconIndex(GameState *state) {
     return iconIndex;
 }
 
+/*
+ * Opens the save menu on the saved games (SAVE_MENU_GAMES) or the replay
+ * records (SAVE_MENU_REPLAYS), loading its images and putting the cursor on
+ * the first free slot.
+ */
+#ifdef NON_MATCHING
+void OpenSaveMenu(s32 kind) {
+    EncodedAsset encodedAsset;
+    AssetFile file;
+    SaveData *save;
+    s32 slot;
+    s32 playerIndex;
+    s32 iconIndex;
+    Unk68 *record;
+    UnkB8 *player;
+    GameState *state;
+    u16 frameId;
+    void *picture;
+    s32 fileSize;
+
+    save = GetSaveData();
+    if (kind == SAVE_MENU_GAMES) {
+        InvalidateBrokenSavedGames();
+    } else {
+        func_8005D0D8();
+    }
+    if (kind == SAVE_MENU_GAMES) {
+        SetSongVolume(SAVE_MENU_SONG_VOLUME);
+    }
+    ReadEncodedAsset(sPanelImage = AllocMemory(OpenEncodedAsset(SAVE_MENU_PANEL_IMAGE, &encodedAsset)), &encodedAsset);
+    ReadEncodedAsset(sSaveMenuTitleImage = AllocMemory(OpenEncodedAsset(SAVE_MENU_TITLE_IMAGE, &encodedAsset)),
+                     &encodedAsset);
+    PlaySoundWithEffects(SOUND_SAVE_MENU_OPEN, g_NextSoundChannel, MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
+                         SAVE_MENU_SOUND_PAN);
+    for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
+        ReadEncodedAsset(sCharacterImages[slot] = AllocMemory(OpenEncodedAsset(
+                             D_800C547C[CHARACTER_PLUM] + CHARACTER_IMAGE_OFFSET, &encodedAsset)),
+                         &encodedAsset);
+        OpenAssetFile(D_800C54A0[CHARACTER_PLUM], &file);
+        fileSize = GetAssetFileSize(&file);
+        ReadAssetFile(sCharacterFiles[slot] = AllocMemory(fileSize), fileSize, &file);
+    }
+    if (kind == SAVE_MENU_GAMES) {
+        for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
+            if (save->savedGames[slot].isValid &&
+                (iconIndex = GetModeIconIndex(&save->savedGames[slot].state)) != NO_MODE_ICON) {
+                ReadEncodedAsset(sModeIconImages[slot][0] = AllocMemory(OpenEncodedAsset(
+                                     g_ModeIconAnimations[iconIndex][0], &encodedAsset)),
+                                 &encodedAsset);
+                frameId = g_ModeIconAnimations[iconIndex][1];
+            } else {
+                ReadEncodedAsset(sModeIconImages[slot][0] = AllocMemory(OpenEncodedAsset(
+                                     g_ModeIconAnimations[0][0], &encodedAsset)),
+                                 &encodedAsset);
+                frameId = g_ModeIconAnimations[0][1];
+            }
+            sModeIconImages[slot][1] = picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+            ReadEncodedAsset(picture, &encodedAsset);
+        }
+    } else {
+        for (slot = 0; slot != REPLAY_LABEL_COUNT; slot++) {
+            ReadEncodedAsset(sReplayLabelImages[slot] = AllocMemory(OpenEncodedAsset(sReplayLabelIds[slot],
+                                                                                     &encodedAsset)),
+                             &encodedAsset);
+        }
+        ReadEncodedAsset(sCourseNumbersImage = AllocMemory(OpenEncodedAsset(COURSE_NUMBERS_IMAGE, &encodedAsset)),
+                         &encodedAsset);
+    }
+    if (kind == SAVE_MENU_GAMES) {
+        for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
+            if (save->savedGames[slot].isValid) {
+                state = &save->savedGames[slot].state;
+                for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
+                    player = &save->savedPlayers[slot][playerIndex];
+                    OpenEncodedAsset(D_800C547C[(s8)player->unk1D] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+                    ReadEncodedAsset(sCharacterImages[slot * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
+                    OpenAssetFile(D_800C54A0[(s8)player->unk1D] + (s8)player->unk7B, &file);
+                    ReadAssetFile(sCharacterFiles[slot * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
+                                  &file);
+                }
+            }
+        }
+    } else {
+        for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
+            record = &save->unk1DF0[slot];
+            if (record->unk36 & RECORD_IN_USE) {
+                OpenEncodedAsset(D_800C547C[(s8)record->unk37] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+                ReadEncodedAsset(sCharacterImages[slot], &encodedAsset);
+                OpenAssetFile(D_800C54A0[(s8)record->unk37] + (s8)record->unk39, &file);
+                ReadAssetFile(sCharacterFiles[slot], GetAssetFileSize(&file), &file);
+            }
+        }
+    }
+    sIconImageIndex = 0;
+    sIconFrames[0] = 1;
+    sIconFrames[1] = 1;
+    sIconFrames[2] = 1;
+    if (kind == SAVE_MENU_GAMES) {
+        sCursorIndex = END_GAME_ROW;
+        for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
+            if (!save->savedGames[slot].isValid) {
+                sCursorIndex = slot;
+                break;
+            }
+        }
+    } else {
+        sCursorIndex = SKIP_REPLAY_ROW;
+        for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
+            if (!(save->unk1DF0[slot].unk36 & RECORD_IN_USE)) {
+                sCursorIndex = slot;
+                break;
+            }
+        }
+    }
+    sStateFrame = 0;
+    sMenuState = SAVE_MENU_STATE_OPENING;
+    sSlideOffsets[0] = SCREEN_WIDTH;
+    sSlideOffsets[1] = SCREEN_WIDTH;
+    sSlideOffsets[2] = SCREEN_WIDTH;
+    sSlideOffsets[3] = SCREEN_WIDTH;
+    sMenuKind = kind;
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", OpenSaveMenu);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", CloseSaveMenu);
+void CloseSaveMenu(void) {
+    s32 index;
 
+    SetSongVolume(FULL_SONG_VOLUME);
+    FreeMemory(&sPanelImage);
+    FreeMemory(&sSaveMenuTitleImage);
+    if (sMenuKind == SAVE_MENU_GAMES) {
+        for (index = 0; index != SAVED_GAME_COUNT; index++) {
+            FreeMemory(&sModeIconImages[index][0]);
+            FreeMemory(&sModeIconImages[index][1]);
+        }
+    } else {
+        for (index = 0; index != REPLAY_LABEL_COUNT; index++) {
+            FreeMemory(&sReplayLabelImages[index]);
+        }
+        FreeMemory(&sCourseNumbersImage);
+    }
+    for (index = 0; index != CHARACTER_IMAGE_COUNT; index++) {
+        FreeMemory(&sCharacterImages[index]);
+        FreeMemory(&sCharacterFiles[index]);
+    }
+    sMenuKind = SAVE_MENU_CLOSED;
+    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 0, 0, 0, 0, 0, 0);
+    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 1, 0, 0, 0, 0, 0);
+    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 2, 0, 0, 0, 0, 0);
+    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 3, 0, 0, 0, 0, 0);
+    func_800719A0(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 4, 0, 0, 0, 0, 0);
+}
+
+/*
+ * Every few frames, or at once when told to, shows the next frame of the
+ * chosen saved game's mode icon and the first frame of the others. Each
+ * icon has two images, read into in turn.
+ */
+#ifdef NON_MATCHING
+void AnimateModeIcons(s32 isImmediate) {
+    EncodedAsset encodedAsset;
+    SaveData *save;
+    SavedGame *game;
+    s32 slot;
+    void **images;
+
+    save = GetSaveData();
+    if ((++sIconFrameTimer >= ICON_FRAME_PERIOD) | (isImmediate == TRUE)) {
+        sIconFrameTimer = 0;
+        for (slot = 0, images = sModeIconImages[0]; slot != SAVED_GAME_COUNT; slot++, images += 2) {
+            game = &save->savedGames[slot];
+            if (!save->savedGames[slot].isValid) {
+                continue;
+            }
+            if (game->state.isMiniGolf) {
+                if (sCursorIndex == slot) {
+                    if (g_ModeIconAnimations[MODE_ICON_MINI_GOLF][++sIconFrames[slot]] == END_OF_ICON_FRAMES) {
+                        sIconFrames[slot] = 0;
+                    }
+                    OpenEncodedAsset(g_ModeIconAnimations[MODE_ICON_MINI_GOLF][sIconFrames[slot]], &encodedAsset);
+                } else {
+                    OpenEncodedAsset(g_ModeIconAnimations[MODE_ICON_MINI_GOLF][0], &encodedAsset);
+                }
+            } else if (sCursorIndex == slot) {
+                if (g_ModeIconAnimations[sModeIcons[game->state.gameMode]][++sIconFrames[slot]] == END_OF_ICON_FRAMES) {
+                    sIconFrames[slot] = 0;
+                }
+                OpenEncodedAsset(g_ModeIconAnimations[sModeIcons[game->state.gameMode]][sIconFrames[slot]],
+                                 &encodedAsset);
+            } else {
+                OpenEncodedAsset(g_ModeIconAnimations[sModeIcons[game->state.gameMode]][0], &encodedAsset);
+            }
+            ReadEncodedAsset(images[sIconImageIndex], &encodedAsset);
+        }
+        sIconImageIndex ^= 1;
+    }
+}
+
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", AnimateModeIcons);
+#endif
 
 __asm__(".section .rodata");
 const s32 D_80245918_ovl_12[4] = { 0x2A, 0x2A, 0x2A, 0x19 };
@@ -167,18 +443,45 @@ const char D_80245938_ovl_12[] = "%s";
 
 INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", DrawGameSaveMenu);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", SaveGameToSlot);
+/* Saves the current game in the chosen slot and loads its players' images */
+void SaveGameToSlot(void) {
+    EncodedAsset encodedAsset;
+    AssetFile file;
+    SaveData *save;
+    SavedGame *game;
+    GameState *state;
+    UnkB8 *player;
+    s32 playerIndex;
+
+    save = GetSaveData();
+    game = &save->savedGames[sCursorIndex];
+    SaveOrContinueGame(sCursorIndex, FALSE);
+    state = &game->state;
+    sStateFrame = 0;
+    InvalidateBrokenSavedGames();
+    if (save->savedGames[sCursorIndex].isValid) {
+        sMenuState = SAVE_MENU_STATE_SAVED;
+        AnimateModeIcons(TRUE);
+        for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
+            player = &save->savedPlayers[sCursorIndex][playerIndex];
+            OpenEncodedAsset(D_800C547C[(s8)player->unk1D] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+            ReadEncodedAsset(sCharacterImages[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
+            OpenAssetFile(D_800C54A0[(s8)player->unk1D] + (s8)player->unk7B, &file);
+            ReadAssetFile(sCharacterFiles[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
+                          &file);
+        }
+    } else {
+        sMenuState = SAVE_MENU_STATE_CHOOSING;
+    }
+    WriteSaveData();
+}
 
 void LeaveGameSaveMenu(void) {
     sStateFrame = 0;
     sMenuState = SAVE_MENU_STATE_LEAVING;
 }
 
-/*
- * Stores the current replay in the chosen record and loads its character's
- * images. The menu reads the record's character signed, though Unk68 keeps
- * it unsigned; the casts are there to match.
- */
+/* Stores the current replay in the chosen record and loads its character's images */
 void SaveReplayToSlot(void) {
     EncodedAsset encodedAsset;
     AssetFile file;
@@ -205,9 +508,221 @@ void LeaveReplaySaveMenu(void) {
     sMenuState = SAVE_MENU_STATE_LEAVING;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", UpdateGameSaveMenu);
+/* Slides the saved games in and out and lets the player choose one to save over or end the game */
+void UpdateGameSaveMenu(ControllerState *controller) {
+    SaveData *save;
+    s32 row;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", UpdateReplaySaveMenu);
+    save = GetSaveData();
+    sStateFrame++;
+    switch (sMenuState) {
+        case SAVE_MENU_STATE_OPENING:
+            for (row = 0; row != SLIDE_ROW_COUNT; row++) {
+                if (row < sStateFrame && sSlideOffsets[row] > 0) {
+                    if (sSlideOffsets[row] == 1) {
+                        sSlideOffsets[row] = 0;
+                    } else {
+                        sSlideOffsets[row] += -sSlideOffsets[row] / 2;
+                    }
+                }
+            }
+            if (sStateFrame == SLIDE_FRAMES) {
+                sMenuState = SAVE_MENU_STATE_CHOOSING;
+            }
+            break;
+        case SAVE_MENU_STATE_CHOOSING:
+            if (!func_8006BA10()) {
+                break;
+            }
+            if (controller->pressedButtons & B_BUTTON) {
+                PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel, MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
+                                     0);
+                AnimateModeIcons(TRUE);
+                sStateFrame = 0;
+                sMenuState = SAVE_MENU_STATE_BACKING_OUT;
+                break;
+            }
+            if (controller->pressedButtons & A_BUTTON) {
+                if (sCursorIndex >= 0 && sCursorIndex < SAVED_GAME_COUNT) {
+                    if (save->savedGames[sCursorIndex].isValid) {
+                        D_800C306C = PAUSE_SCREEN_UNK6;
+                        func_8006BA24(PROMPT_OVERWRITE_GAME);
+                        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                    } else {
+                        SaveGameToSlot();
+                        PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                    }
+                } else {
+                    D_800C306C = PAUSE_SCREEN_UNK6;
+                    func_8006BA24(PROMPT_END_GAME);
+                }
+                break;
+            }
+            if (controller->repeatedButtons & U_JPAD) {
+                sCursorIndex--;
+                AnimateModeIcons(TRUE);
+                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+            } else if (controller->repeatedButtons & D_JPAD) {
+                sCursorIndex++;
+                AnimateModeIcons(TRUE);
+                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+            }
+            if (sCursorIndex < 0) {
+                sCursorIndex = END_GAME_ROW;
+            }
+            if (sCursorIndex > END_GAME_ROW) {
+                sCursorIndex = 0;
+            }
+            break;
+        case SAVE_MENU_STATE_BACKING_OUT:
+            for (row = 0; row != SLIDE_ROW_COUNT; row++) {
+                if (row < sStateFrame) {
+                    if (sSlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
+                        sSlideOffsets[row] -= SLIDE_OUT_START_STEP;
+                    } else {
+                        sSlideOffsets[row] += sSlideOffsets[row] / 2;
+                    }
+                }
+            }
+            if (sStateFrame == SLIDE_SOUND_FRAME) {
+                PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel, MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
+                                     0);
+            }
+            if (sStateFrame == SLIDE_FRAMES) {
+                sMenuState = SAVE_MENU_STATE_BACKED_OUT;
+            }
+            break;
+        case SAVE_MENU_STATE_BACKED_OUT:
+            CloseSaveMenu();
+            D_800C306C = PAUSE_SCREEN_NONE;
+            func_800934CC(-1);
+            SetFramebufferCount(3);
+            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+            D_801061BD = TRUE;
+            D_801061C4 = TRUE;
+            D_801061BF = TRUE;
+            D_801061BE = FALSE;
+            D_801061C0 = TRUE;
+            D_801061C1 = TRUE;
+            D_801061C2 = TRUE;
+            D_801061C3 = TRUE;
+            D_801061C5 = TRUE;
+            break;
+        case SAVE_MENU_STATE_SAVED:
+            if (sStateFrame == SAVED_WAIT_FRAMES) {
+                sMenuState = SAVE_MENU_STATE_LEAVING;
+                sStateFrame = 0;
+            }
+            break;
+        case SAVE_MENU_STATE_LEAVING:
+            for (row = 0; row != SLIDE_ROW_COUNT; row++) {
+                if (row < sStateFrame) {
+                    if (sSlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
+                        sSlideOffsets[row] -= SLIDE_OUT_START_STEP;
+                    } else {
+                        sSlideOffsets[row] += sSlideOffsets[row] / 2;
+                    }
+                }
+            }
+            if (sStateFrame == SLIDE_SOUND_FRAME) {
+                PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel, MENU_SOUND_VOLUME, MENU_SOUND_REVERB,
+                                     0);
+            }
+            if (sStateFrame == SLIDE_FRAMES) {
+                D_800C306C = PAUSE_SCREEN_NONE;
+                CloseSaveMenu();
+                func_80060358();
+            }
+            break;
+    }
+}
+
+/*
+ * Slides the replay records in and out and lets the player choose one to
+ * store the replay in. It returns a REPLAY_MENU_* value.
+ */
+s32 UpdateReplaySaveMenu(ControllerState *controller) {
+    SaveData *save;
+    s32 row;
+
+    save = GetSaveData();
+    sStateFrame++;
+    switch (sMenuState) {
+        case SAVE_MENU_STATE_OPENING:
+            for (row = 0; row != SLIDE_ROW_COUNT; row++) {
+                if (row < sStateFrame && sSlideOffsets[row] > 0) {
+                    if (sSlideOffsets[row] == 1) {
+                        sSlideOffsets[row] = 0;
+                    } else {
+                        sSlideOffsets[row] += -sSlideOffsets[row] / 2;
+                    }
+                }
+            }
+            if (sStateFrame == SLIDE_FRAMES) {
+                sMenuState = SAVE_MENU_STATE_CHOOSING;
+            }
+            break;
+        case SAVE_MENU_STATE_CHOOSING:
+            if (!func_8006BA10()) {
+                break;
+            }
+            if (controller->pressedButtons & A_BUTTON) {
+                if (sCursorIndex >= 0 && sCursorIndex < SAVE_RECORD_COUNT) {
+                    /* The pointer arithmetic is there to match */
+                    if ((save->unk1DF0 + sCursorIndex)->unk36 & RECORD_IN_USE) {
+                        D_800C306C = PAUSE_SCREEN_UNK6;
+                        func_8006BA24(PROMPT_OVERWRITE_REPLAY);
+                        PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                        return REPLAY_MENU_PROMPTING;
+                    }
+                    SaveReplayToSlot();
+                    PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                } else {
+                    D_800C306C = PAUSE_SCREEN_UNK6;
+                    func_8006BA24(PROMPT_SKIP_REPLAY);
+                    return REPLAY_MENU_PROMPTING;
+                }
+            } else if (controller->pressedButtons & B_BUTTON) {
+                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+                sCursorIndex = SKIP_REPLAY_ROW;
+            } else if (controller->repeatedButtons & U_JPAD) {
+                sCursorIndex--;
+                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+            } else if (controller->repeatedButtons & D_JPAD) {
+                sCursorIndex++;
+                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+            }
+            if (sCursorIndex < 0) {
+                sCursorIndex = SKIP_REPLAY_ROW;
+            }
+            if (sCursorIndex > SKIP_REPLAY_ROW) {
+                sCursorIndex = 0;
+            }
+            break;
+        case SAVE_MENU_STATE_SAVED:
+            if (sStateFrame == SAVED_WAIT_FRAMES) {
+                sMenuState = SAVE_MENU_STATE_LEAVING;
+                sStateFrame = 0;
+            }
+            break;
+        case SAVE_MENU_STATE_LEAVING:
+            for (row = 0; row != SLIDE_ROW_COUNT; row++) {
+                if (row < sStateFrame) {
+                    if (sSlideOffsets[row] >= SLIDE_OUT_START_OFFSET) {
+                        sSlideOffsets[row] -= SLIDE_OUT_START_STEP;
+                    } else {
+                        sSlideOffsets[row] += sSlideOffsets[row] / 2;
+                    }
+                }
+            }
+            if (sStateFrame == SAVED_WAIT_FRAMES) {
+                CloseSaveMenu();
+                return REPLAY_MENU_CLOSED;
+            }
+            break;
+    }
+    return REPLAY_MENU_OPEN;
+}
 
 __asm__(".section .rodata");
 const s32 D_802459C0_ovl_12[6] = { 0x21, 0x21, 0x21, 0x21, 0x21, 0x18 };
@@ -238,7 +753,47 @@ void CloseControlsScreen(void) {
     PlaySong(sResumedSongId, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_12/save_menu", DrawControlsScreen);
+/* Draws the Controls picture in strips, slid down by sSlideOffsets[0] */
+void DrawControlsScreen(Gfx **displayListHead) {
+    Gfx *gfx;
+    s32 strip;
+    s32 topRaise;
+    s32 bottomRaise;
+
+    gfx = *displayListHead;
+    if (sIsControlsShown == TRUE) {
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        func_8006A548(&gfx, (u8 *)sPanelImage + IMAGE_HEADER_SIZE);
+        for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
+            func_8006A84C(&gfx,
+                          (u8 *)sPanelImage + LARGE_PALETTED_TEXELS_OFFSET +
+                              strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH,
+                          G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH, CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR,
+                          G_TX_MIRROR, 0, 0, 0, 0);
+            /* How far above the screen top the first strip's top and bottom edges sit */
+            topRaise = sSlideOffsets[0] - SCREEN_BORDER;
+            bottomRaise = sSlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
+            func_8006A2C0(&gfx, CONTROLS_PICTURE_LEFT << 2,
+                          (strip * CONTROLS_STRIP_HEIGHT - topRaise) << 2,
+                          (CONTROLS_PICTURE_LEFT + CONTROLS_PICTURE_WIDTH) << 2,
+                          (strip * CONTROLS_STRIP_HEIGHT - bottomRaise) << 2,
+                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+        *displayListHead = gfx;
+    }
+}
 
 void UpdateControlsScreen(ControllerState *controller) {
     sStateFrame++;
