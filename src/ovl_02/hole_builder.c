@@ -5,6 +5,7 @@
 #include "functions.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
+#include "math_util.h"
 #include "save.h"
 #include "scene.h"
 #include "terrain.h"
@@ -58,6 +59,19 @@
 /* The table of hole asset ids has a row for each course and then some */
 #define HOLE_ASSET_COURSE_COUNT 9
 
+/* A colour that lights or shades the ground */
+typedef struct GroundLightColor {
+    /* 0x0 */ u16 red;
+    /* 0x2 */ u16 green;
+    /* 0x4 */ u16 blue;
+} GroundLightColor; /* size = 0x6 */
+
+/* The work-area buffers that the ground tiles' display lists and vertices are built in */
+#define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
+#define GROUND_DISPLAY_LIST_END ((Gfx *)&g_WorkArea.bytes[0x77D20])
+#define GROUND_VERTEX_START ((Vtx *)&g_WorkArea.bytes[0x77F20])
+#define GROUND_VERTEX_END ((Vtx *)&g_WorkArea.bytes[0x82720])
+
 /* The asset ids of a hole's files */
 typedef struct HoleAssetIds {
     /* 0x0 */ u16 vertices;
@@ -77,6 +91,8 @@ extern u8 *sReadCursor;
 extern u8 *sBuildBuffer;
 extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
+
+void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfx, Vtx **vertices);
 
 void LoadCodeMap(char *path);
 void EncodeCodeMap(void);
@@ -1410,17 +1426,80 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
 
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802527FC_ovl_02);
+/*
+ * Sets the ground's light and shade colours for the scene's colour index,
+ * interpolating between those of the key indexes around it.
+ * InterpolateChannel is a nested function, a GNU C extension.
+ */
+void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
+    GroundLightColor keyLights[2];
+    GroundLightColor keyShades[2];
+    s32 keyIndexes[2];
+    s32 i;
+    f32 fraction;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8025283C_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552BC_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552C4_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552CC_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552D4_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552DC_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552E4_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552EC_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552F4_ovl_02);
+    s32 InterpolateChannel(s32 from, s32 to, f32 fraction) {
+        return (to - from) * fraction + from;
+    }
+
+    if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_UNK11) {
+        keyIndexes[1] = keyIndexes[0] = g_HoleConditions.sceneColorIndex;
+    } else if ((s32)g_HoleConditions.sceneColorIndex >= SCENE_COLOR_INDEX_DRIVING_RANGE) {
+        keyIndexes[0] = SCENE_COLOR_INDEX_DRIVING_RANGE;
+        keyIndexes[1] = SCENE_COLOR_INDEX_ROUND_END;
+    } else {
+        keyIndexes[0] = SCENE_COLOR_INDEX_ROUND_START;
+        keyIndexes[1] = SCENE_COLOR_INDEX_DRIVING_RANGE;
+    }
+    for (i = 0; i < 2; i++) {
+        switch (keyIndexes[i]) {
+            default:
+            case SCENE_COLOR_INDEX_ROUND_END: {
+                static const GroundLightColor endLight = { 23, 18, 14 };
+                static const GroundLightColor endShade = { 10, 6, 0 };
+
+                keyLights[i] = endLight;
+                keyShades[i] = endShade;
+                break;
+            }
+            case SCENE_COLOR_INDEX_DRIVING_RANGE: {
+                static const GroundLightColor middleLight = { 21, 21, 21 };
+                static const GroundLightColor middleShade = { 4, 4, 4 };
+
+                keyLights[i] = middleLight;
+                keyShades[i] = middleShade;
+                break;
+            }
+            case SCENE_COLOR_INDEX_ROUND_START: {
+                static const GroundLightColor startLight = { 20, 20, 20 };
+                static const GroundLightColor startShade = { 6, 6, 6 };
+
+                keyLights[i] = startLight;
+                keyShades[i] = startShade;
+                break;
+            }
+            case SCENE_COLOR_INDEX_UNK11: {
+                static const GroundLightColor unk11Light = { 20, 20, 2 };
+                static const GroundLightColor unk11Shade = { 0, 0, 0 };
+
+                keyLights[i] = unk11Light;
+                keyShades[i] = unk11Shade;
+                break;
+            }
+        }
+    }
+    if (keyIndexes[1] == keyIndexes[0]) {
+        fraction = 0.0f;
+    } else {
+        fraction = (f32)((s32)g_HoleConditions.sceneColorIndex - keyIndexes[0]) / (f32)(keyIndexes[1] - keyIndexes[0]);
+    }
+    light->red = InterpolateChannel(keyLights[0].red, keyLights[1].red, fraction);
+    light->green = InterpolateChannel(keyLights[0].green, keyLights[1].green, fraction);
+    light->blue = InterpolateChannel(keyLights[0].blue, keyLights[1].blue, fraction);
+    shade->red = InterpolateChannel(keyShades[0].red, keyShades[1].red, fraction);
+    shade->green = InterpolateChannel(keyShades[0].green, keyShades[1].green, fraction);
+    shade->blue = InterpolateChannel(keyShades[0].blue, keyShades[1].blue, fraction);
+}
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552FC_ovl_02);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
@@ -1479,7 +1558,27 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802536FC_ovl_02);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802537EC_ovl_02);
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", BuildGroundTileDisplayList);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802541E8_ovl_02);
+/*
+ * Builds every ground tile's display list and vertices in the work area,
+ * reporting an error if either overflows its buffer
+ */
+void BuildGroundDisplayLists(void) {
+    Gfx *gfx;
+    Vtx *vertices;
+    s32 column;
+    s32 row;
+
+    gfx = GROUND_DISPLAY_LIST_START;
+    vertices = GROUND_VERTEX_START;
+    for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_TILE_COLUMN_COUNT; column++) {
+            BuildGroundTileDisplayList(column, row, &gfx, &vertices);
+        }
+    }
+    if ((u32)gfx > (u32)GROUND_DISPLAY_LIST_END || (u32)vertices > (u32)GROUND_VERTEX_END) {
+        ReportDivisionError();
+    }
+}
 
