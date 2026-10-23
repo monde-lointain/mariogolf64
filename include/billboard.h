@@ -39,7 +39,10 @@ void SortBillboardsByDepth(void);
 extern Billboard g_Billboards[BILLBOARD_COUNT];
 extern BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
 
-/* Keeps billboards near the course's edge, and tilts them less */
-extern s8 g_ShowsBillboardsAtEdge;
+/*
+ * g_GameState.isMiniGolf, read on its own. Mini-golf keeps billboards near
+ * the course's edge, and tilts them less.
+ */
+extern s8 g_IsMiniGolf;
 
 #endif

@@ -467,9 +467,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
             g_GameState.courseIndex = (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) % COURSE_INDEX_COUNT;
             if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
                 g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-                g_ShowsBillboardsAtEdge = TRUE;
+                g_IsMiniGolf = TRUE;
             } else {
-                g_ShowsBillboardsAtEdge = FALSE;
+                g_IsMiniGolf = FALSE;
             }
             if (g_GameState.courseIndex > openCourseCount - 1 && g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
                 g_GameState.courseIndex = openCourseCount - 1;
@@ -486,9 +486,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
             }
             if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
                 g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-                g_ShowsBillboardsAtEdge = TRUE;
+                g_IsMiniGolf = TRUE;
             } else {
-                g_ShowsBillboardsAtEdge = FALSE;
+                g_IsMiniGolf = FALSE;
             }
             result = SELECT_MOVED;
             sPressedDirection = DIRECTION_DOWN;

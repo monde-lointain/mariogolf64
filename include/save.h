@@ -87,7 +87,7 @@ typedef struct GameState {
     /* 0x28 */ u8 unk28[0x30 - 0x28];
     /* 0x30 */ s8 unk30;
     /* 0x31 */ u8 unk31[0x3A - 0x31];
-    /* 0x3A */ s8 unk3A;
+    /* 0x3A */ s8 isMiniGolf;
     /* 0x3B */ u8 unk3B[0x3D - 0x3B];
     /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
     /* 0x3E */ u8 unk3E[0x44 - 0x3E];

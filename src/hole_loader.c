@@ -591,7 +591,7 @@ void ShrinkMiniGolfHolePoints(void) {
     s32 axis;
     s32 index;
 
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         g_MiniGolfScale[AXIS_X] = 1.0f / MINI_GOLF_SHRINK_X;
         g_MiniGolfScale[AXIS_Y] = 1.0f / MINI_GOLF_SHRINK_Y;
         g_MiniGolfScale[AXIS_Z] = 1.0f / MINI_GOLF_SHRINK_Z;
@@ -610,7 +610,7 @@ void ShrinkMiniGolfHolePoints(void) {
 
 /* Reads the current hole's asset files, then shrinks its points for mini-golf */
 void LoadHole(void) {
-    osSyncPrintf("putter%d:course%d:hole%d\n", g_ShowsBillboardsAtEdge, g_CourseIndex, g_HoleIndex);
+    osSyncPrintf("putter%d:course%d:hole%d\n", g_IsMiniGolf, g_CourseIndex, g_HoleIndex);
     func_802504E8(GetCourseRecordIndex(), GetHoleRecordIndex());
     ShrinkMiniGolfHolePoints();
 }
@@ -627,7 +627,7 @@ void ShrinkMiniGolfHole(void) {
     s32 vertexIndex;
     Vtx *vertex;
 
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         g_MiniGolfScale[AXIS_X] = 1.0f / MINI_GOLF_SHRINK_X;
         g_MiniGolfScale[AXIS_Y] = 1.0f / MINI_GOLF_SHRINK_Y;
         g_MiniGolfScale[AXIS_Z] = 1.0f / MINI_GOLF_SHRINK_Z;
@@ -721,7 +721,7 @@ s32 ChooseHoleConditions(void) {
     }
     if (g_GameMode != GAME_MODE_UNK12 && g_GameMode != GAME_MODE_UNK13) {
         /* The first hole, mini-golf and GAME_MODE_UNK3 stay dry */
-        if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_UNK3 && !g_GameState.unk3A) {
+        if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_UNK3 && !g_GameState.isMiniGolf) {
             if ((rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
                 g_HoleConditions.isRaining = FALSE;
             } else {
@@ -741,7 +741,7 @@ s32 ChooseHoleConditions(void) {
             }
         } while (g_GameState.holeIndex == 0 && g_HoleConditions.windSpeed == 0);
         g_HoleConditions.windDirection = rand() * 2;
-        if (g_GameState.unk3A) {
+        if (g_GameState.isMiniGolf) {
             g_HoleConditions.windSpeed = 0;
         }
         g_HoleConditions.lightPitch = HOLE_LIGHT_PITCH;
@@ -764,7 +764,7 @@ s32 ChooseHoleConditions(void) {
                 g_HoleConditions.sceneColorIndex = colorIndex;
                 g_HoleConditions.lightYaw += g_GameState.holeIndex * LIGHT_YAW_STEP_PER_HOLE;
             }
-            if (g_ShowsBillboardsAtEdge) {
+            if (g_IsMiniGolf) {
                 g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
             }
             if (D_801B60A0 != 0) {
@@ -788,7 +788,7 @@ s32 ChooseHoleConditions(void) {
     attemptCount = 0;
     if (g_GameMode == GAME_MODE_RING_SHOT) {
         cupIndex = 0;
-    } else if (g_ShowsBillboardsAtEdge) {
+    } else if (g_IsMiniGolf) {
         cupIndex = (g_CourseIndex - MINI_GOLF_COURSE_INDEX) % MINI_GOLF_COURSES_PER_RECORD;
     } else if (g_GameMode == GAME_MODE_UNK3) {
         cupIndex = sCycledCupIndex++ & (CUP_POSITION_COUNT - 1);

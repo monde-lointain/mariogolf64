@@ -249,15 +249,14 @@ void SkipNextPinDraw(void) {
 
 /*
  * Returns whether the pin stands in the cup. During GameState.unk0 6 and 7 it
- * is taken out while the shot is from the green, unless
- * g_ShowsBillboardsAtEdge is set.
+ * is taken out while the shot is from the green, except in mini-golf.
  */
 s32 IsPinInCup(void) {
     if (sIsPinOut || sSkipsNextPinDraw) {
         return FALSE;
     }
     if (g_GameState.unk0 == GAME_STATE_UNK6 || g_GameState.unk0 == GAME_STATE_UNK7) {
-        if (g_ShowsBillboardsAtEdge) {
+        if (g_IsMiniGolf) {
             return TRUE;
         }
         return GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN;

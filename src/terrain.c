@@ -432,7 +432,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     s32 bestIndex;
     f32 bestWeight;
 
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         return GetMiniGolfSurface(x, z, lowersWaterLevel);
     }
     if ((u32)(x - 0x3C00) > 0x3F87FF) {
@@ -1438,7 +1438,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
         return TRUE;
     }
 
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         if ((u32)x > 0xFFFFF) {
             return -1;
         }
@@ -1448,7 +1448,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle) {
     } else if ((u32)x > 0x3FFFFF || (u32)z > 0x7FFFFF) {
         return -1;
     }
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         baseColumn = (x >> 17) * 4;
         baseRow = (z >> 16) * 4;
         slotColumn = (x >> 15) & 3;
@@ -1626,7 +1626,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
     s32 offsetZ;
     s32 height;
 
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         if ((u32)x > 0xFFFFF) {
             if (x < 0) {
                 x = 0;

@@ -107,7 +107,7 @@ s32 GetCourseRecordIndex(void) {
     if (g_GameMode == GAME_MODE_RING_SHOT) {
         return g_RingShotHoles[g_CourseIndex][g_HoleIndex].courseRecordIndex;
     }
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         return ((g_CourseIndex - MINI_GOLF_COURSE_INDEX) / MINI_GOLF_COURSES_PER_RECORD & 1) |
                COURSE_RECORD_LUIGIS_GARDEN;
     }
@@ -137,7 +137,7 @@ s32 GetHoleIndexInRecord(void) {
 
 /* With g_IsDebugEnabled set, the first hole counts too */
 s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         return FALSE;
     }
     if (g_IsDebugEnabled && holeIndex == 0) {
@@ -147,7 +147,7 @@ s32 IsMarkedParFive(s32 courseRecordIndex, s32 holeIndex) {
 }
 
 s32 IsParThree(s32 courseRecordIndex, s32 holeIndex) {
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         return FALSE;
     }
     return g_CourseRecords[courseRecordIndex].holes[holeIndex].flags & HOLE_FLAG_PAR_THREE;

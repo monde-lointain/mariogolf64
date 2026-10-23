@@ -89,7 +89,7 @@ void SimulateShot(Unk20 *shot) {
         func_80037E50(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]), g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
             ->unk5;
     func_80037F94(simulation, 2, shot);
-    g_SimulatedShot.unk2E08 = g_ShowsBillboardsAtEdge || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
+    g_SimulatedShot.unk2E08 = g_IsMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->isRunning) {
         flags = func_8003327C(simulation);

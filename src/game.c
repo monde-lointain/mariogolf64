@@ -1343,7 +1343,7 @@ s32 DrawGame(void) {
                         SetCharacterHilite(matrices);
                         ConvertMatrixToFixed(matrices->viewingF, &matrices->viewing);
                         target = courseView->lookAt;
-                        if (g_ShowsBillboardsAtEdge) {
+                        if (g_IsMiniGolf) {
                             billboardRise =
                                 (courseView->lookAt[1] - courseView->eye[1]) * 0.125f;
                         } else {

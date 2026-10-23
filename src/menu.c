@@ -1167,7 +1167,7 @@ void InvalidateBrokenSavedGames(void) {
         }
         unk = &save->savedGames[index];
         sub = &unk->state;
-        if (sub->unk3A == 0) {
+        if (sub->isMiniGolf == 0) {
             switch (sub->gameMode) {
                 case 0:
                 case 2:

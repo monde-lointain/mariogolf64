@@ -104,7 +104,7 @@ extern u8 sUnk14Values[9];
 extern s8 sStockUnk30Values[CLUB_SET_COUNT];
 extern Unk20 sPutterTestShot;
 extern s32 sClubChoiceDelay;
-extern s8 g_ShowsBillboardsAtEdge;
+extern s8 g_IsMiniGolf;
 
 s32 func_8021EA48(void);
 
@@ -639,7 +639,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats *stats) {
         if (club->unk0 < 70) {
             club->unk0 = 70;
         }
-        g_ShowsBillboardsAtEdge = FALSE;
+        g_IsMiniGolf = FALSE;
         GenerateClub(setIndex * CLUB_SET_SIZE + type);
     }
 }
@@ -821,7 +821,7 @@ s32 GetSurfaceClubMask(s32 distinguishesKinds, SurfaceInfo *info) {
     if (IsGameFlagSet(GAME_FLAG_ANY_CLUB_ANYWHERE)) {
         return CLUB_SURFACE_ALL;
     }
-    if (g_ShowsBillboardsAtEdge) {
+    if (g_IsMiniGolf) {
         return CLUB_SURFACE_GREEN;
     }
     if (!distinguishesKinds) {

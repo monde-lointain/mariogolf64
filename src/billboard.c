@@ -122,7 +122,7 @@ void PlaceBillboards(void) {
         if (g_Billboards[i].textureIndex >= 0) {
             x = g_Billboards[i].x;
             z = g_Billboards[i].z;
-            if (!g_ShowsBillboardsAtEdge
+            if (!g_IsMiniGolf
                 && (x <= COURSE_EDGE_MIN_X || z <= COURSE_EDGE_MIN_Z
                     || x >= COURSE_EDGE_MAX_X || z >= COURSE_EDGE_MAX_Z)) {
                 g_Billboards[i].isNearCourseEdge = TRUE;
