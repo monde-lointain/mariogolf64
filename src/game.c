@@ -618,7 +618,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
         }
     }
 
-    if ((g_Scene != 12) & (g_Scene != 14)) {
+    if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
         return;
     }
     stripTop = g_HorizonRow - HORIZON_STRIP_RISE;
@@ -1048,26 +1048,26 @@ s32 DrawGame(void) {
     }
 
     switch (g_Scene) {
-        case 1:
-        case 3:
-        case 5:
-        case 15:
-        case 16:
-        case 28:
+        case SCENE_HEIGHTS:
+        case SCENE_TREES:
+        case SCENE_PIN:
+        case SCENE_TRIANGLES:
+        case SCENE_RINGS:
+        case SCENE_WALLS:
             drawMode = DRAW_MODE_MAP_PERSPECTIVE;
             break;
-        case 9:
-        case 10:
+        case SCENE_UNK9:
+        case SCENE_UNK10:
             drawMode = DRAW_MODE_MAP_TOP_DOWN;
             break;
-        case 0:
-        case 2:
+        case SCENE_MAP_OVERVIEW:
+        case SCENE_GROUND_CAMERA:
             drawMode = DRAW_MODE_MAP_MINIATURE;
             break;
-        case 14:
+        case SCENE_MENU:
             drawMode = DRAW_MODE_INSET_SCREEN;
             break;
-        case 27:
+        case SCENE_BOOT_LOGOS:
             drawMode = 9;
             break;
         case 26:
@@ -1182,7 +1182,7 @@ s32 DrawGame(void) {
                 topDownEyeX = g_MapCamera.view.eye[0];
                 topDownEyeY = g_MapCamera.view.eye[1] - MAP_TOP_DOWN_HEIGHT;
                 topDownEyeZ = g_MapCamera.view.eye[2] - MAP_TOP_DOWN_TILT;
-                terrainStyle = (g_Scene == 9) ? 3 : 2;
+                terrainStyle = (g_Scene == SCENE_UNK9) ? 3 : 2;
                 guLookAt(&matrices->viewing, topDownEyeX, topDownEyeY, topDownEyeZ, topDownEyeX, g_MapCamera.view.eye[1], g_MapCamera.view.eye[2],
                          0.0f, -1.0f, 0.0f);
                 guAlign(&matrices->billboard, 0.0f, g_MapCamera.view.eye[0] - topDownEyeX, g_MapCamera.view.eye[1] - topDownEyeY,
@@ -1643,7 +1643,7 @@ s32 DrawGame(void) {
             if (g_IsModuleAlive[1]) {
                 func_801FE370(matrices);
             }
-            if (IsGameFlagSet(0x50) && g_Scene != 8) {
+            if (IsGameFlagSet(0x50) && g_Scene != SCENE_FLAG_PANEL) {
                 func_8040C360(matrices, &g_DisplayListHead);
             }
         }
@@ -1966,7 +1966,7 @@ void UpdateGame(void) {
     u16 *windDirection;
 
     sUpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
-    if (g_Scene == 2) {
+    if (g_Scene == SCENE_GROUND_CAMERA) {
         if (g_ControllerData[0].button & U_CBUTTONS) {
             g_MapCamera.view.eye[2] += MAP_CAMERA_STEP;
         }
@@ -1999,7 +1999,7 @@ void UpdateGame(void) {
         }
         func_801F6788();
         func_8007B054();
-    } else if (g_Scene == 7 || g_Scene == 12 || g_Scene == 13) {
+    } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 || g_Scene == SCENE_PLAY_UNK13) {
         if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
             func_8004CDA0();
         }
@@ -2035,7 +2035,7 @@ void UpdateGame(void) {
         if (g_ViewedWindAngles[1] < 0.0f) {
             g_ViewedWindAngles[1] += 2 * M_PI;
         }
-    } else if (g_Scene == 14) {
+    } else if (g_Scene == SCENE_MENU) {
         func_8004CDA0();
         animation = &g_InsetViewAnimation;
         if (*animation == INSET_VIEW_OPENING) {
@@ -2090,16 +2090,16 @@ void UpdateGame(void) {
                 }
             }
         }
-    } else if (g_Scene == 2) {
+    } else if (g_Scene == SCENE_GROUND_CAMERA) {
         g_Cameras[INSET_CAMERA].view.scissorX = SCREEN_WIDTH / 2;
         g_Cameras[INSET_CAMERA].view.scissorY = SCREEN_HEIGHT / 2;
         g_Cameras[INSET_CAMERA].view.scissorWidth = SCREEN_WIDTH / 2;
         g_Cameras[INSET_CAMERA].view.scissorHeight = SCREEN_HEIGHT / 2;
-    } else if (g_Scene == 27) {
+    } else if (g_Scene == SCENE_BOOT_LOGOS) {
         UpdateBootLogos();
     } else if (g_Scene == 26) {
         func_801F4A40();
-    } else if (g_Scene == 21) {
+    } else if (g_Scene == SCENE_TITLE_SCREEN) {
         UpdateTitleScreen();
     } else if (g_Scene == 30) {
         func_801F7148();
