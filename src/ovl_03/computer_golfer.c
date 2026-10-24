@@ -30,6 +30,11 @@ typedef struct GolferTraits {
     /* 0x6 */ s8 unk6[0xE - 0x6];
 } GolferTraits; /* size = 0xE */
 
+/* GolferTraits.windPlay values */
+#define WIND_PLAY_HEAD_WINDS 0      /* Offsets shots for head winds */
+#define WIND_PLAY_STRONG_WINDS 1    /* Offsets shots for the strongest winds either way */
+#define WIND_PLAY_FOLLOWING_WINDS 2 /* Offsets shots for following winds */
+
 extern GolferTraits sGolferTraits[CHARACTER_COUNT];
 extern s32 sPlanThreadState;
 extern OSThread sPlanThread;
@@ -620,7 +625,91 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802517F0_ovl_03);
+#define APPROACH_BAND_COUNT 4
+#define APPROACH_STYLE_COUNT 3
+#define APPROACH_STYLE_UNK1 1
+#define APPROACH_STYLE_UNK2 2
+
+/*
+ * The upper limits of each approach band, as shares of the cup distance that lie
+ * short of the green, for each value of the golfer's unk1 trait
+ */
+extern f32 sApproachBandLimits[APPROACH_BAND_COUNT][APPROACH_STYLE_COUNT];
+
+/*
+ * Aims at the cup and returns the type of club to approach it with. The club
+ * depends on how much of the line to the cup lies short of the green, where the
+ * line's peak counts when it is on the green, and on the golfer's unk1 trait.
+ * A line that crosses rough or hazards takes a wedge.
+ */
+s32 ChooseApproachClub(s32 *targetX, s32 *targetZ) {
+    CoursePoint peak;
+    s32 cupDistance;
+    s32 edgeDistance;
+    f32 edgeShare;
+    u32 peakKind;
+    s32 band;
+    s32 style;
+
+    *targetX = D_800BA9D8.cupPosition[AXIS_X];
+    *targetZ = g_CupPositionZ;
+    cupDistance = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sShot.ballPosition[AXIS_X],
+                              g_CupPositionZ - sShot.ballPosition[AXIS_Z]);
+    /* Unused; it is there to match */
+    GetSurfaceInfo(sShot.surface);
+    if (IsLineOffFairway(sShot.ballPosition, D_800BA9D8.cupPosition) == TRUE) {
+        osSyncPrintf("Appr60 Return point 1\n");
+        if (sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].windPlay < WIND_PLAY_FOLLOWING_WINDS) {
+            return CLUB_TYPE_PITCHING_WEDGE;
+        }
+        return CLUB_TYPE_SAND_WEDGE;
+    }
+    edgeDistance = GetGreenEdgeDistance(sShot.ballPosition, D_800BA9D8.cupPosition);
+    edgeShare = (f32)edgeDistance / (f32)cupDistance;
+    osSyncPrintf("Approach : DistForEdge = %d\n", edgeDistance);
+    osSyncPrintf("Approach : Distance = %d\n", cupDistance);
+    osSyncPrintf("Approach : EdgePercent = %f\n", edgeShare);
+    FindPeakOnLine(sShot.ballPosition, D_800BA9D8.cupPosition, peak);
+    peakKind = GetSurfaceInfoAt(peak[AXIS_X], peak[AXIS_Z])->kind;
+    if (peakKind == SURFACE_KIND_GREEN || peakKind == SURFACE_KIND_GREEN_EDGE) {
+        edgeDistance =
+            IntLength2D(peak[AXIS_X] - sShot.ballPosition[AXIS_X], peak[AXIS_Z] - sShot.ballPosition[AXIS_Z]);
+        edgeShare = (f32)edgeDistance / (f32)cupDistance;
+    }
+    style = sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk1;
+    for (band = 0; band < APPROACH_BAND_COUNT; band++) {
+        if (edgeShare < sApproachBandLimits[band][style]) {
+            if (band == 0) {
+                return CLUB_TYPE_PITCHING_WEDGE;
+            } else if (band == 1) {
+                if (style == APPROACH_STYLE_UNK2) {
+                    return CLUB_TYPE_DRIVER;
+                }
+                if (style == APPROACH_STYLE_UNK1) {
+                    return CLUB_TYPE_THREE_WOOD;
+                }
+                return CLUB_TYPE_FOUR_WOOD;
+            } else if (band == 2) {
+                if (style == APPROACH_STYLE_UNK2) {
+                    return CLUB_TYPE_FIVE_IRON;
+                }
+                if (style == APPROACH_STYLE_UNK1) {
+                    return CLUB_TYPE_FOUR_IRON;
+                }
+                return CLUB_TYPE_THREE_IRON;
+            } else if (band == 3) {
+                if (style == APPROACH_STYLE_UNK2) {
+                    return CLUB_TYPE_SAND_WEDGE;
+                }
+                if (style == APPROACH_STYLE_UNK1) {
+                    return CLUB_TYPE_PITCHING_WEDGE;
+                }
+                return CLUB_TYPE_NINE_IRON;
+            }
+        }
+    }
+    return CLUB_TYPE_PITCHING_WEDGE;
+}
 
 /* sShot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
 #define SHOT_UNK4_MIN 3
@@ -716,11 +805,6 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
     }
     return difference;
 }
-
-/* GolferTraits.windPlay values */
-#define WIND_PLAY_HEAD_WINDS 0      /* Offsets shots for head winds */
-#define WIND_PLAY_STRONG_WINDS 1    /* Offsets shots for the strongest winds either way */
-#define WIND_PLAY_FOLLOWING_WINDS 2 /* Offsets shots for following winds */
 
 /* ChooseShotOffset's results, indices into the shot offset table */
 #define SHOT_OFFSET_NONE 0
