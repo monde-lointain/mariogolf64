@@ -23,7 +23,10 @@ typedef struct GolferTraits {
     /* 0x0 */ s8 unk0;
     /* 0x1 */ s8 unk1;
     /* 0x2 */ s8 unk2;
-    /* 0x3 */ s8 unk3[0xE - 0x3];
+    /* 0x3 */ s8 unk3;
+    /* 0x4 */ s8 unk4;
+    /* 0x5 */ s8 windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
+    /* 0x6 */ s8 unk6[0xE - 0x6];
 } GolferTraits; /* size = 0xE */
 
 extern GolferTraits sGolferTraits[CHARACTER_COUNT];
@@ -32,6 +35,8 @@ extern OSThread sPlanThread;
 extern CurrentShot sPlannedShot;
 extern u8 sPlanThreadStackEnd[];
 extern s32 D_8025C640_ovl_03;
+/* Where the planned shot aims */
+extern CoursePoint sPlanTarget;
 extern s8 sIsPlanStarted;
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 
@@ -198,7 +203,8 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EC8_ovl_03);
 /* The cup distance from which PlanCupDistance allows for the wind */
 #define WIND_ALLOWANCE_MIN_DISTANCE 153600.0f
 /* windSpeed's units in a unit of the wind's push */
-#define WIND_SPEED_SCALE (1.0f / 0x10000)
+#define WIND_PUSH_UNIT 0x10000
+#define WIND_SPEED_SCALE (1.0f / WIND_PUSH_UNIT)
 /* The fraction of the distance that each unit of push along the line takes off */
 #define WIND_FOLLOW_FRACTION 0.01f
 #define WIND_DISTANCE_RATIO_MIN 0.8f
@@ -623,7 +629,136 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
     return difference;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8025319C_ovl_03);
+/* GolferTraits.windPlay values */
+#define WIND_PLAY_HEAD_WINDS 0      /* Offsets shots for head winds */
+#define WIND_PLAY_STRONG_WINDS 1    /* Offsets shots for the strongest winds either way */
+#define WIND_PLAY_FOLLOWING_WINDS 2 /* Offsets shots for following winds */
+
+/* ChooseShotOffset's results, indices into the shot offset table */
+#define SHOT_OFFSET_NONE 0
+#define SHOT_OFFSET_PLUS_SMALL 1
+#define SHOT_OFFSET_PLUS_MEDIUM 2
+#define SHOT_OFFSET_PLUS_LARGE 3
+#define SHOT_OFFSET_MINUS_SMALL 4
+#define SHOT_OFFSET_MINUS_MEDIUM 5
+#define SHOT_OFFSET_MINUS_LARGE 6
+
+/* How far below the ball a target must be for the largest minus offset */
+#define DOWNHILL_TARGET_DROP 0xB400
+/* The angle within which the wind counts as following the shot */
+#define FOLLOWING_WIND_ANGLE 10000
+
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsWindSpeedInRange(lowest, limit) \
+    (g_HoleConditions.windSpeed >= (lowest) && g_HoleConditions.windSpeed < (limit))
+
+/* sClubKindChances rows */
+#define CLUB_CHANCE_SET_FOLLOWING_WIND 0
+#define CLUB_CHANCE_SET_HEAD_WIND 1
+
+/*
+ * Chooses the offset to give the planned shot, from the lie, the golfer's
+ * windPlay trait, whether the shot aims at the cup, how far below the ball
+ * the target is, and the wind's speed and direction against the shot's yaw.
+ * Most offsets also need RollClubKindChance to succeed.
+ */
+s32 ChooseShotOffset(void) {
+    s32 windPlay;
+    s32 aimYaw;
+    s32 windDirection;
+
+    switch (GetSurfaceInfo(sShot.surface)->kind) {
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNK9:
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+        case SURFACE_KIND_BARE_GROUND:
+        case SURFACE_KIND_DEEP_ROUGH:
+        case SURFACE_KIND_BARE_GROUND_UNK20:
+        case SURFACE_KIND_WASTE_AREA:
+            return SHOT_OFFSET_NONE;
+    }
+    windPlay = sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].windPlay;
+    if (sPlanTarget[AXIS_X] == D_800BA9D8.cupPosition[AXIS_X] && sPlanTarget[AXIS_Z] == g_CupPositionZ) {
+        switch (windPlay) {
+            case WIND_PLAY_HEAD_WINDS:
+                if (rand() % 2 == 1) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+                break;
+            case WIND_PLAY_STRONG_WINDS:
+                if (rand() % 3 == 0) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+                break;
+        }
+    }
+    if (sPlanTarget[AXIS_Y] < sShot.ballPosition[AXIS_Y] - DOWNHILL_TARGET_DROP) {
+        return SHOT_OFFSET_MINUS_LARGE;
+    }
+    aimYaw = (u16)sShot.unk0;
+    windDirection = g_HoleConditions.windDirection;
+    osSyncPrintf("skSCAI.angy = %ld\n", aimYaw);
+    osSyncPrintf("wind_ang = %ld\n", windDirection);
+    if (GetAngleDifference(windDirection, aimYaw) < FOLLOWING_WIND_ANGLE) {
+        osSyncPrintf("---- Follow\n");
+        if (windPlay == WIND_PLAY_FOLLOWING_WINDS) {
+            if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_SMALL;
+                }
+            } else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_MEDIUM;
+                }
+            } else if (g_HoleConditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_LARGE;
+                }
+            }
+        } else if (windPlay == WIND_PLAY_STRONG_WINDS) {
+            if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_SMALL;
+                }
+            } else if (g_HoleConditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_FOLLOWING_WIND) == TRUE) {
+                    return SHOT_OFFSET_MINUS_MEDIUM;
+                }
+            }
+        }
+    } else {
+        osSyncPrintf("---- back\n");
+        if (windPlay == WIND_PLAY_HEAD_WINDS) {
+            if (IsWindSpeedInRange(4 * WIND_PUSH_UNIT, 5 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_SMALL;
+                }
+            } else if (IsWindSpeedInRange(5 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+            } else if (g_HoleConditions.windSpeed >= 9 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_LARGE;
+                }
+            }
+        } else if (windPlay == WIND_PLAY_STRONG_WINDS) {
+            if (IsWindSpeedInRange(6 * WIND_PUSH_UNIT, 7 * WIND_PUSH_UNIT)) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_SMALL;
+                }
+            } else if (g_HoleConditions.windSpeed >= 7 * WIND_PUSH_UNIT) {
+                if (RollClubKindChance(CLUB_CHANCE_SET_HEAD_WIND) == TRUE) {
+                    return SHOT_OFFSET_PLUS_MEDIUM;
+                }
+            }
+        }
+    }
+    return SHOT_OFFSET_NONE;
+}
 
 #define CLUB_TYPE_LAST_WOOD 2
 #define CLUB_TYPE_FIRST_IRON 3
