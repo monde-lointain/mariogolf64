@@ -89,6 +89,18 @@ typedef struct GroundLightColor {
  */
 #define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_ROW_COUNT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
+/* The map rows that DrawBandHeights fills at a time */
+#define HEIGHT_BAND_ROW_COUNT 32
+/* Marks a map texel that no triangle has drawn a height on */
+#define NO_HEIGHT (-0x8000)
+#define NO_HEIGHT_PAIR 0x80008000
+/* Ground positions are in units of 1/HEIGHT_ROW_SPAN map texel */
+#define HEIGHT_ROW_SPAN 16
+#define HEIGHT_FRACTION_BITS 12
+/* Scales a step per ground unit to a step per map row in HEIGHT_FRACTION_BITS fixed point */
+#define HEIGHT_ROW_STEP_SCALE 65536.0f
+/* sHeightStepScales holds 65536 / n for the counts below this */
+#define HEIGHT_STEP_SCALE_COUNT 32
 
 /* The points of a tile's grid, edges included, that MeasureGroundTiles averages */
 #define GROUND_TILE_AVERAGED_POINT_COUNT ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
@@ -123,6 +135,7 @@ extern u8 *sReadCursor;
 extern u8 *sBuildBuffer;
 extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
+extern f32 sHeightStepScales[];
 
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfx, Vtx **vertices);
 
@@ -238,9 +251,213 @@ s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ListOffsetsByDistance);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024DA78_ovl_02);
+/*
+ * Fills heights, a band of HEIGHT_BAND_ROW_COUNT map rows by MAP_COLUMN_COUNT
+ * columns, with the ground's heights, by drawing the two triangles of each
+ * ground grid square that covers the band. Where triangles overlap, it averages
+ * their heights. A band at or past GROUND_TILE_ROW_COUNT is left untouched.
+ * It does not match: the nested DrawTriangleHeights allocates its registers
+ * differently, using $s7 where the original reloads the static chain.
+ */
+#ifdef NON_MATCHING
+void DrawBandHeights(s16 *heights, s32 band) {
+    /* corners[4] is where the corners are swapped; it is there to match */
+    Vtx *corners[5];
+    s32 cachedSpan;
+    f32 cachedReciprocal;
+    s32 row;
+    s32 column;
+    f64 fill;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024E02C_ovl_02);
+    /* DrawTriangleHeights is a nested function, a GNU C extension. */
+    void DrawTriangleHeights(void) {
+        f32 longSlopeX;
+        f32 longSlopeHeight;
+        f32 shortSlopeX;
+        f32 shortSlopeHeight;
+        s32 longX;
+        s32 longHeight;
+        s32 shortX;
+        s32 shortHeight;
+        s32 longXStep;
+        s32 longHeightStep;
+        s32 shortXStep;
+        s32 shortHeightStep;
+        s32 totalSpan;
+        s32 span;
+        s32 lowerSpan;
+        s32 z;
+
+        /* DrawHeightRow is a nested function, a GNU C extension. */
+        inline void DrawHeightRow(s32 longX, s32 longHeight, s32 shortX, s32 shortHeight, s32 texelRow) {
+            s32 fromX;
+            s32 fromHeight;
+            s32 toX;
+            s32 toHeight;
+            s32 width;
+            s32 count;
+            s32 direction;
+            s32 texelHeightStep;
+            s32 height;
+            s32 texelColumn;
+            s16 *texel;
+            s32 texelIndex;
+            s32 value;
+
+            fromX = longX >> HEIGHT_FRACTION_BITS;
+            fromHeight = longHeight >> HEIGHT_FRACTION_BITS;
+            toX = shortX >> HEIGHT_FRACTION_BITS;
+            toHeight = shortHeight >> HEIGHT_FRACTION_BITS;
+            width = fromX - toX;
+            if (width < 0) {
+                width = -width;
+            }
+            count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
+            direction = (fromX < toX) ? 1 : -1;
+            if (count < HEIGHT_STEP_SCALE_COUNT) {
+                texelHeightStep = sHeightStepScales[count] * (toHeight - fromHeight);
+            } else {
+                texelHeightStep = ((toHeight - fromHeight) << 16) / count;
+            }
+            texelColumn = longX >> (HEIGHT_FRACTION_BITS + 4);
+            texelRow = (texelRow >> 4) - band * HEIGHT_BAND_ROW_COUNT;
+            if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
+                height = fromHeight << 16;
+                texel = &heights[texelRow * MAP_COLUMN_COUNT];
+                texel += texelColumn;
+                for (texelIndex = 0; texelIndex <= count; texelIndex++) {
+                    if (texelColumn >= 0 && texelColumn < MAP_COLUMN_COUNT) {
+                        value = height >> 16;
+                        if (*texel != NO_HEIGHT) {
+                            value = (*texel + value) / 2;
+                        }
+                        *texel = value;
+                    }
+                    texelColumn += direction;
+                    texel += direction;
+                    height += texelHeightStep;
+                }
+            }
+        }
+
+        totalSpan = corners[2]->v.ob[2] - corners[0]->v.ob[2];
+        if (cachedSpan != totalSpan) {
+            cachedSpan = totalSpan;
+            cachedReciprocal = 1.0f / totalSpan;
+        }
+        longSlopeX = (corners[2]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
+        longSlopeHeight = (corners[2]->v.ob[1] - corners[0]->v.ob[1]) * cachedReciprocal;
+        span = corners[1]->v.ob[2] - corners[0]->v.ob[2];
+        if (span != 0) {
+            if (cachedSpan != span) {
+                cachedSpan = span;
+                cachedReciprocal = 1.0f / span;
+            }
+            shortSlopeX = (corners[1]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
+            shortSlopeHeight = (corners[1]->v.ob[1] - corners[0]->v.ob[1]) * cachedReciprocal;
+            longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
+            shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
+            longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
+            shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
+            longX = shortX = corners[0]->v.ob[0] << HEIGHT_FRACTION_BITS;
+            longHeight = shortHeight = corners[0]->v.ob[1] << HEIGHT_FRACTION_BITS;
+            for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
+                DrawHeightRow(longX, longHeight, shortX, shortHeight, corners[0]->v.ob[2] + z);
+                longX += longXStep;
+                shortX += shortXStep;
+                longHeight += longHeightStep;
+                shortHeight += shortHeightStep;
+            }
+        }
+        lowerSpan = corners[2]->v.ob[2] - corners[1]->v.ob[2];
+        if (lowerSpan != 0) {
+            if (cachedSpan != lowerSpan) {
+                cachedSpan = lowerSpan;
+                cachedReciprocal = 1.0f / lowerSpan;
+            }
+            longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[0]) << HEIGHT_FRACTION_BITS;
+            longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[1]) << HEIGHT_FRACTION_BITS;
+            shortSlopeX = (corners[2]->v.ob[0] - corners[1]->v.ob[0]) * cachedReciprocal;
+            shortSlopeHeight = (corners[2]->v.ob[1] - corners[1]->v.ob[1]) * cachedReciprocal;
+            longXStep = longSlopeX * HEIGHT_ROW_STEP_SCALE;
+            shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
+            longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
+            shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
+            shortX = corners[1]->v.ob[0] << HEIGHT_FRACTION_BITS;
+            shortHeight = corners[1]->v.ob[1] << HEIGHT_FRACTION_BITS;
+            for (z = 0; z < lowerSpan + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
+                DrawHeightRow(longX, longHeight, shortX, shortHeight, corners[1]->v.ob[2] + z);
+                longX += longXStep;
+                shortX += shortXStep;
+                longHeight += longHeightStep;
+                shortHeight += shortHeightStep;
+            }
+        }
+    }
+
+    cachedSpan = -1;
+    if (band < GROUND_TILE_ROW_COUNT) {
+        ((u32 *)heights)[0] = NO_HEIGHT_PAIR;
+        ((u32 *)heights)[1] = NO_HEIGHT_PAIR;
+        fill = *(f64 *)heights;
+        for (column = 1; column < HEIGHT_BAND_ROW_COUNT * MAP_COLUMN_COUNT / 4; column++) {
+            ((f64 *)heights)[column] = fill;
+        }
+        for (row = band * GROUND_TILE_POINT_SPAN; row < (band + 1) * GROUND_TILE_POINT_SPAN; row++) {
+            for (column = 0; column < GROUND_POINT_COLUMN_COUNT - 1; column++) {
+                corners[0] = GetGroundPoint(column, row);
+                corners[1] = GetGroundPoint(column + 1, row);
+                corners[2] = GetGroundPoint(column, row + 1);
+                corners[3] = GetGroundPoint(column + 1, row + 1);
+                if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+                    corners[4] = corners[0];
+                    corners[0] = corners[1];
+                    corners[1] = corners[4];
+                }
+                if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
+                    corners[4] = corners[1];
+                    corners[1] = corners[2];
+                    corners[2] = corners[4];
+                }
+                if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+                    corners[4] = corners[0];
+                    corners[0] = corners[1];
+                    corners[1] = corners[4];
+                }
+                DrawTriangleHeights();
+                corners[0] = GetGroundPoint(column, row);
+                corners[1] = GetGroundPoint(column + 1, row);
+                corners[2] = GetGroundPoint(column, row + 1);
+                corners[3] = GetGroundPoint(column + 1, row + 1);
+                /* The second triangle has the far corner in place of the first */
+                corners[0] = corners[3];
+                if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+                    corners[4] = corners[0];
+                    corners[0] = corners[1];
+                    corners[1] = corners[4];
+                }
+                if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
+                    corners[4] = corners[1];
+                    corners[1] = corners[2];
+                    corners[2] = corners[4];
+                }
+                if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
+                    corners[4] = corners[0];
+                    corners[0] = corners[1];
+                    corners[1] = corners[4];
+                }
+                DrawTriangleHeights();
+            }
+        }
+        /* An empty loop; the original has it */
+        for (column = 0; column < 0x2000; column++) {
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", DrawTriangleHeights);
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", DrawBandHeights);
+#endif
 
 /* Empties every terrain code cell and frees the packed code blocks */
 #ifdef NON_MATCHING
