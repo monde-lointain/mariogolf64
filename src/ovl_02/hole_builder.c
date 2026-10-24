@@ -152,6 +152,7 @@ extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
 extern f32 sHeightStepScales[];
 extern s32 sPaintLogic;
+extern Vec3 g_MiniGolfScale;
 extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
 
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfx, Vtx **vertices);
@@ -1503,7 +1504,43 @@ f32 MeasureGroundTiles(void) {
     return tileIndex;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80250194_ovl_02);
+/*
+ * Scales the hole's ground points, tile centres, billboards, tee and cup
+ * with g_MiniGolfScale
+ */
+void ScaleMiniGolfHole(void) {
+    Vtx_t point;
+    s32 row;
+    s32 column;
+    s32 index;
+
+    for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+            point = GetGroundPoint(column, row)->v;
+            point.ob[AXIS_X] = point.ob[AXIS_X] * g_MiniGolfScale[AXIS_X];
+            point.ob[AXIS_Y] = point.ob[AXIS_Y] * g_MiniGolfScale[AXIS_Y];
+            point.ob[AXIS_Z] = point.ob[AXIS_Z] * g_MiniGolfScale[AXIS_Z];
+            SetGroundPoint(column, row, &point);
+        }
+    }
+    for (index = 0; index < GROUND_TILE_COUNT; index++) {
+        g_WorkArea.hole.tiles[index].center[AXIS_X] *= g_MiniGolfScale[AXIS_X];
+        g_WorkArea.hole.tiles[index].center[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
+        g_WorkArea.hole.tiles[index].center[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
+    }
+    for (index = 0; index < BILLBOARD_COUNT; index++) {
+        if (g_Billboards[index].textureIndex >= 0) {
+            g_Billboards[index].x *= g_MiniGolfScale[AXIS_X];
+            g_Billboards[index].z *= g_MiniGolfScale[AXIS_Z];
+        }
+    }
+    D_800BA9D8.teePosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
+    D_800BA9D8.teePosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
+    D_800BA9D8.teePosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
+    D_800BA9D8.cupPosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
+    D_800BA9D8.cupPosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
+    D_800BA9D8.cupPosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
+}
 
 /* Returns the paint logic that a course's terrain is painted with */
 s32 GetCoursePaintLogic(s32 course) {

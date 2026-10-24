@@ -1588,6 +1588,7 @@ FinishCodeMapCleanup = 0x8024FA98; // type:func segment:ovl_02
 PaintGroundTiles = 0x8024FAA0; // type:func segment:ovl_02
 ToggleCodeMapCleanup = 0x8024FF14; // type:func segment:ovl_02
 MeasureGroundTiles = 0x8024FF74; // type:func segment:ovl_02
+ScaleMiniGolfHole = 0x80250194; // type:func segment:ovl_02
 GetCoursePaintLogic = 0x80250474; // type:func segment:ovl_02
 FinishHolePoints = 0x802504E0; // type:func segment:ovl_02
 BuildHole = 0x802504E8; // type:func segment:ovl_02
