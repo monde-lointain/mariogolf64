@@ -1546,6 +1546,7 @@ EaseLookAtBelowBall = 0x80047B34; // type:func
 EaseLookAtPoint = 0x80047CAC; // type:func
 SnapLookAtPoint = 0x80047D68; // type:func
 EaseCameraPosition = 0x80047DBC; // type:func
+StartHoleCamerasAndSong = 0x800484F8; // type:func
 StartHoleFlyover = 0x80048690; // type:func
 ClearHoleIntroText = 0x8004876C; // type:func
 EndHoleFlyover = 0x800487E4; // type:func

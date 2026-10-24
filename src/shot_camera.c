@@ -12,6 +12,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
+#include "scoring.h"
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
@@ -491,7 +492,92 @@ void EaseCameraPosition(Vec3 target) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047E9C);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800484F8);
+/* The songs of the holes */
+#define HOLE_SONG_TOURNAMENT 0x0B
+#define HOLE_SONG_FINAL 0x14 /* A hole that can decide the round */
+#define HOLE_SONG_UNK18 0x18
+#define HOLE_SONG_MATCH 0x19
+#define HOLE_SONG_UNK1A 0x1A
+#define HOLE_SONG_COURSE 0x1B
+#define HOLE_SONG_RING_SHOT 0x1D
+#define HOLE_SONG_UNK1F 0x1F
+#define HOLE_SONG_CLUB_SLOTS 0x2B
+#define HOLE_SONG_MINI_GOLF 0x2D
+#define HOLE_SONG_SKINS_MATCH 0x2E
+
+void func_800934CC(s32);
+
+extern s8 D_801061B8;
+extern s8 D_801061C0;
+extern s8 D_801061C3;
+extern s8 D_801B60B9;
+extern s32 g_PlayerCount;
+
+/* Resets the cameras for the start of a hole, and plays the game mode's song */
+void StartHoleCamerasAndSong(void) {
+    func_800934CC(-1);
+    D_801061CE = 1;
+    D_801061B8 = -1;
+    D_801061C0 = 1;
+    D_801061C3 = 1;
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
+    g_HoleFlyoverFrame = 0;
+    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    if (D_801B60B9) {
+        PlaySong(HOLE_SONG_UNK1F, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
+        return;
+    }
+    switch (g_GameMode) {
+        case GAME_MODE_UNK3:
+            PlaySong(HOLE_SONG_UNK1A, SONG_FLAG_UNREAD);
+            break;
+        case GAME_MODE_MATCH_GAME:
+        case GAME_MODE_GET_CHARACTER:
+            if (GetMatchStanding(0, 1) != MATCH_STANDING_OPEN) {
+                PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+            } else {
+                PlaySong(HOLE_SONG_MATCH, SONG_FLAG_UNREAD);
+            }
+            break;
+        case GAME_MODE_SKINS_MATCH:
+            if (GetLastHoleIndex() == g_HoleIndex) {
+                PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+            } else {
+                PlaySong(HOLE_SONG_SKINS_MATCH, SONG_FLAG_UNREAD);
+            }
+            break;
+        case GAME_MODE_TOURNAMENT:
+            PlaySong(HOLE_SONG_TOURNAMENT, SONG_FLAG_UNREAD);
+            break;
+        case GAME_MODE_UNK7:
+            PlaySong(HOLE_SONG_UNK18, SONG_FLAG_UNREAD);
+            break;
+        case GAME_MODE_RING_SHOT:
+            PlaySong(HOLE_SONG_RING_SHOT, SONG_FLAG_UNREAD);
+            D_801061C0 = 0;
+            D_801061C3 = 0;
+            break;
+        case GAME_MODE_CLUB_SLOTS:
+            if (GetLastHoleIndex() == g_HoleIndex) {
+                PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+            } else {
+                PlaySong(HOLE_SONG_CLUB_SLOTS, SONG_FLAG_UNREAD);
+            }
+            break;
+        case GAME_MODE_STROKE:
+        default:
+            if (g_HoleIndex == GetLastHoleIndex() && g_PlayerCount != 1) {
+                PlaySong(HOLE_SONG_FINAL, SONG_FLAG_UNREAD);
+            } else if (g_IsMiniGolf) {
+                PlaySong(HOLE_SONG_MINI_GOLF, SONG_FLAG_UNREAD);
+            } else {
+                PlaySong(HOLE_SONG_COURSE, SONG_FLAG_UNREAD);
+            }
+            break;
+    }
+}
 
 /* Starts the flyover of the hole, with the inset view on the cup */
 void StartHoleFlyover(void) {
