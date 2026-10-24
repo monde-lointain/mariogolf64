@@ -1,13 +1,19 @@
 #include "common.h"
+#include "billboard.h"
 #include "camera.h"
 #include "current_shot.h"
 #include "functions.h"
+#include "game_flags.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "scene.h"
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
+#include "text.h"
+#include "variables.h"
 
 /* Unused; the original has it */
 static const char sUnusedFloatFormat[] = "            %f";
@@ -38,6 +44,21 @@ static const char sUnusedFloatFormat[] = "            %f";
 
 #define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
 
+/* The flyover's field of view, in degrees, and the inset view's rectangle */
+#define FLYOVER_FIELD_OF_VIEW 80.0f
+#define FLYOVER_INSET_CENTER_X 160
+#define FLYOVER_INSET_CENTER_Y 112
+#define FLYOVER_INSET_SIZE 128
+/* g_HoleFlyoverFrame's value once the flyover is over, while the screen fades back */
+#define HOLE_FLYOVER_ENDED (-1)
+/* The text slots that the hole's introduction shows */
+#define INTRO_TEXT_SLOT_UNK0 0
+#define INTRO_TEXT_SLOT_UNK1 1
+
+/* windSpeed's units in a unit of wind, and the speed of a wind that EndHoleFlyover calls strong */
+#define WIND_SPEED_UNIT 0x10000
+#define STRONG_WIND_SPEED 6
+
 /* How far below the ball the look-at point settles, in world units */
 #define LOOK_AT_DROP 19.650002f
 /* The fractions of the way to the ball that the look-at point eases each frame */
@@ -61,6 +82,8 @@ extern s32 D_800C5AAC;
 extern s32 g_BallFlightStep;
 extern SimulatedShot g_SimulatedShot;
 extern s32 sCupViewHoldCount;
+extern s32 g_HoleFlyoverFrame;
+extern s8 D_801061CE;
 extern s32 sEndReaction;
 /* How many frames the flight camera waits after the ball's path ends */
 extern s32 sLandingWaitFrameCount;
@@ -82,7 +105,9 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045910);
 
 void func_8009226C(s32);
 void func_80205AE4(s32, s32);
+void func_80216130(s32);
 void func_80216B74(s32);
+s32 StepHoleFlyover(void);
 
 /* The surface under the player's ball */
 SurfaceInfo *GetBallSurfaceInfo(UnkB8 *player) {
@@ -209,13 +234,42 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047E9C);
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800484F8);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80048690);
+/* Starts the flyover of the hole, with the inset view on the cup */
+void StartHoleFlyover(void) {
+    g_HoleFlyoverFrame = 0;
+    D_801061CE = 0;
+    g_InsetViewAnimation = INSET_VIEW_STILL;
+    g_InsetViewStep = 0;
+    g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+    g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+    g_Cameras[INSET_CAMERA].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+    g_Cameras[0].view.fieldOfView = FLYOVER_FIELD_OF_VIEW;
+    SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
+    SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
+    SetInsetViewRect(FLYOVER_INSET_CENTER_X, FLYOVER_INSET_CENTER_Y, FLYOVER_INSET_SIZE, FLYOVER_INSET_SIZE);
+    StepHoleFlyover();
+}
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004876C);
+void ClearHoleIntroText(void) {
+    D_801061CE = 0;
+    SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
+    SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
+}
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800487E4);
+/* Ends the hole flyover; the screen fades back, and a strong wind gets func_80216130 */
+void EndHoleFlyover(void) {
+    g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
+    g_InsetViewAnimation = INSET_VIEW_STILL;
+    g_InsetViewStep = 0;
+    g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+    if (g_GameMode != GAME_MODE_UNK7 && !g_IsMiniGolf) {
+        if (IsGameFlagSet(GAME_FLAG_UNK48) || g_HoleConditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
+            func_80216130(1);
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004887C);
+INCLUDE_ASM("asm/nonmatchings/shot_camera", StepHoleFlyover);
 
 /* Turns the camera's yaw to face the look-at point, unless the camera is over it */
 void AimCameraYaw(void) {

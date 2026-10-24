@@ -63,6 +63,9 @@
 /* Prints each character slot's animation frame */
 #define GAME_FLAG_SHOW_ANIMATION_FRAMES 0x38
 
+/* Among other uses, makes EndHoleFlyover act as it does for a strong wind */
+#define GAME_FLAG_UNK48 0x48
+
 /* Turns the character sound queue into a delay editor, among other uses */
 #define GAME_FLAG_UNK5F 0x5F
 

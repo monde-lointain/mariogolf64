@@ -80,6 +80,9 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK1 1
 #define GAME_MODE_UNK6 6
 
+/* A mode in which EndHoleFlyover skips its call for a strong wind */
+#define GAME_MODE_UNK7 7
+
 /* A mode in which SetUpPlayers sets up the players from a record */
 #define GAME_MODE_UNK8 8
 
