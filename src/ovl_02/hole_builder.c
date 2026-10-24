@@ -2561,7 +2561,130 @@ void ShadeGround(void) {
     osSyncPrintf("EE\n");
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_80253270_ovl_02);
+/* The texels in a tile's border: one before its texels and three after */
+#define TILE_BORDER_BEFORE 1
+#define TILE_BORDER_END (GROUND_TILE_TEXEL_ROW_LENGTH - TILE_BORDER_BEFORE)
+#define BORDERED_TILE_TEXEL_COUNT (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH)
+
+/*
+ * The texel at texelColumn and texelRow in the tile at tileColumn and
+ * tileRow, in either layout. Texels past a tile's last ones are in the next
+ * tile; past the map's edges they repeat the edge texels.
+ */
+static inline u16 ReadTileTexel(s32 tileColumn, s32 tileRow, s32 texelColumn, s32 texelRow) {
+    s32 tileIndex;
+    GroundTile *tile;
+    u16 *texel;
+
+    if (tileColumn < 0) {
+        tileColumn = 0;
+        texelColumn = 0;
+    } else if (tileColumn >= GROUND_TILE_COLUMN_COUNT) {
+        tileColumn = GROUND_TILE_COLUMN_COUNT - 1;
+        texelColumn = -1;
+    }
+    if (tileRow < 0) {
+        tileRow = 0;
+        texelRow = 0;
+    } else if (tileRow >= GROUND_TILE_ROW_COUNT) {
+        tileRow = GROUND_TILE_ROW_COUNT - 1;
+        texelRow = -1;
+    }
+    tileIndex = tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn;
+    if (texelColumn > GROUND_TILE_TEXEL_SPAN) {
+        texelColumn = GROUND_TILE_TEXEL_SPAN;
+    }
+    texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
+    texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
+    tile = &g_WorkArea.hole.tiles[tileIndex];
+    if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] !=
+        0) {
+        texel = &tile->texels[0][(texelRow + TILE_BORDER_BEFORE) * GROUND_TILE_TEXEL_ROW_LENGTH + texelColumn +
+                                 TILE_BORDER_BEFORE];
+    } else {
+        texel = &tile->texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn];
+    }
+    return *texel;
+}
+
+/*
+ * Switches the ground tiles between their two texel layouts: 32 texels a
+ * row, or inside a border of their neighbors' texels. It does not match:
+ * where ReadTileTexel reads a tile, the original adds the tile's address
+ * after the layout test, and ours adds it before; ours also masks the texel
+ * coordinates in another order, and is two instructions shorter.
+ */
+#ifdef NON_MATCHING
+void ToggleGroundTileBorders(void) {
+    u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH];
+    s32 tileColumn;
+    s32 tileRow;
+    s32 texelColumn;
+    s32 texelRow;
+    s32 i;
+    u16 *texel;
+    u16 *tileTexel;
+    f64 *source;
+    f64 *destination;
+
+    if (g_WorkArea.hole.tiles[0].texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
+        for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+            for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
+                for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
+                    for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
+                        texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn] =
+                            ReadTileTexel(tileColumn, tileRow, texelColumn, texelRow);
+                    }
+                }
+                texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
+                for (i = 0; i < BORDERED_TILE_TEXEL_COUNT; i++) {
+                    g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn].texels[0][i] =
+                        texels[0][i];
+                }
+            }
+        }
+        return;
+    }
+    for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+        for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
+            texel = &texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE];
+            tileTexel = g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn].texels[0];
+            for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
+                for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN; texelColumn++) {
+                    *texel++ = *tileTexel++;
+                }
+                texel += GROUND_TILE_TEXEL_ROW_LENGTH - GROUND_TILE_TEXEL_SPAN;
+            }
+            texel = texels[0];
+            for (texelRow = -TILE_BORDER_BEFORE; texelRow < GROUND_TILE_TEXEL_ROW_COUNT - TILE_BORDER_BEFORE;
+                 texelRow++) {
+                for (texelColumn = -TILE_BORDER_BEFORE; texelColumn < TILE_BORDER_END;) {
+                    *texel = ReadTileTexel(tileColumn + (texelColumn >> MAP_TILE_SHIFT),
+                                           tileRow + (texelRow >> MAP_TILE_SHIFT), texelColumn, texelRow);
+                    /* Skips the texels already copied */
+                    if ((u32)texelRow < GROUND_TILE_TEXEL_SPAN && texelColumn == -TILE_BORDER_BEFORE) {
+                        texel += GROUND_TILE_TEXEL_SPAN + 1;
+                        texelColumn += GROUND_TILE_TEXEL_SPAN + 1;
+                    } else {
+                        texel++;
+                        texelColumn++;
+                    }
+                }
+            }
+            texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
+            source = (f64 *)texels;
+            destination = (f64 *)g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn].texels;
+            while (source != (f64 *)&texels[GROUND_TILE_TEXEL_ROW_COUNT]) {
+                *destination++ = *source++;
+                *destination++ = *source++;
+            }
+            g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn].unk990 = 0;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ToggleGroundTileBorders);
+#endif
 
 /*
  * Gives the vertices from start up to end texture coordinates on the

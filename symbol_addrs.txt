@@ -1619,6 +1619,7 @@ ShadeGroundTiles = 0x80252B24; // type:func segment:ovl_02
 BuildGroundTileDisplayList = 0x802537EC; // type:func segment:ovl_02
 BuildGroundDisplayLists = 0x802541E8; // type:func segment:ovl_02
 ShadeGround = 0x80253234; // type:func segment:ovl_02
+ToggleGroundTileBorders = 0x80253270; // type:func segment:ovl_02
 SetMiniGolfTileTextureCoords = 0x80253620; // type:func segment:ovl_02
 SetTileTextureCoords = 0x80253680; // type:func segment:ovl_02
 sPaintSeed = 0x802542A0; // size:0x4 segment:ovl_02

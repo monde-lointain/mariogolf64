@@ -90,7 +90,7 @@ void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
 void func_8024FF14(void);
 void func_80253234(s32);
-void func_80253270(void);
+void ToggleGroundTileBorders(void);
 void func_8040000C(void);
 void func_804002C0(void);
 void func_80400FBC(void);
@@ -1374,7 +1374,7 @@ void UpdateDebugScenes(void) {
             func_80253234(1);
         }
         if (g_MenuControllerData[0].trigger & L_CBUTTONS) {
-            func_80253270();
+            ToggleGroundTileBorders();
         }
         g_MapCamera.view.eye[0] = sMapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
         g_MapCamera.view.eye[2] = sMapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;

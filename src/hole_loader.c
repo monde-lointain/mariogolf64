@@ -147,7 +147,7 @@ void PlacePlayersOnTee(void);
 void func_80080220(void);
 void func_800802E0(void);
 void func_80253234(s32);
-void func_80253270(void);
+void ToggleGroundTileBorders(void);
 void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
@@ -696,7 +696,7 @@ void PrepareHoleScene(void) {
         func_80253234(unk);
     }
     D_800BB0E8 = 0;
-    func_80253270();
+    ToggleGroundTileBorders();
     SetCharacterLights();
     ShrinkMiniGolfHole();
 }
