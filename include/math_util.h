@@ -9,6 +9,8 @@
 #define BINARY_ANGLE_MASK 0xFFFF
 /* A full turn as a binary angle */
 #define BINARY_ANGLE_TURN 0x10000
+/* Converts radians to binary angles */
+#define RADIANS_TO_BINARY_ANGLE (32768.0 / (f32)M_PI)
 
 /* The radians to degrees factor of rotations */
 #define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))

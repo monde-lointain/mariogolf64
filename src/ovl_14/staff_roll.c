@@ -182,7 +182,6 @@
 /* The putts are framed from three steps to the left of straight on */
 #define PUTT_YAW_OFFSET 15
 #define DEGREES_TO_RADIANS_F ((f32)M_PI / 180)
-#define RADIANS_TO_BINARY_ANGLE 10430.378060218739
 #define GOLFER_HEADING ((f32)DEGREES_TO_RADIANS(-30))
 /* The putts are taken from this far along the x axis from the cup */
 #define NEAR_CUP_DISTANCE (150 * 1024)

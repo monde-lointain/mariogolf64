@@ -14,8 +14,6 @@
 #include "sound.h"
 #include "surface.h"
 
-/* Converts radians to an angle where 0x10000 is a full turn */
-#define RADIANS_TO_ANGLE 10430.378060218739
 /* The direction GenerateClub measures each test shot's landing against */
 #define STRAIGHT_ANGLE 0x1000
 
@@ -580,7 +578,7 @@ void GenerateClub(s32 clubIndex) {
         club->deflection[shotMode] =
             STRAIGHT_ANGLE - (s32)(atan2(simulation.position[2] - simulation.startPosition[2],
                                          simulation.position[0] - simulation.startPosition[0]) *
-                                   RADIANS_TO_ANGLE);
+                                   RADIANS_TO_BINARY_ANGLE);
     }
     g_ClubTestMode = CLUB_TEST_NONE;
 }
