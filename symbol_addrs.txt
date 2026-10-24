@@ -1547,6 +1547,7 @@ sCupViewHoldCount = 0x800BE660; // size:0x4
 sFlightCameraFlags = 0x800BE664; // size:0x4
 sEndReaction = 0x800BE688; // size:0x4
 sLandingWaitFrameCount = 0x800BE68C; // size:0x4
+g_HoleFlyoverFrame = 0x800BE694; // size:0x4
 sNextCameraPickIndex = 0x800BE6A0; // size:0x4
 sCameraPicks = 0x800DAEE0; // size:0xA
 sFlightBallPosition = 0x800DAEEC; // size:0xC

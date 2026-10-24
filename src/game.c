@@ -896,7 +896,11 @@ extern s32 sFadeAlpha;
 extern s32 sFadeColor;
 /* Toggled by a debug button; nothing reads it */
 extern s32 sUnreadDebugSwitch;
-extern s32 D_800BE694;
+/*
+ * The hole flyover's frame; DrawGame fades the screen out over its last
+ * frames, and back in while it is -1
+ */
+extern s32 g_HoleFlyoverFrame;
 extern f32 D_800C30D4;
 extern s32 D_800C7304;
 extern s32 D_8022BE08;
@@ -1681,16 +1685,16 @@ s32 DrawGame(void) {
     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
     gDPPipeSync(g_DisplayListHead++);
 
-    if (D_800BE694 > 0xAA) {
-        sFadeAlpha = (D_800BE694 - 0xAA) * 16;
+    if (g_HoleFlyoverFrame > 0xAA) {
+        sFadeAlpha = (g_HoleFlyoverFrame - 0xAA) * 16;
         if (sFadeColor == FADE_COLOR_NONE) {
             SetScreenEffect(SCREEN_EFFECT_SPIN, 30);
         }
-    } else if (D_800BE694 == -1) {
+    } else if (g_HoleFlyoverFrame == -1) {
         sFadeAlpha -= 32;
         if (sFadeAlpha < 0) {
             sFadeAlpha = 0;
-            D_800BE694 = 0;
+            g_HoleFlyoverFrame = 0;
         }
     } else {
         sFadeAlpha = 0;
