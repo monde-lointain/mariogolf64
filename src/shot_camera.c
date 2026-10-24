@@ -357,8 +357,24 @@ void EaseLookAtBelowBall(f32 drop) {
 INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
 #endif
 
-/* Eases the look-at point toward the ball */
+/*
+ * Eases the look-at point toward the ball.
+ * It does not match: the original keeps the loads of the ball's and the
+ * look-at point's coordinates in statement order, where this schedules the
+ * ball's loads first.
+ */
+#ifdef NON_MATCHING
+void EaseLookAtPoint(void) {
+    sLookAtPoint[AXIS_X] +=
+        (sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_X]) * LOOK_AT_EASE_FRACTION;
+    sLookAtPoint[AXIS_Y] += (sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - LOOK_AT_DROP - sLookAtPoint[AXIS_Y])
+                          * LOOK_AT_HEIGHT_EASE_FRACTION;
+    sLookAtPoint[AXIS_Z] +=
+        (sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_Z]) * LOOK_AT_EASE_FRACTION;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtPoint);
+#endif
 
 /* Puts the look-at point on the ball */
 void SnapLookAtPoint(void) {
