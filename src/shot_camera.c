@@ -1,6 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "camera.h"
+#include "club.h"
 #include "current_shot.h"
 #include "functions.h"
 #include "game_flags.h"
@@ -55,6 +56,32 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define INTRO_TEXT_SLOT_UNK0 0
 #define INTRO_TEXT_SLOT_UNK1 1
 
+/* How far the camera must be from where it eases to before it moves, and how far it goes */
+#define CAMERA_EASE_DEAD_ZONE 1.0f
+#define CAMERA_EASE_FRACTION 0.2f
+
+/*
+ * The ring of BuildRingTexels' texture, by distance in texels from its
+ * corner: clear inside RING_INNER_RADIUS, brightening to RING_PEAK_RADIUS,
+ * then fading to clear at RING_OUTER_RADIUS
+ */
+#define RING_INNER_RADIUS 5
+#define RING_PEAK_RADIUS 55
+#define RING_OUTER_RADIUS 62
+#define RING_INNER_INTENSITY 10
+#define RING_RISE_PER_TEXEL 5
+#define RING_PEAK_INTENSITY 255
+#define RING_FALL_PER_TEXEL 36
+
+/* RateShotLength's ratings */
+#define SHOT_LENGTH_UNRATED 0
+#define SHOT_LENGTH_FULL 1
+#define SHOT_LENGTH_SHORT 2
+
+/* The fractions of the selected shot distance a full and a short shot go beyond */
+#define FULL_SHOT_FRACTION 0.8f
+#define SHORT_SHOT_FRACTION 0.6f
+
 /* windSpeed's units in a unit of wind, and the speed of a wind that EndHoleFlyover calls strong */
 #define WIND_SPEED_UNIT 0x10000
 #define STRONG_WIND_SPEED 6
@@ -78,6 +105,10 @@ static const char sUnusedFloatFormat[] = "            %f";
 extern s32 D_800BE698;
 extern s32 D_800BE69C;
 extern s32 D_800C5AAC;
+extern s32 D_800BE640;
+extern s32 D_800BE644;
+extern s32 D_800BE648;
+extern SurfaceInfo *sEndSurfaceInfo;
 /* The step of the simulated path that the ball's flight has reached */
 extern s32 g_BallFlightStep;
 extern SimulatedShot g_SimulatedShot;
@@ -206,7 +237,37 @@ s32 IsCupPassPoint(s32 cupDistance, s32 height) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80046898);
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsShotLengthRated(endKind)                                                 \
+    ((endKind) != SURFACE_KIND_WATER_HAZARD && D_800BE644 >= sLandingCupDistance   \
+     && D_800BE648 != 1 && g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00     \
+     && g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
+
+/*
+ * Rates how far the simulated shot goes, in yards, against the distance
+ * selected for it. Shots that end out of play or in water, approach shots and
+ * some others go unrated.
+ */
+s32 RateShotLength(void) {
+    s32 endKind;
+
+    endKind = sEndSurfaceInfo->kind;
+    if (endKind == SURFACE_KIND_OUT_OF_COURSE) {
+        return SHOT_LENGTH_UNRATED;
+    }
+    if (endKind == SURFACE_KIND_OUT_OF_BOUNDS) {
+        return SHOT_LENGTH_UNRATED;
+    }
+    if (IsShotLengthRated(endKind)) {
+        if (GetSelectedShotDistance() * FULL_SHOT_FRACTION < D_800BE640 * YARDS_PER_UNIT) {
+            return SHOT_LENGTH_FULL;
+        }
+        if (GetSelectedShotDistance() * SHORT_SHOT_FRACTION < D_800BE640 * YARDS_PER_UNIT) {
+            return SHOT_LENGTH_SHORT;
+        }
+    }
+    return SHOT_LENGTH_UNRATED;
+}
 
 s32 GetEndReaction(void) {
     return sEndReaction;
@@ -228,7 +289,26 @@ void SnapLookAtPoint(void) {
     sLookAtPoint[AXIS_Z] = sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047DBC);
+/* Eases each of the camera's coordinates toward target's, unless it is already close */
+void EaseCameraPosition(Vec3 target) {
+    f32 offset;
+
+    offset = target[AXIS_X] - sCameraPosition[AXIS_X];
+    /* The do-while is there to match */
+    do {
+        if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
+            sCameraPosition[AXIS_X] += offset * CAMERA_EASE_FRACTION;
+        }
+    } while (0);
+    offset = target[AXIS_Y] - sCameraPosition[AXIS_Y];
+    if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
+        sCameraPosition[AXIS_Y] += offset * CAMERA_EASE_FRACTION;
+    }
+    offset = target[AXIS_Z] - sCameraPosition[AXIS_Z];
+    if (fabsf(offset) > CAMERA_EASE_DEAD_ZONE) {
+        sCameraPosition[AXIS_Z] += offset * CAMERA_EASE_FRACTION;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047E9C);
 
@@ -306,7 +386,33 @@ void func_8004C6B8(void) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6C0);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C860);
+/* Fills a width by height texture with a quarter of a ring around its far corner */
+void BuildRingTexels(u8 *texels, s32 width, s32 height) {
+    s32 row;
+    s32 column;
+    s32 texelIndex;
+    s32 radius;
+    f32 distance;
+    s32 intensity;
+
+    texelIndex = 0;
+    for (row = 0; row != height; row++) {
+        for (column = 0; column != width; column++) {
+            distance = sqrtf((row - height) * (row - height) + (column - width) * (column - width));
+            radius = distance;
+            if (radius < RING_INNER_RADIUS) {
+                intensity = 0;
+            } else if (radius < RING_PEAK_RADIUS) {
+                intensity = (s32)(distance - RING_INNER_RADIUS) * RING_RISE_PER_TEXEL + RING_INNER_INTENSITY;
+            } else if (radius < RING_OUTER_RADIUS) {
+                intensity = RING_PEAK_INTENSITY - (s32)(distance - RING_PEAK_RADIUS) * RING_FALL_PER_TEXEL;
+            } else {
+                intensity = 0;
+            }
+            texels[texelIndex++] = intensity;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C958);
 
