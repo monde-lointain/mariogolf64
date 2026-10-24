@@ -655,7 +655,77 @@ void func_8004C6B0(void) {
 void func_8004C6B8(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6C0);
+#define SPOT_QUARTER_SIZE 32
+#define SPOT_PEAK_INTENSITY 210
+#define SPOT_DISC_RADIUS 16
+#define SPOT_GAP_RADIUS 24
+#define SPOT_GAP_FALL_PER_TEXEL 26
+#define SPOT_RING_RISE_PER_TEXEL 16
+#define SPOT_SOFT_DISC_RADIUS 15
+#define SPOT_SOFT_FALL_PER_TEXEL 12
+
+/*
+ * Builds the top-left quarter of a spot, as SPOT_QUARTER_SIZE x
+ * SPOT_QUARTER_SIZE I8 texels. A soft spot is a disc that fades out toward its
+ * edge. Otherwise it is a disc, a dark gap and a ring that brightens outward.
+ * It does not match: the soft spot converts its squared distance in $f2
+ * rather than $f0.
+ */
+#ifdef NON_MATCHING
+void BuildSpotTexels(u8 *texels, s32 isSoft) {
+    s32 row;
+    s32 column;
+    s32 texelIndex;
+    s32 radius;
+    f32 distance;
+    s32 intensity;
+    s32 width;
+    s32 height;
+    s32 softDiscRadius;
+    s32 lastRadius;
+
+    texelIndex = 0;
+    width = SPOT_QUARTER_SIZE;
+    height = SPOT_QUARTER_SIZE;
+    lastRadius = SPOT_QUARTER_SIZE - 1;
+    if (!isSoft) {
+        for (row = 0; row != height; row++) {
+            for (column = 0; column != width; column++) {
+                radius = sqrtf((row - height) * (row - height)
+                               + (column - width) * (column - width));
+                if (radius <= SPOT_DISC_RADIUS) {
+                    intensity = SPOT_PEAK_INTENSITY;
+                } else if (radius <= SPOT_GAP_RADIUS) {
+                    intensity = SPOT_PEAK_INTENSITY - (radius - SPOT_DISC_RADIUS) * SPOT_GAP_FALL_PER_TEXEL;
+                } else if (radius < SPOT_QUARTER_SIZE) {
+                    intensity = (radius - SPOT_GAP_RADIUS) * SPOT_RING_RISE_PER_TEXEL;
+                } else {
+                    intensity = 0;
+                }
+                texels[texelIndex++] = intensity;
+            }
+        }
+    } else {
+        for (row = 0, softDiscRadius = SPOT_SOFT_DISC_RADIUS; row != height; row++) {
+            for (column = 0; column != width; column++) {
+                distance = (row - height) * (row - height) + (column - width) * (column - width);
+                distance = sqrtf(distance);
+                radius = distance;
+                if (radius <= softDiscRadius) {
+                    intensity = SPOT_PEAK_INTENSITY;
+                } else if (radius <= lastRadius) {
+                    intensity = SPOT_PEAK_INTENSITY - (s32)(distance - softDiscRadius) * SPOT_SOFT_FALL_PER_TEXEL;
+                } else {
+                    intensity = 0;
+                }
+                texels[texelIndex++] = intensity;
+            }
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/shot_camera", BuildSpotTexels);
+#endif
 
 /* Fills a width by height texture with a quarter of a ring around its far corner */
 void BuildRingTexels(u8 *texels, s32 width, s32 height) {

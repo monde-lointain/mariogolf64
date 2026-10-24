@@ -1553,6 +1553,7 @@ StepHoleFlyover = 0x8004887C; // type:func
 AimCameraYaw = 0x80048CF8; // type:func
 SetLandingWaitFrameCount = 0x8004C510; // type:func
 GetViewSidePoints = 0x8004C51C; // type:func
+BuildSpotTexels = 0x8004C6C0; // type:func
 BuildRingTexels = 0x8004C860; // type:func
 DisplaceNoiseSquare = 0x8004C958; // type:func
 StepNoiseTexture = 0x8004CDA0; // type:func
