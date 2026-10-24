@@ -2489,7 +2489,254 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
     ReadAssetFile(sReadCursor, GetAssetFileSize(&sHoleAsset), &sHoleAsset);
 }
 
+/* An RGBA 5551 texel's channels */
+#define TEXEL_RED_SHIFT 11
+#define TEXEL_GREEN_SHIFT 6
+#define TEXEL_BLUE_SHIFT 1
+#define TEXEL_RED_MASK 0xF800
+#define TEXEL_GREEN_MASK 0x7C0
+#define TEXEL_BLUE_MASK 0x3E
+#define TEXEL_ALPHA_MASK 1
+#define TEXEL_CHANNEL_MAX 31
+
+/* A billboard's position is in units of 1/BILLBOARD_UNITS_PER_TEXEL map texel */
+#define BILLBOARD_UNITS_PER_TEXEL 16
+/* The map texels around a billboard's base that its shadow can fall on */
+#define SHADOW_ROWS_BEFORE 16
+#define SHADOW_ROWS_AFTER 25
+#define SHADOW_COLUMN_REACH 25
+/* How far toward the light the point that a billboard is viewed toward is */
+#define SHADOW_LIGHT_DISTANCE 1000.0f
+/* The hit mask's solidities, sampled at BILLBOARD_MASK_SIZE + 1 points a side */
+#define SOLIDITY_ROW_SHIFT 5
+#define SOLIDITY_ROW_LENGTH (1 << SOLIDITY_ROW_SHIFT)
+/* How much of a texel's brightness is kept in a shadow, in percent */
+#define LIT_PERCENT_FULL 100
+#define LIT_PERCENT_AT_BASE 50.0f
+#define SHADOW_NEARNESS_LIMIT 1.5f
+#define SHADOW_NEARNESS_MIN 0.1f
+#define SHADOW_SOLIDITY_SCALE 4.0f
+/* A texel's brightness is its red * 4 + green * 8 + blue * 2, less SHADOW_BRIGHTNESS_FLOOR */
+#define SHADOW_BRIGHTNESS_FLOOR 60
+#define SHADOW_BRIGHTNESS_MAX 163
+#define SHADOW_DARKENING_SCALE 4
+#define SHADOW_SCALE_FRACTION_BITS 16
+#define SHADOW_SCALE_ONE (1 << SHADOW_SCALE_FRACTION_BITS)
+
+extern s8 sShadowlessTextures[];
+
+static inline u16 *GetShadowedTexel(u32 column, u32 row) {
+    return &g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+                                  (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
+                .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN + (column & MAP_TILE_MASK)];
+}
+
+/*
+ * Darkens the map texels in the billboards' shadows. Each texel near a
+ * billboard is put in the view from the billboard's base toward the light.
+ * Where that falls within the billboard's width and height, the texel is
+ * darkened by the hit mask's solidity there, less with its distance along the
+ * light, and within a diamond around the base, more toward the base. Dark
+ * texels are kept, and bright ones are darkened the most. A row with no texel
+ * within the width ends the shadow once one has started. Billboards with a
+ * texture in sShadowlessTextures cast no shadow.
+ * It does not match: ours keeps heightScale in a float register and loads
+ * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
+ * $s2 and $f22, and the other registers differ from there.
+ */
+#ifdef NON_MATCHING
+void CastBillboardShadows(void) {
+    f32 lightView[4][4];
+    Vec3 lightPoint;
+    u8 solidities[SOLIDITY_ROW_LENGTH][SOLIDITY_ROW_LENGTH];
+    u8 *solidityCells;
+    Vec3 rowPoint;
+    f32 lightYaw;
+    f32 lightPitch;
+    s32 lastTextureIndex;
+    s32 index;
+    s32 listIndex;
+    s32 hasShadowStarted;
+    s32 isRowInWidth;
+    s32 row;
+    s32 column;
+    s32 rowEnd;
+    s32 columnEnd;
+    s32 centerColumn;
+    s32 centerRow;
+    s32 x;
+    s32 z;
+    f32 width;
+    f32 height;
+    f32 widthScale;
+    f32 heightScale;
+    f32 widthFraction;
+    f32 heightFraction;
+    f32 nearness;
+    s32 litPercent;
+    s32 solidLitPercent;
+    s32 solidity;
+    s32 brightness;
+    u32 scale;
+    u16 color;
+    u32 red;
+    u32 green;
+    u32 blue;
+    f32 viewX;
+    f32 viewY;
+
+    lastTextureIndex = -1;
+    lightYaw = g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
+    lightPitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+    /* solidityCells is there to match */
+    solidityCells = solidities[0];
+    for (index = 0; index != BILLBOARD_COUNT; index++) {
+        hasShadowStarted = FALSE;
+        if (g_Billboards[index].textureIndex < 0) {
+            continue;
+        }
+        for (listIndex = 0;; listIndex++) {
+            if (g_Billboards[index].textureIndex == sShadowlessTextures[listIndex]) {
+                listIndex = -1;
+                break;
+            }
+            if (sShadowlessTextures[listIndex] < 0) {
+                break;
+            }
+        }
+        if (listIndex < 0) {
+            continue;
+        }
+        if (g_Billboards[index].textureIndex != lastTextureIndex) {
+            for (row = 0; row <= BILLBOARD_MASK_SIZE; row++) {
+                for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
+                    solidityCells[(row << SOLIDITY_ROW_SHIFT) + column] =
+                        GetBillboardSolidity(g_Billboards[index].textureIndex, column * (1.0f / BILLBOARD_MASK_SIZE),
+                                             row * (1.0f / BILLBOARD_MASK_SIZE));
+                }
+            }
+            lastTextureIndex = g_Billboards[index].textureIndex;
+        }
+        width = g_Billboards[index].width;
+        widthScale = 1.0f / width;
+        height = g_Billboards[index].height;
+        heightScale = 1.0f / height;
+        x = g_Billboards[index].x;
+        z = g_Billboards[index].z;
+        lightPoint[0] = cosf(lightPitch) * cosf(lightYaw) * SHADOW_LIGHT_DISTANCE + x;
+        lightPoint[2] = cosf(lightPitch) * sinf(lightYaw) * SHADOW_LIGHT_DISTANCE + z;
+        lightPoint[1] = sinf(lightPitch) * SHADOW_LIGHT_DISTANCE;
+        guLookAtF(lightView, x, 0.0f, z, lightPoint[0], lightPoint[1], lightPoint[2], 0.0f, -1.0f, 0.0f);
+        centerColumn = x / BILLBOARD_UNITS_PER_TEXEL;
+        centerRow = z / BILLBOARD_UNITS_PER_TEXEL;
+        lightView[0][0] *= BILLBOARD_UNITS_PER_TEXEL;
+        lightView[0][1] *= BILLBOARD_UNITS_PER_TEXEL;
+        lightView[0][2] *= BILLBOARD_UNITS_PER_TEXEL;
+        lightView[2][0] *= BILLBOARD_UNITS_PER_TEXEL;
+        lightView[2][1] *= BILLBOARD_UNITS_PER_TEXEL;
+        lightView[2][2] *= BILLBOARD_UNITS_PER_TEXEL;
+        row = centerRow - SHADOW_ROWS_BEFORE;
+        rowEnd = centerRow + SHADOW_ROWS_AFTER;
+        if (row < 0) {
+            row = 0;
+        }
+        if (rowEnd >= MAP_ROW_COUNT) {
+            rowEnd = MAP_ROW_COUNT - 1;
+        }
+        for (; row < rowEnd; row++) {
+            rowPoint[0] = lightView[2][0] * row + lightView[3][0];
+            rowPoint[1] = lightView[2][1] * row + lightView[3][1];
+            rowPoint[2] = lightView[2][2] * row + lightView[3][2];
+            isRowInWidth = FALSE;
+            column = centerColumn - SHADOW_COLUMN_REACH;
+            columnEnd = centerColumn + SHADOW_COLUMN_REACH;
+            if (column < 0) {
+                column = 0;
+            }
+            if (columnEnd >= MAP_COLUMN_COUNT) {
+                columnEnd = MAP_COLUMN_COUNT - 1;
+            }
+            for (; column < columnEnd; column++) {
+                viewX = lightView[0][0] * column + rowPoint[0];
+                if (width <= fabsf(viewX)) {
+                    if (!isRowInWidth) {
+                        continue;
+                    }
+                    break;
+                }
+                isRowInWidth = TRUE;
+                viewY = lightView[0][1] * column + rowPoint[1];
+                if (((-width <= viewY) & (viewY < height)) == 0) {
+                    continue;
+                }
+                litPercent = LIT_PERCENT_FULL;
+                heightFraction = viewY * heightScale;
+                widthFraction = fabsf(viewX) * widthScale;
+                if (widthFraction + fabsf(heightFraction * 2) < 1.0f) {
+                    litPercent = sqrtf(widthFraction * widthFraction + heightFraction * heightFraction * 4.0f) *
+                                     LIT_PERCENT_AT_BASE +
+                                 LIT_PERCENT_AT_BASE;
+                }
+                if (viewY >= 0.0f) {
+                    solidity = solidityCells[((s32)(heightFraction * BILLBOARD_MASK_SIZE) << SOLIDITY_ROW_SHIFT) +
+                                             (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
+                    if (solidity != 0) {
+                        nearness = SHADOW_NEARNESS_LIMIT - fabsf(lightView[0][2] * column + rowPoint[2]) * heightScale;
+                        if (nearness > SHADOW_NEARNESS_MIN) {
+                            solidLitPercent = LIT_PERCENT_FULL - solidity * nearness * SHADOW_SOLIDITY_SCALE;
+                            if (solidLitPercent < litPercent) {
+                                litPercent = solidLitPercent;
+                            }
+                        }
+                    }
+                }
+                if (litPercent == LIT_PERCENT_FULL) {
+                    continue;
+                }
+                color = *GetShadowedTexel(column, row);
+                red = color & TEXEL_RED_MASK;
+                green = color & TEXEL_GREEN_MASK;
+                blue = color & TEXEL_BLUE_MASK;
+                brightness = (red >> 9) + (green >> 3) + blue - SHADOW_BRIGHTNESS_FLOOR;
+                if (brightness < 0) {
+                    continue;
+                }
+                if (brightness > SHADOW_BRIGHTNESS_MAX) {
+                    brightness = SHADOW_BRIGHTNESS_MAX;
+                }
+                scale = SHADOW_SCALE_ONE - (LIT_PERCENT_FULL - litPercent) * brightness * SHADOW_DARKENING_SCALE;
+                red = (red * scale) >> SHADOW_SCALE_FRACTION_BITS;
+                green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
+                blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;
+                if (red > TEXEL_RED_MASK) {
+                    red = TEXEL_RED_MASK;
+                } else {
+                    red &= TEXEL_RED_MASK;
+                }
+                if (green > TEXEL_GREEN_MASK) {
+                    green = TEXEL_GREEN_MASK;
+                } else {
+                    green &= TEXEL_GREEN_MASK;
+                }
+                if (blue > TEXEL_BLUE_MASK) {
+                    blue = TEXEL_BLUE_MASK;
+                } else {
+                    blue &= TEXEL_BLUE_MASK;
+                }
+                color = red | green | blue | (color & TEXEL_ALPHA_MASK);
+                *GetShadowedTexel(column, row) = color;
+            }
+            if (isRowInWidth) {
+                hasShadowStarted = TRUE;
+            } else if (hasShadowStarted == TRUE) {
+                break;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
+#endif
 
 /*
  * Sets the ground's light and shade colours for the scene's colour index,
@@ -2589,15 +2836,6 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
 #define HEIGHT_FADE_SCALE 0.008f
 #define HEIGHT_FADE_LIMIT 0.25f
 #define HEIGHT_FADE_FULL 1.0f
-/* An RGBA 5551 texel's channels */
-#define TEXEL_RED_SHIFT 11
-#define TEXEL_GREEN_SHIFT 6
-#define TEXEL_BLUE_SHIFT 1
-#define TEXEL_RED_MASK 0xF800
-#define TEXEL_GREEN_MASK 0x7C0
-#define TEXEL_BLUE_MASK 0x3E
-#define TEXEL_ALPHA_MASK 1
-#define TEXEL_CHANNEL_MAX 31
 
 /* The light's colour for each slope, a channel per word */
 #define SLOPE_LIGHT_RED 0

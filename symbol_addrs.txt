@@ -1639,6 +1639,7 @@ sBuildCursor = 0x8025D354; // size:0x4 segment:ovl_02
 g_TerrainCodeBlockCount = 0x800BB00C; // size:0x4
 sHolePaintLogics = 0x80254C4C; // segment:ovl_02
 g_MiniGolfScale = 0x80254C88; // size:0xC segment:ovl_02
+sShadowlessTextures = 0x80254F20; // size:0x4 segment:ovl_02
 sTileVertexSlots = 0x80254F30; // size:0x20 segment:ovl_02
 sHeightStepScales = 0x80254F50; // size:0x80 segment:ovl_02
 sVerticesPathFormat = 0x80255168; // size:0x20 segment:ovl_02

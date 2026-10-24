@@ -10,6 +10,8 @@
 
 #define BILLBOARD_COUNT 128
 #define BILLBOARD_TEXTURE_COUNT 46
+/* A billboard texture's hit mask has this many rows of this many cells */
+#define BILLBOARD_MASK_SIZE 16
 
 typedef struct Billboard {
     /* 0x0 */ s16 x;
@@ -36,6 +38,7 @@ void InitBillboardManager(void *heapStart, s32 heapSize);
 void RevertBillboardManager(void);
 void PlaceBillboards(void);
 void SortBillboardsByDepth(void);
+s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down);
 
 extern Billboard g_Billboards[BILLBOARD_COUNT];
 extern BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];

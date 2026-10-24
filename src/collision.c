@@ -17,7 +17,6 @@
  * middle out to its side. A digit names what a ball hits there; '0' is
  * nothing.
  */
-#define BILLBOARD_MASK_SIZE 16
 #define BILLBOARD_MASK_COUNT 41
 #define BILLBOARD_MASK_INDEX_COUNT 64
 #define BILLBOARD_CELL_EMPTY 0
