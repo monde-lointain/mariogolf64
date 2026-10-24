@@ -1555,6 +1555,7 @@ ClearHoleIntroText = 0x8004876C; // type:func
 EndHoleFlyover = 0x800487E4; // type:func
 StepHoleFlyover = 0x8004887C; // type:func
 AimCameraYaw = 0x80048CF8; // type:func
+ChooseFlightCameraKind = 0x8004AC04; // type:func
 SetLandingWaitFrameCount = 0x8004C510; // type:func
 GetViewSidePoints = 0x8004C51C; // type:func
 BuildSpotTexels = 0x8004C6C0; // type:func
