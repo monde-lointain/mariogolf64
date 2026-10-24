@@ -19,6 +19,12 @@
 /* The most rings that a hole of Ring Shot has */
 #define RING_COUNT 3
 
+/* Values of the players' ringStates. Above RING_STATE_SHOWN, a state counts
+   the frames of the ring fading out, while sparkles circle it */
+#define RING_STATE_NONE 0
+#define RING_STATE_SHOWN 1
+#define RING_STATE_FADED 32
+
 /*
  * The games kept for continuing by game mode rather than by slot, and the
  * players and records kept with them
@@ -210,7 +216,7 @@ typedef struct UnkB8 {
     /* 0x27 */ u8 unk27;
     /* 0x28 */ s8 unk28;
     /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
-    /* 0x2A */ u8 unk2A;
+    /* 0x2A */ s8 soundPan;
     /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
     /* 0x4F */ u8 unk4F[0x52 - 0x4F];
     /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */

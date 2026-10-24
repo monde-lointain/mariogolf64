@@ -31,7 +31,7 @@ typedef struct SimulatedShot {
     /* 0x2E3C */ s32 unkB0Step; /* The first step with unkB0 set, or NO_STEP */
     /* 0x2E40 */ s8 endSurface;
     /* 0x2E41 */ s8 unk2E41;
-    /* 0x2E42 */ u8 unk2E42;
+    /* 0x2E42 */ s8 unk2E42;
 } SimulatedShot; /* size = 0x2E44 */
 
 extern SimulatedShot g_SimulatedShot;

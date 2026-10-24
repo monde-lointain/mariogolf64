@@ -47,11 +47,6 @@ typedef struct RingCorners {
 /* Degrees that the rings spin by each frame */
 #define RING_SPIN_SPEED 2.0
 
-/* Values of the players' ringStates. Above RING_STATE_SHOWN, a state counts
-   the frames of the ring fading out, while sparkles circle it */
-#define RING_STATE_NONE 0
-#define RING_STATE_SHOWN 1
-#define RING_STATE_FADED 32
 #define RING_FADE_STEP 16
 #define RING_SPARKLE_SPACING 4  /* In sections */
 #define RING_SPARKLE_TURN ((f32)M_PI / 64)/* Radians each frame */

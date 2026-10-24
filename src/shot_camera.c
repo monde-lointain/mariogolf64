@@ -53,6 +53,12 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define END_REACTION_ONLOOKERS 1
 #define END_REACTION_UNK2 2
 
+/* Values of sPendingResultSound, which plays when D_800BE620 reaches RESULT_SOUND_STAGE */
+#define RESULT_SOUND_NONE 0
+#define RESULT_SOUND_UNK1 1 /* Plays FLIGHT_SOUND_UNK17 */
+#define RESULT_SOUND_UNK2 2 /* Plays FLIGHT_SOUND_UNK67 */
+#define RESULT_SOUND_STAGE 15
+
 #define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
 
 /* The flyover's field of view, in degrees, and the inset view's rectangle */
@@ -420,7 +426,7 @@ extern s32 D_800BE620;
 extern s32 D_800BE624;
 extern s32 D_800BE650;
 extern f32 D_800BE65C;
-extern s8 D_800BE670;
+extern s8 sPendingResultSound;
 extern s32 D_800BE678;
 extern s32 D_800BE67C;
 extern s32 D_800BE680;
@@ -430,10 +436,10 @@ extern CoursePoint sShotStartPosition;
 extern f32 sEndYawFromCup;
 extern f32 sStartYawFromCup;
 extern s32 D_800DAF20;
-extern s32 D_800DAF3C;
-extern s32 D_800DAF40;
+extern s32 sGreenSoundCount;
+extern s32 sIsLandingSoundPlayed;
 extern s32 D_800DAF44;
-extern s8 D_800DAF48;
+extern s8 sPassedPathFlags;
 extern s8 D_801061BF;
 extern s8 D_801061C0;
 extern s8 D_801061C1;
@@ -499,8 +505,8 @@ void StartFlightCamera(s32 earlierFlightCount) {
     D_800BE620 = 0;
     D_800BE628 = FALSE;
     sCupViewHoldCount = 0;
-    D_800DAF3C = 0;
-    D_800DAF40 = 0;
+    sGreenSoundCount = 0;
+    sIsLandingSoundPlayed = FALSE;
     D_800DAF44 = 0;
     sEndReaction = END_REACTION_NONE;
     sCameraYaw = (f32)RandomBelow(RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
@@ -517,8 +523,8 @@ void StartFlightCamera(s32 earlierFlightCount) {
     } else if (sEndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
         D_800BE678 = 3;
     }
-    D_800DAF48 = 0;
-    D_800BE670 = 0;
+    sPassedPathFlags = 0;
+    sPendingResultSound = RESULT_SOUND_NONE;
     D_800BE67C = 1;
     if (D_800DAF20) {
         D_800BE67C = RandomBelow(2);
@@ -744,7 +750,302 @@ s32 GetEndReaction(void) {
     return sEndReaction;
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800469EC);
+/* PlayFlightSounds' sounds, by what they follow where that is clear */
+#define FLIGHT_SOUND_UNK17 0x17
+#define FLIGHT_SOUND_UNK67 0x67
+#define FLIGHT_SOUND_UNK74 0x74
+#define FLIGHT_SOUND_UNK75 0x75
+#define FLIGHT_SOUND_UNK76 0x76
+#define FLIGHT_SOUND_FULL_SHOT 0x7B
+#define FLIGHT_SOUND_TROUBLE_LANDING 0x7C /* In a bunker, water or out of play */
+#define FLIGHT_SOUND_UNK7E 0x7E
+#define FLIGHT_SOUND_UNK7F 0x7F
+#define FLIGHT_SOUND_UNK80 0x80
+#define FLIGHT_SOUND_UNK81 0x81
+#define FLIGHT_SOUND_UNK82 0x82
+#define FLIGHT_SOUND_OUT_OF_COURSE 0x83
+#define FLIGHT_SOUND_UNK91 0x91
+#define FLIGHT_SOUND_UNK92 0x92
+#define FLIGHT_SOUND_UNK93 0x93
+#define FLIGHT_SOUND_UNK97 0x97
+#define FLIGHT_SOUND_DEEP_ROUGH_LANDING 0x99
+#define FLIGHT_SOUND_WASTE_AREA_LANDING 0x9A
+#define FLIGHT_SOUND_UNK9B 0x9B
+#define FLIGHT_SOUND_CHANNEL_UNK3 3
+#define FLIGHT_SOUND_CHANNEL_UNKE 0xE
+#define FLIGHT_SOUND_VOLUME 0x7F
+#define FLIGHT_SOUND_VOLUME_UNK50 0x50
+#define FLIGHT_SOUND_VOLUME_UNK60 0x60
+#define FLIGHT_SOUND_VOLUME_UNK64 0x64
+#define GREEN_SOUND_VOLUME 0x5F
+#define FAIRWAY_SOUND_VOLUME 0x3F
+#define FULL_SHOT_REVERB 0x14
+
+/* The steps of the flight at which PlayFlightSounds plays some sounds */
+#define UNK2E42_SOUND_STEP 10
+#define FULL_SHOT_REACTION_STEP 14
+#define SHOT_RESULT_STEP 20
+/* Most sounds wait for the flight to pass its first steps */
+#define EARLY_STEP_COUNT 10
+/* Sounds that play this many steps before the end of the flight */
+#define LANDING_SOUND_STEP_COUNT 3
+#define UNK92_SOUND_STEP_COUNT 10
+#define UNKB0_SOUND_STEP_COUNT 15
+
+/* Bits of g_SimulatedShot.pathFlags */
+#define PATH_FLAG_UNK1 (1 << 0)
+#define PATH_FLAG_UNK4 (1 << 2)
+#define PATH_FLAG_UNK8 (1 << 3)
+
+/* Distances that PlayFlightSounds tests, in course units */
+#define CLOSE_LANDING_DISTANCE 0x3C00
+#define NEAR_LANDING_DISTANCE 0x5A00
+#define GREEN_SOUND_MAX_DISTANCE 0x7800
+#define LONG_PUTT_MIN_DISTANCE 0x25800
+#define LONG_SHOT_SOUND_MIN_DISTANCE 0x4B000
+#define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
+
+extern s8 D_8010623F;
+extern s32 g_PlayerCount;
+extern s8 D_80104B6B;
+
+void func_8020D874(f32);
+void func_8020FFEC(s32);
+
+/* Queues a character sound of the given kind for each player but the one who shot */
+static inline void QueueOnlookerSounds(s32 kind) {
+    s32 i;
+
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (i != g_CurrentShot.playerIndex) {
+            QueueCharacterSound((s8)g_Players[i].characterIndex, i, kind, FLIGHT_SOUND_VOLUME,
+                                g_Players[i].soundPan);
+        }
+    }
+}
+
+/*
+ * Plays the sounds and the other players' reactions that go with the ball's
+ * flight: after a full shot, on landing in trouble and, at the end of the
+ * flight, by the shooter's stroke count against par. step is
+ * g_BallFlightStep, which the caller clamps to the recorded path.
+ */
+void PlayFlightSounds(s32 step) {
+    s32 shownRingCount;
+    s32 scoreToPar;
+    s32 i;
+    SurfaceInfo *info;
+    UnkB8 *player;
+    s32 *greenSoundCount; /* The pointers are there to match */
+    s32 *isPlayed;
+    s32 *isStillPlayed;
+
+    scoreToPar = g_Players[g_CurrentShot.playerIndex].strokeCount - g_HolePar;
+    shownRingCount = 0;
+    if (g_GameMode == GAME_MODE_RING_SHOT) {
+        player = &g_Players[D_8010623F];
+        for (i = 0; i != RING_COUNT; i++) {
+            shownRingCount += player->ringStates[i] == RING_STATE_SHOWN;
+        }
+    }
+    sPassedPathFlags |= g_SimulatedShot.pathFlags[step];
+    if (step == FULL_SHOT_REACTION_STEP && RateShotLength() == SHOT_LENGTH_FULL) {
+        QueueOnlookerSounds(0);
+    }
+    if (step == SHOT_RESULT_STEP) {
+        if (sEndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE && !g_IsMiniGolf) {
+            PlaySound(FLIGHT_SOUND_OUT_OF_COURSE, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(4);
+        } else if (RateShotLength() == SHOT_LENGTH_FULL) {
+            PlaySoundWithEffects(FLIGHT_SOUND_FULL_SHOT, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME,
+                                 FULL_SHOT_REVERB, g_Players[g_CurrentShot.playerIndex].soundPan);
+        }
+    }
+    if (step == UNK2E42_SOUND_STEP && g_SimulatedShot.unk2E42) {
+        /* Plays the sound again for each player; the original has it */
+        for (i = 0; i != g_PlayerCount; i++) {
+            PlaySound(FLIGHT_SOUND_UNK97, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            if (i != g_CurrentShot.playerIndex) {
+                QueueCharacterSound((s8)g_Players[i].characterIndex, i, 5, FLIGHT_SOUND_VOLUME,
+                                    g_Players[i].soundPan);
+            }
+        }
+    }
+    if (step > EARLY_STEP_COUNT) {
+        greenSoundCount = &sGreenSoundCount;
+        if (!*greenSoundCount && !shownRingCount && (g_SimulatedShot.pathFlags[step - 2] & PATH_FLAG_UNK1)
+            && !g_SimulatedShot.unk2E0C && !g_SimulatedShot.unk2E08 && g_SimulatedShot.endsOnGreen
+            && sEndSurfaceInfo->kind == SURFACE_KIND_GREEN) {
+            if (g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount + 1) {
+                (*greenSoundCount)++;
+                PlaySound(FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
+            } else if (g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount + 2
+                       && sLandingCupDistance < GREEN_SOUND_MAX_DISTANCE) {
+                (*greenSoundCount)++;
+                PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKB, GREEN_SOUND_VOLUME);
+            }
+        }
+    }
+    if (D_800BE620 == RESULT_SOUND_STAGE) {
+        if (sPendingResultSound == RESULT_SOUND_UNK1) {
+            PlaySound(FLIGHT_SOUND_UNK17, FLIGHT_SOUND_CHANNEL_UNKE, FLIGHT_SOUND_VOLUME);
+        } else if (sPendingResultSound == RESULT_SOUND_UNK2) {
+            PlaySound(FLIGHT_SOUND_UNK67, FLIGHT_SOUND_CHANNEL_UNKE, FLIGHT_SOUND_VOLUME);
+        }
+    }
+    if (!g_IsMiniGolf) {
+        if ((g_SimulatedShot.pathFlags[step + 5] & PATH_FLAG_UNK8) && g_SimulatedShot.unkB0Step == NO_STEP) {
+            D_800BE680 = 1;
+        }
+        if ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) && !g_SimulatedShot.unk2E10
+            && g_SimulatedShot.unkB0Step == NO_STEP) {
+            D_800BE680 = 0;
+            func_8020D874(D_800BE684);
+        }
+    }
+    if (!shownRingCount && g_BallFlightStep == g_SimulatedShot.stepCount - 1 && !g_SimulatedShot.unk2E10) {
+        if (g_SimulatedShot.unk2E08) {
+            if (sLandingCupDistance < CLOSE_LANDING_DISTANCE && D_800BE644 > LONG_PUTT_MIN_DISTANCE
+                && !(sPassedPathFlags & (PATH_FLAG_UNK4 | PATH_FLAG_UNK8))
+                && g_HolePar > g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                func_8020E7B4(3);
+                PlaySound(FLIGHT_SOUND_UNK82, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            }
+        } else if (g_SimulatedShot.unkB0Step != NO_STEP) {
+            func_8020E7B4(6);
+            PlaySound(FLIGHT_SOUND_UNK91, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            func_80205AE4(g_CurrentShot.playerIndex, 6);
+            sPendingResultSound = RESULT_SOUND_UNK2;
+        } else if (sPassedPathFlags & PATH_FLAG_UNK8) {
+            func_80205AE4(g_CurrentShot.playerIndex, 2);
+            func_8020E7B4(5);
+            PlaySound(FLIGHT_SOUND_UNK93, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            sPendingResultSound = RESULT_SOUND_UNK2;
+        } else if (g_SimulatedShot.endsOnGreen) {
+            if (g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                func_80205AE4(g_CurrentShot.playerIndex, 0);
+                func_8020E7B4(8);
+                PlaySound(FLIGHT_SOUND_UNK7F, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                QueueOnlookerSounds(2);
+                sPendingResultSound = RESULT_SOUND_UNK2;
+            } else if (g_HolePar - 2 == g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                if (sLandingCupDistance <= CLOSE_LANDING_DISTANCE) {
+                    func_80205AE4(g_CurrentShot.playerIndex, 1);
+                    func_8020E7B4(7);
+                    PlaySound(FLIGHT_SOUND_UNK7E, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                    QueueOnlookerSounds(1);
+                    sPendingResultSound = RESULT_SOUND_UNK1;
+                } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH || g_SimulatedShot.unk2E0C) {
+                    if (sLandingCupDistance <= NEAR_LANDING_DISTANCE) {
+                        func_8020E7B4(2);
+                        PlaySound(FLIGHT_SOUND_UNK81, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                        sPendingResultSound = RESULT_SOUND_UNK1;
+                    } else {
+                        func_8020E7B4(1);
+                        PlaySound(FLIGHT_SOUND_UNK80, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                    }
+                } else {
+                    func_8020E7B4(1);
+                    PlaySound(FLIGHT_SOUND_UNK80, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                }
+            } else if (g_HolePar - 1 == g_Players[g_CurrentShot.playerIndex].strokeCount
+                       && (g_SimulatedShot.shot.shotMode == SHOT_MODE_APPROACH || g_SimulatedShot.unk2E0C)
+                       && sLandingCupDistance <= NEAR_LANDING_DISTANCE) {
+                func_8020E7B4(2);
+                PlaySound(FLIGHT_SOUND_UNK81, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            }
+        }
+    }
+    if (g_SimulatedShot.unk2E10) {
+        if (g_BallFlightStep >= g_SimulatedShot.stepCount - UNKB0_SOUND_STEP_COUNT && sEndReaction == END_REACTION_NONE
+            && g_SimulatedShot.unkB0Step != NO_STEP) {
+            func_8020E7B4(6);
+            PlaySound(FLIGHT_SOUND_UNK91, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(1);
+            func_80205AE4(g_CurrentShot.playerIndex, 6);
+            sEndReaction = END_REACTION_ONLOOKERS;
+            sPendingResultSound = RESULT_SOUND_UNK2;
+        }
+        if (g_BallFlightStep >= g_SimulatedShot.stepCount - UNK92_SOUND_STEP_COUNT && sEndReaction == END_REACTION_NONE
+            && !g_SimulatedShot.unk2E08
+            && g_Players[g_CurrentShot.playerIndex].strokeCount >= 2 && g_SimulatedShot.unkB0Step == NO_STEP) {
+            func_8020E7B4(4);
+            PlaySound(FLIGHT_SOUND_UNK92, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(2);
+            sEndReaction = END_REACTION_ONLOOKERS;
+        }
+    }
+    isPlayed = &sIsLandingSoundPlayed;
+    if (!*isPlayed) {
+        if (g_BallFlightStep == g_SimulatedShot.stepCount && !shownRingCount && g_SimulatedShot.unk2E10) {
+            *isPlayed = TRUE;
+            if (IsGameFlagSet(GAME_FLAG_UNK48)) {
+                if (D_800BE69C == 1 && (scoreToPar >= -2 && scoreToPar <= 1) && !IsPinInCup()) {
+                    func_8020FFEC(5);
+                }
+            } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() && D_800BE69C == 1) {
+                if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
+                    func_8020FFEC(0x10);
+                } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
+                    func_8020FFEC(5);
+                }
+            }
+            if (g_SimulatedShot.unk2E08) {
+                if (D_800BE644 > LONG_SHOT_SOUND_MIN_DISTANCE || IsGameFlagSet(GAME_FLAG_UNK48)) {
+                    PlaySound(FLIGHT_SOUND_UNK9B, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
+                    sEndReaction = END_REACTION_UNK2;
+                }
+            }
+            if (!g_SimulatedShot.unk2E08) {
+                if (D_800BE644 > LONG_LANDING_MIN_DISTANCE) {
+                    func_80205AE4(g_CurrentShot.playerIndex, 4);
+                    sPendingResultSound = RESULT_SOUND_UNK2;
+                } else {
+                    func_80205AE4(g_CurrentShot.playerIndex, 3);
+                    sPendingResultSound = RESULT_SOUND_UNK1;
+                }
+            }
+            if (g_Players[g_CurrentShot.playerIndex].strokeCount == 1) {
+                PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME);
+            } else if (g_HolePar - 3 == g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK64);
+            } else if (g_HolePar - 2 == g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                PlaySound(FLIGHT_SOUND_UNK76, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK50);
+            } else if (g_HolePar - 1 == g_Players[g_CurrentShot.playerIndex].strokeCount) {
+                PlaySound(FLIGHT_SOUND_UNK74, FLIGHT_SOUND_CHANNEL_UNKF, FLIGHT_SOUND_VOLUME_UNK60);
+            }
+        }
+        isStillPlayed = &sIsLandingSoundPlayed;
+        if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT
+            && (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] & PATH_FLAG_UNK1)
+            && GetSelectedShotDistance() * FULL_SHOT_FRACTION < D_800BE640 * YARDS_PER_UNIT
+            && (info = GetSurfaceInfo(D_80104B6B), IsFairwayKind(info->kind)) && !g_IsMiniGolf
+            && D_800BE644 > sLandingCupDistance
+            && g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
+            *isStillPlayed = TRUE;
+            PlaySound(FLIGHT_SOUND_UNK75, FLIGHT_SOUND_CHANNEL_UNKB, FAIRWAY_SOUND_VOLUME);
+        }
+    }
+    if (g_BallFlightStep > EARLY_STEP_COUNT
+        && g_BallFlightStep == g_SimulatedShot.stepCount - LANDING_SOUND_STEP_COUNT) {
+        if (IsBunkerKind(sEndSurfaceInfo->kind)) {
+            sIsLandingSoundPlayed = TRUE;
+            PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(6);
+        } else if (sEndSurfaceInfo->kind == SURFACE_KIND_DEEP_ROUGH) {
+            PlaySound(FLIGHT_SOUND_DEEP_ROUGH_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(6);
+        } else if (sEndSurfaceInfo->kind == SURFACE_KIND_WASTE_AREA) {
+            PlaySound(FLIGHT_SOUND_WASTE_AREA_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, FLIGHT_SOUND_VOLUME);
+        } else if (sEndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD
+                   || sEndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS
+                   || sEndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_COURSE) {
+            sIsLandingSoundPlayed = TRUE;
+            PlaySound(FLIGHT_SOUND_TROUBLE_LANDING, FLIGHT_SOUND_CHANNEL_UNKB, FLIGHT_SOUND_VOLUME);
+            QueueOnlookerSounds(5);
+        }
+    }
+}
 
 /* It is a macro, as an inline function compiles differently from the original */
 #define IsBallLanding()                                                            \
@@ -965,7 +1266,6 @@ void func_800934CC(s32);
 
 extern s8 D_801061B8;
 extern s8 D_801B60B9;
-extern s32 g_PlayerCount;
 
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
