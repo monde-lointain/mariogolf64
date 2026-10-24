@@ -398,7 +398,39 @@ void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targe
     *arg4 = values[strokeCount];
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251198_ovl_03);
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsOffFairway(surfaceKind)                                                                       \
+    ((surfaceKind) != SURFACE_KIND_FAIRWAY && (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE &&        \
+     (surfaceKind) != SURFACE_KIND_FAIRWAY_POOR_LIE && (surfaceKind) != SURFACE_KIND_SEMI_ROUGH &&     \
+     (surfaceKind) != SURFACE_KIND_GREEN && (surfaceKind) != SURFACE_KIND_GREEN_EDGE)
+
+/*
+ * Returns whether any point a yard apart on the line from from to to, from
+ * from itself, lies off the fairway, semi-rough, green and green edge.
+ */
+s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
+    s32 distance;
+    f32 angle;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    u32 kind;
+
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
+        /* Setting stepLength in the loop is there to match */
+        stepLength = UNITS_PER_YARD;
+        x = step * (cosf(angle) * stepLength) + from[AXIS_X];
+        z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+        kind = GetSurfaceInfoAt(x, z)->kind;
+        if (IsOffFairway(kind)) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 
 /* FindGreenEdgeOnLine's results */
 #define GREEN_EDGE_FOUND 1
@@ -451,7 +483,42 @@ s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
     return distance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802515DC_ovl_03);
+/*
+ * Stores in peak the point a yard apart on the line from from to to whose
+ * ground height is farthest from 0, starting with from's x and z. It sets
+ * peak's height only for a point past from.
+ */
+void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
+    s32 distance;
+    f32 angle;
+    s32 peakHeight;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    s32 height;
+
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    peakHeight = GetGroundHeight(from[AXIS_X], from[AXIS_Z]);
+    peakHeight = ABS(peakHeight);
+    peak[AXIS_X] = from[AXIS_X];
+    peak[AXIS_Z] = from[AXIS_Z];
+    for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
+        /* Setting stepLength in the loop is there to match */
+        stepLength = UNITS_PER_YARD;
+        x = step * (cosf(angle) * stepLength) + from[AXIS_X];
+        z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+        height = GetGroundHeight(x, z);
+        height = ABS(height);
+        if (peakHeight < height) {
+            peak[AXIS_X] = x;
+            peak[AXIS_Y] = GetGroundHeight(x, z);
+            peakHeight = height;
+            peak[AXIS_Z] = z;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802517F0_ovl_03);
 
