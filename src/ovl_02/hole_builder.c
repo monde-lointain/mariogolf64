@@ -1415,7 +1415,73 @@ void LoadToolCodeMap(void) {
     sIsCodeMapCleaned = FALSE;
 }
 
+/* Returns the code at a column and row of the code map, pointing the build cursor at it */
+static inline u8 GetCode(s32 column, s32 row) {
+    sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
+    return *sBuildCursor;
+}
+
+/* Sets the code at a column and row of the code map, pointing the build cursor at it */
+static inline void SetCode(s32 column, s32 row, u8 code) {
+    sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
+    *sBuildCursor = code;
+}
+
+/*
+ * Fills the code at a column and row of the code map with its neighbours'
+ * code, if they are equal and it differs. The neighbours are a step away
+ * each side.
+ */
+static inline void FillCodeGap(s32 column, s32 row, s32 columnStep, s32 rowStep) {
+    u8 code = GetCode(column, row);
+    u8 previousCode = GetCode(column - columnStep, row - rowStep);
+    /* The second read of the previous code is there to match */
+    u8 rereadPreviousCode = GetCode(column - columnStep, row - rowStep);
+    u8 nextCode = GetCode(column + columnStep, row + rowStep);
+
+    if (code != previousCode && rereadPreviousCode == nextCode) {
+        SetCode(column, row, GetCode(column + columnStep, row + rowStep));
+    }
+}
+
+/*
+ * Encodes the map as EncodeCodeMap does, then runs the clean-up passes, each
+ * filling the codes that differ from two equal neighbours, along the row
+ * and then down the column. There are no passes, so it only encodes the map.
+ * It does not match: the encoding has EncodeCodeMap's texel address order,
+ * and the passes compute each neighbour's index from one strength-reduced
+ * index and read the previous code's address once, where the original
+ * computes it for both reads.
+ */
+#ifdef NON_MATCHING
+void CleanCodeMap(void) {
+    s32 passCount = 0;
+    s32 column;
+    s32 row;
+
+    sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+    for (row = 0; row < MAP_ROW_COUNT; row++) {
+        for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+            sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
+            *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+        }
+    }
+    for (; passCount != 0; passCount--) {
+        for (row = 0; row < MAP_ROW_COUNT; row++) {
+            for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+                if (column > 0 && column < MAP_COLUMN_COUNT - 1) {
+                    FillCodeGap(column, row, 1, 0);
+                }
+                if (row > 0 && row < MAP_ROW_COUNT - 1) {
+                    FillCodeGap(column, row, 0, 1);
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CleanCodeMap);
+#endif
 
 /* Does nothing */
 void FinishCodeMapCleanup(void) {
