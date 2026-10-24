@@ -1300,20 +1300,17 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32
 
 /* Returns the map texel at a column and row of the whole hole's map */
 static inline u16 *GetMapTexel(s32 column, s32 row) {
+    /* tileRow is there to match */
+    s32 tileRow = row >> MAP_TILE_SHIFT;
     u16 *texels = (u16 *)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
-                                                (row >> MAP_TILE_SHIFT) * GROUND_TILE_COLUMN_COUNT];
+                                                tileRow * GROUND_TILE_COLUMN_COUNT];
 
     return &texels[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN + (column & MAP_TILE_MASK)];
 }
 
-/* Whether a column and row lie on the map */
-static inline s32 IsOnMap(s32 column, s32 row) {
-    return column >= 0 && column < MAP_COLUMN_COUNT && row >= 0 && row < MAP_ROW_COUNT;
-}
-
 /* Returns the map texel at a column and row, or 0 off the map */
 static inline u16 ReadMapTexel(s32 column, s32 row) {
-    /* The separate tests, rather than IsOnMap, are there to match */
+    /* The separate tests are there to match */
     if (column < 0) {
         return 0;
     }
@@ -1331,8 +1328,9 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
 
 /*
  * Encodes the map's texels as terrain codes, a byte each, in the hole file
- * buffer. It does not match: the original computes the row's tile offset
- * inside the column loop, where this hoists it out.
+ * buffer. It does not match: the original adds the work area's address to
+ * the tile offset after it computes the texel offset, so it reads the texel
+ * into $v0 rather than $v1.
  */
 #ifdef NON_MATCHING
 void EncodeCodeMap(void) {
@@ -1352,10 +1350,29 @@ void EncodeCodeMap(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", EncodeCodeMap);
 #endif
 
+/* Sets the map texel at a column and row, unless it is off the map */
+static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
+    /* The separate tests are there to match */
+    if (column < 0) {
+        return;
+    }
+    if (column >= MAP_COLUMN_COUNT) {
+        return;
+    }
+    if (row < 0) {
+        return;
+    }
+    if (row >= MAP_ROW_COUNT) {
+        return;
+    }
+    *GetMapTexel(column, row) = color;
+}
+
 /*
  * Clears the map, reads a code map from the host and paints the map's texels
- * with the colours of its terrain codes. It does not match, for the same
- * reason as EncodeCodeMap.
+ * with the colours of its terrain codes. It does not match: like
+ * EncodeCodeMap, the original adds the work area's address to the tile
+ * offset after it computes the texel offset.
  */
 #ifdef NON_MATCHING
 void LoadCodeMap(char *path) {
@@ -1377,11 +1394,9 @@ void LoadCodeMap(char *path) {
     }
     for (row = 0; row < MAP_ROW_COUNT; row++) {
         for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-            sBuildCursor = sBuildBuffer + row * MAP_COLUMN_COUNT + column;
+            sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
             color = GetTerrainCodeColor(*sBuildCursor);
-            if (IsOnMap(column, row)) {
-                *GetMapTexel(column, row) = color;
-            }
+            WriteMapTexel(column, row, color);
         }
     }
 }
