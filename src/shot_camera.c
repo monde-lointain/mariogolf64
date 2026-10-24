@@ -3,6 +3,7 @@
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
+#include "character_slot.h"
 #include "club.h"
 #include "current_shot.h"
 #include "functions.h"
@@ -161,7 +162,64 @@ extern CoursePoint sShotEndPosition;
 extern Vec3 sCameraPosition;
 extern Vec3 sLookAtPoint;
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800453E0);
+/* How far the golfer stands along the shot's yaw from the ball */
+#define STANCE_AIM_OFFSET -921.60004f
+#define STANCE_SLOPE_PASS_COUNT 2
+
+static inline f32 AbsoluteF32(f32 value) {
+    if (value < 0.0f) {
+        value = -value;
+    }
+    return value;
+}
+
+/*
+ * Places a golfer at the current shot's ball, its club's ball distance away a
+ * quarter turn from the shot's yaw, and tilts it to the slope of the ground
+ * there. The golfer stands on the other side, mirrored, when player->unk22 is set.
+ * Each pass measures the slope again at the point the last slope gives.
+ */
+void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
+    Vec3 groundPoint;
+    Mat4 unusedMatrices[2]; /* Unused; it is there to match */
+    UnkB8 *player;
+    s16 aimYaw;
+    f32 distance;
+    f32 angle;
+    f32 reach;
+    f32 slope;
+    s32 ballHeight;
+    s32 passIndex;
+
+    player = &g_Players[g_CurrentShot.playerIndex];
+    aimYaw = g_CurrentShot.unk0;
+    distance = GetBallDistance(0, player->clubs[g_CurrentShot.clubSlot], FALSE, g_CurrentShot.shotMode);
+    angle = ((aimYaw + BINARY_ANGLE_TURN / 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+    if (player->unk22) {
+        distance = -distance;
+    }
+    groundPoint[AXIS_X] = cosf(angle) * distance + sinf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_X];
+    /* The offset's sign on z differs from the loop's; the original has it */
+    groundPoint[AXIS_Z] = sinf(angle) * distance + cosf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_Z];
+    groundPoint[AXIS_Y] = GetGroundHeight(groundPoint[AXIS_X], groundPoint[AXIS_Z]);
+    ballHeight = player->ballPosition[AXIS_Y];
+    slope = atan2(groundPoint[AXIS_Y] - ballHeight, distance);
+    for (passIndex = 0; passIndex < STANCE_SLOPE_PASS_COUNT; passIndex++) {
+        reach = cosf(slope) * distance;
+        position[AXIS_X] = cosf(angle) * reach + sinf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_X];
+        position[AXIS_Z] = sinf(angle) * reach - cosf(angle) * STANCE_AIM_OFFSET + player->ballPosition[AXIS_Z];
+        position[AXIS_Y] = GetGroundHeight(position[AXIS_X], position[AXIS_Z]);
+        if (position[AXIS_Y] - ballHeight > AbsoluteF32(distance)) {
+            position[AXIS_Y] = AbsoluteF32(distance) + ballHeight;
+        }
+        slope = rotation[AXIS_X] = atan2(position[AXIS_Y] - ballHeight, reach);
+    }
+    scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z] = 1.0f;
+    if (player->unk22) {
+        scale[AXIS_Y] = -1.0f;
+    }
+    rotation[AXIS_Z] = 0.0f;
+}
 
 #define CROSS_SLOPE_DISTANCE 0x3C00
 #define CROSS_SLOPE_CAPPED_RISE 0x1E00

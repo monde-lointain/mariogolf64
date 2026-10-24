@@ -1519,6 +1519,7 @@ GetLieSpan = 0x80044C7C; // type:func
 StepToClubChoice = 0x80044CCC; // type:func
 HandleClubInput = 0x80044FDC; // type:func
 HandleShotModeInput = 0x800451E4; // type:func
+PlaceGolferAtBall = 0x800453E0; // type:func
 GetCrossSlopeAngle = 0x80045734; // type:func
 GetAimSlopeAngle = 0x80045910; // type:func
 g_ClubTestMode = 0x800B7908; // size:0x1

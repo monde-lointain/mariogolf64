@@ -113,7 +113,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 en
 void SetSceneFog(Gfx **displayListHead);
 
 /* Set a character's position, rotation and scale for a shot */
-void func_800453E0(Vec3 position, Vec3 rotation, Vec3 scale);
+void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale);
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale);
 
 /* Sets the two lights and a third when that is enabled, returning whether it set them */

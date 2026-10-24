@@ -1634,12 +1634,12 @@ void DrawCharacter(u32 slotIndex) {
 INCLUDE_ASM("asm/nonmatchings/character", DrawCharacter);
 #endif
 
-/* Places the character in the slot with func_800453E0, turned to the current shot's direction */
+/* Places the character in the slot with PlaceGolferAtBall, turned to the current shot's direction */
 void PlaceCharacterForShot(u32 slotIndex) {
     CharacterSlot *slot = GetUsedCharacterSlot(slotIndex);
 
     if (slot != NULL) {
-        func_800453E0(slot->position, slot->rotation, slot->scale);
+        PlaceGolferAtBall(slot->position, slot->rotation, slot->scale);
         slot->rotation[AXIS_Y] = ((-g_CurrentShot.unk0) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
     }
 }
