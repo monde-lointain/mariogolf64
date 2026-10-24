@@ -1565,6 +1565,7 @@ sHoleSeed = 0x800C3FA0; // size:0x4
 g_HasLoaderFinished = 0x800C3FA8; // size:0x4
 sLoaderThread = 0x800E1A50; // size:0x1B0
 SetPaintSeed = 0x8024D800; // type:func segment:ovl_02
+ListOffsetsByDistance = 0x8024D80C; // type:func segment:ovl_02
 ResetTerrainCodeCells = 0x8024E288; // type:func segment:ovl_02
 PaintMainCourse = 0x8024E2D4; // type:func segment:ovl_02
 PaintPaleRoughCourse = 0x8024E514; // type:func segment:ovl_02

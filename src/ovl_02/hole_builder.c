@@ -60,6 +60,22 @@
 /* The table of hole asset ids has a row for each course and then some */
 #define HOLE_ASSET_COURSE_COUNT 9
 
+/* A column and row offset from a point, with its distance */
+typedef struct GridOffset {
+    /* 0x0 */ s8 column;
+    /* 0x1 */ s8 row;
+    /* 0x2 */ u16 distance;
+} GridOffset; /* size = 0x4 */
+
+/* The largest span ListOffsetsByDistance handles */
+#define MAX_OFFSET_SPAN GROUND_POINT_ROW_COUNT
+/* The units per grid step of the distances that ListOffsetsByDistance lists */
+#define OFFSET_DISTANCE_SCALE 256
+/* Marks an offset that ListOffsetsByDistance has already listed */
+#define LISTED_DISTANCE 0xFFFF
+/* Farther than any distance ListOffsetsByDistance computes */
+#define BEYOND_ALL_DISTANCES 0x10000
+
 /* A colour that lights or shades the ground */
 typedef struct GroundLightColor {
     /* 0x0 */ u16 red;
@@ -73,6 +89,7 @@ typedef struct GroundLightColor {
  */
 #define MAP_COLUMN_COUNT (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
 #define MAP_ROW_COUNT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
+
 /* The points of a tile's grid, edges included, that MeasureGroundTiles averages */
 #define GROUND_TILE_AVERAGED_POINT_COUNT ((GROUND_TILE_POINT_SPAN + 1) * (GROUND_TILE_POINT_SPAN + 1))
 #define MIN_GROUND_TILE_HEIGHT_RANGE 32
@@ -134,7 +151,92 @@ void SetPaintSeed(u32 seed) {
     sPaintSeed = seed;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024D80C_ovl_02);
+/*
+ * Fills offsets with up to maxCount column and row offsets less than span
+ * from the origin, nearest first, and returns how many it wrote. Distances
+ * are in units of 1/OFFSET_DISTANCE_SCALE. It does not match: the row
+ * counter and the squares pointer swap registers.
+ */
+#ifdef NON_MATCHING
+s32 ListOffsetsByDistance(s32 span, GridOffset *offsets, s32 maxCount) {
+    f32 squares[MAX_OFFSET_SPAN + 1];
+    u16 distances[span * span * 2];
+    s32 row;
+    s32 column;
+    s32 count;
+    s32 nearestIndex;
+    s32 nearestDistance;
+    s32 nearestRow;
+    s32 nearestColumn;
+    s32 mirroredRow;
+
+    squares[0] = 0.0f;
+    row = 0;
+    while (row < span) {
+        row++;
+        squares[row] = (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE);
+    }
+    for (row = 0; row < span; row++) {
+        for (column = 0; column < span; column++) {
+            distances[row * span + column] = sqrtf(squares[column] + squares[row]);
+        }
+    }
+    for (count = 0; count < maxCount;) {
+        nearestDistance = BEYOND_ALL_DISTANCES;
+        nearestIndex = 0;
+        for (column = 0; column < span * span; column++) {
+            if (distances[column] < nearestDistance) {
+                nearestIndex = column;
+                nearestDistance = distances[column];
+            }
+        }
+        if (nearestDistance >= span * OFFSET_DISTANCE_SCALE) {
+            break;
+        }
+        nearestRow = nearestIndex / span;
+        nearestColumn = nearestIndex % span;
+        distances[nearestIndex] = LISTED_DISTANCE;
+        offsets[count].distance = nearestDistance;
+        offsets[count].column = nearestColumn;
+        offsets[count].row = nearestRow;
+        count++;
+        if (count >= maxCount) {
+            break;
+        }
+        if (nearestColumn != 0) {
+            offsets[count].column = -nearestColumn;
+            offsets[count].row = nearestRow;
+            offsets[count].distance = nearestDistance;
+            count++;
+            if (count >= maxCount) {
+                break;
+            }
+        }
+        if (nearestRow != 0) {
+            mirroredRow = -nearestRow;
+            offsets[count].column = nearestColumn;
+            offsets[count].row = mirroredRow;
+            offsets[count].distance = nearestDistance;
+            count++;
+            if (count >= maxCount) {
+                break;
+            }
+            if (nearestColumn != 0) {
+                offsets[count].column = -nearestColumn;
+                offsets[count].row = mirroredRow;
+                offsets[count].distance = nearestDistance;
+                count++;
+                if (count >= maxCount) {
+                    break;
+                }
+            }
+        }
+    }
+    return count;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ListOffsetsByDistance);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_8024DA78_ovl_02);
 
