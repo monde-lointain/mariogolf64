@@ -2071,6 +2071,7 @@ ScaleToShotUnk4 = 0x80251AC0; // type:func segment:ovl_03
 FindClubSlot = 0x80252EE4; // type:func segment:ovl_03
 ChooseClubForDistance = 0x80252F70; // type:func segment:ovl_03
 GetAngleDifference = 0x80253180; // type:func segment:ovl_03
+IsLineMostlyLost = 0x80253754; // type:func segment:ovl_03
 sGolferTraits = 0x80253B50; // size:0xFC segment:ovl_03
 sPlanThreadState = 0x80253C64; // size:0x4 segment:ovl_03
 sPlanThread = 0x80254300; // size:0x1B0 segment:ovl_03

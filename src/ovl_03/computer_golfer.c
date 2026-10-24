@@ -621,6 +621,51 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8025319C_ovl_03);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253574_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253754_ovl_03);
+/* Tens of yards in a unit of distance */
+#define TENS_OF_YARDS_PER_UNIT 0.000007119878f
+/* The fraction of a line's points past which the line counts as lost */
+#define LOST_LINE_FRACTION 0.5f
+
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsLostBallKind(surfaceKind)                                                               \
+    ((surfaceKind) == SURFACE_KIND_WATER_HAZARD || (surfaceKind) == SURFACE_KIND_OUT_OF_BOUNDS || \
+     (surfaceKind) == SURFACE_KIND_OUT_OF_COURSE)
+
+/*
+ * Returns whether more than half of the points a yard apart on the first tenth
+ * of the line from from to to lie in water, out of bounds or out of the course.
+ */
+s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
+    s32 distance;
+    f32 angle;
+    s32 sampleCount;
+    s32 step;
+    s32 lostCount;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+    u32 kind;
+
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    sampleCount = 0;
+    lostCount = 0;
+    for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
+        /* Setting stepLength in the loop is there to match */
+        stepLength = UNITS_PER_YARD;
+        x = step * (cosf(angle) * stepLength) + from[AXIS_X];
+        z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+        kind = GetSurfaceInfoAt(x, z)->kind;
+        if (IsLostBallKind(kind)) {
+            lostCount++;
+        }
+        sampleCount++;
+    }
+    if ((f32)lostCount / sampleCount > LOST_LINE_FRACTION) {
+        osSyncPrintf("Many OB!!\n");
+        return TRUE;
+    }
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253978_ovl_03);
