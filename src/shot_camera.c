@@ -1,8 +1,12 @@
 #include "common.h"
+#include "camera.h"
+#include "current_shot.h"
 #include "functions.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "shot_simulation.h"
+#include "sound.h"
 #include "surface.h"
 
 /* Unused; the original has it */
@@ -16,6 +20,21 @@ static const char sUnusedFloatFormat[] = "            %f";
 /* How many swaps a shuffle makes */
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
+
+#define NO_FLIGHT_CAMERA (-1)
+
+/* The field of view, in degrees, of the main camera between shots */
+#define DEFAULT_FIELD_OF_VIEW 45.0f
+
+/* The sound channels of the flight's sounds, which fade over SOUND_FADE_FRAME_COUNT */
+#define FLIGHT_SOUND_CHANNEL_UNKB 0xB
+#define FLIGHT_SOUND_CHANNEL_UNKF 0xF
+#define SOUND_FADE_FRAME_COUNT 120
+
+/* sEndReaction values: how the others reacted as the ball neared its end */
+#define END_REACTION_NONE 0
+#define END_REACTION_ONLOOKERS 1
+#define END_REACTION_UNK2 2
 
 #define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
 
@@ -35,6 +54,16 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CUP_PASS_MAX_DEPTH 0x1A400
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
 
+extern s32 D_800BE698;
+extern s32 D_800BE69C;
+extern s32 D_800C5AAC;
+/* The step of the simulated path that the ball's flight has reached */
+extern s32 g_BallFlightStep;
+extern SimulatedShot g_SimulatedShot;
+extern s32 sCupViewHoldCount;
+extern s32 sEndReaction;
+/* How many frames the flight camera waits after the ball's path ends */
+extern s32 sLandingWaitFrameCount;
 extern s32 sLandingCupDistance;
 extern s32 sFlightCameraFlags;
 extern f32 sCameraYaw;
@@ -50,6 +79,10 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800453E0);
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045734);
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045910);
+
+void func_8009226C(s32);
+void func_80205AE4(s32, s32);
+void func_80216B74(s32);
 
 /* The surface under the player's ball */
 SurfaceInfo *GetBallSurfaceInfo(UnkB8 *player) {
@@ -96,7 +129,33 @@ s32 NextCameraPick(s32 isDealing) {
     return pick;
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045C00);
+/*
+ * Ends the flight camera: it restores the main camera's field of view, stops
+ * drawing the inset view, fades the flight's sounds, and reports a ball that
+ * has finished its path with unk2E41 set.
+ */
+void EndFlightCamera(void) {
+    D_800BE698 = 1;
+    D_800BE69C = 0;
+    sCupViewHoldCount = 0;
+    D_800C5AAC = 0;
+    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    func_8009226C(-1);
+    g_InsetViewAnimation = INSET_VIEW_STILL;
+    g_InsetViewStep = 0;
+    g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+    FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
+    FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
+    func_80216B74(0);
+    sFlightCameraKind = NO_FLIGHT_CAMERA;
+    if (g_BallFlightStep == g_SimulatedShot.stepCount) {
+        osSyncPrintf("\nCheckWater1\n");
+        if (g_SimulatedShot.unk2E41) {
+            osSyncPrintf("\nCheckWater2\n");
+            func_80205AE4(g_CurrentShot.playerIndex, 0xB);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045CE0);
 
@@ -124,7 +183,9 @@ s32 IsCupPassPoint(s32 cupDistance, s32 height) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80046898);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800469E0);
+s32 GetEndReaction(void) {
+    return sEndReaction;
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800469EC);
 
@@ -174,15 +235,20 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004AC04);
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004B474);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C510);
+void SetLandingWaitFrameCount(s32 frameCount) {
+    sLandingWaitFrameCount = frameCount;
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C51C);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6A8);
+void func_8004C6A8(void) {
+}
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6B0);
+void func_8004C6B0(void) {
+}
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6B8);
+void func_8004C6B8(void) {
+}
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C6C0);
 
