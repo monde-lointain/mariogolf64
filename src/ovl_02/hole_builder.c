@@ -2566,8 +2566,289 @@ void GetGroundLightColors(GroundLightColor *light, GroundLightColor *shade) {
     shade->blue = InterpolateChannel(keyShades[0].blue, keyShades[1].blue, fraction);
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802552FC_ovl_02);
+/* The two bands of height rows that ShadeGroundTiles shades from, in the hole file buffer */
+#define HEIGHT_RING_ROW_COUNT (HEIGHT_BAND_ROW_COUNT * 2)
+#define HEIGHT_RING_ROW_MASK (HEIGHT_RING_ROW_COUNT - 1)
+/* A band is drawn while shading the rows half a band before it */
+#define HEIGHT_BAND_LEAD (HEIGHT_BAND_ROW_COUNT / 2)
+/* The slopes along the light's yaw that the ground is lit for */
+#define LIGHT_SLOPE_MIN (-32)
+#define LIGHT_SLOPE_MAX 31
+#define LIGHT_SLOPE_COUNT (LIGHT_SLOPE_MAX - LIGHT_SLOPE_MIN + 1)
+/* Lighting scales, in LIGHT_SCALE_FRACTION_BITS fixed point */
+#define LIGHT_SCALE_FRACTION_BITS 11
+#define LIGHT_SCALE_ONE (1 << LIGHT_SCALE_FRACTION_BITS)
+#define LIGHT_SCALE_SLOPE_STEP 0x30
+#define LIGHT_SCALE_MIN 0x500
+#define LIGHT_SCALE_MAX 0xC00
+/* How far apart, in map texels, the heights that give a slope are, along the light's yaw */
+#define LIGHT_OFFSET_LENGTH 4.5f
+/* The light's colour is in fractions of full brightness of this many bits */
+#define LIGHT_COLOR_FRACTION_BITS 5
+/* How much a unit of height fades the ground toward white */
+#define HEIGHT_FADE_SCALE 0.008f
+#define HEIGHT_FADE_LIMIT 0.25f
+#define HEIGHT_FADE_FULL 1.0f
+/* An RGBA 5551 texel's channels */
+#define TEXEL_RED_SHIFT 11
+#define TEXEL_GREEN_SHIFT 6
+#define TEXEL_BLUE_SHIFT 1
+#define TEXEL_RED_MASK 0xF800
+#define TEXEL_GREEN_MASK 0x7C0
+#define TEXEL_BLUE_MASK 0x3E
+#define TEXEL_ALPHA_MASK 1
+#define TEXEL_CHANNEL_MAX 31
+
+/* The light's colour for each slope, a channel per word */
+#define SLOPE_LIGHT_RED 0
+#define SLOPE_LIGHT_GREEN 1
+#define SLOPE_LIGHT_BLUE 2
+#define SLOPE_LIGHT_WORD_COUNT 4
+
+/*
+ * Lights the ground tiles' map texels by the slope of the ground along the
+ * light's yaw, from the heights that DrawBandHeights draws a band at a time.
+ * Texels at heights below 0 are only lit. When GAME_FLAG_UNK12 is set, the
+ * others also fade toward white with height: up to HEIGHT_FADE_LIMIT, fully
+ * when GAME_FLAG_UNK60 is set, or not at all when GAME_FLAG_UNK69 is set.
+ * It does not match: the original computes the leading height row last and
+ * keeps a second, spilled copy of the trailing one, and it reads the fade
+ * flags from the stack for each tile, where ours extends isHighGroundFaded
+ * once per row and keeps it in another stack slot.
+ */
+#ifdef NON_MATCHING
+void ShadeGroundTiles(void) {
+    s32 unused[20]; /* Unused; it is there to match */
+    GroundLightColor light = { 24, 22, 16 };
+    GroundLightColor shade;
+    struct {
+        u8 red;
+        u8 green;
+        u8 blue;
+    } fadeColor;
+    u32 slopeLights[LIGHT_SLOPE_COUNT * SLOPE_LIGHT_WORD_COUNT];
+    struct {
+        u16 red;
+        u16 green;
+        u16 blue;
+        u16 alpha;
+    } shaded;
+    s8 isHighGroundFaded;
+    s8 isFadeUnlimited;
+    s8 isFadeDisabled;
+    s16 (*heightRows)[MAP_COLUMN_COUNT];
+    f32 pitch;
+    s32 lightColumnOffset;
+    s32 lightRowOffset;
+    s32 slope;
+    s32 scale;
+    s32 row;
+    s32 bandRow;
+    s32 column;
+    s32 count;
+    s32 isMapEdge;
+    s32 trailingColumn;
+    s32 leadingColumn;
+    s16 *heights;
+    s16 *trailingHeights;
+    s16 *leadingHeights;
+    s16 *trailing;
+    s16 *leading;
+    u16 *texel;
+    u16 texelColor;
+    u32 color;
+    u32 channel;
+    u32 red;
+    u32 green;
+    u32 blue;
+    s32 fadedRed;
+    s32 fadedGreen;
+    s32 fadedBlue;
+    f32 fade;
+    f32 fadeLimit;
+    s32 fadeWeight;
+    s32 keptWeight;
+
+    isHighGroundFaded = IsGameFlagSet(GAME_FLAG_UNK12);
+    isFadeUnlimited = IsGameFlagSet(GAME_FLAG_UNK60);
+    isFadeDisabled = IsGameFlagSet(GAME_FLAG_UNK69);
+    heightRows = (s16(*)[MAP_COLUMN_COUNT])HOLE_FILE_BUFFER;
+    fadeColor.red = TEXEL_CHANNEL_MAX;
+    fadeColor.green = TEXEL_CHANNEL_MAX;
+    fadeColor.blue = TEXEL_CHANNEL_MAX;
+    GetGroundLightColors(&light, &shade);
+    shade.green <<= TEXEL_GREEN_SHIFT;
+    shade.blue <<= TEXEL_BLUE_SHIFT;
+    pitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+    /* The light's pitch is unused */
+    cosf(pitch);
+    sinf(pitch);
+    for (slope = LIGHT_SLOPE_MIN; slope <= LIGHT_SLOPE_MAX; slope++) {
+        scale = LIGHT_SCALE_ONE + slope * LIGHT_SCALE_SLOPE_STEP;
+        if (scale < LIGHT_SCALE_MIN) {
+            scale = LIGHT_SCALE_MIN;
+        } else if (scale > LIGHT_SCALE_MAX) {
+            scale = LIGHT_SCALE_MAX;
+        }
+        slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_RED] = light.red * scale;
+        slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_GREEN] = light.green * scale;
+        slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_BLUE] = light.blue * scale;
+    }
+    lightColumnOffset = cosf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) * LIGHT_OFFSET_LENGTH;
+    lightRowOffset = sinf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) * LIGHT_OFFSET_LENGTH;
+    osSyncPrintf("LightXd%d Zd%d\n", lightColumnOffset, lightRowOffset);
+    for (row = 1 - HEIGHT_BAND_ROW_COUNT; row < MAP_ROW_COUNT; row++) {
+        bandRow = row + HEIGHT_BAND_LEAD;
+        if (bandRow >= 0) {
+            if (bandRow < MAP_ROW_COUNT && !(bandRow & MAP_TILE_MASK)) {
+                DrawBandHeights(heightRows[bandRow & HEIGHT_BAND_ROW_COUNT], bandRow / HEIGHT_BAND_ROW_COUNT);
+            }
+        }
+        if (row < 0) {
+            continue;
+        }
+        heights = heightRows[row & HEIGHT_RING_ROW_MASK];
+        trailingHeights = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK];
+        leadingHeights = heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK];
+        column = 0;
+        do {
+            texel = &g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+                                           (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
+                         .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
+            /* The offset heights can be off the map only in the edge tiles */
+            isMapEdge = column == 0 || column == MAP_COLUMN_COUNT - GROUND_TILE_TEXEL_SPAN;
+            if (!isMapEdge) {
+                /* Indexing heightRows again is there to match */
+                trailing = &heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK][column - lightColumnOffset];
+                leading = &leadingHeights[column + lightColumnOffset];
+            }
+            for (count = GROUND_TILE_TEXEL_SPAN; count != 0; count--) {
+                if (isMapEdge) {
+                    trailingColumn = column - lightColumnOffset;
+                    leadingColumn = column + lightColumnOffset;
+                    /* Only one of the columns is clamped */
+                    if (trailingColumn < 0) {
+                        trailingColumn = 0;
+                    } else if (leadingColumn < 0) {
+                        leadingColumn = 0;
+                    } else if (trailingColumn >= MAP_COLUMN_COUNT) {
+                        trailingColumn = MAP_COLUMN_COUNT - 1;
+                    } else if (leadingColumn >= MAP_COLUMN_COUNT) {
+                        leadingColumn = MAP_COLUMN_COUNT - 1;
+                    }
+                    slope = trailingHeights[trailingColumn] - leadingHeights[leadingColumn];
+                } else {
+                    slope = *trailing++ - *leading++;
+                }
+                if (slope < LIGHT_SLOPE_MIN) {
+                    slope = LIGHT_SLOPE_MIN;
+                } else if (slope > LIGHT_SLOPE_MAX) {
+                    slope = LIGHT_SLOPE_MAX;
+                }
+                texelColor = *texel;
+                if (*heights < 0) {
+                    color = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
+                             slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_RED]) >>
+                            (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
+                    if (color > TEXEL_CHANNEL_MAX) {
+                        color = TEXEL_CHANNEL_MAX;
+                    }
+                    color <<= TEXEL_RED_SHIFT;
+                    channel = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
+                               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_GREEN]) >>
+                              (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_GREEN_SHIFT);
+                    if (channel > TEXEL_CHANNEL_MAX) {
+                        channel = TEXEL_CHANNEL_MAX;
+                    }
+                    color |= channel << TEXEL_GREEN_SHIFT;
+                    channel = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
+                               slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_BLUE]) >>
+                              (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_BLUE_SHIFT);
+                    if (channel > TEXEL_CHANNEL_MAX) {
+                        channel = TEXEL_CHANNEL_MAX;
+                    }
+                    color |= channel << TEXEL_BLUE_SHIFT;
+                    *texel = color | (texelColor & TEXEL_ALPHA_MASK);
+                } else {
+                    red = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
+                           slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_RED]) >>
+                          (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
+                    if ((shaded.red = red) > TEXEL_CHANNEL_MAX) {
+                        shaded.red = TEXEL_CHANNEL_MAX;
+                    }
+                    green = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
+                             slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_GREEN]) >>
+                            (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_GREEN_SHIFT);
+                    if ((shaded.green = green) > TEXEL_CHANNEL_MAX) {
+                        shaded.green = TEXEL_CHANNEL_MAX;
+                    }
+                    blue = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
+                            slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT + SLOPE_LIGHT_BLUE]) >>
+                           (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS + TEXEL_BLUE_SHIFT);
+                    if ((shaded.blue = blue) > TEXEL_CHANNEL_MAX) {
+                        shaded.blue = TEXEL_CHANNEL_MAX;
+                    }
+                    shaded.alpha = texelColor & TEXEL_ALPHA_MASK;
+                    /* The height test is always true here; the original has it */
+                    if (*heights >= 0 && isHighGroundFaded) {
+                        fade = *heights * HEIGHT_FADE_SCALE;
+                        if (isFadeUnlimited) {
+                            fadeLimit = HEIGHT_FADE_FULL;
+                        } else if (isFadeDisabled) {
+                            fade = 0.0f;
+                            /* The goto is there to match */
+                            goto faded;
+                        } else {
+                            fadeLimit = HEIGHT_FADE_LIMIT;
+                        }
+                        if (fade >= fadeLimit) {
+                            fade = fadeLimit;
+                        }
+                    faded:
+                        fadeWeight = fade * LIGHT_SCALE_ONE;
+                        keptWeight = LIGHT_SCALE_ONE - fadeWeight;
+                        fadedRed = shaded.red;
+                        fadedGreen = shaded.green;
+                        fadedBlue = shaded.blue;
+                        fadedRed = fadedRed * keptWeight + fadeColor.red * fadeWeight;
+                        if (fadedRed > TEXEL_RED_MASK) {
+                            fadedRed = TEXEL_RED_MASK;
+                        } else {
+                            fadedRed &= TEXEL_RED_MASK;
+                        }
+                        fadedGreen = (fadedGreen * keptWeight + fadeColor.green * fadeWeight) >>
+                                     (LIGHT_SCALE_FRACTION_BITS - TEXEL_GREEN_SHIFT);
+                        if (fadedGreen > TEXEL_GREEN_MASK) {
+                            fadedGreen = TEXEL_GREEN_MASK;
+                        } else {
+                            fadedGreen &= TEXEL_GREEN_MASK;
+                        }
+                        fadedBlue = (fadedBlue * keptWeight + fadeColor.blue * fadeWeight) >>
+                                    (LIGHT_SCALE_FRACTION_BITS - TEXEL_BLUE_SHIFT);
+                        if (fadedBlue > TEXEL_BLUE_MASK) {
+                            fadedBlue = TEXEL_BLUE_MASK;
+                        } else {
+                            fadedBlue &= TEXEL_BLUE_MASK;
+                        }
+                        texelColor = fadedRed | fadedGreen | fadedBlue | shaded.alpha;
+                    } else {
+                        texelColor = shaded.alpha | ((shaded.red << TEXEL_RED_SHIFT) |
+                                                     (shaded.green << TEXEL_GREEN_SHIFT) |
+                                                     (shaded.blue << TEXEL_BLUE_SHIFT));
+                    }
+                    *texel = texelColor;
+                }
+                column++;
+                texel++;
+                heights++;
+            }
+        } while (column < MAP_COLUMN_COUNT);
+    }
+}
+#else
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", sDefaultGroundLight);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
+#endif
 
 /* Shades the ground tiles, then darkens them under the billboards' shadows */
 void ShadeGround(void) {
