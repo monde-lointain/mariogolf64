@@ -553,8 +553,9 @@ segments:
     exclusive_ram_id: overlay_8024D800
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1300A0, asm]
+      - [0x1300A0, c, ovl_03/computer_golfer]
       - [0x1363F0, data]
+      - [0x1365D0, .rodata, ovl_03/computer_golfer]
       - { start: 0x136BA0, type: bss, vram: 0x80254300 }
 
   - name: ovl_04
