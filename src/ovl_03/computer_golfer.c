@@ -187,9 +187,75 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F0B0_ovl_03);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F320_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F688_ovl_03);
+/* SortByKeys's orders */
+#define SORT_ASCENDING 0
+#define SORT_DESCENDING 1
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F790_ovl_03);
+/*
+ * Selection sorts count keys in the given order, swapping the entries of the
+ * values and otherValues arrays along with them unless they are NULL.
+ */
+void SortByKeys(s32 count, s32 *values, s32 *otherValues, s32 *keys, s32 order) {
+    s32 index;
+    s32 otherIndex;
+    s32 chosenIndex;
+    s32 swapped;
+
+    for (index = 0; index < count - 1; index++) {
+        chosenIndex = index;
+        for (otherIndex = index + 1; otherIndex < count; otherIndex++) {
+            if (order == SORT_DESCENDING) {
+                if (keys[otherIndex] > keys[chosenIndex]) {
+                    chosenIndex = otherIndex;
+                }
+            } else if (keys[otherIndex] < keys[chosenIndex]) {
+                chosenIndex = otherIndex;
+            }
+        }
+        if (values != NULL) {
+            swapped = values[index];
+            values[index] = values[chosenIndex];
+            values[chosenIndex] = swapped;
+        }
+        if (otherValues != NULL) {
+            swapped = otherValues[index];
+            otherValues[index] = otherValues[chosenIndex];
+            otherValues[chosenIndex] = swapped;
+        }
+        swapped = keys[index];
+        keys[index] = keys[chosenIndex];
+        keys[chosenIndex] = swapped;
+    }
+}
+
+/*
+ * Returns the player's strokes over par on the holes before this one,
+ * counting only holes with strokes. A hole with more than twice its par plus
+ * one strokes counts as one under par.
+ */
+s32 GetScoreToParSoFar(s32 playerIndex) {
+    s32 strokeTotal = 0;
+    s32 parTotal = 0;
+    s32 hole;
+    s32 par;
+    s32 strokes;
+
+    if (g_GameState.holeIndex == 0) {
+        return 0;
+    }
+    for (hole = 0; hole < g_GameState.holeIndex; hole++) {
+        strokes = g_Players[playerIndex].holes[hole].strokes;
+        par = (s8)g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
+        if (par * 2 + 1 < strokes) {
+            strokes = par - 1;
+        }
+        if (strokes > 0) {
+            strokeTotal += strokes;
+            parTotal += par;
+        }
+    }
+    return strokeTotal - parTotal;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F844_ovl_03);
 
