@@ -1994,17 +1994,17 @@ void UpdateGame(void) {
             func_8004CDA0();
         }
         if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
-            if ((g_ControllerStates[1].pressedButtons & L_JPAD) && g_InsetViewStep < INSET_VIEW_STEP_COUNT) {
-                g_InsetViewAnimation = INSET_VIEW_OPENING;
+            if ((g_ControllerStates[1].pressedButtons & L_JPAD) && g_InsetView.step < INSET_VIEW_STEP_COUNT) {
+                g_InsetView.animation = INSET_VIEW_OPENING;
             }
-            if ((g_ControllerStates[1].pressedButtons & R_JPAD) && g_InsetViewStep > 0) {
-                g_InsetViewAnimation = INSET_VIEW_CLOSING;
+            if ((g_ControllerStates[1].pressedButtons & R_JPAD) && g_InsetView.step > 0) {
+                g_InsetView.animation = INSET_VIEW_CLOSING;
             }
-            if ((g_ControllerStates[3].pressedButtons & L_JPAD) && g_InsetViewStep < INSET_VIEW_STEP_COUNT) {
-                g_InsetViewAnimation = INSET_VIEW_OPENING;
+            if ((g_ControllerStates[3].pressedButtons & L_JPAD) && g_InsetView.step < INSET_VIEW_STEP_COUNT) {
+                g_InsetView.animation = INSET_VIEW_OPENING;
             }
-            if ((g_ControllerStates[3].pressedButtons & R_JPAD) && g_InsetViewStep > 0) {
-                g_InsetViewAnimation = INSET_VIEW_CLOSING;
+            if ((g_ControllerStates[3].pressedButtons & R_JPAD) && g_InsetView.step > 0) {
+                g_InsetView.animation = INSET_VIEW_CLOSING;
             }
         }
         UpdateInsetView();
@@ -2027,28 +2027,28 @@ void UpdateGame(void) {
         }
     } else if (g_Scene == SCENE_MENU) {
         func_8004CDA0();
-        animation = &g_InsetViewAnimation;
+        animation = &g_InsetView.animation;
         if (*animation == INSET_VIEW_OPENING) {
             g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
-            g_InsetViewStep++;
-            if (g_InsetViewStep >= LARGE_INSET_VIEW_STEP_COUNT) {
-                g_InsetViewStep = LARGE_INSET_VIEW_STEP_COUNT;
+            g_InsetView.step++;
+            if (g_InsetView.step >= LARGE_INSET_VIEW_STEP_COUNT) {
+                g_InsetView.step = LARGE_INSET_VIEW_STEP_COUNT;
                 *animation = INSET_VIEW_STILL;
             }
         } else if (*animation == INSET_VIEW_CLOSING) {
-            g_InsetViewStep--;
-            if (g_InsetViewStep <= 0) {
-                g_InsetViewStep = 0;
+            g_InsetView.step--;
+            if (g_InsetView.step <= 0) {
+                g_InsetView.step = 0;
                 *animation = INSET_VIEW_STILL;
                 g_Cameras[INSET_CAMERA].view.drawFlags = 0;
             }
         }
-        g_Cameras[INSET_CAMERA].view.scissorWidth = g_InsetViewStep * LARGE_INSET_VIEW_GROWTH_PER_STEP;
-        g_Cameras[INSET_CAMERA].view.scissorHeight = g_InsetViewStep * LARGE_INSET_VIEW_GROWTH_PER_STEP;
+        g_Cameras[INSET_CAMERA].view.scissorWidth = g_InsetView.step * LARGE_INSET_VIEW_GROWTH_PER_STEP;
+        g_Cameras[INSET_CAMERA].view.scissorHeight = g_InsetView.step * LARGE_INSET_VIEW_GROWTH_PER_STEP;
         g_Cameras[INSET_CAMERA].view.scissorX =
-            LARGE_INSET_VIEW_CENTER_X - g_InsetViewStep * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+            LARGE_INSET_VIEW_CENTER_X - g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
         g_Cameras[INSET_CAMERA].view.scissorY =
-            LARGE_INSET_VIEW_CENTER_Y - g_InsetViewStep * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+            LARGE_INSET_VIEW_CENTER_Y - g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
         g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
         func_801F4C78();
         if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
@@ -2170,35 +2170,35 @@ void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height) {
 
 /* Grows or shrinks the inset view's window by a step and centres it */
 void UpdateInsetView(void) {
-    s32 *animation = &g_InsetViewAnimation;
+    s32 *animation = &g_InsetView.animation;
 
     if (*animation == INSET_VIEW_OPENING) {
-        if (g_InsetViewStep == 1) {
+        if (g_InsetView.step == 1) {
             PlaySoundWithEffects(SOUND_INSET_VIEW_OPEN, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
                           INSET_VIEW_SOUND_PAN);
         }
         g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;
-        g_InsetViewStep++;
-        if (g_InsetViewStep >= INSET_VIEW_STEP_COUNT) {
-            g_InsetViewStep = INSET_VIEW_STEP_COUNT;
+        g_InsetView.step++;
+        if (g_InsetView.step >= INSET_VIEW_STEP_COUNT) {
+            g_InsetView.step = INSET_VIEW_STEP_COUNT;
             *animation = INSET_VIEW_STILL;
         }
     } else if (*animation == INSET_VIEW_CLOSING) {
-        if (g_InsetViewStep == INSET_VIEW_STEP_COUNT - 1) {
+        if (g_InsetView.step == INSET_VIEW_STEP_COUNT - 1) {
             PlaySoundWithEffects(SOUND_INSET_VIEW_CLOSE, g_NextSoundChannel, INSET_VIEW_SOUND_VOLUME, INSET_VIEW_SOUND_REVERB,
                           INSET_VIEW_SOUND_PAN);
         }
-        g_InsetViewStep--;
-        if (g_InsetViewStep <= 0) {
-            g_InsetViewStep = 0;
+        g_InsetView.step--;
+        if (g_InsetView.step <= 0) {
+            g_InsetView.step = 0;
             *animation = INSET_VIEW_STILL;
             g_Cameras[INSET_CAMERA].view.drawFlags = 0;
         }
     }
-    g_Cameras[INSET_CAMERA].view.scissorWidth = g_InsetViewStep * sInsetViewWidth / INSET_VIEW_STEP_COUNT;
-    g_Cameras[INSET_CAMERA].view.scissorHeight = g_InsetViewStep * sInsetViewHeight / INSET_VIEW_STEP_COUNT;
-    g_Cameras[INSET_CAMERA].view.scissorX = sInsetViewCenterX - g_InsetViewStep * sInsetViewWidth / (2 * INSET_VIEW_STEP_COUNT);
-    g_Cameras[INSET_CAMERA].view.scissorY = sInsetViewCenterY - g_InsetViewStep * sInsetViewHeight / (2 * INSET_VIEW_STEP_COUNT);
+    g_Cameras[INSET_CAMERA].view.scissorWidth = g_InsetView.step * sInsetViewWidth / INSET_VIEW_STEP_COUNT;
+    g_Cameras[INSET_CAMERA].view.scissorHeight = g_InsetView.step * sInsetViewHeight / INSET_VIEW_STEP_COUNT;
+    g_Cameras[INSET_CAMERA].view.scissorX = sInsetViewCenterX - g_InsetView.step * sInsetViewWidth / (2 * INSET_VIEW_STEP_COUNT);
+    g_Cameras[INSET_CAMERA].view.scissorY = sInsetViewCenterY - g_InsetView.step * sInsetViewHeight / (2 * INSET_VIEW_STEP_COUNT);
     g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
 }
 

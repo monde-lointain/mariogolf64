@@ -53,13 +53,20 @@ typedef struct CameraMatrices {
 /* The camera of the inset view, a window over the main view */
 #define INSET_CAMERA 1
 
-/* g_InsetViewAnimation values */
+/* InsetView.animation values */
 #define INSET_VIEW_STILL 0
 #define INSET_VIEW_OPENING 1
 #define INSET_VIEW_CLOSING 2
 
-extern s32 g_InsetViewAnimation;
-extern s32 g_InsetViewStep;
+/* How the inset view opens and closes */
+typedef struct InsetView {
+    /* 0x00 */ s32 animation; /* INSET_VIEW_* */
+    /* 0x04 */ s32 step;
+    /* 0x08 */ s32 unk8;
+    /* 0x0C */ s32 unkC;
+} InsetView; /* size = 0x10 */
+
+extern InsetView g_InsetView;
 
 void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height);
 void UpdateInsetView(void);

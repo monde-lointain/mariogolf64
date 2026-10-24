@@ -166,8 +166,8 @@ void EndFlightCamera(void) {
     D_800C5AAC = 0;
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     func_8009226C(-1);
-    g_InsetViewAnimation = INSET_VIEW_STILL;
-    g_InsetViewStep = 0;
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
     FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
@@ -238,8 +238,8 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800484F8);
 void StartHoleFlyover(void) {
     g_HoleFlyoverFrame = 0;
     D_801061CE = 0;
-    g_InsetViewAnimation = INSET_VIEW_STILL;
-    g_InsetViewStep = 0;
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
     g_Cameras[INSET_CAMERA].view.mode = CAMERA_MODE_BEHIND_GOLFER;
@@ -259,8 +259,8 @@ void ClearHoleIntroText(void) {
 /* Ends the hole flyover; the screen fades back, and a strong wind gets func_80216130 */
 void EndHoleFlyover(void) {
     g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
-    g_InsetViewAnimation = INSET_VIEW_STILL;
-    g_InsetViewStep = 0;
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     if (g_GameMode != GAME_MODE_UNK7 && !g_IsMiniGolf) {
         if (IsGameFlagSet(GAME_FLAG_UNK48) || g_HoleConditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
