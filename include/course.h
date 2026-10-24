@@ -29,6 +29,7 @@
 /* The main courses keep their records' order */
 #define COURSE_SHY_GUY_DESERT 2
 #define COURSE_YOSHIS_ISLAND 3
+#define COURSE_MARIOS_STAR 5
 
 /* HoleRecord.flags; the main courses mark three or four par 5s and every par 3 */
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)

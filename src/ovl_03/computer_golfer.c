@@ -1,9 +1,11 @@
+#include "club.h"
 #include "common.h"
 #include "course.h"
 #include "current_shot.h"
 #include "functions.h"
 #include "math_util.h"
 #include "save.h"
+#include "surface.h"
 
 /* The shot planning thread's states, in sPlanThreadState */
 #define PLAN_THREAD_RUNNING 0
@@ -140,7 +142,10 @@ s32 GetSideSlope(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", PlanShot);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F070_ovl_03);
+s32 GetBallCupDistance(void) {
+    return IntLength2D(sShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                       sShot.ballPosition[AXIS_Z] - g_CupPositionZ);
+}
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D78_ovl_03);
 
@@ -190,7 +195,60 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F844_ovl_03);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802504A0_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80250768_ovl_03);
+/* How good a place to land each surface kind is, from LANDING_NONE to LANDING_BEST */
+#define LANDING_NONE 0
+#define LANDING_POOR 5
+#define LANDING_FAIR 7
+#define LANDING_BEST 8
+
+s32 GetLandingRating(u32 surfaceKind) {
+    s32 rating;
+
+    if (g_CourseIndex == COURSE_MARIOS_STAR) {
+        if (surfaceKind == SURFACE_KIND_ROCK) {
+            return LANDING_FAIR;
+        }
+        if (surfaceKind == SURFACE_KIND_BUNKER) {
+            return LANDING_FAIR;
+        }
+    }
+    switch (surfaceKind) {
+        case SURFACE_KIND_FAIRWAY:
+        case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+        case SURFACE_KIND_FAIRWAY_POOR_LIE:
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+        case SURFACE_KIND_TEE_GROUND:
+        case SURFACE_KIND_SEMI_ROUGH:
+            rating = LANDING_BEST;
+            break;
+        case SURFACE_KIND_ROUGH:
+        case SURFACE_KIND_ROUGH_POOR_LIE:
+        case 5:
+        case SURFACE_KIND_CART_WAY:
+        case SURFACE_KIND_ROCK:
+        case SURFACE_KIND_BARE_GROUND:
+        case SURFACE_KIND_DEEP_ROUGH:
+        case SURFACE_KIND_BARE_GROUND_UNK20:
+        case SURFACE_KIND_WASTE_AREA:
+            rating = LANDING_FAIR;
+            break;
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+            rating = LANDING_POOR;
+            break;
+        case SURFACE_KIND_BUNKER_UNK9:
+        case SURFACE_KIND_WATER_HAZARD:
+        case SURFACE_KIND_OUT_OF_BOUNDS:
+        case SURFACE_KIND_OUT_OF_COURSE:
+        case SURFACE_KIND_TEE_UP:
+        default:
+            rating = LANDING_NONE;
+            break;
+    }
+    return rating;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802507D8_ovl_03);
 
@@ -206,17 +264,56 @@ INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802515DC_ovl_03);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802517F0_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251AC0_ovl_03);
+/* sShot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
+#define SHOT_UNK4_MIN 3
+#define SHOT_UNK4_MAX 30
+#define SHOT_UNK4_SCALE (SHOT_UNK4_MAX / 256.0f)
+
+s32 ScaleToShotUnk4(s32 amount) {
+    s32 value;
+    s32 unused;
+    s32 uninitialized;
+
+    /* The store of an uninitialized value is there to match */
+    *(&unused) = uninitialized;
+
+    value = amount * SHOT_UNK4_SCALE + 0.5f;
+    if (value < SHOT_UNK4_MIN) {
+        value = SHOT_UNK4_MIN;
+    }
+    if (value > SHOT_UNK4_MAX - 1) {
+        value = SHOT_UNK4_MAX;
+    }
+    return value;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80254154_ovl_03);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251B20_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80252EE4_ovl_03);
+/* Returns the slot of the golfer's club of type clubType, or 0 if there is none */
+s32 FindClubSlot(s32 unused, s32 clubType) {
+    s32 slot;
+
+    for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+        if (GetClub(g_Players[sShot.playerIndex].clubs[slot])->type == clubType) {
+            return slot;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80252F70_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253180_ovl_03);
+/* Returns how far apart two binary angles are, up to half a turn */
+s32 GetAngleDifference(s32 angle, s32 otherAngle) {
+    s32 difference = (s16)(angle - otherAngle);
+
+    if (difference < 0) {
+        difference = -difference;
+    }
+    return difference;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8025319C_ovl_03);
 
