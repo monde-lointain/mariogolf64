@@ -1,4 +1,5 @@
 #include "common.h"
+#include "course.h"
 #include "billboard.h"
 #include "camera.h"
 #include "club.h"
@@ -81,6 +82,26 @@ static const char sUnusedFloatFormat[] = "            %f";
 /* The fractions of the selected shot distance a full and a short shot go beyond */
 #define FULL_SHOT_FRACTION 0.8f
 #define SHORT_SHOT_FRACTION 0.6f
+
+/*
+ * The flyover's frames: it swings around the cup by a half turn every
+ * FLYOVER_HALF_TURN_FRAME_COUNT frames up to a full turn, opens the inset view
+ * and closes it again, and ends on HOLE_FLYOVER_FRAME_COUNT
+ */
+#define FLYOVER_HALF_TURN_FRAME_COUNT 90
+#define FLYOVER_MAX_HALF_TURNS 2.0f
+#define FLYOVER_INSET_OPEN_FRAME 94
+#define FLYOVER_INSET_CLOSE_FRAME 162
+#define HOLE_FLYOVER_FRAME_COUNT 185
+/* How the flyover's distance from the cup, and height above it, follow the hole's radius */
+#define FLYOVER_RADIUS_APPROACH 15.0f
+#define FLYOVER_DISTANCE_SCALE 1536.0f
+#define FLYOVER_HEIGHT_APPROACH 200.0f
+#define FLYOVER_HEIGHT_SCALE 1.5f
+/* The inset camera looks at a point below the cup from this far and this much higher */
+#define FLYOVER_INSET_LOOK_AT_DROP 15360.0f
+#define FLYOVER_INSET_DISTANCE 184320.0f
+#define FLYOVER_INSET_EYE_RISE 75.0f
 
 /* windSpeed's units in a unit of wind, and the speed of a wind that EndHoleFlyover calls strong */
 #define WIND_SPEED_UNIT 0x10000
@@ -349,7 +370,73 @@ void EndHoleFlyover(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", StepHoleFlyover);
+/*
+ * Moves the flyover's cameras on by a frame. The main camera swings around
+ * the cup from the tee's side as it closes in; the inset camera circles the
+ * cup twice as fast. It returns whether the flyover has reached its end.
+ */
+s32 StepHoleFlyover(void) {
+    Vec3 offset;
+    f32 halfTurns;
+    f32 widening;
+    f32 approach;
+    f32 yaw;
+    f32 distance;
+    f32 height;
+    s32 holeRadius;
+
+    halfTurns = g_HoleFlyoverFrame * (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
+    if (g_HoleFlyoverFrame > FLYOVER_HALF_TURN_FRAME_COUNT) {
+        widening = 0.0f;
+        approach = 1.0f - sinf(DEGREES_TO_RADIANS(g_HoleFlyoverFrame));
+    } else {
+        approach = (1.0f - sinf(DEGREES_TO_RADIANS(g_HoleFlyoverFrame))) * 0.5f;
+        widening = (FLYOVER_HALF_TURN_FRAME_COUNT - g_HoleFlyoverFrame) * (1.0f / FLYOVER_HALF_TURN_FRAME_COUNT);
+    }
+    if (halfTurns > FLYOVER_MAX_HALF_TURNS) {
+        halfTurns = FLYOVER_MAX_HALF_TURNS;
+    }
+    if (!g_IsMiniGolf) {
+        if (g_HoleFlyoverFrame == FLYOVER_INSET_OPEN_FRAME) {
+            g_InsetView.animation = INSET_VIEW_OPENING;
+        }
+        if (g_HoleFlyoverFrame == FLYOVER_INSET_CLOSE_FRAME) {
+            g_InsetView.animation = INSET_VIEW_CLOSING;
+        }
+    }
+    offset[AXIS_X] = D_800BA9D8.teePosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
+    offset[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y] - g_CupPositionY;
+    offset[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z] - g_CupPositionZ;
+    g_InsetView.unk8 = 100;
+    g_InsetView.unkC = 101;
+    g_Cameras[0].view.lookAt[AXIS_X] =
+        (D_800BA9D8.cupPosition[AXIS_X] + offset[AXIS_X] * approach) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.lookAt[AXIS_Y] = (g_CupPositionY + offset[AXIS_Y] * approach) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.lookAt[AXIS_Z] = (g_CupPositionZ + offset[AXIS_Z] * approach) * COURSE_TO_WORLD_SCALE;
+    yaw = atan2(offset[AXIS_X], offset[AXIS_Z]) + halfTurns * M_PI;
+    holeRadius = GetHoleRadius(GetCourseRecordIndex(), GetHoleRecordIndex());
+    /* Storing the sine before computing distance is there to match */
+    offset[AXIS_X] = sinf(yaw);
+    distance = ((holeRadius - approach * FLYOVER_RADIUS_APPROACH) + holeRadius * widening) * FLYOVER_DISTANCE_SCALE;
+    offset[AXIS_X] *= distance;
+    offset[AXIS_Z] = cosf(yaw) * distance;
+    g_Cameras[0].view.eye[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] + offset[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    yaw += yaw;
+    height = (holeRadius / 2 + approach * FLYOVER_HEIGHT_APPROACH) * FLYOVER_HEIGHT_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.eye[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - height;
+    g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] + offset[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = (g_CupPositionY - FLYOVER_INSET_LOOK_AT_DROP) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
+    offset[AXIS_X] = sinf(yaw) * FLYOVER_INSET_DISTANCE;
+    offset[AXIS_Z] = cosf(yaw) * FLYOVER_INSET_DISTANCE;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_X] =
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] + offset[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] = g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] - FLYOVER_INSET_EYE_RISE;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] =
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] + offset[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    return ++g_HoleFlyoverFrame == HOLE_FLYOVER_FRAME_COUNT;
+}
 
 /* Turns the camera's yaw to face the look-at point, unless the camera is over it */
 void AimCameraYaw(void) {
