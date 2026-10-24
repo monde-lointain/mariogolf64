@@ -68,7 +68,15 @@ extern RouteCoordinates sRoute;
 /* The route points nearest the cup first, as PlanRoute orders them */
 extern s8 sRouteOrder[ROUTE_POINT_COUNT];
 extern s32 sRouteOrderCount;
-extern s8 sIsPlanStarted;
+/* How far PlanShot has got with the shot */
+extern s8 sPlanStage;
+#define PLAN_STAGE_UNSTARTED 0
+#define PLAN_STAGE_STARTED 1
+#define PLAN_STAGE_TARGET_CHOSEN 2
+#define PLAN_STAGE_TRIAL_TAKEN 3
+#define PLAN_STAGE_UNK4 4
+#define PLAN_STAGE_LEVEL_FINISHED 5
+#define PLAN_STAGE_TRIAL_RUNNING 6
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 /* The size of the golfer's club set */
 extern s32 sClubCount;
@@ -86,7 +94,7 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 s32 ChooseClubForDistance(s32 distance);
 
 void RestartShotPlan(void) {
-    sIsPlanStarted = FALSE;
+    sPlanStage = PLAN_STAGE_UNSTARTED;
 }
 
 /* Starts planning the shot that sets g_CurrentShot up, on its own thread */
@@ -1469,7 +1477,7 @@ s32 StepTrialShot(void) {
     s32 index;
 
     flags = 0;
-    if (sIsPlanStarted != 6) {
+    if (sPlanStage != PLAN_STAGE_TRIAL_RUNNING) {
         sIsTrialLost = FALSE;
         sTrialEvaluation = 0;
         sIsPutting = FALSE;
@@ -1550,7 +1558,7 @@ s32 StepTrialShot(void) {
                 sUnk1Position[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
             }
             if (sTrialEvaluation < sBestEvaluation) {
-                sIsPlanStarted = 6;
+                sPlanStage = PLAN_STAGE_TRIAL_RUNNING;
                 return 0;
             }
         } while (0);
