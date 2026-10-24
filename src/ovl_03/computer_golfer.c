@@ -3,6 +3,7 @@
 #include "course.h"
 #include "current_shot.h"
 #include "functions.h"
+#include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
@@ -37,6 +38,13 @@ extern u8 sPlanThreadStackEnd[];
 extern s32 D_8025C640_ovl_03;
 /* Where the planned shot aims */
 extern CoursePoint sPlanTarget;
+/* The route points and the tee, as PlanRoute gathers them */
+typedef struct RouteCoordinates {
+    /* 0x00 */ s32 x[ROUTE_POINT_COUNT + 1];
+    /* 0x24 */ s32 z[ROUTE_POINT_COUNT + 1];
+} RouteCoordinates; /* size = 0x48 */
+
+extern RouteCoordinates sRoute;
 extern s8 sIsPlanStarted;
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 
@@ -331,7 +339,87 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F844_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802504A0_ovl_03);
+#define NO_ROUTE_POINT (-1)
+/* Beyond any distance on a hole */
+#define FARTHEST_DISTANCE 0x0FFFFFFF
+
+/*
+ * Stores in route the indices into sRoute of the hole's route
+ * points to play through, from the tee toward the cup, and returns their count.
+ * Starting at the cup, it walks to the nearest point not yet visited until it
+ * reaches the tee.
+ */
+s32 PlanRoute(s8 *route) {
+    s8 isVisited[ROUTE_POINT_COUNT + 1];
+    s8 order[ROUTE_POINT_COUNT];
+    s32 index;
+    s32 pointCount;
+    s8 remainingCount;
+    s32 currentX;
+    s32 currentZ;
+    s32 orderCount;
+    s32 nearestDistance;
+    s32 nearest;
+    s32 distance;
+    s32 orderIndex;
+
+    for (index = ROUTE_POINT_COUNT - 1; index >= 0; index--) {
+        isVisited[index] = FALSE;
+    }
+    currentX = D_800BA9D8.cupPosition[AXIS_X];
+    currentZ = g_CupPositionZ;
+    pointCount = 0;
+    for (index = 0; index < ROUTE_POINT_COUNT; index++) {
+        if (g_HolePoints.routePoints[index][AXIS_X] == 0 && g_HolePoints.routePoints[index][AXIS_Z] == 0) {
+            break;
+        }
+        sRoute.x[pointCount] = g_HolePoints.routePoints[index][AXIS_X];
+        sRoute.z[pointCount] = g_HolePoints.routePoints[index][AXIS_Z];
+        pointCount++;
+    }
+    sRoute.x[pointCount] = D_800BA9D8.teePosition[AXIS_X];
+    sRoute.z[pointCount] = D_800BA9D8.teePosition[AXIS_Z];
+    pointCount++;
+    remainingCount = pointCount;
+    orderCount = 0;
+    while (remainingCount > 0) {
+        nearest = NO_ROUTE_POINT;
+        nearestDistance = FARTHEST_DISTANCE;
+        for (index = 0; index < pointCount; index++) {
+            if (isVisited[index]) {
+                continue;
+            }
+            distance = IntLength2D(currentX - sRoute.x[index], currentZ - sRoute.z[index]);
+            /* Unused; it is there to match */
+            IntLength2D(sRoute.x[index] - D_800BA9D8.teePosition[AXIS_X],
+                        sRoute.z[index] - D_800BA9D8.teePosition[AXIS_Z]);
+            if (distance < nearestDistance) {
+                nearest = index;
+                nearestDistance = distance;
+            }
+        }
+        if (nearest != NO_ROUTE_POINT) {
+            remainingCount--;
+            order[orderCount] = nearest;
+            isVisited[nearest] = TRUE;
+            currentX = sRoute.x[nearest];
+            currentZ = sRoute.z[nearest];
+            orderCount++;
+            if (currentX == D_800BA9D8.teePosition[AXIS_X] &&
+                currentZ == D_800BA9D8.teePosition[AXIS_Z]) {
+                break;
+            }
+        }
+    }
+    /* Counting the route in index is there to match */
+    index = 0;
+    for (orderIndex = orderCount - 1; orderIndex >= 0; orderIndex--) {
+        if (order[orderIndex] != pointCount - 1) {
+            route[index++] = order[orderIndex];
+        }
+    }
+    return index;
+}
 
 /* How good a place to land each surface kind is, from LANDING_NONE to LANDING_BEST */
 #define LANDING_NONE 0
