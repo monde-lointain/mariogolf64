@@ -26,9 +26,12 @@ typedef struct BallSimulation {
     /* 0x00 */ s32 startPosition[3];
     /* 0x0C */ s32 unkC[3];
     /* 0x18 */ s32 position[3];
-    /* 0x24 */ u8 unk24[0x8C - 0x24];
+    /* 0x24 */ s32 unk24[3];
+    /* 0x30 */ u8 unk30[0x8C - 0x30];
     /* 0x8C */ s32 isRunning;
-    /* 0x90 */ u8 unk90[0xA0 - 0x90];
+    /* 0x90 */ s32 unk90;
+    /* 0x94 */ s32 unk94;
+    /* 0x98 */ u8 unk98[0xA0 - 0x98];
     /* 0xA0 */ s8 unkA0;
     /* 0xA1 */ u8 unkA1[2];
     /* 0xA3 */ s8 surface;

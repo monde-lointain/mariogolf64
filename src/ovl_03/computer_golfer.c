@@ -1355,9 +1355,435 @@ s32 ScaleToShotUnk4(s32 amount) {
     return value;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80254154_ovl_03);
+/* Where the shot to try starts, as PlanShot sets it up */
+extern CurrentShot sTrialShot;
+extern Unk20 *sTrialLaunch;
+extern BallSimulation sTrialSimulation;
+extern s32 sTrialStepCount;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251B20_ovl_03);
+s32 func_8005F248(s32 value);
+
+/* ChooseShotOffset's results, indices into sShotOffsets */
+#define SHOT_OFFSET_NONE 0
+#define SHOT_OFFSET_PLUS_SMALL 1
+#define SHOT_OFFSET_PLUS_MEDIUM 2
+#define SHOT_OFFSET_PLUS_LARGE 3
+#define SHOT_OFFSET_MINUS_SMALL 4
+#define SHOT_OFFSET_MINUS_MEDIUM 5
+#define SHOT_OFFSET_MINUS_LARGE 6
+
+/* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
+typedef struct ShotOffset {
+    /* 0x0 */ s8 unk14; /* Becomes sShot.unk14 */
+    /* 0x1 */ s8 unk18; /* Becomes sShot.unk18 */
+} ShotOffset; /* size = 0x2 */
+
+#define SHOT_OFFSET_COUNT 8
+
+extern ShotOffset sShotOffsets[SHOT_OFFSET_COUNT];
+/* The SHOT_OFFSET_* that PlanShot chose for the shot */
+extern s32 sShotOffset;
+/* Whether the trial's club is one for the green */
+extern s32 sIsPutting;
+/* How much worse than ideal an evaluation may be for the trial to be taken */
+extern s32 sAcceptableEvaluation;
+/* How many times PlanShot has changed the club or carry */
+extern s32 sTrialLevel;
+/* Whether the trial has reported STEP_FLAG_UNK1, and where it first did */
+extern s32 sHasUnk1Position;
+extern CoursePoint sUnk1Position;
+/* Whether the trial ended out of bounds, off the course or in water */
+extern s32 sIsTrialLost;
+/* The nearest that a putt has come to the target */
+extern s32 sClosestTargetDistance;
+/* The count of trials at this level */
+extern s32 sTrialIndex;
+/* Set when the trial asks PlanShot for a longer or a shorter club */
+extern s32 sNeedsLongerClub;
+extern s32 sNeedsShorterClub;
+/* The trial's evaluation; lower is better */
+extern s32 sTrialEvaluation;
+/* Where the trial's ball rests, or for a putt where it passes nearest the target */
+extern CoursePoint sTrialEndPoint;
+/* Set when the trial is good enough to take */
+extern s32 sIsTrialAccepted;
+/* The best evaluation so far, and whether there is one */
+extern s32 sBestEvaluation;
+extern s32 sHasBestEvaluation;
+extern s32 sAimChangeCount;
+extern s32 sHasUnk3Contact;
+/* The fault report of StepTrialShot and IsTrialShotSafe, which share its one copy */
+extern const char sSimFaultText[];
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", sSimFaultText);
+
+/* What the trial costs for each step a putt takes, and for a putt at the stroke limit */
+#define PUTT_STEP_EVALUATION 0x10
+#define POOR_LANDING_EVALUATION 0x8000
+#define BLOCKED_CUP_EVALUATION 0x80000
+#define LOST_BALL_EVALUATION 0x10000000
+#define FAR_FROM_TARGET 0x40000000
+#define MISS_EVALUATION_SCALE 0.006535948f
+#define APPROACH_TOLERANCE_SCALE 0.0065104165f
+#define LONG_PUTT_DISTANCE 0x7800
+#define PUTT_DRIFT_LIMIT 0xF000
+/* The largest launch power a club can give */
+#define MAX_LAUNCH_POWER 256
+#define AIM_CHANGE_STEP 0x400
+#define EXCLUDED_SECTOR_COUNT 9
+
+/*
+ * Advances the trial of sShot by one step of the ball simulation, setting the
+ * trial up first unless it is under way. It returns 0 while the trial is still
+ * better than the best so far, and 1 once it has evaluated the trial, or
+ * abandoned it, and adjusted sShot's power, mode or aim for the next one.
+ *
+ * It does not match: ours gives some values other saved registers than the
+ * original does, and it keeps the address of sShot.ballPosition's z in a saved
+ * register across the atan2 calls, where the original loads it again.
+ */
+#ifdef NON_MATCHING
+s32 StepTrialShot(void) {
+    PlaneTriangle hit;
+    f32 fraction;
+    s32 flags;
+    s32 isRunning;
+    s32 stepFlags;
+    s32 unk24Y;
+    s32 unk94;
+    s32 targetMiss;
+    s32 heightMiss;
+    SurfaceInfo *surfaceInfo;
+    s32 targetRating;
+    s32 kind;
+    s32 par;
+    s32 strokes;
+    s32 strokesOver;
+    s32 approachDistance;
+    s32 flyDistance;
+    s32 targetDistance;
+    f32 aimCos;
+    f32 aimSin;
+    f32 ratio;
+    s32 launchPower;
+    s32 index;
+
+    flags = 0;
+    if (sIsPlanStarted != 6) {
+        sIsTrialLost = FALSE;
+        sTrialEvaluation = 0;
+        sIsPutting = FALSE;
+        sHasUnk1Position = FALSE;
+        sShot.unk14 = sShotOffsets[sShotOffset].unk14 + (rand() & 7) - 3;
+        sShot.unk18 = sShotOffsets[sShotOffset].unk18 + (rand() & 7) - 3;
+        sTrialLaunch->unk0 = sShot.unk0;
+        sTrialLaunch->clubIndex = sShot.clubSlot;
+        sClosestTargetDistance = FAR_FROM_TARGET;
+        sTrialLaunch->unk8 = func_8005F248(sShot.unk4);
+        sTrialLaunch->unkC = 0;
+        sTrialLaunch->unk10 = sShot.unk14;
+        sTrialLaunch->unk14 = sShot.unk18;
+        sTrialLaunch->unk18 = sShot.playerIndex;
+        sTrialLaunch->shotMode = sShot.shotMode;
+        sIsPutting = GetClub(sShot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
+        if (!IsGameFlagSet(GAME_FLAG_UNK3C)) {
+            if (sIsPutting) {
+                sAcceptableEvaluation = sAcceptableEvaluation * 1.1f + 0.2f;
+            } else {
+                sAcceptableEvaluation = sAcceptableEvaluation * 1.1f + 20.0f;
+            }
+        }
+        sTrialSimulation.position[AXIS_X] = sShot.ballPosition[AXIS_X];
+        sTrialSimulation.position[AXIS_Y] = sShot.ballPosition[AXIS_Y];
+        sTrialSimulation.position[AXIS_Z] = sShot.ballPosition[AXIS_Z];
+        sTrialSimulation.surface = sShot.surface;
+        func_80037F94(&sTrialSimulation, 2, sTrialLaunch);
+        sTrialStepCount = 0;
+        sHasUnk3Contact = FALSE;
+        sTrialEndPoint[AXIS_X] = sTrialSimulation.position[AXIS_X];
+        sTrialEndPoint[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+        sTrialEndPoint[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+        sUnk1Position[AXIS_X] = sTrialSimulation.position[AXIS_X];
+        sUnk1Position[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+        sUnk1Position[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+    }
+    isRunning = sTrialSimulation.isRunning;
+    if (isRunning) {
+        do {
+            unk24Y = sTrialSimulation.unk24[AXIS_Y];
+            unk94 = sTrialSimulation.unk94;
+            sTrialStepCount++;
+            stepFlags = flags = func_8003327C(&sTrialSimulation);
+            if (sTrialStepCount >= MAX_STEP_COUNT) {
+                SetDebugTextHighlight(TRUE);
+                PrintDebugText(sSimFaultText, 10, 12);
+                break;
+            }
+            if (flags & STEP_FLAG_UNK10) {
+                break;
+            }
+            if (unk94 == 0 && (flags & 3) && unk24Y < 0 && isRunning == 1) {
+                if (sHasBestEvaluation || sTrialLevel < 2) {
+                    break;
+                }
+                sHasUnk3Contact = isRunning;
+            }
+            if (sIsPutting) {
+                targetMiss = IntLength2D(sTrialSimulation.position[AXIS_X] - sPlanTarget[AXIS_X],
+                                         sTrialSimulation.position[AXIS_Z] - sPlanTarget[AXIS_Z]);
+                if (targetMiss < sClosestTargetDistance) {
+                    sClosestTargetDistance = targetMiss;
+                    sTrialEndPoint[AXIS_X] = sTrialSimulation.position[AXIS_X];
+                    sTrialEndPoint[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+                    sTrialEndPoint[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+                }
+                if (stepFlags & 4) {
+                    sTrialEvaluation += PUTT_STEP_EVALUATION;
+                    if (IsStrokeLimitReached()) {
+                        sTrialEvaluation += POOR_LANDING_EVALUATION;
+                    }
+                }
+            } else if ((stepFlags & STEP_FLAG_UNK1) && sTrialSimulation.isRunning == 1 && !sHasUnk1Position) {
+                sHasUnk1Position = sTrialSimulation.isRunning;
+                sUnk1Position[AXIS_X] = sTrialSimulation.position[AXIS_X];
+                sUnk1Position[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+                sUnk1Position[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+            }
+            if (sTrialEvaluation < sBestEvaluation) {
+                sIsPlanStarted = 6;
+                return 0;
+            }
+        } while (0);
+    }
+    if (!sIsPutting) {
+        sTrialEndPoint[AXIS_X] = sTrialSimulation.position[AXIS_X];
+        sTrialEndPoint[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+        sTrialEndPoint[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+    }
+    if (!sTrialSimulation.isRunning) {
+        IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sTrialEndPoint[AXIS_X], g_CupPositionZ - sTrialEndPoint[AXIS_Z]);
+        targetMiss = IntLength2D(sPlanTarget[AXIS_X] - sTrialEndPoint[AXIS_X],
+                                 sPlanTarget[AXIS_Z] - sTrialEndPoint[AXIS_Z]);
+        if (sIsPutting) {
+            targetMiss = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sTrialSimulation.position[AXIS_X],
+                                     g_CupPositionZ - sTrialSimulation.position[AXIS_Z]);
+            if (IntLength2D(sTrialSimulation.position[AXIS_X] - sTrialEndPoint[AXIS_X],
+                            sTrialSimulation.position[AXIS_Z] - sTrialEndPoint[AXIS_Z]) > PUTT_DRIFT_LIMIT) {
+                sTrialEvaluation = POOR_LANDING_EVALUATION;
+            }
+            if (g_Players[sShot.playerIndex].unk23 + 1 < g_HolePar + sHoleTargetToPar && sHoleTargetToPar > 0 &&
+                IntLength2D(sShot.ballPosition[AXIS_X] - sTrialEndPoint[AXIS_X],
+                            sShot.ballPosition[AXIS_Z] - sTrialEndPoint[AXIS_Z]) > LONG_PUTT_DISTANCE) {
+                goto evaluate;
+            }
+        }
+        if (sTrialSimulation.unkA0) {
+            sTrialEvaluation = 0;
+        } else {
+        evaluate:
+            surfaceInfo = GetSurfaceInfo(sTrialSimulation.surface);
+            if (FindGroundHit(sTrialSimulation.position[AXIS_X],
+                              sTrialSimulation.position[AXIS_Y] - PATH_GROUND_CLEARANCE,
+                              sTrialSimulation.position[AXIS_Z], D_800BA9D8.cupPosition[AXIS_X],
+                              sTrialSimulation.position[AXIS_Y] -
+                                  (IntLength2D(sTrialSimulation.position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                               sTrialSimulation.position[AXIS_Z] - g_CupPositionZ) >>
+                                   1),
+                              g_CupPositionZ, &hit, &fraction)) {
+                sTrialEvaluation += BLOCKED_CUP_EVALUATION;
+            }
+            targetRating = GetLandingRating(GetSurfaceInfoAt(sPlanTarget[AXIS_X], sPlanTarget[AXIS_Z])->kind);
+            if (GetLandingRating(surfaceInfo->kind) < targetRating) {
+                kind = surfaceInfo->kind;
+                sTrialEvaluation += POOR_LANDING_EVALUATION;
+                if (kind == SURFACE_KIND_OUT_OF_BOUNDS || kind == SURFACE_KIND_OUT_OF_COURSE) {
+                    sTrialEvaluation = LOST_BALL_EVALUATION;
+                    sIsTrialLost = TRUE;
+                }
+                if (surfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+                    osSyncPrintf("Water Hazzad\n");
+                    sTrialEvaluation = LOST_BALL_EVALUATION;
+                    sIsTrialLost = TRUE;
+                }
+            }
+            heightMiss = sPlanTarget[AXIS_Y] - sTrialSimulation.position[AXIS_Y];
+            sTrialEvaluation += (targetMiss + ABS(heightMiss) / 2) * MISS_EVALUATION_SCALE;
+        }
+        osSyncPrintf("BestEval = %d\n", sBestEvaluation);
+        if (sTrialEvaluation < sBestEvaluation) {
+            sHasBestEvaluation = TRUE;
+            sBestEvaluation = sTrialEvaluation;
+            sTrialShot = sShot;
+        }
+        if (sTrialIndex != 0) {
+            par = g_HolePar;
+            strokes = g_Players[sShot.playerIndex].unk23;
+            if (GetSurfaceInfoAt(sPlanTarget[AXIS_X], sPlanTarget[AXIS_Z])->kind == SURFACE_KIND_GREEN) {
+                strokesOver = strokes + 1;
+                strokesOver -= par + sHoleTargetToPar;
+                if (strokesOver >= 0) {
+                    if (sBestEvaluation <= sAcceptableEvaluation) {
+                        sIsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                } else if (!sIsPutting) {
+                    if (strokesOver >= -1) {
+                        if (sBestEvaluation <= sAcceptableEvaluation + 500) {
+                            sIsTrialAccepted = TRUE;
+                            return 1;
+                        }
+                    } else if (sBestEvaluation < sAcceptableEvaluation + 0x8000) {
+                        sIsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                } else {
+                    approachDistance = (s32)IntLength2D(sShot.ballPosition[AXIS_X] - sPlanTarget[AXIS_X],
+                                                        sShot.ballPosition[AXIS_Z] - sPlanTarget[AXIS_Z]) *
+                                       APPROACH_TOLERANCE_SCALE;
+                    if (strokesOver >= -1) {
+                        if (sBestEvaluation <= approachDistance * 0.3f + sAcceptableEvaluation) {
+                            sIsTrialAccepted = TRUE;
+                            return 1;
+                        }
+                    } else if (sBestEvaluation <= approachDistance * 0.4f + sAcceptableEvaluation) {
+                        sIsTrialAccepted = TRUE;
+                        return 1;
+                    }
+                }
+            } else if (sBestEvaluation < sAcceptableEvaluation + 8000) {
+                sIsTrialAccepted = TRUE;
+                return 1;
+            }
+        }
+        if (!sIsPutting) {
+            flyDistance = IntLength2D((sTrialSimulation.position[AXIS_X] + sTrialEndPoint[AXIS_X]) / 2 -
+                                          sShot.ballPosition[AXIS_X],
+                                      (sTrialSimulation.position[AXIS_Z] + sTrialEndPoint[AXIS_Z]) / 2 -
+                                          sShot.ballPosition[AXIS_Z]);
+            targetDistance = IntLength2D(sPlanTarget[AXIS_X] - sShot.ballPosition[AXIS_X],
+                                         sPlanTarget[AXIS_Z] - sShot.ballPosition[AXIS_Z]);
+        } else {
+            aimCos = cosf((u16)sShot.unk0 * BINARY_ANGLE_TO_RADIANS);
+            aimSin = sinf((u16)sShot.unk0 * BINARY_ANGLE_TO_RADIANS);
+            flyDistance =
+                aimCos * ((sTrialSimulation.position[AXIS_X] * 3 + sTrialEndPoint[AXIS_X]) / 4 -
+                          sShot.ballPosition[AXIS_X]) +
+                aimSin * ((sTrialSimulation.position[AXIS_Z] * 3 + sTrialEndPoint[AXIS_Z]) / 4 -
+                          sShot.ballPosition[AXIS_Z]);
+            targetDistance = aimCos * (sPlanTarget[AXIS_X] - sShot.ballPosition[AXIS_X]) +
+                             aimSin * (sPlanTarget[AXIS_Z] - sShot.ballPosition[AXIS_Z]);
+            if (flyDistance <= 0) {
+                flyDistance = 1;
+            }
+            if (targetDistance <= 0) {
+                targetDistance = 1;
+            }
+        }
+        osSyncPrintf("flydist = %d\n", flyDistance);
+        osSyncPrintf("targetdist = %d\n", targetDistance);
+        osSyncPrintf("powermode = %d\n", sShot.shotMode);
+        osSyncPrintf("powermodeleft = %d\n", sShot.unk54);
+        osSyncPrintf("ClubSelectType = %d\n", sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk2);
+        if (flyDistance != 0) {
+            ratio = (f32)targetDistance / flyDistance;
+            launchPower = sTrialLaunch->unk8 * ratio;
+            if (launchPower > MAX_LAUNCH_POWER) {
+                if (sShot.shotMode == SHOT_MODE_NORMAL && sShot.unk54 > 0 &&
+                    ((sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk6 != 0 &&
+                      sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk2 < 2) ||
+                     (rand() & 1)) &&
+                    GetSurfaceInfoAt(sPlanTarget[AXIS_X], sPlanTarget[AXIS_Z])->kind == SURFACE_KIND_GREEN) {
+                    sShot.shotMode = SHOT_MODE_POWER;
+                    osSyncPrintf("Power mode\n ");
+                } else if (sShot.shotMode == SHOT_MODE_NORMAL && sShot.unk54 > 0 &&
+                           sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk2 == 2) {
+                    sShot.shotMode = SHOT_MODE_POWER;
+                    osSyncPrintf("Power mode\n ");
+                } else if (sShot.shotMode == SHOT_MODE_APPROACH) {
+                    sShot.shotMode = SHOT_MODE_NORMAL;
+                } else if (targetDistance < flyDistance) {
+                    osSyncPrintf("Level Down\n");
+                    sNeedsShorterClub = TRUE;
+                    return 1;
+                } else if (sHasUnk3Contact || ratio >= 10.0f) {
+                    sAimChangeCount++;
+                    sShot.unk0 = !(sAimChangeCount & 1) ? sShot.unk0 - sAimChangeCount * AIM_CHANGE_STEP
+                                                        : sShot.unk0 + sAimChangeCount * AIM_CHANGE_STEP;
+                    osSyncPrintf("Angle Change3\n");
+                    for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
+                        sIsDirectionExcluded[(u8)((sShot.unk0 >> DIRECTION_SECTOR_SHIFT) + index -
+                                                  EXCLUDED_SECTOR_COUNT / 2)] = TRUE;
+                    }
+                    if (sAimChangeCount >= 17) {
+                        osSyncPrintf("Level Down\n");
+                        sAimChangeCount = 0;
+                        sNeedsShorterClub = TRUE;
+                    }
+                    return 1;
+                } else {
+                    sNeedsLongerClub = TRUE;
+                    osSyncPrintf("Level Up1\n");
+                    return 1;
+                }
+            } else {
+                sShot.unk4 = ScaleToShotUnk4(launchPower);
+                if (sIsPutting) {
+                    sShot.unk4 = sShot.unk4 + 1 + (rand() & 1);
+                }
+                if (sShot.unk4 > SHOT_UNK4_MAX) {
+                    sShot.unk4 = SHOT_UNK4_MAX;
+                }
+                if (sShot.unk4 < 2) {
+                    sShot.unk4 = 2;
+                }
+                if (sTrialLaunch->unk8 < launchPower) {
+                    if (func_8005F248(sShot.unk4) <= sTrialLaunch->unk8 && sShot.unk4 < SHOT_UNK4_MAX) {
+                        sShot.unk4++;
+                    }
+                } else if (launchPower < sTrialLaunch->unk8) {
+                    if (func_8005F248(sShot.unk4) >= sTrialLaunch->unk8 && sShot.unk4 >= 4) {
+                        sShot.unk4--;
+                    }
+                }
+            }
+        }
+        sShot.unk0 += (s32)(atan2(sPlanTarget[AXIS_Z] - sShot.ballPosition[AXIS_Z],
+                                  sPlanTarget[AXIS_X] - sShot.ballPosition[AXIS_X]) *
+                            RADIANS_TO_BINARY_ANGLE) -
+                      (s32)(atan2(sTrialEndPoint[AXIS_Z] - sShot.ballPosition[AXIS_Z],
+                                  sTrialEndPoint[AXIS_X] - sShot.ballPosition[AXIS_X]) *
+                            RADIANS_TO_BINARY_ANGLE);
+        return 1;
+    }
+    if (flags & STEP_FLAG_UNK1) {
+        if (!(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN)) {
+            sShot.clubSlot++;
+            if (GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN) {
+                sShot.clubSlot--;
+            }
+        }
+    }
+    sAimChangeCount++;
+    for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
+        sIsDirectionExcluded[(u8)((sShot.unk0 >> DIRECTION_SECTOR_SHIFT) + index - EXCLUDED_SECTOR_COUNT / 2)] = TRUE;
+    }
+    sShotOffset = SHOT_OFFSET_MINUS_LARGE;
+    if (!(sAimChangeCount & 1)) {
+        sShot.unk0 -= sAimChangeCount * AIM_CHANGE_STEP;
+    } else {
+        sShot.unk0 += sAimChangeCount * AIM_CHANGE_STEP;
+    }
+    osSyncPrintf("Angle Change4\n");
+    if (sAimChangeCount >= 3) {
+        osSyncPrintf("Level Down\n");
+        sAimChangeCount = 0;
+        sNeedsShorterClub = TRUE;
+    }
+    return 1;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", StepTrialShot);
+#endif
 
 /* Returns the slot of the golfer's club of type clubType, or 0 if there is none */
 s32 FindClubSlot(s32 unused, s32 clubType) {
@@ -1426,15 +1852,6 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
     }
     return difference;
 }
-
-/* ChooseShotOffset's results, indices into the shot offset table */
-#define SHOT_OFFSET_NONE 0
-#define SHOT_OFFSET_PLUS_SMALL 1
-#define SHOT_OFFSET_PLUS_MEDIUM 2
-#define SHOT_OFFSET_PLUS_LARGE 3
-#define SHOT_OFFSET_MINUS_SMALL 4
-#define SHOT_OFFSET_MINUS_MEDIUM 5
-#define SHOT_OFFSET_MINUS_LARGE 6
 
 /* How far below the ball a target must be for the largest minus offset */
 #define DOWNHILL_TARGET_DROP 0xB400
@@ -1638,14 +2055,6 @@ s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     return FALSE;
 }
 
-/* Where the shot to try starts, as PlanShot sets it up */
-extern CurrentShot sTrialShot;
-extern Unk20 *sTrialLaunch;
-extern BallSimulation sTrialSimulation;
-extern s32 sTrialStepCount;
-
-s32 func_8005F248(s32 value);
-
 /*
  * Simulates sTrialShot and returns TRUE if the ball comes to rest, and not out of
  * bounds, off the course or in a water hazard
@@ -1682,7 +2091,7 @@ s32 IsTrialShotSafe(void) {
             }
         } else {
             SetDebugTextHighlight(TRUE);
-            PrintDebugText("AI Sim Fault!", 10, 12);
+            PrintDebugText(sSimFaultText, 10, 12);
             break;
         }
     }
