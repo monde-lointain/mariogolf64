@@ -8,6 +8,7 @@
 #include "club.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "framing.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "hole_loader.h"
@@ -21,6 +22,7 @@
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "text.h"
 #include "variables.h"
 
@@ -353,7 +355,7 @@ void func_80216B74(s32);
 /* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
 s32 func_8005DE40();
 void ChooseFlightCameraKind(void);
-void func_80048D7C(s32);
+void PlaceFlightCamera(s32 step);
 s32 StepHoleFlyover(void);
 
 /* The surface under the player's ball */
@@ -634,7 +636,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     sFlightBallPosition[AXIS_Z] = sShotStartPosition[AXIS_Z];
     ChooseFlightCameraKind();
     D_800BE628 = TRUE;
-    func_80048D7C(0);
+    PlaceFlightCamera(0);
     g_Cameras[0].view.eye[AXIS_X] = sCameraPosition[AXIS_X];
     g_Cameras[0].view.eye[AXIS_Y] = sCameraPosition[AXIS_Y];
     g_Cameras[0].view.eye[AXIS_Z] = sCameraPosition[AXIS_Z];
@@ -1124,12 +1126,13 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
 
 /*
  * Eases the look-at point toward the ball.
+ * It ignores yaw, which PlaceFlightCamera passes.
  * It does not match: the original keeps the loads of the ball's and the
  * look-at point's coordinates in statement order, where this schedules the
  * ball's loads first.
  */
 #ifdef NON_MATCHING
-void EaseLookAtPoint(void) {
+void EaseLookAtPoint(f32 yaw) {
     sLookAtPoint[AXIS_X] +=
         (sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_X]) * LOOK_AT_EASE_FRACTION;
     sLookAtPoint[AXIS_Y] += (sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - LOOK_AT_DROP - sLookAtPoint[AXIS_Y])
@@ -1469,7 +1472,599 @@ void AimCameraYaw(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80048D7C);
+void EaseLookAtBelowBall(f32 drop);
+void EaseLookAtPoint(f32 yaw);
+
+extern s32 sIsBehindViewFar;
+extern s32 sSideViewCount;
+extern s32 sIsApexViewFar;
+extern s32 sIsTrailViewClose;
+extern f32 sCircleAngle;
+extern f32 sFlaggedStepYaw;
+
+void func_80203B4C(void);
+
+/* PlaceFlightCamera's distances are in course units unless they say otherwise; y points down */
+#define CUP_FRAMING_PITCH -0.14f
+#define CUP_FRAMING_RISE 0xC00 /* Above the cup, of both framed spheres */
+#define CUP_FRAMING_RADIUS 3.0f
+#define CUP_FRAMING_DEPTH_OFFSET -1.5f
+#define PATH_FRAMING_PITCH -0.7853982f
+#define PATH_FRAMING_RADIUS -15.0f
+#define PATH_FRAMING_DEPTH_OFFSET -150.0f
+#define LAUNCH_VIEW_STEP 11
+#define LAUNCH_VIEW_MIN_RISE 0x6600
+#define CHASE_DISTANCE 15.0f /* In world units */
+#define CHASE_FIELD_OF_VIEW 80.0f
+#define FOLLOW_STEP_COUNT 10 /* How many path steps behind the ball the camera follows */
+#define FOLLOW_RISE 0x3C00
+#define FOLLOW_FIELD_OF_VIEW 80.0f
+#define TEE_VIEW_YAW_OFFSET 1.0f
+#define TEE_VIEW_DISTANCE 15360.0f
+#define TEE_VIEW_RISE 0x3600
+#define TEE_LOOK_AT_RISE 0x3000
+#define TEE_VIEW_FIELD_OF_VIEW 110.0f
+#define NEAR_BEHIND_VIEW_LENGTH_FRACTION 0.2f
+#define NEAR_BEHIND_VIEW_DISTANCE 15360.0f
+#define FAR_BEHIND_VIEW_LENGTH_FRACTION 0.4f
+#define FAR_BEHIND_VIEW_DISTANCE 30720.0f
+#define BEHIND_VIEW_SPREAD_FRACTION 0.1
+#define BEHIND_VIEW_SIDE_SPREAD_FRACTION 0.2
+#define BEHIND_VIEW_SIDE_DISTANCE 23040.0f
+#define BEHIND_VIEW_RISE 23040.0f
+#define BEHIND_LOOK_AT_RISE 4.5f /* In world units */
+#define BEHIND_LOOK_AT_EASED_RISE 4608.0f
+#define APEX_VIEW_NEAR_HALF_DISTANCE 1536.0f
+#define APEX_VIEW_FAR_DISTANCE 30720.0f
+#define APEX_VIEW_RISE_STEP 0x600
+#define APEX_VIEW_FAR_RISE_STEP_COUNT 10
+#define APEX_VIEW_MIN_RISE 0x6600
+#define SIDE_VIEW_LENGTH_FRACTION 0.1f
+#define SIDE_VIEW_AHEAD_FRACTION 0.5f
+#define SIDE_VIEW_SPREAD_STEP 0x600
+#define SIDE_VIEW_SPREAD_STEP_COUNT 200
+#define SIDE_VIEW_MAX_DISTANCE 768000.0f
+#define SIDE_VIEW_MIN_DISTANCE 76800.0f
+#define SIDE_VIEW_RISE_FRACTION 0.1f
+#define SIDE_VIEW_RISE 153600.0f
+#define SIDE_VIEW_MAX_DROP_BELOW_APEX 0x3C00
+#define SIDE_VIEW_MIN_RISE_ABOVE_END 0x6600
+#define SIDE_VIEW_MIN_RISE 0x7800
+#define TRAIL_SHORT_SHOT_RISE 92160.0f
+#define TRAIL_SHORT_SHOT_DISTANCE 153600.0f
+#define TRAIL_LONG_SHOT_RISE 122880.0f
+#define TRAIL_LONG_SHOT_DISTANCE 230400.0f
+#define TRAIL_CLOSE_RISE 46080.0f
+#define TRAIL_CLOSE_DISTANCE 61440.0f
+#define TRAIL_EASE_START_PERCENT 100.0f
+#define TRAIL_EASE_PERCENT_STEP 2.0f
+#define TRAIL_EFFECT_END_FRACTION 0.1f
+#define TRAIL_ANGLE_SCALE 0.25
+#define UNKD_VIEW_DISTANCE 76800.0f
+#define UNKD_VIEW_RISE 0x5A00
+#define UNKD_EASE_DEAD_ZONE 0.5f
+#define UNKD_EASE_FRACTION 0.1f
+#define FLAGGED_VIEW_DISTANCE 460800.0f
+#define FLAGGED_VIEW_RISE 0x4B000
+/* While D_800BE624 is below this, the circle starts at angle 0 rather than at a side */
+#define CIRCLE_START_FLIGHT_COUNT 2
+#define CIRCLE_ANGLE_STEP DEGREES_TO_RADIANS(2)
+#define CIRCLE_DISTANCE 30720.0f
+#define CIRCLE_RISE 23040.0f
+#define CIRCLE_LOOK_AT_RISE 15360.0f
+#define CIRCLE_MIN_RISE_ABOVE_START 23040.0f
+#define BESIDE_GOLFER_FIELD_OF_VIEW 100.0f
+#define BESIDE_GOLFER_FIRST_STEP 7
+#define BESIDE_GOLFER_STEP_LIMIT 15
+#define BESIDE_GOLFER_STEP 1536.0f
+#define BESIDE_GOLFER_RISE 1536.0f
+#define BESIDE_GOLFER_MIN_RISE 7680.0f
+#define BESIDE_GOLFER_CLEARANCE 22.5f /* In world units */
+#define BESIDE_GOLFER_LOOK_AT_RISE 12288.0f
+#define BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW 80.0f
+#define WORLD_TO_COURSE_SCALE 1024.0f
+#define MAX_EYE_DEPTH_BELOW_GROUND 0x21C0000
+#define MINI_GOLF_GROUND_SIZE 1048576.0f
+
+/*
+ * Places the flight camera's eye and look-at point for sFlightCameraKind at a step of
+ * the ball's flight, then keeps the eye above the ground and over the course.
+ * The kinds that test D_800BE628 do their setup once when it is set, then clear it.
+ * It does not match: the original allocates some registers differently, and orders
+ * three spots differently: the load of CHASE_FIELD_OF_VIEW, the move of cosf's
+ * argument for FLIGHT_CAMERA_BEHIND_START, and the stores of point for FLIGHT_CAMERA_UNKD.
+ */
+#ifdef NON_MATCHING
+void PlaceFlightCamera(s32 step) {
+    Vec3 point;
+    f32 extraRise;
+    Vec3 cupSphere;
+    Vec3 pathSphere;
+    Vec3 position;
+    f32 yaw;
+    f32 distance;
+    f32 sideYaw;
+    f32 circleYaw;
+    f32 height;
+    f32 easeFraction;
+    f32 sideDistance;
+    f32 delta;
+    f32 riseDistance;
+    f32 angle;
+    s32 index;
+    s32 lowestHeight;
+
+    switch (sFlightCameraKind) {
+        case FLIGHT_CAMERA_FRAMING_CUP:
+            ClearFramedSpheres();
+            SetFramingAngles(CUP_FRAMING_PITCH, -sStartYawFromCup - M_PI / 6);
+            cupSphere[AXIS_X] = (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            cupSphere[AXIS_Z] = (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            cupSphere[AXIS_Y] = (f32)(D_800BA9D8.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(cupSphere, CUP_FRAMING_RADIUS);
+            cupSphere[AXIS_X] = (f32)g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            cupSphere[AXIS_Z] = (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            cupSphere[AXIS_Y] = (f32)(D_800BA9D8.cupPosition[AXIS_Y] - CUP_FRAMING_RISE) * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(cupSphere, CUP_FRAMING_RADIUS);
+            FrameSpheres(CUP_FRAMING_DEPTH_OFFSET);
+            GetFramedView(sCameraPosition, sLookAtPoint);
+            break;
+        case FLIGHT_CAMERA_FRAMING_PATH:
+            ClearFramedSpheres();
+            SetFramingAngles(PATH_FRAMING_PITCH, 0.0f);
+            pathSphere[AXIS_X] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_X]][AXIS_X] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Y] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_X]][AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Z] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_X]][AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(pathSphere, PATH_FRAMING_RADIUS);
+            pathSphere[AXIS_X] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Z]][AXIS_X] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Y] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Z]][AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Z] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Z]][AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(pathSphere, PATH_FRAMING_RADIUS);
+            pathSphere[AXIS_X] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_X]][AXIS_X] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Y] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_X]][AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Z] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_X]][AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(pathSphere, PATH_FRAMING_RADIUS);
+            pathSphere[AXIS_X] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_Z]][AXIS_X] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Y] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_Z]][AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            pathSphere[AXIS_Z] =
+                (f32)g_SimulatedShot.path[g_SimulatedShot.maxPositionStep[AXIS_Z]][AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            AddFramedSphere(pathSphere, PATH_FRAMING_RADIUS);
+            FrameSpheres(PATH_FRAMING_DEPTH_OFFSET);
+            GetFramedView(sCameraPosition, sLookAtPoint);
+            break;
+        case FLIGHT_CAMERA_NEAR_LAUNCH:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                sCameraPosition[AXIS_X] = g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_X];
+                sCameraPosition[AXIS_Y] = g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_Y];
+                sCameraPosition[AXIS_Z] = g_SimulatedShot.path[LAUNCH_VIEW_STEP][AXIS_Z];
+                height = GetGroundHeight(sCameraPosition[AXIS_X], sCameraPosition[AXIS_Z]) - LAUNCH_VIEW_MIN_RISE;
+                if (height < sCameraPosition[AXIS_Y]) {
+                    sCameraPosition[AXIS_Y] = height;
+                }
+                sCameraPosition[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_X] = (f32)sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Y] = (f32)sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Z] = (f32)sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            }
+            break;
+        case FLIGHT_CAMERA_CHASING_BALL:
+            /* Back along the path, level with the ball */
+            position[AXIS_X] = g_SimulatedShot.path[step - 1][AXIS_X] - (f32)sFlightBallPosition[AXIS_X];
+            position[AXIS_Y] = 0.0f;
+            position[AXIS_Z] = g_SimulatedShot.path[step - 1][AXIS_Z] - (f32)sFlightBallPosition[AXIS_Z];
+            distance = CHASE_DISTANCE / sqrtf(position[AXIS_X] * position[AXIS_X] + position[AXIS_Y] * position[AXIS_Y]
+                                              + position[AXIS_Z] * position[AXIS_Z]);
+            position[AXIS_X] *= distance;
+            position[AXIS_Y] *= distance;
+            position[AXIS_Z] *= distance;
+            g_Cameras[0].view.fieldOfView = CHASE_FIELD_OF_VIEW;
+            sLookAtPoint[AXIS_X] = sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE - position[AXIS_X];
+            sLookAtPoint[AXIS_Y] = sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            sLookAtPoint[AXIS_Z] = sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE - position[AXIS_Z];
+            sCameraPosition[AXIS_X] = sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE + position[AXIS_X];
+            sCameraPosition[AXIS_Y] = sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Z] = sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE + position[AXIS_Z];
+            break;
+        case FLIGHT_CAMERA_FOLLOWING_PATH:
+            sCameraPosition[AXIS_X] =
+                (f32)g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_X] * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Y] =
+                (f32)(g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_Y] - FOLLOW_RISE) * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Z] =
+                (f32)g_SimulatedShot.path[step - FOLLOW_STEP_COUNT][AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.fieldOfView = FOLLOW_FIELD_OF_VIEW;
+            EaseLookAtFlyingBall();
+            break;
+        case FLIGHT_CAMERA_UNK10:
+        case FLIGHT_CAMERA_UNK11:
+            EaseLookAtFlyingBall();
+            break;
+        case FLIGHT_CAMERA_BESIDE_TEE:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS - TEE_VIEW_YAW_OFFSET;
+                point[AXIS_X] = cosf(yaw) * TEE_VIEW_DISTANCE + sShotStartPosition[AXIS_X];
+                point[AXIS_Z] = sinf(yaw) * TEE_VIEW_DISTANCE + sShotStartPosition[AXIS_Z];
+                point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - TEE_VIEW_RISE;
+                point[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+                point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+                point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_X] = point[AXIS_X];
+                sCameraPosition[AXIS_Y] = point[AXIS_Y];
+                sCameraPosition[AXIS_Z] = point[AXIS_Z];
+                sLookAtPoint[AXIS_X] = (f32)sShotStartPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Y] = (f32)(sShotStartPosition[AXIS_Y] - TEE_LOOK_AT_RISE) * COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Z] = (f32)sShotStartPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                AimCameraYaw();
+            }
+            g_Cameras[0].view.fieldOfView = TEE_VIEW_FIELD_OF_VIEW;
+            break;
+        case FLIGHT_CAMERA_BEHIND_START:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                sIsBehindViewFar ^= TRUE;
+                yaw = sShotFlightYaw + M_PI;
+                g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+                if (sIsBehindViewFar == FALSE) {
+                    sideYaw = sShotFlightYaw + M_PI / 4 + (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
+                    distance = D_800BE640 * NEAR_BEHIND_VIEW_LENGTH_FRACTION + NEAR_BEHIND_VIEW_DISTANCE
+                             - RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
+                } else {
+                    sideYaw = sShotFlightYaw - M_PI / 4 - (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 65536);
+                    distance = D_800BE640 * FAR_BEHIND_VIEW_LENGTH_FRACTION + FAR_BEHIND_VIEW_DISTANCE
+                             - RandomBelow(D_800BE640 * BEHIND_VIEW_SPREAD_FRACTION);
+                }
+                sideDistance = RandomBelow(D_800BE640 * BEHIND_VIEW_SIDE_SPREAD_FRACTION) + BEHIND_VIEW_SIDE_DISTANCE;
+                point[AXIS_X] = sShotStartPosition[AXIS_X] + sinf(yaw) * distance + sinf(sideYaw) * sideDistance;
+                point[AXIS_Z] = sShotStartPosition[AXIS_Z] - cosf(yaw) * distance - cosf(sideYaw) * sideDistance;
+                point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - BEHIND_VIEW_RISE;
+                sCameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                SnapLookAtPoint();
+                sLookAtPoint[AXIS_Y] -= BEHIND_LOOK_AT_RISE;
+            }
+            EaseLookAtBelowBall(BEHIND_LOOK_AT_EASED_RISE);
+            break;
+        case FLIGHT_CAMERA_SIDE_OF_FLIGHT:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                sSideViewCount++;
+                if (sSideViewCount & 1) {
+                    /* Beside the path's highest point */
+                    sideYaw = sShotFlightYaw - M_PI / 2 + (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+                    sIsApexViewFar ^= TRUE;
+                    if (sIsApexViewFar == FALSE) {
+                        /* RandomBelow(1) is always 0; the original has it */
+                        point[AXIS_X] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_X]
+                                        + 2.0f * (sinf(sideYaw) * APEX_VIEW_NEAR_HALF_DISTANCE);
+                        point[AXIS_Y] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Y]
+                                        + RandomBelow(1) * APEX_VIEW_RISE_STEP;
+                        point[AXIS_Z] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Z]
+                                        - 2.0f * (cosf(sideYaw) * APEX_VIEW_NEAR_HALF_DISTANCE);
+                    } else {
+                        point[AXIS_X] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_X]
+                                        + sinf(sideYaw) * APEX_VIEW_FAR_DISTANCE;
+                        point[AXIS_Y] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Y]
+                                        + RandomBelow(APEX_VIEW_FAR_RISE_STEP_COUNT) * APEX_VIEW_RISE_STEP;
+                        point[AXIS_Z] = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Z]
+                                        - cosf(sideYaw) * APEX_VIEW_FAR_DISTANCE;
+                    }
+                    height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - APEX_VIEW_MIN_RISE;
+                    if (height < point[AXIS_Y]) {
+                        point[AXIS_Y] = height;
+                    }
+                } else {
+                    /* Off to the side of the flight, ahead of the start */
+                    sideDistance = D_800BE640 * SIDE_VIEW_LENGTH_FRACTION;
+                    distance = D_800BE640 * SIDE_VIEW_AHEAD_FRACTION;
+                    /* Holding this yaw in angle is there to match */
+                    angle = sShotFlightYaw + M_PI / 2 + (f32)(rand() & RANDOM_YAW_MASK) * RANDOM_YAW_TO_RADIANS;
+                    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+                    yaw = sShotFlightYaw + M_PI;
+                    sideDistance -= RandomBelow(SIDE_VIEW_SPREAD_STEP_COUNT) * SIDE_VIEW_SPREAD_STEP;
+                    if (sideDistance > SIDE_VIEW_MAX_DISTANCE) {
+                        sideDistance = SIDE_VIEW_MAX_DISTANCE;
+                    }
+                    if (sideDistance < SIDE_VIEW_MIN_DISTANCE) {
+                        sideDistance = SIDE_VIEW_MIN_DISTANCE;
+                    }
+                    point[AXIS_X] = sShotStartPosition[AXIS_X] + sinf(yaw) * distance + sinf(angle) * sideDistance;
+                    point[AXIS_Z] = sShotStartPosition[AXIS_Z] - cosf(yaw) * distance - cosf(angle) * sideDistance;
+                    /* Computing extraRise before GetGroundHeight is there to match */
+                    extraRise = D_800BE640 * SIDE_VIEW_RISE_FRACTION;
+                    point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
+                    if (!g_SimulatedShot.unk2E08) {
+                        point[AXIS_Y] -= extraRise + SIDE_VIEW_RISE;
+                    }
+                    height = g_SimulatedShot.path[g_SimulatedShot.minPositionStep[AXIS_Y]][AXIS_Y]
+                           + SIDE_VIEW_MAX_DROP_BELOW_APEX;
+                    if (height < point[AXIS_Y]) {
+                        point[AXIS_Y] = height;
+                    }
+                    height = sShotEndPosition[AXIS_Y] - SIDE_VIEW_MIN_RISE_ABOVE_END;
+                    if (height < point[AXIS_Y]) {
+                        point[AXIS_Y] = height;
+                    }
+                    height = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - SIDE_VIEW_MIN_RISE;
+                    if (height < point[AXIS_Y]) {
+                        point[AXIS_Y] = height;
+                    }
+                }
+                sCameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                sCameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                SnapLookAtPoint();
+                AimCameraYaw();
+            }
+            EaseLookAtFlyingBall();
+            break;
+        case FLIGHT_CAMERA_AROUND_END:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                PlaceCameraAroundShotEnd();
+                AimCameraYaw();
+            }
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            EaseLookAtFlyingBall();
+            break;
+        case FLIGHT_CAMERA_TRAILING_BALL:
+            if (D_800BE628 == TRUE) {
+                SnapLookAtPoint();
+                D_800BE628 = FALSE;
+                AimCameraYaw();
+                sIsTrailViewClose ^= TRUE;
+            }
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            if (sIsTrailViewClose == FALSE) {
+                if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
+                    riseDistance = TRAIL_SHORT_SHOT_RISE;
+                    sideDistance = TRAIL_SHORT_SHOT_DISTANCE;
+                } else {
+                    riseDistance = TRAIL_LONG_SHOT_RISE;
+                    sideDistance = TRAIL_LONG_SHOT_DISTANCE;
+                }
+            } else {
+                riseDistance = TRAIL_CLOSE_RISE;
+                sideDistance = TRAIL_CLOSE_DISTANCE;
+            }
+            /* Unused; the original has it */
+            rand();
+            /* Converting step through easeFraction is there to match */
+            easeFraction = step;
+            easeFraction = TRAIL_EASE_START_PERCENT - TRAIL_EASE_PERCENT_STEP * easeFraction;
+            if (easeFraction < 0.0f) {
+                easeFraction = 0.0f;
+            }
+            if (easeFraction > 100.0f) {
+                easeFraction = 100.0f;
+            }
+            easeFraction *= 0.01f;
+            if (easeFraction < TRAIL_EFFECT_END_FRACTION) {
+                func_8009226C(NO_EFFECT);
+            }
+            angle = D_800BE65C;
+            if (angle < M_PI / 6) {
+                angle = M_PI / 6;
+            }
+            if (angle > 2 * M_PI - M_PI / 6) {
+                angle = 2 * M_PI - M_PI / 6;
+            }
+            if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
+                angle = (angle - M_PI) * TRAIL_ANGLE_SCALE - M_PI;
+            } else {
+                angle = (angle - M_PI) * TRAIL_ANGLE_SCALE;
+            }
+            position[AXIS_X] =
+                (-sinf(sShotFlightYaw + angle) * sideDistance + sFlightBallPosition[AXIS_X]) * COURSE_TO_WORLD_SCALE;
+            position[AXIS_Z] =
+                (cosf(sShotFlightYaw + angle) * sideDistance + sFlightBallPosition[AXIS_Z]) * COURSE_TO_WORLD_SCALE;
+            position[AXIS_Y] = (sFlightBallPosition[AXIS_Y] - riseDistance) * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_X] += (position[AXIS_X] - sCameraPosition[AXIS_X]) * easeFraction;
+            sCameraPosition[AXIS_Y] += (position[AXIS_Y] - sCameraPosition[AXIS_Y]) * easeFraction;
+            sCameraPosition[AXIS_Z] += (position[AXIS_Z] - sCameraPosition[AXIS_Z]) * easeFraction;
+            EaseLookAtFlyingBall();
+            break;
+        case FLIGHT_CAMERA_UNKD:
+            yaw = sEndYawFromCup;
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            point[AXIS_X] = -sinf(yaw) * UNKD_VIEW_DISTANCE + sFlightBallPosition[AXIS_X];
+            point[AXIS_Z] = cosf(yaw) * UNKD_VIEW_DISTANCE + sFlightBallPosition[AXIS_Z];
+            point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - UNKD_VIEW_RISE;
+            height = sShotEndPosition[AXIS_Y] - UNKD_VIEW_RISE;
+            if (height < point[AXIS_Y]) {
+                point[AXIS_Y] = height;
+            }
+            point[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+            /* Computing delta before scaling y and z, and the do-while, are there to match */
+            delta = point[AXIS_X] - sCameraPosition[AXIS_X];
+            point[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+            point[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+            do {
+                if (fabsf(delta) > UNKD_EASE_DEAD_ZONE) {
+                    sCameraPosition[AXIS_X] += delta * UNKD_EASE_FRACTION;
+                }
+            } while (0);
+            delta = point[AXIS_Y] - sCameraPosition[AXIS_Y];
+            if (fabsf(delta) > UNKD_EASE_DEAD_ZONE) {
+                sCameraPosition[AXIS_Y] += delta * UNKD_EASE_FRACTION;
+            }
+            delta = point[AXIS_Z] - sCameraPosition[AXIS_Z];
+            if (fabsf(delta) > UNKD_EASE_DEAD_ZONE) {
+                sCameraPosition[AXIS_Z] += delta * UNKD_EASE_FRACTION;
+            }
+            EaseLookAtPoint(sEndYawFromCup);
+            break;
+        case FLIGHT_CAMERA_FLAGGED_STEP:
+            if (D_800BE64C == 0) {
+                D_800BE64C = 1;
+            }
+            sFlaggedStepYaw =
+                -atan2((f32)(g_SimulatedShot.path[D_800BE64C][AXIS_X] - g_SimulatedShot.path[D_800BE64C - 1][AXIS_X]),
+                       (f32)(g_SimulatedShot.path[D_800BE64C][AXIS_Z] - g_SimulatedShot.path[D_800BE64C - 1][AXIS_Z]));
+            point[AXIS_X] = -sinf(sFlaggedStepYaw) * FLAGGED_VIEW_DISTANCE + g_SimulatedShot.path[D_800BE64C][AXIS_X];
+            point[AXIS_Z] = cosf(sFlaggedStepYaw) * FLAGGED_VIEW_DISTANCE + g_SimulatedShot.path[D_800BE64C][AXIS_Z];
+            point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]) - FLAGGED_VIEW_RISE;
+            sCameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            EaseLookAtFlyingBall();
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            break;
+        case FLIGHT_CAMERA_UNK3:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                func_80203B4C();
+                sCameraPosition[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
+                sCameraPosition[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+                sCameraPosition[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
+                sLookAtPoint[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X];
+                sLookAtPoint[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y];
+                sLookAtPoint[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z];
+                AimCameraYaw();
+            }
+            break;
+        case FLIGHT_CAMERA_CIRCLING_BALL:
+            if (D_800BE628 == TRUE) {
+                D_800BE628 = FALSE;
+                if (D_800BE624 < CIRCLE_START_FLIGHT_COUNT) {
+                    sCircleAngle = 0.0f;
+                } else if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
+                    sCircleAngle = M_PI / 2;
+                } else {
+                    sCircleAngle = -M_PI / 2;
+                }
+            }
+            if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
+                sCircleAngle += CIRCLE_ANGLE_STEP;
+                if (sCircleAngle > M_PI) {
+                    sCircleAngle = M_PI;
+                }
+            } else {
+                sCircleAngle -= CIRCLE_ANGLE_STEP;
+                if (sCircleAngle < -M_PI) {
+                    sCircleAngle = -M_PI;
+                }
+            }
+            circleYaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + sCircleAngle;
+            sCameraPosition[AXIS_X] = cosf(circleYaw) * CIRCLE_DISTANCE + g_CurrentShot.ballPosition[AXIS_X];
+            sCameraPosition[AXIS_Z] = sinf(circleYaw) * CIRCLE_DISTANCE + g_CurrentShot.ballPosition[AXIS_Z];
+            sCameraPosition[AXIS_Y] = GetGroundHeight(sCameraPosition[AXIS_X], sCameraPosition[AXIS_Z]) - CIRCLE_RISE;
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            sCameraPosition[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+            sCameraPosition[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+            sLookAtPoint[AXIS_X] = (f32)g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            sLookAtPoint[AXIS_Y] =
+                ((f32)g_CurrentShot.ballPosition[AXIS_Y] - CIRCLE_LOOK_AT_RISE) * COURSE_TO_WORLD_SCALE;
+            sLookAtPoint[AXIS_Z] = (f32)g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            break;
+        case FLIGHT_CAMERA_BESIDE_GOLFER:
+            if (D_800BE628 == TRUE) {
+                g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FIELD_OF_VIEW;
+                GetCharacterPointPosition(0, 1, position);
+                D_800BE628 = FALSE;
+                if (g_Players[g_CurrentShot.playerIndex].unk22 == TRUE) {
+                    yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2;
+                } else {
+                    yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS - M_PI / 2;
+                }
+                for (index = BESIDE_GOLFER_FIRST_STEP; index < BESIDE_GOLFER_STEP_LIMIT; index++) {
+                    sCameraPosition[AXIS_X] =
+                        cosf(yaw) * (distance = index * BESIDE_GOLFER_STEP) + g_CurrentShot.ballPosition[AXIS_X];
+                    sCameraPosition[AXIS_Z] = sinf(yaw) * distance + g_CurrentShot.ballPosition[AXIS_Z];
+                    sCameraPosition[AXIS_Y] =
+                        GetGroundHeight(sCameraPosition[AXIS_X], sCameraPosition[AXIS_Z]) - BESIDE_GOLFER_RISE;
+                    if (g_CurrentShot.ballPosition[AXIS_Y] - BESIDE_GOLFER_MIN_RISE < sCameraPosition[AXIS_Y]) {
+                        sCameraPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] - BESIDE_GOLFER_MIN_RISE;
+                    }
+                    sCameraPosition[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+                    sCameraPosition[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+                    sCameraPosition[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+                    if (Length2D(sCameraPosition[AXIS_X] - position[AXIS_X], sCameraPosition[AXIS_Z] - position[AXIS_Z])
+                        > BESIDE_GOLFER_CLEARANCE) {
+                        break;
+                    }
+                }
+                sLookAtPoint[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+                sLookAtPoint[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] - BESIDE_GOLFER_LOOK_AT_RISE;
+                sLookAtPoint[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+                sLookAtPoint[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+                sLookAtPoint[AXIS_Y] *= COURSE_TO_WORLD_SCALE;
+                AimCameraYaw();
+            }
+            g_Cameras[0].view.fieldOfView = BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW;
+            break;
+    }
+    position[AXIS_X] = sCameraPosition[AXIS_X] * WORLD_TO_COURSE_SCALE;
+    position[AXIS_Y] = sCameraPosition[AXIS_Y] * WORLD_TO_COURSE_SCALE;
+    position[AXIS_Z] = sCameraPosition[AXIS_Z] * WORLD_TO_COURSE_SCALE;
+    lowestHeight = GetGroundHeight(position[AXIS_X], position[AXIS_Z]) + MAX_EYE_DEPTH_BELOW_GROUND;
+    if (sFlightCameraKind == FLIGHT_CAMERA_CIRCLING_BALL) {
+        if (lowestHeight < position[AXIS_Y]) {
+            position[AXIS_Y] = lowestHeight;
+        }
+        height = sShotStartPosition[AXIS_Y] - CIRCLE_MIN_RISE_ABOVE_START;
+        if (height < position[AXIS_Y]) {
+            position[AXIS_Y] = height;
+        }
+    } else if (sFlightCameraKind != FLIGHT_CAMERA_BESIDE_GOLFER && sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
+        height = lowestHeight;
+        if (height < position[AXIS_Y]) {
+            position[AXIS_Y] = height;
+        }
+    }
+    if (g_IsMiniGolf) {
+        if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_PATH) {
+            if (position[AXIS_X] > MINI_GOLF_GROUND_SIZE) {
+                position[AXIS_X] = MINI_GOLF_GROUND_SIZE;
+            }
+            if (position[AXIS_X] < 0.0f) {
+                position[AXIS_X] = 0.0f;
+            }
+            if (position[AXIS_Z] > MINI_GOLF_GROUND_SIZE) {
+                position[AXIS_Z] = MINI_GOLF_GROUND_SIZE;
+            }
+            if (position[AXIS_Z] < 0.0f) {
+                position[AXIS_Z] = 0.0f;
+            }
+        }
+    } else {
+        if (position[AXIS_X] > GROUND_WIDTH) {
+            position[AXIS_X] = GROUND_WIDTH;
+        }
+        if (position[AXIS_X] < 0.0f) {
+            position[AXIS_X] = 0.0f;
+        }
+        if (position[AXIS_Z] > GROUND_LENGTH) {
+            position[AXIS_Z] = GROUND_LENGTH;
+        }
+        if (position[AXIS_Z] < 0.0f) {
+            position[AXIS_Z] = 0.0f;
+        }
+    }
+    sCameraPosition[AXIS_X] = position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    sCameraPosition[AXIS_Y] = position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    sCameraPosition[AXIS_Z] = position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
+#endif
 
 #define LONG_SHOT_MIN_LENGTH 0x1C2000
 #define MID_SHOT_MIN_LENGTH 0x4B001
@@ -2045,7 +2640,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     }
     PlayFlightSounds(step);
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-    func_80048D7C(step);
+    PlaceFlightCamera(step);
     D_800BE698 = TRUE;
     D_800BE69C = FALSE;
     if (g_SimulatedShot.unk2E0C) {
