@@ -3,8 +3,16 @@
 
 #include <ultra64.h>
 
+/* A simulation still going after this many steps is given up on */
+#define MAX_STEP_COUNT 1801
+
+/* Bits of the flags func_8003327C returns for each step */
+#define STEP_FLAG_UNK1 0x1
+#define STEP_FLAG_UNK10 0x10
+#define STEP_FLAG_UNK40 0x40
+
 typedef struct Unk20 {
-    /* 0x00 */ s32 unk0;
+    /* 0x00 */ s16 unk0;
     /* 0x04 */ s32 clubIndex;
     /* 0x08 */ s32 unk8;
     /* 0x0C */ s32 unkC;

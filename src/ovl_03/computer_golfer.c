@@ -1,5 +1,7 @@
+#include "ball_simulation.h"
 #include "club.h"
 #include "common.h"
+#include "debug_text.h"
 #include "course.h"
 #include "current_shot.h"
 #include "functions.h"
@@ -1017,4 +1019,65 @@ s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253978_ovl_03);
+/* Where the shot to try starts, as PlanShot sets it up */
+extern CurrentShot sTrialShot;
+extern Unk20 *sTrialLaunch;
+extern BallSimulation sTrialSimulation;
+extern s32 sTrialStepCount;
+
+s32 func_8005F248(s32 value);
+
+/*
+ * Simulates sTrialShot and returns TRUE if the ball comes to rest, and not out of
+ * bounds, off the course or in a water hazard
+ *
+ * It does not match: ours reads isRunning in the loop test from its address,
+ * where the original reads it through the register that holds the simulation's
+ * address, and the original places the fault report after the surface test.
+ */
+#ifdef NON_MATCHING
+s32 IsTrialShotSafe(void) {
+    u32 kind;
+    s32 flags;
+
+    sTrialLaunch->unk0 = sTrialShot.unk0;
+    sTrialLaunch->clubIndex = sTrialShot.clubSlot;
+    sTrialLaunch->unk8 = func_8005F248(sTrialShot.unk4);
+    sTrialLaunch->unkC = sTrialShot.unk8 - 60;
+    sTrialLaunch->unk10 = sTrialShot.unk14;
+    sTrialLaunch->unk14 = sTrialShot.unk18;
+    sTrialLaunch->unk18 = sTrialShot.playerIndex;
+    sTrialLaunch->shotMode = sTrialShot.shotMode;
+    sTrialSimulation.position[AXIS_X] = sTrialShot.ballPosition[AXIS_X];
+    sTrialSimulation.position[AXIS_Y] = sTrialShot.ballPosition[AXIS_Y];
+    sTrialSimulation.position[AXIS_Z] = sTrialShot.ballPosition[AXIS_Z];
+    sTrialSimulation.surface = sTrialShot.surface;
+    func_80037F94(&sTrialSimulation, 2, sTrialLaunch);
+    sTrialStepCount = 0;
+    while (sTrialSimulation.isRunning) {
+        sTrialStepCount++;
+        flags = func_8003327C(&sTrialSimulation);
+        if (sTrialStepCount < MAX_STEP_COUNT) {
+            if (flags & STEP_FLAG_UNK10) {
+                break;
+            }
+        } else {
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText("AI Sim Fault!", 10, 12);
+            break;
+        }
+    }
+    if (!sTrialSimulation.isRunning) {
+        kind = GetSurfaceInfo(sTrialSimulation.surface)->kind;
+        if (kind == SURFACE_KIND_OUT_OF_BOUNDS || kind == SURFACE_KIND_OUT_OF_COURSE) {
+        } else if (kind != SURFACE_KIND_WATER_HAZARD) {
+            osSyncPrintf("nmResultCheck: TRUE\n");
+            return TRUE;
+        }
+    }
+    osSyncPrintf("nmResultCheck: FALSE\n");
+    return FALSE;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", IsTrialShotSafe);
+#endif

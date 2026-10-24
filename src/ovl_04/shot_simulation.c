@@ -12,13 +12,6 @@
 /* Steps past this aren't kept, though the simulation goes on */
 #define PATH_STEP_COUNT 900
 
-/* A simulation still going after this many steps is given up on */
-#define MAX_STEP_COUNT 1801
-
-/* Bits of the flags func_8003327C returns for each step */
-#define STEP_FLAG_UNK1 0x1
-#define STEP_FLAG_UNK40 0x40
-
 #define NO_STEP (-1)
 
 typedef struct SimulatedShot {
