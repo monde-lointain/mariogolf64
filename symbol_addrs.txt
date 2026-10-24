@@ -746,7 +746,6 @@ DrawBillboards = 0x80026CC4; // type:func
 GetGroundHeight = 0x80043A04; // type:func
 GetViewDepth = 0x80065600; // type:func
 g_IsMiniGolf = 0x801B60C2; // size:0x2
-IsDebugBButtonView = 0x80045AC0; // type:func
 g_BillboardLightColor = 0x800CA100; // size:0xC
 g_BillboardEnvColor = 0x800CA10C; // size:0xC
 g_LightYaw = 0x800BAA00; // size:0x2
@@ -1526,6 +1525,27 @@ sUnk14Values = 0x800BE5DC; // size:0x9
 sStockUnk30Values = 0x800BE5E8; // size:0x12
 sPutterTestShot = 0x800BE5FC; // size:0x20
 sClubChoiceDelay = 0x800BE61C; // size:0x4
+
+// Shot camera
+GetBallSurfaceInfo = 0x80045A9C; // type:func
+IsDebugBButtonView = 0x80045AC0; // type:func
+SwapCameraPicks = 0x80045AD4; // type:func
+NextCameraPick = 0x80045B14; // type:func
+RandomBelow = 0x800467DC; // type:func
+IsCupPassPoint = 0x8004683C; // type:func
+EaseLookAtPoint = 0x80047CAC; // type:func
+SnapLookAtPoint = 0x80047D68; // type:func
+AimCameraYaw = 0x80048CF8; // type:func
+sFlightCameraKind = 0x800BE62C; // size:0x4
+sLandingCupDistance = 0x800BE63C; // size:0x4
+sCameraYaw = 0x800BE654; // size:0x4
+sFlightCameraFlags = 0x800BE664; // size:0x4
+sNextCameraPickIndex = 0x800BE6A0; // size:0x4
+sCameraPicks = 0x800DAEE0; // size:0xA
+sFlightBallPosition = 0x800DAEEC; // size:0xC
+sCameraPosition = 0x800DAF24; // size:0xC
+sLookAtPoint = 0x800DAF30; // size:0xC
+
 DimNextTranslucentTriangles = 0x800660A0; // type:func
 DrawHoleTriangles = 0x800660B0; // type:func
 DrawRings = 0x80066B50; // type:func
