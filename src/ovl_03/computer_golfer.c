@@ -34,6 +34,9 @@ extern s8 sIsPlanStarted;
 extern CurrentShot sShot;
 
 s32 PlanShot(CurrentShot *plannedShot);
+s32 func_8024F0B0_ovl_03(s32 arg0);
+s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
+s32 func_80252F70_ovl_03(s32 arg0);
 
 void RestartShotPlan(void) {
     sIsPlanStarted = FALSE;
@@ -318,13 +321,45 @@ s32 GetLandingRating(u32 surfaceKind) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802507D8_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802510D0_ovl_03);
+#define UNK802510D0_VALUE_COUNT 16
+
+void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targetZ, s32 *arg4) {
+    s32 pad[44]; /* Unused; it is there to match */
+    s32 values[UNK802510D0_VALUE_COUNT];
+    s32 index;
+    s32 one; /* one is there to match */
+    s32 strokeCount;
+
+    one = 1;
+    for (index = UNK802510D0_VALUE_COUNT - 1; index >= 0; index--) {
+        values[index] = one;
+    }
+    strokeCount = g_Players[sShot.playerIndex].unk23;
+    *plannedClub = func_80252F70_ovl_03(func_8024F0B0_ovl_03(one));
+    *targetX = D_800BA9D8.cupPosition[AXIS_X];
+    *targetZ = g_CupPositionZ;
+    *arg4 = values[strokeCount];
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251198_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251378_ovl_03);
+INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", FindGreenEdgeOnLine);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251570_ovl_03);
+/*
+ * Returns the distance from from to the first green edge on the line to to,
+ * or to to itself if the line crosses no green edge.
+ */
+s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
+    CoursePoint edge;
+    s32 distance;
+
+    if (FindGreenEdgeOnLine(from, to, edge) != TRUE) {
+        distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    } else {
+        distance = IntLength2D(edge[AXIS_X] - from[AXIS_X], edge[AXIS_Z] - from[AXIS_Z]);
+    }
+    return distance;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802515DC_ovl_03);
 
