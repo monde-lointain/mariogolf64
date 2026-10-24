@@ -34,6 +34,12 @@ extern u8 sPlanThreadStackEnd[];
 extern s32 D_8025C640_ovl_03;
 extern s8 sIsPlanStarted;
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
+
+/* The rows of sClubKindChances */
+#define CLUB_CHANCE_SET_COUNT 2
+/* Woods, irons and the other clubs */
+#define CLUB_CHANCE_KIND_COUNT 3
+extern s8 sClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT];
 extern CurrentShot sShot;
 
 s32 PlanShot(CurrentShot *plannedShot);
@@ -619,7 +625,43 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8025319C_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80253574_ovl_03);
+#define CLUB_TYPE_LAST_WOOD 2
+#define CLUB_TYPE_FIRST_IRON 3
+#define CLUB_TYPE_LAST_IRON 10
+#define CLUB_CHANCE_WOOD 0
+#define CLUB_CHANCE_IRON 1
+#define CLUB_CHANCE_OTHER 2
+
+/* Whether the shot's club lies between the slots of the two club types */
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsShotClubOfTypes(firstType, lastType)                       \
+    (sShot.clubSlot >= FindClubSlot(sShot.playerIndex, (firstType)) && \
+     FindClubSlot(sShot.playerIndex, (lastType)) >= sShot.clubSlot)
+
+/*
+ * Returns TRUE on the golfer's first stroke of the hole. Otherwise it returns
+ * TRUE with the percent chance that row chanceSetIndex of sClubKindChances
+ * gives for the kind of the shot's club.
+ */
+s32 RollClubKindChance(s32 chanceSetIndex) {
+    if (g_Players[sShot.playerIndex].unk23 == 0) {
+        return TRUE;
+    }
+    if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {
+        if (rand() % 100 < sClubKindChances[chanceSetIndex][CLUB_CHANCE_WOOD]) {
+            return TRUE;
+        }
+    } else if (IsShotClubOfTypes(CLUB_TYPE_FIRST_IRON, CLUB_TYPE_LAST_IRON)) {
+        if (rand() % 100 < sClubKindChances[chanceSetIndex][CLUB_CHANCE_IRON]) {
+            return TRUE;
+        }
+    } else {
+        if (rand() % 100 < sClubKindChances[chanceSetIndex][CLUB_CHANCE_OTHER]) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
 
 /* Tens of yards in a unit of distance */
 #define TENS_OF_YARDS_PER_UNIT 0.000007119878f
