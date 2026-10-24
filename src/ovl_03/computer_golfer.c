@@ -3,6 +3,7 @@
 #include "course.h"
 #include "current_shot.h"
 #include "functions.h"
+#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "surface.h"
@@ -343,7 +344,40 @@ void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targe
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80251198_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", FindGreenEdgeOnLine);
+/* FindGreenEdgeOnLine's results */
+#define GREEN_EDGE_FOUND 1
+#define GREEN_EDGE_NOT_FOUND (-1)
+
+/*
+ * Steps a yard at a time along the line from from to to, and stores the
+ * first point on a green edge in edge. Returns GREEN_EDGE_FOUND if it found
+ * one, otherwise GREEN_EDGE_NOT_FOUND.
+ */
+s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
+    s32 distance;
+    f32 angle;
+    s32 step;
+    f32 stepLength;
+    s32 x;
+    s32 z;
+
+    distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
+    angle = atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
+    osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
+    osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
+    for (step = 1; step < distance * YARDS_PER_UNIT + 1; step++) {
+        /* Setting stepLength in the loop is there to match */
+        stepLength = UNITS_PER_YARD;
+        x = step * (cosf(angle) * stepLength) + from[AXIS_X];
+        z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+        if (GetSurfaceInfoAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
+            edge[AXIS_X] = x;
+            edge[AXIS_Z] = z;
+            return GREEN_EDGE_FOUND;
+        }
+    }
+    return GREEN_EDGE_NOT_FOUND;
+}
 
 /*
  * Returns the distance from from to the first green edge on the line to to,
@@ -353,7 +387,7 @@ s32 GetGreenEdgeDistance(CoursePoint from, CoursePoint to) {
     CoursePoint edge;
     s32 distance;
 
-    if (FindGreenEdgeOnLine(from, to, edge) != TRUE) {
+    if (FindGreenEdgeOnLine(from, to, edge) != GREEN_EDGE_FOUND) {
         distance = IntLength2D(to[AXIS_X] - from[AXIS_X], to[AXIS_Z] - from[AXIS_Z]);
     } else {
         distance = IntLength2D(edge[AXIS_X] - from[AXIS_X], edge[AXIS_Z] - from[AXIS_Z]);

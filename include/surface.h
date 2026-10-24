@@ -75,5 +75,6 @@ typedef struct SurfaceInfo {
 } SurfaceInfo; /* size = 0x1C */
 
 SurfaceInfo *GetSurfaceInfo(s32 surface);
+SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z);
 
 #endif
