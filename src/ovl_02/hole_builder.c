@@ -59,6 +59,12 @@
 #define UNK12_ATTRIBUTES_ASSET 0x3F6
 /* The paint logic of the last mini-golf course; later courses use it too */
 #define LAST_MINI_GOLF_PAINT_LOGIC 11
+
+/* The size of a terrain code cell, and of a row of them */
+#define TERRAIN_CODE_CELL_SIZE 2
+#define TERRAIN_CODE_CELL_ROW_SIZE (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SIZE)
+/* The words a block of packed codes fills */
+#define TERRAIN_CODE_BLOCK_WORD_COUNT (TERRAIN_CODE_BLOCK_SIZE / 4)
 /* The size of the host file paths that BuildHole and SaveHoleFiles use */
 #define HOST_PATH_SIZE 0x80
 /* The sizes of the hole files that SaveHoleFiles writes */
@@ -81,6 +87,29 @@ typedef struct GridOffset {
     /* 0x1 */ s8 row;
     /* 0x2 */ u16 distance;
 } GridOffset; /* size = 0x4 */
+
+/*
+ * Paints a map texel of a code, given the nearest other code and its
+ * distance. It returns the color, shifted by PAINTED_COLOR_SHIFT, with the
+ * terrain code it painted.
+ */
+typedef s32 (*PaintRoutine)(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z);
+
+#define PAINTED_COLOR_SHIFT 16
+
+/* How a course paints its ground tiles from their terrain codes */
+typedef struct PaintLogic {
+    /*
+     * For each code, how far to search for another code: 0 paints without
+     * searching, and a negative span uses the code's painting at the origin
+     */
+    /* 0x00 */ s8 searchSpans[TERRAIN_CODE_COUNT];
+    /* 0x10 */ PaintRoutine paint;
+} PaintLogic; /* size = 0x14 */
+
+/* The number of offsets PaintGroundTiles searches, and their largest span */
+#define PAINT_OFFSET_COUNT 100
+#define PAINT_OFFSET_SPAN 5
 
 /* The largest span ListOffsetsByDistance handles */
 #define MAX_OFFSET_SPAN GROUND_POINT_ROW_COUNT
@@ -152,6 +181,7 @@ extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
 extern f32 sHeightStepScales[];
 extern s32 sPaintLogic;
+extern PaintLogic sPaintLogics[];
 extern Vec3 g_MiniGolfScale;
 extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
 
@@ -1487,7 +1517,173 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CleanCodeMap);
 void FinishCodeMapCleanup(void) {
 }
 
+/* The byte offset of a map texel's terrain code cell */
+static inline s32 GetCellOffset(u32 column, u32 row) {
+    return (column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE +
+           (row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE;
+}
+
+/* The offset of a map texel's code in the packed codes */
+static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
+    return (column % TERRAIN_CODE_CELL_SPAN) / 2 + (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
+           block * TERRAIN_CODE_BLOCK_SIZE;
+}
+
+/*
+ * The offset of a map texel's code in the packed codes of its cell, given
+ * the cell's block marker
+ */
+static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
+    return (column % TERRAIN_CODE_CELL_SPAN) / 2 + (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
+           (cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE;
+}
+
+/*
+ * Sets a map texel's code in a block of packed codes, two to a byte, with
+ * the even column's code in the high bits
+ */
+static inline void SetPackedTerrainCode(s32 block, u32 column, u32 row, s32 code) {
+    if (column & 1) {
+        g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
+            (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] & EVEN_COLUMN_CODE_MASK) | code;
+    } else {
+        g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] =
+            (g_WorkArea.hole.terrainCodes[GetPackedCodeOffset(block, column, row)] & TERRAIN_CODE_MASK) |
+            (code << TERRAIN_CODE_BITS);
+    }
+}
+
+/*
+ * Stores a map texel's terrain code in its cell, giving the cell a block of
+ * packed codes once it holds more than one. Once the blocks run out, cells
+ * keep their first code.
+ */
+static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
+    s32 cellOffset = GetCellOffset(column, row);
+    s32 cell = *(s16 *)((u8 *)g_TerrainCodeCells + cellOffset);
+    s32 block;
+    u32 fill;
+    s32 i;
+    u32 *word;
+
+    if (cell == code) {
+        return;
+    }
+    if (cell == NO_CELL_TERRAIN_CODE) {
+        *(s16 *)((u8 *)g_TerrainCodeCells + cellOffset) = code;
+    } else if (cell >= 0) {
+        if (g_TerrainCodeBlockCount < TERRAIN_CODE_BLOCK_COUNT) {
+            /* Repeats the cell's code in every half byte of a word */
+            fill = (cell << TERRAIN_CODE_BITS) | cell;
+            block = g_TerrainCodeBlockCount++;
+            fill |= fill << 8;
+            fill |= fill << 16;
+            word = (u32 *)&g_WorkArea.hole.terrainCodes[block * TERRAIN_CODE_BLOCK_SIZE];
+            for (i = 0; i < TERRAIN_CODE_BLOCK_WORD_COUNT; i++) {
+                *word++ = fill;
+            }
+            /* Computing the offset again is there to match */
+            cellOffset = GetCellOffset(column, row);
+            *(s16 *)((u8 *)g_TerrainCodeCells + cellOffset) = block | TERRAIN_CODE_CELL_BLOCK;
+            SetPackedTerrainCode(block, column, row, code);
+        }
+    } else {
+        /* The separate stores are there to match */
+        if (column & 1) {
+            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
+                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] & EVEN_COLUMN_CODE_MASK) | code;
+        } else {
+            g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] =
+                (g_WorkArea.hole.terrainCodes[GetCellCodeOffset(cell, column, row)] & TERRAIN_CODE_MASK) |
+                (code << TERRAIN_CODE_BITS);
+        }
+    }
+}
+
+/*
+ * Paints the map's texels from the code map with the course's paint logic,
+ * sets each terrain code's color, and stores the painted terrain codes in
+ * their cells. It does not match: ours keeps the painting in other
+ * registers, sets up the neighbour search's offset pointer before the
+ * scaled search span, and when the blocks run out it branches to the texel
+ * loop's increment, where the original's branch-likely does the increment
+ * in its delay slot.
+ */
+#ifdef NON_MATCHING
+void PaintGroundTiles(void) {
+    GridOffset offsets[PAINT_OFFSET_COUNT];
+    u32 codePaintings[TERRAIN_CODE_COUNT];
+    u8 *codes;
+    s8 *searchSpans;
+    PaintRoutine paint = sPaintLogics[sPaintLogic].paint;
+    u8 *nextCode;
+    u16 *texel;
+    s32 offsetCount;
+    s32 offsetIndex;
+    s32 column;
+    s32 row;
+    u32 neighborColumn;
+    u32 neighborRow;
+    s32 texelIndex;
+    s32 code;
+    s32 nearestCode;
+    s32 nearestDistance;
+    u32 painting;
+
+    SetPaintSeed(0);
+    ResetTerrainCodeCells();
+    offsetCount = ListOffsetsByDistance(PAINT_OFFSET_SPAN, offsets, PAINT_OFFSET_COUNT);
+    osSyncPrintf("MakeTex..");
+    nextCode = sBuildCursor = codes = sBuildBuffer;
+    searchSpans = sPaintLogics[sPaintLogic].searchSpans;
+    /* row is there to match */
+    for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
+        codePaintings[row] = paint(row, row, 0, 0, 0);
+        g_TerrainCodeColors[codePaintings[row] & TERRAIN_CODE_MASK] = codePaintings[row] >> PAINTED_COLOR_SHIFT;
+    }
+    for (row = 0; row < MAP_ROW_COUNT; row++) {
+        for (column = 0; column < MAP_COLUMN_COUNT;) {
+            texel = &((u16 *)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+                                                    row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT])
+                [(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
+            for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++) {
+                nearestCode = code = *nextCode++;
+                nearestDistance = searchSpans[code];
+                if (nearestDistance != 0) {
+                    if (nearestDistance < 0) {
+                        painting = codePaintings[code];
+                        /* The goto is there to match */
+                        goto painted;
+                    }
+                    for (offsetIndex = 1; offsetIndex < offsetCount; offsetIndex++) {
+                        if (offsets[offsetIndex].distance >= nearestDistance * OFFSET_DISTANCE_SCALE) {
+                            break;
+                        }
+                        neighborColumn = column + offsets[offsetIndex].column;
+                        neighborRow = row + offsets[offsetIndex].row;
+                        if (neighborColumn < MAP_COLUMN_COUNT && neighborRow < MAP_ROW_COUNT) {
+                            nearestCode = codes[neighborRow * MAP_COLUMN_COUNT + neighborColumn];
+                            if (nearestCode != code) {
+                                break;
+                            }
+                        }
+                    }
+                    nearestDistance = offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE;
+                }
+                painting = paint(code, nearestCode, nearestDistance, column, row);
+            painted:
+                *texel++ = painting >> PAINTED_COLOR_SHIFT;
+                SetCellTerrainCode(column, row, painting & TERRAIN_CODE_MASK);
+                column++;
+            }
+        }
+    }
+    osSyncPrintf("Comp\n");
+    sBuildCursor = sBuildBuffer;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
+#endif
 
 /*
  * Cleans up the terrain code map and repaints the ground tiles from it,

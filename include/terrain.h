@@ -81,6 +81,19 @@ extern u16 g_TerrainCodeColors[TERRAIN_CODE_COUNT];
  */
 #define TERRAIN_CODE_CELL_ROW_COUNT 32
 #define TERRAIN_CODE_CELL_COLUMN_COUNT 16
+/* The map texels a terrain code cell covers each way */
+#define TERRAIN_CODE_CELL_SPAN 16
+/* Marks a cell with no terrain code */
+#define NO_CELL_TERRAIN_CODE -1
+/* Marks a cell whose codes are in a block, with the block's index */
+#define TERRAIN_CODE_CELL_BLOCK 0x8000
+/* The size of a block of packed codes, two to a byte, and how many there are */
+#define TERRAIN_CODE_BLOCK_SIZE (TERRAIN_CODE_CELL_SPAN * TERRAIN_CODE_CELL_SPAN / 2)
+#define TERRAIN_CODE_BLOCK_COUNT 0x180
+/* The bits of a packed terrain code, and the bits of the even column's code */
+#define TERRAIN_CODE_BITS 4
+#define TERRAIN_CODE_MASK 0xF
+#define EVEN_COLUMN_CODE_MASK (TERRAIN_CODE_MASK << TERRAIN_CODE_BITS)
 extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COLUMN_COUNT];
 
 /* Each ground tile's height range, which also serves as the radius of its bounding sphere */

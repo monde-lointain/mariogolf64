@@ -1622,6 +1622,7 @@ ShadeGround = 0x80253234; // type:func segment:ovl_02
 SetMiniGolfTileTextureCoords = 0x80253620; // type:func segment:ovl_02
 SetTileTextureCoords = 0x80253680; // type:func segment:ovl_02
 sPaintSeed = 0x802542A0; // size:0x4 segment:ovl_02
+sPaintLogics = 0x802542A4; // size:0x104 segment:ovl_02
 sIsCodeMapCleaned = 0x802543A8; // size:0x4 segment:ovl_02
 sHoleAssetIds = 0x802543AC; // size:0x8A0 segment:ovl_02
 sPaintLogic = 0x80255320; // size:0x4 segment:ovl_02
