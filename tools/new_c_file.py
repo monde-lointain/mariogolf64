@@ -37,6 +37,7 @@ def main():
         yaml_file.write(yaml)
 
     c_path = os.path.join(ROOT, "src", f"{name}.c")
+    os.makedirs(os.path.dirname(c_path), exist_ok=True)
     with open(c_path, "w") as c_file:
         c_file.write('#include "common.h"\n\n')
         for function in functions:
