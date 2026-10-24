@@ -132,7 +132,7 @@ s32 GetPlannedShot(CurrentShot *shot) {
     return -1;
 }
 
-s8 GetGolferTraitUnk2(void) {
+s32 GetGolferTraitUnk2(void) {
     return sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk2;
 }
 
@@ -198,51 +198,479 @@ s32 GetSideSlope(void) {
     return sideSlope;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", PlanShot);
+/* Where the shot to try starts, as PlanShot sets it up */
+extern CurrentShot sTrialShot;
+extern Unk20 *sTrialLaunch;
+extern BallSimulation sTrialSimulation;
+extern s32 sTrialStepCount;
+
+s32 func_8005F248(s32 value);
+
+/* ChooseShotOffset's results, indices into sShotOffsets */
+#define SHOT_OFFSET_NONE 0
+#define SHOT_OFFSET_PLUS_SMALL 1
+#define SHOT_OFFSET_PLUS_MEDIUM 2
+#define SHOT_OFFSET_PLUS_LARGE 3
+#define SHOT_OFFSET_MINUS_SMALL 4
+#define SHOT_OFFSET_MINUS_MEDIUM 5
+#define SHOT_OFFSET_MINUS_LARGE 6
+
+/* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
+typedef struct ShotOffset {
+    /* 0x0 */ s8 unk14; /* Becomes sShot.unk14 */
+    /* 0x1 */ s8 unk18; /* Becomes sShot.unk18 */
+} ShotOffset; /* size = 0x2 */
+
+#define SHOT_OFFSET_COUNT 8
+
+extern ShotOffset sShotOffsets[SHOT_OFFSET_COUNT];
+/* The SHOT_OFFSET_* that PlanShot chose for the shot */
+extern s32 sShotOffset;
+/* Whether the trial's club is one for the green */
+extern s32 sIsPutting;
+/* How much worse than ideal an evaluation may be for the trial to be taken */
+extern s32 sAcceptableEvaluation;
+/* How many times PlanShot has changed the club or carry */
+extern s32 sTrialLevel;
+/* Whether the trial has reported STEP_FLAG_UNK1, and where it first did */
+extern s32 sHasUnk1Position;
+extern CoursePoint sUnk1Position;
+/* Whether the trial ended out of bounds, off the course or in water */
+extern s32 sIsTrialLost;
+/* The nearest that a putt has come to the target */
+extern s32 sClosestTargetDistance;
+/* The count of trials at this level */
+extern s32 sTrialIndex;
+/* Set when the trial asks PlanShot for a longer or a shorter club */
+extern s32 sNeedsLongerClub;
+extern s32 sNeedsShorterClub;
+/* The trial's evaluation; lower is better */
+extern s32 sTrialEvaluation;
+/* Where the trial's ball rests, or for a putt where it passes nearest the target */
+extern CoursePoint sTrialEndPoint;
+/* Set when the trial is good enough to take */
+extern s32 sIsTrialAccepted;
+/* The best evaluation so far, and whether there is one */
+extern s32 sBestEvaluation;
+extern s32 sHasBestEvaluation;
+extern s32 sAimChangeCount;
+extern s32 sHasUnk3Contact;
+/* The evaluation of a lost ball, and the one that the best starts at */
+#define LOST_BALL_EVALUATION 0x10000000
+/* Whether sTrialShot holds a copy of sShot yet */
+extern s32 sHasTrialShot;
+/* Set when the level needs a new landing target */
+extern s32 sNeedsNewTarget;
+/* The carry that the landing target is chosen for, and what the club's carry is scaled by for it */
+extern s32 sTargetCarry;
+extern f32 sCarryScale;
+/* The count of trials to take at the level */
+extern s32 sLevelTrialCount;
+/* The count of trials that ended with the ball lost */
+extern s32 sLostTrialCount;
+/* PlanShot clears these, and nothing in the overlay reads them */
+extern s32 sUnk658;
+extern s8 sUnk840;
+extern Unk20 sTrialLaunchValues;
+
+s32 StepTrialShot(void);
+s32 IsTrialShotSafe(void);
+s32 ChooseShotOffset(void);
+s32 FindClubSlot(s32 unused, s32 clubType);
+s32 PlanRoute(s8 *route);
+void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
+void PlanClubAndTarget(CoursePoint target);
+void ChooseLongShot(s32 unused, s32 *clubType, s32 *targetX, s32 *targetZ, s32 *shotMode);
+s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable);
+void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range);
+
+/* sShot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
+#define SHOT_UNK4_MIN 3
+#define SHOT_UNK4_MAX 30
+/* The levels that PlanShot always tries, tries while the best evaluation is poor, and tries at most */
+#define MIN_TRIAL_LEVEL_COUNT 4
+#define POOR_TRIAL_LEVEL_COUNT 8
+#define MAX_TRIAL_LEVEL_COUNT 30
+#define POOR_EVALUATION 0x10000
+#define INITIAL_CARRY_SCALE 1.1f
+#define CARRY_SCALE_STEP 0.9f
+#define RAINY_CARRY_SCALE 0.95f
+#define RAINY_DISTANCE_SCALE 1.1f
+/* A club is swapped for the next while its shortest reach is at least this and fits the distance fewer times */
+#define MIN_CLUB_DOWN_REACH 0x600
+#define CLUB_DOWN_REACH_COUNT 21
+/* How far from the cup a golfer ahead of its target aims on purpose */
+#define MAX_MISS_DISTANCE 0x25800
+#define LEVEL_MISS_DISTANCE 0x1E00
+#define MISS_STRETCH 2.5f
+/* How many times PlanShot reports a deliberate miss */
+#define MISS_REPORT_COUNT 40
+/* The whole of a surface's percent range */
+#define FULL_PERCENT 100
+#define DEFAULT_SHOT_UNK8 60
+/* The least sShot.unk4 that PlanShot plans, and how much it scales it up by for some golfers */
+#define MIN_PLANNED_SHOT_UNK4 2
+#define SHOT_UNK4_BOOST 1.2f
+/* The trials taken at each level, at a level that aims at the cup, and under GAME_FLAG_UNK3C */
+#define LEVEL_TRIAL_COUNT 4
+#define CUP_LEVEL_TRIAL_COUNT 5
+#define UNK3C_LEVEL_TRIAL_COUNT 20
+/* A mis-hit is a roll below MISHIT_ROLL_RANGE divided by a golfer's divisor, and the sign bit sets its direction */
+#define MISHIT_ROLL_RANGE 250
+#define MISHIT_SIGN_BIT 0x2000
+
+/*
+ * Plans the computer golfer's shot from g_CurrentShot a step at a time, and
+ * returns PLAN_UNFINISHED until the plan is made. The first call chooses the
+ * usable clubs, the route and the club and target. Each level then picks a
+ * landing target for the club's carry and an aim and power for it, and tries
+ * shots at it with StepTrialShot, changing the club or the carry when the
+ * trials ask for it. Once a trial is taken or the levels run out, the best
+ * trial may get a random mis-hit, and it is copied to plannedShot.
+ */
+s32 PlanShot(CurrentShot *plannedShot) {
+    char text[0x80];
+    s32 percentRange[2];
+    s32 clubType;
+    s32 targetX;
+    s32 targetZ;
+    s32 shotMode;
+    s32 index;
+    s32 strokesOver;
+    s32 distance;
+    s32 reach;
+    s32 nextSlot;
+    s32 shortestReach;
+    s32 targetDistance;
+    s32 missDistance;
+    f32 missAngle;
+    f32 aimAngle;
+    f32 missX;
+    f32 missZ;
+    f32 along;
+    s32 savedUnk4;
+    s32 savedUnk8;
+    s32 par;
+    s32 strokes;
+    s32 mishit;
+    s32 maxMishit;
+    s32 mishitDivisor;
+    s32 *shotPower;
+    u32 kind;
+
+    if (sPlanStage == PLAN_STAGE_UNSTARTED) {
+        osSyncPrintf("\n------------------AI Start---------------------\n");
+        sShot = g_CurrentShot;
+        sTrialShot = sShot;
+        sBestEvaluation = LOST_BALL_EVALUATION;
+        sNeedsNewTarget = TRUE;
+        sHasBestEvaluation = FALSE;
+        sIsTrialLost = FALSE;
+        sLostTrialCount = 0;
+        sUnk658 = 0;
+        sIsTrialAccepted = FALSE;
+        sAcceptableEvaluation = 0;
+        sAimChangeCount = 0;
+        sShotOffset = SHOT_OFFSET_NONE;
+        sTrialIndex = 0;
+        sTrialLevel = 0;
+        sUnk840 = 0;
+        sAimChangeCount = 0;
+        sHasTrialShot = FALSE;
+        sTrialLaunch = &sTrialLaunchValues;
+        sCarryScale = INITIAL_CARRY_SCALE;
+        for (index = 0; index < DIRECTION_SECTOR_COUNT; index++) {
+            sIsDirectionExcluded[index] = FALSE;
+        }
+        sClubCount = MarkUsableClubs((s32)GetSurfaceInfo(g_CurrentShot.surface),
+                                     g_Players[g_CurrentShot.playerIndex].clubs, sIsClubUsable);
+        osSyncPrintf("canuseflags = ");
+        for (index = 0; index < sClubCount; index++) {
+            osSyncPrintf("%d", sIsClubUsable[index]);
+        }
+        osSyncPrintf("\n");
+        sRouteOrderCount = PlanRoute(sRouteOrder);
+        osSyncPrintf("TargetNum = %d\n", sRouteOrderCount);
+        for (index = 0; index < sRouteOrderCount; index++) {
+            osSyncPrintf("%d ", sRouteOrder[index]);
+        }
+        osSyncPrintf("\n");
+        PlanClubAndTarget(sPlanTarget);
+        kind = GetSurfaceInfo(sShot.surface)->kind;
+        if (kind == SURFACE_KIND_GREEN || kind == SURFACE_KIND_GREEN_EDGE) {
+            sTrialLevel = 0;
+        }
+        osSyncPrintf("wnmTargetScoreOffset = %d\n", sHoleTargetToPar);
+        osSyncPrintf("ClubIndex = %d\n", sShot.clubSlot);
+        sprintf(text, "Target %d   ", sHoleTargetToPar);
+        PrintDebugText(text, 3, 12);
+        sPlanStage = PLAN_STAGE_STARTED;
+        return PLAN_UNFINISHED;
+    }
+    while (sTrialLevel < MIN_TRIAL_LEVEL_COUNT ||
+           (sBestEvaluation > POOR_EVALUATION && sTrialLevel < POOR_TRIAL_LEVEL_COUNT) ||
+           (!sHasBestEvaluation && sTrialLevel < MAX_TRIAL_LEVEL_COUNT)) {
+        if (sPlanStage == PLAN_STAGE_TRIAL_TAKEN || sPlanStage == PLAN_STAGE_UNK4 ||
+            sPlanStage == PLAN_STAGE_TRIAL_RUNNING) {
+            /* A trial is under way */
+        } else if (sNeedsNewTarget == TRUE) {
+            if (sPlanStage != PLAN_STAGE_TARGET_CHOSEN) {
+                osSyncPrintf("Level %d\n", sTrialLevel);
+                sNeedsShorterClub = FALSE;
+                sNeedsLongerClub = FALSE;
+                if (sShot.clubSlot != FindClubSlot(sShot.playerIndex, CLUB_TYPE_PUTTER)) {
+                    sTargetCarry = GetShotWorldDistance(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]),
+                                                        sShot.shotMode);
+                    if (g_HoleConditions.isRaining == TRUE) {
+                        sTargetCarry = sTargetCarry * RAINY_CARRY_SCALE;
+                    }
+                    sTargetCarry = sTargetCarry * sCarryScale;
+                    ChooseLandingTarget(sShot.ballPosition[AXIS_X], sShot.ballPosition[AXIS_Z], sTargetCarry,
+                                        &sPlanTarget[AXIS_X], &sPlanTarget[AXIS_Z]);
+                } else {
+                    sPlanTarget[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X];
+                    sPlanTarget[AXIS_Z] = g_CupPositionZ;
+                }
+                if (sShot.shotMode != SHOT_MODE_APPROACH &&
+                    !(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask &
+                      CLUB_SURFACE_GREEN)) {
+                    targetDistance = IntLength2D(sPlanTarget[AXIS_X] - sShot.ballPosition[AXIS_X],
+                                                 sPlanTarget[AXIS_Z] - sShot.ballPosition[AXIS_Z]);
+                    if (g_HoleConditions.isRaining == TRUE) {
+                        targetDistance = (s32)(targetDistance * RAINY_DISTANCE_SCALE);
+                    }
+                    while (TRUE) {
+                        shortestReach =
+                            GetShotWorldDistance(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]),
+                                                 sShot.shotMode);
+                        GetSurfacePercentRange(GetSurfaceInfo(sShot.surface),
+                                               GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]),
+                                               percentRange);
+                        /* The carry per unit of sShot.unk4 at the least percent */
+                        shortestReach = shortestReach * percentRange[0] / (FULL_PERCENT * SHOT_UNK4_MAX);
+                        if (shortestReach < MIN_CLUB_DOWN_REACH ||
+                            targetDistance / shortestReach >= CLUB_DOWN_REACH_COUNT) {
+                            break;
+                        }
+                        nextSlot = sShot.clubSlot;
+                        if ((GetClub(g_Players[sShot.playerIndex].clubs[nextSlot])->surfaceMask &
+                             CLUB_SURFACE_GREEN) ||
+                            (GetClub(g_Players[sShot.playerIndex].clubs[++nextSlot])->surfaceMask &
+                             CLUB_SURFACE_GREEN)) {
+                            break;
+                        }
+                        sShot.clubSlot = nextSlot;
+                        osSyncPrintf("ChangeDefault----------------------ClubDown\n");
+                    }
+                }
+                sPlanStage = PLAN_STAGE_TARGET_CHOSEN;
+                if (sPlanTarget[AXIS_X] == D_800BA9D8.cupPosition[AXIS_X] && sPlanTarget[AXIS_Z] == g_CupPositionZ &&
+                    GetSurfaceInfo(sShot.surface)->kind != SURFACE_KIND_GREEN) {
+                    strokesOver = g_Players[sShot.playerIndex].unk23 - (g_HolePar + sHoleTargetToPar - 2);
+                    if (strokesOver <= 0) {
+                        missDistance = IntLength2D(g_CupPositionX - sShot.ballPosition[AXIS_X],
+                                                   g_CupPositionZ - sShot.ballPosition[AXIS_Z]) >>
+                                       3;
+                        missAngle = ((rand() * 4) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+                        aimAngle = (u16)sShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+                        if (missDistance >= MAX_MISS_DISTANCE) {
+                            missDistance = MAX_MISS_DISTANCE;
+                        }
+                        if (strokesOver < -1) {
+                            missDistance *= 2;
+                        }
+                        if (strokesOver == 0) {
+                            missDistance = LEVEL_MISS_DISTANCE;
+                        }
+                        missDistance = missDistance * 0.5f;
+                        missX = cosf(missAngle) * missDistance;
+                        missZ = sinf(missAngle) * missDistance;
+                        along = (missX * cosf(aimAngle) + missZ * sinf(aimAngle)) * MISS_STRETCH;
+                        missX += cosf(aimAngle) * along;
+                        missZ += sinf(aimAngle) * along;
+                        sPlanTarget[AXIS_X] = sPlanTarget[AXIS_X] + missX;
+                        sPlanTarget[AXIS_Z] = sPlanTarget[AXIS_Z] + missZ;
+                        for (index = 0; index < MISS_REPORT_COUNT; index++) {
+                            osSyncPrintf("Iziwaru %d\n", strokesOver);
+                        }
+                    }
+                }
+                return PLAN_UNFINISHED;
+            }
+            sPlanTarget[AXIS_Y] = GetGroundHeight(sPlanTarget[AXIS_X], sPlanTarget[AXIS_Z]);
+            sShot.unk0 = atan2(sPlanTarget[AXIS_Z] - sShot.ballPosition[AXIS_Z],
+                               sPlanTarget[AXIS_X] - sShot.ballPosition[AXIS_X]) *
+                         RADIANS_TO_BINARY_ANGLE;
+            if (GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN) {
+                sShot.unk0 += GetSideSlope();
+            }
+            sShot.unk8 = DEFAULT_SHOT_UNK8;
+            sShot.unk4 = SHOT_UNK4_MAX;
+            reach = GetShotWorldDistance(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]), sShot.shotMode);
+            distance = IntLength2D(sShot.ballPosition[AXIS_X] - sPlanTarget[AXIS_X],
+                                   sShot.ballPosition[AXIS_Z] - sPlanTarget[AXIS_Z]);
+            if (g_HoleConditions.isRaining == TRUE) {
+                distance = (s32)(distance * RAINY_DISTANCE_SCALE);
+            }
+            GetSurfacePercentRange(GetSurfaceInfo(sShot.surface),
+                                   GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]), percentRange);
+            /* The carry per unit of sShot.unk4 at the mean percent */
+            reach = reach * (percentRange[1] + percentRange[0]) / (2 * FULL_PERCENT * SHOT_UNK4_MAX);
+            /* Holding sShot.unk4 in distance is there to match */
+            distance = (rand() & 3) + distance / reach;
+            if (GetGolferTraitUnk2() >= 2) {
+                distance = distance * SHOT_UNK4_BOOST;
+            }
+            if (distance < MIN_PLANNED_SHOT_UNK4) {
+                distance = MIN_PLANNED_SHOT_UNK4;
+            } else if (distance > SHOT_UNK4_MAX) {
+                distance = SHOT_UNK4_MAX;
+            }
+            /* Storing through shotPower is there to match */
+            shotPower = &sShot.unk4;
+            *shotPower = distance;
+            if (sShotOffset == SHOT_OFFSET_NONE) {
+                sShot.unk14 = 0;
+                sShot.unk18 = 0;
+                sShotOffset = ChooseShotOffset();
+            }
+            sTrialIndex = 0;
+            sLevelTrialCount = LEVEL_TRIAL_COUNT;
+            if (!sHasTrialShot) {
+                sTrialShot = sShot;
+                sHasTrialShot = TRUE;
+            }
+            if (sPlanTarget[AXIS_X] == D_800BA9D8.cupPosition[AXIS_X] && sPlanTarget[AXIS_Z] == g_CupPositionZ) {
+                sLevelTrialCount = CUP_LEVEL_TRIAL_COUNT;
+            }
+            if (IsGameFlagSet(GAME_FLAG_UNK3C)) {
+                sLevelTrialCount = UNK3C_LEVEL_TRIAL_COUNT;
+            }
+            sNeedsNewTarget = FALSE;
+        } else {
+            sTrialIndex = 0;
+        }
+        if (sTrialIndex < sLevelTrialCount) {
+            if (!StepTrialShot()) {
+                return PLAN_UNFINISHED;
+            }
+            if (!sIsTrialAccepted && !sNeedsShorterClub && !sNeedsLongerClub) {
+                sPlanStage = PLAN_STAGE_TRIAL_TAKEN;
+                sTrialIndex++;
+                return PLAN_UNFINISHED;
+            }
+        }
+        sPlanStage = PLAN_STAGE_LEVEL_FINISHED;
+        if (sIsTrialLost == TRUE) {
+            sLostTrialCount++;
+        }
+        osSyncPrintf("Besteval = %d\n", sBestEvaluation);
+        if (sIsTrialAccepted) {
+            break;
+        }
+        if (sNeedsShorterClub) {
+            if (sShot.clubSlot == FindClubSlot(sShot.playerIndex, CLUB_TYPE_PUTTER)) {
+                break;
+            }
+            if (sShot.shotMode == SHOT_MODE_APPROACH) {
+                if (sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].windPlay < 2 &&
+                    sShot.clubSlot == FindClubSlot(sShot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
+                    sShot.clubSlot = FindClubSlot(sShot.playerIndex, CLUB_TYPE_SAND_WEDGE);
+                } else {
+                    osSyncPrintf("Approach cancel\n");
+                    ChooseLongShot(sHoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
+                    sShot.shotMode = shotMode;
+                    sShot.clubSlot = FindClubSlot(sShot.playerIndex, clubType);
+                }
+                sNeedsNewTarget = TRUE;
+                sTrialLevel++;
+                continue;
+            }
+            sShot.clubSlot++;
+            if (sShot.clubSlot >= FindClubSlot(sShot.playerIndex, CLUB_TYPE_PITCHING_WEDGE)) {
+                sShot.clubSlot = FindClubSlot(sShot.playerIndex, CLUB_TYPE_PITCHING_WEDGE);
+            }
+            sNeedsNewTarget = TRUE;
+        } else if (sNeedsLongerClub == TRUE) {
+            osSyncPrintf("num_hit = %d\n", g_Players[sShot.playerIndex].unk23);
+            if (sShot.clubSlot == FindClubSlot(sShot.playerIndex, CLUB_TYPE_PUTTER)) {
+                break;
+            }
+            if (sShot.clubSlot > 0) {
+                sShot.clubSlot--;
+                if (!sIsClubUsable[sShot.clubSlot] ||
+                    (GetGolferTraitUnk2() < 2 &&
+                     GetLieRating(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]), sShot.surface,
+                                  sShot.shotMode) < 2)) {
+                    sShot.clubSlot++;
+                    sCarryScale *= CARRY_SCALE_STEP;
+                }
+            } else {
+                sCarryScale *= CARRY_SCALE_STEP;
+            }
+            sNeedsNewTarget = TRUE;
+        }
+        sTrialLevel++;
+    }
+    osSyncPrintf("Finish Eval %d tlevel%d bestevalappear %d\n", sBestEvaluation, sTrialLevel, sHasBestEvaluation);
+    savedUnk8 = sTrialShot.unk8;
+    savedUnk4 = sTrialShot.unk4;
+    if ((s32)IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sTrialShot.ballPosition[AXIS_X],
+                         g_CupPositionZ - sTrialShot.ballPosition[AXIS_Z]) <
+        (s32)IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sPlanTarget[AXIS_X], g_CupPositionZ - sPlanTarget[AXIS_Z])) {
+        strokes = g_Players[sShot.playerIndex].unk23;
+        par = g_HolePar;
+        mishit = 0;
+        if (GetSurfaceInfo(sTrialShot.surface)->kind != SURFACE_KIND_GREEN && strokes < par + sHoleTargetToPar - 1) {
+            maxMishit = GetLieRating(GetClub(g_Players[sTrialShot.playerIndex].clubs[sTrialShot.clubSlot]),
+                                     sTrialShot.surface, sTrialShot.shotMode);
+            maxMishit -= maxMishit != 0;
+            if (strokes < par + sHoleTargetToPar - 2) {
+                switch (sGolferTraits[(s8)g_Players[sTrialShot.playerIndex].characterIndex].unk1) {
+                    case 0:
+                        mishitDivisor = 62;
+                        break;
+                    case 1:
+                        mishitDivisor = 83;
+                        break;
+                    case 2:
+                    default:
+                        mishitDivisor = 125;
+                        break;
+                }
+            } else {
+                mishitDivisor = 208;
+            }
+            mishit = rand() % MISHIT_ROLL_RANGE / mishitDivisor;
+            if (maxMishit < ABS(mishit) && (sHoleTargetToPar < 0 || strokes >= par + sHoleTargetToPar - 3)) {
+                mishit = maxMishit;
+            }
+            if (mishit != 0 && (rand() & MISHIT_SIGN_BIT)) {
+                mishit = -mishit;
+            }
+            sTrialShot.unk8 += mishit;
+            /* Never printed; the original has it, and its string is in the ROM */
+            if (FALSE) {
+                osSyncPrintf("Dahuri = %d\n", mishit);
+            }
+        }
+        if ((sHoleTargetToPar <= 0) & (mishit != 0) && !IsTrialShotSafe()) {
+            sTrialShot.unk8 = savedUnk8;
+            sTrialShot.unk4 = savedUnk4;
+        }
+    }
+    osSyncPrintf("clubidx = %d\n", sTrialShot.clubSlot);
+    osSyncPrintf("pgaugeresult = %d\n", sTrialShot.unk4);
+    osSyncPrintf("pgaugeinpact = %d\n", sTrialShot.unk8);
+    *plannedShot = sTrialShot;
+    osSyncPrintf("AI End\n");
+    return 1;
+}
 
 s32 GetBallCupDistance(void) {
     return IntLength2D(sShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
                        sShot.ballPosition[AXIS_Z] - g_CupPositionZ);
 }
-
-/* A line break that PlanShot and ChooseHoleStrokeTarget print; they share its one copy */
-extern const char sLineBreakText[];
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", sLineBreakText);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D7C_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D8C_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D90_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253DAC_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253DBC_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253DCC_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253DD8_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E08_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E14_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E24_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E38_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E48_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E84_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253E94_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EA8_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EBC_ovl_03);
-
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EC8_ovl_03);
 
 /* The cup distance from which PlanCupDistance allows for the wind */
 #define WIND_ALLOWANCE_MIN_DISTANCE 153600.0f
@@ -307,7 +735,6 @@ s32 PlanCupDistance(s32 unused) {
 #define RAINY_PUTT_DISTANCE_SCALE 1.2f
 
 s32 ChooseHoleStrokeTarget(void);
-void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
 
 /*
  * Chooses sShot's club and shot mode for the lie and sets target to where the
@@ -740,12 +1167,12 @@ s32 ChooseHoleStrokeTarget(void) {
             }
         }
     }
-    osSyncPrintf(sLineBreakText);
+    osSyncPrintf("\n");
     osSyncPrintf("OS => ");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
         osSyncPrintf(" %d", (s8)g_CourseRecords[g_CourseIndex].holes[index].par);
     }
-    osSyncPrintf(sLineBreakText);
+    osSyncPrintf("\n");
     for (index = 0; index < COURSE_HOLE_COUNT; index++) {
         if (holes[index] == g_HoleIndex) {
             /* The comma is in the original's string */
@@ -1340,9 +1767,6 @@ s32 ChooseApproachClub(s32 *targetX, s32 *targetZ) {
     return CLUB_TYPE_PITCHING_WEDGE;
 }
 
-/* sShot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
-#define SHOT_UNK4_MIN 3
-#define SHOT_UNK4_MAX 30
 #define SHOT_UNK4_SCALE (SHOT_UNK4_MAX / 256.0f)
 
 s32 ScaleToShotUnk4(s32 amount) {
@@ -1363,63 +1787,6 @@ s32 ScaleToShotUnk4(s32 amount) {
     return value;
 }
 
-/* Where the shot to try starts, as PlanShot sets it up */
-extern CurrentShot sTrialShot;
-extern Unk20 *sTrialLaunch;
-extern BallSimulation sTrialSimulation;
-extern s32 sTrialStepCount;
-
-s32 func_8005F248(s32 value);
-
-/* ChooseShotOffset's results, indices into sShotOffsets */
-#define SHOT_OFFSET_NONE 0
-#define SHOT_OFFSET_PLUS_SMALL 1
-#define SHOT_OFFSET_PLUS_MEDIUM 2
-#define SHOT_OFFSET_PLUS_LARGE 3
-#define SHOT_OFFSET_MINUS_SMALL 4
-#define SHOT_OFFSET_MINUS_MEDIUM 5
-#define SHOT_OFFSET_MINUS_LARGE 6
-
-/* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
-typedef struct ShotOffset {
-    /* 0x0 */ s8 unk14; /* Becomes sShot.unk14 */
-    /* 0x1 */ s8 unk18; /* Becomes sShot.unk18 */
-} ShotOffset; /* size = 0x2 */
-
-#define SHOT_OFFSET_COUNT 8
-
-extern ShotOffset sShotOffsets[SHOT_OFFSET_COUNT];
-/* The SHOT_OFFSET_* that PlanShot chose for the shot */
-extern s32 sShotOffset;
-/* Whether the trial's club is one for the green */
-extern s32 sIsPutting;
-/* How much worse than ideal an evaluation may be for the trial to be taken */
-extern s32 sAcceptableEvaluation;
-/* How many times PlanShot has changed the club or carry */
-extern s32 sTrialLevel;
-/* Whether the trial has reported STEP_FLAG_UNK1, and where it first did */
-extern s32 sHasUnk1Position;
-extern CoursePoint sUnk1Position;
-/* Whether the trial ended out of bounds, off the course or in water */
-extern s32 sIsTrialLost;
-/* The nearest that a putt has come to the target */
-extern s32 sClosestTargetDistance;
-/* The count of trials at this level */
-extern s32 sTrialIndex;
-/* Set when the trial asks PlanShot for a longer or a shorter club */
-extern s32 sNeedsLongerClub;
-extern s32 sNeedsShorterClub;
-/* The trial's evaluation; lower is better */
-extern s32 sTrialEvaluation;
-/* Where the trial's ball rests, or for a putt where it passes nearest the target */
-extern CoursePoint sTrialEndPoint;
-/* Set when the trial is good enough to take */
-extern s32 sIsTrialAccepted;
-/* The best evaluation so far, and whether there is one */
-extern s32 sBestEvaluation;
-extern s32 sHasBestEvaluation;
-extern s32 sAimChangeCount;
-extern s32 sHasUnk3Contact;
 /* The fault report of StepTrialShot and IsTrialShotSafe, which share its one copy */
 extern const char sSimFaultText[];
 
@@ -1429,7 +1796,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", sSimFaultText);
 #define PUTT_STEP_EVALUATION 0x10
 #define POOR_LANDING_EVALUATION 0x8000
 #define BLOCKED_CUP_EVALUATION 0x80000
-#define LOST_BALL_EVALUATION 0x10000000
 #define FAR_FROM_TARGET 0x40000000
 #define MISS_EVALUATION_SCALE 0.006535948f
 #define APPROACH_TOLERANCE_SCALE 0.0065104165f

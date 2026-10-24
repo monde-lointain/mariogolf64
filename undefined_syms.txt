@@ -26,3 +26,7 @@ sUnk6PathFormat = 0x802551C8;
 sPointsPathFormat = 0x802551E8;
 sTrianglesPathFormat = 0x80255208;
 sAttributesPathFormat = 0x80255228;
+
+/* D_800BA9D8.cupPosition's x, which PlanShot reads under a symbol of its
+   own, as g_CupPositionY and g_CupPositionZ are for y and z */
+g_CupPositionX = D_800BA9D8;
