@@ -112,6 +112,12 @@ static const char sUnusedFloatFormat[] = "            %f";
 /* The fractions of the way to the ball that the look-at point eases each frame */
 #define LOOK_AT_EASE_FRACTION 0.2f
 #define LOOK_AT_HEIGHT_EASE_FRACTION 0.5f
+/*
+ * The ball is landing once it is within LANDING_STEP_COUNT steps of the end of
+ * the simulated path and within LANDING_RADIUS of its end on both x and z
+ */
+#define LANDING_STEP_COUNT 10
+#define LANDING_RADIUS 0x1E00
 
 #define FLIGHT_CAMERA_FLAG_UNK2 (1 << 1)
 
@@ -146,6 +152,7 @@ extern s32 sFlightCameraKind;
 extern s32 sNextCameraPickIndex;
 extern s8 sCameraPicks[CAMERA_PICK_COUNT];
 extern CoursePoint sFlightBallPosition;
+extern CoursePoint sShotEndPosition;
 extern Vec3 sCameraPosition;
 extern Vec3 sLookAtPoint;
 
@@ -296,9 +303,59 @@ s32 GetEndReaction(void) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800469EC);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800479C0);
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsBallLanding()                                                            \
+    (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT             \
+     && (f32)sShotEndPosition[AXIS_X]                                              \
+            < (f32)(sFlightBallPosition[AXIS_X] + LANDING_RADIUS)                  \
+     && (f32)(sFlightBallPosition[AXIS_X] - LANDING_RADIUS)                        \
+            < (f32)sShotEndPosition[AXIS_X]                                        \
+     && (f32)sShotEndPosition[AXIS_Z]                                              \
+            < (f32)(sFlightBallPosition[AXIS_Z] + LANDING_RADIUS)                  \
+     && (f32)(sFlightBallPosition[AXIS_Z] - LANDING_RADIUS)                        \
+            < (f32)sShotEndPosition[AXIS_Z])
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047B34);
+/*
+ * Eases the look-at point toward the ball, unless it is landing.
+ * It does not match: the original keeps the loads of the ball's and the
+ * look-at point's coordinates in statement order, where this schedules the
+ * ball's loads first.
+ */
+#ifdef NON_MATCHING
+void EaseLookAtFlyingBall(void) {
+    if (!IsBallLanding()) {
+        sLookAtPoint[AXIS_X] +=
+            (sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_X]) * LOOK_AT_EASE_FRACTION;
+        sLookAtPoint[AXIS_Y] +=
+            (sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_Y]) * LOOK_AT_HEIGHT_EASE_FRACTION;
+        sLookAtPoint[AXIS_Z] +=
+            (sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_Z]) * LOOK_AT_EASE_FRACTION;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtFlyingBall);
+#endif
+
+/*
+ * Eases the look-at point toward a point drop below the ball, unless it is landing.
+ * It does not match: the original keeps the loads of the ball's and the
+ * look-at point's coordinates in statement order, where this schedules the
+ * ball's loads first and copies drop to another register.
+ */
+#ifdef NON_MATCHING
+void EaseLookAtBelowBall(f32 drop) {
+    if (!IsBallLanding()) {
+        sLookAtPoint[AXIS_X] +=
+            (sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_X]) * LOOK_AT_EASE_FRACTION;
+        sLookAtPoint[AXIS_Y] += ((sFlightBallPosition[AXIS_Y] - drop) * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_Y])
+                              * LOOK_AT_HEIGHT_EASE_FRACTION;
+        sLookAtPoint[AXIS_Z] +=
+            (sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE - sLookAtPoint[AXIS_Z]) * LOOK_AT_EASE_FRACTION;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtBelowBall);
+#endif
 
 /* Eases the look-at point toward the ball */
 INCLUDE_ASM("asm/nonmatchings/shot_camera", EaseLookAtPoint);
