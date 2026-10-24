@@ -485,24 +485,29 @@ s32 GetLandingRating(u32 surfaceKind) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802507D8_ovl_03);
 
-#define UNK802510D0_VALUE_COUNT 16
+/* The shot modes for each stroke count; all of them are SHOT_MODE_NORMAL */
+#define STROKE_SHOT_MODE_COUNT 16
 
-void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targetZ, s32 *arg4) {
+/*
+ * Plans a shot from beyond approach range: aims at the cup with the club whose
+ * carry covers PlanCupDistance, in the shot mode for the player's stroke count
+ */
+void ChooseLongShot(s32 unused, s32 *clubType, s32 *targetX, s32 *targetZ, s32 *shotMode) {
     s32 pad[44]; /* Unused; it is there to match */
-    s32 values[UNK802510D0_VALUE_COUNT];
+    s32 shotModes[STROKE_SHOT_MODE_COUNT];
     s32 index;
     s32 one; /* one is there to match */
     s32 strokeCount;
 
-    one = 1;
-    for (index = UNK802510D0_VALUE_COUNT - 1; index >= 0; index--) {
-        values[index] = one;
+    one = SHOT_MODE_NORMAL;
+    for (index = STROKE_SHOT_MODE_COUNT - 1; index >= 0; index--) {
+        shotModes[index] = one;
     }
     strokeCount = g_Players[sShot.playerIndex].unk23;
-    *plannedClub = ChooseClubForDistance(PlanCupDistance(one));
+    *clubType = ChooseClubForDistance(PlanCupDistance(one));
     *targetX = D_800BA9D8.cupPosition[AXIS_X];
     *targetZ = g_CupPositionZ;
-    *arg4 = values[strokeCount];
+    *shotMode = shotModes[strokeCount];
 }
 
 /* It is a macro, as an inline function compiles differently from the original */

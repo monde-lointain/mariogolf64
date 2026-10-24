@@ -2064,6 +2064,7 @@ SortByKeys = 0x8024F688; // type:func segment:ovl_03
 GetScoreToParSoFar = 0x8024F790; // type:func segment:ovl_03
 PlanRoute = 0x802504A0; // type:func segment:ovl_03
 GetLandingRating = 0x80250768; // type:func segment:ovl_03
+ChooseLongShot = 0x802510D0; // type:func segment:ovl_03
 IsLineOffFairway = 0x80251198; // type:func segment:ovl_03
 FindGreenEdgeOnLine = 0x80251378; // type:func segment:ovl_03
 GetGreenEdgeDistance = 0x80251570; // type:func segment:ovl_03
