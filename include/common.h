@@ -18,6 +18,11 @@ typedef f32 Vec3[3];
  */
 typedef s32 CoursePoint[AXIS_COUNT];
 
+/* Course point units in a yard, and in a foot */
+#define UNITS_PER_YARD 14045.184f
+#define UNITS_PER_FOOT 4681.728f
+#define YARDS_PER_UNIT 0.00007119878f
+
 /* A 4 by 4 matrix of floats, indexed by row and then column */
 typedef f32 Mat4[4][4];
 

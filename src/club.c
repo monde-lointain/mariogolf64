@@ -14,10 +14,6 @@
 #include "sound.h"
 #include "surface.h"
 
-/* World units in a yard, and in a foot */
-#define UNITS_PER_YARD 14045.184f
-#define UNITS_PER_FOOT 4681.728f
-#define YARDS_PER_UNIT 0.00007119878f
 /* Converts radians to an angle where 0x10000 is a full turn */
 #define RADIANS_TO_ANGLE 10430.378060218739
 /* The direction GenerateClub measures each test shot's landing against */
