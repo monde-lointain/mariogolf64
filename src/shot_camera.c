@@ -574,8 +574,181 @@ void BuildRingTexels(u8 *texels, s32 width, s32 height) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C958);
+#define NOISE_GRID_COUNT 2
+#define NOISE_GRID_SIZE 64
+#define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
+#define MIN_UNDIVIDED_NOISE_SIZE 2
+#define NOISE_DISPLACEMENT_MASK 0xFF
+#define NOISE_DISPLACEMENT_BIAS 0x80
+#define NOISE_CORNER_SEED -0xFE0
+#define NOISE_CENTER_SEED 0x3F80
+#define NOISE_EDGE_SEED 1
+#define NOISE_MAX_BLEND_WEIGHT 0x3F
+#define NOISE_BLEND_STEP_MASK 0x7F
+#define NOISE_INTENSITY_SHIFT 13
+#define NOISE_MAX_INTENSITY 0xFF
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004CDA0);
+/* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise texture blends */
+extern s16 sNoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
+/* The grid that DisplaceNoiseSquare builds */
+extern s16 (*sNoiseGrid)[NOISE_GRID_SIZE];
+/* The displacement scale at each midpoint displacement level */
+extern s16 sNoiseRoughness[];
+extern s16 sNoiseGridIndex;
+extern s32 sNoiseBlendStep;
+extern s8 sIsNoiseResetPending;
+extern s8 sNoiseRow;
+/* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
+extern u8 *g_NoiseTexels;
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004D148);
+static inline s32 RandomNoiseDisplacement(void) {
+    return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;
+}
+
+/*
+ * Midpoint displacement: sets each unset midpoint of the square of side
+ * NOISE_GRID_SIZE >> level at column, row to the average of its corners plus
+ * a random displacement, then does the same for the square's quarters.
+ * A zero point is unset, so a displacement that gives zero is drawn again.
+ */
+void DisplaceNoiseSquare(s32 level, s32 column, s32 row) {
+    u16 size;
+    u16 half;
+    s16 roughness;
+    s16 topLeft;
+    s16 topRight;
+    s16 bottomLeft;
+    s16 bottomRight;
+    s32 nextLevel;
+
+    size = NOISE_GRID_SIZE >> level;
+    roughness = sNoiseRoughness[level];
+    half = size >> 1;
+    topLeft = sNoiseGrid[row][column];
+    topRight = sNoiseGrid[row][(column + size) & NOISE_GRID_MASK];
+    bottomLeft = sNoiseGrid[(row + size) & NOISE_GRID_MASK][column];
+    bottomRight = sNoiseGrid[(row + size) & NOISE_GRID_MASK][(column + size) & NOISE_GRID_MASK];
+    if (sNoiseGrid[row + half][column + half] == 0) {
+        do {
+            sNoiseGrid[row + half][column + half] =
+                ((topLeft + topRight + bottomLeft + bottomRight) >> 2) + RandomNoiseDisplacement() * roughness;
+        } while (sNoiseGrid[row + half][column + half] == 0);
+    }
+    if (sNoiseGrid[row][column + half] == 0) {
+        do {
+            sNoiseGrid[row][column + half] = ((topLeft + topRight) >> 1) + RandomNoiseDisplacement() * roughness;
+        } while (sNoiseGrid[row][column + half] == 0);
+    }
+    if (sNoiseGrid[row + half][column] == 0) {
+        do {
+            sNoiseGrid[row + half][column] = ((topLeft + bottomLeft) >> 1) + RandomNoiseDisplacement() * roughness;
+        } while (sNoiseGrid[row + half][column] == 0);
+    }
+    if (sNoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] == 0) {
+        do {
+            sNoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] =
+                ((topRight + bottomRight) >> 1) + RandomNoiseDisplacement() * roughness;
+        } while (sNoiseGrid[row + half][(column + size) & NOISE_GRID_MASK] == 0);
+    }
+    if (sNoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] == 0) {
+        do {
+            sNoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] =
+                ((bottomLeft + bottomRight) >> 1) + RandomNoiseDisplacement() * roughness;
+        } while (sNoiseGrid[(row + size) & NOISE_GRID_MASK][column + half] == 0);
+    }
+    if (size > MIN_UNDIVIDED_NOISE_SIZE) {
+        nextLevel = level + 1;
+        DisplaceNoiseSquare(nextLevel, column, row);
+        DisplaceNoiseSquare(nextLevel, column + half, row);
+        DisplaceNoiseSquare(nextLevel, column, row + half);
+        DisplaceNoiseSquare(nextLevel, column + half, row + half);
+    }
+}
+
+static inline void SelectNoiseGrid(s16 gridIndex) {
+    sNoiseGrid = sNoiseGrids[gridIndex];
+}
+
+/*
+ * Draws one row of the noise texture as a blend of the two noise grids. After
+ * every row has been drawn, it moves the blend a step toward the other grid.
+ * Once the blend has gone fully over, it rebuilds the faded-out grid and swaps
+ * the grids, so the new one fades in.
+ */
+void StepNoiseTexture(void) {
+    /* index counts the grids, then the texels; sharing it is there to match */
+    s16 index;
+    s16 row;
+    s16 column;
+    s8 weight;
+    s32 intensity;
+    s32 blend;
+
+    if (!IsGameFlagSet(GAME_FLAG_PAUSE_NOISE_TEXTURE)) {
+        if (sIsNoiseResetPending) {
+            sIsNoiseResetPending = FALSE;
+            sNoiseBlendStep = 0;
+            sNoiseRow = 0;
+            sNoiseGridIndex = 0;
+            for (index = 0; index < NOISE_GRID_COUNT; index++) {
+                SelectNoiseGrid(index);
+                for (row = 0; row < NOISE_GRID_SIZE; row++) {
+                    for (column = 0; column < NOISE_GRID_SIZE; column++) {
+                        sNoiseGrid[row][column] = 0;
+                    }
+                }
+            }
+            SelectNoiseGrid(sNoiseGridIndex);
+            sNoiseGrid[0][0] = NOISE_CORNER_SEED;
+            sNoiseGrid[NOISE_GRID_SIZE / 2][NOISE_GRID_SIZE / 2] = NOISE_CENTER_SEED;
+            DisplaceNoiseSquare(0, 0, 0);
+            /* Seeds the same grid again, leaving the other one unseeded; the original has it */
+            sNoiseGrid[0][0] = NOISE_CORNER_SEED;
+            sNoiseGrid[NOISE_GRID_SIZE / 2][NOISE_GRID_SIZE / 2] = NOISE_CENTER_SEED;
+            SelectNoiseGrid(sNoiseGridIndex ^ 1);
+            DisplaceNoiseSquare(0, 0, 0);
+        }
+        index = sNoiseRow * NOISE_GRID_SIZE;
+        weight = sNoiseBlendStep & NOISE_MAX_BLEND_WEIGHT;
+        for (row = sNoiseRow; row < sNoiseRow + 1; row++) {
+            for (column = 0; column < NOISE_GRID_SIZE; column++) {
+                blend = (sNoiseGrids[sNoiseGridIndex][row][column] * (NOISE_MAX_BLEND_WEIGHT - weight)
+                             + sNoiseGrids[sNoiseGridIndex ^ 1][row][column] * weight)
+                         >> NOISE_INTENSITY_SHIFT;
+                intensity = ABS(blend);
+                if (intensity > NOISE_MAX_INTENSITY) {
+                    intensity = NOISE_MAX_INTENSITY;
+                }
+                g_NoiseTexels[index++] = intensity;
+            }
+        }
+        sNoiseRow = (sNoiseRow + 1) & NOISE_GRID_MASK;
+        if (sNoiseRow == 0) {
+            sNoiseBlendStep = (sNoiseBlendStep + 1) & NOISE_BLEND_STEP_MASK;
+            if ((sNoiseBlendStep & NOISE_MAX_BLEND_WEIGHT) == 0) {
+                SelectNoiseGrid(sNoiseGridIndex);
+                for (row = 0; row < NOISE_GRID_SIZE; row++) {
+                    for (column = 0; column < NOISE_GRID_SIZE; column++) {
+                        sNoiseGrid[row][column] = 0;
+                    }
+                }
+                sNoiseGrid[0][0] = 0;
+                sNoiseGrid[NOISE_GRID_SIZE / 2][NOISE_GRID_SIZE / 2] = 0;
+                sNoiseGrid[0][NOISE_GRID_SIZE / 2] = NOISE_EDGE_SEED;
+                sNoiseGrid[NOISE_GRID_SIZE / 2][0] = NOISE_EDGE_SEED;
+                DisplaceNoiseSquare(0, 0, 0);
+                sNoiseGridIndex ^= 1;
+            }
+        }
+    }
+}
+
+/* Resets the noise grids and draws every row of the noise texture */
+void BuildNoiseTexture(void) {
+    s32 row;
+
+    sIsNoiseResetPending = TRUE;
+    for (row = 0; row < NOISE_GRID_SIZE; row++) {
+        StepNoiseTexture();
+    }
+}

@@ -122,7 +122,8 @@ s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
 /* Draws the textures the course model reads through RSP segments */
 void BuildDynamicTextures(Gfx **displayListHead);
 
-void func_8004CDA0(void);
+void BuildNoiseTexture(void);
+void StepNoiseTexture(void);
 void func_8007B054(void);
 void func_80078D94(void);
 void func_8008E1B4(void);

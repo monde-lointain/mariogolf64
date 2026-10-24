@@ -140,7 +140,6 @@ extern Unk800BA9D8 D_80105F40;
 /* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are copied here */
 extern Unk800BA9D8 D_800FEDD8;
 
-void func_8004D148(void);
 void func_8005F1C8(void);
 void PlacePlayersOnTee(void);
 void func_80080220(void);
@@ -938,7 +937,7 @@ void StartLoaderThread(void) {
                    LOADER_THREAD_PRIORITY);
     osStartThread(&sLoaderThread);
     g_HasLoaderFinished = FALSE;
-    func_8004D148();
+    BuildNoiseTexture();
 }
 
 void StopLoaderThread(void) {

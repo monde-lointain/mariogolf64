@@ -1979,7 +1979,7 @@ void UpdateGame(void) {
         g_MapCamera.view.lookAt[2] = g_MapCamera.view.eye[2] + sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
     }
     if (g_Scene == 19) {
-        func_8004CDA0();
+        StepNoiseTexture();
         g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
         if (g_ViewedWindAngles[0] > 2 * M_PI) {
             g_ViewedWindAngles[0] -= 2 * M_PI;
@@ -1991,7 +1991,7 @@ void UpdateGame(void) {
         func_8007B054();
     } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 || g_Scene == SCENE_PLAY_UNK13) {
         if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
-            func_8004CDA0();
+            StepNoiseTexture();
         }
         if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {
             if ((g_ControllerStates[1].pressedButtons & L_JPAD) && g_InsetView.step < INSET_VIEW_STEP_COUNT) {
@@ -2026,7 +2026,7 @@ void UpdateGame(void) {
             g_ViewedWindAngles[1] += 2 * M_PI;
         }
     } else if (g_Scene == SCENE_MENU) {
-        func_8004CDA0();
+        StepNoiseTexture();
         animation = &g_InsetView.animation;
         if (*animation == INSET_VIEW_OPENING) {
             g_Cameras[INSET_CAMERA].view.drawFlags = CAMERA_DRAW_SCENE;

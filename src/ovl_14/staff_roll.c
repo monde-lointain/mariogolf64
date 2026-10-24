@@ -1185,7 +1185,7 @@ void UpdateStaffRoll(void) {
         }
         sprintf(g_PrintBuffer, "MAX:%d    ", lineCount);
         PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
-        func_8004CDA0();
+        StepNoiseTexture();
         g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
         if (g_ViewedWindAngles[0] > 2 * M_PI) {
             g_ViewedWindAngles[0] -= 2 * M_PI;
