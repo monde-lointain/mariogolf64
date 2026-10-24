@@ -41,6 +41,11 @@ extern GolferTraits sGolferTraits[CHARACTER_COUNT];
 extern s32 sPlanThreadState;
 extern OSThread sPlanThread;
 extern CurrentShot sPlannedShot;
+/* The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT sectors */
+#define DIRECTION_SECTOR_COUNT 256
+#define DIRECTION_SECTOR_SHIFT 8
+/* The direction sectors in which no target is chosen */
+extern s8 sIsDirectionExcluded[DIRECTION_SECTOR_COUNT];
 extern u8 sPlanThreadStackEnd[];
 /* sHoleStrokeTarget less the hole's par */
 extern s32 sHoleTargetToPar;
@@ -55,6 +60,9 @@ typedef struct RouteCoordinates {
 } RouteCoordinates; /* size = 0x48 */
 
 extern RouteCoordinates sRoute;
+/* The route points nearest the cup first, as PlanRoute orders them */
+extern s8 sRouteOrder[ROUTE_POINT_COUNT];
+extern s32 sRouteOrderCount;
 extern s8 sIsPlanStarted;
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 /* The size of the golfer's club set */
@@ -283,7 +291,7 @@ s32 PlanCupDistance(s32 unused) {
 #define RAINY_PUTT_DISTANCE_SCALE 1.2f
 
 s32 ChooseHoleStrokeTarget(void);
-void func_802507D8_ovl_03(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
+void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
 
 /*
  * Chooses sShot's club and shot mode for the lie and sets target to where the
@@ -338,7 +346,7 @@ void PlanClubAndTarget(CoursePoint target) {
         case SURFACE_KIND_BUNKER_UNK9:
             sShot.shotMode = SHOT_MODE_NORMAL;
             sShot.clubSlot = FindClubSlot(sShot.playerIndex, CLUB_TYPE_SAND_WEDGE);
-            func_802507D8_ovl_03(
+            ChooseLandingTarget(
                 sShot.ballPosition[AXIS_X], sShot.ballPosition[AXIS_Z],
                 GetShotWorldDistance(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]), sShot.shotMode),
                 &targetX, &targetZ);
@@ -575,7 +583,218 @@ s32 GetLandingRating(u32 surfaceKind) {
     return rating;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_802507D8_ovl_03);
+#define END_ROUTE_POINT 0xFF
+/* The landing search walks back from the cup this many yards a step */
+#define TARGET_STEP_YARDS 2
+/* The search takes up to reach * TARGET_STEPS_PER_UNIT + EXTRA_TARGET_STEP_COUNT steps */
+#define TARGET_STEPS_PER_UNIT (4 * YARDS_PER_UNIT)
+#define EXTRA_TARGET_STEP_COUNT 50.0f
+#define TARGET_SIDE_COUNT 100
+#define TARGET_SIDE_SPACING (4 * UNITS_PER_YARD)
+/* The neighbours a target's lie is tested at, in TARGET_NEIGHBOUR_SPACINGs */
+#define TARGET_NEIGHBOUR_REACH 2
+#define TARGET_NEIGHBOUR_SPACING 4
+/* How far below the paths the ground test starts */
+#define PATH_GROUND_CLEARANCE 0x600
+/* Rolls shorter than this are not tested for ground in the way */
+#define MIN_TESTED_ROLL (2 * UNITS_PER_YARD)
+
+/*
+ * Chooses where a shot of distance from (x, z) lands. Walking from the cup back
+ * toward the ball a step at a time, and out to either side at each step, it takes
+ * the first point within reach that is outside the excluded directions, lands as
+ * well as the cup, has no ground in the way of the flight or the roll to the cup,
+ * and has no much worse lie around it. It aims at the ball if none qualifies, and
+ * at the cup if no route point is nearer the cup than the ball. Points that lie
+ * farther below the ball than they are across from it are skipped.
+ */
+void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ) {
+    u8 order[ROUTE_POINT_COUNT + 1];
+    s32 pointX[ROUTE_POINT_COUNT + 1];
+    s32 pointZ[ROUTE_POINT_COUNT + 1];
+    s32 nearIndices[ROUTE_POINT_COUNT + 1];
+    PlaneTriangle hit;
+    f32 hitFraction;
+    s32 pointCount;
+    s32 index;
+    s32 nearCount;
+    s32 ballCupDistance;
+    s32 answerIndex;
+    s32 reach;
+    s32 alongX;
+    s32 alongZ;
+    s32 endX;
+    s32 endZ;
+    s32 endRating;
+    s32 sideCount;
+    s32 isFound;
+    s32 startX;
+    s32 startZ;
+    f32 angle;
+    f32 cosAngle;
+    f32 sinAngle;
+    f32 along;
+    s32 side;
+    s32 offsetX;
+    s32 offsetZ;
+    s32 candidateX;
+    s32 candidateZ;
+    s32 height;
+    s32 flatDistance;
+    s32 cupDistance;
+    s32 isPoorlySurrounded;
+    s32 column;
+    s32 row;
+
+    osSyncPrintf("Distance = %dYd\n", (s32)(distance * YARDS_PER_UNIT));
+    pointCount = sRouteOrderCount;
+    isFound = FALSE;
+    if (pointCount == 0) {
+        sideCount = TARGET_SIDE_COUNT;
+        endX = D_800BA9D8.cupPosition[AXIS_X];
+        endZ = g_CupPositionZ;
+        startX = x;
+        startZ = z;
+    } else {
+        for (index = 0; index < sRouteOrderCount; index++) {
+            order[index] = sRouteOrder[index];
+        }
+        for (index = 0; index < pointCount; index++) {
+            pointX[index] = sRoute.x[order[index]];
+            pointZ[index] = sRoute.z[order[index]];
+            osSyncPrintf("PointList[%d] = (%d, %d)\n", index, pointX[index], pointZ[index]);
+        }
+        pointX[pointCount] = D_800BA9D8.cupPosition[AXIS_X];
+        /* Reading the cup's z through D_800BA9D8 here and below is there to match */
+        pointZ[pointCount] = D_800BA9D8.cupPosition[AXIS_Z];
+        order[pointCount] = END_ROUTE_POINT;
+        pointCount++;
+        nearCount = 0;
+        ballCupDistance = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - x, g_CupPositionZ - z);
+        for (index = 0; index < pointCount; index++) {
+            if ((s32)IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - pointX[index],
+                                 D_800BA9D8.cupPosition[AXIS_Z] - pointZ[index]) < ballCupDistance) {
+                nearIndices[nearCount++] = index;
+            }
+        }
+        for (index = 0; index < nearCount; index++) {
+            order[index] = order[nearIndices[index]];
+            pointX[index] = pointX[nearIndices[index]];
+            pointZ[index] = pointZ[nearIndices[index]];
+        }
+        pointCount = nearCount;
+        answerIndex = -2;
+        if (pointCount == 0) {
+            *targetX = D_800BA9D8.cupPosition[AXIS_X];
+            *targetZ = g_CupPositionZ;
+            return;
+        }
+        for (index = 0; index < pointCount; index++) {
+            if (distance < (s32)IntLength2D(pointX[index] - x, pointZ[index] - z)) {
+                answerIndex = index - 1;
+                break;
+            }
+        }
+        osSyncPrintf("AnsIndex = %d\n", answerIndex);
+        endX = D_800BA9D8.cupPosition[AXIS_X];
+        endZ = g_CupPositionZ;
+        startX = x;
+        startZ = z;
+        sideCount = TARGET_SIDE_COUNT;
+    }
+    osSyncPrintf("StartX = %d, StartY = %d\n", startX, startZ);
+    osSyncPrintf("EndX = %d, EndY = %d\n", endX, endZ);
+    angle = atan2((f32)(startZ - endZ), (f32)(startX - endX));
+    reach = IntLength2D(endX - startX, endZ - startZ);
+    osSyncPrintf("r = %d\n", reach);
+    cosAngle = cosf(angle);
+    sinAngle = sinf(angle);
+    *targetX = startX;
+    *targetZ = startZ;
+    endRating = GetLandingRating(GetSurfaceInfoAt(endX, endZ)->kind);
+    osSyncPrintf("TALevel %d\n", endRating);
+    /* Counting the steps in index is there to match */
+    for (index = 0; index < reach * TARGET_STEPS_PER_UNIT + EXTRA_TARGET_STEP_COUNT; index++) {
+        along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
+        alongX = along * cosAngle + endX;
+        alongZ = along * sinAngle + endZ;
+        for (side = 0; side < sideCount; side++) {
+            offsetX = -sinAngle * side * TARGET_SIDE_SPACING;
+            offsetZ = cosAngle * side * TARGET_SIDE_SPACING;
+            if (side & 1) {
+                candidateX = alongX + offsetX;
+                candidateZ = alongZ + offsetZ;
+            } else {
+                candidateX = alongX - offsetX;
+                candidateZ = alongZ - offsetZ;
+            }
+            if (distance < (s32)IntLength2D(candidateX - x, candidateZ - z)) {
+                break;
+            }
+            if (GetLandingRating(GetSurfaceInfoAt(candidateX, candidateZ)->kind) < endRating) {
+                continue;
+            }
+            if (sIsDirectionExcluded[((u32)(s32)(atan2f(candidateZ - sShot.ballPosition[AXIS_Z],
+                                                  candidateX - sShot.ballPosition[AXIS_X]) *
+                                            RADIANS_TO_BINARY_ANGLE) &
+                                      BINARY_ANGLE_MASK) >>
+                                     DIRECTION_SECTOR_SHIFT]) {
+                continue;
+            }
+            height = GetGroundHeight(candidateX, candidateZ);
+            flatDistance =
+                IntLength2D(candidateZ - sShot.ballPosition[AXIS_Z], candidateX - sShot.ballPosition[AXIS_X]);
+            if (flatDistance < sShot.ballPosition[AXIS_Y] - height) {
+                continue;
+            }
+            cupDistance = IntLength2D(candidateX - D_800BA9D8.cupPosition[AXIS_X],
+                                      candidateZ - D_800BA9D8.cupPosition[AXIS_Z]);
+            if (FindGroundHit(sShot.ballPosition[AXIS_X], sShot.ballPosition[AXIS_Y] - PATH_GROUND_CLEARANCE,
+                              sShot.ballPosition[AXIS_Z], candidateX, sShot.ballPosition[AXIS_Y] - flatDistance,
+                              candidateZ, &hit, &hitFraction)) {
+                continue;
+            }
+            if (cupDistance >= MIN_TESTED_ROLL) {
+                if (FindGroundHit(candidateX, height - PATH_GROUND_CLEARANCE, candidateZ,
+                                  D_800BA9D8.cupPosition[AXIS_X], height - cupDistance / 2, g_CupPositionZ, &hit,
+                                  &hitFraction)) {
+                    continue;
+                }
+            }
+            isPoorlySurrounded = FALSE;
+            if (candidateX != D_800BA9D8.cupPosition[AXIS_X] || candidateZ != D_800BA9D8.cupPosition[AXIS_Z]) {
+                for (column = -TARGET_NEIGHBOUR_REACH; column <= TARGET_NEIGHBOUR_REACH; column++) {
+                    for (row = -TARGET_NEIGHBOUR_REACH; row <= TARGET_NEIGHBOUR_REACH; row++) {
+                        if (column == 0 && row == 0) {
+                            continue;
+                        }
+                        if (GetLandingRating(
+                                GetSurfaceInfoAt(candidateX + column * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD,
+                                                 candidateZ + row * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD)
+                                    ->kind) < endRating - 1) {
+                            isPoorlySurrounded = TRUE;
+                            break;
+                        }
+                    }
+                    if (isPoorlySurrounded == TRUE) {
+                        break;
+                    }
+                }
+            }
+            if (!isPoorlySurrounded) {
+                isFound = TRUE;
+                *targetX = candidateX;
+                *targetZ = candidateZ;
+                break;
+            }
+        }
+        if (isFound) {
+            break;
+        }
+    }
+    osSyncPrintf("ResultX = %d, ResultY = %d\n", *targetX, *targetZ);
+    osSyncPrintf("Result TALevel %d\n", GetLandingRating(GetSurfaceInfoAt(*targetX, *targetZ)->kind));
+}
 
 /* The shot modes for each stroke count; all of them are SHOT_MODE_NORMAL */
 #define STROKE_SHOT_MODE_COUNT 16

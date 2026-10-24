@@ -103,6 +103,12 @@ s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
  */
 s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
                         f32 *fraction);
+/*
+ * Finds the nearest ground triangle that a path hits, and sets the triangle
+ * and the fraction along the path. It returns whether one is hit.
+ */
+s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
+                  f32 *fraction);
 /* Sets the fog factor and fog color */
 void SetSceneFog(Gfx **displayListHead);
 
