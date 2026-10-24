@@ -1,6 +1,8 @@
 #include "common.h"
 #include "course.h"
 #include "current_shot.h"
+#include "functions.h"
+#include "math_util.h"
 #include "save.h"
 
 /* The shot planning thread's states, in sPlanThreadState */
@@ -78,7 +80,63 @@ s32 IsStrokeLimitReached(void) {
     return g_Players[sShot.playerIndex].unk23 >= g_HolePar + D_8025C640_ovl_03 - 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024D9E8_ovl_03);
+/* Course units, of which there are 1024 to a world unit */
+#define SIDE_SLOPE_MIN_DISTANCE 15360.0f
+#define SIDE_SLOPE_SAMPLE_SPACING 7680.0f
+#define SIDE_SLOPE_SAMPLE_REACH 1536.0f
+#define SIDE_SLOPE_STEP 64
+#define SIDE_SLOPE_LIMIT 512
+
+/*
+ * Returns how the ground slopes across the line from the ball to the cup: the
+ * count of points along the line where the ground is lower toward (-z, x) of
+ * the line than the other way, less the count where it is higher, times
+ * SIDE_SLOPE_STEP. It returns 0 for a cup within SIDE_SLOPE_MIN_DISTANCE.
+ */
+s32 GetSideSlope(void) {
+    f32 direction[AXIS_COUNT];
+    f32 distance;
+    s32 sideSlope;
+    s32 sampleIndex;
+    s32 reachX;
+    s32 reachZ;
+    s32 sampleX;
+    s32 sampleZ;
+    s32 reachHeight;
+    s32 oppositeHeight;
+    f32 along;
+
+    direction[AXIS_Y] = 0;
+    direction[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] - sShot.ballPosition[AXIS_X];
+    direction[AXIS_Z] = g_CupPositionZ - sShot.ballPosition[AXIS_Z];
+    distance = Length2D(direction[AXIS_X], direction[AXIS_Z]);
+    sideSlope = 0;
+    if (distance < SIDE_SLOPE_MIN_DISTANCE) {
+        return 0;
+    }
+    guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
+    reachX = 2.0f * (-direction[AXIS_Z] * SIDE_SLOPE_SAMPLE_REACH);
+    reachZ = 2.0f * (direction[AXIS_X] * SIDE_SLOPE_SAMPLE_REACH);
+    for (sampleIndex = 1; sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING)); sampleIndex++) {
+        sampleX = sShot.ballPosition[AXIS_X] + (along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X];
+        sampleZ = sShot.ballPosition[AXIS_Z] + along * direction[AXIS_Z];
+        reachHeight = GetGroundHeight(sampleX + reachX, sampleZ + reachZ);
+        oppositeHeight = GetGroundHeight(sampleX - reachX, sampleZ - reachZ);
+        if (reachHeight > oppositeHeight) {
+            sideSlope--;
+        } else if (reachHeight < oppositeHeight) {
+            sideSlope++;
+        }
+    }
+    sideSlope *= SIDE_SLOPE_STEP;
+    if (sideSlope < -SIDE_SLOPE_LIMIT) {
+        sideSlope = -SIDE_SLOPE_LIMIT;
+    }
+    if (sideSlope > SIDE_SLOPE_LIMIT) {
+        sideSlope = SIDE_SLOPE_LIMIT;
+    }
+    return sideSlope;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", PlanShot);
 
