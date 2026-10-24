@@ -27,4 +27,7 @@ typedef f32 Mat4[4][4];
    into a variable of its own, as a GNU statement expression does. */
 #define ABS(value) ({ s32 absValue = (value); (absValue < 0) ? -absValue : absValue; })
 
+/* The RDP loads textures from 8-byte boundaries */
+#define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
+
 #endif

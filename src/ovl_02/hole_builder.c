@@ -154,6 +154,19 @@ typedef struct GroundLightColor {
 #define MAP_TILE_SHIFT 5
 #define MAP_TILE_MASK (GROUND_TILE_TEXEL_SPAN - 1)
 
+/*
+ * A ground tile has 5 by 5 points: its grid vertices and midpoints. The
+ * vertices of an edge's or a middle line's midpoints go through a segment,
+ * which can move them to coarse vertices halfway between their neighbors.
+ */
+#define TILE_POINT_SPAN 5
+#define TILE_VERTEX_SEGMENT_COUNT 8
+
+/* A ground tile's texture is its bordered 16-bit texels */
+#define GROUND_TEXTURE_LOAD_SIZE (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH - 1)
+#define GROUND_TEXTURE_LINE_SIZE ((GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES + 7) >> 3)
+#define GROUND_TEXTURE_DXT CALC_DXT(GROUND_TILE_TEXEL_ROW_LENGTH, G_IM_SIZ_16b_BYTES)
+
 /* The work-area buffers that the ground tiles' display lists and vertices are built in */
 #define GROUND_DISPLAY_LIST_START ((Gfx *)&g_WorkArea.bytes[0x6E920])
 #define GROUND_DISPLAY_LIST_END ((Gfx *)&g_WorkArea.bytes[0x77D20])
@@ -184,8 +197,11 @@ extern s32 sPaintLogic;
 extern PaintLogic sPaintLogics[];
 extern Vec3 g_MiniGolfScale;
 extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
+extern Gfx *g_GroundTileDisplayLists[GROUND_TILE_COUNT];
+extern s32 g_CoarseVertexOffsets[GROUND_TILE_COUNT][TILE_VERTEX_SEGMENT_COUNT];
+extern s8 sTileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
 
-void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfx, Vtx **vertices);
+void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vertexCursor);
 
 void LoadCodeMap(char *path);
 void EncodeCodeMap(void);
@@ -2728,9 +2744,153 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t *start, Vtx_t *end) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802536FC_ovl_02);
+/* Copies count vertices; copying them as f64s is there to match */
+static inline void CopyVertices(Vtx *destination, Vtx *source, s32 count) {
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", BuildGroundTileDisplayList);
+    for (i = 0; i < count; i++) {
+        ((f64 *)&destination[i])[0] = ((f64 *)&source[i])[0];
+        ((f64 *)&destination[i])[1] = ((f64 *)&source[i])[1];
+    }
+}
+
+/* The address of a vertex through a vertex segment */
+#define SegmentedVertex(segment, vertex) ((u8 *)(vertex) + ((segment) << 24))
+
+/*
+ * Builds the display list and vertices of the ground tile at column and
+ * row, at the cursors, and moves the cursors past them
+ */
+void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfxCursor, Vtx **vertexCursor) {
+    /*
+     * Sets midpoint halfway between from and to, as SetVertexMidpoint does.
+     * SetTileVertexMidpoint is a nested function, a GNU C extension.
+     */
+    void SetTileVertexMidpoint(Vtx_t *from, Vtx_t *to, Vtx_t *midpoint) {
+        midpoint->ob[0] = (from->ob[0] + to->ob[0]) / 2;
+        midpoint->ob[1] = (from->ob[1] + to->ob[1]) / 2;
+        midpoint->ob[2] = (from->ob[2] + to->ob[2]) / 2;
+        midpoint->flag = 0;
+        midpoint->tc[0] = (from->tc[0] + to->tc[0]) / 2;
+        midpoint->tc[1] = (from->tc[1] + to->tc[1]) / 2;
+        midpoint->cn[0] = (from->cn[0] + to->cn[0]) / 2;
+        midpoint->cn[1] = (from->cn[1] + to->cn[1]) / 2;
+        midpoint->cn[2] = (from->cn[2] + to->cn[2]) / 2;
+        midpoint->cn[3] = (from->cn[3] + to->cn[3]) / 2;
+    }
+    Gfx *gfx = *gfxCursor;
+    Vtx *vertex = *vertexCursor;
+    s32 tileIndex = row * GROUND_TILE_COLUMN_COUNT + column;
+    Vtx *midpoints;
+    s32 *coarseOffsets;
+    s32 segmentIndex = 0;
+    s32 columnBlock;
+    s32 rowBlock;
+    s32 pointRow;
+    s32 pointColumn;
+
+    midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex];
+    g_GroundTileDisplayLists[tileIndex] = gfx;
+    gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]));
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, 3,
+               G_TX_MIRROR | G_TX_WRAP, 6, 3);
+    gDPLoadSync(gfx++);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, GROUND_TEXTURE_LOAD_SIZE, GROUND_TEXTURE_DXT);
+    gDPPipeSync(gfx++);
+    gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TEXTURE_LINE_SIZE, 0, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP,
+               G_TX_NOMASK, 3, G_TX_MIRROR | G_TX_WRAP, 6, 3);
+    /* 33.5 by 32.5 texels, in 10.2 fixed point */
+    gDPSetTileSize(gfx++, 1, 0, 0, 0x86, 0x82);
+    coarseOffsets = g_CoarseVertexOffsets[tileIndex];
+
+    /* The corners */
+    CopyVertices(vertex, GetGridVertex(column * 2, row * 2), 2);
+    CopyVertices(&vertex[2], GetGridVertex(column * 2, (row + 1) * 2), 2);
+    gSPVertex(gfx++, vertex, 4, 0);
+    vertex += 4;
+
+    /* The midpoints inside the tile, then those on its edges */
+    gSPVertex(gfx++, &midpoints[8], 8, 4);
+    gSPVertex(gfx++, SegmentedVertex(1, &midpoints[0]), 2, 12);
+    coarseOffsets[segmentIndex++] = (u8 *)vertex - (u8 *)midpoints;
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v, &GetGridVertex(column * 2 + 1, row * 2)->v,
+                          &vertex++->v);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2)->v, &GetGridVertex(column * 2 + 2, row * 2)->v,
+                          &vertex++->v);
+    gSPVertex(gfx++, SegmentedVertex(2, &midpoints[2]), 1, 14);
+    gSPVertex(gfx++, SegmentedVertex(2, &midpoints[4]), 1, 15);
+    gSPVertex(gfx++, SegmentedVertex(3, &midpoints[3]), 1, 16);
+    gSPVertex(gfx++, SegmentedVertex(3, &midpoints[5]), 1, 17);
+    coarseOffsets[segmentIndex++] = (u8 *)vertex - (u8 *)(midpoints + 2);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v, &GetGridVertex(column * 2, row * 2 + 1)->v,
+                          &vertex[0].v);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 1)->v, &GetGridVertex(column * 2, row * 2 + 2)->v,
+                          &vertex[2].v);
+    vertex++;
+    coarseOffsets[segmentIndex++] = (u8 *)vertex - (u8 *)(midpoints + 3);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v, &GetGridVertex(column * 2 + 2, row * 2 + 1)->v,
+                      &vertex[0].v);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2 + 1)->v,
+                          &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
+                      &vertex[2].v);
+    vertex += 3;
+    gSPVertex(gfx++, SegmentedVertex(4, &midpoints[6]), 2, 18);
+    coarseOffsets[segmentIndex++] = (u8 *)vertex - (u8 *)(midpoints + 6);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v, &GetGridVertex(column * 2 + 1, row * 2 + 2)->v,
+                      &vertex++->v);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2 + 2)->v,
+                          &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
+                      &vertex++->v);
+
+    /* The grid vertices at the middles of the edges and at the center */
+    CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2), 1);
+    gSPVertex(gfx++, SegmentedVertex(5, vertex), 1, 20);
+    vertex++;
+    coarseOffsets[segmentIndex++] = sizeof(Vtx);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v, &GetGridVertex(column * 2 + 2, row * 2)->v,
+                          &vertex++->v);
+    CopyVertices(vertex, GetGridVertex(column * 2, row * 2 + 1), 1);
+    gSPVertex(gfx++, SegmentedVertex(6, vertex), 1, 21);
+    vertex++;
+    coarseOffsets[segmentIndex++] = sizeof(Vtx);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v, &GetGridVertex(column * 2, row * 2 + 2)->v,
+                          &vertex++->v);
+    CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 1), 1);
+    gSPVertex(gfx++, vertex, 1, 22);
+    vertex++;
+    CopyVertices(vertex, GetGridVertex(column * 2 + 2, row * 2 + 1), 1);
+    gSPVertex(gfx++, SegmentedVertex(7, vertex), 1, 23);
+    vertex++;
+    coarseOffsets[segmentIndex++] = sizeof(Vtx);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v, &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
+                      &vertex++->v);
+    CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 2), 1);
+    gSPVertex(gfx++, SegmentedVertex(8, vertex), 1, 24);
+    vertex++;
+    coarseOffsets[segmentIndex++] = sizeof(Vtx);
+    SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v, &GetGridVertex(column * 2 + 2, row * 2 + 2)->v,
+                      &vertex++->v);
+
+    for (columnBlock = 0; columnBlock < TILE_POINT_SPAN - 1; columnBlock += 2) {
+        for (rowBlock = 0; rowBlock < TILE_POINT_SPAN - 1; rowBlock += 2) {
+            for (pointRow = rowBlock; pointRow < rowBlock + 2; pointRow++) {
+                for (pointColumn = columnBlock; pointColumn < columnBlock + 2; pointColumn++) {
+                    gSP2Triangles(gfx++, sTileVertexSlots[pointRow][pointColumn],
+                                  sTileVertexSlots[pointRow][pointColumn + 1],
+                                  sTileVertexSlots[pointRow + 1][pointColumn], 0,
+                                  sTileVertexSlots[pointRow][pointColumn + 1],
+                                  sTileVertexSlots[pointRow + 1][pointColumn + 1],
+                                  sTileVertexSlots[pointRow + 1][pointColumn], 0);
+                }
+            }
+        }
+    }
+    gSPEndDisplayList(gfx++);
+    SetTileTextureCoords(column, row, &(*vertexCursor)->v, &vertex->v);
+    SetTileTextureCoords(column, row, &midpoints->v, &midpoints[TILE_MIDPOINT_COUNT].v);
+    *gfxCursor = gfx;
+    *vertexCursor = vertex;
+}
 
 /*
  * Builds every ground tile's display list and vertices in the work area,

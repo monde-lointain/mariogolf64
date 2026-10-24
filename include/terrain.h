@@ -100,6 +100,7 @@ extern s16 g_TerrainCodeCells[TERRAIN_CODE_CELL_ROW_COUNT][TERRAIN_CODE_CELL_COL
 extern f32 g_GroundTileHeightRanges[GROUND_TILE_COUNT];
 
 Vtx *GetGroundPoint(u32 column, u32 row);
+Vtx *GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t *point);
 void PrepareHoleTriangles(void);
 s32 IsOverlayInExpansionMemory(void);

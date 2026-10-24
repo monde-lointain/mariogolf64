@@ -198,9 +198,6 @@ extern s32 sScreenFadeBlue;
 extern f32 sChoiceBobAngle;
 extern Gfx D_800C3FC0[];
 
-/* The RDP loads textures from 8-byte boundaries */
-#define TEXTURE_ADDRESS(address) ((u32)(address) & ~7)
-
 /*
  * Draws a texture rectangle between pipe syncs, cut where it reaches past
  * the screen's top or left
