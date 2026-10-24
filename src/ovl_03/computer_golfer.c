@@ -1774,7 +1774,13 @@ s32 ScaleToShotUnk4(s32 amount) {
     s32 unused;
     s32 uninitialized;
 
-    /* The store of an uninitialized value is there to match */
+    /*
+     * The original nests this routine in StepTrialShot, a GNU C extension:
+     * nested there, it compiles to the original's code, and StepTrialShot
+     * passes a stack address in $v0 as the static chain, which this stores.
+     * It stays separate here, as StepTrialShot does not match. The store of
+     * an uninitialized value is there to match.
+     */
     *(&unused) = uninitialized;
 
     value = amount * SHOT_UNK4_SCALE + 0.5f;
