@@ -41,8 +41,7 @@
 #define LIGHT_YAW_STEP_PER_HOLE 0x5000
 #define HOLE_LIGHT_PITCH 0x3000
 
-/* g_GameMode values whose purpose is not yet known */
-#define GAME_MODE_UNK3 3
+/* A g_GameMode value whose purpose is not yet known */
 #define GAME_MODE_UNK13 13
 
 /* GetHoleRandom's generator, a linear congruential one */

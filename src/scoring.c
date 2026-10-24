@@ -5,7 +5,6 @@
 #include "scene.h"
 #include "scoring.h"
 
-#define HOLES_PER_NINE 9
 #define DEBUG_ROUND_HOLE_COUNT 2
 /* Above any score, so the first player compared sets the best one */
 #define NO_BEST_SCORE 0x40000000

@@ -457,9 +457,6 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
 #define HIGHEST_PAR 5
 /* A hole's planned strokes are lowered only from this many or more */
 #define LOWEST_LOWERED_STROKES 3
-#define HOLES_PER_NINE 9
-/* GameState.gameMode's value for which the planned strokes are the hole's par */
-#define GAME_MODE_UNK3 3
 
 /*
  * Spreads strokeCount strokes, or takes -strokeCount away, one a hole at a
