@@ -159,6 +159,7 @@ extern s32 sNextCameraPickIndex;
 extern s8 sCameraPicks[CAMERA_PICK_COUNT];
 extern CoursePoint sFlightBallPosition;
 extern CoursePoint sShotEndPosition;
+extern f32 sShotFlightYaw;
 extern Vec3 sCameraPosition;
 extern Vec3 sLookAtPoint;
 
@@ -313,6 +314,8 @@ void func_8009226C(s32);
 void func_80205AE4(s32, s32);
 void func_80216130(s32);
 void func_80216B74(s32);
+/* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
+s32 func_8005DE40();
 s32 StepHoleFlyover(void);
 
 /* The surface under the player's ball */
@@ -620,7 +623,106 @@ void EaseCameraPosition(Vec3 target) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80047E9C);
+#define RANDOM_YAW_MASK 0x7FFF
+#define UNK2E08_HEIGHT_SPREAD_FRACTION 0.2
+#define DISTANCE_SPREAD_FRACTION 0.2f
+#define DEFAULT_HEIGHT_SPREAD_FRACTION 0.1f
+#define OPTION_UNK3_HEIGHT_SPREAD_FRACTION 0.2f
+#define UNK2E08_MIN_HEIGHT 0x6600
+#define RANDOM_DISTANCE_STEP_COUNT 1536
+#define UNK2E08_DISTANCE_STEP 15
+#define UNK2E08_MIN_DISTANCE 0xB400
+#define SHORT_SHOT_MAX_LENGTH 0xBB7FF
+#define SHORT_SHOT_DISTANCE 76800.0f
+#define GREEN_DISTANCE_STEP 50
+#define GREEN_MIN_DISTANCE 0x12C00
+#define MIN_CAMERA_DISTANCE 76800.0f
+#define MAX_CAMERA_DISTANCE 460800.0f
+#define DEFAULT_MIN_HEIGHT 46080.0f
+#define DEFAULT_MAX_HEIGHT 92160.0f
+#define OPTION_UNK3_MIN_HEIGHT 92160.0f
+#define OPTION_UNK3_MAX_HEIGHT 153600.0f
+#define MIN_RISE_ABOVE_SHOT_END 0x7800
+
+/*
+ * Places the camera at a random yaw around the shot's end, a random distance away
+ * and a random height above the ground there, then snaps the look-at point. The
+ * ground point is kept at least MIN_RISE_ABOVE_SHOT_END above the shot's end.
+ * Course y points down, so heights are subtracted.
+ */
+void PlaceCameraAroundShotEnd(void) {
+    CoursePoint point;
+    f32 height;
+    f64 yawScale; /* Holding the scale in yawScale is there to match */
+    f32 distance;
+    f32 yaw;
+
+    if (g_SimulatedShot.unk2E08) {
+        height = RandomBelow(D_800BE640 * UNK2E08_HEIGHT_SPREAD_FRACTION) + UNK2E08_MIN_HEIGHT;
+        distance =
+            (guRandom() % RANDOM_DISTANCE_STEP_COUNT) * UNK2E08_DISTANCE_STEP + UNK2E08_MIN_DISTANCE;
+        RandomBelow(RANDOM_YAW_MASK);
+        yawScale = M_PI / 65536;
+        yaw = sShotFlightYaw - (f32)(rand() & RANDOM_YAW_MASK) * yawScale;
+    } else if (!func_8005DE40()) {
+        if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
+            distance = SHORT_SHOT_DISTANCE;
+            height = 0.0f;
+            yaw = sShotFlightYaw + M_PI / 8 - (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 131072);
+        } else {
+            if (g_SimulatedShot.endsOnGreen) {
+                distance =
+                    (guRandom() % RANDOM_DISTANCE_STEP_COUNT) * GREEN_DISTANCE_STEP + GREEN_MIN_DISTANCE;
+            } else if (D_800BE640 * DISTANCE_SPREAD_FRACTION != 0.0f) {
+                distance = (guRandom() % D_800BE640) * DISTANCE_SPREAD_FRACTION + MIN_CAMERA_DISTANCE;
+            } else {
+                distance = MIN_CAMERA_DISTANCE;
+            }
+            if (D_800BE640 * DEFAULT_HEIGHT_SPREAD_FRACTION != 0.0f) {
+                height = (guRandom() % D_800BE640) * DEFAULT_HEIGHT_SPREAD_FRACTION + DEFAULT_MIN_HEIGHT;
+            } else {
+                height = DEFAULT_MIN_HEIGHT;
+            }
+            if (height > DEFAULT_MAX_HEIGHT) {
+                height = DEFAULT_MAX_HEIGHT;
+            }
+            if (distance > MAX_CAMERA_DISTANCE) {
+                distance = MAX_CAMERA_DISTANCE;
+            }
+            yaw = sShotFlightYaw + M_PI + M_PI * 5 / 8
+                  + (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768 * 1.225f);
+        }
+    } else {
+        if (D_800BE640 * DISTANCE_SPREAD_FRACTION != 0.0f) {
+            distance = (guRandom() % D_800BE640) * DISTANCE_SPREAD_FRACTION + MIN_CAMERA_DISTANCE;
+        } else {
+            distance = MIN_CAMERA_DISTANCE;
+        }
+        if (D_800BE640 * OPTION_UNK3_HEIGHT_SPREAD_FRACTION != 0.0f) {
+            height = (guRandom() % D_800BE640) * OPTION_UNK3_HEIGHT_SPREAD_FRACTION + OPTION_UNK3_MIN_HEIGHT;
+        } else {
+            height = OPTION_UNK3_MIN_HEIGHT;
+        }
+        if (height > OPTION_UNK3_MAX_HEIGHT) {
+            height = OPTION_UNK3_MAX_HEIGHT;
+        }
+        if (distance > MAX_CAMERA_DISTANCE) {
+            distance = MAX_CAMERA_DISTANCE;
+        }
+        yaw = sShotFlightYaw + M_PI + M_PI / 2 + (f32)(rand() & RANDOM_YAW_MASK) * (M_PI / 32768);
+    }
+    point[AXIS_X] = -sinf(yaw) * distance + sShotEndPosition[AXIS_X];
+    point[AXIS_Z] = cosf(yaw) * distance + sShotEndPosition[AXIS_Z];
+    point[AXIS_Y] = GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
+    if (point[AXIS_Y] > sShotEndPosition[AXIS_Y] - MIN_RISE_ABOVE_SHOT_END) {
+        point[AXIS_Y] = sShotEndPosition[AXIS_Y] - MIN_RISE_ABOVE_SHOT_END;
+    }
+    point[AXIS_Y] = point[AXIS_Y] - height;
+    sCameraPosition[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    sCameraPosition[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    sCameraPosition[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    SnapLookAtPoint();
+}
 
 /* The songs of the holes */
 #define HOLE_SONG_TOURNAMENT 0x0B
