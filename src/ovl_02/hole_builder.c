@@ -1,11 +1,13 @@
 #include "asset.h"
 #include "billboard.h"
 #include "common.h"
+#include "course.h"
 #include "debug_text.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "hole_loader.h"
-#include "host_file.h"
 #include "hole_triangles.h"
+#include "host_file.h"
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
@@ -51,8 +53,21 @@
 #define UNK12_VERTICES_ASSET 0x3F0
 #define UNK12_MIDPOINTS_ASSET 0x3F1
 #define UNK12_TREES_ASSET 0x3F2
+#define UNK12_UNK6_ASSET 0x3F3
+#define UNK12_POINTS_ASSET 0x3F4
 #define UNK12_TRIANGLES_ASSET 0x3F5
 #define UNK12_ATTRIBUTES_ASSET 0x3F6
+/* The paint logic of the last mini-golf course; later courses use it too */
+#define LAST_MINI_GOLF_PAINT_LOGIC 11
+/* The size of the host file paths that BuildHole and SaveHoleFiles use */
+#define HOST_PATH_SIZE 0x80
+/* The sizes of the hole files that SaveHoleFiles writes */
+#define HOLE_VERTICES_FILE_SIZE 0x2520
+#define HOLE_MIDPOINTS_FILE_SIZE 0x8000
+#define HOLE_TREES_FILE_SIZE 0x800
+#define HOLE_UNK6_FILE_SIZE 0x34
+#define HOLE_POINTS_FILE_SIZE 0x120
+#define HOLE_TRIANGLES_FILE_SIZE 0x3C00
 /* The size of the attributes unpacked into the build buffer */
 #define ATTRIBUTE_BUFFER_SIZE 0x20000
 /* Where hole files are read to */
@@ -136,6 +151,8 @@ extern u8 *sBuildBuffer;
 extern u8 *sBuildCursor;
 extern s32 g_TerrainCodeBlockCount;
 extern f32 sHeightStepScales[];
+extern s32 sPaintLogic;
+extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
 
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx **gfx, Vtx **vertices);
 
@@ -146,6 +163,8 @@ void PaintGroundTiles(void);
 void ClearHolePoints(void);
 void ShadeGroundTiles(void);
 void CastBillboardShadows(void);
+void MoveRingsToEnd(void);
+void FillRandomGrid(s32 range, s32 base);
 
 /* Copies bytes from the read cursor and advances it past them */
 static inline void ReadFileBytes(void *destination, s32 size) {
@@ -1294,10 +1313,20 @@ static inline s32 IsOnMap(s32 column, s32 row) {
 
 /* Returns the map texel at a column and row, or 0 off the map */
 static inline u16 ReadMapTexel(s32 column, s32 row) {
-    if (IsOnMap(column, row)) {
-        return *GetMapTexel(column, row);
+    /* The separate tests, rather than IsOnMap, are there to match */
+    if (column < 0) {
+        return 0;
     }
-    return 0;
+    if (column >= MAP_COLUMN_COUNT) {
+        return 0;
+    }
+    if (row < 0) {
+        return 0;
+    }
+    if (row >= MAP_ROW_COUNT) {
+        return 0;
+    }
+    return *GetMapTexel(column, row);
 }
 
 /*
@@ -1313,7 +1342,7 @@ void EncodeCodeMap(void) {
     sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
     for (row = 0; row < MAP_ROW_COUNT; row++) {
         for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-            sBuildCursor = sBuildBuffer + row * MAP_COLUMN_COUNT + column;
+            sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
             *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
         }
     }
@@ -1490,18 +1519,154 @@ s32 GetCoursePaintLogic(s32 course) {
 void FinishHolePoints(s32 course, s32 hole) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802504E8_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255168_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255188_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551A8_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551C8_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_802551E8_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255208_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255228_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_80255248_ovl_02);
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", D_8025524C_ovl_02);
+/*
+ * Builds a hole: reads its files, either from its assets or, with
+ * GAME_FLAG_READ_HOST_HOLE, from the host, then measures and paints its
+ * ground tiles and places its billboards
+ */
+void BuildHole(s32 course, s32 hole) {
+    AssetFile asset;
+    char path[HOST_PATH_SIZE];
+    u32 size;
+    s32 pointsSize;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", func_802509BC_ovl_02);
+    /* The repeated case is there to match */
+    if (course == 2) {
+        FillRandomGrid(0x60, 0xC8);
+    } else if (course == 3) {
+        FillRandomGrid(0x60, 0xC8);
+    } else {
+        FillRandomGrid(0x60, 0xBE);
+    }
+    if (g_IsMiniGolf) {
+        sPaintLogic = g_CourseIndex;
+        if (g_CourseIndex > LAST_MINI_GOLF_PAINT_LOGIC) {
+            sPaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
+        }
+        FillRandomGrid(0x40, 0xD2);
+    } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
+        sPaintLogic = sHolePaintLogics[course][hole - 1];
+        if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
+            sPaintLogic++;
+        }
+        if (IsGameFlagSet(GAME_FLAG_UNK6B)) {
+            sPaintLogic++;
+        }
+    } else {
+        sPaintLogic = GetCoursePaintLogic(course);
+    }
+    osSyncPrintf("PaintLogic%d\n", sPaintLogic);
+    if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
+        if (IsGameFlagSet(GAME_FLAG_UNK51) && hole == 0) {
+            hole = COURSE_HOLE_COUNT;
+        }
+        ClearHoleBuild();
+        OpenHoleAsset(course, hole, HOLE_ASSET_VERTICES);
+        ReadGridVertices();
+        OpenHoleAsset(course, hole, HOLE_ASSET_MIDPOINTS);
+        ReadTileMidpoints();
+        OpenHoleAsset(course, hole, HOLE_ASSET_TREES);
+        ReadBillboards();
+        if (!g_GameState.unk30 && g_Scene != SCENE_STAFF_ROLL) {
+            if (g_GameMode == GAME_MODE_UNK12) {
+                OpenAssetFile(UNK12_UNK6_ASSET, &asset);
+            } else {
+                OpenAssetFile(sHoleAssetIds[course][hole].unk6, &asset);
+            }
+            ReadAssetFile(&D_800BA9D8, GetAssetFileSize(&asset), &asset);
+        }
+        if (g_GameMode == GAME_MODE_UNK12) {
+            OpenAssetFile(UNK12_POINTS_ASSET, &asset);
+        } else {
+            OpenAssetFile(sHoleAssetIds[course][hole].points, &asset);
+        }
+        pointsSize = GetAssetFileSize(&asset);
+        ReadAssetFile(&g_HolePoints, pointsSize, &asset);
+        osSyncPrintf("%d\n", pointsSize);
+        FinishHolePoints(course, hole);
+        OpenHoleAsset(course, hole, HOLE_ASSET_TRIANGLES);
+        ReadHoleTriangles();
+        OpenHoleAsset(course, hole, HOLE_ASSET_ATTRIBUTES);
+        MeasureGroundTiles();
+        PrepareHoleTriangles();
+        sIsCodeMapCleaned = TRUE;
+        osSyncPrintf("GT..\n");
+        PaintGroundTiles();
+        osSyncPrintf("OK!\n");
+        PlaceBillboards();
+        return;
+    }
+    ClearHoleBuild();
+    if (IsGameFlagSet(GAME_FLAG_SKIP_HOST_HOLE_READ)) {
+        ClearGameFlag(GAME_FLAG_SKIP_HOST_HOLE_READ);
+    } else {
+        sprintf(path, "bin/course%d/hole%d%2.2d.vtx", course, course, hole);
+        ReadHostFile(path, &size);
+        sprintf(path, "bin/course%d/hole%d%2.2d.dtx", course, course, hole);
+        ReadHostFile(path, &size);
+        sprintf(path, "bin/course%d/hole%d%2.2d.tre", course, course, hole);
+        ReadHostFile(path, &size);
+        sprintf(path, "bin/course%d/hole%d%2.2d.hol", course, course, hole);
+        ReadHostFile(path, &size);
+        sprintf(path, "bin/course%d/hole%d%2.2d.pnt", course, course, hole);
+        ReadHostFile(path, &size);
+        sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
+        if (ReadHostFile(path, &size) == HOST_FILE_OK) {
+            MoveRingsToEnd();
+        }
+        sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
+        ReadHostFile(path, &size);
+    }
+    osSyncPrintf("@1\n");
+    MeasureGroundTiles();
+    sIsCodeMapCleaned = TRUE;
+    PaintGroundTiles();
+    PlaceBillboards();
+    osSyncPrintf("Ok!\n");
+}
+
+/*
+ * Writes a hole's files to the host, the attributes as the map's terrain
+ * codes, a byte each. A cleaned code map is first restored from its backup.
+ * It does not match for the same reason as EncodeCodeMap.
+ */
+#ifdef NON_MATCHING
+void SaveHoleFiles(s32 course, s32 hole) {
+    char path[HOST_PATH_SIZE];
+    s32 column;
+    s32 row;
+
+    sprintf(path, "bin/course%d/hole%d%2.2d.vtx", course, course, hole);
+    WriteHostFile(path, HOLE_VERTICES_FILE_SIZE);
+    sprintf(path, "bin/course%d/hole%d%2.2d.dtx", course, course, hole);
+    WriteHostFile(path, HOLE_MIDPOINTS_FILE_SIZE);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tre", course, course, hole);
+    WriteHostFile(path, HOLE_TREES_FILE_SIZE);
+    sprintf(path, "bin/course%d/hole%d%2.2d.hol", course, course, hole);
+    WriteHostFile(path, HOLE_UNK6_FILE_SIZE);
+    sprintf(path, "bin/course%d/hole%d%2.2d.pnt", course, course, hole);
+    WriteHostFile(path, HOLE_POINTS_FILE_SIZE);
+    sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
+    WriteHostFile(path, HOLE_TRIANGLES_FILE_SIZE);
+    if (sIsCodeMapCleaned) {
+        LoadBackupCodeMap();
+        sIsCodeMapCleaned = FALSE;
+    }
+    sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+    for (row = 0; row < MAP_ROW_COUNT; row++) {
+        for (column = 0; column < MAP_COLUMN_COUNT; column++) {
+            sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
+            *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+        }
+    }
+    sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
+    if (WriteHostFile(path, MAP_COLUMN_COUNT * MAP_ROW_COUNT) == HOST_FILE_OK) {
+        sBuildCursor = sBuildBuffer;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", SaveHoleFiles);
+#endif
 
 /*
  * Moves the rings, from the first triangle that is one, to the last

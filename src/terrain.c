@@ -101,7 +101,7 @@ void func_80404B84(void);
 void func_80406818(void);
 void func_80406C3C(void);
 
-void func_802504E8(s32 courseRecordIndex, s32 holeRecordIndex);
+void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
 s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
 s32 GetSurface(s32 x, s32 z);
 Vtx *GetGridVertex(u32 column, u32 row);
@@ -1206,11 +1206,11 @@ void PrepareHoleTriangles(void) {
 }
 
 /*
- * Tests whether func_802504E8 was linked above the first 4 MB of RAM. It
+ * Tests whether BuildHole was linked above the first 4 MB of RAM. It
  * is not, so this returns FALSE and the debug scene menu never opens.
  */
 s32 IsOverlayInExpansionMemory(void) {
-    return (u32)func_802504E8 > 0x803FFFFF;
+    return (u32)BuildHole > 0x803FFFFF;
 }
 
 /* Marks each billboard on the map image in red */

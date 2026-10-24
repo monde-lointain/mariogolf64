@@ -87,8 +87,15 @@
 #define GAME_FLAG_UNK51 0x51
 #define GAME_FLAG_UNK60 0x60
 #define GAME_FLAG_UNK69 0x69
+#define GAME_FLAG_UNK6A 0x6A
+#define GAME_FLAG_UNK6B 0x6B
 #define GAME_FLAG_UNK7C 0x7C
 #define GAME_FLAG_UNK7D 0x7D
+
+/* Has BuildHole read the hole's files from the host instead of its assets */
+#define GAME_FLAG_READ_HOST_HOLE 0x50
+/* Has BuildHole keep the hole already in memory once instead of reading the host files */
+#define GAME_FLAG_SKIP_HOST_HOLE_READ 0x52
 
 /* Prints the frame number of the golfer's reaction */
 #define GAME_FLAG_SHOW_REACTION_FRAME 0x3E

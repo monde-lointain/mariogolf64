@@ -16,3 +16,13 @@ D_8024DD34_ovl_04 = g_SimulatedShot + 0x14;
 /* The sound pointer bank ends where the wave bank begins, an address
    splat already gives to g_SoundWaveBankRomStart */
 g_SoundPointerBankRomEnd = 0x18BE00;
+
+/* The hole file path formats, which BuildHole has as string literals and
+   the asm of SaveHoleFiles reads under these names */
+sVerticesPathFormat = 0x80255168;
+sMidpointsPathFormat = 0x80255188;
+sTreesPathFormat = 0x802551A8;
+sUnk6PathFormat = 0x802551C8;
+sPointsPathFormat = 0x802551E8;
+sTrianglesPathFormat = 0x80255208;
+sAttributesPathFormat = 0x80255228;

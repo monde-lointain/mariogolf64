@@ -148,7 +148,7 @@ void func_80080220(void);
 void func_800802E0(void);
 void func_80253234(s32);
 void func_80253270(void);
-void func_802504E8(s32 courseRecordIndex, s32 holeRecordIndex);
+void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
 f32 MeasureGroundTiles(void);
@@ -609,7 +609,7 @@ void ShrinkMiniGolfHolePoints(void) {
 /* Reads the current hole's asset files, then shrinks its points for mini-golf */
 void LoadHole(void) {
     osSyncPrintf("putter%d:course%d:hole%d\n", g_IsMiniGolf, g_CourseIndex, g_HoleIndex);
-    func_802504E8(GetCourseRecordIndex(), GetHoleRecordIndex());
+    BuildHole(GetCourseRecordIndex(), GetHoleRecordIndex());
     ShrinkMiniGolfHolePoints();
 }
 
