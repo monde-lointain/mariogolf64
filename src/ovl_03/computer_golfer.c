@@ -32,12 +32,13 @@ extern CurrentShot sPlannedShot;
 extern u8 sPlanThreadStackEnd[];
 extern s32 D_8025C640_ovl_03;
 extern s8 sIsPlanStarted;
+extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 extern CurrentShot sShot;
 
 s32 PlanShot(CurrentShot *plannedShot);
 s32 func_8024F0B0_ovl_03(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
-s32 func_80252F70_ovl_03(s32 arg0);
+s32 ChooseClubForDistance(s32 distance);
 
 void RestartShotPlan(void) {
     sIsPlanStarted = FALSE;
@@ -336,7 +337,7 @@ void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targe
         values[index] = one;
     }
     strokeCount = g_Players[sShot.playerIndex].unk23;
-    *plannedClub = func_80252F70_ovl_03(func_8024F0B0_ovl_03(one));
+    *plannedClub = ChooseClubForDistance(func_8024F0B0_ovl_03(one));
     *targetX = D_800BA9D8.cupPosition[AXIS_X];
     *targetZ = g_CupPositionZ;
     *arg4 = values[strokeCount];
@@ -438,7 +439,51 @@ s32 FindClubSlot(s32 unused, s32 clubType) {
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_80252F70_ovl_03);
+/* GetLieRating's worst rating */
+#define WORST_LIE_RATING 1
+/* What rain leaves of a shot's distance, for golfers it shortens */
+#define RAINY_DISTANCE_FRACTION 0.95f
+
+/*
+ * Returns the type of the shortest usable club, from the sand wedge up, whose
+ * normal shot carries beyond distance from the ball's lie. A club the golfer
+ * would hit from the worst lie only counts if the golfer's unk2 trait is 2 or
+ * more. If no club carries that far, it returns the slot of the longest club
+ * that counted, or CLUB_TYPE_SAND_WEDGE if none did.
+ */
+s32 ChooseClubForDistance(s32 distance) {
+    s32 fallback = CLUB_TYPE_SAND_WEDGE;
+    s32 type;
+    s32 slot;
+    Club *club;
+    s32 carry;
+    s32 rating;
+
+    for (type = CLUB_TYPE_SAND_WEDGE; type >= 0; type--) {
+        slot = FindClubSlot(sShot.playerIndex, type);
+        if (!sIsClubUsable[slot]) {
+            continue;
+        }
+        club = GetClub(g_Players[sShot.playerIndex].clubs[slot]);
+        carry = GetShotWorldDistance(club, SHOT_MODE_NORMAL);
+        if (g_HoleConditions.isRaining == TRUE &&
+            sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk1 < 2) {
+            carry = carry * RAINY_DISTANCE_FRACTION;
+        }
+        carry = carry * GetSurfaceInfo(sShot.surface)->minPercent / 100;
+        rating = GetLieRating(club, sShot.surface, SHOT_MODE_NORMAL);
+        if (sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk2 < 2) {
+            if (rating == WORST_LIE_RATING) {
+                continue;
+            }
+        }
+        fallback = slot;
+        if (distance < carry) {
+            return type;
+        }
+    }
+    return fallback;
+}
 
 /* Returns how far apart two binary angles are, up to half a turn */
 s32 GetAngleDifference(s32 angle, s32 otherAngle) {
