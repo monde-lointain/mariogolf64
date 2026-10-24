@@ -291,10 +291,10 @@ extern CoursePoint sNearCupPoint;
 
 void AssignCharacterBuffers(void);
 void SetFramebufferCount(s32 count);
-void func_80078910(void);
+void FreeEffectImages(void);
 void DrawStaffLine(Gfx **displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx **displayListHead);
-void func_800789C8(void);
+void LoadEffectImages(void);
 
 u8 sIsPaintingShown = TRUE;
 s32 sStaffRollFrame = 0;
@@ -443,14 +443,14 @@ void LoadStaffRoll(void) {
     sIsLeavingStaffRoll = FALSE;
     sTextScrollOffset = 0;
     sTopLineIndex = FIRST_TOP_LINE_INDEX;
-    func_800789C8();
+    LoadEffectImages();
 }
 
 /* Module 0x1F's onUnload */
 void UnloadStaffRoll(void) {
     s32 index;
 
-    func_80078910();
+    FreeEffectImages();
     g_Cameras[0].view.scissorX = SCREEN_BORDER;
     g_Cameras[0].view.scissorY = SCREEN_BORDER;
     g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
@@ -650,7 +650,7 @@ void RunStaffRollTimeline(s32 frame) {
         sNearCupPoint[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
         sNearCupPoint[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
         sNearCupPoint[AXIS_Y] = GetGroundHeight(sNearCupPoint[AXIS_X], sNearCupPoint[AXIS_Z]);
-        func_80078D94();
+        ClearEffects();
         sViewShrinkStartFrame = NEVER_FRAME;
         sUnreadValue = 0.0f;
         sCastFramingPitch = 0.0f;
@@ -697,7 +697,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == TEE_REACTIONS_FRAME || frame == 360 || frame == 420 || frame == 480) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -728,7 +728,7 @@ void RunStaffRollTimeline(s32 frame) {
         StartFadeIn(CAST_FADE_FRAMES);
     }
     if (frame == FAIRWAY_SHOTS_FRAME || frame == 770 || frame == 810 || frame == 850) {
-        func_80078D94();
+        ClearEffects();
         PickFramingPitch();
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
         sCastFramingYaw = ((sCastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
@@ -757,7 +757,7 @@ void RunStaffRollTimeline(s32 frame) {
         SetSwingAnimation(sCastSlot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
     }
     if (frame == FAIRWAY_REACTIONS_FRAME || frame == 1000 || frame == 1060 || frame == 1120) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -788,7 +788,7 @@ void RunStaffRollTimeline(s32 frame) {
         StartFadeIn(CAST_FADE_FRAMES);
     }
     if (frame == APPROACH_SHOTS_FRAME || frame == 1420 || frame == 1460 || frame == 1500) {
-        func_80078D94();
+        ClearEffects();
         PickFramingPitch();
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
         sCastFramingYaw = ((sCastIndex - 2 * SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
@@ -817,7 +817,7 @@ void RunStaffRollTimeline(s32 frame) {
         SetSwingAnimation(sCastSlot, APPROACH_CLUB, SHOT_MODE_NORMAL);
     }
     if (frame == APPROACH_REACTIONS_FRAME || frame == 1680 || frame == 1760 || frame == 1840) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -848,7 +848,7 @@ void RunStaffRollTimeline(s32 frame) {
         StartFadeIn(CAST_FADE_FRAMES);
     }
     if (frame == PUTT_SHOTS_FRAME || frame == 2060 || frame == 2100 || frame == 2150) {
-        func_80078D94();
+        ClearEffects();
         sCastFramingYaw = ((sCastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
         PickFramingPitch();
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
@@ -878,7 +878,7 @@ void RunStaffRollTimeline(s32 frame) {
         SetSwingAnimation(sCastSlot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
     }
     if (frame == PUTT_REACTIONS_FRAME || frame == 2300 || frame == 2400 || frame == 2500) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -908,7 +908,7 @@ void RunStaffRollTimeline(s32 frame) {
     if (frame == FINALE_FRAME) {
         StartFadeIn(CAST_FADE_FRAMES);
         sCastFramingYaw = 0.0f;
-        func_80078D94();
+        ClearEffects();
         PickFramingPitch();
         sIsReactionShown = FALSE;
         FreeCharacterSlot(sCastSlot);
@@ -927,7 +927,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 2740) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -947,7 +947,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 2800) {
-        func_80078D94();
+        ClearEffects();
         sCastFramingYaw = 0.0f;
         PickFramingPitch();
         FreeCharacterSlot(sCastSlot);
@@ -967,7 +967,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 2950) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -988,7 +988,7 @@ void RunStaffRollTimeline(s32 frame) {
     }
     if (frame == 3030) {
         sCastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
-        func_80078D94();
+        ClearEffects();
         PickFramingPitch();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
@@ -1008,7 +1008,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 3100) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
@@ -1028,7 +1028,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 3180) {
-        func_80078D94();
+        ClearEffects();
         PickFramingPitch();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
@@ -1048,7 +1048,7 @@ void RunStaffRollTimeline(s32 frame) {
         sCastSlot = slot;
     }
     if (frame == 3240) {
-        func_80078D94();
+        ClearEffects();
         FreeCharacterSlot(sCastSlot);
         ResetStaffRollEase();
         slot = sCastSlot ^ 1;
