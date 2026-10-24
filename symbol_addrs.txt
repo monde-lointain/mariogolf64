@@ -1537,6 +1537,7 @@ IsDebugBButtonView = 0x80045AC0; // type:func
 SwapCameraPicks = 0x80045AD4; // type:func
 NextCameraPick = 0x80045B14; // type:func
 EndFlightCamera = 0x80045C00; // type:func
+PlayContactSound = 0x80046604; // type:func
 RandomBelow = 0x800467DC; // type:func
 IsCupPassPoint = 0x8004683C; // type:func
 RateShotLength = 0x80046898; // type:func

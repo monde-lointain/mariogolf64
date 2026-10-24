@@ -25,6 +25,9 @@ static const char sUnusedFloatFormat[] = "            %f";
 /* The camera kind that the B button picks in debug builds */
 #define FLIGHT_CAMERA_UNK4 4
 
+/* A camera kind that keeps the putter's contact from calling func_80213D70 */
+#define FLIGHT_CAMERA_UNK13 0x13
+
 /* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in turn */
 #define CAMERA_PICK_COUNT 10
 /* How many swaps a shuffle makes */
@@ -329,7 +332,76 @@ void EndFlightCamera(void) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045CE0);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80046604);
+/* The sounds of the club meeting the ball */
+#define CONTACT_SOUND_WOOD_UNK50 0x50 /* Off a tee, or on some power shots */
+#define CONTACT_SOUND_WOOD 0x52
+#define CONTACT_SOUND_IRON_TEE 0x53
+#define CONTACT_SOUND_IRON 0x54
+#define CONTACT_SOUND_IRON_BUNKER 0x56
+#define CONTACT_SOUND_PUTTER 0x57
+#define CONTACT_SOUND_CHANNEL 2
+#define CONTACT_SOUND_VOLUME 0x7F
+
+/* The clubs in slots below it get func_80213D70(1) on some power shots */
+#define LEADING_CLUB_SLOT_COUNT 6
+
+void func_80213D70(s32);
+void func_80216CAC(void);
+
+/* These are macros, as inline functions compile differently from the original */
+#define IsUnk2E14PowerShot() (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
+#define IsFairwayKind(kind)                                                        \
+    ((kind) == SURFACE_KIND_FAIRWAY || (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE     \
+     || (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
+#define IsBunkerKind(kind)                                                         \
+    ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE       \
+     || (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
+
+/* Plays the sound of the simulated shot's club meeting the ball */
+void PlayContactSound(void) {
+    Club *club;
+    SurfaceInfo *surfaceInfo;
+
+    club = GetClub(g_Players[g_SimulatedShot.shot.unk18].clubs[g_SimulatedShot.shot.clubIndex]);
+    surfaceInfo = GetSurfaceInfo(g_CurrentShot.surface);
+    if (club->kind == CLUB_KIND_WOOD) {
+        if (IsUnk2E14PowerShot()) {
+            PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+            func_80213D70(0);
+        } else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+            func_80213D70(2);
+            PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else {
+            func_80213D70(2);
+            PlaySound(CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        }
+        func_80216CAC();
+    } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
+        if (IsUnk2E14PowerShot()) {
+            if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
+                func_80213D70(1);
+            } else {
+                func_80213D70(2);
+            }
+        } else {
+            func_80213D70(2);
+        }
+        if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+            PlaySound(CONTACT_SOUND_IRON_TEE, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (IsFairwayKind(surfaceInfo->kind)) {
+            PlaySound(CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (IsBunkerKind(surfaceInfo->kind)) {
+            PlaySound(CONTACT_SOUND_IRON_BUNKER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else {
+            PlaySound(CONTACT_SOUND_IRON, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        }
+    } else {
+        PlaySound(CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        if (sFlightCameraKind != FLIGHT_CAMERA_UNK13) {
+            func_80213D70(3);
+        }
+    }
+}
 
 /* A random value from 0 to limit - 1, or 0 if limit is 0 */
 s32 RandomBelow(s32 limit) {
