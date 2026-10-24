@@ -27,11 +27,29 @@
 /* Unused; the original has it */
 static const char sUnusedFloatFormat[] = "            %f";
 
-/* The camera kind that the B button picks in debug builds */
-#define FLIGHT_CAMERA_UNK4 4
-
-/* A camera kind that keeps the putter's contact from calling func_80213D70 */
-#define FLIGHT_CAMERA_UNK13 0x13
+/* The flight camera kinds, which sFlightCameraKind holds */
+#define FLIGHT_CAMERA_UNK0 0
+#define FLIGHT_CAMERA_UNK1 1
+#define FLIGHT_CAMERA_BESIDE_TEE 2 /* Beside the tee, looking at it */
+#define FLIGHT_CAMERA_UNK3 3 /* Placed by func_80203B4C */
+#define FLIGHT_CAMERA_BESIDE_GOLFER 4 /* Picked by the B button in debug builds */
+#define FLIGHT_CAMERA_CIRCLING_BALL 5 /* Picked by the A button in debug builds */
+#define FLIGHT_CAMERA_TRAILING_BALL 6
+#define FLIGHT_CAMERA_NEAR_LAUNCH 7 /* At an early step of the path */
+#define FLIGHT_CAMERA_CHASING_BALL 8
+#define FLIGHT_CAMERA_FOLLOWING_PATH 9 /* At a step of the path behind the ball */
+#define FLIGHT_CAMERA_SIDE_OF_FLIGHT 0xA
+#define FLIGHT_CAMERA_BEHIND_START 0xB
+#define FLIGHT_CAMERA_AROUND_END 0xC /* Placed by PlaceCameraAroundShotEnd */
+#define FLIGHT_CAMERA_UNKD 0xD
+#define FLIGHT_CAMERA_UNKE 0xE
+#define FLIGHT_CAMERA_UNKF 0xF
+#define FLIGHT_CAMERA_UNK10 0x10
+#define FLIGHT_CAMERA_UNK11 0x11
+#define FLIGHT_CAMERA_FRAMING_PATH 0x12 /* Frames the path's extreme points on x and z */
+/* Frames the cup and the ball; it keeps the putter's contact from calling func_80213D70 */
+#define FLIGHT_CAMERA_FRAMING_CUP 0x13
+#define FLIGHT_CAMERA_FLAGGED_STEP 0x14 /* Looks along the path at D_800BE64C */
 
 /* The values 0 to CAMERA_PICK_COUNT - 1, shuffled; NextCameraPick deals them in turn */
 #define CAMERA_PICK_COUNT 10
@@ -344,7 +362,7 @@ SurfaceInfo *GetBallSurfaceInfo(UnkB8 *player) {
 }
 
 s32 IsDebugBButtonView(void) {
-    return sFlightCameraKind == FLIGHT_CAMERA_UNK4;
+    return sFlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER;
 }
 
 /*
@@ -690,7 +708,7 @@ void PlayContactSound(void) {
         }
     } else {
         PlaySound(CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
-        if (sFlightCameraKind != FLIGHT_CAMERA_UNK13) {
+        if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
             func_80213D70(3);
         }
     }
@@ -1453,16 +1471,6 @@ void AimCameraYaw(void) {
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80048D7C);
 
-#define FLIGHT_CAMERA_UNK3 3
-#define FLIGHT_CAMERA_UNK5 5 /* The camera kind that the A button picks in debug builds */
-#define FLIGHT_CAMERA_UNK6 6
-#define FLIGHT_CAMERA_UNK7 7
-#define FLIGHT_CAMERA_UNK9 9
-#define FLIGHT_CAMERA_UNKA 0xA
-#define FLIGHT_CAMERA_UNKB 0xB
-#define FLIGHT_CAMERA_UNKC 0xC
-#define FLIGHT_CAMERA_UNKD 0xD
-#define FLIGHT_CAMERA_UNK12 0x12
 #define LONG_SHOT_MIN_LENGTH 0x1C2000
 #define MID_SHOT_MIN_LENGTH 0x4B001
 #define NEAR_CUP_DISTANCE 0x1E00
@@ -1481,10 +1489,10 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80048D7C);
  * Picks a flight camera kind for the value of D_800DAF50, and switches to it if it is
  * greater than the current kind. The picks depend on the simulated shot, save option 3
  * and chance. A switch ends func_8009226C's effect and may start another one. In debug
- * builds, the second controller's B and A buttons pick FLIGHT_CAMERA_UNK4 and
- * FLIGHT_CAMERA_UNK5.
+ * builds, the second controller's B and A buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and
+ * FLIGHT_CAMERA_CIRCLING_BALL.
  * It does not match: cross-jumping sends the second switch's case 5 trouble-surface
- * branch through the identical "kind = FLIGHT_CAMERA_UNKC" tail of the first switch's
+ * branch through the identical "kind = FLIGHT_CAMERA_AROUND_END" tail of the first switch's
  * case 3, where the original branches straight to the end. The other instructions are
  * the same.
  */
@@ -1504,7 +1512,7 @@ void ChooseFlightCameraKind(void) {
                 if (!(sFlightCameraFlags & FLIGHT_CAMERA_FLAG_UNK2) && RandomBelow(2) == 0 && !IsPinInCup()
                     && D_800BE644 >= CUP_LANDING_MIN_DISTANCE && D_800BE644 <= CUP_LANDING_MAX_DISTANCE
                     && (g_SimulatedShot.unk2E10 || sLandingCupDistance < NEAR_CUP_DISTANCE)) {
-                    kind = FLIGHT_CAMERA_UNK13;
+                    kind = FLIGHT_CAMERA_FRAMING_CUP;
                 } else if (g_IsMiniGolf) {
                     pick = RandomBelow(10);
                     switch (pick) {
@@ -1513,14 +1521,14 @@ void ChooseFlightCameraKind(void) {
                             kind = FLIGHT_CAMERA_UNK3;
                             break;
                         case 2:
-                            kind = FLIGHT_CAMERA_UNKB;
+                            kind = FLIGHT_CAMERA_BEHIND_START;
                             break;
                         case 3:
                         case 4:
-                            kind = FLIGHT_CAMERA_UNKC;
+                            kind = FLIGHT_CAMERA_AROUND_END;
                             break;
                         default:
-                            kind = FLIGHT_CAMERA_UNK12;
+                            kind = FLIGHT_CAMERA_FRAMING_PATH;
                             break;
                     }
                 } else {
@@ -1529,26 +1537,26 @@ void ChooseFlightCameraKind(void) {
                         kind = FLIGHT_CAMERA_UNK3;
                     } else if (pick == 3) {
                         if ((D_800BE658 & 2) || g_SimulatedShot.stepCount > 120) {
-                            kind = FLIGHT_CAMERA_UNKB;
+                            kind = FLIGHT_CAMERA_BEHIND_START;
                         } else {
-                            kind = FLIGHT_CAMERA_UNK4;
+                            kind = FLIGHT_CAMERA_BESIDE_GOLFER;
                         }
                     } else if (pick == 4) {
-                        kind = FLIGHT_CAMERA_UNKB;
+                        kind = FLIGHT_CAMERA_BEHIND_START;
                     } else {
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                     }
                 }
                 break;
             case 3:
-                if (sFlightCameraKind != FLIGHT_CAMERA_UNK12 && sFlightCameraKind != FLIGHT_CAMERA_UNK13
-                    && sFlightCameraKind != FLIGHT_CAMERA_UNKB) {
-                    kind = FLIGHT_CAMERA_UNKC;
+                if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_PATH && sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP
+                    && sFlightCameraKind != FLIGHT_CAMERA_BEHIND_START) {
+                    kind = FLIGHT_CAMERA_AROUND_END;
                 }
                 break;
             case 6:
-                if (sFlightCameraKind != FLIGHT_CAMERA_UNK12 && sFlightCameraKind != FLIGHT_CAMERA_UNK13) {
-                    kind = FLIGHT_CAMERA_UNKC;
+                if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_PATH && sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
+                    kind = FLIGHT_CAMERA_AROUND_END;
                 }
                 break;
             case 7:
@@ -1569,79 +1577,79 @@ void ChooseFlightCameraKind(void) {
                     if (D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
                         kind = FLIGHT_CAMERA_UNK3;
                     } else {
-                        kind = FLIGHT_CAMERA_UNK5;
+                        kind = FLIGHT_CAMERA_CIRCLING_BALL;
                     }
                 } else if (pick == 5) {
                     kind = FLIGHT_CAMERA_UNK3;
                     if (D_800BE690 == 1 && g_SimulatedShot.stepCount >= 61) {
-                        kind = FLIGHT_CAMERA_UNK4;
+                        kind = FLIGHT_CAMERA_BESIDE_GOLFER;
                     }
                 } else if (pick == 6) {
                     if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                     } else {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
                 } else if (pick == 7) {
                     if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                     } else {
-                        kind = FLIGHT_CAMERA_UNK6;
+                        kind = FLIGHT_CAMERA_TRAILING_BALL;
                     }
                 } else if (pick == 8) {
-                    kind = FLIGHT_CAMERA_UNKA;
+                    kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                 } else if (pick == 9) {
                     kind = FLIGHT_CAMERA_UNK3;
                     if (D_800BE640 >= MID_SHOT_MIN_LENGTH && g_SimulatedShot.stepCount >= 16) {
-                        kind = FLIGHT_CAMERA_UNK7;
+                        kind = FLIGHT_CAMERA_NEAR_LAUNCH;
                     }
                 }
                 break;
             case 2:
-                if (sFlightCameraKind == FLIGHT_CAMERA_UNK7) {
+                if (sFlightCameraKind == FLIGHT_CAMERA_NEAR_LAUNCH) {
                     effectIndex = 3;
-                    kind = FLIGHT_CAMERA_UNKA;
+                    kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                 } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK3) {
                     if (RandomBelow(3) == 0) {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
                     if (D_800BE640 >= LONG_SHOT_MIN_LENGTH && RandomBelow(4) == 0) {
-                        kind = FLIGHT_CAMERA_UNK9;
+                        kind = FLIGHT_CAMERA_FOLLOWING_PATH;
                     }
-                } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK4) {
+                } else if (sFlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
                     if (g_SimulatedShot.stepCount < 120) {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     } else if (g_SimulatedShot.unk2E0C) {
-                        kind = FLIGHT_CAMERA_UNKB;
+                        kind = FLIGHT_CAMERA_BEHIND_START;
                     } else if (D_800BE640 < LONG_SHOT_MIN_LENGTH) {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     } else if (RandomBelow(4) == 0) {
-                        kind = FLIGHT_CAMERA_UNK9;
+                        kind = FLIGHT_CAMERA_FOLLOWING_PATH;
                     } else {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
                 }
                 break;
             case 3:
-                if (sFlightCameraKind == FLIGHT_CAMERA_UNK4) {
+                if (sFlightCameraKind == FLIGHT_CAMERA_BESIDE_GOLFER) {
                     if (g_SimulatedShot.stepCount < 120) {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     } else if (g_SimulatedShot.unk2E0C) {
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                     }
-                } else if (sFlightCameraKind != FLIGHT_CAMERA_UNK6) {
+                } else if (sFlightCameraKind != FLIGHT_CAMERA_TRAILING_BALL) {
                     /* The nested ifs and the separate cases are there to match */
-                    if (sFlightCameraKind != FLIGHT_CAMERA_UNK9) {
-                        if (sFlightCameraKind != FLIGHT_CAMERA_UNKA) {
+                    if (sFlightCameraKind != FLIGHT_CAMERA_FOLLOWING_PATH) {
+                        if (sFlightCameraKind != FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
                             switch (RandomBelow(5)) {
                                 case 0:
-                                    kind = FLIGHT_CAMERA_UNKA;
+                                    kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                                     break;
                                 case 1:
-                                    kind = FLIGHT_CAMERA_UNKA;
+                                    kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                                     break;
                                 case 2:
-                                    kind = FLIGHT_CAMERA_UNKC;
+                                    kind = FLIGHT_CAMERA_AROUND_END;
                                     break;
                             }
                         }
@@ -1651,32 +1659,32 @@ void ChooseFlightCameraKind(void) {
             case 4:
                 if (D_800BE674) {
                     D_800BE630 = TRUE;
-                } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK6) {
+                } else if (sFlightCameraKind == FLIGHT_CAMERA_TRAILING_BALL) {
                     /* The empty branches are there to match */
-                } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK9) {
+                } else if (sFlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
                 } else {
                     if (sLandingCupDistance <= SHORT_SHOT_MAX_LENGTH) {
                         if (RandomBelow(2) == 0) {
-                            kind = FLIGHT_CAMERA_UNKC;
+                            kind = FLIGHT_CAMERA_AROUND_END;
                         }
                     } else if (RandomBelow(8) == 0) {
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                         effectIndex = 3;
                     } else if (RandomBelow(8) < 4) {
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                     }
                 }
                 break;
             case 5:
-                kind = FLIGHT_CAMERA_UNKC;
+                kind = FLIGHT_CAMERA_AROUND_END;
                 /* The repeated store is there to match */
-                if (IsTroubleSurface(sEndSurfaceInfo) || sFlightCameraKind == FLIGHT_CAMERA_UNK9) {
-                    kind = FLIGHT_CAMERA_UNKC;
+                if (IsTroubleSurface(sEndSurfaceInfo) || sFlightCameraKind == FLIGHT_CAMERA_FOLLOWING_PATH) {
+                    kind = FLIGHT_CAMERA_AROUND_END;
                 }
                 break;
             case 6:
                 if (!D_800BE674) {
-                    kind = FLIGHT_CAMERA_UNKC;
+                    kind = FLIGHT_CAMERA_AROUND_END;
                 } else {
                     D_800BE630 = TRUE;
                 }
@@ -1688,7 +1696,7 @@ void ChooseFlightCameraKind(void) {
                     if (D_800BE674 || g_SimulatedShot.stepCount < 21) {
                         D_800BE630 = TRUE;
                     } else if (sLandingCupDistance <= SHORT_SHOT_MAX_LENGTH
-                               || sFlightCameraKind == FLIGHT_CAMERA_UNKC) {
+                               || sFlightCameraKind == FLIGHT_CAMERA_AROUND_END) {
                         kind = FLIGHT_CAMERA_UNKD;
                     }
                 }
@@ -1708,7 +1716,7 @@ void ChooseFlightCameraKind(void) {
                     case 4:
                     case 5:
                         if (D_800BE640 <= SHORT_SHOT_MAX_LENGTH) {
-                            kind = FLIGHT_CAMERA_UNKC;
+                            kind = FLIGHT_CAMERA_AROUND_END;
                         } else {
                             kind = FLIGHT_CAMERA_UNK3;
                         }
@@ -1716,20 +1724,20 @@ void ChooseFlightCameraKind(void) {
                     case 6:
                         kind = FLIGHT_CAMERA_UNK3;
                         if (D_800BE690 == 1 && g_SimulatedShot.stepCount >= 61) {
-                            kind = FLIGHT_CAMERA_UNK4;
+                            kind = FLIGHT_CAMERA_BESIDE_GOLFER;
                         }
                         break;
                     case 7:
-                        kind = FLIGHT_CAMERA_UNKA;
+                        kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                         break;
                     case 8:
-                        kind = FLIGHT_CAMERA_UNKC;
+                        kind = FLIGHT_CAMERA_AROUND_END;
                         break;
                 }
                 D_800BE630 = TRUE;
                 break;
             case 5:
-                kind = FLIGHT_CAMERA_UNKC;
+                kind = FLIGHT_CAMERA_AROUND_END;
                 D_800BE630 = TRUE;
                 break;
             case 6:
@@ -1742,8 +1750,8 @@ void ChooseFlightCameraKind(void) {
         func_8009226C(NO_EFFECT);
         if (effectIndex == NO_EFFECT) {
             if (D_800DAF50 >= 4 && !g_SimulatedShot.unk2E08 && D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
-                if (kind == FLIGHT_CAMERA_UNKC) {
-                    if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_UNKA) {
+                if (kind == FLIGHT_CAMERA_AROUND_END) {
+                    if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
                         func_8009226C(3);
                     } else if (RandomBelow(8) == 0) {
                         func_8009226C(1);
@@ -1760,10 +1768,10 @@ void ChooseFlightCameraKind(void) {
     }
     if (g_IsDebugEnabled) {
         if (g_ControllerStates[DEBUG_CAMERA_CONTROLLER].buttons & B_BUTTON) {
-            sFlightCameraKind = FLIGHT_CAMERA_UNK4;
+            sFlightCameraKind = FLIGHT_CAMERA_BESIDE_GOLFER;
         }
         if (g_ControllerStates[DEBUG_CAMERA_CONTROLLER].buttons & A_BUTTON) {
-            sFlightCameraKind = FLIGHT_CAMERA_UNK5;
+            sFlightCameraKind = FLIGHT_CAMERA_CIRCLING_BALL;
         }
     }
 }
@@ -1773,15 +1781,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 
 #define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
 #define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
-#define FLIGHT_CAMERA_UNK0 0
-#define FLIGHT_CAMERA_UNK1 1
-#define FLIGHT_CAMERA_UNK2 2
-#define FLIGHT_CAMERA_UNK8 8
-#define FLIGHT_CAMERA_UNKE 0xE
-#define FLIGHT_CAMERA_UNKF 0xF
-#define FLIGHT_CAMERA_UNK10 0x10
-#define FLIGHT_CAMERA_UNK11 0x11
-#define FLIGHT_CAMERA_UNK14 0x14
 #define VERY_LONG_SHOT_MIN_LENGTH 0x2A3000
 #define BALL_SOUND_MIN_SHOT_LENGTH 0x25800
 #define BALL_SOUND_VOLUME_LENGTH 0x7800 /* Shot length per step of volume */
@@ -1978,14 +1977,14 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         }
     }
     if (step > 60 && step < D_800BE64C && !D_800BE674) {
-        sFlightCameraKind = FLIGHT_CAMERA_UNK14;
+        sFlightCameraKind = FLIGHT_CAMERA_FLAGGED_STEP;
     }
-    if (D_800BE64C != -1 && D_800BE64C + 10 < step && sFlightCameraKind != FLIGHT_CAMERA_UNKC
+    if (D_800BE64C != -1 && D_800BE64C + 10 < step && sFlightCameraKind != FLIGHT_CAMERA_AROUND_END
         && (s32)IntLength3D(sFlightBallPosition[AXIS_X] - sShotEndPosition[AXIS_X],
                             sFlightBallPosition[AXIS_Y] - sShotEndPosition[AXIS_Y],
                             sFlightBallPosition[AXIS_Z] - sShotEndPosition[AXIS_Z]) > 0x25800) {
         D_800BE628 = TRUE;
-        sFlightCameraKind = FLIGHT_CAMERA_UNKC;
+        sFlightCameraKind = FLIGHT_CAMERA_AROUND_END;
     }
     if (D_800BE64C < step && (g_BallFlightStep + 40 < g_SimulatedShot.stepCount || D_800DAF50 == 7)
         && D_800BE630 == TRUE && !D_800BE69C && !D_800BE658) {
@@ -2015,12 +2014,12 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
             switch (sFlightCameraKind) {
                 case FLIGHT_CAMERA_UNK0:
                 case FLIGHT_CAMERA_UNK1:
-                case FLIGHT_CAMERA_UNK2:
+                case FLIGHT_CAMERA_BESIDE_TEE:
                 case FLIGHT_CAMERA_UNK3:
-                case FLIGHT_CAMERA_UNK4:
-                case FLIGHT_CAMERA_UNK5:
-                case FLIGHT_CAMERA_UNK8:
-                case FLIGHT_CAMERA_UNK9:
+                case FLIGHT_CAMERA_BESIDE_GOLFER:
+                case FLIGHT_CAMERA_CIRCLING_BALL:
+                case FLIGHT_CAMERA_CHASING_BALL:
+                case FLIGHT_CAMERA_FOLLOWING_PATH:
                     PlaySoundWithEffects(BALL_SOUND_UNK59, BALL_SOUND_CHANNEL, volume,
                                          BALL_SOUND_REVERB, BALL_SOUND_PAN);
                     break;
@@ -2029,10 +2028,10 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         if (step == BALL_SOUND_LATE_STEP) {
             osSyncPrintf("ball:%d\n", volume);
             switch (sFlightCameraKind) {
-                case FLIGHT_CAMERA_UNK6:
-                case FLIGHT_CAMERA_UNK7:
-                case FLIGHT_CAMERA_UNKA:
-                case FLIGHT_CAMERA_UNKC:
+                case FLIGHT_CAMERA_TRAILING_BALL:
+                case FLIGHT_CAMERA_NEAR_LAUNCH:
+                case FLIGHT_CAMERA_SIDE_OF_FLIGHT:
+                case FLIGHT_CAMERA_AROUND_END:
                 case FLIGHT_CAMERA_UNKD:
                 case FLIGHT_CAMERA_UNKE:
                 case FLIGHT_CAMERA_UNKF:
