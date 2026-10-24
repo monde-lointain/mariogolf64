@@ -42,7 +42,10 @@ extern s32 sPlanThreadState;
 extern OSThread sPlanThread;
 extern CurrentShot sPlannedShot;
 extern u8 sPlanThreadStackEnd[];
-extern s32 D_8025C640_ovl_03;
+/* sHoleStrokeTarget less the hole's par */
+extern s32 sHoleTargetToPar;
+/* The strokes the golfer aims to take on the hole */
+extern s32 sHoleStrokeTarget;
 /* Where the planned shot aims */
 extern CoursePoint sPlanTarget;
 /* The route points and the tee, as PlanRoute gathers them */
@@ -54,6 +57,8 @@ typedef struct RouteCoordinates {
 extern RouteCoordinates sRoute;
 extern s8 sIsPlanStarted;
 extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
+/* The size of the golfer's club set */
+extern s32 sClubCount;
 
 /* The rows of sClubKindChances */
 #define CLUB_CHANCE_SET_COUNT 2
@@ -111,7 +116,7 @@ s8 GetGolferTraitUnk2(void) {
 }
 
 s32 IsStrokeLimitReached(void) {
-    return g_Players[sShot.playerIndex].unk23 >= g_HolePar + D_8025C640_ovl_03 - 1;
+    return g_Players[sShot.playerIndex].unk23 >= g_HolePar + sHoleTargetToPar - 1;
 }
 
 /* Course units, of which there are 1024 to a world unit */
@@ -272,7 +277,94 @@ s32 PlanCupDistance(s32 unused) {
     return distance + (sShot.ballPosition[AXIS_Y] - g_CupPositionY) * HEIGHT_DISTANCE_FRACTION;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F320_ovl_03);
+/* Shots from farther than this are long shots */
+#define APPROACH_RANGE (60 * UNITS_PER_YARD)
+/* How much farther than the cup distance a putt is played in the rain */
+#define RAINY_PUTT_DISTANCE_SCALE 1.2f
+
+s32 ChooseHoleStrokeTarget(void);
+void func_802507D8_ovl_03(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ);
+
+/*
+ * Chooses sShot's club and shot mode for the lie and sets target to where the
+ * shot aims. From the bunker lies other than SURFACE_KIND_BUNKER it plays the
+ * sand wedge; on the green it takes the last usable club that can play from the
+ * green, in the weakest shot mode that reaches the cup; elsewhere it plays a long
+ * shot or an approach, by the cup distance.
+ */
+void PlanClubAndTarget(CoursePoint target) {
+    s32 targetX;
+    s32 targetZ;
+    s32 clubType;
+    s32 shotMode;
+    u32 kind;
+    s32 rest;
+    s32 slot;
+    Club *club;
+
+    clubType = CLUB_TYPE_DRIVER;
+    kind = GetSurfaceInfo(sShot.surface)->kind;
+    sHoleStrokeTarget = ChooseHoleStrokeTarget();
+    sHoleTargetToPar = sHoleStrokeTarget - g_HolePar;
+    switch (kind) {
+        case SURFACE_KIND_GREEN:
+        case SURFACE_KIND_GREEN_EDGE:
+            rest = GetBallCupDistance();
+            osSyncPrintf("rest = %d\n", rest);
+            if (g_HoleConditions.isRaining == TRUE) {
+                rest = rest * RAINY_PUTT_DISTANCE_SCALE;
+            }
+            for (slot = 0; slot < sClubCount; slot++) {
+                if (!sIsClubUsable[slot]) {
+                    continue;
+                }
+                club = GetClub(g_Players[sShot.playerIndex].clubs[slot]);
+                if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
+                    continue;
+                }
+                if (GetShotWorldDistance(club, SHOT_MODE_APPROACH) >= rest) {
+                    sShot.shotMode = SHOT_MODE_APPROACH;
+                } else if (GetShotWorldDistance(club, SHOT_MODE_NORMAL) >= rest) {
+                    sShot.shotMode = SHOT_MODE_NORMAL;
+                } else {
+                    sShot.shotMode = SHOT_MODE_POWER;
+                }
+                osSyncPrintf("skSCAI.powermode = %d\n", sShot.shotMode);
+                sShot.clubSlot = slot;
+            }
+            break;
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNK9:
+            sShot.shotMode = SHOT_MODE_NORMAL;
+            sShot.clubSlot = FindClubSlot(sShot.playerIndex, CLUB_TYPE_SAND_WEDGE);
+            func_802507D8_ovl_03(
+                sShot.ballPosition[AXIS_X], sShot.ballPosition[AXIS_Z],
+                GetShotWorldDistance(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot]), sShot.shotMode),
+                &targetX, &targetZ);
+            target[AXIS_X] = targetX;
+            target[AXIS_Z] = targetZ;
+            target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+            break;
+        default:
+            if (GetBallCupDistance() > APPROACH_RANGE) {
+                ChooseLongShot(sHoleStrokeTarget, &clubType, &targetX, &targetZ, &shotMode);
+                target[AXIS_X] = targetX;
+                target[AXIS_Z] = targetZ;
+                target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+                sShot.shotMode = shotMode;
+                sShot.clubSlot = FindClubSlot(sShot.playerIndex, clubType);
+            } else {
+                clubType = ChooseApproachClub(&targetX, &targetZ);
+                target[AXIS_X] = targetX;
+                target[AXIS_Z] = targetZ;
+                target[AXIS_Y] = GetGroundHeight(targetX, targetZ);
+                sShot.shotMode = SHOT_MODE_APPROACH;
+                sShot.clubSlot = FindClubSlot(sShot.playerIndex, clubType);
+            }
+            break;
+    }
+}
 
 /* SortByKeys's orders */
 #define SORT_ASCENDING 0
@@ -344,7 +436,7 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
     return strokeTotal - parTotal;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F844_ovl_03);
+INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", ChooseHoleStrokeTarget);
 
 #define NO_ROUTE_POINT (-1)
 /* Beyond any distance on a hole */
