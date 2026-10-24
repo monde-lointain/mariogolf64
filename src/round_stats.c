@@ -474,7 +474,7 @@ void RecordHoleStats(void) {
     GetSaveData();
     stats = &g_RoundStats;
     if (g_Players[0].unk9C) {
-        if (g_Players[0].unk23 <= g_HolePar) {
+        if (g_Players[0].strokeCount <= g_HolePar) {
             stats->unk0++;
         } else {
             g_RoundStats.unk4++;
@@ -558,10 +558,10 @@ void SettleHoleBets(void) {
         for (i = 0; i != g_GameState.playerCount; i++) {
             for (j = 0; j != g_GameState.playerCount; j++) {
                 if (j != i) {
-                    score = g_Players[i].unk23 +
+                    score = g_Players[i].strokeCount +
                             GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[i].handicap);
                     g_BetTallies[i][BET_STROKES] +=
-                        (g_Players[j].unk23 +
+                        (g_Players[j].strokeCount +
                          GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[j].handicap) - score) *
                         g_GameState.betRates[BET_STROKES];
                 }
@@ -571,10 +571,10 @@ void SettleHoleBets(void) {
     lasVegasRate = &g_GameState.betRates[BET_LAS_VEGAS];
     if (*lasVegasRate > 0) {
         lasVegasTally = &g_BetTallies[0][BET_LAS_VEGAS];
-        teamScore = g_Players[0].unk23 + g_Players[1].unk23 +
+        teamScore = g_Players[0].strokeCount + g_Players[1].strokeCount +
                     GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[0].handicap) +
                     GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[1].handicap);
-        rivalTeamScore = g_Players[2].unk23 + g_Players[3].unk23 +
+        rivalTeamScore = g_Players[2].strokeCount + g_Players[3].strokeCount +
                          GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[2].handicap) +
                          GetHandicapOffset(GetCourseRecordIndex(), lastHole, g_Players[3].handicap);
         *lasVegasTally += (rivalTeamScore - teamScore) * *lasVegasRate;
@@ -643,7 +643,7 @@ void SettleHoleBets(void) {
             case GAME_MODE_UNK1:
             case GAME_MODE_UNK6: {
                 for (i = 0; i != g_GameState.playerCount; i++) {
-                    scores[i] = g_Players[i].unk23 + GetHandicapOffset(g_GameState.courseIndex,
+                    scores[i] = g_Players[i].strokeCount + GetHandicapOffset(g_GameState.courseIndex,
                                                                       g_GameState.holeIndex - 1,
                                                                       g_Players[i].handicap);
                 }

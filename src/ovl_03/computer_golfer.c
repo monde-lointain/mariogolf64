@@ -137,7 +137,7 @@ s32 GetGolferTraitUnk2(void) {
 }
 
 s32 IsStrokeLimitReached(void) {
-    return g_Players[sShot.playerIndex].unk23 >= g_HolePar + sHoleTargetToPar - 1;
+    return g_Players[sShot.playerIndex].strokeCount >= g_HolePar + sHoleTargetToPar - 1;
 }
 
 /* Course units, of which there are 1024 to a world unit */
@@ -466,7 +466,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
                 sPlanStage = PLAN_STAGE_TARGET_CHOSEN;
                 if (sPlanTarget[AXIS_X] == D_800BA9D8.cupPosition[AXIS_X] && sPlanTarget[AXIS_Z] == g_CupPositionZ &&
                     GetSurfaceInfo(sShot.surface)->kind != SURFACE_KIND_GREEN) {
-                    strokesOver = g_Players[sShot.playerIndex].unk23 - (g_HolePar + sHoleTargetToPar - 2);
+                    strokesOver = g_Players[sShot.playerIndex].strokeCount - (g_HolePar + sHoleTargetToPar - 2);
                     if (strokesOver <= 0) {
                         missDistance = IntLength2D(g_CupPositionX - sShot.ballPosition[AXIS_X],
                                                    g_CupPositionZ - sShot.ballPosition[AXIS_Z]) >>
@@ -592,7 +592,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
             }
             sNeedsNewTarget = TRUE;
         } else if (sNeedsLongerClub == TRUE) {
-            osSyncPrintf("num_hit = %d\n", g_Players[sShot.playerIndex].unk23);
+            osSyncPrintf("num_hit = %d\n", g_Players[sShot.playerIndex].strokeCount);
             if (sShot.clubSlot == FindClubSlot(sShot.playerIndex, CLUB_TYPE_PUTTER)) {
                 break;
             }
@@ -618,7 +618,7 @@ s32 PlanShot(CurrentShot *plannedShot) {
     if ((s32)IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sTrialShot.ballPosition[AXIS_X],
                          g_CupPositionZ - sTrialShot.ballPosition[AXIS_Z]) <
         (s32)IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - sPlanTarget[AXIS_X], g_CupPositionZ - sPlanTarget[AXIS_Z])) {
-        strokes = g_Players[sShot.playerIndex].unk23;
+        strokes = g_Players[sShot.playerIndex].strokeCount;
         par = g_HolePar;
         mishit = 0;
         if (GetSurfaceInfo(sTrialShot.surface)->kind != SURFACE_KIND_GREEN && strokes < par + sHoleTargetToPar - 1) {
@@ -1552,7 +1552,7 @@ void ChooseLongShot(s32 unused, s32 *clubType, s32 *targetX, s32 *targetZ, s32 *
     for (index = STROKE_SHOT_MODE_COUNT - 1; index >= 0; index--) {
         shotModes[index] = one;
     }
-    strokeCount = g_Players[sShot.playerIndex].unk23;
+    strokeCount = g_Players[sShot.playerIndex].strokeCount;
     *clubType = ChooseClubForDistance(PlanCupDistance(one));
     *targetX = D_800BA9D8.cupPosition[AXIS_X];
     *targetZ = g_CupPositionZ;
@@ -1951,7 +1951,7 @@ s32 StepTrialShot(void) {
                             sTrialSimulation.position[AXIS_Z] - sTrialEndPoint[AXIS_Z]) > PUTT_DRIFT_LIMIT) {
                 sTrialEvaluation = POOR_LANDING_EVALUATION;
             }
-            if (g_Players[sShot.playerIndex].unk23 + 1 < g_HolePar + sHoleTargetToPar && sHoleTargetToPar > 0 &&
+            if (g_Players[sShot.playerIndex].strokeCount + 1 < g_HolePar + sHoleTargetToPar && sHoleTargetToPar > 0 &&
                 IntLength2D(sShot.ballPosition[AXIS_X] - sTrialEndPoint[AXIS_X],
                             sShot.ballPosition[AXIS_Z] - sTrialEndPoint[AXIS_Z]) > LONG_PUTT_DISTANCE) {
                 goto evaluate;
@@ -1997,7 +1997,7 @@ s32 StepTrialShot(void) {
         }
         if (sTrialIndex != 0) {
             par = g_HolePar;
-            strokes = g_Players[sShot.playerIndex].unk23;
+            strokes = g_Players[sShot.playerIndex].strokeCount;
             if (GetSurfaceInfoAt(sPlanTarget[AXIS_X], sPlanTarget[AXIS_Z])->kind == SURFACE_KIND_GREEN) {
                 strokesOver = strokes + 1;
                 strokesOver -= par + sHoleTargetToPar;
@@ -2369,7 +2369,7 @@ s32 ChooseShotOffset(void) {
  * gives for the kind of the shot's club.
  */
 s32 RollClubKindChance(s32 chanceSetIndex) {
-    if (g_Players[sShot.playerIndex].unk23 == 0) {
+    if (g_Players[sShot.playerIndex].strokeCount == 0) {
         return TRUE;
     }
     if (IsShotClubOfTypes(CLUB_TYPE_DRIVER, CLUB_TYPE_LAST_WOOD)) {

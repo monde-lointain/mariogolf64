@@ -373,7 +373,7 @@ void PlacePlayersOnTee(void) {
             teeHeight = D_800BA9D8.teePosition[AXIS_Y];
             g_Players[i].ballPosition[AXIS_Y] = !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
             g_Players[i].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
-            g_Players[i].unk23 = 0;
+            g_Players[i].strokeCount = 0;
             g_Players[i].unk24 = 0;
             g_Players[i].unk26 = 0;
             g_Players[i].ballSurface = SURFACE_TEE_UP;
@@ -406,7 +406,7 @@ void PlayContestMovies(void) {
 
     if (D_800FBDB8 == 0) {
         for (i = 0; i < g_GameState.playerCount; i++) {
-            if (g_Players[i].unk23 == 0) {
+            if (g_Players[i].strokeCount == 0) {
                 break;
             }
             if (g_Players[i].unkC != PLAYER_STATE_UNK11 && g_Players[i].unkC != PLAYER_STATE_UNK14) {
@@ -482,14 +482,15 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
  * It is a macro, as an inline function compiles differently from the
  * original.
  */
-#define TeesAfter(player, other)                                                                                      \
-    (g_Players[player].unk23 > g_Players[other].unk23 ||                                                              \
-     (g_Players[player].unk23 == g_Players[other].unk23 && g_Players[player].teeOrder > g_Players[other].teeOrder))
+#define TeesAfter(player, other)                                                   \
+    (g_Players[player].strokeCount > g_Players[other].strokeCount                  \
+     || (g_Players[player].strokeCount == g_Players[other].strokeCount             \
+         && g_Players[player].teeOrder > g_Players[other].teeOrder))
 
 /*
  * Sets each player's teeOrder for the next hole. In the group modes a
  * hole's winner goes first and the others move down one; otherwise the
- * players go in order of unk23, ties keeping their previous order.
+ * players go in order of strokeCount, ties keeping their previous order.
  */
 void SetNextTeeOrder(void) {
     s32 orders[MAX_PLAYER_COUNT];

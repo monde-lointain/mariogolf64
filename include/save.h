@@ -203,7 +203,7 @@ typedef struct UnkB8 {
     /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
     /* 0x1E */ u8 unk1E[0x22 - 0x1E];
     /* 0x22 */ s8 unk22;
-    /* 0x23 */ s8 unk23;
+    /* 0x23 */ s8 strokeCount; /* On the current hole */
     /* 0x24 */ s8 unk24;
     /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
     /* 0x26 */ s8 unk26;

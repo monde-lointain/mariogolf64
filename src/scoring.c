@@ -44,9 +44,9 @@ s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
            - (handicap % COURSE_HOLE_COUNT >= g_CourseRecords[GetCourseRecordIndex(courseIndex)].holes[holeIndex].handicap);
 }
 
-/* unk23 with the current hole's handicap offset, which the matches compare */
+/* strokeCount with the current hole's handicap offset, which the matches compare */
 s32 GetNetScore(s32 playerIndex) {
-    return g_Players[playerIndex].unk23
+    return g_Players[playerIndex].strokeCount
            + GetHandicapOffset(g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
 }
 
