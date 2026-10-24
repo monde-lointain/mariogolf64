@@ -15,6 +15,9 @@
 /* Prints the paths that the collision tests are given */
 #define GAME_FLAG_UNK0 0x00
 
+/* Blanks two lines of debug text when the flight camera finishes */
+#define GAME_FLAG_UNK22 0x22
+
 /* Adds a ring at a fixed place, once each time the flag is set */
 #define GAME_FLAG_TEST_RING 0x25
 

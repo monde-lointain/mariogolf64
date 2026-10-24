@@ -227,7 +227,7 @@ void UnloadOverlay(s32 overlayId) {
 }
 
 /* The module number is missing from the format's arguments in the original */
-s32 ReportModuleNotAlive(void) {
+s32 ReportModuleNotAlive(s32 moduleId) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
     }

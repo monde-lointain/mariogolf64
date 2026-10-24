@@ -7,11 +7,13 @@
 #include "character_slot.h"
 #include "club.h"
 #include "current_shot.h"
+#include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
+#include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"
 #include "scene.h"
@@ -794,6 +796,7 @@ s32 GetEndReaction(void) {
 
 /* Bits of g_SimulatedShot.pathFlags */
 #define PATH_FLAG_UNK1 (1 << 0)
+#define PATH_FLAG_UNK2 (1 << 1)
 #define PATH_FLAG_UNK4 (1 << 2)
 #define PATH_FLAG_UNK8 (1 << 3)
 
@@ -1768,7 +1771,417 @@ void ChooseFlightCameraKind(void) {
 INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004B474);
+#define CUP_PASS_LOOKAHEAD_STEP_COUNT 30
+#define PATH_FLAG_LOOKAHEAD_STEP_COUNT 60
+#define FLIGHT_CAMERA_UNK0 0
+#define FLIGHT_CAMERA_UNK1 1
+#define FLIGHT_CAMERA_UNK2 2
+#define FLIGHT_CAMERA_UNK8 8
+#define FLIGHT_CAMERA_UNKE 0xE
+#define FLIGHT_CAMERA_UNKF 0xF
+#define FLIGHT_CAMERA_UNK10 0x10
+#define FLIGHT_CAMERA_UNK11 0x11
+#define FLIGHT_CAMERA_UNK14 0x14
+#define VERY_LONG_SHOT_MIN_LENGTH 0x2A3000
+#define BALL_SOUND_MIN_SHOT_LENGTH 0x25800
+#define BALL_SOUND_VOLUME_LENGTH 0x7800 /* Shot length per step of volume */
+#define BALL_SOUND_MIN_VOLUME 10
+#define BALL_SOUND_MAX_VOLUME 64
+#define BALL_SOUND_EARLY_STEP 6
+#define BALL_SOUND_LATE_STEP 10
+#define BALL_SOUND_UNK59 0x59
+#define BALL_SOUND_UNK5A 0x5A
+#define BALL_SOUND_CHANNEL 8
+#define BALL_SOUND_REVERB 0x1E
+#define BALL_SOUND_PAN 0x7F
+#define MODULE_UNK1 1
+#define CUP_LOOK_AT_DEPTH 11520.0f
+#define CUP_CLOSE_VIEW_DISTANCE 60.0f
+#define CUP_CLOSE_VIEW_HEIGHT 11.700001f
+#define CUP_VIEW_FIELD_OF_VIEW 15.0f
+#define CUP_VIEW_HOLD_COUNT 3
+#define CUP_VIEW_DISTANCE 76800.0f
+#define CUP_VIEW_HEIGHT 0x7800
+#define INSET_VIEW_SIDE_OFFSET 0x3C00
+#define INSET_VIEW_HEIGHT 0x7800
+#define INSET_FIELD_OF_VIEW 30.0f
+#define LOOK_AT_NUDGE 0.1f /* Keeps the eye from sitting straight above the point it looks at */
+
+extern s8 D_801061CB;
+extern s32 sBallCupDistance;
+extern s32 sBallCupGroundDistance;
+extern s8 D_80104B68;
+
+void func_801FD9C0(void);
+s32 func_8020D838(void);
+void func_80081D4C(s32);
+void func_8008679C(s32);
+s32 func_800959F8(void);
+
+/*
+ * Updates the flight camera, the inset view and the ball's sounds for one frame of the
+ * ball's flight, and advances g_BallFlightStep when isAdvancing is 1. Once the flight has
+ * ended, it counts the landing wait and returns TRUE when it is over. The START button
+ * clears D_801061BF through D_801061C5 and D_801061CB.
+ */
+s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
+    f32 point[3];
+    s32 step;
+    s32 volume;
+    s32 aheadStep;
+    s32 waitFrame;
+    s32 *flightStep;
+
+    if (isAdvancing == 0) {
+        D_801061CB = 0;
+    } else {
+        D_801061CB = 1;
+    }
+    if (buttons & START_BUTTON) {
+        D_801061C4 = 0;
+        D_801061BF = 0;
+        D_801061C0 = 0;
+        D_801061C1 = 0;
+        D_801061C2 = 0;
+        D_801061C3 = 0;
+        D_801061C5 = 0;
+        D_801061CB = 0;
+    } else {
+        D_801061C4 = D_800BE67C;
+        D_801061BF = D_800BE67C;
+        D_801061C0 = D_800BE67C;
+        D_801061C1 = D_800BE67C;
+        D_801061C2 = D_800BE67C;
+        D_801061C3 = D_800BE67C;
+        D_801061C5 = D_800BE67C;
+    }
+    if (g_BallFlightStep >= PATH_STEP_COUNT) {
+        step = PATH_STEP_COUNT - 1;
+    } else {
+        step = g_BallFlightStep;
+    }
+    if (step >= g_SimulatedShot.stepCount - 1) {
+        step = g_SimulatedShot.stepCount - 1;
+    }
+    if (isAdvancing == 0) {
+        sFlightBallPosition[AXIS_X] = sShotStartPosition[AXIS_X];
+        sFlightBallPosition[AXIS_Y] = sShotStartPosition[AXIS_Y];
+        sFlightBallPosition[AXIS_Z] = sShotStartPosition[AXIS_Z];
+    } else if (g_BallFlightStep == g_SimulatedShot.stepCount) {
+        sFlightBallPosition[AXIS_X] = g_SimulatedShot.endPosition[AXIS_X];
+        sFlightBallPosition[AXIS_Y] = g_SimulatedShot.endPosition[AXIS_Y];
+        sFlightBallPosition[AXIS_Z] = g_SimulatedShot.endPosition[AXIS_Z];
+    } else {
+        sFlightBallPosition[AXIS_X] = g_SimulatedShot.path[step][AXIS_X];
+        sFlightBallPosition[AXIS_Y] = g_SimulatedShot.path[step][AXIS_Y];
+        sFlightBallPosition[AXIS_Z] = g_SimulatedShot.path[step][AXIS_Z];
+    }
+    sBallCupDistance = IntLength3D(sFlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                             sFlightBallPosition[AXIS_Y] - D_800BA9D8.cupPosition[AXIS_Y],
+                             sFlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+    sBallCupGroundDistance = IntLength2D(sFlightBallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                             sFlightBallPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+    if (g_SimulatedShot.unk2E08) {
+        switch (D_800DAF50) {
+            case 1:
+                if (isAdvancing == 1 && step == 10 && g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
+                    D_800DAF50 = 3;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 3:
+                if (step == 40 && g_BallFlightStep < g_SimulatedShot.stepCount - 10) {
+                    D_800DAF50 = 6;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 6:
+                if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
+                    D_800DAF50 = 7;
+                    D_800BE630 = TRUE;
+                }
+                break;
+        }
+    } else if (func_8005DE40() == 0) {
+        switch (D_800DAF50) {
+            case 0:
+                D_800DAF50 = 1;
+                D_800BE630 = TRUE;
+                break;
+            case 1:
+                if (isAdvancing == 1 && step == 10) {
+                    D_800DAF50 = 2;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 2:
+                if (step == 15) {
+                    D_800DAF50 = 3;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 3:
+                if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
+                    D_800DAF50 = 4;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 4:
+                if (g_SimulatedShot.pathFlags[step + 40]) {
+                    D_800DAF50 = 5;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 5:
+                if (g_SimulatedShot.pathFlags[step]) {
+                    D_800DAF50 = 6;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 6:
+                if (g_SimulatedShot.stepCount - 10 < g_BallFlightStep) {
+                    D_800DAF50 = 7;
+                    D_800BE630 = TRUE;
+                }
+                break;
+        }
+    } else {
+        switch (D_800DAF50) {
+            case 1:
+                D_800DAF50 = 3;
+                break;
+            case 3:
+                if (g_BallFlightStep > g_SimulatedShot.minPositionStep[AXIS_Y]) {
+                    D_800DAF50 = 5;
+                    D_800BE630 = TRUE;
+                }
+                break;
+            case 5:
+                /* The empty case is there to match */
+                break;
+        }
+    }
+    /* Holding both look-ahead steps in aheadStep is there to match */
+    aheadStep = step + CUP_PASS_LOOKAHEAD_STEP_COUNT;
+    if (aheadStep <= g_SimulatedShot.stepCount
+        && IsCupPassPoint(IntLength2D(g_SimulatedShot.path[aheadStep][AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                      g_SimulatedShot.path[aheadStep][AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]),
+                          g_SimulatedShot.path[aheadStep][AXIS_Y])) {
+        D_800BE658 |= 2;
+    }
+    aheadStep = step + PATH_FLAG_LOOKAHEAD_STEP_COUNT;
+    if (g_SimulatedShot.stepCount >= aheadStep && (g_SimulatedShot.pathFlags[aheadStep] & PATH_FLAG_UNK2)) {
+        D_800BE658 |= 1;
+        if (D_800BE64C == -1) {
+            D_800BE64C = aheadStep;
+            D_800BE650 = 70;
+        }
+    }
+    if (step > 60 && step < D_800BE64C && !D_800BE674) {
+        sFlightCameraKind = FLIGHT_CAMERA_UNK14;
+    }
+    if (D_800BE64C != -1 && D_800BE64C + 10 < step && sFlightCameraKind != FLIGHT_CAMERA_UNKC
+        && (s32)IntLength3D(sFlightBallPosition[AXIS_X] - sShotEndPosition[AXIS_X],
+                            sFlightBallPosition[AXIS_Y] - sShotEndPosition[AXIS_Y],
+                            sFlightBallPosition[AXIS_Z] - sShotEndPosition[AXIS_Z]) > 0x25800) {
+        D_800BE628 = TRUE;
+        sFlightCameraKind = FLIGHT_CAMERA_UNKC;
+    }
+    if (D_800BE64C < step && (g_BallFlightStep + 40 < g_SimulatedShot.stepCount || D_800DAF50 == 7)
+        && D_800BE630 == TRUE && !D_800BE69C && !D_800BE658) {
+        if (!D_800BE674) {
+            ChooseFlightCameraKind();
+        }
+    }
+    if (D_800BE674 > 0) {
+        D_800BE674--;
+    }
+    if (g_IsDebugEnabled && IsGameFlagSet(GAME_FLAG_UNK5F)) {
+        sprintf(g_PrintBuffer, "C:%d F:%2d %3d %3d ", D_800BE630, D_800BE674, step, g_BallFlightStep);
+        PrintDebugText(g_PrintBuffer, 8, 2);
+        sprintf(g_PrintBuffer, "TYPE:%2d TIME:%2d", sFlightCameraKind, D_800DAF50);
+        PrintDebugText(g_PrintBuffer, 10, 3);
+    }
+    if (D_800BE640 > VERY_LONG_SHOT_MIN_LENGTH && g_BallFlightStep == 40 && g_SimulatedShot.stepCount > 80) {
+        func_8008679C(0);
+    }
+    if (D_800BE640 > BALL_SOUND_MIN_SHOT_LENGTH && !g_SimulatedShot.unk2E0C) {
+        volume = D_800BE640 / BALL_SOUND_VOLUME_LENGTH + BALL_SOUND_MIN_VOLUME;
+        if (volume > BALL_SOUND_MAX_VOLUME) {
+            volume = BALL_SOUND_MAX_VOLUME;
+        }
+        if (step == BALL_SOUND_EARLY_STEP) {
+            osSyncPrintf("ball:%d\n", volume);
+            switch (sFlightCameraKind) {
+                case FLIGHT_CAMERA_UNK0:
+                case FLIGHT_CAMERA_UNK1:
+                case FLIGHT_CAMERA_UNK2:
+                case FLIGHT_CAMERA_UNK3:
+                case FLIGHT_CAMERA_UNK4:
+                case FLIGHT_CAMERA_UNK5:
+                case FLIGHT_CAMERA_UNK8:
+                case FLIGHT_CAMERA_UNK9:
+                    PlaySoundWithEffects(BALL_SOUND_UNK59, BALL_SOUND_CHANNEL, volume,
+                                         BALL_SOUND_REVERB, BALL_SOUND_PAN);
+                    break;
+            }
+        }
+        if (step == BALL_SOUND_LATE_STEP) {
+            osSyncPrintf("ball:%d\n", volume);
+            switch (sFlightCameraKind) {
+                case FLIGHT_CAMERA_UNK6:
+                case FLIGHT_CAMERA_UNK7:
+                case FLIGHT_CAMERA_UNKA:
+                case FLIGHT_CAMERA_UNKC:
+                case FLIGHT_CAMERA_UNKD:
+                case FLIGHT_CAMERA_UNKE:
+                case FLIGHT_CAMERA_UNKF:
+                case FLIGHT_CAMERA_UNK10:
+                case FLIGHT_CAMERA_UNK11:
+                    PlaySoundWithEffects(BALL_SOUND_UNK5A, BALL_SOUND_CHANNEL, volume,
+                                         BALL_SOUND_REVERB, BALL_SOUND_PAN);
+                    break;
+            }
+        }
+    }
+    PlayFlightSounds(step);
+    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    func_80048D7C(step);
+    D_800BE698 = TRUE;
+    D_800BE69C = FALSE;
+    if (g_SimulatedShot.unk2E0C) {
+        if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+            func_801FD9C0();
+        }
+        /* pathFlags is an s8, so testing 0x100 tests its sign; the original has it */
+        if ((g_SimulatedShot.pathFlags[step] & 0x100) || (g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK4)) {
+            func_80213D70(-1);
+        }
+    } else if (g_SimulatedShot.pathFlags[step]) {
+        D_800C5AAC = 2;
+        func_80213D70(10);
+        if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+            func_801FD9C0();
+        }
+    }
+    if (sBallCupGroundDistance > CUP_PASS_RADIUS) {
+        if (sCupViewHoldCount > 0) {
+            sCupViewHoldCount--;
+        }
+    }
+    if (isAdvancing == 1) {
+        if (D_800BE650 > 0) {
+            D_800BE650--;
+        }
+        if (!g_IsMiniGolf && !g_SimulatedShot.unk2E10
+            && ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) || func_8020D838() || D_800BE680 == TRUE)) {
+            g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+            func_8009226C(NO_EFFECT);
+            g_InsetView.animation = INSET_VIEW_STILL;
+            g_InsetView.step = 0;
+            g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+            g_Cameras[0].view.lookAt[AXIS_X] = (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Y] =
+                ((f32)D_800BA9D8.cupPosition[AXIS_Y] - CUP_LOOK_AT_DEPTH) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Z] = (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_X] =
+                g_Cameras[0].view.lookAt[AXIS_X] + sinf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
+            g_Cameras[0].view.eye[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - CUP_CLOSE_VIEW_HEIGHT;
+            g_Cameras[0].view.eye[AXIS_Z] =
+                g_Cameras[0].view.lookAt[AXIS_Z] - cosf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
+        } else if (IsCupPassPoint(sBallCupGroundDistance, sFlightBallPosition[AXIS_Y]) || sCupViewHoldCount > 0) {
+            g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
+            func_8009226C(NO_EFFECT);
+            D_800BE69C = TRUE;
+            D_800BE698 = FALSE;
+            D_800BE658 &= ~2;
+            if (sCupViewHoldCount == 0) {
+                sCupViewHoldCount = CUP_VIEW_HOLD_COUNT;
+            }
+            D_800BE674 = CAMERA_CHANGE_HOLD_COUNT;
+            g_InsetView.animation = INSET_VIEW_STILL;
+            g_InsetView.step = 0;
+            g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+            g_Cameras[0].view.lookAt[AXIS_X] = (f32)D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Y] = (f32)D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Z] = (f32)D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            point[AXIS_X] = -sinf(sCameraYaw) * CUP_VIEW_DISTANCE + D_800BA9D8.cupPosition[AXIS_X];
+            point[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] - CUP_VIEW_HEIGHT;
+            point[AXIS_Z] = cosf(sCameraYaw) * CUP_VIEW_DISTANCE + D_800BA9D8.cupPosition[AXIS_Z];
+            g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        } else {
+            g_Cameras[0].view.eye[AXIS_X] = sCameraPosition[AXIS_X];
+            g_Cameras[0].view.eye[AXIS_Y] = sCameraPosition[AXIS_Y];
+            g_Cameras[0].view.eye[AXIS_Z] = sCameraPosition[AXIS_Z];
+            g_Cameras[0].view.lookAt[AXIS_X] = sLookAtPoint[AXIS_X];
+            g_Cameras[0].view.lookAt[AXIS_Y] = sLookAtPoint[AXIS_Y];
+            g_Cameras[0].view.lookAt[AXIS_Z] = sLookAtPoint[AXIS_Z];
+        }
+    } else {
+        g_Cameras[0].view.eye[AXIS_X] = sCameraPosition[AXIS_X];
+        g_Cameras[0].view.eye[AXIS_Y] = sCameraPosition[AXIS_Y];
+        g_Cameras[0].view.eye[AXIS_Z] = sCameraPosition[AXIS_Z];
+        g_Cameras[0].view.lookAt[AXIS_X] = sLookAtPoint[AXIS_X];
+        g_Cameras[0].view.lookAt[AXIS_Y] = sLookAtPoint[AXIS_Y];
+        g_Cameras[0].view.lookAt[AXIS_Z] = sLookAtPoint[AXIS_Z];
+    }
+    if (!D_800BE69C) {
+        AimCameraYaw();
+    }
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_X] =
+        (f32)(sShotEndPosition[AXIS_X] - INSET_VIEW_SIDE_OFFSET) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Y] =
+        (f32)(sShotEndPosition[AXIS_Y] - INSET_VIEW_HEIGHT) * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] = (f32)sShotEndPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[INSET_CAMERA].view.fieldOfView = INSET_FIELD_OF_VIEW;
+    if (sEndSurfaceInfo->kind == SURFACE_KIND_OUT_OF_BOUNDS) {
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = (f32)sShotEndPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = (f32)sShotEndPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = (f32)sShotEndPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    } else {
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] = (f32)sFlightBallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Y] = (f32)sFlightBallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] = (f32)sFlightBallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    }
+    if (g_Cameras[0].view.eye[AXIS_X] == g_Cameras[0].view.lookAt[AXIS_X]
+        && g_Cameras[0].view.eye[AXIS_Z] == g_Cameras[0].view.lookAt[AXIS_Z]) {
+        g_Cameras[0].view.lookAt[AXIS_X] += LOOK_AT_NUDGE;
+        g_Cameras[0].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
+    }
+    if (g_Cameras[INSET_CAMERA].view.eye[AXIS_X] == g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X]
+        && g_Cameras[INSET_CAMERA].view.eye[AXIS_Z] == g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z]) {
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] += LOOK_AT_NUDGE;
+        g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
+    }
+    if (g_SimulatedShot.stepCount < g_BallFlightStep + 40 && func_800959F8() == 1) {
+        func_8009226C(NO_EFFECT);
+    }
+    if (isAdvancing == 1 && g_BallFlightStep == 0) {
+        PlayContactSound();
+    }
+    /* Reading D_800BE620 and g_BallFlightStep through locals is there to match */
+    waitFrame = D_800BE620;
+    if (isAdvancing == 1) {
+        flightStep = &g_BallFlightStep;
+        if (*flightStep == g_SimulatedShot.stepCount) {
+            if (waitFrame == 0 && !D_80104B68) {
+                func_80081D4C(1);
+            }
+            if (++D_800BE620 >= sLandingWaitFrameCount) {
+                if (IsGameFlagSet(GAME_FLAG_UNK22)) {
+                    PrintDebugText("        ", 16, 4);
+                    PrintDebugText("         ", 10, 2);
+                }
+                return TRUE;
+            }
+        } else {
+            (*flightStep)++;
+        }
+    }
+    return FALSE;
+}
 
 void SetLandingWaitFrameCount(s32 frameCount) {
     sLandingWaitFrameCount = frameCount;
