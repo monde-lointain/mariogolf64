@@ -1,14 +1,16 @@
 #include "ball_simulation.h"
 #include "club.h"
 #include "common.h"
-#include "debug_text.h"
 #include "course.h"
 #include "current_shot.h"
+#include "debug_text.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "scene.h"
 #include "surface.h"
 #include "variables.h"
 
@@ -29,7 +31,9 @@ typedef struct GolferTraits {
     /* 0x3 */ s8 unk3;
     /* 0x4 */ s8 unk4;
     /* 0x5 */ s8 windPlay; /* WIND_PLAY_*: which winds the golfer offsets shots for */
-    /* 0x6 */ s8 unk6[0xE - 0x6];
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ s8 targetScores[COURSE_COUNT]; /* The score to par it aims at on each course */
+    /* 0xD */ s8 unkD;                      /* Added to the target score */
 } GolferTraits; /* size = 0xE */
 
 /* GolferTraits.windPlay values */
@@ -51,6 +55,7 @@ extern u8 sPlanThreadStackEnd[];
 extern s32 sHoleTargetToPar;
 /* The strokes the golfer aims to take on the hole */
 extern s32 sHoleStrokeTarget;
+extern s32 D_801B60B4;
 /* Where the planned shot aims */
 extern CoursePoint sPlanTarget;
 /* The route points and the tee, as PlanRoute gathers them */
@@ -192,7 +197,10 @@ s32 GetBallCupDistance(void) {
                        sShot.ballPosition[AXIS_Z] - g_CupPositionZ);
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D78_ovl_03);
+/* A line break that PlanShot and ChooseHoleStrokeTarget print; they share its one copy */
+extern const char sLineBreakText[];
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", sLineBreakText);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253D7C_ovl_03);
 
@@ -444,7 +452,305 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
     return strokeTotal - parTotal;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", ChooseHoleStrokeTarget);
+/* The par range of the course's holes */
+#define LOWEST_PAR 3
+#define HIGHEST_PAR 5
+/* A hole's planned strokes are lowered only from this many or more */
+#define LOWEST_LOWERED_STROKES 3
+#define HOLES_PER_NINE 9
+/* GameState.gameMode's value for which the planned strokes are the hole's par */
+#define GAME_MODE_UNK3 3
+
+/*
+ * Spreads strokeCount strokes, or takes -strokeCount away, one a hole at a
+ * time in the order of the entries, over the holes that isSpreadHole picks,
+ * until they run out or no hole can take any more. It is a macro, as
+ * isSpreadHole is an expression on the caller's index.
+ */
+#define SpreadStrokes(strokes, strokeCount, isSpreadHole)                          \
+    {                                                                              \
+        s32 changeCount_;                                                          \
+                                                                                   \
+        while ((strokeCount) != 0) {                                               \
+            changeCount_ = 0;                                                      \
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) {                  \
+                if (!(isSpreadHole)) {                                             \
+                    continue;                                                      \
+                }                                                                  \
+                if ((strokeCount) < 0) {                                           \
+                    if ((strokes)[index] >= LOWEST_LOWERED_STROKES) {              \
+                        changeCount_++;                                            \
+                        (strokes)[index]--;                                        \
+                        (strokeCount)++;                                           \
+                        if ((strokeCount) >= 0) {                                  \
+                            break;                                                 \
+                        }                                                          \
+                    }                                                              \
+                } else {                                                           \
+                    changeCount_++;                                                \
+                    (strokes)[index]++;                                            \
+                    (strokeCount)--;                                               \
+                    if ((strokeCount) <= 0) {                                      \
+                        break;                                                     \
+                    }                                                              \
+                }                                                                  \
+            }                                                                      \
+            if (changeCount_ == 0) {                                               \
+                break;                                                             \
+            }                                                                      \
+        }                                                                          \
+    }
+
+/*
+ * Chooses how many strokes the golfer aims to take on this hole. It takes the
+ * character's target score to par for the course, plus a lucky bonus of 0 to 3
+ * strokes in Get Character when its record against the player's character has
+ * more losses than wins. It spreads that score over the holes by par and
+ * handicap, then spreads what the score so far leaves over the holes still to
+ * play.
+ */
+s32 ChooseHoleStrokeTarget(void) {
+    s32 strokes[COURSE_HOLE_COUNT];
+    s32 handicaps[COURSE_HOLE_COUNT];
+    s32 holes[COURSE_HOLE_COUNT];
+    s32 groupHandicaps[COURSE_HOLE_COUNT];
+    s32 groupStrokes[COURSE_HOLE_COUNT];
+    s32 groupHoles[COURSE_HOLE_COUNT];
+    s32 luckyBonus;
+    s32 lossCount;
+    s32 winBits;
+    s32 targetScore;
+    s32 spreadStyle;
+    s32 index;
+    s32 par;
+    s32 groupCount;
+    s32 frontStrokes;
+    s32 backStrokes;
+    s32 negativeCount;
+    s32 targetLeftToPar;
+    s32 plannedLeftToPar;
+    s32 entry;
+    s32 strokesLeft;
+
+    luckyBonus = 0;
+    if (IsGameFlagSet(GAME_FLAG_UNK3C)) {
+        return 0;
+    }
+    if (g_GameMode == GAME_MODE_UNK3) {
+        return g_HolePar;
+    }
+    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+        lossCount = GetSaveData()->unk990.unkAF0[(s8)g_Players[0].characterIndex]
+                                                [(s8)g_Players[sShot.playerIndex].characterIndex].unk0;
+        winBits = GetSaveData()->unk990.unkAF0[(s8)g_Players[0].characterIndex]
+                                              [(s8)g_Players[sShot.playerIndex].characterIndex].unk1;
+        if ((winBits & WIN_COUNT_MASK) < (lossCount & WIN_COUNT_MASK)) {
+            luckyBonus = D_801B60B4 & 3;
+        }
+        osSyncPrintf("win%d lose%d lucky%d\n", winBits, lossCount, luckyBonus);
+    }
+    targetScore = luckyBonus + sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unkD +
+                  sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].targetScores[g_CourseIndex];
+    osSyncPrintf("Char Index = %d\n", (s8)g_Players[sShot.playerIndex].characterIndex);
+    osSyncPrintf("TargetScore = %d\n", targetScore);
+    spreadStyle = sGolferTraits[(s8)g_Players[sShot.playerIndex].characterIndex].unk0;
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        strokes[index] = 0;
+        handicaps[index] = 0;
+    }
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        handicaps[index] = g_CourseRecords[g_GameState.courseIndex].holes[index].handicap;
+        strokes[index] = (s8)g_CourseRecords[g_GameState.courseIndex].holes[index].par;
+        holes[index] = index;
+    }
+    if (targetScore < 0) {
+        SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_DESCENDING);
+    } else {
+        SortByKeys(COURSE_HOLE_COUNT, holes, handicaps, strokes, SORT_ASCENDING);
+    }
+    for (index = HIGHEST_PAR; index >= LOWEST_PAR; index--) {
+        groupCount = 0;
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (strokes[entry] == index) {
+                groupHoles[groupCount] = holes[entry];
+                groupStrokes[groupCount] = strokes[entry];
+                groupHandicaps[groupCount] = handicaps[entry];
+                groupCount++;
+            }
+        }
+        if (targetScore < 0) {
+            SortByKeys(groupCount, groupHoles, groupStrokes, groupHandicaps, SORT_DESCENDING);
+        } else {
+            SortByKeys(groupCount, groupHoles, groupStrokes, groupHandicaps, SORT_ASCENDING);
+        }
+        groupCount = 0;
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (strokes[entry] == index) {
+                holes[entry] = groupHoles[groupCount];
+                strokes[entry] = groupStrokes[groupCount];
+                /* Reads handicaps rather than groupHandicaps; the original has it */
+                handicaps[entry] = handicaps[groupCount];
+                groupCount++;
+            }
+        }
+    }
+    backStrokes = targetScore / 2;
+    frontStrokes = backStrokes;
+    if (spreadStyle == 0) {
+        if (targetScore & 1) {
+            frontStrokes = targetScore - backStrokes;
+        }
+    } else if (spreadStyle == 1) {
+        if (targetScore & 1) {
+            frontStrokes = targetScore - backStrokes;
+        }
+    } else if (spreadStyle == 2) {
+        if (targetScore & 1) {
+            backStrokes = targetScore - backStrokes;
+        }
+    }
+    strokesLeft = frontStrokes;
+    SpreadStrokes(strokes, strokesLeft, holes[index] < HOLES_PER_NINE);
+    strokesLeft = backStrokes;
+    SpreadStrokes(strokes, strokesLeft, holes[index] >= HOLES_PER_NINE);
+    if (spreadStyle == 1 || spreadStyle == 2) {
+        negativeCount = 0;
+        backStrokes = 0;
+        frontStrokes = 0;
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (spreadStyle == 1 && !(holes[index] < HOLES_PER_NINE)) {
+                continue;
+            }
+            if (spreadStyle == 2 && holes[index] < HOLES_PER_NINE) {
+                continue;
+            }
+            if (strokes[index] < 0) {
+                negativeCount++;
+            }
+        }
+        if (targetScore > 0) {
+            if (negativeCount == 0) {
+                if (spreadStyle == 1) {
+                    frontStrokes--;
+                    backStrokes++;
+                } else if (spreadStyle == 2) {
+                    backStrokes--;
+                    frontStrokes++;
+                }
+            }
+        } else if (targetScore == 0 || targetScore == -1) {
+            if (negativeCount < 2) {
+                if (spreadStyle == 1) {
+                    frontStrokes += negativeCount - 2;
+                    backStrokes -= negativeCount - 2;
+                } else if (spreadStyle == 2) {
+                    backStrokes += negativeCount - 2;
+                    frontStrokes -= negativeCount - 2;
+                }
+            }
+        } else if (negativeCount < 3) {
+            if (spreadStyle == 1) {
+                frontStrokes += negativeCount - 3;
+                backStrokes -= negativeCount - 3;
+            } else if (spreadStyle == 2) {
+                backStrokes += negativeCount - 3;
+                frontStrokes -= negativeCount - 3;
+            }
+        }
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (holes[index] < HOLES_PER_NINE) {
+                if (frontStrokes < 0) {
+                    if (strokes[index] == (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par &&
+                        strokes[index] != LOWEST_LOWERED_STROKES) {
+                        strokes[index]--;
+                        frontStrokes++;
+                    }
+                } else if (frontStrokes > 0) {
+                    if (strokes[index] == (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
+                        strokes[index]++;
+                        frontStrokes--;
+                    }
+                }
+            } else if (backStrokes < 0) {
+                if (strokes[index] == (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par &&
+                    strokes[index] != LOWEST_LOWERED_STROKES) {
+                    strokes[index]--;
+                    backStrokes++;
+                }
+            } else if (backStrokes > 0) {
+                if (strokes[index] == (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par) {
+                    strokes[index]++;
+                    backStrokes--;
+                }
+            }
+        }
+    }
+    plannedLeftToPar = 0;
+    targetLeftToPar = targetScore - GetScoreToParSoFar(sShot.playerIndex);
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        if (holes[index] >= g_GameState.holeIndex) {
+            plannedLeftToPar += strokes[index] - (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+        }
+    }
+    if (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) {
+        targetLeftToPar = targetScore - targetLeftToPar;
+        if (g_GameState.holeIndex >= HOLES_PER_NINE) {
+            targetLeftToPar = 0;
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+                if (holes[index] < HOLES_PER_NINE) {
+                    targetLeftToPar +=
+                        strokes[index] - (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+                }
+            }
+            for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+                if (holes[index] >= HOLES_PER_NINE && holes[index] < g_GameState.holeIndex) {
+                    targetLeftToPar += g_Players[sShot.playerIndex].holes[holes[index]].strokes -
+                              (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+                }
+            }
+            targetLeftToPar = targetScore - targetLeftToPar;
+        }
+    }
+    if (g_GameState.betRates[BET_UNK4] > 0 || g_GameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameMode == GAME_MODE_CLUB_SLOTS) {
+        targetLeftToPar = 0;
+        for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+            if (holes[index] < g_GameState.holeIndex) {
+                targetLeftToPar +=
+                    strokes[index] - (s8)g_CourseRecords[g_GameState.courseIndex].holes[holes[index]].par;
+            }
+        }
+        targetLeftToPar = targetScore - targetLeftToPar;
+    }
+    SortByKeys(COURSE_HOLE_COUNT, strokes, handicaps, holes, SORT_ASCENDING);
+    osSyncPrintf("OrgOffset = %d\n", targetLeftToPar);
+    osSyncPrintf("Work = %d\n", plannedLeftToPar);
+    strokesLeft = targetLeftToPar - plannedLeftToPar;
+    SpreadStrokes(strokes, strokesLeft, g_GameState.holeIndex <= holes[index]);
+    osSyncPrintf("TS => ");
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        for (entry = 0; entry < COURSE_HOLE_COUNT; entry++) {
+            if (holes[entry] == index) {
+                osSyncPrintf(" %d", strokes[entry]);
+            }
+        }
+    }
+    osSyncPrintf(sLineBreakText);
+    osSyncPrintf("OS => ");
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        osSyncPrintf(" %d", (s8)g_CourseRecords[g_CourseIndex].holes[index].par);
+    }
+    osSyncPrintf(sLineBreakText);
+    for (index = 0; index < COURSE_HOLE_COUNT; index++) {
+        if (holes[index] == g_HoleIndex) {
+            /* The comma is in the original's string */
+            osSyncPrintf("++ %d\n,", strokes[index]);
+            return strokes[index];
+        }
+    }
+    /* Reads past the holes; the original has it */
+    return (s8)g_CourseRecords[g_CourseIndex].holes[index].par;
+}
 
 #define NO_ROUTE_POINT (-1)
 /* Beyond any distance on a hole */

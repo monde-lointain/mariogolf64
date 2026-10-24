@@ -2084,6 +2084,7 @@ IsTrialShotSafe = 0x80253978; // type:func segment:ovl_03
 sGolferTraits = 0x80253B50; // size:0xFC segment:ovl_03
 sClubKindChances = 0x80253C4C; // size:0x6 segment:ovl_03
 sApproachBandLimits = 0x80253C70; // size:0x30 segment:ovl_03
+sLineBreakText = 0x80253D78; // size:0x4 segment:ovl_03
 sPlanThreadState = 0x80253C64; // size:0x4 segment:ovl_03
 sPlanThread = 0x80254300; // size:0x1B0 segment:ovl_03
 sPlannedShot = 0x802544B0; // size:0x58 segment:ovl_03

@@ -113,6 +113,9 @@
 #define GAME_FLAG_UNK32 0x32
 #define GAME_FLAG_UNK55 0x55
 
+/* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is not yet known */
+#define GAME_FLAG_UNK3C 0x3C
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);
