@@ -600,7 +600,6 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x, s32 z
     return (color << 16) | paintedCode;
 }
 
-
 /*
  * A paint logic like PaintMainCourse with pale rough, out-of-bounds ground
  * painted 0xBEEF, and TERRAIN_CODE_UNK3 painted as cart way away from more of
@@ -2213,7 +2212,6 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", CastBillboardShadows);
-
 
 /*
  * Sets the ground's light and shade colours for the scene's colour index,
