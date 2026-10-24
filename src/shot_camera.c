@@ -1,5 +1,6 @@
 #include "common.h"
 #include "course.h"
+#include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
 #include "club.h"
@@ -158,9 +159,93 @@ extern Vec3 sLookAtPoint;
 
 INCLUDE_ASM("asm/nonmatchings/shot_camera", func_800453E0);
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045734);
+#define CROSS_SLOPE_DISTANCE 0x3C00
+#define CROSS_SLOPE_CAPPED_RISE 0x1E00
+#define TEE_HEIGHT 307.2f
+#define AIM_SLOPE_STEP 6144.0f
+#define AIM_SLOPE_MAX_RISE 0x1800
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045910);
+/*
+ * Returns the binary angle of the ground's slope from the ball to a point
+ * CROSS_SLOPE_DISTANCE away, a quarter turn from the shot's yaw. The point is
+ * on the other side when player->unk22 is set, and the slope is then negated.
+ */
+s16 GetCrossSlopeAngle(UnkB8 *player, Unk20 *shot) {
+    SurfaceInfo *surfaceInfo;
+    s32 sampleDistance;
+    s16 aimYaw;
+    s32 yaw;
+    f32 angle;
+    s32 height;
+    s32 rise;
+
+    aimYaw = shot->unk0;
+    /* The (s8) cast is there to match */
+    surfaceInfo = GetSurfaceInfo((s8)player->ballSurface);
+    sampleDistance = CROSS_SLOPE_DISTANCE;
+    yaw = aimYaw + BINARY_ANGLE_TURN / 4;
+    if (player->unk22) {
+        angle = BINARY_ANGLE_TO_RADIANS * ((yaw + BINARY_ANGLE_TURN / 2) & BINARY_ANGLE_MASK);
+    } else {
+        angle = (yaw & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS;
+    }
+    height = GetGroundHeight((s32)(cos(angle) * sampleDistance) + player->ballPosition[AXIS_X],
+                             (s32)(sin(angle) * sampleDistance) + player->ballPosition[AXIS_Z]);
+    if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
+        height -= TEE_HEIGHT;
+    }
+    if (height < player->ballPosition[AXIS_Y] - sampleDistance) {
+        height = player->ballPosition[AXIS_Y] - sampleDistance;
+    }
+    if (height > player->ballPosition[AXIS_Y] + sampleDistance) {
+        height = player->ballPosition[AXIS_Y] + sampleDistance;
+    }
+    rise = height - player->ballPosition[AXIS_Y];
+    if (player->unk22) {
+        rise = -rise;
+    }
+    if (rise > CROSS_SLOPE_DISTANCE) {
+        rise = CROSS_SLOPE_CAPPED_RISE;
+    } else if (rise < -CROSS_SLOPE_DISTANCE) {
+        rise = -CROSS_SLOPE_CAPPED_RISE;
+    }
+    return atan2(rise, sampleDistance) * RADIANS_TO_BINARY_ANGLE;
+}
+
+/*
+ * Returns the binary angle of the ground's slope along the shot's yaw, between
+ * points half an AIM_SLOPE_STEP ahead of the ball and an AIM_SLOPE_STEP behind it.
+ */
+s16 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot) {
+    f32 angle;
+    f32 step[2]; /* On x, then z */
+    s32 aheadHeight;
+    s32 behindHeight;
+
+    angle = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
+    step[0] = cosf(angle) * AIM_SLOPE_STEP;
+    step[1] = sinf(angle) * AIM_SLOPE_STEP;
+    aheadHeight = GetGroundHeight((s32)step[0] / 2 + player->ballPosition[AXIS_X],
+                                  (s32)step[1] / 2 + player->ballPosition[AXIS_Z]);
+    if (aheadHeight < player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE) {
+        aheadHeight = player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE;
+    }
+    if (aheadHeight > player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE) {
+        aheadHeight = player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE;
+    }
+    behindHeight =
+        GetGroundHeight(player->ballPosition[AXIS_X] - (s32)step[0], player->ballPosition[AXIS_Z] - (s32)step[1]);
+    if (behindHeight < player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE) {
+        behindHeight = player->ballPosition[AXIS_Y] - AIM_SLOPE_MAX_RISE;
+    }
+    if (behindHeight > player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE) {
+        behindHeight = player->ballPosition[AXIS_Y] + AIM_SLOPE_MAX_RISE;
+    }
+    return atan2(aheadHeight - behindHeight, AIM_SLOPE_STEP * 1.5) * RADIANS_TO_BINARY_ANGLE;
+}
+
+/* Unreferenced; the original has it, and its zero is in the ROM */
+static const f64 sUnusedZero = 0.0;
 
 void func_8009226C(s32);
 void func_80205AE4(s32, s32);
@@ -533,7 +618,33 @@ void SetLandingWaitFrameCount(s32 frameCount) {
     sLandingWaitFrameCount = frameCount;
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_8004C51C);
+#define VIEW_SIDE_DISTANCE 153600.0f
+
+/*
+ * Finds the points VIEW_SIDE_DISTANCE from center on x and z, a quarter turn
+ * either way from the main camera's yaw.
+ */
+void GetViewSidePoints(CoursePoint center, CoursePoint plusQuarterPoint, CoursePoint minusQuarterPoint) {
+    f32 offsetX;
+    f32 offsetZ;
+    f32 yaw;
+    f32 plusQuarterAngle;
+    f32 minusQuarterAngle;
+
+    offsetX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+    offsetZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    if ((s32)offsetX != 0 || (s32)offsetZ != 0) {
+        yaw = M_PI - atan2f(offsetX, offsetZ);
+    } else {
+        yaw = 0.0f;
+    }
+    plusQuarterAngle = yaw + M_PI / 2;
+    plusQuarterPoint[AXIS_X] = (s32)(-sinf(plusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_X];
+    plusQuarterPoint[AXIS_Z] = (s32)(cosf(plusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_Z];
+    minusQuarterAngle = yaw - M_PI / 2;
+    minusQuarterPoint[AXIS_X] = (s32)(-sinf(minusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_X];
+    minusQuarterPoint[AXIS_Z] = (s32)(cosf(minusQuarterAngle) * VIEW_SIDE_DISTANCE) + center[AXIS_Z];
+}
 
 void func_8004C6A8(void) {
 }

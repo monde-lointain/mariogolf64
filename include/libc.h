@@ -14,5 +14,7 @@ void srand(u32 seed);
 double fabs(double value);
 double atan(double value);
 double atan2(double y, double x);
+double sin(double angle);
+double cos(double angle);
 
 #endif
