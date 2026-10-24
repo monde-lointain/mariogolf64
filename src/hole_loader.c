@@ -600,7 +600,7 @@ void ShrinkMiniGolfHolePoints(void) {
             }
             for (index = 0; index < ARRAY_COUNT(g_HolePoints.unk60); index++) {
                 g_HolePoints.unk60[index][axis] *= g_MiniGolfScale[axis];
-                g_HolePoints.unkC0[index][axis] *= g_MiniGolfScale[axis];
+                g_HolePoints.routePoints[index][axis] *= g_MiniGolfScale[axis];
             }
         }
     }

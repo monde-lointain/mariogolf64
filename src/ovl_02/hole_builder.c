@@ -2055,8 +2055,8 @@ void ClearHolePoints(void) {
         g_HolePoints.unk60[i][AXIS_Y] = 0;
         g_HolePoints.unk60[i][AXIS_Z] = 0;
         /* The dereference is there to match */
-        *g_HolePoints.unkC0[i] = 0;
-        g_HolePoints.unkC0[i][AXIS_Z] = 0;
+        *g_HolePoints.routePoints[i] = 0;
+        g_HolePoints.routePoints[i][AXIS_Z] = 0;
     }
 }
 

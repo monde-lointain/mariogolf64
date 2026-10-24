@@ -5,12 +5,14 @@
 #include "common.h"
 
 #define CUP_POSITION_COUNT 4
+/* Points that the computer golfer may route its shots through */
+#define ROUTE_POINT_COUNT 8
 
 typedef struct HolePoints {
     /* 0x00 */ CoursePoint cupPositions[CUP_POSITION_COUNT]; /* Zero where a hole has fewer */
     /* 0x30 */ CoursePoint unk30[CUP_POSITION_COUNT];
     /* 0x60 */ CoursePoint unk60[8];
-    /* 0xC0 */ CoursePoint unkC0[8];
+    /* 0xC0 */ CoursePoint routePoints[ROUTE_POINT_COUNT]; /* For the computer golfer; zero where unused */
 } HolePoints; /* size = 0x120 */
 
 extern HolePoints g_HolePoints;
