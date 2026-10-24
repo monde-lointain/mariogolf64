@@ -37,6 +37,7 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
 
+#define NO_EFFECT -1 /* func_8009226C's argument that ends its effect */
 #define NO_FLIGHT_CAMERA (-1)
 
 /* The field of view, in degrees, of the main camera between shots */
@@ -325,6 +326,8 @@ void func_80216130(s32);
 void func_80216B74(s32);
 /* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
 s32 func_8005DE40();
+void ChooseFlightCameraKind(void);
+void func_80048D7C(s32);
 s32 StepHoleFlyover(void);
 
 /* The surface under the player's ball */
@@ -400,7 +403,219 @@ void EndFlightCamera(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80045CE0);
+/* Random yaws come in steps of a 32768th of a turn */
+#define RANDOM_YAW_RANGE 0x7FFF
+#define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
+/* The shortest shot length that the cameras work with */
+#define MIN_SHOT_LENGTH 0x7800
+/* The path steps searched for cup passes and for path flags */
+#define SCANNED_STEP_COUNT 30
+/* The ground is probed at five points, 45 degrees apart, around the ball */
+#define GROUND_PROBE_COUNT 5
+#define GROUND_PROBE_ANGLE_STEP (M_PI / 4)
+#define GROUND_PROBE_DISTANCE 30720.0f
+#define GROUND_PROBE_MAX_RISE 4608.0f
+
+extern s32 D_800BE620;
+extern s32 D_800BE624;
+extern s32 D_800BE650;
+extern f32 D_800BE65C;
+extern s8 D_800BE670;
+extern s32 D_800BE678;
+extern s32 D_800BE67C;
+extern s32 D_800BE680;
+extern f32 D_800BE684;
+extern s32 D_800C7300;
+extern CoursePoint sShotStartPosition;
+extern f32 sEndYawFromCup;
+extern f32 sStartYawFromCup;
+extern s32 D_800DAF20;
+extern s32 D_800DAF3C;
+extern s32 D_800DAF40;
+extern s32 D_800DAF44;
+extern s8 D_800DAF48;
+extern s8 D_801061BF;
+extern s8 D_801061C0;
+extern s8 D_801061C1;
+extern s8 D_801061C2;
+extern s8 D_801061C3;
+extern s8 D_801061C4;
+extern s8 D_801061C5;
+extern s8 D_801061CF;
+extern u16 D_8010623A;
+extern s32 D_802246F8;
+
+void func_80083A48(void);
+void func_8020E7B4(s32);
+
+/*
+ * Starts the flight camera for the simulated shot. It resets the flight state, records the
+ * shot's start and end points and their yaws from the cup, looks for cup passes and
+ * flagged steps at the start of the path, and probes the ground on one side of the ball.
+ * Then it picks the first camera kind and moves the main camera to it.
+ * earlierFlightCount is ovl_00's count of the earlier calls; on the first, the camera picks
+ * are shuffled again.
+ */
+void StartFlightCamera(s32 earlierFlightCount) {
+    CoursePoint probe;
+    s32 i;
+    f32 yaw;
+    f32 degrees;
+
+    D_800BE624 = earlierFlightCount;
+    func_80216B74(1);
+    func_80083A48();
+    D_800BE674 = 0;
+    sEndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
+    if (earlierFlightCount == 0) {
+        NextCameraPick(FALSE);
+    }
+    func_8009226C(NO_EFFECT);
+    func_8020E7B4(-1);
+    sFlightCameraFlags = 0;
+    /* The separate tests are there to match */
+    if (earlierFlightCount == 0) {
+        sFlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
+    } else if (RandomBelow(2) == 0) {
+        sFlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
+    }
+    if (earlierFlightCount == 0) {
+        D_800C7300 = 0;
+    }
+    g_InsetView.animation = INSET_VIEW_STILL;
+    g_InsetView.step = 0;
+    g_Cameras[INSET_CAMERA].view.drawFlags = 0;
+    /* The nested ifs are there to match */
+    if (!g_SimulatedShot.unk2E08) {
+        if (earlierFlightCount != 0 && D_802246F8 == -1) {
+            D_801061CF = TRUE;
+        } else {
+            D_801061CF = FALSE;
+        }
+    } else {
+        D_801061CF = FALSE;
+    }
+    g_BallFlightStep = 0;
+    D_800BE620 = 0;
+    D_800BE628 = FALSE;
+    sCupViewHoldCount = 0;
+    D_800DAF3C = 0;
+    D_800DAF40 = 0;
+    D_800DAF44 = 0;
+    sEndReaction = END_REACTION_NONE;
+    sCameraYaw = (f32)RandomBelow(RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
+    D_800BE65C = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
+    D_800BE684 = (f32)(rand() & RANDOM_YAW_RANGE) * RANDOM_YAW_TO_RADIANS;
+    if (earlierFlightCount == 0) {
+        D_800DAF20 = FALSE;
+    } else {
+        D_800DAF20 = TRUE;
+    }
+    D_800BE678 = 0;
+    if (g_SimulatedShot.unk2E08) {
+        D_800BE678 = 1;
+    } else if (sEndSurfaceInfo->kind == SURFACE_KIND_WATER_HAZARD) {
+        D_800BE678 = 3;
+    }
+    D_800DAF48 = 0;
+    D_800BE670 = 0;
+    D_800BE67C = 1;
+    if (D_800DAF20) {
+        D_800BE67C = RandomBelow(2);
+        D_801061C4 = D_800BE67C;
+        D_801061BF = D_800BE67C;
+        D_801061C0 = D_800BE67C;
+        D_801061C1 = D_800BE67C;
+        D_801061C2 = D_800BE67C;
+        D_801061C3 = D_800BE67C;
+        D_801061C5 = D_800BE67C;
+    }
+    /* Converting through f32, and writing the start point first, are there to match */
+    sShotStartPosition[AXIS_X] = (f32)g_SimulatedShot.startPosition[AXIS_X];
+    sShotStartPosition[AXIS_Y] = (f32)g_SimulatedShot.startPosition[AXIS_Y];
+    sShotStartPosition[AXIS_Z] = (f32)g_SimulatedShot.startPosition[AXIS_Z];
+    sShotEndPosition[AXIS_X] = (f32)g_SimulatedShot.endPosition[AXIS_X];
+    sShotEndPosition[AXIS_Y] = (f32)g_SimulatedShot.endPosition[AXIS_Y];
+    sShotEndPosition[AXIS_Z] = (f32)g_SimulatedShot.endPosition[AXIS_Z];
+    sShotFlightYaw = -atan2((f32)(sShotEndPosition[AXIS_X] - sShotStartPosition[AXIS_X]),
+                            (f32)(sShotEndPosition[AXIS_Z] - sShotStartPosition[AXIS_Z]));
+    sEndYawFromCup = -atan2((f32)(sShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
+                            (f32)(sShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
+    sStartYawFromCup = -atan2((f32)(sShotStartPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X]),
+                              (f32)(sShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]));
+    D_800BE644 = GetCupDistance(sShotStartPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                sShotStartPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+    D_800BE640 = IntLength3D(sShotStartPosition[AXIS_X] - sShotEndPosition[AXIS_X],
+                             sShotStartPosition[AXIS_Y] - sShotEndPosition[AXIS_Y],
+                             sShotStartPosition[AXIS_Z] - sShotEndPosition[AXIS_Z]);
+    if (D_800BE640 < MIN_SHOT_LENGTH) {
+        D_800BE640 = MIN_SHOT_LENGTH;
+    }
+    sLandingCupDistance = GetCupDistance(sShotEndPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                         sShotEndPosition[AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]);
+    D_800BE658 = 0;
+    /* The != tests are there to match */
+    for (i = 0; i != SCANNED_STEP_COUNT; i++) {
+        if (i < g_SimulatedShot.stepCount
+            && IsCupPassPoint(IntLength2D(g_SimulatedShot.path[i][AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                          g_SimulatedShot.path[i][AXIS_Z] - D_800BA9D8.cupPosition[AXIS_Z]),
+                              g_SimulatedShot.path[i][AXIS_Y])) {
+            D_800BE658 |= 2;
+        }
+    }
+    D_800BE648 = FALSE;
+    D_800BE64C = -1;
+    D_800BE650 = -1;
+    for (i = 0; i != SCANNED_STEP_COUNT; i++) {
+        if (i < g_SimulatedShot.stepCount && (g_SimulatedShot.pathFlags[i] & 2)) {
+            D_800BE648 = TRUE;
+            D_800BE658 |= 1;
+            if (D_800BE64C == -1) {
+                D_800BE64C = i;
+                D_800BE650 = 40;
+            }
+        }
+    }
+    D_800BE690 = TRUE;
+    for (i = 0; i != GROUND_PROBE_COUNT; i++) {
+        if (g_Players[g_CurrentShot.playerIndex].unk22 == 1) {
+            yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + (f32)i * GROUND_PROBE_ANGLE_STEP;
+        } else {
+            yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS - (f32)i * GROUND_PROBE_ANGLE_STEP;
+        }
+        probe[AXIS_X] = cosf(yaw) * GROUND_PROBE_DISTANCE + g_CurrentShot.ballPosition[AXIS_X];
+        probe[AXIS_Z] = sinf(yaw) * GROUND_PROBE_DISTANCE + g_CurrentShot.ballPosition[AXIS_Z];
+        probe[AXIS_Y] = GetGroundHeight(probe[AXIS_X], probe[AXIS_Z]);
+        if (probe[AXIS_Y] < g_CurrentShot.ballPosition[AXIS_Y] - GROUND_PROBE_MAX_RISE) {
+            D_800BE690 = FALSE;
+        }
+        if (probe[AXIS_Y] > g_CurrentShot.ballPosition[AXIS_Y] + GROUND_PROBE_MAX_RISE) {
+            D_800BE690 = FALSE;
+        }
+    }
+    degrees = D_8010623A * (360.0f * BINARY_ANGLE_TO_RADIANS) * (1.0 / (2 * M_PI));
+    if (degrees < 350.0f && degrees > 10.0f) {
+        D_800BE690 = FALSE;
+    }
+    D_800BE628 = FALSE;
+    D_800BE630 = FALSE;
+    D_800DAF50 = 1;
+    sFlightCameraKind = NO_FLIGHT_CAMERA;
+    D_800BE680 = 0;
+    g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
+    sFlightBallPosition[AXIS_X] = sShotStartPosition[AXIS_X];
+    sFlightBallPosition[AXIS_Y] = sShotStartPosition[AXIS_Y];
+    sFlightBallPosition[AXIS_Z] = sShotStartPosition[AXIS_Z];
+    ChooseFlightCameraKind();
+    D_800BE628 = TRUE;
+    func_80048D7C(0);
+    g_Cameras[0].view.eye[AXIS_X] = sCameraPosition[AXIS_X];
+    g_Cameras[0].view.eye[AXIS_Y] = sCameraPosition[AXIS_Y];
+    g_Cameras[0].view.eye[AXIS_Z] = sCameraPosition[AXIS_Z];
+    g_Cameras[0].view.lookAt[AXIS_X] = sLookAtPoint[AXIS_X];
+    g_Cameras[0].view.lookAt[AXIS_Y] = sLookAtPoint[AXIS_Y];
+    g_Cameras[0].view.lookAt[AXIS_Z] = sLookAtPoint[AXIS_Z];
+}
 
 /* The sounds of the club meeting the ball */
 #define CONTACT_SOUND_WOOD_UNK50 0x50 /* Off a tee, or on some power shots */
@@ -749,8 +964,6 @@ void PlaceCameraAroundShotEnd(void) {
 void func_800934CC(s32);
 
 extern s8 D_801061B8;
-extern s8 D_801061C0;
-extern s8 D_801061C3;
 extern s8 D_801B60B9;
 extern s32 g_PlayerCount;
 
@@ -947,7 +1160,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", func_80048D7C);
 #define FLIGHT_CAMERA_UNKC 0xC
 #define FLIGHT_CAMERA_UNKD 0xD
 #define FLIGHT_CAMERA_UNK12 0x12
-#define NO_EFFECT -1 /* func_8009226C's argument that ends its effect */
 #define LONG_SHOT_MIN_LENGTH 0x1C2000
 #define MID_SHOT_MIN_LENGTH 0x4B001
 #define NEAR_CUP_DISTANCE 0x1E00
