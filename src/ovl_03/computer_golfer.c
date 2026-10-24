@@ -7,6 +7,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "surface.h"
+#include "variables.h"
 
 /* The shot planning thread's states, in sPlanThreadState */
 #define PLAN_THREAD_RUNNING 0
@@ -36,7 +37,7 @@ extern s8 sIsClubUsable[CLUB_SLOT_COUNT];
 extern CurrentShot sShot;
 
 s32 PlanShot(CurrentShot *plannedShot);
-s32 func_8024F0B0_ovl_03(s32 arg0);
+s32 PlanCupDistance(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 s32 ChooseClubForDistance(s32 distance);
 
@@ -188,7 +189,61 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EBC_ovl_03);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", D_80253EC8_ovl_03);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F0B0_ovl_03);
+/* The cup distance from which PlanCupDistance allows for the wind */
+#define WIND_ALLOWANCE_MIN_DISTANCE 153600.0f
+/* windSpeed's units in a unit of the wind's push */
+#define WIND_SPEED_SCALE (1.0f / 0x10000)
+/* The fraction of the distance that each unit of push along the line takes off */
+#define WIND_FOLLOW_FRACTION 0.01f
+#define WIND_DISTANCE_RATIO_MIN 0.8f
+#define WIND_DISTANCE_RATIO_MAX 1.2f
+/* The distance that each unit of the ball's height above the cup adds */
+#define HEIGHT_DISTANCE_FRACTION 0.1f
+
+/*
+ * Returns the distance to plan a shot to the cup for: the flat distance,
+ * shortened by a following wind and lengthened by a head wind from
+ * WIND_ALLOWANCE_MIN_DISTANCE out, plus a part of the ball's height above the
+ * cup.
+ */
+s32 PlanCupDistance(s32 unused) {
+    s32 distance;
+    f32 cupX;
+    f32 cupZ;
+    f32 length;
+    f32 windAngle;
+    f32 inverseLength;
+    f32 windFollow;
+    f32 windX;
+    f32 windZ;
+
+    distance = IntLength2D(sShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                           sShot.ballPosition[AXIS_Z] - g_CupPositionZ);
+    cupX = D_800BA9D8.cupPosition[AXIS_X] - sShot.ballPosition[AXIS_X];
+    cupZ = g_CupPositionZ - sShot.ballPosition[AXIS_Z];
+    length = sqrtf(cupX * cupX + cupZ * cupZ);
+    windAngle = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+    if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
+        inverseLength = 1.0f / length;
+        cupX *= inverseLength;
+        cupZ *= inverseLength;
+        windX = cosf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
+        windZ = sinf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
+        windFollow = cupX * windX + cupZ * windZ;
+        osSyncPrintf("WindFollow%f\n", windFollow);
+        /* Turning windFollow into the distance ratio is there to match */
+        windFollow = -windFollow * WIND_FOLLOW_FRACTION + 1.0f;
+        osSyncPrintf("WindCareRatio%f\n", windFollow);
+        if (windFollow < WIND_DISTANCE_RATIO_MIN) {
+            windFollow = WIND_DISTANCE_RATIO_MIN;
+        }
+        if (windFollow >= WIND_DISTANCE_RATIO_MAX) {
+            windFollow = WIND_DISTANCE_RATIO_MAX;
+        }
+        distance = distance * windFollow;
+    }
+    return distance + (sShot.ballPosition[AXIS_Y] - g_CupPositionY) * HEIGHT_DISTANCE_FRACTION;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_03/computer_golfer", func_8024F320_ovl_03);
 
@@ -337,7 +392,7 @@ void func_802510D0_ovl_03(s32 unused, s32 *plannedClub, s32 *targetX, s32 *targe
         values[index] = one;
     }
     strokeCount = g_Players[sShot.playerIndex].unk23;
-    *plannedClub = ChooseClubForDistance(func_8024F0B0_ovl_03(one));
+    *plannedClub = ChooseClubForDistance(PlanCupDistance(one));
     *targetX = D_800BA9D8.cupPosition[AXIS_X];
     *targetZ = g_CupPositionZ;
     *arg4 = values[strokeCount];
