@@ -72,6 +72,17 @@
 
 /* The notice cloud grows by one step each time it is drawn, up to this size */
 #define NOTICE_FULL_SIZE 4
+/* The cloud is drawn in two strips about its centre, its half-size growing by a step per size */
+#define NOTICE_CENTRE_X 160
+#define NOTICE_CENTRE_Y 116
+#define NOTICE_WIDTH 256
+#define NOTICE_STRIP_HEIGHT 32
+#define NOTICE_STRIP_COUNT 2
+#define NOTICE_STRIP_SIZE (NOTICE_WIDTH * NOTICE_STRIP_HEIGHT / 2)
+#define NOTICE_HALF_WIDTH_STEP 34
+#define NOTICE_HALF_HEIGHT_STEP 16
+#define NOTICE_TEXT_TOP 110
+#define NOTICE_TEXT_SLOT 3
 
 /* The Accessing sign, drawn in strips */
 #define ACCESSING_LEFT 52
@@ -1159,7 +1170,77 @@ s32 GetNoticeState(void) {
     return sNoticeState;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawNotice);
+/*
+ * Steps the notice cloud's size and draws it from its centre, with its message once it is full
+ * size.
+ */
+void DrawNotice(Gfx **displayListHead) {
+    Gfx *displayList = *displayListHead;
+    s32 strip;
+    s32 halfWidth;
+    s32 halfHeight;
+    /* The copy of halfHeight, and its starting value, are there to match */
+    s32 stripHeight = 0;
+    s32 bottom;
+
+    if (sNoticeState == NOTICE_HIDDEN) {
+        return;
+    }
+    if (sNoticeState == NOTICE_OPENING) {
+        if (sNoticeSize < NOTICE_FULL_SIZE) {
+            sNoticeSize++;
+        } else {
+            sNoticeState = NOTICE_SHOWN;
+        }
+    } else if (sNoticeState == NOTICE_CLOSING) {
+        if (sNoticeSize > 0) {
+            sNoticeSize--;
+        } else {
+            sNoticeState = NOTICE_HIDDEN;
+        }
+    }
+    gDPPipeSync(displayList++);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_NONE);
+    gDPPipeSync(displayList++);
+    gDPSetAlphaDither(displayList++, G_AD_PATTERN);
+    gDPPipeSync(displayList++);
+    gDPSetTextureFilter(displayList++, G_TF_BILERP);
+    gDPPipeSync(displayList++);
+    gDPSetRenderMode(displayList++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(displayList++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    gDPPipeSync(displayList++);
+    gDPSetAlphaCompare(displayList++, G_AC_NONE);
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 240);
+    if (sNoticeSize > 0) {
+        for (strip = 0; strip != NOTICE_STRIP_COUNT; strip++) {
+            halfHeight = sNoticeSize * NOTICE_HALF_HEIGHT_STEP;
+            halfWidth = sNoticeSize * NOTICE_HALF_WIDTH_STEP;
+            LoadNibbleTextureBlock(&displayList,
+                                   (u8 *)g_GameBoyTransfer.noticeCloudImage + IMAGE_HEADER_SIZE +
+                                       strip * NOTICE_STRIP_SIZE,
+                                   G_IM_FMT_I, NOTICE_WIDTH, NOTICE_STRIP_HEIGHT, 0, G_TX_CLAMP, G_TX_CLAMP, 0, 0,
+                                   0, 0);
+            stripHeight = halfHeight;
+            bottom = strip * stripHeight + NOTICE_CENTRE_Y;
+            DrawTextureRect(&displayList, (NOTICE_CENTRE_X - halfWidth) << 2, (bottom - stripHeight) << 2,
+                            (NOTICE_CENTRE_X + halfWidth) << 2, bottom << 2,
+                            G_TX_RENDERTILE, 0, 0, (NOTICE_WIDTH << 10) / 2 / halfWidth,
+                            (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
+        }
+    }
+    if (sNoticeState == NOTICE_SHOWN) {
+        /* The unused array is there to match */
+        s32 unused[2];
+
+        SetTextSlot(NOTICE_CENTRE_X, NOTICE_TEXT_TOP, sNoticeMessage, 1, NOTICE_TEXT_SLOT,
+                    TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
+        DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
+    }
+    *displayListHead = displayList;
+}
 
 void DrawAccessingSign(Gfx **displayListHead) {
     Gfx *displayList = *displayListHead;
