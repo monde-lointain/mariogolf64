@@ -62,8 +62,6 @@ typedef struct MessageTable {
 #define CHARACTER_CODE_MARK_FIRST 0xDE
 #define CHARACTER_CODE_MARK_COUNT 2
 #define CHARACTER_CODE_OTHER_MARK_FIRST 0x9E
-/* Added to a lowercase letter to give its character code */
-#define LOWERCASE_CODE_OFFSET 0x80
 /* The pixels between lines, over the font size */
 #define LINE_SPACING 6
 /* The gap between the lines of a slot drawn in the medium font */

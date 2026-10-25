@@ -47,6 +47,8 @@
 #define MEASURE_TEXT_FIXED_WIDTH 0x01
 
 #define TEXT_NAME_SIZE 20
+/* Added to a lowercase letter to give its character code */
+#define LOWERCASE_CODE_OFFSET 0x80
 #define TEXT_PALETTE_COLOR_COUNT 4
 
 typedef struct TextSlot {
