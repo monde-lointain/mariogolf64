@@ -70,6 +70,37 @@ extern s32 sIsCourseSelectLoaded;
 extern f32 g_RainSoundVolume;
 
 /*
+ * The flag of the wind indicator is a grid of vertices that the wind waves.
+ * Its front and back sides each have one grid per matrix buffer; the back's
+ * texture runs the other way.
+ */
+#define WIND_FLAG_COLUMN_COUNT 6
+#define WIND_FLAG_ROW_COUNT 5
+#define WIND_FLAG_VERTEX_COUNT (WIND_FLAG_COLUMN_COUNT * WIND_FLAG_ROW_COUNT)
+#define WIND_FLAG_SIDE_COUNT 2
+#define MATRIX_BUFFER_COUNT 2
+#define WIND_FLAG_CELL_SIZE 160
+#define WIND_FLAG_TEXEL_COLUMN_STEP 0x266 /* In s10.5 texture coordinates */
+#define WIND_FLAG_TEXEL_ROW_STEP 0x2A0
+#define WIND_FLAG_BACK_TEXEL_START 0xC00
+#define WIND_FLAG_START_SHADE 0xB7
+
+/* The near and far planes of the screen's orthographic projection */
+#define SCREEN_ORTHO_NEAR 1.0f
+#define SCREEN_ORTHO_FAR 1000.0f
+
+extern Vtx sWindFlagVertices[WIND_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][WIND_FLAG_VERTEX_COUNT];
+extern u8 sWindFlagShades[WIND_FLAG_VERTEX_COUNT];
+extern s32 D_800C5478;
+extern Mtx D_80105278;
+extern u16 g_ScreenEffectPerspNorm;
+extern f32 D_801B7F38[2];
+extern f32 D_801B7F40[2];
+extern f32 D_801B7F48[2];
+extern f32 D_801B7F50[2];
+extern f32 D_801B7F58[2];
+
+/*
  * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
  * along y, with a face at each z of +-40, and a larger outline around it.
  * The body's texture runs along y, a texel row every
