@@ -56,7 +56,7 @@
 #define ASSET_ROUND_IMAGE_563 0x563
 #define ASSET_ROUND_IMAGE_564 0x564
 #define ASSET_ROUND_IMAGE_562 0x562
-#define ASSET_ROUND_IMAGE_57C 0x57C
+#define ASSET_SHOT_OFFSET_MARKER_IMAGE 0x57C
 #define ASSET_ROUND_IMAGE_97B 0x97B
 #define ASSET_ROUND_IMAGE_725 0x725
 #define ASSET_ROUND_IMAGE_568 0x568
@@ -146,6 +146,25 @@ extern s32 g_MatrixBufferIndex;
 
 extern s32 sShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
 extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
+
+/*
+ * The marker is an animated 16x16 image, drawn at an offset from the shot
+ * panel. Its asset holds the frames of the animation, then a still frame.
+ */
+#define SHOT_OFFSET_MARKER_SIZE 16
+#define SHOT_OFFSET_MARKER_FRAME_COUNT 11
+#define SHOT_OFFSET_MARKER_FRAME_SIZE (SHOT_OFFSET_MARKER_SIZE * SHOT_OFFSET_MARKER_SIZE / 2)
+#define SHOT_OFFSET_MARKER_STILL_FRAME SHOT_OFFSET_MARKER_FRAME_COUNT
+#define SHOT_OFFSET_MARKER_X 264
+#define SHOT_OFFSET_MARKER_Y 174
+#define D_80106240_UNK8 0x8 /* Animates the shot offset marker */
+
+extern s32 D_800C54C4;
+extern s32 D_800C54C8;
+extern s32 sShotOffsetMarkerFrame;
+extern s32 sShotOffsetMarkerTexelOffset;
+extern void *sShotOffsetMarkerImage;
+extern u8 D_80106240;
 
 /* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
@@ -286,7 +305,7 @@ extern s32 D_800C59DC;
 extern void *D_800E2138;
 extern void *D_800E2158;
 extern void *D_800E214C[3];
-extern void *D_800E2184;
+
 extern void *D_800E2164;
 extern void *D_800E2168;
 extern void *D_800E216C;
@@ -528,8 +547,8 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_800E214C[1], &asset);
     D_800E214C[2] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_562, &asset));
     ReadEncodedAsset(D_800E214C[2], &asset);
-    D_800E2184 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_57C, &asset));
-    ReadEncodedAsset(D_800E2184, &asset);
+    sShotOffsetMarkerImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
+    ReadEncodedAsset(sShotOffsetMarkerImage, &asset);
     D_800E2164 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_97B, &asset));
     ReadEncodedAsset(D_800E2164, &asset);
     D_800E2168 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
@@ -573,7 +592,7 @@ void FreeSceneryImages(void) {
         FreeMemory(&D_800E214C[0]);
         FreeMemory(&D_800E214C[1]);
         FreeMemory(&D_800E214C[2]);
-        FreeMemory(&D_800E2184);
+        FreeMemory(&sShotOffsetMarkerImage);
         FreeMemory(&D_800E2164);
         FreeMemory(&D_800E2168);
         FreeMemory(&D_800E216C);
@@ -898,7 +917,32 @@ void SetShotOffsetMarker(s32 x, s32 y) {
     sShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80087CB0);
+/* Draws the shot offset marker, animated while D_80106240_UNK8 is set */
+#ifdef NON_MATCHING
+void DrawShotOffsetMarker(void) {
+    gDPPipeSync(g_DisplayListHead++);
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sShotOffsetMarkerImage + IMAGE_HEADER_SIZE) & ~7);
+    sShotOffsetMarkerFrame = (sShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
+    if (D_80106240 & D_80106240_UNK8) {
+        sShotOffsetMarkerTexelOffset = sShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
+    } else {
+        sShotOffsetMarkerTexelOffset = SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
+    }
+    gDPLoadTextureBlock_4b(g_DisplayListHead++,
+                           ((u32)sShotOffsetMarkerImage + PALETTED_TEXELS_OFFSET + sShotOffsetMarkerTexelOffset) & ~7,
+                           G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE, SHOT_OFFSET_MARKER_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(g_DisplayListHead++);
+    gSPScisTextureRectangle(g_DisplayListHead++, (sShotOffsetMarkerXs[0] + (D_800C54C8 + SHOT_OFFSET_MARKER_X)) << 2,
+                            (sShotOffsetMarkerYs[0] + (D_800C54C4 + SHOT_OFFSET_MARKER_Y) + sHudOffsetY) << 2,
+                            (sShotOffsetMarkerXs[0] + (D_800C54C8 + SHOT_OFFSET_MARKER_X) + SHOT_OFFSET_MARKER_SIZE) << 2,
+                            (sShotOffsetMarkerYs[0] + (D_800C54C4 + SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE) +
+                             sHudOffsetY) << 2,
+                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_800880A0);
 
