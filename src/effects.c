@@ -63,6 +63,7 @@ typedef struct RainSplash {
 #define EFFECT_KIND_RIPPLE 0xC
 #define EFFECT_KIND_UNKE 0xE
 #define EFFECT_KIND_SPREADING_CIRCLE 0x13 /* Drawn with sArcImage */
+#define EFFECT_KIND_RISING_CLUMP 0x10 /* Drawn with sClumpImage */
 #define EFFECT_KIND_TEAR 0x14
 
 /* The debris that the ball's lie gives, chosen by its surface kind */
@@ -623,7 +624,43 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_80079ADC);
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_80079EBC);
+#define RISING_CLUMP_COUNT 3
+/* In course units; course y points down */
+#define RISING_CLUMP_HEIGHT 15360.0f
+
+/*
+ * Starts RISING_CLUMP_COUNT clumps rising from above the ball, each faster than the last, that
+ * grow as they fade. The callers pass a point, but the ball's position is used instead.
+ */
+void SpawnRisingClumps(CoursePoint unusedPoint) {
+    s32 index;
+    s32 spawnCount;
+    Effect *effect;
+
+    spawnCount = 0;
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_NONE) {
+            effect->position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Y] =
+                (g_CurrentShot.ballPosition[AXIS_Y] - RISING_CLUMP_HEIGHT) * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            effect->velocity[AXIS_X] = 0;
+            effect->velocity[AXIS_Y] = (spawnCount * 0.3f + 0.1f + guRandom() % 10 * 0.01f) * -1.5f;
+            effect->velocity[AXIS_Z] = 0;
+            effect->alpha = 255.0f;
+            effect->alphaStep = -1.0f;
+            effect->scale = guRandom() % 30 * 0.1f + 1.0f;
+            effect->scaleStep = guRandom() % 10 * 0.001f + 0.04;
+            effect->unk3B = 0;
+            effect->kind = EFFECT_KIND_RISING_CLUMP;
+            spawnCount++;
+            if (spawnCount == RISING_CLUMP_COUNT) {
+                break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007A10C);
 
