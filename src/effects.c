@@ -81,7 +81,7 @@ typedef struct RainSplash {
 extern u8 *sRippleImage;
 extern u8 *sArcImage;
 extern u8 *sDropImage;
-extern u8 *sSparkImage;
+extern u8 *sDivotImage;
 extern u8 *sPlumeImage;
 extern u8 *sCloudImage;
 extern u8 *sClumpImage;
@@ -158,7 +158,7 @@ void StartRain(void);
 #define GRASS_IMAGE_ASSET 0x6B6 /* Blades of grass */
 #define CLOUD_IMAGE_ASSET 0x6B5
 #define CLUMP_IMAGE_ASSET 0x6B8
-#define SPARK_IMAGE_ASSET 0x6C0
+#define DIVOT_IMAGE_ASSET 0x6C0 /* A flying divot, then the mark it leaves */
 #define PLUME_IMAGE_ASSET 0x6C1
 #define SPLASH_IMAGE_ASSET 0x6C2
 #define STAR_IMAGE_ASSET 0x69E
@@ -172,7 +172,7 @@ void FreeEffectImages(void) {
         FreeMemory(&sRippleImage);
         FreeMemory(&sArcImage);
         FreeMemory(&sDropImage);
-        FreeMemory(&sSparkImage);
+        FreeMemory(&sDivotImage);
         FreeMemory(&sPlumeImage);
         FreeMemory(&sCloudImage);
         FreeMemory(&sClumpImage);
@@ -204,8 +204,8 @@ void LoadEffectImages(void) {
         ReadEncodedAsset(sArcImage, &asset);
         sDropImage = AllocMemory(OpenEncodedAsset(DROP_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sDropImage, &asset);
-        sSparkImage = AllocMemory(OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset));
-        ReadEncodedAsset(sSparkImage, &asset);
+        sDivotImage = AllocMemory(OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset));
+        ReadEncodedAsset(sDivotImage, &asset);
         sPlumeImage = AllocMemory(OpenEncodedAsset(PLUME_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sPlumeImage, &asset);
         sSpeckleImage = AllocMemory(OpenEncodedAsset(SPECKLE_IMAGE_ASSET, &asset));
@@ -236,8 +236,8 @@ void PrepareShotEffects(BallSimulation *simulation) {
     ReadEncodedAsset(sRippleImage, &asset);
     OpenEncodedAsset(DROP_IMAGE_ASSET, &asset);
     ReadEncodedAsset(sDropImage, &asset);
-    OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(sSparkImage, &asset);
+    OpenEncodedAsset(DIVOT_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sDivotImage, &asset);
     /* Clearing the effects here instead of calling ClearEffects is there to match */
     for (index = 0; index != EFFECT_COUNT; index++) {
         effect = &sEffects[index];
