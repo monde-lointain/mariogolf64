@@ -1082,7 +1082,8 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008C6B0);
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
- * stopwatch, before the hole starts
+ * stopwatch, before the hole starts. The target reloads g_CourseIndex for
+ * each color, which it matches when declared volatile.
  */
 #ifdef NON_MATCHING
 void DrawHoleIntroText(Gfx **displayListHead) {
