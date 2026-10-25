@@ -186,10 +186,6 @@ void ResetBallSimulations(void) {
     }
 }
 
-void func_80216FC4_ovl_00(s32 *position);
-void func_80216FCC_ovl_00(s32 *position);
-void func_8020DA18_ovl_00(s32 unk);
-
 /*
  * The absolute value as a statement expression, which compiles to a compare and branch. It is a
  * macro because StepBallSimulation compiles further from the original when these sites call an
