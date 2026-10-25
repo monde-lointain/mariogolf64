@@ -2466,3 +2466,6 @@ DrawShotOffsetMarker = 0x80087CB0; // type:func
 sShotOffsetMarkerFrame = 0x800C5E24;
 sShotOffsetMarkerTexelOffset = 0x800E2134;
 sShotOffsetMarkerImage = 0x800E2184;
+sWindArrowLights = 0x800C5AB8; // size:0x18
+DrawWindIndicator = 0x80084EBC; // type:func
+sWindIndicatorMatrices = 0x800E1ED0; // size:0x80

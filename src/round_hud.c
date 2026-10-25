@@ -8,10 +8,12 @@
 #include "camera.h"
 #include "character.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "math_util.h"
 #include "movie.h"
 #include "overlay_manager.h"
 #include "pin.h"
@@ -313,6 +315,20 @@ extern void *D_800E2170;
 extern void *D_800E2174;
 extern void *D_800E217C;
 extern void *D_800E2178;
+
+/*
+ * The wind indicator is a model in module 9, lit by sWindArrowLights. It
+ * sits in front of the camera, tilted to its pitch and turned to the wind.
+ */
+#define MODULE_UNK9 9
+#define WIND_INDICATOR_DEPTH -300.0f
+#define WIND_INDICATOR_TILT 0.3f
+#define WIND_INDICATOR_SCALE -0.07f
+#define WIND_INDICATOR_FACING_DEGREES 180.0
+extern Lights1 sWindArrowLights;
+extern Mtx sWindIndicatorMatrices[2];
+extern Gfx D_80222400[];
+void func_80084468(Gfx **displayListHead, f32 x, f32 y);
 extern void *D_80105214;
 extern s32 sSceneryState;
 extern u8 D_801061B8[0x8C];
@@ -803,7 +819,61 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_800842C0);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80084468);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80084EBC);
+/*
+ * Draws the wind indicator at the given point. func_80084468's part is drawn
+ * after the model while the viewed wind angle is between a quarter and three
+ * quarters of a turn, and before it otherwise.
+ */
+void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
+    Vec3 viewDirection;
+    Vec3 rotation;
+    Vec3 translation;
+    Vec3 unusedScale;
+    Mat4 matrix;
+    Mat4 transform;
+    Gfx *gfx = *displayListHead;
+
+    viewDirection[AXIS_X] = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+    viewDirection[AXIS_Z] = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    viewDirection[AXIS_Y] = g_Cameras[0].view.lookAt[AXIS_Y] - g_Cameras[0].view.eye[AXIS_Y];
+    rotation[AXIS_X] = atan2(viewDirection[AXIS_Y], sqrtf(viewDirection[AXIS_X] * viewDirection[AXIS_X] +
+                                                          viewDirection[AXIS_Z] * viewDirection[AXIS_Z])) +
+                       M_PI + WIND_INDICATOR_TILT;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_X] = x;
+    translation[AXIS_Y] = y;
+    translation[AXIS_Z] = WIND_INDICATOR_DEPTH;
+    BuildRotationMatrix(matrix, rotation, translation);
+    guRotateRPYF(transform, 0.0f,
+                 WIND_INDICATOR_FACING_DEGREES - g_ViewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI)), 0.0f);
+    guMtxCatF(transform, matrix, matrix);
+    guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE);
+    guMtxCatF(transform, matrix, matrix);
+    guMtxF2L(matrix, &sWindIndicatorMatrices[g_MatrixBufferIndex]);
+    if (!(g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2)) {
+        func_80084468(&gfx, x, y);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sWindIndicatorMatrices[g_MatrixBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPSetLights1(gfx++, sWindArrowLights);
+    if (g_IsModuleAlive[MODULE_UNK9]) {
+        g_ModuleRdpRequestFrames[MODULE_UNK9] = g_FrameCount;
+        gSPDisplayList(gfx++, D_80222400);
+    }
+    if (g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2) {
+        func_80084468(&gfx, x, y);
+    }
+    *displayListHead = gfx;
+}
 
 /* Lets the second controller's C buttons nudge the HUD up and down, and prints the offset */
 void AdjustHudOffset(void) {
