@@ -15,6 +15,9 @@
 /* Prints the paths that the collision tests are given */
 #define GAME_FLAG_UNK0 0x00
 
+/* Logs a stroke's rolling ball's vertical velocity each step */
+#define GAME_FLAG_LOG_VERTICAL_VELOCITY 0x02
+
 /* Blanks two lines of debug text when the flight camera finishes */
 #define GAME_FLAG_UNK22 0x22
 
@@ -29,6 +32,9 @@
 
 /* Lets a rising ball, whose course y falls, hit the flag */
 #define GAME_FLAG_RISING_FLAG_HITS 0x4E
+
+/* Lets the ball hit walls outside mini-golf */
+#define GAME_FLAG_WALL_HITS 0x3A
 
 /* Silences the overlay manager's log */
 #define GAME_FLAG_QUIET_OVERLAY_LOG 0x4D

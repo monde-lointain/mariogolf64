@@ -532,7 +532,7 @@ void GenerateClub(s32 clubIndex) {
                 if (!simulation.isRunning) {
                     break;
                 }
-                func_8003327C(&simulation);
+                StepBallSimulation(&simulation);
             }
             distance = IntLength2D(simulation.position[0], simulation.position[2]);
             error = distance - targetDistance;
@@ -734,7 +734,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
             if (!simulation.isRunning) {
                 break;
             }
-            func_8003327C(&simulation);
+            StepBallSimulation(&simulation);
         }
         distance = IntLength2D(simulation.position[0], simulation.position[2]);
         error = fabsf(distance - targetDistance);

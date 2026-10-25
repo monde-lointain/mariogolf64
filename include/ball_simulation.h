@@ -7,10 +7,22 @@
 /* A simulation still going after this many steps is given up on */
 #define MAX_STEP_COUNT 1801
 
-/* Bits of the flags func_8003327C returns for each step */
+/* Bits of the flags StepBallSimulation returns for each step */
 #define STEP_FLAG_UNK1 0x1
+#define STEP_FLAG_BILLBOARD_HIT 0x2
+#define STEP_FLAG_LIPPED_OUT 0x4
+#define STEP_FLAG_PIN_HIT 0x8
 #define STEP_FLAG_UNK10 0x10
+#define STEP_FLAG_HOLE_TRIANGLE_HIT 0x20
 #define STEP_FLAG_UNK40 0x40
+#define STEP_FLAG_CUP_PULL 0x80
+
+/* Values of a BallSimulation's isRunning */
+#define BALL_STATE_STOPPED 0
+#define BALL_STATE_FLYING 1
+#define BALL_STATE_ROLLING 2
+#define BALL_STATE_IN_CUP 3
+#define BALL_STATE_IN_WATER 4
 
 #define BALL_SIMULATION_COUNT 1
 
@@ -84,7 +96,7 @@ extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
 Unk6 *GetUnkCEntry(Club *club, s32 surface, s32 shotMode, s32 unkC);
-s32 func_8003327C(BallSimulation *simulation);
+s32 StepBallSimulation(BallSimulation *simulation);
 s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, Unk20 *shot);
 
 #endif

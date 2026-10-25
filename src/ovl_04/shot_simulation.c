@@ -54,7 +54,7 @@ void SimulateShot(Unk20 *shot) {
     g_SimulatedShot.unk2E08 = g_IsMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->isRunning) {
-        flags = func_8003327C(simulation);
+        flags = StepBallSimulation(simulation);
         if (step < PATH_STEP_COUNT) {
             g_SimulatedShot.pathFlags[step] = flags;
             g_SimulatedShot.path[step][0] = simulation->position[0];

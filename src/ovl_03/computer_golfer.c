@@ -1893,7 +1893,7 @@ s32 StepTrialShot(void) {
             velocityY = sTrialSimulation.velocity[AXIS_Y];
             unk94 = sTrialSimulation.unk94;
             sTrialStepCount++;
-            stepFlags = flags = func_8003327C(&sTrialSimulation);
+            stepFlags = flags = StepBallSimulation(&sTrialSimulation);
             if (sTrialStepCount >= MAX_STEP_COUNT) {
                 SetDebugTextHighlight(TRUE);
                 PrintDebugText(sSimFaultText, 10, 12);
@@ -2464,7 +2464,7 @@ s32 IsTrialShotSafe(void) {
     sTrialStepCount = 0;
     while (sTrialSimulation.isRunning) {
         sTrialStepCount++;
-        flags = func_8003327C(&sTrialSimulation);
+        flags = StepBallSimulation(&sTrialSimulation);
         if (sTrialStepCount < MAX_STEP_COUNT) {
             if (flags & STEP_FLAG_UNK10) {
                 break;

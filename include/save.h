@@ -23,6 +23,8 @@
    the frames of the ring fading out, while sparkles circle it */
 #define RING_STATE_NONE 0
 #define RING_STATE_SHOWN 1
+/* The state a ring takes when the ball passes through it, the first frame of its fade */
+#define RING_STATE_PASSED 2
 #define RING_STATE_FADED 32
 
 /*
