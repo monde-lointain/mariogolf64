@@ -471,9 +471,40 @@ INCLUDE_ASM("asm/nonmatchings/effects", func_8007D4E8);
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007DB08);
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007DE9C);
+/* Ripples and spreading circles are drawn in this light gray */
+#define CIRCLE_GRAY 230
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007DFD0);
+/* Draws a ripple at its matrix, faded by its alpha */
+void DrawRipple(Gfx **displayListHead, Effect *effect) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sEffectMatrices[effect->matrixIndex]),
+              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sRippleVertices, 4, 0);
+    gDPPipeSync(gfx++);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Draws a spreading circle at its matrix, faded by its alpha */
+void DrawSpreadingCircle(Gfx **displayListHead, Effect *effect) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, CIRCLE_GRAY, CIRCLE_GRAY, CIRCLE_GRAY, (u32)effect->alpha);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sEffectMatrices[effect->matrixIndex]),
+              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sSpreadingCircleVertices, 4, 0);
+    gDPPipeSync(gfx++);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 #define RUMBLE_FREQUENCY 0x100
 #define RUMBLE_FRAME_COUNT 10
