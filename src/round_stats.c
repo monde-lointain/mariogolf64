@@ -8,7 +8,6 @@
 #include "scoring.h"
 #include "variables.h"
 
-#define UNSET_BET_RATE -1
 #define NO_SKINS_WINNER -1
 /* The course records' totals stop here */
 #define RECORD_TOTAL_LIMIT 0x7FFFFFFF

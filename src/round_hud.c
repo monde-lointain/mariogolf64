@@ -1,4 +1,7 @@
 #include "common.h"
+#include "controller.h"
+#include "debug_text.h"
+#include "game_flags.h"
 #include "asset.h"
 #include "billboard.h"
 #include "burst.h"
@@ -10,6 +13,8 @@
 #include "heap.h"
 #include "libc.h"
 #include "pin.h"
+#include "save.h"
+#include "scoring.h"
 #include "round_hud.h"
 #include "screen.h"
 #include "scene.h"
@@ -131,6 +136,42 @@ extern s32 g_MatrixBufferIndex;
 
 extern s32 sShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
 extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
+
+/* The images that a hole's intro shows for the bets and the match standing */
+#define ASSET_LONGEST_DRIVE_IMAGE 0x554
+#define ASSET_NEAREST_PIN_IMAGE 0x555
+#define ASSET_DORMIE_IMAGE 0x8FC
+#define ASSET_UNK8FF_IMAGE 0x8FF
+
+/* Which of the hole intro's images are loaded */
+#define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
+#define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
+
+extern s32 sLoadedHoleIntroImages;
+extern void *sHoleContestImage;
+extern void *sMatchStandingImage;
+extern s32 D_801B60A0;
+
+/* The ball's recent world positions, which its trail is drawn through */
+#define BALL_TRAIL_LENGTH 128
+extern f32 sBallTrail[BALL_TRAIL_LENGTH][3];
+extern s32 sBallTrailHead; /* The latest position */
+
+/*
+ * The scrolling of the wind arrow's texture, a step for every
+ * WIND_SPEED_PER_ARROW_SCROLL_STEP of wind; its texture repeats every
+ * ARROW_TEXTURE_PERIOD of texture coordinate.
+ */
+#define WIND_SPEED_PER_ARROW_SCROLL_STEP 0x2000
+#define ARROW_TEXTURE_PERIOD 0x2000
+#define ARROW_TEXTURE_COORDINATE_LIMIT 0x4000
+
+/* A debugging option that lets the second controller nudge the HUD vertically */
+#define GAME_FLAG_ADJUST_HUD_OFFSET 0x6E
+#define HUD_OFFSET_CONTROLLER 1
+#define HUD_OFFSET_TEXT_COLUMN 20
+#define HUD_OFFSET_TEXT_ROW 6
+extern s32 sHudOffsetY;
 
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
@@ -458,7 +499,20 @@ void FreeRoundHudTextures(void) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008156C);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081C90);
+/* Scrolls the wind arrow's texture along it, faster in stronger wind */
+void ScrollWindArrow(void) {
+    s32 step = g_HoleConditions.windSpeed / WIND_SPEED_PER_ARROW_SCROLL_STEP;
+    s32 i;
+
+    for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
+        sArrows[g_MatrixBufferIndex].body[i].v.tc[1] += step;
+    }
+    if (sArrows[g_MatrixBufferIndex].body[0].v.tc[1] > ARROW_TEXTURE_COORDINATE_LIMIT) {
+        for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
+            sArrows[g_MatrixBufferIndex].body[i].v.tc[1] -= ARROW_TEXTURE_PERIOD;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081D4C);
 
@@ -493,7 +547,17 @@ INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1B10);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80082534);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80083A48);
+/* Gathers the whole ball trail at the ball, so it starts out empty */
+void ResetBallTrail(void) {
+    s32 i;
+
+    sBallTrailHead = 0;
+    for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
+        sBallTrail[i][AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        sBallTrail[i][AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        sBallTrail[i][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80083AC8);
 
@@ -503,7 +567,19 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80084468);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80084EBC);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_800852A8);
+/* Lets the second controller's C buttons nudge the HUD up and down, and prints the offset */
+void AdjustHudOffset(void) {
+    if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
+            sHudOffsetY--;
+        }
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS) {
+            sHudOffsetY++;
+        }
+        sprintf(g_PrintBuffer, "%3d", sHudOffsetY);
+        PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008534C);
 
@@ -572,9 +648,47 @@ INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C98);
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", jtbl_800D1CA0);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", LoadHoleIntroImages);
+/* Loads the images that the hole's intro shows for its contest bet and the match standing */
+void LoadHoleIntroImages(void) {
+    EncodedAsset asset;
+    s32 standing;
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", FreeHoleIntroImages);
+    sLoadedHoleIntroImages = 0;
+    if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE && IsMarkedParFive(g_CourseIndex, g_HoleIndex)) {
+        sHoleContestImage = AllocMemory(OpenEncodedAsset(ASSET_LONGEST_DRIVE_IMAGE, &asset));
+        ReadEncodedAsset(sHoleContestImage, &asset);
+        sLoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
+    } else if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE && IsParThree(g_CourseIndex, g_HoleIndex)) {
+        sHoleContestImage = AllocMemory(OpenEncodedAsset(ASSET_NEAREST_PIN_IMAGE, &asset));
+        ReadEncodedAsset(sHoleContestImage, &asset);
+        sLoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
+    }
+    if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
+        if (D_801B60A0 != 0) {
+            sMatchStandingImage = AllocMemory(OpenEncodedAsset(ASSET_UNK8FF_IMAGE, &asset));
+            ReadEncodedAsset(sMatchStandingImage, &asset);
+            sLoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+        } else {
+            standing = GetMatchStanding(0, 1);
+            if (standing == MATCH_STANDING_PLAYER_DORMIE || standing == MATCH_STANDING_OPPONENT_DORMIE) {
+                sMatchStandingImage = AllocMemory(OpenEncodedAsset(ASSET_DORMIE_IMAGE, &asset));
+                ReadEncodedAsset(sMatchStandingImage, &asset);
+                sLoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+            }
+        }
+    }
+}
+
+/* Frees the images that LoadHoleIntroImages loaded */
+void FreeHoleIntroImages(void) {
+    if (sLoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
+        FreeMemory(&sHoleContestImage);
+    }
+    if (sLoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
+        FreeMemory(&sMatchStandingImage);
+    }
+    sLoadedHoleIntroImages = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008C6B0);
 

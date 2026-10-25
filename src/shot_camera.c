@@ -17,6 +17,7 @@
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
@@ -471,7 +472,6 @@ extern s8 D_801061CF;
 extern u16 D_8010623A;
 extern s32 D_802246F8;
 
-void func_80083A48(void);
 void func_8020E7B4(s32);
 
 /*
@@ -490,7 +490,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 
     D_800BE624 = earlierFlightCount;
     func_80216B74(1);
-    func_80083A48();
+    ResetBallTrail();
     D_800BE674 = 0;
     sEndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
     if (earlierFlightCount == 0) {

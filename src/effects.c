@@ -130,7 +130,6 @@ extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
 extern f32 g_RainSoundVolume;
-extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
 extern u8 *sRainSplashImage;
 extern Mtx sRainModelViewMatrix;
@@ -662,7 +661,7 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
 #define IMPACT_PUFF_COUNT 3
 
 /*
- * Spawns effects at D_80104AE0 by the surface kind under the ball: rising puffs of the ground's
+ * Spawns effects at g_BallPosition by the surface kind under the ball: rising puffs of the ground's
  * color on fairway lies and semi-rough, larger and faster ones on bunker lies and bare ground, or
  * a ripple on water.
  */
@@ -686,9 +685,9 @@ void SpawnImpactEffects(BallSimulation *simulation) {
             for (index = 0; index != EFFECT_COUNT; index++) {
                 effect = &sEffects[index];
                 if (effect->kind == EFFECT_KIND_NONE) {
-                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                     effect->velocity[AXIS_X] = 0;
                     effect->velocity[AXIS_Y] = -puffNumber * DEBRIS_SPEED_STEP * (0.2f * COURSE_TO_WORLD_SCALE);
                     effect->velocity[AXIS_Z] = 0;
@@ -714,9 +713,9 @@ void SpawnImpactEffects(BallSimulation *simulation) {
             for (index = 0; index != EFFECT_COUNT; index++) {
                 effect = &sEffects[index];
                 if (effect->kind == EFFECT_KIND_NONE) {
-                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                     effect->velocity[AXIS_X] = 0;
                     effect->velocity[AXIS_Y] = -puffNumber * DEBRIS_SPEED_STEP * (0.7f * COURSE_TO_WORLD_SCALE);
                     effect->velocity[AXIS_Z] = 0;
@@ -739,9 +738,9 @@ void SpawnImpactEffects(BallSimulation *simulation) {
             for (index = 0; index != EFFECT_COUNT; index++) {
                 effect = &sEffects[index];
                 if (effect->kind == EFFECT_KIND_NONE) {
-                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
                     effect->kind = EFFECT_KIND_RIPPLE;
                     effect->unk3B = 0;
                     effect->matrixIndex = sNextMatrixIndex;

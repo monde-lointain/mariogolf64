@@ -19,5 +19,8 @@ u32 GetWarmthTint(s32 warmth, s32 alpha);
 void ResetShotOffsetMarker(void);
 void SetShotOffsetMarker(s32 x, s32 y);
 void SwapMatrixBuffers(void);
+void ResetBallTrail(void);
+void ScrollWindArrow(void);
+void AdjustHudOffset(void);
 
 #endif

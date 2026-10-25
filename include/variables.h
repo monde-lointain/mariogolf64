@@ -28,6 +28,8 @@ extern u16 *nuGfxZBuffer;
 extern s32 g_DrawBufferIndex;
 
 /* The scene light's direction, in binary angles */
+/* Where the ball is, in course units */
+extern s32 g_BallPosition[3];
 extern u16 g_LightYaw;
 extern u16 g_LightPitch;
 

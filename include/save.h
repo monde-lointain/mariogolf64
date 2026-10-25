@@ -91,6 +91,8 @@ typedef struct Unk68 {
 #define BET_UNK5 5          /* Settled as BET_UNK4, when that bet is not set */
 #define BET_LAS_VEGAS 6     /* Paid per stroke, between the two teams of two */
 #define BET_COUNT 7
+/* The rate of a bet that is not played */
+#define UNSET_BET_RATE (-1)
 
 /* The contest distances that are not measured yet, or do not count */
 #define UNCOUNTED_DISTANCE -1
