@@ -13,6 +13,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "surface.h"
@@ -135,7 +136,6 @@ extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
 extern u8 *sRainSplashImage;
 extern Mtx sRainModelViewMatrix;
-extern Mtx g_ScreenOrthoMatrix;
 extern Raindrop *sRaindrops;
 extern RainSplash *sRainSplashes;
 /* The x and z that the rain falls around, RAIN_CENTER_DISTANCE ahead of the camera */

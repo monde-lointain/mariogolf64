@@ -184,7 +184,6 @@ void SetFramebufferCount(s32 count);
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
 
 extern s32 g_MatrixBufferIndex;
-extern Mtx g_ScreenOrthoMatrix;
 /* The faces of the characters, by row of sCharacterFaceRows, after three stars and after fewer */
 extern u16 D_800C2650[][FACE_FRAME_COUNT];
 extern u16 D_800C2780[][FACE_FRAME_COUNT];

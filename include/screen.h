@@ -20,6 +20,9 @@
 #define SCREEN_EFFECT_SAVED_FRAME 3 /* Draws a frame saved elsewhere */
 #define SCREEN_EFFECT_NONE 4
 
+/* An orthographic projection of one unit per pixel, centred on the screen, with y rising */
+extern Mtx g_ScreenOrthoMatrix;
+
 void SetScreenEffect(s32 effect, s32 frameCount);
 
 #endif
