@@ -2,6 +2,7 @@
 #define CLUB_H
 
 #include <ultra64.h>
+#include "surface.h"
 
 /* How far the selected club hits: a power shot, a normal shot or an approach shot */
 #define SHOT_MODE_POWER 0
@@ -102,6 +103,7 @@ s32 GetSelectedShotDistance(void);
 s32 GetSelectedShotWorldDistance(void);
 s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds);
 s32 GetLieRating(Club *club, s32 surface, s32 shotMode);
+void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range);
 void GetLieSpan(Club *club, s32 surface, s32 *span, s32 shotMode);
 void HandleClubInput(void);
 void HandleShotModeInput(void);

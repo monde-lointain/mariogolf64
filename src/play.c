@@ -117,14 +117,12 @@ extern s8 D_800FEE11;
 extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 
-s32 GetGroundOrWaterHeight(s32 x, s32 z);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
 void func_80080564(s32 playerIndex, s32 characterIndex, s32 arg2);
-s32 GetSurface(s32 x, s32 z);
 void func_80080220(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);

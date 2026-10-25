@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "common.h"
+#include "functions.h"
 
 /*
  * The ground is a grid of points, GROUND_POINT_COLUMN_COUNT by
@@ -108,5 +109,9 @@ void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
 s32 GetColorTerrainCode(s32 color);
 s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface);
+s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
+s32 GetSurface(s32 x, s32 z);
+s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle);
+s32 GetGroundOrWaterHeight(s32 x, s32 z);
 
 #endif

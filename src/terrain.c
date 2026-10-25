@@ -102,8 +102,6 @@ void func_80406818(void);
 void func_80406C3C(void);
 
 void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
-s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
-s32 GetSurface(s32 x, s32 z);
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
 void SetGridVertexHeight(s32 column, s32 row, s32 height);
 void SetGridVertex(s32 column, s32 row, Vtx_t *point);

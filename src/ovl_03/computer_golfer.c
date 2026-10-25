@@ -282,7 +282,6 @@ void ChooseLandingTarget(s32 x, s32 z, s32 distance, s32 *targetX, s32 *targetZ)
 void PlanClubAndTarget(CoursePoint target);
 void ChooseLongShot(s32 unused, s32 *clubType, s32 *targetX, s32 *targetZ, s32 *shotMode);
 s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable);
-void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range);
 
 /* sShot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
 #define SHOT_UNK4_MIN 3

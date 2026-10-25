@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "variables.h"
 
 BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT] = { 0 };
@@ -186,10 +187,6 @@ void ResetBallSimulations(void) {
 
 void SpawnImpactEffects(BallSimulation *simulation);
 void StartRingPassRumble(UnkB8 *player);
-s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
-s32 GetSurface(s32 x, s32 z);
-s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle *triangle);
-s32 GetGroundOrWaterHeight(s32 x, s32 z);
 void func_80216FC4_ovl_00(s32 *position);
 void func_80216FCC_ovl_00(s32 *position);
 void func_8020DA18_ovl_00(s32 unk);
@@ -1746,9 +1743,6 @@ void StartPlayerRumble(UnkB8 *player);
 s16 GetCrossSlopeAngle(UnkB8 *player, Unk20 *shot);
 /* It returns s16; declaring it s32 here is there to match */
 s32 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot);
-void GetSurfacePercentRange(SurfaceInfo *info, Club *club, s32 *range);
-s32 GetPuttPower(s32 fraction, s32 shotMode);
-s32 GetClubPower(Club *club, s32 shotMode);
 
 /*
  * Sets the simulation's start, velocity and wind from the shot.
