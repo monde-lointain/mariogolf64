@@ -23,6 +23,17 @@
 /* An orthographic projection of one unit per pixel, centred on the screen, with y rising */
 extern Mtx g_ScreenOrthoMatrix;
 
+/* A rectangle of the screen, in pixels */
+typedef struct ScreenRect {
+    /* 0x00 */ s16 left;
+    /* 0x02 */ s16 top;
+    /* 0x04 */ s16 right;
+    /* 0x06 */ s16 bottom;
+} ScreenRect; /* size = 0x8 */
+
+/* The rectangle that the HUD is drawn within */
+extern ScreenRect g_HudScissor;
+
 void SetScreenEffect(s32 effect, s32 frameCount);
 
 #endif

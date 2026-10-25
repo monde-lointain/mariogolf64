@@ -928,7 +928,6 @@ void func_8008D3F4(Gfx **displayListHead);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 void func_8009351C(Gfx **displayListHead, s32);
 void func_800939E8(Gfx **displayListHead);
-void func_800957F0(void);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
 void DrawBootLogos(Gfx **displayListHead);
@@ -1776,7 +1775,7 @@ s32 DrawGame(void) {
     if (IsGameFlagSet(0x46)) {
         func_80088BDC(&g_DisplayListHead);
     }
-    func_800957F0();
+    DrawHudAnimation();
     if (g_IsModuleAlive[3]) {
         func_80200CBC(&g_DisplayListHead, 1);
     }

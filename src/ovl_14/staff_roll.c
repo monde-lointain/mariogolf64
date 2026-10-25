@@ -13,6 +13,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
@@ -1151,7 +1152,7 @@ void UpdateStaffRoll(void) {
         }
         if ((pressedButtons & (A_BUTTON | START_BUTTON)) && sStaffRollFrame >= FIRST_LEAVING_FRAME) {
             RequestSongStop();
-            StartHudAnimation(10);
+            StartHudAnimation(HUD_ANIMATION_UNK10);
             g_Scene = SCENE_SWAPPING_MODULES;
             g_NextScene = SCENE_BOOT_LOGOS;
             g_SceneModuleToUnload = 0x1F;

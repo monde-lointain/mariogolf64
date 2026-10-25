@@ -13,7 +13,7 @@
  */
 void WaitForConfirmButton(void) {
     if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
-        StartHudAnimation(8);
+        StartHudAnimation(HUD_ANIMATION_UNK8);
         g_Scene = SCENE_SWAPPING_MODULES;
         g_NextScene = 27;
         g_SceneModuleToUnload = 0x0D;

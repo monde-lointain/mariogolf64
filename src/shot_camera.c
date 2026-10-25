@@ -61,7 +61,6 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
 
-#define NO_EFFECT -1 /* StartHudAnimation's argument that ends its effect */
 #define NO_FLIGHT_CAMERA (-1)
 
 /* The field of view, in degrees, of the main camera between shots */
@@ -413,7 +412,7 @@ void EndFlightCamera(void) {
     sCupViewHoldCount = 0;
     D_800C5AAC = 0;
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-    StartHudAnimation(-1);
+    StartHudAnimation(HUD_ANIMATION_NONE);
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -496,7 +495,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     if (earlierFlightCount == 0) {
         NextCameraPick(FALSE);
     }
-    StartHudAnimation(NO_EFFECT);
+    StartHudAnimation(HUD_ANIMATION_NONE);
     func_8020E7B4(-1);
     sFlightCameraFlags = 0;
     /* The separate tests are there to match */
@@ -1850,7 +1849,7 @@ void PlaceFlightCamera(s32 step) {
             }
             easeFraction *= 0.01f;
             if (easeFraction < TRAIL_EFFECT_END_FRACTION) {
-                StartHudAnimation(NO_EFFECT);
+                StartHudAnimation(HUD_ANIMATION_NONE);
             }
             angle = D_800BE65C;
             if (angle < M_PI / 6) {
@@ -2089,11 +2088,11 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 #ifdef NON_MATCHING
 void ChooseFlightCameraKind(void) {
     f32 unusedValues[14]; /* Unused; it is there to match */
-    s32 effectIndex;
+    s32 animation;
     s32 kind;
     s32 pick;
 
-    effectIndex = NO_EFFECT;
+    animation = HUD_ANIMATION_NONE;
     D_800BE630 = FALSE;
     kind = 0;
     if (g_SimulatedShot.unk2E08) {
@@ -2197,7 +2196,7 @@ void ChooseFlightCameraKind(void) {
                 break;
             case 2:
                 if (sFlightCameraKind == FLIGHT_CAMERA_NEAR_LAUNCH) {
-                    effectIndex = 3;
+                    animation = HUD_ANIMATION_UNK3;
                     kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                 } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK3) {
                     if (RandomBelow(3) == 0) {
@@ -2259,7 +2258,7 @@ void ChooseFlightCameraKind(void) {
                         }
                     } else if (RandomBelow(8) == 0) {
                         kind = FLIGHT_CAMERA_AROUND_END;
-                        effectIndex = 3;
+                        animation = HUD_ANIMATION_UNK3;
                     } else if (RandomBelow(8) < 4) {
                         kind = FLIGHT_CAMERA_AROUND_END;
                     }
@@ -2337,21 +2336,21 @@ void ChooseFlightCameraKind(void) {
     }
     if (sFlightCameraKind < kind) {
         D_800BE628 = TRUE;
-        StartHudAnimation(NO_EFFECT);
-        if (effectIndex == NO_EFFECT) {
+        StartHudAnimation(HUD_ANIMATION_NONE);
+        if (animation == HUD_ANIMATION_NONE) {
             if (D_800DAF50 >= 4 && !g_SimulatedShot.unk2E08 && D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
                 if (kind == FLIGHT_CAMERA_AROUND_END) {
                     if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
-                        StartHudAnimation(3);
+                        StartHudAnimation(HUD_ANIMATION_UNK3);
                     } else if (RandomBelow(8) == 0) {
-                        StartHudAnimation(1);
+                        StartHudAnimation(HUD_ANIMATION_UNK1);
                     } else if (RandomBelow(3) == 0) {
-                        StartHudAnimation(9);
+                        StartHudAnimation(HUD_ANIMATION_UNK9);
                     }
                 }
             }
         } else if (D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
-            StartHudAnimation(effectIndex);
+            StartHudAnimation(animation);
         }
         sFlightCameraKind = kind;
         D_800BE674 = CAMERA_CHANGE_HOLD_COUNT;
@@ -2664,7 +2663,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         if (!g_IsMiniGolf && !g_SimulatedShot.unk2E10
             && ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) || func_8020D838() || D_800BE680 == TRUE)) {
             g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-            StartHudAnimation(NO_EFFECT);
+            StartHudAnimation(HUD_ANIMATION_NONE);
             g_InsetView.animation = INSET_VIEW_STILL;
             g_InsetView.step = 0;
             g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -2679,7 +2678,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
                 g_Cameras[0].view.lookAt[AXIS_Z] - cosf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
         } else if (IsCupPassPoint(sBallCupGroundDistance, sFlightBallPosition[AXIS_Y]) || sCupViewHoldCount > 0) {
             g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
-            StartHudAnimation(NO_EFFECT);
+            StartHudAnimation(HUD_ANIMATION_NONE);
             D_800BE69C = TRUE;
             D_800BE698 = FALSE;
             D_800BE658 &= ~2;
@@ -2744,7 +2743,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
     }
     if (g_SimulatedShot.stepCount < g_BallFlightStep + 40 && IsHudAnimationDone() == 1) {
-        StartHudAnimation(NO_EFFECT);
+        StartHudAnimation(HUD_ANIMATION_NONE);
     }
     if (isAdvancing == 1 && g_BallFlightStep == 0) {
         PlayContactSound();

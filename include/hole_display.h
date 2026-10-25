@@ -11,6 +11,19 @@
 #define MENU_BACKDROP_STYLE_PLAIN 1
 #define MENU_BACKDROP_STYLE_UNK2 2
 
+/* StartHudAnimation's animations, which DrawHudAnimation draws */
+#define HUD_ANIMATION_NONE (-1)
+#define HUD_ANIMATION_UNK0 0
+#define HUD_ANIMATION_UNK1 1
+#define HUD_ANIMATION_UNK2 2
+#define HUD_ANIMATION_UNK3 3
+#define HUD_ANIMATION_UNK4 4
+#define HUD_ANIMATION_UNK5 5
+#define HUD_ANIMATION_UNK6 6
+#define HUD_ANIMATION_UNK7 7
+#define HUD_ANIMATION_UNK8 8
+#define HUD_ANIMATION_UNK9 9
+#define HUD_ANIMATION_UNK10 10
 extern s32 g_MenuBackdropStyle;
 
 void SetUpTitleHole(void);
@@ -18,5 +31,7 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet);
 void SetMenuBackdrop(s32 backdrop);
 void StartHudAnimation(s32 animation);
 s32 IsHudAnimationDone(void);
+void DrawHudAnimation(void);
+void ResetHudScissor(void);
 
 #endif
