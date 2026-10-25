@@ -17,14 +17,16 @@
 #define HUD_ANIMATION_UNK1 1
 #define HUD_ANIMATION_UNK2 2
 #define HUD_ANIMATION_UNK3 3
-#define HUD_ANIMATION_UNK4 4
-#define HUD_ANIMATION_UNK5 5
-#define HUD_ANIMATION_UNK6 6
+#define HUD_ANIMATION_SLICE_CAPTURE 4
+#define HUD_ANIMATION_SLICES 5
+#define HUD_ANIMATION_NEGATIVE 6 /* The frame with its colours inverted */
 #define HUD_ANIMATION_UNK7 7
 #define HUD_ANIMATION_UNK8 8
 #define HUD_ANIMATION_UNK9 9
 #define HUD_ANIMATION_UNK10 10
 extern s32 g_MenuBackdropStyle;
+/* How many slices of the frame HUD_ANIMATION_SLICE_CAPTURE has copied */
+extern s32 g_CapturedSliceCount;
 
 void SetUpTitleHole(void);
 void UsePrimitiveDepth(s32 isPrimitiveDepthSet);

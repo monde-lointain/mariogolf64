@@ -452,7 +452,6 @@ extern s32 D_800BE678;
 extern s32 D_800BE67C;
 extern s32 D_800BE680;
 extern f32 D_800BE684;
-extern s32 D_800C7300;
 extern CoursePoint sShotStartPosition;
 extern f32 sEndYawFromCup;
 extern f32 sStartYawFromCup;
@@ -506,7 +505,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
         sFlightCameraFlags |= FLIGHT_CAMERA_FLAG_UNK2;
     }
     if (earlierFlightCount == 0) {
-        D_800C7300 = 0;
+        g_CapturedSliceCount = 0;
     }
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;

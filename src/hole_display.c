@@ -49,16 +49,63 @@ extern s32 sMenuBackdrop;
 extern s32 sHudAnimationFramesLeft;
 
 extern s32 sHudAnimation;
-extern s32 sIsHudAnimationPlaying;
+/*
+ * The frame that the HUD animations break apart, copied two pixels to a word
+ * from inside the HUD's margins. The tile animations copy it as a grid of
+ * tiles, and HUD_ANIMATION_SLICE_CAPTURE copies a slice of the middle of the
+ * frame each time it starts, for HUD_ANIMATION_SLICES to show.
+ */
+#define FRAME_WORDS_PER_ROW (SCREEN_WIDTH / 2)
+#define FRAME_MARGIN_ROWS 8
+#define FRAME_MARGIN_WORDS 4
+#define FRAME_TILE_ROW_COUNT 7
+#define FRAME_TILE_COLUMN_COUNT 5
+#define FRAME_TILE_ROWS 32
+#define FRAME_TILE_WORDS 32
+#define FRAME_SLICE_COUNT 8
+#define FRAME_SLICE_TOP 88
+#define FRAME_SLICE_BOTTOM 208
+#define FRAME_SLICE_LEFT_WORD 40
+#define FRAME_SLICE_RIGHT_WORD 80
+#define FRAME_SLICE_WORD_COUNT ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
+
+/*
+ * The slices that the slice animation copied fill the screen, a column of
+ * them at a time, each drawn in strips that fit in texture memory. A new
+ * slice appears every SLICE_FRAME_COUNT frames, with a sound.
+ */
+#define SLICE_ANIMATION_FRAME_COUNT 64
+#define SLICE_FRAME_COUNT 8
+#define SLICE_WIDTH ((FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD) * 2)
+#define SLICE_HEIGHT (FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP)
+#define SLICE_COLUMN_COUNT (SCREEN_WIDTH / SLICE_WIDTH)
+#define SLICE_STRIP_COUNT 8
+#define SLICE_STRIP_HEIGHT (SLICE_HEIGHT / SLICE_STRIP_COUNT)
+#define SLICE_STRIP_WORD_COUNT (SLICE_STRIP_HEIGHT * SLICE_WIDTH / 2)
+#define SOUND_SLICE 0x45
+#define SLICE_SOUND_CHANNEL 13
+#define SLICE_SOUND_VOLUME 127
+
+/* The corners of the tiles, for each of two frames */
+#define TILE_GRID_ROW_COUNT 8
+#define TILE_GRID_COLUMN_COUNT 6
+#define TILE_GRID_LEFT (-152)
+#define TILE_GRID_RIGHT 152
+#define TILE_GRID_TOP 112
+#define TILE_GRID_SPACING 64
+#define TILE_GRID_ROW_SPACING 32
+
+extern u32 *sCapturedFrame;
+extern Vtx sTileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT];
+extern s32 sIsFrameCapturePending;
 extern s32 sHudAnimationFrame;
-extern s32 D_800C7300;
 extern u16 *D_800FED10;
 
-void func_80095150(void);
+void CaptureHudAnimationFrame(void);
 void func_8009232C(Gfx **displayListHead);
 void func_800947A8(void);
 void func_80094228(void);
-void func_8009548C(void);
+void DrawSliceAnimation(void);
 void func_80092F18(Gfx **displayListHead);
 
 void SetFramebufferCount(s32 count);
@@ -140,12 +187,12 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", func_80091110);
 /* Starts one of the HUD's animations, which lasts a given number of frames, or stops it with HUD_ANIMATION_NONE */
 void StartHudAnimation(s32 animation) {
     if (animation == HUD_ANIMATION_NONE) {
-        sIsHudAnimationPlaying = FALSE;
+        sIsFrameCapturePending = FALSE;
         sHudAnimationFramesLeft = 0;
         return;
     }
-    if (animation != HUD_ANIMATION_UNK4 && animation != HUD_ANIMATION_UNK5) {
-        D_800C7300 = 0;
+    if (animation != HUD_ANIMATION_SLICE_CAPTURE && animation != HUD_ANIMATION_SLICES) {
+        g_CapturedSliceCount = 0;
     }
     switch (animation) {
         case HUD_ANIMATION_UNK0:
@@ -167,16 +214,16 @@ void StartHudAnimation(s32 animation) {
         case HUD_ANIMATION_UNK3:
             sHudAnimationFramesLeft = 255;
             break;
-        case HUD_ANIMATION_UNK5:
+        case HUD_ANIMATION_SLICES:
             sHudAnimationFramesLeft = 64;
             break;
-        case HUD_ANIMATION_UNK6:
+        case HUD_ANIMATION_NEGATIVE:
         case HUD_ANIMATION_UNK7:
             sHudAnimationFramesLeft = 32;
             break;
     }
     sHudAnimation = animation;
-    sIsHudAnimationPlaying = TRUE;
+    sIsFrameCapturePending = TRUE;
     sHudAnimationFrame = 0;
 }
 
@@ -212,18 +259,160 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", func_80094228);
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_800947A8);
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_80095150);
+/* Copies the frame that a HUD animation that has just started breaks apart */
+#ifdef NON_MATCHING
+void CaptureHudAnimationFrame(void) {
+    u32 *frame;
+    s32 wordIndex;
+    s32 tileRow;
+    s32 tileColumn;
+    s32 row;
+    s32 column;
+    Vtx *vertex;
+    Vtx *nextVertex;
+    s32 y;
+    s32 x;
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8009548C);
+    if (!sIsFrameCapturePending) {
+        return;
+    }
+    frame = (u32 *)nuGfxCfb_ptr;
+    sIsFrameCapturePending = FALSE;
+    wordIndex = 0;
+    if (sHudAnimation == HUD_ANIMATION_UNK2 || sHudAnimation == HUD_ANIMATION_UNK3) {
+        for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
+            for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+                for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
+                    for (column = FRAME_MARGIN_WORDS; column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
+                        sCapturedFrame[wordIndex++] =
+                            frame[row * FRAME_WORDS_PER_ROW + column + tileColumn * FRAME_TILE_WORDS +
+                                  tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW];
+                    }
+                }
+            }
+        }
+        vertex = sTileGridVertices[0];
+        nextVertex = sTileGridVertices[1];
+        for (row = 0, y = TILE_GRID_TOP; row != TILE_GRID_ROW_COUNT; row++, y -= TILE_GRID_ROW_SPACING) {
+            for (column = 0, x = TILE_GRID_LEFT; column != TILE_GRID_COLUMN_COUNT - 1; column++, x += TILE_GRID_SPACING) {
+                vertex->v.ob[0] = x;
+                vertex->v.ob[1] = y;
+                vertex->v.ob[2] = 0;
+                nextVertex->v.ob[0] = x;
+                nextVertex->v.ob[1] = y;
+                nextVertex->v.ob[2] = 0;
+                vertex++;
+                nextVertex++;
+            }
+            /* The last column is narrower, ending inside the HUD's margin */
+            for (column = TILE_GRID_COLUMN_COUNT - 1, x = TILE_GRID_RIGHT; column != TILE_GRID_COLUMN_COUNT;
+                 column++, x += TILE_GRID_SPACING) {
+                vertex->v.ob[0] = x;
+                vertex->v.ob[1] = y;
+                vertex->v.ob[2] = 0;
+                nextVertex->v.ob[0] = x;
+                nextVertex->v.ob[1] = y;
+                nextVertex->v.ob[2] = 0;
+                vertex++;
+                nextVertex++;
+            }
+        }
+    } else if (sHudAnimation == HUD_ANIMATION_UNK1 || sHudAnimation == HUD_ANIMATION_UNK9 ||
+               sHudAnimation == HUD_ANIMATION_UNK8 || sHudAnimation == HUD_ANIMATION_UNK10) {
+        for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
+            for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
+                sCapturedFrame[wordIndex++] = frame[row * FRAME_WORDS_PER_ROW + column];
+            }
+        }
+    } else if (sHudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
+            if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
+                wordIndex = 0;
+                for (row = FRAME_SLICE_TOP; row != FRAME_SLICE_BOTTOM; row++) {
+                    for (column = FRAME_SLICE_LEFT_WORD; column != FRAME_SLICE_RIGHT_WORD;) {
+                        sCapturedFrame[g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT + wordIndex++] =
+                            frame[row * FRAME_WORDS_PER_ROW + column++];
+                    }
+                }
+                g_CapturedSliceCount++;
+            }
+    } else if (sHudAnimation == HUD_ANIMATION_UNK7) {
+    } else if (sHudAnimation == HUD_ANIMATION_NEGATIVE) {
+            for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
+                for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
+                    sCapturedFrame[wordIndex++] = ~frame[row * FRAME_WORDS_PER_ROW + column];
+                }
+            }
+    }
+    sHudAnimationFrame = 1;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
+#endif
+
+/* Draws the slice animation, which fills the screen with copies of its middle */
+#ifdef NON_MATCHING
+void DrawSliceAnimation(void) {
+    s32 frame;
+    s32 sliceCount;
+    s32 slice;
+    s32 strip;
+    s32 column;
+    s32 wordIndex;
+    s32 sliceY;
+    s32 y;
+
+    if (sHudAnimationFramesLeft <= 0) {
+        return;
+    }
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPPipeSync(g_DisplayListHead++);
+    column = 0;
+    wordIndex = 0;
+    frame = SLICE_ANIMATION_FRAME_COUNT - sHudAnimationFramesLeft;
+    sliceCount = frame / SLICE_FRAME_COUNT + 1;
+    if (frame % SLICE_FRAME_COUNT == 0) {
+        PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SLICE_SOUND_VOLUME);
+    }
+    sliceY = 0;
+    for (slice = 0; slice != sliceCount; slice++) {
+        y = sliceY;
+        for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
+            gDPLoadTextureBlock(g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                                SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            wordIndex += SLICE_STRIP_WORD_COUNT;
+            gSPTextureRectangle(g_DisplayListHead++, column * SLICE_WIDTH << 2, y << 2,
+                                (column * SLICE_WIDTH + SLICE_WIDTH) << 2, (y + SLICE_STRIP_HEIGHT) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            gDPPipeSync(g_DisplayListHead++);
+            y += SLICE_STRIP_HEIGHT;
+        }
+        column++;
+        if (column == SLICE_COLUMN_COUNT) {
+            column = 0;
+            sliceY += SLICE_HEIGHT;
+        }
+    }
+    sHudAnimationFramesLeft--;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawSliceAnimation);
+#endif
 
 /* Draws the animation that StartHudAnimation started over the frame */
 void DrawHudAnimation(void) {
-    func_80095150();
+    CaptureHudAnimationFrame();
     gDPPipeSync(g_DisplayListHead++);
     gDPSetColorDither(g_DisplayListHead++, G_CD_DISABLE);
     switch (sHudAnimation) {
         case HUD_ANIMATION_UNK1:
-        case HUD_ANIMATION_UNK6:
+        case HUD_ANIMATION_NEGATIVE:
         case HUD_ANIMATION_UNK7:
         case HUD_ANIMATION_UNK8:
         case HUD_ANIMATION_UNK9:
@@ -235,8 +424,8 @@ void DrawHudAnimation(void) {
         case HUD_ANIMATION_UNK3:
             func_80094228();
             break;
-        case HUD_ANIMATION_UNK5:
-            func_8009548C();
+        case HUD_ANIMATION_SLICES:
+            DrawSliceAnimation();
             break;
         case HUD_ANIMATION_UNK10:
             func_80092F18(&g_DisplayListHead);
