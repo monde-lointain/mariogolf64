@@ -1358,7 +1358,207 @@ void UpdateEffects(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007B994);
+#define RIPPLE_IMAGE_SIZE 64
+#define ARC_IMAGE_SIZE 64
+/* Effects are drawn only where their texels' alpha is above these */
+#define DIVOT_MARK_ALPHA_THRESHOLD 0x1E
+#define BILLBOARD_ALPHA_THRESHOLD 0x1F
+#define SPARKLE_ALPHA_THRESHOLD 0x3F
+#define RISING_CLUMP_TINT GPACK_RGBA5551(32, 248, 32, 0)
+#define UNKE_TINT GPACK_RGBA5551(0, 0, 0, 0)
+#define SPARKLE_TINT GPACK_RGBA5551(255, 255, 0, 0)
+
+void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color);
+void DrawEffectShadow(Gfx **displayListHead, Effect *effect);
+void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEffect);
+void DrawDivot(Gfx **displayListHead, Effect *effect);
+void DrawDivotMark(Gfx **displayListHead);
+void DrawRipple(Gfx **displayListHead, Effect *effect);
+void DrawSpreadingCircle(Gfx **displayListHead, Effect *effect);
+
+/*
+ * Draws every effect, a kind at a time: divot marks, ripples, spreading circles, drops and divots
+ * with their shadows, then the billboards. It sets the render state between the loops.
+ */
+void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 index;
+    Effect *effect;
+    s32 color;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, DIVOT_MARK_ALPHA_THRESHOLD);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_DIVOT_MARK) {
+            DrawDivotMark(&gfx);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sRippleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I, RIPPLE_IMAGE_SIZE,
+                           RIPPLE_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
+                           G_TX_NOLOD, G_TX_NOLOD);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_RIPPLE) {
+            DrawRipple(&gfx, effect);
+        }
+    }
+
+    gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sArcImage + IMAGE_HEADER_SIZE), G_IM_FMT_I, ARC_IMAGE_SIZE,
+                           ARC_IMAGE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD,
+                           G_TX_NOLOD);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
+            DrawSpreadingCircle(&gfx, effect);
+        }
+    }
+
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_DROP) {
+            DrawEffectShadow(&gfx, effect);
+            DrawDrop(&gfx, matrices, effect);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPPipeSync(gfx++);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_DIVOT) {
+            DrawEffectShadow(&gfx, effect);
+            DrawDivot(&gfx, effect);
+        }
+    }
+
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_DITHER);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_NOISE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK1 || effect->kind == EFFECT_KIND_UNK2) {
+            DrawBillboardEffect(&gfx, effect, effect->unk38);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_UNK3 || effect->kind == EFFECT_KIND_UNK4) {
+            DrawBillboardEffect(&gfx, effect, effect->unk38);
+        }
+    }
+
+    /* Setting color before each group's commands (after one for sparkles) is there to match */
+    color = RISING_CLUMP_TINT;
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
+            DrawBillboardEffect(&gfx, effect, color);
+        }
+    }
+
+    color = UNKE_TINT;
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, BILLBOARD_ALPHA_THRESHOLD);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_UNKE) {
+            DrawBillboardEffect(&gfx, effect, color);
+        }
+    }
+
+    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE,
+                      TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    color = SPARKLE_TINT;
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SPARKLE_ALPHA_THRESHOLD);
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_SPARKLE) {
+            DrawBillboardEffect(&gfx, effect, color);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, TEXTURE_ADDRESS(sDropletImage + IMAGE_HEADER_SIZE));
+    /* Reusing the sparkles' color for the tears is there to match */
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_TEAR) {
+            DrawBillboardEffect(&gfx, effect, color);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /* Effects are drawn only where they project to a depth below this */
 #define EFFECT_NEAREST_DEPTH (-3.0f)

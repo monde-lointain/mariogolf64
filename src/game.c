@@ -913,7 +913,7 @@ void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
-void func_8007B994(CameraMatrices *matrices, Gfx **displayListHead);
+void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void func_8007EF0C(Gfx **displayListHead, CameraMatrices *matrices);
 void func_8008156C(void);
 void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
@@ -1527,7 +1527,7 @@ s32 DrawGame(void) {
                     SetSceneFog(&g_DisplayListHead);
                     if (g_Scene == 19) {
                         func_801FA4EC(matrices, &g_DisplayListHead);
-                        func_8007B994(matrices, &g_DisplayListHead);
+                        DrawEffects(matrices, &g_DisplayListHead);
                     } else {
                         if (!IsGameFlagSet(0x17)) {
                             DrawPin(matrices, &camera->view, viewIndex);
@@ -1570,7 +1570,7 @@ s32 DrawGame(void) {
                             if (g_IsModuleAlive[17]) {
                                 func_80214250(&g_DisplayListHead, matrices);
                             }
-                            func_8007B994(matrices, &g_DisplayListHead);
+                            DrawEffects(matrices, &g_DisplayListHead);
                             if (viewIndex == 0 && g_IsModuleAlive[18]) {
                                 func_8021857C(&g_DisplayListHead, matrices);
                             }

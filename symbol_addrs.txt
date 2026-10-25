@@ -1351,6 +1351,7 @@ UpdateAndDrawBursts = 0x80078128; // type:func
 SpawnImpactEffects = 0x80079ADC; // type:func
 SpawnShotDebris = 0x8007A6C8; // type:func
 UpdateEffects = 0x8007B054; // type:func
+DrawEffects = 0x8007B994; // type:func
 DrawBillboardEffect = 0x8007C5D8; // type:func
 DrawDrop = 0x8007D19C; // type:func
 DrawDivot = 0x8007D4E8; // type:func
