@@ -1148,8 +1148,133 @@ INCLUDE_ASM("asm/nonmatchings/effects", func_8007B054);
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007B994);
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007C5D8);
-INCLUDE_RODATA("asm/nonmatchings/effects", D_800D1A40);
+#define EFFECT_NEAREST_DEPTH (-3.0f)
+/* The rectangles step across this many texels; the smaller images are shifted down to fit */
+#define BILLBOARD_IMAGE_SIZE 64
+#define BILLBOARD_FRAME_SIZE (BILLBOARD_IMAGE_SIZE * BILLBOARD_IMAGE_SIZE)
+#define STAR_FRAME_SIZE (BILLBOARD_IMAGE_SIZE * BILLBOARD_IMAGE_SIZE / 2)
+#define STAR_LAST_FRAME 2
+#define SPARKLE_HIDDEN_FRAME_COUNT 2
+#define SPARKLE_STEP_COUNT 7
+#define SPECKLE_IMAGE_SIZE 32
+#define DROPLET_IMAGE_SIZE 16
+#define DROPLET_FRAME_SIZE (DROPLET_IMAGE_SIZE * DROPLET_IMAGE_SIZE / 2)
+#define TEAR_SECOND_FRAME_START 6
+#define TEAR_THIRD_FRAME_START 20
+/*
+ * 1 << this is BILLBOARD_IMAGE_SIZE texels in s10.5, which the droplet's tile, shifted down by 2
+ * and mirrored every 16 texels, draws flipped. Shifting instead of multiplying is there to
+ * match.
+ */
+#define TEAR_MIRROR_S_SHIFT 11
+#define PUFF_LIGHTENING 0x40
+
+/*
+ * Draws an effect as a screen-aligned rectangle with its image's frame, tinted by color (RGBA
+ * 5551) and faded by its alpha. Kinds 0 and 1 are lightened.
+ */
+void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint center;
+    s32 halfSize;
+    s32 textureStep;
+    s32 frameOffset;
+    s32 sparkleStep;
+    s32 red;
+    s32 green;
+    s32 blue;
+
+    if (ProjectPoint(effect->position[AXIS_X], effect->position[AXIS_Y], effect->position[AXIS_Z], &center)
+        < EFFECT_NEAREST_DEPTH) {
+        halfSize = center.scaleX * effect->scale;
+        /* Returning early here is there to match */
+        if (effect->alpha == 0.0f) {
+            *displayListHead = gfx;
+            return;
+        }
+        if (halfSize >= 2) {
+            frameOffset = effect->unk3B * BILLBOARD_FRAME_SIZE;
+            gDPPipeSync(gfx++);
+            gDPSetPrimDepth(gfx++, center.depth, 0);
+            gDPPipeSync(gfx++);
+            /* Texels per pixel, in s5.10 fixed point */
+            textureStep = ((BILLBOARD_IMAGE_SIZE / 2) << 10) / halfSize;
+            if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
+                gDPLoadTextureBlock(gfx++, TEXTURE_ADDRESS(sClumpImage + (frameOffset + IMAGE_HEADER_SIZE)),
+                                    G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP,
+                                    G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            } else if (effect->kind == EFFECT_KIND_SPARKLE) {
+                s32 sparkleFrames[SPARKLE_STEP_COUNT] = { 2, 1, 0, 0, 1, 1, 2 };
+
+                sparkleStep = effect->unk3B - SPARKLE_HIDDEN_FRAME_COUNT;
+                if (effect->unk3B < SPARKLE_HIDDEN_FRAME_COUNT) {
+                    *displayListHead = gfx;
+                    return;
+                }
+                if (sparkleStep > SPARKLE_STEP_COUNT - 1) {
+                    sparkleStep = SPARKLE_STEP_COUNT - 1;
+                }
+                frameOffset = sparkleFrames[sparkleStep] * STAR_FRAME_SIZE;
+                if (frameOffset > STAR_LAST_FRAME * STAR_FRAME_SIZE) {
+                    frameOffset = STAR_LAST_FRAME * STAR_FRAME_SIZE;
+                }
+                gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sStarImage + (frameOffset + IMAGE_HEADER_SIZE)),
+                                       G_IM_FMT_I, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP,
+                                       G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            } else if (effect->kind == EFFECT_KIND_TEAR) {
+                if (effect->unk3B < TEAR_SECOND_FRAME_START) {
+                    frameOffset = 0 * DROPLET_FRAME_SIZE;
+                } else if (effect->unk3B < TEAR_THIRD_FRAME_START) {
+                    frameOffset = 1 * DROPLET_FRAME_SIZE;
+                } else {
+                    frameOffset = 2 * DROPLET_FRAME_SIZE;
+                }
+                gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sDropletImage + (frameOffset + PALETTED_TEXELS_OFFSET)),
+                                       G_IM_FMT_CI, DROPLET_IMAGE_SIZE, DROPLET_IMAGE_SIZE, 0, G_TX_MIRROR,
+                                       G_TX_WRAP, 4, 0, 2, 2);
+            } else if (effect->kind == EFFECT_KIND_UNKE) {
+                gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sSpeckleImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+                                       SPECKLE_IMAGE_SIZE, SPECKLE_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, 6, 6, 1, 1);
+            } else {
+                gDPLoadTextureBlock(gfx++, TEXTURE_ADDRESS(sDebrisImage + (frameOffset + IMAGE_HEADER_SIZE)),
+                                    G_IM_FMT_I, G_IM_SIZ_8b, BILLBOARD_IMAGE_SIZE, BILLBOARD_IMAGE_SIZE, 0, G_TX_WRAP,
+                                    G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+            }
+            gDPPipeSync(gfx++);
+            red = (color >> 11) << 3;
+            green = ((color >> 6) & 0x1F) << 3;
+            blue = ((color >> 1) & 0x1F) << 3;
+            if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK1) {
+                red += PUFF_LIGHTENING;
+                green += PUFF_LIGHTENING;
+                blue += PUFF_LIGHTENING;
+                if (red > 0xFF) {
+                    red = 0xFF;
+                }
+                if (green > 0xFF) {
+                    green = 0xFF;
+                }
+                if (blue > 0xFF) {
+                    blue = 0xFF;
+                }
+            }
+            gDPSetPrimColor(gfx++, 0, 0, red, green, blue, effect->alpha);
+            gDPPipeSync(gfx++);
+            /* Odd frames of a tear draw the droplet mirrored */
+            if (effect->kind == EFFECT_KIND_TEAR) {
+                gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
+                                        (center.x + halfSize) << 2, (center.y + halfSize) << 2, G_TX_RENDERTILE,
+                                        (effect->unk3B & 1) << TEAR_MIRROR_S_SHIFT, 0, textureStep, textureStep);
+            } else {
+                gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
+                                        (center.x + halfSize) << 2, (center.y + halfSize) << 2, G_TX_RENDERTILE, 0,
+                                        0, textureStep, textureStep);
+            }
+            gDPPipeSync(gfx++);
+        }
+    }
+    *displayListHead = gfx;
+}
 
 /* Shadows are drawn only between these depths from ProjectPoint */
 #define SHADOW_NEAREST_DEPTH (-3.0f)
