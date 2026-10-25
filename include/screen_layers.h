@@ -16,6 +16,7 @@
 #define PROMPT_END_GAME 1
 #define PROMPT_OVERWRITE_REPLAY 2
 #define PROMPT_SKIP_REPLAY 5
+#define PROMPT_OVERWRITE_RECORDS 10 /* On the cartridge, from the Transmit menu */
 
 void DrawTextureRect(Gfx **displayListHead, s32 xl, s32 yl, s32 xh, s32 yh, s32 tile, s32 s, s32 t, s32 dsdx,
                      s32 dtdy);

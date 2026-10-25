@@ -25,6 +25,22 @@
 #define TRANSMIT_OPTION_CHARACTERS 2
 #define TRANSMIT_OPTION_MAIN_MENU 3
 
+/* screenStep values on the Send Status screen */
+#define SEND_STATUS_SHOWING_ERROR 0 /* Or the cancelled pak check, closing */
+#define SEND_STATUS_CHOOSING 1
+#define SEND_STATUS_READY 3
+#define SEND_STATUS_CHECKING 4
+#define SEND_STATUS_SENT 5
+#define SEND_STATUS_ASKING 8 /* Whether to overwrite the cartridge's status */
+#define SEND_STATUS_STARTING 9
+#define SEND_STATUS_CONFIRMING 10 /* Asking the player to start a pak check */
+#define SEND_STATUS_TAGGING 11
+#define SEND_STATUS_WRITING 12
+
+/* The answers to PROMPT_OVERWRITE_RECORDS */
+#define OVERWRITE_RECORDS_YES 10
+#define OVERWRITE_RECORDS_NO 11
+
 /* screenStep values on the Send Experience screen */
 #define SEND_EXPERIENCE_CHOOSING 0
 #define SEND_EXPERIENCE_SENT 3
@@ -183,12 +199,17 @@
 #define MENU_SOUND_VOLUME 127
 
 void LoadCursorBox(void *image);
+void ResetSendStatus(void);
 void ResetSendExperience(void);
+s32 TagCartridges(void);
+s32 CheckStatusCartridge(s32 cartridgeIndex);
+s32 WriteStatusToCartridge(s32 cartridgeIndex);
 s32 WriteExperienceToCartridge(s32 characterIndex);
 void SetNoticeState(s32 state, s32 message);
 s32 GetNoticeState(void);
 
 /* The buttons pressed this frame, and those pressed or repeating while held */
+extern ControllerState D_801FC5C0_ovl_13;
 extern u16 D_801FC5C4_ovl_13;
 extern u16 D_801FC5C8_ovl_13;
 
@@ -384,7 +405,167 @@ void ShowTransferError(u32 result) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateSendStatus);
+/*
+ * Runs the Send Status screen. After a pak check that tags the cartridges, the player chooses one,
+ * and the status is written to it, after asking whether to overwrite any status already there.
+ */
+void UpdateSendStatus(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    s32 result;
+
+    switch (transfer->screenStep) {
+        case SEND_STATUS_SHOWING_ERROR:
+            switch (GetNoticeState()) {
+                case NOTICE_SHOWN:
+                    transfer->isAccessing = FALSE;
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_HIDDEN:
+                    transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    break;
+            }
+            break;
+        case SEND_STATUS_STARTING:
+            transfer->screenStep = SEND_STATUS_CONFIRMING;
+            ResetSendStatus();
+            SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+            break;
+        case SEND_STATUS_CONFIRMING:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                    if (!transfer->isCancelled) {
+                        transfer->isAccessing = TRUE;
+                        transfer->screenStep = SEND_STATUS_TAGGING;
+                    } else {
+                        transfer->isAccessing = FALSE;
+                        transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    }
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = FALSE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    } else if (D_801FC5C4_ovl_13 & B_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = TRUE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case SEND_STATUS_TAGGING:
+            result = TagCartridges();
+            if (result == PAK_RESULT_OK) {
+                transfer->isAccessing = FALSE;
+                transfer->screenStep = SEND_STATUS_CHOOSING;
+            } else {
+                ShowTransferError(result);
+                transfer->isAccessing = FALSE;
+                transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
+            }
+            break;
+        case SEND_STATUS_CHOOSING:
+            if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screenStep = SEND_STATUS_READY;
+            } else if (D_801FC5C4_ovl_13 & B_BUTTON) {
+                PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+            } else if ((D_801FC5C8_ovl_13 & L_JPAD) && transfer->chosenCartridgeIndex > 0) {
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->chosenCartridgeIndex--;
+            } else if ((D_801FC5C8_ovl_13 & R_JPAD)
+                       && transfer->chosenCartridgeIndex < transfer->taggedCartridgeCount - 1) {
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->chosenCartridgeIndex++;
+            }
+            break;
+        case SEND_STATUS_READY:
+            transfer->pressingHandPosition = PRESSING_HAND_LOW;
+            if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                transfer->isAccessing = TRUE;
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screenStep = SEND_STATUS_CHECKING;
+            } else if (D_801FC5C4_ovl_13 & B_BUTTON) {
+                transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screenStep = SEND_STATUS_CHOOSING;
+            }
+            break;
+        case SEND_STATUS_CHECKING:
+            switch (CheckStatusCartridge(transfer->chosenCartridgeIndex)) {
+                case STATUS_CHECK_NO_STATUS:
+                    transfer->isAccessing = FALSE;
+                    transfer->screenStep = SEND_STATUS_WRITING;
+                    break;
+                case STATUS_CHECK_HAS_STATUS:
+                    transfer->isAccessing = FALSE;
+                    transfer->screenStep = SEND_STATUS_ASKING;
+                    OpenPrompt(PROMPT_OVERWRITE_RECORDS);
+                    break;
+                case STATUS_CHECK_FAILED:
+                    transfer->isAccessing = FALSE;
+                    ShowTransferError(transfer->transferResult);
+                    transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
+                    break;
+            }
+            break;
+        case SEND_STATUS_ASKING:
+            switch (UpdatePrompt(&D_801FC5C0_ovl_13)) {
+                case OVERWRITE_RECORDS_YES:
+                    transfer->isAccessing = TRUE;
+                    transfer->screenStep = SEND_STATUS_WRITING;
+                    break;
+                case OVERWRITE_RECORDS_NO:
+                    transfer->screenStep = SEND_STATUS_CHOOSING;
+                    break;
+            }
+            break;
+        case SEND_STATUS_WRITING:
+            result = WriteStatusToCartridge(transfer->chosenCartridgeIndex);
+            transfer->isAccessing = FALSE;
+            switch (result) {
+                case STATUS_WRITE_DONE:
+                case STATUS_WRITE_FAILED:
+                    if (transfer->transferResult == PAK_RESULT_OK) {
+                        transfer->screenStep = SEND_STATUS_SENT;
+                    } else {
+                        ShowTransferError(transfer->transferResult);
+                        transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
+                    }
+                    break;
+                case STATUS_WRITE_PAK_ERROR:
+                    ShowPakError(transfer->transferResult);
+                    transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
+                    break;
+            }
+            break;
+        case SEND_STATUS_SENT:
+            transfer->pressingHandPosition = PRESSING_HAND_LOW;
+            if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+            }
+            break;
+    }
+}
 
 /*
  * Lets the player choose a character whose experience to send, asks them to start a pak check,
@@ -716,13 +897,13 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
     s32 message = NO_MESSAGE;
 
     switch (transfer->screenStep) {
-        case 1:
+        case SEND_STATUS_CHOOSING:
             message = CHOOSE_CARTRIDGE_MESSAGE;
             break;
-        case 5:
+        case SEND_STATUS_SENT:
             message = SEND_STATUS_MESSAGE;
             break;
-        case 3:
+        case SEND_STATUS_READY:
             message = KEEP_POWER_ON_MESSAGE;
             break;
     }
