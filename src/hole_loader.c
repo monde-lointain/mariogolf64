@@ -129,7 +129,6 @@ extern s32 D_80104E70[COURSE_HOLE_COUNT];
 extern s32 D_80105B20[COURSE_HOLE_COUNT];
 extern s32 D_80106148[COURSE_HOLE_COUNT];
 extern s32 D_8010CF60[COURSE_HOLE_COUNT];
-extern s32 D_801B60B0;
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
 extern s32 D_801B60A0;
@@ -852,7 +851,7 @@ void InitHoleState(void) {
     ResetBallSimulations();
     D_80105B20[g_GameState.holeIndex] = 0;
     if (g_GameState.holeIndex == 0) {
-        D_801B60B0 = 0;
+        g_StopwatchFrameCount = 0;
         for (index = 0; index != COURSE_HOLE_COUNT; index++) {
             D_80105B20[index] = 0;
             D_80104E70[index] = 0;

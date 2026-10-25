@@ -785,7 +785,7 @@ void RecordDisplayListLength(u32 commandCount) {
 
 /*
  * The longest time accepted. The overlay at ADD30 adds 18000 to the time
- * that is passed in here (D_801B60B0) and caps it at this.
+ * that is passed in here (g_StopwatchFrameCount) and caps it at this.
  */
 #define MAX_TIME 108000
 #define UNKE50_MAX 3

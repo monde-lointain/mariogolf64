@@ -13,6 +13,7 @@
 #include "heap.h"
 #include "libc.h"
 #include "movie.h"
+#include "overlay_manager.h"
 #include "pin.h"
 #include "save.h"
 #include "scoring.h"
@@ -296,6 +297,30 @@ extern void *D_800E2178;
 extern void *D_80105214;
 extern s32 sSceneryState;
 extern u8 D_801061B8[0x8C];
+extern s8 D_801B60B9;
+/* The colors of each course's name, which gradients from the first to the second */
+extern s32 g_CourseNameEnvColors[];
+extern s32 g_CourseNamePrimColors[];
+/* "%02d:%02d:%02d", which func_80089094 also uses */
+extern char D_800D1C84[];
+
+s32 func_80242418(void);
+void func_80242424(Gfx **displayListHead);
+void func_80242D40(Gfx **displayListHead);
+
+/* The game counts time in frames */
+#define FRAMES_PER_SECOND 30
+#define SECONDS_PER_MINUTE 60
+#define HUNDREDTHS_PER_SECOND 100
+#define MODULE_UNK21 21
+#define MODULE_UNK26 26
+#define STOPWATCH_X 168
+#define STOPWATCH_Y 176
+#define STOPWATCH_ENV_COLOR 0xFFFF0000
+#define STOPWATCH_PRIM_COLOR 0x30FF0000
+#define HOLE_TITLE_X (SCREEN_WIDTH / 2)
+#define COURSE_NAME_Y 32
+#define HOLE_NUMBER_Y 48
 
 void func_80216B74(s32);
 void func_8008E1B4(void);
@@ -1011,7 +1036,58 @@ void FreeHoleIntroImages(void) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008C6B0);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008CD30);
+/*
+ * Draws the course's name and the hole's number, or in the timed modes a
+ * stopwatch, before the hole starts
+ */
+#ifdef NON_MATCHING
+void DrawHoleIntroText(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 hundredths;
+    s32 minutes;
+    s32 seconds;
+    s32 totalSeconds;
+
+    if (g_IsHoleIntroTextShown == 1) {
+        if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
+            if (g_IsModuleAlive[MODULE_UNK26] && func_80242418()) {
+                func_80242424(&gfx);
+            }
+        } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+        } else if (g_GameMode == GAME_MODE_UNK3) {
+            if (g_IsModuleAlive[MODULE_UNK21]) {
+                func_80242D40(&gfx);
+            }
+        } else if (g_GameMode == GAME_MODE_UNK7 && D_801B60B9 == 0) {
+            hundredths = (s32)(g_StopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) % HUNDREDTHS_PER_SECOND;
+            totalSeconds = g_StopwatchFrameCount / FRAMES_PER_SECOND;
+            seconds = totalSeconds % SECONDS_PER_MINUTE;
+            minutes = totalSeconds / SECONDS_PER_MINUTE;
+            SetUpGradientTextDrawing(&gfx, 0);
+            sprintf(g_PrintBuffer, D_800D1C84, minutes, seconds, hundredths);
+            DrawLargeTextWithShadow(&gfx, STOPWATCH_X, STOPWATCH_Y, g_PrintBuffer, STOPWATCH_ENV_COLOR,
+                                    STOPWATCH_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
+        } else {
+            SetUpGradientTextDrawing(&gfx, 0);
+            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x00, 0x00, 0xFF);
+            gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x00, 0xFF);
+            sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
+            sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
+            DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, COURSE_NAME_Y, g_PrintBuffer, g_CourseNameEnvColors[g_CourseIndex],
+                                    g_CourseNamePrimColors[g_CourseIndex], TEXT_FLAG_CENTERED);
+            sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
+            DrawLargeTextWithShadow(&gfx, HOLE_TITLE_X, HOLE_NUMBER_Y, g_PrintBuffer, g_CourseNameEnvColors[g_CourseIndex],
+                                    g_CourseNamePrimColors[g_CourseIndex], TEXT_FLAG_CENTERED);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroText);
+#endif
 
 /* Switches to the other matrix buffer, which the RSP is not reading */
 void SwapMatrixBuffers(void) {

@@ -156,8 +156,8 @@ void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
 void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
 
 extern Gfx D_800C3FC0[];
-extern s32 D_800C2AD8[];
-extern s32 D_800C2B00[];
+extern s32 g_CourseNameEnvColors[];
+extern s32 g_CourseNamePrimColors[];
 
 extern u8 *sBoardImage; /* The name plate or the hole sign */
 extern u8 *sCourseBadges[COURSE_INDEX_COUNT];
@@ -770,12 +770,12 @@ void DrawHoleSelect(Gfx **displayListHead) {
             colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
         }
         sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-        DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
-                                D_800C2B00[colorIndex], TEXT_FLAG_CENTERED);
+        DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset, g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+                                g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
         if (!IsOnDrivingRange()) {
             sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
-            DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset, g_PrintBuffer, D_800C2AD8[colorIndex],
-                                    D_800C2B00[colorIndex], TEXT_FLAG_CENTERED);
+            DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset, g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+                                    g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
         }
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);

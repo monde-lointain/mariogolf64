@@ -178,7 +178,6 @@ extern s32 g_BallFlightStep;
 extern SimulatedShot g_SimulatedShot;
 extern s32 sCupViewHoldCount;
 extern s32 g_HoleFlyoverFrame;
-extern s8 D_801061CE;
 extern s32 sEndReaction;
 /* How many frames the flight camera waits after the ball's path ends */
 extern s32 sLandingWaitFrameCount;
@@ -1287,7 +1286,7 @@ extern s8 D_801061B8;
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
     SetMenuBackdrop(MENU_BACKDROP_NONE);
-    D_801061CE = 1;
+    g_IsHoleIntroTextShown = 1;
     D_801061B8 = -1;
     D_801061C0 = 1;
     D_801061C3 = 1;
@@ -1353,7 +1352,7 @@ void StartHoleCamerasAndSong(void) {
 /* Starts the flyover of the hole, with the inset view on the cup */
 void StartHoleFlyover(void) {
     g_HoleFlyoverFrame = 0;
-    D_801061CE = 0;
+    g_IsHoleIntroTextShown = 0;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -1367,7 +1366,7 @@ void StartHoleFlyover(void) {
 }
 
 void ClearHoleIntroText(void) {
-    D_801061CE = 0;
+    g_IsHoleIntroTextShown = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
     SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
 }
