@@ -109,8 +109,6 @@ typedef struct ShotDebris {
 #define DEBRIS_KIND_ROUGH 4
 #define DEBRIS_KIND_BURIED 6 /* Bunker lies with the ball sunk in the sand */
 
-#define WEATHER_NONE (-1)
-#define WEATHER_RAIN 2
 
 /* Each holds an image asset: a header, then texels */
 extern u8 *sRippleImage;
@@ -1918,7 +1916,6 @@ void StartRingPassRumble(UnkB8 *player) {
 }
 
 #define RAIN_SPLASH_IMAGE_ASSET 0x6BC
-#define RAIN_SOUND_CHANNEL 9
 
 /* Sets the weather, and for rain loads its image and sets up its buffers */
 void StartWeather(s32 weather) {

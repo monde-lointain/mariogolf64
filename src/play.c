@@ -8,6 +8,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
@@ -122,8 +123,6 @@ void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
-void func_80080564(s32 playerIndex, s32 characterIndex, s32 arg2);
-void func_80080220(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord *record);
@@ -283,7 +282,7 @@ void SetUpPlayers(void) {
             g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
         }
         g_Players[0].unk28 = -1;
-        func_80080564(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].unk7B);
+        LoadPlayerFace(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].unk7B);
         for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
             if (slot >= CLUB_SET_SIZE) {
                 g_Players[0].clubs[slot] = NO_CLUB;
@@ -347,7 +346,7 @@ void InitPlay(s32 kind) {
     }
     InitExpansionPakFeatures();
     if (kind != 3) {
-        func_80080220();
+        PrepareHoleDisplay();
     }
     WriteBallDistancesIfEnabled();
     osSyncPrintf("PlayInitComplete\n");

@@ -9,6 +9,7 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "overlay_manager.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
@@ -142,8 +143,6 @@ extern Unk800BA9D8 D_800FEDD8;
 
 void func_8005F1C8(void);
 void PlacePlayersOnTee(void);
-void func_80080220(void);
-void func_800802E0(void);
 void func_80253234(s32);
 void ToggleGroundTileBorders(void);
 void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
@@ -846,7 +845,7 @@ void InitHoleState(void) {
     PlacePlayersOnTee();
     g_CurrentShot.surface = 0;
     osSyncPrintf("mp2sub1\n");
-    func_80080220();
+    PrepareHoleDisplay();
     osSyncPrintf("mp2sub2\n");
     func_8005F1C8();
     osSyncPrintf("mp2sub3\n");
@@ -916,7 +915,7 @@ void RunLoaderThread(void) {
         osSyncPrintf("MP4\n");
         BuildGroundDisplayLists();
         osSyncPrintf("MP5\n");
-        func_800802E0();
+        InitRoundHud();
         SetGameFlag(GAME_FLAG_HOLE_LOADED);
         if (IsGameFlagSet(GAME_FLAG_HALT_HOLE_LOADER)) {
             while (TRUE) {}

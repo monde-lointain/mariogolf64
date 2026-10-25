@@ -83,8 +83,6 @@
 
 /* The replay records keep their character's image when this bit of unk36 is set */
 #define RECORD_IN_USE 0x80
-/* Added to a character's g_CharacterImageAssets entry for the image shown in the menu */
-#define CHARACTER_IMAGE_OFFSET 9
 /* A character image for each player of each saved game, or for each replay record */
 #define CHARACTER_IMAGE_COUNT (SAVED_GAME_COUNT * MAX_PLAYER_COUNT)
 /* Albatross, Hole in One, Eagle, Birdie, Par and Chip In */
@@ -409,7 +407,7 @@ void OpenSaveMenu(s32 kind) {
                          SAVE_MENU_SOUND_PAN);
     for (slot = 0; slot != CHARACTER_IMAGE_COUNT; slot++) {
         ReadEncodedAsset(sCharacterImages[slot] = AllocMemory(OpenEncodedAsset(
-                             g_CharacterImageAssets[CHARACTER_PLUM] + CHARACTER_IMAGE_OFFSET, &encodedAsset)),
+                             g_CharacterImageAssets[CHARACTER_PLUM] + CHARACTER_FACE_IMAGE_OFFSET, &encodedAsset)),
                          &encodedAsset);
         OpenAssetFile(g_CharacterPaletteAssets[CHARACTER_PLUM], &file);
         fileSize = GetAssetFileSize(&file);
@@ -447,7 +445,7 @@ void OpenSaveMenu(s32 kind) {
                 state = &save->savedGames[slot].state;
                 for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
                     player = &save->savedPlayers[slot][playerIndex];
-                    OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_IMAGE_OFFSET,
+                    OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                                      &encodedAsset);
                     ReadEncodedAsset(sCharacterImages[slot * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
                     OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->unk7B, &file);
@@ -460,7 +458,7 @@ void OpenSaveMenu(s32 kind) {
         for (slot = 0; slot != SAVE_RECORD_COUNT; slot++) {
             record = &save->unk1DF0[slot];
             if (record->unk36 & RECORD_IN_USE) {
-                OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+                OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] + CHARACTER_FACE_IMAGE_OFFSET, &encodedAsset);
                 ReadEncodedAsset(sCharacterImages[slot], &encodedAsset);
                 OpenAssetFile(g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39, &file);
                 ReadAssetFile(sCharacterFiles[slot], GetAssetFileSize(&file), &file);
@@ -919,7 +917,7 @@ void SaveGameToSlot(void) {
         AnimateModeIcons(TRUE);
         for (playerIndex = 0; playerIndex != state->playerCount; playerIndex++) {
             player = &save->savedPlayers[sCursorIndex][playerIndex];
-            OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_IMAGE_OFFSET,
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                              &encodedAsset);
             ReadEncodedAsset(sCharacterImages[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
             OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->unk7B, &file);
@@ -948,7 +946,7 @@ void SaveReplayToSlot(void) {
     sStateFrame = 0;
     func_8005D0D8();
     if (record->unk36 & RECORD_IN_USE) {
-        OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] + CHARACTER_IMAGE_OFFSET, &encodedAsset);
+        OpenEncodedAsset(g_CharacterImageAssets[(s8)record->unk37] + CHARACTER_FACE_IMAGE_OFFSET, &encodedAsset);
         ReadEncodedAsset(sCharacterImages[sCursorIndex], &encodedAsset);
         OpenAssetFile(g_CharacterPaletteAssets[(s8)record->unk37] + (s8)record->unk39, &file);
         ReadAssetFile(sCharacterFiles[sCursorIndex], GetAssetFileSize(&file), &file);

@@ -2,6 +2,7 @@
 #include "game_flags.h"
 #include "functions.h"
 #include "overlay_manager.h"
+#include "round_hud.h"
 #include "segment_symbols.h"
 #include "variables.h"
 
@@ -41,7 +42,7 @@ static s8 sModuleIdsOfOverlay16[] = { 0x1F, MODULE_ID_END };
 Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
     OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, OnLoadOverlay2, func_80080E14),
+    OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, OnLoadOverlay2, FreeScenery),
     OVERLAY_ENTRY(ovl_01, sModuleIdsOfOverlay03, LoadMenuResources, FreeMenuResources),
     OVERLAY_ENTRY(ovl_02, sModuleIdsOfOverlay04, NULL, NULL),
     OVERLAY_ENTRY(ovl_03, sModuleIdsOfOverlay05, NULL, NULL),
@@ -62,7 +63,7 @@ Overlay g_Overlays[OVERLAY_COUNT] = {
 static s8 sOverlayIndexOfModule[MODULE_COUNT];
 
 void OnLoadOverlay2(void) {
-    func_80080DCC();
+    InitScenery();
     func_801FD624_ovl_00();
 }
 

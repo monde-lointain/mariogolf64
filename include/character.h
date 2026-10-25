@@ -29,6 +29,8 @@
 
 /* The first of each character's image assets, of which its face is first */
 extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
+/* Added to a character's g_CharacterImageAssets entry for the face that menus show */
+#define CHARACTER_FACE_IMAGE_OFFSET 9
 /* The asset file of each character's first palette, followed by those of its other colours */
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 

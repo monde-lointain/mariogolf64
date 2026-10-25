@@ -10,6 +10,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "libc.h"
+#include "round_hud.h"
 #include "scene.h"
 #include "sound.h"
 #include "surface.h"
@@ -85,7 +86,6 @@ extern s8 D_800C30D1;
 
 void func_8005D9A0(void);
 void InitPlay(s32);
-void func_800802E0(void);
 void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
 void func_8024FF14(void);
@@ -1142,17 +1142,17 @@ s32 UpdateDebugSceneMenu(void) {
             case SCENE_PLAY_HOLE:
                 InitPlay(0);
                 ChooseConditionsAndInitHole();
-                func_800802E0();
+                InitRoundHud();
                 break;
             case SCENE_UNK9:
                 break;
             case SCENE_PLAY_UNK12:
                 InitPlay(1);
-                func_800802E0();
+                InitRoundHud();
                 break;
             case SCENE_PLAY_UNK13:
                 InitPlay(2);
-                func_800802E0();
+                InitRoundHud();
                 break;
         }
     }

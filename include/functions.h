@@ -28,8 +28,6 @@ void UpdateOverlays(void);
 void EnterDevelopmentDebugger(s32 argument);
 void LoadMenuResources(void);
 void FreeMenuResources(void);
-void func_80080DCC(void);
-void func_80080E14(void);
 /* Whether the view mode that the B button picks in debug builds is on */
 s32 IsDebugBButtonView(void);
 

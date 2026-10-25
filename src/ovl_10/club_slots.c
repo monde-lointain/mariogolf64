@@ -188,8 +188,6 @@ extern s32 g_MatrixBufferIndex;
 extern u16 D_800C2650[][FACE_FRAME_COUNT];
 extern u16 D_800C2780[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
-extern u8 *D_801B55E0[MAX_PLAYER_COUNT];
-extern u16 *D_801321C8[MAX_PLAYER_COUNT];
 
 extern Mtx sReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
 extern Mtx sShadeMatrix;
@@ -773,7 +771,7 @@ void DrawClubSlots(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        LoadLargePalette(&gfx, D_801321C8[playerIndex]);
+        LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
         if (playerIndex == sSlots->playerIndex) {
             LoadTextureBlock(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex], G_IM_FMT_CI, G_IM_SIZ_8b,
                           FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
@@ -816,7 +814,7 @@ void DrawClubSlots(Gfx **displayListHead) {
                 }
             }
         } else {
-            LoadTextureBlock(&gfx, D_801B55E0[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0,
+            LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0,
                           0, 0, 0);
             gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
             DrawTextureRect(&gfx, OTHER_FACE_LEFT << 2, (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,

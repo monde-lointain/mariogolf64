@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "burst.h"
 #include "cpu_projection.h"
 #include "functions.h"
 #include "heap.h"
