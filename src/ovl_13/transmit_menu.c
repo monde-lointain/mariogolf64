@@ -226,6 +226,14 @@
 #define CARTRIDGE_FAULT_UNINITIALIZED 1 /* Its save lacks the signature */
 #define CARTRIDGE_FAULT_CORRUPTED 2
 
+/* How far ReadCartridgeCharacters has checked a save */
+#define NOT_CHECKED 0
+#define SAVE_CHECKED 1 /* Its signature and checksum */
+#define DATA_CHECKED 2 /* Its character data's sum too */
+#define SAVE_READ_ATTEMPTS 5
+#define DATA_READ_ATTEMPTS 3
+#define RECORD_PRESENT 1 /* The first byte of a record in use */
+
 /* What CheckStatusCartridge found */
 #define STATUS_CHECK_NO_STATUS 0
 #define STATUS_CHECK_FAILED 1 /* With the cause in transferResult */
@@ -1180,7 +1188,8 @@ void DecodeCartridgeCharacter(u8 *save, s32 cartridgeIndex, s32 saveIndex, s32 u
     character->unk38 = saveIndex;
 }
 
-void SkipCartridgeSave(void) {
+void SkipCartridgeSave(u8 *unusedData, s32 unusedCartridgeIndex, s32 unusedSaveIndex, u8 *unusedTitle,
+                       s32 unusedUnk34) {
 }
 
 s32 IsCharacterFromSave(GameBoyCharacter *character, u8 *save) {
@@ -1989,14 +1998,215 @@ failed:
     return STATUS_WRITE_FAILED;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", ReadCartridgeCharacters);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBFD4_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBFF8_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC010_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC028_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC044_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC060_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC080_ovl_13);
+/*
+ * Reads one save of the Game Boy cartridges per call, opening each controller's pak before its
+ * saves, and lists the characters in the saves that check out. Returns PAK_RESULT_STILL_READING
+ * until the last save is read, then what was found.
+ */
+s32 ReadCartridgeCharacters(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    u8 save[CARTRIDGE_SAVE_SIZE];
+    u8 characterData[CHARACTER_DATA_SIZE];
+    s32 port;
+    s32 saveIndex;
+    s32 recordOffset;
+    s32 checkedState; /* How far the save has been checked */
+    s32 result;
+    s32 attempt;
+    s32 index;
+    s32 isSignatureWrong;
+    s32 storedSum;
+    s32 dataAddress;
+    s32 dataSize;
+    s32 sum; /* Of the save, then of the character data; sharing it is there to match */
+    s32 isAlreadyBrought;
+    s32 slot;
+
+    if (transfer->unk7A0 == 0) {
+        nuContGBPakMgrInit();
+        transfer->unk7BC = 0;
+        transfer->listedCharacterCount = 0;
+        transfer->unk7C0 = FALSE;
+        transfer->unk7C4 = FALSE;
+        transfer->unk7C8 = FALSE;
+        transfer->unk7CC = FALSE;
+        transfer->unk7D0 = FALSE;
+    }
+    if (transfer->unk7A0 % 4 == 0) {
+        port = g_PlayerControllerPorts[transfer->unk7A0 / 4];
+        transfer->transferResult = OpenGameBoyPakWithRetries(port, &transfer->cartridgeHeader, &transfer->pakFile);
+        osSyncPrintf("loadres %d  cont %d\n", transfer->transferResult, port);
+        if (transfer->transferResult == PAK_RESULT_NO_PAK) {
+            transfer->unk7C8 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
+            transfer->unk7C4 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
+            transfer->unk7C0 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
+            transfer->unk7CC = TRUE;
+        }
+    } else if (transfer->transferResult == PAK_RESULT_OK) {
+        saveIndex = transfer->unk7A0 % 4 - 1;
+        /* The original starts the offset at 0xA042, which every save index replaces */
+        recordOffset = 0xA042;
+        checkedState = NOT_CHECKED;
+        for (index = 0; index != CHARACTER_DATA_SIZE; index++) {
+            characterData[index] = 0;
+        }
+        transfer->unk7BC++;
+        if (saveIndex == 0) {
+            recordOffset = SAVE_RECORDS_OFFSET;
+        }
+        if (saveIndex == 1) {
+            recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
+        }
+        if (saveIndex == 2) {
+            recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE * 2;
+        }
+        for (attempt = 0; attempt != SAVE_READ_ATTEMPTS; attempt++) {
+            result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+            if (result == 0) {
+                sum = ComputeSaveChecksum(save);
+                storedSum = GetStoredChecksum(save);
+                isSignatureWrong = FALSE;
+                for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+                    if (save[SAVE_SIGNATURE_OFFSET + index] != sCartridgeSaveSignature[index]) {
+                        isSignatureWrong = TRUE;
+                        transfer->unk7D0 = TRUE;
+                    }
+                }
+                if (sum == storedSum && isSignatureWrong == FALSE) {
+                    checkedState = SAVE_CHECKED;
+                    osSyncPrintf("checksum1 OK! \n");
+                    break;
+                }
+            }
+        }
+        /* The nested tests are there to match */
+        if (checkedState == SAVE_CHECKED) {
+            if (result == 0) {
+                if (save[recordOffset] == RECORD_PRESENT) {
+                    checkedState = NOT_CHECKED;
+                    /* Working out the address in storedSum first is there to match */
+                    storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET]
+                                + (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8) - STATUS_ADDRESS_BIAS;
+                    dataSize = save[recordOffset + RECORD_SIZE_OFFSET]
+                               + (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+                    dataAddress = storedSum;
+                    for (attempt = 0; attempt != DATA_READ_ATTEMPTS; attempt++) {
+                        result = nuContGBPakFread(&transfer->pakFile, dataAddress, characterData, dataSize);
+                        storedSum = save[recordOffset + RECORD_SUM_OFFSET]
+                                    | (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+                        sum = 0;
+                        for (index = 0; index != dataSize; index++) {
+                            sum += characterData[index];
+                        }
+                        sum &= 0xFFFF;
+                        if (sum == storedSum) {
+                            checkedState = DATA_CHECKED;
+                            osSyncPrintf("checksum2 OK! \n");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (checkedState == DATA_CHECKED) {
+            switch (result) {
+                case 0:
+                    isAlreadyBrought = FALSE;
+                    /* "Slot %d read successfully" */
+                    osSyncPrintf("\x83X\x83\x8D\x83" "b\x83g%d \x93\xC7\x82\xDD\x8D\x9E\x82\xDD\x90\xAC\x8C\xF7"
+                                 "\x82\xB5\x82\xDC\x82\xB5\x82\xBD  \n",
+                                 saveIndex);
+                    for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
+                        if (g_GameBoyCharacters[slot].status == GAME_BOY_CHARACTER_STATUS_PRESENT
+                            && IsCharacterFromSave(&g_GameBoyCharacters[slot], characterData)) {
+                            isAlreadyBrought = TRUE;
+                            transfer->cartridgeCharacters[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT
+                                                          + saveIndex].status = GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
+                            ListPresentCharacters();
+                            break;
+                        }
+                    }
+                    if (!isAlreadyBrought) {
+                        /* transferResult is OK here, so the original never skips a save */
+                        if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
+                            SkipCartridgeSave(characterData, transfer->unk7A0 / 4, saveIndex,
+                                              transfer->cartridgeHeader.game_title,
+                                              transfer->cartridgeHeader.company_code);
+                        } else {
+                            DecodeCartridgeCharacter(characterData, transfer->unk7A0 / 4, saveIndex,
+                                                     transfer->cartridgeHeader.company_code);
+                        }
+                        transfer->unk76C[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT + saveIndex] = 1;
+                        transfer->listedCharacterCount++;
+                        ListPresentCharacters();
+                    }
+                    break;
+                case PFS_ERR_NOPACK:
+                    transfer->unk7C8 = TRUE;
+                    osSyncPrintf("3rd PFS_ERR_NOPACK  \n");
+                    break;
+                case PFS_ERR_DEVICE:
+                    transfer->unk7C4 = TRUE;
+                    osSyncPrintf("3rd PFS_ERR_DEVICE  \n");
+                    break;
+                case PFS_ERR_CONTRFAIL:
+                    transfer->unk7D4 = TRUE;
+                    osSyncPrintf("3rd PFS_ERR_CONTRFAIL  \n");
+                    break;
+                case PFS_ERR_NO_GBCART:
+                    transfer->unk7C0 = TRUE;
+                    osSyncPrintf("3rd PFS_ERR_NO_GBCART  \n");
+                    break;
+                case PFS_ERR_NEW_GBCART:
+                    osSyncPrintf("3rd PFS_ERR_NEW_GBCART  \n");
+                    break;
+            }
+        }
+    }
+    if (transfer->unk7A0 % 4 == 3) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    }
+    if (transfer->unk7A0 == g_ControllerCount * 4 - 1) {
+        /* Repeating the results for one cartridge is there to match */
+        if (transfer->unk7BC == 1) {
+            if (transfer->unk7D0 == TRUE) {
+                return PAK_RESULT_UNINITIALIZED;
+            }
+            if (transfer->listedCharacterCount == 0) {
+                return PAK_RESULT_NO_CHARACTERS;
+            }
+            return PAK_RESULT_OK;
+        }
+        if (transfer->unk7BC > 0) {
+            if (transfer->listedCharacterCount == 0) {
+                return PAK_RESULT_NO_CHARACTERS;
+            }
+            return PAK_RESULT_OK;
+        }
+        if (transfer->unk7CC == TRUE) {
+            return PAK_RESULT_WRONG_CARTRIDGE;
+        }
+        if (transfer->unk7C0 == TRUE) {
+            return PAK_RESULT_NO_CARTRIDGE;
+        }
+        if (transfer->unk7C4 == TRUE) {
+            return PAK_RESULT_OTHER_PAK;
+        }
+        if (transfer->unk7C8 == TRUE) {
+            return PAK_RESULT_NO_PAK;
+        }
+        return PAK_RESULT_CONNECTOR_PROBLEM;
+    }
+    transfer->unk7A0++;
+    return PAK_RESULT_STILL_READING;
+}
 
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
     s32 failureCount;
