@@ -15,7 +15,7 @@
 extern s8 D_801B60C5;
 extern s32 D_801B60B4;
 
-void func_8007FE44(s32 badgeCount);
+void ShowBirdieBadgeCount(s32 badgeCount);
 
 /*
  * Counts a win or a loss in unkAF0[row][column], and saves. A win also sets
@@ -69,7 +69,7 @@ void AddBirdieBadge(void) {
 }
 
 /*
- * Passes how many holes have a birdie badge to func_8007FE44, if this is a
+ * Passes how many holes have a birdie badge to ShowBirdieBadgeCount, if this is a
  * tournament and the current hole has none yet
  */
 void ReportBirdieBadgeCount(void) {
@@ -86,7 +86,7 @@ void ReportBirdieBadgeCount(void) {
                 badgeCount += unk990->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
             }
         }
-        func_8007FE44(badgeCount);
+        ShowBirdieBadgeCount(badgeCount);
     }
 }
 

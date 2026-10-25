@@ -127,9 +127,9 @@ void FrameReaction(u32 slotIndex, CameraView *view);
 void FrameYoshiReaction(u32 slotIndex, CameraView *view);
 void FrameSherryReaction(u32 slotIndex, CameraView *view);
 void FrameKidReaction(u32 slotIndex, CameraView *view);
-void func_80079358(u32 slotIndex, s32 pointId);
-void func_80078DC0(u32 slotIndex, s32 pointId);
-void func_80078FA8(u32 slotIndex, s32 pointId, f32 heading);
+void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId);
+void SpawnSpreadingCircle(u32 slotIndex, s32 pointId);
+void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
 
 /*
  * Whether the reaction views drop the eye and raise what they look at.
@@ -587,7 +587,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView *view) {
     }
     if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
         if (sReactionFrame >= MARIO_EFFECT_START_FRAME) {
-            func_80079358(slotIndex, 3);
+            SpawnSparkleNearPoint(slotIndex, 3);
             GetCharacterPointPosition(0, 3, lightDirection);
             GetCharacterPointPosition(0, REACTION_FOCUS_POINT, lightOrigin);
             lightDirection[AXIS_X] -= lightOrigin[AXIS_X];
@@ -663,7 +663,7 @@ void FrameWarioReaction(u32 slotIndex, CameraView *view) {
     }
     if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
         if (sReactionFrame >= WARIO_EFFECT_START_FRAME) {
-            func_80079358(slotIndex, 3);
+            SpawnSparkleNearPoint(slotIndex, 3);
         }
     }
     GetCharacterPointPosition(slotIndex, CHARACTER_POINT_SHADOW, focus);
@@ -741,9 +741,9 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView *view) {
             heading = 0.0f;
         }
         if (!(sReactionFrame & 1)) {
-            func_80078FA8(slotIndex, 3, heading + M_PI / 2);
+            SpawnTear(slotIndex, 3, heading + M_PI / 2);
         } else {
-            func_80078FA8(slotIndex, 4, heading - M_PI / 2);
+            SpawnTear(slotIndex, 4, heading - M_PI / 2);
         }
     }
     if (IsReactionViewLow()) {
@@ -762,7 +762,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView *view) {
 
     if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
         if (sReactionFrame % 3 == 0) {
-            func_80079358(slotIndex, 3);
+            SpawnSparkleNearPoint(slotIndex, 3);
         }
     }
     GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -807,7 +807,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView *view) {
 
     if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
         if (sReactionFrame == 10 || sReactionFrame == 24 || sReactionFrame == 33) {
-            func_80078DC0(0, 3);
+            SpawnSpreadingCircle(0, 3);
         }
     }
     GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
@@ -987,8 +987,8 @@ void FrameSherryReaction(u32 slotIndex, CameraView *view) {
 
     if (sReactionAnimation == REACTION_ANIMATION_EAGLE
         && (u32)(sReactionFrame - SHERRY_EFFECT_START_FRAME) < SHERRY_EFFECT_FRAME_COUNT) {
-        func_80079358(slotIndex, sReactionFrame % 3 + 3);
-        func_80079358(slotIndex, sReactionFrame % 3 + 6);
+        SpawnSparkleNearPoint(slotIndex, sReactionFrame % 3 + 3);
+        SpawnSparkleNearPoint(slotIndex, sReactionFrame % 3 + 6);
     }
     GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
     highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE, focus[AXIS_Z] * WORLD_TO_COURSE_SCALE)

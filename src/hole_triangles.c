@@ -76,7 +76,7 @@ extern s32 D_800C306C;
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
 
-void func_80079940(s32 *position);
+void SpawnSparkle(s32 *position);
 static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
 
@@ -313,7 +313,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera) 
                             position[0] = worldPoint[0] * POSITION_SCALE;
                             position[1] = worldPoint[1] * POSITION_SCALE;
                             position[2] = worldPoint[2] * POSITION_SCALE;
-                            func_80079940(position);
+                            SpawnSparkle(position);
                         }
                     }
                     state++;
