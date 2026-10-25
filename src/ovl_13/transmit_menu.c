@@ -5,6 +5,7 @@
 #include "debug_text.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "math_util.h"
 #include "host_file.h"
 #include "save.h"
 #include "scene.h"
@@ -139,6 +140,12 @@
 #define CONTROLLER_ICONS_TOP 72
 #define CONTROLLER_ICON_SPACING 56
 #define CONTROLLER_ICON_SIZE 32
+#define CONTROLLER_CURSOR_MARGIN 8
+/* The pointer at the chosen cartridge on the Send Status screen */
+#define POINTER_WIDTH 24
+#define POINTER_HEIGHT 24
+#define POINTER_IMAGE_HEIGHT 76
+#define POINTER_TOP 76
 #define EXPERIENCE_LEFT 20 /* Below each face */
 #define EXPERIENCE_TOP 174
 
@@ -1441,7 +1448,76 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = displayList;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawSendStatusScreen);
+/*
+ * Draws the Send Status screen: the imported faces and the icons of the tagged controllers, dimming
+ * the others once a cartridge is chosen. A swinging pointer marks the cartridge while choosing and
+ * the cursor box once it is chosen.
+ */
+void DrawSendStatusScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
+    Gfx *displayList = *displayListHead;
+    s32 index;
+    s32 slot;
+    s32 pointerRestLeft;
+    s32 pointerSwing;
+
+    DrawImportedFaces(&displayList, transfer);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    gDPSetCombineMode(displayList++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&displayList, (u8 *)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0, 0, 0, 0);
+    slot = 0;
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    for (index = 0; index != transfer->taggedCartridgeCount; index++) {
+        if (transfer->screenStep == SEND_STATUS_READY && slot != transfer->chosenCartridgeIndex) {
+            gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, 255);
+        } else {
+            gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+        }
+        DrawTextureRect(&displayList, (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
+                        CONTROLLER_ICONS_TOP << 2,
+                        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING + CONTROLLER_ICON_SIZE) << 2,
+                        (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+                        (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+        slot++;
+    }
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    if (transfer->taggedCartridgeCount != 0) {
+        /* An if-chain rather than a switch is there to match */
+        if (transfer->screenStep == SEND_STATUS_CHOOSING) {
+            /* The pointer swings in and out over half a turn of the angle */
+            sStatusPointerAngle += DEGREES_TO_RADIANS(10);
+            if (sStatusPointerAngle > M_PI) {
+                sStatusPointerAngle -= M_PI;
+            }
+            pointerSwing = sinf(sStatusPointerAngle) * 8.0f;
+            gDPPipeSync(displayList++);
+            gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+            LoadSmallPalette(&displayList, 0, (u8 *)transfer->pointerImage + IMAGE_HEADER_SIZE);
+            /* The original loads the controller icons again, which the pointer replaces */
+            LoadNibbleTextureBlock(&displayList, (u8 *)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET,
+                                   G_IM_FMT_CI, CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0,
+                                   0, 0, 0, 0, 0);
+            gDPLoadTextureTile_4b(displayList++, ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
+                                  G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1, POINTER_IMAGE_HEIGHT - 1,
+                                  0, 0, 0, 0, 0, 0, 0);
+            /* Subtracting the swing in each coordinate is there to match */
+            pointerRestLeft =
+                transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING + (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
+            DrawTextureRect(&displayList, (pointerRestLeft - pointerSwing) << 2, POINTER_TOP << 2,
+                            (pointerRestLeft - pointerSwing + POINTER_WIDTH) << 2, (POINTER_TOP + POINTER_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        } else if (transfer->screenStep == SEND_STATUS_READY) {
+            DrawCursorBox(&displayList,
+                          CONTROLLER_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN
+                              + transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING,
+                          CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN);
+        }
+    }
+    *displayListHead = displayList;
+}
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *displayList = *displayListHead;
