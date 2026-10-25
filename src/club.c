@@ -527,7 +527,7 @@ void GenerateClub(s32 clubIndex) {
             simulation.position[0] = 0;
             simulation.position[1] = 0;
             simulation.position[2] = 0;
-            func_80037F94(&simulation, 1, &sClubTestShot);
+            LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &sClubTestShot);
             for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
                 if (!simulation.isRunning) {
                     break;
@@ -729,7 +729,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
         simulation.position[1] = 0;
         simulation.position[2] = 0;
         simulation.surface = PUTT_TEST_SURFACE;
-        func_80037F94(&simulation, 1, &sPutterTestShot);
+        LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST, &sPutterTestShot);
         for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
             if (!simulation.isRunning) {
                 break;

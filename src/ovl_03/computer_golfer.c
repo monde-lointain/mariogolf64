@@ -1829,7 +1829,7 @@ s32 StepTrialShot(void) {
     s32 flags;
     s32 isRunning;
     s32 stepFlags;
-    s32 unk24Y;
+    s32 velocityY;
     s32 unk94;
     s32 targetMiss;
     s32 heightMiss;
@@ -1877,7 +1877,7 @@ s32 StepTrialShot(void) {
         sTrialSimulation.position[AXIS_Y] = sShot.ballPosition[AXIS_Y];
         sTrialSimulation.position[AXIS_Z] = sShot.ballPosition[AXIS_Z];
         sTrialSimulation.surface = sShot.surface;
-        func_80037F94(&sTrialSimulation, 2, sTrialLaunch);
+        LaunchBallSimulation(&sTrialSimulation, LAUNCH_PURPOSE_TRIAL, sTrialLaunch);
         sTrialStepCount = 0;
         sHasUnk3Contact = FALSE;
         sTrialEndPoint[AXIS_X] = sTrialSimulation.position[AXIS_X];
@@ -1890,7 +1890,7 @@ s32 StepTrialShot(void) {
     isRunning = sTrialSimulation.isRunning;
     if (isRunning) {
         do {
-            unk24Y = sTrialSimulation.unk24[AXIS_Y];
+            velocityY = sTrialSimulation.velocity[AXIS_Y];
             unk94 = sTrialSimulation.unk94;
             sTrialStepCount++;
             stepFlags = flags = func_8003327C(&sTrialSimulation);
@@ -1902,7 +1902,7 @@ s32 StepTrialShot(void) {
             if (flags & STEP_FLAG_UNK10) {
                 break;
             }
-            if (unk94 == 0 && (flags & 3) && unk24Y < 0 && isRunning == 1) {
+            if (unk94 == 0 && (flags & 3) && velocityY < 0 && isRunning == 1) {
                 if (sHasBestEvaluation || sTrialLevel < 2) {
                     break;
                 }
@@ -2460,7 +2460,7 @@ s32 IsTrialShotSafe(void) {
     sTrialSimulation.position[AXIS_Y] = sTrialShot.ballPosition[AXIS_Y];
     sTrialSimulation.position[AXIS_Z] = sTrialShot.ballPosition[AXIS_Z];
     sTrialSimulation.surface = sTrialShot.surface;
-    func_80037F94(&sTrialSimulation, 2, sTrialLaunch);
+    LaunchBallSimulation(&sTrialSimulation, LAUNCH_PURPOSE_TRIAL, sTrialLaunch);
     sTrialStepCount = 0;
     while (sTrialSimulation.isRunning) {
         sTrialStepCount++;

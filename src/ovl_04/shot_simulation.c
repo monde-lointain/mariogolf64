@@ -10,8 +10,6 @@
 #include "surface.h"
 #include "variables.h"
 
-Club *func_80037E50(Club *, s32, s32, s32);
-
 /* Simulates the shot from the ball's position and records its path */
 void SimulateShot(Unk20 *shot) {
     BallSimulation simulationState;
@@ -49,9 +47,10 @@ void SimulateShot(Unk20 *shot) {
     g_SimulatedShot.unk2E14 =
         shot->unkC == 0 && shot->unk8 >= 0x100 && !(GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN);
     g_SimulatedShot.unk2E42 =
-        func_80037E50(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]), g_CurrentShot.surface, g_CurrentShot.shotMode, shot->unkC)
+        GetUnkCEntry(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]), g_CurrentShot.surface,
+                     g_CurrentShot.shotMode, shot->unkC)
             ->unk5;
-    func_80037F94(simulation, 2, shot);
+    LaunchBallSimulation(simulation, LAUNCH_PURPOSE_TRIAL, shot);
     g_SimulatedShot.unk2E08 = g_IsMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN;
     step = 0;
     while (simulation->isRunning) {
