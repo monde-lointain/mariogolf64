@@ -675,7 +675,35 @@ INCLUDE_ASM("asm/nonmatchings/effects", func_8007B994);
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007C5D8);
 INCLUDE_RODATA("asm/nonmatchings/effects", D_800D1A40);
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007CF10);
+/* Shadows are drawn only between these depths from ProjectPoint */
+#define SHADOW_NEAREST_DEPTH (-3.0f)
+#define SHADOW_FARTHEST_DEPTH (-60.0f)
+#define SHADOW_ALPHA 63
+
+/* Draws a dot of shadow on the spawn ground height, under an effect */
+void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint shadow;
+    f32 depth;
+
+    depth = ProjectPoint(effect->position[AXIS_X], sSpawnGroundHeight * COURSE_TO_WORLD_SCALE,
+                         effect->position[AXIS_Z], &shadow);
+    /* Nesting the tests is there to match */
+    if (depth < SHADOW_NEAREST_DEPTH) {
+        if (depth > SHADOW_FARTHEST_DEPTH) {
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, SHADOW_ALPHA);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, (shadow.x - 1) << 2, (shadow.y - 1) << 2, (shadow.x + 1) << 2,
+                                    (shadow.y + 1) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+        }
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007D19C);
 

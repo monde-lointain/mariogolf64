@@ -558,6 +558,7 @@ LaunchDrop = 0x800796F8;
 SpawnSparkle = 0x80079940;
 SpawnUnkEEffect = 0x80079A08;
 SpawnRisingClumps = 0x80079EBC;
+DrawEffectShadow = 0x8007CF10;
 DrawRipple = 0x8007DE9C;
 DrawSpreadingCircle = 0x8007DFD0;
 StartPlayerRumble = 0x8007E104;
