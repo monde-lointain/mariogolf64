@@ -38,6 +38,7 @@
 #define BRING_STARTING 13
 #define BRING_SHOWING_ERROR 14
 #define BRING_NEXT_CARTRIDGE 16
+#define BRINGING_FRAME_COUNT 16
 
 /* screenStep values on the Send Status screen */
 #define SEND_STATUS_SHOWING_ERROR 0 /* Or the cancelled pak check, closing */
@@ -488,7 +489,7 @@ void UpdateBringCharacters(void) {
             break;
         case BRING_BRINGING:
             D_800C42D0 = 1;
-            if (++transfer->unk7AC == 16) {
+            if (++transfer->bringingFrame == BRINGING_FRAME_COUNT) {
                 BringOverCharacter(transfer->listedCharacterIndex, transfer->characterIndex);
                 transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 0;
                 GenerateClubSet(FIRST_GAME_BOY_GOLFER + transfer->characterIndex,
@@ -507,7 +508,7 @@ void UpdateBringCharacters(void) {
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
                 transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
                 transfer->screenStep = BRING_BRINGING;
-                transfer->unk7AC = 0;
+                transfer->bringingFrame = 0;
             } else if (sTransmitController.pressedButtons & B_BUTTON) {
                 PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
                 transfer->screenStep = BRING_CHOOSING;
@@ -529,7 +530,7 @@ void UpdateBringCharacters(void) {
                     transfer->screenStep = BRING_BRINGING;
                     transfer->characterIndex = transfer->characterCount;
                     transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
-                    transfer->unk7AC = 0;
+                    transfer->bringingFrame = 0;
                 }
             } else if (sTransmitController.pressedButtons & B_BUTTON) {
                 PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -541,7 +542,7 @@ void UpdateBringCharacters(void) {
                 }
                 PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
             } else if ((sTransmitController.repeatedButtons & R_JPAD)
-                       && transfer->listedCharacterIndex < transfer->unk79C - 1) {
+                       && transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
                 transfer->listedCharacterIndex++;
                 if (transfer->unk7B8 + 5 < transfer->listedCharacterIndex) {
                     transfer->unk7B8++;
@@ -1380,7 +1381,7 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
         character = &g_GameBoyCharacters[transfer->characterIndex];
     }
     if ((transfer->screenStep == BRING_CHOOSING || transfer->screenStep == BRING_BRINGING)
-        && g_GameBoyTransfer.unk79C > 0) {
+        && g_GameBoyTransfer.listedCharacterCount > 0) {
         isCharacterShown = TRUE;
         character = &transfer->cartridgeCharacters[transfer->listedCharacters[transfer->listedCharacterIndex]];
     }
@@ -1526,7 +1527,7 @@ void ClearCartridgeCharacters(void) {
                 transfer->cartridgeCharacters[controller * CARTRIDGE_SAVE_COUNT + save].status = 0;
             }
         }
-        transfer->unk79C = 0;
+        transfer->listedCharacterCount = 0;
     }
 }
 

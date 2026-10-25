@@ -107,11 +107,11 @@ typedef struct GameBoyTransfer {
     /* 0x0CC */ GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
     /* 0x75C */ s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
     /* 0x76C */ s32 unk76C[CARTRIDGE_CHARACTER_COUNT];
-    /* 0x79C */ s32 unk79C;
+    /* 0x79C */ s32 listedCharacterCount;
     /* 0x7A0 */ s32 unk7A0;
     /* 0x7A4 */ s32 transferResult;
     /* 0x7A8 */ s32 screenStep;
-    /* 0x7AC */ s32 unk7AC;
+    /* 0x7AC */ s32 bringingFrame;
     /* 0x7B0 */ s32 listedCharacterIndex;
     /* 0x7B4 */ s32 characterIndex; /* Into g_GameBoyCharacters */
     /* 0x7B8 */ s32 unk7B8;
