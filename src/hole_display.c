@@ -42,6 +42,17 @@ extern u16 sSunDepth;
 extern s32 sIsSunGlareSettled;
 extern f32 sSunGlareStrength;
 
+/* The sky's vertices, for each view and each matrix buffer */
+#define SKY_VIEW_COUNT 2
+#define SKY_VERTEX_COUNT 10
+#define SKY_COLORED_VERTEX_COUNT 5
+#define SKY_BLEND_STEP_COUNT 1000 /* sSkyBlendStep counts to this at most */
+
+extern Vtx sSkyVertices[SKY_VIEW_COUNT * 2][SKY_VERTEX_COUNT];
+extern s32 sSkyTimeIndex;
+extern s32 sSkyBlendStep;
+extern s32 sSkyBlendStepCount;
+
 extern s32 D_801B609C;
 extern s32 g_PlayerCount;
 extern s32 sIsPrimitiveDepthSet;
@@ -165,7 +176,42 @@ void UpdateSunGlare(void) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008D3F4);
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008DDDC);
+/*
+ * Moves the sky's and the fog's colors a step on from those of one time of
+ * day towards those of the next
+ */
+void BlendSkyColors(void) {
+    SkyColors *from;
+    SkyColors *to;
+    s32 group;
+    s32 channel;
+
+    if (sSkyBlendStep < sSkyBlendStepCount) {
+        sSkyBlendStep++;
+    }
+    from = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex];
+    to = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex + 1];
+    for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
+        for (channel = 0; channel != 3; channel++) {
+            sSkyVertices[group][0].v.cn[channel] =
+                from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            sSkyVertices[group][1].v.cn[channel] =
+                from->unk7[channel] + (to->unk7[channel] - from->unk7[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            sSkyVertices[group][2].v.cn[channel] =
+                from->unk7[channel] + (to->unk7[channel] - from->unk7[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            sSkyVertices[group][3].v.cn[channel] =
+                from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            sSkyVertices[group][4].v.cn[channel] =
+                from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+        }
+    }
+    for (channel = 0; channel != 3; channel++) {
+        g_SceneFog.color[channel] = from->fogColor[channel] +
+                                    (to->fogColor[channel] - from->fogColor[channel]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+    }
+    g_SceneFog.near = from->fogNear + (to->fogNear - from->fogNear) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+    g_SceneFog.far = from->fogFar + (to->fogFar - from->fogFar) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008E164);
 

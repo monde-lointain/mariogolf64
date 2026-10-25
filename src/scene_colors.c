@@ -10,18 +10,9 @@
 
 #define PLANE_TILE_SIZE 16
 
-typedef struct Unk100 {
-    /* 0x00 */ u8 unk0[4];
-    /* 0x04 */ u8 unk4[3];
-    /* 0x07 */ u8 unk7[3];
-    /* 0x0A */ u8 unkA[3];
-    /* 0x0D */ u8 unkD[0x100 - 0xD];
-} Unk100; /* size = 0x100 */
-
 extern Vtx g_TexturePlaneVertices[6];
 extern Vtx g_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
 extern s32 sPlaneTextureScroll;
-extern Unk100 D_800C6014[];
 extern s32 D_800E1C10;
 extern s32 D_800E1C14;
 extern u8 D_800E1C18;
@@ -34,16 +25,17 @@ extern u8 D_800E1C1D;
 
 /*
  * Sets the shaded quads of g_ShadedVertices and two color globals from
- * the colors of the D_800C6014 entry that g_HoleConditions selects
+ * the colors of the g_SkyColors entry that g_HoleConditions selects
  */
 void DeriveSceneColors(void) {
-    Unk100 *entry;
+    SkyColors *entry;
     s32 vertexOffset;
     s32 channelIndex;
 
     D_800E1C10 = 0;
     D_800E1C14 = 0;
-    entry = &D_800C6014[g_HoleConditions.isRaining * 3 + g_HoleConditions.sceneColorIndex];
+    /* This steps through the table a course of colors at a time, unlike BlendSkyColors */
+    entry = g_SkyColors[g_HoleConditions.isRaining * 3 + g_HoleConditions.sceneColorIndex];
     for (vertexOffset = 0; vertexOffset != QUAD_VERTEX_COUNT; vertexOffset++) {
         for (channelIndex = 0; channelIndex != RGB_CHANNEL_COUNT; channelIndex++) {
             g_ShadedVertices[0][SHADED_QUAD_START + vertexOffset].v.cn[channelIndex] =

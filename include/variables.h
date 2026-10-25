@@ -52,6 +52,35 @@ typedef struct HoleConditions {
     /* 0x12 */ u16 lightPitch; /* g_LightPitch */
 } HoleConditions; /* size = 0x14 */
 
+typedef struct Fog {
+    /* 0x00 */ s32 color[3];
+    /* 0x0C */ s32 near;
+    /* 0x10 */ s32 far;
+} Fog; /* size = 0x14 */
+
+extern Fog g_SceneFog;
+
+/*
+ * The scene's colors at one time of day. The sky's two colors go to its
+ * vertices; DeriveSceneColors also derives other colors from them.
+ */
+typedef struct SkyColors {
+    /* 0x00 */ u8 unk0[4];
+    /* 0x04 */ u8 unk4[3];
+    /* 0x07 */ u8 unk7[3];
+    /* 0x0A */ u8 unkA[3];
+    /* 0x0D */ u8 unkD[0x18 - 0xD];
+    /* 0x18 */ u8 fogColor[3];
+    /* 0x1C */ s16 fogNear;
+    /* 0x1E */ s16 fogFar;
+} SkyColors; /* size = 0x20 */
+
+/* Each course has colors for each time of day, dry and in the rain */
+#define SKY_TIME_COUNT 4
+#define SKY_WEATHER_COUNT 2
+
+extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
+
 /* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
 #define SCENE_COLOR_INDEX_ROUND_START 0
 #define SCENE_COLOR_INDEX_DRIVING_RANGE 6

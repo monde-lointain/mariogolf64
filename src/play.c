@@ -26,12 +26,6 @@
 #define PLAYER_STATE_UNK14 0x14
 
 /* A fog color and the range over which the fog thickens */
-typedef struct Fog {
-    /* 0x00 */ s32 color[3];
-    /* 0x0C */ s32 near;
-    /* 0x10 */ s32 far;
-} Fog; /* size = 0x14 */
-
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
 
@@ -105,7 +99,6 @@ extern u8 D_800FE330;
 extern s32 D_801B60B4;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
-extern Fog g_SceneFog;
 extern Fog g_DebugFog;
 extern s8 D_800C3098;
 extern PlayRecord D_800FED40[];
