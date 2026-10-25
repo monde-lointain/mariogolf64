@@ -7,6 +7,7 @@
 #include "heap.h"
 #include "host_file.h"
 #include "save.h"
+#include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
@@ -64,6 +65,7 @@
 #define CARTRIDGE_REMOVED_MESSAGE 0x14E
 #define RETRYING_AFTER_REMOVAL_MESSAGE 0x14F
 #define CONNECTOR_PROBLEM_MESSAGE 0x151
+#define INSERT_RUMBLE_PAK_MESSAGE 0x155
 #define CORRUPTED_SAVE_MESSAGE 0x152
 #define UNINITIALIZED_SAVE_MESSAGE 0x153
 #define CARTRIDGE_REPLACED_MESSAGE 0x156
@@ -199,6 +201,12 @@
 #define MENU_SOUND_VOLUME 127
 
 void LoadCursorBox(void *image);
+void UpdateBringCharacters(void);
+void UpdateSendStatus(void);
+void UpdateSendExperience(void);
+s32 HaveAllRumblePaks(void);
+void ClearCartridgeCharacters(void);
+void func_8005DC50(void);
 void ResetSendStatus(void);
 void ResetSendExperience(void);
 s32 TagCartridges(void);
@@ -714,7 +722,143 @@ s32 HaveAllRumblePaks(void) {
     return haveAll;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateTransmitMenu);
+/* A macro rather than an inline function, which leaves a store-flag result */
+#define AreAllCButtonsHeld(buttons)                                                                   \
+    ((((buttons) & (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) == (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) \
+     && ((buttons) & R_CBUTTONS))
+
+/*
+ * Runs the options screen and hands each frame to the screen chosen there, then leaves for the
+ * title screen or the main menu, asking for any missing Rumble Pak first.
+ */
+void UpdateTransmitMenu(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    s32 controller;
+
+    sTransmitController.repeatedButtons = 0;
+    sTransmitController.buttons = 0;
+    sTransmitController.pressedButtons = 0;
+    for (controller = 0; controller != g_ControllerCount; controller++) {
+        sTransmitController.repeatedButtons |= g_ControllerStates[controller].repeatedButtons;
+        sTransmitController.buttons |= g_ControllerStates[controller].buttons;
+        sTransmitController.pressedButtons |= g_ControllerStates[controller].pressedButtons;
+    }
+    if (IsGameFlagSet(GAME_FLAG_ALLOW_CARTRIDGE_DUMP) && AreAllCButtonsHeld(g_ControllerStates[0].buttons)) {
+        DumpCartridgeRam();
+    }
+    switch (transfer->screen) {
+        case TRANSMIT_SCREEN_OPTIONS:
+            if (GetWipeProgress() != 20) {
+                break;
+            }
+            if (sTransmitController.pressedButtons & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                if (transfer->optionIndex == 0) {
+                    transfer->screen = TRANSMIT_SCREEN_SEND_STATUS;
+                    transfer->screenStep = SEND_STATUS_STARTING;
+                    ResetSendStatus();
+                } else if (transfer->optionIndex == 1) {
+                    if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
+                        transfer->screen = TRANSMIT_SCREEN_BRING_CHARACTERS;
+                        transfer->screenStep = 13;
+                        ClearCartridgeCharacters();
+                    } else {
+                        transfer->screen = TRANSMIT_SCREEN_SEND_EXPERIENCE;
+                        transfer->screenStep = SEND_EXPERIENCE_DONE;
+                        ResetSendExperience();
+                    }
+                }
+                if (transfer->optionIndex == 2) {
+                    if (!HaveAllRumblePaks()) {
+                        transfer->isCancelled = FALSE;
+                        transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
+                        SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
+                    } else {
+                        transfer->screen = TRANSMIT_SCREEN_LEAVING;
+                        StartWipe(WIPE_CLOSING);
+                    }
+                }
+            } else if (sTransmitController.pressedButtons & B_BUTTON) {
+                if (transfer->transferMode == TRANSFER_MODE_FROM_MENU) {
+                    if (!HaveAllRumblePaks()) {
+                        transfer->isCancelled = TRUE;
+                        transfer->screen = TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT;
+                        SetNoticeState(NOTICE_OPENING, INSERT_RUMBLE_PAK_MESSAGE);
+                    } else {
+                        transfer->screen = TRANSMIT_SCREEN_LEAVING;
+                        StartWipe(WIPE_CLOSING);
+                    }
+                }
+            } else if (sTransmitController.repeatedButtons & U_JPAD) {
+                if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
+                    transfer->optionIndex = (transfer->optionIndex + 2) % 3;
+                } else {
+                    transfer->optionIndex ^= 1;
+                }
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            } else if (sTransmitController.repeatedButtons & D_JPAD) {
+                if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
+                    transfer->optionIndex = (transfer->optionIndex + 4) % 3;
+                } else {
+                    transfer->optionIndex ^= 1;
+                }
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            }
+            break;
+        case TRANSMIT_SCREEN_BRING_CHARACTERS:
+            UpdateBringCharacters();
+            break;
+        case TRANSMIT_SCREEN_SEND_STATUS:
+            UpdateSendStatus();
+            break;
+        case TRANSMIT_SCREEN_SEND_EXPERIENCE:
+            UpdateSendExperience();
+            break;
+        case TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                    if (!transfer->isCancelled) {
+                        transfer->screen = TRANSMIT_SCREEN_LEAVING;
+                    } else {
+                        transfer->screen = TRANSMIT_SCREEN_UNK6;
+                    }
+                    StartWipe(WIPE_CLOSING);
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (sTransmitController.pressedButtons & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case TRANSMIT_SCREEN_LEAVING:
+            if (GetWipeProgress() == 0) {
+                StartWipe(WIPE_OPENING);
+                g_Scene = SCENE_SWAPPING_MODULES;
+                g_SceneModuleToUnload = 0x1B;
+                g_NextScene = SCENE_TITLE_SCREEN;
+                g_SceneModuleToLoad = 0x04;
+            }
+            break;
+        case TRANSMIT_SCREEN_UNK6:
+            if (GetWipeProgress() == 0) {
+                StartWipe(WIPE_OPENING);
+                func_8005DC50();
+                g_Scene = SCENE_SWAPPING_MODULES;
+                g_SceneModuleToUnload = 0x1B;
+                g_NextScene = SCENE_MENU;
+                g_SceneModuleToLoad = 0x02;
+            }
+            break;
+    }
+}
 
 /* Fills the slot for a cartridge's save from the save's bytes */
 void DecodeCartridgeCharacter(u8 *save, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {

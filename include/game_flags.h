@@ -117,6 +117,9 @@
 /* Prints the frame number of the golfer's reaction */
 #define GAME_FLAG_SHOW_REACTION_FRAME 0x3E
 
+/* Lets the four C buttons on controller 1 dump the cartridge RAM from the Transmit menu */
+#define GAME_FLAG_ALLOW_CARTRIDGE_DUMP 0x7E
+
 /* Read by the reaction framing, whose purpose is not yet known */
 #define GAME_FLAG_UNK7F 0x7F
 
