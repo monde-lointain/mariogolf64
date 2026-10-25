@@ -1,13 +1,16 @@
 #include "common.h"
 #include "asset.h"
+#include "camera.h"
 #include "character_slot.h"
 #include "controller.h"
 #include "cpu_projection.h"
 #include "functions.h"
 #include "heap.h"
+#include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "sound.h"
+#include "variables.h"
 #include <lib/libnusys/nusys.h>
 
 /* The particle effects drawn in the scene, such as the sparkles of a passed ring */
@@ -26,6 +29,29 @@ typedef struct Effect {
 } Effect; /* size = 0x40 */
 
 #define EFFECT_COUNT 40
+
+#define RAINDROP_COUNT 48
+#define RAIN_SPLASH_COUNT 32
+
+typedef struct Raindrop {
+    /* 0x00 */ Vec3 head;
+    /* 0x0C */ Vec3 tail;
+    /* 0x18 */ f32 unk18;
+    /* 0x1C */ f32 unk1C;
+    /* 0x20 */ s16 unk20[5];
+    /* 0x2A */ s16 unk2A;
+    /* 0x2C */ s8 unk2C;
+    /* 0x2D */ u8 unk2D;
+} Raindrop; /* size = 0x30 */
+
+typedef struct RainSplash {
+    /* 0x00 */ Vec3 position;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ u8 unk10[6];
+    /* 0x16 */ s8 unk16;
+    /* 0x17 */ s8 unk17;
+    /* 0x18 */ s8 unk18;
+} RainSplash; /* size = 0x1C */
 
 #define EFFECT_KIND_NONE (-1)
 #define EFFECT_KIND_SPARKLE 8
@@ -55,8 +81,15 @@ extern Mtx sEffectMatrices[EFFECT_COUNT];
 extern s32 sSpawnGroundHeight;
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
-extern void *D_801EFFA8;
-extern void *D_801B8BB8;
+extern Raindrop *sRaindrops;
+extern RainSplash *sRainSplashes;
+/* The x and z that the rain falls around, RAIN_CENTER_DISTANCE ahead of the camera */
+extern s32 sRainCenter[2];
+/* How far the wind blows the rain sideways for each unit it falls */
+extern f32 sRainDriftX;
+extern f32 sRainDriftZ;
+extern Vec3 sRainVelocity; /* Per frame */
+extern s32 D_80104AC0;
 
 s32 D_800C52B0 = 0;
 s32 sNextMatrixIndex = 0;
@@ -87,8 +120,8 @@ Vtx sSpreadingCircleVertices[] = {
 s32 sAreEffectImagesLoaded = FALSE;
 f32 sUnreferencedValues[] = { 1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1 };
 u8 sPingPongFrameIndices[] = { 0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1 };
-s32 D_800C5400 = 48;
-s32 D_800C5404 = 32;
+s32 sRaindropCount = RAINDROP_COUNT;
+s32 sRainSplashCount = RAIN_SPLASH_COUNT;
 Vtx D_800C5408[] = {
     { { { 0, 0, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
     { { { 0, -1, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
@@ -102,7 +135,8 @@ f32 D_800C5454 = 0.0f;
 s32 sShownBadgeCount = 0;
 s32 sIsBadgeCountShown = FALSE;
 s32 sBadgeCountFrame = 0;
-void func_8007E7B8(void);
+void ResetRaindrop(Raindrop *drop);
+void StartRain(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0
 #define DROP_IMAGE_ASSET 0x6B2
@@ -542,8 +576,6 @@ void StartRingPassRumble(UnkB8 *player) {
 }
 
 #define RAIN_SPLASH_IMAGE_ASSET 0x6BC
-#define UNK801EFFA8_BUFFER_SIZE 0x900
-#define UNK801B8BB8_BUFFER_SIZE 0x380
 #define RAIN_SOUND_CHANNEL 9
 
 /* Sets the weather, and for rain loads its image and sets up its buffers */
@@ -553,9 +585,9 @@ void StartWeather(s32 weather) {
     if (weather == WEATHER_RAIN) {
         sRainSplashImage = AllocMemory(OpenEncodedAsset(RAIN_SPLASH_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sRainSplashImage, &asset);
-        D_801EFFA8 = AllocMemory(UNK801EFFA8_BUFFER_SIZE);
-        D_801B8BB8 = AllocMemory(UNK801B8BB8_BUFFER_SIZE);
-        func_8007E7B8();
+        sRaindrops = AllocMemory(RAINDROP_COUNT * sizeof(Raindrop));
+        sRainSplashes = AllocMemory(RAIN_SPLASH_COUNT * sizeof(RainSplash));
+        StartRain();
     }
     sWeather = weather;
 }
@@ -564,20 +596,88 @@ void StartWeather(s32 weather) {
 void EndWeather(void) {
     if (sWeather == WEATHER_RAIN) {
         FreeMemory(&sRainSplashImage);
-        FreeMemory(&D_801EFFA8);
-        FreeMemory(&D_801B8BB8);
+        FreeMemory(&sRaindrops);
+        FreeMemory(&sRainSplashes);
     }
     StopSound(RAIN_SOUND_CHANNEL);
     sWeather = WEATHER_NONE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007E30C);
+#define RAIN_CENTER_DISTANCE 150.0f
+/* New raindrops and splashes are placed in steps of this many course units around the center */
+#define RAIN_SPREAD_STEP 0x600
+#define RAIN_SPLASH_SPREAD_STEP_COUNT 500
+#define RAIN_FALL_SPEED 60.0f
+#define WIND_SPEED_UNIT 0x10000
+/* How far the rain drifts sideways per unit of fall, for each whole unit of wind speed */
+#define RAIN_DRIFT_PER_WIND_SPEED 0.1f
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007E438);
+/* Centers the rain RAIN_CENTER_DISTANCE ahead of the camera, in the direction it looks */
+void PlaceRainCenter(void) {
+    s32 viewX;
+    s32 viewZ;
+    f32 scale;
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007E664);
+    viewX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
+    viewZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
+    /* Holding the view's length in scale is there to match */
+    scale = sqrtf(viewX * viewX + viewZ * viewZ);
+    sRainCenter[0] = viewX;
+    sRainCenter[1] = viewZ;
+    if ((s32)scale != 0.0f) {
+        scale = RAIN_CENTER_DISTANCE / scale;
+    } else {
+        osSyncPrintf("Rain Pos Error");
+        scale = 0.0f;
+    }
+    sRainCenter[0] = sRainCenter[0] * scale + g_Cameras[0].view.eye[AXIS_X];
+    sRainCenter[1] = sRainCenter[1] * scale + g_Cameras[0].view.eye[AXIS_Z];
+}
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007E7B8);
+INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
+
+/* Moves a splash to a random spot on the ground around the rain's center */
+void ResetRainSplash(RainSplash *splash) {
+    splash->position[AXIS_X] =
+        (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT - RAIN_SPLASH_SPREAD_STEP_COUNT / 2) * RAIN_SPREAD_STEP
+            * COURSE_TO_WORLD_SCALE
+        + sRainCenter[0];
+    splash->position[AXIS_Z] =
+        (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT - RAIN_SPLASH_SPREAD_STEP_COUNT / 2) * RAIN_SPREAD_STEP
+            * COURSE_TO_WORLD_SCALE
+        + sRainCenter[1];
+    splash->position[AXIS_Y] = GetGroundHeight(splash->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                                               splash->position[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+                             * COURSE_TO_WORLD_SCALE;
+    splash->unk18 = 0;
+}
+
+/* Sets the rain's path from the wind, and places every raindrop and splash */
+void StartRain(void) {
+    f32 direction;
+    f32 speed;
+    s32 index;
+
+    D_80104AC0 = 0;
+    direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+    speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT * RAIN_DRIFT_PER_WIND_SPEED;
+    sRainDriftX = cosf(direction) * speed;
+    sRainDriftZ = sinf(direction) * speed;
+    sRainVelocity[AXIS_Y] = RAIN_FALL_SPEED;
+    sRainVelocity[AXIS_X] = sRainDriftX * RAIN_FALL_SPEED;
+    sRainVelocity[AXIS_Z] = sRainDriftZ * RAIN_FALL_SPEED;
+    PlaceRainCenter();
+    for (index = 0; index != RAINDROP_COUNT; index++) {
+        ResetRaindrop(&sRaindrops[index]);
+        sRaindrops[index].unk2A = 0;
+    }
+    for (index = 0; index != RAIN_SPLASH_COUNT; index++) {
+        ResetRainSplash(&sRainSplashes[index]);
+        sRainSplashes[index].unkC = 1.0f;
+        sRainSplashes[index].unk16 = index % 9 - 1;
+        sRainSplashes[index].unk17 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007E980);
 INCLUDE_RODATA("asm/nonmatchings/effects", D_800D1A88);
