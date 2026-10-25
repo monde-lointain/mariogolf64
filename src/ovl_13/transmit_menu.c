@@ -105,6 +105,19 @@
 #define SAVE_CHECKSUM_OFFSET 0x30
 #define SAVE_UNKB_OFFSET 0xB
 #define SAVE_CHARACTER_OFFSET 0x10
+/* The save's 16-bit values are little-endian */
+#define SAVE_HALFWORD_SIZE 2
+#define SAVE_HAS_STATUS_OFFSET 0xA0
+#define SAVE_STATUS_ADDRESS_OFFSET 0xA2
+#define SAVE_STATUS_SIZE_OFFSET 0xA4
+#define SAVE_STATUS_SUM_OFFSET 0xA6
+#define STATUS_ADDRESS_BIAS 0x6000
+#define STATUS_DATA_SIZE 0x800
+
+/* What WriteStatusToCartridge did */
+#define STATUS_WRITE_DONE 0
+#define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
+#define STATUS_WRITE_FAILED 2 /* With the cause in transferResult */
 
 /* Results of opening and accessing the Game Boy cartridges, after the notice each shows */
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
@@ -629,18 +642,120 @@ void ClearCartridgeCharacters(void) {
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF08_ovl_13);
+/* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this */
+extern const char sWriteSumFormat[];
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", sWriteSumFormat);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF24_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF30_ovl_13);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", CheckStatusCartridge);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF4C_ovl_13);
+/*
+ * "Write mark violation", which CheckStatusCartridge and WriteStatusToCartridge share one copy of
+ */
+extern const char sTagViolationText[];
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", sTagViolationText);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF60_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF6C_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF78_ovl_13);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteStatusToCartridge);
+/*
+ * Marks the chosen cartridge's save as holding a status and writes the status data where the save
+ * says, then the sums of both. It first checks that the cartridge is the one tagged and that its
+ * save is intact.
+ */
+s32 WriteStatusToCartridge(s32 cartridgeIndex) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    u8 save[CARTRIDGE_SAVE_SIZE];
+    u8 status[STATUS_DATA_SIZE];
+    s32 result;
+    s32 index;
+    s32 statusAddress;
+    s32 statusSize;
+    s32 sum;
+
+    g_GameBoyTransfer.transferResult =
+        OpenGameBoyPakWithRetries(g_PlayerControllerPorts[transfer->taggedControllers[cartridgeIndex]],
+                                  transfer->cartridgeHeader, &transfer->pakFile);
+    if (g_GameBoyTransfer.transferResult != PAK_RESULT_OK) {
+        /* Going to the shared power-off is there to match */
+        goto failed;
+    }
+    result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+    if (result != 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        g_GameBoyTransfer.transferResult = result;
+        return STATUS_WRITE_PAK_ERROR;
+    }
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+        if (save[index] != transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]][index]) {
+            goto tagViolated;
+        }
+    }
+    sum = ComputeSaveChecksum(save);
+    if (sum != GetStoredChecksum(save)) {
+        transfer->transferResult = PAK_RESULT_LOOSE_PAK;
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        return STATUS_WRITE_FAILED;
+    }
+    statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] + (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << 8);
+    save[SAVE_HAS_STATUS_OFFSET] = TRUE;
+    statusSize = save[SAVE_STATUS_SIZE_OFFSET] + (save[SAVE_STATUS_SIZE_OFFSET + 1] << 8);
+    result = nuContGBPakFwrite(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS + SAVE_HAS_STATUS_OFFSET,
+                               &save[SAVE_HAS_STATUS_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        transfer->transferResult = result;
+        return STATUS_WRITE_PAK_ERROR;
+    }
+    BuildStatusData(status);
+    result = nuContGBPakFwrite(&transfer->pakFile, statusAddress - STATUS_ADDRESS_BIAS, status, statusSize);
+    if (result != 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        transfer->transferResult = result;
+        return STATUS_WRITE_PAK_ERROR;
+    }
+    sum = 0;
+    for (index = 0; index != statusSize; index++) {
+        sum += status[index];
+    }
+    sum &= 0xFFFF;
+    osSyncPrintf(sWriteSumFormat, sum);
+    save[SAVE_STATUS_SUM_OFFSET] = sum;
+    save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> 8;
+    result = nuContGBPakFwrite(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS + SAVE_STATUS_SUM_OFFSET,
+                               &save[SAVE_STATUS_SUM_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        transfer->transferResult = result;
+        return STATUS_WRITE_PAK_ERROR;
+    }
+    sum = ComputeSaveChecksum(save) & 0xFFFF;
+    save[SAVE_CHECKSUM_OFFSET] = sum;
+    save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
+    osSyncPrintf("write sum2 %04x\n", sum);
+    result = nuContGBPakFwrite(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
+                               &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
+    if (result != 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        transfer->transferResult = result;
+        return STATUS_WRITE_PAK_ERROR;
+    }
+    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    transfer->transferResult = PAK_RESULT_OK;
+    return STATUS_WRITE_DONE;
+tagViolated:
+    osSyncPrintf(sTagViolationText, sum); /* The original passes sum before setting it */
+    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
+    return STATUS_WRITE_FAILED;
+failed:
+    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    return STATUS_WRITE_FAILED;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", ReadCartridgeCharacters);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBFD4_ovl_13);
