@@ -2,6 +2,7 @@
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "club.h"
+#include "collision.h"
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
@@ -183,16 +184,6 @@ void ResetBallSimulations(void) {
     }
 }
 
-s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hitRing,
-                f32 *fraction);
-s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
-                          s32 endZ, PlaneTriangle *hit, f32 *fraction);
-s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, s32 *cell, f32 *fraction);
-s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, CoursePoint velocity, f32 *fraction,
-               s32 unkB0, BallSimulation *simulation);
-s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit, f32 *fraction);
-void MoveBallToCupEdge(BallSimulation *simulation);
-s32 PushBallOutOfWalls(BallSimulation *simulation, s32 checksHeight);
 void SpawnImpactEffects(BallSimulation *simulation);
 void StartRingPassRumble(UnkB8 *player);
 s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel);
@@ -209,8 +200,6 @@ void func_8020DA18_ovl_00(s32 unk);
  * inline function instead, whether a static one or the AbsoluteValue nested one.
  */
 #define AbsoluteValueExpression(value) ({ f32 absValue = (value); (absValue < 0.0f) ? -absValue : absValue; })
-#define PIN_HIT_FLAGSTICK 1
-#define PIN_HIT_FLAG 2
 #define ROLL_SOUND_CHANNEL 8
 
 /*

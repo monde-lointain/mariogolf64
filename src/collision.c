@@ -1,5 +1,6 @@
 #include "ball_simulation.h"
 #include "billboard.h"
+#include "collision.h"
 #include "common.h"
 #include "debug_text.h"
 #include "functions.h"
@@ -47,11 +48,6 @@
 /* A ball bounces off the flagstick with between these fractions of its speed */
 #define FLAGSTICK_MOST_BOUNCE 0.8f
 #define FLAGSTICK_LEAST_BOUNCE 0.2f
-
-/* What FindPinHit returns */
-#define PIN_HIT_NONE 0
-#define PIN_HIT_FLAGSTICK 1
-#define PIN_HIT_FLAG 2
 
 /* Course units in a whole unit */
 #define WHOLE_UNIT_SIZE (1 << COURSE_UNIT_SHIFT)
