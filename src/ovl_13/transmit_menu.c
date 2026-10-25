@@ -165,6 +165,10 @@ void LoadCursorBox(void *image);
 #define PAK_RESULT_UNINITIALIZED 12
 #define GAME_BOY_PAK_OPEN_ATTEMPTS 3
 
+/* OpenGameBoyPak knows Mario Golf's cartridge by its title's start and Nintendo's licensee code */
+#define GAME_BOY_TITLE_CHECKED_LENGTH 14
+#define GAME_BOY_COMPANY_CODE 0x3031 /* "01" */
+
 /*
  * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as a scalar is there to match:
  * GCC keeps a struct field's constant address in a register when it is used twice.
@@ -174,8 +178,8 @@ extern void *g_PressingHandImage;
 void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, GameBoyTransfer *transfer);
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top);
-s32 OpenGameBoyPak(s32 port, u8 *header, NUContPakFile *file);
-s32 OpenGameBoyPakWithRetries(s32 port, u8 *header, NUContPakFile *file);
+s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file);
+s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file);
 
 /* Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge to the host */
 void DumpCartridgeRam(void) {
@@ -188,7 +192,7 @@ void DumpCartridgeRam(void) {
     PrintDebugText("          ", 10, 4);
     PrintDebugText("          ", 10, 5);
     /* The original takes 0 from OpenGameBoyPakWithRetries as success, which is not PAK_RESULT_OK */
-    if (OpenGameBoyPakWithRetries(0, transfer->cartridgeHeader, &transfer->pakFile) == 0) {
+    if (OpenGameBoyPakWithRetries(0, &transfer->cartridgeHeader, &transfer->pakFile) == 0) {
         PrintDebugText("GOLF OK", 10, 3);
         if (nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, cartridgeRam,
                              CARTRIDGE_RAM_SIZE) == 0) {
@@ -744,7 +748,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     s32 storedSum;
 
     result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[g_GameBoyTransfer.taggedControllers[cartridgeIndex]],
-                                       transfer->cartridgeHeader, &transfer->pakFile);
+                                       &transfer->cartridgeHeader, &transfer->pakFile);
     g_GameBoyTransfer.transferResult = result;
     if (result != PAK_RESULT_OK) {
         /* Going to the shared power-off is there to match */
@@ -810,7 +814,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
 
     g_GameBoyTransfer.transferResult =
         OpenGameBoyPakWithRetries(g_PlayerControllerPorts[transfer->taggedControllers[cartridgeIndex]],
-                                  transfer->cartridgeHeader, &transfer->pakFile);
+                                  &transfer->cartridgeHeader, &transfer->pakFile);
     if (g_GameBoyTransfer.transferResult != PAK_RESULT_OK) {
         /* Going to the shared power-off is there to match */
         goto failed;
@@ -896,7 +900,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC044_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC060_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC080_ovl_13);
 
-s32 OpenGameBoyPakWithRetries(s32 port, u8 *header, NUContPakFile *file) {
+s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file) {
     s32 failureCount;
     s32 result;
 
@@ -910,27 +914,157 @@ s32 OpenGameBoyPakWithRetries(s32 port, u8 *header, NUContPakFile *file) {
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", OpenGameBoyPak);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC114_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC124_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC15C_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC188_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC1B4_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC1E0_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC204_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC208_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC210_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC244_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC284_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC2B0_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC2DC_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC328_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC360_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC394_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC3D4_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC400_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC440_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC478_ovl_13);
+/*
+ * Opens the Game Boy pak on a port, powers it on if needed and reads the cartridge header, then
+ * tells whether the cartridge is Mario Golf's.
+ */
+s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file) {
+    s32 isMarioGolf = TRUE;
+    s32 index;
+    u8 status;
+
+    switch (nuContGBPakOpen(file, port)) {
+        case 0:
+            osSyncPrintf("1st GB PACK OK %d\n", port);
+            break;
+        case PFS_ERR_NOPACK:
+            osSyncPrintf("1st GB NOPACK %d\n", port);
+            return PAK_RESULT_NO_PAK;
+        case PFS_ERR_DEVICE:
+            osSyncPrintf("1st GB DEVICE ER %d\n", port);
+            return PAK_RESULT_OTHER_PAK;
+        default:
+            osSyncPrintf("1st GB DEFAULT ERROR %d\n", port);
+            return -1;
+    }
+    switch (nuContGBPakGetStatus(file, &status)) {
+        case 0:
+        case PFS_ERR_NEW_GBCART:
+            if (!(status & OS_GBPAK_POWER)) {
+                switch (nuContGBPakPower(file, NU_CONT_GBPAK_POWER_ON)) {
+                    case 0:
+                        /* "3rd Power on" */
+                        osSyncPrintf("3rd \x93" "d\x8C\xB9\x82n\x82m\n");
+                        break;
+                    case PFS_ERR_NOPACK:
+                        /* "3rd Nothing is plugged into the given controller" */
+                        osSyncPrintf("3rd \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93"
+                                     "\x83g\x83\x8D\x81[\x83\x89\x82\xC9\x89\xBD"
+                                     "\x82\xE0\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA"
+                                     "\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1 \n");
+                        return PAK_RESULT_NO_PAK;
+                    case PFS_ERR_CONTRFAIL:
+                        /* "3rd Data transfer with the controller failed." */
+                        osSyncPrintf("3rd \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89"
+                                     "\x82\xC6\x82\xCC\x83" "f\x81[\x83^\x93]\x91\x97"
+                                     "\x82\xCC\x8E\xB8\x94s\x82\xC5\x82\xB7\x81" "B\n");
+                        return PAK_RESULT_CONNECTOR_PROBLEM;
+                }
+            }
+            switch (nuContGBPakReadID(file, header, &status)) {
+                case PFS_ERR_NEW_GBCART:
+                    /* "4th The GB cartridge was removed and inserted." */
+                    osSyncPrintf("4th GB\x83J\x81[\x83g\x83\x8A\x83" "b\x83W\x82\xCC"
+                                 "\x91}\x94\xB2\x82\xAA\x8Ds\x82\xED\x82\xEA\x82\xDC"
+                                 "\x82\xB5\x82\xBD\x81" "B\n");
+                case 0:
+                    if (!(status & OS_GBPAK_GBCART_ON)) {
+                        /* "5th No cassette is inserted in the GB pak." */
+                        osSyncPrintf("5th \x82" "f\x82" "a\x83p\x83" "b\x83N\x82\xC9"
+                                     "\x83J\x83Z\x83" "b\x83g\x82\xAA\x8Eh\x82\xB3"
+                                     "\x82\xC1\x82\xC4\x82\xDC\x82\xB9\x82\xF1\x81" "B"
+                                     "\n");
+                        return PAK_RESULT_CARTRIDGE_REMOVED;
+                    }
+                    if (status & OS_GBPAK_GBCART_PULL) {
+                        /* "The cassette was removed and inserted." */
+                        osSyncPrintf("\x83J\x83Z\x83" "b\x83g\x82\xCC\x94\xB2\x82\xAB"
+                                     "\x8D\xB7\x82\xB5\x82\xAA\x8Ds\x82\xED\x82\xEA"
+                                     "\x82\xDC\x82\xB5\x82\xBD\x81" "B\n");
+                        return PAK_RESULT_REMOVED_RETRYING;
+                    }
+                    for (index = 0; index != GAME_BOY_TITLE_CHECKED_LENGTH; index++) {
+                        if (header->game_title[index] != sGameBoyCartridgeTitle[index]) {
+                            isMarioGolf = FALSE;
+                        }
+                    }
+                    if (header->company_code != GAME_BOY_COMPANY_CODE) {
+                        isMarioGolf = FALSE;
+                    }
+                    osSyncPrintf("%s\n", header->game_title);
+                    osSyncPrintf("%02x\n", header->company_code);
+                    if (isMarioGolf != TRUE) {
+                        return PAK_RESULT_WRONG_CARTRIDGE;
+                    }
+                    return PAK_RESULT_OK;
+                case PFS_ERR_NOPACK:
+                    /* "4th Nothing is plugged into the given controller" */
+                    osSyncPrintf("4th \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93\x83g"
+                                 "\x83\x8D\x81[\x83\x89\x82\xC9\x89\xBD\x82\xE0\x8D\xB7"
+                                 "\x82\xB5\x8D\x9E\x82\xDC\x82\xEA\x82\xC4\x82\xA2"
+                                 "\x82\xDC\x82\xB9\x82\xF1\n");
+                    return PAK_RESULT_NO_PAK;
+                case PFS_ERR_DEVICE:
+                    /* "4th A device other than the 64GB pak is plugged into the controller" */
+                    osSyncPrintf("4th 64GB\x83p\x83" "b\x83N\x88\xC8\x8AO\x82\xCC"
+                                 "\x83" "f\x83o\x83" "C\x83X\x82\xAA\x83R\x83\x93\x83g"
+                                 "\x83\x8D\x81[\x83\x89\x82\xC9\x8D\xB7\x82\xB5\x8D\x9E"
+                                 "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB7\n");
+                    return PAK_RESULT_OTHER_PAK;
+                case PFS_ERR_CONTRFAIL:
+                    /* "4th Data transfer with the controller failed." */
+                    osSyncPrintf("4th \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xC6"
+                                 "\x82\xCC\x83" "f\x81[\x83^\x93]\x91\x97\x82\xCC"
+                                 "\x8E\xB8\x94s\x82\xC5\x82\xB7\x81" "B\n");
+                    /* "The controller is not connected properly, or" */
+                    osSyncPrintf("\x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xAA"
+                                 "\x90\xB3\x82\xB5\x82\xAD\x90\xDA\x91\xB1\x82\xB3"
+                                 "\x82\xEA\x82\xC4\x82\xA2\x82\xC8\x82\xA2\x82\xA9"
+                                 "\x81" "A\n");
+                    /* "the 64GB pak or controller connector may be faulty. stat = %xH" */
+                    osSyncPrintf("64GB\x83p\x83" "b\x83N\x82\xA9\x83R\x83\x93\x83g"
+                                 "\x83\x8D\x81[\x83\x89\x83R\x83l\x83N\x83^\x82\xC9"
+                                 "\x88\xD9\x8F\xED\x82\xAA\x82\xA0\x82\xE9\x89\xC2"
+                                 "\x94\\\x90\xAB\x82\xAA\x82\xA0\x82\xE8\x82\xDC"
+                                 "\x82\xB7\x81" "Bstat = %xH\n", status);
+                    return PAK_RESULT_CONNECTOR_PROBLEM;
+                case PFS_ERR_NO_GBCART:
+                    /* "4th No GB cartridge is inserted in the 64GB pak." */
+                    osSyncPrintf("4th 64GB\x83p\x83" "b\x83N\x82\xC9GB\x83J\x81[\x83g"
+                                 "\x83\x8A\x83" "b\x83W\x82\xAA\x8D\xB7\x82\xB5\x8D\x9E"
+                                 "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB9"
+                                 "\x82\xF1\x81" "B\n");
+                    return PAK_RESULT_NO_CARTRIDGE;
+            }
+            break;
+        case PFS_ERR_NOPACK:
+            /* "2nd Nothing is plugged into the given controller" */
+            osSyncPrintf("2nd \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93\x83g\x83\x8D"
+                         "\x81[\x83\x89\x82\xC9\x89\xBD\x82\xE0\x8D\xB7\x82\xB5\x8D\x9E"
+                         "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1\n");
+            return PAK_RESULT_NO_PAK;
+        case PFS_ERR_DEVICE:
+            /* "2nd A device other than the 64GB pak is plugged into the controller" */
+            osSyncPrintf("2nd 64GB\x83p\x83" "b\x83N\x88\xC8\x8AO\x82\xCC\x83" "f\x83o"
+                         "\x83" "C\x83X\x82\xAA\x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89"
+                         "\x82\xC9\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA\x82\xC4"
+                         "\x82\xA2\x82\xDC\x82\xB7\n");
+            return PAK_RESULT_OTHER_PAK;
+        case PFS_ERR_CONTRFAIL:
+            /* "2nd Data transfer with the controller failed." */
+            osSyncPrintf("2nd \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xC6\x82\xCC"
+                         "\x83" "f\x81[\x83^\x93]\x91\x97\x82\xCC\x8E\xB8\x94s\x82\xC5"
+                         "\x82\xB7\x81" "B\n");
+            return PAK_RESULT_CONNECTOR_PROBLEM;
+        case PFS_ERR_NO_GBCART:
+            /* "2ndt No GB cartridge is inserted in the 64GB pak." */
+            osSyncPrintf("2ndt 64GB\x83p\x83" "b\x83N\x82\xC9GB\x83J\x81[\x83g\x83\x8A"
+                         "\x83" "b\x83W\x82\xAA\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA"
+                         "\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1\x81" "B\n");
+            return PAK_RESULT_NO_CARTRIDGE;
+    }
+    return -1;
+}
 
 /*
  * Writes a random tag to the cartridge RAM of each Game Boy cartridge and lists the controllers
@@ -939,7 +1073,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC478_ovl_13);
 s32 TagCartridges(void) {
     /* The transfer pointer is there to match */
     GameBoyTransfer *transfer = &g_GameBoyTransfer;
-    u8 header[CARTRIDGE_HEADER_SIZE];
+    OSGbpakId header;
     NUContPakFile file;
     u8 tag[CARTRIDGE_TAG_SIZE];
     u8 status;
@@ -959,7 +1093,7 @@ s32 TagCartridges(void) {
     }
     nuContGBPakMgrInit();
     for (controller = 0; controller < g_ControllerCount; controller++) {
-        result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller], header, &file);
+        result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller], &header, &file);
         if (result == PAK_RESULT_NO_PAK) {
             wasNoPak = TRUE;
         }

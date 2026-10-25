@@ -75,7 +75,6 @@ extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];
 #define CARTRIDGE_CHARACTER_COUNT (MAXCONTROLLERS * CARTRIDGE_SAVE_COUNT)
 
 /* The Game Boy cartridge header, from cartridge address 0x100 */
-#define CARTRIDGE_HEADER_SIZE 0x50
 
 /* Random bytes written to each cartridge's RAM to tell the cartridges apart */
 #define CARTRIDGE_TAG_SIZE 16
@@ -104,7 +103,7 @@ typedef struct GameBoyTransfer {
     /* 0x064 */ s32 optionIndex;
     /* 0x068 */ s32 characterCount; /* Of g_GameBoyCharacters */
     /* 0x06C */ NUContPakFile pakFile;
-    /* 0x07C */ u8 cartridgeHeader[CARTRIDGE_HEADER_SIZE];
+    /* 0x07C */ OSGbpakId cartridgeHeader;
     /* 0x0CC */ GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
     /* 0x75C */ s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
     /* 0x76C */ s32 unk76C[CARTRIDGE_CHARACTER_COUNT];
