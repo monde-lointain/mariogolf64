@@ -2070,6 +2070,7 @@ sCursorBoxImage = 0x801FBBE0; // size:0x4 segment:ovl_13
 sCursorBoxVertices = 0x801FBBE8; // size:0x40 segment:ovl_13
 sCursorCornerPhases = 0x801FBC28; // size:0x10 segment:ovl_13
 sWriteSumFormat = 0x801FBF08; // size:0x10 segment:ovl_13
+sTransmitController = 0x801FC5C0; // size:0x10 segment:ovl_13
 GetCastModelKind = 0x801F4A40; // type:func segment:ovl_14
 SwapCastMembers = 0x801F4A50; // type:func segment:ovl_14
 ShuffleCastOrder = 0x801F4A88; // type:func segment:ovl_14
