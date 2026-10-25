@@ -3,6 +3,7 @@
 #include "controller.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_display.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -99,8 +100,6 @@ extern PressStartText sPressStartText;
 extern s32 D_800B6808;
 
 void func_8005DC50(void);
-void func_8009226C(s32);
-s32 func_800959F8(void);
 
 void OnUnlockCodeEntered(void);
 void EnableDebug(void);
@@ -281,13 +280,13 @@ void UpdateTitleScreen(void) {
     }
     switch (sTitleStage) {
         case TITLE_SHOWING:
-            if (HasScreenFadeEnded() && func_800959F8()) {
+            if (HasScreenFadeEnded() && IsHudAnimationDone()) {
                 pressedButtons = 0;
                 for (controllerIndex = 0; controllerIndex != g_ControllerCount; controllerIndex++) {
                     pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
                 }
                 if (pressedButtons & (A_BUTTON | START_BUTTON)) {
-                    func_8009226C(10);
+                    StartHudAnimation(10);
                     g_Scene = SCENE_SWAPPING_MODULES;
                     g_NextScene = 14;
                     g_SceneModuleToUnload = 0x04;

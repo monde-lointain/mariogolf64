@@ -4,6 +4,7 @@
 #include "character_slot.h"
 #include "controller.h"
 #include "functions.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "scene.h"
 #include "screen.h"
@@ -97,14 +98,13 @@ extern N64Logo sN64Logo;
 
 extern s32 D_800B6808;
 
-void func_8008D100(void);
 
 /* The frames since the stage began */
 static s32 sBootLogoFrame = 0;
 static s32 sBootLogoStage = BOOT_LOGO_N64;
 /* Never read or written */
 s32 g_BootLogoUnusedWord = 0;
-/* Whether func_8008D100 has reset g_GameState during the Camelot logo */
+/* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
 static s32 sHasResetGameState = FALSE;
 
 void LoadBootLogos(void) {
@@ -207,7 +207,7 @@ void UpdateBootLogos(void) {
                 if (IsCharacterSlotBusy(0)) {
                     FreeCharacterSlot(0);
                 } else {
-                    func_8008D100();
+                    SetUpTitleHole();
                     sHasResetGameState = TRUE;
                 }
             }

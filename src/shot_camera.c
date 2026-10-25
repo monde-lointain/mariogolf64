@@ -11,6 +11,7 @@
 #include "framing.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
@@ -59,7 +60,7 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CAMERA_PICK_SWAP_COUNT 5
 #define NO_CAMERA_PICK (-1)
 
-#define NO_EFFECT -1 /* func_8009226C's argument that ends its effect */
+#define NO_EFFECT -1 /* StartHudAnimation's argument that ends its effect */
 #define NO_FLIGHT_CAMERA (-1)
 
 /* The field of view, in degrees, of the main camera between shots */
@@ -346,7 +347,6 @@ s16 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot) {
 /* Unreferenced; the original has it, and its zero is in the ROM */
 static const f64 sUnusedZero = 0.0;
 
-void func_8009226C(s32);
 void func_80205AE4(s32, s32);
 void func_80216130(s32);
 void func_80216B74(s32);
@@ -412,7 +412,7 @@ void EndFlightCamera(void) {
     sCupViewHoldCount = 0;
     D_800C5AAC = 0;
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-    func_8009226C(-1);
+    StartHudAnimation(-1);
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -496,7 +496,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     if (earlierFlightCount == 0) {
         NextCameraPick(FALSE);
     }
-    func_8009226C(NO_EFFECT);
+    StartHudAnimation(NO_EFFECT);
     func_8020E7B4(-1);
     sFlightCameraFlags = 0;
     /* The separate tests are there to match */
@@ -1284,13 +1284,12 @@ void PlaceCameraAroundShotEnd(void) {
 #define HOLE_SONG_MINI_GOLF 0x2D
 #define HOLE_SONG_SKINS_MATCH 0x2E
 
-void func_800934CC(s32);
 
 extern s8 D_801061B8;
 
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
-    func_800934CC(-1);
+    SetMenuBackdrop(MENU_BACKDROP_NONE);
     D_801061CE = 1;
     D_801061B8 = -1;
     D_801061C0 = 1;
@@ -1851,7 +1850,7 @@ void PlaceFlightCamera(s32 step) {
             }
             easeFraction *= 0.01f;
             if (easeFraction < TRAIL_EFFECT_END_FRACTION) {
-                func_8009226C(NO_EFFECT);
+                StartHudAnimation(NO_EFFECT);
             }
             angle = D_800BE65C;
             if (angle < M_PI / 6) {
@@ -2079,7 +2078,7 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 /*
  * Picks a flight camera kind for the value of D_800DAF50, and switches to it if it is
  * greater than the current kind. The picks depend on the simulated shot, save option 3
- * and chance. A switch ends func_8009226C's effect and may start another one. In debug
+ * and chance. A switch ends StartHudAnimation's effect and may start another one. In debug
  * builds, the second controller's B and A buttons pick FLIGHT_CAMERA_BESIDE_GOLFER and
  * FLIGHT_CAMERA_CIRCLING_BALL.
  * It does not match: cross-jumping sends the second switch's case 5 trouble-surface
@@ -2338,21 +2337,21 @@ void ChooseFlightCameraKind(void) {
     }
     if (sFlightCameraKind < kind) {
         D_800BE628 = TRUE;
-        func_8009226C(NO_EFFECT);
+        StartHudAnimation(NO_EFFECT);
         if (effectIndex == NO_EFFECT) {
             if (D_800DAF50 >= 4 && !g_SimulatedShot.unk2E08 && D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
                 if (kind == FLIGHT_CAMERA_AROUND_END) {
                     if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
-                        func_8009226C(3);
+                        StartHudAnimation(3);
                     } else if (RandomBelow(8) == 0) {
-                        func_8009226C(1);
+                        StartHudAnimation(1);
                     } else if (RandomBelow(3) == 0) {
-                        func_8009226C(9);
+                        StartHudAnimation(9);
                     }
                 }
             }
         } else if (D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
-            func_8009226C(effectIndex);
+            StartHudAnimation(effectIndex);
         }
         sFlightCameraKind = kind;
         D_800BE674 = CAMERA_CHANGE_HOLD_COUNT;
@@ -2406,7 +2405,6 @@ void func_801FD9C0(void);
 s32 func_8020D838(void);
 void func_80081D4C(s32);
 void func_8008679C(s32);
-s32 func_800959F8(void);
 
 /*
  * Updates the flight camera, the inset view and the ball's sounds for one frame of the
@@ -2666,7 +2664,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         if (!g_IsMiniGolf && !g_SimulatedShot.unk2E10
             && ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) || func_8020D838() || D_800BE680 == TRUE)) {
             g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-            func_8009226C(NO_EFFECT);
+            StartHudAnimation(NO_EFFECT);
             g_InsetView.animation = INSET_VIEW_STILL;
             g_InsetView.step = 0;
             g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -2681,7 +2679,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
                 g_Cameras[0].view.lookAt[AXIS_Z] - cosf(D_800BE684) * CUP_CLOSE_VIEW_DISTANCE;
         } else if (IsCupPassPoint(sBallCupGroundDistance, sFlightBallPosition[AXIS_Y]) || sCupViewHoldCount > 0) {
             g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
-            func_8009226C(NO_EFFECT);
+            StartHudAnimation(NO_EFFECT);
             D_800BE69C = TRUE;
             D_800BE698 = FALSE;
             D_800BE658 &= ~2;
@@ -2745,8 +2743,8 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_X] += LOOK_AT_NUDGE;
         g_Cameras[INSET_CAMERA].view.lookAt[AXIS_Z] += LOOK_AT_NUDGE;
     }
-    if (g_SimulatedShot.stepCount < g_BallFlightStep + 40 && func_800959F8() == 1) {
-        func_8009226C(NO_EFFECT);
+    if (g_SimulatedShot.stepCount < g_BallFlightStep + 40 && IsHudAnimationDone() == 1) {
+        StartHudAnimation(NO_EFFECT);
     }
     if (isAdvancing == 1 && g_BallFlightStep == 0) {
         PlayContactSound();

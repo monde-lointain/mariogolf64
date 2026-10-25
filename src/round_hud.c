@@ -120,6 +120,18 @@ typedef struct ArrowShape {
 extern ArrowShape sArrows[ARROW_COUNT];
 extern s32 g_MatrixBufferIndex;
 
+/*
+ * The marker of the current shot's offset, with the positions it had in the
+ * previous frames for its trail. The offset is clamped to a circle, in shot
+ * units; the marker moves a pixel every SHOT_OFFSET_UNITS_PER_PIXEL units.
+ */
+#define SHOT_OFFSET_MARKER_COUNT 5
+#define SHOT_OFFSET_MAX_RADIUS 56.0f
+#define SHOT_OFFSET_UNITS_PER_PIXEL 4
+
+extern s32 sShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
+extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
+
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *D_800E2188;
@@ -439,7 +451,10 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80080E7C);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081284);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081550);
+/* Frees what the round HUD loaded for the round */
+void FreeRoundHudTextures(void) {
+    FreePinTextures();
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008156C);
 
@@ -449,7 +464,30 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081D4C);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081EF8);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_800824E4);
+/*
+ * Returns white tinted toward red by a positive warmth, or toward blue by a
+ * negative one, as an RGBA colour with the given alpha. Nothing calls it.
+ */
+u32 GetWarmthTint(s32 warmth, s32 alpha) {
+    s32 red;
+    s32 green;
+    s32 blue;
+
+    blue = 0xFF;
+    if (warmth == 0) {
+        green = 0xFF;
+        red = 0xFF;
+    } else if (warmth > 0) {
+        red = 0xFF;
+        blue = warmth;
+        blue = red - blue;
+        green = blue;
+    } else {
+        green = warmth + 0xFF;
+        red = green;
+    }
+    return (red << 24) | (green << 16) | (blue << 8) | (alpha & 0xFF);
+}
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1B10);
 
@@ -479,9 +517,38 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80086864);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_800874D8);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80087BAC);
+/* Moves the shot offset marker and its trail back to the center */
+void ResetShotOffsetMarker(void) {
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80087BE4);
+    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
+        sShotOffsetMarkerXs[i] = 0;
+        sShotOffsetMarkerYs[i] = 0;
+    }
+}
+
+/*
+ * Moves the shot offset marker to the given offset. The test is inverted, so
+ * the length is only measured when it is zero and the offset is never
+ * clamped to SHOT_OFFSET_MAX_RADIUS.
+ */
+void SetShotOffsetMarker(s32 x, s32 y) {
+    f32 length;
+    f32 scale;
+
+    if (x == 0 && y == 0) {
+        length = sqrtf(x * x + y * y);
+    } else {
+        length = 0.0f;
+    }
+    if (length > SHOT_OFFSET_MAX_RADIUS) {
+        scale = SHOT_OFFSET_MAX_RADIUS / length;
+        x = x * scale;
+        y = y * scale;
+    }
+    sShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
+    sShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80087CB0);
 
@@ -513,4 +580,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008C6B0);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008CD30);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008D0DC);
+/* Switches to the other matrix buffer, which the RSP is not reading */
+void SwapMatrixBuffers(void) {
+    g_MatrixBufferIndex ^= 1;
+}

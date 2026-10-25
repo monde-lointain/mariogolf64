@@ -5,6 +5,7 @@
 #include "controller.h"
 #include "course.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
@@ -292,7 +293,6 @@ void func_8005D0D8(void);
 void SetTextSlot(s32 x, s32 y, s32 image, s32, s32 slot, s32, s32, s32, s32, s32);
 void InvalidateBrokenSavedGames(void);
 s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing);
-void func_800934CC(s32);
 void func_80060358(void);
 void SetFramebufferCount(s32 count);
 void CloseControlsScreen(void);
@@ -1049,7 +1049,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
         case SAVE_MENU_STATE_BACKED_OUT:
             CloseSaveMenu();
             D_800C306C = PAUSE_SCREEN_NONE;
-            func_800934CC(-1);
+            SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             D_801061BD = TRUE;
@@ -1577,7 +1577,7 @@ void UpdateControlsScreen(ControllerState *controller) {
         case SAVE_MENU_STATE_BACKED_OUT:
             CloseControlsScreen();
             D_800C306C = PAUSE_SCREEN_NONE;
-            func_800934CC(-1);
+            SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
             D_801061BD = TRUE;

@@ -3,6 +3,7 @@
 #include "asset.h"
 #include "character_slot.h"
 #include "controller.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "math_util.h"
 #include "menu_memory.h"
@@ -70,8 +71,6 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 #define TOPIC_PAGE_Y 105
 #define LISTED_TOPIC_COUNT 5
 
-s32 func_800959F8(void);
-void func_8009226C(s32);
 
 extern s32 D_800C2000;
 extern s32 D_800FE334;
@@ -307,7 +306,7 @@ void UpdateHelpBoard(void) {
     s32 index;
     MenuMemory *memory = func_8005AF74();
 
-    if (func_800959F8() != 1) {
+    if (IsHudAnimationDone() != 1) {
         return;
     }
     if (D_800C2000 & A_BUTTON) {
@@ -337,7 +336,7 @@ void UpdateHelpBoard(void) {
     } else if (D_800C2000 & B_BUTTON) {
         PlaySound(0x5F, 0xF, 0x7F);
         if (sOpenTopic <= 0) {
-            func_8009226C(9);
+            StartHudAnimation(9);
             if (memory->unk46 == 0) {
                 D_801EFFA0 = 0x1C;
             } else {

@@ -14,5 +14,10 @@ void InitScenery(void);
 void FreeScenery(void);
 void LoadHoleIntroImages(void);
 void FreeHoleIntroImages(void);
+void FreeRoundHudTextures(void);
+u32 GetWarmthTint(s32 warmth, s32 alpha);
+void ResetShotOffsetMarker(void);
+void SetShotOffsetMarker(s32 x, s32 y);
+void SwapMatrixBuffers(void);
 
 #endif

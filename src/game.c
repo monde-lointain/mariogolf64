@@ -5,6 +5,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "game_flags.h"
+#include "hole_display.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "libc.h"
@@ -16,6 +17,7 @@
 #include "overlay_manager.h"
 #include "performance_meter.h"
 #include "pin.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -902,7 +904,6 @@ extern s32 sUnreadDebugSwitch;
  */
 extern s32 g_HoleFlyoverFrame;
 extern f32 D_800C30D4;
-extern s32 D_800C7304;
 extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
@@ -923,9 +924,7 @@ void func_80088BDC(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void func_8008C6B0(Gfx **displayListHead);
 void func_8008CD30(Gfx **displayListHead);
-void func_8008D0DC(void);
 void func_8008D3F4(Gfx **displayListHead);
-void func_8008FF14(s32);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 void func_8009351C(Gfx **displayListHead, s32);
 void func_800939E8(Gfx **displayListHead);
@@ -1298,13 +1297,13 @@ s32 DrawGame(void) {
                     gDPPipeSync(g_DisplayListHead++);
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
-                    func_8008FF14(1);
+                    UsePrimitiveDepth(1);
                     func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
                     LoadProjection();
                 }
                 break;
             case DRAW_MODE_COURSE:
-                if (D_800C7304 != 0 && D_800C306C != 4) {
+                if (g_MenuBackdropStyle != 0 && D_800C306C != 4) {
                     ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
                 } else if (g_HasLoaderFinished == 0) {
                     if (viewIndex == 0) {
@@ -1403,7 +1402,7 @@ s32 DrawGame(void) {
                         if ((g_Cameras[0].view.drawFlags != (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                              sScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
                             D_800C306C != 4) {
-                            func_8008FF14(0);
+                            UsePrimitiveDepth(0);
                             if (!IsGameFlagSet(0x15)) {
                                 func_80091110(&g_DisplayListHead, &g_Cameras[0].view, 0);
                             }
@@ -1464,7 +1463,7 @@ s32 DrawGame(void) {
                             gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
                             gDPPipeSync(g_DisplayListHead++);
                             SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
-                            func_8008FF14(0);
+                            UsePrimitiveDepth(0);
                             func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
                             LoadProjection();
                         }
@@ -1483,15 +1482,15 @@ s32 DrawGame(void) {
             guTranslate(&sIdentityMatrix, 0.0f, 0.0f, 0.0f);
         }
         gSPMatrix(g_DisplayListHead++, &sIdentityMatrix, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        if (D_800C7304 != 0) {
+        if (g_MenuBackdropStyle != 0) {
             if (viewIndex == 0) {
-                func_8009351C(&g_DisplayListHead, D_800C7304);
+                func_8009351C(&g_DisplayListHead, g_MenuBackdropStyle);
                 func_800939E8(&g_DisplayListHead);
             }
         }
 
         if (drawMode == DRAW_MODE_COURSE) {
-            if (g_HasLoaderFinished == 1 && (D_800C7304 == 0 || D_800C306C == 4)) {
+            if (g_HasLoaderFinished == 1 && (g_MenuBackdropStyle == 0 || D_800C306C == 4)) {
                 if (g_Cameras[viewIndex].view.drawFlags != 0) {
                     if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                         gDPPipeSync(g_DisplayListHead++);
@@ -1679,7 +1678,7 @@ s32 DrawGame(void) {
             DrawControlsScreen(&g_DisplayListHead);
         }
     }
-    func_8008D0DC();
+    SwapMatrixBuffers();
     func_8005029C();
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);

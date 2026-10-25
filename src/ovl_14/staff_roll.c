@@ -1151,7 +1151,7 @@ void UpdateStaffRoll(void) {
         }
         if ((pressedButtons & (A_BUTTON | START_BUTTON)) && sStaffRollFrame >= FIRST_LEAVING_FRAME) {
             RequestSongStop();
-            func_8009226C(10);
+            StartHudAnimation(10);
             g_Scene = SCENE_SWAPPING_MODULES;
             g_NextScene = SCENE_BOOT_LOGOS;
             g_SceneModuleToUnload = 0x1F;

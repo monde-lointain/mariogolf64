@@ -5,6 +5,7 @@
 #include "cpu_projection.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "math_util.h"
 #include "save.h"
 #include "screen.h"
@@ -179,7 +180,6 @@ typedef struct ClubSlots {
     /* 0x58 */ u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
 } ClubSlots; /* size = 0x78 */
 
-void func_800934CC(s32);
 void SetFramebufferCount(s32 count);
 void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
 
@@ -231,7 +231,7 @@ void LoadClubSlots(void) {
     f32 angle;
 
     sSlots = AllocMemory(sizeof(ClubSlots));
-    func_800934CC(0);
+    SetMenuBackdrop(MENU_BACKDROP_UNK0);
     sSlots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
     sSlots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
     sSlots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
@@ -324,7 +324,7 @@ void LoadClubSlots(void) {
 void FreeClubSlots(void) {
     s32 playerIndex;
 
-    func_800934CC(-1);
+    SetMenuBackdrop(MENU_BACKDROP_NONE);
     SetFramebufferCount(3);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     FreeMemory(&sSlots->symbolImages);
