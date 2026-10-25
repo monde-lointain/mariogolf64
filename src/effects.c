@@ -34,7 +34,9 @@ typedef struct Effect {
 #define EFFECT_KIND_SPREADING_CIRCLE 0x13 /* Drawn with sArcImage */
 #define EFFECT_KIND_TEAR 0x14
 
-extern s32 sAreEffectImagesLoaded;
+#define WEATHER_NONE (-1)
+#define WEATHER_RAIN 2
+
 /* Each holds an image asset: a header, then texels */
 extern u8 *sRippleImage;
 extern u8 *sArcImage;
@@ -50,16 +52,56 @@ extern u8 *sStarImage;
 extern u8 *sDropletImage;
 extern Effect sEffects[EFFECT_COUNT];
 extern Mtx sEffectMatrices[EFFECT_COUNT];
-extern s32 sNextMatrixIndex;
 extern s32 sSpawnGroundHeight;
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
 extern void *D_801EFFA8;
 extern void *D_801B8BB8;
-extern s32 sWeather; /* A WEATHER_* value */
-extern s32 sShownBadgeCount;
-extern s32 sIsBadgeCountShown;
-extern s32 sBadgeCountFrame;
+
+s32 D_800C52B0 = 0;
+s32 sNextMatrixIndex = 0;
+Vtx sUprightQuadVertices[] = {
+    { { { -1, -1, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -1, 1, 0 }, 0, { 0, 0x400 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 1, 1, 0 }, 0, { 0x400, 0x400 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 1, -1, 0 }, 0, { 0x400, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+Vtx sSmallFlatQuadVertices[] = {
+    { { { -3, 0, -3 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -3, 0, 3 }, 0, { 0x7FF, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 3, 0, 3 }, 0, { 0x7FF, 0x7FF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 3, 0, -3 }, 0, { 0, 0x7FF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+Vtx sRippleVertices[] = {
+    { { { -7, 0, -7 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -7, 0, 7 }, 0, { 0xFFF, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 7, 0, 7 }, 0, { 0xFFF, 0xFFF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 7, 0, -7 }, 0, { 0, 0xFFF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+Vtx sSpreadingCircleVertices[] = {
+    { { { -7, 0, -7 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { -7, 0, 7 }, 0, { 0x1FFF, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 7, 0, 7 }, 0, { 0x1FFF, 0x1FFF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+    { { { 7, 0, -7 }, 0, { 0, 0x1FFF }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
+};
+s32 sAreEffectImagesLoaded = FALSE;
+f32 sUnreferencedValues[] = { 1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1 };
+u8 sPingPongFrameIndices[] = { 0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1 };
+s32 D_800C5400 = 48;
+s32 D_800C5404 = 32;
+Vtx D_800C5408[] = {
+    { { { 0, 0, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
+    { { { 0, -1, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
+    { { { 48, -1, -100 }, 0, { 0, 0 }, { 0x90, 0xA0, 0xA0, 0x5F } } },
+    { { { 48, 0, -100 }, 0, { 0, 0 }, { 0x90, 0xA0, 0xA0, 0x5F } } },
+};
+s32 sWeather = WEATHER_NONE; /* A WEATHER_* value */
+f32 D_800C544C = 0.0f;
+f32 D_800C5450 = 0.0f;
+f32 D_800C5454 = 0.0f;
+s32 sShownBadgeCount = 0;
+s32 sIsBadgeCountShown = FALSE;
+s32 sBadgeCountFrame = 0;
 void func_8007E7B8(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0
@@ -467,9 +509,6 @@ void StartRingPassRumble(UnkB8 *player) {
         }
     }
 }
-
-#define WEATHER_NONE (-1)
-#define WEATHER_RAIN 2
 
 #define RAIN_SPLASH_IMAGE_ASSET 0x6BC
 #define UNK801EFFA8_BUFFER_SIZE 0x900

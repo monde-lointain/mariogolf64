@@ -357,6 +357,8 @@ segments:
       - [0x9E010, .data, fault]
       - [0x9E3F0, .data, music]
       - [0x9E460, data]
+      - [0xA06B0, .data, effects]
+      - [0xA0870, data]
       - [0xA27A0, .data, reaction]
       - [0xA27F0, .data, password]
       - [0xA2AB0, .data, ../lib/libmus/src/player]
