@@ -2401,7 +2401,6 @@ extern s8 D_80104B68;
 
 void func_801FD9C0(void);
 s32 func_8020D838(void);
-void func_8008679C(s32);
 
 /*
  * Updates the flight camera, the inset view and the ball's sounds for one frame of the
@@ -2588,7 +2587,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         PrintDebugText(g_PrintBuffer, 10, 3);
     }
     if (D_800BE640 > VERY_LONG_SHOT_MIN_LENGTH && g_BallFlightStep == 40 && g_SimulatedShot.stepCount > 80) {
-        func_8008679C(0);
+        StartShotEffect(SHOT_EFFECT_LONG_SHOT);
     }
     if (D_800BE640 > BALL_SOUND_MIN_SHOT_LENGTH && !g_SimulatedShot.unk2E0C) {
         volume = D_800BE640 / BALL_SOUND_VOLUME_LENGTH + BALL_SOUND_MIN_VOLUME;

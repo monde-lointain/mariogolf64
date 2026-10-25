@@ -2442,3 +2442,6 @@ sIsSunGlareSettled = 0x800C6918;
 sSunGlareStrength = 0x800C691C;
 DrawHoleImageModel = 0x8008658C; // type:func size:0x40
 sHoleImageMatrix = 0x800E2050; // size:0x40
+StartShotEffect = 0x8008679C; // type:func
+sShotEffectTime = 0x800C5DF0;
+sShotEffect = 0x800C5DF4;

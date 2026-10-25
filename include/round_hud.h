@@ -3,6 +3,11 @@
 
 #include <ultra64.h>
 
+/* The effects over a shot in flight that StartShotEffect starts */
+#define SHOT_EFFECT_NONE (-1)
+#define SHOT_EFFECT_LONG_SHOT 0
+#define SHOT_EFFECT_UNK1 1
+
 /* The landing reactions that StartLandingReaction starts */
 #define LANDING_REACTION_NONE (-1)
 #define LANDING_REACTION_UNK1 1
@@ -29,5 +34,6 @@ void ResetBallTrail(void);
 void ScrollWindArrow(void);
 void AdjustHudOffset(void);
 void StartLandingReaction(s32 reaction);
+void StartShotEffect(s32 effect);
 
 #endif

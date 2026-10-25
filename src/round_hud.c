@@ -236,6 +236,27 @@ extern Mtx sHoleImageMatrix;
 
 void func_80085F98(s32 arg0);
 
+/*
+ * StartShotEffect's long shot effect, which func_80086864 draws, plays a
+ * sound, and a different, louder one for some kinds of golfer.
+ */
+#define SHOT_EFFECT_TIME_OFF (-1.0f)
+#define GOLFER_KIND_UNK2 2
+#define GOLFER_KIND_UNK10 10
+#define SOUND_LONG_SHOT 0x70
+#define SOUND_LONG_SHOT_HEAVY 0x71
+#define LONG_SHOT_SOUND_CHANNEL 14
+#define LONG_SHOT_SOUND_VOLUME 0x40
+#define LONG_SHOT_HEAVY_SOUND_VOLUME 0x60
+#define LONG_SHOT_SOUND_REVERB 30
+#define LONG_SHOT_SOUND_PAN 127
+
+extern f32 sShotEffectTime;
+extern s32 sShotEffect;
+
+s32 func_80213C78(UnkB8 *player);
+extern s8 D_8010623F;
+
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *D_800E2188;
@@ -780,7 +801,27 @@ void DrawHoleImageModel(void) {
     gDPPipeSync(g_DisplayListHead++);
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008679C);
+/* Starts one of the effects over a shot in flight, or stops it with SHOT_EFFECT_NONE */
+void StartShotEffect(s32 effect) {
+    s32 golferKind;
+
+    if (effect == SHOT_EFFECT_NONE) {
+        sShotEffectTime = SHOT_EFFECT_TIME_OFF;
+        return;
+    }
+    if (effect == SHOT_EFFECT_LONG_SHOT) {
+        golferKind = func_80213C78(&g_Players[D_8010623F]);
+        if (golferKind != GOLFER_KIND_UNK10 & golferKind != GOLFER_KIND_UNK2) {
+            PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL, LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB,
+                                 LONG_SHOT_SOUND_PAN);
+        } else {
+            PlaySoundWithEffects(SOUND_LONG_SHOT_HEAVY, LONG_SHOT_SOUND_CHANNEL, LONG_SHOT_HEAVY_SOUND_VOLUME,
+                                 LONG_SHOT_SOUND_REVERB, LONG_SHOT_SOUND_PAN);
+        }
+    }
+    sShotEffect = effect;
+    sShotEffectTime = 0.0f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80086864);
 
