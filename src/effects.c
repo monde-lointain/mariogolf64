@@ -39,16 +39,17 @@ typedef struct Effect {
 #define EFFECT_COUNT 40
 
 #define RAINDROP_COUNT 48
+#define RAINDROP_FALLING (-1)
 #define RAIN_SPLASH_COUNT 32
 
 typedef struct Raindrop {
     /* 0x00 */ Vec3 head;
     /* 0x0C */ Vec3 tail;
-    /* 0x18 */ f32 unk18;
+    /* 0x18 */ f32 groundHeight; /* Under the drop; UpdateRain refreshes one drop each frame */
     /* 0x1C */ f32 unk1C;
     /* 0x20 */ s16 unk20[5];
     /* 0x2A */ s16 unk2A;
-    /* 0x2C */ s8 unk2C;
+    /* 0x2C */ s8 landedFrameCount; /* RAINDROP_FALLING until the drop reaches the ground */
     /* 0x2D */ u8 unk2D;
 } Raindrop; /* size = 0x30 */
 
@@ -56,7 +57,7 @@ typedef struct RainSplash {
     /* 0x00 */ Vec3 position;
     /* 0x0C */ f32 unkC;
     /* 0x10 */ u8 unk10[6];
-    /* 0x16 */ s8 unk16;
+    /* 0x16 */ s8 frameCount;
     /* 0x17 */ s8 unk17;
     /* 0x18 */ s8 unk18;
 } RainSplash; /* size = 0x1C */
@@ -120,6 +121,7 @@ extern Mtx sDropMatrices[]; /* One per draw buffer */
 extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
+extern f32 g_RainSoundVolume;
 extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
 extern s8 D_801B60B9;
@@ -132,7 +134,7 @@ extern s32 sRainCenter[2];
 extern f32 sRainDriftX;
 extern f32 sRainDriftZ;
 extern Vec3 sRainVelocity; /* Per frame */
-extern s32 D_80104AC0;
+extern s32 sGroundCheckDropIndex; /* The raindrop whose ground height UpdateRain refreshes next */
 
 s32 sDebrisKind = 0;
 s32 sNextMatrixIndex = 0;
@@ -172,9 +174,7 @@ Vtx D_800C5408[] = {
     { { { 48, 0, -100 }, 0, { 0, 0 }, { 0x90, 0xA0, 0xA0, 0x5F } } },
 };
 s32 sWeather = WEATHER_NONE; /* A WEATHER_* value */
-f32 D_800C544C = 0.0f;
-f32 D_800C5450 = 0.0f;
-f32 D_800C5454 = 0.0f;
+Vec3 sLastRainEye = { 0.0f, 0.0f, 0.0f }; /* The camera's eye on UpdateRain's last frame */
 s32 sShownBadgeCount = 0;
 s32 sIsBadgeCountShown = FALSE;
 s32 sBadgeCountFrame = 0;
@@ -1401,9 +1401,9 @@ void ResetRaindrop(Raindrop *drop) {
     drop->head[AXIS_Y] += g_Cameras[0].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
     drop->head[AXIS_X] += sRainVelocity[AXIS_X] * fallFrameCount;
     drop->head[AXIS_Z] += sRainVelocity[AXIS_Z] * fallFrameCount;
-    drop->unk18 = 0;
+    drop->groundHeight = 0;
     drop->unk2A = 0;
-    drop->unk2C = -1;
+    drop->landedFrameCount = RAINDROP_FALLING;
     drop->unk2D = 0;
     drop->unk1C = 1.0f;
     drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
@@ -1436,7 +1436,7 @@ void StartRain(void) {
     f32 speed;
     s32 index;
 
-    D_80104AC0 = 0;
+    sGroundCheckDropIndex = 0;
     direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
     speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT * RAIN_DRIFT_PER_WIND_SPEED;
     sRainDriftX = cosf(direction) * speed;
@@ -1452,13 +1452,105 @@ void StartRain(void) {
     for (index = 0; index != RAIN_SPLASH_COUNT; index++) {
         ResetRainSplash(&sRainSplashes[index]);
         sRainSplashes[index].unkC = 1.0f;
-        sRainSplashes[index].unk16 = index % 9 - 1;
+        sRainSplashes[index].frameCount = index % 9 - 1;
         sRainSplashes[index].unk17 = 0;
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007E980);
-INCLUDE_RODATA("asm/nonmatchings/effects", D_800D1A88);
+#define RAIN_SOUND_STEADY_VOLUME 80.0f
+#define RAIN_SOUND_FADE_STEP 0.5f
+/* A camera that moves farther than this across the ground in a frame takes the rain with it */
+#define RAIN_CAMERA_JUMP_DISTANCE 15.0f
+#define RAINDROP_LANDED_FRAME_COUNT 8
+#define RAIN_SPLASH_FRAME_COUNT 8
+
+/*
+ * Moves the rain on while it rains: fades the rain sound down, follows the wind and the camera,
+ * restarts each splash after RAIN_SPLASH_FRAME_COUNT frames, and drops each raindrop until it
+ * reaches the ground, then restarts it RAINDROP_LANDED_FRAME_COUNT frames later.
+ */
+void UpdateRain(void) {
+    Vec3 cameraShift = { 0.0f, 0.0f, 0.0f };
+    f32 direction;
+    f32 speed;
+    f32 shiftX;
+    f32 shiftZ;
+    s32 index;
+    Raindrop *drop;
+    RainSplash *splash;
+
+    if (g_HoleConditions.isRaining == TRUE && sWeather == WEATHER_RAIN) {
+        if (g_RainSoundVolume > RAIN_SOUND_STEADY_VOLUME) {
+            g_RainSoundVolume -= RAIN_SOUND_FADE_STEP;
+        }
+        SetSoundVolume(RAIN_SOUND_CHANNEL, g_RainSoundVolume);
+        direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+        speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT * RAIN_DRIFT_PER_WIND_SPEED;
+        sRainDriftX = cosf(direction) * speed;
+        sRainDriftZ = sinf(direction) * speed;
+        sRainVelocity[AXIS_Y] = RAIN_FALL_SPEED;
+        sRainVelocity[AXIS_X] = sRainDriftX * RAIN_FALL_SPEED;
+        sRainVelocity[AXIS_Z] = sRainDriftZ * RAIN_FALL_SPEED;
+        PlaceRainCenter();
+        shiftX = g_Cameras[0].view.eye[AXIS_X] - sLastRainEye[AXIS_X];
+        shiftZ = g_Cameras[0].view.eye[AXIS_Z] - sLastRainEye[AXIS_Z];
+        if (sqrtf(shiftX * shiftX + shiftZ * shiftZ) > RAIN_CAMERA_JUMP_DISTANCE) {
+            cameraShift[AXIS_X] += shiftX;
+            cameraShift[AXIS_Z] += shiftZ;
+        } else if (sLastRainEye[AXIS_Y] < g_Cameras[0].view.eye[AXIS_Y]) {
+            cameraShift[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y] - sLastRainEye[AXIS_Y];
+        }
+        sLastRainEye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
+        sLastRainEye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+        sLastRainEye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
+        /* Indexing the drop each time is there to match */
+        sRaindrops[sGroundCheckDropIndex].groundHeight =
+            GetGroundHeight(sRaindrops[sGroundCheckDropIndex].head[AXIS_X] * WORLD_TO_COURSE_SCALE,
+                            sRaindrops[sGroundCheckDropIndex].head[AXIS_Z] * WORLD_TO_COURSE_SCALE)
+            * COURSE_TO_WORLD_SCALE;
+        for (index = 0; index != sRainSplashCount; index++) {
+            splash = &sRainSplashes[index];
+            splash->frameCount++;
+            if (splash->frameCount == RAIN_SPLASH_FRAME_COUNT) {
+                ResetRainSplash(&sRainSplashes[index]);
+                splash->frameCount = 0;
+            }
+        }
+        for (index = 0; index != sRaindropCount; index++) {
+            drop = &sRaindrops[index];
+            if (drop->head[AXIS_Y] < drop->groundHeight) {
+                drop->head[AXIS_X] += sRainVelocity[AXIS_X];
+                drop->head[AXIS_Y] += sRainVelocity[AXIS_Y];
+                drop->head[AXIS_Z] += sRainVelocity[AXIS_Z];
+            }
+            if (drop->head[AXIS_Y] > drop->groundHeight) {
+                drop->unk2A |= 0x10;
+            }
+            if (drop->landedFrameCount == RAINDROP_FALLING) {
+                if (drop->head[AXIS_Y] < drop->groundHeight) {
+                    drop->head[AXIS_X] += cameraShift[AXIS_X];
+                    drop->head[AXIS_Y] += cameraShift[AXIS_Y];
+                    drop->head[AXIS_Z] += cameraShift[AXIS_Z];
+                }
+                drop->tail[AXIS_X] += sRainVelocity[AXIS_X] + cameraShift[AXIS_X];
+                drop->tail[AXIS_Y] += sRainVelocity[AXIS_Y] + cameraShift[AXIS_Y];
+                drop->tail[AXIS_Z] += sRainVelocity[AXIS_Z] + cameraShift[AXIS_Z];
+                if (drop->tail[AXIS_Y] > drop->groundHeight) {
+                    drop->landedFrameCount = 0;
+                    drop->tail[AXIS_X] = drop->head[AXIS_X] + (drop->groundHeight - drop->head[AXIS_Y]) * sRainDriftX;
+                    drop->tail[AXIS_Y] = drop->head[AXIS_Y] + (drop->groundHeight - drop->head[AXIS_Y]);
+                    drop->tail[AXIS_Z] = drop->head[AXIS_Z] + (drop->groundHeight - drop->head[AXIS_Y]) * sRainDriftZ;
+                }
+            } else {
+                drop->landedFrameCount++;
+            }
+            if (drop->landedFrameCount == RAINDROP_LANDED_FRAME_COUNT) {
+                ResetRaindrop(drop);
+            }
+        }
+        sGroundCheckDropIndex = (sGroundCheckDropIndex + 1) % sRaindropCount;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007EF0C);
 
