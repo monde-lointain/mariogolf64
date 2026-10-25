@@ -136,6 +136,28 @@
 #define FACE_SPACING 40
 #define FACE_SIZE 32
 #define FACE_CURSOR_MARGIN 9
+
+/* Where a cartridge character is on the Bring Characters list */
+#define LISTING_SHOWN 1
+#define LISTING_BRINGING 2 /* Moving to its slot */
+
+/* The listed cartridge characters on the Bring Characters screen, each above its controller */
+#define LISTED_FACES_LEFT 28
+#define LISTED_FACES_TOP 56
+#define LISTED_FACE_SPACING 46
+#define LISTED_ICONS_TOP 88
+#define SHOWN_LISTED_COUNT 6
+#define BRING_CURSOR_MARGIN 8
+
+/* The arrows beside the list when it scrolls */
+#define ARROW_FRAME_COUNT 8
+#define ARROWS_IMAGE_SIZE 0x200 /* Of each frame's image */
+#define ARROW_SIZE 16
+#define ARROWS_TOP 92
+#define LEFT_ARROW_LEFT 16
+#define LEFT_ARROW_ROW 48
+#define RIGHT_ARROW_LEFT 288
+#define RIGHT_ARROW_ROW 32
 #define CONTROLLER_ICONS_LEFT 60
 #define CONTROLLER_ICONS_TOP 72
 #define CONTROLLER_ICON_SPACING 56
@@ -331,6 +353,7 @@ extern void *g_PressingHandImage;
 void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, GameBoyTransfer *transfer);
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top);
+extern Gfx D_800C3FC0[];
 s32 OpenGameBoyPak(s32 port, OSGbpakId *header, NUContPakFile *file);
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId *header, NUContPakFile *file);
 
@@ -1574,7 +1597,114 @@ void DrawOptionsScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = displayList;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawBringCharactersScreen);
+/* Whether a cartridge character is on the list: read in, or being brought over */
+static inline s32 IsListed(s32 listing) {
+    return listing == LISTING_SHOWN || listing == LISTING_BRINGING;
+}
+
+/*
+ * Draws the Bring Characters screen: the faces already brought over, the cartridge characters on
+ * the list with their controllers, the cursor, and the arrows when the list scrolls. A character
+ * being brought over moves from the list to its slot.
+ */
+void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
+    Gfx *displayList = *displayListHead;
+    s32 index;
+    s32 shownCount;
+    s32 listed;
+    s32 left;
+    s32 slotLeft;
+    s32 top;
+    s32 character;
+
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    DrawImportedFaces(&displayList, transfer);
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&displayList, (u8 *)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0, 0, 0, 0);
+    shownCount = 0;
+    for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
+        if (transfer->cartridgeCharacters[transfer->listedCharacters[index]].status == GAME_BOY_CHARACTER_STATUS_PRESENT
+            && IsListed(transfer->unk76C[transfer->listedCharacters[index]])) {
+            DrawTextureRect(&displayList, (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING) << 2,
+                            LISTED_ICONS_TOP << 2,
+                            (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING + CONTROLLER_ICON_SIZE) << 2,
+                            (LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+                            (transfer->listedCharacters[index] / CARTRIDGE_SAVE_COUNT * CONTROLLER_ICON_SIZE) << 5,
+                            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            shownCount++;
+            if (shownCount == SHOWN_LISTED_COUNT) {
+                break;
+            }
+        }
+    }
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->statBarsImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(displayList++, ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                          CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2, (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
+                    (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    shownCount = 0;
+    for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
+        listed = transfer->listedCharacters[index];
+        if (transfer->cartridgeCharacters[listed].status == GAME_BOY_CHARACTER_STATUS_PRESENT
+            && IsListed(transfer->unk76C[listed])) {
+            character = transfer->cartridgeCharacters[listed].character;
+            left = LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING;
+            top = LISTED_FACES_TOP;
+            if (transfer->unk76C[listed] == LISTING_BRINGING) {
+                slotLeft = FACES_LEFT + transfer->characterIndex * FACE_SPACING;
+                left += (slotLeft - left) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
+                top += (FACES_TOP - top) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
+            }
+            LoadLargePalette(&displayList, transfer->facePalettes[character]);
+            LoadTextureBlock(&displayList, transfer->faceImages[character], G_IM_FMT_CI, G_IM_SIZ_8b,
+                             FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&displayList, left << 2, top << 2, (left + FACE_SIZE) << 2, (top + FACE_SIZE) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            shownCount++;
+            if (shownCount == SHOWN_LISTED_COUNT) {
+                break;
+            }
+        }
+    }
+    if (g_GameBoyTransfer.listedCharacterCount != 0) {
+        if (transfer->screenStep == BRING_CHOOSING) {
+            DrawCursorBox(&displayList,
+                          LISTED_FACES_LEFT - BRING_CURSOR_MARGIN
+                              + (transfer->listedCharacterIndex - transfer->unk7B8) * LISTED_FACE_SPACING,
+                          LISTED_FACES_TOP - BRING_CURSOR_MARGIN);
+        } else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
+            DrawCursorBox(&displayList, FACES_LEFT - BRING_CURSOR_MARGIN + transfer->characterIndex * FACE_SPACING,
+                          FACES_TOP - BRING_CURSOR_MARGIN);
+        }
+    }
+    gSPDisplayList(displayList++, D_800C3FC0);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    gDPPipeSync(displayList++);
+    gDPSetTexturePersp(displayList++, G_TP_NONE);
+    if (transfer->screenStep == BRING_CHOOSING) {
+        sCharacterArrowFrame = (sCharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
+        LoadSmallPalette(&displayList, 0, (u8 *)transfer->arrowsImage + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&displayList,
+                               (u8 *)transfer->arrowsImage
+                                   + (sCharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE + PALETTED_TEXELS_OFFSET),
+                               G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
+        gDPPipeSync(displayList++);
+        if (transfer->unk7B8 > 0) {
+            DrawTextureRect(&displayList, LEFT_ARROW_LEFT << 2, ARROWS_TOP << 2, (LEFT_ARROW_LEFT + ARROW_SIZE) << 2,
+                            (ARROWS_TOP + ARROW_SIZE) << 2, G_TX_RENDERTILE, 0, LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        }
+        if (transfer->unk7B8 < transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
+            DrawTextureRect(&displayList, RIGHT_ARROW_LEFT << 2, ARROWS_TOP << 2,
+                            (RIGHT_ARROW_LEFT + ARROW_SIZE) << 2, (ARROWS_TOP + ARROW_SIZE) << 2, G_TX_RENDERTILE, 0,
+                            RIGHT_ARROW_ROW << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    *displayListHead = displayList;
+}
 
 void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
     Gfx *displayList = *displayListHead;
