@@ -54,7 +54,6 @@ extern s32 sSkyBlendStep;
 extern s32 sSkyBlendStepCount;
 
 extern s32 D_801B609C;
-extern s32 g_PlayerCount;
 extern s32 sIsPrimitiveDepthSet;
 extern s32 sMenuBackdrop;
 extern s32 sHudAnimationFramesLeft;

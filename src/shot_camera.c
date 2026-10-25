@@ -825,7 +825,6 @@ s32 GetEndReaction(void) {
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
 extern s8 D_8010623F;
-extern s32 g_PlayerCount;
 
 void func_8020D874(f32);
 

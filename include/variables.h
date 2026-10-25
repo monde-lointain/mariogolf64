@@ -59,6 +59,7 @@ typedef struct Fog {
 } Fog; /* size = 0x14 */
 
 extern Fog g_SceneFog;
+extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
 extern s32 g_StopwatchFrameCount;
 /* Whether the course's name and the hole's number show before the flyover */

@@ -9,6 +9,7 @@
 #include "character.h"
 #include "course.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
@@ -17,6 +18,7 @@
 #include "movie.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scoring.h"
 #include "round_hud.h"
@@ -38,7 +40,8 @@
 
 /* Bytes of each buffer the scenery images come with */
 #define SCENERY_BUFFER_A_SIZE 0x128
-#define SCENERY_BUFFER_B_SIZE 0x1208
+/* Bytes of the buffer that StartShotPanel loads the lie's image into */
+#define LIE_IMAGE_SIZE 0x1208
 
 /* Images of the round's scenery, effects and HUD, named after their asset ids until their users are decompiled */
 #define ASSET_ROUND_IMAGE_541 0x541
@@ -161,8 +164,8 @@ extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
 #define SHOT_OFFSET_MARKER_Y 174
 #define D_80106240_UNK8 0x8 /* Animates the shot offset marker */
 
-extern s32 D_800C54C4;
-extern s32 D_800C54C8;
+extern s32 sShotPanelOffsetY;
+extern s32 sShotPanelOffsetX;
 extern s32 sShotOffsetMarkerFrame;
 extern s32 sShotOffsetMarkerTexelOffset;
 extern void *sShotOffsetMarkerImage;
@@ -303,8 +306,9 @@ extern void *g_ShadowTexture;
 extern s32 D_800C59D8;
 extern void *D_800E2140;
 extern void *D_800E2144[2];
-extern s32 D_800C59DC;
-extern void *D_800E2138;
+/* The image asset of the lie that the HUD shows, loaded into sLieImage */
+extern s32 sLieImageAsset;
+extern void *sLieImage;
 extern void *D_800E2158;
 extern void *D_800E214C[3];
 
@@ -332,6 +336,27 @@ void func_80084468(Gfx **displayListHead, f32 x, f32 y);
 extern void *D_80105214;
 extern s32 sSceneryState;
 extern u8 D_801061B8[0x8C];
+
+/*
+ * The height of the ball above the cup, in yards, meters and feet, and for
+ * each whether the ball is above, below or level with it
+ */
+#define HEIGHT_ABOVE 0
+#define HEIGHT_BELOW 1
+#define HEIGHT_LEVEL 2
+#define LEVEL_HEIGHT 0.01f /* Heights in meters or feet nearer zero than this */
+extern s8 sBallHeightYardsDirection;
+extern s8 sBallHeightMetersDirection;
+extern s8 sBallHeightFeetDirection;
+extern s32 sBallHeightYards;
+extern f32 sBallHeightMeters;
+extern f32 sBallHeightFeet;
+extern s32 sCupDistance;
+/* On the tee ground, the shot panel sits this much higher */
+#define TEE_GROUND_PANEL_OFFSET_Y -3
+#define SHOT_PANEL_START_OFFSET_X 64
+void func_8021E710(void);
+void func_8021419C(UnkB8 *player);
 extern s8 D_801B60B9;
 /* The colors of each course's name, which gradients from the first to the second */
 extern s32 g_CourseNameEnvColors[];
@@ -553,8 +578,8 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_800E2140, &asset);
     D_800E2144[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
     D_800E2144[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-    D_800C59DC = -1;
-    D_800E2138 = AllocMemory(SCENERY_BUFFER_B_SIZE);
+    sLieImageAsset = -1;
+    sLieImage = AllocMemory(LIE_IMAGE_SIZE);
     D_800E2158 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
     ReadEncodedAsset(D_800E2158, &asset);
     D_800E214C[0] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_563, &asset));
@@ -603,7 +628,7 @@ void FreeSceneryImages(void) {
         FreeMemory(&D_800E2140);
         FreeMemory(&D_800E2144[0]);
         FreeMemory(&D_800E2144[1]);
-        FreeMemory(&D_800E2138);
+        FreeMemory(&sLieImage);
         FreeMemory(&D_800E2158);
         FreeMemory(&D_800E214C[0]);
         FreeMemory(&D_800E214C[1]);
@@ -645,7 +670,94 @@ void FreeScenery(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80080E7C);
+/*
+ * Updates the shot panel for a new shot: the ball's height above the cup and
+ * distance from it, the lie's image, and the scores that the game mode shows.
+ * The target addresses g_HoleIndex from g_PlayerCount's base, as if the two
+ * were fields of one struct.
+ */
+#ifdef NON_MATCHING
+void StartShotPanel(void) {
+    EncodedAsset asset;
+    s32 height;
+    s32 playerIndex;
+    s32 holeIndex;
+
+    height = g_CurrentShot.ballPosition[AXIS_Y] - g_CupPositionY;
+    sBallHeightYards = height * YARDS_PER_UNIT;
+    sBallHeightMeters = height * METERS_PER_UNIT;
+    sBallHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
+    if (sBallHeightYards == 0) {
+        sBallHeightYardsDirection = HEIGHT_LEVEL;
+    } else if (sBallHeightYards > 0) {
+        sBallHeightYardsDirection = HEIGHT_ABOVE;
+    } else {
+        sBallHeightYardsDirection = HEIGHT_BELOW;
+    }
+    if (sBallHeightMeters < LEVEL_HEIGHT && sBallHeightMeters > -LEVEL_HEIGHT) {
+        sBallHeightMetersDirection = HEIGHT_LEVEL;
+    } else if (sBallHeightMeters > 0.0f) {
+        sBallHeightMetersDirection = HEIGHT_ABOVE;
+    } else {
+        sBallHeightMetersDirection = HEIGHT_BELOW;
+    }
+    /* The direction in feet is taken from the height in meters */
+    if (sBallHeightFeet < LEVEL_HEIGHT && sBallHeightFeet > -LEVEL_HEIGHT) {
+        sBallHeightFeetDirection = HEIGHT_LEVEL;
+    } else if (sBallHeightMeters > 0.0f) {
+        sBallHeightFeetDirection = HEIGHT_ABOVE;
+    } else {
+        sBallHeightFeetDirection = HEIGHT_BELOW;
+    }
+    sCupDistance = (f32)GetCupDistance(g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                     g_CurrentShot.ballPosition[AXIS_Z] - g_CupPositionZ);
+    if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != sLieImageAsset) {
+        sLieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
+        if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_TEE_GROUND) {
+            sShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
+        } else {
+            sShotPanelOffsetY = 0;
+        }
+        OpenEncodedAsset(sLieImageAsset, &asset);
+        ReadEncodedAsset(sLieImage, &asset);
+    }
+    if (D_801B60B9) {
+        g_SkinsTotals[0] = 0;
+    } else {
+        switch (g_GameMode) {
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNK1:
+            case GAME_MODE_TOURNAMENT:
+            case GAME_MODE_UNK7:
+                for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+                    g_SkinsTotals[playerIndex] = GetNetScoreToPar(g_HoleIndex, playerIndex);
+                }
+                break;
+            case GAME_MODE_MATCH_GAME:
+            case GAME_MODE_GET_CHARACTER:
+                g_SkinsTotals[0] = 0;
+                for (holeIndex = 0; holeIndex != g_HoleIndex; holeIndex++) {
+                    if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+                        g_SkinsTotals[0]--;
+                    } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+                        g_SkinsTotals[0]++;
+                    }
+                }
+                g_SkinsTotals[1] = -g_SkinsTotals[0];
+                break;
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                TallySkins(GetHoleRecordIndex());
+                break;
+        }
+    }
+    sShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
+    func_8021E710();
+    func_8021419C(&g_Players[D_8010623F]);
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", StartShotPanel);
+#endif
 
 /*
  * Allocates and loads what the HUD draws for the whole round. The buffers of
@@ -1003,10 +1115,10 @@ void DrawShotOffsetMarker(void) {
                            G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE, SHOT_OFFSET_MARKER_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
-    gSPScisTextureRectangle(g_DisplayListHead++, (sShotOffsetMarkerXs[0] + (D_800C54C8 + SHOT_OFFSET_MARKER_X)) << 2,
-                            (sShotOffsetMarkerYs[0] + (D_800C54C4 + SHOT_OFFSET_MARKER_Y) + sHudOffsetY) << 2,
-                            (sShotOffsetMarkerXs[0] + (D_800C54C8 + SHOT_OFFSET_MARKER_X) + SHOT_OFFSET_MARKER_SIZE) << 2,
-                            (sShotOffsetMarkerYs[0] + (D_800C54C4 + SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE) +
+    gSPScisTextureRectangle(g_DisplayListHead++, (sShotOffsetMarkerXs[0] + (sShotPanelOffsetX + SHOT_OFFSET_MARKER_X)) << 2,
+                            (sShotOffsetMarkerYs[0] + (sShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) + sHudOffsetY) << 2,
+                            (sShotOffsetMarkerXs[0] + (sShotPanelOffsetX + SHOT_OFFSET_MARKER_X) + SHOT_OFFSET_MARKER_SIZE) << 2,
+                            (sShotOffsetMarkerYs[0] + (sShotPanelOffsetY + SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE) +
                              sHudOffsetY) << 2,
                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 }

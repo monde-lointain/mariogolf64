@@ -276,7 +276,6 @@ typedef struct StaffRollEasedView {
 
 extern u8 g_StaffTextRomStart[];
 extern u8 *g_ShadowTexture;
-extern s32 g_PlayerCount;
 extern s32 D_801B609C;
 
 extern StaffRollImage sStaffRollImage;

@@ -26,6 +26,8 @@ typedef s32 CoursePoint[AXIS_COUNT];
 #define UNITS_PER_YARD 14045.184f
 #define UNITS_PER_FOOT 4681.728f
 #define YARDS_PER_UNIT 0.00007119878f
+#define METERS_PER_UNIT 0.00006510417f
+#define FEET_PER_YARD 3
 
 /* A 4 by 4 matrix of floats, indexed by row and then column */
 typedef f32 Mat4[4][4];
