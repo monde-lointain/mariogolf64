@@ -141,8 +141,8 @@
 
 /* The first fourteen characters have their own club sets; the others use the sets after them */
 #define CHARACTER_CLUB_SET_COUNT 14
-/* Players whose unk27 is this read the first controller */
-#define UNK27_FIRST_CONTROLLER 4
+/* Players whose controllerIndex is this read the first controller */
+#define CONTROLLER_INDEX_UNK4 4
 
 #define SOUND_CLUB_SLOTS_TURN 0x22
 #define SOUND_REELS_START 0x64
@@ -428,10 +428,10 @@ s32 UpdateClubSlots(void) {
             }
             break;
         case CLUB_SLOTS_STOPPING:
-            if ((s8)player->unk27 == UNK27_FIRST_CONTROLLER) {
+            if (player->controllerIndex == CONTROLLER_INDEX_UNK4) {
                 controllerIndex = 0;
             } else {
-                controllerIndex = (s8)player->unk27;
+                controllerIndex = player->controllerIndex;
             }
             sStopWaitTime++;
             if (sSlots->pressCount < REEL_COUNT) {

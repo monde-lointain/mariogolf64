@@ -213,7 +213,7 @@ typedef struct UnkB8 {
     /* 0x24 */ s8 unk24;
     /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
     /* 0x26 */ s8 unk26;
-    /* 0x27 */ u8 unk27;
+    /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below MAXCONTROLLERS */
     /* 0x28 */ s8 unk28;
     /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
     /* 0x2A */ s8 soundPan;
