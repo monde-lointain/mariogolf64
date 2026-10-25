@@ -4,6 +4,7 @@
 #include "club.h"
 #include "collision.h"
 #include "debug_text.h"
+#include "effects.h"
 #include "functions.h"
 #include "game_flags.h"
 #include "libc.h"
@@ -185,8 +186,6 @@ void ResetBallSimulations(void) {
     }
 }
 
-void SpawnImpactEffects(BallSimulation *simulation);
-void StartRingPassRumble(UnkB8 *player);
 void func_80216FC4_ovl_00(s32 *position);
 void func_80216FCC_ovl_00(s32 *position);
 void func_8020DA18_ovl_00(s32 unk);
@@ -1738,8 +1737,6 @@ Unk6 *GetUnkCEntry(Club *club, s32 surface, s32 shotMode, s32 unkC) {
     return &D_800B7C08;
 }
 
-void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed);
-void StartPlayerRumble(UnkB8 *player);
 s16 GetCrossSlopeAngle(UnkB8 *player, Unk20 *shot);
 /* It returns s16; declaring it s32 here is there to match */
 s32 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot);

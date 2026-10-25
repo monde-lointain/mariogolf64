@@ -7,6 +7,7 @@
 #include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
+#include "effects.h"
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
