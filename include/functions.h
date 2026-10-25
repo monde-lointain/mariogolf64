@@ -53,8 +53,8 @@ void UnloadTitleScreen(void);
 void LoadBootLogos(void);
 
 /* ovl_13 */
-void func_801F4B20_ovl_13(void);
-void func_801F4E70_ovl_13(void);
+void LoadTransmitMenu(void);
+void FreeTransmitMenu(void);
 
 /* ovl_14 */
 void LoadStaffRoll(void);

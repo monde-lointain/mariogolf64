@@ -690,8 +690,13 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x165BC0, asm]
-      - [0x16CCB0, data]
+      - [0x165BC0, hasm, ovl_13/padding]
+      - [0x165BD0, c, ovl_13/transmit_menu]
+      - [0x16C590, c, ovl_13/cursor_box]
+      - [0x16CCB0, .data, ovl_13/transmit_menu]
+      - [0x16CD70, .data, ovl_13/cursor_box]
+      - [0x16CDD0, .rodata, ovl_13/transmit_menu]
+      - [0x16D640, .rodata, ovl_13/cursor_box]
       - { start: 0x16D650, type: bss, vram: 0x801FC4C0 }
 
   - name: ovl_14
