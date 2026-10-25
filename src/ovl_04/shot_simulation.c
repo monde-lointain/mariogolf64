@@ -15,7 +15,7 @@ void SimulateShot(Unk20 *shot) {
     BallSimulation simulationState;
     BallSimulation *simulation;
     s32 step;
-    s32 hasUnk1Flag;
+    s32 hasGroundHit;
     s32 hasUnk40Flag;
     s32 flags;
     s32 unkA7Kind;
@@ -41,7 +41,7 @@ void SimulateShot(Unk20 *shot) {
     simulation->position[1] = g_CurrentShot.ballPosition[1];
     simulation->position[2] = g_CurrentShot.ballPosition[2];
     simulation->surface = g_CurrentShot.surface;
-    hasUnk1Flag = FALSE;
+    hasGroundHit = FALSE;
     hasUnk40Flag = FALSE;
     g_SimulatedShot.unk2E0C = GetClub(shot->clubIndex)->surfaceMask & CLUB_SURFACE_GREEN;
     g_SimulatedShot.unk2E14 =
@@ -64,10 +64,10 @@ void SimulateShot(Unk20 *shot) {
         if (simulation->unkB0 && g_SimulatedShot.unkB0Step == NO_STEP) {
             g_SimulatedShot.unkB0Step = step;
         }
-        if (flags & STEP_FLAG_UNK1 & !hasUnk1Flag) {
-            hasUnk1Flag = TRUE;
+        if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
+            hasGroundHit = TRUE;
         }
-        if (flags & STEP_FLAG_UNK40) {
+        if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
             hasUnk40Flag = TRUE;
         }
         if (step < PATH_STEP_COUNT) {

@@ -8,13 +8,13 @@
 #define MAX_STEP_COUNT 1801
 
 /* Bits of the flags StepBallSimulation returns for each step */
-#define STEP_FLAG_UNK1 0x1
+#define STEP_FLAG_GROUND_HIT 0x1
 #define STEP_FLAG_BILLBOARD_HIT 0x2
 #define STEP_FLAG_LIPPED_OUT 0x4
 #define STEP_FLAG_PIN_HIT 0x8
-#define STEP_FLAG_UNK10 0x10
+#define STEP_FLAG_OUTSIDE_COURSE 0x10
 #define STEP_FLAG_HOLE_TRIANGLE_HIT 0x20
-#define STEP_FLAG_UNK40 0x40
+#define STEP_FLAG_HOLE_TRIANGLE_BOUNCE 0x40
 #define STEP_FLAG_CUP_PULL 0x80
 
 /* Values of a BallSimulation's isRunning */

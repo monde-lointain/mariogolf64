@@ -232,9 +232,9 @@ extern s32 sIsPutting;
 extern s32 sAcceptableEvaluation;
 /* How many times PlanShot has changed the club or carry */
 extern s32 sTrialLevel;
-/* Whether the trial has reported STEP_FLAG_UNK1, and where it first did */
-extern s32 sHasUnk1Position;
-extern CoursePoint sUnk1Position;
+/* Whether the flying trial ball has come down on the ground yet, and where it first did */
+extern s32 sHasLanded;
+extern CoursePoint sLandingPosition;
 /* Whether the trial ended out of bounds, off the course or in water */
 extern s32 sIsTrialLost;
 /* The nearest that a putt has come to the target */
@@ -1853,7 +1853,7 @@ s32 StepTrialShot(void) {
         sIsTrialLost = FALSE;
         sTrialEvaluation = 0;
         sIsPutting = FALSE;
-        sHasUnk1Position = FALSE;
+        sHasLanded = FALSE;
         sShot.unk14 = sShotOffsets[sShotOffset].unk14 + (rand() & 7) - 3;
         sShot.unk18 = sShotOffsets[sShotOffset].unk18 + (rand() & 7) - 3;
         sTrialLaunch->unk0 = sShot.unk0;
@@ -1883,9 +1883,9 @@ s32 StepTrialShot(void) {
         sTrialEndPoint[AXIS_X] = sTrialSimulation.position[AXIS_X];
         sTrialEndPoint[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
         sTrialEndPoint[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
-        sUnk1Position[AXIS_X] = sTrialSimulation.position[AXIS_X];
-        sUnk1Position[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
-        sUnk1Position[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+        sLandingPosition[AXIS_X] = sTrialSimulation.position[AXIS_X];
+        sLandingPosition[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+        sLandingPosition[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
     }
     isRunning = sTrialSimulation.isRunning;
     if (isRunning) {
@@ -1899,7 +1899,7 @@ s32 StepTrialShot(void) {
                 PrintDebugText(sSimFaultText, 10, 12);
                 break;
             }
-            if (flags & STEP_FLAG_UNK10) {
+            if (flags & STEP_FLAG_OUTSIDE_COURSE) {
                 break;
             }
             if (unk94 == 0 && (flags & 3) && velocityY < 0 && isRunning == 1) {
@@ -1923,11 +1923,11 @@ s32 StepTrialShot(void) {
                         sTrialEvaluation += POOR_LANDING_EVALUATION;
                     }
                 }
-            } else if ((stepFlags & STEP_FLAG_UNK1) && sTrialSimulation.isRunning == 1 && !sHasUnk1Position) {
-                sHasUnk1Position = sTrialSimulation.isRunning;
-                sUnk1Position[AXIS_X] = sTrialSimulation.position[AXIS_X];
-                sUnk1Position[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
-                sUnk1Position[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
+            } else if ((stepFlags & STEP_FLAG_GROUND_HIT) && sTrialSimulation.isRunning == 1 && !sHasLanded) {
+                sHasLanded = sTrialSimulation.isRunning;
+                sLandingPosition[AXIS_X] = sTrialSimulation.position[AXIS_X];
+                sLandingPosition[AXIS_Y] = sTrialSimulation.position[AXIS_Y];
+                sLandingPosition[AXIS_Z] = sTrialSimulation.position[AXIS_Z];
             }
             if (sTrialEvaluation < sBestEvaluation) {
                 sPlanStage = PLAN_STAGE_TRIAL_RUNNING;
@@ -2135,7 +2135,7 @@ s32 StepTrialShot(void) {
                             RADIANS_TO_BINARY_ANGLE);
         return 1;
     }
-    if (flags & STEP_FLAG_UNK1) {
+    if (flags & STEP_FLAG_GROUND_HIT) {
         if (!(GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN)) {
             sShot.clubSlot++;
             if (GetClub(g_Players[sShot.playerIndex].clubs[sShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN) {
@@ -2466,7 +2466,7 @@ s32 IsTrialShotSafe(void) {
         sTrialStepCount++;
         flags = StepBallSimulation(&sTrialSimulation);
         if (sTrialStepCount < MAX_STEP_COUNT) {
-            if (flags & STEP_FLAG_UNK10) {
+            if (flags & STEP_FLAG_OUTSIDE_COURSE) {
                 break;
             }
         } else {

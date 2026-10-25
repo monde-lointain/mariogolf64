@@ -365,7 +365,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 triangle.corners[AXIS_Z][0] = 0;
                 triangle.corners[AXIS_Z][1] = 0;
                 triangle.corners[AXIS_Z][2] = 0x100;
-                contact = STEP_FLAG_UNK1;
+                contact = STEP_FLAG_GROUND_HIT;
                 if (ABS(simulation->position[AXIS_Y]) + ABS(startY) != 0) {
                     fraction = (f32)simulation->position[AXIS_Y]
                              / (ABS(simulation->position[AXIS_Y]) + ABS(startY));
@@ -436,17 +436,17 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                                      simulation->position[AXIS_Y], simulation->position[AXIS_Z],
                                                      &triangle.unk0, &fraction);
                 }
-                if (hitsBillboard && contact == STEP_FLAG_UNK1) {
+                if (hitsBillboard && contact == STEP_FLAG_GROUND_HIT) {
                     if (hitFraction <= fraction) {
                         triangle = hit;
                         fraction = hitFraction;
-                        contact = STEP_FLAG_UNK1;
+                        contact = STEP_FLAG_GROUND_HIT;
                     } else {
                         contact = STEP_FLAG_BILLBOARD_HIT;
                     }
                 } else if (hitsBillboard) {
                     contact = STEP_FLAG_BILLBOARD_HIT;
-                } else if (contact == STEP_FLAG_UNK1) {
+                } else if (contact == STEP_FLAG_GROUND_HIT) {
                     triangle = hit;
                     fraction = hitFraction;
                 } else {
@@ -978,7 +978,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     }
                     break;
             }
-            flags |= STEP_FLAG_UNK40;
+            flags |= STEP_FLAG_HOLE_TRIANGLE_BOUNCE;
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                 SpawnImpactEffects(&impact);
                 func_8020DA18_ovl_00(0);
@@ -1028,7 +1028,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             simulation->unk38 = 0;
             velocity[AXIS_Y] += 262.0f;
         }
-        if (simulation->isRunning == BALL_STATE_FLYING && contact == STEP_FLAG_UNK1) {
+        if (simulation->isRunning == BALL_STATE_FLYING && contact == STEP_FLAG_GROUND_HIT) {
             TrianglePlane plane;
             f32 speed;
             s32 cupDistance;
@@ -1323,9 +1323,9 @@ s32 StepBallSimulation(BallSimulation *simulation) {
         }
         if (simulation->unkA1 && simulation->isRunning == BALL_STATE_ROLLING && contact == 0
             && FindGroundTriangle(simulation->position[AXIS_X], simulation->position[AXIS_Z], &triangle) == 0) {
-            contact = STEP_FLAG_UNK1;
+            contact = STEP_FLAG_GROUND_HIT;
         }
-        if (simulation->isRunning == BALL_STATE_ROLLING && !isNearCup && contact == STEP_FLAG_UNK1) {
+        if (simulation->isRunning == BALL_STATE_ROLLING && !isNearCup && contact == STEP_FLAG_GROUND_HIT) {
             TrianglePlane plane;
             SurfaceInfo *info;
             s32 groundHeight;
@@ -1619,7 +1619,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 isOutside = TRUE;
             }
             if (isOutside) {
-                flags |= STEP_FLAG_UNK10;
+                flags |= STEP_FLAG_OUTSIDE_COURSE;
             }
         }
     settle:
