@@ -890,7 +890,7 @@ void DecodeCartridgeCharacter(u8 *save, s32 cartridgeIndex, s32 saveIndex, s32 u
     }
     character->unk1B = save[0x12];
     character->unk1C = save[0x1C];
-    character->unk1D = save[0x1D];
+    character->shotCurve = save[0x1D];
     character->unk1E = save[0x1E];
     character->unk1F = save[0x1F];
     if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
@@ -914,7 +914,7 @@ void DecodeCartridgeCharacter(u8 *save, s32 cartridgeIndex, s32 saveIndex, s32 u
     character->unk24 = (save[0x28] << 16) | (save[0x27] << 8) | save[0x26];
     character->experience = 0;
     character->unk2C = save[0x1A] | (save[0x1B] << 8);
-    osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C, character->unk1D);
+    osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C, character->shotCurve);
     for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
         character->unk3C[index].unk0 = save[0x100 + index * 6] | (save[0x101 + index * 6] << 8);
         character->unk3C[index].unk2 = save[0x102 + index * 6] | (save[0x103 + index * 6] << 8);
