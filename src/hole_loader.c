@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ball_simulation.h"
 #include "billboard.h"
 #include "character_slot.h"
 #include "course.h"
@@ -850,7 +851,7 @@ void InitHoleState(void) {
     osSyncPrintf("mp2sub2\n");
     func_8005F1C8();
     osSyncPrintf("mp2sub3\n");
-    InitEffectTable();
+    ResetBallSimulations();
     D_80105B20[g_GameState.holeIndex] = 0;
     if (g_GameState.holeIndex == 0) {
         D_801B60B0 = 0;

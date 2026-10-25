@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ball_simulation.h"
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
@@ -260,7 +261,7 @@ void mainproc(void *arg) {
     InitTerrainTextures();
     InitExpansionPakFeatures();
     ResetLoaderThread();
-    InitEffectTable();
+    ResetBallSimulations();
     ResetCharacterSlots();
     AssignCharacterBuffers();
     InitClubs();

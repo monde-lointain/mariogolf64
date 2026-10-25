@@ -81,6 +81,11 @@ typedef struct Club {
 /* Every club set, one after another */
 extern Club g_Clubs[CLUB_COUNT];
 
+/* Values of g_ClubTestMode, which tells the ball simulation a test shot is running */
+#define CLUB_TEST_NONE 0
+#define CLUB_TEST_SHOT 1
+#define CLUB_TEST_PUTT 2
+
 /* Set while GenerateClub or GetPuttPower test-fires a club */
 extern s8 g_ClubTestMode;
 

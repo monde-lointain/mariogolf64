@@ -18,7 +18,6 @@ s32 GetCharacterBufferSize(void);
 void SetCharacterBuffer(s32 slotIndex, u8 *buffer);
 void InitTerrainTextures(void);
 void InitExpansionPakFeatures(void);
-void InitEffectTable(void);
 void StartGame(void);
 void UpdateGame(void);
 s32 DrawGame(void);

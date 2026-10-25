@@ -51,11 +51,6 @@
 
 #define CLUB_ASSERT_LINE 543
 
-/* Values of g_ClubTestMode, which tells the ball simulation a test shot is running */
-#define CLUB_TEST_NONE 0
-#define CLUB_TEST_SHOT 1
-#define CLUB_TEST_PUTT 2
-
 /* Frames between the steps StepToClubChoice takes */
 #define CLUB_CHOICE_STEP_DELAY 3
 

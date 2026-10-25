@@ -71,7 +71,11 @@ typedef struct SurfaceInfo {
     /* 0x08 */ s8 minPercent;
     /* 0x09 */ s8 maxPercent;
     /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not meant for the surface */
-    /* 0x0B */ u8 unkB[0x1C - 0xB];
+    /* 0x0C */ s16 unkC;
+    /* 0x0E */ s16 unkE;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+    /* 0x18 */ s32 unk18;
 } SurfaceInfo; /* size = 0x1C */
 
 SurfaceInfo *GetSurfaceInfo(s32 surface);
