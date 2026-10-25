@@ -1347,6 +1347,7 @@ FreeBursts = 0x80077DEC; // type:func
 HaveBurstsStayedFreed = 0x80077E6C; // type:func
 LaunchBurst = 0x80077E94; // type:func
 UpdateAndDrawBursts = 0x80078128; // type:func
+SpawnImpactEffects = 0x80079ADC; // type:func
 SpawnShotDebris = 0x8007A6C8; // type:func
 DrawDrop = 0x8007D19C; // type:func
 DrawDivotMark = 0x8007DB08; // type:func

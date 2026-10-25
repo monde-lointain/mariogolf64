@@ -120,6 +120,7 @@ extern Mtx sDropMatrices[]; /* One per draw buffer */
 extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
+extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
@@ -649,7 +650,121 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_80079ADC);
+#define DEBRIS_SPEED_STEP 0x600
+#define IMPACT_PUFF_COUNT 3
+
+/*
+ * Spawns effects at D_80104AE0 by the surface kind under the ball: rising puffs of the ground's
+ * color on fairway lies and semi-rough, larger and faster ones on bunker lies and bare ground, or
+ * a ripple on water.
+ */
+void SpawnImpactEffects(BallSimulation *simulation) {
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 index;
+    s32 puffNumber;
+    s32 color;
+    Effect *effect;
+
+    color = BlendSurfaceMapColor(simulation->position[AXIS_X], simulation->position[AXIS_Z], simulation->surface);
+    puffNumber = 1;
+    switch (GetSurfaceInfo(simulation->surface)->kind) {
+        case SURFACE_KIND_FAIRWAY:
+        case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+        case SURFACE_KIND_FAIRWAY_POOR_LIE:
+        case SURFACE_KIND_SEMI_ROUGH:
+            for (index = 0; index != EFFECT_COUNT; index++) {
+                effect = &sEffects[index];
+                if (effect->kind == EFFECT_KIND_NONE) {
+                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->velocity[AXIS_X] = 0;
+                    effect->velocity[AXIS_Y] = -puffNumber * DEBRIS_SPEED_STEP * (0.2f * COURSE_TO_WORLD_SCALE);
+                    effect->velocity[AXIS_Z] = 0;
+                    effect->unk38 = color;
+                    effect->alpha = 230.0f;
+                    effect->alphaStep = -2.0f;
+                    effect->scale = 1.0f;
+                    effect->scaleStep = 0.04f;
+                    effect->kind = EFFECT_KIND_UNK0;
+                    effect->unk3B = 0;
+                    puffNumber++;
+                    if (puffNumber == IMPACT_PUFF_COUNT + 1) {
+                        break;
+                    }
+                }
+            }
+            break;
+        case SURFACE_KIND_BUNKER:
+        case SURFACE_KIND_BUNKER_FAIR_LIE:
+        case SURFACE_KIND_BUNKER_POOR_LIE:
+        case SURFACE_KIND_BUNKER_UNK9:
+        case SURFACE_KIND_BARE_GROUND:
+            for (index = 0; index != EFFECT_COUNT; index++) {
+                effect = &sEffects[index];
+                if (effect->kind == EFFECT_KIND_NONE) {
+                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->velocity[AXIS_X] = 0;
+                    effect->velocity[AXIS_Y] = -puffNumber * DEBRIS_SPEED_STEP * (0.7f * COURSE_TO_WORLD_SCALE);
+                    effect->velocity[AXIS_Z] = 0;
+                    effect->unk38 = color;
+                    effect->alpha = 230.0f;
+                    effect->alphaStep = -2.0f;
+                    effect->scale = 2.0f;
+                    effect->scaleStep = 0.1f;
+                    effect->kind = EFFECT_KIND_UNK0;
+                    effect->unk3B = 0;
+                    puffNumber++;
+                    if (puffNumber == IMPACT_PUFF_COUNT + 1) {
+                        break;
+                    }
+                }
+            }
+            break;
+        case SURFACE_KIND_WATER_HAZARD:
+            /* The original spawns the ripple here instead of calling SpawnRipple */
+            for (index = 0; index != EFFECT_COUNT; index++) {
+                effect = &sEffects[index];
+                if (effect->kind == EFFECT_KIND_NONE) {
+                    effect->position[AXIS_X] = D_80104AE0[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Y] = D_80104AE0[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                    effect->position[AXIS_Z] = D_80104AE0[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                    effect->kind = EFFECT_KIND_RIPPLE;
+                    effect->unk3B = 0;
+                    effect->matrixIndex = sNextMatrixIndex;
+                    effect->velocity[AXIS_X] = 0;
+                    effect->velocity[AXIS_Y] = 0;
+                    effect->velocity[AXIS_Z] = 0;
+                    effect->alpha = 95.0f;
+                    effect->alphaStep = -2.0f;
+                    effect->scale = 1.0f;
+                    effect->scaleStep = 0.1f;
+                    translation[AXIS_X] = effect->position[AXIS_X];
+                    translation[AXIS_Y] = effect->position[AXIS_Y];
+                    translation[AXIS_Z] = effect->position[AXIS_Z];
+                    rotation[AXIS_X] = 0.0f;
+                    rotation[AXIS_Y] = 0;
+                    rotation[AXIS_Z] = 0;
+                    scale[AXIS_X] = effect->scale;
+                    scale[AXIS_Y] = effect->scale;
+                    sNextMatrixIndex = (sNextMatrixIndex + 1) % EFFECT_COUNT;
+                    scale[AXIS_Z] = effect->scale;
+                    BuildTransformMatrix(matrix, rotation, translation, scale);
+                    ConvertMatrixToFixed(matrix, &sEffectMatrices[effect->matrixIndex]);
+                    return;
+                }
+            }
+            break;
+        /* The empty case is there to match */
+        case SURFACE_KIND_DEEP_ROUGH:
+            break;
+    }
+}
 
 #define RISING_CLUMP_COUNT 3
 /* In course units; course y points down */
@@ -694,7 +809,6 @@ void SpawnRisingClumps(CoursePoint unusedPoint) {
 #define DEBRIS_AMOUNT_MOST 10.0f
 #define BURIED_DEBRIS_EXTRA 4.0f
 #define DEBRIS_SLOWEST_STEP_COUNT 5
-#define DEBRIS_SPEED_STEP 0x600
 #define DEBRIS_OUTWARD_SCALE (0.03f * COURSE_TO_WORLD_SCALE)
 #define PUTTED_DROP_SLOWEST_RISE_SPEED (1500 * COURSE_TO_WORLD_SCALE)
 #define PUTTED_DROP_RISE_STEP 10
