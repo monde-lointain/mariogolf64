@@ -793,6 +793,7 @@ nuRDPOutputBuf = 0x8010CFC0;
 nuYieldBuf = 0x8010C2E0; // size:0xC00
 nuGfxTask = 0x801B5D08; // size:0x370
 nuGfxTaskMgrMesgQ = 0x801B93F8; // size:0x18
+sDropMatrices = 0x801B9418; // size:0x88
 nuGfxTaskEndFunc = 0x800B67B8; // size:0x4
 ReportFailedAssertion = 0x800298E0; // type:func
 InitFramebuffers = 0x800299D0; // type:func

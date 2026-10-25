@@ -116,7 +116,7 @@ extern u8 *sStarImage;
 extern u8 *sDropletImage;
 extern Effect sEffects[EFFECT_COUNT];
 extern Mtx sEffectMatrices[EFFECT_COUNT];
-extern Mtx D_801B9418[];
+extern Mtx sDropMatrices[]; /* One per draw buffer */
 extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
@@ -582,7 +582,7 @@ void LaunchDrop(CoursePoint point) {
             scale[AXIS_Y] = effect->scale;
             scale[AXIS_Z] = effect->scale;
             BuildTransformMatrix(matrix, rotation, translation, scale);
-            ConvertMatrixToFixed(matrix, &D_801B9418[g_DrawBufferIndex]);
+            ConvertMatrixToFixed(matrix, &sDropMatrices[g_DrawBufferIndex]);
             return;
         }
     }
@@ -935,7 +935,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
             spawnedCount++;
             scale[AXIS_Z] = effect->scale;
             BuildTransformMatrix(matrix, rotation, translation, scale);
-            ConvertMatrixToFixed(matrix, &D_801B9418[g_DrawBufferIndex]);
+            ConvertMatrixToFixed(matrix, &sDropMatrices[g_DrawBufferIndex]);
         }
     }
     /* The divot flies out on the mirror image of the drop's heading */
