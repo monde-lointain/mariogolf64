@@ -114,6 +114,14 @@
 #define STATUS_ADDRESS_BIAS 0x6000
 #define STATUS_DATA_SIZE 0x800
 
+#define SAVE_SIGNATURE_OFFSET 0x20
+
+/* What CheckStatusCartridge found */
+#define STATUS_CHECK_NO_STATUS 0
+#define STATUS_CHECK_FAILED 1 /* With the cause in transferResult */
+#define STATUS_CHECK_HAS_STATUS 2
+#define STATUS_CHECK_READ_FAILED 3 /* With the error in transferResult */
+
 /* What WriteStatusToCartridge did */
 #define STATUS_WRITE_DONE 0
 #define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
@@ -650,16 +658,69 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF24_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF30_ovl_13);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", CheckStatusCartridge);
 /*
- * "Write mark violation", which CheckStatusCartridge and WriteStatusToCartridge share one copy of
+ * Checks that the chosen cartridge is the one tagged and that its save is intact, and reports
+ * whether the save already holds a status, which WriteStatusToCartridge marks.
  */
-extern const char sTagViolationText[];
+s32 CheckStatusCartridge(s32 cartridgeIndex) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    u8 save[CARTRIDGE_SAVE_SIZE];
+    s32 isSignatureWrong;
+    s32 index;
+    s32 result;
+    s32 readResult;
+    s32 computedSum;
+    s32 storedSum;
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", sTagViolationText);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF60_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF6C_ovl_13);
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF78_ovl_13);
+    result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[g_GameBoyTransfer.taggedControllers[cartridgeIndex]],
+                                       transfer->cartridgeHeader, &transfer->pakFile);
+    g_GameBoyTransfer.transferResult = result;
+    if (result != PAK_RESULT_OK) {
+        /* Going to the shared power-off is there to match */
+        goto failed;
+    }
+    isSignatureWrong = FALSE;
+    readResult = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+    if (readResult != 0) {
+        osSyncPrintf("head error  2\n");
+        g_GameBoyTransfer.transferResult = readResult;
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        return STATUS_CHECK_READ_FAILED;
+    }
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+        if (save[SAVE_SIGNATURE_OFFSET + index] != sCartridgeSaveSignature[index]) {
+            isSignatureWrong = TRUE;
+        }
+    }
+    for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+        if (save[index] != transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]][index]) {
+            osSyncPrintf("\x83\x89\x83" "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n"); /* "Write mark violation" */
+            transfer->transferResult = PAK_RESULT_REMOVED_RETRYING;
+            nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+            return STATUS_CHECK_FAILED;
+        }
+    }
+    computedSum = ComputeSaveChecksum(save);
+    storedSum = GetStoredChecksum(save);
+    osSyncPrintf("sum1 %04x\n", computedSum);
+    osSyncPrintf("sum2 %04x\n", storedSum);
+    if (computedSum != storedSum || isSignatureWrong) {
+        osSyncPrintf("sum error  2\n");
+        transfer->transferResult = PAK_RESULT_CORRUPTED;
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        return STATUS_CHECK_FAILED;
+    }
+    if (save[SAVE_HAS_STATUS_OFFSET] == 0) {
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+        return STATUS_CHECK_NO_STATUS;
+    }
+    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    return STATUS_CHECK_HAS_STATUS;
+failed:
+    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    return STATUS_CHECK_FAILED;
+}
 
 /*
  * Marks the chosen cartridge's save as holding a status and writes the status data where the save
@@ -748,7 +809,8 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     transfer->transferResult = PAK_RESULT_OK;
     return STATUS_WRITE_DONE;
 tagViolated:
-    osSyncPrintf(sTagViolationText, sum); /* The original passes sum before setting it */
+    /* "Write mark violation"; the original passes sum before setting it */
+    osSyncPrintf("\x83\x89\x83" "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n", sum);
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
     return STATUS_WRITE_FAILED;
