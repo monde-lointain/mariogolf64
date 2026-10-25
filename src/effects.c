@@ -20,7 +20,8 @@
 typedef struct Effect {
     /* 0x00 */ Vec3 position; /* In world units */
     /* 0x0C */ Vec3 velocity; /* In world units a frame */
-    /* 0x18 */ u8 unk18[0x10];
+    /* 0x18 */ u8 unk18[0xC];
+    /* 0x24 */ f32 unk24; /* An angle about x and z */
     /* 0x28 */ f32 alpha;
     /* 0x2C */ f32 alphaStep;
     /* 0x30 */ f32 scale;
@@ -57,6 +58,7 @@ typedef struct RainSplash {
 } RainSplash; /* size = 0x1C */
 
 #define EFFECT_KIND_NONE (-1)
+#define EFFECT_KIND_DROP 5 /* Drawn with sDropImage */
 #define EFFECT_KIND_SPARKLE 8
 #define EFFECT_KIND_RIPPLE 0xC
 #define EFFECT_KIND_UNKE 0xE
@@ -89,6 +91,7 @@ extern u8 *sStarImage;
 extern u8 *sDropletImage;
 extern Effect sEffects[EFFECT_COUNT];
 extern Mtx sEffectMatrices[EFFECT_COUNT];
+extern Mtx D_801B9418[];
 extern s32 sSpawnGroundHeight;
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
@@ -497,7 +500,65 @@ void SpawnRipple(CoursePoint position) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_800796F8);
+#define DROP_HEADING_COUNT 32
+/* Horizontal speeds, in course units a frame */
+#define DROP_SLOWEST_SPEED 200
+#define DROP_SPEED_STEP 20
+/* World units a frame; the faster a drop flies out, the faster it rises */
+#define DROP_SLOWEST_RISE_SPEED (2700 * COURSE_TO_WORLD_SCALE)
+
+/*
+ * Launches a drop up and out from a point, in one of DROP_HEADING_COUNT headings across a
+ * quarter turn.
+ */
+void LaunchDrop(CoursePoint point) {
+    Vec3 translation;
+    Vec3 scale;
+    Vec3 rotation;
+    Mat4 matrix;
+    s32 index;
+    Effect *effect;
+    s32 random;
+    /* Of the horizontal speed above the slowest */
+    s32 speedOffset;
+    f32 speed;
+    f32 heading;
+
+    sSpawnGroundHeight = (f32)GetGroundHeight(point[AXIS_X], point[AXIS_Z]);
+    for (index = 0; index < EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_NONE) {
+            effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            random = guRandom() % DROP_HEADING_COUNT;
+            speedOffset = random * DROP_SPEED_STEP;
+            speed = speedOffset + DROP_SLOWEST_SPEED;
+            heading = (f32)(random * (M_PI / 2 / DROP_HEADING_COUNT)) - M_PI / 4;
+            effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            effect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED - speedOffset * COURSE_TO_WORLD_SCALE;
+            effect->unk24 = 0;
+            effect->kind = EFFECT_KIND_DROP;
+            effect->alphaStep = 0;
+            effect->scaleStep = 0;
+            effect->alpha = 255.0f;
+            effect->scale = 0.5f;
+            translation[AXIS_X] = effect->position[AXIS_X];
+            translation[AXIS_Y] = effect->position[AXIS_Y];
+            translation[AXIS_Z] = effect->position[AXIS_Z];
+            rotation[AXIS_X] = effect->unk24;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = effect->unk24;
+            scale[AXIS_X] = effect->scale;
+            scale[AXIS_Y] = effect->scale;
+            scale[AXIS_Z] = effect->scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &D_801B9418[g_DrawBufferIndex]);
+            return;
+        }
+    }
+}
 
 /* Starts a sparkle at position; passed rings spawn them */
 void SpawnSparkle(CoursePoint position) {
