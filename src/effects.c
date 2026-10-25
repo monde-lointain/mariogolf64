@@ -775,7 +775,46 @@ void PlaceRainCenter(void) {
     sRainCenter[1] = sRainCenter[1] * scale + g_Cameras[0].view.eye[AXIS_Z];
 }
 
+#define RAIN_SPREAD_STEP_COUNT 200
+/* Course units above the drop's lowest start, which is RAIN_TOP_BELOW_EYE below the camera */
+#define RAINDROP_LOWEST_RISE 0x1A400
+#define RAIN_TOP_BELOW_EYE 15.0f
+#define RAINDROP_LENGTH 90.0f
+
+/*
+ * Places a raindrop at a random spot above the area around the rain's center, moved back along
+ * the rain's path by as far as it drifts while falling to just below the camera.
+ * It does not match: from the head's z drift on, the instructions are scheduled differently.
+ */
+#ifdef NON_MATCHING
+void ResetRaindrop(Raindrop *drop) {
+    f32 fallFrameCount;
+
+    drop->head[AXIS_X] =
+        (rand() % RAIN_SPREAD_STEP_COUNT - RAIN_SPREAD_STEP_COUNT / 2) * RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE
+        + sRainCenter[0];
+    /* Course y points down */
+    drop->head[AXIS_Y] =
+        (-RAINDROP_LOWEST_RISE - rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP) * COURSE_TO_WORLD_SCALE;
+    drop->head[AXIS_Z] =
+        (rand() % RAIN_SPREAD_STEP_COUNT - RAIN_SPREAD_STEP_COUNT / 2) * RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE
+        + sRainCenter[1];
+    fallFrameCount = drop->head[AXIS_Y] / sRainVelocity[AXIS_Y];
+    drop->head[AXIS_Y] += g_Cameras[0].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
+    drop->head[AXIS_X] += sRainVelocity[AXIS_X] * fallFrameCount;
+    drop->head[AXIS_Z] += sRainVelocity[AXIS_Z] * fallFrameCount;
+    drop->unk18 = 0;
+    drop->unk2A = 0;
+    drop->unk2C = -1;
+    drop->unk2D = 0;
+    drop->unk1C = 1.0f;
+    drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
+    drop->tail[AXIS_X] = drop->head[AXIS_X] + sRainDriftX * RAINDROP_LENGTH;
+    drop->tail[AXIS_Z] = drop->head[AXIS_Z] + sRainDriftZ * RAINDROP_LENGTH;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
+#endif
 
 /* Moves a splash to a random spot on the ground around the rain's center */
 void ResetRainSplash(RainSplash *splash) {
