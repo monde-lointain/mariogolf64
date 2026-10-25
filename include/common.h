@@ -18,6 +18,10 @@ typedef f32 Vec3[3];
  */
 typedef s32 CoursePoint[AXIS_COUNT];
 
+/* Scale between course units and world units */
+#define WORLD_TO_COURSE_SCALE 1024.0f
+#define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
+
 /* Course point units in a yard, and in a foot */
 #define UNITS_PER_YARD 14045.184f
 #define UNITS_PER_FOOT 4681.728f

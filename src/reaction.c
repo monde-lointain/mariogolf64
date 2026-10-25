@@ -33,8 +33,6 @@
 
 /* Course units in a world unit */
 #define COURSE_UNITS_PER_UNIT 1024
-#define WORLD_TO_COURSE_SCALE 1024.0f
-#define COURSE_TO_WORLD_SCALE (1.0f / 1024)
 /* The camera keeps this many course units above the ground */
 #define CAMERA_GROUND_CLEARANCE 0x1E00
 
@@ -557,7 +555,6 @@ s32 PlayReactionSounds(void) {
             break;
     }
 }
-
 
 /* Keeps the point CAMERA_GROUND_CLEARANCE above the ground, where heights grow downward */
 void KeepAboveGround(f32 *point) {

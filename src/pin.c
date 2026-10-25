@@ -16,8 +16,6 @@
 /* In 1/1024ths of a unit */
 #define CUP_DISTANCE_OFFSET 0x699
 
-#define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
-
 /*
  * The shadow is a strip of rows of two vertices, running from the cup along
  * the light's yaw and narrowing row by row

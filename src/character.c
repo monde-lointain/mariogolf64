@@ -115,7 +115,6 @@
  */
 #define VIEW_DISTANCE 61440.0f
 #define VIEW_DROP 15360.0f
-#define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
 #define QUARTER_TURN_RADIANS 1.5707964f
 
 void AdvanceTextureAnimations(u32 slotIndex, s32 unused, s32 frameLastDigit, s32 frame);
@@ -206,7 +205,6 @@ extern u8 *g_ShadowTexture;
 /* The camera index DrawCharacterAndShadow always draws for */
 #define CAMERA_UNK2 2
 #define SECOND_LIGHT_DIRECTION_LENGTH 64.0f
-#define WORLD_TO_COURSE_SCALE 1024.0f
 /* How far from the shadow point, in model units, the ground is sampled */
 #define SHADOW_CORNER_DISTANCE 30.0f
 /* CharacterSlot.shadowScale is in these units */

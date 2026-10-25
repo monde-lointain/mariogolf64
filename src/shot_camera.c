@@ -81,8 +81,6 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define RESULT_SOUND_UNK2 2 /* Plays FLIGHT_SOUND_UNK67 */
 #define RESULT_SOUND_STAGE 15
 
-#define COURSE_TO_WORLD_SCALE (1.0f / 1024.0f)
-
 /* The flyover's field of view, in degrees, and the inset view's rectangle */
 #define FLYOVER_FIELD_OF_VIEW 80.0f
 #define FLYOVER_INSET_CENTER_X 160
@@ -1562,7 +1560,6 @@ void func_80203B4C(void);
 #define BESIDE_GOLFER_CLEARANCE 22.5f /* In world units */
 #define BESIDE_GOLFER_LOOK_AT_RISE 12288.0f
 #define BESIDE_GOLFER_FLIGHT_FIELD_OF_VIEW 80.0f
-#define WORLD_TO_COURSE_SCALE 1024.0f
 #define MAX_EYE_DEPTH_BELOW_GROUND 0x21C0000
 #define MINI_GOLF_GROUND_SIZE 1048576.0f
 
