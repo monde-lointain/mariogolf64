@@ -1210,10 +1210,67 @@ void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEff
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007D4E8);
-
 #define DIVOT_IMAGE_SIZE 32
 #define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
+#define DIVOT_NEAREST_DEPTH (-3.0f)
+/* The spin is cut into this many steps, each drawn with the frame in sPingPongFrameIndices */
+#define DIVOT_SPIN_STEP_COUNT 12
+#define DIVOT_DEPTH_BIAS 0.75f
+
+/* Draws a flying divot as a screen-aligned rectangle, with the frame for its spin angle */
+void DrawDivot(Gfx **displayListHead, Effect *effect) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint center;
+    s32 halfSize;
+    s32 textureStep;
+    s32 spinStep;
+    f32 angle;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, TEXTURE_ADDRESS(sDivotImage + IMAGE_HEADER_SIZE));
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (ProjectPoint(effect->position[AXIS_X], effect->position[AXIS_Y], effect->position[AXIS_Z], &center)
+        < DIVOT_NEAREST_DEPTH) {
+        halfSize = center.scaleX * effect->scale;
+        if (halfSize > 0) {
+            /* Texels per pixel, in s5.10 fixed point */
+            textureStep = ((DIVOT_IMAGE_SIZE / 2) << 10) / halfSize;
+            /* Half a step on, so that each frame is centered on its step */
+            angle = effect->unk24 + M_PI / DIVOT_SPIN_STEP_COUNT;
+            if (angle > 2 * M_PI) {
+                angle -= 2 * M_PI;
+            }
+            if (angle < 0.0f) {
+                angle += 2 * M_PI;
+            }
+            center.depth -= center.depthStep * DIVOT_DEPTH_BIAS;
+            gDPSetPrimDepth(gfx++, center.depth, 0);
+            spinStep = angle * DIVOT_SPIN_STEP_COUNT / (2 * M_PI);
+            gDPLoadTextureBlock_4b(gfx++,
+                                   TEXTURE_ADDRESS(sDivotImage
+                                                   + (sPingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE
+                                                      + PALETTED_TEXELS_OFFSET)),
+                                   G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP, 6, 6,
+                                   G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, (center.x - halfSize) << 2, (center.y - halfSize) << 2,
+                                    (center.x + halfSize) << 2, (center.y + halfSize) << 2, G_TX_RENDERTILE, 0, 0,
+                                    textureStep, textureStep);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
 #define DIVOT_MARK_FRAME 4
 
 /* Draws the divot's mark where SpawnShotDebris placed it, flat on the ground */

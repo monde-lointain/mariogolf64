@@ -1351,6 +1351,7 @@ UpdateAndDrawBursts = 0x80078128; // type:func
 SpawnImpactEffects = 0x80079ADC; // type:func
 SpawnShotDebris = 0x8007A6C8; // type:func
 DrawDrop = 0x8007D19C; // type:func
+DrawDivot = 0x8007D4E8; // type:func
 DrawDivotMark = 0x8007DB08; // type:func
 UpdateRain = 0x8007E980; // type:func
 DrawBirdieBadgeCount = 0x8007FEAC; // type:func
