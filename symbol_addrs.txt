@@ -2434,6 +2434,7 @@ sLandingReaction = 0x800C5A10;
 sLandingReactionFrame = 0x800C5A14;
 LoadRoundHud = 0x80081284; // type:func
 g_RingTexels = 0x800FE3D4;
+DrawLetterbox = 0x80088890; // type:func
 sSunScreenX = 0x800C5F24;
 sSunScreenY = 0x800C5F2C;
 sSunDepth = 0x800C6914;

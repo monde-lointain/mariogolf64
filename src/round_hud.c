@@ -218,6 +218,14 @@ extern void *D_800FBE0C;
 extern void *D_800E2160;
 extern s32 D_800E21BC;
 
+/* The black bars that grow over the top and bottom of the HUD's area */
+#define LETTERBOX_GROWTH_STEP 2
+#define LETTERBOX_MAX_HEIGHT 16
+#define LETTERBOX_STATE_UNK5 5
+
+extern s8 D_801061BD;
+extern s32 D_800C308C;
+
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *D_800E2188;
@@ -772,7 +780,40 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80087CB0);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_800880A0);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80088890);
+/*
+ * Draws black bars at the top and bottom of the HUD's area, growing them each
+ * frame up to LETTERBOX_MAX_HEIGHT. Returns their new height.
+ */
+s32 DrawLetterbox(Gfx **gfxP, s32 height) {
+    Gfx *gfx = *gfxP;
+
+    if (D_801061BD) {
+        if (D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) {
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF | ZMODE_XLU, G_RM_XLU_SURF2 | ZMODE_XLU);
+            gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+            gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+            gDPPipeSync(gfx++);
+            if (height > 0) {
+                gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2, HUD_MARGIN << 2, (SCREEN_WIDTH - HUD_MARGIN) << 2,
+                                        (HUD_MARGIN + height) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                gSPScisTextureRectangle(gfx++, HUD_MARGIN << 2, (SCREEN_HEIGHT - HUD_MARGIN - height) << 2,
+                                        (SCREEN_WIDTH - HUD_MARGIN) << 2, (SCREEN_HEIGHT - HUD_MARGIN) << 2,
+                                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            }
+            gDPPipeSync(gfx++);
+            height += LETTERBOX_GROWTH_STEP;
+            if (height > LETTERBOX_MAX_HEIGHT) {
+                height = LETTERBOX_MAX_HEIGHT;
+            }
+        } else {
+            height = 0;
+        }
+    }
+    *gfxP = gfx;
+    return height;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80088A90);
 
