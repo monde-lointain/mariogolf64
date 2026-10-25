@@ -203,6 +203,32 @@ extern s32 sBallTrailHead; /* The latest position */
 /* A debugging option that lets the second controller nudge the HUD vertically */
 #define GAME_FLAG_ADJUST_HUD_OFFSET 0x6E
 #define HUD_OFFSET_CONTROLLER 1
+
+/*
+ * A debug screen for trying out text colours: controller 2 picks a channel
+ * of the primitive or environment colour and changes it, and moves and
+ * shades the sample text
+ */
+#define COLOR_TEST_CONTROLLER 1
+#define COLOR_TEST_COLOR_COUNT 2 /* The primitive and environment colours */
+#define COLOR_TEST_CHANNEL_COUNT 3
+#define COLOR_TEST_PRIM 0
+#define COLOR_TEST_ENV 1
+#define COLOR_TEST_STEP 4
+#define COLOR_CHANNEL_MAX 255
+#define COLOR_TEST_TEXT_COLUMN 20
+#define COLOR_TEST_TEXT_ROW 5
+#define COLOR_TEST_COLUMN_WIDTH 5 /* Columns from one channel's value to the next */
+extern s32 sTestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT];
+extern s32 sTestTextX;
+extern s32 sTestTextY;
+extern s32 sTestChannelIndex;
+extern s32 sTestColorIndex;
+extern s32 sIsTestGradientShown;
+/* "Sample" in half-width katakana, then "ABCDEFG" */
+extern char sColorTestSampleText[];
+/* Printed over a cursor to erase it */
+extern char sBlankText[];
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
 extern s32 sHudOffsetY;
@@ -1204,11 +1230,77 @@ void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
     *gfxP = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1BB8);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", sColorTestSampleText);
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1BC8);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", sBlankText);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80088BDC);
+/* Draws the colour test screen and handles its controls */
+void DrawColorTest(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    SetUpGradientTextDrawing(&gfx, sIsTestGradientShown);
+    gDPSetPrimColor(gfx++, 0, 0, sTestColors[COLOR_TEST_PRIM][0], sTestColors[COLOR_TEST_PRIM][1],
+                    sTestColors[COLOR_TEST_PRIM][2], COLOR_CHANNEL_MAX);
+    gDPSetEnvColor(gfx++, sTestColors[COLOR_TEST_ENV][0], sTestColors[COLOR_TEST_ENV][1],
+                   sTestColors[COLOR_TEST_ENV][2], COLOR_CHANNEL_MAX);
+    gDPPipeSync(gfx++);
+    /* The casts read only the low halves, as the target does */
+    DrawCenteredLargeText(&gfx, (s16)sTestTextX, (s16)sTestTextY, sColorTestSampleText);
+    gDPPipeSync(gfx++);
+    PrintDebugText(sBlankText, sTestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+                   sTestColorIndex + COLOR_TEST_TEXT_ROW);
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
+        sTestColorIndex ^= 1;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & D_CBUTTONS) {
+        sTestColorIndex ^= 1;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & L_CBUTTONS) {
+        sTestChannelIndex = (sTestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) % COLOR_TEST_CHANNEL_COUNT;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & R_CBUTTONS) {
+        sTestChannelIndex = (sTestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & A_BUTTON) {
+        sTestColors[sTestColorIndex][sTestChannelIndex] += COLOR_TEST_STEP;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & B_BUTTON) {
+        sTestColors[sTestColorIndex][sTestChannelIndex] -= COLOR_TEST_STEP;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
+        sIsTestGradientShown ^= 1;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {
+        sTestTextY -= COLOR_TEST_STEP;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & D_JPAD) {
+        sTestTextY += COLOR_TEST_STEP;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & L_JPAD) {
+        sTestTextX -= COLOR_TEST_STEP;
+    }
+    if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & R_JPAD) {
+        sTestTextX += COLOR_TEST_STEP;
+    }
+    if (sTestColors[sTestColorIndex][sTestChannelIndex] > COLOR_CHANNEL_MAX) {
+        sTestColors[sTestColorIndex][sTestChannelIndex] = COLOR_CHANNEL_MAX;
+    }
+    if (sTestColors[sTestColorIndex][sTestChannelIndex] < 0) {
+        sTestColors[sTestColorIndex][sTestChannelIndex] = 0;
+    }
+    sprintf(g_PrintBuffer, "%3d  %3d  %3d", sTestColors[COLOR_TEST_PRIM][0], sTestColors[COLOR_TEST_PRIM][1],
+            sTestColors[COLOR_TEST_PRIM][2]);
+    PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
+    sprintf(g_PrintBuffer, "%3d  %3d  %3d", sTestColors[COLOR_TEST_ENV][0], sTestColors[COLOR_TEST_ENV][1],
+            sTestColors[COLOR_TEST_ENV][2]);
+    PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN, COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
+    PrintDebugText(">", sTestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+                   sTestColorIndex + COLOR_TEST_TEXT_ROW);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80089094);
 

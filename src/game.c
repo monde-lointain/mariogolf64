@@ -920,7 +920,6 @@ void func_8008156C(void);
 void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80086864(Gfx **displayListHead);
-void func_80088BDC(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void func_8008C6B0(Gfx **displayListHead);
 void DrawHoleIntroText(Gfx **displayListHead);
@@ -1772,8 +1771,8 @@ s32 DrawGame(void) {
     DrawWipe(&g_DisplayListHead);
     DrawScreenFade(&g_DisplayListHead);
     DrawHoleIntroText(&g_DisplayListHead);
-    if (IsGameFlagSet(0x46)) {
-        func_80088BDC(&g_DisplayListHead);
+    if (IsGameFlagSet(GAME_FLAG_COLOR_TEST)) {
+        DrawColorTest(&g_DisplayListHead);
     }
     DrawHudAnimation();
     if (g_IsModuleAlive[3]) {

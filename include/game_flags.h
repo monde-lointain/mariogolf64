@@ -73,6 +73,8 @@
 #define GAME_FLAG_SHOW_ANIMATION_FRAMES 0x38
 /* Prints LaunchBallSimulation's results for a stroke */
 #define GAME_FLAG_SHOW_LAUNCH_VALUES 0x08
+/* Shows DrawColorTest's screen */
+#define GAME_FLAG_COLOR_TEST 0x46
 
 /* Among other uses, makes EndHoleFlyover act as it does for a strong wind */
 #define GAME_FLAG_UNK48 0x48
