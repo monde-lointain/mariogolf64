@@ -138,6 +138,7 @@
 #define FACE_CURSOR_MARGIN 9
 
 /* Where a cartridge character is on the Bring Characters list */
+#define LISTING_NONE 0
 #define LISTING_SHOWN 1
 #define LISTING_BRINGING 2 /* Moving to its slot */
 
@@ -547,7 +548,7 @@ void UpdateBringCharacters(void) {
             D_800C42D0 = 1;
             if (++transfer->bringingFrame == BRINGING_FRAME_COUNT) {
                 BringOverCharacter(transfer->listedCharacterIndex, transfer->characterIndex);
-                transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 0;
+                transfer->listingStates[transfer->listedCharacters[transfer->listedCharacterIndex]] = LISTING_NONE;
                 GenerateClubSet(FIRST_GAME_BOY_GOLFER + transfer->characterIndex,
                                 &g_GameBoyCharacters[transfer->characterIndex]);
                 SetTextName(g_GameBoyCharacters[transfer->characterIndex].name);
@@ -562,7 +563,7 @@ void UpdateBringCharacters(void) {
         case BRING_CHOOSING_SLOT:
             if (sTransmitController.pressedButtons & A_BUTTON) {
                 PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
-                transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
+                transfer->listingStates[transfer->listedCharacters[transfer->listedCharacterIndex]] = LISTING_BRINGING;
                 transfer->screenStep = BRING_BRINGING;
                 transfer->bringingFrame = 0;
             } else if (sTransmitController.pressedButtons & B_BUTTON) {
@@ -585,7 +586,8 @@ void UpdateBringCharacters(void) {
                 } else {
                     transfer->screenStep = BRING_BRINGING;
                     transfer->characterIndex = transfer->characterCount;
-                    transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
+                    transfer->listingStates[transfer->listedCharacters[transfer->listedCharacterIndex]] =
+                        LISTING_BRINGING;
                     transfer->bringingFrame = 0;
                 }
             } else if (sTransmitController.pressedButtons & B_BUTTON) {
@@ -1626,7 +1628,7 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     shownCount = 0;
     for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
         if (transfer->cartridgeCharacters[transfer->listedCharacters[index]].status == GAME_BOY_CHARACTER_STATUS_PRESENT
-            && IsListed(transfer->unk76C[transfer->listedCharacters[index]])) {
+            && IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
             DrawTextureRect(&displayList, (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING) << 2,
                             LISTED_ICONS_TOP << 2,
                             (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING + CONTROLLER_ICON_SIZE) << 2,
@@ -1648,11 +1650,11 @@ void DrawBringCharactersScreen(Gfx **displayListHead, GameBoyTransfer *transfer)
     for (index = transfer->unk7B8; index != CARTRIDGE_CHARACTER_COUNT; index++) {
         listed = transfer->listedCharacters[index];
         if (transfer->cartridgeCharacters[listed].status == GAME_BOY_CHARACTER_STATUS_PRESENT
-            && IsListed(transfer->unk76C[listed])) {
+            && IsListed(transfer->listingStates[listed])) {
             character = transfer->cartridgeCharacters[listed].character;
             left = LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING;
             top = LISTED_FACES_TOP;
-            if (transfer->unk76C[listed] == LISTING_BRINGING) {
+            if (transfer->listingStates[listed] == LISTING_BRINGING) {
                 slotLeft = FACES_LEFT + transfer->characterIndex * FACE_SPACING;
                 left += (slotLeft - left) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
                 top += (FACES_TOP - top) * transfer->bringingFrame / (BRINGING_FRAME_COUNT - 1);
@@ -1756,7 +1758,7 @@ void ClearCartridgeCharacters(void) {
         ResetBringCharacters();
         for (controller = 0; controller != MAXCONTROLLERS; controller++) {
             for (save = 0; save != CARTRIDGE_SAVE_COUNT; save++) {
-                transfer->unk76C[controller * CARTRIDGE_SAVE_COUNT + save] = 0;
+                transfer->listingStates[controller * CARTRIDGE_SAVE_COUNT + save] = LISTING_NONE;
                 transfer->cartridgeCharacters[controller * CARTRIDGE_SAVE_COUNT + save].status = 0;
             }
         }
@@ -2273,7 +2275,8 @@ s32 ReadCartridgeCharacters(void) {
                             DecodeCartridgeCharacter(characterData, transfer->unk7A0 / 4, saveIndex,
                                                      transfer->cartridgeHeader.company_code);
                         }
-                        transfer->unk76C[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT + saveIndex] = 1;
+                        transfer->listingStates[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT + saveIndex] =
+                            LISTING_SHOWN;
                         transfer->listedCharacterCount++;
                         ListPresentCharacters();
                     }

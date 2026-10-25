@@ -106,7 +106,7 @@ typedef struct GameBoyTransfer {
     /* 0x07C */ OSGbpakId cartridgeHeader;
     /* 0x0CC */ GameBoyCharacter cartridgeCharacters[CARTRIDGE_CHARACTER_COUNT];
     /* 0x75C */ s32 sourceIndices[GAME_BOY_CHARACTER_COUNT];
-    /* 0x76C */ s32 unk76C[CARTRIDGE_CHARACTER_COUNT];
+    /* 0x76C */ s32 listingStates[CARTRIDGE_CHARACTER_COUNT]; /* LISTING_* */
     /* 0x79C */ s32 listedCharacterCount;
     /* 0x7A0 */ s32 unk7A0;
     /* 0x7A4 */ s32 transferResult;
