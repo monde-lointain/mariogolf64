@@ -25,6 +25,15 @@
 #define TRANSMIT_OPTION_CHARACTERS 2
 #define TRANSMIT_OPTION_MAIN_MENU 3
 
+/* screenStep values on the Send Experience screen */
+#define SEND_EXPERIENCE_CHOOSING 0
+#define SEND_EXPERIENCE_SENT 3
+#define SEND_EXPERIENCE_WRITING 4
+#define SEND_EXPERIENCE_FAILED 8
+#define SEND_EXPERIENCE_DONE 9
+#define SEND_EXPERIENCE_CONFIRMING 10 /* Asking the player to start a pak check */
+#define SEND_EXPERIENCE_NOTHING_TO_SEND 11
+
 /* sNoticeState: the notice cloud grows, shows its message, then shrinks */
 #define NOTICE_HIDDEN 0
 #define NOTICE_OPENING 1
@@ -42,8 +51,11 @@
 #define CORRUPTED_SAVE_MESSAGE 0x152
 #define UNINITIALIZED_SAVE_MESSAGE 0x153
 #define CARTRIDGE_REPLACED_MESSAGE 0x156
+#define PAK_CHECK_MESSAGE 0x147
+#define NO_EXPERIENCE_MESSAGE 0x157
 #define CHOOSE_EXPERIENCE_MESSAGE 0x158
 #define EXPERIENCE_SENT_MESSAGE 0x159
+#define NOT_FROM_CARTRIDGE_MESSAGE 0x15A
 #define CHOOSE_CHARACTER_MESSAGE 0x15C
 #define CHARACTER_BROUGHT_MESSAGE 0x15D
 #define CHOOSE_SWAPPED_CHARACTER_MESSAGE 0x15E
@@ -140,6 +152,12 @@
 #define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
 #define STATUS_WRITE_FAILED 2 /* With the cause in transferResult */
 
+/* What WriteExperienceToCartridge did */
+#define EXPERIENCE_WRITE_DONE 0
+#define EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE 1
+#define EXPERIENCE_WRITE_FAILED 2 /* With the cause in transferResult */
+#define EXPERIENCE_WRITE_PAK_ERROR 3 /* With the error in transferResult */
+
 #define WOOD_PANEL_ASSET 0x8FD
 #define COURSE_SCENE_ASSET 0x51E
 #define POINTER_ASSET 0x70F
@@ -158,7 +176,21 @@
 #define FIRST_GAME_BOY_GOLFER CHARACTER_KID
 #define TRANSMIT_MENU_SONG 0x16
 
+#define SOUND_MENU_MOVE 0x5C
+#define SOUND_MENU_CONFIRM 0x5D
+#define SOUND_MENU_CANCEL 0x5F
+#define SOUND_MENU_BLOCKED 0x63
+#define MENU_SOUND_VOLUME 127
+
 void LoadCursorBox(void *image);
+void ResetSendExperience(void);
+s32 WriteExperienceToCartridge(s32 characterIndex);
+void SetNoticeState(s32 state, s32 message);
+s32 GetNoticeState(void);
+
+/* The buttons pressed this frame, and those pressed or repeating while held */
+extern u16 D_801FC5C4_ovl_13;
+extern u16 D_801FC5C8_ovl_13;
 
 /* Results of opening and accessing the Game Boy cartridges, after the notice each shows */
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
@@ -354,7 +386,140 @@ void ShowTransferError(u32 result) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateSendStatus);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateSendExperience);
+/*
+ * Lets the player choose a character whose experience to send, asks them to start a pak check,
+ * then writes the experience to the cartridge and shows the result.
+ */
+void UpdateSendExperience(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+
+    switch (transfer->screenStep) {
+        case SEND_EXPERIENCE_DONE:
+            transfer->screenStep = SEND_EXPERIENCE_CHOOSING;
+            ResetSendExperience();
+            break;
+        case SEND_EXPERIENCE_NOTHING_TO_SEND:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->screenStep = SEND_EXPERIENCE_CHOOSING;
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case SEND_EXPERIENCE_CHOOSING:
+            if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                if (g_GameBoyCharacters[transfer->characterIndex].experience == 0) {
+                    transfer->screenStep = SEND_EXPERIENCE_NOTHING_TO_SEND;
+                    SetNoticeState(NOTICE_OPENING, NO_EXPERIENCE_MESSAGE);
+                    PlaySound(SOUND_MENU_BLOCKED, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                } else {
+                    transfer->screenStep = SEND_EXPERIENCE_CONFIRMING;
+                    SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+                    PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                }
+            } else if (D_801FC5C4_ovl_13 & B_BUTTON) {
+                PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+            } else if ((D_801FC5C8_ovl_13 & L_JPAD) && transfer->characterIndex > 0) {
+                transfer->characterIndex--;
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            } else if ((D_801FC5C8_ovl_13 & R_JPAD) && transfer->characterIndex < transfer->characterCount - 1) {
+                transfer->characterIndex++;
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            }
+            break;
+        case SEND_EXPERIENCE_CONFIRMING:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                    if (!transfer->isCancelled) {
+                        transfer->isAccessing = TRUE;
+                        transfer->screenStep = SEND_EXPERIENCE_WRITING;
+                    } else {
+                        transfer->isAccessing = FALSE;
+                        transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    }
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = FALSE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    } else if (D_801FC5C4_ovl_13 & B_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = TRUE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case SEND_EXPERIENCE_WRITING:
+            transfer->isAccessing = FALSE;
+            switch (WriteExperienceToCartridge(transfer->characterIndex)) {
+                case EXPERIENCE_WRITE_DONE:
+                    transfer->screenStep = SEND_EXPERIENCE_SENT;
+                    break;
+                case EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE:
+                    SetNoticeState(NOTICE_OPENING, NOT_FROM_CARTRIDGE_MESSAGE);
+                    transfer->screenStep = SEND_EXPERIENCE_FAILED;
+                    break;
+                case EXPERIENCE_WRITE_FAILED:
+                default:
+                    ShowTransferError(transfer->transferResult);
+                    transfer->screenStep = SEND_EXPERIENCE_FAILED;
+                    break;
+                case EXPERIENCE_WRITE_PAK_ERROR:
+                    ShowPakError(transfer->transferResult);
+                    transfer->screenStep = SEND_EXPERIENCE_FAILED;
+                    break;
+            }
+            break;
+        case SEND_EXPERIENCE_SENT:
+            transfer->pressingHandPosition = PRESSING_HAND_LOW;
+            if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screenStep = SEND_EXPERIENCE_DONE;
+            }
+            break;
+        case 5: /* Steps 5 to 7 end like a failure */
+        case 6:
+        case 7:
+        case SEND_EXPERIENCE_FAILED:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->screenStep = SEND_EXPERIENCE_DONE;
+                    transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (D_801FC5C4_ovl_13 & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+    }
+}
 
 /* Whether every playing controller holds a Rumble Pak */
 s32 HaveAllRumblePaks(void) {
@@ -630,10 +795,10 @@ void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     SetUpTextDrawing(&displayList);
     message = NO_MESSAGE;
     switch (transfer->screenStep) {
-        case 0:
+        case SEND_EXPERIENCE_CHOOSING:
             message = CHOOSE_EXPERIENCE_MESSAGE;
             break;
-        case 3:
+        case SEND_EXPERIENCE_SENT:
             message = EXPERIENCE_SENT_MESSAGE;
             break;
     }
