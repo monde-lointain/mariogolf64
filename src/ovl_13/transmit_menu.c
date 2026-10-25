@@ -753,7 +753,11 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     }
     for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
         if (save[index] != transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]][index]) {
-            goto tagViolated;
+            /* "Write mark violation"; the original passes sum before setting it */
+            osSyncPrintf("\x83\x89\x83" "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n", sum);
+            nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+            transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
+            return STATUS_WRITE_FAILED;
         }
     }
     sum = ComputeSaveChecksum(save);
@@ -808,12 +812,6 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     transfer->transferResult = PAK_RESULT_OK;
     return STATUS_WRITE_DONE;
-tagViolated:
-    /* "Write mark violation"; the original passes sum before setting it */
-    osSyncPrintf("\x83\x89\x83" "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n", sum);
-    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
-    transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
-    return STATUS_WRITE_FAILED;
 failed:
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_WRITE_FAILED;
