@@ -7,6 +7,7 @@
 #include "heap.h"
 #include "math_util.h"
 #include "host_file.h"
+#include "libc.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -214,6 +215,62 @@
 
 /* The largest value the status sends for each figure */
 #define MAX_STATUS_VALUE 999
+
+/* The status data BuildStatusData fills for the Game Boy cartridge; its values are little-endian */
+#define STATUS_CLEARED_SIZE 0x400
+/* Scores are sent raised by this, to keep them positive */
+#define STATUS_SCORE_BIAS 54
+#define STATUS_THIRD_PLACE (1 << 0)
+#define STATUS_SECOND_PLACE (1 << 1)
+#define STATUS_FIRST_PLACE (1 << 2)
+#define STATUS_UNKAF0_COLUMN_COUNT 14
+#define FRAMES_PER_SECOND 30
+#define FRAMES_PER_MINUTE (60 * FRAMES_PER_SECOND)
+
+typedef struct StatusTime {
+    /* 0x0 */ u8 minutes;
+    /* 0x1 */ u8 seconds;
+    /* 0x2 */ u8 hundredths;
+    /* 0x3 */ u8 unk3;
+    /* 0x4 */ u8 unk4;
+} StatusTime; /* size = 0x5 */
+
+/* One course's figures in the status data, or every course's together */
+typedef struct StatusCourse {
+    /* 0x00 */ u8 roundCount[2];
+    /* 0x02 */ u8 bestScore;
+    /* 0x03 */ u8 averageStrokes;
+    /* 0x04 */ u8 longestDrive[2];
+    /* 0x06 */ u8 averageDrive[2];
+    /* 0x08 */ u8 unk8;
+    /* 0x09 */ u8 averagePutts; /* In tenths, from PackTenths */
+    /* 0x0A */ u8 parOrBetterRate; /* As percentages */
+    /* 0x0B */ u8 parOnRate;
+    /* 0x0C */ u8 unkC;
+    /* 0x0D */ u8 places; /* STATUS_*_PLACE bits */
+    /* 0x0E */ u8 characterBestScores[CHARACTER_COUNT];
+    /* 0x20 */ StatusTime bestTimes[BEST_TIME_COUNT];
+    /* 0x2F */ u8 birdieBadges[3]; /* One bit per hole, from the first hole's top bit */
+} StatusCourse; /* size = 0x32 */
+
+typedef struct StatusUnkAF0Bits {
+    /* 0x0 */ u8 nonzeroBits[2];
+    /* 0x2 */ u8 flagBits[2];
+} StatusUnkAF0Bits; /* size = 0x4 */
+
+/* What the player has opened and won, in the status data */
+typedef struct StatusProgress {
+    /* 0x00 */ u8 openCourses;
+    /* 0x01 */ u8 ringShotStars[RING_SHOT_COURSE_COUNT]; /* One bit per hole */
+    /* 0x07 */ u8 birdieBadgeCount;
+    /* 0x08 */ StatusUnkAF0Bits unkAF0Bits[SAVE_UNKAF0_ROW_COUNT];
+} StatusProgress; /* size = 0x50 */
+
+typedef struct StatusData {
+    /* 0x000 */ StatusCourse courses[COURSE_COUNT];
+    /* 0x12C */ StatusCourse allCourses;
+    /* 0x15E */ StatusProgress progress;
+} StatusData; /* size = 0x1AE */
 
 /* A Game Boy save in the cartridge RAM */
 #define CARTRIDGE_SAVE_SIZE 0x200
@@ -2713,7 +2770,248 @@ void DrawPressingHand(Gfx **displayListHead) {
     *displayListHead = displayList;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", BuildStatusData);
+s32 RoundedWholePart(f32 value);
+
+/* The save from unk990 on, which BuildStatusData reads through a pointer to unk990 */
+typedef struct SaveRecords {
+    Unk990 unk990;
+    s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
+    s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
+    UnkE98 unkE98[COURSE_COUNT];
+    u8 unk1150[0x1320 - 0x1150];
+    s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+} SaveRecords;
+
+/* Returns value rounded to tenths, times ten, up to MAX_STATUS_VALUE and nine tenths */
+static inline s32 PackTenths(f32 value) {
+    s32 wholePart = value;
+    s32 fraction = (value - wholePart) * 100.0f;
+
+    if (fraction % 10 >= 5) {
+        fraction += 10;
+    }
+    fraction /= 10;
+    if (fraction >= 10) {
+        wholePart++;
+        fraction = 0;
+        if (wholePart >= MAX_STATUS_VALUE + 1) {
+            wholePart = MAX_STATUS_VALUE;
+            fraction = 9;
+        }
+    }
+    return wholePart * 10 + fraction;
+}
+
+/*
+ * Fills status with the save's course records, best times, badges and stars, in the layout of the
+ * Game Boy cartridge's status data.
+ */
+void BuildStatusData(u8 *status) {
+    StatusData *data = (StatusData *)status;
+    SaveData *save = GetSaveData();
+    StatusCourse *course;
+    StatusProgress *progress;
+    /* Reading the records through a pointer to unk990 is there to match */
+    SaveRecords *records = (SaveRecords *)&save->unk990;
+    UnkE98 *entry;
+    UnkE98 *scores;
+    f32 reciprocal;
+    s32 value;
+    s32 sum;
+    s32 courseIndex;
+    s32 index;
+    s32 bits[2];
+    s32 row;
+    s32 openCourseCount;
+
+    memset(status, 0, STATUS_CLEARED_SIZE);
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        entry = &save->unkE98[courseIndex];
+        course = &data->courses[courseIndex];
+        /* Testing for zero first is there to match */
+        if (entry->roundCount != 0) {
+            if (entry->roundCount > 0) {
+                reciprocal = 1.0f / entry->roundCount;
+                /* Copying the count into value is there to match */
+                value = entry->roundCount;
+                course->roundCount[0] = value;
+                course->roundCount[1] = value >> 8;
+                course->bestScore = entry->bestScore + STATUS_SCORE_BIAS;
+                course->averageStrokes = RoundedWholePart(entry->strokeTotal * reciprocal);
+                value = RoundedWholePart(entry->longestDrive * UNK_SCALE);
+                course->longestDrive[0] = value;
+                course->longestDrive[1] = value >> 8;
+                value = RoundedWholePart(entry->averageDrive * UNK_SCALE);
+                course->averageDrive[0] = value;
+                course->averageDrive[1] = value >> 8;
+                course->unk8 = RoundedWholePart(entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND));
+                course->averagePutts = PackTenths(entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND));
+                course->parOrBetterRate =
+                    RoundedWholePart(entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND));
+                course->parOnRate = RoundedWholePart(entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND));
+                sum = entry->unk28 + entry->unk2C;
+                if (sum == 0) {
+                    course->unkC = 0;
+                } else {
+                    course->unkC = RoundedWholePart(((f32)entry->unk28 / (f32)sum) * 100.0f);
+                }
+                course->places = 0;
+                /* Setting the first bit with |= is there to match */
+                if (entry->hasPlace[THIRD_PLACE_INDEX] > 0) {
+                    course->places |= STATUS_THIRD_PLACE;
+                }
+                if (entry->hasPlace[SECOND_PLACE_INDEX] > 0) {
+                    course->places |= STATUS_SECOND_PLACE;
+                }
+                if (entry->hasPlace[FIRST_PLACE_INDEX] > 0) {
+                    course->places |= STATUS_FIRST_PLACE;
+                }
+                for (index = 0; index != CHARACTER_COUNT; index++) {
+                    if (entry->hasCharacterBestScore[index] == TRUE) {
+                        course->characterBestScores[index] = entry->characterBestScores[index] + STATUS_SCORE_BIAS;
+                    } else {
+                        course->characterBestScores[index] = 0;
+                    }
+                }
+            }
+        }
+        for (index = 0; index != BEST_TIME_COUNT; index++) {
+            if (records->bestTimes[courseIndex][index] > 0) {
+                /* Passing the parts through value is there to match */
+                value = records->bestTimes[courseIndex][index] / FRAMES_PER_MINUTE;
+                course->bestTimes[index].minutes = value;
+                value = records->bestTimes[courseIndex][index] / FRAMES_PER_SECOND % 60;
+                course->bestTimes[index].seconds = value;
+                value = (s32)(records->bestTimes[courseIndex][index] * (100.0f / FRAMES_PER_SECOND)) % 100;
+                course->bestTimes[index].hundredths = value;
+                course->bestTimes[index].unk3 = records->unkE08[courseIndex][index];
+                course->bestTimes[index].unk4 = records->unkD78[courseIndex][index] + STATUS_SCORE_BIAS;
+            } else {
+                course->bestTimes[index].minutes = 0;
+                course->bestTimes[index].seconds = 0;
+                course->bestTimes[index].hundredths = 0;
+                course->bestTimes[index].unk3 = 0;
+                course->bestTimes[index].unk4 = 0;
+            }
+        }
+        course->birdieBadges[0] = 0;
+        course->birdieBadges[1] = 0;
+        course->birdieBadges[2] = 0;
+        for (index = 0; index != 8; index++) {
+            if (records->unk990.birdieBadgeCounts[courseIndex][index] > 0) {
+                course->birdieBadges[0] |= 1 << (7 - index);
+            }
+        }
+        for (index = 0; index != 8; index++) {
+            if (records->unk990.birdieBadgeCounts[courseIndex][8 + index] > 0) {
+                course->birdieBadges[1] |= 1 << (7 - index);
+            }
+        }
+        for (index = 0; index != 2; index++) {
+            if (records->unk990.birdieBadgeCounts[courseIndex][16 + index] > 0) {
+                course->birdieBadges[2] |= 1 << (7 - index);
+            }
+        }
+    }
+
+    ComputeRoundStatistics();
+    course = &data->allCourses;
+    value = D_80105C38[COURSE_COUNT].roundCount;
+    if (value > 0) {
+        course->roundCount[0] = value;
+        course->roundCount[1] = value >> 8;
+        course->bestScore = (s32)D_80105C38[COURSE_COUNT].unk4 + STATUS_SCORE_BIAS;
+        course->averageStrokes = RoundedWholePart(D_80105C38[COURSE_COUNT].unk8);
+        /* Holding the drives in sum, and the scores below in scores, is there to match */
+        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].unkC);
+        course->longestDrive[0] = sum;
+        course->longestDrive[1] = sum >> 8;
+        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].unk10);
+        course->averageDrive[0] = sum;
+        course->averageDrive[1] = sum >> 8;
+        course->unk8 = RoundedWholePart(D_80105C38[COURSE_COUNT].unk18);
+        course->averagePutts = PackTenths(D_80105C38[COURSE_COUNT].unk1C);
+        course->parOrBetterRate = RoundedWholePart(D_80105C38[COURSE_COUNT].unk20);
+        course->parOnRate = RoundedWholePart(D_80105C38[COURSE_COUNT].unk24);
+        course->unkC = RoundedWholePart(D_80105C38[COURSE_COUNT].unk28);
+        course->places = 0;
+        for (index = 0; index != CHARACTER_COUNT; index++) {
+            for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+                scores = &save->unkE98[courseIndex];
+                if (scores->hasCharacterBestScore[index] == TRUE) {
+                    course->characterBestScores[index] = scores->characterBestScores[index] + STATUS_SCORE_BIAS;
+                    break;
+                }
+            }
+            if (courseIndex < COURSE_COUNT) {
+                for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+                    scores = &save->unkE98[courseIndex];
+                    if (scores->hasCharacterBestScore[index] == TRUE
+                        && course->characterBestScores[index]
+                               > scores->characterBestScores[index] + STATUS_SCORE_BIAS) {
+                        course->characterBestScores[index] = scores->characterBestScores[index] + STATUS_SCORE_BIAS;
+                    }
+                }
+            } else {
+                course->characterBestScores[index] = 0;
+            }
+        }
+        for (index = 0; index != BEST_TIME_COUNT; index++) {
+            course->bestTimes[index].minutes = 0;
+            course->bestTimes[index].seconds = 0;
+            course->bestTimes[index].hundredths = 0;
+            course->bestTimes[index].unk3 = 0;
+            course->bestTimes[index].unk4 = 0;
+        }
+        course->birdieBadges[0] = 0;
+        course->birdieBadges[1] = 0;
+        course->birdieBadges[2] = 0;
+    }
+
+    progress = &data->progress;
+    openCourseCount = CountOpenCourses(save->coursePoints);
+    progress->openCourses = 0;
+    for (courseIndex = 0; courseIndex != openCourseCount; courseIndex++) {
+        /* The original keeps only the last course's bit */
+        progress->openCourses = 1 << courseIndex;
+    }
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        progress->ringShotStars[courseIndex] = 0;
+        for (index = 0; index != RING_SHOT_HOLE_COUNT; index++) {
+            if (records->hasRingShotStar[courseIndex][index] != 0) {
+                progress->ringShotStars[courseIndex] |= 1 << index;
+            }
+        }
+    }
+    progress->birdieBadgeCount = 0;
+    for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
+        for (index = 0; index != COURSE_HOLE_COUNT; index++) {
+            if (records->unk990.birdieBadgeCounts[courseIndex][index] != 0) {
+                progress->birdieBadgeCount++;
+            }
+        }
+    }
+    for (courseIndex = 0; courseIndex != SAVE_UNKAF0_ROW_COUNT; courseIndex++) {
+        /* The bits array, zeroed from its end, and courseIndex as row index are there to match */
+        row = sStatusHoleOrder[courseIndex];
+        bits[1] = 0;
+        bits[0] = 0;
+        for (index = 0; index != STATUS_UNKAF0_COLUMN_COUNT; index++) {
+            if (records->unk990.unkAF0[row][index].unk1 != 0) {
+                bits[0] |= 1 << index;
+            }
+            if (records->unk990.unkAF0[row][index].unk1 & UNKAF0_FLAG) {
+                bits[1] |= 1 << index;
+            }
+        }
+        progress->unkAF0Bits[courseIndex].nonzeroBits[0] = bits[0];
+        progress->unkAF0Bits[courseIndex].nonzeroBits[1] = bits[0] >> 8;
+        progress->unkAF0Bits[courseIndex].flagBits[0] = bits[1];
+        progress->unkAF0Bits[courseIndex].flagBits[1] = bits[1] >> 8;
+    }
+}
 
 /* The whole part of value once rounded to tenths, up to MAX_STATUS_VALUE */
 s32 RoundedWholePart(f32 value) {
