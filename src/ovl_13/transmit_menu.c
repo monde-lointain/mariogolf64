@@ -27,6 +27,8 @@
 #define TRANSMIT_OPTION_EXPERIENCE 1
 #define TRANSMIT_OPTION_CHARACTERS 2
 #define TRANSMIT_OPTION_MAIN_MENU 3
+/* The hint below each option, counted the same way */
+#define TRANSMIT_OPTION_HINTS 0x143
 
 /* screenStep values on the Bring Characters screen */
 #define BRING_READING 0
@@ -172,6 +174,28 @@
 #define POINTER_TOP 76
 #define EXPERIENCE_LEFT 20 /* Below each face */
 #define EXPERIENCE_TOP 174
+/* The options, centred above the hint, with the pointer at the left of the chosen one */
+#define OPTIONS_CENTRE_X 160
+#define OPTIONS_TOP 64
+#define OPTION_SPACING 18
+#define OPTION_POINTER_TOP 60
+#define OPTION_POINTER_GAP 8 /* Between the pointer at rest and the chosen option's name */
+/* The backdrop: the course scene at double size in strips, then the title and the wood panel */
+#define COURSE_SCENE_LEFT 8
+#define COURSE_SCENE_TOP 8
+#define COURSE_SCENE_WIDTH 152
+#define COURSE_SCENE_STRIP_ROWS 11
+#define COURSE_SCENE_STRIP_COUNT 11
+#define TITLE_LEFT 60
+#define TITLE_TOP 16
+#define TITLE_WIDTH 200
+#define TITLE_STRIP_ROWS 10
+#define TITLE_STRIP_COUNT 3
+#define WOOD_PANEL_LEFT 16
+#define WOOD_PANEL_TOP 48
+#define WOOD_PANEL_WIDTH 288
+#define WOOD_PANEL_STRIP_ROWS 7
+#define WOOD_PANEL_STRIP_COUNT 26
 
 /* The notice cloud grows by one step each time it is drawn, up to this size */
 #define NOTICE_FULL_SIZE 4
@@ -1802,7 +1826,160 @@ void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) 
     *displayListHead = displayList;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawTransmitMenu);
+void DrawTransmitMenu(Gfx **displayListHead) {
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    Gfx *displayList = *displayListHead;
+    s32 index;
+    s32 rowCount;
+    s32 panelRowCount; /* Apart from rowCount, which is there to match */
+    s32 option;
+    s32 width;
+    s32 height;
+    s32 pointerLeft;
+    s32 pointerSwing;
+
+    gDPPipeSync(displayList++);
+    gDPPipeSync(displayList++);
+    gDPSetCycleType(displayList++, G_CYC_1CYCLE);
+    gDPPipeSync(displayList++);
+    gDPPipeSync(displayList++);
+    gDPSetRenderMode(displayList++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(displayList++);
+    gDPSetColorDither(displayList++, G_CD_DISABLE);
+    gSPTexture(displayList++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(displayList++);
+    gDPSetTexturePersp(displayList++, G_TP_NONE);
+    gDPPipeSync(displayList++);
+    gDPSetTextureFilter(displayList++, G_TF_POINT);
+    gDPPipeSync(displayList++);
+    gDPSetAlphaCompare(displayList++, G_AC_NONE);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    LoadLargePalette(&displayList, (u8 *)transfer->courseSceneImage + IMAGE_HEADER_SIZE);
+    for (index = 0; index != COURSE_SCENE_STRIP_COUNT; index++) {
+        rowCount = (index != COURSE_SCENE_STRIP_COUNT - 1) ? COURSE_SCENE_STRIP_ROWS : 1;
+        if (index == 0) {
+            LoadTextureBlock(&displayList, (u8 *)transfer->courseSceneImage + LARGE_PALETTED_TEXELS_OFFSET,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH, COURSE_SCENE_STRIP_ROWS + 2, 0, 0, 0, 0, 0,
+                             0, 0);
+            DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2, COURSE_SCENE_TOP << 2,
+                            (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
+                            (COURSE_SCENE_TOP + (COURSE_SCENE_STRIP_ROWS + 1) * 2) << 2, G_TX_RENDERTILE, 0, 0,
+                            TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
+        } else {
+            LoadTextureBlock(&displayList,
+                             (u8 *)transfer->courseSceneImage + LARGE_PALETTED_TEXELS_OFFSET
+                                 + index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH, rowCount + 2, 0, 0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
+                            (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2) << 2,
+                            (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
+                            (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2 + rowCount * 2) << 2,
+                            G_TX_RENDERTILE, 0, 1 << 5, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
+        }
+    }
+    LoadLargePalette(&displayList, (u8 *)transfer->titleImage + IMAGE_HEADER_SIZE);
+    for (index = 0; index != TITLE_STRIP_COUNT; index++) {
+        gDPLoadTextureTile(displayList++,
+                           ((u32)transfer->titleImage + LARGE_PALETTED_TEXELS_OFFSET
+                            + index * (TITLE_WIDTH * TITLE_STRIP_ROWS)) & ~7,
+                           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1, TITLE_STRIP_ROWS - 1, 0,
+                           0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&displayList, TITLE_LEFT << 2, (TITLE_TOP + index * TITLE_STRIP_ROWS) << 2,
+                        (TITLE_LEFT + TITLE_WIDTH) << 2, (TITLE_TOP + index * TITLE_STRIP_ROWS + TITLE_STRIP_ROWS) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_NONE);
+    for (index = 0; index != WOOD_PANEL_STRIP_COUNT; index++) {
+        panelRowCount = (index != WOOD_PANEL_STRIP_COUNT - 1) ? WOOD_PANEL_STRIP_ROWS : 1;
+        gDPLoadTextureTile(displayList++,
+                           ((u32)transfer->woodPanelImage + IMAGE_HEADER_SIZE
+                            + index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2)) & ~7,
+                           G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0, WOOD_PANEL_WIDTH - 1,
+                           panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&displayList, WOOD_PANEL_LEFT << 2, (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS) << 2,
+                        (WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH) << 2,
+                        (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS + panelRowCount) << 2, G_TX_RENDERTILE, 0, 0,
+                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    switch (transfer->screen) {
+        case TRANSMIT_SCREEN_OPTIONS:
+            DrawOptionsScreen(&displayList, transfer);
+            break;
+        case TRANSMIT_SCREEN_BRING_CHARACTERS:
+            DrawBringCharactersScreen(&displayList, transfer);
+            break;
+        case TRANSMIT_SCREEN_SEND_STATUS:
+            DrawSendStatusScreen(&displayList, transfer);
+            break;
+        case TRANSMIT_SCREEN_SEND_EXPERIENCE:
+            DrawSendExperienceScreen(&displayList, transfer);
+            break;
+    }
+    if (transfer->screen == TRANSMIT_SCREEN_OPTIONS) {
+        MeasureMessage(sModeOptions[transfer->transferMode][transfer->optionIndex] + TRANSMIT_OPTION_MESSAGES,
+                       FONT_SIZE_LARGE, &width, &height, 0);
+        /* The pointer swings in and out over half a turn of the angle */
+        sOptionPointerAngle += DEGREES_TO_RADIANS(10);
+        if (sOptionPointerAngle > M_PI) {
+            sOptionPointerAngle -= M_PI;
+        }
+        pointerSwing = sinf(sOptionPointerAngle) * 8.0f;
+        gDPPipeSync(displayList++);
+        gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+        LoadSmallPalette(&displayList, 0, (u8 *)transfer->pointerImage + IMAGE_HEADER_SIZE);
+        gDPLoadTextureTile_4b(displayList++, ((u32)transfer->pointerImage + PALETTED_TEXELS_OFFSET) & ~7,
+                              G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1, POINTER_IMAGE_HEIGHT - 1, 0, 0,
+                              0, 0, 0, 0, 0);
+        pointerLeft = OPTIONS_CENTRE_X - OPTION_POINTER_GAP - POINTER_WIDTH - width / 2 - pointerSwing;
+        DrawTextureRect(&displayList, pointerLeft << 2,
+                        (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING) << 2,
+                        (pointerLeft + POINTER_WIDTH) << 2,
+                        (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING + POINTER_HEIGHT) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    SetUpTextDrawing(&displayList);
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    if (transfer->screen == TRANSMIT_SCREEN_OPTIONS || transfer->screen == TRANSMIT_SCREEN_LEAVING
+        || transfer->screen == TRANSMIT_SCREEN_UNK6 || transfer->screen == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT) {
+        for (index = 0; index != MODE_OPTION_COUNT; index++) {
+            option = sModeOptions[transfer->transferMode][index];
+            if (option != TRANSMIT_OPTION_NONE) {
+                SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + index * OPTION_SPACING, option + TRANSMIT_OPTION_MESSAGES,
+                            1, index, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+                DrawLargeTextSlot(&displayList, index);
+            }
+        }
+        SetTextSlot(HINT_LEFT, HINT_TOP,
+                    sModeOptions[transfer->transferMode][transfer->optionIndex] + TRANSMIT_OPTION_HINTS, 1,
+                    HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+    }
+    if (transfer->screen == TRANSMIT_SCREEN_SEND_STATUS) {
+        DrawSendStatusHint(&displayList, transfer);
+    }
+    if (transfer->screen == TRANSMIT_SCREEN_BRING_CHARACTERS) {
+        DrawBringCharactersText(&displayList, transfer);
+    }
+    if (transfer->screen == TRANSMIT_SCREEN_SEND_EXPERIENCE) {
+        DrawSendExperienceText(&displayList, transfer);
+    }
+    DrawNotice(&displayList);
+    gSPDisplayList(displayList++, D_800C3FC0);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    gDPPipeSync(displayList++);
+    gDPSetTextureFilter(displayList++, G_TF_POINT);
+    if (transfer->isAccessing == TRUE) {
+        DrawAccessingSign(&displayList);
+    }
+    if (transfer->pressingHandPosition != 0) {
+        DrawPressingHand(&displayList);
+    }
+    *displayListHead = displayList;
+}
 
 void ClearCartridgeCharacters(void) {
     /* The transfer pointer is there to match */
