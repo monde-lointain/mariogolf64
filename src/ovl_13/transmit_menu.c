@@ -26,6 +26,19 @@
 #define TRANSMIT_OPTION_CHARACTERS 2
 #define TRANSMIT_OPTION_MAIN_MENU 3
 
+/* screenStep values on the Bring Characters screen */
+#define BRING_READING 0
+#define BRING_CHOOSING 2
+#define BRING_BRINGING 3
+#define BRING_ASKING 4 /* Whether to bring more characters */
+#define BRING_BROUGHT 7
+#define BRING_CHOOSING_SLOT 8 /* The character to replace */
+#define BRING_NO_CHARACTERS 10
+#define BRING_CONFIRMING 12 /* Asking the player to start a pak check */
+#define BRING_STARTING 13
+#define BRING_SHOWING_ERROR 14
+#define BRING_NEXT_CARTRIDGE 16
+
 /* screenStep values on the Send Status screen */
 #define SEND_STATUS_SHOWING_ERROR 0 /* Or the cancelled pak check, closing */
 #define SEND_STATUS_CHOOSING 1
@@ -37,6 +50,10 @@
 #define SEND_STATUS_CONFIRMING 10 /* Asking the player to start a pak check */
 #define SEND_STATUS_TAGGING 11
 #define SEND_STATUS_WRITING 12
+
+/* The answers to PROMPT_BRING_MORE_CHARACTERS */
+#define BRING_MORE_CHARACTERS_YES 8
+#define BRING_MORE_CHARACTERS_NO 9
 
 /* The answers to PROMPT_OVERWRITE_RECORDS */
 #define OVERWRITE_RECORDS_YES 10
@@ -68,6 +85,7 @@
 #define INSERT_RUMBLE_PAK_MESSAGE 0x155
 #define CORRUPTED_SAVE_MESSAGE 0x152
 #define UNINITIALIZED_SAVE_MESSAGE 0x153
+#define SWAP_GAME_BOY_PAKS_MESSAGE 0x154
 #define CARTRIDGE_REPLACED_MESSAGE 0x156
 #define PAK_CHECK_MESSAGE 0x147
 #define NO_EXPERIENCE_MESSAGE 0x157
@@ -225,6 +243,11 @@
 
 void LoadCursorBox(void *image);
 void UpdateBringCharacters(void);
+s32 ReadCartridgeCharacters(void);
+void BringOverCharacter(s32 listedIndex, s32 slot);
+void ListPresentCharacters(void);
+/* The character's stats from 0x1C on are laid out as GenerateClubSet takes them */
+void GenerateClubSet(s32 setIndex, GameBoyCharacter *stats);
 void UpdateSendStatus(void);
 void UpdateSendExperience(void);
 s32 HaveAllRumblePaks(void);
@@ -242,7 +265,10 @@ s32 GetNoticeState(void);
 /* The buttons of every controller together, which any player may use on the menu */
 extern ControllerState sTransmitController;
 
+extern s32 D_800C42D0;
+
 /* Results of opening and accessing the Game Boy cartridges, after the notice each shows */
+#define PAK_RESULT_STILL_READING -1 /* ReadCartridgeCharacters has more saves to read */
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
 #define PAK_RESULT_OK 1
 #define PAK_RESULT_NO_CHARACTERS 2
@@ -372,7 +398,184 @@ void FreeTransmitMenu(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateBringCharacters);
+/*
+ * Runs the Bring Characters screen. After a pak check it reads the cartridges' characters, lets
+ * the player choose one and, once all four slots are full, the slot to replace, then brings the
+ * character over and offers to bring more from another Game Boy cartridge.
+ */
+void UpdateBringCharacters(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    s32 result;
+
+    switch (transfer->screenStep) {
+        default:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (sTransmitController.pressedButtons & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case BRING_NEXT_CARTRIDGE:
+            SetNoticeState(NOTICE_OPENING, SWAP_GAME_BOY_PAKS_MESSAGE);
+            ClearCartridgeCharacters();
+            transfer->screenStep = BRING_CONFIRMING;
+            break;
+        case BRING_STARTING:
+            SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
+            ClearCartridgeCharacters();
+            transfer->screenStep = BRING_CONFIRMING;
+            break;
+        case BRING_CONFIRMING:
+            switch (GetNoticeState()) {
+                case NOTICE_HIDDEN:
+                    if (!transfer->isCancelled) {
+                        transfer->isAccessing = TRUE;
+                        transfer->screenStep = BRING_READING;
+                    } else {
+                        transfer->isAccessing = FALSE;
+                        transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    }
+                    break;
+                case NOTICE_CLOSING:
+                    break;
+                case NOTICE_SHOWN:
+                    transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
+                    if (sTransmitController.pressedButtons & A_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = FALSE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    } else if (sTransmitController.pressedButtons & B_BUTTON) {
+                        transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                        transfer->isCancelled = TRUE;
+                        SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
+                        PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    }
+                    break;
+            }
+            break;
+        case BRING_READING:
+            result = ReadCartridgeCharacters();
+            switch (result) {
+                case PAK_RESULT_OK:
+                    transfer->screenStep = BRING_CHOOSING;
+                    transfer->isAccessing = FALSE;
+                    break;
+                case PAK_RESULT_STILL_READING: /* The empty case is there to match */
+                    break;
+                case PAK_RESULT_NO_CHARACTERS:
+                    SetNoticeState(NOTICE_OPENING, NO_CHARACTERS_MESSAGE);
+                    transfer->screenStep = BRING_NO_CHARACTERS;
+                    transfer->isAccessing = FALSE;
+                    break;
+                default:
+                    ShowTransferError(result);
+                    transfer->screenStep = BRING_SHOWING_ERROR;
+                    transfer->isAccessing = FALSE;
+                    break;
+            }
+            break;
+        case BRING_BRINGING:
+            D_800C42D0 = 1;
+            if (++transfer->unk7AC == 16) {
+                BringOverCharacter(transfer->listedCharacterIndex, transfer->characterIndex);
+                transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 0;
+                GenerateClubSet(FIRST_GAME_BOY_GOLFER + transfer->characterIndex,
+                                &g_GameBoyCharacters[transfer->characterIndex]);
+                SetTextName(g_GameBoyCharacters[transfer->characterIndex].name);
+                SetTextPaletteColor(255, 255, 0, 0);
+                if (transfer->characterCount < GAME_BOY_GOLFER_COUNT) {
+                    transfer->characterCount++;
+                }
+                transfer->screenStep = BRING_BROUGHT;
+                ListPresentCharacters();
+            }
+            break;
+        case BRING_CHOOSING_SLOT:
+            if (sTransmitController.pressedButtons & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
+                transfer->screenStep = BRING_BRINGING;
+                transfer->unk7AC = 0;
+            } else if (sTransmitController.pressedButtons & B_BUTTON) {
+                PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screenStep = BRING_CHOOSING;
+            } else if ((sTransmitController.repeatedButtons & L_JPAD) && transfer->characterIndex > 0) {
+                transfer->characterIndex--;
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            } else if ((sTransmitController.repeatedButtons & R_JPAD)
+                       && transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
+                transfer->characterIndex++;
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            }
+            break;
+        case BRING_CHOOSING:
+            if (sTransmitController.pressedButtons & A_BUTTON) {
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                if (transfer->characterCount == GAME_BOY_GOLFER_COUNT) {
+                    transfer->screenStep = BRING_CHOOSING_SLOT;
+                } else {
+                    transfer->screenStep = BRING_BRINGING;
+                    transfer->characterIndex = transfer->characterCount;
+                    transfer->unk76C[transfer->listedCharacters[transfer->listedCharacterIndex]] = 2;
+                    transfer->unk7AC = 0;
+                }
+            } else if (sTransmitController.pressedButtons & B_BUTTON) {
+                PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+            } else if ((sTransmitController.repeatedButtons & L_JPAD) && transfer->listedCharacterIndex > 0) {
+                transfer->listedCharacterIndex--;
+                if (transfer->listedCharacterIndex < transfer->unk7B8) {
+                    transfer->unk7B8--;
+                }
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            } else if ((sTransmitController.repeatedButtons & R_JPAD)
+                       && transfer->listedCharacterIndex < transfer->unk79C - 1) {
+                transfer->listedCharacterIndex++;
+                if (transfer->unk7B8 + 5 < transfer->listedCharacterIndex) {
+                    transfer->unk7B8++;
+                }
+                PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            }
+            break;
+        case BRING_BROUGHT:
+            transfer->pressingHandPosition = PRESSING_HAND_LOW;
+            if (sTransmitController.pressedButtons & A_BUTTON) {
+                transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
+                PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                if (transfer->characterCount != GAME_BOY_GOLFER_COUNT) {
+                    OpenPrompt(PROMPT_BRING_MORE_CHARACTERS);
+                    transfer->screenStep = BRING_ASKING;
+                } else {
+                    transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                }
+            }
+            break;
+        case BRING_ASKING:
+            switch (UpdatePrompt(&sTransmitController)) {
+                case BRING_MORE_CHARACTERS_YES:
+                    transfer->screenStep = BRING_NEXT_CARTRIDGE;
+                    break;
+                case BRING_MORE_CHARACTERS_NO:
+                    transfer->screen = TRANSMIT_SCREEN_OPTIONS;
+                    break;
+            }
+            break;
+        case 5: /* Step 5 does nothing */
+            break;
+    }
+}
 
 void ShowPakError(s32 pfsError) {
     switch (pfsError) {
@@ -786,7 +989,7 @@ void UpdateTransmitMenu(void) {
                 } else if (transfer->optionIndex == 1) {
                     if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
                         transfer->screen = TRANSMIT_SCREEN_BRING_CHARACTERS;
-                        transfer->screenStep = 13;
+                        transfer->screenStep = BRING_STARTING;
                         ClearCartridgeCharacters();
                     } else {
                         transfer->screen = TRANSMIT_SCREEN_SEND_EXPERIENCE;
@@ -1172,11 +1375,12 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     sprintf(g_PrintBuffer, "%3d", transfer->screenStep);
     PrintDebugText(g_PrintBuffer, 20, 2);
-    if (transfer->screenStep == 8) {
+    if (transfer->screenStep == BRING_CHOOSING_SLOT) {
         isCharacterShown = TRUE;
         character = &g_GameBoyCharacters[transfer->characterIndex];
     }
-    if ((transfer->screenStep == 2 || transfer->screenStep == 3) && g_GameBoyTransfer.unk79C > 0) {
+    if ((transfer->screenStep == BRING_CHOOSING || transfer->screenStep == BRING_BRINGING)
+        && g_GameBoyTransfer.unk79C > 0) {
         isCharacterShown = TRUE;
         character = &transfer->cartridgeCharacters[transfer->listedCharacters[transfer->listedCharacterIndex]];
     }
@@ -1187,13 +1391,13 @@ void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     if (transfer->unk7A0 == g_ControllerCount * 4 - 1) {
         message = NO_MESSAGE;
         switch (transfer->screenStep) {
-            case 2:
+            case BRING_CHOOSING:
                 message = CHOOSE_CHARACTER_MESSAGE;
                 break;
-            case 8:
+            case BRING_CHOOSING_SLOT:
                 message = CHOOSE_SWAPPED_CHARACTER_MESSAGE;
                 break;
-            case 7:
+            case BRING_BROUGHT:
                 message = CHARACTER_BROUGHT_MESSAGE;
                 break;
         }
