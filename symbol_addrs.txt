@@ -2372,3 +2372,4 @@ sTrialEndPoint = 0x8025C834; // size:0xC segment:ovl_03
 sUnk840 = 0x8025C840; // size:0x1 segment:ovl_03
 sLostTrialCount = 0x8025C844; // size:0x4 segment:ovl_03
 sNeedsShorterClub = 0x8025C84C; // size:0x4 segment:ovl_03
+D_800D1B10 = 0x800D1B10; // type:u32 size:0x8
