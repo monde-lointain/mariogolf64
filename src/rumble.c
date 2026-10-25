@@ -11,18 +11,6 @@
 #include "text.h"
 #include "transfer_pak.h"
 
-typedef struct Unk800FE450 {
-    /* 0x000 */ u8 unk0[0x75C];
-    /* 0x75C */ s32 unk75C[GAME_BOY_CHARACTER_COUNT];
-} Unk800FE450;
-
-extern Unk800FE450 D_800FE450;
-extern s32 sHasGameBoyPak;
-extern s32 D_800FE4AC;
-extern s32 D_800FE4B0;
-extern s32 D_800FE4B4;
-extern s32 D_800FE4B8;
-extern s32 D_800FEC00;
 /* Set until the boot logos, finding a Game Boy Pak, have once gone to the Game Boy Pak transfer module */
 extern s32 sIsBootTransmitPending;
 extern s32 sHasRumblePak[MAXCONTROLLERS];
@@ -128,7 +116,7 @@ void AddGameBoyExperience(s32 characterIndex, s32 experience) {
 }
 
 s32 HasGameBoyPak(void) {
-    return sHasGameBoyPak;
+    return g_GameBoyTransfer.hasGameBoyPak;
 }
 
 s32 IsGameBoyCharacterPresent(s32 characterIndex) {
@@ -144,21 +132,21 @@ u8 *GetGameBoyCharacterName(s32 characterIndex) {
 void ResetGameBoyTransfer(s32 transferMode) {
     s32 index;
 
-    D_800FE4B0 = transferMode;
-    D_800FE4AC = 0;
-    if (transferMode == 0) {
+    g_GameBoyTransfer.transferMode = transferMode;
+    g_GameBoyTransfer.screen = TRANSMIT_SCREEN_OPTIONS;
+    if (transferMode == TRANSFER_MODE_AT_BOOT) {
         for (index = 0; index != GAME_BOY_CHARACTER_COUNT; index++) {
             g_GameBoyCharacters[index].status = 0;
             g_GameBoyCharacters[index].unk34 = -1;
             g_GameBoyCharacters[index].unk38 = -1;
-            ((s32 *)&D_800FE450)[index + 0x75C / 4] = -1;
+            g_GameBoyTransfer.sourceIndices[index] = -1;
         }
-        D_800FE4B4 = 0;
-        D_800FEC00 = 0;
-        D_800FE4B8 = 0;
+        g_GameBoyTransfer.optionIndex = 0;
+        g_GameBoyTransfer.listedCharacterIndex = 0;
+        g_GameBoyTransfer.characterCount = 0;
     } else {
-        D_800FE4B4 = 0;
-        D_800FEC00 = 0;
+        g_GameBoyTransfer.optionIndex = 0;
+        g_GameBoyTransfer.listedCharacterIndex = 0;
     }
 }
 
@@ -174,18 +162,18 @@ s32 IsBootTransmitPending(void) {
     return sIsBootTransmitPending;
 }
 
-/* Sets sHasGameBoyPak if any controller holds a Transfer Pak with a Game Boy cartridge in it */
+/* Sets hasGameBoyPak if any controller holds a Transfer Pak with a Game Boy cartridge in it */
 void DetectGameBoyPaks(void) {
     NUContPakFile file;
     s32 index;
 
     nuContGBPakMgrInit();
-    sHasGameBoyPak = FALSE;
+    g_GameBoyTransfer.hasGameBoyPak = FALSE;
     for (index = 0; index < g_ControllerCount; index++) {
         switch (nuContGBPakOpen(&file, g_PlayerControllerPorts[index])) {
             case 0:
                 osSyncPrintf("GB PACK OK %d\n", index);
-                sHasGameBoyPak = TRUE;
+                g_GameBoyTransfer.hasGameBoyPak = TRUE;
                 break;
             case PFS_ERR_NOPACK:
                 osSyncPrintf("GB NOPACK %d\n", index);
