@@ -914,7 +914,7 @@ void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
-void func_8007EF0C(Gfx **displayListHead, CameraMatrices *matrices);
+void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
 void func_8008156C(void);
 void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
@@ -1320,7 +1320,8 @@ s32 DrawGame(void) {
                     if (g_Cameras[viewIndex].view.drawFlags != 0) {
                         nearZ = -COURSE_NEAR_CLIP;
                         farClip = -D_800C30D4 * 1.2f;
-                        if (g_Cameras[viewIndex].view.mode == 8 || g_Cameras[viewIndex].view.mode == 2) {
+                        if (g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK8
+                            || g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK2) {
                             nearZ = -CLOSE_UP_NEAR_CLIP;
                         }
                         /* Only chooses between two fixed planes; the computed distance itself is dropped */
@@ -1575,7 +1576,7 @@ s32 DrawGame(void) {
                                 func_8021857C(&g_DisplayListHead, matrices);
                             }
                         }
-                        func_8007EF0C(&g_DisplayListHead, matrices);
+                        DrawRain(&g_DisplayListHead, matrices);
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             if (viewIndex == 0) {
                                 func_80083AC8(&g_DisplayListHead, matrices);

@@ -6,6 +6,7 @@
 /* The camera mode that frames the shot from behind the golfer */
 #define CAMERA_MODE_BEHIND_GOLFER 1
 #define CAMERA_MODE_UNK2 2
+#define CAMERA_MODE_UNK8 8
 
 /* Camera drawFlags bits */
 #define CAMERA_DRAW_SCENE (1 << 0)

@@ -40,17 +40,25 @@ typedef struct Effect {
 
 #define RAINDROP_COUNT 48
 #define RAINDROP_FALLING (-1)
+
+/* Raindrop flags bits */
+#define RAINDROP_OFF_SCREEN (1 << 0)
+#define RAINDROP_HEAD_GROUNDED (1 << 4) /* The head has reached the ground too */
 #define RAIN_SPLASH_COUNT 32
 
 typedef struct Raindrop {
     /* 0x00 */ Vec3 head;
     /* 0x0C */ Vec3 tail;
     /* 0x18 */ f32 groundHeight; /* Under the drop; UpdateRain refreshes one drop each frame */
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ s16 unk20[5];
-    /* 0x2A */ s16 unk2A;
+    /* 0x1C */ f32 tailScale;   /* The tail's projected scale */
+    /* 0x20 */ s16 headScreenX; /* In quarter pixels */
+    /* 0x22 */ s16 headScreenY;
+    /* 0x24 */ s16 tailScreenX;
+    /* 0x26 */ s16 tailScreenY;
+    /* 0x28 */ s16 tailDepth;
+    /* 0x2A */ u16 flags; /* RAINDROP_* bits */
     /* 0x2C */ s8 landedFrameCount; /* RAINDROP_FALLING until the drop reaches the ground */
-    /* 0x2D */ u8 unk2D;
+    /* 0x2D */ u8 splashColumn; /* The column of sRainSplashImage frames it lands with */
 } Raindrop; /* size = 0x30 */
 
 typedef struct RainSplash {
@@ -59,7 +67,7 @@ typedef struct RainSplash {
     /* 0x10 */ u8 unk10[6];
     /* 0x16 */ s8 frameCount;
     /* 0x17 */ s8 unk17;
-    /* 0x18 */ s8 unk18;
+    /* 0x18 */ u8 column; /* The column of sRainSplashImage frames it shows */
 } RainSplash; /* size = 0x1C */
 
 /*
@@ -126,6 +134,8 @@ extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
+extern Mtx sRainModelViewMatrix;
+extern Mtx g_ScreenOrthoMatrix;
 extern Raindrop *sRaindrops;
 extern RainSplash *sRainSplashes;
 /* The x and z that the rain falls around, RAIN_CENTER_DISTANCE ahead of the camera */
@@ -167,7 +177,7 @@ f32 sUnreferencedValues[] = { 1, 2, 3, 10, 11, 12, 13, 14, 20, 21, 22, 25, 30, 1
 u8 sPingPongFrameIndices[] = { 0, 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1 };
 s32 sRaindropCount = RAINDROP_COUNT;
 s32 sRainSplashCount = RAIN_SPLASH_COUNT;
-Vtx D_800C5408[] = {
+Vtx sRainStreakVertices[] = {
     { { { 0, 0, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
     { { { 0, -1, -100 }, 0, { 0, 0 }, { 0xAF, 0xAF, 0xBF, 0x1F } } },
     { { { 48, -1, -100 }, 0, { 0, 0 }, { 0x90, 0xA0, 0xA0, 0x5F } } },
@@ -1994,10 +2004,10 @@ void ResetRaindrop(Raindrop *drop) {
     drop->head[AXIS_X] += sRainVelocity[AXIS_X] * fallFrameCount;
     drop->head[AXIS_Z] += sRainVelocity[AXIS_Z] * fallFrameCount;
     drop->groundHeight = 0;
-    drop->unk2A = 0;
+    drop->flags = 0;
     drop->landedFrameCount = RAINDROP_FALLING;
-    drop->unk2D = 0;
-    drop->unk1C = 1.0f;
+    drop->splashColumn = 0;
+    drop->tailScale = 1.0f;
     drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
     drop->tail[AXIS_X] = drop->head[AXIS_X] + sRainDriftX * RAINDROP_LENGTH;
     drop->tail[AXIS_Z] = drop->head[AXIS_Z] + sRainDriftZ * RAINDROP_LENGTH;
@@ -2019,7 +2029,7 @@ void ResetRainSplash(RainSplash *splash) {
     splash->position[AXIS_Y] = GetGroundHeight(splash->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
                                                splash->position[AXIS_Z] * WORLD_TO_COURSE_SCALE)
                              * COURSE_TO_WORLD_SCALE;
-    splash->unk18 = 0;
+    splash->column = 0;
 }
 
 /* Sets the rain's path from the wind, and places every raindrop and splash */
@@ -2039,7 +2049,7 @@ void StartRain(void) {
     PlaceRainCenter();
     for (index = 0; index != RAINDROP_COUNT; index++) {
         ResetRaindrop(&sRaindrops[index]);
-        sRaindrops[index].unk2A = 0;
+        sRaindrops[index].flags = 0;
     }
     for (index = 0; index != RAIN_SPLASH_COUNT; index++) {
         ResetRainSplash(&sRainSplashes[index]);
@@ -2116,7 +2126,7 @@ void UpdateRain(void) {
                 drop->head[AXIS_Z] += sRainVelocity[AXIS_Z];
             }
             if (drop->head[AXIS_Y] > drop->groundHeight) {
-                drop->unk2A |= 0x10;
+                drop->flags |= RAINDROP_HEAD_GROUNDED;
             }
             if (drop->landedFrameCount == RAINDROP_FALLING) {
                 if (drop->head[AXIS_Y] < drop->groundHeight) {
@@ -2144,7 +2154,202 @@ void UpdateRain(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007EF0C);
+/* ProjectPoint depths that rain is drawn at, nearest first */
+#define RAINDROP_NEAREST_DEPTH (-15.0f)
+#define RAIN_SPLASH_NEAREST_DEPTH (-7.5f)
+/* Screen coordinates in display lists are in quarter pixels */
+#define QUARTER_PIXELS_PER_PIXEL 4
+/* How far a streak's second edge is offset from its first, in quarter pixels */
+#define RAINDROP_WIDTH 5.0f
+#define RAIN_ALPHA_THRESHOLD 1
+#define RAIN_SPLASH_IMAGE_WIDTH 32
+#define RAIN_SPLASH_IMAGE_HEIGHT 64
+/* The splash image holds columns of square frames */
+#define RAIN_SPLASH_FRAME_SIZE 16
+/* Shifts a frame index to its texture coordinate, in 10.5 fixed point */
+#define RAIN_SPLASH_FRAME_SHIFT 9
+/* Each splash frame shows for this many frames */
+#define RAIN_SPLASH_FRAME_DURATION 2
+#define RAIN_SPLASH_GRAY 0xBF
+#define RAIN_SPLASH_ALPHA 0x9F
+/* Splash half sizes, in quarter pixels for each unit of projected scale */
+#define RAIN_SPLASH_HALF_SIZE_PER_SCALE 8.0f
+#define LANDED_DROP_SMALLEST_HALF_SIZE 4.0f
+#define RAIN_SPLASH_SMALLEST_HALF_SIZE 1.0f
+#define RAIN_SPLASH_LARGEST_HALF_SIZE 16
+
+/*
+ * Updates the rain and draws it while it rains, unless the main camera is in mode 2 or 8. Falling
+ * drops are drawn as streaks between their projected head and tail, and landed drops and splashes
+ * as frames of sRainSplashImage.
+ */
+void DrawRain(Gfx **displayListHead, CameraMatrices *matrices) {
+    ScreenPoint point;
+    ScreenPoint splashPoint;
+    Gfx *gfx = *displayListHead;
+    s32 index;
+    /* Separate variables for each loop are there to match */
+    Raindrop *drop;
+    Raindrop *streak;
+    Raindrop *landedDrop;
+    RainSplash *splash;
+    f32 lengthX; /* Then the streak's widening along y */
+    f32 lengthY; /* Then the streak's widening along x */
+    f32 widthScale;
+    s32 halfSize;
+    s32 splashSize;
+    s32 splashStep;
+    s32 textureStep;
+
+    if (g_HoleConditions.isRaining == TRUE && sWeather == WEATHER_RAIN
+        /* Comparing with FALSE is there to match */
+        && (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 || g_Cameras[0].view.mode == CAMERA_MODE_UNK8) == FALSE) {
+        UpdateRain();
+        for (index = 0; index != sRaindropCount; index++) {
+            drop = &sRaindrops[index];
+            if (ProjectPoint(drop->tail[AXIS_X], drop->tail[AXIS_Y], drop->tail[AXIS_Z], &point)
+                < RAINDROP_NEAREST_DEPTH) {
+                drop->tailScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
+                drop->tailScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
+                /* Storing the depth before the flags is there to match */
+                drop->tailDepth = point.depth;
+                drop->flags &= ~RAINDROP_OFF_SCREEN;
+                drop->tailScale = point.scaleX;
+                if (!(drop->flags & RAINDROP_HEAD_GROUNDED)) {
+                    if (ProjectPointToScreen(drop->head[AXIS_X], drop->head[AXIS_Y], drop->head[AXIS_Z], &point)
+                        < RAINDROP_NEAREST_DEPTH) {
+                        drop->headScreenX = point.x * QUARTER_PIXELS_PER_PIXEL;
+                        drop->headScreenY = point.y * QUARTER_PIXELS_PER_PIXEL;
+                    } else {
+                        drop->flags |= RAINDROP_OFF_SCREEN;
+                    }
+                }
+            } else {
+                drop->flags |= RAINDROP_OFF_SCREEN;
+            }
+        }
+        guMtxIdent(&sRainModelViewMatrix);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sRainModelViewMatrix), G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sRainStreakVertices, ARRAY_COUNT(sRainStreakVertices), 0);
+        for (index = 0; index != sRaindropCount; index++) {
+            streak = &sRaindrops[index];
+            /* On screen, with the head still falling */
+            if (streak->flags == 0) {
+                lengthX = streak->headScreenX - streak->tailScreenX;
+                lengthY = streak->headScreenY - streak->tailScreenY;
+                if (lengthX == 0.0f && lengthY == 0.0f) {
+                    /* The empty branch is there to match */
+                } else {
+                    widthScale = RAINDROP_WIDTH / sqrtf(lengthX * lengthX + lengthY * lengthY);
+                    gDPPipeSync(gfx++);
+                    gDPSetPrimDepth(gfx++, streak->tailDepth, 0);
+                    gDPPipeSync(gfx++);
+                    /* Scaling the lengths in place is there to match */
+                    lengthY *= widthScale;
+                    gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
+                                    ((streak->headScreenX + (s32)lengthY) << 16) + streak->headScreenY);
+                    lengthX *= widthScale;
+                    gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
+                                    (streak->headScreenX << 16) + (streak->headScreenY + (s32)lengthX));
+                    gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
+                                    ((streak->tailScreenX + (s32)lengthY) << 16) + streak->tailScreenY);
+                    gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
+                                    (streak->tailScreenX << 16) + (streak->tailScreenY + (s32)lengthX));
+                    gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+                }
+            }
+        }
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE,
+                          0);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, RAIN_ALPHA_THRESHOLD);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sRainSplashImage + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+                               RAIN_SPLASH_IMAGE_WIDTH, RAIN_SPLASH_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+        gDPSetPrimColor(gfx++, 0, 0, RAIN_SPLASH_GRAY, RAIN_SPLASH_GRAY, RAIN_SPLASH_GRAY, RAIN_SPLASH_ALPHA);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        for (index = 0; index != sRaindropCount; index++) {
+            landedDrop = &sRaindrops[index];
+            if (landedDrop->landedFrameCount != RAINDROP_FALLING && !(landedDrop->flags & RAINDROP_OFF_SCREEN)) {
+                gDPPipeSync(gfx++);
+                gDPSetPrimDepth(gfx++, landedDrop->tailDepth, 0);
+                gDPPipeSync(gfx++);
+                halfSize = landedDrop->tailScale * RAIN_SPLASH_HALF_SIZE_PER_SCALE;
+                if (halfSize >= LANDED_DROP_SMALLEST_HALF_SIZE) {
+                    if (halfSize > (f32)RAIN_SPLASH_LARGEST_HALF_SIZE) {
+                        halfSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
+                    }
+                    textureStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / halfSize;
+                    gSPScisTextureRectangle(gfx++, landedDrop->tailScreenX - halfSize,
+                                            landedDrop->tailScreenY - halfSize, landedDrop->tailScreenX + halfSize,
+                                            landedDrop->tailScreenY + halfSize, G_TX_RENDERTILE,
+                                            landedDrop->splashColumn << RAIN_SPLASH_FRAME_SHIFT,
+                                            (landedDrop->landedFrameCount / RAIN_SPLASH_FRAME_DURATION)
+                                                << RAIN_SPLASH_FRAME_SHIFT,
+                                            textureStep, textureStep);
+                }
+            }
+        }
+        for (index = 0; index != sRainSplashCount; index++) {
+            splash = &sRainSplashes[index];
+            if (ProjectPointToScreen(splash->position[AXIS_X], splash->position[AXIS_Y], splash->position[AXIS_Z],
+                                     &splashPoint)
+                < RAIN_SPLASH_NEAREST_DEPTH) {
+                splashSize = splashPoint.scaleX * RAIN_SPLASH_HALF_SIZE_PER_SCALE;
+                if (splashSize >= RAIN_SPLASH_SMALLEST_HALF_SIZE) {
+                    if (splashSize > (f32)RAIN_SPLASH_LARGEST_HALF_SIZE) {
+                        splashSize = RAIN_SPLASH_LARGEST_HALF_SIZE;
+                    }
+                    splashStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / splashSize;
+                    gSPScisTextureRectangle(gfx++, splashPoint.x * QUARTER_PIXELS_PER_PIXEL - splashSize,
+                                            splashPoint.y * QUARTER_PIXELS_PER_PIXEL - splashSize,
+                                            splashPoint.x * QUARTER_PIXELS_PER_PIXEL + splashSize,
+                                            splashPoint.y * QUARTER_PIXELS_PER_PIXEL + splashSize, G_TX_RENDERTILE,
+                                            splash->column << RAIN_SPLASH_FRAME_SHIFT,
+                                            (splash->frameCount / RAIN_SPLASH_FRAME_DURATION)
+                                                << RAIN_SPLASH_FRAME_SHIFT,
+                                            splashStep, splashStep);
+                }
+            }
+        }
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        *displayListHead = gfx;
+    }
+}
 
 #define SPINNING_BADGE_IMAGE_ASSET 0x663
 #define COUNT_GLYPHS_IMAGE_ASSET 0x689
