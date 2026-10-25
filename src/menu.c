@@ -1371,31 +1371,6 @@ void func_8005D334(void) {
     }
 }
 
-/* The figures D_80105C38 holds for each course, then for all of them */
-typedef struct Unk80105C38 {
-    /* 0x00 */ f32 roundCount;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
-    /* 0x2C */ s32 hasThirdPlace;
-    /* 0x30 */ s32 hasSecondPlace;
-    /* 0x34 */ s32 hasFirstPlace;
-} Unk80105C38; /* size = 0x38 */
-
-extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
-
-#define HOLES_PER_ROUND 18.0f
-
-/* Applied to the save's 0x0C and 0x10 figures; what it converts is unknown */
-#define UNK_SCALE 0.00007119878f
-
 void ComputeRoundStatistics(void) {
     UnkE98 *saved;
     UnkE98 *entry;
