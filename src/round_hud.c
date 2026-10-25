@@ -226,6 +226,16 @@ extern s32 D_800E21BC;
 extern s8 D_801061BD;
 extern s32 D_800C308C;
 
+/* Where the hole image sits in front of the perspective camera, at a tenth of its size */
+#define HOLE_IMAGE_MODEL_X (-240.0f)
+#define HOLE_IMAGE_MODEL_Y 180.0f
+#define HOLE_IMAGE_MODEL_Z (-500.0f)
+#define HOLE_IMAGE_MODEL_SCALE 0.1f
+
+extern Mtx sHoleImageMatrix;
+
+void func_80085F98(s32 arg0);
+
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *D_800E2188;
@@ -735,7 +745,40 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008534C);
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80085F98);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008658C);
+/* Draws the hole image as a model in the perspective of the screen effects */
+void DrawHoleImageModel(void) {
+    Vec3 translation;
+    Vec3 scale;
+    Vec3 rotation;
+    Mat4 matrix;
+
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = 0.0f;
+    translation[AXIS_X] = HOLE_IMAGE_MODEL_X;
+    translation[AXIS_Y] = HOLE_IMAGE_MODEL_Y;
+    translation[AXIS_Z] = HOLE_IMAGE_MODEL_Z;
+    scale[AXIS_X] = HOLE_IMAGE_MODEL_SCALE;
+    scale[AXIS_Y] = HOLE_IMAGE_MODEL_SCALE;
+    scale[AXIS_Z] = HOLE_IMAGE_MODEL_SCALE;
+    BuildTransformMatrix(matrix, rotation, translation, scale);
+    ConvertMatrixToFixed(matrix, &sHoleImageMatrix);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+    gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sHoleImageMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    func_80085F98(0);
+    gDPPipeSync(g_DisplayListHead++);
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008679C);
 

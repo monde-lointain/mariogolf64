@@ -2440,3 +2440,5 @@ sSunScreenY = 0x800C5F2C;
 sSunDepth = 0x800C6914;
 sIsSunGlareSettled = 0x800C6918;
 sSunGlareStrength = 0x800C691C;
+DrawHoleImageModel = 0x8008658C; // type:func size:0x40
+sHoleImageMatrix = 0x800E2050; // size:0x40
