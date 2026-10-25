@@ -70,6 +70,7 @@ typedef struct InsetView {
 extern InsetView g_InsetView;
 
 void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height);
+void SetLandingWaitFrameCount(s32 frameCount);
 void UpdateInsetView(void);
 
 /* Looks down on the course for the map views */

@@ -3,6 +3,11 @@
 
 #include <ultra64.h>
 
+/* The landing reactions that StartLandingReaction starts */
+#define LANDING_REACTION_NONE (-1)
+#define LANDING_REACTION_UNK1 1
+#define LANDING_REACTION_UNK2 2 /* In the water or off the course */
+
 void PrepareHoleDisplay(void);
 void InitRoundHud(void);
 void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex);
@@ -22,5 +27,6 @@ void SwapMatrixBuffers(void);
 void ResetBallTrail(void);
 void ScrollWindArrow(void);
 void AdjustHudOffset(void);
+void StartLandingReaction(s32 reaction);
 
 #endif

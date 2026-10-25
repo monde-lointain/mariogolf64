@@ -8,6 +8,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "movie.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
@@ -33,11 +34,6 @@ typedef struct Fog {
 
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
-
-/* Movies that StartMovie plays */
-#define MOVIE_LONGEST_DRIVE 12 /* A longest drive contest's winner */
-#define MOVIE_NEAREST_PIN 13   /* A nearest pin contest's winner */
-#define MOVIE_DRIVE_RECORD 14  /* A tournament's longest drive yet */
 
 typedef struct PlayUnk8 {
     /* 0x0 */ u16 unk0;
@@ -126,7 +122,6 @@ void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord *record);
-void StartMovie(s32 movie);
 s32 IsMovieFinished(void);
 
 s32 func_8005F180(void) {

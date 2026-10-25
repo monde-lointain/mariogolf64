@@ -12,6 +12,7 @@
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "movie.h"
 #include "pin.h"
 #include "save.h"
 #include "scoring.h"
@@ -19,6 +20,8 @@
 #include "screen.h"
 #include "scene.h"
 #include "sound.h"
+#include "surface.h"
+#include "text.h"
 #include "variables.h"
 
 /* sSceneryState values */
@@ -172,6 +175,29 @@ extern s32 sBallTrailHead; /* The latest position */
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
 extern s32 sHudOffsetY;
+
+/* How long the shot camera waits after the ball lands, in frames */
+#define LANDING_WAIT_FRAME_COUNT 40
+#define LANDING_WAIT_LONG_FRAME_COUNT 60
+
+/* The inset view that shows where the ball landed, and the one Toad's movie plays in */
+#define LANDING_INSET_CENTER_X 160
+#define LANDING_INSET_CENTER_Y 160
+#define LANDING_INSET_WIDTH 64
+#define LANDING_INSET_HEIGHT 56
+#define MOVIE_INSET_CENTER_X 160
+#define MOVIE_INSET_CENTER_Y 128
+#define MOVIE_INSET_SIZE 128
+#define LANDING_INSET_UNK8 77
+#define LANDING_INSET_UNKC 77
+#define MOVIE_INSET_UNKC 101
+
+/* The text of the landing reaction, in two glyph groups */
+#define LANDING_GLYPH_GROUP_FIRST 0
+#define LANDING_GLYPH_GROUP_SECOND 1
+
+extern s32 sLandingReaction;
+extern s32 sLandingReactionFrame;
 
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
@@ -514,7 +540,55 @@ void ScrollWindArrow(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081D4C);
+/*
+ * Starts the reaction to where the ball landed, or clears it away with
+ * LANDING_REACTION_NONE. Out of bounds, Toad's movie plays in the inset view
+ * in place of a reaction; elsewhere the inset view shows the ball.
+ */
+void StartLandingReaction(s32 reaction) {
+    s32 previousReaction;
+
+    sLandingReactionFrame = 0;
+    if (reaction == LANDING_REACTION_NONE) {
+        sLandingReaction = reaction;
+        PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, NO_FONT_SIZE, 0, 0, 0, NULL);
+        PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, NO_FONT_SIZE, 0, 0, 0, NULL);
+        StartMovie(MOVIE_NONE);
+        return;
+    }
+    previousReaction = sLandingReaction;
+    if (previousReaction != LANDING_REACTION_NONE) {
+        return;
+    }
+    sLandingReaction = reaction;
+    switch ((u32)GetSurfaceInfo(g_BallSurface)->kind) {
+        case SURFACE_KIND_OUT_OF_BOUNDS:
+            g_InsetView.animation = INSET_VIEW_OPENING;
+            g_InsetView.unk8 = LANDING_INSET_UNK8;
+            sLandingReaction = previousReaction;
+            g_InsetView.unkC = MOVIE_INSET_UNKC;
+            SetInsetViewRect(MOVIE_INSET_CENTER_X, MOVIE_INSET_CENTER_Y, MOVIE_INSET_SIZE, MOVIE_INSET_SIZE);
+            SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
+            StartMovie(MOVIE_TOAD_OUT_OF_BOUNDS);
+            osSyncPrintf("MOVIE KINOP \n");
+            break;
+        case SURFACE_KIND_OUT_OF_COURSE:
+        case SURFACE_KIND_WATER_HAZARD:
+            sLandingReaction = LANDING_REACTION_UNK2;
+            SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
+            break;
+        case SURFACE_KIND_GREEN:
+            SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
+            break;
+        default:
+            g_InsetView.animation = INSET_VIEW_OPENING;
+            g_InsetView.unk8 = LANDING_INSET_UNK8;
+            g_InsetView.unkC = LANDING_INSET_UNKC;
+            SetLandingWaitFrameCount(LANDING_WAIT_FRAME_COUNT);
+            SetInsetViewRect(LANDING_INSET_CENTER_X, LANDING_INSET_CENTER_Y, LANDING_INSET_WIDTH, LANDING_INSET_HEIGHT);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081EF8);
 

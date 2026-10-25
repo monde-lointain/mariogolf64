@@ -161,8 +161,6 @@ typedef struct GlyphSprite {
 
 #define GLYPH_SPRITE_COUNT 300
 #define NO_GLYPH_GROUP (-1)
-/* Given this as its font size, PlaceGlyphGroup only frees the group */
-#define NO_FONT_SIZE (-1)
 /* Without this flag, PlaceGlyphGroup centres the text on its x */
 #define GLYPH_FLAG_LEFT_ALIGNED 0x10
 /* Only the top or the bottom part of a large glyph is drawn */

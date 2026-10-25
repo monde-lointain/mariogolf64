@@ -2428,3 +2428,7 @@ sHudAnimationFrame = 0x800C72FC;
 DrawHudAnimation = 0x800957F0; // type:func
 ResetHudScissor = 0x800958D8; // type:func
 g_HudScissor = 0x801B7F30; // size:0x8
+g_BallSurface = 0x80104B6B;
+StartLandingReaction = 0x80081D4C; // type:func
+sLandingReaction = 0x800C5A10;
+sLandingReactionFrame = 0x800C5A14;

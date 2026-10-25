@@ -15,6 +15,7 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
+#include "movie.h"
 #include "overlay_manager.h"
 #include "pin.h"
 #include "round_hud.h"
@@ -827,10 +828,8 @@ s32 GetEndReaction(void) {
 
 extern s8 D_8010623F;
 extern s32 g_PlayerCount;
-extern s8 D_80104B6B;
 
 void func_8020D874(f32);
-void func_8020FFEC(s32);
 
 /* Queues a character sound of the given kind for each player but the one who shot */
 static inline void QueueOnlookerSounds(s32 kind) {
@@ -1001,13 +1000,13 @@ void PlayFlightSounds(s32 step) {
             *isPlayed = TRUE;
             if (IsGameFlagSet(GAME_FLAG_UNK48)) {
                 if (D_800BE69C == 1 && (scoreToPar >= -2 && scoreToPar <= 1) && !IsPinInCup()) {
-                    func_8020FFEC(5);
+                    StartMovie(MOVIE_UNK5);
                 }
             } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() && D_800BE69C == 1) {
                 if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
-                    func_8020FFEC(0x10);
+                    StartMovie(MOVIE_UNK16);
                 } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
-                    func_8020FFEC(5);
+                    StartMovie(MOVIE_UNK5);
                 }
             }
             if (g_SimulatedShot.unk2E08) {
@@ -1039,7 +1038,7 @@ void PlayFlightSounds(s32 step) {
         if (!*isStillPlayed && g_BallFlightStep > EARLY_STEP_COUNT
             && (g_SimulatedShot.pathFlags[step - EARLY_STEP_COUNT] & PATH_FLAG_UNK1)
             && GetSelectedShotDistance() * FULL_SHOT_FRACTION < D_800BE640 * YARDS_PER_UNIT
-            && (info = GetSurfaceInfo(D_80104B6B), IsFairwayKind(info->kind)) && !g_IsMiniGolf
+            && (info = GetSurfaceInfo(g_BallSurface), IsFairwayKind(info->kind)) && !g_IsMiniGolf
             && D_800BE644 > sLandingCupDistance
             && g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
             *isStillPlayed = TRUE;
@@ -2402,7 +2401,6 @@ extern s8 D_80104B68;
 
 void func_801FD9C0(void);
 s32 func_8020D838(void);
-void func_80081D4C(s32);
 void func_8008679C(s32);
 
 /*
@@ -2754,7 +2752,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         flightStep = &g_BallFlightStep;
         if (*flightStep == g_SimulatedShot.stepCount) {
             if (waitFrame == 0 && !D_80104B68) {
-                func_80081D4C(1);
+                StartLandingReaction(LANDING_REACTION_UNK1);
             }
             if (++D_800BE620 >= sLandingWaitFrameCount) {
                 if (IsGameFlagSet(GAME_FLAG_UNK22)) {

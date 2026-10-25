@@ -30,6 +30,8 @@ extern s32 g_DrawBufferIndex;
 /* The scene light's direction, in binary angles */
 /* Where the ball is, in course units */
 extern s32 g_BallPosition[3];
+/* The SURFACE_* that the ball is on */
+extern s8 g_BallSurface;
 extern u16 g_LightYaw;
 extern u16 g_LightPitch;
 

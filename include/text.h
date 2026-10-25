@@ -65,9 +65,13 @@ typedef struct TextSlot {
     /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot; /* size = 0x2C */
 
+/* Given this as its font size, PlaceGlyphGroup only frees the group */
+#define NO_FONT_SIZE (-1)
+
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
+void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *text);
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
 void SetTextName(char *name);
