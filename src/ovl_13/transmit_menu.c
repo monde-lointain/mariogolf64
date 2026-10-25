@@ -621,7 +621,83 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FC400_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC440_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", jtbl_801FC478_ovl_13);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", TagCartridges);
+/*
+ * Writes a random tag to the cartridge RAM of each Game Boy cartridge and lists the controllers
+ * whose cartridges took it, so that later accesses can tell whether a cartridge was swapped.
+ */
+s32 TagCartridges(void) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    u8 header[CARTRIDGE_HEADER_SIZE];
+    NUContPakFile file;
+    u8 tag[CARTRIDGE_TAG_SIZE];
+    u8 status;
+    s32 isAnyTagged = FALSE;
+    s32 wasNoCartridge = FALSE;
+    s32 wasNoPak = FALSE;
+    s32 wasOtherPak = FALSE;
+    s32 wasWrongCartridge = FALSE;
+    s32 wasCartridgePulled = FALSE;
+    s32 controller;
+    s32 index;
+    s32 result;
+
+    g_GameBoyTransfer.taggedCartridgeCount = 0;
+    for (controller = 0; controller != MAXCONTROLLERS; controller++) {
+        transfer->taggedControllers[controller] = 0;
+    }
+    nuContGBPakMgrInit();
+    for (controller = 0; controller < g_ControllerCount; controller++) {
+        result = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller], header, &file);
+        if (result == PAK_RESULT_NO_PAK) {
+            wasNoPak = TRUE;
+        }
+        if (result == PAK_RESULT_OTHER_PAK) {
+            wasOtherPak = TRUE;
+        }
+        if (result == PAK_RESULT_NO_CARTRIDGE) {
+            wasNoCartridge = TRUE;
+        }
+        if (result == PAK_RESULT_WRONG_CARTRIDGE) {
+            wasWrongCartridge = TRUE;
+        }
+        if (result == PAK_RESULT_OK) {
+            for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+                transfer->cartridgeTags[controller][index] = tag[index] = guRandom() % 256;
+            }
+            if (nuContGBPakFwrite(&file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0
+                && nuContGBPakGetStatus(&file, &status) == 0) {
+                if (status & OS_GBPAK_GBCART_PULL) {
+                    wasCartridgePulled = TRUE;
+                } else {
+                    transfer->taggedControllers[transfer->taggedCartridgeCount] = controller;
+                    isAnyTagged = TRUE;
+                    transfer->taggedCartridgeCount++;
+                }
+            }
+        }
+        nuContGBPakPower(&file, NU_CONT_GBPAK_POWER_OFF);
+    }
+    if (isAnyTagged == TRUE) {
+        return PAK_RESULT_OK;
+    }
+    if (wasCartridgePulled == TRUE) {
+        return PAK_RESULT_REMOVED_RETRYING;
+    }
+    if (wasWrongCartridge == TRUE) {
+        return PAK_RESULT_WRONG_CARTRIDGE;
+    }
+    if (wasNoCartridge == TRUE) {
+        return PAK_RESULT_NO_CARTRIDGE;
+    }
+    if (wasOtherPak == TRUE) {
+        return PAK_RESULT_OTHER_PAK;
+    }
+    if (wasNoPak == TRUE) {
+        return PAK_RESULT_NO_PAK;
+    }
+    return PAK_RESULT_LOOSE_PAK;
+}
 
 void SetNoticeState(s32 state, s32 message) {
     sNoticeState = state;
