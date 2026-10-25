@@ -79,6 +79,7 @@ void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char *text, s32 fontSize, s32 flags);
 void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
+void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text);
 void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
                              s32 flags);
 

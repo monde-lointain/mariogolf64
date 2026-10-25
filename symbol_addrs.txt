@@ -1347,6 +1347,7 @@ HaveBurstsStayedFreed = 0x80077E6C; // type:func
 LaunchBurst = 0x80077E94; // type:func
 UpdateAndDrawBursts = 0x80078128; // type:func
 SpawnShotDebris = 0x8007A6C8; // type:func
+DrawBirdieBadgeCount = 0x8007FEAC; // type:func
 sBurstCount = 0x800C4660; // size:0x4
 sBurstState = 0x800C4664; // size:0x4
 sBurstParticleVertices = 0x800C4668; // size:0x30

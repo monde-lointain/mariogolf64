@@ -12,9 +12,11 @@
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
+#include "text.h"
 #include "variables.h"
 #include <lib/libnusys/nusys.h>
 
@@ -118,6 +120,7 @@ extern Mtx D_801B9418[];
 extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
+extern Gfx D_800C3FC0[];
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
 extern Raindrop *sRaindrops;
@@ -1307,5 +1310,72 @@ void ShowBirdieBadgeCount(s32 badgeCount) {
     ReadEncodedAsset(sClumpImage, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007FEAC);
+#define BADGE_SIZE 24
+#define BADGE_FRAME_SIZE (BADGE_SIZE * BADGE_SIZE / 2)
+#define BADGE_SPIN_FRAME_COUNT 6
+#define BADGE_LEFT 216
+#define BADGE_RESTING_TOP 20
+#define BADGE_COUNT_LEFT 258
+#define BADGE_COUNT_TOP 24
+#define BADGE_COUNT_SHOWN_FRAME_COUNT 60
+#define BADGE_COUNT_RISE_FRAME 40
+#define BADGE_COUNT_ADD_FRAME 15
+#define BADGE_COUNT_SOUND 0x6B
+#define COUNT_GLYPHS_HEIGHT 256
+
+/*
+ * Drops the spinning badge and its count in at the top right, adds the new badge to the count,
+ * then lifts them out of view. ShowBirdieBadgeCount loaded their images in place of the cloud
+ * and clump images.
+ */
+void DrawBirdieBadgeCount(Gfx **displayListHead) {
+    Gfx *gfx;
+    s32 spinFrame;
+    s32 offsetY;
+
+    gfx = *displayListHead;
+    if (sIsBadgeCountShown) {
+        gSPDisplayList(gfx++, D_800C3FC0);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+        spinFrame = sBadgeCountFrame / 2 % BADGE_SPIN_FRAME_COUNT;
+        if (sBadgeCountFrame < BADGE_COUNT_RISE_FRAME) {
+            offsetY = sBadgeCountFrame * 4 - 24;
+            if (offsetY > 0) {
+                offsetY = 0;
+            }
+        } else {
+            offsetY = (BADGE_COUNT_RISE_FRAME - sBadgeCountFrame) * 4;
+            if (offsetY < -100) {
+                offsetY = -100;
+            }
+        }
+        LoadSmallPalette(&gfx, 0, sCloudImage + IMAGE_HEADER_SIZE);
+        /* Grouping the frame's offset is there to match */
+        gDPLoadTextureTile_4b(gfx++,
+                              TEXTURE_ADDRESS(sCloudImage + (spinFrame * BADGE_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
+                              G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1, BADGE_SIZE - 1, 0, 0, 0, 0,
+                              0, 0, 0);
+        DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2, (BADGE_LEFT + BADGE_SIZE) << 2,
+                        (offsetY + BADGE_RESTING_TOP + BADGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        LoadSmallPalette(&gfx, 0, sClumpImage + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx, sClumpImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, 16, COUNT_GLYPHS_HEIGHT, 0,
+                               0, 0, 0, 0, 0, 0);
+        DrawDigitText(&gfx, BADGE_LEFT + BADGE_SIZE, offsetY + BADGE_COUNT_TOP, "*");
+        sprintf(g_PrintBuffer, "%d", sShownBadgeCount);
+        DrawDigitText(&gfx, BADGE_COUNT_LEFT, offsetY + BADGE_COUNT_TOP, g_PrintBuffer);
+        sBadgeCountFrame++;
+        if (sBadgeCountFrame == BADGE_COUNT_ADD_FRAME) {
+            sShownBadgeCount++;
+            PlaySound(BADGE_COUNT_SOUND, g_NextSoundChannel, 100);
+        }
+        if (sBadgeCountFrame == BADGE_COUNT_SHOWN_FRAME_COUNT) {
+            sBadgeCountFrame = 0;
+            sIsBadgeCountShown = FALSE;
+        }
+        *displayListHead = gfx;
+    }
+}
 
