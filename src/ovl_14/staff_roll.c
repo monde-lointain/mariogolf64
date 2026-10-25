@@ -1071,7 +1071,7 @@ void RunStaffRollTimeline(s32 frame) {
         StartFadeOut(LAST_FADE_FRAMES);
     }
     TakePinOut();
-    func_8007B054();
+    UpdateEffects();
     if (sShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
         func_8008E1B4();
         sShownSceneColorIndex = g_HoleConditions.sceneColorIndex;

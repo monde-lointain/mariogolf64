@@ -1144,7 +1144,219 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007B054);
+#define WIND_SPEED_UNIT 0x10000
+/* How far the wind pushes an effect a frame, in world units, for each whole unit of wind speed */
+#define EFFECT_PUSH_PER_WIND_SPEED 0.005f
+/* Positive y velocities fall, in world units a frame each frame */
+#define EFFECT_FALL_ACCELERATION (26.2f * COURSE_TO_WORLD_SCALE)
+#define RISING_CLUMP_FALL_ACCELERATION (2 * EFFECT_FALL_ACCELERATION)
+#define OTHER_EFFECT_FALL_ACCELERATION (8 * EFFECT_FALL_ACCELERATION)
+#define TEAR_FALL_ACCELERATION 0.23027343f
+/* The share of its velocity that an effect keeps each frame */
+#define RISING_CLUMP_VELOCITY_KEPT 0.95f
+#define LIGHT_EFFECT_VELOCITY_KEPT 0.97f
+#define HIGH_DEBRIS_VELOCITY_KEPT 0.8f
+#define OTHER_EFFECT_VELOCITY_KEPT 0.95f
+/* Kind 0xE effects feel this share of the wind */
+#define UNKE_WIND_SHARE 0.1f
+/* Effects past the ground height fade this many times as fast */
+#define PAST_GROUND_FADE_SCALE 4.0f
+/* Effects spin about x and z by SPIN_PER_SPEED for each unit their fall speed is below this */
+#define SPIN_FALL_SPEED 100.0f
+#define SPIN_PER_SPEED (M_PI * 0.001f)
+/* Kinds 0 and 3 (high debris) and most other kinds pick frame 0, 1 or 2 by their fall speed */
+#define HIGH_DEBRIS_FAST_RISE_SPEED (-1.5f)
+#define HIGH_DEBRIS_SLOW_RISE_SPEED (-0.15f)
+#define OTHER_EFFECT_FAST_RISE_SPEED (-1.5f)
+#define OTHER_EFFECT_FAST_FALL_SPEED 1.5f
+#define TEAR_FRAME_STEP 2
+#define TEAR_LAST_FRAME 40
+#define SPARKLE_LAST_FRAME 20
+#define CYCLING_FRAME_COUNT 3
+/* Drops and divots past the ground height are held this many course units past it */
+#define GROUNDED_EFFECT_DEPTH 15.36f
+
+/* It is a macro, as an inline function compiles differently from the original */
+#define IsPastSpawnGround(effect) ((f32)sSpawnGroundHeight < (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
+
+/*
+ * Moves, fades, spins and animates every effect for a frame, and removes those that are done.
+ * The wind pushes rising clumps, kind 0xE effects and kinds 0 and 3. Most effects past the spawn
+ * ground height fade faster. It also rebuilds the transform matrices of ripples, spreading
+ * circles and drops.
+ */
+void UpdateEffects(void) {
+    Mat4 matrix;
+    Vec3 scale;
+    Vec3 translation;
+    Vec3 rotation;
+    f32 direction;
+    f32 speed;
+    f32 windPushX;
+    f32 windPushZ;
+    s32 index;
+    Effect *effect;
+
+    direction = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
+    speed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT * EFFECT_PUSH_PER_WIND_SPEED;
+    windPushX = cosf(direction) * speed;
+    windPushZ = sinf(direction) * speed;
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (effect->kind == EFFECT_KIND_NONE) {
+            continue;
+        }
+        if (IsPastSpawnGround(effect)
+            && effect->kind != EFFECT_KIND_RIPPLE && effect->kind != EFFECT_KIND_SPREADING_CIRCLE
+            && effect->kind != EFFECT_KIND_SPARKLE && effect->kind != EFFECT_KIND_TEAR) {
+            if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
+                effect->alpha = 0.0f;
+            } else {
+                effect->alpha += effect->alphaStep * PAST_GROUND_FADE_SCALE;
+            }
+        } else if (effect->alpha > 0.0f || effect->scale > 0.0f) {
+            effect->position[AXIS_X] += effect->velocity[AXIS_X];
+            effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
+            effect->position[AXIS_Z] += effect->velocity[AXIS_Z];
+            /* Accelerating every axis before keeping a share of each is there to match */
+            if (effect->kind == EFFECT_KIND_RISING_CLUMP) {
+                effect->velocity[AXIS_X] += windPushX;
+                effect->velocity[AXIS_Y] += RISING_CLUMP_FALL_ACCELERATION;
+                effect->velocity[AXIS_Z] += windPushZ;
+                effect->velocity[AXIS_X] *= RISING_CLUMP_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= RISING_CLUMP_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= RISING_CLUMP_VELOCITY_KEPT;
+            } else if (effect->kind == EFFECT_KIND_TEAR) {
+                effect->velocity[AXIS_Y] += TEAR_FALL_ACCELERATION;
+                effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
+            } else if (effect->kind == EFFECT_KIND_SPARKLE) {
+                effect->velocity[AXIS_Y] += EFFECT_FALL_ACCELERATION;
+                effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
+            } else if (effect->kind == EFFECT_KIND_UNKE) {
+                effect->velocity[AXIS_X] += windPushX * UNKE_WIND_SHARE;
+                effect->velocity[AXIS_Y] += 0.0f; /* The original has it */
+                effect->velocity[AXIS_Z] += windPushZ * UNKE_WIND_SHARE;
+                effect->velocity[AXIS_X] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= LIGHT_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= LIGHT_EFFECT_VELOCITY_KEPT;
+            } else if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK3) {
+                effect->velocity[AXIS_X] += windPushX;
+                effect->velocity[AXIS_Y] += EFFECT_FALL_ACCELERATION;
+                effect->velocity[AXIS_Z] += windPushZ;
+                effect->velocity[AXIS_X] *= HIGH_DEBRIS_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= HIGH_DEBRIS_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= HIGH_DEBRIS_VELOCITY_KEPT;
+            } else if (effect->kind == EFFECT_KIND_RIPPLE || effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
+                /* The empty branch is there to match */
+            } else {
+                effect->velocity[AXIS_Y] += OTHER_EFFECT_FALL_ACCELERATION;
+                effect->velocity[AXIS_X] *= OTHER_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Z] *= OTHER_EFFECT_VELOCITY_KEPT;
+                effect->velocity[AXIS_Y] *= OTHER_EFFECT_VELOCITY_KEPT;
+            }
+            effect->alpha += effect->alphaStep;
+            effect->scale += effect->scaleStep;
+            if (effect->velocity[AXIS_Y] < SPIN_FALL_SPEED) {
+                effect->unk24 -= (effect->velocity[AXIS_Y] - SPIN_FALL_SPEED) * SPIN_PER_SPEED;
+            }
+            if (effect->unk24 > 2 * M_PI) {
+                effect->unk24 -= 2 * M_PI;
+            }
+            if (effect->unk24 < 0.0f) {
+                effect->unk24 += 2 * M_PI;
+            }
+            if (effect->kind == EFFECT_KIND_UNK0 || effect->kind == EFFECT_KIND_UNK3) {
+                if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_FAST_RISE_SPEED) {
+                    effect->unk3B = 0;
+                } else if (effect->velocity[AXIS_Y] < HIGH_DEBRIS_SLOW_RISE_SPEED) {
+                    effect->unk3B = 1;
+                } else {
+                    effect->unk3B = 2;
+                }
+            } else if (effect->kind == EFFECT_KIND_TEAR) {
+                effect->unk3B += TEAR_FRAME_STEP;
+                if (effect->unk3B > TEAR_LAST_FRAME) {
+                    effect->kind = EFFECT_KIND_NONE;
+                }
+            } else if (effect->kind == EFFECT_KIND_SPARKLE) {
+                if (effect->unk3B < SPARKLE_LAST_FRAME) {
+                    effect->unk3B++;
+                } else {
+                    effect->kind = EFFECT_KIND_NONE;
+                }
+            } else if (effect->kind == EFFECT_KIND_RISING_CLUMP || effect->kind == EFFECT_KIND_UNKE) {
+                effect->unk3B = (effect->unk3B + 1) % CYCLING_FRAME_COUNT;
+            } else {
+                if (effect->velocity[AXIS_Y] < OTHER_EFFECT_FAST_RISE_SPEED) {
+                    effect->unk3B = 0;
+                } else if (effect->velocity[AXIS_Y] > OTHER_EFFECT_FAST_FALL_SPEED) {
+                    effect->unk3B = 2;
+                } else {
+                    effect->unk3B = 1;
+                }
+                effect->unk3B = 0; /* Overwrites the frame picked above; the original has it */
+            }
+            if (IsPastSpawnGround(effect)
+                && (effect->kind == EFFECT_KIND_DROP || effect->kind == EFFECT_KIND_DIVOT)) {
+                effect->position[AXIS_Y] = (sSpawnGroundHeight + GROUNDED_EFFECT_DEPTH) * COURSE_TO_WORLD_SCALE;
+            }
+        }
+        if (effect->kind == EFFECT_KIND_RIPPLE) {
+            effect->matrixIndex = sNextMatrixIndex;
+            translation[AXIS_X] = effect->position[AXIS_X];
+            translation[AXIS_Y] = effect->position[AXIS_Y];
+            translation[AXIS_Z] = effect->position[AXIS_Z];
+            rotation[AXIS_X] = 0.0f;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            scale[AXIS_X] = effect->scale;
+            scale[AXIS_Y] = effect->scale;
+            scale[AXIS_Z] = effect->scale;
+            sNextMatrixIndex = (sNextMatrixIndex + 1) % EFFECT_COUNT;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sEffectMatrices[effect->matrixIndex]);
+        }
+        if (effect->kind == EFFECT_KIND_SPREADING_CIRCLE) {
+            effect->matrixIndex = sNextMatrixIndex;
+            translation[AXIS_X] = effect->position[AXIS_X];
+            translation[AXIS_Y] = effect->position[AXIS_Y];
+            translation[AXIS_Z] = effect->position[AXIS_Z];
+            rotation[AXIS_X] = 0.0f;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            scale[AXIS_X] = effect->scale;
+            scale[AXIS_Y] = effect->scale;
+            scale[AXIS_Z] = effect->scale;
+            sNextMatrixIndex = (sNextMatrixIndex + 1) % EFFECT_COUNT;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sEffectMatrices[effect->matrixIndex]);
+        }
+        /* Fading or shrinking away does not remove divot marks, drops, divots or tears */
+        if ((effect->alpha <= 0.0f || effect->scale < 1.0f) && effect->kind != EFFECT_KIND_DIVOT_MARK
+            && effect->kind != EFFECT_KIND_DROP && effect->kind != EFFECT_KIND_DIVOT
+            && effect->kind != EFFECT_KIND_TEAR) {
+            effect->kind = EFFECT_KIND_NONE;
+            effect->alpha = 0.0f;
+        }
+        if (effect->kind == EFFECT_KIND_DROP) {
+            translation[AXIS_X] = effect->position[AXIS_X];
+            translation[AXIS_Y] = effect->position[AXIS_Y];
+            translation[AXIS_Z] = effect->position[AXIS_Z];
+            rotation[AXIS_X] = effect->unk24;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = effect->unk24;
+            scale[AXIS_X] = effect->scale;
+            scale[AXIS_Y] = effect->scale;
+            scale[AXIS_Z] = effect->scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sDropMatrices[g_DrawBufferIndex]);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007B994);
 
@@ -1528,7 +1740,6 @@ void EndWeather(void) {
 #define RAIN_SPREAD_STEP 0x600
 #define RAIN_SPLASH_SPREAD_STEP_COUNT 500
 #define RAIN_FALL_SPEED 60.0f
-#define WIND_SPEED_UNIT 0x10000
 /* How far the rain drifts sideways per unit of fall, for each whole unit of wind speed */
 #define RAIN_DRIFT_PER_WIND_SPEED 0.1f
 

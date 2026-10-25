@@ -1988,7 +1988,7 @@ void UpdateGame(void) {
             g_ViewedWindAngles[0] += 2 * M_PI;
         }
         func_801F6788();
-        func_8007B054();
+        UpdateEffects();
     } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 || g_Scene == SCENE_PLAY_UNK13) {
         if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
             StepNoiseTexture();
@@ -2008,7 +2008,7 @@ void UpdateGame(void) {
             }
         }
         UpdateInsetView();
-        func_8007B054();
+        UpdateEffects();
         func_800605EC();
         windDirection = &g_HoleConditions.windDirection;
         g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);

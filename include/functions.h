@@ -125,7 +125,7 @@ void BuildDynamicTextures(Gfx **displayListHead);
 
 void BuildNoiseTexture(void);
 void StepNoiseTexture(void);
-void func_8007B054(void);
+void UpdateEffects(void);
 void ClearEffects(void);
 void func_8008E1B4(void);
 void func_800605EC(void);
