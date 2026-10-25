@@ -77,6 +77,7 @@ void SetUpTextDrawing(Gfx **displayListHead);
 void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
 void DrawTextSlots(Gfx **displayListHead);
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
+void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char *text, s32 fontSize, s32 flags);

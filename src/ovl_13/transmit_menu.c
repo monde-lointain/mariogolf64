@@ -87,6 +87,29 @@
 #define HINT_TOP 186
 #define HINT_TEXT_SLOT 3
 
+/* DrawCharacterStats' layout */
+#define STATS_NAME_LEFT 192
+#define STATS_NAME_TOP 140
+#define STATS_LEFT 188 /* Of both the stat labels and the stats */
+#define STATS_TOP 172
+#define STAT_LABELS_WIDTH 80
+#define STAT_LABELS_HEIGHT 8
+#define SHOT_TYPE_LEFT 212
+#define SHOT_TYPE_TOP 152
+#define SHOT_TYPE_WIDTH 64
+#define SHOT_TYPE_HEIGHT 8
+#define CURVE_BAR_LEFT 204
+#define CURVE_BAR_TOP 162
+#define CURVE_BAR_WIDTH 72
+#define CURVE_BAR_HEIGHT 8
+#define CURVE_SEGMENT_WIDTH 8
+#define CURVE_SEGMENT_COUNT 9 /* From a fade of 4 to a draw of 4 */
+
+/* The rows of the shot types image */
+#define SHOT_TYPE_STRAIGHT 0
+#define SHOT_TYPE_DRAW 1
+#define SHOT_TYPE_FADE 2
+
 /* The faces of the characters brought over, along the bottom */
 #define FACES_LEFT 24
 #define FACES_TOP 136
@@ -1057,7 +1080,85 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
     *displayListHead = displayList;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawCharacterStats);
+/*
+ * Draws a Game Boy character's name, level and drive, the name of their shot type and a bar from
+ * its centre out to their shot curve.
+ */
+void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, GameBoyTransfer *transfer) {
+    Gfx *displayList = *displayListHead;
+    s32 segment;
+    /* Holding the shot type row in segmentCurve first is there to match */
+    s32 segmentCurve;
+
+    SetUpTextDrawing(&displayList);
+    DrawLargeText(&displayList, STATS_NAME_LEFT, STATS_NAME_TOP, character->name);
+    BeginShadowedText(&displayList);
+    sprintf(g_PrintBuffer, "  %2d     :%3d", character->level, character->driveDistance);
+    DrawSmallText(&displayList, STATS_LEFT, STATS_TOP, g_PrintBuffer);
+    if (character->shotCurve == 0) {
+        segmentCurve = SHOT_TYPE_STRAIGHT;
+    } else if (character->shotCurve > 0) {
+        segmentCurve = SHOT_TYPE_DRAW;
+    } else {
+        segmentCurve = SHOT_TYPE_FADE;
+    }
+    SetTextSlot(HINT_LEFT, HINT_TOP, CHOOSE_CHARACTER_MESSAGE, 1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255,
+                255);
+    gDPPipeSync(displayList++);
+    gDPSetAlphaCompare(displayList++, G_AC_NONE);
+    gDPPipeSync(displayList++);
+    gDPSetRenderMode(displayList++, G_RM_TEX_EDGE | AA_EN, G_RM_TEX_EDGE2 | AA_EN);
+    gDPSetCombineMode(displayList++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(displayList++);
+    gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->shotTypesImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&displayList, (u8 *)transfer->shotTypesImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           SHOT_TYPE_WIDTH, SHOT_TYPE_HEIGHT * 3, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&displayList, SHOT_TYPE_LEFT << 2, SHOT_TYPE_TOP << 2, (SHOT_TYPE_LEFT + SHOT_TYPE_WIDTH) << 2,
+                    (SHOT_TYPE_TOP + SHOT_TYPE_HEIGHT) << 2, G_TX_RENDERTILE, 0, (segmentCurve * SHOT_TYPE_HEIGHT) << 5,
+                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->statLabelsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&displayList, (u8 *)transfer->statLabelsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           STAT_LABELS_WIDTH, STAT_LABELS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&displayList, STATS_LEFT << 2, STATS_TOP << 2, (STATS_LEFT + STAT_LABELS_WIDTH) << 2,
+                    (STATS_TOP + STAT_LABELS_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->statBarsImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(displayList++, ((u32)transfer->statBarsImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                          CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2, (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
+                    (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    LoadLargePalette(&displayList, (u8 *)transfer->unk3C + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&displayList, (u8 *)transfer->unk3C + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b,
+                     CURVE_SEGMENT_WIDTH, CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
+    for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2; segment != CURVE_SEGMENT_COUNT;
+         segment++, segmentCurve++) {
+        /* Light segments from the centre out to the shot curve; the continues are there to match */
+        if (character->shotCurve < 0) {
+            if (segmentCurve < character->shotCurve) {
+                continue;
+            }
+            if (segmentCurve > 0) {
+                continue;
+            }
+        }
+        if (character->shotCurve > 0) {
+            if (segmentCurve > character->shotCurve) {
+                continue;
+            }
+            if (segmentCurve < 0) {
+                continue;
+            }
+        }
+        if (character->shotCurve == 0 && segment != CURVE_SEGMENT_COUNT / 2) {
+            continue;
+        }
+        DrawTextureRect(&displayList, (CURVE_BAR_LEFT + segment * CURVE_SEGMENT_WIDTH) << 2, CURVE_BAR_TOP << 2,
+                        (CURVE_BAR_LEFT + (segment + 1) * CURVE_SEGMENT_WIDTH) << 2,
+                        (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                        (segment * CURVE_SEGMENT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    *displayListHead = displayList;
+}
 
 void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
     GameBoyCharacter *character = g_GameBoyCharacters;
