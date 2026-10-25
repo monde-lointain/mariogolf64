@@ -18,6 +18,18 @@
 #define SAVE_NAME_SIZE 11
 #define SAVE_UNKB_SIZE 5
 
+/* The golfers of the Game Boy Color version, whose faces the transmit menu shows */
+#define GAME_BOY_GOLFER_COUNT 4
+
+#define GAME_BOY_CHARACTER_UNK3C_COUNT 13
+
+typedef struct GameBoyCharacterUnk3C {
+    /* 0x0 */ u16 unk0;
+    /* 0x2 */ u16 unk2;
+    /* 0x4 */ u8 unk4;
+    /* 0x5 */ u8 unk5;
+} GameBoyCharacterUnk3C; /* size = 0x6 */
+
 /* A character from the Game Boy Color version's save, read through the Transfer Pak */
 typedef struct GameBoyCharacter {
     /* 0x00 */ u8 status;
@@ -25,14 +37,21 @@ typedef struct GameBoyCharacter {
     /* 0x0D */ u8 saveName[SAVE_NAME_SIZE]; /* As the Game Boy save spells it */
     /* 0x18 */ u8 unk18;
     /* 0x19 */ u8 character;
-    /* 0x1A */ u8 unk1A[0x28 - 0x1A];
+    /* 0x1A */ u8 unk1A;
+    /* 0x1B */ u8 unk1B;
+    /* 0x1C */ s8 unk1C;
+    /* 0x1D */ s8 unk1D;
+    /* 0x1E */ u8 unk1E;
+    /* 0x1F */ u8 unk1F;
+    /* 0x20 */ s8 ballType;
+    /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 experience;
     /* 0x2C */ s16 unk2C;
     /* 0x2E */ u8 saveUnkB[SAVE_UNKB_SIZE]; /* Copied from the save's bytes at 0xB */
     /* 0x33 */ u8 unk33;
     /* 0x34 */ s32 unk34;
     /* 0x38 */ s32 unk38;
-    /* 0x3C */ u8 unk3C[0x8C - 0x3C];
+    /* 0x3C */ GameBoyCharacterUnk3C unk3C[GAME_BOY_CHARACTER_UNK3C_COUNT];
 } GameBoyCharacter; /* size = 0x8C */
 
 extern GameBoyCharacter g_GameBoyCharacters[GAME_BOY_CHARACTER_COUNT];

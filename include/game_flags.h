@@ -133,6 +133,18 @@
 /* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is not yet known */
 #define GAME_FLAG_UNK3C 0x3C
 
+/* Sets unk1A of each Game Boy character read through the Transfer Pak to 1; its purpose is not yet known */
+#define GAME_FLAG_UNK6F 0x6F
+
+/* Give Game Boy characters read through the Transfer Pak that ball type, the lowest set flag winning */
+#define GAME_FLAG_BALL_TYPE_1 0x88
+#define GAME_FLAG_BALL_TYPE_2 0x89
+#define GAME_FLAG_BALL_TYPE_3 0x8A
+#define GAME_FLAG_BALL_TYPE_4 0x8B
+#define GAME_FLAG_BALL_TYPE_5 0x8C
+#define GAME_FLAG_BALL_TYPE_6 0x8D
+#define GAME_FLAG_BALL_TYPE_7 0x8E
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

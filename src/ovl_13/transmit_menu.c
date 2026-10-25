@@ -2,6 +2,7 @@
 #include "asset.h"
 #include "controller.h"
 #include "debug_text.h"
+#include "game_flags.h"
 #include "heap.h"
 #include "host_file.h"
 #include "save.h"
@@ -103,6 +104,7 @@
 #define CARTRIDGE_SAVE_SIZE 0x200
 #define SAVE_CHECKSUM_OFFSET 0x30
 #define SAVE_UNKB_OFFSET 0xB
+#define SAVE_CHARACTER_OFFSET 0x10
 
 /* Results of opening and accessing the Game Boy cartridges, after the notice each shows */
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
@@ -263,7 +265,71 @@ s32 HaveAllRumblePaks(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", UpdateTransmitMenu);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DecodeCartridgeCharacter);
+/* Fills the slot for a cartridge's save from the save's bytes */
+void DecodeCartridgeCharacter(u8 *save, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
+    GameBoyCharacter *character =
+        &g_GameBoyTransfer.cartridgeCharacters[cartridgeIndex * CARTRIDGE_SAVE_COUNT + saveIndex];
+    s32 index;
+
+    character->status = GAME_BOY_CHARACTER_STATUS_PRESENT;
+    for (index = 0; index != (SAVE_NAME_SIZE - 1); index++) {
+        character->name[index] = save[index];
+        character->saveName[index] = save[index];
+        if (character->name[index] >= 'a' && character->name[index] <= 'z') {
+            character->name[index] += LOWERCASE_CODE_OFFSET;
+        }
+    }
+    character->name[(SAVE_NAME_SIZE - 1)] = '\0';
+    character->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
+    for (index = 0; index != SAVE_UNKB_SIZE; index++) {
+        character->saveUnkB[index] = save[SAVE_UNKB_OFFSET + index];
+    }
+    character->character = save[SAVE_CHARACTER_OFFSET];
+    if (character->character >= GAME_BOY_GOLFER_COUNT) {
+        character->character = GAME_BOY_GOLFER_COUNT - 1;
+    }
+    if (IsGameFlagSet(GAME_FLAG_UNK6F)) {
+        character->unk1A = 1;
+    } else {
+        character->unk1A = save[0x11];
+    }
+    character->unk1B = save[0x12];
+    character->unk1C = save[0x1C];
+    character->unk1D = save[0x1D];
+    character->unk1E = save[0x1E];
+    character->unk1F = save[0x1F];
+    if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_1)) {
+        character->ballType = 1;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_2)) {
+        character->ballType = 2;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_3)) {
+        character->ballType = 3;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_4)) {
+        character->ballType = 4;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_5)) {
+        character->ballType = 5;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_6)) {
+        character->ballType = 6;
+    } else if (IsGameFlagSet(GAME_FLAG_BALL_TYPE_7)) {
+        character->ballType = 7;
+    } else {
+        character->ballType = save[0x3E];
+    }
+    osSyncPrintf("balltype %d\n", character->ballType);
+    character->unk24 = (save[0x28] << 16) | (save[0x27] << 8) | save[0x26];
+    character->experience = 0;
+    character->unk2C = save[0x1A] | (save[0x1B] << 8);
+    osSyncPrintf("%d, %d %d\n", character->experience, character->unk1C, character->unk1D);
+    for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
+        character->unk3C[index].unk0 = save[0x100 + index * 6] | (save[0x101 + index * 6] << 8);
+        character->unk3C[index].unk2 = save[0x102 + index * 6] | (save[0x103 + index * 6] << 8);
+        character->unk3C[index].unk4 = save[0x104 + index * 6];
+        character->unk3C[index].unk5 = save[0x105 + index * 6];
+        osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0, character->unk3C[index].unk2);
+    }
+    character->unk34 = unk34;
+    character->unk38 = saveIndex;
+}
 
 void SkipCartridgeSave(void) {
 }
