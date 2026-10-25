@@ -19,6 +19,7 @@
 #include "round_hud.h"
 #include "screen.h"
 #include "scene.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "surface.h"
 #include "text.h"
@@ -44,6 +45,11 @@
 #define ASSET_ROUND_IMAGE_93C 0x93C
 #define ASSET_ROUND_IMAGE_4DB 0x4DB
 #define ASSET_SHADOW_TEXTURE 0x4C3
+#define ASSET_ROUND_IMAGE_4BA 0x4BA
+#define ASSET_ROUND_IMAGE_4D4 0x4D4
+#define ASSET_ROUND_IMAGE_722 0x722
+#define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
+#define ASSET_BLENDED_TEXTURE_STILL_LAYER 0x4D9
 #define ASSET_ROUND_IMAGE_4E3 0x4E3
 #define ASSET_ROUND_IMAGE_648 0x648
 #define ASSET_ROUND_IMAGE_563 0x563
@@ -198,6 +204,19 @@ extern s32 sHudOffsetY;
 
 extern s32 sLandingReaction;
 extern s32 sLandingReactionFrame;
+
+/* An I8 texture of a ring, that marks where the ball will land */
+#define RING_TEXTURE_SIZE 64
+#define RING_TEXTURE_OUTER_RADIUS 62
+extern u8 *g_RingTexels;
+
+/* The HUD keeps this far in from the edges of the screen */
+#define HUD_MARGIN 8
+
+extern void *D_801EFFA4;
+extern void *D_800FBE0C;
+extern void *D_800E2160;
+extern s32 D_800E21BC;
 
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
@@ -516,7 +535,56 @@ void FreeScenery(void) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80080E7C);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081284);
+/*
+ * Allocates and loads what the HUD draws for the whole round. The buffers of
+ * the hole and par images are sized by the first of them, and later holes
+ * read theirs into the same buffers.
+ */
+void LoadRoundHud(void) {
+    AssetFile file;
+    EncodedAsset asset;
+    s32 i;
+    u32 paletteSize;
+
+    D_801EFFA4 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4BA, &asset));
+    ReadEncodedAsset(D_801EFFA4, &asset);
+    D_800FBE0C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4D4, &asset));
+    ReadEncodedAsset(D_800FBE0C, &asset);
+    sHoleImage = AllocMemory(OpenEncodedAsset(sHoleImageAssets[0], &asset));
+    ReadEncodedAsset(sHoleImage, &asset);
+    sParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
+    ReadEncodedAsset(sParImage, &asset);
+    D_800E2160 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
+    ReadEncodedAsset(D_800E2160, &asset);
+    g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
+    BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_TEXTURE_OUTER_RADIUS);
+    for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
+        sShotOffsetMarkerXs[i] = 0;
+        sShotOffsetMarkerYs[i] = 0;
+    }
+    g_HudScissor.left = HUD_MARGIN;
+    g_HudScissor.top = HUD_MARGIN;
+    g_HudScissor.right = SCREEN_WIDTH - HUD_MARGIN;
+    D_800E21BC = 0;
+    g_HudScissor.bottom = SCREEN_HEIGHT - HUD_MARGIN;
+    g_NoiseTexels = AllocMemory(NOISE_GRID_SIZE * NOISE_GRID_SIZE);
+    g_BlendedTextureScrollingLayer = AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_SCROLLING_LAYER, &asset));
+    ReadEncodedAsset(g_BlendedTextureScrollingLayer, &asset);
+    g_BlendedTextureStillLayer = AllocMemory(OpenEncodedAsset(ASSET_BLENDED_TEXTURE_STILL_LAYER, &asset));
+    ReadEncodedAsset(g_BlendedTextureStillLayer, &asset);
+    for (i = 0; i != MAX_PLAYER_COUNT; i++) {
+        g_PlayerFaceImages[i] =
+            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[i] + CHARACTER_FACE_IMAGE_OFFSET, &asset));
+        ReadEncodedAsset(g_PlayerFaceImages[i], &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[i], &file);
+        paletteSize = GetAssetFileSize(&file);
+        g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
+        ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);
+    }
+    InitScreenLayers();
+    LoadPinTextures();
+    ClearEffects();
+}
 
 /* Frees what the round HUD loaded for the round */
 void FreeRoundHudTextures(void) {

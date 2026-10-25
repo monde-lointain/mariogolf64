@@ -269,7 +269,7 @@ void StartGame(void) {
     osViSetSpecialFeatures(VI_FEATURES);
     ClearDebugText();
     LoadTextAssets();
-    func_80081284();
+    LoadRoundHud();
     LoadPinTextures();
 
 }

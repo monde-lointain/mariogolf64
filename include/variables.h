@@ -92,6 +92,10 @@ extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
 
+#define NOISE_GRID_SIZE 64
+/* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
+extern u8 *g_NoiseTexels;
+
 /*
  * The screen row of the horizon in the main view, from its pitch and zoom.
  * The background drawer sets it.

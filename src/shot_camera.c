@@ -2881,8 +2881,12 @@ void BuildSpotTexels(u8 *texels, s32 isSoft) {
 INCLUDE_ASM("asm/nonmatchings/shot_camera", BuildSpotTexels);
 #endif
 
-/* Fills a width by height texture with a quarter of a ring around its far corner */
-void BuildRingTexels(u8 *texels, s32 width, s32 height) {
+/*
+ * Fills a width by height texture with a quarter of a ring around its far
+ * corner. The outer radius is unused: the ring always ends at
+ * RING_OUTER_RADIUS.
+ */
+void BuildRingTexels(u8 *texels, s32 width, s32 height, s32 outerRadius) {
     s32 row;
     s32 column;
     s32 texelIndex;
@@ -2910,7 +2914,6 @@ void BuildRingTexels(u8 *texels, s32 width, s32 height) {
 }
 
 #define NOISE_GRID_COUNT 2
-#define NOISE_GRID_SIZE 64
 #define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
 #define MIN_UNDIVIDED_NOISE_SIZE 2
 #define NOISE_DISPLACEMENT_MASK 0xFF
@@ -2933,8 +2936,6 @@ extern s16 sNoiseGridIndex;
 extern s32 sNoiseBlendStep;
 extern s8 sIsNoiseResetPending;
 extern s8 sNoiseRow;
-/* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
-extern u8 *g_NoiseTexels;
 
 static inline s32 RandomNoiseDisplacement(void) {
     return (rand() & NOISE_DISPLACEMENT_MASK) - NOISE_DISPLACEMENT_BIAS;

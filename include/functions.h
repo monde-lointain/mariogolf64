@@ -139,6 +139,6 @@ void func_801F5F1C(void);
 void func_801F6788(void);
 void UpdateStaffRoll(void);
 
-void func_80081284(void);
+void LoadRoundHud(void);
 
 #endif

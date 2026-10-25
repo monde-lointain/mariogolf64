@@ -10,6 +10,7 @@
 
 void PrepareHoleDisplay(void);
 void InitRoundHud(void);
+void LoadRoundHud(void);
 void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex);
 void EndHoleIntro(void);
 void StartHoleIntro(void);

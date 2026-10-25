@@ -2432,3 +2432,5 @@ g_BallSurface = 0x80104B6B;
 StartLandingReaction = 0x80081D4C; // type:func
 sLandingReaction = 0x800C5A10;
 sLandingReactionFrame = 0x800C5A14;
+LoadRoundHud = 0x80081284; // type:func
+g_RingTexels = 0x800FE3D4;
