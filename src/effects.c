@@ -1148,6 +1148,7 @@ INCLUDE_ASM("asm/nonmatchings/effects", func_8007B054);
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007B994);
 
+/* Effects are drawn only where they project to a depth below this */
 #define EFFECT_NEAREST_DEPTH (-3.0f)
 /* The rectangles step across this many texels; the smaller images are shifted down to fit */
 #define BILLBOARD_IMAGE_SIZE 64
@@ -1277,7 +1278,6 @@ void DrawBillboardEffect(Gfx **displayListHead, Effect *effect, u16 color) {
 }
 
 /* Shadows are drawn only between these depths from ProjectPoint */
-#define SHADOW_NEAREST_DEPTH (-3.0f)
 #define SHADOW_FARTHEST_DEPTH (-60.0f)
 #define SHADOW_ALPHA 63
 
@@ -1290,7 +1290,7 @@ void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
     depth = ProjectPoint(effect->position[AXIS_X], sSpawnGroundHeight * COURSE_TO_WORLD_SCALE,
                          effect->position[AXIS_Z], &shadow);
     /* Nesting the tests is there to match */
-    if (depth < SHADOW_NEAREST_DEPTH) {
+    if (depth < EFFECT_NEAREST_DEPTH) {
         if (depth > SHADOW_FARTHEST_DEPTH) {
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
@@ -1337,7 +1337,6 @@ void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEff
 
 #define DIVOT_IMAGE_SIZE 32
 #define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
-#define DIVOT_NEAREST_DEPTH (-3.0f)
 /* The spin is cut into this many steps, each drawn with the frame in sPingPongFrameIndices */
 #define DIVOT_SPIN_STEP_COUNT 12
 #define DIVOT_DEPTH_BIAS 0.75f
@@ -1363,7 +1362,7 @@ void DrawDivot(Gfx **displayListHead, Effect *effect) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     if (ProjectPoint(effect->position[AXIS_X], effect->position[AXIS_Y], effect->position[AXIS_Z], &center)
-        < DIVOT_NEAREST_DEPTH) {
+        < EFFECT_NEAREST_DEPTH) {
         halfSize = center.scaleX * effect->scale;
         if (halfSize > 0) {
             /* Texels per pixel, in s5.10 fixed point */
