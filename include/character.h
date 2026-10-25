@@ -1,6 +1,8 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
+#include <ultra64.h>
+
 /*
  * Indices of the playable characters, in the order of the name table. A
  * character's models are this index plus a multiple of CHARACTER_COUNT.
@@ -24,5 +26,10 @@
 #define CHARACTER_AZALEA 16
 #define CHARACTER_JOE 17
 #define CHARACTER_COUNT 18
+
+/* The first of each character's image assets, of which its face is first */
+extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
+/* The asset file of each character's first palette, followed by those of its other colours */
+extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 
 #endif
