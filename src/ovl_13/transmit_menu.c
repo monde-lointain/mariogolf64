@@ -207,6 +207,24 @@
 #define STATUS_DATA_SIZE 0x800
 
 #define SAVE_SIGNATURE_OFFSET 0x20
+/* Records of where the save's data is: one per Game Boy character, then the status's */
+#define SAVE_RECORDS_OFFSET 0x40
+#define SAVE_RECORD_SIZE 0x20
+#define RECORD_ADDRESS_OFFSET 2
+#define RECORD_SIZE_OFFSET 4
+#define RECORD_SUM_OFFSET 6
+/* A Game Boy character's data */
+#define CHARACTER_DATA_SIZE 0x800
+#define DATA_EXPERIENCE_OFFSET 0x15C
+#define DATA_UNK15E_OFFSET 0x15E
+/* The experience and the byte after it */
+#define DATA_EXPERIENCE_WRITE_SIZE 3
+#define MAX_EXPERIENCE 0xFFFF
+
+/* What was wrong with the character's cartridge, reported when it was the only one found */
+#define CARTRIDGE_FAULT_NONE 0
+#define CARTRIDGE_FAULT_UNINITIALIZED 1 /* Its save lacks the signature */
+#define CARTRIDGE_FAULT_CORRUPTED 2
 
 /* What CheckStatusCartridge found */
 #define STATUS_CHECK_NO_STATUS 0
@@ -1607,14 +1625,210 @@ void ClearCartridgeCharacters(void) {
     }
 }
 
+/*
+ * Adds the character's experience to its save on the Game Boy cartridge it came from, looking
+ * through every controller's pak for it, and rewrites the save's checksums.
+ * It does not match: the original copies the experience sum from a scratch register into the one
+ * that holds the character data's experience.
+ */
+#ifdef NON_MATCHING
+s32 WriteExperienceToCartridge(s32 characterIndex) {
+    /* The transfer pointer is there to match */
+    GameBoyTransfer *transfer = &g_GameBoyTransfer;
+    u8 characterData[CHARACTER_DATA_SIZE];
+    u8 save[CARTRIDGE_SAVE_SIZE];
+    GameBoyCharacter *character;
+    s32 fault = CARTRIDGE_FAULT_NONE;
+    s32 controller;
+    s32 result;
+    s32 isSignatureWrong;
+    s32 index;
+    s32 saveIndex;
+    s32 recordOffset;
+    s32 dataAddress;
+    s32 dataSize;
+    s32 storedSum;
+    s32 sum;
+    s32 experience;
+
+    transfer->unk7C8 = FALSE;
+    transfer->unk7C4 = FALSE;
+    transfer->unk7C0 = FALSE;
+    transfer->unk7CC = FALSE;
+    transfer->unk7BC = 0;
+    result = 0;
+    for (controller = 0; controller != g_ControllerCount; controller++) {
+        transfer->transferResult = OpenGameBoyPakWithRetries(g_PlayerControllerPorts[controller],
+                                                             &transfer->cartridgeHeader, &transfer->pakFile);
+        if (transfer->transferResult == PAK_RESULT_NO_PAK) {
+            transfer->unk7C8 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
+            transfer->unk7C4 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
+            transfer->unk7C0 = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
+            transfer->unk7CC = TRUE;
+        }
+        if (transfer->transferResult == PAK_RESULT_OK) {
+            recordOffset = SAVE_RECORDS_OFFSET;
+            isSignatureWrong = FALSE;
+            character = &g_GameBoyCharacters[characterIndex];
+            saveIndex = character->unk38;
+            transfer->unk7BC++;
+            osSyncPrintf("PHASE 1\n");
+            result = nuContGBPakFread(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
+            /* Powering off and continuing after each pak error is there to match */
+            if (result != 0) {
+                nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                continue;
+            }
+            osSyncPrintf("PHASE 2\n");
+            for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
+                if (save[SAVE_SIGNATURE_OFFSET + index] != sCartridgeSaveSignature[index]) {
+                    isSignatureWrong = TRUE;
+                }
+            }
+            osSyncPrintf("PHASE 3\n");
+            if (isSignatureWrong == TRUE) {
+                fault = CARTRIDGE_FAULT_UNINITIALIZED;
+            }
+            if (ComputeSaveChecksum(save) != GetStoredChecksum(save)) {
+                fault = CARTRIDGE_FAULT_CORRUPTED;
+            } else {
+                osSyncPrintf("PHASE 4\n");
+                if (saveIndex == 0) {
+                    recordOffset = SAVE_RECORDS_OFFSET;
+                }
+                if (saveIndex == 1) {
+                    recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
+                }
+                if (saveIndex == 2) {
+                    recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE * 2;
+                }
+                osSyncPrintf("PHASE 5\n");
+                dataAddress = save[recordOffset + RECORD_ADDRESS_OFFSET]
+                              + (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8);
+                dataSize = save[recordOffset + RECORD_SIZE_OFFSET] + (save[recordOffset + RECORD_SIZE_OFFSET + 1] << 8);
+                osSyncPrintf("PHASE 6\n");
+                result = nuContGBPakFread(&transfer->pakFile, dataAddress - STATUS_ADDRESS_BIAS, characterData,
+                                          dataSize);
+                if (result != 0) {
+                    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                    continue;
+                }
+                sum = 0;
+                osSyncPrintf("PHASE 7\n");
+                storedSum = save[recordOffset + RECORD_SUM_OFFSET] | (save[recordOffset + RECORD_SUM_OFFSET + 1] << 8);
+                for (index = 0; index != dataSize; index++) {
+                    sum += characterData[index];
+                }
+                osSyncPrintf("PHASE 8\n");
+                sum &= 0xFFFF;
+                if (sum != storedSum) {
+                    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                    fault = CARTRIDGE_FAULT_CORRUPTED;
+                    continue;
+                }
+                osSyncPrintf("PHASE 9\n");
+                if (IsCharacterFromSave(character, characterData)) {
+                    osSyncPrintf("PHASE 9.5\n");
+                    sum = character->experience
+                          + ((characterData[DATA_EXPERIENCE_OFFSET + 1] << 8) | characterData[DATA_EXPERIENCE_OFFSET]);
+                    experience = (sum > MAX_EXPERIENCE) ? MAX_EXPERIENCE : sum;
+                    osSyncPrintf("PHASE 10\n");
+                    characterData[DATA_EXPERIENCE_OFFSET + 1] = experience >> 8;
+                    characterData[DATA_EXPERIENCE_OFFSET] = experience;
+                    characterData[DATA_UNK15E_OFFSET] = 100;
+                    result = nuContGBPakFwrite(&transfer->pakFile,
+                                               dataAddress - STATUS_ADDRESS_BIAS + DATA_EXPERIENCE_OFFSET,
+                                               &characterData[DATA_EXPERIENCE_OFFSET], DATA_EXPERIENCE_WRITE_SIZE);
+                    if (result != 0) {
+                        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                        continue;
+                    }
+                    sum = 0;
+                    osSyncPrintf("PHASE 11\n");
+                    for (index = 0; index != dataSize; index++) {
+                        sum += characterData[index];
+                    }
+                    sum &= 0xFFFF;
+                    osSyncPrintf("write sum %04x\n", sum);
+                    osSyncPrintf("PHASE 12\n");
+                    save[recordOffset + RECORD_SUM_OFFSET] = sum;
+                    save[recordOffset + RECORD_SUM_OFFSET + 1] = sum >> 8;
+                    result = nuContGBPakFwrite(&transfer->pakFile,
+                                               CARTRIDGE_RAM_ADDRESS + recordOffset + RECORD_SUM_OFFSET,
+                                               &save[recordOffset + RECORD_SUM_OFFSET], SAVE_HALFWORD_SIZE);
+                    if (result != 0) {
+                        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                        continue;
+                    }
+                    osSyncPrintf("PHASE 13\n");
+                    sum = ComputeSaveChecksum(save);
+                    save[SAVE_CHECKSUM_OFFSET] = sum;
+                    save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
+                    result = nuContGBPakFwrite(&transfer->pakFile, CARTRIDGE_RAM_ADDRESS + SAVE_CHECKSUM_OFFSET,
+                                               &save[SAVE_CHECKSUM_OFFSET], SAVE_HALFWORD_SIZE);
+                    if (result != 0) {
+                        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                        continue;
+                    }
+                    nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+                    osSyncPrintf("PHASE 14\n");
+                    character->experience = 0;
+                    transfer->transferResult = PAK_RESULT_OK;
+                    return EXPERIENCE_WRITE_DONE;
+                }
+            }
+        }
+        nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
+    }
+    if (transfer->unk7BC == 1) {
+        if (fault == CARTRIDGE_FAULT_UNINITIALIZED) {
+            transfer->transferResult = PAK_RESULT_UNINITIALIZED;
+            return EXPERIENCE_WRITE_FAILED;
+        }
+        if (fault == CARTRIDGE_FAULT_CORRUPTED) {
+            transfer->transferResult = PAK_RESULT_CORRUPTED;
+            return EXPERIENCE_WRITE_FAILED;
+        }
+    }
+    if (transfer->unk7BC > 0) {
+        transfer->transferResult = PAK_RESULT_NO_CHARACTERS;
+        return EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE;
+    }
+    if (transfer->unk7CC == TRUE) {
+        transfer->transferResult = PAK_RESULT_WRONG_CARTRIDGE;
+    } else if (transfer->unk7C0 == TRUE) {
+        transfer->transferResult = PAK_RESULT_NO_CARTRIDGE;
+    } else if (transfer->unk7C4 == TRUE) {
+        transfer->transferResult = PAK_RESULT_OTHER_PAK;
+    } else if (result != 0) {
+        transfer->transferResult = result;
+        return EXPERIENCE_WRITE_PAK_ERROR;
+    } else {
+        transfer->transferResult = PAK_RESULT_NO_PAK;
+    }
+    return EXPERIENCE_WRITE_FAILED;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge);
+#endif
+
 /* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this */
 extern const char sWriteSumFormat[];
 
+#ifndef NON_MATCHING
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", sWriteSumFormat);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF24_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF30_ovl_13);
+#else
+const char sWriteSumFormat[] = "write sum %04x\n";
+#endif
 
 /*
  * Checks that the chosen cartridge is the one tagged and that its save is intact, and reports
