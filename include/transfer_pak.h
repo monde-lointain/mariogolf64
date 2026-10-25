@@ -38,7 +38,7 @@ typedef struct GameBoyCharacter {
     /* 0x18 */ u8 unk18;
     /* 0x19 */ u8 character;
     /* 0x1A */ u8 unk1A;
-    /* 0x1B */ u8 unk1B;
+    /* 0x1B */ u8 level;
     /* 0x1C */ s8 unk1C;
     /* 0x1D */ s8 shotCurve; /* Positive for a draw, negative for a fade, 0 for straight */
     /* 0x1E */ u8 unk1E;
@@ -46,7 +46,7 @@ typedef struct GameBoyCharacter {
     /* 0x20 */ s8 ballType;
     /* 0x24 */ s32 unk24;
     /* 0x28 */ s32 experience;
-    /* 0x2C */ s16 unk2C;
+    /* 0x2C */ s16 driveDistance; /* Shown beside "Drive:" */
     /* 0x2E */ u8 saveUnkB[SAVE_UNKB_SIZE]; /* Copied from the save's bytes at 0xB */
     /* 0x33 */ u8 unk33;
     /* 0x34 */ s32 unk34;
