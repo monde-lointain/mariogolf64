@@ -107,5 +107,6 @@ s32 IsOverlayInExpansionMemory(void);
 void UpdateDebugScenes(void);
 s32 GetTerrainCodeColor(s32 code);
 s32 GetColorTerrainCode(s32 color);
+s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface);
 
 #endif

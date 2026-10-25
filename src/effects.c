@@ -3,6 +3,7 @@
 #include "ball_simulation.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "club.h"
 #include "controller.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
@@ -13,6 +14,7 @@
 #include "save.h"
 #include "sound.h"
 #include "surface.h"
+#include "terrain.h"
 #include "variables.h"
 #include <lib/libnusys/nusys.h>
 
@@ -57,8 +59,28 @@ typedef struct RainSplash {
     /* 0x18 */ s8 unk18;
 } RainSplash; /* size = 0x1C */
 
+/*
+ * Set up for each shot's debris. Keeping the club kind in a struct is there to match, as it keeps
+ * its loads from moving above the effects' stores.
+ */
+typedef struct ShotDebris {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ f32 unk8;
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ s32 clubKind;
+    /* 0x14 */ s32 unk14;
+} ShotDebris; /* size = 0x18 */
+
 #define EFFECT_KIND_NONE (-1)
+#define EFFECT_KIND_UNK0 0
+#define EFFECT_KIND_UNK1 1
+#define EFFECT_KIND_UNK2 2
+#define EFFECT_KIND_UNK3 3
+#define EFFECT_KIND_UNK4 4
 #define EFFECT_KIND_DROP 5 /* Drawn with sDropImage */
+#define EFFECT_KIND_DIVOT 6 /* Drawn with sDivotImage */
+#define EFFECT_KIND_DIVOT_MARK 7 /* Drawn with sDivotImage's last frame */
 #define EFFECT_KIND_SPARKLE 8
 #define EFFECT_KIND_RIPPLE 0xC
 #define EFFECT_KIND_UNKE 0xE
@@ -93,6 +115,8 @@ extern u8 *sDropletImage;
 extern Effect sEffects[EFFECT_COUNT];
 extern Mtx sEffectMatrices[EFFECT_COUNT];
 extern Mtx D_801B9418[];
+extern Mtx sDivotMarkMatrix;
+extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
 extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
@@ -662,11 +686,346 @@ void SpawnRisingClumps(CoursePoint unusedPoint) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007A10C);
+#define LAUNCH_SPEED_MOST 0xB400
+#define DEBRIS_AMOUNT_LEAST 2.0f
+#define DEBRIS_AMOUNT_MOST 10.0f
+#define BURIED_DEBRIS_EXTRA 4.0f
+#define DEBRIS_SLOWEST_STEP_COUNT 5
+#define DEBRIS_SPEED_STEP 0x600
+#define DEBRIS_OUTWARD_SCALE (0.03f * COURSE_TO_WORLD_SCALE)
+#define PUTTED_DROP_SLOWEST_RISE_SPEED (1500 * COURSE_TO_WORLD_SCALE)
+#define PUTTED_DROP_RISE_STEP 10
+#define SHOT_DROP_SCALE 0.8f
+#define DIVOT_SCALE_PER_AMOUNT 0.15f
+#define DIVOT_SMALLEST_SCALE 1.0f
+#define DIVOT_LARGEST_SCALE 1.5f
+#define DIVOT_MARK_SCALE_PER_AMOUNT 0.07f
+#define DIVOT_MARK_SMALLEST_SCALE 0.5f
+#define DIVOT_MARK_LARGEST_SCALE 1.0f
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007A40C);
+/*
+ * A random number from 0 to below limit, or 0 when limit is 0. It is a macro, as an inline
+ * function compiles differently from the original.
+ */
+#define RandomBelow(limit) ((limit) == 0 ? 0 : guRandom() % (limit))
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007A6C8);
+/*
+ * Throws up the debris of a shot struck from point: a drop for a teed-up ball, a divot and its
+ * mark for an iron or wedge from grass, and the low and high debris that the debris kind gives.
+ * The amount of debris grows with -sin(pitch). The nested spawners share the count and index.
+ */
+void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 spawnedCount;
+    s32 index;
+    f32 cosYaw;
+    f32 sinPitch;
+    f32 sinYaw;
+    s32 groundColor;
+    f32 debrisAmount;
+    s32 nextIndex;
+    s32 dropCount;
+    s32 divotCount;
+    s32 divotMarkCount;
+    s32 lowDebrisCount;
+    s32 highDebrisCount;
+    Effect *effect;
+    Effect *clearedEffect;
+    Effect *divotEffect;
+    Effect *divotMarkEffect;
+    s32 headingIndex;
+    f32 speed;
+    f32 heading;
+
+    /* Spawns up to debrisCount slow-rising, slow-fading pieces of debris */
+    s32 SpawnLowDebris(s32 slotCount, s32 debrisCount, s32 kind) {
+        Effect *effect;
+        s32 speed;
+
+        spawnedCount = 0;
+        for (index = 0; index < EFFECT_COUNT; index++) {
+            effect = &sEffects[index];
+            if (spawnedCount == debrisCount) {
+                break;
+            }
+            spawnedCount++;
+            slotCount++;
+            if (effect->kind == EFFECT_KIND_NONE) {
+                effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                /* Reading launchSpeed here is there to match */
+                speed = launchSpeed;
+                if (kind == EFFECT_KIND_UNK2) {
+                    speed = (RandomBelow(spawnedCount * 2) + DEBRIS_SLOWEST_STEP_COUNT) * DEBRIS_SPEED_STEP;
+                } else {
+                    speed = (RandomBelow(spawnedCount * 3) + DEBRIS_SLOWEST_STEP_COUNT) * DEBRIS_SPEED_STEP;
+                }
+                effect->velocity[AXIS_X] = cosYaw * speed * DEBRIS_OUTWARD_SCALE;
+                effect->velocity[AXIS_Y] = sinPitch * speed * (0.1f * COURSE_TO_WORLD_SCALE);
+                effect->velocity[AXIS_Z] = sinYaw * speed * DEBRIS_OUTWARD_SCALE;
+                effect->unk38 = groundColor;
+                effect->alpha = guRandom() % 32 + 95;
+                effect->alphaStep = -1.0f;
+                if (kind == EFFECT_KIND_UNK1) {
+                    effect->scale = (guRandom() % 16 + 10) * 0.2f;
+                    effect->scaleStep = debrisAmount * 0.01f + 0.6f;
+                } else {
+                    effect->scale = 3.2f;
+                    effect->scaleStep = debrisAmount * 0.05f + 0.2;
+                }
+                effect->kind = kind;
+                effect->unk3B = 0;
+            }
+        }
+        return slotCount;
+    }
+
+    /* Spawns up to debrisCount faster-rising, faster-fading pieces of debris */
+    s32 SpawnHighDebris(s32 slotCount, s32 debrisCount, s32 kind) {
+        Effect *effect;
+        s32 speed;
+
+        spawnedCount = 0;
+        for (index = 0; index < EFFECT_COUNT; index++) {
+            effect = &sEffects[index];
+            /* The original has it */
+            guRandom();
+            if (spawnedCount == debrisCount) {
+                break;
+            }
+            spawnedCount++;
+            slotCount++;
+            if (effect->kind == EFFECT_KIND_NONE) {
+                effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+                effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+                effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+                speed = (RandomBelow(spawnedCount * 3) + DEBRIS_SLOWEST_STEP_COUNT) * DEBRIS_SPEED_STEP;
+                effect->velocity[AXIS_X] = cosYaw * speed * DEBRIS_OUTWARD_SCALE;
+                effect->velocity[AXIS_Y] = sinPitch * speed * (0.15f * COURSE_TO_WORLD_SCALE);
+                effect->velocity[AXIS_Z] = sinYaw * speed * DEBRIS_OUTWARD_SCALE;
+                effect->unk38 = groundColor;
+                if (kind == EFFECT_KIND_UNK0) {
+                    effect->alpha = guRandom() % 32 + 191;
+                } else {
+                    effect->alpha = guRandom() % 32 + 159;
+                }
+                effect->alphaStep = -2.0f;
+                effect->scale = guRandom() % 32 * 0.2f;
+                effect->scaleStep = debrisAmount * 0.01f + 0.4f;
+                effect->kind = kind;
+                effect->unk3B = 0;
+            }
+        }
+        return slotCount;
+    }
+
+    nextIndex = 0;
+    dropCount = 0;
+    groundColor = BlendSurfaceMapColor(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z],
+                                       g_CurrentShot.surface);
+    sinPitch = sinf(pitch);
+    cosYaw = cosf(yaw);
+    divotCount = 0;
+    highDebrisCount = 0;
+    sinYaw = sinf(yaw);
+    sShotDebris.unk0 = 0;
+    sShotDebris.unk8 = -2.0f;
+    sShotDebris.unkC = 0.5f;
+    lowDebrisCount = 0;
+    divotMarkCount = 0;
+    if (launchSpeed > LAUNCH_SPEED_MOST) {
+        launchSpeed = LAUNCH_SPEED_MOST;
+    }
+    sShotDebris.clubKind = GetSelectedClub()->kind;
+    if (sShotDebris.clubKind == CLUB_KIND_WOOD) {
+        debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
+    } else if (sShotDebris.clubKind == CLUB_KIND_IRON) {
+        debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
+    } else if (sShotDebris.clubKind == CLUB_KIND_WEDGE) {
+        debrisAmount = -sinPitch * DEBRIS_AMOUNT_MOST;
+    } else {
+        debrisAmount = 0;
+    }
+    if (debrisAmount < DEBRIS_AMOUNT_LEAST) {
+        debrisAmount = DEBRIS_AMOUNT_LEAST;
+    }
+    if (debrisAmount > DEBRIS_AMOUNT_MOST) {
+        debrisAmount = DEBRIS_AMOUNT_MOST;
+    }
+    /* Clearing the effects here instead of calling ClearEffects is there to match */
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        clearedEffect = &sEffects[index];
+        clearedEffect->kind = EFFECT_KIND_NONE;
+    }
+    if (sDebrisKind == DEBRIS_KIND_TEE_UP) {
+        dropCount = 1;
+        if (sShotDebris.clubKind == CLUB_KIND_IRON) {
+            lowDebrisCount = debrisAmount;
+        } else if (sShotDebris.clubKind == CLUB_KIND_WEDGE) {
+            lowDebrisCount = debrisAmount;
+        }
+    } else if (sDebrisKind == DEBRIS_KIND_GRASS) {
+        if (sShotDebris.clubKind == CLUB_KIND_WOOD) {
+            lowDebrisCount = debrisAmount;
+        }
+        if (sShotDebris.clubKind == CLUB_KIND_IRON || sShotDebris.clubKind == CLUB_KIND_WEDGE) {
+            divotCount = 1;
+            lowDebrisCount = 2.0f * debrisAmount;
+            divotMarkCount = 1;
+        }
+    } else if (sDebrisKind == DEBRIS_KIND_ROUGH) {
+        lowDebrisCount = 2.0f * debrisAmount;
+        highDebrisCount = 0;
+    } else if (sDebrisKind == DEBRIS_KIND_DUST) {
+        lowDebrisCount = 2.0f * debrisAmount;
+        highDebrisCount = lowDebrisCount;
+    } else if (sDebrisKind == DEBRIS_KIND_BURIED) {
+        debrisAmount += BURIED_DEBRIS_EXTRA;
+        if (debrisAmount > DEBRIS_AMOUNT_MOST) {
+            debrisAmount = DEBRIS_AMOUNT_MOST;
+        }
+        lowDebrisCount = 2.0f * debrisAmount;
+        highDebrisCount = lowDebrisCount;
+    }
+    spawnedCount = 0;
+    for (index = nextIndex; index < EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        if (spawnedCount == dropCount) {
+            break;
+        }
+        nextIndex++;
+        if (effect->kind == EFFECT_KIND_NONE) {
+            effect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
+            speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
+            heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS)
+                    + (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - M_PI / 4;
+            effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            if (sShotDebris.clubKind == CLUB_KIND_PUTTER) {
+                effect->velocity[AXIS_Y] =
+                    -PUTTED_DROP_SLOWEST_RISE_SPEED - headingIndex * PUTTED_DROP_RISE_STEP * COURSE_TO_WORLD_SCALE;
+            } else {
+                effect->velocity[AXIS_Y] =
+                    -DROP_SLOWEST_RISE_SPEED - headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
+            }
+            effect->unk24 = 0.0f;
+            effect->kind = EFFECT_KIND_DROP;
+            effect->alphaStep = 0;
+            effect->scaleStep = 0;
+            effect->alpha = 255.0f;
+            effect->scale = SHOT_DROP_SCALE;
+            translation[AXIS_X] = effect->position[AXIS_X];
+            translation[AXIS_Y] = effect->position[AXIS_Y];
+            translation[AXIS_Z] = effect->position[AXIS_Z];
+            rotation[AXIS_X] = effect->unk24;
+            rotation[AXIS_Y] = 0.0f;
+            rotation[AXIS_Z] = effect->unk24;
+            scale[AXIS_X] = effect->scale;
+            scale[AXIS_Y] = effect->scale;
+            spawnedCount++;
+            scale[AXIS_Z] = effect->scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &D_801B9418[g_DrawBufferIndex]);
+        }
+    }
+    /* The divot flies out on the mirror image of the drop's heading */
+    spawnedCount = 0;
+    for (index = nextIndex; index < EFFECT_COUNT; index++) {
+        divotEffect = &sEffects[index];
+        if (spawnedCount == divotCount) {
+            break;
+        }
+        nextIndex++;
+        if (divotEffect->kind == EFFECT_KIND_NONE) {
+            divotEffect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            divotEffect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            divotEffect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
+            speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
+            heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS)
+                    - (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) + M_PI / 4;
+            divotEffect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            divotEffect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
+            divotEffect->kind = EFFECT_KIND_DIVOT;
+            divotEffect->unk24 = 0;
+            divotEffect->alphaStep = 0;
+            divotEffect->alpha = 255.0f;
+            divotEffect->velocity[AXIS_Y] =
+                -DROP_SLOWEST_RISE_SPEED - headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
+            divotEffect->scale = debrisAmount * DIVOT_SCALE_PER_AMOUNT;
+            if (divotEffect->scale < DIVOT_SMALLEST_SCALE) {
+                divotEffect->scale = DIVOT_SMALLEST_SCALE;
+            }
+            if (divotEffect->scale > DIVOT_LARGEST_SCALE) {
+                divotEffect->scale = DIVOT_LARGEST_SCALE;
+            }
+            divotEffect->scaleStep = 0;
+            spawnedCount++;
+        }
+    }
+    /* The mark stays at point, turned by yaw */
+    spawnedCount = 0;
+    for (index = nextIndex; index < EFFECT_COUNT; index++) {
+        divotMarkEffect = &sEffects[index];
+        if (spawnedCount == divotMarkCount) {
+            break;
+        }
+        nextIndex++;
+        if (divotMarkEffect->kind == EFFECT_KIND_NONE) {
+            divotMarkEffect->position[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            divotMarkEffect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            divotMarkEffect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+            divotMarkEffect->velocity[AXIS_X] = 0;
+            divotMarkEffect->velocity[AXIS_Y] = 0;
+            divotMarkEffect->velocity[AXIS_Z] = 0;
+            divotMarkEffect->scale = debrisAmount * DIVOT_MARK_SCALE_PER_AMOUNT;
+            if (divotMarkEffect->scale < DIVOT_MARK_SMALLEST_SCALE) {
+                divotMarkEffect->scale = DIVOT_MARK_SMALLEST_SCALE;
+            }
+            if (divotMarkEffect->scale > DIVOT_MARK_LARGEST_SCALE) {
+                divotMarkEffect->scale = DIVOT_MARK_LARGEST_SCALE;
+            }
+            divotMarkEffect->alphaStep = 0;
+            divotMarkEffect->scaleStep = 0;
+            divotMarkEffect->kind = EFFECT_KIND_DIVOT_MARK;
+            divotMarkEffect->alpha = 255.0f;
+            translation[AXIS_X] = divotMarkEffect->position[AXIS_X];
+            translation[AXIS_Y] = divotMarkEffect->position[AXIS_Y];
+            translation[AXIS_Z] = divotMarkEffect->position[AXIS_Z];
+            rotation[AXIS_X] = 0.0f;
+            rotation[AXIS_Y] = -yaw + M_PI;
+            rotation[AXIS_Z] = 0.0f;
+            scale[AXIS_X] = divotMarkEffect->scale;
+            scale[AXIS_Y] = divotMarkEffect->scale;
+            spawnedCount++;
+            scale[AXIS_Z] = divotMarkEffect->scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sDivotMarkMatrix);
+        }
+    }
+    switch (sDebrisKind) {
+        case DEBRIS_KIND_TEE_UP:
+        case DEBRIS_KIND_GRASS:
+            SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK2);
+            break;
+        case DEBRIS_KIND_ROUGH:
+            nextIndex += SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK4);
+            SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_UNK3);
+            break;
+        case DEBRIS_KIND_DUST:
+        case DEBRIS_KIND_BURIED:
+            nextIndex += SpawnLowDebris(nextIndex, lowDebrisCount, EFFECT_KIND_UNK1);
+            SpawnHighDebris(nextIndex, highDebrisCount, EFFECT_KIND_UNK0);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007B054);
 
