@@ -1067,7 +1067,34 @@ void DrawEffectShadow(Gfx **displayListHead, Effect *effect) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007D19C);
+#define DROP_IMAGE_SIZE 16
+#define DROP_GRAY 239
+
+/* Draws the drop that LaunchDrop placed, turned to face the camera */
+void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEffect) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetPrimColor(gfx++, 0, 0, DROP_GRAY, DROP_GRAY, DROP_GRAY, 255);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    /* The masks of 6 are wider than the image; the original has them */
+    gDPLoadTextureBlock_4b(gfx++, TEXTURE_ADDRESS(sDropImage + IMAGE_HEADER_SIZE), G_IM_FMT_I, DROP_IMAGE_SIZE,
+                           DROP_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sDropMatrices[g_DrawBufferIndex]), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sUprightQuadVertices, 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007D4E8);
 
