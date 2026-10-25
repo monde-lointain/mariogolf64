@@ -39,6 +39,11 @@
 #define CORRUPTED_SAVE_MESSAGE 0x152
 #define UNINITIALIZED_SAVE_MESSAGE 0x153
 #define CARTRIDGE_REPLACED_MESSAGE 0x156
+#define CHOOSE_EXPERIENCE_MESSAGE 0x158
+#define EXPERIENCE_SENT_MESSAGE 0x159
+#define CHOOSE_CHARACTER_MESSAGE 0x15C
+#define CHARACTER_BROUGHT_MESSAGE 0x15D
+#define CHOOSE_SWAPPED_CHARACTER_MESSAGE 0x15E
 #define NO_CHARACTERS_MESSAGE 0x15F
 
 /* The hints below the status screen */
@@ -54,6 +59,8 @@
 #define FACES_TOP 136
 #define FACE_SPACING 40
 #define FACE_SIZE 32
+#define EXPERIENCE_LEFT 20 /* Below each face */
+#define EXPERIENCE_TOP 174
 
 /* The notice cloud grows by one step each time it is drawn, up to this size */
 #define NOTICE_FULL_SIZE 4
@@ -114,6 +121,7 @@
  */
 extern void *g_PressingHandImage;
 
+void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, GameBoyTransfer *transfer);
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 s32 OpenGameBoyPak(s32 port, u8 *header, NUContPakFile *file);
 s32 OpenGameBoyPakWithRetries(s32 port, u8 *header, NUContPakFile *file);
@@ -384,9 +392,79 @@ void DrawSendStatusHint(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawCharacterStats);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawBringCharactersText);
+void DrawBringCharactersText(Gfx **displayListHead, GameBoyTransfer *transfer) {
+    GameBoyCharacter *character = g_GameBoyCharacters;
+    Gfx *displayList = *displayListHead;
+    s32 isCharacterShown = FALSE;
+    s32 message;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawSendExperienceText);
+    SetUpTextDrawing(&displayList);
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    sprintf(g_PrintBuffer, "%3d", transfer->screenStep);
+    PrintDebugText(g_PrintBuffer, 20, 2);
+    if (transfer->screenStep == 8) {
+        isCharacterShown = TRUE;
+        character = &g_GameBoyCharacters[transfer->characterIndex];
+    }
+    if ((transfer->screenStep == 2 || transfer->screenStep == 3) && g_GameBoyTransfer.unk79C > 0) {
+        isCharacterShown = TRUE;
+        character = &transfer->cartridgeCharacters[transfer->listedCharacters[transfer->listedCharacterIndex]];
+    }
+    if (isCharacterShown) {
+        DrawCharacterStats(&displayList, character, transfer);
+    }
+    SetUpTextDrawing(&displayList);
+    if (transfer->unk7A0 == g_ControllerCount * 4 - 1) {
+        message = NO_MESSAGE;
+        switch (transfer->screenStep) {
+            case 2:
+                message = CHOOSE_CHARACTER_MESSAGE;
+                break;
+            case 8:
+                message = CHOOSE_SWAPPED_CHARACTER_MESSAGE;
+                break;
+            case 7:
+                message = CHARACTER_BROUGHT_MESSAGE;
+                break;
+        }
+        if (message != NO_MESSAGE) {
+            SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+            DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+        }
+    }
+    *displayListHead = displayList;
+}
+
+void DrawSendExperienceText(Gfx **displayListHead, GameBoyTransfer *transfer) {
+    Gfx *displayList = *displayListHead;
+    s32 slot;
+    s32 message;
+
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    BeginShadowedText(&displayList);
+    for (slot = 0; slot != g_GameBoyTransfer.characterCount; slot++) {
+        GameBoyCharacter *character = &g_GameBoyCharacters[slot];
+
+        sprintf(g_PrintBuffer, "%4d", character->experience);
+        DrawSmallText(&displayList, EXPERIENCE_LEFT + slot * FACE_SPACING, EXPERIENCE_TOP, g_PrintBuffer);
+    }
+    DrawCharacterStats(&displayList, &g_GameBoyCharacters[transfer->characterIndex], transfer);
+    SetUpTextDrawing(&displayList);
+    message = NO_MESSAGE;
+    switch (transfer->screenStep) {
+        case 0:
+            message = CHOOSE_EXPERIENCE_MESSAGE;
+            break;
+        case 3:
+            message = EXPERIENCE_SENT_MESSAGE;
+            break;
+    }
+    if (message != NO_MESSAGE) {
+        SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
+    }
+    *displayListHead = displayList;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawSendStatusScreen);
 
