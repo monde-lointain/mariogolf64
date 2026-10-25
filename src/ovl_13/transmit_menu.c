@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "character.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "game_flags.h"
@@ -8,6 +9,7 @@
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
 
@@ -127,6 +129,26 @@
 #define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
 #define STATUS_WRITE_FAILED 2 /* With the cause in transferResult */
 
+#define WOOD_PANEL_ASSET 0x8FD
+#define COURSE_SCENE_ASSET 0x51E
+#define POINTER_ASSET 0x70F
+#define ARROWS_ASSET 0x720
+#define CONTROLLER_ICONS_ASSET 0x900
+#define TITLE_ASSET 0x93F
+#define CURSOR_BOX_ASSET 0x5F7
+#define UNK8EE_ASSET 0x8EE
+#define PRESSING_HAND_ASSET 0x8EB
+#define STAT_BARS_ASSET 0x95D
+#define SHOT_TYPES_ASSET 0x979
+#define NOTICE_CLOUD_ASSET 0x70B
+#define ACCESSING_ASSET 0x96B
+#define STAT_LABELS_ASSET 0x978
+
+#define FIRST_GAME_BOY_GOLFER CHARACTER_KID
+#define TRANSMIT_MENU_SONG 0x16
+
+void LoadCursorBox(void *image);
+
 /* Results of opening and accessing the Game Boy cartridges, after the notice each shows */
 #define PAK_RESULT_CONNECTOR_PROBLEM 0
 #define PAK_RESULT_OK 1
@@ -178,7 +200,55 @@ void DumpCartridgeRam(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", LoadTransmitMenu);
+/*
+ * Loads the menu's images, and the faces and palettes of the Game Boy golfers, then starts the
+ * menu's song and stops any rumble.
+ */
+void LoadTransmitMenu(void) {
+    AssetFile file;
+    EncodedAsset asset;
+    s32 index;
+    s32 size;
+
+    ReadEncodedAsset(g_GameBoyTransfer.woodPanelImage = AllocMemory(OpenEncodedAsset(WOOD_PANEL_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.courseSceneImage = AllocMemory(OpenEncodedAsset(COURSE_SCENE_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.pointerImage = AllocMemory(OpenEncodedAsset(POINTER_ASSET, &asset)), &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.arrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset)), &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.controllerIconsImage =
+                         AllocMemory(OpenEncodedAsset(CONTROLLER_ICONS_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.titleImage = AllocMemory(OpenEncodedAsset(TITLE_ASSET, &asset)), &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.cursorBoxImage = AllocMemory(OpenEncodedAsset(CURSOR_BOX_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.unk3C = AllocMemory(OpenEncodedAsset(UNK8EE_ASSET, &asset)), &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.pressingHandImage = AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.statBarsImage = AllocMemory(OpenEncodedAsset(STAT_BARS_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.shotTypesImage = AllocMemory(OpenEncodedAsset(SHOT_TYPES_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.noticeCloudImage = AllocMemory(OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.accessingImage = AllocMemory(OpenEncodedAsset(ACCESSING_ASSET, &asset)),
+                     &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.statLabelsImage = AllocMemory(OpenEncodedAsset(STAT_LABELS_ASSET, &asset)),
+                     &asset);
+    g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_HIDDEN;
+    g_GameBoyTransfer.isAccessing = FALSE;
+    for (index = 0; index != GAME_BOY_GOLFER_COUNT; index++) {
+        ReadEncodedAsset(g_GameBoyTransfer.faceImages[index] = AllocMemory(OpenEncodedAsset(
+                             g_CharacterImageAssets[FIRST_GAME_BOY_GOLFER + index], &asset)),
+                         &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[FIRST_GAME_BOY_GOLFER + index], &file);
+        size = GetAssetFileSize(&file);
+        ReadAssetFile(g_GameBoyTransfer.facePalettes[index] = AllocMemory(size), size, &file);
+    }
+    PlaySong(TRANSMIT_MENU_SONG, 0);
+    LoadCursorBox(g_GameBoyTransfer.cursorBoxImage);
+    nuContRmbForceStop();
+}
 
 void FreeTransmitMenu(void) {
     s32 index;
