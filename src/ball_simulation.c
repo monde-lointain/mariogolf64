@@ -179,7 +179,7 @@ void ResetBallSimulations(void) {
         g_BallSimulations[index].velocity[AXIS_Y] = -100;
         g_BallSimulations[index].velocity[AXIS_Z] = rand() & 0x3FF;
         g_BallSimulations[index].unk30 = 0;
-        g_BallSimulations[index].isRunning = TRUE;
+        g_BallSimulations[index].isRunning = BALL_STATE_FLYING;
     }
 }
 

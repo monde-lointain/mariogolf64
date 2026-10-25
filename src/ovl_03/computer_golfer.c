@@ -1902,7 +1902,7 @@ s32 StepTrialShot(void) {
             if (flags & STEP_FLAG_OUTSIDE_COURSE) {
                 break;
             }
-            if (unk94 == 0 && (flags & 3) && velocityY < 0 && isRunning == 1) {
+            if (unk94 == 0 && (flags & 3) && velocityY < 0 && isRunning == BALL_STATE_FLYING) {
                 if (sHasBestEvaluation || sTrialLevel < 2) {
                     break;
                 }
@@ -1923,7 +1923,8 @@ s32 StepTrialShot(void) {
                         sTrialEvaluation += POOR_LANDING_EVALUATION;
                     }
                 }
-            } else if ((stepFlags & STEP_FLAG_GROUND_HIT) && sTrialSimulation.isRunning == 1 && !sHasLanded) {
+            } else if ((stepFlags & STEP_FLAG_GROUND_HIT) && sTrialSimulation.isRunning == BALL_STATE_FLYING
+                       && !sHasLanded) {
                 sHasLanded = sTrialSimulation.isRunning;
                 sLandingPosition[AXIS_X] = sTrialSimulation.position[AXIS_X];
                 sLandingPosition[AXIS_Y] = sTrialSimulation.position[AXIS_Y];

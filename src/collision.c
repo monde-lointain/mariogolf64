@@ -68,7 +68,6 @@
 #define MINI_GOLF_TILE_Z_SHIFT 16
 /* FindMiniGolfGroundHit takes sides of a plane closer than this as a path barely crossing it */
 #define BARE_CROSSING_DISTANCE 786.0f
-#define BALL_STATE_UNK2 2
 /* FindGroundHit's halvings of the search for where a path enters the next tile */
 #define TILE_SEARCH_STEP_COUNT 10
 /* The side length of the level triangle FindGroundHit gives for a path off the ground */
@@ -187,7 +186,8 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * the original.
  */
 #define IsBareCrossing(simulation, startSide, endSide)                                                                \
-    (((simulation)->isRunning == BALL_STATE_UNK2) && (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
+    (((simulation)->isRunning == BALL_STATE_ROLLING)                                                                  \
+     && (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
 /*
  * Whether a value is less than, or more than, every corner's, which are
@@ -221,8 +221,8 @@ const char g_PathDebugBlankText[] = "          ";
  * tiles are 1 << MINI_GOLF_TILE_X_SHIFT units along x and
  * 1 << MINI_GOLF_TILE_Z_SHIFT along z. A triangle is hit only by a path
  * whose start is on its plane or on the side away from its end. A path
- * that starts on the plane, or, while the simulation state is
- * BALL_STATE_UNK2, barely crosses it, hits it at the path's end.
+ * that starts on the plane, or, while the ball rolls, barely crosses
+ * it, hits it at the path's end.
  */
 #ifdef NON_MATCHING
 s32 FindMiniGolfGroundHit(BallSimulation *simulation, s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
@@ -933,7 +933,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
             velocity[AXIS_Z] = 0;
         } else {
             bounceSpeed = speed * FLAGSTICK_MOST_BOUNCE - ABS(deltaY) * 2;
-            if (simulation->isRunning == 1) {
+            if (simulation->isRunning == BALL_STATE_FLYING) {
                 bounceSpeed *= 0.5f;
             }
             if (bounceSpeed > speed * FLAGSTICK_MOST_BOUNCE) {
