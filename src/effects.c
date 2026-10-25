@@ -1098,7 +1098,37 @@ void DrawDrop(Gfx **displayListHead, CameraMatrices *matrices, Effect *unusedEff
 
 INCLUDE_ASM("asm/nonmatchings/effects", func_8007D4E8);
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_8007DB08);
+#define DIVOT_IMAGE_SIZE 32
+#define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
+#define DIVOT_MARK_FRAME 4
+
+/* Draws the divot's mark where SpawnShotDebris placed it, flat on the ground */
+void DrawDivotMark(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, TEXTURE_ADDRESS(sDivotImage + IMAGE_HEADER_SIZE));
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    /* Grouping the frame's offset is there to match */
+    gDPLoadTextureBlock_4b(gfx++,
+                           TEXTURE_ADDRESS(sDivotImage
+                                           + (DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
+                           G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP, 6, 6, G_TX_NOLOD,
+                           G_TX_NOLOD);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sDivotMarkMatrix), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sSmallFlatQuadVertices, 4, 0);
+    gDPPipeSync(gfx++);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /* Ripples and spreading circles are drawn in this light gray */
 #define CIRCLE_GRAY 230

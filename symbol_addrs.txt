@@ -1349,6 +1349,7 @@ LaunchBurst = 0x80077E94; // type:func
 UpdateAndDrawBursts = 0x80078128; // type:func
 SpawnShotDebris = 0x8007A6C8; // type:func
 DrawDrop = 0x8007D19C; // type:func
+DrawDivotMark = 0x8007DB08; // type:func
 DrawBirdieBadgeCount = 0x8007FEAC; // type:func
 sBurstCount = 0x800C4660; // size:0x4
 sBurstState = 0x800C4664; // size:0x4
