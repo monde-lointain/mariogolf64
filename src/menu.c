@@ -109,7 +109,6 @@ extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
 extern s8 D_801323B8;
 extern s8 D_801323D0;
-extern s8 D_801B60B9;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
 extern s8 D_801B70F1;
@@ -1682,7 +1681,7 @@ void func_8005DDAC(void) {
     D_801052E8 = 1;
     D_800C2BD4 = 0;
     D_801B9410 = 1;
-    D_801B60B9 = 0;
+    g_GameState.unk31 = 0;
     ClearGameFlag(GAME_FLAG_UNK1E);
     D_801EFFA0 = 0xC;
 }

@@ -131,7 +131,6 @@ extern s32 D_8010CF60[COURSE_HOLE_COUNT];
 extern s32 D_801B60B0;
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
-extern s8 D_801B60B9;
 extern s32 D_801B60A0;
 extern s32 D_801B60B4;
 extern s32 sCycledCupIndex;
@@ -714,7 +713,7 @@ s32 ChooseHoleConditions(void) {
     s32 courseRecordIndex;
 
     D_80104B6D = -1;
-    if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 || D_801B60B9 != 0) {
+    if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 || g_GameState.unk31 != 0) {
         if (g_GameMode == GAME_MODE_RING_SHOT) {
             D_800BA9D8 = D_80105F40;
         } else {

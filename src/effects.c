@@ -133,7 +133,6 @@ extern s32 sSpawnGroundHeight;
 extern f32 g_RainSoundVolume;
 extern s32 D_80104AE0[3];
 extern Gfx D_800C3FC0[];
-extern s8 D_801B60B9;
 extern u8 *sRainSplashImage;
 extern Mtx sRainModelViewMatrix;
 extern Mtx g_ScreenOrthoMatrix;
@@ -1886,9 +1885,9 @@ void DrawSpreadingCircle(Gfx **displayListHead, Effect *effect) {
 #define RUMBLE_FREQUENCY 0x100
 #define RUMBLE_FRAME_COUNT 10
 
-/* Rumbles the player's controller briefly if it has a Rumble Pak, unless D_801B60B9 is set */
+/* Rumbles the player's controller briefly if it has a Rumble Pak, unless g_GameState.unk31 is set */
 void StartPlayerRumble(UnkB8 *player) {
-    if (player->controllerIndex < MAXCONTROLLERS && !D_801B60B9) {
+    if (player->controllerIndex < MAXCONTROLLERS && !g_GameState.unk31) {
         switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
             case 0:
                 nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex], RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);
@@ -1904,7 +1903,7 @@ void StartPlayerRumble(UnkB8 *player) {
 
 /* The same as StartPlayerRumble; the ball simulation calls it when the ball passes a ring */
 void StartRingPassRumble(UnkB8 *player) {
-    if (player->controllerIndex < MAXCONTROLLERS && !D_801B60B9) {
+    if (player->controllerIndex < MAXCONTROLLERS && !g_GameState.unk31) {
         switch (nuContRmbCheck(g_PlayerControllerPorts[player->controllerIndex])) {
             case 0:
                 nuContRmbStart(g_PlayerControllerPorts[player->controllerIndex], RUMBLE_FREQUENCY, RUMBLE_FRAME_COUNT);

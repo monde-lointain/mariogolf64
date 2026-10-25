@@ -158,7 +158,6 @@ void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
 extern Gfx D_800C3FC0[];
 extern s32 D_800C2AD8[];
 extern s32 D_800C2B00[];
-extern s8 D_801B60B9;
 
 extern u8 *sBoardImage; /* The name plate or the hole sign */
 extern u8 *sCourseBadges[COURSE_INDEX_COUNT];
@@ -632,7 +631,7 @@ void DrawRingShotSelect(Gfx **displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
         LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
-        if (D_801B60B9 == 0 && CountOpenRingShotCourses() >= 2) {
+        if (g_GameState.unk31 == 0 && CountOpenRingShotCourses() >= 2) {
             arrowFrame = sCourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
             LoadNibbleTextureBlock(&gfx, sArrowsImage + PALETTED_TEXELS_OFFSET + arrowFrame * ARROWS_FRAME_SIZE,
                           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);

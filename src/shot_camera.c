@@ -1287,7 +1287,6 @@ void PlaceCameraAroundShotEnd(void) {
 void func_800934CC(s32);
 
 extern s8 D_801061B8;
-extern s8 D_801B60B9;
 
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
@@ -1301,7 +1300,7 @@ void StartHoleCamerasAndSong(void) {
     g_HoleFlyoverFrame = 0;
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     g_Cameras[1].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
-    if (D_801B60B9) {
+    if (g_GameState.unk31) {
         PlaySong(HOLE_SONG_UNK1F, SONG_FLAG_UNK10 | SONG_FLAG_UNREAD);
         return;
     }
