@@ -257,6 +257,19 @@ extern s32 sShotEffect;
 s32 func_80213C78(UnkB8 *player);
 extern s8 D_8010623F;
 
+/*
+ * The loaded texture of distance glyphs: the digits, then the units and the
+ * decimal point, all DISTANCE_GLYPH_HEIGHT high
+ */
+#define DISTANCE_GLYPH_HEIGHT 12
+#define DISTANCE_DIGIT_WIDTH 8
+#define DISTANCE_METRES_S 80
+#define DISTANCE_YARDS_S 88
+#define DISTANCE_FEET_S 96
+#define DISTANCE_FEET_WIDTH 16
+#define DISTANCE_POINT_S 112
+#define DISTANCE_POINT_WIDTH 4
+
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *D_800E2188;
@@ -899,7 +912,46 @@ s32 DrawLetterbox(Gfx **gfxP, s32 height) {
     return height;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80088A90);
+/*
+ * Draws a distance such as "12.5m" with the loaded distance glyphs, from its
+ * top left corner. Spaces are skipped without advancing.
+ */
+void DrawDistanceText(Gfx **gfxP, s32 x, s32 y, char *text) {
+    s32 width;
+    s32 glyphS;
+    Gfx *gfx = *gfxP;
+
+    for (; *text != '\0'; text++) {
+        switch (*text) {
+            case ' ':
+                continue;
+            case '.':
+                width = DISTANCE_POINT_WIDTH;
+                glyphS = DISTANCE_POINT_S;
+                break;
+            case 'm':
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = DISTANCE_METRES_S;
+                break;
+            case 'y':
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = DISTANCE_YARDS_S;
+                break;
+            case 'f':
+                width = DISTANCE_FEET_WIDTH;
+                glyphS = DISTANCE_FEET_S;
+                break;
+            default:
+                width = DISTANCE_DIGIT_WIDTH;
+                glyphS = (*text - '0') * DISTANCE_DIGIT_WIDTH;
+                break;
+        }
+        gSPTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2, (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE,
+                            glyphS << 5, 0, 1 << 10, 1 << 10);
+        x += width;
+    }
+    *gfxP = gfx;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1BB8);
 

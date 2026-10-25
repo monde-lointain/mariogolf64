@@ -2445,3 +2445,4 @@ sHoleImageMatrix = 0x800E2050; // size:0x40
 StartShotEffect = 0x8008679C; // type:func
 sShotEffectTime = 0x800C5DF0;
 sShotEffect = 0x800C5DF4;
+DrawDistanceText = 0x80088A90; // type:func
