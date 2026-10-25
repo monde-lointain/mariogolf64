@@ -22,6 +22,26 @@
 #define GAME_FLAG_UNK7 0x07
 #define TITLE_FRAMEBUFFER_COUNT 2
 
+/*
+ * The sun's glare grows while the sun is on the screen with nothing in front
+ * of it, flaring past SUN_GLARE_FLARE_STRENGTH before settling at full
+ * strength, and fades when something covers it. Only the z-buffer within
+ * SUN_DEPTH_MARGIN of the screen's edges is read.
+ */
+#define SUN_DEPTH_MARGIN 16.0f
+#define SUN_GLARE_MARGIN 120.0f
+#define SUN_SKY_DEPTH 0xFFFC /* The z-buffer value of the sky */
+#define SUN_GLARE_FADE_STEP 0.1f
+#define SUN_GLARE_GROWTH_STEP 0.3f
+#define SUN_GLARE_FLARE_STRENGTH 1.5f
+#define SUN_GLARE_FULL_STRENGTH 1.0f
+
+extern f32 sSunScreenX;
+extern f32 sSunScreenY;
+extern u16 sSunDepth;
+extern s32 sIsSunGlareSettled;
+extern f32 sSunGlareStrength;
+
 extern s32 D_801B609C;
 extern s32 g_PlayerCount;
 extern s32 sIsPrimitiveDepthSet;
@@ -63,7 +83,38 @@ void SetUpTitleHole(void) {
     SetFramebufferCount(TITLE_FRAMEBUFFER_COUNT);
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateZBufferVisibility);
+/* Grows or fades the sun's glare by whether the z-buffer shows anything in front of the sun */
+void UpdateSunGlare(void) {
+    u16 *zBuffer;
+
+    if (sSunScreenX >= SUN_DEPTH_MARGIN && sSunScreenX <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
+        sSunScreenY >= SUN_DEPTH_MARGIN && sSunScreenY <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
+        zBuffer = nuGfxZBuffer;
+        sSunDepth = zBuffer[(s32)sSunScreenY * SCREEN_WIDTH + (s32)sSunScreenX];
+        if (sSunDepth >= SUN_SKY_DEPTH) {
+            goto grow;
+        }
+        sIsSunGlareSettled = FALSE;
+        sSunGlareStrength -= SUN_GLARE_FADE_STEP;
+        if (sSunGlareStrength < 0.0f) {
+            sSunGlareStrength = 0.0f;
+        }
+    } else if (sSunScreenX > -SUN_GLARE_MARGIN && sSunScreenX < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
+               sSunScreenY > -SUN_GLARE_MARGIN && sSunScreenY < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
+    grow:
+        if (!sIsSunGlareSettled) {
+            sSunGlareStrength += SUN_GLARE_GROWTH_STEP;
+        }
+        if (sSunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !sIsSunGlareSettled) {
+            sIsSunGlareSettled = TRUE;
+            sSunGlareStrength = SUN_GLARE_FULL_STRENGTH;
+        }
+    } else {
+        sSunDepth = 0;
+        sIsSunGlareSettled = FALSE;
+        sSunGlareStrength = 0.0f;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008D3F4);
 

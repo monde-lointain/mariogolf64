@@ -645,7 +645,7 @@ nuScRetraceTotal = 0x801B68E0; // size:0x4
 nusched = 0x801B8380; // size:0x680
 
 // Game routines and variables that NuSystem's scheduler refers to
-UpdateZBufferVisibility = 0x8008D1DC; // type:func
+UpdateSunGlare = 0x8008D1DC; // type:func
 HandleFrameBufferSwap = 0x80092324; // type:func
 g_IsDebugEnabled = 0x800B67C0; // size:0x1
 
@@ -2434,3 +2434,8 @@ sLandingReaction = 0x800C5A10;
 sLandingReactionFrame = 0x800C5A14;
 LoadRoundHud = 0x80081284; // type:func
 g_RingTexels = 0x800FE3D4;
+sSunScreenX = 0x800C5F24;
+sSunScreenY = 0x800C5F2C;
+sSunDepth = 0x800C6914;
+sIsSunGlareSettled = 0x800C6918;
+sSunGlareStrength = 0x800C691C;

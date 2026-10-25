@@ -85,7 +85,7 @@ volatile u32	nuScGfxTaskStartRetrace;	/* Retrace count when it started */
 #define WATCHDOG_DISPLAY_OFF_RETRACE	54	/* Give up and blank the display */
 
 extern s8	g_IsDebugEnabled;
-extern void	UpdateZBufferVisibility(void);
+extern void	UpdateSunGlare(void);
 extern void	HandleFrameBufferSwap(void* frameBuffer);
 
 
@@ -621,7 +621,7 @@ static void nuScExecuteGraphics(void)
 #endif /* NU_DEBUG */
 
 	if(gfxTask->flags & NU_SC_SWAPBUFFER){
-	    UpdateZBufferVisibility();
+	    UpdateSunGlare();
 	    HandleFrameBufferSwap(gfxTask->framebuffer);
 	}
 
