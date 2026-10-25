@@ -1,15 +1,18 @@
 #include "common.h"
 #include "asset.h"
+#include "ball_simulation.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "controller.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
 #include "sound.h"
+#include "surface.h"
 #include "variables.h"
 #include <lib/libnusys/nusys.h>
 
@@ -60,6 +63,14 @@ typedef struct RainSplash {
 #define EFFECT_KIND_SPREADING_CIRCLE 0x13 /* Drawn with sArcImage */
 #define EFFECT_KIND_TEAR 0x14
 
+/* The debris that the ball's lie gives, chosen by its surface kind */
+#define DEBRIS_KIND_NONE 0
+#define DEBRIS_KIND_TEE_UP 1
+#define DEBRIS_KIND_GRASS 2 /* Fairway, tee ground and semi-rough */
+#define DEBRIS_KIND_DUST 3 /* Bunker and bare ground */
+#define DEBRIS_KIND_ROUGH 4
+#define DEBRIS_KIND_BURIED 6 /* Bunker lies with the ball sunk in the sand */
+
 #define WEATHER_NONE (-1)
 #define WEATHER_RAIN 2
 
@@ -91,7 +102,7 @@ extern f32 sRainDriftZ;
 extern Vec3 sRainVelocity; /* Per frame */
 extern s32 D_80104AC0;
 
-s32 D_800C52B0 = 0;
+s32 sDebrisKind = 0;
 s32 sNextMatrixIndex = 0;
 Vtx sUprightQuadVertices[] = {
     { { { -1, -1, 0 }, 0, { 0, 0 }, { 0xFF, 0xFF, 0xFF, 0xFF } } },
@@ -140,6 +151,7 @@ void StartRain(void);
 
 #define RIPPLE_IMAGE_ASSET 0x6B0
 #define DROP_IMAGE_ASSET 0x6B2
+#define GRASS_IMAGE_ASSET 0x6B6 /* Blades of grass */
 #define CLOUD_IMAGE_ASSET 0x6B5
 #define CLUMP_IMAGE_ASSET 0x6B8
 #define SPARK_IMAGE_ASSET 0x6C0
@@ -203,7 +215,75 @@ void LoadEffectImages(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/effects", func_80078BDC);
+/*
+ * Reloads five of the effect images, clears the effects, and loads the debris image that the
+ * ball's lie calls for.
+ */
+void PrepareShotEffects(BallSimulation *simulation) {
+    EncodedAsset asset;
+    s32 index;
+    Effect *effect;
+
+    OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sCloudImage, &asset);
+    OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sClumpImage, &asset);
+    OpenEncodedAsset(RIPPLE_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sRippleImage, &asset);
+    OpenEncodedAsset(DROP_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sDropImage, &asset);
+    OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset);
+    ReadEncodedAsset(sSparkImage, &asset);
+    /* Clearing the effects here instead of calling ClearEffects is there to match */
+    for (index = 0; index != EFFECT_COUNT; index++) {
+        effect = &sEffects[index];
+        effect->kind = EFFECT_KIND_NONE;
+    }
+    sSpawnGroundHeight =
+        (f32)GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
+    if (simulation->surface == SURFACE_TEE_UP) {
+        sDebrisKind = DEBRIS_KIND_TEE_UP;
+        OpenEncodedAsset(GRASS_IMAGE_ASSET, &asset);
+        ReadEncodedAsset(sDebrisImage, &asset);
+    } else {
+        switch (GetSurfaceInfo(g_CurrentShot.surface)->kind) {
+            case SURFACE_KIND_FAIRWAY:
+            case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+            case SURFACE_KIND_FAIRWAY_POOR_LIE:
+            case SURFACE_KIND_TEE_GROUND:
+            case SURFACE_KIND_SEMI_ROUGH:
+                sDebrisKind = DEBRIS_KIND_GRASS;
+                OpenEncodedAsset(GRASS_IMAGE_ASSET, &asset);
+                ReadEncodedAsset(sDebrisImage, &asset);
+                break;
+            case SURFACE_KIND_ROUGH:
+            case SURFACE_KIND_ROUGH_POOR_LIE:
+            case 5:
+            case SURFACE_KIND_DEEP_ROUGH:
+                sDebrisKind = DEBRIS_KIND_ROUGH;
+                OpenEncodedAsset(CLUMP_IMAGE_ASSET, &asset);
+                ReadEncodedAsset(sDebrisImage, &asset);
+                break;
+            case SURFACE_KIND_BUNKER:
+            case SURFACE_KIND_BARE_GROUND:
+                sDebrisKind = DEBRIS_KIND_DUST;
+                OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+                ReadEncodedAsset(sDebrisImage, &asset);
+                break;
+            case SURFACE_KIND_BUNKER_FAIR_LIE:
+            case SURFACE_KIND_BUNKER_POOR_LIE:
+            case SURFACE_KIND_BUNKER_UNK9:
+                sDebrisKind = DEBRIS_KIND_BURIED;
+                OpenEncodedAsset(CLOUD_IMAGE_ASSET, &asset);
+                ReadEncodedAsset(sDebrisImage, &asset);
+                break;
+            default:
+                sDebrisKind = DEBRIS_KIND_NONE;
+                break;
+        }
+    }
+    func_80216B10_ovl_00();
+}
 
 /* Frees every effect */
 void ClearEffects(void) {

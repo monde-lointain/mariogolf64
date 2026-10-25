@@ -36,6 +36,7 @@ s32 IsDebugBButtonView(void);
 
 /* ovl_00 */
 void func_801FD624_ovl_00(void);
+void func_80216B10_ovl_00(void);
 
 /* ovl_05 */
 void func_801F5018_ovl_05(void);
