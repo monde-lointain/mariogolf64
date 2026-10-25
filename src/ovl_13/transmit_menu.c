@@ -206,7 +206,7 @@
 #define CONTROLLER_ICONS_ASSET 0x900
 #define TITLE_ASSET 0x93F
 #define CURSOR_BOX_ASSET 0x5F7
-#define UNK8EE_ASSET 0x8EE
+#define CURVE_SEGMENTS_ASSET 0x8EE
 #define PRESSING_HAND_ASSET 0x8EB
 #define STAT_BARS_ASSET 0x95D
 #define SHOT_TYPES_ASSET 0x979
@@ -319,7 +319,9 @@ void LoadTransmitMenu(void) {
     ReadEncodedAsset(g_GameBoyTransfer.titleImage = AllocMemory(OpenEncodedAsset(TITLE_ASSET, &asset)), &asset);
     ReadEncodedAsset(g_GameBoyTransfer.cursorBoxImage = AllocMemory(OpenEncodedAsset(CURSOR_BOX_ASSET, &asset)),
                      &asset);
-    ReadEncodedAsset(g_GameBoyTransfer.unk3C = AllocMemory(OpenEncodedAsset(UNK8EE_ASSET, &asset)), &asset);
+    ReadEncodedAsset(g_GameBoyTransfer.curveSegmentsImage =
+                         AllocMemory(OpenEncodedAsset(CURVE_SEGMENTS_ASSET, &asset)),
+                     &asset);
     ReadEncodedAsset(g_GameBoyTransfer.pressingHandImage = AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset)),
                      &asset);
     ReadEncodedAsset(g_GameBoyTransfer.statBarsImage = AllocMemory(OpenEncodedAsset(STAT_BARS_ASSET, &asset)),
@@ -357,7 +359,7 @@ void FreeTransmitMenu(void) {
     FreeMemory(&g_GameBoyTransfer.controllerIconsImage);
     FreeMemory(&g_GameBoyTransfer.titleImage);
     FreeMemory(&g_GameBoyTransfer.cursorBoxImage);
-    FreeMemory(&g_GameBoyTransfer.unk3C);
+    FreeMemory(&g_GameBoyTransfer.curveSegmentsImage);
     FreeMemory(&g_GameBoyTransfer.pressingHandImage);
     FreeMemory(&g_GameBoyTransfer.statBarsImage);
     FreeMemory(&g_GameBoyTransfer.shotTypesImage);
@@ -1127,9 +1129,9 @@ void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, Game
                           CURVE_BAR_WIDTH, 0, 0, 0, CURVE_BAR_WIDTH - 1, CURVE_BAR_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, CURVE_BAR_LEFT << 2, CURVE_BAR_TOP << 2, (CURVE_BAR_LEFT + CURVE_BAR_WIDTH) << 2,
                     (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    LoadLargePalette(&displayList, (u8 *)transfer->unk3C + IMAGE_HEADER_SIZE);
-    LoadTextureBlock(&displayList, (u8 *)transfer->unk3C + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b,
-                     CURVE_SEGMENT_WIDTH, CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
+    LoadLargePalette(&displayList, (u8 *)transfer->curveSegmentsImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&displayList, (u8 *)transfer->curveSegmentsImage + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                     G_IM_SIZ_8b, CURVE_SEGMENT_WIDTH, CURVE_SEGMENT_WIDTH * CURVE_SEGMENT_COUNT, 0, 0, 0, 0, 0, 0, 0);
     for (segment = 0, segmentCurve = -CURVE_SEGMENT_COUNT / 2; segment != CURVE_SEGMENT_COUNT;
          segment++, segmentCurve++) {
         /* Light segments from the centre out to the shot curve; the continues are there to match */

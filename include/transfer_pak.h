@@ -90,7 +90,7 @@ typedef struct GameBoyTransfer {
     /* 0x030 */ void *woodPanelImage;
     /* 0x034 */ void *controllerIconsImage;
     /* 0x038 */ void *cursorBoxImage;
-    /* 0x03C */ void *unk3C;
+    /* 0x03C */ void *curveSegmentsImage;
     /* 0x040 */ void *pressingHandImage;
     /* 0x044 */ void *statBarsImage;
     /* 0x048 */ void *statLabelsImage;
