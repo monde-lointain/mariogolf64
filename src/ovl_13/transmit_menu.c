@@ -59,6 +59,11 @@
 #define FACES_TOP 136
 #define FACE_SPACING 40
 #define FACE_SIZE 32
+#define FACE_CURSOR_MARGIN 9
+#define CONTROLLER_ICONS_LEFT 60
+#define CONTROLLER_ICONS_TOP 72
+#define CONTROLLER_ICON_SPACING 56
+#define CONTROLLER_ICON_SIZE 32
 #define EXPERIENCE_LEFT 20 /* Below each face */
 #define EXPERIENCE_TOP 174
 
@@ -123,6 +128,7 @@ extern void *g_PressingHandImage;
 
 void DrawCharacterStats(Gfx **displayListHead, GameBoyCharacter *character, GameBoyTransfer *transfer);
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
+void DrawCursorBox(Gfx **displayListHead, s32 left, s32 top);
 s32 OpenGameBoyPak(s32 port, u8 *header, NUContPakFile *file);
 s32 OpenGameBoyPakWithRetries(s32 port, u8 *header, NUContPakFile *file);
 
@@ -498,7 +504,42 @@ void DrawOptionsScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawBringCharactersScreen);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawSendExperienceScreen);
+void DrawSendExperienceScreen(Gfx **displayListHead, GameBoyTransfer *transfer) {
+    Gfx *displayList = *displayListHead;
+    s32 index;
+    /* A second counter alongside index is there to match */
+    s32 slot;
+
+    DrawImportedFaces(&displayList, transfer);
+    if (transfer->screenStep == 0) {
+        DrawCursorBox(&displayList, FACES_LEFT - FACE_CURSOR_MARGIN + transfer->characterIndex * FACE_SPACING,
+                      FACES_TOP - FACE_CURSOR_MARGIN);
+        gDPPipeSync(displayList++);
+        gDPSetTexturePersp(displayList++, G_TP_NONE);
+        gDPPipeSync(displayList++);
+        gDPSetTextureLUT(displayList++, G_TT_RGBA16);
+    }
+    LoadSmallPalette(&displayList, 0, (u8 *)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&displayList, (u8 *)transfer->controllerIconsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE * MAXCONTROLLERS, 0, 0, 0, 0, 0, 0, 0);
+    slot = 0;
+    gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+    for (index = 0; index != transfer->taggedCartridgeCount; index++) {
+        if (transfer->screenStep == 3 && slot != transfer->chosenCartridgeIndex) {
+            gDPSetPrimColor(displayList++, 0, 0, 127, 127, 127, 255);
+        } else {
+            gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
+        }
+        DrawTextureRect(&displayList, (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
+                        CONTROLLER_ICONS_TOP << 2,
+                        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING + CONTROLLER_ICON_SIZE) << 2,
+                        (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
+                        (transfer->taggedControllers[index] * CONTROLLER_ICON_SIZE) << 5, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+        slot++;
+    }
+    *displayListHead = displayList;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawTransmitMenu);
 
