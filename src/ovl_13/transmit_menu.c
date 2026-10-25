@@ -1,4 +1,5 @@
 #include "common.h"
+#include "asset.h"
 #include "controller.h"
 #include "debug_text.h"
 #include "heap.h"
@@ -57,6 +58,28 @@
 /* The notice cloud grows by one step each time it is drawn, up to this size */
 #define NOTICE_FULL_SIZE 4
 
+/* The Accessing sign, drawn in strips */
+#define ACCESSING_LEFT 52
+#define ACCESSING_TOP 64
+#define ACCESSING_WIDTH 216
+#define ACCESSING_STRIP_HEIGHT 9
+#define ACCESSING_STRIP_COUNT 10
+#define ACCESSING_STRIP_SIZE (ACCESSING_WIDTH * ACCESSING_STRIP_HEIGHT)
+
+/* pressingHandPosition values: the hand pressing the A button, while the menu waits for it */
+#define PRESSING_HAND_HIDDEN 0
+#define PRESSING_HAND_LOW 1
+#define PRESSING_HAND_FOR_NOTICE 2
+#define LOW_PRESSING_HAND_LEFT 272
+#define LOW_PRESSING_HAND_TOP 192
+#define NOTICE_PRESSING_HAND_LEFT 256
+#define NOTICE_PRESSING_HAND_TOP 128
+/* The hand's three images each show for three draws */
+#define PRESSING_HAND_FRAMES_PER_IMAGE 3
+#define PRESSING_HAND_FRAME_COUNT (3 * PRESSING_HAND_FRAMES_PER_IMAGE)
+#define PRESSING_HAND_SIZE 24
+#define PRESSING_HAND_IMAGE_SIZE (PRESSING_HAND_SIZE * PRESSING_HAND_SIZE)
+
 /* Where the Game Boy cartridge's RAM appears through the Transfer Pak */
 #define CARTRIDGE_RAM_ADDRESS 0xA000
 #define CARTRIDGE_RAM_SIZE 0x2000
@@ -84,6 +107,12 @@
 #define PAK_RESULT_CARTRIDGE_REPLACED 11
 #define PAK_RESULT_UNINITIALIZED 12
 #define GAME_BOY_PAK_OPEN_ATTEMPTS 3
+
+/*
+ * g_GameBoyTransfer.pressingHandImage under a scalar name. Reading it as a scalar is there to match:
+ * GCC keeps a struct field's constant address in a register when it is used twice.
+ */
+extern void *g_PressingHandImage;
 
 void DrawImportedFaces(Gfx **displayListHead, GameBoyTransfer *transfer);
 s32 OpenGameBoyPak(s32 port, u8 *header, NUContPakFile *file);
@@ -160,7 +189,7 @@ void ShowPakError(s32 pfsError) {
 }
 
 void ShowTransferError(u32 result) {
-    g_GameBoyTransfer.pressingHandPosition = 2;
+    g_GameBoyTransfer.pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
     switch (result) {
         case PAK_RESULT_NO_CHARACTERS:
             SetNoticeState(NOTICE_OPENING, NO_CHARACTERS_MESSAGE);
@@ -492,9 +521,46 @@ s32 GetNoticeState(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawNotice);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawAccessingSign);
+void DrawAccessingSign(Gfx **displayListHead) {
+    Gfx *displayList = *displayListHead;
+    s32 strip;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", DrawPressingHand);
+    LoadLargePalette(&displayList, (u8 *)g_GameBoyTransfer.accessingImage + IMAGE_HEADER_SIZE);
+    for (strip = 0; strip != ACCESSING_STRIP_COUNT; strip++) {
+        LoadTextureBlock(&displayList,
+                         (u8 *)g_GameBoyTransfer.accessingImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             strip * ACCESSING_STRIP_SIZE,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, ACCESSING_WIDTH, ACCESSING_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&displayList, ACCESSING_LEFT << 2, (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT) << 2,
+                        (ACCESSING_LEFT + ACCESSING_WIDTH) << 2,
+                        (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT + ACCESSING_STRIP_HEIGHT) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    *displayListHead = displayList;
+}
+
+void DrawPressingHand(Gfx **displayListHead) {
+    Gfx *displayList = *displayListHead;
+
+    sPressingHandFrame = (sPressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
+    LoadLargePalette(&displayList, (u8 *)g_PressingHandImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&displayList,
+                     (u8 *)g_PressingHandImage + LARGE_PALETTED_TEXELS_OFFSET +
+                         sPressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE * PRESSING_HAND_IMAGE_SIZE,
+                     G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE, PRESSING_HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
+        DrawTextureRect(&displayList, LOW_PRESSING_HAND_LEFT << 2, LOW_PRESSING_HAND_TOP << 2,
+                        (LOW_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
+                        (LOW_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    } else {
+        DrawTextureRect(&displayList, NOTICE_PRESSING_HAND_LEFT << 2, NOTICE_PRESSING_HAND_TOP << 2,
+                        (NOTICE_PRESSING_HAND_LEFT + PRESSING_HAND_SIZE) << 2,
+                        (NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    }
+    *displayListHead = displayList;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", BuildStatusData);
 
