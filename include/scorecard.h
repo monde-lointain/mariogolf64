@@ -29,12 +29,12 @@ typedef struct Scorecard {
     /* 0x18 */ u8 *unk18;
     /* 0x1C */ u8 *labelsImage;
     /* 0x20 */ u8 *pageTitleImages[3];
-    /* 0x2C */ u8 *unk2C;
+    /* 0x2C */ u8 *matchPanelImage;  /* Behind each player's row of a match */
     /* 0x30 */ u8 *digitsImage;
     /* 0x34 */ u8 *placesImage;
-    /* 0x38 */ u8 *unk38;
-    /* 0x3C */ u8 *unk3C;
-    /* 0x40 */ u8 *unk40;
+    /* 0x38 */ u8 *winMarkImage;     /* Marks a match's hole won, or a skin */
+    /* 0x3C */ u8 *winsNeededImage;  /* The tiles of the holes a match still needs */
+    /* 0x40 */ u8 *winnerArrowImage; /* Rises over the hole's winner in a match */
     /* 0x44 */ u8 *betImages[BET_COUNT][2];
     /* 0x7C */ u8 unk7C[8];
     /* 0x84 */ u8 *totalHeadingImage; /* Heads the bets page's column of totals */

@@ -211,10 +211,10 @@ void SetScorecardState(s32 state);
 #define LABELS_IMAGE_ASSET 0x68A
 #define UNK8C_IMAGE_ASSET 0x693
 #define PLACES_IMAGE_ASSET 0x688
-#define UNK2C_IMAGE_ASSET 0x68E
-#define MATCH_UNK38_IMAGE_ASSET 0x68C
-#define UNK3C_IMAGE_ASSET 0x68D
-#define UNK40_IMAGE_ASSET 0x694
+#define MATCH_PANEL_IMAGE_ASSET 0x68E
+#define WIN_MARK_IMAGE_ASSET 0x68C
+#define WINS_NEEDED_IMAGE_ASSET 0x68D
+#define WINNER_ARROW_IMAGE_ASSET 0x694
 #define SKIN_ICON_IMAGE_ASSET 0x68B
 #define UNK90_IMAGE_ASSET 0x695
 #define UNK88_IMAGE_ASSET 0x692
@@ -345,14 +345,14 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             } else {
                 g_Scorecard.pageCount = 2;
             }
-            g_Scorecard.unk2C = AllocMemory(OpenEncodedAsset(UNK2C_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk2C, &asset);
-            g_Scorecard.unk38 = AllocMemory(OpenEncodedAsset(MATCH_UNK38_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk38, &asset);
-            g_Scorecard.unk3C = AllocMemory(OpenEncodedAsset(UNK3C_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk3C, &asset);
-            g_Scorecard.unk40 = AllocMemory(OpenEncodedAsset(UNK40_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk40, &asset);
+            g_Scorecard.matchPanelImage = AllocMemory(OpenEncodedAsset(MATCH_PANEL_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.matchPanelImage, &asset);
+            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(WIN_MARK_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.winMarkImage, &asset);
+            g_Scorecard.winsNeededImage = AllocMemory(OpenEncodedAsset(WINS_NEEDED_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.winsNeededImage, &asset);
+            g_Scorecard.winnerArrowImage = AllocMemory(OpenEncodedAsset(WINNER_ARROW_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.winnerArrowImage, &asset);
             break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
@@ -365,8 +365,8 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             }
             g_Scorecard.placesImage = AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
             ReadEncodedAsset(g_Scorecard.placesImage, &asset);
-            g_Scorecard.unk38 = AllocMemory(OpenEncodedAsset(SKIN_ICON_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk38, &asset);
+            g_Scorecard.winMarkImage = AllocMemory(OpenEncodedAsset(SKIN_ICON_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.winMarkImage, &asset);
             break;
         case GAME_MODE_TOURNAMENT:
             shownHoleCount = g_Scorecard.content.holeIndex;
@@ -484,15 +484,15 @@ void FreeScorecard(void) {
                 break;
             case GAME_MODE_MATCH_GAME:
             case GAME_MODE_GET_CHARACTER:
-                FreeMemory(&g_Scorecard.unk2C);
-                FreeMemory(&g_Scorecard.unk38);
-                FreeMemory(&g_Scorecard.unk3C);
-                FreeMemory(&g_Scorecard.unk40);
+                FreeMemory(&g_Scorecard.matchPanelImage);
+                FreeMemory(&g_Scorecard.winMarkImage);
+                FreeMemory(&g_Scorecard.winsNeededImage);
+                FreeMemory(&g_Scorecard.winnerArrowImage);
                 break;
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
                 FreeMemory(&g_Scorecard.placesImage);
-                FreeMemory(&g_Scorecard.unk38);
+                FreeMemory(&g_Scorecard.winMarkImage);
                 break;
             case GAME_MODE_TOURNAMENT:
                 FreeMemory(&g_Scorecard.unk10);
@@ -1880,9 +1880,9 @@ void DrawMatchPage(Gfx **displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, g_Scorecard.unk2C + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, g_Scorecard.unk2C + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, PANEL_WIDTH, PANEL_HEIGHT, 0,
-                           0, 0, 0, 0, 0, 0);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.matchPanelImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.matchPanelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, PANEL_WIDTH,
+                           PANEL_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, (g_Scorecard.x + PANEL_LEFT) << 2, (g_Scorecard.y + PANEL_TOP) << 2,
                     (g_Scorecard.x + PANEL_LEFT + PANEL_WIDTH * 2) << 2,
                     (g_Scorecard.y + PANEL_TOP + PANEL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_HALF,
@@ -1894,8 +1894,8 @@ void DrawMatchPage(Gfx **displayListHead) {
 
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    LoadSmallPalette(&gfx, 0, g_Scorecard.unk3C + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, g_Scorecard.unk3C + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, TILE_IMAGE_WIDTH,
+    LoadSmallPalette(&gfx, 0, g_Scorecard.winsNeededImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.winsNeededImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, TILE_IMAGE_WIDTH,
                            TILE_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     for (i = 0, rowOffset = 0; i != MATCH_PLAYER_COUNT; i++, rowOffset += MATCH_ROW_SPACING) {
@@ -1943,9 +1943,9 @@ void DrawMatchPage(Gfx **displayListHead) {
 
     /* A mark that the other player has matched shows its second image */
     gDPPipeSync(gfx++);
-    LoadLargePalette(&gfx, g_Scorecard.unk38 + IMAGE_HEADER_SIZE);
-    LoadTextureBlock(&gfx, g_Scorecard.unk38 + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH,
-                     WIN_MARK_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    LoadLargePalette(&gfx, g_Scorecard.winMarkImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, g_Scorecard.winMarkImage + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b,
+                     WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
         for (j = 0; j != wins[i]; j++) {
@@ -1965,7 +1965,7 @@ void DrawMatchPage(Gfx **displayListHead) {
         bounce = -(s32)(sinf((f32)frame * WIN_MARK_BOUNCE_STEP) * WIN_MARK_BOUNCE_HEIGHT);
         /* The mark only rises */
         bounce = (bounce <= 0) ? bounce : 0;
-        LoadTextureBlock(&gfx, g_Scorecard.unk38 + LARGE_PALETTED_TEXELS_OFFSET + j * WIN_MARK_SIZE, G_IM_FMT_CI,
+        LoadTextureBlock(&gfx, g_Scorecard.winMarkImage + LARGE_PALETTED_TEXELS_OFFSET + j * WIN_MARK_SIZE, G_IM_FMT_CI,
                          G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
@@ -1985,8 +1985,8 @@ void DrawMatchPage(Gfx **displayListHead) {
                             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
 
-        LoadSmallPalette(&gfx, 0, g_Scorecard.unk40 + IMAGE_HEADER_SIZE);
-        LoadNibbleTextureBlock(&gfx, g_Scorecard.unk40 + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ARROW_WIDTH,
+        LoadSmallPalette(&gfx, 0, g_Scorecard.winnerArrowImage + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx, g_Scorecard.winnerArrowImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ARROW_WIDTH,
                                ARROW_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
         holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
         if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
@@ -2123,8 +2123,8 @@ void DrawSkinsPage(Gfx **displayListHead) {
                   places[i] & PLACE_MASK);
     }
 
-    LoadLargePalette(&gfx, g_Scorecard.unk38 + IMAGE_HEADER_SIZE);
-    LoadTextureBlock(&gfx, g_Scorecard.unk38 + SKIN_ICON_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, SKIN_ICON_SIZE,
+    LoadLargePalette(&gfx, g_Scorecard.winMarkImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, g_Scorecard.winMarkImage + SKIN_ICON_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, SKIN_ICON_SIZE,
                      SKIN_ICON_SIZE, 0, 0, 0, 0, 0, 0, 0);
     for (i = 0; i != g_GameState.playerCount; i++) {
         DrawTextureRect(&gfx, (g_Scorecard.x + SKIN_ICON_LEFT) << 2, (SKIN_ICON_TOP + i * SKINS_ROW_SPACING) << 2,
