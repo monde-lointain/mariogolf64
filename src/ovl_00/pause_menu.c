@@ -262,6 +262,40 @@ void FreePauseMenu(void) {
     SetSongVolume(FULL_SONG_VOLUME);
 }
 
+/* What a pause option shows beside its label, and how the cursor points at it */
+#define PAUSE_OPTION_KIND_PLAIN 0
+#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
+#define PAUSE_OPTION_KIND_UNK8C 2   /* Shows the player's UnkB8.unk8C as black or white */
+#define PAUSE_OPTION_KIND_UNK3 3
+#define PAUSE_OPTION_KIND_UNK4 4
+#define PAUSE_OPTION_KIND_UNK5 5
+#define PAUSE_OPTION_KIND_UNKD678 7 /* Shows another label while sPauseMenuUnkD678 is clear */
+
+/* The option that is greyed out while sPauseMenuUnkD678 is clear */
+#define PAUSE_OPTION_UNKD678 2
+
+#define PAUSE_LAYOUT_MAX_OPTIONS 9
+#define PAUSE_OPTION_MESSAGE_BASE 0x77
+#define PAUSE_OPTION_UNKD678_OFF_MESSAGE 0xE
+
+typedef struct PauseOption {
+    /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ u16 kind;
+} PauseOption; /* size = 0x6 */
+
+extern PauseOption sPauseOptions[];
+extern s8 sPauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
+extern s8 sPauseLayoutOptionCounts[];
+extern char *sClearText;
+extern char *sRainText;
+extern char *sBlackText;
+extern char *sWhiteText;
+/* Written once the menu is drawn and cleared by its input, but never read */
+extern s32 sPauseMenuDrawnMarker;
+extern f32 sPauseGlowAngle;
+extern f32 sPauseCursorAngle;
+
 INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_80219034_ovl_00);
 
 /*
@@ -306,40 +340,6 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     *displayListHead = gfx;
 }
-
-/* What a pause option shows beside its label, and how the cursor points at it */
-#define PAUSE_OPTION_KIND_PLAIN 0
-#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
-#define PAUSE_OPTION_KIND_UNK8C 2   /* Shows the player's UnkB8.unk8C as black or white */
-#define PAUSE_OPTION_KIND_UNK3 3
-#define PAUSE_OPTION_KIND_UNK4 4
-#define PAUSE_OPTION_KIND_UNK5 5
-#define PAUSE_OPTION_KIND_UNKD678 7 /* Shows another label while sPauseMenuUnkD678 is clear */
-
-/* The option that is greyed out while sPauseMenuUnkD678 is clear */
-#define PAUSE_OPTION_UNKD678 2
-
-#define PAUSE_LAYOUT_MAX_OPTIONS 9
-#define PAUSE_OPTION_MESSAGE_BASE 0x77
-#define PAUSE_OPTION_UNKD678_OFF_MESSAGE 0xE
-
-typedef struct PauseOption {
-    /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
-    /* 0x2 */ s16 unk2;
-    /* 0x4 */ u16 kind;
-} PauseOption; /* size = 0x6 */
-
-extern PauseOption sPauseOptions[];
-extern s8 sPauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern s8 sPauseLayoutOptionCounts[];
-extern char *sClearText;
-extern char *sRainText;
-extern char *sBlackText;
-extern char *sWhiteText;
-/* Written once the menu is drawn and cleared by its input, but never read */
-extern s32 sPauseMenuDrawnMarker;
-extern f32 sPauseGlowAngle;
-extern f32 sPauseCursorAngle;
 
 #define PAUSE_CLOUD_LEFT 32
 #define PAUSE_CLOUD_RIGHT 288
