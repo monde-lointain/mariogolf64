@@ -2907,4 +2907,5 @@ AimDownRange = 0x802038D0; // type:func segment:ovl_00
 KeepAimCameraOnCourse = 0x80202A20; // type:func segment:ovl_00
 TurnAim = 0x8020466C; // type:func segment:ovl_00
 StartPlayerShot = 0x80207388; // type:func segment:ovl_00
+PickStartingClub = 0x80205624; // type:func segment:ovl_00
 BuildShotPreview = 0x80205DE8; // type:func segment:ovl_00

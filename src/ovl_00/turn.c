@@ -170,6 +170,8 @@
 #define SWING_PHASE_UNK3 3
 #define SWING_PHASE_UNK4 4
 #define SWING_PHASE_UNK5 5
+/* PickStartingClub settles for clubs with at least this lie rating */
+#define STARTING_CLUB_MIN_LIE_RATING 2
 /* Aims every shot straight down the driving range */
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
 /* Only hole-outs in fewer strokes than this enter the records */
@@ -731,7 +733,98 @@ s32 func_8020561C_ovl_00(s32 arg0) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205624_ovl_00);
+s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable);
+
+/*
+ * Picks the club and the shot mode that the shot starts with. On a green, it is the
+ * putter, in the shortest putt mode that reaches the cup. Elsewhere, it is the club
+ * whose normal shot comes nearest the cup, out of those with a good enough lie, and
+ * preferring those that reach.
+ */
+#ifdef NON_MATCHING
+void PickStartingClub(Unk800BA9D8 *hole) {
+    s8 isUsable[CLUB_SLOT_COUNT];
+    s32 clubCount;
+    s32 cupDistance;
+    s32 slot;
+    s32 rating;
+    s32 minRating = 0;
+    Club *club;
+
+    g_CurrentShot.clubSlot = 0;
+    g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
+    clubCount = MarkUsableClubs((s32)GetSurfaceInfo(g_CurrentShot.surface),
+                                g_Players[g_CurrentShot.playerIndex].clubs, isUsable);
+    cupDistance = GetCupDistance(g_CurrentShot.ballPosition[AXIS_X] - hole->cupPosition[AXIS_X],
+                                 g_CurrentShot.ballPosition[AXIS_Z] - hole->cupPosition[AXIS_Z]);
+    if (g_IsMiniGolf || GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+        for (slot = 0; slot < clubCount; slot++) {
+            if (!isUsable[slot]) {
+                continue;
+            }
+            club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
+            if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
+                continue;
+            }
+            if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
+                g_CurrentShot.shotMode = PUTT_MODE_SHORT;
+            } else if (g_CurrentShot.unk54 && GetShotWorldDistance(club, PUTT_MODE_MIDDLE) < cupDistance) {
+                g_CurrentShot.shotMode = PUTT_MODE_LONG;
+            } else {
+                g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
+            }
+            g_CurrentShot.clubSlot = slot;
+            break;
+        }
+    } else {
+        s32 bestGap = 0x7FFFFFFF;
+        s32 reaches = FALSE;
+        s32 bestSlot = 0;
+        s32 distance;
+        s32 gap;
+
+        for (slot = 0; slot < clubCount; slot++) {
+            rating = GetLieRating(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]), g_CurrentShot.surface,
+                                  SHOT_MODE_NORMAL);
+            if (minRating < rating) {
+                minRating = rating;
+            }
+            if (rating >= STARTING_CLUB_MIN_LIE_RATING) {
+                break;
+            }
+        }
+        if (minRating > STARTING_CLUB_MIN_LIE_RATING) {
+            minRating = STARTING_CLUB_MIN_LIE_RATING;
+        }
+        for (slot = 0; slot < clubCount; slot++) {
+            if (!isUsable[slot]) {
+                continue;
+            }
+            club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
+            if (club->surfaceMask & CLUB_SURFACE_GREEN) {
+                continue;
+            }
+            rating = GetLieRating(club, g_CurrentShot.surface, SHOT_MODE_NORMAL);
+            distance = GetShotDistance(club, SHOT_MODE_NORMAL) * UNITS_PER_YARD;
+            if (rating < minRating) {
+                continue;
+            }
+            gap = distance - cupDistance;
+            if (ABS(gap) < bestGap && (!reaches || distance >= cupDistance)) {
+                bestSlot = slot;
+                bestGap = ABS(gap);
+                if (distance >= cupDistance) {
+                    reaches = TRUE;
+                }
+            }
+        }
+        g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
+        g_CurrentShot.clubSlot = bestSlot;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickStartingClub);
+#endif
 
 /* Puts the simulated ball at rest on the player's ball, and shows the player's passed rings again */
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
@@ -1184,7 +1277,6 @@ static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
 }
 
 void func_80202D04_ovl_00(void);
-void func_80205624_ovl_00(Unk800BA9D8 *hole);
 
 /*
  * Sets the shot up for the player whose turn it is: where the ball lies and the heading.
@@ -1228,7 +1320,7 @@ void StartPlayerShot(s32 playerIndex) {
         }
         g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
                                    target[AXIS_X] - player->ballPosition[AXIS_X]) * RADIANS_TO_BINARY_ANGLE;
-        func_80205624_ovl_00(&D_800BA9D8);
+        PickStartingClub(&D_800BA9D8);
     }
     D_800C3068 = FALSE;
     if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
