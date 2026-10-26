@@ -854,9 +854,13 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSkyEditor);
  * Points the sky of a view at its camera, and scrolls the sky's texture with
  * the wind. The first view also blends the sky's colors, unless the sky
  * editor is open.
+ *
+ * Doesn't match: the target's stack frame is 0x20 bytes larger, and it keeps
+ * horizonHalfWidth and its double conversion in each other's registers.
  */
 #ifdef NON_MATCHING
 void UpdateSky(CameraView *view, s32 viewIndex) {
+    f32 pitchScale; /* Narrower fields of view move the horizon further for each radian of pitch */
     Vec3 direction;
     Vtx *vertices;
     f32 slope;
@@ -886,9 +890,8 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     }
     slope = (view->lookAt[1] - view->eye[1]) *
             (SKY_SLOPE_DISTANCE / sqrtf(direction[0] * direction[0] + direction[2] * direction[2]));
-    g_SkyState.horizonLevels[viewIndex] =
-        -g_SkyState.pitches[viewIndex] * (SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT) +
-        view->eye[1] * SKY_EYE_HEIGHT_SCALE;
+    pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
+    g_SkyState.horizonLevels[viewIndex] = -g_SkyState.pitches[viewIndex] * pitchScale + view->eye[1] * SKY_EYE_HEIGHT_SCALE;
     if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
         g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
     }
