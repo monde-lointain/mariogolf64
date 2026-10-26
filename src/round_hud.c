@@ -1538,6 +1538,7 @@ void WaveHoleFlag(void) {
     f32 windSpeed;
     f32 factor;
     f32 otherFactor;
+    f32 bulge;
 
     ScrollWindArrow();
     windSpeed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT;
@@ -1606,11 +1607,11 @@ void WaveHoleFlag(void) {
     factor = windSpeed * HOLE_FLAG_BULGE_PER_SPEED + HOLE_FLAG_MIN_BULGE;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            bulge = (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
+                    (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor;
             otherFactor = HOLE_FLAG_BULGE_SCALE;
             HOLE_FLAG_VERTEX(row, column).v.ob[2] =
-                (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
-                (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor * otherFactor *
-                (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
+                bulge * otherFactor * (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
         }
     }
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
