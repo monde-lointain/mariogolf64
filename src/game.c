@@ -914,7 +914,7 @@ void MusPrintDmaUsage(void);
 s32 __MusIntMemRemaining(void);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
-void func_8005029C(void);
+void DrawAnimatedBoxes(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
@@ -1669,7 +1669,7 @@ s32 DrawGame(void) {
         }
     }
     SwapMatrixBuffers();
-    func_8005029C();
+    DrawAnimatedBoxes();
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
