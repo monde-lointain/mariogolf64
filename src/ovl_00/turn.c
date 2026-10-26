@@ -94,6 +94,11 @@
 #define AIM_CAMERA_BUTTON_DISTANCE_STEP 42670.0810546875
 #define AIM_CAMERA_BUTTON_HEIGHT_STEP 28446.720703125
 #define AIM_CAMERA_BUTTON_PUTT_STEP 4267.00810546875
+/* While putting, the crane's steps are this times a count that grows with the putt's length */
+#define AIM_CAMERA_PUTT_STEP_UNIT 426.700810546875
+/* The crane swings the camera forward only while it is below this height, and back only above the other */
+#define AIM_CAMERA_CRANE_FORWARD_HEIGHT (-0x5A00)
+#define AIM_CAMERA_CRANE_BACK_HEIGHT (-0x96000)
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
@@ -272,7 +277,35 @@ void TurnFreeLook(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204210_ovl_00);
+/* Swings the aim camera up and back, or down and forward, with C-right and C-left */
+void CraneAimCamera(void) {
+    s32 stepCount;
+
+    if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+        if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
+            stepCount = 10;
+        } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
+            stepCount = 13;
+        } else {
+            stepCount = 15;
+        }
+        if (g_TurnController.buttons & L_CBUTTONS) {
+            g_CurrentShot.aimCameraHeight += stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
+        } else if (g_TurnController.buttons & R_CBUTTONS) {
+            g_CurrentShot.aimCameraHeight -= stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
+        }
+    } else if (g_TurnController.buttons & L_CBUTTONS) {
+        g_CurrentShot.aimCameraHeight += AIM_CAMERA_BUTTON_HEIGHT_STEP;
+        if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_CRANE_FORWARD_HEIGHT) {
+            g_CurrentShot.aimCameraDistance += AIM_CAMERA_BUTTON_HEIGHT_STEP;
+        }
+    } else if (g_TurnController.buttons & R_CBUTTONS) {
+        g_CurrentShot.aimCameraHeight -= AIM_CAMERA_BUTTON_HEIGHT_STEP;
+        if (g_CurrentShot.aimCameraHeight > AIM_CAMERA_CRANE_BACK_HEIGHT) {
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_BUTTON_HEIGHT_STEP;
+        }
+    }
+}
 
 /* Moves the aim camera along the aim line with the C buttons, in smaller steps for a putt */
 void MoveAimCameraDistanceByButtons(void) {
@@ -291,7 +324,31 @@ void MoveAimCameraDistanceByButtons(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204460_ovl_00);
+/* Moves the aim camera along the aim line with C-up and C-down, by steps that suit a putt's length */
+void MoveAimCameraDistanceByUpDown(void) {
+    s32 stepCount;
+
+    if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+        if (g_CurrentShot.shotMode == PUTT_MODE_SHORT) {
+            stepCount = 10;
+        } else if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
+            stepCount = 15;
+        } else {
+            stepCount = 20;
+        }
+        if (g_TurnController.buttons & U_CBUTTONS) {
+            g_CurrentShot.aimCameraDistance += stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
+        } else if (g_TurnController.buttons & D_CBUTTONS) {
+            g_CurrentShot.aimCameraDistance -= stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
+        }
+    } else {
+        if (g_TurnController.buttons & U_CBUTTONS) {
+            g_CurrentShot.aimCameraDistance += AIM_CAMERA_BUTTON_DISTANCE_STEP;
+        } else if (g_TurnController.buttons & D_CBUTTONS) {
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_BUTTON_DISTANCE_STEP;
+        }
+    }
+}
 
 /* Raises or lowers the aim camera with the stick's Y */
 void MoveAimCameraHeight(void) {
