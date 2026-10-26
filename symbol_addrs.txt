@@ -2607,3 +2607,7 @@ sFlapVertices = 0x8024C508; // size:0xC0 segment:ovl_09
 sFlapLights = 0x8024C5C8; // size:0x18 segment:ovl_09
 sArrowPulseAngle = 0x8024C5E0; // type:f32 size:0x4 segment:ovl_09
 sFlapMatrices = 0x8024CA40; // size:0x500 segment:ovl_09
+DrawScoresPage = 0x802493DC; // type:func segment:ovl_09
+sScorePulseAngle = 0x8024C5E4; // type:f32 size:0x4 segment:ovl_09
+sScoresStyle = 0x8024C5E8; // type:s32 size:0x4 segment:ovl_09
+sBadgeGlowAngle = 0x8024C5EC; // type:f32 size:0x4 segment:ovl_09
