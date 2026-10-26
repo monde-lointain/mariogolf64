@@ -922,7 +922,7 @@ void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawShotEffect(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
-void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
+void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
 void DrawBootLogos(Gfx **displayListHead);
@@ -1288,7 +1288,7 @@ s32 DrawGame(void) {
                     gDPPipeSync(g_DisplayListHead++);
                     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
                     UsePrimitiveDepth(1);
-                    func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
+                    DrawBackdrop(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
                     LoadProjection();
                 }
                 break;
@@ -1394,7 +1394,7 @@ s32 DrawGame(void) {
                             g_PauseScreen != PAUSE_SCREEN_UNK4) {
                             UsePrimitiveDepth(0);
                             if (!IsGameFlagSet(0x15)) {
-                                func_80091110(&g_DisplayListHead, &g_Cameras[0].view, 0);
+                                DrawBackdrop(&g_DisplayListHead, &g_Cameras[0].view, 0);
                             }
                             LoadProjection();
                             /* Keeps the main view out of the inset view, which clears it again */
@@ -1454,7 +1454,7 @@ s32 DrawGame(void) {
                             gDPPipeSync(g_DisplayListHead++);
                             SET_CAMERA_SCISSOR(g_Cameras[INSET_CAMERA].view);
                             UsePrimitiveDepth(0);
-                            func_80091110(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
+                            DrawBackdrop(&g_DisplayListHead, &g_Cameras[INSET_CAMERA].view, INSET_CAMERA);
                             LoadProjection();
                         }
                     }

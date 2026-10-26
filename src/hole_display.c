@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "burst.h"
 #include "camera.h"
 #include "course.h"
 #include "controller.h"
@@ -1015,7 +1016,229 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008FF20);
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_80091110);
+
+/* The course's backdrop image, drawn behind the course in strips from the horizon down */
+#define BACKDROP_STRIP_COUNT 16
+#define BACKDROP_STRIP_HEIGHT 4
+#define BACKDROP_IMAGE_WIDTH 512
+#define BACKDROP_IMAGE_WIDTH_MASK 9 /* The image's width is 1 << this */
+#define BACKDROP_HORIZON_LEVEL 64.0f
+#define STAFF_ROLL_BACKDROP_RISE 32
+#define BACKDROP_YAW_TEXELS 49152.0f /* How far the backdrop scrolls as the camera turns once */
+#define BACKDROP_FIRST_CULLED_ROW (SCREEN_HEIGHT - SCREEN_BORDER + 1)
+#define BACKDROP_ABOVE_SCREEN 32
+#define FULL_VIEW_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
+#define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - 2 * SCREEN_BORDER)
+extern s32 sBackdropStripCount;
+extern s32 sBackdropStripHeight;
+extern s32 sBackdropImageWidth;
+extern s32 sBackdropWidthMask;
+
+void func_8008FF20(Gfx **displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex);
+
+#ifdef NON_MATCHING
+/* Draws the sky and, below it, the course's backdrop in strips that follow the camera's yaw and pitch */
+void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
+    Gfx *gfx;
+    s32 isNibbleImage;
+    s32 centreShift;
+    s32 yawOffset;
+    s32 y;
+    s32 row;
+    s32 imageRow;
+    s32 texelWord;
+    s32 texelByte;
+    s32 bottom;
+    s32 top;
+    s32 texelStepX;
+    s32 texelStepY;
+    s32 textureX;
+    f32 inverseZoom;
+    f32 zoom;
+
+    gfx = *displayListHead;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_BAYER);
+    centreShift = (view->zoom * FULL_VIEW_HEIGHT - (view->viewportCenterY - view->scissorY * 2)) * 0.5f;
+    func_8008FF20(&gfx, view->eye[1], 1, cameraIndex);
+    isNibbleImage = FALSE;
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    if (cameraIndex == 0) {
+        UpdateAndDrawBursts(&gfx);
+    }
+    yawOffset = g_SkyState.yaws[cameraIndex] * BACKDROP_YAW_TEXELS * (1 / (2 * M_PI));
+    if (g_Scene == SCENE_STAFF_ROLL) {
+        y = (s32)((BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) * view->zoom) -
+            STAFF_ROLL_BACKDROP_RISE;
+    } else {
+        y = (BACKDROP_HORIZON_LEVEL - g_SkyState.horizonLevels[cameraIndex]) * view->zoom;
+        if (cameraIndex == 0) {
+            g_HorizonRow = y;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, ((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE) & ~7);
+    sBackdropStripCount = BACKDROP_STRIP_COUNT;
+    sBackdropStripHeight = BACKDROP_STRIP_HEIGHT;
+    sBackdropImageWidth = BACKDROP_IMAGE_WIDTH;
+    sBackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
+    if (view->scissorWidth == FULL_VIEW_WIDTH && view->scissorHeight == FULL_VIEW_HEIGHT) {
+        /* The full screen copies the strips unscaled */
+        gDPPipeSync(gfx++);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, 0, 0);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_COPY);
+        for (row = 0;; row++, y += sBackdropStripHeight) {
+            s32 clip;
+
+            if (y >= BACKDROP_FIRST_CULLED_ROW) {
+                break;
+            }
+            if (y < -sBackdropStripHeight - BACKDROP_ABOVE_SCREEN) {
+                continue;
+            }
+            if (row < sBackdropStripCount - 1) {
+                imageRow = row;
+                texelByte = sBackdropImageWidth * row * sBackdropStripHeight +
+                            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+            } else {
+                texelByte = sBackdropImageWidth * (sBackdropStripCount - 1) * sBackdropStripHeight +
+                            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+                imageRow = sBackdropStripCount - 1;
+            }
+            texelWord = texelByte / 2;
+            if (!isNibbleImage) {
+                gDPLoadTextureBlock(gfx++, (u32)((u16 *)g_CourseSkyImage + PALETTE_START + texelWord) & ~7,
+                                    G_IM_FMT_CI, G_IM_SIZ_8b, sBackdropImageWidth, sBackdropStripHeight, 0,
+                                    G_TX_WRAP, G_TX_WRAP, sBackdropWidthMask, 0, 0, 0);
+            } else {
+                gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
+                                   (u32)((u16 *)g_CourseSkyImage + texelWord) & ~7);
+                gDPLoadSync(gfx++);
+                gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+                             ((sBackdropImageWidth * sBackdropStripHeight + 3) >> 2) - 1,
+                             CALC_DXT_4b(sBackdropImageWidth));
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, ((sBackdropImageWidth >> 1) + 7) >> 3, 0,
+                           G_TX_RENDERTILE, imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, sBackdropWidthMask, 0);
+            }
+            clip = 0;
+            if (y < 0) {
+                clip = -y;
+            }
+            if (row < sBackdropStripCount - 1) {
+                bottom = sBackdropStripHeight + y + SCREEN_BORDER - 1;
+                if (bottom > SCREEN_HEIGHT - SCREEN_BORDER) {
+                    bottom = SCREEN_HEIGHT - SCREEN_BORDER;
+                }
+                gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + clip + y) << 2,
+                                    (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2, bottom << 2, G_TX_RENDERTILE,
+                                    yawOffset, clip << 5, 4 << 10, TEXEL_STEP_ONE);
+            } else {
+                /* The last strip stretches to the bottom of the screen */
+                gSPTextureRectangle(gfx++, SCREEN_BORDER << 2, (SCREEN_BORDER + clip + y) << 2,
+                                    (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2, (SCREEN_HEIGHT - SCREEN_BORDER) << 2,
+                                    G_TX_RENDERTILE, yawOffset, clip << 5, 4 << 10, TEXEL_STEP_ONE);
+                break;
+            }
+        }
+    } else {
+        /* A smaller view scales the strips by its zoom */
+        inverseZoom = 1.0f / view->zoom;
+        texelStepX = inverseZoom * 1024.0f;
+        texelStepY = inverseZoom * 2048.0f;
+        if (sIsPrimitiveDepthSet) {
+            gDPSetPrimDepth(gfx++, 0x7FF3, 0);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+        } else {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        }
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        zoom = view->zoom;
+        textureX = yawOffset + (s32)((zoom * FULL_VIEW_WIDTH - view->scissorWidth) * 16.0f / zoom);
+        top = y + view->scissorY - centreShift;
+        bottom = (f32)y + sBackdropStripHeight * zoom + view->scissorY - centreShift;
+        for (row = 0;; row++, top = bottom, bottom = bottom + sBackdropStripHeight * view->zoom) {
+            if (top < view->scissorY - sBackdropStripHeight * view->zoom) {
+                continue;
+            }
+            if (row < sBackdropStripCount - 1) {
+                imageRow = row;
+                texelByte = sBackdropImageWidth * row * sBackdropStripHeight +
+                            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+            } else {
+                texelByte = sBackdropImageWidth * (sBackdropStripCount - 1) * sBackdropStripHeight +
+                            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+                imageRow = sBackdropStripCount - 1;
+            }
+            texelWord = texelByte / 2;
+            if (!isNibbleImage) {
+                gDPLoadTextureBlock(gfx++, (u32)((u16 *)g_CourseSkyImage + texelWord) & ~7, G_IM_FMT_CI,
+                                    G_IM_SIZ_8b, sBackdropImageWidth, sBackdropStripHeight, 0, G_TX_WRAP, G_TX_WRAP,
+                                    sBackdropWidthMask, 0, 0, 0);
+            } else {
+                gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
+                                   (u32)((u16 *)g_CourseSkyImage + texelWord) & ~7);
+                gDPLoadSync(gfx++);
+                gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+                             ((sBackdropImageWidth * sBackdropStripHeight + 3) >> 2) - 1,
+                             CALC_DXT_4b(sBackdropImageWidth));
+                gDPPipeSync(gfx++);
+                gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b, ((sBackdropImageWidth >> 1) + 7) >> 3, 0,
+                           G_TX_RENDERTILE, imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, sBackdropWidthMask, 0);
+            }
+            if (row < sBackdropStripCount - 1) {
+                if (bottom > view->scissorY + view->scissorHeight) {
+                    bottom = view->scissorY + view->scissorHeight;
+                }
+            } else {
+                bottom = view->scissorY + view->scissorHeight;
+            }
+            if (bottom > view->scissorY + view->scissorHeight) {
+                bottom = view->scissorY + view->scissorHeight;
+            }
+            gSPTextureRectangle(gfx++, view->scissorX << 2, top << 2, (view->scissorX + view->scissorWidth) << 2,
+                                bottom << 2, G_TX_RENDERTILE, textureX, 0, texelStepX, texelStepY);
+            if (bottom == view->scissorY + view->scissorHeight) {
+                break;
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawBackdrop);
+#endif
 
 /* Starts one of the HUD's animations, which lasts a given number of frames, or stops it with HUD_ANIMATION_NONE */
 void StartHudAnimation(s32 animation) {
