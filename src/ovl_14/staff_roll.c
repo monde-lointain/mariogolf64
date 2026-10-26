@@ -138,13 +138,6 @@
 #define PITCH_STEP_COUNT 10
 #define FRAMING_GROUND_CLEARANCE 0xC00
 
-/* Each club kind has three animations in a row: a stance, a swing and an approach swing */
-#define WOOD_ANIMATIONS 0
-#define IRON_ANIMATIONS 3
-#define WEDGE_ANIMATIONS 6
-#define PUTTER_ANIMATIONS 9
-#define SWING_ANIMATION 1
-
 /*
  * The cast's timeline; its frames count from TIMELINE_START_FRAME. Only
  * each stage's first frames are named; the later shots and reactions

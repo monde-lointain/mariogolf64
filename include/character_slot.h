@@ -237,6 +237,13 @@ typedef struct CharacterSlot {
 
 #define NO_NEXT_ANIMATION -1
 
+/* Each club kind has three animations in a row: a stance, a swing and an approach swing */
+#define WOOD_ANIMATIONS 0
+#define IRON_ANIMATIONS 3
+#define WEDGE_ANIMATIONS 6
+#define PUTTER_ANIMATIONS 9
+#define SWING_ANIMATION 1
+
 /* CharacterSlot.lighting values: the lights the slot's character is drawn with */
 #define CHARACTER_LIGHTING_FIXED 0 /* Lights that don't follow the scene's light direction */
 #define CHARACTER_LIGHTING_SCENE 1 /* Lit along the scene's light direction, in the weather's colors */
