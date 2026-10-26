@@ -3,14 +3,18 @@
 #include "character.h"
 #include "controller.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "game_flags.h"
 #include "heap.h"
 #include "math_util.h"
 #include "movie.h"
+#include "pin.h"
 #include "round_events.h"
+#include "round_hud.h"
 #include "save.h"
 #include "screen_layers.h"
 #include "shot_effects.h"
+#include "sound.h"
 #include "text.h"
 #include "transfer_pak.h"
 #include "variables.h"
@@ -88,6 +92,14 @@ extern BannerLetter sBannerLetters[];
 extern BannerLayout sBannerLayouts[];
 extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
+/* The contact effect's quad spans from vertex 0 to vertex 1 */
+extern Vtx sContactVertices[2];
+extern s32 sIsContactEffectFading;
+extern s32 sContactStyle;
+/* The texture coordinates of the quad's far corner, in S10.5 */
+extern s32 sContactTextureS;
+extern s32 sContactTextureT;
+extern Mtx sContactMatrices[];
 extern s32 sCurrentMovie;
 extern s32 sMovieFrame;
 /* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie */
@@ -127,6 +139,17 @@ extern Mtx sFlipMessageMatrices[2];
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
 #define FLIP_MESSAGE_OPEN_FRAME 10
 #define BANNER_FRAME_NONE (-1)
+#define CONTACT_MATRIX_COUNT 81
+/* The effect sits a little below the ball's centre */
+#define CONTACT_DROP_PER_PIN_SCALE 0.3f
+#define CONTACT_SOUND_CHANNEL 2
+#define CONTACT_STYLE_SOUND_CHANNEL 15
+#define CONTACT_SOUND_VOLUME 127
+#define SOUND_CONTACT_PLAIN 0x51
+#define SOUND_CONTACT_MARIO 0x2E /* Also Bowser's */
+#define SOUND_CONTACT_HEAVY_HITTER 0x2F
+#define SOUND_CONTACT_WARIO 0x30
+#define CONTACT_PUTT_Y -2
 /* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
 #define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
 #define BANNER_LETTER_SPACING 32
@@ -783,7 +806,101 @@ s32 GetContactStyle(UnkB8 *player) {
     return CONTACT_STYLE_PLAIN;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartContactEffect);
+/*
+ * Places a contact effect at the ball and sizes it for its style; CONTACT_EFFECT_NONE removes it
+ * and CONTACT_EFFECT_FADE fades it out
+ */
+void StartContactEffect(s32 effect) {
+    s32 i;
+
+    if (effect == CONTACT_EFFECT_NONE) {
+        g_ContactEffect = effect;
+    } else if (effect == CONTACT_EFFECT_POWER_WOOD || effect == CONTACT_EFFECT_POWER_IRON ||
+               effect == CONTACT_EFFECT_SHOT || effect == CONTACT_EFFECT_PUTT) {
+        for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+            guTranslate(&sContactMatrices[i], g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                        g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
+                            g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE,
+                        g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+        }
+        g_ContactEffect = 0;
+        sIsContactEffectFading = FALSE;
+        sContactVertices[0].v.ob[1] = 0;
+        sContactVertices[1].v.ob[1] = 0;
+        if (effect == CONTACT_EFFECT_POWER_IRON) {
+            sContactStyle = CONTACT_STYLE_POWER_IRON;
+        } else if (effect == CONTACT_EFFECT_SHOT) {
+            sContactStyle = CONTACT_STYLE_SHOT;
+        } else if (effect == CONTACT_EFFECT_PUTT) {
+            sContactStyle = CONTACT_STYLE_PUTT;
+        } else {
+            sContactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+        }
+    } else {
+        sIsContactEffectFading = TRUE;
+    }
+    if (effect != CONTACT_EFFECT_NONE &&
+        (effect == CONTACT_EFFECT_POWER_WOOD || effect == CONTACT_EFFECT_POWER_IRON ||
+         effect == CONTACT_EFFECT_SHOT || effect == CONTACT_EFFECT_PUTT)) {
+        /* Each style sets its quad's half width, its texture's far corner and its sound */
+        if (sContactStyle == CONTACT_STYLE_POWER_IRON) {
+            sContactVertices[0].v.ob[0] = -20;
+            sContactVertices[1].v.ob[0] = 20;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0xD6;
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (sContactStyle == CONTACT_STYLE_SHOT) {
+            sContactVertices[0].v.ob[0] = -10;
+            sContactVertices[1].v.ob[0] = 10;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0xD6;
+        } else if (sContactStyle == CONTACT_STYLE_PUTT) {
+            sContactVertices[0].v.ob[0] = -18;
+            sContactVertices[1].v.ob[0] = 18;
+            sContactVertices[0].v.ob[1] = CONTACT_PUTT_Y;
+            sContactVertices[1].v.ob[1] = CONTACT_PUTT_Y;
+            sContactTextureS = 0x1FF;
+            sContactTextureT = 0x2A;
+        } else if (sContactStyle == CONTACT_STYLE_WARIO || sContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            StartShotEffect(0);
+            sContactVertices[0].v.ob[0] = -120;
+            sContactVertices[1].v.ob[0] = 120;
+            sContactTextureS = 0x5FF;
+            sContactTextureT = 0x7FF;
+            PlaySound(SOUND_CONTACT_WARIO, CONTACT_STYLE_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (sContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
+            sContactVertices[0].v.ob[0] = -60;
+            sContactVertices[1].v.ob[0] = 60;
+            sContactTextureS = 0x7FF;
+            sContactTextureT = 0;
+            PlaySound(SOUND_CONTACT_HEAVY_HITTER, CONTACT_STYLE_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (sContactStyle == CONTACT_STYLE_BOWSER) {
+            sContactVertices[0].v.ob[0] = -20;
+            sContactVertices[1].v.ob[0] = 20;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0x54;
+            PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (sContactStyle == CONTACT_STYLE_MARIO) {
+            sContactVertices[0].v.ob[0] = -160;
+            sContactVertices[1].v.ob[0] = 160;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0x2A;
+            PlaySound(SOUND_CONTACT_MARIO, CONTACT_STYLE_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else if (sContactStyle == CONTACT_STYLE_GAME_BOY_BALL_5) {
+            sContactVertices[0].v.ob[0] = -30;
+            sContactVertices[1].v.ob[0] = 30;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0x2A;
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        } else {
+            sContactVertices[0].v.ob[0] = -20;
+            sContactVertices[1].v.ob[0] = 20;
+            sContactTextureS = 0x3FF;
+            sContactTextureT = 0x2A;
+            PlaySound(SOUND_CONTACT_PLAIN, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
+        }
+    }
+}
 
 /* Reads the images of the player's contact effect */
 void LoadContactImages(UnkB8 *player) {

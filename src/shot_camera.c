@@ -642,7 +642,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
 #define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_SOUND_VOLUME 0x7F
 
-/* The clubs in slots below it get StartContactEffect(1) on some power shots */
+/* The clubs in slots below it get CONTACT_EFFECT_POWER_IRON on some power shots */
 #define LEADING_CLUB_SLOT_COUNT 6
 
 
@@ -665,24 +665,24 @@ void PlayContactSound(void) {
     if (club->kind == CLUB_KIND_WOOD) {
         if (IsUnk2E14PowerShot()) {
             PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
-            StartContactEffect(0);
+            StartContactEffect(CONTACT_EFFECT_POWER_WOOD);
         } else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
-            StartContactEffect(2);
+            StartContactEffect(CONTACT_EFFECT_SHOT);
             PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         } else {
-            StartContactEffect(2);
+            StartContactEffect(CONTACT_EFFECT_SHOT);
             PlaySound(CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         }
         StartImpactSparks();
     } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
         if (IsUnk2E14PowerShot()) {
             if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
-                StartContactEffect(1);
+                StartContactEffect(CONTACT_EFFECT_POWER_IRON);
             } else {
-                StartContactEffect(2);
+                StartContactEffect(CONTACT_EFFECT_SHOT);
             }
         } else {
-            StartContactEffect(2);
+            StartContactEffect(CONTACT_EFFECT_SHOT);
         }
         if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
             PlaySound(CONTACT_SOUND_IRON_TEE, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
@@ -696,7 +696,7 @@ void PlayContactSound(void) {
     } else {
         PlaySound(CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
-            StartContactEffect(3);
+            StartContactEffect(CONTACT_EFFECT_PUTT);
         }
     }
 }
@@ -2625,7 +2625,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         }
     } else if (g_SimulatedShot.pathFlags[step]) {
         D_800C5AAC = 2;
-        StartContactEffect(10);
+        StartContactEffect(CONTACT_EFFECT_FADE);
         if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
             StartFastBallAfterimage();
         }

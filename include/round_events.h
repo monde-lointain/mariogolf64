@@ -7,8 +7,13 @@
 /* ShowWindFlyGuy's argument that hides the Fly Guy */
 #define FLY_GUY_HIDDEN (-1)
 
-/* The contact effect that StartContactEffect shows when no effect is shown */
+/* The contact effects that StartContactEffect shows where the club meets the ball */
 #define CONTACT_EFFECT_NONE (-1)
+#define CONTACT_EFFECT_POWER_WOOD 0 /* In the character's own style */
+#define CONTACT_EFFECT_POWER_IRON 1 /* Only for the longer irons */
+#define CONTACT_EFFECT_SHOT 2
+#define CONTACT_EFFECT_PUTT 3
+#define CONTACT_EFFECT_FADE 10 /* Or any other value: fades the shown effect out */
 
 /* The styles of contact effect; each character has one, and Game Boy characters one for their ball */
 #define CONTACT_STYLE_MARIO 0 /* For Mario, Baby Mario and Metal Mario */
@@ -16,6 +21,10 @@
 #define CONTACT_STYLE_WARIO 2
 #define CONTACT_STYLE_HEAVY_HITTER 3 /* For Maple and Donkey Kong */
 #define CONTACT_STYLE_PLAIN 4
+/* The styles that every character shares */
+#define CONTACT_STYLE_POWER_IRON 5
+#define CONTACT_STYLE_SHOT 6
+#define CONTACT_STYLE_PUTT 7
 #define CONTACT_STYLE_GAME_BOY_BALL_5 8
 #define CONTACT_STYLE_GAME_BOY_BALL_6 9
 #define CONTACT_STYLE_GAME_BOY_BALL_7 10
