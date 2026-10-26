@@ -305,9 +305,6 @@ extern s32 sLandingReactionFrame;
 #define LANDING_NAME_Y 96
 #define LANDING_DISTANCE_Y 112
 #define HUNDREDTHS_PER_UNIT 100
-/* The characters that the fonts draw as the symbols for yards and feet */
-#define YARDS_GLYPH 0xF9
-#define FEET_GLYPH 0xFB
 /* The translucent black panel behind the text spins half a turn as it grows */
 #define LANDING_PANEL_ALPHA 159
 #define LANDING_PANEL_START_DEGREES 180.0f

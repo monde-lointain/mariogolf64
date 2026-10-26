@@ -35,6 +35,10 @@
 /* Each glyph of the large font takes the same width */
 #define TEXT_FLAG_FIXED_WIDTH 0x80
 
+/* The characters that the fonts draw as the symbols for yards and feet */
+#define YARDS_GLYPH 0xF9
+#define FEET_GLYPH 0xFB
+
 /* The font size, in pixels, of the font whose characters differ in width */
 #define FONT_SIZE_LARGE 12
 #define FONT_SIZE_MEDIUM 10
