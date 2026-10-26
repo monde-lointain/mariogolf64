@@ -45,7 +45,7 @@
 
 /* Images of the round's scenery, effects and HUD, named after their asset ids until their users are decompiled */
 #define ASSET_ROUND_IMAGE_541 0x541
-#define ASSET_ROUND_IMAGE_5A4 0x5A4
+#define ASSET_WIND_ICON_IMAGE 0x5A4
 #define ASSET_ROUND_IMAGE_5E3 0x5E3
 #define ASSET_ROUND_IMAGE_972 0x972
 #define ASSET_ROUND_IMAGE_93C 0x93C
@@ -60,7 +60,7 @@
 #define ASSET_ROUND_IMAGE_564 0x564
 #define ASSET_ROUND_IMAGE_562 0x562
 #define ASSET_SHOT_OFFSET_MARKER_IMAGE 0x57C
-#define ASSET_ROUND_IMAGE_97B 0x97B
+#define ASSET_WIND_SPEED_FONT 0x97B
 #define ASSET_ROUND_IMAGE_725 0x725
 #define ASSET_ROUND_IMAGE_568 0x568
 #define ASSET_ROUND_IMAGE_56B 0x56B
@@ -317,7 +317,7 @@ extern s8 D_8010623F;
 
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
-extern void *D_800E2188;
+extern void *sWindIconImage;
 extern void *D_80132360;
 extern void *D_800FED0C;
 extern void *D_800FF4F0;
@@ -332,7 +332,7 @@ extern void *sLieImage;
 extern void *D_800E2158;
 extern void *D_800E214C[3];
 
-extern void *D_800E2164;
+extern void *sWindSpeedFont;
 extern void *D_800E2168;
 extern void *D_800E216C;
 extern void *D_800E2170;
@@ -350,9 +350,55 @@ extern void *D_800E2178;
 #define WIND_INDICATOR_SCALE -0.07f
 #define WIND_INDICATOR_FACING_DEGREES 180.0
 extern Lights1 sWindArrowLights;
+
+/*
+ * The wind speed display's icon pulses around these half sizes, and is wider
+ * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
+ */
+extern f32 sWindIconPulseAngle;
+extern u8 D_80106242;
+#define WIND_ICON_PULSE_STEP (M_PI / 18)
+#define WIND_SPEED_TO_METERS_SCALE 3600
+#define WIND_SPEED_TO_METERS_DIVISOR 104857600
+#define WIND_SPEED_TWO_DIGITS 10
+#define WIND_ICON_WIDE_HALF_WIDTH 32.0f
+#define WIND_ICON_NARROW_HALF_WIDTH 20.0f
+#define WIND_ICON_HALF_HEIGHT 13.0f
+#define WIND_ICON_TEXTURE_WIDTH 32
+#define WIND_ICON_TEXTURE_HEIGHT 16
+#define HALF_TEXEL 16.0f
+#define WIND_WIDE_LEAN_X 18.0f
+#define WIND_NARROW_LEAN_X 12.0f
+#define WIND_LEAN_Y 16.0f
+#define WIND_OFFSET_X 146.0f
+#define WIND_OFFSET_Y 4.0f
+#define WIND_POSITIVE_BIAS 64
+#define WIND_ICON_OFFSET_X 13
+#define WIND_ICON_OFFSET_Y 6
+#define WIND_WIDE_TEXT_SHIFT_X 6.0f
+#define WIND_HIGHLIGHT_OFFSET_X 52.0f
+#define WIND_HIGHLIGHT_OFFSET_Y 56.0f
+#define WIND_HIGHLIGHT_WIDE_SIZE 56
+#define WIND_HIGHLIGHT_NARROW_SIZE 44
+/* The wind speed font has ten digits and then a wider 'm' */
+#define WIND_FONT_WIDTH 144
+#define WIND_FONT_HEIGHT 14
+#define WIND_DIGIT_WIDTH 12
+#define WIND_METERS_GLYPH_S 119
+#define WIND_METERS_GLYPH_WIDTH 14
+#define WIND_TEXT_RAISE 1
+#define WIND_TEXT_RENDER_MODE IM_RD | CLR_ON_CVG | CVG_X_ALPHA | GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+#define WIND_TEXT_RENDER_MODE2 IM_RD | CLR_ON_CVG | CVG_X_ALPHA | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
+#define WIND_TEXT_PRIM_RED 0x3F
+#define WIND_TEXT_PRIM_GREEN 0x3F
+#define WIND_TEXT_PRIM_BLUE 0xFF
+#define WIND_TEXT_ENV_RED 0x00
+#define WIND_TEXT_ENV_GREEN 0x20
+#define WIND_TEXT_ENV_BLUE 0x7F
+void func_802199EC(Gfx **displayListHead, s32 x, s32 y, s32 size);
 extern Mtx sWindIndicatorMatrices[2];
 extern Gfx D_80222400[];
-void func_80084468(Gfx **displayListHead, f32 x, f32 y);
+void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 extern void *D_80105214;
 extern s32 sSceneryState;
 extern u8 D_801061B8[0x8C];
@@ -580,8 +626,8 @@ void LoadSceneryImages(void) {
     func_8021E5F4();
     D_801B55DC = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_541, &asset));
     ReadEncodedAsset(D_801B55DC, &asset);
-    D_800E2188 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_5A4, &asset));
-    ReadEncodedAsset(D_800E2188, &asset);
+    sWindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
+    ReadEncodedAsset(sWindIconImage, &asset);
     D_80132360 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_5E3, &asset));
     ReadEncodedAsset(D_80132360, &asset);
     D_800FED0C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_972, &asset));
@@ -609,8 +655,8 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_800E214C[2], &asset);
     sShotOffsetMarkerImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
     ReadEncodedAsset(sShotOffsetMarkerImage, &asset);
-    D_800E2164 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_97B, &asset));
-    ReadEncodedAsset(D_800E2164, &asset);
+    sWindSpeedFont = AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
+    ReadEncodedAsset(sWindSpeedFont, &asset);
     D_800E2168 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
     ReadEncodedAsset(D_800E2168, &asset);
     D_800E216C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
@@ -638,7 +684,7 @@ void FreeSceneryImages(void) {
         func_8020E78C();
         func_8021E6B8();
         FreeMemory(&D_801B55DC);
-        FreeMemory(&D_800E2188);
+        FreeMemory(&sWindIconImage);
         FreeMemory(&D_80132360);
         FreeMemory(&D_800FED0C);
         FreeMemory(&D_800FF4F0);
@@ -653,7 +699,7 @@ void FreeSceneryImages(void) {
         FreeMemory(&D_800E214C[1]);
         FreeMemory(&D_800E214C[2]);
         FreeMemory(&sShotOffsetMarkerImage);
-        FreeMemory(&D_800E2164);
+        FreeMemory(&sWindSpeedFont);
         FreeMemory(&D_800E2168);
         FreeMemory(&D_800E216C);
         FreeMemory(&D_800E2170);
@@ -946,12 +992,150 @@ void ResetBallTrail(void) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80083AC8);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_800842C0);
+/*
+ * Draws the wind's icon, which pulses in size, and the wind's speed in
+ * meters below it. Both lean away from the given point along the viewed wind.
+ *
+ * Doesn't match: the target reads *displayListHead before the other loads and
+ * schedules the last commands before reading D_80106242. Its rodata also has
+ * an empty string after "%dm", which this doesn't emit.
+ */
+#ifdef NON_MATCHING
+void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 halfWidthRounded;
+    s32 halfHeightRounded;
+    s32 textureS;
+    s32 textureT;
+    s32 dsdx;
+    s32 dtdy;
+    s32 speed;
+    f32 halfWidth;
+    f32 halfHeight;
+    f32 centerX;
+    f32 centerY;
+    s32 roundedCenterX;
+    s32 roundedCenterY;
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80084468);
+    /* Draws text of digits, spaces and 'm' from the wind speed font, with its top left at the given point */
+    void DrawWindSpeedText(s32 textX, s32 textY, char *text) {
+        s32 offsetX;
+        s32 glyphS;
+        s32 glyphWidth;
+
+        for (offsetX = 0; *text != '\0'; text++, offsetX += WIND_DIGIT_WIDTH) {
+            if (*text == ' ') {
+                continue;
+            }
+            if (*text == 'm') {
+                glyphS = WIND_METERS_GLYPH_S;
+                glyphWidth = WIND_METERS_GLYPH_WIDTH;
+            } else {
+                glyphS = (*text - '0') * WIND_DIGIT_WIDTH;
+                glyphWidth = WIND_DIGIT_WIDTH;
+            }
+            gSPScisTextureRectangle(gfx++, (textX + offsetX) << 2, (textY - WIND_TEXT_RAISE) << 2,
+                                    (textX + offsetX + glyphWidth) << 2,
+                                    (textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT) << 2, G_TX_RENDERTILE,
+                                    glyphS << 5, 0, 1 << 10, 1 << 10);
+        }
+    }
+
+    sWindIconPulseAngle += WIND_ICON_PULSE_STEP;
+    speed = (u32)g_HoleConditions.windSpeed * WIND_SPEED_TO_METERS_SCALE / WIND_SPEED_TO_METERS_DIVISOR;
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        halfWidth = sinf(sWindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
+    } else {
+        halfWidth = sinf(sWindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
+    }
+    halfHeight = sinf(sWindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
+    halfWidthRounded = halfWidth + 0.5f;
+    halfHeightRounded = halfHeight + 0.5f;
+    dsdx = (WIND_ICON_TEXTURE_WIDTH / 2 << 10) / halfWidth;
+    dtdy = (WIND_ICON_TEXTURE_HEIGHT / 2 << 10) / halfHeight;
+    /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel in */
+    textureS = HALF_TEXEL - (halfWidthRounded - halfWidth) * HALF_TEXEL;
+    textureT = HALF_TEXEL - (halfHeightRounded - halfHeight) * HALF_TEXEL;
+    /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by truncation works */
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        centerX = -sinf(g_ViewedWindAngles[0]) * WIND_WIDE_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
+    } else {
+        centerX = -sinf(g_ViewedWindAngles[0]) * WIND_NARROW_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
+    }
+    centerY = -cosf(g_ViewedWindAngles[0]) * WIND_LEAN_Y + (SCREEN_HEIGHT / 2 - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)sWindIconImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, WIND_ICON_TEXTURE_WIDTH,
+                           WIND_ICON_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    roundedCenterX = centerX + 0.5f;
+    roundedCenterY = centerY + 0.5f;
+    gSPScisTextureRectangle(gfx++, (roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X - halfWidthRounded) << 2,
+                            (roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y - halfHeightRounded) << 2,
+                            (roundedCenterX - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_X + halfWidthRounded) << 2,
+                            (roundedCenterY - WIND_POSITIVE_BIAS + WIND_ICON_OFFSET_Y + halfHeightRounded) << 2,
+                            G_TX_RENDERTILE, textureS, textureT, dsdx, dtdy);
+    gDPPipeSync(gfx++);
+    SetUpTextDrawing(&gfx);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, WIND_TEXT_RENDER_MODE, WIND_TEXT_RENDER_MODE2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPSetPrimColor(gfx++, 0, 0, WIND_TEXT_PRIM_RED, WIND_TEXT_PRIM_GREEN, WIND_TEXT_PRIM_BLUE, 255);
+    gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN, WIND_TEXT_ENV_BLUE, 255);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)sWindSpeedFont + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)sWindSpeedFont + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, WIND_FONT_WIDTH,
+                           WIND_FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    sprintf(g_PrintBuffer, "%dm", speed);
+    if (speed >= WIND_SPEED_TWO_DIGITS) {
+        DrawWindSpeedText(centerX - WIND_POSITIVE_BIAS - WIND_WIDE_TEXT_SHIFT_X, centerY - WIND_POSITIVE_BIAS,
+                      g_PrintBuffer);
+    } else {
+        DrawWindSpeedText(centerX - WIND_POSITIVE_BIAS, centerY - WIND_POSITIVE_BIAS, g_PrintBuffer);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    if (D_80106242 == 1) {
+        if (speed != 0) {
+            func_802199EC(&gfx, centerX - WIND_HIGHLIGHT_OFFSET_X, centerY - WIND_HIGHLIGHT_OFFSET_Y,
+                          WIND_HIGHLIGHT_WIDE_SIZE);
+        } else {
+            func_802199EC(&gfx, centerX - WIND_HIGHLIGHT_OFFSET_X, centerY - WIND_HIGHLIGHT_OFFSET_Y,
+                          WIND_HIGHLIGHT_NARROW_SIZE);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeedText);
+
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawWindSpeed);
+#endif
 
 /*
- * Draws the wind indicator at the given point. func_80084468's part is drawn
+ * Draws the wind indicator at the given point. DrawWindSpeed's part is drawn
  * after the model while the viewed wind angle is between a quarter and three
  * quarters of a turn, and before it otherwise.
  */
@@ -983,7 +1167,7 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     guMtxCatF(transform, matrix, matrix);
     guMtxF2L(matrix, &sWindIndicatorMatrices[g_MatrixBufferIndex]);
     if (!(g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2)) {
-        func_80084468(&gfx, x, y);
+        DrawWindSpeed(&gfx, x, y);
     }
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
@@ -1001,7 +1185,7 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
         gSPDisplayList(gfx++, D_80222400);
     }
     if (g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2) {
-        func_80084468(&gfx, x, y);
+        DrawWindSpeed(&gfx, x, y);
     }
     *displayListHead = gfx;
 }
