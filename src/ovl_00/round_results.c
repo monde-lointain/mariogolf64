@@ -101,10 +101,10 @@
 #define PRIZE_TOP_TEN 10
 #define PRIZE_TOP_TWENTY 20
 
-/* The results' images. g_IsUnk3B swaps in another set. */
+/* The results' images. g_IsClubTournament swaps in another set. */
 #define RESULTS_BACKDROP_ASSET 0x6A0
-#define RESULTS_UNK3B_BACKDROP_ASSET 0x947
-#define RESULTS_UNK3B_UNK949_ASSET 0x949
+#define CLUB_TOURNAMENT_BACKDROP_ASSET 0x947
+#define NINTENDO_BADGE_ASSET 0x949
 #define PRESSING_HAND_ASSET 0x8EB
 #define RESULTS_DIGITS_ASSET 0x722
 #define PLACE_DIGITS_ASSET 0x98E
@@ -171,7 +171,7 @@ extern u8 *D_8022571C_ovl_00;
 extern u8 *sTrophyImage;
 extern u8 *sTrophyPalette;
 extern u8 *sMatchStandingWordsImage;
-extern u8 *D_80225730_ovl_00;
+extern u8 *sNintendoBadgeImage;
 extern u8 *sPlaceDigitsImage;
 extern s32 sPortraitCharacterIndex;
 extern s32 sPlayerResults[MAX_PLAYER_COUNT];
@@ -217,7 +217,7 @@ extern TrophyAssets sTrophyAssets[];
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
-s32 func_8005D23C(void);
+s32 GetClubTournamentCourse(void);
 
 void FreeRoundResults(void);
 void LoadRoundResults(void);
@@ -321,7 +321,7 @@ void LoadRoundResults(void) {
         g_Players[0].points += 9999;
     }
 
-    sResultsBackdropImage = AllocMemory(OpenEncodedAsset(g_IsUnk3B ? RESULTS_UNK3B_BACKDROP_ASSET : RESULTS_BACKDROP_ASSET, &asset));
+    sResultsBackdropImage = AllocMemory(OpenEncodedAsset(g_IsClubTournament ? CLUB_TOURNAMENT_BACKDROP_ASSET : RESULTS_BACKDROP_ASSET, &asset));
     ReadEncodedAsset(sResultsBackdropImage, &asset);
     sResultsHandImage = AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset));
     ReadEncodedAsset(sResultsHandImage, &asset);
@@ -329,10 +329,10 @@ void LoadRoundResults(void) {
     ReadEncodedAsset(sDigitsImage, &asset);
     sPlaceDigitsImage = AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
     ReadEncodedAsset(sPlaceDigitsImage, &asset);
-    if (g_IsUnk3B) {
-        D_80225730_ovl_00 = AllocMemory(OpenEncodedAsset(RESULTS_UNK3B_UNK949_ASSET, &asset));
-        ReadEncodedAsset(D_80225730_ovl_00, &asset);
-        sResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[func_8005D23C()], &asset));
+    if (g_IsClubTournament) {
+        sNintendoBadgeImage = AllocMemory(OpenEncodedAsset(NINTENDO_BADGE_ASSET, &asset));
+        ReadEncodedAsset(sNintendoBadgeImage, &asset);
+        sResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[GetClubTournamentCourse()], &asset));
         ReadEncodedAsset(sResultsCourseImage, &asset);
     } else {
         D_802256C4_ovl_00 = AllocMemory(OpenEncodedAsset(RESULTS_UNK69F_ASSET, &asset));
@@ -373,7 +373,7 @@ void LoadRoundResults(void) {
         }
     }
 
-    if (!g_IsUnk3B) {
+    if (!g_IsClubTournament) {
         if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
             sResultsPlacesImage = AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
             ReadEncodedAsset(sResultsPlacesImage, &asset);
@@ -402,7 +402,7 @@ void LoadRoundResults(void) {
         sPortraitTimers[i] = 0;
     }
 
-    if (g_IsUnk3B) {
+    if (g_IsClubTournament) {
         for (i = 0; i != g_PlayerCount; i++) {
             sPlayerResults[i] = GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
         }
@@ -691,8 +691,8 @@ void FreeRoundResults(void) {
         FreeMemory(&sResultsHandImage);
         FreeMemory(&sDigitsImage);
         FreeMemory(&sPlaceDigitsImage);
-        if (g_IsUnk3B) {
-            FreeMemory(&D_80225730_ovl_00);
+        if (g_IsClubTournament) {
+            FreeMemory(&sNintendoBadgeImage);
             FreeMemory(&sResultsCourseImage);
         } else {
             FreeMemory(&D_802256C4_ovl_00);
@@ -709,7 +709,7 @@ void FreeRoundResults(void) {
             FreeMemory(&sPlayerPortraitImages[i]);
             FreeMemory(&sPlayerPortraitPalettes[i]);
         }
-        if (!g_IsUnk3B) {
+        if (!g_IsClubTournament) {
             if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
                 FreeMemory(&sResultsPlacesImage);
                 FreeMemory(&D_80225708_ovl_00);
@@ -1448,7 +1448,7 @@ s32 UpdateRoundResults(void) {
             sResultsSlide += -sResultsSlide / 2;
             break;
         case RESULTS_SHOWN:
-            if (g_IsUnk3B) {
+            if (g_IsClubTournament) {
                 isDone = ShowScorePassword();
             } else {
                 switch (g_GameMode) {

@@ -197,7 +197,7 @@ extern Unk800C29B8 D_800C29B8[];
 extern s16 D_800C2BB0[15];
 
 void *func_8005AF74(void);
-s32 func_8005D23C(void);
+s32 GetClubTournamentCourse(void);
 void func_8005D9A0(void);
 s32 ReadSaveCopies(SaveData *save, u8 isInSram);
 s32 WriteSaveCopies(SaveData *save, u8 isInSram);
@@ -1264,7 +1264,7 @@ void func_8005D1E4(void) {
     unk[0x2F] = g_CourseIndex;
 }
 
-s32 func_8005D218(void) {
+s32 GetClubTournamentGameMode(void) {
     s32 value;
 
     switch (D_80105DC1) {
@@ -1280,15 +1280,15 @@ s32 func_8005D218(void) {
 }
 
 
-s32 func_8005D23C(void) {
+s32 GetClubTournamentCourse(void) {
     return D_80105DC2;
 }
 
-s32 func_8005D248(void) {
+s32 IsNintendoClubTournament(void) {
     return D_80105DC4 != 0;
 }
 
-s32 func_8005D258(void) {
+s32 GetClubTournamentNameMessage(void) {
     s32 value;
 
     value = D_80105DC8;
@@ -1298,17 +1298,17 @@ s32 func_8005D258(void) {
     return value + 0x16F;
 }
 
-s32 func_8005D274(void) {
+s32 GetClubTournamentCourseMessage(void) {
     s32 value;
 
-    value = func_8005D23C();
+    value = GetClubTournamentCourse();
     if (value < 0) {
         value = 0;
     }
     return value + 0x1EB;
 }
 
-s32 func_8005D2A0(void) {
+s32 GetClubTournamentNumber(void) {
     s32 value;
 
     value = D_80105DCC;
@@ -1326,7 +1326,7 @@ void CopyTournamentCode(u8 *destination) {
     }
 }
 
-s32 func_8005D2E4(void) {
+s32 GetClubTournamentModeMessage(void) {
     s32 value;
 
     switch (D_80105DC1) {
@@ -1342,7 +1342,7 @@ s32 func_8005D2E4(void) {
 }
 
 
-s32 func_8005D308(void) {
+s32 GetClubTournamentCourseTitleMessage(void) {
     s32 value;
 
     if (D_80105DC2 >= 6) {

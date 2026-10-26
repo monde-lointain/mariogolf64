@@ -43,7 +43,7 @@
 /* The layouts used while D_800C42D0 is set */
 #define PAUSE_LAYOUT_UNK42D0_SPEED_GOLF 7
 #define PAUSE_LAYOUT_UNK42D0 8
-/* The layouts used while g_IsUnk3B is set */
+/* The layouts used while g_IsClubTournament is set */
 #define PAUSE_LAYOUT_UNK3B_SPEED_GOLF 9
 #define PAUSE_LAYOUT_UNK3B 10
 
@@ -180,7 +180,7 @@ void LoadPauseMenu(void) {
     if (!sIsPauseMenuLoaded) {
         sIsPauseMenuLoaded = TRUE;
         sPauseSelection = 0;
-        if (g_IsUnk3B) {
+        if (g_IsClubTournament) {
             if (g_GameMode == GAME_MODE_SPEED_GOLF) {
                 sPauseLayout = PAUSE_LAYOUT_UNK3B_SPEED_GOLF;
             } else {
