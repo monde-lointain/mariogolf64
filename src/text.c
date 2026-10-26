@@ -114,21 +114,6 @@ typedef struct MessageTable {
 #define SHADOW_OFFSET 1
 #define SHADOW_DIMMING_SHIFT 2
 
-/*
- * The digit font's glyphs are 16 pixels square, one to a row of its image,
- * and drawn 14 pixels apart. The digits start at the second row, after the
- * star.
- */
-#define DIGIT_GLYPH_SIZE 16
-#define DIGIT_GLYPH_WIDTH 14
-#define DIGIT_GLYPH_STAR 0
-#define DIGIT_GLYPH_ZERO 1
-#define DIGIT_GLYPH_COLON 11
-#define DIGIT_GLYPH_PLUS 12
-#define DIGIT_GLYPH_MINUS 13
-#define DIGIT_GLYPH_HASH 14
-#define DIGIT_GLYPH_EXCLAMATION 15
-
 /* Where the glyph and message files are in the ROM */
 extern u8 g_GlyphFileRomStart[];
 extern u8 g_MessageFileRomStart[];

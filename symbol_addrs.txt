@@ -2564,3 +2564,5 @@ DrawLargeImage = 0x8024373C; // type:func segment:ovl_09
 DrawPlace = 0x802445C0; // type:func segment:ovl_09
 DrawScorecardLabel = 0x80244748; // type:func segment:ovl_09
 FormatLeaderboardRow = 0x80247D80; // type:func segment:ovl_09
+DrawBetTallies = 0x8024C1D8; // type:func segment:ovl_09
+sDecimalFormat = 0x8024C960; // segment:ovl_09

@@ -67,6 +67,23 @@ typedef struct TextSlot {
     /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot; /* size = 0x2C */
 
+/*
+ * The digit font's glyphs are 16 pixels square, one to a row of its image,
+ * and drawn 14 pixels apart. The digits start at the second row, after the
+ * star.
+ */
+#define DIGIT_GLYPH_SIZE 16
+#define DIGIT_GLYPH_WIDTH 14
+#define DIGIT_GLYPH_STAR 0
+#define DIGIT_GLYPH_ZERO 1
+#define DIGIT_GLYPH_COLON 11
+#define DIGIT_GLYPH_PLUS 12
+#define DIGIT_GLYPH_MINUS 13
+#define DIGIT_GLYPH_HASH 14
+#define DIGIT_GLYPH_EXCLAMATION 15
+#define DIGIT_GLYPH_COUNT 16
+#define DIGIT_FONT_HEIGHT (DIGIT_GLYPH_COUNT * DIGIT_GLYPH_SIZE)
+
 /* Given this as its font size, PlaceGlyphGroup only frees the group */
 #define NO_FONT_SIZE (-1)
 
@@ -94,6 +111,7 @@ s32 MeasureText(char *text, s32 fontSize, s32 flags);
 void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
 void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void BeginShadowedText(Gfx **displayListHead);
+s32 GetDigitGlyphTop(char code);
 void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text);
 void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
                              s32 flags);

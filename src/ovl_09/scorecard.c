@@ -72,6 +72,13 @@
 #define LABEL_SIZE (LABEL_WIDTH * LABEL_HEIGHT / 2)
 #define LABEL_SHOWN_WIDTH 54
 
+/* Where DrawBetTallies draws the players' rows, from the scorecard's left */
+#define BET_TALLY_LEFT 64
+#define BET_TALLY_TOP 96
+#define BET_TALLY_COLUMN_SPACING 34
+#define BET_TALLY_ROW_SPACING 36
+#define BET_TOTAL_LEFT 302
+
 /* Where a leaderboard row's columns start in its text */
 #define LEADERBOARD_SCORE_COLUMN 12
 #define LEADERBOARD_HOLES_COLUMN 18
@@ -150,6 +157,7 @@ extern ScorecardContent sScorecardContent;
 extern s32 sScorecardState;
 #define RESULT_CHARACTERS_IDLE (-1) /* sResultCharactersLoadStep when no characters are loading */
 extern s32 sResultCharactersLoadStep;
+extern const char sDecimalFormat[];
 
 void ScrollLeaderboard(u16 buttons);
 
@@ -586,7 +594,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80247E3C_ovl_09);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802493DC_ovl_09);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C960_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sDecimalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C964_ovl_09);
 
@@ -616,5 +624,58 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C9B0_ovl_09);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C9B8_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_8024C1D8_ovl_09);
+/*
+ * Draws each player's row of bet tallies in the digit font, with their total
+ * at the end. The bet columns show g_PrintBuffer as it already stands, and
+ * are skipped when the bet rate at the player's index is zero or unset.
+ *
+ * Doesn't match: this keeps loop values on the stack that the target keeps in
+ * saved registers, and it tests the bet rate as a range where the target
+ * compares it with zero and UNSET_BET_RATE in turn.
+ */
+#ifdef NON_MATCHING
+void DrawBetTallies(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 playerIndex;
+    s32 betIndex;
+    s32 total;
+    s32 column;
+    s32 left;
+    s32 x;
+    char *text;
+
+    LoadSmallPalette(&gfx, 0, sScorecard.digitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sScorecard.digitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, DIGIT_GLYPH_SIZE,
+                           DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
+        total = 0;
+        column = BET_TALLY_LEFT;
+        for (betIndex = 0; betIndex != BET_COUNT; betIndex++) {
+            total += g_BetTallies[playerIndex][betIndex];
+            if (g_GameState.betRates[playerIndex] != 0 && g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
+                for (text = g_PrintBuffer, left = column; *text != '\0'; left += DIGIT_GLYPH_SIZE) {
+                    x = left + sScorecard.x;
+                    DrawTextureRect(&gfx, x << 2, (BET_TALLY_TOP + playerIndex * BET_TALLY_ROW_SPACING) << 2,
+                                    (x + DIGIT_GLYPH_SIZE) << 2,
+                                    (BET_TALLY_TOP + DIGIT_GLYPH_SIZE + playerIndex * BET_TALLY_ROW_SPACING) << 2,
+                                    G_TX_RENDERTILE, 0, GetDigitGlyphTop(*text++) << 5, TEXEL_STEP_ONE,
+                                    TEXEL_STEP_ONE);
+                }
+            }
+            column += BET_TALLY_COLUMN_SPACING;
+        }
+        sprintf(g_PrintBuffer, sDecimalFormat, total);
+        for (text = g_PrintBuffer, left = BET_TOTAL_LEFT; *text != '\0'; left += DIGIT_GLYPH_SIZE) {
+            x = left + sScorecard.x;
+            DrawTextureRect(&gfx, x << 2, (BET_TALLY_TOP + playerIndex * BET_TALLY_ROW_SPACING) << 2,
+                            (x + DIGIT_GLYPH_SIZE) << 2,
+                            (BET_TALLY_TOP + DIGIT_GLYPH_SIZE + playerIndex * BET_TALLY_ROW_SPACING) << 2,
+                            G_TX_RENDERTILE, 0, GetDigitGlyphTop(*text++) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawBetTallies);
+#endif
 
