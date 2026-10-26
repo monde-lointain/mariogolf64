@@ -738,27 +738,27 @@ void DrawMovie(Gfx **displayListHead) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802104BC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80210F40_ovl_00);
-
 /*
  * The caption and a copy of it slide in from either side until they meet
  * at the centre. The caption flashes, then grows and fades away.
  */
-#define PUTT_CAPTION_MEET_DRAW 25
-#define PUTT_CAPTION_FLASH_END_DRAW 37
-#define PUTT_CAPTION_GROW_DRAW 44
-#define PUTT_CAPTION_GROW_END_DRAW 56
-#define PUTT_CAPTION_DRAW_COUNT 90
-#define PUTT_CAPTION_TURN_PER_FRAME (M_PI / 12)
-#define PUTT_CAPTION_START_SLIDE 600
-#define PUTT_CAPTION_SLIDE_PER_FRAME 24
-#define PUTT_CAPTION_MAX_GROWTH 48
-#define PUTT_CAPTION_COPY_ALPHA 127
-#define PUTT_CAPTION_COPY_TOP (SHRINKING_IMAGE_CENTRE_Y - MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)
-#define PUTT_CAPTION_FLASH_DEPTH 127.0f
-#define SOUND_PUTT_CAPTION_MEET 0x4B
-#define PUTT_CAPTION_SOUND_CHANNEL 13
-#define PUTT_CAPTION_SOUND_VOLUME 63
+#define CAPTION_MEET_DRAW 25
+#define CAPTION_FLASH_END_DRAW 37
+#define CAPTION_GROW_DRAW 44
+#define CAPTION_GROW_END_DRAW 56
+#define CAPTION_DRAW_COUNT 90
+#define CAPTION_TURN_PER_FRAME (M_PI / 12)
+#define CAPTION_START_SLIDE 600
+#define CAPTION_SLIDE_PER_FRAME 24
+#define CAPTION_MAX_GROWTH 48
+#define CAPTION_COPY_ALPHA 127
+#define CAPTION_COPY_TOP (SHRINKING_IMAGE_CENTRE_Y - MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)
+#define CAPTION_FLASH_DEPTH 127.0f
+#define SOUND_CAPTION_MEET 0x4B
+#define CAPTION_SOUND_CHANNEL 13
+#define CAPTION_SOUND_VOLUME 63
+
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80210F40_ovl_00);
 
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx **displayListHead) {
@@ -784,26 +784,26 @@ void DrawPuttCaption(Gfx **displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0,
                       ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
-    if (sMovieDrawCount == PUTT_CAPTION_MEET_DRAW + 1) {
-        PlaySoundWithEffects(SOUND_PUTT_CAPTION_MEET, PUTT_CAPTION_SOUND_CHANNEL, PUTT_CAPTION_SOUND_VOLUME, 0,
+    if (sMovieDrawCount == CAPTION_MEET_DRAW + 1) {
+        PlaySoundWithEffects(SOUND_CAPTION_MEET, CAPTION_SOUND_CHANNEL, CAPTION_SOUND_VOLUME, 0,
                              MOVIE_SOUND_PAN);
     }
-    if (sMovieDrawCount < PUTT_CAPTION_MEET_DRAW) {
+    if (sMovieDrawCount < CAPTION_MEET_DRAW) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-        gDPSetEnvColor(gfx++, 255, 255, 255, PUTT_CAPTION_COPY_ALPHA);
-    } else if (sMovieDrawCount < PUTT_CAPTION_FLASH_END_DRAW) {
-        alpha = 255.0f - sinf((sMovieDrawCount - PUTT_CAPTION_MEET_DRAW) * PUTT_CAPTION_TURN_PER_FRAME) *
-                             PUTT_CAPTION_FLASH_DEPTH;
+        gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
+    } else if (sMovieDrawCount < CAPTION_FLASH_END_DRAW) {
+        alpha = 255.0f - sinf((sMovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
+                             CAPTION_FLASH_DEPTH;
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
         gDPSetEnvColor(gfx++, 255, 255, 255, 255);
-    } else if (sMovieDrawCount < PUTT_CAPTION_GROW_DRAW) {
+    } else if (sMovieDrawCount < CAPTION_GROW_DRAW) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
         gDPSetEnvColor(gfx++, 255, 255, 255, 255);
-    } else if (sMovieDrawCount < PUTT_CAPTION_GROW_END_DRAW) {
-        angle = (sMovieDrawCount - PUTT_CAPTION_GROW_DRAW) * PUTT_CAPTION_TURN_PER_FRAME;
-        fade = sinf(angle) * PUTT_CAPTION_FLASH_DEPTH;
+    } else if (sMovieDrawCount < CAPTION_GROW_END_DRAW) {
+        angle = (sMovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
+        fade = sinf(angle) * CAPTION_FLASH_DEPTH;
         halfWidth = cosf(angle) * halfWidth;
-        stripHeight = (1.0f - cosf(angle)) * PUTT_CAPTION_MAX_GROWTH + MOVIE_IMAGE_STRIP_HEIGHT;
+        stripHeight = (1.0f - cosf(angle)) * CAPTION_MAX_GROWTH + MOVIE_IMAGE_STRIP_HEIGHT;
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
         gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
     } else {
@@ -812,10 +812,10 @@ void DrawPuttCaption(Gfx **displayListHead) {
     }
     gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
     gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
-    if (sMovieDrawCount < PUTT_CAPTION_DRAW_COUNT && halfWidth > 0) {
+    if (sMovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
         bottom = SHRINKING_IMAGE_CENTRE_Y;
         for (i = 0; i != stripCount; i++) {
-            slide = PUTT_CAPTION_START_SLIDE - sMovieDrawCount * PUTT_CAPTION_SLIDE_PER_FRAME;
+            slide = CAPTION_START_SLIDE - sMovieDrawCount * CAPTION_SLIDE_PER_FRAME;
             if (slide < 0) {
                 slide = 0;
             }
@@ -828,9 +828,9 @@ void DrawPuttCaption(Gfx **displayListHead) {
                             (bottom - stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE + stripHeight) << 2,
                             G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
                             (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
-            if (sMovieDrawCount < PUTT_CAPTION_MEET_DRAW) {
+            if (sMovieDrawCount < CAPTION_MEET_DRAW) {
                 centreX = SHRINKING_IMAGE_CENTRE_X - slide;
-                copyTop = PUTT_CAPTION_COPY_TOP + i * MOVIE_IMAGE_STRIP_HEIGHT;
+                copyTop = CAPTION_COPY_TOP + i * MOVIE_IMAGE_STRIP_HEIGHT;
                 DrawTextureRect(&gfx, (centreX - (s32)(width >> 1)) << 2, copyTop << 2,
                                 (centreX + (s32)(width >> 1)) << 2, (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2,
                                 G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
