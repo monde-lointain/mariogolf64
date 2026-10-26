@@ -315,7 +315,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             break;
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
-        case GAME_MODE_UNK3:
+        case GAME_MODE_TRAINING:
         case GAME_MODE_UNK6:
         case GAME_MODE_UNK8:
         case GAME_MODE_RING_SHOT:
@@ -477,7 +477,7 @@ void FreeScorecard(void) {
         switch (g_GameMode) {
             case GAME_MODE_STROKE:
             case GAME_MODE_UNK1:
-            case GAME_MODE_UNK3:
+            case GAME_MODE_TRAINING:
             case GAME_MODE_UNK6:
             case GAME_MODE_UNK8:
             case GAME_MODE_RING_SHOT:
@@ -658,7 +658,7 @@ void StartScorecardTally(s32 layout) {
     g_RoundHud.scorecardPage = 0;
     switch (g_GameMode) {
         case GAME_MODE_UNK1:
-        case GAME_MODE_UNK3:
+        case GAME_MODE_TRAINING:
         case GAME_MODE_TOURNAMENT:
         case GAME_MODE_UNK6:
         case GAME_MODE_SPEED_GOLF:
@@ -771,7 +771,7 @@ void SetScorecardLayout(s32 layout) {
     g_RoundHud.scorecardPage = 0;
     switch (g_GameMode) {
         case GAME_MODE_UNK1:
-        case GAME_MODE_UNK3:
+        case GAME_MODE_TRAINING:
         case GAME_MODE_TOURNAMENT:
         case GAME_MODE_UNK6:
         case GAME_MODE_SPEED_GOLF:
@@ -1029,7 +1029,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
             case GAME_MODE_STROKE:
             case GAME_MODE_UNK1:
             case GAME_MODE_MATCH_GAME:
-            case GAME_MODE_UNK3:
+            case GAME_MODE_TRAINING:
             case GAME_MODE_GET_CHARACTER:
             case GAME_MODE_UNK6:
             case GAME_MODE_SPEED_GOLF:
@@ -1055,7 +1055,7 @@ s32 UpdateShownScorecard(u16 buttons) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
         case GAME_MODE_MATCH_GAME:
-        case GAME_MODE_UNK3:
+        case GAME_MODE_TRAINING:
         case GAME_MODE_GET_CHARACTER:
         case GAME_MODE_UNK6:
         case GAME_MODE_SPEED_GOLF:
@@ -1183,7 +1183,7 @@ void DrawScorecard(Gfx **displayListHead) {
                     break;
                 case GAME_MODE_STROKE:
                 case GAME_MODE_UNK1:
-                case GAME_MODE_UNK3:
+                case GAME_MODE_TRAINING:
                 case GAME_MODE_UNK6:
                 case GAME_MODE_UNK8:
                 case GAME_MODE_RING_SHOT:

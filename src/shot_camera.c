@@ -1286,7 +1286,7 @@ void StartHoleCamerasAndSong(void) {
         return;
     }
     switch (g_GameMode) {
-        case GAME_MODE_UNK3:
+        case GAME_MODE_TRAINING:
             PlaySong(HOLE_SONG_UNK1A, SONG_FLAG_UNREAD);
             break;
         case GAME_MODE_MATCH_GAME:

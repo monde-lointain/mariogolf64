@@ -144,7 +144,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802059C0_ovl_00);
 void CountNotableShot(s32 playerIndex, s32 shotKind) {
     u8 *count;
 
-    if ((s8)g_Players[playerIndex].unk1E[0] != 0 || g_GameState.unk31 || g_GameMode == GAME_MODE_UNK3) {
+    if ((s8)g_Players[playerIndex].unk1E[0] != 0 || g_GameState.unk31 || g_GameMode == GAME_MODE_TRAINING) {
         return;
     }
     if (g_GameMode == GAME_MODE_RING_SHOT || sShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {

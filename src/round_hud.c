@@ -590,7 +590,7 @@ void EndHoleIntro(void) {
             sIsCourseSelectLoaded = FALSE;
             FreeCourseSelect();
         }
-    } else if (g_GameMode == GAME_MODE_UNK3) {
+    } else if (g_GameMode == GAME_MODE_TRAINING) {
         if (sIsCourseSelectLoaded == TRUE) {
             sIsCourseSelectLoaded = FALSE;
             FreeCourseSelect();
@@ -638,7 +638,7 @@ void StartHoleIntro(void) {
             sIsCourseSelectLoaded = TRUE;
             LoadCourseSelect(0);
         }
-    } else if (g_GameMode == GAME_MODE_UNK3) {
+    } else if (g_GameMode == GAME_MODE_TRAINING) {
         if (sIsCourseSelectLoaded == FALSE) {
             sIsCourseSelectLoaded = TRUE;
             LoadCourseSelect(1);
@@ -2242,7 +2242,7 @@ void DrawHoleIntroText(Gfx **displayListHead) {
                 func_80242424(&gfx);
             }
         } else if (g_GameMode == GAME_MODE_RING_SHOT) {
-        } else if (g_GameMode == GAME_MODE_UNK3) {
+        } else if (g_GameMode == GAME_MODE_TRAINING) {
             if (g_IsModuleAlive[MODULE_UNK21]) {
                 func_80242D40(&gfx);
             }

@@ -40,7 +40,7 @@
 
 /* The panel's images, in each shot mode */
 #define PANEL_ASSET_POWER 0x56C
-#define PANEL_ASSET_POWER_UNK3 0x56D /* In GAME_MODE_UNK3 */
+#define PANEL_ASSET_POWER_UNK3 0x56D /* In GAME_MODE_TRAINING */
 #define PANEL_ASSET_NORMAL 0x56E
 #define PANEL_ASSET_APPROACH 0x56F
 #define PANEL_ASSET_PUTT_LONG 0x570
@@ -151,7 +151,7 @@ void UpdateClubPanelImages(void) {
                     OpenEncodedAsset(PANEL_ASSET_NORMAL, &panelAsset);
                     break;
                 case SHOT_MODE_POWER:
-                    if (g_GameMode == GAME_MODE_UNK3) {
+                    if (g_GameMode == GAME_MODE_TRAINING) {
                         OpenEncodedAsset(PANEL_ASSET_POWER_UNK3, &panelAsset);
                     } else {
                         OpenEncodedAsset(PANEL_ASSET_POWER, &panelAsset);
@@ -201,7 +201,7 @@ void UpdateClubPanelImages(void) {
                         OpenEncodedAsset(PANEL_ASSET_NORMAL, &frameAsset);
                         break;
                     case SHOT_MODE_POWER:
-                        if (g_GameMode == GAME_MODE_UNK3) {
+                        if (g_GameMode == GAME_MODE_TRAINING) {
                             OpenEncodedAsset(PANEL_ASSET_POWER_UNK3, &frameAsset);
                         } else {
                             OpenEncodedAsset(PANEL_ASSET_POWER, &frameAsset);

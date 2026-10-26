@@ -967,7 +967,7 @@ s32 ChooseHoleStrokeTarget(void) {
     if (IsGameFlagSet(GAME_FLAG_UNK3C)) {
         return 0;
     }
-    if (g_GameMode == GAME_MODE_UNK3) {
+    if (g_GameMode == GAME_MODE_TRAINING) {
         return g_HolePar;
     }
     if (g_GameMode == GAME_MODE_GET_CHARACTER) {

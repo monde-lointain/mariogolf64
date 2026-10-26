@@ -432,7 +432,7 @@ void LoadRoundResults(void) {
                 AddRoundPoints(save);
                 break;
             case GAME_MODE_UNK1:
-            case GAME_MODE_UNK3:
+            case GAME_MODE_TRAINING:
             case GAME_MODE_UNK6:
             case GAME_MODE_UNK8:
             case GAME_MODE_RING_SHOT:
@@ -697,7 +697,7 @@ void FreeRoundResults(void) {
             switch (g_GameMode) {
                 case GAME_MODE_STROKE:
                 case GAME_MODE_UNK1:
-                case GAME_MODE_UNK3:
+                case GAME_MODE_TRAINING:
                 case GAME_MODE_UNK6:
                 case GAME_MODE_SPEED_GOLF:
                 case GAME_MODE_UNK8:

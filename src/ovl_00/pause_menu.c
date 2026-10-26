@@ -189,7 +189,7 @@ void LoadPauseMenu(void) {
                 sPauseLayout = PAUSE_LAYOUT_UNK42D0_SPEED_GOLF;
             } else if (g_GameMode == GAME_MODE_RING_SHOT) {
                 sPauseLayout = PAUSE_LAYOUT_RING_SHOT;
-            } else if (g_GameMode == GAME_MODE_UNK3) {
+            } else if (g_GameMode == GAME_MODE_TRAINING) {
                 if (g_IsMiniGolf == TRUE) {
                     sPauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
                 } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {
@@ -205,7 +205,7 @@ void LoadPauseMenu(void) {
                 case GAME_MODE_SPEED_GOLF:
                     sPauseLayout = PAUSE_LAYOUT_SPEED_GOLF;
                     break;
-                case GAME_MODE_UNK3:
+                case GAME_MODE_TRAINING:
                     if (g_IsMiniGolf == TRUE) {
                         sPauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
                     } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {

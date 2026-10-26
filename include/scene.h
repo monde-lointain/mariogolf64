@@ -91,10 +91,12 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK8 8
 
 /*
- * A mode with dry holes, cup positions taken in turn and, for the computer
- * golfer, a planned score of par on each hole
+ * The walkthrough's Training: it has dry holes, cup positions taken in
+ * turn and, for the computer golfer, a planned score of par on each hole.
+ * Like Ring Shot it earns no Course Points, and its pause menu has
+ * layouts for the driving range and mini golf.
  */
-#define GAME_MODE_UNK3 3
+#define GAME_MODE_TRAINING 3
 
 /* A mode in which every hole is built from the same hole assets */
 #define GAME_MODE_UNK12 12

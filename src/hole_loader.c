@@ -719,8 +719,8 @@ s32 ChooseHoleConditions(void) {
         return;
     }
     if (g_GameMode != GAME_MODE_UNK12 && g_GameMode != GAME_MODE_UNK13) {
-        /* The first hole, mini-golf and GAME_MODE_UNK3 stay dry */
-        if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_UNK3 && !g_GameState.isMiniGolf) {
+        /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
+        if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_TRAINING && !g_GameState.isMiniGolf) {
             if ((rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
                 g_HoleConditions.isRaining = FALSE;
             } else {
@@ -789,7 +789,7 @@ s32 ChooseHoleConditions(void) {
         cupIndex = 0;
     } else if (g_IsMiniGolf) {
         cupIndex = (g_CourseIndex - MINI_GOLF_COURSE_INDEX) % MINI_GOLF_COURSES_PER_RECORD;
-    } else if (g_GameMode == GAME_MODE_UNK3) {
+    } else if (g_GameMode == GAME_MODE_TRAINING) {
         cupIndex = sCycledCupIndex++ & (CUP_POSITION_COUNT - 1);
     } else {
         /* The cups are drawn three, three, two and one times in nine */
