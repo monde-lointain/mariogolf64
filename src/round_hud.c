@@ -76,10 +76,6 @@
 #define ASSET_ROUND_IMAGE_723 0x723
 #define ASSET_ROUND_IMAGE_724 0x724
 
-/* The sound of the rain, played at full volume when a hole starts in the rain */
-#define RAIN_SOUND 0
-#define RAIN_SOUND_START_VOLUME 100
-
 /* The image of the hole's par, one per par from 3 to 5 */
 #define ASSET_PAR_THREE_IMAGE 0x565
 #define ASSET_PAR_FOUR_IMAGE 0x566
@@ -94,7 +90,6 @@ extern void *sParImage;
 
 /* Set while the overlay of the course selection is loaded for the hole */
 extern s32 sIsCourseSelectLoaded;
-extern f32 g_RainSoundVolume;
 
 /*
  * The hole's flag, which shows the hole image, is a grid of vertices. pin.c

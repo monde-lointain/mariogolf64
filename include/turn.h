@@ -2,6 +2,7 @@
 #define TURN_H
 
 #include <ultra64.h>
+#include "ball_simulation.h"
 
 /*
  * The kinds of notable shot that earn Course Points. Most are named after
@@ -21,5 +22,7 @@
 #define SHOT_KIND_WATER_CUT 11    /* Crosses water without stopping in it, the debug text's "WaterCut" */
 
 void CountNotableShot(s32 playerIndex, s32 shotKind);
+void StartFreeLook(void);
+void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation);
 
 #endif

@@ -130,7 +130,6 @@ extern Mtx sDropMatrices[]; /* One per draw buffer */
 extern Mtx sDivotMarkMatrix;
 extern ShotDebris sShotDebris;
 extern s32 sSpawnGroundHeight;
-extern f32 g_RainSoundVolume;
 extern Gfx D_800C3FC0[];
 extern u8 *sRainSplashImage;
 extern Mtx sRainModelViewMatrix;
