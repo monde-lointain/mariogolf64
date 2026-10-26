@@ -266,7 +266,7 @@ void FreePauseMenu(void) {
 /* What a pause option shows beside its label, and how the cursor points at it */
 #define PAUSE_OPTION_KIND_PLAIN 0
 #define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
-#define PAUSE_OPTION_KIND_UNK8C 2   /* Shows the player's UnkB8.unk8C as black or white */
+#define PAUSE_OPTION_KIND_GRID_COLOR 2 /* Shows the player's grid colour as black or white */
 #define PAUSE_OPTION_KIND_WIND_SPEED 3
 #define PAUSE_OPTION_KIND_WIND_DIRECTION 4
 #define PAUSE_OPTION_KIND_LIE 5
@@ -613,11 +613,11 @@ s32 UpdatePauseMenu(ControllerState *controller) {
         if (g_HoleConditions.windSpeed > PAUSE_WIND_SPEED_MAX) {
             g_HoleConditions.windSpeed = PAUSE_WIND_SPEED_MAX;
         }
-    } else if (kind == PAUSE_OPTION_KIND_UNK8C) {
+    } else if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
         if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
-            g_Players[g_CurrentShot.playerIndex].unk8C ^= 1;
+            g_Players[g_CurrentShot.playerIndex].gridColor ^= 1;
             if (g_CurrentShot.playerIndex == 0) {
-                GetSaveData()->options[SAVE_OPTION_UNK2] = g_Players[g_CurrentShot.playerIndex].unk8C;
+                GetSaveData()->options[SAVE_OPTION_GRID_COLOR] = g_Players[g_CurrentShot.playerIndex].gridColor;
                 WriteSaveData();
             }
             PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -794,9 +794,9 @@ void DrawPauseMenu(Gfx **displayListHead) {
                     green, blue, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
         DrawLargeTextSlot(&gfx, i);
-        if (kind == PAUSE_OPTION_KIND_UNK8C) {
+        if (kind == PAUSE_OPTION_KIND_GRID_COLOR) {
             DrawLargeText(&gfx, PAUSE_VALUE_X, y,
-                          (s8)g_Players[g_CurrentShot.playerIndex].unk8C == 1 ? sBlackText : sWhiteText);
+                          (s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK ? sBlackText : sWhiteText);
         }
         if (kind == PAUSE_OPTION_KIND_WEATHER) {
             DrawLargeText(&gfx, PAUSE_VALUE_X, y, g_HoleConditions.isRaining == TRUE ? sRainText : sClearText);
@@ -824,7 +824,7 @@ void DrawPauseMenu(Gfx **displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
     }
     selectedKind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
-    if (selectedKind == PAUSE_OPTION_KIND_WEATHER || selectedKind == PAUSE_OPTION_KIND_UNK8C ||
+    if (selectedKind == PAUSE_OPTION_KIND_WEATHER || selectedKind == PAUSE_OPTION_KIND_GRID_COLOR ||
         selectedKind == PAUSE_OPTION_KIND_WIND_SPEED || selectedKind == PAUSE_OPTION_KIND_WIND_DIRECTION ||
         selectedKind == PAUSE_OPTION_KIND_LIE) {
         DrawTextureRect(&gfx, PAUSE_TEE_X * 4, (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,

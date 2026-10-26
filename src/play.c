@@ -246,7 +246,7 @@ void SetUpPlayers(void) {
             g_Players[i].unk22 = 0;
             g_Players[i].unk1E[0] = 0;
             g_Players[i].teeOrder = 0;
-            g_Players[i].unk8C = GetSaveData()->options[SAVE_OPTION_UNK2];
+            g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
             for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
                 g_Players[i].holes[hole].strokes = 0;
                 g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;

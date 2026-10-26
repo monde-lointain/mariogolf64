@@ -41,9 +41,13 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
-#define SAVE_OPTION_UNK2 2 /* Copied into each player's UnkB8.unk8C */
+#define SAVE_OPTION_GRID_COLOR 2 /* Copied into each player's UnkB8.gridColor */
 #define SAVE_OPTION_UNK3 3
 #define SAVE_OPTION_COUNT 4
+
+/* SAVE_OPTION_GRID_COLOR values */
+#define GRID_COLOR_WHITE 0
+#define GRID_COLOR_BLACK 1
 
 /* Bits of g_OptionBits, each mirroring one of the saved options */
 #define OPTION_BIT_UNK0 (1 << 0)
@@ -281,7 +285,7 @@ typedef struct UnkB8 {
     /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x88 */ s32 unk88;
-    /* 0x8C */ u8 unk8C;
+    /* 0x8C */ u8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
     /* 0x8D */ u8 unk8D;
     /* 0x8E */ s16 betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
     /* 0x9C */ s8 unk9C;
