@@ -5,9 +5,11 @@
 #include "movie.h"
 #include "round_events.h"
 #include "save.h"
+#include "screen_layers.h"
 #include "shot_effects.h"
 #include "text.h"
 #include "transfer_pak.h"
+#include "variables.h"
 
 /* The buffer that a movie's images, or the wind Fly Guy's, are read into */
 #define MOVIE_BUFFER_SIZE 0x6270
@@ -37,8 +39,36 @@
 #define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
 #define HEAVY_HITTER_CONTACT_IMAGE_ASSET 0x6A6
 
-extern s32 sMovieUnk14;
-extern s32 sMovieUnk20;
+/* A banner's letters, each an image drawn on its own square */
+typedef struct Banner {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ u16 imageAsset;
+    /* 0x4 */ s8 letterCount;
+    /* 0x5 */ u8 letterWidth;
+    /* 0x6 */ u8 letterHeight;
+    /* 0x7 */ s8 animation;
+} Banner; /* size = 0x8 */
+
+/* Where a letter of the shown banner is, and its matrix in each matrix buffer */
+typedef struct BannerLetter {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 scale;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ Mtx matrices[2];
+} BannerLetter; /* size = 0x90 */
+
+extern s32 sCurrentBanner;
+/* The banner whose images are in sMovieBuffer */
+extern s32 sLoadedBanner;
+/* The number that BANNER_STROKES_OVER_PAR's banner shows after its "+" */
+extern s32 sBannerNumber;
+/* The "+" and the number's digits */
+extern s32 sBannerNumberLetterCount;
+extern Vtx sBannerLetterVertices[4];
+extern Banner sBanners[];
+extern Mtx sBannerMatrices[2];
+extern BannerLetter sBannerLetters[];
 extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
 extern s32 sCurrentMovie;
@@ -65,15 +95,24 @@ extern Vtx sFlipMessageBoardVertices[4];
 #define FLIP_MESSAGE_BOARD_MARGIN_X 6
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
 
+/* Each letter image follows the images' header and palette */
+#define BANNER_LETTER_IMAGES_OFFSET 0x208
+#define BANNER_LETTER_IMAGE_SIZE 0x800
+#define BANNER_LETTER_IMAGE_WIDTH 32
+#define BANNER_LETTER_IMAGE_HEIGHT 64
+/* The number banner's first image is "+", and its digit images follow */
+#define BANNER_PLUS_IMAGE 0
+#define BANNER_FIRST_DIGIT_IMAGE 1
+
 void ResetPath(void);
 
 void AllocMovieBuffer(void) {
     EncodedAsset unused;
 
-    sMovieUnk14 = -1;
+    sCurrentBanner = -1;
     sIsMovieBufferAllocated = TRUE;
     sMovieBuffer = AllocMemory(MOVIE_BUFFER_SIZE);
-    sMovieUnk20 = -1;
+    sLoadedBanner = -1;
 }
 
 void FreeMovieBuffer(void) {
@@ -83,9 +122,50 @@ void FreeMovieBuffer(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartBanner);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020EBBC_ovl_00);
+/* Draws the number banner's "+" and digits */
+void DrawNumberBanner(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 imageOffset;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020ED54_ovl_00);
+    sprintf(g_PrintBuffer, "%d", sBannerNumber);
+    for (i = 0; i != sBannerNumberLetterCount; i++) {
+        if (i == 0) {
+            imageOffset = BANNER_PLUS_IMAGE * BANNER_LETTER_IMAGE_SIZE;
+        } else {
+            imageOffset = (g_PrintBuffer[i - 1] - '0') * BANNER_LETTER_IMAGE_SIZE +
+                          BANNER_FIRST_DIGIT_IMAGE * BANNER_LETTER_IMAGE_SIZE;
+        }
+        LoadTextureBlock(&gfx, sMovieBuffer + (imageOffset + BANNER_LETTER_IMAGES_OFFSET),
+                         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0,
+                         0, 0, 0, 0);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sBannerLetters[i].matrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sBannerLetterVertices, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Draws the shown banner's letters, each placed within the whole banner's matrix */
+void DrawBannerLetters(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+
+    for (i = 0; i != sBanners[sCurrentBanner].letterCount; i++) {
+        LoadTextureBlock(&gfx, sMovieBuffer + BANNER_LETTER_IMAGES_OFFSET + i * BANNER_LETTER_IMAGE_SIZE, G_IM_FMT_CI,
+                         G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH, BANNER_LETTER_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sBannerMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sBannerLetters[i].matrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sBannerLetterVertices, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void func_8020EEEC_ovl_00(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
@@ -265,8 +345,8 @@ void ShowWindFlyGuy(s32 show) {
         ReadEncodedAsset(sMovieBuffer, &asset);
         OpenEncodedAsset(WIND_STREAK_IMAGE_ASSET, &asset);
         ReadEncodedAsset(sMovieBuffer + FLY_GUY_IMAGE_SIZE, &asset);
-        sMovieUnk20 = -1;
-        sMovieUnk14 = -1;
+        sLoadedBanner = -1;
+        sCurrentBanner = -1;
         ResetPath();
     }
 }
