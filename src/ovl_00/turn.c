@@ -17,12 +17,14 @@
 #include "hole_loader.h"
 #include "math_util.h"
 #include "overlay_manager.h"
+#include "pin.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
 #include "turn.h"
@@ -849,7 +851,38 @@ void FreeCharacterAndReactionLight(void) {
     TurnOffReactionLight();
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207A34_ovl_00);
+/*
+ * Measures a tee shot for the records: the drive counts if it ends on the fairway or the
+ * green, and the distance to the pin if it ends on the green.
+ */
+void MeasureTeeShot(s32 playerIndex) {
+    s32 distance;
+    SurfaceInfo *info;
+
+    if (g_Players[playerIndex].strokeCount == 1) {
+        distance = UNCOUNTED_DISTANCE;
+        info = GetSurfaceInfo(g_SimulatedShot.endSurface);
+        switch ((u32)info->kind) {
+            case SURFACE_KIND_FAIRWAY:
+            case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+            case SURFACE_KIND_FAIRWAY_POOR_LIE:
+            case SURFACE_KIND_GREEN:
+            case SURFACE_KIND_GREEN_EDGE:
+                distance = IntLength2D(g_SimulatedShot.startPosition[AXIS_X] - g_SimulatedShot.endPosition[AXIS_X],
+                                       g_SimulatedShot.startPosition[AXIS_Z] - g_SimulatedShot.endPosition[AXIS_Z]);
+                break;
+        }
+        g_Players[playerIndex].driveDistance = distance;
+        distance = UNCOUNTED_DISTANCE;
+        if (g_SimulatedShot.unk2E10) {
+            distance = 0;
+        } else if (info->kind == SURFACE_KIND_GREEN) {
+            distance = GetCupDistance(g_CupPositionX - g_SimulatedShot.endPosition[AXIS_X],
+                                      g_CupPositionZ - g_SimulatedShot.endPosition[AXIS_Z]);
+        }
+        g_Players[playerIndex].pinDistance = distance;
+    }
+}
 
 /* Leaves the distances that the player's contests have not measured uncounted */
 void SkipUnmeasuredDistances(s32 playerIndex) {

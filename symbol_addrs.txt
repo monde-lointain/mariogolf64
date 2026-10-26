@@ -2897,3 +2897,4 @@ IsRecordableHoleOut = 0x80206BD0; // type:func segment:ovl_00
 PlaceBallAtRest = 0x802059C0; // type:func segment:ovl_00
 RecordHoleOut = 0x80206CF0; // type:func segment:ovl_00
 RecordRingShotHole = 0x80206E88; // type:func segment:ovl_00
+MeasureTeeShot = 0x80207A34; // type:func segment:ovl_00
