@@ -6,6 +6,7 @@
 #include "current_shot.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "libc.h"
 #include "math_util.h"
 #include "movie.h"
 #include "pin.h"
@@ -1575,4 +1576,177 @@ void ShowWindFlyGuy(s32 show) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802161D4_ovl_00);
+/* The Fly Guy and its streak are drawn on screen; a point's x and y are in screen pixels */
+typedef struct FlyGuyPoint {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 z;
+} FlyGuyPoint;
+
+extern FlyGuyPoint sWindFlyGuyPath[];
+/* Where the Fly Guy stays while its streak fades */
+extern FlyGuyPoint sWindFlyGuyExit;
+extern FlyGuyPoint sWindFlyGuyLastPosition;
+/* The contact matrix that the streak starts from; the streak's matrices form a ring behind it */
+extern s32 sWindStreakHead;
+
+#define WIND_FLY_GUY_PATH_POINT_COUNT 17
+#define WIND_FLY_GUY_PATH_PACE 12
+#define WIND_FLY_GUY_FRAME_COUNT 14
+/* sWindFlyGuyFrame while the Fly Guy flies its path; after it, the frame counts up as the streak fades */
+#define WIND_FLY_GUY_STARTING 0
+#define WIND_FLY_GUY_FLYING 1
+#define WIND_FLY_GUY_ARRIVED 2
+#define WIND_FLY_GUY_GONE_FRAME 20
+#define WIND_STREAK_ALPHA 190
+#define WIND_STREAK_FADE_STEP 10
+#define WIND_STREAK_HALF_WIDTH 10
+#define WIND_STREAK_LENGTH 80
+/* The streak's quads, drawn as two runs since only 32 vertices fit in the vertex cache */
+#define WIND_STREAK_FIRST_RUN 16
+#define WIND_STREAK_SECOND_RUN_END 31
+#define WIND_STREAK_QUADS_PER_RUN 15
+/* The first vertex slot of the last quad of a run */
+#define WIND_STREAK_LAST_SLOT ((WIND_STREAK_QUADS_PER_RUN - 1) * 2)
+/* The far side of the streak texture, in S10.5 */
+#define WIND_STREAK_TEXTURE_S 0x5FF
+/* Each quad steps the streak texture by 8 texels */
+#define WIND_STREAK_TEXTURE_T_SHIFT 8
+#define WIND_STREAK_IMAGE_WIDTH 48
+#define WIND_STREAK_IMAGE_HEIGHT 128
+#define WIND_STREAK_IMAGE_MASK_T 7
+#define WIND_STREAK_DEPTH -300.0f
+#define FLY_GUY_IMAGE_WIDTH 32
+#define FLY_GUY_IMAGE_HEIGHT 32
+#define SOUND_WIND_FLY_GUY 0x28
+#define WIND_FLY_GUY_SOUND_CHANNEL 10
+#define WIND_FLY_GUY_SOUND_VOLUME 63
+
+#ifdef NON_MATCHING
+/* The Fly Guy that warns of a strong wind, flying across the screen and trailing a streak of wind */
+void DrawWindFlyGuy(Gfx **displayListHead) {
+    EncodedAsset asset;
+    FlyGuyPoint position;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Gfx *gfx = *displayListHead;
+    s32 alpha;
+    s32 i;
+    s32 slotsBack;
+
+
+    if (sWindFlyGuyFrame == FLY_GUY_HIDDEN || g_PauseScreen) {
+        return;
+    }
+    sWindFlyGuyAsset++;
+    if (sWindFlyGuyAsset == FLY_GUY_IMAGE_ASSET + WIND_FLY_GUY_FRAME_COUNT) {
+        sWindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
+    }
+    OpenEncodedAsset(sWindFlyGuyAsset, &asset);
+    ReadEncodedAsset(sMovieBuffer, &asset);
+    if (sWindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
+        if (StepAlongPath((f32(*)[AXIS_COUNT])sWindFlyGuyPath, WIND_FLY_GUY_PATH_POINT_COUNT, WIND_FLY_GUY_PATH_PACE,
+                          &position.x) == 1) {
+            sWindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
+        }
+        alpha = WIND_STREAK_ALPHA;
+    } else {
+        sWindFlyGuyFrame++;
+        alpha = WIND_STREAK_ALPHA - sWindFlyGuyFrame * WIND_STREAK_FADE_STEP;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (sWindFlyGuyFrame == WIND_FLY_GUY_GONE_FRAME) {
+            sWindFlyGuyFrame = FLY_GUY_HIDDEN;
+        }
+        position = sWindFlyGuyExit;
+    }
+    if (sWindFlyGuyFrame == WIND_FLY_GUY_STARTING) {
+        sWindFlyGuyLastPosition = sWindFlyGuyPath[0];
+        sContactVertices[0].v.ob[0] = -WIND_STREAK_HALF_WIDTH;
+        sWindStreakHead = 0;
+        sContactVertices[1].v.ob[0] = WIND_STREAK_HALF_WIDTH;
+        for (i = 0; i != CONTACT_MATRIX_COUNT; i++) {
+            guTranslate(&sContactMatrices[i], position.x - SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - position.y,
+                        WIND_STREAK_DEPTH);
+        }
+        PlaySound(SOUND_WIND_FLY_GUY, WIND_FLY_GUY_SOUND_CHANNEL, WIND_FLY_GUY_SOUND_VOLUME);
+        sWindFlyGuyFrame = WIND_FLY_GUY_FLYING;
+    }
+    rotation[AXIS_X] = 0.0f;
+    rotation[AXIS_Y] = 0.0f;
+    rotation[AXIS_Z] = atan2(sWindFlyGuyLastPosition.x - position.x, sWindFlyGuyLastPosition.y - position.y);
+    translation[AXIS_Z] = WIND_STREAK_DEPTH;
+    translation[AXIS_X] = position.x - SCREEN_WIDTH / 2;
+    translation[AXIS_Y] = SCREEN_HEIGHT / 2 - position.y;
+    BuildRotationMatrix(matrix, rotation, translation);
+    ConvertMatrixToFixed(matrix, &sContactMatrices[sWindStreakHead]);
+    sWindFlyGuyLastPosition = position;
+    SetUpTextDrawing(&gfx);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    LoadNibbleTextureBlock(&gfx, sMovieBuffer + FLY_GUY_IMAGE_SIZE + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+                           WIND_STREAK_IMAGE_WIDTH, WIND_STREAK_IMAGE_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0,
+                           WIND_STREAK_IMAGE_MASK_T, 0, 0);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != WIND_STREAK_FIRST_RUN; i++) {
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sContactMatrices[(sWindStreakHead + i) % WIND_STREAK_LENGTH]),
+                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPVertex(gfx++, sContactVertices, 2, i * 2);
+        gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
+        gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST,
+                        (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
+    }
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
+        gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2, i * 2 + 3, 0);
+    }
+    /* The second run reuses the vertex slots backwards from the last vertex of the first */
+    for (i = WIND_STREAK_FIRST_RUN, slotsBack = 0; i != WIND_STREAK_SECOND_RUN_END; i++, slotsBack += 2) {
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sContactMatrices[(sWindStreakHead + i) % WIND_STREAK_LENGTH]),
+                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPVertex(gfx++, sContactVertices, 2, WIND_STREAK_LAST_SLOT - slotsBack);
+        gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT - slotsBack, G_MWO_POINT_ST,
+                        i << WIND_STREAK_TEXTURE_T_SHIFT);
+        gSPModifyVertex(gfx++, WIND_STREAK_LAST_SLOT + 1 - slotsBack, G_MWO_POINT_ST,
+                        (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
+    }
+    for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
+        gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2, i * 2 + 3, 0);
+    }
+    sWindStreakHead--;
+    if (sWindStreakHead < 0) {
+        sWindStreakHead = WIND_STREAK_LENGTH - 1;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    LoadTextureBlock(&gfx, sMovieBuffer + IMAGE_HEADER_SIZE, G_IM_FMT_RGBA, G_IM_SIZ_16b, FLY_GUY_IMAGE_WIDTH,
+                     FLY_GUY_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, ((s32)position.x - FLY_GUY_IMAGE_WIDTH / 2) * 4,
+                    ((s32)position.y - FLY_GUY_IMAGE_HEIGHT / 2) * 4, ((s32)position.x + FLY_GUY_IMAGE_WIDTH / 2) * 4,
+                    ((s32)position.y + FLY_GUY_IMAGE_HEIGHT / 2) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawWindFlyGuy);
+#endif
