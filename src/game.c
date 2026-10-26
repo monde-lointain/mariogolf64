@@ -925,7 +925,6 @@ void func_8008C6B0(Gfx **displayListHead);
 void DrawHoleIntroText(Gfx **displayListHead);
 void func_8008D3F4(Gfx **displayListHead);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
-void func_8009351C(Gfx **displayListHead, s32);
 void func_800939E8(Gfx **displayListHead);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
@@ -1482,7 +1481,7 @@ s32 DrawGame(void) {
         gSPMatrix(g_DisplayListHead++, &sIdentityMatrix, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
         if (g_MenuBackdropStyle != 0) {
             if (viewIndex == 0) {
-                func_8009351C(&g_DisplayListHead, g_MenuBackdropStyle);
+                CaptureMenuBackdrop(&g_DisplayListHead, g_MenuBackdropStyle);
                 func_800939E8(&g_DisplayListHead);
             }
         }

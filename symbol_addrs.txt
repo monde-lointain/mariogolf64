@@ -2490,3 +2490,6 @@ sIsTestGradientShown = 0x800C5E94;
 DrawColorTest = 0x80088BDC; // type:func
 sColorTestSampleText = 0x800D1BB8;
 sBlankText = 0x800D1BC8;
+CaptureMenuBackdrop = 0x8009351C; // type:func
+sLastFrameBuffer = 0x800FED10;
+sBackdropFadeLevel = 0x800C7310;

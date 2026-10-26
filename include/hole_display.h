@@ -25,6 +25,8 @@
 #define HUD_ANIMATION_UNK9 9
 #define HUD_ANIMATION_UNK10 10
 extern s32 g_MenuBackdropStyle;
+
+void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused);
 /* How many slices of the frame HUD_ANIMATION_SLICE_CAPTURE has copied */
 extern s32 g_CapturedSliceCount;
 

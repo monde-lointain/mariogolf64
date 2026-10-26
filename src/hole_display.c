@@ -109,7 +109,25 @@ extern u32 *sCapturedFrame;
 extern Vtx sTileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT];
 extern s32 sIsFrameCapturePending;
 extern s32 sHudAnimationFrame;
-extern u16 *D_800FED10;
+/* The frame buffer of the last frame, kept for the next frame's captures */
+extern u16 *sLastFrameBuffer;
+
+/*
+ * The plain backdrop copies the last frame, inside a border, into
+ * sCapturedFrame in strips. Each strip loads two rows more than it steps,
+ * and the last loads only the rows that are left.
+ */
+#define BACKDROP_BORDER 8
+#define BACKDROP_RIGHT (SCREEN_WIDTH - BACKDROP_BORDER - 1)
+#define BACKDROP_STRIP_COUNT 38
+#define BACKDROP_STRIP_STEP 6
+#define BACKDROP_STRIP_HEIGHT 8
+#define BACKDROP_LAST_STRIP_HEIGHT 2
+#define STRIP_HEIGHT(strip) \
+    ((strip) != BACKDROP_STRIP_COUNT - 1 ? BACKDROP_STRIP_HEIGHT : BACKDROP_LAST_STRIP_HEIGHT)
+#define COPY_MODE_DSDX (4 << 10) /* Copy mode writes four texels a cycle */
+#define BACKDROP_START_FADE_LEVEL 255
+extern s32 sBackdropFadeLevel;
 
 void CaptureHudAnimationFrame(void);
 void func_8009232C(Gfx **displayListHead);
@@ -296,7 +314,62 @@ void SetMenuBackdrop(s32 backdrop) {
     sMenuBackdrop = backdrop;
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8009351C);
+/* Starts the plain menu backdrop by capturing the last frame for it */
+#ifdef NON_MATCHING
+void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
+    s32 height;
+    u16 *source;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_COPY);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_PLAIN) {
+        g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
+        sBackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
+        gDPPipeSync(gfx++);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, OS_K0_TO_PHYSICAL(sCapturedFrame) & ~7);
+        gDPPipeSync(gfx++);
+        source = sLastFrameBuffer;
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = STRIP_HEIGHT(strip);
+            gDPLoadTextureTile(gfx++, (u32)source & ~7,
+                               G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
+                               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2, (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                    BACKDROP_RIGHT << 2,
+                                    (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height - 1) << 2,
+                                    G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, COPY_MODE_DSDX,
+                                    1 << 10);
+            gDPPipeSync(gfx++);
+            source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
+        }
+        gDPPipeSync(gfx++);
+        gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, OS_K0_TO_PHYSICAL(nuGfxCfb_ptr) & ~7);
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_800939E8);
 
@@ -476,7 +549,7 @@ void DrawHudAnimation(void) {
             func_80092F18(&g_DisplayListHead);
             break;
     }
-    D_800FED10 = nuGfxCfb_ptr;
+    sLastFrameBuffer = nuGfxCfb_ptr;
 }
 
 /* Lets the HUD draw over the whole screen again */
