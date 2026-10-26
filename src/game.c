@@ -938,7 +938,7 @@ void DrawBanner(Gfx **displayListHead);
 void DrawFlipMessage(Gfx **displayListHead);
 void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawWindFlyGuy(Gfx **displayListHead);
-void func_80217164(Gfx **displayListHead);
+void DrawSparks(Gfx **displayListHead);
 void DrawPauseMenu(Gfx **displayListHead);
 void DrawChoiceBox(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
@@ -1571,7 +1571,7 @@ s32 DrawGame(void) {
                                 DrawBallTrail(&g_DisplayListHead, matrices);
                                 DrawShotEffect(&g_DisplayListHead);
                                 if (g_IsModuleAlive[18]) {
-                                    func_80217164(&g_DisplayListHead);
+                                    DrawSparks(&g_DisplayListHead);
                                 }
                             }
                             if (g_PauseScreen != PAUSE_SCREEN_UNK4) {

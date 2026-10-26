@@ -2,6 +2,7 @@
 #include "asset.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "cpu_projection.h"
 #include "current_shot.h"
 #include "effects.h"
 #include "golf_balls.h"
@@ -11,6 +12,7 @@
 #include "movie.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "screen.h"
 #include "shot_effects.h"
 #include "sound.h"
 
@@ -70,7 +72,7 @@ extern u8 sSparkKinds[SPARK_COUNT];
 extern u8 sSparkBursts[SPARK_COUNT];
 /* Each burst's age in frames, or NO_SPARK_BURST */
 extern s8 sSparkBurstAges[SPARK_BURST_COUNT];
-extern s8 sSparkBurstTimers[SPARK_BURST_COUNT];
+extern u8 sSparkBurstTimers[SPARK_BURST_COUNT];
 extern CoursePoint sSparkBurstPoints[SPARK_BURST_COUNT];
 extern u8 *sSparkImage;
 extern u8 *sSwingTrailImage;
@@ -269,7 +271,210 @@ void StartFlagstickSparks(CoursePoint point) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", func_80217164_ovl_00);
+/* The impact flash rises in a few frames and fades more slowly */
+#define IMPACT_FRAME_COUNT_END 100
+#define IMPACT_FLASH_RISE_STEP 64
+#define IMPACT_FLASH_FADE_STEP 32
+#define IMPACT_FLASH_LOWEST_LEVEL 1
+#define SPARK_BURST_SHOWN 1
+#define SPARK_BURST_HIDDEN -1
+#define SPARK_BURST_MAX_AGE 127
+/* A burst's sparks are sized by its distance and grow with its age */
+#define SPARK_DISTANCE_SCALE 0.3f
+#define SPARK_MAX_SCALE 2.0f
+#define SPARK_AGE_GROWTH 0.0625f
+#define SPARK_START_SIZE 0.3f
+#define SPARK_IMAGE_HALF_SIZE 8.0f
+/* Texels per pixel in s5.10 fixed point, for SPARK_IMAGE_SIZE / 2 texels across the half size */
+#define SPARK_TEXTURE_STEP_SCALE 2048.0f
+#define SPARK_NO_TEXTURE_STEP 0xFFFF
+#define SPARK_IMAGE_SIZE 32
+#define SPARK_DRAG 0.98f
+#define SPARK_MODEL_Z -100.0f
+#define SPARK_MODEL_SCALE 0.1f
+/* Texture rectangles beyond these screen coordinates would overflow */
+#define SPARK_MAX_SCREEN_COORD 511
+
+extern Vtx sSparkVertices[3];
+extern Mtx sSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+
+#ifdef NON_MATCHING
+/*
+ * Moves the sparks and draws them at their bursts' points on screen, the
+ * flagstick's as sprites and the impact's as triangles, and steps the impact
+ * flash that lights the golfer
+ */
+void DrawSparks(Gfx **displayListHead) {
+    Vec3 rotation;
+    Vec3 translation;
+    Vec3 scale;
+    Mat4 matrix;
+    ScreenPoint point;
+    f32 burstScales[SPARK_BURST_COUNT];
+    s32 burstShown[SPARK_BURST_COUNT];
+    s32 burstPoints[SPARK_BURST_COUNT][3];
+    s32 burstHalfSizes[SPARK_BURST_COUNT];
+    s32 burstTextureSteps[SPARK_BURST_COUNT];
+    Gfx *gfx = *displayListHead;
+    f32 size;
+    f32 halfSize;
+    s32 burst;
+    s32 left;
+    s32 top;
+    s32 i;
+
+    if (sImpactFrameCount != 0) {
+        if (++sImpactFrameCount == IMPACT_FRAME_COUNT_END) {
+            sImpactFrameCount = 0;
+        }
+        if (g_ImpactFlashState == IMPACT_FLASH_RISING) {
+            g_ImpactFlashLevel += IMPACT_FLASH_RISE_STEP;
+            if (g_ImpactFlashLevel > IMPACT_FLASH_FULL_LEVEL) {
+                g_ImpactFlashLevel = IMPACT_FLASH_FULL_LEVEL;
+                g_ImpactFlashState = IMPACT_FLASH_FADING;
+            }
+        } else if (g_ImpactFlashState == IMPACT_FLASH_FADING) {
+            g_ImpactFlashLevel -= IMPACT_FLASH_FADE_STEP;
+            if (g_ImpactFlashLevel < 0) {
+                g_ImpactFlashLevel = IMPACT_FLASH_LOWEST_LEVEL;
+                g_ImpactFlashState = IMPACT_FLASH_NONE;
+            }
+        }
+    }
+    for (i = 0; i != SPARK_BURST_COUNT; i++) {
+        if (sSparkBurstAges[i] != NO_SPARK_BURST) {
+            if (ProjectPoint(sSparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                             sSparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                             sSparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE, &point) < 0) {
+                size = sSparkBurstAges[i] * SPARK_AGE_GROWTH + SPARK_START_SIZE;
+                burstShown[i] = SPARK_BURST_SHOWN;
+                burstPoints[i][0] = point.x;
+                burstPoints[i][1] = point.y;
+                burstPoints[i][2] = point.depth;
+                burstScales[i] = point.scaleX * SPARK_DISTANCE_SCALE;
+                if (burstScales[i] > SPARK_MAX_SCALE) {
+                    burstScales[i] = SPARK_MAX_SCALE;
+                }
+                halfSize = size * SPARK_IMAGE_HALF_SIZE;
+                burstHalfSizes[i] = burstScales[i] * halfSize;
+                if (burstHalfSizes[i] > 0) {
+                    burstTextureSteps[i] = SPARK_TEXTURE_STEP_SCALE / (burstScales[i] * size);
+                } else {
+                    burstTextureSteps[i] = SPARK_NO_TEXTURE_STEP;
+                }
+            } else {
+                burstShown[i] = SPARK_BURST_HIDDEN;
+            }
+            if (sSparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
+                sSparkBurstAges[i]++;
+            }
+        } else {
+            burstShown[i] = SPARK_BURST_HIDDEN;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)sSparkImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, SPARK_IMAGE_SIZE,
+                           SPARK_IMAGE_SIZE, 0, G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                           G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != SPARK_COUNT; i++) {
+        if (sSparkLives[i] != 0) {
+            burst = sSparkBursts[i];
+            sSparkOffsets[i][0] += sSparkVelocities[i][0];
+            sSparkOffsets[i][1] += sSparkVelocities[i][1];
+            sSparkVelocities[i][0] *= SPARK_DRAG;
+            sSparkVelocities[i][1] *= SPARK_DRAG;
+            sSparkLives[i]--;
+            if (burstShown[burst] == SPARK_BURST_SHOWN) {
+                rotation[AXIS_X] = 0;
+                rotation[AXIS_Y] = 0;
+                rotation[AXIS_Z] = sSparkAngles[i];
+                translation[AXIS_X] =
+                    sSparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0] - SCREEN_WIDTH / 2;
+                translation[AXIS_Y] =
+                    sSparkOffsets[i][1] * burstScales[burst] - burstPoints[burst][1] + SCREEN_HEIGHT / 2;
+                translation[AXIS_Z] = SPARK_MODEL_Z;
+                scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
+                scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
+                scale[AXIS_Z] = burstScales[burst] * SPARK_MODEL_SCALE;
+                if (sSparkKinds[i] == SPARK_KIND_IMPACT) {
+                    BuildTransformMatrix(matrix, rotation, translation, scale);
+                    ConvertMatrixToFixed(matrix, &sSparkMatrices[g_MatrixBufferIndex][i]);
+                }
+                if (sSparkKinds[i] == SPARK_KIND_FLAGSTICK &&
+                    burstPoints[burst][0] >= -SPARK_MAX_SCREEN_COORD &&
+                    burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
+                    burstPoints[burst][1] >= -SPARK_MAX_SCREEN_COORD &&
+                    burstPoints[burst][1] <= SPARK_MAX_SCREEN_COORD) {
+                    left = sSparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0];
+                    top = sSparkOffsets[i][1] * burstScales[burst] + burstPoints[burst][1];
+                    gSPScisTextureRectangle(gfx++, (left - burstHalfSizes[burst]) << 2,
+                                            (top - burstHalfSizes[burst]) << 2, (left + burstHalfSizes[burst]) << 2,
+                                            (top + burstHalfSizes[burst]) << 2, G_TX_RENDERTILE, 0, 0,
+                                            burstTextureSteps[burst], burstTextureSteps[burst]);
+                }
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_CLD_SURF2);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    for (i = 0; i != SPARK_COUNT; i++) {
+        if (sSparkKinds[i] == SPARK_KIND_IMPACT && burstShown[sSparkBursts[i]] == SPARK_BURST_SHOWN) {
+            gDPSetPrimDepth(gfx++, burstPoints[sSparkBursts[i]][2], 0);
+            if (sSparkLives[i] != 0) {
+                gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSparkMatrices[g_MatrixBufferIndex][i]),
+                          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPVertex(gfx++, sSparkVertices, 3, 0);
+                gSP1Triangle(gfx++, 0, 1, 2, 0);
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != SPARK_BURST_COUNT; i++) {
+        if (sSparkBurstTimers[i] == 0) {
+            sSparkBurstAges[i] = NO_SPARK_BURST;
+        } else {
+            sSparkBurstTimers[i]--;
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/shot_effects", DrawSparks);
+#endif
 
 void func_80217F44_ovl_00(void) {
 }
