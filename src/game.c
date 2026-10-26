@@ -7,6 +7,7 @@
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "hole_objects.h"
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
@@ -932,7 +933,6 @@ void func_801FCC48(Gfx **displayListHead);
 void func_801FD578(Gfx **displayListHead);
 void func_801FE370(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
-void func_8020DCA4(Gfx **displayListHead);
 void func_8020EEF8(Gfx **displayListHead);
 void func_8020FC10(Gfx **displayListHead);
 void func_80210370(Gfx **displayListHead);
@@ -1548,7 +1548,7 @@ s32 DrawGame(void) {
                                 }
                                 if (g_IsModuleAlive[11]) {
                                     if (viewIndex == 0) {
-                                        func_8020DCA4(&g_DisplayListHead);
+                                        DrawHoleCreatures(&g_DisplayListHead);
                                     }
                                 }
                             }

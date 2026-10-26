@@ -6,6 +6,7 @@
 #include "effects.h"
 #include "golf_balls.h"
 #include "heap.h"
+#include "hole_objects.h"
 #include "math_util.h"
 #include "movie.h"
 #include "round_hud.h"
@@ -122,7 +123,6 @@ extern f32 sSwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
 void func_80213D70_ovl_00(s32);
 void func_8020E7B4_ovl_00(s32);
-void func_8020D9F0_ovl_00(void);
 void func_80216130_ovl_00(s32);
 f32 InterpolateHermite(f32 values[], f32 position);
 
@@ -147,7 +147,7 @@ void ClearShotEffects(s32 kind) {
     ClearEffects();
     sImpactFrameCount = 0;
     g_ImpactFlashState = IMPACT_FLASH_NONE;
-    func_8020D9F0_ovl_00();
+    ClearHoleCreatures();
     func_80213D70_ovl_00(-1);
     if (kind == CLEAR_KIND_HOLE_END) {
         func_8020E7B4_ovl_00(-2);

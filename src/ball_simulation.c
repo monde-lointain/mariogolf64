@@ -7,6 +7,7 @@
 #include "effects.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_objects.h"
 #include "libc.h"
 #include "math_util.h"
 #include "save.h"
@@ -963,7 +964,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
             flags |= STEP_FLAG_HOLE_TRIANGLE_BOUNCE;
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                 SpawnImpactEffects(&impact);
-                func_8020DA18_ovl_00(0);
+                StartCheepCheepLeap(0);
             }
             if (simulation->surface == SURFACE_WATER_HAZARD
                 && (simulation->isRunning == BALL_STATE_ROLLING || fabsf(impactSpeed) >= 14223.36f

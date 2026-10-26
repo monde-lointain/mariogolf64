@@ -14,6 +14,7 @@
 #include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "hole_objects.h"
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"
@@ -816,7 +817,6 @@ s32 GetEndReaction(void) {
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
 
-void func_8020D874(f32);
 
 /* Queues a character sound of the given kind for each player but the one who shot */
 static inline void QueueOnlookerSounds(s32 kind) {
@@ -906,7 +906,7 @@ void PlayFlightSounds(s32 step) {
         if ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) && !g_SimulatedShot.unk2E10
             && g_SimulatedShot.unkB0Step == NO_STEP) {
             D_800BE680 = 0;
-            func_8020D874(D_800BE684);
+            StartMonkeyDrop(D_800BE684);
         }
     }
     if (!shownRingCount && g_BallFlightStep == g_SimulatedShot.stepCount - 1 && !g_SimulatedShot.unk2E10) {
@@ -2384,7 +2384,6 @@ extern s32 sBallCupDistance;
 extern s32 sBallCupGroundDistance;
 extern s8 D_80104B68;
 
-s32 func_8020D838(void);
 
 /*
  * Updates the flight camera, the inset view and the ball's sounds for one frame of the
@@ -2642,7 +2641,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
             D_800BE650--;
         }
         if (!g_IsMiniGolf && !g_SimulatedShot.unk2E10
-            && ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) || func_8020D838() || D_800BE680 == TRUE)) {
+            && ((g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK8) || IsMonkeyShown() || D_800BE680 == TRUE)) {
             g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
             StartHudAnimation(HUD_ANIMATION_NONE);
             g_InsetView.animation = INSET_VIEW_STILL;

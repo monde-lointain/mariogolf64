@@ -16,6 +16,7 @@
 #include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "hole_objects.h"
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"
@@ -492,10 +493,8 @@ void func_802427E8(Gfx **displayListHead);
 
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
-void func_8020D6F0(void);
 void func_80216EDC(void);
 void func_8020E740(void);
-void func_8020D784(void);
 void func_80216F8C(void);
 void func_8020E78C(void);
 
@@ -658,7 +657,7 @@ void LoadSceneryImages(void) {
     sSceneryState = SCENERY_LOADED;
     LoadGolfBallImages();
     LoadEffectImages();
-    func_8020D6F0();
+    LoadHoleCreatureImages();
     func_80216EDC();
     func_8020E740();
     LoadClubPanelImages();
@@ -717,7 +716,7 @@ void FreeSceneryImages(void) {
     if (sSceneryState == SCENERY_LOADED) {
         sSceneryState = SCENERY_BILLBOARDS_READY;
         FreeEffectImages();
-        func_8020D784();
+        FreeHoleCreatureImages();
         func_80216F8C();
         func_8020E78C();
         FreeClubPanelImages();
