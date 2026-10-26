@@ -5,8 +5,10 @@
 
 /* SetMenuBackdrop's backdrops, and the styles that DrawGame draws them in */
 #define MENU_BACKDROP_NONE (-1)
-#define MENU_BACKDROP_UNK0 0
-#define MENU_BACKDROP_UNK3 3
+#define MENU_BACKDROP_STILL 0
+#define MENU_BACKDROP_TINTED 1  /* The last frame in brown, read as intensity */
+#define MENU_BACKDROP_DIMMING 2 /* The last frame, dimming to half brightness */
+#define MENU_BACKDROP_PATTERN 3 /* A scrolling pattern */
 #define MENU_BACKDROP_STYLE_NONE 0
 #define MENU_BACKDROP_STYLE_PLAIN 1
 #define MENU_BACKDROP_STYLE_UNK2 2
@@ -27,6 +29,9 @@
 extern s32 g_MenuBackdropStyle;
 
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused);
+void DrawMenuBackdrop(Gfx **displayListHead);
+/* The 64x64 four-bit paletted image that MENU_BACKDROP_PATTERN tiles */
+extern void *g_BackdropPatternImage;
 /* How many slices of the frame HUD_ANIMATION_SLICE_CAPTURE has copied */
 extern s32 g_CapturedSliceCount;
 

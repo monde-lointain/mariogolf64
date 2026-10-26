@@ -13,6 +13,7 @@
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "libc.h"
 #include "math_util.h"
 #include "movie.h"
@@ -48,7 +49,7 @@
 #define ASSET_WIND_ICON_IMAGE 0x5A4
 #define ASSET_ROUND_IMAGE_5E3 0x5E3
 #define ASSET_ROUND_IMAGE_972 0x972
-#define ASSET_ROUND_IMAGE_93C 0x93C
+#define ASSET_BACKDROP_PATTERN_IMAGE 0x93C
 #define ASSET_ROUND_IMAGE_4DB 0x4DB
 #define ASSET_SHADOW_TEXTURE 0x4C3
 #define ASSET_ROUND_IMAGE_722 0x722
@@ -389,7 +390,6 @@ extern void *D_801B55DC;
 extern void *sWindIconImage;
 extern void *D_80132360;
 extern void *D_800FED0C;
-extern void *D_800FF4F0;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
 extern s32 D_800C59D8;
@@ -704,8 +704,8 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_80132360, &asset);
     D_800FED0C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_972, &asset));
     ReadEncodedAsset(D_800FED0C, &asset);
-    D_800FF4F0 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_93C, &asset));
-    ReadEncodedAsset(D_800FF4F0, &asset);
+    g_BackdropPatternImage = AllocMemory(OpenEncodedAsset(ASSET_BACKDROP_PATTERN_IMAGE, &asset));
+    ReadEncodedAsset(g_BackdropPatternImage, &asset);
     D_8012D428 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4DB, &asset));
     ReadEncodedAsset(D_8012D428, &asset);
     g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
@@ -759,7 +759,7 @@ void FreeSceneryImages(void) {
         FreeMemory(&sWindIconImage);
         FreeMemory(&D_80132360);
         FreeMemory(&D_800FED0C);
-        FreeMemory(&D_800FF4F0);
+        FreeMemory(&g_BackdropPatternImage);
         FreeMemory(&D_8012D428);
         FreeMemory(&g_ShadowTexture);
         FreeMemory(&D_800E2140);

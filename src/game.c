@@ -922,7 +922,6 @@ void func_80089094(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
 void func_8008D3F4(Gfx **displayListHead);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
-void func_800939E8(Gfx **displayListHead);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
 void DrawBootLogos(Gfx **displayListHead);
@@ -1479,7 +1478,7 @@ s32 DrawGame(void) {
         if (g_MenuBackdropStyle != 0) {
             if (viewIndex == 0) {
                 CaptureMenuBackdrop(&g_DisplayListHead, g_MenuBackdropStyle);
-                func_800939E8(&g_DisplayListHead);
+                DrawMenuBackdrop(&g_DisplayListHead);
             }
         }
 

@@ -230,7 +230,7 @@ void LoadClubSlots(void) {
     f32 angle;
 
     sSlots = AllocMemory(sizeof(ClubSlots));
-    SetMenuBackdrop(MENU_BACKDROP_UNK0);
+    SetMenuBackdrop(MENU_BACKDROP_STILL);
     sSlots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
     sSlots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
     sSlots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);

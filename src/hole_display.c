@@ -155,6 +155,9 @@ extern u16 *sLastFrameBuffer;
     ((strip) != BACKDROP_STRIP_COUNT - 1 ? BACKDROP_STRIP_HEIGHT : BACKDROP_LAST_STRIP_HEIGHT)
 #define COPY_MODE_DSDX (4 << 10) /* Copy mode writes four texels a cycle */
 #define BACKDROP_START_FADE_LEVEL 255
+/* Each frame the fade level steps down until it is at most BACKDROP_LAST_FADE_LEVEL */
+#define BACKDROP_FADE_STEP 32
+#define BACKDROP_LAST_FADE_LEVEL 128
 extern s32 sBackdropFadeLevel;
 
 /*
@@ -608,7 +611,7 @@ void SetMenuBackdrop(s32 backdrop) {
         g_MenuBackdropStyle = MENU_BACKDROP_STYLE_NONE;
         return;
     }
-    if (backdrop == MENU_BACKDROP_UNK3) {
+    if (backdrop == MENU_BACKDROP_PATTERN) {
         sMenuBackdrop = backdrop;
         g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
         return;
@@ -674,7 +677,96 @@ void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_800939E8);
+/* MENU_BACKDROP_TINTED's color */
+#define BACKDROP_TINT_RED 144
+#define BACKDROP_TINT_GREEN 104
+#define BACKDROP_TINT_BLUE 32
+/* MENU_BACKDROP_PATTERN's image, which scrolls diagonally by a texel a frame */
+#define BACKDROP_PATTERN_SIZE 64
+#define BACKDROP_PATTERN_MASK 6 /* log2(BACKDROP_PATTERN_SIZE) */
+extern s32 sBackdropPatternScroll;
+
+/*
+ * Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's
+ * border.
+ *
+ * Doesn't match: registers are allocated differently in the pattern's display
+ * list, and the strip height is chosen with a branch instead of without one.
+ */
+#ifdef NON_MATCHING
+void DrawMenuBackdrop(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
+    s32 height;
+
+    if (sBackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
+        sBackdropFadeLevel -= BACKDROP_FADE_STEP;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    if (sMenuBackdrop == MENU_BACKDROP_PATTERN) {
+        sBackdropPatternScroll++;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock_4b(gfx++, ((u32)g_BackdropPatternImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                               BACKDROP_PATTERN_SIZE, BACKDROP_PATTERN_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, BACKDROP_PATTERN_MASK, BACKDROP_PATTERN_MASK, G_TX_NOLOD,
+                               G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal16(gfx++, 0, ((u32)g_BackdropPatternImage + IMAGE_HEADER_SIZE) & ~7);
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2, (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
+                            (SCREEN_HEIGHT - BACKDROP_BORDER) << 2, G_TX_RENDERTILE, sBackdropPatternScroll << 5,
+                            sBackdropPatternScroll << 5, 1 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+    } else if (sMenuBackdrop == MENU_BACKDROP_STILL | sMenuBackdrop == MENU_BACKDROP_DIMMING) {
+        if (sMenuBackdrop == MENU_BACKDROP_STILL) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        } else {
+            gDPSetPrimColor(gfx++, 0, 0, (u8)sBackdropFadeLevel, (u8)sBackdropFadeLevel, (u8)sBackdropFadeLevel,
+                            255);
+        }
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = STRIP_HEIGHT(strip);
+            gDPLoadTextureTile(gfx++, (u32)&sCapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                               G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
+                               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2, (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                    (BACKDROP_RIGHT + 1) << 2,
+                                    (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2, G_TX_RENDERTILE,
+                                    BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+        }
+    } else {
+        gDPSetPrimColor(gfx++, 0, 0, BACKDROP_TINT_RED, BACKDROP_TINT_GREEN, BACKDROP_TINT_BLUE, 255);
+        for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+            height = STRIP_HEIGHT(strip);
+            gDPLoadTextureTile(gfx++, (u32)&sCapturedFrame[strip * BACKDROP_STRIP_STEP * FRAME_WORDS_PER_ROW] & ~7,
+                               G_IM_FMT_IA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
+                               BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2, (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                    (BACKDROP_RIGHT + 1) << 2,
+                                    (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2, G_TX_RENDERTILE,
+                                    BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawMenuBackdrop);
+#endif
 
 /* Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart */
 #ifdef NON_MATCHING
