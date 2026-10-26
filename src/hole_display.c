@@ -1,9 +1,11 @@
 #include "common.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "math_util.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -129,10 +131,30 @@ extern u16 *sLastFrameBuffer;
 #define BACKDROP_START_FADE_LEVEL 255
 extern s32 sBackdropFadeLevel;
 
+/*
+ * The frame's tiles turn over and fly apart towards the camera as the
+ * animation goes on. The last column is narrower than the others.
+ */
+#define FRAME_TILE_COUNT (FRAME_TILE_ROW_COUNT * FRAME_TILE_COLUMN_COUNT)
+#define FRAME_TILE_WIDTH (FRAME_TILE_WORDS * 2)
+#define FRAME_TILE_WORD_COUNT (FRAME_TILE_ROWS * FRAME_TILE_WORDS)
+#define TILE_ANIMATION_FRAME_COUNT 255
+#define TILE_ANIMATION_STEP 10
+#define TILE_ANIMATION_GAP_X 64
+#define TILE_ANIMATION_GAP_Y 32
+#define TILE_ANIMATION_OFFSET_X 8
+#define TILE_ANIMATION_DEPTH -290.0f
+#define TILE_ANIMATION_SPEED_Z 2
+#define TILE_ANIMATION_UNUSED_ANGLE_OFFSET 0.2f
+#define TILE_VERTEX_COUNT 4
+extern Mtx sTileMatrices[2][FRAME_TILE_COUNT];
+extern Vtx sTileVertices[TILE_VERTEX_COUNT];
+extern Vtx sLastColumnTileVertices[TILE_VERTEX_COUNT];
+
 void CaptureHudAnimationFrame(void);
 void func_8009232C(Gfx **displayListHead);
 void func_800947A8(void);
-void func_80094228(void);
+void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
 void func_80092F18(Gfx **displayListHead);
 
@@ -274,7 +296,7 @@ void StartHudAnimation(s32 animation) {
         case HUD_ANIMATION_UNK10:
             sHudAnimationFramesLeft = 72;
             break;
-        case HUD_ANIMATION_UNK3:
+        case HUD_ANIMATION_TILES:
             sHudAnimationFramesLeft = 255;
             break;
         case HUD_ANIMATION_SLICES:
@@ -373,7 +395,79 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_800939E8);
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_80094228);
+/* Draws HUD_ANIMATION_TILES, where the frame's tiles turn over and fly apart */
+#ifdef NON_MATCHING
+void DrawTileAnimation(void) {
+    Vec3 rotation;
+    Vec3 translation;
+    Mat4 matrix;
+    f32 angle;
+    f32 unusedSine;
+    f32 unusedCosine;
+    s32 progress;
+    s32 tileRow;
+    s32 tileColumn;
+    s32 wordIndex = 0;
+
+    if (sHudAnimationFramesLeft > 0) {
+        angle = (f32)(M_PI / 2 - sHudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT)) +
+                TILE_ANIMATION_UNUSED_ANGLE_OFFSET;
+        unusedSine = sinf(angle);
+        unusedCosine = cosf(angle);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+        gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gDPPipeSync(g_DisplayListHead++);
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] = M_PI / 2 - sHudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
+        rotation[AXIS_Z] = rotation[AXIS_Y];
+        for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
+            for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
+                progress = TILE_ANIMATION_FRAME_COUNT - sHudAnimationFramesLeft;
+                translation[AXIS_Z] = TILE_ANIMATION_DEPTH - progress * TILE_ANIMATION_SPEED_Z;
+                translation[AXIS_X] = (progress + TILE_ANIMATION_GAP_X) * (tileColumn - FRAME_TILE_COLUMN_COUNT / 2) +
+                                      TILE_ANIMATION_OFFSET_X;
+                translation[AXIS_Y] = -(progress + TILE_ANIMATION_GAP_Y) * (tileRow - FRAME_TILE_ROW_COUNT / 2);
+                BuildRotationMatrix(matrix, rotation, translation);
+                ConvertMatrixToFixed(matrix,
+                                     &sTileMatrices[g_MatrixBufferIndex][tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]);
+                gSPMatrix(g_DisplayListHead++,
+                          OS_K0_TO_PHYSICAL(
+                              &sTileMatrices[g_MatrixBufferIndex][tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]),
+                          G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                if (tileColumn == FRAME_TILE_COLUMN_COUNT - 1) {
+                    gSPVertex(g_DisplayListHead++, sLastColumnTileVertices, TILE_VERTEX_COUNT, 0);
+                } else {
+                    gSPVertex(g_DisplayListHead++, sTileVertices, TILE_VERTEX_COUNT, 0);
+                }
+                gDPLoadTextureBlock(g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA,
+                                    G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gDPPipeSync(g_DisplayListHead++);
+            }
+        }
+        gDPPipeSync(g_DisplayListHead++);
+        sHudAnimationFramesLeft -= TILE_ANIMATION_STEP;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_800947A8);
 
@@ -397,7 +491,7 @@ void CaptureHudAnimationFrame(void) {
     frame = (u32 *)nuGfxCfb_ptr;
     sIsFrameCapturePending = FALSE;
     wordIndex = 0;
-    if (sHudAnimation == HUD_ANIMATION_UNK2 || sHudAnimation == HUD_ANIMATION_UNK3) {
+    if (sHudAnimation == HUD_ANIMATION_UNK2 || sHudAnimation == HUD_ANIMATION_TILES) {
         for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
             for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
                 for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
@@ -539,8 +633,8 @@ void DrawHudAnimation(void) {
         case HUD_ANIMATION_UNK2:
             func_800947A8();
             break;
-        case HUD_ANIMATION_UNK3:
-            func_80094228();
+        case HUD_ANIMATION_TILES:
+            DrawTileAnimation();
             break;
         case HUD_ANIMATION_SLICES:
             DrawSliceAnimation();

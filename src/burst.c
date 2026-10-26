@@ -7,6 +7,7 @@
 #include "math_util.h"
 #include "screen.h"
 #include "sound.h"
+#include "variables.h"
 
 /* How many bursts sBursts has room for */
 #define BURST_CAPACITY 4
@@ -62,7 +63,6 @@ extern u16 sBurstShapeAssetIds[8];
 extern f32 sBurstHue;
 extern BurstShape *sBurstShape;
 extern Burst sBursts[BURST_CAPACITY];
-extern s32 g_MatrixBufferIndex;
 
 
 /* Makes the first burst launch in 70 frames */

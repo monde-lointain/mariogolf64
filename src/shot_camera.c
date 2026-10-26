@@ -2192,7 +2192,7 @@ void ChooseFlightCameraKind(void) {
                 break;
             case 2:
                 if (sFlightCameraKind == FLIGHT_CAMERA_NEAR_LAUNCH) {
-                    animation = HUD_ANIMATION_UNK3;
+                    animation = HUD_ANIMATION_TILES;
                     kind = FLIGHT_CAMERA_SIDE_OF_FLIGHT;
                 } else if (sFlightCameraKind == FLIGHT_CAMERA_UNK3) {
                     if (RandomBelow(3) == 0) {
@@ -2254,7 +2254,7 @@ void ChooseFlightCameraKind(void) {
                         }
                     } else if (RandomBelow(8) == 0) {
                         kind = FLIGHT_CAMERA_AROUND_END;
-                        animation = HUD_ANIMATION_UNK3;
+                        animation = HUD_ANIMATION_TILES;
                     } else if (RandomBelow(8) < 4) {
                         kind = FLIGHT_CAMERA_AROUND_END;
                     }
@@ -2337,7 +2337,7 @@ void ChooseFlightCameraKind(void) {
             if (D_800DAF50 >= 4 && !g_SimulatedShot.unk2E08 && D_800BE640 > SHORT_SHOT_MAX_LENGTH) {
                 if (kind == FLIGHT_CAMERA_AROUND_END) {
                     if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
-                        StartHudAnimation(HUD_ANIMATION_UNK3);
+                        StartHudAnimation(HUD_ANIMATION_TILES);
                     } else if (RandomBelow(8) == 0) {
                         StartHudAnimation(HUD_ANIMATION_UNK1);
                     } else if (RandomBelow(3) == 0) {

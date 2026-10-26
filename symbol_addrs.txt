@@ -2493,3 +2493,7 @@ sBlankText = 0x800D1BC8;
 CaptureMenuBackdrop = 0x8009351C; // type:func
 sLastFrameBuffer = 0x800FED10;
 sBackdropFadeLevel = 0x800C7310;
+DrawTileAnimation = 0x80094228; // type:func
+sTileMatrices = 0x800E3A50; // size:0x1180
+sTileVertices = 0x800C7318; // size:0x40
+sLastColumnTileVertices = 0x800C7358; // size:0x40

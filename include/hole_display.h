@@ -16,7 +16,7 @@
 #define HUD_ANIMATION_UNK0 0
 #define HUD_ANIMATION_UNK1 1
 #define HUD_ANIMATION_UNK2 2
-#define HUD_ANIMATION_UNK3 3
+#define HUD_ANIMATION_TILES 3
 #define HUD_ANIMATION_SLICE_CAPTURE 4
 #define HUD_ANIMATION_SLICES 5
 #define HUD_ANIMATION_NEGATIVE 6 /* The frame with its colours inverted */

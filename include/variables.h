@@ -37,6 +37,9 @@ extern u16 g_LightPitch;
 
 /* A 45-degree perspective projection for the screen effects */
 extern Mtx g_ScreenEffectProjection;
+extern u16 g_ScreenEffectPerspNorm;
+/* Which of the two matrix buffers this frame fills */
+extern s32 g_MatrixBufferIndex;
 
 /* The display lists, one per draw buffer */
 #define DISPLAY_LIST_LENGTH 14000

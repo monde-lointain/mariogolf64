@@ -113,7 +113,6 @@ extern Vtx sWindFlagVertices[WIND_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][WIND_FLA
 extern u8 sWindFlagShades[WIND_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 extern Mtx D_80105278;
-extern u16 g_ScreenEffectPerspNorm;
 extern f32 D_801B7F38[2];
 extern f32 D_801B7F40[2];
 extern f32 D_801B7F48[2];
@@ -138,7 +137,6 @@ typedef struct ArrowShape {
 } ArrowShape; /* size = 0x1C0 */
 
 extern ArrowShape sArrows[ARROW_COUNT];
-extern s32 g_MatrixBufferIndex;
 
 /*
  * The marker of the current shot's offset, with the positions it had in the
