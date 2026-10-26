@@ -244,7 +244,7 @@ typedef struct UnkB8 {
     /* 0x9D */ u8 unk9D[3];
     /* 0xA0 */ s32 lastDriveDistance; /* The driveDistance that RecordDrive took */
     /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
-    /* 0xA8 */ u8 unkA8[0xAA - 0xA8];
+    /* 0xA8 */ s16 unkA8;
     /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
     /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
 } UnkB8; /* size = 0xB8 */

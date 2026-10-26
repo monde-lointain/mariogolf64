@@ -20,6 +20,9 @@
 #define OVERLAY_ID_BASE 0x100
 #define MODULE_ID_END (-1)
 
+/* The module that holds the golf balls' afterimages */
+#define MODULE_UNK1 1
+
 typedef struct Overlay {
     /* 0x00 */ s8 isLoaded;
     /* 0x04 */ s8 *moduleIds; /* Terminated by MODULE_ID_END */

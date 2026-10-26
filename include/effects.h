@@ -13,6 +13,7 @@
 /* The sound channel the rain plays on */
 #define RAIN_SOUND_CHANNEL 9
 
+void PrepareShotEffects(BallSimulation *simulation);
 void SpawnImpactEffects(BallSimulation *simulation);
 void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed);
 void StartPlayerRumble(UnkB8 *player);

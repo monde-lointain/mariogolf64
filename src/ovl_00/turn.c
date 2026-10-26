@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
 #include "character.h"
@@ -8,11 +9,14 @@
 #include "course.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "effects.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "math_util.h"
+#include "overlay_manager.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
@@ -152,6 +156,7 @@ void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
 void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
+void func_8006034C(s8 value);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -450,7 +455,38 @@ s32 func_8020561C_ovl_00(s32 arg0) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205624_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802059C0_ovl_00);
+/* Puts the simulated ball at rest on the player's ball, and shows the player's passed rings again */
+void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation) {
+    UnkB8 *player = &g_Players[playerIndex];
+    s32 i;
+    s32 groundHeight;
+
+    StopSound(IMPACT_POINT_SOUND_CHANNEL);
+    for (i = 0; i < RING_COUNT; i++) {
+        if (player->ringStates[i] != RING_STATE_NONE) {
+            player->ringStates[i] = RING_STATE_SHOWN;
+        }
+        func_8006034C(0);
+    }
+    player->unkA8 = 0;
+    simulation->position[AXIS_X] = player->ballPosition[AXIS_X];
+    simulation->position[AXIS_Y] = player->ballPosition[AXIS_Y];
+    simulation->position[AXIS_Z] = player->ballPosition[AXIS_Z];
+    simulation->playerIndex = playerIndex;
+    simulation->unkA0 = 0;
+    simulation->isRunning = FALSE;
+    groundHeight = GetGroundHeight(simulation->position[AXIS_X], simulation->position[AXIS_Z]);
+    if (groundHeight < simulation->position[AXIS_Y]) {
+        simulation->position[AXIS_Y] = groundHeight;
+    }
+    simulation->surface = player->ballSurface;
+    simulation->purpose = LAUNCH_PURPOSE_UNK3;
+    simulation->unkA1 = 0;
+    PrepareShotEffects(simulation);
+    if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
+        ResetBallAfterimage();
+    }
+}
 
 /* Counts a notable shot towards the player's Course Points */
 void CountNotableShot(s32 playerIndex, s32 shotKind) {

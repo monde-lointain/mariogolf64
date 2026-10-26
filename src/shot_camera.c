@@ -2367,7 +2367,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 #define BALL_SOUND_CHANNEL 8
 #define BALL_SOUND_REVERB 0x1E
 #define BALL_SOUND_PAN 0x7F
-#define MODULE_UNK1 1
 #define CUP_LOOK_AT_DEPTH 11520.0f
 #define CUP_CLOSE_VIEW_DISTANCE 60.0f
 #define CUP_CLOSE_VIEW_HEIGHT 11.700001f

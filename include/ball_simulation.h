@@ -56,6 +56,7 @@ typedef struct Unk20 {
 #define LAUNCH_PURPOSE_STROKE 0
 #define LAUNCH_PURPOSE_CLUB_TEST 1
 #define LAUNCH_PURPOSE_TRIAL 2
+#define LAUNCH_PURPOSE_UNK3 3
 #define LAUNCH_PURPOSE_UNK5 5
 
 typedef struct BallSimulation {
