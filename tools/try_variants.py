@@ -45,7 +45,8 @@ def main():
     # The variants have their own names, so they take the flags of the file they vary
     optflags = fncompare.get_optflags(c_path)
 
-    with ProcessPoolExecutor(max_workers=os.cpu_count()) as pool:
+    # Leave room for a permuter running alongside
+    with ProcessPoolExecutor(max_workers=int(os.environ.get("VARIANT_JOBS", 8))) as pool:
         results = []
         for block in blocks:
             old, new = block.split("\n----\n")
