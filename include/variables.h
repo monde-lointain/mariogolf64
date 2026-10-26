@@ -65,7 +65,6 @@ extern Fog g_SceneFog;
 /* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
 extern Fog g_DebugFog;
 extern s32 g_PlayerCount;
-/* The time the stopwatch modes show, in frames */
 
 /* The game counts time in frames */
 #define FRAMES_PER_SECOND 30
