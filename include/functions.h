@@ -32,7 +32,6 @@ void FreeMenuResources(void);
 s32 IsDebugBButtonView(void);
 
 /* ovl_00 */
-void func_801FD624_ovl_00(void);
 void func_8020DA18_ovl_00(s32 unk);
 void func_80216B10_ovl_00(void);
 void func_80216FC4_ovl_00(s32 *position);

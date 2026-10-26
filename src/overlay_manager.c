@@ -1,6 +1,7 @@
 #include "common.h"
 #include "game_flags.h"
 #include "functions.h"
+#include "golf_balls.h"
 #include "overlay_manager.h"
 #include "round_hud.h"
 #include "segment_symbols.h"
@@ -64,7 +65,7 @@ static s8 sOverlayIndexOfModule[MODULE_COUNT];
 
 void OnLoadOverlay2(void) {
     InitScenery();
-    func_801FD624_ovl_00();
+    LoadGolfBallImages();
 }
 
 void OnLoadOverlay7(void) {

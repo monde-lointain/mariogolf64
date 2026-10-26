@@ -4,6 +4,7 @@
 #include "character_slot.h"
 #include "current_shot.h"
 #include "effects.h"
+#include "golf_balls.h"
 #include "heap.h"
 #include "math_util.h"
 #include "movie.h"
@@ -122,7 +123,6 @@ extern f32 sSwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 void func_80213D70_ovl_00(s32);
 void func_8020E7B4_ovl_00(s32);
 void func_8020D9F0_ovl_00(void);
-void func_801FD8DC_ovl_00(void);
 void func_80216130_ovl_00(s32);
 f32 InterpolateHermite(f32 values[], f32 position);
 
@@ -156,7 +156,7 @@ void ClearShotEffects(s32 kind) {
         StartMovie(-1);
         func_8020E7B4_ovl_00(-1);
     }
-    func_801FD8DC_ovl_00();
+    ResetBallAfterimage();
     StartSwingTrail(-1);
 }
 

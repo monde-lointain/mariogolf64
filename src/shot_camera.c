@@ -11,6 +11,7 @@
 #include "framing.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
@@ -2383,7 +2384,6 @@ extern s32 sBallCupDistance;
 extern s32 sBallCupGroundDistance;
 extern s8 D_80104B68;
 
-void func_801FD9C0(void);
 s32 func_8020D838(void);
 
 /*
@@ -2619,7 +2619,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     D_800BE69C = FALSE;
     if (g_SimulatedShot.unk2E0C) {
         if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
-            func_801FD9C0();
+            StartFastBallAfterimage();
         }
         /* pathFlags is an s8, so testing 0x100 tests its sign; the original has it */
         if ((g_SimulatedShot.pathFlags[step] & 0x100) || (g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK4)) {
@@ -2629,7 +2629,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         D_800C5AAC = 2;
         func_80213D70(10);
         if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
-            func_801FD9C0();
+            StartFastBallAfterimage();
         }
     }
     if (sBallCupGroundDistance > CUP_PASS_RADIUS) {

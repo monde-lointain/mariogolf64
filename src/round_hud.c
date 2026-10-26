@@ -12,6 +12,7 @@
 #include "current_shot.h"
 #include "effects.h"
 #include "functions.h"
+#include "golf_balls.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "libc.h"
@@ -491,7 +492,6 @@ void func_802427E8(Gfx **displayListHead);
 
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
-void func_801FD624(void);
 void func_8020D6F0(void);
 void func_80216EDC(void);
 void func_8020E740(void);
@@ -658,7 +658,7 @@ void LoadSceneryImages(void) {
     EncodedAsset asset;
 
     sSceneryState = SCENERY_LOADED;
-    func_801FD624();
+    LoadGolfBallImages();
     LoadEffectImages();
     func_8020D6F0();
     func_80216EDC();
