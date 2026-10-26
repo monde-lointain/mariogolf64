@@ -120,7 +120,8 @@ typedef struct GameState {
     /* 0x1C */ s32 unk1C;
     /* 0x20 */ s32 unk20;
     /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
-    /* 0x28 */ u8 unk28[0x30 - 0x28];
+    /* 0x28 */ s32 stopwatchFrameCount; /* The time the stopwatch modes show, in frames */
+    /* 0x2C */ s32 unk2C;
     /* 0x30 */ s8 unk30;
     /* 0x31 */ s8 unk31;
     /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */

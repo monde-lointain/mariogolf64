@@ -4,10 +4,12 @@
 #include "character.h"
 #include "character_slot.h"
 #include "cpu_projection.h"
+#include "course.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "heap.h"
-#include "hole_loader.h"
 #include "hole_display.h"
+#include "hole_loader.h"
 #include "math_util.h"
 #include "reaction.h"
 #include "round_hud.h"
@@ -42,7 +44,7 @@
 #define SCORECARD_LAYOUT_MATCH 1 /* Match games and Get Character */
 #define SCORECARD_LAYOUT_SKINS 2 /* Skins matches and club slots */
 #define SCORECARD_LAYOUT_TOURNAMENT 3
-#define SCORECARD_LAYOUT_UNK4 4 /* For GAME_MODE_SPEED_GOLF */
+#define SCORECARD_LAYOUT_SPEED_GOLF 4
 
 /*
  * The tallies of a match's hole happen at these frames of the TALLYING state.
@@ -281,9 +283,207 @@ void FreeScorecard(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242334_ovl_09);
-
 #define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
+#define STOPWATCH_HOUR (60 * SECONDS_PER_MINUTE * FRAMES_PER_SECOND)
+/* A hole time of this many minutes or more shows as dashes */
+#define SHOWN_MINUTE_LIMIT 60
+
+/*
+ * Picks the scorecard's layout for the last hole's result with the result
+ * not yet tallied: it plays the result's song, picks the hole's winner and,
+ * in Speed Golf, records the hole's time. It then turns to the first page and
+ * picks each player's face by how they did on the hole.
+ */
+void StartScorecardTally(s32 layout) {
+    s32 ranks[MAX_PLAYER_COUNT];
+    s32 scoresToPar[MAX_PLAYER_COUNT];
+    s32 holeIndex;
+    s32 song;
+    s32 timedHoleCount;
+    s32 i;
+    s32 j;
+
+    g_Scorecard.layout = layout;
+    SettleHoleBets();
+    g_Scorecard.isTallied = FALSE;
+    switch (layout) {
+        case SCORECARD_LAYOUT_STROKE:
+            break;
+        case SCORECARD_LAYOUT_MATCH:
+            holeIndex = g_Scorecard.content.holeIndex - 1;
+            if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+                if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+                    song = SONG_HOLE_WON;
+                } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+                    song = SONG_HOLE_LOST;
+                } else {
+                    goto halved;
+                }
+            } else {
+                song = SONG_HOLE_WON;
+                if (g_Players[0].holes[holeIndex].strokes == g_Players[1].holes[holeIndex].strokes) {
+                halved:
+                    song = SONG_HOLE_HALVED;
+                }
+            }
+            PlaySong(song, 0);
+            if (g_Players[0].holes[holeIndex].strokes == g_Players[1].holes[holeIndex].strokes) {
+                g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
+            } else if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+                g_Scorecard.holeWinnerIndex = 0;
+            } else {
+                g_Scorecard.holeWinnerIndex = 1;
+            }
+            g_Scorecard.skinsCarryover.onLastHole = 0;
+            g_Scorecard.skinsCarryover.fromLastHole = g_Scorecard.skinsCarryover.intoLastHole =
+                g_Scorecard.content.holeIndex - 1;
+            break;
+        case SCORECARD_LAYOUT_SKINS:
+            g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;
+            for (i = 0; i != g_PlayerCount; i++) {
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes != 0) {
+                    g_Scorecard.holeWinnerIndex = i;
+                }
+            }
+            song = SONG_HOLE_WON;
+            if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
+                song = SONG_HOLE_HALVED;
+            }
+            PlaySong(song, 0);
+            break;
+        case SCORECARD_LAYOUT_TOURNAMENT:
+            g_Scorecard.content.flipTime = 0;
+            for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+                g_Scorecard.content.rowFlipAngles[i] = 0;
+                g_Scorecard.content.isRowFlipping[i] = TRUE;
+            }
+            break;
+        case SCORECARD_LAYOUT_SPEED_GOLF:
+            if (IsGameFlagSet(GAME_FLAG_STOPWATCH_HOUR)) {
+                g_GameState.stopwatchFrameCount = STOPWATCH_HOUR;
+            }
+            for (i = 0, timedHoleCount = 0; i != COURSE_HOLE_COUNT; i++) {
+                timedHoleCount += g_HoleTimeFrames[i] != 0;
+            }
+            if (timedHoleCount > 0) {
+                /* The stopwatch runs on through the round, so the last hole's time first takes all of it */
+                g_HoleTimeFrames[timedHoleCount - 1] = g_GameState.stopwatchFrameCount;
+                g_HoleTimeMinutes[timedHoleCount - 1] =
+                    g_GameState.stopwatchFrameCount / (FRAMES_PER_SECOND * SECONDS_PER_MINUTE);
+                g_HoleTimeSeconds[timedHoleCount - 1] =
+                    g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
+                g_HoleTimeHundredths[timedHoleCount - 1] =
+                    (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                    HUNDREDTHS_PER_SECOND;
+                if (timedHoleCount == 1 && g_HoleTimeMinutes[0] >= SHOWN_MINUTE_LIMIT) {
+                    g_HoleTimeMinutes[0] = -1;
+                    g_HoleTimeSeconds[0] = -1;
+                    g_HoleTimeHundredths[0] = -1;
+                }
+                /* Then loses each earlier hole's time */
+                for (i = 0; i < timedHoleCount - 1; i++) {
+                    if (g_HoleTimeMinutes[timedHoleCount - 1] < 0 ||
+                        g_HoleTimeMinutes[timedHoleCount - 1] >= SHOWN_MINUTE_LIMIT ||
+                        g_HoleTimeMinutes[i] < 0) {
+                        g_HoleTimeMinutes[timedHoleCount - 1] = -1;
+                        g_HoleTimeSeconds[timedHoleCount - 1] = -1;
+                        g_HoleTimeHundredths[timedHoleCount - 1] = -1;
+                        break;
+                    }
+                    g_HoleTimeFrames[timedHoleCount - 1] -= g_HoleTimeFrames[i];
+                    g_HoleTimeMinutes[timedHoleCount - 1] -= g_HoleTimeMinutes[i];
+                    if (g_HoleTimeSeconds[timedHoleCount - 1] < g_HoleTimeSeconds[i]) {
+                        g_HoleTimeMinutes[timedHoleCount - 1]--;
+                        g_HoleTimeSeconds[timedHoleCount - 1] += SECONDS_PER_MINUTE - g_HoleTimeSeconds[i];
+                    } else {
+                        g_HoleTimeSeconds[timedHoleCount - 1] -= g_HoleTimeSeconds[i];
+                    }
+                    if (g_HoleTimeHundredths[timedHoleCount - 1] < g_HoleTimeHundredths[i]) {
+                        if (g_HoleTimeSeconds[timedHoleCount - 1] > 0) {
+                            g_HoleTimeSeconds[timedHoleCount - 1]--;
+                        } else {
+                            g_HoleTimeMinutes[timedHoleCount - 1]--;
+                            g_HoleTimeSeconds[timedHoleCount - 1] = SECONDS_PER_MINUTE - 1;
+                        }
+                        g_HoleTimeHundredths[timedHoleCount - 1] += HUNDREDTHS_PER_SECOND - g_HoleTimeHundredths[i];
+                    } else {
+                        g_HoleTimeHundredths[timedHoleCount - 1] -= g_HoleTimeHundredths[i];
+                    }
+                }
+            }
+            break;
+    }
+
+    g_RoundHud.scorecardPage = 0;
+    switch (g_GameMode) {
+        case GAME_MODE_UNK1:
+        case GAME_MODE_UNK3:
+        case GAME_MODE_TOURNAMENT:
+        case GAME_MODE_UNK6:
+        case GAME_MODE_SPEED_GOLF:
+        case GAME_MODE_UNK8:
+        case GAME_MODE_RING_SHOT:
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
+            }
+            break;
+        case GAME_MODE_STROKE:
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
+            }
+            /* The ranks go unused */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                ranks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && scoresToPar[i] > scoresToPar[j]) {
+                        ranks[i]++;
+                    }
+                }
+            }
+            /* A player over par on the hole, after their handicap, looks behind */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                CourseRecord *course = &g_CourseRecords[GetCourseRecordIndex()];
+
+                if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes -
+                        (s8)course->holes[g_Scorecard.content.holeIndex - 1].par +
+                        GetHandicapOffset(g_CourseIndex, g_Scorecard.content.holeIndex - 1, g_Players[i].handicap) <=
+                    0) {
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
+                } else {
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
+                }
+            }
+            break;
+        case GAME_MODE_MATCH_GAME:
+        case GAME_MODE_GET_CHARACTER:
+            if (g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokes <
+                g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+                g_Scorecard.content.faceImageOffsets[0] = 0;
+                g_Scorecard.content.faceImageOffsets[1] = BEHIND_FACE_IMAGE_OFFSET;
+            } else if (g_Players[1].holes[g_Scorecard.content.holeIndex - 1].strokes <
+                       g_Players[0].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+                g_Scorecard.content.faceImageOffsets[0] = BEHIND_FACE_IMAGE_OFFSET;
+                g_Scorecard.content.faceImageOffsets[1] = 0;
+            } else {
+                g_Scorecard.content.faceImageOffsets[0] = 0;
+                g_Scorecard.content.faceImageOffsets[1] = 0;
+            }
+            break;
+        case GAME_MODE_SKINS_MATCH:
+        case GAME_MODE_CLUB_SLOTS:
+            /* A player with more strokes on the hole than anybody else looks behind */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (g_Players[i].holes[g_Scorecard.content.holeIndex - 1].strokes <
+                        g_Players[j].holes[g_Scorecard.content.holeIndex - 1].strokes) {
+                        g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
+                    }
+                }
+            }
+            break;
+    }
+}
 
 /*
  * Picks the scorecard's layout for the last hole's result and sets up its
@@ -302,7 +502,7 @@ void SetScorecardLayout(s32 layout) {
     g_Scorecard.layout = layout;
     switch (layout) {
         case SCORECARD_LAYOUT_STROKE:
-        case SCORECARD_LAYOUT_UNK4:
+        case SCORECARD_LAYOUT_SPEED_GOLF:
             break;
         case SCORECARD_LAYOUT_MATCH:
             /*
@@ -947,7 +1147,7 @@ s32 TallyScorecardSkins(void) {
     switch (g_Scorecard.layout) {
         case SCORECARD_LAYOUT_STROKE:
         case SCORECARD_LAYOUT_TOURNAMENT:
-        case SCORECARD_LAYOUT_UNK4:
+        case SCORECARD_LAYOUT_SPEED_GOLF:
             return TRUE;
         case SCORECARD_LAYOUT_MATCH:
             if (g_Scorecard.stateTime == MATCH_RESULT_SOUND_TIME && g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {

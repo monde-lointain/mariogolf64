@@ -24,6 +24,7 @@ typedef struct SkinsCarryover {
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);
 void TallySkins(s32 endHole);
 void StartBets(void);
+void SettleHoleBets(void);
 void ResumeBets(void);
 s32 GetContestWinner(void);
 void SetContestWinner(s32 playerIndex);

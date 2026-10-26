@@ -156,6 +156,9 @@
 #define GAME_FLAG_BALL_TYPE_6 0x8D
 #define GAME_FLAG_BALL_TYPE_7 0x8E
 
+/* Sets the stopwatch to an hour when the scorecard starts a Speed Golf hole's tally */
+#define GAME_FLAG_STOPWATCH_HOUR 0x91
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);

@@ -2588,3 +2588,5 @@ DrawSkinsPage = 0x802460F8; // type:func segment:ovl_09
 sCompactHoleFormat = 0x8024C7F8; // segment:ovl_09
 sCarryOverText = 0x8024C4C0; // segment:ovl_09
 sWinColorAngle = 0x8024C4CC; // segment:ovl_09
+StartScorecardTally = 0x80242334; // type:func segment:ovl_09
+g_HoleTimeFrames = 0x80105B20;

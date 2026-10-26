@@ -22,6 +22,7 @@ extern HolePoints g_HolePoints;
 extern s32 g_HasLoaderFinished;
 
 /* Each hole's time in Speed Golf. A negative minute count shows as dashes. */
+extern s32 g_HoleTimeFrames[COURSE_HOLE_COUNT]; /* Zero for a hole not yet timed */
 extern s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
 extern s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
 extern s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
