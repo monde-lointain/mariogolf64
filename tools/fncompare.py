@@ -32,7 +32,7 @@ CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ff
           "-nostdinc", "-funsigned-char", "-w"]
 # Optimization levels by file or directory, as the Makefile sets them
 OPTFLAGS_BY_PATH = {os.path.join("src", "libkmc"): "-O1 -fno-fast-math"}
-DEFAULT_OPTFLAGS = "-O2"
+DEFAULT_OPTFLAGS = os.environ.get("OPTFLAGS", "-O2")
 INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
             "-Ilib/ultralib/include/PR", "-Ilib/libmus/include", "-Isrc",
             "-Ibuild"]
