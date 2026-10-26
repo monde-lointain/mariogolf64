@@ -1,4 +1,29 @@
 #include "common.h"
+#include "camera.h"
+#include "character_slot.h"
+#include "club.h"
+#include "controller.h"
+#include "current_shot.h"
+#include "math_util.h"
+#include "reaction.h"
+#include "save.h"
+#include "sound.h"
+
+/* The loop played while the stick sets the impact point */
+#define IMPACT_POINT_SOUND 0x26
+#define IMPACT_POINT_SOUND_CHANNEL 8
+#define IMPACT_POINT_SOUND_VOLUME 60
+#define IMPACT_POINT_SOUND_REVERB 20
+#define IMPACT_POINT_SOUND_PAN 230
+
+/* The buttons that hold the impact point mode */
+#define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
+
+/* Bit 1 of D_800C3084 keeps the impact point from being set */
+#define SHOT_UNK3084_NO_IMPACT_POINT 2
+
+extern s32 D_800C3084;
+extern s32 D_80227194_ovl_00;
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_801FD5F0_ovl_00);
 
@@ -36,7 +61,18 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80203B4C_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80203DAC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80203E58_ovl_00);
+void UpdateImpactPointMode(void) {
+    if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) && !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
+        if (!g_IsSettingImpactPoint && D_80227194_ovl_00 == 0) {
+            PlaySoundWithEffects(IMPACT_POINT_SOUND, IMPACT_POINT_SOUND_CHANNEL, IMPACT_POINT_SOUND_VOLUME,
+                                 IMPACT_POINT_SOUND_REVERB, IMPACT_POINT_SOUND_PAN);
+        }
+        g_IsSettingImpactPoint = TRUE;
+    } else {
+        StopSound(IMPACT_POINT_SOUND_CHANNEL);
+        g_IsSettingImpactPoint = FALSE;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80203EEC_ovl_00);
 
@@ -64,7 +100,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802054CC_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802055F8_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020561C_ovl_00);
+/* Always FALSE; maybe once a debug check */
+s32 func_8020561C_ovl_00(s32 arg0) {
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80205624_ovl_00);
 
@@ -98,25 +137,90 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207080_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802071B8_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207250_ovl_00);
+/*
+ * The first of the club kind's animations; shotMode is unused. The staff
+ * roll overlay has its own copies of these four routines, with the same
+ * names, so these are static to link beside them.
+ */
+static s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+    s32 animation;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802072AC_ovl_00);
+    switch (GetCharacterClubKind(slotIndex, club)) {
+        case CLUB_KIND_WOOD:
+            animation = WOOD_ANIMATIONS;
+            break;
+        case CLUB_KIND_IRON:
+            animation = IRON_ANIMATIONS;
+            break;
+        case CLUB_KIND_WEDGE:
+            animation = WEDGE_ANIMATIONS;
+            break;
+        case CLUB_KIND_PUTTER:
+            animation = PUTTER_ANIMATIONS;
+            break;
+        default:
+            animation = WOOD_ANIMATIONS;
+            break;
+    }
+    return animation;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207328_ovl_00);
+/* The second of the club kind's animations, or the third for an approach shot */
+static s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+    s32 animation;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207358_ovl_00);
+    switch (GetCharacterClubKind(slotIndex, club)) {
+        case CLUB_KIND_WOOD:
+            animation = WOOD_ANIMATIONS + SWING_ANIMATION;
+            break;
+        case CLUB_KIND_IRON:
+            animation = IRON_ANIMATIONS + SWING_ANIMATION;
+            break;
+        case CLUB_KIND_WEDGE:
+            animation = WEDGE_ANIMATIONS + SWING_ANIMATION;
+            break;
+        case CLUB_KIND_PUTTER:
+            animation = PUTTER_ANIMATIONS + SWING_ANIMATION;
+            break;
+        default:
+            animation = 0;
+            break;
+    }
+    return animation + (shotMode == SHOT_MODE_APPROACH);
+}
+
+static void SetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+    SetCharacterAnimation(slotIndex, GetStanceAnimation(slotIndex, club, shotMode));
+}
+
+static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
+    SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207388_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207660_ovl_00);
+void func_80207660_ovl_00(UnkB8 *player) {
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207668_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802078C4_ovl_00);
+/* Hides the rings the ball passed, so that a new shot can pass them again */
+void ClearPassedRings(UnkB8 *player) {
+    s32 i;
+
+    for (i = 0; i < RING_COUNT; i++) {
+        if (player->ringStates[i] >= RING_STATE_PASSED) {
+            player->ringStates[i] = RING_STATE_NONE;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_802078F4_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207A10_ovl_00);
+void FreeCharacterAndReactionLight(void) {
+    FreeCharacterSlot(0);
+    TurnOffReactionLight();
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_80207A34_ovl_00);
 
@@ -156,7 +260,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020D6F0_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020D784_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020D7C4_ovl_00);
+/* The yaw the camera looks along, or 0 when it looks straight up or down */
+f32 GetCameraYaw(void) {
+    f32 x = g_Cameras->view.lookAt[0] - g_Cameras->view.eye[0];
+    f32 yaw = 0.0f;
+    f32 z = g_Cameras->view.lookAt[2] - g_Cameras->view.eye[2];
+
+    if ((s32)x != 0 || (s32)z != 0) {
+        yaw = atan2f(x, z);
+    }
+    return yaw;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020D838_ovl_00);
 
@@ -178,7 +292,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020EBBC_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020ED54_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020EEEC_ovl_00);
+void func_8020EEEC_ovl_00(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_8020EEF8_ovl_00);
 
