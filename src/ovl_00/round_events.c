@@ -6,6 +6,7 @@
 #include "round_events.h"
 #include "save.h"
 #include "shot_effects.h"
+#include "text.h"
 #include "transfer_pak.h"
 
 /* The buffer that a movie's images, or the wind Fly Guy's, are read into */
@@ -44,6 +45,25 @@ extern s32 sCurrentMovie;
 extern s32 sMovieFrame;
 extern s32 sWindFlyGuyFrame;
 extern s32 sWindFlyGuyAsset;
+extern s32 sIsFlipMessageLeaving;
+extern s32 sFlipMessageFrame; /* FLIP_MESSAGE_FRAME_NONE while no message is shown */
+extern s32 sFlipMessageId;
+extern s32 sFlipMessageHalfWidth;
+extern s32 sFlipMessageHalfHeight;
+extern Vtx sFlipMessageBoardVertices[4];
+
+/* ShowFlipMessage's arguments, besides a message to flip in */
+#define FLIP_MESSAGE_RESET (-2)
+#define FLIP_MESSAGE_LEAVE (-1)
+#define FLIP_MESSAGE_FRAME_NONE (-1)
+#define FLIP_MESSAGE_GLYPH_GROUP 0
+#define FLIP_MESSAGE_TEXT_SLOT 0
+#define FLIP_MESSAGE_X 160
+#define FLIP_MESSAGE_Y 114
+#define FLIP_MESSAGE_FONT 1
+/* How far the board reaches past the message on each side */
+#define FLIP_MESSAGE_BOARD_MARGIN_X 6
+#define FLIP_MESSAGE_BOARD_MARGIN_Y 14
 
 void ResetPath(void);
 
@@ -75,7 +95,47 @@ void func_8020EEEC_ovl_00(Gfx **displayListHead) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020EEF8_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020FAE8_ovl_00);
+#ifdef NON_MATCHING
+/*
+ * Flips a message in on a board in the middle of the screen, sized to fit it. FLIP_MESSAGE_LEAVE
+ * flips the board back out, and FLIP_MESSAGE_RESET takes it away at once.
+ */
+void ShowFlipMessage(s32 messageId) {
+    s32 halfSize;
+    s32 halfWidth;
+    s32 halfHeight;
+
+    sFlipMessageId = messageId;
+    if (messageId == FLIP_MESSAGE_RESET) {
+        sIsFlipMessageLeaving = FALSE;
+        sFlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
+        return;
+    }
+    if (messageId == FLIP_MESSAGE_LEAVE) {
+        sIsFlipMessageLeaving = TRUE;
+        return;
+    }
+    sIsFlipMessageLeaving = FALSE;
+    sFlipMessageFrame = 0;
+    halfSize = PlaceMessageGlyphGroup(FLIP_MESSAGE_GLYPH_GROUP, FONT_SIZE_LARGE, 0, 0, messageId);
+    halfWidth = (u32)halfSize >> 16;
+    sFlipMessageHalfWidth = halfWidth;
+    sFlipMessageBoardVertices[0].v.ob[0] = -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
+    sFlipMessageBoardVertices[1].v.ob[0] = -halfWidth - FLIP_MESSAGE_BOARD_MARGIN_X;
+    sFlipMessageBoardVertices[2].v.ob[0] = halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
+    sFlipMessageBoardVertices[3].v.ob[0] = halfWidth + FLIP_MESSAGE_BOARD_MARGIN_X;
+    halfHeight = halfSize & 0xFFFF;
+    sFlipMessageHalfHeight = halfHeight;
+    sFlipMessageBoardVertices[0].v.ob[1] = halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
+    sFlipMessageBoardVertices[3].v.ob[1] = halfHeight + FLIP_MESSAGE_BOARD_MARGIN_Y;
+    sFlipMessageBoardVertices[1].v.ob[1] = -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
+    sFlipMessageBoardVertices[2].v.ob[1] = -halfHeight - FLIP_MESSAGE_BOARD_MARGIN_Y;
+    SetTextSlot(FLIP_MESSAGE_X, FLIP_MESSAGE_Y, sFlipMessageId, FLIP_MESSAGE_FONT, FLIP_MESSAGE_TEXT_SLOT,
+                TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 127, 255, 127, 255);
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", ShowFlipMessage);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020FC10_ovl_00);
 
