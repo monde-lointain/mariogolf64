@@ -63,8 +63,8 @@ extern s32 sPauseLayout;
 extern s32 sPauseMenuRequest;
 extern s32 sPauseMenuUnkD678;
 /* Where the panels of the lie and of the wind slide to beside the menu */
-extern f32 sLiePanelPosition[2];
-extern f32 sWindPanelPosition[2];
+extern f32 g_LiePanelPosition[2];
+extern f32 g_WindPanelPosition[2];
 extern u8 *sPauseCursorImage;
 extern u8 *sMenuCloudImage; /* The pause menu's cloud, or the choice box's */
 extern u8 *sPauseArrowsImage;
@@ -247,9 +247,9 @@ void LoadPauseMenu(void) {
         ReadEncodedAsset(sPauseCursorImage, &asset);
         sMenuCloudImage = AllocMemory(OpenEncodedAsset(PAUSE_CLOUD_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sMenuCloudImage, &asset);
-        sWindPanelPosition[AXIS_X] = SCREEN_WIDTH;
-        sWindPanelPosition[AXIS_Y] = SCREEN_HEIGHT;
-        sLiePanelPosition[AXIS_X] = SCREEN_HEIGHT;
+        g_WindPanelPosition[AXIS_X] = SCREEN_WIDTH;
+        g_WindPanelPosition[AXIS_Y] = SCREEN_HEIGHT;
+        g_LiePanelPosition[AXIS_X] = SCREEN_HEIGHT;
         sPauseArrowsImage = AllocMemory(OpenEncodedAsset(PAUSE_ARROWS_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sPauseArrowsImage, &asset);
         SetSongVolume(PAUSE_MENU_SONG_VOLUME);
@@ -465,18 +465,18 @@ s32 UpdatePauseMenu(ControllerState *controller) {
     g_RoundHud.areWindSpeedArrowsShown = 0;
     g_RoundHud.areWindDirectionArrowsShown = 0;
     if (kind == PAUSE_OPTION_KIND_WIND_SPEED || kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
-        sWindPanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - sWindPanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
-        sWindPanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - sWindPanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
+        g_WindPanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - g_WindPanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
+        g_WindPanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - g_WindPanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
     } else {
-        sWindPanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
-        sWindPanelPosition[AXIS_Y] = PAUSE_PANEL_HIDDEN_Y;
+        g_WindPanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
+        g_WindPanelPosition[AXIS_Y] = PAUSE_PANEL_HIDDEN_Y;
     }
     if (kind == PAUSE_OPTION_KIND_LIE) {
-        sLiePanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - sLiePanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
-        sLiePanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - sLiePanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
+        g_LiePanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - g_LiePanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
+        g_LiePanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - g_LiePanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
     } else {
-        sLiePanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
-        sLiePanelPosition[AXIS_Y] = -PAUSE_PANEL_HIDDEN_Y;
+        g_LiePanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
+        g_LiePanelPosition[AXIS_Y] = -PAUSE_PANEL_HIDDEN_Y;
     }
     if (kind == PAUSE_OPTION_KIND_LIE) {
         hasLieChanged = FALSE;
