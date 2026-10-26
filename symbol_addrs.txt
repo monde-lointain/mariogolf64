@@ -2543,3 +2543,4 @@ g_BackdropPatternImage = 0x800FF4F0;
 DrawMenuBackdrop = 0x800939E8; // type:func
 DrawTurnAwayAnimation = 0x800947A8; // type:func
 DrawLensFlare = 0x8008D3F4; // type:func
+DrawFadeAnimation = 0x8009232C; // type:func

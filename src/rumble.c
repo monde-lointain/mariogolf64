@@ -336,7 +336,7 @@ void UpdateHelpBoard(void) {
     } else if (D_800C2000 & B_BUTTON) {
         PlaySound(0x5F, 0xF, 0x7F);
         if (sOpenTopic <= 0) {
-            StartHudAnimation(HUD_ANIMATION_UNK9);
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
             if (memory->unk46 == 0) {
                 D_801EFFA0 = 0x1C;
             } else {

@@ -2339,9 +2339,9 @@ void ChooseFlightCameraKind(void) {
                     if (RandomBelow(16) == 0 && sFlightCameraKind == FLIGHT_CAMERA_SIDE_OF_FLIGHT) {
                         StartHudAnimation(HUD_ANIMATION_TILES);
                     } else if (RandomBelow(8) == 0) {
-                        StartHudAnimation(HUD_ANIMATION_UNK1);
+                        StartHudAnimation(HUD_ANIMATION_FADE_OUT);
                     } else if (RandomBelow(3) == 0) {
-                        StartHudAnimation(HUD_ANIMATION_UNK9);
+                        StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
                     }
                 }
             }

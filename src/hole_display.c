@@ -201,7 +201,6 @@ extern Vtx sTileVertices[TILE_VERTEX_COUNT];
 extern Vtx sLastColumnTileVertices[TILE_VERTEX_COUNT];
 
 void CaptureHudAnimationFrame(void);
-void func_8009232C(Gfx **displayListHead);
 void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
 void DrawSpiralAnimation(Gfx **displayListHead);
@@ -574,14 +573,14 @@ void StartHudAnimation(s32 animation) {
         case HUD_ANIMATION_UNK0:
             sHudAnimationFramesLeft = 352;
             break;
-        case HUD_ANIMATION_UNK1:
-        case HUD_ANIMATION_UNK9:
+        case HUD_ANIMATION_FADE_OUT:
+        case HUD_ANIMATION_FAST_FADE_OUT:
             sHudAnimationFramesLeft = 255;
             break;
         case HUD_ANIMATION_TURN_AWAY:
             sHudAnimationFramesLeft = 255;
             break;
-        case HUD_ANIMATION_UNK8:
+        case HUD_ANIMATION_SLIDE_APART:
             sHudAnimationFramesLeft = 160;
             break;
         case HUD_ANIMATION_SPIRAL:
@@ -594,7 +593,7 @@ void StartHudAnimation(s32 animation) {
             sHudAnimationFramesLeft = 64;
             break;
         case HUD_ANIMATION_NEGATIVE:
-        case HUD_ANIMATION_UNK7:
+        case HUD_ANIMATION_MOTION_BLUR:
             sHudAnimationFramesLeft = 32;
             break;
     }
@@ -606,7 +605,162 @@ void StartHudAnimation(s32 animation) {
 void HandleFrameBufferSwap(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8009232C);
+/*
+ * The fading animations draw sCapturedFrame, which holds the frame inside
+ * the border, in strips. Each strip is loaded as a block, and the tiles are
+ * set up with the first.
+ */
+#define FADE_FRAME_WIDTH (SCREEN_WIDTH - 2 * BACKDROP_BORDER)
+#define FADE_FRAME_WORDS_PER_ROW (FADE_FRAME_WIDTH / 2)
+#define FADE_STEP 12
+#define FAST_FADE_STEP 24
+#define NEGATIVE_BRIGHTNESS 127
+#define MOTION_BLUR_ALPHA 95
+/* Blends nothing, but forces blending on */
+#define RM_FORCED_PASS GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1) | FORCE_BL
+#define RM_FORCED_PASS2 GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+#define FADE_COUNT_PERIOD 8
+
+#define LOAD_FADE_FRAME_STRIP(gfx, texels, height, isTileSet)                                                         \
+    {                                                                                                                 \
+        if (!(isTileSet)) {                                                                                           \
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7);                            \
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);                 \
+            gDPLoadSync(gfx++);                                                                                       \
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, (height) * FADE_FRAME_WIDTH - 1,                                 \
+                         CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES));                                             \
+            gDPPipeSync(gfx++);                                                                                       \
+            gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES + 7) >> 3, 0,       \
+                       G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);                                                         \
+            gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,             \
+                           ((height) - 1) << G_TEXTURE_IMAGE_FRAC);                                                   \
+            isTileSet = TRUE;                                                                                         \
+        } else {                                                                                                      \
+            gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7);                            \
+            gDPLoadSync(gfx++);                                                                                       \
+            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, (height) * FADE_FRAME_WIDTH - 1,                                 \
+                         CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES));                                             \
+            gDPPipeSync(gfx++);                                                                                       \
+        }                                                                                                             \
+    }
+
+extern s32 D_800C7308;
+
+/*
+ * Draws the HUD animations that show the whole frame: fading it out,
+ * drawing it at half brightness, blurring the scene with the last frame, or
+ * splitting the frame into halves that slide apart. When a fade ends,
+ * D_800C7308 counts up, wrapping at FADE_COUNT_PERIOD.
+ *
+ * Doesn't match: registers are allocated differently, and sCapturedFrame is
+ * kept in a saved register and on the stack.
+ */
+#ifdef NON_MATCHING
+void DrawFadeAnimation(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    u32 *frame = sCapturedFrame;
+    s32 isTileSet;
+    s32 strip;
+    s32 row;
+    s32 height;
+    u16 *source;
+
+    if (sHudAnimationFramesLeft > 0) {
+        isTileSet = FALSE;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_NONE) {
+            if (sHudAnimation == HUD_ANIMATION_NEGATIVE) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
+                gDPSetPrimColor(gfx++, 0, 0, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS, 255);
+            } else if (sHudAnimation == HUD_ANIMATION_FADE_OUT | sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, sHudAnimationFramesLeft);
+            } else if (sHudAnimation == HUD_ANIMATION_MOTION_BLUR) {
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, MOTION_BLUR_ALPHA);
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+                source = sLastFrameBuffer;
+                for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+                    height = STRIP_HEIGHT(strip);
+                    gDPLoadTextureTile(gfx++, (u32)source & ~7,
+                                       G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, BACKDROP_BORDER, BACKDROP_BORDER,
+                                       BACKDROP_RIGHT, BACKDROP_BORDER + height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                    gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                            (BACKDROP_RIGHT + 1) << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+                                            G_TX_RENDERTILE, BACKDROP_BORDER << 5, BACKDROP_BORDER << 5, 1 << 10,
+                                            1 << 10);
+                    source += BACKDROP_STRIP_STEP * SCREEN_WIDTH;
+                }
+                *displayListHead = gfx;
+                return;
+            } else if (sHudAnimation == HUD_ANIMATION_SLIDE_APART | sHudAnimation == HUD_ANIMATION_SPIRAL) {
+                /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation instead */
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
+                gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+                gDPPipeSync(gfx++);
+                for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
+                    height = STRIP_HEIGHT(strip);
+                    LOAD_FADE_FRAME_STRIP(gfx, &frame[strip * BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW], height,
+                                          isTileSet);
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(gfx++, BACKDROP_BORDER << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                            sHudAnimationFramesLeft << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+                                            G_TX_RENDERTILE, (SCREEN_WIDTH / 2 - sHudAnimationFramesLeft) << 5, 0,
+                                            1 << 10, 1 << 10);
+                    gSPScisTextureRectangle(gfx++, (SCREEN_WIDTH - sHudAnimationFramesLeft) << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
+                                            (BACKDROP_RIGHT + 1) << 2,
+                                            (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
+                                            G_TX_RENDERTILE, (FADE_FRAME_WIDTH / 2) << 5, 0, 1 << 10, 1 << 10);
+                    gDPPipeSync(gfx++);
+                }
+                sHudAnimationFramesLeft -= FADE_STEP;
+                *displayListHead = gfx;
+                return;
+            }
+        }
+        gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+        gDPPipeSync(gfx++);
+        for (row = BACKDROP_BORDER; row < SCREEN_HEIGHT - BACKDROP_BORDER; row += BACKDROP_STRIP_STEP) {
+            height = row + BACKDROP_STRIP_STEP <= SCREEN_HEIGHT - BACKDROP_BORDER ? BACKDROP_STRIP_HEIGHT
+                                                                                  : BACKDROP_LAST_STRIP_HEIGHT;
+            LOAD_FADE_FRAME_STRIP(gfx, frame, height, isTileSet);
+            gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, row << 2, (BACKDROP_RIGHT + 1) << 2, (row + height) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
+        }
+        if (sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+            sHudAnimationFramesLeft -= FAST_FADE_STEP;
+        } else {
+            sHudAnimationFramesLeft -= FADE_STEP;
+        }
+        if (sHudAnimationFramesLeft < 0) {
+            D_800C7308 = (D_800C7308 + 1) % FADE_COUNT_PERIOD;
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawFadeAnimation);
+#endif
 
 /*
  * Draws HUD_ANIMATION_SPIRAL, where the frame is cut into a grid of tiles. It
@@ -1164,8 +1318,8 @@ void CaptureHudAnimationFrame(void) {
                 nextVertex++;
             }
         }
-    } else if (sHudAnimation == HUD_ANIMATION_UNK1 || sHudAnimation == HUD_ANIMATION_UNK9 ||
-               sHudAnimation == HUD_ANIMATION_UNK8 || sHudAnimation == HUD_ANIMATION_SPIRAL) {
+    } else if (sHudAnimation == HUD_ANIMATION_FADE_OUT || sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
+               sHudAnimation == HUD_ANIMATION_SLIDE_APART || sHudAnimation == HUD_ANIMATION_SPIRAL) {
         for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
             for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
                 sCapturedFrame[wordIndex++] = frame[row * FRAME_WORDS_PER_ROW + column];
@@ -1182,7 +1336,7 @@ void CaptureHudAnimationFrame(void) {
                 }
                 g_CapturedSliceCount++;
             }
-    } else if (sHudAnimation == HUD_ANIMATION_UNK7) {
+    } else if (sHudAnimation == HUD_ANIMATION_MOTION_BLUR) {
     } else if (sHudAnimation == HUD_ANIMATION_NEGATIVE) {
             for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
                 for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
@@ -1258,12 +1412,12 @@ void DrawHudAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetColorDither(g_DisplayListHead++, G_CD_DISABLE);
     switch (sHudAnimation) {
-        case HUD_ANIMATION_UNK1:
+        case HUD_ANIMATION_FADE_OUT:
         case HUD_ANIMATION_NEGATIVE:
-        case HUD_ANIMATION_UNK7:
-        case HUD_ANIMATION_UNK8:
-        case HUD_ANIMATION_UNK9:
-            func_8009232C(&g_DisplayListHead);
+        case HUD_ANIMATION_MOTION_BLUR:
+        case HUD_ANIMATION_SLIDE_APART:
+        case HUD_ANIMATION_FAST_FADE_OUT:
+            DrawFadeAnimation(&g_DisplayListHead);
             break;
         case HUD_ANIMATION_TURN_AWAY:
             DrawTurnAwayAnimation();

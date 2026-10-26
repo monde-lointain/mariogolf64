@@ -16,15 +16,15 @@
 /* StartHudAnimation's animations, which DrawHudAnimation draws */
 #define HUD_ANIMATION_NONE (-1)
 #define HUD_ANIMATION_UNK0 0
-#define HUD_ANIMATION_UNK1 1
+#define HUD_ANIMATION_FADE_OUT 1
 #define HUD_ANIMATION_TURN_AWAY 2
 #define HUD_ANIMATION_TILES 3
 #define HUD_ANIMATION_SLICE_CAPTURE 4
 #define HUD_ANIMATION_SLICES 5
 #define HUD_ANIMATION_NEGATIVE 6 /* The frame with its colours inverted */
-#define HUD_ANIMATION_UNK7 7
-#define HUD_ANIMATION_UNK8 8
-#define HUD_ANIMATION_UNK9 9
+#define HUD_ANIMATION_MOTION_BLUR 7
+#define HUD_ANIMATION_SLIDE_APART 8
+#define HUD_ANIMATION_FAST_FADE_OUT 9
 #define HUD_ANIMATION_SPIRAL 10
 extern s32 g_MenuBackdropStyle;
 
