@@ -1870,9 +1870,122 @@ void DrawSpeedGolfResults(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FB500_ovl_00);
+#define RESULTS_LABEL_BETS 4
+#define RESULTS_HEADING_Y 54
+#define RESULTS_ROW_HEIGHT 32
+#define RESULTS_ICON_ROW_Y 68
+#define RESULTS_TEXT_ROW_Y 80
+/* Bet totals of four digits all shift left, so that the column stays centred */
+#define FOUR_DIGIT_BET_SHIFT -16
+#define FOUR_DIGIT_BET_MIN 999
+#define FOUR_DIGIT_BET_MAX 9999
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E08_ovl_00);
+/* Computer players earn no Course Points, which shows as a dash */
+extern const char sNoPointsText[];
+
+#ifdef NON_MATCHING
+/* The results of several players: place, portrait, score, any bet totals and Course Points */
+void DrawPlayersResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 betShift = FOUR_DIGIT_BET_SHIFT;
+    s32 i;
+
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (sPlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+            betShift = 0;
+        }
+        if (sPlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+            betShift = 0;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    if (sHasBets) {
+        DrawResultsLabel(&gfx, sResultsSlide + 88, sResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
+        DrawResultsLabel(&gfx, sResultsSlide + 192, sResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_BETS);
+        DrawResultsLabel(&gfx, sResultsSlide + 248, sResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
+        for (i = 0; i != g_PlayerCount; i++) {
+            if (g_PlayerCount >= 2) {
+                DrawPlaceIcon(&gfx, sResultsSlide + 18, sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                              sPlayerRanks[i]);
+            }
+            DrawPlayerPortrait(&gfx, sResultsSlide + 50, sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i,
+                               FALSE);
+        }
+    } else {
+        DrawResultsLabel(&gfx, sResultsSlide + 144, sResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
+        DrawResultsLabel(&gfx, sResultsSlide + 234, sResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
+        for (i = 0; i != g_PlayerCount; i++) {
+            if (g_PlayerCount >= 2) {
+                DrawRank(&gfx, sResultsSlide + 32, sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                         sPlayerRanks[i]);
+            }
+            DrawPlayerPortrait(&gfx, sResultsSlide + 96, sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i,
+                               FALSE);
+        }
+    }
+    LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, LARGE_DIGIT_WIDTH,
+                           LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    if (sHasBets) {
+        for (i = 0; i != g_PlayerCount; i++) {
+            if (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerResults[i]);
+            } else if (sPlayerResults[i] == 0) {
+                sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+            } else {
+                sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 96, sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                          g_PrintBuffer);
+            sprintf(g_PrintBuffer, "%5d", sPlayerBetTotals[i]);
+            DrawDigitText(&gfx, sResultsSlide + 156 + betShift,
+                          sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT, g_PrintBuffer);
+            if (sPlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+            } else {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 242, sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                          g_PrintBuffer);
+        }
+    } else {
+        for (i = 0; i != g_PlayerCount; i++) {
+            if (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerResults[i]);
+            } else if (sPlayerResults[i] == 0) {
+                sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+            } else {
+                sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 152, sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                          g_PrintBuffer);
+            if (sPlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+            } else {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 232, sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                          g_PrintBuffer);
+        }
+    }
+    if (sOpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(sResultsSlide + 32, sResultsTop + 200, MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    } else {
+        DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y, sPointsToNextCourse + sPointsEarned);
+        SetTextSlot(sResultsSlide + 64, sResultsTop + 200, MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlayersResults);
+#endif
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNoPointsText);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FBBBC_ovl_00);
 
