@@ -1,4 +1,5 @@
 #include "common.h"
+#include "asset.h"
 #include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
@@ -7,6 +8,7 @@
 #include "club.h"
 #include "controller.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "current_shot.h"
 #include "debug_text.h"
 #include "effects.h"
@@ -193,6 +195,12 @@
 #define LOOK_BACK_RISE 0x3C00
 #define LOOK_BACK_HEIGHT_SCALE 0.5f
 #define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
+/* Draws the shot preview in the RDP's time */
+#define MODULE_UNK10 10
+/* The shot preview's dash image is this many texels on a side */
+#define SHOT_PREVIEW_IMAGE_SIZE 32
+/* Half the putt preview line's width, in screen pixels */
+#define PUTT_PREVIEW_HALF_WIDTH 10.0f
 /* Hides the shot preview */
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
 /* Lets the D-pad change how far the shot preview reaches */
@@ -245,6 +253,10 @@ extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing 
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
 extern s32 D_80223E40_ovl_00;  /* Set once the shot preview has been built */
 extern f32 D_80223E48_ovl_00;  /* A debug tilt of the aim camera, which the C buttons tune */
+extern void *D_8012D428;        /* The shot preview's dash image, which round_hud.c loads */
+extern Vtx D_80223E60_ovl_00[4]; /* A dash of the shot preview */
+extern Vtx D_80223EB0_ovl_00[4]; /* The putt preview's line, placed on screen */
+extern Mtx D_80227110_ovl_00;    /* An identity matrix for the putt preview */
 extern s32 D_80223EA0_ovl_00;  /* How many steps the shot preview simulates */
 extern s32 D_80223EA4_ovl_00;  /* How many of the shot preview's points are shown */
 extern s8 D_80223EA8_ovl_00;   /* Whether the shot preview ran to its end */
@@ -1259,7 +1271,117 @@ void BuildShotPreview(Unk20 *swing, s32 swingPhase) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206354_ovl_00);
+/*
+ * Draws the shot preview that BuildShotPreview built. On the pause screen it is
+ * instead a straight line on screen, from the ball to the preview's last point.
+ */
+#ifdef NON_MATCHING
+void DrawShotPreview(CameraMatrices *matrices) {
+    ScreenPoint ball;
+    ScreenPoint end;
+
+    if (!D_80223E40_ovl_00) {
+        return;
+    }
+    g_ModuleRdpRequestFrames[MODULE_UNK10] = g_FrameCount;
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x7F);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPLoadTextureBlock(g_DisplayListHead++, TEXTURE_ADDRESS((u8 *)D_8012D428 + IMAGE_HEADER_SIZE), G_IM_FMT_I,
+                        G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetTileSize(g_DisplayListHead++, G_TX_RENDERTILE, D_80223EAC_ovl_00, 0,
+                   D_80223EAC_ovl_00 + (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),
+                   SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC);
+    gDPSetEnvColor(g_DisplayListHead++, 0xE0, 0xE0, 0x00, 0x40);
+    if (D_80223EA8_ovl_00) {
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0x00, 0x00, 0xC8);
+    } else {
+        gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
+    }
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+        f32 dx;
+        f32 dy;
+        f32 scale;
+        s32 offsetX;
+        s32 offsetY;
+
+        if (ProjectPoint(g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                         g_CurrentShot.ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                         g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &ball) >= 0) {
+            return;
+        }
+        if (ProjectPoint(D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_X],
+                         D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Y],
+                         D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Z], &end) >= 0) {
+            return;
+        }
+        guMtxIdent(&D_80227110_ovl_00);
+        ball.x *= 4;
+        ball.y *= 4;
+        end.x *= 4;
+        end.y *= 4;
+        dx = end.x - ball.x;
+        dy = end.y - ball.y;
+        if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
+            scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+            gSPLoadGeometryMode(g_DisplayListHead++, 0);
+            gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
+            gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+            gDPPipeSync(g_DisplayListHead++);
+            gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+                      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+            gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&D_80227110_ovl_00),
+                      G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPVertex(g_DisplayListHead++, D_80223EB0_ovl_00, 4, 0);
+            offsetX = dy * scale;
+            offsetY = dx * scale;
+            gSPModifyVertex(g_DisplayListHead++, 0, G_MWO_POINT_XYSCREEN, ((ball.x + offsetX) << 16) + ball.y);
+            gSPModifyVertex(g_DisplayListHead++, 1, G_MWO_POINT_XYSCREEN, (ball.x << 16) + (ball.y + offsetY));
+            gSPModifyVertex(g_DisplayListHead++, 2, G_MWO_POINT_XYSCREEN, ((end.x + offsetX) << 16) + end.y);
+            gSPModifyVertex(g_DisplayListHead++, 3, G_MWO_POINT_XYSCREEN, (end.x << 16) + (end.y + offsetY));
+            gSP2Triangles(g_DisplayListHead++, 1, 0, 2, 0, 1, 2, 3, 0);
+            gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+            gDPPipeSync(g_DisplayListHead++);
+        }
+    } else {
+        s32 step;
+
+        gDPPipeSync(g_DisplayListHead++);
+        if (D_800C308C == LETTERBOX_STATE_NONE || D_800C308C == LETTERBOX_STATE_UNK5) {
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+        } else {
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+        }
+        gSPLoadGeometryMode(g_DisplayListHead++, 0);
+        gSPSetGeometryMode(g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
+        gSPFogFactor(g_DisplayListHead++, 320, -128);
+        gDPSetCombineLERP(g_DisplayListHead++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0,
+                          TEXEL0, 0, SHADE, 0);
+        for (step = 0; step < D_80223EA4_ovl_00; step++) {
+            gSPMatrix(g_DisplayListHead++, &D_802271A0_ovl_00[g_DrawBufferIndex][step],
+                      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            gSPVertex(g_DisplayListHead++, D_80223E60_ovl_00, 4, 0);
+            gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
+        }
+        gDPPipeSync(g_DisplayListHead++);
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DrawShotPreview);
+#endif
 
 /*
  * Returns whether the player's hole-out may enter the records: a short one,
