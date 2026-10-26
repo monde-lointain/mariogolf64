@@ -2515,3 +2515,5 @@ DrawWindSpeedText = 0x800842C0; // type:func
 sWindIconImage = 0x800E2188;
 sWindSpeedFont = 0x800E2164;
 DrawHoleFlag = 0x80085F98; // type:func
+sHoleFlagWavePhase = 0x800C5E20;
+WaveHoleFlag = 0x800874D8; // type:func

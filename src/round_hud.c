@@ -105,13 +105,41 @@ extern f32 g_RainSoundVolume;
 #define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
 #define HOLE_FLAG_START_SHADE 0xB7
+#define HOLE_FLAG_VERTEX(row, column) \
+    sHoleFlagVertices[0][g_MatrixBufferIndex][(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+#define HOLE_FLAG_SHADE(row, column) sHoleFlagShades[(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+
+/* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
+#define HOLE_FLAG_SKEW 0.0f
+#define HOLE_FLAG_ROW_SKEW_SCALE 5.0f
+/* Wind speeds here are in WIND_SPEED_UNIT */
+#define WIND_SPEED_UNIT 0x10000
+#define HOLE_FLAG_MIN_WIND_SPEED 1.5f
+#define HOLE_FLAG_GALE_WIND_SPEED 9.0f
+#define HOLE_FLAG_CALM_SPREAD 0.01f
+#define HOLE_FLAG_SPREAD_STEP 0.1f
+#define HOLE_FLAG_SPREAD_STEP_COUNT 10.0f
+#define HOLE_FLAG_SWING_DEGREES_PER_SPEED 2.0f
+#define HOLE_FLAG_MIN_SWING_DEGREES 2.0f
+#define HOLE_FLAG_SWING_JITTER_RANGE 16
+#define HOLE_FLAG_ROW_JITTER_PER_SPEED 4.0f
+#define HOLE_FLAG_BULGE_PER_SPEED 0.03f
+#define HOLE_FLAG_MIN_BULGE 3.5f
+#define HOLE_FLAG_BULGE_SCALE 0.1f
+#define HOLE_FLAG_BULGE_COLUMN_BASE 8
+#define HOLE_FLAG_BULGE_ROW_BASE 10
+#define HOLE_FLAG_BULGE_ROW_SCALE 10.0f
+#define HOLE_FLAG_FIRST_PULLED_COLUMN 2
+#define HOLE_FLAG_DEPTH_PER_PULL 4
+extern f32 sHoleFlagWavePhase;
 
 /* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
 
 extern Vtx sHoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
-extern u8 sHoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
+/* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
+extern s8 sHoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 extern Mtx D_80105278;
 extern f32 D_801B7F38[2];
@@ -1340,7 +1368,120 @@ void StartShotEffect(s32 effect) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_80086864);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_800874D8);
+/*
+ * Waves the hole's flag in the wind. A shade swings down the flagstick side
+ * of the flag and spreads across it, faster the stronger the wind. Each
+ * vertex then bulges out of the flag by its shade, and the columns draw in to
+ * make up for the bulges.
+ *
+ * factor and otherFactor hold several unrelated factors in turn, as in the
+ * original; separate variables change the registers.
+ *
+ * Doesn't match: the zero for the skew factors goes in otherFactor's register
+ * first instead of factor's, the else branch for the row shade adds a jump,
+ * and the bulge's constants are loaded in a different place.
+ */
+#ifdef NON_MATCHING
+void WaveHoleFlag(void) {
+    s32 row;
+    s32 column;
+    s32 shade;
+    s32 rowShade;
+    s32 depth;
+    s32 pull;
+    f32 windSpeed;
+    f32 factor;
+    f32 otherFactor;
+
+    ScrollWindArrow();
+    windSpeed = g_HoleConditions.windSpeed / WIND_SPEED_UNIT;
+    factor = HOLE_FLAG_SKEW;
+    otherFactor = factor;
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            HOLE_FLAG_VERTEX(row, column).v.ob[0] = (s16)(column * HOLE_FLAG_CELL_SIZE - column * factor) -
+                                                    row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE;
+            if (HOLE_FLAG_VERTEX(row, column).v.ob[0] < column * otherFactor) {
+                HOLE_FLAG_VERTEX(row, column).v.ob[0] = column * otherFactor;
+            }
+            HOLE_FLAG_VERTEX(row, column).v.ob[1] = -row * HOLE_FLAG_CELL_SIZE - column * factor;
+        }
+    }
+    if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
+        windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
+    }
+    /* factor is how much of its neighbor's shade a vertex takes; otherFactor is how much of its own it keeps */
+    if (windSpeed < 1.0f) {
+        factor = HOLE_FLAG_CALM_SPREAD;
+        otherFactor = 1.0f - HOLE_FLAG_CALM_SPREAD;
+    } else if (windSpeed > HOLE_FLAG_GALE_WIND_SPEED) {
+        factor = 1.0f;
+        otherFactor = 0.0f;
+    } else {
+        factor = windSpeed * HOLE_FLAG_SPREAD_STEP + HOLE_FLAG_SPREAD_STEP;
+        otherFactor = (HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP - HOLE_FLAG_SPREAD_STEP;
+    }
+    for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes the code */
+            shade = sHoleFlagShades[row * HOLE_FLAG_COLUMN_COUNT + column - 1] * factor +
+                    HOLE_FLAG_SHADE(row, column) * otherFactor;
+            HOLE_FLAG_SHADE(row, column) = shade;
+        }
+    }
+    sHoleFlagWavePhase +=
+        (HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed + HOLE_FLAG_MIN_SWING_DEGREES) * DEGREES_TO_RADIANS(1);
+    if (sHoleFlagWavePhase > 2 * M_PI) {
+        sHoleFlagWavePhase -= 2 * M_PI;
+    }
+    if (sHoleFlagWavePhase < 0.0f) {
+        sHoleFlagWavePhase += 2 * M_PI;
+    }
+    /* factor is the swing's amplitude here */
+    factor = windSpeed + rand() % HOLE_FLAG_SWING_JITTER_RANGE;
+    shade = (s32)(sinf(sHoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        if ((s32)windSpeed != 0) {
+            rowShade = (f32)(shade + rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED)) -
+                       HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed;
+        } else {
+            rowShade = shade;
+        }
+        HOLE_FLAG_SHADE(row, 0) = rowShade;
+    }
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            HOLE_FLAG_VERTEX(row, column).v.cn[0] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[1] = HOLE_FLAG_SHADE(row, column);
+            HOLE_FLAG_VERTEX(row, column).v.cn[2] = HOLE_FLAG_SHADE(row, column);
+        }
+    }
+    /* Bulges are deeper toward the flag's free edge and its top */
+    factor = windSpeed * HOLE_FLAG_BULGE_PER_SPEED + HOLE_FLAG_MIN_BULGE;
+    otherFactor = HOLE_FLAG_BULGE_SCALE;
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            HOLE_FLAG_VERTEX(row, column).v.ob[2] =
+                (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
+                (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor * otherFactor *
+                (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
+        }
+    }
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+        pull = 0;
+        for (column = HOLE_FLAG_FIRST_PULLED_COLUMN; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            depth = HOLE_FLAG_VERTEX(row, column).v.ob[2];
+            if (depth < 0) {
+                depth = -depth;
+            }
+            pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
+            HOLE_FLAG_VERTEX(row, column).v.ob[0] = column * HOLE_FLAG_CELL_SIZE - pull;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", WaveHoleFlag);
+#endif
 
 /* Moves the shot offset marker and its trail back to the center */
 void ResetShotOffsetMarker(void) {
