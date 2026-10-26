@@ -31,47 +31,6 @@
 /* How far above the tee a ball starts on the main courses */
 #define TEE_HEIGHT 307.2f
 
-typedef struct PlayUnk8 {
-    /* 0x0 */ u16 unk0;
-    /* 0x2 */ s8 unk2;
-    /* 0x3 */ s8 unk3;
-    /* 0x4 */ s8 unk4;
-    /* 0x5 */ s8 unk5;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ s8 unk7;
-} PlayUnk8; /* size = 0x8 */
-
-typedef struct PlayRecord {
-    /* 0x00 */ Unk800BA9D8 hole;
-    /* 0x34 */ s32 gameMode;
-    /* 0x38 */ s8 courseIndex;
-    /* 0x39 */ s8 holeIndex;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 characterIndex;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 unk3D;
-    /* 0x3E */ u8 unk3E;
-    /* 0x3F */ u8 unk3F;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ PlayUnk8 unk44[4];
-    /* 0x64 */ u8 unk64[0x68 - 0x64];
-} PlayRecord; /* size = 0x68 */
-
-typedef struct RingShotRecord {
-    /* 0x00 */ Unk800BA9D8 hole;
-    /* 0x34 */ s8 courseIndex;
-    /* 0x35 */ s8 holeIndex;
-    /* 0x36 */ u8 unk36;
-    /* 0x37 */ u8 characterIndex;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ PlayUnk8 unk40[4];
-    /* 0x60 */ u8 unk60[0x68 - 0x60];
-} RingShotRecord; /* size = 0x68 */
-
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern s32 D_800C3070;
@@ -252,14 +211,14 @@ void SetUpPlayers(void) {
             g_Players[0].teeOrder = 0;
             g_Players[0].characterIndex = D_80105F40->characterIndex;
             g_Players[0].unk22 = D_80105F40->unk38;
-            g_Players[0].paletteIndex = D_80105F40->unk39;
+            g_Players[0].paletteIndex = D_80105F40->paletteIndex;
             g_Players[0].unk88 = D_80105F40->unk3C;
         } else {
             g_Players[0].unk1E[0] = 0;
             g_Players[0].teeOrder = 0;
             g_Players[0].characterIndex = D_800FEDD8->characterIndex;
             g_Players[0].unk22 = D_800FEDD8->unk3C;
-            g_Players[0].paletteIndex = D_800FEDD8->unk3D;
+            g_Players[0].paletteIndex = D_800FEDD8->paletteIndex;
             g_Players[0].unk88 = D_800FEDD8->unk40;
         }
         for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
@@ -514,23 +473,23 @@ void SetNextTeeOrder(void) {
 
 void func_800600C0(s32 index) {
 
-    D_80104F78 = D_800FEDD8->unk44[index].unk0;
-    D_80104F7C = D_800FEDD8->unk44[index].unk2;
-    D_80104F80 = D_800FEDD8->unk44[index].unk3;
-    D_80104F84 = D_800FEDD8->unk44[index].unk4;
-    D_80104F88 = D_800FEDD8->unk44[index].unk5;
-    D_80104F8C = D_800FEDD8->unk44[index].unk6;
-    D_80104F90 = D_800FEDD8->unk44[index].unk7;
+    D_80104F78 = D_800FEDD8->shots[index].heading;
+    D_80104F7C = D_800FEDD8->shots[index].unk2;
+    D_80104F80 = D_800FEDD8->shots[index].unk3;
+    D_80104F84 = D_800FEDD8->shots[index].shotMode;
+    D_80104F88 = D_800FEDD8->shots[index].clubSlot;
+    D_80104F8C = D_800FEDD8->shots[index].unk6;
+    D_80104F90 = D_800FEDD8->shots[index].unk7;
 }
 
 void func_80060128(s32 index) {
-    D_80104F78 = D_80105F40->unk40[index].unk0;
-    D_80104F7C = D_80105F40->unk40[index].unk2;
-    D_80104F80 = D_80105F40->unk40[index].unk3;
-    D_80104F84 = D_80105F40->unk40[index].unk4;
-    D_80104F88 = D_80105F40->unk40[index].unk5;
-    D_80104F8C = D_80105F40->unk40[index].unk6;
-    D_80104F90 = D_80105F40->unk40[index].unk7;
+    D_80104F78 = D_80105F40->shots[index].heading;
+    D_80104F7C = D_80105F40->shots[index].unk2;
+    D_80104F80 = D_80105F40->shots[index].unk3;
+    D_80104F84 = D_80105F40->shots[index].shotMode;
+    D_80104F88 = D_80105F40->shots[index].clubSlot;
+    D_80104F8C = D_80105F40->shots[index].unk6;
+    D_80104F90 = D_80105F40->shots[index].unk7;
 }
 
 s32 func_80060190(s32 strokes) {
@@ -561,7 +520,7 @@ void LoadSuperShotReplay(PlayRecord *record) {
     g_GameMode = record->gameMode;
     g_CourseIndex = record->courseIndex;
     g_HoleIndex = record->holeIndex;
-    D_800FE330 = record->unk3E;
+    D_800FE330 = record->strokeCount;
     SetUpPlayers();
     osSyncPrintf("SetSuperShotReplay\n");
 }
@@ -572,7 +531,7 @@ void LoadRingShotRecord(RingShotRecord *record) {
     g_GameMode = GAME_MODE_RING_SHOT;
     g_CourseIndex = record->courseIndex;
     g_HoleIndex = record->holeIndex;
-    D_800FE330 = record->unk3A;
+    D_800FE330 = record->strokeCount;
     SetUpPlayers();
 }
 

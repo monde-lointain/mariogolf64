@@ -141,6 +141,50 @@ typedef struct Unk800BA9D8 {
     /* 0x2E */ u8 unk2E[0x34 - 0x2E];
 } Unk800BA9D8; /* size = 0x34 */
 
+/* A shot as a record keeps it, from the CurrentShot it was played with */
+typedef struct RecordedShot {
+    /* 0x0 */ u16 heading;
+    /* 0x2 */ s8 unk2;
+    /* 0x3 */ s8 unk3;
+    /* 0x4 */ s8 shotMode;
+    /* 0x5 */ s8 clubSlot;
+    /* 0x6 */ s8 unk6;
+    /* 0x7 */ s8 unk7;
+} RecordedShot; /* size = 0x8 */
+
+/* A hole that a player finished in few strokes, kept to be replayed */
+typedef struct PlayRecord {
+    /* 0x00 */ Unk800BA9D8 hole;
+    /* 0x34 */ s32 gameMode;
+    /* 0x38 */ s8 courseIndex;
+    /* 0x39 */ s8 holeIndex;
+    /* 0x3A */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+    /* 0x3B */ u8 characterIndex;
+    /* 0x3C */ u8 unk3C;
+    /* 0x3D */ u8 paletteIndex;
+    /* 0x3E */ u8 strokeCount;
+    /* 0x3F */ u8 unk3F;
+    /* 0x40 */ s32 unk40;
+    /* 0x44 */ RecordedShot shots[4]; /* RecordHoleOut writes a fifth past the end */
+    /* 0x64 */ u8 unk64[0x68 - 0x64];
+} PlayRecord; /* size = 0x68 */
+
+/* A Ring Shot hole as a player played it, kept to be replayed */
+typedef struct RingShotRecord {
+    /* 0x00 */ Unk800BA9D8 hole;
+    /* 0x34 */ s8 courseIndex;
+    /* 0x35 */ s8 holeIndex;
+    /* 0x36 */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+    /* 0x37 */ u8 characterIndex;
+    /* 0x38 */ u8 unk38;
+    /* 0x39 */ u8 paletteIndex;
+    /* 0x3A */ u8 strokeCount;
+    /* 0x3B */ u8 unk3B;
+    /* 0x3C */ s32 unk3C;
+    /* 0x40 */ RecordedShot shots[4]; /* RecordRingShotHole writes up to six */
+    /* 0x60 */ u8 unk60[0x68 - 0x60];
+} RingShotRecord; /* size = 0x68 */
+
 extern Unk800BA9D8 D_800BA9D8;
 /*
  * D_800BA9D8.cupPosition's x, y and z. Some code reads them under symbols
