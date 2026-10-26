@@ -2609,9 +2609,205 @@ void DrawClubTournamentResults(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 #endif
 
+#define BACKDROP_STRIP_WIDTH 288
+#define BACKDROP_STRIP_HEIGHT 5
+#define BACKDROP_STRIP_COUNT 40
+/* The club tournament backdrop is taller, so it starts higher */
+#define CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT 7
+#define CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT 32
+#define HAND_SIZE 24
+/* The pressing hand shows each of its frames for this many draws */
+#define HAND_FRAME_DRAWS 3
+#define HAND_FRAME_COUNT 3
+#define FINAL_RESULTS_TITLE_WIDTH 200
+#define FINAL_RESULTS_TITLE_STRIP_HEIGHT 8
+/* Each strip loads a row more than it shows so that filtering has a row below it */
+#define FINAL_RESULTS_TITLE_LOADED_HEIGHT 10
+#define FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT 6
+#define FINAL_RESULTS_TITLE_STRIP_COUNT 4
+#define FINAL_RESULTS_TITLE_X 24.0f
+#define FINAL_RESULTS_TITLE_Y 20.0f
+#define FINAL_RESULTS_TITLE_BOB 5.0f
+#define FINAL_RESULTS_TITLE_BOB_STEP (M_PI / 18)
+/* A texture coordinate of this many units steps one texel */
+#define TEXEL_UNITS 32
+#define SUBTEXEL_STEPS 16.0f
+/* The portrait animations load their faces only every fourth draw */
+#define PORTRAIT_FRAME_DRAWS_MASK 3
+#define PORTRAIT_ANIMATION_FRAME_COUNT 5
+#define PORTRAIT_ANIMATION_REST 0
+#define NO_PORTRAIT_FRAME (-1)
+
+/* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a frame */
+extern s32 sHandFrame;
+extern f32 sTitleBobAngle;
+#ifdef NON_MATCHING
+/* The results card, its game mode's results, the bobbing title and the players' portraits */
+void DrawRoundResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    f32 titleX;
+    f32 titleY;
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 stripHeight;
+    s32 textureS;
+    s32 textureT;
+    s32 i;
+
+    if (!sAreResultsLoaded) {
+        return;
+    }
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    LoadLargePalette(&gfx, sResultsBackdropImage + IMAGE_HEADER_SIZE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    if (g_IsClubTournament) {
+        for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx,
+                             sResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * BACKDROP_STRIP_WIDTH * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0,
+                             0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&gfx, (sResultsSlide + 16) * 4,
+                            (sResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8)) * 4,
+                            (sResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+                            (sResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8 +
+                                            CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)) * 4,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    } else {
+        for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx,
+                             sResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH, BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0,
+                             0);
+            DrawTextureRect(&gfx, (sResultsSlide + 16) * 4, (i * BACKDROP_STRIP_HEIGHT + 24 + sResultsTop) * 4,
+                            (sResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+                            (i * BACKDROP_STRIP_HEIGHT + 24 + BACKDROP_STRIP_HEIGHT + sResultsTop) * 4,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    if (sIsAwaitingConfirm == TRUE) {
+        sHandFrame = (sHandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
+        LoadLargePalette(&gfx, sResultsHandImage + IMAGE_HEADER_SIZE);
+        LoadTextureBlock(&gfx,
+                         sResultsHandImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             sHandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&gfx, (sResultsSlide + 272) * 4, (sResultsTop + 192) * 4,
+                        (sResultsSlide + 272 + HAND_SIZE) * 4, (sResultsTop + 192 + HAND_SIZE) * 4, G_TX_RENDERTILE,
+                        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    if (g_IsClubTournament) {
+        DrawClubTournamentResults(&gfx);
+    } else {
+        switch (g_GameMode) {
+            case GAME_MODE_SPEED_GOLF:
+                DrawSpeedGolfResults(&gfx);
+                break;
+            case GAME_MODE_STROKE:
+            case GAME_MODE_UNK1:
+            case GAME_MODE_TRAINING:
+            case GAME_MODE_UNK6:
+            case GAME_MODE_UNK8:
+            case GAME_MODE_RING_SHOT:
+            case GAME_MODE_SKINS_MATCH:
+            case GAME_MODE_CLUB_SLOTS:
+                DrawPlayersResults(&gfx);
+                break;
+            case GAME_MODE_MATCH_GAME:
+            case GAME_MODE_GET_CHARACTER:
+                DrawMatchResults(&gfx);
+                break;
+            case GAME_MODE_TOURNAMENT:
+                DrawTournamentResults(&gfx);
+                break;
+        }
+    }
+    if (!g_IsClubTournament) {
+        titleX = cosf(sTitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB + FINAL_RESULTS_TITLE_X;
+        titleY = sinf(sTitleBobAngle) * FINAL_RESULTS_TITLE_BOB + FINAL_RESULTS_TITLE_Y;
+        left = titleX < 0.0f ? titleX + 0.5f : titleX - 0.5f;
+        top = titleY < 0.0f ? titleY + 0.5f : titleY - 0.5f;
+        gSPDisplayList(gfx++, D_800C3FC0);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+        textureS = (s32)(SUBTEXEL_STEPS - (titleX - left) * SUBTEXEL_STEPS) * 2;
+        textureT = (s32)(SUBTEXEL_STEPS - (titleY - top) * SUBTEXEL_STEPS) * 2 + TEXEL_UNITS;
+        sTitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
+        LoadLargePalette(&gfx, sFinalResultsTitleImage + IMAGE_HEADER_SIZE);
+        right = left + FINAL_RESULTS_TITLE_WIDTH;
+        for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
+            stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
+            if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
+                stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
+            }
+            LoadTextureBlock(&gfx,
+                             sFinalResultsTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * FINAL_RESULTS_TITLE_WIDTH * FINAL_RESULTS_TITLE_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH, FINAL_RESULTS_TITLE_LOADED_HEIGHT,
+                             0, 0, 0, 0, 0, 0, 0);
+            gSPTextureRectangle(gfx++, (left - sResultsSlide) * 4,
+                                (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + sResultsTop + top) * 4,
+                                (right - sResultsSlide) * 4,
+                                (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + sResultsTop + top) * 4,
+                                G_TX_RENDERTILE, textureS, textureT, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    for (i = 0; i != g_PlayerCount; i++) {
+        AssetFile file;
+        s32 unused[4];
+
+        if (sPortraitFrames[i] != NO_PORTRAIT_FRAME) {
+            if (!(sPortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
+                switch (sPortraitAnimations[i]) {
+                    case PORTRAIT_ANIMATION_REST:
+                        OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &file);
+                        ReadEncodedAsset(sPlayerPortraitImages[i], &file);
+                        sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        break;
+                    case PORTRAIT_ANIMATION_UNK1:
+                        OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[i].characterIndex] + sPortraitFrames[i],
+                                         &file);
+                        ReadEncodedAsset(sPlayerPortraitImages[i], &file);
+                        sPortraitFrames[i]++;
+                        if (sPortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        }
+                        break;
+                    case PORTRAIT_ANIMATION_UNK4: {
+                        s32 unk4Faces[PORTRAIT_ANIMATION_FRAME_COUNT] = { 0, 5, 6, 7, 8 };
+
+                        OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
+                                             unk4Faces[sPortraitFrames[i]],
+                                         &file);
+                        ReadEncodedAsset(sPlayerPortraitImages[i], &file);
+                        sPortraitFrames[i]++;
+                        if (sPortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+                            sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+                        }
+                        break;
+                    }
+                }
+            }
+            sPortraitTimers[i]++;
+        }
+    }
+    func_801F8BB8_ovl_00(&gfx);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E3C_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FCC48_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRoundResults);
+#endif
 
 void DrawResultsNotice(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;

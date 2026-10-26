@@ -3007,3 +3007,4 @@ sTextSlotColors = 0x8021FE48; // size:0xF segment:ovl_00
 sFinalResultsTitleImage = 0x802256C4; // size:0x4 segment:ovl_00
 sHandFrame = 0x8021FE58; // size:0x4 segment:ovl_00
 sTitleBobAngle = 0x8021FE5C; // size:0x4 segment:ovl_00
+DrawRoundResults = 0x801FCC48; // type:func segment:ovl_00

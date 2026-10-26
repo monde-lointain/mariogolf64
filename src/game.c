@@ -930,7 +930,7 @@ void DrawStaffRoll(Gfx **displayListHead);
 void func_801F8110(Gfx **displayListHead);
 void func_801FA4EC(CameraMatrices *matrices, Gfx **displayListHead);
 void func_801FB198(Gfx **displayListHead);
-void func_801FCC48(Gfx **displayListHead);
+void DrawRoundResults(Gfx **displayListHead);
 void func_801FD578(Gfx **displayListHead);
 void func_801FE370(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
@@ -1658,7 +1658,7 @@ s32 DrawGame(void) {
             DrawScorecard(&g_DisplayListHead);
         }
         if (g_IsModuleAlive[15]) {
-            func_801FCC48(&g_DisplayListHead);
+            DrawRoundResults(&g_DisplayListHead);
             func_801FD578(&g_DisplayListHead);
         }
         DrawHalfTurn(&g_DisplayListHead);
