@@ -248,7 +248,270 @@ s32 IsShotModeChangeDone(void) {
     return sShotModeChangeFrame == 0;
 }
 
+#ifdef NON_MATCHING
+/*
+ * The power gauge runs from GAUGE_EMPTY_X leftwards, so a fuller gauge
+ * reaches further left. Its ticks are GAUGE_TICK_SPACING apart, with
+ * medium ticks every GAUGE_TICKS_PER_GROUP ticks and long ones at each end.
+ */
+#define GAUGE_FULL_X 56
+#define GAUGE_LENGTH 140
+#define GAUGE_EMPTY_X (GAUGE_FULL_X + GAUGE_LENGTH)
+#define GAUGE_MAX_VALUE 30
+#define GAUGE_TOP 210
+#define GAUGE_BOTTOM 218
+#define GAUGE_TICK_SPACING 7
+#define GAUGE_TICK_WIDTH 4
+#define GAUGE_GROUP_COUNT 5
+#define GAUGE_TICKS_PER_GROUP 5
+#define GAUGE_EXTRA_TICK_COUNT 2
+#define GAUGE_END_TICK_COUNT 2
+#define GAUGE_MEDIUM_TICK_COUNT 3
+#define GAUGE_MEDIUM_TICK_TOP 212
+#define GAUGE_MEDIUM_TICK_BOTTOM 216
+/* The markers and the long ticks reach past the gauge */
+#define GAUGE_MARKER_TOP 208
+#define GAUGE_MARKER_BOTTOM 220
+#define GAUGE_MARKER_WIDTH 4
+/* The fill's gradient image */
+#define GAUGE_FILL_IMAGE_WIDTH 64
+#define GAUGE_FILL_IMAGE_HEIGHT 16
+#define GAUGE_TICK_IMAGE_WIDTH 16
+#define GAUGE_TICK_IMAGE_HEIGHT 12
+
+/* g_Players[].unkC values that hide the gauge's markers */
+#define PLAYER_STATE_UNK2 2
+#define PLAYER_STATE_UNK4 4
+#define PLAYER_STATE_UNK5 5
+
+/* The bar that shows the lie's span below the gauge */
+#define SPAN_BAR_X 38.0f
+#define SPAN_BAR_Y -103.0f
+#define SPAN_BAR_Z -100.0f
+#define SPAN_BAR_SCALE_PER_SPAN 0.032857146f
+#define SPAN_BAR_THICKNESS 0.1f
+#define SPAN_BAR_VERTEX_COUNT 8
+
+/* The markers pulse at a twelfth of a turn per frame */
+#define MARKER_PULSE_STEP (M_PI / 6)
+#define MARKER_PULSE_LEVEL 100.0
+
+extern Vtx sSpanBarVertices[SPAN_BAR_VERTEX_COUNT];
+extern Gfx sSpanBarDisplayList[];
+extern f32 sMarkerPulseAngle;
+extern Mtx sSpanBarTranslation;
+extern Mtx sSpanBarScale;
+extern s32 sShotPanelOffsetX;
+
+s32 func_8005F224(void);
+
+/* Draws the power gauge, its markers, and the bar for the lie's span */
+void DrawClubPanel(Gfx **displayListHead) {
+    s32 span;
+    Gfx *gfx;
+    s32 isPutter;
+    s32 value;
+    s32 playerState;
+    s32 group;
+    s32 tick;
+    s32 firstTick;
+    s32 x;
+    s32 fillWidth;
+
+    s32 markerOffset;
+    s32 pulse;
+    s32 alpha;
+    s32 absValue;
+
+    gfx = *displayListHead;
+    isPutter = GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN;
+    playerState = g_Players[g_CurrentShot.playerIndex].unkC;
+    GetLieSpan(GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]), g_CurrentShot.surface,
+               &span, g_CurrentShot.shotMode);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 191);
+    gDPPipeSync(gfx++);
+    if (g_RoundHud.flags & HUD_FLAG_TRANSLUCENT_GAUGE) {
+        alpha = 127;
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    } else {
+        alpha = 255;
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    }
+    switch (g_CurrentShot.shotMode) {
+        case SHOT_MODE_NORMAL:
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 32, alpha);
+            break;
+        case SHOT_MODE_POWER:
+            gDPSetPrimColor(gfx++, 0, 0, 255, 32, 32, alpha);
+            break;
+        default:
+            gDPSetPrimColor(gfx++, 0, 0, 64, 127, 255, alpha);
+            break;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)sClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH,
+                           GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 2, 0, 0, 0);
+    for (group = 0, firstTick = 0; group != GAUGE_GROUP_COUNT; group++, firstTick += GAUGE_TICKS_PER_GROUP) {
+        for (tick = 1; tick != GAUGE_TICKS_PER_GROUP; tick++) {
+            x = (firstTick + tick) * GAUGE_TICK_SPACING;
+            gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
+                                (GAUGE_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                                (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
+                                (GAUGE_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0, 0,
+                                0x400, 0x600);
+        }
+    }
+    for (tick = 0; tick != GAUGE_EXTRA_TICK_COUNT; tick++) {
+        x = (firstTick + tick) * GAUGE_TICK_SPACING;
+        gSPTextureRectangle(gfx++, (GAUGE_FULL_X + x) << 2,
+                            (GAUGE_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            (GAUGE_FULL_X + GAUGE_TICK_WIDTH + x) << 2,
+                            (GAUGE_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0, 0,
+                            0x400, 0x600);
+    }
+    for (tick = 0; tick < GAUGE_END_TICK_COUNT; tick++) {
+        gSPTextureRectangle(gfx++, (GAUGE_FULL_X + tick * GAUGE_LENGTH) << 2,
+                            (GAUGE_MARKER_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            (GAUGE_FULL_X + tick * GAUGE_LENGTH + GAUGE_TICK_WIDTH) << 2,
+                            (GAUGE_MARKER_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0,
+                            0, 0x400, 0x400);
+    }
+    for (tick = 1; tick <= GAUGE_MEDIUM_TICK_COUNT; tick++) {
+        gSPTextureRectangle(gfx++, (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING) << 2,
+                            (GAUGE_MEDIUM_TICK_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            (GAUGE_FULL_X + tick * GAUGE_TICKS_PER_GROUP * GAUGE_TICK_SPACING + GAUGE_TICK_WIDTH) << 2,
+                            (GAUGE_MEDIUM_TICK_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            G_TX_RENDERTILE, 0, 0, 0x400, 0xC00);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    fillWidth = GAUGE_FILL_IMAGE_WIDTH;
+    value = func_8005F224();
+    gDPLoadTextureBlock(gfx++, ((u32)sShotModeImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                        fillWidth, GAUGE_FILL_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
+    if (playerState != PLAYER_STATE_UNK2 && playerState == PLAYER_STATE_UNK4) {
+        sClubPanelUnk24 = value;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (playerState != PLAYER_STATE_UNK2) {
+        gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - sClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE) << 2,
+                            (GAUGE_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
+                            (GAUGE_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE,
+                            (((GAUGE_MAX_VALUE * 5 - sClubPanelUnk24 * 5) << 6) / (GAUGE_MAX_VALUE * 5)) << 5, 0,
+                            0x1B4, 0x800);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)sClubPanelImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, GAUGE_TICK_IMAGE_WIDTH,
+                           GAUGE_TICK_IMAGE_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 2, 0, 0, 0);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, GAUGE_EMPTY_X << 2, (GAUGE_MARKER_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                        (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
+                        (GAUGE_MARKER_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0, 0,
+                        0x400, 0x400);
+    if (isPutter) {
+        markerOffset = sClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+    } else {
+        markerOffset = value * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+    }
+    sMarkerPulseAngle += MARKER_PULSE_STEP;
+    pulse = sinf(sMarkerPulseAngle) * MARKER_PULSE_LEVEL + MARKER_PULSE_LEVEL;
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+    if (playerState == PLAYER_STATE_UNK2 || playerState == PLAYER_STATE_UNK4 || playerState == PLAYER_STATE_UNK5 ||
+        isPutter) {
+        gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+    } else if (value == 0) {
+        gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
+    } else {
+        absValue = value;
+        if (absValue < 0) {
+            absValue = -absValue;
+        }
+        if (span / 2 < absValue) {
+            gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+            gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+        } else {
+            gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, TEXEL0, 0, 0, 1, PRIMITIVE, ENVIRONMENT,
+                      TEXEL0, ENVIRONMENT, TEXEL0, 0, 0, 1);
+    gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
+                        (GAUGE_MARKER_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                        (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
+                        (GAUGE_MARKER_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0, 0,
+                        0x400, 0x400);
+    gDPPipeSync(gfx++);
+    if (playerState != PLAYER_STATE_UNK2 && playerState != PLAYER_STATE_UNK4 && !isPutter) {
+        gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
+        markerOffset = sClubPanelUnk24 * GAUGE_LENGTH / GAUGE_MAX_VALUE;
+        if (sClubPanelUnk24 == GAUGE_MAX_VALUE) {
+            gDPSetEnvColor(gfx++, pulse, pulse, pulse, 255);
+        } else {
+            gDPSetEnvColor(gfx++, 0, 0, 0, 255);
+        }
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(gfx++, (GAUGE_EMPTY_X - markerOffset) << 2,
+                            (GAUGE_MARKER_TOP + sClubPanelDebugValue + sShotPanelOffsetX) << 2,
+                            (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH - markerOffset) << 2,
+                            (GAUGE_MARKER_BOTTOM + sClubPanelDebugValue + sShotPanelOffsetX) << 2, G_TX_RENDERTILE, 0,
+                            0, 0x400, 0x400);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    if (span != 0) {
+        guTranslate(&sSpanBarTranslation, SPAN_BAR_X, SPAN_BAR_Y - sShotPanelOffsetX - sClubPanelDebugValue,
+                    SPAN_BAR_Z);
+        guScale(&sSpanBarScale, span * SPAN_BAR_SCALE_PER_SPAN, SPAN_BAR_THICKNESS, SPAN_BAR_THICKNESS);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSpanBarTranslation), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSpanBarScale), G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        gSPVertex(gfx++, sSpanBarVertices, SPAN_BAR_VERTEX_COUNT, 0);
+        gSPDisplayList(gfx++, sSpanBarDisplayList);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/club_panel", DrawClubPanel);
+#endif
 
 void DrawClubPanelIfShown(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;

@@ -25,6 +25,7 @@
 
 /* RoundHud.flags */
 #define HUD_FLAG_ANIMATE_OFFSET_MARKER 0x8 /* Animates the shot offset marker */
+#define HUD_FLAG_TRANSLUCENT_GAUGE 0x40    /* Set in free look, so the course shows through */
 
 /* The HUD's state for a round, which FreeScenery clears */
 typedef struct RoundHud {
