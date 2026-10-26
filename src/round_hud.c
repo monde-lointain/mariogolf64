@@ -2252,8 +2252,8 @@ void DrawHoleIntroText(Gfx **displayListHead) {
                 func_80242D40(&gfx);
             }
         } else if (g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
-            hundredths = (s32)(g_StopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) % HUNDREDTHS_PER_SECOND;
-            totalSeconds = g_StopwatchFrameCount / FRAMES_PER_SECOND;
+            hundredths = (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) % HUNDREDTHS_PER_SECOND;
+            totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
             seconds = totalSeconds % SECONDS_PER_MINUTE;
             minutes = totalSeconds / SECONDS_PER_MINUTE;
             SetUpGradientTextDrawing(&gfx, 0);

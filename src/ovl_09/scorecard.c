@@ -1679,9 +1679,11 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
         }
     }
 
-    sprintf(g_PrintBuffer, "%02d:%02d:%02d", g_StopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE,
-            g_StopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE,
-            (s32)(g_StopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) % HUNDREDTHS_PER_SECOND);
+    sprintf(g_PrintBuffer, "%02d:%02d:%02d",
+            g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE,
+            g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE,
+            (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                HUNDREDTHS_PER_SECOND);
     DrawFixedWidthLargeText(&gfx, g_Scorecard.x + ROUND_TOTAL_LEFT, g_Scorecard.y + ROUND_TIME_TOP, g_PrintBuffer);
     scoreToPar = GetNetScoreToPar(shownHoleCount, 0);
     if (scoreToPar == 0) {

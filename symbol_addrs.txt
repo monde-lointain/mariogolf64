@@ -2458,7 +2458,6 @@ BlendSkyColors = 0x8008DDDC; // type:func
 DrawHoleIntroText = 0x8008CD30; // type:func
 g_CourseNameEnvColors = 0x800C2AD8;
 g_CourseNamePrimColors = 0x800C2B00;
-g_StopwatchFrameCount = 0x801B60B0;
 DrawShotOffsetMarker = 0x80087CB0; // type:func
 sShotOffsetMarkerFrame = 0x800C5E24;
 sShotOffsetMarkerTexelOffset = 0x800E2134;

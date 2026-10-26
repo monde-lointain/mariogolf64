@@ -847,7 +847,7 @@ void InitHoleState(void) {
     ResetBallSimulations();
     g_HoleTimeFrames[g_GameState.holeIndex] = 0;
     if (g_GameState.holeIndex == 0) {
-        g_StopwatchFrameCount = 0;
+        g_GameState.stopwatchFrameCount = 0;
         for (index = 0; index != COURSE_HOLE_COUNT; index++) {
             g_HoleTimeFrames[index] = 0;
             g_HoleTimeHundredths[index] = 0;

@@ -81,7 +81,7 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK6 6
 
 /*
- * The walkthrough's Speed Golf: the HUD shows g_StopwatchFrameCount in this
+ * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount in this
  * mode, and its scorecard page shows each hole's time and the round's score.
  * EndHoleFlyover skips its call for a strong wind in it.
  */

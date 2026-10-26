@@ -66,7 +66,6 @@ extern Fog g_SceneFog;
 extern Fog g_DebugFog;
 extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
-extern s32 g_StopwatchFrameCount;
 
 /* The game counts time in frames */
 #define FRAMES_PER_SECOND 30
