@@ -62,9 +62,6 @@ extern s32 sPauseSelection;
 extern s32 sPauseLayout;
 extern s32 sPauseMenuRequest;
 extern s32 sPauseMenuUnkD678;
-/* Where the panels of the lie and of the wind slide to beside the menu */
-extern f32 g_LiePanelPosition[2];
-extern f32 g_WindPanelPosition[2];
 extern u8 *sPauseCursorImage;
 extern u8 *sMenuCloudImage; /* The pause menu's cloud, or the choice box's */
 extern u8 *sPauseArrowsImage;
