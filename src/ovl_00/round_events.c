@@ -12,6 +12,7 @@
 #include "pin.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "round_stats.h"
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -308,7 +309,7 @@ extern Mtx sFlipMessageMatrices[2];
 #define MOVIE_TEST_CONTROLLER 1
 
 void ResetPath(void);
-void func_802104BC_ovl_00(Gfx **displayListHead);
+void DrawContestWinnerMovie(Gfx **displayListHead);
 void DrawDriveRecord(Gfx **displayListHead);
 void DrawPuttCaption(Gfx **displayListHead);
 void DrawReadyGoMovie(Gfx **displayListHead);
@@ -716,7 +717,7 @@ void DrawMovie(Gfx **displayListHead) {
             break;
         case MOVIE_LONGEST_DRIVE:
         case MOVIE_NEAREST_PIN:
-            func_802104BC_ovl_00(&gfx);
+            DrawContestWinnerMovie(&gfx);
             break;
         case MOVIE_DRIVE_RECORD:
             DrawDriveRecord(&gfx);
@@ -739,7 +740,210 @@ void DrawMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802104BC_ovl_00);
+/* Where the contest winner's palette, face and plaque are kept, after the movie image */
+#define WINNER_PALETTE_OFFSET 0x2788
+#define WINNER_FACE_OFFSET 0x2988
+#define WINNER_PLAQUE_OFFSET 0x2D88
+#define WINNER_PLAQUE_ASSET 0x832 /* A wooden plaque behind the winner's face */
+#define WINNER_FACE_SIZE 32
+#define WINNER_PLAQUE_SIZE 48
+/* The plaque shows this much more than the face on each side */
+#define WINNER_PLAQUE_MARGIN 8
+#define WINNER_CENTRE_X 160
+#define WINNER_CENTRE_Y 128
+/* The face and plaque grow to this many steps of WINNER_GROWTH_STEP pixels, then shrink back */
+#define WINNER_MAX_GROWTH 4
+#define WINNER_GROWTH_STEP 5
+#define WINNER_SHRINK_FRAME 31
+#define CONTEST_SLIDE_DRAW 20
+#define CONTEST_PAN_DRAW_END 25
+#define CONTEST_PAN_START 223
+#define CONTEST_PAN_STEP 20
+#define CONTEST_SOUND_REVERB 20
+#define CONTEST_MEET_DRAW 25
+#define CONTEST_FLASH_END_DRAW 37
+#define CONTEST_SLIDE_OUT_DRAW 58
+#define CONTEST_END_DRAW 70
+#define CONTEST_DRAW_COUNT 90
+#define CONTEST_START_SLIDE 600
+#define CONTEST_SLIDE_PER_FRAME 24
+#define CONTEST_COPY_ALPHA 127
+#define CONTEST_FLASH_DEPTH 127.0f
+#define CONTEST_TURN_PER_FRAME (M_PI / 12)
+#define CONTEST_IMAGE_CENTRE_X 160
+#define CONTEST_IMAGE_CENTRE_Y 80
+#define CONTEST_IMAGE_STRIPS_ABOVE_CENTRE 4
+/* The winner cheers as the caption meets */
+#define CONTEST_CHEER_DRAW 26
+#define CHARACTER_SOUND_LONGEST_DRIVE 16
+#define CHARACTER_SOUND_NEAREST_PIN 18
+#define CHARACTER_SOUND_VOLUME 127
+#define CHARACTER_SOUND_PAN 127
+/* The face appears and vanishes over these frames, counted from CONTEST_MEET_DRAW */
+#define WINNER_FIRST_FRAME 1
+#define WINNER_LAST_FRAME 32
+#define SOUND_WINNER_APPEAR 0x49
+#define SOUND_WINNER_VANISH 0x4A
+#define WINNER_SOUND_VOLUME 63
+#define WINNER_SOUND_REVERB 30
+#define WINNER_SOUND_PAN 127
+/* The face's later frames, which g_CharacterImageAssets lists after its first */
+#define WINNER_BLINK_FRAME 8
+#define WINNER_FACE_FRAME_COUNT 4
+
+#ifdef NON_MATCHING
+/* The caption of a longest drive or nearest pin contest, then its winner's face */
+void DrawContestWinnerMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    AssetFile file;
+    u32 width;
+    s32 height;
+    s32 stripCount;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 slide;
+    s32 centreX;
+    s32 bottom;
+    s32 i;
+    s32 frame;
+    s32 growth;
+    s32 plaqueHalfSize;
+    s32 step;
+    f32 alpha;
+
+    width = (sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    height = (sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
+    stripCount = height / stripHeight;
+    slide = 0;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, 0, 0, 0, TEXEL0, TEXEL0, ENVIRONMENT,
+                      PRIMITIVE_ALPHA, ENVIRONMENT, 0, 0, 0, TEXEL0);
+    halfWidth = width >> 1;
+    if (sMovieDrawCount == CONTEST_SLIDE_DRAW) {
+        PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL, SHRINKING_IMAGE_SOUND_VOLUME,
+                             CONTEST_SOUND_REVERB, CONTEST_PAN_START);
+    }
+    if (sMovieDrawCount == CONTEST_CHEER_DRAW) {
+        if (sCurrentMovie == MOVIE_LONGEST_DRIVE) {
+            PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex, GetContestWinner(),
+                               CHARACTER_SOUND_LONGEST_DRIVE, CHARACTER_SOUND_VOLUME, CHARACTER_SOUND_PAN);
+        } else {
+            PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex, GetContestWinner(),
+                               CHARACTER_SOUND_NEAREST_PIN, CHARACTER_SOUND_VOLUME, CHARACTER_SOUND_PAN);
+        }
+    }
+    if (sMovieDrawCount > CONTEST_SLIDE_DRAW && sMovieDrawCount < CONTEST_PAN_DRAW_END) {
+        SetSoundPan(SHRINKING_IMAGE_SOUND_CHANNEL,
+                    CONTEST_PAN_START - (sMovieDrawCount - CONTEST_SLIDE_DRAW) * CONTEST_PAN_STEP);
+    }
+    if (sMovieDrawCount < CONTEST_MEET_DRAW) {
+        slide = CONTEST_START_SLIDE - sMovieDrawCount * CONTEST_SLIDE_PER_FRAME;
+        if (slide < 0) {
+            slide = 0;
+        }
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
+        if (sMovieDrawCount == 0) {
+            OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[GetContestWinner()].characterIndex] +
+                              (s8)g_Players[GetContestWinner()].paletteIndex,
+                          &file);
+            ReadAssetFile(sMovieBuffer + WINNER_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()].characterIndex], &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_FACE_OFFSET, &asset);
+            OpenEncodedAsset(WINNER_PLAQUE_ASSET, &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_PLAQUE_OFFSET, &asset);
+        }
+    } else if (sMovieDrawCount < CONTEST_FLASH_END_DRAW) {
+        alpha = 255.0f - sinf((sMovieDrawCount - CONTEST_MEET_DRAW) * CONTEST_TURN_PER_FRAME) * CONTEST_FLASH_DEPTH;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    } else if (sMovieDrawCount < CONTEST_SLIDE_OUT_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    } else if (sMovieDrawCount < CONTEST_END_DRAW) {
+        slide = (CONTEST_SLIDE_OUT_DRAW - sMovieDrawCount) * CONTEST_SLIDE_PER_FRAME;
+    } else {
+        sCurrentMovie = MOVIE_NONE;
+        halfWidth = 0;
+    }
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (sMovieDrawCount < CONTEST_DRAW_COUNT && halfWidth != 0) {
+        bottom = CONTEST_IMAGE_CENTRE_Y;
+        for (i = 0; i != stripCount; i++) {
+            LoadTextureBlock(&gfx, sMovieBuffer + (i * width * MOVIE_IMAGE_STRIP_HEIGHT + MOVIE_IMAGE_PIXELS_OFFSET),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            centreX = CONTEST_IMAGE_CENTRE_X + slide;
+            DrawTextureRect(&gfx, (centreX - halfWidth) << 2,
+                            (bottom - stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE) << 2,
+                            (centreX + halfWidth) << 2,
+                            (bottom - stripHeight * CONTEST_IMAGE_STRIPS_ABOVE_CENTRE + MOVIE_IMAGE_STRIP_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
+                            (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+            bottom += MOVIE_IMAGE_STRIP_HEIGHT;
+        }
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    if (sMovieDrawCount > CONTEST_MEET_DRAW && sMovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
+        frame = sMovieDrawCount - CONTEST_MEET_DRAW;
+        if (frame == WINNER_BLINK_FRAME) {
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()].characterIndex] + 1,
+                             &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_FACE_OFFSET, &asset);
+        } else if (frame == WINNER_BLINK_FRAME + 2) {
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()].characterIndex] + 2,
+                             &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_FACE_OFFSET, &asset);
+        } else if (frame == WINNER_BLINK_FRAME + 4) {
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()].characterIndex] + 3,
+                             &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_FACE_OFFSET, &asset);
+        } else if (frame == WINNER_BLINK_FRAME + 6) {
+            OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[GetContestWinner()].characterIndex] + 4,
+                             &asset);
+            ReadEncodedAsset(sMovieBuffer + WINNER_FACE_OFFSET, &asset);
+        }
+        if (frame == WINNER_FIRST_FRAME) {
+            PlaySoundWithEffects(SOUND_WINNER_APPEAR, g_NextSoundChannel, WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB,
+                                 WINNER_SOUND_PAN);
+        }
+        if (frame == WINNER_SHRINK_FRAME) {
+            PlaySoundWithEffects(SOUND_WINNER_VANISH, g_NextSoundChannel, WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB,
+                                 WINNER_SOUND_PAN);
+        }
+        if (frame >= WINNER_SHRINK_FRAME) {
+            frame = WINNER_SHRINK_FRAME + 3 - frame;
+            if (frame <= 0) {
+                frame = 1;
+            }
+        } else if (frame > WINNER_MAX_GROWTH) {
+            frame = WINNER_MAX_GROWTH;
+        }
+        growth = frame * WINNER_GROWTH_STEP;
+        LoadSmallPalette(&gfx, 0, sMovieBuffer + WINNER_PLAQUE_OFFSET + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx, sMovieBuffer + WINNER_PLAQUE_OFFSET + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                               WINNER_PLAQUE_SIZE, WINNER_PLAQUE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        plaqueHalfSize = growth + WINNER_PLAQUE_MARGIN;
+        step = ((WINNER_PLAQUE_SIZE / 2) << 10) / plaqueHalfSize;
+        DrawTextureRect(&gfx, (WINNER_CENTRE_X - plaqueHalfSize) << 2, (WINNER_CENTRE_Y - plaqueHalfSize) << 2,
+                        (WINNER_CENTRE_X + plaqueHalfSize) << 2, (WINNER_CENTRE_Y + plaqueHalfSize) << 2,
+                        G_TX_RENDERTILE, 0, 0, step, step);
+        LoadLargePalette(&gfx, sMovieBuffer + WINNER_PALETTE_OFFSET);
+        LoadTextureBlock(&gfx, sMovieBuffer + WINNER_FACE_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, WINNER_FACE_SIZE,
+                         WINNER_FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        step = ((WINNER_FACE_SIZE / 2) << 10) / growth;
+        DrawTextureRect(&gfx, (WINNER_CENTRE_X - growth) << 2, (WINNER_CENTRE_Y - growth) << 2,
+                        (WINNER_CENTRE_X + growth) << 2, (WINNER_CENTRE_Y + growth) << 2, G_TX_RENDERTILE, 0, 0, step,
+                        step);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
+#endif
 
 /*
  * The caption and a copy of it slide in from either side until they meet
