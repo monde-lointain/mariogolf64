@@ -122,13 +122,13 @@ void SetFramebufferCount(s32 count);
 void HideRoundHud(void) {
     g_RoundHud.isLetterboxShown = FALSE;
     g_RoundHud.unkC = 0;
-    g_RoundHud.unk7 = 0;
+    g_RoundHud.isWindIndicatorShown = 0;
     g_RoundHud.areLieArrowsShown = 0;
     g_RoundHud.areWindSpeedArrowsShown = 0;
     g_RoundHud.areWindDirectionArrowsShown = 0;
     g_RoundHud.unk8 = 0;
-    g_RoundHud.unk9 = 0;
-    g_RoundHud.unkA = 0;
+    g_RoundHud.isLieIconShown = 0;
+    g_RoundHud.isClubHeadIconShown = 0;
     g_RoundHud.unkB = 0;
     g_RoundHud.unkD = 0;
 }
@@ -136,13 +136,13 @@ void HideRoundHud(void) {
 void ResumeRound(void) {
     g_RoundHud.isLetterboxShown = TRUE;
     g_RoundHud.unkC = 1;
-    g_RoundHud.unk7 = 1;
+    g_RoundHud.isWindIndicatorShown = 1;
     g_RoundHud.areLieArrowsShown = 0;
     g_RoundHud.areWindSpeedArrowsShown = 0;
     g_RoundHud.areWindDirectionArrowsShown = 0;
     g_RoundHud.unk8 = 1;
-    g_RoundHud.unk9 = 1;
-    g_RoundHud.unkA = 1;
+    g_RoundHud.isLieIconShown = 1;
+    g_RoundHud.isClubHeadIconShown = 1;
     g_RoundHud.unkB = 1;
     g_RoundHud.unkD = 1;
     SetMenuBackdrop(MENU_BACKDROP_NONE);

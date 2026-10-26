@@ -35,10 +35,10 @@ typedef struct RoundHud {
     /* 0x04 */ u8 unk4;
     /* 0x05 */ s8 isLetterboxShown; /* DrawLetterbox draws its bars only while this is set */
     /* 0x06 */ s8 unk6;
-    /* 0x07 */ s8 unk7;
+    /* 0x07 */ s8 isWindIndicatorShown;
     /* 0x08 */ s8 unk8;
-    /* 0x09 */ s8 unk9;
-    /* 0x0A */ s8 unkA;
+    /* 0x09 */ s8 isLieIconShown;
+    /* 0x0A */ s8 isClubHeadIconShown;
     /* 0x0B */ s8 unkB;
     /* 0x0C */ s8 unkC;
     /* 0x0D */ s8 unkD;
@@ -65,8 +65,8 @@ typedef struct RoundHud {
     /* 0x28 */ s32 cupDistance;
     /* 0x2C */ u8 unk2C[0x78 - 0x2C];
     /* 0x78 */ u16 skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as TallySkins counts them */
-    /* 0x80 */ u16 unk80;
-    /* 0x82 */ u16 unk82;
+    /* 0x80 */ u16 clubHeadTilt; /* Binary angles; the icons tilt by half */
+    /* 0x82 */ u16 lieTilt;      /* The slope under the ball */
     /* 0x84 */ u8 unk84[3];
     /* 0x87 */ s8 unk87;
     /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */

@@ -2001,11 +2001,11 @@ void StartPlayerShot(s32 playerIndex) {
         D_800C308C = LETTERBOX_STATE_NONE;
     }
     g_RoundHud.scorecardPage = -1;
-    g_RoundHud.unk7 = TRUE;
+    g_RoundHud.isWindIndicatorShown = TRUE;
     g_RoundHud.unk8 = TRUE;
     g_RoundHud.isLetterboxShown = TRUE;
-    g_RoundHud.unk9 = TRUE;
-    g_RoundHud.unkA = TRUE;
+    g_RoundHud.isLieIconShown = TRUE;
+    g_RoundHud.isClubHeadIconShown = TRUE;
     g_RoundHud.unkB = TRUE;
     g_RoundHud.isHoleIntroTextShown = FALSE;
     g_RoundHud.unkC = TRUE;
@@ -2534,10 +2534,10 @@ void SetRoundHudPartsShown(s8 isShown) {
     s32 garbage;
 
     unused = garbage;
-    g_RoundHud.unk7 = isShown;
+    g_RoundHud.isWindIndicatorShown = isShown;
     g_RoundHud.unk8 = isShown;
-    g_RoundHud.unk9 = isShown;
-    g_RoundHud.unkA = isShown;
+    g_RoundHud.isLieIconShown = isShown;
+    g_RoundHud.isClubHeadIconShown = isShown;
     g_RoundHud.unkB = isShown;
     g_RoundHud.unkD = isShown;
 }

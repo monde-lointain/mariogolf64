@@ -1620,7 +1620,7 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
                                 SCREEN_HEIGHT / 2 - g_WindPanelPosition[AXIS_Y], PAUSE_PANEL_ARROWS_GAP);
             }
         }
-    } else if (g_HoleConditions.windSpeed != 0 && g_RoundHud.unk7 &&
+    } else if (g_HoleConditions.windSpeed != 0 && g_RoundHud.isWindIndicatorShown &&
                GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && D_800BE69C == 0) {
         DrawWindIndicator(&gfx, sShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X, SHOT_PANEL_WIND_INDICATOR_Y);
     }
@@ -1631,7 +1631,7 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
     if (D_800BE69C == 0 && g_IsModuleAlive[MODULE_UNK25]) {
         DrawClubPanelIfShown(&gfx);
     }
-    if (g_RoundHud.unkA && D_800BE69C == 0) {
+    if (g_RoundHud.isClubHeadIconShown && D_800BE69C == 0) {
         club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
         if (club->headImageAsset != sClubHeadImageAsset) {
             EncodedAsset asset;
@@ -1643,7 +1643,7 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
             OpenEncodedAsset(sClubNameAssets[g_CurrentShot.clubSlot], &asset);
             ReadEncodedAsset(sClubNameImages[sClubNameImageIndex], &asset);
         }
-        clubHeadAngle = g_RoundHud.unk80 * BINARY_ANGLE_TO_RADIANS;
+        clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
         if (clubHeadAngle > M_PI) {
             clubHeadAngle -= 2 * M_PI;
         }
@@ -1679,15 +1679,15 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
     }
-    if ((g_RoundHud.unk9 || g_RoundHud.areLieArrowsShown) && D_800BE69C == 0) {
-        lieAngle = g_RoundHud.unk82 * BINARY_ANGLE_TO_RADIANS;
+    if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) && D_800BE69C == 0) {
+        lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
         if (lieAngle > M_PI) {
             lieAngle -= 2 * M_PI;
         }
         rotation[AXIS_X] = 0;
         rotation[AXIS_Y] = 0;
         rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
-        if (g_RoundHud.unk9) {
+        if (g_RoundHud.isLieIconShown) {
             translation[AXIS_X] = sShotPanelOffsetX + LIE_ICON_X;
             translation[AXIS_Y] = LIE_ICON_Y - sHudOffsetY;
             translation[AXIS_Z] = SHOT_PANEL_ICON_Z;

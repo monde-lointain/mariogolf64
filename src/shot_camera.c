@@ -538,10 +538,10 @@ void StartFlightCamera(s32 earlierFlightCount) {
     if (D_800DAF20) {
         D_800BE67C = RandomBelow(2);
         g_RoundHud.unkC = D_800BE67C;
-        g_RoundHud.unk7 = D_800BE67C;
+        g_RoundHud.isWindIndicatorShown = D_800BE67C;
         g_RoundHud.unk8 = D_800BE67C;
-        g_RoundHud.unk9 = D_800BE67C;
-        g_RoundHud.unkA = D_800BE67C;
+        g_RoundHud.isLieIconShown = D_800BE67C;
+        g_RoundHud.isClubHeadIconShown = D_800BE67C;
         g_RoundHud.unkB = D_800BE67C;
         g_RoundHud.unkD = D_800BE67C;
     }
@@ -608,7 +608,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
             D_800BE690 = FALSE;
         }
     }
-    degrees = g_RoundHud.unk82 * (360.0f * BINARY_ANGLE_TO_RADIANS) * (1.0 / (2 * M_PI));
+    degrees = g_RoundHud.lieTilt * (360.0f * BINARY_ANGLE_TO_RADIANS) * (1.0 / (2 * M_PI));
     if (degrees < 350.0f && degrees > 10.0f) {
         D_800BE690 = FALSE;
     }
@@ -2388,7 +2388,7 @@ extern s8 D_80104B68;
  * Updates the flight camera, the inset view and the ball's sounds for one frame of the
  * ball's flight, and advances g_BallFlightStep when isAdvancing is 1. Once the flight has
  * ended, it counts the landing wait and returns TRUE when it is over. The START button
- * clears g_RoundHud.unk7 through g_RoundHud.unkD and g_RoundHud.unk13.
+ * clears g_RoundHud.isWindIndicatorShown through g_RoundHud.unkD and g_RoundHud.unk13.
  */
 s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     f32 point[3];
@@ -2405,19 +2405,19 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     }
     if (buttons & START_BUTTON) {
         g_RoundHud.unkC = 0;
-        g_RoundHud.unk7 = 0;
+        g_RoundHud.isWindIndicatorShown = 0;
         g_RoundHud.unk8 = 0;
-        g_RoundHud.unk9 = 0;
-        g_RoundHud.unkA = 0;
+        g_RoundHud.isLieIconShown = 0;
+        g_RoundHud.isClubHeadIconShown = 0;
         g_RoundHud.unkB = 0;
         g_RoundHud.unkD = 0;
         g_RoundHud.unk13 = 0;
     } else {
         g_RoundHud.unkC = D_800BE67C;
-        g_RoundHud.unk7 = D_800BE67C;
+        g_RoundHud.isWindIndicatorShown = D_800BE67C;
         g_RoundHud.unk8 = D_800BE67C;
-        g_RoundHud.unk9 = D_800BE67C;
-        g_RoundHud.unkA = D_800BE67C;
+        g_RoundHud.isLieIconShown = D_800BE67C;
+        g_RoundHud.isClubHeadIconShown = D_800BE67C;
         g_RoundHud.unkB = D_800BE67C;
         g_RoundHud.unkD = D_800BE67C;
     }
