@@ -3028,3 +3028,5 @@ UpdatePauseMenu = 0x80219034; // type:func segment:ovl_00
 g_TeePositionX = 0x800BA9E4; // size:0x4
 g_TeePositionZ = 0x800BA9EC; // size:0x4
 g_TurnBallSimulation = 0x80104AC8;
+DrawBanner = 0x8020EEF8; // type:func segment:ovl_00
+sTestBanner = 0x802243B0; // size:0x4 segment:ovl_00

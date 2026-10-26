@@ -934,7 +934,7 @@ void DrawRoundResults(Gfx **displayListHead);
 void func_801FD578(Gfx **displayListHead);
 void func_801FE370(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
-void func_8020EEF8(Gfx **displayListHead);
+void DrawBanner(Gfx **displayListHead);
 void DrawFlipMessage(Gfx **displayListHead);
 void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawWindFlyGuy(Gfx **displayListHead);
@@ -1648,7 +1648,7 @@ s32 DrawGame(void) {
             DrawMovie(&g_DisplayListHead);
         }
         if (g_IsModuleAlive[17]) {
-            func_8020EEF8(&g_DisplayListHead);
+            DrawBanner(&g_DisplayListHead);
         }
         if (g_IsModuleAlive[17]) {
             DrawWindFlyGuy(&g_DisplayListHead);

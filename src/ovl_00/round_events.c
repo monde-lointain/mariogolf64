@@ -466,7 +466,274 @@ void func_8020EEEC_ovl_00(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020EEF8_ovl_00);
+/* How a banner comes in, as its Banner.animation */
+#define BANNER_ANIMATION_ZOOM 0      /* Shrinks onto the screen while fading in, then leaves */
+#define BANNER_ANIMATION_SPIN 1      /* Grows while turning once */
+#define BANNER_ANIMATION_SLIDE 2     /* Slides in from the right and wobbles, then leaves */
+#define BANNER_ANIMATION_ZOOM_STAY 3 /* Like BANNER_ANIMATION_ZOOM, but larger and stays */
+
+/* The debug flag that lets the D-Pad pick a banner and start it */
+#define GAME_FLAG_TEST_BANNERS 0x6D
+#define TEST_BANNER_LAST 37
+
+#define BANNER_LAST_FRAME 200
+#define BANNER_END_FRAME 60
+#define SOUND_BANNER 0x44
+#define BANNER_SOUND_FRAME 10
+#define BANNER_SOUND_CHANNEL 13
+#define BANNER_SOUND_VOLUME 63
+#define BANNER_Y 64.0f
+/* The zooming banners start large and shrink by this each frame */
+#define BANNER_ZOOM_FRAMES 20
+#define BANNER_ZOOM_PER_FRAME 0.3f
+#define BANNER_ZOOM_SMALLEST 1.2f
+#define BANNER_ZOOM_STAY_SMALLEST 1.0f
+#define BANNER_SPIN_GROWTH_PER_FRAME 0.1f
+#define BANNER_SLIDE_FRAMES 10
+#define BANNER_SLIDE_PER_FRAME 36.0f
+/* The sliding banner wobbles over these frames, less and less */
+#define BANNER_WOBBLE_FRAMES 20
+#define BANNER_WOBBLE_DEPTH 0.4f
+#define BANNER_WOBBLE_DEPTH_LOSS 0.05f
+#define BANNER_WOBBLE_SMALLEST_DEPTH 0.1f
+#define BANNER_WOBBLE_TURN_PER_FRAME (M_PI / 10)
+/* The banner's shading shows through less as it fades in */
+#define BANNER_MAX_ALPHA 255
+#define BANNER_BLEND_ALPHA 1
+
+extern s32 sTestBanner;
+
+/* Animates the shown banner and draws it, its letters each on their own square */
+void DrawBanner(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 alpha;
+    f32 letterScale;
+    f32 angle;
+    f32 slide;
+    f32 wobbleDepth;
+    s32 i;
+
+    angle = 0.0f;
+    if (IsGameFlagSet(GAME_FLAG_TEST_BANNERS)) {
+        if ((g_ControllerStates[0].pressedButtons & L_JPAD) && sTestBanner > 0) {
+            sTestBanner--;
+        }
+        if ((g_ControllerStates[0].pressedButtons & R_JPAD) && sTestBanner < TEST_BANNER_LAST) {
+            sTestBanner++;
+        }
+        if (g_ControllerStates[0].pressedButtons & D_JPAD) {
+            StartBanner(sTestBanner);
+        }
+    }
+    if (sCurrentBanner == BANNER_NONE || sBannerFrame == BANNER_FRAME_NONE) {
+        return;
+    }
+    sBannerFrame++;
+    if (sBannerFrame > BANNER_LAST_FRAME) {
+        sBannerFrame = BANNER_LAST_FRAME;
+    }
+    if (sBannerFrame == BANNER_SOUND_FRAME) {
+        PlaySound(SOUND_BANNER, BANNER_SOUND_CHANNEL, BANNER_SOUND_VOLUME);
+    }
+    switch (sBanners[sCurrentBanner].animation) {
+        case BANNER_ANIMATION_ZOOM:
+            letterScale = (BANNER_ZOOM_FRAMES - sBannerFrame) * BANNER_ZOOM_PER_FRAME;
+            if (letterScale < BANNER_ZOOM_SMALLEST) {
+                letterScale = BANNER_ZOOM_SMALLEST;
+            }
+            alpha = sBannerFrame * sBannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
+            if (sBannerFrame == BANNER_END_FRAME) {
+                sBannerFrame = BANNER_FRAME_NONE;
+            }
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = angle;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            translation[AXIS_Y] = BANNER_Y;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerMatrices[g_MatrixBufferIndex]);
+            break;
+        case BANNER_ANIMATION_SPIN:
+            letterScale = sBannerFrame * BANNER_SPIN_GROWTH_PER_FRAME;
+            if (letterScale > 1.0f) {
+                letterScale = 1.0f;
+            }
+            alpha = sBannerFrame * sBannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
+            angle = sBannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * (2 * M_PI);
+            if (angle > 2 * M_PI) {
+                angle = 0.0f;
+            }
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = angle;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerMatrices[g_MatrixBufferIndex]);
+            break;
+        case BANNER_ANIMATION_SLIDE:
+            slide = (BANNER_SLIDE_FRAMES - sBannerFrame) * BANNER_SLIDE_PER_FRAME;
+            if (slide < 0.0f) {
+                slide = 0.0f;
+            }
+            if (sBannerFrame >= BANNER_SLIDE_FRAMES && sBannerFrame < BANNER_SLIDE_FRAMES + BANNER_WOBBLE_FRAMES) {
+                wobbleDepth = BANNER_WOBBLE_DEPTH - (sBannerFrame - BANNER_WOBBLE_FRAMES) * BANNER_WOBBLE_DEPTH_LOSS;
+                if (wobbleDepth < BANNER_WOBBLE_SMALLEST_DEPTH) {
+                    wobbleDepth = BANNER_WOBBLE_SMALLEST_DEPTH;
+                }
+                letterScale = (sinf((sBannerFrame - BANNER_WOBBLE_FRAMES) * BANNER_WOBBLE_TURN_PER_FRAME) + 1.0f) *
+                             wobbleDepth +
+                         (1.0f - wobbleDepth);
+            } else {
+                letterScale = 1.0f;
+            }
+            /* Keeps the banner's left edge in place while it stretches */
+            slide += sBannerLayouts[sCurrentBanner][BANNER_LAYOUT_LEFT] * (1.0f - letterScale);
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = letterScale;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_X] = slide;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerMatrices[g_MatrixBufferIndex]);
+            letterScale = 1.0f;
+            if (sBannerFrame == BANNER_END_FRAME) {
+                sBannerFrame = BANNER_FRAME_NONE;
+            }
+            break;
+        case BANNER_ANIMATION_ZOOM_STAY:
+            letterScale = (BANNER_ZOOM_FRAMES - sBannerFrame) * BANNER_ZOOM_PER_FRAME;
+            if (letterScale < BANNER_ZOOM_STAY_SMALLEST) {
+                letterScale = BANNER_ZOOM_STAY_SMALLEST;
+            }
+            alpha = sBannerFrame * sBannerFrame;
+            if (alpha > BANNER_MAX_ALPHA) {
+                alpha = BANNER_MAX_ALPHA;
+            }
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = 0.0f;
+            translation[AXIS_Z] = 0;
+            scale[AXIS_X] = 1.0f;
+            scale[AXIS_Y] = 1.0f;
+            scale[AXIS_Z] = 1.0f;
+            translation[AXIS_Y] = BANNER_Y;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerMatrices[g_MatrixBufferIndex]);
+            break;
+    }
+    if (sCurrentBanner < BANNER_OVER_PAR_NUMBER) {
+        for (i = 0; i != sBanners[sCurrentBanner].letterCount; i++) {
+            sBannerLetters[i].x = ((f32)sBannerLayouts[sCurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
+                                   (f32)sBannerLayouts[sCurrentBanner][BANNER_LAYOUT_LEFT]) *
+                                  letterScale;
+            sBannerLetters[i].y = 0.0f;
+            sBannerLetters[i].unkC = 0;
+            sBannerLetters[i].scale = letterScale;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_X] = sBannerLetters[i].x;
+            translation[AXIS_Y] = sBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = sBannerLetters[i].scale;
+            scale[AXIS_Y] = sBannerLetters[i].scale;
+            scale[AXIS_Z] = sBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    } else {
+        for (i = 0; i != sBannerNumberLetterCount; i++) {
+            sBannerLetters[i].x =
+                (i * BANNER_LETTER_SPACING - sBannerNumberLetterCount * (BANNER_LETTER_SPACING / 2)) * letterScale;
+            sBannerLetters[i].y = 0.0f;
+            sBannerLetters[i].unkC = 0;
+            sBannerLetters[i].scale = letterScale;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0.0f;
+            translation[AXIS_X] = sBannerLetters[i].x;
+            translation[AXIS_Y] = sBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = sBannerLetters[i].scale;
+            scale[AXIS_Y] = sBannerLetters[i].scale;
+            scale[AXIS_Z] = sBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    switch (sBanners[sCurrentBanner].animation) {
+        case BANNER_ANIMATION_ZOOM:
+        case BANNER_ANIMATION_ZOOM_STAY:
+            gDPSetCombineLERP(gfx++, SHADE, TEXEL0, PRIMITIVE_ALPHA, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, TEXEL0,
+                              PRIMITIVE_ALPHA, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0);
+            if (alpha == BANNER_MAX_ALPHA) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+            } else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+            }
+            break;
+        case BANNER_ANIMATION_SPIN:
+        case BANNER_ANIMATION_SLIDE:
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+            break;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, ~alpha);
+    gDPSetEnvColor(gfx++, 0, 0, 0, alpha);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, BANNER_BLEND_ALPHA);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    if (sCurrentBanner < BANNER_OVER_PAR_NUMBER) {
+        DrawBannerLetters(&gfx);
+        func_8020EEEC_ovl_00(&gfx);
+    } else {
+        DrawNumberBanner(&gfx);
+    }
+    *displayListHead = gfx;
+}
 
 #ifdef NON_MATCHING
 /*
