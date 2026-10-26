@@ -192,7 +192,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
 void DrawStandingsPage(Gfx **displayListHead);
 void DrawMatchPage(Gfx **displayListHead);
 void DrawSkinsPage(Gfx **displayListHead);
-void func_80246804_ovl_09(Gfx **displayListHead);
+void DrawBetsPage(Gfx **displayListHead);
 void DrawSpeedGolfPage(Gfx **displayListHead);
 void func_80247E3C_ovl_09(Gfx **displayListHead);
 void func_802493DC_ovl_09(Gfx **displayListHead);
@@ -207,7 +207,7 @@ void SetScorecardState(s32 state);
 #define UNK14_IMAGE_ASSET 0x690
 #define UNK18_IMAGE_ASSET 0x691
 #define DIGITS_IMAGE_ASSET 0x689
-#define UNKB8_IMAGE_ASSET 0x97A
+#define BET_SUBTITLES_IMAGE_ASSET 0x97A
 #define LABELS_IMAGE_ASSET 0x68A
 #define UNK8C_IMAGE_ASSET 0x693
 #define PLACES_IMAGE_ASSET 0x688
@@ -218,8 +218,8 @@ void SetScorecardState(s32 state);
 #define SKIN_ICON_IMAGE_ASSET 0x68B
 #define UNK90_IMAGE_ASSET 0x695
 #define UNK88_IMAGE_ASSET 0x692
-#define UNK84_IMAGE_ASSET 0x696
-#define UNK94_IMAGE_ASSET 0x69D
+#define TOTAL_HEADING_IMAGE_ASSET 0x696
+#define GRID_IMAGE_ASSET 0x69D
 
 /* The rows of sPageTitleAssets */
 #define PAGE_TITLES_SPEED_GOLF 0
@@ -278,8 +278,8 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
     ReadEncodedAsset(g_Scorecard.unk18, &asset);
     g_Scorecard.digitsImage = AllocMemory(OpenEncodedAsset(DIGITS_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.digitsImage, &asset);
-    g_Scorecard.unkB8 = AllocMemory(OpenEncodedAsset(UNKB8_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_Scorecard.unkB8, &asset);
+    g_Scorecard.betSubtitlesImage = AllocMemory(OpenEncodedAsset(BET_SUBTITLES_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.betSubtitlesImage, &asset);
     g_Scorecard.labelsImage = AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.labelsImage, &asset);
     g_Scorecard.unk8C = AllocMemory(OpenEncodedAsset(UNK8C_IMAGE_ASSET, &asset));
@@ -431,10 +431,10 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             imageIndex++;
         }
     }
-    g_Scorecard.unk84 = AllocMemory(OpenEncodedAsset(UNK84_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_Scorecard.unk84, &asset);
-    g_Scorecard.unk94 = AllocMemory(OpenEncodedAsset(UNK94_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_Scorecard.unk94, &asset);
+    g_Scorecard.totalHeadingImage = AllocMemory(OpenEncodedAsset(TOTAL_HEADING_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.totalHeadingImage, &asset);
+    g_Scorecard.gridImage = AllocMemory(OpenEncodedAsset(GRID_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.gridImage, &asset);
     SetScorecardState(SCORECARD_OPENING);
     ForceStopRumble();
 }
@@ -468,11 +468,11 @@ void FreeScorecard(void) {
                 imageIndex++;
             }
         }
-        FreeMemory(&g_Scorecard.unk84);
+        FreeMemory(&g_Scorecard.totalHeadingImage);
         FreeMemory(&g_Scorecard.pageTitleImages[2]);
         FreeMemory(&g_Scorecard.pageTitleImages[1]);
         FreeMemory(&g_Scorecard.pageTitleImages[0]);
-        FreeMemory(&g_Scorecard.unk94);
+        FreeMemory(&g_Scorecard.gridImage);
         switch (g_GameMode) {
             case GAME_MODE_STROKE:
             case GAME_MODE_UNK1:
@@ -506,7 +506,7 @@ void FreeScorecard(void) {
         FreeMemory(&g_Scorecard.unk8C);
         FreeMemory(&g_Scorecard.labelsImage);
         FreeMemory(&g_Scorecard.digitsImage);
-        FreeMemory(&g_Scorecard.unkB8);
+        FreeMemory(&g_Scorecard.betSubtitlesImage);
         FreeMemory(&g_Scorecard.unk18);
         FreeMemory(&g_Scorecard.unk14);
         FreeMemory(&g_Scorecard.tableImage);
@@ -1165,7 +1165,7 @@ void DrawScorecard(Gfx **displayListHead) {
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
-                        func_80246804_ovl_09(&gfx);
+                        DrawBetsPage(&gfx);
                     }
                     break;
                 case GAME_MODE_MATCH_GAME:
@@ -1177,7 +1177,7 @@ void DrawScorecard(Gfx **displayListHead) {
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
-                        func_80246804_ovl_09(&gfx);
+                        DrawBetsPage(&gfx);
                     }
                     break;
                 case GAME_MODE_STROKE:
@@ -1190,14 +1190,14 @@ void DrawScorecard(Gfx **displayListHead) {
                         if (g_RoundHud.scorecardPage == 0) {
                             func_802493DC_ovl_09(&gfx);
                         } else {
-                            func_80246804_ovl_09(&gfx);
+                            DrawBetsPage(&gfx);
                         }
                     } else if (g_RoundHud.scorecardPage == 0) {
                         DrawStandingsPage(&gfx);
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
-                        func_80246804_ovl_09(&gfx);
+                        DrawBetsPage(&gfx);
                     }
                     break;
             }
@@ -2153,7 +2153,303 @@ void DrawSkinsPage(Gfx **displayListHead) {
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C848_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80246804_ovl_09);
+/* The bets page: a grid with a column for each bet being played and one for the totals */
+#define BET_COLUMN_SPACING 35
+#define BET_NAME_SPACING 36
+#define BET_BLINK_TIME 7
+#define UNPLAYED_BET_GRAY 0xBF
+/* The grid's lines are cut from a small image of 3 texel pieces */
+#define GRID_IMAGE_SIZE 16
+#define GRID_LINE_WIDTH 3
+#define GRID_LEFT 32
+#define GRID_RIGHT 292
+#define GRID_TOP 64
+#define GRID_BOTTOM 220
+#define GRID_HEADER_LINE_TOP 74
+#define GRID_ROW_LINE_TOP 96
+#define GRID_ROW_LINE_LEFT 28
+#define GRID_ROW_COUNT 4
+#define GRID_ROW_HEIGHT 32
+#define GRID_COLUMN_LINE_LEFT 54
+#define GRID_COLUMN_COUNT 7
+#define GRID_STRETCHED_STEP 11 /* Stretches one texel along a header line */
+#define GRID_COLUMN_STEP 18    /* Stretches the column line's texels down the grid */
+#define GRID_TEXEL_LINE 3
+#define GRID_TEXEL_TOP_END 6
+#define GRID_TEXEL_BOTTOM_END 9
+#define GRID_TEXEL_CROSSING 12
+/* The bets' heading images, and the totals' heading after them */
+#define BET_IMAGE_SIZE 24
+#define BET_IMAGE_LEFT 60
+#define BET_IMAGE_TOP 46
+/* The subtitles under some bets' headings, from rows of one image */
+#define BET_SUBTITLE_WIDTH 32
+#define BET_SUBTITLE_HEIGHT 16
+#define BET_SUBTITLE_IMAGE_HEIGHT 48
+#define BET_SUBTITLE_LEFT 56
+#define BET_SUBTITLE_TOP 58
+#define NO_BET_SUBTITLE -1
+#define BET_FACE_LEFT 18
+#define BET_FACE_TOP 100
+#define BET_NAME_LEFT 71
+#define BET_NAME_TOP 46
+#define BET_RATE_LEFT 74
+#define BET_RATE_TOP 48
+#define BET_RATE_RED 0xFF
+#define BET_RATE_GREEN 0xA0
+#define CARRY_OVER_TOP 78
+#define CARRY_OVER_SECOND_TOP 86
+#define BET_POT_LEFT 69
+#define BET_POT_TOP 86
+#define BET_TALLY_LEFT 53
+#define NO_TALLY_LEFT 69
+#define BET_TALLY_TOP 112
+
+/* The headings blink between their two images, a frame each this many draws */
+extern s32 sBetBlinkFrame;
+extern s32 sBetBlinkTime;
+extern s8 sBetSubtitleRows[BET_COUNT];
+extern char *sBetNames[BET_COUNT];
+
+/*
+ * Draws the bets page: each bet being played, its rate, any pot carried over,
+ * and what each player has won on it and in total. A bet with a rate of zero is
+ * grayed out.
+ *
+ * Doesn't match: the target adds each offset to the position it loads, where
+ * this folds the offsets' constants into extra loop registers, so its frame
+ * is 0x70 bytes, not 0x78.
+ */
+#ifdef NON_MATCHING
+void DrawBetsPage(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 j;
+    s32 left;
+    s32 frame;
+    s32 column;
+    s32 total;
+
+    if (++sBetBlinkTime >= BET_BLINK_TIME) {
+        sBetBlinkTime = 0;
+        sBetBlinkFrame ^= 1;
+    }
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.gridImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.gridImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, GRID_IMAGE_SIZE,
+                           GRID_IMAGE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, (g_Scorecard.x + GRID_LEFT) << 2, (g_Scorecard.y + GRID_HEADER_LINE_TOP) << 2,
+                    (g_Scorecard.x + GRID_RIGHT) << 2, (g_Scorecard.y + GRID_HEADER_LINE_TOP + GRID_LINE_WIDTH) << 2,
+                    G_TX_RENDERTILE, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, 0, GRID_STRETCHED_STEP,
+                    TEXEL_STEP_ONE);
+    for (i = 0; i != GRID_ROW_COUNT; i++) {
+        DrawTextureRect(&gfx, (g_Scorecard.x + GRID_ROW_LINE_LEFT) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP)) << 2,
+                        (g_Scorecard.x + GRID_RIGHT) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP + GRID_LINE_WIDTH)) << 2,
+                        G_TX_RENDERTILE, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, 0, GRID_STRETCHED_STEP,
+                        TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, (g_Scorecard.x + GRID_ROW_LINE_LEFT) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP)) << 2,
+                        (g_Scorecard.x + GRID_ROW_LINE_LEFT + GRID_LINE_WIDTH) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP + GRID_LINE_WIDTH)) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, (g_Scorecard.x + GRID_RIGHT - GRID_LINE_WIDTH) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP)) << 2,
+                        (g_Scorecard.x + GRID_RIGHT) << 2,
+                        (i * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP + GRID_LINE_WIDTH)) << 2,
+                        G_TX_RENDERTILE, 0, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    }
+    for (i = 0, left = 0; i != GRID_COLUMN_COUNT; i++, left += BET_COLUMN_SPACING) {
+        DrawTextureRect(&gfx, (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT)) << 2, (g_Scorecard.y + GRID_TOP) << 2,
+                        (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH)) << 2,
+                        (g_Scorecard.y + GRID_BOTTOM) << 2, G_TX_RENDERTILE,
+                        GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS,
+                        GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE, GRID_COLUMN_STEP);
+        DrawTextureRect(&gfx, (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT)) << 2, (g_Scorecard.y + GRID_TOP) << 2,
+                        (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH)) << 2,
+                        (g_Scorecard.y + GRID_TOP + GRID_LINE_WIDTH) << 2, G_TX_RENDERTILE, 0,
+                        GRID_TEXEL_TOP_END << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT)) << 2,
+                        (g_Scorecard.y + GRID_BOTTOM - GRID_LINE_WIDTH) << 2,
+                        (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH)) << 2,
+                        (g_Scorecard.y + GRID_BOTTOM) << 2, G_TX_RENDERTILE, 0,
+                        GRID_TEXEL_BOTTOM_END << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    /* Where the lines cross */
+    for (i = 0, left = 0; i != GRID_COLUMN_COUNT; i++, left += BET_COLUMN_SPACING) {
+        DrawTextureRect(&gfx, (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT)) << 2,
+                        (g_Scorecard.y + GRID_HEADER_LINE_TOP) << 2,
+                        (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH)) << 2,
+                        (g_Scorecard.y + GRID_HEADER_LINE_TOP + GRID_LINE_WIDTH) << 2, G_TX_RENDERTILE, 0,
+                        GRID_TEXEL_CROSSING << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        for (j = 0; j != GRID_ROW_COUNT; j++) {
+            DrawTextureRect(&gfx, (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT)) << 2,
+                            (j * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP)) << 2,
+                            (left + (g_Scorecard.x + GRID_COLUMN_LINE_LEFT + GRID_LINE_WIDTH)) << 2,
+                            (j * GRID_ROW_HEIGHT + (g_Scorecard.y + GRID_ROW_LINE_TOP + GRID_LINE_WIDTH)) << 2,
+                            G_TX_RENDERTILE, 0, GRID_TEXEL_CROSSING << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        }
+    }
+
+    gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+    for (i = 0, column = 0, left = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
+            frame = 0;
+            if (g_GameState.betRates[i] == 0) {
+                gDPSetPrimColor(gfx++, 0, 0, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY, 0xFF);
+            } else {
+                frame = sBetBlinkFrame;
+                gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+            LoadSmallPalette(&gfx, 0, g_Scorecard.betImages[column][frame] + IMAGE_HEADER_SIZE);
+            gDPLoadTextureTile_4b(gfx++, g_Scorecard.betImages[column][frame] + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                                  BET_IMAGE_SIZE, BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1, BET_IMAGE_SIZE - 1, 0,
+                                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                  G_TX_NOLOD, G_TX_NOLOD);
+            DrawTextureRect(&gfx, (left + (g_Scorecard.x + BET_IMAGE_LEFT)) << 2, BET_IMAGE_TOP << 2,
+                            (left + (g_Scorecard.x + BET_IMAGE_LEFT + BET_IMAGE_SIZE)) << 2,
+                            (BET_IMAGE_TOP + BET_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+            column++;
+            left += BET_COLUMN_SPACING;
+        }
+    }
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.totalHeadingImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(gfx++, g_Scorecard.totalHeadingImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, BET_IMAGE_SIZE,
+                          BET_IMAGE_SIZE, 0, 0, BET_IMAGE_SIZE - 1, BET_IMAGE_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    DrawTextureRect(&gfx, (column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_IMAGE_LEFT)) << 2, BET_IMAGE_TOP << 2,
+                    (column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_IMAGE_LEFT + BET_IMAGE_SIZE)) << 2,
+                    (BET_IMAGE_TOP + BET_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+
+    LoadSmallPalette(&gfx, 0, g_Scorecard.betSubtitlesImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.betSubtitlesImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                           BET_SUBTITLE_WIDTH, BET_SUBTITLE_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0, left = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
+            if (sBetSubtitleRows[i] != NO_BET_SUBTITLE) {
+                if (g_GameState.betRates[i] == 0) {
+                    SetTextColor(&gfx, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY);
+                } else {
+                    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+                }
+                DrawTextureRect(&gfx, (left + (g_Scorecard.x + BET_SUBTITLE_LEFT)) << 2, BET_SUBTITLE_TOP << 2,
+                                (left + (g_Scorecard.x + BET_SUBTITLE_LEFT + BET_SUBTITLE_WIDTH)) << 2,
+                                (BET_SUBTITLE_TOP + BET_SUBTITLE_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                                (sBetSubtitleRows[i] * BET_SUBTITLE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS,
+                                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            }
+            left += BET_COLUMN_SPACING;
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    for (i = 0; i != g_PlayerCount; i++) {
+        DrawSmallFace(&gfx, g_Scorecard.x + BET_FACE_LEFT, BET_FACE_TOP + i * GRID_ROW_HEIGHT, i, TRUE);
+    }
+
+    BeginShadowedText(&gfx);
+    for (i = 0, left = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
+            if (g_GameState.betRates[i] == 0) {
+                SetTextColor(&gfx, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY, UNPLAYED_BET_GRAY);
+            } else {
+                SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+            }
+            DrawCenteredSmallText(&gfx, left + (g_Scorecard.x + BET_NAME_LEFT), g_Scorecard.y + BET_NAME_TOP,
+                                  sBetNames[i]);
+            left += BET_NAME_SPACING;
+        }
+    }
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+    /* Drawn a letter at a time, each at its own position */
+    DrawSmallText(&gfx, g_Scorecard.x + 21, g_Scorecard.y + CARRY_OVER_TOP, "C");
+    DrawSmallText(&gfx, g_Scorecard.x + 29, g_Scorecard.y + CARRY_OVER_TOP, "a");
+    DrawSmallText(&gfx, g_Scorecard.x + 35, g_Scorecard.y + CARRY_OVER_TOP, "r");
+    DrawSmallText(&gfx, g_Scorecard.x + 40, g_Scorecard.y + CARRY_OVER_TOP, "r");
+    DrawSmallText(&gfx, g_Scorecard.x + 46, g_Scorecard.y + CARRY_OVER_TOP, "y");
+    DrawSmallText(&gfx, g_Scorecard.x + 24, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "o");
+    DrawSmallText(&gfx, g_Scorecard.x + 31, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "v");
+    DrawSmallText(&gfx, g_Scorecard.x + 39, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "e");
+    DrawSmallText(&gfx, g_Scorecard.x + 45, g_Scorecard.y + CARRY_OVER_SECOND_TOP, "r");
+    /* A pot holds its bet's rate plus whatever ties carried over */
+    for (i = 0, column = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] > 0) {
+            if (i == BET_LONGEST_DRIVE) {
+                sprintf(g_PrintBuffer, sTotalFormat, g_LongestDrivePot - g_GameState.betRates[BET_LONGEST_DRIVE]);
+                DrawCenteredSmallText(&gfx, column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_POT_LEFT),
+                                      g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
+            }
+            if (i == BET_NEAREST_PIN) {
+                sprintf(g_PrintBuffer, sTotalFormat, g_NearestPinPot - g_GameState.betRates[BET_NEAREST_PIN]);
+                DrawCenteredSmallText(&gfx, column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_POT_LEFT),
+                                      g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
+            }
+            if (i == BET_UNK4) {
+                sprintf(g_PrintBuffer, sTotalFormat, g_HolePot - g_GameState.betRates[BET_UNK4]);
+                DrawCenteredSmallText(&gfx, column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_POT_LEFT),
+                                      g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
+            }
+            if (i == BET_UNK5) {
+                sprintf(g_PrintBuffer, sTotalFormat, g_HolePot - g_GameState.betRates[BET_UNK5]);
+                DrawCenteredSmallText(&gfx, column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_POT_LEFT),
+                                      g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
+            }
+        }
+        column += g_GameState.betRates[i] >= 0;
+    }
+
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, BET_RATE_RED, BET_RATE_GREEN, 0);
+    for (i = 0, left = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
+            if (g_GameState.betRates[i] != 0) {
+                sprintf(g_PrintBuffer, sTwoDigitFormat, g_GameState.betRates[i]);
+                DrawCondensedShadowedText(&gfx, left + (g_Scorecard.x + BET_RATE_LEFT), g_Scorecard.y + BET_RATE_TOP,
+                                          g_PrintBuffer);
+            }
+            left += BET_COLUMN_SPACING;
+        }
+    }
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+    for (i = 0; i != g_PlayerCount; i++) {
+        total = 0;
+        column = 0;
+        for (j = 0, left = 0; j != BET_COUNT; j++) {
+            if (g_GameState.betRates[j] == 0) {
+                column++;
+                DrawShadowedText(&gfx, left + (g_Scorecard.x + NO_TALLY_LEFT),
+                                 i * GRID_ROW_HEIGHT + (g_Scorecard.y + BET_TALLY_TOP), "-");
+                left += BET_COLUMN_SPACING;
+            } else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
+                column++;
+                total += g_BetTallies[i][j];
+                sprintf(g_PrintBuffer, sWideTotalFormat, g_BetTallies[i][j]);
+                DrawCondensedShadowedText(&gfx, left + (g_Scorecard.x + BET_TALLY_LEFT),
+                                          i * GRID_ROW_HEIGHT + (g_Scorecard.y + BET_TALLY_TOP), g_PrintBuffer);
+                left += BET_COLUMN_SPACING;
+            }
+        }
+        sprintf(g_PrintBuffer, sWideTotalFormat, total);
+        DrawCondensedShadowedText(&gfx, column * BET_COLUMN_SPACING + (g_Scorecard.x + BET_TALLY_LEFT),
+                                  i * GRID_ROW_HEIGHT + (g_Scorecard.y + BET_TALLY_TOP), g_PrintBuffer);
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawBetsPage);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sTwoDigitFormat);
 

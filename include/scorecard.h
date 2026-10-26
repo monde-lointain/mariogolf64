@@ -37,14 +37,14 @@ typedef struct Scorecard {
     /* 0x40 */ u8 *unk40;
     /* 0x44 */ u8 *betImages[BET_COUNT][2];
     /* 0x7C */ u8 unk7C[8];
-    /* 0x84 */ u8 *unk84;
+    /* 0x84 */ u8 *totalHeadingImage; /* Heads the bets page's column of totals */
     /* 0x88 */ u8 *unk88;
     /* 0x8C */ u8 *unk8C;
     /* 0x90 */ u8 *unk90;
-    /* 0x94 */ u8 *unk94;
+    /* 0x94 */ u8 *gridImage;         /* The pieces of the bets page's grid lines */
     /* 0x98 */ u8 *faceImages[MAX_PLAYER_COUNT];
     /* 0xA8 */ u16 *facePalettes[MAX_PLAYER_COUNT];
-    /* 0xB8 */ u8 *unkB8;
+    /* 0xB8 */ u8 *betSubtitlesImage; /* Rows of the subtitles under some bets' headings */
     /* 0xBC */ u8 unkBC;
     /* 0xBD */ u8 faceTime;  /* Frames since the faces were opened */
     /* 0xBE */ u8 faceFrame; /* Which of the faces' images they show */
