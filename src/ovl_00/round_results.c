@@ -1290,6 +1290,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA684_ovl_00);
 extern const char sEvenScoreFormat[];
 extern const char sScoreFormat[];
 extern const char sPointsFormat[];
+extern const char sTimeFormat[];
+extern const char sTimeLabel[];
 
 /* The tournament results: place, portrait, score, Course Points and the points to the next course */
 void DrawTournamentResults(Gfx **displayListHead) {
@@ -1331,11 +1333,66 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sScoreFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sPointsFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DE4_ovl_00);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sTimeFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DF4_ovl_00);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sTimeLabel);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FB02C_ovl_00);
+/* The minutes wrap here, since the time shows two digits */
+#define SHOWN_MINUTES_LIMIT 99
+#define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
+#define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
+
+/* The Speed Golf results: portrait, time, strokes, Course Points and the points to the next course */
+void DrawSpeedGolfResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 seconds;
+    s32 hundredths;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    DrawPlayerPortrait(&gfx, sResultsSlide + 40, sResultsTop + 88, 0, FALSE);
+    DrawResultsLabel(&gfx, sResultsSlide + 82, sResultsTop + 56, RESULTS_LABEL_SCORE);
+    DrawResultsLabel(&gfx, sResultsSlide + 232, sResultsTop + 56, RESULTS_LABEL_POINTS);
+    if (sOpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(sResultsSlide + 32, sResultsTop + 192, MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    } else {
+        DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y, sPointsToNextCourse + sPrizePoints + sPointsEarned);
+        SetTextSlot(sResultsSlide + 64, sResultsTop + 200, MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    }
+    LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, LARGE_DIGIT_WIDTH,
+                           LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    if (sPlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+    } else {
+        sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[0]);
+    }
+    DrawDigitText(&gfx, sResultsSlide + 90, sResultsTop + 132, g_PrintBuffer);
+    seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+    hundredths = (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                 HUNDREDTHS_PER_SECOND;
+    sprintf(g_PrintBuffer, sTimeFormat, seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
+            seconds % SECONDS_PER_MINUTE, hundredths);
+    DrawDigitText(&gfx, sResultsSlide + 90, sResultsTop + 94, g_PrintBuffer);
+    sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[0]);
+    DrawDigitText(&gfx, sResultsSlide + 228, sResultsTop + 88, g_PrintBuffer);
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, sTimeLabel);
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 86, sResultsTop + 76, g_PrintBuffer, RESULTS_HEADING_ENV_COLOR,
+                            RESULTS_HEADING_PRIM_COLOR, 0);
+    sprintf(g_PrintBuffer, "Stroke");
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 86, sResultsTop + 114, g_PrintBuffer, RESULTS_HEADING_ENV_COLOR,
+                            RESULTS_HEADING_PRIM_COLOR, 0);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FB500_ovl_00);
 

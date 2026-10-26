@@ -2974,3 +2974,6 @@ sMovieImageSetupDisplayList = 0x80224490; // segment:ovl_00
 UpdateCoursePointsResults = 0x801FA248; // type:func segment:ovl_00
 DrawRank = 0x801F6DFC; // type:func segment:ovl_00
 sPlaceNumberFormat = 0x80224CBC; // size:0x4 segment:ovl_00
+DrawSpeedGolfResults = 0x801FB02C; // type:func segment:ovl_00
+sTimeFormat = 0x80224DE4; // size:0x10 segment:ovl_00
+sTimeLabel = 0x80224DF4; // size:0x8 segment:ovl_00
