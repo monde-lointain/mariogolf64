@@ -2,6 +2,7 @@
 #include "club.h"
 #include "course.h"
 #include "debug_text.h"
+#include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
@@ -75,7 +76,7 @@ void TallySkins(s32 endHole) {
     s32 skins;
 
     for (player = 0; player != g_GameState.playerCount; player++) {
-        g_SkinsTotals[player] = 0;
+        g_RoundHud.skinsTotals[player] = 0;
     }
     isAnyUnk26Clear = FALSE;
     for (player = 0; player != g_GameState.playerCount; player++) {
@@ -104,7 +105,7 @@ void TallySkins(s32 endHole) {
             skins++;
             g_SkinsCarryover.fromLastHole = skins - 1;
         } else {
-            g_SkinsTotals[winner] += skins;
+            g_RoundHud.skinsTotals[winner] += skins;
             skins = 1;
             g_SkinsCarryover.fromLastHole = 0;
         }

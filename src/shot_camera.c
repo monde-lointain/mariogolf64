@@ -459,15 +459,6 @@ extern s32 sGreenSoundCount;
 extern s32 sIsLandingSoundPlayed;
 extern s32 D_800DAF44;
 extern s8 sPassedPathFlags;
-extern s8 D_801061BF;
-extern s8 D_801061C0;
-extern s8 D_801061C1;
-extern s8 D_801061C2;
-extern s8 D_801061C3;
-extern s8 D_801061C4;
-extern s8 D_801061C5;
-extern s8 D_801061CF;
-extern u16 D_8010623A;
 extern s32 D_802246F8;
 
 void func_8020E7B4(s32);
@@ -512,12 +503,12 @@ void StartFlightCamera(s32 earlierFlightCount) {
     /* The nested ifs are there to match */
     if (!g_SimulatedShot.unk2E08) {
         if (earlierFlightCount != 0 && D_802246F8 == -1) {
-            D_801061CF = TRUE;
+            g_RoundHud.unk17 = TRUE;
         } else {
-            D_801061CF = FALSE;
+            g_RoundHud.unk17 = FALSE;
         }
     } else {
-        D_801061CF = FALSE;
+        g_RoundHud.unk17 = FALSE;
     }
     g_BallFlightStep = 0;
     D_800BE620 = 0;
@@ -546,13 +537,13 @@ void StartFlightCamera(s32 earlierFlightCount) {
     D_800BE67C = 1;
     if (D_800DAF20) {
         D_800BE67C = RandomBelow(2);
-        D_801061C4 = D_800BE67C;
-        D_801061BF = D_800BE67C;
-        D_801061C0 = D_800BE67C;
-        D_801061C1 = D_800BE67C;
-        D_801061C2 = D_800BE67C;
-        D_801061C3 = D_800BE67C;
-        D_801061C5 = D_800BE67C;
+        g_RoundHud.unkC = D_800BE67C;
+        g_RoundHud.unk7 = D_800BE67C;
+        g_RoundHud.unk8 = D_800BE67C;
+        g_RoundHud.unk9 = D_800BE67C;
+        g_RoundHud.unkA = D_800BE67C;
+        g_RoundHud.unkB = D_800BE67C;
+        g_RoundHud.unkD = D_800BE67C;
     }
     /* Converting through f32, and writing the start point first, are there to match */
     sShotStartPosition[AXIS_X] = (f32)g_SimulatedShot.startPosition[AXIS_X];
@@ -617,7 +608,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
             D_800BE690 = FALSE;
         }
     }
-    degrees = D_8010623A * (360.0f * BINARY_ANGLE_TO_RADIANS) * (1.0 / (2 * M_PI));
+    degrees = g_RoundHud.unk82 * (360.0f * BINARY_ANGLE_TO_RADIANS) * (1.0 / (2 * M_PI));
     if (degrees < 350.0f && degrees > 10.0f) {
         D_800BE690 = FALSE;
     }
@@ -824,7 +815,6 @@ s32 GetEndReaction(void) {
 #define LONG_SHOT_SOUND_MIN_DISTANCE 0x4B000
 #define LONG_LANDING_MIN_DISTANCE (60.0f * UNITS_PER_YARD)
 
-extern s8 D_8010623F;
 
 void func_8020D874(f32);
 
@@ -859,7 +849,7 @@ void PlayFlightSounds(s32 step) {
     scoreToPar = g_Players[g_CurrentShot.playerIndex].strokeCount - g_HolePar;
     shownRingCount = 0;
     if (g_GameMode == GAME_MODE_RING_SHOT) {
-        player = &g_Players[D_8010623F];
+        player = &g_Players[g_RoundHud.unk87];
         for (i = 0; i != RING_COUNT; i++) {
             shownRingCount += player->ringStates[i] == RING_STATE_SHOWN;
         }
@@ -1280,15 +1270,14 @@ void PlaceCameraAroundShotEnd(void) {
 #define HOLE_SONG_SKINS_MATCH 0x2E
 
 
-extern s8 D_801061B8;
 
 /* Resets the cameras for the start of a hole, and plays the game mode's song */
 void StartHoleCamerasAndSong(void) {
     SetMenuBackdrop(MENU_BACKDROP_NONE);
-    g_IsHoleIntroTextShown = 1;
-    D_801061B8 = -1;
-    D_801061C0 = 1;
-    D_801061C3 = 1;
+    g_RoundHud.isHoleIntroTextShown = 1;
+    g_RoundHud.scorecardPage = -1;
+    g_RoundHud.unk8 = 1;
+    g_RoundHud.unkB = 1;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_HoleFlyoverFrame = 0;
@@ -1325,8 +1314,8 @@ void StartHoleCamerasAndSong(void) {
             break;
         case GAME_MODE_RING_SHOT:
             PlaySong(HOLE_SONG_RING_SHOT, SONG_FLAG_UNREAD);
-            D_801061C0 = 0;
-            D_801061C3 = 0;
+            g_RoundHud.unk8 = 0;
+            g_RoundHud.unkB = 0;
             break;
         case GAME_MODE_CLUB_SLOTS:
             if (GetLastHoleIndex() == g_HoleIndex) {
@@ -1351,7 +1340,7 @@ void StartHoleCamerasAndSong(void) {
 /* Starts the flyover of the hole, with the inset view on the cup */
 void StartHoleFlyover(void) {
     g_HoleFlyoverFrame = 0;
-    g_IsHoleIntroTextShown = 0;
+    g_RoundHud.isHoleIntroTextShown = 0;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
@@ -1365,7 +1354,7 @@ void StartHoleFlyover(void) {
 }
 
 void ClearHoleIntroText(void) {
-    g_IsHoleIntroTextShown = 0;
+    g_RoundHud.isHoleIntroTextShown = 0;
     SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK0, 0, 0, 0, 0, 0);
     SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
 }
@@ -2391,7 +2380,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", ChooseFlightCameraKind);
 #define INSET_FIELD_OF_VIEW 30.0f
 #define LOOK_AT_NUDGE 0.1f /* Keeps the eye from sitting straight above the point it looks at */
 
-extern s8 D_801061CB;
 extern s32 sBallCupDistance;
 extern s32 sBallCupGroundDistance;
 extern s8 D_80104B68;
@@ -2403,7 +2391,7 @@ s32 func_8020D838(void);
  * Updates the flight camera, the inset view and the ball's sounds for one frame of the
  * ball's flight, and advances g_BallFlightStep when isAdvancing is 1. Once the flight has
  * ended, it counts the landing wait and returns TRUE when it is over. The START button
- * clears D_801061BF through D_801061C5 and D_801061CB.
+ * clears g_RoundHud.unk7 through g_RoundHud.unkD and g_RoundHud.unk13.
  */
 s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     f32 point[3];
@@ -2414,27 +2402,27 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     s32 *flightStep;
 
     if (isAdvancing == 0) {
-        D_801061CB = 0;
+        g_RoundHud.unk13 = 0;
     } else {
-        D_801061CB = 1;
+        g_RoundHud.unk13 = 1;
     }
     if (buttons & START_BUTTON) {
-        D_801061C4 = 0;
-        D_801061BF = 0;
-        D_801061C0 = 0;
-        D_801061C1 = 0;
-        D_801061C2 = 0;
-        D_801061C3 = 0;
-        D_801061C5 = 0;
-        D_801061CB = 0;
+        g_RoundHud.unkC = 0;
+        g_RoundHud.unk7 = 0;
+        g_RoundHud.unk8 = 0;
+        g_RoundHud.unk9 = 0;
+        g_RoundHud.unkA = 0;
+        g_RoundHud.unkB = 0;
+        g_RoundHud.unkD = 0;
+        g_RoundHud.unk13 = 0;
     } else {
-        D_801061C4 = D_800BE67C;
-        D_801061BF = D_800BE67C;
-        D_801061C0 = D_800BE67C;
-        D_801061C1 = D_800BE67C;
-        D_801061C2 = D_800BE67C;
-        D_801061C3 = D_800BE67C;
-        D_801061C5 = D_800BE67C;
+        g_RoundHud.unkC = D_800BE67C;
+        g_RoundHud.unk7 = D_800BE67C;
+        g_RoundHud.unk8 = D_800BE67C;
+        g_RoundHud.unk9 = D_800BE67C;
+        g_RoundHud.unkA = D_800BE67C;
+        g_RoundHud.unkB = D_800BE67C;
+        g_RoundHud.unkD = D_800BE67C;
     }
     if (g_BallFlightStep >= PATH_STEP_COUNT) {
         step = PATH_STEP_COUNT - 1;

@@ -7,6 +7,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -267,15 +268,6 @@
  */
 extern s32 D_800C306C;
 extern Unk800BA9D8 D_80105F40;
-extern s8 D_801061BD;
-extern s8 D_801061BE;
-extern s8 D_801061BF;
-extern s8 D_801061C0;
-extern s8 D_801061C1;
-extern s8 D_801061C2;
-extern s8 D_801061C3;
-extern s8 D_801061C4;
-extern s8 D_801061C5;
 
 extern s32 sSlideOffsets[4];
 extern void *sCharacterFiles[CHARACTER_IMAGE_COUNT];
@@ -1052,15 +1044,15 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-            D_801061BD = TRUE;
-            D_801061C4 = TRUE;
-            D_801061BF = TRUE;
-            D_801061BE = FALSE;
-            D_801061C0 = TRUE;
-            D_801061C1 = TRUE;
-            D_801061C2 = TRUE;
-            D_801061C3 = TRUE;
-            D_801061C5 = TRUE;
+            g_RoundHud.isLetterboxShown = TRUE;
+            g_RoundHud.unkC = TRUE;
+            g_RoundHud.unk7 = TRUE;
+            g_RoundHud.unk6 = FALSE;
+            g_RoundHud.unk8 = TRUE;
+            g_RoundHud.unk9 = TRUE;
+            g_RoundHud.unkA = TRUE;
+            g_RoundHud.unkB = TRUE;
+            g_RoundHud.unkD = TRUE;
             break;
         case SAVE_MENU_STATE_SAVED:
             if (sStateFrame == SAVED_WAIT_FRAMES) {
@@ -1580,15 +1572,15 @@ void UpdateControlsScreen(ControllerState *controller) {
             SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-            D_801061BD = TRUE;
-            D_801061C4 = TRUE;
-            D_801061BF = TRUE;
-            D_801061BE = FALSE;
-            D_801061C0 = TRUE;
-            D_801061C1 = TRUE;
-            D_801061C2 = TRUE;
-            D_801061C3 = TRUE;
-            D_801061C5 = TRUE;
+            g_RoundHud.isLetterboxShown = TRUE;
+            g_RoundHud.unkC = TRUE;
+            g_RoundHud.unk7 = TRUE;
+            g_RoundHud.unk6 = FALSE;
+            g_RoundHud.unk8 = TRUE;
+            g_RoundHud.unk9 = TRUE;
+            g_RoundHud.unkA = TRUE;
+            g_RoundHud.unkB = TRUE;
+            g_RoundHud.unkD = TRUE;
             break;
     }
 }

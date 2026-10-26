@@ -8,8 +8,6 @@
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
 extern RoundStats g_RoundStats;
 
-/* The skins each player has won, as TallySkins counts them */
-extern u16 g_SkinsTotals[MAX_PLAYER_COUNT];
 
 #define NO_LAST_HOLE_SKINS -1
 

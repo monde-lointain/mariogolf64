@@ -4,6 +4,7 @@
 #include "functions.h"
 #include "heap.h"
 #include "libc.h"
+#include "round_hud.h"
 #include "round_stats.h"
 #include "scene.h"
 #include "screen_layers.h"
@@ -591,7 +592,7 @@ void DrawLargeTextSlot(Gfx **displayListHead, s32 slot) {
                     sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
                     break;
                 case MESSAGE_CODE_SCORE:
-                    score = (s16)g_SkinsTotals[g_CurrentShot.playerIndex];
+                    score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
                     isPrinted = TRUE;
                     if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
                         if (score == 0) {
@@ -816,7 +817,7 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot) {
                     sprintf(g_PrintBuffer, g_TextNumberFormat, textSlot->values[3]);
                     break;
                 case MESSAGE_CODE_SCORE:
-                    score = (s16)g_SkinsTotals[g_CurrentShot.playerIndex];
+                    score = (s16)g_RoundHud.skinsTotals[g_CurrentShot.playerIndex];
                     isPrinted = TRUE;
                     if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
                         if (score == 0) {

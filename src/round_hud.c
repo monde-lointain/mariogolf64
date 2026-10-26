@@ -185,14 +185,12 @@ extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
 #define SHOT_OFFSET_MARKER_STILL_FRAME SHOT_OFFSET_MARKER_FRAME_COUNT
 #define SHOT_OFFSET_MARKER_X 264
 #define SHOT_OFFSET_MARKER_Y 174
-#define D_80106240_UNK8 0x8 /* Animates the shot offset marker */
 
 extern s32 sShotPanelOffsetY;
 extern s32 sShotPanelOffsetX;
 extern s32 sShotOffsetMarkerFrame;
 extern s32 sShotOffsetMarkerTexelOffset;
 extern void *sShotOffsetMarkerImage;
-extern u8 D_80106240;
 
 /* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
@@ -331,7 +329,6 @@ extern s32 D_800E21BC;
 #define LETTERBOX_MAX_HEIGHT 16
 #define LETTERBOX_STATE_UNK5 5
 
-extern s8 D_801061BD;
 extern s32 D_800C308C;
 
 /* Where the hole image sits in front of the perspective camera, at a tenth of its size */
@@ -362,7 +359,6 @@ extern f32 sShotEffectTime;
 extern s32 sShotEffect;
 
 s32 func_80213C78(UnkB8 *player);
-extern s8 D_8010623F;
 
 /*
  * The loaded texture of distance glyphs: the digits, then the units and the
@@ -419,7 +415,6 @@ extern Lights1 sWindArrowLights;
  * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
  */
 extern f32 sWindIconPulseAngle;
-extern u8 D_80106242;
 #define WIND_ICON_PULSE_STEP (M_PI / 18)
 #define WIND_SPEED_TO_METERS_SCALE 3600
 #define WIND_SPEED_TO_METERS_DIVISOR 104857600
@@ -464,23 +459,8 @@ extern Gfx D_80222400[];
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
 extern void *D_80105214;
 extern s32 sSceneryState;
-extern u8 D_801061B8[0x8C];
 
-/*
- * The height of the ball above the cup, in yards, meters and feet, and for
- * each whether the ball is above, below or level with it
- */
-#define HEIGHT_ABOVE 0
-#define HEIGHT_BELOW 1
-#define HEIGHT_LEVEL 2
 #define LEVEL_HEIGHT 0.01f /* Heights in meters or feet nearer zero than this */
-extern s8 sBallHeightYardsDirection;
-extern s8 sBallHeightMetersDirection;
-extern s8 sBallHeightFeetDirection;
-extern s32 sBallHeightYards;
-extern f32 sBallHeightMeters;
-extern f32 sBallHeightFeet;
-extern s32 sCupDistance;
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
@@ -795,7 +775,7 @@ void FreeScenery(void) {
         func_80216B74(1);
         FreeSceneryImages();
         sSceneryState = SCENERY_UNLOADED;
-        memset(D_801061B8, 0, sizeof(D_801061B8));
+        memset(&g_RoundHud, 0, sizeof(g_RoundHud));
     }
 }
 
@@ -813,32 +793,32 @@ void StartShotPanel(void) {
     s32 holeIndex;
 
     height = g_CurrentShot.ballPosition[AXIS_Y] - g_CupPositionY;
-    sBallHeightYards = height * YARDS_PER_UNIT;
-    sBallHeightMeters = height * METERS_PER_UNIT;
-    sBallHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
-    if (sBallHeightYards == 0) {
-        sBallHeightYardsDirection = HEIGHT_LEVEL;
-    } else if (sBallHeightYards > 0) {
-        sBallHeightYardsDirection = HEIGHT_ABOVE;
+    g_RoundHud.ballHeightYards = height * YARDS_PER_UNIT;
+    g_RoundHud.ballHeightMeters = height * METERS_PER_UNIT;
+    g_RoundHud.ballHeightFeet = (height * FEET_PER_YARD) * YARDS_PER_UNIT;
+    if (g_RoundHud.ballHeightYards == 0) {
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_LEVEL;
+    } else if (g_RoundHud.ballHeightYards > 0) {
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_ABOVE;
     } else {
-        sBallHeightYardsDirection = HEIGHT_BELOW;
+        g_RoundHud.ballHeightYardsDirection = HEIGHT_BELOW;
     }
-    if (sBallHeightMeters < LEVEL_HEIGHT && sBallHeightMeters > -LEVEL_HEIGHT) {
-        sBallHeightMetersDirection = HEIGHT_LEVEL;
-    } else if (sBallHeightMeters > 0.0f) {
-        sBallHeightMetersDirection = HEIGHT_ABOVE;
+    if (g_RoundHud.ballHeightMeters < LEVEL_HEIGHT && g_RoundHud.ballHeightMeters > -LEVEL_HEIGHT) {
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_LEVEL;
+    } else if (g_RoundHud.ballHeightMeters > 0.0f) {
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_ABOVE;
     } else {
-        sBallHeightMetersDirection = HEIGHT_BELOW;
+        g_RoundHud.ballHeightMetersDirection = HEIGHT_BELOW;
     }
     /* The direction in feet is taken from the height in meters */
-    if (sBallHeightFeet < LEVEL_HEIGHT && sBallHeightFeet > -LEVEL_HEIGHT) {
-        sBallHeightFeetDirection = HEIGHT_LEVEL;
-    } else if (sBallHeightMeters > 0.0f) {
-        sBallHeightFeetDirection = HEIGHT_ABOVE;
+    if (g_RoundHud.ballHeightFeet < LEVEL_HEIGHT && g_RoundHud.ballHeightFeet > -LEVEL_HEIGHT) {
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_LEVEL;
+    } else if (g_RoundHud.ballHeightMeters > 0.0f) {
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_ABOVE;
     } else {
-        sBallHeightFeetDirection = HEIGHT_BELOW;
+        g_RoundHud.ballHeightFeetDirection = HEIGHT_BELOW;
     }
-    sCupDistance = (f32)GetCupDistance(g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+    g_RoundHud.cupDistance = (f32)GetCupDistance(g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
                                      g_CurrentShot.ballPosition[AXIS_Z] - g_CupPositionZ);
     if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != sLieImageAsset) {
         sLieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
@@ -851,7 +831,7 @@ void StartShotPanel(void) {
         ReadEncodedAsset(sLieImage, &asset);
     }
     if (D_801B60B9) {
-        g_SkinsTotals[0] = 0;
+        g_RoundHud.skinsTotals[0] = 0;
     } else {
         switch (g_GameMode) {
             case GAME_MODE_STROKE:
@@ -859,20 +839,20 @@ void StartShotPanel(void) {
             case GAME_MODE_TOURNAMENT:
             case GAME_MODE_UNK7:
                 for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
-                    g_SkinsTotals[playerIndex] = GetNetScoreToPar(g_HoleIndex, playerIndex);
+                    g_RoundHud.skinsTotals[playerIndex] = GetNetScoreToPar(g_HoleIndex, playerIndex);
                 }
                 break;
             case GAME_MODE_MATCH_GAME:
             case GAME_MODE_GET_CHARACTER:
-                g_SkinsTotals[0] = 0;
+                g_RoundHud.skinsTotals[0] = 0;
                 for (holeIndex = 0; holeIndex != g_HoleIndex; holeIndex++) {
                     if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
-                        g_SkinsTotals[0]--;
+                        g_RoundHud.skinsTotals[0]--;
                     } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
-                        g_SkinsTotals[0]++;
+                        g_RoundHud.skinsTotals[0]++;
                     }
                 }
-                g_SkinsTotals[1] = -g_SkinsTotals[0];
+                g_RoundHud.skinsTotals[1] = -g_RoundHud.skinsTotals[0];
                 break;
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
@@ -882,7 +862,7 @@ void StartShotPanel(void) {
     }
     sShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
     func_8021E710();
-    func_8021419C(&g_Players[D_8010623F]);
+    func_8021419C(&g_Players[g_RoundHud.unk87]);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/round_hud", StartShotPanel);
@@ -1260,7 +1240,6 @@ typedef struct TrailPoint {
 } TrailPoint; /* size = 0x0C */
 
 extern s32 D_800C5AAC;
-extern s8 D_801061CF;
 extern s32 D_800BE69C;
 extern TrailPoint sBallTrailPoints[BALL_TRAIL_LENGTH];
 extern Mtx sBallTrailMatrix;
@@ -1287,7 +1266,7 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 offsetX;
     f32 offsetY;
 
-    if (D_800C5AAC != 0 && D_801061CF) {
+    if (D_800C5AAC != 0 && g_RoundHud.unk17) {
         if (D_800C5AAC == BALL_TRAIL_RECORDING) {
             if (++sBallTrailHead == BALL_TRAIL_LENGTH) {
                 sBallTrailHead = 0;
@@ -1384,7 +1363,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawBallTrail);
  * meters below it. Both lean away from the given point along the viewed wind.
  *
  * Doesn't match: the target reads *displayListHead before the other loads and
- * schedules the last commands before reading D_80106242. Its rodata also has
+ * schedules the last commands before reading g_RoundHud.unk8A. Its rodata also has
  * an empty string after "%dm", which this doesn't emit.
  */
 #ifdef NON_MATCHING
@@ -1504,7 +1483,7 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     }
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    if (D_80106242 == 1) {
+    if (g_RoundHud.unk8A == 1) {
         if (speed != 0) {
             func_802199EC(&gfx, centerX - WIND_HIGHLIGHT_OFFSET_X, centerY - WIND_HIGHLIGHT_OFFSET_Y,
                           WIND_HIGHLIGHT_WIDE_SIZE);
@@ -1710,7 +1689,7 @@ void StartShotEffect(s32 effect) {
         return;
     }
     if (effect == SHOT_EFFECT_LONG_SHOT) {
-        golferKind = func_80213C78(&g_Players[D_8010623F]);
+        golferKind = func_80213C78(&g_Players[g_RoundHud.unk87]);
         if (golferKind != GOLFER_KIND_UNK10 & golferKind != GOLFER_KIND_UNK2) {
             PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL, LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB,
                                  LONG_SHOT_SOUND_PAN);
@@ -1873,13 +1852,13 @@ void SetShotOffsetMarker(s32 x, s32 y) {
     sShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
-/* Draws the shot offset marker, animated while D_80106240_UNK8 is set */
+/* Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER is set */
 #ifdef NON_MATCHING
 void DrawShotOffsetMarker(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sShotOffsetMarkerImage + IMAGE_HEADER_SIZE) & ~7);
     sShotOffsetMarkerFrame = (sShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
-    if (D_80106240 & D_80106240_UNK8) {
+    if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
         sShotOffsetMarkerTexelOffset = sShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
     } else {
         sShotOffsetMarkerTexelOffset = SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
@@ -1992,7 +1971,7 @@ void DrawAnimatedIcon(Gfx **displayListHead, s32 mode) {
 s32 DrawLetterbox(Gfx **gfxP, s32 height) {
     Gfx *gfx = *gfxP;
 
-    if (D_801061BD) {
+    if (g_RoundHud.isLetterboxShown) {
         if (D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) {
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
@@ -2195,7 +2174,7 @@ void DrawHoleIntroImages(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
     s32 strip;
 
-    if (g_IsHoleIntroTextShown == 1) {
+    if (g_RoundHud.isHoleIntroTextShown == 1) {
         if (g_GameMode == GAME_MODE_RING_SHOT) {
             if (g_IsModuleAlive[MODULE_UNK21]) {
                 func_802427E8(&gfx);
@@ -2266,7 +2245,7 @@ void DrawHoleIntroText(Gfx **displayListHead) {
     s32 seconds;
     s32 totalSeconds;
 
-    if (g_IsHoleIntroTextShown == 1) {
+    if (g_RoundHud.isHoleIntroTextShown == 1) {
         if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
             if (g_IsModuleAlive[MODULE_UNK26] && func_80242418()) {
                 func_80242424(&gfx);

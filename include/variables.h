@@ -67,8 +67,6 @@ extern Fog g_DebugFog;
 extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
 extern s32 g_StopwatchFrameCount;
-/* Whether the course's name and the hole's number show before the flyover */
-extern s8 g_IsHoleIntroTextShown;
 
 /*
  * The scene's colors at one time of day. The sky's two colors go to its
