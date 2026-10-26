@@ -51,7 +51,7 @@
 #define LIE_IMAGE_SIZE 0x1208
 
 /* Images of the round's scenery, effects and HUD, named after their asset ids until their users are decompiled */
-#define ASSET_ROUND_IMAGE_541 0x541
+#define ASSET_PIN_FLAG_IMAGES 0x541
 #define ASSET_WIND_ICON_IMAGE 0x5A4
 #define ASSET_PLAYER_TAG_IMAGES 0x5E3
 #define ASSET_LEADER_LINE_IMAGE 0x972
@@ -74,7 +74,7 @@
 #define ASSET_ROUND_IMAGE_56A 0x56A
 #define ASSET_ROUND_IMAGE_569 0x569
 #define ASSET_ROUND_IMAGE_723 0x723
-#define ASSET_ROUND_IMAGE_724 0x724
+#define ASSET_DISTANCE_SIGN_IMAGE 0x724
 
 /* The image of the hole's par, one per par from 3 to 5 */
 #define ASSET_PAR_THREE_IMAGE 0x565
@@ -370,7 +370,7 @@ extern s32 sShotEffect;
 #define DISTANCE_POINT_WIDTH 4
 
 extern void *sSceneryBillboardHeap;
-extern void *D_801B55DC;
+extern void *g_PinFlagImages;
 extern void *sWindIconImage;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
@@ -453,7 +453,7 @@ extern f32 sWindIconPulseAngle;
 extern Mtx sWindIndicatorMatrices[2];
 extern Gfx D_80222400[];
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
-extern void *D_80105214;
+extern void *g_DistanceSignImage;
 extern s32 sSceneryState;
 
 #define LEVEL_HEIGHT 0.01f /* Heights in meters or feet nearer zero than this */
@@ -650,8 +650,8 @@ void LoadSceneryImages(void) {
     func_80216EDC();
     AllocMovieBuffer();
     LoadClubPanelImages();
-    D_801B55DC = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_541, &asset));
-    ReadEncodedAsset(D_801B55DC, &asset);
+    g_PinFlagImages = AllocMemory(OpenEncodedAsset(ASSET_PIN_FLAG_IMAGES, &asset));
+    ReadEncodedAsset(g_PinFlagImages, &asset);
     sWindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
     ReadEncodedAsset(sWindIconImage, &asset);
     g_PlayerTagImages = AllocMemory(OpenEncodedAsset(ASSET_PLAYER_TAG_IMAGES, &asset));
@@ -695,8 +695,8 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_800E217C, &asset);
     D_800E2178 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
     ReadEncodedAsset(D_800E2178, &asset);
-    D_80105214 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_724, &asset));
-    ReadEncodedAsset(D_80105214, &asset);
+    g_DistanceSignImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
+    ReadEncodedAsset(g_DistanceSignImage, &asset);
     LoadBursts(GetCourseRecordIndex());
 }
 
@@ -709,7 +709,7 @@ void FreeSceneryImages(void) {
         func_80216F8C();
         FreeMovieBuffer();
         FreeClubPanelImages();
-        FreeMemory(&D_801B55DC);
+        FreeMemory(&g_PinFlagImages);
         FreeMemory(&sWindIconImage);
         FreeMemory(&g_PlayerTagImages);
         FreeMemory(&g_LeaderLineImage);
@@ -732,7 +732,7 @@ void FreeSceneryImages(void) {
         FreeMemory(&D_800E2174);
         FreeMemory(&D_800E217C);
         FreeMemory(&D_800E2178);
-        FreeMemory(&D_80105214);
+        FreeMemory(&g_DistanceSignImage);
         FreeBursts();
     }
 }
