@@ -339,7 +339,7 @@ extern Mtx sHoleImageMatrix;
 
 
 /*
- * StartShotEffect's long shot effect, which func_80086864 draws, plays a
+ * StartShotEffect's long shot effect, which DrawShotEffect draws, plays a
  * sound, and a different, louder one for the Wario and Game Boy ball 7
  * contact styles.
  */
@@ -1863,7 +1863,169 @@ void StartShotEffect(s32 effect) {
     sShotEffectTime = 0.0f;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80086864);
+/* The effect grows and shrinks over half a turn of its time */
+#define SHOT_EFFECT_TIME_STEP 0.2f
+#define SHOT_EFFECT_SCALE 0.5f
+#define SHOT_EFFECT_SPIN_START 0.7f
+#define SHOT_EFFECT_SPIN_RATE 0.5f
+#define SHOT_EFFECT_Z -100.0f
+/* The heavy long shot of the Wario and Game Boy ball 7 contact styles, an animation that flickers round */
+#define HEAVY_LONG_SHOT_SCALE 0.4f
+#define HEAVY_LONG_SHOT_FRAME_COUNT 6
+#define HEAVY_LONG_SHOT_FRAME_TICKS 4
+#define HEAVY_LONG_SHOT_FRAMES_OFFSET 0x970
+#define HEAVY_LONG_SHOT_FRAME_SIZE 0xC08
+#define HEAVY_LONG_SHOT_FRAME_WIDTH 48
+#define HEAVY_LONG_SHOT_FRAME_HEIGHT 128
+#define HEAVY_LONG_SHOT_ALPHA 191
+#define LONG_SHOT_GROUP_COUNT 4
+#define HEAVY_LONG_SHOT_QUAD_COUNT 2
+
+extern Mtx sShotEffectMatrices[2];
+extern Vec3 sShotEffectTranslation;
+extern Vec3 sShotEffectScale;
+extern Vec3 sShotEffectRotation;
+/* Four groups of eight vertices, each three pairs of triangles */
+extern Vtx sLongShotVertices[LONG_SHOT_GROUP_COUNT * 8];
+extern Vtx sHeavyLongShotVertices[16];
+extern s32 sHeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT];
+extern s32 sHeavyLongShotFrame;
+extern s32 sHeavyLongShotFrameTimer;
+/* The two frame buffers in g_SharedEffectImages, each loaded in turn and both drawn */
+extern s32 sHeavyLongShotBufferIndex;
+
+/* Draws the effect that StartShotEffect started at the ball, until its time runs out */
+void DrawShotEffect(Gfx **displayListHead) {
+    Mat4 matrix;
+    ScreenPoint point;
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 contactStyle;
+    f32 scale;
+    s32 i;
+
+    if (sShotEffectTime < 0.0f) {
+        return;
+    }
+    sShotEffectTime += SHOT_EFFECT_TIME_STEP;
+    if (sShotEffectTime > M_PI) {
+        sShotEffectTime = SHOT_EFFECT_TIME_OFF;
+        return;
+    }
+    if (ProjectPoint(g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE, g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                     g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &point) >= 0) {
+        return;
+    }
+    contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+    if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 & contactStyle != CONTACT_STYLE_WARIO) {
+        scale = sinf(sShotEffectTime) * SHOT_EFFECT_SCALE;
+        sShotEffectRotation[AXIS_X] = 0.0f;
+        sShotEffectRotation[AXIS_Y] = 0.0f;
+        sShotEffectRotation[AXIS_Z] = (sShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
+    } else {
+        scale = sinf(sShotEffectTime) * HEAVY_LONG_SHOT_SCALE;
+        sShotEffectRotation[AXIS_X] = 0.0f;
+        sShotEffectRotation[AXIS_Y] = 0.0f;
+        sShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
+    }
+    sShotEffectScale[AXIS_X] = scale;
+    sShotEffectScale[AXIS_Y] = scale;
+    sShotEffectScale[AXIS_Z] = scale;
+    sShotEffectTranslation[AXIS_X] = point.x - SCREEN_WIDTH / 2;
+    sShotEffectTranslation[AXIS_Y] = -point.y + SCREEN_HEIGHT / 2;
+    sShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
+    BuildTransformMatrix(matrix, sShotEffectRotation, sShotEffectTranslation, sShotEffectScale);
+    ConvertMatrixToFixed(matrix, &sShotEffectMatrices[g_MatrixBufferIndex]);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+    if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 & contactStyle != CONTACT_STYLE_WARIO) {
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, 255);
+        gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+        if (sShotEffect == SHOT_EFFECT_LONG_SHOT) {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        } else {
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        }
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sShotEffectMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sLongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
+        for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
+            gSP2Triangles(gfx++, i * 8, i * 8 + 1, i * 8 + 2, 0, i * 8, i * 8 + 2, i * 8 + 3, 0);
+            gSP2Triangles(gfx++, i * 8 + 1, i * 8 + 4, i * 8 + 5, 0, i * 8 + 1, i * 8 + 5, i * 8 + 2, 0);
+            gSP2Triangles(gfx++, i * 8 + 4, i * 8 + 6, i * 8 + 7, 0, i * 8 + 4, i * 8 + 7, i * 8 + 5, 0);
+        }
+    } else {
+        if (++sHeavyLongShotFrameTimer == HEAVY_LONG_SHOT_FRAME_TICKS) {
+            sHeavyLongShotFrameTimer = 0;
+            sHeavyLongShotFrame = (sHeavyLongShotFrame + 1) % HEAVY_LONG_SHOT_FRAME_COUNT;
+            OpenEncodedAsset(sHeavyLongShotFrameAssets[sHeavyLongShotFrame], &asset);
+            ReadEncodedAsset(g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET +
+                                 sHeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE,
+                             &asset);
+            sHeavyLongShotBufferIndex ^= 1;
+        }
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        if (contactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
+            gDPSetEnvColor(gfx++, 255, 255, 127, 255);
+            gDPSetPrimColor(gfx++, 0, 0, guRandom() % 255, guRandom() % 255, guRandom() % 255,
+                            HEAVY_LONG_SHOT_ALPHA);
+        } else {
+            gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, HEAVY_LONG_SHOT_ALPHA);
+            gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+        }
+        gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT,
+                          PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sShotEffectMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sHeavyLongShotVertices, 16, 0);
+        gDPLoadTextureBlock_4b(gfx++,
+                               ((u32)g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+                               G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT, 0, G_TX_WRAP,
+                               G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
+            gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2, i * 4 + 3, 0);
+        }
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock_4b(gfx++,
+                               ((u32)g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET + HEAVY_LONG_SHOT_FRAME_SIZE +
+                                IMAGE_HEADER_SIZE) &
+                                   ~7,
+                               G_IM_FMT_I, HEAVY_LONG_SHOT_FRAME_WIDTH, HEAVY_LONG_SHOT_FRAME_HEIGHT, 0, G_TX_WRAP,
+                               G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
+            gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2, i * 4 + 3, 0);
+        }
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Waves the hole's flag in the wind. A shade swings down the flagstick side
