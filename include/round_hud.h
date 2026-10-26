@@ -105,6 +105,10 @@ void AdjustHudOffset(void);
 /* An I8 texture of a ring, that marks where the ball will land and draws the lens flare */
 #define RING_TEXTURE_SIZE 64
 extern u8 *g_RingTexels;
+/* The 16 by 8 tags "1P" to "4P", "1C" to "4C" and "Com", over one palette */
+extern void *g_PlayerTagImages;
+/* The line from a player's tag to their ball */
+extern void *g_LeaderLineImage;
 
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);

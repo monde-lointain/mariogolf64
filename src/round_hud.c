@@ -372,8 +372,6 @@ extern s32 sShotEffect;
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *sWindIconImage;
-extern void *g_PlayerTagImages;
-extern void *g_LeaderLineImage;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
 /* The image asset of the club's head that the HUD shows, loaded into sClubHeadImage */
