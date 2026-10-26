@@ -2572,3 +2572,4 @@ sDrawText = 0x8024C7C4; // segment:ovl_09
 sWinText = 0x8024C7CC; // segment:ovl_09
 sLoseText = 0x8024C7D0; // segment:ovl_09
 sHoleNumberFormat = 0x8024C7BC; // segment:ovl_09
+DrawScorecardTable = 0x80243C48; // type:func segment:ovl_09

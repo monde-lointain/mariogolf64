@@ -145,6 +145,7 @@ extern s32 sScorecardState;
 #define RESULT_CHARACTERS_LOADED 3
 extern s32 sMatchResultFrameCount;
 extern Mtx sResultCharacterMatrices[MATCH_PLAYER_COUNT];
+extern Gfx D_800C3FC0[];
 /* "Hole %d" in half-width katakana */
 extern const char sHoleNumberFormat[];
 /* Each player's result in a match. func_802460F8 shows sWinText too. */
@@ -171,7 +172,7 @@ extern const char sDecimalFormat[];
 
 void SetFramebufferCount(s32 count);
 void DrawMatchResult(Gfx **displayListHead);
-void func_80243C48_ovl_09(Gfx **displayListHead, s32 pageCount, s32 page);
+void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
 void func_80244CA0_ovl_09(Gfx **displayListHead);
 void func_80245184_ovl_09(Gfx **displayListHead);
 void func_802460F8_ovl_09(Gfx **displayListHead);
@@ -544,7 +545,7 @@ void DrawScorecard(Gfx **displayListHead) {
         DrawMatchResult(&gfx);
     } else if (sScorecardState != SCORECARD_UNK6) {
         if (sScorecardState != SCORECARD_CLOSED) {
-            func_80243C48_ovl_09(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
+            DrawScorecardTable(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
             gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
             for (i = 0; i != g_Scorecard.pageCount; i++) {
                 if (i == g_RoundHud.scorecardPage) {
@@ -629,7 +630,118 @@ void DrawScorecard(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80243C48_ovl_09);
+/*
+ * The table image holds strips of tabs, then the table's body. Each strip is a
+ * row of tabs drawn across the table's full width.
+ */
+#define TABLE_WIDTH 288
+#define TABLE_SHOWN_WIDTH 284
+#define TABLE_LEFT 20
+#define TAB_TOP 20
+#define TAB_HEIGHT 24
+#define TAB_STRIP_COUNT 5
+#define TAB_BACK_DROP 2 /* The tabs behind the front one sit lower */
+#define TABLE_BODY_TOP 44
+#define TABLE_BODY_HEIGHT 190
+#define TABLE_BODY_OFFSET (LARGE_PALETTED_TEXELS_OFFSET + TAB_STRIP_COUNT * TAB_HEIGHT * TABLE_WIDTH)
+#define TABLE_LOAD_HEIGHT 7 /* The rows that fit in texture memory at once */
+#define TAB_BACK_GRAY 0xBF
+#define FIRST_OF_THREE_TAB_STRIP 0
+#define SECOND_OF_THREE_TAB_STRIP 1
+#define THIRD_OF_THREE_TAB_STRIP 2
+#define FIRST_OF_TWO_TAB_STRIP 3
+#define SECOND_OF_TWO_TAB_STRIP 4
+
+/*
+ * Draws the scorecard's tabs and the table under them. The tab strips are
+ * drawn back to front, the last in front at full brightness, and their order
+ * depends on the page shown.
+ *
+ * Doesn't match: the target adds each rectangle's top offset to the
+ * scorecard's y before adding the row, where this adds the row first, and it
+ * swaps two saved registers.
+ */
+#ifdef NON_MATCHING
+void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
+    s32 tabStrips[THREE_PAGE_COUNT];
+    Gfx *gfx = *displayListHead;
+    s32 tabIndex;
+    s32 row;
+    s32 dropY;
+    s32 texelsOffset;
+    s32 loadHeight;
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    if (pageCount == 1) {
+        tabStrips[0] = SECOND_OF_TWO_TAB_STRIP;
+    } else if (pageCount == 2) {
+        if (page == 0) {
+            tabStrips[0] = FIRST_OF_TWO_TAB_STRIP;
+            tabStrips[1] = SECOND_OF_TWO_TAB_STRIP;
+        } else {
+            tabStrips[0] = SECOND_OF_TWO_TAB_STRIP;
+            tabStrips[1] = FIRST_OF_TWO_TAB_STRIP;
+        }
+    } else if (page == 0) {
+        tabStrips[0] = FIRST_OF_THREE_TAB_STRIP;
+        tabStrips[1] = SECOND_OF_THREE_TAB_STRIP;
+        tabStrips[2] = THIRD_OF_THREE_TAB_STRIP;
+    } else if (page == 1) {
+        tabStrips[0] = FIRST_OF_THREE_TAB_STRIP;
+        tabStrips[1] = THIRD_OF_THREE_TAB_STRIP;
+        tabStrips[2] = SECOND_OF_THREE_TAB_STRIP;
+    } else {
+        tabStrips[0] = THIRD_OF_THREE_TAB_STRIP;
+        tabStrips[1] = SECOND_OF_THREE_TAB_STRIP;
+        tabStrips[2] = FIRST_OF_THREE_TAB_STRIP;
+    }
+
+    LoadLargePalette(&gfx, g_Scorecard.tableImage + IMAGE_HEADER_SIZE);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetPrimColor(gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, 0xFF);
+    for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
+        texelsOffset = tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH + LARGE_PALETTED_TEXELS_OFFSET;
+        dropY = TAB_BACK_DROP;
+        if (tabIndex == pageCount - 1) {
+            gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            dropY = 0;
+        }
+        for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
+            LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI, G_IM_SIZ_8b, TABLE_WIDTH,
+                             TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
+            DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + g_Scorecard.y + TAB_TOP + dropY) << 2,
+                            (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
+                            (row + (g_Scorecard.y + TAB_TOP + TABLE_LOAD_HEIGHT) + dropY) << 2, G_TX_RENDERTILE, 0, 0,
+                            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    texelsOffset = TABLE_BODY_OFFSET;
+    for (row = 0; row < TABLE_BODY_HEIGHT; row += TABLE_LOAD_HEIGHT) {
+        /* The body's last load is its one leftover row */
+        loadHeight = (row + TABLE_LOAD_HEIGHT <= TABLE_BODY_HEIGHT) ? TABLE_LOAD_HEIGHT : 1;
+        gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, (u32)(g_Scorecard.tableImage + texelsOffset) & ~7);
+        gDPLoadSync(gfx++);
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, loadHeight * (TABLE_WIDTH / 2) - 1,
+                     CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
+        texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
+        DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + (g_Scorecard.y + TABLE_BODY_TOP)) << 2,
+                        (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
+                        (row + loadHeight + (g_Scorecard.y + TABLE_BODY_TOP)) << 2, G_TX_RENDERTILE, 0, 0,
+                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecardTable);
+#endif
 
 void FreeResultCharacters(void) {
     FreeCharacterSlot(0);
