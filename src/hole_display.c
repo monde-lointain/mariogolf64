@@ -1,7 +1,9 @@
 #include "common.h"
 #include "asset.h"
 #include "course.h"
+#include "controller.h"
 #include "cpu_projection.h"
+#include "debug_text.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
@@ -546,7 +548,286 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", Lerp);
 INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008E82C);
+/* The sky editor's table, in debug text cells */
+#define SKY_EDITOR_CONTROLLER 1
+#define SKY_EDITOR_TEXT_COLUMN 13
+#define SKY_EDITOR_TEXT_ROW 11
+#define SKY_EDITOR_COLUMN_WIDTH 4
+#define SKY_EDITOR_ERASE_COLUMN 14
+#define SKY_EDITOR_ERASE_ROW 5
+#define SKY_EDITOR_FRAMEBUFFER_COUNT 3
+
+/* The table's columns: top, bottom, the unkA colors, the background image's color, and fog */
+#define SKY_EDITOR_TOP 0
+#define SKY_EDITOR_BOTTOM 1
+#define SKY_EDITOR_UNKA 2
+#define SKY_EDITOR_BACKGROUND 3
+#define SKY_EDITOR_FOG 4
+/* Rows past blue: the background's alpha, and the fog's near and far */
+#define SKY_EDITOR_ALPHA_ROW 3
+#define SKY_EDITOR_FAR_ROW 4
+#define SKY_EDITOR_LAST_COLOR_ROW 2
+
+#define SKY_EDITOR_COLOR_STEP 4
+#define SKY_EDITOR_FOG_STEP 4
+#define BYTE_VALUE_COUNT 256
+#define FOG_COLOR_MAX 255
+#define FOG_DEPTH_MAX 1200
+/* sSkyHorizonColor's starting value in each channel */
+#define SKY_HORIZON_LEVEL 63
+
+extern s32 sSkyEditorColumn;
+extern s32 sSkyEditorRow;
+extern SkyColors *sEditedSkyColors;
+
+/*
+ * While GAME_FLAG_SKY_EDITOR is set, lets controller 2 edit the current sky
+ * colors and g_DebugFog, shows them in a table, and returns TRUE. The D-pad
+ * or C buttons move the cursor, and holding A or B raises or lowers the value
+ * under it.
+ *
+ * Doesn't match: one sum of two colors adds its registers in the other order.
+ */
+#ifdef NON_MATCHING
+s32 UpdateSkyEditor(void) {
+    EncodedAsset asset;
+    s32 isImageChanged;
+    s32 index; /* Counts the vertex groups, then the palette colors */
+    s32 channel;
+    u16 color;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+    s32 outerMix;
+    s32 innerMix;
+    u16 pressedButtons;
+
+    isImageChanged = FALSE;
+    if (!IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
+        return FALSE;
+    }
+    PrintDebugText(" ", sSkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_ERASE_COLUMN,
+                   sSkyEditorRow + SKY_EDITOR_ERASE_ROW);
+    sEditedSkyColors =
+        &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyColorTimeIndex];
+    if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons & (L_JPAD | L_CBUTTONS)) && sSkyEditorColumn > 0) {
+        sSkyEditorColumn--;
+    }
+    if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons & (R_JPAD | R_CBUTTONS)) &&
+        sSkyEditorColumn < SKY_EDITOR_FOG) {
+        sSkyEditorColumn++;
+    }
+    pressedButtons = g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons;
+    if (pressedButtons & (U_JPAD | U_CBUTTONS)) {
+        sSkyEditorRow--;
+    }
+    if (pressedButtons & (D_JPAD | D_CBUTTONS)) {
+        sSkyEditorRow++;
+    }
+    if (sSkyEditorRow < 0) {
+        sSkyEditorRow = 0;
+    }
+    if (sSkyEditorColumn == SKY_EDITOR_BACKGROUND) {
+        if (sSkyEditorRow > SKY_EDITOR_ALPHA_ROW) {
+            sSkyEditorRow = SKY_EDITOR_ALPHA_ROW;
+        }
+    } else if (sSkyEditorColumn == SKY_EDITOR_FOG) {
+        if (sSkyEditorRow > SKY_EDITOR_FAR_ROW) {
+            sSkyEditorRow = SKY_EDITOR_FAR_ROW;
+        }
+    } else if (sSkyEditorRow > SKY_EDITOR_LAST_COLOR_ROW) {
+        sSkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
+    }
+
+    /* The rows of the fog column run past g_DebugFog.color into near and far */
+    if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
+        switch (sSkyEditorColumn) {
+            case SKY_EDITOR_TOP:
+                sEditedSkyColors->unk4[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unk4[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BOTTOM:
+                sEditedSkyColors->unk7[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unk7[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_UNKA:
+                sEditedSkyColors->unkA[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unkA[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BACKGROUND:
+                sEditedSkyColors->unkD[sSkyEditorRow]++;
+                isImageChanged = TRUE;
+                if (sSkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+                    /* Wraps the percent past either end */
+                    if (sEditedSkyColors->unkD[sSkyEditorRow] == PERCENT_COUNT + 1) {
+                        sEditedSkyColors->unkD[sSkyEditorRow] = 0;
+                    }
+                    if (sEditedSkyColors->unkD[sSkyEditorRow] > PERCENT_COUNT + 1) {
+                        sEditedSkyColors->unkD[sSkyEditorRow] = PERCENT_COUNT;
+                    }
+                } else {
+                    sEditedSkyColors->unkD[sSkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+                }
+                break;
+            case SKY_EDITOR_FOG:
+                g_DebugFog.color[sSkyEditorRow] += SKY_EDITOR_FOG_STEP;
+                break;
+        }
+    } else if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & B_BUTTON) {
+        switch (sSkyEditorColumn) {
+            case SKY_EDITOR_TOP:
+                sEditedSkyColors->unk4[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unk4[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BOTTOM:
+                sEditedSkyColors->unk7[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unk7[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_UNKA:
+                sEditedSkyColors->unkA[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+                sEditedSkyColors->unkA[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+                break;
+            case SKY_EDITOR_BACKGROUND:
+                sEditedSkyColors->unkD[sSkyEditorRow]--;
+                isImageChanged = TRUE;
+                if (sSkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+                    if (sEditedSkyColors->unkD[sSkyEditorRow] == PERCENT_COUNT + 1) {
+                        sEditedSkyColors->unkD[sSkyEditorRow] = 0;
+                    }
+                    if (sEditedSkyColors->unkD[sSkyEditorRow] > PERCENT_COUNT + 1) {
+                        sEditedSkyColors->unkD[sSkyEditorRow] = PERCENT_COUNT;
+                    }
+                } else {
+                    sEditedSkyColors->unkD[sSkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+                }
+                break;
+            case SKY_EDITOR_FOG:
+                g_DebugFog.color[sSkyEditorRow] -= SKY_EDITOR_FOG_STEP;
+                break;
+        }
+    }
+    if (g_DebugFog.color[0] > FOG_COLOR_MAX) {
+        g_DebugFog.color[0] = FOG_COLOR_MAX;
+    }
+    if (g_DebugFog.color[1] > FOG_COLOR_MAX) {
+        g_DebugFog.color[1] = FOG_COLOR_MAX;
+    }
+    if (g_DebugFog.color[2] > FOG_COLOR_MAX) {
+        g_DebugFog.color[2] = FOG_COLOR_MAX;
+    }
+    if (g_DebugFog.near > FOG_DEPTH_MAX) {
+        g_DebugFog.near = FOG_DEPTH_MAX;
+    }
+    if (g_DebugFog.far > FOG_DEPTH_MAX) {
+        g_DebugFog.far = FOG_DEPTH_MAX;
+    }
+    if (g_DebugFog.color[0] < 0) {
+        g_DebugFog.color[0] = 0;
+    }
+    if (g_DebugFog.color[1] < 0) {
+        g_DebugFog.color[1] = 0;
+    }
+    if (g_DebugFog.color[2] < 0) {
+        g_DebugFog.color[2] = 0;
+    }
+    if (g_DebugFog.near < 0) {
+        g_DebugFog.near = 0;
+    }
+    if (g_DebugFog.far < 0) {
+        g_DebugFog.far = 0;
+    }
+
+    for (index = 0; index != SKY_VIEW_COUNT * 2; index++) {
+        for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
+            sSkyVertices[index][0].v.cn[channel] = sEditedSkyColors->unk4[channel];
+            sSkyVertices[index][1].v.cn[channel] = sEditedSkyColors->unk7[channel];
+            sSkyVertices[index][2].v.cn[channel] = sEditedSkyColors->unk7[channel];
+            sSkyVertices[index][3].v.cn[channel] = sEditedSkyColors->unk4[channel];
+            sSkyVertices[index][4].v.cn[channel] = sEditedSkyColors->unk4[channel];
+            innerMix = (sEditedSkyColors->unk4[channel] + sEditedSkyColors->unk7[channel]) * 0.5f;
+            outerMix = (sEditedSkyColors->unk4[channel] + SKY_HORIZON_LEVEL) * 0.5f;
+            innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
+            sSkyVertices[index][5].v.cn[channel] = outerMix;
+            sSkyVertices[index][6].v.cn[channel] = innerMix;
+            sSkyVertices[index][7].v.cn[channel] = innerMix;
+            sSkyVertices[index][8].v.cn[channel] = outerMix;
+            sSkyVertices[index][9].v.cn[channel] = outerMix;
+        }
+    }
+
+    if (isImageChanged) {
+        OpenEncodedAsset((u16)sCourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+        ReadEncodedAsset(g_CourseSkyImage, &asset);
+        for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
+            color = ((u16 *)g_CourseSkyImage)[PALETTE_START + index];
+            red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
+            green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
+            blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
+            alpha = color & 1;
+            if (!alpha) {
+                red = (sEditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS + sEditedSkyColors->unk4[0]) /
+                      SKY_IMAGE_DIVISOR;
+                green = (sEditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS + sEditedSkyColors->unk4[1]) /
+                        SKY_IMAGE_DIVISOR;
+                blue = (sEditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS + sEditedSkyColors->unk4[2]) /
+                       SKY_IMAGE_DIVISOR;
+            } else {
+                red = (red * (PERCENT_COUNT - sEditedSkyColors->unk10) +
+                       sEditedSkyColors->unkD[0] * sEditedSkyColors->unk10) /
+                      PERCENT_COUNT;
+                green = (green * (PERCENT_COUNT - sEditedSkyColors->unk10) +
+                         sEditedSkyColors->unkD[1] * sEditedSkyColors->unk10) /
+                        PERCENT_COUNT;
+                blue = (blue * (PERCENT_COUNT - sEditedSkyColors->unk10) +
+                        sEditedSkyColors->unkD[2] * sEditedSkyColors->unk10) /
+                       PERCENT_COUNT;
+            }
+            if (red < 0) {
+                red = 0;
+            }
+            if (green < 0) {
+                green = 0;
+            }
+            if (blue < 0) {
+                blue = 0;
+            }
+            if (red > SKY_IMAGE_CHANNEL_MAX) {
+                red = SKY_IMAGE_CHANNEL_MAX;
+            }
+            if (green > SKY_IMAGE_CHANNEL_MAX) {
+                green = SKY_IMAGE_CHANNEL_MAX;
+            }
+            if (blue > SKY_IMAGE_CHANNEL_MAX) {
+                blue = SKY_IMAGE_CHANNEL_MAX;
+            }
+            ((u16 *)g_CourseSkyImage)[PALETTE_START + index] = (red << 11) | (green << 6) | (blue << 1) | alpha;
+        }
+    }
+
+    PrintDebugText("   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW);
+    sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[0], sEditedSkyColors->unk7[0],
+            sEditedSkyColors->unkA[0], sEditedSkyColors->unkD[0], g_DebugFog.color[0]);
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 1);
+    sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[1], sEditedSkyColors->unk7[1],
+            sEditedSkyColors->unkA[1], sEditedSkyColors->unkD[1], g_DebugFog.color[1]);
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 2);
+    sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[2], sEditedSkyColors->unk7[2],
+            sEditedSkyColors->unkA[2], sEditedSkyColors->unkD[2], g_DebugFog.color[2]);
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 3);
+    sprintf(g_PrintBuffer, "A:             %3d %4d  ", sEditedSkyColors->unk10, g_DebugFog.near);
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 4);
+    sprintf(g_PrintBuffer, "CC:%d               %4d  ", sEditedSkyColors->unk0, g_DebugFog.far);
+    PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
+    PrintDebugText(">", sSkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_TEXT_COLUMN + 2,
+                   sSkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
+    SetFramebufferCount(SKY_EDITOR_FRAMEBUFFER_COUNT);
+    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+    return TRUE;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSkyEditor);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008F30C);
 

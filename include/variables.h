@@ -62,6 +62,8 @@ typedef struct Fog {
 } Fog; /* size = 0x14 */
 
 extern Fog g_SceneFog;
+/* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
+extern Fog g_DebugFog;
 extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
 extern s32 g_StopwatchFrameCount;
@@ -73,7 +75,7 @@ extern s8 g_IsHoleIntroTextShown;
  * vertices; DeriveSceneColors also derives other colors from them.
  */
 typedef struct SkyColors {
-    /* 0x00 */ u8 unk0[4];
+    /* 0x00 */ s32 unk0; /* UpdateSkyEditor shows it as "CC" */
     /* 0x04 */ u8 unk4[3];
     /* 0x07 */ u8 unk7[3];
     /* 0x0A */ u8 unkA[3];

@@ -99,7 +99,6 @@ extern u8 D_800FE330;
 extern s32 D_801B60B4;
 extern s8 D_800FBDB8;
 extern s32 D_800C3094;
-extern Fog g_DebugFog;
 extern s8 D_800C3098;
 extern PlayRecord D_800FED40[];
 extern s8 D_800FEE10;
@@ -666,12 +665,12 @@ void InitExpansionPakFeatures(void) {
 
 /*
  * Sets the fog range and color from g_SceneFog, or from g_DebugFog,
- * with no fog alpha, while game flag 0x2D is set
+ * with no fog alpha, while GAME_FLAG_SKY_EDITOR is set
  */
 void SetSceneFog(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
 
-    if (IsGameFlagSet(0x2D)) {
+    if (IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
         gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
         gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1], g_DebugFog.color[2], 0);
     } else {

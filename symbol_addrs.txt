@@ -2544,3 +2544,7 @@ DrawMenuBackdrop = 0x800939E8; // type:func
 DrawTurnAwayAnimation = 0x800947A8; // type:func
 DrawLensFlare = 0x8008D3F4; // type:func
 DrawFadeAnimation = 0x8009232C; // type:func
+UpdateSkyEditor = 0x8008E82C; // type:func
+sSkyEditorColumn = 0x800C6CE4;
+sSkyEditorRow = 0x800C6CE8;
+sEditedSkyColors = 0x800E3980;
