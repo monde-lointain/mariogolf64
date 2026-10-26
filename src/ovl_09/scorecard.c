@@ -153,6 +153,10 @@ extern const char sHoleNumberFormat[];
 /* Formats that more than one page shares */
 extern const char sStringFormat[];
 extern const char sTwoDigitFormat[];
+extern const char sZeroToParFormat[];
+extern const char sScoreToParFormat[];
+extern const char sWideTotalFormat[];
+extern const char sTotalFormat[];
 /* Each player's result in a match. func_802460F8 shows sWinText too. */
 extern const char sDrawText[];
 extern const char sWinText[];
@@ -178,7 +182,7 @@ extern const char sDecimalFormat[];
 void SetFramebufferCount(s32 count);
 void DrawMatchResult(Gfx **displayListHead);
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
-void func_80244CA0_ovl_09(Gfx **displayListHead);
+void DrawStandingsPage(Gfx **displayListHead);
 void func_80245184_ovl_09(Gfx **displayListHead);
 void func_802460F8_ovl_09(Gfx **displayListHead);
 void func_80246804_ovl_09(Gfx **displayListHead);
@@ -744,7 +748,7 @@ void DrawScorecard(Gfx **displayListHead) {
                             func_80246804_ovl_09(&gfx);
                         }
                     } else if (g_RoundHud.scorecardPage == 0) {
-                        func_80244CA0_ovl_09(&gfx);
+                        DrawStandingsPage(&gfx);
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
@@ -1122,15 +1126,125 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sWinText);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sLoseText);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80244CA0_ovl_09);
+#define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
+#define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7E0_ovl_09);
+/*
+ * The standings page lists each player's place, face, score to par and,
+ * when there are bets, bet total. Without bets its columns shift right.
+ */
+#define STANDINGS_HOLE_LEFT 40
+#define STANDINGS_HOLE_TOP 48
+#define NO_BETS_SHIFT 32
+#define STANDINGS_PLACE_LEFT 32
+#define STANDINGS_FACE_LEFT 108
+#define STANDINGS_SCORE_LEFT 152
+#define STANDINGS_BET_TOTAL_LEFT 224
+#define STANDINGS_ROW_TOP 72
+#define STANDINGS_TEXT_TOP 82
+#define STANDINGS_ROW_SPACING 36
+#define STANDINGS_LABEL_TOP 52
+#define STANDINGS_SCORE_LABEL_LEFT 160
+#define STANDINGS_BET_TOTAL_LABEL_LEFT 248
+#define SCORE_LABEL 2     /* Drawn over the score column */
+#define BET_TOTAL_LABEL 4 /* Drawn over the bet total column */
+#define WIDE_BET_TOTAL 1000
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7E8_ovl_09);
+/*
+ * Draws the standings page of a round with more than one player: the hole,
+ * then each player's place, face and score to par, and their bet total from
+ * the bets that are worth something.
+ */
+void DrawStandingsPage(Gfx **displayListHead) {
+    s32 places[MAX_PLAYER_COUNT];
+    s32 scoresToPar[MAX_PLAYER_COUNT];
+    Gfx *gfx;
+    s32 holeIndex;
+    s32 shift;
+    s32 i;
+    s32 j;
+    s32 betTotal;
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7F0_ovl_09);
+    gfx = *displayListHead;
+    holeIndex = g_Scorecard.content.holeIndex;
+    shift = g_Scorecard.hasBets ? 0 : NO_BETS_SHIFT;
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, "Hole %d", holeIndex + g_Scorecard.isTallied);
+    DrawLargeTextWithShadow(&gfx, g_Scorecard.x + STANDINGS_HOLE_LEFT, g_Scorecard.y + STANDINGS_HOLE_TOP,
+                            g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7F4_ovl_09);
+    for (i = 0; i < g_GameState.playerCount; i++) {
+        scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
+    }
+    /* Each player's place counts the players ahead of them */
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        places[i] = 0;
+        for (j = 0; j != g_GameState.playerCount; j++) {
+            if (i != j && scoresToPar[i] > scoresToPar[j]) {
+                places[i]++;
+            }
+        }
+    }
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        DrawScorecardFace(&gfx, shift + STANDINGS_FACE_LEFT + g_Scorecard.x,
+                          STANDINGS_ROW_TOP + i * STANDINGS_ROW_SPACING, i);
+    }
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        DrawPlace(&gfx, shift + STANDINGS_PLACE_LEFT + g_Scorecard.x, STANDINGS_ROW_TOP + i * STANDINGS_ROW_SPACING,
+                  places[i] & PLACE_MASK);
+    }
+    DrawScorecardLabel(&gfx, shift + STANDINGS_SCORE_LABEL_LEFT + g_Scorecard.x, STANDINGS_LABEL_TOP, SCORE_LABEL);
+    if (g_Scorecard.hasBets) {
+        DrawScorecardLabel(&gfx, g_Scorecard.x + STANDINGS_BET_TOTAL_LABEL_LEFT, STANDINGS_LABEL_TOP, BET_TOTAL_LABEL);
+    }
+
+    LoadSmallPalette(&gfx, 0, g_Scorecard.digitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.digitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, DIGIT_GLYPH_SIZE,
+                           DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        betTotal = 0;
+        if (scoresToPar[i] == 0) {
+            sprintf(g_PrintBuffer, sZeroToParFormat);
+        } else {
+            sprintf(g_PrintBuffer, sScoreToParFormat, scoresToPar[i]);
+        }
+        DrawDigitText(&gfx, shift + STANDINGS_SCORE_LEFT + g_Scorecard.x,
+                      STANDINGS_TEXT_TOP + i * STANDINGS_ROW_SPACING, g_PrintBuffer);
+        if (g_Scorecard.hasBets) {
+            for (j = 0; j != BET_COUNT; j++) {
+                if (g_GameState.betRates[j] > 0) {
+                    betTotal += g_BetTallies[i][j];
+                }
+            }
+            if (betTotal >= WIDE_BET_TOTAL) {
+                sprintf(g_PrintBuffer, sWideTotalFormat, betTotal);
+            } else {
+                sprintf(g_PrintBuffer, sTotalFormat, betTotal);
+            }
+            DrawDigitText(&gfx, g_Scorecard.x + STANDINGS_BET_TOTAL_LEFT,
+                          STANDINGS_TEXT_TOP + i * STANDINGS_ROW_SPACING, g_PrintBuffer);
+        }
+    }
+    *displayListHead = gfx;
+}
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sZeroToParFormat);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sScoreToParFormat);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sWideTotalFormat);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sTotalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7F8_ovl_09);
 
@@ -1156,8 +1270,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C86C_ovl_09);
 #define HOLE_TIME_TOP 51
 #define HOLE_ROW_SPACING 16
 #define NINE_HOLE_COUNT 9
-#define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
-#define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
 #define ROUND_TOTAL_LABEL_LEFT 96
 #define ROUND_TOTAL_LEFT 160
 #define ROUND_TIME_TOP 194
