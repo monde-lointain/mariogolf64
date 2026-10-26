@@ -1,11 +1,14 @@
 #include "common.h"
 #include "billboard.h"
+#include "camera.h"
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
 #include "course.h"
 #include "current_shot.h"
 #include "debug_text.h"
+#include "functions.h"
+#include "math_util.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
@@ -53,6 +56,11 @@
 /* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY read it */
 #define DPAD_STICK_TILT 40
 #define LETTERBOX_STATE_UNK4 4
+/* The aim camera stays inside the course's ground, in course units */
+#define AIM_CAMERA_MAX_X 4347904.0f
+#define AIM_CAMERA_MAX_Z 8542208.0f
+/* How far above the ground under the ball the aim camera looks, in world units */
+#define AIM_LOOK_AT_RISE 17.25f
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
@@ -82,6 +90,7 @@ extern s32 sShotFlightCount;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
+s32 func_8005F30C(s32 x, s32 z);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -96,7 +105,45 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202D04_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802038D0_ovl_00);
 
+/* Places the aim camera on the aim line, looking at the ball */
+#ifdef NON_MATCHING
+void PlaceAimCamera(void) {
+    Vec3 eye;
+    f32 heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+
+    eye[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_X];
+    if (eye[AXIS_X] < 0.0f) {
+        eye[AXIS_X] = 0.0f;
+    } else if (eye[AXIS_X] >= AIM_CAMERA_MAX_X) {
+        eye[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
+    }
+    eye[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_Z];
+    if (eye[AXIS_Z] < 0.0f) {
+        eye[AXIS_Z] = 0.0f;
+    } else if (eye[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
+        eye[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
+    }
+    eye[AXIS_Y] = GetGroundHeight(eye[AXIS_X], eye[AXIS_Z]);
+    if (g_CurrentShot.ballPosition[AXIS_Y] < eye[AXIS_Y]) {
+        eye[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    }
+    g_Cameras[0].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    g_Cameras[0].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    eye[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+    eye[AXIS_Y] = (eye[AXIS_Y] + g_CurrentShot.aimCameraHeight) * COURSE_TO_WORLD_SCALE;
+    eye[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
+    g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
+    g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
+    g_Cameras[0].view.lookAt[AXIS_Y] =
+        func_8005F30C(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]) * COURSE_TO_WORLD_SCALE
+        - AIM_LOOK_AT_RISE;
+    g_Cameras[0].view.lookAt[AXIS_X] *= COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.lookAt[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceAimCamera);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203DAC_ovl_00);
 
