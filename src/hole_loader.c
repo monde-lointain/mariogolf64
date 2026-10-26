@@ -125,10 +125,7 @@ extern volatile s32 g_HasLoaderFinished;
 extern OSThread sLoaderThread;
 extern u8 D_8025D350[];
 extern u32 D_80105318;
-extern s32 D_80104E70[COURSE_HOLE_COUNT];
 extern s32 D_80105B20[COURSE_HOLE_COUNT];
-extern s32 D_80106148[COURSE_HOLE_COUNT];
-extern s32 D_8010CF60[COURSE_HOLE_COUNT];
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
 extern s32 D_801B60A0;
@@ -854,9 +851,9 @@ void InitHoleState(void) {
         g_StopwatchFrameCount = 0;
         for (index = 0; index != COURSE_HOLE_COUNT; index++) {
             D_80105B20[index] = 0;
-            D_80104E70[index] = 0;
-            D_8010CF60[index] = 0;
-            D_80106148[index] = 0;
+            g_HoleTimeHundredths[index] = 0;
+            g_HoleTimeSeconds[index] = 0;
+            g_HoleTimeMinutes[index] = 0;
         }
     }
 }

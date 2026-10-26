@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "common.h"
+#include "save.h"
 
 #define CUP_POSITION_COUNT 4
 /* Points that the computer golfer may route its shots through */
@@ -19,6 +20,11 @@ extern HolePoints g_HolePoints;
 
 /* Cleared while the loader thread loads a hole; set once it is done or stopped */
 extern s32 g_HasLoaderFinished;
+
+/* Each hole's time in Speed Golf. A negative minute count shows as dashes. */
+extern s32 g_HoleTimeMinutes[COURSE_HOLE_COUNT];
+extern s32 g_HoleTimeSeconds[COURSE_HOLE_COUNT];
+extern s32 g_HoleTimeHundredths[COURSE_HOLE_COUNT];
 
 void ResetLoaderThread(void);
 void StartLoaderThread(void);

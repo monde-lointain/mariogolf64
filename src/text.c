@@ -193,8 +193,6 @@ extern u8 g_LargeFontWidths[];
 void DrawMediumTextSlot(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 s32 GetTextLength(char *text);
 

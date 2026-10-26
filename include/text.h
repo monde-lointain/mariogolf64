@@ -101,6 +101,8 @@ void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
 void DrawTextSlots(Gfx **displayListHead);
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawGlyphGroup(Gfx **displayListHead, s32 group);
