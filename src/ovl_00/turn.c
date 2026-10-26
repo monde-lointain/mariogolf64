@@ -1,10 +1,13 @@
 #include "common.h"
+#include "billboard.h"
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
+#include "course.h"
 #include "current_shot.h"
 #include "reaction.h"
 #include "save.h"
+#include "scene.h"
 #include "sound.h"
 
 /* The loop played while the stick sets the impact point */
@@ -22,8 +25,15 @@
 
 extern s32 D_800C3084;
 extern s32 D_80227194_ovl_00;
+extern s32 sTurnTimerStart; /* Nothing reads it */
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202A00_ovl_00);
+s32 HasNoRingsLeft(UnkB8 *player);
+void RecordRingShotClear(s32 playerIndex);
+
+/* Lets the Rumble Paks run again after nuContRmbForceStop */
+void EndRumbleForceStop(void) {
+    nuSiSendMesg(NU_CONT_RMB_FORCESTOPEND_MSG, NULL);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202A20_ovl_00);
 
@@ -72,7 +82,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204910_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802054CC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802055F8_ovl_00);
+void StartTurnTimer(void) {
+    sTurnTimerStart = osGetCount();
+}
 
 /* Always FALSE; maybe once a debug check */
 s32 func_8020561C_ovl_00(s32 arg0) {
@@ -85,7 +97,49 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802059C0_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205AE4_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205BB8_ovl_00);
+/* The course points that the player has earned with the shots of one kind */
+s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
+    s32 count = (u8)g_Players[playerIndex].unkAA[shotKind];
+    s32 points;
+
+    switch (shotKind) {
+        case 0:
+        case 1:
+            points = 2;
+            break;
+        case 4:
+            points = 8;
+            break;
+        case 2:
+        case 5:
+            points = 4;
+            break;
+        case 7:
+            if (g_IsMiniGolf) {
+                points = 10;
+            } else {
+                points = 20;
+            }
+            break;
+        case 6:
+        case 9:
+        case 11:
+            points = 10;
+            break;
+        case 8:
+            points = 16;
+            break;
+        case 3:
+        case 10:
+            points = 6;
+            break;
+        default:
+            osSyncPrintf("Unknown Shot Type%d\n", shotKind);
+            points = 0;
+            break;
+    }
+    return count * points;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205C78_ovl_00);
 
@@ -103,13 +157,19 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206CF0_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206E88_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207014_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", HasNoRingsLeft);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207048_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207080_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", RecordRingShotClear);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802071B8_ovl_00);
+/* Saves a Ring Shot hole as cleared once it is holed within par with every ring passed */
+void CheckRingShotClear(s32 playerIndex) {
+    if (g_GameMode == GAME_MODE_RING_SHOT && g_Players[playerIndex].strokeCount <= g_HolePar &&
+        (s8)g_Players[playerIndex].unk1E[0] == 0 && HasNoRingsLeft(&g_Players[playerIndex])) {
+        RecordRingShotClear(playerIndex);
+    }
+}
 
 /*
  * The first of the club kind's animations; shotMode is unused. The staff
