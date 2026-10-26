@@ -109,6 +109,10 @@ extern u8 *g_RingTexels;
 extern void *g_PlayerTagImages;
 /* The line from a player's tag to their ball */
 extern void *g_LeaderLineImage;
+/* The wooden sign behind the shot's distance */
+extern void *g_DistanceSignImage;
+/* The frames of the flag that marks the pin */
+extern void *g_PinFlagImages;
 
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);

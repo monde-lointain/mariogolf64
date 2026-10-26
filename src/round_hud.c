@@ -370,7 +370,6 @@ extern s32 sShotEffect;
 #define DISTANCE_POINT_WIDTH 4
 
 extern void *sSceneryBillboardHeap;
-extern void *g_PinFlagImages;
 extern void *sWindIconImage;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
@@ -453,7 +452,6 @@ extern f32 sWindIconPulseAngle;
 extern Mtx sWindIndicatorMatrices[2];
 extern Gfx D_80222400[];
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
-extern void *g_DistanceSignImage;
 extern s32 sSceneryState;
 
 #define LEVEL_HEIGHT 0.01f /* Heights in meters or feet nearer zero than this */
