@@ -96,7 +96,7 @@
 #define RESULTS_UNK3B_UNK949_ASSET 0x949
 #define PRESSING_HAND_ASSET 0x8EB
 #define RESULTS_DIGITS_ASSET 0x722
-#define RESULTS_UNK98E_ASSET 0x98E
+#define PLACE_DIGITS_ASSET 0x98E
 #define RESULTS_UNK69F_ASSET 0x69F
 #define LABELS_IMAGE_ASSET 0x68A
 #define LARGE_DIGITS_IMAGE_ASSET 0x689
@@ -160,7 +160,7 @@ extern u8 *sTrophyImage;
 extern u8 *sTrophyPalette;
 extern u8 *D_8022572C_ovl_00;
 extern u8 *D_80225730_ovl_00;
-extern u8 *D_80225738_ovl_00;
+extern u8 *sPlaceDigitsImage;
 extern s32 sPortraitCharacterIndex;
 extern s32 sPlayerResults[MAX_PLAYER_COUNT];
 extern s32 sPlayerPoints[MAX_PLAYER_COUNT];
@@ -313,8 +313,8 @@ void LoadRoundResults(void) {
     ReadEncodedAsset(sResultsHandImage, &asset);
     sDigitsImage = AllocMemory(OpenEncodedAsset(RESULTS_DIGITS_ASSET, &asset));
     ReadEncodedAsset(sDigitsImage, &asset);
-    D_80225738_ovl_00 = AllocMemory(OpenEncodedAsset(RESULTS_UNK98E_ASSET, &asset));
-    ReadEncodedAsset(D_80225738_ovl_00, &asset);
+    sPlaceDigitsImage = AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
+    ReadEncodedAsset(sPlaceDigitsImage, &asset);
     if (g_IsUnk3B) {
         D_80225730_ovl_00 = AllocMemory(OpenEncodedAsset(RESULTS_UNK3B_UNK949_ASSET, &asset));
         ReadEncodedAsset(D_80225730_ovl_00, &asset);
@@ -676,7 +676,7 @@ void FreeRoundResults(void) {
         FreeMemory(&sResultsBackdropImage);
         FreeMemory(&sResultsHandImage);
         FreeMemory(&sDigitsImage);
-        FreeMemory(&D_80225738_ovl_00);
+        FreeMemory(&sPlaceDigitsImage);
         if (g_IsUnk3B) {
             FreeMemory(&D_80225730_ovl_00);
             FreeMemory(&sResultsCourseImage);
@@ -778,7 +778,84 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F6718_ovl_00);
+/* sPlaceDigitsImage holds 24-pixel glyphs: the digits, then the st, nd, rd and th suffixes */
+#define PLACE_GLYPH_SIZE 24
+#define PLACE_GLYPH_SPACING 20
+#define PLACE_SUFFIX_GLYPH_FIRST 10
+#define PLACE_SUFFIX_ST 0
+#define PLACE_SUFFIX_TH 3
+/* From the 4th to the 20th, places end in th */
+#define PLACE_TEENS_END 20
+#define PLACES_PER_HUNDRED 100
+#define PLACE_NUMBER_X_OFFSET (-12)
+
+/* Loads glyph from sPlaceDigitsImage and draws it at x, y */
+#define DRAW_PLACE_GLYPH(gfx, x, y, glyph)                                                                       \
+    {                                                                                                          \
+        gDPLoadTextureTile(gfx++, (u32)(sPlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,     \
+                           G_IM_SIZ_8b,                                                                \
+                           PLACE_GLYPH_SIZE, 0, 0, (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,           \
+                           (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,    \
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);       \
+        gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2, ((x) + PLACE_GLYPH_SIZE) << 2,                       \
+                                ((y) + PLACE_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,                             \
+                                ((glyph) * PLACE_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);            \
+    }
+
+#ifdef NON_MATCHING
+/* Draws place, as in "21st", centred on x */
+void DrawPlaceNumber(Gfx **displayListHead, s32 x, s32 y, s32 place) {
+    Gfx *gfx = *displayListHead;
+    char *c;
+    s32 width;
+    s32 suffix;
+    s32 lastDigit;
+    u8 character;
+    s32 glyph;
+    s32 left;
+
+    sprintf(g_PrintBuffer, sPlaceNumberFormat, place);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, sPlaceDigitsImage + IMAGE_HEADER_SIZE);
+    width = 0;
+    for (c = g_PrintBuffer; *c != '\0'; c++) {
+        width += PLACE_GLYPH_SPACING;
+    }
+    left = x + PLACE_NUMBER_X_OFFSET;
+    left -= width / 2;
+    width = 0;
+    for (c = g_PrintBuffer; *c != '\0'; c++) {
+        character = *c;
+        if (character != ' ') {
+            glyph = character - '0';
+            DRAW_PLACE_GLYPH(gfx, left + width, y, glyph);
+        }
+        width += PLACE_GLYPH_SPACING;
+    }
+    suffix = place;
+    if (suffix > PLACES_PER_HUNDRED) {
+        suffix %= PLACES_PER_HUNDRED;
+    }
+    suffix--;
+    if (suffix > PLACE_SUFFIX_TH - 1) {
+        if (suffix < PLACE_TEENS_END) {
+            suffix = PLACE_SUFFIX_TH;
+        } else if (suffix < PLACES_PER_HUNDRED) {
+            lastDigit = suffix % 10;
+            if (lastDigit < PLACE_SUFFIX_TH) {
+                suffix = lastDigit;
+            } else {
+                suffix = PLACE_SUFFIX_TH;
+            }
+        }
+    }
+    DRAW_PLACE_GLYPH(gfx, left + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlaceNumber);
+#endif
 
 void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     Gfx *gfx = *displayListHead;
