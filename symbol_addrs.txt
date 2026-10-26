@@ -2941,3 +2941,5 @@ sIntroFrame = 0x80224B10; // size:0x4 segment:ovl_00
 sIntroCameraDistance = 0x80224B14; // size:0x4 segment:ovl_00
 sIntroCameraHeight = 0x80224B18; // size:0x4 segment:ovl_00
 UpdateHoleIntroCamera = 0x8021E090; // type:func segment:ovl_00
+DrawPauseArrows = 0x802199EC; // type:func segment:ovl_00
+sPauseArrowsTick = 0x80224A84; // size:0x4 segment:ovl_00

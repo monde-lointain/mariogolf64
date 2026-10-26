@@ -5,6 +5,7 @@
 #include "course.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "pause_menu.h"
 #include "round_hud.h"
 #include "scene.h"
 #include "screen.h"
@@ -60,6 +61,7 @@ extern f32 sPauseMenuUnkD688;
 extern u8 *sPauseCursorImage;
 extern u8 *sMenuCloudImage; /* The pause menu's cloud, or the choice box's */
 extern u8 *sPauseArrowsImage;
+extern s32 sPauseArrowsTick;
 extern u8 *sChoiceBoxCursorImage;
 
 #define CHOICE_BOX_MAX_OPTIONS 4
@@ -259,7 +261,48 @@ void FreePauseMenu(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_80219034_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_802199EC_ovl_00);
+/*
+ * The arrows image is a strip of 16 by 16 pixel tiles, two frames of four tiles each. Each
+ * frame's left arrow is its last tile and its right arrow the one before.
+ */
+#define PAUSE_ARROW_SIZE 16
+#define PAUSE_ARROWS_FRAME_HEIGHT (PAUSE_ARROW_SIZE * 4)
+#define PAUSE_ARROWS_FRAME_SIZE (PAUSE_ARROW_SIZE * PAUSE_ARROWS_FRAME_HEIGHT / 2)
+#define PAUSE_ARROWS_TICKS_PER_FRAME 4
+#define PAUSE_ARROWS_TICK_COUNT (PAUSE_ARROWS_TICKS_PER_FRAME * 2)
+#define PAUSE_LEFT_ARROW_T ((PAUSE_ARROW_SIZE * 3) << 5)
+#define PAUSE_RIGHT_ARROW_T ((PAUSE_ARROW_SIZE * 2) << 5)
+
+/* Draws a pair of flashing arrows centred on (x, y), with their centres gap pixels apart */
+void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
+    Gfx *gfx = *displayListHead;
+    s32 top;
+    s32 bottom;
+
+    sPauseArrowsTick = (sPauseArrowsTick + 1) % PAUSE_ARROWS_TICK_COUNT;
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    LoadSmallPalette(&gfx, 0, sPauseArrowsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx,
+                           sPauseArrowsImage + PALETTED_TEXELS_OFFSET +
+                               sPauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME * PAUSE_ARROWS_FRAME_SIZE,
+                           G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    top = (y - PAUSE_ARROW_SIZE / 2) << 2;
+    bottom = (y + PAUSE_ARROW_SIZE / 2) << 2;
+    gDPPipeSync(gfx++);
+    DrawTextureRect(&gfx, (x - gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top, (x - gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom,
+                    G_TX_RENDERTILE, 0, PAUSE_LEFT_ARROW_T, 1 << 10, 1 << 10);
+    DrawTextureRect(&gfx, (x + gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top, (x + gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom,
+                    G_TX_RENDERTILE, 0, PAUSE_RIGHT_ARROW_T, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_80219C74_ovl_00);
 

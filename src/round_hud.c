@@ -21,6 +21,7 @@
 #include "math_util.h"
 #include "movie.h"
 #include "overlay_manager.h"
+#include "pause_menu.h"
 #include "pin.h"
 #include "round_events.h"
 #include "round_stats.h"
@@ -437,10 +438,11 @@ extern f32 sWindIconPulseAngle;
 #define WIND_ICON_OFFSET_X 13
 #define WIND_ICON_OFFSET_Y 6
 #define WIND_WIDE_TEXT_SHIFT_X 6.0f
-#define WIND_HIGHLIGHT_OFFSET_X 52.0f
-#define WIND_HIGHLIGHT_OFFSET_Y 56.0f
-#define WIND_HIGHLIGHT_WIDE_SIZE 56
-#define WIND_HIGHLIGHT_NARROW_SIZE 44
+#define WIND_ARROWS_OFFSET_X 52.0f
+#define WIND_ARROWS_OFFSET_Y 56.0f
+/* Arrows either side of the wind speed; they sit closer when there is no wind */
+#define WIND_ARROWS_WIDE_GAP 56
+#define WIND_ARROWS_NARROW_GAP 44
 /* The wind speed font has ten digits and then a wider 'm' */
 #define WIND_FONT_WIDTH 144
 #define WIND_FONT_HEIGHT 14
@@ -456,7 +458,6 @@ extern f32 sWindIconPulseAngle;
 #define WIND_TEXT_ENV_RED 0x00
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
-void func_802199EC(Gfx **displayListHead, s32 x, s32 y, s32 size);
 extern Mtx sWindIndicatorMatrices[2];
 extern Gfx D_80222400[];
 void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y);
@@ -1474,11 +1475,11 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
     if (g_RoundHud.unk8A == 1) {
         if (speed != 0) {
-            func_802199EC(&gfx, centerX - WIND_HIGHLIGHT_OFFSET_X, centerY - WIND_HIGHLIGHT_OFFSET_Y,
-                          WIND_HIGHLIGHT_WIDE_SIZE);
+            DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X, centerY - WIND_ARROWS_OFFSET_Y,
+                            WIND_ARROWS_WIDE_GAP);
         } else {
-            func_802199EC(&gfx, centerX - WIND_HIGHLIGHT_OFFSET_X, centerY - WIND_HIGHLIGHT_OFFSET_Y,
-                          WIND_HIGHLIGHT_NARROW_SIZE);
+            DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X, centerY - WIND_ARROWS_OFFSET_Y,
+                            WIND_ARROWS_NARROW_GAP);
         }
     }
     *displayListHead = gfx;
