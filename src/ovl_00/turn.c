@@ -1,6 +1,7 @@
 #include "common.h"
 #include "billboard.h"
 #include "camera.h"
+#include "character.h"
 #include "character_slot.h"
 #include "club.h"
 #include "controller.h"
@@ -8,6 +9,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "math_util.h"
@@ -104,6 +106,8 @@
 #define AMBIENT_SOUND_VOLUME 0x5F
 #define AMBIENT_SOUND_REVERB 15
 #define SOUND_PAN_RANGE 255
+/* Only hole-outs in fewer strokes than this enter the records */
+#define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
 #define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
@@ -551,7 +555,48 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205DE8_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206354_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206BD0_ovl_00);
+/*
+ * Returns whether the player's hole-out may enter the records: a short one,
+ * by one of the main characters, outside mini-golf, in a mode that keeps them
+ */
+s32 IsRecordableHoleOut(s32 playerIndex) {
+    if (g_GameState.unk31) {
+        return FALSE;
+    }
+    if (!IsGameFlagSet(GAME_FLAG_RECORD_ALL_HOLE_OUTS)) {
+        if ((s8)g_Players[playerIndex].unk1E[0] != 0) {
+            return FALSE;
+        }
+        if (g_GameMode == GAME_MODE_TRAINING) {
+            return FALSE;
+        }
+    }
+    if (g_Players[playerIndex].strokeCount > MAX_RECORDED_STROKE_COUNT) {
+        return FALSE;
+    }
+    if ((s8)g_Players[playerIndex].characterIndex >= CHARACTER_KID) {
+        return FALSE;
+    }
+    if (g_IsMiniGolf) {
+        return FALSE;
+    }
+    switch (g_GameMode) {
+        case GAME_MODE_STROKE:
+        case GAME_MODE_UNK1:
+        case GAME_MODE_TRAINING:
+        case GAME_MODE_GET_CHARACTER:
+        case GAME_MODE_TOURNAMENT:
+        case GAME_MODE_SPEED_GOLF:
+            return TRUE;
+        case GAME_MODE_MATCH_GAME:
+        case GAME_MODE_UNK6:
+        case GAME_MODE_UNK8:
+        case GAME_MODE_RING_SHOT:
+        case GAME_MODE_SKINS_MATCH:
+            return FALSE;
+    }
+    return FALSE;
+}
 
 s32 IsRingShotRound(void) {
     if (!g_GameState.unk31) {

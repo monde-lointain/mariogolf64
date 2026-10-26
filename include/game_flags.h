@@ -39,6 +39,9 @@
 /* Lets a rising ball, whose course y falls, hit the flag */
 #define GAME_FLAG_RISING_FLAG_HITS 0x4E
 
+/* Lets every player's hole-outs, and those in Training, enter the records */
+#define GAME_FLAG_RECORD_ALL_HOLE_OUTS 0x3B
+
 /* Lets the ball hit walls outside mini-golf */
 #define GAME_FLAG_WALL_HITS 0x3A
 
