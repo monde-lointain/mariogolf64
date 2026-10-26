@@ -108,7 +108,7 @@
 #define PRESSING_HAND_ASSET 0x8EB
 #define RESULTS_DIGITS_ASSET 0x722
 #define PLACE_DIGITS_ASSET 0x98E
-#define RESULTS_UNK69F_ASSET 0x69F
+#define FINAL_RESULTS_TITLE_ASSET 0x69F
 #define LABELS_IMAGE_ASSET 0x68A
 #define LARGE_DIGITS_IMAGE_ASSET 0x689
 #define NOTICE_CLOUD_ASSET 0x70B
@@ -164,7 +164,7 @@ extern u8 *sResultsLabelsImage;
 extern u8 *sResultsLargeDigitsImage;
 extern u8 *sResultsCloudImage;
 extern u8 *sResultsPlacesImage;
-extern u8 *D_802256C4_ovl_00;
+extern u8 *sFinalResultsTitleImage;
 extern u8 *D_80225708_ovl_00;
 extern u8 *D_80225718_ovl_00;
 extern u8 *D_8022571C_ovl_00;
@@ -193,7 +193,8 @@ extern s32 sPrizePoints;
 extern s32 sPrizeShown;
 extern s32 sResultsUnk94;
 extern s32 sResultsUnk98;
-extern s32 sResultsUnk8C;
+/* The pressing hand shows while the results wait for A */
+extern s32 sIsAwaitingConfirm;
 extern s32 sResultsUnk78;
 extern s32 sResultsUnk7C;
 /* The score password of a round of a tournament entered by password */
@@ -313,7 +314,7 @@ void LoadRoundResults(void) {
     sResultsUnk94 = 3;
     sResultsUnk98 = 0;
     sTallySpeed = 1;
-    sResultsUnk8C = 0;
+    sIsAwaitingConfirm = 0;
     if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
         g_Players[0].points += 500;
     }
@@ -335,8 +336,8 @@ void LoadRoundResults(void) {
         sResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[GetClubTournamentCourse()], &asset));
         ReadEncodedAsset(sResultsCourseImage, &asset);
     } else {
-        D_802256C4_ovl_00 = AllocMemory(OpenEncodedAsset(RESULTS_UNK69F_ASSET, &asset));
-        ReadEncodedAsset(D_802256C4_ovl_00, &asset);
+        sFinalResultsTitleImage = AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
+        ReadEncodedAsset(sFinalResultsTitleImage, &asset);
         sResultsLabelsImage = AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sResultsLabelsImage, &asset);
         sResultsLargeDigitsImage = AllocMemory(OpenEncodedAsset(LARGE_DIGITS_IMAGE_ASSET, &asset));
@@ -695,7 +696,7 @@ void FreeRoundResults(void) {
             FreeMemory(&sNintendoBadgeImage);
             FreeMemory(&sResultsCourseImage);
         } else {
-            FreeMemory(&D_802256C4_ovl_00);
+            FreeMemory(&sFinalResultsTitleImage);
             FreeMemory(&sResultsLabelsImage);
             FreeMemory(&sResultsLargeDigitsImage);
             FreeMemory(&sResultsCloudImage);
@@ -1548,11 +1549,11 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (record->roundCount <= 0 || record->bestScore >= sPlayerResults[0]) {
                         PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL, TALLY_DONE_SOUND_VOLUME);
                     }
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     break;
                 case TOURNAMENT_STEP_SHOWN:
                     if (controller->buttons & A_BUTTON) {
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         SetResultsUnk94(0, 1);
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                         sResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
@@ -1595,7 +1596,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                         if (*points < 0) {
                             sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
                             *points = 0;
-                            sResultsUnk8C = TRUE;
+                            sIsAwaitingConfirm = TRUE;
                             if (sTournamentOpenCourseCount < COURSE_COUNT) {
                                 PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
                             }
@@ -1606,7 +1607,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (controller->buttons & A_BUTTON) {
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                         sTallySpeed = 1;
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         sResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
                     }
                     /* A debugging shortcut to the course notice */
@@ -1659,7 +1660,7 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (sPointsEarned == 0) {
                         PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
                         sResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
-                        sResultsUnk8C = TRUE;
+                        sIsAwaitingConfirm = TRUE;
                     }
                     break;
                 case TOURNAMENT_STEP_POINTS_TALLIED:
@@ -1671,12 +1672,12 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     break;
                 case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
                     if (GetResultsUnk94() == 3) {
-                        sResultsUnk8C = TRUE;
+                        sIsAwaitingConfirm = TRUE;
                         sResultsUnk78 = TOURNAMENT_STEP_WAITING;
                     }
                     break;
                 case TOURNAMENT_STEP_WAITING:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     if (controller->buttons & A_BUTTON) {
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                         return TRUE;
@@ -1714,11 +1715,11 @@ s32 ShowScorePassword(ControllerState *controller) {
             report.time = g_GameState.stopwatchFrameCount;
             report.gameBoyLevel = g_GameBoyCharacters[g_Players[0].gameBoyCharacterIndex].level;
             EncodeScorePassword(&report, sScorePassword);
-            sResultsUnk8C = TRUE;
+            sIsAwaitingConfirm = TRUE;
             break;
         case SCORE_PASSWORD_STEP_SHOWN:
             if (controller->buttons & A_BUTTON) {
-                sResultsUnk8C = FALSE;
+                sIsAwaitingConfirm = FALSE;
                 sResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
                 OpenPrompt(PROMPT_SCORE_PASSWORD);
                 PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
@@ -1732,12 +1733,12 @@ s32 ShowScorePassword(ControllerState *controller) {
                     break;
                 case SCORE_PASSWORD_PROMPT_NO:
                     sResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     break;
             }
             break;
         case SCORE_PASSWORD_STEP_DONE:
-            sResultsUnk8C = FALSE;
+            sIsAwaitingConfirm = FALSE;
             return TRUE;
     }
     return FALSE;
@@ -1786,9 +1787,9 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
             }
             switch (sResultsUnk78) {
                 case POINTS_STEP_SHOWN:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     if (controller->buttons & A_BUTTON) {
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         sResultsUnk78 = POINTS_STEP_START_TALLY;
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                     }
@@ -1842,14 +1843,14 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                         sResultsUnk7C = 0;
                         PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
                         sResultsUnk78 = POINTS_STEP_TALLIED;
-                        sResultsUnk8C = TRUE;
+                        sIsAwaitingConfirm = TRUE;
                     }
                     break;
                 case POINTS_STEP_TALLIED:
                     if (controller->buttons & A_BUTTON) {
                         SetResultsUnk94(4, 3);
                         sResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                     }
                     break;
                 case POINTS_STEP_SLIDING_OUT_TALLY:
@@ -1858,10 +1859,10 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                     }
                     break;
                 case POINTS_STEP_WAITING:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     if (controller->pressedButtons & A_BUTTON) {
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         return TRUE;
                     }
                     break;
@@ -1926,9 +1927,9 @@ s32 UpdateMatchResults(ControllerState *controller) {
             }
             switch (sResultsUnk78) {
                 case MATCH_STEP_SHOWN:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     if (controller->buttons & A_BUTTON) {
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         sResultsUnk78 = MATCH_STEP_START_TALLY;
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                     }
@@ -1983,11 +1984,11 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     }
                     break;
                 case MATCH_STEP_TALLIED:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     if (controller->buttons & A_BUTTON) {
                         SetResultsUnk94(4, 3);
                         sResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                     }
                     break;
                 case MATCH_STEP_SLIDING_OUT_TALLY:
@@ -2034,7 +2035,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     }
                     break;
                 case MATCH_STEP_WAITING:
-                    sResultsUnk8C = TRUE;
+                    sIsAwaitingConfirm = TRUE;
                     /* A debugging aid: up and down choose a character, and B shows its notice */
                     if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
                         if ((g_ControllerStates[0].repeatedButtons & U_JPAD) && sDebugUnlockCharacter > 0) {
@@ -2066,7 +2067,7 @@ s32 UpdateMatchResults(ControllerState *controller) {
                     }
                     if (controller->buttons & A_BUTTON) {
                         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
-                        sResultsUnk8C = FALSE;
+                        sIsAwaitingConfirm = FALSE;
                         return TRUE;
                     }
                     break;
