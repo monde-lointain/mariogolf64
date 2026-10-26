@@ -72,6 +72,8 @@
 /* Logs the ID of each encoded asset that is opened */
 #define GAME_FLAG_LOG_ENCODED_ASSETS 0x49
 
+/* Lets the player with the fewest strokes play next, instead of the farthest from the cup */
+#define GAME_FLAG_FEWEST_STROKES_FIRST 0x3F
 /* Cuts every round to two holes */
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
 /* Logs LoadCharacter's progress */

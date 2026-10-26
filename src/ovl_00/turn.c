@@ -126,6 +126,14 @@
 #define SOUND_IMPACT_MISHIT 0x63
 #define SOUND_IMPACT_OFF_MARK 0x6E
 #define IMPACT_SOUND_VOLUME 0x64
+/* D_800FBDB8 while the contest movies play */
+#define CONTEST_MOVIES_PLAYING 60
+/* The order in which players' lies come up, from the first */
+#define LIE_PRIORITY_TEE 2
+#define LIE_PRIORITY_OFF_GREEN 1
+#define LIE_PRIORITY_ON_GREEN 0
+/* Under GAME_FLAG_FEWEST_STROKES_FIRST, a priority that falls with each stroke */
+#define STROKE_PRIORITY_BASE 200
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
@@ -156,6 +164,9 @@
 extern s32 D_800C3070;
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
+extern s32 D_801B60A8; /* g_GameState.unk20, the current player, under a symbol of its own */
+extern s8 D_800FBDB8; /* PlayContestMovies' state */
+extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is picked */
 extern u16 D_80104990; /* The first controller's buttons, as play copies them each frame */
 extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing was stopped */
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
@@ -874,7 +885,80 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207388_ovl_00);
 void func_80207660_ovl_00(UnkB8 *player) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207668_ovl_00);
+/*
+ * Once every player's shot has finished, picks who plays next. Players still on the tee
+ * go first, then those off the green, then those on it. Among those, the farthest from
+ * the cup goes first, and the earliest in the tee order breaks ties.
+ */
+#ifdef NON_MATCHING
+void PickNextPlayer(void) {
+    s32 i;
+    s32 finishedCount;
+    s32 nextPlayer;
+    s32 bestPriority;
+    s32 bestDistance;
+    s32 bestTeeOrder;
+    s32 priority;
+    s32 distance;
+
+    if (D_800FBDB8 == CONTEST_MOVIES_PLAYING) {
+        return;
+    }
+    for (finishedCount = 0; finishedCount < g_PlayerCount; finishedCount++) {
+        if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK11
+            && g_Players[finishedCount].unkC != PLAYER_STATE_UNK14) {
+            break;
+        }
+    }
+    bestDistance = -1;
+    if (finishedCount != g_PlayerCount) {
+        return;
+    }
+    bestPriority = 0;
+    bestTeeOrder = 0x7FFFFFFF;
+    nextPlayer = 0;
+    for (i = 0; i < g_PlayerCount; i++) {
+        priority = LIE_PRIORITY_TEE;
+        if (g_Players[i].unk26 != 0) {
+            continue;
+        }
+        if (IsGameFlagSet(GAME_FLAG_FEWEST_STROKES_FIRST)) {
+            distance = 0;
+            priority = STROKE_PRIORITY_BASE - g_Players[i].strokeCount;
+        } else {
+            if (g_Players[i].strokeCount != 0) {
+                priority = GetSurfaceInfo((s8)g_Players[i].ballSurface)->kind != SURFACE_KIND_GREEN;
+            }
+            distance = IntLength2D(D_800BA9D8.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
+                                   D_800BA9D8.cupPosition[AXIS_Z] - g_Players[i].ballPosition[AXIS_Z]);
+        }
+        if (priority > bestPriority) {
+            bestPriority = priority;
+            nextPlayer = i;
+            bestTeeOrder = g_Players[nextPlayer].teeOrder;
+            bestDistance = distance;
+        } else if (priority == bestPriority) {
+            if (distance > bestDistance) {
+                nextPlayer = i;
+                bestTeeOrder = g_Players[nextPlayer].teeOrder;
+                bestDistance = distance;
+            } else if (distance == bestDistance && g_Players[i].teeOrder < bestTeeOrder) {
+                bestTeeOrder = g_Players[i].teeOrder;
+                bestDistance = distance;
+                nextPlayer = i;
+            }
+        }
+    }
+    D_801B60A8 = nextPlayer;
+    g_Players[nextPlayer].unkC = 0;
+    if (D_800C3098) {
+        StartHudAnimation(HUD_ANIMATION_TURN_AWAY);
+        D_800C3098 = 0;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PickNextPlayer);
+#endif
 
 /* Hides the rings the ball passed, so that a new shot can pass them again */
 void ClearPassedRings(UnkB8 *player) {
