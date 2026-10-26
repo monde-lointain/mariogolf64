@@ -88,9 +88,6 @@ typedef struct MessageTable {
 #define FONT_GLYPHS_PER_ROW 16
 #define GLYPH_TILE_WIDTH 16
 
-#define FONT_SIZE_MEDIUM 10
-#define FONT_SIZE_SMALL 8
-
 /* How far the shadowed font advances for a glyph, and for a full stop */
 #define SHADOWED_GLYPH_WIDTH 8
 #define SHADOWED_POINT_WIDTH 2
@@ -211,7 +208,6 @@ void DrawMediumTextSlot(Gfx **displayListHead, s32 slot);
 void ClearGlyphSprites(void);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 s32 GetTextLength(char *text);

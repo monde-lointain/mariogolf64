@@ -37,6 +37,8 @@
 
 /* The font size, in pixels, of the font whose characters differ in width */
 #define FONT_SIZE_LARGE 12
+#define FONT_SIZE_MEDIUM 10
+#define FONT_SIZE_SMALL 8
 
 /* MeasureText flag: use each character's own width rather than the font size */
 #define MEASURE_TEXT_PROPORTIONAL 0x02
@@ -82,6 +84,10 @@ void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
 void DrawTextSlots(Gfx **displayListHead);
 void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
 void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawGlyphGroup(Gfx **displayListHead, s32 group);
+void SetUpPerspectiveTextDrawing(Gfx **displayListHead);
 void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
 s32 MeasureText(char *text, s32 fontSize, s32 flags);
