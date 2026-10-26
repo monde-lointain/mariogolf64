@@ -35,7 +35,6 @@
 
 /* The kinds of notable shot that earn Course Points, as counted in unkAA */
 #define SHOT_KIND_COUNT PLAYER_UNKAA_COUNT
-#define SHOT_KIND_UNK7 7      /* The only kind that mini golf counts */
 #define SHOT_KIND_MAX_COUNT 0xFF
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
@@ -150,7 +149,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     if (g_GameMode == GAME_MODE_RING_SHOT || sShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
         return;
     }
-    if (g_IsMiniGolf && shotKind != SHOT_KIND_UNK7) {
+    if (g_IsMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
         return;
     }
     count = (u8 *)&g_Players[playerIndex].unkAA[shotKind];
@@ -166,34 +165,34 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
     s32 points;
 
     switch (shotKind) {
-        case 0:
-        case 1:
+        case SHOT_KIND_GREAT:
+        case SHOT_KIND_EXCELLENT:
             points = 2;
             break;
-        case 4:
+        case SHOT_KIND_LONG_CHIP_IN:
             points = 8;
             break;
-        case 2:
-        case 5:
+        case SHOT_KIND_PIN_SHOT:
+        case SHOT_KIND_UNK5:
             points = 4;
             break;
-        case 7:
+        case SHOT_KIND_HOLE_IN_ONE:
             if (g_IsMiniGolf) {
                 points = 10;
             } else {
                 points = 20;
             }
             break;
-        case 6:
-        case 9:
-        case 11:
+        case SHOT_KIND_FLAG_SHOT:
+        case SHOT_KIND_EAGLE:
+        case SHOT_KIND_WATER_CUT:
             points = 10;
             break;
-        case 8:
+        case SHOT_KIND_ALBATROSS:
             points = 16;
             break;
-        case 3:
-        case 10:
+        case SHOT_KIND_CHIP_IN:
+        case SHOT_KIND_BIRDIE:
             points = 6;
             break;
         default:
