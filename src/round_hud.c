@@ -7,6 +7,7 @@
 #include "burst.h"
 #include "camera.h"
 #include "character.h"
+#include "club_panel.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "current_shot.h"
@@ -466,7 +467,6 @@ extern s32 sSceneryState;
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
-void func_8021E710(void);
 void func_8021419C(UnkB8 *player);
 extern s8 D_801B60B9;
 /* The colors of each course's name, which gradients from the first to the second */
@@ -495,11 +495,9 @@ void FreeCourseSelect(void);
 void func_8020D6F0(void);
 void func_80216EDC(void);
 void func_8020E740(void);
-void func_8021E5F4(void);
 void func_8020D784(void);
 void func_80216F8C(void);
 void func_8020E78C(void);
-void func_8021E6B8(void);
 
 /* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {
@@ -663,7 +661,7 @@ void LoadSceneryImages(void) {
     func_8020D6F0();
     func_80216EDC();
     func_8020E740();
-    func_8021E5F4();
+    LoadClubPanelImages();
     D_801B55DC = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_541, &asset));
     ReadEncodedAsset(D_801B55DC, &asset);
     sWindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
@@ -722,7 +720,7 @@ void FreeSceneryImages(void) {
         func_8020D784();
         func_80216F8C();
         func_8020E78C();
-        func_8021E6B8();
+        FreeClubPanelImages();
         FreeMemory(&D_801B55DC);
         FreeMemory(&sWindIconImage);
         FreeMemory(&D_80132360);
@@ -857,7 +855,7 @@ void StartShotPanel(void) {
         }
     }
     sShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
-    func_8021E710();
+    ResetShotModeChange();
     func_8021419C(&g_Players[g_RoundHud.unk87]);
 }
 #else

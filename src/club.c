@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ball_simulation.h"
 #include "club.h"
+#include "club_panel.h"
 #include "controller.h"
 #include "current_shot.h"
 #include "game_flags.h"
@@ -94,8 +95,6 @@ extern s8 sStockUnk30Values[CLUB_SET_COUNT];
 extern Unk20 sPutterTestShot;
 extern s32 sClubChoiceDelay;
 extern s8 g_IsMiniGolf;
-
-s32 func_8021EA48(void);
 
 /*
  * Each set's clubs' parameters for each shot mode. WriteClubParameters
@@ -1049,7 +1048,7 @@ void HandleClubInput(void) {
     s32 slot;
     u16 buttons;
 
-    if (func_8021EA48()) {
+    if (IsShotModeChangeDone()) {
         buttons = g_MenuControllerData[g_CurrentShot.controllerIndex].button;
         if (buttons & D_JPAD) {
             for (slot = g_CurrentShot.clubSlot + 1; slot < CLUB_SLOT_COUNT; slot++) {
@@ -1091,7 +1090,7 @@ void HandleShotModeInput(void) {
                       YARDS_PER_UNIT;
     s32 sound;
 
-    if ((g_MenuControllerData[g_CurrentShot.controllerIndex].button & B_BUTTON) && func_8021EA48()) {
+    if ((g_MenuControllerData[g_CurrentShot.controllerIndex].button & B_BUTTON) && IsShotModeChangeDone()) {
         if (club->surfaceMask & CLUB_SURFACE_GREEN) {
             if (g_CurrentShot.shotMode == PUTT_MODE_MIDDLE) {
                 g_CurrentShot.shotMode = PUTT_MODE_LONG;
