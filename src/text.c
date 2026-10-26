@@ -102,8 +102,6 @@ typedef struct MessageTable {
 #define SHADOWED_GLYPH_SIZE 8
 #define SHADOWED_GLYPHS_PER_ROW 31
 #define SHADOWED_GLYPH_FIRST ' '
-#define SHADOWED_FONT_IMAGE_WIDTH 256
-#define SHADOWED_FONT_IMAGE_HEIGHT 32
 /* Its last row has narrower glyphs, from the apostrophe on */
 #define NARROW_GLYPH_ROW 3
 #define NARROW_GLYPH_FIRST '\''
@@ -121,7 +119,6 @@ extern void *g_SmallFontImage;
 extern void *g_MediumFontImage;
 extern void *g_LargeFontImage;
 extern void *g_TextIconImage;
-extern void *g_ShadowedFontImage;
 extern void *g_TextGradientImages[2];
 extern void *g_MessageGlyphs;
 extern MessageTable *g_Messages;

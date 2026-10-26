@@ -35,6 +35,10 @@
 /* Each glyph of the large font takes the same width */
 #define TEXT_FLAG_FIXED_WIDTH 0x80
 
+/* The shadowed font's glyphs share one image */
+#define SHADOWED_FONT_IMAGE_WIDTH 256
+#define SHADOWED_FONT_IMAGE_HEIGHT 32
+
 /* The characters that the fonts draw as the symbols for yards and feet */
 #define YARDS_GLYPH 0xF9
 #define FEET_GLYPH 0xFB
@@ -96,6 +100,9 @@ typedef struct TextSlot {
 /* Given this as its font size, PlaceGlyphGroup only frees the group */
 #define NO_FONT_SIZE (-1)
 
+/* The font that DrawShadowedText and its kin draw */
+extern void *g_ShadowedFontImage;
+
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
@@ -126,6 +133,7 @@ void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, char *text);
+void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
 s32 GetDigitGlyphTop(char code);
 void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text);
 void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
