@@ -1508,8 +1508,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_80086864);
  * original; separate variables change the registers.
  *
  * Doesn't match: the zero for the skew factors goes in otherFactor's register
- * first instead of factor's, the else branch for the row shade adds a jump,
- * and the bulge's constants are loaded in a different place.
+ * first instead of factor's.
  */
 #ifdef NON_MATCHING
 void WaveHoleFlag(void) {
@@ -1571,11 +1570,11 @@ void WaveHoleFlag(void) {
     factor = windSpeed + rand() % HOLE_FLAG_SWING_JITTER_RANGE;
     shade = (s32)(sinf(sHoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
-        if ((s32)windSpeed != 0) {
+        if ((s32)windSpeed == 0) {
+            rowShade = shade;
+        } else {
             rowShade = (f32)(shade + rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED)) -
                        HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed;
-        } else {
-            rowShade = shade;
         }
         HOLE_FLAG_SHADE(row, 0) = rowShade;
     }
@@ -1588,9 +1587,9 @@ void WaveHoleFlag(void) {
     }
     /* Bulges are deeper toward the flag's free edge and its top */
     factor = windSpeed * HOLE_FLAG_BULGE_PER_SPEED + HOLE_FLAG_MIN_BULGE;
-    otherFactor = HOLE_FLAG_BULGE_SCALE;
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
         for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+            otherFactor = HOLE_FLAG_BULGE_SCALE;
             HOLE_FLAG_VERTEX(row, column).v.ob[2] =
                 (f32)(HOLE_FLAG_VERTEX(row, column).v.cn[0] - HOLE_FLAG_START_SHADE) /
                 (f32)(HOLE_FLAG_BULGE_COLUMN_BASE - column) * factor * otherFactor *
