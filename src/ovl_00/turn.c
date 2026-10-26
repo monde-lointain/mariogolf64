@@ -80,6 +80,9 @@
 #define FREE_LOOK_HUD_FLAGS 0x47
 #define LETTERBOX_STATE_UNK1 1
 #define FREE_LOOK_FRAMEBUFFER_COUNT 3
+/* A shorter pulse than the shots' rumble in effects.c */
+#define TURN_RUMBLE_FREQUENCY 0x100
+#define TURN_RUMBLE_FRAME_COUNT 8
 /* The stopwatches stop at an hour */
 #define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
@@ -106,6 +109,7 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3070;
+extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s16 D_800C307A; /* The free-look camera's heading, in binary angle units */
 extern s32 D_800C3080;
@@ -684,7 +688,30 @@ void SkipUnmeasuredDistances(s32 playerIndex) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207BEC_ovl_00);
+/*
+ * Rumbles the player's controller briefly in a game for several players,
+ * if every player has a controller of their own
+ */
+void StartTurnRumble(s32 playerIndex) {
+    if (D_801051F0 == TRUE && g_PlayerCount >= 2) {
+        s32 controllerIndex = g_Players[playerIndex].controllerIndex;
+
+        EndRumbleForceStop();
+        if ((u32)controllerIndex < MAXCONTROLLERS && !g_GameState.unk31) {
+            switch (nuContRmbCheck(g_PlayerControllerPorts[controllerIndex])) {
+                case 0:
+                    nuContRmbStart(g_PlayerControllerPorts[controllerIndex], TURN_RUMBLE_FREQUENCY,
+                                   TURN_RUMBLE_FRAME_COUNT);
+                    break;
+                /* The empty cases are there to match */
+                case PFS_ERR_NOPACK:
+                    break;
+                case PFS_ERR_CONTRFAIL:
+                    break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207CAC_ovl_00);
 
