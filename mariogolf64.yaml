@@ -515,10 +515,26 @@ segments:
     subsegments:
       - [0xADD30, hasm, ovl_00/padding]
       - [0xADD40, c, ovl_00/round_results]
-      - [0xB68F0, c, ovl_00/round]
+      - [0xB68F0, c, ovl_00/golf_balls]
+      - [0xBBD00, c, ovl_00/turn]
+      - [0xC69F0, c, ovl_00/hole_objects]
+      - [0xC7A40, c, ovl_00/round_events]
+      - [0xCFE10, c, ovl_00/shot_effects]
+      - [0xD1FC0, c, ovl_00/pause_menu]
+      - [0xD4330, c, ovl_00/shot_labels]
+      - [0xD71D0, c, ovl_00/hole_intro]
+      - [0xD7850, c, ovl_00/club_panel]
       - [0xD8F70, data]
       - [0xDDF10, .rodata, ovl_00/round_results]
-      - [0xDE190, .rodata, ovl_00/round]
+      - [0xDE190, .rodata, ovl_00/golf_balls]
+      - [0xDE1F0, .rodata, ovl_00/turn]
+      - [0xDE570, .rodata, ovl_00/hole_objects]
+      - [0xDE590, .rodata, ovl_00/round_events]
+      - [0xDE710, .rodata, ovl_00/shot_effects]
+      - [0xDE740, .rodata, ovl_00/pause_menu]
+      - [0xDE900, .rodata, ovl_00/shot_labels]
+      - [0xDE940, .rodata, ovl_00/hole_intro]
+      - [0xDE990, .rodata, ovl_00/club_panel]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
 
   - name: ovl_01
