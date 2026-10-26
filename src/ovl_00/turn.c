@@ -83,6 +83,19 @@
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
 #define TURN_RUMBLE_FRAME_COUNT 8
+/* Players in these states may make their characters call out during another player's turn */
+#define PLAYER_STATE_UNK11 0x11
+#define PLAYER_STATE_UNK14 0x14
+/* The character sound that each button plays; the D-pad and C buttons give eight calls */
+#define CALL_OUT_SOUND_UP 0
+#define CALL_OUT_SOUND_DOWN 2
+#define CALL_OUT_SOUND_LEFT 4
+#define CALL_OUT_SOUND_RIGHT 6
+#define CALL_OUT_SOUND_C_UP 8
+#define CALL_OUT_SOUND_C_DOWN 10
+#define CALL_OUT_SOUND_C_LEFT 12
+#define CALL_OUT_SOUND_C_RIGHT 14
+#define CALL_OUT_VOLUME 0x7F
 /* The stopwatches stop at an hour */
 #define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
@@ -713,7 +726,55 @@ void StartTurnRumble(s32 playerIndex) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207CAC_ovl_00);
+/*
+ * Lets the players who are waiting make their characters call out with the
+ * D-pad and the C buttons, if every player has a controller of their own
+ */
+void PlayWaitingPlayersCalls(void) {
+    s32 i;
+    s32 controllerIndex;
+    u16 pressed;
+
+    if (D_801051F0 == TRUE) {
+        for (i = 0; i < g_PlayerCount; i++) {
+            if ((g_Players[i].unkC == PLAYER_STATE_UNK11) | (g_Players[i].unkC == PLAYER_STATE_UNK14)) {
+                controllerIndex = g_Players[i].controllerIndex;
+                if (controllerIndex == g_Players[g_GameState.unk20].controllerIndex) {
+                    continue;
+                }
+                if (controllerIndex >= MAXCONTROLLERS) {
+                    continue;
+                }
+                pressed = g_ControllerStates[controllerIndex].pressedButtons;
+                if (pressed & U_JPAD) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_UP, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & D_JPAD) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_DOWN, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & L_JPAD) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_LEFT, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & R_JPAD) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_RIGHT, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & U_CBUTTONS) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_C_UP, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & D_CBUTTONS) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_C_DOWN, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & L_CBUTTONS) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_C_LEFT, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                } else if (pressed & R_CBUTTONS) {
+                    PlayCharacterSound((s8)g_Players[i].characterIndex, i, CALL_OUT_SOUND_C_RIGHT, CALL_OUT_VOLUME,
+                                       g_Players[i].soundPan);
+                }
+            }
+        }
+    }
+}
 
 /* Plays the jingle for how the player finished the hole */
 void PlayHoleOutSong(s32 playerIndex) {
