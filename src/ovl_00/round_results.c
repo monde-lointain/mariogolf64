@@ -1074,7 +1074,177 @@ void UpdateCourseResultsNotice(void) {
     }
 }
 
+/* The course image is two strips of 64x32 that shrink from twice their size to full size as the notice swings */
+#define NOTICE_COURSE_STRIP_WIDTH 64
+#define NOTICE_COURSE_STRIP_HEIGHT 32
+#define NOTICE_COURSE_STRIP_COUNT 2
+#define NOTICE_COURSE_CENTRE_X 160
+#define NOTICE_COURSE_CENTRE_Y 128
+#define NOTICE_COURSE_SCALE_BIAS 2.0f
+#define NOTICE_TITLE_STRIP_WIDTH 160
+#define NOTICE_TITLE_STRIP_HEIGHT 8
+#define NOTICE_TITLE_STRIP_COUNT 8
+#define NOTICE_TITLE_LEFT 80
+#define NOTICE_TITLE_TOP 56
+#define NOTICE_TITLE_LIFT 96.0f
+#define NOTICE_SHINE_SIZE 64
+/* Wider than the shine texture, so that it sweeps across the title */
+#define NOTICE_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / NOTICE_TITLE_STRIP_WIDTH)
+#define NOTICE_SHINE_STEP 18
+#define NOTICE_SHINE_START 16
+#define NOTICE_SHINE_END 40
+/* The title's depth, and the shine's behind it, so that the shine only lights the title's letters */
+#define NOTICE_TITLE_DEPTH 0x3FFF
+#define NOTICE_SHINE_DEPTH 0x4027
+#define NOTICE_PAN_START 3
+#define NOTICE_PAN_END 60
+#define NOTICE_PAN_MAX 255
+#define NOTICE_PAN_RANGE 126
+#define NOTICE_SWING_SOUND 0x69
+#define NOTICE_SWING_SOUND_CHANNEL 13
+#define NOTICE_SWING_SOUND_VOLUME 95
+#define NOTICE_CHEER_SOUND 0x9D
+#define NOTICE_CHEER_SOUND_CHANNEL 3
+#define NOTICE_CHEER_SOUND_VOLUME 127
+#define NOTICE_SHINE_SOUND 0x43
+#define NOTICE_SHINE_SOUND_CHANNEL 14
+#define NOTICE_SHINE_SOUND_VOLUME 63
+#define NOTICE_SOUND_PAN_CENTRE 127
+#define NOTICE_SOUND_PAN_RIGHT 255
+
+extern Gfx D_800C3FC0[];
+
+#ifdef NON_MATCHING
+/* The notice that a course has opened: its picture and title swing in, then a shine sweeps the title */
+void DrawCourseResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 size;
+    s32 step;
+    s32 lift;
+    s32 top;
+    s32 pan;
+    s32 centreX;
+    s32 i;
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    /* Once the swing settles the picture is drawn at full size, where point sampling is sharper */
+    if (sNoticeAngle == M_PI) {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    }
+    LoadLargePalette(&gfx, sResultsCourseImage + IMAGE_HEADER_SIZE);
+    for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
+        size = (cosf(sNoticeAngle) + NOTICE_COURSE_SCALE_BIAS) * NOTICE_COURSE_STRIP_HEIGHT;
+        step = (NOTICE_COURSE_STRIP_HEIGHT << 10) / size;
+        LoadTextureBlock(&gfx,
+                         sResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH, NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0,
+                         0, 0);
+        top = i * size + NOTICE_COURSE_CENTRE_Y - size;
+        centreX = sNoticeSwing + NOTICE_COURSE_CENTRE_X;
+        DrawTextureRect(&gfx, (centreX - size) * 4, (top + sNoticeUnk54) * 4,
+                        (size + centreX) * 4, (top + size + sNoticeUnk54) * 4,
+                        G_TX_RENDERTILE, 0, 0, step, step);
+    }
+    LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+        lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+        lift -= (s32)NOTICE_TITLE_LIFT;
+        LoadTextureBlock(&gfx,
+                         sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH, NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0,
+                         0, 0);
+        top = lift + NOTICE_TITLE_TOP + i * NOTICE_TITLE_STRIP_HEIGHT;
+        DrawTextureRect(&gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4, (top + sNoticeUnk54) * 4,
+                        (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+                        (top + (sNoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    }
+    /* The title again, into the depth buffer alone */
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM), G_RM_AA_ZB_TEX_EDGE2);
+    LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+    for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
+        lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+        lift -= (s32)NOTICE_TITLE_LIFT;
+        LoadTextureBlock(&gfx,
+                         sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH, NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0,
+                         0, 0);
+        top = lift + NOTICE_TITLE_TOP + i * NOTICE_TITLE_STRIP_HEIGHT;
+        DrawTextureRect(&gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4, (top + sNoticeUnk54) * 4,
+                        (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+                        (top + (sNoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    }
+    gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE,
+                     NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    if (sNoticeFrameCount == NOTICE_SHINE_START) {
+        PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL, NOTICE_SHINE_SOUND_VOLUME, 0,
+                             NOTICE_SOUND_PAN_CENTRE);
+    }
+    if (sNoticeFrameCount == 2) {
+        PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL, NOTICE_SWING_SOUND_VOLUME, 0,
+                             NOTICE_SOUND_PAN_RIGHT);
+        PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL, NOTICE_CHEER_SOUND_VOLUME);
+    }
+    /* The swing sound follows the notice across the screen */
+    if (sNoticeFrameCount >= NOTICE_PAN_START && sNoticeFrameCount < NOTICE_PAN_END) {
+        pan = (sNoticeSwing + NOTICE_COURSE_CENTRE_X) * NOTICE_PAN_RANGE / NOTICE_COURSE_CENTRE_X;
+        if (pan < 0) {
+            pan = 0;
+        }
+        if (pan > NOTICE_PAN_MAX) {
+            pan = NOTICE_PAN_MAX;
+        }
+        SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
+    }
+    lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+    lift -= (s32)NOTICE_TITLE_LIFT;
+    if (sNoticeFrameCount >= NOTICE_SHINE_START) {
+        if (sNoticeFrameCount < NOTICE_SHINE_END) {
+            DrawTextureRect(&gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4,
+                            (lift + (sNoticeUnk54 + NOTICE_TITLE_TOP)) * 4,
+                            (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+                            (lift + (sNoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)) * 4, G_TX_RENDERTILE,
+                            (NOTICE_SHINE_SIZE - (sNoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP) << 5, 0,
+                            NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCourseResultsNotice);
+#endif
 
 /* Changes the beaten character's face, then lifts the notice away */
 void UpdateCharacterResultsNotice(void) {
