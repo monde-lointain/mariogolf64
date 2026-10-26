@@ -3,9 +3,10 @@
 #include "character.h"
 #include "character_slot.h"
 #include "functions.h"
+#include "heap.h"
+#include "hole_display.h"
 #include "math_util.h"
 #include "reaction.h"
-#include "heap.h"
 #include "round_hud.h"
 #include "round_stats.h"
 #include "save.h"
@@ -51,6 +52,15 @@
 #define SOUND_SKIN_COUNTED 0x6B
 #define TALLY_SOUND_CHANNEL 13
 #define MATCH_RESULT_SOUND_CHANNEL 14
+
+#define SCORECARD_OPEN_TIME 12  /* Frames the scorecard takes to slide in */
+#define SCORECARD_CLOSE_TIME 10 /* Frames before a closing scorecard is freed */
+#define SCORECARD_SLIDE_SPEED 32
+#define SCORECARD_CLOSE_ACCELERATION 8
+#define ROUND_FRAMEBUFFER_COUNT 3
+/* The faces step through their images once every FACE_FRAME_TIME frames */
+#define FACE_FRAME_COUNT 5
+#define FACE_FRAME_TIME 3
 
 #define SOUND_SCORECARD_OPEN 0x47
 #define SOUND_SCORECARD_CLOSE 0x48
@@ -126,6 +136,8 @@ extern s32 sScorecardState;
 #define RESULT_CHARACTERS_IDLE (-1) /* sResultCharactersLoadStep when no characters are loading */
 extern s32 sResultCharactersLoadStep;
 extern const char sDecimalFormat[];
+
+void SetFramebufferCount(s32 count);
 
 void ScrollLeaderboard(u16 buttons);
 
@@ -232,7 +244,95 @@ void SetScorecardState(s32 state) {
     g_Scorecard.stateTime = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", AnimateScorecard);
+/* Slides the scorecard in or out, tallies the last hole, and animates the faces on it */
+void AnimateScorecard(void) {
+    EncodedAsset asset;
+    s32 i;
+    s32 slideSpeed;
+
+    switch (sScorecardState) {
+        case SCORECARD_TALLYING:
+            if (TallyScorecardSkins()) {
+                sScorecardState = SCORECARD_SHOWN;
+            }
+            g_Scorecard.stateTime++;
+            break;
+        case SCORECARD_OPENING:
+            g_Scorecard.stateTime++;
+            if (g_Scorecard.stateTime == SCORECARD_OPEN_TIME) {
+                g_Scorecard.stateTime = 0;
+                if (g_Scorecard.isTallied) {
+                    sScorecardState = SCORECARD_SHOWN;
+                } else {
+                    sScorecardState = SCORECARD_TALLYING;
+                }
+            }
+            if (g_Scorecard.x > 0) {
+                if (g_Scorecard.x < 2) {
+                    g_Scorecard.x = 0;
+                }
+                g_Scorecard.x -= g_Scorecard.x / 2;
+            } else if (g_Scorecard.x < 0) {
+                g_Scorecard.x += SCORECARD_SLIDE_SPEED;
+            }
+            if (g_Scorecard.y > 0) {
+                g_Scorecard.y -= SCORECARD_SLIDE_SPEED;
+                if (g_Scorecard.y < 0) {
+                    g_Scorecard.y = 0;
+                }
+            } else if (g_Scorecard.y < 0) {
+                g_Scorecard.y += SCORECARD_SLIDE_SPEED;
+                if (g_Scorecard.y > 0) {
+                    g_Scorecard.y = 0;
+                }
+            }
+            break;
+        case SCORECARD_CLOSING:
+            g_Scorecard.stateTime++;
+            if (g_Scorecard.x > -SCREEN_WIDTH) {
+                slideSpeed = g_Scorecard.stateTime * SCORECARD_CLOSE_ACCELERATION;
+                if (slideSpeed > SCORECARD_SLIDE_SPEED * 2) {
+                    slideSpeed = SCORECARD_SLIDE_SPEED * 2;
+                }
+                g_Scorecard.x -= slideSpeed;
+            }
+            /* The target stores the y offset back unchanged here */
+            g_Scorecard.y = g_Scorecard.y;
+            if (g_Scorecard.stateTime == SCORECARD_CLOSE_TIME) {
+                FreeScorecard();
+                g_PauseScreen = PAUSE_SCREEN_NONE;
+                SetMenuBackdrop(MENU_BACKDROP_NONE);
+                SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+                SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+                g_RoundHud.isLetterboxShown = TRUE;
+                g_RoundHud.unkC = 1;
+                g_RoundHud.unk7 = 1;
+                g_RoundHud.unk6 = 0;
+                g_RoundHud.unk8 = 1;
+                g_RoundHud.unk9 = 1;
+                g_RoundHud.unkA = 1;
+                g_RoundHud.unkB = 1;
+                g_RoundHud.unkD = 1;
+            }
+            break;
+        case SCORECARD_SHOWN:
+            if (g_Scorecard.faceTime++ % FACE_FRAME_TIME == 1) {
+                g_Scorecard.faceFrame++;
+                g_Scorecard.unkBC ^= 1;
+                if (g_Scorecard.faceFrame < FACE_FRAME_COUNT) {
+                    for (i = 0; i != g_PlayerCount; i++) {
+                        OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
+                                             g_Scorecard.faceFrame + g_Scorecard.content.faceImageOffsets[i],
+                                         &asset);
+                        ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
+                    }
+                } else {
+                    g_Scorecard.faceFrame = FACE_FRAME_COUNT - 1;
+                }
+            }
+            break;
+    }
+}
 
 /*
  * Left and right on the control pad turn the pages, round from the last to the first.

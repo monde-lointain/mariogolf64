@@ -15,7 +15,7 @@ typedef struct ScorecardContent {
     /* 0x00 */ f32 rowFlipAngles[LEADERBOARD_ROW_COUNT];
     /* 0x28 */ s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
     /* 0x34 */ s32 flipTime;
-    /* 0x38 */ s32 unk38[MAX_PLAYER_COUNT];
+    /* 0x38 */ s32 faceImageOffsets[MAX_PLAYER_COUNT]; /* Added to each player's first face image */
     /* 0x48 */ s32 courseIndex;
     /* 0x4C */ s32 holeIndex;
     /* 0x50 */ s32 unk50;
@@ -46,15 +46,15 @@ typedef struct Scorecard {
     /* 0xA8 */ u16 *facePalettes[MAX_PLAYER_COUNT];
     /* 0xB8 */ u8 *unkB8;
     /* 0xBC */ u8 unkBC;
-    /* 0xBD */ u8 unkBD;
-    /* 0xBE */ u8 unkBE;
+    /* 0xBD */ u8 faceTime;  /* Frames since the faces were opened */
+    /* 0xBE */ u8 faceFrame; /* Which of the faces' images they show */
     /* 0xBF */ s8 unkBF;
     /* 0xC0 */ s32 topRow; /* The contestant at the top of the leaderboard */
     /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
     /* 0xC8 */ s32 y;
     /* 0xCC */ s32 unkCC;
     /* 0xD0 */ s32 stateTime; /* Frames since sScorecardState changed */
-    /* 0xD4 */ s32 unkD4;
+    /* 0xD4 */ s32 isTallied; /* The last hole's result is already on the scorecard */
     /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a HOLE_WINNER_* value */
     /* 0xDC */ s32 layout;
     /* 0xE0 */ s32 pageCount;
