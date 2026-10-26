@@ -16,8 +16,9 @@ typedef struct CurrentShot {
     /* 0x28 */ s32 surface;
     /* 0x2C */ s32 playerIndex;
     /* 0x30 */ s32 controllerIndex;
-    /* 0x34 */ f32 unk34[2];
-    /* 0x3C */ f32 unk3C;
+    /* 0x34 */ s32 aimCameraDistance; /* From the ball along the aim, so negative is behind it */
+    /* 0x38 */ s32 unk38;
+    /* 0x3C */ s32 aimCameraHeight;   /* Added to the lower of the ground's and the ball's heights */
     /* 0x40 */ s32 unk40;
     /* 0x44 */ CoursePoint unk44;
     /* 0x50 */ s32 unk50;

@@ -41,7 +41,7 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define FLIGHT_CAMERA_UNK0 0
 #define FLIGHT_CAMERA_UNK1 1
 #define FLIGHT_CAMERA_BESIDE_TEE 2 /* Beside the tee, looking at it */
-#define FLIGHT_CAMERA_UNK3 3 /* Placed by func_80203B4C */
+#define FLIGHT_CAMERA_UNK3 3 /* Placed by PlaceAimCamera */
 #define FLIGHT_CAMERA_BESIDE_GOLFER 4 /* Picked by the B button in debug builds */
 #define FLIGHT_CAMERA_CIRCLING_BALL 5 /* Picked by the A button in debug builds */
 #define FLIGHT_CAMERA_TRAILING_BALL 6
@@ -1462,7 +1462,7 @@ extern s32 sIsTrailViewClose;
 extern f32 sCircleAngle;
 extern f32 sFlaggedStepYaw;
 
-void func_80203B4C(void);
+void PlaceAimCamera(void);
 
 /* PlaceFlightCamera's distances are in course units unless they say otherwise; y points down */
 #define CUP_FRAMING_PITCH -0.14f
@@ -1907,7 +1907,7 @@ void PlaceFlightCamera(s32 step) {
         case FLIGHT_CAMERA_UNK3:
             if (D_800BE628 == TRUE) {
                 D_800BE628 = FALSE;
-                func_80203B4C();
+                PlaceAimCamera();
                 sCameraPosition[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
                 sCameraPosition[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
                 sCameraPosition[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];

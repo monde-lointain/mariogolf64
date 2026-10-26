@@ -53,9 +53,18 @@
 /* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY read it */
 #define DPAD_STICK_TILT 40
 #define LETTERBOX_STATE_UNK4 4
+/* Where the aim camera starts, in course units */
+#define AIM_CAMERA_START_DISTANCE (-0xF000)
+#define AIM_CAMERA_START_HEIGHT (-0x4E00)
+/* The stick moves the aim camera's height by this much for every AIM_STICK_STEP of tilt */
+#define AIM_CAMERA_HEIGHT_STEP 0x600
+#define AIM_STICK_STEP 16
+#define AIM_STICK_DEAD_ZONE 8
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
+extern s32 D_800C3070;
+extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C308C; /* The letterbox's state */
 extern s32 D_80227194_ovl_00;
@@ -64,6 +73,7 @@ extern s32 sTurnTimerStart; /* Nothing reads it */
 extern s32 sShotFlightCount;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
+void PlaceAimCamera(void);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -78,7 +88,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202D04_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802038D0_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203B4C_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceAimCamera);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203DAC_ovl_00);
 
@@ -95,7 +105,15 @@ void UpdateImpactPointMode(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203EEC_ovl_00);
+void ResetAimCamera(void) {
+    s32 unused[4];
+
+    g_CurrentShot.aimCameraDistance = AIM_CAMERA_START_DISTANCE;
+    g_CurrentShot.aimCameraHeight = AIM_CAMERA_START_HEIGHT;
+    D_800C3070 = 0;
+    D_800C3080 = 0;
+    PlaceAimCamera();
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203F30_ovl_00);
 
@@ -109,7 +127,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020439C_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204460_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204568_ovl_00);
+/* Raises or lowers the aim camera with the stick's Y */
+void MoveAimCameraHeight(void) {
+    if (ABS(g_TurnController.stickY) > AIM_STICK_DEAD_ZONE) {
+        g_CurrentShot.aimCameraHeight -= g_TurnController.stickY / AIM_STICK_STEP * AIM_CAMERA_HEIGHT_STEP;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802045BC_ovl_00);
 

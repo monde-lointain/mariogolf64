@@ -2877,3 +2877,6 @@ SkipUnmeasuredDistances = 0x80207B8C; // type:func segment:ovl_00
 GetTurnStickX = 0x802080D4; // type:func segment:ovl_00
 GetTurnStickY = 0x80208120; // type:func segment:ovl_00
 UpdateGolferTranslucency = 0x8020816C; // type:func segment:ovl_00
+PlaceAimCamera = 0x80203B4C; // type:func segment:ovl_00
+ResetAimCamera = 0x80203EEC; // type:func segment:ovl_00
+MoveAimCameraHeight = 0x80204568; // type:func segment:ovl_00
