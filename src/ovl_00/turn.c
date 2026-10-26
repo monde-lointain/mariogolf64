@@ -72,6 +72,12 @@
 #define AIM_CAMERA_MAX_Z 8542208.0f
 /* How far above the ground under the ball the aim camera looks, in world units */
 #define AIM_LOOK_AT_RISE 17.25f
+/* Where AimDownRange puts the aim camera, on the green and elsewhere */
+#define DOWN_RANGE_GREEN_OFFSET (-0x10E00)
+#define DOWN_RANGE_DISTANCE (-0x2D000)
+#define DOWN_RANGE_HEIGHT (-0x12C00)
+/* How far beyond the camera the down-range look-at point lies */
+#define DOWN_RANGE_LOOK_AHEAD 0x280000
 /* Where the aim camera eases to, in course units */
 #define AIM_CAMERA_PUTT_DISTANCE (-0x1800C)
 #define AIM_CAMERA_APPROACH_BACKOFF 0x4B000 /* Back from where the shot lands */
@@ -186,7 +192,47 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202A20_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202D04_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802038D0_ovl_00);
+/*
+ * Backs the aim camera up behind the ball, and points it down the shot's heading. The
+ * clamped point that it first works out goes unused, as does the ground height.
+ */
+void AimDownRange(void) {
+    Vec3 lookAt;
+    f32 heading;
+
+    GetSelectedClub();
+    if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+        g_CurrentShot.aimCameraHeight = DOWN_RANGE_GREEN_OFFSET;
+        g_CurrentShot.aimCameraDistance = DOWN_RANGE_GREEN_OFFSET;
+    } else {
+        g_CurrentShot.aimCameraHeight = DOWN_RANGE_HEIGHT;
+        g_CurrentShot.aimCameraDistance = DOWN_RANGE_DISTANCE;
+    }
+    heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+    lookAt[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_X];
+    if (lookAt[AXIS_X] < 0.0f) {
+        lookAt[AXIS_X] = 0.0f;
+    } else if (lookAt[AXIS_X] >= AIM_CAMERA_MAX_X) {
+        lookAt[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
+    }
+    lookAt[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_Z];
+    if (lookAt[AXIS_Z] < 0.0f) {
+        lookAt[AXIS_Z] = 0.0f;
+    } else if (lookAt[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
+        lookAt[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
+    }
+    lookAt[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)
+                     + g_CurrentShot.ballPosition[AXIS_X];
+    lookAt[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)
+                     + g_CurrentShot.ballPosition[AXIS_Z];
+    lookAt[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+    GetGroundHeight(lookAt[AXIS_X], lookAt[AXIS_Z]);
+    g_Cameras[0].view.heading = heading;
+    g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    g_Cameras[0].view.lookAt[AXIS_Y] =
+        lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE - g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE;
+}
 
 /* Places the aim camera on the aim line, looking at the ball */
 #ifdef NON_MATCHING
