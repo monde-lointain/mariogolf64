@@ -113,9 +113,20 @@ extern u16 sMontyMoleMovieFrameAssets[];
 extern u16 sGoombaMovieFrameAssets[];
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 extern s32 sMovieDrawCount;
-extern f32 sLakituX;
-extern f32 sLakituY;
-extern f32 sLakituScale;
+typedef struct LakituFlight {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+    /* 0x8 */ f32 scale;
+} LakituFlight;
+
+typedef struct LakituVelocity {
+    /* 0x0 */ f32 x;
+    /* 0x4 */ f32 y;
+} LakituVelocity;
+
+extern LakituFlight sLakitu;
+extern LakituVelocity sLakituVelocity;
+extern u16 sLakituMovieFrameAssets[];
 extern s32 sWindFlyGuyFrame;
 extern s32 sWindFlyGuyAsset;
 extern s32 sIsFlipMessageLeaving;
@@ -202,6 +213,29 @@ extern Mtx sFlipMessageMatrices[2];
 #define LAKITU_START_X 384.0f
 #define LAKITU_START_Y -64.0f
 #define LAKITU_START_SCALE 0.7f
+/* Lakitu flies in to its hover point over LAKITU_ARRIVE_DRAW draws */
+#define LAKITU_HOVER_X 192.0f
+#define LAKITU_HOVER_Y 96.0f
+#define LAKITU_ARRIVE_DRAW 30
+/* Then it counts down on its starting light until LAKITU_LEAVE_DRAW, and flies off to the left */
+#define LAKITU_LEAVE_DRAW 120
+#define LAKITU_TICKS_PER_FRAME 8
+#define LAKITU_LAST_FRAME 12
+#define LAKITU_LEAVE_ACCELERATION_X 0.2f
+#define LAKITU_LEAVE_ACCELERATION_Y 0.1f
+#define LAKITU_LEAVE_GROWTH 0.01f
+#define LAKITU_GONE_X -64.0f
+#define LAKITU_FRAME_SIZE 0x1008
+#define LAKITU_WIDTH 56
+#define LAKITU_STRIP_HEIGHT 32
+#define LAKITU_STRIP_COUNT 2
+#define LAKITU_STRIP_SIZE (LAKITU_WIDTH * LAKITU_STRIP_HEIGHT)
+#define LAKITU_RED_LIGHT_DRAW 50
+#define LAKITU_SECOND_RED_LIGHT_DRAW 80
+#define LAKITU_GO_LIGHT_DRAW 110
+#define SOUND_START_LIGHT_RED 0x23
+#define SOUND_START_LIGHT_GO 0x24
+#define START_LIGHT_SOUND_VOLUME 127
 #define ASSET_MONTY_MOLE_MOVIE_PALETTE 0x914
 #define ASSET_GOOMBA_MOVIE_PALETTE 0x91F
 #define ASSET_DRIVE_RECORD_TEXT 0x55E
@@ -252,7 +286,7 @@ void func_8021169C_ovl_00(Gfx **displayListHead);
 void func_80211D60_ovl_00(Gfx **displayListHead);
 void DrawMontyMoleMovie(Gfx **displayListHead);
 void DrawGoombaMovie(Gfx **displayListHead);
-void func_80213038_ovl_00(Gfx **displayListHead);
+void DrawLakituMovie(Gfx **displayListHead);
 void func_80213634_ovl_00(Gfx **displayListHead);
 
 void AllocMovieBuffer(void) {
@@ -555,9 +589,9 @@ void StartMovie(s32 movie) {
             ReadEncodedAsset(sMovieBuffer, &asset);
             OpenEncodedAsset(ASSET_LAKITU, &asset);
             ReadEncodedAsset(sMovieBuffer + LAKITU_BACK_IMAGE_OFFSET, &asset);
-            sLakituX = LAKITU_START_X;
-            sLakituY = LAKITU_START_Y;
-            sLakituScale = LAKITU_START_SCALE;
+            sLakitu.x = LAKITU_START_X;
+            sLakitu.y = LAKITU_START_Y;
+            sLakitu.scale = LAKITU_START_SCALE;
             break;
         case MOVIE_MONTY_MOLE_UNK2:
         case MOVIE_MONTY_MOLE_UNK3:
@@ -644,7 +678,7 @@ void DrawMovie(Gfx **displayListHead) {
             func_80213634_ovl_00(&gfx);
             break;
         case MOVIE_LAKITU:
-            func_80213038_ovl_00(&gfx);
+            DrawLakituMovie(&gfx);
             break;
         case MOVIE_MONTY_MOLE:
             DrawMontyMoleMovie(&gfx);
@@ -825,7 +859,89 @@ void DrawGoombaMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80213038_ovl_00);
+#ifdef NON_MATCHING
+/* Lakitu flies in, counts down to the start on its starting light, then flies off */
+void DrawLakituMovie(Gfx **displayListHead) {
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    f32 halfWidth;
+    f32 halfHeight;
+    s32 roundedHalfWidth;
+    s32 roundedHalfHeight;
+    s32 x;
+    s32 y;
+    s32 offset;
+
+    if (sMovieDrawCount == LAKITU_RED_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    }
+    if (sMovieDrawCount == LAKITU_SECOND_RED_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    }
+    if (sMovieDrawCount == LAKITU_GO_LIGHT_DRAW) {
+        PlaySound(SOUND_START_LIGHT_GO, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
+    }
+    if (sMovieDrawCount < LAKITU_ARRIVE_DRAW) {
+        sLakitu.x -= (LAKITU_START_X - LAKITU_HOVER_X) / LAKITU_ARRIVE_DRAW;
+        sLakitu.y += (LAKITU_HOVER_Y - LAKITU_START_Y) / LAKITU_ARRIVE_DRAW;
+    } else if (sMovieDrawCount < LAKITU_LEAVE_DRAW) {
+        sMovieTick++;
+        if (sMovieTick == LAKITU_TICKS_PER_FRAME) {
+            sMovieTick = 0;
+            if (sMovieFrame < LAKITU_LAST_FRAME) {
+                sMovieFrame++;
+                sMovieBackBuffer ^= 1;
+                OpenEncodedAsset(sLakituMovieFrameAssets[sMovieFrame], &asset);
+                ReadEncodedAsset(sMovieBuffer + sMovieBackBuffer * LAKITU_FRAME_SIZE, &asset);
+            }
+        }
+        sLakituVelocity.x = 0.0f;
+        sLakituVelocity.y = 0.0f;
+    } else {
+        sLakituVelocity.x -= LAKITU_LEAVE_ACCELERATION_X;
+        sLakituVelocity.y -= LAKITU_LEAVE_ACCELERATION_Y;
+        sLakitu.x += sLakituVelocity.x;
+        sLakitu.scale += LAKITU_LEAVE_GROWTH;
+        sLakitu.y += sLakituVelocity.y;
+        if (sLakitu.x < LAKITU_GONE_X) {
+            sCurrentMovie = MOVIE_NONE;
+        }
+    }
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPLoadTLUT_pal256(gfx++,
+                       TEXTURE_ADDRESS(sMovieBuffer + (sMovieBackBuffer * LAKITU_FRAME_SIZE + MOVIE_IMAGE_PALETTE_OFFSET)));
+    offset = MOVIE_IMAGE_PIXELS_OFFSET;
+    for (i = 0; i != LAKITU_STRIP_COUNT; i++) {
+        halfWidth = sLakitu.scale * (LAKITU_WIDTH / 2);
+        halfHeight = sLakitu.scale * LAKITU_STRIP_HEIGHT;
+        gDPLoadTextureTile(gfx++, TEXTURE_ADDRESS(sMovieBuffer + (sMovieBackBuffer * LAKITU_FRAME_SIZE + offset)),
+                           G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_WIDTH, LAKITU_STRIP_HEIGHT, 0, 0, LAKITU_WIDTH - 1,
+                           LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        roundedHalfWidth = halfWidth + 0.5f;
+        roundedHalfHeight = halfHeight + 0.5f;
+        x = sLakitu.x;
+        y = sLakitu.y;
+        /* Start half a texel in, less the rounding, so that the image stays centred as it scales */
+        DrawTextureRect(&gfx, (x - roundedHalfWidth) << 2, (y - roundedHalfHeight + i * roundedHalfHeight) << 2,
+                        (x + roundedHalfWidth) << 2, (y + i * roundedHalfHeight) << 2, G_TX_RENDERTILE,
+                        16.0f - ((f32) roundedHalfWidth - halfWidth) * 16.0f,
+                        16.0f - ((f32) roundedHalfHeight - halfHeight) * 16.0f,
+                        ((LAKITU_WIDTH / 2) << 10) / halfWidth, (LAKITU_STRIP_HEIGHT << 10) / halfHeight);
+        gDPPipeSync(gfx++);
+        offset += LAKITU_STRIP_SIZE;
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawLakituMovie);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80213634_ovl_00);
 
