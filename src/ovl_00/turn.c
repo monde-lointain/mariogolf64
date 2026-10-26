@@ -72,6 +72,15 @@
 #define AIM_CAMERA_MAX_Z 8542208.0f
 /* How far above the ground under the ball the aim camera looks, in world units */
 #define AIM_LOOK_AT_RISE 17.25f
+/* The bounds that KeepAimCameraOnCourse keeps the aim camera within */
+#define AIM_CAMERA_MIN_COORD (-0x25800)
+#define AIM_CAMERA_COURSE_MAX_X 0x425800
+#define AIM_CAMERA_COURSE_MAX_Z 0x825800
+#define AIM_CAMERA_MINI_GOLF_MAX_X 0x109600
+#define AIM_CAMERA_MINI_GOLF_MAX_Z 0x104B00
+/* How far the C buttons push the aim camera on, once it has been pulled in */
+#define AIM_CAMERA_PUSH_STEP 0x25800
+#define AIM_CAMERA_MINI_GOLF_PUSH_STEP 0xB400
 /* Where AimDownRange puts the aim camera, on the green and elsewhere */
 #define DOWN_RANGE_GREEN_OFFSET (-0x10E00)
 #define DOWN_RANGE_DISTANCE (-0x2D000)
@@ -199,7 +208,75 @@ void EndRumbleForceStop(void) {
     nuSiSendMesg(NU_CONT_RMB_FORCESTOPEND_MSG, NULL);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202A20_ovl_00);
+/*
+ * Pulls the aim camera in along the heading, as far as it takes to keep it within the
+ * course. Once it has moved, a held C button pushes it on by a step.
+ */
+#ifdef NON_MATCHING
+void KeepAimCameraOnCourse(void) {
+    Vec3 eye;
+    s32 oldDistance = g_CurrentShot.aimCameraDistance;
+    s32 minCoord;
+    s32 maxX;
+    s32 maxZ;
+    f32 heading;
+    f32 offset;
+    f32 overshoot;
+
+    if (g_IsMiniGolf) {
+        maxX = AIM_CAMERA_MINI_GOLF_MAX_X;
+        maxZ = AIM_CAMERA_MINI_GOLF_MAX_Z;
+    } else {
+        maxX = AIM_CAMERA_COURSE_MAX_X;
+        maxZ = AIM_CAMERA_COURSE_MAX_Z;
+    }
+    heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+    offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
+    eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
+    minCoord = AIM_CAMERA_MIN_COORD;
+    overshoot = 0.0f;
+    if (eye[AXIS_X] < minCoord) {
+        overshoot = minCoord - eye[AXIS_X];
+    } else if (eye[AXIS_X] > maxX) {
+        overshoot = eye[AXIS_X] - maxX;
+    }
+    if ((s32)offset != 0) {
+        g_CurrentShot.aimCameraDistance *= (fabsf(offset) - overshoot) / fabsf(offset);
+    }
+    offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
+    eye[AXIS_Z] = offset + g_CurrentShot.ballPosition[AXIS_Z];
+    overshoot = 0.0f;
+    if (eye[AXIS_Z] < minCoord) {
+        D_800C3070 = FALSE;
+        overshoot = minCoord - eye[AXIS_Z];
+    } else if (eye[AXIS_Z] > maxZ) {
+        D_800C3070 = FALSE;
+        overshoot = eye[AXIS_Z] - maxZ;
+    }
+    if ((s32)offset != 0) {
+        g_CurrentShot.aimCameraDistance *= (fabsf(offset) - overshoot) / fabsf(offset);
+    }
+    if (g_IsMiniGolf) {
+        if (oldDistance < g_CurrentShot.aimCameraDistance) {
+            if (g_TurnController.buttons & D_CBUTTONS) {
+                g_CurrentShot.aimCameraDistance += AIM_CAMERA_MINI_GOLF_PUSH_STEP;
+            }
+        } else if (g_CurrentShot.aimCameraDistance < oldDistance && (g_TurnController.buttons & U_CBUTTONS)) {
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_MINI_GOLF_PUSH_STEP;
+        }
+    } else {
+        if (oldDistance < g_CurrentShot.aimCameraDistance) {
+            if (g_TurnController.buttons & D_CBUTTONS) {
+                g_CurrentShot.aimCameraDistance += AIM_CAMERA_PUSH_STEP;
+            }
+        } else if (g_CurrentShot.aimCameraDistance < oldDistance && (g_TurnController.buttons & U_CBUTTONS)) {
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_PUSH_STEP;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202D04_ovl_00);
 

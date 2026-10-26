@@ -2904,3 +2904,4 @@ DoesImpactRumble = 0x80208810; // type:func segment:ovl_00
 PlayImpactClickSound = 0x80208850; // type:func segment:ovl_00
 PickNextPlayer = 0x80207668; // type:func segment:ovl_00
 AimDownRange = 0x802038D0; // type:func segment:ovl_00
+KeepAimCameraOnCourse = 0x80202A20; // type:func segment:ovl_00
