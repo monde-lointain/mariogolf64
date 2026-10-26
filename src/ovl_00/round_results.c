@@ -1496,7 +1496,313 @@ void SetResultsBanner(s32 state, s32 kind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8BB8_ovl_00);
+/* The trophy is drawn in two parts, as each must fit in texture memory */
+#define TROPHY_PART_COUNT 2
+
+/* Each course's trophy image's sizes, indexed by these */
+#define TROPHY_WIDTH 0
+#define TROPHY_PART_HEIGHTS 1 /* TROPHY_PART_COUNT of them */
+#define TROPHY_SHINE_HEIGHT 3
+#define TROPHY_SIZE_COUNT 4
+
+extern s32 sTrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT];
+extern s32 sTrophyShineFrame;
+extern s32 sTrophyFrame;
+
+#define BANNER_KIND_TOURNAMENT_PLACE 1
+#define BANNER_KIND_UNK2 2
+#define BANNER_KIND_POINTS 3
+#define BANNER_KIND_UNK4 4
+#define BANNER_KIND_UNK5 5
+
+#define BANNER_SLIDING_IN 0
+#define BANNER_SHOWN 1
+#define BANNER_HIDDEN 3
+#define BANNER_SLIDING_OUT 4
+/* Off the screen's left */
+#define BANNER_GONE_X (-SCREEN_WIDTH)
+#define BANNER_SLIDE_OUT_SPEED 4
+
+#define MESSAGE_TROPHY_PRIZE 0x3C /* Plus the place */
+#define MESSAGE_PLACE_PRIZE 0x40
+#define MESSAGE_TROPHY_PLACE 0x40 /* Plus the place */
+#define MESSAGE_UNK48 0x48
+#define MESSAGE_PLACE 0x49
+#define MESSAGE_POINTS_EARNED 0x1F3
+
+#define BANNER_TEXT_SLOT 1
+#define BANNER_TEXT_FONT 1
+#define BANNER_TEXT_RED 32
+#define BANNER_TEXT_GREEN 64
+#define BANNER_TEXT_BLUE 255
+#define BANNER_TEXT_ALPHA 255
+#define PRIZE_TEXT_X 66
+#define PRIZE_TEXT_Y 128
+#define BANNER_TEXT_X 168
+#define BANNER_TEXT_Y 140
+
+/* The places that the ordinal suffixes differ for */
+#define PLACE_TWENTY_FIRST 21
+#define PLACE_TWENTY_SECOND 22
+#define PLACE_TWENTY_THIRD 23
+
+#define BANNER_CLOUD_ALPHA 240
+#define BANNER_CLOUD_WIDTH 256
+#define BANNER_CLOUD_HEIGHT 32
+#define BANNER_CLOUD_STRIP_COUNT 2
+#define BANNER_CLOUD_STRIP_SIZE (BANNER_CLOUD_WIDTH * BANNER_CLOUD_HEIGHT / 2)
+#define BANNER_CLOUD_LEFT 24
+#define BANNER_CLOUD_RIGHT 296
+#define BANNER_CLOUD_TOP 112
+/* The points banner is taller, its clouds stretched */
+#define TALL_BANNER_CLOUD_TOP 104
+#define TALL_BANNER_CLOUD_HEIGHT 40
+#define BANNER_CLOUD_DSDX 0x3C3
+#define TALL_BANNER_CLOUD_DTDY 0x333
+
+/* The trophy turns, a frame each TROPHY_FRAME_TICKS, as the shine sweeps it */
+#define TROPHY_SHINE_CYCLE 256
+#define TROPHY_FRAME_TICKS 3
+#define TROPHY_CENTRE_X 48
+#define TROPHY_BOTTOM 160
+#define TROPHY_SHINE_TEXT_ALPHA 127
+#define TROPHY_SHINE_START 16
+#define TROPHY_SHINE_SOUND_FRAME 18
+#define TROPHY_SHINE_SOUND_CHANNEL 15
+#define TROPHY_SHINE_SOUND_VOLUME 40
+#define TROPHY_SHINE_SOUND_REVERB 20
+#define TROPHY_SHINE_SOUND_PAN 31
+#define TROPHY_SHINE_SPEED 16
+#define TROPHY_SHINE_DSDX 0x800
+
+#ifdef NON_MATCHING
+/* Draws the banner of a round's result, and the trophy above a top three tournament place */
+void DrawResultsBanner(Gfx **displayListHead) {
+    Gfx *gfx;
+    s32 i;
+    s32 rank;
+    s32 place;
+    s32 course;
+    s32 top;
+
+    gfx = *displayListHead;
+
+    switch (sBannerState) {
+        case BANNER_SHOWN:
+        case BANNER_HIDDEN:
+            break;
+        case BANNER_SLIDING_IN:
+            if (sBannerX == 1) {
+                sBannerState = BANNER_SHOWN;
+            } else {
+                sBannerX += -sBannerX / 2;
+            }
+            break;
+        case BANNER_SLIDING_OUT:
+            if (sBannerX >= -1) {
+                sBannerX -= BANNER_SLIDE_OUT_SPEED;
+            } else {
+                sBannerX += sBannerX / 2;
+            }
+            if (sBannerX < BANNER_GONE_X) {
+                sBannerState = BANNER_HIDDEN;
+            }
+            break;
+    }
+    switch (sBannerKind) {
+        case BANNER_KIND_UNK2:
+        case BANNER_KIND_UNK4:
+            break;
+        case BANNER_KIND_POINTS:
+            SetTextSlotValue(sPointsShown, BANNER_TEXT_SLOT, 0);
+            SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y, MESSAGE_POINTS_EARNED,
+                        BANNER_TEXT_FONT, BANNER_TEXT_SLOT, TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+                        BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+            break;
+        case BANNER_KIND_TOURNAMENT_PLACE:
+            rank = sPlayerRanks[0];
+            place = rank - 1;
+            if (sTournamentOpenCourseCount < COURSE_COUNT) {
+                if (place < TROPHY_PLACE_COUNT) {
+                    SetTextSlotValue(sPrizeShown, BANNER_TEXT_SLOT, 0);
+                    SetTextSlot(sBannerX + PRIZE_TEXT_X, sBannerY + PRIZE_TEXT_Y,
+                                rank + MESSAGE_TROPHY_PRIZE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT, TEXT_FLAG_UNK20,
+                                BANNER_TEXT_RED, BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+                } else {
+                    if (rank < PLACE_TWENTY_FIRST || rank > PLACE_TWENTY_THIRD) {
+                        sprintf(g_PrintBuffer, "%dth", rank);
+                    } else if (rank == PLACE_TWENTY_FIRST) {
+                        sprintf(g_PrintBuffer, "%dst", rank);
+                    } else if (rank == PLACE_TWENTY_SECOND) {
+                        sprintf(g_PrintBuffer, "%dnd", rank);
+                    } else if (rank == PLACE_TWENTY_THIRD) {
+                        sprintf(g_PrintBuffer, "%drd", rank);
+                    }
+                    SetTextName(g_PrintBuffer);
+                    SetTextSlotValue(sPrizeShown, BANNER_TEXT_SLOT, 1);
+                    SetTextSlot(sBannerX + PRIZE_TEXT_X, sBannerY + PRIZE_TEXT_Y, MESSAGE_PLACE_PRIZE,
+                                BANNER_TEXT_FONT, BANNER_TEXT_SLOT, TEXT_FLAG_UNK20, BANNER_TEXT_RED,
+                                BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+                }
+            } else if (place < TROPHY_PLACE_COUNT) {
+                SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y,
+                            rank + MESSAGE_TROPHY_PLACE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
+                            TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
+                            BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+            } else {
+                SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
+                SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y, MESSAGE_PLACE,
+                            BANNER_TEXT_FONT, BANNER_TEXT_SLOT, TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED,
+                            BANNER_TEXT_RED, BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+            }
+            break;
+        case BANNER_KIND_UNK5:
+            SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y, MESSAGE_UNK48,
+                        BANNER_TEXT_FONT, BANNER_TEXT_SLOT, TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
+                        BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+            break;
+    }
+    if (sBannerState == BANNER_HIDDEN) {
+        return;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
+                      0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, BANNER_CLOUD_ALPHA);
+    for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
+        LoadNibbleTextureBlock(&gfx, sResultsCloudImage + IMAGE_HEADER_SIZE + i * BANNER_CLOUD_STRIP_SIZE, G_IM_FMT_I,
+                               BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
+        if (sBannerKind == BANNER_KIND_POINTS) {
+            DrawTextureRect(&gfx, (sBannerX + BANNER_CLOUD_LEFT) * 4,
+                            (sBannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT) * 4,
+                            (sBannerX + BANNER_CLOUD_RIGHT) * 4,
+                            (sBannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT +
+                             TALL_BANNER_CLOUD_HEIGHT) *
+                                4,
+                            G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TALL_BANNER_CLOUD_DTDY);
+        } else {
+            DrawTextureRect(&gfx, (sBannerX + BANNER_CLOUD_LEFT) * 4,
+                            (sBannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT) * 4,
+                            (sBannerX + BANNER_CLOUD_RIGHT) * 4,
+                            (sBannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT + BANNER_CLOUD_HEIGHT) * 4,
+                            G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TEXEL_STEP_ONE);
+        }
+    }
+    SetUpTextDrawing(&gfx);
+    gDPSetPrimColor(gfx++, 0, 0, BANNER_TEXT_RED, BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
+    DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
+    if (sBannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
+        course = g_CourseIndex;
+        if (sPlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+            sTrophyShineFrame = (sTrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
+            if (sTallySpeed == FAST_TALLY_SPEED || sTrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
+                EncodedAsset asset;
+
+                sTrophyFrame++;
+                if (sTrophyFrame == sTrophyAssets[course].frameCount) {
+                    sTrophyFrame = 0;
+                }
+                OpenEncodedAsset(sTrophyAssets[course].image + sTrophyFrame, &asset);
+                ReadEncodedAsset(sTrophyImage, &asset);
+            }
+            gSPDisplayList(gfx++, D_800C3FC0);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_POINT);
+            LoadLargePalette(&gfx, sTrophyPalette);
+            top = -sTrophySizes[course][TROPHY_PART_HEIGHTS] - sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+                gDPLoadTextureTile(gfx++,
+                                   ((u32)sTrophyImage + i * sTrophySizes[course][TROPHY_WIDTH] *
+                                                            sTrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                                       ~7,
+                                   G_IM_FMT_CI, G_IM_SIZ_8b, sTrophySizes[course][TROPHY_WIDTH],
+                                   sTrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
+                                   sTrophySizes[course][TROPHY_WIDTH] - 1,
+                                   sTrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0, 0, 0);
+                DrawTextureRect(&gfx, (TROPHY_CENTRE_X + sBannerX - sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                (top + TROPHY_BOTTOM) * 4,
+                                (TROPHY_CENTRE_X + sBannerX + sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                (sTrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM + top) * 4,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                top += sTrophySizes[course][TROPHY_PART_HEIGHTS + i];
+            }
+            /* The trophy again, into the depth buffer alone */
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PRIM);
+            gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+            gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM), G_RM_AA_ZB_TEX_EDGE2);
+            top = -sTrophySizes[course][TROPHY_PART_HEIGHTS] - sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+            for (i = 0; i != TROPHY_PART_COUNT; i++) {
+                gDPLoadTextureTile(gfx++,
+                                   ((u32)sTrophyImage + i * sTrophySizes[course][TROPHY_WIDTH] *
+                                                            sTrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                                       ~7,
+                                   G_IM_FMT_CI, G_IM_SIZ_8b, sTrophySizes[course][TROPHY_WIDTH],
+                                   sTrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
+                                   sTrophySizes[course][TROPHY_WIDTH] - 1,
+                                   sTrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0, 0, 0, 0, 0, 0, 0);
+                DrawTextureRect(&gfx, (TROPHY_CENTRE_X + sBannerX - sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                (top + TROPHY_BOTTOM) * 4,
+                                (TROPHY_CENTRE_X + sBannerX + sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                (sTrophySizes[course][TROPHY_PART_HEIGHTS + i] + TROPHY_BOTTOM + top) * 4,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                top += sTrophySizes[course][TROPHY_PART_HEIGHTS + i];
+            }
+            gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+            gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0,
+                              TEXEL0, 0);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
+            LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE,
+                             NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+            if (sTrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
+                PlaySoundWithEffects(NOTICE_SHINE_SOUND, TROPHY_SHINE_SOUND_CHANNEL, TROPHY_SHINE_SOUND_VOLUME,
+                                     TROPHY_SHINE_SOUND_REVERB, TROPHY_SHINE_SOUND_PAN);
+            }
+            if (sTrophyShineFrame >= TROPHY_SHINE_START) {
+                if (sTrophyShineFrame < TROPHY_SHINE_CYCLE) {
+                    top = sTrophySizes[course][TROPHY_PART_HEIGHTS] + sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+                    DrawTextureRect(&gfx, (TROPHY_CENTRE_X + sBannerX - sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                    (TROPHY_BOTTOM - top) * 4,
+                                    (TROPHY_CENTRE_X + sBannerX + sTrophySizes[course][TROPHY_WIDTH] / 2) * 4,
+                                    (TROPHY_BOTTOM - top + sTrophySizes[course][TROPHY_SHINE_HEIGHT]) * 4,
+                                    G_TX_RENDERTILE,
+                                    (NOTICE_SHINE_SIZE - (sTrophyShineFrame - TROPHY_SHINE_START) * TROPHY_SHINE_SPEED)
+                                        << 5,
+                                    0, TROPHY_SHINE_DSDX, TEXEL_STEP_ONE);
+
+                }
+            }
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
+#endif
 
 /* sResultsUnk78 values while UpdateTournamentResults runs */
 #define TOURNAMENT_STEP_START 0
@@ -2800,7 +3106,7 @@ void DrawRoundResults(Gfx **displayListHead) {
             sPortraitTimers[i]++;
         }
     }
-    func_801F8BB8_ovl_00(&gfx);
+    DrawResultsBanner(&gfx);
     *displayListHead = gfx;
 }
 #else

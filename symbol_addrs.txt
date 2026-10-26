@@ -3069,3 +3069,7 @@ g_PinFlagImages = 0x801B55DC; // size:0x4
 DrawAimGuides = 0x8021C6B4; // type:func segment:ovl_00
 sOutOfBoundsPulseAngle = 0x80224B08; // size:0x4 segment:ovl_00
 sPinFlagWaveFrame = 0x80224B0C; // size:0x4 segment:ovl_00
+DrawResultsBanner = 0x801F8BB8; // type:func segment:ovl_00
+sTrophySizes = 0x8021FDD4; // size:0x60 segment:ovl_00
+sTrophyShineFrame = 0x8021FE34; // size:0x4 segment:ovl_00
+sTrophyFrame = 0x8021FE38; // size:0x4 segment:ovl_00
