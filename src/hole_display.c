@@ -7,6 +7,7 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "math_util.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
@@ -258,7 +259,132 @@ void UpdateSunGlare(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008D3F4);
+/*
+ * The lens flare is drawn while the sun is on the screen, away from its
+ * edges, and the inset view isn't drawing the scene. The wider bounds that
+ * are also tested can't fail after the narrower ones. The glare grows with the sun's distance from the nearer side and
+ * from the top, or from the bottom within GLARE_BOTTOM_ROWS of it, and
+ * nothing is drawn below MIN_VISIBLE_GLARE.
+ */
+#define LENS_FLARE_TOP_MARGIN 64.0f
+#define GLARE_BOTTOM_ROWS 96.0f
+#define GLARE_BASE 16.0f
+#define MIN_VISIBLE_GLARE 8.0f
+/* The flares lie along the line from the sun through this point */
+#define LENS_FLARE_AXIS_X (SCREEN_WIDTH / 2)
+#define LENS_FLARE_AXIS_Y 96.0f
+/* A flare's half width is its size times (glare + LENS_FLARE_SIZE_BIAS) / 128 */
+#define LENS_FLARE_SIZE_BIAS 16.0f
+#define LENS_FLARE_SIZE_SCALE (1.0f / 128)
+/* Only texels above this alpha are drawn */
+#define LENS_FLARE_ALPHA_THRESHOLD 1
+#define LENS_FLARE_COUNT 8
+
+typedef struct LensFlare {
+    /* 0x00 */ u8 color[3];    /* Where the ring texture is brightest */
+    /* 0x03 */ u8 envColor[3]; /* Where it is darkest, and the texels blend between them */
+    /* 0x08 */ s32 size;
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ f32 position; /* Along the line, 0 at the sun and 1 at its axis point */
+} LensFlare; /* size = 0x14 */
+
+extern LensFlare sLensFlares[LENS_FLARE_COUNT];
+
+/*
+ * Draws the sun's lens flare, as rings along a line through the sun.
+ *
+ * Doesn't match: four of the display list pointers kept on the stack are
+ * given each other's slots.
+ */
+#ifdef NON_MATCHING
+void DrawLensFlare(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SkyColors *colors =
+        &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyColorTimeIndex];
+    f32 edgeDistanceX;
+    f32 edgeDistanceY;
+    f32 glare;
+    f32 centerX;
+    f32 centerY;
+    s32 size;
+    s32 texelStep;
+    s32 i;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    if (!colors->hasLensFlare || sSunScreenX[0] <= SUN_DEPTH_MARGIN || sSunScreenX[0] >= SCREEN_WIDTH - SUN_DEPTH_MARGIN ||
+        sSunScreenY[0] <= SUN_DEPTH_MARGIN || sSunScreenY[0] >= SCREEN_HEIGHT - SUN_DEPTH_MARGIN ||
+        sSunScreenY[0] < -LENS_FLARE_TOP_MARGIN || sSunScreenY[0] > SCREEN_HEIGHT + SUN_GLARE_MARGIN ||
+        sSunScreenX[0] < -SUN_GLARE_MARGIN || sSunScreenX[0] > SCREEN_WIDTH + SUN_GLARE_MARGIN ||
+        g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
+        return;
+    }
+    edgeDistanceX = SCREEN_WIDTH - sSunScreenX[0];
+    if (edgeDistanceX > SCREEN_WIDTH / 2) {
+        edgeDistanceX = SCREEN_WIDTH - edgeDistanceX;
+    }
+    edgeDistanceY = SCREEN_HEIGHT - sSunScreenY[0];
+    if (edgeDistanceY > GLARE_BOTTOM_ROWS) {
+        edgeDistanceY = SCREEN_HEIGHT - edgeDistanceY;
+    }
+    glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * sSunGlareStrength;
+    if (glare < MIN_VISIBLE_GLARE) {
+        return;
+    }
+    if (glare > colors->unk14->maxSunGlare) {
+        glare = colors->unk14->maxSunGlare;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPSetBlendColor(gfx++, 255, 255, 255, LENS_FLARE_ALPHA_THRESHOLD);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE,
+                      ENVIRONMENT, TEXEL0, ENVIRONMENT, PRIMITIVE, 0, TEXEL0, 0);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gDPLoadTextureBlock(gfx++, (u32)g_RingTexels & ~7, G_IM_FMT_I, G_IM_SIZ_8b, RING_TEXTURE_SIZE,
+                        RING_TEXTURE_SIZE, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6,
+                        G_TX_NOLOD, G_TX_NOLOD);
+    for (i = 0; i != LENS_FLARE_COUNT; i++) {
+        centerX = sSunScreenX[0] + (LENS_FLARE_AXIS_X - sSunScreenX[0]) * sLensFlares[i].position;
+        centerY = sSunScreenY[0] + (LENS_FLARE_AXIS_Y - sSunScreenY[0]) * sLensFlares[i].position;
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, sLensFlares[i].color[0], sLensFlares[i].color[1], sLensFlares[i].color[2],
+                        glare);
+        gDPSetEnvColor(gfx++, sLensFlares[i].envColor[0], sLensFlares[i].envColor[1],
+                       sLensFlares[i].envColor[2], 255);
+        size = sLensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) * LENS_FLARE_SIZE_SCALE;
+        texelStep = (RING_TEXTURE_SIZE << 10) / size;
+        gSPScisTextureRectangle(gfx++, (s32)(centerX - size) << 2, (s32)(centerY - size) << 2,
+                                (s32)(centerX + size) << 2, (s32)(centerY + size) << 2, G_TX_RENDERTILE, 0, 0,
+                                texelStep, texelStep);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawLensFlare);
+#endif
 
 /*
  * Moves the sky's and the fog's colors a step on from those of one time of

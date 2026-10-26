@@ -323,10 +323,7 @@ extern s32 sLandingReactionFrame;
 extern Vtx sLandingPanelVertices[4];
 extern Mtx sLandingPanelMatrices[MATRIX_BUFFER_COUNT];
 
-/* An I8 texture of a ring, that marks where the ball will land */
-#define RING_TEXTURE_SIZE 64
 #define RING_TEXTURE_OUTER_RADIUS 62
-extern u8 *g_RingTexels;
 
 /* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8

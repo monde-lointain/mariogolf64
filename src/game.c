@@ -920,7 +920,6 @@ void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80086864(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
-void func_8008D3F4(Gfx **displayListHead);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 void func_801F4AD8(Gfx **displayListHead);
 void DrawTitleScreen(Gfx **displayListHead);
@@ -1579,7 +1578,7 @@ s32 DrawGame(void) {
                             }
                             if (D_800C306C != 4) {
                                 if (viewIndex == 0) {
-                                    func_8008D3F4(&g_DisplayListHead);
+                                    DrawLensFlare(&g_DisplayListHead);
                                 }
                             }
                         }

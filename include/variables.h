@@ -79,7 +79,8 @@ typedef struct SkyColors {
     /* 0x0A */ u8 unkA[3];
     /* 0x0D */ u8 unkD[3];
     /* 0x10 */ u8 unk10; /* Percent of unkD that InitSkyColors mixes into g_CourseSkyImage */
-    /* 0x11 */ u8 unk11[3];
+    /* 0x11 */ u8 hasLensFlare;
+    /* 0x12 */ u8 unk12[2];
     /* 0x14 */ struct Unk800C5F34 *unk14;
     /* 0x18 */ u8 fogColor[3];
     /* 0x1C */ s16 fogNear;
@@ -93,7 +94,8 @@ typedef struct SkyColors {
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 
 typedef struct Unk800C5F34 {
-    /* 0x00 */ u8 unk0[0x1C];
+    /* 0x00 */ u8 unk0[0x18];
+    /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
     /* 0x1C */ u8 imageKind; /* Which images InitSkyColors loads into g_SkyImage */
 } Unk800C5F34;
 

@@ -30,6 +30,7 @@ extern s32 g_MenuBackdropStyle;
 
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused);
 void DrawMenuBackdrop(Gfx **displayListHead);
+void DrawLensFlare(Gfx **displayListHead);
 /* The 64x64 four-bit paletted image that MENU_BACKDROP_PATTERN tiles */
 extern void *g_BackdropPatternImage;
 /* How many slices of the frame HUD_ANIMATION_SLICE_CAPTURE has copied */

@@ -38,6 +38,10 @@ void SwapMatrixBuffers(void);
 void ResetBallTrail(void);
 void ScrollWindArrow(void);
 void AdjustHudOffset(void);
+/* An I8 texture of a ring, that marks where the ball will land and draws the lens flare */
+#define RING_TEXTURE_SIZE 64
+extern u8 *g_RingTexels;
+
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);
 void DrawHoleFlag(s32 isBackDrawn);
