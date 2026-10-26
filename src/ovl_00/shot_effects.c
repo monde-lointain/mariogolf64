@@ -57,7 +57,6 @@ enum SparkKind {
 #define SHARED_EFFECT_SECOND_IMAGE_ASSET 0x969
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
 
-extern u8 *g_SharedEffectImages;
 /* Counts the frames from the last impact flash, back to 0 after 100 */
 extern s32 sImpactFrameCount;
 

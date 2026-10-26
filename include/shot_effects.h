@@ -20,6 +20,9 @@ void ResetShotEffects(void);
 void ClearShotEffects(s32 kind);
 void StopAllSounds(void);
 void StartImpactSparks(void);
+/* Images that the shot effects and the contact effects share */
+extern u8 *g_SharedEffectImages;
+
 void LoadShotEffectImages(void);
 void FreeShotEffectImages(void);
 void StartFlagSparks(CoursePoint point);

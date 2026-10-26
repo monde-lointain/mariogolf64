@@ -2,12 +2,23 @@
 #define ROUND_EVENTS_H
 
 #include <ultra64.h>
+#include "save.h"
 
 /* ShowWindFlyGuy's argument that hides the Fly Guy */
 #define FLY_GUY_HIDDEN (-1)
 
 /* The contact effect that StartContactEffect shows when no effect is shown */
 #define CONTACT_EFFECT_NONE (-1)
+
+/* The styles of contact effect; each character has one, and Game Boy characters one for their ball */
+#define CONTACT_STYLE_MARIO 0 /* For Mario, Baby Mario and Metal Mario */
+#define CONTACT_STYLE_BOWSER 1
+#define CONTACT_STYLE_WARIO 2
+#define CONTACT_STYLE_HEAVY_HITTER 3 /* For Maple and Donkey Kong */
+#define CONTACT_STYLE_PLAIN 4
+#define CONTACT_STYLE_GAME_BOY_BALL_5 8
+#define CONTACT_STYLE_GAME_BOY_BALL_6 9
+#define CONTACT_STYLE_GAME_BOY_BALL_7 10
 
 /* The word banners that StartBanner flies in, named after their text */
 #define BANNER_HIDE_NICE_SHOT (-2) /* Hides the banner only if it is BANNER_NICE_SHOT */
@@ -36,6 +47,8 @@ extern s32 g_ContactEffect;
 
 void StartBanner(s32 banner);
 void ShowWindFlyGuy(s32 show);
+s32 GetContactStyle(UnkB8 *player);
+void LoadContactImages(UnkB8 *player);
 s32 IsContactEffectShown(void);
 void StartContactEffect(s32 effect);
 

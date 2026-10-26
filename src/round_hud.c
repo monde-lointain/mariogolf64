@@ -22,6 +22,7 @@
 #include "movie.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "round_events.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scoring.h"
@@ -346,11 +347,10 @@ extern Mtx sHoleImageMatrix;
 
 /*
  * StartShotEffect's long shot effect, which func_80086864 draws, plays a
- * sound, and a different, louder one for some kinds of golfer.
+ * sound, and a different, louder one for the Wario and Game Boy ball 7
+ * contact styles.
  */
 #define SHOT_EFFECT_TIME_OFF (-1.0f)
-#define GOLFER_KIND_UNK2 2
-#define GOLFER_KIND_UNK10 10
 #define SOUND_LONG_SHOT 0x70
 #define SOUND_LONG_SHOT_HEAVY 0x71
 #define LONG_SHOT_SOUND_CHANNEL 14
@@ -362,7 +362,6 @@ extern Mtx sHoleImageMatrix;
 extern f32 sShotEffectTime;
 extern s32 sShotEffect;
 
-s32 func_80213C78(UnkB8 *player);
 
 /*
  * The loaded texture of distance glyphs: the digits, then the units and the
@@ -468,7 +467,6 @@ extern s32 sSceneryState;
 /* On the tee ground, the shot panel sits this much higher */
 #define TEE_GROUND_PANEL_OFFSET_Y -3
 #define SHOT_PANEL_START_OFFSET_X 64
-void func_8021419C(UnkB8 *player);
 extern s8 D_801B60B9;
 /* The colors of each course's name, which gradients from the first to the second */
 extern s32 g_CourseNameEnvColors[];
@@ -853,7 +851,7 @@ void StartShotPanel(void) {
     }
     sShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
     ResetShotModeChange();
-    func_8021419C(&g_Players[g_RoundHud.unk87]);
+    LoadContactImages(&g_Players[g_RoundHud.unk87]);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/round_hud", StartShotPanel);
@@ -1673,15 +1671,15 @@ void DrawHoleImageModel(void) {
 
 /* Starts one of the effects over a shot in flight, or stops it with SHOT_EFFECT_NONE */
 void StartShotEffect(s32 effect) {
-    s32 golferKind;
+    s32 contactStyle;
 
     if (effect == SHOT_EFFECT_NONE) {
         sShotEffectTime = SHOT_EFFECT_TIME_OFF;
         return;
     }
     if (effect == SHOT_EFFECT_LONG_SHOT) {
-        golferKind = func_80213C78(&g_Players[g_RoundHud.unk87]);
-        if (golferKind != GOLFER_KIND_UNK10 & golferKind != GOLFER_KIND_UNK2) {
+        contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
+        if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 & contactStyle != CONTACT_STYLE_WARIO) {
             PlaySoundWithEffects(SOUND_LONG_SHOT, LONG_SHOT_SOUND_CHANNEL, LONG_SHOT_SOUND_VOLUME, LONG_SHOT_SOUND_REVERB,
                                  LONG_SHOT_SOUND_PAN);
         } else {

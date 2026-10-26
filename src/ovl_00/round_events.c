@@ -1,8 +1,12 @@
 #include "common.h"
 #include "asset.h"
+#include "character.h"
 #include "heap.h"
 #include "movie.h"
 #include "round_events.h"
+#include "save.h"
+#include "shot_effects.h"
+#include "transfer_pak.h"
 
 /* The buffer that a movie's images, or the wind Fly Guy's, are read into */
 #define MOVIE_BUFFER_SIZE 0x6270
@@ -12,6 +16,25 @@
 #define FLY_GUY_IMAGE_ASSET 0x6CF
 #define WIND_STREAK_IMAGE_ASSET 0x6AF
 #define FLY_GUY_IMAGE_SIZE 0x808 /* With its header; the wind streak follows it */
+
+/* Game Boy balls 1 to 4 copy a character's contact effect, and 5 to 7 have their own */
+#define GAME_BOY_BALL_TYPE_PLAIN 0
+#define GAME_BOY_BALL_TYPE_MARIO 1
+#define GAME_BOY_BALL_TYPE_BOWSER 2
+#define GAME_BOY_BALL_TYPE_WARIO 3
+#define GAME_BOY_BALL_TYPE_HEAVY_HITTER 4
+#define GAME_BOY_BALL_TYPE_5 5
+#define GAME_BOY_BALL_TYPE_6 6
+#define GAME_BOY_BALL_TYPE_7 7
+
+/* Where the contact effect's images go in g_SharedEffectImages, and their assets */
+#define CONTACT_IMAGE_OFFSET 0x970
+#define CONTACT_SECOND_IMAGE_OFFSET 0x1578
+#define MARIO_CONTACT_IMAGE_ASSET 0x6BE
+#define BOWSER_CONTACT_IMAGE_ASSET 0x6AE
+#define WARIO_CONTACT_IMAGE_ASSET 0x6A7
+#define WARIO_CONTACT_SECOND_IMAGE_ASSET 0x6A8
+#define HEAVY_HITTER_CONTACT_IMAGE_ASSET 0x6A6
 
 extern s32 sMovieUnk14;
 extern s32 sMovieUnk20;
@@ -90,11 +113,80 @@ s32 IsContactEffectShown(void) {
     return g_ContactEffect != CONTACT_EFFECT_NONE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80213C78_ovl_00);
+/* Returns the CONTACT_STYLE_* of the player's character, or for a Game Boy one, of its ball */
+s32 GetContactStyle(UnkB8 *player) {
+    GameBoyCharacter *gameBoyCharacter;
+    s8 character = player->characterIndex;
+
+    if (character >= CHARACTER_KID) {
+        gameBoyCharacter = &g_GameBoyCharacters[player->gameBoyCharacterIndex];
+        if (gameBoyCharacter->status != GAME_BOY_CHARACTER_STATUS_PRESENT) {
+            return CONTACT_STYLE_PLAIN;
+        }
+        switch (gameBoyCharacter->ballType) {
+            case GAME_BOY_BALL_TYPE_PLAIN:
+                return CONTACT_STYLE_PLAIN;
+            case GAME_BOY_BALL_TYPE_MARIO:
+                return CONTACT_STYLE_MARIO;
+            case GAME_BOY_BALL_TYPE_BOWSER:
+                return CONTACT_STYLE_BOWSER;
+            case GAME_BOY_BALL_TYPE_WARIO:
+                return CONTACT_STYLE_WARIO;
+            case GAME_BOY_BALL_TYPE_HEAVY_HITTER:
+                return CONTACT_STYLE_HEAVY_HITTER;
+            case GAME_BOY_BALL_TYPE_5:
+                return CONTACT_STYLE_GAME_BOY_BALL_5;
+            case GAME_BOY_BALL_TYPE_6:
+                return CONTACT_STYLE_GAME_BOY_BALL_6;
+            case GAME_BOY_BALL_TYPE_7:
+                return CONTACT_STYLE_GAME_BOY_BALL_7;
+            default:
+                return CONTACT_STYLE_PLAIN;
+        }
+    }
+    if (character == CHARACTER_WARIO) {
+        return CONTACT_STYLE_WARIO;
+    }
+    if (character == CHARACTER_MAPLE || character == CHARACTER_DONKEY_KONG) {
+        return CONTACT_STYLE_HEAVY_HITTER;
+    }
+    if (character == CHARACTER_BOWSER) {
+        return CONTACT_STYLE_BOWSER;
+    }
+    if (character == CHARACTER_BABY_MARIO || character == CHARACTER_MARIO || character == CHARACTER_METAL_MARIO) {
+        return CONTACT_STYLE_MARIO;
+    }
+    return CONTACT_STYLE_PLAIN;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartContactEffect);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8021419C_ovl_00);
+/* Reads the images of the player's contact effect */
+void LoadContactImages(UnkB8 *player) {
+    EncodedAsset asset;
+
+    switch (GetContactStyle(player)) {
+        case CONTACT_STYLE_WARIO:
+        case CONTACT_STYLE_GAME_BOY_BALL_7:
+            OpenEncodedAsset(WARIO_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            OpenEncodedAsset(WARIO_CONTACT_SECOND_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_SECOND_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_HEAVY_HITTER:
+            OpenEncodedAsset(HEAVY_HITTER_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_MARIO:
+            OpenEncodedAsset(MARIO_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+        case CONTACT_STYLE_BOWSER:
+            OpenEncodedAsset(BOWSER_CONTACT_IMAGE_ASSET, &asset);
+            ReadEncodedAsset(g_SharedEffectImages + CONTACT_IMAGE_OFFSET, &asset);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80214250_ovl_00);
 
