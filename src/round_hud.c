@@ -53,8 +53,8 @@
 /* Images of the round's scenery, effects and HUD, named after their asset ids until their users are decompiled */
 #define ASSET_ROUND_IMAGE_541 0x541
 #define ASSET_WIND_ICON_IMAGE 0x5A4
-#define ASSET_ROUND_IMAGE_5E3 0x5E3
-#define ASSET_ROUND_IMAGE_972 0x972
+#define ASSET_PLAYER_TAG_IMAGES 0x5E3
+#define ASSET_LEADER_LINE_IMAGE 0x972
 #define ASSET_BACKDROP_PATTERN_IMAGE 0x93C
 #define ASSET_ROUND_IMAGE_4DB 0x4DB
 #define ASSET_SHADOW_TEXTURE 0x4C3
@@ -372,8 +372,8 @@ extern s32 sShotEffect;
 extern void *sSceneryBillboardHeap;
 extern void *D_801B55DC;
 extern void *sWindIconImage;
-extern void *D_80132360;
-extern void *D_800FED0C;
+extern void *g_PlayerTagImages;
+extern void *g_LeaderLineImage;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
 /* The image asset of the club's head that the HUD shows, loaded into sClubHeadImage */
@@ -656,10 +656,10 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_801B55DC, &asset);
     sWindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
     ReadEncodedAsset(sWindIconImage, &asset);
-    D_80132360 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_5E3, &asset));
-    ReadEncodedAsset(D_80132360, &asset);
-    D_800FED0C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_972, &asset));
-    ReadEncodedAsset(D_800FED0C, &asset);
+    g_PlayerTagImages = AllocMemory(OpenEncodedAsset(ASSET_PLAYER_TAG_IMAGES, &asset));
+    ReadEncodedAsset(g_PlayerTagImages, &asset);
+    g_LeaderLineImage = AllocMemory(OpenEncodedAsset(ASSET_LEADER_LINE_IMAGE, &asset));
+    ReadEncodedAsset(g_LeaderLineImage, &asset);
     g_BackdropPatternImage = AllocMemory(OpenEncodedAsset(ASSET_BACKDROP_PATTERN_IMAGE, &asset));
     ReadEncodedAsset(g_BackdropPatternImage, &asset);
     D_8012D428 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4DB, &asset));
@@ -713,8 +713,8 @@ void FreeSceneryImages(void) {
         FreeClubPanelImages();
         FreeMemory(&D_801B55DC);
         FreeMemory(&sWindIconImage);
-        FreeMemory(&D_80132360);
-        FreeMemory(&D_800FED0C);
+        FreeMemory(&g_PlayerTagImages);
+        FreeMemory(&g_LeaderLineImage);
         FreeMemory(&g_BackdropPatternImage);
         FreeMemory(&D_8012D428);
         FreeMemory(&g_ShadowTexture);

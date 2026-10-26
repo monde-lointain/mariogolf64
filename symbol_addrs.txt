@@ -3054,3 +3054,5 @@ sHeavyLongShotBufferIndex = 0x800C5E18; // size:0x4
 DrawSparks = 0x80217164; // type:func segment:ovl_00
 sSparkVertices = 0x80224868; // size:0x30 segment:ovl_00
 sSparkMatrices = 0x80228080; // size:0xF00 segment:ovl_00
+g_PlayerTagImages = 0x80132360; // size:0x4
+g_LeaderLineImage = 0x800FED0C; // size:0x4
