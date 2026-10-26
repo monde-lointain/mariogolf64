@@ -9,6 +9,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "hole_display.h"
+#include "hole_loader.h"
 #include "math_util.h"
 #include "reaction.h"
 #include "round_events.h"
@@ -79,6 +80,8 @@
 #define FREE_LOOK_HUD_FLAGS 0x47
 #define LETTERBOX_STATE_UNK1 1
 #define FREE_LOOK_FRAMEBUFFER_COUNT 3
+/* The stopwatches stop at an hour */
+#define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
@@ -103,6 +106,7 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3070;
+extern s32 D_80223FF8_ovl_00;
 extern s16 D_800C307A; /* The free-look camera's heading, in binary angle units */
 extern s32 D_800C3080;
 extern s32 D_800C3084;
@@ -846,7 +850,32 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateGolferTranslucency);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802081F8_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208354_ovl_00);
+/* Advances the player's, the round's and the hole's stopwatches by a frame, up to their limit */
+#ifdef NON_MATCHING
+void TickStopwatches(void) {
+    /* The original reads the player index through a never-set pointer */
+    s32 *volatile unused;
+    s32 *playerIndex;
+
+    unused = playerIndex;
+    if (D_80223FF8_ovl_00 < 2) {
+        g_Players[*playerIndex].stopwatchFrameCount++;
+        g_GameState.stopwatchFrameCount++;
+        g_HoleTimeFrames[g_HoleIndex]++;
+        if (g_Players[*playerIndex].stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
+            g_Players[*playerIndex].stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+        }
+        if (g_GameState.stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
+            g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
+        }
+        if (g_HoleTimeFrames[g_HoleIndex] > STOPWATCH_MAX_FRAMES) {
+            g_HoleTimeFrames[g_HoleIndex] = STOPWATCH_MAX_FRAMES;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TickStopwatches);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020845C_ovl_00);
 

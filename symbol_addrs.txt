@@ -2889,3 +2889,4 @@ StartFreeLook = 0x80203DAC; // type:func segment:ovl_00
 TurnFreeLook = 0x802041C8; // type:func segment:ovl_00
 CraneAimCamera = 0x80204210; // type:func segment:ovl_00
 MoveAimCameraDistanceByUpDown = 0x80204460; // type:func segment:ovl_00
+TickStopwatches = 0x80208354; // type:func segment:ovl_00

@@ -302,7 +302,7 @@ void SetUpPlayers(void) {
                     g_Players[i].clubs[slot] = slot + (s8)g_Players[i].characterIndex * CLUB_SET_SIZE;
                 }
             }
-            g_Players[i].unk74 = 0;
+            g_Players[i].stopwatchFrameCount = 0;
             g_Players[i].unk88 = NextRandom();
         }
     }

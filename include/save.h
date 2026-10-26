@@ -229,7 +229,7 @@ typedef struct UnkB8 {
     /* 0x4F */ u8 unk4F[0x52 - 0x4F];
     /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
     /* 0x72 */ u8 unk72[0x74 - 0x72];
-    /* 0x74 */ s32 unk74;
+    /* 0x74 */ s32 stopwatchFrameCount; /* The player's time in the stopwatch modes */
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
     /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
     /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from CHARACTER_KID on */
