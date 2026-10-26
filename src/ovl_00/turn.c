@@ -50,15 +50,20 @@
 #define HOLE_OUT_CALL_BOGEY 0x98
 #define HOLE_OUT_CALL_CHANNEL 3
 #define HOLE_OUT_CALL_VOLUME 0x7F
+/* How far the control pad tilts the stick, as GetTurnStickX and GetTurnStickY read it */
+#define DPAD_STICK_TILT 40
+#define LETTERBOX_STATE_UNK4 4
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3084;
+extern s32 D_800C308C; /* The letterbox's state */
 extern s32 D_80227194_ovl_00;
 extern s32 sTurnTimerStart; /* Nothing reads it */
 /* How many times the shot's flight has been shown; StartFlightCamera gets the earlier count */
 extern s32 sShotFlightCount;
 
+void SetCharacterTranslucent(u32 slotIndex, s32 value);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -407,7 +412,15 @@ void FreeCharacterAndReactionLight(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207A34_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207B8C_ovl_00);
+/* Leaves the distances that the player's contests have not measured uncounted */
+void SkipUnmeasuredDistances(s32 playerIndex) {
+    if (g_Players[playerIndex].driveDistance == UNMEASURED_DISTANCE) {
+        g_Players[playerIndex].driveDistance = UNCOUNTED_DISTANCE;
+    }
+    if (g_Players[playerIndex].pinDistance == UNMEASURED_DISTANCE) {
+        g_Players[playerIndex].pinDistance = UNCOUNTED_DISTANCE;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207BEC_ovl_00);
 
@@ -471,11 +484,68 @@ void ShowHoleOutBanner(s32 playerIndex) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802080B4_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802080D4_ovl_00);
+/* The turn controller's stick X, which left and right on the control pad tilt fully */
+#ifdef NON_MATCHING
+s8 GetTurnStickX(void) {
+    /* The original stores a never-set register to the stack */
+    volatile s32 unused;
+    s32 garbage;
+    s32 x;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208120_ovl_00);
+    unused = garbage;
+    x = (g_TurnController.buttons & L_JPAD) ? -DPAD_STICK_TILT : 0;
+    if (g_TurnController.buttons & R_JPAD) {
+        x = DPAD_STICK_TILT;
+    }
+    if (x == 0) {
+        x = g_TurnController.stickX;
+    }
+    return x;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickX);
+#endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020816C_ovl_00);
+/* The turn controller's stick Y, which down and up on the control pad tilt fully */
+#ifdef NON_MATCHING
+s8 GetTurnStickY(void) {
+    /* The original stores a never-set register to the stack */
+    volatile s32 unused;
+    s32 garbage;
+    s32 y;
+
+    unused = garbage;
+    y = (g_TurnController.buttons & D_JPAD) ? -DPAD_STICK_TILT : 0;
+    if (g_TurnController.buttons & U_JPAD) {
+        y = DPAD_STICK_TILT;
+    }
+    if (y == 0) {
+        y = g_TurnController.stickY;
+    }
+    return y;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickY);
+#endif
+
+/* Makes the golfer translucent while a club for the green is held */
+#ifdef NON_MATCHING
+void UpdateGolferTranslucency(void) {
+    /* The original reads the player index through a never-set pointer */
+    s32 *volatile unused;
+    s32 *playerIndex;
+
+    unused = playerIndex;
+    if ((GetClub(g_Players[*playerIndex].clubs[g_CurrentShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN)
+        && D_800C308C != LETTERBOX_STATE_UNK4) {
+        SetCharacterTranslucent(0, TRUE);
+    } else {
+        SetCharacterTranslucent(0, FALSE);
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateGolferTranslucency);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802081F8_ovl_00);
 

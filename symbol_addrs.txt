@@ -2873,3 +2873,7 @@ sPauseMenuUnkD688 = 0x8022D688; // size:0x4 segment:ovl_00
 AreAllRingsPassed = 0x80207048; // type:func segment:ovl_00
 ShowHoleOutBanner = 0x80207F70; // type:func segment:ovl_00
 StartBanner = 0x8020E7B4; // type:func segment:ovl_00
+SkipUnmeasuredDistances = 0x80207B8C; // type:func segment:ovl_00
+GetTurnStickX = 0x802080D4; // type:func segment:ovl_00
+GetTurnStickY = 0x80208120; // type:func segment:ovl_00
+UpdateGolferTranslucency = 0x8020816C; // type:func segment:ovl_00
