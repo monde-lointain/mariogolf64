@@ -120,7 +120,8 @@
 #define MATCH_PLACES_IMAGE_ASSET 0x6A2
 #define MATCH_UNK6A3_ASSET 0x6A3
 #define NAMEPLATE_ASSET 0x832
-#define MATCH_UNK8FE_ASSET 0x8FE
+/* The words UP, DOWN and EVEN, stacked, for match play standings */
+#define MATCH_STANDING_WORDS_ASSET 0x8FE
 #define TOURNAMENT_UNK6A1_ASSET 0x6A1
 
 extern s32 sAreResultsLoaded;
@@ -169,7 +170,7 @@ extern u8 *D_80225718_ovl_00;
 extern u8 *D_8022571C_ovl_00;
 extern u8 *sTrophyImage;
 extern u8 *sTrophyPalette;
-extern u8 *D_8022572C_ovl_00;
+extern u8 *sMatchStandingWordsImage;
 extern u8 *D_80225730_ovl_00;
 extern u8 *sPlaceDigitsImage;
 extern s32 sPortraitCharacterIndex;
@@ -380,8 +381,8 @@ void LoadRoundResults(void) {
             ReadEncodedAsset(D_80225708_ovl_00, &asset);
             sNameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
             ReadEncodedAsset(sNameplateImage, &asset);
-            D_8022572C_ovl_00 = AllocMemory(OpenEncodedAsset(MATCH_UNK8FE_ASSET, &asset));
-            ReadEncodedAsset(D_8022572C_ovl_00, &asset);
+            sMatchStandingWordsImage = AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
+            ReadEncodedAsset(sMatchStandingWordsImage, &asset);
             sPortraitCharacterIndex = (s8)g_Players[1].characterIndex;
         } else {
             sResultsPlacesImage = AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
@@ -713,7 +714,7 @@ void FreeRoundResults(void) {
                 FreeMemory(&sResultsPlacesImage);
                 FreeMemory(&D_80225708_ovl_00);
                 FreeMemory(&sNameplateImage);
-                FreeMemory(&D_8022572C_ovl_00);
+                FreeMemory(&sMatchStandingWordsImage);
             } else {
                 FreeMemory(&sResultsPlacesImage);
             }

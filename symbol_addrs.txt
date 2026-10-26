@@ -2991,3 +2991,4 @@ DrawDriveRecord = 0x80210F40; // type:func segment:ovl_00
 DrawReadyGoMovie = 0x80211D60; // type:func segment:ovl_00
 sReadyGoVertices = 0x80224538; // size:0xC0 segment:ovl_00
 sReadyGoMatrices = 0x80227D20; // size:0x80 segment:ovl_00
+sMatchStandingWordsImage = 0x8022572C; // size:0x4 segment:ovl_00
