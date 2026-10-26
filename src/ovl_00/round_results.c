@@ -28,6 +28,8 @@
 
 /* sResultsState values */
 #define RESULTS_SLIDING_IN 0
+#define RESULTS_SHOWN 1
+#define RESULTS_CLOSING 2 /* Saves and frees them */
 
 /* LoadUnlockNotice's unlocks */
 #define UNLOCK_NOTICE_DONKEY_KONG 0
@@ -64,6 +66,16 @@
 #define NOTICE_LIFT_DELAY 50
 #define NOTICE_LIFT_START_SPEED 8
 #define NOTICE_LIFT_EXIT -200
+
+/* The places image's 32x32 icons, after its 256-color palette */
+#define PLACE_ICON_SIZE 32
+
+/* The labels image's 16-color strips. Each is stored wider than drawn. */
+#define RESULTS_LABEL_WIDTH 72
+#define RESULTS_LABEL_STORED_WIDTH 80
+#define RESULTS_LABEL_HEIGHT 18
+
+#define PORTRAIT_SIZE 32
 
 #define RESULTS_SONG 3
 #define TOURNAMENT_RESULTS_SONG 0x25
@@ -163,11 +175,13 @@ extern s32 sHasBets;
 extern s32 sTournamentPrizes[][TROPHY_PLACE_COUNT + 3];
 extern s32 sPrizePoints;
 extern s32 sPrizeShown;
-extern u8 *sTrophyImage;
-extern u8 *sTrophyPalette;
 extern s32 sResultsUnk94;
 extern s32 sResultsUnk98;
 extern s32 sResultsUnk8C;
+extern s32 sResultsUnk78;
+extern s32 sResultsUnk7C;
+extern s32 sResultsUnk9C;
+extern s32 sResultsUnkA0;
 extern s32 sTournamentOpenCourseCount;
 extern u16 D_800C2074[];
 extern s32 D_801B60B4;
@@ -189,6 +203,12 @@ s32 func_8005D23C(void);
 
 void FreeRoundResults(void);
 void LoadRoundResults(void);
+void DrawCourseResultsNotice(Gfx **displayListHead);
+void DrawCharacterResultsNotice(Gfx **displayListHead);
+s32 func_801F9AD0_ovl_00(void);
+s32 func_801FA098_ovl_00(void);
+s32 func_801FA248_ovl_00(void);
+s32 func_801FA684_ovl_00(void);
 
 /* The course points that open the courses up to courseIndex, together */
 s32 SumCoursePointsNeeded(s32 courseIndex) {
@@ -750,33 +770,200 @@ void DrawResultsNumber(Gfx **displayListHead, s32 x, s32 y, s32 value) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F6718_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F6D0C_ovl_00);
+void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
+    Gfx *gfx = *displayListHead;
+
+    LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, sResultsPlacesImage + ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+                     G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, x * 4, y * 4, (x + PLACE_ICON_SIZE) * 4, (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
+                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F6DFC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F7294_ovl_00);
+void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F7418_ovl_00);
+    LoadSmallPalette(&gfx, 0, sResultsLabelsImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(gfx++,
+                          (u32)(sResultsLabelsImage +
+                                (label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2) + PALETTED_TEXELS_OFFSET)) &
+                              ~7,
+                          G_IM_FMT_CI, RESULTS_LABEL_STORED_WIDTH, 0, 0, 0, RESULTS_LABEL_WIDTH - 1,
+                          RESULTS_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    DrawTextureRect(&gfx, x * 4, y * 4, (x + RESULTS_LABEL_WIDTH) * 4, (y + RESULTS_LABEL_HEIGHT) * 4,
+                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F7518_ovl_00);
+/*
+ * isMirrored starts the texture a width in (S10.5 texels), where its
+ * mirrored wrap flips it
+ */
+void DrawPlayerPortrait(Gfx **displayListHead, s32 x, s32 y, s32 playerIndex, s32 isMirrored) {
+    Gfx *gfx = *displayListHead;
+
+    LoadLargePalette(&gfx, sPlayerPortraitPalettes[playerIndex]);
+    LoadTextureBlock(&gfx, sPlayerPortraitImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, PORTRAIT_SIZE, PORTRAIT_SIZE,
+                     0, G_TX_MIRROR, G_TX_NOMIRROR, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    DrawTextureRect(&gfx, x * 4, y * 4, (x + PORTRAIT_SIZE) * 4, (y + PORTRAIT_SIZE) * 4, G_TX_RENDERTILE,
+                    isMirrored * (PORTRAIT_SIZE << 5), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
+
+void StartResultsNotice(s32 kind) {
+    sUnlockNoticeKind = kind;
+    switch (kind) {
+        case UNLOCK_NOTICE_KIND_NONE:
+            break;
+        case UNLOCK_NOTICE_KIND_COURSE:
+            sNoticeStage = 0;
+            sNoticeFrameCount = 0;
+            sNoticeSwing = SCREEN_WIDTH;
+            sNoticeUnk54 = 0;
+            sNoticeAngle = -1.57f;
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            sIsNoticeHeld = FALSE;
+            sNoticeTime = 0;
+            sNoticeFaceIndex = 0;
+            sNoticeLift = 0;
+            sNoticeUnk6C = 0;
+            break;
+    }
+}
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNumberFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224CBC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F75B0_ovl_00);
+/* Swings the notice in, then counts the course it opened */
+void UpdateCourseResultsNotice(void) {
+    SaveData *save = GetSaveData();
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F7740_ovl_00);
+    sNoticeFrameCount++;
+    switch (sNoticeStage) {
+        case 0:
+            sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
+            sNoticeUnk54 = 0;
+            sNoticeAngle += NOTICE_SWING_STEP;
+            if (sNoticeAngle > M_PI) {
+                sNoticeAngle = M_PI;
+            }
+            if (sNoticeFrameCount >= NOTICE_SWING_FRAMES) {
+                sNoticeStage = 1;
+            }
+            break;
+        case 1:
+            sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
+            sNoticeAngle += NOTICE_SWING_STEP;
+            if (sNoticeFrameCount >= NOTICE_DONE_FRAME) {
+                StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
+                sOpenCourseCount++;
+                if (sOpenCourseCount < COURSE_COUNT) {
+                    sPointsToNextCourse = GetCoursePointsNeeded(sOpenCourseCount) - save->coursePoints;
+                }
+            }
+            break;
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F7F7C_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCourseResultsNotice);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8094_ovl_00);
+/* Changes the beaten character's face, then lifts the notice away */
+void UpdateCharacterResultsNotice(void) {
+    EncodedAsset asset;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8A30_ovl_00);
+    GetSaveData();
+    sNoticeTime++;
+    if (sIsNoticeHeld) {
+        return;
+    }
+    if (sNoticeTime > NOTICE_FACE_DELAY && !(sNoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+        sNoticeFaceIndex < NOTICE_LAST_FACE) {
+        sNoticeFaceIndex++;
+        OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[1].characterIndex] + sNoticeFaceIndex, &asset);
+        ReadEncodedAsset(sPortraitImage, &asset);
+    }
+    if (sNoticeTime > NOTICE_LIFT_DELAY) {
+        if (sNoticeLift > -2) {
+            sNoticeLift -= NOTICE_LIFT_START_SPEED;
+        } else {
+            sNoticeLift += sNoticeLift * 2 / 3;
+        }
+        if (sNoticeLift < NOTICE_LIFT_EXIT) {
+            StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
+        }
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8B7C_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8B88_ovl_00);
+/* Returns TRUE once the results have been saved and freed */
+s32 UpdateRoundResults(void) {
+    s32 isDone;
+
+    switch (sResultsState) {
+        case RESULTS_SLIDING_IN:
+            if (sResultsSlide == 1) {
+                sResultsState = RESULTS_SHOWN;
+                sResultsSlide = 0;
+                sResultsUnk78 = 0;
+                sResultsUnk7C = 0;
+                break;
+            }
+            sResultsSlide += -sResultsSlide / 2;
+            break;
+        case RESULTS_SHOWN:
+            if (g_IsUnk3B) {
+                isDone = func_801FA098_ovl_00();
+            } else {
+                switch (g_GameMode) {
+                    case GAME_MODE_STROKE:
+                    case GAME_MODE_UNK6:
+                    case GAME_MODE_SPEED_GOLF:
+                    case GAME_MODE_SKINS_MATCH:
+                    case GAME_MODE_CLUB_SLOTS:
+                        isDone = func_801FA248_ovl_00();
+                        break;
+                    case GAME_MODE_MATCH_GAME:
+                    case GAME_MODE_GET_CHARACTER:
+                        isDone = func_801FA684_ovl_00();
+                        break;
+                    case GAME_MODE_TOURNAMENT:
+                        isDone = func_801F9AD0_ovl_00();
+                        break;
+                    default:
+                        return FALSE;
+                }
+            }
+            if (isDone) {
+                sResultsState = RESULTS_CLOSING;
+            }
+            break;
+        case RESULTS_CLOSING:
+            WriteSaveData();
+            OpenRoundResults(CLOSE_ROUND_RESULTS);
+            return TRUE;
+    }
+    return FALSE;
+}
+
+s32 GetResultsUnk94(void) {
+    return sResultsUnk94;
+}
+
+void SetResultsUnk94(s32 value, s32 unk98) {
+    sResultsUnk94 = value;
+    sResultsUnk98 = unk98;
+    if (value == 0) {
+        sResultsUnk9C = SCREEN_WIDTH;
+        sResultsUnkA0 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8BB8_ovl_00);
 
@@ -816,4 +1003,18 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E3C_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FCC48_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FD578_ovl_00);
+void DrawResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    switch (sUnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_NONE:
+            break;
+        case UNLOCK_NOTICE_KIND_COURSE:
+            DrawCourseResultsNotice(&gfx);
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            DrawCharacterResultsNotice(&gfx);
+            break;
+    }
+    *displayListHead = gfx;
+}
