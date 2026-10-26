@@ -3,12 +3,15 @@
 #include "billboard.h"
 #include "controller.h"
 #include "course.h"
+#include "current_shot.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "pause_menu.h"
 #include "round_hud.h"
+#include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
 #include "variables.h"
@@ -304,7 +307,203 @@ void DrawPauseArrows(Gfx **displayListHead, s32 x, s32 y, s32 gap) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_80219C74_ovl_00);
+/* What a pause option shows beside its label, and how the cursor points at it */
+#define PAUSE_OPTION_KIND_PLAIN 0
+#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
+#define PAUSE_OPTION_KIND_UNK8C 2   /* Shows the player's UnkB8.unk8C as black or white */
+#define PAUSE_OPTION_KIND_UNK3 3
+#define PAUSE_OPTION_KIND_UNK4 4
+#define PAUSE_OPTION_KIND_UNK5 5
+#define PAUSE_OPTION_KIND_UNKD678 7 /* Shows another label while sPauseMenuUnkD678 is clear */
+
+/* The option that is greyed out while sPauseMenuUnkD678 is clear */
+#define PAUSE_OPTION_UNKD678 2
+
+#define PAUSE_LAYOUT_MAX_OPTIONS 9
+#define PAUSE_OPTION_MESSAGE_BASE 0x77
+#define PAUSE_OPTION_UNKD678_OFF_MESSAGE 0xE
+
+typedef struct PauseOption {
+    /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ u16 kind;
+} PauseOption; /* size = 0x6 */
+
+extern PauseOption sPauseOptions[];
+extern s8 sPauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
+extern s8 sPauseLayoutOptionCounts[];
+extern char *sClearText;
+extern char *sRainText;
+extern char *sBlackText;
+extern char *sWhiteText;
+/* Written once the menu is drawn and cleared by its input, but never read */
+extern s32 sPauseMenuDrawnMarker;
+extern f32 sPauseGlowAngle;
+extern f32 sPauseCursorAngle;
+
+#define PAUSE_CLOUD_LEFT 32
+#define PAUSE_CLOUD_RIGHT 288
+#define PAUSE_CLOUD_TOP 32
+#define PAUSE_CLOUD_PART_WIDTH 256
+#define PAUSE_CLOUD_PART_HEIGHT 32
+#define PAUSE_CLOUD_PART_SIZE 0x1000
+#define PAUSE_LABEL_X 80
+#define PAUSE_LABELS_TOP 48
+#define PAUSE_LABEL_SPACING 18
+#define PAUSE_LABEL_FONT 1
+#define PAUSE_LABEL_FLAGS 0x20
+#define PAUSE_VALUE_X 212
+#define PAUSE_RED_WAVE_MIDDLE 95
+#define PAUSE_RED_WAVE_AMPLITUDE 95.0f
+#define PAUSE_LABEL_RED 0x5F
+#define PAUSE_LABEL_GREEN 0x3F
+#define PAUSE_LABEL_BLUE 0xFF
+#define PAUSE_CURSOR_SIZE 24
+#define PAUSE_CURSOR_LOADED_HEIGHT 76
+#define PAUSE_CURSOR_RIGHT 80
+#define PAUSE_CURSOR_SWAY 8.0f
+/* The cursor shows the tee frames instead of the glove for options with a value */
+#define PAUSE_TEE_X 56
+/* The tee leans the other way once the glove's sway passes this */
+#define PAUSE_TEE_LEAN_SWAY 5
+/* The tee frames follow the glove in the cursor image */
+#define PAUSE_TEES_T (PAUSE_CURSOR_SIZE << 5)
+
+#ifdef NON_MATCHING
+/* Loads or frees the pause menu as RequestPauseMenu asked, then draws the menu while it is loaded */
+void DrawPauseMenu(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 cloudMiddle;
+    s32 labelsHeight;
+    s32 glowRed;
+    s32 glowGreen;
+    s32 glowBlue;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 i;
+    s16 y;
+    s32 message;
+    u16 kind;
+    u16 selectedKind;
+    s32 sway;
+    s32 teeFrame;
+
+    if (sPauseMenuRequest == PAUSE_MENU_REQUEST_LOAD) {
+        LoadPauseMenu();
+        sPauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+    } else if (sPauseMenuRequest == PAUSE_MENU_REQUEST_FREE) {
+        FreePauseMenu();
+        sPauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+    }
+    if (!sIsPauseMenuLoaded) {
+        return;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 220, 220, 230, 210);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0,
+                      TEXEL0, 0);
+    labelsHeight = sPauseLayoutOptionCounts[sPauseLayout] * PAUSE_LABEL_SPACING;
+    LoadNibbleTextureBlock(&gfx, sMenuCloudImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, PAUSE_CLOUD_PART_WIDTH,
+                           PAUSE_CLOUD_PART_HEIGHT, 0, G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
+    cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
+    DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, PAUSE_CLOUD_TOP * 4, PAUSE_CLOUD_RIGHT * 4, cloudMiddle,
+                    G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    LoadNibbleTextureBlock(&gfx, sMenuCloudImage + IMAGE_HEADER_SIZE + PAUSE_CLOUD_PART_SIZE, G_IM_FMT_I,
+                           PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, PAUSE_CLOUD_LEFT * 4, cloudMiddle, PAUSE_CLOUD_RIGHT * 4,
+                    (labelsHeight + PAUSE_CLOUD_TOP + PAUSE_CLOUD_PART_HEIGHT) * 4, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                    1 << 10);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    sPauseGlowAngle += M_PI / 18;
+    glowRed = (s32)(sinf(sPauseGlowAngle) * PAUSE_RED_WAVE_AMPLITUDE) + PAUSE_RED_WAVE_MIDDLE;
+    glowGreen = (s32)(sinf(sPauseGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
+    glowBlue = (s32)(sinf(sPauseGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
+    SetUpTextDrawing(&gfx);
+    for (i = 0, y = PAUSE_LABELS_TOP; i != sPauseLayoutOptionCounts[sPauseLayout]; i++, y += PAUSE_LABEL_SPACING) {
+        message = sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].message;
+        kind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].kind;
+        red = PAUSE_LABEL_RED;
+        if (sPauseSelection == i) {
+            red = glowRed;
+            green = glowGreen;
+            blue = glowBlue;
+        } else {
+            green = PAUSE_LABEL_GREEN;
+            blue = PAUSE_LABEL_BLUE;
+        }
+        if (sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].kind == PAUSE_OPTION_KIND_UNKD678) {
+            if (!sPauseMenuUnkD678) {
+                message = PAUSE_OPTION_UNKD678_OFF_MESSAGE;
+            }
+        }
+        SetTextSlot(PAUSE_LABEL_X, y, message + PAUSE_OPTION_MESSAGE_BASE, PAUSE_LABEL_FONT, i, PAUSE_LABEL_FLAGS, red,
+                    green, blue, 0xFF);
+        gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
+        DrawLargeTextSlot(&gfx, i);
+        if (kind == PAUSE_OPTION_KIND_UNK8C) {
+            DrawLargeText(&gfx, PAUSE_VALUE_X, y,
+                          (s8)g_Players[g_CurrentShot.playerIndex].unk8C == 1 ? sBlackText : sWhiteText);
+        }
+        if (kind == PAUSE_OPTION_KIND_WEATHER) {
+            DrawLargeText(&gfx, PAUSE_VALUE_X, y, g_HoleConditions.isRaining == TRUE ? sRainText : sClearText);
+        }
+    }
+    sPauseCursorAngle += M_PI / 12;
+    if (sPauseCursorAngle > M_PI) {
+        sPauseCursorAngle -= M_PI;
+    }
+    sway = sinf(sPauseCursorAngle) * PAUSE_CURSOR_SWAY;
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    teeFrame = sway >= PAUSE_TEE_LEAN_SWAY;
+    LoadSmallPalette(&gfx, 0, sPauseCursorImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(gfx++, TEXTURE_ADDRESS(sPauseCursorImage + PALETTED_TEXELS_OFFSET), G_IM_FMT_CI,
+                          PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1, PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0,
+                          0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    if (sPauseLayoutOptions[sPauseLayout][sPauseSelection] == PAUSE_OPTION_UNKD678 && !sPauseMenuUnkD678) {
+        gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0,
+                          PRIMITIVE, 0);
+        gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
+    }
+    selectedKind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
+    if (selectedKind == PAUSE_OPTION_KIND_WEATHER || selectedKind == PAUSE_OPTION_KIND_UNK8C ||
+        selectedKind == PAUSE_OPTION_KIND_UNK3 || selectedKind == PAUSE_OPTION_KIND_UNK4 ||
+        selectedKind == PAUSE_OPTION_KIND_UNK5) {
+        DrawTextureRect(&gfx, PAUSE_TEE_X * 4, (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
+                        PAUSE_CURSOR_RIGHT * 4,
+                        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 + PAUSE_CURSOR_SIZE) * 4,
+                        G_TX_RENDERTILE, 0, PAUSE_TEES_T + teeFrame * (PAUSE_CURSOR_SIZE << 5), 1 << 10, 1 << 10);
+    } else {
+        DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
+                        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4) * 4,
+                        (PAUSE_CURSOR_RIGHT - sway) * 4,
+                        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4 + PAUSE_CURSOR_SIZE) * 4,
+                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    }
+    sPauseMenuDrawnMarker = 0xFFFFFF;
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", DrawPauseMenu);
+#endif
 
 void LoadChoiceBoxImages(void) {
     EncodedAsset asset;

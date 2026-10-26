@@ -939,7 +939,7 @@ void DrawFlipMessage(Gfx **displayListHead);
 void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawWindFlyGuy(Gfx **displayListHead);
 void func_80217164(Gfx **displayListHead);
-void func_80219C74(Gfx **displayListHead);
+void DrawPauseMenu(Gfx **displayListHead);
 void DrawChoiceBox(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
 void DrawGameSaveMenu(Gfx **displayListHead);
@@ -1639,7 +1639,7 @@ s32 DrawGame(void) {
             DrawInsetViewFrame();
         }
         if (g_IsModuleAlive[20]) {
-            func_80219C74(&g_DisplayListHead);
+            DrawPauseMenu(&g_DisplayListHead);
         }
         if (g_HasLoaderFinished == 1 && !IsGameFlagSet(0x13) && !IsGameFlagSet(0x2D)) {
             func_80089094(&g_Cameras[0].view);
