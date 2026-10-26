@@ -837,7 +837,7 @@ void StartShotPanel(void) {
             case GAME_MODE_STROKE:
             case GAME_MODE_UNK1:
             case GAME_MODE_TOURNAMENT:
-            case GAME_MODE_UNK7:
+            case GAME_MODE_SPEED_GOLF:
                 for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
                     g_RoundHud.skinsTotals[playerIndex] = GetNetScoreToPar(g_HoleIndex, playerIndex);
                 }
@@ -2255,7 +2255,7 @@ void DrawHoleIntroText(Gfx **displayListHead) {
             if (g_IsModuleAlive[MODULE_UNK21]) {
                 func_80242D40(&gfx);
             }
-        } else if (g_GameMode == GAME_MODE_UNK7 && D_801B60B9 == 0) {
+        } else if (g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
             hundredths = (s32)(g_StopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) % HUNDREDTHS_PER_SECOND;
             totalSeconds = g_StopwatchFrameCount / FRAMES_PER_SECOND;
             seconds = totalSeconds % SECONDS_PER_MINUTE;

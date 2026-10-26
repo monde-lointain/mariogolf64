@@ -41,7 +41,7 @@
 #define SCORECARD_LAYOUT_MATCH 1 /* Match games and Get Character */
 #define SCORECARD_LAYOUT_SKINS 2 /* Skins matches and club slots */
 #define SCORECARD_LAYOUT_TOURNAMENT 3
-#define SCORECARD_LAYOUT_UNK4 4 /* For GAME_MODE_UNK7 */
+#define SCORECARD_LAYOUT_UNK4 4 /* For GAME_MODE_SPEED_GOLF */
 
 /*
  * The tallies of a match's hole happen at these frames of the TALLYING state.
@@ -320,7 +320,7 @@ void SetScorecardLayout(s32 layout) {
         case GAME_MODE_UNK3:
         case GAME_MODE_TOURNAMENT:
         case GAME_MODE_UNK6:
-        case GAME_MODE_UNK7:
+        case GAME_MODE_SPEED_GOLF:
         case GAME_MODE_UNK8:
         case GAME_MODE_RING_SHOT:
             for (i = 0; i != g_GameState.playerCount; i++) {
@@ -578,7 +578,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
             case GAME_MODE_UNK3:
             case GAME_MODE_GET_CHARACTER:
             case GAME_MODE_UNK6:
-            case GAME_MODE_UNK7:
+            case GAME_MODE_SPEED_GOLF:
             case GAME_MODE_UNK8:
             case GAME_MODE_RING_SHOT:
             case GAME_MODE_SKINS_MATCH:
@@ -604,7 +604,7 @@ s32 UpdateShownScorecard(u16 buttons) {
         case GAME_MODE_UNK3:
         case GAME_MODE_GET_CHARACTER:
         case GAME_MODE_UNK6:
-        case GAME_MODE_UNK7:
+        case GAME_MODE_SPEED_GOLF:
         case GAME_MODE_UNK8:
         case GAME_MODE_RING_SHOT:
         case GAME_MODE_SKINS_MATCH:
@@ -698,7 +698,7 @@ void DrawScorecard(Gfx **displayListHead) {
                         func_802493DC_ovl_09(&gfx);
                     }
                     break;
-                case GAME_MODE_UNK7:
+                case GAME_MODE_SPEED_GOLF:
                     if (g_RoundHud.scorecardPage == 0) {
                         func_802478B0_ovl_09(&gfx);
                     } else {

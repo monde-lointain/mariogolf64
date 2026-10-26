@@ -1309,7 +1309,7 @@ void StartHoleCamerasAndSong(void) {
         case GAME_MODE_TOURNAMENT:
             PlaySong(HOLE_SONG_TOURNAMENT, SONG_FLAG_UNREAD);
             break;
-        case GAME_MODE_UNK7:
+        case GAME_MODE_SPEED_GOLF:
             PlaySong(HOLE_SONG_UNK18, SONG_FLAG_UNREAD);
             break;
         case GAME_MODE_RING_SHOT:
@@ -1365,7 +1365,7 @@ void EndHoleFlyover(void) {
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
-    if (g_GameMode != GAME_MODE_UNK7 && !g_IsMiniGolf) {
+    if (g_GameMode != GAME_MODE_SPEED_GOLF && !g_IsMiniGolf) {
         if (IsGameFlagSet(GAME_FLAG_UNK48) || g_HoleConditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
             func_80216130(1);
         }

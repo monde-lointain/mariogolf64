@@ -80,8 +80,12 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK1 1
 #define GAME_MODE_UNK6 6
 
-/* A mode in which EndHoleFlyover skips its call for a strong wind */
-#define GAME_MODE_UNK7 7
+/*
+ * The walkthrough's Speed Golf: the HUD shows g_StopwatchFrameCount in this
+ * mode, and its scorecard page shows each hole's time and the round's score.
+ * EndHoleFlyover skips its call for a strong wind in it.
+ */
+#define GAME_MODE_SPEED_GOLF 7
 
 /* A mode in which SetUpPlayers sets up the players from a record */
 #define GAME_MODE_UNK8 8
