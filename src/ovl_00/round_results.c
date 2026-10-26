@@ -48,6 +48,15 @@
 #define RESULTS_DIGIT_HEIGHT 12
 
 #define SOUND_TALLY_TICK 0x20
+#define SOUND_TALLY_DONE 0x22
+#define TALLY_DONE_SOUND_VOLUME 127
+/* sTallySpeed while A is held */
+#define FAST_TALLY_SPEED 10
+#define CONFIRM_SOUND_CHANNEL 15
+#define CONFIRM_SOUND_VOLUME 100
+
+#define PORTRAIT_ANIMATION_UNK1 1
+#define PORTRAIT_ANIMATION_UNK4 4
 
 /*
  * The course notice drops in on a half sine swing, NOTICE_SWING_STEP an
@@ -1166,9 +1175,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F9AD0_ovl_00);
 /* UpdatePrompt's results for PROMPT_SCORE_PASSWORD */
 #define SCORE_PASSWORD_PROMPT_YES 10
 #define SCORE_PASSWORD_PROMPT_NO 11
-#define SCORE_PASSWORD_SOUND_CHANNEL 15
-#define SCORE_PASSWORD_SOUND_VOLUME 100
-#define PORTRAIT_ANIMATION_UNK1 1
 
 /* Shows the round's score password until the player says they have it. Returns TRUE then. */
 s32 ShowScorePassword(ControllerState *controller) {
@@ -1194,8 +1200,8 @@ s32 ShowScorePassword(ControllerState *controller) {
                 sResultsUnk8C = FALSE;
                 sResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
                 OpenPrompt(PROMPT_SCORE_PASSWORD);
-                PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL,
-                          SCORE_PASSWORD_SOUND_VOLUME);
+                PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
+                          CONFIRM_SOUND_VOLUME);
             }
             break;
         case SCORE_PASSWORD_STEP_ASKING:
@@ -1224,10 +1230,6 @@ s32 ShowScorePassword(ControllerState *controller) {
 #define POINTS_STEP_WAITING 4
 #define POINTS_STEP_TALLYING 5
 #define POINTS_STEP_START_TALLY 6
-#define PORTRAIT_ANIMATION_UNK4 4
-#define FAST_TALLY_SPEED 10
-#define SOUND_TALLY_DONE 0x22
-#define TALLY_DONE_SOUND_VOLUME 127
 
 #ifdef NON_MATCHING
 /*
@@ -1267,7 +1269,7 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                     if (controller->buttons & A_BUTTON) {
                         sResultsUnk8C = FALSE;
                         sResultsUnk78 = POINTS_STEP_START_TALLY;
-                        PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL, SCORE_PASSWORD_SOUND_VOLUME);
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                     }
                     break;
                 case POINTS_STEP_START_TALLY:
@@ -1333,7 +1335,7 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                 case POINTS_STEP_WAITING:
                     sResultsUnk8C = TRUE;
                     if (controller->pressedButtons & A_BUTTON) {
-                        PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL, SCORE_PASSWORD_SOUND_VOLUME);
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
                         sResultsUnk8C = FALSE;
                         return TRUE;
                     }
