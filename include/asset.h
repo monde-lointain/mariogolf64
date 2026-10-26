@@ -32,6 +32,9 @@ typedef struct ImageHeader {
     /* 0x4 */ u16 height;
     /* 0x6 */ u16 unk6;
 } ImageHeader; /* size = 0x8 */
+/* Where ImageHeader's width and height start, for reading them a byte at a time */
+#define IMAGE_WIDTH_OFFSET 2
+#define IMAGE_HEIGHT_OFFSET 4
 
 void OpenAssetFile(s32 assetId, AssetFile *file);
 AssetFile *OpenPooledAssetFile(s32 assetId);

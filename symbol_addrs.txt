@@ -2560,3 +2560,7 @@ sScorecard = 0x80104FD4; // size:0xE8
 sScorecardContent = 0x801050C4; // size:0x54
 sScorecardState = 0x800C4140; // size:0x4
 g_RoundHud = 0x801061B8; // type:RoundHud size:0x8C
+DrawLargeImage = 0x8024373C; // type:func segment:ovl_09
+DrawPlace = 0x802445C0; // type:func segment:ovl_09
+DrawScorecardLabel = 0x80244748; // type:func segment:ovl_09
+FormatLeaderboardRow = 0x80247D80; // type:func segment:ovl_09

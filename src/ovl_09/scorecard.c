@@ -50,6 +50,31 @@
 #define LEADERBOARD_GLYPH_GROUP_COUNT 20
 
 #define FACE_SIZE 32
+
+/* Images wider than this are drawn in two strips */
+#define MAX_UNSPLIT_IMAGE_WIDTH 96
+
+/*
+ * placesImage holds the left halves of the four places' images, then their
+ * right halves, each half PLACE_HALF_WIDTH by PLACE_HEIGHT. The right half
+ * overlaps the left one.
+ */
+#define PLACE_IMAGE_COUNT 4
+#define PLACE_HALF_WIDTH 32
+#define PLACE_HEIGHT 32
+#define PLACE_HALF_SIZE (PLACE_HALF_WIDTH * PLACE_HEIGHT)
+#define PLACE_RIGHT_HALF_X 24
+#define PLACE_RIGHT_HALVES_OFFSET (LARGE_PALETTED_TEXELS_OFFSET + PLACE_IMAGE_COUNT * PLACE_HALF_SIZE)
+
+/* labelsImage holds four-bit labels of this size, one after another */
+#define LABEL_WIDTH 80
+#define LABEL_HEIGHT 18
+#define LABEL_SIZE (LABEL_WIDTH * LABEL_HEIGHT / 2)
+#define LABEL_SHOWN_WIDTH 54
+
+/* Where a leaderboard row's columns start in its text */
+#define LEADERBOARD_SCORE_COLUMN 12
+#define LEADERBOARD_HOLES_COLUMN 18
 #define SMALL_FACE_HEIGHT 24
 /* With G_TX_MIRROR, texels from this column on mirror the face */
 #define MIRRORED_FACE_MASK 5
@@ -69,7 +94,7 @@ typedef struct Scorecard {
     /* 0x20 */ u8 *pageTitleImages[3];
     /* 0x2C */ u8 *unk2C;
     /* 0x30 */ u8 *digitsImage;
-    /* 0x34 */ u8 *unk34;
+    /* 0x34 */ u8 *placesImage;
     /* 0x38 */ u8 *unk38;
     /* 0x3C */ u8 *unk3C;
     /* 0x40 */ u8 *unk40;
@@ -168,7 +193,7 @@ void FreeScorecard(void) {
             case GAME_MODE_UNK6:
             case GAME_MODE_UNK8:
             case GAME_MODE_RING_SHOT:
-                FreeMemory(&sScorecard.unk34);
+                FreeMemory(&sScorecard.placesImage);
                 break;
             case GAME_MODE_MATCH_GAME:
             case GAME_MODE_GET_CHARACTER:
@@ -179,7 +204,7 @@ void FreeScorecard(void) {
                 break;
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
-                FreeMemory(&sScorecard.unk34);
+                FreeMemory(&sScorecard.placesImage);
                 FreeMemory(&sScorecard.unk38);
                 break;
             case GAME_MODE_TOURNAMENT:
@@ -351,7 +376,32 @@ s32 UpdateShownScorecard(u16 buttons) {
     return TRUE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_8024373C_ovl_09);
+/*
+ * Draws an eight-bit image at its own size. Images wider than
+ * MAX_UNSPLIT_IMAGE_WIDTH are loaded and drawn as two strips, top then bottom.
+ */
+void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
+    Gfx *gfx = *displayListHead;
+    s32 width = (image[IMAGE_WIDTH_OFFSET] << 8) | image[IMAGE_WIDTH_OFFSET + 1];
+    s32 height = (image[IMAGE_HEIGHT_OFFSET] << 8) | image[IMAGE_HEIGHT_OFFSET + 1];
+    s32 stripCount;
+    s32 stripIndex;
+
+    stripCount = 1;
+    if (width > MAX_UNSPLIT_IMAGE_WIDTH) {
+        stripCount = 2;
+    }
+    LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+    height /= stripCount;
+    for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
+        LoadTextureBlock(&gfx, image + LARGE_PALETTED_TEXELS_OFFSET + stripIndex * width * height, G_IM_FMT_CI,
+                         G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&gfx, left << 2, top << 2, (left + width) << 2, (top + height) << 2, G_TX_RENDERTILE, 0, 0,
+                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        top += height;
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecard);
 
@@ -432,13 +482,41 @@ void DrawSmallFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex, s3
     LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, SMALL_FACE_HEIGHT, 0,
                      G_TX_MIRROR, G_TX_MIRROR, isMirrored * MIRRORED_FACE_MASK, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + FACE_SIZE) << 2, (top + SMALL_FACE_HEIGHT) << 2,
-                    G_TX_RENDERTILE, isMirrored * (FACE_SIZE << TEXTURE_COORD_FRACTION_BITS), 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                    G_TX_RENDERTILE, isMirrored * (FACE_SIZE << TEXTURE_COORD_FRACTION_BITS), 0, TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE);
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802445C0_ovl_09);
+/* Draws a place, from 0 for first, as the left and right halves of its image */
+void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80244748_ovl_09);
+    LoadLargePalette(&gfx, sScorecard.placesImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, sScorecard.placesImage + (place * PLACE_HALF_SIZE + PLACE_RIGHT_HALVES_OFFSET), G_IM_FMT_CI,
+                     G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, (left + PLACE_RIGHT_HALF_X) << 2, top << 2,
+                    (left + PLACE_RIGHT_HALF_X + PLACE_HALF_WIDTH) << 2, (top + PLACE_HEIGHT) << 2, G_TX_RENDERTILE,
+                    0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    LoadTextureBlock(&gfx, sScorecard.placesImage + (place * PLACE_HALF_SIZE + LARGE_PALETTED_TEXELS_OFFSET),
+                     G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, left << 2, top << 2, (left + PLACE_HALF_WIDTH) << 2, (top + PLACE_HEIGHT) << 2,
+                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
+
+/* Draws one of the labels in labelsImage, which shows only its left LABEL_SHOWN_WIDTH texels */
+void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
+    Gfx *gfx = *displayListHead;
+
+    LoadSmallPalette(&gfx, 0, sScorecard.labelsImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(gfx++, (u32)(sScorecard.labelsImage + PALETTED_TEXELS_OFFSET + labelIndex * LABEL_SIZE) & ~7,
+                          G_IM_FMT_CI, LABEL_WIDTH, LABEL_HEIGHT, 0, 0, LABEL_WIDTH - 1, LABEL_HEIGHT - 1, 0,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                          G_TX_NOLOD);
+    DrawTextureRect(&gfx, left << 2, top << 2, (left + LABEL_SHOWN_WIDTH) << 2, (top + LABEL_HEIGHT) << 2,
+                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802448D4_ovl_09);
 
@@ -478,7 +556,31 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C86C_ovl_09);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802478B0_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80247D80_ovl_09);
+/* Writes a standing's place, score to par and holes played into a leaderboard row */
+void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
+    u8 place = standing->place;
+    s16 score;
+    s8 holeCount;
+
+    if (place & PLACE_TIED) {
+        sprintf(row, "%2dT          ", place & PLACE_MASK);
+    } else {
+        sprintf(row, "%2d           ", place);
+    }
+
+    score = standing->score;
+    if (score == 0) {
+        sprintf(row + LEADERBOARD_SCORE_COLUMN, "   #0   ", 0);
+    } else {
+        sprintf(row + LEADERBOARD_SCORE_COLUMN, "  %+3d   ", score);
+    }
+    holeCount = standing->holeCount;
+    if (holeCount == 0) {
+        sprintf(row + LEADERBOARD_HOLES_COLUMN, "  -");
+    } else {
+        sprintf(row + LEADERBOARD_HOLES_COLUMN, " %2d", holeCount);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80247E3C_ovl_09);
 
