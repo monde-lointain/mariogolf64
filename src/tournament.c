@@ -11,10 +11,6 @@
 #define SCORE_LIMIT 18
 #define COURSE_HOLE_COUNT 18
 
-/* Each course's tournament draws its computer contestants from its own block of names */
-#define NAMES_PER_COURSE 30
-#define NAME_LENGTH 13
-
 #define RANDOM_MULTIPLIER 0x5D588B65
 
 /* Half a sine wave over a round */
@@ -28,9 +24,6 @@ typedef struct ContestantProfile {
 
 extern s32 sTournamentSeed;
 extern ContestantProfile sContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1];
-extern char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][NAME_LENGTH];
-/* Into g_ContestantNames, for the computer contestants */
-extern s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];
 
 void SortIndicesDescending(s32 *values, s32 *order, s32 count);
 double sin(double angle);

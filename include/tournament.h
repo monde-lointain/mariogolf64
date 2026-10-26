@@ -2,6 +2,7 @@
 #define TOURNAMENT_H
 
 #include <ultra64.h>
+#include "save.h"
 
 /* The player and 29 computer contestants */
 #define TOURNAMENT_CONTESTANT_COUNT 30
@@ -21,8 +22,16 @@ typedef struct TournamentStanding {
     /* 0x5 */ u8 place;
 } TournamentStanding; /* size = 0x6 */
 
+/* Each course's tournament draws its computer contestants from its own block of names */
+#define NAMES_PER_COURSE 30
+#define CONTESTANT_NAME_LENGTH 13
+
 /* From best to worst once RankTournament has run */
 extern TournamentStanding g_TournamentStandings[TOURNAMENT_CONTESTANT_COUNT];
+
+extern char g_ContestantNames[COURSE_COUNT * NAMES_PER_COURSE][CONTESTANT_NAME_LENGTH];
+/* Into g_ContestantNames, for the computer contestants */
+extern s16 g_ContestantNameIndices[TOURNAMENT_CONTESTANT_COUNT - 1];
 
 u8 RankTournament(s32 holeCount, s32 lastAheadIndex, s32 playerScore, s32 seed);
 
