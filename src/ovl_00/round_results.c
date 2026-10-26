@@ -7,6 +7,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "password.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -16,6 +17,7 @@
 #include "sound.h"
 #include "text.h"
 #include "tournament.h"
+#include "transfer_pak.h"
 #include "variables.h"
 /*
  * The round overlay. It begins with the results that slide in when a
@@ -180,6 +182,8 @@ extern s32 sResultsUnk98;
 extern s32 sResultsUnk8C;
 extern s32 sResultsUnk78;
 extern s32 sResultsUnk7C;
+/* The score password of a round of a tournament entered by password */
+extern char sScorePassword[];
 extern s32 sResultsUnk9C;
 extern s32 sResultsUnkA0;
 extern s32 sTournamentOpenCourseCount;
@@ -206,7 +210,11 @@ void LoadRoundResults(void);
 void DrawCourseResultsNotice(Gfx **displayListHead);
 void DrawCharacterResultsNotice(Gfx **displayListHead);
 s32 func_801F9AD0_ovl_00(void);
-s32 func_801FA098_ovl_00(void);
+/*
+ * UpdateRoundResults calls this without the controller argument, so it
+ * is declared without a prototype
+ */
+s32 ShowScorePassword();
 s32 func_801FA248_ovl_00(void);
 s32 func_801FA684_ovl_00(void);
 
@@ -919,7 +927,7 @@ s32 UpdateRoundResults(void) {
             break;
         case RESULTS_SHOWN:
             if (g_IsUnk3B) {
-                isDone = func_801FA098_ovl_00();
+                isDone = ShowScorePassword();
             } else {
                 switch (g_GameMode) {
                     case GAME_MODE_STROKE:
@@ -969,7 +977,63 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8BB8_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F9AD0_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA098_ovl_00);
+/* The steps of ShowScorePassword, in sResultsUnk78 */
+#define SCORE_PASSWORD_STEP_START 0
+#define SCORE_PASSWORD_STEP_SHOWN 1
+#define SCORE_PASSWORD_STEP_ASKING 2
+#define SCORE_PASSWORD_STEP_DONE 3
+/* UpdatePrompt's results for PROMPT_SCORE_PASSWORD */
+#define SCORE_PASSWORD_PROMPT_YES 10
+#define SCORE_PASSWORD_PROMPT_NO 11
+#define SCORE_PASSWORD_SOUND_CHANNEL 15
+#define SCORE_PASSWORD_SOUND_VOLUME 100
+#define PORTRAIT_ANIMATION_UNK1 1
+
+/* Shows the round's score password until the player says they have it. Returns TRUE then. */
+s32 ShowScorePassword(ControllerState *controller) {
+    ScoreReport report;
+    s32 unused[2];
+
+    GetSaveData();
+    sResultsUnk7C++;
+    switch (sResultsUnk78) {
+        case SCORE_PASSWORD_STEP_START:
+            sResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+            CopyTournamentCode(report.tournamentCode);
+            report.characterIndex = g_Players[0].characterIndex;
+            report.score = sPlayerResults[0];
+            report.time = g_GameState.stopwatchFrameCount;
+            report.gameBoyLevel = g_GameBoyCharacters[g_Players[0].gameBoyCharacterIndex].level;
+            EncodeScorePassword(&report, sScorePassword);
+            sResultsUnk8C = TRUE;
+            break;
+        case SCORE_PASSWORD_STEP_SHOWN:
+            if (controller->buttons & A_BUTTON) {
+                sResultsUnk8C = FALSE;
+                sResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
+                OpenPrompt(PROMPT_SCORE_PASSWORD);
+                PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL,
+                          SCORE_PASSWORD_SOUND_VOLUME);
+            }
+            break;
+        case SCORE_PASSWORD_STEP_ASKING:
+            switch (UpdatePrompt(controller)) {
+                case SCORE_PASSWORD_PROMPT_YES:
+                    sResultsUnk78 = SCORE_PASSWORD_STEP_DONE;
+                    break;
+                case SCORE_PASSWORD_PROMPT_NO:
+                    sResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+                    sResultsUnk8C = TRUE;
+                    break;
+            }
+            break;
+        case SCORE_PASSWORD_STEP_DONE:
+            sResultsUnk8C = FALSE;
+            return TRUE;
+    }
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA248_ovl_00);
 

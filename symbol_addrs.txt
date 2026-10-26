@@ -2932,3 +2932,7 @@ sBannerMatrices = 0x80227EB0; // size:0x80 segment:ovl_00
 sBannerLetters = 0x8022BC70; // segment:ovl_00
 DrawMovie = 0x80210370; // type:func segment:ovl_00
 sMovieDrawCount = 0x80224408; // size:0x4 segment:ovl_00
+ShowScorePassword = 0x801FA098; // type:func segment:ovl_00
+sScorePassword = 0x80225770; // segment:ovl_00
+CopyTournamentCode = 0x8005D2B8; // type:func
+g_TournamentCode = 0x8012D400; // size:0x3

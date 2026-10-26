@@ -9,6 +9,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "password.h"
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
@@ -101,7 +102,8 @@ extern s8 D_80105DC2;
 extern s32 D_80105DC4;
 extern s32 D_80105DC8;
 extern s32 D_80105DCC;
-extern u8 D_8012D400[3];
+/* The code of the tournament whose password was entered */
+extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
 extern s32 D_8012F480;
 extern s32 D_8012F484;
 extern s32 D_8012F488;
@@ -1316,11 +1318,11 @@ s32 func_8005D2A0(void) {
     return value;
 }
 
-void func_8005D2B8(u8 *destination) {
+void CopyTournamentCode(u8 *destination) {
     s32 index;
 
-    for (index = 0; index != ARRAY_COUNT(D_8012D400); index++) {
-        *destination++ = D_8012D400[index];
+    for (index = 0; index != ARRAY_COUNT(g_TournamentCode); index++) {
+        *destination++ = g_TournamentCode[index];
     }
 }
 

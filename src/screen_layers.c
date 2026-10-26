@@ -134,7 +134,6 @@
 #define SOUND_PROMPT_SAVE 0x3B
 #define SAVE_SOUND_CHANNEL 15
 #define SOUND_PROMPT_MOVE 0x5C
-#define SOUND_PROMPT_CONFIRM 0x5D
 #define SOUND_PROMPT_CLOSE 0x65
 #define PROMPT_CHOICE_YES 0
 #define PROMPT_FONT_SIZE 12
@@ -537,14 +536,14 @@ s32 UpdatePrompt(ControllerState *controller) {
             if (prompt->results[sPromptChoice] >= 0 && prompt->results[sPromptChoice] < SAVING_RESULT_COUNT) {
                 PlaySound(SOUND_PROMPT_SAVE, SAVE_SOUND_CHANNEL, PROMPT_SOUND_VOLUME);
             } else {
-                PlaySound(SOUND_PROMPT_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
             }
             return NO_PROMPT_RESULT;
         }
         if (controller->pressedButtons == B_BUTTON) {
             sPromptChoice = PROMPT_CHOICE_NO;
             sPromptState = PROMPT_STATE_CHOSEN;
-            PlaySound(SOUND_PROMPT_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
+            PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
             return NO_PROMPT_RESULT;
         }
         if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {

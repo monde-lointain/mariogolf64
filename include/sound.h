@@ -6,6 +6,9 @@
 /* Sound effects play on channels, each holding one effect at a time */
 #define SOUND_CHANNEL_COUNT 16
 
+/* The sound of confirming a choice */
+#define SOUND_CONFIRM 0x5D
+
 /*
  * The songs for a hole's result. Stroke play picks one by the score against
  * par. Get Character plays the one for how the first player did, and match

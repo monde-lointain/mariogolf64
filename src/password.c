@@ -26,7 +26,7 @@
 #define SCORE_RANGE 200
 #define TIME_RANGE 108000
 #define PASSWORD_CHARACTER_COUNT 18
-#define PASSWORD_UNKC_LIMIT 100
+#define PASSWORD_GAME_BOY_LEVEL_LIMIT 100
 /* A random number in this range pads the score's number */
 #define SCORE_NOISE_RANGE 4600
 
@@ -222,15 +222,15 @@ void EncodeScorePassword(ScoreReport *source, char *password) {
     if (clamped->time > TIME_RANGE - 1) {
         clamped->time = TIME_RANGE - 1;
     }
-    if (clamped->unkC >= PASSWORD_UNKC_LIMIT) {
-        clamped->unkC = PASSWORD_UNKC_LIMIT - 1;
+    if (clamped->gameBoyLevel >= PASSWORD_GAME_BOY_LEVEL_LIMIT) {
+        clamped->gameBoyLevel = PASSWORD_GAME_BOY_LEVEL_LIMIT - 1;
     }
     number = (clamped->tournamentCode[0] << 16) | (clamped->tournamentCode[1] << 8) | clamped->tournamentCode[2];
     for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
         symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
         number /= PASSWORD_SYMBOL_COUNT;
     }
-    number = clamped->unkC * TIME_RANGE + clamped->time + TIME_NUMBER_SALT;
+    number = clamped->gameBoyLevel * TIME_RANGE + clamped->time + TIME_NUMBER_SALT;
     for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
         symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
         number /= PASSWORD_SYMBOL_COUNT;
