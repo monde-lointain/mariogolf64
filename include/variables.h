@@ -68,6 +68,11 @@ extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
 extern s32 g_StopwatchFrameCount;
 
+/* The game counts time in frames */
+#define FRAMES_PER_SECOND 30
+#define SECONDS_PER_MINUTE 60
+#define HUNDREDTHS_PER_SECOND 100
+
 /* Which pause screen is shown over the round */
 #define PAUSE_SCREEN_NONE 0
 #define PAUSE_SCREEN_UNK4 4

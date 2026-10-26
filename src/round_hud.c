@@ -478,10 +478,6 @@ void func_80242424(Gfx **displayListHead);
 void func_80242D40(Gfx **displayListHead);
 void func_802427E8(Gfx **displayListHead);
 
-/* The game counts time in frames */
-#define FRAMES_PER_SECOND 30
-#define SECONDS_PER_MINUTE 60
-#define HUNDREDTHS_PER_SECOND 100
 #define MODULE_UNK21 21
 #define MODULE_UNK26 26
 #define STOPWATCH_X 168
