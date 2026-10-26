@@ -14,6 +14,7 @@
 #include "main.h"
 #include "math_util.h"
 #include "save.h"
+#include "shot_effects.h"
 #include "variables.h"
 
 /* Room for a model's files and, FRAME_DATA_OFFSET in, its frame data copies */
@@ -136,8 +137,8 @@ extern Lights2 sRainLights[DRAW_BUFFER_COUNT];
 /* SetCharacterLights' lights, in dry weather colors that change near the end of the round */
 extern Lights2 sDryLights[DRAW_BUFFER_COUNT];
 /*
- * The ambient and first light last drawn with, used instead while D_800C1B70
- * is set; DrawCharacterAndShadow then sets their second light
+ * The ambient and first light last drawn with, used instead during the impact flash;
+ * DrawCharacterAndShadow then sets their second light to the flash level
  */
 extern Lights2 sSavedLights[DRAW_BUFFER_COUNT];
 /* The direction of each set's second light, across the main camera's view */
@@ -164,8 +165,6 @@ extern s32 sSecondLightDirectionZ;
 #define RAIN_LIGHT_BLUE 120
 #define RAIN_SECOND_LIGHT_LEVEL 150
 
-/* Set to draw with sSavedLights */
-extern s32 D_800C1B70;
 /* Set until the first draw sets up the matrices */
 extern s32 sIsMatrixSetupPending;
 /* Flips between 0 and 1 on each draw */
@@ -187,9 +186,8 @@ extern Gfx sBackCulling[];
 #define BLEND_ALPHA 0x80
 #define OPAQUE_ALPHA 0xFF
 
-/* Written elsewhere; D_800C1B74 is the level of sSavedLights' second light while D_800C1B70 is set */
+/* Written elsewhere */
 extern s32 D_800BE698;
-extern s32 D_800C1B74;
 /* Each slot's matrices, for each draw buffer */
 extern Mtx sModelMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
 extern Mtx sShadowMatrices[CHARACTER_SLOT_COUNT][DRAW_BUFFER_COUNT];
@@ -1558,7 +1556,7 @@ void DrawCharacter(u32 slotIndex) {
                  0.0f);
     }
     if (slot != NULL) {
-        if (D_800C1B70 == 0) {
+        if (g_ImpactFlashState == IMPACT_FLASH_NONE) {
             switch (slot->lighting) {
                 case CHARACTER_LIGHTING_FIXED:
                     gSPSetLights2(gfx++, sFixedLights);
@@ -1732,13 +1730,13 @@ void DrawCharacterAndShadow(CameraMatrices *matrices, s32 cameraIndex, s32 slotI
             sSecondLightDirectionZ = lightDirection[AXIS_Z] = viewDirection[AXIS_X];
             SetCharacterLights();
         }
-        if (D_800C1B70 != 0) {
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[0] = D_800C1B74;
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[1] = D_800C1B74;
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[2] = D_800C1B74 / 2;
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[0] = D_800C1B74;
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = D_800C1B74;
-            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = D_800C1B74 / 2;
+        if (g_ImpactFlashState != IMPACT_FLASH_NONE) {
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[0] = g_ImpactFlashLevel;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[1] = g_ImpactFlashLevel;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.col[2] = g_ImpactFlashLevel / 2;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[0] = g_ImpactFlashLevel;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[1] = g_ImpactFlashLevel;
+            sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.colc[2] = g_ImpactFlashLevel / 2;
             sSavedLights[g_DrawBufferIndex ^ 1].l[1].l.dir[0] =
                 sinf(g_Players[g_CurrentShot.playerIndex].unk22 ? slot->rotation[1] : -slot->rotation[1]) *
                 LIGHT_DIRECTION_SCALE;

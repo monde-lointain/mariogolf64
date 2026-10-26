@@ -15,6 +15,7 @@
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
@@ -321,7 +322,7 @@ void PrepareShotEffects(BallSimulation *simulation) {
                 break;
         }
     }
-    func_80216B10_ovl_00();
+    ResetShotEffects();
 }
 
 /* Frees every effect */

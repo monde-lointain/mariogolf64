@@ -14,6 +14,7 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "shot_effects.h"
 #include "surface.h"
 #include "terrain.h"
 #include "tournament.h"
@@ -106,7 +107,6 @@ extern GameState D_801B55F0;
 extern UnkB8 D_8012D0C8[MAX_PLAYER_COUNT];
 
 s32 SaveOrContinueGameByMode(s32 isContinuing);
-void func_80216B74(s32);
 void func_80407D64(void);
 void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
@@ -584,7 +584,7 @@ void func_8006034C(s8 value) {
 void func_80060358(void) {
     g_PauseScreen = PAUSE_SCREEN_NONE;
     SaveOrContinueGameByMode(FALSE);
-    func_80216B74(0);
+    ClearShotEffects(0);
     g_GameState.unk0 = 7;
     D_800C30A8 = 3;
     D_800C30AC = 9;

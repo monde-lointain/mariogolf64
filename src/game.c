@@ -23,6 +23,7 @@
 #include "screen.h"
 #include "scorecard.h"
 #include "screen_layers.h"
+#include "shot_effects.h"
 #include "sound.h"
 #include "text.h"
 #include "variables.h"
@@ -938,7 +939,6 @@ void func_80210370(Gfx **displayListHead);
 void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void func_802161D4(Gfx **displayListHead);
 void func_80217164(Gfx **displayListHead);
-void func_8021857C(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80219C74(Gfx **displayListHead);
 void func_8021A940(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
@@ -1562,7 +1562,7 @@ s32 DrawGame(void) {
                             }
                             DrawEffects(matrices, &g_DisplayListHead);
                             if (viewIndex == 0 && g_IsModuleAlive[18]) {
-                                func_8021857C(&g_DisplayListHead, matrices);
+                                DrawSwingTrail(&g_DisplayListHead, matrices);
                             }
                         }
                         DrawRain(&g_DisplayListHead, matrices);

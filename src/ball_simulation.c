@@ -11,6 +11,7 @@
 #include "math_util.h"
 #include "save.h"
 #include "scene.h"
+#include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
 #include "terrain.h"
@@ -480,10 +481,10 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                     }
                     if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                         if (pinHit == PIN_HIT_FLAGSTICK) {
-                            func_80216FCC_ovl_00(simulation->position);
+                            StartFlagstickSparks(simulation->position);
                         }
                         if (pinHit == PIN_HIT_FLAG) {
-                            func_80216FC4_ovl_00(simulation->position);
+                            StartFlagSparks(simulation->position);
                         }
                     }
                     if (pinHit == PIN_HIT_FLAGSTICK) {
@@ -635,7 +636,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                                 contact = 0;
                                 flags |= STEP_FLAG_LIPPED_OUT;
                                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-                                    func_80216FCC_ovl_00(simulation->position);
+                                    StartFlagstickSparks(simulation->position);
                                 }
                                 PlayStrokeImpactSound(0x10, 711.168f, outwardSpeed);
                             }
@@ -850,7 +851,7 @@ s32 StepBallSimulation(BallSimulation *simulation) {
                 simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
                 simulation->position[AXIS_Z] = hitPosition[AXIS_Z];
                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE && fabsf(inwardSpeed) > 153.6f) {
-                    func_80216FCC_ovl_00(simulation->position);
+                    StartFlagstickSparks(simulation->position);
                 }
                 reflected[AXIS_X] = velocity[AXIS_X] - -normalZ * (2.0f * inwardSpeed);
                 reflected[AXIS_Y] = velocity[AXIS_Y] - normalY * (2.0f * inwardSpeed);

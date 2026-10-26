@@ -26,6 +26,7 @@
 #include "screen.h"
 #include "scene.h"
 #include "screen_layers.h"
+#include "shot_effects.h"
 #include "sound.h"
 #include "surface.h"
 #include "text.h"
@@ -488,7 +489,6 @@ void func_802427E8(Gfx **displayListHead);
 #define COURSE_NAME_Y 32
 #define HOLE_NUMBER_Y 48
 
-void func_80216B74(s32);
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
 void func_801FD624(void);
@@ -768,7 +768,7 @@ void FreeScenery(void) {
         DestroyBillboardManager();
         FreeMemory(&sSceneryBillboardHeap);
         EndWeather();
-        func_80216B74(1);
+        ClearShotEffects(1);
         FreeSceneryImages();
         sSceneryState = SCENERY_UNLOADED;
         memset(&g_RoundHud, 0, sizeof(g_RoundHud));

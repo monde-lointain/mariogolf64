@@ -22,6 +22,7 @@
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
+#include "shot_effects.h"
 #include "shot_simulation.h"
 #include "sound.h"
 #include "surface.h"
@@ -349,7 +350,6 @@ static const f64 sUnusedZero = 0.0;
 
 void func_80205AE4(s32, s32);
 void func_80216130(s32);
-void func_80216B74(s32);
 /* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
 s32 func_8005DE40();
 void ChooseFlightCameraKind(void);
@@ -418,7 +418,7 @@ void EndFlightCamera(void) {
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKB, SOUND_FADE_FRAME_COUNT);
     FadeOutSound(FLIGHT_SOUND_CHANNEL_UNKF, SOUND_FADE_FRAME_COUNT);
-    func_80216B74(0);
+    ClearShotEffects(0);
     sFlightCameraKind = NO_FLIGHT_CAMERA;
     if (g_BallFlightStep == g_SimulatedShot.stepCount) {
         osSyncPrintf("\nCheckWater1\n");
@@ -478,7 +478,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     f32 degrees;
 
     D_800BE624 = earlierFlightCount;
-    func_80216B74(1);
+    ClearShotEffects(1);
     ResetBallTrail();
     D_800BE674 = 0;
     sEndSurfaceInfo = GetSurfaceInfo(g_SimulatedShot.endSurface);
@@ -646,7 +646,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
 #define LEADING_CLUB_SLOT_COUNT 6
 
 void func_80213D70(s32);
-void func_80216CAC(void);
 
 /* These are macros, as inline functions compile differently from the original */
 #define IsUnk2E14PowerShot() (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
@@ -675,7 +674,7 @@ void PlayContactSound(void) {
             func_80213D70(2);
             PlaySound(CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         }
-        func_80216CAC();
+        StartImpactSparks();
     } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
         if (IsUnk2E14PowerShot()) {
             if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
