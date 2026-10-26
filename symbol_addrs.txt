@@ -2986,3 +2986,4 @@ sLakituMovieFrameAssets = 0x80224434; // size:0x1C segment:ovl_00
 DrawToadMovie = 0x80213634; // type:func segment:ovl_00
 DrawPlayersResults = 0x801FB500; // type:func segment:ovl_00
 sNoPointsText = 0x80224E08; // size:0x4 segment:ovl_00
+DrawPuttCaption = 0x8021169C; // type:func segment:ovl_00
