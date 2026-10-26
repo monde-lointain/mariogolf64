@@ -220,7 +220,7 @@ void FreeRoundResults(void);
 void LoadRoundResults(void);
 void DrawCourseResultsNotice(Gfx **displayListHead);
 void DrawCharacterResultsNotice(Gfx **displayListHead);
-s32 func_801F9AD0_ovl_00(void);
+s32 UpdateTournamentResults();
 /*
  * UpdateRoundResults calls this without the controller argument, so it
  * is declared without a prototype
@@ -1132,7 +1132,7 @@ s32 UpdateRoundResults(void) {
                         isDone = func_801FA684_ovl_00();
                         break;
                     case GAME_MODE_TOURNAMENT:
-                        isDone = func_801F9AD0_ovl_00();
+                        isDone = UpdateTournamentResults();
                         break;
                     default:
                         return FALSE;
@@ -1165,7 +1165,192 @@ void SetResultsUnk94(s32 value, s32 unk98) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8BB8_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F9AD0_ovl_00);
+/* sResultsUnk78 values while UpdateTournamentResults runs */
+#define TOURNAMENT_STEP_START 0
+#define TOURNAMENT_STEP_SLIDING_IN_PRIZE 1
+#define TOURNAMENT_STEP_TALLYING_PRIZE 2
+#define TOURNAMENT_STEP_PRIZE_TALLIED 3
+#define TOURNAMENT_STEP_SLIDE_OUT_PRIZE 4
+#define TOURNAMENT_STEP_SLIDING_OUT_PRIZE 5
+#define TOURNAMENT_STEP_SLIDING_IN_POINTS 6
+#define TOURNAMENT_STEP_TALLYING_POINTS 7
+#define TOURNAMENT_STEP_POINTS_TALLIED 8
+#define TOURNAMENT_STEP_SLIDING_OUT_POINTS 9
+#define TOURNAMENT_STEP_WAITING 10
+#define TOURNAMENT_STEP_SHOWN 11
+#define SOUND_NEW_BEST_SCORE 0x9C
+#define NEW_BEST_SCORE_SOUND_CHANNEL 3
+#define CHARACTER_SOUND_WIN 0x1C
+#define WIN_SOUND_PAN 32
+
+#ifdef NON_MATCHING
+/*
+ * Counts the tournament prize, then the earned course points, into the save, showing a notice when they
+ * open a course, then returns TRUE once A is pressed
+ */
+s32 UpdateTournamentResults(ControllerState *controller) {
+    EncodedAsset asset;
+    UnkE98 *record;
+    s32 overshoot;
+
+    GetSaveData();
+    switch (sUnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            break;
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (sOpenCourseCount < COURSE_COUNT && sPointsToNextCourse + sPrizePoints + sPointsEarned == 0) {
+                StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
+                ReadEncodedAsset(sResultsCourseImage, &asset);
+                OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(sNoticeTitleImage, &asset);
+                return FALSE;
+            }
+            switch (sResultsUnk78) {
+                case TOURNAMENT_STEP_START:
+                    record = &GetSaveData()->unkE98[g_CourseIndex];
+                    sResultsUnk78 = TOURNAMENT_STEP_SHOWN;
+                    if (record->roundCount <= 0 || record->bestScore >= sPlayerResults[0]) {
+                        PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL, TALLY_DONE_SOUND_VOLUME);
+                    }
+                    sResultsUnk8C = TRUE;
+                    break;
+                case TOURNAMENT_STEP_SHOWN:
+                    if (controller->buttons & A_BUTTON) {
+                        sResultsUnk8C = FALSE;
+                        SetResultsUnk94(0, 1);
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        sResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
+                    }
+                    break;
+                case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
+                    if (GetResultsUnk94() == 1) {
+                        sResultsUnk78 = TOURNAMENT_STEP_TALLYING_PRIZE;
+                        if (sPlayerRanks[0] == 1) {
+                            StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+                            PlayCharacterSound((s8)g_Players[0].characterIndex, 0, CHARACTER_SOUND_WIN,
+                                               TALLY_DONE_SOUND_VOLUME, WIN_SOUND_PAN);
+                        }
+                    }
+                    break;
+                case TOURNAMENT_STEP_TALLYING_PRIZE:
+                    if (controller->buttons & A_BUTTON) {
+                        sTallySpeed = FAST_TALLY_SPEED;
+                    }
+                    sPrizePoints -= sTallySpeed;
+                    if (sPrizePoints > 0) {
+                        PlayTallySound();
+                    }
+                    if (sOpenCourseCount == COURSE_COUNT) {
+                        sPrizePoints = 0;
+                        sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+                        if (sTournamentOpenCourseCount < COURSE_COUNT) {
+                            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                        }
+                        break;
+                    }
+                    /* Stop on the points that open the next course, so that its notice shows */
+                    overshoot = sPointsToNextCourse + sPrizePoints + sPointsEarned;
+                    if (overshoot < 0) {
+                        sPrizePoints -= overshoot;
+                    }
+                    if (sPrizePoints < 0) {
+                        sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+                        sPrizePoints = 0;
+                        sResultsUnk8C = TRUE;
+                        if (sTournamentOpenCourseCount < COURSE_COUNT) {
+                            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                        }
+                    }
+                    break;
+                case TOURNAMENT_STEP_PRIZE_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        sTallySpeed = 1;
+                        sResultsUnk8C = FALSE;
+                        sResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
+                    }
+                    /* A debugging shortcut to the course notice */
+                    if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
+                        StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                    }
+                    break;
+                case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
+                    SetResultsUnk94(4, 1);
+                    sResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
+                    break;
+                case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
+                    if (GetResultsUnk94() == 3) {
+                        if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
+                            sResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_POINTS;
+                            SetResultsUnk94(0, 3);
+                        } else {
+                            sResultsUnk78 = TOURNAMENT_STEP_WAITING;
+                        }
+                    }
+                    break;
+                case TOURNAMENT_STEP_SLIDING_IN_POINTS:
+                    if (GetResultsUnk94() == 1) {
+                        sResultsUnk78 = TOURNAMENT_STEP_TALLYING_POINTS;
+                    }
+                    break;
+                case TOURNAMENT_STEP_TALLYING_POINTS:
+                    if (controller->buttons & A_BUTTON) {
+                        sTallySpeed = FAST_TALLY_SPEED;
+                    }
+                    if (sPointsEarned > 0) {
+                        PlayTallySound();
+                    }
+                    sPointsEarned -= sTallySpeed;
+                    if (sPointsEarned < 0) {
+                        sPointsEarned = 0;
+                    }
+                    if (sOpenCourseCount == COURSE_COUNT) {
+                        sPointsEarned = 0;
+                    } else {
+                        overshoot = sPointsToNextCourse + sPrizePoints + sPointsEarned;
+                        if (overshoot < 0) {
+                            sPointsEarned -= overshoot;
+                        }
+                    }
+                    if (sPointsEarned == 0) {
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                        sResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
+                        sResultsUnk8C = TRUE;
+                    }
+                    break;
+                case TOURNAMENT_STEP_POINTS_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        SetResultsUnk94(4, 3);
+                        sResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
+                    }
+                    break;
+                case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
+                    if (GetResultsUnk94() == 3) {
+                        sResultsUnk8C = TRUE;
+                        sResultsUnk78 = TOURNAMENT_STEP_WAITING;
+                    }
+                    break;
+                case TOURNAMENT_STEP_WAITING:
+                    sResultsUnk8C = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        return TRUE;
+                    }
+                    break;
+            }
+            break;
+    }
+    return FALSE;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateTournamentResults);
+#endif
 
 /* The steps of ShowScorePassword, in sResultsUnk78 */
 #define SCORE_PASSWORD_STEP_START 0
