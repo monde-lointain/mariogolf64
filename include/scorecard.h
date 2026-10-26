@@ -48,7 +48,7 @@ typedef struct Scorecard {
     /* 0xBC */ u8 unkBC;
     /* 0xBD */ u8 faceTime;  /* Frames since the faces were opened */
     /* 0xBE */ u8 faceFrame; /* Which of the faces' images they show */
-    /* 0xBF */ s8 unkBF;
+    /* 0xBF */ s8 placeChange; /* Which way a tournament player's place moved on the hole, a PLACE_* value */
     /* 0xC0 */ s32 topRow; /* The contestant at the top of the leaderboard */
     /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
     /* 0xC8 */ s32 y;

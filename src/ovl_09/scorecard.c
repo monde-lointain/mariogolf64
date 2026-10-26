@@ -200,7 +200,247 @@ void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void ScrollLeaderboard(u16 buttons);
 
+void SetScorecardState(s32 state);
+
+#define TABLE_IMAGE_ASSET 0x68F
+#define UNK10_IMAGE_ASSET 0x682
+#define UNK14_IMAGE_ASSET 0x690
+#define UNK18_IMAGE_ASSET 0x691
+#define DIGITS_IMAGE_ASSET 0x689
+#define UNKB8_IMAGE_ASSET 0x97A
+#define LABELS_IMAGE_ASSET 0x68A
+#define UNK8C_IMAGE_ASSET 0x693
+#define PLACES_IMAGE_ASSET 0x688
+#define UNK2C_IMAGE_ASSET 0x68E
+#define MATCH_UNK38_IMAGE_ASSET 0x68C
+#define UNK3C_IMAGE_ASSET 0x68D
+#define UNK40_IMAGE_ASSET 0x694
+#define SKIN_ICON_IMAGE_ASSET 0x68B
+#define UNK90_IMAGE_ASSET 0x695
+#define UNK88_IMAGE_ASSET 0x692
+#define UNK84_IMAGE_ASSET 0x696
+#define UNK94_IMAGE_ASSET 0x69D
+
+/* The rows of sPageTitleAssets */
+#define PAGE_TITLES_SPEED_GOLF 0
+#define PAGE_TITLES_SOLO 1
+#define PAGE_TITLES_VERSUS 2
+#define PAGE_TITLES_SKINS 3
+#define PAGE_TITLES_TOURNAMENT 4
+#define PAGE_TITLES_ROW_COUNT 5
+#define PAGE_TITLE_COUNT 3
+
+/* Values of Scorecard.placeChange */
+#define PLACE_HELD (-1)
+#define PLACE_ROSE 0
+#define PLACE_FELL 1
+
+extern u16 sPageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT];
+/* Each bet's two images */
+extern u16 sBetImageAssets[BET_COUNT][2];
+extern s32 D_801B60A0;
+extern s32 D_801B60B4;
+
+/*
+ * Opens the scorecard at the given hole: loads the images that every game
+ * mode shows, the players' faces and those that the game mode's pages show,
+ * and counts the pages. In a tournament it also ranks the player before and
+ * after the hole to see which way their place moved.
+ *
+ * Doesn't match: the target copies the arguments to other registers before
+ * it saves its own and stores them after it reads $sp, and it loads
+ * g_TournamentStandings after setting up the loops' other registers.
+ */
+#ifdef NON_MATCHING
+void OpenScorecard(s32 courseIndex, s32 holeIndex) {
+    EncodedAsset asset;
+    AssetFile file;
+    s32 pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
+    s32 shownHoleCount;
+    s32 oldPlace;
+    s32 newPlace;
+    s32 size;
+    s32 i;
+    s32 imageIndex;
+    s32 standingIndex;
+    TournamentStanding *standing;
+    register void *stackPointer asm("$sp");
+
+    g_Scorecard.content.courseIndex = courseIndex;
+    g_Scorecard.content.holeIndex = holeIndex;
+    g_Scorecard.content.unk50 = D_801B60A0;
+    osSyncPrintf("SP Address = %x\n", stackPointer);
+    g_Scorecard.tableImage = AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.tableImage, &asset);
+    g_Scorecard.unk14 = AllocMemory(OpenEncodedAsset(UNK14_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unk14, &asset);
+    g_Scorecard.unk18 = AllocMemory(OpenEncodedAsset(UNK18_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unk18, &asset);
+    g_Scorecard.digitsImage = AllocMemory(OpenEncodedAsset(DIGITS_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.digitsImage, &asset);
+    g_Scorecard.unkB8 = AllocMemory(OpenEncodedAsset(UNKB8_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unkB8, &asset);
+    g_Scorecard.labelsImage = AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.labelsImage, &asset);
+    g_Scorecard.unk8C = AllocMemory(OpenEncodedAsset(UNK8C_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unk8C, &asset);
+
+    g_Scorecard.hasBets = FALSE;
+    for (i = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] > 0) {
+            g_Scorecard.hasBets = TRUE;
+            break;
+        }
+    }
+
+    for (i = 0; i != g_PlayerCount; i++) {
+        g_Scorecard.faceImages[i] =
+            AllocMemory(OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
+        ReadEncodedAsset(g_Scorecard.faceImages[i], &asset);
+        OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[i].characterIndex] + (s8)g_Players[i].paletteIndex,
+                      &file);
+        size = GetAssetFileSize(&file);
+        g_Scorecard.facePalettes[i] = AllocMemory(size);
+        ReadAssetFile(g_Scorecard.facePalettes[i], size, &file);
+    }
+    g_Scorecard.unkBC = 0;
+    g_Scorecard.faceTime = 0;
+    g_Scorecard.faceFrame = 0;
+
+    switch (g_GameMode) {
+        case GAME_MODE_SPEED_GOLF:
+            g_Scorecard.pageCount = 2;
+            pageTitlesRow = PAGE_TITLES_SPEED_GOLF;
+            break;
+        case GAME_MODE_STROKE:
+        case GAME_MODE_UNK1:
+        case GAME_MODE_UNK3:
+        case GAME_MODE_UNK6:
+        case GAME_MODE_UNK8:
+        case GAME_MODE_RING_SHOT:
+            /* The bets get a page of their own */
+            if (g_PlayerCount == 1) {
+                pageTitlesRow = PAGE_TITLES_SOLO;
+                if (g_Scorecard.hasBets == TRUE) {
+                    g_Scorecard.pageCount = 2;
+                } else {
+                    g_Scorecard.pageCount = 1;
+                }
+            } else {
+                pageTitlesRow = PAGE_TITLES_VERSUS;
+                if (g_Scorecard.hasBets == TRUE) {
+                    g_Scorecard.pageCount = 3;
+                } else {
+                    g_Scorecard.pageCount = 2;
+                }
+            }
+            g_Scorecard.placesImage = AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.placesImage, &asset);
+            break;
+        case GAME_MODE_MATCH_GAME:
+        case GAME_MODE_GET_CHARACTER:
+            pageTitlesRow = PAGE_TITLES_VERSUS;
+            if (g_Scorecard.hasBets == TRUE) {
+                g_Scorecard.pageCount = 3;
+            } else {
+                g_Scorecard.pageCount = 2;
+            }
+            g_Scorecard.unk2C = AllocMemory(OpenEncodedAsset(UNK2C_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk2C, &asset);
+            g_Scorecard.unk38 = AllocMemory(OpenEncodedAsset(MATCH_UNK38_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk38, &asset);
+            g_Scorecard.unk3C = AllocMemory(OpenEncodedAsset(UNK3C_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk3C, &asset);
+            g_Scorecard.unk40 = AllocMemory(OpenEncodedAsset(UNK40_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk40, &asset);
+            break;
+        case GAME_MODE_SKINS_MATCH:
+        case GAME_MODE_CLUB_SLOTS:
+            pageTitlesRow = PAGE_TITLES_SKINS;
+            TallySkins(g_Scorecard.content.holeIndex);
+            if (g_Scorecard.hasBets == TRUE) {
+                g_Scorecard.pageCount = 3;
+            } else {
+                g_Scorecard.pageCount = 2;
+            }
+            g_Scorecard.placesImage = AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.placesImage, &asset);
+            g_Scorecard.unk38 = AllocMemory(OpenEncodedAsset(SKIN_ICON_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk38, &asset);
+            break;
+        case GAME_MODE_TOURNAMENT:
+            shownHoleCount = g_Scorecard.content.holeIndex;
+            g_Scorecard.pageCount = 2;
+            g_Scorecard.unk90 = AllocMemory(OpenEncodedAsset(UNK90_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk90, &asset);
+            g_Scorecard.unk88 = AllocMemory(OpenEncodedAsset(UNK88_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk88, &asset);
+            g_Scorecard.unk10 = AllocMemory(OpenEncodedAsset(UNK10_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.unk10, &asset);
+            shownHoleCount += g_Players[0].unk26 != 0;
+            pageTitlesRow = PAGE_TITLES_TOURNAMENT;
+            if (shownHoleCount > 0) {
+                if (g_Scorecard.content.holeIndex == 1) {
+                    RankTournament(shownHoleCount - 1, 0, 0, D_801B60B4);
+                } else {
+                    RankTournament(shownHoleCount - 1, 0, GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
+                                   D_801B60B4);
+                }
+                oldPlace = -1;
+                for (standingIndex = 0, standing = g_TournamentStandings; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+                     standingIndex++, standing++) {
+                    if (standing->contestantId == PLAYER_CONTESTANT) {
+                        oldPlace = standing->place & PLACE_MASK;
+                        break;
+                    }
+                }
+                RankTournament(shownHoleCount, 0, GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
+                for (standingIndex = 0, standing = g_TournamentStandings; standingIndex != TOURNAMENT_CONTESTANT_COUNT;
+                     standingIndex++, standing++) {
+                    if (standing->contestantId == PLAYER_CONTESTANT) {
+                        newPlace = standing->place & PLACE_MASK;
+                        if (oldPlace < newPlace) {
+                            g_Scorecard.placeChange = PLACE_FELL;
+                        } else if (newPlace < oldPlace) {
+                            g_Scorecard.placeChange = PLACE_ROSE;
+                        } else {
+                            g_Scorecard.placeChange = PLACE_HELD;
+                        }
+                        break;
+                    }
+                }
+            } else {
+                RankTournament(shownHoleCount, 0, GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
+                g_Scorecard.placeChange = PLACE_HELD;
+            }
+            g_Scorecard.topRow = 0;
+            break;
+    }
+
+    for (i = 0; i != PAGE_TITLE_COUNT; i++) {
+        g_Scorecard.pageTitleImages[i] = AllocMemory(OpenEncodedAsset(sPageTitleAssets[pageTitlesRow][i], &asset));
+        ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
+    }
+    /* Only the bets being played have images */
+    for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
+        if (g_GameState.betRates[i] != UNSET_BET_RATE) {
+            g_Scorecard.betImages[imageIndex][0] = AllocMemory(OpenEncodedAsset(sBetImageAssets[i][0], &asset));
+            ReadEncodedAsset(g_Scorecard.betImages[imageIndex][0], &asset);
+            g_Scorecard.betImages[imageIndex][1] = AllocMemory(OpenEncodedAsset(sBetImageAssets[i][1], &asset));
+            ReadEncodedAsset(g_Scorecard.betImages[imageIndex][1], &asset);
+            imageIndex++;
+        }
+    }
+    g_Scorecard.unk84 = AllocMemory(OpenEncodedAsset(UNK84_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unk84, &asset);
+    g_Scorecard.unk94 = AllocMemory(OpenEncodedAsset(UNK94_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.unk94, &asset);
+    SetScorecardState(SCORECARD_OPENING);
+    ForceStopRumble();
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", OpenScorecard);
+#endif
 
 /*
  * Closes the scorecard: frees the images that OpenScorecard loaded for the

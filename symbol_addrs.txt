@@ -2589,3 +2589,5 @@ sCarryOverText = 0x8024C4C0; // segment:ovl_09
 sWinColorAngle = 0x8024C4CC; // segment:ovl_09
 StartScorecardTally = 0x80242334; // type:func segment:ovl_09
 g_HoleTimeFrames = 0x80105B20;
+sPageTitleAssets = 0x8024C468; // type:u16 size:0x20 segment:ovl_09
+sBetImageAssets = 0x8024C488; // type:u16 size:0x1C segment:ovl_09
