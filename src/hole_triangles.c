@@ -52,7 +52,7 @@ typedef struct RingCorners {
 #define RING_SPARKLE_TURN ((f32)M_PI / 64)/* Radians each frame */
 #define POSITION_SCALE 1024.0f
 
-/* The rings' colors, apart from in D_800C306C's mode 4 */
+/* The rings' colors, apart from under PAUSE_SCREEN_UNK4 */
 #define RING_RED 0xFF
 #define RING_GREEN 0xF0
 #define RING_BLUE 0x40
@@ -72,7 +72,6 @@ extern Mtx sRingSpinMatrices[2];
 extern Vtx sRingVertices[RING_VERTEX_COUNT];
 extern Mtx sRingMatrices[];
 extern s32 D_800BE69C;
-extern s32 D_800C306C;
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
 
@@ -273,7 +272,7 @@ void DrawRings(Gfx **displayListHead, CameraMatrices *matrices, Camera *camera) 
                         DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
                         G_TX_NOLOD, G_TX_NOLOD);
     gSPTexture(gfx++, 0x07C0, 0x07C0, 0, G_TX_RENDERTILE, G_ON);
-    if (D_800C306C == 4) {
+    if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
         gDPSetCombineLERP(gfx++, PRIMITIVE, TEXEL0, ENV_ALPHA, TEXEL0, 0, 0, 0, PRIMITIVE, PRIMITIVE, TEXEL0,
                           ENV_ALPHA, TEXEL0, 0, 0, 0, PRIMITIVE);
         red = RING_MODE_FOUR_RED;

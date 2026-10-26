@@ -575,7 +575,6 @@ void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     }
 }
 
-extern s32 D_800C306C;
 
 /*
  * Draws the dynamic textures, filling g_MirrorTexture from a strip of the
@@ -650,7 +649,7 @@ void BuildHorizonDynamicTextures(Gfx **displayListHead) {
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
                      osVirtualToPhysical(g_MirrorTexture) & ~7);
     gDPPipeSync(gfx++);
-    if (g_Cameras[1].view.drawFlags != CAMERA_DRAW_SCENE && D_800C306C != 4 &&
+    if (g_Cameras[1].view.drawFlags != CAMERA_DRAW_SCENE && g_PauseScreen != PAUSE_SCREEN_UNK4 &&
         sourceTop <= HORIZON_STRIP_BOTTOM && destOffset < DYNAMIC_TEXTURE_SIZE) {
         for (rowIndex = 0; rowIndex != rowCount; rowIndex++) {
             for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
@@ -1294,7 +1293,7 @@ s32 DrawGame(void) {
                 }
                 break;
             case DRAW_MODE_COURSE:
-                if (g_MenuBackdropStyle != 0 && D_800C306C != 4) {
+                if (g_MenuBackdropStyle != 0 && g_PauseScreen != PAUSE_SCREEN_UNK4) {
                     ClearBuffers(BUFFER_CLEAR_DEPTH_ONLY);
                 } else if (g_HasLoaderFinished == 0) {
                     if (viewIndex == 0) {
@@ -1392,7 +1391,7 @@ s32 DrawGame(void) {
                         SET_CAMERA_SCISSOR(g_Cameras[0].view);
                         if ((g_Cameras[0].view.drawFlags != (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                              g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
-                            D_800C306C != 4) {
+                            g_PauseScreen != PAUSE_SCREEN_UNK4) {
                             UsePrimitiveDepth(0);
                             if (!IsGameFlagSet(0x15)) {
                                 func_80091110(&g_DisplayListHead, &g_Cameras[0].view, 0);
@@ -1481,7 +1480,7 @@ s32 DrawGame(void) {
         }
 
         if (drawMode == DRAW_MODE_COURSE) {
-            if (g_HasLoaderFinished == 1 && (g_MenuBackdropStyle == 0 || D_800C306C == 4)) {
+            if (g_HasLoaderFinished == 1 && (g_MenuBackdropStyle == 0 || g_PauseScreen == PAUSE_SCREEN_UNK4)) {
                 if (g_Cameras[viewIndex].view.drawFlags != 0) {
                     if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                         gDPPipeSync(g_DisplayListHead++);
@@ -1575,7 +1574,7 @@ s32 DrawGame(void) {
                                     func_80217164(&g_DisplayListHead);
                                 }
                             }
-                            if (D_800C306C != 4) {
+                            if (g_PauseScreen != PAUSE_SCREEN_UNK4) {
                                 if (viewIndex == 0) {
                                     DrawLensFlare(&g_DisplayListHead);
                                 }

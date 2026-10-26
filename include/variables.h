@@ -68,6 +68,13 @@ extern s32 g_PlayerCount;
 /* The time the stopwatch modes show, in frames */
 extern s32 g_StopwatchFrameCount;
 
+/* Which pause screen is shown over the round */
+#define PAUSE_SCREEN_NONE 0
+#define PAUSE_SCREEN_UNK4 4
+#define PAUSE_SCREEN_UNK6 6
+#define PAUSE_SCREEN_SCORECARD 7
+extern s32 g_PauseScreen;
+
 /*
  * The scene's colors at one time of day. The sky's two colors go to its
  * vertices; DeriveSceneColors also derives other colors from them.

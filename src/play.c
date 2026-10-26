@@ -17,6 +17,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "tournament.h"
+#include "variables.h"
 
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
@@ -72,7 +73,6 @@ typedef struct RingShotRecord {
 
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
-extern s32 D_800C306C;
 extern s32 D_800C3070;
 extern s32 D_800C3074;
 extern s16 D_800C3078;
@@ -121,7 +121,7 @@ s32 func_8005F180(void) {
 }
 
 void func_8005F1C8(void) {
-    D_800C306C = 0;
+    g_PauseScreen = PAUSE_SCREEN_NONE;
     D_800C3070 = 0;
     D_800C3074 = 0;
     D_800C3078 = 0;
@@ -583,7 +583,7 @@ void func_8006034C(s8 value) {
 }
 
 void func_80060358(void) {
-    D_800C306C = 0;
+    g_PauseScreen = PAUSE_SCREEN_NONE;
     SaveOrContinueGameByMode(FALSE);
     func_80216B74(0);
     g_GameState.unk0 = 7;

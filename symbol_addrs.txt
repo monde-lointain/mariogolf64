@@ -2566,3 +2566,4 @@ DrawScorecardLabel = 0x80244748; // type:func segment:ovl_09
 FormatLeaderboardRow = 0x80247D80; // type:func segment:ovl_09
 DrawBetTallies = 0x8024C1D8; // type:func segment:ovl_09
 sDecimalFormat = 0x8024C960; // segment:ovl_09
+g_PauseScreen = 0x800C306C; // size:0x4

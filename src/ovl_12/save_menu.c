@@ -104,9 +104,6 @@
 /* Given this as its text, SetTextSlot clears the slot */
 #define NO_TEXT -1
 
-/* D_800C306C's value while no pause screen is shown */
-#define PAUSE_SCREEN_NONE 0
-#define PAUSE_SCREEN_UNK6 6
 
 
 /* What UpdateReplaySaveMenu returns */
@@ -266,7 +263,6 @@
  * records as signed, though UnkB8 and Unk68 keep them unsigned; the casts
  * are there to match.
  */
-extern s32 D_800C306C;
 extern Unk800BA9D8 D_80105F40;
 
 extern s32 sSlideOffsets[4];
@@ -991,7 +987,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             if (controller->pressedButtons & A_BUTTON) {
                 if (sCursorIndex >= 0 && sCursorIndex < SAVED_GAME_COUNT) {
                     if (save->savedGames[sCursorIndex].isValid) {
-                        D_800C306C = PAUSE_SCREEN_UNK6;
+                        g_PauseScreen = PAUSE_SCREEN_UNK6;
                         OpenPrompt(PROMPT_OVERWRITE_GAME);
                         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                     } else {
@@ -999,7 +995,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                         PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                     }
                 } else {
-                    D_800C306C = PAUSE_SCREEN_UNK6;
+                    g_PauseScreen = PAUSE_SCREEN_UNK6;
                     OpenPrompt(PROMPT_END_GAME);
                 }
                 break;
@@ -1040,7 +1036,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
             break;
         case SAVE_MENU_STATE_BACKED_OUT:
             CloseSaveMenu();
-            D_800C306C = PAUSE_SCREEN_NONE;
+            g_PauseScreen = PAUSE_SCREEN_NONE;
             SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -1075,7 +1071,7 @@ void UpdateGameSaveMenu(ControllerState *controller) {
                                      0);
             }
             if (sStateFrame == SLIDE_FRAMES) {
-                D_800C306C = PAUSE_SCREEN_NONE;
+                g_PauseScreen = PAUSE_SCREEN_NONE;
                 CloseSaveMenu();
                 func_80060358();
             }
@@ -1116,7 +1112,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                 if (sCursorIndex >= 0 && sCursorIndex < SAVE_RECORD_COUNT) {
                     /* The pointer arithmetic is there to match */
                     if ((save->unk1DF0 + sCursorIndex)->unk36 & RECORD_IN_USE) {
-                        D_800C306C = PAUSE_SCREEN_UNK6;
+                        g_PauseScreen = PAUSE_SCREEN_UNK6;
                         OpenPrompt(PROMPT_OVERWRITE_REPLAY);
                         PlaySound(SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                         return REPLAY_MENU_PROMPTING;
@@ -1124,7 +1120,7 @@ s32 UpdateReplaySaveMenu(ControllerState *controller) {
                     SaveReplayToSlot();
                     PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
                 } else {
-                    D_800C306C = PAUSE_SCREEN_UNK6;
+                    g_PauseScreen = PAUSE_SCREEN_UNK6;
                     OpenPrompt(PROMPT_SKIP_REPLAY);
                     return REPLAY_MENU_PROMPTING;
                 }
@@ -1568,7 +1564,7 @@ void UpdateControlsScreen(ControllerState *controller) {
             break;
         case SAVE_MENU_STATE_BACKED_OUT:
             CloseControlsScreen();
-            D_800C306C = PAUSE_SCREEN_NONE;
+            g_PauseScreen = PAUSE_SCREEN_NONE;
             SetMenuBackdrop(MENU_BACKDROP_NONE);
             SetFramebufferCount(3);
             SetScreenEffect(SCREEN_EFFECT_NONE, 0);
