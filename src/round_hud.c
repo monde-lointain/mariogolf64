@@ -61,7 +61,7 @@
 #define ASSET_ROUND_IMAGE_722 0x722
 #define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
 #define ASSET_BLENDED_TEXTURE_STILL_LAYER 0x4D9
-#define ASSET_ROUND_IMAGE_4E3 0x4E3
+#define ASSET_DRIVER_HEAD_IMAGE 0x4E3
 #define ASSET_ROUND_IMAGE_648 0x648
 #define ASSET_ROUND_IMAGE_563 0x563
 #define ASSET_ROUND_IMAGE_564 0x564
@@ -376,9 +376,11 @@ extern void *D_80132360;
 extern void *D_800FED0C;
 extern void *D_8012D428;
 extern void *g_ShadowTexture;
-extern s32 D_800C59D8;
-extern void *D_800E2140;
-extern void *D_800E2144[2];
+/* The image asset of the club's head that the HUD shows, loaded into sClubHeadImage */
+extern s32 sClubHeadImageAsset;
+extern void *sClubHeadImage;
+/* The selected club's name image, loaded into each buffer in turn as sClubNameImageIndex alternates */
+extern void *sClubNameImages[2];
 /* The image asset of the lie that the HUD shows, loaded into sLieImage */
 extern s32 sLieImageAsset;
 extern void *sLieImage;
@@ -664,11 +666,11 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(D_8012D428, &asset);
     g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
     ReadEncodedAsset(g_ShadowTexture, &asset);
-    D_800C59D8 = -1;
-    D_800E2140 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4E3, &asset));
-    ReadEncodedAsset(D_800E2140, &asset);
-    D_800E2144[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-    D_800E2144[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+    sClubHeadImageAsset = -1;
+    sClubHeadImage = AllocMemory(OpenEncodedAsset(ASSET_DRIVER_HEAD_IMAGE, &asset));
+    ReadEncodedAsset(sClubHeadImage, &asset);
+    sClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+    sClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
     sLieImageAsset = -1;
     sLieImage = AllocMemory(LIE_IMAGE_SIZE);
     sAnimatedIconImages[0] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
@@ -716,9 +718,9 @@ void FreeSceneryImages(void) {
         FreeMemory(&g_BackdropPatternImage);
         FreeMemory(&D_8012D428);
         FreeMemory(&g_ShadowTexture);
-        FreeMemory(&D_800E2140);
-        FreeMemory(&D_800E2144[0]);
-        FreeMemory(&D_800E2144[1]);
+        FreeMemory(&sClubHeadImage);
+        FreeMemory(&sClubNameImages[0]);
+        FreeMemory(&sClubNameImages[1]);
         FreeMemory(&sLieImage);
         FreeMemory(&sAnimatedIconImages[0]);
         FreeMemory(&sAnimatedIconLabelImages[0]);
