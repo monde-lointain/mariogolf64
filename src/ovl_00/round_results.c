@@ -1988,7 +1988,152 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlayersResults);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNoPointsText);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FBBBC_ovl_00);
+#define MATCH_PLAYER_COUNT 2
+#define MATCH_ROW_HEIGHT 72
+/* The standing words are 48x48, holding UP, DOWN and EVEN in rows of 16 */
+#define STANDING_WORDS_SIZE 48
+#define STANDING_WORD_WIDTH 48
+#define STANDING_WORD_HEIGHT 16
+#define STANDING_WORD_UP_ROW 0
+#define STANDING_WORD_DOWN_ROW 16
+#define STANDING_WORD_EVEN_ROW 32
+/* Shifts the hole count and its word left, so that the pair stays centred */
+#define STANDING_ONE_DIGIT_UP_SHIFT -8
+#define STANDING_ONE_DIGIT_DOWN_SHIFT -20
+#define STANDING_TWO_DIGIT_DOWN_SHIFT -12
+
+#ifdef NON_MATCHING
+/* The match play results of two players: place, portrait, holes up or down, any bets and Course Points */
+void DrawMatchResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 unused[4];
+    s32 standingShift[MATCH_PLAYER_COUNT];
+    s32 betShift = FOUR_DIGIT_BET_SHIFT;
+    s32 standingRow;
+    s32 holeCount;
+    s32 i;
+
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (sPlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+            betShift = 0;
+        }
+        if (sPlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+            betShift = 0;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    if (sHasBets) {
+        DrawResultsLabel(&gfx, sResultsSlide + 152, sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_BETS);
+        DrawResultsLabel(&gfx, sResultsSlide + 240, sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
+        DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 48, sPlayerRanks[0]);
+        DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 48 + MATCH_ROW_HEIGHT, sPlayerRanks[1]);
+        DrawPlayerPortrait(&gfx, sResultsSlide + 62, sResultsTop + 76, 0, FALSE);
+        DrawPlayerPortrait(&gfx, sResultsSlide + 62, sResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+    } else {
+        DrawResultsLabel(&gfx, sResultsSlide + 220, sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
+        DrawRank(&gfx, sResultsSlide + 56, sResultsTop + 48, sPlayerRanks[0]);
+        DrawRank(&gfx, sResultsSlide + 56, sResultsTop + 48 + MATCH_ROW_HEIGHT, sPlayerRanks[1]);
+        DrawPlayerPortrait(&gfx, sResultsSlide + 78, sResultsTop + 76, 0, FALSE);
+        DrawPlayerPortrait(&gfx, sResultsSlide + 78, sResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+    }
+    LoadSmallPalette(&gfx, 0, sMatchStandingWordsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sMatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, STANDING_WORDS_SIZE,
+                           STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (sPlayerResults[i] > 0) {
+            if (sPlayerResults[i] < 10) {
+                standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
+            } else {
+                standingShift[i] = 0;
+            }
+        } else if (sPlayerResults[i] < 0) {
+            if (sPlayerResults[i] < -9) {
+                standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
+            } else {
+                standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
+            }
+        }
+    }
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (sPlayerResults[i] > 0) {
+            standingRow = STANDING_WORD_UP_ROW;
+        } else if (sPlayerResults[i] < 0) {
+            standingRow = STANDING_WORD_DOWN_ROW;
+        } else {
+            standingRow = STANDING_WORD_EVEN_ROW;
+        }
+        if (sHasBets) {
+            DrawTextureRect(&gfx, (standingShift[i] + 80 + sResultsSlide) << 2,
+                            (sResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
+                            (standingShift[i] + 80 + STANDING_WORD_WIDTH + sResultsSlide) << 2,
+                            (sResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT) << 2, G_TX_RENDERTILE,
+                            0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        } else {
+            DrawTextureRect(&gfx, (standingShift[i] + 96 + sResultsSlide) << 2,
+                            (sResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
+                            (standingShift[i] + 96 + STANDING_WORD_WIDTH + sResultsSlide) << 2,
+                            (sResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT) << 2, G_TX_RENDERTILE,
+                            0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, LARGE_DIGIT_WIDTH,
+                           LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (sHasBets) {
+            /* An even match draws only the word */
+            if (sPlayerResults[0] != 0) {
+                holeCount = sPlayerResults[i];
+                if (holeCount < 0) {
+                    holeCount = -holeCount;
+                }
+                sprintf(g_PrintBuffer, "%2d", holeCount);
+                DrawDigitText(&gfx, standingShift[i] + sResultsSlide + 48, sResultsTop + 108 + i * MATCH_ROW_HEIGHT,
+                              g_PrintBuffer);
+            }
+            sprintf(g_PrintBuffer, sNumberFormat, sPlayerBetTotals[i]);
+            DrawDigitText(&gfx, betShift + 128 + sResultsSlide, sResultsTop + 92 + i * MATCH_ROW_HEIGHT,
+                          g_PrintBuffer);
+            if (sPlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+            } else {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 234, sResultsTop + 92 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
+        } else {
+            if (sPlayerResults[0] != 0) {
+                holeCount = sPlayerResults[i];
+                if (holeCount < 0) {
+                    holeCount = -holeCount;
+                }
+                sprintf(g_PrintBuffer, "%2d", holeCount);
+                DrawDigitText(&gfx, standingShift[i] + sResultsSlide + 64, sResultsTop + 108 + i * MATCH_ROW_HEIGHT,
+                              g_PrintBuffer);
+            }
+            if (sPlayerPoints[i] < 0) {
+                sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+            } else {
+                sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+            }
+            DrawDigitText(&gfx, sResultsSlide + 218, sResultsTop + 92 + i * 64, g_PrintBuffer);
+        }
+    }
+    if (sOpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(sResultsSlide + 32, sResultsTop + 204, MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    } else {
+        DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y, sPointsToNextCourse + sPointsEarned);
+        SetTextSlot(sResultsSlide + 64, sResultsTop + 200, MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawMatchResults);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 
