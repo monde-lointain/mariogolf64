@@ -104,6 +104,7 @@
 #define FREE_LOOK_HUD_FLAGS 0x47
 #define LETTERBOX_STATE_NONE 0
 #define LETTERBOX_STATE_UNK1 1
+#define LETTERBOX_STATE_UNK2 2
 #define LETTERBOX_STATE_UNK5 5
 #define FREE_LOOK_FRAMEBUFFER_COUNT 3
 /* A shorter pulse than the shots' rumble in effects.c */
@@ -161,6 +162,37 @@
 #define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
 /* How far below the ball's centre the preview is drawn */
 #define SHOT_PREVIEW_DROP 0x133
+/* Lets C-left and C-right tilt the aim camera */
+#define GAME_FLAG_TUNE_AIM_CAMERA_TILT 0x21
+#define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
+/* The pause screen's camera circles the ball at this distance, and rises this far above it */
+#define PAUSE_CAMERA_RADIUS 1536000.0f
+#define PAUSE_CAMERA_RISE 4608000.0f
+/* In mini golf, it circles the middle of the course instead */
+#define MINI_GOLF_CENTER_X 543488.0f
+#define MINI_GOLF_CENTER_Z 533888.0f
+#define MINI_GOLF_PAUSE_CAMERA_RADIUS 15360.0f
+#define MINI_GOLF_PAUSE_CAMERA_RISE 890880.0f
+#define MINI_GOLF_PAUSE_CAMERA_DISTANCE 0x1A400
+/* The aim camera keeps above the lowest ground of this many points behind it */
+#define AIM_GROUND_PROBE_COUNT 4
+#define AIM_GROUND_PROBE_STEP 0x12C00
+/* Without an impact point, the camera drops lower and rises less with its height */
+#define NO_IMPACT_POINT_DROP 5683.2f
+#define NO_IMPACT_POINT_HEIGHT_SCALE 0.4f
+/* The camera rises at most the square of its distance in thousands, over this */
+#define AIM_CAMERA_RISE_DIVISOR 4
+/* On the green, the camera looks this far past the ball and this far above the ground */
+#define GREEN_LOOK_AHEAD 0x4B000
+#define GREEN_LOOK_RISE 0x1200
+#define GREEN_LOOK_HEIGHT_SCALE 0.7f
+/* Off the green, the camera tilts down by the yards the club falls short of this */
+#define AIM_TILT_FULL_DISTANCE 300
+#define AIM_TILT_PER_YARD 0.005f
+/* Looking back from the far side, the camera looks this far up from the ball */
+#define LOOK_BACK_RISE 0x3C00
+#define LOOK_BACK_HEIGHT_SCALE 0.5f
+#define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
 /* Hides the shot preview */
 #define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
 /* Lets the D-pad change how far the shot preview reaches */
@@ -212,6 +244,7 @@ extern u16 D_80104990; /* The first controller's buttons, as play copies them ea
 extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing was stopped */
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
 extern s32 D_80223E40_ovl_00;  /* Set once the shot preview has been built */
+extern f32 D_80223E48_ovl_00;  /* A debug tilt of the aim camera, which the C buttons tune */
 extern s32 D_80223EA0_ovl_00;  /* How many steps the shot preview simulates */
 extern s32 D_80223EA4_ovl_00;  /* How many of the shot preview's points are shown */
 extern s8 D_80223EA8_ovl_00;   /* Whether the shot preview ran to its end */
@@ -237,6 +270,7 @@ extern s32 sShotFlightCount;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
+void PlaceShotCamera(void);
 void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
@@ -319,7 +353,173 @@ void KeepAimCameraOnCourse(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", KeepAimCameraOnCourse);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80202D04_ovl_00);
+void func_8004C6A8(void);
+
+/*
+ * Places the camera for the shot being set up: circling the ball on the pause screen,
+ * behind the ball while aiming, or looking back at it from past the ball.
+ */
+#ifdef NON_MATCHING
+void PlaceShotCamera(void) {
+    Vec3 point;
+    CoursePoint center;
+    f32 heading;
+
+    if (IsGameFlagSet(GAME_FLAG_TUNE_AIM_CAMERA_TILT)) {
+        if (g_ControllerStates[0].buttons & L_CBUTTONS) {
+            D_80223E48_ovl_00 -= 1.0f;
+        }
+        if (g_ControllerStates[0].buttons & R_CBUTTONS) {
+            D_80223E48_ovl_00 += 1.0f;
+        }
+    }
+    if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+        g_Cameras[0].view.mode = CAMERA_MODE_UNK2;
+        point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+        point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+        point[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        heading = (u16)D_800C307A * BINARY_ANGLE_TO_RADIANS;
+        if (!g_IsMiniGolf) {
+            g_Cameras[0].view.lookAt[AXIS_X] = (point[AXIS_X] + cosf(heading) * PAUSE_CAMERA_RADIUS) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Z] =
+                (point[AXIS_Z] - g_CurrentShot.aimCameraDistance + sinf(heading) * PAUSE_CAMERA_RADIUS)
+                * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_X] = (point[AXIS_X] + cosf(heading) * -PAUSE_CAMERA_RADIUS) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Y] = (point[AXIS_Y] - PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Z] =
+                (point[AXIS_Z] - g_CurrentShot.aimCameraDistance + sinf(heading) * -PAUSE_CAMERA_RADIUS)
+                * COURSE_TO_WORLD_SCALE;
+        } else {
+            point[AXIS_X] = MINI_GOLF_CENTER_X;
+            point[AXIS_Z] = MINI_GOLF_CENTER_Z;
+            point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y]
+                            + (g_CupPositionY - D_800BA9D8.teePosition[AXIS_Y]) * 0.5f;
+            g_Cameras[0].view.lookAt[AXIS_X] =
+                (point[AXIS_X] + cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.lookAt[AXIS_Z] =
+                (point[AXIS_Z] - (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE)
+                 + sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)
+                * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_X] =
+                (point[AXIS_X] + cosf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Y] = (point[AXIS_Y] - MINI_GOLF_PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
+            g_Cameras[0].view.eye[AXIS_Z] =
+                (point[AXIS_Z] - (g_CurrentShot.aimCameraDistance + MINI_GOLF_PAUSE_CAMERA_DISTANCE)
+                 + sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS)
+                * COURSE_TO_WORLD_SCALE;
+        }
+    } else if (D_800C308C == LETTERBOX_STATE_NONE || D_800C308C == LETTERBOX_STATE_UNK5) {
+        PlaceAimCamera();
+    } else if (D_800C308C == LETTERBOX_STATE_UNK1 || D_800C308C == LETTERBOX_STATE_UNK2) {
+        s32 lowestGround;
+        s32 ground;
+        s32 probe;
+        s32 offset;
+        s32 rise;
+        f32 tilt;
+
+        heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+        KeepAimCameraOnCourse();
+        point[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_X];
+        point[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance + g_CurrentShot.ballPosition[AXIS_Z];
+        if (point[AXIS_X] < AIM_CAMERA_MIN_COORD) {
+            point[AXIS_X] = AIM_CAMERA_MIN_COORD;
+        } else if (point[AXIS_X] > AIM_CAMERA_MAX_X) {
+            point[AXIS_X] = AIM_CAMERA_MAX_X;
+            D_800C3070 = 0;
+        }
+        if (point[AXIS_Z] < AIM_CAMERA_MIN_COORD) {
+            point[AXIS_Z] = AIM_CAMERA_MIN_COORD;
+            D_800C3070 = 0;
+        } else if (point[AXIS_Z] > AIM_CAMERA_MAX_Z) {
+            point[AXIS_Z] = AIM_CAMERA_MAX_Z;
+            D_800C3070 = 0;
+        }
+        lowestGround = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
+        g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        for (probe = 0; probe < AIM_GROUND_PROBE_COUNT; probe++) {
+            offset = probe * AIM_GROUND_PROBE_STEP;
+            point[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance + offset)
+                            + g_CurrentShot.ballPosition[AXIS_X];
+            point[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance + offset)
+                            + g_CurrentShot.ballPosition[AXIS_Z];
+            ground = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
+            if (ground < lowestGround) {
+                lowestGround = ground;
+            }
+        }
+        if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+            point[AXIS_Y] = lowestGround - NO_IMPACT_POINT_DROP
+                            + g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE;
+        } else {
+            point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
+        }
+        rise = g_CurrentShot.aimCameraDistance / 1000;
+        if (g_CurrentShot.ballPosition[AXIS_Y] + rise * rise / AIM_CAMERA_RISE_DIVISOR < point[AXIS_Y]) {
+            point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] + rise * rise / AIM_CAMERA_RISE_DIVISOR;
+        }
+        g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
+            point[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)
+                            + g_CurrentShot.ballPosition[AXIS_X];
+            point[AXIS_Y] = (lowestGround - GREEN_LOOK_RISE) - g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE;
+            point[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)
+                            + g_CurrentShot.ballPosition[AXIS_Z];
+            g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        } else {
+            tilt = (AIM_TILT_FULL_DISTANCE - GetSelectedClub()->distance) * AIM_TILT_PER_YARD;
+            if (tilt < 0.0f) {
+                tilt = 0.0f;
+            }
+            point[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)
+                            + g_CurrentShot.ballPosition[AXIS_X];
+            point[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)
+                            + g_CurrentShot.ballPosition[AXIS_Z];
+            point[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
+            g_Cameras[0].view.lookAt[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE
+                                               - g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE)
+                                               + D_80223E48_ovl_00 * AIM_CAMERA_DEBUG_TILT_SCALE;
+        }
+        g_Cameras[0].view.heading = heading;
+        g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    } else {
+        KeepAimCameraOnCourse();
+        /* The middle of the ball and the cup is worked out, but the ball is used */
+        center[AXIS_Y] = g_CupPositionY;
+        center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+        heading = (u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS + M_PI;
+        center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X]
+                         + (D_800BA9D8.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) * 0.5f;
+        center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+        center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z]
+                         + (g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z]) * 0.5f;
+        center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        point[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance + center[AXIS_X];
+        point[AXIS_Y] = g_CurrentShot.aimCameraHeight + center[AXIS_Y];
+        point[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance + center[AXIS_Z];
+        point[AXIS_Y] = func_8005F30C(point[AXIS_X], point[AXIS_Z]) + g_CurrentShot.aimCameraHeight;
+        g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        point[AXIS_X] = cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) + center[AXIS_X];
+        point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE)
+                        - g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE;
+        point[AXIS_Z] = sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) + center[AXIS_Z];
+        g_Cameras[0].view.heading = heading;
+        g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    }
+    g_Cameras[0].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
+    func_8004C6A8();
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceShotCamera);
+#endif
 
 /*
  * Backs the aim camera up behind the ball, and points it down the shot's heading. The
@@ -1276,7 +1476,6 @@ static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
     SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }
 
-void func_80202D04_ovl_00(void);
 
 /*
  * Sets the shot up for the player whose turn it is: where the ball lies and the heading.
@@ -1344,7 +1543,7 @@ void StartPlayerShot(s32 playerIndex) {
     g_RoundHud.unk84[0] = TRUE;
     g_RoundHud.unk84[1] = FALSE;
     g_RoundHud.flags = 0;
-    func_80202D04_ovl_00();
+    PlaceShotCamera();
     ResetShotOffsetMarker();
 }
 
