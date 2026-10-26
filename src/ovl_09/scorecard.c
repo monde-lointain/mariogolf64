@@ -32,6 +32,8 @@
 #define SCORECARD_SHOWN 2    /* The player can turn its pages */
 #define SCORECARD_TALLYING 3 /* Counting skins before it is shown */
 #define SCORECARD_CLOSED 4
+#define SCORECARD_MATCH_RESULT 5 /* DrawMatchResult shows who won the hole */
+#define SCORECARD_UNK6 6
 
 /* The layouts that SetScorecardLayout picks for the game modes */
 #define SCORECARD_LAYOUT_STROKE 0
@@ -168,6 +170,15 @@ extern s32 sResultCharactersLoadStep;
 extern const char sDecimalFormat[];
 
 void SetFramebufferCount(s32 count);
+void DrawMatchResult(Gfx **displayListHead);
+void func_80243C48_ovl_09(Gfx **displayListHead, s32 pageCount, s32 page);
+void func_80244CA0_ovl_09(Gfx **displayListHead);
+void func_80245184_ovl_09(Gfx **displayListHead);
+void func_802460F8_ovl_09(Gfx **displayListHead);
+void func_80246804_ovl_09(Gfx **displayListHead);
+void func_802478B0_ovl_09(Gfx **displayListHead);
+void func_80247E3C_ovl_09(Gfx **displayListHead);
+void func_802493DC_ovl_09(Gfx **displayListHead);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void ScrollLeaderboard(u16 buttons);
@@ -510,7 +521,113 @@ void DrawLargeImage(Gfx **displayListHead, u8 *image, s32 left, s32 top) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecard);
+/* The page titles sit in a row along the scorecard's top, the page shown a pixel higher */
+#define PAGE_TITLE_LEFT 32
+#define PAGE_TITLE_SPACING 136
+#define THREE_PAGE_TITLE_LEFT 29
+#define THREE_PAGE_TITLE_SPACING 104
+#define PAGE_TITLE_TOP 21
+#define THREE_PAGE_COUNT 3
+#define UNSHOWN_PAGE_GRAY 0x7F
+
+/*
+ * Draws the scorecard: its page titles, with the other pages' grayed out, and
+ * the page shown, which depends on the game mode. Draws DrawMatchResult's
+ * screen instead while that is up.
+ */
+void DrawScorecard(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 i;
+    s32 dropY;
+
+    if (sScorecardState == SCORECARD_MATCH_RESULT) {
+        DrawMatchResult(&gfx);
+    } else if (sScorecardState != SCORECARD_UNK6) {
+        if (sScorecardState != SCORECARD_CLOSED) {
+            func_80243C48_ovl_09(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
+            gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+            for (i = 0; i != g_Scorecard.pageCount; i++) {
+                if (i == g_RoundHud.scorecardPage) {
+                    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                    dropY = 0;
+                } else {
+                    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetPrimColor(gfx++, 0, 0, UNSHOWN_PAGE_GRAY, UNSHOWN_PAGE_GRAY, UNSHOWN_PAGE_GRAY, 0xFF);
+                    dropY = 1;
+                }
+                gDPPipeSync(gfx++);
+                if (g_Scorecard.pageCount == THREE_PAGE_COUNT) {
+                    DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
+                                   (i * THREE_PAGE_TITLE_SPACING + THREE_PAGE_TITLE_LEFT) + g_Scorecard.x,
+                                   g_Scorecard.y + PAGE_TITLE_TOP + dropY);
+                } else {
+                    DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
+                                   (i * PAGE_TITLE_SPACING + PAGE_TITLE_LEFT) + g_Scorecard.x,
+                                   g_Scorecard.y + PAGE_TITLE_TOP + dropY);
+                }
+            }
+            switch (g_GameMode) {
+                case GAME_MODE_TOURNAMENT:
+                    if (g_RoundHud.scorecardPage == 0) {
+                        func_80247E3C_ovl_09(&gfx);
+                    } else {
+                        func_802493DC_ovl_09(&gfx);
+                    }
+                    break;
+                case GAME_MODE_UNK7:
+                    if (g_RoundHud.scorecardPage == 0) {
+                        func_802478B0_ovl_09(&gfx);
+                    } else {
+                        func_802493DC_ovl_09(&gfx);
+                    }
+                    break;
+                case GAME_MODE_SKINS_MATCH:
+                case GAME_MODE_CLUB_SLOTS:
+                    if (g_RoundHud.scorecardPage == 0) {
+                        func_802460F8_ovl_09(&gfx);
+                    } else if (g_RoundHud.scorecardPage == 1) {
+                        func_802493DC_ovl_09(&gfx);
+                    } else {
+                        func_80246804_ovl_09(&gfx);
+                    }
+                    break;
+                case GAME_MODE_MATCH_GAME:
+                case GAME_MODE_GET_CHARACTER:
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
+                    if (g_RoundHud.scorecardPage == 0) {
+                        func_80245184_ovl_09(&gfx);
+                    } else if (g_RoundHud.scorecardPage == 1) {
+                        func_802493DC_ovl_09(&gfx);
+                    } else {
+                        func_80246804_ovl_09(&gfx);
+                    }
+                    break;
+                case GAME_MODE_STROKE:
+                case GAME_MODE_UNK1:
+                case GAME_MODE_UNK3:
+                case GAME_MODE_UNK6:
+                case GAME_MODE_UNK8:
+                case GAME_MODE_RING_SHOT:
+                    if (g_PlayerCount == 1) {
+                        if (g_RoundHud.scorecardPage == 0) {
+                            func_802493DC_ovl_09(&gfx);
+                        } else {
+                            func_80246804_ovl_09(&gfx);
+                        }
+                    } else if (g_RoundHud.scorecardPage == 0) {
+                        func_80244CA0_ovl_09(&gfx);
+                    } else if (g_RoundHud.scorecardPage == 1) {
+                        func_802493DC_ovl_09(&gfx);
+                    } else {
+                        func_80246804_ovl_09(&gfx);
+                    }
+                    break;
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80243C48_ovl_09);
 
