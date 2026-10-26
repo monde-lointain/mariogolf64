@@ -48,5 +48,7 @@ extern BillboardTransform g_BillboardTransforms[BILLBOARD_COUNT];
  * the course's edge, and tilts them less.
  */
 extern s8 g_IsMiniGolf;
+/* g_GameState.unk3B[0], read on its own; the round results then load other images */
+extern s8 g_IsUnk3B;
 
 #endif

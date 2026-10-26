@@ -112,6 +112,9 @@
 #define GAME_FLAG_UNK51 0x51
 #define GAME_FLAG_UNK60 0x60
 #define GAME_FLAG_UNK69 0x69
+/* Debug cheats that pad the first player's round points */
+#define GAME_FLAG_ADD_500_POINTS 0x66
+#define GAME_FLAG_ADD_9999_POINTS 0x6C
 #define GAME_FLAG_UNK6A 0x6A
 #define GAME_FLAG_UNK6B 0x6B
 #define GAME_FLAG_UNK7C 0x7C
