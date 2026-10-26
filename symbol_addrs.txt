@@ -2912,3 +2912,4 @@ BuildShotPreview = 0x80205DE8; // type:func segment:ovl_00
 PlaceShotCamera = 0x80202D04; // type:func segment:ovl_00
 DrawShotPreview = 0x80206354; // type:func segment:ovl_00
 UpdateAimControls = 0x80204910; // type:func segment:ovl_00
+GiveUpHole = 0x8020845C; // type:func segment:ovl_00

@@ -24,8 +24,10 @@
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
+#include "scoring.h"
 #include "screen.h"
 #include "shot_simulation.h"
 #include "sound.h"
@@ -196,6 +198,11 @@
 #define LOOK_BACK_HEIGHT_SCALE 0.5f
 #define SHOT_CAMERA_FIELD_OF_VIEW 45.0f
 /* A replay turns the aim at once, rather than easing it round */
+/* UnkB8.unk26: whether the player is still playing the hole */
+#define HOLE_STATUS_HOLED_OUT 1
+#define HOLE_STATUS_OUT 3
+/* A hole given up outside a match counts as this many times its par */
+#define GIVE_UP_PAR_MULTIPLE 3
 #define GAME_FLAG_SNAP_REPLAY_AIM 0xF
 /* A replay eases the aim by this much plus a 128th of what is left, until this close */
 #define REPLAY_AIM_MIN_STEP 0x80
@@ -2477,7 +2484,50 @@ void TickStopwatches(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TickStopwatches);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020845C_ovl_00);
+/*
+ * Takes the player out of the hole. In a match, a player whose opponent has holed out loses
+ * the hole by a stroke; otherwise the hole counts as GIVE_UP_PAR_MULTIPLE times its par, and
+ * an opponent still playing wins it by a stroke.
+ */
+#ifdef NON_MATCHING
+void GiveUpHole(s32 playerIndex) {
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
+    volatile s32 unused;
+    s32 garbage;
+    s32 opponentIndex;
+
+    unused = garbage;
+    if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER)
+        && g_Players[playerIndex ^ 1].unk26 == HOLE_STATUS_HOLED_OUT) {
+        g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes =
+            g_Players[playerIndex ^ 1].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes + 1;
+        g_Players[playerIndex].strokeCount =
+            g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes
+            - GetHandicapOffset(g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
+        g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
+    } else {
+        g_Players[playerIndex].strokeCount = g_HolePar * GIVE_UP_PAR_MULTIPLE;
+        g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes = g_HolePar * GIVE_UP_PAR_MULTIPLE;
+        g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
+    }
+    SkipUnmeasuredDistances(playerIndex);
+    UpdateContest(FALSE);
+    if (!g_GameState.unk31) {
+        opponentIndex = playerIndex ^ 1;
+        if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
+            g_Players[opponentIndex].unk26 = HOLE_STATUS_HOLED_OUT;
+            g_Players[opponentIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes =
+                g_Players[playerIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes - 1;
+            g_Players[opponentIndex].strokeCount =
+                g_Players[opponentIndex].holes[g_HoleIndex % COURSE_HOLE_COUNT].strokes
+                - GetHandicapOffset(g_CourseIndex, g_HoleIndex, g_Players[opponentIndex].handicap);
+            SkipUnmeasuredDistances(opponentIndex);
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GiveUpHole);
+#endif
 
 /* Shows or hides the HUD's parts, apart from the club panel and the letterbox */
 void SetRoundHudPartsShown(s8 isShown) {
