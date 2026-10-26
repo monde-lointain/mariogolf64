@@ -74,6 +74,8 @@
 
 /* Lets the player with the fewest strokes play next, instead of the farthest from the cup */
 #define GAME_FLAG_FEWEST_STROKES_FIRST 0x3F
+/* Draws through two or three framebuffers at random, while aiming */
+#define GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT 0x9F
 /* Cuts every round to two holes */
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
 /* Logs LoadCharacter's progress */

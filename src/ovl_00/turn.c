@@ -15,6 +15,7 @@
 #include "golf_balls.h"
 #include "hole_display.h"
 #include "hole_loader.h"
+#include "libc.h"
 #include "math_util.h"
 #include "overlay_manager.h"
 #include "pin.h"
@@ -101,7 +102,9 @@
 #define FREE_LOOK_START_DISTANCE (-0x12C00)
 #define FREE_LOOK_TURN_STEP 200
 #define FREE_LOOK_HUD_FLAGS 0x47
+#define LETTERBOX_STATE_NONE 0
 #define LETTERBOX_STATE_UNK1 1
+#define LETTERBOX_STATE_UNK5 5
 #define FREE_LOOK_FRAMEBUFFER_COUNT 3
 /* A shorter pulse than the shots' rumble in effects.c */
 #define TURN_RUMBLE_FREQUENCY 0x100
@@ -143,6 +146,13 @@
 #define LIE_PRIORITY_ON_GREEN 0
 /* Under GAME_FLAG_FEWEST_STROKES_FIRST, a priority that falls with each stroke */
 #define STROKE_PRIORITY_BASE 200
+/* The stick turns the aim by half its tilt, times a quarter (a sixth for D_800C3078) of it */
+#define AIM_STICK_SPEED_DIVISOR 4
+#define ALT_HEADING_STICK_SPEED_DIVISOR 6
+/* The D-pad's turn speeds up over this many frames */
+#define AIM_DPAD_MAX_FRAMES 60
+#define AIM_DPAD_SPEED_DIVISOR 6
+#define AIM_DPAD_BASE_SPEED 3
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
@@ -189,6 +199,8 @@ extern s16 D_800C307A; /* The free-look camera's heading, in binary angle units 
 extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C308C; /* The letterbox's state */
+extern s16 D_800C3078; /* A heading that TurnAim can turn in place of the shot's */
+extern s32 D_80223E50_ovl_00; /* Frames that the D-pad has turned the aim, negative to the right */
 extern s32 D_80227194_ovl_00;
 extern s32 sTurnTimerStart; /* Nothing reads it */
 /* How many times the shot's flight has been shown; StartFlightCamera gets the earlier count */
@@ -563,7 +575,95 @@ void MoveAimCameraDistance(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020466C_ovl_00);
+/*
+ * Turns the aim with the stick, or D_800C3078 instead when asked, and the shot's heading
+ * with the D-pad, faster the longer it is held. While the heading holds still, the scene
+ * is drawn from a saved frame, through two framebuffers.
+ */
+#ifdef NON_MATCHING
+void TurnAim(s32 turnsAltHeading) {
+    s32 stickX = g_TurnController.stickX;
+    s16 heading = g_CurrentShot.unk0;
+    s32 speed;
+    s32 step;
+    s32 dpad;
+    s32 dpadSpeed;
+
+    if (g_IsSettingImpactPoint) {
+        return;
+    }
+    if (!turnsAltHeading) {
+        step = stickX / 2;
+        speed = stickX / AIM_STICK_SPEED_DIVISOR;
+        if (speed < 0) {
+            speed = -speed;
+        }
+        if (speed != 0) {
+            step *= speed;
+        }
+        g_CurrentShot.unk0 -= step;
+    } else {
+        step = stickX / 2;
+        speed = stickX / ALT_HEADING_STICK_SPEED_DIVISOR;
+        if (speed < 0) {
+            speed = -speed;
+        }
+        if (speed != 0) {
+            step *= speed;
+        }
+        D_800C3078 -= step;
+    }
+    dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
+    if (dpad == 0 || dpad == (L_JPAD | R_JPAD)) {
+        D_80223E50_ovl_00 = 0;
+    } else if (dpad & L_JPAD) {
+        s32 *dpadFrames = &D_80223E50_ovl_00;
+
+        if (*dpadFrames < 0) {
+            *dpadFrames = 0;
+        }
+        if (++*dpadFrames > AIM_DPAD_MAX_FRAMES) {
+            *dpadFrames = AIM_DPAD_MAX_FRAMES;
+        }
+    } else {
+        s32 *dpadFrames = &D_80223E50_ovl_00;
+
+        if (*dpadFrames > 0) {
+            *dpadFrames = 0;
+        }
+        if (--*dpadFrames < -AIM_DPAD_MAX_FRAMES) {
+            *dpadFrames = -AIM_DPAD_MAX_FRAMES;
+        }
+    }
+    dpad = D_80223E50_ovl_00;
+    dpadSpeed = (dpad < 0) ? -dpad : dpad;
+    g_CurrentShot.unk0 += dpad * (dpadSpeed / AIM_DPAD_SPEED_DIVISOR + AIM_DPAD_BASE_SPEED);
+    if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
+        if (D_800C308C == LETTERBOX_STATE_NONE || D_800C308C == LETTERBOX_STATE_UNK5) {
+            if (heading == (s16)g_CurrentShot.unk0) {
+                if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+                    SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
+                    SetFramebufferCount(2);
+                }
+            } else if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+                SetFramebufferCount(3);
+                SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+            }
+        } else {
+            SetFramebufferCount(3);
+        }
+    }
+    if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
+        if (rand() & 1) {
+            SetFramebufferCount(3);
+        } else {
+            SetFramebufferCount(2);
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", TurnAim);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204910_ovl_00);
 
