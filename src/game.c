@@ -21,6 +21,7 @@
 #include "save.h"
 #include "scene.h"
 #include "screen.h"
+#include "scorecard.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
@@ -943,7 +944,6 @@ void func_80219C74(Gfx **displayListHead);
 void func_8021A940(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
 void DrawGameSaveMenu(Gfx **displayListHead);
-void func_802438D0(Gfx **displayListHead);
 void DrawReplaySaveMenu(Gfx **displayListHead);
 void DrawControlsScreen(Gfx **displayListHead);
 void func_8040BFC8(void);
@@ -1656,7 +1656,7 @@ s32 DrawGame(void) {
         }
         DrawHoleIntroImages(&g_DisplayListHead);
         if (g_IsModuleAlive[5]) {
-            func_802438D0(&g_DisplayListHead);
+            DrawScorecard(&g_DisplayListHead);
         }
         if (g_IsModuleAlive[15]) {
             func_801FCC48(&g_DisplayListHead);

@@ -1,40 +1,40 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80241800_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", OpenScorecard);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242074_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242334_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242B74_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", SetScorecardLayout);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242FC0_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", SetScorecardState);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80243050_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", AnimateScorecard);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802433B4_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TurnScorecardPage);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802434A0_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", ScrollLeaderboard);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80243634_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", UpdateScorecard);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802436C8_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", UpdateShownScorecard);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_8024373C_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802438D0_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecard);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80243C48_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_8024407C_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeResultCharacters);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802440AC_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80244244_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TallyScorecardSkins);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802443D0_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecardFace);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802444B8_ovl_09);
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawSmallFace);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802445C0_ovl_09);
 
