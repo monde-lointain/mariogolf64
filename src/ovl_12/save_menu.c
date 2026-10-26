@@ -436,7 +436,8 @@ void OpenSaveMenu(s32 kind) {
                     OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                                      &encodedAsset);
                     ReadEncodedAsset(sCharacterImages[slot * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
-                    OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->unk7B, &file);
+                    OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->paletteIndex,
+                                  &file);
                     ReadAssetFile(sCharacterFiles[slot * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
                                   &file);
                 }
@@ -908,7 +909,7 @@ void SaveGameToSlot(void) {
             OpenEncodedAsset(g_CharacterImageAssets[(s8)player->characterIndex] + CHARACTER_FACE_IMAGE_OFFSET,
                              &encodedAsset);
             ReadEncodedAsset(sCharacterImages[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], &encodedAsset);
-            OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->unk7B, &file);
+            OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] + (s8)player->paletteIndex, &file);
             ReadAssetFile(sCharacterFiles[sCursorIndex * MAX_PLAYER_COUNT + playerIndex], GetAssetFileSize(&file),
                           &file);
         }

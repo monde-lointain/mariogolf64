@@ -1104,8 +1104,8 @@ s32 LoadResultCharacters(void) {
         FreeCharacterSlot(1);
         return FALSE;
     }
-    LoadCharacter(0, (s8)g_Players[0].characterIndex + CHARACTER_COUNT, (s8)g_Players[0].unk7B);
-    LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT, (s8)g_Players[1].unk7B);
+    LoadCharacter(0, (s8)g_Players[0].characterIndex + CHARACTER_COUNT, (s8)g_Players[0].paletteIndex);
+    LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT, (s8)g_Players[1].paletteIndex);
     song = SONG_MATCH_RESULT;
     if (g_GameMode == GAME_MODE_GET_CHARACTER) {
         if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {

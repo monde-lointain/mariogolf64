@@ -33,5 +33,6 @@ extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
 #define CHARACTER_FACE_IMAGE_OFFSET 9
 /* The asset file of each character's first palette, followed by those of its other colours */
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
+#define CHARACTER_PALETTE_COUNT 4
 
 #endif

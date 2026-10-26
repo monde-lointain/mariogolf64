@@ -333,9 +333,9 @@ u8 sStaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     6, 9, 6, 6, 6, 9, 9, 12, 9, 10, 7, 0, 0, 0, 0, 0,
 };
 
-/* The kind of model the cast is loaded as, from the first player's unk7B */
+/* The kind of model the cast is loaded as, from the first player's paletteIndex */
 s32 GetCastModelKind(void) {
-    return g_Players[0].unk7B & (CHARACTER_MODEL_KIND_COUNT - 1);
+    return g_Players[0].paletteIndex & (CHARACTER_MODEL_KIND_COUNT - 1);
 }
 
 

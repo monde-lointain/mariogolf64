@@ -1194,7 +1194,7 @@ void InvalidateBrokenSavedGames(void) {
             if (player->characterIndex >= CHARACTER_COUNT) {
                 isInvalid[index] = TRUE;
             }
-            if (player->unk7B >= 4) {
+            if (player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
                 isInvalid[index] = TRUE;
             }
         }

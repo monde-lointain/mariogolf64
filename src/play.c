@@ -254,14 +254,14 @@ void SetUpPlayers(void) {
             g_Players[0].teeOrder = 0;
             g_Players[0].characterIndex = D_80105F40->characterIndex;
             g_Players[0].unk22 = D_80105F40->unk38;
-            g_Players[0].unk7B = D_80105F40->unk39;
+            g_Players[0].paletteIndex = D_80105F40->unk39;
             g_Players[0].unk88 = D_80105F40->unk3C;
         } else {
             g_Players[0].unk1E[0] = 0;
             g_Players[0].teeOrder = 0;
             g_Players[0].characterIndex = D_800FEDD8->characterIndex;
             g_Players[0].unk22 = D_800FEDD8->unk3C;
-            g_Players[0].unk7B = D_800FEDD8->unk3D;
+            g_Players[0].paletteIndex = D_800FEDD8->unk3D;
             g_Players[0].unk88 = D_800FEDD8->unk40;
         }
         for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
@@ -269,7 +269,7 @@ void SetUpPlayers(void) {
             g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
         }
         g_Players[0].unk28 = -1;
-        LoadPlayerFace(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].unk7B);
+        LoadPlayerFace(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].paletteIndex);
         for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
             if (slot >= CLUB_SET_SIZE) {
                 g_Players[0].clubs[slot] = NO_CLUB;

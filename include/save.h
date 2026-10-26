@@ -231,7 +231,7 @@ typedef struct UnkB8 {
     /* 0x72 */ u8 unk72[0x74 - 0x72];
     /* 0x74 */ s32 unk74;
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
-    /* 0x7B */ u8 unk7B;
+    /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
     /* 0x7C */ u8 unk7C[4];
     /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
