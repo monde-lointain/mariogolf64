@@ -1,7 +1,9 @@
 #include "common.h"
 #include "asset.h"
+#include "burst.h"
 #include "character.h"
 #include "character_slot.h"
+#include "cpu_projection.h"
 #include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
@@ -134,10 +136,39 @@
 
 extern s32 sScorecardState;
 #define RESULT_CHARACTERS_IDLE (-1) /* sResultCharactersLoadStep when no characters are loading */
+/* Match games are between two players */
+#define MATCH_PLAYER_COUNT 2
+/* The step counts up to LOADING, then waits for LoadResultCharacters */
+#define RESULT_CHARACTERS_LOADING 2
+#define RESULT_CHARACTERS_LOADED 3
+extern s32 sMatchResultFrameCount;
+extern Mtx sResultCharacterMatrices[MATCH_PLAYER_COUNT];
+/* "Hole %d" in half-width katakana */
+extern const char sHoleNumberFormat[];
+/* Each player's result in a match. func_802460F8 shows sWinText too. */
+extern const char sDrawText[];
+extern const char sWinText[];
+extern const char sLoseText[];
+
+/* Where DrawMatchResult draws its text */
+#define MATCH_TITLE_X 32
+#define MATCH_TITLE_Y 28
+#define MATCH_HOLE_X 136
+#define MATCH_HOLE_Y 48
+#define MATCH_RESULT_LEFT 64
+#define MATCH_RESULT_SPACING 128
+#define MATCH_RESULT_Y 64
+/* And where it draws the characters */
+#define RESULT_CHARACTER_LEFT -56.0f
+#define RESULT_CHARACTER_SPACING 112.0f
+#define RESULT_CHARACTER_Y -80.0f
+#define RESULT_CHARACTER_Z -500.0f
+#define RESULT_CHARACTER_SCALE 5.0f
 extern s32 sResultCharactersLoadStep;
 extern const char sDecimalFormat[];
 
 void SetFramebufferCount(s32 count);
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
 void ScrollLeaderboard(u16 buttons);
 
@@ -543,7 +574,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
  *
  * Doesn't match: the code matches, but this puts its jump table in .rodata
  * without the word of padding after it, which moves the rodata that follows
- * from func_802448D4's asm 4 bytes early.
+ * 4 bytes early.
  */
 #ifdef NON_MATCHING
 s32 TallyScorecardSkins(void) {
@@ -645,15 +676,94 @@ void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802448D4_ovl_09);
+/*
+ * Shows who won the last hole of a match game, above the two players'
+ * characters, once LoadResultCharacters has loaded them.
+ *
+ * Doesn't match: the target keeps the hole's offset in $s0 and the player's
+ * in $s1, where this swaps them.
+ */
+#ifdef NON_MATCHING
+void DrawMatchResult(Gfx **displayListHead) {
+    s32 holeNumber = g_Scorecard.content.holeIndex;
+    s32 i;
+    s32 x;
+    s32 holeIndex;
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7BC_ovl_09);
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+    DrawLargeText(&gfx, MATCH_TITLE_X, MATCH_TITLE_Y, "Match Game");
+    sprintf(g_PrintBuffer, sHoleNumberFormat, holeNumber);
+    DrawLargeText(&gfx, MATCH_HOLE_X, MATCH_HOLE_Y, g_PrintBuffer);
+    holeIndex = holeNumber - 1;
+    for (i = 0, x = MATCH_RESULT_LEFT; i != MATCH_PLAYER_COUNT; i++) {
+        if (g_Players[i].holes[holeIndex].strokes == g_Players[i ^ 1].holes[holeIndex].strokes) {
+            SetTextColor(&gfx, 0xFF, 0xFF, 0);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, sDrawText);
+        } else if (g_Players[i].holes[holeIndex].strokes <
+                   g_Players[i ^ 1].holes[holeIndex].strokes) {
+            SetTextColor(&gfx, 0xFF, 0x7F, 0x7F);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, sWinText);
+        } else {
+            SetTextColor(&gfx, 0x7F, 0x7F, 0xFF);
+            DrawLargeText(&gfx, x, MATCH_RESULT_Y, sLoseText);
+        }
+        x += MATCH_RESULT_SPACING;
+    }
+    UpdateAndDrawBursts(&gfx);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    if (sResultCharactersLoadStep == RESULT_CHARACTERS_LOADING && LoadResultCharacters() == TRUE) {
+        sResultCharactersLoadStep = RESULT_CHARACTERS_LOADED;
+    }
+    if (sResultCharactersLoadStep < RESULT_CHARACTERS_LOADING) {
+        sResultCharactersLoadStep++;
+    }
+    if (sResultCharactersLoadStep == RESULT_CHARACTERS_LOADED) {
+        Vec3 translation;
+        Vec3 rotation;
+        Vec3 scale;
+        Mat4 matrix;
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7C4_ovl_09);
+        sMatchResultFrameCount++;
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
+            translation[0] = i * RESULT_CHARACTER_SPACING + RESULT_CHARACTER_LEFT;
+            rotation[0] = 0.0f;
+            rotation[1] = 0;
+            rotation[2] = 0;
+            translation[1] = RESULT_CHARACTER_Y;
+            translation[2] = RESULT_CHARACTER_Z;
+            scale[0] = RESULT_CHARACTER_SCALE;
+            scale[1] = RESULT_CHARACTER_SCALE;
+            scale[2] = RESULT_CHARACTER_SCALE;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sResultCharacterMatrices[i]);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sResultCharacterMatrices[i]),
+                      G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            g_DisplayListHead = gfx;
+            DrawCharacter(i);
+            gfx = *displayListHead = g_DisplayListHead;
+        }
+        AnimateAllCharacters();
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawMatchResult);
+#endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7CC_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sHoleNumberFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7D0_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sDrawText);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sWinText);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sLoseText);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80244CA0_ovl_09);
 
