@@ -3083,3 +3083,5 @@ sSpanBarDisplayList = 0x80224BB0; // size:0x20 segment:ovl_00
 sMarkerPulseAngle = 0x80224C04; // size:0x4 segment:ovl_00
 sSpanBarTranslation = 0x8022B540; // size:0x40 segment:ovl_00
 sSpanBarScale = 0x8022B580; // size:0x40 segment:ovl_00
+DrawSky = 0x8008FF20; // type:func
+sSkyModelMatrix = 0x800E3988;

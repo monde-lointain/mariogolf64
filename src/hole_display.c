@@ -1014,7 +1014,187 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
     sIsPrimitiveDepthSet = isPrimitiveDepthSet;
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008FF20);
+/* The sky dome is drawn this far in front of the camera */
+#define SKY_DOME_DISTANCE -300.0f
+#define SKY_NOISE_IMAGE_SIZE 64
+#define SKY_NOISE_MASK 6
+#define SKY_DEPTH 0x7FFB
+/* The sun moves SUN_TURN_WIDTH pixels across the screen as the camera turns once */
+#define SUN_TURN_WIDTH 1536.0f
+#define SUN_YAW_OFFSET (M_PI / 4)
+#define SUN_HORIZON_Y 112.0f
+#define SUN_CULL_MARGIN 64.0f
+#define SUN_DEPTH 0x7FF7
+#define SUN_IMAGE_KIND_TWO_TEXTURES 2
+#define SUN_IMAGE_SIZE 32
+#define SUN_GLOW_IMAGE_SIZE 64
+#define SUN_GLOW_MASK 6
+#define SUN_MASK_TMEM 0x100
+#define LIGHT_YAW_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
+extern Mtx sSkyModelMatrix;
+
+/*
+ * Draws the sky dome around the camera and, when the scene has one, the sun.
+ * The sun is a textured rectangle placed from the camera's yaw against the
+ * light's, and the dome's height above the horizon.
+ */
+void DrawSky(Gfx **displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
+    Gfx *gfx = *displayListHead;
+    SkyColors *colors;
+    Mat4 matrix;
+    s32 unused[16];
+    Vec3 rotation;
+    Vec3 translation;
+    f32 angle;
+
+    UpdateSky(&g_Cameras[cameraIndex].view, cameraIndex);
+    /* Unlike the other lookups of g_SkyColors, this steps by three times, not SKY_TIME_COUNT, in the rain */
+    colors = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * 3 + sSkyColorTimeIndex];
+    translation[0] = 0.0f;
+    translation[1] = 0.0f;
+    rotation[0] = 0.0f;
+    rotation[1] = 0.0f;
+    rotation[2] = 0.0f;
+    translation[2] = SKY_DOME_DISTANCE;
+    BuildRotationMatrix(matrix, rotation, translation);
+    ConvertMatrixToFixed(matrix, &sSkyModelMatrix);
+    gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    if (sIsPrimitiveDepthSet) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetPrimDepth(gfx++, SKY_DEPTH, 0);
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    if (colors->unk0 == 0) {
+        gDPSetCombineLERP(gfx++, ENVIRONMENT, SHADE, TEXEL0, SHADE, 0, 0, 0, TEXEL0, ENVIRONMENT, SHADE, TEXEL0, SHADE,
+                          0, 0, 0, TEXEL0);
+    } else {
+        gDPSetCombineLERP(gfx++, TEXEL0, 0, ENVIRONMENT, SHADE, 0, 0, 0, TEXEL0, TEXEL0, 0, ENVIRONMENT, SHADE, 0, 0,
+                          0, TEXEL0);
+    }
+    gDPSetEnvColor(gfx++, colors->unkA[0], colors->unkA[1], colors->unkA[2], 255);
+    gDPLoadTextureBlock(gfx++, (u32)g_NoiseTexels & ~7, G_IM_FMT_I, G_IM_SIZ_8b, SKY_NOISE_IMAGE_SIZE,
+                        SKY_NOISE_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, SKY_NOISE_MASK, SKY_NOISE_MASK, G_TX_NOLOD,
+                        G_TX_NOLOD);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSkyModelMatrix), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
+    gSPVertex(gfx++, sSkyVertices[g_MatrixBufferIndex + cameraIndex * 2], SKY_VERTEX_COUNT, 0);
+    gDPPipeSync(gfx++);
+    gSP1Triangle(gfx++, 0, 1, 4, 0);
+    gSP1Triangle(gfx++, 1, 2, 4, 0);
+    gSP1Triangle(gfx++, 4, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    if (colors->hasLensFlare == TRUE) {
+        angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET - g_LightYaw * LIGHT_YAW_TO_RADIANS;
+        if (angle > 2 * M_PI) {
+            angle -= 2 * M_PI;
+        }
+        if (angle < 0.0f) {
+            angle += 2 * M_PI;
+        }
+        if (angle > 2 * M_PI) {
+            angle -= 2 * M_PI;
+        }
+        if (angle < 0.0f) {
+            angle += 2 * M_PI;
+        }
+        sSunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
+        sSunScreenY[cameraIndex] =
+            -g_SkyState.horizonLevels[cameraIndex] - colors->unk14->sunHeight + SUN_HORIZON_Y;
+        if (sSunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
+            sSunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
+        }
+        if (sSunScreenX[cameraIndex] > -SUN_CULL_MARGIN && sSunScreenX[cameraIndex] < SCREEN_WIDTH + SUN_CULL_MARGIN &&
+            sSunScreenY[cameraIndex] > -SUN_CULL_MARGIN && sSunScreenY[cameraIndex] < SCREEN_HEIGHT + SUN_CULL_MARGIN) {
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_NONE);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+            gDPPipeSync(gfx++);
+            gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+            if (sIsPrimitiveDepthSet) {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF | Z_UPD, G_RM_ZB_XLU_SURF2);
+                gDPSetPrimDepth(gfx++, SUN_DEPTH, 0);
+            } else {
+                gDPPipeSync(gfx++);
+                gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            }
+            gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+            if (colors->unk14->imageKind == SUN_IMAGE_KIND_TWO_TEXTURES) {
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+                gDPPipeSync(gfx++);
+                gDPPipeSync(gfx++);
+                gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+                gDPSetCombineLERP(gfx++, TEXEL1, 0, TEXEL0, 0, 0, 0, 0, TEXEL1, TEXEL1, 0, COMBINED, 0, 0, 0, 0,
+                                  COMBINED);
+                gDPLoadTextureBlock(gfx++, ((u32)g_SkyImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                                    SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK,
+                                    G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPLoadMultiBlock_4b(gfx++, ((u32)g_SkyImage + SKY_IMAGE_HALF_OFFSET + IMAGE_HEADER_SIZE) & ~7,
+                                     SUN_MASK_TMEM, 1, G_IM_FMT_I, SUN_IMAGE_SIZE, SUN_IMAGE_SIZE, 0, G_TX_WRAP,
+                                     G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(gfx++, ((s32)sSunScreenX[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
+                                        ((s32)sSunScreenY[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
+                                        ((s32)sSunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
+                                        ((s32)sSunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
+                                        G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
+                                        colors->unk14->sunTexelStep);
+                gDPPipeSync(gfx++);
+            } else {
+                gDPPipeSync(gfx++);
+                gDPSetAlphaDither(gfx++, G_AD_NOISE);
+                gDPSetCombineLERP(gfx++, PRIMITIVE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, TEXEL0, PRIMITIVE,
+                                  ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, TEXEL0);
+                gDPLoadTextureBlock(gfx++, ((u32)g_SkyImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
+                                    SUN_GLOW_IMAGE_SIZE, SUN_GLOW_IMAGE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR,
+                                    SUN_GLOW_MASK, SUN_GLOW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPSetPrimColor(gfx++, 0, 0, colors->unk14->sunPrimColor[0], colors->unk14->sunPrimColor[1],
+                                colors->unk14->sunPrimColor[2], 255);
+                gDPSetEnvColor(gfx++, colors->unk14->sunEnvColor[0], colors->unk14->sunEnvColor[1],
+                               colors->unk14->sunEnvColor[2], 255);
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(gfx++, ((s32)sSunScreenX[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
+                                        ((s32)sSunScreenY[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
+                                        ((s32)sSunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
+                                        ((s32)sSunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
+                                        G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
+                                        colors->unk14->sunTexelStep);
+                gDPPipeSync(gfx++);
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
 
 
 /* The course's backdrop image, drawn behind the course in strips from the horizon down */
@@ -1033,8 +1213,6 @@ extern s32 sBackdropStripCount;
 extern s32 sBackdropStripHeight;
 extern s32 sBackdropImageWidth;
 extern s32 sBackdropWidthMask;
-
-void func_8008FF20(Gfx **displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex);
 
 #ifdef NON_MATCHING
 /* Draws the sky and, below it, the course's backdrop in strips that follow the camera's yaw and pitch */
@@ -1061,7 +1239,7 @@ void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex) {
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_BAYER);
     centreShift = (view->zoom * FULL_VIEW_HEIGHT - (view->viewportCenterY - view->scissorY * 2)) * 0.5f;
-    func_8008FF20(&gfx, view->eye[1], 1, cameraIndex);
+    DrawSky(&gfx, view->eye[1], 1, cameraIndex);
     isNibbleImage = FALSE;
     gDPPipeSync(gfx++);
     gDPSetColorDither(gfx++, G_CD_DISABLE);
