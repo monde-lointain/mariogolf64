@@ -232,7 +232,8 @@ typedef struct UnkB8 {
     /* 0x74 */ s32 unk74;
     /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
     /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
-    /* 0x7C */ u8 unk7C[4];
+    /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from CHARACTER_KID on */
+    /* 0x7D */ u8 unk7D[3];
     /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
     /* 0x88 */ s32 unk88;
@@ -242,7 +243,8 @@ typedef struct UnkB8 {
     /* 0x9C */ s8 unk9C;
     /* 0x9D */ u8 unk9D[3];
     /* 0xA0 */ s32 lastDriveDistance; /* The driveDistance that RecordDrive took */
-    /* 0xA4 */ u8 unkA4[0xAA - 0xA4];
+    /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
+    /* 0xA8 */ u8 unkA8[0xAA - 0xA8];
     /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
     /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
 } UnkB8; /* size = 0xB8 */
