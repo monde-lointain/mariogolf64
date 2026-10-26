@@ -58,9 +58,9 @@ extern s32 sPauseSelection;
 extern s32 sPauseLayout;
 extern s32 sPauseMenuRequest;
 extern s32 sPauseMenuUnkD678;
-extern f32 sPauseMenuUnkD67C;
-extern f32 sPauseMenuUnkD684;
-extern f32 sPauseMenuUnkD688;
+/* Where the panels of the lie and of the wind slide to beside the menu */
+extern f32 sLiePanelPosition[2];
+extern f32 sWindPanelPosition[2];
 extern u8 *sPauseCursorImage;
 extern u8 *sMenuCloudImage; /* The pause menu's cloud, or the choice box's */
 extern u8 *sPauseArrowsImage;
@@ -122,9 +122,9 @@ void HideRoundHud(void) {
     g_RoundHud.isLetterboxShown = FALSE;
     g_RoundHud.unkC = 0;
     g_RoundHud.unk7 = 0;
-    g_RoundHud.unk89 = 0;
-    g_RoundHud.unk8A = 0;
-    g_RoundHud.unk8B = 0;
+    g_RoundHud.areLieArrowsShown = 0;
+    g_RoundHud.areWindSpeedArrowsShown = 0;
+    g_RoundHud.areWindDirectionArrowsShown = 0;
     g_RoundHud.unk8 = 0;
     g_RoundHud.unk9 = 0;
     g_RoundHud.unkA = 0;
@@ -136,9 +136,9 @@ void ResumeRound(void) {
     g_RoundHud.isLetterboxShown = TRUE;
     g_RoundHud.unkC = 1;
     g_RoundHud.unk7 = 1;
-    g_RoundHud.unk89 = 0;
-    g_RoundHud.unk8A = 0;
-    g_RoundHud.unk8B = 0;
+    g_RoundHud.areLieArrowsShown = 0;
+    g_RoundHud.areWindSpeedArrowsShown = 0;
+    g_RoundHud.areWindDirectionArrowsShown = 0;
     g_RoundHud.unk8 = 1;
     g_RoundHud.unk9 = 1;
     g_RoundHud.unkA = 1;
@@ -243,9 +243,9 @@ void LoadPauseMenu(void) {
         ReadEncodedAsset(sPauseCursorImage, &asset);
         sMenuCloudImage = AllocMemory(OpenEncodedAsset(PAUSE_CLOUD_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sMenuCloudImage, &asset);
-        sPauseMenuUnkD684 = SCREEN_WIDTH;
-        sPauseMenuUnkD688 = SCREEN_HEIGHT;
-        sPauseMenuUnkD67C = SCREEN_HEIGHT;
+        sWindPanelPosition[AXIS_X] = SCREEN_WIDTH;
+        sWindPanelPosition[AXIS_Y] = SCREEN_HEIGHT;
+        sLiePanelPosition[AXIS_X] = SCREEN_HEIGHT;
         sPauseArrowsImage = AllocMemory(OpenEncodedAsset(PAUSE_ARROWS_IMAGE_ASSET, &asset));
         ReadEncodedAsset(sPauseArrowsImage, &asset);
         SetSongVolume(PAUSE_MENU_SONG_VOLUME);
@@ -266,9 +266,9 @@ void FreePauseMenu(void) {
 #define PAUSE_OPTION_KIND_PLAIN 0
 #define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
 #define PAUSE_OPTION_KIND_UNK8C 2   /* Shows the player's UnkB8.unk8C as black or white */
-#define PAUSE_OPTION_KIND_UNK3 3
-#define PAUSE_OPTION_KIND_UNK4 4
-#define PAUSE_OPTION_KIND_UNK5 5
+#define PAUSE_OPTION_KIND_WIND_SPEED 3
+#define PAUSE_OPTION_KIND_WIND_DIRECTION 4
+#define PAUSE_OPTION_KIND_LIE 5
 #define PAUSE_OPTION_KIND_UNKD678 7 /* Shows another label while sPauseMenuUnkD678 is clear */
 
 /* The option that is greyed out while sPauseMenuUnkD678 is clear */
@@ -485,8 +485,8 @@ void DrawPauseMenu(Gfx **displayListHead) {
     }
     selectedKind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
     if (selectedKind == PAUSE_OPTION_KIND_WEATHER || selectedKind == PAUSE_OPTION_KIND_UNK8C ||
-        selectedKind == PAUSE_OPTION_KIND_UNK3 || selectedKind == PAUSE_OPTION_KIND_UNK4 ||
-        selectedKind == PAUSE_OPTION_KIND_UNK5) {
+        selectedKind == PAUSE_OPTION_KIND_WIND_SPEED || selectedKind == PAUSE_OPTION_KIND_WIND_DIRECTION ||
+        selectedKind == PAUSE_OPTION_KIND_LIE) {
         DrawTextureRect(&gfx, PAUSE_TEE_X * 4, (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
                         PAUSE_CURSOR_RIGHT * 4,
                         (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 + PAUSE_CURSOR_SIZE) * 4,

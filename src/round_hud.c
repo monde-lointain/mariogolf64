@@ -1345,7 +1345,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawBallTrail);
  * meters below it. Both lean away from the given point along the viewed wind.
  *
  * Doesn't match: the target reads *displayListHead before the other loads and
- * schedules the last commands before reading g_RoundHud.unk8A. Its rodata also has
+ * schedules the last commands before reading g_RoundHud.areWindSpeedArrowsShown. Its rodata also has
  * an empty string after "%dm", which this doesn't emit.
  */
 #ifdef NON_MATCHING
@@ -1465,7 +1465,7 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     }
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    if (g_RoundHud.unk8A == 1) {
+    if (g_RoundHud.areWindSpeedArrowsShown == 1) {
         if (speed != 0) {
             DrawPauseArrows(&gfx, centerX - WIND_ARROWS_OFFSET_X, centerY - WIND_ARROWS_OFFSET_Y,
                             WIND_ARROWS_WIDE_GAP);

@@ -70,9 +70,9 @@ typedef struct RoundHud {
     /* 0x84 */ u8 unk84[3];
     /* 0x87 */ s8 unk87;
     /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */
-    /* 0x89 */ u8 unk89;
-    /* 0x8A */ u8 unk8A;
-    /* 0x8B */ u8 unk8B;
+    /* 0x89 */ u8 areLieArrowsShown; /* While the pause menu sets the lie */
+    /* 0x8A */ u8 areWindSpeedArrowsShown;
+    /* 0x8B */ u8 areWindDirectionArrowsShown;
 } RoundHud; /* size = 0x8C */
 
 extern RoundHud g_RoundHud;
