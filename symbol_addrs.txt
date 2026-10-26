@@ -2961,3 +2961,5 @@ sLakituY = 0x8022BC64; // segment:ovl_00
 sLakituScale = 0x8022BC68; // segment:ovl_00
 DrawFlipMessage = 0x8020FC10; // type:func segment:ovl_00
 sFlipMessageMatrices = 0x80227CA0; // size:0x80 segment:ovl_00
+sBannerFrame = 0x80224110; // size:0x4 segment:ovl_00
+sBannerLayouts = 0x80224200; // size:0x1B0 segment:ovl_00

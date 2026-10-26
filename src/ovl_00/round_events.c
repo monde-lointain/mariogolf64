@@ -44,6 +44,8 @@
 #define HEAVY_HITTER_CONTACT_IMAGE_ASSET 0x6A6
 
 /* A banner's letters, each an image drawn on its own square */
+#define BANNER_MAX_LETTERS 11
+
 typedef struct Banner {
     /* 0x0 */ s16 unk0;
     /* 0x2 */ u16 imageAsset;
@@ -62,6 +64,16 @@ typedef struct BannerLetter {
     /* 0x10 */ Mtx matrices[2];
 } BannerLetter; /* size = 0x90 */
 
+/*
+ * A banner's left edge (BANNER_LAYOUT_LEFT), then where each letter sits from it
+ * (BANNER_LAYOUT_FIRST_LETTER onwards)
+ */
+#define BANNER_LAYOUT_LEFT 0
+#define BANNER_LAYOUT_FIRST_LETTER 1
+typedef s16 BannerLayout[BANNER_LAYOUT_FIRST_LETTER + BANNER_MAX_LETTERS];
+
+/* Frames since the banner started, or BANNER_FRAME_NONE */
+extern s32 sBannerFrame;
 extern s32 sCurrentBanner;
 /* The banner whose images are in sMovieBuffer */
 extern s32 sLoadedBanner;
@@ -73,6 +85,7 @@ extern Vtx sBannerLetterVertices[4];
 extern Banner sBanners[];
 extern Mtx sBannerMatrices[2];
 extern BannerLetter sBannerLetters[];
+extern BannerLayout sBannerLayouts[];
 extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
 extern s32 sCurrentMovie;
@@ -113,6 +126,11 @@ extern Mtx sFlipMessageMatrices[2];
 #define FLIP_MESSAGE_BOARD_MARGIN_X 6
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
 #define FLIP_MESSAGE_OPEN_FRAME 10
+#define BANNER_FRAME_NONE (-1)
+/* The banner that shows "+N", which BANNER_STROKES_OVER_PAR + N starts */
+#define BANNER_OVER_PAR_NUMBER (BANNER_STROKES_OVER_PAR + 1)
+#define BANNER_LETTER_SPACING 32
+#define BANNER_Z -300.0f
 /* The board starts face down and turns this far each frame until it faces the camera */
 #define FLIP_MESSAGE_DEGREES_PER_FRAME 18.0f
 #define FLIP_MESSAGE_START_DEGREES 180.0f
@@ -211,7 +229,88 @@ void FreeMovieBuffer(void) {
     FreeMemory(&sMovieBuffer);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartBanner);
+void StartBanner(s32 banner) {
+    EncodedAsset asset;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 i;
+
+    if (sIsMovieBufferAllocated != TRUE) {
+        return;
+    }
+    if (banner == BANNER_HIDE_NICE_SHOT) {
+        if (sCurrentBanner == BANNER_NICE_SHOT) {
+            sBannerFrame = BANNER_FRAME_NONE;
+        }
+        return;
+    }
+    if (banner == BANNER_NONE) {
+        sBannerFrame = BANNER_FRAME_NONE;
+        return;
+    }
+    sCurrentBanner = banner;
+    sBannerFrame = 0;
+    if (banner > BANNER_STROKES_OVER_PAR) {
+        sBannerNumber = banner - BANNER_STROKES_OVER_PAR;
+        sCurrentBanner = BANNER_OVER_PAR_NUMBER;
+        if (sLoadedBanner < BANNER_OVER_PAR_NUMBER || sLoadedBanner == BANNER_NONE) {
+            OpenEncodedAsset(sBanners[BANNER_OVER_PAR_NUMBER].imageAsset, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+        }
+        sLoadedBanner = sCurrentBanner;
+        /* The "+" and the digits */
+        if (sBannerNumber < 10) {
+            sBannerNumberLetterCount = 2;
+        } else if (sBannerNumber < 100) {
+            sBannerNumberLetterCount = 3;
+        } else {
+            sBannerNumberLetterCount = 4;
+        }
+        for (i = 0; i != sBannerNumberLetterCount; i++) {
+            sBannerLetters[i].x = i * BANNER_LETTER_SPACING - (sBannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2);
+            sBannerLetters[i].y = 0.0f;
+            sBannerLetters[i].unkC = 0;
+            sBannerLetters[i].scale = 1.0f;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = sBannerLetters[i].x;
+            translation[AXIS_Y] = sBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = sBannerLetters[i].scale;
+            scale[AXIS_Y] = sBannerLetters[i].scale;
+            scale[AXIS_Z] = sBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    }
+    if ((sLoadedBanner != sCurrentBanner && sCurrentBanner < BANNER_OVER_PAR_NUMBER) || sLoadedBanner == BANNER_NONE) {
+        OpenEncodedAsset(sBanners[sCurrentBanner].imageAsset, &asset);
+        ReadEncodedAsset(sMovieBuffer, &asset);
+        sLoadedBanner = sCurrentBanner;
+        for (i = 0; i != sBanners[sCurrentBanner].letterCount; i++) {
+            sBannerLetters[i].x =
+                (f32) sBannerLayouts[sCurrentBanner][BANNER_LAYOUT_FIRST_LETTER + i] +
+                (f32) sBannerLayouts[sCurrentBanner][BANNER_LAYOUT_LEFT];
+            sBannerLetters[i].y = 0.0f;
+            sBannerLetters[i].unkC = 0;
+            sBannerLetters[i].scale = 1.0f;
+            rotation[AXIS_X] = 0;
+            rotation[AXIS_Y] = 0;
+            rotation[AXIS_Z] = 0;
+            translation[AXIS_X] = sBannerLetters[i].x;
+            translation[AXIS_Y] = sBannerLetters[i].y;
+            translation[AXIS_Z] = BANNER_Z;
+            scale[AXIS_X] = sBannerLetters[i].scale;
+            scale[AXIS_Y] = sBannerLetters[i].scale;
+            scale[AXIS_Z] = sBannerLetters[i].scale;
+            BuildTransformMatrix(matrix, rotation, translation, scale);
+            ConvertMatrixToFixed(matrix, &sBannerLetters[i].matrices[g_MatrixBufferIndex]);
+        }
+    }
+}
 
 /* Draws the number banner's "+" and digits */
 void DrawNumberBanner(Gfx **displayListHead) {
