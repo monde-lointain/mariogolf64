@@ -7,6 +7,10 @@
 /* What each player has won on each BET_* bet this game */
 extern s16 g_BetTallies[MAX_PLAYER_COUNT][BET_COUNT];
 extern RoundStats g_RoundStats;
+/* The pots of the contests and of the hole, which a tie carries over */
+extern s32 g_LongestDrivePot;
+extern s32 g_NearestPinPot;
+extern s32 g_HolePot;
 
 
 #define NO_LAST_HOLE_SKINS -1

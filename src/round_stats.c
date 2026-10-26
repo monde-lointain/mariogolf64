@@ -29,10 +29,6 @@
 /* Drives are compared at this scale, so those nearly as long tie */
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
-/* The pots of the contests and of the hole, which a tie carries over */
-extern s32 sLongestDrivePot;
-extern s32 sNearestPinPot;
-extern s32 sHolePot;
 extern s32 sIsContestDecided;
 
 /*
@@ -136,17 +132,17 @@ void StartBets(void) {
     }
     sIsContestDecided = FALSE;
     sContestWinner = NO_CONTEST_WINNER;
-    sLongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
-    sNearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
+    g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
+    g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
     if (g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
-        sHolePot = g_GameState.betRates[BET_UNK5];
+        g_HolePot = g_GameState.betRates[BET_UNK5];
     }
     if (g_GameState.betRates[BET_UNK4] != UNSET_BET_RATE) {
-        sHolePot = g_GameState.betRates[BET_UNK4];
+        g_HolePot = g_GameState.betRates[BET_UNK4];
     }
-    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = sLongestDrivePot;
-    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = sNearestPinPot;
-    g_GameState.carriedPots[CARRIED_POT_HOLE] = sHolePot;
+    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
+    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
+    g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
 }
 
 /* Takes the tallies and pots back from a continued game */
@@ -161,9 +157,9 @@ void ResumeBets(void) {
     }
     sIsContestDecided = FALSE;
     sContestWinner = NO_CONTEST_WINNER;
-    sLongestDrivePot = g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE];
-    sNearestPinPot = g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN];
-    sHolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
+    g_LongestDrivePot = g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE];
+    g_NearestPinPot = g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN];
+    g_HolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
 }
 
 s32 GetContestWinner(void) {
@@ -195,15 +191,15 @@ void SettleLongestDrive(void) {
             }
         }
         if (sContestWinner == NO_CONTEST_WINNER) {
-            sLongestDrivePot += g_GameState.betRates[BET_LONGEST_DRIVE];
+            g_LongestDrivePot += g_GameState.betRates[BET_LONGEST_DRIVE];
         } else {
-            g_BetTallies[sContestWinner][BET_LONGEST_DRIVE] += sLongestDrivePot * (g_GameState.playerCount - 1);
+            g_BetTallies[sContestWinner][BET_LONGEST_DRIVE] += g_LongestDrivePot * (g_GameState.playerCount - 1);
             for (player = 0; player != g_GameState.playerCount; player++) {
                 if (player != sContestWinner) {
-                    g_BetTallies[player][BET_LONGEST_DRIVE] -= sLongestDrivePot;
+                    g_BetTallies[player][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
                 }
             }
-            sLongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
+            g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
         }
     }
 }
@@ -229,15 +225,15 @@ void SettleNearestPin(void) {
             }
         }
         if (sContestWinner == NO_CONTEST_WINNER) {
-            sNearestPinPot += g_GameState.betRates[BET_NEAREST_PIN];
+            g_NearestPinPot += g_GameState.betRates[BET_NEAREST_PIN];
         } else {
-            g_BetTallies[sContestWinner][BET_NEAREST_PIN] += sNearestPinPot * (g_GameState.playerCount - 1);
+            g_BetTallies[sContestWinner][BET_NEAREST_PIN] += g_NearestPinPot * (g_GameState.playerCount - 1);
             for (player = 0; player != g_GameState.playerCount; player++) {
                 if (player != sContestWinner) {
-                    g_BetTallies[player][BET_NEAREST_PIN] -= sNearestPinPot;
+                    g_BetTallies[player][BET_NEAREST_PIN] -= g_NearestPinPot;
                 }
             }
-            sNearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
+            g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
         }
     }
 }
@@ -616,29 +612,29 @@ void SettleHoleBets(void) {
                 if (count != g_GameState.playerCount) {
                     for (i = 0; i != g_GameState.playerCount; i++) {
                         if (g_Players[i].holes[g_GameState.holeIndex - 1].strokes != 0) {
-                            g_BetTallies[i][bet] += sHolePot * (g_GameState.playerCount - 1);
+                            g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
                         } else {
-                            g_BetTallies[i][bet] -= sHolePot;
+                            g_BetTallies[i][bet] -= g_HolePot;
                         }
                     }
-                    sHolePot = g_GameState.betRates[bet];
+                    g_HolePot = g_GameState.betRates[bet];
                 } else {
-                    sHolePot += g_GameState.betRates[bet];
+                    g_HolePot += g_GameState.betRates[bet];
                 }
                 break;
             case GAME_MODE_MATCH_GAME:
                 if (g_Players[0].holes[g_GameState.holeIndex - 1].strokes <
                     g_Players[1].holes[g_GameState.holeIndex - 1].strokes) {
-                    g_BetTallies[0][bet] += sHolePot;
-                    g_BetTallies[1][bet] -= sHolePot;
-                    sHolePot = g_GameState.betRates[bet];
+                    g_BetTallies[0][bet] += g_HolePot;
+                    g_BetTallies[1][bet] -= g_HolePot;
+                    g_HolePot = g_GameState.betRates[bet];
                 } else if (g_Players[1].holes[g_GameState.holeIndex - 1].strokes <
                            g_Players[0].holes[g_GameState.holeIndex - 1].strokes) {
-                    g_BetTallies[0][bet] -= sHolePot;
-                    g_BetTallies[1][bet] += sHolePot;
-                    sHolePot = g_GameState.betRates[bet];
+                    g_BetTallies[0][bet] -= g_HolePot;
+                    g_BetTallies[1][bet] += g_HolePot;
+                    g_HolePot = g_GameState.betRates[bet];
                 } else {
-                    sHolePot += g_GameState.betRates[bet];
+                    g_HolePot += g_GameState.betRates[bet];
                 }
                 break;
             case GAME_MODE_STROKE:
@@ -662,22 +658,22 @@ void SettleHoleBets(void) {
                 if (count == 1) {
                     for (i = 0; i != g_GameState.playerCount; i++) {
                         if (best == scores[i]) {
-                            g_BetTallies[i][bet] += sHolePot * (g_GameState.playerCount - 1);
+                            g_BetTallies[i][bet] += g_HolePot * (g_GameState.playerCount - 1);
                         } else {
-                            g_BetTallies[i][bet] -= sHolePot;
+                            g_BetTallies[i][bet] -= g_HolePot;
                         }
                     }
-                    sHolePot = g_GameState.betRates[bet];
+                    g_HolePot = g_GameState.betRates[bet];
                 } else {
-                    sHolePot += g_GameState.betRates[bet];
+                    g_HolePot += g_GameState.betRates[bet];
                 }
                 break;
             }
         }
     }
-    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = sLongestDrivePot;
-    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = sNearestPinPot;
-    g_GameState.carriedPots[CARRIED_POT_HOLE] = sHolePot;
+    g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE] = g_LongestDrivePot;
+    g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN] = g_NearestPinPot;
+    g_GameState.carriedPots[CARRIED_POT_HOLE] = g_HolePot;
     for (i = 0; i != MAX_PLAYER_COUNT; i++) {
         for (j = 0; j != BET_COUNT; j++) {
             g_Players[i].betTallies[j] = g_BetTallies[i][j];
