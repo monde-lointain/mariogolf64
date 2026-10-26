@@ -31,6 +31,7 @@
 #include "surface.h"
 #include "terrain.h"
 #include "text.h"
+#include "turn.h"
 #include "variables.h"
 
 /* Unused; the original has it */
@@ -351,7 +352,6 @@ s16 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot) {
 /* Unreferenced; the original has it, and its zero is in the ROM */
 static const f64 sUnusedZero = 0.0;
 
-void func_80205AE4(s32, s32);
 /* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
 s32 func_8005DE40();
 void ChooseFlightCameraKind(void);
@@ -426,7 +426,7 @@ void EndFlightCamera(void) {
         osSyncPrintf("\nCheckWater1\n");
         if (g_SimulatedShot.unk2E41) {
             osSyncPrintf("\nCheckWater2\n");
-            func_80205AE4(g_CurrentShot.playerIndex, 0xB);
+            CountNotableShot(g_CurrentShot.playerIndex, 0xB);
         }
     }
 }
@@ -918,23 +918,23 @@ void PlayFlightSounds(s32 step) {
         } else if (g_SimulatedShot.unkB0Step != NO_STEP) {
             func_8020E7B4(6);
             PlaySound(FLIGHT_SOUND_UNK91, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
-            func_80205AE4(g_CurrentShot.playerIndex, 6);
+            CountNotableShot(g_CurrentShot.playerIndex, 6);
             sPendingResultSound = RESULT_SOUND_UNK2;
         } else if (sPassedPathFlags & PATH_FLAG_UNK8) {
-            func_80205AE4(g_CurrentShot.playerIndex, 2);
+            CountNotableShot(g_CurrentShot.playerIndex, 2);
             func_8020E7B4(5);
             PlaySound(FLIGHT_SOUND_UNK93, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
             sPendingResultSound = RESULT_SOUND_UNK2;
         } else if (g_SimulatedShot.endsOnGreen) {
             if (g_HolePar - 3 >= g_Players[g_CurrentShot.playerIndex].strokeCount) {
-                func_80205AE4(g_CurrentShot.playerIndex, 0);
+                CountNotableShot(g_CurrentShot.playerIndex, 0);
                 func_8020E7B4(8);
                 PlaySound(FLIGHT_SOUND_UNK7F, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
                 QueueOnlookerSounds(2);
                 sPendingResultSound = RESULT_SOUND_UNK2;
             } else if (g_HolePar - 2 == g_Players[g_CurrentShot.playerIndex].strokeCount) {
                 if (sLandingCupDistance <= CLOSE_LANDING_DISTANCE) {
-                    func_80205AE4(g_CurrentShot.playerIndex, 1);
+                    CountNotableShot(g_CurrentShot.playerIndex, 1);
                     func_8020E7B4(7);
                     PlaySound(FLIGHT_SOUND_UNK7E, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
                     QueueOnlookerSounds(1);
@@ -966,7 +966,7 @@ void PlayFlightSounds(s32 step) {
             func_8020E7B4(6);
             PlaySound(FLIGHT_SOUND_UNK91, FLIGHT_SOUND_CHANNEL_UNK3, FLIGHT_SOUND_VOLUME);
             QueueOnlookerSounds(1);
-            func_80205AE4(g_CurrentShot.playerIndex, 6);
+            CountNotableShot(g_CurrentShot.playerIndex, 6);
             sEndReaction = END_REACTION_ONLOOKERS;
             sPendingResultSound = RESULT_SOUND_UNK2;
         }
@@ -1002,10 +1002,10 @@ void PlayFlightSounds(s32 step) {
             }
             if (!g_SimulatedShot.unk2E08) {
                 if (D_800BE644 > LONG_LANDING_MIN_DISTANCE) {
-                    func_80205AE4(g_CurrentShot.playerIndex, 4);
+                    CountNotableShot(g_CurrentShot.playerIndex, 4);
                     sPendingResultSound = RESULT_SOUND_UNK2;
                 } else {
-                    func_80205AE4(g_CurrentShot.playerIndex, 3);
+                    CountNotableShot(g_CurrentShot.playerIndex, 3);
                     sPendingResultSound = RESULT_SOUND_UNK1;
                 }
             }

@@ -5,10 +5,15 @@
 #include "controller.h"
 #include "course.h"
 #include "current_shot.h"
+#include "debug_text.h"
 #include "reaction.h"
+#include "round_hud.h"
 #include "save.h"
 #include "scene.h"
 #include "sound.h"
+#include "surface.h"
+#include "turn.h"
+#include "variables.h"
 
 /* The loop played while the stick sets the impact point */
 #define IMPACT_POINT_SOUND 0x26
@@ -20,12 +25,26 @@
 /* The buttons that hold the impact point mode */
 #define IMPACT_POINT_BUTTONS (Z_TRIG | L_TRIG)
 
-/* Bit 1 of D_800C3084 keeps the impact point from being set */
-#define SHOT_UNK3084_NO_IMPACT_POINT 2
+/* D_800C3084's bits, which UpdateShotFlags sets for the shot being set up */
+#define SHOT_UNK3084_ON_GREEN 1
+#define SHOT_UNK3084_NO_IMPACT_POINT 2 /* For a putter, or in mini golf */
+#define SHOT_UNK3084_APPROACH 4
+#define SHOT_UNK3084_UNK8 8 /* Set while g_CurrentShot.unk50 is at most SHOT_UNK8_MAX_UNK50 */
+#define SHOT_UNK50_SCALE (1.0f / 1536)
+#define SHOT_UNK8_MAX_UNK50 600.0f
+
+/* The kinds of notable shot that earn Course Points, as counted in unkAA */
+#define SHOT_KIND_COUNT PLAYER_UNKAA_COUNT
+#define SHOT_KIND_UNK7 7      /* The only kind that mini golf counts */
+#define SHOT_KIND_MAX_COUNT 0xFF
+/* Shots count towards Course Points on their first flights only */
+#define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3084;
 extern s32 D_80227194_ovl_00;
 extern s32 sTurnTimerStart; /* Nothing reads it */
+/* How many times the shot's flight has been shown; StartFlightCamera gets the earlier count */
+extern s32 sShotFlightCount;
 
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
@@ -80,7 +99,33 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020466C_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204910_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802054CC_ovl_00);
+void UpdateShotFlags(void) {
+    s32 surfaceMask = GetSelectedClub()->surfaceMask;
+    s8 *isMiniGolf;
+
+    D_800C3084 = 0;
+    if (surfaceMask & CLUB_SURFACE_GREEN) {
+        D_800C3084 = SHOT_UNK3084_NO_IMPACT_POINT;
+    }
+    isMiniGolf = &g_IsMiniGolf;
+
+    if (*isMiniGolf) {
+
+        D_800C3084 |= SHOT_UNK3084_NO_IMPACT_POINT;
+    }
+    if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
+        D_800C3084 |= SHOT_UNK3084_ON_GREEN;
+    }
+    if (*isMiniGolf) {
+        D_800C3084 |= SHOT_UNK3084_ON_GREEN | SHOT_UNK3084_NO_IMPACT_POINT;
+    }
+    if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
+        D_800C3084 |= SHOT_UNK3084_APPROACH;
+    }
+    if (g_CurrentShot.unk50 * SHOT_UNK50_SCALE <= SHOT_UNK8_MAX_UNK50) {
+        D_800C3084 |= SHOT_UNK3084_UNK8;
+    }
+}
 
 void StartTurnTimer(void) {
     sTurnTimerStart = osGetCount();
@@ -95,7 +140,25 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205624_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802059C0_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205AE4_ovl_00);
+/* Counts a notable shot towards the player's Course Points */
+void CountNotableShot(s32 playerIndex, s32 shotKind) {
+    u8 *count;
+
+    if ((s8)g_Players[playerIndex].unk1E[0] != 0 || g_GameState.unk31 || g_GameMode == GAME_MODE_UNK3) {
+        return;
+    }
+    if (g_GameMode == GAME_MODE_RING_SHOT || sShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
+        return;
+    }
+    if (g_IsMiniGolf && shotKind != SHOT_KIND_UNK7) {
+        return;
+    }
+    count = (u8 *)&g_Players[playerIndex].unkAA[shotKind];
+    if (*count < SHOT_KIND_MAX_COUNT) {
+        osSyncPrintf("EXP GET type %d\n", shotKind);
+        (*count)++;
+    }
+}
 
 /* The course points that the player has earned with the shots of one kind */
 s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
@@ -141,9 +204,40 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
     return count * points;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205C78_ovl_00);
+/* Turns each player's counts of notable shots into points, and returns everyone's total */
+s32 TallyCoursePoints(void) {
+    s32 playerIndex;
+    s32 shotKind;
+    s32 points;
+    s32 total = 0;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205D44_ovl_00);
+    for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+        points = 0;
+        for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
+            points += GetShotKindPoints(playerIndex, shotKind);
+            g_Players[playerIndex].unkAA[shotKind] = 0;
+        }
+        total += points;
+        g_Players[playerIndex].points = points;
+    }
+    return total;
+}
+
+void PrintCoursePoints(void) {
+    char text[128];
+    s32 playerIndex;
+    s32 shotKind;
+    s32 points;
+
+    for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
+        points = 0;
+        for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
+            points += GetShotKindPoints(playerIndex, shotKind);
+        }
+        sprintf(text, "Player%d EXP %d\n", playerIndex, points);
+        PrintDebugText(text, 2, playerIndex + 3);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205DE8_ovl_00);
 
@@ -151,7 +245,12 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206354_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206BD0_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206CC8_ovl_00);
+s32 IsRingShotRound(void) {
+    if (!g_GameState.unk31) {
+        return g_GameMode == GAME_MODE_RING_SHOT;
+    }
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206CF0_ovl_00);
 
@@ -282,7 +381,20 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208354_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020845C_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802087D0_ovl_00);
+/* Shows or hides the HUD's parts, apart from the club panel and the letterbox */
+void SetRoundHudPartsShown(s8 isShown) {
+    /* The original stores a never-set register to the stack */
+    volatile s32 unused;
+    s32 garbage;
+
+    unused = garbage;
+    g_RoundHud.unk7 = isShown;
+    g_RoundHud.unk8 = isShown;
+    g_RoundHud.unk9 = isShown;
+    g_RoundHud.unkA = isShown;
+    g_RoundHud.unkB = isShown;
+    g_RoundHud.unkD = isShown;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208810_ovl_00);
 
