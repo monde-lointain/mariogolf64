@@ -9,6 +9,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "pin.h"
+#include "round_hud.h"
 #include "save.h"
 #include "surface.h"
 #include "variables.h"
@@ -130,7 +131,6 @@ extern s32 g_PinVertexScale;
 extern s32 g_CupViewDepth;
 extern s32 D_800BE69C;
 
-void func_80085F98(s32 arg0);
 
 /*
  * Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.
@@ -574,7 +574,7 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
         gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
         gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sFlagMatrices[g_DrawBufferIndex]),
                   G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        func_80085F98(1);
+        DrawHoleFlag(TRUE);
         gDPPipeSync(g_DisplayListHead++);
         gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
     }

@@ -81,6 +81,8 @@
 /* The first asset of each course record's hole images, one per hole */
 extern u16 sHoleImageAssets[COURSE_RECORD_COUNT];
 extern void *sHoleImage;
+#define HOLE_IMAGE_WIDTH 48
+#define HOLE_IMAGE_HEIGHT 42
 extern void *sParImage;
 
 /* Set while the overlay of the course selection is loaded for the hole */
@@ -279,7 +281,6 @@ extern s32 D_800C308C;
 
 extern Mtx sHoleImageMatrix;
 
-void func_80085F98(s32 arg0);
 
 /*
  * StartShotEffect's long shot effect, which func_80086864 draws, plays a
@@ -1206,7 +1207,78 @@ void AdjustHudOffset(void) {
 
 INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008534C);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80085F98);
+/*
+ * Draws the flag grid with the hole image on it. With isBackDrawn, it then
+ * draws the back too, by changing the grid's texture coordinates to the
+ * back's and mirroring its shades around WIND_FLAG_START_SHADE.
+ *
+ * Doesn't match: the loop that modifies the back's vertices allocates its
+ * registers differently.
+ */
+#ifdef NON_MATCHING
+void DrawHoleFlag(s32 isBackDrawn) {
+    s32 row;
+    s32 column;
+    s32 index;
+    Vtx *vertex;
+
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 255, 255);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
+    gDPLoadTLUT_pal256(g_DisplayListHead++, ((u32)sHoleImage + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPLoadTextureBlock(g_DisplayListHead++, ((u32)sHoleImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                        G_IM_SIZ_8b, HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(g_DisplayListHead++);
+    gSPVertex(g_DisplayListHead++, sWindFlagVertices[0][g_MatrixBufferIndex], WIND_FLAG_VERTEX_COUNT, 0);
+    for (row = 0; row != WIND_FLAG_ROW_COUNT - 1; row++) {
+        for (column = 0; column != WIND_FLAG_COLUMN_COUNT - 1; column++) {
+            index = row * WIND_FLAG_COLUMN_COUNT + column;
+            gSP2Triangles(g_DisplayListHead++, index, index + WIND_FLAG_COLUMN_COUNT, index + WIND_FLAG_COLUMN_COUNT + 1,
+                          0, index, index + WIND_FLAG_COLUMN_COUNT + 1, index + 1, 0);
+        }
+    }
+    if (isBackDrawn == TRUE) {
+        index = 0;
+        vertex = sWindFlagVertices[0][g_MatrixBufferIndex];
+        for (row = 0; row != WIND_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != WIND_FLAG_COLUMN_COUNT; column++, index++, vertex++) {
+                /* These texture coordinates are after the gSPTexture scale, which halves them */
+                gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_ST,
+                                ((WIND_FLAG_BACK_TEXEL_START / 2 - column * (WIND_FLAG_TEXEL_COLUMN_STEP / 2)) << 16) +
+                                    row * (WIND_FLAG_TEXEL_ROW_STEP / 2));
+                gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_RGBA,
+                                ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
+                                    ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
+                                    ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[2]) << 8) | WIND_FLAG_START_SHADE);
+            }
+        }
+        for (row = 0; row != WIND_FLAG_ROW_COUNT - 1; row++) {
+            for (column = 0; column != WIND_FLAG_COLUMN_COUNT - 1; column++) {
+                index = row * WIND_FLAG_COLUMN_COUNT + column;
+                gSP2Triangles(g_DisplayListHead++, index, index + WIND_FLAG_COLUMN_COUNT + 1,
+                              index + WIND_FLAG_COLUMN_COUNT, 0, index, index + 1, index + WIND_FLAG_COLUMN_COUNT + 1, 0);
+            }
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleFlag);
+#endif
 
 /* Draws the hole image as a model in the perspective of the screen effects */
 void DrawHoleImageModel(void) {
@@ -1239,7 +1311,7 @@ void DrawHoleImageModel(void) {
     gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sHoleImageMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    func_80085F98(0);
+    DrawHoleFlag(FALSE);
     gDPPipeSync(g_DisplayListHead++);
 }
 

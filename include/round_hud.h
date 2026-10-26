@@ -36,5 +36,6 @@ void ScrollWindArrow(void);
 void AdjustHudOffset(void);
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);
+void DrawHoleFlag(s32 isBackDrawn);
 
 #endif
