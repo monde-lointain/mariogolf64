@@ -21,7 +21,9 @@ import fncompare  # noqa: E402
 ROOT = fncompare.ROOT
 M2C = os.path.join(ROOT, ".venv", "bin", "m2c")
 DATA_FILES = [p for p in os.environ.get("SURVEY_DATA", "").split(":") if p]
-PRELUDE = '#include "common.h"\n#include "m2c_macros.h"\n\n'
+# SURVEY_HEADERS adds headers (colon-separated) that declare the globals
+# m2c's output uses
+PRELUDE = "".join(f'#include "{h}"\n' for h in ["common.h", "m2c_macros.h", *[p for p in os.environ.get("SURVEY_HEADERS", "").split(":") if p]]) + "\n"
 # m2c guesses each callee's prototype from one call, which other calls then
 # contradict; declaring the callees without parameter lists avoids that
 GUESSED_PROTOTYPE_RE = re.compile(r"^(.*?\b(\w+))\(.*\);( +/\* (?:extern|static) \*/)$", re.MULTILINE)
