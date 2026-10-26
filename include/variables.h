@@ -121,8 +121,19 @@ extern u8 *g_CourseSkyImage;
 
 extern HoleConditions g_HoleConditions;
 
-/* The wind's direction as each camera sees it, in radians, for its arrow */
-extern f32 g_ViewedWindAngles[2];
+/* What UpdateSky works out about the main and inset cameras, for drawing the sky */
+#define SKY_VIEW_COUNT 2
+typedef struct SkyState {
+    /* 0x00 */ f32 horizonLevels[SKY_VIEW_COUNT];
+    /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky sets them */
+    /* 0x10 */ f32 lookAtLevels[SKY_VIEW_COUNT];
+    /* 0x18 */ f32 pitches[SKY_VIEW_COUNT]; /* In radians */
+    /* 0x20 */ f32 yaws[SKY_VIEW_COUNT];
+    /* 0x28 */ f32 scrollX; /* How far the sky's texture has scrolled with the wind */
+    /* 0x2C */ f32 scrollY;
+    /* 0x30 */ f32 viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera sees it, in radians */
+} SkyState; /* size = 0x38 */
+extern SkyState g_SkyState;
 
 /* HoleConditions.windDirection's units per radian */
 #define WIND_DIRECTION_TO_RADIANS ((f32)(2 * M_PI / 0x10000))

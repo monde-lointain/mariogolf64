@@ -1971,12 +1971,12 @@ void UpdateGame(void) {
     }
     if (g_Scene == 19) {
         StepNoiseTexture();
-        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
-        if (g_ViewedWindAngles[0] > 2 * M_PI) {
-            g_ViewedWindAngles[0] -= 2 * M_PI;
+        g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);
+        if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
+            g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
         }
-        if (g_ViewedWindAngles[0] < 0.0f) {
-            g_ViewedWindAngles[0] += 2 * M_PI;
+        if (g_SkyState.viewedWindAngles[0] < 0.0f) {
+            g_SkyState.viewedWindAngles[0] += 2 * M_PI;
         }
         func_801F6788();
         UpdateEffects();
@@ -2002,19 +2002,19 @@ void UpdateGame(void) {
         UpdateEffects();
         func_800605EC();
         windDirection = &g_HoleConditions.windDirection;
-        g_ViewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
-        g_ViewedWindAngles[1] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
-        if (g_ViewedWindAngles[0] > 2 * M_PI) {
-            g_ViewedWindAngles[0] -= 2 * M_PI;
+        g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
+        g_SkyState.viewedWindAngles[1] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
+        if (g_SkyState.viewedWindAngles[0] > 2 * M_PI) {
+            g_SkyState.viewedWindAngles[0] -= 2 * M_PI;
         }
-        if (g_ViewedWindAngles[0] < 0.0f) {
-            g_ViewedWindAngles[0] += 2 * M_PI;
+        if (g_SkyState.viewedWindAngles[0] < 0.0f) {
+            g_SkyState.viewedWindAngles[0] += 2 * M_PI;
         }
-        if (g_ViewedWindAngles[1] > 2 * M_PI) {
-            g_ViewedWindAngles[1] -= 2 * M_PI;
+        if (g_SkyState.viewedWindAngles[1] > 2 * M_PI) {
+            g_SkyState.viewedWindAngles[1] -= 2 * M_PI;
         }
-        if (g_ViewedWindAngles[1] < 0.0f) {
-            g_ViewedWindAngles[1] += 2 * M_PI;
+        if (g_SkyState.viewedWindAngles[1] < 0.0f) {
+            g_SkyState.viewedWindAngles[1] += 2 * M_PI;
         }
     } else if (g_Scene == SCENE_MENU) {
         StepNoiseTexture();

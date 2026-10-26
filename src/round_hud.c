@@ -143,11 +143,6 @@ extern Vtx sHoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLA
 extern s8 sHoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 extern Mtx D_80105278;
-extern f32 D_801B7F38[2];
-extern f32 D_801B7F40[2];
-extern f32 D_801B7F48[2];
-extern f32 D_801B7F50[2];
-extern f32 D_801B7F58[2];
 
 /*
  * A solid arrow: a triangular head on a rectangular shaft, from -160 to 160
@@ -587,18 +582,18 @@ void InitRoundHud(void) {
             SCREEN_ORTHO_NEAR, SCREEN_ORTHO_FAR, 1.0f);
     guPerspective(&D_80105278, &g_ScreenEffectPerspNorm, 10.0f, 4.0f / 3.0f, 10.0f, 30000.0f, 1.0f);
     guPerspective(&g_ScreenEffectProjection, &g_ScreenEffectPerspNorm, 45.0f, 4.0f / 3.0f, 10.0f, 8000.0f, 1.0f);
-    g_ViewedWindAngles[0] = 0.0f;
-    D_801B7F38[0] = 0.0f;
-    D_801B7F48[0] = 0.0f;
-    D_801B7F50[0] = 0.0f;
-    D_801B7F58[0] = 0.0f;
-    D_801B7F40[0] = 0.0f;
-    g_ViewedWindAngles[1] = 0.0f;
-    D_801B7F38[1] = 0.0f;
-    D_801B7F48[1] = 0.0f;
-    D_801B7F50[1] = 0.0f;
-    D_801B7F58[1] = 0.0f;
-    D_801B7F40[1] = 0.0f;
+    g_SkyState.viewedWindAngles[0] = 0.0f;
+    g_SkyState.horizonLevels[0] = 0.0f;
+    g_SkyState.lookAtLevels[0] = 0.0f;
+    g_SkyState.pitches[0] = 0.0f;
+    g_SkyState.yaws[0] = 0.0f;
+    g_SkyState.screenHeights[0] = 0.0f;
+    g_SkyState.viewedWindAngles[1] = 0.0f;
+    g_SkyState.horizonLevels[1] = 0.0f;
+    g_SkyState.lookAtLevels[1] = 0.0f;
+    g_SkyState.pitches[1] = 0.0f;
+    g_SkyState.yaws[1] = 0.0f;
+    g_SkyState.screenHeights[1] = 0.0f;
     g_InsetView.animation = INSET_VIEW_STILL;
     g_InsetView.step = 0;
 }
@@ -1450,11 +1445,11 @@ void DrawWindSpeed(Gfx **displayListHead, f32 x, f32 y) {
     textureT = HALF_TEXEL - (halfHeightRounded - halfHeight) * HALF_TEXEL;
     /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by truncation works */
     if (speed >= WIND_SPEED_TWO_DIGITS) {
-        centerX = -sinf(g_ViewedWindAngles[0]) * WIND_WIDE_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
+        centerX = -sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
     } else {
-        centerX = -sinf(g_ViewedWindAngles[0]) * WIND_NARROW_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
+        centerX = -sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X + (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
     }
-    centerY = -cosf(g_ViewedWindAngles[0]) * WIND_LEAN_Y + (SCREEN_HEIGHT / 2 - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
+    centerY = -cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y + (SCREEN_HEIGHT / 2 - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -1553,12 +1548,12 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
     translation[AXIS_Z] = WIND_INDICATOR_DEPTH;
     BuildRotationMatrix(matrix, rotation, translation);
     guRotateRPYF(transform, 0.0f,
-                 WIND_INDICATOR_FACING_DEGREES - g_ViewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI)), 0.0f);
+                 WIND_INDICATOR_FACING_DEGREES - g_SkyState.viewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI)), 0.0f);
     guMtxCatF(transform, matrix, matrix);
     guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE);
     guMtxCatF(transform, matrix, matrix);
     guMtxF2L(matrix, &sWindIndicatorMatrices[g_MatrixBufferIndex]);
-    if (!(g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2)) {
+    if (!(g_SkyState.viewedWindAngles[0] > M_PI / 2 && g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
         DrawWindSpeed(&gfx, x, y);
     }
     gDPPipeSync(gfx++);
@@ -1576,7 +1571,7 @@ void DrawWindIndicator(Gfx **displayListHead, f32 x, f32 y) {
         g_ModuleRdpRequestFrames[MODULE_UNK9] = g_FrameCount;
         gSPDisplayList(gfx++, D_80222400);
     }
-    if (g_ViewedWindAngles[0] > M_PI / 2 && g_ViewedWindAngles[0] < 3 * M_PI / 2) {
+    if (g_SkyState.viewedWindAngles[0] > M_PI / 2 && g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2) {
         DrawWindSpeed(&gfx, x, y);
     }
     *displayListHead = gfx;

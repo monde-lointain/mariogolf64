@@ -42,7 +42,6 @@
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
-#define SKY_VIEW_COUNT 2
 extern f32 sSunScreenX[SKY_VIEW_COUNT]; /* For each view */
 extern f32 sSunScreenY[SKY_VIEW_COUNT];
 extern u16 sSunDepth;
@@ -81,8 +80,6 @@ extern s8 sSceneSkyBlendTimes[];
 extern s8 sSceneSkyBlendPercents[];
 extern s32 sSkyHorizonColor[RGB_CHANNEL_COUNT];
 extern s32 sCourseSkyImageAssets[];
-extern s32 D_801B7F60;
-extern s32 D_801B7F64;
 
 extern s32 D_801B609C;
 extern s32 sIsPrimitiveDepthSet;
@@ -469,8 +466,8 @@ void InitSkyColors(void) {
     colors = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyColorTimeIndex];
     from = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex];
     to = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex + 1];
-    D_801B7F60 = 0;
-    D_801B7F64 = 0;
+    g_SkyState.scrollX = 0.0f;
+    g_SkyState.scrollY = 0.0f;
     for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
         for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
             sSkyVertices[group][0].v.cn[channel] = colors->unk4[channel];
