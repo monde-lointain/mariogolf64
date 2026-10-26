@@ -87,7 +87,6 @@ extern s32 sDynamicTextureScroll;
 /* How far BuildHorizonDynamicTextures has scrolled its textures */
 extern s32 sHorizonTextureScroll;
 
-extern s32 sScreenEffect;
 /* Holds a frame for the saved-frame effect */
 extern u16 *sSavedFrameBuffer;
 /* The effect's length in frames; the tiled image counts it down */
@@ -289,7 +288,7 @@ void ScaleMatrix(Mtx *matrix, f32 x, f32 y, f32 z) {
 }
 
 void SetScreenEffect(s32 effect, s32 frameCount) {
-    sScreenEffect = effect;
+    g_ScreenEffect = effect;
     sScreenEffectFrameCount = frameCount;
     if (effect == SCREEN_EFFECT_NONE) {
         g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
@@ -559,18 +558,18 @@ void DrawEmptyEffect(Gfx **displayListHead, CameraView *view) {
 
 void DrawScreenEffect(CameraMatrices *matrices, CameraView *view) {
     /* The spin effect pushes a modelview matrix and changes the projection */
-    if (sScreenEffect == SCREEN_EFFECT_SPIN) {
+    if (g_ScreenEffect == SCREEN_EFFECT_SPIN) {
         DrawSpinEffect(&g_DisplayListHead, view);
         gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
         gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    } else if (sScreenEffect == SCREEN_EFFECT_TILED_IMAGE) {
+    } else if (g_ScreenEffect == SCREEN_EFFECT_TILED_IMAGE) {
         DrawTiledImageEffect(&g_DisplayListHead, view);
-    } else if (sScreenEffect == SCREEN_EFFECT_EMPTY) {
+    } else if (g_ScreenEffect == SCREEN_EFFECT_EMPTY) {
         DrawEmptyEffect(&g_DisplayListHead, view);
         /* Pops although DrawEmptyEffect pushed nothing, as if it once spun too */
         gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
         gSPMatrix(g_DisplayListHead++, &matrices->projection, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    } else if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+    } else if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
         DrawSavedFrameEffect(&g_DisplayListHead, view);
     }
 }
@@ -1353,7 +1352,7 @@ s32 DrawGame(void) {
                     }
                     if (viewIndex == 0) {
                         if (g_Cameras[0].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT)) {
-                            if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 2) {
+                            if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 2) {
                                 gDPPipeSync(g_DisplayListHead++);
                                 gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
                                 gDPPipeSync(g_DisplayListHead++);
@@ -1370,7 +1369,7 @@ s32 DrawGame(void) {
                             gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                                              osVirtualToPhysical(g_DepthBuffer) & ~7);
                             gDPPipeSync(g_DisplayListHead++);
-                            if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+                            if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
                                 gDPSetDepthImage(g_DisplayListHead++, (u32)sSavedFrameBuffer & ~7);
                             }
                         } else {
@@ -1392,7 +1391,7 @@ s32 DrawGame(void) {
                         gDPPipeSync(g_DisplayListHead++);
                         SET_CAMERA_SCISSOR(g_Cameras[0].view);
                         if ((g_Cameras[0].view.drawFlags != (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
-                             sScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
+                             g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME || sScreenEffectFrameCount != 1) &&
                             D_800C306C != 4) {
                             UsePrimitiveDepth(0);
                             if (!IsGameFlagSet(0x15)) {
@@ -1484,7 +1483,7 @@ s32 DrawGame(void) {
         if (drawMode == DRAW_MODE_COURSE) {
             if (g_HasLoaderFinished == 1 && (g_MenuBackdropStyle == 0 || D_800C306C == 4)) {
                 if (g_Cameras[viewIndex].view.drawFlags != 0) {
-                    if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
+                    if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                         gDPPipeSync(g_DisplayListHead++);
                         gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                                          osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
@@ -1496,7 +1495,7 @@ s32 DrawGame(void) {
                             func_80062A8C(matrices, terrainStyle);
                         }
                         DrawBillboards(matrices, viewIndex);
-                        if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+                        if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
                             DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
@@ -1508,7 +1507,7 @@ s32 DrawGame(void) {
                         }
                     }
                     if (g_Cameras[viewIndex].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) &&
-                        sScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+                        g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
                         gDPPipeSync(g_DisplayListHead++);
                         gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                                          osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
@@ -1524,7 +1523,7 @@ s32 DrawGame(void) {
                         if (!IsGameFlagSet(0x17)) {
                             DrawPin(matrices, &camera->view, viewIndex);
                         }
-                        if (sScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
+                        if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME && sScreenEffectFrameCount == 1) {
                             DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
@@ -1583,8 +1582,8 @@ s32 DrawGame(void) {
                             }
                         }
                         if (g_Cameras[viewIndex].view.drawFlags == (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) &&
-                            (sScreenEffect == SCREEN_EFFECT_SPIN || sScreenEffect == SCREEN_EFFECT_TILED_IMAGE ||
-                             sScreenEffect == SCREEN_EFFECT_EMPTY)) {
+                            (g_ScreenEffect == SCREEN_EFFECT_SPIN || g_ScreenEffect == SCREEN_EFFECT_TILED_IMAGE ||
+                             g_ScreenEffect == SCREEN_EFFECT_EMPTY)) {
                             gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
                                              osVirtualToPhysical(nuGfxCfb_ptr) & ~7);
                             gDPSetDepthImage(g_DisplayListHead++, (u32)nuGfxZBuffer & ~7);
@@ -1982,7 +1981,7 @@ void UpdateGame(void) {
         func_801F6788();
         UpdateEffects();
     } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 || g_Scene == SCENE_PLAY_UNK13) {
-        if (sScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+        if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
             StepNoiseTexture();
         }
         if (IsGameFlagSet(GAME_FLAG_INSET_VIEW_BUTTONS)) {

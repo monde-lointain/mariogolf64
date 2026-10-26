@@ -19,6 +19,7 @@
 #define SCREEN_EFFECT_TILED_IMAGE 2 /* Repeats part of the saved frame */
 #define SCREEN_EFFECT_SAVED_FRAME 3 /* Draws a frame saved elsewhere */
 #define SCREEN_EFFECT_NONE 4
+extern s32 g_ScreenEffect; /* The effect SetScreenEffect last set */
 
 /* An orthographic projection of one unit per pixel, centred on the screen, with y rising */
 extern Mtx g_ScreenOrthoMatrix;
