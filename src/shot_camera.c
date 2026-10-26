@@ -2748,7 +2748,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         flightStep = &g_BallFlightStep;
         if (*flightStep == g_SimulatedShot.stepCount) {
             if (waitFrame == 0 && !D_80104B68) {
-                StartLandingReaction(LANDING_REACTION_UNK1);
+                StartLandingReaction(LANDING_REACTION_REST);
             }
             if (++D_800BE620 >= sLandingWaitFrameCount) {
                 if (IsGameFlagSet(GAME_FLAG_UNK22)) {

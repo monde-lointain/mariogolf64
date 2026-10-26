@@ -282,6 +282,29 @@ extern s32 sHudOffsetY;
 
 extern s32 sLandingReaction;
 extern s32 sLandingReactionFrame;
+/* The reaction stops counting its frames here */
+#define LANDING_REACTION_FRAME_COUNT 30
+#define LANDING_NAME_GLYPH_Y 8
+#define LANDING_DISTANCE_GLYPH_Y (-8)
+#define LANDING_NAME_Y 96
+#define LANDING_DISTANCE_Y 112
+#define HUNDREDTHS_PER_UNIT 100
+/* The characters that the fonts draw as the symbols for yards and feet */
+#define YARDS_GLYPH 0xF9
+#define FEET_GLYPH 0xFB
+/* The translucent black panel behind the text spins half a turn as it grows */
+#define LANDING_PANEL_ALPHA 159
+#define LANDING_PANEL_START_DEGREES 180.0f
+#define LANDING_PANEL_DEGREES_PER_FRAME 18.0f
+#define LANDING_PANEL_GROWTH_FRAME_COUNT 10
+#define LANDING_PANEL_GROWTH_PER_FRAME (1.0f / LANDING_PANEL_GROWTH_FRAME_COUNT)
+#define LANDING_PANEL_X (-72.0f)
+#define LANDING_PANEL_Y 32.0f
+#define LANDING_PANEL_Z (-100.0f)
+#define LANDING_PANEL_PIVOT_X 72.0f
+#define LANDING_PANEL_PIVOT_Y (-20.0f)
+extern Vtx sLandingPanelVertices[4];
+extern Mtx sLandingPanelMatrices[MATRIX_BUFFER_COUNT];
 
 /* An I8 texture of a ring, that marks where the ball will land */
 #define RING_TEXTURE_SIZE 64
@@ -977,7 +1000,114 @@ void StartLandingReaction(s32 reaction) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80081EF8);
+/*
+ * Draws the landing reaction: a panel with the name of the surface the ball
+ * landed on and, for LANDING_REACTION_REST, how far it rests from the cup.
+ * The panel spins and grows into place over its first frames, while the text
+ * is drawn as glyph groups in its perspective; after that the text is drawn
+ * flat.
+ *
+ * Doesn't match: the hundredths of the distance go in a different register.
+ */
+#ifdef NON_MATCHING
+void DrawLandingReaction(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 scale;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Mat4 offset;
+    SurfaceInfo *surface;
+    s32 distance;
+    s32 hundredths;
+    f32 angle;
+    f32 size;
+
+    if (sLandingReaction != LANDING_REACTION_NONE) {
+        surface = GetSurfaceInfo(g_BallSurface);
+        if (sLandingReactionFrame == 1) {
+            PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, FONT_SIZE_LARGE, 0, 0, LANDING_NAME_GLYPH_Y, surface->name);
+        }
+        if (sLandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+            distance = GetCupDistance(g_BallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
+                                    g_BallPosition[AXIS_Z] - g_CupPositionZ);
+            /* Mini golf and the green measure in feet */
+            if (g_IsMiniGolf || surface->kind == SURFACE_KIND_GREEN) {
+                hundredths = distance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+                sprintf(g_PrintBuffer, "%2d.%02d%c REST", hundredths / HUNDREDTHS_PER_UNIT,
+                        hundredths % HUNDREDTHS_PER_UNIT, FEET_GLYPH);
+            } else {
+                hundredths = distance * HUNDREDTHS_PER_UNIT * YARDS_PER_UNIT;
+                sprintf(g_PrintBuffer, "%3d.%02d%c REST", hundredths / HUNDREDTHS_PER_UNIT,
+                        hundredths % HUNDREDTHS_PER_UNIT, YARDS_GLYPH);
+            }
+            if (sLandingReactionFrame == 1) {
+                PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, FONT_SIZE_MEDIUM, 0, 0, LANDING_DISTANCE_GLYPH_Y,
+                                g_PrintBuffer);
+            }
+        }
+        if (sLandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
+            sLandingReactionFrame++;
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
+        gDPPipeSync(gfx++);
+        angle = DEGREES_TO_RADIANS(sLandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME + LANDING_PANEL_START_DEGREES);
+        if (angle > 2 * M_PI) {
+            angle = 2 * M_PI;
+        }
+        size = sLandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
+        if (size > 1.0f) {
+            size = 1.0f;
+        }
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] = 0.0f;
+        scale[AXIS_X] = size;
+        scale[AXIS_Y] = size;
+        scale[AXIS_Z] = size;
+        rotation[AXIS_Z] = -angle;
+        translation[AXIS_X] = LANDING_PANEL_X;
+        translation[AXIS_Y] = LANDING_PANEL_Y;
+        translation[AXIS_Z] = LANDING_PANEL_Z;
+        BuildTransformMatrix(matrix, rotation, translation, scale);
+        /* Spins the panel around a point away from its center */
+        guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
+        guMtxCatF(offset, matrix, matrix);
+        ConvertMatrixToFixed(matrix, &sLandingPanelMatrices[g_MatrixBufferIndex]);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sLandingPanelMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sLandingPanelVertices, ARRAY_COUNT(sLandingPanelVertices), 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        if (sLandingReactionFrame < LANDING_PANEL_GROWTH_FRAME_COUNT) {
+            SetUpPerspectiveTextDrawing(&gfx);
+            DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_FIRST);
+            if (sLandingReaction == LANDING_REACTION_REST) {
+                DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_SECOND);
+            }
+        } else {
+            SetUpTextDrawing(&gfx);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+            DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y, surface->name);
+            if (sLandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+                DrawCenteredMediumText(&gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y, g_PrintBuffer);
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawLandingReaction);
+#endif
 
 /*
  * Returns white tinted toward red by a positive warmth, or toward blue by a

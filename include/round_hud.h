@@ -10,7 +10,7 @@
 
 /* The landing reactions that StartLandingReaction starts */
 #define LANDING_REACTION_NONE (-1)
-#define LANDING_REACTION_UNK1 1
+#define LANDING_REACTION_REST 1 /* Shows the surface and how far the ball rests from the cup */
 #define LANDING_REACTION_UNK2 2 /* In the water or off the course */
 
 void PrepareHoleDisplay(void);

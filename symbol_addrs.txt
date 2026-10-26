@@ -2517,3 +2517,6 @@ sWindSpeedFont = 0x800E2164;
 DrawHoleFlag = 0x80085F98; // type:func
 sHoleFlagWavePhase = 0x800C5E20;
 WaveHoleFlag = 0x800874D8; // type:func
+sLandingPanelVertices = 0x800C5A18;
+sLandingPanelMatrices = 0x800E1DD0;
+DrawLandingReaction = 0x80081EF8; // type:func
