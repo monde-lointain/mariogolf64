@@ -153,6 +153,8 @@
 #define AIM_DPAD_MAX_FRAMES 60
 #define AIM_DPAD_SPEED_DIVISOR 6
 #define AIM_DPAD_BASE_SPEED 3
+/* Aims every shot straight down the driving range */
+#define GAME_FLAG_AIM_DOWN_RANGE 0x24
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
@@ -181,6 +183,7 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3070;
+extern s8 D_800C3068; /* Keeps the last heading for the next shot, in Training */
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s32 D_801B60A8; /* g_GameState.unk20, the current player, under a symbol of its own */
@@ -1057,7 +1060,78 @@ static void SetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
     SetCharacterAnimation(slotIndex, GetSwingAnimation(slotIndex, club, shotMode));
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207388_ovl_00);
+void func_80202D04_ovl_00(void);
+void func_80205624_ovl_00(Unk800BA9D8 *hole);
+
+/*
+ * Sets the shot up for the player whose turn it is: where the ball lies and the heading.
+ * Off the tee of a par 4 or 5 the shot aims at the hole's first aim point, and otherwise
+ * at the cup. A hole without that point gets the cup's position for it.
+ */
+void StartPlayerShot(s32 playerIndex) {
+    UnkB8 *player = &g_Players[playerIndex];
+    CoursePoint target;
+    s32 x;
+    s32 z;
+
+    g_CurrentShot.playerIndex = playerIndex;
+    g_CurrentShot.controllerIndex = player->controllerIndex;
+    g_CurrentShot.ballPosition[AXIS_X] = x = player->ballPosition[AXIS_X];
+    g_CurrentShot.ballPosition[AXIS_Y] = player->ballPosition[AXIS_Y];
+    g_CurrentShot.ballPosition[AXIS_Z] = z = player->ballPosition[AXIS_Z];
+    g_CurrentShot.surface = (s8)player->ballSurface;
+    g_CurrentShot.unk18 = 0;
+    g_CurrentShot.unk14 = 0;
+    g_CurrentShot.unk54 = player->unk28;
+    g_CurrentShot.unk40 = 0;
+    g_CurrentShot.unk50 = GetCupDistance(x - D_800BA9D8.cupPosition[AXIS_X],
+                                         z - D_800BA9D8.cupPosition[AXIS_Z]);
+    if (!D_800C3068 || g_GameMode != GAME_MODE_TRAINING) {
+        s32 surfaceKind = GetSurfaceInfo(g_CurrentShot.surface)->kind;
+
+        if (g_HolePoints.unk60[0][AXIS_X] == 0 || g_HolePoints.unk60[0][AXIS_Z] == 0) {
+            g_HolePoints.unk60[0][AXIS_X] = D_800BA9D8.cupPosition[AXIS_X];
+            g_HolePoints.unk60[0][AXIS_Y] = g_CupPositionY;
+            g_HolePoints.unk60[0][AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+        }
+        if (g_HolePar != 3 && (surfaceKind == SURFACE_KIND_TEE_UP || surfaceKind == SURFACE_KIND_TEE_GROUND)) {
+            target[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
+            target[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
+            target[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
+        } else {
+            target[AXIS_X] = g_CupPositionX;
+            target[AXIS_Y] = g_CupPositionY;
+            target[AXIS_Z] = g_CupPositionZ;
+        }
+        g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
+                                   target[AXIS_X] - player->ballPosition[AXIS_X]) * RADIANS_TO_BINARY_ANGLE;
+        func_80205624_ovl_00(&D_800BA9D8);
+    }
+    D_800C3068 = FALSE;
+    if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
+        AimDownRange();
+        D_800C308C = LETTERBOX_STATE_UNK1;
+    } else {
+        ResetAimCamera();
+        D_800C308C = LETTERBOX_STATE_NONE;
+    }
+    g_RoundHud.scorecardPage = -1;
+    g_RoundHud.unk7 = TRUE;
+    g_RoundHud.unk8 = TRUE;
+    g_RoundHud.isLetterboxShown = TRUE;
+    g_RoundHud.unk9 = TRUE;
+    g_RoundHud.unkA = TRUE;
+    g_RoundHud.unkB = TRUE;
+    g_RoundHud.isHoleIntroTextShown = FALSE;
+    g_RoundHud.unkC = TRUE;
+    g_RoundHud.unk13 = FALSE;
+    g_RoundHud.unkD = TRUE;
+    g_RoundHud.unk84[0] = TRUE;
+    g_RoundHud.unk84[1] = FALSE;
+    g_RoundHud.flags = 0;
+    func_80202D04_ovl_00();
+    ResetShotOffsetMarker();
+}
 
 void func_80207660_ovl_00(UnkB8 *player) {
 }
