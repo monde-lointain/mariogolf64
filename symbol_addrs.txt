@@ -2987,3 +2987,4 @@ DrawToadMovie = 0x80213634; // type:func segment:ovl_00
 DrawPlayersResults = 0x801FB500; // type:func segment:ovl_00
 sNoPointsText = 0x80224E08; // size:0x4 segment:ovl_00
 DrawPuttCaption = 0x8021169C; // type:func segment:ovl_00
+DrawDriveRecord = 0x80210F40; // type:func segment:ovl_00

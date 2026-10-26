@@ -306,7 +306,7 @@ extern Mtx sFlipMessageMatrices[2];
 
 void ResetPath(void);
 void func_802104BC_ovl_00(Gfx **displayListHead);
-void func_80210F40_ovl_00(Gfx **displayListHead);
+void DrawDriveRecord(Gfx **displayListHead);
 void DrawPuttCaption(Gfx **displayListHead);
 void func_80211D60_ovl_00(Gfx **displayListHead);
 void DrawMontyMoleMovie(Gfx **displayListHead);
@@ -716,7 +716,7 @@ void DrawMovie(Gfx **displayListHead) {
             func_802104BC_ovl_00(&gfx);
             break;
         case MOVIE_DRIVE_RECORD:
-            func_80210F40_ovl_00(&gfx);
+            DrawDriveRecord(&gfx);
             break;
         case MOVIE_ALBATROSS_PUTT:
         case MOVIE_EAGLE_PUTT:
@@ -758,7 +758,105 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802104BC_ovl_00);
 #define CAPTION_SOUND_CHANNEL 13
 #define CAPTION_SOUND_VOLUME 63
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80210F40_ovl_00);
+/* The record distance shows under the caption once it has met at the centre */
+#define DRIVE_RECORD_DISTANCE_DRAW 26
+#define DRIVE_RECORD_DISTANCE_END_DRAW 45
+#define DRIVE_RECORD_DISTANCE_X 136
+#define DRIVE_RECORD_DISTANCE_Y 116
+#define DRIVE_RECORD_DISTANCE_ENV_COLOR 0xFF600000
+#define DRIVE_RECORD_DISTANCE_PRIM_COLOR 0xFFFF0000
+
+#ifdef NON_MATCHING
+void DrawDriveRecord(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    u32 width;
+    s32 height;
+    s32 stripCount;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 slide;
+    s32 centreX;
+    s32 bottom;
+    s32 copyTop;
+    s32 i;
+    f32 angle;
+    f32 fade;
+    f32 alpha;
+
+    width = (sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
+    height = (sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1];
+    if (sMovieDrawCount == CAPTION_MEET_DRAW + 1) {
+        PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, CAPTION_SOUND_CHANNEL, CAPTION_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
+    }
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    halfWidth = width >> 1;
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0,
+                      ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
+    stripCount = height / stripHeight;
+    if (sMovieDrawCount < CAPTION_MEET_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
+    } else if (sMovieDrawCount < CAPTION_FLASH_END_DRAW) {
+        alpha = 255.0f - sinf((sMovieDrawCount - CAPTION_MEET_DRAW) * CAPTION_TURN_PER_FRAME) *
+                             CAPTION_FLASH_DEPTH;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    } else if (sMovieDrawCount < CAPTION_GROW_DRAW) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    } else if (sMovieDrawCount < CAPTION_GROW_END_DRAW) {
+        angle = (sMovieDrawCount - CAPTION_GROW_DRAW) * CAPTION_TURN_PER_FRAME;
+        fade = sinf(angle) * CAPTION_FLASH_DEPTH;
+        halfWidth = cosf(angle) * halfWidth;
+        stripHeight = (1.0f - cosf(angle)) * CAPTION_MAX_GROWTH + MOVIE_IMAGE_STRIP_HEIGHT;
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255.0f - fade);
+        gDPSetEnvColor(gfx++, 255, 255, 255, 255.0f - fade);
+    } else {
+        sCurrentMovie = MOVIE_NONE;
+        halfWidth = 0;
+    }
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (sMovieDrawCount < CAPTION_DRAW_COUNT && halfWidth > 0) {
+        bottom = SHRINKING_IMAGE_CENTRE_Y;
+        for (i = 0; i != stripCount; i++) {
+            slide = CAPTION_START_SLIDE - sMovieDrawCount * CAPTION_SLIDE_PER_FRAME;
+            if (slide < 0) {
+                slide = 0;
+            }
+            LoadTextureBlock(&gfx, sMovieBuffer + (i * width * MOVIE_IMAGE_STRIP_HEIGHT + MOVIE_IMAGE_PIXELS_OFFSET),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            centreX = SHRINKING_IMAGE_CENTRE_X + slide;
+            DrawTextureRect(&gfx, (centreX - halfWidth) << 2,
+                            (bottom - stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE) << 2,
+                            (centreX + halfWidth) << 2,
+                            (bottom - stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE + stripHeight) << 2,
+                            G_TX_RENDERTILE, 0, 0, (s32)((width >> 1) << 10) / halfWidth,
+                            (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+            if (sMovieDrawCount < CAPTION_MEET_DRAW) {
+                centreX = SHRINKING_IMAGE_CENTRE_X - slide;
+                copyTop = CAPTION_COPY_TOP + i * MOVIE_IMAGE_STRIP_HEIGHT;
+                DrawTextureRect(&gfx, (centreX - (s32)(width >> 1)) << 2, copyTop << 2,
+                                (centreX + (s32)(width >> 1)) << 2, (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            }
+            bottom += stripHeight;
+        }
+    }
+    if (sMovieDrawCount >= DRIVE_RECORD_DISTANCE_DRAW && sMovieDrawCount < DRIVE_RECORD_DISTANCE_END_DRAW) {
+        SetUpGradientTextDrawing(&gfx, 0);
+        sprintf(g_PrintBuffer, "%5.2f%c", g_Players[0].lastDriveDistance * YARDS_PER_UNIT, YARDS_GLYPH);
+        DrawLargeTextWithShadow(&gfx, DRIVE_RECORD_DISTANCE_X, DRIVE_RECORD_DISTANCE_Y, g_PrintBuffer,
+                                DRIVE_RECORD_DISTANCE_ENV_COLOR, DRIVE_RECORD_DISTANCE_PRIM_COLOR,
+                                TEXT_FLAG_FIXED_WIDTH);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawDriveRecord);
+#endif
 
 #ifdef NON_MATCHING
 void DrawPuttCaption(Gfx **displayListHead) {
