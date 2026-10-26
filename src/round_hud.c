@@ -398,8 +398,10 @@ extern void *D_800E2144[2];
 /* The image asset of the lie that the HUD shows, loaded into sLieImage */
 extern s32 sLieImageAsset;
 extern void *sLieImage;
-extern void *D_800E2158;
-extern void *D_800E214C[3];
+#define ANIMATED_ICON_LABEL_COUNT 3
+/* The images of the animated icon and its labels; see DrawAnimatedIcon */
+extern void *sAnimatedIconImages[];
+extern void *sAnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
 
 extern void *sWindSpeedFont;
 extern void *D_800E2168;
@@ -715,14 +717,14 @@ void LoadSceneryImages(void) {
     D_800E2144[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
     sLieImageAsset = -1;
     sLieImage = AllocMemory(LIE_IMAGE_SIZE);
-    D_800E2158 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
-    ReadEncodedAsset(D_800E2158, &asset);
-    D_800E214C[0] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_563, &asset));
-    ReadEncodedAsset(D_800E214C[0], &asset);
-    D_800E214C[1] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_564, &asset));
-    ReadEncodedAsset(D_800E214C[1], &asset);
-    D_800E214C[2] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_562, &asset));
-    ReadEncodedAsset(D_800E214C[2], &asset);
+    sAnimatedIconImages[0] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
+    ReadEncodedAsset(sAnimatedIconImages[0], &asset);
+    sAnimatedIconLabelImages[0] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_563, &asset));
+    ReadEncodedAsset(sAnimatedIconLabelImages[0], &asset);
+    sAnimatedIconLabelImages[1] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_564, &asset));
+    ReadEncodedAsset(sAnimatedIconLabelImages[1], &asset);
+    sAnimatedIconLabelImages[2] = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_562, &asset));
+    ReadEncodedAsset(sAnimatedIconLabelImages[2], &asset);
     sShotOffsetMarkerImage = AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
     ReadEncodedAsset(sShotOffsetMarkerImage, &asset);
     sWindSpeedFont = AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
@@ -764,10 +766,10 @@ void FreeSceneryImages(void) {
         FreeMemory(&D_800E2144[0]);
         FreeMemory(&D_800E2144[1]);
         FreeMemory(&sLieImage);
-        FreeMemory(&D_800E2158);
-        FreeMemory(&D_800E214C[0]);
-        FreeMemory(&D_800E214C[1]);
-        FreeMemory(&D_800E214C[2]);
+        FreeMemory(&sAnimatedIconImages[0]);
+        FreeMemory(&sAnimatedIconLabelImages[0]);
+        FreeMemory(&sAnimatedIconLabelImages[1]);
+        FreeMemory(&sAnimatedIconLabelImages[2]);
         FreeMemory(&sShotOffsetMarkerImage);
         FreeMemory(&sWindSpeedFont);
         FreeMemory(&D_800E2168);
@@ -1765,7 +1767,90 @@ void DrawShotOffsetMarker(void) {
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_800880A0);
+/* The icon cycles through ANIMATED_ICON_FRAME_COUNT images, a new one every few frames */
+#define ANIMATED_ICON_FRAME_COUNT 8
+#define ANIMATED_ICON_FRAME_LENGTH 4
+#define ANIMATED_ICON_SIZE 32
+/* The icon eases a fifth of the way toward its place each frame */
+#define ANIMATED_ICON_X 96.0f
+#define ANIMATED_ICON_Y 24.0f
+#define ANIMATED_ICON_EASING 0.2f
+#define ANIMATED_ICON_MODE_UNK2 2
+#define ANIMATED_ICON_LABEL_WIDTH 64
+#define ANIMATED_ICON_LABEL_HEIGHT 16
+#define ANIMATED_ICON_LABEL_OFFSET_X 24
+#define ANIMATED_ICON_LABEL_UNK0 0
+#define ANIMATED_ICON_LABEL_UNK1 1
+#define ANIMATED_ICON_LABEL_UNK2 2
+extern u32 sAnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT];
+extern s32 sAnimatedIconFrameTime;
+extern s32 sAnimatedIconFrame;
+extern s32 sAnimatedIconImageIndex;
+extern f32 sAnimatedIconX;
+extern f32 sAnimatedIconY;
+
+/*
+ * Draws an animated icon that eases into place, with a label beside it that
+ * depends on D_800C308C. Each new frame of the icon is read into the same
+ * image.
+ */
+void DrawAnimatedIcon(Gfx **displayListHead, s32 mode) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 label;
+
+    if (sSceneryState == SCENERY_LOADED) {
+        if (mode == ANIMATED_ICON_MODE_UNK2) {
+            sAnimatedIconX = 0.0f;
+            sAnimatedIconY = 0.0f;
+        } else {
+            sAnimatedIconX += (ANIMATED_ICON_X - sAnimatedIconX) * ANIMATED_ICON_EASING;
+            sAnimatedIconY += (ANIMATED_ICON_Y - sAnimatedIconY) * ANIMATED_ICON_EASING;
+        }
+        if (++sAnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
+            sAnimatedIconFrameTime = 0;
+            sAnimatedIconFrame = (sAnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
+            OpenEncodedAsset(sAnimatedIconFrameAssets[sAnimatedIconFrame], &asset);
+            ReadEncodedAsset(sAnimatedIconImages[sAnimatedIconImageIndex], &asset);
+        }
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal256(gfx++, (u32)sAnimatedIconImages[sAnimatedIconImageIndex] + IMAGE_HEADER_SIZE & ~7);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPLoadTextureBlock(gfx++,
+                            (u32)sAnimatedIconImages[sAnimatedIconImageIndex] + LARGE_PALETTED_TEXELS_OFFSET & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (s32)sAnimatedIconX << 2, (s32)sAnimatedIconY << 2,
+                                ((s32)sAnimatedIconX + ANIMATED_ICON_SIZE) << 2,
+                                ((s32)sAnimatedIconY + ANIMATED_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        gDPPipeSync(gfx++);
+        if (D_800C308C == 1) {
+            label = ANIMATED_ICON_LABEL_UNK1;
+        } else if (D_800C308C == 2) {
+            label = ANIMATED_ICON_LABEL_UNK0;
+        } else {
+            label = ANIMATED_ICON_LABEL_UNK2;
+        }
+        gDPLoadTLUT_pal16(gfx++, 0, (u32)sAnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE & ~7);
+        gDPLoadTextureBlock_4b(gfx++, (u32)sAnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET & ~7,
+                               G_IM_FMT_CI, ANIMATED_ICON_LABEL_WIDTH, ANIMATED_ICON_LABEL_HEIGHT, 0,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                               G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, ((s32)sAnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X) << 2,
+                                (s32)sAnimatedIconY << 2,
+                                ((s32)sAnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X + ANIMATED_ICON_LABEL_WIDTH) << 2,
+                                ((s32)sAnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                1 << 10, 1 << 10);
+        *displayListHead = gfx;
+    }
+}
 
 /*
  * Draws black bars at the top and bottom of the HUD's area, growing them each
