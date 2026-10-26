@@ -80,6 +80,8 @@ extern s32 g_SkippedNines;
 #define PAUSE_SCREEN_UNK4 4
 #define PAUSE_SCREEN_UNK6 6
 #define PAUSE_SCREEN_SCORECARD 7
+#define PAUSE_SCREEN_UNK8 8
+#define PAUSE_SCREEN_UNK9 9
 extern s32 g_PauseScreen;
 
 /*

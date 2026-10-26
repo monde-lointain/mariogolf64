@@ -3024,3 +3024,7 @@ sPauseLayoutOptionCounts = 0x80224A6C; // size:0xB segment:ovl_00
 sPauseGlowAngle = 0x80224A88; // size:0x4 segment:ovl_00
 sPauseCursorAngle = 0x80224A8C; // size:0x4 segment:ovl_00
 DrawContestWinnerMovie = 0x802104BC; // type:func segment:ovl_00
+UpdatePauseMenu = 0x80219034; // type:func segment:ovl_00
+g_TeePositionX = 0x800BA9E4; // size:0x4
+g_TeePositionZ = 0x800BA9EC; // size:0x4
+g_TurnBallSimulation = 0x80104AC8;

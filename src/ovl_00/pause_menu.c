@@ -4,6 +4,8 @@
 #include "controller.h"
 #include "course.h"
 #include "current_shot.h"
+#include "effects.h"
+#include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "pause_menu.h"
@@ -13,7 +15,9 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "surface.h"
 #include "text.h"
+#include "turn.h"
 #include "variables.h"
 
 /*
@@ -280,7 +284,7 @@ void FreePauseMenu(void) {
 
 typedef struct PauseOption {
     /* 0x0 */ s16 message; /* Counted from PAUSE_OPTION_MESSAGE_BASE */
-    /* 0x2 */ s16 unk2;
+    /* 0x2 */ s16 action; /* A PAUSE_ACTION_* value, done when the option is chosen */
     /* 0x4 */ u16 kind;
 } PauseOption; /* size = 0x6 */
 
@@ -296,7 +300,346 @@ extern s32 sPauseMenuDrawnMarker;
 extern f32 sPauseGlowAngle;
 extern f32 sPauseCursorAngle;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", func_80219034_ovl_00);
+/* What choosing a pause option does, as its PauseOption.action */
+#define PAUSE_ACTION_FREE_LOOK 0
+#define PAUSE_ACTION_SCORECARD 1
+#define PAUSE_ACTION_UNKD678 2 /* Only while debugging or with sPauseMenuUnkD678 set */
+#define PAUSE_ACTION_UNK3 3
+#define PAUSE_ACTION_UNK4 4
+#define PAUSE_ACTION_UNK6 6
+#define PAUSE_ACTION_RETRY_HOLE 9
+#define PAUSE_ACTION_UNK13 13
+#define PAUSE_ACTION_UNK14 14
+#define PAUSE_ACTION_UNK15 15
+/* UpdatePauseMenu's result while no option is chosen */
+#define PAUSE_ACTION_NONE (-1)
+
+/* The prompts that some options open */
+#define PROMPT_UNK3 3
+#define PROMPT_UNK4 4
+#define PROMPT_UNK7 7
+#define PROMPT_UNK8 8
+
+#define PAUSE_SUB_MODULE_SCORECARD 0x05
+#define PAUSE_SUB_MODULE_UNK16 0x16
+
+#define SOUND_MENU_MOVE 0x5C
+#define SOUND_RING_SHOT_RETRY 0x8E
+#define RING_SHOT_RETRY_SOUND_CHANNEL 3
+#define RING_SHOT_RETRY_SOUND_VOLUME 0x7F
+
+/* Where the panels of the wind and of the lie slide to while their option is selected */
+#define PAUSE_PANEL_SHOWN_X 72.0f
+#define PAUSE_PANEL_SHOWN_Y 44.0f
+#define PAUSE_PANEL_HIDDEN_X 224.0f
+#define PAUSE_PANEL_HIDDEN_Y 184.0f
+#define PAUSE_PANEL_EASING 0.5f
+
+/*
+ * The wind speed steps by about a mile an hour as the menu shows it, but
+ * from calm the first step is larger, so that the shown speed starts at one.
+ */
+#define PAUSE_WIND_SPEED_STEP 0x71C7
+#define PAUSE_WIND_SPEED_FIRST_STEP 0xAAAA
+#define PAUSE_WIND_SPEED_CALM 0x93E8 /* Slower winds than this are calm */
+#define PAUSE_WIND_SPEED_MAX 0x99CF0
+#define PAUSE_WIND_SPEED_RAISE_LIMIT 0x9FFFF
+#define PAUSE_WIND_TURN_PER_STICK 5
+#define PAUSE_WIND_TURN_STEP 0xF0
+
+/* The lies that the lie option sets the ball in, from the tee's */
+#define PAUSE_LIE_TEE_UP 0
+#define PAUSE_LIE_FAIRWAY 1
+#define PAUSE_LIE_FAIRWAY_FAIR_LIE 2
+#define PAUSE_LIE_FAIRWAY_POOR_LIE 3
+#define PAUSE_LIE_SEMI_ROUGH 4
+#define PAUSE_LIE_ROUGH 5
+#define PAUSE_LIE_ROUGH_POOR_LIE 6
+#define PAUSE_LIE_DEEP_ROUGH 7
+#define PAUSE_LIE_BUNKER 8
+#define PAUSE_LIE_BUNKER_FAIR_LIE 9
+#define PAUSE_LIE_BUNKER_POOR_LIE 10
+#define PAUSE_LIE_COUNT 11
+/* The ball moves across from the tee onto the patches of the rougher lies */
+#define PAUSE_ROUGH_LIES_OFFSET_X (-0x2D000)
+#define PAUSE_DEEP_ROUGH_OFFSET_X (-0x5A000)
+#define PAUSE_BUNKER_LIES_OFFSET_X 0x2D000
+/* The tee holds the ball up off the ground */
+#define PAUSE_TEE_UP_HEIGHT 307.2f
+
+extern s32 g_TeePositionX; /* D_800BA9D8.teePosition's x, under its own symbol */
+extern s32 g_TeePositionZ;
+
+/*
+ * Takes the player's input on the pause menu. It returns the chosen option's
+ * action, or PAUSE_ACTION_NONE. The weather, wind and lie options are changed
+ * with the control pad's left and right.
+ */
+s32 UpdatePauseMenu(ControllerState *controller) {
+    s32 action;
+    u16 kind;
+    s32 lie;
+    s32 hasLieChanged;
+    s32 surface;
+
+    if (controller->repeatedButtons & A_BUTTON) {
+        action = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].action;
+        switch (action) {
+            case PAUSE_ACTION_UNK4:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_UNK6;
+                OpenPrompt(PROMPT_UNK4);
+                break;
+            case PAUSE_ACTION_UNK14:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_UNK6;
+                OpenPrompt(PROMPT_UNK7);
+                break;
+            case PAUSE_ACTION_UNK15:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_UNK6;
+                OpenPrompt(PROMPT_UNK8);
+                break;
+            case PAUSE_ACTION_UNK3:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_UNK8;
+                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                g_PendingSubModuleId = PAUSE_SUB_MODULE_UNK16;
+                break;
+            case PAUSE_ACTION_UNK13:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_UNK9;
+                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                g_PendingSubModuleId = PAUSE_SUB_MODULE_UNK16;
+                break;
+            case PAUSE_ACTION_UNKD678:
+                if (g_IsDebugEnabled || sPauseMenuUnkD678) {
+                    PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                    RequestPauseMenu(0, -1);
+                    g_PauseScreen = PAUSE_SCREEN_UNK6;
+                    OpenPrompt(PROMPT_UNK3);
+                }
+                break;
+            case PAUSE_ACTION_SCORECARD:
+                RequestPauseMenu(0, -1);
+                g_PauseScreen = PAUSE_SCREEN_SCORECARD;
+                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                g_PendingSubModuleId = PAUSE_SUB_MODULE_SCORECARD;
+                break;
+            case PAUSE_ACTION_FREE_LOOK:
+                RequestPauseMenu(0, -1);
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                StartFreeLook();
+                break;
+            case PAUSE_ACTION_RETRY_HOLE:
+                if (g_GameMode == GAME_MODE_RING_SHOT) {
+                    PlaySound(SOUND_RING_SHOT_RETRY, RING_SHOT_RETRY_SOUND_CHANNEL, RING_SHOT_RETRY_SOUND_VOLUME);
+                }
+            case PAUSE_ACTION_UNK6:
+                PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+                break;
+        }
+        return action;
+    }
+    if (controller->repeatedButtons & U_JPAD) {
+        sPauseSelection--;
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+    } else if (controller->repeatedButtons & D_JPAD) {
+        sPauseSelection++;
+        PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+    }
+    if (sPauseSelection > sPauseLayoutOptionCounts[sPauseLayout] - 1) {
+        sPauseSelection = 0;
+    }
+    if (sPauseSelection < 0) {
+        sPauseSelection = sPauseLayoutOptionCounts[sPauseLayout] - 1;
+    }
+    kind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
+    sPauseMenuDrawnMarker = 0;
+    g_RoundHud.areLieArrowsShown = 0;
+    g_RoundHud.areWindSpeedArrowsShown = 0;
+    g_RoundHud.areWindDirectionArrowsShown = 0;
+    if (kind == PAUSE_OPTION_KIND_WIND_SPEED || kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
+        sWindPanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - sWindPanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
+        sWindPanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - sWindPanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
+    } else {
+        sWindPanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
+        sWindPanelPosition[AXIS_Y] = PAUSE_PANEL_HIDDEN_Y;
+    }
+    if (kind == PAUSE_OPTION_KIND_LIE) {
+        sLiePanelPosition[AXIS_X] += (PAUSE_PANEL_SHOWN_X - sLiePanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
+        sLiePanelPosition[AXIS_Y] += (PAUSE_PANEL_SHOWN_Y - sLiePanelPosition[AXIS_Y]) * PAUSE_PANEL_EASING;
+    } else {
+        sLiePanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
+        sLiePanelPosition[AXIS_Y] = -PAUSE_PANEL_HIDDEN_Y;
+    }
+    if (kind == PAUSE_OPTION_KIND_LIE) {
+        hasLieChanged = FALSE;
+        switch (GetSurfaceInfo(g_CurrentShot.surface)->kind) {
+            case SURFACE_KIND_TEE_UP:
+                lie = PAUSE_LIE_TEE_UP;
+                break;
+            case SURFACE_KIND_FAIRWAY:
+                lie = PAUSE_LIE_FAIRWAY;
+                break;
+            case SURFACE_KIND_FAIRWAY_FAIR_LIE:
+                lie = PAUSE_LIE_FAIRWAY_FAIR_LIE;
+                break;
+            case SURFACE_KIND_FAIRWAY_POOR_LIE:
+                lie = PAUSE_LIE_FAIRWAY_POOR_LIE;
+                break;
+            case SURFACE_KIND_SEMI_ROUGH:
+                lie = PAUSE_LIE_SEMI_ROUGH;
+                break;
+            case SURFACE_KIND_ROUGH:
+                lie = PAUSE_LIE_ROUGH;
+                break;
+            case SURFACE_KIND_ROUGH_POOR_LIE:
+                lie = PAUSE_LIE_ROUGH_POOR_LIE;
+                break;
+            case SURFACE_KIND_DEEP_ROUGH:
+                lie = PAUSE_LIE_DEEP_ROUGH;
+                break;
+            case SURFACE_KIND_BUNKER:
+                lie = PAUSE_LIE_BUNKER;
+                break;
+            case SURFACE_KIND_BUNKER_FAIR_LIE:
+                lie = PAUSE_LIE_BUNKER_FAIR_LIE;
+                break;
+            default:
+                lie = PAUSE_LIE_BUNKER_POOR_LIE;
+                break;
+        }
+        g_RoundHud.areLieArrowsShown = 1;
+        if (controller->repeatedButtons & L_JPAD) {
+            hasLieChanged = TRUE;
+            lie = (lie + PAUSE_LIE_COUNT - 1) % PAUSE_LIE_COUNT;
+            PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        } else if (controller->repeatedButtons & R_JPAD) {
+            hasLieChanged = TRUE;
+            lie = (lie + 1) % PAUSE_LIE_COUNT;
+            PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        }
+        if (hasLieChanged) {
+            g_Players[0].ballPosition[AXIS_Z] = g_TeePositionZ;
+            g_CurrentShot.ballPosition[AXIS_Z] = g_TeePositionZ;
+            if (lie < PAUSE_LIE_SEMI_ROUGH) {
+                g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X] = g_TeePositionX;
+            } else if (lie < PAUSE_LIE_DEEP_ROUGH) {
+                g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X] =
+                    g_TeePositionX + PAUSE_ROUGH_LIES_OFFSET_X;
+            } else if (lie == PAUSE_LIE_DEEP_ROUGH) {
+                g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X] =
+                    g_TeePositionX + PAUSE_DEEP_ROUGH_OFFSET_X;
+            } else {
+                g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X] =
+                    g_TeePositionX + PAUSE_BUNKER_LIES_OFFSET_X;
+            }
+            g_CurrentShot.ballPosition[AXIS_Y] =
+                GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X], g_CurrentShot.ballPosition[AXIS_Z]);
+            switch (lie) {
+                case PAUSE_LIE_TEE_UP:
+                    g_CurrentShot.ballPosition[AXIS_Y] -= PAUSE_TEE_UP_HEIGHT;
+                    surface = SURFACE_TEE_UP;
+                    break;
+                case PAUSE_LIE_FAIRWAY:
+                    surface = SURFACE_FAIRWAY;
+                    break;
+                case PAUSE_LIE_FAIRWAY_FAIR_LIE:
+                    surface = SURFACE_FAIRWAY_FAIR_LIE;
+                    break;
+                case PAUSE_LIE_FAIRWAY_POOR_LIE:
+                    surface = SURFACE_FAIRWAY_POOR_LIE;
+                    break;
+                case PAUSE_LIE_SEMI_ROUGH:
+                    surface = SURFACE_SEMI_ROUGH;
+                    break;
+                case PAUSE_LIE_ROUGH:
+                    surface = SURFACE_ROUGH;
+                    break;
+                case PAUSE_LIE_ROUGH_POOR_LIE:
+                    surface = SURFACE_ROUGH_POOR_LIE;
+                    break;
+                case PAUSE_LIE_DEEP_ROUGH:
+                    surface = SURFACE_DEEP_ROUGH;
+                    break;
+                case PAUSE_LIE_BUNKER:
+                    surface = SURFACE_BUNKER;
+                    break;
+                case PAUSE_LIE_BUNKER_FAIR_LIE:
+                    surface = SURFACE_BUNKER_FAIR_LIE;
+                    break;
+                case PAUSE_LIE_BUNKER_POOR_LIE:
+                default:
+                    surface = SURFACE_BUNKER_POOR_LIE;
+                    break;
+            }
+            g_Players[0].ballSurface = surface;
+            g_CurrentShot.surface = surface;
+            g_Players[0].ballPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+            PlaceBallAtRest(0, &g_TurnBallSimulation);
+            StartShotPanel();
+        }
+    } else if (kind == PAUSE_OPTION_KIND_WIND_DIRECTION) {
+        g_RoundHud.areWindDirectionArrowsShown = 1;
+        g_HoleConditions.windDirection += controller->stickX * PAUSE_WIND_TURN_PER_STICK;
+        if (controller->stickX == 0) {
+            if (controller->buttons & L_JPAD) {
+                g_HoleConditions.windDirection -= PAUSE_WIND_TURN_STEP;
+            }
+            if (controller->buttons & R_JPAD) {
+                g_HoleConditions.windDirection += PAUSE_WIND_TURN_STEP;
+            }
+        }
+    } else if (kind == PAUSE_OPTION_KIND_WIND_SPEED) {
+        g_RoundHud.areWindSpeedArrowsShown = 1;
+        if ((controller->repeatedButtons & L_JPAD) && g_HoleConditions.windSpeed > 0) {
+            g_HoleConditions.windSpeed -= PAUSE_WIND_SPEED_STEP;
+            PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        }
+        if ((controller->repeatedButtons & R_JPAD) && g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_RAISE_LIMIT) {
+            if (g_HoleConditions.windSpeed < PAUSE_WIND_SPEED_FIRST_STEP) {
+                g_HoleConditions.windSpeed += PAUSE_WIND_SPEED_FIRST_STEP;
+            } else {
+                g_HoleConditions.windSpeed += PAUSE_WIND_SPEED_STEP;
+            }
+            PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        }
+        if (g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_CALM) {
+            g_HoleConditions.windSpeed = 0;
+        }
+        if (g_HoleConditions.windSpeed > PAUSE_WIND_SPEED_MAX) {
+            g_HoleConditions.windSpeed = PAUSE_WIND_SPEED_MAX;
+        }
+    } else if (kind == PAUSE_OPTION_KIND_UNK8C) {
+        if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
+            g_Players[g_CurrentShot.playerIndex].unk8C ^= 1;
+            if (g_CurrentShot.playerIndex == 0) {
+                GetSaveData()->options[SAVE_OPTION_UNK2] = g_Players[g_CurrentShot.playerIndex].unk8C;
+                WriteSaveData();
+            }
+            PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+        }
+    } else if (kind == PAUSE_OPTION_KIND_WEATHER) {
+        if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
+            PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
+            if (g_HoleConditions.isRaining == TRUE) {
+                StopSound(RAIN_SOUND_CHANNEL);
+                g_HoleConditions.isRaining = FALSE;
+            } else {
+                PlaySound(RAIN_SOUND, RAIN_SOUND_CHANNEL, RAIN_SOUND_START_VOLUME);
+                g_HoleConditions.isRaining = TRUE;
+                g_RainSoundVolume = RAIN_SOUND_START_VOLUME;
+            }
+        }
+    }
+    return PAUSE_ACTION_NONE;
+}
 
 /*
  * The arrows image is a strip of 16 by 16 pixel tiles, two frames of four tiles each. Each

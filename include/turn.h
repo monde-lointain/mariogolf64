@@ -21,6 +21,9 @@
 #define SHOT_KIND_BIRDIE 10
 #define SHOT_KIND_WATER_CUT 11    /* Crosses water without stopping in it, the debug text's "WaterCut" */
 
+/* The ball of the player whose turn it is, as PlaceBallAtRest sets it */
+extern BallSimulation g_TurnBallSimulation;
+
 void CountNotableShot(s32 playerIndex, s32 shotKind);
 void StartFreeLook(void);
 void PlaceBallAtRest(s32 playerIndex, BallSimulation *simulation);
