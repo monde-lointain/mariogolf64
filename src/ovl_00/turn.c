@@ -939,12 +939,19 @@ void ShowHoleOutBanner(s32 playerIndex) {
     }
 }
 
+/*
+ * The functions from here to func_802088B0 are nested in it in the original,
+ * a GNU C extension. GCC passes them the parent's frame in $v0, its static
+ * chain, and they read the parent's playerIndex through it. As nested
+ * functions they match, but they can only be written so once their parent
+ * is C.
+ */
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802080B4_ovl_00);
 
 /* The turn controller's stick X, which left and right on the control pad tilt fully */
 #ifdef NON_MATCHING
 s8 GetTurnStickX(void) {
-    /* The original stores a never-set register to the stack */
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
     volatile s32 unused;
     s32 garbage;
     s32 x;
@@ -966,7 +973,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickX);
 /* The turn controller's stick Y, which down and up on the control pad tilt fully */
 #ifdef NON_MATCHING
 s8 GetTurnStickY(void) {
-    /* The original stores a never-set register to the stack */
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
     volatile s32 unused;
     s32 garbage;
     s32 y;
@@ -988,7 +995,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GetTurnStickY);
 /* Makes the golfer translucent while a club for the green is held */
 #ifdef NON_MATCHING
 void UpdateGolferTranslucency(void) {
-    /* The original reads the player index through a never-set pointer */
+    /* Stands in for the static chain, through which the original reads its parent's playerIndex */
     s32 *volatile unused;
     s32 *playerIndex;
 
@@ -1009,7 +1016,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802081F8_ovl_00);
 /* Advances the player's, the round's and the hole's stopwatches by a frame, up to their limit */
 #ifdef NON_MATCHING
 void TickStopwatches(void) {
-    /* The original reads the player index through a never-set pointer */
+    /* Stands in for the static chain, through which the original reads its parent's playerIndex */
     s32 *volatile unused;
     s32 *playerIndex;
 
@@ -1037,7 +1044,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_8020845C_ovl_00);
 
 /* Shows or hides the HUD's parts, apart from the club panel and the letterbox */
 void SetRoundHudPartsShown(s8 isShown) {
-    /* The original stores a never-set register to the stack */
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
     volatile s32 unused;
     s32 garbage;
 
