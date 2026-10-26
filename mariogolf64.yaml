@@ -514,9 +514,11 @@ segments:
     symbol_name_format: $VRAM_$SEG
     subsegments:
       - [0xADD30, hasm, ovl_00/padding]
-      - [0xADD40, c, ovl_00/round]
+      - [0xADD40, c, ovl_00/round_results]
+      - [0xB68F0, c, ovl_00/round]
       - [0xD8F70, data]
-      - [0xDDF10, .rodata, ovl_00/round]
+      - [0xDDF10, .rodata, ovl_00/round_results]
+      - [0xDE190, .rodata, ovl_00/round]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
 
   - name: ovl_01
