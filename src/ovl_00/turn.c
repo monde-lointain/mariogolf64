@@ -153,6 +153,23 @@
 #define AIM_DPAD_MAX_FRAMES 60
 #define AIM_DPAD_SPEED_DIVISOR 6
 #define AIM_DPAD_BASE_SPEED 3
+/* The shot preview's step count, which a debug flag lets the D-pad tune */
+#define SHOT_PREVIEW_MIN_STEPS 2
+#define SHOT_PREVIEW_MAX_STEPS 20
+#define SHOT_PREVIEW_SCROLL_STEP 8
+/* Steps longer than this are not stretched into a dash */
+#define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
+/* How far below the ball's centre the preview is drawn */
+#define SHOT_PREVIEW_DROP 0x133
+/* Hides the shot preview */
+#define GAME_FLAG_HIDE_SHOT_PREVIEW 0x4B
+/* Lets the D-pad change how far the shot preview reaches */
+#define GAME_FLAG_TUNE_SHOT_PREVIEW 0x71
+/* Swing meter phases that BuildShotPreview tells apart */
+#define SWING_PHASE_UNK2 2
+#define SWING_PHASE_UNK3 3
+#define SWING_PHASE_UNK4 4
+#define SWING_PHASE_UNK5 5
 /* Aims every shot straight down the driving range */
 #define GAME_FLAG_AIM_DOWN_RANGE 0x24
 /* Only hole-outs in fewer strokes than this enter the records */
@@ -192,6 +209,13 @@ extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is p
 extern u16 D_80104990; /* The first controller's buttons, as play copies them each frame */
 extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing was stopped */
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
+extern s32 D_80223E40_ovl_00;  /* Set once the shot preview has been built */
+extern s32 D_80223EA0_ovl_00;  /* How many steps the shot preview simulates */
+extern s32 D_80223EA4_ovl_00;  /* How many of the shot preview's points are shown */
+extern s8 D_80223EA8_ovl_00;   /* Whether the shot preview ran to its end */
+extern s32 D_80223EAC_ovl_00;  /* Scrolls the shot preview's dots */
+extern Mtx D_802271A0_ovl_00[2][SHOT_PREVIEW_MAX_STEPS]; /* The preview's matrices, by draw buffer */
+extern f32 D_80227BA0_ovl_00[SHOT_PREVIEW_MAX_STEPS][AXIS_COUNT]; /* The preview's points */
 extern s32 D_8022716C_ovl_00; /* The shot mode that the golfer was last posed with */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
@@ -841,7 +865,106 @@ void PrintCoursePoints(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80205DE8_ovl_00);
+/*
+ * Simulates the shot as the swing stands and builds the matrices for the dashes that
+ * preview its path. Until the swing sets the power, the preview shows a full swing.
+ */
+void BuildShotPreview(Unk20 *swing, s32 swingPhase) {
+    BallSimulation simulation;
+    Unk20 shot;
+    CoursePoint start;
+    f32 dash[4][4];
+    f32 align[4][4];
+    s32 step;
+    s32 length;
+    s8 *isMiniGolf;
+
+    if ((GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) || IsGameFlagSet(GAME_FLAG_HIDE_SHOT_PREVIEW)) {
+        return;
+    }
+    D_80223E40_ovl_00 = TRUE;
+    shot.unk0 = g_CurrentShot.unk0;
+    shot.clubIndex = g_CurrentShot.clubSlot;
+    if (IsGameFlagSet(GAME_FLAG_TUNE_SHOT_PREVIEW)) {
+        PrintDebugText("               ", 10, 10);
+        if ((g_ControllerStates[0].pressedButtons & U_JPAD) && D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
+            D_80223EA0_ovl_00++;
+        }
+        if ((g_ControllerStates[0].pressedButtons & D_JPAD) && D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
+            D_80223EA0_ovl_00--;
+        }
+        if ((g_ControllerStates[0].buttons & L_JPAD) && D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
+            D_80223EA0_ovl_00++;
+        }
+        if ((g_ControllerStates[0].buttons & R_JPAD) && D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
+            D_80223EA0_ovl_00--;
+        }
+        sprintf(g_PrintBuffer, "prec:%4d", D_80223EA0_ovl_00);
+        PrintDebugText(g_PrintBuffer, 10, 3);
+    }
+    if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 || swingPhase == SWING_PHASE_UNK3) {
+        shot.unk8 = 0x100;
+    } else {
+        shot.unk8 = swing->unk8;
+    }
+    shot.unkC = 0;
+    if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 || swingPhase == SWING_PHASE_UNK5
+        || swingPhase == SWING_PHASE_UNK3) {
+        shot.unk10 = swing->unk10;
+        shot.unk14 = swing->unk14;
+    } else {
+        shot.unk10 = 0;
+        shot.unk14 = 0;
+    }
+    shot.unk18 = g_CurrentShot.playerIndex;
+    shot.shotMode = g_CurrentShot.shotMode;
+    simulation.position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    simulation.position[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    simulation.position[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    simulation.surface = g_CurrentShot.surface;
+    LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_UNK5, &shot);
+    D_80223EAC_ovl_00 += SHOT_PREVIEW_SCROLL_STEP;
+    for (step = 0; step < D_80223EA0_ovl_00; step++) {
+        isMiniGolf = &g_IsMiniGolf;
+        if (*isMiniGolf && !simulation.unk94) {
+            break;
+        }
+        start[AXIS_X] = simulation.position[AXIS_X];
+        start[AXIS_Y] = simulation.position[AXIS_Y];
+        start[AXIS_Z] = simulation.position[AXIS_Z];
+        StepBallSimulation(&simulation);
+        length = IntLength3D(simulation.position[AXIS_X] - start[AXIS_X], simulation.position[AXIS_Y] - start[AXIS_Y],
+                             simulation.position[AXIS_Z] - start[AXIS_Z]);
+        guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE, (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
+                     start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+        D_80227BA0_ovl_00[step][AXIS_X] = simulation.position[AXIS_X] * COURSE_TO_WORLD_SCALE;
+        D_80227BA0_ovl_00[step][AXIS_Y] = simulation.position[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+        D_80227BA0_ovl_00[step][AXIS_Z] = simulation.position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
+            guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
+            guAlignF(align, 0.0f, simulation.position[AXIS_X] - start[AXIS_X],
+                     simulation.position[AXIS_Y] - start[AXIS_Y], simulation.position[AXIS_Z] - start[AXIS_Z]);
+            guMtxCatF(dash, align, dash);
+            guTranslateF(align, start[AXIS_X] * COURSE_TO_WORLD_SCALE, start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                         start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+            guMtxCatF(dash, align, dash);
+        }
+        guMtxF2L(dash, &D_802271A0_ovl_00[g_DrawBufferIndex][step]);
+        if (!*isMiniGolf && simulation.unk94) {
+            break;
+        }
+    }
+    D_80223EA4_ovl_00 = step - 2;
+    if (D_80223EA4_ovl_00 <= 0) {
+        D_80223EA4_ovl_00 = 1;
+    }
+    if (simulation.unk94) {
+        D_80223EA8_ovl_00 = TRUE;
+        D_80223EA4_ovl_00 = step + 1;
+    } else {
+        D_80223EA8_ovl_00 = FALSE;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206354_ovl_00);
 
