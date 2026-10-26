@@ -286,7 +286,7 @@ void UpdateTitleScreen(void) {
                     pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
                 }
                 if (pressedButtons & (A_BUTTON | START_BUTTON)) {
-                    StartHudAnimation(HUD_ANIMATION_UNK10);
+                    StartHudAnimation(HUD_ANIMATION_SPIRAL);
                     g_Scene = SCENE_SWAPPING_MODULES;
                     g_NextScene = 14;
                     g_SceneModuleToUnload = 0x04;

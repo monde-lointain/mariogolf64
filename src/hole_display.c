@@ -132,6 +132,23 @@ extern u16 *sLastFrameBuffer;
 extern s32 sBackdropFadeLevel;
 
 /*
+ * HUD_ANIMATION_SPIRAL cuts the frame inside the margins into a square grid.
+ * Each frame, it draws as many fewer tiles as it fades.
+ */
+#define SPIRAL_GRID_SIZE 8
+#define SPIRAL_TILE_COUNT (SPIRAL_GRID_SIZE * SPIRAL_GRID_SIZE)
+#define SPIRAL_FRAME_WIDTH (SCREEN_WIDTH - 2 * FRAME_MARGIN_ROWS)
+#define SPIRAL_TILE_WIDTH (SPIRAL_FRAME_WIDTH / SPIRAL_GRID_SIZE)
+#define SPIRAL_TILE_HEIGHT ((SCREEN_HEIGHT - 2 * FRAME_MARGIN_ROWS) / SPIRAL_GRID_SIZE)
+#define SPIRAL_FADING_TILE_COUNT 4
+#define SPIRAL_OPAQUE_ALPHA 255
+#define SPIRAL_ALPHA_STEP (SPIRAL_OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
+#define SPIRAL_RIGHT 0
+#define SPIRAL_DOWN 1
+#define SPIRAL_LEFT 2
+#define SPIRAL_UP 3
+
+/*
  * The frame's tiles turn over and fly apart towards the camera as the
  * animation goes on. The last column is narrower than the others.
  */
@@ -156,7 +173,7 @@ void func_8009232C(Gfx **displayListHead);
 void func_800947A8(void);
 void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
-void func_80092F18(Gfx **displayListHead);
+void DrawSpiralAnimation(Gfx **displayListHead);
 
 void SetFramebufferCount(s32 count);
 
@@ -293,7 +310,7 @@ void StartHudAnimation(s32 animation) {
         case HUD_ANIMATION_UNK8:
             sHudAnimationFramesLeft = 160;
             break;
-        case HUD_ANIMATION_UNK10:
+        case HUD_ANIMATION_SPIRAL:
             sHudAnimationFramesLeft = 72;
             break;
         case HUD_ANIMATION_TILES:
@@ -317,9 +334,129 @@ void HandleFrameBufferSwap(void) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8009232C);
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_80092E10);
+/*
+ * Draws HUD_ANIMATION_SPIRAL, where the frame is cut into a grid of tiles. It
+ * draws the tiles along a spiral from the top left corner inwards, and draws
+ * fewer of them each frame, so the frame disappears from the centre out. The
+ * few tiles after the opaque ones fade, more the further in they are.
+ */
+void DrawSpiralAnimation(Gfx **displayListHead) {
+    s32 tileColumn;
+    s32 rightColumn;
+    s32 topRow;
+    s32 direction;
+    s32 tileRow;
+    s32 bottomRow;
+    s32 leftColumn;
+    Gfx *gfx = *displayListHead;
+    u32 *frame = sCapturedFrame;
+    s32 tileCount;
+    s32 tileIndex;
+    s32 alpha;
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_80092F18);
+    /* Steps to the next tile of the spiral, turning at each edge and moving the edge in */
+    void StepSpiral(void) {
+        switch (direction) {
+            case SPIRAL_RIGHT:
+                tileColumn++;
+                if (tileColumn == rightColumn) {
+                    topRow++;
+                    direction++;
+                }
+                break;
+            case SPIRAL_DOWN:
+                tileRow++;
+                if (tileRow == bottomRow) {
+                    rightColumn--;
+                    direction++;
+                }
+                break;
+            case SPIRAL_LEFT:
+                tileColumn--;
+                if (tileColumn == leftColumn) {
+                    bottomRow--;
+                    direction++;
+                }
+                break;
+            case SPIRAL_UP:
+                tileRow--;
+                if (tileRow == topRow) {
+                    direction = SPIRAL_RIGHT;
+                    leftColumn++;
+                }
+                break;
+        }
+    }
+
+    if (sHudAnimationFramesLeft > 0) {
+        tileCount = sHudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
+        alpha = SPIRAL_OPAQUE_ALPHA;
+        bottomRow = SPIRAL_GRID_SIZE - 1;
+        rightColumn = SPIRAL_GRID_SIZE - 1;
+        topRow = 0;
+        leftColumn = 0;
+        direction = SPIRAL_RIGHT;
+        tileColumn = 0;
+        tileRow = 0;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_NONE);
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+        if (tileCount > SPIRAL_TILE_COUNT) {
+            tileCount = SPIRAL_TILE_COUNT;
+        }
+        for (tileIndex = 0; tileIndex != tileCount; tileIndex++) {
+            gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0,
+                               tileColumn * SPIRAL_TILE_WIDTH, tileRow * SPIRAL_TILE_HEIGHT,
+                               tileColumn * SPIRAL_TILE_WIDTH + SPIRAL_TILE_WIDTH - 1,
+                               tileRow * SPIRAL_TILE_HEIGHT + SPIRAL_TILE_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS) << 2,
+                                (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS) << 2,
+                                (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS + SPIRAL_TILE_WIDTH) << 2,
+                                (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS + SPIRAL_TILE_HEIGHT) << 2,
+                                G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,
+                                (tileRow * SPIRAL_TILE_HEIGHT) << 5, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+            StepSpiral();
+        }
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0, PRIMITIVE);
+        tileCount += SPIRAL_FADING_TILE_COUNT;
+        if (tileCount > SPIRAL_TILE_COUNT) {
+            tileCount = SPIRAL_TILE_COUNT;
+        }
+        for (; tileIndex != tileCount; tileIndex++) {
+            alpha -= SPIRAL_ALPHA_STEP;
+            gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b, SPIRAL_FRAME_WIDTH, 0,
+                               tileColumn * SPIRAL_TILE_WIDTH, tileRow * SPIRAL_TILE_HEIGHT,
+                               tileColumn * SPIRAL_TILE_WIDTH + SPIRAL_TILE_WIDTH - 1,
+                               tileRow * SPIRAL_TILE_HEIGHT + SPIRAL_TILE_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPSetPrimColor(gfx++, 0, 0, SPIRAL_OPAQUE_ALPHA, SPIRAL_OPAQUE_ALPHA, SPIRAL_OPAQUE_ALPHA, alpha);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS) << 2,
+                                (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS) << 2,
+                                (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS + SPIRAL_TILE_WIDTH) << 2,
+                                (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS + SPIRAL_TILE_HEIGHT) << 2,
+                                G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,
+                                (tileRow * SPIRAL_TILE_HEIGHT) << 5, 1 << 10, 1 << 10);
+            gDPPipeSync(gfx++);
+            StepSpiral();
+        }
+        sHudAnimationFramesLeft -= SPIRAL_FADING_TILE_COUNT;
+    }
+    *displayListHead = gfx;
+}
 
 /* Shows a menu's backdrop in place of the course, or MENU_BACKDROP_NONE to show the course again */
 void SetMenuBackdrop(s32 backdrop) {
@@ -530,7 +667,7 @@ void CaptureHudAnimationFrame(void) {
             }
         }
     } else if (sHudAnimation == HUD_ANIMATION_UNK1 || sHudAnimation == HUD_ANIMATION_UNK9 ||
-               sHudAnimation == HUD_ANIMATION_UNK8 || sHudAnimation == HUD_ANIMATION_UNK10) {
+               sHudAnimation == HUD_ANIMATION_UNK8 || sHudAnimation == HUD_ANIMATION_SPIRAL) {
         for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS; row++) {
             for (column = FRAME_MARGIN_WORDS; column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
                 sCapturedFrame[wordIndex++] = frame[row * FRAME_WORDS_PER_ROW + column];
@@ -639,8 +776,8 @@ void DrawHudAnimation(void) {
         case HUD_ANIMATION_SLICES:
             DrawSliceAnimation();
             break;
-        case HUD_ANIMATION_UNK10:
-            func_80092F18(&g_DisplayListHead);
+        case HUD_ANIMATION_SPIRAL:
+            DrawSpiralAnimation(&g_DisplayListHead);
             break;
     }
     sLastFrameBuffer = nuGfxCfb_ptr;

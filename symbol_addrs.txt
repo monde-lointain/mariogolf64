@@ -2497,3 +2497,5 @@ DrawTileAnimation = 0x80094228; // type:func
 sTileMatrices = 0x800E3A50; // size:0x1180
 sTileVertices = 0x800C7318; // size:0x40
 sLastColumnTileVertices = 0x800C7358; // size:0x40
+DrawSpiralAnimation = 0x80092F18; // type:func
+StepSpiral = 0x80092E10; // type:func

@@ -23,7 +23,7 @@
 #define HUD_ANIMATION_UNK7 7
 #define HUD_ANIMATION_UNK8 8
 #define HUD_ANIMATION_UNK9 9
-#define HUD_ANIMATION_UNK10 10
+#define HUD_ANIMATION_SPIRAL 10
 extern s32 g_MenuBackdropStyle;
 
 void CaptureMenuBackdrop(Gfx **displayListHead, s32 unused);
