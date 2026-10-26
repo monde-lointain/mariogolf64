@@ -78,10 +78,14 @@
 #define SCORECARD_CLOSE_SOUND_PAN 0x20
 #define SOUND_PAN_FULL_RIGHT 0xFF
 
-/* The songs for how the first player did against the second */
-#define SONG_GET_CHARACTER_WIN 6
-#define SONG_GET_CHARACTER_LOSS 7
-#define SONG_GET_CHARACTER_DRAW 8
+/*
+ * The songs for a hole's result. Get Character plays the one for how the
+ * first player did; match games and skins matches play SONG_HOLE_WON for any
+ * hole that somebody won.
+ */
+#define SONG_HOLE_WON 6
+#define SONG_HOLE_LOST 7
+#define SONG_HOLE_HALVED 8
 #define SONG_MATCH_RESULT 10
 
 /* The leaderboard writes its contestants' names with these glyph groups */
@@ -905,11 +909,11 @@ s32 LoadResultCharacters(void) {
     song = SONG_MATCH_RESULT;
     if (g_GameMode == GAME_MODE_GET_CHARACTER) {
         if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
-            song = SONG_GET_CHARACTER_WIN;
+            song = SONG_HOLE_WON;
         } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
-            song = SONG_GET_CHARACTER_LOSS;
+            song = SONG_HOLE_LOST;
         } else {
-            song = SONG_GET_CHARACTER_DRAW;
+            song = SONG_HOLE_HALVED;
         }
     }
     PlaySong(song, 0);
