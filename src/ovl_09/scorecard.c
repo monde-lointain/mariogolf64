@@ -37,9 +37,6 @@
 #define SCORECARD_LAYOUT_TOURNAMENT 3
 #define SCORECARD_LAYOUT_UNK4 4 /* For GAME_MODE_UNK7 */
 
-#define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
-#define HOLE_WINNER_UNSET (-2)  /* What SetScorecardLayout starts it as */
-
 /*
  * The tallies of a match's hole happen at these frames of the TALLYING state.
  * A skins match carries a halved hole's skins over at SKINS_TALLY_TIME, or
@@ -116,48 +113,6 @@
  */
 #define TEXTURE_COORD_FRACTION_BITS 5
 
-typedef struct Scorecard {
-    /* 0x00 */ u8 unk0[0xC];
-    /* 0x0C */ u8 *tableImage;
-    /* 0x10 */ u8 *unk10;
-    /* 0x14 */ u8 *unk14;
-    /* 0x18 */ u8 *unk18;
-    /* 0x1C */ u8 *labelsImage;
-    /* 0x20 */ u8 *pageTitleImages[3];
-    /* 0x2C */ u8 *unk2C;
-    /* 0x30 */ u8 *digitsImage;
-    /* 0x34 */ u8 *placesImage;
-    /* 0x38 */ u8 *unk38;
-    /* 0x3C */ u8 *unk3C;
-    /* 0x40 */ u8 *unk40;
-    /* 0x44 */ u8 *betImages[BET_COUNT][2];
-    /* 0x7C */ u8 unk7C[8];
-    /* 0x84 */ u8 *unk84;
-    /* 0x88 */ u8 *unk88;
-    /* 0x8C */ u8 *unk8C;
-    /* 0x90 */ u8 *unk90;
-    /* 0x94 */ u8 *unk94;
-    /* 0x98 */ u8 *faceImages[MAX_PLAYER_COUNT];
-    /* 0xA8 */ u16 *facePalettes[MAX_PLAYER_COUNT];
-    /* 0xB8 */ u8 *unkB8;
-    /* 0xBC */ u8 unkBC;
-    /* 0xBD */ u8 unkBD;
-    /* 0xBE */ u8 unkBE;
-    /* 0xBF */ s8 unkBF;
-    /* 0xC0 */ s32 topRow; /* The contestant at the top of the leaderboard */
-    /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
-    /* 0xC8 */ s32 y;
-    /* 0xCC */ s32 unkCC;
-    /* 0xD0 */ s32 stateTime; /* Frames since sScorecardState changed */
-    /* 0xD4 */ s32 unkD4;
-    /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a HOLE_WINNER_* value */
-    /* 0xDC */ s32 layout;
-    /* 0xE0 */ s32 pageCount;
-    /* 0xE4 */ s32 hasBets;
-} Scorecard; /* size = 0xE8 */
-
-/* The leaderboard shows this many of the tournament's contestants at a time */
-#define LEADERBOARD_ROW_COUNT 10
 #define LEADERBOARD_LAST_TOP_ROW (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
 /* Each row starts to flip over this many frames after the one above it */
 #define ROW_FLIP_STAGGER 4
@@ -167,18 +122,6 @@ typedef struct Scorecard {
 #define SOUND_ROW_FLIPPED 0x5B
 #define ROW_FLIP_SOUND_CHANNEL 13
 
-typedef struct ScorecardContent {
-    /* 0x00 */ f32 rowFlipAngles[LEADERBOARD_ROW_COUNT];
-    /* 0x28 */ s8 isRowFlipping[LEADERBOARD_ROW_COUNT];
-    /* 0x34 */ s32 flipTime;
-    /* 0x38 */ s32 unk38[MAX_PLAYER_COUNT];
-    /* 0x48 */ s32 courseIndex;
-    /* 0x4C */ s32 holeIndex;
-    /* 0x50 */ s32 unk50;
-} ScorecardContent; /* size = 0x54 */
-
-extern Scorecard sScorecard;
-extern ScorecardContent sScorecardContent;
 extern s32 sScorecardState;
 #define RESULT_CHARACTERS_IDLE (-1) /* sResultCharactersLoadStep when no characters are loading */
 extern s32 sResultCharactersLoadStep;
@@ -209,16 +152,16 @@ void FreeScorecard(void) {
         /* Only the bets being played have images */
         for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
             if (g_GameState.betRates[i] != UNSET_BET_RATE) {
-                FreeMemory(&sScorecard.betImages[imageIndex][0]);
-                FreeMemory(&sScorecard.betImages[imageIndex][1]);
+                FreeMemory(&g_Scorecard.betImages[imageIndex][0]);
+                FreeMemory(&g_Scorecard.betImages[imageIndex][1]);
                 imageIndex++;
             }
         }
-        FreeMemory(&sScorecard.unk84);
-        FreeMemory(&sScorecard.pageTitleImages[2]);
-        FreeMemory(&sScorecard.pageTitleImages[1]);
-        FreeMemory(&sScorecard.pageTitleImages[0]);
-        FreeMemory(&sScorecard.unk94);
+        FreeMemory(&g_Scorecard.unk84);
+        FreeMemory(&g_Scorecard.pageTitleImages[2]);
+        FreeMemory(&g_Scorecard.pageTitleImages[1]);
+        FreeMemory(&g_Scorecard.pageTitleImages[0]);
+        FreeMemory(&g_Scorecard.unk94);
         switch (g_GameMode) {
             case GAME_MODE_STROKE:
             case GAME_MODE_UNK1:
@@ -226,39 +169,39 @@ void FreeScorecard(void) {
             case GAME_MODE_UNK6:
             case GAME_MODE_UNK8:
             case GAME_MODE_RING_SHOT:
-                FreeMemory(&sScorecard.placesImage);
+                FreeMemory(&g_Scorecard.placesImage);
                 break;
             case GAME_MODE_MATCH_GAME:
             case GAME_MODE_GET_CHARACTER:
-                FreeMemory(&sScorecard.unk2C);
-                FreeMemory(&sScorecard.unk38);
-                FreeMemory(&sScorecard.unk3C);
-                FreeMemory(&sScorecard.unk40);
+                FreeMemory(&g_Scorecard.unk2C);
+                FreeMemory(&g_Scorecard.unk38);
+                FreeMemory(&g_Scorecard.unk3C);
+                FreeMemory(&g_Scorecard.unk40);
                 break;
             case GAME_MODE_SKINS_MATCH:
             case GAME_MODE_CLUB_SLOTS:
-                FreeMemory(&sScorecard.placesImage);
-                FreeMemory(&sScorecard.unk38);
+                FreeMemory(&g_Scorecard.placesImage);
+                FreeMemory(&g_Scorecard.unk38);
                 break;
             case GAME_MODE_TOURNAMENT:
-                FreeMemory(&sScorecard.unk10);
-                FreeMemory(&sScorecard.unk90);
-                FreeMemory(&sScorecard.unk88);
+                FreeMemory(&g_Scorecard.unk10);
+                FreeMemory(&g_Scorecard.unk90);
+                FreeMemory(&g_Scorecard.unk88);
                 for (i = 0; i != LEADERBOARD_GLYPH_GROUP_COUNT; i++) {
                     PlaceGlyphGroup(i, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
                 }
                 break;
         }
-        FreeMemory(&sScorecard.unk8C);
-        FreeMemory(&sScorecard.labelsImage);
-        FreeMemory(&sScorecard.digitsImage);
-        FreeMemory(&sScorecard.unkB8);
-        FreeMemory(&sScorecard.unk18);
-        FreeMemory(&sScorecard.unk14);
-        FreeMemory(&sScorecard.tableImage);
+        FreeMemory(&g_Scorecard.unk8C);
+        FreeMemory(&g_Scorecard.labelsImage);
+        FreeMemory(&g_Scorecard.digitsImage);
+        FreeMemory(&g_Scorecard.unkB8);
+        FreeMemory(&g_Scorecard.unk18);
+        FreeMemory(&g_Scorecard.unk14);
+        FreeMemory(&g_Scorecard.tableImage);
         for (i = 0; i != g_PlayerCount; i++) {
-            FreeMemory(&sScorecard.faceImages[i]);
-            FreeMemory(&sScorecard.facePalettes[i]);
+            FreeMemory(&g_Scorecard.faceImages[i]);
+            FreeMemory(&g_Scorecard.facePalettes[i]);
         }
         SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
         SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
@@ -282,11 +225,11 @@ void SetScorecardState(s32 state) {
                              SCORECARD_SLIDE_SOUND_REVERB, SCORECARD_CLOSE_SOUND_PAN);
     }
     if (state == SCORECARD_OPENING) {
-        sScorecard.x = SCREEN_WIDTH;
-        sScorecard.y = 0;
+        g_Scorecard.x = SCREEN_WIDTH;
+        g_Scorecard.y = 0;
     }
     sScorecardState = state;
-    sScorecard.stateTime = 0;
+    g_Scorecard.stateTime = 0;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", AnimateScorecard);
@@ -299,7 +242,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", AnimateScorecard);
  */
 #ifdef NON_MATCHING
 void TurnScorecardPage(u16 buttons) {
-    s32 pageCount = sScorecard.pageCount;
+    s32 pageCount = g_Scorecard.pageCount;
 
     if (pageCount > 1) {
         if (buttons & L_JPAD) {
@@ -328,28 +271,28 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TurnScorecardPage);
 void ScrollLeaderboard(u16 buttons) {
     s32 row;
 
-    if (sScorecardContent.flipTime < ROW_FLIP_TIME) {
-        sScorecardContent.flipTime++;
+    if (g_Scorecard.content.flipTime < ROW_FLIP_TIME) {
+        g_Scorecard.content.flipTime++;
     }
     for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
-        if (row * ROW_FLIP_STAGGER < sScorecardContent.flipTime && sScorecardContent.isRowFlipping[row] == TRUE) {
-            sScorecardContent.rowFlipAngles[row] += DEGREES_TO_RADIANS(ROW_FLIP_DEGREES_PER_FRAME);
-            if (sScorecardContent.rowFlipAngles[row] > DEGREES_TO_RADIANS(ROW_FLIP_END_DEGREES)) {
-                sScorecardContent.rowFlipAngles[row] = 0.0f;
-                sScorecardContent.isRowFlipping[row] = FALSE;
+        if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime && g_Scorecard.content.isRowFlipping[row] == TRUE) {
+            g_Scorecard.content.rowFlipAngles[row] += DEGREES_TO_RADIANS(ROW_FLIP_DEGREES_PER_FRAME);
+            if (g_Scorecard.content.rowFlipAngles[row] > DEGREES_TO_RADIANS(ROW_FLIP_END_DEGREES)) {
+                g_Scorecard.content.rowFlipAngles[row] = 0.0f;
+                g_Scorecard.content.isRowFlipping[row] = FALSE;
                 PlaySound(SOUND_ROW_FLIPPED, ROW_FLIP_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
             }
         }
     }
     if (g_RoundHud.scorecardPage == 0) {
         if (buttons & U_JPAD) {
-            if (sScorecard.topRow > 0) {
-                sScorecard.topRow--;
+            if (g_Scorecard.topRow > 0) {
+                g_Scorecard.topRow--;
                 PlaySound(SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
             }
         }
-        if ((buttons & D_JPAD) && sScorecard.topRow < LEADERBOARD_LAST_TOP_ROW) {
-            sScorecard.topRow++;
+        if ((buttons & D_JPAD) && g_Scorecard.topRow < LEADERBOARD_LAST_TOP_ROW) {
+            g_Scorecard.topRow++;
             PlaySound(SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
         }
     }
@@ -456,7 +399,7 @@ void FreeResultCharacters(void) {
  */
 #ifdef NON_MATCHING
 s32 LoadResultCharacters(void) {
-    s32 holeIndex = sScorecardContent.holeIndex - 1;
+    s32 holeIndex = g_Scorecard.content.holeIndex - 1;
     s32 song;
 
     if (IsCharacterSlotBusy(0) || IsCharacterSlotBusy(1)) {
@@ -498,44 +441,45 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
 /*
  * Counts the last hole's result onto the scorecard. Returns TRUE once it is done.
  *
- * Doesn't match: this keeps g_SkinsCarryover's address in a register where
- * the target addresses each access to it on its own.
+ * Doesn't match: the code matches, but this puts its jump table in .rodata
+ * without the word of padding after it, which moves the rodata that follows
+ * from func_802448D4's asm 4 bytes early.
  */
 #ifdef NON_MATCHING
 s32 TallyScorecardSkins(void) {
-    switch (sScorecard.layout) {
+    switch (g_Scorecard.layout) {
         case SCORECARD_LAYOUT_STROKE:
         case SCORECARD_LAYOUT_TOURNAMENT:
         case SCORECARD_LAYOUT_UNK4:
             return TRUE;
         case SCORECARD_LAYOUT_MATCH:
-            if (sScorecard.stateTime == MATCH_RESULT_SOUND_TIME && sScorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
+            if (g_Scorecard.stateTime == MATCH_RESULT_SOUND_TIME && g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
                 PlaySound(SOUND_UNK22, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
             }
-            if (sScorecard.stateTime == MATCH_RESULT_TIME) {
-                g_SkinsCarryover.onLastHole = 1;
-                if (sScorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
+            if (g_Scorecard.stateTime == MATCH_RESULT_TIME) {
+                g_Scorecard.skinsCarryover.onLastHole = 1;
+                if (g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
                     PlaySound(SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
                 }
                 return TRUE;
             }
             break;
         case SCORECARD_LAYOUT_SKINS:
-            if (sScorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
-                if (sScorecard.stateTime == SKINS_TALLY_TIME) {
-                    g_SkinsCarryover.intoLastHole++;
+            if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
+                if (g_Scorecard.stateTime == SKINS_TALLY_TIME) {
+                    g_Scorecard.skinsCarryover.intoLastHole++;
                     PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
                     return TRUE;
                 }
-            } else if (sScorecard.stateTime >= SKINS_TALLY_TIME) {
-                if (g_SkinsCarryover.onLastHole <= 0) {
+            } else if (g_Scorecard.stateTime >= SKINS_TALLY_TIME) {
+                if (g_Scorecard.skinsCarryover.onLastHole <= 0) {
                     return TRUE;
                 }
-                if ((sScorecard.stateTime - SKINS_TALLY_TIME) % SKINS_TALLY_INTERVAL == 1) {
-                    if (g_SkinsCarryover.intoLastHole > 0) {
-                        g_SkinsCarryover.intoLastHole--;
+                if ((g_Scorecard.stateTime - SKINS_TALLY_TIME) % SKINS_TALLY_INTERVAL == 1) {
+                    if (g_Scorecard.skinsCarryover.intoLastHole > 0) {
+                        g_Scorecard.skinsCarryover.intoLastHole--;
                     }
-                    g_SkinsCarryover.onLastHole--;
+                    g_Scorecard.skinsCarryover.onLastHole--;
                     PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
                 }
             }
@@ -550,8 +494,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TallyScorecardSkins);
 void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex) {
     Gfx *gfx = *displayListHead;
 
-    LoadLargePalette(&gfx, sScorecard.facePalettes[playerIndex]);
-    LoadTextureBlock(&gfx, sScorecard.faceImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
+    LoadLargePalette(&gfx, g_Scorecard.facePalettes[playerIndex]);
+    LoadTextureBlock(&gfx, g_Scorecard.faceImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
                      0, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + FACE_SIZE) << 2, (top + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
                     TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -574,13 +518,13 @@ void DrawSmallFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex, s3
 void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
     Gfx *gfx = *displayListHead;
 
-    LoadLargePalette(&gfx, sScorecard.placesImage + IMAGE_HEADER_SIZE);
-    LoadTextureBlock(&gfx, sScorecard.placesImage + (place * PLACE_HALF_SIZE + PLACE_RIGHT_HALVES_OFFSET), G_IM_FMT_CI,
+    LoadLargePalette(&gfx, g_Scorecard.placesImage + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, g_Scorecard.placesImage + (place * PLACE_HALF_SIZE + PLACE_RIGHT_HALVES_OFFSET), G_IM_FMT_CI,
                      G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, (left + PLACE_RIGHT_HALF_X) << 2, top << 2,
                     (left + PLACE_RIGHT_HALF_X + PLACE_HALF_WIDTH) << 2, (top + PLACE_HEIGHT) << 2, G_TX_RENDERTILE,
                     0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    LoadTextureBlock(&gfx, sScorecard.placesImage + (place * PLACE_HALF_SIZE + LARGE_PALETTED_TEXELS_OFFSET),
+    LoadTextureBlock(&gfx, g_Scorecard.placesImage + (place * PLACE_HALF_SIZE + LARGE_PALETTED_TEXELS_OFFSET),
                      G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_HALF_WIDTH, PLACE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + PLACE_HALF_WIDTH) << 2, (top + PLACE_HEIGHT) << 2,
                     G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -591,8 +535,8 @@ void DrawPlace(Gfx **displayListHead, s32 left, s32 top, s32 place) {
 void DrawScorecardLabel(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
     Gfx *gfx = *displayListHead;
 
-    LoadSmallPalette(&gfx, 0, sScorecard.labelsImage + IMAGE_HEADER_SIZE);
-    gDPLoadTextureTile_4b(gfx++, (u32)(sScorecard.labelsImage + PALETTED_TEXELS_OFFSET + labelIndex * LABEL_SIZE) & ~7,
+    LoadSmallPalette(&gfx, 0, g_Scorecard.labelsImage + IMAGE_HEADER_SIZE);
+    gDPLoadTextureTile_4b(gfx++, (u32)(g_Scorecard.labelsImage + PALETTED_TEXELS_OFFSET + labelIndex * LABEL_SIZE) & ~7,
                           G_IM_FMT_CI, LABEL_WIDTH, LABEL_HEIGHT, 0, 0, LABEL_WIDTH - 1, LABEL_HEIGHT - 1, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                           G_TX_NOLOD);
@@ -719,8 +663,8 @@ void DrawBetTallies(Gfx **displayListHead) {
     s32 x;
     char *text;
 
-    LoadSmallPalette(&gfx, 0, sScorecard.digitsImage + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, sScorecard.digitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, DIGIT_GLYPH_SIZE,
+    LoadSmallPalette(&gfx, 0, g_Scorecard.digitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.digitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, DIGIT_GLYPH_SIZE,
                            DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
         total = 0;
@@ -729,7 +673,7 @@ void DrawBetTallies(Gfx **displayListHead) {
             total += g_BetTallies[playerIndex][betIndex];
             if (g_GameState.betRates[playerIndex] != 0 && g_GameState.betRates[playerIndex] != UNSET_BET_RATE) {
                 for (text = g_PrintBuffer, left = column; *text != '\0'; left += DIGIT_GLYPH_SIZE) {
-                    x = left + sScorecard.x;
+                    x = left + g_Scorecard.x;
                     DrawTextureRect(&gfx, x << 2, (BET_TALLY_TOP + playerIndex * BET_TALLY_ROW_SPACING) << 2,
                                     (x + DIGIT_GLYPH_SIZE) << 2,
                                     (BET_TALLY_TOP + DIGIT_GLYPH_SIZE + playerIndex * BET_TALLY_ROW_SPACING) << 2,
@@ -741,7 +685,7 @@ void DrawBetTallies(Gfx **displayListHead) {
         }
         sprintf(g_PrintBuffer, sDecimalFormat, total);
         for (text = g_PrintBuffer, left = BET_TOTAL_LEFT; *text != '\0'; left += DIGIT_GLYPH_SIZE) {
-            x = left + sScorecard.x;
+            x = left + g_Scorecard.x;
             DrawTextureRect(&gfx, x << 2, (BET_TALLY_TOP + playerIndex * BET_TALLY_ROW_SPACING) << 2,
                             (x + DIGIT_GLYPH_SIZE) << 2,
                             (BET_TALLY_TOP + DIGIT_GLYPH_SIZE + playerIndex * BET_TALLY_ROW_SPACING) << 2,

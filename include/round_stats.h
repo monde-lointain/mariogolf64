@@ -21,8 +21,6 @@ typedef struct SkinsCarryover {
     /* 0x2 */ s8 fromLastHole; /* The skins carried over from it */
 } SkinsCarryover; /* size = 0x3 */
 
-extern SkinsCarryover g_SkinsCarryover;
-
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);
 void TallySkins(s32 endHole);
 void StartBets(void);

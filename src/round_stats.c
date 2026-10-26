@@ -6,6 +6,7 @@
 #include "round_stats.h"
 #include "save.h"
 #include "scene.h"
+#include "scorecard.h"
 #include "scoring.h"
 #include "variables.h"
 
@@ -85,9 +86,9 @@ void TallySkins(s32 endHole) {
         }
     }
     endHole += !isAnyUnk26Clear;
-    g_SkinsCarryover.intoLastHole = NO_LAST_HOLE_SKINS;
-    g_SkinsCarryover.onLastHole = 0;
-    g_SkinsCarryover.fromLastHole = 0;
+    g_Scorecard.skinsCarryover.intoLastHole = NO_LAST_HOLE_SKINS;
+    g_Scorecard.skinsCarryover.onLastHole = 0;
+    g_Scorecard.skinsCarryover.fromLastHole = 0;
     skins = 1;
     for (hole = GetFirstHoleIndex(); hole < endHole; hole++) {
         winner = NO_SKINS_WINNER;
@@ -98,19 +99,20 @@ void TallySkins(s32 endHole) {
             }
         }
         if (hole == endHole - 1) {
-            g_SkinsCarryover.intoLastHole = skins - 1;
-            g_SkinsCarryover.onLastHole = skins;
+            g_Scorecard.skinsCarryover.intoLastHole = skins - 1;
+            g_Scorecard.skinsCarryover.onLastHole = skins;
         }
         if (winner == NO_SKINS_WINNER) {
             skins++;
-            g_SkinsCarryover.fromLastHole = skins - 1;
+            g_Scorecard.skinsCarryover.fromLastHole = skins - 1;
         } else {
             g_RoundHud.skinsTotals[winner] += skins;
             skins = 1;
-            g_SkinsCarryover.fromLastHole = 0;
+            g_Scorecard.skinsCarryover.fromLastHole = 0;
         }
     }
-    sprintf(g_PrintBuffer, "%2d %d    ", g_SkinsCarryover.intoLastHole, g_SkinsCarryover.onLastHole);
+    sprintf(g_PrintBuffer, "%2d %d    ", g_Scorecard.skinsCarryover.intoLastHole,
+            g_Scorecard.skinsCarryover.onLastHole);
     PrintDebugText(g_PrintBuffer, SKINS_DEBUG_COLUMN, SKINS_DEBUG_ROW);
 }
 
