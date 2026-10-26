@@ -145,6 +145,8 @@
 extern s32 D_800C3070;
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
+extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
+extern s32 D_8022716C_ovl_00; /* The shot mode that the golfer was last posed with */
 extern PlayRecord D_800FEDD8[];
 extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
@@ -1136,7 +1138,36 @@ void UpdateGolferTranslucency(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateGolferTranslucency);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802081F8_ovl_00);
+/*
+ * Poses the golfer for the picked club and shot mode, when either has changed. An approach
+ * shows the swing's first frame, held; the other modes show the stance.
+ */
+#ifdef NON_MATCHING
+void PoseGolferForShot(void) {
+    /* Stands in for the static chain, through which the original reads its parent's playerIndex */
+    s32 *volatile unused;
+    s32 *playerIndex;
+
+    s32 *lastClubSlot = &D_80227154_ovl_00;
+
+    unused = playerIndex;
+    if (*lastClubSlot != g_CurrentShot.clubSlot || D_8022716C_ovl_00 != g_CurrentShot.shotMode) {
+        *lastClubSlot = g_CurrentShot.clubSlot;
+        D_8022716C_ovl_00 = g_CurrentShot.shotMode;
+        SetCharacterClub(0, g_Players[*playerIndex].clubs[g_CurrentShot.clubSlot]);
+        UpdateGolferTranslucency();
+        if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
+            SetSwingAnimation(0, g_Players[*playerIndex].clubs[g_CurrentShot.clubSlot], SHOT_MODE_APPROACH);
+            SetAnimationSpeed(0, 0);
+        } else {
+            SetStanceAnimation(0, g_Players[*playerIndex].clubs[g_CurrentShot.clubSlot], g_CurrentShot.shotMode);
+            SkipToAnimationEnd(0);
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PoseGolferForShot);
+#endif
 
 /* Advances the player's, the round's and the hole's stopwatches by a frame, up to their limit */
 #ifdef NON_MATCHING
