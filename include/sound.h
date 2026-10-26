@@ -6,6 +6,21 @@
 /* Sound effects play on channels, each holding one effect at a time */
 #define SOUND_CHANNEL_COUNT 16
 
+/*
+ * The songs for a hole's result. Stroke play picks one by the score against
+ * par. Get Character plays the one for how the first player did, and match
+ * games and skins matches play SONG_HOLE_WON for any hole that somebody won.
+ */
+#define SONG_HOLE_OUT_EAGLE 0  /* Also for an albatross */
+#define SONG_HOLE_OUT_BIRDIE 1 /* Also for a hole-in-one */
+#define SONG_HOLE_OUT_PAR 2
+#define SONG_HOLE_OUT_BOGEY 4
+#define SONG_HOLE_OUT_OVER_BOGEY 5
+#define SONG_HOLE_WON 6
+#define SONG_HOLE_LOST 7
+#define SONG_HOLE_HALVED 8
+#define SONG_MATCH_RESULT 10
+
 /* PlaySong's flags */
 #define SONG_FLAG_UNREAD 0x01  /* Passed by some callers, but PlaySong never tests it */
 #define SONG_FLAG_UNK10 0x10   /* Stops the song instead when SAVE_OPTION_UNK0 is set */

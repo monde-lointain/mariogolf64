@@ -81,16 +81,6 @@
 #define SCORECARD_CLOSE_SOUND_PAN 0x20
 #define SOUND_PAN_FULL_RIGHT 0xFF
 
-/*
- * The songs for a hole's result. Get Character plays the one for how the
- * first player did; match games and skins matches play SONG_HOLE_WON for any
- * hole that somebody won.
- */
-#define SONG_HOLE_WON 6
-#define SONG_HOLE_LOST 7
-#define SONG_HOLE_HALVED 8
-#define SONG_MATCH_RESULT 10
-
 /* The leaderboard writes its contestants' names with these glyph groups */
 #define LEADERBOARD_GLYPH_GROUP_COUNT 20
 

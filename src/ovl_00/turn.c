@@ -546,7 +546,46 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207BEC_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207CAC_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207E88_ovl_00);
+/* Plays the jingle for how the player finished the hole */
+void PlayHoleOutSong(s32 playerIndex) {
+    s32 strokeCount = g_Players[playerIndex].strokeCount;
+    s32 scoreToPar = strokeCount - g_HolePar;
+
+    if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+        PlaySong(SONG_HOLE_WON, 0);
+    } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+        if (AreAllRingsPassed(&g_Players[playerIndex])) {
+            PlaySong(SONG_HOLE_WON, 0);
+        } else {
+            PlaySong(SONG_HOLE_LOST, 0);
+        }
+    } else if (strokeCount == 1) {
+        PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
+    } else {
+        switch (scoreToPar) {
+            case -1:
+                PlaySong(SONG_HOLE_OUT_BIRDIE, 0);
+                break;
+            case -2:
+                PlaySong(SONG_HOLE_OUT_EAGLE, 0);
+                break;
+            case -3:
+                PlaySong(SONG_HOLE_OUT_EAGLE, 0);
+                break;
+            case 0:
+                PlaySong(SONG_HOLE_OUT_PAR, 0);
+                break;
+            case 1:
+                PlaySong(SONG_HOLE_OUT_BOGEY, 0);
+                break;
+            case 2:
+            case 3:
+            default:
+                PlaySong(SONG_HOLE_OUT_OVER_BOGEY, 0);
+                break;
+        }
+    }
+}
 
 void ShowHoleOutBanner(s32 playerIndex) {
     s8 strokeCount = g_Players[playerIndex].strokeCount;
