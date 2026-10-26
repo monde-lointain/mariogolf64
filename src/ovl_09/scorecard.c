@@ -190,7 +190,7 @@ void SetFramebufferCount(s32 count);
 void DrawMatchResult(Gfx **displayListHead);
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
 void DrawStandingsPage(Gfx **displayListHead);
-void func_80245184_ovl_09(Gfx **displayListHead);
+void DrawMatchPage(Gfx **displayListHead);
 void DrawSkinsPage(Gfx **displayListHead);
 void func_80246804_ovl_09(Gfx **displayListHead);
 void DrawSpeedGolfPage(Gfx **displayListHead);
@@ -268,7 +268,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
 
     g_Scorecard.content.courseIndex = courseIndex;
     g_Scorecard.content.holeIndex = holeIndex;
-    g_Scorecard.content.unk50 = D_801B60A0;
+    g_Scorecard.content.isSuddenDeath = D_801B60A0;
     osSyncPrintf("SP Address = %x\n", stackPointer);
     g_Scorecard.tableImage = AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.tableImage, &asset);
@@ -1173,7 +1173,7 @@ void DrawScorecard(Gfx **displayListHead) {
                     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
                     SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
                     if (g_RoundHud.scorecardPage == 0) {
-                        func_80245184_ovl_09(&gfx);
+                        DrawMatchPage(&gfx);
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
@@ -1696,7 +1696,321 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sTotalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sCompactHoleFormat);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80245184_ovl_09);
+#define SOUND_UNK61 0x61
+#define MATCH_SOUND_PAN 0x7F
+/* SetTextSlot messages */
+#define WINS_NEEDED_MESSAGE 1 /* Shows SetTextSlotValue's count */
+#define LAST_WIN_NEEDED_MESSAGE 2 /* Shown instead of a count of one when the match can be drawn */
+#define SUDDEN_DEATH_ENV_COLOR 0x00FFFF00
+#define SUDDEN_DEATH_PRIM_COLOR 0xCF48FF00
+#define MATCH_TITLE_LEFT 128
+#define MATCH_TITLE_TOP 48
+#define MATCH_ROW_SPACING 80
+#define WINS_NEEDED_LEFT 88
+#define WINS_NEEDED_TOP 72
+/* The panel behind each player's row, drawn at twice its image's size */
+#define PANEL_LEFT 32
+#define PANEL_TOP 64
+#define PANEL_WIDTH 128
+#define PANEL_HEIGHT 32
+#define PANEL_SHOWN_HEIGHT 62
+#define PANEL_SECOND_TOP 144
+#define TEXEL_STEP_HALF (TEXEL_STEP_ONE / 2)
+/* The tiles that count off the wins needed, each from three pieces */
+#define TILE_IMAGE_WIDTH 32
+#define TILE_IMAGE_HEIGHT 96
+#define TILE_LEFT 36
+#define TILE_TOP 98
+#define TILE_SPACING 25
+#define TILE_PIECE_WIDTH 8
+#define TILE_HEIGHT 24
+#define TILES_PER_IMAGE_ROW 4
+#define TILE_EDGE_IMAGE_ROW 3
+#define WIDE_TILE_INDEX 9 /* The tenth tile has an image of its own, three pieces wide */
+#define WIDE_TILE_LEFT 261
+#define WIDE_TILE_IMAGE_COLUMN 1
+#define WIDE_TILE_IMAGE_ROW 2
+#define MATCH_FACE_LEFT 48
+#define MATCH_FACE_TOP 64
+/* The marks of the holes won, from a strip of images */
+#define WIN_MARK_WIDTH 48
+#define WIN_MARK_HEIGHT 24
+#define WIN_MARK_SHOWN_WIDTH 24
+#define WIN_MARK_TOP 97
+#define WIN_MARK_SIZE (WIN_MARK_WIDTH * WIN_MARK_HEIGHT)
+#define WIN_MARK_START_TIME 2
+#define WIN_MARK_ANIMATION_TIME 18
+#define WIN_MARK_FRAME_TIME 2
+#define WIN_MARK_BOUNCE_HEIGHT 24.0f
+#define WIN_MARK_BOUNCE_STEP (M_PI / 12)
+/* The arrow that rises over the hole's winner */
+#define ARROW_WIDTH 16
+#define ARROW_HEIGHT 8
+#define ARROW_LEFT 40
+#define ARROW_TOP 81
+#define MATCH_COUNT_TIME 20 /* When the hole's result joins the counts */
+#define MATCH_ANIMATION_TIME 30
+
+extern u8 sWinMarkFrames[];
+
+/*
+ * Draws a match's first page: the hole, any sudden death or dormie, and, for
+ * each player, their face, the tiles of the holes they still need and a mark
+ * for each hole won. Once the hole's result is tallied, it animates the
+ * winner's new mark.
+ *
+ * Doesn't match: the target counts the tiles' left edges with one register
+ * where this keeps one for each edge, so its frame is 0x98 bytes, not 0xB8,
+ * and it halves winsNeeded before it subtracts one.
+ */
+#ifdef NON_MATCHING
+void DrawMatchPage(Gfx **displayListHead) {
+    s32 wins[MATCH_PLAYER_COUNT];
+    Gfx *gfx;
+    Gfx **head;
+    s32 winsNeeded;
+    s32 rowOffset;
+    s32 canDraw = FALSE;
+    s32 halvedCount;
+    s32 countEnd;
+    s32 holeIndex;
+    s32 i;
+    s32 j;
+    s32 column;
+    s32 imageRow;
+    s32 frame;
+    s32 bounce;
+
+    head = displayListHead;
+    gfx = *displayListHead;
+    if (g_Scorecard.content.isSuddenDeath == TRUE) {
+        winsNeeded = 2;
+    } else {
+        winsNeeded = GetRoundHoleCount() + 2;
+    }
+    if (g_Scorecard.skinsCarryover.onLastHole > 0) {
+        if (++g_Scorecard.skinsCarryover.onLastHole == MATCH_COUNT_TIME) {
+            g_Scorecard.skinsCarryover.intoLastHole++;
+        }
+        if (g_Scorecard.skinsCarryover.onLastHole == MATCH_ANIMATION_TIME) {
+            g_Scorecard.skinsCarryover.onLastHole = 0;
+        }
+    }
+
+    /* Each halved hole leaves one fewer to win */
+    countEnd = g_Scorecard.skinsCarryover.intoLastHole;
+    halvedCount = 0;
+    wins[1] = 0;
+    wins[0] = 0;
+    for (i = GetFirstHoleIndex(); i != countEnd; i++) {
+        if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+            wins[0]++;
+        } else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+            wins[1]++;
+        } else if (g_Players[0].holes[i].strokes == g_Players[1].holes[i].strokes) {
+
+            winsNeeded--;
+            halvedCount++;
+        }
+    }
+    if (g_Scorecard.skinsCarryover.onLastHole == MATCH_COUNT_TIME && g_Scorecard.content.isSuddenDeath == FALSE &&
+        g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED && (halvedCount & 1) == ((GetRoundHoleCount() - 1) & 1)) {
+        PlaySoundWithEffects(SOUND_UNK61, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME, 0, MATCH_SOUND_PAN);
+    }
+    /* An even count of holes to share out can end level */
+    if ((winsNeeded - 1) / 2 != (winsNeeded /= 2)) {
+        canDraw = TRUE;
+    }
+    if (winsNeeded <= 0) {
+        winsNeeded = 1;
+    }
+
+    SetUpGradientTextDrawing(&gfx, 0);
+    gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0, 0xFF);
+    gDPSetPrimColor(gfx++, 0, 0, 0x30, 0xFF, 0, 0xFF);
+    sprintf(g_PrintBuffer, sCompactHoleFormat, g_Scorecard.content.holeIndex + g_Scorecard.isTallied);
+    DrawLargeTextWithShadow(&gfx, g_Scorecard.x + STANDINGS_HOLE_LEFT, g_Scorecard.y + STANDINGS_HOLE_TOP,
+                            g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
+    if (g_Scorecard.content.isSuddenDeath) {
+        sprintf(g_PrintBuffer, "SUDDEN DEATH");
+        DrawLargeTextWithShadow(&gfx, g_Scorecard.x + MATCH_TITLE_LEFT, g_Scorecard.y + MATCH_TITLE_TOP,
+                                g_PrintBuffer, SUDDEN_DEATH_ENV_COLOR, SUDDEN_DEATH_PRIM_COLOR, 0);
+    } else {
+        s32 points[MATCH_PLAYER_COUNT];
+
+        /* A win counts two points and a halved hole one */
+        points[0] = 0;
+        points[1] = 0;
+        for (i = GetFirstHoleIndex(); i != g_Scorecard.skinsCarryover.fromLastHole; i++) {
+            if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                points[0] += 2;
+            } else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                points[1] += 2;
+            } else if (g_Players[0].holes[i].strokes == g_Players[1].holes[i].strokes) {
+                points[0]++;
+                points[1]++;
+            }
+        }
+        if (GetRoundHoleCount() - 1 < points[0] || GetRoundHoleCount() - 1 < points[1]) {
+            sprintf(g_PrintBuffer, "DORMIE");
+            DrawLargeTextWithShadow(&gfx, g_Scorecard.x + MATCH_TITLE_LEFT, g_Scorecard.y + MATCH_TITLE_TOP,
+                                    g_PrintBuffer, HEADING_ENV_COLOR, HEADING_PRIM_COLOR, 0);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gSPDisplayList(gfx++, D_800C3FC0);
+    for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
+        if (canDraw == TRUE && winsNeeded - wins[i] == 1 && winsNeeded - wins[i ^ 1] >= 2) {
+            SetTextSlot(g_Scorecard.x + WINS_NEEDED_LEFT, i * MATCH_ROW_SPACING + g_Scorecard.y + WINS_NEEDED_TOP,
+                        LAST_WIN_NEEDED_MESSAGE, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        } else if (winsNeeded != wins[i] && winsNeeded != wins[i ^ 1]) {
+            SetTextSlotValue(winsNeeded - wins[i], i, 0);
+            SetTextSlot(g_Scorecard.x + WINS_NEEDED_LEFT, i * MATCH_ROW_SPACING + g_Scorecard.y + WINS_NEEDED_TOP,
+                        WINS_NEEDED_MESSAGE, 1, i, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        } else {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, i, 1, 0, 0, 0, 0);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.unk2C + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.unk2C + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, PANEL_WIDTH, PANEL_HEIGHT, 0,
+                           0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, (g_Scorecard.x + PANEL_LEFT) << 2, (g_Scorecard.y + PANEL_TOP) << 2,
+                    (g_Scorecard.x + PANEL_LEFT + PANEL_WIDTH * 2) << 2,
+                    (g_Scorecard.y + PANEL_TOP + PANEL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_HALF,
+                    TEXEL_STEP_HALF);
+    DrawTextureRect(&gfx, (g_Scorecard.x + PANEL_LEFT) << 2, (g_Scorecard.y + PANEL_SECOND_TOP) << 2,
+                    (g_Scorecard.x + PANEL_LEFT + PANEL_WIDTH * 2) << 2,
+                    (g_Scorecard.y + PANEL_SECOND_TOP + PANEL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                    TEXEL_STEP_HALF, TEXEL_STEP_HALF);
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.unk3C + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.unk3C + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, TILE_IMAGE_WIDTH,
+                           TILE_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    for (i = 0, rowOffset = 0; i != MATCH_PLAYER_COUNT; i++, rowOffset += MATCH_ROW_SPACING) {
+        for (j = 0; j != winsNeeded; j++) {
+            column = j % TILES_PER_IMAGE_ROW;
+            imageRow = j / TILES_PER_IMAGE_ROW;
+            if (j == WIDE_TILE_INDEX) {
+                DrawTextureRect(&gfx, (g_Scorecard.x + WIDE_TILE_LEFT) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP)) << 2,
+                                (g_Scorecard.x + WIDE_TILE_LEFT + TILE_PIECE_WIDTH * 3) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP + TILE_HEIGHT)) << 2, G_TX_RENDERTILE,
+                                (WIDE_TILE_IMAGE_COLUMN * TILE_PIECE_WIDTH) << TEXTURE_COORD_FRACTION_BITS,
+                                (WIDE_TILE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+            } else {
+                DrawTextureRect(&gfx, (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP)) << 2,
+                                (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + TILE_PIECE_WIDTH)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP + TILE_HEIGHT)) << 2, G_TX_RENDERTILE, 0,
+                                (TILE_EDGE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+                DrawTextureRect(&gfx, (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + TILE_PIECE_WIDTH)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP)) << 2,
+                                (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + TILE_PIECE_WIDTH * 2)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP + TILE_HEIGHT)) << 2, G_TX_RENDERTILE,
+                                (column * TILE_PIECE_WIDTH) << TEXTURE_COORD_FRACTION_BITS,
+                                (imageRow * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+                DrawTextureRect(&gfx, (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + TILE_PIECE_WIDTH * 2)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP)) << 2,
+                                (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + TILE_PIECE_WIDTH * 3)) << 2,
+                                (rowOffset + (g_Scorecard.y + TILE_TOP + TILE_HEIGHT)) << 2, G_TX_RENDERTILE,
+                                TILE_PIECE_WIDTH << TEXTURE_COORD_FRACTION_BITS,
+                                (TILE_EDGE_IMAGE_ROW * TILE_HEIGHT) << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+            }
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    for (i = 0; i != g_PlayerCount; i++) {
+        DrawScorecardFace(&gfx, g_Scorecard.x + MATCH_FACE_LEFT, MATCH_FACE_TOP + i * MATCH_ROW_SPACING, i);
+    }
+
+    /* A mark that the other player has matched shows its second image */
+    gDPPipeSync(gfx++);
+    LoadLargePalette(&gfx, g_Scorecard.unk38 + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, g_Scorecard.unk38 + LARGE_PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, WIN_MARK_WIDTH,
+                     WIN_MARK_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != MATCH_PLAYER_COUNT; i++) {
+        for (j = 0; j != wins[i]; j++) {
+            DrawTextureRect(&gfx, (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)) << 2,
+                            (i * MATCH_ROW_SPACING + (g_Scorecard.y + WIN_MARK_TOP)) << 2,
+                            (j * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + WIN_MARK_SHOWN_WIDTH)) << 2,
+                            (i * MATCH_ROW_SPACING + (g_Scorecard.y + WIN_MARK_TOP + WIN_MARK_HEIGHT)) << 2,
+                            G_TX_RENDERTILE, 0,
+                            (j < wins[i ^ 1]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS : 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        }
+    }
+
+    if ((u8)(g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME) < WIN_MARK_ANIMATION_TIME) {
+        frame = g_Scorecard.skinsCarryover.onLastHole - WIN_MARK_START_TIME;
+        j = sWinMarkFrames[frame / WIN_MARK_FRAME_TIME];
+        bounce = -(s32)(sinf((f32)frame * WIN_MARK_BOUNCE_STEP) * WIN_MARK_BOUNCE_HEIGHT);
+        /* The mark only rises */
+        bounce = (bounce <= 0) ? bounce : 0;
+        LoadTextureBlock(&gfx, g_Scorecard.unk38 + LARGE_PALETTED_TEXELS_OFFSET + j * WIN_MARK_SIZE, G_IM_FMT_CI,
+                         G_IM_SIZ_8b, WIN_MARK_WIDTH, WIN_MARK_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
+        if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+            DrawTextureRect(&gfx, (wins[0] * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)) << 2,
+                            (bounce + (g_Scorecard.y + WIN_MARK_TOP)) << 2,
+                            (wins[0] * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + WIN_MARK_SHOWN_WIDTH)) << 2,
+                            (bounce + (g_Scorecard.y + WIN_MARK_TOP + WIN_MARK_HEIGHT)) << 2, G_TX_RENDERTILE, 0,
+                            (wins[1] < wins[0]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS : 0,
+                            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+            DrawTextureRect(&gfx, (wins[1] * TILE_SPACING + (g_Scorecard.x + TILE_LEFT)) << 2,
+                            (bounce + (g_Scorecard.y + WIN_MARK_TOP + MATCH_ROW_SPACING)) << 2,
+                            (wins[1] * TILE_SPACING + (g_Scorecard.x + TILE_LEFT + WIN_MARK_SHOWN_WIDTH)) << 2,
+                            (bounce + (g_Scorecard.y + WIN_MARK_TOP + MATCH_ROW_SPACING + WIN_MARK_HEIGHT)) << 2,
+                            G_TX_RENDERTILE, 0,
+                            (wins[0] < wins[1]) ? WIN_MARK_HEIGHT << TEXTURE_COORD_FRACTION_BITS : 0,
+                            TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+
+        LoadSmallPalette(&gfx, 0, g_Scorecard.unk40 + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx, g_Scorecard.unk40 + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ARROW_WIDTH,
+                               ARROW_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        holeIndex = g_Scorecard.skinsCarryover.intoLastHole;
+        if (g_Players[0].holes[holeIndex].strokes < g_Players[1].holes[holeIndex].strokes) {
+            DrawTextureRect(&gfx, (wins[0] * TILE_SPACING + (g_Scorecard.x + ARROW_LEFT)) << 2,
+                            (-g_Scorecard.skinsCarryover.onLastHole + (g_Scorecard.y + ARROW_TOP)) << 2,
+                            (wins[0] * TILE_SPACING + (g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH)) << 2,
+                            (-g_Scorecard.skinsCarryover.onLastHole + (g_Scorecard.y + ARROW_TOP + ARROW_HEIGHT)) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        } else if (g_Players[1].holes[holeIndex].strokes < g_Players[0].holes[holeIndex].strokes) {
+            DrawTextureRect(&gfx, (wins[1] * TILE_SPACING + (g_Scorecard.x + ARROW_LEFT)) << 2,
+                            (-g_Scorecard.skinsCarryover.onLastHole +
+                             (g_Scorecard.y + ARROW_TOP + MATCH_ROW_SPACING)) << 2,
+                            (wins[1] * TILE_SPACING + (g_Scorecard.x + ARROW_LEFT + ARROW_WIDTH)) << 2,
+                            (-g_Scorecard.skinsCarryover.onLastHole +
+                             (g_Scorecard.y + ARROW_TOP + MATCH_ROW_SPACING + ARROW_HEIGHT)) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *head = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawMatchPage);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sStringFormat);
 

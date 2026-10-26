@@ -18,7 +18,7 @@ typedef struct ScorecardContent {
     /* 0x38 */ s32 faceImageOffsets[MAX_PLAYER_COUNT]; /* Added to each player's first face image */
     /* 0x48 */ s32 courseIndex;
     /* 0x4C */ s32 holeIndex;
-    /* 0x50 */ s32 unk50;
+    /* 0x50 */ s32 isSuddenDeath; /* The page shows SUDDEN DEATH */
 } ScorecardContent; /* size = 0x54 */
 
 typedef struct Scorecard {
