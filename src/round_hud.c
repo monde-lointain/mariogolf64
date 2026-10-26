@@ -90,27 +90,28 @@ extern s32 sIsCourseSelectLoaded;
 extern f32 g_RainSoundVolume;
 
 /*
- * The flag of the wind indicator is a grid of vertices that the wind waves.
- * Its front and back sides each have one grid per matrix buffer; the back's
+ * The hole's flag, which shows the hole image, is a grid of vertices. pin.c
+ * draws it at the cup and DrawHoleImageModel draws it on the screen. Its
+ * front and back sides each have one grid per matrix buffer; the back's
  * texture runs the other way.
  */
-#define WIND_FLAG_COLUMN_COUNT 6
-#define WIND_FLAG_ROW_COUNT 5
-#define WIND_FLAG_VERTEX_COUNT (WIND_FLAG_COLUMN_COUNT * WIND_FLAG_ROW_COUNT)
-#define WIND_FLAG_SIDE_COUNT 2
+#define HOLE_FLAG_COLUMN_COUNT 6
+#define HOLE_FLAG_ROW_COUNT 5
+#define HOLE_FLAG_VERTEX_COUNT (HOLE_FLAG_COLUMN_COUNT * HOLE_FLAG_ROW_COUNT)
+#define HOLE_FLAG_SIDE_COUNT 2
 #define MATRIX_BUFFER_COUNT 2
-#define WIND_FLAG_CELL_SIZE 160
-#define WIND_FLAG_TEXEL_COLUMN_STEP 0x266 /* In s10.5 texture coordinates */
-#define WIND_FLAG_TEXEL_ROW_STEP 0x2A0
-#define WIND_FLAG_BACK_TEXEL_START 0xC00
-#define WIND_FLAG_START_SHADE 0xB7
+#define HOLE_FLAG_CELL_SIZE 160
+#define HOLE_FLAG_TEXEL_COLUMN_STEP 0x266 /* In s10.5 texture coordinates */
+#define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
+#define HOLE_FLAG_BACK_TEXEL_START 0xC00
+#define HOLE_FLAG_START_SHADE 0xB7
 
 /* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
 
-extern Vtx sWindFlagVertices[WIND_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][WIND_FLAG_VERTEX_COUNT];
-extern u8 sWindFlagShades[WIND_FLAG_VERTEX_COUNT];
+extern Vtx sHoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT][HOLE_FLAG_VERTEX_COUNT];
+extern u8 sHoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 extern Mtx D_80105278;
 extern f32 D_801B7F38[2];
@@ -486,34 +487,34 @@ void InitRoundHud(void) {
     Vtx *vertex;
 
     D_800C5478 = 0;
-    for (grid = 0; grid != WIND_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-        vertex = sWindFlagVertices[0][grid];
-        for (row = 0; row != WIND_FLAG_ROW_COUNT; row++) {
-            for (column = 0; column != WIND_FLAG_COLUMN_COUNT; column++) {
-                vertex->v.ob[0] = column * WIND_FLAG_CELL_SIZE;
-                vertex->v.ob[1] = -row * WIND_FLAG_CELL_SIZE;
+    for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
+        vertex = sHoleFlagVertices[0][grid];
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+                vertex->v.ob[0] = column * HOLE_FLAG_CELL_SIZE;
+                vertex->v.ob[1] = -row * HOLE_FLAG_CELL_SIZE;
                 vertex->v.ob[2] = 0;
-                vertex->v.tc[0] = column * WIND_FLAG_TEXEL_COLUMN_STEP;
-                vertex->v.tc[1] = row * WIND_FLAG_TEXEL_ROW_STEP;
-                vertex->v.cn[0] = WIND_FLAG_START_SHADE;
-                vertex->v.cn[1] = WIND_FLAG_START_SHADE;
-                vertex->v.cn[2] = WIND_FLAG_START_SHADE;
-                vertex->v.cn[3] = WIND_FLAG_START_SHADE;
+                vertex->v.tc[0] = column * HOLE_FLAG_TEXEL_COLUMN_STEP;
+                vertex->v.tc[1] = row * HOLE_FLAG_TEXEL_ROW_STEP;
+                vertex->v.cn[0] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[1] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[2] = HOLE_FLAG_START_SHADE;
+                vertex->v.cn[3] = HOLE_FLAG_START_SHADE;
                 vertex++;
             }
         }
     }
     for (grid = 0; grid != MATRIX_BUFFER_COUNT; grid++) {
-        vertex = sWindFlagVertices[1][grid];
-        for (row = 0; row != WIND_FLAG_ROW_COUNT; row++) {
-            for (column = 0; column != WIND_FLAG_COLUMN_COUNT; column++) {
-                vertex->v.tc[0] = WIND_FLAG_BACK_TEXEL_START - column * WIND_FLAG_TEXEL_COLUMN_STEP;
+        vertex = sHoleFlagVertices[1][grid];
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
+                vertex->v.tc[0] = HOLE_FLAG_BACK_TEXEL_START - column * HOLE_FLAG_TEXEL_COLUMN_STEP;
                 vertex++;
             }
         }
     }
-    for (column = 0; column != WIND_FLAG_VERTEX_COUNT; column++) {
-        sWindFlagShades[column] = WIND_FLAG_START_SHADE;
+    for (column = 0; column != HOLE_FLAG_VERTEX_COUNT; column++) {
+        sHoleFlagShades[column] = HOLE_FLAG_START_SHADE;
     }
     guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2, -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2,
             SCREEN_ORTHO_NEAR, SCREEN_ORTHO_FAR, 1.0f);
@@ -1210,7 +1211,7 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008534C);
 /*
  * Draws the flag grid with the hole image on it. With isBackDrawn, it then
  * draws the back too, by changing the grid's texture coordinates to the
- * back's and mirroring its shades around WIND_FLAG_START_SHADE.
+ * back's and mirroring its shades around HOLE_FLAG_START_SHADE.
  *
  * Doesn't match: the loop that modifies the back's vertices allocates its
  * registers differently.
@@ -1244,34 +1245,34 @@ void DrawHoleFlag(s32 isBackDrawn) {
                         G_IM_SIZ_8b, HOLE_IMAGE_WIDTH, HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
-    gSPVertex(g_DisplayListHead++, sWindFlagVertices[0][g_MatrixBufferIndex], WIND_FLAG_VERTEX_COUNT, 0);
-    for (row = 0; row != WIND_FLAG_ROW_COUNT - 1; row++) {
-        for (column = 0; column != WIND_FLAG_COLUMN_COUNT - 1; column++) {
-            index = row * WIND_FLAG_COLUMN_COUNT + column;
-            gSP2Triangles(g_DisplayListHead++, index, index + WIND_FLAG_COLUMN_COUNT, index + WIND_FLAG_COLUMN_COUNT + 1,
-                          0, index, index + WIND_FLAG_COLUMN_COUNT + 1, index + 1, 0);
+    gSPVertex(g_DisplayListHead++, sHoleFlagVertices[0][g_MatrixBufferIndex], HOLE_FLAG_VERTEX_COUNT, 0);
+    for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
+        for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
+            index = row * HOLE_FLAG_COLUMN_COUNT + column;
+            gSP2Triangles(g_DisplayListHead++, index, index + HOLE_FLAG_COLUMN_COUNT, index + HOLE_FLAG_COLUMN_COUNT + 1,
+                          0, index, index + HOLE_FLAG_COLUMN_COUNT + 1, index + 1, 0);
         }
     }
     if (isBackDrawn == TRUE) {
         index = 0;
-        vertex = sWindFlagVertices[0][g_MatrixBufferIndex];
-        for (row = 0; row != WIND_FLAG_ROW_COUNT; row++) {
-            for (column = 0; column != WIND_FLAG_COLUMN_COUNT; column++, index++, vertex++) {
+        vertex = sHoleFlagVertices[0][g_MatrixBufferIndex];
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++, index++, vertex++) {
                 /* These texture coordinates are after the gSPTexture scale, which halves them */
                 gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_ST,
-                                ((WIND_FLAG_BACK_TEXEL_START / 2 - column * (WIND_FLAG_TEXEL_COLUMN_STEP / 2)) << 16) +
-                                    row * (WIND_FLAG_TEXEL_ROW_STEP / 2));
+                                ((HOLE_FLAG_BACK_TEXEL_START / 2 - column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)) << 16) +
+                                    row * (HOLE_FLAG_TEXEL_ROW_STEP / 2));
                 gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_RGBA,
-                                ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
-                                    ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
-                                    ((2 * WIND_FLAG_START_SHADE - vertex->v.cn[2]) << 8) | WIND_FLAG_START_SHADE);
+                                ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
+                                    ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
+                                    ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[2]) << 8) | HOLE_FLAG_START_SHADE);
             }
         }
-        for (row = 0; row != WIND_FLAG_ROW_COUNT - 1; row++) {
-            for (column = 0; column != WIND_FLAG_COLUMN_COUNT - 1; column++) {
-                index = row * WIND_FLAG_COLUMN_COUNT + column;
-                gSP2Triangles(g_DisplayListHead++, index, index + WIND_FLAG_COLUMN_COUNT + 1,
-                              index + WIND_FLAG_COLUMN_COUNT, 0, index, index + 1, index + WIND_FLAG_COLUMN_COUNT + 1, 0);
+        for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
+            for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
+                index = row * HOLE_FLAG_COLUMN_COUNT + column;
+                gSP2Triangles(g_DisplayListHead++, index, index + HOLE_FLAG_COLUMN_COUNT + 1,
+                              index + HOLE_FLAG_COLUMN_COUNT, 0, index, index + 1, index + HOLE_FLAG_COLUMN_COUNT + 1, 0);
             }
         }
     }
