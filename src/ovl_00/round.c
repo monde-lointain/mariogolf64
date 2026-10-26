@@ -1,7 +1,5 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_801F4A30_ovl_00);
-
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_801F4A40_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round", func_801F4AA4_ovl_00);

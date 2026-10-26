@@ -513,7 +513,8 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0xADD30, c, ovl_00/round]
+      - [0xADD30, hasm, ovl_00/padding]
+      - [0xADD40, c, ovl_00/round]
       - [0xD8F70, data]
       - [0xDDF10, .rodata, ovl_00/round]
       - { start: 0xDE9B0, type: bss, vram: 0x802256B0 }
