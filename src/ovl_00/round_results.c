@@ -115,6 +115,7 @@
 extern s32 sAreResultsLoaded;
 extern s32 sResultsState;
 extern s32 sResultsSlide;
+extern s32 sResultsTop;
 extern s32 sTallySpeed;
 extern s32 sTallySoundCount;
 extern f32 sCoursePointRates[];
@@ -1039,13 +1040,66 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA248_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA684_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FAD2C_ovl_00);
+/* Makes func_801F6DFC_ovl_00 draw the rank as a place: 1st, 2nd and so on */
+#define RANK_AS_PLACE 0x1000
+#define RESULTS_LABEL_SCORE 2
+#define RESULTS_LABEL_POINTS 5
+#define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
+#define MESSAGE_ALL_COURSES_OPEN 0x47
+#define RESULTS_TEXT_SLOT 0
+#define RESULTS_TEXT_FONT 1
+#define RESULTS_TEXT_RED 230
+#define RESULTS_TEXT_GREEN 230
+#define RESULTS_TEXT_BLUE 255
+#define RESULTS_TEXT_ALPHA 255
+#define LARGE_DIGIT_WIDTH 16
+#define LARGE_DIGITS_HEIGHT 256
+#define POINTS_TOTAL_Y 201
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DD4_ovl_00);
+/* The digit font draws '#' as a plus-minus sign, for an even score */
+extern const char sEvenScoreFormat[];
+extern const char sScoreFormat[];
+extern const char sPointsFormat[];
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DD8_ovl_00);
+/* The tournament results: place, portrait, score, Course Points and the points to the next course */
+void DrawTournamentResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DE0_ovl_00);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    func_801F6DFC_ovl_00(&gfx, sResultsSlide + 40, sResultsTop + 80, (sPlayerRanks[0] - 1) | RANK_AS_PLACE);
+    DrawPlayerPortrait(&gfx, sResultsSlide + 100, sResultsTop + 80, 0, FALSE);
+    DrawResultsLabel(&gfx, sResultsSlide + 144, sResultsTop + 60, RESULTS_LABEL_SCORE);
+    DrawResultsLabel(&gfx, sResultsSlide + 232, sResultsTop + 60, RESULTS_LABEL_POINTS);
+    if (sOpenCourseCount == COURSE_COUNT) {
+        SetTextSlot(sResultsSlide + 32, sResultsTop + 192, MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    } else {
+        DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y, sPointsToNextCourse + sPrizePoints + sPointsEarned);
+        SetTextSlot(sResultsSlide + 64, sResultsTop + 200, MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
+                    RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+    }
+    LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, LARGE_DIGIT_WIDTH,
+                           LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    if (sPlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+    } else {
+        sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[0]);
+    }
+    DrawDigitText(&gfx, sResultsSlide + 152, sResultsTop + 88, g_PrintBuffer);
+    sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[0]);
+    DrawDigitText(&gfx, sResultsSlide + 232, sResultsTop + 88, g_PrintBuffer);
+    *displayListHead = gfx;
+}
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sEvenScoreFormat);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sScoreFormat);
+
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sPointsFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224DE4_ovl_00);
 
