@@ -991,7 +991,7 @@ void PlayFlightSounds(s32 step) {
                 }
             } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() && D_800BE69C == 1) {
                 if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
-                    StartMovie(MOVIE_UNK16);
+                    StartMovie(MOVIE_MONTY_MOLE);
                 } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
                     StartMovie(MOVIE_UNK5);
                 }

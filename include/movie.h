@@ -18,7 +18,7 @@
 #define MOVIE_NEAREST_PIN 13   /* A nearest pin contest's winner */
 #define MOVIE_DRIVE_RECORD 14  /* A tournament's longest drive yet */
 #define MOVIE_UNK15 15
-#define MOVIE_UNK16 16
+#define MOVIE_MONTY_MOLE 16
 
 void AllocMovieBuffer(void);
 void FreeMovieBuffer(void);

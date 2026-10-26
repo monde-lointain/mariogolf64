@@ -75,6 +75,11 @@ extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
 extern s32 sCurrentMovie;
 extern s32 sMovieFrame;
+/* Counts up to MOVIE_TICKS_PER_FRAME between the frames of a Monty Mole movie */
+extern s32 sMovieTick;
+/* Sets the render state for drawing a movie's paletted strips */
+extern Gfx sMovieSetupDisplayList[];
+extern u16 sMontyMoleMovieFrameAssets[];
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 extern s32 sMovieDrawCount;
 extern s32 sWindFlyGuyFrame;
@@ -109,6 +114,25 @@ extern Vtx sFlipMessageBoardVertices[4];
 #define BANNER_FIRST_DIGIT_IMAGE 1
 
 #define MOVIE_DRAW_COUNT_MAX 1000
+
+/* Each movie frame read into sMovieBuffer, after its palette */
+#define MOVIE_PALETTE_OFFSET 0x4208
+#define MOVIE_FRAME_OFFSET 0x4408
+#define MOVIE_TICKS_PER_FRAME 3
+#define MOVIE_SOUND_CHANNEL 2
+#define MOVIE_SOUND_VOLUME 100
+#define MOVIE_SOUND_REVERB 10
+#define MOVIE_SOUND_PAN 127
+
+#define SOUND_MONTY_MOLE 0x2A
+#define MONTY_MOLE_FRAME_COUNT 17
+/* Each frame is drawn in strips, as a frame is too big to load at once */
+#define MONTY_MOLE_WIDTH 108
+#define MONTY_MOLE_STRIP_HEIGHT 18
+#define MONTY_MOLE_STRIP_COUNT 4
+#define MONTY_MOLE_STRIP_SIZE (MONTY_MOLE_WIDTH * MONTY_MOLE_STRIP_HEIGHT)
+#define MONTY_MOLE_X 106
+#define MONTY_MOLE_Y 62
 /* The controller whose buttons play movies under GAME_FLAG_TEST_AIM_TILT_AND_MOVIES */
 #define MOVIE_TEST_CONTROLLER 1
 
@@ -117,7 +141,7 @@ void func_802104BC_ovl_00(Gfx **displayListHead);
 void func_80210F40_ovl_00(Gfx **displayListHead);
 void func_8021169C_ovl_00(Gfx **displayListHead);
 void func_80211D60_ovl_00(Gfx **displayListHead);
-void func_802129C0_ovl_00(Gfx **displayListHead);
+void DrawMontyMoleMovie(Gfx **displayListHead);
 void func_80212CE0_ovl_00(Gfx **displayListHead);
 void func_80213038_ovl_00(Gfx **displayListHead);
 void func_80213634_ovl_00(Gfx **displayListHead);
@@ -268,8 +292,8 @@ void DrawMovie(Gfx **displayListHead) {
         case MOVIE_UNK1:
             func_80213038_ovl_00(&gfx);
             break;
-        case MOVIE_UNK16:
-            func_802129C0_ovl_00(&gfx);
+        case MOVIE_MONTY_MOLE:
+            DrawMontyMoleMovie(&gfx);
             break;
         case MOVIE_UNK5:
             func_80212CE0_ovl_00(&gfx);
@@ -309,7 +333,44 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80211D60_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80212590_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802129C0_ovl_00);
+/* A Monty Mole pops out of the green */
+void DrawMontyMoleMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 unused[4];
+    s32 i;
+
+    sMovieTick++;
+    if (sMovieTick == MOVIE_TICKS_PER_FRAME) {
+        sMovieTick = 0;
+        OpenEncodedAsset(sMontyMoleMovieFrameAssets[sMovieFrame], &asset);
+        ReadEncodedAsset(sMovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+        sMovieFrame++;
+        if (sMovieFrame == MONTY_MOLE_FRAME_COUNT) {
+            sCurrentMovie = MOVIE_NONE;
+        }
+    }
+    if (sMovieDrawCount == 1) {
+        PlaySoundWithEffects(SOUND_MONTY_MOLE, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB,
+                             MOVIE_SOUND_PAN);
+    }
+    gSPDisplayList(gfx++, sMovieSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_PALETTE_OFFSET));
+    for (i = 0; i != MONTY_MOLE_STRIP_COUNT; i++) {
+        gDPLoadTextureTile(gfx++, TEXTURE_ADDRESS(sMovieBuffer + (MOVIE_FRAME_OFFSET + i * MONTY_MOLE_STRIP_SIZE)),
+                           G_IM_FMT_CI, G_IM_SIZ_8b, MONTY_MOLE_WIDTH, MONTY_MOLE_STRIP_HEIGHT, 0, 0,
+                           MONTY_MOLE_WIDTH - 1, MONTY_MOLE_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, MONTY_MOLE_X << 2, (MONTY_MOLE_Y + i * MONTY_MOLE_STRIP_HEIGHT) << 2,
+                        (MONTY_MOLE_X + MONTY_MOLE_WIDTH) << 2,
+                        (MONTY_MOLE_Y + MONTY_MOLE_STRIP_HEIGHT + i * MONTY_MOLE_STRIP_HEIGHT) << 2,
+                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80212CE0_ovl_00);
 
