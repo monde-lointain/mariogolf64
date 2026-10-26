@@ -2959,3 +2959,5 @@ sToadMovieFrameAssets = 0x8022441C; // segment:ovl_00
 sLakituX = 0x8022BC60; // segment:ovl_00
 sLakituY = 0x8022BC64; // segment:ovl_00
 sLakituScale = 0x8022BC68; // segment:ovl_00
+DrawFlipMessage = 0x8020FC10; // type:func segment:ovl_00
+sFlipMessageMatrices = 0x80227CA0; // size:0x80 segment:ovl_00

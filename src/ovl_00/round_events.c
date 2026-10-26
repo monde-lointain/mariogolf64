@@ -2,8 +2,10 @@
 #include "asset.h"
 #include "character.h"
 #include "controller.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "heap.h"
+#include "math_util.h"
 #include "movie.h"
 #include "round_events.h"
 #include "save.h"
@@ -96,6 +98,7 @@ extern s32 sFlipMessageId;
 extern s32 sFlipMessageHalfWidth;
 extern s32 sFlipMessageHalfHeight;
 extern Vtx sFlipMessageBoardVertices[4];
+extern Mtx sFlipMessageMatrices[2];
 
 /* ShowFlipMessage's arguments, besides a message to flip in */
 #define FLIP_MESSAGE_RESET (-2)
@@ -109,6 +112,15 @@ extern Vtx sFlipMessageBoardVertices[4];
 /* How far the board reaches past the message on each side */
 #define FLIP_MESSAGE_BOARD_MARGIN_X 6
 #define FLIP_MESSAGE_BOARD_MARGIN_Y 14
+#define FLIP_MESSAGE_OPEN_FRAME 10
+/* The board starts face down and turns this far each frame until it faces the camera */
+#define FLIP_MESSAGE_DEGREES_PER_FRAME 18.0f
+#define FLIP_MESSAGE_START_DEGREES 180.0f
+#define FLIP_MESSAGE_GROWTH_PER_FRAME 0.1f
+/* The board hinges on its left edge */
+#define FLIP_MESSAGE_BOARD_Y 20.0f
+#define FLIP_MESSAGE_BOARD_Z -300.0f
+#define FLIP_MESSAGE_BOARD_ALPHA 159
 
 /* Each letter image follows the images' header and palette */
 #define BANNER_LETTER_IMAGES_OFFSET 0x208
@@ -296,7 +308,73 @@ void ShowFlipMessage(s32 messageId) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", ShowFlipMessage);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020FC10_ovl_00);
+/* Turns the flip message board a frame further in or out, then draws it and its text */
+void DrawFlipMessage(Gfx **displayListHead) {
+    Vec3 scale;
+    Vec3 translation;
+    Vec3 rotation;
+    Mat4 matrix;
+    Mat4 hingeMatrix;
+    Gfx *gfx = *displayListHead;
+    f32 angle;
+    f32 size;
+
+    if (sFlipMessageFrame != FLIP_MESSAGE_FRAME_NONE) {
+        if (!sIsFlipMessageLeaving) {
+            if (sFlipMessageFrame < FLIP_MESSAGE_OPEN_FRAME) {
+                sFlipMessageFrame++;
+            }
+        } else if (sFlipMessageFrame > 0) {
+            sFlipMessageFrame--;
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+        gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, FLIP_MESSAGE_BOARD_ALPHA);
+        gDPPipeSync(gfx++);
+        angle = DEGREES_TO_RADIANS(sFlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME + FLIP_MESSAGE_START_DEGREES);
+        if (angle > 2 * M_PI) {
+            angle = 2 * M_PI;
+        }
+        size = sFlipMessageFrame * FLIP_MESSAGE_GROWTH_PER_FRAME;
+        if (size > 1.0f) {
+            size = 1.0f;
+        }
+        scale[AXIS_X] = size;
+        scale[AXIS_Y] = size;
+        scale[AXIS_Z] = size;
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = -angle;
+        translation[AXIS_X] = -sFlipMessageHalfWidth;
+        translation[AXIS_Y] = FLIP_MESSAGE_BOARD_Y;
+        translation[AXIS_Z] = FLIP_MESSAGE_BOARD_Z;
+        BuildTransformMatrix(matrix, rotation, translation, scale);
+        guTranslateF(hingeMatrix, sFlipMessageHalfWidth, -FLIP_MESSAGE_BOARD_Y, 0);
+        guMtxCatF(hingeMatrix, matrix, matrix);
+        ConvertMatrixToFixed(matrix, &sFlipMessageMatrices[g_MatrixBufferIndex]);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sFlipMessageMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sFlipMessageBoardVertices, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        if (sFlipMessageFrame == FLIP_MESSAGE_OPEN_FRAME) {
+            SetUpTextDrawing(&gfx);
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 240, 255);
+            DrawLargeTextSlot(&gfx, FLIP_MESSAGE_TEXT_SLOT);
+        } else {
+            SetUpPerspectiveTextDrawing(&gfx);
+            DrawGlyphGroup(&gfx, FLIP_MESSAGE_GLYPH_GROUP);
+        }
+    }
+    *displayListHead = gfx;
+}
 
 s32 IsMovieFinished(void) {
     return sCurrentMovie == MOVIE_NONE;
