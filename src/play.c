@@ -82,7 +82,6 @@ extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C3088;
 extern s32 D_800C308C;
-extern s32 D_800C3090;
 extern s8 D_800C30A4;
 extern s32 D_800C30A8;
 extern s32 D_800C30AC;
@@ -128,7 +127,7 @@ void func_8005F1C8(void) {
     D_800C3084 = 0;
     D_800C3088 = 0;
     D_800C308C = 0;
-    D_800C3090 = 0;
+    g_IsSettingImpactPoint = 0;
     D_800C307A = 0;
     D_800C307C = 0;
     D_800C3080 = 0;

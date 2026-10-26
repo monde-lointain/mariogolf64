@@ -25,5 +25,7 @@ typedef struct CurrentShot {
 } CurrentShot; /* size = 0x58 */
 
 extern CurrentShot g_CurrentShot;
+/* Holding Z or L sets the impact point with the stick, rather than aiming */
+extern s32 g_IsSettingImpactPoint;
 
 #endif

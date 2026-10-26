@@ -2696,3 +2696,5 @@ sResultsUnk78 = 0x8021FC78; // size:0x4 segment:ovl_00
 sResultsUnk7C = 0x8021FC7C; // size:0x4 segment:ovl_00
 sResultsUnk9C = 0x8021FD9C; // size:0x4 segment:ovl_00
 sResultsUnkA0 = 0x8021FDA0; // size:0x4 segment:ovl_00
+g_TurnController = 0x801B55CC; // size:0xE
+g_IsSettingImpactPoint = 0x800C3090; // size:0x4

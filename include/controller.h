@@ -46,6 +46,8 @@ extern u8 g_ConnectedControllerBits;
 /* The players' controllers: how many there are and their ports */
 extern s32 g_ControllerCount;
 extern s32 g_PlayerControllerPorts[MAXCONTROLLERS];
+/* The controller of the player whose turn it is, cleared for a computer player */
+extern ControllerState g_TurnController;
 
 void ReadControllers(void);
 
