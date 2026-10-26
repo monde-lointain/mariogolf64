@@ -110,6 +110,9 @@
 #define AMBIENT_SOUND_VOLUME 0x5F
 #define AMBIENT_SOUND_REVERB 15
 #define SOUND_PAN_RANGE 255
+/* The most shots that each kind of replay record keeps */
+#define HOLE_RECORD_MAX_STROKES 5
+#define RING_SHOT_RECORD_MAX_STROKES 6
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
@@ -140,6 +143,8 @@
 extern s32 D_800C3070;
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
+extern PlayRecord D_800FEDD8[];
+extern RingShotRecord D_80105F40[];
 extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
 /* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
 extern s32 D_80223EF0_ovl_00[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
@@ -157,6 +162,7 @@ void PlaceAimCamera(void);
 void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 void func_8006034C(s8 value);
+s32 func_80060190(s32 strokes);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
 
@@ -641,9 +647,59 @@ s32 IsRingShotRound(void) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206CF0_ovl_00);
+/* Keeps the player's last shot, and the hole and how it was played, in their replay record */
+void RecordHoleOut(s32 playerIndex) {
+    u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206E88_ovl_00);
+    if (shotIndex < HOLE_RECORD_MAX_STROKES) {
+        PlayRecord *record = &D_800FEDD8[playerIndex];
+
+        /* Read through g_GameState, which keeps GCC from loading the fields early, to match */
+        record->gameMode = g_GameState.gameMode;
+        record->courseIndex = g_GameState.courseIndex;
+        record->holeIndex = g_GameState.holeIndex;
+        record->scoreKind = func_80060190(g_Players[playerIndex].strokeCount);
+        record->characterIndex = g_Players[playerIndex].characterIndex;
+        record->unk3C = g_Players[playerIndex].unk22;
+        record->paletteIndex = g_Players[playerIndex].paletteIndex;
+        record->strokeCount = g_Players[playerIndex].strokeCount;
+        record->unk40 = g_Players[playerIndex].unk88;
+        record->hole = D_800BA9D8;
+        record->shots[shotIndex].heading = g_CurrentShot.unk0;
+        record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
+        record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
+        record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
+        record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
+        record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
+        record->shots[shotIndex].unk7 = g_CurrentShot.unk18;
+    }
+}
+
+/* Keeps the player's last shot, and the hole and how it was played, in their Ring Shot record */
+void RecordRingShotHole(s32 playerIndex) {
+    u32 shotIndex = g_Players[playerIndex].strokeCount - 1;
+
+    if (shotIndex < RING_SHOT_RECORD_MAX_STROKES) {
+        RingShotRecord *record = &D_80105F40[playerIndex];
+
+        record->courseIndex = g_CourseIndex;
+        record->holeIndex = g_HoleIndex;
+        record->scoreKind = func_80060190(g_Players[playerIndex].strokeCount);
+        record->characterIndex = g_Players[playerIndex].characterIndex;
+        record->unk38 = g_Players[playerIndex].unk22;
+        record->paletteIndex = g_Players[playerIndex].paletteIndex;
+        record->strokeCount = g_Players[playerIndex].strokeCount;
+        record->unk3C = g_Players[playerIndex].unk88;
+        record->hole = D_800BA9D8;
+        record->shots[shotIndex].heading = g_CurrentShot.unk0;
+        record->shots[shotIndex].unk2 = g_CurrentShot.unk4;
+        record->shots[shotIndex].unk3 = g_CurrentShot.unk8;
+        record->shots[shotIndex].shotMode = g_CurrentShot.shotMode;
+        record->shots[shotIndex].clubSlot = g_CurrentShot.clubSlot;
+        record->shots[shotIndex].unk6 = g_CurrentShot.unk14;
+        record->shots[shotIndex].unk7 = g_CurrentShot.unk18;
+    }
+}
 
 s32 HasNoRingsLeft(UnkB8 *player) {
     s32 i;

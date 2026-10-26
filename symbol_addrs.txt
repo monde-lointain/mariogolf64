@@ -2895,3 +2895,5 @@ PlayWaitingPlayersCalls = 0x80207CAC; // type:func segment:ovl_00
 PlayAmbientSound = 0x802078F4; // type:func segment:ovl_00
 IsRecordableHoleOut = 0x80206BD0; // type:func segment:ovl_00
 PlaceBallAtRest = 0x802059C0; // type:func segment:ovl_00
+RecordHoleOut = 0x80206CF0; // type:func segment:ovl_00
+RecordRingShotHole = 0x80206E88; // type:func segment:ovl_00
