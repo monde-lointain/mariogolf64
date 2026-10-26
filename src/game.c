@@ -921,7 +921,6 @@ void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80086864(Gfx **displayListHead);
 void func_80089094(CameraView *view);
-void func_8008C6B0(Gfx **displayListHead);
 void DrawHoleIntroText(Gfx **displayListHead);
 void func_8008D3F4(Gfx **displayListHead);
 void func_80091110(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
@@ -1660,7 +1659,7 @@ s32 DrawGame(void) {
         if (g_IsModuleAlive[17]) {
             func_802161D4(&g_DisplayListHead);
         }
-        func_8008C6B0(&g_DisplayListHead);
+        DrawHoleIntroImages(&g_DisplayListHead);
         if (g_IsModuleAlive[5]) {
             func_802438D0(&g_DisplayListHead);
         }

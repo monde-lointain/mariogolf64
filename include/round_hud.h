@@ -16,6 +16,7 @@
 void PrepareHoleDisplay(void);
 void InitRoundHud(void);
 void LoadRoundHud(void);
+void DrawHoleIntroImages(Gfx **displayListHead);
 void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex);
 void EndHoleIntro(void);
 void DrawColorTest(Gfx **displayListHead);

@@ -207,6 +207,22 @@ extern u8 D_80106240;
 /* Which of the hole intro's images are loaded */
 #define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
+/* The intro images are drawn opaque, keeping the coverage of their alpha */
+#define HOLE_INTRO_IMAGE_RENDER_MODE \
+    AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+#define HOLE_INTRO_IMAGE_RENDER_MODE2 \
+    AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
+/* The contest image is 256x64 and the match standing image 160x40, centered */
+#define CONTEST_IMAGE_WIDTH 256
+#define CONTEST_IMAGE_STRIP_HEIGHT 8
+#define CONTEST_IMAGE_STRIP_COUNT 8
+#define CONTEST_IMAGE_X ((SCREEN_WIDTH - CONTEST_IMAGE_WIDTH) / 2)
+#define CONTEST_IMAGE_Y 72
+#define MATCH_IMAGE_WIDTH 160
+#define MATCH_IMAGE_STRIP_HEIGHT 10
+#define MATCH_IMAGE_STRIP_COUNT 4
+#define MATCH_IMAGE_X ((SCREEN_WIDTH - MATCH_IMAGE_WIDTH) / 2)
+#define MATCH_IMAGE_Y 140
 
 extern s32 sLoadedHoleIntroImages;
 extern void *sHoleContestImage;
@@ -486,6 +502,7 @@ extern char D_800D1C84[];
 s32 func_80242418(void);
 void func_80242424(Gfx **displayListHead);
 void func_80242D40(Gfx **displayListHead);
+void func_802427E8(Gfx **displayListHead);
 
 /* The game counts time in frames */
 #define FRAMES_PER_SECOND 30
@@ -1872,7 +1889,75 @@ void FreeHoleIntroImages(void) {
     sLoadedHoleIntroImages = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008C6B0);
+/*
+ * Draws the images that LoadHoleIntroImages loaded, a strip at a time, while
+ * the hole's intro text is shown. Ring shot draws its own intro instead.
+ *
+ * Doesn't match: the match standing image's loop keeps different constants
+ * in registers.
+ */
+#ifdef NON_MATCHING
+void DrawHoleIntroImages(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 strip;
+
+    if (g_IsHoleIntroTextShown == 1) {
+        if (g_GameMode == GAME_MODE_RING_SHOT) {
+            if (g_IsModuleAlive[MODULE_UNK21]) {
+                func_802427E8(&gfx);
+            }
+        } else {
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            if ((g_GameState.betRates[BET_LONGEST_DRIVE] > 0 && IsMarkedParFive(GetCourseRecordIndex(), g_HoleIndex)) ||
+                (g_GameState.betRates[BET_NEAREST_PIN] > 0 && IsParThree(GetCourseRecordIndex(), g_HoleIndex))) {
+                gDPLoadTLUT_pal256(gfx++, (u32)sHoleContestImage + IMAGE_HEADER_SIZE & ~7);
+                for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
+                    gDPLoadTextureBlock(gfx++,
+                                        (u32)sHoleContestImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                                strip * (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT) & ~7,
+                                        G_IM_FMT_CI, G_IM_SIZ_8b, CONTEST_IMAGE_WIDTH, CONTEST_IMAGE_STRIP_HEIGHT, 0,
+                                        G_TX_MIRROR, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(gfx++, CONTEST_IMAGE_X << 2,
+                                            (CONTEST_IMAGE_Y + strip * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
+                                            (CONTEST_IMAGE_X + CONTEST_IMAGE_WIDTH) << 2,
+                                            (CONTEST_IMAGE_Y + (strip + 1) * CONTEST_IMAGE_STRIP_HEIGHT) << 2,
+                                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                    gDPPipeSync(gfx++);
+                }
+            }
+            if ((g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) &&
+                (sLoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
+                gDPLoadTLUT_pal256(gfx++, (u32)sMatchStandingImage + IMAGE_HEADER_SIZE & ~7);
+                for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
+                    gDPLoadTextureTile(gfx++,
+                                       (u32)sMatchStandingImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                               strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT) & ~7,
+                                       G_IM_FMT_CI, G_IM_SIZ_8b, MATCH_IMAGE_WIDTH, MATCH_IMAGE_STRIP_HEIGHT, 0, 0,
+                                       MATCH_IMAGE_WIDTH - 1, MATCH_IMAGE_STRIP_HEIGHT - 1, 0, G_TX_MIRROR, G_TX_MIRROR,
+                                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                    gDPPipeSync(gfx++);
+                    gSPScisTextureRectangle(gfx++, MATCH_IMAGE_X << 2,
+                                            (MATCH_IMAGE_Y + strip * MATCH_IMAGE_STRIP_HEIGHT) << 2,
+                                            (MATCH_IMAGE_X + MATCH_IMAGE_WIDTH) << 2,
+                                            (MATCH_IMAGE_Y + (strip + 1) * MATCH_IMAGE_STRIP_HEIGHT) << 2,
+                                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+                    gDPPipeSync(gfx++);
+                }
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawHoleIntroImages);
+#endif
 
 /*
  * Draws the course's name and the hole's number, or in the timed modes a
