@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "ball_simulation.h"
+#include "billboard.h"
 #include "cpu_projection.h"
 #include "debug_text.h"
 #include "golf_balls.h"
@@ -67,6 +68,9 @@ typedef struct BallAfterimage {
 
 /* Set while the camera shows the cup up close, at twice the distance from it */
 extern s32 D_800BE69C;
+
+/* g_GameState.unk20, under a symbol of its own */
+extern s32 D_801B60A8;
 
 extern GolfBall sGolfBalls[GOLF_BALL_COUNT];
 extern BallAfterimage sBallAfterimages[AFTERIMAGE_MAX_LENGTH];
@@ -189,7 +193,185 @@ void ResetGolfBalls(void) {
     sGolfBallUnk100 = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", func_801FDA64_ovl_00);
+#ifdef NON_MATCHING
+void UpdateGolfBalls(void) {
+    s32 currentIndex;
+    s32 i;
+    UnkB8 *player;
+    GolfBall *ball;
+    BallSimulation *simulation;
+    BallAfterimage *head;
+    BallAfterimage *afterimage;
+    BallAfterimage *previous;
+    Mat4 scaling;
+    Mat4 rotated;
+    Mat4 translation;
+    f32 scale;
+    f32 distance;
+    s8 markerPlayerIndex;
+
+    currentIndex = 0;
+    if (g_GameState.unk0 == GAME_STATE_UNK6) {
+        currentIndex = D_801B60A8;
+    }
+    for (i = 0, player = g_Players, ball = sGolfBalls; i < g_GameState.playerCount; i++, player++, ball++) {
+        if (player->unk26 != 0 || player->strokeCount == 0) {
+            ball->alpha = BALL_HIDDEN;
+        }
+        if (currentIndex != i) {
+            ball->state = BALL_STATE_STOPPED;
+            if (GetSurfaceInfo((s8)player->ballSurface)->kind == SURFACE_KIND_GREEN) {
+                ball->markerPlayerIndex = i;
+            } else if (g_IsMiniGolf) {
+                ball->markerPlayerIndex = i;
+            } else {
+                ball->markerPlayerIndex = BALL_NO_MARKER;
+            }
+        }
+    }
+    if (g_GameState.unk0 == GAME_STATE_UNK6 || g_GameState.unk0 == GAME_STATE_UNK11) {
+        ball = &sGolfBalls[currentIndex];
+        for (i = 0; i < BALL_SIMULATION_COUNT; i++) {
+            simulation = &g_BallSimulations[i];
+            ball->isInCup = FALSE;
+            if (simulation->playerIndex >= 0 && g_Players[currentIndex].unk26 == 0) {
+                if (D_800BE69C == TRUE) {
+                    ball->position[0] = (simulation->position[0] - (f32)(D_800BA9D8.cupPosition[0] - simulation->position[0])) * COURSE_TO_WORLD_SCALE;
+                    ball->position[1] = (simulation->position[1] - (f32)(D_800BA9D8.cupPosition[1] - simulation->position[1])) * COURSE_TO_WORLD_SCALE;
+                    ball->position[2] = (simulation->position[2] - (f32)(D_800BA9D8.cupPosition[2] - simulation->position[2])) * COURSE_TO_WORLD_SCALE;
+                } else {
+                    ball->position[0] = simulation->position[0] * COURSE_TO_WORLD_SCALE;
+                    ball->position[1] = simulation->position[1] * COURSE_TO_WORLD_SCALE;
+                    ball->position[2] = simulation->position[2] * COURSE_TO_WORLD_SCALE;
+                }
+                ball->alpha = BALL_SHOWN;
+                ball->surface = GetSurfaceInfo(simulation->surface);
+                if (simulation->isRunning != BALL_STATE_IN_CUP) {
+                    ball->isInCup = FALSE;
+                } else {
+                    ball->isInCup = TRUE;
+                }
+                if (GetCupDistance(simulation->position[0] - D_800BA9D8.cupPosition[0],
+                                   simulation->position[2] - D_800BA9D8.cupPosition[2]) == 0 ||
+                    simulation->isRunning == BALL_STATE_IN_CUP || simulation->unkA0 != 0) {
+                    ball->isInCup = TRUE;
+                } else {
+                    ball->isInCup = FALSE;
+                }
+                RollGolfBall(ball, simulation);
+                ball->state = simulation->isRunning;
+                ball->unk9E = simulation->unkA1;
+                ball->purpose = simulation->purpose;
+                markerPlayerIndex = BALL_NO_MARKER;
+                if (currentIndex != simulation->playerIndex &&
+                    (GetSurfaceInfo(simulation->surface)->kind == SURFACE_KIND_GREEN || g_IsMiniGolf)) {
+                    markerPlayerIndex = simulation->playerIndex;
+                }
+                ball->markerPlayerIndex = markerPlayerIndex;
+                scale = g_PinVertexScale * BALL_MODEL_SCALE;
+                guScaleF(scaling, scale, scale, scale);
+                guMtxCatF(sBallRotation, scaling, rotated);
+                guTranslateF(translation, ball->position[0],
+                             ball->position[1] - (g_PinVertexScale * BALL_RADIUS) / 5120.0, ball->position[2]);
+                MultiplyMatrices(rotated, translation, scaling);
+                ConvertMatrixToFixed(scaling, &ball->matrices[g_DrawBufferIndex]);
+            }
+        }
+    }
+    if (sIsBallAfterimageShown == TRUE) {
+        if (D_800BE69C == TRUE) {
+            if (!sIsBallAfterimageZoomed) {
+                sIsBallAfterimageZoomed = TRUE;
+                for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength; i++, afterimage++) {
+                    if (afterimage->alpha != AFTERIMAGE_UNUSED) {
+                        s32 coursePosition[3];
+
+                        coursePosition[0] = afterimage->position[0] * 1024.0f;
+                        coursePosition[1] = afterimage->position[1] * 1024.0f;
+                        coursePosition[2] = afterimage->position[2] * 1024.0f;
+                        afterimage->position[0] += afterimage->position[0] - D_800BA9D8.cupPosition[0] * COURSE_TO_WORLD_SCALE;
+                        afterimage->position[1] += afterimage->position[1] - D_800BA9D8.cupPosition[1] * COURSE_TO_WORLD_SCALE;
+                        afterimage->position[2] += afterimage->position[2] - D_800BA9D8.cupPosition[2] * COURSE_TO_WORLD_SCALE;
+                    }
+                }
+            }
+        } else if (sIsBallAfterimageZoomed == TRUE) {
+            sIsBallAfterimageZoomed = FALSE;
+            for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength; i++, afterimage++) {
+                if (afterimage->alpha != AFTERIMAGE_UNUSED) {
+                    afterimage->position[0] -= (afterimage->position[0] - D_800BA9D8.cupPosition[0] * COURSE_TO_WORLD_SCALE) * 0.5f;
+                    afterimage->position[1] -= (afterimage->position[1] - D_800BA9D8.cupPosition[1] * COURSE_TO_WORLD_SCALE) * 0.5f;
+                    afterimage->position[2] -= (afterimage->position[2] - D_800BA9D8.cupPosition[2] * COURSE_TO_WORLD_SCALE) * 0.5f;
+                }
+            }
+        }
+        head = &sBallAfterimages[sBallAfterimageHead];
+        ball = &sGolfBalls[currentIndex];
+        if (sBallAfterimageHead == 0) {
+            previous = &sBallAfterimages[sBallAfterimageLength - 1];
+        } else {
+            previous = &sBallAfterimages[sBallAfterimageHead - 1];
+        }
+        {
+            f32 offset[3];
+
+            offset[0] = ball->position[0] - previous->position[0];
+            offset[1] = ball->position[1] - previous->position[1];
+            offset[2] = ball->position[2] - previous->position[2];
+            distance = sqrtf(offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2]);
+        }
+        if (sIsBallAfterimageFast == TRUE) {
+            if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
+                g_BallSimulations[0].isRunning == BALL_STATE_ROLLING) {
+                head->alpha = AFTERIMAGE_FAST_ALPHA;
+                head->position[0] = ball->position[0];
+                head->position[1] = ball->position[1];
+                head->position[2] = ball->position[2];
+                if (ball->isInCup != TRUE) {
+                    head->isInCup = FALSE;
+                } else {
+                    head->isInCup = TRUE;
+                }
+                sBallAfterimageHead++;
+                if (sBallAfterimageHead == sBallAfterimageLength) {
+                    sBallAfterimageHead = 0;
+                }
+            }
+            for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength; i++, afterimage++) {
+                if (afterimage->alpha > 0) {
+                    afterimage->alpha -= AFTERIMAGE_FAST_FADE;
+                }
+            }
+        } else {
+            if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.0005859375f < distance) {
+                head->alpha = AFTERIMAGE_ALPHA;
+                head->position[0] = ball->position[0];
+                head->position[1] = ball->position[1];
+                head->position[2] = ball->position[2];
+                if (ball->isInCup != TRUE) {
+                    head->isInCup = FALSE;
+                } else {
+                    head->isInCup = ball->isInCup;
+                }
+                sBallAfterimageHead++;
+                if (sBallAfterimageHead == sBallAfterimageLength) {
+                    sBallAfterimageHead = 0;
+                }
+            }
+            if (sBallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
+                for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength; i++, afterimage++) {
+                    if (afterimage->alpha > 0) {
+                        afterimage->alpha--;
+                    }
+                }
+            }
+        }
+        sBallAfterimageFrameCount++;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", UpdateGolfBalls);
+#endif
 
 s32 IsAnyBallInCup(void) {
     s32 isInCup = FALSE;

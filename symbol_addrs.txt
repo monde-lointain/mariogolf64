@@ -2794,3 +2794,4 @@ sToPowerFrames = 0x80224BF4; // size:0x8 segment:ovl_00
 sClubPanelImage = 0x8022D690; // size:0x4 segment:ovl_00
 sShotModeImage = 0x8022D694; // size:0x4 segment:ovl_00
 UpdateClubPanelImages = 0x8021E724; // type:func segment:ovl_00
+UpdateGolfBalls = 0x801FDA64; // type:func segment:ovl_00
