@@ -1187,7 +1187,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F8BB8_ovl_00);
 #define CHARACTER_SOUND_WIN 0x1C
 #define WIN_SOUND_PAN 32
 
-#ifdef NON_MATCHING
 /*
  * Counts the tournament prize, then the earned course points, into the save, showing a notice when they
  * open a course, then returns TRUE once A is pressed
@@ -1245,29 +1244,33 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (controller->buttons & A_BUTTON) {
                         sTallySpeed = FAST_TALLY_SPEED;
                     }
-                    sPrizePoints -= sTallySpeed;
-                    if (sPrizePoints > 0) {
-                        PlayTallySound();
-                    }
-                    if (sOpenCourseCount == COURSE_COUNT) {
-                        sPrizePoints = 0;
-                        sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
-                        if (sTournamentOpenCourseCount < COURSE_COUNT) {
-                            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                    {
+                        s32 *points = &sPrizePoints;
+
+                        *points -= sTallySpeed;
+                        if (*points > 0) {
+                            PlayTallySound();
                         }
-                        break;
-                    }
-                    /* Stop on the points that open the next course, so that its notice shows */
-                    overshoot = sPointsToNextCourse + sPrizePoints + sPointsEarned;
-                    if (overshoot < 0) {
-                        sPrizePoints -= overshoot;
-                    }
-                    if (sPrizePoints < 0) {
-                        sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
-                        sPrizePoints = 0;
-                        sResultsUnk8C = TRUE;
-                        if (sTournamentOpenCourseCount < COURSE_COUNT) {
-                            PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                        if (sOpenCourseCount == COURSE_COUNT) {
+                            *points = 0;
+                            sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+                            if (sTournamentOpenCourseCount < COURSE_COUNT) {
+                                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                            }
+                            break;
+                        }
+                        /* Stop on the points that open the next course, so that its notice shows */
+                        overshoot = sPointsToNextCourse + *points + sPointsEarned;
+                        if (overshoot < 0) {
+                            *points -= overshoot;
+                        }
+                        if (*points < 0) {
+                            sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+                            *points = 0;
+                            sResultsUnk8C = TRUE;
+                            if (sTournamentOpenCourseCount < COURSE_COUNT) {
+                                PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                            }
                         }
                     }
                     break;
@@ -1306,19 +1309,23 @@ s32 UpdateTournamentResults(ControllerState *controller) {
                     if (controller->buttons & A_BUTTON) {
                         sTallySpeed = FAST_TALLY_SPEED;
                     }
-                    if (sPointsEarned > 0) {
-                        PlayTallySound();
-                    }
-                    sPointsEarned -= sTallySpeed;
-                    if (sPointsEarned < 0) {
-                        sPointsEarned = 0;
-                    }
-                    if (sOpenCourseCount == COURSE_COUNT) {
-                        sPointsEarned = 0;
-                    } else {
-                        overshoot = sPointsToNextCourse + sPrizePoints + sPointsEarned;
-                        if (overshoot < 0) {
-                            sPointsEarned -= overshoot;
+                    {
+                        s32 *points = &sPointsEarned;
+
+                        if (*points > 0) {
+                            PlayTallySound();
+                        }
+                        *points -= sTallySpeed;
+                        if (*points < 0) {
+                            *points = 0;
+                        }
+                        if (sOpenCourseCount == COURSE_COUNT) {
+                            *points = 0;
+                        } else {
+                            overshoot = sPointsToNextCourse + sPrizePoints + *points;
+                            if (overshoot < 0) {
+                                *points -= overshoot;
+                            }
                         }
                     }
                     if (sPointsEarned == 0) {
@@ -1352,9 +1359,6 @@ s32 UpdateTournamentResults(ControllerState *controller) {
     }
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateTournamentResults);
-#endif
 
 /* The steps of ShowScorePassword, in sResultsUnk78 */
 #define SCORE_PASSWORD_STEP_START 0
@@ -1486,20 +1490,24 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
                     if (controller->buttons & A_BUTTON) {
                         sTallySpeed = FAST_TALLY_SPEED;
                     }
-                    if (sPointsEarned > 0) {
-                        PlayTallySound();
-                    }
-                    sPointsEarned -= sTallySpeed;
-                    if (sPointsEarned < 0) {
-                        sPointsEarned = 0;
-                    }
-                    if (sOpenCourseCount == COURSE_COUNT) {
-                        sPointsEarned = 0;
-                    } else {
-                        /* Stop on the points that open the next course, so that its notice shows */
-                        overshoot = sPointsToNextCourse + sPointsEarned;
-                        if (overshoot < 0) {
-                            sPointsEarned -= overshoot;
+                    {
+                        s32 *points = &sPointsEarned;
+
+                        if (*points > 0) {
+                            PlayTallySound();
+                        }
+                        *points -= sTallySpeed;
+                        if (*points < 0) {
+                            *points = 0;
+                        }
+                        if (sOpenCourseCount == COURSE_COUNT) {
+                            *points = 0;
+                        } else {
+                            /* Stop on the points that open the next course, so that its notice shows */
+                            overshoot = sPointsToNextCourse + *points;
+                            if (overshoot < 0) {
+                                *points -= overshoot;
+                            }
                         }
                     }
                     if (sPointsEarned == 0) {
