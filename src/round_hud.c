@@ -1258,6 +1258,7 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_COLOR 0xFFFFFF00
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
+#define BALL_TRAIL_SEGMENT_COLOR(segment) ((BALL_TRAIL_ALPHA - (segment) / BALL_TRAIL_SEGMENTS_PER_FADE) | BALL_TRAIL_COLOR)
 
 /* A point of the ball's trail on the screen, in quarter pixels */
 typedef struct TrailPoint {
@@ -1279,8 +1280,8 @@ extern Vtx sBallTrailVertices[4];
  * that fade out with age. While D_800C5AAC is BALL_TRAIL_RECORDING it also
  * adds the ball's current position.
  *
- * Doesn't match: the display list pointer's copies and the color's stores
- * are scheduled differently.
+ * Doesn't match: a display list pointer's spill is scheduled differently,
+ * and the offsets' floating-point registers are swapped.
  */
 #ifdef NON_MATCHING
 void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
@@ -1293,7 +1294,6 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 scale;
     f32 offsetX;
     f32 offsetY;
-    s32 color;
 
     if (D_800C5AAC != 0 && D_801061CF) {
         if (D_800C5AAC == BALL_TRAIL_RECORDING) {
@@ -1355,11 +1355,10 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                         gDPPipeSync(gfx++);
                         gDPSetPrimDepth(gfx++, sBallTrailPoints[i].depth, 0);
                         gDPPipeSync(gfx++);
-                        color = (BALL_TRAIL_ALPHA - i / BALL_TRAIL_SEGMENTS_PER_FADE) | BALL_TRAIL_COLOR;
-                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, color);
-                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, color);
-                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, color);
-                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, color);
+                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
+                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, BALL_TRAIL_SEGMENT_COLOR(i));
                         gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
                                         ((sBallTrailPoints[i].x + (s32)offsetX) << 16) + (sBallTrailPoints[i].y - (s32)offsetY));
                         gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
