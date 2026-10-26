@@ -1273,7 +1273,164 @@ void UpdateCharacterResultsNotice(void) {
     }
 }
 
+/* The character notice pops open past its full size, then settles at sin(NOTICE_POP_SETTLE_ANGLE) */
+#define NOTICE_POP_FRAMES 10
+#define NOTICE_POP_STEP 0.15f
+#define NOTICE_POP_SETTLE_ANGLE (3 * M_PI / 4)
+#define NOTICE_CENTRE_X 160
+#define NOTICE_CENTRE_Y 128
+#define NOTICE_NAMEPLATE_SIZE 48
+#define NOTICE_NAMEPLATE_POP_SIZE 36.0f
+#define NOTICE_PORTRAIT_SIZE 32
+#define NOTICE_PORTRAIT_POP_SIZE 24.0f
+#define NOTICE_CHARACTER_TITLE_WIDTH 144
+#define NOTICE_CHARACTER_TITLE_TOP 80
+#define NOTICE_CHARACTER_TITLE_POP_WIDTH 108.0f
+#define NOTICE_CHARACTER_TITLE_POP_HEIGHT 12.0f
+#define NOTICE_CHARACTER_TITLE_STRIP_COUNT 7
+#define NOTICE_CHARACTER_SHINE_LEFT 88
+#define NOTICE_CHARACTER_SHINE_TOP 52
+#define NOTICE_CHARACTER_SHINE_HEIGHT 56
+#define NOTICE_CHARACTER_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / 128)
+#define NOTICE_CHARACTER_SHINE_DTDY ((NOTICE_SHINE_SIZE << 10) / NOTICE_CHARACTER_SHINE_HEIGHT)
+#define NOTICE_CHARACTER_VOICE_FRAME 14
+#define NOTICE_CHARACTER_VOICE_SLOT 1
+#define NOTICE_CHARACTER_VOICE 20
+#define NOTICE_CHARACTER_VOICE_VOLUME 127
+
+#ifdef NON_MATCHING
+/* The notice that a character has been beaten: their nameplate, face and title pop open, then a shine sweeps the title */
+void DrawCharacterResultsNotice(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    f32 angle;
+    f32 pop;
+    s32 size;
+    s32 step;
+    s32 width;
+    s32 height;
+    s32 top;
+    s32 centreX;
+    s32 centreY;
+    s32 i;
+
+    if (sNoticeTime < NOTICE_POP_FRAMES) {
+        angle = sNoticeTime * NOTICE_POP_STEP * (M_PI / 2);
+    } else {
+        angle = NOTICE_POP_SETTLE_ANGLE;
+    }
+    pop = sinf(angle);
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    size = pop * NOTICE_NAMEPLATE_POP_SIZE;
+    if (size > 0) {
+        LoadSmallPalette(&gfx, 0, sNameplateImage + IMAGE_HEADER_SIZE);
+        LoadNibbleTextureBlock(&gfx, sNameplateImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, NOTICE_NAMEPLATE_SIZE,
+                               NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
+        centreX = sNoticeLift + NOTICE_CENTRE_X;
+        centreY = sNoticeUnk6C + NOTICE_CENTRE_Y;
+        DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4, (size + centreX) * 4, (size + centreY) * 4,
+                        G_TX_RENDERTILE, 0, 0, step, step);
+    }
+    size = pop * NOTICE_PORTRAIT_POP_SIZE;
+    if (size > 0) {
+        LoadLargePalette(&gfx, sPortraitPalette);
+        LoadTextureBlock(&gfx, sPortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0,
+                         0, 0, 0, 0, 0, 0);
+        step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
+        centreX = sNoticeLift + NOTICE_CENTRE_X;
+        centreY = sNoticeUnk6C + NOTICE_CENTRE_Y;
+        DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4, (size + centreX) * 4, (size + centreY) * 4,
+                        G_TX_RENDERTILE, 0, 0, step, step);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
+    width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
+    if (width > 0 && height > 0) {
+        LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx,
+                             sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH, NOTICE_TITLE_STRIP_HEIGHT, 0, 0,
+                             0, 0, 0, 0, 0);
+            top = NOTICE_CHARACTER_TITLE_TOP - height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2 + i * height;
+            /* This pass mirrors the slide, unlike the depth pass and the shine */
+            DrawTextureRect(&gfx, (NOTICE_CENTRE_X - (sNoticeLift + width)) * 4, (top + sNoticeUnk6C) * 4,
+                            (width - (sNoticeLift - NOTICE_CENTRE_X)) * 4, (top + height + sNoticeUnk6C) * 4,
+
+                            G_TX_RENDERTILE, 0, 0, ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
+                            (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
+        }
+        /* The title again, into the depth buffer alone, so that the shine behind it only lights the letters */
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PRIM);
+        gDPSetPrimDepth(gfx++, NOTICE_TITLE_DEPTH, 0);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM), G_RM_AA_ZB_TEX_EDGE2);
+        for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx,
+                             sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH, NOTICE_TITLE_STRIP_HEIGHT, 0, 0,
+                             0, 0, 0, 0, 0);
+            top = NOTICE_CHARACTER_TITLE_TOP - height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2 + i * height;
+            centreX = sNoticeLift + NOTICE_CENTRE_X;
+            DrawTextureRect(&gfx, (centreX - width) * 4, (top + sNoticeUnk6C) * 4, (width + centreX) * 4,
+                            (top + height + sNoticeUnk6C) * 4, G_TX_RENDERTILE, 0, 0,
+                            ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width, (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
+        }
+        gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0,
+                          TEXEL0, 0);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE,
+                         NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        if (sNoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
+            PlayCharacterSound(sPortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT, NOTICE_CHARACTER_VOICE,
+                               NOTICE_CHARACTER_VOICE_VOLUME, NOTICE_SOUND_PAN_CENTRE);
+        }
+        if (sNoticeTime == NOTICE_SHINE_START) {
+            PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL, NOTICE_SHINE_SOUND_VOLUME, 0,
+                                 NOTICE_SOUND_PAN_CENTRE);
+        }
+        if (sNoticeTime == 2) {
+            PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL, NOTICE_SWING_SOUND_VOLUME, 0,
+                                 NOTICE_SOUND_PAN_CENTRE);
+        }
+        if (sNoticeTime >= NOTICE_SHINE_START) {
+            if (sNoticeTime < NOTICE_SHINE_END) {
+                DrawTextureRect(&gfx, (sNoticeLift + NOTICE_CHARACTER_SHINE_LEFT) * 4,
+                                (sNoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP) * 4,
+                                (sNoticeLift + NOTICE_CHARACTER_SHINE_LEFT + NOTICE_CHARACTER_TITLE_WIDTH) * 4,
+                                (sNoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP + NOTICE_CHARACTER_SHINE_HEIGHT) * 4,
+                                G_TX_RENDERTILE,
+                                (NOTICE_SHINE_SIZE - (sNoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP) << 5, 0,
+                                NOTICE_CHARACTER_SHINE_DSDX, NOTICE_CHARACTER_SHINE_DTDY);
+            }
+        }
+        gDPPipeSync(gfx++);
+        gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice);
+#endif
 
 /* Returns TRUE once the results have been saved and freed */
 s32 UpdateRoundResults(void) {
