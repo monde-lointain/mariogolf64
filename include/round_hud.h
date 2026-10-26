@@ -20,6 +20,9 @@
 #define HEIGHT_BELOW 1
 #define HEIGHT_LEVEL 2
 
+/* RoundHud.scorecardPage while the scorecard is closed */
+#define NO_SCORECARD_PAGE (-1)
+
 /* RoundHud.flags */
 #define HUD_FLAG_ANIMATE_OFFSET_MARKER 0x8 /* Animates the shot offset marker */
 

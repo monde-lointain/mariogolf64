@@ -1275,7 +1275,7 @@ void PlaceCameraAroundShotEnd(void) {
 void StartHoleCamerasAndSong(void) {
     SetMenuBackdrop(MENU_BACKDROP_NONE);
     g_RoundHud.isHoleIntroTextShown = 1;
-    g_RoundHud.scorecardPage = -1;
+    g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
     g_RoundHud.unk8 = 1;
     g_RoundHud.unkB = 1;
     g_InsetView.animation = INSET_VIEW_STILL;
