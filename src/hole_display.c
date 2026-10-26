@@ -854,14 +854,12 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSkyEditor);
  * Points the sky of a view at its camera, and scrolls the sky's texture with
  * the wind. The first view also blends the sky's colors, unless the sky
  * editor is open.
- *
- * Doesn't match: the target's stack frame is 0x20 bytes larger, and it keeps
- * horizonHalfWidth and its double conversion in each other's registers.
  */
-#ifdef NON_MATCHING
 void UpdateSky(CameraView *view, s32 viewIndex) {
+    f32 *pitches;
     f32 pitchScale; /* Narrower fields of view move the horizon further for each radian of pitch */
     Vec3 direction;
+    s32 unused[8]; /* The original frame has room for this */
     Vtx *vertices;
     f32 slope;
     f32 scroll;
@@ -972,9 +970,10 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     coordinate = sine * distance + cosine * SKY_TEXTURE_HALF_WIDTH;
     vertices[2].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
     coordinate = cosine * distance - sine * SKY_TEXTURE_HALF_WIDTH;
+    pitches = g_SkyState.pitches;
     vertices[2].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
     horizonHalfWidth = SCREEN_WIDTH;
-    distance = SKY_TEXTURE_NEAR_DISTANCE - g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI) + clippedHeight;
+    distance = SKY_TEXTURE_NEAR_DISTANCE - pitches[viewIndex] * horizonHalfWidth * (2 / M_PI) + clippedHeight;
     coordinate = sine * distance - cosine * SKY_TEXTURE_HALF_WIDTH;
     vertices[0].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
     coordinate = cosine * distance + sine * SKY_TEXTURE_HALF_WIDTH;
@@ -985,7 +984,7 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     vertices[3].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
     vertices[4].v.tc[0] = (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
     vertices[4].v.tc[1] = (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-    distance = (SKY_TEXTURE_HORIZON_DISTANCE - -g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+    distance = (SKY_TEXTURE_HORIZON_DISTANCE - -pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
                horizonHalfWidth / SCREEN_WIDTH;
     coordinate = sine * distance - cosine * horizonHalfWidth;
     vertices[6].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
@@ -995,7 +994,7 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     vertices[7].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
     coordinate = cosine * distance - sine * horizonHalfWidth;
     vertices[7].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-    distance = (SKY_TEXTURE_NEAR_DISTANCE - -g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+    distance = (SKY_TEXTURE_NEAR_DISTANCE - -pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
                horizonHalfWidth / SCREEN_WIDTH;
     coordinate = sine * distance - cosine * horizonHalfWidth;
     vertices[5].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
@@ -1008,9 +1007,6 @@ void UpdateSky(CameraView *view, s32 viewIndex) {
     vertices[9].v.tc[0] = (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
     vertices[9].v.tc[1] = (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSky);
-#endif
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
 void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
