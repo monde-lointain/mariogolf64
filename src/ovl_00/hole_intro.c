@@ -131,14 +131,14 @@ s32 UpdateHoleIntroCamera(void) {
     g_Cameras[0].view.eye[AXIS_Z] = g_Cameras[1].view.lookAt[AXIS_Z] + offset[AXIS_Z];
     if (g_HoleIndex == GetFirstHoleIndex()) {
         if (sIntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
-            StartMovie(MOVIE_UNK1);
+            StartMovie(MOVIE_LAKITU);
         }
         if (sIntroFrame > FIRST_HOLE_INTRO_MOVIE_FRAME && IsMoviePastCue()) {
             return TRUE;
         }
     } else {
         if (sIntroFrame == LATER_HOLE_INTRO_MOVIE_FRAME) {
-            StartMovie(MOVIE_UNK15);
+            StartMovie(MOVIE_READY_GO);
         }
         if (sIntroFrame == LATER_HOLE_INTRO_SOUND_FRAME) {
             PlaySound(SOUND_HOLE_INTRO, HOLE_INTRO_SOUND_CHANNEL, HOLE_INTRO_SOUND_VOLUME);

@@ -79,10 +79,15 @@ extern s32 sMovieFrame;
 extern s32 sMovieTick;
 /* Sets the render state for drawing a movie's paletted strips */
 extern Gfx sMovieSetupDisplayList[];
+extern s32 sMovieBackBuffer; /* Which of a two-buffer movie's frame buffers to read into next */
+extern u16 sToadMovieFrameAssets[];
 extern u16 sMontyMoleMovieFrameAssets[];
 extern u16 sGoombaMovieFrameAssets[];
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 extern s32 sMovieDrawCount;
+extern f32 sLakituX;
+extern f32 sLakituY;
+extern f32 sLakituScale;
 extern s32 sWindFlyGuyFrame;
 extern s32 sWindFlyGuyAsset;
 extern s32 sIsFlipMessageLeaving;
@@ -119,6 +124,28 @@ extern Vtx sFlipMessageBoardVertices[4];
 /* Each movie frame read into sMovieBuffer, after its palette */
 #define MOVIE_PALETTE_OFFSET 0x4208
 #define MOVIE_FRAME_OFFSET 0x4408
+#define ASSET_TOAD_MOVIE_PALETTE 0x92C
+#define TOAD_FRAME_OFFSET 0x200
+#define TOAD_BACK_FRAME_OFFSET 0x2880
+#define ASSET_LAKITU 0x64E
+#define LAKITU_BACK_IMAGE_OFFSET 0x1008
+#define LAKITU_START_X 384.0f
+#define LAKITU_START_Y -64.0f
+#define LAKITU_START_SCALE 0.7f
+#define ASSET_MONTY_MOLE_MOVIE_PALETTE 0x914
+#define ASSET_GOOMBA_MOVIE_PALETTE 0x91F
+#define ASSET_DRIVE_RECORD_TEXT 0x55E
+#define ASSET_LONGEST_DRIVE_TEXT 0x55C
+#define ASSET_NEAREST_PIN_TEXT 0x55B
+#define ASSET_ALBATROSS_PUTT_TEXT 0x556
+#define ASSET_EAGLE_PUTT_TEXT 0x557
+#define ASSET_BIRDIE_PUTT_TEXT 0x558
+#define ASSET_SINK_TO_WIN_TEXT 0x559
+#define ASSET_MISS_AND_LOSE_TEXT 0x55A
+#define ASSET_SINK_TO_TIE_TEXT 0x55D
+#define ASSET_READY_TEXT 0x976
+#define ASSET_GO_TEXT 0x977
+#define GO_TEXT_OFFSET 0x2508
 #define MOVIE_TICKS_PER_FRAME 3
 #define MOVIE_SOUND_CHANNEL 2
 #define MOVIE_SOUND_VOLUME 100
@@ -275,7 +302,105 @@ s32 IsMovieFinished(void) {
     return sCurrentMovie == MOVIE_NONE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartMovie);
+void StartMovie(s32 movie) {
+    EncodedAsset asset;
+    AssetFile file;
+
+    osSyncPrintf("MOVIE %d \n", movie);
+    if (sIsMovieBufferAllocated != TRUE) {
+        return;
+    }
+    sCurrentMovie = movie;
+    if (movie == MOVIE_NONE) {
+        return;
+    }
+    sLoadedBanner = BANNER_NONE;
+    sCurrentBanner = BANNER_NONE;
+    sMovieDrawCount = 0;
+    sMovieTick = 0;
+    sMovieBackBuffer = 0;
+    /* The first frame is loaded here */
+    sMovieFrame = 1;
+    switch (movie) {
+        case MOVIE_NONE:
+            break;
+        case MOVIE_TOAD_OUT_OF_BOUNDS:
+
+            OpenAssetFile(ASSET_TOAD_MOVIE_PALETTE, &file);
+            ReadAssetFile(sMovieBuffer, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(sToadMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(sMovieBuffer + TOAD_FRAME_OFFSET, &asset);
+            OpenEncodedAsset(sToadMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(sMovieBuffer + TOAD_BACK_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_LAKITU:
+            OpenEncodedAsset(ASSET_LAKITU, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            OpenEncodedAsset(ASSET_LAKITU, &asset);
+            ReadEncodedAsset(sMovieBuffer + LAKITU_BACK_IMAGE_OFFSET, &asset);
+            sLakituX = LAKITU_START_X;
+            sLakituY = LAKITU_START_Y;
+            sLakituScale = LAKITU_START_SCALE;
+            break;
+        case MOVIE_MONTY_MOLE_UNK2:
+        case MOVIE_MONTY_MOLE_UNK3:
+        case MOVIE_MONTY_MOLE_UNK4:
+        case MOVIE_MONTY_MOLE:
+            OpenAssetFile(ASSET_MONTY_MOLE_MOVIE_PALETTE, &file);
+            ReadAssetFile(sMovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(sMontyMoleMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(sMovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_GOOMBA:
+            OpenAssetFile(ASSET_GOOMBA_MOVIE_PALETTE, &file);
+            ReadAssetFile(sMovieBuffer + MOVIE_PALETTE_OFFSET, GetAssetFileSize(&file), &file);
+            OpenEncodedAsset(sGoombaMovieFrameAssets[0], &asset);
+            ReadEncodedAsset(sMovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+            break;
+        case MOVIE_DRIVE_RECORD:
+            OpenEncodedAsset(ASSET_DRIVE_RECORD_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_LONGEST_DRIVE:
+            OpenEncodedAsset(ASSET_LONGEST_DRIVE_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_NEAREST_PIN:
+            OpenEncodedAsset(ASSET_NEAREST_PIN_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_ALBATROSS_PUTT:
+            OpenEncodedAsset(ASSET_ALBATROSS_PUTT_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_EAGLE_PUTT:
+            OpenEncodedAsset(ASSET_EAGLE_PUTT_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_BIRDIE_PUTT:
+            OpenEncodedAsset(ASSET_BIRDIE_PUTT_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_SINK_TO_WIN:
+            OpenEncodedAsset(ASSET_SINK_TO_WIN_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_MISS_AND_LOSE:
+            OpenEncodedAsset(ASSET_MISS_AND_LOSE_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_SINK_TO_TIE:
+            OpenEncodedAsset(ASSET_SINK_TO_TIE_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            break;
+        case MOVIE_READY_GO:
+            OpenEncodedAsset(ASSET_READY_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer, &asset);
+            OpenEncodedAsset(ASSET_GO_TEXT, &asset);
+            ReadEncodedAsset(sMovieBuffer + GO_TEXT_OFFSET, &asset);
+            break;
+    }
+}
 
 s32 IsMoviePastCue(void) {
     return sMovieFrame >= MOVIE_CUE_FRAME;
@@ -292,7 +417,7 @@ void DrawMovie(Gfx **displayListHead) {
             StartMovie(MOVIE_DRIVE_RECORD);
         }
         if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & B_BUTTON) {
-            StartMovie(MOVIE_UNK15);
+            StartMovie(MOVIE_READY_GO);
         }
     }
     switch (sCurrentMovie) {
@@ -301,7 +426,7 @@ void DrawMovie(Gfx **displayListHead) {
         case MOVIE_TOAD_OUT_OF_BOUNDS:
             func_80213634_ovl_00(&gfx);
             break;
-        case MOVIE_UNK1:
+        case MOVIE_LAKITU:
             func_80213038_ovl_00(&gfx);
             break;
         case MOVIE_MONTY_MOLE:
@@ -317,15 +442,15 @@ void DrawMovie(Gfx **displayListHead) {
         case MOVIE_DRIVE_RECORD:
             func_80210F40_ovl_00(&gfx);
             break;
-        case MOVIE_UNK6:
-        case MOVIE_UNK7:
-        case MOVIE_UNK8:
-        case MOVIE_UNK9:
-        case MOVIE_UNK10:
-        case MOVIE_UNK11:
+        case MOVIE_ALBATROSS_PUTT:
+        case MOVIE_EAGLE_PUTT:
+        case MOVIE_BIRDIE_PUTT:
+        case MOVIE_SINK_TO_WIN:
+        case MOVIE_SINK_TO_TIE:
+        case MOVIE_MISS_AND_LOSE:
             func_8021169C_ovl_00(&gfx);
             break;
-        case MOVIE_UNK15:
+        case MOVIE_READY_GO:
             func_80211D60_ovl_00(&gfx);
             break;
     }
