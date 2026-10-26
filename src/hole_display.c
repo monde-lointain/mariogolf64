@@ -199,7 +199,6 @@ extern Vtx sLastColumnTileVertices[TILE_VERTEX_COUNT];
 
 void CaptureHudAnimationFrame(void);
 void func_8009232C(Gfx **displayListHead);
-void func_800947A8(void);
 void DrawTileAnimation(void);
 void DrawSliceAnimation(void);
 void DrawSpiralAnimation(Gfx **displayListHead);
@@ -451,7 +450,7 @@ void StartHudAnimation(s32 animation) {
         case HUD_ANIMATION_UNK9:
             sHudAnimationFramesLeft = 255;
             break;
-        case HUD_ANIMATION_UNK2:
+        case HUD_ANIMATION_TURN_AWAY:
             sHudAnimationFramesLeft = 255;
             break;
         case HUD_ANIMATION_UNK8:
@@ -842,7 +841,142 @@ void DrawTileAnimation(void) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_800947A8);
+/*
+ * HUD_ANIMATION_TURN_AWAY turns the whole frame away about two axes as it
+ * moves away from the camera. The frame's tiles are drawn on the tile grid,
+ * the upper rows from one load of its vertices and the rest from another;
+ * only the upper rows have a back, drawn in their shade.
+ */
+#define TURN_AWAY_UPPER_ROW_COUNT 4
+#define TURN_AWAY_LOWER_ROW_COUNT (FRAME_TILE_ROW_COUNT - TURN_AWAY_UPPER_ROW_COUNT)
+/* The last column's texture coordinates span this many texels */
+#define LAST_TILE_TEXEL_WIDTH 47
+/* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed point */
+#define LOWER_TILE_TEXCOORD_INSET 8
+extern Mtx sTurnAwayMatrices[2];
+
+/*
+ * Draws HUD_ANIMATION_TURN_AWAY.
+ *
+ * Doesn't match: the target computes each corner's vertex index from its own
+ * per-row induction variable, and registers are allocated differently.
+ */
+#ifdef NON_MATCHING
+void DrawTurnAwayAnimation(void) {
+    Vec3 rotation;
+    Vec3 translation;
+    Mat4 matrix;
+    s32 wordIndex = 0;
+    s32 row;
+    s32 column;
+    s32 width;
+    s32 vertex;
+
+    if (sHudAnimationFramesLeft > 0) {
+        rotation[AXIS_X] = 0.0f;
+        rotation[AXIS_Y] = M_PI / 2 - sHudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
+        rotation[AXIS_Z] = rotation[AXIS_Y];
+        translation[AXIS_X] = 0.0f;
+        translation[AXIS_Y] = 0.0f;
+        translation[AXIS_Z] = TILE_ANIMATION_DEPTH - (TILE_ANIMATION_FRAME_COUNT - sHudAnimationFramesLeft);
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &sTurnAwayMatrices[g_MatrixBufferIndex]);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPClearGeometryMode(g_DisplayListHead++, 0xFFFFFFFF);
+        gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gSPPerspNormalize(g_DisplayListHead++, g_ScreenEffectPerspNorm);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sTurnAwayMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(g_DisplayListHead++, sTileGridVertices[g_MatrixBufferIndex],
+                  (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(g_DisplayListHead++);
+        for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                gDPLoadTextureBlock(g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA,
+                                    G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                width = FRAME_TILE_WIDTH;
+                if (column == FRAME_TILE_COLUMN_COUNT - 1) {
+                    width = LAST_TILE_TEXEL_WIDTH;
+                }
+                vertex = row * TILE_GRID_COLUMN_COUNT + column;
+                gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
+                gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT, G_MWO_POINT_ST,
+                                FRAME_TILE_ROWS << 5);
+                gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
+                                (width << 21) + (FRAME_TILE_ROWS << 5));
+                gSPModifyVertex(g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST, width << 21);
+                gDPPipeSync(g_DisplayListHead++);
+                gSP2Triangles(g_DisplayListHead++, vertex, vertex + TILE_GRID_COLUMN_COUNT,
+                              vertex + TILE_GRID_COLUMN_COUNT + 1, 0, vertex, vertex + TILE_GRID_COLUMN_COUNT + 1,
+                              vertex + 1, 0);
+                gDPPipeSync(g_DisplayListHead++);
+            }
+        }
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
+        gDPPipeSync(g_DisplayListHead++);
+        for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                vertex = row * TILE_GRID_COLUMN_COUNT + column;
+                gSP2Triangles(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT + 1, vertex + TILE_GRID_COLUMN_COUNT,
+                              vertex, 0, vertex + 1, vertex + TILE_GRID_COLUMN_COUNT + 1, vertex, 0);
+            }
+        }
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPVertex(g_DisplayListHead++,
+                  &sTileGridVertices[g_MatrixBufferIndex][TURN_AWAY_UPPER_ROW_COUNT * TILE_GRID_COLUMN_COUNT],
+                  (TURN_AWAY_LOWER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
+        for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
+            for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
+                gDPLoadTextureBlock(g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA,
+                                    G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                wordIndex += FRAME_TILE_WORD_COUNT;
+                width = FRAME_TILE_WIDTH;
+                if (column == FRAME_TILE_COLUMN_COUNT - 1) {
+                    width = LAST_TILE_TEXEL_WIDTH;
+                }
+                vertex = row * TILE_GRID_COLUMN_COUNT + column;
+                gDPPipeSync(g_DisplayListHead++);
+                gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
+                gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT, G_MWO_POINT_ST,
+                                (FRAME_TILE_ROWS << 5) - LOWER_TILE_TEXCOORD_INSET);
+                gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT + 1, G_MWO_POINT_ST,
+                                (((width << 5) - LOWER_TILE_TEXCOORD_INSET) << 16) +
+                                    ((FRAME_TILE_ROWS << 5) - LOWER_TILE_TEXCOORD_INSET));
+                gSPModifyVertex(g_DisplayListHead++, vertex + 1, G_MWO_POINT_ST,
+                                ((width << 5) - LOWER_TILE_TEXCOORD_INSET) << 16);
+                gSP2Triangles(g_DisplayListHead++, vertex, vertex + TILE_GRID_COLUMN_COUNT,
+                              vertex + TILE_GRID_COLUMN_COUNT + 1, 0, vertex, vertex + TILE_GRID_COLUMN_COUNT + 1,
+                              vertex + 1, 0);
+                gDPPipeSync(g_DisplayListHead++);
+            }
+        }
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
+        gDPPipeSync(g_DisplayListHead++);
+        sHudAnimationFramesLeft -= TILE_ANIMATION_STEP;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTurnAwayAnimation);
+#endif
 
 /* Copies the frame that a HUD animation that has just started breaks apart */
 #ifdef NON_MATCHING
@@ -864,7 +998,7 @@ void CaptureHudAnimationFrame(void) {
     frame = (u32 *)nuGfxCfb_ptr;
     sIsFrameCapturePending = FALSE;
     wordIndex = 0;
-    if (sHudAnimation == HUD_ANIMATION_UNK2 || sHudAnimation == HUD_ANIMATION_TILES) {
+    if (sHudAnimation == HUD_ANIMATION_TURN_AWAY || sHudAnimation == HUD_ANIMATION_TILES) {
         for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
             for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT; tileColumn++) {
                 for (row = FRAME_MARGIN_ROWS; row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
@@ -1003,8 +1137,8 @@ void DrawHudAnimation(void) {
         case HUD_ANIMATION_UNK9:
             func_8009232C(&g_DisplayListHead);
             break;
-        case HUD_ANIMATION_UNK2:
-            func_800947A8();
+        case HUD_ANIMATION_TURN_AWAY:
+            DrawTurnAwayAnimation();
             break;
         case HUD_ANIMATION_TILES:
             DrawTileAnimation();
