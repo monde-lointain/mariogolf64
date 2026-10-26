@@ -39,14 +39,14 @@
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
-extern f32 sSunScreenX;
-extern f32 sSunScreenY;
+#define SKY_VIEW_COUNT 2
+extern f32 sSunScreenX[SKY_VIEW_COUNT]; /* For each view */
+extern f32 sSunScreenY[SKY_VIEW_COUNT];
 extern u16 sSunDepth;
 extern s32 sIsSunGlareSettled;
 extern f32 sSunGlareStrength;
 
 /* The sky's vertices, for each view and each matrix buffer */
-#define SKY_VIEW_COUNT 2
 #define SKY_VERTEX_COUNT 10
 #define SKY_COLORED_VERTEX_COUNT 5
 #define SKY_BLEND_STEP_COUNT 1000 /* sSkyBlendStep counts to this at most */
@@ -229,10 +229,10 @@ void SetUpTitleHole(void) {
 void UpdateSunGlare(void) {
     u16 *zBuffer;
 
-    if (sSunScreenX >= SUN_DEPTH_MARGIN && sSunScreenX <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
-        sSunScreenY >= SUN_DEPTH_MARGIN && sSunScreenY <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
+    if (sSunScreenX[0] >= SUN_DEPTH_MARGIN && sSunScreenX[0] <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
+        sSunScreenY[0] >= SUN_DEPTH_MARGIN && sSunScreenY[0] <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
         zBuffer = nuGfxZBuffer;
-        sSunDepth = zBuffer[(s32)sSunScreenY * SCREEN_WIDTH + (s32)sSunScreenX];
+        sSunDepth = zBuffer[(s32)sSunScreenY[0] * SCREEN_WIDTH + (s32)sSunScreenX[0]];
         if (sSunDepth >= SUN_SKY_DEPTH) {
             goto grow;
         }
@@ -241,8 +241,8 @@ void UpdateSunGlare(void) {
         if (sSunGlareStrength < 0.0f) {
             sSunGlareStrength = 0.0f;
         }
-    } else if (sSunScreenX > -SUN_GLARE_MARGIN && sSunScreenX < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
-               sSunScreenY > -SUN_GLARE_MARGIN && sSunScreenY < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
+    } else if (sSunScreenX[0] > -SUN_GLARE_MARGIN && sSunScreenX[0] < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
+               sSunScreenY[0] > -SUN_GLARE_MARGIN && sSunScreenY[0] < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
     grow:
         if (!sIsSunGlareSettled) {
             sSunGlareStrength += SUN_GLARE_GROWTH_STEP;
