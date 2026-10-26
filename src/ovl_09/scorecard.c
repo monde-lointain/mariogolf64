@@ -780,7 +780,7 @@ void DrawScorecard(Gfx **displayListHead) {
  * drawn back to front, the last in front at full brightness, and their order
  * depends on the page shown.
  *
- * Doesn't match: the target adds each rectangle's top offset to the
+ * Doesn't match: the target adds each tab rectangle's top offset to the
  * scorecard's y before adding the row, where this adds the row first, and it
  * swaps two saved registers.
  */
@@ -793,6 +793,7 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
     s32 dropY;
     s32 texelsOffset;
     s32 loadHeight;
+    s32 top;
 
     gSPDisplayList(gfx++, D_800C3FC0);
     gDPPipeSync(gfx++);
@@ -853,11 +854,11 @@ void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page) {
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, loadHeight * (TABLE_WIDTH / 2) - 1,
                      CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
+        top = g_Scorecard.y + TABLE_BODY_TOP;
         texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;
-        DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + (g_Scorecard.y + TABLE_BODY_TOP)) << 2,
-                        (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2,
-                        (row + loadHeight + (g_Scorecard.y + TABLE_BODY_TOP)) << 2, G_TX_RENDERTILE, 0, 0,
-                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawTextureRect(&gfx, (g_Scorecard.x + TABLE_LEFT) << 2, (row + top) << 2,
+                        (g_Scorecard.x + TABLE_LEFT + TABLE_SHOWN_WIDTH) << 2, (row + loadHeight + top) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
