@@ -127,6 +127,8 @@ typedef struct LakituVelocity {
 
 extern LakituFlight sLakitu;
 extern LakituVelocity sLakituVelocity;
+extern Mtx sReadyGoMatrices[2];
+extern Vtx sReadyGoVertices[];
 extern u16 sLakituMovieFrameAssets[];
 extern s32 sWindFlyGuyFrame;
 extern s32 sWindFlyGuyAsset;
@@ -308,7 +310,7 @@ void ResetPath(void);
 void func_802104BC_ovl_00(Gfx **displayListHead);
 void DrawDriveRecord(Gfx **displayListHead);
 void DrawPuttCaption(Gfx **displayListHead);
-void func_80211D60_ovl_00(Gfx **displayListHead);
+void DrawReadyGoMovie(Gfx **displayListHead);
 void DrawMontyMoleMovie(Gfx **displayListHead);
 void DrawGoombaMovie(Gfx **displayListHead);
 void DrawLakituMovie(Gfx **displayListHead);
@@ -727,7 +729,7 @@ void DrawMovie(Gfx **displayListHead) {
             DrawPuttCaption(&gfx);
             break;
         case MOVIE_READY_GO:
-            func_80211D60_ovl_00(&gfx);
+            DrawReadyGoMovie(&gfx);
             break;
     }
     if (sMovieDrawCount < MOVIE_DRAW_COUNT_MAX) {
@@ -943,7 +945,151 @@ void DrawPuttCaption(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawPuttCaption);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80211D60_ovl_00);
+/*
+ * "Ready" flips over to face the camera and away again, then "Go" flips in,
+ * grows and fades. Each word is a textured quad, drawn in strips whose
+ * texture coordinates are patched into the shared vertices.
+ */
+#define SOUND_READY 0x49
+#define SOUND_GO 0x4A
+#define READY_GO_SOUND_VOLUME 63
+#define READY_GO_SOUND_REVERB 30
+#define READY_SOUND_DRAW 1
+#define READY_FLIP_DRAW 6
+#define READY_FACING_DRAW 18
+#define GO_DRAW 24
+#define GO_GROW_DRAW 30
+#define READY_GO_END_DRAW 42
+#define READY_GO_TURN_PER_FRAME (M_PI / 12)
+#define GO_GROWTH_PER_FRAME 2.0f
+#define GO_FADE_PER_FRAME 32
+#define READY_GO_DISTANCE -300.0f
+#define READY_GO_VERTEX_COUNT 12
+#define READY_GO_STRIP_COUNT 5
+#define READY_WIDTH 160
+#define READY_STRIP_HEIGHT 12
+#define GO_WIDTH 144
+#define GO_STRIP_HEIGHT 14
+#define READY_GO_LAST_STRIP_HEIGHT 8
+/* Texture coordinates are in 10.5 fixed point */
+#define TEXEL_COORD(texels) ((texels) << 5)
+
+void DrawReadyGoMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    Vec3 rotation;
+    Vec3 translation;
+    Vec3 scale;
+    Mat4 matrix;
+    s32 alpha;
+    s32 stripHeight;
+    s32 i;
+
+    sMovieBackBuffer ^= 1;
+    alpha = 255;
+    if (sMovieDrawCount == READY_SOUND_DRAW) {
+        PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, READY_GO_SOUND_VOLUME, READY_GO_SOUND_REVERB,
+                             MOVIE_SOUND_PAN);
+    }
+    if (sMovieDrawCount == GO_GROW_DRAW) {
+        PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, READY_GO_SOUND_VOLUME, READY_GO_SOUND_REVERB,
+                             MOVIE_SOUND_PAN);
+    }
+    scale[0] = 1.0f;
+    scale[1] = 1.0f;
+    scale[2] = 1.0f;
+    if (sMovieDrawCount < READY_FLIP_DRAW) {
+        rotation[0] = M_PI;
+        rotation[1] = M_PI / 2 - (f32)sMovieDrawCount * READY_GO_TURN_PER_FRAME;
+        rotation[2] = 0.0f;
+    } else if (sMovieDrawCount < READY_FACING_DRAW) {
+        rotation[0] = M_PI - (f32)(sMovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME;
+        rotation[1] = 0.0f;
+        rotation[2] = 0.0f;
+    } else if (sMovieDrawCount < GO_DRAW) {
+        rotation[0] = M_PI - (f32)(sMovieDrawCount - READY_FLIP_DRAW) * READY_GO_TURN_PER_FRAME;
+        rotation[1] = 0.0f;
+        rotation[2] = 0.0f;
+    } else if (sMovieDrawCount < GO_GROW_DRAW) {
+        rotation[0] = M_PI - (f32)(sMovieDrawCount - READY_FACING_DRAW) * READY_GO_TURN_PER_FRAME;
+        rotation[1] = 0.0f;
+        rotation[2] = 0.0f;
+    } else if (sMovieDrawCount < READY_GO_END_DRAW) {
+        alpha = 255 - (sMovieDrawCount - GO_GROW_DRAW) * GO_FADE_PER_FRAME;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        rotation[0] = rotation[1] = rotation[2] = 0.0f;
+        scale[0] = scale[1] = scale[2] = GO_GROWTH_PER_FRAME * (sMovieDrawCount - GO_GROW_DRAW) + 1.0f;
+    } else {
+        sCurrentMovie = MOVIE_NONE;
+        return;
+    }
+    translation[0] = 0.0f;
+    translation[1] = 0.0f;
+    translation[2] = READY_GO_DISTANCE;
+    BuildTransformMatrix(matrix, rotation, translation, scale);
+    ConvertMatrixToFixed(matrix, &sReadyGoMatrices[sMovieBackBuffer]);
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, alpha);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0, 0, 0, 0, TEXEL0, ENVIRONMENT, 0, TEXEL0, 0);
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    if (alpha == 255) {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+    }
+    if (sMovieDrawCount < GO_DRAW) {
+        gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    } else {
+        gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET));
+    }
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sReadyGoMatrices[sMovieBackBuffer]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sReadyGoVertices, READY_GO_VERTEX_COUNT, 0);
+    for (i = 0; i != READY_GO_STRIP_COUNT; i++) {
+        if (sMovieDrawCount < GO_DRAW) {
+            stripHeight = (i != READY_GO_STRIP_COUNT - 1) ? READY_STRIP_HEIGHT : READY_GO_LAST_STRIP_HEIGHT;
+            gDPLoadTextureTile(gfx++,
+                               TEXTURE_ADDRESS(sMovieBuffer + (MOVIE_IMAGE_PIXELS_OFFSET +
+                                                               i * READY_WIDTH * READY_STRIP_HEIGHT)),
+                               G_IM_FMT_CI, G_IM_SIZ_8b, READY_WIDTH, stripHeight, 0, 0, READY_WIDTH - 1,
+                               stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK,
+                               G_TX_NOLOD, G_TX_NOLOD);
+            gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+            gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST, (TEXEL_COORD(READY_WIDTH) - 1) << 16);
+            gSPModifyVertex(gfx++, i * 2 + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+            gSPModifyVertex(gfx++, i * 2 + 3, G_MWO_POINT_ST,
+                            ((TEXEL_COORD(READY_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
+        } else {
+            stripHeight = (i != READY_GO_STRIP_COUNT - 1) ? GO_STRIP_HEIGHT : READY_GO_LAST_STRIP_HEIGHT;
+            gDPLoadTextureTile(gfx++,
+                               TEXTURE_ADDRESS(sMovieBuffer + (GO_TEXT_OFFSET + MOVIE_IMAGE_PIXELS_OFFSET +
+                                                               i * GO_WIDTH * GO_STRIP_HEIGHT)),
+                               G_IM_FMT_CI, G_IM_SIZ_8b, GO_WIDTH, stripHeight, 0, 0, GO_WIDTH - 1,
+                               stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK,
+                               G_TX_NOLOD, G_TX_NOLOD);
+            gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+            gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST, (TEXEL_COORD(GO_WIDTH) - 1) << 16);
+            gSPModifyVertex(gfx++, i * 2 + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+            gSPModifyVertex(gfx++, i * 2 + 3, G_MWO_POINT_ST,
+                            ((TEXEL_COORD(GO_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
+        }
+        gSP2Triangles(gfx++, i * 2, i * 2 + 2, i * 2 + 3, 0, i * 2, i * 2 + 3, i * 2 + 1, 0);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 #ifdef NON_MATCHING
 /* Unused: draws the movie image in sMovieBuffer, shrinking it from double size to its own size */
