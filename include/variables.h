@@ -77,7 +77,10 @@ typedef struct SkyColors {
     /* 0x04 */ u8 unk4[3];
     /* 0x07 */ u8 unk7[3];
     /* 0x0A */ u8 unkA[3];
-    /* 0x0D */ u8 unkD[0x18 - 0xD];
+    /* 0x0D */ u8 unkD[3];
+    /* 0x10 */ u8 unk10; /* Percent of unkD that InitSkyColors mixes into g_CourseSkyImage */
+    /* 0x11 */ u8 unk11[3];
+    /* 0x14 */ struct Unk800C5F34 *unk14;
     /* 0x18 */ u8 fogColor[3];
     /* 0x1C */ s16 fogNear;
     /* 0x1E */ s16 fogFar;
@@ -88,6 +91,21 @@ typedef struct SkyColors {
 #define SKY_WEATHER_COUNT 2
 
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
+
+typedef struct Unk800C5F34 {
+    /* 0x00 */ u8 unk0[0x1C];
+    /* 0x1C */ u8 imageKind; /* Which images InitSkyColors loads into g_SkyImage */
+} Unk800C5F34;
+
+/* Images that InitSkyColors loads and recolors with the sky's colors */
+#define ASSET_SKY_IMAGE_0 0x4D4
+#define ASSET_SKY_IMAGE_1 0x4D5
+#define ASSET_SKY_IMAGE_2_FIRST_HALF 0x706
+#define ASSET_SKY_IMAGE_2_SECOND_HALF 0x707
+#define SKY_IMAGE_HALF_OFFSET 0x808
+#define ASSET_COURSE_SKY_IMAGE_0 0x4BA
+extern u8 *g_SkyImage;
+extern u8 *g_CourseSkyImage;
 
 /* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
 #define SCENE_COLOR_INDEX_ROUND_START 0

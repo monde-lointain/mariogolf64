@@ -127,7 +127,7 @@ void BuildNoiseTexture(void);
 void StepNoiseTexture(void);
 void UpdateEffects(void);
 void ClearEffects(void);
-void func_8008E1B4(void);
+void InitSkyColors(void);
 void func_800605EC(void);
 
 /* Scene modules' update routines, in overlays */

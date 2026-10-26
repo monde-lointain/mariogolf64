@@ -1073,7 +1073,7 @@ void RunStaffRollTimeline(s32 frame) {
     TakePinOut();
     UpdateEffects();
     if (sShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
-        func_8008E1B4();
+        InitSkyColors();
         sShownSceneColorIndex = g_HoleConditions.sceneColorIndex;
     }
     g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;

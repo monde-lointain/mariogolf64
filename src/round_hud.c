@@ -51,8 +51,6 @@
 #define ASSET_ROUND_IMAGE_93C 0x93C
 #define ASSET_ROUND_IMAGE_4DB 0x4DB
 #define ASSET_SHADOW_TEXTURE 0x4C3
-#define ASSET_ROUND_IMAGE_4BA 0x4BA
-#define ASSET_ROUND_IMAGE_4D4 0x4D4
 #define ASSET_ROUND_IMAGE_722 0x722
 #define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
 #define ASSET_BLENDED_TEXTURE_STILL_LAYER 0x4D9
@@ -262,8 +260,6 @@ extern u8 *g_RingTexels;
 /* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8
 
-extern void *D_801EFFA4;
-extern void *D_800FBE0C;
 extern void *D_800E2160;
 extern s32 D_800E21BC;
 
@@ -407,7 +403,6 @@ void func_80242D40(Gfx **displayListHead);
 #define HOLE_NUMBER_Y 48
 
 void func_80216B74(s32);
-void func_8008E1B4(void);
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
 void func_801FD624(void);
@@ -432,7 +427,7 @@ void PrepareHoleDisplay(void) {
             (sArrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW + ARROW_CENTER_TEXEL_ROW) << TEXEL_COORDINATE_SHIFT;
     }
     BuildPinShadow();
-    func_8008E1B4();
+    InitSkyColors();
 }
 
 /* Lays out the wind flag and builds the projections the HUD draws with */
@@ -794,10 +789,10 @@ void LoadRoundHud(void) {
     s32 i;
     u32 paletteSize;
 
-    D_801EFFA4 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4BA, &asset));
-    ReadEncodedAsset(D_801EFFA4, &asset);
-    D_800FBE0C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4D4, &asset));
-    ReadEncodedAsset(D_800FBE0C, &asset);
+    g_CourseSkyImage = AllocMemory(OpenEncodedAsset(ASSET_COURSE_SKY_IMAGE_0, &asset));
+    ReadEncodedAsset(g_CourseSkyImage, &asset);
+    g_SkyImage = AllocMemory(OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset));
+    ReadEncodedAsset(g_SkyImage, &asset);
     sHoleImage = AllocMemory(OpenEncodedAsset(sHoleImageAssets[0], &asset));
     ReadEncodedAsset(sHoleImage, &asset);
     sParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));

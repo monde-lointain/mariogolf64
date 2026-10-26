@@ -1,4 +1,5 @@
 #include "common.h"
+#include "asset.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "game_flags.h"
@@ -54,6 +55,31 @@ extern Vtx sSkyVertices[SKY_VIEW_COUNT * 2][SKY_VERTEX_COUNT];
 extern s32 sSkyTimeIndex;
 extern s32 sSkyBlendStep;
 extern s32 sSkyBlendStepCount;
+
+/*
+ * Each scene color index has a time of day for the sky's colors, and a time
+ * and a percentage to blend from towards the next time. The tables are read
+ * one entry past the scene color index too, for the next index's values.
+ */
+#define SKY_PERCENT_TO_STEPS (SKY_BLEND_STEP_COUNT / 100)
+#define PERCENT_COUNT 100
+#define SKY_IMAGE_KIND_0 0
+#define SKY_IMAGE_KIND_1 1
+/* The course sky image is paletted, and InitSkyColors recolors its palette */
+#define PALETTE_START (IMAGE_HEADER_SIZE / PALETTE_COLOR_SIZE)
+#define SKY_IMAGE_CHANNEL_MAX 31
+/* The palette colors mix five parts of unk7 with one of unk4, shifted down to five bits */
+#define SKY_IMAGE_UNK7_PARTS 5
+#define SKY_IMAGE_DIVISOR (6 * 8)
+#define RGB_CHANNEL_COUNT 3
+extern s32 sSkyColorTimeIndex;
+extern s8 sSceneSkyColorTimes[];
+extern s8 sSceneSkyBlendTimes[];
+extern s8 sSceneSkyBlendPercents[];
+extern s32 sSkyHorizonColor[RGB_CHANNEL_COUNT];
+extern s32 sCourseSkyImageAssets[];
+extern s32 D_801B7F60;
+extern s32 D_801B7F64;
 
 extern s32 D_801B609C;
 extern s32 sIsPrimitiveDepthSet;
@@ -269,9 +295,127 @@ void BlendSkyColors(void) {
     g_SceneFog.far = from->fogFar + (to->fogFar - from->fogFar) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008E164);
+/*
+ * Sets the sky up for the hole's scene color index: its vertices' colors, the
+ * blend between times of day that BlendSkyColors steps through, and
+ * g_SkyImage and g_CourseSkyImage, recolored to match
+ *
+ * Doesn't match: the target keeps &g_HoleConditions.isRaining in a register
+ * across the three GetCourseRecordIndex calls, and allocates other registers.
+ */
+#ifdef NON_MATCHING
+void InitSkyColors(void) {
+    EncodedAsset asset;
+    u8 unused[0x10]; /* Pads the frame to the target's size */
+    s32 blended[RGB_CHANNEL_COUNT];
+    SkyColors *colors;
+    SkyColors *from;
+    SkyColors *to;
+    s32 group;
+    s32 channel;
+    s32 colorIndex;
+    u16 color;
+    s32 red;
+    s32 green;
+    s32 blue;
+    s32 alpha;
+    s32 outerMix;
+    s32 innerMix;
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008E1B4);
+    /* Unused */
+    s32 Lerp(s32 start, s32 end, f32 fraction) {
+        return start * (1.0f - fraction) + end * fraction;
+    }
+
+    sSkyColorTimeIndex = sSceneSkyColorTimes[g_HoleConditions.sceneColorIndex];
+    sSkyTimeIndex = sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex];
+    sSkyBlendStep = sSceneSkyBlendPercents[g_HoleConditions.sceneColorIndex] * SKY_PERCENT_TO_STEPS;
+    sSkyBlendStepCount = sSceneSkyBlendPercents[g_HoleConditions.sceneColorIndex + 1] * SKY_PERCENT_TO_STEPS;
+    if (sSkyBlendStepCount == 0 && sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex] !=
+                                       sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex + 1]) {
+        sSkyBlendStepCount = SKY_BLEND_STEP_COUNT;
+    }
+    colors = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyColorTimeIndex];
+    from = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex];
+    to = &g_SkyColors[GetCourseRecordIndex()][g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex + 1];
+    D_801B7F60 = 0;
+    D_801B7F64 = 0;
+    for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
+        for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
+            sSkyVertices[group][0].v.cn[channel] = colors->unk4[channel];
+            sSkyVertices[group][1].v.cn[channel] = colors->unk7[channel];
+            sSkyVertices[group][2].v.cn[channel] = colors->unk7[channel];
+            sSkyVertices[group][3].v.cn[channel] = colors->unk4[channel];
+            sSkyVertices[group][4].v.cn[channel] = colors->unk4[channel];
+            innerMix = (colors->unk4[channel] + colors->unk7[channel]) * 0.5f;
+            outerMix = (colors->unk4[channel] + sSkyHorizonColor[channel]) * 0.5f;
+            innerMix = (innerMix + sSkyHorizonColor[channel]) * 0.5f;
+            sSkyVertices[group][5].v.cn[channel] = outerMix;
+            sSkyVertices[group][6].v.cn[channel] = innerMix;
+            sSkyVertices[group][7].v.cn[channel] = innerMix;
+            sSkyVertices[group][8].v.cn[channel] = outerMix;
+            sSkyVertices[group][9].v.cn[channel] = outerMix;
+        }
+    }
+    if (colors->unk14->imageKind == SKY_IMAGE_KIND_0) {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+    } else if (colors->unk14->imageKind == SKY_IMAGE_KIND_1) {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_1, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+    } else {
+        OpenEncodedAsset(ASSET_SKY_IMAGE_2_FIRST_HALF, &asset);
+        ReadEncodedAsset(g_SkyImage, &asset);
+        OpenEncodedAsset(ASSET_SKY_IMAGE_2_SECOND_HALF, &asset);
+        ReadEncodedAsset(g_SkyImage + SKY_IMAGE_HALF_OFFSET, &asset);
+    }
+    OpenEncodedAsset((u16)sCourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+    ReadEncodedAsset(g_CourseSkyImage, &asset);
+    for (colorIndex = 0; colorIndex != LARGE_PALETTE_COLOR_COUNT; colorIndex++) {
+        color = ((u16 *)g_CourseSkyImage)[PALETTE_START + colorIndex];
+        red = (color >> 11) & SKY_IMAGE_CHANNEL_MAX;
+        green = (color >> 6) & SKY_IMAGE_CHANNEL_MAX;
+        blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
+        alpha = color & 1;
+        if (!alpha) {
+            red = (colors->unk7[0] * SKY_IMAGE_UNK7_PARTS + colors->unk4[0]) / SKY_IMAGE_DIVISOR;
+            green = (colors->unk7[1] * SKY_IMAGE_UNK7_PARTS + colors->unk4[1]) / SKY_IMAGE_DIVISOR;
+            blue = (colors->unk7[2] * SKY_IMAGE_UNK7_PARTS + colors->unk4[2]) / SKY_IMAGE_DIVISOR;
+        } else {
+            blended[0] = from->unkD[0] + (to->unkD[0] - from->unkD[0]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            blended[1] = from->unkD[1] + (to->unkD[1] - from->unkD[1]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            blended[2] = from->unkD[2] + (to->unkD[2] - from->unkD[2]) * sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+            red = (red * (PERCENT_COUNT - colors->unk10) + blended[0] * colors->unk10) / PERCENT_COUNT;
+            green = (green * (PERCENT_COUNT - colors->unk10) + blended[1] * colors->unk10) / PERCENT_COUNT;
+            blue = (blue * (PERCENT_COUNT - colors->unk10) + blended[2] * colors->unk10) / PERCENT_COUNT;
+        }
+        if (red < 0) {
+            red = 0;
+        }
+        if (green < 0) {
+            green = 0;
+        }
+        if (blue < 0) {
+            blue = 0;
+        }
+        if (red > SKY_IMAGE_CHANNEL_MAX) {
+            red = SKY_IMAGE_CHANNEL_MAX;
+        }
+        if (green > SKY_IMAGE_CHANNEL_MAX) {
+            green = SKY_IMAGE_CHANNEL_MAX;
+        }
+        if (blue > SKY_IMAGE_CHANNEL_MAX) {
+            blue = SKY_IMAGE_CHANNEL_MAX;
+        }
+        ((u16 *)g_CourseSkyImage)[PALETTE_START + colorIndex] = (red << 11) | (green << 6) | (blue << 1) | alpha;
+    }
+    DeriveSceneColors();
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", Lerp);
+
+INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008E82C);
 
