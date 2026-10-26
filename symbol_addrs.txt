@@ -2972,3 +2972,5 @@ sContactMatrices = 0x8022C210; // size:0x1440 segment:ovl_00
 DrawShrinkingMovieImage = 0x80212590; // type:func segment:ovl_00
 sMovieImageSetupDisplayList = 0x80224490; // segment:ovl_00
 UpdateCoursePointsResults = 0x801FA248; // type:func segment:ovl_00
+DrawRank = 0x801F6DFC; // type:func segment:ovl_00
+sPlaceNumberFormat = 0x80224CBC; // size:0x4 segment:ovl_00

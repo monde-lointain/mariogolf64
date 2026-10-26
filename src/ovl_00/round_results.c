@@ -123,6 +123,7 @@ extern s32 sOpenCourseCount;
 extern s32 sPointsToNextCourse;
 extern s32 sCourseNoticeAssets[];
 extern const char sNumberFormat[];
+extern const char sPlaceNumberFormat[];
 
 extern s32 sUnlockNoticeKind;
 extern s32 sNoticeStage;
@@ -790,7 +791,109 @@ void DrawPlaceIcon(Gfx **displayListHead, s32 x, s32 y, s32 place) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801F6DFC_ovl_00);
+/* Makes DrawRank draw the rank as a place: 1st, 2nd and so on */
+#define RANK_AS_PLACE 0x1000
+/* Ranks from this one draw a banner instead */
+#define RANK_BANNER 100
+#define RANK_BANNER_WIDTH 96
+#define RANK_BANNER_STRIP_HEIGHT 16
+#define RANK_BANNER_STRIP_COUNT 3
+/* The place suffixes' icons: st, nd, rd and th */
+#define PLACE_SUFFIX_TH 3
+#define PLACE_TWENTY_FIRST 20
+#define PLACE_TWENTY_FOURTH 23
+#define PLACE_DIGIT_WIDTH 24
+#define PLACE_DIGIT_SPACING 20
+#define PLACE_DIGIT_X 4
+#define PLACE_DIGIT_Y 10
+/* Two-digit places start further left, from the 10th */
+#define PLACE_TENTH 9
+#define PLACE_TWO_DIGIT_SHIFT 16
+/* The suffix icons follow the 1st to 4th place icons in the image */
+#define PLACE_SUFFIX_ICON_FIRST 4
+#define RANK_BANNER_X_OFFSET (-12)
+
+#ifdef NON_MATCHING
+/*
+ * Draws the place icon for a rank. With RANK_AS_PLACE, places past 3rd
+ * are written as digits followed by a suffix.
+ */
+void DrawRank(Gfx **displayListHead, s32 x, s32 y, s32 rank) {
+    Gfx *gfx = *displayListHead;
+    s32 suffix;
+    s32 digitX;
+    s32 digit;
+    u8 *image;
+    s32 i;
+    s32 stripY;
+    s32 offset;
+
+    if (rank & RANK_AS_PLACE) {
+        rank &= ~RANK_AS_PLACE;
+        suffix = rank;
+        if (rank >= PLACE_SUFFIX_TH) {
+            if (rank < PLACE_TWENTY_FIRST) {
+                suffix = PLACE_SUFFIX_TH;
+            } else if (rank < PLACE_TWENTY_FOURTH) {
+                suffix = rank - PLACE_TWENTY_FIRST;
+            } else {
+                suffix = PLACE_SUFFIX_TH;
+            }
+        }
+        LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+        LoadTextureBlock(&gfx, sResultsPlacesImage + ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET + PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE),
+                         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&gfx, (x + PLACE_DIGIT_WIDTH) * 4, y * 4, (x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE) * 4,
+                        (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        if (rank >= PLACE_SUFFIX_TH) {
+            sprintf(g_PrintBuffer, sPlaceNumberFormat, rank + 1);
+            LoadSmallPalette(&gfx, 0, D_80225708_ovl_00 + IMAGE_HEADER_SIZE);
+            if (rank >= PLACE_TENTH) {
+                x -= PLACE_TWO_DIGIT_SHIFT;
+            }
+            for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
+                digit = g_PrintBuffer[i] - '0';
+                digitX = i * PLACE_DIGIT_SPACING + PLACE_DIGIT_X;
+                gDPLoadTextureTile_4b(gfx++, (u32)(D_80225708_ovl_00 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                                      PLACE_DIGIT_WIDTH, 0, 0, digit * PLACE_DIGIT_WIDTH, PLACE_DIGIT_WIDTH - 1,
+                                      digit * PLACE_DIGIT_WIDTH + PLACE_DIGIT_WIDTH - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                DrawTextureRect(&gfx, (x + digitX) * 4, (y + PLACE_DIGIT_Y) * 4, (x + digitX + PLACE_DIGIT_WIDTH) * 4,
+                                (y + PLACE_DIGIT_Y + PLACE_DIGIT_WIDTH) * 4, G_TX_RENDERTILE, 0,
+                                (digit * PLACE_DIGIT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            }
+        } else {
+            DrawPlaceIcon(&gfx, x, y, rank);
+        }
+    } else if (rank >= RANK_BANNER) {
+        if (rank == RANK_BANNER) {
+            image = sResultsPlacesImage;
+        } else {
+            image = D_80225708_ovl_00;
+        }
+        LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+        for (i = 0, stripY = y, offset = LARGE_PALETTED_TEXELS_OFFSET; i != RANK_BANNER_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx, image + offset, G_IM_FMT_CI, G_IM_SIZ_8b, RANK_BANNER_WIDTH,
+                             RANK_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&gfx, (x + RANK_BANNER_X_OFFSET) * 4, stripY * 4, (x + RANK_BANNER_X_OFFSET + RANK_BANNER_WIDTH) * 4,
+                            (stripY + RANK_BANNER_STRIP_HEIGHT) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+            stripY += RANK_BANNER_STRIP_HEIGHT;
+            offset += RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT;
+        }
+    } else {
+        LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+        LoadTextureBlock(&gfx, sResultsPlacesImage + ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) + LARGE_PALETTED_TEXELS_OFFSET + PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE),
+                         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&gfx, (x + PLACE_DIGIT_WIDTH) * 4, y * 4, (x + PLACE_DIGIT_WIDTH + PLACE_ICON_SIZE) * 4,
+                        (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        DrawPlaceIcon(&gfx, x, y, rank);
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRank);
+#endif
 
 void DrawResultsLabel(Gfx **displayListHead, s32 x, s32 y, s32 label) {
     Gfx *gfx = *displayListHead;
@@ -847,7 +950,7 @@ void StartResultsNotice(s32 kind) {
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNumberFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224CBC_ovl_00);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sPlaceNumberFormat);
 
 /* Swings the notice in, then counts the course it opened */
 void UpdateCourseResultsNotice(void) {
@@ -1169,8 +1272,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA684_ovl_00);
 
-/* Makes func_801F6DFC_ovl_00 draw the rank as a place: 1st, 2nd and so on */
-#define RANK_AS_PLACE 0x1000
 #define RESULTS_LABEL_SCORE 2
 #define RESULTS_LABEL_POINTS 5
 #define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
@@ -1198,7 +1299,7 @@ void DrawTournamentResults(Gfx **displayListHead) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    func_801F6DFC_ovl_00(&gfx, sResultsSlide + 40, sResultsTop + 80, (sPlayerRanks[0] - 1) | RANK_AS_PLACE);
+    DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 80, (sPlayerRanks[0] - 1) | RANK_AS_PLACE);
     DrawPlayerPortrait(&gfx, sResultsSlide + 100, sResultsTop + 80, 0, FALSE);
     DrawResultsLabel(&gfx, sResultsSlide + 144, sResultsTop + 60, RESULTS_LABEL_SCORE);
     DrawResultsLabel(&gfx, sResultsSlide + 232, sResultsTop + 60, RESULTS_LABEL_POINTS);
