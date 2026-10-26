@@ -115,6 +115,11 @@
 /* The most shots that each kind of replay record keeps */
 #define HOLE_RECORD_MAX_STROKES 5
 #define RING_SHOT_RECORD_MAX_STROKES 6
+/* The swing meter's impact clicks */
+#define SOUND_IMPACT_ON_MARK 0x62
+#define SOUND_IMPACT_MISHIT 0x63
+#define SOUND_IMPACT_OFF_MARK 0x6E
+#define IMPACT_SOUND_VOLUME 0x64
 /* Only hole-outs in fewer strokes than this enter the records */
 #define MAX_RECORDED_STROKE_COUNT 4
 /* The stopwatches stop at an hour */
@@ -145,6 +150,8 @@
 extern s32 D_800C3070;
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
+extern u16 D_80104990; /* The first controller's buttons, as play copies them each frame */
+extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing was stopped */
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
 extern s32 D_8022716C_ovl_00; /* The shot mode that the golfer was last posed with */
 extern PlayRecord D_800FEDD8[];
@@ -1073,7 +1080,20 @@ void ShowHoleOutBanner(s32 playerIndex) {
  * functions they match, but they can only be written so once their parent
  * is C.
  */
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802080B4_ovl_00);
+/* Returns whether the B button is held */
+#ifdef NON_MATCHING
+s32 IsBButtonHeld(void) {
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
+    volatile s32 unused;
+    s32 garbage;
+    s32 held = D_80104990 & B_BUTTON;
+
+    unused = garbage;
+    return held != 0;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", IsBButtonHeld);
+#endif
 
 /* The turn controller's stick X, which left and right on the control pad tilt fully */
 #ifdef NON_MATCHING
@@ -1213,8 +1233,38 @@ void SetRoundHudPartsShown(s8 isShown) {
     g_RoundHud.unkD = isShown;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208810_ovl_00);
+/* Returns whether a shot stopped this far from the impact mark rumbles, as a mishit */
+#ifdef NON_MATCHING
+s32 DoesImpactRumble(void) {
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
+    volatile s32 unused;
+    s32 garbage;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80208850_ovl_00);
+    unused = garbage;
+    return GetUnkCEntry(GetSelectedClub(), g_CurrentShot.surface, g_CurrentShot.shotMode, D_8022715C_ovl_00)->unk5;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DoesImpactRumble);
+#endif
+
+/* Plays the impact click: a mishit, a stop right on the mark, or one off it */
+#ifdef NON_MATCHING
+void PlayImpactClickSound(void) {
+    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
+    volatile s32 unused;
+    s32 garbage;
+
+    unused = garbage;
+    if (DoesImpactRumble()) {
+        PlaySound(SOUND_IMPACT_MISHIT, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+    } else if (D_8022715C_ovl_00 == 0) {
+        PlaySound(SOUND_IMPACT_ON_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+    } else {
+        PlaySound(SOUND_IMPACT_OFF_MARK, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlayImpactClickSound);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802088B0_ovl_00);

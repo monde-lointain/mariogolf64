@@ -2899,3 +2899,6 @@ RecordHoleOut = 0x80206CF0; // type:func segment:ovl_00
 RecordRingShotHole = 0x80206E88; // type:func segment:ovl_00
 MeasureTeeShot = 0x80207A34; // type:func segment:ovl_00
 PoseGolferForShot = 0x802081F8; // type:func segment:ovl_00
+IsBButtonHeld = 0x802080B4; // type:func segment:ovl_00
+DoesImpactRumble = 0x80208810; // type:func segment:ovl_00
+PlayImpactClickSound = 0x80208850; // type:func segment:ovl_00
