@@ -2,7 +2,9 @@
 #include "asset.h"
 #include "billboard.h"
 #include "character.h"
+#include "controller.h"
 #include "course.h"
+#include "debug_text.h"
 #include "effects.h"
 #include "functions.h"
 #include "game_flags.h"
@@ -227,7 +229,9 @@ s32 UpdateTournamentResults();
  */
 s32 ShowScorePassword();
 s32 UpdateCoursePointsResults();
-s32 func_801FA684_ovl_00(void);
+s32 UpdateMatchResults();
+s32 func_8005CEE0(s32 index);
+void RecordComCharacterResult(s32 row, s32 column, s32 isWin);
 
 /* The course points that open the courses up to courseIndex, together */
 s32 SumCoursePointsNeeded(s32 courseIndex) {
@@ -1129,7 +1133,7 @@ s32 UpdateRoundResults(void) {
                         break;
                     case GAME_MODE_MATCH_GAME:
                     case GAME_MODE_GET_CHARACTER:
-                        isDone = func_801FA684_ovl_00();
+                        isDone = UpdateMatchResults();
                         break;
                     case GAME_MODE_TOURNAMENT:
                         isDone = UpdateTournamentResults();
@@ -1534,7 +1538,207 @@ s32 UpdateCoursePointsResults(ControllerState *controller) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA684_ovl_00);
+/* sResultsUnk78 values while UpdateMatchResults runs */
+#define MATCH_STEP_SHOWN 0
+#define MATCH_STEP_SLIDING_IN_TALLY 1
+#define MATCH_STEP_TALLYING 2
+#define MATCH_STEP_TALLIED 3
+#define MATCH_STEP_SLIDING_OUT_TALLY 4
+#define MATCH_STEP_RECORD_RESULT 5
+#define MATCH_STEP_WAITING 6
+#define MATCH_STEP_SHOW_CHARACTER_NOTICE 7
+#define MATCH_STEP_START_NOTICE_WAIT 8
+#define MATCH_STEP_NOTICE_WAIT 9
+#define MATCH_STEP_START_TALLY 10
+#define CHARACTER_NOTICE_TITLE_ASSET 0x560
+#define CHARACTER_NOTICE_WAIT_FRAMES 8
+/* sPlayerRanks[0] when the first player wins the match */
+#define MATCH_RANK_WON RANK_BANNER
+
+extern s32 sDebugUnlockCharacter;
+
+/*
+ * Counts the earned course points into the save, then in Get Character
+ * records the match and unlocks a beaten opponent, returning TRUE once
+ * A is pressed
+ */
+s32 UpdateMatchResults(ControllerState *controller) {
+    EncodedAsset asset;
+    s32 i;
+    s32 overshoot;
+
+    GetSaveData();
+    sResultsUnk7C++;
+    switch (sUnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            UpdateCharacterResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (sOpenCourseCount < COURSE_COUNT && sPointsToNextCourse + sPointsEarned == 0) {
+                for (i = 0; i != g_PlayerCount; i++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+                }
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
+                ReadEncodedAsset(sResultsCourseImage, &asset);
+                OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(sNoticeTitleImage, &asset);
+                return FALSE;
+            }
+            switch (sResultsUnk78) {
+                case MATCH_STEP_SHOWN:
+                    sResultsUnk8C = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        sResultsUnk8C = FALSE;
+                        sResultsUnk78 = MATCH_STEP_START_TALLY;
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                    }
+                    break;
+                case MATCH_STEP_START_TALLY:
+                    if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
+                        sResultsUnk78 = MATCH_STEP_SLIDING_IN_TALLY;
+                        SetResultsUnk94(0, 3);
+                    } else {
+                        sResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+                    }
+                    if (sPlayerRanks[0] == MATCH_RANK_WON) {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 1);
+                    } else {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 1);
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 0);
+                    }
+                    break;
+                case MATCH_STEP_SLIDING_IN_TALLY:
+                    if (GetResultsUnk94() == 1) {
+                        sResultsUnk78 = MATCH_STEP_TALLYING;
+                    }
+                    break;
+                case MATCH_STEP_TALLYING:
+                    if (controller->buttons & A_BUTTON) {
+                        sTallySpeed = FAST_TALLY_SPEED;
+                    }
+                    {
+                        s32 *points = &sPointsEarned;
+
+                        if (*points > 0) {
+                            PlayTallySound();
+                        }
+                        *points -= sTallySpeed;
+                        if (*points < 0) {
+                            *points = 0;
+                        }
+                        if (sOpenCourseCount == COURSE_COUNT) {
+                            *points = 0;
+                        } else {
+                            /* Stop on the points that open the next course, so that its notice shows */
+                            overshoot = sPointsToNextCourse + *points;
+                            if (overshoot < 0) {
+                                *points -= overshoot;
+                            }
+                        }
+                    }
+                    if (sPointsEarned == 0) {
+                        sResultsUnk78 = MATCH_STEP_TALLIED;
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                    }
+                    break;
+                case MATCH_STEP_TALLIED:
+                    sResultsUnk8C = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        SetResultsUnk94(4, 3);
+                        sResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+                        sResultsUnk8C = FALSE;
+                    }
+                    break;
+                case MATCH_STEP_SLIDING_OUT_TALLY:
+                    if (GetResultsUnk94() == 3) {
+                        sResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+                    }
+                    break;
+                case MATCH_STEP_RECORD_RESULT:
+                    sResultsUnk78 = MATCH_STEP_WAITING;
+                    sResultsUnk7C = 0;
+                    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+                        /* Beating a still locked opponent unlocks them, except those that other feats unlock */
+                        if (sPlayerRanks[0] == MATCH_RANK_WON &&
+                            func_8005CEE0((s8)g_Players[1].characterIndex) == -1 &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_PLUM &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_CHARLIE &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_PEACH &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_BABY_MARIO &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_YOSHI &&
+                            (s8)g_Players[1].characterIndex != CHARACTER_DONKEY_KONG &&
+                            (s8)g_Players[1].characterIndex < CHARACTER_METAL_MARIO) {
+                            sResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
+                        }
+                        RecordComCharacterResult((s8)g_Players[0].characterIndex, (s8)g_Players[1].characterIndex,
+                                                 GetMatchWinner(0, 1) == 1);
+                    }
+                    break;
+                case MATCH_STEP_SHOW_CHARACTER_NOTICE: {
+                    EncodedAsset titleAsset;
+
+                    StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
+                    OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
+                    ReadEncodedAsset(sNoticeTitleImage, &titleAsset);
+                    sResultsUnk78 = MATCH_STEP_START_NOTICE_WAIT;
+                    break;
+                }
+                case MATCH_STEP_START_NOTICE_WAIT:
+                    sResultsUnk78 = MATCH_STEP_NOTICE_WAIT;
+                    sResultsUnk7C = 0;
+                    break;
+                case MATCH_STEP_NOTICE_WAIT:
+                    if (sResultsUnk7C == CHARACTER_NOTICE_WAIT_FRAMES) {
+                        sResultsUnk78 = MATCH_STEP_WAITING;
+                    }
+                    break;
+                case MATCH_STEP_WAITING:
+                    sResultsUnk8C = TRUE;
+                    /* A debugging aid: up and down choose a character, and B shows its notice */
+                    if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
+                        if ((g_ControllerStates[0].repeatedButtons & U_JPAD) && sDebugUnlockCharacter > 0) {
+                            sDebugUnlockCharacter--;
+                        }
+                        if ((g_ControllerStates[0].repeatedButtons & D_JPAD) &&
+                            sDebugUnlockCharacter < CHARACTER_COUNT - 1) {
+                            sDebugUnlockCharacter++;
+                        }
+                        sprintf(g_PrintBuffer, "CHARA:%2d", sDebugUnlockCharacter);
+                        PrintDebugText(g_PrintBuffer, 25, 5);
+                        if (controller->pressedButtons & B_BUTTON) {
+                            EncodedAsset portraitAsset;
+                            AssetFile file;
+
+                            StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
+                            g_Players[1].characterIndex = sDebugUnlockCharacter;
+                            sPortraitCharacterIndex = (s8)sDebugUnlockCharacter;
+                            OpenEncodedAsset(g_CharacterImageAssets[(s8)sDebugUnlockCharacter], &portraitAsset);
+                            ReadEncodedAsset(sPortraitImage, &portraitAsset);
+                            OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[1].characterIndex] +
+                                              (s8)g_Players[1].paletteIndex,
+                                          &file);
+                            ReadAssetFile(sPortraitPalette, GetAssetFileSize(&file), &file);
+                            OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
+                            ReadEncodedAsset(sNoticeTitleImage, &portraitAsset);
+                            sResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+                        }
+                    }
+                    if (controller->buttons & A_BUTTON) {
+                        PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
+                        sResultsUnk8C = FALSE;
+                        return TRUE;
+                    }
+                    break;
+            }
+            break;
+    }
+    return FALSE;
+}
 
 #define RESULTS_LABEL_SCORE 2
 #define RESULTS_LABEL_POINTS 5

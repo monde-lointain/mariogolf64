@@ -128,6 +128,8 @@
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66
 #define GAME_FLAG_ADD_9999_POINTS 0x6C
+/* Lets the match results choose a character with the D-Pad and show its unlock notice with B */
+#define GAME_FLAG_CHOOSE_UNLOCK_NOTICE 0x6E
 #define GAME_FLAG_UNK6A 0x6A
 #define GAME_FLAG_UNK6B 0x6B
 #define GAME_FLAG_UNK7C 0x7C

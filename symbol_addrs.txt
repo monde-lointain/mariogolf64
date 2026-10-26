@@ -2980,3 +2980,5 @@ sTimeLabel = 0x80224DF4; // size:0x8 segment:ovl_00
 DrawPlaceNumber = 0x801F6718; // type:func segment:ovl_00
 sPlaceDigitsImage = 0x80225738; // size:0x4 segment:ovl_00
 UpdateTournamentResults = 0x801F9AD0; // type:func segment:ovl_00
+UpdateMatchResults = 0x801FA684; // type:func segment:ovl_00
+sDebugUnlockCharacter = 0x8021FE3C; // size:0x4 segment:ovl_00
