@@ -216,7 +216,7 @@ s32 func_801F9AD0_ovl_00(void);
  * is declared without a prototype
  */
 s32 ShowScorePassword();
-s32 func_801FA248_ovl_00(void);
+s32 UpdateCoursePointsResults();
 s32 func_801FA684_ovl_00(void);
 
 /* The course points that open the courses up to courseIndex, together */
@@ -936,7 +936,7 @@ s32 UpdateRoundResults(void) {
                     case GAME_MODE_SPEED_GOLF:
                     case GAME_MODE_SKINS_MATCH:
                     case GAME_MODE_CLUB_SLOTS:
-                        isDone = func_801FA248_ovl_00();
+                        isDone = UpdateCoursePointsResults();
                         break;
                     case GAME_MODE_MATCH_GAME:
                     case GAME_MODE_GET_CHARACTER:
@@ -1036,7 +1036,136 @@ s32 ShowScorePassword(ControllerState *controller) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA248_ovl_00);
+/* sResultsUnk78 values while UpdateCoursePointsResults runs */
+#define POINTS_STEP_SHOWN 0
+#define POINTS_STEP_SLIDING_IN_TALLY 1
+#define POINTS_STEP_TALLIED 2
+#define POINTS_STEP_SLIDING_OUT_TALLY 3
+#define POINTS_STEP_WAITING 4
+#define POINTS_STEP_TALLYING 5
+#define POINTS_STEP_START_TALLY 6
+#define PORTRAIT_ANIMATION_UNK4 4
+#define FAST_TALLY_SPEED 10
+#define SOUND_TALLY_DONE 0x22
+#define TALLY_DONE_SOUND_VOLUME 127
+
+#ifdef NON_MATCHING
+/*
+ * Counts the earned course points into the save, showing a notice when they open a course, then
+ * returns TRUE once A is pressed
+ */
+s32 UpdateCoursePointsResults(ControllerState *controller) {
+    EncodedAsset asset;
+    s32 i;
+    s32 j;
+    s32 overshoot;
+
+    GetSaveData();
+    sResultsUnk7C++;
+    switch (sUnlockNoticeKind) {
+        case UNLOCK_NOTICE_KIND_COURSE:
+            UpdateCourseResultsNotice();
+            break;
+        case UNLOCK_NOTICE_KIND_CHARACTER:
+            break;
+
+        case UNLOCK_NOTICE_KIND_NONE:
+            if (sOpenCourseCount < COURSE_COUNT && sPointsToNextCourse + sPointsEarned == 0) {
+                for (i = 0; i != g_PlayerCount; i++) {
+                    StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+                }
+                StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
+                OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
+                ReadEncodedAsset(sResultsCourseImage, &asset);
+                OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
+                ReadEncodedAsset(sNoticeTitleImage, &asset);
+                return FALSE;
+            }
+            switch (sResultsUnk78) {
+                case POINTS_STEP_SHOWN:
+                    sResultsUnk8C = TRUE;
+                    if (controller->buttons & A_BUTTON) {
+                        sResultsUnk8C = FALSE;
+                        sResultsUnk78 = POINTS_STEP_START_TALLY;
+                        PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL, SCORE_PASSWORD_SOUND_VOLUME);
+                    }
+                    break;
+                case POINTS_STEP_START_TALLY:
+                    if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
+                        sResultsUnk78 = POINTS_STEP_SLIDING_IN_TALLY;
+                        SetResultsUnk94(0, 3);
+                    } else {
+                        sResultsUnk78 = POINTS_STEP_WAITING;
+                    }
+                    for (i = 0; i != g_PlayerCount; i++) {
+                        StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
+                        for (j = 0; j != g_PlayerCount; j++) {
+                            if (i != j && sPlayerRanks[j] < sPlayerRanks[i]) {
+                                StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, i);
+                            }
+                        }
+                    }
+                    break;
+                case POINTS_STEP_SLIDING_IN_TALLY:
+                    if (GetResultsUnk94() == 1) {
+                        sResultsUnk78 = POINTS_STEP_TALLYING;
+                    }
+                    break;
+                case POINTS_STEP_TALLYING:
+                    if (controller->buttons & A_BUTTON) {
+                        sTallySpeed = FAST_TALLY_SPEED;
+                    }
+                    if (sPointsEarned > 0) {
+                        PlayTallySound();
+                    }
+                    sPointsEarned -= sTallySpeed;
+                    if (sPointsEarned < 0) {
+                        sPointsEarned = 0;
+                    }
+                    if (sOpenCourseCount == COURSE_COUNT) {
+                        sPointsEarned = 0;
+                    } else {
+                        /* Stop on the points that open the next course, so that its notice shows */
+                        overshoot = sPointsToNextCourse + sPointsEarned;
+                        if (overshoot < 0) {
+                            sPointsEarned -= overshoot;
+                        }
+                    }
+                    if (sPointsEarned == 0) {
+                        sResultsUnk7C = 0;
+                        PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
+                        sResultsUnk78 = POINTS_STEP_TALLIED;
+                        sResultsUnk8C = TRUE;
+                    }
+                    break;
+                case POINTS_STEP_TALLIED:
+                    if (controller->buttons & A_BUTTON) {
+                        SetResultsUnk94(4, 3);
+                        sResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
+                        sResultsUnk8C = FALSE;
+                    }
+                    break;
+                case POINTS_STEP_SLIDING_OUT_TALLY:
+                    if (GetResultsUnk94() == 3) {
+                        sResultsUnk78 = POINTS_STEP_WAITING;
+                    }
+                    break;
+                case POINTS_STEP_WAITING:
+                    sResultsUnk8C = TRUE;
+                    if (controller->pressedButtons & A_BUTTON) {
+                        PlaySound(SOUND_CONFIRM, SCORE_PASSWORD_SOUND_CHANNEL, SCORE_PASSWORD_SOUND_VOLUME);
+                        sResultsUnk8C = FALSE;
+                        return TRUE;
+                    }
+                    break;
+            }
+            break;
+    }
+    return FALSE;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FA684_ovl_00);
 
