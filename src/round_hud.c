@@ -494,9 +494,7 @@ void func_802427E8(Gfx **displayListHead);
 void LoadCourseSelect(s32);
 void FreeCourseSelect(void);
 void func_80216EDC(void);
-void func_8020E740(void);
 void func_80216F8C(void);
-void func_8020E78C(void);
 
 /* Sets up what the hole's drawing needs before its first frame */
 void PrepareHoleDisplay(void) {
@@ -659,7 +657,7 @@ void LoadSceneryImages(void) {
     LoadEffectImages();
     LoadHoleCreatureImages();
     func_80216EDC();
-    func_8020E740();
+    AllocMovieBuffer();
     LoadClubPanelImages();
     D_801B55DC = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_541, &asset));
     ReadEncodedAsset(D_801B55DC, &asset);
@@ -718,7 +716,7 @@ void FreeSceneryImages(void) {
         FreeEffectImages();
         FreeHoleCreatureImages();
         func_80216F8C();
-        func_8020E78C();
+        FreeMovieBuffer();
         FreeClubPanelImages();
         FreeMemory(&D_801B55DC);
         FreeMemory(&sWindIconImage);

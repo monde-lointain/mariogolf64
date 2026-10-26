@@ -113,7 +113,6 @@ void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
 void LoadSuperShotReplay(PlayRecord *record);
-s32 IsMovieFinished(void);
 
 s32 func_8005F180(void) {
     return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);

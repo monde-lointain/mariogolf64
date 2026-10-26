@@ -12,6 +12,10 @@
 #define MOVIE_DRIVE_RECORD 14  /* A tournament's longest drive yet */
 #define MOVIE_UNK16 16
 
+void AllocMovieBuffer(void);
+void FreeMovieBuffer(void);
+s32 IsMovieFinished(void);
 void StartMovie(s32 movie);
+s32 IsMoviePastCue(void);
 
 #endif

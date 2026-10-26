@@ -20,6 +20,7 @@
 #include "movie.h"
 #include "overlay_manager.h"
 #include "pin.h"
+#include "round_events.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -55,7 +56,7 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define FLIGHT_CAMERA_UNK10 0x10
 #define FLIGHT_CAMERA_UNK11 0x11
 #define FLIGHT_CAMERA_FRAMING_PATH 0x12 /* Frames the path's extreme points on x and z */
-/* Frames the cup and the ball; it keeps the putter's contact from calling func_80213D70 */
+/* Frames the cup and the ball; it keeps the putter's contact from calling StartContactEffect */
 #define FLIGHT_CAMERA_FRAMING_CUP 0x13
 #define FLIGHT_CAMERA_FLAGGED_STEP 0x14 /* Looks along the path at D_800BE64C */
 
@@ -351,7 +352,6 @@ s16 GetAimSlopeAngle(UnkB8 *player, Unk20 *shot) {
 static const f64 sUnusedZero = 0.0;
 
 void func_80205AE4(s32, s32);
-void func_80216130(s32);
 /* menu.c returns an s8, but the original calls it without truncating, as if undeclared */
 s32 func_8005DE40();
 void ChooseFlightCameraKind(void);
@@ -461,7 +461,6 @@ extern s32 sGreenSoundCount;
 extern s32 sIsLandingSoundPlayed;
 extern s32 D_800DAF44;
 extern s8 sPassedPathFlags;
-extern s32 D_802246F8;
 
 void func_8020E7B4(s32);
 
@@ -504,7 +503,7 @@ void StartFlightCamera(s32 earlierFlightCount) {
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     /* The nested ifs are there to match */
     if (!g_SimulatedShot.unk2E08) {
-        if (earlierFlightCount != 0 && D_802246F8 == -1) {
+        if (earlierFlightCount != 0 && g_ContactEffect == CONTACT_EFFECT_NONE) {
             g_RoundHud.unk17 = TRUE;
         } else {
             g_RoundHud.unk17 = FALSE;
@@ -644,10 +643,9 @@ void StartFlightCamera(s32 earlierFlightCount) {
 #define CONTACT_SOUND_CHANNEL 2
 #define CONTACT_SOUND_VOLUME 0x7F
 
-/* The clubs in slots below it get func_80213D70(1) on some power shots */
+/* The clubs in slots below it get StartContactEffect(1) on some power shots */
 #define LEADING_CLUB_SLOT_COUNT 6
 
-void func_80213D70(s32);
 
 /* These are macros, as inline functions compile differently from the original */
 #define IsUnk2E14PowerShot() (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
@@ -668,24 +666,24 @@ void PlayContactSound(void) {
     if (club->kind == CLUB_KIND_WOOD) {
         if (IsUnk2E14PowerShot()) {
             PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
-            func_80213D70(0);
+            StartContactEffect(0);
         } else if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
-            func_80213D70(2);
+            StartContactEffect(2);
             PlaySound(CONTACT_SOUND_WOOD_UNK50, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         } else {
-            func_80213D70(2);
+            StartContactEffect(2);
             PlaySound(CONTACT_SOUND_WOOD, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         }
         StartImpactSparks();
     } else if (club->kind == CLUB_KIND_IRON || club->kind == CLUB_KIND_WEDGE) {
         if (IsUnk2E14PowerShot()) {
             if (g_CurrentShot.clubSlot < LEADING_CLUB_SLOT_COUNT) {
-                func_80213D70(1);
+                StartContactEffect(1);
             } else {
-                func_80213D70(2);
+                StartContactEffect(2);
             }
         } else {
-            func_80213D70(2);
+            StartContactEffect(2);
         }
         if (surfaceInfo->kind == SURFACE_KIND_TEE_UP) {
             PlaySound(CONTACT_SOUND_IRON_TEE, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
@@ -699,7 +697,7 @@ void PlayContactSound(void) {
     } else {
         PlaySound(CONTACT_SOUND_PUTTER, CONTACT_SOUND_CHANNEL, CONTACT_SOUND_VOLUME);
         if (sFlightCameraKind != FLIGHT_CAMERA_FRAMING_CUP) {
-            func_80213D70(3);
+            StartContactEffect(3);
         }
     }
 }
@@ -1359,7 +1357,7 @@ void ClearHoleIntroText(void) {
     SetTextSlot(0, 0, NO_MESSAGE, 1, INTRO_TEXT_SLOT_UNK1, 0, 0, 0, 0, 0);
 }
 
-/* Ends the hole flyover; the screen fades back, and a strong wind gets func_80216130 */
+/* Ends the hole flyover; the screen fades back, and a strong wind brings the Fly Guy that warns of it */
 void EndHoleFlyover(void) {
     g_HoleFlyoverFrame = HOLE_FLYOVER_ENDED;
     g_InsetView.animation = INSET_VIEW_STILL;
@@ -1367,7 +1365,7 @@ void EndHoleFlyover(void) {
     g_Cameras[INSET_CAMERA].view.drawFlags = 0;
     if (g_GameMode != GAME_MODE_SPEED_GOLF && !g_IsMiniGolf) {
         if (IsGameFlagSet(GAME_FLAG_UNK48) || g_HoleConditions.windSpeed / WIND_SPEED_UNIT >= STRONG_WIND_SPEED) {
-            func_80216130(1);
+            ShowWindFlyGuy(TRUE);
         }
     }
 }
@@ -2622,11 +2620,11 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         }
         /* pathFlags is an s8, so testing 0x100 tests its sign; the original has it */
         if ((g_SimulatedShot.pathFlags[step] & 0x100) || (g_SimulatedShot.pathFlags[step] & PATH_FLAG_UNK4)) {
-            func_80213D70(-1);
+            StartContactEffect(CONTACT_EFFECT_NONE);
         }
     } else if (g_SimulatedShot.pathFlags[step]) {
         D_800C5AAC = 2;
-        func_80213D70(10);
+        StartContactEffect(10);
         if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
             StartFastBallAfterimage();
         }

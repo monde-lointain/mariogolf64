@@ -9,6 +9,7 @@
 #include "hole_objects.h"
 #include "math_util.h"
 #include "movie.h"
+#include "round_events.h"
 #include "round_hud.h"
 #include "shot_effects.h"
 #include "sound.h"
@@ -57,7 +58,6 @@ enum SparkKind {
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
 
 extern u8 *g_SharedEffectImages;
-extern s32 D_802246F8_ovl_00;
 /* Counts the frames from the last impact flash, back to 0 after 100 */
 extern s32 sImpactFrameCount;
 
@@ -121,9 +121,7 @@ extern Mtx sSwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
 extern f32 sSwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
 extern f32 sSwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
-void func_80213D70_ovl_00(s32);
 void func_8020E7B4_ovl_00(s32);
-void func_80216130_ovl_00(s32);
 f32 InterpolateHermite(f32 values[], f32 position);
 
 void ResetShotEffects(void) {
@@ -131,7 +129,7 @@ void ResetShotEffects(void) {
 
     sImpactFrameCount = 0;
     g_ImpactFlashState = IMPACT_FLASH_NONE;
-    D_802246F8_ovl_00 = -1;
+    g_ContactEffect = CONTACT_EFFECT_NONE;
     for (i = 0; i != SPARK_BURST_COUNT; i++) {
         sSparkBurstAges[i] = NO_SPARK_BURST;
     }
@@ -142,13 +140,13 @@ void ResetShotEffects(void) {
 
 void ClearShotEffects(s32 kind) {
     osSyncPrintf("effect Clear!%d\n", kind);
-    func_80216130_ovl_00(-1);
+    ShowWindFlyGuy(FLY_GUY_HIDDEN);
     StartShotEffect(-1);
     ClearEffects();
     sImpactFrameCount = 0;
     g_ImpactFlashState = IMPACT_FLASH_NONE;
     ClearHoleCreatures();
-    func_80213D70_ovl_00(-1);
+    StartContactEffect(CONTACT_EFFECT_NONE);
     if (kind == CLEAR_KIND_HOLE_END) {
         func_8020E7B4_ovl_00(-2);
     }
