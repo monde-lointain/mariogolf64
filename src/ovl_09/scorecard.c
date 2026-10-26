@@ -30,6 +30,31 @@
 #define SCORECARD_TALLYING 3 /* Counting skins before it is shown */
 #define SCORECARD_CLOSED 4
 
+/* The layouts that SetScorecardLayout picks for the game modes */
+#define SCORECARD_LAYOUT_STROKE 0
+#define SCORECARD_LAYOUT_MATCH 1 /* Match games and Get Character */
+#define SCORECARD_LAYOUT_SKINS 2 /* Skins matches and club slots */
+#define SCORECARD_LAYOUT_TOURNAMENT 3
+#define SCORECARD_LAYOUT_UNK4 4 /* For GAME_MODE_UNK7 */
+
+#define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
+#define HOLE_WINNER_UNSET (-2)  /* What SetScorecardLayout starts it as */
+
+/*
+ * The tallies of a match's hole happen at these frames of the TALLYING state.
+ * A skins match carries a halved hole's skins over at SKINS_TALLY_TIME, or
+ * from then hands a won hole's skins over one every SKINS_TALLY_INTERVAL.
+ */
+#define MATCH_RESULT_SOUND_TIME 1
+#define MATCH_RESULT_TIME 5
+#define SKINS_TALLY_TIME 20
+#define SKINS_TALLY_INTERVAL 4
+#define SOUND_UNK22 0x22
+#define SOUND_UNK67 0x67
+#define SOUND_SKIN_COUNTED 0x6B
+#define TALLY_SOUND_CHANNEL 13
+#define MATCH_RESULT_SOUND_CHANNEL 14
+
 #define SOUND_SCORECARD_OPEN 0x47
 #define SOUND_SCORECARD_CLOSE 0x48
 #define SOUND_SCORECARD_PAGE 0x5C
@@ -125,7 +150,7 @@ typedef struct Scorecard {
     /* 0xCC */ s32 unkCC;
     /* 0xD0 */ s32 stateTime; /* Frames since sScorecardState changed */
     /* 0xD4 */ s32 unkD4;
-    /* 0xD8 */ s32 unkD8;
+    /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a HOLE_WINNER_* value */
     /* 0xDC */ s32 layout;
     /* 0xE0 */ s32 pageCount;
     /* 0xE4 */ s32 hasBets;
@@ -470,7 +495,57 @@ s32 LoadResultCharacters(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
 #endif
 
+/*
+ * Counts the last hole's result onto the scorecard. Returns TRUE once it is done.
+ *
+ * Doesn't match: this keeps g_SkinsCarryover's address in a register where
+ * the target addresses each access to it on its own.
+ */
+#ifdef NON_MATCHING
+s32 TallyScorecardSkins(void) {
+    switch (sScorecard.layout) {
+        case SCORECARD_LAYOUT_STROKE:
+        case SCORECARD_LAYOUT_TOURNAMENT:
+        case SCORECARD_LAYOUT_UNK4:
+            return TRUE;
+        case SCORECARD_LAYOUT_MATCH:
+            if (sScorecard.stateTime == MATCH_RESULT_SOUND_TIME && sScorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
+                PlaySound(SOUND_UNK22, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+            }
+            if (sScorecard.stateTime == MATCH_RESULT_TIME) {
+                g_SkinsCarryover.onLastHole = 1;
+                if (sScorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
+                    PlaySound(SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+                }
+                return TRUE;
+            }
+            break;
+        case SCORECARD_LAYOUT_SKINS:
+            if (sScorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
+                if (sScorecard.stateTime == SKINS_TALLY_TIME) {
+                    g_SkinsCarryover.intoLastHole++;
+                    PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+                    return TRUE;
+                }
+            } else if (sScorecard.stateTime >= SKINS_TALLY_TIME) {
+                if (g_SkinsCarryover.onLastHole <= 0) {
+                    return TRUE;
+                }
+                if ((sScorecard.stateTime - SKINS_TALLY_TIME) % SKINS_TALLY_INTERVAL == 1) {
+                    if (g_SkinsCarryover.intoLastHole > 0) {
+                        g_SkinsCarryover.intoLastHole--;
+                    }
+                    g_SkinsCarryover.onLastHole--;
+                    PlaySound(SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
+                }
+            }
+            break;
+    }
+    return FALSE;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TallyScorecardSkins);
+#endif
 
 void DrawScorecardFace(Gfx **displayListHead, s32 left, s32 top, s32 playerIndex) {
     Gfx *gfx = *displayListHead;
