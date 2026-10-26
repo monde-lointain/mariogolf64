@@ -127,7 +127,6 @@ extern Mtx sFlagMatrices[DRAW_BUFFER_COUNT];
 extern Vtx sPinVertices[PIN_VERTEX_COUNT];
 extern Vtx sLargePinVertices[PIN_VERTEX_COUNT];
 extern f32 sFlagWavePhase;
-extern s32 g_PinVertexScale;
 extern s32 g_CupViewDepth;
 extern s32 D_800BE69C;
 

@@ -1244,7 +1244,149 @@ void ResetBallTrail(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80083AC8);
+/* Adds the ball's position to its trail each frame */
+#define BALL_TRAIL_RECORDING 1
+/* The trail is drawn this far below the ball's center, scaled like the pin */
+#define BALL_TRAIL_DROP 0.27f
+/* And this many depth steps nearer the camera, scaled like the pin */
+#define BALL_TRAIL_DEPTH_BIAS 7
+/* The depth of a trail point that is behind the camera */
+#define BALL_TRAIL_HIDDEN (-1)
+/* Half the trail's width, in quarter pixels */
+#define BALL_TRAIL_HALF_WIDTH 4.0f
+/* The trail is white; its newest segment has this alpha, fading by one every few segments */
+#define BALL_TRAIL_COLOR 0xFFFFFF00
+#define BALL_TRAIL_ALPHA 64
+#define BALL_TRAIL_SEGMENTS_PER_FADE 4
+
+/* A point of the ball's trail on the screen, in quarter pixels */
+typedef struct TrailPoint {
+    /* 0x00 */ s32 x;
+    /* 0x04 */ s32 y;
+    /* 0x08 */ s32 depth;
+} TrailPoint; /* size = 0x0C */
+
+extern s32 D_800C5AAC;
+extern s8 D_801061CF;
+extern s32 D_800BE69C;
+extern TrailPoint sBallTrailPoints[BALL_TRAIL_LENGTH];
+extern Mtx sBallTrailMatrix;
+/* The quad that each segment of the trail moves into place on the screen */
+extern Vtx sBallTrailVertices[4];
+
+/*
+ * Draws the ball's trail through its recent positions as screen-space quads
+ * that fade out with age. While D_800C5AAC is BALL_TRAIL_RECORDING it also
+ * adds the ball's current position.
+ *
+ * Doesn't match: the display list pointer's copies and the color's stores
+ * are scheduled differently.
+ */
+#ifdef NON_MATCHING
+void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
+    Gfx *gfx = *displayListHead;
+    ScreenPoint point;
+    s32 i;
+    s32 index;
+    f32 deltaX;
+    f32 deltaY;
+    f32 scale;
+    f32 offsetX;
+    f32 offsetY;
+    s32 color;
+
+    if (D_800C5AAC != 0 && D_801061CF) {
+        if (D_800C5AAC == BALL_TRAIL_RECORDING) {
+            if (++sBallTrailHead == BALL_TRAIL_LENGTH) {
+                sBallTrailHead = 0;
+            }
+            sBallTrail[sBallTrailHead][AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            sBallTrail[sBallTrailHead][AXIS_Y] =
+                g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - g_PinVertexScale * BALL_TRAIL_DROP;
+            sBallTrail[sBallTrailHead][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+        }
+        if (D_800BE69C != 1) {
+            /* Projects the trail from its newest position back */
+            index = sBallTrailHead;
+            for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
+                if (index == -1) {
+                    index = BALL_TRAIL_LENGTH - 1;
+                }
+                if (ProjectPoint(sBallTrail[index][AXIS_X], sBallTrail[index][AXIS_Y], sBallTrail[index][AXIS_Z],
+                                 &point) < 0) {
+                    sBallTrailPoints[i].x = point.x * 4;
+                    sBallTrailPoints[i].y = point.y * 4;
+                    sBallTrailPoints[i].depth = point.depth - point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS);
+                } else {
+                    sBallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
+                }
+            }
+            guMtxIdent(&sBallTrailMatrix);
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+            gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+            gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_PERSP);
+            gDPPipeSync(gfx++);
+            gDPSetTextureFilter(gfx++, G_TF_BILERP);
+            gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PRIM);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+            gDPPipeSync(gfx++);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sBallTrailMatrix), G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPVertex(gfx++, sBallTrailVertices, ARRAY_COUNT(sBallTrailVertices), 0);
+            for (i = 0; i != BALL_TRAIL_LENGTH - 1; i++) {
+                if (sBallTrailPoints[i].depth != BALL_TRAIL_HIDDEN && sBallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
+                    deltaX = sBallTrailPoints[i].x - sBallTrailPoints[i + 1].x;
+                    deltaY = sBallTrailPoints[i].y - sBallTrailPoints[i + 1].y;
+                    /* The empty branch for a segment of no length is there to match */
+                    if (deltaX == 0.0f & deltaY == 0.0f) {
+                    } else {
+                        scale = BALL_TRAIL_HALF_WIDTH / sqrtf(deltaX * deltaX + deltaY * deltaY);
+                        offsetX = deltaY * scale;
+                        offsetY = deltaX * scale;
+                        gDPPipeSync(gfx++);
+                        gDPSetPrimDepth(gfx++, sBallTrailPoints[i].depth, 0);
+                        gDPPipeSync(gfx++);
+                        color = (BALL_TRAIL_ALPHA - i / BALL_TRAIL_SEGMENTS_PER_FADE) | BALL_TRAIL_COLOR;
+                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA, color);
+                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA, color);
+                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA, color);
+                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA, color);
+                        gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
+                                        ((sBallTrailPoints[i].x + (s32)offsetX) << 16) + (sBallTrailPoints[i].y - (s32)offsetY));
+                        gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
+                                        ((sBallTrailPoints[i].x - (s32)offsetX) << 16) + (sBallTrailPoints[i].y + (s32)offsetY));
+                        gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
+                                        ((sBallTrailPoints[i + 1].x + (s32)offsetX) << 16) +
+                                            (sBallTrailPoints[i + 1].y - (s32)offsetY));
+                        gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
+                                        ((sBallTrailPoints[i + 1].x - (s32)offsetX) << 16) +
+                                            (sBallTrailPoints[i + 1].y + (s32)offsetY));
+                        gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+                    }
+                }
+            }
+            gDPPipeSync(gfx++);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+            gDPPipeSync(gfx++);
+            gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+            gDPPipeSync(gfx++);
+            *displayListHead = gfx;
+        }
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawBallTrail);
+#endif
 
 /*
  * Draws the wind's icon, which pulses in size, and the wind's speed in

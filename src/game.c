@@ -917,7 +917,6 @@ void func_80062A8C(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
-void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80086864(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
@@ -1573,7 +1572,7 @@ s32 DrawGame(void) {
                         DrawRain(&g_DisplayListHead, matrices);
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             if (viewIndex == 0) {
-                                func_80083AC8(&g_DisplayListHead, matrices);
+                                DrawBallTrail(&g_DisplayListHead, matrices);
                                 func_80086864(&g_DisplayListHead);
                                 if (g_IsModuleAlive[18]) {
                                     func_80217164(&g_DisplayListHead);

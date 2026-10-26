@@ -2,6 +2,7 @@
 #define ROUND_HUD_H
 
 #include <ultra64.h>
+#include "camera.h"
 
 /* The effects over a shot in flight that StartShotEffect starts */
 #define SHOT_EFFECT_NONE (-1)
@@ -17,6 +18,7 @@ void PrepareHoleDisplay(void);
 void InitRoundHud(void);
 void LoadRoundHud(void);
 void DrawInsetViewFrame(void);
+void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawHoleIntroImages(Gfx **displayListHead);
 void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex);
 void EndHoleIntro(void);

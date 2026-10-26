@@ -2532,3 +2532,7 @@ sAnimatedIconY = 0x800C5E68; // size:0x4
 sAnimatedIconLabelImages = 0x800E214C; // size:0xC
 sAnimatedIconImages = 0x800E2158;
 DrawAnimatedIcon = 0x800880A0; // type:func
+sBallTrailPoints = 0x800E2D70;
+sBallTrailMatrix = 0x800E1E90;
+sBallTrailVertices = 0x800C5A60;
+DrawBallTrail = 0x80083AC8; // type:func

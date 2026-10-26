@@ -4,6 +4,9 @@
 #include <ultra64.h>
 #include "camera.h"
 
+/* How many times its model's size the pin, the cup and the ball's trail are drawn */
+extern s32 g_PinVertexScale;
+
 s32 GetCupDistance(s32 x, s32 z);
 void BuildPinShadow(void);
 void LoadPinTextures(void);
