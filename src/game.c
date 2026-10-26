@@ -940,7 +940,7 @@ void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void func_802161D4(Gfx **displayListHead);
 void func_80217164(Gfx **displayListHead);
 void func_80219C74(Gfx **displayListHead);
-void func_8021A940(Gfx **displayListHead);
+void DrawChoiceBox(Gfx **displayListHead);
 void func_8021C6B4(CameraMatrices *matrices);
 void DrawGameSaveMenu(Gfx **displayListHead);
 void DrawReplaySaveMenu(Gfx **displayListHead);
@@ -1754,7 +1754,7 @@ s32 DrawGame(void) {
 
     DrawPrompt(&g_DisplayListHead);
     if (g_IsModuleAlive[20]) {
-        func_8021A940(&g_DisplayListHead);
+        DrawChoiceBox(&g_DisplayListHead);
     }
     DrawTextSlots(&g_DisplayListHead);
     if (g_IsModuleAlive[17]) {
