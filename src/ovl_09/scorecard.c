@@ -14,6 +14,7 @@
 #include "save.h"
 #include "scene.h"
 #include "scorecard.h"
+#include "scoring.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
@@ -269,7 +270,129 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80242334_ovl_09);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", SetScorecardLayout);
+#define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
+
+/*
+ * Picks the scorecard's layout for the last hole's result and sets up its
+ * tally, then turns to the first page and picks each player's face.
+ */
+void SetScorecardLayout(s32 layout) {
+    s32 ranks[MAX_PLAYER_COUNT];
+    s32 scoresToPar[MAX_PLAYER_COUNT];
+    s32 holesWon[MATCH_PLAYER_COUNT];
+    s32 skinsRanks[MAX_PLAYER_COUNT];
+    s32 unused[4]; /* The original frame has room for this */
+    s32 i;
+    s32 j;
+
+    g_Scorecard.isTallied = TRUE;
+    g_Scorecard.layout = layout;
+    switch (layout) {
+        case SCORECARD_LAYOUT_STROKE:
+        case SCORECARD_LAYOUT_UNK4:
+            break;
+        case SCORECARD_LAYOUT_MATCH:
+            /*
+             * A match's tally reuses the skins fields: two keep the hole number,
+             * and TallyScorecardSkins sets onLastHole once it counts the result.
+             */
+            g_Scorecard.holeWinnerIndex = HOLE_WINNER_UNSET;
+            g_Scorecard.skinsCarryover.onLastHole = 0;
+            g_Scorecard.skinsCarryover.intoLastHole = g_Scorecard.content.holeIndex;
+            g_Scorecard.skinsCarryover.fromLastHole = g_Scorecard.content.holeIndex;
+            break;
+        case SCORECARD_LAYOUT_SKINS:
+            g_Scorecard.holeWinnerIndex = HOLE_WINNER_UNSET;
+            g_Scorecard.skinsCarryover.intoLastHole++;
+            break;
+        case SCORECARD_LAYOUT_TOURNAMENT:
+            g_Scorecard.content.flipTime = ROW_FLIP_TIME;
+            for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+                g_Scorecard.content.rowFlipAngles[i] = 0;
+                g_Scorecard.content.isRowFlipping[i] = FALSE;
+            }
+            break;
+    }
+
+    g_RoundHud.scorecardPage = 0;
+    switch (g_GameMode) {
+        case GAME_MODE_UNK1:
+        case GAME_MODE_UNK3:
+        case GAME_MODE_TOURNAMENT:
+        case GAME_MODE_UNK6:
+        case GAME_MODE_UNK7:
+        case GAME_MODE_UNK8:
+        case GAME_MODE_RING_SHOT:
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                g_Scorecard.content.faceImageOffsets[i] = 0;
+            }
+            break;
+        case GAME_MODE_STROKE:
+            for (i = 0; i < g_GameState.playerCount; i++) {
+                scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
+            }
+            /* Each player's rank counts the players ahead of them */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                ranks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && scoresToPar[i] > scoresToPar[j]) {
+                        ranks[i]++;
+                    }
+                }
+            }
+            /* Every rank is below the player count, so this always picks 0 */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                if (ranks[i] < g_GameState.playerCount + 1) {
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
+                } else {
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
+                }
+            }
+            break;
+        case GAME_MODE_MATCH_GAME:
+        case GAME_MODE_GET_CHARACTER:
+            holesWon[0] = 0;
+            holesWon[1] = 0;
+            for (i = GetFirstHoleIndex(); i != g_Scorecard.content.holeIndex; i++) {
+                if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
+                    holesWon[0]++;
+                } else if (g_Players[1].holes[i].strokes < g_Players[0].holes[i].strokes) {
+                    holesWon[1]++;
+                }
+            }
+            if (holesWon[0] > holesWon[1]) {
+                g_Scorecard.content.faceImageOffsets[0] = 0;
+                g_Scorecard.content.faceImageOffsets[1] = BEHIND_FACE_IMAGE_OFFSET;
+            } else if (holesWon[0] < holesWon[1]) {
+                g_Scorecard.content.faceImageOffsets[0] = BEHIND_FACE_IMAGE_OFFSET;
+                g_Scorecard.content.faceImageOffsets[1] = 0;
+            } else {
+                g_Scorecard.content.faceImageOffsets[0] = 0;
+                g_Scorecard.content.faceImageOffsets[1] = 0;
+            }
+            break;
+        case GAME_MODE_SKINS_MATCH:
+        case GAME_MODE_CLUB_SLOTS:
+            /* Each player's rank counts the players with fewer skins */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                skinsRanks[i] = 0;
+                for (j = 0; j != g_GameState.playerCount; j++) {
+                    if (i != j && (s16)g_RoundHud.skinsTotals[i] > (s16)g_RoundHud.skinsTotals[j]) {
+                        skinsRanks[i]++;
+                    }
+                }
+            }
+            /* Every rank is below the player count, so this always picks 0 */
+            for (i = 0; i != g_GameState.playerCount; i++) {
+                if (skinsRanks[i] < g_GameState.playerCount + 1) {
+                    g_Scorecard.content.faceImageOffsets[i] = 0;
+                } else {
+                    g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
+                }
+            }
+            break;
+    }
+}
 
 void SetScorecardState(s32 state) {
     if (state == SCORECARD_OPENING) {
