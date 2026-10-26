@@ -2870,3 +2870,6 @@ sPauseMenuUnkD678 = 0x8022D678; // size:0x4 segment:ovl_00
 sPauseMenuUnkD67C = 0x8022D67C; // size:0x4 segment:ovl_00
 sPauseMenuUnkD684 = 0x8022D684; // size:0x4 segment:ovl_00
 sPauseMenuUnkD688 = 0x8022D688; // size:0x4 segment:ovl_00
+AreAllRingsPassed = 0x80207048; // type:func segment:ovl_00
+ShowHoleOutBanner = 0x80207F70; // type:func segment:ovl_00
+StartBanner = 0x8020E7B4; // type:func segment:ovl_00

@@ -38,7 +38,7 @@ void FreeMovieBuffer(void) {
     FreeMemory(&sMovieBuffer);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020E7B4_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", StartBanner);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8020EBBC_ovl_00);
 

@@ -7,6 +7,7 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "reaction.h"
+#include "round_events.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -36,6 +37,19 @@
 /* The kinds of notable shot that earn Course Points, as counted in unkAA */
 #define SHOT_KIND_COUNT PLAYER_UNKAA_COUNT
 #define SHOT_KIND_MAX_COUNT 0xFF
+#define MAX_RING_SHOT_CLEAR_COUNT 99
+
+/* The voice that reads out the hole-out banners */
+#define HOLE_OUT_CALL_HOLE_IN_ONE 0x84
+#define HOLE_OUT_CALL_ALBATROSS 0x85
+#define HOLE_OUT_CALL_EAGLE 0x86
+#define HOLE_OUT_CALL_BIRDIE 0x87
+#define HOLE_OUT_CALL_PAR 0x88
+#define HOLE_OUT_CALL_FINISH 0x90
+#define HOLE_OUT_CALL_COMPLETE 0x96
+#define HOLE_OUT_CALL_BOGEY 0x98
+#define HOLE_OUT_CALL_CHANNEL 3
+#define HOLE_OUT_CALL_VOLUME 0x7F
 /* Shots count towards Course Points on their first flights only */
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
@@ -255,11 +269,48 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206CF0_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80206E88_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", HasNoRingsLeft);
+s32 HasNoRingsLeft(UnkB8 *player) {
+    s32 i;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207048_ovl_00);
+    for (i = 0; i < RING_COUNT; i++) {
+        if (player->ringStates[i] != RING_STATE_NONE) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", RecordRingShotClear);
+s32 AreAllRingsPassed(UnkB8 *player) {
+    s32 i;
+
+    for (i = 0; i < RING_COUNT; i++) {
+        if (player->ringStates[i] == RING_STATE_SHOWN) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+void RecordRingShotClear(s32 playerIndex) {
+    s8 *count = &GetSaveData()->hasRingShotStar[g_CourseIndex][g_HoleIndex];
+
+    (*count)++;
+    if (*count < 0) {
+        *count = 0;
+    } else if (*count > MAX_RING_SHOT_CLEAR_COUNT) {
+        *count = MAX_RING_SHOT_CLEAR_COUNT;
+    }
+    if ((s8)g_Players[playerIndex].characterIndex < SAVE_UNK1344_ENTRY_COUNT) {
+        count = &GetSaveData()->unk1344[g_CourseIndex][g_HoleIndex][(s8)g_Players[playerIndex].characterIndex];
+        (*count)++;
+        if (*count < 0) {
+            *count = 0;
+        } else if (*count > MAX_RING_SHOT_CLEAR_COUNT) {
+            *count = MAX_RING_SHOT_CLEAR_COUNT;
+        }
+    }
+    WriteSaveData();
+}
 
 /* Saves a Ring Shot hole as cleared once it is holed within par with every ring passed */
 void CheckRingShotClear(s32 playerIndex) {
@@ -364,7 +415,59 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207CAC_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207E88_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80207F70_ovl_00);
+void ShowHoleOutBanner(s32 playerIndex) {
+    s8 strokeCount = g_Players[playerIndex].strokeCount;
+    s32 scoreToPar = strokeCount - g_HolePar;
+    s32 banner = BANNER_NONE;
+
+    if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+        StartBanner(BANNER_FINISH);
+        PlaySound(HOLE_OUT_CALL_FINISH, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+    } else if (g_GameMode == GAME_MODE_RING_SHOT) {
+        if (AreAllRingsPassed(&g_Players[playerIndex])) {
+            StartBanner(BANNER_COMPLETE);
+            PlaySound(HOLE_OUT_CALL_COMPLETE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+        }
+    } else if (strokeCount == 1) {
+        banner = BANNER_HOLE_IN_ONE;
+        PlaySound(HOLE_OUT_CALL_HOLE_IN_ONE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+    } else {
+        switch (scoreToPar) {
+            case -1:
+                banner = BANNER_BIRDIE;
+                PlaySound(HOLE_OUT_CALL_BIRDIE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+                break;
+            case -2:
+                banner = BANNER_EAGLE;
+                PlaySound(HOLE_OUT_CALL_EAGLE, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+                break;
+            case -3:
+                banner = BANNER_ALBATROSS;
+                PlaySound(HOLE_OUT_CALL_ALBATROSS, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+                break;
+            case 0:
+                banner = BANNER_PAR;
+                PlaySound(HOLE_OUT_CALL_PAR, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+                break;
+            case 1:
+                banner = BANNER_BOGEY;
+                PlaySound(HOLE_OUT_CALL_BOGEY, HOLE_OUT_CALL_CHANNEL, HOLE_OUT_CALL_VOLUME);
+                break;
+            case 2:
+                banner = BANNER_STROKES_OVER_PAR + 2;
+                break;
+            case 3:
+                banner = BANNER_STROKES_OVER_PAR + 3;
+                break;
+            default:
+                banner = BANNER_STROKES_OVER_PAR + scoreToPar;
+                break;
+        }
+    }
+    if (banner >= 0) {
+        StartBanner(banner);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802080B4_ovl_00);
 

@@ -121,7 +121,6 @@ extern Mtx sSwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
 extern f32 sSwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
 extern f32 sSwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
-void func_8020E7B4_ovl_00(s32);
 f32 InterpolateHermite(f32 values[], f32 position);
 
 void ResetShotEffects(void) {
@@ -148,11 +147,11 @@ void ClearShotEffects(s32 kind) {
     ClearHoleCreatures();
     StartContactEffect(CONTACT_EFFECT_NONE);
     if (kind == CLEAR_KIND_HOLE_END) {
-        func_8020E7B4_ovl_00(-2);
+        StartBanner(BANNER_HIDE_NICE_SHOT);
     }
     if (kind == CLEAR_KIND_ROUND_END) {
         StartMovie(-1);
-        func_8020E7B4_ovl_00(-1);
+        StartBanner(BANNER_NONE);
     }
     ResetBallAfterimage();
     StartSwingTrail(-1);
