@@ -2464,7 +2464,149 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawMatchResults);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", func_801FC3D4_ovl_00);
+#define CLUB_TOURNAMENT_COURSE_STRIP_WIDTH 64
+#define CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT 32
+#define CLUB_TOURNAMENT_COURSE_STRIP_COUNT 2
+#define NINTENDO_BADGE_STRIP_WIDTH 144
+#define NINTENDO_BADGE_STRIP_HEIGHT 10
+#define NINTENDO_BADGE_STRIP_COUNT 2
+/* Without the badge the details move up into its place and spread out */
+#define CLUB_TOURNAMENT_DETAILS_TOP 74
+#define CLUB_TOURNAMENT_LINE_HEIGHT 16
+#define CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP 58
+#define CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT 18
+#define CLUB_TOURNAMENT_NAME_SLOT 3
+#define CLUB_TOURNAMENT_COURSE_SLOT 4
+#define CLUB_TOURNAMENT_MODE_SLOT 5
+#define CLUB_TOURNAMENT_TEXT_FLAGS (TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20)
+/* DrawLargeTextWithShadow ignores this flag */
+#define CLUB_TOURNAMENT_LABEL_FLAGS 4
+#define CLUB_TOURNAMENT_LABEL_ENV_COLOR 0xFF5B0000
+#define CLUB_TOURNAMENT_LABEL_PRIM_COLOR 0xFFFF0000
+#define SCORE_PASSWORD_ENV_COLOR 0x00FF0000
+#define SCORE_PASSWORD_PRIM_COLOR 0xFFFF0000
+/* The score password shows as two lines of ten symbols */
+#define SCORE_PASSWORD_LINE_LENGTH 10
+
+/* The text colour of each text slot, from slot 1 */
+extern u8 sTextSlotColors[][3];
+
+#ifdef NON_MATCHING
+/* The results of a club tournament: its course, number, name and mode, the score and the password to send in */
+void DrawClubTournamentResults(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 width;
+    s32 height;
+    s32 gameMode;
+    s32 isNintendo;
+    s32 detailsTop;
+    s32 lineHeight;
+    s32 seconds;
+    s32 minutes;
+    s32 hundredths;
+    s32 i;
+
+    isNintendo = IsNintendoClubTournament();
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gameMode = GetClubTournamentGameMode();
+    LoadLargePalette(&gfx, sResultsCourseImage + IMAGE_HEADER_SIZE);
+    for (i = 0; i < CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
+        LoadTextureBlock(&gfx,
+                         sResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+                             i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
+                         CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        DrawTextureRect(&gfx, (sResultsSlide + 28) * 4,
+                        (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT + (sResultsTop + 104)) * 4,
+                        (sResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH) * 4,
+                        (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT +
+                         (sResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)) * 4,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
+    if (isNintendo) {
+        lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
+        DrawPlayerPortrait(&gfx, sResultsSlide + 96, sResultsTop + 136, 0, TRUE);
+        LoadLargePalette(&gfx, sNintendoBadgeImage + IMAGE_HEADER_SIZE);
+        for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
+            LoadTextureBlock(&gfx,
+                             sNintendoBadgeImage + LARGE_PALETTED_TEXELS_OFFSET +
+                                 i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT,
+                             G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH, NINTENDO_BADGE_STRIP_HEIGHT, 0,
+                             G_TX_MIRROR, 0, 0, 0, 0, 0);
+            DrawTextureRect(&gfx, (sResultsSlide + 88) * 4, (sResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT) * 4,
+                            (sResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH) * 4,
+                            (sResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT + NINTENDO_BADGE_STRIP_HEIGHT) * 4,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    } else {
+        detailsTop = CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP;
+        lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
+        DrawPlayerPortrait(&gfx, sResultsSlide + 96, sResultsTop + 128, 0, TRUE);
+    }
+    DrawPlaceNumber(&gfx, sResultsSlide + 160, sResultsTop + detailsTop, GetClubTournamentNumber());
+    SetUpTextDrawing(&gfx);
+    MeasureMessage(GetClubTournamentNameMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    MeasureMessage(GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+    SetTextSlot(sResultsSlide + 160, sResultsTop + detailsTop + lineHeight + 8, GetClubTournamentNameMessage(),
+                RESULTS_TEXT_FONT, CLUB_TOURNAMENT_NAME_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 127, 191, 255, 255);
+    SetTextSlot(sResultsSlide + 160, sResultsTop + detailsTop + lineHeight * 2 + 8,
+                GetClubTournamentCourseTitleMessage(), RESULTS_TEXT_FONT, CLUB_TOURNAMENT_COURSE_SLOT,
+                CLUB_TOURNAMENT_TEXT_FLAGS, 43, 255, 75, 255);
+    SetTextSlot(sResultsSlide + 160, sResultsTop + detailsTop + lineHeight * 3 + 8, GetClubTournamentModeMessage(),
+                RESULTS_TEXT_FONT, CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127, 255);
+    for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
+        gDPSetPrimColor(gfx++, 0, 0, sTextSlotColors[i - 1][0], sTextSlotColors[i - 1][1],
+                        sTextSlotColors[i - 1][2], 255);
+        DrawLargeTextSlot(&gfx, i);
+    }
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, "Score");
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 144, sResultsTop + detailsTop + lineHeight * 4 + 8, g_PrintBuffer,
+                            CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+                            CLUB_TOURNAMENT_LABEL_FLAGS);
+    if (sPlayerResults[0] == 0) {
+        sprintf(g_PrintBuffer, "#0", 0);
+    } else {
+        sprintf(g_PrintBuffer, "%+d", sPlayerResults[0]);
+    }
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 192, sResultsTop + detailsTop + lineHeight * 4 + 8, g_PrintBuffer,
+                            CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
+    if (gameMode == GAME_MODE_SPEED_GOLF) {
+        hundredths = (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                     HUNDREDTHS_PER_SECOND;
+        seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND % SECONDS_PER_MINUTE;
+        minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT;
+        sprintf(g_PrintBuffer, sTimeLabel);
+        DrawLargeTextWithShadow(&gfx, sResultsSlide + 144, sResultsTop + detailsTop + lineHeight * 5 + 8,
+                                g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+                                CLUB_TOURNAMENT_LABEL_FLAGS);
+        sprintf(g_PrintBuffer, sTimeFormat, minutes, seconds, hundredths);
+        DrawLargeTextWithShadow(&gfx, sResultsSlide + 192, sResultsTop + detailsTop + lineHeight * 5 + 8,
+                                g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+                                TEXT_FLAG_FIXED_WIDTH);
+    }
+    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
+        g_PrintBuffer[i] = sScorePassword[i];
+    }
+    g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 116, sResultsTop + 182, g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR,
+                            SCORE_PASSWORD_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
+    for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
+        g_PrintBuffer[i] = sScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
+    }
+    g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
+    DrawLargeTextWithShadow(&gfx, sResultsSlide + 116, sResultsTop + 200, g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR,
+                            SCORE_PASSWORD_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E3C_ovl_00);
 

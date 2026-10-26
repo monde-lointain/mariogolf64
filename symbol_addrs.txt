@@ -3002,3 +3002,5 @@ GetClubTournamentNumber = 0x8005D2A0; // type:func
 GetClubTournamentModeMessage = 0x8005D2E4; // type:func
 GetClubTournamentCourseTitleMessage = 0x8005D308; // type:func
 sNintendoBadgeImage = 0x80225730; // size:0x4 segment:ovl_00
+DrawClubTournamentResults = 0x801FC3D4; // type:func segment:ovl_00
+sTextSlotColors = 0x8021FE48; // size:0xF segment:ovl_00
