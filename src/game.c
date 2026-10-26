@@ -941,7 +941,7 @@ void DrawWindFlyGuy(Gfx **displayListHead);
 void DrawSparks(Gfx **displayListHead);
 void DrawPauseMenu(Gfx **displayListHead);
 void DrawChoiceBox(Gfx **displayListHead);
-void func_8021C6B4(CameraMatrices *matrices);
+void DrawAimGuides(CameraMatrices *matrices);
 void DrawGameSaveMenu(Gfx **displayListHead);
 void DrawReplaySaveMenu(Gfx **displayListHead);
 void DrawControlsScreen(Gfx **displayListHead);
@@ -1555,7 +1555,7 @@ s32 DrawGame(void) {
                         }
                         if (g_GameState.unk0 != 3 && g_GameState.unk0 != 4) {
                             if (g_IsModuleAlive[23] && !IsGameFlagSet(0x2D)) {
-                                func_8021C6B4(matrices);
+                                DrawAimGuides(matrices);
                             }
                             if (g_IsModuleAlive[17]) {
                                 func_80214250(&g_DisplayListHead, matrices);
