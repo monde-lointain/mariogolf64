@@ -152,8 +152,10 @@ extern u16 *sLastFrameBuffer;
 #define BACKDROP_STRIP_STEP 6
 #define BACKDROP_STRIP_HEIGHT 8
 #define BACKDROP_LAST_STRIP_HEIGHT 2
+/* Written with | because the target computes it without a branch, and + or a plain ?: branches */
 #define STRIP_HEIGHT(strip) \
-    ((strip) != BACKDROP_STRIP_COUNT - 1 ? BACKDROP_STRIP_HEIGHT : BACKDROP_LAST_STRIP_HEIGHT)
+    (BACKDROP_LAST_STRIP_HEIGHT | \
+     ((strip) != BACKDROP_STRIP_COUNT - 1 ? BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT : 0))
 #define COPY_MODE_DSDX (4 << 10) /* Copy mode writes four texels a cycle */
 #define BACKDROP_START_FADE_LEVEL 255
 /* Each frame the fade level steps down until it is at most BACKDROP_LAST_FADE_LEVEL */
