@@ -2930,3 +2930,5 @@ sBannerLetterVertices = 0x80224130; // size:0x40 segment:ovl_00
 sBanners = 0x80224170; // segment:ovl_00
 sBannerMatrices = 0x80227EB0; // size:0x80 segment:ovl_00
 sBannerLetters = 0x8022BC70; // segment:ovl_00
+DrawMovie = 0x80210370; // type:func segment:ovl_00
+sMovieDrawCount = 0x80224408; // size:0x4 segment:ovl_00

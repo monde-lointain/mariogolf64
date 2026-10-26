@@ -11,6 +11,7 @@
 #include "hole_triangles.h"
 #include "libc.h"
 #include "main.h"
+#include "movie.h"
 #include "camera.h"
 #include "character_slot.h"
 #include "functions.h"
@@ -935,7 +936,6 @@ void func_801FE370(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
 void func_8020EEF8(Gfx **displayListHead);
 void func_8020FC10(Gfx **displayListHead);
-void func_80210370(Gfx **displayListHead);
 void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
 void func_802161D4(Gfx **displayListHead);
 void func_80217164(Gfx **displayListHead);
@@ -1645,7 +1645,7 @@ s32 DrawGame(void) {
             func_80089094(&g_Cameras[0].view);
         }
         if (g_IsModuleAlive[17]) {
-            func_80210370(&g_DisplayListHead);
+            DrawMovie(&g_DisplayListHead);
         }
         if (g_IsModuleAlive[17]) {
             func_8020EEF8(&g_DisplayListHead);

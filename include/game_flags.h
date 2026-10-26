@@ -18,6 +18,12 @@
 /* Logs a stroke's rolling ball's vertical velocity each step */
 #define GAME_FLAG_LOG_VERTICAL_VELOCITY 0x02
 
+/*
+ * Lets controller 1's C-left and C-right tilt the aim camera, and controller 2's A and B play
+ * the drive record movie and movie 15
+ */
+#define GAME_FLAG_TEST_AIM_TILT_AND_MOVIES 0x21
+
 /* Blanks two lines of debug text when the flight camera finishes */
 #define GAME_FLAG_UNK22 0x22
 

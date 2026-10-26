@@ -1,6 +1,8 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "controller.h"
+#include "game_flags.h"
 #include "heap.h"
 #include "movie.h"
 #include "round_events.h"
@@ -73,6 +75,8 @@ extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
 extern s32 sCurrentMovie;
 extern s32 sMovieFrame;
+/* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
+extern s32 sMovieDrawCount;
 extern s32 sWindFlyGuyFrame;
 extern s32 sWindFlyGuyAsset;
 extern s32 sIsFlipMessageLeaving;
@@ -104,7 +108,19 @@ extern Vtx sFlipMessageBoardVertices[4];
 #define BANNER_PLUS_IMAGE 0
 #define BANNER_FIRST_DIGIT_IMAGE 1
 
+#define MOVIE_DRAW_COUNT_MAX 1000
+/* The controller whose buttons play movies under GAME_FLAG_TEST_AIM_TILT_AND_MOVIES */
+#define MOVIE_TEST_CONTROLLER 1
+
 void ResetPath(void);
+void func_802104BC_ovl_00(Gfx **displayListHead);
+void func_80210F40_ovl_00(Gfx **displayListHead);
+void func_8021169C_ovl_00(Gfx **displayListHead);
+void func_80211D60_ovl_00(Gfx **displayListHead);
+void func_802129C0_ovl_00(Gfx **displayListHead);
+void func_80212CE0_ovl_00(Gfx **displayListHead);
+void func_80213038_ovl_00(Gfx **displayListHead);
+void func_80213634_ovl_00(Gfx **displayListHead);
 
 void AllocMovieBuffer(void) {
     EncodedAsset unused;
@@ -229,7 +245,59 @@ s32 IsMoviePastCue(void) {
     return sMovieFrame >= MOVIE_CUE_FRAME;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80210370_ovl_00);
+void DrawMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    if (g_PauseScreen != PAUSE_SCREEN_NONE) {
+        return;
+    }
+    if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
+        if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & A_BUTTON) {
+            StartMovie(MOVIE_DRIVE_RECORD);
+        }
+        if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & B_BUTTON) {
+            StartMovie(MOVIE_UNK15);
+        }
+    }
+    switch (sCurrentMovie) {
+        case MOVIE_NONE:
+            break;
+        case MOVIE_TOAD_OUT_OF_BOUNDS:
+            func_80213634_ovl_00(&gfx);
+            break;
+        case MOVIE_UNK1:
+            func_80213038_ovl_00(&gfx);
+            break;
+        case MOVIE_UNK16:
+            func_802129C0_ovl_00(&gfx);
+            break;
+        case MOVIE_UNK5:
+            func_80212CE0_ovl_00(&gfx);
+            break;
+        case MOVIE_LONGEST_DRIVE:
+        case MOVIE_NEAREST_PIN:
+            func_802104BC_ovl_00(&gfx);
+            break;
+        case MOVIE_DRIVE_RECORD:
+            func_80210F40_ovl_00(&gfx);
+            break;
+        case MOVIE_UNK6:
+        case MOVIE_UNK7:
+        case MOVIE_UNK8:
+        case MOVIE_UNK9:
+        case MOVIE_UNK10:
+        case MOVIE_UNK11:
+            func_8021169C_ovl_00(&gfx);
+            break;
+        case MOVIE_UNK15:
+            func_80211D60_ovl_00(&gfx);
+            break;
+    }
+    if (sMovieDrawCount < MOVIE_DRAW_COUNT_MAX) {
+        sMovieDrawCount++;
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_802104BC_ovl_00);
 

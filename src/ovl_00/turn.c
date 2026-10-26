@@ -166,8 +166,6 @@
 #define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
 /* How far below the ball's centre the preview is drawn */
 #define SHOT_PREVIEW_DROP 0x133
-/* Lets C-left and C-right tilt the aim camera */
-#define GAME_FLAG_TUNE_AIM_CAMERA_TILT 0x21
 #define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
 /* The pause screen's camera circles the ball at this distance, and rises this far above it */
 #define PAUSE_CAMERA_RADIUS 1536000.0f
@@ -421,7 +419,7 @@ void PlaceShotCamera(void) {
     CoursePoint center;
     f32 heading;
 
-    if (IsGameFlagSet(GAME_FLAG_TUNE_AIM_CAMERA_TILT)) {
+    if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
         if (g_ControllerStates[0].buttons & L_CBUTTONS) {
             D_80223E48_ovl_00 -= 1.0f;
         }
