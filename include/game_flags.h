@@ -24,6 +24,9 @@
 /* Adds a ring at a fixed place, once each time the flag is set */
 #define GAME_FLAG_TEST_RING 0x25
 
+/* Lets controller 1's C-up and C-down cycle isRaining and the scene color index */
+#define GAME_FLAG_CYCLE_SKY_CONDITIONS 0x20
+
 /* Lets controller 2 edit the sky colors and fog, and draws the fog from g_DebugFog */
 #define GAME_FLAG_SKY_EDITOR 0x2D
 

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "camera.h"
 #include "course.h"
 #include "controller.h"
 #include "cpu_projection.h"
@@ -826,7 +827,187 @@ s32 UpdateSkyEditor(void) {
 INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSkyEditor);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/hole_display", func_8008F30C);
+/* UpdateSky's limits and scales */
+#define SKY_PITCH_LIMIT 1.5f
+#define SKY_SLOPE_DISTANCE 200.0
+#define SKY_REFERENCE_FIELD_OF_VIEW 60.0f
+#define SKY_EYE_HEIGHT_SCALE 0.05f
+#define SKY_HORIZON_LEVEL_MIN (-320.0f)
+#define SKY_HORIZON_BIAS 10.0f
+#define SKY_HORIZON_TO_HEIGHT 7.3f
+#define SKY_TOP_DEPTH (-2048.0f)
+#define SKY_PITCH_TO_DEPTH (-2048.0f / 3.14f)
+#define SKY_HEIGHT_LIMIT 0x500
+#define SKY_CLIPPED_HEIGHT_SHIFT 5 /* Scales how far the clipped heights push the texture */
+#define SKY_SCROLL_PER_WIND_SPEED 0.5f
+#define SKY_SCROLL_X_WRAP 8192.0f
+#define SKY_SCROLL_Y_WRAP 8192.0f
+#define SKY_SCROLL_Y_PERIOD 16384.0f
+#define SKY_TEXTURE_HALF_WIDTH 640.0f
+#define SKY_TEXTURE_FAR_DISTANCE 800.0f
+#define SKY_TEXTURE_NEAR_DISTANCE 160.0
+#define SKY_TEXTURE_HORIZON_DISTANCE 640.0
+#define SKY_TEXTURE_SCALE 16
+#define SKY_DEBUG_CYCLE_LENGTH 3
+
+/*
+ * Points the sky of a view at its camera, and scrolls the sky's texture with
+ * the wind. The first view also blends the sky's colors, unless the sky
+ * editor is open.
+ */
+#ifdef NON_MATCHING
+void UpdateSky(CameraView *view, s32 viewIndex) {
+    Vec3 direction;
+    Vtx *vertices;
+    f32 slope;
+    f32 scroll;
+    s32 clippedHeight;
+    f32 sine;
+    f32 cosine;
+    s32 distance;
+    f32 coordinate;
+    f32 horizonHalfWidth;
+
+    if (!UpdateSkyEditor() && viewIndex == 0) {
+        BlendSkyColors();
+    }
+    direction[0] = view->lookAt[0] - view->eye[0];
+    direction[1] = view->lookAt[1] - view->eye[1];
+    direction[2] = view->lookAt[2] - view->eye[2];
+    vertices = sSkyVertices[g_MatrixBufferIndex + viewIndex * 2];
+    g_SkyState.yaws[viewIndex] = atan2(direction[0], direction[2]);
+    g_SkyState.pitches[viewIndex] =
+        -atan2(direction[1], sqrtf(direction[0] * direction[0] + direction[2] * direction[2]));
+    if (g_SkyState.pitches[viewIndex] < -SKY_PITCH_LIMIT) {
+        g_SkyState.pitches[viewIndex] = -SKY_PITCH_LIMIT;
+    }
+    if (g_SkyState.pitches[viewIndex] > SKY_PITCH_LIMIT) {
+        g_SkyState.pitches[viewIndex] = SKY_PITCH_LIMIT;
+    }
+    slope = (view->lookAt[1] - view->eye[1]) *
+            (SKY_SLOPE_DISTANCE / sqrtf(direction[0] * direction[0] + direction[2] * direction[2]));
+    g_SkyState.horizonLevels[viewIndex] =
+        -g_SkyState.pitches[viewIndex] * (SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT) +
+        view->eye[1] * SKY_EYE_HEIGHT_SCALE;
+    if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
+        g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
+    }
+    g_SkyState.screenHeights[viewIndex] = SCREEN_HEIGHT;
+    g_SkyState.lookAtLevels[viewIndex] =
+        g_SkyState.horizonLevels[viewIndex] - (view->lookAt[1] * slope - view->eye[1]) * SKY_EYE_HEIGHT_SCALE;
+
+    if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
+        if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
+            g_HoleConditions.isRaining = (u32)(g_HoleConditions.isRaining + 1) % SKY_DEBUG_CYCLE_LENGTH;
+            InitSkyColors();
+        }
+        if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
+            g_HoleConditions.sceneColorIndex = (g_HoleConditions.sceneColorIndex + 1) % SKY_DEBUG_CYCLE_LENGTH;
+            InitSkyColors();
+        }
+    }
+
+    clippedHeight = 0;
+    scroll = -(f32)(g_HoleConditions.windSpeed / WIND_SPEED_UNIT) * SKY_SCROLL_PER_WIND_SPEED;
+    if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
+        g_SkyState.scrollY += scroll;
+    }
+    if (g_SkyState.scrollX > SKY_SCROLL_X_WRAP) {
+        g_SkyState.scrollX -= SKY_SCROLL_X_WRAP;
+    }
+    if (g_SkyState.scrollX < -SKY_SCROLL_X_WRAP) {
+        g_SkyState.scrollX += SKY_SCROLL_X_WRAP;
+    }
+    if (scroll > 0.0f) {
+        if (g_SkyState.scrollY > SKY_SCROLL_Y_WRAP) {
+            g_SkyState.scrollY -= SKY_SCROLL_Y_PERIOD;
+        }
+    } else if (g_SkyState.scrollY < -SKY_SCROLL_Y_WRAP) {
+        g_SkyState.scrollY += SKY_SCROLL_Y_PERIOD;
+    }
+
+    /* Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the pitch alone */
+    if (g_SkyState.pitches[viewIndex] < 0.0f) {
+        vertices[0].v.ob[1] = SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
+        vertices[3].v.ob[1] = SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
+        vertices[4].v.ob[1] = SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
+    } else {
+        vertices[0].v.ob[1] = SCREEN_HEIGHT / 2;
+        vertices[3].v.ob[1] = SCREEN_HEIGHT / 2;
+        vertices[4].v.ob[1] = SCREEN_HEIGHT / 2;
+    }
+    vertices[1].v.ob[1] = (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
+    vertices[2].v.ob[1] = (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) * SKY_HORIZON_TO_HEIGHT;
+    vertices[1].v.ob[2] = SKY_TOP_DEPTH - g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+    vertices[2].v.ob[2] = SKY_TOP_DEPTH - g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+    vertices[6].v.ob[2] = SKY_TOP_DEPTH - -g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+    vertices[7].v.ob[2] = SKY_TOP_DEPTH - -g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+    if (vertices[1].v.ob[1] < -SKY_HEIGHT_LIMIT) {
+        clippedHeight = (vertices[1].v.ob[1] + SKY_HEIGHT_LIMIT) / (1 << SKY_CLIPPED_HEIGHT_SHIFT);
+        vertices[1].v.ob[1] = -SKY_HEIGHT_LIMIT;
+    }
+    if (vertices[2].v.ob[1] < -SKY_HEIGHT_LIMIT) {
+        vertices[2].v.ob[1] = -SKY_HEIGHT_LIMIT;
+    }
+    if (vertices[1].v.ob[1] > SKY_HEIGHT_LIMIT) {
+        vertices[1].v.ob[1] = SKY_HEIGHT_LIMIT;
+    }
+    if (vertices[2].v.ob[1] > SKY_HEIGHT_LIMIT) {
+        vertices[2].v.ob[1] = SKY_HEIGHT_LIMIT;
+    }
+    vertices[6].v.ob[1] = vertices[1].v.ob[1];
+    vertices[7].v.ob[1] = vertices[2].v.ob[1];
+
+    /* Each row of texture coordinates lies at a distance along the viewed wind direction */
+    sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
+    cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
+    distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
+    coordinate = sine * distance - cosine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[1].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance + sine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[1].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    coordinate = sine * distance + cosine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[2].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance - sine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[2].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    horizonHalfWidth = SCREEN_WIDTH;
+    distance = SKY_TEXTURE_NEAR_DISTANCE - g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI) + clippedHeight;
+    coordinate = sine * distance - cosine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[0].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance + sine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[0].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    coordinate = sine * distance + cosine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[3].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance - sine * SKY_TEXTURE_HALF_WIDTH;
+    vertices[3].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    vertices[4].v.tc[0] = (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    vertices[4].v.tc[1] = (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    distance = (SKY_TEXTURE_HORIZON_DISTANCE - -g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+               horizonHalfWidth / SCREEN_WIDTH;
+    coordinate = sine * distance - cosine * horizonHalfWidth;
+    vertices[6].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance + sine * horizonHalfWidth;
+    vertices[6].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    coordinate = sine * distance + cosine * horizonHalfWidth;
+    vertices[7].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance - sine * horizonHalfWidth;
+    vertices[7].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    distance = (SKY_TEXTURE_NEAR_DISTANCE - -g_SkyState.pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+               horizonHalfWidth / SCREEN_WIDTH;
+    coordinate = sine * distance - cosine * horizonHalfWidth;
+    vertices[5].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance + sine * horizonHalfWidth;
+    vertices[5].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    coordinate = sine * distance + cosine * horizonHalfWidth;
+    vertices[8].v.tc[0] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    coordinate = cosine * distance - sine * horizonHalfWidth;
+    vertices[8].v.tc[1] = (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+    vertices[9].v.tc[0] = (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+    vertices[9].v.tc[1] = (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSky);
+#endif
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
 void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {

@@ -2547,4 +2547,5 @@ UpdateSkyEditor = 0x8008E82C; // type:func
 sSkyEditorColumn = 0x800C6CE4;
 sSkyEditorRow = 0x800C6CE8;
 sEditedSkyColors = 0x800E3980;
+UpdateSky = 0x8008F30C; // type:func
 g_SkyState = 0x801B7F38; // size:0x38

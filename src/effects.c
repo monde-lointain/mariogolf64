@@ -1151,7 +1151,6 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
     }
 }
 
-#define WIND_SPEED_UNIT 0x10000
 /* How far the wind pushes an effect a frame, in world units, for each whole unit of wind speed */
 #define EFFECT_PUSH_PER_WIND_SPEED 0.005f
 /* Positive y velocities fall, in world units a frame each frame */
