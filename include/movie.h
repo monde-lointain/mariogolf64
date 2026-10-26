@@ -7,7 +7,7 @@
 #define MOVIE_NONE (-1)            /* Stops the movie */
 #define MOVIE_TOAD_OUT_OF_BOUNDS 0 /* Toad, when the ball goes out of bounds */
 #define MOVIE_UNK1 1
-#define MOVIE_UNK5 5
+#define MOVIE_GOOMBA 5
 #define MOVIE_UNK6 6
 #define MOVIE_UNK7 7
 #define MOVIE_UNK8 8

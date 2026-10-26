@@ -80,6 +80,7 @@ extern s32 sMovieTick;
 /* Sets the render state for drawing a movie's paletted strips */
 extern Gfx sMovieSetupDisplayList[];
 extern u16 sMontyMoleMovieFrameAssets[];
+extern u16 sGoombaMovieFrameAssets[];
 /* Counts the frames that DrawMovie has drawn, up to MOVIE_DRAW_COUNT_MAX */
 extern s32 sMovieDrawCount;
 extern s32 sWindFlyGuyFrame;
@@ -133,6 +134,17 @@ extern Vtx sFlipMessageBoardVertices[4];
 #define MONTY_MOLE_STRIP_SIZE (MONTY_MOLE_WIDTH * MONTY_MOLE_STRIP_HEIGHT)
 #define MONTY_MOLE_X 106
 #define MONTY_MOLE_Y 62
+
+#define SOUND_GOOMBA 0x2A
+#define GOOMBA_FRAME_COUNT 11
+#define GOOMBA_WIDTH 80
+#define GOOMBA_STRIP_HEIGHT 25
+/* The last strip holds what is left of the 73 rows */
+#define GOOMBA_LAST_STRIP_HEIGHT 23
+#define GOOMBA_STRIP_COUNT 3
+#define GOOMBA_STRIP_SIZE (GOOMBA_WIDTH * GOOMBA_STRIP_HEIGHT)
+#define GOOMBA_X 120
+#define GOOMBA_Y 62
 /* The controller whose buttons play movies under GAME_FLAG_TEST_AIM_TILT_AND_MOVIES */
 #define MOVIE_TEST_CONTROLLER 1
 
@@ -142,7 +154,7 @@ void func_80210F40_ovl_00(Gfx **displayListHead);
 void func_8021169C_ovl_00(Gfx **displayListHead);
 void func_80211D60_ovl_00(Gfx **displayListHead);
 void DrawMontyMoleMovie(Gfx **displayListHead);
-void func_80212CE0_ovl_00(Gfx **displayListHead);
+void DrawGoombaMovie(Gfx **displayListHead);
 void func_80213038_ovl_00(Gfx **displayListHead);
 void func_80213634_ovl_00(Gfx **displayListHead);
 
@@ -295,8 +307,8 @@ void DrawMovie(Gfx **displayListHead) {
         case MOVIE_MONTY_MOLE:
             DrawMontyMoleMovie(&gfx);
             break;
-        case MOVIE_UNK5:
-            func_80212CE0_ovl_00(&gfx);
+        case MOVIE_GOOMBA:
+            DrawGoombaMovie(&gfx);
             break;
         case MOVIE_LONGEST_DRIVE:
         case MOVIE_NEAREST_PIN:
@@ -372,7 +384,48 @@ void DrawMontyMoleMovie(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80212CE0_ovl_00);
+/* A Goomba hops out of the green */
+void DrawGoombaMovie(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 unused[4];
+    s32 i;
+    s32 height;
+
+    sMovieTick++;
+    if (sMovieTick == MOVIE_TICKS_PER_FRAME) {
+        sMovieTick = 0;
+        OpenEncodedAsset(sGoombaMovieFrameAssets[sMovieFrame], &asset);
+        ReadEncodedAsset(sMovieBuffer + MOVIE_FRAME_OFFSET, &asset);
+        sMovieFrame++;
+        if (sMovieFrame == GOOMBA_FRAME_COUNT) {
+            sCurrentMovie = MOVIE_NONE;
+        }
+    }
+    if (sMovieDrawCount == 1) {
+        PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB,
+                             MOVIE_SOUND_PAN);
+    }
+    gSPDisplayList(gfx++, sMovieSetupDisplayList);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_PALETTE_OFFSET));
+    for (i = 0; i != GOOMBA_STRIP_COUNT; i++) {
+        if (i == GOOMBA_STRIP_COUNT - 1) {
+            height = GOOMBA_LAST_STRIP_HEIGHT;
+        } else {
+            height = GOOMBA_STRIP_HEIGHT;
+        }
+        gDPLoadTextureTile(gfx++, TEXTURE_ADDRESS(sMovieBuffer + (MOVIE_FRAME_OFFSET + i * GOOMBA_STRIP_SIZE)),
+                           G_IM_FMT_CI, G_IM_SIZ_8b, GOOMBA_WIDTH, height, 0, 0, GOOMBA_WIDTH - 1, height - 1, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, GOOMBA_X << 2, (GOOMBA_Y + i * GOOMBA_STRIP_HEIGHT) << 2, (GOOMBA_X + GOOMBA_WIDTH) << 2,
+                        (GOOMBA_Y + i * GOOMBA_STRIP_HEIGHT + height) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80213038_ovl_00);
 

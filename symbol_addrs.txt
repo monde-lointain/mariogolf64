@@ -2952,3 +2952,5 @@ DrawMontyMoleMovie = 0x802129C0; // type:func segment:ovl_00
 sMovieTick = 0x8022440C; // size:0x4 segment:ovl_00
 sMovieSetupDisplayList = 0x802245F8; // segment:ovl_00
 sMontyMoleMovieFrameAssets = 0x80224450; // size:0x24 segment:ovl_00
+DrawGoombaMovie = 0x80212CE0; // type:func segment:ovl_00
+sGoombaMovieFrameAssets = 0x80224474; // size:0x1C segment:ovl_00
