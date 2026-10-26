@@ -2892,3 +2892,4 @@ MoveAimCameraDistanceByUpDown = 0x80204460; // type:func segment:ovl_00
 TickStopwatches = 0x80208354; // type:func segment:ovl_00
 StartTurnRumble = 0x80207BEC; // type:func segment:ovl_00
 PlayWaitingPlayersCalls = 0x80207CAC; // type:func segment:ovl_00
+PlayAmbientSound = 0x802078F4; // type:func segment:ovl_00

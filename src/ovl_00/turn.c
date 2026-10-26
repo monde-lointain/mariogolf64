@@ -96,6 +96,14 @@
 #define CALL_OUT_SOUND_C_LEFT 12
 #define CALL_OUT_SOUND_C_RIGHT 14
 #define CALL_OUT_VOLUME 0x7F
+/* Every AMBIENT_SOUND_INTERVAL frames, one of the course's ambient sounds may play */
+#define AMBIENT_SOUND_INTERVAL 240
+#define AMBIENT_SOUND_CHOICES 7
+#define NO_AMBIENT_SOUND (-1)
+#define AMBIENT_SOUND_CHANNEL 10
+#define AMBIENT_SOUND_VOLUME 0x5F
+#define AMBIENT_SOUND_REVERB 15
+#define SOUND_PAN_RANGE 255
 /* The stopwatches stop at an hour */
 #define STOPWATCH_MAX_FRAMES 108000
 /* Where the aim camera starts, in course units */
@@ -124,6 +132,9 @@
 extern s32 D_800C3070;
 extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
+extern s32 D_80223FEC_ovl_00; /* Frames since the last ambient sound */
+/* The ambient sounds that each course may play, or NO_AMBIENT_SOUND */
+extern s32 D_80223EF0_ovl_00[COURSE_RECORD_COUNT][AMBIENT_SOUND_CHOICES];
 extern s16 D_800C307A; /* The free-look camera's heading, in binary angle units */
 extern s32 D_800C3080;
 extern s32 D_800C3084;
@@ -682,7 +693,19 @@ void ClearPassedRings(UnkB8 *player) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802078F4_ovl_00);
+/* Now and then plays one of the course's ambient sounds, picked at random, from a random side */
+void PlayAmbientSound(void) {
+    s32 choice;
+
+    if (++D_80223FEC_ovl_00 == AMBIENT_SOUND_INTERVAL) {
+        choice = guRandom() % AMBIENT_SOUND_CHOICES;
+        D_80223FEC_ovl_00 = 0;
+        if (D_80223EF0_ovl_00[GetCourseRecordIndex()][choice] != NO_AMBIENT_SOUND) {
+            PlaySoundWithEffects(D_80223EF0_ovl_00[GetCourseRecordIndex()][choice], AMBIENT_SOUND_CHANNEL,
+                                 AMBIENT_SOUND_VOLUME, AMBIENT_SOUND_REVERB, guRandom() % SOUND_PAN_RANGE);
+        }
+    }
+}
 
 void FreeCharacterAndReactionLight(void) {
     FreeCharacterSlot(0);
