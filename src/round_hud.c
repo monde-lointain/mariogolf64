@@ -1554,7 +1554,184 @@ void AdjustHudOffset(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008534C);
+#define MODULE_PAUSE_MENU 20
+#define MODULE_UNK25 25
+/* Where the shot panel's wind indicator sits, unless the shot is on the green, where the wind doesn't count */
+#define SHOT_PANEL_WIND_INDICATOR_X 100.0f
+#define SHOT_PANEL_WIND_INDICATOR_Y 76.0f
+/* The arrows beside a pause menu panel; they take screen coordinates, while the panels sit in the centred view */
+#define PAUSE_PANEL_ARROWS_GAP 64
+/* The shot panel's icons, in the centred orthographic view and in front of the camera */
+#define CLUB_HEAD_ICON_X -128.0f
+#define CLUB_HEAD_ICON_Y -76.0f
+#define LIE_ICON_X 112
+#define LIE_ICON_Y -70.0f
+#define SHOT_PANEL_ICON_Z -300.0f
+/* The icons tilt by half of their angle */
+#define SHOT_PANEL_ICON_TILT 0.5f
+/* RoundHud.flags bits that light the club head icon fully, otherwise it is dimmed */
+#define HUD_FLAG_LIGHT_CLUB_HEAD 0x2
+#define SHOT_PANEL_ICON_DIM 191
+#define CLUB_HEAD_IMAGE_SIZE 32
+/* The lie image is two halves, each its own texture on its own quad */
+#define LIE_IMAGE_WIDTH 48
+#define LIE_IMAGE_HALF_HEIGHT 24
+#define LIE_IMAGE_HALF_SIZE (LIE_IMAGE_WIDTH * LIE_IMAGE_HALF_HEIGHT * 2)
+
+extern Vtx sClubHeadIconVertices[4];
+extern Vtx sLieIconVertices[8];
+extern Mtx sClubHeadIconMatrices[2];
+extern Mtx sLieIconMatrices[2];
+extern s32 sClubNameImageIndex;
+/* The name image of each club slot */
+extern u16 sClubNameAssets[];
+
+/*
+ * Draws the shot panel's wind indicator, club head and lie, or the wind
+ * and lie panels beside the pause menu while it sets them
+ */
+void DrawShotPanelIcons(Gfx **displayListHead) {
+    Vec3 rotation;
+    Vec3 translation;
+    Vec3 unusedScale;
+    Mat4 matrix;
+    s32 unused[18];
+    Gfx *gfx;
+    Club *club;
+    f32 clubHeadAngle;
+    f32 lieAngle;
+
+    gfx = *displayListHead;
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK);
+    if (g_RoundHud.areWindSpeedArrowsShown == TRUE || g_RoundHud.areWindDirectionArrowsShown == TRUE) {
+        if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
+            DrawWindIndicator(&gfx, g_WindPanelPosition[AXIS_X], g_WindPanelPosition[AXIS_Y]);
+            if (g_RoundHud.areWindDirectionArrowsShown == TRUE) {
+                DrawPauseArrows(&gfx, g_WindPanelPosition[AXIS_X] + SCREEN_WIDTH / 2,
+                                SCREEN_HEIGHT / 2 - g_WindPanelPosition[AXIS_Y], PAUSE_PANEL_ARROWS_GAP);
+            }
+        }
+    } else if (g_HoleConditions.windSpeed != 0 && g_RoundHud.unk7 &&
+               GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && D_800BE69C == 0) {
+        DrawWindIndicator(&gfx, sShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X, SHOT_PANEL_WIND_INDICATOR_Y);
+    }
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gDPPipeSync(gfx++);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
+    if (D_800BE69C == 0 && g_IsModuleAlive[MODULE_UNK25]) {
+        DrawClubPanelIfShown(&gfx);
+    }
+    if (g_RoundHud.unkA && D_800BE69C == 0) {
+        club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
+        if (club->headImageAsset != sClubHeadImageAsset) {
+            EncodedAsset asset;
+
+            sClubHeadImageAsset = club->headImageAsset;
+            OpenEncodedAsset(club->headImageAsset, &asset);
+            ReadEncodedAsset(sClubHeadImage, &asset);
+            sClubNameImageIndex ^= 1;
+            OpenEncodedAsset(sClubNameAssets[g_CurrentShot.clubSlot], &asset);
+            ReadEncodedAsset(sClubNameImages[sClubNameImageIndex], &asset);
+        }
+        clubHeadAngle = g_RoundHud.unk80 * BINARY_ANGLE_TO_RADIANS;
+        if (clubHeadAngle > M_PI) {
+            clubHeadAngle -= 2 * M_PI;
+        }
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
+        translation[AXIS_X] = CLUB_HEAD_ICON_X - sShotPanelOffsetX;
+        translation[AXIS_Y] = CLUB_HEAD_ICON_Y - sHudOffsetY;
+        translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &sClubHeadIconMatrices[g_MatrixBufferIndex]);
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        if (g_RoundHud.flags & HUD_FLAG_LIGHT_CLUB_HEAD) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        } else {
+            gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM, 255);
+        }
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gDPLoadTextureBlock(gfx++, ((u32)sClubHeadImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                            CLUB_HEAD_IMAGE_SIZE, CLUB_HEAD_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK,
+                            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sClubHeadIconMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sClubHeadIconVertices, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+    }
+    if ((g_RoundHud.unk9 || g_RoundHud.areLieArrowsShown) && D_800BE69C == 0) {
+        lieAngle = g_RoundHud.unk82 * BINARY_ANGLE_TO_RADIANS;
+        if (lieAngle > M_PI) {
+            lieAngle -= 2 * M_PI;
+        }
+        rotation[AXIS_X] = 0;
+        rotation[AXIS_Y] = 0;
+        rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
+        if (g_RoundHud.unk9) {
+            translation[AXIS_X] = sShotPanelOffsetX + LIE_ICON_X;
+            translation[AXIS_Y] = LIE_ICON_Y - sHudOffsetY;
+            translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+        } else if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
+            translation[AXIS_X] = g_LiePanelPosition[AXIS_X];
+            translation[AXIS_Y] = g_LiePanelPosition[AXIS_Y];
+            translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
+            DrawPauseArrows(&gfx, g_LiePanelPosition[AXIS_X] + SCREEN_WIDTH / 2,
+                            SCREEN_HEIGHT / 2 - g_LiePanelPosition[AXIS_Y], PAUSE_PANEL_ARROWS_GAP);
+        }
+        BuildRotationMatrix(matrix, rotation, translation);
+        ConvertMatrixToFixed(matrix, &sLieIconMatrices[g_MatrixBufferIndex]);
+        if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
+            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+        } else {
+            gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM, 255);
+        }
+        gDPPipeSync(gfx++);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        gDPLoadTLUT_pal16(gfx++, 0, ((u32)sLieImage + IMAGE_HEADER_SIZE) & ~7);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sLieIconMatrices[g_MatrixBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, sLieIconVertices, 8, 0);
+        gDPLoadTextureBlock(gfx++, ((u32)sLieImage + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                            LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPLoadTextureBlock(gfx++, ((u32)sLieImage + IMAGE_HEADER_SIZE + LIE_IMAGE_HALF_SIZE) & ~7, G_IM_FMT_RGBA,
+                            G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
+                            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 /*
  * Draws the flag grid with the hole image on it. With isBackDrawn, it then
