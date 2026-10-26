@@ -208,6 +208,30 @@ extern Mtx sFlipMessageMatrices[2];
 #define ASSET_TOAD_MOVIE_PALETTE 0x92C
 #define TOAD_FRAME_OFFSET 0x200
 #define TOAD_BACK_FRAME_OFFSET 0x2880
+#define TOAD_FRAME_SIZE (TOAD_BACK_FRAME_OFFSET - TOAD_FRAME_OFFSET)
+#define TOAD_FRAME_COUNT 12
+#define TOAD_WIDTH 112
+#define TOAD_STRIP_HEIGHT 11
+#define TOAD_STRIP_COUNT 8
+#define TOAD_STRIP_SIZE (TOAD_WIDTH * TOAD_STRIP_HEIGHT)
+#define TOAD_X 104
+#define TOAD_Y 86
+/* The flag swishes as it swings to each side */
+#define TOAD_SWING_LEFT_FRAME 8
+#define TOAD_SWING_RIGHT_FRAME 2
+#define SOUND_FLAG_SWISH 0x1F
+#define FLAG_SWISH_SOUND_CHANNEL 15
+#define FLAG_SWISH_SOUND_VOLUME 127
+#define FLAG_SWISH_LEFT_PAN 16
+#define FLAG_SWISH_RIGHT_PAN 239
+#define FLAG_SWISH_PITCH 12.0f
+#define SOUND_OUT_OF_BOUNDS 0x77
+#define OUT_OF_BOUNDS_SOUND_DRAW 16
+#define OUT_OF_BOUNDS_SOUND_CHANNEL 13
+/* Toad draws in the inset view, kept off its frame */
+#define INSET_VIEW_CAMERA 1
+#define INSET_FRAME_WIDTH 2
+#define INSET_FRAME_HEIGHT 1
 #define ASSET_LAKITU 0x64E
 #define LAKITU_BACK_IMAGE_OFFSET 0x1008
 #define LAKITU_START_X 384.0f
@@ -287,7 +311,7 @@ void func_80211D60_ovl_00(Gfx **displayListHead);
 void DrawMontyMoleMovie(Gfx **displayListHead);
 void DrawGoombaMovie(Gfx **displayListHead);
 void DrawLakituMovie(Gfx **displayListHead);
-void func_80213634_ovl_00(Gfx **displayListHead);
+void DrawToadMovie(Gfx **displayListHead);
 
 void AllocMovieBuffer(void) {
     EncodedAsset unused;
@@ -675,7 +699,7 @@ void DrawMovie(Gfx **displayListHead) {
         case MOVIE_NONE:
             break;
         case MOVIE_TOAD_OUT_OF_BOUNDS:
-            func_80213634_ovl_00(&gfx);
+            DrawToadMovie(&gfx);
             break;
         case MOVIE_LAKITU:
             DrawLakituMovie(&gfx);
@@ -943,7 +967,69 @@ void DrawLakituMovie(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawLakituMovie);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80213634_ovl_00);
+#ifdef NON_MATCHING
+/* Toad waves the out of bounds flag in the inset view */
+void DrawToadMovie(Gfx **displayListHead) {
+    EncodedAsset asset;
+    Gfx *gfx = *displayListHead;
+    s32 i;
+
+    sMovieTick++;
+    if (sMovieTick == MOVIE_TICKS_PER_FRAME) {
+        sMovieTick = 0;
+        sMovieFrame = (sMovieFrame + 1) % TOAD_FRAME_COUNT;
+        if (sMovieFrame == TOAD_SWING_LEFT_FRAME) {
+            PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_SOUND_VOLUME,
+                                 MOVIE_SOUND_REVERB, FLAG_SWISH_LEFT_PAN);
+            SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+        }
+        if (sMovieFrame == TOAD_SWING_RIGHT_FRAME) {
+            PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_SOUND_VOLUME,
+                                 MOVIE_SOUND_REVERB, FLAG_SWISH_RIGHT_PAN);
+            SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
+        }
+        sMovieBackBuffer ^= 1;
+        OpenEncodedAsset(sToadMovieFrameAssets[sMovieFrame], &asset);
+        ReadEncodedAsset(sMovieBuffer + (sMovieBackBuffer * TOAD_FRAME_SIZE + TOAD_FRAME_OFFSET), &asset);
+    }
+    if (sMovieDrawCount == OUT_OF_BOUNDS_SOUND_DRAW) {
+        PlaySoundWithEffects(SOUND_OUT_OF_BOUNDS, OUT_OF_BOUNDS_SOUND_CHANNEL, MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB,
+                             MOVIE_SOUND_PAN);
+    }
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, g_Cameras[INSET_VIEW_CAMERA].view.scissorX + INSET_FRAME_WIDTH,
+                  g_Cameras[INSET_VIEW_CAMERA].view.scissorY + INSET_FRAME_HEIGHT,
+                  g_Cameras[INSET_VIEW_CAMERA].view.scissorX + g_Cameras[INSET_VIEW_CAMERA].view.scissorWidth -
+                      INSET_FRAME_WIDTH,
+                  g_Cameras[INSET_VIEW_CAMERA].view.scissorY + g_Cameras[INSET_VIEW_CAMERA].view.scissorHeight -
+                      INSET_FRAME_HEIGHT);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer));
+    for (i = 0; i != TOAD_STRIP_COUNT; i++) {
+        gDPLoadTextureTile(gfx++,
+                           TEXTURE_ADDRESS(sMovieBuffer + TOAD_FRAME_OFFSET +
+                                           (sMovieBackBuffer * TOAD_FRAME_SIZE + i * TOAD_STRIP_SIZE)),
+                           G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, TOAD_STRIP_HEIGHT, 0, 0, TOAD_WIDTH - 1,
+                           TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        DrawTextureRect(&gfx, TOAD_X << 2, (TOAD_Y + i * TOAD_STRIP_HEIGHT) << 2, (TOAD_X + TOAD_WIDTH) << 2,
+                        (TOAD_Y + TOAD_STRIP_HEIGHT + i * TOAD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                        1 << 10);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetScissor(gfx++, G_SC_NON_INTERLACE, g_Cameras[0].view.scissorX, g_Cameras[0].view.scissorY,
+                  g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth,
+                  g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawToadMovie);
+#endif
 
 s32 IsContactEffectShown(void) {
     return g_ContactEffect != CONTACT_EFFECT_NONE;
