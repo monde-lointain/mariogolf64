@@ -24,7 +24,7 @@ typedef struct ScorecardContent {
 typedef struct Scorecard {
     /* 0x00 */ u8 unk0[0xC];
     /* 0x0C */ u8 *tableImage;
-    /* 0x10 */ u8 *unk10;
+    /* 0x10 */ u8 *placeArrowImage; /* Beside the player's row when their place changed */
     /* 0x14 */ u8 *unk14;
     /* 0x18 */ u8 *unk18;
     /* 0x1C */ u8 *labelsImage;
@@ -38,9 +38,9 @@ typedef struct Scorecard {
     /* 0x44 */ u8 *betImages[BET_COUNT][2];
     /* 0x7C */ u8 unk7C[8];
     /* 0x84 */ u8 *totalHeadingImage; /* Heads the bets page's column of totals */
-    /* 0x88 */ u8 *unk88;
+    /* 0x88 */ u8 *leaderboardRowImage; /* Behind each leaderboard row, and on its flaps */
     /* 0x8C */ u8 *unk8C;
-    /* 0x90 */ u8 *unk90;
+    /* 0x90 */ u8 *flapNameImages;      /* One for each row, over the names on its flaps */
     /* 0x94 */ u8 *gridImage;         /* The pieces of the bets page's grid lines */
     /* 0x98 */ u8 *faceImages[MAX_PLAYER_COUNT];
     /* 0xA8 */ u16 *facePalettes[MAX_PLAYER_COUNT];

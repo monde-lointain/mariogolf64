@@ -194,7 +194,7 @@ void DrawMatchPage(Gfx **displayListHead);
 void DrawSkinsPage(Gfx **displayListHead);
 void DrawBetsPage(Gfx **displayListHead);
 void DrawSpeedGolfPage(Gfx **displayListHead);
-void func_80247E3C_ovl_09(Gfx **displayListHead);
+void DrawLeaderboardPage(Gfx **displayListHead);
 void func_802493DC_ovl_09(Gfx **displayListHead);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 
@@ -203,7 +203,7 @@ void ScrollLeaderboard(u16 buttons);
 void SetScorecardState(s32 state);
 
 #define TABLE_IMAGE_ASSET 0x68F
-#define UNK10_IMAGE_ASSET 0x682
+#define PLACE_ARROW_IMAGE_ASSET 0x682
 #define UNK14_IMAGE_ASSET 0x690
 #define UNK18_IMAGE_ASSET 0x691
 #define DIGITS_IMAGE_ASSET 0x689
@@ -216,8 +216,8 @@ void SetScorecardState(s32 state);
 #define WINS_NEEDED_IMAGE_ASSET 0x68D
 #define WINNER_ARROW_IMAGE_ASSET 0x694
 #define SKIN_ICON_IMAGE_ASSET 0x68B
-#define UNK90_IMAGE_ASSET 0x695
-#define UNK88_IMAGE_ASSET 0x692
+#define FLAP_NAME_IMAGES_ASSET 0x695
+#define LEADERBOARD_ROW_IMAGE_ASSET 0x692
 #define TOTAL_HEADING_IMAGE_ASSET 0x696
 #define GRID_IMAGE_ASSET 0x69D
 
@@ -371,12 +371,12 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         case GAME_MODE_TOURNAMENT:
             shownHoleCount = g_Scorecard.content.holeIndex;
             g_Scorecard.pageCount = 2;
-            g_Scorecard.unk90 = AllocMemory(OpenEncodedAsset(UNK90_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk90, &asset);
-            g_Scorecard.unk88 = AllocMemory(OpenEncodedAsset(UNK88_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk88, &asset);
-            g_Scorecard.unk10 = AllocMemory(OpenEncodedAsset(UNK10_IMAGE_ASSET, &asset));
-            ReadEncodedAsset(g_Scorecard.unk10, &asset);
+            g_Scorecard.flapNameImages = AllocMemory(OpenEncodedAsset(FLAP_NAME_IMAGES_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.flapNameImages, &asset);
+            g_Scorecard.leaderboardRowImage = AllocMemory(OpenEncodedAsset(LEADERBOARD_ROW_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.leaderboardRowImage, &asset);
+            g_Scorecard.placeArrowImage = AllocMemory(OpenEncodedAsset(PLACE_ARROW_IMAGE_ASSET, &asset));
+            ReadEncodedAsset(g_Scorecard.placeArrowImage, &asset);
             shownHoleCount += g_Players[0].unk26 != 0;
             pageTitlesRow = PAGE_TITLES_TOURNAMENT;
             if (shownHoleCount > 0) {
@@ -495,9 +495,9 @@ void FreeScorecard(void) {
                 FreeMemory(&g_Scorecard.winMarkImage);
                 break;
             case GAME_MODE_TOURNAMENT:
-                FreeMemory(&g_Scorecard.unk10);
-                FreeMemory(&g_Scorecard.unk90);
-                FreeMemory(&g_Scorecard.unk88);
+                FreeMemory(&g_Scorecard.placeArrowImage);
+                FreeMemory(&g_Scorecard.flapNameImages);
+                FreeMemory(&g_Scorecard.leaderboardRowImage);
                 for (i = 0; i != LEADERBOARD_GLYPH_GROUP_COUNT; i++) {
                     PlaceGlyphGroup(i, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
                 }
@@ -1146,7 +1146,7 @@ void DrawScorecard(Gfx **displayListHead) {
             switch (g_GameMode) {
                 case GAME_MODE_TOURNAMENT:
                     if (g_RoundHud.scorecardPage == 0) {
-                        func_80247E3C_ovl_09(&gfx);
+                        DrawLeaderboardPage(&gfx);
                     } else {
                         func_802493DC_ovl_09(&gfx);
                     }
@@ -2574,7 +2574,376 @@ void FormatLeaderboardRow(char *row, TournamentStanding *standing) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80247E3C_ovl_09);
+/*
+ * The tournament leaderboard is a board of split flaps. A row that changes
+ * turns its top flap down over a hinge across the middle of the row.
+ */
+/* Each label sits over the column it names */
+#define PLACE_LABEL 0
+#define NAME_LABEL 1
+#define HOLES_LABEL 3
+#define LEADERBOARD_LABEL_TOP 46
+#define PLACE_LABEL_LEFT 32
+#define NAME_LABEL_LEFT 100
+#define SCORE_LABEL_LEFT 184
+#define HOLES_LABEL_LEFT 248
+#define LEADERBOARD_ROW_SPACING 16
+#define ROW_IMAGE_WIDTH 256
+#define ROW_IMAGE_HEIGHT 14
+#define ROW_LEFT 32
+#define ROW_TOP 66
+#define ROW_HINGE_TOP 72
+/* The texel row where the bottom flap starts */
+#define ROW_BOTTOM_HALF_ROW 7
+#define FLAP_NAME_IMAGE_WIDTH 128
+#define FLAP_NAME_LEFT 96
+#define ROW_TEXT_LEFT 34
+#define ROW_TEXT_TOP 67
+#define ROW_NAME_LEFT 98
+/* A flap turns its far side to the screen past a quarter turn */
+#define FLAP_EDGE_ON_ANGLE (M_PI / 2)
+/* The board shades a flap by up to this much as it turns away from the light */
+#define FLAP_SHADE_RANGE 63.0f
+#define FLAP_LIT_SHADE 255.0f
+#define FLAP_FACING_SHADE (FLAP_LIT_SHADE - FLAP_SHADE_RANGE - 1.0f)
+#define FLAP_DISTANCE -290.0f
+#define FLAP_NAME_X (-62)
+#define FLAP_GLYPH_GROUP_COUNT 10
+#define LEADERBOARD_FACE_LEFT 66
+#define LEADERBOARD_FACE_TOP 60
+/* An arrow pulses beside the player's row when their place has changed */
+#define ARROW_IMAGE_SIZE 32
+#define ARROW_CENTER_X 32
+/* With G_TX_MIRROR, the texels below the image are the image upside down, which a fall draws */
+#define ARROW_MIRROR_MASK 5
+#define ARROW_PULSE_SIZE 2.0f
+#define FELL_ARROW_HALF_SIZE 8.0f
+#define ROSE_ARROW_HALF_SIZE 12.0f
+#define FELL_ARROW_PULSE_STEP 0.4f
+#define ROSE_ARROW_PULSE_STEP 0.3f
+
+/* The quads of sFlapVertices */
+#define FLAP_TOP_QUAD 0
+#define FLAP_BOTTOM_QUAD 1 /* The top flap's far side, once it has turned down */
+#define FLAP_NAME_QUAD 2
+#define FLAP_QUAD_COUNT 3
+#define QUAD_VERTEX_COUNT 4
+
+extern Vtx sFlapVertices[FLAP_QUAD_COUNT][QUAD_VERTEX_COUNT];
+extern Lights1 sFlapLights;
+extern f32 sArrowPulseAngle;
+/* A turning flap's matrix, one for each draw buffer */
+extern Mtx sFlapMatrices[LEADERBOARD_ROW_COUNT][2];
+
+/*
+ * Draws the tournament leaderboard's page. Rows flip over in turn to show the
+ * new standings, and the player's row shows their face and, if their place
+ * changed, an arrow.
+ *
+ * Doesn't match: the target keeps displayListHead in a saved register, where
+ * this spills it, so its frame is 0xE0 bytes, not 0xD8. The bottom flaps'
+ * loop also reads the flip angles through the stagger's index instead of a
+ * pointer of their own.
+ */
+#ifdef NON_MATCHING
+void DrawLeaderboardPage(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    TournamentStanding *standing;
+    s32 i;
+    s32 shade;
+    s32 group;
+    s32 contestantId;
+    f32 halfSize;
+    s32 roundedHalfSize;
+    s32 top;
+    s32 texelStart;
+    s32 texelStep;
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    DrawScorecardLabel(&gfx, g_Scorecard.x + PLACE_LABEL_LEFT, LEADERBOARD_LABEL_TOP, PLACE_LABEL);
+    DrawScorecardLabel(&gfx, g_Scorecard.x + NAME_LABEL_LEFT, LEADERBOARD_LABEL_TOP, NAME_LABEL);
+    DrawScorecardLabel(&gfx, g_Scorecard.x + SCORE_LABEL_LEFT, LEADERBOARD_LABEL_TOP, SCORE_LABEL);
+    DrawScorecardLabel(&gfx, g_Scorecard.x + HOLES_LABEL_LEFT, LEADERBOARD_LABEL_TOP, HOLES_LABEL);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.leaderboardRowImage + IMAGE_HEADER_SIZE);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.leaderboardRowImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ROW_IMAGE_WIDTH,
+                           ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    /* The rows behind the flaps */
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            shade = 0xFF;
+            if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
+                !(g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE)) {
+                shade = sinf(g_Scorecard.content.rowFlipAngles[i]) * FLAP_SHADE_RANGE + FLAP_FACING_SHADE;
+            }
+        } else {
+            shade = 0xFF;
+        }
+        gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
+        DrawTextureRect(&gfx, (g_Scorecard.x + ROW_LEFT) << 2,
+                        (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP) << 2,
+                        (g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH) << 2,
+                        (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_IMAGE_HEIGHT) << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        /* Until the flap has turned a radian */
+        if (g_Scorecard.content.isRowFlipping[i] == TRUE && (s32)g_Scorecard.content.rowFlipAngles[i] == 0) {
+            LoadTextureBlock(&gfx,
+                             g_Scorecard.flapNameImages + (i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT +
+                                                  LARGE_PALETTED_TEXELS_OFFSET),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&gfx, (g_Scorecard.x + FLAP_NAME_LEFT) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP) << 2,
+                            (g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_IMAGE_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+    for (i = 0, top = 0; i != LEADERBOARD_ROW_COUNT; i++, top += LEADERBOARD_ROW_SPACING) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            FormatLeaderboardRow(g_PrintBuffer, &g_TournamentStandings[g_Scorecard.topRow + i]);
+            DrawFixedWidthLargeText(&gfx, g_Scorecard.x + ROW_TEXT_LEFT, g_Scorecard.y + top + ROW_TEXT_TOP,
+                                    g_PrintBuffer);
+            contestantId = g_TournamentStandings[g_Scorecard.topRow + i].contestantId;
+            if (contestantId == PLAYER_CONTESTANT) {
+                sprintf(g_PrintBuffer, "%-8s  ", g_Players[0].name);
+            } else {
+                sprintf(g_PrintBuffer, sStringFormat, g_ContestantNames[g_ContestantNameIndices[contestantId]]);
+            }
+            DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT, g_Scorecard.y + top + ROW_TEXT_TOP, g_PrintBuffer);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gSPSetLights1(gfx++, sFlapLights);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_LIGHTING | G_SHADING_SMOOTH);
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime && g_Scorecard.content.isRowFlipping[i] == TRUE) {
+            Mat4 matrix;
+            Vec3 translation;
+            Vec3 rotation;
+
+            /* Past a quarter turn, the flap turns a half turn more to show its far side the right way up */
+            if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
+                rotation[0] = g_Scorecard.content.rowFlipAngles[i] + M_PI;
+            } else {
+                rotation[0] = g_Scorecard.content.rowFlipAngles[i];
+            }
+            rotation[1] = 0;
+            rotation[2] = 0;
+            translation[0] = g_Scorecard.x;
+            translation[1] = SCREEN_HEIGHT / 2.0f - (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_HINGE_TOP);
+            translation[2] = FLAP_DISTANCE;
+            BuildRotationMatrix(matrix, rotation, translation);
+            ConvertMatrixToFixed(matrix, &sFlapMatrices[i][g_MatrixBufferIndex]);
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.leaderboardRowImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.leaderboardRowImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ROW_IMAGE_WIDTH,
+                           ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    /* The bottom flaps, which a top flap shades as it falls over them */
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime && g_Scorecard.content.isRowFlipping[i] == TRUE) {
+            shade = 0xFF;
+            if (!(g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE)) {
+                shade = FLAP_LIT_SHADE -
+                        sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) * FLAP_SHADE_RANGE;
+            }
+            gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
+            DrawTextureRect(&gfx, (g_Scorecard.x + ROW_LEFT) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_BOTTOM_HALF_ROW) << 2,
+                            (g_Scorecard.x + ROW_LEFT + ROW_IMAGE_WIDTH) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_IMAGE_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, ROW_BOTTOM_HALF_ROW << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        }
+    }
+    LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (g_Scorecard.content.isRowFlipping[i] == TRUE) {
+            if (g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+                shade = 0xFF;
+            } else {
+                shade = FLAP_LIT_SHADE -
+                        sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) * FLAP_SHADE_RANGE;
+            }
+            gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
+            LoadTextureBlock(&gfx,
+                             g_Scorecard.flapNameImages + (i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT +
+                                                  LARGE_PALETTED_TEXELS_OFFSET),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            DrawTextureRect(&gfx, (g_Scorecard.x + FLAP_NAME_LEFT) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_BOTTOM_HALF_ROW) << 2,
+                            (g_Scorecard.x + FLAP_NAME_LEFT + FLAP_NAME_IMAGE_WIDTH) << 2,
+                            (g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_TOP + ROW_IMAGE_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, ROW_BOTTOM_HALF_ROW << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+        }
+    }
+
+    /* The top flaps, turning */
+    gDPPipeSync(gfx++);
+    LoadSmallPalette(&gfx, 0, g_Scorecard.leaderboardRowImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.leaderboardRowImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, ROW_IMAGE_WIDTH,
+                           ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPSetCombineMode(gfx++, G_CC_MODULATERGBA, G_CC_MODULATERGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime && g_Scorecard.content.isRowFlipping[i] == TRUE) {
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sFlapMatrices[i][g_MatrixBufferIndex]),
+                      G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            if (g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
+                gSPVertex(gfx++, sFlapVertices[FLAP_BOTTOM_QUAD], QUAD_VERTEX_COUNT, 0);
+            } else {
+                gSPVertex(gfx++, sFlapVertices[FLAP_TOP_QUAD], QUAD_VERTEX_COUNT, 0);
+            }
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        }
+    }
+    LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
+    for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime && g_Scorecard.content.isRowFlipping[i] == TRUE &&
+            g_Scorecard.content.rowFlipAngles[i] < FLAP_EDGE_ON_ANGLE) {
+            LoadTextureBlock(&gfx,
+                             g_Scorecard.flapNameImages + (i * FLAP_NAME_IMAGE_WIDTH * ROW_IMAGE_HEIGHT +
+                                                  LARGE_PALETTED_TEXELS_OFFSET),
+                             G_IM_FMT_CI, G_IM_SIZ_8b, FLAP_NAME_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sFlapMatrices[i][g_MatrixBufferIndex]),
+                      G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+            gDPPipeSync(gfx++);
+            gSPVertex(gfx++, sFlapVertices[FLAP_NAME_QUAD], QUAD_VERTEX_COUNT, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gDPPipeSync(gfx++);
+        }
+    }
+
+    /* The new standings, on the far sides of the flaps that are past a quarter turn */
+    gDPPipeSync(gfx++);
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+    SetUpPerspectiveTextDrawing(&gfx);
+    for (i = 0, group = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+        if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
+            if (g_Scorecard.content.isRowFlipping[i] == TRUE &&
+                g_Scorecard.content.rowFlipAngles[i] > FLAP_EDGE_ON_ANGLE) {
+                standing = &g_TournamentStandings[g_Scorecard.topRow + i];
+                FormatLeaderboardRow(g_PrintBuffer, standing);
+                PlaceGlyphGroup(group, FONT_SIZE_LARGE, TEXT_FLAG_FIXED_WIDTH | GLYPH_FLAG_BOTTOM_PART, 0, 0,
+                                g_PrintBuffer);
+                if (standing->contestantId == PLAYER_CONTESTANT) {
+                    sprintf(g_PrintBuffer, "%-8s", g_Players[0].name);
+                } else {
+                    sprintf(g_PrintBuffer, sStringFormat,
+                            g_ContestantNames[g_ContestantNameIndices[standing->contestantId]]);
+                }
+                PlaceGlyphGroup(group + 1, FONT_SIZE_LARGE, GLYPH_FLAG_LEFT_ALIGNED | GLYPH_FLAG_BOTTOM_PART,
+                                FLAP_NAME_X, 0, g_PrintBuffer);
+                gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sFlapMatrices[i][g_MatrixBufferIndex]),
+                          G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+                DrawGlyphGroup(&gfx, group);
+                DrawGlyphGroup(&gfx, group + 1);
+            }
+            group = (group + 2) % FLAP_GLYPH_GROUP_COUNT;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+
+    if (g_Scorecard.content.flipTime > ROW_FLIP_TIME) {
+        for (i = 0, top = LEADERBOARD_FACE_TOP; i != LEADERBOARD_ROW_COUNT; i++, top += LEADERBOARD_ROW_SPACING) {
+            if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId == PLAYER_CONTESTANT) {
+                gSPDisplayList(gfx++, D_800C3FC0);
+                gDPPipeSync(gfx++);
+                gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+                DrawSmallFace(&gfx, g_Scorecard.x + LEADERBOARD_FACE_LEFT, top, 0, TRUE);
+            }
+        }
+    }
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.placeArrowImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, ARROW_IMAGE_SIZE,
+                           ARROW_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           ARROW_MIRROR_MASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT,
+                      PRIMITIVE, TEXEL0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (g_Scorecard.content.flipTime > ROW_FLIP_TIME) {
+        for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
+            if (g_TournamentStandings[g_Scorecard.topRow + i].contestantId == PLAYER_CONTESTANT &&
+                g_Scorecard.placeChange != PLACE_HELD) {
+                if (g_Scorecard.placeChange & PLACE_FELL) {
+                    gDPSetEnvColor(gfx++, 0xA0, 0xA0, 0xFF, 0xFF);
+                    gDPSetPrimColor(gfx++, 0, 0, 0x00, 0x40, 0xFF, 0xFF);
+                    gDPPipeSync(gfx++);
+                    sArrowPulseAngle += FELL_ARROW_PULSE_STEP;
+                    halfSize = ARROW_PULSE_SIZE * sinf(sArrowPulseAngle) + FELL_ARROW_HALF_SIZE;
+                } else {
+                    gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x90, 0xFF);
+                    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x40, 0x40, 0xF0);
+                    gDPPipeSync(gfx++);
+                    sArrowPulseAngle += ROSE_ARROW_PULSE_STEP;
+                    halfSize = ARROW_PULSE_SIZE * sinf(sArrowPulseAngle) + ROSE_ARROW_HALF_SIZE;
+                }
+                roundedHalfSize = halfSize + 0.5f;
+                top = g_Scorecard.y + i * LEADERBOARD_ROW_SPACING + ROW_HINGE_TOP;
+                /* Starts the texels part of a texel in, as far as the rect's rounding moved its edge */
+                texelStart = (ARROW_IMAGE_SIZE / 2) - ((f32)roundedHalfSize - halfSize) * (ARROW_IMAGE_SIZE / 2);
+                texelStep = (TEXEL_STEP_ONE * ARROW_IMAGE_SIZE / 2) / halfSize;
+                DrawTextureRect(&gfx, (g_Scorecard.x - (roundedHalfSize - ARROW_CENTER_X)) << 2,
+                                (top - roundedHalfSize) << 2,
+                                (g_Scorecard.x + (roundedHalfSize + ARROW_CENTER_X)) << 2,
+                                (top + roundedHalfSize) << 2, G_TX_RENDERTILE, texelStart,
+                                texelStart +
+                                    (g_Scorecard.placeChange * ARROW_IMAGE_SIZE << TEXTURE_COORD_FRACTION_BITS),
+                                texelStep, texelStep);
+            }
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawLeaderboardPage);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802493DC_ovl_09);
 
