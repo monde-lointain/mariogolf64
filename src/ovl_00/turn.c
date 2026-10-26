@@ -61,6 +61,16 @@
 #define AIM_CAMERA_MAX_Z 8542208.0f
 /* How far above the ground under the ball the aim camera looks, in world units */
 #define AIM_LOOK_AT_RISE 17.25f
+/* Where the aim camera eases to, in course units */
+#define AIM_CAMERA_PUTT_DISTANCE (-0x1800C)
+#define AIM_CAMERA_APPROACH_BACKOFF 0x4B000 /* Back from where the shot lands */
+#define AIM_CAMERA_SHOT_BACKOFF_YARDS 50    /* Short of the shot's full distance */
+#define AIM_CAMERA_PUTT_HEIGHT (-0xB400)
+#define AIM_CAMERA_APPROACH_HEIGHT (-0x12C00)
+#define AIM_CAMERA_SHOT_HEIGHT (-0x25800)
+/* The aim camera moves this fraction of the way each frame, up to the most */
+#define AIM_CAMERA_EASE_FRACTION 0.3f
+#define AIM_CAMERA_MAX_EASE_STEP (10 * UNITS_PER_YARD)
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
@@ -170,7 +180,44 @@ void ResetAimCamera(void) {
     PlaceAimCamera();
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203F30_ovl_00);
+/* Eases the aim camera towards the place that suits the shot, and stops once it is close */
+#ifdef NON_MATCHING
+void EaseAimCamera(void) {
+    s32 targetDistance;
+    s32 targetHeight;
+
+    if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+        targetDistance = AIM_CAMERA_PUTT_DISTANCE;
+    } else if (D_800C3084 & SHOT_UNK3084_APPROACH) {
+        targetDistance = g_CurrentShot.unk50 - AIM_CAMERA_APPROACH_BACKOFF;
+    } else {
+        targetDistance = (GetSelectedShotDistance() - AIM_CAMERA_SHOT_BACKOFF_YARDS) * UNITS_PER_YARD;
+    }
+    if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
+        targetHeight = AIM_CAMERA_PUTT_HEIGHT;
+    } else if (D_800C3084 & SHOT_UNK3084_APPROACH) {
+        targetHeight = AIM_CAMERA_APPROACH_HEIGHT;
+    } else {
+        targetHeight = AIM_CAMERA_SHOT_HEIGHT;
+    }
+    if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) > AIM_CAMERA_MAX_EASE_STEP) {
+        if (g_CurrentShot.aimCameraDistance > targetDistance) {
+            g_CurrentShot.aimCameraDistance -= AIM_CAMERA_MAX_EASE_STEP;
+        } else {
+            g_CurrentShot.aimCameraDistance += AIM_CAMERA_MAX_EASE_STEP;
+        }
+    } else {
+        g_CurrentShot.aimCameraDistance +=
+            (targetDistance - g_CurrentShot.aimCameraDistance) * AIM_CAMERA_EASE_FRACTION;
+    }
+    g_CurrentShot.aimCameraHeight += (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
+    if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) < UNITS_PER_YARD) {
+        D_800C3070 = 0;
+    }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", EaseAimCamera);
+#endif
 
 /* Raises or lowers the aim camera with the C buttons, in smaller steps for a putt */
 void MoveAimCameraHeightByButtons(void) {
