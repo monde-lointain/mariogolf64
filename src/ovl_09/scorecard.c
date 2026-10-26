@@ -205,11 +205,11 @@ void SetScorecardState(s32 state);
 #define TABLE_IMAGE_ASSET 0x68F
 #define PLACE_ARROW_IMAGE_ASSET 0x682
 #define UNK14_IMAGE_ASSET 0x690
-#define UNK18_IMAGE_ASSET 0x691
+#define SCORES_PANEL_IMAGE_ASSET 0x691
 #define DIGITS_IMAGE_ASSET 0x689
 #define BET_SUBTITLES_IMAGE_ASSET 0x97A
 #define LABELS_IMAGE_ASSET 0x68A
-#define UNK8C_IMAGE_ASSET 0x693
+#define TOTAL_LABELS_IMAGE_ASSET 0x693
 #define PLACES_IMAGE_ASSET 0x688
 #define MATCH_PANEL_IMAGE_ASSET 0x68E
 #define WIN_MARK_IMAGE_ASSET 0x68C
@@ -274,16 +274,16 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
     ReadEncodedAsset(g_Scorecard.tableImage, &asset);
     g_Scorecard.unk14 = AllocMemory(OpenEncodedAsset(UNK14_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.unk14, &asset);
-    g_Scorecard.unk18 = AllocMemory(OpenEncodedAsset(UNK18_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_Scorecard.unk18, &asset);
+    g_Scorecard.scoresPanelImage = AllocMemory(OpenEncodedAsset(SCORES_PANEL_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.scoresPanelImage, &asset);
     g_Scorecard.digitsImage = AllocMemory(OpenEncodedAsset(DIGITS_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.digitsImage, &asset);
     g_Scorecard.betSubtitlesImage = AllocMemory(OpenEncodedAsset(BET_SUBTITLES_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.betSubtitlesImage, &asset);
     g_Scorecard.labelsImage = AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
     ReadEncodedAsset(g_Scorecard.labelsImage, &asset);
-    g_Scorecard.unk8C = AllocMemory(OpenEncodedAsset(UNK8C_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(g_Scorecard.unk8C, &asset);
+    g_Scorecard.totalLabelsImage = AllocMemory(OpenEncodedAsset(TOTAL_LABELS_IMAGE_ASSET, &asset));
+    ReadEncodedAsset(g_Scorecard.totalLabelsImage, &asset);
 
     g_Scorecard.hasBets = FALSE;
     for (i = 0; i != BET_COUNT; i++) {
@@ -503,11 +503,11 @@ void FreeScorecard(void) {
                 }
                 break;
         }
-        FreeMemory(&g_Scorecard.unk8C);
+        FreeMemory(&g_Scorecard.totalLabelsImage);
         FreeMemory(&g_Scorecard.labelsImage);
         FreeMemory(&g_Scorecard.digitsImage);
         FreeMemory(&g_Scorecard.betSubtitlesImage);
-        FreeMemory(&g_Scorecard.unk18);
+        FreeMemory(&g_Scorecard.scoresPanelImage);
         FreeMemory(&g_Scorecard.unk14);
         FreeMemory(&g_Scorecard.tableImage);
         for (i = 0; i != g_PlayerCount; i++) {
