@@ -8,12 +8,14 @@
 #include "current_shot.h"
 #include "debug_text.h"
 #include "functions.h"
+#include "hole_display.h"
 #include "math_util.h"
 #include "reaction.h"
 #include "round_events.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
+#include "screen.h"
 #include "sound.h"
 #include "surface.h"
 #include "turn.h"
@@ -71,6 +73,12 @@
 /* The aim camera moves this fraction of the way each frame, up to the most */
 #define AIM_CAMERA_EASE_FRACTION 0.3f
 #define AIM_CAMERA_MAX_EASE_STEP (10 * UNITS_PER_YARD)
+/* The free-look camera starts behind the ball, and C-left and C-right turn it */
+#define FREE_LOOK_START_DISTANCE (-0x12C00)
+#define FREE_LOOK_TURN_STEP 200
+#define FREE_LOOK_HUD_FLAGS 0x47
+#define LETTERBOX_STATE_UNK1 1
+#define FREE_LOOK_FRAMEBUFFER_COUNT 3
 /* Where the aim camera starts, in course units */
 #define AIM_CAMERA_START_DISTANCE (-0xF000)
 #define AIM_CAMERA_START_HEIGHT (-0x4E00)
@@ -90,6 +98,7 @@
 #define MAX_COUNTED_FLIGHT_COUNT 2
 
 extern s32 D_800C3070;
+extern s16 D_800C307A; /* The free-look camera's heading, in binary angle units */
 extern s32 D_800C3080;
 extern s32 D_800C3084;
 extern s32 D_800C308C; /* The letterbox's state */
@@ -100,6 +109,7 @@ extern s32 sShotFlightCount;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
+void SetFramebufferCount(s32 count);
 s32 func_8005F30C(s32 x, s32 z);
 s32 HasNoRingsLeft(UnkB8 *player);
 void RecordRingShotClear(s32 playerIndex);
@@ -155,7 +165,24 @@ void PlaceAimCamera(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlaceAimCamera);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80203DAC_ovl_00);
+/* Switches from the pause menu to the free-look camera, facing along the aim line */
+void StartFreeLook(void) {
+    g_CurrentShot.aimCameraDistance = FREE_LOOK_START_DISTANCE;
+    D_800C308C = LETTERBOX_STATE_UNK1;
+    D_800C3070 = 0;
+    g_IsSettingImpactPoint = FALSE;
+    g_RoundHud.flags = FREE_LOOK_HUD_FLAGS;
+    D_800C307A = g_CurrentShot.unk0;
+    SetMenuBackdrop(MENU_BACKDROP_PATTERN);
+    g_PauseScreen = PAUSE_SCREEN_UNK4;
+    g_RoundHud.isLetterboxShown = FALSE;
+    g_RoundHud.unkC = 0;
+    if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
+        SetFramebufferCount(FREE_LOOK_FRAMEBUFFER_COUNT);
+        SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+    }
+    StopSound(IMPACT_POINT_SOUND_CHANNEL);
+}
 
 void UpdateImpactPointMode(void) {
     if ((g_TurnController.buttons & IMPACT_POINT_BUTTONS) && !(D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT)) {
@@ -236,7 +263,14 @@ void MoveAimCameraHeightByButtons(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802041C8_ovl_00);
+/* Turns the free-look camera with C-left and C-right */
+void TurnFreeLook(void) {
+    if (g_TurnController.buttons & L_CBUTTONS) {
+        D_800C307A -= FREE_LOOK_TURN_STEP;
+    } else if (g_TurnController.buttons & R_CBUTTONS) {
+        D_800C307A += FREE_LOOK_TURN_STEP;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_80204210_ovl_00);
 

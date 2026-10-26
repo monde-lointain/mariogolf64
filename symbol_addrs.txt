@@ -2885,3 +2885,5 @@ MoveAimCameraDistanceByButtons = 0x8020439C; // type:func segment:ovl_00
 MoveAimCameraDistance = 0x802045BC; // type:func segment:ovl_00
 PlayHoleOutSong = 0x80207E88; // type:func segment:ovl_00
 EaseAimCamera = 0x80203F30; // type:func segment:ovl_00
+StartFreeLook = 0x80203DAC; // type:func segment:ovl_00
+TurnFreeLook = 0x802041C8; // type:func segment:ovl_00
