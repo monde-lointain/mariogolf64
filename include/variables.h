@@ -65,6 +65,10 @@ extern Fog g_SceneFog;
 /* The fog SetSceneFog draws while GAME_FLAG_SKY_EDITOR is set */
 extern Fog g_DebugFog;
 extern s32 g_PlayerCount;
+/* Which nines the round leaves out, as *_NINE_SKIPPED flags */
+extern s32 g_SkippedNines;
+#define FRONT_NINE_SKIPPED 0x2
+#define BACK_NINE_SKIPPED 0x4
 
 /* The game counts time in frames */
 #define FRAMES_PER_SECOND 30
