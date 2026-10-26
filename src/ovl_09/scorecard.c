@@ -152,6 +152,7 @@ extern Gfx D_800C3FC0[];
 extern const char sHoleNumberFormat[];
 /* Formats that more than one page shares */
 extern const char sStringFormat[];
+extern const char sCompactHoleFormat[];
 extern const char sTwoDigitFormat[];
 extern const char sZeroToParFormat[];
 extern const char sScoreToParFormat[];
@@ -184,7 +185,7 @@ void DrawMatchResult(Gfx **displayListHead);
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
 void DrawStandingsPage(Gfx **displayListHead);
 void func_80245184_ovl_09(Gfx **displayListHead);
-void func_802460F8_ovl_09(Gfx **displayListHead);
+void DrawSkinsPage(Gfx **displayListHead);
 void func_80246804_ovl_09(Gfx **displayListHead);
 void DrawSpeedGolfPage(Gfx **displayListHead);
 void func_80247E3C_ovl_09(Gfx **displayListHead);
@@ -716,7 +717,7 @@ void DrawScorecard(Gfx **displayListHead) {
                 case GAME_MODE_SKINS_MATCH:
                 case GAME_MODE_CLUB_SLOTS:
                     if (g_RoundHud.scorecardPage == 0) {
-                        func_802460F8_ovl_09(&gfx);
+                        DrawSkinsPage(&gfx);
                     } else if (g_RoundHud.scorecardPage == 1) {
                         func_802493DC_ovl_09(&gfx);
                     } else {
@@ -1128,6 +1129,9 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sLoseText);
 
 #define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
 #define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
+/* The colors of the headings that some pages draw beside their columns */
+#define HEADING_ENV_COLOR 0xFF730000
+#define HEADING_PRIM_COLOR 0xFFFF1C00
 
 /*
  * The standings page lists each player's place, face, score to par and,
@@ -1246,13 +1250,148 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sWideTotalFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sTotalFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C7F8_ovl_09);
+INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sCompactHoleFormat);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_80245184_ovl_09);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", sStringFormat);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", func_802460F8_ovl_09);
+/*
+ * The skins page lists each player's place, face and skins, and the skins
+ * carried over
+ */
+#define SKINS_TITLE_LEFT 122
+#define SKINS_TITLE_TOP 52
+#define SKINS_ROW_TOP 72
+#define SKINS_ROW_SPACING 36
+#define SKINS_WIN_LEFT 32
+#define SKINS_WIN_TOP 82
+#define SKINS_PLACE_LEFT 56
+#define SKINS_FACE_LEFT 120
+#define SKIN_ICON_LEFT 168
+#define SKIN_ICON_TOP 80
+#define SKIN_ICON_SIZE 24
+#define SKINS_COUNT_LEFT 208
+#define SKINS_COUNT_TOP 83
+#define CARRYOVER_ICON_LEFT 204
+#define CARRYOVER_ICON_TOP 46
+#define CARRYOVER_COUNT_LEFT 236
+#define CARRYOVER_COUNT_TOP 49
+#define SKIN_ICON_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
+/* Only the star and the digits */
+#define SKINS_DIGIT_FONT_HEIGHT (DIGIT_GLYPH_COLON * DIGIT_GLYPH_SIZE)
+#define M_PI 3.14159265358979323846
+/* "Win" cycles through the colors, each channel a sine wave about mid-gray */
+#define WIN_COLOR_STEP (M_PI / 9)
+#define WIN_COLOR_MIDPOINT 0x7F
+#define WIN_COLOR_SWING 127.0f
+
+extern const char sCarryOverText[];
+/* The angle the colors of "Win" are at */
+extern f32 sWinColorAngle;
+
+/*
+ * Draws the skins page of a skins match or club slots round: the hole, each
+ * player's place, face and skins, and the skins carried over. The last hole's
+ * winner is shown without the skins still on it, which TallyScorecardSkins
+ * counts down. While a hole has a winner, "Win" flashes beside each player
+ * with strokes at holes[holeIndex].
+ */
+void DrawSkinsPage(Gfx **displayListHead) {
+    s32 places[MAX_PLAYER_COUNT];
+    s32 skinCounts[MAX_PLAYER_COUNT];
+    Gfx *gfx;
+    s32 holeIndex;
+    s32 i;
+    s32 j;
+    s32 red;
+    s32 green;
+
+    gfx = *displayListHead;
+    holeIndex = g_Scorecard.content.holeIndex;
+    SetUpGradientTextDrawing(&gfx, 0);
+    sprintf(g_PrintBuffer, sCompactHoleFormat, holeIndex + g_Scorecard.isTallied);
+    DrawLargeTextWithShadow(&gfx, g_Scorecard.x + STANDINGS_HOLE_LEFT, g_Scorecard.y + STANDINGS_HOLE_TOP,
+                            g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
+    sprintf(g_PrintBuffer, sStringFormat, sCarryOverText);
+    DrawLargeTextWithShadow(&gfx, g_Scorecard.x + SKINS_TITLE_LEFT, g_Scorecard.y + SKINS_TITLE_TOP, g_PrintBuffer,
+                            HEADING_ENV_COLOR, HEADING_PRIM_COLOR, 0);
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (g_Scorecard.holeWinnerIndex == i) {
+            skinCounts[i] = (s16)g_RoundHud.skinsTotals[i] - g_Scorecard.skinsCarryover.onLastHole;
+        } else {
+            skinCounts[i] = (s16)g_RoundHud.skinsTotals[i];
+        }
+    }
+    /* Each player's place counts the players with more skins */
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        places[i] = 0;
+        for (j = 0; j != g_GameState.playerCount; j++) {
+            if (i != j) {
+                if (skinCounts[i] < skinCounts[j]) {
+                    places[i]++;
+                }
+                if (skinCounts[i] == skinCounts[j]) {
+                    places[i] |= PLACE_TIED;
+                }
+            }
+        }
+    }
+
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        if (g_Scorecard.holeWinnerIndex >= 0 && g_Players[i].holes[holeIndex].strokes != 0) {
+            sWinColorAngle += WIN_COLOR_STEP;
+            red = (u8)((s32)(sinf(sWinColorAngle) * WIN_COLOR_SWING) + WIN_COLOR_MIDPOINT);
+            green = (u8)((s32)(sinf(sWinColorAngle + M_PI) * WIN_COLOR_SWING) + WIN_COLOR_MIDPOINT);
+            SetTextColor(&gfx, red, green,
+                         (u8)((s32)(sinf(sWinColorAngle + M_PI / 2) * WIN_COLOR_SWING) + WIN_COLOR_MIDPOINT));
+            DrawSmallText(&gfx, g_Scorecard.x + SKINS_WIN_LEFT, SKINS_WIN_TOP + i * SKINS_ROW_SPACING, sWinText);
+        }
+    }
+
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        DrawScorecardFace(&gfx, g_Scorecard.x + SKINS_FACE_LEFT, SKINS_ROW_TOP + i * SKINS_ROW_SPACING, i);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        DrawPlace(&gfx, g_Scorecard.x + SKINS_PLACE_LEFT, SKINS_ROW_TOP + i * SKINS_ROW_SPACING,
+                  places[i] & PLACE_MASK);
+    }
+
+    LoadLargePalette(&gfx, g_Scorecard.unk38 + IMAGE_HEADER_SIZE);
+    LoadTextureBlock(&gfx, g_Scorecard.unk38 + SKIN_ICON_TEXELS_OFFSET, G_IM_FMT_CI, G_IM_SIZ_8b, SKIN_ICON_SIZE,
+                     SKIN_ICON_SIZE, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        DrawTextureRect(&gfx, (g_Scorecard.x + SKIN_ICON_LEFT) << 2, (SKIN_ICON_TOP + i * SKINS_ROW_SPACING) << 2,
+                        (g_Scorecard.x + SKIN_ICON_LEFT + SKIN_ICON_SIZE) << 2,
+                        (SKIN_ICON_TOP + SKIN_ICON_SIZE + i * SKINS_ROW_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
+                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    }
+    DrawTextureRect(&gfx, (g_Scorecard.x + CARRYOVER_ICON_LEFT) << 2, CARRYOVER_ICON_TOP << 2,
+                    (g_Scorecard.x + CARRYOVER_ICON_LEFT + SKIN_ICON_SIZE) << 2,
+                    (CARRYOVER_ICON_TOP + SKIN_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE);
+
+    LoadSmallPalette(&gfx, 0, g_Scorecard.digitsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, g_Scorecard.digitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, DIGIT_GLYPH_SIZE,
+                           SKINS_DIGIT_FONT_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    for (i = 0; i != g_GameState.playerCount; i++) {
+        sprintf(g_PrintBuffer, "* %d", skinCounts[i]);
+        DrawDigitText(&gfx, g_Scorecard.x + SKINS_COUNT_LEFT, SKINS_COUNT_TOP + i * SKINS_ROW_SPACING, g_PrintBuffer);
+    }
+    sprintf(g_PrintBuffer, "* %d",
+            (g_Scorecard.isTallied == TRUE) ? g_Scorecard.skinsCarryover.fromLastHole
+                                            : g_Scorecard.skinsCarryover.intoLastHole);
+    DrawDigitText(&gfx, g_Scorecard.x + CARRYOVER_COUNT_LEFT, CARRYOVER_COUNT_TOP, g_PrintBuffer);
+    *displayListHead = gfx;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C848_ovl_09);
 
@@ -1274,8 +1413,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard", D_8024C86C_ovl_09);
 #define ROUND_TOTAL_LEFT 160
 #define ROUND_TIME_TOP 194
 #define ROUND_SCORE_TOP 208
-#define ROUND_TOTAL_LABEL_ENV_COLOR 0xFF730000
-#define ROUND_TOTAL_LABEL_PRIM_COLOR 0xFFFF1C00
 
 /*
  * Draws the Speed Golf page: each hole's time, with dashes for a hole without
@@ -1306,10 +1443,10 @@ void DrawSpeedGolfPage(Gfx **displayListHead) {
     }
     sprintf(g_PrintBuffer, "Time");
     DrawLargeTextWithShadow(&gfx, g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT, g_Scorecard.y + ROUND_TIME_TOP,
-                            g_PrintBuffer, ROUND_TOTAL_LABEL_ENV_COLOR, ROUND_TOTAL_LABEL_PRIM_COLOR, 0);
+                            g_PrintBuffer, HEADING_ENV_COLOR, HEADING_PRIM_COLOR, 0);
     sprintf(g_PrintBuffer, "Score");
     DrawLargeTextWithShadow(&gfx, g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT, g_Scorecard.y + ROUND_SCORE_TOP,
-                            g_PrintBuffer, ROUND_TOTAL_LABEL_ENV_COLOR, ROUND_TOTAL_LABEL_PRIM_COLOR, 0);
+                            g_PrintBuffer, HEADING_ENV_COLOR, HEADING_PRIM_COLOR, 0);
 
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);

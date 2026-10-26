@@ -2584,3 +2584,7 @@ sZeroToParFormat = 0x8024C7E0; // segment:ovl_09
 sScoreToParFormat = 0x8024C7E8; // segment:ovl_09
 sWideTotalFormat = 0x8024C7F0; // segment:ovl_09
 sTotalFormat = 0x8024C7F4; // segment:ovl_09
+DrawSkinsPage = 0x802460F8; // type:func segment:ovl_09
+sCompactHoleFormat = 0x8024C7F8; // segment:ovl_09
+sCarryOverText = 0x8024C4C0; // segment:ovl_09
+sWinColorAngle = 0x8024C4CC; // segment:ovl_09
