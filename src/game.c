@@ -916,7 +916,6 @@ void func_8005029C(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
-void func_8008156C(void);
 void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80083AC8(Gfx **displayListHead, CameraMatrices *matrices);
 void func_80086864(Gfx **displayListHead);
@@ -1642,7 +1641,7 @@ s32 DrawGame(void) {
         SET_CAMERA_SCISSOR(g_Cameras[0].view);
         gSPViewport(g_DisplayListHead++, &g_Viewports[g_DrawBufferIndex]);
         if (g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
-            func_8008156C();
+            DrawInsetViewFrame();
         }
         if (g_IsModuleAlive[20]) {
             func_80219C74(&g_DisplayListHead);

@@ -950,7 +950,82 @@ void FreeRoundHudTextures(void) {
     FreePinTextures();
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_8008156C);
+/* The inset view's frame is a 16x3 I4 texture, wrapped along its lines */
+#define INSET_FRAME_TEXTURE_WIDTH 16
+#define INSET_FRAME_TEXTURE_HEIGHT 3
+#define INSET_FRAME_SIDE_TEXTURE_HEIGHT 1
+#define INSET_FRAME_TEXTURE_MASK 1
+/* Where in the texture's first row the frame's sides start */
+#define INSET_FRAME_SIDE_TEXEL 5
+#define INSET_FRAME_SIDE_HALF_WIDTH 2
+#define INSET_FRAME_BORDER_OUTSIDE 1
+#define INSET_FRAME_BORDER_INSIDE 2
+extern u8 sInsetFrameTexture[];
+
+/* Draws the frame around the inset view */
+void DrawInsetViewFrame(void) {
+    SetUpTextDrawing(&g_DisplayListHead);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 0, 0, 0, 1);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPLoadTextureBlock_4b(g_DisplayListHead++, (u32)sInsetFrameTexture & ~7, G_IM_FMT_I, INSET_FRAME_TEXTURE_WIDTH,
+                           INSET_FRAME_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+                           INSET_FRAME_TEXTURE_MASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_Cameras[INSET_CAMERA].view.scissorWidth > 0) {
+        gSPTextureRectangle(g_DisplayListHead++, g_Cameras[INSET_CAMERA].view.scissorX << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY - INSET_FRAME_BORDER_OUTSIDE) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY + INSET_FRAME_BORDER_INSIDE) << 2,
+                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gSPTextureRectangle(g_DisplayListHead++, g_Cameras[INSET_CAMERA].view.scissorX << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight -
+                             INSET_FRAME_BORDER_INSIDE) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight +
+                             INSET_FRAME_BORDER_OUTSIDE) << 2,
+                            G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    }
+    gDPPipeSync(g_DisplayListHead++);
+    gDPLoadTextureBlock_4b(g_DisplayListHead++, (u32)sInsetFrameTexture & ~7, G_IM_FMT_I, INSET_FRAME_TEXTURE_WIDTH,
+                           INSET_FRAME_SIDE_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+                           G_TX_NOMASK, INSET_FRAME_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_Cameras[INSET_CAMERA].view.scissorHeight > 0) {
+        gSPTextureRectangle(g_DisplayListHead++,
+                            (g_Cameras[INSET_CAMERA].view.scissorX - INSET_FRAME_SIDE_HALF_WIDTH) << 2,
+                            g_Cameras[INSET_CAMERA].view.scissorY << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorX + INSET_FRAME_SIDE_HALF_WIDTH) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight) << 2,
+                            G_TX_RENDERTILE, INSET_FRAME_SIDE_TEXEL << 5, 0, 1 << 10, 1 << 10);
+        gSPTextureRectangle(g_DisplayListHead++,
+                            (g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth -
+                             INSET_FRAME_SIDE_HALF_WIDTH) << 2,
+                            g_Cameras[INSET_CAMERA].view.scissorY << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorX + g_Cameras[INSET_CAMERA].view.scissorWidth +
+                             INSET_FRAME_SIDE_HALF_WIDTH) << 2,
+                            (g_Cameras[INSET_CAMERA].view.scissorY + g_Cameras[INSET_CAMERA].view.scissorHeight) << 2,
+                            G_TX_RENDERTILE, INSET_FRAME_SIDE_TEXEL << 5, 0, 1 << 10, 1 << 10);
+    }
+    gDPPipeSync(g_DisplayListHead++);
+}
 
 /* Scrolls the wind arrow's texture along it, faster in stronger wind */
 void ScrollWindArrow(void) {
