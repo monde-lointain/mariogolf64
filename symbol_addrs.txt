@@ -2969,3 +2969,5 @@ sContactStyle = 0x80224700; // size:0x4 segment:ovl_00
 sContactTextureS = 0x80224704; // size:0x4 segment:ovl_00
 sContactTextureT = 0x80224708; // size:0x4 segment:ovl_00
 sContactMatrices = 0x8022C210; // size:0x1440 segment:ovl_00
+DrawShrinkingMovieImage = 0x80212590; // type:func segment:ovl_00
+sMovieImageSetupDisplayList = 0x80224490; // segment:ovl_00

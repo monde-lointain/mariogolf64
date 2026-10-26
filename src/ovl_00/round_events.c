@@ -106,6 +106,7 @@ extern s32 sMovieFrame;
 extern s32 sMovieTick;
 /* Sets the render state for drawing a movie's paletted strips */
 extern Gfx sMovieSetupDisplayList[];
+extern Gfx sMovieImageSetupDisplayList[];
 extern s32 sMovieBackBuffer; /* Which of a two-buffer movie's frame buffers to read into next */
 extern u16 sToadMovieFrameAssets[];
 extern u16 sMontyMoleMovieFrameAssets[];
@@ -140,6 +141,22 @@ extern Mtx sFlipMessageMatrices[2];
 #define FLIP_MESSAGE_OPEN_FRAME 10
 #define BANNER_FRAME_NONE (-1)
 #define CONTACT_MATRIX_COUNT 81
+/* A movie image starts with its size, then its palette, then its CI8 pixels */
+#define MOVIE_IMAGE_WIDTH_OFFSET 2
+#define MOVIE_IMAGE_HEIGHT_OFFSET 4
+#define MOVIE_IMAGE_PALETTE_OFFSET 8
+#define MOVIE_IMAGE_PIXELS_OFFSET 0x208
+#define MOVIE_IMAGE_STRIP_HEIGHT 6
+#define SHRINKING_IMAGE_SOUND_DRAW 26
+#define SOUND_SHRINKING_IMAGE 0x43
+#define SHRINKING_IMAGE_SOUND_CHANNEL 13
+#define SHRINKING_IMAGE_SOUND_VOLUME 63
+#define SHRINKING_IMAGE_DRAW_COUNT 90
+/* The image shrinks from double size over the quarter turn's 8 frames */
+#define SHRINKING_IMAGE_TURN_PER_FRAME (M_PI / 16)
+#define SHRINKING_IMAGE_CENTRE_X 160
+#define SHRINKING_IMAGE_CENTRE_Y 104
+#define SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE 4
 /* The effect sits a little below the ball's centre */
 #define CONTACT_DROP_PER_PIN_SCALE 0.3f
 #define CONTACT_SOUND_CHANNEL 2
@@ -668,7 +685,63 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_8021169C_ovl_00);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80211D60_ovl_00);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80212590_ovl_00);
+#ifdef NON_MATCHING
+/* Unused: draws the movie image in sMovieBuffer, shrinking it from double size to its own size */
+void DrawShrinkingMovieImage(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 width;
+    s32 stripCount;
+    f32 angle;
+    s32 halfWidth;
+    s32 stripHeight;
+    s32 i;
+    s32 offset;
+    s32 bottom;
+    s32 top;
+
+    stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
+    width = (sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_WIDTH_OFFSET + 1];
+    stripCount =
+        ((sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET] << 8) | sMovieBuffer[MOVIE_IMAGE_HEIGHT_OFFSET + 1]) / stripHeight;
+    if (sMovieDrawCount == SHRINKING_IMAGE_SOUND_DRAW) {
+        PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL, SHRINKING_IMAGE_SOUND_VOLUME, 0,
+                             MOVIE_SOUND_PAN);
+    }
+    gSPDisplayList(gfx++, sMovieImageSetupDisplayList);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetCombineLERP(gfx++, TEXEL0, ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0, TEXEL0,
+                      ENVIRONMENT, PRIMITIVE_ALPHA, ENVIRONMENT, ENVIRONMENT, 0, TEXEL0, 0);
+    gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(sMovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
+    if (sMovieDrawCount < SHRINKING_IMAGE_DRAW_COUNT) {
+        angle = (f32) sMovieDrawCount * SHRINKING_IMAGE_TURN_PER_FRAME;
+        if (angle > M_PI / 2) {
+            angle = M_PI / 2;
+        }
+        halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
+        stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
+        if (halfWidth > 0 && stripHeight > 0) {
+            bottom = SHRINKING_IMAGE_CENTRE_Y;
+            offset = 0;
+            for (i = 0; i < stripCount; i++) {
+                LoadTextureBlock(&gfx, sMovieBuffer + (offset * MOVIE_IMAGE_STRIP_HEIGHT + MOVIE_IMAGE_PIXELS_OFFSET),
+                                 G_IM_FMT_CI, G_IM_SIZ_8b, width, MOVIE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+                offset += width;
+                top = bottom - stripHeight * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE;
+                bottom += stripHeight;
+                DrawTextureRect(&gfx, (SHRINKING_IMAGE_CENTRE_X - halfWidth) << 2, top << 2,
+                                (SHRINKING_IMAGE_CENTRE_X + halfWidth) << 2, (top + stripHeight) << 2, G_TX_RENDERTILE,
+                                0, 0, ((width >> 1) << 10) / halfWidth,
+                                (MOVIE_IMAGE_STRIP_HEIGHT << 10) / stripHeight);
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawShrinkingMovieImage);
+#endif
 
 /* A Monty Mole pops out of the green */
 void DrawMontyMoleMovie(Gfx **displayListHead) {
