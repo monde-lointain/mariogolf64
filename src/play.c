@@ -1930,7 +1930,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 extern s32 g_GroundClipRatio;
 extern s32 g_GroundTimingRow;
 extern u32 g_GroundDrawFrame;
-void func_804083E0();
+void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle);
 
 /*
  * Draws the ground's tiles, each at a detail that its distance picks. The
@@ -1983,7 +1983,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
   gfx = g_DisplayListHead;
   start = osGetCount();
   if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-    func_804083E0(matrices, terrainStyle);
+    DrawHoleEditorGround(matrices, terrainStyle);
     return;
   }
 

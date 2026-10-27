@@ -106,7 +106,7 @@ extern AnimatedBox f_SceneMenuBox;
 extern s32 f_SceneMenuScenes[SCENE_MENU_LENGTH];
 extern s32 f_IsFirstDebugUpdate;
 extern s32 f_SceneMenuSelection;
-extern s8 D_800C30D1;
+extern s8 g_ShowsGroundWaves;
 
 void func_8005D9A0(void);
 void InitPlay(s32);
@@ -1219,7 +1219,7 @@ s32 UpdateDebugSceneMenu(void) {
 
   g_CurrentShot.surface = 0;
   ClearGameFlag(GAME_FLAG_HOLE_LOADED);
-  D_800C30D1 = 0;
+  g_ShowsGroundWaves = 0;
   if (g_MenuControllerData[0].button & START_BUTTON) {
     ClearDebugText();
     f_IsSceneMenuOpen = FALSE;

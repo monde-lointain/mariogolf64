@@ -423,12 +423,12 @@ extern f32
     f_HeightCameraHeading; /* In radians, from f_HeightCameraHeadingAngle */
 extern s32 f_HeightCameraHeadingAngle;
 extern s32 f_LastSetHeight; /* The height C-up or C-down last set */
-extern s32 D_8040C668_hole_editor; /* Copied to D_800C30D1 */
+extern s32 f_ShowsGroundWaves; /* Copied to g_ShowsGroundWaves */
 extern s32 f_CLeftPickedHeight; /* Heights picked up by the second editor pad */
 extern s32 f_CUpPickedHeight;
 extern s32 f_LastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
 
-extern s8 D_800C30D1;
+extern s8 g_ShowsGroundWaves;
 
 /*
  * Declared without a prototype, as func_804077B0 passes it a float height,
@@ -778,7 +778,7 @@ void func_80400FBC_hole_editor(void) {
   sprintf(text, "X:%d Z:%d             ", f_HolePointCursor[0],
       f_HolePointCursor[1]);
   PrintDebugText(text, CURSOR_TEXT_COLUMN, CURSOR_TEXT_ROW);
-  D_800C30D1 = FALSE;
+  g_ShowsGroundWaves = FALSE;
   isStepping = FALSE;
   if (f_HolePointEditMode == HOLE_POINT_MODE_UNSET) {
     f_HolePointEditMode = HOLE_POINT_MODE_PIN_TEE;
@@ -1185,7 +1185,7 @@ void func_80402428_hole_editor(void) {
   Vtx_t* lookAtVertex;
 
   editKind = TRIANGLE_EDIT_NONE;
-  D_800C30D1 = FALSE;
+  g_ShowsGroundWaves = FALSE;
   stepY = 0.0f;
   stepRight = stepY;
   stepUp = stepRight;
@@ -1421,7 +1421,7 @@ void func_80402E1C_hole_editor(void) {
 
   editKind = TRIANGLE_EDIT_NONE;
   stepY = 0.0f;
-  D_800C30D1 = FALSE;
+  g_ShowsGroundWaves = FALSE;
   sprintf(g_PrintBuffer, "EditNo : %d   ", f_RingTriangleIndex);
   PrintDebugText(g_PrintBuffer, RING_TEXT_COLUMN, RING_TEXT_ROW);
   stepRight = 0.0f;
@@ -1701,7 +1701,7 @@ void func_80403A04_hole_editor(void) {
 
   editKind = TRIANGLE_EDIT_NONE;
   isDropping = FALSE;
-  D_800C30D1 = FALSE;
+  g_ShowsGroundWaves = FALSE;
   stepY = 0.0f;
   stepRight = stepY;
   stepUp = stepRight;
@@ -2107,8 +2107,9 @@ void func_80404850_hole_editor(void) {
  * repeats the last height and C-left adds noise to it, and A and B add
  * noise to the point. On the second pad, C-left and C-up pick up two
  * heights and C-right and C-down move the point by their difference. The
- * option pad toggles D_8040C668 and calls func_804045C0 and func_80404850.
- * After a frame of edits, the next frame without one rebuilds the slopes.
+ * option pad toggles f_ShowsGroundWaves and calls func_804045C0 and
+ * func_80404850. After a frame of edits, the next frame without one rebuilds
+ * the slopes.
  */
 void func_80404B84_hole_editor(void) {
   char text[DEBUG_TEXT_BUFFER_SIZE];
@@ -2137,10 +2138,10 @@ void func_80404B84_hole_editor(void) {
 
   editKind = HEIGHT_EDIT_NONE;
   direction = CURSOR_DIRECTION_NONE;
-  if (D_8040C668_hole_editor) {
-    D_800C30D1 = TRUE;
+  if (f_ShowsGroundWaves) {
+    g_ShowsGroundWaves = TRUE;
   } else {
-    D_800C30D1 = FALSE;
+    g_ShowsGroundWaves = FALSE;
   }
 
   if (g_MenuControllerData[OPTION_PAD].button & D_CBUTTONS) {
@@ -2180,10 +2181,10 @@ void func_80404B84_hole_editor(void) {
   }
 
   if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
-    if (D_8040C668_hole_editor) {
-      D_8040C668_hole_editor = FALSE;
+    if (f_ShowsGroundWaves) {
+      f_ShowsGroundWaves = FALSE;
     } else {
-      D_8040C668_hole_editor = TRUE;
+      f_ShowsGroundWaves = TRUE;
     }
   }
 
@@ -3079,7 +3080,7 @@ void func_80406C3C_hole_editor(void) {
   PrintDebugText("EDIT NUM", TREE_TEXT_COLUMN, TREE_INDEX_LABEL_ROW);
   PrintDebugText("        ", TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
   PrintDebugHex(f_EditedTreeIndex, TREE_TEXT_COLUMN, TREE_INDEX_TEXT_ROW);
-  D_800C30D1 = FALSE;
+  g_ShowsGroundWaves = FALSE;
   editKind = TRIANGLE_EDIT_NONE;
   if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
     editKind = TRIANGLE_EDIT_MOVE;
@@ -3564,9 +3565,9 @@ void GetMidpointVertex(Vtx_t* first, Vtx_t* second, Vtx_t* midpoint) {
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", GetMidpointVertex);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80408170_hole_editor);
+INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", SetEditorCombineMode);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804083E0_hole_editor);
+INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", DrawHoleEditorGround);
 
 /*
  * Marks the billboards on the map, then writes the whole map image to

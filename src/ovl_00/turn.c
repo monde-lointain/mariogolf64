@@ -2741,7 +2741,7 @@ extern u16 D_80104998;
 extern u16 D_80104994;
 extern u8 D_800FE330;
 extern s32 D_800C3094;
-extern s8 D_800C30D1;
+extern s8 g_ShowsGroundWaves;
 extern s32 g_PauseScreen;
 extern s32 g_IsSettingImpactPoint;
 extern s8 D_801B60B9;
@@ -3651,7 +3651,7 @@ void UpdateTurns(void) {
 
           if ((D_80227194_ovl_00 != 0 && isReady) ||
               (D_80227194_ovl_00 == 0 && D_800C3074 == 1)) {
-            D_800C30D1 = 0;
+            g_ShowsGroundWaves = 0;
             if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
               SkipToAnimationEnd(0);
             }
