@@ -51,7 +51,7 @@ extern s32 D_8020AC4C_ovl_05;
 extern s32 D_8020AC50_ovl_05;
 extern f32 D_8020AC5C_ovl_05;
 extern s32 D_8020AC60_ovl_05;
-extern s32 D_8020AC64_ovl_05;
+extern s32 f_AreAmbientSoundsOn;
 extern u8 D_80212830_ovl_05[];
 extern u8 D_80213A40_ovl_05[];
 /* The steps that a name logo's animation starts each phase at */
@@ -176,79 +176,133 @@ void func_801F4A6C_ovl_05(void) {
   }
 }
 
-extern s32 D_8020AC68_ovl_05;
-extern s32 D_8020AC6C_ovl_05;
-extern s32 D_8020AC70_ovl_05;
-extern s32 D_8020AC74_ovl_05;
-extern s32 D_8020AC78_ovl_05;
-extern s32 D_8020AC7C_ovl_05;
-extern s32 D_8020AC80_ovl_05;
-extern s32 D_8020AC84_ovl_05;
-extern s32 D_8020AC88_ovl_05;
-extern s32 D_8020AC8C_ovl_05;
+/* The opening's ambient sounds, each with a channel and pan of its own */
+#define SOUND_AMBIENT_ALTERNATING_FIRST 0x184
+#define SOUND_AMBIENT_ALTERNATING_SECOND 0x185
+#define SOUND_AMBIENT_REPEATING 0x18B
+#define SOUND_AMBIENT_RANDOM_FIRST 0x1A3
+#define SOUND_AMBIENT_RANDOM_SECOND 0x1BA
+#define ALTERNATING_SOUND_CHANNEL 13
+#define REPEATING_SOUND_CHANNEL 14
+#define RANDOM_SOUND_CHANNEL 15
+#define ALTERNATING_SOUND_PAN 0x9D
+#define REPEATING_SOUND_PAN 0x75
+#define RANDOM_SOUND_PAN 0x61
+#define AMBIENT_SOUND_FULL_VOLUME 127
+/* How much quieter the sounds are for each unit of camera distance */
+#define AMBIENT_SOUND_FADE_RATE 0.5f
+/* Out of the values that rand() & AMBIENT_SOUND_CHANCE_MASK can give */
+#define AMBIENT_SOUND_CHANCE_MASK 100
+#define AMBIENT_SOUND_CHANCE 80
+/* The random sound picks from four choices, two of which are silence */
+#define RANDOM_SOUND_CHOICE_MASK 3
 
-void func_801F4AEC_ovl_05(void) {
-  if (D_8020AC64_ovl_05 == 1) {
-    if ((u32)(g_CameraEditor.distance * 0.5f) < 127) {
-      if (D_8020AC68_ovl_05 == 0 && (rand() & 100) < 80) {
-        if (D_8020AC74_ovl_05 == 2) {
-          D_8020AC74_ovl_05 = 1;
-          D_8020AC68_ovl_05 = D_8020AC7C_ovl_05;
+/* Which of a pair of sounds is playing, or none */
+typedef enum AmbientSoundChoice {
+  AMBIENT_SOUND_NONE,
+  AMBIENT_SOUND_FIRST,
+  AMBIENT_SOUND_SECOND
+} AmbientSoundChoice;
+
+extern s32 f_AlternatingSoundTimer;
+extern s32 f_RepeatingSoundTimer;
+extern s32 f_RandomSoundTimer;
+extern s32 f_AlternatingSound;
+extern s32 f_RandomSound;
+extern s32 f_AlternatingSoundFirstLength;
+extern s32 f_AlternatingSoundSecondLength;
+extern s32 f_RepeatingSoundLength;
+extern s32 f_RandomSoundFirstLength;
+extern s32 f_RandomSoundSecondLength;
+
+/*
+ * Plays the opening's ambient sounds while f_AreAmbientSoundsOn is set,
+ * more quietly the further the camera is from its look-at point.
+ *
+ * Each kind of sound has a timer. Once its timer runs out, and while the
+ * camera is near enough to hear it, the sound may start again; the timer
+ * then counts down for the length of the sound that started.
+ */
+void PlayOpeningAmbientSounds(void) {
+  if (f_AreAmbientSoundsOn == 1) {
+    if ((u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE) <
+        AMBIENT_SOUND_FULL_VOLUME) {
+      if (f_AlternatingSoundTimer == 0 &&
+          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+        if (f_AlternatingSound == AMBIENT_SOUND_SECOND) {
+          f_AlternatingSound = AMBIENT_SOUND_FIRST;
+          f_AlternatingSoundTimer = f_AlternatingSoundFirstLength;
         } else {
-          D_8020AC74_ovl_05 = 2;
-          D_8020AC68_ovl_05 = D_8020AC80_ovl_05;
+          f_AlternatingSound = AMBIENT_SOUND_SECOND;
+          f_AlternatingSoundTimer = f_AlternatingSoundSecondLength;
         }
       }
-      if (D_8020AC6C_ovl_05 == 0 && (rand() & 100) < 80) {
-        D_8020AC6C_ovl_05 = D_8020AC84_ovl_05;
+      if (f_RepeatingSoundTimer == 0 &&
+          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+        f_RepeatingSoundTimer = f_RepeatingSoundLength;
       }
-      if (D_8020AC70_ovl_05 == 0 && (rand() & 100) < 80) {
-        switch (rand() & 3) {
+      if (f_RandomSoundTimer == 0 &&
+          (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
+        switch (rand() & RANDOM_SOUND_CHOICE_MASK) {
           case 0:
-            D_8020AC78_ovl_05 = 1;
-            D_8020AC70_ovl_05 = D_8020AC88_ovl_05;
+            f_RandomSound = AMBIENT_SOUND_FIRST;
+            f_RandomSoundTimer = f_RandomSoundFirstLength;
             break;
           case 1:
-            D_8020AC78_ovl_05 = 2;
-            D_8020AC70_ovl_05 = D_8020AC8C_ovl_05;
+            f_RandomSound = AMBIENT_SOUND_SECOND;
+            f_RandomSoundTimer = f_RandomSoundSecondLength;
             break;
         }
       }
     }
-    if (D_8020AC68_ovl_05 != 0) {
-      if (D_8020AC74_ovl_05 == 1 && D_8020AC68_ovl_05 == D_8020AC7C_ovl_05) {
-        PlaySoundWithEffects(0x184, 13,
-                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
-                             0x9D);
+    if (f_AlternatingSoundTimer != 0) {
+      if (f_AlternatingSound == AMBIENT_SOUND_FIRST &&
+          f_AlternatingSoundTimer == f_AlternatingSoundFirstLength) {
+        PlaySoundWithEffects(
+            SOUND_AMBIENT_ALTERNATING_FIRST, ALTERNATING_SOUND_CHANNEL,
+            AMBIENT_SOUND_FULL_VOLUME -
+                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+            0, ALTERNATING_SOUND_PAN);
       }
-      if (D_8020AC74_ovl_05 == 2 && D_8020AC68_ovl_05 == D_8020AC80_ovl_05) {
-        PlaySoundWithEffects(0x185, 13,
-                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
-                             0x9D);
+      if (f_AlternatingSound == AMBIENT_SOUND_SECOND &&
+          f_AlternatingSoundTimer == f_AlternatingSoundSecondLength) {
+        PlaySoundWithEffects(
+            SOUND_AMBIENT_ALTERNATING_SECOND, ALTERNATING_SOUND_CHANNEL,
+            AMBIENT_SOUND_FULL_VOLUME -
+                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+            0, ALTERNATING_SOUND_PAN);
       }
-      D_8020AC68_ovl_05--;
+      f_AlternatingSoundTimer--;
     }
-    if (D_8020AC6C_ovl_05 != 0) {
-      if (D_8020AC6C_ovl_05 == D_8020AC84_ovl_05) {
-        PlaySoundWithEffects(0x18B, 14,
-                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
-                             0x75);
+    if (f_RepeatingSoundTimer != 0) {
+      if (f_RepeatingSoundTimer == f_RepeatingSoundLength) {
+        PlaySoundWithEffects(
+            SOUND_AMBIENT_REPEATING, REPEATING_SOUND_CHANNEL,
+            AMBIENT_SOUND_FULL_VOLUME -
+                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+            0, REPEATING_SOUND_PAN);
       }
-      D_8020AC6C_ovl_05--;
+      f_RepeatingSoundTimer--;
     }
-    if (D_8020AC70_ovl_05 != 0) {
-      if (D_8020AC78_ovl_05 == 1 && D_8020AC70_ovl_05 == D_8020AC88_ovl_05) {
-        PlaySoundWithEffects(0x1A3, 15,
-                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
-                             0x61);
+    if (f_RandomSoundTimer != 0) {
+      if (f_RandomSound == AMBIENT_SOUND_FIRST &&
+          f_RandomSoundTimer == f_RandomSoundFirstLength) {
+        PlaySoundWithEffects(
+            SOUND_AMBIENT_RANDOM_FIRST, RANDOM_SOUND_CHANNEL,
+            AMBIENT_SOUND_FULL_VOLUME -
+                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+            0, RANDOM_SOUND_PAN);
       }
-      if (D_8020AC78_ovl_05 == 2 && D_8020AC70_ovl_05 == D_8020AC8C_ovl_05) {
-        PlaySoundWithEffects(0x1BA, 15,
-                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
-                             0x61);
+      if (f_RandomSound == AMBIENT_SOUND_SECOND &&
+          f_RandomSoundTimer == f_RandomSoundSecondLength) {
+        PlaySoundWithEffects(
+            SOUND_AMBIENT_RANDOM_SECOND, RANDOM_SOUND_CHANNEL,
+            AMBIENT_SOUND_FULL_VOLUME -
+                (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
+            0, RANDOM_SOUND_PAN);
       }
-      if (--D_8020AC70_ovl_05 == 0) {
-        D_8020AC78_ovl_05 = 0;
+      if (--f_RandomSoundTimer == 0) {
+        f_RandomSound = AMBIENT_SOUND_NONE;
       }
     }
   }
@@ -271,7 +325,7 @@ void LoadOpening(void) {
   SetCharacterBuffer(3, (u8*)g_DepthBuffer);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
-  D_8020AC64_ovl_05 = 0;
+  f_AreAmbientSoundsOn = 0;
   LoadEffectImages();
   LoadOpeningLogo();
 }
