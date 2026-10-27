@@ -15,6 +15,7 @@
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
+#include "surface.h"
 #include "terrain.h"
 #include "variables.h"
 #include "work_area.h"
@@ -232,6 +233,22 @@
 #define Z_LIMIT_TEXT_ROW 7
 #define POINT_HEIGHT_TEXT_ROW 8
 #define DEAD_TRIANGLE_TEXT_ROW 9
+
+/* func_80400FBC's hole point editor */
+#define HOLE_POINT_MODE_UNSET -1
+#define HOLE_POINT_MODE_PIN_TEE 0
+#define HOLE_POINT_MODE_MESON 1
+#define HOLE_POINT_MODE_ROUTE 2
+#define HOLE_POINT_MODE_COUNT 3
+#define HOLE_POINT_STEP_LENGTH 10.0
+#define HEADING_RADIANS ((u16)sHolePointCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS)
+#define CURSOR_TEXT_COLUMN 3
+#define CURSOR_TEXT_ROW 5
+#define SURFACE_TEXT_COLUMN 2
+#define SURFACE_TEXT_ROW 4
+#define HOLE_POINT_TEXT_COLUMN 9
+#define HOLE_POINT_MODE_TEXT_ROW 6
+#define HOLE_POINT_INDEX_TEXT_ROW 7
 /* How scene 9's cursor zooms the map camera each frame R or L is held */
 #define CURSOR_ZOOM_IN_FACTOR 1.1f
 #define CURSOR_ZOOM_OUT_FACTOR 0.9f
@@ -307,6 +324,15 @@ extern s32 sPointCursorColumn;
 extern s32 sPointCursorRow;
 extern s32 D_8040C5B8_hole_editor;
 extern s32 D_8040C5BC_hole_editor;
+/* func_80400FBC's state */
+extern s32 sHolePointCursor[2]; /* x, z */
+extern f32 sHolePointCameraPitch;
+extern f32 sHolePointCameraHeading;
+extern s32 sHolePointCameraHeadingAngle;
+extern s32 sHolePointEditMode;
+extern s32 sPinTeeIndex;
+extern s32 sMesonPointIndex;
+extern s32 sRoutePointIndex;
 
 /* func_80402428's state */
 extern f32 sTriangleCameraPitch;   /* In radians */
@@ -647,7 +673,293 @@ void func_804002C0_hole_editor(void) {
     PrintDebugText(text, POINT_TEXT_COLUMN, DEAD_TRIANGLE_TEXT_ROW);
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80400FBC_hole_editor);
+/*
+ * Edits the hole's points over the map: the pins and tees, the "Meson" points
+ * and the computer golfer's route. The C-buttons pick the list and the point,
+ * the stick and control pad move the cursor, and A places the point on the
+ * ground under the cursor (B places the tee). The first pin and tee also become
+ * the hole's own.
+ */
+void func_80400FBC_hole_editor(void) {
+    char text[DEBUG_TEXT_BUFFER_SIZE];
+    s32 stepX;
+    s32 stepZ;
+    s32 isStepping;
+    f64 cameraDistance;
+
+    sprintf(text, "X:%d Z:%d             ", sHolePointCursor[0], sHolePointCursor[1]);
+    PrintDebugText(text, CURSOR_TEXT_COLUMN, CURSOR_TEXT_ROW);
+    D_800C30D1 = FALSE;
+    isStepping = FALSE;
+    if (sHolePointEditMode == HOLE_POINT_MODE_UNSET) {
+        sHolePointEditMode = HOLE_POINT_MODE_PIN_TEE;
+        sHolePointCursor[0] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+        sHolePointCursor[1] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        ClearDebugText();
+        sHolePointEditMode++;
+        if (sHolePointEditMode == HOLE_POINT_MODE_COUNT) {
+            sHolePointEditMode = HOLE_POINT_MODE_COUNT - 1;
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
+            sHolePointCursor[0] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+            sMesonPointIndex = 0;
+            sRoutePointIndex = 0;
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_MESON) {
+            sHolePointCursor[0] = g_HolePoints.unk60[sMesonPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_ROUTE) {
+            sHolePointCursor[0] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        ClearDebugText();
+        sHolePointEditMode--;
+        if (sHolePointEditMode < 0) {
+            sHolePointEditMode = HOLE_POINT_MODE_PIN_TEE;
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
+            sHolePointCursor[0] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+            sMesonPointIndex = 0;
+            sRoutePointIndex = 0;
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_MESON) {
+            sHolePointCursor[0] = g_HolePoints.unk60[sMesonPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        if (sHolePointEditMode == HOLE_POINT_MODE_ROUTE) {
+            sHolePointCursor[0] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+    }
+    if (sHolePointEditMode == HOLE_POINT_MODE_PIN_TEE) {
+        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] = sHolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] = sHolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X],
+                                g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z]);
+            PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+            PrintDebugText(GetSurfaceInfoAt(g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X],
+                                            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z])->name,
+                           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
+            if (sPinTeeIndex == 0) {
+                D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
+                g_CupPositionY = g_HolePoints.cupPositions[0][AXIS_Y];
+                g_CupPositionZ = g_HolePoints.cupPositions[0][AXIS_Z];
+            }
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_X] = sHolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_Z] = sHolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.teePositions[sPinTeeIndex][AXIS_X],
+                                g_HolePoints.teePositions[sPinTeeIndex][AXIS_Z]);
+            PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+            PrintDebugText(GetSurfaceInfoAt(g_HolePoints.teePositions[sPinTeeIndex][AXIS_X],
+                                            g_HolePoints.teePositions[sPinTeeIndex][AXIS_Z])->name,
+                           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
+            if (sPinTeeIndex == 0) {
+                g_TeePositionX = g_HolePoints.teePositions[0][AXIS_X];
+                g_TeePositionY = g_HolePoints.teePositions[0][AXIS_Y];
+                g_TeePositionZ = g_HolePoints.teePositions[0][AXIS_Z];
+            }
+        }
+        /* The second pad's B clears the point */
+        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] = 0;
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Y] = 0;
+            g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] = 0;
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_X] = 0;
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_Y] = 0;
+            g_HolePoints.teePositions[sPinTeeIndex][AXIS_Z] = 0;
+            sHolePointCursor[0] = 0;
+            sHolePointCursor[1] = 0;
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+            sPinTeeIndex++;
+            if (sPinTeeIndex == CUP_POSITION_COUNT) {
+                sPinTeeIndex = 0;
+            }
+            sHolePointCursor[0] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+            sPinTeeIndex--;
+            if (sPinTeeIndex < 0) {
+                sPinTeeIndex = CUP_POSITION_COUNT - 1;
+            }
+            sHolePointCursor[0] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.cupPositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        /* Start jumps to the tee */
+        if (g_MenuControllerData[EDITOR_PAD].button & START_BUTTON) {
+            sHolePointCursor[0] = g_HolePoints.teePositions[sPinTeeIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.teePositions[sPinTeeIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        PrintDebugText("Pin Tee Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+        PrintDebugHex(sPinTeeIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
+    }
+    if (sHolePointEditMode == HOLE_POINT_MODE_MESON) {
+        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_X] = sHolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] = sHolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.unk60[sMesonPointIndex][AXIS_X],
+                                g_HolePoints.unk60[sMesonPointIndex][AXIS_Z]);
+            PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+            PrintDebugText(GetSurfaceInfoAt(g_HolePoints.unk60[sMesonPointIndex][AXIS_X],
+                                            g_HolePoints.unk60[sMesonPointIndex][AXIS_Z])->name,
+                           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
+        }
+        /* The second pad's B clears the point */
+        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_X] = 0;
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_Y] = 0;
+            g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] = 0;
+            sHolePointCursor[0] = 0;
+            sHolePointCursor[1] = 0;
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+            sMesonPointIndex++;
+            if (sMesonPointIndex == ARRAY_COUNT(g_HolePoints.unk60)) {
+                sMesonPointIndex = 0;
+            }
+            sHolePointCursor[0] = g_HolePoints.unk60[sMesonPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+            sMesonPointIndex--;
+            if (sMesonPointIndex < 0) {
+                sMesonPointIndex = ARRAY_COUNT(g_HolePoints.unk60) - 1;
+            }
+            sHolePointCursor[0] = g_HolePoints.unk60[sMesonPointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.unk60[sMesonPointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        PrintDebugText("Meson Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+        PrintDebugHex(sMesonPointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
+    }
+    if (sHolePointEditMode == HOLE_POINT_MODE_ROUTE) {
+        if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] = sHolePointCursor[0] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] = sHolePointCursor[1] << WORLD_TO_COURSE_SHIFT;
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.routePoints[sRoutePointIndex][AXIS_X],
+                                g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z]);
+            PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+            PrintDebugText(GetSurfaceInfoAt(g_HolePoints.routePoints[sRoutePointIndex][AXIS_X],
+                                            g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z])->name,
+                           SURFACE_TEXT_COLUMN, SURFACE_TEXT_ROW);
+        }
+        /* The second pad's B clears the point */
+        if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] = 0;
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_Y] = 0;
+            g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] = 0;
+            sHolePointCursor[0] = 0;
+            sHolePointCursor[1] = 0;
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+            sRoutePointIndex++;
+            if (sRoutePointIndex == ROUTE_POINT_COUNT) {
+                sRoutePointIndex = 0;
+            }
+            sHolePointCursor[0] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        if (g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+            sRoutePointIndex--;
+            if (sRoutePointIndex < 0) {
+                sRoutePointIndex = ROUTE_POINT_COUNT - 1;
+            }
+            sHolePointCursor[0] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_X] / (1 << WORLD_TO_COURSE_SHIFT);
+            sHolePointCursor[1] = g_HolePoints.routePoints[sRoutePointIndex][AXIS_Z] / (1 << WORLD_TO_COURSE_SHIFT);
+        }
+        PrintDebugText("AI Edit Mode", HOLE_POINT_TEXT_COLUMN, HOLE_POINT_MODE_TEXT_ROW);
+        PrintDebugHex(sRoutePointIndex, HOLE_POINT_TEXT_COLUMN, HOLE_POINT_INDEX_TEXT_ROW);
+    }
+    /* Z held turns the camera instead of moving the cursor */
+    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        if (*(u16 *)&g_MenuControllerData[EDITOR_PAD].stick_x != 0) {
+            stepX = -cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y -
+                    sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
+            stepZ = -sin(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_y +
+                    cos(HEADING_RADIANS) * g_MenuControllerData[EDITOR_PAD].stick_x;
+            sHolePointCursor[0] += stepX;
+            sHolePointCursor[1] += stepZ;
+        } else {
+            if (g_MenuControllerData[EDITOR_PAD].button & U_JPAD) {
+                stepX = -cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+                isStepping = TRUE;
+                stepZ = -sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+            }
+            if (g_MenuControllerData[EDITOR_PAD].button & D_JPAD) {
+                stepX = cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+                isStepping = TRUE;
+                stepZ = sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+            }
+            if (g_MenuControllerData[EDITOR_PAD].button & R_JPAD) {
+                stepX = -sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+                isStepping = TRUE;
+                stepZ = cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+            }
+            if (g_MenuControllerData[EDITOR_PAD].button & L_JPAD) {
+                stepX = sin(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+                isStepping = TRUE;
+                stepZ = -cos(HEADING_RADIANS) * HOLE_POINT_STEP_LENGTH;
+            }
+            if (isStepping) {
+                sHolePointCursor[0] += stepX;
+                sHolePointCursor[1] += stepZ;
+            }
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        sHolePointCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE *
+            HEADING_STICK_SPEED;
+        sHolePointCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (sHolePointCameraPitch > 0.0f) {
+        sHolePointCameraPitch = 0.0f;
+    }
+    if (sHolePointCameraPitch < EDITOR_PITCH_MIN) {
+        sHolePointCameraPitch = EDITOR_PITCH_MIN;
+    }
+    sHolePointCameraHeading = sHolePointCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    g_MapCamera.view.lookAt[AXIS_X] = sHolePointCursor[0];
+    g_MapCamera.view.lookAt[AXIS_Z] = sHolePointCursor[1];
+    g_MapCamera.view.lookAt[AXIS_Y] =
+        GetGroundHeight(sHolePointCursor[0] << WORLD_TO_COURSE_SHIFT, sHolePointCursor[1] << WORLD_TO_COURSE_SHIFT) *
+        (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
+    g_MapCamera.view.eye[AXIS_X] = cos(sHolePointCameraPitch) * cos(sHolePointCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(sHolePointCameraPitch) * sin(sHolePointCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] = sin(sHolePointCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Y];
+}
 
 /*
  * Scene SCENE_TRIANGLES's editor for the hole triangles. On the editor pad,
