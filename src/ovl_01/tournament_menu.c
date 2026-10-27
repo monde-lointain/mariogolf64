@@ -109,6 +109,15 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 #define CODE_KEY_BLANK 0xFD
 #define CODE_KEY_BACK 0xFE
 #define CODE_KEY_END 0xFF
+/*
+ * func_8022ADE8 draws each key's 16x16 glyph from asset 0x942 in
+ * D_80230F4C, tinting the chosen one yellow
+ */
+#define CODE_GLYPH_SIZE 16
+#define CODE_GLYPH_FIRST_X 40
+#define CODE_GLYPH_FIRST_Y 62
+#define CODE_GLYPH_NONE -1
+extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT];
 
 /* What func_80228C00 is doing, in D_80230F70 */
 #define CLUB_CODE_PHASE_TYPING 0
@@ -882,7 +891,57 @@ void func_8022A8F4_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022ADE8_ovl_01);
+void func_8022ADE8_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory = func_8005AF74();
+    s32 row;
+    s32 column;
+    s8 glyph;
+    s32 grow;
+    s32 size;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_80230F4C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (row = 0; row != CODE_KEYBOARD_ROW_COUNT; row++) {
+        for (column = 0; column != CODE_KEYBOARD_COLUMN_COUNT; column++) {
+            glyph = D_80230FAC_ovl_01[row][column];
+            if (glyph == CODE_GLYPH_NONE) {
+                continue;
+            }
+            if (memory->codeKeyColumn == column && memory->codeKeyRow == row) {
+                gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+                /* Both branches set these the same; the chosen key may once have been drawn larger */
+                grow = 0;
+                size = CODE_GLYPH_SIZE;
+            } else {
+                gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                grow = 0;
+                size = CODE_GLYPH_SIZE;
+            }
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_80230F4C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                    glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2)) & ~7,
+                                   G_IM_FMT_CI, CODE_GLYPH_SIZE, CODE_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gSPScisTextureRectangle(gfx++, (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X - grow) << 2,
+                                    (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y - grow) << 2,
+                                    (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X + CODE_GLYPH_SIZE + grow) << 2,
+                                    (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE + grow) << 2,
+                                    G_TX_RENDERTILE, 0, 0, (CODE_GLYPH_SIZE << 10) / size,
+                                    (CODE_GLYPH_SIZE << 10) / size);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    D_80230F78_ovl_01 = D_80230F60_ovl_01 * 2;
+    *displayListHead = gfx;
+}
 
 void func_8022B360_ovl_01(Gfx **displayListHead) {
     s32 charIndex;
