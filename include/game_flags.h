@@ -63,6 +63,9 @@
 /* Makes every character selectable */
 #define GAME_FLAG_ALL_CHARACTERS 0x54
 
+/* Keeps a saved game in the save data once it is continued */
+#define GAME_FLAG_KEEP_SAVED_GAMES 0x5D
+
 /* Opens every course on the hole and Ring Shot selects */
 #define GAME_FLAG_ALL_COURSES 0x5E
 

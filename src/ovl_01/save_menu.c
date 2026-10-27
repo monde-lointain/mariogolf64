@@ -1,6 +1,9 @@
 #include "common.h"
 #include "asset.h"
+#include "game_flags.h"
+#include "libc.h"
 #include "menu_memory.h"
+#include "round_hud.h"
 #include "save.h"
 #include "sram.h"
 
@@ -23,7 +26,11 @@ extern void *D_8023B67C_ovl_01;
 /* The Ring Shot stars that each level of func_8022181C takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
+extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
+extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern void **D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void *D_8023BD78_ovl_01;
@@ -209,7 +216,41 @@ s32 func_80222C94_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80222CDC_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80222F2C_ovl_01);
+extern const char D_80231A3C_ovl_01[];
+
+s32 func_80222F2C_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    UnkB8 *savedPlayer;
+    s32 playerIndex;
+    s32 character;
+    s32 controller;
+
+    if (D_80230B50_ovl_01[memory->savedGameIndex] == -1) {
+        return -1;
+    }
+    if (SaveOrContinueGame(memory->savedGameIndex, TRUE) == -1) {
+        return -1;
+    }
+    savedPlayer = save->savedPlayers[memory->savedGameIndex];
+    for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+        controller = D_80230B40_ovl_01[playerIndex];
+        D_800C1FF4[playerIndex] = controller;
+        g_Players[playerIndex].controllerIndex = controller;
+        sprintf(g_Players[playerIndex].name, D_80231A3C_ovl_01, savedPlayer->name);
+        character = (s8)savedPlayer->characterIndex;
+        D_8012F480[playerIndex] = character;
+        g_Players[playerIndex].characterIndex = character;
+        LoadPlayerFace(playerIndex, character, (s8)g_Players[playerIndex].paletteIndex);
+        savedPlayer++;
+    }
+    if (!IsGameFlagSet(GAME_FLAG_KEEP_SAVED_GAMES)) {
+        memset(&save->savedGames[memory->savedGameIndex], 0, sizeof(SavedGame));
+    }
+    return 0;
+}
+
+const char D_80231A3C_ovl_01[] = "%s";
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
 
