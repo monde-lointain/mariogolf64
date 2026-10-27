@@ -38,6 +38,12 @@ extern char g_BirdieBadgeLabelText[];
 extern f32 sMenuBobOffset;
 extern f32 sMenuBobPhase;
 
+/* Players whose D_800C1FF4 holds this never clash with the others */
+#define UNSHARED_SLOT_INDEX 4
+
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s32 D_801051F0;
+extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s32 D_801B609C;
@@ -131,7 +137,31 @@ s32 GetChosenCourseIndex(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C78_ovl_01);
 
+/*
+ * Doesn't match: the original reloads g_PlayerCount for each pass of the
+ * outer loop, where this keeps it in a register.
+ */
+#ifdef NON_MATCHING
+void func_801F6A38_ovl_01(void) {
+    s32 playerIndex;
+    s32 otherIndex;
+
+    D_801051F0 = TRUE;
+    for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
+        for (otherIndex = 0; otherIndex != g_PlayerCount; otherIndex++) {
+            if (playerIndex != otherIndex && D_800C1FF4[playerIndex] != UNSHARED_SLOT_INDEX &&
+                D_800C1FF4[otherIndex] != UNSHARED_SLOT_INDEX && D_800C1FF4[playerIndex] == D_800C1FF4[otherIndex]) {
+                D_801051F0 = FALSE;
+            }
+        }
+    }
+    for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
+        g_Players[playerIndex].soundPan = D_8022F8E0_ovl_01[g_PlayerCount][playerIndex];
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F6A38_ovl_01);
+#endif
 
 void func_801F6B20_ovl_01(void) {
 }
