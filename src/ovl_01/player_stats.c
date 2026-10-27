@@ -65,7 +65,10 @@
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
+/* The stats icons are 24x24, and func_80219460 shows each of their two frames for 4 video frames */
+#define STATS_ICON_SIZE 24
 #define STATS_ICON_FRAME_COUNT 2
+#define STATS_ICON_FRAME_DURATION 4
 
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
@@ -175,7 +178,7 @@ extern s16 D_8023040C_ovl_01[][STATS_INDEX_COLUMN_COUNT];
 extern u8 D_801B5634;
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
-extern u8 D_8022F8C5_ovl_01;
+extern s8 D_8022F8C5_ovl_01;
 extern u8 D_802303A0_ovl_01;
 extern s16 D_802303A2_ovl_01;
 extern s16 D_802303A4_ovl_01;
@@ -309,7 +312,39 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021826C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219460_ovl_01);
+void func_80219460_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 size, s32 textureStep) {
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory = func_8005AF74();
+    EncodedAsset asset;
+    void *image;
+    u8 iconIndex;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    image = D_8023B350_ovl_01[D_8022F8C4_ovl_01];
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureTile_4b(gfx++, ((u32)image + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, STATS_ICON_SIZE,
+                          STATS_ICON_SIZE, 0, 0, STATS_ICON_SIZE - 1, STATS_ICON_SIZE - 1, 0,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                          G_TX_NOLOD, G_TX_NOLOD);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + size) << 2, (top + size) << 2, G_TX_RENDERTILE, 0,
+                            0, textureStep, textureStep);
+    D_8022F8C5_ovl_01++;
+    gDPPipeSync(gfx++);
+    if (D_8022F8C5_ovl_01 == STATS_ICON_FRAME_DURATION) {
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01++;
+        if (D_8022F8C0_ovl_01 >= STATS_ICON_FRAME_COUNT) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        D_8022F8C4_ovl_01 = !D_8022F8C4_ovl_01;
+        iconIndex = D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD];
+        OpenEncodedAsset(D_802303CC_ovl_01[iconIndex][D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01], &asset);
+    }
+    *displayListHead = gfx;
+}
 
 /* Returns nothing, but is declared to return a value, which leaves v0 live at its end */
 s32 func_80219948_ovl_01(void) {
