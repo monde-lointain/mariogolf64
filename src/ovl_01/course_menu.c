@@ -30,6 +30,25 @@
 #define STATS_LABEL_X 30
 #define STATS_FIRST_Y 154
 #define STATS_LINE_HEIGHT 16
+/* The statistics in the order the panel lists them */
+#define STAT_ROUND_COUNT 0
+#define STAT_BEST_SCORE 1
+#define STAT_AVERAGE_SCORE 2
+#define STAT_BEST_DRIVE 3
+#define STAT_AVERAGE_DRIVE 4
+#define STAT_FAIRWAY_PERCENT 5
+#define STAT_AVERAGE_PUTTS 6
+#define STAT_PAR_SAVE_PERCENT 7
+#define STAT_PAR_ON_PERCENT 8
+#define STAT_SAND_SAVE_PERCENT 9
+/* Where func_8020F9B8 draws the figures; shorter best scores move right to line up */
+#define STATS_ROUND_COUNT_X 96
+#define STATS_VALUE_X 112
+#define STATS_TWO_DIGIT_X 128
+#define STATS_ONE_DIGIT_X 144
+#define STATS_UNIT_X 178
+#define STATS_UNIT_OFFSET_Y 4
+#define MENU_NUMBER_UNK2 2
 
 /* The arrows beside the statistics that show there are more rows above or below */
 #define STATS_FIRST_ARROW_IMAGE 16
@@ -83,7 +102,10 @@ s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void func_80207E28_ovl_01(Gfx **displayListHead, void *image, s32 x, s32 y);
+void func_80210D34_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_80210D94_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
 void func_80210DF4_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_80211A5C_ovl_01(Gfx **displayListHead, s32 x, s32 y, f32 value);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
 void func_8020E010_ovl_01(void **buffers) {
@@ -210,7 +232,86 @@ void func_8020F794_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F9B8_ovl_01);
+void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row) {
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory;
+    s32 courseIndex;
+    s32 bestScore;
+    s32 openCourseCount;
+
+    GetSaveData();
+    memory = func_8005AF74();
+    openCourseCount = GetOpenCourseCount();
+    if (memory->unk30 != openCourseCount) {
+        courseIndex = memory->unk30;
+    } else {
+        /* The figures for all the courses together */
+        courseIndex = COURSE_COUNT;
+    }
+    if (D_80105C38[courseIndex].roundCount == 0.0f) {
+        return;
+    }
+    switch (statIndex) {
+        case STAT_ROUND_COUNT:
+            func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].roundCount, 0);
+            break;
+        case STAT_BEST_SCORE:
+            bestScore = D_80105C38[courseIndex].bestScore;
+            if (bestScore >= -9 && bestScore <= 9) {
+                func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+                                     MENU_NUMBER_UNK2);
+            } else if ((bestScore >= 10 && bestScore <= 99) || (bestScore >= -99 && bestScore <= -10)) {
+                func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+                                     MENU_NUMBER_UNK2);
+            } else {
+                func_80210D34_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+                                     MENU_NUMBER_UNK2);
+            }
+            break;
+        case STAT_AVERAGE_SCORE:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].averageScore);
+            break;
+        case STAT_BEST_DRIVE:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].bestDrive);
+            gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+            func_8020FD48_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+        case STAT_AVERAGE_DRIVE:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].averageDrive);
+            func_8020FD48_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+        case STAT_FAIRWAY_PERCENT:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].fairwayPercent);
+            func_8020FE20_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+        case STAT_AVERAGE_PUTTS:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].averagePutts);
+            break;
+        case STAT_PAR_SAVE_PERCENT:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].parSavePercent);
+            func_8020FE20_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+        case STAT_PAR_ON_PERCENT:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].parOnPercent);
+            func_8020FE20_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+        case STAT_SAND_SAVE_PERCENT:
+            func_80211A5C_ovl_01(&gfx, STATS_VALUE_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+                                 D_80105C38[courseIndex].sandSavePercent);
+            func_8020FE20_ovl_01(&gfx, STATS_UNIT_X, STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+            break;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 const char D_802318E0_ovl_01[] = "%c";
 
