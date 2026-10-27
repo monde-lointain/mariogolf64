@@ -140,9 +140,7 @@ extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s32 D_8022BE0C_ovl_01;
-extern s32 D_8022BE28_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
-extern s32 D_801B7070;
 extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
@@ -158,11 +156,9 @@ extern u8 D_801B9410;
 extern s8 D_801B5634;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
-extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern s32 D_8022BE1C_ovl_01;
 extern u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT]; /* Each player's clubs, a bit per slot */
 extern s32 D_8022F8F4_ovl_01[];
-extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 /*
  * The mini-golf course select. A record's three courses lie on a disc that

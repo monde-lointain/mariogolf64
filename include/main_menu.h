@@ -2,6 +2,7 @@
 #define MAIN_MENU_H
 
 #include "common.h"
+#include "character.h"
 #include "menu_memory.h"
 
 /* The most modes the mode select offers for a player count */
@@ -61,6 +62,11 @@ extern MenuMemory D_801323A0;
 extern u8 D_8022BE88_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
 extern u8 D_800FF4C0;
+extern s32 D_801B7070;
+extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern s32 D_8022BE28_ovl_01;
+extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
+extern const char D_80231514_ovl_01[];
 
 s32 GetOpenCourseCount(void);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
