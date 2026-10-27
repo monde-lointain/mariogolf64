@@ -55,6 +55,12 @@ typedef struct GroundTile {
     /* 0x9A8 */ u8 unk9A8[0xA00 - 0x9A8];
 } GroundTile; /* size = 0xA00 */
 
+/* GroundTile.detail, how finely DrawGround draws a tile this frame */
+#define GROUND_DETAIL_HIDDEN (-1)
+#define GROUND_DETAIL_COARSE 0 /* Two triangles between the tile's corners */
+#define GROUND_DETAIL_MEDIUM 1 /* Eight triangles between its grid vertices */
+#define GROUND_DETAIL_FINE 2   /* Its own display list, midpoints and all */
+
 /* The terrain codes that GetTerrainCode reads from the hole */
 #define TERRAIN_CODE_FAIRWAY 0
 #define TERRAIN_CODE_ROUGH 1

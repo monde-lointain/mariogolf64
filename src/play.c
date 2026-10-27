@@ -4,6 +4,7 @@
 #include "club.h"
 #include "controller.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "current_shot.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -27,6 +28,7 @@
 #include "terrain.h"
 #include "tournament.h"
 #include "variables.h"
+#include "work_area.h"
 
 /* D_800E12B0 is a square of random bytes this many on a side */
 #define RANDOM_GRID_SIZE 32
@@ -1679,7 +1681,530 @@ void func_800628C4(void) {
 INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #endif
 
+#ifdef NON_MATCHING
+/* A tile's edges, in the order of the segments that move their vertices */
+#define TILE_EDGE_TOP 0
+#define TILE_EDGE_LEFT 1
+#define TILE_EDGE_RIGHT 2
+#define TILE_EDGE_BOTTOM 3
+#define TILE_EDGE_COUNT 4
+
+/* The ground is drawn in two halves, each a column of groups of four tiles */
+#define GROUND_TILE_GROUP_SIZE 4
+#define GROUND_HALF_COUNT 2
+#define GROUND_HALF_VERTEX_COLUMNS (GROUND_TILE_GROUP_SIZE * 2)
+
+/*
+ * A visible tile is drawn finely when its view depth times this is under its
+ * height range, and at medium detail when the depth times the medium scale is
+ */
+#define FINE_DEPTH_SCALE (-0.025f)
+#define ZOOMED_FINE_DEPTH_SCALE (-0.0125f)
+#define MEDIUM_DEPTH_SCALE (-0.01f)
+#define MIN_GROUND_TILE_RADIUS 384.0f
+#define NEAR_DEPTH_DIVISOR 8
+#define NO_NEAR_DEPTH (-1000.0f)
+
+/* DrawGround's terrainStyle: the round's view, or one of the map views */
+#define TERRAIN_STYLE_NORMAL 0
+#define TERRAIN_STYLE_MAP 2
+#define TERRAIN_STYLE_TOP_DOWN_MAP 3
+
+/* The vertex cache slots of a row's three vertex rows, which rotate from row to row */
+#define FIRST_TOP_SLOT 9
+#define FIRST_MIDDLE_SLOT 18
+#define FIRST_BOTTOM_SLOT 0
+/* A vertex row's odd vertices follow its even ones */
+#define ODD_SLOT (GROUND_TILE_GROUP_SIZE + 1)
+
+/* A tile whose unk990 is positive is drawn a second time */
+#define GROUND_TILE_MAX_PASSES 2
+
+/* The noise texture sits in TMEM after a tile's texels, and is blended in by this */
+#define NOISE_TMEM (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES / 8)
+#define NOISE_BLEND_ALPHA 110
+
+#define CLIP_RATIO_COUNT 6
+#define CLIP_RATIO_TEXT_COLUMN 10
+#define CLIP_RATIO_TEXT_ROW 12
+/* osGetCount ticks per unit of the printed time */
+#define GROUND_TIMING_TICKS 3000
+#define GROUND_TIMING_COLUMN 5
+#define GROUND_TIMING_ROW 11
+
+/* The grid vertex at a vertex column and row, as GetGridVertex finds it */
+#define GRID_VERTEX(column, row) \
+    (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + ((u32)(column) & 1) * 9])
+
+/* Whether a fine tile's neighbor makes it snap the vertices of their shared edge's middle */
+#define IS_COARSE(tileIndex) (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
+/* Whether the neighbor makes it snap the edge's midpoints */
+#define IS_COARSER_THAN_FINE(tileIndex) \
+    (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
+     g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
+
+/* Sets a vertex halfway between two others */
+#define SET_AVERAGE_VERTEX(midpoint, from, to)                       \
+    {                                                                \
+        (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
+        (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
+        (midpoint)->v.ob[2] = ((from)->v.ob[2] + (to)->v.ob[2]) / 2; \
+        (midpoint)->v.flag = 0;                                      \
+        (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
+        (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \
+    }
+
+/* Loads a row's odd vertices as averages of its even ones, so that they line up with a coarse row */
+#define LOAD_AVERAGED_ROW(row, slot)                          \
+    {                                                         \
+        Vtx *even = (row);                                    \
+        SET_AVERAGE_VERTEX(&vertices[0], &even[0], &even[1]); \
+        SET_AVERAGE_VERTEX(&vertices[1], &even[1], &even[2]); \
+        SET_AVERAGE_VERTEX(&vertices[2], &even[2], &even[3]); \
+        SET_AVERAGE_VERTEX(&vertices[3], &even[3], &even[4]); \
+        gSPVertex(gfx++, vertices, 4, slot);                  \
+        vertices += 4;                                        \
+    }
+
+/* Loads a tile's texture, skipping its one-texel border */
+#define LOAD_TILE_TEXTURE(tileIndex, column, row)                                                           \
+    {                                                                                                       \
+        gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, G_IM_FMT_RGBA,  \
+                          G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, GROUND_TILE_TEXEL_ROW_COUNT, 0,      \
+                          G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, \
+                          G_TX_NOLOD);                                                                      \
+        gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2, (column) * 128 + 0x86,              \
+                       (row) * 128 + 0x82);                                                                 \
+    }
+
+/* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
+#define DRAW_TILE_QUADS(top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
+    {                                                                                             \
+        gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0);               \
+        gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0);      \
+        gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0);            \
+        gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, bottomOdd, 0);   \
+    }
+
+/* Loads the noise texture that DrawGround blends over the tiles */
+#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                                                                \
+    gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, G_TX_RENDERTILE, G_IM_FMT_I,        \
+                      G_IM_SIZ_8b, RANDOM_GRID_SIZE, RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, \
+                      shiftS, shiftT)
+
+extern s32 g_GroundClipRatio;
+extern Vtx *g_VertexListHead;
+extern f32 g_GroundFarthestDepth;
+extern f32 g_GroundNearDepthEighth;
+extern s32 g_GroundTimingRow;
+extern u32 g_GroundDrawFrame;
+void func_804083E0();
+
+/*
+ * Draws the ground's tiles, each at a detail that its distance picks. The
+ * tiles go down two halves in rows of four, and a fine tile snaps the edge
+ * vertices it shares with coarser neighbors so that no gaps open between them.
+ */
+void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
+    u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last fine tile */
+    Gfx *gfx;
+    s32 half;
+    Vtx *vertices;
+    u32 start;
+    u8 current;
+    f32 fineScale;
+    f32 radius;
+    s32 visibility;
+    s32 detail;
+    s32 maxDetail;
+    s32 groupDetail;
+    s32 previousDetail;
+    s32 i;
+    s32 j;
+    s32 row;
+    s32 k;
+    s32 pass;
+    s32 tileIndex;
+    s32 tileColumn;
+    s32 column;
+    s32 topSlot;
+    s32 middleSlot;
+    s32 bottomSlot;
+    s32 spareSlot;
+    s32 *offsets;
+    GroundTile *tiles;
+
+    /*
+     * SetGroundCombineMode is a nested function, a GNU C extension. It
+     * blends the noise texture over the tile texture.
+     */
+    void SetGroundCombineMode(s32 unused0, s32 unused1) {
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_NONE);
+        gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE, TEXEL1, ENVIRONMENT, COMBINED, TEXEL0,
+                          COMBINED_ALPHA, TEXEL0, 0, 0, 0, 1);
+    }
+
+    current = 0;
+    vertices = g_VertexListHead;
+    gfx = g_DisplayListHead;
+    start = osGetCount();
+    if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
+        func_804083E0(matrices, terrainStyle);
+        return;
+    }
+    if (!g_HasLoaderFinished) {
+        return;
+    }
+    g_GroundDrawFrame = g_FrameCount;
+    if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+        func_800628C4();
+    }
+    if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
+        char text[0x98];
+
+        sprintf(text, "CLIPRATIO=%d", g_GroundClipRatio);
+        PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);
+        switch (g_GroundClipRatio) {
+            case 1:
+                gSPClipRatio(gfx++, FRUSTRATIO_1);
+                break;
+            case 2:
+                gSPClipRatio(gfx++, FRUSTRATIO_2);
+                break;
+            case 3:
+                gSPClipRatio(gfx++, FRUSTRATIO_3);
+                break;
+            case 4:
+                gSPClipRatio(gfx++, FRUSTRATIO_4);
+                break;
+            case 5:
+                gSPClipRatio(gfx++, FRUSTRATIO_5);
+                break;
+            case 6:
+                gSPClipRatio(gfx++, FRUSTRATIO_6);
+                break;
+        }
+        if (g_ControllerData[1].trigger & A_BUTTON) {
+            g_GroundClipRatio = g_GroundClipRatio % CLIP_RATIO_COUNT + 1;
+        }
+    } else {
+        gSPClipRatio(gfx++, FRUSTRATIO_1);
+    }
+    if (IsGameFlagSet(GAME_FLAG_HIDE_GROUND)) {
+        return;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPPipelineMode(gfx++, G_PM_1PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gSPLoadGeometryMode(gfx++, 0);
+    if (g_GameState.isMiniGolf) {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_POINT);
+    } else {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureDetail(gfx++, G_TD_CLAMP);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    if (terrainStyle == TERRAIN_STYLE_NORMAL) {
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_SHADING_SMOOTH);
+        SetSceneFog(&gfx);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+            if (g_GameState.isMiniGolf) {
+                LOAD_NOISE_TEXTURE(15, G_TX_NOLOD);
+            } else {
+                LOAD_NOISE_TEXTURE(13, 13);
+            }
+        } else {
+            LOAD_NOISE_TEXTURE(13, 15);
+        }
+        SetGroundCombineMode(0, 0);
+        gDPSetEnvColor(gfx++, 0, 0, 0, NOISE_BLEND_ALPHA);
+        gDPPipeSync(gfx++);
+    }
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    g_GroundFarthestDepth = 0.0f;
+    g_GroundNearDepthEighth = NO_NEAR_DEPTH;
+    fineScale = FINE_DEPTH_SCALE;
+    if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 || g_Cameras[0].view.mode == CAMERA_MODE_UNK8) {
+        fineScale = ZOOMED_FINE_DEPTH_SCALE;
+    }
+    maxDetail = GROUND_DETAIL_COARSE;
+    tiles = g_WorkArea.hole.tiles;
+    for (i = 0; i < GROUND_TILE_COUNT; i++) {
+        radius = (g_GroundTileHeightRanges[i] >= MIN_GROUND_TILE_RADIUS) ? g_GroundTileHeightRanges[i]
+                                                                         : MIN_GROUND_TILE_RADIUS;
+        visibility = GetSphereVisibility(tiles[i].center[0], tiles[i].center[1], tiles[i].center[2], radius);
+        detail = GROUND_DETAIL_HIDDEN;
+        if (visibility < 0) {
+            if (tiles[i].midpointBlockIndex >= 0 &&
+                (g_IsGroundTileNearby[i] || visibility * fineScale < g_GroundTileHeightRanges[i])) {
+                detail = GROUND_DETAIL_FINE;
+            } else if (visibility * MEDIUM_DEPTH_SCALE < g_GroundTileHeightRanges[i]) {
+                detail = GROUND_DETAIL_MEDIUM;
+            } else {
+                detail = GROUND_DETAIL_COARSE;
+            }
+        }
+        /* The map scenes draw every visible tile finely */
+        if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
+            (terrainStyle == TERRAIN_STYLE_MAP || terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
+            detail != GROUND_DETAIL_HIDDEN) {
+            detail = GROUND_DETAIL_FINE;
+        }
+        if (maxDetail < detail) {
+            maxDetail = detail;
+        }
+        tiles[i].detail = detail;
+        if ((i & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
+            /* Coarse tiles in a group with finer ones are drawn at medium detail */
+            if (maxDetail > GROUND_DETAIL_COARSE) {
+                for (j = 0; j < GROUND_TILE_GROUP_SIZE; j++) {
+                    if (tiles[i - j].detail == GROUND_DETAIL_COARSE) {
+                        tiles[i - j].detail = GROUND_DETAIL_MEDIUM;
+                    }
+                }
+            }
+            maxDetail = GROUND_DETAIL_COARSE;
+        }
+        if (detail >= 0) {
+            if (visibility < g_GroundFarthestDepth) {
+                g_GroundFarthestDepth = visibility;
+            }
+            if (g_GroundNearDepthEighth < visibility / NEAR_DEPTH_DIVISOR) {
+                g_GroundNearDepthEighth = visibility / NEAR_DEPTH_DIVISOR;
+            }
+        }
+    }
+    ClearNearbyGroundTiles();
+    if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+        osSyncPrintf("%f\n", g_GroundFarthestDepth);
+    }
+    for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
+        for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+            snapsEdge[i][j] = FALSE;
+        }
+    }
+    gSPSegment(gfx++, 1, 0);
+    gSPSegment(gfx++, 2, 0);
+    gSPSegment(gfx++, 3, 0);
+    gSPSegment(gfx++, 4, 0);
+    gSPSegment(gfx++, 5, 0);
+    gSPSegment(gfx++, 6, 0);
+    gSPSegment(gfx++, 7, 0);
+    gSPSegment(gfx++, 8, 0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    SetGroundCombineMode(0, 0);
+    for (half = 0; half < GROUND_HALF_COUNT; half++) {
+        previousDetail = GROUND_DETAIL_HIDDEN;
+        topSlot = FIRST_TOP_SLOT;
+        bottomSlot = FIRST_BOTTOM_SLOT;
+        middleSlot = FIRST_MIDDLE_SLOT;
+        tileIndex = half * GROUND_TILE_GROUP_SIZE;
+        if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+            osSyncPrintf("DG[");
+            if (half != 0) {
+                break;
+            }
+        }
+        column = half * GROUND_HALF_VERTEX_COLUMNS;
+        for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+            groupDetail = GROUND_DETAIL_COARSE;
+            for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
+                    groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
+                }
+            }
+            if (groupDetail >= GROUND_DETAIL_FINE) {
+                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                    if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+                        osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
+                    }
+                    tileColumn = half * GROUND_TILE_GROUP_SIZE + k;
+                    if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
+                        g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
+                        if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
+                            if (tileColumn != 0) {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
+                                    IS_COARSE(tileIndex - 1);
+                                snapsEdge[current][TILE_EDGE_LEFT] =
+                                    IS_COARSER_THAN_FINE(tileIndex - 1);
+                            } else {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
+                                snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
+                            }
+                            if (row != 0) {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
+                                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                                snapsEdge[current][TILE_EDGE_TOP] =
+                                    IS_COARSER_THAN_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                            } else {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
+                                snapsEdge[current][TILE_EDGE_TOP] = FALSE;
+                            }
+                            if (row != GROUND_TILE_ROW_COUNT - 1) {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
+                                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                                snapsEdge[current][TILE_EDGE_BOTTOM] =
+                                    IS_COARSER_THAN_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                            } else {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
+                                snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
+                            }
+                            if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
+                                    IS_COARSE(tileIndex + 1);
+                                snapsEdge[current][TILE_EDGE_RIGHT] =
+                                    IS_COARSER_THAN_FINE(tileIndex + 1);
+                            } else {
+                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
+                                snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
+                            }
+                            offsets = g_CoarseVertexOffsets[tileIndex];
+                            for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+                                /* Moves a snapped edge's vertices, or moves back those snapped for the last tile */
+                                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
+                                    gSPSegment(gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
+                                }
+                            }
+                            current ^= 1;
+                            gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
+                        }
+                    } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                        /* A medium tile among fine ones loads only its own vertices */
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2), 2, 0);
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2), 1, 2);
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 1), 2, 3);
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1, 5);
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 2), 2, 6);
+                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1, 8);
+                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                            LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
+                            DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
+                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                                break;
+                            }
+                        }
+                    }
+                    tileIndex++;
+                }
+            } else if (groupDetail > GROUND_DETAIL_COARSE) {
+                spareSlot = middleSlot;
+                middleSlot = topSlot;
+                topSlot = bottomSlot;
+                bottomSlot = spareSlot;
+                gDPPipeSync(gfx++);
+                /* The last row's bottom vertices are still in the cache, unless it was fine or skipped */
+                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                    gSPVertex(gfx++, GRID_VERTEX(column, row * 2), GROUND_TILE_GROUP_SIZE + 1, topSlot);
+                    gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2), GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
+                } else if (previousDetail == GROUND_DETAIL_COARSE) {
+                    LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
+                }
+                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 1), GROUND_TILE_GROUP_SIZE + 1, middleSlot);
+                gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 1), GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
+                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2), GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+                if (row != GROUND_TILE_ROW_COUNT - 1 &&
+                    g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT].detail == GROUND_DETAIL_COARSE) {
+                    LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2 + 2), bottomSlot + ODD_SLOT);
+                } else {
+                    gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 2), GROUND_TILE_GROUP_SIZE,
+                              bottomSlot + ODD_SLOT);
+                }
+                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                            LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
+                            DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1, middleSlot, middleSlot + ODD_SLOT,
+                                            middleSlot + 1, bottomSlot, bottomSlot + ODD_SLOT, bottomSlot + 1);
+                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                                break;
+                            }
+                        }
+                    }
+                    topSlot++;
+                    bottomSlot++;
+                    middleSlot++;
+                    tileIndex++;
+                }
+                topSlot -= GROUND_TILE_GROUP_SIZE;
+                bottomSlot -= GROUND_TILE_GROUP_SIZE;
+                middleSlot -= GROUND_TILE_GROUP_SIZE;
+            } else if (groupDetail < GROUND_DETAIL_COARSE) {
+                tileIndex += GROUND_TILE_GROUP_SIZE;
+            } else {
+                spareSlot = middleSlot;
+                middleSlot = topSlot;
+                topSlot = bottomSlot;
+                bottomSlot = spareSlot;
+                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+                    gSPVertex(gfx++, GRID_VERTEX(column, row * 2), GROUND_TILE_GROUP_SIZE + 1, topSlot);
+                }
+                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2), GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                            LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
+                            gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0, topSlot + 1, bottomSlot + 1,
+                                          bottomSlot, 0);
+                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                                break;
+                            }
+                        }
+                    }
+                    topSlot++;
+                    bottomSlot++;
+                    tileIndex++;
+                }
+                topSlot -= GROUND_TILE_GROUP_SIZE;
+                bottomSlot -= GROUND_TILE_GROUP_SIZE;
+            }
+            previousDetail = groupDetail;
+            /* Skips the other half's group */
+            tileIndex += GROUND_TILE_GROUP_SIZE;
+            if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+                osSyncPrintf("]\n");
+            }
+        }
+    }
+    g_VertexListHead = vertices;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPPipelineMode(gfx++, G_PM_NPRIMITIVE);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
+    if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
+        start = osGetCount() - start;
+        PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN, g_GroundTimingRow + GROUND_TIMING_ROW);
+        g_GroundTimingRow = 1 - g_GroundTimingRow;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/play", SetGroundCombineMode);
 
 INCLUDE_ASM("asm/nonmatchings/play", DrawGround);
+#endif
 

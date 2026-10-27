@@ -113,6 +113,21 @@
 /* Keeps songs from starting */
 #define GAME_FLAG_SILENCE_SONGS 0x9D
 
+/* Prints how long DrawGround took, in units of GROUND_TIMING_TICKS */
+#define GAME_FLAG_TIME_GROUND 0x04
+
+/* Keeps DrawGround from drawing the ground */
+#define GAME_FLAG_HIDE_GROUND 0x0D
+
+/* Shows the ground's clip ratio, which the second controller's A button cycles */
+#define GAME_FLAG_CYCLE_CLIP_RATIO 0x10
+
+/* Rebuilds the ground texture coordinates every frame and tries other noise texture scales */
+#define GAME_FLAG_TEST_GROUND_TEXTURE 0x27
+
+/* Logs the detail of each fine row of ground tiles */
+#define GAME_FLAG_LOG_GROUND_ROWS 0x9E
+
 /* Cleared while the loader thread loads a hole, and set once it is done */
 #define GAME_FLAG_HOLE_LOADED 0x07
 
