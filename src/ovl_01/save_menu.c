@@ -63,6 +63,7 @@ extern void* D_8023B670_ovl_01;
 extern void* D_8023B674_ovl_01;
 extern void* D_8023B678_ovl_01;
 extern void* D_8023B67C_ovl_01;
+
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
 
@@ -83,6 +84,8 @@ extern void* D_8023B67C_ovl_01;
  * golf's */
 #define SAVE_MENU_MODE_COUNT 10
 #define SAVE_MENU_MODE_MINI_GOLF 10
+
+extern const char D_80231A3C_ovl_01[];
 
 void func_80221CC0_ovl_01(void);
 
@@ -849,8 +852,6 @@ s32 func_80222CDC_ovl_01(void) {
   D_801B60B8 = 2;
   return 0;
 }
-
-extern const char D_80231A3C_ovl_01[];
 
 s32 func_80222F2C_ovl_01(void) {
   SaveData* save = GetSaveData();

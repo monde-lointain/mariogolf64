@@ -39,6 +39,16 @@
 #define STICK_STEP_SIZE 32
 
 /*
+ * Whether a midpoint on a tile's first row, or first column, is also kept
+ * by the tile before it. They are macros, as inline functions compile
+ * differently from the original.
+ */
+#define IsSharedWithPreviousTileRow(column, row) \
+  (((column) & 1) && !((row) & 3) && ((row) / 4 > 0))
+#define IsSharedWithPreviousTileColumn(column, row) \
+  (((row) & 1) && !((column) & 3) && ((column) / 4 > 0))
+
+/*
  * What SCENE_MAP_OVERVIEW's controls change. Only the camera position is
  * read back; nothing in the ROM reads the other three.
  */
@@ -820,16 +830,6 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
 #else
 INCLUDE_ASM("asm/nonmatchings/terrain", GetGroundPoint);
 #endif
-
-/*
- * Whether a midpoint on a tile's first row, or first column, is also kept
- * by the tile before it. They are macros, as inline functions compile
- * differently from the original.
- */
-#define IsSharedWithPreviousTileRow(column, row) \
-  (((column) & 1) && !((row) & 3) && ((row) / 4 > 0))
-#define IsSharedWithPreviousTileColumn(column, row) \
-  (((row) & 1) && !((column) & 3) && ((column) / 4 > 0))
 
 /*
  * Copies a point into the ground point, and into every tile that keeps a

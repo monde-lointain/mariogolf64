@@ -24,6 +24,18 @@
 /* PlanShot's result while it has more to do */
 #define PLAN_UNFINISHED (-1)
 
+/* ChooseShotOffset's results, indices into f_ShotOffsets */
+#define SHOT_OFFSET_NONE 0
+#define SHOT_OFFSET_MINUS_LARGE 6
+/* The evaluation of a lost ball, and the one that the best starts at */
+#define LOST_BALL_EVALUATION 0x10000000
+#define SHOT_UNK4_MAX 30
+#define SORT_DESCENDING 1
+/* How far below the paths the ground test starts */
+#define PATH_GROUND_CLEARANCE 0x600
+/* FindGreenEdgeOnLine's results */
+#define GREEN_EDGE_FOUND 1
+
 /* How a character plays when the computer controls it */
 typedef struct GolferTraits {
   /* 0x0 */ s8 unk0;
@@ -49,6 +61,7 @@ extern GolferTraits f_GolferTraits[CHARACTER_COUNT];
 extern s32 f_PlanThreadState;
 extern OSThread f_PlanThread;
 extern CurrentShot f_PlannedShot;
+
 /* The directions from the ball, in BINARY_ANGLE_TURN / DIRECTION_SECTOR_COUNT
  * sectors */
 #define DIRECTION_SECTOR_COUNT 256
@@ -76,6 +89,7 @@ extern s8 f_RouteOrder[ROUTE_POINT_COUNT];
 extern s32 f_RouteOrderCount;
 /* How far PlanShot has got with the shot */
 extern s8 f_PlanStage;
+
 #define PLAN_STAGE_UNSTARTED 0
 #define PLAN_STAGE_STARTED 1
 #define PLAN_STAGE_TARGET_CHOSEN 2
@@ -94,10 +108,51 @@ extern s32 f_ClubCount;
 extern s8 f_ClubKindChances[CLUB_CHANCE_SET_COUNT][CLUB_CHANCE_KIND_COUNT];
 extern CurrentShot f_Shot;
 
+/* Where the shot to try starts, as PlanShot sets it up */
+extern CurrentShot f_TrialShot;
+extern Unk20* f_TrialLaunch;
+extern BallSimulation f_TrialSimulation;
+extern s32 f_TrialStepCount;
+/* The SHOT_OFFSET_* that PlanShot chose for the shot */
+extern s32 f_ShotOffset;
+/* How much worse than ideal an evaluation may be for the trial to be taken */
+extern s32 f_AcceptableEvaluation;
+/* How many times PlanShot has changed the club or carry */
+extern s32 f_TrialLevel;
+/* Whether the trial ended out of bounds, off the course or in water */
+extern s32 f_IsTrialLost;
+/* The count of trials at this level */
+extern s32 f_TrialIndex;
+/* Set when the trial asks PlanShot for a longer or a shorter club */
+extern s32 f_NeedsLongerClub;
+extern s32 f_NeedsShorterClub;
+/* Set when the trial is good enough to take */
+extern s32 f_IsTrialAccepted;
+/* The best evaluation so far, and whether there is one */
+extern s32 f_BestEvaluation;
+extern s32 f_HasBestEvaluation;
+extern s32 f_AimChangeCount;
+/* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
+ * copy */
+extern const char f_SimFaultText[];
+
 s32 PlanShot(CurrentShot* plannedShot);
 s32 PlanCupDistance(s32 arg0);
 s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge);
 s32 ChooseClubForDistance(s32 distance);
+
+s32 func_8005F248(s32 value);
+s32 StepTrialShot(void);
+s32 IsTrialShotSafe(void);
+s32 ChooseShotOffset(void);
+s32 FindClubSlot(s32 unused, s32 clubType);
+s32 PlanRoute(s8* route);
+void ChooseLandingTarget(
+    s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ);
+void PlanClubAndTarget(CoursePoint target);
+void ChooseLongShot(
+    s32 unused, s32* clubType, s32* targetX, s32* targetZ, s32* shotMode);
+s32 ChooseHoleStrokeTarget(void);
 
 void RestartShotPlan(void) {
   f_PlanStage = PLAN_STAGE_UNSTARTED;
@@ -210,22 +265,11 @@ s32 GetSideSlope(void) {
   return sideSlope;
 }
 
-/* Where the shot to try starts, as PlanShot sets it up */
-extern CurrentShot f_TrialShot;
-extern Unk20* f_TrialLaunch;
-extern BallSimulation f_TrialSimulation;
-extern s32 f_TrialStepCount;
-
-s32 func_8005F248(s32 value);
-
-/* ChooseShotOffset's results, indices into f_ShotOffsets */
-#define SHOT_OFFSET_NONE 0
 #define SHOT_OFFSET_PLUS_SMALL 1
 #define SHOT_OFFSET_PLUS_MEDIUM 2
 #define SHOT_OFFSET_PLUS_LARGE 3
 #define SHOT_OFFSET_MINUS_SMALL 4
 #define SHOT_OFFSET_MINUS_MEDIUM 5
-#define SHOT_OFFSET_MINUS_LARGE 6
 
 /* The spin-like launch values that each SHOT_OFFSET_* gives a shot */
 typedef struct ShotOffset {
@@ -236,41 +280,20 @@ typedef struct ShotOffset {
 #define SHOT_OFFSET_COUNT 8
 
 extern ShotOffset f_ShotOffsets[SHOT_OFFSET_COUNT];
-/* The SHOT_OFFSET_* that PlanShot chose for the shot */
-extern s32 f_ShotOffset;
 /* Whether the trial's club is one for the green */
 extern s32 f_IsPutting;
-/* How much worse than ideal an evaluation may be for the trial to be taken */
-extern s32 f_AcceptableEvaluation;
-/* How many times PlanShot has changed the club or carry */
-extern s32 f_TrialLevel;
 /* Whether the flying trial ball has come down on the ground yet, and where it
  * first did */
 extern s32 f_HasLanded;
 extern CoursePoint f_LandingPosition;
-/* Whether the trial ended out of bounds, off the course or in water */
-extern s32 f_IsTrialLost;
 /* The nearest that a putt has come to the target */
 extern s32 f_ClosestTargetDistance;
-/* The count of trials at this level */
-extern s32 f_TrialIndex;
-/* Set when the trial asks PlanShot for a longer or a shorter club */
-extern s32 f_NeedsLongerClub;
-extern s32 f_NeedsShorterClub;
 /* The trial's evaluation; lower is better */
 extern s32 f_TrialEvaluation;
 /* Where the trial's ball rests, or for a putt where it passes nearest the
  * target */
 extern CoursePoint f_TrialEndPoint;
-/* Set when the trial is good enough to take */
-extern s32 f_IsTrialAccepted;
-/* The best evaluation so far, and whether there is one */
-extern s32 f_BestEvaluation;
-extern s32 f_HasBestEvaluation;
-extern s32 f_AimChangeCount;
 extern s32 f_HasUnk3Contact;
-/* The evaluation of a lost ball, and the one that the best starts at */
-#define LOST_BALL_EVALUATION 0x10000000
 /* Whether f_TrialShot holds a copy of f_Shot yet */
 extern s32 f_HasTrialShot;
 /* Set when the level needs a new landing target */
@@ -288,21 +311,10 @@ extern s32 f_Unk658;
 extern s8 f_Unk840;
 extern Unk20 f_TrialLaunchValues;
 
-s32 StepTrialShot(void);
-s32 IsTrialShotSafe(void);
-s32 ChooseShotOffset(void);
-s32 FindClubSlot(s32 unused, s32 clubType);
-s32 PlanRoute(s8* route);
-void ChooseLandingTarget(
-    s32 x, s32 z, s32 distance, s32* targetX, s32* targetZ);
-void PlanClubAndTarget(CoursePoint target);
-void ChooseLongShot(
-    s32 unused, s32* clubType, s32* targetX, s32* targetZ, s32* shotMode);
 s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable);
 
 /* f_Shot.unk4's range, which ScaleToShotUnk4 maps 0 to 256 onto */
 #define SHOT_UNK4_MIN 3
-#define SHOT_UNK4_MAX 30
 /* The levels that PlanShot always tries, tries while the best evaluation is
  * poor, and tries at most */
 #define MIN_TRIAL_LEVEL_COUNT 4
@@ -802,8 +814,6 @@ s32 PlanCupDistance(s32 unused) {
 /* How much farther than the cup distance a putt is played in the rain */
 #define RAINY_PUTT_DISTANCE_SCALE 1.2f
 
-s32 ChooseHoleStrokeTarget(void);
-
 /*
  * Chooses f_Shot's club and shot mode for the lie and sets target to where the
  * shot aims. From the bunker lies other than SURFACE_KIND_BUNKER it plays the
@@ -890,7 +900,6 @@ void PlanClubAndTarget(CoursePoint target) {
 
 /* SortByKeys's orders */
 #define SORT_ASCENDING 0
-#define SORT_DESCENDING 1
 
 /*
  * Selection sorts count keys in the given order, swapping the entries of the
@@ -1444,8 +1453,6 @@ s32 GetLandingRating(u32 surfaceKind) {
 /* The neighbours a target's lie is tested at, in TARGET_NEIGHBOUR_SPACINGs */
 #define TARGET_NEIGHBOUR_REACH 2
 #define TARGET_NEIGHBOUR_SPACING 4
-/* How far below the paths the ground test starts */
-#define PATH_GROUND_CLEARANCE 0x600
 /* Rolls shorter than this are not tested for ground in the way */
 #define MIN_TESTED_ROLL (2 * UNITS_PER_YARD)
 
@@ -1729,8 +1736,6 @@ s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
   return FALSE;
 }
 
-/* FindGreenEdgeOnLine's results */
-#define GREEN_EDGE_FOUND 1
 #define GREEN_EDGE_NOT_FOUND (-1)
 
 /*
@@ -1935,10 +1940,6 @@ s32 ScaleToShotUnk4(s32 amount) {
   }
   return value;
 }
-
-/* The fault report of StepTrialShot and IsTrialShotSafe, which share its one
- * copy */
-extern const char f_SimFaultText[];
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_03/computer_golfer", f_SimFaultText);
 

@@ -125,6 +125,45 @@
 #define MATCH_STANDING_WORDS_ASSET 0x8FE
 #define TOURNAMENT_UNK6A1_ASSET 0x6A1
 
+/* Makes DrawRank draw the rank as a place: 1st, 2nd and so on */
+#define RANK_AS_PLACE 0x1000
+#define NOTICE_TITLE_STRIP_HEIGHT 8
+#define NOTICE_SHINE_SIZE 64
+#define NOTICE_SHINE_STEP 18
+#define NOTICE_SHINE_START 16
+#define NOTICE_SHINE_END 40
+/* The title's depth, and the shine's behind it, so that the shine only lights
+ * the title's letters */
+#define NOTICE_TITLE_DEPTH 0x3FFF
+#define NOTICE_SHINE_DEPTH 0x4027
+#define NOTICE_SWING_SOUND 0x69
+#define NOTICE_SWING_SOUND_CHANNEL 13
+#define NOTICE_SWING_SOUND_VOLUME 95
+#define NOTICE_SHINE_SOUND 0x43
+#define NOTICE_SHINE_SOUND_CHANNEL 14
+#define NOTICE_SHINE_SOUND_VOLUME 63
+#define NOTICE_SOUND_PAN_CENTRE 127
+#define RESULTS_LABEL_SCORE 2
+#define RESULTS_LABEL_POINTS 5
+#define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
+#define MESSAGE_ALL_COURSES_OPEN 0x47
+#define RESULTS_TEXT_SLOT 0
+#define RESULTS_TEXT_FONT 1
+#define RESULTS_TEXT_RED 230
+#define RESULTS_TEXT_GREEN 230
+#define RESULTS_TEXT_BLUE 255
+#define RESULTS_TEXT_ALPHA 255
+#define LARGE_DIGIT_WIDTH 16
+#define LARGE_DIGITS_HEIGHT 256
+#define POINTS_TOTAL_Y 201
+/* The minutes wrap here, since the time shows two digits */
+#define SHOWN_MINUTES_LIMIT 99
+#define RESULTS_LABEL_BETS 4
+#define RESULTS_HEADING_Y 54
+/* Bet totals of four digits all shift left, so that the column stays centred */
+#define FOUR_DIGIT_BET_SHIFT -16
+#define FOUR_DIGIT_BET_MIN 999
+#define FOUR_DIGIT_BET_MAX 9999
 extern s32 f_AreResultsLoaded;
 extern s32 f_ResultsState;
 extern s32 f_ResultsSlide;
@@ -218,6 +257,16 @@ extern TrophyAssets f_TrophyAssets[];
 /* f_PlayerRanks of a match's players */
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
+
+extern Gfx D_800C3FC0[];
+/* The digit font draws '#' as a plus-minus sign, for an even score */
+extern const char f_EvenScoreFormat[];
+extern const char f_ScoreFormat[];
+extern const char f_PointsFormat[];
+extern const char f_TimeFormat[];
+extern const char f_TimeLabel[];
+/* Computer players earn no Course Points, which shows as a dash */
+extern const char f_NoPointsText[];
 
 s32 GetClubTournamentCourse(void);
 
@@ -943,8 +992,6 @@ void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   *displayListHead = gfx;
 }
 
-/* Makes DrawRank draw the rank as a place: 1st, 2nd and so on */
-#define RANK_AS_PLACE 0x1000
 /* Ranks from this one draw a banner instead */
 #define RANK_BANNER 100
 #define RANK_BANNER_WIDTH 96
@@ -1171,38 +1218,20 @@ void UpdateCourseResultsNotice(void) {
 #define NOTICE_COURSE_CENTRE_Y 128
 #define NOTICE_COURSE_SCALE_BIAS 2.0f
 #define NOTICE_TITLE_STRIP_WIDTH 160
-#define NOTICE_TITLE_STRIP_HEIGHT 8
 #define NOTICE_TITLE_STRIP_COUNT 8
 #define NOTICE_TITLE_LEFT 80
 #define NOTICE_TITLE_TOP 56
 #define NOTICE_TITLE_LIFT 96.0f
-#define NOTICE_SHINE_SIZE 64
 /* Wider than the shine texture, so that it sweeps across the title */
 #define NOTICE_SHINE_DSDX ((NOTICE_SHINE_SIZE << 10) / NOTICE_TITLE_STRIP_WIDTH)
-#define NOTICE_SHINE_STEP 18
-#define NOTICE_SHINE_START 16
-#define NOTICE_SHINE_END 40
-/* The title's depth, and the shine's behind it, so that the shine only lights
- * the title's letters */
-#define NOTICE_TITLE_DEPTH 0x3FFF
-#define NOTICE_SHINE_DEPTH 0x4027
 #define NOTICE_PAN_START 3
 #define NOTICE_PAN_END 60
 #define NOTICE_PAN_MAX 255
 #define NOTICE_PAN_RANGE 126
-#define NOTICE_SWING_SOUND 0x69
-#define NOTICE_SWING_SOUND_CHANNEL 13
-#define NOTICE_SWING_SOUND_VOLUME 95
 #define NOTICE_CHEER_SOUND 0x9D
 #define NOTICE_CHEER_SOUND_CHANNEL 3
 #define NOTICE_CHEER_SOUND_VOLUME 127
-#define NOTICE_SHINE_SOUND 0x43
-#define NOTICE_SHINE_SOUND_CHANNEL 14
-#define NOTICE_SHINE_SOUND_VOLUME 63
-#define NOTICE_SOUND_PAN_CENTRE 127
 #define NOTICE_SOUND_PAN_RIGHT 255
-
-extern Gfx D_800C3FC0[];
 
 #ifdef NON_MATCHING
 /* The notice that a course has opened: its picture and title swing in, then a
@@ -2588,27 +2617,6 @@ s32 UpdateMatchResults(ControllerState* controller) {
   return FALSE;
 }
 
-#define RESULTS_LABEL_SCORE 2
-#define RESULTS_LABEL_POINTS 5
-#define MESSAGE_POINTS_TO_NEXT_COURSE 0x46
-#define MESSAGE_ALL_COURSES_OPEN 0x47
-#define RESULTS_TEXT_SLOT 0
-#define RESULTS_TEXT_FONT 1
-#define RESULTS_TEXT_RED 230
-#define RESULTS_TEXT_GREEN 230
-#define RESULTS_TEXT_BLUE 255
-#define RESULTS_TEXT_ALPHA 255
-#define LARGE_DIGIT_WIDTH 16
-#define LARGE_DIGITS_HEIGHT 256
-#define POINTS_TOTAL_Y 201
-
-/* The digit font draws '#' as a plus-minus sign, for an even score */
-extern const char f_EvenScoreFormat[];
-extern const char f_ScoreFormat[];
-extern const char f_PointsFormat[];
-extern const char f_TimeFormat[];
-extern const char f_TimeLabel[];
-
 /* The tournament results: place, portrait, score, Course Points and the points
  * to the next course */
 void DrawTournamentResults(Gfx** displayListHead) {
@@ -2663,8 +2671,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeFormat);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeLabel);
 
-/* The minutes wrap here, since the time shows two digits */
-#define SHOWN_MINUTES_LIMIT 99
 #define RESULTS_HEADING_ENV_COLOR 0xFFFF0000
 #define RESULTS_HEADING_PRIM_COLOR 0x30FF0000
 
@@ -2731,18 +2737,9 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-#define RESULTS_LABEL_BETS 4
-#define RESULTS_HEADING_Y 54
 #define RESULTS_ROW_HEIGHT 32
 #define RESULTS_ICON_ROW_Y 68
 #define RESULTS_TEXT_ROW_Y 80
-/* Bet totals of four digits all shift left, so that the column stays centred */
-#define FOUR_DIGIT_BET_SHIFT -16
-#define FOUR_DIGIT_BET_MIN 999
-#define FOUR_DIGIT_BET_MAX 9999
-
-/* Computer players earn no Course Points, which shows as a dash */
-extern const char f_NoPointsText[];
 
 #ifdef NON_MATCHING
 /* The results of several players: place, portrait, score, any bet totals and
@@ -3243,6 +3240,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
  * frame */
 extern s32 f_HandFrame;
 extern f32 f_TitleBobAngle;
+
 #ifdef NON_MATCHING
 /* The results card, its game mode's results, the bobbing title and the players'
  * portraits */

@@ -58,6 +58,27 @@
 /* A banner's letters, each an image drawn on its own square */
 #define BANNER_MAX_LETTERS 11
 
+/*
+ * The caption and a copy of it slide in from either side until they meet
+ * at the centre. The caption flashes, then grows and fades away.
+ */
+#define CAPTION_MEET_DRAW 25
+#define CAPTION_FLASH_END_DRAW 37
+#define CAPTION_GROW_DRAW 44
+#define CAPTION_GROW_END_DRAW 56
+#define CAPTION_DRAW_COUNT 90
+#define CAPTION_TURN_PER_FRAME (M_PI / 12)
+#define CAPTION_START_SLIDE 600
+#define CAPTION_SLIDE_PER_FRAME 24
+#define CAPTION_MAX_GROWTH 48
+#define CAPTION_COPY_ALPHA 127
+#define CAPTION_COPY_TOP \
+  (SHRINKING_IMAGE_CENTRE_Y - \
+      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE))
+#define CAPTION_FLASH_DEPTH 127.0f
+#define CAPTION_SOUND_CHANNEL 13
+#define CAPTION_SOUND_VOLUME 63
+
 typedef struct Banner {
   /* 0x0 */ s16 unk0;
   /* 0x2 */ u16 imageAsset;
@@ -1322,27 +1343,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #endif
 
-/*
- * The caption and a copy of it slide in from either side until they meet
- * at the centre. The caption flashes, then grows and fades away.
- */
-#define CAPTION_MEET_DRAW 25
-#define CAPTION_FLASH_END_DRAW 37
-#define CAPTION_GROW_DRAW 44
-#define CAPTION_GROW_END_DRAW 56
-#define CAPTION_DRAW_COUNT 90
-#define CAPTION_TURN_PER_FRAME (M_PI / 12)
-#define CAPTION_START_SLIDE 600
-#define CAPTION_SLIDE_PER_FRAME 24
-#define CAPTION_MAX_GROWTH 48
-#define CAPTION_COPY_ALPHA 127
-#define CAPTION_COPY_TOP \
-  (SHRINKING_IMAGE_CENTRE_Y - \
-      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE))
-#define CAPTION_FLASH_DEPTH 127.0f
 #define SOUND_CAPTION_MEET 0x4B
-#define CAPTION_SOUND_CHANNEL 13
-#define CAPTION_SOUND_VOLUME 63
 
 /* The record distance shows under the caption once it has met at the centre */
 #define DRIVE_RECORD_DISTANCE_DRAW 26

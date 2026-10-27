@@ -61,6 +61,22 @@
  */
 #define TEXTURE_COORD_FRACTION_BITS 5
 
+#define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
+#define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
+/* The colors of the headings that some pages draw beside their columns */
+#define HEADING_ENV_COLOR 0xFF730000
+#define HEADING_PRIM_COLOR 0xFFFF1C00
+/*
+ * The standings page lists each player's place, face, score to par and,
+ * when there are bets, bet total. Without bets its columns shift right.
+ */
+#define STANDINGS_HOLE_LEFT 40
+#define STANDINGS_HOLE_TOP 48
+#define SCORE_LABEL 2 /* Drawn over the score column */
+#define M_PI 3.14159265358979323846
+#define BET_TALLY_LEFT 53
+#define BET_TALLY_TOP 112
+
 extern s32 f_MatchResultFrameCount;
 extern Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
 /* "Hole %d" in half-width katakana */
@@ -260,18 +276,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_WinText);
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_LoseText);
 
-#define HOLE_NUMBER_ENV_COLOR 0xFFFF0000
-#define HOLE_NUMBER_PRIM_COLOR 0x30FF0000
-/* The colors of the headings that some pages draw beside their columns */
-#define HEADING_ENV_COLOR 0xFF730000
-#define HEADING_PRIM_COLOR 0xFFFF1C00
-
-/*
- * The standings page lists each player's place, face, score to par and,
- * when there are bets, bet total. Without bets its columns shift right.
- */
-#define STANDINGS_HOLE_LEFT 40
-#define STANDINGS_HOLE_TOP 48
 #define NO_BETS_SHIFT 32
 #define STANDINGS_PLACE_LEFT 32
 #define STANDINGS_FACE_LEFT 108
@@ -283,7 +287,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_LoseText);
 #define STANDINGS_LABEL_TOP 52
 #define STANDINGS_SCORE_LABEL_LEFT 160
 #define STANDINGS_BET_TOTAL_LABEL_LEFT 248
-#define SCORE_LABEL 2 /* Drawn over the score column */
 #define BET_TOTAL_LABEL 4 /* Drawn over the bet total column */
 #define WIDE_BET_TOTAL 1000
 
@@ -806,7 +809,6 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_StringFormat);
 #define SKIN_ICON_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
 /* Only the star and the digits */
 #define SKINS_DIGIT_FONT_HEIGHT (DIGIT_GLYPH_COLON * DIGIT_GLYPH_SIZE)
-#define M_PI 3.14159265358979323846
 /* "Win" cycles through the colors, each channel a sine wave about mid-gray */
 #define WIN_COLOR_STEP (M_PI / 9)
 #define WIN_COLOR_MIDPOINT 0x7F
@@ -988,9 +990,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", D_8024C848_ovl_09);
 #define CARRY_OVER_SECOND_TOP 86
 #define BET_POT_LEFT 69
 #define BET_POT_TOP 86
-#define BET_TALLY_LEFT 53
 #define NO_TALLY_LEFT 69
-#define BET_TALLY_TOP 112
 
 /* The headings blink between their two images, a frame each this many draws */
 extern s32 f_BetBlinkFrame;

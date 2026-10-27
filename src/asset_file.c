@@ -13,6 +13,23 @@
 /* Rounds a stack buffer up to the 16-byte alignment that ROM reads need */
 #define ALIGN_BUFFER(buffer) ((void*)(((u32)(buffer) + 0xF) & ~0xF))
 
+/* Reads the next chunk of the asset into chunk */
+#define READ_CHUNK(chunk, remaining, asset) \
+  if ((remaining) < ASSET_CHUNK_SIZE) { \
+    ReadAssetFile(chunk, remaining, &(asset)->file); \
+    (remaining) = 0; \
+  } else { \
+    ReadAssetFile(chunk, ASSET_CHUNK_SIZE, &(asset)->file); \
+    (remaining) -= ASSET_CHUNK_SIZE; \
+  }
+/* Moves past a byte of chunk, reading the next chunk at its end */
+#define ADVANCE(chunk, position, remaining, asset) \
+  (position)++; \
+  if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
+    READ_CHUNK(chunk, remaining, asset); \
+    (position) = 0; \
+  }
+
 typedef struct AssetTableEntry {
   /* 0x0 */ s32 size;
   /* 0x4 */ u32 offset; /* From the archive's start */
@@ -20,9 +37,13 @@ typedef struct AssetTableEntry {
 
 /* The archive in ROM starts with a table of each asset's AssetTableEntry */
 extern u8 g_AssetArchiveRomStart[];
+
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
 extern AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
 extern s32 f_LastOpenedAssetId;
+
+void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
+void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);
 
 void InitAssetFiles(void) {
   s32 index;
@@ -110,9 +131,6 @@ s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset) {
   return *header &= 0xFFFFFF;
 }
 
-void DecodeByteRuns(u8* buffer, EncodedAsset* asset);
-void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset);
-
 void ReadEncodedAsset(void* buffer, EncodedAsset* asset) {
   if (asset->method == ENCODING_BYTE_RUNS) {
     DecodeByteRuns(buffer, asset);
@@ -134,24 +152,6 @@ typedef struct LargeChunkReader {
   /* 0x2020 */ s32 position;
   /* 0x2024 */ u32 remaining;
 } LargeChunkReader;
-
-/* Reads the next chunk of the asset into chunk */
-#define READ_CHUNK(chunk, remaining, asset) \
-  if ((remaining) < ASSET_CHUNK_SIZE) { \
-    ReadAssetFile(chunk, remaining, &(asset)->file); \
-    (remaining) = 0; \
-  } else { \
-    ReadAssetFile(chunk, ASSET_CHUNK_SIZE, &(asset)->file); \
-    (remaining) -= ASSET_CHUNK_SIZE; \
-  }
-
-/* Moves past a byte of chunk, reading the next chunk at its end */
-#define ADVANCE(chunk, position, remaining, asset) \
-  (position)++; \
-  if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
-    READ_CHUNK(chunk, remaining, asset); \
-    (position) = 0; \
-  }
 
 /*
  * Decodes runs that each start with a signed count byte: a positive

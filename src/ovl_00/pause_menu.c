@@ -61,6 +61,13 @@
 
 #define PAUSE_MENU_SONG_VOLUME 0x60
 
+#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
+/* Shows the player's grid colour as black or white */
+#define PAUSE_OPTION_KIND_GRID_COLOR 2
+#define PAUSE_OPTION_KIND_WIND_SPEED 3
+#define PAUSE_OPTION_KIND_WIND_DIRECTION 4
+#define PAUSE_OPTION_KIND_LIE 5
+
 extern s32 D_800C42D0; /* Set once a Game Boy character has been brought over */
 extern s32 f_IsPauseMenuLoaded;
 extern s32 f_PauseSelection;
@@ -122,6 +129,10 @@ extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 #define CHOICE_CURSOR_SWAY 8.0f
 #define COLOR_WAVE_MIDDLE 127
 #define COLOR_WAVE_AMPLITUDE 127.0f
+
+extern s8 f_PauseLayoutOptionCounts[];
+/* Written once the menu is drawn and cleared by its input, but never read */
+extern s32 f_PauseMenuDrawnMarker;
 
 void SetFramebufferCount(s32 count);
 
@@ -276,12 +287,6 @@ void FreePauseMenu(void) {
 /* What a pause option shows beside its label, and how the cursor points at it
  */
 #define PAUSE_OPTION_KIND_PLAIN 0
-#define PAUSE_OPTION_KIND_WEATHER 1 /* Shows whether it rains */
-/* Shows the player's grid colour as black or white */
-#define PAUSE_OPTION_KIND_GRID_COLOR 2
-#define PAUSE_OPTION_KIND_WIND_SPEED 3
-#define PAUSE_OPTION_KIND_WIND_DIRECTION 4
-#define PAUSE_OPTION_KIND_LIE 5
 /* Shows another label while f_PauseMenuUnkD678 is clear */
 #define PAUSE_OPTION_KIND_UNKD678 7
 
@@ -301,13 +306,10 @@ typedef struct PauseOption {
 
 extern PauseOption f_PauseOptions[];
 extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern s8 f_PauseLayoutOptionCounts[];
 extern char* f_ClearText;
 extern char* f_RainText;
 extern char* f_BlackText;
 extern char* f_WhiteText;
-/* Written once the menu is drawn and cleared by its input, but never read */
-extern s32 f_PauseMenuDrawnMarker;
 extern f32 f_PauseGlowAngle;
 extern f32 f_PauseCursorAngle;
 

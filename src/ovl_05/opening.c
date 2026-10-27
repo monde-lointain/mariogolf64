@@ -49,6 +49,11 @@
 /* A ball at this scale sits a little higher, with its shadow lower */
 #define OPENING_BALL_LARGE_SCALE 3.0f
 
+/* Ends the opening */
+#define OPENING_SCENE_END 999
+/* How far in front of the camera Lakitu's trail is drawn */
+#define LAKITU_TRAIL_DEPTH 300.0f
+
 /* What an opening ball slot shows */
 typedef enum OpeningBallState {
   OPENING_BALL_HIDDEN,
@@ -80,6 +85,7 @@ extern s32 f_IsLogoClubSwinging;
 extern s32 f_AreAmbientSoundsOn;
 extern u8 D_80212830_ovl_05[];
 extern u8 f_ShotBallImage[];
+
 /* The steps that a name logo's animation starts each phase at */
 #define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
 #define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
@@ -103,6 +109,7 @@ extern void* f_OpeningBillboardHeap;
  * from 0 to OPENING_CUE_COUNT - 1, or one of the values below
  */
 extern s32 f_OpeningCue;
+
 #define OPENING_CUE_COUNT 29
 #define OPENING_CUE_INVALID 29
 #define OPENING_CUES_FINISHED 30
@@ -113,6 +120,7 @@ extern s32 f_LakituScreenPoint[2];
 extern u8 f_LakituImage[];
 /* A 48x128 I4 image with its header */
 extern u8 f_LakituTrailImage[];
+
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
 extern Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
 extern f32 f_LakituTrailStart[2];
@@ -220,6 +228,7 @@ extern s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
 
 extern s32 f_OpeningShotDashCount;
 extern BallSimulation f_OpeningShotSimulation;
+
 /* f_OpeningShotDashCount's starting value, and the most it can be */
 #define OPENING_SHOT_MAX_DASH_COUNT 200
 extern Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
@@ -238,6 +247,29 @@ extern Vtx f_OpeningShotDashVertices[4];
 extern s32 f_IsBurstShown;
 extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
 
+/* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
+extern s32 f_IsDonkeyKongShown;
+/* The opening script's current scene */
+extern s32 f_OpeningScene;
+/* The frames left before the opening's current scene moves on */
+extern s32 f_OpeningSceneFramesLeft;
+/*
+ * Whether a slot shows the logo ball, the ball in the title logo. Only this
+ * slot's flag is ever set, and setting it also has all balls projected to
+ * the screen
+ */
+extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
+extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
+extern s32 f_AreImpactLinesShown;
+extern s32 f_ShotBallScale;
+extern s32 f_OpeningSparksState;
+extern Vec3 f_OpeningSparksOrigin;
+/*
+ * Set once the title logo starts forming. The opening can no longer be skipped
+ * after that, and it ends without the confirm sound.
+ */
+extern s32 f_HasLogoStarted;
+
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
 void DrawNameLogos(Gfx** displayListHead);
@@ -253,6 +285,13 @@ void DrawOpeningSparks(Gfx** displayListHead);
  * so that each can overlap the last few */
 #define ROTATING_SOUND_CHANNEL_COUNT 11
 #define OPENING_SOUND_PAN_CENTRE 127
+
+void LoadOpeningShotBall(void);
+void LoadOpeningBurst(void);
+void LoadLakitu(void);
+void LoadOpeningImpactLines(void);
+void EaseOpeningLookAt(void);
+void LoadOpeningBall(s32 imageIndex, s32 slot);
 
 /* Moves f_OpeningSoundChannel on to the next of the rotating channels */
 void AdvanceOpeningSoundChannel(void) {
@@ -573,8 +612,6 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
 
 /* Written but never read */
 extern s32 f_LastPlacedSlotIndex;
-/* Whether Donkey Kong stands in for Yoshi, once he is unlocked */
-extern s32 f_IsDonkeyKongShown;
 extern s32 f_CueSlotIndex;
 
 /* Places the cue slot's character, leaving the point's height unset */
@@ -912,12 +949,6 @@ s32 UpdateOpeningCharacters(void) {
   return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
-/* The opening script's current scene */
-extern s32 f_OpeningScene;
-/* Ends the opening */
-#define OPENING_SCENE_END 999
-/* The frames left before the opening's current scene moves on */
-extern s32 f_OpeningSceneFramesLeft;
 /*
  * Mario shows on the logo ball from this scene on, whenever fewer than this
  * many of a scene's frames are left
@@ -925,17 +956,7 @@ extern s32 f_OpeningSceneFramesLeft;
 #define OPENING_SCENE_LOGO_BALL_MARIO 200
 #define LOGO_BALL_MARIO_FRAMES_LEFT 98
 
-/*
- * Whether a slot shows the logo ball, the ball in the title logo. Only this
- * slot's flag is ever set, and setting it also has all balls projected to
- * the screen
- */
-extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
 #define LOGO_BALL_SLOT 1
-
-extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
-extern s32 f_AreImpactLinesShown;
-extern s32 f_ShotBallScale;
 
 /* What the sparks are doing */
 typedef enum SparksState {
@@ -944,17 +965,10 @@ typedef enum SparksState {
   SPARKS_FLYING
 } SparksState;
 
-extern s32 f_OpeningSparksState;
-extern Vec3 f_OpeningSparksOrigin;
-
 /* The frames since the opening started, after which it ends itself */
 extern s32 f_OpeningFrameCount;
+
 #define OPENING_FRAME_LIMIT 9000
-/*
- * Set once the title logo starts forming. The opening can no longer be skipped
- * after that, and it ends without the confirm sound.
- */
-extern s32 f_HasLogoStarted;
 extern Unk20 D_8020ADB8_ovl_05;
 extern Unk20 D_8020ADD8_ovl_05;
 extern Unk20 D_8020ADF8_ovl_05;
@@ -969,6 +983,7 @@ extern CoursePoint D_8020C404_ovl_05;
  */
 extern s32 f_DonkeyKongSoundChannel;
 extern s32 f_ClosingSoundChannel;
+
 /* The first channel after the rotating ones */
 #define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 extern f32 D_80217078_ovl_05;
@@ -978,12 +993,6 @@ void SpawnRisingClumps(CoursePoint point);
 s32 IsDonkeyKongUnlocked(void);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
 void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
-void LoadOpeningShotBall(void);
-void LoadOpeningBurst(void);
-void LoadLakitu(void);
-void LoadOpeningImpactLines(void);
-void EaseOpeningLookAt(void);
-void LoadOpeningBall(s32 imageIndex, s32 slot);
 
 /* Fades the screen to white when a button skips the rest of the opening */
 #define OPENING_SCENE_SKIPPED 998
@@ -3339,8 +3348,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
 
 #define ASSET_LAKITU_IMAGE 0x64B
 #define ASSET_LAKITU_TRAIL_IMAGE 0x6AF
-/* How far in front of the camera Lakitu's trail is drawn */
-#define LAKITU_TRAIL_DEPTH 300.0f
 
 /* Loads Lakitu's images and gathers his trail behind him */
 void LoadLakitu(void) {
@@ -4072,6 +4079,7 @@ extern f32 f_LogoClubUnusedAngle; /* Its sine is never used */
 extern f32 f_LogoClubWobbleAngle;
 /* The top and bottom halves of a letter */
 extern Vtx f_LogoLetterVertices[2][4];
+
 /* The club's image is drawn in six strips */
 #define LOGO_CLUB_STRIP_COUNT 6
 extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];

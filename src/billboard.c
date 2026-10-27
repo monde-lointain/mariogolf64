@@ -23,6 +23,9 @@
 /* Vertices per billboard shape, of which the first four form its quad */
 #define SHAPE_VERTEX_COUNT 8
 
+/* Room for the file name in a host command, including padding */
+#define HOST_FILE_NAME_SIZE_MAX 0x100
+
 typedef struct BillboardTexture {
   /* 0x0 */ s32 assetId;
   /* 0x4 */ s16 type;
@@ -38,6 +41,7 @@ extern s8 f_IsHeapReady;
 extern u8* f_HeapStart;
 extern u8* f_HeapEnd;
 extern u16 f_DrawOrder[BILLBOARD_COUNT];
+
 s32 GetGroundHeight(s32 x, s32 z);
 
 /* Billboards this close to the course's edges are hidden */
@@ -572,9 +576,6 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawFadingBillboards);
 
 #define HOST_COMMAND_WRITE_FILE 10
 #define HOST_COMMAND_READ_FILE 11
-
-/* Room for the file name in a host command, including padding */
-#define HOST_FILE_NAME_SIZE_MAX 0x100
 
 s32 WriteHostFile(char* fileName, u32 size) {
   u32* command;

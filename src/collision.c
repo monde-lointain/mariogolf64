@@ -141,6 +141,27 @@
       ((plane).normal[AXIS_Z] * (z)) + \
       ((plane).distance * COURSE_UNITS_PER_UNIT))
 
+/*
+ * Whether all three of a triangle's corners are below the path. It is a
+ * macro, as an inline function allocates registers differently from the
+ * original.
+ */
+#define IsTriangleBelowPath(isFirstBelow, isSecondBelow, isThirdBelow) \
+  ((isFirstBelow) && (isSecondBelow) && (isThirdBelow))
+/*
+ * Whether a value is less than, or more than, every corner's, which are
+ * in units. They are macros, as inline functions allocate registers
+ * differently from the original.
+ */
+#define IsLessThanCorners(value, corners) \
+  (((value) < (corners)[0] * COURSE_UNITS_PER_UNIT) && \
+      ((value) < (corners)[1] * COURSE_UNITS_PER_UNIT) && \
+      ((value) < (corners)[2] * COURSE_UNITS_PER_UNIT))
+#define IsMoreThanCorners(value, corners) \
+  (((corners)[0] * COURSE_UNITS_PER_UNIT < (value)) && \
+      ((corners)[1] * COURSE_UNITS_PER_UNIT < (value)) && \
+      ((corners)[2] * COURSE_UNITS_PER_UNIT < (value)))
+
 /* Whether a point is off the ground; a negative x or z is too, as an unsigned
  * one is big */
 static inline s32 IsOffGround(s32 x, s32 z) {
@@ -151,14 +172,6 @@ static inline s32 IsOffGround(s32 x, s32 z) {
 static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
   return ((u32)x >= MINI_GOLF_GROUND_SIZE) || ((u32)z >= MINI_GOLF_GROUND_SIZE);
 }
-
-/*
- * Whether all three of a triangle's corners are below the path. It is a
- * macro, as an inline function allocates registers differently from the
- * original.
- */
-#define IsTriangleBelowPath(isFirstBelow, isSecondBelow, isThirdBelow) \
-  ((isFirstBelow) && (isSecondBelow) && (isThirdBelow))
 
 /*
  * Whether two values are both negative or both not. It is a macro, as
@@ -204,20 +217,6 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
 #define IsBareCrossing(simulation, startSide, endSide) \
   (((simulation)->isRunning == BALL_STATE_ROLLING) && \
       (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
-
-/*
- * Whether a value is less than, or more than, every corner's, which are
- * in units. They are macros, as inline functions allocate registers
- * differently from the original.
- */
-#define IsLessThanCorners(value, corners) \
-  (((value) < (corners)[0] * COURSE_UNITS_PER_UNIT) && \
-      ((value) < (corners)[1] * COURSE_UNITS_PER_UNIT) && \
-      ((value) < (corners)[2] * COURSE_UNITS_PER_UNIT))
-#define IsMoreThanCorners(value, corners) \
-  (((corners)[0] * COURSE_UNITS_PER_UNIT < (value)) && \
-      ((corners)[1] * COURSE_UNITS_PER_UNIT < (value)) && \
-      ((corners)[2] * COURSE_UNITS_PER_UNIT < (value)))
 
 /* The hit masks, and which mask each billboard texture has */
 extern s8 g_BillboardMasks[BILLBOARD_MASK_COUNT]

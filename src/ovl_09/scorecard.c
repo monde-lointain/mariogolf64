@@ -92,7 +92,11 @@
 #define SOUND_ROW_FLIPPED 0x5B
 #define ROW_FLIP_SOUND_CHANNEL 13
 
+#define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
+#define THREE_PAGE_COUNT 3
+
 extern s32 f_ScorecardState;
+
 void SetFramebufferCount(s32 count);
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
 
@@ -443,7 +447,6 @@ void FreeScorecard(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", FreeScorecard);
 #endif
 
-#define BEHIND_FACE_IMAGE_OFFSET 4 /* The face shown for a player behind */
 #define STOPWATCH_HOUR (60 * SECONDS_PER_MINUTE * FRAMES_PER_SECOND)
 /* A hole time of this many minutes or more shows as dashes */
 #define SHOWN_MINUTE_LIMIT 60
@@ -1063,7 +1066,6 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
 #define THREE_PAGE_TITLE_LEFT 29
 #define THREE_PAGE_TITLE_SPACING 104
 #define PAGE_TITLE_TOP 21
-#define THREE_PAGE_COUNT 3
 #define UNSHOWN_PAGE_GRAY 0x7F
 
 /*

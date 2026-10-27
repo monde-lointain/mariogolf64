@@ -64,6 +64,12 @@
 #define CLUB_SOUND_CHANNEL 0xF
 #define CLUB_SOUND_VOLUME 0x7F
 
+/*
+ * Lie ratings, as one digit for each club type from the 1W to the SW; the
+ * putter is not rated. Several surface kinds share each group's ratings.
+ */
+#define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
+
 /* A club's stats, as GenerateClubSet takes them */
 typedef struct ClubStats {
   /* 0x0 */ s16 distance; /* In yards */
@@ -868,11 +874,6 @@ s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds) {
       distinguishesKinds, GetSurfaceInfo(g_CurrentShot.surface));
 }
 
-/*
- * Lie ratings, as one digit for each club type from the 1W to the SW; the
- * putter is not rated. Several surface kinds share each group's ratings.
- */
-#define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
 static const char f_TeeUpLieRatings[LIE_RATING_LENGTH + 1] = "3444444555555";
 static const char f_TeeUpApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "5555555555555";

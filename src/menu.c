@@ -29,6 +29,14 @@
 /* The SRAM check buffer is read and written by DMA, so it starts on a cache
  * line */
 #define DMA_ALIGNMENT 0x10
+/* Player states that a saved game may hold; the first group restarts as 0 */
+#define PLAYER_STATE_UNK0 0
+#define PLAYER_STATE_UNK2 2
+#define PLAYER_STATE_UNK3 3
+#define PLAYER_STATE_UNK17 17
+#define PLAYER_STATE_UNK20 20
+#define PLAYER_STATE_UNK21 21
+
 #define ALIGN_FOR_DMA(address) \
   (((u32)(address) + DMA_ALIGNMENT - 1) & ~(DMA_ALIGNMENT - 1))
 
@@ -138,6 +146,7 @@ extern u16 D_800C2064[7];
 extern s16 D_800C20D4[2];
 extern u16 D_800C20E0[][12];
 extern u16 D_800C28B0[1];
+
 void SetFramebufferCount(s32 count);
 
 /* D_800C29B8 lists slots in id order up to this count */
@@ -568,14 +577,6 @@ void InsertRankedRecord(Unk68* record) {
   }
   osSyncPrintf("\n");
 }
-
-/* Player states that a saved game may hold; the first group restarts as 0 */
-#define PLAYER_STATE_UNK0 0
-#define PLAYER_STATE_UNK2 2
-#define PLAYER_STATE_UNK3 3
-#define PLAYER_STATE_UNK17 17
-#define PLAYER_STATE_UNK20 20
-#define PLAYER_STATE_UNK21 21
 
 s32 SaveOrContinueGameByMode(s32 isContinuing) {
   UnkB8* players;

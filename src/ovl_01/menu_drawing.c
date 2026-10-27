@@ -16,6 +16,13 @@
 #include "text.h"
 #include "variables.h"
 
+/* The STATUS, HOW TO PLAY, CODE ENTRY and OPTIONS labels, 128 by 20 each, plain
+ * in D_801B5CD0 and lit in D_8012D420 */
+#define MAIN_CHOICE_LABEL_WIDTH 128
+#define MAIN_CHOICE_LABEL_HEIGHT 20
+#define MAIN_CHOICE_LABEL_IMAGE_SIZE \
+  (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
+
 /* Labels in the shadowed font */
 extern char g_ContinueLabelText[];
 extern char g_BirdieBadgeLabelText[];
@@ -756,13 +763,6 @@ void DrawContinueLabel(Gfx** displayListHead) {
   DrawShadowedText(&gfx, 96, 64, g_ContinueLabelText);
   *displayListHead = gfx;
 }
-
-/* The STATUS, HOW TO PLAY, CODE ENTRY and OPTIONS labels, 128 by 20 each, plain
- * in D_801B5CD0 and lit in D_8012D420 */
-#define MAIN_CHOICE_LABEL_WIDTH 128
-#define MAIN_CHOICE_LABEL_HEIGHT 20
-#define MAIN_CHOICE_LABEL_IMAGE_SIZE \
-  (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
 
 extern s32 D_8022FDF4_ovl_01[MAIN_CHOICE_COUNT][2];
 

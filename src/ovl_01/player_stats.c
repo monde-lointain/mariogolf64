@@ -260,6 +260,8 @@ void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide);
 extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT]
                            [PLAYER_STATS_FILE_SIZE];
 
+s16 func_8021E468_ovl_01(void);
+
 void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
   EncodedAsset asset;
   MenuMemory* memory = func_8005AF74();
@@ -1013,8 +1015,6 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
       break;
   }
 }
-
-s16 func_8021E468_ovl_01(void);
 
 /* func_8021E340 is called without a prototype; the original extends its result
  * from 16 bits, not 8 */

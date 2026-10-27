@@ -311,6 +311,13 @@
  */
 #define KSEG1_OFFSET 0x20000000
 
+/* A plain if leaves GCC to invert the condition, which the game's code does not
+ */
+#define EDITOR_ASSERT(condition, lineNumber) \
+  ((condition) ? (void)0 \
+               : ReportFailedAssertion( \
+                     f_EditorAssertionText, f_EditorFileName, lineNumber))
+
 extern u8 D_80451A60[];
 
 /* func_8040C360's pole: two crossed quads, one in the x-y plane and one in the
@@ -2238,13 +2245,6 @@ void func_80404B84_hole_editor(void) {
 
 static const char f_EditorAssertionText[] = "EX";
 static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
-
-/* A plain if leaves GCC to invert the condition, which the game's code does not
- */
-#define EDITOR_ASSERT(condition, lineNumber) \
-  ((condition) ? (void)0 \
-               : ReportFailedAssertion( \
-                     f_EditorAssertionText, f_EditorFileName, lineNumber))
 
 /*
  * Gathers the terrain codes on each side of the two diagonals of the

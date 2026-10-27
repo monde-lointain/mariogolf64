@@ -85,9 +85,12 @@
 #define ASSET_PAR_FOUR_IMAGE 0x566
 #define ASSET_PAR_FIVE_IMAGE 0x567
 
+#define MODULE_UNK25 25
+
 /* The first asset of each course record's hole images, one per hole */
 extern u16 f_HoleImageAssets[COURSE_RECORD_COUNT];
 extern void* f_HoleImage;
+
 #define HOLE_IMAGE_WIDTH 48
 #define HOLE_IMAGE_HEIGHT 42
 extern void* f_ParImage;
@@ -280,6 +283,7 @@ extern s32 f_IsTestGradientShown;
 extern char f_ColorTestSampleText[];
 /* Printed over a cursor to erase it */
 extern char f_BlankText[];
+
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
 extern s32 f_HudOffsetY;
@@ -307,6 +311,7 @@ extern s32 f_HudOffsetY;
 
 extern s32 f_LandingReaction;
 extern s32 f_LandingReactionFrame;
+
 /* The reaction stops counting its frames here */
 #define LANDING_REACTION_FRAME_COUNT 30
 #define LANDING_NAME_GLYPH_Y 8
@@ -395,6 +400,7 @@ extern void* f_ClubNameImages[2];
 /* The image asset of the lie that the HUD shows, loaded into f_LieImage */
 extern s32 f_LieImageAsset;
 extern void* f_LieImage;
+
 #define ANIMATED_ICON_LABEL_COUNT 3
 /* The images of the animated icon and its labels; see DrawAnimatedIcon */
 extern void* f_AnimatedIconImages[];
@@ -424,6 +430,7 @@ extern Lights1 f_WindArrowLights;
  * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
  */
 extern f32 f_WindIconPulseAngle;
+
 #define WIND_ICON_PULSE_STEP (M_PI / 18)
 #define WIND_SPEED_TO_METERS_SCALE 3600
 #define WIND_SPEED_TO_METERS_DIVISOR 104857600
@@ -470,6 +477,11 @@ extern f32 f_WindIconPulseAngle;
 #define WIND_TEXT_ENV_BLUE 0x7F
 extern Mtx f_WindIndicatorMatrices[2];
 extern Gfx D_80222400[];
+/* The quad that each segment of the ball trail, and of the green grid, moves
+ * into place on the screen */
+extern Vtx f_BallTrailVertices[4];
+extern s32 f_ClubNameImageIndex;
+
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
 extern s32 f_SceneryState;
 
@@ -1337,9 +1349,6 @@ typedef struct GridScreenPoint {
 } GridScreenPoint; /* size = 0x10 */
 
 extern s32 D_800BB0E8;
-/* The quad that each segment of the ball trail, and of the green grid, moves
- * into place on the screen */
-extern Vtx f_BallTrailVertices[4];
 extern s32 f_GreenGridAlpha;
 extern f32 f_GreenGridScroll;
 extern Mtx f_GreenGridMatrix;
@@ -2183,7 +2192,6 @@ void AdjustHudOffset(void) {
 }
 
 #define MODULE_PAUSE_MENU 20
-#define MODULE_UNK25 25
 /* Where the shot panel's wind indicator sits, unless the shot is on the green,
  * where the wind doesn't count */
 #define SHOT_PANEL_WIND_INDICATOR_X 100.0f
@@ -2214,7 +2222,6 @@ extern Vtx f_ClubHeadIconVertices[4];
 extern Vtx f_LieIconVertices[8];
 extern Mtx f_ClubHeadIconMatrices[2];
 extern Mtx f_LieIconMatrices[2];
-extern s32 f_ClubNameImageIndex;
 /* The name image of each club slot */
 extern u16 f_ClubNameAssets[];
 
@@ -3185,6 +3192,7 @@ void DrawColorTest(Gfx** displayListHead) {
 
 /* The HUD's letterbox height, which DrawLetterbox grows each frame */
 extern s32 f_LetterboxHeight;
+
 /* The shot panel slides in from the left by this much a frame */
 #define SHOT_PANEL_SLIDE_STEP 4
 /*
@@ -3217,6 +3225,7 @@ extern s32 f_LetterboxHeight;
 /* The pin flag beside the distance to the cup waves through four frames side by
  * side */
 extern s32 f_PinFlagTime;
+
 #define PIN_FLAG_TIME_COUNT 16
 #define PIN_FLAG_FRAME_LENGTH 4
 #define PIN_FLAG_IMAGE_SIZE 32
@@ -3236,6 +3245,7 @@ extern s32 f_PinFlagTime;
 /* In Ring Shot, a spinning ring beside the count of rings still to pass */
 extern s32 f_RingFrame;
 extern s32 f_RingFrameTime;
+
 #define RING_FRAME_COUNT 3
 #define RING_FRAME_LENGTH 6
 #define RING_IMAGE_SIZE 32
@@ -3246,6 +3256,7 @@ extern s32 f_RingFrameTime;
 #define RING_COUNT_Y 112
 #define DISTANCE_FONT_WIDTH 128
 extern u16 f_WhiteDistancePalette[];
+
 #define HOLE_YARDAGE_X 60
 #define HOLE_YARDAGE_Y 56
 #define PAR_IMAGE_X 24

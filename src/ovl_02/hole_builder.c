@@ -86,6 +86,20 @@
 /* The table of hole asset ids has a row for each course and then some */
 #define HOLE_ASSET_COURSE_COUNT 9
 
+#define TEXEL_RED_MASK 0xF800
+#define TEXEL_GREEN_MASK 0x7C0
+#define TEXEL_BLUE_MASK 0x3E
+#define TEXEL_ALPHA_MASK 1
+/* The texels in a tile's border: one before its texels and three after */
+#define TILE_BORDER_BEFORE 1
+/*
+ * Whether a green cell lies within one cell of other terrain. It is a macro,
+ * as an inline function compiles differently from the original.
+ */
+#define IsGreenEdge(code, nearestCode, nearestDistance) \
+  ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
+      (nearestDistance) < 2)
+
 /*
  * Paints a map texel of a code, given the nearest other code and its
  * distance. It returns the color, shifted by PAINTED_COLOR_SHIFT, with the
@@ -554,14 +568,6 @@ void ResetTerrainCodeCells(void) {
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
 #endif
-
-/*
- * Whether a green cell lies within one cell of other terrain. It is a macro,
- * as an inline function compiles differently from the original.
- */
-#define IsGreenEdge(code, nearestCode, nearestDistance) \
-  ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
-      (nearestDistance) < 2)
 
 /*
  * The paint logic of Toad Highlands, Koopa Park and Mario's Star. It returns
@@ -2577,10 +2583,6 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 #define TEXEL_RED_SHIFT 11
 #define TEXEL_GREEN_SHIFT 6
 #define TEXEL_BLUE_SHIFT 1
-#define TEXEL_RED_MASK 0xF800
-#define TEXEL_GREEN_MASK 0x7C0
-#define TEXEL_BLUE_MASK 0x3E
-#define TEXEL_ALPHA_MASK 1
 #define TEXEL_CHANNEL_MAX 31
 
 /* A billboard's position is in units of 1/BILLBOARD_UNITS_PER_TEXEL map texel
@@ -3241,8 +3243,6 @@ void ShadeGround(void) {
   osSyncPrintf("EE\n");
 }
 
-/* The texels in a tile's border: one before its texels and three after */
-#define TILE_BORDER_BEFORE 1
 #define TILE_BORDER_END (GROUND_TILE_TEXEL_ROW_LENGTH - TILE_BORDER_BEFORE)
 #define BORDERED_TILE_TEXEL_COUNT \
   (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH)

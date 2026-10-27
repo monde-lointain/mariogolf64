@@ -390,6 +390,10 @@ typedef struct StatusData {
 #define SOUND_MENU_CANCEL 0x5F
 #define MENU_SOUND_VOLUME 127
 
+/* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this
+ */
+extern const char f_WriteSumFormat[];
+
 void LoadCursorBox(void* image);
 void UpdateBringCharacters(void);
 s32 ReadCartridgeCharacters(void);
@@ -454,8 +458,11 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
 void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer);
 void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top);
 extern Gfx D_800C3FC0[];
+
 s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file);
 s32 OpenGameBoyPakWithRetries(s32 port, OSGbpakId* header, NUContPakFile* file);
+
+s32 RoundedWholePart(f32 value);
 
 /* Debug code that writes the cartridge RAM of controller 1's Game Boy cartridge
  * to the host */
@@ -2389,10 +2396,6 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
 INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge);
 #endif
 
-/* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this
- */
-extern const char f_WriteSumFormat[];
-
 #ifndef NON_MATCHING
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_WriteSumFormat);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
@@ -3165,8 +3168,6 @@ void DrawPressingHand(Gfx** displayListHead) {
   }
   *displayListHead = displayList;
 }
-
-s32 RoundedWholePart(f32 value);
 
 /* The save from unk990 on, which BuildStatusData reads through a pointer to
  * unk990 */

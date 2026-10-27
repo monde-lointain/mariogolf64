@@ -37,6 +37,14 @@
 #define SCORE_NUMBER_SALT 0x3507F
 
 /*
+ * Writes symbolCount symbols as characters. It fails with -1 on a symbol
+ * outside the alphabet. The caller passes a fourth argument that this
+ * routine doesn't read.
+ */
+s32 WritePasswordSymbols(
+    u8* symbols, char* password, s32 symbolCount, s32 unused);
+
+/*
  * Each symbol's characters. The first one is the one written; the others
  * are accepted because they look alike.
  */
@@ -282,14 +290,6 @@ static u8 ReverseBits(u8 bits) {
   }
   return reversed;
 }
-
-/*
- * Writes symbolCount symbols as characters. It fails with -1 on a symbol
- * outside the alphabet. The caller passes a fourth argument that this
- * routine doesn't read.
- */
-s32 WritePasswordSymbols(
-    u8* symbols, char* password, s32 symbolCount, s32 unused);
 
 #ifdef NON_MATCHING
 s32 WritePasswordSymbols(

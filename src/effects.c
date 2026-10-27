@@ -26,6 +26,34 @@
 #include "text.h"
 #include "variables.h"
 
+/* Effects spawned around a point are offset by up to half this on each axis, in
+ * course units */
+#define POINT_SPREAD 3072
+/* Sparkles start falling at this many world units a frame */
+#define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)
+#define DROP_HEADING_COUNT 32
+/* Horizontal speeds, in course units a frame */
+#define DROP_SLOWEST_SPEED 200
+#define DROP_SPEED_STEP 20
+/* World units a frame; the faster a drop flies out, the faster it rises */
+#define DROP_SLOWEST_RISE_SPEED (2700 * COURSE_TO_WORLD_SCALE)
+#define DEBRIS_SPEED_STEP 0x600
+/* Effects are drawn only where they project to a depth below this */
+#define EFFECT_NEAREST_DEPTH (-3.0f)
+#define DIVOT_IMAGE_SIZE 32
+#define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
+/* Ripples and spreading circles are drawn in this light gray */
+#define CIRCLE_GRAY 230
+#define RUMBLE_FREQUENCY 0x100
+#define RUMBLE_FRAME_COUNT 10
+/* New raindrops and splashes are placed in steps of this many course units
+ * around the center */
+#define RAIN_SPREAD_STEP 0x600
+#define RAIN_FALL_SPEED 60.0f
+/* How far the rain drifts sideways per unit of fall, for each whole unit of
+ * wind speed */
+#define RAIN_DRIFT_PER_WIND_SPEED 0.1f
+
 /* The particle effects drawn in the scene, such as the sparkles of a passed
  * ring */
 typedef struct Effect {
@@ -150,6 +178,13 @@ extern f32 f_RainDriftX;
 extern f32 f_RainDriftZ;
 extern Vec3 f_RainVelocity; /* Per frame */
 extern s32 f_GroundCheckDropIndex; /* The raindrop whose ground height
+void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
+void DrawDrop(
+    Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect);
+void DrawDivot(Gfx** displayListHead, Effect* effect);
+void DrawDivotMark(Gfx** displayListHead);
+void DrawRipple(Gfx** displayListHead, Effect* effect);
+void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect);
                                      UpdateRain refreshes next */
 
 s32 f_DebrisKind = 0;
@@ -350,11 +385,6 @@ void ClearEffects(void) {
 
 /* World units above the point that a spreading circle starts */
 #define SPREADING_CIRCLE_RISE 1.5f
-/* Effects spawned around a point are offset by up to half this on each axis, in
- * course units */
-#define POINT_SPREAD 3072
-/* Sparkles start falling at this many world units a frame */
-#define SPARKLE_FALL_SPEED (2.62f * COURSE_TO_WORLD_SCALE)
 
 /* Starts a circle spreading from a character's point; Bowser's bogey reaction
  * spawns them */
@@ -562,13 +592,6 @@ void SpawnRipple(CoursePoint position) {
   }
 }
 
-#define DROP_HEADING_COUNT 32
-/* Horizontal speeds, in course units a frame */
-#define DROP_SLOWEST_SPEED 200
-#define DROP_SPEED_STEP 20
-/* World units a frame; the faster a drop flies out, the faster it rises */
-#define DROP_SLOWEST_RISE_SPEED (2700 * COURSE_TO_WORLD_SCALE)
-
 /*
  * Launches a drop up and out from a point, in one of DROP_HEADING_COUNT
  * headings across a quarter turn.
@@ -684,7 +707,6 @@ void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
   }
 }
 
-#define DEBRIS_SPEED_STEP 0x600
 #define IMPACT_PUFF_COUNT 3
 
 /*
@@ -1450,13 +1472,6 @@ void UpdateEffects(void) {
 #define SPARKLE_TINT GPACK_RGBA5551(255, 255, 0, 0)
 
 void DrawBillboardEffect(Gfx** displayListHead, Effect* effect, u16 color);
-void DrawEffectShadow(Gfx** displayListHead, Effect* effect);
-void DrawDrop(
-    Gfx** displayListHead, CameraMatrices* matrices, Effect* unusedEffect);
-void DrawDivot(Gfx** displayListHead, Effect* effect);
-void DrawDivotMark(Gfx** displayListHead);
-void DrawRipple(Gfx** displayListHead, Effect* effect);
-void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect);
 
 /*
  * Draws every effect, a kind at a time: divot marks, ripples, spreading
@@ -1650,8 +1665,6 @@ void DrawEffects(CameraMatrices* matrices, Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Effects are drawn only where they project to a depth below this */
-#define EFFECT_NEAREST_DEPTH (-3.0f)
 /* The rectangles step across this many texels; the smaller images are shifted
  * down to fit */
 #define BILLBOARD_IMAGE_SIZE 64
@@ -1856,8 +1869,6 @@ void DrawDrop(
   *displayListHead = gfx;
 }
 
-#define DIVOT_IMAGE_SIZE 32
-#define DIVOT_FRAME_SIZE (DIVOT_IMAGE_SIZE * DIVOT_IMAGE_SIZE / 2)
 /* The spin is cut into this many steps, each drawn with the frame in
  * f_PingPongFrameIndices */
 #define DIVOT_SPIN_STEP_COUNT 12
@@ -1952,9 +1963,6 @@ void DrawDivotMark(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 
-/* Ripples and spreading circles are drawn in this light gray */
-#define CIRCLE_GRAY 230
-
 /* Draws a ripple at its matrix, faded by its alpha */
 void DrawRipple(Gfx** displayListHead, Effect* effect) {
   Gfx* gfx = *displayListHead;
@@ -1988,9 +1996,6 @@ void DrawSpreadingCircle(Gfx** displayListHead, Effect* effect) {
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
-
-#define RUMBLE_FREQUENCY 0x100
-#define RUMBLE_FRAME_COUNT 10
 
 /* Rumbles the player's controller briefly if it has a Rumble Pak, unless
  * g_GameState.unk31 is set */
@@ -2057,14 +2062,7 @@ void EndWeather(void) {
 }
 
 #define RAIN_CENTER_DISTANCE 150.0f
-/* New raindrops and splashes are placed in steps of this many course units
- * around the center */
-#define RAIN_SPREAD_STEP 0x600
 #define RAIN_SPLASH_SPREAD_STEP_COUNT 500
-#define RAIN_FALL_SPEED 60.0f
-/* How far the rain drifts sideways per unit of fall, for each whole unit of
- * wind speed */
-#define RAIN_DRIFT_PER_WIND_SPEED 0.1f
 
 /* Centers the rain RAIN_CENTER_DISTANCE ahead of the camera, in the direction
  * it looks */

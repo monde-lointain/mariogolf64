@@ -35,6 +35,62 @@
 #include "turn.h"
 #include "variables.h"
 
+#define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
+#define FLIGHT_SOUND_VOLUME 0x7F
+#define PATH_FLAG_UNK4 (1 << 2)
+#define PATH_FLAG_UNK8 (1 << 3)
+#define RANDOM_YAW_MASK 0x7FFF
+#define SHORT_SHOT_MAX_LENGTH 0xBB7FF
+#define CAMERA_CHANGE_HOLD_COUNT 20
+#define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
+
+#define IsFairwayKind(kind) \
+  ((kind) == SURFACE_KIND_FAIRWAY || \
+      (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
+      (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
+#define IsBunkerKind(kind) \
+  ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
+      (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
+/* It is a macro, as an inline function compiles differently from the original
+ */
+#define IsBallLanding() \
+  (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
+      (f32)f_ShotEndPosition[AXIS_X] < \
+          (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) && \
+      (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) < \
+          (f32)f_ShotEndPosition[AXIS_X] && \
+      (f32)f_ShotEndPosition[AXIS_Z] < \
+          (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) && \
+      (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) < \
+          (f32)f_ShotEndPosition[AXIS_Z])
+
+extern s32 D_800BE620;
+extern s32 D_800BE624;
+extern s32 D_800BE650;
+extern f32 D_800BE65C;
+extern s8 f_PendingResultSound;
+extern s32 D_800BE67C;
+extern s32 D_800BE680;
+extern f32 D_800BE684;
+extern CoursePoint f_ShotStartPosition;
+extern f32 f_EndYawFromCup;
+extern f32 f_StartYawFromCup;
+extern s32 f_GreenSoundCount;
+extern s32 f_IsLandingSoundPlayed;
+extern s8 f_PassedPathFlags;
+/* The grid that DisplaceNoiseSquare builds */
+extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
+extern s8 f_IsNoiseResetPending;
+
+/* menu.c returns an s8, but the original calls it without truncating, as if
+ * undeclared */
+s32 func_8005DE40();
+void ChooseFlightCameraKind(void);
+void PlaceFlightCamera(s32 step);
+s32 StepHoleFlyover(void);
+void EaseLookAtBelowBall(f32 drop);
+void EaseLookAtPoint(f32 yaw);
+
 /* Unused; the original has it */
 static const char f_UnusedFloatFormat[] = "            %f";
 
@@ -383,13 +439,6 @@ s16 GetAimSlopeAngle(UnkB8* player, Unk20* shot) {
 /* Unreferenced; the original has it, and its zero is in the ROM */
 static const f64 f_UnusedZero = 0.0;
 
-/* menu.c returns an s8, but the original calls it without truncating, as if
- * undeclared */
-s32 func_8005DE40();
-void ChooseFlightCameraKind(void);
-void PlaceFlightCamera(s32 step);
-s32 StepHoleFlyover(void);
-
 /* The surface under the player's ball */
 SurfaceInfo* GetBallSurfaceInfo(UnkB8* player) {
   return GetSurfaceInfoAt(
@@ -466,7 +515,6 @@ void EndFlightCamera(void) {
 
 /* Random yaws come in steps of a 32768th of a turn */
 #define RANDOM_YAW_RANGE 0x7FFF
-#define RANDOM_YAW_TO_RADIANS (M_PI / 16384)
 /* The shortest shot length that the cameras work with */
 #define MIN_SHOT_LENGTH 0x7800
 /* The path steps searched for cup passes and for path flags */
@@ -477,23 +525,9 @@ void EndFlightCamera(void) {
 #define GROUND_PROBE_DISTANCE 30720.0f
 #define GROUND_PROBE_MAX_RISE 4608.0f
 
-extern s32 D_800BE620;
-extern s32 D_800BE624;
-extern s32 D_800BE650;
-extern f32 D_800BE65C;
-extern s8 f_PendingResultSound;
 extern s32 D_800BE678;
-extern s32 D_800BE67C;
-extern s32 D_800BE680;
-extern f32 D_800BE684;
-extern CoursePoint f_ShotStartPosition;
-extern f32 f_EndYawFromCup;
-extern f32 f_StartYawFromCup;
 extern s32 D_800DAF20;
-extern s32 f_GreenSoundCount;
-extern s32 f_IsLandingSoundPlayed;
 extern s32 D_800DAF44;
-extern s8 f_PassedPathFlags;
 
 /*
  * Starts the flight camera for the simulated shot. It resets the flight state,
@@ -698,13 +732,6 @@ void StartFlightCamera(s32 earlierFlightCount) {
  */
 #define IsUnk2E14PowerShot() \
   (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
-#define IsFairwayKind(kind) \
-  ((kind) == SURFACE_KIND_FAIRWAY || \
-      (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
-      (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
-#define IsBunkerKind(kind) \
-  ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
-      (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
 /* Plays the sound of the simulated shot's club meeting the ball */
 void PlayContactSound(void) {
@@ -850,7 +877,6 @@ s32 GetEndReaction(void) {
 #define FLIGHT_SOUND_UNK9B 0x9B
 #define FLIGHT_SOUND_CHANNEL_UNK3 3
 #define FLIGHT_SOUND_CHANNEL_UNKE 0xE
-#define FLIGHT_SOUND_VOLUME 0x7F
 #define FLIGHT_SOUND_VOLUME_UNK50 0x50
 #define FLIGHT_SOUND_VOLUME_UNK60 0x60
 #define FLIGHT_SOUND_VOLUME_UNK64 0x64
@@ -872,8 +898,6 @@ s32 GetEndReaction(void) {
 /* Bits of g_SimulatedShot.pathFlags */
 #define PATH_FLAG_UNK1 (1 << 0)
 #define PATH_FLAG_UNK2 (1 << 1)
-#define PATH_FLAG_UNK4 (1 << 2)
-#define PATH_FLAG_UNK8 (1 << 3)
 
 /* Distances that PlayFlightSounds tests, in course units */
 #define CLOSE_LANDING_DISTANCE 0x3C00
@@ -1170,19 +1194,6 @@ void PlayFlightSounds(s32 step) {
   }
 }
 
-/* It is a macro, as an inline function compiles differently from the original
- */
-#define IsBallLanding() \
-  (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
-      (f32)f_ShotEndPosition[AXIS_X] < \
-          (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) && \
-      (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) < \
-          (f32)f_ShotEndPosition[AXIS_X] && \
-      (f32)f_ShotEndPosition[AXIS_Z] < \
-          (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) && \
-      (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) < \
-          (f32)f_ShotEndPosition[AXIS_Z])
-
 /*
  * Eases the look-at point toward the ball, unless it is landing.
  * It does not match: the original keeps the loads of the ball's and the
@@ -1292,7 +1303,6 @@ void EaseCameraPosition(Vec3 target) {
   }
 }
 
-#define RANDOM_YAW_MASK 0x7FFF
 #define UNK2E08_HEIGHT_SPREAD_FRACTION 0.2
 #define DISTANCE_SPREAD_FRACTION 0.2f
 #define DEFAULT_HEIGHT_SPREAD_FRACTION 0.1f
@@ -1301,7 +1311,6 @@ void EaseCameraPosition(Vec3 target) {
 #define RANDOM_DISTANCE_STEP_COUNT 1536
 #define UNK2E08_DISTANCE_STEP 15
 #define UNK2E08_MIN_DISTANCE 0xB400
-#define SHORT_SHOT_MAX_LENGTH 0xBB7FF
 #define SHORT_SHOT_DISTANCE 76800.0f
 #define GREEN_DISTANCE_STEP 50
 #define GREEN_MIN_DISTANCE 0x12C00
@@ -1616,9 +1625,6 @@ void AimCameraYaw(void) {
     f_CameraYaw = M_PI - atan2f(offsetX, offsetZ);
   }
 }
-
-void EaseLookAtBelowBall(f32 drop);
-void EaseLookAtPoint(f32 yaw);
 
 extern s32 f_IsBehindViewFar;
 extern s32 f_SideViewCount;
@@ -2351,7 +2357,6 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 #define NEAR_CUP_DISTANCE 0x1E00
 #define CUP_LANDING_MIN_DISTANCE 0x1201
 #define CUP_LANDING_MAX_DISTANCE 0x4AFFF
-#define CAMERA_CHANGE_HOLD_COUNT 20
 #define DEBUG_CAMERA_CONTROLLER 1
 
 /* It is a macro, as an inline function compiles differently from the original
@@ -3255,7 +3260,6 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
 }
 
 #define NOISE_GRID_COUNT 2
-#define NOISE_GRID_MASK (NOISE_GRID_SIZE - 1)
 #define MIN_UNDIVIDED_NOISE_SIZE 2
 #define NOISE_DISPLACEMENT_MASK 0xFF
 #define NOISE_DISPLACEMENT_BIAS 0x80
@@ -3270,13 +3274,10 @@ void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius) {
 /* Two grids of NOISE_GRID_SIZE x NOISE_GRID_SIZE heights, which the noise
  * texture blends */
 extern s16 f_NoiseGrids[NOISE_GRID_COUNT][NOISE_GRID_SIZE][NOISE_GRID_SIZE];
-/* The grid that DisplaceNoiseSquare builds */
-extern s16 (*f_NoiseGrid)[NOISE_GRID_SIZE];
 /* The displacement scale at each midpoint displacement level */
 extern s16 f_NoiseRoughness[];
 extern s16 f_NoiseGridIndex;
 extern s32 f_NoiseBlendStep;
-extern s8 f_IsNoiseResetPending;
 extern s8 f_NoiseRow;
 
 static inline s32 RandomNoiseDisplacement(void) {
