@@ -12,7 +12,9 @@ typedef struct MenuMemory {
     /* 0x04 */ s8 characterColumn; /* The character select cursor's column */
     /* 0x05 */ u8 unk5[3];
     /* 0x08 */ s8 characterRow; /* And its row */
-    /* 0x09 */ u8 unk9[0xD - 0x9];
+    /* 0x09 */ u8 unk9[0xB - 0x9];
+    /* 0x0B */ s8 modeChoice; /* The mode select cursor's place in the player count's modes */
+    /* 0x0C */ u8 unkC;
     /* 0x0D */ s8 unkD;
     /* 0x0E */ s8 unkE[MENU_UNKE_COUNT]; /* Set from one of func_80217B88's presets */
     /* 0x16 */ u8 unk16[0x20 - 0x16];
