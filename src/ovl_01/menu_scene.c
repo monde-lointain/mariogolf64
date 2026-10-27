@@ -22,6 +22,17 @@
 #define BEST_TIMES_TURN 90
 #define BEST_TIMES_SPIN_SPEED 18
 
+/*
+ * Asset 0x688 holds 32 by 32 frames of the digits 1 to 4, then the
+ * suffixes ST, ND, RD and TH, each drawn at 24 by 24
+ */
+#define PLACE_LABEL_FRAME_SIZE 32
+#define PLACE_LABEL_FRAME_BYTES (PLACE_LABEL_FRAME_SIZE * PLACE_LABEL_FRAME_SIZE)
+#define PLACE_LABEL_DIGIT_COUNT 4
+#define PLACE_LABEL_SIZE 24
+#define PLACE_LABEL_SUFFIX_X 16
+#define PLACE_LABEL_LAST_PLACE 3
+
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -183,7 +194,59 @@ void func_802144E4_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 characte
     *displayListHead = gfx;
 }
 
+/*
+ * Doesn't match: the original needs one register fewer for the display
+ * list's pointers, so its frame is 16 bytes smaller.
+ */
+#ifdef NON_MATCHING
+void func_802149A8_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 place) {
+    Gfx *gfx = *displayListHead;
+
+    if (place <= 0) {
+        place = 1;
+    }
+    if (place > PLACE_LABEL_LAST_PLACE) {
+        place = PLACE_LABEL_LAST_PLACE;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AA4C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock(gfx++,
+                        ((u32)D_8023AA4C_ovl_01 + (place - 1) * PLACE_LABEL_FRAME_BYTES +
+                         LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE, 0,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                        G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + PLACE_LABEL_SIZE) << 2, (top + PLACE_LABEL_SIZE) << 2,
+                            G_TX_RENDERTILE, 0, 0, (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE,
+                            (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock(gfx++,
+                        ((u32)D_8023AA4C_ovl_01 +
+                         (place + PLACE_LABEL_DIGIT_COUNT - 1) * PLACE_LABEL_FRAME_BYTES +
+                         LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_LABEL_FRAME_SIZE, PLACE_LABEL_FRAME_SIZE, 0,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                        G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (left + PLACE_LABEL_SUFFIX_X) << 2, top << 2,
+                            (left + PLACE_LABEL_SUFFIX_X + PLACE_LABEL_SIZE) << 2, (top + PLACE_LABEL_SIZE) << 2,
+                            G_TX_RENDERTILE, 0, 0, (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE,
+                            (PLACE_LABEL_FRAME_SIZE << 10) / PLACE_LABEL_SIZE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802149A8_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_8021508C_ovl_01);
 
