@@ -61,9 +61,6 @@ extern char g_BirdieBadgeLabelText[];
 extern f32 sMenuBobOffset;
 extern f32 sMenuBobPhase;
 
-/* Players whose D_800C1FF4 holds this never clash with the others */
-#define UNSHARED_SLOT_INDEX 4
-
 /* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and D_801B60D0 */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
@@ -351,8 +348,8 @@ void func_801F6A38_ovl_01(void) {
     D_801051F0 = TRUE;
     for (playerIndex = 0; playerIndex != g_PlayerCount; playerIndex++) {
         for (otherIndex = 0; otherIndex != g_PlayerCount; otherIndex++) {
-            if (playerIndex != otherIndex && D_800C1FF4[playerIndex] != UNSHARED_SLOT_INDEX &&
-                D_800C1FF4[otherIndex] != UNSHARED_SLOT_INDEX && D_800C1FF4[playerIndex] == D_800C1FF4[otherIndex]) {
+            if (playerIndex != otherIndex && D_800C1FF4[playerIndex] != NO_CONTROLLER_INDEX &&
+                D_800C1FF4[otherIndex] != NO_CONTROLLER_INDEX && D_800C1FF4[playerIndex] == D_800C1FF4[otherIndex]) {
                 D_801051F0 = FALSE;
             }
         }

@@ -91,6 +91,12 @@ void LoadMenuWindowImage(s32 imageIndex);
 
 extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 
+/*
+ * D_800C1FF4 holds this for a player with no controller of their own. The
+ * computer plays them, and they never clash with the others.
+ */
+#define NO_CONTROLLER_INDEX 4
+
 /* Indices of the game-mode icon animations in g_ModeIconAnimations */
 #define MODE_ICON_TOURNAMENT 0
 #define MODE_ICON_GET_CHARACTER 1
