@@ -7,6 +7,8 @@
 #include "save.h"
 #include "sound.h"
 
+void func_8005C674(s32 arg0, s32 arg1);
+
 /* The table of screen 15: its columns and rows, and how many of each fit on the screen */
 #define TABLE_COLUMN_COUNT 14
 #define TABLE_SHOWN_COLUMN_COUNT 7
@@ -36,6 +38,18 @@
 #define TABLE_POPUP_TOP_ROW_LIMIT 2
 #define TABLE_POPUP_BOTTOM_ROW 3
 
+/* The characters that func_8021730C shows on the table, the first ones being those of the character grid */
+#define TABLE_CHARACTER_HIDDEN (-1)
+#define TABLE_CHARACTER_SHOWN 1
+#define GRID_CHARACTER_COUNT 13
+#define TABLE_CELL_COUNT 17
+
+/* A cell of the character grid */
+typedef struct TableCell {
+    /* 0x0 */ s32 column;
+    /* 0x4 */ s32 row;
+} TableCell; /* size = 0x8 */
+
 /* The most bytes of each character's file that func_802177D0 keeps */
 #define MENU_SCENE_FILE_SIZE 0x200
 
@@ -52,6 +66,7 @@ extern void *D_8023AC64_ovl_01;
 extern void *D_8023AC68_ovl_01;
 extern void *D_8023AC6C_ovl_01;
 extern void *D_8023AC70_ovl_01;
+extern s32 D_8023AC78_ovl_01[CHARACTER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 
 void func_802159C0_ovl_01(void *buffer, s16 bufferKind) {
@@ -172,7 +187,40 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_802169CC_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80216C14_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_8021730C_ovl_01);
+void func_8021730C_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    TableCell cells[TABLE_CELL_COUNT] = {
+        { 0, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, { 2, 0 }, { 2, 1 }, { 3, 0 }, { 3, 1 }, { 4, 0 },
+        { 4, 1 }, { 5, 0 }, { 5, 1 }, { 6, 0 }, { 0, 2 }, { 1, 2 }, { 2, 2 }, { 3, 2 },
+    };
+    s32 index;
+    s32 recordCount;
+    s32 row;
+    s32 column;
+
+    func_8005C674(1, 0);
+    for (index = 0; index != CHARACTER_COUNT; index++) {
+        D_8023AC78_ovl_01[index] = TABLE_CHARACTER_HIDDEN;
+    }
+    for (index = 0; index != GRID_CHARACTER_COUNT; index++) {
+        row = cells[index].row;
+        column = cells[index].column;
+        if (g_CharacterGrid[row][column] >= 0) {
+            D_8023AC78_ovl_01[index] = TABLE_CHARACTER_SHOWN;
+        }
+    }
+    for (row = GRID_CHARACTER_COUNT; row != CHARACTER_COUNT; row++) {
+        column = 0;
+        recordCount = 0;
+        for (; column != SAVE_UNKAF0_COLUMN_COUNT; column++) {
+            recordCount += (save->unk990.unkAF0[row][column].unk1 & 0x7F) != 0;
+        }
+        /* The original stores these one entry early, over the grid's last character */
+        if (recordCount > 0) {
+            D_8023AC78_ovl_01[row - 1] = TABLE_CHARACTER_SHOWN;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80217464_ovl_01);
 
