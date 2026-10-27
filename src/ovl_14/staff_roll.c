@@ -425,9 +425,9 @@ void LoadStaffRoll(void) {
     D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
     D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[0][AXIS_Y];
     D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[0][AXIS_Z];
-    D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
-    D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
-    D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
+    D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+    D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+    D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
     SetGameFlag(GAME_FLAG_HOLE_LOADED);
     g_PlayerCount = 1;
     StopLoaderThread();

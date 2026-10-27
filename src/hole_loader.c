@@ -588,7 +588,7 @@ void ShrinkMiniGolfHolePoints(void) {
         for (axis = 0; axis < AXIS_COUNT; axis++) {
             for (index = 0; index < CUP_POSITION_COUNT; index++) {
                 g_HolePoints.cupPositions[index][axis] *= g_MiniGolfScale[axis];
-                g_HolePoints.unk30[index][axis] *= g_MiniGolfScale[axis];
+                g_HolePoints.teePositions[index][axis] *= g_MiniGolfScale[axis];
             }
             for (index = 0; index < ARRAY_COUNT(g_HolePoints.unk60); index++) {
                 g_HolePoints.unk60[index][axis] *= g_MiniGolfScale[axis];
@@ -810,9 +810,9 @@ s32 ChooseHoleConditions(void) {
         D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[cupIndex][AXIS_X];
         D_800BA9D8.cupPosition[AXIS_Y] = g_HolePoints.cupPositions[cupIndex][AXIS_Y];
         D_800BA9D8.cupPosition[AXIS_Z] = g_HolePoints.cupPositions[cupIndex][AXIS_Z];
-        D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.unk30[0][AXIS_X];
-        D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.unk30[0][AXIS_Y];
-        D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.unk30[0][AXIS_Z];
+        D_800BA9D8.teePosition[AXIS_X] = g_HolePoints.teePositions[0][AXIS_X];
+        D_800BA9D8.teePosition[AXIS_Y] = g_HolePoints.teePositions[0][AXIS_Y];
+        D_800BA9D8.teePosition[AXIS_Z] = g_HolePoints.teePositions[0][AXIS_Z];
         attemptCount++;
         cupIndex = (cupIndex + 1) & (CUP_POSITION_COUNT - 1);
         if (attemptCount >= MAX_CUP_ATTEMPT_COUNT) {

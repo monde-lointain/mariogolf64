@@ -11,7 +11,7 @@
 
 typedef struct HolePoints {
     /* 0x00 */ CoursePoint cupPositions[CUP_POSITION_COUNT]; /* Zero where a hole has fewer */
-    /* 0x30 */ CoursePoint unk30[CUP_POSITION_COUNT];
+    /* 0x30 */ CoursePoint teePositions[CUP_POSITION_COUNT]; /* Only the first is read as the tee */
     /* 0x60 */ CoursePoint unk60[8];
     /* 0xC0 */ CoursePoint routePoints[ROUTE_POINT_COUNT]; /* For the computer golfer; zero where unused */
 } HolePoints; /* size = 0x120 */

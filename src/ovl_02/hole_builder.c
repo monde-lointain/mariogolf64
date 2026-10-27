@@ -2039,9 +2039,9 @@ void ClearHolePoints(void) {
         g_HolePoints.cupPositions[i][AXIS_X] = 0;
         g_HolePoints.cupPositions[i][AXIS_Y] = 0;
         g_HolePoints.cupPositions[i][AXIS_Z] = 0;
-        g_HolePoints.unk30[i][AXIS_X] = 0;
-        g_HolePoints.unk30[i][AXIS_Y] = 0;
-        g_HolePoints.unk30[i][AXIS_Z] = 0;
+        g_HolePoints.teePositions[i][AXIS_X] = 0;
+        g_HolePoints.teePositions[i][AXIS_Y] = 0;
+        g_HolePoints.teePositions[i][AXIS_Z] = 0;
     }
     for (i = 0; i < ARRAY_COUNT(g_HolePoints.unk60); i++) {
         g_HolePoints.unk60[i][AXIS_X] = 0;
