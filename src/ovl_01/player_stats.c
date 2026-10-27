@@ -51,6 +51,9 @@
 #define ASSET_PLAYER_STATS_UNK7 0x720
 #define ASSET_PLAYER_STATS_UNK8 0x6C4
 #define ASSET_PLAYER_STATS_GAME_LABELS 0x6E8
+#define GAME_LABEL_WIDTH 128
+#define GAME_LABEL_HEIGHT 20
+#define GAME_LABEL_IMAGE_SIZE (GAME_LABEL_WIDTH * GAME_LABEL_HEIGHT / 2)
 #define ASSET_PLAYER_STATS_UNK11 0x721
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
@@ -362,7 +365,29 @@ s32 func_80219948_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B1E0_ovl_01);
+void func_8021B1E0_ovl_01(Gfx **displayListHead, s32 centerX, s32 top, u8 labelIndex) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B364_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(gfx++,
+                           ((u32)D_8023B364_ovl_01 + PALETTED_TEXELS_OFFSET + labelIndex * GAME_LABEL_IMAGE_SIZE) & ~7,
+                           G_IM_FMT_CI, GAME_LABEL_WIDTH, GAME_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (centerX - GAME_LABEL_WIDTH / 2) << 2, top << 2,
+                            (centerX + GAME_LABEL_WIDTH / 2) << 2, (top + GAME_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
