@@ -63,11 +63,27 @@ extern f32 sMenuBobPhase;
 #define LARGE_BANNER_STRIP_HEIGHT 20
 #define LARGE_BANNER_STRIP_SPACING 16
 
+/*
+ * func_801FCB74 reads D_800FF420's buffer as a 160 texel wide image, though
+ * menu.c loads the 256 texel wide board into it; its strips overlap, as each
+ * samples its rows at 8/9 of a texel
+ */
+#define NARROW_BOARD_WIDTH 160
+#define NARROW_BOARD_STRIP_HEIGHT 8
+#define NARROW_BOARD_STRIP_COUNT 20
+#define NARROW_BOARD_STRIP_SPACING 7
+#define NARROW_BOARD_ROW_SCALE 9
+#define NARROW_BOARD_LEFT 15
+#define NARROW_BOARD_TOP 36
+#define NARROW_BOARD_SHOWN_WIDTH 170
+
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern void *D_800FF420[2];
 extern s32 D_801051F0;
 extern void *D_801052BC[2];
 extern void *D_801B60D0;
 extern s16 D_8022BE8C_ovl_01;
+extern s16 D_8022BE92_ovl_01;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 /* The parts of the menu backdrop that func_801FC60C draws */
 #define MENU_LAYER_UNK1 (1 << 0)
@@ -710,7 +726,37 @@ void func_801FC60C_ovl_01(Gfx **displayListHead, s32 layers) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FC754_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FCB74_ovl_01);
+void func_801FCB74_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_800FF420[D_8022BE92_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_800FF420[D_8022BE92_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH, NARROW_BOARD_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = NARROW_BOARD_TOP + stripIndex * NARROW_BOARD_STRIP_SPACING;
+        gSPScisTextureRectangle(gfx++, NARROW_BOARD_LEFT << 2, stripTop << 2,
+                                (NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH) << 2,
+                                (stripTop + NARROW_BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (NARROW_BOARD_WIDTH << 10) / NARROW_BOARD_SHOWN_WIDTH,
+                                (NARROW_BOARD_STRIP_HEIGHT << 10) / NARROW_BOARD_ROW_SCALE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 /* Nothing in the menu calls this; menu.c loads its image, asset 0x521 */
 void func_801FCEF8_ovl_01(Gfx **displayListHead) {
