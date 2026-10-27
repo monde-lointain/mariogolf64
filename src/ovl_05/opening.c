@@ -82,8 +82,7 @@ extern u8 f_LakituImage[];
 extern u8 f_LakituTrailImage[];
 #define LAKITU_TRAIL_SEGMENT_COUNT 40
 extern Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
-extern f32 f_LakituTrailStartX;
-extern f32 f_LakituTrailStartY;
+extern f32 f_LakituTrailStart[2];
 
 extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
@@ -718,11 +717,144 @@ void LoadLakitu(void) {
                   -LAKITU_TRAIL_DEPTH);
     }
   }
-  f_LakituTrailStartX = f_LakituScreenPoint[0] - SCREEN_WIDTH;
-  f_LakituTrailStartY = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+  f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
+  f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
 }
 
+extern s32 D_8020ADAC_ovl_05;
+extern s32 D_8020B1EC_ovl_05;
+extern Vtx D_8020B1F0_ovl_05[2];
+
+#ifdef NON_MATCHING
+/*
+ * Draws Lakitu while he flies, with a fading trail of the places he has been.
+ *
+ * Differs from the original only in stack slots: the pointers of some pairs
+ * of a pipe sync and the command after it swap slots, as in the opening's
+ * sparks.
+ */
+void func_801FE8F8_ovl_05(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  Vec3 translation;
+  Vec3 rotation;
+  Mat4 matrix;
+  s32 segmentIndex;
+  s32 i;
+
+  if (f_IsLakituFlying) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++,
+                       TEXTURE_ADDRESS(f_LakituImage + IMAGE_HEADER_SIZE));
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock(
+        gfx++, TEXTURE_ADDRESS(f_LakituImage + LARGE_PALETTED_TEXELS_OFFSET),
+        G_IM_FMT_CI, G_IM_SIZ_8b, 32, 32, 0, G_TX_MIRROR | G_TX_WRAP,
+        G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (f_LakituScreenPoint[0] - 24) << 2,
+                            (f_LakituScreenPoint[1] - 24) << 2,
+                            (f_LakituScreenPoint[0] + 24) << 2,
+                            (f_LakituScreenPoint[1] + 24) << 2, G_TX_RENDERTILE,
+                            32 << 5, 0, (32 << 10) / 48, (32 << 10) / 48);
+    gDPPipeSync(gfx++);
+    rotation[0] = 0.0f;
+    rotation[1] = 0.0f;
+    rotation[2] = atan2(f_LakituTrailStart[0] -
+                            (f32)(f_LakituScreenPoint[0] - SCREEN_WIDTH / 2),
+                        f_LakituTrailStart[1] -
+                            (f32)(SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1]));
+    translation[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
+    translation[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+    translation[2] = -LAKITU_TRAIL_DEPTH;
+    BuildRotationMatrix(matrix, rotation, translation);
+    ConvertMatrixToFixed(matrix, &f_LakituTrailMatrices[D_8020ADAC_ovl_05]);
+    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
+    f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, D_8020B1EC_ovl_05);
+    gDPSetEnvColor(gfx++, 255, 255, 255, 255);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
+                      0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+    gDPLoadTextureBlock_4b(
+        gfx++, TEXTURE_ADDRESS(f_LakituTrailImage + IMAGE_HEADER_SIZE),
+        G_IM_FMT_I, 48, 128, 0, G_TX_MIRROR | G_TX_WRAP,
+        G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, 7, G_TX_NOLOD, G_TX_NOLOD);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gDPPipeSync(gfx++);
+    segmentIndex = D_8020ADAC_ovl_05;
+    for (i = 0; i != 16; i++) {
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      gSPVertex(gfx++, D_8020B1F0_ovl_05, 2, i * 2);
+      gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, i << 8);
+      gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST,
+                      (0x5FF << 16) + (i << 8));
+      segmentIndex--;
+      if (segmentIndex < 0) {
+        segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
+      }
+    }
+    for (i = 0; i != 15; i++) {
+      gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
+                    i * 2 + 3, 0);
+    }
+    for (i = 16; i != 31; i++) {
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LakituTrailMatrices[segmentIndex]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      gSPVertex(gfx++, D_8020B1F0_ovl_05, 2, 28 - (i - 16) * 2);
+      gSPModifyVertex(gfx++, 28 - (i - 16) * 2, G_MWO_POINT_ST, i << 8);
+      gSPModifyVertex(gfx++, 29 - (i - 16) * 2, G_MWO_POINT_ST,
+                      (0x5FF << 16) + (i << 8));
+      segmentIndex--;
+      if (segmentIndex < 0) {
+        segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
+      }
+    }
+    for (i = 0; i != 15; i++) {
+      gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
+                    i * 2 + 3, 0);
+    }
+    gDPPipeSync(gfx++);
+    if (++D_8020ADAC_ovl_05 >= LAKITU_TRAIL_SEGMENT_COUNT) {
+      D_8020ADAC_ovl_05 = 0;
+    }
+    D_8020B1EC_ovl_05 -= 4;
+    if (D_8020B1EC_ovl_05 < 0) {
+      D_8020B1EC_ovl_05 = 0;
+    }
+    *displayListHead = gfx;
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
+#endif
 
 /* Flies Lakitu across the screen in loops until it has turned through 540
  * degrees */
