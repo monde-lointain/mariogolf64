@@ -132,6 +132,76 @@ typedef struct IntegerPlane {
   /* 0x10 */ s32 unk10; /* Always 256 */
 } IntegerPlane; /* size = 0x14 */
 
+/* Drawing the ground, which DrawGround and the hole editor's copy share */
+
+/* A tile's edges, in the order of the segments that move their vertices */
+#define TILE_EDGE_TOP 0
+#define TILE_EDGE_LEFT 1
+#define TILE_EDGE_RIGHT 2
+#define TILE_EDGE_BOTTOM 3
+#define TILE_EDGE_COUNT 4
+
+/* The ground is drawn in two halves, each a column of groups of four tiles */
+#define GROUND_TILE_GROUP_SIZE 4
+#define GROUND_HALF_COUNT 2
+#define GROUND_HALF_VERTEX_COLUMNS (GROUND_TILE_GROUP_SIZE * 2)
+
+/*
+ * A visible tile is drawn finely when its view depth times this is under its
+ * height range, and at medium detail when the depth times the medium scale is
+ */
+#define FINE_DEPTH_SCALE (-0.025f)
+#define ZOOMED_FINE_DEPTH_SCALE (-0.0125f)
+#define MEDIUM_DEPTH_SCALE (-0.01f)
+#define MIN_GROUND_TILE_RADIUS 384.0f
+#define NEAR_DEPTH_DIVISOR 8
+#define NO_NEAR_DEPTH (-1000.0f)
+
+/* DrawGround's terrainStyle: the round's view, or one of the map views */
+#define TERRAIN_STYLE_NORMAL 0
+#define TERRAIN_STYLE_MAP 2
+#define TERRAIN_STYLE_TOP_DOWN_MAP 3
+
+/* The vertex cache slots of a row's three vertex rows, which rotate from row to
+ * row */
+#define FIRST_TOP_SLOT 9
+#define FIRST_MIDDLE_SLOT 18
+#define FIRST_BOTTOM_SLOT 0
+/* A vertex row's odd vertices follow its even ones */
+#define ODD_SLOT (GROUND_TILE_GROUP_SIZE + 1)
+
+/* A tile whose unk990 is positive is drawn a second time */
+#define GROUND_TILE_MAX_PASSES 2
+
+/* The noise texture sits in TMEM after a tile's texels, and is blended in by
+ * this */
+#define NOISE_TMEM \
+  (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * \
+      G_IM_SIZ_16b_BYTES / 8)
+#define NOISE_BLEND_ALPHA 110
+
+#define CLIP_RATIO_COUNT 6
+#define CLIP_RATIO_TEXT_COLUMN 10
+#define CLIP_RATIO_TEXT_ROW 12
+/* osGetCount ticks per unit of the printed time */
+#define GROUND_TIMING_TICKS 3000
+#define GROUND_TIMING_COLUMN 5
+#define GROUND_TIMING_ROW 11
+
+/* The grid vertex at a vertex column and row, as GetGridVertex finds it */
+#define GRID_VERTEX(column, row) \
+  (&g_WorkArea.hole.gridVertices[((row) * 17) + ((u32)(column) >> 1) + \
+      (((u32)(column) & 1) * 9)])
+
+/* Whether a fine tile's neighbor makes it snap the vertices of their shared
+ * edge's middle */
+#define IS_COARSE(tileIndex) \
+  (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
+
+extern Vtx* g_VertexListHead;
+extern f32 g_GroundFarthestDepth;
+extern f32 g_GroundNearDepthEighth;
+
 Vtx* GetGroundPoint(u32 column, u32 row);
 Vtx* GetGridVertex(u32 column, u32 row);
 s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point);

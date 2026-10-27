@@ -998,7 +998,6 @@ extern Mtx f_IdentityMatrix;
 extern CameraMatrices f_CameraMatrices[2 * 2];
 extern s32 g_PerspectiveNormalization;
 /* The next free vertex of the frame's vertex buffer */
-extern Vtx* g_VertexListHead;
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
 extern s32 f_HasThreeFrameBuffers;
 extern s32 f_FadeAlpha;
@@ -1010,7 +1009,6 @@ extern s32 f_UnreadDebugSwitch;
  * frames, and back in while it is -1
  */
 extern s32 g_HoleFlyoverFrame;
-extern f32 g_GroundFarthestDepth;
 extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
