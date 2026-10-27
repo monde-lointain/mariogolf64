@@ -9,6 +9,11 @@
 #include "sram.h"
 
 /* The image listing the game modes, in orange */
+/* The games that func_80222CDC continues from the save's mode tables, by the save menu's slot */
+#define SAVE_MENU_GAME_TOURNAMENT 0
+#define SAVE_MENU_GAME_GET_CHARACTER 1
+#define SAVE_MENU_GAME_STROKE 2
+
 #define ASSET_MENU_GAME_MODES 0x528
 
 extern s32 D_80230A90_ovl_01;
@@ -61,6 +66,8 @@ extern s16 D_80230B4A_ovl_01;
 extern u8 D_80230B4C_ovl_01;
 extern s8 D_80230B4D_ovl_01;
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
+extern Unk68 D_800FEDD8[MAX_PLAYER_COUNT];
+extern s8 D_801B60B8;
 extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
 extern SaveMenuModeImage D_80230B5C_ovl_01[];
 extern void **D_8023B680_ovl_01;
@@ -411,7 +418,53 @@ s32 func_80222C94_ovl_01(void) {
     return -(game->isValid == FALSE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80222CDC_ovl_01);
+s32 func_80222CDC_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    SavedGame *game;
+    UnkB8 *players;
+    Unk68 *records;
+    s32 playerCount = 0;
+    s32 index;
+
+    switch (memory->savedGameIndex) {
+        case SAVE_MENU_GAME_TOURNAMENT:
+            game = &save->modeGames[MODE5_GAME_INDEX];
+            records = &save->modeRecords[MODE5_RECORD_INDEX];
+            players = &save->modePlayers[MODE5_PLAYER_INDEX];
+            playerCount = MODE5_PLAYER_COUNT;
+            break;
+        case SAVE_MENU_GAME_GET_CHARACTER:
+            game = &save->modeGames[MODE4_GAME_INDEX];
+            records = &save->modeRecords[MODE4_RECORD_INDEX];
+            players = &save->modePlayers[MODE4_PLAYER_INDEX];
+            playerCount = MODE4_PLAYER_COUNT;
+            break;
+        case SAVE_MENU_GAME_STROKE:
+            game = &save->modeGames[MODE0_GAME_INDEX];
+            records = &save->modeRecords[MODE0_RECORD_INDEX];
+            players = &save->modePlayers[MODE0_PLAYER_INDEX];
+            playerCount = MODE0_PLAYER_COUNT;
+            break;
+    }
+    if (!game->isValid) {
+        return -1;
+    }
+    if (game->state.playerCount > playerCount) {
+        return -1;
+    }
+    playerCount = game->state.playerCount;
+    for (index = 0; index != playerCount; index++) {
+        g_Players[index] = players[index];
+        D_800FEDD8[index] = records[index];
+    }
+    g_GameState = game->state;
+    g_GameState.unk0 = 1;
+    SetGameFlag(GAME_FLAG_UNK1E);
+    D_800BA9D8 = game->unk8;
+    D_801B60B8 = 2;
+    return 0;
+}
 
 extern const char D_80231A3C_ovl_01[];
 
