@@ -14,10 +14,10 @@
 #include "work_area.h"
 
 /* The images of D_800C2064 that func_80213390 reads */
-#define MENU_SCENE_IMAGE_COUNT 6
+#define BEST_TIMES_IMAGE_COUNT 6
 
 /* The bytes kept of each best time holder's palette file */
-#define MENU_SCENE_FILE_SIZE 0x200
+#define BEST_TIME_HOLDER_FILE_SIZE 0x200
 
 /* The best times' courses turn this far in all between one course and the next,
  * and this fast */
@@ -58,7 +58,7 @@ extern void* D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern u8 D_8023BFF0_ovl_01[COURSE_COUNT * BEST_TIME_COUNT]
-                           [MENU_SCENE_FILE_SIZE];
+                           [BEST_TIME_HOLDER_FILE_SIZE];
 extern void** D_8023AA40_ovl_01;
 extern s32 D_80230130_ovl_01;
 extern s32 D_80230134_ovl_01;
@@ -79,7 +79,7 @@ void func_80213390_ovl_01(void** buffers) {
   s16 imageIndex;
 
   D_8023AA40_ovl_01 = buffers;
-  for (imageIndex = 0; imageIndex != MENU_SCENE_IMAGE_COUNT; imageIndex++) {
+  for (imageIndex = 0; imageIndex != BEST_TIMES_IMAGE_COUNT; imageIndex++) {
     OpenEncodedAsset(D_800C2064[imageIndex], &asset);
     ReadEncodedAsset(D_8023AA40_ovl_01[imageIndex], &asset);
   }
@@ -171,7 +171,7 @@ void func_80213558_ovl_01(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213748_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", func_80213748_ovl_01);
 
 void func_802144E4_ovl_01(
     Gfx** displayListHead, s32 left, s32 top, s32 character, u8 drawMode) {
@@ -277,7 +277,7 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802149A8_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/best_times", func_802149A8_ovl_01);
 #endif
 
 void func_8021508C_ovl_01(
