@@ -184,13 +184,13 @@ void ResetBallSimulations(void) {
   s32 index;
 
   for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
-    g_BallSimulations[index].position[AXIS_X] = 0x800;
-    g_BallSimulations[index].position[AXIS_Y] = -1000;
+    g_BallSimulations[index].position[AXIS_X] = RESET_BALL_X;
+    g_BallSimulations[index].position[AXIS_Y] = RESET_BALL_Y;
     rand(); /* The original has it */
-    g_BallSimulations[index].position[AXIS_Z] = 0x1000;
-    g_BallSimulations[index].velocity[AXIS_X] = rand() & 0x3FF;
-    g_BallSimulations[index].velocity[AXIS_Y] = -100;
-    g_BallSimulations[index].velocity[AXIS_Z] = rand() & 0x3FF;
+    g_BallSimulations[index].position[AXIS_Z] = RESET_BALL_Z;
+    g_BallSimulations[index].velocity[AXIS_X] = rand() & RESET_BALL_SPEED_MASK;
+    g_BallSimulations[index].velocity[AXIS_Y] = RESET_BALL_VELOCITY_Y;
+    g_BallSimulations[index].velocity[AXIS_Z] = rand() & RESET_BALL_SPEED_MASK;
     g_BallSimulations[index].unk30 = 0;
     g_BallSimulations[index].isRunning = BALL_STATE_FLYING;
   }

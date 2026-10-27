@@ -27,6 +27,14 @@
 
 #define BALL_SIMULATION_COUNT 1
 
+/* The place that ResetBallSimulations starts each ball from, and the speeds
+ * it gives it: a random one up to the mask across, and a fall */
+#define RESET_BALL_X 0x800
+#define RESET_BALL_Y (-1000)
+#define RESET_BALL_Z 0x1000
+#define RESET_BALL_SPEED_MASK 0x3FF
+#define RESET_BALL_VELOCITY_Y (-100)
+
 /* Unk20 unkC values from -UNKC_ENTRY_LIMIT to UNKC_ENTRY_LIMIT have an Unk6 per
  * lie rating */
 #define UNKC_ENTRY_LIMIT 5
