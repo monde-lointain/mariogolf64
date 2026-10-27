@@ -108,7 +108,11 @@ void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
     func_80203620_ovl_05();
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035BC_ovl_05);
+/* Sets the speeds of point index's moves. Nothing calls it */
+void func_802035BC_ovl_05(s32 index, f32 speed, f32 easeSpeed) {
+    g_CameraEditor.unk70[index] = speed;
+    g_CameraEditor.unk78[index] = easeSpeed;
+}
 
 void func_802035E4_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
     g_CameraEditor.unk80 = arg1;
