@@ -1,4 +1,5 @@
 #include "common.h"
+#include "heap.h"
 #include "host_file.h"
 #include "screen.h"
 #include "terrain.h"
@@ -15,6 +16,8 @@
 #define CORNER_CAPTURE_WIDTH 64
 #define CORNER_CAPTURE_HEIGHT 128
 #define CAPTURE_BYTES_PER_PIXEL 3
+/* The size of a whole-screen capture */
+#define SCREEN_CAPTURE_SIZE (CAPTURE_HEADER_SIZE + SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL)
 /* Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens one to 8 bits */
 #define RGBA16_RED_SHIFT 11
 #define RGBA16_GREEN_SHIFT 6
@@ -26,6 +29,8 @@
 
 extern u8 D_80451A60[];
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
+extern s32 D_8040C70C_hole_editor;
+extern u8 D_8040C710_hole_editor[CAPTURE_HEADER_SIZE];
 extern u8 D_8040C748_hole_editor[CAPTURE_HEADER_SIZE];
 
 void *func_80400000_hole_editor(void) {
@@ -158,7 +163,34 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040BF64_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040BFC8_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040C124_hole_editor);
+/* Writes the whole frame to the host as the next numbered capture file */
+void func_8040C124_hole_editor(void) {
+    u16 *frame;
+    u8 *capture;
+    s32 byteIndex;
+    s32 row;
+    s32 column;
+
+    frame = (u16 *)((u8 *)nuGfxCfb_ptr + KSEG1_OFFSET);
+    capture = AllocMemory(SCREEN_CAPTURE_SIZE);
+    for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
+        capture[byteIndex] = D_8040C710_hole_editor[byteIndex];
+    }
+    for (row = SCREEN_HEIGHT - 1; row != -1; row--) {
+        for (column = 0; column != SCREEN_WIDTH; column++) {
+            capture[byteIndex++] = ((frame[row * SCREEN_WIDTH + column] >> RGBA16_BLUE_SHIFT) & RGBA16_CHANNEL_MASK)
+                                    << RGBA16_CHANNEL_WIDEN_SHIFT;
+            capture[byteIndex++] = ((frame[row * SCREEN_WIDTH + column] >> RGBA16_GREEN_SHIFT) & RGBA16_CHANNEL_MASK)
+                                    << RGBA16_CHANNEL_WIDEN_SHIFT;
+            capture[byteIndex++] = ((frame[row * SCREEN_WIDTH + column] >> RGBA16_RED_SHIFT) & RGBA16_CHANNEL_MASK)
+                                    << RGBA16_CHANNEL_WIDEN_SHIFT;
+        }
+    }
+    sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", D_8040C70C_hole_editor);
+    WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
+    FreeMemory(&capture);
+    D_8040C70C_hole_editor++;
+}
 
 /*
  * Writes the frame's top-left corner to the host as capture file
@@ -188,7 +220,7 @@ void func_8040C260_hole_editor(s32 captureIndex) {
         }
     }
     sprintf(g_PrintBuffer, "c:/golf/capture/temp%02d.bmp", captureIndex);
-    WriteHostFile(g_PrintBuffer, CAPTURE_HEADER_SIZE + SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL);
+    WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
 }
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040C360_hole_editor);
