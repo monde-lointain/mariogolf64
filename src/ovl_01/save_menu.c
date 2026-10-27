@@ -20,7 +20,7 @@
 
 /* The image listing the game modes, in orange */
 /* The buffers of func_802218C0, and what it reads into them */
-#define SAVE_GAME_BUFFER_UNK1 1
+#define SAVE_GAME_BUFFER_CONTROLLER_ICONS 1
 #define SAVE_GAME_BUFFER_PLAYER_LABELS 2
 #define SAVE_GAME_BUFFER_UNK3 3
 #define SAVE_GAME_BUFFER_UNK4 4
@@ -39,7 +39,7 @@
 #define COURSE_THUMBNAIL_TOP 182
 #define COURSE_THUMBNAIL_SHOWN_WIDTH 52
 #define COURSE_THUMBNAIL_SHOWN_HEIGHT 18
-#define ASSET_SAVE_GAME_UNK1 0x63D
+#define ASSET_CONTROLLER_ICONS 0x63D /* Controllers numbered 1 to 4, 32 by 32 each */
 #define ASSET_SAVE_GAME_UNK3 0x82A
 #define ASSET_SAVE_GAME_UNK4 0x82B
 #define ASSET_SAVE_GAME_UNK5 0x82C
@@ -531,9 +531,9 @@ void func_802218C0_ovl_01(void *buffer, u8 bufferKind) {
     s32 miniGolfIndex;
 
     switch (bufferKind) {
-        case SAVE_GAME_BUFFER_UNK1:
+        case SAVE_GAME_BUFFER_CONTROLLER_ICONS:
             D_8023BD80_ovl_01 = buffer;
-            OpenEncodedAsset(ASSET_SAVE_GAME_UNK1, &asset);
+            OpenEncodedAsset(ASSET_CONTROLLER_ICONS, &asset);
             ReadEncodedAsset(D_8023BD80_ovl_01, &asset);
             break;
         case SAVE_GAME_BUFFER_PLAYER_LABELS:
