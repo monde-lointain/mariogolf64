@@ -40,7 +40,7 @@
 #define PLAYER_STATS_BUFFER_UNK6 6
 #define PLAYER_STATS_BUFFER_UNK7 7
 #define PLAYER_STATS_BUFFER_UNK8 8
-#define PLAYER_STATS_BUFFER_UNK9 9
+#define PLAYER_STATS_BUFFER_GAME_LABELS 9
 #define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
 #define PLAYER_STATS_BUFFER_UNK11 11
 #define PLAYER_STATS_BUFFER_UNK12 12
@@ -50,7 +50,7 @@
 #define ASSET_PLAYER_STATS_UNK2 0x671
 #define ASSET_PLAYER_STATS_UNK7 0x720
 #define ASSET_PLAYER_STATS_UNK8 0x6C4
-#define ASSET_PLAYER_STATS_UNK9 0x6E8
+#define ASSET_PLAYER_STATS_GAME_LABELS 0x6E8
 #define ASSET_PLAYER_STATS_UNK11 0x721
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
@@ -226,9 +226,9 @@ void func_802178B0_ovl_01(void *buffer, s16 bufferKind) {
             OpenEncodedAsset(ASSET_PLAYER_STATS_UNK8, &asset);
             ReadEncodedAsset(D_8023B360_ovl_01, &asset);
             break;
-        case PLAYER_STATS_BUFFER_UNK9:
+        case PLAYER_STATS_BUFFER_GAME_LABELS:
             D_8023B364_ovl_01 = buffer;
-            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK9, &asset);
+            OpenEncodedAsset(ASSET_PLAYER_STATS_GAME_LABELS, &asset);
             ReadEncodedAsset(D_8023B364_ovl_01, &asset);
             break;
         case PLAYER_STATS_BUFFER_PLAYER_LABELS:
