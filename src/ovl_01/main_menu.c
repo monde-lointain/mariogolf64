@@ -55,6 +55,9 @@ extern f32 sMenuBobPhase;
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
+/* func_801FD1B4 squeezes D_801B60D0 to this width at a given position; nothing calls it */
+#define SMALL_BANNER_WIDTH 96
+
 /* func_801FD4F0 stretches D_801B60D0; its strips overlap, as they are taller than their spacing */
 #define LARGE_BANNER_LEFT 26
 #define LARGE_BANNER_TOP 174
@@ -738,7 +741,34 @@ void func_801FCEF8_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/* Doesn't match: the original tests the s32 top << 2 for the texture's row offset, not the s16 top */
+#ifdef NON_MATCHING
+void func_801FD1B4_ovl_01(Gfx **displayListHead, s16 left, s16 top) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + SMALL_BANNER_WIDTH) << 2,
+                                (top + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (MENU_BANNER_WIDTH << 10) / SMALL_BANNER_WIDTH, TEXEL_STEP_ONE);
+        top += MENU_BANNER_STRIP_HEIGHT;
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
+#endif
 
 /* Nothing in the menu calls this either */
 void func_801FD4F0_ovl_01(Gfx **displayListHead) {
