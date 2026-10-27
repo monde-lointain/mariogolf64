@@ -960,7 +960,7 @@ void LoadOpeningBall(s32 imageIndex, s32 slot);
  * skips to the end, and the debug controllers can stop the script to edit the
  * camera.
  */
-void func_801F6788_ovl_05(void) {
+void UpdateOpening(void) {
   Vec3 point;
   Vec3 logoBallPoint;
   Vec3 handPoint;

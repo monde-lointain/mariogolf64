@@ -1028,12 +1028,12 @@ void DrawTitleScreen(Gfx** displayListHead);
 void DrawBootLogos(Gfx** displayListHead);
 void DrawStaffRoll(Gfx** displayListHead);
 void func_801F8110(Gfx** displayListHead);
-void func_801FA4EC(CameraMatrices* matrices, Gfx** displayListHead);
+void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead);
 void func_801FB198(Gfx** displayListHead);
 void DrawRoundResults(Gfx** displayListHead);
 void func_801FD578(Gfx** displayListHead);
 void DrawGolfBalls(CameraMatrices* matrices);
-void func_80200CBC(Gfx** displayListHead, s32);
+void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn);
 void DrawBanner(Gfx** displayListHead);
 void DrawFlipMessage(Gfx** displayListHead);
 void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices);
@@ -1345,7 +1345,7 @@ s32 DrawGame(void) {
           ClearBuffers(BUFFER_CLEAR_WHOLE);
           gDPPipeSync(g_DisplayListHead++);
           SET_CAMERA_SCISSOR(g_Cameras[0].view);
-          func_801FA4EC(matrices, &g_DisplayListHead);
+          DrawOpening(matrices, &g_DisplayListHead);
         }
         break;
       case 10:
@@ -1682,7 +1682,7 @@ s32 DrawGame(void) {
           }
           SetSceneFog(&g_DisplayListHead);
           if (g_Scene == SCENE_OPENING) {
-            func_801FA4EC(matrices, &g_DisplayListHead);
+            DrawOpening(matrices, &g_DisplayListHead);
             DrawEffects(matrices, &g_DisplayListHead);
           } else {
             if (!IsGameFlagSet(0x17)) {
@@ -1943,7 +1943,7 @@ s32 DrawGame(void) {
   }
   DrawHudAnimation();
   if (g_IsModuleAlive[3]) {
-    func_80200CBC(&g_DisplayListHead, 1);
+    DrawOpeningLogo(&g_DisplayListHead, 1);
   }
   if (g_Scene == 30 && g_IsModuleAlive[31]) {
     DrawStaffRoll(&g_DisplayListHead);
@@ -2184,7 +2184,7 @@ void UpdateGame(void) {
     if (g_SkyState.viewedWindAngles[0] < 0.0f) {
       g_SkyState.viewedWindAngles[0] += 2 * M_PI;
     }
-    func_801F6788();
+    UpdateOpening();
     UpdateEffects();
   } else if (g_Scene == SCENE_PLAY_HOLE || g_Scene == SCENE_PLAY_UNK12 ||
              g_Scene == SCENE_PLAY_UNK13) {

@@ -3478,3 +3478,4 @@ AreEditorFlagsClear = 0x80203DE8; // type:func segment:ovl_05
 UpdateCameraEditor = 0x80203F70; // type:func segment:ovl_05
 EditOpeningCamera = 0x80204EA8; // type:func segment:ovl_05
 StopEditorMoves = 0x80203E14; // type:func segment:ovl_05
+UpdateOpening = 0x801F6788; // type:func segment:ovl_05

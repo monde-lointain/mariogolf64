@@ -139,7 +139,7 @@ void func_801F4C78(void);
 void UpdateTitleScreen(void);
 void UpdateBootLogos(void);
 void func_801F5F1C(void);
-void func_801F6788(void);
+void UpdateOpening(void);
 void UpdateStaffRoll(void);
 
 void LoadRoundHud(void);
