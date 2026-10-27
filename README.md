@@ -29,6 +29,12 @@ The sources follow the Google style through clang-format 23. Run
 `make format` before committing. The SDK sources in `lib/` keep their
 own formatting.
 
+The sources are UTF-8. The build converts each C file to Shift-JIS
+with iconv before KMC GCC compiles it, so the game's Japanese strings
+can be written as they read. GCC 2.7 would take a second byte of 0x5C
+for the start of an escape, so characters such as 能 stay as octal
+escapes.
+
 `make lint` checks the names against the naming scheme in
 `.clang-tidy` with clang-tidy 23.
 

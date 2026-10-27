@@ -1972,7 +1972,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
         continue;
       }
-      osSyncPrintf("\x82\xA4\x82\xC1\n"); /* "Ugh" */
+      osSyncPrintf("うっ\n"); /* "Ugh" */
       for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
         cornerDistance =
             Length2D((wall.corners[AXIS_X][corner] << COURSE_UNIT_SHIFT) - x,

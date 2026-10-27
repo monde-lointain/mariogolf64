@@ -69,12 +69,8 @@ AssetFile* OpenPooledAssetFile(s32 assetId) {
     file++;
   }
   osSyncPrintf("ropen %d\n", assetId);
-  /* "File number %d failed to open." in Shift-JIS */
-  osSyncPrintf(
-      "%d\x94\xD4\x82\xCC\x83t\x83@\x83"
-      "C\x83\x8B\x83I\x81[\x83v\x83\x93\x8E\xB8\x94s\x81"
-      "B\n",
-      assetId);
+  /* "File number %d failed to open." */
+  osSyncPrintf("%d番のファイルオープン失敗。\n", assetId);
   return NULL;
 }
 

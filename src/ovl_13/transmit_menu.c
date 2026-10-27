@@ -2475,10 +2475,8 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     if (save[index] !=
         transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
                                [index]) {
-      osSyncPrintf(
-          "\x83\x89\x83"
-          "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n"); /* "Write mark violation"
-                                                       */
+      osSyncPrintf("ライトマーク違反\n"); /* "Write mark violation"
+                                           */
       transfer->transferResult = PAK_RESULT_REMOVED_RETRYING;
       nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
       return STATUS_CHECK_FAILED;
@@ -2540,10 +2538,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
         transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
                                [index]) {
       /* "Write mark violation"; the original passes sum before setting it */
-      osSyncPrintf(
-          "\x83\x89\x83"
-          "C\x83g\x83}\x81[\x83N\x88\xE1\x94\xBD\n",
-          sum);
+      osSyncPrintf("ライトマーク違反\n", sum);
       nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
       transfer->transferResult = PAK_RESULT_CARTRIDGE_REPLACED;
       return STATUS_WRITE_FAILED;
@@ -2743,11 +2738,7 @@ s32 ReadCartridgeCharacters(void) {
         case 0:
           isAlreadyBrought = FALSE;
           /* "Slot %d read successfully" */
-          osSyncPrintf(
-              "\x83X\x83\x8D\x83"
-              "b\x83g%d \x93\xC7\x82\xDD\x8D\x9E\x82\xDD\x90\xAC\x8C\xF7"
-              "\x82\xB5\x82\xDC\x82\xB5\x82\xBD  \n",
-              saveIndex);
+          osSyncPrintf("スロット%d 読み込み成功しました  \n", saveIndex);
           for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
             if (g_GameBoyCharacters[slot].status ==
                     GAME_BOY_CHARACTER_STATUS_PRESENT &&
@@ -2887,61 +2878,32 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
         switch (nuContGBPakPower(file, NU_CONT_GBPAK_POWER_ON)) {
           case 0:
             /* "3rd Power on" */
-            osSyncPrintf(
-                "3rd \x93"
-                "d\x8C\xB9\x82n\x82m\n");
+            osSyncPrintf("3rd 電源ＯＮ\n");
             break;
           case PFS_ERR_NOPACK:
             /* "3rd Nothing is plugged into the given controller" */
             osSyncPrintf(
-                "3rd \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93"
-                "\x83g\x83\x8D\x81[\x83\x89\x82\xC9\x89\xBD"
-                "\x82\xE0\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA"
-                "\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1 \n");
+                "3rd 指定したコントローラに何も差し込まれていません \n");
             return PAK_RESULT_NO_PAK;
           case PFS_ERR_CONTRFAIL:
             /* "3rd Data transfer with the controller failed." */
-            osSyncPrintf(
-                "3rd \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89"
-                "\x82\xC6\x82\xCC\x83"
-                "f\x81[\x83^\x93]\x91\x97"
-                "\x82\xCC\x8E\xB8\x94s\x82\xC5\x82\xB7\x81"
-                "B\n");
+            osSyncPrintf("3rd コントローラとのデータ転送の失敗です。\n");
             return PAK_RESULT_CONNECTOR_PROBLEM;
         }
       }
       switch (nuContGBPakReadID(file, header, &status)) {
         case PFS_ERR_NEW_GBCART:
           /* "4th The GB cartridge was removed and inserted." */
-          osSyncPrintf(
-              "4th GB\x83J\x81[\x83g\x83\x8A\x83"
-              "b\x83W\x82\xCC"
-              "\x91}\x94\xB2\x82\xAA\x8Ds\x82\xED\x82\xEA\x82\xDC"
-              "\x82\xB5\x82\xBD\x81"
-              "B\n");
+          osSyncPrintf("4th GBカートリッジの挿抜が行われました。\n");
         case 0:
           if (!(status & OS_GBPAK_GBCART_ON)) {
             /* "5th No cassette is inserted in the GB pak." */
-            osSyncPrintf(
-                "5th \x82"
-                "f\x82"
-                "a\x83p\x83"
-                "b\x83N\x82\xC9"
-                "\x83J\x83Z\x83"
-                "b\x83g\x82\xAA\x8Eh\x82\xB3"
-                "\x82\xC1\x82\xC4\x82\xDC\x82\xB9\x82\xF1\x81"
-                "B"
-                "\n");
+            osSyncPrintf("5th ＧＢパックにカセットが刺さってません。\n");
             return PAK_RESULT_CARTRIDGE_REMOVED;
           }
           if (status & OS_GBPAK_GBCART_PULL) {
             /* "The cassette was removed and inserted." */
-            osSyncPrintf(
-                "\x83J\x83Z\x83"
-                "b\x83g\x82\xCC\x94\xB2\x82\xAB"
-                "\x8D\xB7\x82\xB5\x82\xAA\x8Ds\x82\xED\x82\xEA"
-                "\x82\xDC\x82\xB5\x82\xBD\x81"
-                "B\n");
+            osSyncPrintf("カセットの抜き差しが行われました。\n");
             return PAK_RESULT_REMOVED_RETRYING;
           }
           for (index = 0; index != GAME_BOY_TITLE_CHECKED_LENGTH; index++) {
@@ -2960,100 +2922,50 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
           return PAK_RESULT_OK;
         case PFS_ERR_NOPACK:
           /* "4th Nothing is plugged into the given controller" */
-          osSyncPrintf(
-              "4th \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93\x83g"
-              "\x83\x8D\x81[\x83\x89\x82\xC9\x89\xBD\x82\xE0\x8D\xB7"
-              "\x82\xB5\x8D\x9E\x82\xDC\x82\xEA\x82\xC4\x82\xA2"
-              "\x82\xDC\x82\xB9\x82\xF1\n");
+          osSyncPrintf("4th 指定したコントローラに何も差し込まれていません\n");
           return PAK_RESULT_NO_PAK;
         case PFS_ERR_DEVICE:
           /* "4th A device other than the 64GB pak is plugged into the
            * controller" */
           osSyncPrintf(
-              "4th 64GB\x83p\x83"
-              "b\x83N\x88\xC8\x8AO\x82\xCC"
-              "\x83"
-              "f\x83o\x83"
-              "C\x83X\x82\xAA\x83R\x83\x93\x83g"
-              "\x83\x8D\x81[\x83\x89\x82\xC9\x8D\xB7\x82\xB5\x8D\x9E"
-              "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB7\n");
+              "4th "
+              "64GBパック以外のデバイスがコントローラに差し込まれています\n");
           return PAK_RESULT_OTHER_PAK;
         case PFS_ERR_CONTRFAIL:
           /* "4th Data transfer with the controller failed." */
-          osSyncPrintf(
-              "4th \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xC6"
-              "\x82\xCC\x83"
-              "f\x81[\x83^\x93]\x91\x97\x82\xCC"
-              "\x8E\xB8\x94s\x82\xC5\x82\xB7\x81"
-              "B\n");
+          osSyncPrintf("4th コントローラとのデータ転送の失敗です。\n");
           /* "The controller is not connected properly, or" */
-          osSyncPrintf(
-              "\x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xAA"
-              "\x90\xB3\x82\xB5\x82\xAD\x90\xDA\x91\xB1\x82\xB3"
-              "\x82\xEA\x82\xC4\x82\xA2\x82\xC8\x82\xA2\x82\xA9"
-              "\x81"
-              "A\n");
+          osSyncPrintf("コントローラが正しく接続されていないか、\n");
           /* "the 64GB pak or controller connector may be faulty. stat = %xH" */
           osSyncPrintf(
-              "64GB\x83p\x83"
-              "b\x83N\x82\xA9\x83R\x83\x93\x83g"
-              "\x83\x8D\x81[\x83\x89\x83R\x83l\x83N\x83^\x82\xC9"
-              "\x88\xD9\x8F\xED\x82\xAA\x82\xA0\x82\xE9\x89\xC2"
-              "\x94\\\x90\xAB\x82\xAA\x82\xA0\x82\xE8\x82\xDC"
-              "\x82\xB7\x81"
-              "Bstat = %xH\n",
+              "64GBパックかコントローラコネクタに異常がある可\224\134性がありま"
+              "す。stat = %xH\n",
               status);
           return PAK_RESULT_CONNECTOR_PROBLEM;
         case PFS_ERR_NO_GBCART:
           /* "4th No GB cartridge is inserted in the 64GB pak." */
           osSyncPrintf(
-              "4th 64GB\x83p\x83"
-              "b\x83N\x82\xC9GB\x83J\x81[\x83g"
-              "\x83\x8A\x83"
-              "b\x83W\x82\xAA\x8D\xB7\x82\xB5\x8D\x9E"
-              "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB9"
-              "\x82\xF1\x81"
-              "B\n");
+              "4th 64GBパックにGBカートリッジが差し込まれていません。\n");
           return PAK_RESULT_NO_CARTRIDGE;
       }
       break;
     case PFS_ERR_NOPACK:
       /* "2nd Nothing is plugged into the given controller" */
-      osSyncPrintf(
-          "2nd \x8Ew\x92\xE8\x82\xB5\x82\xBD\x83R\x83\x93\x83g\x83\x8D"
-          "\x81[\x83\x89\x82\xC9\x89\xBD\x82\xE0\x8D\xB7\x82\xB5\x8D\x9E"
-          "\x82\xDC\x82\xEA\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1\n");
+      osSyncPrintf("2nd 指定したコントローラに何も差し込まれていません\n");
       return PAK_RESULT_NO_PAK;
     case PFS_ERR_DEVICE:
       /* "2nd A device other than the 64GB pak is plugged into the controller"
        */
       osSyncPrintf(
-          "2nd 64GB\x83p\x83"
-          "b\x83N\x88\xC8\x8AO\x82\xCC\x83"
-          "f\x83o"
-          "\x83"
-          "C\x83X\x82\xAA\x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89"
-          "\x82\xC9\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA\x82\xC4"
-          "\x82\xA2\x82\xDC\x82\xB7\n");
+          "2nd 64GBパック以外のデバイスがコントローラに差し込まれています\n");
       return PAK_RESULT_OTHER_PAK;
     case PFS_ERR_CONTRFAIL:
       /* "2nd Data transfer with the controller failed." */
-      osSyncPrintf(
-          "2nd \x83R\x83\x93\x83g\x83\x8D\x81[\x83\x89\x82\xC6\x82\xCC"
-          "\x83"
-          "f\x81[\x83^\x93]\x91\x97\x82\xCC\x8E\xB8\x94s\x82\xC5"
-          "\x82\xB7\x81"
-          "B\n");
+      osSyncPrintf("2nd コントローラとのデータ転送の失敗です。\n");
       return PAK_RESULT_CONNECTOR_PROBLEM;
     case PFS_ERR_NO_GBCART:
       /* "2ndt No GB cartridge is inserted in the 64GB pak." */
-      osSyncPrintf(
-          "2ndt 64GB\x83p\x83"
-          "b\x83N\x82\xC9GB\x83J\x81[\x83g\x83\x8A"
-          "\x83"
-          "b\x83W\x82\xAA\x8D\xB7\x82\xB5\x8D\x9E\x82\xDC\x82\xEA"
-          "\x82\xC4\x82\xA2\x82\xDC\x82\xB9\x82\xF1\x81"
-          "B\n");
+      osSyncPrintf("2ndt 64GBパックにGBカートリッジが差し込まれていません。\n");
       return PAK_RESULT_NO_CARTRIDGE;
   }
   return -1;

@@ -81,9 +81,7 @@ s32 GetHeapLargestFreeSize(s32 heapIndex) {
 }
 
 /* "Unable to allocate memory %x" */
-static const char sOutOfMemoryMessage[] =
-    "\x83\x81\x83\x82\x83\x8A\x82\xAA\x8Am\x95\xDB\x82\xC5\x82\xAB\x82\xDC\x82"
-    "\xB9\x82\xF1 %x\n";
+static const char sOutOfMemoryMessage[] = "メモリが確保できません %x\n";
 
 void* AllocFromHeap(s32 heapIndex, s32 size) {
   u32 callerAddress;
@@ -157,10 +155,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
   if (pointer == NULL) {
     osSetIntMask(mask);
     /* "A NULL pointer was passed to kFree()" */
-    osSyncPrintf(
-        "NULL\x83|\x83"
-        "C\x83\x93\x83^\x82\xAAkFree()"
-        "\x82\xC9\x93n\x82\xB3\x82\xEA\x82\xDC\x82\xB5\x82\xBD");
+    osSyncPrintf("NULLポインタがkFree()に渡されました");
     return;
   }
   block = (MemoryBlock*)pointer - 1;
@@ -301,10 +296,7 @@ INCLUDE_ASM("asm/nonmatchings/heap", AllocMemory);
 
 /* "A NULL pointer was passed to free(). Called from %x" */
 static const char sFreeNullMessage[] =
-    "NULL\x83|\x83"
-    "C\x83\x93\x83^\x82\xAA"
-    "free()\x82\xC9\x93n\x82\xB3"
-    "\x82\xEA\x82\xDC\x82\xB5\x82\xBD. call from %x\n";
+    "NULLポインタがfree()に渡されました. call from %x\n";
 
 /* Frees the block that *pointerToBlock points to and clears the pointer */
 #ifdef NON_MATCHING

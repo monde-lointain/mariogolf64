@@ -588,17 +588,13 @@ s32 WriteHostFile(char* fileName, u32 size) {
 
   if (size == 0) {
     /* "The transfer size is too small." */
-    osSyncPrintf(
-        "\223\135\221\227\203\124\203\103\203\131\202\252\217\254\202\263\202"
-        "\242\202\305\202\267\201\102");
+    osSyncPrintf("転送サイズが小さいです。");
     return HOST_FILE_SIZE_TOO_SMALL;
   }
   nameSize = strlen(fileName);
   if (nameSize == 0) {
     /* "The file name is too short" */
-    osSyncPrintf(
-        "\203\164\203\100\203\103\203\213\226\274\202\252\222\132\202\267\202"
-        "\254\202\334\202\267");
+    osSyncPrintf("ファイル名が短すぎます");
     return HOST_FILE_NAME_TOO_SHORT;
   }
   nameSize = (nameSize + 3) & ~3;
@@ -614,9 +610,7 @@ s32 WriteHostFile(char* fileName, u32 size) {
     result = HOST_FILE_OK;
   } else {
     /* "The file name is too long" */
-    osSyncPrintf(
-        "\203\164\203\100\203\103\203\213\226\274\202\252\222\267\202\267\202"
-        "\254\202\334\202\267");
+    osSyncPrintf("ファイル名が長すぎます");
     result = HOST_FILE_NAME_TOO_LONG;
   }
   return result;
@@ -629,16 +623,12 @@ s32 ReadHostFile(char* fileName, u32* size) {
 
   nameSize = strlen(fileName);
   if (nameSize == 0) {
-    osSyncPrintf(
-        "\203\164\203\100\203\103\203\213\226\274\202\252\222\132\202\267\202"
-        "\254\202\334\202\267");
+    osSyncPrintf("ファイル名が短すぎます");
     return HOST_FILE_NAME_TOO_SHORT;
   }
   nameSize = (nameSize + 3) & ~3;
   if (nameSize >= HOST_FILE_NAME_SIZE_MAX) {
-    osSyncPrintf(
-        "\203\164\203\100\203\103\203\213\226\274\202\252\222\267\202\267\202"
-        "\254\202\334\202\267");
+    osSyncPrintf("ファイル名が長すぎます");
     return HOST_FILE_NAME_TOO_LONG;
   }
   command = AllocMemory(sizeof(u32));
@@ -649,9 +639,7 @@ s32 ReadHostFile(char* fileName, u32* size) {
   if (*command == 0) {
     *size = 0;
     /* "The file has no data." */
-    osSyncPrintf(
-        "\203\164\203\100\203\103\203\213\202\311\203\146\201\133\203\136\202"
-        "\252\202\240\202\350\202\334\202\271\202\361\201\102");
+    osSyncPrintf("ファイルにデータがありません。");
   }
   FreeMemory(&command);
   FreeMemory(&nameBuffer);
