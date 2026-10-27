@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "text.h"
 
 extern s32 g_MenuWindowState;
 /* How far the window has opened across and down, from 0 to 1 */
@@ -46,6 +47,18 @@ extern void *D_80230F54_ovl_01;
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
 
 extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
+/* What the club tournament code prompt shows */
+#define CLUB_CODE_STATE_ENTERING 0
+#define CLUB_CODE_STATE_INCORRECT 1
+
+/* "Please enter a code.", which "The code entered is incorrect." follows */
+#define MESSAGE_ENTER_CODE 0x165
+
+/* Where the prompt's two messages are drawn */
+#define CLUB_CODE_PROMPT_X 56
+#define CLUB_CODE_INCORRECT_X 24
+#define CLUB_CODE_MESSAGE_Y 180
+
 extern s32 D_80230F6C_ovl_01;
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
 extern s8 D_80105DBC[5];
@@ -233,7 +246,7 @@ void func_80228B60_ovl_01(void) {
         D_80230FD4_ovl_01[charIndex] = 0xFF;
     }
     D_80230F68_ovl_01 = 0;
-    D_80230F6C_ovl_01 = FALSE;
+    D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
     D_80230F5C_ovl_01 = 0;
     D_80230F60_ovl_01 = 0;
     D_80230F64_ovl_01 = 0;
@@ -281,7 +294,36 @@ s32 func_8022B5E0_ovl_01(void) {
     return isEmpty;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B668_ovl_01);
+void func_8022B668_ovl_01(Gfx **displayListHead) {
+    s32 x = 0;
+    Gfx *gfx = *displayListHead;
+    s32 messageOffset;
+    s32 flags;
+
+    switch (D_80230F6C_ovl_01) {
+        case CLUB_CODE_STATE_ENTERING:
+            messageOffset = 0;
+            x = CLUB_CODE_PROMPT_X;
+            flags = !IsMenuWindowOpen() ? TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED : TEXT_FLAG_UNK20;
+            break;
+        case CLUB_CODE_STATE_INCORRECT:
+            messageOffset = 1;
+            x = CLUB_CODE_INCORRECT_X;
+            flags = TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED;
+            break;
+        default:
+            messageOffset = -1;
+            flags = TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED;
+            break;
+    }
+    if (messageOffset >= 0) {
+        gDPPipeSync(gfx++);
+        SetUpTextDrawing(&gfx);
+        SetTextSlot(x, CLUB_CODE_MESSAGE_Y, MESSAGE_ENTER_CODE + messageOffset, 1, 0, flags, 255, 255, 255, 255);
+        DrawLargeTextSlot(&gfx, 0);
+    }
+    *displayListHead = gfx;
+}
 
 s32 func_8022B75C_ovl_01(void) {
     s32 foundIndex = -1;
@@ -303,7 +345,7 @@ s32 func_8022B75C_ovl_01(void) {
         }
     }
     if (foundIndex == -1) {
-        D_80230F6C_ovl_01 = TRUE;
+        D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
     }
     return foundIndex;
 }
