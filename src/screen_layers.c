@@ -113,9 +113,6 @@
 #define HALF_TURN_STATE_LEAVING 2
 #define HALF_TURN_STATE_DONE 3
 
-#define FADE_NONE -1
-#define FADE_OUT 0
-#define FADE_IN 1
 /* The fade's opacity runs over this many steps */
 #define FADE_ALPHA_RANGE 256
 
@@ -183,9 +180,6 @@ extern s32 f_HalfTurnTimer;
 extern f32 f_WipeProgress;
 extern s32 f_WipeKind;
 extern s32 f_WipeShapeIds[WIPE_SHAPE_COUNT];
-extern s32 g_ScreenFadeDuration;
-extern s32 g_ScreenFadeFramesLeft;
-extern s32 g_ScreenFadeKind;
 extern Prompt f_Prompts[];
 extern s32 f_PromptIndex;
 extern s32 f_PromptFrame;
@@ -195,9 +189,6 @@ extern void* f_HalfTurnImage;
 extern void* f_WipeShapeImage;
 extern void* f_PromptCloudImage;
 extern void* f_YesNoImage;
-extern s32 g_ScreenFadeRed;
-extern s32 g_ScreenFadeGreen;
-extern s32 g_ScreenFadeBlue;
 extern f32 f_ChoiceBobAngle;
 extern Gfx D_800C3FC0[];
 

@@ -24,6 +24,18 @@
 /* On the cartridge, from the Transmit menu */
 #define PROMPT_OVERWRITE_RECORDS 10
 
+/* The screen fade's kinds */
+#define FADE_NONE -1
+#define FADE_OUT 0
+#define FADE_IN 1
+
+extern s32 g_ScreenFadeDuration;
+extern s32 g_ScreenFadeFramesLeft;
+extern s32 g_ScreenFadeKind;
+extern s32 g_ScreenFadeRed;
+extern s32 g_ScreenFadeGreen;
+extern s32 g_ScreenFadeBlue;
+
 void DrawTextureRect(Gfx** displayListHead, s32 xl, s32 yl, s32 xh, s32 yh,
                      s32 tile, s32 s, s32 t, s32 dsdx, s32 dtdy);
 void LoadSmallPalette(Gfx** displayListHead, s32 palette, void* tlut);
