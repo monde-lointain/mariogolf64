@@ -194,7 +194,7 @@ void func_80206A68_ovl_01(Gfx **displayListHead);
 void func_80207D08_ovl_01(Gfx **displayListHead);
 void func_80207E18_ovl_01(Gfx **displayListHead);
 void DrawBirdieBadgeLabel(Gfx **displayListHead);
-void func_8020B590_ovl_01(Gfx **displayListHead, s32);
+void func_8020B590_ovl_01(Gfx **displayListHead, u8 isSinglePlayer);
 void func_8020E898_ovl_01(Gfx **displayListHead);
 void func_80213748_ovl_01(Gfx **displayListHead);
 void func_80215DC4_ovl_01(Gfx **displayListHead);

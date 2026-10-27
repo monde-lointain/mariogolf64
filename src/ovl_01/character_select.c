@@ -455,15 +455,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
 #endif
 
 /*
- * Doesn't match: the original adds the player number to the menu memory's
- * address the other way round and keeps the grid slot in another register.
+ * Doesn't match: the original schedules the shift of the choice index for
+ * the character table lookup one instruction later. The menu memory fields
+ * are read through integer addresses because the original adds the player
+ * number before the field offset.
  */
 #ifdef NON_MATCHING
-void func_8020B590_ovl_01(Gfx **displayListHead, s32 isSinglePlayer) {
+void func_8020B590_ovl_01(Gfx **displayListHead, u8 isSinglePlayer) {
     Gfx *gfx = *displayListHead;
     s32 playerNumber;
     s16 column;
-    s32 slot;
+    s16 slot;
     s16 choiceIndex;
     s32 *character;
     s16 clubSet;
@@ -501,8 +503,8 @@ void func_8020B590_ovl_01(Gfx **displayListHead, s32 isSinglePlayer) {
     } else {
         playerNumber = 1;
     }
-    column = (&func_8005AF74()->characterColumn)[(s16)playerNumber - 1];
-    slot = g_CharacterGrid[(&func_8005AF74()->characterRow)[(s16)playerNumber - 1]][column];
+    column = *(s8 *)((s32)&func_8005AF74()->characterColumn + (s16)playerNumber - 1);
+    slot = g_CharacterGrid[*(s8 *)((s32)&func_8005AF74()->characterRow + (s16)playerNumber - 1)][column];
     if (slot < CHOOSABLE_MARK_LIMIT) {
         choiceIndex = slot + MARKED_CHARACTER_OFFSET;
     } else {
@@ -521,8 +523,6 @@ void func_8020B590_ovl_01(Gfx **displayListHead, s32 isSinglePlayer) {
     sprintf(g_PrintBuffer, "%dY", g_Clubs[clubSet * CLUB_SET_SIZE + CLUB_TYPE_DRIVER].distance);
     DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
     if (D_8022FF00_ovl_01 == FALSE) {
-        s32 unused[2];
-
         if ((u8)isSinglePlayer == TRUE) {
             SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER, 1, 0, 1, 255, 255, 255, 255);
         } else {
