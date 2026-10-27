@@ -2,10 +2,14 @@
 #include "asset.h"
 #include "character.h"
 #include "hole_display.h"
+#include "libc.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen.h"
 #include "sound.h"
+#include "text.h"
+#include "variables.h"
 #include "work_area.h"
 
 /* The images of D_800C2064 that func_80213390 reads */
@@ -18,6 +22,15 @@
 #define BEST_TIMES_TURN 90
 #define BEST_TIMES_SPIN_SPEED 18
 
+/* func_802144E4 draws a character's 32x24 face from D_8023AA44; nothing calls it */
+#define FACE_WIDTH 32
+#define FACE_HEIGHT 24
+#define FACE_WITH_NAME 0
+#define FACE_DARKENED 10
+#define FACE_DARKENED_SHADE 10
+#define FACE_NAME_OFFSET_X 24
+#define FACE_NAME_OFFSET_Y 12
+
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -28,6 +41,10 @@ extern s32 D_80230130_ovl_01;
 extern s32 D_80230134_ovl_01;
 extern s32 D_80230138_ovl_01;
 extern void *D_8023AA44_ovl_01;
+extern s32 D_8023013C_ovl_01[CHARACTER_COUNT];
+extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
+
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 extern void *D_8023AA48_ovl_01;
 extern void *D_8023AA4C_ovl_01;
 extern void *D_8023AA50_ovl_01;
@@ -134,7 +151,47 @@ void func_80213558_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213748_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802144E4_ovl_01);
+void func_802144E4_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 character, u8 drawMode) {
+    Gfx *gfx = *displayListHead;
+
+    if (character < 0) {
+        character = 0;
+    }
+    if (character >= CHARACTER_COUNT) {
+        character = CHARACTER_COUNT - 1;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (drawMode == FACE_DARKENED) {
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE, 255);
+    } else {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    }
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AA44_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock(gfx++,
+                        ((u32)D_8023AA44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                         D_8023013C_ovl_01[character] * FACE_WIDTH * FACE_HEIGHT) & ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + FACE_WIDTH) << 2, (top + FACE_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    if (drawMode == FACE_WITH_NAME) {
+        SetUpTextDrawing(&gfx);
+        SetTextColor(&gfx, 255, 255, 255);
+        sprintf(g_PrintBuffer, "%s", D_8022BF70_ovl_01[D_8023013C_ovl_01[character]]);
+        DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802149A8_ovl_01);
 
