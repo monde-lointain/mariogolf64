@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "controller.h"
 #include "game_flags.h"
 #include "menu.h"
 #include "menu_memory.h"
@@ -8,6 +9,15 @@
 
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
+
+/* The diagonals of any controller's stick that func_80209BE0 reports, each once per hold of four frames */
+#define STICK_DIAGONAL_NONE 0
+#define STICK_DIAGONAL_UP_LEFT 1
+#define STICK_DIAGONAL_UP_RIGHT 2
+#define STICK_DIAGONAL_DOWN_LEFT 3
+#define STICK_DIAGONAL_DOWN_RIGHT 4
+#define STICK_DIAGONAL_THRESHOLD 20
+#define STICK_HOLD_FRAME_COUNT 4
 
 /* The bytes of the first of the two images that func_8020B438 reads into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
@@ -21,6 +31,10 @@ extern u16 D_800C2780[][8];
 extern void *D_80105B78[CHARACTER_COUNT];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern s32 D_801B7070;
+extern s32 D_8022FFA0_ovl_01;
+extern s32 D_8022FFA4_ovl_01;
+extern s32 D_8023BFD4_ovl_01;
+extern s32 D_8023BFD8_ovl_01;
 extern u8 D_8022FF01_ovl_01;
 extern s32 D_8022FF2C_ovl_01[];
 extern void *D_8023A568_ovl_01;
@@ -53,7 +67,52 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209894_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209BE0_ovl_01);
+s32 func_80209BE0_ovl_01(void) {
+    s32 stickX;
+    s32 stickY;
+    s8 anyStick;
+
+    func_8005AF74();
+    anyStick = g_ControllerStates[3].stickX |
+               (g_ControllerStates[2].stickX | (g_ControllerStates[0].stickX | g_ControllerStates[1].stickX));
+    stickX = D_8023BFD4_ovl_01 ^ anyStick;
+    stickX &= anyStick;
+    if (D_8023BFD4_ovl_01 == stickX) {
+        D_8022FFA0_ovl_01++;
+        if (D_8022FFA0_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
+            D_8022FFA0_ovl_01 = 0;
+            D_8023BFD4_ovl_01 = 0;
+        }
+    } else {
+        D_8023BFD4_ovl_01 = stickX;
+    }
+    anyStick = g_ControllerStates[3].stickY |
+               (g_ControllerStates[2].stickY | (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
+    stickY = D_8023BFD8_ovl_01 ^ anyStick;
+    stickY &= anyStick;
+    if (D_8023BFD8_ovl_01 == stickY) {
+        D_8022FFA4_ovl_01++;
+        if (D_8022FFA4_ovl_01 >= STICK_HOLD_FRAME_COUNT) {
+            D_8022FFA4_ovl_01 = 0;
+            D_8023BFD8_ovl_01 = 0;
+        }
+    } else {
+        D_8023BFD8_ovl_01 = stickY;
+    }
+    if (stickX < -STICK_DIAGONAL_THRESHOLD && stickY > STICK_DIAGONAL_THRESHOLD) {
+        return STICK_DIAGONAL_UP_LEFT;
+    }
+    if (stickX > STICK_DIAGONAL_THRESHOLD && stickY > STICK_DIAGONAL_THRESHOLD) {
+        return STICK_DIAGONAL_UP_RIGHT;
+    }
+    if (stickX < -STICK_DIAGONAL_THRESHOLD && stickY < -STICK_DIAGONAL_THRESHOLD) {
+        return STICK_DIAGONAL_DOWN_LEFT;
+    }
+    if (stickX > STICK_DIAGONAL_THRESHOLD && stickY < -STICK_DIAGONAL_THRESHOLD) {
+        return STICK_DIAGONAL_DOWN_RIGHT;
+    }
+    return STICK_DIAGONAL_NONE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209D50_ovl_01);
 
