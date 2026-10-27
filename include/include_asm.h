@@ -3,6 +3,8 @@
 
 #if !defined(M2CTX) && !defined(PERMUTER)
 
+/* Keep one assembler directive per line */
+/* clang-format off */
 #ifndef INCLUDE_ASM
 #define INCLUDE_ASM(FOLDER, NAME) \
     __asm__( \
@@ -22,6 +24,7 @@
         ".section .text" \
     )
 #endif
+/* clang-format on */
 
 #if INCLUDE_ASM_USE_MACRO_INC
 __asm__(".include \"include/macro.inc\"\n");

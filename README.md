@@ -23,6 +23,12 @@ make setup    # download the KMC GCC 2.7.2 toolchain and split the ROM
 make -j       # build and verify build/mariogolf64.z64
 ```
 
+## Formatting
+
+The sources follow the Google style through clang-format 23. Run
+`make format` before committing. The SDK sources in `lib/` keep their
+own formatting.
+
 ## Layout
 
 | Path | Contents |

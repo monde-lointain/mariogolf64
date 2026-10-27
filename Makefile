@@ -89,7 +89,7 @@ $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1 -fno-fast-math
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools
+.PHONY: all extract clean distclean setup tools format
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -100,6 +100,12 @@ extract:
 	$(PYTHON) -m splat split $(SPLAT_YAML)
 
 setup: tools extract
+
+CLANG_FORMAT ?= clang-format-23
+FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h')
+
+format:
+	$(CLANG_FORMAT) -i $(FORMAT_FILES)
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
 
