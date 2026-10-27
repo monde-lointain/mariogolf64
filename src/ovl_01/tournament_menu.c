@@ -1,11 +1,15 @@
 #include "common.h"
 #include "asset.h"
+#include "billboard.h"
 #include "controller.h"
+#include "hole_display.h"
 #include "menu.h"
 #include "menu_memory.h"
+#include "password.h"
 #include "save.h"
 #include "screen.h"
 #include "screen_layers.h"
+#include "sound.h"
 #include "text.h"
 #include "variables.h"
 
@@ -98,7 +102,14 @@ extern s32 D_80230F6C_ovl_01;
 extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT];
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
 extern s8 D_80105DBC[5];
+extern s32 D_80105B68;
 extern s32 D_80105DC8;
+extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
+extern s32 D_801B60B4;
+extern s32 D_801B7070;
+extern u8 g_TournamentCode[TOURNAMENT_CODE_SIZE];
+s32 GetClubTournamentCourse(void);
+void StartLoadingChosenHole(void);
 extern s32 D_80105DCC;
 /* The first club tournament's name; D_80105DC8 picks the tournament */
 #define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
@@ -119,6 +130,12 @@ extern s32 D_80105DCC;
 #define CLUB_NAME_SLOT 2
 #define CLUB_COURSE_SLOT 4
 #define CLUB_MODE_SLOT 5
+#define CLUB_TEXT_SLOT_COUNT 11
+/* The window's choice in D_80230F80, which left and right toggle */
+#define CLUB_CHOICE_YES 0
+#define CLUB_CHOICE_NO 1
+#define SOUND_ENTER_TOURNAMENT 0x54
+#define SOUND_DECLINE_TOURNAMENT 0x49
 
 s32 IsNintendoClubTournament(void);
 s32 GetClubTournamentCourseTitleMessage(void);
@@ -367,7 +384,103 @@ void func_80228B60_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228C00_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80229278_ovl_01);
+void func_80229278_ovl_01(void) {
+    s32 isHudAnimationDone;
+    s32 index;
+    u16 buttons;
+    s32 pressedButtons;
+
+    func_8005AF74();
+    isHudAnimationDone = IsHudAnimationDone();
+    if (isHudAnimationDone != TRUE) {
+        return;
+    }
+    if (GetWipeKind() != WIPE_NONE) {
+        for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        }
+        if (GetWipeProgress() == 0) {
+            D_801B60B4 = (g_TournamentCode[0] << 16) | (g_TournamentCode[1] << 8) | g_TournamentCode[2];
+            StartLoadingChosenHole();
+            g_MenuScreen = MENU_SCREEN_EXIT;
+        }
+        return;
+    }
+    if (IsMenuWindowOpen() == -1) {
+        return;
+    }
+    if (IsMenuWindowClosed() == -1) {
+        return;
+    }
+    if (IsMenuWindowClosed()) {
+        D_80230F80_ovl_01 = CLUB_CHOICE_NO;
+        for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        }
+        D_80230F70_ovl_01 = FALSE;
+        D_80230F80_ovl_01 = CLUB_CHOICE_YES;
+        return;
+    }
+    pressedButtons = g_MenuRepeatButtons;
+    if (pressedButtons & A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        if (D_80230F80_ovl_01 == CLUB_CHOICE_YES) {
+            PlaySound(SOUND_ENTER_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_IsClubTournament = TRUE;
+            D_80105B68 = 1;
+            if (func_8022BDB0_ovl_01()) {
+                StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                StartLoadingChosenHole();
+                g_MenuScreen = MENU_SCREEN_UNK24;
+            } else {
+                for (index = 0; index != g_ControllerCount; index++) {
+                    if (g_MenuControllerData[index].button & A_BUTTON) {
+                        D_800C1FF4[0] = index;
+                        break;
+                    }
+                }
+                StartLoadingChosenHole();
+                D_801B7070 = 1;
+                g_PlayerCount = 1;
+                buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
+                          g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+                /* The held C buttons pick the player's colours */
+                if (buttons & L_CBUTTONS) {
+                    g_Players[0].paletteIndex = 1;
+                } else if (buttons & D_CBUTTONS) {
+                    g_Players[0].paletteIndex = 2;
+                } else if (buttons & R_CBUTTONS) {
+                    g_Players[0].paletteIndex = 3;
+                } else {
+                    g_Players[0].paletteIndex = 0;
+                }
+                LoadWipeShape(GetClubTournamentCourse());
+                StartWipe(WIPE_CLOSING);
+            }
+            for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+            }
+        } else {
+            PlaySound(SOUND_DECLINE_TOURNAMENT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            func_80228B60_ovl_01();
+            CloseMenuWindow();
+            for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+            }
+        }
+    } else if (pressedButtons & B_BUTTON) {
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        D_80230F80_ovl_01 = CLUB_CHOICE_YES;
+        D_80230F70_ovl_01 = FALSE;
+        for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+        }
+    } else if ((pressedButtons & L_JPAD) || ((u16)pressedButtons & R_JPAD)) {
+        /* The cast above stops the compiler from merging the two tests, which the original keeps apart */
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        D_80230F80_ovl_01 ^= 1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
 
@@ -377,6 +490,7 @@ void func_80229CB0_ovl_01(Gfx **displayListHead) {
     s32 height = 0;
     s32 windowStyle;
     u16 buttons;
+    s32 pressedButtons;
 
     func_801FB54C_ovl_01(&gfx, CLUB_TOURNAMENT_BOARD_KIND);
     func_8022A43C_ovl_01(&gfx);
