@@ -294,6 +294,8 @@ extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 #define HOLES_CHOICE_ALL 3
 /* D_8022BE88's value once the popup opened with C-up has finished */
 #define MENU_PHASE_UNK2 2
+/* In this phase, the course select's banners slide the other way */
+#define MENU_PHASE_UNK7 7
 #define SONG_UNK17 0x17
 #define SOUND_UNK6A 0x6A
 #define SOUND_HOLES_CHOSEN 0x45
@@ -2056,7 +2058,124 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80201574_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80202000_ovl_01);
 
+/*
+ * func_802047F0 draws the course select's banners of D_801B60D0: one behind
+ * the course's name, and while the holes can be chosen, a wider one below
+ * it behind the choice made, which squeezes the first.
+ */
+#define COURSE_NAME_BANNER_LEFT 67
+#define COURSE_NAME_BANNER_TOP 168
+#define COURSE_NAME_BANNER_WIDTH 190
+#define COURSE_NAME_BANNER_SQUEEZE 48
+#define HOLES_BANNER_LEFT 47
+#define HOLES_BANNER_TOP 190
+#define HOLES_BANNER_WIDTH 230
+#define HOLES_BANNER_STRIP_HEIGHT 11
+#define COURSE_NAME_Y 176
+#define HOLES_CHOICE_Y 202
+/* A HOLES_CHOICE_* value plus this is the message that explains it */
+#define HOLES_CHOICE_MESSAGE_BASE 0xC3
+#define HOLES_CHOICE_TEXT_SLOT 1
+
+extern const char D_80231660_ovl_01[];
+extern char *D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT];
+extern s32 g_CourseNameEnvColors[];
+extern s32 g_CourseNamePrimColors[];
+
+/*
+ * Doesn't match: the original sets the text drawing's argument before the
+ * mini-golf test that picks the name's colours, and keeps the course name
+ * banner's strip top in one register instead of copying it.
+ */
+#ifdef NON_MATCHING
+void func_802047F0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 slide = D_8023BFD0_ovl_01;
+    /* Also the course's index into the name colours, to match the original's registers */
+    s32 stripIndex;
+    s32 stripTop;
+    s32 squeeze;
+    s32 cameraModeTopByte;
+
+    if (D_8022BE88_ovl_01 == MENU_PHASE_UNK7) {
+        slide = -slide;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+    if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
+        for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+            gDPLoadTextureBlock(gfx++,
+                                ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
+                                 stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                                G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            stripTop = HOLES_BANNER_TOP + stripIndex * HOLES_BANNER_STRIP_HEIGHT;
+            gSPScisTextureRectangle(gfx++, HOLES_BANNER_LEFT << 2, (slide + stripTop) << 2,
+                                    (HOLES_BANNER_LEFT + HOLES_BANNER_WIDTH) << 2,
+                                    (slide + stripTop + HOLES_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                    (MENU_BANNER_WIDTH << 10) / HOLES_BANNER_WIDTH,
+                                    (MENU_BANNER_STRIP_HEIGHT << 10) / HOLES_BANNER_STRIP_HEIGHT);
+            gDPPipeSync(gfx++);
+        }
+    }
+    squeeze = MAP_CAMERA_MODE_TOP_BYTE != 0 ? COURSE_NAME_BANNER_SQUEEZE : 0;
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = COURSE_NAME_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
+        gSPScisTextureRectangle(gfx++, (COURSE_NAME_BANNER_LEFT + squeeze / 2) << 2, (slide + stripTop) << 2,
+                                (COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - squeeze / 2) << 2,
+                                (slide + stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (MENU_BANNER_WIDTH << 10) / (COURSE_NAME_BANNER_WIDTH - squeeze), TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    if (!g_IsMiniGolf) {
+        if (D_800FF4C0 == 1) {
+            sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.courseChoice + 1,
+                    g_CourseRecords[D_801323A0.courseChoice].name);
+        } else {
+            sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.courseChoice + 1,
+                    g_TournamentNames[D_801323A0.courseChoice]);
+        }
+    } else {
+        sprintf(g_PrintBuffer, D_80231660_ovl_01, g_MenuChoices.unk13 + 1, D_8022FDEC_ovl_01[g_MenuChoices.unk13]);
+    }
+    SetUpGradientTextDrawing(&gfx, 0);
+    if (g_IsMiniGolf == TRUE) {
+        stripIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX;
+    } else {
+        stripIndex = D_801323A0.courseChoice;
+    }
+    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, slide + COURSE_NAME_Y, g_PrintBuffer,
+                            g_CourseNameEnvColors[stripIndex], g_CourseNamePrimColors[stripIndex],
+                            TEXT_FLAG_CENTERED);
+    cameraModeTopByte = MAP_CAMERA_MODE_TOP_BYTE;
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    if (cameraModeTopByte == 1) {
+        gDPPipeSync(gfx++);
+        SetUpTextDrawing(&gfx);
+        SetTextColor(&gfx, 255, 255, 255);
+        SetTextSlot(SCREEN_WIDTH / 2, slide + HOLES_CHOICE_Y, g_MenuChoices.unk0 + HOLES_CHOICE_MESSAGE_BASE, 1,
+                    HOLES_CHOICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
+        DrawLargeTextSlot(&gfx, HOLES_CHOICE_TEXT_SLOT);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802047F0_ovl_01);
+#endif
 
 void DrawContinueLabel(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
