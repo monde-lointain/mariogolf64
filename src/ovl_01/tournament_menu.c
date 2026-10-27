@@ -55,6 +55,20 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 /* "Please enter a code.", which "The code entered is incorrect." follows */
 #define MESSAGE_ENTER_CODE 0x165
 
+/* The keyboard that the club tournament code is typed on, and its keys that are not characters */
+#define CODE_KEYBOARD_ROW_COUNT 4
+#define CODE_KEYBOARD_COLUMN_COUNT 10
+#define CODE_KEYBOARD_END_ROW 3
+#define CODE_KEYBOARD_END_COLUMN 9
+#define CODE_KEY_BLANK 0xFD
+#define CODE_KEY_BACK 0xFE
+#define CODE_KEY_END 0xFF
+
+/* What func_8022B46C reports after a key is pressed */
+#define CODE_KEY_RESULT_TOO_SHORT -1
+#define CODE_KEY_RESULT_TYPING 0
+#define CODE_KEY_RESULT_DONE 1
+
 /* Where the entered code is drawn, and the value of its characters not yet entered */
 #define CLUB_CODE_FIRST_X 97
 #define CLUB_CODE_Y 150
@@ -67,6 +81,7 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 #define CLUB_CODE_MESSAGE_Y 180
 
 extern s32 D_80230F6C_ovl_01;
+extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT];
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
 extern s8 D_80105DBC[5];
 
@@ -298,7 +313,51 @@ void func_8022B360_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/* Doesn't match: the menu memory pointer and the result take each other's registers */
+#ifdef NON_MATCHING
+s32 func_8022B46C_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 result = CODE_KEY_RESULT_TYPING;
+    u8 key = D_80230F84_ovl_01[memory->unk48][memory->unk47];
+
+    switch (key) {
+        case CODE_KEY_BACK:
+            if (D_80230F68_ovl_01 > 0) {
+                if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
+                    D_80230F68_ovl_01 = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+                }
+                D_80230FD4_ovl_01[D_80230F68_ovl_01] = CLUB_CODE_NO_CHAR;
+                D_80230F68_ovl_01--;
+            } else {
+                D_80230FD4_ovl_01[0] = CLUB_CODE_NO_CHAR;
+            }
+            break;
+        case CODE_KEY_BLANK:
+            break;
+        case CODE_KEY_END:
+            if (D_80230F68_ovl_01 < CLUB_TOURNAMENT_CODE_LENGTH) {
+                return CODE_KEY_RESULT_TOO_SHORT;
+            }
+            result = CODE_KEY_RESULT_DONE;
+            break;
+        default:
+            if (D_80230F68_ovl_01 < CLUB_TOURNAMENT_CODE_LENGTH) {
+                D_80230FD4_ovl_01[D_80230F68_ovl_01] = key;
+                D_80230F68_ovl_01++;
+                if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
+                    memory->unk47 = CODE_KEYBOARD_END_COLUMN;
+                    memory->unk48 = CODE_KEYBOARD_END_ROW;
+                }
+            } else {
+                D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1] = key;
+            }
+            break;
+    }
+    return result;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B46C_ovl_01);
+#endif
 
 s32 func_8022B5E0_ovl_01(void) {
     s32 isEmpty = TRUE;
