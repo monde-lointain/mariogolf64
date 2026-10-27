@@ -35,3 +35,25 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203F70_ovl_0
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80204EA8_ovl_05);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802065FC_ovl_05);
+
+/* Ground kind names in half-width katakana; the data block points at the last four */
+const char D_8020C190_ovl_05[] = "\332\257\304\336";
+const char D_8020C198_ovl_05[] = "\314\336\331\260";
+const char D_8020C1A0_ovl_05[] = "\270\336\330\260\335";
+const char D_8020C1A8_ovl_05[] = "TEE UP";
+const char D_8020C1B0_ovl_05[] = "\261\263\304 \265\314\336 \272\260\275";
+const char D_8020C1BC_ovl_05[] = "            ";
+const char D_8020C1CC_ovl_05[] = "\263\264\275\304\264\330\261";
+const char D_8020C1D4_ovl_05[] = "\303\336\250\260\314\337\327\314";
+const char D_8020C1E0_ovl_05[] = "\315\336\261\270\336\327\263\335\304\336";
+const char D_8020C1EC_ovl_05[] = "\276\320\327\314";
+const char D_8020C1F4_ovl_05[] = "\270\336\330\260\335 \264\257\274\336";
+const char D_8020C200_ovl_05[] = "\333\257\270";
+const char D_8020C204_ovl_05[] = "\303\250\260\270\336\327\263\335\304\336";
+const char D_8020C210_ovl_05[] = "\266\260\304\263\252\262";
+const char D_8020C218_ovl_05[] = "\263\253\260\300\260\312\273\336\260\304\336";
+const char D_8020C224_ovl_05[] = "\265\335 \270\336\330\260\335";
+const char D_8020C230_ovl_05[] = "\312\336\335\266\260";
+const char D_8020C238_ovl_05[] = "\327\314";
+const char D_8020C23C_ovl_05[] = "\314\252\261\263\252\262";
+const char D_8020C244_ovl_05[] = "O.B.";

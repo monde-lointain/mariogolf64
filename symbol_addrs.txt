@@ -3166,3 +3166,6 @@ D_80231854_ovl_01 = 0x80231854; // type:asciz segment:ovl_01 force_not_migration
 D_80231860_ovl_01 = 0x80231860; // type:asciz segment:ovl_01 force_not_migration:True
 D_80231868_ovl_01 = 0x80231868; // type:asciz segment:ovl_01 force_not_migration:True
 D_80231874_ovl_01 = 0x80231874; // type:asciz segment:ovl_01 force_not_migration:True
+D_8040C9B0_hole_editor = 0x8040C9B0; // segment:hole_editor force_migration:True
+D_8040C9B4_hole_editor = 0x8040C9B4; // segment:hole_editor force_migration:True
+D_8020C0A8_ovl_05 = 0x8020C0A8; // type:f64 size:0x8 segment:ovl_05 force_migration:True
