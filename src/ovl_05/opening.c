@@ -74,7 +74,15 @@ extern u8 D_80214C50_ovl_05[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 /* The buffers of character slots 1 and 2 */
 extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
-extern s32 D_8022BFA8_ovl_05;
+/*
+ * The cue that the opening's script has given for setting up its characters,
+ * from 0 to OPENING_CUE_COUNT - 1, or one of the values below
+ */
+extern s32 f_OpeningCue;
+#define OPENING_CUE_COUNT 29
+#define OPENING_CUE_INVALID 29
+#define OPENING_CUES_FINISHED 30
+#define OPENING_CUE_DONE 31
 extern u8* g_ShadowTexture;
 extern s32 f_LakituScreenPoint[2];
 /* A 32x32 CI8 image with its header and palette */
@@ -316,7 +324,7 @@ void LoadOpening(void) {
   osSyncPrintf("ConstOpening\n");
   f_OpeningBillboardHeap = AllocMemory(OPENING_BILLBOARD_HEAP_SIZE);
   InitBillboardManager(f_OpeningBillboardHeap, OPENING_BILLBOARD_HEAP_SIZE);
-  D_8022BFA8_ovl_05 = 31;
+  f_OpeningCue = OPENING_CUE_DONE;
   for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(f_OpeningCharacterBuffers);
        bufferIndex++) {
     f_OpeningCharacterBuffers[bufferIndex] =
@@ -455,16 +463,27 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
 
 s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
 
-extern s32 D_8020AC40_ovl_05;
-extern s32 D_8020AD9C_ovl_05;
-extern s32 D_8020C400_ovl_05;
+/* Written but never read */
+extern s32 f_LastPlacedSlotIndex;
+/* Whether Donkey Kong stands in for Mario, once he is unlocked */
+extern s32 f_IsDonkeyKongShown;
+extern s32 f_CueSlotIndex;
 
-#define PLACE(point, x, z, heading) \
-  point[0] = x;                     \
-  point[2] = z;                     \
-  PlaceCharacter(D_8020C400_ovl_05, point, DEGREES_TO_RADIANS(heading))
+/* Places the cue slot's character, leaving the point's height unset */
+#define PLACE_CUE_CHARACTER(point, x, z, heading) \
+  point[0] = x;                                   \
+  point[2] = z;                                   \
+  PlaceCharacter(f_CueSlotIndex, point, DEGREES_TO_RADIANS(heading))
 
-s32 func_801F58EC_ovl_05(void) {
+/*
+ * Sets up the opening's characters for the cue that its script has given, and
+ * returns whether the cues have finished.
+ *
+ * Cues 1 and 27 step on to the next cue instead of being marked done, which
+ * sets up its characters on the next frame. When cue 1 places its character,
+ * though, it steps from OPENING_CUE_DONE to an invalid cue.
+ */
+s32 UpdateOpeningCharacters(void) {
   CoursePoint point0;
   CoursePoint point1;
   CoursePoint point2;
@@ -496,293 +515,293 @@ s32 func_801F58EC_ovl_05(void) {
   CoursePoint point28;
   CoursePoint point29;
 
-  switch (D_8022BFA8_ovl_05) {
+  switch (f_OpeningCue) {
     case 0:
       SetCharacterLights();
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
-        PLACE(point0, 0xF3400, 0x490000, -30);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
+        PLACE_CUE_CHARACTER(point0, 0xF3400, 0x490000, -30);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 1:
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
-        PLACE(point1, 0xA0B58, 0x4A28BF, 80);
-        D_8022BFA8_ovl_05 = 31;
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
+        PLACE_CUE_CHARACTER(point1, 0xA0B58, 0x4A28BF, 80);
+        f_OpeningCue = OPENING_CUE_DONE;
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05++;
+      f_OpeningCue++;
       break;
     case 2:
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, CHARACTER_KID)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
-        PLACE(point2, 0x1368A0, 0x49D208, 0);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
+        PLACE_CUE_CHARACTER(point2, 0x1368A0, 0x49D208, 0);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 4:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
-      D_8020C400_ovl_05 = 3;
+      f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
-        PLACE(point3, 0xF3400, 0x490000, -30);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
+        PLACE_CUE_CHARACTER(point3, 0xF3400, 0x490000, -30);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 5:
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_BOWSER)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
-        PLACE(point4, 0xB2A34, 0x4F9800, 10);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
+        PLACE_CUE_CHARACTER(point4, 0xB2A34, 0x4F9800, 10);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 7:
       FreeCharacterSlot(0);
       FreeCharacterSlot(3);
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
-        PLACE(point5, 0xF3400, 0x490000, 0);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
+        PLACE_CUE_CHARACTER(point5, 0xF3400, 0x490000, 0);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 8:
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
-        PLACE(point6, 0x1610CF, 0x4AFA34, 0);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
+        PLACE_CUE_CHARACTER(point6, 0x1610CF, 0x4AFA34, 0);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 9:
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_KID)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
-        PLACE(point7, 0xF3400, 0x490000, -45);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
+        PLACE_CUE_CHARACTER(point7, 0xF3400, 0x490000, -45);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 11:
       FreeCharacterSlot(0);
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
-        PLACE(point8, 0x29EB94, 0x26DDDA, 0);
+        SetCharacterAnimation(f_CueSlotIndex, 0x12);
+        PLACE_CUE_CHARACTER(point8, 0x29EB94, 0x26DDDA, 0);
       }
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
-        PLACE(point9, 0x29EB94, 0x26DDDA, 0);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x12);
+        PLACE_CUE_CHARACTER(point9, 0x29EB94, 0x26DDDA, 0);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 12:
       FreeCharacterSlot(1);
       FreeCharacterSlot(2);
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
-        PLACE(point10, 0x2709F8, 0x1CF4B4, 10);
+        SetCharacterAnimation(f_CueSlotIndex, 0x12);
+        PLACE_CUE_CHARACTER(point10, 0x2709F8, 0x1CF4B4, 10);
       }
-      D_8020C400_ovl_05 = 3;
+      f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, CHARACTER_KID)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
-        PLACE(point11, 0x2709F8, 0x1CF4B4, 55);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x12);
+        PLACE_CUE_CHARACTER(point11, 0x2709F8, 0x1CF4B4, 55);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 13:
       FreeCharacterSlot(0);
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
-        PLACE(point12, 0x2709F8, 0x1CF4B4, 10);
+        SetCharacterAnimation(f_CueSlotIndex, 0x13);
+        PLACE_CUE_CHARACTER(point12, 0x2709F8, 0x1CF4B4, 10);
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 14:
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
-        PLACE(point13, 0x2CA5D3, 0x22A928, -98);
+        SetCharacterAnimation(f_CueSlotIndex, 0x13);
+        PLACE_CUE_CHARACTER(point13, 0x2CA5D3, 0x22A928, -98);
       }
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
-        PLACE(point14, 0x2C42D6, 0x22A832, -98);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x14);
+        PLACE_CUE_CHARACTER(point14, 0x2C42D6, 0x22A832, -98);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 15:
       FreeCharacterSlot(0);
       FreeCharacterSlot(2);
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
-        PLACE(point15, 0x2B1194, 0x249320, -98);
+        SetCharacterAnimation(f_CueSlotIndex, 0x14);
+        PLACE_CUE_CHARACTER(point15, 0x2B1194, 0x249320, -98);
       }
-      D_8020C400_ovl_05 = 3;
+      f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x15);
-        PLACE(point16, 0x2B1194, 0x249320, -98);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x15);
+        PLACE_CUE_CHARACTER(point16, 0x2B1194, 0x249320, -98);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 17:
       FreeCharacterSlot(1);
       FreeCharacterSlot(3);
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x15);
-        PLACE(point17, 0x2B1194, 0x249320, -98);
+        SetCharacterAnimation(f_CueSlotIndex, 0x15);
+        PLACE_CUE_CHARACTER(point17, 0x2B1194, 0x249320, -98);
       }
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x16);
-        PLACE(point18, 0x2B1194, 0x249320, -98);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x16);
+        PLACE_CUE_CHARACTER(point18, 0x2B1194, 0x249320, -98);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 18:
       FreeCharacterSlot(2);
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, CHARACTER_BABY_MARIO);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x17);
-      PLACE(point19, 0x2B1194, 0x249320, -98);
-      D_8022BFA8_ovl_05 = 31;
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      SetCharacterAnimation(f_CueSlotIndex, 0x17);
+      PLACE_CUE_CHARACTER(point19, 0x2B1194, 0x249320, -98);
+      f_OpeningCue = OPENING_CUE_DONE;
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
     case 19:
       SetAnimationSpeed(0, 0.0f);
       SetAnimationSpeed(1, 0.0f);
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 20:
       SetAnimationSpeed(0, 1.0f);
       SetAnimationSpeed(1, 1.0f);
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 21:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
-      D_8020C400_ovl_05 = 2;
-      if (D_8020AD9C_ovl_05) {
+      f_CueSlotIndex = 2;
+      if (f_IsDonkeyKongShown) {
         func_80206680_ovl_05(2, CHARACTER_DONKEY_KONG);
       } else {
         func_80206680_ovl_05(2, CHARACTER_MARIO);
       }
       SetAnimationSpeed(2, 0.0f);
-      if (D_8020AD9C_ovl_05 != 0) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+      if (f_IsDonkeyKongShown != 0) {
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
       } else {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
-      PLACE(point20, 0x202B29, 0xCE7DA, -165);
-      D_8020C400_ovl_05 = 3;
+      PLACE_CUE_CHARACTER(point20, 0x202B29, 0xCE7DA, -165);
+      f_CueSlotIndex = 3;
       func_80206680_ovl_05(3, CHARACTER_MAPLE);
       SetAnimationSpeed(3, 0.0f);
-      if (D_8020AD9C_ovl_05 != 0) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+      if (f_IsDonkeyKongShown != 0) {
+        SetCharacterAnimation(f_CueSlotIndex, 0x11);
       } else {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
-      PLACE(point21, 0x202B29, 0xCE7DA, -165);
-      D_8022BFA8_ovl_05 = 31;
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      PLACE_CUE_CHARACTER(point21, 0x202B29, 0xCE7DA, -165);
+      f_OpeningCue = OPENING_CUE_DONE;
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
     case 22:
       SetAnimationSpeed(2, 1.0f);
       SetAnimationSpeed(3, 1.0f);
       break;
     case 23:
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       func_80206680_ovl_05(0, CHARACTER_METAL_MARIO);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x16);
-      PLACE(point22, 0x2B1194, 0x249320, -98);
-      D_8020C400_ovl_05 = 1;
+      SetCharacterAnimation(f_CueSlotIndex, 0x16);
+      PLACE_CUE_CHARACTER(point22, 0x2B1194, 0x249320, -98);
+      f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, CHARACTER_BABY_MARIO);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x18);
-      PLACE(point23, 0x2B1194, 0x249320, -98);
-      D_8022BFA8_ovl_05 = 31;
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      SetCharacterAnimation(f_CueSlotIndex, 0x18);
+      PLACE_CUE_CHARACTER(point23, 0x2B1194, 0x249320, -98);
+      f_OpeningCue = OPENING_CUE_DONE;
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
     case 24:
       FreeAllCharacterSlots();
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 25:
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       func_80206680_ovl_05(0, CHARACTER_KID);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
-      PLACE(point24, 0x16308C, 0x183EDA, 170);
-      D_8022BFA8_ovl_05 = 31;
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      SetCharacterAnimation(f_CueSlotIndex, 0x13);
+      PLACE_CUE_CHARACTER(point24, 0x16308C, 0x183EDA, 170);
+      f_OpeningCue = OPENING_CUE_DONE;
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
     case 26:
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       func_80206680_ovl_05(1, CHARACTER_AZALEA);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
-      PLACE(point25, 0xE3F2C, 0x1D98E6, 70);
-      D_8022BFA8_ovl_05 = 31;
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      SetCharacterAnimation(f_CueSlotIndex, 0x10);
+      PLACE_CUE_CHARACTER(point25, 0xE3F2C, 0x1D98E6, 70);
+      f_OpeningCue = OPENING_CUE_DONE;
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
       break;
     case 27:
       FreeCharacterSlot(0);
       FreeCharacterSlot(1);
-      D_8020C400_ovl_05 = 2;
+      f_CueSlotIndex = 2;
       func_80206680_ovl_05(2, CHARACTER_KID);
-      SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
-      PLACE(point26, 0x16308C, 0x183EDA, 185);
-      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
-      D_8020C400_ovl_05 = 3;
+      SetCharacterAnimation(f_CueSlotIndex, 0x14);
+      PLACE_CUE_CHARACTER(point26, 0x16308C, 0x183EDA, 185);
+      f_LastPlacedSlotIndex = f_CueSlotIndex;
+      f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, CHARACTER_METAL_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x17);
-        PLACE(point27, 0x16806D, 0x17E632, 200);
+        SetCharacterAnimation(f_CueSlotIndex, 0x17);
+        PLACE_CUE_CHARACTER(point27, 0x16806D, 0x17E632, 200);
       }
-      D_8022BFA8_ovl_05++;
+      f_OpeningCue++;
       break;
     case 28:
-      D_8020C400_ovl_05 = 0;
+      f_CueSlotIndex = 0;
       if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x19);
-        PLACE(point28, 0x15E14D, 0x18155C, 170);
+        SetCharacterAnimation(f_CueSlotIndex, 0x19);
+        PLACE_CUE_CHARACTER(point28, 0x15E14D, 0x18155C, 170);
       }
-      D_8020C400_ovl_05 = 1;
+      f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
-        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
-        PLACE(point29, 0x166EDF, 0x1838C7, 200);
-        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+        SetCharacterAnimation(f_CueSlotIndex, 0x13);
+        PLACE_CUE_CHARACTER(point29, 0x166EDF, 0x1838C7, 200);
+        f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
-      D_8022BFA8_ovl_05 = 31;
+      f_OpeningCue = OPENING_CUE_DONE;
       break;
     default:
-      D_8022BFA8_ovl_05 = 29;
+      f_OpeningCue = OPENING_CUE_INVALID;
       break;
   }
-  return D_8022BFA8_ovl_05 == 30;
+  return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F6788_ovl_05);
