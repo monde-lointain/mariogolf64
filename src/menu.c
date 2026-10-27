@@ -1356,9 +1356,9 @@ void ComputeRoundStatistics(void) {
             D_80105C38[courseIndex].averagePutts = 0.0f;
             D_80105C38[courseIndex].parOnPercent = 0.0f;
             D_80105C38[courseIndex].parSavePercent = 0.0f;
-            D_80105C38[courseIndex].hasThirdPlace = FALSE;
-            D_80105C38[courseIndex].hasSecondPlace = FALSE;
-            D_80105C38[courseIndex].hasFirstPlace = FALSE;
+            D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+            D_80105C38[courseIndex].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+            D_80105C38[courseIndex].hasPlace[FIRST_PLACE_INDEX] = FALSE;
         } else {
             /* unk14 is left as it was */
             reciprocal = 1.0f / entry->roundCount;
@@ -1377,9 +1377,9 @@ void ComputeRoundStatistics(void) {
             } else {
                 D_80105C38[courseIndex].sandSavePercent = ((f32)entry->unk28 / (f32)sum) * 100.0f;
             }
-            D_80105C38[courseIndex].hasThirdPlace = entry->hasPlace[THIRD_PLACE_INDEX];
-            D_80105C38[courseIndex].hasSecondPlace = entry->hasPlace[SECOND_PLACE_INDEX];
-            D_80105C38[courseIndex].hasFirstPlace = entry->hasPlace[FIRST_PLACE_INDEX];
+            D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] = entry->hasPlace[THIRD_PLACE_INDEX];
+            D_80105C38[courseIndex].hasPlace[SECOND_PLACE_INDEX] = entry->hasPlace[SECOND_PLACE_INDEX];
+            D_80105C38[courseIndex].hasPlace[FIRST_PLACE_INDEX] = entry->hasPlace[FIRST_PLACE_INDEX];
         }
     }
 
@@ -1395,9 +1395,9 @@ void ComputeRoundStatistics(void) {
     D_80105C38[COURSE_COUNT].parSavePercent = 0.0f;
     D_80105C38[COURSE_COUNT].parOnPercent = 0.0f;
     D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
-    D_80105C38[COURSE_COUNT].hasThirdPlace = FALSE;
-    D_80105C38[COURSE_COUNT].hasSecondPlace = FALSE;
-    D_80105C38[COURSE_COUNT].hasFirstPlace = FALSE;
+    D_80105C38[COURSE_COUNT].hasPlace[THIRD_PLACE_INDEX] = FALSE;
+    D_80105C38[COURSE_COUNT].hasPlace[SECOND_PLACE_INDEX] = FALSE;
+    D_80105C38[COURSE_COUNT].hasPlace[FIRST_PLACE_INDEX] = FALSE;
     D_80105C38[COURSE_COUNT].bestScore = 0.0f;
     D_80105C38[COURSE_COUNT].bestDrive = 0.0f;
     D_80105C38[COURSE_COUNT].bestScore = D_80105C38[0].bestScore;

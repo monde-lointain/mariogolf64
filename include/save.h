@@ -405,9 +405,7 @@ typedef struct Unk80105C38 {
     /* 0x20 */ f32 parSavePercent;
     /* 0x24 */ f32 parOnPercent;
     /* 0x28 */ f32 sandSavePercent;
-    /* 0x2C */ s32 hasThirdPlace;
-    /* 0x30 */ s32 hasSecondPlace;
-    /* 0x34 */ s32 hasFirstPlace;
+    /* 0x2C */ s32 hasPlace[TOURNAMENT_PLACE_COUNT];
 } Unk80105C38; /* size = 0x38 */
 
 extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
