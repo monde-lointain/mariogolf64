@@ -1355,8 +1355,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 
 /* The course's backdrop image, drawn behind the course in strips from the
  * horizon down */
-#define BACKDROP_STRIP_COUNT 16
-#define BACKDROP_STRIP_HEIGHT 4
+#define COURSE_BACKDROP_STRIP_COUNT 16
+#define COURSE_BACKDROP_STRIP_HEIGHT 4
 #define BACKDROP_IMAGE_WIDTH 512
 #define BACKDROP_IMAGE_WIDTH_MASK 9 /* The image's width is 1 << this */
 #define BACKDROP_HORIZON_LEVEL 64.0f
@@ -1429,8 +1429,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPLoadTLUT_pal256(gfx++, ((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE) & ~7);
-  f_BackdropStripCount = BACKDROP_STRIP_COUNT;
-  f_BackdropStripHeight = BACKDROP_STRIP_HEIGHT;
+  f_BackdropStripCount = COURSE_BACKDROP_STRIP_COUNT;
+  f_BackdropStripHeight = COURSE_BACKDROP_STRIP_HEIGHT;
   f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
   f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
   if (view->scissorWidth == FULL_VIEW_WIDTH &&
