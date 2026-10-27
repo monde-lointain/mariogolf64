@@ -9,6 +9,9 @@
 /* The sound of confirming a choice */
 #define SOUND_CONFIRM 0x5D
 
+/* The sound of a menu choice that cannot be made, or a cursor that cannot move that way */
+#define SOUND_MENU_BLOCKED 0x63
+
 /*
  * The songs for a hole's result. Stroke play picks one by the score against
  * par. Get Character plays the one for how the first player did, and match

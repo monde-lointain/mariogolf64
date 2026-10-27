@@ -41,8 +41,6 @@
 #define PLANKS_CLOSING 0
 #define PLANKS_OPENING 1
 
-/* The sound of a cursor that cannot move that way */
-#define SOUND_MENU_BLOCKED 0x63
 #define SOUND_MENU_MOVE 0x5C
 #define MENU_SOUND_CHANNEL 15
 #define MENU_SOUND_VOLUME 127

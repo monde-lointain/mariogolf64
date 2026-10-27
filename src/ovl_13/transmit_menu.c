@@ -376,7 +376,6 @@ typedef struct StatusData {
 #define SOUND_MENU_MOVE 0x5C
 #define SOUND_MENU_CONFIRM 0x5D
 #define SOUND_MENU_CANCEL 0x5F
-#define SOUND_MENU_BLOCKED 0x63
 #define MENU_SOUND_VOLUME 127
 
 void LoadCursorBox(void *image);
