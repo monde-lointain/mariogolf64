@@ -92,7 +92,7 @@ extern s32 sFramesThisSecond;
 extern s32 sIsOddRetrace;
 extern volatile s32 g_MainLoopState;
 extern u8 sGameFlagBits[GAME_FLAG_COUNT / 8];
-extern MenuRepeatState sMenuRepeatStates[MAXCONTROLLERS];
+extern MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
 extern u16 *g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
@@ -318,33 +318,33 @@ void UpdateMenuController(NUContData *pad, NUContData *previousMenuPad, s32 port
         }
         return (stick < 0) ? -magnitude : magnitude;
     }
-    s32 repeatDelay = sMenuRepeatStates[portIndex].repeatDelay;
+    s32 repeatDelay = g_MenuRepeatStates[portIndex].repeatDelay;
     NUContData *menuPad = &g_MenuControllerData[portIndex];
 
     menuPad->stick_x = ApplyStickDeadZone(pad->stick_x);
     menuPad->stick_y = ApplyStickDeadZone(pad->stick_y);
-    sMenuRepeatStates[portIndex].stickDirectionX =
-        GetStickDirection(pad->stick_x, sMenuRepeatStates[portIndex].stickDirectionX, STICK_PRESS_THRESHOLD,
+    g_MenuRepeatStates[portIndex].stickDirectionX =
+        GetStickDirection(pad->stick_x, g_MenuRepeatStates[portIndex].stickDirectionX, STICK_PRESS_THRESHOLD,
                           STICK_RELEASE_THRESHOLD);
-    sMenuRepeatStates[portIndex].stickDirectionY =
-        GetStickDirection(pad->stick_y, sMenuRepeatStates[portIndex].stickDirectionY, STICK_PRESS_THRESHOLD,
+    g_MenuRepeatStates[portIndex].stickDirectionY =
+        GetStickDirection(pad->stick_y, g_MenuRepeatStates[portIndex].stickDirectionY, STICK_PRESS_THRESHOLD,
                           STICK_RELEASE_THRESHOLD);
 
     menuPad->button = pad->button;
-    if (sMenuRepeatStates[portIndex].stickDirectionX == 1) {
+    if (g_MenuRepeatStates[portIndex].stickDirectionX == 1) {
         menuPad->button |= R_JPAD;
-    } else if (sMenuRepeatStates[portIndex].stickDirectionX == -1) {
+    } else if (g_MenuRepeatStates[portIndex].stickDirectionX == -1) {
         menuPad->button |= L_JPAD;
     }
-    if (sMenuRepeatStates[portIndex].stickDirectionY == 1) {
+    if (g_MenuRepeatStates[portIndex].stickDirectionY == 1) {
         menuPad->button |= U_JPAD;
-    } else if (sMenuRepeatStates[portIndex].stickDirectionY == -1) {
+    } else if (g_MenuRepeatStates[portIndex].stickDirectionY == -1) {
         menuPad->button |= D_JPAD;
     }
     menuPad->trigger = pad->trigger;
 
-    if (menuPad->button == sMenuRepeatStates[portIndex].previousButtons) {
-        sMenuRepeatStates[portIndex].previousButtons = menuPad->button;
+    if (menuPad->button == g_MenuRepeatStates[portIndex].previousButtons) {
+        g_MenuRepeatStates[portIndex].previousButtons = menuPad->button;
         if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
             repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
         }
@@ -355,10 +355,10 @@ void UpdateMenuController(NUContData *pad, NUContData *previousMenuPad, s32 port
             menuPad->button = 0;
         }
     } else {
-        sMenuRepeatStates[portIndex].previousButtons = menuPad->button;
+        g_MenuRepeatStates[portIndex].previousButtons = menuPad->button;
         repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
     }
-    sMenuRepeatStates[portIndex].repeatDelay = repeatDelay;
+    g_MenuRepeatStates[portIndex].repeatDelay = repeatDelay;
 }
 
 void UpdateControllerState(NUContData *pad, ControllerState *state) {
