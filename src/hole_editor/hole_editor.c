@@ -36,6 +36,53 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_80404B84's ground height editor */
+#define EDITOR_PAD 0
+#define OPTION_PAD 1
+#define SECOND_EDITOR_PAD 2
+/* Edited points are lit fully */
+#define EDITED_POINT_SHADE 0xFF
+#define HEIGHT_STEP 4
+/* C-left sets the last height plus or minus up to 0x20 */
+#define COARSE_NOISE_MASK 0x3F
+#define COARSE_NOISE_OFFSET 0x20
+/* A moves the point's height by up to 0x40 either way */
+#define ROUGH_NOISE_MASK 0x7F
+#define ROUGH_NOISE_OFFSET 0x40
+/* B moves it HEIGHT_STEP down or up */
+#define STEP_NOISE_BIT (HEIGHT_STEP * 2)
+/* The second editor pad's B lowers it by 0 or 0x10 */
+#define DIP_NOISE_BIT 0x10
+/* What a frame did, kept in D_8040C674 */
+#define HEIGHT_EDIT_NONE 0
+#define HEIGHT_EDIT_POINT 1
+#define HEIGHT_EDIT_MOVE 2
+/* The cursor's moves, in eighths of a turn from the camera's heading */
+#define CURSOR_DIRECTION_NONE 0
+#define CURSOR_DIRECTION_RIGHT 2
+#define CURSOR_DIRECTION_UP_RIGHT 3
+#define CURSOR_DIRECTION_UP 4
+#define CURSOR_DIRECTION_UP_LEFT 5
+#define CURSOR_DIRECTION_LEFT 6
+#define CURSOR_DIRECTION_DOWN_LEFT 7
+#define CURSOR_DIRECTION_DOWN 8
+#define CURSOR_DIRECTION_DOWN_RIGHT 9
+#define BINARY_ANGLE_EIGHTH_TURN (BINARY_ANGLE_TURN / 8)
+/* BINARY_ANGLE_TO_RADIANS with pi as 3.1416, in double precision */
+#define EDITOR_ANGLE_TO_RADIANS (3.1416 / 32768)
+/* Truncated, a step moves the cursor one point along each axis it leans to */
+#define CURSOR_STEP_LENGTH 1.5
+#define HEIGHT_EDITOR_ZOOM_MAX 4.0f
+/* The stick turns the camera in steps of 16 of its units */
+#define STICK_STEP_SIZE 16
+#define HEADING_STICK_SPEED 0x100
+#define PITCH_STICK_SPEED (1.0f / 180)
+#define HEIGHT_EDITOR_PITCH_MIN (-80 * 3.1416 / 180)
+#define HEIGHT_EDITOR_CAMERA_DISTANCE 2000.0
+#define METERS_PER_HEIGHT_UNIT (1.0f / 15)
+#define HEIGHT_TEXT_COLUMN 25
+#define HEIGHT_TEXT_ROW 3
+
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
@@ -150,6 +197,24 @@ typedef struct TriangleSlope {
 } TriangleSlope; /* size = 0xA */
 
 extern TriangleSlope sTriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
+
+/* func_80404B84's state */
+extern s32 D_8040C644_hole_editor; /* The cursor's ground point column */
+extern s32 D_8040C648_hole_editor; /* And its row */
+extern f32 D_8040C654_hole_editor; /* The camera's pitch, in radians */
+extern f32 D_8040C658_hole_editor; /* The camera's heading, in radians */
+extern s32 D_8040C660_hole_editor; /* The camera's heading, as a binary angle */
+extern s32 D_8040C664_hole_editor; /* The height C-up or C-down last set */
+extern s32 D_8040C668_hole_editor; /* Copied to D_800C30D1 */
+extern s32 D_8040C66C_hole_editor; /* Heights picked up by the second editor pad */
+extern s32 D_8040C670_hole_editor;
+extern s32 D_8040C674_hole_editor; /* The last frame's HEIGHT_EDIT_* */
+
+extern s8 D_800C30D1;
+
+f32 MeasureGroundTiles(void);
+s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
+void func_80404850_hole_editor(void);
 
 /* func_80406818's menu */
 extern s32 sIsSavingHoleFiles;
@@ -292,9 +357,293 @@ void func_804045C0_hole_editor(void) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404850_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404B04_hole_editor);
+/*
+ * Runs the ground height editor. On the editor pads, the D-pad moves a
+ * cursor over the ground points, relative to the camera's heading, Z with
+ * the stick turns the camera, and R and L zoom it. On the first pad, C-up
+ * and C-down lower and raise the point (with Z, every point), C-right
+ * repeats the last height and C-left adds noise to it, and A and B add
+ * noise to the point. On the second pad, C-left and C-up pick up two
+ * heights and C-right and C-down move the point by their difference. The
+ * option pad toggles D_8040C668 and calls func_804045C0 and func_80404850.
+ * After a frame of edits, the next frame without one rebuilds the slopes.
+ */
+void func_80404B84_hole_editor(void) {
+    char text[DEBUG_TEXT_BUFFER_SIZE];
+    s32 baseHeight;
+    s32 editKind;
+    s32 direction;
+    s32 columnStep;
+    s32 rowStep;
+    f64 cameraDistance; /* As a literal, GCC would fold it into the angles before the zoom */
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404B84_hole_editor);
+    /* Moves every ground point's height by change */
+    void ChangeGroundHeight(s32 change) {
+        s32 column;
+        s32 row;
+
+        for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+            for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+                s32 height = GetGroundPoint(column, row)->v.ob[AXIS_Y];
+
+                height += change;
+                SetGroundPointHeightAndShade(column, row, height, EDITED_POINT_SHADE);
+            }
+        }
+    }
+
+    editKind = HEIGHT_EDIT_NONE;
+    direction = CURSOR_DIRECTION_NONE;
+    if (D_8040C668_hole_editor) {
+        D_800C30D1 = TRUE;
+    } else {
+        D_800C30D1 = FALSE;
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & D_CBUTTONS) {
+        func_80404850_hole_editor();
+    }
+    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & L_CBUTTONS) {
+        D_8040C66C_hole_editor = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+    }
+    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & U_CBUTTONS) {
+        D_8040C670_hole_editor = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+    }
+    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & R_CBUTTONS) {
+        s32 change = D_8040C670_hole_editor - D_8040C66C_hole_editor;
+
+        editKind = HEIGHT_EDIT_POINT;
+        SetGroundPointHeightAndShade(
+            D_8040C644_hole_editor, D_8040C648_hole_editor,
+            GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] + change,
+            EDITED_POINT_SHADE);
+        MeasureGroundTiles();
+    }
+    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & D_CBUTTONS) {
+        s32 change = D_8040C66C_hole_editor - D_8040C670_hole_editor;
+
+        editKind = HEIGHT_EDIT_POINT;
+        SetGroundPointHeightAndShade(
+            D_8040C644_hole_editor, D_8040C648_hole_editor,
+            GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] + change,
+            EDITED_POINT_SHADE);
+        MeasureGroundTiles();
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+        if (D_8040C668_hole_editor) {
+            D_8040C668_hole_editor = FALSE;
+        } else {
+            D_8040C668_hole_editor = TRUE;
+        }
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        func_804045C0_hole_editor();
+    }
+    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+            ChangeGroundHeight(-HEIGHT_STEP);
+        } else {
+            s32 height = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+
+            height -= HEIGHT_STEP;
+            D_8040C664_hole_editor = height;
+            SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, height, EDITED_POINT_SHADE);
+        }
+        editKind = HEIGHT_EDIT_POINT;
+        MeasureGroundTiles();
+    }
+    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+            ChangeGroundHeight(HEIGHT_STEP);
+        } else {
+            s32 height = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+
+            height += HEIGHT_STEP;
+            D_8040C664_hole_editor = height;
+            SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, height, EDITED_POINT_SHADE);
+        }
+        editKind = HEIGHT_EDIT_POINT;
+        MeasureGroundTiles();
+    }
+    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, D_8040C664_hole_editor,
+                                     EDITED_POINT_SHADE);
+        editKind = HEIGHT_EDIT_POINT;
+        MeasureGroundTiles();
+    }
+    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+                                     D_8040C664_hole_editor + (rand() & COARSE_NOISE_MASK) - COARSE_NOISE_OFFSET,
+                                     EDITED_POINT_SHADE);
+        editKind = HEIGHT_EDIT_POINT;
+        MeasureGroundTiles();
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
+        editKind = HEIGHT_EDIT_POINT;
+        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        baseHeight -= ROUGH_NOISE_OFFSET;
+        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+                                     baseHeight + (rand() & ROUGH_NOISE_MASK), EDITED_POINT_SHADE);
+        MeasureGroundTiles();
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+        editKind = HEIGHT_EDIT_POINT;
+        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        baseHeight -= HEIGHT_STEP;
+        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+                                     baseHeight + (rand() & STEP_NOISE_BIT), EDITED_POINT_SHADE);
+        MeasureGroundTiles();
+    }
+    if (g_MenuControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
+        editKind = HEIGHT_EDIT_POINT;
+        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+                                     baseHeight - (rand() & DIP_NOISE_BIT), EDITED_POINT_SHADE);
+        MeasureGroundTiles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) && !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        direction = CURSOR_DIRECTION_RIGHT;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) && !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        direction = CURSOR_DIRECTION_LEFT;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) && !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        if (direction == CURSOR_DIRECTION_RIGHT) {
+            direction = CURSOR_DIRECTION_DOWN_RIGHT;
+        } else if (direction == CURSOR_DIRECTION_LEFT) {
+            direction = CURSOR_DIRECTION_DOWN_LEFT;
+        } else {
+            direction = CURSOR_DIRECTION_DOWN;
+        }
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) && !(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        if (direction == CURSOR_DIRECTION_RIGHT) {
+            direction = CURSOR_DIRECTION_UP_RIGHT;
+        } else if (direction == CURSOR_DIRECTION_LEFT) {
+            direction = CURSOR_DIRECTION_UP_LEFT;
+        } else {
+            direction = CURSOR_DIRECTION_UP;
+        }
+    }
+    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & R_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        direction = CURSOR_DIRECTION_RIGHT;
+    }
+    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & L_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        direction = CURSOR_DIRECTION_LEFT;
+    }
+    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & D_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        if (direction == CURSOR_DIRECTION_RIGHT) {
+            direction = CURSOR_DIRECTION_DOWN_RIGHT;
+        } else if (direction == CURSOR_DIRECTION_LEFT) {
+            direction = CURSOR_DIRECTION_DOWN_LEFT;
+        } else {
+            direction = CURSOR_DIRECTION_DOWN;
+        }
+    }
+    if ((g_MenuControllerData[SECOND_EDITOR_PAD].button & U_JPAD) &&
+        !(g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG)) {
+        editKind = HEIGHT_EDIT_MOVE;
+        if (direction == CURSOR_DIRECTION_RIGHT) {
+            direction = CURSOR_DIRECTION_UP_RIGHT;
+        } else if (direction == CURSOR_DIRECTION_LEFT) {
+            direction = CURSOR_DIRECTION_UP_LEFT;
+        } else {
+            direction = CURSOR_DIRECTION_UP;
+        }
+    }
+    if (direction != CURSOR_DIRECTION_NONE) {
+        columnStep = cos((direction * BINARY_ANGLE_EIGHTH_TURN + D_8040C660_hole_editor) * EDITOR_ANGLE_TO_RADIANS) *
+                     CURSOR_STEP_LENGTH;
+        rowStep = sin((direction * BINARY_ANGLE_EIGHTH_TURN + D_8040C660_hole_editor) * EDITOR_ANGLE_TO_RADIANS) *
+                  CURSOR_STEP_LENGTH;
+        D_8040C644_hole_editor += columnStep;
+        D_8040C648_hole_editor += rowStep;
+        if (D_8040C644_hole_editor < 0) {
+            D_8040C644_hole_editor = 0;
+        }
+        if (D_8040C648_hole_editor < 0) {
+            D_8040C648_hole_editor = 0;
+        }
+        if (D_8040C644_hole_editor >= GROUND_POINT_COLUMN_COUNT) {
+            D_8040C644_hole_editor = GROUND_POINT_COLUMN_COUNT - 1;
+        }
+        if (D_8040C648_hole_editor >= GROUND_POINT_ROW_COUNT) {
+            D_8040C648_hole_editor = GROUND_POINT_ROW_COUNT - 1;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= HEIGHT_EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = HEIGHT_EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        D_8040C660_hole_editor -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        D_8040C654_hole_editor -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if ((g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= HEIGHT_EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = HEIGHT_EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[SECOND_EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG) {
+        D_8040C660_hole_editor -=
+            g_MenuControllerData[SECOND_EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        D_8040C654_hole_editor -=
+            g_MenuControllerData[SECOND_EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (D_8040C654_hole_editor > 0.0f) {
+        D_8040C654_hole_editor = 0.0f;
+    }
+    if (D_8040C654_hole_editor < HEIGHT_EDITOR_PITCH_MIN) {
+        D_8040C654_hole_editor = HEIGHT_EDITOR_PITCH_MIN;
+    }
+    D_8040C658_hole_editor = D_8040C660_hole_editor * EDITOR_ANGLE_TO_RADIANS;
+    if (D_8040C674_hole_editor && editKind == HEIGHT_EDIT_NONE) {
+        func_804079B8_hole_editor();
+    }
+    D_8040C674_hole_editor = editKind;
+    cameraDistance = HEIGHT_EDITOR_CAMERA_DISTANCE;
+    g_MapCamera.view.lookAt[AXIS_X] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Y] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+    g_MapCamera.view.lookAt[AXIS_Z] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_X] = cos(D_8040C654_hole_editor) * cos(D_8040C658_hole_editor) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(D_8040C654_hole_editor) * sin(D_8040C658_hole_editor) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] =
+        sin(D_8040C654_hole_editor) * (g_MapCamera.view.zoom * cameraDistance) + g_MapCamera.view.lookAt[AXIS_Y];
+    sprintf(text, "%fm  ",
+            -(f32)GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] *
+                METERS_PER_HEIGHT_UNIT);
+    PrintDebugText(text, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
+}
 
 static const char sEditorAssertionText[] = "EX";
 static const char sEditorFileName[] = "c:/usgolf64/hiedit.c";
