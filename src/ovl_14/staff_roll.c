@@ -1236,8 +1236,8 @@ void UpdateStaffRoll(void) {
       StartHudAnimation(HUD_ANIMATION_SPIRAL);
       g_Scene = SCENE_SWAPPING_MODULES;
       g_NextScene = SCENE_BOOT_LOGOS;
-      g_SceneModuleToUnload = 0x1F;
-      g_SceneModuleToLoad = 0x0C;
+      g_SceneModuleToUnload = SCENE_MODULE_STAFF_ROLL;
+      g_SceneModuleToLoad = SCENE_MODULE_BOOT_LOGOS;
       f_StaffRollFrame = 0;
       f_IsLeavingStaffRoll = TRUE;
       PlaySound(0x5D, 0xF, 0x7F);

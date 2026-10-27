@@ -144,23 +144,23 @@ void LeaveBootLogos(void) {
   if (HasGameBoyPak() && IsBootTransmitPending()) {
     ClearBootTransmitPending();
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = 0x0C;
+    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
     g_NextScene = 29;
-    g_SceneModuleToLoad = 0x1B;
+    g_SceneModuleToLoad = SCENE_MODULE_TRANSMIT;
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
   } else if (f_HasResetGameState && g_HasLoaderFinished == 1 &&
              g_ControllerCount != 0) {
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = 0x0C;
-    g_NextScene = 19;
-    g_SceneModuleToLoad = 0x03;
+    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
+    g_NextScene = SCENE_OPENING;
+    g_SceneModuleToLoad = SCENE_MODULE_OPENING;
   } else {
     StopLoaderThread();
     g_Scene = SCENE_SWAPPING_MODULES;
-    g_SceneModuleToUnload = 0x0C;
+    g_SceneModuleToUnload = SCENE_MODULE_BOOT_LOGOS;
     g_NextScene = 21;
-    g_SceneModuleToLoad = 0x04;
+    g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
   }
   /* The position goes unused with NO_MESSAGE */
   SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);

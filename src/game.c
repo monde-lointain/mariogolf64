@@ -1681,7 +1681,7 @@ s32 DrawGame(void) {
             DrawScreenEffect(matrices, &g_Cameras[viewIndex].view);
           }
           SetSceneFog(&g_DisplayListHead);
-          if (g_Scene == 19) {
+          if (g_Scene == SCENE_OPENING) {
             func_801FA4EC(matrices, &g_DisplayListHead);
             DrawEffects(matrices, &g_DisplayListHead);
           } else {
@@ -2174,7 +2174,7 @@ void UpdateGame(void) {
         g_MapCamera.view.eye[2] +
         sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
   }
-  if (g_Scene == 19) {
+  if (g_Scene == SCENE_OPENING) {
     StepNoiseTexture();
     g_SkyState.viewedWindAngles[0] =
         VIEWED_WIND_ANGLE(g_HoleConditions.windDirection, &g_Cameras[0].view);

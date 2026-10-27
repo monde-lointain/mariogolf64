@@ -32,6 +32,7 @@
 #define SCENE_PLAY_UNK12 12 /* Updates like SCENE_PLAY_HOLE */
 #define SCENE_PLAY_UNK13 13 /* Updates like SCENE_PLAY_HOLE */
 #define SCENE_MENU 14
+#define SCENE_OPENING 19 /* The opening movie */
 #define SCENE_TITLE_SCREEN 21
 #define SCENE_TRIANGLES 15
 #define SCENE_RINGS 16
@@ -45,8 +46,10 @@
 
 /* The modules that g_SceneModuleToLoad names for the next scene */
 #define SCENE_MODULE_MENU 0x02
+#define SCENE_MODULE_OPENING 0x03
 #define SCENE_MODULE_TITLE_SCREEN 0x04
 #define SCENE_MODULE_PLAY 0x0A
+#define SCENE_MODULE_BOOT_LOGOS 0x0C
 #define SCENE_MODULE_TRANSMIT 0x1B
 #define SCENE_MODULE_STAFF_ROLL 0x1F
 
