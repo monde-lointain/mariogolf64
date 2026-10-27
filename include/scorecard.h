@@ -67,6 +67,43 @@ typedef struct Scorecard {
 /* The scorecard overlay's state, which TallySkins also keeps its skins in */
 extern Scorecard g_Scorecard;
 
+/* Values of Scorecard.placeChange */
+#define PLACE_HELD (-1)
+#define PLACE_ROSE 0
+#define PLACE_FELL 1
+
+/* The channel of the tally's sounds, and the volume of the scorecard's */
+#define TALLY_SOUND_CHANNEL 13
+#define SCORECARD_SOUND_VOLUME 100
+
+/* Each leaderboard row starts to flip over this many frames after the one above it */
+#define ROW_FLIP_STAGGER 4
+#define ROW_FLIP_TIME (LEADERBOARD_ROW_COUNT * ROW_FLIP_STAGGER)
+
+/* Match games are between two players */
+#define MATCH_PLAYER_COUNT 2
+
+/*
+ * The match result's characters: sResultCharactersLoadStep counts up to
+ * LOADING, then waits for LoadResultCharacters
+ */
+#define RESULT_CHARACTERS_IDLE (-1) /* No characters are loading */
+#define RESULT_CHARACTERS_LOADING 2
+#define RESULT_CHARACTERS_LOADED 3
+extern s32 sResultCharactersLoadStep;
+s32 LoadResultCharacters(void);
+
+extern Gfx D_800C3FC0[];
+
+void DrawMatchResult(Gfx **displayListHead);
+void DrawStandingsPage(Gfx **displayListHead);
+void DrawMatchPage(Gfx **displayListHead);
+void DrawSkinsPage(Gfx **displayListHead);
+void DrawBetsPage(Gfx **displayListHead);
+void DrawSpeedGolfPage(Gfx **displayListHead);
+void DrawLeaderboardPage(Gfx **displayListHead);
+void DrawScoresPage(Gfx **displayListHead);
+
 void DrawScorecard(Gfx **displayListHead);
 
 #endif

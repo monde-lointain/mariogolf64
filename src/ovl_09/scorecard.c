@@ -59,7 +59,6 @@
 #define SOUND_UNK22 0x22
 #define SOUND_UNK67 0x67
 #define SOUND_SKIN_COUNTED 0x6B
-#define TALLY_SOUND_CHANNEL 13
 #define MATCH_RESULT_SOUND_CHANNEL 14
 
 #define SCORECARD_OPEN_TIME 12  /* Frames the scorecard takes to slide in */
@@ -74,7 +73,6 @@
 #define SOUND_SCORECARD_OPEN 0x47
 #define SOUND_SCORECARD_CLOSE 0x48
 #define SOUND_SCORECARD_PAGE 0x5C
-#define SCORECARD_SOUND_VOLUME 100
 #define SCORECARD_SLIDE_SOUND_REVERB 20
 /* The opening sound pans from the right, the closing one from the left */
 #define SCORECARD_OPEN_SOUND_PAN 0xDF
@@ -127,24 +125,14 @@
 #define TEXTURE_COORD_FRACTION_BITS 5
 
 #define LEADERBOARD_LAST_TOP_ROW (TOURNAMENT_CONTESTANT_COUNT - LEADERBOARD_ROW_COUNT)
-/* Each row starts to flip over this many frames after the one above it */
-#define ROW_FLIP_STAGGER 4
-#define ROW_FLIP_TIME (LEADERBOARD_ROW_COUNT * ROW_FLIP_STAGGER)
 #define ROW_FLIP_DEGREES_PER_FRAME 20
 #define ROW_FLIP_END_DEGREES 175
 #define SOUND_ROW_FLIPPED 0x5B
 #define ROW_FLIP_SOUND_CHANNEL 13
 
 extern s32 sScorecardState;
-#define RESULT_CHARACTERS_IDLE (-1) /* sResultCharactersLoadStep when no characters are loading */
-/* Match games are between two players */
-#define MATCH_PLAYER_COUNT 2
-/* The step counts up to LOADING, then waits for LoadResultCharacters */
-#define RESULT_CHARACTERS_LOADING 2
-#define RESULT_CHARACTERS_LOADED 3
 extern s32 sMatchResultFrameCount;
 extern Mtx sResultCharacterMatrices[MATCH_PLAYER_COUNT];
-extern Gfx D_800C3FC0[];
 /* "Hole %d" in half-width katakana */
 extern const char sHoleNumberFormat[];
 /* Formats that more than one page shares */
@@ -174,19 +162,10 @@ extern const char sLoseText[];
 #define RESULT_CHARACTER_Y -80.0f
 #define RESULT_CHARACTER_Z -500.0f
 #define RESULT_CHARACTER_SCALE 5.0f
-extern s32 sResultCharactersLoadStep;
 extern const char sDecimalFormat[];
 
 void SetFramebufferCount(s32 count);
-void DrawMatchResult(Gfx **displayListHead);
 void DrawScorecardTable(Gfx **displayListHead, s32 pageCount, s32 page);
-void DrawStandingsPage(Gfx **displayListHead);
-void DrawMatchPage(Gfx **displayListHead);
-void DrawSkinsPage(Gfx **displayListHead);
-void DrawBetsPage(Gfx **displayListHead);
-void DrawSpeedGolfPage(Gfx **displayListHead);
-void DrawLeaderboardPage(Gfx **displayListHead);
-void DrawScoresPage(Gfx **displayListHead);
 
 void ScrollLeaderboard(u16 buttons);
 
@@ -219,11 +198,6 @@ void SetScorecardState(s32 state);
 #define PAGE_TITLES_TOURNAMENT 4
 #define PAGE_TITLES_ROW_COUNT 5
 #define PAGE_TITLE_COUNT 3
-
-/* Values of Scorecard.placeChange */
-#define PLACE_HELD (-1)
-#define PLACE_ROSE 0
-#define PLACE_FELL 1
 
 extern u16 sPageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT];
 /* Each bet's two images */
