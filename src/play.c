@@ -43,8 +43,8 @@ extern s32 D_800C3084;
 extern s32 D_800C3088;
 extern s32 D_800C308C;
 extern s8 D_800C30A4;
-extern s32 D_800C30A8;
-extern s32 D_800C30AC;
+extern s32 g_PlayExit;
+extern s32 g_HoleEndStep;
 extern u8 D_80104EB8[GROUND_TILE_COUNT];
 extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
@@ -544,8 +544,8 @@ void func_80060358(void) {
     SaveOrContinueGameByMode(FALSE);
     ClearShotEffects(0);
     g_GameState.unk0 = 7;
-    D_800C30A8 = 3;
-    D_800C30AC = 9;
+    g_PlayExit = 3;
+    g_HoleEndStep = 9;
 }
 
 s32 func_800603A8(void) {
@@ -593,7 +593,7 @@ s32 HasWonFinalChallenge(void) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/play", func_800605EC);
+INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
 
 /* Fills D_800E12B0 with random values from base up, capped at 255 */
 void FillRandomGrid(s32 range, s32 base) {

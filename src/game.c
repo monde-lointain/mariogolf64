@@ -1999,7 +1999,7 @@ void UpdateGame(void) {
         }
         UpdateInsetView();
         UpdateEffects();
-        func_800605EC();
+        UpdatePlay();
         windDirection = &g_HoleConditions.windDirection;
         g_SkyState.viewedWindAngles[0] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[0].view);
         g_SkyState.viewedWindAngles[1] = VIEWED_WIND_ANGLE(*windDirection, &g_Cameras[INSET_CAMERA].view);
