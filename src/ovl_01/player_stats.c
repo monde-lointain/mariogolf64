@@ -131,6 +131,14 @@
 #define STATS_SLIDE_IN_FROM_RIGHT 3
 #define STATS_SLIDE_IN_FROM_LEFT 4
 #define STATS_SLIDE_COUNT 5
+/*
+ * func_8021B87C draws the 152x117 brick wall behind the stats in one strip
+ * per row, each stretched across the screen; D_80230760 holds each row's
+ * slide speed
+ */
+#define STATS_WALL_IMAGE_WIDTH 152
+#define STATS_WALL_STRIP_HEIGHT 13
+#define STATS_WALL_ROW_HEIGHT 27
 
 /* The phases of the screen 20 handler, which D_8022BE88 holds */
 #define MENU_PHASE_START 0
@@ -191,6 +199,7 @@ extern void *D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
 extern s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT];
+extern s32 D_80230760_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT];
 extern u8 D_80230838_ovl_01;
@@ -626,7 +635,68 @@ s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
     return index != STATS_SLIDE_ROW_COUNT;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B87C_ovl_01);
+void func_8021B87C_ovl_01(Gfx **displayListHead, u8 slide) {
+    Gfx *gfx = *displayListHead;
+    s32 rowIndex;
+    s32 stripHeight = STATS_WALL_STRIP_HEIGHT;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023B36C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
+        gDPPipeSync(gfx++);
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_8023B36C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripHeight * STATS_WALL_IMAGE_WIDTH * rowIndex) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, STATS_WALL_IMAGE_WIDTH, stripHeight, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        if (D_8023073C_ovl_01[rowIndex] > 0) {
+            D_8023073C_ovl_01[rowIndex]--;
+        } else {
+            switch (slide) {
+                case STATS_SLIDE_OUT_RIGHT:
+                    D_80230784_ovl_01[rowIndex] -= D_80230760_ovl_01[rowIndex];
+                    if (D_80230784_ovl_01[rowIndex] <= 0) {
+                        D_80230784_ovl_01[rowIndex] = 0;
+                    }
+                    break;
+                case STATS_SLIDE_OUT_LEFT:
+                    D_80230784_ovl_01[rowIndex] += D_80230760_ovl_01[rowIndex];
+                    if (D_80230784_ovl_01[rowIndex] > 0) {
+                        D_80230784_ovl_01[rowIndex] = 0;
+                    }
+                    break;
+                case STATS_SLIDE_IN_FROM_RIGHT:
+                    D_80230784_ovl_01[rowIndex] += D_80230760_ovl_01[rowIndex];
+                    if (D_80230784_ovl_01[rowIndex] > SCREEN_WIDTH) {
+                        D_80230784_ovl_01[rowIndex] = SCREEN_WIDTH;
+                    }
+                    break;
+                case STATS_SLIDE_IN_FROM_LEFT:
+                    D_80230784_ovl_01[rowIndex] -= D_80230760_ovl_01[rowIndex];
+                    if (D_80230784_ovl_01[rowIndex] < -SCREEN_WIDTH) {
+                        D_80230784_ovl_01[rowIndex] = -SCREEN_WIDTH;
+                    }
+                    break;
+            }
+        }
+        gSPScisTextureRectangle(gfx++, D_80230784_ovl_01[rowIndex] << 2, (rowIndex * STATS_WALL_ROW_HEIGHT) << 2,
+                                (D_80230784_ovl_01[rowIndex] + SCREEN_WIDTH) << 2,
+                                (rowIndex * STATS_WALL_ROW_HEIGHT + STATS_WALL_ROW_HEIGHT) << 2, G_TX_RENDERTILE,
+                                0, 0, (STATS_WALL_IMAGE_WIDTH << 10) / SCREEN_WIDTH,
+                                (stripHeight << 10) / STATS_WALL_ROW_HEIGHT);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Doesn't match: the original computes the mirrored arrow's start without a
