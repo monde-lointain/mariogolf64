@@ -5,6 +5,7 @@
 #include "functions.h"
 #include "game_flags.h"
 #include "hole_display.h"
+#include "math_util.h"
 #include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
@@ -75,8 +76,6 @@ typedef struct PressStartText {
   /* 0x0 */ ImageHeader header;
   /* 0x8 */ u8 texels[PRESS_START_WIDTH * PRESS_START_HEIGHT / 2];
 } PressStartText; /* size = 0x2E0 */
-
-#define DEGREES_TO_RADIANS(degrees) ((degrees) * (M_PI / 180))
 
 /* ButtonCode.progress once the code has been entered, after which it is ignored
  */

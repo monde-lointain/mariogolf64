@@ -5,6 +5,7 @@
 #include "cpu_projection.h"
 #include "hole_display.h"
 #include "libc.h"
+#include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -368,7 +369,6 @@ void func_8020E390_ovl_01(void) {
 #define DEGREES_PER_TURN 360
 /* statsSpin counts steps of four degrees */
 #define DEGREES_PER_SPIN_STEP 4
-#define DEGREES_TO_RADIANS 0.017453292519943295
 #define COURSE_ICON_WIDTH 64
 #define COURSE_ICON_STRIP_HEIGHT 32
 #define COURSE_ICON_STRIP_COUNT 2
@@ -444,9 +444,9 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != courseCount + 1; index++) {
     ScreenPoint point;
 
-    angle = -(((((statsCourse - index) % (courseCount + 1)) * angleStep) +
-                  (spin * DEGREES_PER_SPIN_STEP)) *
-        DEGREES_TO_RADIANS);
+    angle = -DEGREES_TO_RADIANS(
+        (((statsCourse - index) % (courseCount + 1)) * angleStep) +
+        (spin * DEGREES_PER_SPIN_STEP));
     wheelX = sinf(angle) * WHEEL_RADIUS_X;
     if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) < 0) {
       iconX[index] = point.x;
