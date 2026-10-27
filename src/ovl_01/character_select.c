@@ -584,7 +584,132 @@ void func_8020B590_ovl_01(Gfx **displayListHead, u8 isSinglePlayer) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
 #endif
 
+/* func_8020BA08 draws each grid cell's 32 by 32 face, its row and column 40 pixels apart */
+#define FACE_SIZE 32
+#define FACE_SPACING 40
+#define FACE_GRID_LEFT 24
+#define FACE_GRID_TOP 56
+/* Grid marks below this are characters still to be won, drawn as dark shapes in single player */
+#define HIDDEN_MARK_LIMIT (-10)
+/* The faces' animation steps a frame every four draws, through eight frames */
+#define FACE_FRAME_DURATION 4
+#define FACE_FRAME_COUNT 8
+
+extern s8 D_8022FF09_ovl_01;
+extern s16 D_8022FFC6_ovl_01;
+extern s16 D_8022FFC8_ovl_01;
+
+/*
+ * Doesn't match: the original keeps row in a temporary register and spills the menu memory pointer, where GCC keeps
+ * the pointer in a saved register and spills row instead (148 diff lines, 38 opcodes).
+ */
+#ifdef NON_MATCHING
+void func_8020BA08_ovl_01(Gfx **displayListHead, u8 isSinglePlayer) {
+    EncodedAsset asset;
+    AssetFile file;
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory = func_8005AF74();
+    s16 row;
+    s16 column;
+    u16 slot;
+    s16 gridMark;
+    u16 character;
+    void *faceImage;
+    void *facePalette;
+    u16(*faceAssets)[8];
+
+    for (row = 0; row != CHARACTER_GRID_ROW_COUNT; row++) {
+        for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+            slot = g_CharacterGrid[row][column];
+            if (g_MenuScreen == MENU_SCREEN_UNK16 && row == memory->characterRows[0] &&
+                column == memory->characterColumns[0] && (s8)g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
+                slot = column + FIRST_IMPORTED_CHARACTER;
+            }
+            if ((s16)slot >= 0) {
+                if ((s16)slot >= CHARACTER_COUNT) {
+                    slot = CHARACTER_COUNT - 1;
+                }
+                faceImage = D_8012D430[(s16)slot];
+                facePalette = D_80105B78[(s16)slot];
+                gDPLoadTLUT_pal256(gfx++, (u32)facePalette & ~7);
+                gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+                gDPLoadTextureBlock(gfx++, (u32)faceImage & ~7, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE,
+                                    FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                                    G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(gfx++, (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
+                                        (row * FACE_SPACING + FACE_GRID_TOP) << 2,
+                                        (column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE) << 2,
+                                        (row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+                                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                gDPPipeSync(gfx++);
+            } else if (isSinglePlayer == TRUE && g_CharacterGrid[row][column] < HIDDEN_MARK_LIMIT) {
+                faceImage = D_8012D430[(s16)slot + MARKED_CHARACTER_OFFSET];
+                facePalette = D_80105B78[(s16)slot + MARKED_CHARACTER_OFFSET];
+                gDPLoadTLUT_pal256(gfx++, (u32)facePalette & ~7);
+                gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                gDPSetPrimColor(gfx++, 0, 0, 10, 10, 10, 255);
+                gDPLoadTextureBlock(gfx++, (u32)faceImage & ~7, G_IM_FMT_CI,
+                                    G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(gfx++, (column * FACE_SPACING + FACE_GRID_LEFT) << 2,
+                                        (row * FACE_SPACING + FACE_GRID_TOP) << 2,
+                                        (column * FACE_SPACING + FACE_GRID_LEFT + FACE_SIZE) << 2,
+                                        (row * FACE_SPACING + FACE_GRID_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+                                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                gDPPipeSync(gfx++);
+            }
+        }
+    }
+    D_8022FF06_ovl_01++;
+    if ((s8)D_8022FF06_ovl_01 == FACE_FRAME_DURATION) {
+        D_8022FF06_ovl_01 = 0;
+        D_8022FF04_ovl_01++;
+        if (D_8022FF04_ovl_01 >= FACE_FRAME_COUNT) {
+            D_8022FF04_ovl_01 = 0;
+        }
+        D_8022FF05_ovl_01 ^= 1;
+        gridMark = g_CharacterGrid[memory->characterRows[D_801B7070]][memory->characterColumns[D_801B7070]];
+        character = g_CharacterGrid[memory->characterRows[D_801B7070]][memory->characterColumns[D_801B7070]];
+        if (gridMark < CHOOSABLE_MARK_LIMIT) {
+            character += MARKED_CHARACTER_OFFSET;
+            slot = character;
+        } else if (gridMark >= FIRST_IMPORTED_CHARACTER) {
+            slot = character;
+            character = g_ImportedCharacters[gridMark - FIRST_IMPORTED_CHARACTER].character;
+        } else {
+            slot = character;
+        }
+        faceImage = D_8012D430[(s16)slot];
+        facePalette = D_80105B78[(s16)slot];
+        if (D_8022FF09_ovl_01 == 0) {
+            OpenAssetFile(D_800C2590[(s16)character][0], &file);
+        } else if (D_8022FF09_ovl_01 == 1) {
+            OpenAssetFile(D_800C2590[(s16)character][1], &file);
+        } else if (D_8022FF09_ovl_01 == 2) {
+            OpenAssetFile(D_800C2590[(s16)character][2], &file);
+        } else if (D_8022FF09_ovl_01 == 3) {
+            OpenAssetFile(D_800C2590[(s16)character][3], &file);
+        } else {
+            OpenAssetFile(D_800C2590[(s16)character][(s16)func_8020C2D8_ovl_01((s16)character)], &file);
+        }
+        ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
+        if (!IsGameFlagSet(GAME_FLAG_UNK64)) {
+            faceAssets = D_800C2650;
+        } else {
+            faceAssets = D_800C2780;
+        }
+        OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+        ReadEncodedAsset(faceImage, &asset);
+        D_8022FFC6_ovl_01 = memory->characterColumns[D_801B7070];
+        D_8022FFC8_ovl_01 = memory->characterRows[D_801B7070];
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020BA08_ovl_01);
+#endif
 
 /* Doesn't match: the first loop's index and count take each other's registers */
 #ifdef NON_MATCHING
