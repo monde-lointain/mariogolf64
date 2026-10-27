@@ -112,22 +112,20 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B1E0_ovl_01);
 
-/* Doesn't match: the original keeps the slide's first target and the first offset in each other's registers */
-#ifdef NON_MATCHING
 s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
     Gfx *gfx = *displayListHead;
     s32 index;
     s32 rowIndex;
-    s32 target;
+    s32 offset; /* The slide's first target, then the first row's offset */
     s32 first;
 
     if ((slide != STATS_SLIDE_CURRENT && slide < STATS_SLIDE_COUNT) == FALSE) {
         return -1;
     }
-    target = D_802307A8_ovl_01[slide - 1][0];
+    offset = D_802307A8_ovl_01[slide - 1][0];
     first = D_80230784_ovl_01[0];
     for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-        if (D_80230784_ovl_01[index] != target && first != D_80230784_ovl_01[index]) {
+        if (D_80230784_ovl_01[index] != offset && first != D_80230784_ovl_01[index]) {
             break;
         }
     }
@@ -159,15 +157,12 @@ s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
     gDPPipeSync(gfx++);
     *displayListHead = gfx;
     for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
-        if (D_80230784_ovl_01[0] != D_80230784_ovl_01[index]) {
+        if ((offset = D_80230784_ovl_01[0]) != D_80230784_ovl_01[index]) {
             break;
         }
     }
     return index != STATS_SLIDE_ROW_COUNT;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B618_ovl_01);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B87C_ovl_01);
 
