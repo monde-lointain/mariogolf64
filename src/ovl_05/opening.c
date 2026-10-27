@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "camera_editor.h"
 #include "character_slot.h"
+#include "cpu_projection.h"
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
@@ -934,4 +935,107 @@ void LoadOpeningLogo(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200CBC_ovl_05);
 
+extern s32 D_8020AE38_ovl_05;
+extern Vtx D_8020B4A0_ovl_05[3];
+extern f32 D_8020D850_ovl_05[20][2];
+extern f32 D_8020D8F0_ovl_05[20];
+extern f32 D_8020D940_ovl_05[20][2];
+extern f32 D_8020D9E0_ovl_05;
+extern s32 D_8020D9E4_ovl_05;
+extern Mtx D_8020D9F0_ovl_05[DRAW_BUFFER_COUNT][20];
+extern Vec3 D_802259E0_ovl_05;
+
+#ifdef NON_MATCHING
+/*
+ * Draws sparks flying out from a point once D_8020AE38 is set to 1.
+ *
+ * The only difference from the original is that the display list
+ * pointers spilled after the first and second commands swap stack slots.
+ */
+void func_80202D34_ovl_05(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  ScreenPoint point;
+  Vec3 translation;
+  Vec3 rotation;
+  Vec3 scale;
+  Mat4 matrix;
+  s32 depth;
+  s32 i;
+  f32 speed;
+
+  if (D_8020AE38_ovl_05 == 1) {
+    depth = ProjectPoint(D_802259E0_ovl_05[0], D_802259E0_ovl_05[1],
+                         D_802259E0_ovl_05[2], &point);
+    if (depth < 0) {
+      D_8020D9E0_ovl_05 = 48.0f / (f32)-depth;
+      for (i = 0; i < 20; i++) {
+        D_8020D850_ovl_05[i][0] = point.x - 160;
+        D_8020D850_ovl_05[i][1] = 120 - point.y;
+        D_8020D8F0_ovl_05[i] = (f32)i * (M_PI * 0.1f) +
+                               (f32)DEGREES_TO_RADIANS(guRandom() % 20 - 10);
+        speed = (guRandom() % 16) * D_8020D9E0_ovl_05 + 10.0f;
+        D_8020D940_ovl_05[i][0] =
+            sinf(D_8020D8F0_ovl_05[i]) * speed * D_8020D9E0_ovl_05;
+        D_8020D940_ovl_05[i][1] =
+            -cosf(D_8020D8F0_ovl_05[i]) * speed * D_8020D9E0_ovl_05;
+        D_8020AE38_ovl_05 = 2;
+      }
+      D_8020D9E4_ovl_05 = 10;
+    } else {
+      D_8020AE38_ovl_05 = 0;
+    }
+  }
+  if (D_8020AE38_ovl_05 == 2) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_OFF);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, 0, 0, 0, SHADE, PRIMITIVE,
+                      0, SHADE, 0, 0, 0, 0, SHADE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    for (i = 0; i < 20; i++) {
+      D_8020D850_ovl_05[i][0] += D_8020D940_ovl_05[i][0];
+      D_8020D850_ovl_05[i][1] += D_8020D940_ovl_05[i][1];
+      D_8020D940_ovl_05[i][0] *= 0.98;
+      D_8020D940_ovl_05[i][1] *= 0.98;
+      translation[0] = D_8020D850_ovl_05[i][0];
+      translation[1] = D_8020D850_ovl_05[i][1];
+      translation[2] = -100.0f;
+      rotation[0] = 0.0f;
+      rotation[1] = 0.0f;
+      rotation[2] = D_8020D8F0_ovl_05[i];
+      scale[0] = D_8020D9E0_ovl_05;
+      scale[1] = D_8020D9E0_ovl_05;
+      scale[2] = D_8020D9E0_ovl_05;
+      BuildTransformMatrix(matrix, rotation, translation, scale);
+      ConvertMatrixToFixed(matrix, &D_8020D9F0_ovl_05[g_DrawBufferIndex][i]);
+      gSPMatrix(gfx++,
+                OS_K0_TO_PHYSICAL(&D_8020D9F0_ovl_05[g_DrawBufferIndex][i]),
+                G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      gSPVertex(gfx++, D_8020B4A0_ovl_05, 3, 0);
+      gSP1Triangle(gfx++, 0, 1, 2, 0);
+    }
+    if (--D_8020D9E4_ovl_05 == 0) {
+      D_8020AE38_ovl_05 = 0;
+    }
+  }
+  *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80202D34_ovl_05);
+#endif
