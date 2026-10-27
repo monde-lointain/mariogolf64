@@ -5,10 +5,43 @@
 /* The image listing the game modes, in orange */
 #define ASSET_MENU_GAME_MODES 0x528
 
+extern s32 D_80230A90_ovl_01;
+extern s32 D_80230A94_ovl_01;
+extern s32 D_80230A98_ovl_01;
+extern void *D_8023B670_ovl_01;
+extern void *D_8023B674_ovl_01;
+extern void *D_8023B678_ovl_01;
+extern void *D_8023B67C_ovl_01;
 extern void *D_8023BD78_ovl_01;
 extern void *D_8023BD7C_ovl_01;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F5F0_ovl_01);
+void func_8021F5F0_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+
+    switch (bufferKind) {
+        case 1:
+            D_8023B670_ovl_01 = buffer;
+            break;
+        case 2:
+            D_8023B674_ovl_01 = buffer;
+            OpenEncodedAsset(0x5F7, &asset);
+            ReadEncodedAsset(D_8023B674_ovl_01, &asset);
+            break;
+        case 3:
+            D_8023B678_ovl_01 = buffer;
+            OpenEncodedAsset(0x70E, &asset);
+            ReadEncodedAsset(D_8023B678_ovl_01, &asset);
+            break;
+        case 4:
+            D_8023B67C_ovl_01 = buffer;
+            OpenEncodedAsset(0x720, &asset);
+            ReadEncodedAsset(D_8023B67C_ovl_01, &asset);
+            D_80230A90_ovl_01 = 0;
+            D_80230A94_ovl_01 = 0;
+            D_80230A98_ovl_01 = 0;
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F6E0_ovl_01);
 
