@@ -170,7 +170,106 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
 #endif
 
+/*
+ * Doesn't match: as in func_80209568, the original sign-extends the slot and
+ * character afresh at each use and adds the player number the other way round.
+ */
+#ifdef NON_MATCHING
+s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
+    EncodedAsset asset;
+    AssetFile file;
+    MenuMemory *memory = func_8005AF74();
+    s32 retryCount = 0;
+    s16 oldRow = (s8)(&memory->characterRow)[playerNumber - 1];
+    s16 oldColumn = (s8)(&memory->characterColumn)[playerNumber - 1];
+    s32 column = oldColumn;
+    s32 row = oldRow;
+    u16 slot;
+    u16 character;
+    void *faceImage;
+    s32 unused[2];
+    u16(*faceAssets)[8];
+
+    while (TRUE) {
+        if (retryCount == 0) {
+            if (diagonal == STICK_DIAGONAL_UP_LEFT) {
+                row--;
+                column--;
+            }
+            if (diagonal == STICK_DIAGONAL_UP_RIGHT) {
+                row--;
+                column++;
+            }
+            if (diagonal == STICK_DIAGONAL_DOWN_LEFT) {
+                row++;
+                column--;
+            }
+            if (diagonal == STICK_DIAGONAL_DOWN_RIGHT) {
+                row++;
+                column++;
+            }
+        } else {
+            column -= diagonal == STICK_DIAGONAL_UP_LEFT || diagonal == STICK_DIAGONAL_DOWN_LEFT;
+            column += diagonal == STICK_DIAGONAL_UP_RIGHT || diagonal == STICK_DIAGONAL_DOWN_RIGHT;
+        }
+        if (row < 0) {
+            row = CHARACTER_GRID_ROW_COUNT - 1;
+        }
+        if (row >= CHARACTER_GRID_ROW_COUNT) {
+            row = 0;
+        }
+        if (column < 0) {
+            column = CHARACTER_GRID_COLUMN_COUNT - 1;
+        }
+        if (column >= CHARACTER_GRID_COLUMN_COUNT) {
+            column = 0;
+        }
+        if (column == oldColumn && row == oldRow) {
+            break;
+        }
+        if (g_CharacterGrid[row][column] >= 0 ||
+            (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT && canChooseMarked == TRUE)) {
+            break;
+        }
+        /* After a blocked diagonal, try moving sideways only from where the cursor started */
+        if (retryCount == 0) {
+            column = oldColumn;
+            row = oldRow;
+        }
+        retryCount++;
+    }
+    (&memory->characterColumn)[playerNumber - 1] = column;
+    (&memory->characterRow)[playerNumber - 1] = row;
+    if (column != oldColumn || row != oldRow) {
+        character = g_CharacterGrid[oldRow][oldColumn];
+        D_8022FF04_ovl_01 = 0;
+        D_8022FF06_ovl_01 = 0;
+        D_8022FF05_ovl_01 ^= 1;
+        if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
+            character += MARKED_CHARACTER_OFFSET;
+        }
+        slot = character;
+        if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
+            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
+        } else {
+            character = slot;
+        }
+        faceImage = D_8012D430[(s16)slot];
+        if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+            faceAssets = D_800C2780;
+        } else {
+            faceAssets = D_800C2650;
+        }
+        OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+        ReadEncodedAsset(faceImage, &asset);
+        OpenAssetFile(D_800C2590[(s16)character].assetId, &file);
+        ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
+    }
+    return -(column == oldColumn && row == oldRow);
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209894_ovl_01);
+#endif
 
 s32 func_80209BE0_ovl_01(void) {
     s32 stickX;
