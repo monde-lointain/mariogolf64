@@ -11,6 +11,7 @@
 #include "libc.h"
 #include "main.h"
 #include "math_util.h"
+#include "save.h"
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
@@ -142,8 +143,8 @@
 #define TRIANGLE_EDIT_MOVE 1
 #define TRIANGLE_EDIT_SELECT 2
 #define TRIANGLE_EDIT_KIND 4
-/* Only the first 157 of the HOLE_TRIANGLE_COUNT triangles can be picked */
-#define PICKABLE_TRIANGLE_COUNT 157
+/* The last RING_COUNT triangles hold the rings, which func_80402E1C edits */
+#define FIRST_RING_TRIANGLE (HOLE_TRIANGLE_COUNT - RING_COUNT)
 #define HOLE_TRIANGLE_KIND_COUNT 4
 /* A step moves the corner this far at zoom 1 */
 #define CORNER_STEP_SCALE 10.0f
@@ -493,9 +494,9 @@ void func_80402428_hole_editor(void) {
         sEditedTriangleIndex--;
     }
     if (sEditedTriangleIndex < 0) {
-        sEditedTriangleIndex = PICKABLE_TRIANGLE_COUNT - 1;
+        sEditedTriangleIndex = FIRST_RING_TRIANGLE - 1;
     }
-    if (sEditedTriangleIndex >= PICKABLE_TRIANGLE_COUNT) {
+    if (sEditedTriangleIndex >= FIRST_RING_TRIANGLE) {
         sEditedTriangleIndex = 0;
     }
     if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
