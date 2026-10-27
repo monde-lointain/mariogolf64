@@ -326,7 +326,7 @@ void DrawShotLabels(Gfx** displayListHead) {
           }
           overlaps = FALSE;
           if (tries == CORNER_COUNT) {
-            goto next;
+            goto NEXT;
           }
         }
       } else {
@@ -348,7 +348,7 @@ void DrawShotLabels(Gfx** displayListHead) {
             }
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
-            goto next;
+            goto NEXT;
           }
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
@@ -368,14 +368,15 @@ void DrawShotLabels(Gfx** displayListHead) {
             break;
           }
           if (tries == UPPER_CORNER_COUNT) {
-            goto next;
+            goto NEXT;
           }
         }
       }
       f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
       f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
       f_ShotLabels[i].corner = corner;
-    next:;
+
+NEXT:;
     }
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -533,12 +534,13 @@ void DrawAimGuides(CameraMatrices* matrices) {
       }
       /* The sign fades with distance, except on PAUSE_SCREEN_UNK4 */
       if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-        goto opaque;
+        goto OPAQUE;
       }
       alpha = SIGN_MIN_ALPHA;
       if (depth >= SIGN_FADE_START_DEPTH) {
         if (depth >= SIGN_FADE_END_DEPTH) {
-        opaque:
+OPAQUE:
+
           alpha = 255;
         } else {
           alpha = (depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /

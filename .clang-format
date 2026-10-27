@@ -32,3 +32,5 @@ AlignOperands: DontAlign
 AlignTrailingComments:
   Kind: Never
 AlignEscapedNewlines: DontAlign
+# Chapter 31 also outdents goto labels to the margin, where they stand out
+IndentGotoLabels: NoIndent

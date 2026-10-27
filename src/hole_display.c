@@ -252,7 +252,7 @@ void UpdateSunGlare(void) {
     f_SunDepth =
         zBuffer[(s32)f_SunScreenY[0] * SCREEN_WIDTH + (s32)f_SunScreenX[0]];
     if (f_SunDepth >= SUN_SKY_DEPTH) {
-      goto grow;
+      goto GROW;
     }
     f_IsSunGlareSettled = FALSE;
     f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
@@ -263,7 +263,8 @@ void UpdateSunGlare(void) {
       f_SunScreenX[0] < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
       f_SunScreenY[0] > -SUN_GLARE_MARGIN &&
       f_SunScreenY[0] < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
-  grow:
+GROW:
+
     if (!f_IsSunGlareSettled) {
       f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
     }

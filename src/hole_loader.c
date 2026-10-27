@@ -325,7 +325,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     input += LZ_HEADER_WORD_COUNT;
     output = stream->outputStart;
     history = stream->history;
-    goto decode;
+    goto DECODE;
   }
   output = stream->output;
   input = stream->input;
@@ -352,7 +352,9 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     controlBits = *input++;
     controlBits <<= 16;
     controlBits |= 0x8000;
-  decode:
+
+DECODE:
+
     while (TRUE) {
       while (controlBits >= 0) {
         word = *input++;

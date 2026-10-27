@@ -294,11 +294,13 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold,
       stick = previousDirection;
     }
     if (stick != 0) {
-      goto hasDirection;
+      goto HAS_DIRECTION;
     }
   }
   return 0;
-hasDirection:
+
+HAS_DIRECTION:
+
   return (stick >> 31) | 1;
 }
 

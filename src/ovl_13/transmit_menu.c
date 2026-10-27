@@ -2424,7 +2424,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
   g_GameBoyTransfer.transferResult = result;
   if (result != PAK_RESULT_OK) {
     /* Going to the shared power-off is there to match */
-    goto failed;
+    goto FAILED;
   }
   isSignatureWrong = FALSE;
   readResult = nuContGBPakFread(
@@ -2468,7 +2468,9 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
   }
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_CHECK_HAS_STATUS;
-failed:
+
+FAILED:
+
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_CHECK_FAILED;
 }
@@ -2494,7 +2496,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
       &transfer->cartridgeHeader, &transfer->pakFile);
   if (g_GameBoyTransfer.transferResult != PAK_RESULT_OK) {
     /* Going to the shared power-off is there to match */
-    goto failed;
+    goto FAILED;
   }
   result = nuContGBPakFread(
       &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
@@ -2572,7 +2574,9 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   transfer->transferResult = PAK_RESULT_OK;
   return STATUS_WRITE_DONE;
-failed:
+
+FAILED:
+
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_WRITE_FAILED;
 }

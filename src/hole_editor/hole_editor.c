@@ -2562,23 +2562,25 @@ void func_80405DB0_hole_editor(void) {
             /* The limit is checked at the end of each block; one check compiles
              * differently */
             if (treeCount == BILLBOARD_COUNT) {
-              goto planted;
+              goto PLANTED;
             }
           }
           if (treeCount == BILLBOARD_COUNT) {
-            goto planted;
+            goto PLANTED;
           }
         }
         if (treeCount == BILLBOARD_COUNT) {
-          goto planted;
+          goto PLANTED;
         }
       }
       if (treeCount == BILLBOARD_COUNT) {
-        goto planted;
+        goto PLANTED;
       }
     }
   }
-planted:
+
+PLANTED:
+
   for (billboardIndex = 0; billboardIndex < treeCount; billboardIndex++) {
     g_Billboards[billboardIndex].y =
         GetGroundHeight(

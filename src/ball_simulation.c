@@ -331,7 +331,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
   substep = 0;
   do {
     if (substep != 0 && simulation->purpose == LAUNCH_PURPOSE_UNK5) {
-      goto next;
+      goto NEXT;
     }
     startY = simulation->position[AXIS_Y];
     isNearCup = FALSE;
@@ -342,7 +342,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     previousVelocityZ = velocity[AXIS_Z];
     hitsHoleTriangle = FALSE;
     if (simulation->isRunning == BALL_STATE_STOPPED) {
-      goto settle;
+      goto SETTLE;
     }
     if (simulation->unk98 == 0) {
       BuildUnk44Rotation();
@@ -720,7 +720,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 simulation->position[AXIS_X], simulation->position[AXIS_Z])) {
           simulation->isRunning = BALL_STATE_ROLLING;
           simulation->unkB2 = 0;
-          goto settle;
+          goto SETTLE;
         }
       } else {
         simulation->isRunning = BALL_STATE_STOPPED;
@@ -951,7 +951,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->position[AXIS_Z] + velocity[AXIS_Z] * slide;
         BuildUnk44Rotation();
         PushBallOutOfWalls(simulation, FALSE);
-        goto settle;
+        goto SETTLE;
       }
       PushBallOutOfWalls(simulation, FALSE);
     }
@@ -1526,7 +1526,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         info = GetSurfaceInfo(simulation->surface);
         if (info->kind == SURFACE_KIND_OUT_OF_COURSE) {
           simulation->isRunning = BALL_STATE_STOPPED;
-          goto rolled;
+          goto ROLLED;
         }
         groundHeight = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
@@ -1539,16 +1539,18 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           velocity[AXIS_Y] *= 0.1f;
           velocity[AXIS_Z] *= 0.1f;
           simulation->isRunning = BALL_STATE_FLYING;
-          goto takeOff;
+          goto TAKE_OFF;
         }
         if (simulation->position[AXIS_Y] + 307.2f < groundHeight) {
           simulation->isRunning = BALL_STATE_FLYING;
-        takeOff:
+
+TAKE_OFF:
+
           simulation->unk3C = atan2(velocity[AXIS_Z], velocity[AXIS_X]);
           contact = 0;
           simulation->unk34 = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
           BuildUnk44Rotation();
-          goto rolled;
+          goto ROLLED;
         }
       }
       slopeX = (-plane.normal[AXIS_X] * 196.5f) /
@@ -1648,7 +1650,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->isRunning = BALL_STATE_STOPPED;
       }
     }
-  rolled:
+
+ROLLED:
+
     if ((simulation->isRunning == BALL_STATE_FLYING ||
             simulation->isRunning == BALL_STATE_ROLLING) &&
         contact == 0) {
@@ -1756,7 +1760,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         flags |= STEP_FLAG_OUTSIDE_COURSE;
       }
     }
-  settle:
+
+SETTLE:
+
     if (simulation->purpose != LAUNCH_PURPOSE_UNK5) {
       s32 floor;
 
@@ -1829,7 +1835,9 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         }
       }
     }
-  next:
+
+NEXT:
+
     simulation->unkA6 = flags;
   } while (++substep < substepCount);
   simulation->velocity[AXIS_X] = velocity[AXIS_X];

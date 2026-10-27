@@ -1231,10 +1231,12 @@ void UpdatePlay(void) {
                   g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
                   g_SubModuleState = SUB_MODULE_SWAP_PENDING;
                   g_PendingSubModuleId = SUB_MODULE_UNK22;
-                  goto dimBackdrop;
+                  goto DIM_BACKDROP;
                 }
                 g_HoleEndStep = nextStep;
-              dimBackdrop:
+
+DIM_BACKDROP:
+
                 SetMenuBackdrop(MENU_BACKDROP_DIMMING);
                 clearHud = FALSE;
               } else {

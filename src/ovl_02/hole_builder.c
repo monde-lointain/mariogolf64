@@ -1720,7 +1720,7 @@ void PaintGroundTiles(void) {
           if (nearestDistance < 0) {
             painting = codePaintings[code];
             /* The goto is there to match */
-            goto painted;
+            goto PAINTED;
           }
           for (offsetIndex = 1; offsetIndex < offsetCount; offsetIndex++) {
             if (offsets[offsetIndex].distance >=
@@ -1742,7 +1742,9 @@ void PaintGroundTiles(void) {
               offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE;
         }
         painting = paint(code, nearestCode, nearestDistance, column, row);
-      painted:
+
+PAINTED:
+
         *texel++ = painting >> PAINTED_COLOR_SHIFT;
         SetCellTerrainCode(column, row, painting & TERRAIN_CODE_MASK);
         column++;
@@ -3158,14 +3160,16 @@ void ShadeGroundTiles(void) {
             } else if (isFadeDisabled) {
               fade = 0.0f;
               /* The goto is there to match */
-              goto faded;
+              goto FADED;
             } else {
               fadeLimit = HEIGHT_FADE_LIMIT;
             }
             if (fade >= fadeLimit) {
               fade = fadeLimit;
             }
-          faded:
+
+FADED:
+
             fadeWeight = fade * LIGHT_SCALE_ONE;
             keptWeight = LIGHT_SCALE_ONE - fadeWeight;
             fadedRed = shaded.red;

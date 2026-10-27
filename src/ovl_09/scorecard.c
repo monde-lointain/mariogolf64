@@ -479,13 +479,14 @@ void StartScorecardTally(s32 layout) {
             g_Players[0].holes[holeIndex].strokes) {
           song = SONG_HOLE_LOST;
         } else {
-          goto halved;
+          goto HALVED;
         }
       } else {
         song = SONG_HOLE_WON;
         if (g_Players[0].holes[holeIndex].strokes ==
             g_Players[1].holes[holeIndex].strokes) {
-        halved:
+HALVED:
+
           song = SONG_HOLE_HALVED;
         }
       }

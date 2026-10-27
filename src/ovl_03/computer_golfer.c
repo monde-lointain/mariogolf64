@@ -2107,13 +2107,14 @@ s32 StepTrialShot(void) {
           IntLength2D(f_Shot.ballPosition[AXIS_X] - f_TrialEndPoint[AXIS_X],
               f_Shot.ballPosition[AXIS_Z] - f_TrialEndPoint[AXIS_Z]) >
               LONG_PUTT_DISTANCE) {
-        goto evaluate;
+        goto EVALUATE;
       }
     }
     if (f_TrialSimulation.unkA0) {
       f_TrialEvaluation = 0;
     } else {
-    evaluate:
+EVALUATE:
+
       surfaceInfo = GetSurfaceInfo(f_TrialSimulation.surface);
       if (FindGroundHit(f_TrialSimulation.position[AXIS_X],
               f_TrialSimulation.position[AXIS_Y] - PATH_GROUND_CLEARANCE,
