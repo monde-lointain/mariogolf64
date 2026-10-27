@@ -60,6 +60,7 @@ extern MenuChoices g_MenuChoices;
 
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
+void *GetMenuImageBuffer(void);
 
 /* The states of the menus' popup window, which opens and closes by scaling */
 #define MENU_WINDOW_OPENING 0
