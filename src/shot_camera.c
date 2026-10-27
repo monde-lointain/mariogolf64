@@ -172,7 +172,6 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
 
 extern s32 D_800BE698;
-extern s32 g_IsCupViewShown;
 extern s32 D_800C5AAC;
 extern s32 D_800BE640;
 extern s32 D_800BE644;

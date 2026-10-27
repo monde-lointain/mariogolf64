@@ -1230,7 +1230,6 @@ typedef struct GridScreenPoint {
 } GridScreenPoint; /* size = 0x10 */
 
 extern s32 D_800BB0E8;
-extern s32 g_IsCupViewShown;
 /* The quad that each segment of the ball trail, and of the green grid, moves into place on the screen */
 extern Vtx sBallTrailVertices[4];
 extern s32 sGreenGridAlpha;

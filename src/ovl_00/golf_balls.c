@@ -66,9 +66,6 @@ typedef struct BallAfterimage {
     /* 0x10 */ s32 isInCup;
 } BallAfterimage; /* size = 0x14 */
 
-/* Set while the camera shows the cup up close, at twice the distance from it */
-extern s32 g_IsCupViewShown;
-
 /* g_GameState.unk20, under a symbol of its own */
 extern s32 D_801B60A8;
 

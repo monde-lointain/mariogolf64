@@ -95,7 +95,6 @@ extern BannerLetter sBannerLetters[];
 extern BannerLayout sBannerLayouts[];
 extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
-extern s32 g_IsCupViewShown;
 /* The contact effect's quad spans from vertex 0 to vertex 1 */
 extern Vtx sContactVertices[2];
 extern s32 sIsContactEffectFading;
