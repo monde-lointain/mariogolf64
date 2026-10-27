@@ -2,6 +2,7 @@
 #include "asset.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "sram.h"
 
 /* The image listing the game modes, in orange */
 #define ASSET_MENU_GAME_MODES 0x528
@@ -73,7 +74,31 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F79C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021FC5C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220A30_ovl_01);
+void func_80220A30_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s8 slot;
+
+    InitSram();
+    TransferSaveData(save, FALSE);
+    for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
+        D_8023B684_ovl_01[slot] = -1;
+    }
+    for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
+        if ((s16)func_80220E28_ovl_01(&save->unk1DF0[slot])) {
+            D_8023B684_ovl_01[slot] = slot;
+        } else {
+            D_8023B684_ovl_01[slot] = -1;
+        }
+    }
+    if (D_8023B684_ovl_01[memory->unk42] == -1) {
+        for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
+            if (D_8023B684_ovl_01[slot] != -1) {
+                memory->unk42 = slot;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220BB0_ovl_01);
 
