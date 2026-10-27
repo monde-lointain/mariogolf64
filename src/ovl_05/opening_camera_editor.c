@@ -6,6 +6,11 @@
 #define EDITOR_POINT_LOOK_AT 1
 #define EDITOR_POINT_COUNT 2
 
+/* The axis along which func_8020370C moves a point furthest */
+#define EDITOR_MOVE_AXIS_X 1
+#define EDITOR_MOVE_AXIS_Y 2
+#define EDITOR_MOVE_AXIS_Z 3
+
 /* The state of the opening's camera editor, starting with the camera it moves */
 typedef struct CameraEditor {
     /* 0x00 */ Vec3 points[EDITOR_POINT_COUNT]; /* The eye, then the look-at point */
@@ -38,6 +43,8 @@ typedef struct CameraEditor {
 } CameraEditor; /* size = 0xBC */
 
 /* CameraEditor flags bits */
+#define EDITOR_FLAG_UNK2 0x2
+#define EDITOR_FLAG_UNK4 0x4
 #define EDITOR_FLAG_UNK8 0x8
 #define EDITOR_FLAG_UNK80 0x80
 
@@ -99,7 +106,59 @@ void func_80203620_ovl_05(void) {
               offsetY * offsetY + offsetZ * offsetZ);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_05);
+/* Starts moving point index to (x, y, z) over frameCount frames, or snaps it there when it is close */
+void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
+    f32 distance;
+    s32 easeFrameCount;
+    f32 speed;
+
+    distance = sqrtf((x - g_CameraEditor.points[index][0]) * (x - g_CameraEditor.points[index][0]) +
+                     (y - g_CameraEditor.points[index][1]) * (y - g_CameraEditor.points[index][1]) +
+                     (z - g_CameraEditor.points[index][2]) * (z - g_CameraEditor.points[index][2]));
+    if (distance < 0.1f) {
+        g_CameraEditor.points[index][0] = x;
+        g_CameraEditor.points[index][1] = y;
+        g_CameraEditor.points[index][2] = z;
+        return;
+    }
+    if (frameCount != 0) {
+        easeFrameCount = frameCount / 4;
+        speed = distance / (frameCount - easeFrameCount);
+        g_CameraEditor.unk70[index] = speed;
+        g_CameraEditor.unk78[index] = speed / (easeFrameCount + 1);
+        g_CameraEditor.unk98[index] = distance * 0.25;
+        if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK80)) {
+            if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK2)) {
+                g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK2;
+            }
+            if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK4) {
+                g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK4;
+            }
+        }
+    } else {
+        if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK4)) {
+            g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK4;
+        }
+        if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK2) {
+            g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK2;
+        }
+    }
+    g_CameraEditor.targets[index][0] = x;
+    g_CameraEditor.targets[index][1] = y;
+    g_CameraEditor.targets[index][2] = z;
+    /* The arguments become the offsets, and x the larger of the ground ones */
+    x -= g_CameraEditor.points[index][0];
+    y -= g_CameraEditor.points[index][1];
+    z -= g_CameraEditor.points[index][2];
+    g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_X;
+    if (fabsf(x) < fabsf(z)) {
+        g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_Z;
+        x = z;
+    }
+    if (fabsf(x) < fabsf(y)) {
+        g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_Y;
+    }
+}
 
 /* Sets two flags in entry index and clears them in the other before calling func_8020370C */
 void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
