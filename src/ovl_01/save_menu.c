@@ -26,13 +26,28 @@ extern void *D_8023B67C_ovl_01;
 /* The Ring Shot stars that each level of func_8022181C takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
+/* What func_80221EBC reads: each saved game's mode image and a frame, or the chosen game's two */
+#define SAVE_MENU_BUFFER_SLOTS 1
+#define SAVE_MENU_BUFFER_CHOSEN 2
+#define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
+#define ASSET_SAVE_MENU_FRAME 0x70D
+
+/* The image of each game mode that a saved game can be in */
+typedef struct {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ u16 assetId;
+} SaveMenuModeImage; /* size = 0x4 */
+
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
+extern SaveMenuModeImage D_80230B5C_ovl_01[];
 extern void **D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
+extern void **D_8023BD70_ovl_01;
+extern void **D_8023BD74_ovl_01;
 extern void *D_8023BD78_ovl_01;
 extern void *D_8023BD7C_ovl_01;
 
@@ -187,7 +202,50 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221B20_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221CC0_ovl_01);
 
+/*
+ * Doesn't match: the menu memory pointer and the mode image table take
+ * each other's saved registers.
+ */
+#ifdef NON_MATCHING
+void func_80221EBC_ovl_01(void **buffers, u8 bufferKind) {
+    EncodedAsset asset;
+    MenuMemory *memory = func_8005AF74();
+    s32 imageIndex;
+    s32 mode;
+    SaveMenuModeImage *modeImages;
+
+    switch (bufferKind) {
+        case SAVE_MENU_BUFFER_SLOTS:
+            D_8023BD70_ovl_01 = buffers;
+            modeImages = D_80230B5C_ovl_01;
+            for (imageIndex = 0; imageIndex != SAVED_GAME_COUNT; imageIndex++) {
+                mode = D_80230B50_ovl_01[imageIndex];
+                if (mode == -1) {
+                    mode = 0;
+                }
+                OpenEncodedAsset(modeImages[mode].assetId, &asset);
+                ReadEncodedAsset(D_8023BD70_ovl_01[imageIndex], &asset);
+            }
+            OpenEncodedAsset(ASSET_SAVE_MENU_FRAME, &asset);
+            ReadEncodedAsset(D_8023BD70_ovl_01[SAVED_GAME_COUNT], &asset);
+            break;
+        case SAVE_MENU_BUFFER_CHOSEN:
+            D_8023BD74_ovl_01 = buffers;
+            modeImages = D_80230B5C_ovl_01;
+            for (imageIndex = 0; imageIndex != SAVE_MENU_CHOSEN_IMAGE_COUNT; imageIndex++) {
+                mode = D_80230B50_ovl_01[memory->savedGameIndex];
+                if (mode == -1) {
+                    mode = 0;
+                }
+                OpenEncodedAsset(modeImages[mode].assetId, &asset);
+                ReadEncodedAsset(D_8023BD74_ovl_01[imageIndex], &asset);
+            }
+            break;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221EBC_ovl_01);
+#endif
 
 void func_80222038_ovl_01(void *buffer, u8 bufferIndex) {
     EncodedAsset asset;
