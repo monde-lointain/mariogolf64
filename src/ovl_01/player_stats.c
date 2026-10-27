@@ -102,6 +102,12 @@
 #define STATS_DOWN_ARROW_OFFSET 36
 
 /* The directions that func_8021E340 moves the cursor in, which index D_802309C4 */
+/* func_8021E97C puts the cursor on the stats grid's chosen cell, measured from the screen's centre */
+#define STATS_CURSOR_COLUMN_WIDTH 34
+#define STATS_CURSOR_ROW_HEIGHT 26
+#define STATS_CURSOR_LEFT_X 6
+#define STATS_CURSOR_TOP_Y 30
+
 #define STATS_DIRECTION_LEFT 0
 #define STATS_DIRECTION_RIGHT 1
 #define STATS_DIRECTION_UP 2
@@ -171,6 +177,12 @@ extern s8 D_802309C4_ovl_01[][2];
 extern void **D_8023B630_ovl_01;
 extern void *D_8023B634_ovl_01;
 extern void *D_8023B638_ovl_01;
+extern Vtx D_802309F0_ovl_01[MENU_CURSOR_VERTEX_COUNT];
+extern f32 D_80230A38_ovl_01[MENU_CURSOR_VERTEX_COUNT];
+extern Mtx D_8023B410_ovl_01;
+extern Mtx D_8023B450_ovl_01;
+extern Mtx D_8023B490_ovl_01;
+extern Mtx D_8023B550_ovl_01;
 extern u8 *D_8023B63C_ovl_01;
 extern s32 D_80230A48_ovl_01[CHARACTER_COUNT];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
@@ -1155,7 +1167,67 @@ void func_8021E4B0_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 labelInd
     *displayListHead = gfx;
 }
 
+/*
+ * Doesn't match: the stack slots of the pointers to the second pipe sync
+ * after the image and the cycle type are swapped.
+ */
+#ifdef NON_MATCHING
+void func_8021E97C_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory = func_8005AF74();
+    s32 vertexIndex;
+    s32 red;
+    s32 blue;
+    s32 green;
+
+    for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT; vertexIndex++) {
+        D_80230A38_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+        red = (s32)(sinf(D_80230A38_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) + MENU_CURSOR_COLOR_MIDDLE;
+        blue = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + M_PI / 2) * MENU_CURSOR_COLOR_SWING) +
+               MENU_CURSOR_COLOR_MIDDLE;
+        green = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + M_PI) * MENU_CURSOR_COLOR_SWING) +
+                MENU_CURSOR_COLOR_MIDDLE;
+        D_802309F0_ovl_01[vertexIndex].v.cn[0] = red;
+        D_802309F0_ovl_01[vertexIndex].v.cn[2] = blue;
+        D_802309F0_ovl_01[vertexIndex].v.cn[1] = green;
+    }
+    guOrtho(&D_8023B410_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
+            MENU_CURSOR_NEAR, MENU_CURSOR_FAR, 1.0f);
+    guTranslate(&D_8023B450_ovl_01, memory->unk39 * STATS_CURSOR_COLUMN_WIDTH + STATS_CURSOR_LEFT_X,
+                STATS_CURSOR_TOP_Y - memory->unk3A * STATS_CURSOR_ROW_HEIGHT, MENU_CURSOR_Z);
+    guRotate(&D_8023B490_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
+    guScale(&D_8023B550_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_8023B638_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA, MENU_CURSOR_SIZE,
+                           MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetCombineMode(gfx++, G_CC_SHADEDECALA, G_CC_SHADEDECALA);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B410_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B450_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B490_ovl_01), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B550_ovl_01), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, D_802309F0_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E97C_ovl_01);
+#endif
 
 /* Doesn't match: the original keeps the row and column counters in other saved registers */
 #ifdef NON_MATCHING
