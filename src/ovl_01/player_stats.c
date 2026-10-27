@@ -1,4 +1,7 @@
 #include "common.h"
+#include "menu_memory.h"
+
+extern s16 D_8023B640_ovl_01[][5];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
 
@@ -40,7 +43,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E01C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E340_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E468_ovl_01);
+s16 func_8021E468_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+
+    return D_8023B640_ovl_01[memory->unk3A][memory->unk39];
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E4B0_ovl_01);
 

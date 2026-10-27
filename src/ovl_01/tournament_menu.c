@@ -22,6 +22,7 @@ extern void *D_80230E78_ovl_01;
 extern void *D_80230E7C_ovl_01;
 extern void *D_80230E84_ovl_01;
 extern s16 D_80230F34_ovl_01;
+extern u8 D_80230F40_ovl_01;
 extern void *D_80230F44_ovl_01;
 extern void *D_80230F48_ovl_01;
 extern void *D_80230F4C_ovl_01;
@@ -238,7 +239,13 @@ s32 func_8022BDC4_ovl_01(void) {
     return D_80105DBC[4];
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022BDD0_ovl_01);
+s32 func_8022BDD0_ovl_01(void) {
+    if (D_80230F40_ovl_01) {
+        D_80230F40_ovl_01 = FALSE;
+        return TRUE;
+    }
+    return FALSE;
+}
 
 void func_8022BDF8_ovl_01(void) {
 }

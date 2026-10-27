@@ -15,7 +15,12 @@ typedef struct MenuMemory {
     /* 0x36 */ s8 tableRow;         /* And among its shown rows */
     /* 0x37 */ s8 tableFirstColumn; /* The first column shown of a table wider than the screen */
     /* 0x38 */ s8 tableFirstRow;    /* And the first row shown of one taller */
-    /* 0x39 */ u8 unk39[0x46 - 0x39];
+    /* 0x39 */ s8 unk39;
+    /* 0x3A */ s8 unk3A;
+    /* 0x3B */ u8 unk3B[0x42 - 0x3B];
+    /* 0x42 */ s8 unk42;
+    /* 0x43 */ s8 savedGameIndex;
+    /* 0x44 */ u8 unk44[0x46 - 0x44];
     /* 0x46 */ u8 unk46;
 } MenuMemory;
 

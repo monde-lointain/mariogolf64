@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "menu_memory.h"
 #include "save.h"
 
 /* The image listing the game modes, in orange */
@@ -12,6 +13,7 @@ extern void *D_8023B670_ovl_01;
 extern void *D_8023B674_ovl_01;
 extern void *D_8023B678_ovl_01;
 extern void *D_8023B67C_ovl_01;
+extern s16 D_8023B684_ovl_01[];
 extern void *D_8023BD78_ovl_01;
 extern void *D_8023BD7C_ovl_01;
 
@@ -55,7 +57,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220BB0_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220D68_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220DF8_ovl_01);
+s16 func_80220DF8_ovl_01(void) {
+    return D_8023B684_ovl_01[func_8005AF74()->unk42];
+}
 
 s32 func_80220E28_ovl_01(Unk68 *record) {
     return (u8)record->unk36 >> 7;
@@ -92,7 +96,13 @@ void func_80222038_ovl_01(void *buffer, u8 bufferIndex) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8022209C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80222C94_ovl_01);
+s32 func_80222C94_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    SavedGame *game = &save->savedGames[memory->savedGameIndex];
+
+    return -(game->isValid == FALSE);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80222CDC_ovl_01);
 

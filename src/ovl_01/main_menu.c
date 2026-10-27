@@ -122,7 +122,12 @@ void StartLoadingChosenHole(void) {
     StartLoaderThread();
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C34_ovl_01);
+s32 GetChosenCourseIndex(void) {
+    if (g_IsMiniGolf) {
+        return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
+    }
+    return D_801323A0[0x16];
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C78_ovl_01);
 

@@ -3203,3 +3203,4 @@ DrawMenuScreen = 0x801FB198; // type:func segment:ovl_01
 sMenuBobOffset = 0x8022BE98; // type:f32 size:0x4 segment:ovl_01
 sMenuBobPhase = 0x8022BE9C; // type:f32 size:0x4 segment:ovl_01
 DrawMenuNumber = 0x80210E3C; // type:func segment:ovl_01
+GetChosenCourseIndex = 0x801F4C34; // type:func segment:ovl_01
