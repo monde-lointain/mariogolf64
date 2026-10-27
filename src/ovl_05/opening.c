@@ -54,7 +54,7 @@ extern f32 D_8020AC5C_ovl_05;
 extern s32 D_8020AC60_ovl_05;
 extern s32 f_AreAmbientSoundsOn;
 extern u8 D_80212830_ovl_05[];
-extern u8 D_80213A40_ovl_05[];
+extern u8 f_ShotBallImage[];
 /* The steps that a name logo's animation starts each phase at */
 #define NAME_LOGO_UNFOLD 0     /* Widens over 8 frames */
 #define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
@@ -159,7 +159,7 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
 void DrawOpeningImpactLines(Gfx** displayListHead);
 void func_801FE8F8_ovl_05(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
-void func_801FFC40_ovl_05(Gfx** displayListHead);
+void DrawOpeningShotBall(Gfx** displayListHead);
 void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
 void DrawOpeningSparks(Gfx** displayListHead);
 
@@ -507,7 +507,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   DrawOpeningBurst(&gfx);
   func_801FE8F8_ovl_05(&gfx);
   func_801FBB94_ovl_05(&gfx, matrices);
-  func_801FFC40_ovl_05(&gfx);
+  DrawOpeningShotBall(&gfx);
   DrawOpeningSparks(&gfx);
   func_801FA8D8_ovl_05(&gfx);
   func_80200CBC_ovl_05(&gfx, 0);
@@ -826,64 +826,96 @@ void DrawOpeningBurst(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
 #endif
 
-void func_801FFC10_ovl_05(void) {
+/* A 64x64 CI8 image of a plain golf ball */
+#define ASSET_SHOT_BALL_IMAGE 0x939
+
+/* Loads the image of the ball that the opening's shot sends flying */
+void LoadOpeningShotBall(void) {
   EncodedAsset asset;
 
-  OpenEncodedAsset(0x939, &asset);
-  ReadEncodedAsset(D_80213A40_ovl_05, &asset);
+  OpenEncodedAsset(ASSET_SHOT_BALL_IMAGE, &asset);
+  ReadEncodedAsset(f_ShotBallImage, &asset);
 }
 
-extern s32 D_8020AD64_ovl_05;
-extern s32 D_8020B218_ovl_05;
-extern Vtx D_8020B220_ovl_05[4];
-extern Vec3 D_8020CCF4_ovl_05;
-extern Mtx D_8020CD08_ovl_05;
-extern Mtx D_8020CD48_ovl_05;
+/* The ball image is drawn in strips that fit in texture memory */
+#define SHOT_BALL_IMAGE_SIZE 64
+#define SHOT_BALL_STRIP_HEIGHT 32
+#define SHOT_BALL_STRIP_COUNT 2
+/*
+ * A strip's rows in 10-bit fixed point, less a little so that its last
+ * screen row stays within the strip
+ */
+#define SHOT_BALL_STRIP_ROWS_FIXED 0x7FA0
+/* Half the ball's width on the screen, in pixels, for each step of scale */
+#define SHOT_BALL_HALF_WIDTH_PER_SCALE 2
+/* The ball is projected this far above the look-at point */
+#define SHOT_BALL_LIFT 0.1f
+/* Beyond this camera distance, the ball is a fading dot */
+#define SHOT_BALL_FAR_DISTANCE 400.0f
+#define SHOT_BALL_DOT_SIZE 3
+/* How much alpha the dot loses for each unit of camera distance */
+#define SHOT_BALL_FADE_RATE 0.04
+#define SHOT_BALL_OPAQUE_ALPHA 255
+/* The shadow's scale for each step of f_ShotBallScale */
+#define SHOT_BALL_SHADOW_SCALE 0.5
+#define SHOT_BALL_SHADOW_IMAGE_SIZE 32
+
+extern s32 f_ShotBallScale;
+extern s32 f_ShotBallAlpha;
+extern Vtx f_ShotBallShadowVertices[4];
+extern Vec3 f_ShotBallPosition;
+extern Mtx f_ShotBallShadowTranslation;
+extern Mtx f_ShotBallShadowScaling;
 
 #ifdef NON_MATCHING
 /*
- * Draws the opening's ball once D_8020AD64 is set: a shadow on the ground
- * below the look-at point, then the ball image in two strips over it.
+ * Draws the opening's ball while f_ShotBallScale is set: a shadow on the
+ * ground below the look-at point, then the ball image above the point in
+ * strips, at f_ShotBallScale times the image's size. When the camera is far
+ * away, the ball is instead a dot that fades with distance.
  *
  * Differs from the original only in register and stack slot choices: some
  * pairs of spilled display list pointers swap slots, and the far branch
  * uses other registers.
  */
-void func_801FFC40_ovl_05(Gfx** displayListHead) {
+void DrawOpeningShotBall(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  ScreenPoint point;
-  s32 half;
+  ScreenPoint ballPoint;
+  s32 stripIndex;
   s32 size;
   s32 left;
   s32 top;
   s32 right;
   s32 bottom;
 
-  if (D_8020AD64_ovl_05 != 0) {
-    D_8020CCF4_ovl_05[0] = f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE;
-    D_8020CCF4_ovl_05[2] = f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE;
-    D_8020CCF4_ovl_05[1] = f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE + 0.1f;
+  if (f_ShotBallScale != 0) {
+    f_ShotBallPosition[0] = f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[2] = f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[1] =
+        f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE + SHOT_BALL_LIFT;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
-    if (ProjectPoint(D_8020CCF4_ovl_05[0], D_8020CCF4_ovl_05[1],
-                     D_8020CCF4_ovl_05[2], &point) < 0) {
+    if (ProjectPoint(f_ShotBallPosition[0], f_ShotBallPosition[1],
+                     f_ShotBallPosition[2], &ballPoint) < 0) {
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PRIM);
-      gDPSetPrimDepth(gfx++, point.depth, 0);
+      gDPSetPrimDepth(gfx++, ballPoint.depth, 0);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
-      D_8020CCF4_ovl_05[1] =
-          GetGroundHeight(D_8020CCF4_ovl_05[0] * WORLD_TO_COURSE_SCALE,
-                          D_8020CCF4_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+      f_ShotBallPosition[1] =
+          GetGroundHeight(f_ShotBallPosition[0] * WORLD_TO_COURSE_SCALE,
+                          f_ShotBallPosition[2] * WORLD_TO_COURSE_SCALE) *
           COURSE_TO_WORLD_SCALE;
-      guTranslate(&D_8020CD08_ovl_05, D_8020CCF4_ovl_05[0],
-                  D_8020CCF4_ovl_05[1], D_8020CCF4_ovl_05[2]);
-      guScale(&D_8020CD48_ovl_05, D_8020AD64_ovl_05 * 0.5,
-              D_8020AD64_ovl_05 * 0.5f, D_8020AD64_ovl_05 * 0.5f);
+      guTranslate(&f_ShotBallShadowTranslation, f_ShotBallPosition[0],
+                  f_ShotBallPosition[1], f_ShotBallPosition[2]);
+      guScale(&f_ShotBallShadowScaling,
+              f_ShotBallScale * SHOT_BALL_SHADOW_SCALE,
+              f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE,
+              f_ShotBallScale * (f32)SHOT_BALL_SHADOW_SCALE);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0,
@@ -907,14 +939,15 @@ void func_801FFC40_ovl_05(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
                           TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-                          G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0,
+                          G_IM_FMT_I, G_IM_SIZ_8b, SHOT_BALL_SHADOW_IMAGE_SIZE,
+                          SHOT_BALL_SHADOW_IMAGE_SIZE, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CD08_ovl_05),
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowTranslation),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CD48_ovl_05),
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowScaling),
                 G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, D_8020B220_ovl_05, 4, 0);
+      gSPVertex(gfx++, f_ShotBallShadowVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       gDPPipeSync(gfx++);
@@ -929,7 +962,7 @@ void func_801FFC40_ovl_05(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
       gDPSetBlendColor(gfx++, 255, 255, 255, 2);
-      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, D_8020B218_ovl_05);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_ShotBallAlpha);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -939,38 +972,42 @@ void func_801FFC40_ovl_05(Gfx** displayListHead) {
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      gDPLoadTLUT_pal256(
-          gfx++, TEXTURE_ADDRESS(D_80213A40_ovl_05 + IMAGE_HEADER_SIZE));
+      gDPLoadTLUT_pal256(gfx++,
+                         TEXTURE_ADDRESS(f_ShotBallImage + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
-      for (half = 0; half != 2; half++) {
+      for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(
             gfx++,
-            TEXTURE_ADDRESS(D_80213A40_ovl_05 + LARGE_PALETTED_TEXELS_OFFSET +
-                            half * 64 * 32),
-            G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            TEXTURE_ADDRESS(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
+                            stripIndex * SHOT_BALL_IMAGE_SIZE *
+                                SHOT_BALL_STRIP_HEIGHT),
+            G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
+            SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOLOD);
-        if (g_CameraEditor.distance > 400.0f) {
-          size = D_8020AD64_ovl_05 * 2;
-          left = point.x - size;
-          right = left + 3;
-          top = point.y - (2 - half) * size;
-          bottom = top + 3;
-          D_8020B218_ovl_05 = 255.0 - (u32)g_CameraEditor.distance * 0.04;
-          if (D_8020B218_ovl_05 < 0) {
-            D_8020B218_ovl_05 = 0;
+        if (g_CameraEditor.distance > SHOT_BALL_FAR_DISTANCE) {
+          size = f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE;
+          left = ballPoint.x - size;
+          right = left + SHOT_BALL_DOT_SIZE;
+          top = ballPoint.y - (SHOT_BALL_STRIP_COUNT - stripIndex) * size;
+          bottom = top + SHOT_BALL_DOT_SIZE;
+          f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA -
+                            (u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE;
+          if (f_ShotBallAlpha < 0) {
+            f_ShotBallAlpha = 0;
           }
         } else {
-          size = D_8020AD64_ovl_05 * 2;
-          D_8020B218_ovl_05 = 255;
-          left = point.x - size;
-          right = point.x + size;
-          top = point.y - (2 - half) * size;
-          bottom = point.y + half * size - size;
+          size = f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE;
+          f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
+          left = ballPoint.x - size;
+          right = ballPoint.x + size;
+          top = ballPoint.y - (SHOT_BALL_STRIP_COUNT - stripIndex) * size;
+          bottom = ballPoint.y + stripIndex * size - size;
         }
         gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
-                            G_TX_RENDERTILE, 0, 0, (64 << 10) / (right - left),
-                            0x7FA0 / (bottom - top));
+                            G_TX_RENDERTILE, 0, 0,
+                            (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
+                            SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
         gDPPipeSync(gfx++);
       }
       gDPPipeSync(gfx++);
@@ -982,7 +1019,7 @@ void func_801FFC40_ovl_05(Gfx** displayListHead) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FFC40_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
 #endif
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
