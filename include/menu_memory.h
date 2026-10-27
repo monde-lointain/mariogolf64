@@ -3,15 +3,24 @@
 
 #include <ultra64.h>
 
+/* The values of unkE, which func_80217B88 also turns into the settings of D_801B60BA */
+#define MENU_UNKE_COUNT 8
+
 /* What the menus keep between visits, such as the last choices made */
 typedef struct MenuMemory {
     /* 0x00 */ u8 unk0[4];
     /* 0x04 */ s8 characterColumn; /* The character select cursor's column */
     /* 0x05 */ u8 unk5[3];
     /* 0x08 */ s8 characterRow; /* And its row */
-    /* 0x09 */ u8 unk9[0x20 - 0x9];
+    /* 0x09 */ u8 unk9[0xD - 0x9];
+    /* 0x0D */ s8 unkD;
+    /* 0x0E */ s8 unkE[MENU_UNKE_COUNT]; /* Set from one of func_80217B88's presets */
+    /* 0x16 */ u8 unk16[0x20 - 0x16];
     /* 0x20 */ s8 helpTopicIndex;
-    /* 0x21 */ u8 unk21[0x2E - 0x21];
+    /* 0x21 */ u8 unk21[0x29 - 0x21];
+    /* 0x29 */ s8 unk29;
+    /* 0x2A */ s8 unk2A;
+    /* 0x2B */ u8 unk2B[0x2E - 0x2B];
     /* 0x2E */ s8 holeIndex;   /* The hole the Ring Shot select points at */
     /* 0x2F */ s8 courseIndex; /* And its course */
     /* 0x30 */ u8 unk30[0x35 - 0x30];

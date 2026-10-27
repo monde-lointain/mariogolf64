@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "menu_memory.h"
+#include "save.h"
 
 /* The images of D_800C2064 that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
@@ -19,17 +20,57 @@
 #define STATS_DIRECTION_UP 2
 #define STATS_DIRECTION_DOWN 3
 
+/* The presets of func_80217B88; two of them have a variant that four players take instead */
+#define MENU_UNKE_PRESET_COUNT 7
+#define MENU_UNKE_PRESET_FIRST 0
+#define MENU_UNKE_PRESET_FIRST_FOUR_PLAYER 1
+#define MENU_UNKE_PRESET_SECOND 5
+#define MENU_UNKE_PRESET_SECOND_FOUR_PLAYER 6
+
 extern u16 D_800C2064[];
+extern s32 D_80105B68;
+extern s8 D_801B60BA[MENU_UNKE_COUNT];
+extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
+extern u8 D_802304F4_ovl_01[];
 extern s8 D_802309C4_ovl_01[][2];
 extern void **D_8023B630_ovl_01;
 extern void *D_8023B634_ovl_01;
 extern void *D_8023B638_ovl_01;
 extern u8 *D_8023B63C_ovl_01;
 extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
+extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217B88_ovl_01);
+void func_80217B88_ovl_01(s32 requestedPreset) {
+    s8 presetIndex = requestedPreset;
+    MenuMemory *memory = func_8005AF74();
+    s16 index;
+
+    if ((u8)requestedPreset < MENU_UNKE_PRESET_COUNT) {
+        if ((s8)requestedPreset == MENU_UNKE_PRESET_FIRST && D_80105B68 == MAX_PLAYER_COUNT) {
+            presetIndex = MENU_UNKE_PRESET_FIRST_FOUR_PLAYER;
+        }
+        if (presetIndex == MENU_UNKE_PRESET_SECOND && D_80105B68 == MAX_PLAYER_COUNT) {
+            presetIndex = MENU_UNKE_PRESET_SECOND_FOUR_PLAYER;
+        }
+        for (index = 0; index != MENU_UNKE_COUNT; index++) {
+            memory->unkE[index] = D_802304BC_ovl_01[presetIndex][index];
+            D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+        }
+    } else {
+        for (index = 0; index != MENU_UNKE_COUNT; index++) {
+            memory->unkE[index] = -1;
+            D_801B60BA[index] = -1;
+        }
+    }
+    memory->unkD = 0;
+    for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+        D_8023BFDC_ovl_01[index] = index < D_80105B68 ? 0 : -1;
+    }
+    memory->unk29 = 0;
+    memory->unk2A = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
 
