@@ -16,6 +16,7 @@
 #include "math_util.h"
 #include "round_hud.h"
 #include "screen.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
 
@@ -50,7 +51,7 @@ typedef struct OpeningNameLogo {
 } OpeningNameLogo; /* size = 0x1C */
 
 extern s32 D_8020AC4C_ovl_05;
-extern s32 D_8020AC50_ovl_05;
+extern s32 D_8020AC50_ovl_05[3];
 extern f32 D_8020AC5C_ovl_05;
 extern s32 D_8020AC60_ovl_05;
 extern s32 f_AreAmbientSoundsOn;
@@ -181,7 +182,7 @@ void func_801F4A40_ovl_05(void) {
 void func_801F4A6C_ovl_05(void) {
   if (D_8020AC60_ovl_05 != 0) {
     PlaySoundWithEffects(0x51, 12, 48 - (s32)(D_8020AC5C_ovl_05 * 0.2f), 0,
-                         127 - (D_8020AC50_ovl_05 - 160) / 2);
+                         127 - (D_8020AC50_ovl_05[0] - 160) / 2);
   }
 }
 
@@ -1759,7 +1760,488 @@ void LoadOpeningLogo(void) {
   ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 
+extern s32 D_8020AC48_ovl_05;
+extern s32 D_8020AC90_ovl_05;
+extern s32 D_8020B264_ovl_05;
+extern s32 D_8020B268_ovl_05;
+extern s32 D_8020B26C_ovl_05;
+extern s32 D_8020B270_ovl_05;
+extern s32 D_8020B274_ovl_05;
+extern s32 D_8020B278_ovl_05;
+extern s32 D_8020B27C_ovl_05;
+extern f32 D_8020B280_ovl_05[2];
+extern f32 D_8020B288_ovl_05;
+extern f32 D_8020B28C_ovl_05;
+extern f32 D_8020B294_ovl_05;
+extern f32 D_8020B298_ovl_05;
+extern Vtx D_8020B2A0_ovl_05[2][4];
+extern Vtx D_8020B320_ovl_05[6][4];
+extern Mtx D_8020CD90_ovl_05[LOGO_LETTER_COUNT][2];
+extern Mtx D_8020D210_ovl_05[LOGO_LETTER_COUNT][2];
+extern Mtx D_8020D690_ovl_05[2];
+extern Mtx D_8020D710_ovl_05[2];
+extern Mtx D_8020D790_ovl_05[2];
+extern s32 D_8020D818_ovl_05[LOGO_LETTER_COUNT];
+extern s32 D_8020D83C_ovl_05[2];
+extern f32 D_8020D844_ovl_05;
+extern s32 D_8020D848_ovl_05;
+extern s32 D_8020D84C_ovl_05;
+
+/*
+ * Drives the title logo: the letters drop in behind Lakitu and bounce, the
+ * club swings in around them, and the whole logo then shrinks into place.
+ * Also fades the screen to white and back while the logo forms.
+ *
+ * Differs from the original in register allocation and stack slots: some
+ * spilled display list pointers swap slots, a few addresses are kept in
+ * registers instead of reloaded, and the letters' texture offsets are folded
+ * into their relocations.
+ */
+#ifdef NON_MATCHING
+void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
+  Gfx* gfx = *displayListHead;
+  s32 pad[6];
+  s32 i;
+  s32 j;
+  f32 angle;
+  f32 wobble;
+
+  switch (D_8020B278_ovl_05) {
+    case 1:
+      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
+      D_8020B27C_ovl_05--;
+      if (D_8020B27C_ovl_05 == 24) {
+        D_8020B278_ovl_05++;
+      }
+      break;
+    case 2:
+      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
+      if (D_8020B26C_ovl_05 > 20) {
+        D_8020B278_ovl_05++;
+      }
+      break;
+    case 3:
+      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
+      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
+          (s32)((24 - D_8020B27C_ovl_05) * 5.3333f) + 128;
+      D_8020B27C_ovl_05--;
+      if (D_8020B27C_ovl_05 == 0) {
+        D_8020B278_ovl_05++;
+      }
+      break;
+    case 4:
+      g_ScreenFadeDuration = 2;
+      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 0xFF;
+      g_ScreenFadeKind = FADE_OUT;
+      g_ScreenFadeFramesLeft = 0;
+      if (D_8020B274_ovl_05 == 6) {
+        D_8020B278_ovl_05++;
+      }
+      break;
+    case 5:
+      g_ScreenFadeDuration = 2;
+      g_ScreenFadeKind = FADE_OUT;
+      g_ScreenFadeFramesLeft = 0;
+      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 0xFF;
+      D_8020B264_ovl_05 -= 24;
+      D_8020B268_ovl_05 -= 24;
+      if (D_8020B264_ovl_05 < 0) {
+        D_8020B264_ovl_05 = 0;
+        D_8020B268_ovl_05 = 0;
+        D_8020AC90_ovl_05 = 999;
+      }
+      break;
+  }
+  if (D_80224708_ovl_05[0] == 0 && f_LakituScreenPoint[0] > 57) {
+    f_LogoLetters[0].unk0 = 57;
+    f_LogoLetters[0].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[0] = 1;
+    g_ScreenFadeDuration = g_ScreenFadeFramesLeft = 64;
+    g_ScreenFadeKind = FADE_OUT;
+    g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 128;
+    D_8020B278_ovl_05 = 1;
+    D_8020AC48_ovl_05 = 1;
+  }
+  if (D_80224708_ovl_05[1] == 0 && f_LakituScreenPoint[0] > 81) {
+    f_LogoLetters[1].unk0 = 81;
+    f_LogoLetters[1].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[1] = 1;
+  }
+  if (D_80224708_ovl_05[2] == 0 && f_LakituScreenPoint[0] > 112) {
+    f_LogoLetters[2].unk0 = 112;
+    f_LogoLetters[2].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[2] = 1;
+  }
+  if (D_80224708_ovl_05[3] == 0 && f_LakituScreenPoint[0] > 132) {
+    f_LogoLetters[3].unk0 = 132;
+    f_LogoLetters[3].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[3] = 1;
+  }
+  if (D_80224708_ovl_05[4] == 0 && f_LakituScreenPoint[0] > 154) {
+    f_LogoLetters[4].unk0 = 154;
+    f_LogoLetters[4].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[4] = 1;
+  }
+  if (D_80224708_ovl_05[5] == 0 && f_LakituScreenPoint[0] > 193) {
+    f_LogoLetters[5].unk0 = 193;
+    f_LogoLetters[5].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[5] = 1;
+  }
+  if (D_80224708_ovl_05[6] == 0 && f_LakituScreenPoint[0] > 220) {
+    f_LogoLetters[6].unk0 = 220;
+    f_LogoLetters[6].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[6] = 1;
+  }
+  if (D_80224708_ovl_05[7] == 0 && f_LakituScreenPoint[0] > 242) {
+    f_LogoLetters[7].unk0 = 242;
+    f_LogoLetters[7].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[7] = 1;
+  }
+  if (D_80224708_ovl_05[8] == 0 && f_LakituScreenPoint[0] > 265) {
+    f_LogoLetters[8].unk0 = 265;
+    f_LogoLetters[8].unk4 = f_LakituScreenPoint[1];
+    D_80224708_ovl_05[8] = 1;
+    D_8020B274_ovl_05 = 1;
+  }
+  if (arg1 == 1) {
+    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+      guTranslate(&D_8020CD90_ovl_05[i][g_DrawBufferIndex],
+                  f_LogoLetters[i].unk0 - 160.0f,
+                  (240 - f_LogoLetters[i].unk4) - 120.0f,
+                  f_LogoLetters[i].unk8 + -300.0f);
+      guScale(&D_8020D210_ovl_05[i][g_DrawBufferIndex], D_80224758_ovl_05[i][0],
+              D_80224758_ovl_05[i][1], 1.0f);
+    }
+    guTranslate(&D_8020D690_ovl_05[g_DrawBufferIndex],
+                D_8020AC50_ovl_05[0] - 160.0f, D_8020AC50_ovl_05[1] - 120.0f,
+                D_8020AC50_ovl_05[2] + -300.0f);
+    guRotate(&D_8020D790_ovl_05[g_DrawBufferIndex], D_8020B288_ovl_05, 0.0f,
+             0.0f, 1.0f);
+    guScale(&D_8020D710_ovl_05[g_DrawBufferIndex], D_8020B280_ovl_05[0],
+            D_8020B280_ovl_05[1], 1.0f);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
+                      TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    if (D_8020B278_ovl_05 == 5) {
+      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 10);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD,
+                       G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
+    } else {
+      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x50);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_DISABLE);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLOD(gfx++, G_TL_TILE);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, D_8020B264_ovl_05);
+    gDPLoadTLUT_pal256(gfx++,
+                       TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    gDPPipeSync(gfx++);
+    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+      for (j = 0; j < 2; j++) {
+        gDPLoadTextureBlock(gfx++,
+                            TEXTURE_ADDRESS(f_LogoLetterImages +
+                                            ((j + i * 2) * 48 * 24 +
+                                             LARGE_PALETTED_TEXELS_OFFSET)),
+                            G_IM_FMT_CI, G_IM_SIZ_8b, 48, 24, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+                  G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
+                  OS_K0_TO_PHYSICAL(&D_8020CD90_ovl_05[i][g_DrawBufferIndex]),
+                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
+                  OS_K0_TO_PHYSICAL(&D_8020D210_ovl_05[i][g_DrawBufferIndex]),
+                  G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        gDPSetPrimDepth(gfx++, f_LogoLetters[i].unk8 + 64, 0);
+        gDPPipeSync(gfx++);
+        gSPVertex(gfx++, D_8020B2A0_ovl_05[j], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+      }
+    }
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, D_8020B268_ovl_05);
+    gDPLoadTLUT_pal256(gfx++,
+                       TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
+    gDPPipeSync(gfx++);
+    for (i = 0; i < 6; i++) {
+      gDPLoadTextureBlock(
+          gfx++,
+          TEXTURE_ADDRESS(f_LogoClubImage +
+                          (i * 152 * 13 + LARGE_PALETTED_TEXELS_OFFSET)),
+          G_IM_FMT_CI, G_IM_SIZ_8b, 152, 13, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+          G_TX_NOLOD);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+                G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D690_ovl_05[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D790_ovl_05[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D710_ovl_05[g_DrawBufferIndex]),
+                G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+      gDPSetPrimDepth(gfx++, 92, 0);
+      gDPPipeSync(gfx++);
+      gSPVertex(gfx++, D_8020B320_ovl_05[i], 4, 0);
+      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+      gDPPipeSync(gfx++);
+    }
+  }
+  if ((D_8020B274_ovl_05 == 4) & (arg1 == 1)) {
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetPrimDepth(gfx++, 4, 0);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++,
+                     GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+                     G_RM_AA_ZB_OPA_SURF2);
+    gSPTextureRectangle(gfx++, 8 << 2, 60 << 2, 312 << 2, 120 << 2,
+                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetPrimDepth(gfx++, 40, 0);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(
+        gfx++,
+        AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
+            ALPHA_CVG_SEL |
+            GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+        AA_EN | Z_UPD | IM_RD | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |
+            ALPHA_CVG_SEL |
+            GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM));
+    gDPLoadTLUT_pal256(gfx++,
+                       TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
+    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+      for (j = 0; j < 2; j++) {
+        gDPLoadTextureBlock(gfx++,
+                            TEXTURE_ADDRESS(f_LogoLetterImages +
+                                            ((j + i * 2) * 48 * 24 +
+                                             LARGE_PALETTED_TEXELS_OFFSET)),
+                            G_IM_FMT_CI, G_IM_SIZ_8b, 48, 24, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+                  G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
+                  OS_K0_TO_PHYSICAL(&D_8020CD90_ovl_05[i][g_DrawBufferIndex]),
+                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(gfx++,
+                  OS_K0_TO_PHYSICAL(&D_8020D210_ovl_05[i][g_DrawBufferIndex]),
+                  G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        gDPPipeSync(gfx++);
+        gSPVertex(gfx++, D_8020B2A0_ovl_05[j], 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+      }
+    }
+    if (arg1 == 1) {
+      gDPSetPrimDepth(gfx++, 36, 0);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+      gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
+                        0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      gDPLoadTextureBlock(gfx++,
+                          TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE),
+                          G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+    }
+    D_8020B26C_ovl_05++;
+    if (D_8020B26C_ovl_05 > 64) {
+      D_8020B274_ovl_05 = 5;
+    }
+    if (arg1 == 1 && D_8020B26C_ovl_05 > 4 && D_8020B26C_ovl_05 < 36) {
+      gSPTextureRectangle(
+          gfx++, 10 << 2, 60 << 2, 630 << 2, 120 << 2, G_TX_RENDERTILE,
+          (64 - (D_8020B26C_ovl_05 - 16) * 18) << 5, 0, 0x28F, 0x28F);
+      gDPPipeSync(gfx++);
+    }
+  }
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  *displayListHead = gfx;
+
+  for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+    if (D_80224708_ovl_05[i] == 1) {
+      if (D_80224730_ovl_05[i] > 0.0f) {
+        if (i != 7) {
+          if (f_LogoLetters[i].unk4 + (s32)D_80224730_ovl_05[i] >= 125) {
+            D_80224730_ovl_05[i] *= 0.2f;
+            f_LogoLetters[i].unk4 = 124;
+            if (D_80224730_ovl_05[i] <= 1.0f) {
+              D_80224730_ovl_05[i] = 0.0f;
+              D_80224708_ovl_05[i] = 9;
+              continue;
+            }
+            D_80224730_ovl_05[i] = -D_80224730_ovl_05[i];
+            D_80224708_ovl_05[i] = 2;
+            D_802247A0_ovl_05[i] = 10;
+          }
+        } else {
+          if (f_LogoLetters[7].unk4 + (s32)D_80224730_ovl_05[7] >= 122) {
+            D_80224730_ovl_05[7] *= 0.2f;
+            f_LogoLetters[7].unk4 = 121;
+            if (D_80224730_ovl_05[7] <= 1.0f) {
+              D_80224730_ovl_05[7] = 0.0f;
+              D_80224708_ovl_05[7] = 9;
+              continue;
+            }
+            D_80224730_ovl_05[7] = -D_80224730_ovl_05[7];
+            D_80224708_ovl_05[7] = 2;
+            D_802247A0_ovl_05[7] = 10;
+          }
+        }
+      }
+      f_LogoLetters[i].unk4 += (s32)D_80224730_ovl_05[i];
+      D_80224730_ovl_05[i] += 0.5f;
+      D_80224758_ovl_05[i][0] += 0.04f;
+      D_80224758_ovl_05[i][1] += 0.04f;
+      if (D_80224758_ovl_05[i][0] > 1.0f) {
+        D_80224758_ovl_05[i][0] = 1.0f;
+      }
+      if (D_80224758_ovl_05[i][1] > 1.0f) {
+        D_80224758_ovl_05[i][1] = 1.0f;
+      }
+    } else if (D_80224708_ovl_05[i] == 2) {
+      D_80224758_ovl_05[i][0] += 0.03f;
+      D_80224758_ovl_05[i][1] -= 0.03f;
+      D_802247A0_ovl_05[i]--;
+      if (D_802247A0_ovl_05[i] == 0) {
+        D_80224708_ovl_05[i] = 3;
+        D_802247A0_ovl_05[i] = 2;
+      }
+    } else if (D_80224708_ovl_05[i] == 3) {
+      D_802247A0_ovl_05[i]--;
+      if (D_802247A0_ovl_05[i] == 0) {
+        D_80224708_ovl_05[i] = 4;
+        D_802247A0_ovl_05[i] = 5;
+      }
+    } else if (D_80224708_ovl_05[i] == 4) {
+      D_80224758_ovl_05[i][0] -= 0.06f;
+      D_80224758_ovl_05[i][1] += 0.06f;
+      D_802247A0_ovl_05[i]--;
+      if (D_802247A0_ovl_05[i] == 0) {
+        D_80224708_ovl_05[i] = 1;
+      }
+    }
+  }
+  if (D_8020B274_ovl_05 == 1) {
+    angle = D_8020B28C_ovl_05 * 0.017453294f;
+    sinf(D_8020B294_ovl_05 * 0.017453294f);
+    wobble = -sinf(D_8020B298_ovl_05 * 0.017453294f) * 40.0f;
+    D_8020B274_ovl_05 = 2;
+    D_8020AC50_ovl_05[0] =
+        (s32)(-cosf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 165;
+    D_8020AC50_ovl_05[1] =
+        (s32)(-sinf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 141;
+    D_8020AC60_ovl_05 = 1;
+  }
+  if (D_8020B274_ovl_05 == 2) {
+    angle = D_8020B28C_ovl_05 * 0.017453294f;
+    sinf(D_8020B294_ovl_05 * 0.017453294f);
+    wobble = -sinf(D_8020B298_ovl_05 * 0.017453294f) * 100.0f;
+    D_8020AC50_ovl_05[0] =
+        (s32)(-cosf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 165;
+    D_8020AC50_ovl_05[1] =
+        (s32)(-sinf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 141;
+    D_8020AC5C_ovl_05 -= 4.0f;
+    D_8020B28C_ovl_05 += 5.5f;
+    D_8020B288_ovl_05 -= 23.0f;
+    D_8020B294_ovl_05 += 3.0f;
+    D_8020B298_ovl_05 += 6.0f;
+    if (D_8020AC5C_ovl_05 < 0.0f) {
+      D_8020AC5C_ovl_05 = 0.0f;
+      D_8020B274_ovl_05 = 3;
+    }
+  }
+  if (D_8020B274_ovl_05 == 3) {
+    D_8020B288_ovl_05 -= 23.0f;
+    D_8020B270_ovl_05--;
+    if (D_8020B270_ovl_05 < 0) {
+      D_8020B270_ovl_05 = 0;
+      if (D_8020B288_ovl_05 < 0.0f) {
+        D_8020B288_ovl_05 = 0.0f;
+        D_8020B274_ovl_05 = 4;
+        D_8020AC60_ovl_05 = 0;
+      }
+    }
+  }
+  if (D_8020B274_ovl_05 == 5) {
+    D_8020B274_ovl_05 = 6;
+    D_8020D818_ovl_05[0] = (86 - f_LogoLetters[0].unk0) / 10;
+    D_8020D818_ovl_05[1] = (104 - f_LogoLetters[1].unk0) / 10;
+    D_8020D818_ovl_05[2] = (125 - f_LogoLetters[2].unk0) / 10;
+    D_8020D818_ovl_05[3] = (139 - f_LogoLetters[3].unk0) / 10;
+    D_8020D818_ovl_05[4] = (154 - f_LogoLetters[4].unk0) / 10;
+    D_8020D818_ovl_05[5] = (184 - f_LogoLetters[5].unk0) / 10;
+    D_8020D818_ovl_05[6] = (204 - f_LogoLetters[6].unk0) / 10;
+    D_8020D818_ovl_05[7] = (220 - f_LogoLetters[7].unk0) / 10;
+    D_8020D818_ovl_05[8] = (234 - f_LogoLetters[8].unk0) / 10;
+    D_8020D83C_ovl_05[0] = (70 - f_LogoLetters[0].unk4) / 10;
+    D_8020D83C_ovl_05[1] = (68 - f_LogoLetters[7].unk4) / 10;
+    D_8020D844_ovl_05 = (0.72f - D_80224758_ovl_05[0][0]) * 0.1f;
+    D_8020D848_ovl_05 = (160 - D_8020AC50_ovl_05[0]) / 10;
+    D_8020D84C_ovl_05 = (188 - D_8020AC50_ovl_05[1]) / 10;
+  }
+  if (D_8020B274_ovl_05 == 6) {
+    for (i = 0; i < LOGO_LETTER_COUNT; i++) {
+      if (i != 7) {
+        f_LogoLetters[i].unk0 += D_8020D818_ovl_05[i];
+        f_LogoLetters[i].unk4 += D_8020D83C_ovl_05[0];
+        D_80224758_ovl_05[i][0] += D_8020D844_ovl_05;
+        D_80224758_ovl_05[i][1] += D_8020D844_ovl_05;
+      }
+    }
+    f_LogoLetters[7].unk0 += D_8020D818_ovl_05[7];
+    f_LogoLetters[7].unk4 += D_8020D83C_ovl_05[1];
+    D_8020AC50_ovl_05[0] += D_8020D848_ovl_05;
+    D_8020AC50_ovl_05[1] += D_8020D84C_ovl_05;
+    D_80224758_ovl_05[7][0] += D_8020D844_ovl_05;
+    D_80224758_ovl_05[7][1] += D_8020D844_ovl_05;
+    D_8020B280_ovl_05[0] += D_8020D844_ovl_05;
+    D_8020B280_ovl_05[1] += D_8020D844_ovl_05;
+    if (D_80224758_ovl_05[0][0] < 0.72f) {
+      D_8020B274_ovl_05 = 7;
+    }
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200CBC_ovl_05);
+#endif
 
 /* The opening's sparks, which fan out from a point and slow down */
 #define SPARK_COUNT 20
