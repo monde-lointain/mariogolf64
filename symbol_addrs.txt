@@ -3421,3 +3421,7 @@ f_LogoLetterSpeeds = 0x80224730; // type:f32 size:0x24 segment:ovl_05
 f_LogoLetterScales = 0x80224758; // type:f32 size:0x48 segment:ovl_05
 f_LogoLetterSquashFrames = 0x802247A0; // size:0x24 segment:ovl_05
 f_OpeningScene = 0x8020AC90; // size:0x4 segment:ovl_05
+D_8020ADB4_ovl_05 = 0x8020ADB4; // size:0x2 segment:ovl_05
+D_80217060_ovl_05 = 0x80217060; // type:f32 size:0x18 segment:ovl_05
+D_8020C790_ovl_05 = 0x8020C790; // type:f32 size:0xC segment:ovl_05
+D_8020C994_ovl_05 = 0x8020C994; // type:f32 size:0xC segment:ovl_05

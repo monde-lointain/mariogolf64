@@ -105,7 +105,7 @@ extern s32 f_IsLakituFlying;
 extern s32 f_LakituAngle;
 extern s32 f_LookAtEaseMode;
 extern f32 f_LookAtEaseRate;
-extern Vec3 D_8021706C_ovl_05;
+extern Vec3 D_80217060_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern CoursePoint f_LookAtTarget;
 
 /* A 48x432 CI8 image of the letters, one above the next */
@@ -1110,7 +1110,537 @@ void func_801FBB10_ovl_05(s32 ballIndex, s32 slot) {
   D_8020AD80_ovl_05[slot] = 1.0f;
 }
 
+/* The opening script's current scene */
+extern s32 f_OpeningScene;
+/* Ends the opening */
+#define OPENING_SCENE_END 999
+extern s32 D_8020AC94_ovl_05;
+extern u8 D_8020ADB4_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern Vtx D_8020B048_ovl_05[2][4];
+extern s32 D_8020B0C8_ovl_05;
+extern Vtx D_8020B0D0_ovl_05[4];
+extern Vtx D_8020B110_ovl_05[4];
+extern s32 D_8020B150_ovl_05;
+extern s32 D_8020B154_ovl_05;
+extern s32 D_8020B158_ovl_05;
+extern Vtx D_8020B160_ovl_05[4];
+extern Vtx D_8020B1A0_ovl_05[4];
+extern s32 D_8020B1E0_ovl_05;
+extern s32 D_8020B1E4_ovl_05;
+extern Mtx D_8020C510_ovl_05[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx D_8020C610_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern Mtx D_8020C690_ovl_05[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
+extern Vec3 D_8020C790_ovl_05;
+extern Mtx D_8020C7A0_ovl_05[DRAW_BUFFER_COUNT];
+extern Mtx D_8020C820_ovl_05[DRAW_BUFFER_COUNT];
+extern Mtx D_8020C8A0_ovl_05;
+extern Mtx D_8020C8E0_ovl_05;
+extern Mat4 D_8020C930_ovl_05;
+extern Vec3 D_8020C974_ovl_05;
+extern s32 D_8020C980_ovl_05;
+extern s32 D_8020C984_ovl_05;
+extern s32 D_8020C988_ovl_05;
+extern s32 D_8020C98C_ovl_05;
+extern s32 D_8020C990_ovl_05;
+extern Vec3 D_8020C994_ovl_05;
+extern Mtx D_8020C9A0_ovl_05[DRAW_BUFFER_COUNT][OPENING_BALL_SLOT_COUNT];
+extern Mtx D_8020CAA0_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern Mtx D_8020CB20_ovl_05[DRAW_BUFFER_COUNT];
+extern Mtx D_8020CBA0_ovl_05[DRAW_BUFFER_COUNT];
+extern Mtx D_8020CC20_ovl_05;
+extern Mtx D_8020CC60_ovl_05;
+extern Mat4 D_8020CCB0_ovl_05;
+extern s32 D_8020CCF0_ovl_05;
+
+#ifdef NON_MATCHING
+/*
+ * Draws the balls in the opening's ball slots, each with a shadow on the
+ * ground. Normally a ball is a billboard in the scene, drawn in two strips;
+ * when D_8020ADB4_ovl_05[1] is set, it is instead projected to the screen and
+ * drawn as two texture rectangles. A slot flagged in D_8020ADB4_ovl_05 shows
+ * the rolling logo ball with the Mario image turning on it.
+ *
+ * Differs from the original only in stack slot choices: two pairs of spilled
+ * display list pointers swap slots before the Mario image is drawn.
+ */
+void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
+  Vec3 delta;
+  Mat4 rotation;
+  Vec3 position;
+  ScreenPoint point;
+  Mat4 rotation2;
+  Gfx* gfx;
+  s32 slot;
+  s32 strip;
+  s32 halfSize;
+  f32 scale;
+  f32 angle;
+
+  if (D_8020ADB4_ovl_05[1] == 0) {
+    gfx = *displayListHead;
+    for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
+      if (D_8020AD70_ovl_05[slot] != 0) {
+        position[0] = D_80217060_ovl_05[slot][0];
+        position[2] = D_80217060_ovl_05[slot][2];
+        position[1] = GetGroundHeight(position[0] * WORLD_TO_COURSE_SCALE,
+                                      position[2] * WORLD_TO_COURSE_SCALE) *
+                      COURSE_TO_WORLD_SCALE;
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+        if (D_8020AD70_ovl_05[slot] == 2) {
+          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
+                      position[1] - 0.25f, position[2]);
+        } else if (D_8020AD80_ovl_05[slot] == 3.0f) {
+          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
+                      position[1] - 1.0f, position[2]);
+        } else {
+          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
+                      position[1], position[2]);
+        }
+        guScale(&D_8020C610_ovl_05[slot], D_8020AD80_ovl_05[slot] * 0.7f,
+                D_8020AD80_ovl_05[slot] * 0.7f, D_8020AD80_ovl_05[slot] * 0.7f);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
+                          0, TEXEL0, 0, PRIMITIVE, 0);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+        gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_NONE);
+        gDPLoadTextureBlock(
+            gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
+            G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLOD(gfx++, G_TL_TILE);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gSPLoadGeometryMode(gfx++, 0);
+        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gSPMatrix(
+            gfx++,
+            OS_K0_TO_PHYSICAL(&D_8020C690_ovl_05[slot][g_DrawBufferIndex]),
+            G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C610_ovl_05[slot]),
+                  G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPVertex(gfx++, D_8020B0D0_ovl_05, 4, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+        if (D_8020AD70_ovl_05[slot] == 2) {
+          position[1] = D_80217060_ovl_05[slot][1];
+        }
+        if (D_8020AD80_ovl_05[slot] == 3.0f) {
+          position[1] += 0.5f;
+        }
+        guTranslate(&D_8020C510_ovl_05[slot][g_DrawBufferIndex], position[0],
+                    position[1], position[2]);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(gfx++);
+        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+        gDPPipeSync(gfx++);
+        gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLOD(gfx++, G_TL_TILE);
+        gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        if (D_8020ADB4_ovl_05[slot]) {
+          gDPLoadTLUT_pal256(
+              gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
+        } else {
+          gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
+                                                    IMAGE_HEADER_SIZE));
+        }
+        for (strip = 0; strip < 2; strip++) {
+          gDPPipeSync(gfx++);
+          gSPLoadGeometryMode(gfx++, 0);
+          gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+          gSPMatrix(
+              gfx++,
+              OS_K0_TO_PHYSICAL(&D_8020C510_ovl_05[slot][g_DrawBufferIndex]),
+              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C610_ovl_05[slot]),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          if (D_8020ADB4_ovl_05[slot]) {
+            gDPLoadTextureBlock(
+                gfx++,
+                TEXTURE_ADDRESS(f_LogoBallImages +
+                                LARGE_PALETTED_TEXELS_OFFSET +
+                                (strip * 0x800 + (D_8020B154_ovl_05 << 12))),
+                G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOLOD);
+          } else {
+            gDPLoadTextureBlock(
+                gfx++,
+                TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
+                                LARGE_PALETTED_TEXELS_OFFSET + strip * 0x800),
+                G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                G_TX_NOLOD);
+          }
+          gDPPipeSync(gfx++);
+          gSPVertex(gfx++, D_8020B048_ovl_05[strip], 4, 0);
+          gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        }
+        if (D_8020ADB4_ovl_05[slot]) {
+          if (D_8020B150_ovl_05) {
+            guMtxIdentF(D_8020C930_ovl_05);
+            D_8020B150_ovl_05 = 0;
+            guRotateRPYF(D_8020C930_ovl_05, -40.0f, 0.0f, -30.0f);
+          }
+          if (D_8020B0C8_ovl_05) {
+            delta[0] = D_80217060_ovl_05[slot][0] - D_8020C790_ovl_05[0];
+            delta[1] = D_80217060_ovl_05[slot][1] - D_8020C790_ovl_05[1];
+            delta[2] = D_80217060_ovl_05[slot][2] - D_8020C790_ovl_05[2];
+          } else {
+            D_8020B0C8_ovl_05 = 1;
+            delta[0] = 0.0f;
+            delta[1] = 0.0f;
+            delta[2] = 0.0f;
+          }
+          angle = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] +
+                        delta[2] * delta[2]);
+          angle *= (f32)RADIANS_TO_DEGREES;
+          D_8020C790_ovl_05[0] = D_80217060_ovl_05[slot][0];
+          D_8020C790_ovl_05[1] = D_80217060_ovl_05[slot][1];
+          D_8020C790_ovl_05[2] = D_80217060_ovl_05[slot][2];
+          angle = fabsf(angle);
+          if (angle > 4.0f) {
+            D_8020B154_ovl_05++;
+            if (D_8020B154_ovl_05 == 3) {
+              D_8020B154_ovl_05 = 0;
+            }
+          }
+          guScale(&D_8020C8A0_ovl_05, 0.55f, 0.55f, 0.55f);
+          if (delta[2] != 0.0f || delta[0] != 0.0f) {
+            guRotateF(rotation, angle, -delta[2], 0.0f, delta[0]);
+            guMtxCatF(D_8020C930_ovl_05, rotation, D_8020C930_ovl_05);
+            ConvertMatrixToFixed(D_8020C930_ovl_05,
+                                 &D_8020C820_ovl_05[g_DrawBufferIndex]);
+          }
+          guTranslate(&D_8020C8E0_ovl_05, 0.0f, -0.3f, 0.0f);
+          guTranslate(
+              &D_8020C7A0_ovl_05[g_DrawBufferIndex], D_80217060_ovl_05[slot][0],
+              D_80217060_ovl_05[slot][1] - 1.5f, D_80217060_ovl_05[slot][2]);
+          gDPPipeSync(gfx++);
+          gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+          gDPPipeSync(gfx++);
+          gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+          gDPPipeSync(gfx++);
+          gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+          gDPPipeSync(gfx++);
+          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+          gDPPipeSync(gfx++);
+          gDPSetTexturePersp(gfx++, G_TP_PERSP);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+          gDPLoadTLUT_pal256(
+              gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+          gDPLoadTextureBlock(
+              gfx++,
+              TEXTURE_ADDRESS(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
+              G_IM_FMT_CI, G_IM_SIZ_8b, 24, 24, 0, G_TX_NOMIRROR | G_TX_WRAP,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+              G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLOD(gfx++, G_TL_TILE);
+          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPLoadGeometryMode(gfx++, 0);
+          gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+          gSPMatrix(gfx++,
+                    OS_K0_TO_PHYSICAL(&D_8020C7A0_ovl_05[g_DrawBufferIndex]),
+                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++,
+                    OS_K0_TO_PHYSICAL(&D_8020C820_ovl_05[g_DrawBufferIndex]),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C8A0_ovl_05),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C8E0_ovl_05),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          if (f_OpeningScene >= 200 && D_8020AC94_ovl_05 < 98) {
+            gSPVertex(gfx++, D_8020B110_ovl_05, 4, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+          }
+          gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+          gDPPipeSync(gfx++);
+        }
+        gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+      }
+    }
+    *displayListHead = gfx;
+  } else {
+    Gfx* gfx;
+    s32 strip;
+
+    gfx = *displayListHead;
+    for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
+      if (D_8020AD70_ovl_05[slot] != 0) {
+        D_8020C974_ovl_05[0] = D_80217060_ovl_05[slot][0];
+        D_8020C974_ovl_05[2] = D_80217060_ovl_05[slot][2];
+        if (D_8020AD70_ovl_05[slot] == 2) {
+          D_8020C974_ovl_05[1] = D_80217060_ovl_05[slot][1];
+        } else {
+          D_8020C974_ovl_05[1] =
+              GetGroundHeight(D_8020C974_ovl_05[0] * WORLD_TO_COURSE_SCALE,
+                              D_8020C974_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+              COURSE_TO_WORLD_SCALE;
+        }
+        if (ProjectPoint(D_8020C974_ovl_05[0], D_8020C974_ovl_05[1],
+                         D_8020C974_ovl_05[2], &point) < 0) {
+          scale = point.scaleX;
+          if (scale < 0.0f) {
+            scale = -scale;
+          }
+          halfSize = scale * (1.5f * D_8020AD80_ovl_05[slot]);
+          if (halfSize & 1) {
+            D_8020CCF0_ovl_05 = 1;
+          } else {
+            D_8020CCF0_ovl_05 = 0;
+          }
+          halfSize /= 2;
+          D_8020C980_ovl_05 = point.x - halfSize;
+          D_8020C988_ovl_05 = point.x + halfSize;
+          if (D_8020AD70_ovl_05[slot] == 2) {
+            if (halfSize < 2) {
+              halfSize = 2;
+            }
+          }
+          D_8020C974_ovl_05[1] =
+              GetGroundHeight(D_8020C974_ovl_05[0] * WORLD_TO_COURSE_SCALE,
+                              D_8020C974_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+              COURSE_TO_WORLD_SCALE;
+          if (D_8020AD80_ovl_05[slot] == 3.0f) {
+            D_8020C974_ovl_05[1] -= 2.0f;
+          }
+          if (D_8020AD70_ovl_05[slot] == 2) {
+            guTranslate(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot],
+                        D_8020C974_ovl_05[0], D_8020C974_ovl_05[1] - 0.25f,
+                        D_8020C974_ovl_05[2]);
+          } else {
+            guTranslate(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot],
+                        D_8020C974_ovl_05[0], D_8020C974_ovl_05[1],
+                        D_8020C974_ovl_05[2]);
+          }
+          guScale(&D_8020CAA0_ovl_05[slot], D_8020AD80_ovl_05[slot],
+                  D_8020AD80_ovl_05[slot], D_8020AD80_ovl_05[slot]);
+          gDPPipeSync(gfx++);
+          gDPPipeSync(gfx++);
+          gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+          gDPPipeSync(gfx++);
+          gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+          gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
+                            0, TEXEL0, 0, PRIMITIVE, 0);
+          gDPPipeSync(gfx++);
+          gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+          gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+          gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+          gDPPipeSync(gfx++);
+          gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+          gDPPipeSync(gfx++);
+          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+          gDPPipeSync(gfx++);
+          gDPSetTexturePersp(gfx++, G_TP_PERSP);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLUT(gfx++, G_TT_NONE);
+          gDPLoadTextureBlock(
+              gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
+              G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+              G_TX_NOLOD);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLOD(gfx++, G_TL_TILE);
+          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gSPLoadGeometryMode(gfx++, 0);
+          gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+          gSPMatrix(
+              gfx++,
+              OS_K0_TO_PHYSICAL(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot]),
+              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CAA0_ovl_05[slot]),
+                    G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+          gSPVertex(gfx++, D_8020B160_ovl_05, 4, 0);
+          gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+          gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+          gDPPipeSync(gfx++);
+          gDPPipeSync(gfx++);
+          gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+          gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+          gDPPipeSync(gfx++);
+          gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+          gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+          gDPPipeSync(gfx++);
+          gDPSetTexturePersp(gfx++, G_TP_NONE);
+          gDPPipeSync(gfx++);
+          gDPSetTextureFilter(gfx++, G_TF_BILERP);
+          gDPPipeSync(gfx++);
+          gDPSetAlphaCompare(gfx++, G_AC_NONE);
+          gDPPipeSync(gfx++);
+          gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+          if (D_8020ADB4_ovl_05[slot]) {
+            gDPLoadTLUT_pal256(
+                gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
+          } else {
+            gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
+                                                      IMAGE_HEADER_SIZE));
+          }
+          gDPPipeSync(gfx++);
+          for (strip = 0; strip != 2; strip++) {
+            if (D_8020ADB4_ovl_05[slot]) {
+              gDPLoadTextureBlock(
+                  gfx++,
+                  TEXTURE_ADDRESS(f_LogoBallImages +
+                                  LARGE_PALETTED_TEXELS_OFFSET +
+                                  (strip * 0x800 + (D_8020B1E4_ovl_05 << 12))),
+                  G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0,
+                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            } else {
+              gDPLoadTextureBlock(
+                  gfx++,
+                  TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
+                                  LARGE_PALETTED_TEXELS_OFFSET + strip * 0x800),
+                  G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0,
+                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            }
+            gDPPipeSync(gfx++);
+            gDPPipeSync(gfx++);
+            if (halfSize > 0 && halfSize < 256) {
+              if (D_8020ADB4_ovl_05[slot]) {
+                D_8020C980_ovl_05 = point.x - halfSize - D_8020CCF0_ovl_05;
+                D_8020C988_ovl_05 = point.x + halfSize;
+                D_8020C984_ovl_05 =
+                    point.y - halfSize * (2 - strip) - D_8020CCF0_ovl_05;
+                D_8020C98C_ovl_05 = point.y + strip * halfSize - halfSize;
+              } else {
+                D_8020C980_ovl_05 = point.x - halfSize - D_8020CCF0_ovl_05;
+                D_8020C988_ovl_05 = point.x + halfSize;
+                D_8020C984_ovl_05 =
+                    point.y - halfSize * (2 - strip) - D_8020CCF0_ovl_05 + 2;
+                D_8020C98C_ovl_05 = point.y + strip * halfSize - halfSize + 2;
+              }
+              D_8020C990_ovl_05 = 0x8000 / (halfSize + D_8020CCF0_ovl_05);
+              gSPScisTextureRectangle(
+                  gfx++, D_8020C980_ovl_05 << 2, D_8020C984_ovl_05 << 2,
+                  D_8020C988_ovl_05 << 2, D_8020C98C_ovl_05 << 2,
+                  G_TX_RENDERTILE, 0, 0, D_8020C990_ovl_05, D_8020C990_ovl_05);
+            }
+            gDPPipeSync(gfx++);
+          }
+          if (D_8020ADB4_ovl_05[slot]) {
+            if (D_8020B1E0_ovl_05) {
+              guMtxIdentF(D_8020CCB0_ovl_05);
+              D_8020B1E0_ovl_05 = 0;
+              guRotateRPYF(D_8020CCB0_ovl_05, -40.0f, 0.0f, -30.0f);
+            }
+            if (D_8020B158_ovl_05) {
+              delta[0] = D_80217060_ovl_05[slot][0] - D_8020C994_ovl_05[0];
+              delta[1] = D_80217060_ovl_05[slot][1] - D_8020C994_ovl_05[1];
+              delta[2] = D_80217060_ovl_05[slot][2] - D_8020C994_ovl_05[2];
+            } else {
+              D_8020B158_ovl_05 = 1;
+              delta[0] = 0.0f;
+              delta[1] = 0.0f;
+              delta[2] = 0.0f;
+            }
+            angle = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] +
+                          delta[2] * delta[2]);
+            angle *= (f32)RADIANS_TO_DEGREES;
+            D_8020C994_ovl_05[0] = D_80217060_ovl_05[slot][0];
+            D_8020C994_ovl_05[1] = D_80217060_ovl_05[slot][1];
+            D_8020C994_ovl_05[2] = D_80217060_ovl_05[slot][2];
+            angle = fabsf(angle);
+            if (angle > 4.0f) {
+              D_8020B1E4_ovl_05++;
+              if (D_8020B1E4_ovl_05 == 3) {
+                D_8020B1E4_ovl_05 = 0;
+              }
+            }
+            guScale(&D_8020CC20_ovl_05, 0.6f, 0.6f, 0.6f);
+            if (delta[2] != 0.0f || delta[0] != 0.0f) {
+              guRotateF(rotation2, angle, -delta[2], 0.0f, delta[0]);
+              guMtxCatF(D_8020CCB0_ovl_05, rotation2, D_8020CCB0_ovl_05);
+              ConvertMatrixToFixed(D_8020CCB0_ovl_05,
+                                   &D_8020CBA0_ovl_05[g_DrawBufferIndex]);
+            }
+            guTranslate(&D_8020CC60_ovl_05, 0.0f, -0.38f, 0.0f);
+            guTranslate(&D_8020CB20_ovl_05[g_DrawBufferIndex],
+                        D_80217060_ovl_05[slot][0],
+                        D_80217060_ovl_05[slot][1] - 1.7f,
+                        D_80217060_ovl_05[slot][2]);
+            gDPPipeSync(gfx++);
+            gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+            gDPPipeSync(gfx++);
+            gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+            gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+            gDPPipeSync(gfx++);
+            gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+            gDPPipeSync(gfx++);
+            gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+            gDPPipeSync(gfx++);
+            gDPSetTexturePersp(gfx++, G_TP_PERSP);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+            gDPLoadTLUT_pal256(
+                gfx++, TEXTURE_ADDRESS(f_LogoMarioImage + IMAGE_HEADER_SIZE));
+            gDPLoadTextureBlock(gfx++,
+                                TEXTURE_ADDRESS(f_LogoMarioImage +
+                                                LARGE_PALETTED_TEXELS_OFFSET),
+                                G_IM_FMT_CI, G_IM_SIZ_8b, 24, 24, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                                G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gDPSetTextureLOD(gfx++, G_TL_TILE);
+            gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+            gSPLoadGeometryMode(gfx++, 0);
+            gSPSetGeometryMode(gfx++,
+                               G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+            gSPMatrix(gfx++,
+                      OS_K0_TO_PHYSICAL(&D_8020CB20_ovl_05[g_DrawBufferIndex]),
+                      G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPMatrix(gfx++,
+                      OS_K0_TO_PHYSICAL(&D_8020CBA0_ovl_05[g_DrawBufferIndex]),
+                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CC20_ovl_05),
+                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CC60_ovl_05),
+                      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            gSPVertex(gfx++, D_8020B1A0_ovl_05, 4, 0);
+            gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+            gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+            gDPPipeSync(gfx++);
+          }
+        }
+      }
+    }
+    *displayListHead = gfx;
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FBB94_ovl_05);
+#endif
 
 /* A 64x64 CI8 image of yellow and green lines bursting outwards */
 #define ASSET_IMPACT_LINES_IMAGE 0x908
@@ -1721,7 +2251,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
   1                         /* To f_LookAtTarget, a tenth of the way a frame \
                              */
 #define LOOK_AT_EASE_SLOW 2 /* To f_LookAtTarget, a hundredth of the way */
-/* Near D_8021706C_ovl_05, at a rate that grows to a tenth */
+/* Near D_80217060_ovl_05[1], at a rate that grows to a tenth */
 #define LOOK_AT_EASE_SPEEDING_UP 3
 
 /* Eases the camera's look-at point as f_LookAtEaseMode says */
@@ -1759,15 +2289,15 @@ void EaseOpeningLookAt(void) {
       break;
     case LOOK_AT_EASE_SPEEDING_UP:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((D_8021706C_ovl_05[0] + 38.1f) -
+          ((D_80217060_ovl_05[1][0] + 38.1f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((D_8021706C_ovl_05[1] - 4.5f) -
+          ((D_80217060_ovl_05[1][1] - 4.5f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((D_8021706C_ovl_05[2] - 4.795f) -
+          ((D_80217060_ovl_05[1][2] - 4.795f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           f_LookAtEaseRate;
       func_80203620_ovl_05();
@@ -1815,10 +2345,6 @@ void LoadOpeningLogo(void) {
 }
 
 extern s32 D_8020AC48_ovl_05;
-/* The opening script's current scene */
-extern s32 f_OpeningScene;
-/* Ends the opening */
-#define OPENING_SCENE_END 999
 /* What the title logo as a whole is doing */
 typedef enum LogoState {
   LOGO_DROPPING_LETTERS,
