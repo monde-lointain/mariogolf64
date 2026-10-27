@@ -54,8 +54,6 @@
 
 /* Image buffers shared with the menus */
 extern u8 *D_801B5CD0[];
-/* The panel image buffer that is shown */
-extern u8 *g_ClubPanelImage;
 
 /* The shot mode last shown in the name, and the one that the panel last finished changing to */
 extern u8 sShownShotMode;
