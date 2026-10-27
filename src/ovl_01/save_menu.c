@@ -16,6 +16,14 @@ extern void *D_8023B67C_ovl_01;
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
 
+/* The images of D_800C2064 that func_8021F6E0 reads, before one of its own */
+#define SAVE_MENU_IMAGE_COUNT 6
+
+/* The Ring Shot stars that each level of func_8022181C takes */
+#define RING_SHOT_STARS_PER_LEVEL 4
+
+extern u16 D_800C2064[];
+extern void **D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void *D_8023BD78_ovl_01;
 extern void *D_8023BD7C_ovl_01;
@@ -48,7 +56,18 @@ void func_8021F5F0_ovl_01(void *buffer, s16 bufferKind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F6E0_ovl_01);
+void func_8021F6E0_ovl_01(void **buffers) {
+    EncodedAsset asset;
+    s16 imageIndex;
+
+    D_8023B680_ovl_01 = buffers;
+    for (imageIndex = 0; imageIndex != SAVE_MENU_IMAGE_COUNT; imageIndex++) {
+        OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+        ReadEncodedAsset(D_8023B680_ovl_01[imageIndex], &asset);
+    }
+    OpenEncodedAsset(0x944, &asset);
+    ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F79C_ovl_01);
 
@@ -101,7 +120,34 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220E34_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802213C8_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8022181C_ovl_01);
+s32 func_8022181C_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    s32 starCount = 0;
+    s32 courseIndex;
+    s32 holeIndex;
+
+    for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
+        for (holeIndex = 0; holeIndex != RING_SHOT_HOLE_COUNT; holeIndex++) {
+            starCount += save->hasRingShotStar[courseIndex][holeIndex] > 0;
+        }
+    }
+    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 5) {
+        return 6;
+    }
+    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 4) {
+        return 5;
+    }
+    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 3) {
+        return 4;
+    }
+    if (starCount >= RING_SHOT_STARS_PER_LEVEL * 2) {
+        return 3;
+    }
+    if (starCount >= RING_SHOT_STARS_PER_LEVEL) {
+        return 2;
+    }
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802218C0_ovl_01);
 

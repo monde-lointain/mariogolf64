@@ -1,6 +1,12 @@
 #include "common.h"
+#include "asset.h"
 #include "menu_memory.h"
 
+/* The images of D_800C2064 that func_8021CF10 reads */
+#define PLAYER_STATS_IMAGE_COUNT 6
+
+extern u16 D_800C2064[];
+extern void **D_8023B630_ovl_01;
 extern s16 D_8023B640_ovl_01[][5];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
@@ -31,7 +37,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C67C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CBDC_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CF10_ovl_01);
+void func_8021CF10_ovl_01(void **buffers) {
+    EncodedAsset asset;
+    s16 imageIndex;
+
+    D_8023B630_ovl_01 = buffers;
+    for (imageIndex = 0; imageIndex != PLAYER_STATS_IMAGE_COUNT; imageIndex++) {
+        OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+        ReadEncodedAsset(D_8023B630_ovl_01[imageIndex], &asset);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CFAC_ovl_01);
 

@@ -28,6 +28,14 @@ extern void *D_80230E84_ovl_01;
 extern s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT][TOURNAMENT_IMAGE_COLUMN_COUNT];
 extern s16 D_80230F34_ovl_01;
 extern u8 D_80230F40_ovl_01;
+extern s32 D_80230F5C_ovl_01;
+extern s32 D_80230F60_ovl_01;
+extern s32 D_80230F64_ovl_01;
+extern s32 D_80230F70_ovl_01;
+extern s32 D_80230F74_ovl_01;
+extern s32 D_80230F78_ovl_01;
+extern s32 D_80230F7C_ovl_01;
+extern u8 D_80230F80_ovl_01;
 extern void *D_80230F44_ovl_01;
 extern void *D_80230F48_ovl_01;
 extern void *D_80230F4C_ovl_01;
@@ -214,7 +222,27 @@ void func_80228A80_ovl_01(void *buffer, s32 bufferKind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228B60_ovl_01);
+void func_80228B60_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 charIndex;
+
+    memory->unk47 = 0;
+    memory->unk48 = 0;
+    D_80230F74_ovl_01 = 0;
+    for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
+        D_80230FD4_ovl_01[charIndex] = 0xFF;
+    }
+    D_80230F68_ovl_01 = 0;
+    D_80230F6C_ovl_01 = FALSE;
+    D_80230F5C_ovl_01 = 0;
+    D_80230F60_ovl_01 = 0;
+    D_80230F64_ovl_01 = 0;
+    D_80230F78_ovl_01 = 0;
+    D_80230F70_ovl_01 = 0;
+    D_80230F80_ovl_01 = 0;
+    D_80230F40_ovl_01 = TRUE;
+    D_80230F7C_ovl_01 = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228C00_ovl_01);
 
