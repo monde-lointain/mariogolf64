@@ -1,8 +1,10 @@
 #include "common.h"
 #include "asset.h"
+#include "character.h"
 #include "hole_display.h"
 #include "menu.h"
 #include "menu_memory.h"
+#include "save.h"
 #include "sound.h"
 
 /* The table of screen 15: its columns and rows, and how many of each fit on the screen */
@@ -14,7 +16,14 @@
 /* The images of D_800C2064 that func_80213390 reads */
 #define MENU_SCENE_IMAGE_COUNT 6
 
+/* The most bytes of each character's file that func_802177D0 keeps */
+#define MENU_SCENE_FILE_SIZE 0x200
+
 extern u16 D_800C2064[];
+extern void *D_8012D430[CHARACTER_COUNT];
+extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
+extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][4];
+extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 extern void **D_8023AA40_ovl_01;
 extern void *D_8023AA44_ovl_01;
 
@@ -125,4 +134,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_8021730C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80217464_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_802177D0_ovl_01);
+void func_802177D0_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    s32 characterIndex;
+
+    GetSaveData();
+    for (characterIndex = 0; characterIndex != CHARACTER_COUNT; characterIndex++) {
+        OpenEncodedAsset(D_802308A4_ovl_01[characterIndex], &asset);
+        ReadEncodedAsset(D_8012D430[characterIndex], &asset);
+        OpenAssetFile(D_802308C8_ovl_01[characterIndex][0], &file);
+        ReadAssetFile(D_8023BFF0_ovl_01[characterIndex], GetAssetFileSize(&file), &file);
+    }
+}
