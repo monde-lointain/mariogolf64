@@ -1,9 +1,12 @@
 #include "common.h"
 #include "camera.h"
+#include "controller.h"
+#include "debug_text.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
 #include "main.h"
+#include "scene.h"
 #include "screen.h"
 #include "terrain.h"
 #include "variables.h"
@@ -13,6 +16,15 @@
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
 /* An interpolation weight runs from 0, all the first end, to this, all the second */
 #define EDGE_WEIGHT_MAX 16
+
+/* The ground cells, between neighbouring ground points */
+#define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
+#define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
+/* How scene 9's cursor zooms the map camera each frame R or L is held */
+#define CURSOR_ZOOM_IN_FACTOR 1.1f
+#define CURSOR_ZOOM_OUT_FACTOR 0.9f
+#define CURSOR_ZOOM_MAX 10.0f
+#define CURSOR_ZOOM_MIN 0.1f
 
 /* func_80405870 gathers the terrain codes of cells at least this far from a diagonal */
 #define DIAGONAL_MIN_DISTANCE 3.0f
@@ -73,6 +85,13 @@ s32 GetTerrainCode(s32 column, s32 row);
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
+/* The cell that scene 9's cursor is on, and the cell it hands to scene 10 */
+extern s32 D_8040C5A8_hole_editor;
+extern s32 D_8040C5AC_hole_editor;
+extern s32 D_8040C5B0_hole_editor;
+extern s32 D_8040C5B4_hole_editor;
+
+void func_80405AF4_hole_editor(s32 column, s32 row);
 extern s32 sMapCaptureNumber;
 extern u8 sMapCaptureHeader[CAPTURE_HEADER_SIZE];
 extern u8 sScreenCaptureHeader[CAPTURE_HEADER_SIZE];
@@ -82,7 +101,65 @@ void *func_80400000_hole_editor(void) {
     return D_80451A60;
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040000C_hole_editor);
+/*
+ * Runs scene 9's cell cursor: the D-pad moves it over the ground cells,
+ * R and L zoom the map camera, A toggles the cell's bit and Z hands the
+ * cell to scene 10. The map camera's eye stays over the cell's middle.
+ */
+void func_8040000C_hole_editor(void) {
+    Vtx *corner;
+    Vtx *oppositeCorner;
+
+    if (g_MenuControllerData[0].button & R_JPAD) {
+        D_8040C5A8_hole_editor++;
+    }
+    if (g_MenuControllerData[0].button & L_JPAD) {
+        D_8040C5A8_hole_editor--;
+    }
+    if (g_MenuControllerData[0].button & D_JPAD) {
+        D_8040C5AC_hole_editor--;
+    }
+    if (g_MenuControllerData[0].button & U_JPAD) {
+        D_8040C5AC_hole_editor++;
+    }
+    if (D_8040C5A8_hole_editor < 0) {
+        D_8040C5A8_hole_editor = 0;
+    }
+    if (D_8040C5A8_hole_editor >= CELL_COLUMN_COUNT) {
+        D_8040C5A8_hole_editor = CELL_COLUMN_COUNT - 1;
+    }
+    if (D_8040C5AC_hole_editor < 0) {
+        D_8040C5AC_hole_editor = 0;
+    }
+    if (D_8040C5AC_hole_editor >= CELL_ROW_COUNT) {
+        D_8040C5AC_hole_editor = CELL_ROW_COUNT - 1;
+    }
+    if (g_ControllerData[0].button & R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= CURSOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MAX;
+        }
+    }
+    if (g_ControllerData[0].button & L_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_MenuControllerData[0].button & A_BUTTON) {
+        func_80405AF4_hole_editor(D_8040C5A8_hole_editor, D_8040C5AC_hole_editor);
+    }
+    if (g_MenuControllerData[0].trigger & Z_TRIG) {
+        D_8040C5B0_hole_editor = D_8040C5A8_hole_editor;
+        D_8040C5B4_hole_editor = D_8040C5AC_hole_editor;
+        ClearDebugText();
+        g_Scene = SCENE_UNK10;
+    }
+    corner = GetGroundPoint(D_8040C5A8_hole_editor, D_8040C5AC_hole_editor);
+    oppositeCorner = GetGroundPoint(D_8040C5A8_hole_editor + 1, D_8040C5AC_hole_editor + 1);
+    g_MapCamera.view.eye[0] = (corner->v.ob[0] + oppositeCorner->v.ob[0]) / 2;
+    g_MapCamera.view.eye[2] = (corner->v.ob[2] + oppositeCorner->v.ob[2]) / 2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804002C0_hole_editor);
 
