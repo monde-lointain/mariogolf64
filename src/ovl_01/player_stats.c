@@ -1,9 +1,12 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "game_flags.h"
+#include "hole_display.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
 
@@ -20,6 +23,9 @@
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
+
+/* The text slots that screen 12 clears on leaving */
+#define STATS_TEXT_SLOT_COUNT 4
 
 /* The directions that func_8021E340 moves the cursor in, which index D_802309C4 */
 #define STATS_DIRECTION_LEFT 0
@@ -81,6 +87,10 @@ extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern u8 D_802303A1_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
+extern s8 D_801052E8;
+extern s32 D_800FE334;
+extern s8 D_801B60B9;
+extern u8 D_801B9410;
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
 void func_8021B87C_ovl_01(Gfx **displayListHead, u8 slide);
@@ -290,7 +300,80 @@ void func_8021CFAC_ovl_01(void *buffer, s16 bufferKind) {
     }
 }
 
+s16 func_8021E468_ovl_01(void);
+
+/*
+ * Doesn't match: the original holds the row in a0 and the table in a1 when
+ * finding the chosen record. func_8021E340 is called without a prototype, as
+ * the original's 16-bit extension of its result shows.
+ */
+#ifdef NON_MATCHING
+void func_8021D0B8_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s32 slot;
+    s32 moved;
+
+    if (IsHudAnimationDone() == TRUE) {
+        if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
+            if (GetWipeProgress() == 0) {
+                g_MenuScreen = MENU_SCREEN_EXIT;
+                D_800FE334 = 0;
+                D_801B60B9 = 1;
+                SetGameFlag(GAME_FLAG_UNK1E);
+                for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+            }
+        } else if (GetWipeKind() == WIPE_NONE || D_801B9410 != 1) {
+            if (g_MenuPressedButtons & A_BUTTON) {
+                if (func_8021E468_ovl_01() != STATS_CELL_EMPTY) {
+                    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                    D_801B9410 = 0;
+                    LoadWipeShape(
+                        (s8)save->rankedRecords[D_8023B640_ovl_01[memory->unk3A][memory->unk39]].unk38);
+                    StartWipe(WIPE_CLOSING);
+                    D_801052E8 = 0;
+                }
+            } else if (g_MenuPressedButtons & B_BUTTON) {
+                StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+                StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+                for (slot = 0; slot != STATS_TEXT_SLOT_COUNT; slot++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, slot, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+            } else if (g_MenuRepeatButtons & U_JPAD) {
+                moved = func_8021E340_ovl_01(memory->unk39, memory->unk3A, STATS_DIRECTION_UP);
+                if ((s16)moved != STATS_CELL_EMPTY) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->unk3A = moved;
+                }
+            } else if (g_MenuRepeatButtons & D_JPAD) {
+                moved = func_8021E340_ovl_01(memory->unk39, memory->unk3A, STATS_DIRECTION_DOWN);
+                if ((s16)moved != STATS_CELL_EMPTY) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->unk3A = moved;
+                }
+            } else if (g_MenuRepeatButtons & L_JPAD) {
+                moved = func_8021E340_ovl_01(memory->unk39, memory->unk3A, STATS_DIRECTION_LEFT);
+                if ((s16)moved != STATS_CELL_EMPTY) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->unk39 = moved;
+                }
+            } else if (g_MenuRepeatButtons & R_JPAD) {
+                moved = func_8021E340_ovl_01(memory->unk39, memory->unk3A, STATS_DIRECTION_RIGHT);
+                if ((s16)moved != STATS_CELL_EMPTY) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->unk39 = moved;
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D0B8_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D3AC_ovl_01);
 
