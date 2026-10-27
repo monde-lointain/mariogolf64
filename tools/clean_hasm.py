@@ -12,6 +12,7 @@ that say why the code is written as it is still have to be added by hand.
 
 import re
 import sys
+from pathlib import Path
 
 INSN_RE = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ [0-9A-F]{8} \*/  (.*)$")
 SPLAT_LINE_RE = re.compile(
@@ -19,29 +20,31 @@ SPLAT_LINE_RE = re.compile(
 )
 
 
-def clean(text, renames):
-    lines = []
+def clean(text: str, renames: dict[str, str]) -> str:
+    """Return TEXT without splat's annotations and with its labels renamed."""
+    lines: list[str] = []
     for line in text.splitlines():
         if SPLAT_LINE_RE.match(line):
             continue
         match = INSN_RE.match(line)
-        if match:
-            # Delay slots keep their one-space indent from splat
-            line = "    " + re.sub(r"(\S+) +", r"\1 ", match.group(1), count=1)
-        lines.append(line.rstrip())
+        # Delay slots keep their one-space indent from splat
+        cleaned = (
+            "    " + re.sub(r"(\S+) +", r"\1 ", match.group(1), count=1)
+            if match
+            else line
+        )
+        lines.append(cleaned.rstrip())
     result = re.sub(r"\n{3,}", "\n\n", "\n".join(lines)) + "\n"
     for old, new in renames.items():
         result = re.sub(re.escape(old) + r"\b", new, result)
     return result
 
 
-def main():
-    path = sys.argv[1]
+def main() -> None:
+    """Clean the file named on the command line in place."""
+    path = Path(sys.argv[1])
     renames = dict(arg.split("=", 1) for arg in sys.argv[2:])
-    with open(path) as asm_file:
-        text = asm_file.read()
-    with open(path, "w") as asm_file:
-        asm_file.write(clean(text, renames))
+    _ = path.write_text(clean(path.read_text(), renames))
 
 
 if __name__ == "__main__":

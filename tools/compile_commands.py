@@ -9,8 +9,8 @@ target and keeps quiet about the warnings GCC 2.7 never gave.
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 
 CLANG_FLAGS = [
     "--target=mips-unknown-linux-gnu",
@@ -21,21 +21,22 @@ CLANG_FLAGS = [
 ]
 
 
-def main():
+def main() -> None:
+    """Write one clang command for each source named on the command line."""
     output = sys.argv[1]
     separator = sys.argv.index("--")
     flags = sys.argv[2:separator]
     sources = sys.argv[separator + 1 :]
-    directory = os.getcwd()
+    directory = str(Path.cwd())
     commands = [
         {
             "directory": directory,
             "file": source,
-            "arguments": ["clang"] + CLANG_FLAGS + flags + ["-c", source],
+            "arguments": ["clang", *CLANG_FLAGS, *flags, "-c", source],
         }
         for source in sources
     ]
-    with open(output, "w") as file:
+    with Path(output).open("w") as file:
         json.dump(commands, file, indent=2)
 
 

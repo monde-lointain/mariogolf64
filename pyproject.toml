@@ -28,6 +28,11 @@ ignore = [
   "S607",
 ]
 
+[tool.ruff.lint.isort]
+# The tools import each other, since Python puts a script's directory on
+# the path
+known-first-party = ["fncompare"]
+
 [tool.basedpyright]
 include = ["tools"]
 exclude = ["tools/asm-differ", "**/__pycache__"]
@@ -35,6 +40,9 @@ pythonVersion = "3.10"
 typeCheckingMode = "all"
 venvPath = "."
 venv = ".venv"
+# The tools import each other, since Python puts a script's directory on
+# the path
+extraPaths = ["tools"]
 
 [tool.vulture]
 paths = ["tools"]
