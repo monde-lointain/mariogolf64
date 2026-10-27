@@ -209,7 +209,21 @@ s32 GetClubTournamentCourseTitleMessage(void);
 s32 GetClubTournamentModeMessage(void);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
 void func_8022747C_ovl_01(Gfx **displayListHead, s32, s32, s32, s32, s32, s32, s32);
-void func_802296C4_ovl_01(Gfx **displayListHead, s32, s32, s32);
+void func_802296C4_ovl_01(Gfx **displayListHead, s32 centerX, s32 top, s32 number);
+/*
+ * func_802296C4 writes the club tournament's number as an ordinal from the
+ * 24x24 glyphs of asset 0x98E: the digits, then "st", "nd", "rd" and "th"
+ */
+#define ORDINAL_GLYPH_SIZE 24
+#define ORDINAL_GLYPH_COUNT 14
+#define ORDINAL_IMAGE_HEIGHT (ORDINAL_GLYPH_SIZE * ORDINAL_GLYPH_COUNT)
+#define ORDINAL_DIGIT_SPACING 20
+#define ORDINAL_FIRST_SUFFIX 10
+#define ORDINAL_SUFFIX_TH 3
+/* Places past 100 lose their hundreds; "th" covers the 4th to the 20th */
+#define ORDINAL_PLACE_LIMIT 100
+#define ORDINAL_LAST_TEEN 20
+#define ORDINAL_NUMBER_BASE 10
 void func_8022A43C_ovl_01(Gfx **displayListHead);
 void func_8022A8F4_ovl_01(Gfx **displayListHead);
 void func_8022ADE8_ovl_01(Gfx **displayListHead);
@@ -701,7 +715,76 @@ void func_80229278_ovl_01(void) {
     }
 }
 
+/*
+ * Doesn't match: the left edge takes $t4 instead of the centre's $s2, which
+ * shifts the texel address and the rectangle's halves along a register.
+ */
+#ifdef NON_MATCHING
+void func_802296C4_ovl_01(Gfx **displayListHead, s32 centerX, s32 top, s32 number) {
+    Gfx *gfx = *displayListHead;
+    u8 *image = GetMenuImageBuffer();
+    char *digit;
+    s32 width;
+    s32 left;
+    s32 suffix;
+    s32 glyph;
+    s32 lastDigitSuffix;
+
+    sprintf(g_PrintBuffer, "%d", number);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
+    width = 0;
+    for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
+        width += ORDINAL_DIGIT_SPACING;
+    }
+    left = centerX - ORDINAL_GLYPH_SIZE / 2;
+    left -= width / 2;
+    width = 0;
+    for (digit = g_PrintBuffer; *digit != '\0'; digit++, width += ORDINAL_DIGIT_SPACING) {
+        glyph = *digit;
+        if (glyph != ' ') {
+            gDPLoadTextureTile(gfx++, ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
+                               ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0, (glyph - '0') * ORDINAL_GLYPH_SIZE,
+                               ORDINAL_GLYPH_SIZE - 1, (glyph - '0') * ORDINAL_GLYPH_SIZE + ORDINAL_GLYPH_SIZE - 1, 0,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                               G_TX_NOLOD, G_TX_NOLOD);
+            gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2, (left + width + ORDINAL_GLYPH_SIZE) << 2,
+                                    (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
+                                    ((glyph - '0') * ORDINAL_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        }
+    }
+    suffix = number;
+    if (suffix > ORDINAL_PLACE_LIMIT) {
+        suffix %= ORDINAL_PLACE_LIMIT;
+    }
+    suffix--;
+    if (suffix >= ORDINAL_SUFFIX_TH) {
+        if (suffix < ORDINAL_LAST_TEEN) {
+            suffix = ORDINAL_SUFFIX_TH;
+        } else if (suffix < ORDINAL_PLACE_LIMIT) {
+            lastDigitSuffix = suffix % ORDINAL_NUMBER_BASE;
+            suffix = ORDINAL_SUFFIX_TH;
+            if (lastDigitSuffix < ORDINAL_SUFFIX_TH) {
+                suffix = lastDigitSuffix;
+            }
+        }
+    }
+    gDPLoadTextureTile(gfx++, ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
+                       ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
+                       (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE, ORDINAL_GLYPH_SIZE - 1,
+                       (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE + ORDINAL_GLYPH_SIZE - 1, 0,
+                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                       G_TX_NOLOD);
+    gSPScisTextureRectangle(gfx++, (left + width) << 2, top << 2, (left + width + ORDINAL_GLYPH_SIZE) << 2,
+                            (top + ORDINAL_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,
+                            ((suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE) << 5, TEXEL_STEP_ONE,
+                            TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
+#endif
 
 void func_80229CB0_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
