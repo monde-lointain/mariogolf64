@@ -12,6 +12,7 @@
 #include "menu_memory.h"
 #include "round_hud.h"
 #include "save.h"
+#include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
@@ -968,7 +969,98 @@ void func_80225358_ovl_01(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225960_ovl_01);
+#define CONTROLLER_ICON_SIZE 32
+#define CONTROLLER_ICON_IMAGE_SIZE (CONTROLLER_ICON_SIZE * CONTROLLER_ICON_SIZE)
+/* What D_80230B40 holds for a player with no controller, or for the computer */
+#define NO_CONTROLLER -1
+#define COMPUTER_CONTROLLER MAXCONTROLLERS
+/* The 1P to 4P, 1C to 4C and Com labels, 16 by 8 each */
+#define PLAYER_LABEL_WIDTH 16
+#define PLAYER_LABEL_HEIGHT 8
+#define PLAYER_LABEL_IMAGE_SIZE (PLAYER_LABEL_WIDTH * PLAYER_LABEL_HEIGHT / 2)
+#define PLAYER_LABEL_COMPUTER_FIRST 4
+#define PLAYER_LABEL_COM 8
+#define PLAYER_LABEL_OFFSET_X 8
+#define PLAYER_LABEL_OFFSET_Y 25
+
+/* Where a saved game's screen puts each player's controller icon and label, by the player count */
+extern s32 D_80230DE8_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT][2];
+
+void func_80225960_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
+    s32 position[2];
+    s32 playerIndex;
+    s32 labelIndex;
+    s16 controller;
+    void *image;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    image = D_8023BD80_ovl_01;
+    gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+        if ((s16)D_80230B40_ovl_01[playerIndex] != NO_CONTROLLER) {
+            position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
+            position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+            controller = D_80230B40_ovl_01[playerIndex];
+            if (controller != COMPUTER_CONTROLLER) {
+                gDPLoadTextureBlock(gfx++,
+                                    ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+                                     controller * CONTROLLER_ICON_IMAGE_SIZE) & ~7,
+                                    G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE, CONTROLLER_ICON_SIZE, 0,
+                                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                    G_TX_NOLOD, G_TX_NOLOD);
+                gDPPipeSync(gfx++);
+                gSPScisTextureRectangle(gfx++, position[0] << 2, position[1] << 2,
+                                        (position[0] + CONTROLLER_ICON_SIZE) << 2,
+                                        (position[1] + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
+                                        TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+                gDPPipeSync(gfx++);
+            }
+        }
+    }
+    image = D_8023BD84_ovl_01;
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+        position[0] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][0];
+        position[1] = D_80230DE8_ovl_01[playerCount - 1][playerIndex][1];
+        if ((s16)D_80230B40_ovl_01[playerIndex] == COMPUTER_CONTROLLER) {
+            if (save->savedGames[memory->savedGameIndex].state.gameMode == GAME_MODE_GET_CHARACTER) {
+                labelIndex = PLAYER_LABEL_COM;
+            } else {
+                labelIndex = playerIndex + PLAYER_LABEL_COMPUTER_FIRST;
+            }
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)image + PALETTED_TEXELS_OFFSET + labelIndex * PLAYER_LABEL_IMAGE_SIZE) & ~7,
+                                   G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        } else {
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)image + PALETTED_TEXELS_OFFSET + playerIndex * PLAYER_LABEL_IMAGE_SIZE) & ~7,
+                                   G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        }
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
+                                (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
+                                (position[0] + PLAYER_LABEL_OFFSET_X + PLAYER_LABEL_WIDTH) << 2,
+                                (position[1] + PLAYER_LABEL_OFFSET_Y + PLAYER_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,
+                                0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 void func_80226190_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
