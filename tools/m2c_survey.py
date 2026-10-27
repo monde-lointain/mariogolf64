@@ -14,12 +14,13 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
+from typing import NamedTuple
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import fncompare  # noqa: E402
+import fncompare
 
 ROOT = fncompare.ROOT
-M2C = os.path.join(ROOT, ".venv", "bin", "m2c")
+M2C = ROOT / ".venv" / "bin" / "m2c"
 DATA_FILES = [p for p in os.environ.get("SURVEY_DATA", "").split(":") if p]
 # SURVEY_HEADERS adds headers (colon-separated) that declare the globals
 # m2c's output uses
@@ -40,59 +41,82 @@ GUESSED_PROTOTYPE_RE = re.compile(
     r"^(.*?\b(\w+))\(.*\);( +/\* (?:extern|static) \*/)$", re.MULTILINE
 )
 CALLEE_RE = re.compile(r"\b(func_[0-9A-F]{8}\w*)\b")
+# The score of a function that m2c or the compiler failed on
+FAILED_SCORE = -1.0
 
 
-def declare_callees(text, name):
-    """Unprototypes m2c's guessed declarations and declares callees it left out."""
+class Job(NamedTuple):
+    """One function to decompile and score."""
+
+    out_dir: Path
+    asm_path: Path
+    name: str
+    target: list[int]
+
+
+class Result(NamedTuple):
+    """How a function's m2c output scored."""
+
+    asm_path: Path
+    name: str
+    size: int
+    value: float
+
+
+def declare_callees(text: str, name: str) -> str:
+    """Unprototype m2c's guessed declarations and declare callees it left out."""
     text = GUESSED_PROTOTYPE_RE.sub(r"\1();\3", text)
-    declared = set(re.findall(r"\b(\w+)\(\);", text)) | {name}
-    missing = sorted(set(CALLEE_RE.findall(text)) - declared)
+    declared: set[str] = set(re.findall(r"\b(\w+)\(\);", text)) | {name}
+    called: set[str] = set(CALLEE_RE.findall(text))
+    missing = sorted(called - declared)
     return "".join(f"s32 {callee}();\n" for callee in missing) + text
 
 
-def survey_function(job):
-    out_dir, asm_path, name, target = job
+def survey_function(job: Job) -> Result:
+    """Decompile, compile and score one function."""
+    failed = Result(job.asm_path, job.name, len(job.target), FAILED_SCORE)
     result = subprocess.run(
         [
-            M2C,
+            str(M2C),
             "-t",
             "mips-gcc-c",
             "--valid-syntax",
             "--context",
-            os.path.join(ROOT, "ctx.c"),
+            str(ROOT / "ctx.c"),
             "-f",
-            name,
-            asm_path,
+            job.name,
+            str(job.asm_path),
             *DATA_FILES,
         ],
         capture_output=True,
         text=True,
         cwd=ROOT,
+        check=False,
     )
-    c_path = os.path.join(out_dir, name + ".c")
     if result.returncode != 0:
-        return asm_path, name, len(target), -1.0
-    with open(c_path, "w") as c_file:
-        c_file.write(PRELUDE + declare_callees(result.stdout, name))
+        return failed
+    c_path = job.out_dir / f"{job.name}.c"
+    _ = c_path.write_text(PRELUDE + declare_callees(result.stdout, job.name))
     compiled, _ = fncompare.compile_functions(c_path)
-    if not compiled or name not in compiled:
-        return asm_path, name, len(target), -1.0
-    return asm_path, name, len(target), fncompare.score(target, compiled[name])
+    if not compiled or job.name not in compiled:
+        return failed
+    value = fncompare.score(job.target, compiled[job.name])
+    return failed._replace(value=value)
 
 
-def main():
-    out_dir, *asm_paths = sys.argv[1:]
-    out_dir = os.path.abspath(out_dir)
-    os.makedirs(out_dir, exist_ok=True)
-    jobs = []
-    for asm_path in asm_paths:
-        for name, words in fncompare.read_target_functions(asm_path).items():
-            jobs.append((out_dir, os.path.abspath(asm_path), name, words))
+def main() -> None:
+    """Survey every function of the asm files named on the command line."""
+    out_dir = Path(sys.argv[1]).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    jobs = [
+        Job(out_dir, Path(asm_path).resolve(), name, words)
+        for asm_path in sys.argv[2:]
+        for name, words in fncompare.read_target_functions(asm_path).items()
+    ]
     with multiprocessing.Pool() as pool:
-        for asm_path, name, size, value in pool.imap_unordered(survey_function, jobs):
-            print(
-                f"{os.path.basename(asm_path)}\t{name}\t{size}\t{value:.3f}", flush=True
-            )
+        for result in pool.imap_unordered(survey_function, jobs):
+            fields = [result.asm_path.name, result.name, str(result.size)]
+            print("\t".join([*fields, f"{result.value:.3f}"]), flush=True)
 
 
 if __name__ == "__main__":

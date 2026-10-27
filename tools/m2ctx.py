@@ -1,40 +1,35 @@
 #!/usr/bin/env python3
+"""Write ctx.c, the context m2c reads the types and globals of a C file from.
+
+    m2ctx.py C_FILE
+
+The context is C_FILE preprocessed twice: once for its macro definitions and
+once for its declarations. Macros the preprocessor defines on its own are
+dropped.
+"""
 
 import argparse
-import os
-import sys
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.abspath(os.path.join(script_dir, ".."))
-
-# Project-specific
+ROOT = Path(__file__).resolve().parent.parent
 CPP_FLAGS = [
     "-I.",
     "-Iinclude",
-    "-Ibin/us",
-    "-Ibin/cn",
-    "-Ibin/gw",
-    "-Ibuild/bin/us",
-    "-Ibuild/bin/cn",
-    "-Ibuild/bin/gw",
     "-Ilib/ultralib/include",
-    "-Ilib/ultralib/include/gcc",
     "-Ilib/ultralib/include/PR",
     "-Ilib/libmus/include",
     "-Ilib/ultralib/src",
     "-Ilib/libmus/src",
-    "-Ilib/libmus/include",
     "-D_LANGUAGE_C",
     "-DF3DEX_GBI_2",
     "-D__USE_ISOC99",
     "-DNDEBUG",
     "-D_FINALROM",
     "-D_MIPS_SZLONG=32",
-    "-D__USE_ISOC99",
-    "-DSCRIPT(test...)={}-D__attribute__(test...)=",
+    "-D__attribute__(test...)=",
     "-D__asm__(test...)=",
     "-ffreestanding",
     "-DM2CTX",
@@ -42,79 +37,60 @@ CPP_FLAGS = [
     "-DNON_MATCHING",
     "-D_OS_HOST_H_",
     "-std=gnu89",
+    "-DVERSION_US=1",
+    "-D__IS_KMC__=1",
 ]
 
 
-def import_c_file(in_file, version: str) -> str:
-    in_file = os.path.relpath(in_file, root_dir)
+class Arguments(argparse.Namespace):
+    """The command line's arguments."""
 
-    if version == "us":
-        CPP_FLAGS.append("-DVERSION_US=1")
-        CPP_FLAGS.append("-D__IS_KMC__=1")
-    elif version == "cn":
-        CPP_FLAGS.append("-DVERSION_CN=1")
-        CPP_FLAGS.append("-DBBPLAYER=1")
-        CPP_FLAGS.append("-D__IS_EGCS__=1")
-    elif version == "gw":
-        CPP_FLAGS.append("-DVERSION_GW=1")
-        CPP_FLAGS.append("-D__IS_KMC__=1")
+    c_file: str = ""
 
-    CPP_FLAGS.append(f"-Ibuild/{version}/{Path(in_file).parent}")
 
-    cpp_command = ["gcc", "-E", "-P", "-undef", "-dM", *CPP_FLAGS, in_file]
-    cpp_command2 = ["gcc", "-E", "-P", "-undef", *CPP_FLAGS, in_file]
+def preprocess(arguments: list[str]) -> str:
+    """Return the output of the host preprocessor run in the repo."""
+    return subprocess.check_output(
+        ["gcc", "-E", "-P", "-undef", *arguments], cwd=ROOT, encoding="utf-8"
+    )
 
-    with tempfile.NamedTemporaryFile(suffix=".c") as tmp:
-        stock_macros = subprocess.check_output(
-            ["gcc", "-E", "-P", "-undef", "-dM", tmp.name],
-            cwd=root_dir,
-            encoding="utf-8",
-        )
 
-    out_text = ""
+def import_c_file(c_path: str) -> str:
+    """Return the context of the C file at C_PATH."""
+    relative_path = Path(c_path).resolve().relative_to(ROOT)
+    with tempfile.NamedTemporaryFile(suffix=".c") as empty_file:
+        stock_macros = preprocess(["-dM", empty_file.name])
+
+    macros_command = ["-dM", *CPP_FLAGS, str(relative_path)]
     try:
-        out_text += subprocess.check_output(cpp_command, cwd=root_dir, encoding="utf-8")
-        out_text += subprocess.check_output(
-            cpp_command2, cwd=root_dir, encoding="utf-8"
-        )
+        context = preprocess(macros_command)
+        context += preprocess([*CPP_FLAGS, str(relative_path)])
     except subprocess.CalledProcessError:
+        command = " ".join(["gcc", "-E", "-P", "-undef", *macros_command])
         print(
-            "Failed to preprocess input file, when running command:\n"
-            + " ".join(cpp_command),
+            f"Failed to preprocess input file, when running command:\n{command}",
             file=sys.stderr,
         )
         sys.exit(1)
 
-    if not out_text:
+    if not context:
         print("Output is empty - aborting")
         sys.exit(1)
 
     for line in stock_macros.strip().splitlines():
-        out_text = out_text.replace(line + "\n", "")
-    return out_text
+        context = context.replace(line + "\n", "")
+    return context
 
 
-def main():
+def main() -> None:
+    """Write the context of the C file named on the command line."""
     parser = argparse.ArgumentParser(
-        description="""Create a context file which can be used for m2c"""
+        description="Create a context file which can be used for m2c"
     )
-    parser.add_argument(
-        "c_file",
-        help="""File from which to create context""",
-    )
-    parser.add_argument(
-        "-v",
-        "--version",
-        help="Which version should be processed",
-        default="us",
-        choices=["us", "cn", "gw"],
-    )
-    args = parser.parse_args()
-
-    output = import_c_file(args.c_file, args.version)
-
-    with open(os.path.join(root_dir, "ctx.c"), "w", encoding="UTF-8") as f:
-        f.write(output)
+    _ = parser.add_argument("c_file", help="File from which to create context")
+    arguments = parser.parse_args(namespace=Arguments())
+    context = import_c_file(arguments.c_file)
+    _ = (ROOT / "ctx.c").write_text(context, encoding="utf-8")
 
 
 if __name__ == "__main__":

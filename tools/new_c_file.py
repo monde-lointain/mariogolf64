@@ -10,49 +10,45 @@ expected/NAME.s, where fncompare.py can compare against it after the
 functions are decompiled and splat stops writing their assembly.
 """
 
-import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-YAML_PATH = os.path.join(ROOT, "mariogolf64.yaml")
+ROOT = Path(__file__).resolve().parent.parent
+YAML_PATH = ROOT / "mariogolf64.yaml"
 GLABEL_RE = re.compile(r"^glabel (\w+)", re.MULTILINE)
 
 
-def main():
+def main() -> None:
+    """Make the C file and expected assembly for the segment given."""
     offset, name = sys.argv[1], sys.argv[2]
     rom_offset = int(offset, 16)
-    asm_path = os.path.join(ROOT, "asm", f"{rom_offset:X}.s")
-    with open(asm_path) as asm_file:
-        functions = GLABEL_RE.findall(asm_file.read())
+    asm_path = ROOT / "asm" / f"{rom_offset:X}.s"
+    functions: list[str] = GLABEL_RE.findall(asm_path.read_text())
 
-    with open(YAML_PATH) as yaml_file:
-        yaml = yaml_file.read()
+    yaml = YAML_PATH.read_text()
     segment = f"[0x{rom_offset:X}, asm]"
     if segment not in yaml:
         sys.exit(f"{segment} not found in the yaml")
-    yaml = yaml.replace(segment, f"[0x{rom_offset:X}, c, {name}]")
-    with open(YAML_PATH, "w") as yaml_file:
-        yaml_file.write(yaml)
+    _ = YAML_PATH.write_text(yaml.replace(segment, f"[0x{rom_offset:X}, c, {name}]"))
 
-    c_path = os.path.join(ROOT, "src", f"{name}.c")
-    os.makedirs(os.path.dirname(c_path), exist_ok=True)
-    with open(c_path, "w") as c_file:
-        c_file.write('#include "common.h"\n\n')
-        for function in functions:
-            c_file.write(f'INCLUDE_ASM("asm/nonmatchings/{name}", {function});\n\n')
+    c_path = ROOT / "src" / f"{name}.c"
+    c_path.parent.mkdir(parents=True, exist_ok=True)
+    stubs = "".join(
+        f'INCLUDE_ASM("asm/nonmatchings/{name}", {function});\n\n'
+        for function in functions
+    )
+    _ = c_path.write_text('#include "common.h"\n\n' + stubs)
 
-    subprocess.run(["make", "extract"], cwd=ROOT, check=True, capture_output=True)
-    os.remove(asm_path)
+    _ = subprocess.run(["make", "extract"], cwd=ROOT, check=True, capture_output=True)
+    asm_path.unlink()
 
-    expected_path = os.path.join(ROOT, "expected", f"{name}.s")
-    os.makedirs(os.path.dirname(expected_path), exist_ok=True)
-    with open(expected_path, "w") as expected:
-        for function in functions:
-            path = os.path.join(ROOT, "asm", "nonmatchings", name, f"{function}.s")
-            with open(path) as function_file:
-                expected.write(function_file.read())
+    expected_path = ROOT / "expected" / f"{name}.s"
+    expected_path.parent.mkdir(parents=True, exist_ok=True)
+    function_dir = ROOT / "asm" / "nonmatchings" / name
+    texts = [(function_dir / f"{function}.s").read_text() for function in functions]
+    _ = expected_path.write_text("".join(texts))
     print(f"{len(functions)} functions")
 
 
