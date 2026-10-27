@@ -175,10 +175,6 @@
 #define SHOT_PREVIEW_MIN_STEPS 2
 #define SHOT_PREVIEW_MAX_STEPS 20
 #define SHOT_PREVIEW_SCROLL_STEP 8
-/* Steps longer than this are not stretched into a dash */
-#define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
-/* How far below the ball's centre the preview is drawn */
-#define SHOT_PREVIEW_DROP 0x133
 #define AIM_CAMERA_DEBUG_TILT_SCALE 30.0f
 /* The pause screen's camera circles the ball at this distance, and rises this
  * far above it */

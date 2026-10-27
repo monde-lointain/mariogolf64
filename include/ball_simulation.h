@@ -95,6 +95,14 @@ typedef struct BallSimulation {
   /* 0xB5 */ u8 unkB5[0xB8 - 0xB5];
 } BallSimulation; /* size = 0xB8 */
 
+/*
+ * A shot's preview is drawn as a dash for each step of its simulation;
+ * steps longer than this are not stretched into a dash
+ */
+#define SHOT_PREVIEW_MAX_DASH_LENGTH 0x4AFFF
+/* How far below the ball's centre the preview is drawn */
+#define SHOT_PREVIEW_DROP 0x133
+
 extern BallSimulation g_BallSimulations[BALL_SIMULATION_COUNT];
 
 void ResetBallSimulations(void);
