@@ -802,7 +802,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A568_ovl_01 + PALETTED_TEXELS_OFFSET +
-            stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2) &
+            (stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2)) &
             ~7,
         G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -835,7 +835,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
 #define PLAYER_TAG_COM 8
 #define PLAYER_TAG_IMAGE_SIZE 64 /* Bytes, as 16 by 8 nibbles */
 #define COMPUTER_TAG_TEXELS_OFFSET \
-  (PALETTED_TEXELS_OFFSET + PLAYER_TAG_FIRST_COMPUTER * PLAYER_TAG_IMAGE_SIZE)
+  (PALETTED_TEXELS_OFFSET + (PLAYER_TAG_FIRST_COMPUTER * PLAYER_TAG_IMAGE_SIZE))
 #define PLAYER_TAG_TEXELS(offset) \
   ((u32)((u8*)D_8023A570_ovl_01 + (offset)) & ~7)
 #define PLAYER_TAG_WIDTH 16
@@ -891,29 +891,29 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
     }
     if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS(
-              PALETTED_TEXELS_OFFSET + PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE),
+          PLAYER_TAG_TEXELS(PALETTED_TEXELS_OFFSET +
+              (PLAYER_TAG_COM * PLAYER_TAG_IMAGE_SIZE)),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (D_800C1FF4[playerIndex] == NO_CONTROLLER_INDEX) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS(
-              playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
+          PLAYER_TAG_TEXELS((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
+              COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else if (D_8022FF07_ovl_01 == TRUE && playerIndex == D_801B7070) {
       gDPLoadTextureBlock_4b(gfx++,
-          PLAYER_TAG_TEXELS(
-              playerIndex * PLAYER_TAG_IMAGE_SIZE + COMPUTER_TAG_TEXELS_OFFSET),
+          PLAYER_TAG_TEXELS((playerIndex * PLAYER_TAG_IMAGE_SIZE) +
+              COMPUTER_TAG_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     } else {
       gDPLoadTextureBlock_4b(gfx++,
           PLAYER_TAG_TEXELS(
-              playerIndex * PLAYER_TAG_IMAGE_SIZE + PALETTED_TEXELS_OFFSET),
+              (playerIndex * PLAYER_TAG_IMAGE_SIZE) + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, PLAYER_TAG_WIDTH, PLAYER_TAG_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

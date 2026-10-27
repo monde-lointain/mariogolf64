@@ -490,11 +490,11 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
-          ((s32)(iconY[slot] - halfSize + sortIndex * halfSize) -
+          ((s32)(iconY[slot] - halfSize + (sortIndex * halfSize)) -
               WHEEL_ICON_RAISE)
               << 2,
           (s32)(iconX[slot] + halfSize) << 2,
-          ((s32)(iconY[slot] + sortIndex * halfSize) - WHEEL_ICON_RAISE) << 2,
+          ((s32)(iconY[slot] + (sortIndex * halfSize)) - WHEEL_ICON_RAISE) << 2,
           G_TX_RENDERTILE, 0, 0, step, step);
       gDPPipeSync(gfx++);
     }
@@ -830,7 +830,7 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
           ((u32)D_8023A828_ovl_01 +
               (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
               (PALETTED_TEXELS_OFFSET +
-                  STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) &
+                  (STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE))) &
               ~7,
           G_IM_FMT_CI, STATS_ARROW_WIDTH, STATS_ARROW_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1111,7 +1111,7 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   }
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE) &
+          (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1262,8 +1262,8 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
       left = centerX - (width / 2) - SIDE_ARROW_SIZE;
     }
     gSPScisTextureRectangle(gfx++, left << 2,
-        (centerY - SIDE_ARROW_SIZE / 2) << 2, (left + SIDE_ARROW_SIZE) << 2,
-        (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE, 0, 0,
+        (centerY - (SIDE_ARROW_SIZE / 2)) << 2, (left + SIDE_ARROW_SIZE) << 2,
+        (centerY + (SIDE_ARROW_SIZE / 2)) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
@@ -1313,8 +1313,8 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   left = centerX - (SIDE_ARROW_SIZE / 2);
   top = centerY - (SIDE_ARROW_SIZE / 2);
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,
-      (centerX + SIDE_ARROW_SIZE / 2) << 2,
-      (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE, 0, 0,
+      (centerX + (SIDE_ARROW_SIZE / 2)) << 2,
+      (centerY + (SIDE_ARROW_SIZE / 2)) << 2, G_TX_RENDERTILE, 0, 0,
       TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;

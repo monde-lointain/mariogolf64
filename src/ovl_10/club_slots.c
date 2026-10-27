@@ -82,7 +82,7 @@
 
 /* The symbols' images are 32 by 32 RGBA16 texels */
 #define SYMBOL_SIZE 32
-#define SYMBOL_IMAGE_SIZE (IMAGE_HEADER_SIZE + SYMBOL_SIZE * SYMBOL_SIZE * 2)
+#define SYMBOL_IMAGE_SIZE (IMAGE_HEADER_SIZE + (SYMBOL_SIZE * SYMBOL_SIZE * 2))
 /* The texture coordinate of a symbol's last texel */
 #define SYMBOL_ST_END ((SYMBOL_SIZE << 5) - 1)
 
@@ -691,12 +691,14 @@ void DrawClubSlots(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gSPModifyVertex(gfx++, quadIndex * 2, G_MWO_POINT_ST, 0);
       gSPModifyVertex(
-          gfx++, quadIndex * 2 + 1, G_MWO_POINT_ST, SYMBOL_ST_END << 16);
-      gSPModifyVertex(gfx++, quadIndex * 2 + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
-      gSPModifyVertex(gfx++, quadIndex * 2 + 3, G_MWO_POINT_ST,
+          gfx++, (quadIndex * 2) + 1, G_MWO_POINT_ST, SYMBOL_ST_END << 16);
+      gSPModifyVertex(
+          gfx++, (quadIndex * 2) + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
+      gSPModifyVertex(gfx++, (quadIndex * 2) + 3, G_MWO_POINT_ST,
           (SYMBOL_ST_END << 16) | SYMBOL_ST_END);
-      gSP2Triangles(gfx++, quadIndex * 2 + 1, quadIndex * 2, quadIndex * 2 + 2,
-          0, quadIndex * 2 + 1, quadIndex * 2 + 2, quadIndex * 2 + 3, 0);
+      gSP2Triangles(gfx++, (quadIndex * 2) + 1, quadIndex * 2,
+          (quadIndex * 2) + 2, 0, (quadIndex * 2) + 1, (quadIndex * 2) + 2,
+          (quadIndex * 2) + 3, 0);
       gDPPipeSync(gfx++);
     }
   }
@@ -829,13 +831,13 @@ void DrawClubSlots(Gfx** displayListHead) {
           START_WIDTH - 1, stripHeight - 1, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0,
           0);
       gDPPipeSync(gfx++);
-      gSPScisTextureRectangle(gfx++, (s32)(SCREEN_WIDTH / 2 - halfWidth) << 2,
-          (s32)((SCREEN_HEIGHT / 2 - halfHeight) +
-              stripIndex * startStripHeight)
+      gSPScisTextureRectangle(gfx++, (s32)((SCREEN_WIDTH / 2) - halfWidth) << 2,
+          (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
+              (stripIndex * startStripHeight))
               << 2,
-          (s32)(halfWidth + SCREEN_WIDTH / 2) << 2,
-          (s32)((SCREEN_HEIGHT / 2 - halfHeight) +
-              stripIndex * startStripHeight + startStripHeight)
+          (s32)(halfWidth + (SCREEN_WIDTH / 2)) << 2,
+          (s32)(((SCREEN_HEIGHT / 2) - halfHeight) +
+              (stripIndex * startStripHeight) + startStripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 1 << 5, dsdx, dtdy);
     }
@@ -1022,9 +1024,9 @@ void DrawClubSlotsLogo(
         G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + f_LogoBob) << 2,
+        (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob) << 2,
         (s32)(centerX + halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
+        (s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
             f_LogoBob)
             << 2,
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
@@ -1049,9 +1051,9 @@ void DrawClubSlotsLogo(
         G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + f_LogoBob) << 2,
+        (s32)((centerY - halfHeight) + (index * stripHeight) + f_LogoBob) << 2,
         (s32)(centerX + halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
+        (s32)((centerY - halfHeight) + (index * stripHeight) + stripHeight +
             f_LogoBob)
             << 2,
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);

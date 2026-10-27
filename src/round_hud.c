@@ -113,9 +113,9 @@ extern s32 f_IsCourseSelectLoaded;
 #define HOLE_FLAG_START_SHADE 0xB7
 #define HOLE_FLAG_VERTEX(row, column) \
   f_HoleFlagVertices[0][g_MatrixBufferIndex] \
-                    [(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+                    [((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
 #define HOLE_FLAG_SHADE(row, column) \
-  f_HoleFlagShades[(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+  f_HoleFlagShades[((row) * HOLE_FLAG_COLUMN_COUNT) + (column)]
 
 /* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
 #define HOLE_FLAG_SKEW 0.0f
@@ -1205,7 +1205,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
     gDPPipeSync(gfx++);
     angle = DEGREES_TO_RADIANS(
-        f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME +
+        (f_LandingReactionFrame * LANDING_PANEL_DEGREES_PER_FRAME) +
         LANDING_PANEL_START_DEGREES);
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
@@ -1792,7 +1792,7 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
 #define BALL_TRAIL_SEGMENT_COLOR(segment) \
-  ((BALL_TRAIL_ALPHA - (segment) / BALL_TRAIL_SEGMENTS_PER_FADE) | \
+  ((BALL_TRAIL_ALPHA - ((segment) / BALL_TRAIL_SEGMENTS_PER_FADE)) | \
       BALL_TRAIL_COLOR)
 
 /* A point of the ball's trail on the screen, in quarter pixels */
@@ -2440,10 +2440,10 @@ void DrawHoleFlag(s32 isBackDrawn) {
         /* These texture coordinates are after the gSPTexture scale, which
          * halves them */
         gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_ST,
-            ((HOLE_FLAG_BACK_TEXEL_START / 2 -
-                 column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2))
+            (((HOLE_FLAG_BACK_TEXEL_START / 2) -
+                 (column * (HOLE_FLAG_TEXEL_COLUMN_STEP / 2)))
                 << 16) +
-                row * (HOLE_FLAG_TEXEL_ROW_STEP / 2));
+                (row * (HOLE_FLAG_TEXEL_ROW_STEP / 2)));
         gSPModifyVertex(g_DisplayListHead++, index, G_MWO_POINT_RGBA,
             ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[0]) << 24) |
                 ((2 * HOLE_FLAG_START_SHADE - vertex->v.cn[1]) << 16) |
@@ -2643,12 +2643,12 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
     for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 8, i * 8 + 1, i * 8 + 2, 0, i * 8, i * 8 + 2,
-          i * 8 + 3, 0);
-      gSP2Triangles(gfx++, i * 8 + 1, i * 8 + 4, i * 8 + 5, 0, i * 8 + 1,
-          i * 8 + 5, i * 8 + 2, 0);
-      gSP2Triangles(gfx++, i * 8 + 4, i * 8 + 6, i * 8 + 7, 0, i * 8 + 4,
-          i * 8 + 7, i * 8 + 5, 0);
+      gSP2Triangles(gfx++, i * 8, (i * 8) + 1, (i * 8) + 2, 0, i * 8,
+          (i * 8) + 2, (i * 8) + 3, 0);
+      gSP2Triangles(gfx++, (i * 8) + 1, (i * 8) + 4, (i * 8) + 5, 0,
+          (i * 8) + 1, (i * 8) + 5, (i * 8) + 2, 0);
+      gSP2Triangles(gfx++, (i * 8) + 4, (i * 8) + 6, (i * 8) + 7, 0,
+          (i * 8) + 4, (i * 8) + 7, (i * 8) + 5, 0);
     }
   } else {
     if (++f_HeavyLongShotFrameTimer == HEAVY_LONG_SHOT_FRAME_TICKS) {
@@ -2693,8 +2693,8 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
-          i * 4 + 3, 0);
+      gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
+          (i * 4) + 2, (i * 4) + 3, 0);
     }
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
@@ -2706,8 +2706,8 @@ void DrawShotEffect(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     for (i = 0; i != HEAVY_LONG_SHOT_QUAD_COUNT; i++) {
-      gSP2Triangles(gfx++, i * 4, i * 4 + 1, i * 4 + 2, 0, i * 4, i * 4 + 2,
-          i * 4 + 3, 0);
+      gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
+          (i * 4) + 2, (i * 4) + 3, 0);
     }
     gDPPipeSync(gfx++);
   }
@@ -3917,9 +3917,9 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
             gfx++, (u32)f_HoleContestImage + IMAGE_HEADER_SIZE & ~7);
         for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureBlock(gfx++,
-              (u32)f_HoleContestImage + LARGE_PALETTED_TEXELS_OFFSET +
-                      strip *
-                          (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT) &
+              ((u32)f_HoleContestImage + LARGE_PALETTED_TEXELS_OFFSET +
+                  (strip *
+                      (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT))) &
                   ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, CONTEST_IMAGE_WIDTH,
               CONTEST_IMAGE_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR,
@@ -3940,8 +3940,8 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
             gfx++, (u32)f_MatchStandingImage + IMAGE_HEADER_SIZE & ~7);
         for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureTile(gfx++,
-              (u32)f_MatchStandingImage + LARGE_PALETTED_TEXELS_OFFSET +
-                      strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT) &
+              ((u32)f_MatchStandingImage + LARGE_PALETTED_TEXELS_OFFSET +
+                  (strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT))) &
                   ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, MATCH_IMAGE_WIDTH,
               MATCH_IMAGE_STRIP_HEIGHT, 0, 0, MATCH_IMAGE_WIDTH - 1,

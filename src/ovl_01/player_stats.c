@@ -613,8 +613,8 @@ void func_8021B1E0_ovl_01(
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  gSPScisTextureRectangle(gfx++, (centerX - GAME_LABEL_WIDTH / 2) << 2,
-      top << 2, (centerX + GAME_LABEL_WIDTH / 2) << 2,
+  gSPScisTextureRectangle(gfx++, (centerX - (GAME_LABEL_WIDTH / 2)) << 2,
+      top << 2, (centerX + (GAME_LABEL_WIDTH / 2)) << 2,
       (top + GAME_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
@@ -695,7 +695,7 @@ void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide) {
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock(gfx++,
         ((u32)D_8023B36C_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripHeight * STATS_WALL_IMAGE_WIDTH * rowIndex) &
+            (stripHeight * STATS_WALL_IMAGE_WIDTH * rowIndex)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, STATS_WALL_IMAGE_WIDTH, stripHeight, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -848,8 +848,8 @@ void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
     }
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-        (centerY - PAGE_ARROW_SIZE / 2) << 2, (left + PAGE_ARROW_SIZE) << 2,
-        (centerY + PAGE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE,
+        (centerY - (PAGE_ARROW_SIZE / 2)) << 2, (left + PAGE_ARROW_SIZE) << 2,
+        (centerY + (PAGE_ARROW_SIZE / 2)) << 2, G_TX_RENDERTILE,
         (arrowIndex == PAGE_ARROW_RIGHT) << 10, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);

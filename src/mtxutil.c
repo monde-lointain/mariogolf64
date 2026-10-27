@@ -42,7 +42,7 @@ void guMtxF2L(f32 mf[4][4], Mtx* m) {
         mf[row][(pair * 2) + 1] = MAX_FIXED_ELEMENT;
       }
       first = FLOAT_TO_FIXED(mf[row][pair * 2]);
-      second = FLOAT_TO_FIXED(mf[row][pair * 2 + 1]);
+      second = FLOAT_TO_FIXED(mf[row][(pair * 2) + 1]);
       *(integerParts++) = (first & 0xFFFF0000) | ((second >> 16) & 0xFFFF);
       *(fractionParts++) = ((first << 16) & 0xFFFF0000) | (second & 0xFFFF);
     }

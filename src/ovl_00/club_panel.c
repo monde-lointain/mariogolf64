@@ -443,7 +443,7 @@ void DrawClubPanel(Gfx** displayListHead) {
         (GAUGE_EMPTY_X + GAUGE_MARKER_WIDTH) << 2,
         (GAUGE_BOTTOM + f_ClubPanelDebugValue + f_ShotPanelOffsetX) << 2,
         G_TX_RENDERTILE,
-        (((GAUGE_MAX_VALUE * 5 - f_ClubPanelUnk24 * 5) << 6) /
+        ((((GAUGE_MAX_VALUE * 5) - (f_ClubPanelUnk24 * 5)) << 6) /
             (GAUGE_MAX_VALUE * 5))
             << 5,
         0, 0x1B4, 0x800);

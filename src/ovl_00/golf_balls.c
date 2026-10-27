@@ -492,7 +492,7 @@ extern s32 f_CurrentBallDepth;
 /* The texture coordinate step that stretches texelCount texels from from to to,
  * in quarter pixels */
 #define TEXEL_STEP(texelCount, from, to) \
-  ((to) - (from) != 0 ? (((texelCount) << 13) / ((to) - (from)) + 1) >> 1 : 0)
+  ((to) - (from) != 0 ? ((((texelCount) << 13) / ((to) - (from))) + 1) >> 1 : 0)
 #define gSPStretchedTextureRectangle( \
     pkt, xl, yl, xh, yh, tile, s, t, width, height) \
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
@@ -553,7 +553,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(gfx++,
         TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_ROLLING] +
-            (f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE + IMAGE_HEADER_SIZE)),
+            ((f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE) + IMAGE_HEADER_SIZE)),
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
@@ -700,20 +700,20 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               if (ball->state == BALL_STATE_STOPPED) {
                 gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2,
                     (ballPoint.y - size) << 2, (ballPoint.x + size) << 2,
-                    (ballPoint.y + exposure * size) << 2, BALL_TILE_STILL, 0, 0,
-                    BALL_TEXTURE_SIZE,
+                    (ballPoint.y + (exposure * size)) << 2, BALL_TILE_STILL, 0,
+                    0, BALL_TEXTURE_SIZE,
                     (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
               } else {
                 gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2,
                     (ballPoint.y - size) << 2, (ballPoint.x + size) << 2,
-                    (ballPoint.y + exposure * size) << 2, BALL_TILE_ROLLING, 0,
-                    0, BALL_TEXTURE_SIZE,
+                    (ballPoint.y + (exposure * size)) << 2, BALL_TILE_ROLLING,
+                    0, 0, BALL_TEXTURE_SIZE,
                     (exposure + 1) * (BALL_TEXTURE_SIZE / 2));
               }
             } else if (ballDepth >= BALL_FULL_SPRITE_DEPTH) {
               gSPStretchedTextureRectangle(gfx++, (ballPoint.x - size) << 2,
                   (ballPoint.y - size) << 2, (ballPoint.x + size) << 2,
-                  (ballPoint.y + exposure * size) << 2, BALL_TILE_SMALL, 0, 0,
+                  (ballPoint.y + (exposure * size)) << 2, BALL_TILE_SMALL, 0, 0,
                   SMALL_BALL_TEXTURE_SIZE,
                   (exposure + 1) * (SMALL_BALL_TEXTURE_SIZE / 2));
               spriteKind = BALL_SPRITE_SMALL;

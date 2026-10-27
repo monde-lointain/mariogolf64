@@ -55,10 +55,10 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file);
 #define LARGE_PALETTE_COLOR_COUNT 256
 /* Where a four-bit image's texels start, after its header and palette */
 #define PALETTED_TEXELS_OFFSET \
-  (IMAGE_HEADER_SIZE + SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
+  (IMAGE_HEADER_SIZE + (SMALL_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 /* Where an eight-bit image's texels start, after its header and palette */
 #define LARGE_PALETTED_TEXELS_OFFSET \
-  (IMAGE_HEADER_SIZE + LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
+  (IMAGE_HEADER_SIZE + (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE))
 
 /* The asset that more than one menu loads */
 #define ASSET_PLAYER_LABELS 0x5E3 /* 1P to 4P, 1C to 4C and Com */

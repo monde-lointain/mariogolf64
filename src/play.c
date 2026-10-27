@@ -1812,8 +1812,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
 #define GRID_VERTEX(column, row) \
-  (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + \
-      ((u32)(column) & 1) * 9])
+  (&g_WorkArea.hole.gridVertices[((row) * 17) + ((u32)(column) >> 1) + \
+      (((u32)(column) & 1) * 9)])
 
 /* Whether a fine tile's neighbor makes it snap the vertices of their shared
  * edge's middle */
@@ -1856,8 +1856,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
         G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
         GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
         G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-    gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2, \
-        (column) * 128 + 0x86, (row) * 128 + 0x82); \
+    gDPSetTileSize(gfx++, 1, ((column) * 128) + 2, ((row) * 128) + 2, \
+        ((column) * 128) + 0x86, ((row) * 128) + 0x82); \
   }
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
@@ -2189,14 +2189,16 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
             }
           } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             /* A medium tile among fine ones loads only its own vertices */
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2), 2, 0);
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2), 1, 2);
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 1), 2, 3);
+            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2), row * 2), 2, 0);
+            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2) + 1, row * 2), 1, 2);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1, 5);
-            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 2), 2, 6);
+                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 1), 2, 3);
             gSPVertex(
-                gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1, 8);
+                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 2), 2, 6);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
               DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
@@ -2223,26 +2225,26 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         } else if (previousDetail == GROUND_DETAIL_COARSE) {
           LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
         }
-        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 1),
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-        gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 1),
+        gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 1),
             GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
-        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         if (row != GROUND_TILE_ROW_COUNT - 1 &&
             g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
                     .detail == GROUND_DETAIL_COARSE) {
           LOAD_AVERAGED_ROW(
-              GRID_VERTEX(column, row * 2 + 2), bottomSlot + ODD_SLOT);
+              GRID_VERTEX(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
         } else {
-          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 2),
+          gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 2),
               GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
         }
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LOAD_TILE_TEXTURE(
-                  tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
+                  tileIndex, (half * GROUND_TILE_GROUP_SIZE) + k, row);
               DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
                   middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
                   bottomSlot + ODD_SLOT, bottomSlot + 1);
@@ -2270,13 +2272,13 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
               GROUND_TILE_GROUP_SIZE + 1, topSlot);
         }
-        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
             GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
         for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
           if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
             for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
               LOAD_TILE_TEXTURE(
-                  tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
+                  tileIndex, (half * GROUND_TILE_GROUP_SIZE) + k, row);
               gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
                   topSlot + 1, bottomSlot + 1, bottomSlot, 0);
               if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {

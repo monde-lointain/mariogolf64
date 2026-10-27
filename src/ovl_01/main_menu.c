@@ -1588,7 +1588,7 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
           BACKDROP_FIRST_TOP << 2,
-          (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
+          (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
           (BACKDROP_FIRST_TOP + (BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
@@ -1607,7 +1607,7 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       stripTop = BACKDROP_TOP +
           (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
       gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
-          (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
+          (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
           (BACKDROP_TOP +
               stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE +
               shownRowCount * BACKDROP_SCALE)
@@ -1900,11 +1900,12 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
         growth = D_800FE33C;
       }
       gSPScisTextureRectangle(gfx++,
-          (D_8022F940_ovl_01[labelIndex][0] - growth / 2) << 2,
-          (D_8022F940_ovl_01[labelIndex][1] - growth / 2) << 2,
-          (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH + growth / 2)
+          (D_8022F940_ovl_01[labelIndex][0] - (growth / 2)) << 2,
+          (D_8022F940_ovl_01[labelIndex][1] - (growth / 2)) << 2,
+          (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH + (growth / 2))
               << 2,
-          (D_8022F940_ovl_01[labelIndex][1] + (TITLE_LABEL_HEIGHT + growth / 2))
+          (D_8022F940_ovl_01[labelIndex][1] +
+              (TITLE_LABEL_HEIGHT + (growth / 2)))
               << 2,
           G_TX_RENDERTILE, 0, 0,
           (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),

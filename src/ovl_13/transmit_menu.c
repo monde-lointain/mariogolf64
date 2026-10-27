@@ -2051,7 +2051,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   for (index = 0; index != TITLE_STRIP_COUNT; index++) {
     gDPLoadTextureTile(displayList++,
         ((u32)transfer->titleImage + LARGE_PALETTED_TEXELS_OFFSET +
-            index * (TITLE_WIDTH * TITLE_STRIP_ROWS)) &
+            (index * (TITLE_WIDTH * TITLE_STRIP_ROWS))) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1,
         TITLE_STRIP_ROWS - 1, 0, 0, 0, 0, 0, 0, 0);
@@ -2068,7 +2068,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         (index != WOOD_PANEL_STRIP_COUNT - 1) ? WOOD_PANEL_STRIP_ROWS : 1;
     gDPLoadTextureTile(displayList++,
         ((u32)transfer->woodPanelImage + IMAGE_HEADER_SIZE +
-            index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2)) &
+            (index * (WOOD_PANEL_WIDTH * WOOD_PANEL_STRIP_ROWS * 2))) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0,
         WOOD_PANEL_WIDTH - 1, panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);

@@ -574,8 +574,8 @@ OPAQUE:
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, alpha);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (point.x - SIGN_WIDTH / 2) << 2, (point.y - SIGN_HEIGHT) << 2,
-          (point.x + SIGN_WIDTH / 2) << 2,
+          (point.x - (SIGN_WIDTH / 2)) << 2, (point.y - SIGN_HEIGHT) << 2,
+          (point.x + (SIGN_WIDTH / 2)) << 2,
           (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2, G_TX_RENDERTILE, 0,
           0, 1 << 10, 1 << 10);
       /* The post is drawn opaque */
@@ -583,9 +583,9 @@ OPAQUE:
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(g_DisplayListHead++,
-          (point.x - SIGN_WIDTH / 2) << 2,
+          (point.x - (SIGN_WIDTH / 2)) << 2,
           (point.y - SIGN_HEIGHT + SIGN_BOARD_HEIGHT) << 2,
-          (point.x + SIGN_WIDTH / 2) << 2, point.y << 2, G_TX_RENDERTILE, 0,
+          (point.x + (SIGN_WIDTH / 2)) << 2, point.y << 2, G_TX_RENDERTILE, 0,
           SIGN_BOARD_HEIGHT << 5, 1 << 10, 1 << 10);
       gDPPipeSync(g_DisplayListHead++);
       gDPPipeSync(g_DisplayListHead++);

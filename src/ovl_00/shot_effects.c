@@ -204,7 +204,7 @@ void StartImpactSparks(void) {
         f_SparkOffsets[i][0] = 0;
         f_SparkOffsets[i][1] = 0;
         f_SparkAngles[i] = ((f32)count * IMPACT_SPARK_SPACING) +
-            DEGREES_TO_RADIANS(guRandom() % 20 - 10);
+            DEGREES_TO_RADIANS((guRandom() % 20) - 10);
         f_SparkKinds[i] = SPARK_KIND_IMPACT;
         speed =
             (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_MIN_SPEED;

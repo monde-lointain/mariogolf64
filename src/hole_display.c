@@ -179,10 +179,10 @@ extern s32 f_BackdropFadeLevel;
  */
 #define SPIRAL_GRID_SIZE 8
 #define SPIRAL_TILE_COUNT (SPIRAL_GRID_SIZE * SPIRAL_GRID_SIZE)
-#define SPIRAL_FRAME_WIDTH (SCREEN_WIDTH - 2 * FRAME_MARGIN_ROWS)
+#define SPIRAL_FRAME_WIDTH (SCREEN_WIDTH - (2 * FRAME_MARGIN_ROWS))
 #define SPIRAL_TILE_WIDTH (SPIRAL_FRAME_WIDTH / SPIRAL_GRID_SIZE)
 #define SPIRAL_TILE_HEIGHT \
-  ((SCREEN_HEIGHT - 2 * FRAME_MARGIN_ROWS) / SPIRAL_GRID_SIZE)
+  ((SCREEN_HEIGHT - (2 * FRAME_MARGIN_ROWS)) / SPIRAL_GRID_SIZE)
 #define SPIRAL_FADING_TILE_COUNT 4
 #define SPIRAL_OPAQUE_ALPHA 255
 #define SPIRAL_ALPHA_STEP (SPIRAL_OPAQUE_ALPHA / (SPIRAL_FADING_TILE_COUNT + 1))
@@ -1239,7 +1239,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SkyModelMatrix),
       G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
   gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
-  gSPVertex(gfx++, f_SkyVertices[g_MatrixBufferIndex + cameraIndex * 2],
+  gSPVertex(gfx++, f_SkyVertices[g_MatrixBufferIndex + (cameraIndex * 2)],
       SKY_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP1Triangle(gfx++, 0, 1, 4, 0);
@@ -1365,8 +1365,8 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 #define BACKDROP_YAW_TEXELS 49152.0f
 #define BACKDROP_FIRST_CULLED_ROW (SCREEN_HEIGHT - SCREEN_BORDER + 1)
 #define BACKDROP_ABOVE_SCREEN 32
-#define FULL_VIEW_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
-#define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - 2 * SCREEN_BORDER)
+#define FULL_VIEW_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
+#define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - (2 * SCREEN_BORDER))
 extern s32 f_BackdropStripCount;
 extern s32 f_BackdropStripHeight;
 extern s32 f_BackdropImageWidth;
@@ -1477,7 +1477,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
             (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
-            ((f_BackdropImageWidth * f_BackdropStripHeight + 3) >> 2) - 1,
+            (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
             CALC_DXT_4b(f_BackdropImageWidth));
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
@@ -1560,7 +1560,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
             (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
         gDPLoadSync(gfx++);
         gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
-            ((f_BackdropImageWidth * f_BackdropStripHeight + 3) >> 2) - 1,
+            (((f_BackdropImageWidth * f_BackdropStripHeight) + 3) >> 2) - 1,
             CALC_DXT_4b(f_BackdropImageWidth));
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
@@ -1649,7 +1649,7 @@ void HandleFrameBufferSwap(void) {}
  * the border, in strips. Each strip is loaded as a block, and the tiles are
  * set up with the first.
  */
-#define FADE_FRAME_WIDTH (SCREEN_WIDTH - 2 * BACKDROP_BORDER)
+#define FADE_FRAME_WIDTH (SCREEN_WIDTH - (2 * BACKDROP_BORDER))
 #define FADE_FRAME_WORDS_PER_ROW (FADE_FRAME_WIDTH / 2)
 #define FADE_STEP 12
 #define FAST_FADE_STEP 24
@@ -1670,11 +1670,11 @@ void HandleFrameBufferSwap(void) {}
           0, 0, 0, 0, 0, 0); \
       gDPLoadSync(gfx++); \
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
-          (height) * FADE_FRAME_WIDTH - 1, \
+          ((height) * FADE_FRAME_WIDTH) - 1, \
           CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
       gDPPipeSync(gfx++); \
       gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
-          (FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES + 7) >> 3, 0, \
+          ((FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES) + 7) >> 3, 0, \
           G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0); \
       gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, \
           (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
@@ -1685,7 +1685,7 @@ void HandleFrameBufferSwap(void) {}
           gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7); \
       gDPLoadSync(gfx++); \
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
-          (height) * FADE_FRAME_WIDTH - 1, \
+          ((height) * FADE_FRAME_WIDTH) - 1, \
           CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
       gDPPipeSync(gfx++); \
     } \
@@ -1777,7 +1777,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               f_HudAnimationFramesLeft << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE,
-              (SCREEN_WIDTH / 2 - f_HudAnimationFramesLeft) << 5, 0, 1 << 10,
+              ((SCREEN_WIDTH / 2) - f_HudAnimationFramesLeft) << 5, 0, 1 << 10,
               1 << 10);
           gSPScisTextureRectangle(gfx++,
               (SCREEN_WIDTH - f_HudAnimationFramesLeft) << 2,

@@ -63,7 +63,7 @@
       ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
   for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
     vertex = \
-        (Vtx*)FRAME_DATA_POINTER(slot, (triangle)->vertices + i * VTX_SIZE); \
+        (Vtx*)FRAME_DATA_POINTER(slot, (triangle)->vertices + (i * VTX_SIZE)); \
     vertex->v.tc[0] = (sCoordinates)[i]; \
     vertex->v.tc[1] = (tCoordinates)[i]; \
   }

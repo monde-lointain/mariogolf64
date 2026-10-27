@@ -206,8 +206,8 @@ void DrawPinShadow(void) {
   gSPVertex(
       g_DisplayListHead++, f_PinShadowVertices, PIN_SHADOW_VERTEX_COUNT, 0);
   for (i = 0; i != PIN_SHADOW_ROW_COUNT - 1; i++) {
-    gSP2Triangles(g_DisplayListHead++, i * 2, i * 2 + 2, i * 2 + 1, 0,
-        i * 2 + 1, i * 2 + 2, i * 2 + 3, 0);
+    gSP2Triangles(g_DisplayListHead++, i * 2, (i * 2) + 2, (i * 2) + 1, 0,
+        (i * 2) + 1, (i * 2) + 2, (i * 2) + 3, 0);
   }
 }
 

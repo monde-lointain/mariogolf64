@@ -185,8 +185,8 @@ void func_80200A40_ovl_01(
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-        (top + stripIndex * halfSize) << 2, (left + halfSize + halfSize) << 2,
-        (top + halfSize + stripIndex * halfSize) << 2, G_TX_RENDERTILE, 0, 0,
+        (top + (stripIndex * halfSize)) << 2, (left + halfSize + halfSize) << 2,
+        (top + halfSize + (stripIndex * halfSize)) << 2, G_TX_RENDERTILE, 0, 0,
         scale, scale);
     gDPPipeSync(gfx++);
   }
@@ -697,9 +697,10 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop = COURSE_NAME_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
-    gSPScisTextureRectangle(gfx++, (COURSE_NAME_BANNER_LEFT + squeeze / 2) << 2,
-        (slide + stripTop) << 2,
-        (COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - squeeze / 2) << 2,
+    gSPScisTextureRectangle(gfx++,
+        (COURSE_NAME_BANNER_LEFT + (squeeze / 2)) << 2, (slide + stripTop) << 2,
+        (COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - (squeeze / 2))
+            << 2,
         (slide + stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0,
         0, (MENU_BANNER_WIDTH << 10) / (COURSE_NAME_BANNER_WIDTH - squeeze),
         TEXEL_STEP_ONE);
@@ -801,13 +802,13 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FDF4_ovl_01[choiceIndex][0] - D_800FE33C / 2) << 2,
-      (D_8022FDF4_ovl_01[choiceIndex][1] - D_800FE33C / 2) << 2,
+      (D_8022FDF4_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
+      (D_8022FDF4_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
       (D_8022FDF4_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH +
-          D_800FE33C / 2)
+          (D_800FE33C / 2))
           << 2,
       (D_8022FDF4_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + D_800FE33C / 2))
+          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2)))
           << 2,
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
@@ -880,13 +881,13 @@ void func_802058B8_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FE14_ovl_01[choiceIndex][0] - D_800FE33C / 2) << 2,
-      (D_8022FE14_ovl_01[choiceIndex][1] - D_800FE33C / 2) << 2,
+      (D_8022FE14_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
+      (D_8022FE14_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
       (D_8022FE14_ovl_01[choiceIndex][0] + MAIN_CHOICE_LABEL_WIDTH +
-          D_800FE33C / 2)
+          (D_800FE33C / 2))
           << 2,
       (D_8022FE14_ovl_01[choiceIndex][1] +
-          (MAIN_CHOICE_LABEL_HEIGHT + D_800FE33C / 2))
+          (MAIN_CHOICE_LABEL_HEIGHT + (D_800FE33C / 2)))
           << 2,
       G_TX_RENDERTILE, 0, 0,
       (MAIN_CHOICE_LABEL_WIDTH << 10) / (D_800FE33C + MAIN_CHOICE_LABEL_WIDTH),
@@ -958,11 +959,12 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (D_8022FE2C_ovl_01[choiceIndex][0] - D_800FE33C / 2) << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][1] - D_800FE33C / 2) << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH + D_800FE33C / 2)
+      (D_8022FE2C_ovl_01[choiceIndex][0] - (D_800FE33C / 2)) << 2,
+      (D_8022FE2C_ovl_01[choiceIndex][1] - (D_800FE33C / 2)) << 2,
+      (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH + (D_800FE33C / 2))
           << 2,
-      (D_8022FE2C_ovl_01[choiceIndex][1] + (ROOM_LABEL_HEIGHT + D_800FE33C / 2))
+      (D_8022FE2C_ovl_01[choiceIndex][1] +
+          (ROOM_LABEL_HEIGHT + (D_800FE33C / 2)))
           << 2,
       G_TX_RENDERTILE, 0, 0,
       (ROOM_LABEL_WIDTH << 10) / (D_800FE33C + ROOM_LABEL_WIDTH),
@@ -1095,10 +1097,10 @@ void func_802081E8_ovl_01(Gfx** displayListHead, s32 left, s32 top,
       growHeight = 0;
     }
     gSPScisTextureRectangle(gfx++,
-        (left + starIndex * STAR_WIDTH - growWidth / 2) << 2,
-        (top - growHeight / 2) << 2,
-        (left + starIndex * STAR_WIDTH + growWidth / 2 + STAR_WIDTH) << 2,
-        (top + growHeight / 2 + STAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+        (left + starIndex * STAR_WIDTH - (growWidth / 2)) << 2,
+        (top - (growHeight / 2)) << 2,
+        (left + starIndex * STAR_WIDTH + (growWidth / 2) + STAR_WIDTH) << 2,
+        (top + (growHeight / 2) + STAR_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         (STAR_WIDTH << 10) / (growWidth + STAR_WIDTH),
         (STAR_HEIGHT << 10) / (growHeight + STAR_HEIGHT));
     gDPPipeSync(gfx++);
@@ -1190,10 +1192,10 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
     top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
     /* A hole without its star draws from the silver star's tile */
     tile = save->hasRingShotStar[g_MenuChoices.courseIndex][holeIndex] == FALSE;
-    gSPScisTextureRectangle(gfx++, (left - growWidth / 2) << 2,
-        (top - growHeight / 2) << 2,
-        (left + RING_SHOT_STAR_WIDTH + growWidth / 2) << 2,
-        (top + RING_SHOT_STAR_HEIGHT + growHeight / 2) << 2, tile, 0, 0,
+    gSPScisTextureRectangle(gfx++, (left - (growWidth / 2)) << 2,
+        (top - (growHeight / 2)) << 2,
+        (left + RING_SHOT_STAR_WIDTH + (growWidth / 2)) << 2,
+        (top + RING_SHOT_STAR_HEIGHT + (growHeight / 2)) << 2, tile, 0, 0,
         (RING_SHOT_STAR_WIDTH << 10) / (growWidth + RING_SHOT_STAR_WIDTH),
         (RING_SHOT_STAR_HEIGHT << 10) / (growHeight + RING_SHOT_STAR_HEIGHT));
     gDPPipeSync(gfx++);

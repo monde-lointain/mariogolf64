@@ -137,8 +137,9 @@
  * macro, as an inline function compiles differently from the original.
  */
 #define GetPlaneSide(plane, x, y, z) \
-  ((plane).normal[AXIS_X] * (x) + (plane).normal[AXIS_Y] * (y) + \
-      (plane).normal[AXIS_Z] * (z) + (plane).distance * COURSE_UNITS_PER_UNIT)
+  (((plane).normal[AXIS_X] * (x)) + ((plane).normal[AXIS_Y] * (y)) + \
+      ((plane).normal[AXIS_Z] * (z)) + \
+      ((plane).distance * COURSE_UNITS_PER_UNIT))
 
 /* Whether a point is off the ground; a negative x or z is too, as an unsigned
  * one is big */
@@ -1550,9 +1551,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
         }
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX,
-                  deltaY * endFraction + startY,
-                  deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
+                  (deltaY * endFraction) + startY,
+                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
             osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
             hitPointU = (deltaX * endFraction) + startX;
@@ -1605,9 +1606,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
         }
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX,
-                  deltaY * endFraction + startY,
-                  deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
+                  (deltaY * endFraction) + startY,
+                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
             osSyncPrintf("X Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
             hitPointU = (deltaX * endFraction) + startX;
@@ -1703,9 +1704,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
         }
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX,
-                  deltaY * endFraction + startY,
-                  deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
+                  (deltaY * endFraction) + startY,
+                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
             osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
             hitPointU = (deltaY * endFraction) + startY;
@@ -1750,9 +1751,9 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
         }
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
-          if (fabsf(GetPlaneSide(plane, deltaX * endFraction + startX,
-                  deltaY * endFraction + startY,
-                  deltaZ * endFraction + startZ)) < WALL_END_DISTANCE) {
+          if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
+                  (deltaY * endFraction) + startY,
+                  (deltaZ * endFraction) + startZ)) < WALL_END_DISTANCE) {
             osSyncPrintf("Z Adjust Logic %f,%f\n", hitFraction, endFraction);
             hitFraction = endFraction;
             hitPointU = (deltaY * endFraction) + startY;

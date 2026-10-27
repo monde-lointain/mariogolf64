@@ -1904,7 +1904,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
       spinStep = angle * DIVOT_SPIN_STEP_COUNT / (2 * M_PI);
       gDPLoadTextureBlock_4b(gfx++,
           TEXTURE_ADDRESS(f_DivotImage +
-              (f_PingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE +
+              ((f_PingPongFrameIndices[spinStep] * DIVOT_FRAME_SIZE) +
                   PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
           G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
@@ -1939,7 +1939,7 @@ void DrawDivotMark(Gfx** displayListHead) {
   /* Grouping the frame's offset is there to match */
   gDPLoadTextureBlock_4b(gfx++,
       TEXTURE_ADDRESS(f_DivotImage +
-          (DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
+          ((DIVOT_MARK_FRAME * DIVOT_FRAME_SIZE) + PALETTED_TEXELS_OFFSET)),
       G_IM_FMT_CI, DIVOT_IMAGE_SIZE, DIVOT_IMAGE_SIZE, 0, G_TX_CLAMP,
       G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_DivotMarkMatrix),
@@ -2565,7 +2565,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     /* Grouping the frame's offset is there to match */
     gDPLoadTextureTile_4b(gfx++,
         TEXTURE_ADDRESS(f_CloudImage +
-            (spinFrame * BADGE_FRAME_SIZE + PALETTED_TEXELS_OFFSET)),
+            ((spinFrame * BADGE_FRAME_SIZE) + PALETTED_TEXELS_OFFSET)),
         G_IM_FMT_CI, BADGE_SIZE, BADGE_SIZE, 0, 0, BADGE_SIZE - 1,
         BADGE_SIZE - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, BADGE_LEFT << 2, (offsetY + BADGE_RESTING_TOP) << 2,

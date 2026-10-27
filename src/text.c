@@ -907,8 +907,8 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           if ((u8)g_PrintBuffer[index] >= CHARACTER_CODE_MARK_FIRST &&
               (u8)g_PrintBuffer[index] <
                   CHARACTER_CODE_MARK_FIRST + CHARACTER_CODE_MARK_COUNT) {
-            gSPTextureRectangle(gfx++, (x - FONT_SIZE_MEDIUM / 2) << 2,
-                (y - SLOT_MARK_RISE) << 2, (x + FONT_SIZE_MEDIUM / 2) << 2,
+            gSPTextureRectangle(gfx++, (x - (FONT_SIZE_MEDIUM / 2)) << 2,
+                (y - SLOT_MARK_RISE) << 2, (x + (FONT_SIZE_MEDIUM / 2)) << 2,
                 (y - SLOT_MARK_RISE + FONT_SIZE_MEDIUM) << 2, G_TX_RENDERTILE,
                 characterLeft << 5, characterTop << 5, 1 << 10, 1 << 10);
           } else {

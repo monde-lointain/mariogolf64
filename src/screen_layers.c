@@ -37,7 +37,7 @@
 /* The square that the shape is stretched over, centred on the screen */
 #define WIPE_SQUARE_SIZE 304
 #define WIPE_SQUARE_LEFT SCREEN_BORDER
-#define WIPE_SQUARE_TOP (SCREEN_HEIGHT / 2 - WIPE_SQUARE_SIZE / 2)
+#define WIPE_SQUARE_TOP ((SCREEN_HEIGHT / 2) - (WIPE_SQUARE_SIZE / 2))
 
 #define HALF_TURN_IMAGE 0x955
 #define HALF_TURN_FRAMES 144
@@ -65,7 +65,7 @@
 #define HALF_TURN_LAST_COLUMN_OFFSET 75
 #define HALF_TURN_LAST_ROW_OFFSET 111
 #define HALF_TURN_PAIR(column, row) \
-  texelPairs[(row) * HALF_TURN_PAIRS_PER_ROW + (column)]
+  texelPairs[((row) * HALF_TURN_PAIRS_PER_ROW) + (column)]
 /*
  * Marks the eight octants' points two rows deep, then steps the circle.
  * The offsets are clamped to keep the points on the picture.
@@ -90,7 +90,7 @@
       stepOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
     } \
     MARK_OCTANT_POINTS(stepOffset, radiusOffset, operation); \
-    error = error - 1 - step * 2; \
+    error = error - 1 - (step * 2); \
     if (error < 0) { \
       error += (radius - 1) * 2; \
       radius--; \
@@ -151,7 +151,7 @@
 #define CHOICE_IMAGE_HEIGHT 24
 #define YES_TEXELS_OFFSET LARGE_PALETTED_TEXELS_OFFSET
 #define NO_TEXELS_OFFSET \
-  (YES_TEXELS_OFFSET + CHOICE_IMAGE_WIDTH * CHOICE_IMAGE_HEIGHT)
+  (YES_TEXELS_OFFSET + (CHOICE_IMAGE_WIDTH * CHOICE_IMAGE_HEIGHT))
 #define YES_CENTER_X 128
 #define NO_CENTER_X 192
 /* Below the cloud's middle by a quarter of its height more than this */
@@ -244,7 +244,7 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
         maskt, shiftt, cms, masks, shifts); \
     gDPLoadSync(pkt++); \
     gDPLoadBlock(pkt++, G_TX_LOADTILE, 0, 0, \
-        (((width) * (height) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1, \
+        ((((width) * (height)) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1, \
         CALC_DXT(width, loadSiz##_BYTES)); \
     gDPPipeSync(pkt++); \
     gDPSetTile(pkt++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3, \
@@ -840,7 +840,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
                                                  : HALF_TURN_STRIP_ROWS;
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS((u8*)f_HalfTurnImage + IMAGE_HEADER_SIZE +
-            i * HALF_TURN_STRIP_SIZE),
+            (i * HALF_TURN_STRIP_SIZE)),
         G_IM_FMT_RGBA, G_IM_SIZ_16b, HALF_TURN_WIDTH, stripRows, 0, 0,
         HALF_TURN_WIDTH - 1, stripRows - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,

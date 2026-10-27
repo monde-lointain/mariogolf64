@@ -30,9 +30,9 @@
 /* Grid vertices lie on tile corners and halfway between them */
 #define TILE_SPAN (1 << TILE_ORIGIN_SHIFT)
 #define HALF_TILE_SPAN (TILE_SPAN / 2)
-#define GRID_ROW_VERTEX_COUNT (GROUND_TILE_COLUMN_COUNT * 2 + 1)
+#define GRID_ROW_VERTEX_COUNT ((GROUND_TILE_COLUMN_COUNT * 2) + 1)
 #define GRID_VERTEX_COUNT \
-  (GRID_ROW_VERTEX_COUNT * (GROUND_TILE_ROW_COUNT * 2 + 1))
+  (GRID_ROW_VERTEX_COUNT * ((GROUND_TILE_ROW_COUNT * 2) + 1))
 /* Grid texture coordinates: four per unit, starting one texel in */
 #define GRID_TEXTURE_SCALE 4
 #define GRID_TEXTURE_BORDER (1 << TEXTURE_COORD_FRACTION_BITS)
@@ -159,9 +159,9 @@ typedef struct GroundLightColor {
 
 /* A ground tile's texture is its bordered 16-bit texels */
 #define GROUND_TEXTURE_LOAD_SIZE \
-  (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH - 1)
+  ((GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH) - 1)
 #define GROUND_TEXTURE_LINE_SIZE \
-  ((GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES + 7) >> 3)
+  (((GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES) + 7) >> 3)
 #define GROUND_TEXTURE_DXT \
   CALC_DXT(GROUND_TILE_TEXEL_ROW_LENGTH, G_IM_SIZ_16b_BYTES)
 

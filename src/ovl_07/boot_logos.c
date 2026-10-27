@@ -39,7 +39,7 @@
 
 #define FADE_IN_ALPHA(frame) ((frame) * FADE_IN_ALPHA_STEP)
 #define FADE_OUT_ALPHA(frame) \
-  (255 - ((frame) - FADE_OUT_FIRST_FRAME) * FADE_OUT_ALPHA_STEP)
+  (255 - (((frame) - FADE_OUT_FIRST_FRAME) * FADE_OUT_ALPHA_STEP))
 
 /* The Nintendo logo's sound plays on this frame */
 #define NINTENDO_SOUND_FRAME 3

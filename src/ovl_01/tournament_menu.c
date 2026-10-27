@@ -1288,7 +1288,7 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
       }
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_80230F4C_ovl_01 + PALETTED_TEXELS_OFFSET +
-              glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2)) &
+              (glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2))) &
               ~7,
           G_IM_FMT_CI, CODE_GLYPH_SIZE, CODE_GLYPH_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

@@ -2830,8 +2830,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTextureBlock(gfx++,
                 TEXTURE_ADDRESS(f_LogoBallImages +
                     LARGE_PALETTED_TEXELS_OFFSET +
-                    (stripIndex * OPENING_BALL_STRIP_SIZE +
-                        f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
+                    ((stripIndex * OPENING_BALL_STRIP_SIZE) +
+                        (f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE))),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                 OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2840,7 +2840,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTextureBlock(gfx++,
                 TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
                     LARGE_PALETTED_TEXELS_OFFSET +
-                    stripIndex * OPENING_BALL_STRIP_SIZE),
+                    (stripIndex * OPENING_BALL_STRIP_SIZE)),
                 G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                 OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -3075,9 +3075,9 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               gDPLoadTextureBlock(gfx++,
                   TEXTURE_ADDRESS(f_LogoBallImages +
                       LARGE_PALETTED_TEXELS_OFFSET +
-                      (stripIndex * OPENING_BALL_STRIP_SIZE +
-                          f_ProjectedLogoBallFrameIndex *
-                              LOGO_BALL_FRAME_SIZE)),
+                      ((stripIndex * OPENING_BALL_STRIP_SIZE) +
+                          (f_ProjectedLogoBallFrameIndex *
+                              LOGO_BALL_FRAME_SIZE))),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                   OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -3086,7 +3086,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               gDPLoadTextureBlock(gfx++,
                   TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
                       LARGE_PALETTED_TEXELS_OFFSET +
-                      stripIndex * OPENING_BALL_STRIP_SIZE),
+                      (stripIndex * OPENING_BALL_STRIP_SIZE)),
                   G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
                   OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -3384,8 +3384,8 @@ extern Vtx f_LakituTrailVertices[2];
   (((segment) * LAKITU_TRAIL_ROWS_PER_SEGMENT) << 5)
 /* First vertex buffer slot of a segment in the second batch */
 #define LAKITU_TRAIL_SECOND_BATCH_SLOT(segment) \
-  ((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2 - \
-      ((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2)
+  (((LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 2) * 2) - \
+      (((segment) - LAKITU_TRAIL_BATCH_SEGMENT_COUNT) * 2))
 #define LAKITU_TRAIL_FADE_STEP 4
 
 /*
@@ -3431,11 +3431,11 @@ void DrawLakitu(Gfx** displayListHead) {
         G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (f_LakituScreenPoint[0] - LAKITU_DRAWN_SIZE / 2) << 2,
-        (f_LakituScreenPoint[1] - LAKITU_DRAWN_SIZE / 2) << 2,
-        (f_LakituScreenPoint[0] + LAKITU_DRAWN_SIZE / 2) << 2,
-        (f_LakituScreenPoint[1] + LAKITU_DRAWN_SIZE / 2) << 2, G_TX_RENDERTILE,
-        LAKITU_IMAGE_SIZE << 5, 0, LAKITU_SCALE, LAKITU_SCALE);
+        (f_LakituScreenPoint[0] - (LAKITU_DRAWN_SIZE / 2)) << 2,
+        (f_LakituScreenPoint[1] - (LAKITU_DRAWN_SIZE / 2)) << 2,
+        (f_LakituScreenPoint[0] + (LAKITU_DRAWN_SIZE / 2)) << 2,
+        (f_LakituScreenPoint[1] + (LAKITU_DRAWN_SIZE / 2)) << 2,
+        G_TX_RENDERTILE, LAKITU_IMAGE_SIZE << 5, 0, LAKITU_SCALE, LAKITU_SCALE);
     gDPPipeSync(gfx++);
     rotation[0] = 0.0f;
     rotation[1] = 0.0f;
@@ -3482,7 +3482,7 @@ void DrawLakitu(Gfx** displayListHead) {
       gSPVertex(gfx++, f_LakituTrailVertices, 2, drawnIndex * 2);
       gSPModifyVertex(
           gfx++, drawnIndex * 2, G_MWO_POINT_ST, LAKITU_TRAIL_T(drawnIndex));
-      gSPModifyVertex(gfx++, drawnIndex * 2 + 1, G_MWO_POINT_ST,
+      gSPModifyVertex(gfx++, (drawnIndex * 2) + 1, G_MWO_POINT_ST,
           (LAKITU_TRAIL_RIGHT_S << 16) + LAKITU_TRAIL_T(drawnIndex));
       segmentIndex--;
       if (segmentIndex < 0) {
@@ -3491,9 +3491,9 @@ void DrawLakitu(Gfx** displayListHead) {
     }
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
         drawnIndex++) {
-      gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
-          drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1, drawnIndex * 2 + 2,
-          drawnIndex * 2 + 3, 0);
+      gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
+          (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
+          (drawnIndex * 2) + 3, 0);
     }
     /*
      * The second batch fills the vertex buffer from the end, keeping the
@@ -3518,9 +3518,9 @@ void DrawLakitu(Gfx** displayListHead) {
     }
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
         drawnIndex++) {
-      gSP2Triangles(gfx++, drawnIndex * 2 + 1, drawnIndex * 2,
-          drawnIndex * 2 + 2, 0, drawnIndex * 2 + 1, drawnIndex * 2 + 2,
-          drawnIndex * 2 + 3, 0);
+      gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
+          (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
+          (drawnIndex * 2) + 3, 0);
     }
     gDPPipeSync(gfx++);
     if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
@@ -3790,7 +3790,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       for (stripIndex = 0; stripIndex != SHOT_BALL_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_ShotBallImage + LARGE_PALETTED_TEXELS_OFFSET +
-                stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT),
+                (stripIndex * SHOT_BALL_IMAGE_SIZE * SHOT_BALL_STRIP_HEIGHT)),
             G_IM_FMT_CI, G_IM_SIZ_8b, SHOT_BALL_IMAGE_SIZE,
             SHOT_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -4276,8 +4276,8 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
         gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_LogoLetterImages +
-                ((j + i * LOGO_LETTER_HALF_COUNT) * LOGO_LETTER_WIDTH *
-                        LOGO_LETTER_HALF_HEIGHT +
+                (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                     LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET)),
             G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
             LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -4306,7 +4306,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(gfx++,
           TEXTURE_ADDRESS(f_LogoClubImage +
-              (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT +
+              ((i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT) +
                   LARGE_PALETTED_TEXELS_OFFSET)),
           G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -4357,8 +4357,8 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
         gDPLoadTextureBlock(gfx++,
             TEXTURE_ADDRESS(f_LogoLetterImages +
-                ((j + i * LOGO_LETTER_HALF_COUNT) * LOGO_LETTER_WIDTH *
-                        LOGO_LETTER_HALF_HEIGHT +
+                (((j + (i * LOGO_LETTER_HALF_COUNT)) * LOGO_LETTER_WIDTH *
+                     LOGO_LETTER_HALF_HEIGHT) +
                     LARGE_PALETTED_TEXELS_OFFSET)),
             G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
             LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -4651,8 +4651,8 @@ void DrawOpeningSparks(Gfx** displayListHead) {
         f_OpeningSparkPositions[sparkIndex][1] = (SCREEN_HEIGHT / 2) - origin.y;
         f_OpeningSparkAngles[sparkIndex] =
             ((f32)sparkIndex * SPARK_ANGLE_STEP) +
-            (f32)DEGREES_TO_RADIANS(guRandom() % SPARK_ANGLE_JITTER_RANGE -
-                SPARK_ANGLE_JITTER_RANGE / 2);
+            (f32)DEGREES_TO_RADIANS((guRandom() % SPARK_ANGLE_JITTER_RANGE) -
+                (SPARK_ANGLE_JITTER_RANGE / 2));
         speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) +
             SPARK_MIN_SPEED;
         f_OpeningSparkVelocities[sparkIndex][0] =

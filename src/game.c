@@ -120,7 +120,7 @@ extern s32 f_HasUnloadedSubModule;
  * inside its border at SPIN_MESH_DISTANCE from the camera
  */
 #define SPIN_MESH_ROW_COUNT 42
-#define SPIN_MESH_HALF_WIDTH ((SCREEN_WIDTH / 2 - SCREEN_BORDER) * 10)
+#define SPIN_MESH_HALF_WIDTH (((SCREEN_WIDTH / 2) - SCREEN_BORDER) * 10)
 #define SPIN_MESH_SCALE 0.1f
 #define SPIN_MESH_DISTANCE -290.0f
 #define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
@@ -408,7 +408,8 @@ void DrawSpinMesh(Gfx** displayListHead) {
         gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
             (u32)((u32*)g_DepthBuffer + texelPairOffset) & ~7);
         gDPLoadSync(gfx++);
-        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, SCREEN_WIDTH * stripHeight - 1,
+        gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+            (SCREEN_WIDTH * stripHeight) - 1,
             CALC_DXT(SCREEN_WIDTH, G_IM_SIZ_16b_BYTES));
         gDPPipeSync(gfx++);
       }
@@ -424,15 +425,15 @@ void DrawSpinMesh(Gfx** displayListHead) {
                                 : SAVED_FRAME_STRIP_HEIGHT;
       gSPModifyVertex(
           gfx++, stripIndex * 2, G_MWO_POINT_ST, SCREEN_BORDER << 21);
-      gSPModifyVertex(gfx++, stripIndex * 2 + 1, G_MWO_POINT_ST,
+      gSPModifyVertex(gfx++, (stripIndex * 2) + 1, G_MWO_POINT_ST,
           (SCREEN_WIDTH - SCREEN_BORDER) << 21);
-      gSPModifyVertex(gfx++, stripIndex * 2 + 2, G_MWO_POINT_ST,
+      gSPModifyVertex(gfx++, (stripIndex * 2) + 2, G_MWO_POINT_ST,
           (SCREEN_BORDER << 21) + (stripHeight << 5));
-      gSPModifyVertex(gfx++, stripIndex * 2 + 3, G_MWO_POINT_ST,
+      gSPModifyVertex(gfx++, (stripIndex * 2) + 3, G_MWO_POINT_ST,
           ((SCREEN_WIDTH - SCREEN_BORDER) << 21) + (stripHeight << 5));
-      gSP2Triangles(gfx++, stripIndex * 2, stripIndex * 2 + 2,
-          stripIndex * 2 + 1, 0, stripIndex * 2 + 1, stripIndex * 2 + 2,
-          stripIndex * 2 + 3, 0);
+      gSP2Triangles(gfx++, stripIndex * 2, (stripIndex * 2) + 2,
+          (stripIndex * 2) + 1, 0, (stripIndex * 2) + 1, (stripIndex * 2) + 2,
+          (stripIndex * 2) + 3, 0);
       gDPPipeSync(gfx++);
       if (isLastStrip) {
         break;

@@ -124,7 +124,7 @@
  * that the next strip overlaps it. The last strip is only the overlap,
  * which ends the image at the screen's bottom border.
  */
-#define STAFF_ROLL_IMAGE_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
+#define STAFF_ROLL_IMAGE_WIDTH (SCREEN_WIDTH - (2 * SCREEN_BORDER))
 #define IMAGE_STRIP_COUNT 38
 #define IMAGE_STRIP_STEP 6
 #define IMAGE_STRIP_OVERLAP 2
@@ -235,15 +235,15 @@
     f32 progress = (frames); \
     s32 left = progress * SHRINK_LEFT_STEP; \
     s32 top = progress * SHRINK_TOP_STEP; \
-    s32 height = FULL_VIEW_HEIGHT - progress * SHRINK_HEIGHT_STEP; \
-    s32 width = FULL_VIEW_WIDTH - progress * SHRINK_WIDTH_STEP; \
+    s32 height = FULL_VIEW_HEIGHT - (progress * SHRINK_HEIGHT_STEP); \
+    s32 width = FULL_VIEW_WIDTH - (progress * SHRINK_WIDTH_STEP); \
 \
     (view).scissorX = left; \
     (view).scissorY = top; \
     (view).scissorWidth = width; \
     (view).scissorHeight = height; \
-    (view).viewportCenterX = left * 2 + width; \
-    (view).viewportCenterY = top * 2 + height; \
+    (view).viewportCenterX = (left * 2) + width; \
+    (view).viewportCenterY = (top * 2) + height; \
     (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT); \
   } while (0)
 

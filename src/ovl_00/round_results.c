@@ -863,7 +863,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
         (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
         G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, \
         (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1, \
-        (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0, \
+        ((glyph) * PLACE_GLYPH_SIZE) + PLACE_GLYPH_SIZE - 1, 0, \
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
     gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2, \
@@ -1073,7 +1073,7 @@ void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
   LoadSmallPalette(&gfx, 0, f_ResultsLabelsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(gfx++,
       (u32)(f_ResultsLabelsImage +
-          (label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2) +
+          ((label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2)) +
               PALETTED_TEXELS_OFFSET)) &
           ~7,
       G_IM_FMT_CI, RESULTS_LABEL_STORED_WIDTH, 0, 0, 0, RESULTS_LABEL_WIDTH - 1,
@@ -1869,8 +1869,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
             ((u32)f_TrophyImage +
-                i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])) &
                 ~7,
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
@@ -1906,8 +1906,8 @@ void DrawResultsBanner(Gfx** displayListHead) {
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
             ((u32)f_TrophyImage +
-                i * f_TrophySizes[course][TROPHY_WIDTH] *
-                    f_TrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                (i * f_TrophySizes[course][TROPHY_WIDTH] *
+                    f_TrophySizes[course][TROPHY_PART_HEIGHTS])) &
                 ~7,
             G_IM_FMT_CI, G_IM_SIZ_8b, f_TrophySizes[course][TROPHY_WIDTH],
             f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,

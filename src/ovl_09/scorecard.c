@@ -1180,7 +1180,7 @@ void DrawScorecard(Gfx** displayListHead) {
 #define TABLE_BODY_TOP 44
 #define TABLE_BODY_HEIGHT 190
 #define TABLE_BODY_OFFSET \
-  (LARGE_PALETTED_TEXELS_OFFSET + TAB_STRIP_COUNT * TAB_HEIGHT * TABLE_WIDTH)
+  (LARGE_PALETTED_TEXELS_OFFSET + (TAB_STRIP_COUNT * TAB_HEIGHT * TABLE_WIDTH))
 #define TABLE_LOAD_HEIGHT 7 /* The rows that fit in texture memory at once */
 #define TAB_BACK_GRAY 0xBF
 #define FIRST_OF_THREE_TAB_STRIP 0
@@ -1271,7 +1271,8 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
     gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
         (u32)(g_Scorecard.tableImage + texelsOffset) & ~7);
     gDPLoadSync(gfx++);
-    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, loadHeight * (TABLE_WIDTH / 2) - 1,
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+        (loadHeight * (TABLE_WIDTH / 2)) - 1,
         CALC_DXT(TABLE_WIDTH, G_IM_SIZ_8b_BYTES));
     top = g_Scorecard.y + TABLE_BODY_TOP;
     texelsOffset += TABLE_LOAD_HEIGHT * TABLE_WIDTH;

@@ -337,7 +337,7 @@ void func_8021508C_ovl_01(
     }
     if (group != TIME_GROUP_COUNT - 1) {
       gDPLoadTextureBlock_4b(gfx++,
-          ((u32)D_8023AA48_ovl_01 + TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES +
+          ((u32)D_8023AA48_ovl_01 + (TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES) +
               PALETTED_TEXELS_OFFSET) &
               ~7,
           G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0,

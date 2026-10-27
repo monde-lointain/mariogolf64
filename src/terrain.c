@@ -56,11 +56,11 @@ typedef struct MapOverviewControls {
  */
 #define MAP_TEXEL(column, row) \
   g_WorkArea.hole \
-      .tiles[(column) / GROUND_TILE_TEXEL_SPAN + \
-          ((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT] \
+      .tiles[((column) / GROUND_TILE_TEXEL_SPAN) + \
+          (((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)] \
       .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
-          ((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * \
-              GROUND_TILE_TEXEL_ROW_LENGTH + \
+          (((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * \
+              GROUND_TILE_TEXEL_ROW_LENGTH) + \
           1]
 
 /*
@@ -70,7 +70,7 @@ typedef struct MapOverviewControls {
 #define WATER_PROBE_REACH 3072000
 #define MINI_GOLF_WATER_PROBE_REACH 614400
 #define WATER_PROBE_HEIGHT(fraction, reach) \
-  ((fraction) * (2.0f * (reach)) + -(f32)(reach))
+  (((fraction) * (2.0f * (reach))) + -(f32)(reach))
 /* Raises the water's height for the surface test, or lowers it when asked */
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
@@ -947,7 +947,7 @@ void InitTerrainTextures(void) {
 }
 
 /* A tile's three by three grid vertices, by row and column */
-#define CORNER(row, column) corners[(row) * 3 + (column)]
+#define CORNER(row, column) corners[((row) * 3) + (column)]
 
 /* Sets a tile's midpoints between its grid vertices */
 void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {

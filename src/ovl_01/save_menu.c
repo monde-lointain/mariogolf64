@@ -934,8 +934,8 @@ void func_80224AFC_ovl_01(
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-        (top + stripIndex * halfSize) << 2, (left + halfSize + halfSize) << 2,
-        (top + halfSize + stripIndex * halfSize) << 2, G_TX_RENDERTILE, 0, 0,
+        (top + (stripIndex * halfSize)) << 2, (left + halfSize + halfSize) << 2,
+        (top + halfSize + (stripIndex * halfSize)) << 2, G_TX_RENDERTILE, 0, 0,
         scale, scale);
     gDPPipeSync(gfx++);
   }
@@ -952,9 +952,10 @@ void func_80224AFC_ovl_01(
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, (left + MODE_ICON_OFFSET_X) << 2,
-          (top + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y) << 2,
+          (top + (stripIndex * iconHalfSize) + MODE_ICON_OFFSET_Y) << 2,
           (left + iconHalfSize + iconHalfSize + MODE_ICON_OFFSET_X) << 2,
-          (top + iconHalfSize + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y)
+          (top + iconHalfSize + (stripIndex * iconHalfSize) +
+              MODE_ICON_OFFSET_Y)
               << 2,
           G_TX_RENDERTILE, 0, 0, iconScale, iconScale);
       gDPPipeSync(gfx++);

@@ -38,7 +38,7 @@
 /* Unk20 unkC values from -UNKC_ENTRY_LIMIT to UNKC_ENTRY_LIMIT have an Unk6 per
  * lie rating */
 #define UNKC_ENTRY_LIMIT 5
-#define UNKC_ENTRY_COUNT (UNKC_ENTRY_LIMIT * 2 + 1)
+#define UNKC_ENTRY_COUNT ((UNKC_ENTRY_LIMIT * 2) + 1)
 
 typedef struct Unk6 {
   /* 0x0 */ s8 unk0;

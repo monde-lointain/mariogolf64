@@ -871,9 +871,9 @@ void DrawFlipMessage(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, FLIP_MESSAGE_BOARD_ALPHA);
     gDPPipeSync(gfx++);
-    angle =
-        DEGREES_TO_RADIANS(f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME +
-            FLIP_MESSAGE_START_DEGREES);
+    angle = DEGREES_TO_RADIANS(
+        (f_FlipMessageFrame * FLIP_MESSAGE_DEGREES_PER_FRAME) +
+        FLIP_MESSAGE_START_DEGREES);
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
     }
@@ -1337,7 +1337,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define CAPTION_COPY_ALPHA 127
 #define CAPTION_COPY_TOP \
   (SHRINKING_IMAGE_CENTRE_Y - \
-      MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)
+      (MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE))
 #define CAPTION_FLASH_DEPTH 127.0f
 #define SOUND_CAPTION_MEET 0x4B
 #define CAPTION_SOUND_CHANNEL 13
@@ -1686,16 +1686,16 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
       gDPLoadTextureTile(gfx++,
           TEXTURE_ADDRESS(f_MovieBuffer +
               (MOVIE_IMAGE_PIXELS_OFFSET +
-                  i * READY_WIDTH * READY_STRIP_HEIGHT)),
+                  (i * READY_WIDTH * READY_STRIP_HEIGHT))),
           G_IM_FMT_CI, G_IM_SIZ_8b, READY_WIDTH, stripHeight, 0, 0,
           READY_WIDTH - 1, stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
           G_TX_MIRROR, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
-      gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST,
+      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
           (TEXEL_COORD(READY_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, i * 2 + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
-      gSPModifyVertex(gfx++, i * 2 + 3, G_MWO_POINT_ST,
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+      gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
           ((TEXEL_COORD(READY_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
     } else {
       stripHeight = (i != READY_GO_STRIP_COUNT - 1)
@@ -1704,20 +1704,20 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
       gDPLoadTextureTile(gfx++,
           TEXTURE_ADDRESS(f_MovieBuffer +
               (GO_TEXT_OFFSET + MOVIE_IMAGE_PIXELS_OFFSET +
-                  i * GO_WIDTH * GO_STRIP_HEIGHT)),
+                  (i * GO_WIDTH * GO_STRIP_HEIGHT))),
           G_IM_FMT_CI, G_IM_SIZ_8b, GO_WIDTH, stripHeight, 0, 0, GO_WIDTH - 1,
           stripHeight - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR,
           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPModifyVertex(gfx++, i * 2, G_MWO_POINT_ST, 0);
+      gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
+          (TEXEL_COORD(GO_WIDTH) - 1) << 16);
       gSPModifyVertex(
-          gfx++, i * 2 + 1, G_MWO_POINT_ST, (TEXEL_COORD(GO_WIDTH) - 1) << 16);
-      gSPModifyVertex(
-          gfx++, i * 2 + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
-      gSPModifyVertex(gfx++, i * 2 + 3, G_MWO_POINT_ST,
+          gfx++, (i * 2) + 2, G_MWO_POINT_ST, TEXEL_COORD(stripHeight));
+      gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
           ((TEXEL_COORD(GO_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
     }
-    gSP2Triangles(
-        gfx++, i * 2, i * 2 + 2, i * 2 + 3, 0, i * 2, i * 2 + 3, i * 2 + 1, 0);
+    gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,
+        (i * 2) + 1, 0);
   }
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -1821,7 +1821,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
   for (i = 0; i != MONTY_MOLE_STRIP_COUNT; i++) {
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS(
-            f_MovieBuffer + (MOVIE_FRAME_OFFSET + i * MONTY_MOLE_STRIP_SIZE)),
+            f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * MONTY_MOLE_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, MONTY_MOLE_WIDTH, MONTY_MOLE_STRIP_HEIGHT, 0,
         0, MONTY_MOLE_WIDTH - 1, MONTY_MOLE_STRIP_HEIGHT - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1872,7 +1872,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
     }
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS(
-            f_MovieBuffer + (MOVIE_FRAME_OFFSET + i * GOOMBA_STRIP_SIZE)),
+            f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * GOOMBA_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, GOOMBA_WIDTH, height, 0, 0, GOOMBA_WIDTH - 1,
         height - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1950,7 +1950,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPLoadTLUT_pal256(gfx++,
       TEXTURE_ADDRESS(f_MovieBuffer +
-          (f_MovieBackBuffer * LAKITU_FRAME_SIZE +
+          ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) +
               MOVIE_IMAGE_PALETTE_OFFSET)));
   offset = MOVIE_IMAGE_PIXELS_OFFSET;
   for (i = 0; i != LAKITU_STRIP_COUNT; i++) {
@@ -1958,7 +1958,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
     halfHeight = f_Lakitu.scale * LAKITU_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS(
-            f_MovieBuffer + (f_MovieBackBuffer * LAKITU_FRAME_SIZE + offset)),
+            f_MovieBuffer + ((f_MovieBackBuffer * LAKITU_FRAME_SIZE) + offset)),
         G_IM_FMT_CI, G_IM_SIZ_8b, LAKITU_WIDTH, LAKITU_STRIP_HEIGHT, 0, 0,
         LAKITU_WIDTH - 1, LAKITU_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2034,7 +2034,7 @@ void DrawToadMovie(Gfx** displayListHead) {
   for (i = 0; i != TOAD_STRIP_COUNT; i++) {
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS(f_MovieBuffer + TOAD_FRAME_OFFSET +
-            (f_MovieBackBuffer * TOAD_FRAME_SIZE + i * TOAD_STRIP_SIZE)),
+            ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + (i * TOAD_STRIP_SIZE))),
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, TOAD_STRIP_HEIGHT, 0, 0,
         TOAD_WIDTH - 1, TOAD_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
@@ -2289,12 +2289,12 @@ void LoadContactImages(UnkB8* player) {
   gSPModifyVertex( \
       gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT*(segment)); \
   gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
-      (f_ContactTextureS << 16) + f_ContactTextureT * (segment))
+      (f_ContactTextureS << 16) + (f_ContactTextureT * (segment)))
 
 #define DRAW_CONTACT_TRIANGLES() \
   for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
-    gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2, \
-        i * 2 + 3, 0); \
+    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1, \
+        (i * 2) + 2, (i * 2) + 3, 0); \
   }
 
 /* The shot style draws only the first segments */
@@ -2305,12 +2305,12 @@ void LoadContactImages(UnkB8* player) {
   DRAW_CONTACT_TRIANGLES(); \
   if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
     for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
-      for (i = pass * 30 + 16; i != pass * 30 + 31; i++) { \
-        DRAW_CONTACT_SEGMENT(i, 28 - (i - pass * 30 - 16) * 2); \
+      for (i = (pass * 30) + 16; i != (pass * 30) + 31; i++) { \
+        DRAW_CONTACT_SEGMENT(i, 28 - ((i - (pass * 30) - 16) * 2)); \
       } \
       DRAW_CONTACT_TRIANGLES(); \
-      for (i = pass * 30 + 31; i != pass * 30 + 46; i++) { \
-        DRAW_CONTACT_SEGMENT(i, (i - pass * 30 - 31) * 2 + 2); \
+      for (i = (pass * 30) + 31; i != (pass * 30) + 46; i++) { \
+        DRAW_CONTACT_SEGMENT(i, ((i - (pass * 30) - 31) * 2) + 2); \
       } \
       DRAW_CONTACT_TRIANGLES(); \
     } \
@@ -2744,12 +2744,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
     gSPVertex(gfx++, f_ContactVertices, 2, i * 2);
     gSPModifyVertex(
         gfx++, i * 2, G_MWO_POINT_ST, i << WIND_STREAK_TEXTURE_T_SHIFT);
-    gSPModifyVertex(gfx++, i * 2 + 1, G_MWO_POINT_ST,
+    gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
         (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
-    gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
-        i * 2 + 3, 0);
+    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
+        (i * 2) + 2, (i * 2) + 3, 0);
   }
   /* The second run reuses the vertex slots backwards from the last vertex of
    * the first */
@@ -2767,8 +2767,8 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
         (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
-    gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2,
-        i * 2 + 3, 0);
+    gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
+        (i * 2) + 2, (i * 2) + 3, 0);
   }
   f_WindStreakHead--;
   if (f_WindStreakHead < 0) {
