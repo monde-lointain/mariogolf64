@@ -1,8 +1,25 @@
 #include "common.h"
 
+extern f32 D_8022BE30_ovl_05;
+extern f32 D_8022BE34_ovl_05;
+extern s32 D_8022BE38_ovl_05;
+extern s32 D_8022BE3C_ovl_05;
+extern f32 D_8022BE40_ovl_05;
+extern f32 D_8022BE44_ovl_05;
+
+void func_80203620_ovl_05(void);
+
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020356C_ovl_05);
+void func_8020356C_ovl_05(f32 arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5) {
+    D_8022BE30_ovl_05 = arg0;
+    D_8022BE34_ovl_05 = arg1;
+    D_8022BE38_ovl_05 = arg2;
+    D_8022BE3C_ovl_05 = arg3;
+    D_8022BE40_ovl_05 = arg4;
+    D_8022BE44_ovl_05 = arg5;
+    func_80203620_ovl_05();
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035BC_ovl_05);
 
