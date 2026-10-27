@@ -6,6 +6,9 @@
 /* Sound effects play on channels, each holding one effect at a time */
 #define SOUND_CHANNEL_COUNT 16
 
+/* A ball being struck by a plain club or bouncing on hard ground */
+#define SOUND_CONTACT_PLAIN 0x51
+
 /* The sound of confirming a choice */
 #define SOUND_CONFIRM 0x5D
 

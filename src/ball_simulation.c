@@ -1052,7 +1052,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         case SURFACE_KIND_TEE_GROUND:
         case SURFACE_KIND_ROCK:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
-            PlaySound(0x51, g_NextSoundChannel, 0x7F);
+            PlaySound(SOUND_CONTACT_PLAIN, g_NextSoundChannel, 0x7F);
           }
           break;
       }

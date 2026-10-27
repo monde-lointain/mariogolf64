@@ -253,7 +253,8 @@ void func_801F4A40_ovl_05(void) {
 
 void func_801F4A6C_ovl_05(void) {
   if (f_IsLogoClubSwinging != 0) {
-    PlaySoundWithEffects(0x51, 12, 48 - (s32)(f_LogoClubOrbitRadius * 0.2f), 0,
+    PlaySoundWithEffects(SOUND_CONTACT_PLAIN, 12,
+                         48 - (s32)(f_LogoClubOrbitRadius * 0.2f), 0,
                          127 - (f_LogoClubPosition[0] - 160) / 2);
   }
 }
@@ -1050,7 +1051,7 @@ void func_801F6788_ovl_05(void) {
         break;
       case 0x3:
         if (f_OpeningSceneFramesLeft == 0x1C) {
-          PlaySound(0x51, D_8020AC4C_ovl_05, 0x7F);
+          PlaySound(SOUND_CONTACT_PLAIN, D_8020AC4C_ovl_05, 0x7F);
           func_801F4A40_ovl_05();
         }
         if (f_OpeningSceneFramesLeft == 0x18) {
@@ -1389,7 +1390,7 @@ void func_801F6788_ovl_05(void) {
         break;
       case 0x6F:
         if (f_OpeningSceneFramesLeft == 4) {
-          PlaySound(0x51, D_8020AC4C_ovl_05, 0x7F);
+          PlaySound(SOUND_CONTACT_PLAIN, D_8020AC4C_ovl_05, 0x7F);
           func_801F4A40_ovl_05();
         }
         if (f_OpeningSceneFramesLeft == 0) {
