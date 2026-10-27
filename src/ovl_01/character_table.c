@@ -50,6 +50,14 @@ typedef struct TableCell {
     /* 0x4 */ s32 row;
 } TableCell; /* size = 0x8 */
 
+/* The lines between the table's cells, each from one corner to the next */
+#define TABLE_LINE_COUNT 12
+
+typedef struct TableCorner {
+    /* 0x0 */ s32 x;
+    /* 0x4 */ s32 y;
+} TableCorner; /* size = 0x8 */
+
 /* The most bytes of each character's file that func_802177D0 keeps */
 #define MENU_SCENE_FILE_SIZE 0x200
 
@@ -60,6 +68,7 @@ extern s32 D_80230198_ovl_01;
 extern s32 D_8023019C_ovl_01;
 extern s32 D_802301A0_ovl_01;
 extern s32 D_802301A4_ovl_01;
+extern TableCorner D_80230248_ovl_01[TABLE_LINE_COUNT * 2];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern void *D_8023AC64_ovl_01;
@@ -183,7 +192,23 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80215DC4_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_8021640C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_802169CC_ovl_01);
+void func_802169CC_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 index;
+
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    for (index = 0; index != TABLE_LINE_COUNT * 2; index += 2) {
+        gSPScisTextureRectangle(gfx++, D_80230248_ovl_01[index].x << 2, D_80230248_ovl_01[index].y << 2,
+                                D_80230248_ovl_01[index + 1].x << 2, D_80230248_ovl_01[index + 1].y << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80216C14_ovl_01);
 
