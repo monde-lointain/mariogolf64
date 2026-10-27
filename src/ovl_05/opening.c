@@ -27,12 +27,31 @@
 #define OPENING_BILLBOARD_HEAP_SIZE 0x7038
 
 #define ASSET_SHADOW_TEXTURE 0x4C3
+/* The shadow texture is 32x32 I8 */
+#define SHADOW_TEXTURE_SIZE 32
 
 /* The face-printed golf balls that the opening shows, two at a time */
 #define OPENING_BALL_IMAGE_COUNT 5
 #define OPENING_BALL_SLOT_COUNT 2
 /* A 64x64 CI8 image with its header and palette */
 #define OPENING_BALL_IMAGE_SIZE 0x1208
+#define OPENING_BALL_IMAGE_WIDTH 64
+/* A ball image is drawn in strips that fit in texture memory */
+#define OPENING_BALL_STRIP_HEIGHT 32
+#define OPENING_BALL_STRIP_COUNT 2
+#define OPENING_BALL_STRIP_SIZE \
+  (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_STRIP_HEIGHT)
+/* The scale that a slot starts at */
+#define OPENING_BALL_NORMAL_SCALE 1.0f
+/* A ball at this scale sits a little higher, with its shadow lower */
+#define OPENING_BALL_LARGE_SCALE 3.0f
+
+/* What an opening ball slot shows */
+typedef enum OpeningBallState {
+  OPENING_BALL_HIDDEN,
+  OPENING_BALL_ON_GROUND,
+  OPENING_BALL_IN_AIR /* At its own height, rather than the ground's */
+} OpeningBallState;
 
 /* The character name logos that the opening shows, two at a time */
 #define OPENING_NAME_LOGO_COUNT 7
@@ -68,10 +87,10 @@ extern u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
 extern s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 extern s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
 extern s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
-extern s32 D_8020AD70_ovl_05[OPENING_BALL_SLOT_COUNT];
-extern f32 D_8020AD80_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern s32 f_OpeningBallStates[OPENING_BALL_SLOT_COUNT];
+extern f32 f_OpeningBallScales[OPENING_BALL_SLOT_COUNT];
 extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
-extern u8 D_80214C50_ovl_05[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
+extern u8 f_OpeningBallImages[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 /* The buffers of character slots 1 and 2 */
 extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
@@ -105,7 +124,6 @@ extern s32 f_IsLakituFlying;
 extern s32 f_LakituAngle;
 extern s32 f_LookAtEaseMode;
 extern f32 f_LookAtEaseRate;
-extern Vec3 D_80217060_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern CoursePoint f_LookAtTarget;
 
 /* A 48x432 CI8 image of the letters, one above the next */
@@ -218,7 +236,7 @@ extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
 void DrawNameLogos(Gfx** displayListHead);
-void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
+void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices);
 void DrawOpeningImpactLines(Gfx** displayListHead);
 void DrawLakitu(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
@@ -910,7 +928,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   DrawOpeningImpactLines(&gfx);
   DrawOpeningBurst(&gfx);
   DrawLakitu(&gfx);
-  func_801FBB94_ovl_05(&gfx, matrices);
+  DrawOpeningBalls(&gfx, matrices);
   DrawOpeningShotBall(&gfx);
   DrawOpeningSparks(&gfx);
   DrawNameLogos(&gfx);
@@ -1101,105 +1119,173 @@ void AnimateNameLogos(void) {
 }
 
 /* Loads ball image ballIndex into slot and resets the slot */
-void func_801FBB10_ovl_05(s32 ballIndex, s32 slot) {
+void LoadOpeningBall(s32 ballIndex, s32 slot) {
   EncodedAsset asset;
 
   OpenEncodedAsset(f_OpeningBallAssets[ballIndex], &asset);
-  ReadEncodedAsset(D_80214C50_ovl_05[slot], &asset);
-  D_8020AD70_ovl_05[slot] = 0;
-  D_8020AD80_ovl_05[slot] = 1.0f;
+  ReadEncodedAsset(f_OpeningBallImages[slot], &asset);
+  f_OpeningBallStates[slot] = OPENING_BALL_HIDDEN;
+  f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
 }
 
 /* The opening script's current scene */
 extern s32 f_OpeningScene;
 /* Ends the opening */
 #define OPENING_SCENE_END 999
-extern s32 D_8020AC94_ovl_05;
-extern u8 D_8020ADB4_ovl_05[OPENING_BALL_SLOT_COUNT];
-extern Vtx D_8020B048_ovl_05[2][4];
-extern s32 D_8020B0C8_ovl_05;
-extern Vtx D_8020B0D0_ovl_05[4];
-extern Vtx D_8020B110_ovl_05[4];
-extern s32 D_8020B150_ovl_05;
-extern s32 D_8020B154_ovl_05;
-extern s32 D_8020B158_ovl_05;
-extern Vtx D_8020B160_ovl_05[4];
-extern Vtx D_8020B1A0_ovl_05[4];
-extern s32 D_8020B1E0_ovl_05;
-extern s32 D_8020B1E4_ovl_05;
-extern Mtx D_8020C510_ovl_05[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx D_8020C610_ovl_05[OPENING_BALL_SLOT_COUNT];
-extern Mtx D_8020C690_ovl_05[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
-extern Vec3 D_8020C790_ovl_05;
-extern Mtx D_8020C7A0_ovl_05[DRAW_BUFFER_COUNT];
-extern Mtx D_8020C820_ovl_05[DRAW_BUFFER_COUNT];
-extern Mtx D_8020C8A0_ovl_05;
-extern Mtx D_8020C8E0_ovl_05;
-extern Mat4 D_8020C930_ovl_05;
-extern Vec3 D_8020C974_ovl_05;
-extern s32 D_8020C980_ovl_05;
-extern s32 D_8020C984_ovl_05;
-extern s32 D_8020C988_ovl_05;
-extern s32 D_8020C98C_ovl_05;
-extern s32 D_8020C990_ovl_05;
-extern Vec3 D_8020C994_ovl_05;
-extern Mtx D_8020C9A0_ovl_05[DRAW_BUFFER_COUNT][OPENING_BALL_SLOT_COUNT];
-extern Mtx D_8020CAA0_ovl_05[OPENING_BALL_SLOT_COUNT];
-extern Mtx D_8020CB20_ovl_05[DRAW_BUFFER_COUNT];
-extern Mtx D_8020CBA0_ovl_05[DRAW_BUFFER_COUNT];
-extern Mtx D_8020CC20_ovl_05;
-extern Mtx D_8020CC60_ovl_05;
-extern Mat4 D_8020CCB0_ovl_05;
-extern s32 D_8020CCF0_ovl_05;
+/* The frames left before the opening's current scene moves on */
+extern s32 f_OpeningSceneFramesLeft;
+/*
+ * Mario shows on the logo ball from this scene on, whenever fewer than this
+ * many of a scene's frames are left
+ */
+#define OPENING_SCENE_LOGO_BALL_MARIO 200
+#define LOGO_BALL_MARIO_FRAMES_LEFT 98
+
+/*
+ * Whether a slot shows the logo ball, the ball in the title logo. Only this
+ * slot's flag is ever set, and setting it also has all balls projected to
+ * the screen
+ */
+extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
+#define LOGO_BALL_SLOT 1
+
+/* f_LogoBallImages holds three 64x64 frames of the ball rolling */
+#define LOGO_BALL_FRAME_COUNT 3
+#define LOGO_BALL_FRAME_SIZE \
+  (OPENING_BALL_IMAGE_WIDTH * OPENING_BALL_IMAGE_WIDTH)
+/* The logo ball shows its next frame each time it rolls further than this */
+#define LOGO_BALL_FRAME_ANGLE 4.0f
+/* The logo ball's starting turn, in degrees */
+#define LOGO_BALL_START_ROLL (-40.0f)
+#define LOGO_BALL_START_PITCH 0.0f
+#define LOGO_BALL_START_YAW (-30.0f)
+#define LOGO_MARIO_IMAGE_SIZE 24
+
+/* Every ball model is scaled by this much */
+#define OPENING_BALL_MODEL_SCALE 0.7f
+/* How far below the ground an in-air or large ball's shadow sits */
+#define OPENING_BALL_IN_AIR_SHADOW_DROP 0.25f
+#define OPENING_BALL_LARGE_SHADOW_DROP 1.0f
+#define PROJECTED_BALL_LARGE_SHADOW_DROP 2.0f
+/* How far above the ground a large ball sits */
+#define OPENING_BALL_LARGE_LIFT 0.5f
+/* The Mario image turns about a point this far below the logo ball */
+#define LOGO_BALL_MARIO_DROP 1.5f
+#define PROJECTED_LOGO_BALL_MARIO_DROP 1.7f
+#define LOGO_BALL_MARIO_SCALE 0.55f
+#define PROJECTED_LOGO_BALL_MARIO_SCALE 0.6f
+/* The Mario image's offset from the point it turns about, before scaling */
+#define LOGO_BALL_MARIO_OFFSET_Y (-0.3f)
+#define PROJECTED_LOGO_BALL_MARIO_OFFSET_Y (-0.38f)
+
+/* A projected ball's width on the screen, in pixels, for each step of scale */
+#define PROJECTED_BALL_WIDTH_PER_SCALE 1.5f
+/* So that it stays in sight, an in-air ball is at least this tall */
+#define PROJECTED_BALL_MIN_HALF_SIZE 2
+/* Balls this big or bigger aren't drawn */
+#define PROJECTED_BALL_HALF_SIZE_LIMIT 256
+/* The balls other than the logo ball are drawn this many pixels lower */
+#define PROJECTED_BALL_DROP 2
+
+extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
+extern Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4];
+extern Vtx f_OpeningBallShadowVertices[4];
+extern Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx f_OpeningBallScaleMatrices[OPENING_BALL_SLOT_COUNT];
+extern Mtx f_OpeningBallShadowMatrices[OPENING_BALL_SLOT_COUNT]
+                                      [DRAW_BUFFER_COUNT];
+
+/* The logo ball's roll, from its position's change each frame */
+extern s32 f_ShouldResetLogoBallRoll;
+extern Mat4 f_LogoBallRoll;
+extern s32 f_HasLogoBallLastPosition;
+extern Vec3 f_LogoBallLastPosition;
+extern s32 f_LogoBallFrameIndex;
+extern Vtx f_LogoBallMarioVertices[4];
+extern Mtx f_LogoBallMarioTranslations[DRAW_BUFFER_COUNT];
+extern Mtx f_LogoBallMarioRolls[DRAW_BUFFER_COUNT];
+extern Mtx f_LogoBallMarioScale;
+extern Mtx f_LogoBallMarioOffset;
+
+/* The current projected ball's position and rectangle on the screen */
+extern Vec3 f_ProjectedBallPosition;
+extern s32 f_ProjectedBallLeft;
+extern s32 f_ProjectedBallTop;
+extern s32 f_ProjectedBallRight;
+extern s32 f_ProjectedBallBottom;
+extern s32 f_ProjectedBallTexelStep;
+/* 1 when the ball's size is odd, for the pixel that halving it loses */
+extern s32 f_ProjectedBallExtraPixel;
+extern Vtx f_ProjectedShadowVertices[4];
+extern Mtx f_ProjectedShadowMatrices[DRAW_BUFFER_COUNT]
+                                    [OPENING_BALL_SLOT_COUNT];
+extern Mtx f_ProjectedShadowScaleMatrices[OPENING_BALL_SLOT_COUNT];
+
+/* The same as the logo ball's roll, kept apart for the projected logo ball */
+extern s32 f_ShouldResetProjectedLogoBallRoll;
+extern Mat4 f_ProjectedLogoBallRoll;
+extern s32 f_HasProjectedLogoBallLastPosition;
+extern Vec3 f_ProjectedLogoBallLastPosition;
+extern s32 f_ProjectedLogoBallFrameIndex;
+extern Vtx f_ProjectedLogoBallMarioVertices[4];
+extern Mtx f_ProjectedLogoBallMarioTranslations[DRAW_BUFFER_COUNT];
+extern Mtx f_ProjectedLogoBallMarioRolls[DRAW_BUFFER_COUNT];
+extern Mtx f_ProjectedLogoBallMarioScale;
+extern Mtx f_ProjectedLogoBallMarioOffset;
 
 #ifdef NON_MATCHING
 /*
  * Draws the balls in the opening's ball slots, each with a shadow on the
- * ground. Normally a ball is a billboard in the scene, drawn in two strips;
- * when D_8020ADB4_ovl_05[1] is set, it is instead projected to the screen and
- * drawn as two texture rectangles. A slot flagged in D_8020ADB4_ovl_05 shows
- * the rolling logo ball with the Mario image turning on it.
+ * ground. Normally a ball is a billboard in the scene, drawn in strips. While
+ * the logo ball is out, every ball is instead projected to the screen and
+ * drawn as texture rectangles. The logo ball rolls with its movement, with
+ * the Mario image turning on it.
  *
  * Differs from the original only in stack slot choices: two pairs of spilled
  * display list pointers swap slots before the Mario image is drawn.
  */
-void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
-  Vec3 delta;
-  Mat4 rotation;
+void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
+  Vec3 movement;
+  Mat4 turn;
   Vec3 position;
-  ScreenPoint point;
-  Mat4 rotation2;
+  ScreenPoint ballPoint;
+  Mat4 projectedTurn;
   Gfx* gfx;
   s32 slot;
-  s32 strip;
+  s32 stripIndex;
   s32 halfSize;
-  f32 scale;
-  f32 angle;
+  f32 screenScale;
+  f32 rollAngle;
 
-  if (D_8020ADB4_ovl_05[1] == 0) {
+  if (f_IsLogoBallSlot[LOGO_BALL_SLOT] == 0) {
     gfx = *displayListHead;
     for (slot = 0; slot < OPENING_BALL_SLOT_COUNT; slot++) {
-      if (D_8020AD70_ovl_05[slot] != 0) {
-        position[0] = D_80217060_ovl_05[slot][0];
-        position[2] = D_80217060_ovl_05[slot][2];
+      if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
+        position[0] = f_OpeningBallPositions[slot][0];
+        position[2] = f_OpeningBallPositions[slot][2];
         position[1] = GetGroundHeight(position[0] * WORLD_TO_COURSE_SCALE,
                                       position[2] * WORLD_TO_COURSE_SCALE) *
                       COURSE_TO_WORLD_SCALE;
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-        if (D_8020AD70_ovl_05[slot] == 2) {
-          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
-                      position[1] - 0.25f, position[2]);
-        } else if (D_8020AD80_ovl_05[slot] == 3.0f) {
-          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
-                      position[1] - 1.0f, position[2]);
+        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                      position[0],
+                      position[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+                      position[2]);
+        } else if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                      position[0], position[1] - OPENING_BALL_LARGE_SHADOW_DROP,
+                      position[2]);
         } else {
-          guTranslate(&D_8020C690_ovl_05[slot][g_DrawBufferIndex], position[0],
-                      position[1], position[2]);
+          guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
+                      position[0], position[1], position[2]);
         }
-        guScale(&D_8020C610_ovl_05[slot], D_8020AD80_ovl_05[slot] * 0.7f,
-                D_8020AD80_ovl_05[slot] * 0.7f, D_8020AD80_ovl_05[slot] * 0.7f);
+        guScale(&f_OpeningBallScaleMatrices[slot],
+                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
+                f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineLERP(gfx++, 0, 0, 0, 0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0,
@@ -1218,32 +1304,32 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPSetTextureLUT(gfx++, G_TT_NONE);
         gDPLoadTextureBlock(
             gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-            G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-            G_TX_NOLOD);
+            G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
+            0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
         gSPLoadGeometryMode(gfx++, 0);
         gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-        gSPMatrix(
-            gfx++,
-            OS_K0_TO_PHYSICAL(&D_8020C690_ovl_05[slot][g_DrawBufferIndex]),
-            G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C610_ovl_05[slot]),
+        gSPMatrix(gfx++,
+                  OS_K0_TO_PHYSICAL(
+                      &f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex]),
+                  G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
                   G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        gSPVertex(gfx++, D_8020B0D0_ovl_05, 4, 0);
+        gSPVertex(gfx++, f_OpeningBallShadowVertices, 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         gDPPipeSync(gfx++);
-        if (D_8020AD70_ovl_05[slot] == 2) {
-          position[1] = D_80217060_ovl_05[slot][1];
+        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+          position[1] = f_OpeningBallPositions[slot][1];
         }
-        if (D_8020AD80_ovl_05[slot] == 3.0f) {
-          position[1] += 0.5f;
+        if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+          position[1] += OPENING_BALL_LARGE_LIFT;
         }
-        guTranslate(&D_8020C510_ovl_05[slot][g_DrawBufferIndex], position[0],
-                    position[1], position[2]);
+        guTranslate(&f_OpeningBallMatrices[slot][g_DrawBufferIndex],
+                    position[0], position[1], position[2]);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
         gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1260,87 +1346,100 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
         gDPPipeSync(gfx++);
         gDPSetTextureLOD(gfx++, G_TL_TILE);
         gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-        if (D_8020ADB4_ovl_05[slot]) {
+        if (f_IsLogoBallSlot[slot]) {
           gDPLoadTLUT_pal256(
               gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
         } else {
-          gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
+          gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
                                                     IMAGE_HEADER_SIZE));
         }
-        for (strip = 0; strip < 2; strip++) {
+        for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
+             stripIndex++) {
           gDPPipeSync(gfx++);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-          gSPMatrix(
-              gfx++,
-              OS_K0_TO_PHYSICAL(&D_8020C510_ovl_05[slot][g_DrawBufferIndex]),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++,
+                    OS_K0_TO_PHYSICAL(
+                        &f_OpeningBallMatrices[slot][g_DrawBufferIndex]),
+                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->billboard),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C610_ovl_05[slot]),
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_OpeningBallScaleMatrices[slot]),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          if (D_8020ADB4_ovl_05[slot]) {
+          if (f_IsLogoBallSlot[slot]) {
             gDPLoadTextureBlock(
                 gfx++,
                 TEXTURE_ADDRESS(f_LogoBallImages +
                                 LARGE_PALETTED_TEXELS_OFFSET +
-                                (strip * 0x800 + (D_8020B154_ovl_05 << 12))),
-                G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                (stripIndex * OPENING_BALL_STRIP_SIZE +
+                                 f_LogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
+                G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
+                OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                 G_TX_NOLOD);
           } else {
             gDPLoadTextureBlock(
                 gfx++,
-                TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
-                                LARGE_PALETTED_TEXELS_OFFSET + strip * 0x800),
-                G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
+                                LARGE_PALETTED_TEXELS_OFFSET +
+                                stripIndex * OPENING_BALL_STRIP_SIZE),
+                G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
+                OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                 G_TX_NOLOD);
           }
           gDPPipeSync(gfx++);
-          gSPVertex(gfx++, D_8020B048_ovl_05[strip], 4, 0);
+          gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex], 4, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         }
-        if (D_8020ADB4_ovl_05[slot]) {
-          if (D_8020B150_ovl_05) {
-            guMtxIdentF(D_8020C930_ovl_05);
-            D_8020B150_ovl_05 = 0;
-            guRotateRPYF(D_8020C930_ovl_05, -40.0f, 0.0f, -30.0f);
+        if (f_IsLogoBallSlot[slot]) {
+          if (f_ShouldResetLogoBallRoll) {
+            guMtxIdentF(f_LogoBallRoll);
+            f_ShouldResetLogoBallRoll = 0;
+            guRotateRPYF(f_LogoBallRoll, LOGO_BALL_START_ROLL,
+                         LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
           }
-          if (D_8020B0C8_ovl_05) {
-            delta[0] = D_80217060_ovl_05[slot][0] - D_8020C790_ovl_05[0];
-            delta[1] = D_80217060_ovl_05[slot][1] - D_8020C790_ovl_05[1];
-            delta[2] = D_80217060_ovl_05[slot][2] - D_8020C790_ovl_05[2];
+          if (f_HasLogoBallLastPosition) {
+            movement[0] =
+                f_OpeningBallPositions[slot][0] - f_LogoBallLastPosition[0];
+            movement[1] =
+                f_OpeningBallPositions[slot][1] - f_LogoBallLastPosition[1];
+            movement[2] =
+                f_OpeningBallPositions[slot][2] - f_LogoBallLastPosition[2];
           } else {
-            D_8020B0C8_ovl_05 = 1;
-            delta[0] = 0.0f;
-            delta[1] = 0.0f;
-            delta[2] = 0.0f;
+            f_HasLogoBallLastPosition = 1;
+            movement[0] = 0.0f;
+            movement[1] = 0.0f;
+            movement[2] = 0.0f;
           }
-          angle = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] +
-                        delta[2] * delta[2]);
-          angle *= (f32)RADIANS_TO_DEGREES;
-          D_8020C790_ovl_05[0] = D_80217060_ovl_05[slot][0];
-          D_8020C790_ovl_05[1] = D_80217060_ovl_05[slot][1];
-          D_8020C790_ovl_05[2] = D_80217060_ovl_05[slot][2];
-          angle = fabsf(angle);
-          if (angle > 4.0f) {
-            D_8020B154_ovl_05++;
-            if (D_8020B154_ovl_05 == 3) {
-              D_8020B154_ovl_05 = 0;
+          rollAngle =
+              sqrtf(movement[0] * movement[0] + movement[1] * movement[1] +
+                    movement[2] * movement[2]);
+          rollAngle *= (f32)RADIANS_TO_DEGREES;
+          f_LogoBallLastPosition[0] = f_OpeningBallPositions[slot][0];
+          f_LogoBallLastPosition[1] = f_OpeningBallPositions[slot][1];
+          f_LogoBallLastPosition[2] = f_OpeningBallPositions[slot][2];
+          rollAngle = fabsf(rollAngle);
+          if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
+            f_LogoBallFrameIndex++;
+            if (f_LogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
+              f_LogoBallFrameIndex = 0;
             }
           }
-          guScale(&D_8020C8A0_ovl_05, 0.55f, 0.55f, 0.55f);
-          if (delta[2] != 0.0f || delta[0] != 0.0f) {
-            guRotateF(rotation, angle, -delta[2], 0.0f, delta[0]);
-            guMtxCatF(D_8020C930_ovl_05, rotation, D_8020C930_ovl_05);
-            ConvertMatrixToFixed(D_8020C930_ovl_05,
-                                 &D_8020C820_ovl_05[g_DrawBufferIndex]);
+          guScale(&f_LogoBallMarioScale, LOGO_BALL_MARIO_SCALE,
+                  LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
+          if (movement[2] != 0.0f || movement[0] != 0.0f) {
+            guRotateF(turn, rollAngle, -movement[2], 0.0f, movement[0]);
+            guMtxCatF(f_LogoBallRoll, turn, f_LogoBallRoll);
+            ConvertMatrixToFixed(f_LogoBallRoll,
+                                 &f_LogoBallMarioRolls[g_DrawBufferIndex]);
           }
-          guTranslate(&D_8020C8E0_ovl_05, 0.0f, -0.3f, 0.0f);
-          guTranslate(
-              &D_8020C7A0_ovl_05[g_DrawBufferIndex], D_80217060_ovl_05[slot][0],
-              D_80217060_ovl_05[slot][1] - 1.5f, D_80217060_ovl_05[slot][2]);
+          guTranslate(&f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y,
+                      0.0f);
+          guTranslate(&f_LogoBallMarioTranslations[g_DrawBufferIndex],
+                      f_OpeningBallPositions[slot][0],
+                      f_OpeningBallPositions[slot][1] - LOGO_BALL_MARIO_DROP,
+                      f_OpeningBallPositions[slot][2]);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
           gDPPipeSync(gfx++);
@@ -1359,7 +1458,8 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPLoadTextureBlock(
               gfx++,
               TEXTURE_ADDRESS(f_LogoMarioImage + LARGE_PALETTED_TEXELS_OFFSET),
-              G_IM_FMT_CI, G_IM_SIZ_8b, 24, 24, 0, G_TX_NOMIRROR | G_TX_WRAP,
+              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
+              LOGO_MARIO_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
               G_TX_NOLOD);
           gDPPipeSync(gfx++);
@@ -1368,17 +1468,19 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(&D_8020C7A0_ovl_05[g_DrawBufferIndex]),
+                    OS_K0_TO_PHYSICAL(
+                        &f_LogoBallMarioTranslations[g_DrawBufferIndex]),
                     G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
           gSPMatrix(gfx++,
-                    OS_K0_TO_PHYSICAL(&D_8020C820_ovl_05[g_DrawBufferIndex]),
+                    OS_K0_TO_PHYSICAL(&f_LogoBallMarioRolls[g_DrawBufferIndex]),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C8A0_ovl_05),
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioScale),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020C8E0_ovl_05),
+          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LogoBallMarioOffset),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          if (f_OpeningScene >= 200 && D_8020AC94_ovl_05 < 98) {
-            gSPVertex(gfx++, D_8020B110_ovl_05, 4, 0);
+          if (f_OpeningScene >= OPENING_SCENE_LOGO_BALL_MARIO &&
+              f_OpeningSceneFramesLeft < LOGO_BALL_MARIO_FRAMES_LEFT) {
+            gSPVertex(gfx++, f_LogoBallMarioVertices, 4, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
           gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -1391,59 +1493,65 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
     *displayListHead = gfx;
   } else {
     Gfx* gfx;
-    s32 strip;
+    s32 stripIndex;
 
     gfx = *displayListHead;
     for (slot = 0; slot != OPENING_BALL_SLOT_COUNT; slot++) {
-      if (D_8020AD70_ovl_05[slot] != 0) {
-        D_8020C974_ovl_05[0] = D_80217060_ovl_05[slot][0];
-        D_8020C974_ovl_05[2] = D_80217060_ovl_05[slot][2];
-        if (D_8020AD70_ovl_05[slot] == 2) {
-          D_8020C974_ovl_05[1] = D_80217060_ovl_05[slot][1];
+      if (f_OpeningBallStates[slot] != OPENING_BALL_HIDDEN) {
+        f_ProjectedBallPosition[0] = f_OpeningBallPositions[slot][0];
+        f_ProjectedBallPosition[2] = f_OpeningBallPositions[slot][2];
+        if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+          f_ProjectedBallPosition[1] = f_OpeningBallPositions[slot][1];
         } else {
-          D_8020C974_ovl_05[1] =
-              GetGroundHeight(D_8020C974_ovl_05[0] * WORLD_TO_COURSE_SCALE,
-                              D_8020C974_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+          f_ProjectedBallPosition[1] =
+              GetGroundHeight(
+                  f_ProjectedBallPosition[0] * WORLD_TO_COURSE_SCALE,
+                  f_ProjectedBallPosition[2] * WORLD_TO_COURSE_SCALE) *
               COURSE_TO_WORLD_SCALE;
         }
-        if (ProjectPoint(D_8020C974_ovl_05[0], D_8020C974_ovl_05[1],
-                         D_8020C974_ovl_05[2], &point) < 0) {
-          scale = point.scaleX;
-          if (scale < 0.0f) {
-            scale = -scale;
+        if (ProjectPoint(f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
+                         f_ProjectedBallPosition[2], &ballPoint) < 0) {
+          screenScale = ballPoint.scaleX;
+          if (screenScale < 0.0f) {
+            screenScale = -screenScale;
           }
-          halfSize = scale * (1.5f * D_8020AD80_ovl_05[slot]);
+          halfSize = screenScale * (PROJECTED_BALL_WIDTH_PER_SCALE *
+                                    f_OpeningBallScales[slot]);
           if (halfSize & 1) {
-            D_8020CCF0_ovl_05 = 1;
+            f_ProjectedBallExtraPixel = 1;
           } else {
-            D_8020CCF0_ovl_05 = 0;
+            f_ProjectedBallExtraPixel = 0;
           }
           halfSize /= 2;
-          D_8020C980_ovl_05 = point.x - halfSize;
-          D_8020C988_ovl_05 = point.x + halfSize;
-          if (D_8020AD70_ovl_05[slot] == 2) {
-            if (halfSize < 2) {
-              halfSize = 2;
+          f_ProjectedBallLeft = ballPoint.x - halfSize;
+          f_ProjectedBallRight = ballPoint.x + halfSize;
+          if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+            if (halfSize < PROJECTED_BALL_MIN_HALF_SIZE) {
+              halfSize = PROJECTED_BALL_MIN_HALF_SIZE;
             }
           }
-          D_8020C974_ovl_05[1] =
-              GetGroundHeight(D_8020C974_ovl_05[0] * WORLD_TO_COURSE_SCALE,
-                              D_8020C974_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+          f_ProjectedBallPosition[1] =
+              GetGroundHeight(
+                  f_ProjectedBallPosition[0] * WORLD_TO_COURSE_SCALE,
+                  f_ProjectedBallPosition[2] * WORLD_TO_COURSE_SCALE) *
               COURSE_TO_WORLD_SCALE;
-          if (D_8020AD80_ovl_05[slot] == 3.0f) {
-            D_8020C974_ovl_05[1] -= 2.0f;
+          if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
+            f_ProjectedBallPosition[1] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
           }
-          if (D_8020AD70_ovl_05[slot] == 2) {
-            guTranslate(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot],
-                        D_8020C974_ovl_05[0], D_8020C974_ovl_05[1] - 0.25f,
-                        D_8020C974_ovl_05[2]);
+          if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
+            guTranslate(
+                &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
+                f_ProjectedBallPosition[0],
+                f_ProjectedBallPosition[1] - OPENING_BALL_IN_AIR_SHADOW_DROP,
+                f_ProjectedBallPosition[2]);
           } else {
-            guTranslate(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot],
-                        D_8020C974_ovl_05[0], D_8020C974_ovl_05[1],
-                        D_8020C974_ovl_05[2]);
+            guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
+                        f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
+                        f_ProjectedBallPosition[2]);
           }
-          guScale(&D_8020CAA0_ovl_05[slot], D_8020AD80_ovl_05[slot],
-                  D_8020AD80_ovl_05[slot], D_8020AD80_ovl_05[slot]);
+          guScale(&f_ProjectedShadowScaleMatrices[slot],
+                  f_OpeningBallScales[slot], f_OpeningBallScales[slot],
+                  f_OpeningBallScales[slot]);
           gDPPipeSync(gfx++);
           gDPPipeSync(gfx++);
           gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1465,21 +1573,22 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetTextureLUT(gfx++, G_TT_NONE);
           gDPLoadTextureBlock(
               gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-              G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
-              G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-              G_TX_NOLOD);
+              G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE,
+              0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
           gDPSetTextureLOD(gfx++, G_TL_TILE);
           gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
           gSPLoadGeometryMode(gfx++, 0);
           gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-          gSPMatrix(
-              gfx++,
-              OS_K0_TO_PHYSICAL(&D_8020C9A0_ovl_05[g_DrawBufferIndex][slot]),
-              G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CAA0_ovl_05[slot]),
+          gSPMatrix(gfx++,
+                    OS_K0_TO_PHYSICAL(
+                        &f_ProjectedShadowMatrices[g_DrawBufferIndex][slot]),
+                    G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+          gSPMatrix(gfx++,
+                    OS_K0_TO_PHYSICAL(&f_ProjectedShadowScaleMatrices[slot]),
                     G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, D_8020B160_ovl_05, 4, 0);
+          gSPVertex(gfx++, f_ProjectedShadowVertices, 4, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
           gDPPipeSync(gfx++);
@@ -1497,98 +1606,132 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPSetAlphaCompare(gfx++, G_AC_NONE);
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-          if (D_8020ADB4_ovl_05[slot]) {
+          if (f_IsLogoBallSlot[slot]) {
             gDPLoadTLUT_pal256(
                 gfx++, TEXTURE_ADDRESS(f_LogoBallImages + IMAGE_HEADER_SIZE));
           } else {
-            gDPLoadTLUT_pal256(gfx++, TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
-                                                      IMAGE_HEADER_SIZE));
+            gDPLoadTLUT_pal256(
+                gfx++,
+                TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
           }
           gDPPipeSync(gfx++);
-          for (strip = 0; strip != 2; strip++) {
-            if (D_8020ADB4_ovl_05[slot]) {
+          for (stripIndex = 0; stripIndex != OPENING_BALL_STRIP_COUNT;
+               stripIndex++) {
+            if (f_IsLogoBallSlot[slot]) {
               gDPLoadTextureBlock(
                   gfx++,
-                  TEXTURE_ADDRESS(f_LogoBallImages +
-                                  LARGE_PALETTED_TEXELS_OFFSET +
-                                  (strip * 0x800 + (D_8020B1E4_ovl_05 << 12))),
-                  G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0,
-                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                  TEXTURE_ADDRESS(
+                      f_LogoBallImages + LARGE_PALETTED_TEXELS_OFFSET +
+                      (stripIndex * OPENING_BALL_STRIP_SIZE +
+                       f_ProjectedLogoBallFrameIndex * LOGO_BALL_FRAME_SIZE)),
+                  G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
+                  OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                  G_TX_NOLOD, G_TX_NOLOD);
             } else {
               gDPLoadTextureBlock(
                   gfx++,
-                  TEXTURE_ADDRESS(D_80214C50_ovl_05[slot] +
-                                  LARGE_PALETTED_TEXELS_OFFSET + strip * 0x800),
-                  G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0,
-                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                  TEXTURE_ADDRESS(f_OpeningBallImages[slot] +
+                                  LARGE_PALETTED_TEXELS_OFFSET +
+                                  stripIndex * OPENING_BALL_STRIP_SIZE),
+                  G_IM_FMT_CI, G_IM_SIZ_8b, OPENING_BALL_IMAGE_WIDTH,
+                  OPENING_BALL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                  G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                  G_TX_NOLOD, G_TX_NOLOD);
             }
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
-            if (halfSize > 0 && halfSize < 256) {
-              if (D_8020ADB4_ovl_05[slot]) {
-                D_8020C980_ovl_05 = point.x - halfSize - D_8020CCF0_ovl_05;
-                D_8020C988_ovl_05 = point.x + halfSize;
-                D_8020C984_ovl_05 =
-                    point.y - halfSize * (2 - strip) - D_8020CCF0_ovl_05;
-                D_8020C98C_ovl_05 = point.y + strip * halfSize - halfSize;
+            if (halfSize > 0 && halfSize < PROJECTED_BALL_HALF_SIZE_LIMIT) {
+              if (f_IsLogoBallSlot[slot]) {
+                f_ProjectedBallLeft =
+                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
+                f_ProjectedBallRight = ballPoint.x + halfSize;
+                f_ProjectedBallTop =
+                    ballPoint.y -
+                    halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
+                    f_ProjectedBallExtraPixel;
+                f_ProjectedBallBottom =
+                    ballPoint.y + stripIndex * halfSize - halfSize;
               } else {
-                D_8020C980_ovl_05 = point.x - halfSize - D_8020CCF0_ovl_05;
-                D_8020C988_ovl_05 = point.x + halfSize;
-                D_8020C984_ovl_05 =
-                    point.y - halfSize * (2 - strip) - D_8020CCF0_ovl_05 + 2;
-                D_8020C98C_ovl_05 = point.y + strip * halfSize - halfSize + 2;
+                f_ProjectedBallLeft =
+                    ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
+                f_ProjectedBallRight = ballPoint.x + halfSize;
+                f_ProjectedBallTop =
+                    ballPoint.y -
+                    halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
+                    f_ProjectedBallExtraPixel + PROJECTED_BALL_DROP;
+                f_ProjectedBallBottom = ballPoint.y + stripIndex * halfSize -
+                                        halfSize + PROJECTED_BALL_DROP;
               }
-              D_8020C990_ovl_05 = 0x8000 / (halfSize + D_8020CCF0_ovl_05);
+              f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
+                                         TEXEL_STEP_ONE /
+                                         (halfSize + f_ProjectedBallExtraPixel);
               gSPScisTextureRectangle(
-                  gfx++, D_8020C980_ovl_05 << 2, D_8020C984_ovl_05 << 2,
-                  D_8020C988_ovl_05 << 2, D_8020C98C_ovl_05 << 2,
-                  G_TX_RENDERTILE, 0, 0, D_8020C990_ovl_05, D_8020C990_ovl_05);
+                  gfx++, f_ProjectedBallLeft << 2, f_ProjectedBallTop << 2,
+                  f_ProjectedBallRight << 2, f_ProjectedBallBottom << 2,
+                  G_TX_RENDERTILE, 0, 0, f_ProjectedBallTexelStep,
+                  f_ProjectedBallTexelStep);
             }
             gDPPipeSync(gfx++);
           }
-          if (D_8020ADB4_ovl_05[slot]) {
-            if (D_8020B1E0_ovl_05) {
-              guMtxIdentF(D_8020CCB0_ovl_05);
-              D_8020B1E0_ovl_05 = 0;
-              guRotateRPYF(D_8020CCB0_ovl_05, -40.0f, 0.0f, -30.0f);
+          if (f_IsLogoBallSlot[slot]) {
+            if (f_ShouldResetProjectedLogoBallRoll) {
+              guMtxIdentF(f_ProjectedLogoBallRoll);
+              f_ShouldResetProjectedLogoBallRoll = 0;
+              guRotateRPYF(f_ProjectedLogoBallRoll, LOGO_BALL_START_ROLL,
+                           LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
             }
-            if (D_8020B158_ovl_05) {
-              delta[0] = D_80217060_ovl_05[slot][0] - D_8020C994_ovl_05[0];
-              delta[1] = D_80217060_ovl_05[slot][1] - D_8020C994_ovl_05[1];
-              delta[2] = D_80217060_ovl_05[slot][2] - D_8020C994_ovl_05[2];
+            if (f_HasProjectedLogoBallLastPosition) {
+              movement[0] = f_OpeningBallPositions[slot][0] -
+                            f_ProjectedLogoBallLastPosition[0];
+              movement[1] = f_OpeningBallPositions[slot][1] -
+                            f_ProjectedLogoBallLastPosition[1];
+              movement[2] = f_OpeningBallPositions[slot][2] -
+                            f_ProjectedLogoBallLastPosition[2];
             } else {
-              D_8020B158_ovl_05 = 1;
-              delta[0] = 0.0f;
-              delta[1] = 0.0f;
-              delta[2] = 0.0f;
+              f_HasProjectedLogoBallLastPosition = 1;
+              movement[0] = 0.0f;
+              movement[1] = 0.0f;
+              movement[2] = 0.0f;
             }
-            angle = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] +
-                          delta[2] * delta[2]);
-            angle *= (f32)RADIANS_TO_DEGREES;
-            D_8020C994_ovl_05[0] = D_80217060_ovl_05[slot][0];
-            D_8020C994_ovl_05[1] = D_80217060_ovl_05[slot][1];
-            D_8020C994_ovl_05[2] = D_80217060_ovl_05[slot][2];
-            angle = fabsf(angle);
-            if (angle > 4.0f) {
-              D_8020B1E4_ovl_05++;
-              if (D_8020B1E4_ovl_05 == 3) {
-                D_8020B1E4_ovl_05 = 0;
+            rollAngle =
+                sqrtf(movement[0] * movement[0] + movement[1] * movement[1] +
+                      movement[2] * movement[2]);
+            rollAngle *= (f32)RADIANS_TO_DEGREES;
+            f_ProjectedLogoBallLastPosition[0] =
+                f_OpeningBallPositions[slot][0];
+            f_ProjectedLogoBallLastPosition[1] =
+                f_OpeningBallPositions[slot][1];
+            f_ProjectedLogoBallLastPosition[2] =
+                f_OpeningBallPositions[slot][2];
+            rollAngle = fabsf(rollAngle);
+            if (rollAngle > LOGO_BALL_FRAME_ANGLE) {
+              f_ProjectedLogoBallFrameIndex++;
+              if (f_ProjectedLogoBallFrameIndex == LOGO_BALL_FRAME_COUNT) {
+                f_ProjectedLogoBallFrameIndex = 0;
               }
             }
-            guScale(&D_8020CC20_ovl_05, 0.6f, 0.6f, 0.6f);
-            if (delta[2] != 0.0f || delta[0] != 0.0f) {
-              guRotateF(rotation2, angle, -delta[2], 0.0f, delta[0]);
-              guMtxCatF(D_8020CCB0_ovl_05, rotation2, D_8020CCB0_ovl_05);
-              ConvertMatrixToFixed(D_8020CCB0_ovl_05,
-                                   &D_8020CBA0_ovl_05[g_DrawBufferIndex]);
+            guScale(&f_ProjectedLogoBallMarioScale,
+                    PROJECTED_LOGO_BALL_MARIO_SCALE,
+                    PROJECTED_LOGO_BALL_MARIO_SCALE,
+                    PROJECTED_LOGO_BALL_MARIO_SCALE);
+            if (movement[2] != 0.0f || movement[0] != 0.0f) {
+              guRotateF(projectedTurn, rollAngle, -movement[2], 0.0f,
+                        movement[0]);
+              guMtxCatF(f_ProjectedLogoBallRoll, projectedTurn,
+                        f_ProjectedLogoBallRoll);
+              ConvertMatrixToFixed(
+                  f_ProjectedLogoBallRoll,
+                  &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]);
             }
-            guTranslate(&D_8020CC60_ovl_05, 0.0f, -0.38f, 0.0f);
-            guTranslate(&D_8020CB20_ovl_05[g_DrawBufferIndex],
-                        D_80217060_ovl_05[slot][0],
-                        D_80217060_ovl_05[slot][1] - 1.7f,
-                        D_80217060_ovl_05[slot][2]);
+            guTranslate(&f_ProjectedLogoBallMarioOffset, 0.0f,
+                        PROJECTED_LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
+            guTranslate(
+                &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex],
+                f_OpeningBallPositions[slot][0],
+                f_OpeningBallPositions[slot][1] -
+                    PROJECTED_LOGO_BALL_MARIO_DROP,
+                f_OpeningBallPositions[slot][2]);
             gDPPipeSync(gfx++);
             gDPSetCycleType(gfx++, G_CYC_1CYCLE);
             gDPPipeSync(gfx++);
@@ -1607,7 +1750,8 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTextureBlock(gfx++,
                                 TEXTURE_ADDRESS(f_LogoMarioImage +
                                                 LARGE_PALETTED_TEXELS_OFFSET),
-                                G_IM_FMT_CI, G_IM_SIZ_8b, 24, 24, 0,
+                                G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_MARIO_IMAGE_SIZE,
+                                LOGO_MARIO_IMAGE_SIZE, 0,
                                 G_TX_NOMIRROR | G_TX_WRAP,
                                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
                                 G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1617,17 +1761,20 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPLoadGeometryMode(gfx++, 0);
             gSPSetGeometryMode(gfx++,
                                G_SHADE | G_CULL_FRONT | G_SHADING_SMOOTH);
+            gSPMatrix(
+                gfx++,
+                OS_K0_TO_PHYSICAL(
+                    &f_ProjectedLogoBallMarioTranslations[g_DrawBufferIndex]),
+                G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gSPMatrix(gfx++,
-                      OS_K0_TO_PHYSICAL(&D_8020CB20_ovl_05[g_DrawBufferIndex]),
-                      G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++,
-                      OS_K0_TO_PHYSICAL(&D_8020CBA0_ovl_05[g_DrawBufferIndex]),
+                      OS_K0_TO_PHYSICAL(
+                          &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]),
                       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CC20_ovl_05),
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioScale),
                       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CC60_ovl_05),
+            gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ProjectedLogoBallMarioOffset),
                       G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            gSPVertex(gfx++, D_8020B1A0_ovl_05, 4, 0);
+            gSPVertex(gfx++, f_ProjectedLogoBallMarioVertices, 4, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
             gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
             gDPPipeSync(gfx++);
@@ -1639,7 +1786,7 @@ void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices) {
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FBB94_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBalls);
 #endif
 
 /* A 64x64 CI8 image of yellow and green lines bursting outwards */
@@ -2082,7 +2229,6 @@ void LoadOpeningShotBall(void) {
 #define SHOT_BALL_OPAQUE_ALPHA 255
 /* The shadow's scale for each step of f_ShotBallScale */
 #define SHOT_BALL_SHADOW_SCALE 0.5
-#define SHOT_BALL_SHADOW_IMAGE_SIZE 32
 
 extern s32 f_ShotBallScale;
 extern s32 f_ShotBallAlpha;
@@ -2161,12 +2307,11 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
       gDPSetTextureLOD(gfx++, G_TL_TILE);
       gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
       gDPPipeSync(gfx++);
-      gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
-                          G_IM_FMT_I, G_IM_SIZ_8b, SHOT_BALL_SHADOW_IMAGE_SIZE,
-                          SHOT_BALL_SHADOW_IMAGE_SIZE, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPLoadTextureBlock(
+          gfx++, TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
+          G_IM_FMT_I, G_IM_SIZ_8b, SHADOW_TEXTURE_SIZE, SHADOW_TEXTURE_SIZE, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowTranslation),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShotBallShadowScaling),
@@ -2251,7 +2396,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
   1                         /* To f_LookAtTarget, a tenth of the way a frame \
                              */
 #define LOOK_AT_EASE_SLOW 2 /* To f_LookAtTarget, a hundredth of the way */
-/* Near D_80217060_ovl_05[1], at a rate that grows to a tenth */
+/* Near f_OpeningBallPositions[1], at a rate that grows to a tenth */
 #define LOOK_AT_EASE_SPEEDING_UP 3
 
 /* Eases the camera's look-at point as f_LookAtEaseMode says */
@@ -2289,15 +2434,15 @@ void EaseOpeningLookAt(void) {
       break;
     case LOOK_AT_EASE_SPEEDING_UP:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          ((D_80217060_ovl_05[1][0] + 38.1f) -
+          ((f_OpeningBallPositions[1][0] + 38.1f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          ((D_80217060_ovl_05[1][1] - 4.5f) -
+          ((f_OpeningBallPositions[1][1] - 4.5f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           f_LookAtEaseRate;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          ((D_80217060_ovl_05[1][2] - 4.795f) -
+          ((f_OpeningBallPositions[1][2] - 4.795f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           f_LookAtEaseRate;
       func_80203620_ovl_05();
