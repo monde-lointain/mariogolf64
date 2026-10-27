@@ -125,13 +125,13 @@
 #define EDITOR_ANGLE_TO_RADIANS (3.1416 / 32768)
 /* Truncated, a step moves the cursor one point along each axis it leans to */
 #define CURSOR_STEP_LENGTH 1.5
-#define HEIGHT_EDITOR_ZOOM_MAX 4.0f
+#define EDITOR_ZOOM_MAX 4.0f
 /* The stick turns the camera in steps of 16 of its units */
 #define STICK_STEP_SIZE 16
 #define HEADING_STICK_SPEED 0x100
 #define PITCH_STICK_SPEED (1.0f / 180)
-#define HEIGHT_EDITOR_PITCH_MIN (-80 * 3.1416 / 180)
-#define HEIGHT_EDITOR_CAMERA_DISTANCE 2000.0
+#define EDITOR_PITCH_MIN (-80 * 3.1416 / 180)
+#define EDITOR_CAMERA_DISTANCE 2000.0
 #define METERS_PER_HEIGHT_UNIT (1.0f / 15)
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
@@ -686,8 +686,8 @@ void func_80404B84_hole_editor(void) {
     }
     if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
-        if (g_MapCamera.view.zoom >= HEIGHT_EDITOR_ZOOM_MAX) {
-            g_MapCamera.view.zoom = HEIGHT_EDITOR_ZOOM_MAX;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
     if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
@@ -703,8 +703,8 @@ void func_80404B84_hole_editor(void) {
     }
     if ((g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
-        if (g_MapCamera.view.zoom >= HEIGHT_EDITOR_ZOOM_MAX) {
-            g_MapCamera.view.zoom = HEIGHT_EDITOR_ZOOM_MAX;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
         }
     }
     if ((g_ControllerData[SECOND_EDITOR_PAD].button & L_TRIG) ||
@@ -723,15 +723,15 @@ void func_80404B84_hole_editor(void) {
     if (sHeightCameraPitch > 0.0f) {
         sHeightCameraPitch = 0.0f;
     }
-    if (sHeightCameraPitch < HEIGHT_EDITOR_PITCH_MIN) {
-        sHeightCameraPitch = HEIGHT_EDITOR_PITCH_MIN;
+    if (sHeightCameraPitch < EDITOR_PITCH_MIN) {
+        sHeightCameraPitch = EDITOR_PITCH_MIN;
     }
     sHeightCameraHeading = sHeightCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
     if (sLastHeightEditKind && editKind == HEIGHT_EDIT_NONE) {
         func_804079B8_hole_editor();
     }
     sLastHeightEditKind = editKind;
-    cameraDistance = HEIGHT_EDITOR_CAMERA_DISTANCE;
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
     g_MapCamera.view.lookAt[AXIS_X] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_X];
     g_MapCamera.view.lookAt[AXIS_Y] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
     g_MapCamera.view.lookAt[AXIS_Z] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Z];
