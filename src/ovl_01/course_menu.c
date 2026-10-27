@@ -49,6 +49,11 @@
 #define STATS_UNIT_X 178
 #define STATS_UNIT_OFFSET_Y 4
 #define MENU_NUMBER_UNK2 2
+/* The 16x16 CI4 glyphs of asset 0x689 in D_8023A82C; two of them spell "OFF" */
+#define MENU_GLYPH_SIZE 16
+#define MENU_GLYPH_IMAGE_SIZE (MENU_GLYPH_SIZE * MENU_GLYPH_SIZE / 2)
+#define OFF_FIRST_GLYPH 16
+#define OFF_GLYPH_COUNT 2
 
 /* The arrows beside the statistics that show there are more rows above or below */
 #define STATS_FIRST_ARROW_IMAGE 16
@@ -529,7 +534,34 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80211A5C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802123E0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212858_ovl_01);
+/* Nothing calls this */
+void func_80212858_ovl_01(Gfx **displayListHead, s32 x, s32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 glyphIndex;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
+        gDPLoadTextureBlock_4b(gfx++,
+                               ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                (OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE) & ~7,
+                               G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (x + glyphIndex * MENU_GLYPH_SIZE) << 2, y << 2,
+                                (x + glyphIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2, (y + MENU_GLYPH_SIZE) << 2,
+                                G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 /*
  * Doesn't match: the original spills displayListHead to its argument slot,
