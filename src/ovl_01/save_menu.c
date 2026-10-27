@@ -185,10 +185,10 @@ void func_80220A30_ovl_01(void) {
             D_8023B684_ovl_01[slot] = -1;
         }
     }
-    if (D_8023B684_ovl_01[memory->unk42] == -1) {
+    if (D_8023B684_ovl_01[memory->ringShotReplaySlot] == -1) {
         for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
             if (D_8023B684_ovl_01[slot] != -1) {
-                memory->unk42 = slot;
+                memory->ringShotReplaySlot = slot;
             }
         }
     }
@@ -265,7 +265,7 @@ s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
 }
 
 s16 func_80220DF8_ovl_01(void) {
-    return D_8023B684_ovl_01[func_8005AF74()->unk42];
+    return D_8023B684_ovl_01[func_8005AF74()->ringShotReplaySlot];
 }
 
 s32 func_80220E28_ovl_01(Unk68 *record) {

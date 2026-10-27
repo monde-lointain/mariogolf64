@@ -238,7 +238,7 @@ void StartLoadingChosenHole(void) {
         slotIndex++;
     } while (slotIndex != CHARACTER_SLOT_COUNT);
     D_800FE334 = 1;
-    if (g_MenuScreen == MENU_SCREEN_UNK23 || g_MenuScreen == MENU_SCREEN_UNK13) {
+    if (g_MenuScreen == MENU_SCREEN_UNK23 || g_MenuScreen == MENU_SCREEN_RING_SHOT_RECORDS) {
         g_CourseIndex = g_MenuChoices.courseIndex;
         g_HoleIndex = g_MenuChoices.holeIndex;
     } else if (g_MenuScreen == MENU_SCREEN_CLUB_TOURNAMENT) {
@@ -481,7 +481,7 @@ void func_801F9FF8_ovl_01(void) {
                     break;
                 case CLUBHOUSE_ROOM_UNK13:
                     StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                    g_MenuScreen = MENU_SCREEN_UNK13;
+                    g_MenuScreen = MENU_SCREEN_RING_SHOT_RECORDS;
                     break;
                 case CLUBHOUSE_ROOM_BIRDIE_BADGES:
                     StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -715,7 +715,7 @@ void DrawMenuScreen(Gfx **displayListHead) {
         case MENU_SCREEN_UNK12:
             func_8021D3AC_ovl_01(&gfx);
             break;
-        case MENU_SCREEN_UNK13:
+        case MENU_SCREEN_RING_SHOT_RECORDS:
             func_8021FC5C_ovl_01(&gfx);
             break;
         case MENU_SCREEN_UNK11:

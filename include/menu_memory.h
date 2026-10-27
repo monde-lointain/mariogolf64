@@ -2,6 +2,7 @@
 #define MENU_MEMORY_H
 
 #include <ultra64.h>
+#include "save.h"
 
 /* The values of unkE, which func_80217B88 also turns into the settings of D_801B60BA */
 #define MENU_UNKE_COUNT 8
@@ -35,8 +36,9 @@ typedef struct MenuMemory {
     /* 0x38 */ s8 tableFirstRow;    /* And the first row shown of one taller */
     /* 0x39 */ s8 unk39;
     /* 0x3A */ s8 unk3A;
-    /* 0x3B */ u8 unk3B[0x42 - 0x3B];
-    /* 0x42 */ s8 unk42;
+    /* 0x3B */ s8 ringShotRow; /* The Ring Shot records' row: a course, or the replays after them */
+    /* 0x3C */ s8 ringShotFirstCharacters[RING_SHOT_COURSE_COUNT]; /* Each course's first character shown */
+    /* 0x42 */ s8 ringShotReplaySlot; /* The Ring Shot replay chosen */
     /* 0x43 */ s8 savedGameIndex;
     /* 0x44 */ u8 unk44[0x46 - 0x44];
     /* 0x46 */ u8 unk46;
