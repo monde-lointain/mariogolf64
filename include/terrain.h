@@ -53,8 +53,8 @@ typedef struct GroundTile {
                         [GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
   /* 0x990 */ s16 unk990;
   /* 0x992 */ u16 unk992;
-  /* 0x994 */ s32 detail;  /* How finely the tile is drawn this frame, negative
-                              when hidden */
+  /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative
+                             when hidden */
   /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
   /* 0x9A4 */ s32
       midpointBlockIndex; /* Negative when the tile has no midpoints */
@@ -65,7 +65,7 @@ typedef struct GroundTile {
 #define GROUND_DETAIL_HIDDEN (-1)
 #define GROUND_DETAIL_COARSE 0 /* Two triangles between the tile's corners */
 #define GROUND_DETAIL_MEDIUM 1 /* Eight triangles between its grid vertices */
-#define GROUND_DETAIL_FINE 2   /* Its own display list, midpoints and all */
+#define GROUND_DETAIL_FINE 2 /* Its own display list, midpoints and all */
 
 /* The terrain codes that GetTerrainCode reads from the hole */
 #define TERRAIN_CODE_FAIRWAY 0
@@ -130,7 +130,7 @@ typedef struct IntegerPlane {
   /* 0x00 */ s32 normal[AXIS_COUNT];
   /* 0x0C */ s32 distance;
   /* 0x10 */ s32 unk10; /* Always 256 */
-} IntegerPlane;         /* size = 0x14 */
+} IntegerPlane; /* size = 0x14 */
 
 Vtx* GetGroundPoint(u32 column, u32 row);
 Vtx* GetGridVertex(u32 column, u32 row);

@@ -202,9 +202,9 @@ void ResetBallSimulations(void) {
  * original when these sites call an inline function instead, whether a static
  * one or the AbsoluteValue nested one.
  */
-#define AbsoluteValueExpression(value)        \
-  ({                                          \
-    f32 absValue = (value);                   \
+#define AbsoluteValueExpression(value) \
+  ({ \
+    f32 absValue = (value); \
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 #define ROLL_SOUND_CHANNEL 8

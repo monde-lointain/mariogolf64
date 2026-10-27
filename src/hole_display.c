@@ -110,7 +110,7 @@ extern s32 f_HudAnimation;
 #define FRAME_SLICE_BOTTOM 208
 #define FRAME_SLICE_LEFT_WORD 40
 #define FRAME_SLICE_RIGHT_WORD 80
-#define FRAME_SLICE_WORD_COUNT              \
+#define FRAME_SLICE_WORD_COUNT \
   ((FRAME_SLICE_BOTTOM - FRAME_SLICE_TOP) * \
       (FRAME_SLICE_RIGHT_WORD - FRAME_SLICE_LEFT_WORD))
 
@@ -160,9 +160,9 @@ extern u16* f_LastFrameBuffer;
 #define BACKDROP_LAST_STRIP_HEIGHT 2
 /* Written with | because the target computes it without a branch, and + or a
  * plain ?: branches */
-#define STRIP_HEIGHT(strip)                                        \
-  (BACKDROP_LAST_STRIP_HEIGHT |                                    \
-      ((strip) != BACKDROP_STRIP_COUNT - 1                         \
+#define STRIP_HEIGHT(strip) \
+  (BACKDROP_LAST_STRIP_HEIGHT | \
+      ((strip) != BACKDROP_STRIP_COUNT - 1 \
               ? BACKDROP_STRIP_HEIGHT - BACKDROP_LAST_STRIP_HEIGHT \
               : 0))
 #define COPY_MODE_DSDX (4 << 10) /* Copy mode writes four texels a cycle */
@@ -308,7 +308,7 @@ typedef struct LensFlare {
   /* 0x0C */ s32 unkC;
   /* 0x10 */ f32
       position; /* Along the line, 0 at the sun and 1 at its axis point */
-} LensFlare;    /* size = 0x14 */
+} LensFlare; /* size = 0x14 */
 
 extern LensFlare f_LensFlares[LENS_FLARE_COUNT];
 
@@ -1654,34 +1654,34 @@ void HandleFrameBufferSwap(void) {}
 #define RM_FORCED_PASS2 GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 #define FADE_COUNT_PERIOD 8
 
-#define LOAD_FADE_FRAME_STRIP(gfx, texels, height, isTileSet)                \
-  {                                                                          \
-    if (!(isTileSet)) {                                                      \
-      gDPSetTextureImage(                                                    \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7);        \
+#define LOAD_FADE_FRAME_STRIP(gfx, texels, height, isTileSet) \
+  { \
+    if (!(isTileSet)) { \
+      gDPSetTextureImage( \
+          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7); \
       gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, \
-          0, 0, 0, 0, 0, 0);                                                 \
-      gDPLoadSync(gfx++);                                                    \
-      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,                               \
-          (height) * FADE_FRAME_WIDTH - 1,                                   \
-          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES));                   \
-      gDPPipeSync(gfx++);                                                    \
-      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b,                         \
-          (FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES + 7) >> 3, 0,               \
-          G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0);                             \
-      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0,                           \
-          (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC,                    \
-          ((height) - 1) << G_TEXTURE_IMAGE_FRAC);                           \
-      isTileSet = TRUE;                                                      \
-    } else {                                                                 \
-      gDPSetTextureImage(                                                    \
-          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7);        \
-      gDPLoadSync(gfx++);                                                    \
-      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,                               \
-          (height) * FADE_FRAME_WIDTH - 1,                                   \
-          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES));                   \
-      gDPPipeSync(gfx++);                                                    \
-    }                                                                        \
+          0, 0, 0, 0, 0, 0); \
+      gDPLoadSync(gfx++); \
+      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
+          (height) * FADE_FRAME_WIDTH - 1, \
+          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
+      gDPPipeSync(gfx++); \
+      gDPSetTile(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, \
+          (FADE_FRAME_WIDTH * G_IM_SIZ_16b_BYTES + 7) >> 3, 0, \
+          G_TX_RENDERTILE, 0, 0, 0, 0, 0, 0, 0); \
+      gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, \
+          (FADE_FRAME_WIDTH - 1) << G_TEXTURE_IMAGE_FRAC, \
+          ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \
+      isTileSet = TRUE; \
+    } else { \
+      gDPSetTextureImage( \
+          gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (u32)(texels) & ~7); \
+      gDPLoadSync(gfx++); \
+      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, \
+          (height) * FADE_FRAME_WIDTH - 1, \
+          CALC_DXT(FADE_FRAME_WIDTH, G_IM_SIZ_16b_BYTES)); \
+      gDPPipeSync(gfx++); \
+    } \
   }
 
 extern s32 D_800C7308;

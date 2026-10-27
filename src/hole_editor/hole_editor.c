@@ -370,15 +370,15 @@ extern s32 f_LastTriangleEditKind; /* A TRIANGLE_EDIT_* */
 extern CoursePoint f_SavedCorners[SAVED_CORNER_COUNT];
 
 /* func_80402E1C's state */
-extern f32 f_RingCameraPitch;   /* In radians */
+extern f32 f_RingCameraPitch; /* In radians */
 extern f32 f_RingCameraHeading; /* In radians, from f_RingCameraHeadingAngle */
 extern s32 f_RingCameraHeadingAngle;
 extern s32 f_RingTriangleIndex;
-extern s32 f_RingCornerIndex;  /* Always 0 */
+extern s32 f_RingCornerIndex; /* Always 0 */
 extern s32 f_LastRingEditKind; /* A TRIANGLE_EDIT_* */
 
 /* func_80403A04's state */
-extern f32 f_WallCameraPitch;   /* In radians */
+extern f32 f_WallCameraPitch; /* In radians */
 extern f32 f_WallCameraHeading; /* In radians, from f_WallCameraHeadingAngle */
 extern s32 f_WallCameraHeadingAngle;
 extern s32 f_FirstWallTriangle;
@@ -409,7 +409,7 @@ extern f32 f_HeightCameraPitch; /* In radians */
 extern f32
     f_HeightCameraHeading; /* In radians, from f_HeightCameraHeadingAngle */
 extern s32 f_HeightCameraHeadingAngle;
-extern s32 f_LastSetHeight;        /* The height C-up or C-down last set */
+extern s32 f_LastSetHeight; /* The height C-up or C-down last set */
 extern s32 D_8040C668_hole_editor; /* Copied to D_800C30D1 */
 extern s32 f_CLeftPickedHeight; /* Heights picked up by the second editor pad */
 extern s32 f_CUpPickedHeight;
@@ -425,13 +425,13 @@ s32 SetGroundPointHeightAndShade();
 
 /* func_80406818's menu */
 extern s32 f_IsSavingHoleFiles;
-extern s32 f_HoleFileStep;         /* A HOLE_FILE_STEP_* */
-extern s32 f_HoleFileHoleNumber;   /* From 1 */
+extern s32 f_HoleFileStep; /* A HOLE_FILE_STEP_* */
+extern s32 f_HoleFileHoleNumber; /* From 1 */
 extern s32 f_HoleFileCourseNumber; /* From 1 */
 extern s32 f_HoleFilePromptFrames;
 
 /* func_80406C3C's state */
-extern f32 f_TreeCameraPitch;   /* In radians */
+extern f32 f_TreeCameraPitch; /* In radians */
 extern f32 f_TreeCameraHeading; /* In radians, from f_TreeCameraHeadingAngle */
 extern s32 f_TreeCameraHeadingAngle;
 extern s32 f_EditedTreeIndex;
@@ -2230,8 +2230,8 @@ static const char f_EditorFileName[] = "c:/usgolf64/hiedit.c";
 /* A plain if leaves GCC to invert the condition, which the game's code does not
  */
 #define EDITOR_ASSERT(condition, lineNumber) \
-  ((condition) ? (void)0                     \
-               : ReportFailedAssertion(      \
+  ((condition) ? (void)0 \
+               : ReportFailedAssertion( \
                      f_EditorAssertionText, f_EditorFileName, lineNumber))
 
 /*

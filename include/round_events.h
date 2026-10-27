@@ -46,7 +46,7 @@
 #define BANNER_FLAG_SHOT 6
 #define BANNER_EXCELLENT 7
 #define BANNER_GREAT 8
-#define BANNER_FINISH 9    /* Speed Golf */
+#define BANNER_FINISH 9 /* Speed Golf */
 #define BANNER_COMPLETE 10 /* Ring Shot */
 #define BANNER_HOLE_IN_ONE 11
 #define BANNER_ALBATROSS 12

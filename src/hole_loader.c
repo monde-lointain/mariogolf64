@@ -620,7 +620,7 @@ void LoadHole(void) {
  * even triangle's last one. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define IsRaisedShadedVertex(index, vertexIndex)                        \
+#define IsRaisedShadedVertex(index, vertexIndex) \
   ((((index) & 1) && (((vertexIndex) == 1) || ((vertexIndex) == 2))) || \
       (!((index) & 1) && ((vertexIndex) == 2)))
 

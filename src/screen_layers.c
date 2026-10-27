@@ -70,41 +70,41 @@
  * Marks the eight octants' points two rows deep, then steps the circle.
  * The offsets are clamped to keep the points on the picture.
  */
-#define MARK_CIRCLE_POINTS(operation)                        \
-  do {                                                       \
-    radiusOffset = radius;                                   \
-    stepOffset = step;                                       \
-    if (radius > HALF_TURN_LAST_COLUMN_OFFSET) {             \
-      radiusOffset = HALF_TURN_LAST_COLUMN_OFFSET;           \
-    }                                                        \
-    if (step > HALF_TURN_LAST_ROW_OFFSET) {                  \
-      stepOffset = HALF_TURN_LAST_ROW_OFFSET;                \
-    }                                                        \
+#define MARK_CIRCLE_POINTS(operation) \
+  do { \
+    radiusOffset = radius; \
+    stepOffset = step; \
+    if (radius > HALF_TURN_LAST_COLUMN_OFFSET) { \
+      radiusOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
+    } \
+    if (step > HALF_TURN_LAST_ROW_OFFSET) { \
+      stepOffset = HALF_TURN_LAST_ROW_OFFSET; \
+    } \
     MARK_OCTANT_POINTS(radiusOffset, stepOffset, operation); \
-    stepOffset = step;                                       \
-    radiusOffset = radius;                                   \
-    if (radius > HALF_TURN_LAST_ROW_OFFSET - 1) {            \
-      radiusOffset = HALF_TURN_LAST_ROW_OFFSET - 1;          \
-    }                                                        \
-    if (step > HALF_TURN_LAST_COLUMN_OFFSET) {               \
-      stepOffset = HALF_TURN_LAST_COLUMN_OFFSET;             \
-    }                                                        \
+    stepOffset = step; \
+    radiusOffset = radius; \
+    if (radius > HALF_TURN_LAST_ROW_OFFSET - 1) { \
+      radiusOffset = HALF_TURN_LAST_ROW_OFFSET - 1; \
+    } \
+    if (step > HALF_TURN_LAST_COLUMN_OFFSET) { \
+      stepOffset = HALF_TURN_LAST_COLUMN_OFFSET; \
+    } \
     MARK_OCTANT_POINTS(stepOffset, radiusOffset, operation); \
-    error = error - 1 - step * 2;                            \
-    if (error < 0) {                                         \
-      error += (radius - 1) * 2;                             \
-      radius--;                                              \
-    }                                                        \
-    step++;                                                  \
+    error = error - 1 - step * 2; \
+    if (error < 0) { \
+      error += (radius - 1) * 2; \
+      radius--; \
+    } \
+    step++; \
   } while (0)
-#define MARK_OCTANT_POINTS(column, row, operation)                            \
-  do {                                                                        \
-    HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation;     \
-    HALF_TURN_PAIR(centerColumn + (column), centerRow - (row)) operation;     \
+#define MARK_OCTANT_POINTS(column, row, operation) \
+  do { \
+    HALF_TURN_PAIR(centerColumn + (column), centerRow + (row)) operation; \
+    HALF_TURN_PAIR(centerColumn + (column), centerRow - (row)) operation; \
     HALF_TURN_PAIR(centerColumn + (column), centerRow + (row) + 1) operation; \
     HALF_TURN_PAIR(centerColumn + (column), centerRow - (row) + 1) operation; \
-    HALF_TURN_PAIR(centerColumn - (column), centerRow + (row)) operation;     \
-    HALF_TURN_PAIR(centerColumn - (column), centerRow - (row)) operation;     \
+    HALF_TURN_PAIR(centerColumn - (column), centerRow + (row)) operation; \
+    HALF_TURN_PAIR(centerColumn - (column), centerRow - (row)) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow + (row) + 1) operation; \
     HALF_TURN_PAIR(centerColumn - (column), centerRow - (row) + 1) operation; \
   } while (0)
@@ -235,23 +235,23 @@ void LoadNibbleTextureBlock(Gfx** displayListHead, void* texels, s32 format,
  * whose loading parameters are used, and as the value set in the render
  * tile
  */
-#define LOAD_TEXTURE_BLOCK(pkt, timg, fmt, loadSiz, siz, width, height, pal,  \
-    cms, cmt, masks, maskt, shifts, shiftt)                                   \
-  {                                                                           \
-    gDPSetTextureImage(                                                       \
-        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TEXTURE_ADDRESS(timg));          \
+#define LOAD_TEXTURE_BLOCK(pkt, timg, fmt, loadSiz, siz, width, height, pal, \
+    cms, cmt, masks, maskt, shifts, shiftt) \
+  { \
+    gDPSetTextureImage( \
+        pkt++, fmt, loadSiz##_LOAD_BLOCK, 1, TEXTURE_ADDRESS(timg)); \
     gDPSetTile(pkt++, fmt, loadSiz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0, cmt, \
-        maskt, shiftt, cms, masks, shifts);                                   \
-    gDPLoadSync(pkt++);                                                       \
-    gDPLoadBlock(pkt++, G_TX_LOADTILE, 0, 0,                                  \
-        (((width) * (height) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1,       \
-        CALC_DXT(width, loadSiz##_BYTES));                                    \
-    gDPPipeSync(pkt++);                                                       \
-    gDPSetTile(pkt++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3,  \
-        0, G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts);     \
-    gDPSetTileSize(pkt++, G_TX_RENDERTILE, 0, 0,                              \
-        ((width) - 1) << G_TEXTURE_IMAGE_FRAC,                                \
-        ((height) - 1) << G_TEXTURE_IMAGE_FRAC);                              \
+        maskt, shiftt, cms, masks, shifts); \
+    gDPLoadSync(pkt++); \
+    gDPLoadBlock(pkt++, G_TX_LOADTILE, 0, 0, \
+        (((width) * (height) + loadSiz##_INCR) >> loadSiz##_SHIFT) - 1, \
+        CALC_DXT(width, loadSiz##_BYTES)); \
+    gDPPipeSync(pkt++); \
+    gDPSetTile(pkt++, fmt, siz, (((width) * loadSiz##_LINE_BYTES) + 7) >> 3, \
+        0, G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, shifts); \
+    gDPSetTileSize(pkt++, G_TX_RENDERTILE, 0, 0, \
+        ((width) - 1) << G_TEXTURE_IMAGE_FRAC, \
+        ((height) - 1) << G_TEXTURE_IMAGE_FRAC); \
   }
 
 void LoadTextureBlock(Gfx** displayListHead, void* texels, s32 format, s32 size,

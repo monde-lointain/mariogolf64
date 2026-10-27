@@ -406,9 +406,9 @@ void UpdateHelpBoard(void) {
  * list, down while some are below. It is a macro, as an inline function
  * compiles differently from the original.
  */
-#define IsTopicArrowShown(index)                          \
+#define IsTopicArrowShown(index) \
   ((((index) == ARROW_UP) && (f_FirstListedTopic > 0)) || \
-      (((index) == ARROW_DOWN) &&                         \
+      (((index) == ARROW_DOWN) && \
           (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
 
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text

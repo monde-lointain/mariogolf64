@@ -48,14 +48,14 @@ extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
 /* The weather and light that a hole is played in */
 typedef struct HoleConditions {
-  /* 0x00 */ s32 windSpeed;     /* As the ball's flight feels it */
+  /* 0x00 */ s32 windSpeed; /* As the ball's flight feels it */
   /* 0x04 */ u16 windDirection; /* A full turn is 0x10000 */
   /* 0x08 */ s32 isRaining; /* Shortens shots and changes the scene's colors */
   /* 0x0C */ u32
-      sceneColorIndex;     /* With isRaining, picks DeriveSceneColors' colors */
+      sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
   /* 0x10 */ u16 lightYaw; /* g_LightYaw */
   /* 0x12 */ u16 lightPitch; /* g_LightPitch */
-} HoleConditions;            /* size = 0x14 */
+} HoleConditions; /* size = 0x14 */
 
 typedef struct Fog {
   /* 0x00 */ s32 color[3];
@@ -168,7 +168,7 @@ typedef struct SkyState {
   /* 0x30 */ f32
       viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera
                                            sees it, in radians */
-} SkyState;                             /* size = 0x38 */
+} SkyState; /* size = 0x38 */
 extern SkyState g_SkyState;
 
 /* HoleConditions.windDirection's units per radian */
@@ -178,9 +178,9 @@ extern SkyState g_SkyState;
  * The wind's direction as seen from a camera: the arrow turns with the
  * camera's direction of view
  */
-#define VIEWED_WIND_ANGLE(windDirection, view)          \
+#define VIEWED_WIND_ANGLE(windDirection, view) \
   ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
-      atan2((view)->eye[2] - (view)->lookAt[2],         \
+      atan2((view)->eye[2] - (view)->lookAt[2], \
           (view)->eye[0] - (view)->lookAt[0]))
 
 /*
@@ -188,8 +188,8 @@ extern SkyState g_SkyState;
  * through RSP segments, each DYNAMIC_TEXTURE_SIZE pixels square
  */
 #define DYNAMIC_TEXTURE_SIZE 32
-extern u16 g_MirrorTexture[];  /* Part of the frame, upside down */
-extern u16 g_FlameTexture[];   /* Noise scrolling over a flame gradient */
+extern u16 g_MirrorTexture[]; /* Part of the frame, upside down */
+extern u16 g_FlameTexture[]; /* Noise scrolling over a flame gradient */
 extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
 
 /* The texture memory that the second texture of a two-texture blend uses */

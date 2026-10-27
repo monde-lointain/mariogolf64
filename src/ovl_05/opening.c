@@ -81,9 +81,9 @@ extern s32 f_AreAmbientSoundsOn;
 extern u8 D_80212830_ovl_05[];
 extern u8 f_ShotBallImage[];
 /* The steps that a name logo's animation starts each phase at */
-#define NAME_LOGO_UNFOLD 0     /* Widens over 8 frames */
+#define NAME_LOGO_UNFOLD 0 /* Widens over 8 frames */
 #define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
-#define NAME_LOGO_FLIP_UP 20   /* Grows back over 4 frames */
+#define NAME_LOGO_FLIP_UP 20 /* Grows back over 4 frames */
 #define NAME_LOGO_STILL 30
 
 extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
@@ -189,17 +189,17 @@ typedef enum LogoLetterIndex {
 #define LOGO_F_DEPTH 44
 
 typedef struct LogoLetter {
-  s32 x;      /* On the screen, from the left */
-  s32 y;      /* On the screen, from the top */
-  s32 depth;  /* Nearer letters are drawn over farther ones */
+  s32 x; /* On the screen, from the left */
+  s32 y; /* On the screen, from the top */
+  s32 depth; /* Nearer letters are drawn over farther ones */
 } LogoLetter; /* size = 0xC */
 
 /* What a logo letter is doing */
 typedef enum LogoLetterState {
-  LOGO_LETTER_WAITING,    /* For Lakitu to drop it */
-  LOGO_LETTER_FALLING,    /* Or rising after a bounce, and growing */
-  LOGO_LETTER_SQUASHING,  /* Flattening against the ground */
-  LOGO_LETTER_SQUASHED,   /* Holding flat */
+  LOGO_LETTER_WAITING, /* For Lakitu to drop it */
+  LOGO_LETTER_FALLING, /* Or rising after a bounce, and growing */
+  LOGO_LETTER_SQUASHING, /* Flattening against the ground */
+  LOGO_LETTER_SQUASHED, /* Holding flat */
   LOGO_LETTER_STRETCHING, /* Springing back up */
   LOGO_LETTER_LANDED = 9
 } LogoLetterState;
@@ -577,8 +577,8 @@ extern s32 f_CueSlotIndex;
 
 /* Places the cue slot's character, leaving the point's height unset */
 #define PLACE_CUE_CHARACTER(point, x, z, heading) \
-  point[0] = x;                                   \
-  point[2] = z;                                   \
+  point[0] = x; \
+  point[2] = z; \
   PlaceCharacter(f_CueSlotIndex, point, DEGREES_TO_RADIANS(heading))
 
 /*
@@ -2450,7 +2450,7 @@ void LoadNameLogo(s32 logoIndex, s32 slot) {
  */
 void DrawNameLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 xEdges[2];                         /* Left and right */
+  s32 xEdges[2]; /* Left and right */
   s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; /* Top to bottom of each strip */
   s32 strip;
   s32 slot;
@@ -3945,7 +3945,7 @@ typedef enum LogoState {
 typedef enum LogoFadeStage {
   LOGO_FADE_NONE,
   LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
-  LOGO_FADE_GRAY,    /* Until the shine starts */
+  LOGO_FADE_GRAY, /* Until the shine starts */
   LOGO_FADE_WHITENING,
   LOGO_FADE_WHITE, /* Until the logo shrinks */
   LOGO_FADE_LOGO_OUT
@@ -4062,7 +4062,7 @@ extern s32 f_LogoClubSpinFramesLeft;
 extern s32 f_LogoState;
 extern s32 f_LogoFadeStage;
 extern s32 f_LogoFadeFramesLeft; /* Starts at 63 */
-extern f32 f_LogoClubScale[2];   /* Across, then up */
+extern f32 f_LogoClubScale[2]; /* Across, then up */
 /* In degrees */
 extern f32 f_LogoClubAngle;
 extern f32 f_LogoClubOrbitAngle;

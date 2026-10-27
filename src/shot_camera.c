@@ -42,7 +42,7 @@ static const char f_UnusedFloatFormat[] = "            %f";
 #define FLIGHT_CAMERA_UNK0 0
 #define FLIGHT_CAMERA_UNK1 1
 #define FLIGHT_CAMERA_BESIDE_TEE 2 /* Beside the tee, looking at it */
-#define FLIGHT_CAMERA_UNK3 3       /* Placed by PlaceAimCamera */
+#define FLIGHT_CAMERA_UNK3 3 /* Placed by PlaceAimCamera */
 /* Picked by the B button in debug builds */
 #define FLIGHT_CAMERA_BESIDE_GOLFER 4
 /* Picked by the A button in debug builds */
@@ -694,11 +694,11 @@ void StartFlightCamera(s32 earlierFlightCount) {
  */
 #define IsUnk2E14PowerShot() \
   (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER && g_SimulatedShot.unk2E14)
-#define IsFairwayKind(kind)                      \
-  ((kind) == SURFACE_KIND_FAIRWAY ||             \
+#define IsFairwayKind(kind) \
+  ((kind) == SURFACE_KIND_FAIRWAY || \
       (kind) == SURFACE_KIND_FAIRWAY_FAIR_LIE || \
       (kind) == SURFACE_KIND_FAIRWAY_POOR_LIE)
-#define IsBunkerKind(kind)                                                    \
+#define IsBunkerKind(kind) \
   ((kind) == SURFACE_KIND_BUNKER || (kind) == SURFACE_KIND_BUNKER_FAIR_LIE || \
       (kind) == SURFACE_KIND_BUNKER_POOR_LIE)
 
@@ -781,10 +781,10 @@ s32 IsCupPassPoint(s32 cupDistance, s32 height) {
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsShotLengthRated(endKind)                             \
-  ((endKind) != SURFACE_KIND_WATER_HAZARD &&                   \
+#define IsShotLengthRated(endKind) \
+  ((endKind) != SURFACE_KIND_WATER_HAZARD && \
       D_800BE644 >= f_LandingCupDistance && D_800BE648 != 1 && \
-      g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00 &&   \
+      g_SimulatedShot.unk2E14 && !g_SimulatedShot.unk2E00 && \
       g_SimulatedShot.shot.shotMode != SHOT_MODE_APPROACH)
 
 /*
@@ -1168,15 +1168,15 @@ void PlayFlightSounds(s32 step) {
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsBallLanding()                                                 \
+#define IsBallLanding() \
   (g_SimulatedShot.stepCount < g_BallFlightStep + LANDING_STEP_COUNT && \
-      (f32)f_ShotEndPosition[AXIS_X] <                                  \
-          (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) &&       \
-      (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) <            \
-          (f32)f_ShotEndPosition[AXIS_X] &&                             \
-      (f32)f_ShotEndPosition[AXIS_Z] <                                  \
-          (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) &&       \
-      (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) <            \
+      (f32)f_ShotEndPosition[AXIS_X] < \
+          (f32)(f_FlightBallPosition[AXIS_X] + LANDING_RADIUS) && \
+      (f32)(f_FlightBallPosition[AXIS_X] - LANDING_RADIUS) < \
+          (f32)f_ShotEndPosition[AXIS_X] && \
+      (f32)f_ShotEndPosition[AXIS_Z] < \
+          (f32)(f_FlightBallPosition[AXIS_Z] + LANDING_RADIUS) && \
+      (f32)(f_FlightBallPosition[AXIS_Z] - LANDING_RADIUS) < \
           (f32)f_ShotEndPosition[AXIS_Z])
 
 /*
@@ -2349,11 +2349,11 @@ INCLUDE_ASM("asm/nonmatchings/shot_camera", PlaceFlightCamera);
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsTroubleSurface(info)                        \
-  ((info)->kind == SURFACE_KIND_BUNKER ||             \
+#define IsTroubleSurface(info) \
+  ((info)->kind == SURFACE_KIND_BUNKER || \
       (info)->kind == SURFACE_KIND_BUNKER_FAIR_LIE || \
       (info)->kind == SURFACE_KIND_BUNKER_POOR_LIE || \
-      (info)->kind == SURFACE_KIND_WATER_HAZARD ||    \
+      (info)->kind == SURFACE_KIND_WATER_HAZARD || \
       (info)->kind == SURFACE_KIND_OUT_OF_BOUNDS)
 
 /*

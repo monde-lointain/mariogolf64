@@ -66,7 +66,7 @@ typedef struct ShotLabel {
   /* 0x4 */ s32 y;
   /* 0x8 */ s32 depth;
   /* 0xC */ s32 corner; /* NO_CORNER when the tag is hidden */
-} ShotLabel;            /* size = 0x10 */
+} ShotLabel; /* size = 0x10 */
 
 /* D_800C3084's bit for a shot from the green */
 #define SHOT_UNK3084_ON_GREEN 1
@@ -123,10 +123,10 @@ typedef struct ShotLabel {
 #define PIN_FLAG_FADE_STEP 32
 
 /* Draws the flag opaque, keeping the coverage of its alpha */
-#define PIN_FLAG_RENDER_MODE                       \
+#define PIN_FLAG_RENDER_MODE \
   AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
       GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
-#define PIN_FLAG_RENDER_MODE2                      \
+#define PIN_FLAG_RENDER_MODE2 \
   AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
       GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 
@@ -138,7 +138,7 @@ typedef struct ScreenSpot {
   /* 0x0 */ s32 x;
   /* 0x4 */ s32 y;
   /* 0x8 */ s32 isHidden; /* SPOT_HIDDEN behind the camera, else SPOT_SHOWN */
-} ScreenSpot;             /* size = 0xC */
+} ScreenSpot; /* size = 0xC */
 
 extern s32 D_800C308C; /* The letterbox's state */
 

@@ -36,8 +36,8 @@ typedef struct GolferTraits {
   /* 0x6 */ s8 unk6;
   /* 0x7 */ s8 targetScores[COURSE_COUNT]; /* The score to par it aims at on
                                               each course */
-  /* 0xD */ s8 unkD;                       /* Added to the target score */
-} GolferTraits;                            /* size = 0xE */
+  /* 0xD */ s8 unkD; /* Added to the target score */
+} GolferTraits; /* size = 0xE */
 
 /* GolferTraits.windPlay values */
 #define WIND_PLAY_HEAD_WINDS 0 /* Offsets shots for head winds */
@@ -230,7 +230,7 @@ s32 func_8005F248(s32 value);
 typedef struct ShotOffset {
   /* 0x0 */ s8 unk14; /* Becomes f_Shot.unk14 */
   /* 0x1 */ s8 unk18; /* Becomes f_Shot.unk18 */
-} ShotOffset;         /* size = 0x2 */
+} ShotOffset; /* size = 0x2 */
 
 #define SHOT_OFFSET_COUNT 8
 
@@ -969,38 +969,38 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
  * until they run out or no hole can take any more. It is a macro, as
  * isSpreadHole is an expression on the caller's index.
  */
-#define SpreadStrokes(strokes, strokeCount, isSpreadHole)   \
-  {                                                         \
-    s32 changeCount_;                                       \
-                                                            \
-    while ((strokeCount) != 0) {                            \
-      changeCount_ = 0;                                     \
+#define SpreadStrokes(strokes, strokeCount, isSpreadHole) \
+  { \
+    s32 changeCount_; \
+\
+    while ((strokeCount) != 0) { \
+      changeCount_ = 0; \
       for (index = 0; index < COURSE_HOLE_COUNT; index++) { \
-        if (!(isSpreadHole)) {                              \
-          continue;                                         \
-        }                                                   \
-        if ((strokeCount) < 0) {                            \
+        if (!(isSpreadHole)) { \
+          continue; \
+        } \
+        if ((strokeCount) < 0) { \
           if ((strokes)[index] >= LOWEST_LOWERED_STROKES) { \
-            changeCount_++;                                 \
-            (strokes)[index]--;                             \
-            (strokeCount)++;                                \
-            if ((strokeCount) >= 0) {                       \
-              break;                                        \
-            }                                               \
-          }                                                 \
-        } else {                                            \
-          changeCount_++;                                   \
-          (strokes)[index]++;                               \
-          (strokeCount)--;                                  \
-          if ((strokeCount) <= 0) {                         \
-            break;                                          \
-          }                                                 \
-        }                                                   \
-      }                                                     \
-      if (changeCount_ == 0) {                              \
-        break;                                              \
-      }                                                     \
-    }                                                       \
+            changeCount_++; \
+            (strokes)[index]--; \
+            (strokeCount)++; \
+            if ((strokeCount) >= 0) { \
+              break; \
+            } \
+          } \
+        } else { \
+          changeCount_++; \
+          (strokes)[index]++; \
+          (strokeCount)--; \
+          if ((strokeCount) <= 0) { \
+            break; \
+          } \
+        } \
+      } \
+      if (changeCount_ == 0) { \
+        break; \
+      } \
+    } \
   }
 
 /*
@@ -1689,12 +1689,12 @@ void ChooseLongShot(
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsOffFairway(surfaceKind)                       \
-  ((surfaceKind) != SURFACE_KIND_FAIRWAY &&             \
+#define IsOffFairway(surfaceKind) \
+  ((surfaceKind) != SURFACE_KIND_FAIRWAY && \
       (surfaceKind) != SURFACE_KIND_FAIRWAY_FAIR_LIE && \
       (surfaceKind) != SURFACE_KIND_FAIRWAY_POOR_LIE && \
-      (surfaceKind) != SURFACE_KIND_SEMI_ROUGH &&       \
-      (surfaceKind) != SURFACE_KIND_GREEN &&            \
+      (surfaceKind) != SURFACE_KIND_SEMI_ROUGH && \
+      (surfaceKind) != SURFACE_KIND_GREEN && \
       (surfaceKind) != SURFACE_KIND_GREEN_EDGE)
 
 /*
@@ -2429,7 +2429,7 @@ s32 GetAngleDifference(s32 angle, s32 otherAngle) {
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsWindSpeedInRange(lowest, limit)    \
+#define IsWindSpeedInRange(lowest, limit) \
   (g_HoleConditions.windSpeed >= (lowest) && \
       g_HoleConditions.windSpeed < (limit))
 
@@ -2554,7 +2554,7 @@ s32 ChooseShotOffset(void) {
 /* Whether the shot's club lies between the slots of the two club types */
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsShotClubOfTypes(firstType, lastType)                         \
+#define IsShotClubOfTypes(firstType, lastType) \
   (f_Shot.clubSlot >= FindClubSlot(f_Shot.playerIndex, (firstType)) && \
       FindClubSlot(f_Shot.playerIndex, (lastType)) >= f_Shot.clubSlot)
 
@@ -2590,8 +2590,8 @@ s32 RollClubKindChance(s32 chanceSetIndex) {
 
 /* It is a macro, as an inline function compiles differently from the original
  */
-#define IsLostBallKind(surfaceKind)                  \
-  ((surfaceKind) == SURFACE_KIND_WATER_HAZARD ||     \
+#define IsLostBallKind(surfaceKind) \
+  ((surfaceKind) == SURFACE_KIND_WATER_HAZARD || \
       (surfaceKind) == SURFACE_KIND_OUT_OF_BOUNDS || \
       (surfaceKind) == SURFACE_KIND_OUT_OF_COURSE)
 

@@ -95,7 +95,7 @@ typedef struct TrianglePlane {
   /* 0x00 */ f32 normal[AXIS_COUNT];
   /* 0x0C */ f32 distance;
   /* 0x10 */ f32 unk10; /* Always 1 */
-} TrianglePlane;        /* size = 0x14 */
+} TrianglePlane; /* size = 0x14 */
 
 /* Returns 0, or -1 for a triangle without area, whose plane is then level */
 s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane);

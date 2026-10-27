@@ -304,23 +304,23 @@ extern s32 D_801051F0; /* Set unless two players share a controller */
 extern s32 D_80223FF8_ovl_00;
 extern s32 D_801B60A8; /* g_GameState.unk20, the current player, under a symbol
                           of its own */
-extern s8 D_800FBDB8;  /* PlayContestMovies' state */
-extern s8 D_800C3098;  /* Asks for the HUD to turn away when the next player is
-                          picked */
+extern s8 D_800FBDB8; /* PlayContestMovies' state */
+extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is
+                         picked */
 extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing
                                  was stopped */
 extern s32
     D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
-extern s32 D_80223E40_ovl_00;    /* Set once the shot preview has been built */
-extern f32 D_80223E48_ovl_00;    /* A debug tilt of the aim camera, which the C
-                                    buttons tune */
+extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
+extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
+                                 buttons tune */
 extern Vtx D_80223E60_ovl_00[4]; /* A dash of the shot preview */
 extern Vtx D_80223EB0_ovl_00[4]; /* The putt preview's line, placed on screen */
-extern Mtx D_80227110_ovl_00;    /* An identity matrix for the putt preview */
-extern s32 D_80223EA0_ovl_00;    /* How many steps the shot preview simulates */
+extern Mtx D_80227110_ovl_00; /* An identity matrix for the putt preview */
+extern s32 D_80223EA0_ovl_00; /* How many steps the shot preview simulates */
 extern s32
     D_80223EA4_ovl_00; /* How many of the shot preview's points are shown */
-extern s8 D_80223EA8_ovl_00;  /* Whether the shot preview ran to its end */
+extern s8 D_80223EA8_ovl_00; /* Whether the shot preview ran to its end */
 extern s32 D_80223EAC_ovl_00; /* Scrolls the shot preview's dots */
 extern Mtx D_802271A0_ovl_00[2]
                             [SHOT_PREVIEW_MAX_STEPS]; /* The preview's matrices,

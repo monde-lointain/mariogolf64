@@ -138,7 +138,7 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
  * It is a macro, as an inline function compiles differently from the
  * original.
  */
-#define IsReactionViewLow()          \
+#define IsReactionViewLow() \
   (IsGameFlagSet(GAME_FLAG_UNK7F) || \
       ((g_Scene != SCENE_STAFF_ROLL) && (D_801B60A0 == 1)))
 
@@ -148,8 +148,8 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
  * not smooth enough. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define IsBetterReactionSpot(roughness)               \
-  (!f_HasReactionSpot ||                              \
+#define IsBetterReactionSpot(roughness) \
+  (!f_HasReactionSpot || \
       (((roughness) * 2 < f_ReactionSpotRoughness) && \
           (f_ReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)))
 

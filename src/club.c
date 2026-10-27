@@ -67,7 +67,7 @@
 /* A club's stats, as GenerateClubSet takes them */
 typedef struct ClubStats {
   /* 0x0 */ s16 distance; /* In yards */
-  /* 0x2 */ u16 pitch;    /* 0x10000 is a full turn */
+  /* 0x2 */ u16 pitch; /* 0x10000 is a full turn */
   /* 0x4 */ s8 unk4;
   /* 0x5 */ s8 unk5;
 } ClubStats; /* size = 0x6 */

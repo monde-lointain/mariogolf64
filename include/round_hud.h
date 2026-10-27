@@ -78,11 +78,11 @@ typedef struct RoundHud {
   /* 0x78 */ u16
       skinsTotals[MAX_PLAYER_COUNT]; /* The skins each player has won, as
                                         TallySkins counts them */
-  /* 0x80 */ u16 clubHeadTilt;       /* Binary angles; the icons tilt by half */
-  /* 0x82 */ u16 lieTilt;            /* The slope under the ball */
+  /* 0x80 */ u16 clubHeadTilt; /* Binary angles; the icons tilt by half */
+  /* 0x82 */ u16 lieTilt; /* The slope under the ball */
   /* 0x84 */ u8 unk84[3];
   /* 0x87 */ s8 unk87;
-  /* 0x88 */ u8 flags;             /* HUD_FLAG_* bits */
+  /* 0x88 */ u8 flags; /* HUD_FLAG_* bits */
   /* 0x89 */ u8 areLieArrowsShown; /* While the pause menu sets the lie */
   /* 0x8A */ u8 areWindSpeedArrowsShown;
   /* 0x8B */ u8 areWindDirectionArrowsShown;

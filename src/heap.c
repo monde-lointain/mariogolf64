@@ -45,7 +45,7 @@ typedef struct Heap {
   /* 0x10 */ u32 freeSize;
   /* 0x14 */ u32 largestFreeSize; /* The largest free block, measured by the
                                      last allocation */
-} Heap;                           /* size = 0x18 */
+} Heap; /* size = 0x18 */
 
 extern Heap f_Heaps[HEAP_COUNT];
 extern Heap f_Memory;

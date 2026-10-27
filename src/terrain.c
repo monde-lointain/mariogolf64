@@ -46,21 +46,21 @@ typedef struct MapOverviewControls {
   /* 0x00 */ s32 cameraX;
   /* 0x04 */ s32 cameraZ;
   /* 0x08 */ s32 selectionIndex; /* A and B cycle it */
-  /* 0x0C */ s32 adjustment;     /* L and R step it */
-  /* 0x10 */ s32 isToggled;      /* Z flips it */
-} MapOverviewControls;           /* size = 0x14 */
+  /* 0x0C */ s32 adjustment; /* L and R step it */
+  /* 0x10 */ s32 isToggled; /* Z flips it */
+} MapOverviewControls; /* size = 0x14 */
 
 /*
  * The map image texel at a texel column and row; the first texel row and
  * column of each tile are its border
  */
-#define MAP_TEXEL(column, row)                                         \
-  g_WorkArea.hole                                                      \
-      .tiles[(column) / GROUND_TILE_TEXEL_SPAN +                       \
+#define MAP_TEXEL(column, row) \
+  g_WorkArea.hole \
+      .tiles[(column) / GROUND_TILE_TEXEL_SPAN + \
           ((row) / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT] \
-      .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) +           \
-          ((row) & (GROUND_TILE_TEXEL_SPAN - 1)) *                     \
-              GROUND_TILE_TEXEL_ROW_LENGTH +                           \
+      .texels[1][((column) & (GROUND_TILE_TEXEL_SPAN - 1)) + \
+          ((row) & (GROUND_TILE_TEXEL_SPAN - 1)) * \
+              GROUND_TILE_TEXEL_ROW_LENGTH + \
           1]
 
 /*
@@ -1283,9 +1283,9 @@ void MarkBillboardsOnMap(void) {
  * menu. It is a macro, as an inline function compiles differently from
  * the original.
  */
-#define IsSceneMenuRequested()                                            \
+#define IsSceneMenuRequested() \
   (g_IsDebugEnabled && (g_MenuControllerData[0].button & START_BUTTON) && \
-      ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) ==          \
+      ((g_ControllerData[0].button & (START_BUTTON | L_TRIG)) == \
           (START_BUTTON | L_TRIG)))
 
 /* Runs the debug scene menu and the update routine of the current debug scene
@@ -1573,7 +1573,7 @@ s32 AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
  * normals may be. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define IsNormalTooLong(normalX, normalY, normalZ)       \
+#define IsNormalTooLong(normalX, normalY, normalZ) \
   ((ABS(normalX) > 0x4000) || (ABS(normalY) > 0x4000) || \
       (ABS(normalZ) > 0x4000))
 

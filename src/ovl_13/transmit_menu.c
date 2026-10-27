@@ -276,7 +276,7 @@ typedef struct StatusCourse {
   /* 0x04 */ u8 longestDrive[2];
   /* 0x06 */ u8 averageDrive[2];
   /* 0x08 */ u8 unk8;
-  /* 0x09 */ u8 averagePutts;    /* In tenths, from PackTenths */
+  /* 0x09 */ u8 averagePutts; /* In tenths, from PackTenths */
   /* 0x0A */ u8 parOrBetterRate; /* As percentages */
   /* 0x0B */ u8 parOnRate;
   /* 0x0C */ u8 unkC;
@@ -285,7 +285,7 @@ typedef struct StatusCourse {
   /* 0x20 */ StatusTime bestTimes[BEST_TIME_COUNT];
   /* 0x2F */ u8
       birdieBadges[3]; /* One bit per hole, from the first hole's top bit */
-} StatusCourse;        /* size = 0x32 */
+} StatusCourse; /* size = 0x32 */
 
 typedef struct StatusUnkAF0Bits {
   /* 0x0 */ u8 nonzeroBits[2];
@@ -359,12 +359,12 @@ typedef struct StatusData {
 /* What WriteStatusToCartridge did */
 #define STATUS_WRITE_DONE 0
 #define STATUS_WRITE_PAK_ERROR 1 /* With the error in transferResult */
-#define STATUS_WRITE_FAILED 2    /* With the cause in transferResult */
+#define STATUS_WRITE_FAILED 2 /* With the cause in transferResult */
 
 /* What WriteExperienceToCartridge did */
 #define EXPERIENCE_WRITE_DONE 0
 #define EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE 1
-#define EXPERIENCE_WRITE_FAILED 2    /* With the cause in transferResult */
+#define EXPERIENCE_WRITE_FAILED 2 /* With the cause in transferResult */
 #define EXPERIENCE_WRITE_PAK_ERROR 3 /* With the error in transferResult */
 
 #define WOOD_PANEL_ASSET 0x8FD
@@ -1151,9 +1151,9 @@ s32 HaveAllRumblePaks(void) {
 }
 
 /* A macro rather than an inline function, which leaves a store-flag result */
-#define AreAllCButtonsHeld(buttons)                         \
+#define AreAllCButtonsHeld(buttons) \
   ((((buttons) & (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) == \
-       (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) &&           \
+       (L_CBUTTONS | D_CBUTTONS | U_CBUTTONS)) && \
       ((buttons) & R_CBUTTONS))
 
 /*

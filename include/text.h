@@ -13,7 +13,7 @@
  * The render mode for text, blending it over the frame by its coverage.
  * It is a macro, as it pastes the cycle number into the blender macro.
  */
-#define TextRenderMode(cycle)                                     \
+#define TextRenderMode(cycle) \
   (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \
       GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 

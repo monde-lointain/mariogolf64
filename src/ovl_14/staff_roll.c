@@ -132,7 +132,7 @@
 /* Rows scrolled when the painting's bottom is shown */
 #define PAINTING_SCROLL_LIMIT 228
 #define OPAQUE_ALPHA 255
-#define CLOSING_FADE_RATE 2  /* Alpha per frame */
+#define CLOSING_FADE_RATE 2 /* Alpha per frame */
 #define PAINTING_FADE_RATE 4 /* Alpha per frame */
 #define PAINTING_FADE_IN_FRAMES 64
 #define CLOUD_ALPHA 180 /* Below this an image is drawn with G_RM_CLD_SURF */
@@ -215,14 +215,14 @@
 /* Sets frames to count clamped to 0 through limit; its do-while is there to
  * match */
 #define CLAMP_FRAMES(frames, count, limit) \
-  do {                                     \
-    (frames) = (count);                    \
-    if ((frames) < 0) {                    \
-      (frames) = 0;                        \
-    }                                      \
-    if ((frames) > (limit)) {              \
-      (frames) = (limit);                  \
-    }                                      \
+  do { \
+    (frames) = (count); \
+    if ((frames) < 0) { \
+      (frames) = 0; \
+    } \
+    if ((frames) > (limit)) { \
+      (frames) = (limit); \
+    } \
   } while (0)
 
 /*
@@ -230,21 +230,21 @@
  * its shrink to the screen's upper right. Its do-while is there to
  * match.
  */
-#define SHRINK_VIEW(view, frames)                                  \
-  do {                                                             \
-    f32 progress = (frames);                                       \
-    s32 left = progress * SHRINK_LEFT_STEP;                        \
-    s32 top = progress * SHRINK_TOP_STEP;                          \
+#define SHRINK_VIEW(view, frames) \
+  do { \
+    f32 progress = (frames); \
+    s32 left = progress * SHRINK_LEFT_STEP; \
+    s32 top = progress * SHRINK_TOP_STEP; \
     s32 height = FULL_VIEW_HEIGHT - progress * SHRINK_HEIGHT_STEP; \
-    s32 width = FULL_VIEW_WIDTH - progress * SHRINK_WIDTH_STEP;    \
-                                                                   \
-    (view).scissorX = left;                                        \
-    (view).scissorY = top;                                         \
-    (view).scissorWidth = width;                                   \
-    (view).scissorHeight = height;                                 \
-    (view).viewportCenterX = left * 2 + width;                     \
-    (view).viewportCenterY = top * 2 + height;                     \
-    (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT);       \
+    s32 width = FULL_VIEW_WIDTH - progress * SHRINK_WIDTH_STEP; \
+\
+    (view).scissorX = left; \
+    (view).scissorY = top; \
+    (view).scissorWidth = width; \
+    (view).scissorHeight = height; \
+    (view).viewportCenterX = left * 2 + width; \
+    (view).viewportCenterY = top * 2 + height; \
+    (view).zoom = 2.0f * height * (1.0f / UNIT_ZOOM_HEIGHT); \
   } while (0)
 
 /* EaseStaffRollView's easedParts bits */
@@ -1731,7 +1731,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   s32 length = (f_StaffText->lines + lineIndex)->length;
   /* In u16s, past the size, the line count and the lines */
   s32 firstCharacter = f_StaffText->lineCount * 2 + 2;
-  s32 width;  /* Unused; it is there to match */
+  s32 width; /* Unused; it is there to match */
   s32 height; /* Unused; it is there to match */
   s32 index;
   s32 character;

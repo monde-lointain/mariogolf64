@@ -124,7 +124,7 @@ extern s32 f_HasUnloadedSubModule;
 #define SPIN_MESH_SCALE 0.1f
 #define SPIN_MESH_DISTANCE -290.0f
 #define IS_LAST_SPIN_STRIP(batchIndex, stripIndex) \
-  (((batchIndex) == SPIN_BATCH_COUNT - 1) &        \
+  (((batchIndex) == SPIN_BATCH_COUNT - 1) & \
       ((stripIndex) == SPIN_LAST_BATCH_STRIP_COUNT - 1))
 
 #define RESET_FADE_ALPHA 0x40
@@ -1029,9 +1029,9 @@ void func_8040BFC8(void);
 void func_8040C124(void);
 void func_8040C360(CameraMatrices* matrices, Gfx** displayListHead);
 
-#define SET_CAMERA_SCISSOR(view)                                          \
+#define SET_CAMERA_SCISSOR(view) \
   gDPSetScissor(g_DisplayListHead++, G_SC_NON_INTERLACE, (view).scissorX, \
-      (view).scissorY, (view).scissorX + (view).scissorWidth,             \
+      (view).scissorY, (view).scissorX + (view).scissorWidth, \
       (view).scissorY + (view).scissorHeight)
 
 #ifdef NON_MATCHING

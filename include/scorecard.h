@@ -10,7 +10,7 @@
 #define LEADERBOARD_ROW_COUNT 10
 
 #define HOLE_WINNER_HALVED (-1) /* Nobody won the last hole outright */
-#define HOLE_WINNER_UNSET (-2)  /* What SetScorecardLayout starts it as */
+#define HOLE_WINNER_UNSET (-2) /* What SetScorecardLayout starts it as */
 
 typedef struct ScorecardContent {
   /* 0x00 */ f32 rowFlipAngles[LEADERBOARD_ROW_COUNT];
@@ -21,7 +21,7 @@ typedef struct ScorecardContent {
   /* 0x48 */ s32 courseIndex;
   /* 0x4C */ s32 holeIndex;
   /* 0x50 */ s32 isSuddenDeath; /* The page shows SUDDEN DEATH */
-} ScorecardContent;             /* size = 0x54 */
+} ScorecardContent; /* size = 0x54 */
 
 typedef struct Scorecard {
   /* 0x00 */ u8 unk0[0xC];
@@ -48,18 +48,18 @@ typedef struct Scorecard {
   /* 0x8C */ u8*
       totalLabelsImage; /* Over the scores page's columns of totals */
   /* 0x90 */ u8*
-      flapNameImages;       /* One for each row, over the names on its flaps */
+      flapNameImages; /* One for each row, over the names on its flaps */
   /* 0x94 */ u8* gridImage; /* The pieces of the bets page's grid lines */
   /* 0x98 */ u8* faceImages[MAX_PLAYER_COUNT];
   /* 0xA8 */ u16* facePalettes[MAX_PLAYER_COUNT];
   /* 0xB8 */ u8*
       betSubtitlesImage; /* Rows of the subtitles under some bets' headings */
   /* 0xBC */ u8 unkBC;
-  /* 0xBD */ u8 faceTime;    /* Frames since the faces were opened */
-  /* 0xBE */ u8 faceFrame;   /* Which of the faces' images they show */
+  /* 0xBD */ u8 faceTime; /* Frames since the faces were opened */
+  /* 0xBE */ u8 faceFrame; /* Which of the faces' images they show */
   /* 0xBF */ s8 placeChange; /* Which way a tournament player's place moved on
                                 the hole, a PLACE_* value */
-  /* 0xC0 */ s32 topRow;     /* The contestant at the top of the leaderboard */
+  /* 0xC0 */ s32 topRow; /* The contestant at the top of the leaderboard */
   /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
   /* 0xC8 */ s32 y;
   /* 0xCC */ s32 unkCC;

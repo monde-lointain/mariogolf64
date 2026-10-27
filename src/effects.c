@@ -41,7 +41,7 @@ typedef struct Effect {
   /* 0x3A */ s8 kind;
   /* 0x3B */ s8 unk3B;
   /* 0x3C */ s8 matrixIndex; /* Of the effects' transform matrices */
-} Effect;                    /* size = 0x40 */
+} Effect; /* size = 0x40 */
 
 #define EFFECT_COUNT 40
 
@@ -59,8 +59,8 @@ typedef struct Raindrop {
   /* 0x0C */ Vec3 tail;
   /* 0x18 */ f32 groundHeight; /* Under the drop; UpdateRain refreshes one drop
                                   each frame */
-  /* 0x1C */ f32 tailScale;    /* The tail's projected scale */
-  /* 0x20 */ s16 headScreenX;  /* In quarter pixels */
+  /* 0x1C */ f32 tailScale; /* The tail's projected scale */
+  /* 0x20 */ s16 headScreenX; /* In quarter pixels */
   /* 0x22 */ s16 headScreenY;
   /* 0x24 */ s16 tailScreenX;
   /* 0x26 */ s16 tailScreenY;
@@ -70,7 +70,7 @@ typedef struct Raindrop {
       landedFrameCount; /* RAINDROP_FALLING until the drop reaches the ground */
   /* 0x2D */ u8
       splashColumn; /* The column of f_RainSplashImage frames it lands with */
-} Raindrop;         /* size = 0x30 */
+} Raindrop; /* size = 0x30 */
 
 typedef struct RainSplash {
   /* 0x00 */ Vec3 position;
@@ -79,7 +79,7 @@ typedef struct RainSplash {
   /* 0x16 */ s8 frameCount;
   /* 0x17 */ s8 unk17;
   /* 0x18 */ u8 column; /* The column of f_RainSplashImage frames it shows */
-} RainSplash;           /* size = 0x1C */
+} RainSplash; /* size = 0x1C */
 
 /*
  * Set up for each shot's debris. Keeping the club kind in a struct is there to
@@ -100,21 +100,21 @@ typedef struct ShotDebris {
 #define EFFECT_KIND_UNK2 2
 #define EFFECT_KIND_UNK3 3
 #define EFFECT_KIND_UNK4 4
-#define EFFECT_KIND_DROP 5       /* Drawn with f_DropImage */
-#define EFFECT_KIND_DIVOT 6      /* Drawn with f_DivotImage */
+#define EFFECT_KIND_DROP 5 /* Drawn with f_DropImage */
+#define EFFECT_KIND_DIVOT 6 /* Drawn with f_DivotImage */
 #define EFFECT_KIND_DIVOT_MARK 7 /* Drawn with f_DivotImage's last frame */
 #define EFFECT_KIND_SPARKLE 8
 #define EFFECT_KIND_RIPPLE 0xC
 #define EFFECT_KIND_UNKE 0xE
 #define EFFECT_KIND_SPREADING_CIRCLE 0x13 /* Drawn with f_ArcImage */
-#define EFFECT_KIND_RISING_CLUMP 0x10     /* Drawn with f_ClumpImage */
+#define EFFECT_KIND_RISING_CLUMP 0x10 /* Drawn with f_ClumpImage */
 #define EFFECT_KIND_TEAR 0x14
 
 /* The debris that the ball's lie gives, chosen by its surface kind */
 #define DEBRIS_KIND_NONE 0
 #define DEBRIS_KIND_TEE_UP 1
 #define DEBRIS_KIND_GRASS 2 /* Fairway, tee ground and semi-rough */
-#define DEBRIS_KIND_DUST 3  /* Bunker and bare ground */
+#define DEBRIS_KIND_DUST 3 /* Bunker and bare ground */
 #define DEBRIS_KIND_ROUGH 4
 #define DEBRIS_KIND_BURIED 6 /* Bunker lies with the ball sunk in the sand */
 
@@ -148,7 +148,7 @@ extern s32 f_RainCenter[2];
 /* How far the wind blows the rain sideways for each unit it falls */
 extern f32 f_RainDriftX;
 extern f32 f_RainDriftZ;
-extern Vec3 f_RainVelocity;        /* Per frame */
+extern Vec3 f_RainVelocity; /* Per frame */
 extern s32 f_GroundCheckDropIndex; /* The raindrop whose ground height
                                      UpdateRain refreshes next */
 
@@ -420,9 +420,9 @@ void SpawnSpreadingCircle(u32 slotIndex, s32 pointId) {
  */
 void SpawnTear(u32 slotIndex, s32 pointId, f32 heading) {
   Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation;    /* Unused; it is there to match */
-  Vec3 scale;       /* Unused; it is there to match */
-  Mat4 matrix;      /* Unused; it is there to match */
+  Vec3 rotation; /* Unused; it is there to match */
+  Vec3 scale; /* Unused; it is there to match */
+  Mat4 matrix; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   Effect* effect;
@@ -474,9 +474,9 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading) {
 /* Starts a sparkle near a character's point; eagle reactions spawn them */
 void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
   Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation;    /* Unused; it is there to match */
-  Vec3 scale;       /* Unused; it is there to match */
-  Mat4 matrix;      /* Unused; it is there to match */
+  Vec3 rotation; /* Unused; it is there to match */
+  Vec3 scale; /* Unused; it is there to match */
+  Mat4 matrix; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   Effect* effect;
@@ -647,9 +647,9 @@ void SpawnSparkle(CoursePoint position) {
 /* Unreferenced */
 void SpawnUnkEEffect(u32 slotIndex, s32 pointId) {
   Vec3 translation; /* Unused; it is there to match */
-  Vec3 rotation;    /* Unused; it is there to match */
-  Vec3 scale;       /* Unused; it is there to match */
-  Mat4 matrix;      /* Unused; it is there to match */
+  Vec3 rotation; /* Unused; it is there to match */
+  Vec3 scale; /* Unused; it is there to match */
+  Mat4 matrix; /* Unused; it is there to match */
   Vec3 point;
   s32 index;
   s16 riseScale; /* Always 1; the original has it */
@@ -1238,7 +1238,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
 /* It is a macro, as an inline function compiles differently from the original
  */
 #define IsPastSpawnGround(effect) \
-  ((f32)f_SpawnGroundHeight <     \
+  ((f32)f_SpawnGroundHeight < \
       (effect)->position[AXIS_Y] * WORLD_TO_COURSE_SCALE)
 
 /*

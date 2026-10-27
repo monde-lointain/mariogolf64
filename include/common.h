@@ -37,9 +37,9 @@ typedef f32 Mat4[4][4];
 
 /* The magnitude of an integer. The game's code evaluates the value once,
    into a variable of its own, as a GNU statement expression does. */
-#define ABS(value)                         \
-  ({                                       \
-    s32 absValue = (value);                \
+#define ABS(value) \
+  ({ \
+    s32 absValue = (value); \
     (absValue < 0) ? -absValue : absValue; \
   })
 

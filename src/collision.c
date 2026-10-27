@@ -136,7 +136,7 @@
  * How far a point is from a plane's front, in course units. It is a
  * macro, as an inline function compiles differently from the original.
  */
-#define GetPlaneSide(plane, x, y, z)                             \
+#define GetPlaneSide(plane, x, y, z) \
   ((plane).normal[AXIS_X] * (x) + (plane).normal[AXIS_Y] * (y) + \
       (plane).normal[AXIS_Z] * (z) + (plane).distance * COURSE_UNITS_PER_UNIT)
 
@@ -171,8 +171,8 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * sides of it. It is a macro, as an inline function compiles differently
  * from the original.
  */
-#define DoesPathMeetPlane(startSide, endSide)        \
-  ((fabsf(endSide) < PLANE_TOUCH_DISTANCE) ||        \
+#define DoesPathMeetPlane(startSide, endSide) \
+  ((fabsf(endSide) < PLANE_TOUCH_DISTANCE) || \
       (((startSide) > 0.0f) & ((endSide) < 0.0f)) || \
       (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
@@ -181,8 +181,8 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * ends' sides of it. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define DoesPathReachWall(startSide, endSide)         \
-  ((fabsf(endSide) < WALL_REACH_DISTANCE) ||          \
+#define DoesPathReachWall(startSide, endSide) \
+  ((fabsf(endSide) < WALL_REACH_DISTANCE) || \
       (((startSide) >= 0.0f) & ((endSide) < 0.0f)) || \
       (((startSide) < 0.0f) & ((endSide) > 0.0f)))
 
@@ -191,7 +191,7 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * sides of it. It is a macro, as an inline function compiles differently
  * from the original.
  */
-#define DoesPathMeetRingPlane(startSide, endSide)                         \
+#define DoesPathMeetRingPlane(startSide, endSide) \
   (((endSide) == 0.0f) || (((startSide) > 0.0f) && ((endSide) < 0.0f)) || \
       (((startSide) < 0.0f) && ((endSide) > 0.0f)))
 
@@ -201,7 +201,7 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * the original.
  */
 #define IsBareCrossing(simulation, startSide, endSide) \
-  (((simulation)->isRunning == BALL_STATE_ROLLING) &&  \
+  (((simulation)->isRunning == BALL_STATE_ROLLING) && \
       (fabsf((f32)((startSide) - (endSide))) < BARE_CROSSING_DISTANCE))
 
 /*
@@ -209,12 +209,12 @@ static inline s32 IsOffMiniGolfGround(s32 x, s32 z) {
  * in units. They are macros, as inline functions allocate registers
  * differently from the original.
  */
-#define IsLessThanCorners(value, corners)                 \
-  (((value) < (corners)[0] * COURSE_UNITS_PER_UNIT) &&    \
+#define IsLessThanCorners(value, corners) \
+  (((value) < (corners)[0] * COURSE_UNITS_PER_UNIT) && \
       ((value) < (corners)[1] * COURSE_UNITS_PER_UNIT) && \
       ((value) < (corners)[2] * COURSE_UNITS_PER_UNIT))
-#define IsMoreThanCorners(value, corners)                 \
-  (((corners)[0] * COURSE_UNITS_PER_UNIT < (value)) &&    \
+#define IsMoreThanCorners(value, corners) \
+  (((corners)[0] * COURSE_UNITS_PER_UNIT < (value)) && \
       ((corners)[1] * COURSE_UNITS_PER_UNIT < (value)) && \
       ((corners)[2] * COURSE_UNITS_PER_UNIT < (value)))
 

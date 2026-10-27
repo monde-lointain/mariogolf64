@@ -62,9 +62,9 @@ typedef struct GolfBall {
   /* 0x84 */ f32 position[3];
   /* 0x90 */ s32 alpha; /* Or BALL_HIDDEN */
   /* 0x94 */ u8 isInCup;
-  /* 0x98 */ s32 state;            /* A BALL_STATE_* value */
+  /* 0x98 */ s32 state; /* A BALL_STATE_* value */
   /* 0x9C */ s8 markerPlayerIndex; /* Or BALL_NO_MARKER */
-  /* 0x9D */ s8 purpose;           /* A LAUNCH_PURPOSE_* value */
+  /* 0x9D */ s8 purpose; /* A LAUNCH_PURPOSE_* value */
   /* 0x9E */ s8 unk9E;
 } GolfBall; /* size = 0xA0 */
 
@@ -482,10 +482,10 @@ extern s32 f_CurrentBallDepth;
 
 /* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth
  * buffer */
-#define RM_ZB_XLU_SURF_UPDATE(clk)                               \
+#define RM_ZB_XLU_SURF_UPDATE(clk) \
   (Z_CMP | Z_UPD | IM_RD | CVG_DST_FULL | ZMODE_XLU | FORCE_BL | \
       GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
-#define RM_AA_ZB_XLU_SURF_UPDATE(clk)                                      \
+#define RM_AA_ZB_XLU_SURF_UPDATE(clk) \
   (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | \
       FORCE_BL | GBL_c##clk(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
 
@@ -493,14 +493,14 @@ extern s32 f_CurrentBallDepth;
  * in quarter pixels */
 #define TEXEL_STEP(texelCount, from, to) \
   ((to) - (from) != 0 ? (((texelCount) << 13) / ((to) - (from)) + 1) >> 1 : 0)
-#define gSPStretchedTextureRectangle(                      \
-    pkt, xl, yl, xh, yh, tile, s, t, width, height)        \
+#define gSPStretchedTextureRectangle( \
+    pkt, xl, yl, xh, yh, tile, s, t, width, height) \
   gSPScisTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, \
       TEXEL_STEP(width, xl, xh), TEXEL_STEP(height, yl, yh))
 
-#define ABSF(value)                           \
-  ({                                          \
-    f32 absValue = (value);                   \
+#define ABSF(value) \
+  ({ \
+    f32 absValue = (value); \
     (absValue < 0.0f) ? -absValue : absValue; \
   })
 

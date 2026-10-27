@@ -27,3 +27,8 @@ AllowShortEnumsOnASingleLine: false
 # renaming a routine doesn't move every line of its argument list
 AlignAfterOpenBracket: false
 AlignOperands: DontAlign
+# Nor does it line up endline comments or a macro's backslashes in a column,
+# which a longer line would move
+AlignTrailingComments:
+  Kind: Never
+AlignEscapedNewlines: DontAlign

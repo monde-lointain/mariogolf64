@@ -14,8 +14,8 @@
 #define TEXEL_STEP_ONE (1 << 10)
 
 /* SetScreenEffect's effects */
-#define SCREEN_EFFECT_SPIN 0        /* Spins the saved frame away */
-#define SCREEN_EFFECT_EMPTY 1       /* Draws nothing */
+#define SCREEN_EFFECT_SPIN 0 /* Spins the saved frame away */
+#define SCREEN_EFFECT_EMPTY 1 /* Draws nothing */
 #define SCREEN_EFFECT_TILED_IMAGE 2 /* Repeats part of the saved frame */
 #define SCREEN_EFFECT_SAVED_FRAME 3 /* Draws a frame saved elsewhere */
 #define SCREEN_EFFECT_NONE 4

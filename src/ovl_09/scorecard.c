@@ -31,9 +31,9 @@
  */
 
 /* f_ScorecardState values */
-#define SCORECARD_OPENING 0  /* Sliding in */
-#define SCORECARD_CLOSING 1  /* Sliding out */
-#define SCORECARD_SHOWN 2    /* The player can turn its pages */
+#define SCORECARD_OPENING 0 /* Sliding in */
+#define SCORECARD_CLOSING 1 /* Sliding out */
+#define SCORECARD_SHOWN 2 /* The player can turn its pages */
 #define SCORECARD_TALLYING 3 /* Counting skins before it is shown */
 #define SCORECARD_CLOSED 4
 #define SCORECARD_MATCH_RESULT 5 /* DrawMatchResult shows who won the hole */

@@ -26,7 +26,7 @@
 #define SCENE_PIN 5
 #define SCENE_PLAY_HOLE 7 /* Picks the conditions and starts a hole */
 #define SCENE_FLAG_PANEL 8
-#define SCENE_UNK9 9   /* A top-down map scene */
+#define SCENE_UNK9 9 /* A top-down map scene */
 #define SCENE_UNK10 10 /* A top-down map scene */
 #define SCENE_UNK11 11
 #define SCENE_PLAY_UNK12 12 /* Updates like SCENE_PLAY_HOLE */

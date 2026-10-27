@@ -9,7 +9,7 @@
 /* What a tournament password's rules index picks */
 typedef struct TournamentRules {
   /* 0x0 */ s8 characterIndex; /* -1 for none; it picks a portrait */
-  /* 0x1 */ s8 isSpeedGolf;    /* Otherwise stroke play */
+  /* 0x1 */ s8 isSpeedGolf; /* Otherwise stroke play */
   /* 0x2 */ s8 courseIndex;
 } TournamentRules; /* size = 0x3 */
 
@@ -20,7 +20,7 @@ typedef struct ScoreReport {
   /* 0x4 */ u16 score;
   /* 0x8 */ u32 time;
   /* 0xC */ u8 gameBoyLevel; /* Of the player's Game Boy character */
-} ScoreReport;               /* size = 0x10 */
+} ScoreReport; /* size = 0x10 */
 
 /* It returns 0 for a valid password and -1 otherwise */
 s32 DecodeTournamentPassword(u8* code, char* password);

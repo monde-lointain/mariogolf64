@@ -22,10 +22,10 @@ typedef struct CameraView {
   /* 0x24 */ s32 scissorWidth;
   /* 0x28 */ s32 scissorHeight;
   /* 0x2C */ s32 unreadSettings[2]; /* Set by StartGame, never read */
-  /* 0x34 */ s32 viewportCenterX;   /* In half pixels */
+  /* 0x34 */ s32 viewportCenterX; /* In half pixels */
   /* 0x38 */ s32 viewportCenterY;
   /* 0x3C */ f32 zoom;
-  /* 0x40 */ s32 drawFlags;   /* CAMERA_DRAW_* bits */
+  /* 0x40 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
   /* 0x44 */ f32 fieldOfView; /* In degrees */
   /* 0x48 */ s32 mode;
 } CameraView; /* size = 0x4C */
@@ -41,8 +41,8 @@ extern Camera g_Cameras[];
 typedef struct CameraMatrices {
   /* 0x000 */ Mtx perspective;
   /* 0x040 */ Mtx viewing;
-  /* 0x080 */ Mtx placement;     /* Between the projection and the view */
-  /* 0x0C0 */ Mtx billboard;     /* Turns billboards to face the camera */
+  /* 0x080 */ Mtx placement; /* Between the projection and the view */
+  /* 0x0C0 */ Mtx billboard; /* Turns billboards to face the camera */
   /* 0x100 */ Mtx antiBillboard; /* The opposite turn */
   /* 0x140 */ Mat4 perspectiveF;
   /* 0x180 */ Mat4 viewingF;

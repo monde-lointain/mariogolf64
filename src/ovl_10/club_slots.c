@@ -26,7 +26,7 @@
 #define CLUB_SLOTS_STARTING 1 /* Before the reels speed up */
 #define CLUB_SLOTS_SPEEDING 2 /* The reels speed up while START! grows */
 #define CLUB_SLOTS_STOPPING 3 /* The player stops the reels one by one */
-#define CLUB_SLOTS_STOPPED 4  /* All three reels show their clubs */
+#define CLUB_SLOTS_STOPPED 4 /* All three reels show their clubs */
 /* Each of the first two states lasts this many frames */
 #define CLUB_SLOTS_STATE_TIME 20
 /* The clubs are given this many frames after the reels stop */
@@ -177,7 +177,7 @@ typedef struct ClubSlots {
   /* 0x1C */ f32 reelAngles[REEL_COUNT]; /* How far each reel has turned toward
                                             its next symbol */
   /* 0x28 */ f32 reelSpeeds[REEL_COUNT];
-  /* 0x34 */ s32 pressCount;  /* The reels told to stop */
+  /* 0x34 */ s32 pressCount; /* The reels told to stop */
   /* 0x38 */ s32 playerIndex; /* The player spinning */
   /* 0x3C */ s32 resultTime;
   /* 0x40 */ Vtx* reelVertices;
@@ -441,9 +441,9 @@ void GiveSlotClubs(s32 playerIndex) {
  * player's unk1E is set, or while GAME_FLAG_UNK32 is. It is a macro, as
  * an inline function compiles differently from the original.
  */
-#define IsReelStopping(controllerIndex, player)                       \
+#define IsReelStopping(controllerIndex, player) \
   ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || \
-      (f_StopWaitTime > REEL_STOP_WAIT_TIME) ||                       \
+      (f_StopWaitTime > REEL_STOP_WAIT_TIME) || \
       ((s8)(player)->unk1E[0] != 0) || IsGameFlagSet(GAME_FLAG_UNK32))
 
 /* Returns TRUE once every player has spun */

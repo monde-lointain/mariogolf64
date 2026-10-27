@@ -204,8 +204,8 @@ extern s32 D_800C2BD0;
 extern u8 D_800C2BD5;
 extern s32 D_8022F8D4_ovl_01; /* The disc's frame */
 extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
-extern u8 D_8022F8DC_ovl_01;  /* Which way it turns */
-extern u8 D_8022F8DD_ovl_01;  /* Which buffers it shows */
+extern u8 D_8022F8DC_ovl_01; /* Which way it turns */
+extern u8 D_8022F8DD_ovl_01; /* Which buffers it shows */
 
 /*
  * The course select. Its wheel shows the open courses and the next one

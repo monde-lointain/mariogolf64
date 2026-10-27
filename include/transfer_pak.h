@@ -129,7 +129,7 @@ typedef struct GameBoyTransfer {
   /* 0x7D4 */ s32 unk7D4;
   /* 0x7D8 */ s8
       listedCharacters[CARTRIDGE_CHARACTER_COUNT]; /* Present ones, then -1 */
-  /* 0x7E4 */ s32 chosenCartridgeIndex;            /* Into taggedControllers */
+  /* 0x7E4 */ s32 chosenCartridgeIndex; /* Into taggedControllers */
   /* 0x7E8 */ s32 taggedCartridgeCount;
   /* 0x7EC */ s32 taggedControllers[MAXCONTROLLERS];
   /* 0x7FC */ u8 cartridgeTags[MAXCONTROLLERS][CARTRIDGE_TAG_SIZE];

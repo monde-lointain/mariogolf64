@@ -123,7 +123,7 @@ void ReadEncodedAsset(void* buffer, EncodedAsset* asset) {
 /* An encoded asset's bytes, read a chunk at a time */
 typedef struct ChunkReader {
   /* 0x0000 */ u8 rawChunk[ASSET_CHUNK_SIZE + 0x10]; /* Aligned as chunk */
-  /* 0x2010 */ s32 position;                         /* In chunk */
+  /* 0x2010 */ s32 position; /* In chunk */
   /* 0x2014 */ u32 remaining; /* Unread bytes of the asset */
 } ChunkReader;
 
@@ -135,21 +135,21 @@ typedef struct LargeChunkReader {
 } LargeChunkReader;
 
 /* Reads the next chunk of the asset into chunk */
-#define READ_CHUNK(chunk, remaining, asset)                 \
-  if ((remaining) < ASSET_CHUNK_SIZE) {                     \
-    ReadAssetFile(chunk, remaining, &(asset)->file);        \
-    (remaining) = 0;                                        \
-  } else {                                                  \
+#define READ_CHUNK(chunk, remaining, asset) \
+  if ((remaining) < ASSET_CHUNK_SIZE) { \
+    ReadAssetFile(chunk, remaining, &(asset)->file); \
+    (remaining) = 0; \
+  } else { \
     ReadAssetFile(chunk, ASSET_CHUNK_SIZE, &(asset)->file); \
-    (remaining) -= ASSET_CHUNK_SIZE;                        \
+    (remaining) -= ASSET_CHUNK_SIZE; \
   }
 
 /* Moves past a byte of chunk, reading the next chunk at its end */
-#define ADVANCE(chunk, position, remaining, asset)          \
-  (position)++;                                             \
+#define ADVANCE(chunk, position, remaining, asset) \
+  (position)++; \
   if ((remaining) != 0 && (position) == ASSET_CHUNK_SIZE) { \
-    READ_CHUNK(chunk, remaining, asset);                    \
-    (position) = 0;                                         \
+    READ_CHUNK(chunk, remaining, asset); \
+    (position) = 0; \
   }
 
 /*

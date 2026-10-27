@@ -11,10 +11,10 @@
 #define BUSY_FRAME_COUNT 2
 
 /* Like G_RM_AA_ZB_XLU_SURF, but also updating the depth buffer */
-#define CHARACTER_RENDER_MODE_TRANSLUCENT                                  \
+#define CHARACTER_RENDER_MODE_TRANSLUCENT \
   (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | \
       FORCE_BL | G_RM_PASS)
-#define CHARACTER_RENDER_MODE_TRANSLUCENT2                                 \
+#define CHARACTER_RENDER_MODE_TRANSLUCENT2 \
   (AA_EN | Z_CMP | Z_UPD | IM_RD | CLR_ON_CVG | CVG_DST_WRAP | ZMODE_XLU | \
       FORCE_BL | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA))
 

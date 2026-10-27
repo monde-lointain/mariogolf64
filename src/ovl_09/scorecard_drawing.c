@@ -282,7 +282,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_09/scorecard_drawing", f_LoseText);
 #define STANDINGS_LABEL_TOP 52
 #define STANDINGS_SCORE_LABEL_LEFT 160
 #define STANDINGS_BET_TOTAL_LABEL_LEFT 248
-#define SCORE_LABEL 2     /* Drawn over the score column */
+#define SCORE_LABEL 2 /* Drawn over the score column */
 #define BET_TOTAL_LABEL 4 /* Drawn over the bet total column */
 #define WIDE_BET_TOTAL 1000
 
@@ -1860,10 +1860,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
  * The scores page: the front nine above the back nine, each with a row of
  * hole numbers, a row of pars and a row for each player
  */
-#define IS_MATCH_PLAY_MODE()                   \
-  (g_GameMode == GAME_MODE_MATCH_GAME ||       \
+#define IS_MATCH_PLAY_MODE() \
+  (g_GameMode == GAME_MODE_MATCH_GAME || \
       g_GameMode == GAME_MODE_GET_CHARACTER || \
-      g_GameMode == GAME_MODE_SKINS_MATCH ||   \
+      g_GameMode == GAME_MODE_SKINS_MATCH || \
       g_GameMode == GAME_MODE_CLUB_SLOTS)
 #define FRONT_NINE_TOP 57
 #define BACK_NINE_TOP 137
@@ -1963,7 +1963,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard_drawing", DrawLeaderboardPage);
 #define PAR_COLOR 0
 #define BIRDIE_COLOR 1
 #define DOUBLE_BOGEY_COLOR 2 /* Or worse */
-#define EAGLE_COLOR 3        /* On a par five */
+#define EAGLE_COLOR 3 /* On a par five */
 #define BOGEY_COLOR 4
 #define PULSING_COLOR 5 /* An eagle on a shorter hole, or better */
 #define PULSE_STEP DEGREES_TO_RADIANS(20)

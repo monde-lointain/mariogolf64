@@ -20,8 +20,8 @@
 #define MOVIE_SINK_TO_TIE 10
 #define MOVIE_MISS_AND_LOSE 11
 #define MOVIE_LONGEST_DRIVE 12 /* A longest drive contest's winner */
-#define MOVIE_NEAREST_PIN 13   /* A nearest pin contest's winner */
-#define MOVIE_DRIVE_RECORD 14  /* A tournament's longest drive yet */
+#define MOVIE_NEAREST_PIN 13 /* A nearest pin contest's winner */
+#define MOVIE_DRIVE_RECORD 14 /* A tournament's longest drive yet */
 /* "Ready... Go!", during a later hole's intro */
 #define MOVIE_READY_GO 15
 #define MOVIE_MONTY_MOLE 16

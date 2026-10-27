@@ -22,9 +22,9 @@ extern s32 g_HolePot;
 typedef struct SkinsCarryover {
   /* 0x0 */ s8
       intoLastHole; /* The skins carried into it, or NO_LAST_HOLE_SKINS */
-  /* 0x1 */ s8 onLastHole;   /* The skins at stake on it */
+  /* 0x1 */ s8 onLastHole; /* The skins at stake on it */
   /* 0x2 */ s8 fromLastHole; /* The skins carried over from it */
-} SkinsCarryover;            /* size = 0x3 */
+} SkinsCarryover; /* size = 0x3 */
 
 s32 GetNetScoreToPar(s32 endHole, s32 playerIndex);
 void TallySkins(s32 endHole);

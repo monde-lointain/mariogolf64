@@ -117,8 +117,8 @@ const s32 g_BillboardEnvColor[3] = {128, 64, 32};
  * mini-golf course is. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define IsNearCourseEdge(x, z)                                     \
-  (!g_IsMiniGolf &&                                                \
+#define IsNearCourseEdge(x, z) \
+  (!g_IsMiniGolf && \
       (((x) <= COURSE_EDGE_MIN_X) || ((z) <= COURSE_EDGE_MIN_Z) || \
           ((x) >= COURSE_EDGE_MAX_X) || ((z) >= COURSE_EDGE_MAX_Z)))
 
@@ -182,8 +182,8 @@ void SortBillboardsByDepth(void) {
  * and is not the one loaded for drawing. It is a macro, as an inline function
  * compiles differently from the original.
  */
-#define NeedsTextureLoad(billboard, textureIndex)                             \
-  (((billboard)->textureIndex != f_LoadedTextureIndex) &&                     \
+#define NeedsTextureLoad(billboard, textureIndex) \
+  (((billboard)->textureIndex != f_LoadedTextureIndex) && \
       (f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
       (f_BillboardTextures[textureIndex].pixels != NULL))
 
@@ -439,7 +439,7 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  * is not ready, or by the debug view. It is a macro, as an inline
  * function compiles differently from the original.
  */
-#define AreBillboardsHidden()                                    \
+#define AreBillboardsHidden() \
   (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || \
       IsDebugBButtonView())
 

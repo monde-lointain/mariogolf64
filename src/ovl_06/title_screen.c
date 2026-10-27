@@ -263,7 +263,7 @@ void UnloadTitleScreen(void) {
  * on, or once it has idled long enough. It is a macro, as an inline
  * function compiles differently from the original.
  */
-#define IsLeavingForLogos(pressedButtons)                 \
+#define IsLeavingForLogos(pressedButtons) \
   ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
       (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
 

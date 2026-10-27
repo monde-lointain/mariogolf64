@@ -33,8 +33,8 @@
 #define CLUB_TYPE_PUTTER 13
 
 /* What a club is, from the clubs' initial data */
-#define CLUB_KIND_WOOD 0  /* 1W, 3W and 4W */
-#define CLUB_KIND_IRON 1  /* 2I to 9I */
+#define CLUB_KIND_WOOD 0 /* 1W, 3W and 4W */
+#define CLUB_KIND_IRON 1 /* 2I to 9I */
 #define CLUB_KIND_WEDGE 2 /* PW and SW */
 #define CLUB_KIND_PUTTER 3
 
@@ -68,7 +68,7 @@ typedef struct Club {
   /* 0x06 */ u8 unk6[2];
   /* 0x08 */ s32 surfaceMask;
   /* 0x0C */ s16 distance; /* In yards */
-  /* 0x0E */ s16 pitch;    /* In degrees, from -45 to -7 */
+  /* 0x0E */ s16 pitch; /* In degrees, from -45 to -7 */
   /* 0x10 */ s16 unk10;
   /* 0x12 */ s16 spin; /* Shown as SPIN beside the debug character viewer */
   /* 0x14 */ s16 unk14;

@@ -557,7 +557,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ResetTerrainCodeCells);
  * Whether a green cell lies within one cell of other terrain. It is a macro,
  * as an inline function compiles differently from the original.
  */
-#define IsGreenEdge(code, nearestCode, nearestDistance)       \
+#define IsGreenEdge(code, nearestCode, nearestDistance) \
   ((code) == TERRAIN_CODE_GREEN && (code) != (nearestCode) && \
       (nearestDistance) < 2)
 

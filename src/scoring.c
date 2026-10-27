@@ -176,7 +176,7 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
  * more than one over the other side's. It is a macro, as an inline
  * function compiles differently from the original.
  */
-#define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex)  \
+#define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex) \
   (((standing) == (dormieStanding)) && (g_Players[dormieIndex].unk26 != 0) && \
       !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 

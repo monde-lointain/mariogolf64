@@ -21,7 +21,7 @@
  * par. Get Character plays the one for how the first player did, and match
  * games and skins matches play SONG_HOLE_WON for any hole that somebody won.
  */
-#define SONG_HOLE_OUT_EAGLE 0  /* Also for an albatross */
+#define SONG_HOLE_OUT_EAGLE 0 /* Also for an albatross */
 #define SONG_HOLE_OUT_BIRDIE 1 /* Also for a hole-in-one */
 #define SONG_HOLE_OUT_PAR 2
 #define SONG_HOLE_OUT_BOGEY 4

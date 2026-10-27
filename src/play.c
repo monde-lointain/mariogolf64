@@ -449,8 +449,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
  * It is a macro, as an inline function compiles differently from the
  * original.
  */
-#define TeesAfter(player, other)                                        \
-  (g_Players[player].strokeCount > g_Players[other].strokeCount ||      \
+#define TeesAfter(player, other) \
+  (g_Players[player].strokeCount > g_Players[other].strokeCount || \
       (g_Players[player].strokeCount == g_Players[other].strokeCount && \
           g_Players[player].teeOrder > g_Players[other].teeOrder))
 
@@ -776,7 +776,7 @@ void func_8005DDAC(void);
 #define IS_A_PRESSED() (g_MergedController.pressedButtons & A_BUTTON)
 /* Whether the Ring Shot hole has just earned the last star, which rolls the
  * staff */
-#define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()               \
+#define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT() \
   ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
       IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
@@ -786,9 +786,9 @@ void func_8005DDAC(void);
 
 /* The hole intro camera circles the hole at these distances */
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
-#define INTRO_ORBIT_ANGLE()                                 \
+#define INTRO_ORBIT_ANGLE() \
   (((g_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
-       BINARY_ANGLE_MASK) *                                 \
+       BINARY_ANGLE_MASK) * \
       BINARY_ANGLE_TO_RADIANS)
 #define DEBUG_ORBIT_RADIUS 1500.0f
 #define DEBUG_ORBIT_HEIGHT (-1500.0f)
@@ -1793,7 +1793,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 
 /* The noise texture sits in TMEM after a tile's texels, and is blended in by
  * this */
-#define NOISE_TMEM                                              \
+#define NOISE_TMEM \
   (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * \
       G_IM_SIZ_16b_BYTES / 8)
 #define NOISE_BLEND_ALPHA 110
@@ -1807,7 +1807,7 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #define GROUND_TIMING_ROW 11
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
-#define GRID_VERTEX(column, row)                                     \
+#define GRID_VERTEX(column, row) \
   (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + \
       ((u32)(column) & 1) * 9])
 
@@ -1816,64 +1816,64 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #define IS_COARSE(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 /* Whether the neighbor makes it snap the edge's midpoints */
-#define IS_COARSER_THAN_FINE(tileIndex)                               \
+#define IS_COARSER_THAN_FINE(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
       g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
 /* Sets a vertex halfway between two others */
-#define SET_AVERAGE_VERTEX(midpoint, from, to)                   \
-  {                                                              \
+#define SET_AVERAGE_VERTEX(midpoint, from, to) \
+  { \
     (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
     (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
     (midpoint)->v.ob[2] = ((from)->v.ob[2] + (to)->v.ob[2]) / 2; \
-    (midpoint)->v.flag = 0;                                      \
+    (midpoint)->v.flag = 0; \
     (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
     (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \
   }
 
 /* Loads a row's odd vertices as averages of its even ones, so that they line up
  * with a coarse row */
-#define LOAD_AVERAGED_ROW(row, slot)                      \
-  {                                                       \
-    Vtx* even = (row);                                    \
+#define LOAD_AVERAGED_ROW(row, slot) \
+  { \
+    Vtx* even = (row); \
     SET_AVERAGE_VERTEX(&vertices[0], &even[0], &even[1]); \
     SET_AVERAGE_VERTEX(&vertices[1], &even[1], &even[2]); \
     SET_AVERAGE_VERTEX(&vertices[2], &even[2], &even[3]); \
     SET_AVERAGE_VERTEX(&vertices[3], &even[3], &even[4]); \
-    gSPVertex(gfx++, vertices, 4, slot);                  \
-    vertices += 4;                                        \
+    gSPVertex(gfx++, vertices, 4, slot); \
+    vertices += 4; \
   }
 
 /* Loads a tile's texture, skipping its one-texel border */
-#define LOAD_TILE_TEXTURE(tileIndex, column, row)                            \
-  {                                                                          \
-    gDPLoadMultiBlock(gfx++,                                                 \
-        TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1,            \
-        G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH,           \
-        GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP,             \
+#define LOAD_TILE_TEXTURE(tileIndex, column, row) \
+  { \
+    gDPLoadMultiBlock(gfx++, \
+        TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
+        GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
         G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
-    gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2,            \
-        (column) * 128 + 0x86, (row) * 128 + 0x82);                          \
+    gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2, \
+        (column) * 128 + 0x86, (row) * 128 + 0x82); \
   }
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DRAW_TILE_QUADS(                                                       \
+#define DRAW_TILE_QUADS( \
     top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
-  {                                                                            \
-    gSP2Triangles(                                                             \
-        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0);          \
-    gSP2Triangles(                                                             \
+  { \
+    gSP2Triangles( \
+        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
+    gSP2Triangles( \
         gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
-    gSP2Triangles(                                                             \
-        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0);       \
-    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1,   \
-        bottomOdd, 0);                                                         \
+    gSP2Triangles( \
+        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
+    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, \
+        bottomOdd, 0); \
   }
 
 /* Loads the noise texture that DrawGround blends over the tiles */
-#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                          \
+#define LOAD_NOISE_TEXTURE(shiftS, shiftT) \
   gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, \
-      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE,   \
+      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, RANDOM_GRID_SIZE, \
       RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
 extern s32 g_GroundClipRatio;

@@ -13,8 +13,8 @@
 #define SHOT_KIND_GREAT 0
 /* Close to the cup, on the green in two under par */
 #define SHOT_KIND_EXCELLENT 1
-#define SHOT_KIND_PIN_SHOT 2     /* Hits the pin */
-#define SHOT_KIND_CHIP_IN 3      /* Holed from off the green */
+#define SHOT_KIND_PIN_SHOT 2 /* Hits the pin */
+#define SHOT_KIND_CHIP_IN 3 /* Holed from off the green */
 #define SHOT_KIND_LONG_CHIP_IN 4 /* Holed from far off the green */
 #define SHOT_KIND_UNK5 5
 #define SHOT_KIND_FLAG_SHOT 6 /* Hits the flag */

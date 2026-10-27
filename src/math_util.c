@@ -6,7 +6,7 @@
  * magnitude */
 #define INT_LENGTH_COMPONENT_LIMIT 0x20000000
 /* Whether -INT_LENGTH_COMPONENT_LIMIT <= value < INT_LENGTH_COMPONENT_LIMIT */
-#define IS_SMALL_COMPONENT(value)               \
+#define IS_SMALL_COMPONENT(value) \
   ((u32)(value) - INT_LENGTH_COMPONENT_LIMIT >= \
       (u32)(-2 * INT_LENGTH_COMPONENT_LIMIT))
 

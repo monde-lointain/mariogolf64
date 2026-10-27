@@ -19,7 +19,7 @@
 /* Size of the RDRAM that every console has, without the Expansion Pak */
 #define BASE_RDRAM_SIZE 0x400000
 
-#define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload)                      \
+#define OVERLAY_ENTRY(name, moduleIds, onLoad, onUnload) \
   {FALSE, moduleIds, (u32)name##_ROM_START, (u32)name##_ROM_END, name##_VRAM, \
       name##_TEXT_END, name##_BSS_START, name##_BSS_END, onLoad, onUnload}
 

@@ -3,11 +3,11 @@
 
 /* Bounds of the ROM segments, which the linker script defines */
 
-#define DECLARE_SEGMENT(name)   \
+#define DECLARE_SEGMENT(name) \
   extern u8 name##_ROM_START[]; \
-  extern u8 name##_ROM_END[];   \
-  extern u8 name##_VRAM[];      \
-  extern u8 name##_TEXT_END[];  \
+  extern u8 name##_ROM_END[]; \
+  extern u8 name##_VRAM[]; \
+  extern u8 name##_TEXT_END[]; \
   extern u8 name##_BSS_START[]; \
   extern u8 name##_BSS_END[]
 

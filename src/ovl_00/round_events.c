@@ -1335,7 +1335,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContestWinnerMovie);
 #define CAPTION_SLIDE_PER_FRAME 24
 #define CAPTION_MAX_GROWTH 48
 #define CAPTION_COPY_ALPHA 127
-#define CAPTION_COPY_TOP      \
+#define CAPTION_COPY_TOP \
   (SHRINKING_IMAGE_CENTRE_Y - \
       MOVIE_IMAGE_STRIP_HEIGHT * SHRINKING_IMAGE_STRIPS_ABOVE_CENTRE)
 #define CAPTION_FLASH_DEPTH 127.0f
@@ -2272,44 +2272,44 @@ void LoadContactImages(UnkB8* player) {
 
 /* Draws the ribbon segment between two of the ball's positions, as vertex pair
  * firstVertex */
-#define DRAW_CONTACT_SEGMENT(segment, firstVertex)                            \
-  gSPMatrix(gfx++,                                                            \
+#define DRAW_CONTACT_SEGMENT(segment, firstVertex) \
+  gSPMatrix(gfx++, \
       OS_K0_TO_PHYSICAL(&f_ContactMatrices[(f_ContactTrailHead + (segment)) % \
-          CONTACT_TRAIL_LENGTH]),                                             \
-      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);                              \
-  gSPMatrix(gfx++,                                                            \
-      OS_K0_TO_PHYSICAL(&f_ContactRibbonMatrices[g_DrawBufferIndex]),         \
-      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);                            \
-  gSPVertex(gfx++, f_ContactVertices, 2, firstVertex);                        \
-  gSPPopMatrix(gfx++, G_MTX_MODELVIEW);                                       \
-  gSPModifyVertex(                                                            \
-      gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT*(segment));       \
-  gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST,                   \
+          CONTACT_TRAIL_LENGTH]), \
+      G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
+  gSPMatrix(gfx++, \
+      OS_K0_TO_PHYSICAL(&f_ContactRibbonMatrices[g_DrawBufferIndex]), \
+      G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW); \
+  gSPVertex(gfx++, f_ContactVertices, 2, firstVertex); \
+  gSPPopMatrix(gfx++, G_MTX_MODELVIEW); \
+  gSPModifyVertex( \
+      gfx++, firstVertex, G_MWO_POINT_ST, f_ContactTextureT*(segment)); \
+  gSPModifyVertex(gfx++, (firstVertex) + 1, G_MWO_POINT_ST, \
       (f_ContactTextureS << 16) + f_ContactTextureT * (segment))
 
-#define DRAW_CONTACT_TRIANGLES()                                               \
-  for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) {                      \
+#define DRAW_CONTACT_TRIANGLES() \
+  for (i = 0; i != CONTACT_RIBBON_RELOAD_SEGMENTS; i++) { \
     gSP2Triangles(gfx++, i * 2 + 1, i * 2, i * 2 + 2, 0, i * 2 + 1, i * 2 + 2, \
-        i * 2 + 3, 0);                                                         \
+        i * 2 + 3, 0); \
   }
 
 /* The shot style draws only the first segments */
-#define DRAW_CONTACT_RIBBON()                                      \
-  for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) {           \
-    DRAW_CONTACT_SEGMENT(i, i * 2);                                \
-  }                                                                \
-  DRAW_CONTACT_TRIANGLES();                                        \
-  if (f_ContactStyle != CONTACT_STYLE_SHOT) {                      \
+#define DRAW_CONTACT_RIBBON() \
+  for (i = 0; i != CONTACT_RIBBON_FIRST_SEGMENTS; i++) { \
+    DRAW_CONTACT_SEGMENT(i, i * 2); \
+  } \
+  DRAW_CONTACT_TRIANGLES(); \
+  if (f_ContactStyle != CONTACT_STYLE_SHOT) { \
     for (pass = 0; pass != CONTACT_RIBBON_RELOAD_PASSES; pass++) { \
-      for (i = pass * 30 + 16; i != pass * 30 + 31; i++) {         \
-        DRAW_CONTACT_SEGMENT(i, 28 - (i - pass * 30 - 16) * 2);    \
-      }                                                            \
-      DRAW_CONTACT_TRIANGLES();                                    \
-      for (i = pass * 30 + 31; i != pass * 30 + 46; i++) {         \
-        DRAW_CONTACT_SEGMENT(i, (i - pass * 30 - 31) * 2 + 2);     \
-      }                                                            \
-      DRAW_CONTACT_TRIANGLES();                                    \
-    }                                                              \
+      for (i = pass * 30 + 16; i != pass * 30 + 31; i++) { \
+        DRAW_CONTACT_SEGMENT(i, 28 - (i - pass * 30 - 16) * 2); \
+      } \
+      DRAW_CONTACT_TRIANGLES(); \
+      for (i = pass * 30 + 31; i != pass * 30 + 46; i++) { \
+        DRAW_CONTACT_SEGMENT(i, (i - pass * 30 - 31) * 2 + 2); \
+      } \
+      DRAW_CONTACT_TRIANGLES(); \
+    } \
   }
 
 /*

@@ -112,13 +112,13 @@ typedef struct Unk68 {
 
 /* The bets of a game, indexing GameState.betRates and UnkB8.betTallies */
 #define BET_LONGEST_DRIVE 0 /* On marked par 5 holes */
-#define BET_NEAREST_PIN 1   /* On par 3 holes */
-#define BET_STROKES 2       /* Paid per stroke, between each pair of players */
+#define BET_NEAREST_PIN 1 /* On par 3 holes */
+#define BET_STROKES 2 /* Paid per stroke, between each pair of players */
 /* Paid on the front nine, the back nine and the round */
 #define BET_NASSAU 3
 /* Settled on each hole; a tie carries the pot over */
 #define BET_UNK4 4
-#define BET_UNK5 5      /* Settled as BET_UNK4, when that bet is not set */
+#define BET_UNK5 5 /* Settled as BET_UNK4, when that bet is not set */
 #define BET_LAS_VEGAS 6 /* Paid per stroke, between the two teams of two */
 #define BET_COUNT 7
 /* The rate of a bet that is not played */
@@ -162,14 +162,14 @@ typedef struct GameState {
   /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
   /* 0x3E */ s16
       carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */
-} GameState;                          /* size = 0x44 */
+} GameState; /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
   /* 0x00 */ CoursePoint cupPosition;
-  /* 0x0C */ CoursePoint teePosition;   /* Where each player starts the hole */
+  /* 0x0C */ CoursePoint teePosition; /* Where each player starts the hole */
   /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
-  /* 0x2C */ s8 par;                    /* g_HolePar */
-  /* 0x2D */ s8 nextCupIndex;           /* f_NextCupIndex */
+  /* 0x2C */ s8 par; /* g_HolePar */
+  /* 0x2D */ s8 nextCupIndex; /* f_NextCupIndex */
   /* 0x2E */ u8 unk2E[0x34 - 0x2E];
 } Unk800BA9D8; /* size = 0x34 */
 
@@ -240,7 +240,7 @@ typedef struct RoundStats {
   /* 0x10 */ s32 averagedDriveTotal;
   /* 0x14 */ s32 averagedDriveCount;
   /* 0x18 */ s32 isDriveAveraged; /* Whether the drive was hit with the 1W */
-} RoundStats;                     /* size = 0x1C */
+} RoundStats; /* size = 0x1C */
 
 /* Indices of UnkE98.hasPlace */
 #define THIRD_PLACE_INDEX 0
@@ -287,7 +287,7 @@ typedef struct SavedGame {
 typedef struct PlayerHole {
   /* 0x0 */ s8 strokes;
   /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
-} PlayerHole;         /* size = 0x2 */
+} PlayerHole; /* size = 0x2 */
 
 /* The size of UnkB8.name, with its terminator */
 #define PLAYER_NAME_SIZE 12
@@ -298,7 +298,7 @@ typedef struct UnkB8 {
   /* 0x00 */ char name[PLAYER_NAME_SIZE];
   /* 0x0C */ s32 unkC;
   /* 0x10 */ CoursePoint ballPosition;
-  /* 0x1C */ u8 ballSurface;    /* A SURFACE_* value */
+  /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
   /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
   /* 0x1E */ u8 unk1E[0x22 - 0x1E];
   /* 0x22 */ s8 unk22;
@@ -323,7 +323,7 @@ typedef struct UnkB8 {
                                           CHARACTER_KID on */
   /* 0x7D */ u8 unk7D[3];
   /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
-  /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
+  /* 0x84 */ s32 pinDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
   /* 0x88 */ s32 unk88;
   /* 0x8C */ u8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
   /* 0x8D */ u8 unk8D;
@@ -397,13 +397,13 @@ typedef struct SaveData {
 
 /* Each copy is stored with this, to check that it was read back intact */
 typedef struct SaveCheck {
-  /* 0x0 */ u16 key;      /* Random */
+  /* 0x0 */ u16 key; /* Random */
   /* 0x2 */ u16 keyedCrc; /* The data's CRC-16 exclusive-ored with the key */
 } SaveCheck;
 
 /* Where a copy of the save data and its check are kept */
 typedef struct SaveCopyLocation {
-  /* 0x0 */ char* dataFileName;  /* On the development host */
+  /* 0x0 */ char* dataFileName; /* On the development host */
   /* 0x4 */ char* checkFileName; /* On the development host */
   /* 0x8 */ u32 dataSramAddress;
   /* 0xC */ u32 checkSramAddress;

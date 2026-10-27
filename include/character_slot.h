@@ -91,7 +91,7 @@ typedef struct KeyframeSpan {
   /* 0x0 */ s16 startFrame;
   /* 0x2 */ s16 endFrame;
   /* 0x4 */ s16 index; /* Of the key at startFrame */
-} KeyframeSpan;        /* size = 0x6 */
+} KeyframeSpan; /* size = 0x6 */
 
 /* A joint's keyed translation, rotation and scale */
 typedef struct JointAnimation {
@@ -223,7 +223,7 @@ typedef struct AnimatedTriangle {
 typedef struct TextureAnimationState {
   /* 0x0 */ s32 frame;
   /* 0x4 */ s8 pendingCopyCount; /* TEXTURE_ANIMATION_PLAYING while it plays */
-} TextureAnimationState;         /* size = 0x8 */
+} TextureAnimationState; /* size = 0x8 */
 
 /* A slot keeps three copies of its frame data, so the one being written is
  * never one being drawn */
@@ -253,7 +253,7 @@ typedef struct CharacterSlot {
   /* 0x064 */ Gfx* displayList;
   /* 0x068 */ f32 unk68[UNK68_COUNT];
   /* 0x080 */ s16 shadowScale; /* In units of 1/10000 */
-  /* 0x082 */ s8 lighting;     /* A CHARACTER_LIGHTING value */
+  /* 0x082 */ s8 lighting; /* A CHARACTER_LIGHTING value */
   /* 0x083 */ s8 isLooping;
   /* 0x084 */ s8 nextAnimationId; /* NO_NEXT_ANIMATION, or the one to play after
                                      this one ends */
@@ -262,7 +262,7 @@ typedef struct CharacterSlot {
   /* 0x088 */ TextureAnimationState textureAnimations[TEXTURE_ANIMATION_COUNT];
   /* 0x188 */ s8 unk188;
   /* 0x189 */ s8 reusesLastMatrices; /* For the next draw, which clears it */
-} CharacterSlot;                     /* size = 0x18C */
+} CharacterSlot; /* size = 0x18C */
 
 #define NO_NEXT_ANIMATION -1
 

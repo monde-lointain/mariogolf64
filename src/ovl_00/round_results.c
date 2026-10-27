@@ -211,7 +211,7 @@ typedef struct TrophyAssets {
   /* 0x0 */ s32 palette; /* For first place; second and third follow */
   /* 0x4 */ s32 image;
   /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
-} TrophyAssets;             /* size = 0xC */
+} TrophyAssets; /* size = 0xC */
 
 extern TrophyAssets f_TrophyAssets[];
 
@@ -265,38 +265,38 @@ void OpenRoundResults(s32 request) {
  * scaled by the course's rate. A macro, since the original repeats it
  * for each mode.
  */
-#define AddRoundPoints(save)                                               \
-  {                                                                        \
-    s32 counted_;                                                          \
-    s32 total_;                                                            \
-    s32 i_;                                                                \
-                                                                           \
-    f_OpenCourseCount = CountOpenCourses((save)->coursePoints);            \
-    if (f_OpenCourseCount < COURSE_COUNT) {                                \
-      counted_ = 0;                                                        \
-      f_PointsToNextCourse =                                               \
+#define AddRoundPoints(save) \
+  { \
+    s32 counted_; \
+    s32 total_; \
+    s32 i_; \
+\
+    f_OpenCourseCount = CountOpenCourses((save)->coursePoints); \
+    if (f_OpenCourseCount < COURSE_COUNT) { \
+      counted_ = 0; \
+      f_PointsToNextCourse = \
           GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints; \
-      f_PointsEarned = 0;                                                  \
-      for (i_ = 0; i_ != g_PlayerCount; i_++) {                            \
-        if (f_PlayerPoints[i_] >= 0) {                                     \
-          counted_++;                                                      \
-          f_PointsEarned += f_PlayerPoints[i_];                            \
-        }                                                                  \
-      }                                                                    \
-      if (counted_ == 0) {                                                 \
-        counted_ = 1;                                                      \
-      }                                                                    \
-      f_PointsEarned = f_PointsEarned *                                    \
-          f_CoursePointRates[GetCourseRecordIndex()] / counted_;           \
-      f_PointsShown = f_PointsEarned;                                      \
-      f_PointsToNextCourse -= f_PointsEarned;                              \
-    }                                                                      \
-    total_ = (save)->coursePoints + f_PointsEarned;                        \
-    if (total_ > MAX_COURSE_POINTS) {                                      \
-      (save)->coursePoints = MAX_COURSE_POINTS;                            \
-    } else {                                                               \
-      (save)->coursePoints = total_;                                       \
-    }                                                                      \
+      f_PointsEarned = 0; \
+      for (i_ = 0; i_ != g_PlayerCount; i_++) { \
+        if (f_PlayerPoints[i_] >= 0) { \
+          counted_++; \
+          f_PointsEarned += f_PlayerPoints[i_]; \
+        } \
+      } \
+      if (counted_ == 0) { \
+        counted_ = 1; \
+      } \
+      f_PointsEarned = f_PointsEarned * \
+          f_CoursePointRates[GetCourseRecordIndex()] / counted_; \
+      f_PointsShown = f_PointsEarned; \
+      f_PointsToNextCourse -= f_PointsEarned; \
+    } \
+    total_ = (save)->coursePoints + f_PointsEarned; \
+    if (total_ > MAX_COURSE_POINTS) { \
+      (save)->coursePoints = MAX_COURSE_POINTS; \
+    } else { \
+      (save)->coursePoints = total_; \
+    } \
   }
 
 void LoadRoundResults(void) {
@@ -857,19 +857,19 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 #define PLACE_NUMBER_X_OFFSET (-12)
 
 /* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
-#define DRAW_PLACE_GLYPH(gfx, x, y, glyph)                                     \
-  {                                                                            \
-    gDPLoadTextureTile(gfx++,                                                  \
-        (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,         \
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0,                      \
-        (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,                      \
-        (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,                  \
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,     \
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);                                  \
-    gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2,                         \
-        ((x) + PLACE_GLYPH_SIZE) << 2, ((y) + PLACE_GLYPH_SIZE) << 2,          \
+#define DRAW_PLACE_GLYPH(gfx, x, y, glyph) \
+  { \
+    gDPLoadTextureTile(gfx++, \
+        (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0, \
+        (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1, \
+        (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0, \
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
+    gSPScisTextureRectangle(gfx++, (x) << 2, (y) << 2, \
+        ((x) + PLACE_GLYPH_SIZE) << 2, ((y) + PLACE_GLYPH_SIZE) << 2, \
         G_TX_RENDERTILE, 0, ((glyph) * PLACE_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, \
-        TEXEL_STEP_ONE);                                                       \
+        TEXEL_STEP_ONE); \
   }
 
 #ifdef NON_MATCHING

@@ -100,7 +100,7 @@ extern char* f_ChoiceBoxLabels[];
 extern s32 f_ChoiceBoxState;
 extern s32 f_ChoiceBoxIndex;
 extern s32 f_ChoiceBoxSelection;
-extern f32 f_ChoiceGlowAngle;   /* Cycles the selected label's colour */
+extern f32 f_ChoiceGlowAngle; /* Cycles the selected label's colour */
 extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)

@@ -20,7 +20,7 @@ typedef struct HolePoints {
   /* 0xC0 */ CoursePoint
       routePoints[ROUTE_POINT_COUNT]; /* For the computer golfer; zero where
                                          unused */
-} HolePoints;                         /* size = 0x120 */
+} HolePoints; /* size = 0x120 */
 
 extern HolePoints g_HolePoints;
 

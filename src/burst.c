@@ -45,7 +45,7 @@ typedef struct BurstParticle {
   /* 0x8C */ f32 velocityY;
   /* 0x90 */ u8 unk90[4];
   /* 0x94 */ s16 life; /* Drawn while above 0 */
-} BurstParticle;       /* size = 0x98 */
+} BurstParticle; /* size = 0x98 */
 
 typedef struct Burst {
   /* 0x00 */ BurstParticle* particles;

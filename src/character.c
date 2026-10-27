@@ -36,10 +36,10 @@
 #define JOINT_ANIMATIONS(model) \
   ((JointAnimation*)(model)->segmentAddresses[CHARACTER_MODEL_JOINTS])
 #define ANIMATED_TRIANGLES(model) \
-  ((AnimatedTriangle**)(model)    \
+  ((AnimatedTriangle**)(model) \
           ->segmentAddresses[CHARACTER_MODEL_ANIMATED_TRIANGLES])
 #define TEXTURE_ANIMATIONS(model) \
-  ((TextureAnimation*)(model)     \
+  ((TextureAnimation*)(model) \
           ->segmentAddresses[CHARACTER_MODEL_TEXTURE_ANIMATIONS])
 #define ANIMATED_TEXTURES(model) \
   ((AnimatedTexture*)(model)->segmentAddresses[CHARACTER_MODEL_TEXTURES])
@@ -53,19 +53,19 @@
  * Patches the slot's frame data copy being written so the triangle shows the
  * texture with the texture coordinates. Uses the locals gfx, vertex and i.
  */
-#define SET_TRIANGLE_TEXTURE(                                                \
-    slot, triangle, texture, sCoordinates, tCoordinates)                     \
-  gfx = (Gfx*)FRAME_DATA_POINTER(                                            \
-      slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET);       \
-  gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1),  \
-      G_IM_FMT_RGBA, G_IM_SIZ_16b, (texture)->width, (texture)->height, 0,   \
-      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,                \
+#define SET_TRIANGLE_TEXTURE( \
+    slot, triangle, texture, sCoordinates, tCoordinates) \
+  gfx = (Gfx*)FRAME_DATA_POINTER( \
+      slot, (triangle)->loadTextureBlock + LOAD_TEXTURE_BLOCK_OFFSET); \
+  gDPLoadTextureBlock(gfx++, (texture)->address & ~(TEXTURE_ALIGNMENT - 1), \
+      G_IM_FMT_RGBA, G_IM_SIZ_16b, (texture)->width, (texture)->height, 0, \
+      G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, \
       ANIMATED_TEXTURE_MASK, ANIMATED_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD); \
-  for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) {                              \
-    vertex =                                                                 \
+  for (i = 0; i < TRIANGLE_VERTEX_COUNT; i++) { \
+    vertex = \
         (Vtx*)FRAME_DATA_POINTER(slot, (triangle)->vertices + i * VTX_SIZE); \
-    vertex->v.tc[0] = (sCoordinates)[i];                                     \
-    vertex->v.tc[1] = (tCoordinates)[i];                                     \
+    vertex->v.tc[0] = (sCoordinates)[i]; \
+    vertex->v.tc[1] = (tCoordinates)[i]; \
   }
 
 /* The size of a Vtx */
@@ -80,7 +80,7 @@
 
 /* Makes a slot's model readable at CHARACTER_MODEL_ADDRESS, where its segment
  * addresses point */
-#define MAP_MODEL_BUFFER(slot)                                 \
+#define MAP_MODEL_BUFFER(slot) \
   SetMultiTlb(0, TLB_PAGE_MODE_4K, CHARACTER_MODEL_PAGE_COUNT, \
       CHARACTER_MODEL_ADDRESS, osVirtualToPhysical((slot)->modelBuffer))
 
@@ -1633,10 +1633,10 @@ void SetCharacterLights(void) {
 }
 
 /* Copies the ambient and first light into both of f_SavedLights */
-#define SAVE_LIGHTS(lights)                  \
+#define SAVE_LIGHTS(lights) \
   f_SavedLights[0].l[0].l = (lights).l[0].l; \
   f_SavedLights[1].l[0].l = (lights).l[0].l; \
-  f_SavedLights[0].a.l = (lights).a.l;       \
+  f_SavedLights[0].a.l = (lights).a.l; \
   f_SavedLights[1].a.l = (lights).a.l
 
 /* Draws the character in the slot with its lights, alpha and culling */
@@ -1810,7 +1810,7 @@ void PlaceCharacter(u32 slotIndex, CoursePoint point, f32 heading) {
  * function compiles differently from the original.
  */
 #define IsCharacterDrawnForCamera(cameraIndex) \
-  (((cameraIndex) == CAMERA_UNK2) ||           \
+  (((cameraIndex) == CAMERA_UNK2) || \
       (((cameraIndex) != INSET_CAMERA) && (D_800BE698 != 0)))
 
 /*

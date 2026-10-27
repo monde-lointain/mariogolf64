@@ -111,7 +111,7 @@ extern s32 f_IsCourseSelectLoaded;
 #define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
 #define HOLE_FLAG_START_SHADE 0xB7
-#define HOLE_FLAG_VERTEX(row, column)        \
+#define HOLE_FLAG_VERTEX(row, column) \
   f_HoleFlagVertices[0][g_MatrixBufferIndex] \
                     [(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
 #define HOLE_FLAG_SHADE(row, column) \
@@ -212,10 +212,10 @@ extern void* f_ShotOffsetMarkerImage;
 #define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
 #define HOLE_INTRO_MATCH_IMAGE_LOADED (1 << 1)
 /* The intro images are drawn opaque, keeping the coverage of their alpha */
-#define HOLE_INTRO_IMAGE_RENDER_MODE               \
+#define HOLE_INTRO_IMAGE_RENDER_MODE \
   AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
       GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
-#define HOLE_INTRO_IMAGE_RENDER_MODE2              \
+#define HOLE_INTRO_IMAGE_RENDER_MODE2 \
   AA_EN | CVG_X_ALPHA | ALPHA_CVG_SEL | FORCE_BL | \
       GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1)
 /* The contest image is 256x64 and the match standing image 160x40, centered */
@@ -456,10 +456,10 @@ extern f32 f_WindIconPulseAngle;
 #define WIND_METERS_GLYPH_S 119
 #define WIND_METERS_GLYPH_WIDTH 14
 #define WIND_TEXT_RAISE 1
-#define WIND_TEXT_RENDER_MODE        \
+#define WIND_TEXT_RENDER_MODE \
   IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
       GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
-#define WIND_TEXT_RENDER_MODE2       \
+#define WIND_TEXT_RENDER_MODE2 \
   IM_RD | CLR_ON_CVG | CVG_X_ALPHA | \
       GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM)
 #define WIND_TEXT_PRIM_RED 0x3F
@@ -1351,36 +1351,36 @@ extern s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
  * lines warm towards red where the ground rises and cool towards blue where
  * it falls; black lines turn red or blue.
  */
-#define SET_GREEN_GRID_TINT(slope)                          \
+#define SET_GREEN_GRID_TINT(slope) \
   if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor == \
-      GRID_COLOR_WHITE) {                                   \
-    blue = TINT_CHANNEL_MAX;                                \
-    if ((slope) == 0) {                                     \
-      green = TINT_CHANNEL_MAX;                             \
-      red = TINT_CHANNEL_MAX;                               \
-    } else if ((slope) > 0) {                               \
-      red = TINT_CHANNEL_MAX;                               \
-      blue = (slope);                                       \
-      blue = red - blue;                                    \
-      green = blue;                                         \
-    } else {                                                \
-      green = (slope) + TINT_CHANNEL_MAX;                   \
-      red = green;                                          \
-    }                                                       \
-  } else {                                                  \
-    blue = 0;                                               \
-    if ((slope) == 0) {                                     \
-      green = 0;                                            \
-      red = 0;                                              \
-    } else if ((slope) > 0) {                               \
-      red = (slope);                                        \
-      blue = 0;                                             \
-      green = 0;                                            \
-    } else {                                                \
-      blue = -(slope);                                      \
-      green = 0;                                            \
-      red = 0;                                              \
-    }                                                       \
+      GRID_COLOR_WHITE) { \
+    blue = TINT_CHANNEL_MAX; \
+    if ((slope) == 0) { \
+      green = TINT_CHANNEL_MAX; \
+      red = TINT_CHANNEL_MAX; \
+    } else if ((slope) > 0) { \
+      red = TINT_CHANNEL_MAX; \
+      blue = (slope); \
+      blue = red - blue; \
+      green = blue; \
+    } else { \
+      green = (slope) + TINT_CHANNEL_MAX; \
+      red = green; \
+    } \
+  } else { \
+    blue = 0; \
+    if ((slope) == 0) { \
+      green = 0; \
+      red = 0; \
+    } else if ((slope) > 0) { \
+      red = (slope); \
+      blue = 0; \
+      green = 0; \
+    } else { \
+      blue = -(slope); \
+      green = 0; \
+      red = 0; \
+    } \
   }
 
 void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
@@ -1791,7 +1791,7 @@ void ResetBallTrail(void) {
 #define BALL_TRAIL_COLOR 0xFFFFFF00
 #define BALL_TRAIL_ALPHA 64
 #define BALL_TRAIL_SEGMENTS_PER_FADE 4
-#define BALL_TRAIL_SEGMENT_COLOR(segment)                          \
+#define BALL_TRAIL_SEGMENT_COLOR(segment) \
   ((BALL_TRAIL_ALPHA - (segment) / BALL_TRAIL_SEGMENTS_PER_FADE) | \
       BALL_TRAIL_COLOR)
 
@@ -3281,12 +3281,12 @@ void func_80217F54(Gfx** displayListHead);
 
 /* Loads one of the shot panel's labels, which DrawRoundHud does in each branch
  * that picks one */
-#define LOAD_SHOT_PANEL_LABEL(image)                                     \
-  gDPLoadTLUT_pal16(                                                     \
-      g_DisplayListHead++, 0, ((u32)(image) + IMAGE_HEADER_SIZE) & ~7);  \
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,                            \
-      ((u32)(image) + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,         \
-      SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,                \
+#define LOAD_SHOT_PANEL_LABEL(image) \
+  gDPLoadTLUT_pal16( \
+      g_DisplayListHead++, 0, ((u32)(image) + IMAGE_HEADER_SIZE) & ~7); \
+  gDPLoadTextureBlock_4b(g_DisplayListHead++, \
+      ((u32)(image) + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, \
+      SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, \
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, \
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD)
 
