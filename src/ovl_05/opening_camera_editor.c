@@ -49,11 +49,51 @@ typedef struct CameraEditor {
 #define EDITOR_FLAG_UNK80 0x80
 
 extern CameraEditor g_CameraEditor;
+extern f32 D_8020AE3C_ovl_05; /* A scale that the opening passes to guScale */
 
 void func_80203620_ovl_05(void);
 void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
+/* Starts the editor with its eye at (0, -100, 100) looking at the origin, and its moves stopped */
+void func_802033B0_ovl_05(void) {
+    s32 i;
+
+    g_CameraEditor.points[EDITOR_POINT_EYE][0] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = 0.0f;
+    g_CameraEditor.points[EDITOR_POINT_EYE][1] = -100.0f;
+    g_CameraEditor.points[EDITOR_POINT_EYE][2] = 100.0f;
+    g_CameraEditor.unk24 = 45.0f;
+    for (i = 0; i != EDITOR_POINT_COUNT; i++) {
+        g_CameraEditor.targets[i][0] = 0.0f;
+        g_CameraEditor.targets[i][1] = 0.0f;
+        g_CameraEditor.targets[i][2] = 0.0f;
+        g_CameraEditor.unk40[i][0] = 0.0f;
+        g_CameraEditor.unk40[i][1] = 0.0f;
+        g_CameraEditor.unk40[i][2] = 0.0f;
+        /* The game clears these twice */
+        g_CameraEditor.unk40[i][0] = 0.0f;
+        g_CameraEditor.unk40[i][1] = 0.0f;
+        g_CameraEditor.unk40[i][2] = 0.0f;
+        g_CameraEditor.unk70[i] = 30.0f;
+        g_CameraEditor.unk78[i] = 3.0f;
+        g_CameraEditor.unk98[i] = 0.0f;
+        g_CameraEditor.unkB4[i] = 0;
+        g_CameraEditor.flags[i] = 0;
+    }
+    g_CameraEditor.unkA0 = 0.0f;
+    g_CameraEditor.unkA4 = 0.0f;
+    g_CameraEditor.unkA8 = 0.0f;
+    g_CameraEditor.unk80 = DEGREES_TO_RADIANS(6.0f);
+    g_CameraEditor.unk84 = DEGREES_TO_RADIANS(2.0f);
+    g_CameraEditor.unk88 = DEGREES_TO_RADIANS(3.0f);
+    g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
+    g_CameraEditor.unk90 = 10.0f;
+    g_CameraEditor.unk94 = 1.0f;
+    func_80203620_ovl_05();
+    D_8020AE3C_ovl_05 = 1.0f;
+}
 
 void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
     g_CameraEditor.points[EDITOR_POINT_EYE][0] = arg0;
