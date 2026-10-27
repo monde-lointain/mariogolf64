@@ -1828,7 +1828,140 @@ extern void *D_801B5CD0[2];
 extern s16 D_800FE33C;
 extern u8 D_800FBDB9;
 
+/* The title screen's labels, 128 by 20 each, plain in D_801B5CD0 and lit in D_8012D420 */
+#define TITLE_LABEL_COUNT 7
+#define TITLE_LABEL_WIDTH 128
+#define TITLE_LABEL_HEIGHT 20
+#define TITLE_LABEL_IMAGE_SIZE (TITLE_LABEL_WIDTH * TITLE_LABEL_HEIGHT / 2)
+/* NEW GAME comes first, then the player counts, then the saved games and the menus */
+#define TITLE_LABEL_NEW_GAME 0
+#define TITLE_LABEL_FIRST_PLAYER_COUNT 1
+#define TITLE_LABEL_FIRST_OTHER_CHOICE 4
+#define TITLE_LABEL_SAVED_GAMES 5
+/* While D_800C42D0 is set the saved games' row leads to Transmit, and this label takes its place */
+#define TITLE_LABEL_TRANSMIT 7
+/* A plain-text menu under the board: "MAIN MENU", "1P GAME" to "3P GAME" and three figures */
+#define PLAIN_MENU_HEADING_X 64
+#define PLAIN_MENU_HEADING_Y 32
+#define PLAIN_MENU_NAME_COUNT 3
+#define PLAIN_MENU_NAME_X 112
+#define PLAIN_MENU_NAME_TOP 128
+#define PLAIN_MENU_NAME_SPACING 8
+#define PLAIN_MENU_FIGURES_X 32
+#define PLAIN_MENU_FIGURES_Y 100
+#define TITLE_BOARD_KIND 61
+
+extern char *D_8022BF28_ovl_01[];
+extern s32 D_8022F940_ovl_01[TITLE_LABEL_COUNT][2];
+
+/*
+ * Doesn't match: in the lit labels' loop GCC works out labelIndex * TITLE_LABEL_IMAGE_SIZE afresh each pass, where
+ * the original steps an offset by 5 alongside the label table's pointers, which also moves the title row's pointer
+ * from s0 to t7. 100 diff lines are left, mostly from those registers; a permuter run found nothing better.
+ */
+#ifdef NON_MATCHING
+const char D_80231634_ovl_01[] = "MAIN MENU";
+const char D_80231640_ovl_01[] = "%8d:%8d:%8d";
+
+void func_801FDA40_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 labelIndex;
+    s32 labelOffset;
+    s16 growth;
+
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    DrawShadowedText(&gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, D_80231634_ovl_01);
+    for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
+        DrawShadowedText(&gfx, PLAIN_MENU_NAME_X, PLAIN_MENU_NAME_TOP + labelIndex * PLAIN_MENU_NAME_SPACING,
+                         D_8022BF28_ovl_01[labelIndex]);
+    }
+    sprintf(g_PrintBuffer, D_80231640_ovl_01, 0x820, 0x208, 0x2A78);
+    DrawShadowedText(&gfx, PLAIN_MENU_FIGURES_X, PLAIN_MENU_FIGURES_Y, g_PrintBuffer);
+    func_801FB54C_ovl_01(&gfx, TITLE_BOARD_KIND);
+    if (g_ControllerStates[0].buttons & B_BUTTON) {
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
+    }
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
+        if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && labelIndex == TITLE_LABEL_NEW_GAME) ||
+            (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
+             labelIndex == D_801323A0.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT) ||
+            (D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE == labelIndex &&
+             D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+            continue;
+        }
+        {
+            if (labelIndex == TITLE_LABEL_SAVED_GAMES && D_800C42D0 == TRUE) {
+                labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
+            } else {
+                labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
+            }
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET + labelOffset) & ~7,
+                                   G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, D_8022F940_ovl_01[labelIndex][0] << 2,
+                                    D_8022F940_ovl_01[labelIndex][1] << 2,
+                                    (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH) << 2,
+                                    (D_8022F940_ovl_01[labelIndex][1] + TITLE_LABEL_HEIGHT) << 2,
+                                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (labelIndex = 0; labelIndex != TITLE_LABEL_COUNT; labelIndex++) {
+        if ((D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME && labelIndex == TITLE_LABEL_NEW_GAME) ||
+            (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME &&
+             labelIndex == D_801323A0.playerCountChoice + TITLE_LABEL_FIRST_PLAYER_COUNT) ||
+            (labelIndex == D_801323A0.titleChoice + TITLE_LABEL_FIRST_OTHER_CHOICE &&
+             D_801323A0.titleChoice != TITLE_CHOICE_NEW_GAME)) {
+            if (labelIndex == TITLE_LABEL_SAVED_GAMES && D_800C42D0 == TRUE) {
+                labelOffset = TITLE_LABEL_TRANSMIT * TITLE_LABEL_IMAGE_SIZE;
+            } else {
+                labelOffset = labelIndex * TITLE_LABEL_IMAGE_SIZE;
+            }
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET + labelOffset) & ~7,
+                                   G_IM_FMT_CI, TITLE_LABEL_WIDTH, TITLE_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            /* NEW GAME stays still */
+            growth = 0;
+            if (labelIndex != TITLE_LABEL_NEW_GAME) {
+                growth = D_800FE33C;
+            }
+            gSPScisTextureRectangle(gfx++, (D_8022F940_ovl_01[labelIndex][0] - growth / 2) << 2,
+                                    (D_8022F940_ovl_01[labelIndex][1] - growth / 2) << 2,
+                                    (D_8022F940_ovl_01[labelIndex][0] + TITLE_LABEL_WIDTH + growth / 2) << 2,
+                                    (D_8022F940_ovl_01[labelIndex][1] + (TITLE_LABEL_HEIGHT + growth / 2)) << 2,
+                                    G_TX_RENDERTILE, 0, 0, (TITLE_LABEL_WIDTH << 10) / (growth + TITLE_LABEL_WIDTH),
+                                    (TITLE_LABEL_HEIGHT << 10) / (growth + TITLE_LABEL_HEIGHT));
+            gDPPipeSync(gfx++);
+        }
+    }
+    if (D_800FBDB9 == LABEL_GROWING) {
+        D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+    }
+    if (D_800FBDB9 == LABEL_SHRINKING) {
+        D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+    }
+    if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
+        D_800FBDB9 = LABEL_SHRINKING;
+    }
+    if (D_800FE33C < 0) {
+        D_800FBDB9 = LABEL_GROWING;
+    }
+    *displayListHead = gfx;
+}
+
+/* Nothing reads this */
+const char D_8023164C_ovl_01[] = "";
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FE4D0_ovl_01);
 
