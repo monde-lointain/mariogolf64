@@ -7,6 +7,8 @@
 #define MENU_SCREEN_TITLE 0
 #define MENU_SCREEN_MAIN 2
 #define MENU_SCREEN_OPTIONS 4
+#define MENU_SCREEN_UNK5 5
+#define MENU_SCREEN_UNK6 6
 #define MENU_SCREEN_CLUBHOUSE 9
 #define MENU_SCREEN_UNK13 13
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */

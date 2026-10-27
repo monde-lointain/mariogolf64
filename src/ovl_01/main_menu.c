@@ -247,7 +247,38 @@ void func_801FA1B8_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FA20C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FADBC_ovl_01);
+void func_801FADBC_ovl_01(void) {
+    if (IsHudAnimationDone() != TRUE) {
+        return;
+    }
+    if (GetWipeKind() != WIPE_NONE) {
+        if (GetWipeProgress() == 0) {
+            g_MenuScreen = MENU_SCREEN_EXIT;
+        }
+        return;
+    }
+    if (g_MenuPressedButtons & A_BUTTON) {
+        PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        StartWipe(WIPE_CLOSING);
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        if (D_801323A0[0xB] == MENU_SCREEN_UNK5) {
+            g_MenuScreen = D_801323A0[0xB];
+        } else {
+            g_MenuScreen = MENU_SCREEN_UNK6;
+        }
+        return;
+    }
+    if ((g_MenuRepeatButtons & U_JPAD) && g_MenuChoices.unk1 > 0) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        g_MenuChoices.unk1--;
+    } else if ((g_MenuRepeatButtons & D_JPAD) && g_MenuChoices.unk1 < CADDY_COUNT - 1) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        g_MenuChoices.unk1++;
+    }
+}
 
 void LeaveMenuWithWipe(void) {
     if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
