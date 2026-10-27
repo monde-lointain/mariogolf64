@@ -833,7 +833,157 @@ void func_801FFC10_ovl_05(void) {
   ReadEncodedAsset(D_80213A40_ovl_05, &asset);
 }
 
+extern s32 D_8020AD64_ovl_05;
+extern s32 D_8020B218_ovl_05;
+extern Vtx D_8020B220_ovl_05[4];
+extern Vec3 D_8020CCF4_ovl_05;
+extern Mtx D_8020CD08_ovl_05;
+extern Mtx D_8020CD48_ovl_05;
+
+#ifdef NON_MATCHING
+/*
+ * Draws the opening's ball once D_8020AD64 is set: a shadow on the ground
+ * below the look-at point, then the ball image in two strips over it.
+ *
+ * Differs from the original only in register and stack slot choices: some
+ * pairs of spilled display list pointers swap slots, and the far branch
+ * uses other registers.
+ */
+void func_801FFC40_ovl_05(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  ScreenPoint point;
+  s32 half;
+  s32 size;
+  s32 left;
+  s32 top;
+  s32 right;
+  s32 bottom;
+
+  if (D_8020AD64_ovl_05 != 0) {
+    D_8020CCF4_ovl_05[0] = f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE;
+    D_8020CCF4_ovl_05[2] = f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE;
+    D_8020CCF4_ovl_05[1] = f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE + 0.1f;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    if (ProjectPoint(D_8020CCF4_ovl_05[0], D_8020CCF4_ovl_05[1],
+                     D_8020CCF4_ovl_05[2], &point) < 0) {
+      gDPPipeSync(gfx++);
+      gDPSetDepthSource(gfx++, G_ZS_PRIM);
+      gDPSetPrimDepth(gfx++, point.depth, 0);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      D_8020CCF4_ovl_05[1] =
+          GetGroundHeight(D_8020CCF4_ovl_05[0] * WORLD_TO_COURSE_SCALE,
+                          D_8020CCF4_ovl_05[2] * WORLD_TO_COURSE_SCALE) *
+          COURSE_TO_WORLD_SCALE;
+      guTranslate(&D_8020CD08_ovl_05, D_8020CCF4_ovl_05[0],
+                  D_8020CCF4_ovl_05[1], D_8020CCF4_ovl_05[2]);
+      guScale(&D_8020CD48_ovl_05, D_8020AD64_ovl_05 * 0.5,
+              D_8020AD64_ovl_05 * 0.5f, D_8020AD64_ovl_05 * 0.5f);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+      gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0, 0,
+                        0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+      gDPSetBlendColor(gfx++, 255, 255, 255, 16);
+      gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 127);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+      gDPPipeSync(gfx++);
+      gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_PERSP);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLOD(gfx++, G_TL_TILE);
+      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gDPPipeSync(gfx++);
+      gDPLoadTextureBlock(gfx++,
+                          TEXTURE_ADDRESS(g_ShadowTexture + IMAGE_HEADER_SIZE),
+                          G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CD08_ovl_05),
+                G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020CD48_ovl_05),
+                G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+      gSPVertex(gfx++, D_8020B220_ovl_05, 4, 0);
+      gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+      gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
+                        0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
+      gDPPipeSync(gfx++);
+      gDPSetColorDither(gfx++, G_CD_DISABLE);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+      gDPSetBlendColor(gfx++, 255, 255, 255, 2);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, D_8020B218_ovl_05);
+      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureFilter(gfx++, G_TF_BILERP);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(
+          gfx++, TEXTURE_ADDRESS(D_80213A40_ovl_05 + IMAGE_HEADER_SIZE));
+      gDPPipeSync(gfx++);
+      for (half = 0; half != 2; half++) {
+        gDPLoadTextureBlock(
+            gfx++,
+            TEXTURE_ADDRESS(D_80213A40_ovl_05 + LARGE_PALETTED_TEXELS_OFFSET +
+                            half * 64 * 32),
+            G_IM_FMT_CI, G_IM_SIZ_8b, 64, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
+        if (g_CameraEditor.distance > 400.0f) {
+          size = D_8020AD64_ovl_05 * 2;
+          left = point.x - size;
+          right = left + 3;
+          top = point.y - (2 - half) * size;
+          bottom = top + 3;
+          D_8020B218_ovl_05 = 255.0 - (u32)g_CameraEditor.distance * 0.04;
+          if (D_8020B218_ovl_05 < 0) {
+            D_8020B218_ovl_05 = 0;
+          }
+        } else {
+          size = D_8020AD64_ovl_05 * 2;
+          D_8020B218_ovl_05 = 255;
+          left = point.x - size;
+          right = point.x + size;
+          top = point.y - (2 - half) * size;
+          bottom = point.y + half * size - size;
+        }
+        gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
+                            G_TX_RENDERTILE, 0, 0, (64 << 10) / (right - left),
+                            0x7FA0 / (bottom - top));
+        gDPPipeSync(gfx++);
+      }
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+      gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+  }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FFC40_ovl_05);
+#endif
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
 #define LOOK_AT_EASE_FAST                                                    \
