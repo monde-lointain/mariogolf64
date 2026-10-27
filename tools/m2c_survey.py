@@ -23,10 +23,22 @@ M2C = os.path.join(ROOT, ".venv", "bin", "m2c")
 DATA_FILES = [p for p in os.environ.get("SURVEY_DATA", "").split(":") if p]
 # SURVEY_HEADERS adds headers (colon-separated) that declare the globals
 # m2c's output uses
-PRELUDE = "".join(f'#include "{h}"\n' for h in ["common.h", "m2c_macros.h", *[p for p in os.environ.get("SURVEY_HEADERS", "").split(":") if p]]) + "\n"
+PRELUDE = (
+    "".join(
+        f'#include "{h}"\n'
+        for h in [
+            "common.h",
+            "m2c_macros.h",
+            *[p for p in os.environ.get("SURVEY_HEADERS", "").split(":") if p],
+        ]
+    )
+    + "\n"
+)
 # m2c guesses each callee's prototype from one call, which other calls then
 # contradict; declaring the callees without parameter lists avoids that
-GUESSED_PROTOTYPE_RE = re.compile(r"^(.*?\b(\w+))\(.*\);( +/\* (?:extern|static) \*/)$", re.MULTILINE)
+GUESSED_PROTOTYPE_RE = re.compile(
+    r"^(.*?\b(\w+))\(.*\);( +/\* (?:extern|static) \*/)$", re.MULTILINE
+)
 CALLEE_RE = re.compile(r"\b(func_[0-9A-F]{8}\w*)\b")
 
 
@@ -41,8 +53,22 @@ def declare_callees(text, name):
 def survey_function(job):
     out_dir, asm_path, name, target = job
     result = subprocess.run(
-        [M2C, "-t", "mips-gcc-c", "--valid-syntax", "--context", os.path.join(ROOT, "ctx.c"), "-f", name, asm_path, *DATA_FILES],
-        capture_output=True, text=True, cwd=ROOT)
+        [
+            M2C,
+            "-t",
+            "mips-gcc-c",
+            "--valid-syntax",
+            "--context",
+            os.path.join(ROOT, "ctx.c"),
+            "-f",
+            name,
+            asm_path,
+            *DATA_FILES,
+        ],
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+    )
     c_path = os.path.join(out_dir, name + ".c")
     if result.returncode != 0:
         return asm_path, name, len(target), -1.0
@@ -64,7 +90,9 @@ def main():
             jobs.append((out_dir, os.path.abspath(asm_path), name, words))
     with multiprocessing.Pool() as pool:
         for asm_path, name, size, value in pool.imap_unordered(survey_function, jobs):
-            print(f"{os.path.basename(asm_path)}\t{name}\t{size}\t{value:.3f}", flush=True)
+            print(
+                f"{os.path.basename(asm_path)}\t{name}\t{size}\t{value:.3f}", flush=True
+            )
 
 
 if __name__ == "__main__":

@@ -31,8 +31,10 @@ def main():
         if tag == "equal":
             continue
         print(f"{tag:7} expected {start}-{end} {' '.join(expected_ops[start:end])}")
-        print(f"        compiled {compiled_start}-{compiled_end} "
-              f"{' '.join(compiled_ops[compiled_start:compiled_end])}")
+        print(
+            f"        compiled {compiled_start}-{compiled_end} "
+            f"{' '.join(compiled_ops[compiled_start:compiled_end])}"
+        )
 
 
 if __name__ == "__main__":

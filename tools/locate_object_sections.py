@@ -20,6 +20,7 @@ Common symbols (uninitialized globals that the compiler leaves to the
 linker) have no section of their own, so each one is reported by name as
 "object COMMON:symbol address - size votes".
 """
+
 import argparse
 import collections
 import io
@@ -55,7 +56,7 @@ def mask_for_relocation(relocationType):
 def masked_words(data, maskByOffset):
     words = []
     for offset in range(0, len(data) - 3, 4):
-        word = struct.unpack(">I", data[offset:offset + 4])[0]
+        word = struct.unpack(">I", data[offset : offset + 4])[0]
         words.append(word & ~maskByOffset.get(offset, 0) & 0xFFFFFFFF)
     return words
 
@@ -71,21 +72,31 @@ def function_rom_offsets(elf, romBytes, textRom, relocations):
     """
     text = elf.get_section_by_name(".text")
     textData = text.data()
-    maskByOffset = {relocation["r_offset"]: mask_for_relocation(relocation["r_info_type"])
-                    for relocation in relocations}
+    maskByOffset = {
+        relocation["r_offset"]: mask_for_relocation(relocation["r_info_type"])
+        for relocation in relocations
+    }
     textIndex = text_section_index(elf)
-    functions = sorted((symbol["st_value"], symbol["st_size"])
-                       for symbol in elf.get_section_by_name(".symtab").iter_symbols()
-                       if symbol["st_info"]["type"] == "STT_FUNC" and symbol["st_size"] > 0
-                       and symbol["st_shndx"] == textIndex)
+    functions = sorted(
+        (symbol["st_value"], symbol["st_size"])
+        for symbol in elf.get_section_by_name(".symtab").iter_symbols()
+        if symbol["st_info"]["type"] == "STT_FUNC"
+        and symbol["st_size"] > 0
+        and symbol["st_shndx"] == textIndex
+    )
     offsets = {}
     searchStart = textRom
     for start, size in functions:
-        functionMask = {offset - start: mask for offset, mask in maskByOffset.items()
-                        if start <= offset < start + size}
-        objectWords = masked_words(textData[start:start + size], functionMask)
+        functionMask = {
+            offset - start: mask
+            for offset, mask in maskByOffset.items()
+            if start <= offset < start + size
+        }
+        objectWords = masked_words(textData[start : start + size], functionMask)
         for candidate in range(searchStart, searchStart + SEARCH_WINDOW, 4):
-            romWords = masked_words(romBytes[candidate:candidate + size], functionMask)
+            romWords = masked_words(
+                romBytes[candidate : candidate + size], functionMask
+            )
             if romWords == objectWords:
                 offsets[start] = (candidate, size)
                 searchStart = candidate + size
@@ -104,7 +115,9 @@ def section_addresses(elf, romBytes, textRom):
     """Return {sectionName or "COMMON:symbol": Counter(address)} for one object."""
     textData = elf.get_section_by_name(".text").data()
     symbolTable = elf.get_section_by_name(".symtab")
-    sectionNames = {index: section.name for index, section in enumerate(elf.iter_sections())}
+    sectionNames = {
+        index: section.name for index, section in enumerate(elf.iter_sections())
+    }
     votes = collections.defaultdict(collections.Counter)
 
     relocationSection = elf.get_section_by_name(".rel.text")
@@ -125,11 +138,20 @@ def section_addresses(elf, romBytes, textRom):
         symbolIndex = hiRelocation["r_info_sym"]
         symbol = symbolTable.get_symbol(symbolIndex)
         sectionName = sectionNames.get(symbol["st_shndx"])
-        isCommon = symbol["st_shndx"] == SHN_COMMON or sectionName == SCOMMON_SECTION_NAME
+        isCommon = (
+            symbol["st_shndx"] == SHN_COMMON or sectionName == SCOMMON_SECTION_NAME
+        )
         if sectionName not in DATA_SECTION_NAMES and not isCommon:
             continue
-        loRelocation = next((later for later in relocations[position + 1:]
-                             if later["r_info_type"] == R_MIPS_LO16 and later["r_info_sym"] == symbolIndex), None)
+        loRelocation = next(
+            (
+                later
+                for later in relocations[position + 1 :]
+                if later["r_info_type"] == R_MIPS_LO16
+                and later["r_info_sym"] == symbolIndex
+            ),
+            None,
+        )
         if loRelocation is None:
             continue
         hiOffset = hiRelocation["r_offset"]
@@ -138,10 +160,10 @@ def section_addresses(elf, romBytes, textRom):
         romLoOffset = rom_offset_of(loOffset)
         if romHiOffset is None or romLoOffset is None:
             continue
-        objectHi = struct.unpack(">I", textData[hiOffset:hiOffset + 4])[0] & 0xFFFF
-        objectLo = struct.unpack(">I", textData[loOffset:loOffset + 4])[0] & 0xFFFF
-        romHi = struct.unpack(">I", romBytes[romHiOffset:romHiOffset + 4])[0] & 0xFFFF
-        romLo = struct.unpack(">I", romBytes[romLoOffset:romLoOffset + 4])[0] & 0xFFFF
+        objectHi = struct.unpack(">I", textData[hiOffset : hiOffset + 4])[0] & 0xFFFF
+        objectLo = struct.unpack(">I", textData[loOffset : loOffset + 4])[0] & 0xFFFF
+        romHi = struct.unpack(">I", romBytes[romHiOffset : romHiOffset + 4])[0] & 0xFFFF
+        romLo = struct.unpack(">I", romBytes[romLoOffset : romLoOffset + 4])[0] & 0xFFFF
         romAddress = ((romHi << 16) + sign_extend_16(romLo)) & 0xFFFFFFFF
         addend = (objectHi << 16) + sign_extend_16(objectLo)
         if isCommon:
@@ -154,16 +176,23 @@ def section_addresses(elf, romBytes, textRom):
 
 def common_symbol_sizes(elf):
     """Return {name: size} for the object's common symbols."""
-    sectionNames = {index: section.name for index, section in enumerate(elf.iter_sections())}
+    sectionNames = {
+        index: section.name for index, section in enumerate(elf.iter_sections())
+    }
     sizes = {}
     for symbol in elf.get_section_by_name(".symtab").iter_symbols():
-        if symbol["st_shndx"] == SHN_COMMON or sectionNames.get(symbol["st_shndx"]) == SCOMMON_SECTION_NAME:
+        if (
+            symbol["st_shndx"] == SHN_COMMON
+            or sectionNames.get(symbol["st_shndx"]) == SCOMMON_SECTION_NAME
+        ):
             sizes[symbol.name] = symbol["st_size"]
     return sizes
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("rom")
     parser.add_argument("segmentRom", type=lambda text: int(text, 16))
     parser.add_argument("segmentVram", type=lambda text: int(text, 16))
@@ -185,18 +214,41 @@ def main():
                 continue
             address, count = votes[sectionName].most_common(1)[0]
             if len(votes[sectionName]) > 1:
-                print("warning: %s %s has conflicting addresses %s" % (
-                    objectPath, sectionName, {hex(a): c for a, c in votes[sectionName].items()}), file=sys.stderr)
-            romOffset = address - args.segmentVram + args.segmentRom if sectionName != ".bss" else None
-            print("%s %s 0x%08X %s 0x%X %d" % (objectPath, sectionName, address,
-                                               "0x%X" % romOffset if romOffset is not None else "-", size, count))
+                print(
+                    "warning: %s %s has conflicting addresses %s"
+                    % (
+                        objectPath,
+                        sectionName,
+                        {hex(a): c for a, c in votes[sectionName].items()},
+                    ),
+                    file=sys.stderr,
+                )
+            romOffset = (
+                address - args.segmentVram + args.segmentRom
+                if sectionName != ".bss"
+                else None
+            )
+            print(
+                "%s %s 0x%08X %s 0x%X %d"
+                % (
+                    objectPath,
+                    sectionName,
+                    address,
+                    "0x%X" % romOffset if romOffset is not None else "-",
+                    size,
+                    count,
+                )
+            )
         for symbolName, size in sorted(common_symbol_sizes(elf).items()):
             symbolVotes = votes.get("COMMON:" + symbolName)
             if not symbolVotes:
                 print("%s COMMON:%s ? - 0x%X 0" % (objectPath, symbolName, size))
                 continue
             address, count = symbolVotes.most_common(1)[0]
-            print("%s COMMON:%s 0x%08X - 0x%X %d" % (objectPath, symbolName, address, size, count))
+            print(
+                "%s COMMON:%s 0x%08X - 0x%X %d"
+                % (objectPath, symbolName, address, size, count)
+            )
 
 
 if __name__ == "__main__":

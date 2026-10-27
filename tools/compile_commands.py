@@ -7,6 +7,7 @@ The flags are the build's include paths and defines. clang stands in
 for KMC GCC 2.7.2, so it parses the sources as GNU C89 for a MIPS
 target and keeps quiet about the warnings GCC 2.7 never gave.
 """
+
 import json
 import os
 import sys

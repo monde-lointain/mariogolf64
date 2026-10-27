@@ -19,7 +19,9 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PERMUTER_DIR = os.environ.get("PERMUTER_DIR", os.path.expanduser("~/src/decomp-permuter"))
+PERMUTER_DIR = os.environ.get(
+    "PERMUTER_DIR", os.path.expanduser("~/src/decomp-permuter")
+)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fncompare  # noqa: E402
@@ -32,26 +34,55 @@ COMPILER_PATH={kmc} exec {kmc}/gcc -c {flags} -x c "$@"
 
 def main():
     c_path, asm_path, function = sys.argv[1:4]
-    out_dir = sys.argv[4] if len(sys.argv) > 4 else os.path.join(ROOT, "build", "permuter", function)
+    out_dir = (
+        sys.argv[4]
+        if len(sys.argv) > 4
+        else os.path.join(ROOT, "build", "permuter", function)
+    )
     os.makedirs(out_dir, exist_ok=True)
 
     # Preprocess without KMC's cpp quirks; INCLUDE_ASM expands to nothing
     # under PERMUTER
     base_path = os.path.join(out_dir, "base.c")
     preprocessed = subprocess.run(
-        ["mips-linux-gnu-cpp", "-P", "-undef", "-nostdinc", "-DPERMUTER", *fncompare.INCLUDES,
-         *fncompare.DEFINES, "-D__GNUC__=2", "-D__mips__",
-         c_path],
-        cwd=ROOT, check=True, capture_output=True, text=True).stdout
+        [
+            "mips-linux-gnu-cpp",
+            "-P",
+            "-undef",
+            "-nostdinc",
+            "-DPERMUTER",
+            *fncompare.INCLUDES,
+            *fncompare.DEFINES,
+            "-D__GNUC__=2",
+            "-D__mips__",
+            c_path,
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
     with open(base_path, "w") as base_file:
         base_file.write(preprocessed)
-    subprocess.run([sys.executable, os.path.join(PERMUTER_DIR, "strip_other_fns.py"), base_path, function],
-                   check=True)
+    subprocess.run(
+        [
+            sys.executable,
+            os.path.join(PERMUTER_DIR, "strip_other_fns.py"),
+            base_path,
+            function,
+        ],
+        check=True,
+    )
     # Nothing calls the function once the others are stripped, so a static
     # one would not be emitted at all
     with open(base_path) as base_file:
         base = base_file.read()
-    base = re.sub(r"^static\s+(.*\b%s\s*\()" % re.escape(function), r"\1", base, flags=re.MULTILINE)
+    base = re.sub(
+        r"^static\s+(.*\b%s\s*\()" % re.escape(function),
+        r"\1",
+        base,
+        flags=re.MULTILINE,
+    )
     with open(base_path, "w") as base_file:
         base_file.write(base)
 
@@ -64,13 +95,28 @@ def main():
     body = re.sub(r"(%lo\([\w.]+ \+ )\((0x[0-9A-Fa-f]+) & 0xFFFF\)\)", r"\1\2)", body)
     with open(target_s, "w") as target:
         target.write(header + '.include "macro.inc"\n' + body)
-    subprocess.run(["mips-linux-gnu-as", "-march=vr4300", "-mabi=32", "-G0", "-EB", "-Iinclude",
-                    "-o", os.path.join(out_dir, "target.o"), target_s], cwd=ROOT, check=True)
+    subprocess.run(
+        [
+            "mips-linux-gnu-as",
+            "-march=vr4300",
+            "-mabi=32",
+            "-G0",
+            "-EB",
+            "-Iinclude",
+            "-o",
+            os.path.join(out_dir, "target.o"),
+            target_s,
+        ],
+        cwd=ROOT,
+        check=True,
+    )
 
     compile_sh = os.path.join(out_dir, "compile.sh")
     with open(compile_sh, "w") as script:
         flags = " ".join(fncompare.CFLAGS + fncompare.get_optflags(c_path))
-        script.write(COMPILE_SH.format(kmc=os.path.join(ROOT, "tools", "gcc_kmc"), flags=flags))
+        script.write(
+            COMPILE_SH.format(kmc=os.path.join(ROOT, "tools", "gcc_kmc"), flags=flags)
+        )
     os.chmod(compile_sh, 0o755)
 
     with open(os.path.join(out_dir, "settings.toml"), "w") as settings:

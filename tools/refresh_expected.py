@@ -7,6 +7,7 @@ the functions of expected/NAME.s, so that splat writes their assembly with
 the current names again, saves it to expected/NAME.s and puts the C file
 back.
 """
+
 import os
 import re
 import shutil
@@ -14,8 +15,12 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FUNCTION_RE = re.compile(r"^glabel (\w+)\n(?:.*\n)*?\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ", re.MULTILINE)
-SYMBOL_RE = re.compile(r"^(\w+) = 0x([0-9A-Fa-f]{8});.*type:func(?:.*segment:(\w+))?", re.MULTILINE)
+FUNCTION_RE = re.compile(
+    r"^glabel (\w+)\n(?:.*\n)*?\s*/\* [0-9A-F]+ ([0-9A-F]{8}) ", re.MULTILINE
+)
+SYMBOL_RE = re.compile(
+    r"^(\w+) = 0x([0-9A-Fa-f]{8});.*type:func(?:.*segment:(\w+))?", re.MULTILINE
+)
 
 
 def main():
@@ -23,7 +28,9 @@ def main():
     expected_path = os.path.join(ROOT, "expected", f"{name}.s")
     c_path = os.path.join(ROOT, "src", f"{name}.c")
     with open(expected_path) as expected_file:
-        addresses = [address for _, address in FUNCTION_RE.findall(expected_file.read())]
+        addresses = [
+            address for _, address in FUNCTION_RE.findall(expected_file.read())
+        ]
     with open(os.path.join(ROOT, "symbol_addrs.txt")) as symbol_file:
         symbols = SYMBOL_RE.findall(symbol_file.read())
     # Overlays share addresses, so a symbol of this file's segment wins
@@ -33,7 +40,10 @@ def main():
         if symbol_segment in ("", segment):
             names_by_address.setdefault(address.upper(), symbol)
     suffix = f"_{segment}" if segment.startswith("ovl_") else ""
-    functions = [names_by_address.get(address, f"func_{address}{suffix}") for address in addresses]
+    functions = [
+        names_by_address.get(address, f"func_{address}{suffix}")
+        for address in addresses
+    ]
 
     backup_path = c_path + ".refresh_backup"
     shutil.copyfile(c_path, backup_path)

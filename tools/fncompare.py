@@ -28,17 +28,41 @@ from elftools.elf.relocation import RelocationSection
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KMC_DIR = os.path.join(ROOT, "tools", "gcc_kmc")
-CFLAGS = ["-G0", "-mips3", "-mgp32", "-mfp32", "-mno-abicalls", "-fno-PIC", "-ffast-math",
-          "-nostdinc", "-funsigned-char", "-w"]
+CFLAGS = [
+    "-G0",
+    "-mips3",
+    "-mgp32",
+    "-mfp32",
+    "-mno-abicalls",
+    "-fno-PIC",
+    "-ffast-math",
+    "-nostdinc",
+    "-funsigned-char",
+    "-w",
+]
 # Optimization levels by file or directory, as the Makefile sets them
 OPTFLAGS_BY_PATH = {os.path.join("src", "libkmc"): "-O1 -fno-fast-math"}
 DEFAULT_OPTFLAGS = os.environ.get("OPTFLAGS", "-O2")
-INCLUDES = ["-Iinclude", "-Iinclude/libc", "-Ilib/ultralib/include",
-            "-Ilib/ultralib/include/PR", "-Ilib/libmus/include", "-Isrc",
-            "-Ibuild"]
-DEFINES = ["-D_LANGUAGE_C", "-D_MIPS_SZLONG=32", "-D_MIPS_SZINT=32", "-DF3DEX_GBI_2",
-           "-DNDEBUG", "-D_FINALROM", "-DBUILD_VERSION=VERSION_J", "-D__IS_KMC__=1",
-           "-DNON_MATCHING"]
+INCLUDES = [
+    "-Iinclude",
+    "-Iinclude/libc",
+    "-Ilib/ultralib/include",
+    "-Ilib/ultralib/include/PR",
+    "-Ilib/libmus/include",
+    "-Isrc",
+    "-Ibuild",
+]
+DEFINES = [
+    "-D_LANGUAGE_C",
+    "-D_MIPS_SZLONG=32",
+    "-D_MIPS_SZINT=32",
+    "-DF3DEX_GBI_2",
+    "-DNDEBUG",
+    "-D_FINALROM",
+    "-DBUILD_VERSION=VERSION_J",
+    "-D__IS_KMC__=1",
+    "-DNON_MATCHING",
+]
 
 INSN_RE = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]+ ([0-9A-F]{8}) \*/\s+(.*)$")
 GLABEL_RE = re.compile(r"^glabel (\w+)")
@@ -119,9 +143,22 @@ def compile_functions(c_path, optflags=None):
         obj_path = os.path.join(tmp, "out.o")
         env = dict(os.environ, COMPILER_PATH=KMC_DIR)
         result = subprocess.run(
-            [os.path.join(KMC_DIR, "gcc"), "-c", *CFLAGS, *optflags, *INCLUDES, *DEFINES,
-             "-o", obj_path, c_path],
-            cwd=get_work_dir(), env=env, capture_output=True, text=True)
+            [
+                os.path.join(KMC_DIR, "gcc"),
+                "-c",
+                *CFLAGS,
+                *optflags,
+                *INCLUDES,
+                *DEFINES,
+                "-o",
+                obj_path,
+                c_path,
+            ],
+            cwd=get_work_dir(),
+            env=env,
+            capture_output=True,
+            text=True,
+        )
         if result.returncode != 0:
             return None, result.stderr
         with open(obj_path, "rb") as obj_file:
@@ -134,7 +171,7 @@ def read_object_functions(elf):
         if section.name == ".text":
             text_index = index
             text = section.data()
-    words = [int.from_bytes(text[i:i + 4], "big") for i in range(0, len(text), 4)]
+    words = [int.from_bytes(text[i : i + 4], "big") for i in range(0, len(text), 4)]
     for section in elf.iter_sections():
         if isinstance(section, RelocationSection) and section.name == ".rel.text":
             for reloc in section.iter_relocations():
@@ -149,7 +186,7 @@ def read_object_functions(elf):
             start = symbol["st_value"] // 4
             # GCC names a nested function NAME.N, after its label number
             name = symbol.name.split(".")[0]
-            functions[name] = words[start:start + symbol["st_size"] // 4]
+            functions[name] = words[start : start + symbol["st_size"] // 4]
     return functions
 
 
@@ -162,6 +199,7 @@ def score(target, compiled):
 
 def disassemble(word):
     import rabbitizer
+
     return rabbitizer.Instruction(word).disassemble()
 
 

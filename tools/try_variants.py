@@ -20,7 +20,9 @@ import fncompare
 
 
 def score_variant(source, c_dir, optflags, target, function):
-    with tempfile.NamedTemporaryFile("w", suffix=".c", dir=c_dir, delete=False) as variant:
+    with tempfile.NamedTemporaryFile(
+        "w", suffix=".c", dir=c_dir, delete=False
+    ) as variant:
         variant.write(source)
     try:
         compiled, error = fncompare.compile_functions(variant.name, optflags)
@@ -46,14 +48,25 @@ def main():
     optflags = fncompare.get_optflags(c_path)
 
     # Leave room for a permuter running alongside
-    with ProcessPoolExecutor(max_workers=int(os.environ.get("VARIANT_JOBS", 8))) as pool:
+    with ProcessPoolExecutor(
+        max_workers=int(os.environ.get("VARIANT_JOBS", 8))
+    ) as pool:
         results = []
         for block in blocks:
             old, new = block.split("\n----\n")
             if old not in source:
                 results.append(None)
             else:
-                results.append(pool.submit(score_variant, source.replace(old, new, 1), c_dir, optflags, target, function))
+                results.append(
+                    pool.submit(
+                        score_variant,
+                        source.replace(old, new, 1),
+                        c_dir,
+                        optflags,
+                        target,
+                        function,
+                    )
+                )
         for number, result in enumerate(results):
             print(f"{number}: {result.result() if result else 'text not found'}")
 

@@ -174,7 +174,9 @@ def decode(words):
     """Returns gfxdis's macros for a list of 32-bit words, or None."""
     text = [f"{word:08X}" for word in words]
     try:
-        result = subprocess.run([GFXDIS, "-p", "-w", *text], capture_output=True, text=True)
+        result = subprocess.run(
+            [GFXDIS, "-p", "-w", *text], capture_output=True, text=True
+        )
     except FileNotFoundError:
         return None
     return result.stdout.strip()

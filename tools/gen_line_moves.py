@@ -23,7 +23,7 @@ def main():
     for from_index, line in enumerate(lines):
         if not line.strip().endswith(";"):
             continue
-        rest = lines[:from_index] + lines[from_index + 1:]
+        rest = lines[:from_index] + lines[from_index + 1 :]
         for to_index in range(len(rest) + 1):
             if to_index == from_index:
                 continue

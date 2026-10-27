@@ -47,7 +47,15 @@ def find_opcode(text):
     """Returns the constant holding a command's opcode in a computed word."""
     for digits in HEX_RE.findall(text):
         value = int(digits, 16)
-        if value >= 0xC0000000 or (value >> 24) in (0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07):
+        if value >= 0xC0000000 or (value >> 24) in (
+            0x01,
+            0x02,
+            0x03,
+            0x04,
+            0x05,
+            0x06,
+            0x07,
+        ):
             return value & 0xFF000000 | value & 0x00FFFFFF
     return None
 
@@ -115,7 +123,9 @@ def decode_run(run):
     words = []
     for _, word0, word1, _ in run:
         words += [f"{word0:08X}", f"{word1:08X}"]
-    result = subprocess.run([GFXDIS, "-i", "-p", "-w", *words], capture_output=True, text=True)
+    result = subprocess.run(
+        [GFXDIS, "-i", "-p", "-w", *words], capture_output=True, text=True
+    )
     decoded = []
     for line in result.stdout.splitlines():
         match = OFFSET_RE.match(line)
@@ -128,8 +138,12 @@ def print_run(run):
     decoded = decode_run(run)
     for index, (start, text) in enumerate(decoded):
         end = decoded[index + 1][0] if index + 1 < len(decoded) else len(run) * 8
-        dynamic = [expr for command in run[start // 8:end // 8] for expr in command[3]]
-        if "TextureRectangle" in text and any(CLAMP_RE.search(expr) for expr in dynamic):
+        dynamic = [
+            expr for command in run[start // 8 : end // 8] for expr in command[3]
+        ]
+        if "TextureRectangle" in text and any(
+            CLAMP_RE.search(expr) for expr in dynamic
+        ):
             text = text.replace("gsSPTextureRectangle", "gsSPScisTextureRectangle")
         print(f"  {run[0][0] + start:#05x} {text}")
         for expr in dynamic:

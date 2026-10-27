@@ -34,8 +34,7 @@ CPP_FLAGS = [
     "-D_FINALROM",
     "-D_MIPS_SZLONG=32",
     "-D__USE_ISOC99",
-    "-DSCRIPT(test...)={}"
-    "-D__attribute__(test...)=",
+    "-DSCRIPT(test...)={}-D__attribute__(test...)=",
     "-D__asm__(test...)=",
     "-ffreestanding",
     "-DM2CTX",
@@ -44,6 +43,7 @@ CPP_FLAGS = [
     "-D_OS_HOST_H_",
     "-std=gnu89",
 ]
+
 
 def import_c_file(in_file, version: str) -> str:
     in_file = os.path.relpath(in_file, root_dir)
@@ -65,18 +65,24 @@ def import_c_file(in_file, version: str) -> str:
     cpp_command2 = ["gcc", "-E", "-P", "-undef", *CPP_FLAGS, in_file]
 
     with tempfile.NamedTemporaryFile(suffix=".c") as tmp:
-        stock_macros = subprocess.check_output(["gcc", "-E", "-P", "-undef", "-dM", tmp.name], cwd=root_dir, encoding="utf-8")
+        stock_macros = subprocess.check_output(
+            ["gcc", "-E", "-P", "-undef", "-dM", tmp.name],
+            cwd=root_dir,
+            encoding="utf-8",
+        )
 
     out_text = ""
     try:
         out_text += subprocess.check_output(cpp_command, cwd=root_dir, encoding="utf-8")
-        out_text += subprocess.check_output(cpp_command2, cwd=root_dir, encoding="utf-8")
+        out_text += subprocess.check_output(
+            cpp_command2, cwd=root_dir, encoding="utf-8"
+        )
     except subprocess.CalledProcessError:
         print(
             "Failed to preprocess input file, when running command:\n"
             + " ".join(cpp_command),
             file=sys.stderr,
-            )
+        )
         sys.exit(1)
 
     if not out_text:
@@ -87,6 +93,7 @@ def import_c_file(in_file, version: str) -> str:
         out_text = out_text.replace(line + "\n", "")
     return out_text
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="""Create a context file which can be used for m2c"""
@@ -95,7 +102,13 @@ def main():
         "c_file",
         help="""File from which to create context""",
     )
-    parser.add_argument("-v", "--version", help="Which version should be processed", default="us", choices=["us", "cn", "gw"])
+    parser.add_argument(
+        "-v",
+        "--version",
+        help="Which version should be processed",
+        default="us",
+        choices=["us", "cn", "gw"],
+    )
     args = parser.parse_args()
 
     output = import_c_file(args.c_file, args.version)

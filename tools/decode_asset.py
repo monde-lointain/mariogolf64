@@ -26,7 +26,7 @@ IMAGE_HEADER_SIZE = 8
 def read_asset(rom, asset_id):
     size, offset = struct.unpack_from(">iI", rom, ARCHIVE_START + asset_id * 8)
     start = ARCHIVE_START + offset
-    return rom[start:start + size]
+    return rom[start : start + size]
 
 
 def decode_runs(data, unit):
@@ -39,10 +39,10 @@ def decode_runs(data, unit):
         if count == 0:
             return bytes(out)
         if count > 0:
-            out += data[position:position + unit] * count
+            out += data[position : position + unit] * count
             position += unit
         else:
-            out += data[position:position + unit * -count]
+            out += data[position : position + unit * -count]
             position += unit * -count
 
 
@@ -57,8 +57,13 @@ def decode_asset(rom, asset_id):
 def rgba16(value):
     def channel(bits):
         return bits << 3 | bits >> 2
-    return (channel(value >> 11 & 31), channel(value >> 6 & 31), channel(value >> 1 & 31),
-            255 if value & 1 else 0)
+
+    return (
+        channel(value >> 11 & 31),
+        channel(value >> 6 & 31),
+        channel(value >> 1 & 31),
+        255 if value & 1 else 0,
+    )
 
 
 def texel_values(texels, bits, count):
@@ -76,7 +81,7 @@ def to_image(decoded, image_format):
     if image_format.startswith("ci"):
         colors = 16 if image_format == "ci4" else 256
         palette = [rgba16(v) for v in struct.unpack_from(f">{colors}H", body)]
-        values = texel_values(body[colors * 2:], int(image_format[2:]), count)
+        values = texel_values(body[colors * 2 :], int(image_format[2:]), count)
         pixels = [palette[v] for v in values]
     elif image_format == "rgba16":
         pixels = [rgba16(v) for v in texel_values(body, 16, count)]
@@ -84,7 +89,10 @@ def to_image(decoded, image_format):
         bits = int(image_format[2:])
         values = texel_values(body, bits, count)
         if bits == 4:
-            pixels = [((v >> 1) * 36, (v >> 1) * 36, (v >> 1) * 36, 255 * (v & 1)) for v in values]
+            pixels = [
+                ((v >> 1) * 36, (v >> 1) * 36, (v >> 1) * 36, 255 * (v & 1))
+                for v in values
+            ]
         elif bits == 8:
             pixels = [((v >> 4) * 17,) * 3 + ((v & 15) * 17,) for v in values]
         else:
@@ -104,8 +112,14 @@ def main():
         rom = rom_file.read()
     decoded = decode_asset(rom, asset_id)
     if len(sys.argv) < 4:
-        header = struct.unpack_from(">4H", decoded) if len(decoded) >= IMAGE_HEADER_SIZE else ()
-        print(f"asset {asset_id:#x}: {len(decoded):#x} bytes, header {[hex(v) for v in header]}")
+        header = (
+            struct.unpack_from(">4H", decoded)
+            if len(decoded) >= IMAGE_HEADER_SIZE
+            else ()
+        )
+        print(
+            f"asset {asset_id:#x}: {len(decoded):#x} bytes, header {[hex(v) for v in header]}"
+        )
         return
     to_image(decoded, sys.argv[2]).save(sys.argv[3])
 
