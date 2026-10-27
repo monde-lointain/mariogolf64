@@ -8,7 +8,14 @@
 #define COURSE_MENU_IMAGE_COUNT 7
 
 extern u16 D_800C2064[];
+extern s32 D_802300A8_ovl_01;
+extern s32 D_802300AC_ovl_01;
+extern void *D_8023A810_ovl_01;
 extern void **D_8023A820_ovl_01;
+extern void *D_8023A824_ovl_01;
+extern void *D_8023A828_ovl_01;
+extern void *D_8023A82C_ovl_01;
+extern void *D_8023A830_ovl_01;
 
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
@@ -27,7 +34,47 @@ void func_8020E010_ovl_01(void **buffers) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E0AC_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E26C_ovl_01);
+void func_8020E26C_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+
+    switch (bufferKind) {
+        /* The course menu keeps no buffer of kind 1 */
+        case 1:
+            break;
+        case 2:
+            D_8023A810_ovl_01 = buffer;
+            OpenEncodedAsset(0x8EA, &asset);
+            ReadEncodedAsset(D_8023A810_ovl_01, &asset);
+            break;
+        case 3:
+            D_8023A824_ovl_01 = buffer;
+            OpenEncodedAsset(0x521, &asset);
+            ReadEncodedAsset(D_8023A824_ovl_01, &asset);
+            break;
+        case 4:
+            D_8023A810_ovl_01 = buffer;
+            OpenEncodedAsset(0x663, &asset);
+            ReadEncodedAsset(D_8023A810_ovl_01, &asset);
+            break;
+        case 5:
+            D_8023A828_ovl_01 = buffer;
+            OpenEncodedAsset(0x5A5, &asset);
+            ReadEncodedAsset(D_8023A828_ovl_01, &asset);
+            break;
+        case 6:
+            D_8023A82C_ovl_01 = buffer;
+            OpenEncodedAsset(0x689, &asset);
+            ReadEncodedAsset(D_8023A82C_ovl_01, &asset);
+            break;
+        case 7:
+            D_8023A830_ovl_01 = buffer;
+            OpenEncodedAsset(0x720, &asset);
+            ReadEncodedAsset(D_8023A830_ovl_01, &asset);
+            D_802300A8_ovl_01 = 0;
+            D_802300AC_ovl_01 = 0;
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E390_ovl_01);
 

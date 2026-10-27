@@ -1,4 +1,5 @@
 #include "common.h"
+#include "asset.h"
 #include "character.h"
 #include "menu.h"
 #include "menu_memory.h"
@@ -7,7 +8,19 @@
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
 
+/* The buffer that func_8020B2C4 keeps without reading an image into it */
+#define CHARACTER_SELECT_UNREAD_KIND 10
+
 extern s32 D_801B7070;
+extern u8 D_8022FF01_ovl_01;
+extern s32 D_8022FF2C_ovl_01[];
+extern void *D_8023A568_ovl_01;
+extern void *D_8023A570_ovl_01;
+extern void *D_8023A574_ovl_01;
+extern void *D_8023A578_ovl_01;
+extern void *D_8023A57C_ovl_01;
+extern void *D_8023A580_ovl_01;
+extern void *D_8023A584_ovl_01;
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
 
@@ -35,7 +48,43 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209BE0_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209D50_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B2C4_ovl_01);
+void func_8020B2C4_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+    void *image = buffer;
+
+    switch (bufferKind) {
+        case 1:
+            D_8023A570_ovl_01 = buffer;
+            break;
+        case 2:
+            D_8023A568_ovl_01 = buffer;
+            break;
+        case 5:
+            D_8023A574_ovl_01 = buffer;
+            break;
+        case 6:
+            D_8023A57C_ovl_01 = buffer;
+            break;
+        case 7:
+            D_8023A580_ovl_01 = buffer;
+            break;
+        case 8:
+            D_8023A584_ovl_01 = buffer;
+            break;
+        case CHARACTER_SELECT_UNREAD_KIND:
+            D_8023A578_ovl_01 = buffer;
+            break;
+        default:
+            D_8023A570_ovl_01 = buffer;
+            bufferKind = CHARACTER_SELECT_UNREAD_KIND;
+            break;
+    }
+    if (bufferKind != CHARACTER_SELECT_UNREAD_KIND) {
+        OpenEncodedAsset(D_8022FF2C_ovl_01[bufferKind], &asset);
+        ReadEncodedAsset(image, &asset);
+    }
+    D_8022FF01_ovl_01 = FALSE;
+}
 
 void func_8020B3CC_ovl_01(void) {
     MenuMemory *memory = func_8005AF74();
