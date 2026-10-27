@@ -584,10 +584,7 @@ extern SkyColors *sEditedSkyColors;
  * colors and g_DebugFog, shows them in a table, and returns TRUE. The D-pad
  * or C buttons move the cursor, and holding A or B raises or lowers the value
  * under it.
- *
- * Doesn't match: one sum of two colors adds its registers in the other order.
  */
-#ifdef NON_MATCHING
 s32 UpdateSkyEditor(void) {
     EncodedAsset asset;
     s32 isImageChanged;
@@ -744,7 +741,7 @@ s32 UpdateSkyEditor(void) {
             sSkyVertices[index][2].v.cn[channel] = sEditedSkyColors->unk7[channel];
             sSkyVertices[index][3].v.cn[channel] = sEditedSkyColors->unk4[channel];
             sSkyVertices[index][4].v.cn[channel] = sEditedSkyColors->unk4[channel];
-            innerMix = (sEditedSkyColors->unk4[channel] + sEditedSkyColors->unk7[channel]) * 0.5f;
+            innerMix = (u16)(sEditedSkyColors->unk4[channel] + sEditedSkyColors->unk7[channel]) * 0.5f;
             outerMix = (sEditedSkyColors->unk4[channel] + SKY_HORIZON_LEVEL) * 0.5f;
             innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
             sSkyVertices[index][5].v.cn[channel] = outerMix;
@@ -824,9 +821,6 @@ s32 UpdateSkyEditor(void) {
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     return TRUE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/hole_display", UpdateSkyEditor);
-#endif
 
 /* UpdateSky's limits and scales */
 #define SKY_PITCH_LIMIT 1.5f
