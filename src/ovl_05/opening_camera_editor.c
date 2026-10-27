@@ -10,6 +10,13 @@ typedef struct EditedCamera {
 } EditedCamera;
 
 extern EditedCamera D_8022BE30_ovl_05;
+extern f32 D_8022BEB0_ovl_05;
+extern f32 D_8022BEB4_ovl_05;
+extern f32 D_8022BEB8_ovl_05;
+extern f32 D_8022BEBC_ovl_05;
+extern f32 D_8022BEC0_ovl_05;
+extern f32 D_8022BEC4_ovl_05;
+extern s32 D_8022BEDC_ovl_05[2];
 
 void func_80203620_ovl_05(void);
 
@@ -27,11 +34,20 @@ void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035BC_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035E4_ovl_05);
+void func_802035E4_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+    D_8022BEB0_ovl_05 = arg1;
+    D_8022BEB4_ovl_05 = arg2;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035F8_ovl_05);
+void func_802035F8_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+    D_8022BEB8_ovl_05 = arg1;
+    D_8022BEBC_ovl_05 = arg2;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020360C_ovl_05);
+void func_8020360C_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+    D_8022BEC0_ovl_05 = arg1;
+    D_8022BEC4_ovl_05 = arg2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203620_ovl_05);
 
@@ -45,9 +61,19 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203B60_ovl_0
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203C90_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203DC4_ovl_05);
+s32 func_80203DC4_ovl_05(void) {
+    if (D_8022BEDC_ovl_05[0] == 0 && D_8022BEDC_ovl_05[1] == 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203DE8_ovl_05);
+s32 func_80203DE8_ovl_05(s32 mask) {
+    if (!(D_8022BEDC_ovl_05[0] & mask) && !(D_8022BEDC_ovl_05[1] & mask)) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203E14_ovl_05);
 
