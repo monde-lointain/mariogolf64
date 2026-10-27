@@ -577,6 +577,8 @@ segments:
       - [0x11BA50, c, hole_editor/hole_editor]
       - [0x127FD0, data]
       - [0x128250, .rodata, hole_editor/hole_editor]
+      # The original assembler padded the rodata to 16 bytes; ours does not
+      - [0x128578, rodata]
 
   - name: ovl_02
     type: code
