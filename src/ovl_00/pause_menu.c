@@ -364,9 +364,6 @@ extern f32 sPauseCursorAngle;
 /* The tee holds the ball up off the ground */
 #define PAUSE_TEE_UP_HEIGHT 307.2f
 
-extern s32 g_TeePositionX; /* D_800BA9D8.teePosition's x, under its own symbol */
-extern s32 g_TeePositionZ;
-
 /*
  * Takes the player's input on the pause menu. It returns the chosen option's
  * action, or PAUSE_ACTION_NONE. The weather, wind and lie options are changed
