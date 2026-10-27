@@ -145,7 +145,7 @@ extern s8 sTagOffsetsY[CORNER_COUNT];
 extern f32 sOutOfBoundsPulseAngle;
 extern s32 sPinFlagWaveFrame;
 extern s32 D_800C3084;
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 extern s32 D_800C307C; /* Frames, up to PIN_FLAG_HIDE_FRAME, since the shot was set up */
 
 void DrawShotLabels(Gfx **displayListHead);
@@ -450,7 +450,7 @@ void DrawAimGuides(CameraMatrices *matrices) {
     club = GetSelectedClub();
     outOfBoundsGreen = sinf(sOutOfBoundsPulseAngle) * OUT_OF_BOUNDS_GREEN_SWING;
     surfaceKind = GetSurfaceInfoAt(g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])->kind;
-    if (D_800BE69C != 0) {
+    if (g_IsCupViewShown != 0) {
         return;
     }
     gDPPipeSync(g_DisplayListHead++);

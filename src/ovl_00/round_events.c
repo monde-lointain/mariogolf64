@@ -95,7 +95,7 @@ extern BannerLetter sBannerLetters[];
 extern BannerLayout sBannerLayouts[];
 extern s32 sIsMovieBufferAllocated;
 extern u8 *sMovieBuffer;
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 /* The contact effect's quad spans from vertex 0 to vertex 1 */
 extern Vtx sContactVertices[2];
 extern s32 sIsContactEffectFading;
@@ -2120,7 +2120,7 @@ void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices) {
     } else if (g_ContactEffect < CONTACT_AGE_MAX) {
         g_ContactEffect++;
     }
-    if (D_800BE69C == 1) {
+    if (g_IsCupViewShown == 1) {
         return;
     }
     if (sContactStyle == CONTACT_STYLE_WARIO || sContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {

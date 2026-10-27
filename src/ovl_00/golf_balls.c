@@ -67,7 +67,7 @@ typedef struct BallAfterimage {
 } BallAfterimage; /* size = 0x14 */
 
 /* Set while the camera shows the cup up close, at twice the distance from it */
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 
 /* g_GameState.unk20, under a symbol of its own */
 extern s32 D_801B60A8;
@@ -235,7 +235,7 @@ void UpdateGolfBalls(void) {
             simulation = &g_BallSimulations[i];
             ball->isInCup = FALSE;
             if (simulation->playerIndex >= 0 && g_Players[currentIndex].unk26 == 0) {
-                if (D_800BE69C == TRUE) {
+                if (g_IsCupViewShown == TRUE) {
                     ball->position[0] = (simulation->position[0] - (f32)(D_800BA9D8.cupPosition[0] - simulation->position[0])) * COURSE_TO_WORLD_SCALE;
                     ball->position[1] = (simulation->position[1] - (f32)(D_800BA9D8.cupPosition[1] - simulation->position[1])) * COURSE_TO_WORLD_SCALE;
                     ball->position[2] = (simulation->position[2] - (f32)(D_800BA9D8.cupPosition[2] - simulation->position[2])) * COURSE_TO_WORLD_SCALE;
@@ -279,7 +279,7 @@ void UpdateGolfBalls(void) {
         }
     }
     if (sIsBallAfterimageShown == TRUE) {
-        if (D_800BE69C == TRUE) {
+        if (g_IsCupViewShown == TRUE) {
             if (!sIsBallAfterimageZoomed) {
                 sIsBallAfterimageZoomed = TRUE;
                 for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength; i++, afterimage++) {

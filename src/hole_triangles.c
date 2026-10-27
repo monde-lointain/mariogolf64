@@ -71,7 +71,7 @@ extern Lights1 sRingLights;
 extern Mtx sRingSpinMatrices[2];
 extern Vtx sRingVertices[RING_VERTEX_COUNT];
 extern Mtx sRingMatrices[];
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 extern u8 *g_BlendedTextureScrollingLayer;
 extern u8 *g_BlendedTextureStillLayer;
 
@@ -170,7 +170,7 @@ void DrawHoleTriangles(Gfx **displayListHead, CameraMatrices *matrices, Camera *
                 gSP1Triangle(gfx++, 0, 1, 2, 0);
                 break;
             case HOLE_TRIANGLE_KIND_SHADED:
-                if (D_800BE69C != 0) {
+                if (g_IsCupViewShown != 0) {
                     break;
                 }
                 edgeY = 0.0f;

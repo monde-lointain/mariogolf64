@@ -55,7 +55,7 @@
 /* Image buffers shared with the menus */
 extern u8 *D_801B5CD0[];
 /* The panel image buffer that is shown */
-extern u8 *D_801321FC;
+extern u8 *g_ClubPanelImage;
 
 /* The shot mode last shown in the name, and the one that the panel last finished changing to */
 extern u8 sShownShotMode;
@@ -163,7 +163,7 @@ void UpdateClubPanelImages(void) {
             }
         }
         ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex], &panelAsset);
-        D_801321FC = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex];
+        g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex];
     }
     if (sShownShotMode != g_CurrentShot.shotMode) {
         sShownShotMode = g_CurrentShot.shotMode;
@@ -236,7 +236,7 @@ void UpdateClubPanelImages(void) {
         }
         ReadEncodedAsset(D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex], &frameAsset);
         sShotModeChangeFrame++;
-        D_801321FC = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex];
+        g_ClubPanelImage = D_801B5CD0[CLUB_PANEL_BUFFER_SLOT + sPanelBufferIndex];
         if (sShotModeChangeFrame == SHOT_MODE_CHANGE_FRAME_COUNT) {
             sShotModeChangeFrame = 0;
             sPanelShotMode = g_CurrentShot.shotMode;

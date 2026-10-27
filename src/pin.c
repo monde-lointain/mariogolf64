@@ -128,7 +128,7 @@ extern Vtx sPinVertices[PIN_VERTEX_COUNT];
 extern Vtx sLargePinVertices[PIN_VERTEX_COUNT];
 extern f32 sFlagWavePhase;
 extern s32 g_CupViewDepth;
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 
 
 /*
@@ -325,7 +325,7 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
         shadowTranslation[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
         shadowTranslation[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
         shadowTranslation[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-        if (D_800BE69C == 1) {
+        if (g_IsCupViewShown == 1) {
             shadowScale[AXIS_X] = LARGE_PIN_SHADOW_SCALE;
             shadowScale[AXIS_Y] = LARGE_PIN_SHADOW_SCALE;
             shadowScale[AXIS_Z] = LARGE_PIN_SHADOW_SCALE;
@@ -364,13 +364,13 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
                  D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
                  (D_800BA9D8.cupPosition[AXIS_Z] - footOffsetZ) * COURSE_TO_WORLD_SCALE, &stickFoot);
     g_CupViewDepth = cupDepth;
-    if (D_800BE69C == 1) {
+    if (g_IsCupViewShown == 1) {
         g_PinVertexScale = LARGE_PIN_VERTEX_SCALE;
     } else {
         g_PinVertexScale = PIN_VERTEX_SCALE;
     }
     if (cupDepth < 0) {
-        if (D_800BE69C == 1) {
+        if (g_IsCupViewShown == 1) {
             primDepth = LARGE_CUP_PRIM_DEPTH;
         } else {
             primDepth = cup.depth - cup.depthStep * (f64)(g_PinVertexScale * CUP_DEPTH_HEIGHT) + CUP_DEPTH_OFFSET -
@@ -398,7 +398,7 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
         gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x01);
         gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sPinMatrices[cameraIndex][g_DrawBufferIndex]),
                   G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        if (D_800BE69C == 1) {
+        if (g_IsCupViewShown == 1) {
             gSPVertex(g_DisplayListHead++, sLargePinVertices, PIN_VERTEX_COUNT, 0);
         } else {
             gSPVertex(g_DisplayListHead++, sPinVertices, PIN_VERTEX_COUNT, 0);
@@ -449,14 +449,14 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
         gDPPipeSync(g_DisplayListHead++);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
-        if (D_800BE69C == 1) {
+        if (g_IsCupViewShown == 1) {
             primDepth = LARGE_CUP_WALL_PRIM_DEPTH;
         } else {
             primDepth = cup.depth - cup.depthStep * (CUP_WALL_DEPTH_HEIGHT * g_PinVertexScale) +
                         CUP_WALL_DEPTH_OFFSET - PART_DEPTH_BIAS;
             primDepth &= PRIM_DEPTH_MASK;
         }
-        if (D_800BE69C == 1) {
+        if (g_IsCupViewShown == 1) {
             gDPSetPrimDepth(g_DisplayListHead++, primDepth, 0);
             gDPSetCombineLERP(g_DisplayListHead++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0,
                               1);
@@ -499,7 +499,7 @@ void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex) {
                                 (((top.x * SCREEN_SUBPIXEL_COUNT) + SCREEN_FLAGSTICK_HALF_WIDTH) << 16) +
                                     top.y * SCREEN_SUBPIXEL_COUNT);
             }
-            if (D_800BE69C == 1) {
+            if (g_IsCupViewShown == 1) {
                 primDepth = LARGE_FLAGSTICK_PRIM_DEPTH;
             } else if (cupDepth < SMALL_CUP_DEPTH) {
                 primDepth = cup.depth;

@@ -319,7 +319,7 @@ extern Mtx sLandingPanelMatrices[MATRIX_BUFFER_COUNT];
 /* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8
 
-extern void *D_800E2160;
+extern void *sDistanceFont;
 extern s32 D_800E21BC;
 
 /* The black bars that grow over the top and bottom of the HUD's area */
@@ -387,11 +387,11 @@ extern void *sAnimatedIconImages[];
 extern void *sAnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
 
 extern void *sWindSpeedFont;
-extern void *D_800E2168;
-extern void *D_800E216C;
-extern void *D_800E2170;
-extern void *D_800E2174;
-extern void *D_800E217C;
+extern void *sRingImages;
+extern void *sRestLabelImage;
+extern void *sFlatLabelImage;
+extern void *sDownLabelImage;
+extern void *sUpLabelImage;
 extern void *D_800E2178;
 
 /*
@@ -462,7 +462,7 @@ extern s8 D_801B60B9;
 /* The colors of each course's name, which gradients from the first to the second */
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
-/* "%02d:%02d:%02d", which func_80089094 also uses */
+/* "%02d:%02d:%02d", which DrawRoundHud also uses */
 extern char D_800D1C84[];
 
 s32 func_80242418(void);
@@ -681,16 +681,16 @@ void LoadSceneryImages(void) {
     ReadEncodedAsset(sShotOffsetMarkerImage, &asset);
     sWindSpeedFont = AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
     ReadEncodedAsset(sWindSpeedFont, &asset);
-    D_800E2168 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
-    ReadEncodedAsset(D_800E2168, &asset);
-    D_800E216C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
-    ReadEncodedAsset(D_800E216C, &asset);
-    D_800E2170 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56B, &asset));
-    ReadEncodedAsset(D_800E2170, &asset);
-    D_800E2174 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56A, &asset));
-    ReadEncodedAsset(D_800E2174, &asset);
-    D_800E217C = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
-    ReadEncodedAsset(D_800E217C, &asset);
+    sRingImages = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
+    ReadEncodedAsset(sRingImages, &asset);
+    sRestLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
+    ReadEncodedAsset(sRestLabelImage, &asset);
+    sFlatLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56B, &asset));
+    ReadEncodedAsset(sFlatLabelImage, &asset);
+    sDownLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56A, &asset));
+    ReadEncodedAsset(sDownLabelImage, &asset);
+    sUpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
+    ReadEncodedAsset(sUpLabelImage, &asset);
     D_800E2178 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
     ReadEncodedAsset(D_800E2178, &asset);
     g_DistanceSignImage = AllocMemory(OpenEncodedAsset(ASSET_DISTANCE_SIGN_IMAGE, &asset));
@@ -724,11 +724,11 @@ void FreeSceneryImages(void) {
         FreeMemory(&sAnimatedIconLabelImages[2]);
         FreeMemory(&sShotOffsetMarkerImage);
         FreeMemory(&sWindSpeedFont);
-        FreeMemory(&D_800E2168);
-        FreeMemory(&D_800E216C);
-        FreeMemory(&D_800E2170);
-        FreeMemory(&D_800E2174);
-        FreeMemory(&D_800E217C);
+        FreeMemory(&sRingImages);
+        FreeMemory(&sRestLabelImage);
+        FreeMemory(&sFlatLabelImage);
+        FreeMemory(&sDownLabelImage);
+        FreeMemory(&sUpLabelImage);
         FreeMemory(&D_800E2178);
         FreeMemory(&g_DistanceSignImage);
         FreeBursts();
@@ -867,8 +867,8 @@ void LoadRoundHud(void) {
     ReadEncodedAsset(sHoleImage, &asset);
     sParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
     ReadEncodedAsset(sParImage, &asset);
-    D_800E2160 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
-    ReadEncodedAsset(D_800E2160, &asset);
+    sDistanceFont = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
+    ReadEncodedAsset(sDistanceFont, &asset);
     g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
     BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE, RING_TEXTURE_OUTER_RADIUS);
     for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
@@ -1230,7 +1230,7 @@ typedef struct GridScreenPoint {
 } GridScreenPoint; /* size = 0x10 */
 
 extern s32 D_800BB0E8;
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 /* The quad that each segment of the ball trail, and of the green grid, moves into place on the screen */
 extern Vtx sBallTrailVertices[4];
 extern s32 sGreenGridAlpha;
@@ -1322,7 +1322,7 @@ void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
     f32 dy;
     f32 scale;
 
-    if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN || D_800BE69C == 1 || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
+    if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN || g_IsCupViewShown == 1 || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
         (g_GameState.unk0 != GAME_STATE_UNK6 && g_GameState.unk0 != GAME_STATE_UNK11)) {
         return;
     }
@@ -1699,7 +1699,7 @@ void DrawBallTrail(Gfx **displayListHead, CameraMatrices *matrices) {
                 g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE - g_PinVertexScale * BALL_TRAIL_DROP;
             sBallTrail[sBallTrailHead][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
         }
-        if (D_800BE69C != 1) {
+        if (g_IsCupViewShown != 1) {
             /* Projects the trail from its newest position back */
             index = sBallTrailHead;
             for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
@@ -2060,17 +2060,17 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
             }
         }
     } else if (g_HoleConditions.windSpeed != 0 && g_RoundHud.isWindIndicatorShown &&
-               GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && D_800BE69C == 0) {
+               GetSurfaceInfo(g_CurrentShot.surface)->kind != SURFACE_KIND_GREEN && g_IsCupViewShown == 0) {
         DrawWindIndicator(&gfx, sShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X, SHOT_PANEL_WIND_INDICATOR_Y);
     }
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(gfx++);
     gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH | G_CULL_BACK);
-    if (D_800BE69C == 0 && g_IsModuleAlive[MODULE_UNK25]) {
+    if (g_IsCupViewShown == 0 && g_IsModuleAlive[MODULE_UNK25]) {
         DrawClubPanelIfShown(&gfx);
     }
-    if (g_RoundHud.isClubHeadIconShown && D_800BE69C == 0) {
+    if (g_RoundHud.isClubHeadIconShown && g_IsCupViewShown == 0) {
         club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
         if (club->headImageAsset != sClubHeadImageAsset) {
             EncodedAsset asset;
@@ -2118,7 +2118,7 @@ void DrawShotPanelIcons(Gfx **displayListHead) {
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
     }
-    if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) && D_800BE69C == 0) {
+    if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) && g_IsCupViewShown == 0) {
         lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
         if (lieAngle > M_PI) {
             lieAngle -= 2 * M_PI;
@@ -2874,7 +2874,7 @@ void DrawColorTest(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80089094);
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawRoundHud);
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C84);
 

@@ -172,7 +172,7 @@ static const char sUnusedFloatFormat[] = "            %f";
 #define CUP_PASS_MAX_LANDING_DISTANCE 0x4B000
 
 extern s32 D_800BE698;
-extern s32 D_800BE69C;
+extern s32 g_IsCupViewShown;
 extern s32 D_800C5AAC;
 extern s32 D_800BE640;
 extern s32 D_800BE644;
@@ -410,7 +410,7 @@ s32 NextCameraPick(s32 isDealing) {
  */
 void EndFlightCamera(void) {
     D_800BE698 = 1;
-    D_800BE69C = 0;
+    g_IsCupViewShown = 0;
     sCupViewHoldCount = 0;
     D_800C5AAC = 0;
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
@@ -986,10 +986,10 @@ void PlayFlightSounds(s32 step) {
         if (g_BallFlightStep == g_SimulatedShot.stepCount && !shownRingCount && g_SimulatedShot.unk2E10) {
             *isPlayed = TRUE;
             if (IsGameFlagSet(GAME_FLAG_UNK48)) {
-                if (D_800BE69C == 1 && (scoreToPar >= -2 && scoreToPar <= 1) && !IsPinInCup()) {
+                if (g_IsCupViewShown == 1 && (scoreToPar >= -2 && scoreToPar <= 1) && !IsPinInCup()) {
                     StartMovie(MOVIE_GOOMBA);
                 }
-            } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() && D_800BE69C == 1) {
+            } else if (scoreToPar >= -2 && scoreToPar <= 0 && !IsPinInCup() && g_IsCupViewShown == 1) {
                 if (g_SimulatedShot.shot.shotMode == SHOT_MODE_NORMAL) {
                     StartMovie(MOVIE_MONTY_MOLE);
                 } else if (g_SimulatedShot.shot.shotMode == SHOT_MODE_POWER) {
@@ -2554,7 +2554,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         sFlightCameraKind = FLIGHT_CAMERA_AROUND_END;
     }
     if (D_800BE64C < step && (g_BallFlightStep + 40 < g_SimulatedShot.stepCount || D_800DAF50 == 7)
-        && D_800BE630 == TRUE && !D_800BE69C && !D_800BE658) {
+        && D_800BE630 == TRUE && !g_IsCupViewShown && !D_800BE658) {
         if (!D_800BE674) {
             ChooseFlightCameraKind();
         }
@@ -2614,7 +2614,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
     g_Cameras[0].view.fieldOfView = DEFAULT_FIELD_OF_VIEW;
     PlaceFlightCamera(step);
     D_800BE698 = TRUE;
-    D_800BE69C = FALSE;
+    g_IsCupViewShown = FALSE;
     if (g_SimulatedShot.unk2E0C) {
         if (g_IsModuleAlive[MODULE_UNK1] || ReportModuleNotAlive(MODULE_UNK1)) {
             StartFastBallAfterimage();
@@ -2658,7 +2658,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         } else if (IsCupPassPoint(sBallCupGroundDistance, sFlightBallPosition[AXIS_Y]) || sCupViewHoldCount > 0) {
             g_Cameras[0].view.fieldOfView = CUP_VIEW_FIELD_OF_VIEW;
             StartHudAnimation(HUD_ANIMATION_NONE);
-            D_800BE69C = TRUE;
+            g_IsCupViewShown = TRUE;
             D_800BE698 = FALSE;
             D_800BE658 &= ~2;
             if (sCupViewHoldCount == 0) {
@@ -2693,7 +2693,7 @@ s32 UpdateFlightCamera(s32 isAdvancing, s32 buttons) {
         g_Cameras[0].view.lookAt[AXIS_Y] = sLookAtPoint[AXIS_Y];
         g_Cameras[0].view.lookAt[AXIS_Z] = sLookAtPoint[AXIS_Z];
     }
-    if (!D_800BE69C) {
+    if (!g_IsCupViewShown) {
         AimCameraYaw();
     }
     g_Cameras[INSET_CAMERA].view.eye[AXIS_X] =

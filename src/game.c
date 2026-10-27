@@ -920,7 +920,7 @@ void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawShotEffect(Gfx **displayListHead);
-void func_80089094(CameraView *view);
+void DrawRoundHud(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
 void DrawBackdrop(Gfx **displayListHead, CameraView *view, s32 cameraIndex);
 void func_801F4AD8(Gfx **displayListHead);
@@ -1642,7 +1642,7 @@ s32 DrawGame(void) {
             DrawPauseMenu(&g_DisplayListHead);
         }
         if (g_HasLoaderFinished == 1 && !IsGameFlagSet(0x13) && !IsGameFlagSet(0x2D)) {
-            func_80089094(&g_Cameras[0].view);
+            DrawRoundHud(&g_Cameras[0].view);
         }
         if (g_IsModuleAlive[17]) {
             DrawMovie(&g_DisplayListHead);
