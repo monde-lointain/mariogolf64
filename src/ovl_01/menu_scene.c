@@ -1,8 +1,17 @@
 #include "common.h"
+#include "asset.h"
+
+extern void *D_8023AA44_ovl_01;
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213390_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_8021342C_ovl_01);
+void func_8021342C_ovl_01(void *buffer) {
+    EncodedAsset asset;
+
+    D_8023AA44_ovl_01 = buffer;
+    OpenEncodedAsset(0x8E9, &asset);
+    ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213464_ovl_01);
 
