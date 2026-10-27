@@ -5,6 +5,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "heap.h"
+#include "hole_builder.h"
 #include "hole_loader.h"
 #include "host_file.h"
 #include "libc.h"
@@ -212,7 +213,6 @@ extern s32 sLastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
 
 extern s8 D_800C30D1;
 
-f32 MeasureGroundTiles(void);
 s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
 void func_80404850_hole_editor(void);
 
@@ -223,9 +223,6 @@ extern s32 sHoleFileHoleNumber; /* From 1 */
 extern s32 sHoleFileCourseNumber; /* From 1 */
 extern s32 sHoleFilePromptFrames;
 
-void BuildHole(s32 course, s32 hole);
-void SaveHoleFiles(s32 course, s32 hole);
-void ToggleGroundTileBorders(void);
 extern s32 sMapCaptureNumber;
 extern u8 sMapCaptureHeader[CAPTURE_HEADER_SIZE];
 extern u8 sScreenCaptureHeader[CAPTURE_HEADER_SIZE];

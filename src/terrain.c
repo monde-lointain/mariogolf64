@@ -9,6 +9,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_builder.h"
 #include "libc.h"
 #include "round_hud.h"
 #include "scene.h"
@@ -90,7 +91,6 @@ void ChooseConditionsAndInitHole(void);
 void func_8024F7B0(void);
 void func_8024FF14(void);
 void func_80253234(s32);
-void ToggleGroundTileBorders(void);
 void func_8040000C(void);
 void func_804002C0(void);
 void func_80400FBC(void);
@@ -101,7 +101,6 @@ void func_80404B84(void);
 void func_80406818(void);
 void func_80406C3C(void);
 
-void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
 void InitGridVertex(s32 column, s32 row, s32 height, u8 shade);
 void SetGridVertexHeight(s32 column, s32 row, s32 height);
 void SetGridVertex(s32 column, s32 row, Vtx_t *point);

@@ -5,6 +5,7 @@
 #include "debug_text.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_builder.h"
 #include "hole_loader.h"
 #include "hole_triangles.h"
 #include "host_file.h"
@@ -81,13 +82,6 @@
 /* The table of hole asset ids has a row for each course and then some */
 #define HOLE_ASSET_COURSE_COUNT 9
 
-/* A column and row offset from a point, with its distance */
-typedef struct GridOffset {
-    /* 0x0 */ s8 column;
-    /* 0x1 */ s8 row;
-    /* 0x2 */ u16 distance;
-} GridOffset; /* size = 0x4 */
-
 /*
  * Paints a map texel of a code, given the nearest other code and its
  * distance. It returns the color, shifted by PAINTED_COLOR_SHIFT, with the
@@ -113,8 +107,6 @@ typedef struct PaintLogic {
 
 /* The largest span ListOffsetsByDistance handles */
 #define MAX_OFFSET_SPAN GROUND_POINT_ROW_COUNT
-/* The units per grid step of the distances that ListOffsetsByDistance lists */
-#define OFFSET_DISTANCE_SCALE 256
 /* Marks an offset that ListOffsetsByDistance has already listed */
 #define LISTED_DISTANCE 0xFFFF
 /* Farther than any distance ListOffsetsByDistance computes */

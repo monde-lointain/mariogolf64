@@ -6,6 +6,7 @@
 #include "current_shot.h"
 #include "functions.h"
 #include "game_flags.h"
+#include "hole_builder.h"
 #include "hole_loader.h"
 #include "libc.h"
 #include "overlay_manager.h"
@@ -139,11 +140,8 @@ extern Unk800BA9D8 D_800FEDD8;
 void func_8005F1C8(void);
 void PlacePlayersOnTee(void);
 void func_80253234(s32);
-void ToggleGroundTileBorders(void);
-void BuildHole(s32 courseRecordIndex, s32 holeRecordIndex);
 void BuildGroundDisplayLists(void);
 void ShrinkMiniGolfHolePoints(void);
-f32 MeasureGroundTiles(void);
 s32 ChooseHoleConditions(void);
 
 /*
