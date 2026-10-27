@@ -1621,7 +1621,7 @@ g_Clubs = 0x800BB258; // size:0x3330
 sNoClub = 0x800BE588; // size:0x34
 sClubTestShot = 0x800BE5BC; // size:0x20
 sUnk14Values = 0x800BE5DC; // size:0x9
-sStockUnk30Values = 0x800BE5E8; // size:0x12
+sStockCurves = 0x800BE5E8; // size:0x12
 sPutterTestShot = 0x800BE5FC; // size:0x20
 sClubChoiceDelay = 0x800BE61C; // size:0x4
 

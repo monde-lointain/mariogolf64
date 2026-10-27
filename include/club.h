@@ -75,7 +75,7 @@ typedef struct Club {
     /* 0x26 */ s16 unk26;
     /* 0x28 */ s16 deflection[SHOT_MODE_COUNT]; /* 0x1000 less the test shot's landing direction */
     /* 0x2E */ u16 headImageAsset; /* The image of the club's head that the HUD shows */
-    /* 0x30 */ s8 unk30;
+    /* 0x30 */ s8 curve; /* From -4, the strongest fade, to 4, the strongest draw */
     /* 0x31 */ u8 unk31[3];
 } Club; /* size = 0x34 */
 

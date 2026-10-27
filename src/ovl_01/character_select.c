@@ -779,7 +779,7 @@ void func_8020D734_ovl_01(Gfx **displayListHead) {
 
 void func_8020DB30_ovl_01(Gfx **displayListHead, s32 clubSet) {
     Gfx *gfx = *displayListHead;
-    s32 curve = g_Clubs[clubSet * CLUB_SET_SIZE].unk30;
+    s32 curve = g_Clubs[clubSet * CLUB_SET_SIZE].curve;
     s32 firstCell;
     s32 cellIndex;
     s32 endCell;
@@ -828,9 +828,9 @@ void func_8020DB30_ovl_01(Gfx **displayListHead, s32 clubSet) {
     LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, CURVE_LABEL_WIDTH,
                            CURVE_LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-    if (g_Clubs[clubSet * CLUB_SET_SIZE].unk30 > 0) {
+    if (g_Clubs[clubSet * CLUB_SET_SIZE].curve > 0) {
         labelRow = CURVE_LABEL_DRAW;
-    } else if (g_Clubs[clubSet * CLUB_SET_SIZE].unk30 < 0) {
+    } else if (g_Clubs[clubSet * CLUB_SET_SIZE].curve < 0) {
         labelRow = CURVE_LABEL_FADE;
     } else {
         labelRow = CURVE_LABEL_STRAIGHT;

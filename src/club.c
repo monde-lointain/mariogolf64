@@ -72,7 +72,7 @@ typedef struct ClubStats {
 typedef struct ClubSetStats {
     /* 0x00 */ u8 unk0[0x1C];
     /* 0x1C */ s8 pitch; /* In degrees, added to each club's */
-    /* 0x1D */ s8 unk1D;
+    /* 0x1D */ s8 curve; /* Positive draws, negative fades */
     /* 0x1E */ s8 unk1E;
     /* 0x1F */ s8 unk1F;
     /* 0x20 */ u8 unk20[0x3C - 0x20];
@@ -91,7 +91,7 @@ extern s32 sPutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT];
 extern Club sNoClub;
 extern Unk20 sClubTestShot;
 extern u8 sUnk14Values[9];
-extern s8 sStockUnk30Values[CLUB_SET_COUNT];
+extern s8 sStockCurves[CLUB_SET_COUNT];
 extern Unk20 sPutterTestShot;
 extern s32 sClubChoiceDelay;
 extern s8 g_IsMiniGolf;
@@ -614,12 +614,12 @@ void GenerateClubSet(s32 setIndex, ClubSetStats *stats) {
             club->unk14 = sUnk14Values[stats->unk1E + 4];
         }
         club->unk0 = 110 - stats->unk1F * 9;
-        club->unk30 = stats->unk1D;
-        if (club->unk30 < -4) {
-            club->unk30 = -4;
+        club->curve = stats->curve;
+        if (club->curve < -4) {
+            club->curve = -4;
         }
-        if (club->unk30 > 4) {
-            club->unk30 = 4;
+        if (club->curve > 4) {
+            club->curve = 4;
         }
         if (club->unk0 > 145) {
             club->unk0 = 145;
@@ -635,7 +635,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats *stats) {
 /*
  * Fills in the stock sets' parameters from sClubParameters; with
  * GAME_FLAG_GENERATE_CLUBS set, generates every club's instead and passes
- * the results to WriteClubParameters. GetStockUnk30 is a nested function, a
+ * the results to WriteClubParameters. GetStockCurve is a nested function, a
  * GNU C extension.
  */
 void InitClubs(void) {
@@ -643,13 +643,13 @@ void InitClubs(void) {
     ClubParameters *parameters;
     Club *club;
 
-    s8 GetStockUnk30(s32 clubIndex) {
+    s8 GetStockCurve(s32 clubIndex) {
         u32 setIndex = clubIndex / CLUB_SET_SIZE;
 
         if (setIndex >= CLUB_SET_COUNT) {
             setIndex = 0;
         }
-        return sStockUnk30Values[setIndex];
+        return sStockCurves[setIndex];
     }
 
     if (!IsGameFlagSet(GAME_FLAG_GENERATE_CLUBS)) {
@@ -663,7 +663,7 @@ void InitClubs(void) {
             club->deflection[0] = parameters->deflection[0];
             club->deflection[1] = parameters->deflection[1];
             club->deflection[2] = parameters->deflection[2];
-            club->unk30 = GetStockUnk30(clubIndex);
+            club->curve = GetStockCurve(clubIndex);
         }
     } else if (IsGameFlagSet(GAME_FLAG_GENERATE_CLUBS)) {
         for (clubIndex = 0; clubIndex < CLUB_COUNT; clubIndex++) {
