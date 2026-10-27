@@ -554,6 +554,13 @@ segments:
       - [0x109570, c, ovl_01/save_menu]
       - [0x110670, c, ovl_01/tournament_menu]
       - [0x115D80, data]
+      - [0x11B398, .rodata, ovl_01/main_menu]
+      - [0x11B730, .rodata, ovl_01/character_select]
+      - [0x11B800, .rodata, ovl_01/course_menu]
+      - [0x11B870, .rodata, ovl_01/menu_scene]
+      - [0x11B920, .rodata, ovl_01/player_stats]
+      - [0x11B980, .rodata, ovl_01/save_menu]
+      - [0x11B9D0, .rodata, ovl_01/tournament_menu]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
 
   - name: hole_editor

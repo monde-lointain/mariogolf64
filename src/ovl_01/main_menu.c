@@ -96,6 +96,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206180_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206A2C_ovl_01);
 
+const char D_802316EC_ovl_01[] = "Peach's Castle";
+const char D_802316FC_ovl_01[] = "Luigi's Garden";
+
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206A68_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80207D08_ovl_01);
