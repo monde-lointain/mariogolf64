@@ -136,6 +136,22 @@
 #define HEIGHT_TEXT_COLUMN 25
 #define HEIGHT_TEXT_ROW 3
 
+/* func_80402428's triangle editor */
+/* What a frame did, kept in sLastTriangleEditKind */
+#define TRIANGLE_EDIT_NONE 0
+#define TRIANGLE_EDIT_MOVE 1
+#define TRIANGLE_EDIT_SELECT 2
+#define TRIANGLE_EDIT_KIND 4
+/* Only the first 157 of the HOLE_TRIANGLE_COUNT triangles can be picked */
+#define PICKABLE_TRIANGLE_COUNT 157
+#define HOLE_TRIANGLE_KIND_COUNT 4
+/* A step moves the corner this far at zoom 1 */
+#define CORNER_STEP_SCALE 10.0f
+#define SAVED_CORNER_COUNT 10
+#define TRIANGLE_TEXT_COLUMN 10
+#define EDIT_KIND_TEXT_ROW 10
+#define CORNER_HEIGHT_TEXT_ROW 11
+
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
@@ -238,6 +254,16 @@ extern s32 sCellCursorColumn;
 extern s32 sCellCursorRow;
 extern s32 D_8040C5B0_hole_editor;
 extern s32 D_8040C5B4_hole_editor;
+
+/* func_80402428's state */
+extern f32 sTriangleCameraPitch;   /* In radians */
+extern f32 sTriangleCameraHeading; /* In radians, from sTriangleCameraHeadingAngle */
+extern s32 sTriangleCameraHeadingAngle;
+extern s32 sEditedTriangleIndex;
+extern s32 sEditedCornerIndex;
+extern s32 sSavedCornerIndex;
+extern s32 sLastTriangleEditKind; /* A TRIANGLE_EDIT_* */
+extern CoursePoint sSavedCorners[SAVED_CORNER_COUNT];
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
 
@@ -353,7 +379,184 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804002C0_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80400FBC_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80402428_hole_editor);
+/*
+ * Scene SCENE_TRIANGLES's editor for the hole triangles. On the editor pad,
+ * the C-buttons move the picked triangle across the ground, relative to the
+ * camera's heading, and B picks its next corner. With Z held only that
+ * corner moves. The option pad's
+ * C-down and C-up move it along y, A saves the corner in a ring of
+ * positions and B restores the last one saved. Right and left on the
+ * control pad pick the triangle, and up and down change its kind. R
+ * zooms in, L or Z with R zooms out, and Z with the stick orbits the
+ * camera around the corner.
+ */
+void func_80402428_hole_editor(void) {
+    Mat4 unusedMatrices[2]; /* The game's frame has room for two matrices */
+    f32 stepRight;
+    f32 stepUp;
+    f32 stepY;
+    f32 stepX;
+    f32 stepZ;
+    f32 moveY; /* The scaled y step; stepY itself would compile differently */
+    s32 editKind;
+    s32 corner;
+    f64 cameraDistance; /* As a literal, GCC would fold it into the angles before the zoom */
+    Vtx_t *lookAtVertex;
+
+    editKind = TRIANGLE_EDIT_NONE;
+    D_800C30D1 = FALSE;
+    stepUp = stepRight = stepY = 0.0f;
+    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepUp = 1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepUp = -1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepRight = 1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepRight = -1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = 1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = -1.0f;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+        sEditedCornerIndex = (sEditedCornerIndex + 1) % HOLE_TRIANGLE_VERTEX_COUNT;
+    }
+    PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
+    if (editKind == TRIANGLE_EDIT_MOVE) {
+        stepX = -cos((u16)sTriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp -
+                sin((u16)sTriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        stepZ = -sin((u16)sTriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp +
+                cos((u16)sTriangleCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        /* Scaled in two steps; in one expression GCC would multiply 10 by the zoom first */
+        {
+            f32 scaledX = stepX * CORNER_STEP_SCALE;
+            f32 scaledY = stepY * CORNER_STEP_SCALE;
+            f32 scaledZ = stepZ * CORNER_STEP_SCALE;
+
+            stepX = scaledX * g_MapCamera.view.zoom;
+            moveY = scaledY * g_MapCamera.view.zoom;
+            stepZ = scaledZ * g_MapCamera.view.zoom;
+        }
+        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+            if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) || sEditedCornerIndex == corner) {
+                Vtx_t *vertex;
+
+                vertex = &g_WorkArea.hole.triangles[sEditedTriangleIndex].vertices[corner].v;
+                vertex->ob[AXIS_X] = vertex->ob[AXIS_X] + stepX;
+                vertex->ob[AXIS_Y] = vertex->ob[AXIS_Y] + moveY;
+                vertex->ob[AXIS_Z] = vertex->ob[AXIS_Z] + stepZ;
+                PrintDebugHex(vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN, CORNER_HEIGHT_TEXT_ROW);
+            }
+        }
+        PrepareHoleTriangles();
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+        Vtx_t *vertex;
+
+        vertex = &g_WorkArea.hole.triangles[sEditedTriangleIndex].vertices[sEditedCornerIndex].v;
+        sSavedCornerIndex = (sSavedCornerIndex + 1) % SAVED_CORNER_COUNT;
+        sSavedCorners[sSavedCornerIndex][AXIS_X] = vertex->ob[AXIS_X];
+        sSavedCorners[sSavedCornerIndex][AXIS_Y] = vertex->ob[AXIS_Y];
+        sSavedCorners[sSavedCornerIndex][AXIS_Z] = vertex->ob[AXIS_Z];
+        PrepareHoleTriangles();
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        Vtx_t *vertex;
+
+        vertex = &g_WorkArea.hole.triangles[sEditedTriangleIndex].vertices[sEditedCornerIndex].v;
+        vertex->ob[AXIS_X] = sSavedCorners[sSavedCornerIndex][AXIS_X];
+        vertex->ob[AXIS_Y] = sSavedCorners[sSavedCornerIndex][AXIS_Y];
+        vertex->ob[AXIS_Z] = sSavedCorners[sSavedCornerIndex][AXIS_Z];
+        sSavedCornerIndex = (sSavedCornerIndex + SAVED_CORNER_COUNT - 1) % SAVED_CORNER_COUNT;
+        PrepareHoleTriangles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sEditedTriangleIndex++;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sEditedTriangleIndex--;
+    }
+    if (sEditedTriangleIndex < 0) {
+        sEditedTriangleIndex = PICKABLE_TRIANGLE_COUNT - 1;
+    }
+    if (sEditedTriangleIndex >= PICKABLE_TRIANGLE_COUNT) {
+        sEditedTriangleIndex = 0;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        g_WorkArea.hole.triangles[sEditedTriangleIndex].kind++;
+        editKind = TRIANGLE_EDIT_KIND;
+        if (g_WorkArea.hole.triangles[sEditedTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
+            g_WorkArea.hole.triangles[sEditedTriangleIndex].kind = 0;
+        }
+        PrepareHoleTriangles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        g_WorkArea.hole.triangles[sEditedTriangleIndex].kind--;
+        editKind = TRIANGLE_EDIT_KIND;
+        PrepareHoleTriangles();
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        sTriangleCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        sTriangleCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (sTriangleCameraPitch > 0.0f) {
+        sTriangleCameraPitch = 0.0f;
+    }
+    if (sTriangleCameraPitch < EDITOR_PITCH_MIN) {
+        sTriangleCameraPitch = EDITOR_PITCH_MIN;
+    }
+    sTriangleCameraHeading = sTriangleCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    /* The first frame without an edit rebuilds the slopes */
+    if ((sLastTriangleEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
+        func_804079B8_hole_editor();
+    }
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
+    lookAtVertex = &g_WorkArea.hole.triangles[sEditedTriangleIndex].vertices[sEditedCornerIndex].v;
+    g_MapCamera.view.lookAt[AXIS_X] = lookAtVertex->ob[AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
+    sLastTriangleEditKind = editKind;
+    g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_X] = cos(sTriangleCameraPitch) * cos(sTriangleCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(sTriangleCameraPitch) * sin(sTriangleCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] = sin(sTriangleCameraPitch) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Y];
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80402E1C_hole_editor);
 
