@@ -1347,34 +1347,35 @@ void ComputeRoundStatistics(void) {
         entry = &saved[courseIndex];
         D_80105C38[courseIndex].roundCount = entry->roundCount;
         if (D_80105C38[courseIndex].roundCount == 0.0f) {
-            D_80105C38[courseIndex].unk4 = 0.0f;
-            D_80105C38[courseIndex].unk8 = 0.0f;
-            D_80105C38[courseIndex].unkC = 0.0f;
-            D_80105C38[courseIndex].unk10 = 0.0f;
+            D_80105C38[courseIndex].bestScore = 0.0f;
+            D_80105C38[courseIndex].averageScore = 0.0f;
+            D_80105C38[courseIndex].bestDrive = 0.0f;
+            D_80105C38[courseIndex].averageDrive = 0.0f;
             D_80105C38[courseIndex].unk14 = 0.0f;
-            D_80105C38[courseIndex].unk18 = 0.0f;
-            D_80105C38[courseIndex].unk1C = 0.0f;
-            D_80105C38[courseIndex].unk24 = 0.0f;
-            D_80105C38[courseIndex].unk20 = 0.0f;
+            D_80105C38[courseIndex].fairwayPercent = 0.0f;
+            D_80105C38[courseIndex].averagePutts = 0.0f;
+            D_80105C38[courseIndex].parOnPercent = 0.0f;
+            D_80105C38[courseIndex].parSavePercent = 0.0f;
             D_80105C38[courseIndex].hasThirdPlace = FALSE;
             D_80105C38[courseIndex].hasSecondPlace = FALSE;
             D_80105C38[courseIndex].hasFirstPlace = FALSE;
         } else {
             /* unk14 is left as it was */
             reciprocal = 1.0f / entry->roundCount;
-            D_80105C38[courseIndex].unk4 = entry->bestScore;
-            D_80105C38[courseIndex].unk8 = entry->strokeTotal * reciprocal;
-            D_80105C38[courseIndex].unkC = entry->longestDrive * UNK_SCALE;
-            D_80105C38[courseIndex].unk10 = entry->averageDrive * UNK_SCALE;
-            D_80105C38[courseIndex].unk18 = entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk1C = entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk20 = entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
-            D_80105C38[courseIndex].unk24 = entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].bestScore = entry->bestScore;
+            D_80105C38[courseIndex].averageScore = entry->strokeTotal * reciprocal;
+            D_80105C38[courseIndex].bestDrive = entry->longestDrive * UNK_SCALE;
+            D_80105C38[courseIndex].averageDrive = entry->averageDrive * UNK_SCALE;
+            D_80105C38[courseIndex].fairwayPercent =
+                entry->measuredDriveTotal * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].averagePutts = entry->puttTotal * reciprocal * (1.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].parSavePercent = entry->parOrBetterCount * reciprocal * (100.0f / HOLES_PER_ROUND);
+            D_80105C38[courseIndex].parOnPercent = entry->parOnCount * reciprocal * (100.0f / HOLES_PER_ROUND);
             sum = entry->unk28 + entry->unk2C;
             if (sum <= 0) {
-                D_80105C38[courseIndex].unk28 = 0.0f;
+                D_80105C38[courseIndex].sandSavePercent = 0.0f;
             } else {
-                D_80105C38[courseIndex].unk28 = ((f32)entry->unk28 / (f32)sum) * 100.0f;
+                D_80105C38[courseIndex].sandSavePercent = ((f32)entry->unk28 / (f32)sum) * 100.0f;
             }
             D_80105C38[courseIndex].hasThirdPlace = entry->hasPlace[THIRD_PLACE_INDEX];
             D_80105C38[courseIndex].hasSecondPlace = entry->hasPlace[SECOND_PLACE_INDEX];
@@ -1385,35 +1386,35 @@ void ComputeRoundStatistics(void) {
     courseIndex = 0; /* Zeroed this early to match */
     hasPlayedCourse = FALSE;
     D_80105C38[COURSE_COUNT].roundCount = 0.0f;
-    D_80105C38[COURSE_COUNT].unk4 = 0.0f;
-    D_80105C38[COURSE_COUNT].unk8 = 0.0f;
-    D_80105C38[COURSE_COUNT].unkC = 0.0f;
-    D_80105C38[COURSE_COUNT].unk10 = 0.0f;
-    D_80105C38[COURSE_COUNT].unk18 = 0.0f;
-    D_80105C38[COURSE_COUNT].unk1C = 0.0f;
-    D_80105C38[COURSE_COUNT].unk20 = 0.0f;
-    D_80105C38[COURSE_COUNT].unk24 = 0.0f;
-    D_80105C38[COURSE_COUNT].unk28 = 0.0f;
+    D_80105C38[COURSE_COUNT].bestScore = 0.0f;
+    D_80105C38[COURSE_COUNT].averageScore = 0.0f;
+    D_80105C38[COURSE_COUNT].bestDrive = 0.0f;
+    D_80105C38[COURSE_COUNT].averageDrive = 0.0f;
+    D_80105C38[COURSE_COUNT].fairwayPercent = 0.0f;
+    D_80105C38[COURSE_COUNT].averagePutts = 0.0f;
+    D_80105C38[COURSE_COUNT].parSavePercent = 0.0f;
+    D_80105C38[COURSE_COUNT].parOnPercent = 0.0f;
+    D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
     D_80105C38[COURSE_COUNT].hasThirdPlace = FALSE;
     D_80105C38[COURSE_COUNT].hasSecondPlace = FALSE;
     D_80105C38[COURSE_COUNT].hasFirstPlace = FALSE;
-    D_80105C38[COURSE_COUNT].unk4 = 0.0f;
-    D_80105C38[COURSE_COUNT].unkC = 0.0f;
-    D_80105C38[COURSE_COUNT].unk4 = D_80105C38[0].unk4;
-    D_80105C38[COURSE_COUNT].unkC = D_80105C38[0].unkC;
+    D_80105C38[COURSE_COUNT].bestScore = 0.0f;
+    D_80105C38[COURSE_COUNT].bestDrive = 0.0f;
+    D_80105C38[COURSE_COUNT].bestScore = D_80105C38[0].bestScore;
+    D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[0].bestDrive;
     zero = D_80105C38[COURSE_COUNT].roundCount; /* Read back after being zeroed */
     for (; courseIndex != COURSE_COUNT; courseIndex++) {
         if (zero < D_80105C38[courseIndex].roundCount) {
             if (!hasPlayedCourse) {
-                D_80105C38[COURSE_COUNT].unk4 = D_80105C38[courseIndex].unk4;
+                D_80105C38[COURSE_COUNT].bestScore = D_80105C38[courseIndex].bestScore;
                 hasPlayedCourse = TRUE;
-                D_80105C38[COURSE_COUNT].unkC = D_80105C38[courseIndex].unkC;
+                D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
             }
-            if (D_80105C38[COURSE_COUNT].unk4 > D_80105C38[courseIndex].unk4) {
-                D_80105C38[COURSE_COUNT].unk4 = D_80105C38[courseIndex].unk4;
+            if (D_80105C38[COURSE_COUNT].bestScore > D_80105C38[courseIndex].bestScore) {
+                D_80105C38[COURSE_COUNT].bestScore = D_80105C38[courseIndex].bestScore;
             }
-            if (D_80105C38[COURSE_COUNT].unkC < D_80105C38[courseIndex].unkC) {
-                D_80105C38[COURSE_COUNT].unkC = D_80105C38[courseIndex].unkC;
+            if (D_80105C38[COURSE_COUNT].bestDrive < D_80105C38[courseIndex].bestDrive) {
+                D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
             }
             D_80105C38[COURSE_COUNT].roundCount += D_80105C38[courseIndex].roundCount;
         }
@@ -1445,20 +1446,20 @@ void ComputeRoundStatistics(void) {
     }
     if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {
         if (sum28And2C <= 0.0f) {
-            D_80105C38[COURSE_COUNT].unk28 = 0.0f;
+            D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
         } else {
-            D_80105C38[COURSE_COUNT].unk28 = (sum28 / sum28And2C) * 100.0f;
+            D_80105C38[COURSE_COUNT].sandSavePercent = (sum28 / sum28And2C) * 100.0f;
         }
         holeCount = D_80105C38[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
-        D_80105C38[COURSE_COUNT].unk1C = sum1C / holeCount;
-        D_80105C38[COURSE_COUNT].unk18 = (sum18 / holeCount) * 100.0f;
-        D_80105C38[COURSE_COUNT].unk20 = (sum20 / holeCount) * 100.0f;
-        D_80105C38[COURSE_COUNT].unk24 = (sum24 / holeCount) * 100.0f;
-        D_80105C38[COURSE_COUNT].unk8 = sum8 / D_80105C38[COURSE_COUNT].roundCount;
+        D_80105C38[COURSE_COUNT].averagePutts = sum1C / holeCount;
+        D_80105C38[COURSE_COUNT].fairwayPercent = (sum18 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].parSavePercent = (sum20 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].parOnPercent = (sum24 / holeCount) * 100.0f;
+        D_80105C38[COURSE_COUNT].averageScore = sum8 / D_80105C38[COURSE_COUNT].roundCount;
         if (sum10 > 0.0f && sum14 > 0) {
-            D_80105C38[COURSE_COUNT].unk10 = sum10 / sum14;
+            D_80105C38[COURSE_COUNT].averageDrive = sum10 / sum14;
         } else {
-            D_80105C38[COURSE_COUNT].unk10 = 0.0f;
+            D_80105C38[COURSE_COUNT].averageDrive = 0.0f;
         }
     }
 }

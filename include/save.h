@@ -395,16 +395,16 @@ extern UnkB8 g_Players[MAX_PLAYER_COUNT];
 /* The figures D_80105C38 holds for each course, then for all of them */
 typedef struct Unk80105C38 {
     /* 0x00 */ f32 roundCount;
-    /* 0x04 */ f32 unk4;
-    /* 0x08 */ f32 unk8;
-    /* 0x0C */ f32 unkC;
-    /* 0x10 */ f32 unk10;
+    /* 0x04 */ f32 bestScore;
+    /* 0x08 */ f32 averageScore;
+    /* 0x0C */ f32 bestDrive;
+    /* 0x10 */ f32 averageDrive;
     /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 unk18;
-    /* 0x1C */ f32 unk1C;
-    /* 0x20 */ f32 unk20;
-    /* 0x24 */ f32 unk24;
-    /* 0x28 */ f32 unk28;
+    /* 0x18 */ f32 fairwayPercent;
+    /* 0x1C */ f32 averagePutts;
+    /* 0x20 */ f32 parSavePercent;
+    /* 0x24 */ f32 parOnPercent;
+    /* 0x28 */ f32 sandSavePercent;
     /* 0x2C */ s32 hasThirdPlace;
     /* 0x30 */ s32 hasSecondPlace;
     /* 0x34 */ s32 hasFirstPlace;

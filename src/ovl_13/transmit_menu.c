@@ -3099,20 +3099,20 @@ void BuildStatusData(u8 *status) {
     if (value > 0) {
         course->roundCount[0] = value;
         course->roundCount[1] = value >> 8;
-        course->bestScore = (s32)D_80105C38[COURSE_COUNT].unk4 + STATUS_SCORE_BIAS;
-        course->averageStrokes = RoundedWholePart(D_80105C38[COURSE_COUNT].unk8);
+        course->bestScore = (s32)D_80105C38[COURSE_COUNT].bestScore + STATUS_SCORE_BIAS;
+        course->averageStrokes = RoundedWholePart(D_80105C38[COURSE_COUNT].averageScore);
         /* Holding the drives in sum, and the scores below in scores, is there to match */
-        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].unkC);
+        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].bestDrive);
         course->longestDrive[0] = sum;
         course->longestDrive[1] = sum >> 8;
-        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].unk10);
+        sum = RoundedWholePart(D_80105C38[COURSE_COUNT].averageDrive);
         course->averageDrive[0] = sum;
         course->averageDrive[1] = sum >> 8;
-        course->unk8 = RoundedWholePart(D_80105C38[COURSE_COUNT].unk18);
-        course->averagePutts = PackTenths(D_80105C38[COURSE_COUNT].unk1C);
-        course->parOrBetterRate = RoundedWholePart(D_80105C38[COURSE_COUNT].unk20);
-        course->parOnRate = RoundedWholePart(D_80105C38[COURSE_COUNT].unk24);
-        course->unkC = RoundedWholePart(D_80105C38[COURSE_COUNT].unk28);
+        course->unk8 = RoundedWholePart(D_80105C38[COURSE_COUNT].fairwayPercent);
+        course->averagePutts = PackTenths(D_80105C38[COURSE_COUNT].averagePutts);
+        course->parOrBetterRate = RoundedWholePart(D_80105C38[COURSE_COUNT].parSavePercent);
+        course->parOnRate = RoundedWholePart(D_80105C38[COURSE_COUNT].parOnPercent);
+        course->unkC = RoundedWholePart(D_80105C38[COURSE_COUNT].sandSavePercent);
         course->places = 0;
         for (index = 0; index != CHARACTER_COUNT; index++) {
             for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
