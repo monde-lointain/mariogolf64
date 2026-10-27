@@ -51,9 +51,9 @@ typedef struct OpeningNameLogo {
 } OpeningNameLogo; /* size = 0x1C */
 
 extern s32 D_8020AC4C_ovl_05;
-extern s32 D_8020AC50_ovl_05[3];
-extern f32 D_8020AC5C_ovl_05;
-extern s32 D_8020AC60_ovl_05;
+extern s32 f_LogoClubPosition[3];
+extern f32 f_LogoClubOrbitRadius;
+extern s32 f_IsLogoClubSwinging;
 extern s32 f_AreAmbientSoundsOn;
 extern u8 D_80212830_ovl_05[];
 extern u8 f_ShotBallImage[];
@@ -121,14 +121,67 @@ extern CoursePoint f_LookAtTarget;
 
 /* "MARIO GOLF" */
 #define LOGO_LETTER_COUNT 9
+/* The letters of "MARIO GOLF", left to right */
+typedef enum LogoLetterIndex {
+  LOGO_LETTER_M,
+  LOGO_LETTER_A,
+  LOGO_LETTER_R,
+  LOGO_LETTER_I,
+  LOGO_LETTER_FIRST_O,
+  LOGO_LETTER_G,
+  LOGO_LETTER_SECOND_O,
+  LOGO_LETTER_L,
+  LOGO_LETTER_F
+} LogoLetterIndex;
 /* Where a letter starts, off the screen */
 #define LOGO_LETTER_HIDDEN (-1000)
 
+/* Where Lakitu drops each letter, on the screen */
+#define LOGO_M_DROP_X 57
+#define LOGO_A_DROP_X 81
+#define LOGO_R_DROP_X 112
+#define LOGO_I_DROP_X 132
+#define LOGO_FIRST_O_DROP_X 154
+#define LOGO_G_DROP_X 193
+#define LOGO_SECOND_O_DROP_X 220
+#define LOGO_L_DROP_X 242
+#define LOGO_F_DROP_X 265
+/* Where each letter ends up once the logo shrinks, on the screen */
+#define LOGO_M_SHRUNK_X 86
+#define LOGO_A_SHRUNK_X 104
+#define LOGO_R_SHRUNK_X 125
+#define LOGO_I_SHRUNK_X 139
+#define LOGO_FIRST_O_SHRUNK_X 154
+#define LOGO_G_SHRUNK_X 184
+#define LOGO_SECOND_O_SHRUNK_X 204
+#define LOGO_L_SHRUNK_X 220
+#define LOGO_F_SHRUNK_X 234
+/* Each letter's depth, which decides which letters overlap which */
+#define LOGO_M_DEPTH 8
+#define LOGO_A_DEPTH 12
+#define LOGO_R_DEPTH 16
+#define LOGO_I_DEPTH 20
+#define LOGO_FIRST_O_DEPTH 24
+#define LOGO_G_DEPTH 28
+#define LOGO_SECOND_O_DEPTH 36
+#define LOGO_L_DEPTH 40
+#define LOGO_F_DEPTH 44
+
 typedef struct LogoLetter {
-  s32 unk0;
-  s32 unk4;
-  s32 unk8;
+  s32 x;      /* On the screen, from the left */
+  s32 y;      /* On the screen, from the top */
+  s32 depth;  /* Nearer letters are drawn over farther ones */
 } LogoLetter; /* size = 0xC */
+
+/* What a logo letter is doing */
+typedef enum LogoLetterState {
+  LOGO_LETTER_WAITING,    /* For Lakitu to drop it */
+  LOGO_LETTER_FALLING,    /* Or rising after a bounce, and growing */
+  LOGO_LETTER_SQUASHING,  /* Flattening against the ground */
+  LOGO_LETTER_SQUASHED,   /* Holding flat */
+  LOGO_LETTER_STRETCHING, /* Springing back up */
+  LOGO_LETTER_LANDED = 9
+} LogoLetterState;
 
 extern u8 f_LogoLetterImages[];
 extern u8 f_LogoClubImage[];
@@ -136,10 +189,11 @@ extern u8 f_LogoMarioImage[];
 extern u8 f_LogoBallImages[];
 extern u8 f_LogoShineImage[];
 extern LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
-extern s32 D_80224708_ovl_05[LOGO_LETTER_COUNT];
-extern f32 D_80224730_ovl_05[LOGO_LETTER_COUNT];
-extern f32 D_80224758_ovl_05[LOGO_LETTER_COUNT][2];
-extern s32 D_802247A0_ovl_05[LOGO_LETTER_COUNT];
+extern s32 f_LogoLetterStates[LOGO_LETTER_COUNT];
+extern f32 f_LogoLetterSpeeds[LOGO_LETTER_COUNT]; /* Down, in pixels a frame */
+extern f32 f_LogoLetterScales[LOGO_LETTER_COUNT][2]; /* Across, then up */
+/* Frames left in a letter's squashing, squashed or stretching state */
+extern s32 f_LogoLetterSquashFrames[LOGO_LETTER_COUNT];
 
 extern s32 f_OpeningShotDashCount;
 extern BallSimulation f_OpeningShotSimulation;
@@ -169,7 +223,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead);
 void DrawLakitu(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void DrawOpeningShotBall(Gfx** displayListHead);
-void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
+void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn);
 void DrawOpeningSparks(Gfx** displayListHead);
 
 void func_801F4A40_ovl_05(void) {
@@ -180,9 +234,9 @@ void func_801F4A40_ovl_05(void) {
 }
 
 void func_801F4A6C_ovl_05(void) {
-  if (D_8020AC60_ovl_05 != 0) {
-    PlaySoundWithEffects(0x51, 12, 48 - (s32)(D_8020AC5C_ovl_05 * 0.2f), 0,
-                         127 - (D_8020AC50_ovl_05[0] - 160) / 2);
+  if (f_IsLogoClubSwinging != 0) {
+    PlaySoundWithEffects(0x51, 12, 48 - (s32)(f_LogoClubOrbitRadius * 0.2f), 0,
+                         127 - (f_LogoClubPosition[0] - 160) / 2);
   }
 }
 
@@ -860,7 +914,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   DrawOpeningShotBall(&gfx);
   DrawOpeningSparks(&gfx);
   DrawNameLogos(&gfx);
-  func_80200CBC_ovl_05(&gfx, 0);
+  DrawOpeningLogo(&gfx, 0);
   *displayListHead = gfx;
 }
 
@@ -1735,23 +1789,23 @@ void LoadOpeningLogo(void) {
   OpenEncodedAsset(ASSET_LOGO_CLUB_IMAGE, &asset);
   ReadEncodedAsset(f_LogoClubImage, &asset);
   for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
-    D_80224708_ovl_05[letterIndex] = 0;
-    D_80224730_ovl_05[letterIndex] = -14.0f;
-    f_LogoLetters[letterIndex].unk0 = LOGO_LETTER_HIDDEN;
-    f_LogoLetters[letterIndex].unk4 = LOGO_LETTER_HIDDEN;
-    D_80224758_ovl_05[letterIndex][0] = 0.1f;
-    D_80224758_ovl_05[letterIndex][1] = 0.1f;
-    D_802247A0_ovl_05[letterIndex] = 0;
+    f_LogoLetterStates[letterIndex] = LOGO_LETTER_WAITING;
+    f_LogoLetterSpeeds[letterIndex] = -14.0f;
+    f_LogoLetters[letterIndex].x = LOGO_LETTER_HIDDEN;
+    f_LogoLetters[letterIndex].y = LOGO_LETTER_HIDDEN;
+    f_LogoLetterScales[letterIndex][0] = 0.1f;
+    f_LogoLetterScales[letterIndex][1] = 0.1f;
+    f_LogoLetterSquashFrames[letterIndex] = 0;
   }
-  f_LogoLetters[0].unk8 = 8;
-  f_LogoLetters[1].unk8 = 12;
-  f_LogoLetters[2].unk8 = 16;
-  f_LogoLetters[3].unk8 = 20;
-  f_LogoLetters[4].unk8 = 24;
-  f_LogoLetters[5].unk8 = 28;
-  f_LogoLetters[6].unk8 = 36;
-  f_LogoLetters[7].unk8 = 40;
-  f_LogoLetters[8].unk8 = 44;
+  f_LogoLetters[LOGO_LETTER_M].depth = LOGO_M_DEPTH;
+  f_LogoLetters[LOGO_LETTER_A].depth = LOGO_A_DEPTH;
+  f_LogoLetters[LOGO_LETTER_R].depth = LOGO_R_DEPTH;
+  f_LogoLetters[LOGO_LETTER_I].depth = LOGO_I_DEPTH;
+  f_LogoLetters[LOGO_LETTER_FIRST_O].depth = LOGO_FIRST_O_DEPTH;
+  f_LogoLetters[LOGO_LETTER_G].depth = LOGO_G_DEPTH;
+  f_LogoLetters[LOGO_LETTER_SECOND_O].depth = LOGO_SECOND_O_DEPTH;
+  f_LogoLetters[LOGO_LETTER_L].depth = LOGO_L_DEPTH;
+  f_LogoLetters[LOGO_LETTER_F].depth = LOGO_F_DEPTH;
   OpenEncodedAsset(ASSET_LOGO_MARIO_IMAGE, &asset);
   ReadEncodedAsset(f_LogoMarioImage, &asset);
   OpenEncodedAsset(ASSET_LOGO_BALL_IMAGES, &asset);
@@ -1761,36 +1815,171 @@ void LoadOpeningLogo(void) {
 }
 
 extern s32 D_8020AC48_ovl_05;
-extern s32 D_8020AC90_ovl_05;
-extern s32 D_8020B264_ovl_05;
-extern s32 D_8020B268_ovl_05;
-extern s32 D_8020B26C_ovl_05;
-extern s32 D_8020B270_ovl_05;
-extern s32 D_8020B274_ovl_05;
-extern s32 D_8020B278_ovl_05;
-extern s32 D_8020B27C_ovl_05;
-extern f32 D_8020B280_ovl_05[2];
-extern f32 D_8020B288_ovl_05;
-extern f32 D_8020B28C_ovl_05;
-extern f32 D_8020B294_ovl_05;
-extern f32 D_8020B298_ovl_05;
-extern Vtx D_8020B2A0_ovl_05[2][4];
-extern Vtx D_8020B320_ovl_05[6][4];
-extern Mtx D_8020CD90_ovl_05[LOGO_LETTER_COUNT][2];
-extern Mtx D_8020D210_ovl_05[LOGO_LETTER_COUNT][2];
-extern Mtx D_8020D690_ovl_05[2];
-extern Mtx D_8020D710_ovl_05[2];
-extern Mtx D_8020D790_ovl_05[2];
-extern s32 D_8020D818_ovl_05[LOGO_LETTER_COUNT];
-extern s32 D_8020D83C_ovl_05[2];
-extern f32 D_8020D844_ovl_05;
-extern s32 D_8020D848_ovl_05;
-extern s32 D_8020D84C_ovl_05;
+/* The opening script's current scene */
+extern s32 f_OpeningScene;
+/* Ends the opening */
+#define OPENING_SCENE_END 999
+/* What the title logo as a whole is doing */
+typedef enum LogoState {
+  LOGO_DROPPING_LETTERS,
+  LOGO_CLUB_STARTING, /* The last letter has been dropped */
+  LOGO_CLUB_CIRCLING, /* Spiralling in to the letters, spinning */
+  LOGO_CLUB_SPINNING, /* In place, until it turns upright */
+  LOGO_SHINING,
+  LOGO_SHRINK_STARTING,
+  LOGO_SHRINKING,
+  LOGO_SHRUNK
+} LogoState;
+
+/* How the screen fade behind the logo follows the logo */
+typedef enum LogoFadeStage {
+  LOGO_FADE_NONE,
+  LOGO_FADE_GRAYING, /* Starts as the first letter is dropped */
+  LOGO_FADE_GRAY,    /* Until the shine starts */
+  LOGO_FADE_WHITENING,
+  LOGO_FADE_WHITE, /* Until the logo shrinks */
+  LOGO_FADE_LOGO_OUT
+} LogoFadeStage;
+
+/* The gray the screen fades to while the letters fall */
+#define LOGO_FADE_GRAY_LEVEL 128
+/* The fade's frames left when graying stops, and whitening's length */
+#define LOGO_FADE_WHITENING_FRAMES 24
+/* About (256 - LOGO_FADE_GRAY_LEVEL) / LOGO_FADE_WHITENING_FRAMES */
+#define LOGO_FADE_WHITENING_STEP 5.3333f
+#define LOGO_FADE_WHITE_LEVEL 0xFF
+/* Keeps the white fade fully opaque */
+#define LOGO_FADE_WHITE_DURATION 2
+/* The alpha the logo loses each frame as it fades out */
+#define LOGO_FADE_OUT_STEP 24
+#define LOGO_GRAYING_DURATION 64
+
+/* Where the letters stop falling, on the screen; the L sits higher */
+#define LOGO_LETTER_GROUND_Y 125
+#define LOGO_LETTER_L_GROUND_Y 122
+/* The share of its speed a letter keeps when it bounces */
+#define LOGO_LETTER_BOUNCINESS 0.2f
+/* Bounces slower than this, in pixels a frame, end in landing */
+#define LOGO_LETTER_MIN_BOUNCE_SPEED 1.0f
+#define LOGO_LETTER_GRAVITY 0.5f
+/* How much a falling letter grows each frame, to full size */
+#define LOGO_LETTER_GROWTH 0.04f
+#define LOGO_LETTER_SQUASH_FRAMES 10
+#define LOGO_LETTER_SQUASH_STEP 0.03f
+#define LOGO_LETTER_SQUASHED_FRAMES 2
+#define LOGO_LETTER_STRETCH_FRAMES 5
+#define LOGO_LETTER_STRETCH_STEP 0.06f
+
+/* What the club spirals around, on the screen */
+#define LOGO_CLUB_ORBIT_CENTER_X 165
+#define LOGO_CLUB_ORBIT_CENTER_Y 141
+/* How far the club strays from its spiral, in pixels */
+#define LOGO_CLUB_FIRST_WOBBLE 40.0f
+#define LOGO_CLUB_WOBBLE 100.0f
+/* How far the club closes in each frame, in pixels */
+#define LOGO_CLUB_ORBIT_RADIUS_STEP 4.0f
+/* Each frame's turns, in degrees */
+#define LOGO_CLUB_ORBIT_ANGLE_STEP 5.5f
+#define LOGO_CLUB_SPIN_STEP 23.0f
+#define LOGO_CLUB_UNUSED_ANGLE_STEP 3.0f
+#define LOGO_CLUB_WOBBLE_ANGLE_STEP 6.0f
+/* The original's single-precision approximation of pi / 180 */
+#define LOGO_DEGREES_TO_RADIANS 0.017453294f
 
 /*
- * Drives the title logo: the letters drop in behind Lakitu and bounce, the
- * club swings in around them, and the whole logo then shrinks into place.
- * Also fades the screen to white and back while the logo forms.
+ * The shine's frames. Counting starts after the first, so the first shown
+ * frame is never the limit.
+ */
+#define LOGO_SHINE_FIRST_FRAME 20
+#define LOGO_SHINE_FIRST_SHOWN_FRAME 4
+#define LOGO_SHINE_LAST_SHOWN_FRAME 36
+#define LOGO_SHINE_LAST_FRAME 64
+/* Where the shine's image starts on the frame given */
+#define LOGO_SHINE_ORIGIN_TEXEL 64
+#define LOGO_SHINE_ORIGIN_FRAME 16
+/* How far the shine moves each frame, in texels */
+#define LOGO_SHINE_SPEED 18
+/* About 0.64 texels a pixel, in s5.10 */
+#define LOGO_SHINE_TEXEL_STEP 0x28F
+#define LOGO_SHINE_IMAGE_SIZE 64
+/* Where the shine sweeps, on the screen; it runs past the right edge */
+#define LOGO_SHINE_LEFT 10
+#define LOGO_SHINE_TOP 60
+#define LOGO_SHINE_RIGHT 630
+#define LOGO_SHINE_BOTTOM 120
+/*
+ * The shine is drawn only over the letters: their area is first filled with
+ * a near depth, the letters are redrawn with a far one, and the shine is
+ * depth tested between the two.
+ */
+#define LOGO_SHINE_MASK_LEFT 8
+#define LOGO_SHINE_MASK_RIGHT 312
+#define LOGO_SHINE_MASK_DEPTH 4
+#define LOGO_SHINE_LETTER_DEPTH 40
+#define LOGO_SHINE_DEPTH 36
+
+/* Each letter is drawn in a top and a bottom half */
+#define LOGO_LETTER_HALF_COUNT 2
+#define LOGO_LETTER_WIDTH 48
+#define LOGO_LETTER_HALF_HEIGHT 24
+/* Added to each letter's depth to give its primitive depth */
+#define LOGO_LETTER_DEPTH_OFFSET 64
+#define LOGO_CLUB_WIDTH 152
+#define LOGO_CLUB_STRIP_HEIGHT 13
+#define LOGO_CLUB_DEPTH 92
+/* The alpha below which the logo's texels aren't drawn */
+#define LOGO_ALPHA_THRESHOLD 0x50
+#define LOGO_FADING_ALPHA_THRESHOLD 10
+
+#define LOGO_SHRINK_FRAMES 10
+/* Where the logo ends up, on the screen */
+#define LOGO_SHRUNK_Y 70
+#define LOGO_SHRUNK_L_Y 68
+#define LOGO_SHRUNK_SCALE 0.72f
+#define LOGO_SHRUNK_CLUB_X 160
+#define LOGO_SHRUNK_CLUB_Y 188
+
+/* Where the logo is drawn, in the screen's orthographic projection */
+#define LOGO_Z (-300.0f)
+
+/* Starts at 0xFF */
+extern s32 f_LogoLettersAlpha;
+extern s32 f_LogoClubAlpha;
+/* Starts at LOGO_SHINE_FIRST_FRAME, and counts while the logo shines */
+extern s32 f_LogoShineFrame;
+/* How long, at least, the club spins in place; starts at 40 */
+extern s32 f_LogoClubSpinFramesLeft;
+extern s32 f_LogoState;
+extern s32 f_LogoFadeStage;
+extern s32 f_LogoFadeFramesLeft; /* Starts at 63 */
+extern f32 f_LogoClubScale[2];   /* Across, then up */
+/* In degrees */
+extern f32 f_LogoClubAngle;
+extern f32 f_LogoClubOrbitAngle;
+extern f32 f_LogoClubUnusedAngle; /* Its sine is never used */
+extern f32 f_LogoClubWobbleAngle;
+/* The top and bottom halves of a letter */
+extern Vtx f_LogoLetterVertices[2][4];
+/* The club's image is drawn in six strips */
+#define LOGO_CLUB_STRIP_COUNT 6
+extern Vtx f_LogoClubVertices[LOGO_CLUB_STRIP_COUNT][4];
+extern Mtx f_LogoLetterTranslations[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx f_LogoLetterScalings[LOGO_LETTER_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx f_LogoClubTranslations[DRAW_BUFFER_COUNT];
+extern Mtx f_LogoClubScalings[DRAW_BUFFER_COUNT];
+extern Mtx f_LogoClubRotations[DRAW_BUFFER_COUNT];
+/* While the logo shrinks, each frame's moves, in pixels */
+extern s32 f_LogoLetterSteps[LOGO_LETTER_COUNT];
+extern s32 f_LogoLetterRises[2]; /* Up; the other letters', then the L's */
+extern f32 f_LogoScaleStep;
+extern s32 f_LogoClubStepX;
+extern s32 f_LogoClubStepY;
+
+/*
+ * Drives the title logo: Lakitu drops the letters, which bounce into place,
+ * the club spirals in to them, a shine sweeps across, and the logo shrinks
+ * into place. Meanwhile the screen behind it fades to gray and then white.
+ * The logo is only drawn when isDrawn is 1, but moves on every call.
  *
  * Differs from the original in register allocation and stack slots: some
  * spilled display list pointers swap slots, a few addresses are kept in
@@ -1798,7 +1987,7 @@ extern s32 D_8020D84C_ovl_05;
  * into their relocations.
  */
 #ifdef NON_MATCHING
-void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
+void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
   Gfx* gfx = *displayListHead;
   s32 pad[6];
   s32 i;
@@ -1806,119 +1995,135 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
   f32 angle;
   f32 wobble;
 
-  switch (D_8020B278_ovl_05) {
-    case 1:
-      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
-      D_8020B27C_ovl_05--;
-      if (D_8020B27C_ovl_05 == 24) {
-        D_8020B278_ovl_05++;
+  switch (f_LogoFadeStage) {
+    case LOGO_FADE_GRAYING:
+      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
+      f_LogoFadeFramesLeft--;
+      if (f_LogoFadeFramesLeft == LOGO_FADE_WHITENING_FRAMES) {
+        f_LogoFadeStage++;
       }
       break;
-    case 2:
-      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
-      if (D_8020B26C_ovl_05 > 20) {
-        D_8020B278_ovl_05++;
+    case LOGO_FADE_GRAY:
+      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
+      if (f_LogoShineFrame > LOGO_SHINE_FIRST_FRAME) {
+        f_LogoFadeStage++;
       }
       break;
-    case 3:
-      g_ScreenFadeFramesLeft = D_8020B27C_ovl_05;
+    case LOGO_FADE_WHITENING:
+      g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
       g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
-          (s32)((24 - D_8020B27C_ovl_05) * 5.3333f) + 128;
-      D_8020B27C_ovl_05--;
-      if (D_8020B27C_ovl_05 == 0) {
-        D_8020B278_ovl_05++;
+          (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
+                LOGO_FADE_WHITENING_STEP) +
+          LOGO_FADE_GRAY_LEVEL;
+      f_LogoFadeFramesLeft--;
+      if (f_LogoFadeFramesLeft == 0) {
+        f_LogoFadeStage++;
       }
       break;
-    case 4:
-      g_ScreenFadeDuration = 2;
-      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 0xFF;
+    case LOGO_FADE_WHITE:
+      g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
+      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
+          LOGO_FADE_WHITE_LEVEL;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
-      if (D_8020B274_ovl_05 == 6) {
-        D_8020B278_ovl_05++;
+      if (f_LogoState == LOGO_SHRINKING) {
+        f_LogoFadeStage++;
       }
       break;
-    case 5:
-      g_ScreenFadeDuration = 2;
+    case LOGO_FADE_LOGO_OUT:
+      g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
-      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 0xFF;
-      D_8020B264_ovl_05 -= 24;
-      D_8020B268_ovl_05 -= 24;
-      if (D_8020B264_ovl_05 < 0) {
-        D_8020B264_ovl_05 = 0;
-        D_8020B268_ovl_05 = 0;
-        D_8020AC90_ovl_05 = 999;
+      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
+          LOGO_FADE_WHITE_LEVEL;
+      f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
+      f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
+      if (f_LogoLettersAlpha < 0) {
+        f_LogoLettersAlpha = 0;
+        f_LogoClubAlpha = 0;
+        f_OpeningScene = OPENING_SCENE_END;
       }
       break;
   }
-  if (D_80224708_ovl_05[0] == 0 && f_LakituScreenPoint[0] > 57) {
-    f_LogoLetters[0].unk0 = 57;
-    f_LogoLetters[0].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[0] = 1;
-    g_ScreenFadeDuration = g_ScreenFadeFramesLeft = 64;
+  /* Lakitu drops each letter as he passes where it lands */
+  if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_M_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
+    f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
+    g_ScreenFadeDuration = g_ScreenFadeFramesLeft = LOGO_GRAYING_DURATION;
     g_ScreenFadeKind = FADE_OUT;
-    g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue = 128;
-    D_8020B278_ovl_05 = 1;
+    g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
+        LOGO_FADE_GRAY_LEVEL;
+    f_LogoFadeStage = LOGO_FADE_GRAYING;
     D_8020AC48_ovl_05 = 1;
   }
-  if (D_80224708_ovl_05[1] == 0 && f_LakituScreenPoint[0] > 81) {
-    f_LogoLetters[1].unk0 = 81;
-    f_LogoLetters[1].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[1] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_A_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_A].x = LOGO_A_DROP_X;
+    f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_A] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[2] == 0 && f_LakituScreenPoint[0] > 112) {
-    f_LogoLetters[2].unk0 = 112;
-    f_LogoLetters[2].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[2] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_R] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_R_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_R].x = LOGO_R_DROP_X;
+    f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_R] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[3] == 0 && f_LakituScreenPoint[0] > 132) {
-    f_LogoLetters[3].unk0 = 132;
-    f_LogoLetters[3].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[3] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_I] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_I_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_I].x = LOGO_I_DROP_X;
+    f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_I] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[4] == 0 && f_LakituScreenPoint[0] > 154) {
-    f_LogoLetters[4].unk0 = 154;
-    f_LogoLetters[4].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[4] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_FIRST_O] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_FIRST_O_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_FIRST_O].x = LOGO_FIRST_O_DROP_X;
+    f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_FIRST_O] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[5] == 0 && f_LakituScreenPoint[0] > 193) {
-    f_LogoLetters[5].unk0 = 193;
-    f_LogoLetters[5].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[5] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_G] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_G_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_G].x = LOGO_G_DROP_X;
+    f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_G] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[6] == 0 && f_LakituScreenPoint[0] > 220) {
-    f_LogoLetters[6].unk0 = 220;
-    f_LogoLetters[6].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[6] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_SECOND_O] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_SECOND_O_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_SECOND_O].x = LOGO_SECOND_O_DROP_X;
+    f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_SECOND_O] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[7] == 0 && f_LakituScreenPoint[0] > 242) {
-    f_LogoLetters[7].unk0 = 242;
-    f_LogoLetters[7].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[7] = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_L] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_L_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_L].x = LOGO_L_DROP_X;
+    f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_FALLING;
   }
-  if (D_80224708_ovl_05[8] == 0 && f_LakituScreenPoint[0] > 265) {
-    f_LogoLetters[8].unk0 = 265;
-    f_LogoLetters[8].unk4 = f_LakituScreenPoint[1];
-    D_80224708_ovl_05[8] = 1;
-    D_8020B274_ovl_05 = 1;
+  if (f_LogoLetterStates[LOGO_LETTER_F] == LOGO_LETTER_WAITING &&
+      f_LakituScreenPoint[0] > LOGO_F_DROP_X) {
+    f_LogoLetters[LOGO_LETTER_F].x = LOGO_F_DROP_X;
+    f_LogoLetters[LOGO_LETTER_F].y = f_LakituScreenPoint[1];
+    f_LogoLetterStates[LOGO_LETTER_F] = LOGO_LETTER_FALLING;
+    f_LogoState = LOGO_CLUB_STARTING;
   }
-  if (arg1 == 1) {
+  if (isDrawn == 1) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      guTranslate(&D_8020CD90_ovl_05[i][g_DrawBufferIndex],
-                  f_LogoLetters[i].unk0 - 160.0f,
-                  (240 - f_LogoLetters[i].unk4) - 120.0f,
-                  f_LogoLetters[i].unk8 + -300.0f);
-      guScale(&D_8020D210_ovl_05[i][g_DrawBufferIndex], D_80224758_ovl_05[i][0],
-              D_80224758_ovl_05[i][1], 1.0f);
+      guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
+                  f_LogoLetters[i].x - SCREEN_WIDTH / 2.0f,
+                  (SCREEN_HEIGHT - f_LogoLetters[i].y) - SCREEN_HEIGHT / 2.0f,
+                  f_LogoLetters[i].depth + LOGO_Z);
+      guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
+              f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
     }
-    guTranslate(&D_8020D690_ovl_05[g_DrawBufferIndex],
-                D_8020AC50_ovl_05[0] - 160.0f, D_8020AC50_ovl_05[1] - 120.0f,
-                D_8020AC50_ovl_05[2] + -300.0f);
-    guRotate(&D_8020D790_ovl_05[g_DrawBufferIndex], D_8020B288_ovl_05, 0.0f,
+    guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
+                f_LogoClubPosition[0] - SCREEN_WIDTH / 2.0f,
+                f_LogoClubPosition[1] - SCREEN_HEIGHT / 2.0f,
+                f_LogoClubPosition[2] + LOGO_Z);
+    guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f,
              0.0f, 1.0f);
-    guScale(&D_8020D710_ovl_05[g_DrawBufferIndex], D_8020B280_ovl_05[0],
-            D_8020B280_ovl_05[1], 1.0f);
+    guScale(&f_LogoClubScalings[g_DrawBufferIndex], f_LogoClubScale[0],
+            f_LogoClubScale[1], 1.0f);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1930,13 +2135,13 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
                       TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-    if (D_8020B278_ovl_05 == 5) {
-      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 10);
+    if (f_LogoFadeStage == LOGO_FADE_LOGO_OUT) {
+      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_FADING_ALPHA_THRESHOLD);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF | Z_UPD,
                        G_RM_AA_ZB_XLU_SURF2 | Z_UPD);
     } else {
-      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x50);
+      gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, LOGO_ALPHA_THRESHOLD);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
     }
@@ -1953,75 +2158,85 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
     gDPSetTextureLOD(gfx++, G_TL_TILE);
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, D_8020B264_ovl_05);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoLettersAlpha);
     gDPLoadTLUT_pal256(gfx++,
                        TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      for (j = 0; j < 2; j++) {
-        gDPLoadTextureBlock(gfx++,
-                            TEXTURE_ADDRESS(f_LogoLetterImages +
-                                            ((j + i * 2) * 48 * 24 +
-                                             LARGE_PALETTED_TEXELS_OFFSET)),
-                            G_IM_FMT_CI, G_IM_SIZ_8b, 48, 24, 0,
-                            G_TX_NOMIRROR | G_TX_WRAP,
-                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                            G_TX_NOLOD, G_TX_NOLOD);
+      for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+        gDPLoadTextureBlock(
+            gfx++,
+            TEXTURE_ADDRESS(f_LogoLetterImages +
+                            ((j + i * LOGO_LETTER_HALF_COUNT) *
+                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT +
+                             LARGE_PALETTED_TEXELS_OFFSET)),
+            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
+            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
                   G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&D_8020CD90_ovl_05[i][g_DrawBufferIndex]),
-                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&D_8020D210_ovl_05[i][g_DrawBufferIndex]),
-                  G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gDPSetPrimDepth(gfx++, f_LogoLetters[i].unk8 + 64, 0);
+        gSPMatrix(
+            gfx++,
+            OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(
+            gfx++,
+            OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        gDPSetPrimDepth(gfx++,
+                        f_LogoLetters[i].depth + LOGO_LETTER_DEPTH_OFFSET, 0);
         gDPPipeSync(gfx++);
-        gSPVertex(gfx++, D_8020B2A0_ovl_05[j], 4, 0);
+        gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
       }
     }
-    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, D_8020B268_ovl_05);
+    gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
     gDPLoadTLUT_pal256(gfx++,
                        TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
     gDPPipeSync(gfx++);
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < LOGO_CLUB_STRIP_COUNT; i++) {
       gDPLoadTextureBlock(
           gfx++,
           TEXTURE_ADDRESS(f_LogoClubImage +
-                          (i * 152 * 13 + LARGE_PALETTED_TEXELS_OFFSET)),
-          G_IM_FMT_CI, G_IM_SIZ_8b, 152, 13, 0, G_TX_NOMIRROR | G_TX_WRAP,
-          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-          G_TX_NOLOD);
+                          (i * LOGO_CLUB_WIDTH * LOGO_CLUB_STRIP_HEIGHT +
+                           LARGE_PALETTED_TEXELS_OFFSET)),
+          G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_CLUB_WIDTH, LOGO_CLUB_STRIP_HEIGHT, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
                 G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D690_ovl_05[g_DrawBufferIndex]),
+      gSPMatrix(gfx++,
+                OS_K0_TO_PHYSICAL(&f_LogoClubTranslations[g_DrawBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D790_ovl_05[g_DrawBufferIndex]),
+      gSPMatrix(gfx++,
+                OS_K0_TO_PHYSICAL(&f_LogoClubRotations[g_DrawBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8020D710_ovl_05[g_DrawBufferIndex]),
+      gSPMatrix(gfx++,
+                OS_K0_TO_PHYSICAL(&f_LogoClubScalings[g_DrawBufferIndex]),
                 G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-      gDPSetPrimDepth(gfx++, 92, 0);
+      gDPSetPrimDepth(gfx++, LOGO_CLUB_DEPTH, 0);
       gDPPipeSync(gfx++);
-      gSPVertex(gfx++, D_8020B320_ovl_05[i], 4, 0);
+      gSPVertex(gfx++, f_LogoClubVertices[i], 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
     }
   }
-  if ((D_8020B274_ovl_05 == 4) & (arg1 == 1)) {
+  if ((f_LogoState == LOGO_SHINING) & (isDrawn == 1)) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetPrimDepth(gfx++, 4, 0);
+    gDPSetPrimDepth(gfx++, LOGO_SHINE_MASK_DEPTH, 0);
     gDPSetCombineLERP(gfx++, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++,
                      GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
                      G_RM_AA_ZB_OPA_SURF2);
-    gSPTextureRectangle(gfx++, 8 << 2, 60 << 2, 312 << 2, 120 << 2,
-                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gSPTextureRectangle(gfx++, LOGO_SHINE_MASK_LEFT << 2, LOGO_SHINE_TOP << 2,
+                        LOGO_SHINE_MASK_RIGHT << 2, LOGO_SHINE_BOTTOM << 2,
+                        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPSetPrimDepth(gfx++, 40, 0);
+    gDPSetPrimDepth(gfx++, LOGO_SHINE_LETTER_DEPTH, 0);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(
         gfx++,
@@ -2034,32 +2249,36 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
     gDPLoadTLUT_pal256(gfx++,
                        TEXTURE_ADDRESS(f_LogoLetterImages + IMAGE_HEADER_SIZE));
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      for (j = 0; j < 2; j++) {
-        gDPLoadTextureBlock(gfx++,
-                            TEXTURE_ADDRESS(f_LogoLetterImages +
-                                            ((j + i * 2) * 48 * 24 +
-                                             LARGE_PALETTED_TEXELS_OFFSET)),
-                            G_IM_FMT_CI, G_IM_SIZ_8b, 48, 24, 0,
-                            G_TX_NOMIRROR | G_TX_WRAP,
-                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                            G_TX_NOLOD, G_TX_NOLOD);
+      for (j = 0; j < LOGO_LETTER_HALF_COUNT; j++) {
+        gDPLoadTextureBlock(
+            gfx++,
+            TEXTURE_ADDRESS(f_LogoLetterImages +
+                            ((j + i * LOGO_LETTER_HALF_COUNT) *
+                                 LOGO_LETTER_WIDTH * LOGO_LETTER_HALF_HEIGHT +
+                             LARGE_PALETTED_TEXELS_OFFSET)),
+            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_LETTER_WIDTH,
+            LOGO_LETTER_HALF_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+            G_TX_NOLOD);
         gDPPipeSync(gfx++);
         gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
                   G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&D_8020CD90_ovl_05[i][g_DrawBufferIndex]),
-                  G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&D_8020D210_ovl_05[i][g_DrawBufferIndex]),
-                  G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        gSPMatrix(
+            gfx++,
+            OS_K0_TO_PHYSICAL(&f_LogoLetterTranslations[i][g_DrawBufferIndex]),
+            G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPMatrix(
+            gfx++,
+            OS_K0_TO_PHYSICAL(&f_LogoLetterScalings[i][g_DrawBufferIndex]),
+            G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
         gDPPipeSync(gfx++);
-        gSPVertex(gfx++, D_8020B2A0_ovl_05[j], 4, 0);
+        gSPVertex(gfx++, f_LogoLetterVertices[j], 4, 0);
         gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         gDPPipeSync(gfx++);
       }
     }
-    if (arg1 == 1) {
-      gDPSetPrimDepth(gfx++, 36, 0);
+    if (isDrawn == 1) {
+      gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
@@ -2073,21 +2292,26 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       gDPPipeSync(gfx++);
       gDPSetTexturePersp(gfx++, G_TP_NONE);
-      gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE),
-                          G_IM_FMT_I, G_IM_SIZ_8b, 64, 64, 0,
-                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPLoadTextureBlock(
+          gfx++, TEXTURE_ADDRESS(f_LogoShineImage + IMAGE_HEADER_SIZE),
+          G_IM_FMT_I, G_IM_SIZ_8b, LOGO_SHINE_IMAGE_SIZE, LOGO_SHINE_IMAGE_SIZE,
+          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
     }
-    D_8020B26C_ovl_05++;
-    if (D_8020B26C_ovl_05 > 64) {
-      D_8020B274_ovl_05 = 5;
+    f_LogoShineFrame++;
+    if (f_LogoShineFrame > LOGO_SHINE_LAST_FRAME) {
+      f_LogoState = LOGO_SHRINK_STARTING;
     }
-    if (arg1 == 1 && D_8020B26C_ovl_05 > 4 && D_8020B26C_ovl_05 < 36) {
+    if (isDrawn == 1 && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
+        f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
       gSPTextureRectangle(
-          gfx++, 10 << 2, 60 << 2, 630 << 2, 120 << 2, G_TX_RENDERTILE,
-          (64 - (D_8020B26C_ovl_05 - 16) * 18) << 5, 0, 0x28F, 0x28F);
+          gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
+          LOGO_SHINE_RIGHT << 2, LOGO_SHINE_BOTTOM << 2, G_TX_RENDERTILE,
+          (LOGO_SHINE_ORIGIN_TEXEL -
+           (f_LogoShineFrame - LOGO_SHINE_ORIGIN_FRAME) * LOGO_SHINE_SPEED)
+              << 5,
+          0, LOGO_SHINE_TEXEL_STEP, LOGO_SHINE_TEXEL_STEP);
       gDPPipeSync(gfx++);
     }
   }
@@ -2096,151 +2320,180 @@ void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1) {
   *displayListHead = gfx;
 
   for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-    if (D_80224708_ovl_05[i] == 1) {
-      if (D_80224730_ovl_05[i] > 0.0f) {
-        if (i != 7) {
-          if (f_LogoLetters[i].unk4 + (s32)D_80224730_ovl_05[i] >= 125) {
-            D_80224730_ovl_05[i] *= 0.2f;
-            f_LogoLetters[i].unk4 = 124;
-            if (D_80224730_ovl_05[i] <= 1.0f) {
-              D_80224730_ovl_05[i] = 0.0f;
-              D_80224708_ovl_05[i] = 9;
+    if (f_LogoLetterStates[i] == LOGO_LETTER_FALLING) {
+      if (f_LogoLetterSpeeds[i] > 0.0f) {
+        if (i != LOGO_LETTER_L) {
+          if (f_LogoLetters[i].y + (s32)f_LogoLetterSpeeds[i] >=
+              LOGO_LETTER_GROUND_Y) {
+            f_LogoLetterSpeeds[i] *= LOGO_LETTER_BOUNCINESS;
+            f_LogoLetters[i].y = LOGO_LETTER_GROUND_Y - 1;
+            if (f_LogoLetterSpeeds[i] <= LOGO_LETTER_MIN_BOUNCE_SPEED) {
+              f_LogoLetterSpeeds[i] = 0.0f;
+              f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
               continue;
             }
-            D_80224730_ovl_05[i] = -D_80224730_ovl_05[i];
-            D_80224708_ovl_05[i] = 2;
-            D_802247A0_ovl_05[i] = 10;
+            f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
+            f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
+            f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
           }
         } else {
-          if (f_LogoLetters[7].unk4 + (s32)D_80224730_ovl_05[7] >= 122) {
-            D_80224730_ovl_05[7] *= 0.2f;
-            f_LogoLetters[7].unk4 = 121;
-            if (D_80224730_ovl_05[7] <= 1.0f) {
-              D_80224730_ovl_05[7] = 0.0f;
-              D_80224708_ovl_05[7] = 9;
+          if (f_LogoLetters[LOGO_LETTER_L].y +
+                  (s32)f_LogoLetterSpeeds[LOGO_LETTER_L] >=
+              LOGO_LETTER_L_GROUND_Y) {
+            f_LogoLetterSpeeds[LOGO_LETTER_L] *= LOGO_LETTER_BOUNCINESS;
+            f_LogoLetters[LOGO_LETTER_L].y = LOGO_LETTER_L_GROUND_Y - 1;
+            if (f_LogoLetterSpeeds[LOGO_LETTER_L] <=
+                LOGO_LETTER_MIN_BOUNCE_SPEED) {
+              f_LogoLetterSpeeds[LOGO_LETTER_L] = 0.0f;
+              f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_LANDED;
               continue;
             }
-            D_80224730_ovl_05[7] = -D_80224730_ovl_05[7];
-            D_80224708_ovl_05[7] = 2;
-            D_802247A0_ovl_05[7] = 10;
+            f_LogoLetterSpeeds[LOGO_LETTER_L] =
+                -f_LogoLetterSpeeds[LOGO_LETTER_L];
+            f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
+            f_LogoLetterSquashFrames[LOGO_LETTER_L] = LOGO_LETTER_SQUASH_FRAMES;
           }
         }
       }
-      f_LogoLetters[i].unk4 += (s32)D_80224730_ovl_05[i];
-      D_80224730_ovl_05[i] += 0.5f;
-      D_80224758_ovl_05[i][0] += 0.04f;
-      D_80224758_ovl_05[i][1] += 0.04f;
-      if (D_80224758_ovl_05[i][0] > 1.0f) {
-        D_80224758_ovl_05[i][0] = 1.0f;
+      f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
+      f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
+      f_LogoLetterScales[i][0] += LOGO_LETTER_GROWTH;
+      f_LogoLetterScales[i][1] += LOGO_LETTER_GROWTH;
+      if (f_LogoLetterScales[i][0] > 1.0f) {
+        f_LogoLetterScales[i][0] = 1.0f;
       }
-      if (D_80224758_ovl_05[i][1] > 1.0f) {
-        D_80224758_ovl_05[i][1] = 1.0f;
+      if (f_LogoLetterScales[i][1] > 1.0f) {
+        f_LogoLetterScales[i][1] = 1.0f;
       }
-    } else if (D_80224708_ovl_05[i] == 2) {
-      D_80224758_ovl_05[i][0] += 0.03f;
-      D_80224758_ovl_05[i][1] -= 0.03f;
-      D_802247A0_ovl_05[i]--;
-      if (D_802247A0_ovl_05[i] == 0) {
-        D_80224708_ovl_05[i] = 3;
-        D_802247A0_ovl_05[i] = 2;
+    } else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHING) {
+      f_LogoLetterScales[i][0] += LOGO_LETTER_SQUASH_STEP;
+      f_LogoLetterScales[i][1] -= LOGO_LETTER_SQUASH_STEP;
+      f_LogoLetterSquashFrames[i]--;
+      if (f_LogoLetterSquashFrames[i] == 0) {
+        f_LogoLetterStates[i] = LOGO_LETTER_SQUASHED;
+        f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASHED_FRAMES;
       }
-    } else if (D_80224708_ovl_05[i] == 3) {
-      D_802247A0_ovl_05[i]--;
-      if (D_802247A0_ovl_05[i] == 0) {
-        D_80224708_ovl_05[i] = 4;
-        D_802247A0_ovl_05[i] = 5;
+    } else if (f_LogoLetterStates[i] == LOGO_LETTER_SQUASHED) {
+      f_LogoLetterSquashFrames[i]--;
+      if (f_LogoLetterSquashFrames[i] == 0) {
+        f_LogoLetterStates[i] = LOGO_LETTER_STRETCHING;
+        f_LogoLetterSquashFrames[i] = LOGO_LETTER_STRETCH_FRAMES;
       }
-    } else if (D_80224708_ovl_05[i] == 4) {
-      D_80224758_ovl_05[i][0] -= 0.06f;
-      D_80224758_ovl_05[i][1] += 0.06f;
-      D_802247A0_ovl_05[i]--;
-      if (D_802247A0_ovl_05[i] == 0) {
-        D_80224708_ovl_05[i] = 1;
-      }
-    }
-  }
-  if (D_8020B274_ovl_05 == 1) {
-    angle = D_8020B28C_ovl_05 * 0.017453294f;
-    sinf(D_8020B294_ovl_05 * 0.017453294f);
-    wobble = -sinf(D_8020B298_ovl_05 * 0.017453294f) * 40.0f;
-    D_8020B274_ovl_05 = 2;
-    D_8020AC50_ovl_05[0] =
-        (s32)(-cosf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 165;
-    D_8020AC50_ovl_05[1] =
-        (s32)(-sinf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 141;
-    D_8020AC60_ovl_05 = 1;
-  }
-  if (D_8020B274_ovl_05 == 2) {
-    angle = D_8020B28C_ovl_05 * 0.017453294f;
-    sinf(D_8020B294_ovl_05 * 0.017453294f);
-    wobble = -sinf(D_8020B298_ovl_05 * 0.017453294f) * 100.0f;
-    D_8020AC50_ovl_05[0] =
-        (s32)(-cosf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 165;
-    D_8020AC50_ovl_05[1] =
-        (s32)(-sinf(angle) * (D_8020AC5C_ovl_05 + wobble)) + 141;
-    D_8020AC5C_ovl_05 -= 4.0f;
-    D_8020B28C_ovl_05 += 5.5f;
-    D_8020B288_ovl_05 -= 23.0f;
-    D_8020B294_ovl_05 += 3.0f;
-    D_8020B298_ovl_05 += 6.0f;
-    if (D_8020AC5C_ovl_05 < 0.0f) {
-      D_8020AC5C_ovl_05 = 0.0f;
-      D_8020B274_ovl_05 = 3;
-    }
-  }
-  if (D_8020B274_ovl_05 == 3) {
-    D_8020B288_ovl_05 -= 23.0f;
-    D_8020B270_ovl_05--;
-    if (D_8020B270_ovl_05 < 0) {
-      D_8020B270_ovl_05 = 0;
-      if (D_8020B288_ovl_05 < 0.0f) {
-        D_8020B288_ovl_05 = 0.0f;
-        D_8020B274_ovl_05 = 4;
-        D_8020AC60_ovl_05 = 0;
+    } else if (f_LogoLetterStates[i] == LOGO_LETTER_STRETCHING) {
+      f_LogoLetterScales[i][0] -= LOGO_LETTER_STRETCH_STEP;
+      f_LogoLetterScales[i][1] += LOGO_LETTER_STRETCH_STEP;
+      f_LogoLetterSquashFrames[i]--;
+      if (f_LogoLetterSquashFrames[i] == 0) {
+        f_LogoLetterStates[i] = LOGO_LETTER_FALLING;
       }
     }
   }
-  if (D_8020B274_ovl_05 == 5) {
-    D_8020B274_ovl_05 = 6;
-    D_8020D818_ovl_05[0] = (86 - f_LogoLetters[0].unk0) / 10;
-    D_8020D818_ovl_05[1] = (104 - f_LogoLetters[1].unk0) / 10;
-    D_8020D818_ovl_05[2] = (125 - f_LogoLetters[2].unk0) / 10;
-    D_8020D818_ovl_05[3] = (139 - f_LogoLetters[3].unk0) / 10;
-    D_8020D818_ovl_05[4] = (154 - f_LogoLetters[4].unk0) / 10;
-    D_8020D818_ovl_05[5] = (184 - f_LogoLetters[5].unk0) / 10;
-    D_8020D818_ovl_05[6] = (204 - f_LogoLetters[6].unk0) / 10;
-    D_8020D818_ovl_05[7] = (220 - f_LogoLetters[7].unk0) / 10;
-    D_8020D818_ovl_05[8] = (234 - f_LogoLetters[8].unk0) / 10;
-    D_8020D83C_ovl_05[0] = (70 - f_LogoLetters[0].unk4) / 10;
-    D_8020D83C_ovl_05[1] = (68 - f_LogoLetters[7].unk4) / 10;
-    D_8020D844_ovl_05 = (0.72f - D_80224758_ovl_05[0][0]) * 0.1f;
-    D_8020D848_ovl_05 = (160 - D_8020AC50_ovl_05[0]) / 10;
-    D_8020D84C_ovl_05 = (188 - D_8020AC50_ovl_05[1]) / 10;
+  if (f_LogoState == LOGO_CLUB_STARTING) {
+    angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
+    sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
+    wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
+             LOGO_CLUB_FIRST_WOBBLE;
+    f_LogoState = LOGO_CLUB_CIRCLING;
+    f_LogoClubPosition[0] =
+        (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        LOGO_CLUB_ORBIT_CENTER_X;
+    f_LogoClubPosition[1] =
+        (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        LOGO_CLUB_ORBIT_CENTER_Y;
+    f_IsLogoClubSwinging = 1;
   }
-  if (D_8020B274_ovl_05 == 6) {
+  if (f_LogoState == LOGO_CLUB_CIRCLING) {
+    angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
+    sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
+    wobble = -sinf(f_LogoClubWobbleAngle * LOGO_DEGREES_TO_RADIANS) *
+             LOGO_CLUB_WOBBLE;
+    f_LogoClubPosition[0] =
+        (s32)(-cosf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        LOGO_CLUB_ORBIT_CENTER_X;
+    f_LogoClubPosition[1] =
+        (s32)(-sinf(angle) * (f_LogoClubOrbitRadius + wobble)) +
+        LOGO_CLUB_ORBIT_CENTER_Y;
+    f_LogoClubOrbitRadius -= LOGO_CLUB_ORBIT_RADIUS_STEP;
+    f_LogoClubOrbitAngle += LOGO_CLUB_ORBIT_ANGLE_STEP;
+    f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
+    f_LogoClubUnusedAngle += LOGO_CLUB_UNUSED_ANGLE_STEP;
+    f_LogoClubWobbleAngle += LOGO_CLUB_WOBBLE_ANGLE_STEP;
+    if (f_LogoClubOrbitRadius < 0.0f) {
+      f_LogoClubOrbitRadius = 0.0f;
+      f_LogoState = LOGO_CLUB_SPINNING;
+    }
+  }
+  if (f_LogoState == LOGO_CLUB_SPINNING) {
+    f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
+    f_LogoClubSpinFramesLeft--;
+    if (f_LogoClubSpinFramesLeft < 0) {
+      f_LogoClubSpinFramesLeft = 0;
+      if (f_LogoClubAngle < 0.0f) {
+        f_LogoClubAngle = 0.0f;
+        f_LogoState = LOGO_SHINING;
+        f_IsLogoClubSwinging = 0;
+      }
+    }
+  }
+  if (f_LogoState == LOGO_SHRINK_STARTING) {
+    f_LogoState = LOGO_SHRINKING;
+    /* The letters' shrunk x positions */
+    f_LogoLetterSteps[LOGO_LETTER_M] =
+        (LOGO_M_SHRUNK_X - f_LogoLetters[LOGO_LETTER_M].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_A] =
+        (LOGO_A_SHRUNK_X - f_LogoLetters[LOGO_LETTER_A].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_R] =
+        (LOGO_R_SHRUNK_X - f_LogoLetters[LOGO_LETTER_R].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_I] =
+        (LOGO_I_SHRUNK_X - f_LogoLetters[LOGO_LETTER_I].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_FIRST_O] =
+        (LOGO_FIRST_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_FIRST_O].x) /
+        LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_G] =
+        (LOGO_G_SHRUNK_X - f_LogoLetters[LOGO_LETTER_G].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_SECOND_O] =
+        (LOGO_SECOND_O_SHRUNK_X - f_LogoLetters[LOGO_LETTER_SECOND_O].x) /
+        LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_L] =
+        (LOGO_L_SHRUNK_X - f_LogoLetters[LOGO_LETTER_L].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterSteps[LOGO_LETTER_F] =
+        (LOGO_F_SHRUNK_X - f_LogoLetters[LOGO_LETTER_F].x) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterRises[LOGO_LETTER_M] =
+        (LOGO_SHRUNK_Y - f_LogoLetters[LOGO_LETTER_M].y) / LOGO_SHRINK_FRAMES;
+    f_LogoLetterRises[LOGO_LETTER_A] =
+        (LOGO_SHRUNK_L_Y - f_LogoLetters[LOGO_LETTER_L].y) / LOGO_SHRINK_FRAMES;
+    f_LogoScaleStep =
+        (LOGO_SHRUNK_SCALE - f_LogoLetterScales[LOGO_LETTER_M][0]) *
+        (1.0f / LOGO_SHRINK_FRAMES);
+    f_LogoClubStepX =
+        (LOGO_SHRUNK_CLUB_X - f_LogoClubPosition[0]) / LOGO_SHRINK_FRAMES;
+    f_LogoClubStepY =
+        (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[1]) / LOGO_SHRINK_FRAMES;
+  }
+  if (f_LogoState == LOGO_SHRINKING) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
-      if (i != 7) {
-        f_LogoLetters[i].unk0 += D_8020D818_ovl_05[i];
-        f_LogoLetters[i].unk4 += D_8020D83C_ovl_05[0];
-        D_80224758_ovl_05[i][0] += D_8020D844_ovl_05;
-        D_80224758_ovl_05[i][1] += D_8020D844_ovl_05;
+      if (i != LOGO_LETTER_L) {
+        f_LogoLetters[i].x += f_LogoLetterSteps[i];
+        f_LogoLetters[i].y += f_LogoLetterRises[LOGO_LETTER_M];
+        f_LogoLetterScales[i][0] += f_LogoScaleStep;
+        f_LogoLetterScales[i][1] += f_LogoScaleStep;
       }
     }
-    f_LogoLetters[7].unk0 += D_8020D818_ovl_05[7];
-    f_LogoLetters[7].unk4 += D_8020D83C_ovl_05[1];
-    D_8020AC50_ovl_05[0] += D_8020D848_ovl_05;
-    D_8020AC50_ovl_05[1] += D_8020D84C_ovl_05;
-    D_80224758_ovl_05[7][0] += D_8020D844_ovl_05;
-    D_80224758_ovl_05[7][1] += D_8020D844_ovl_05;
-    D_8020B280_ovl_05[0] += D_8020D844_ovl_05;
-    D_8020B280_ovl_05[1] += D_8020D844_ovl_05;
-    if (D_80224758_ovl_05[0][0] < 0.72f) {
-      D_8020B274_ovl_05 = 7;
+    f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
+    f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
+    f_LogoClubPosition[0] += f_LogoClubStepX;
+    f_LogoClubPosition[1] += f_LogoClubStepY;
+    f_LogoLetterScales[LOGO_LETTER_L][0] += f_LogoScaleStep;
+    f_LogoLetterScales[LOGO_LETTER_L][1] += f_LogoScaleStep;
+    f_LogoClubScale[0] += f_LogoScaleStep;
+    f_LogoClubScale[1] += f_LogoScaleStep;
+    if (f_LogoLetterScales[LOGO_LETTER_M][0] < LOGO_SHRUNK_SCALE) {
+      f_LogoState = LOGO_SHRUNK;
     }
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200CBC_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 #endif
 
 /* The opening's sparks, which fan out from a point and slow down */
