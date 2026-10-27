@@ -791,7 +791,113 @@ void func_80210DF4_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80211A5C_ovl_01);
+/* func_80211A5C writes a figure to one decimal place, its whole part lined up on the right */
+#define MENU_GLYPH_FIRST_DIGIT 1
+#define MENU_GLYPH_POINT 18
+#define DECIMAL_WHOLE_LIMIT 999
+#define DECIMAL_DIGIT_LIMIT 6
+#define HUNDREDTHS_PER_UNIT 100.0f
+#define DECIMAL_BASE 10
+/* The point is drawn half a glyph back, over the right half of the last whole digit */
+#define DECIMAL_POINT_OFFSET (MENU_GLYPH_SIZE / 2)
+
+const char D_802318E4_ovl_01[] = "%d";
+
+void func_80211A5C_ovl_01(Gfx **displayListHead, s32 x, s32 y, f32 value) {
+    Gfx *gfx = *displayListHead;
+    s32 whole = value;
+    s32 shift;
+    s32 fraction;
+    s32 digitIndex;
+    u8 digit;
+    s32 unused[4];
+
+    if (whole > DECIMAL_WHOLE_LIMIT) {
+        whole = DECIMAL_WHOLE_LIMIT;
+    }
+    if (whole < 0) {
+        whole = 0;
+    }
+    fraction = (value - whole) * HUNDREDTHS_PER_UNIT;
+    /* Round the hundredths to tenths */
+    if (fraction % DECIMAL_BASE >= DECIMAL_BASE / 2) {
+        fraction += DECIMAL_BASE;
+    }
+    fraction /= DECIMAL_BASE;
+    if (fraction >= DECIMAL_BASE) {
+        whole++;
+        if (whole > DECIMAL_WHOLE_LIMIT) {
+            whole = DECIMAL_WHOLE_LIMIT;
+            fraction = DECIMAL_BASE - 1;
+        } else {
+            fraction = 0;
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    shift = 0;
+    if (whole >= 0 && whole < DECIMAL_BASE) {
+        shift = 2 * MENU_GLYPH_SIZE;
+    }
+    if (whole >= DECIMAL_BASE && whole < DECIMAL_BASE * DECIMAL_BASE) {
+        shift += MENU_GLYPH_SIZE;
+    }
+    sprintf(g_PrintBuffer, D_802318E4_ovl_01, whole);
+    for (digitIndex = 0; digitIndex != DECIMAL_DIGIT_LIMIT; digitIndex++) {
+        digit = g_PrintBuffer[digitIndex];
+        if (digit == '\0') {
+            break;
+        }
+        gDPLoadTextureBlock_4b(gfx++,
+                               ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                (digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+                                   ~7,
+                               G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
+                                (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+                                (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    gDPLoadTextureBlock_4b(gfx++,
+                           ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                            MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE) & ~7,
+                           G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET) << 2,
+                            y << 2,
+                            (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET + MENU_GLYPH_SIZE)
+                                << 2,
+                            (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++,
+                           ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                            (fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+                               ~7,
+                           G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
+                            (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+                            (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Nothing reads these */
+const char D_802318E8_ovl_01[] = "";
+const char D_802318EC_ovl_01[] = "";
 
 void func_802123E0_ovl_01(Gfx **displayListHead, s32 x, s32 y, u8 sign) {
     Gfx *gfx = *displayListHead;
