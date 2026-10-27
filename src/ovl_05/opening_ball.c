@@ -1,6 +1,8 @@
 #include "common.h"
 
+#include "ball_simulation.h"
 #include "character_slot.h"
+#include "libc.h"
 #include "reaction.h"
 #include "surface.h"
 
@@ -32,7 +34,23 @@ SurfaceInfo* func_802066F0_ovl_05(s32 surface) {
   return &D_8020B564_ovl_05[surface];
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206718_ovl_05);
+/* An unused copy of ResetBallSimulations, which resets g_BallSimulations as
+ * that does */
+void func_80206718_ovl_05(void) {
+  s32 index;
+
+  for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
+    g_BallSimulations[index].position[AXIS_X] = 0x800;
+    g_BallSimulations[index].position[AXIS_Y] = -1000;
+    rand(); /* The original has it */
+    g_BallSimulations[index].position[AXIS_Z] = 0x1000;
+    g_BallSimulations[index].velocity[AXIS_X] = rand() & 0x3FF;
+    g_BallSimulations[index].velocity[AXIS_Y] = -100;
+    g_BallSimulations[index].velocity[AXIS_Z] = rand() & 0x3FF;
+    g_BallSimulations[index].unk30 = 0;
+    g_BallSimulations[index].isRunning = BALL_STATE_FLYING;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_ball", func_80206800_ovl_05);
 
