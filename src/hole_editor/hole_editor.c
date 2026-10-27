@@ -9,6 +9,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "main.h"
+#include "math_util.h"
 #include "scene.h"
 #include "screen.h"
 #include "sound.h"
@@ -25,6 +26,15 @@
 #define EDITOR_SOUND_VOLUME 127
 /* WORLD_TO_COURSE_SCALE as a shift */
 #define WORLD_TO_COURSE_SHIFT 10
+
+/* func_804079B8 goes over the ground in two halves of 8 by 16 blocks */
+#define SLOPE_HALF_COUNT 2
+#define SLOPE_BLOCK_COLUMN_COUNT 8
+#define SLOPE_BLOCK_ROW_COUNT 16
+/* The triangles' starting corners; every corner is overwritten before it is read */
+#define START_TRIANGLE_SIZE 256
+#define SLOPE_SHADE_OFFSET 0x40
+#define SLOPE_SHADE_MAX 0xFF
 
 /* func_80406818's steps, in sHoleFileStep */
 #define HOLE_FILE_STEP_ACTION 0
@@ -121,6 +131,18 @@ extern s32 D_8040C5B0_hole_editor;
 extern s32 D_8040C5B4_hole_editor;
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
+
+/* A ground triangle's slope, from func_804079B8 */
+typedef struct TriangleSlope {
+    /* 0x0 */ s16 unk0;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 normalX; /* Twice the normal's x, of a normal 256 long */
+    /* 0x6 */ s16 normalZ;
+    /* 0x8 */ u8 shade; /* 0 when flat, from SLOPE_SHADE_OFFSET up for slopes */
+    /* 0x9 */ u8 unk9;
+} TriangleSlope; /* size = 0xA */
+
+extern TriangleSlope sTriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 
 /* func_80406818's menu */
 extern s32 sIsSavingHoleFiles;
@@ -539,7 +561,120 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406C3C_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804077B0_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804079B8_hole_editor);
+/*
+ * Fills sTriangleSlopes from the ground. It goes over the cells in blocks
+ * of 2 columns by 4 rows; each cell's two triangles take an entry each.
+ */
+void func_804079B8_hole_editor(void) {
+    PlaneTriangle firstTriangle;
+    PlaneTriangle secondTriangle;
+    IntegerPlane plane;
+    s32 blockRow;
+    s32 half;
+    s32 blockColumn;
+    s32 block;
+    s32 pairRow;
+    s32 cellRowInPair;
+    s32 cellRow;
+    s32 cellColumnInBlock;
+    s32 row;
+    s32 slopeIndex;
+    s32 column;
+    Vtx *corner;
+    Vtx *nextColumnCorner;
+    Vtx *nextRowCorner;
+    Vtx *oppositeCorner;
+
+    slopeIndex = 0;
+    firstTriangle.corners[AXIS_X][0] = 0;
+    firstTriangle.corners[AXIS_X][1] = START_TRIANGLE_SIZE;
+    firstTriangle.corners[AXIS_X][2] = 0;
+    firstTriangle.corners[AXIS_Z][0] = 0;
+    firstTriangle.corners[AXIS_Z][1] = 0;
+    firstTriangle.corners[AXIS_Z][2] = START_TRIANGLE_SIZE;
+    secondTriangle.corners[AXIS_X][0] = START_TRIANGLE_SIZE;
+    secondTriangle.corners[AXIS_X][1] = 0;
+    secondTriangle.corners[AXIS_X][2] = START_TRIANGLE_SIZE;
+    secondTriangle.corners[AXIS_Z][0] = 0;
+    secondTriangle.corners[AXIS_Z][1] = START_TRIANGLE_SIZE;
+    secondTriangle.corners[AXIS_Z][2] = START_TRIANGLE_SIZE;
+    for (half = 0; half < SLOPE_HALF_COUNT; half++) {
+        for (blockRow = 0; blockRow < SLOPE_BLOCK_ROW_COUNT; blockRow++) {
+            for (blockColumn = 0; blockColumn < SLOPE_BLOCK_COLUMN_COUNT; blockColumn++) {
+                block = half * SLOPE_BLOCK_COLUMN_COUNT + blockColumn;
+                for (pairRow = 0; pairRow < 2; pairRow++) {
+                    cellRow = (blockRow * 2 + pairRow) * 2;
+                    for (cellRowInPair = 0; cellRowInPair < 2; cellRowInPair++) {
+                        for (cellColumnInBlock = 0; cellColumnInBlock < 2; cellColumnInBlock++) {
+                            row = cellRow + cellRowInPair;
+                            column = block * 2 + cellColumnInBlock;
+                            corner = GetGroundPoint(column, row);
+                            nextColumnCorner = GetGroundPoint(column + 1, row);
+                            nextRowCorner = GetGroundPoint(column, row + 1);
+                            oppositeCorner = GetGroundPoint(column + 1, row + 1);
+                            firstTriangle.corners[AXIS_Y][0] = corner->v.ob[AXIS_Y];
+                            secondTriangle.corners[AXIS_Y][0] = firstTriangle.corners[AXIS_Y][1] =
+                                nextColumnCorner->v.ob[AXIS_Y];
+                            secondTriangle.corners[AXIS_Y][2] = firstTriangle.corners[AXIS_Y][2] =
+                                nextRowCorner->v.ob[AXIS_Y];
+                            secondTriangle.corners[AXIS_Y][1] = oppositeCorner->v.ob[AXIS_Y];
+                            firstTriangle.corners[AXIS_X][0] = corner->v.ob[AXIS_X];
+                            firstTriangle.corners[AXIS_X][1] = nextColumnCorner->v.ob[AXIS_X];
+                            firstTriangle.corners[AXIS_X][2] = nextRowCorner->v.ob[AXIS_X];
+                            firstTriangle.corners[AXIS_Z][0] = corner->v.ob[AXIS_Z];
+                            firstTriangle.corners[AXIS_Z][1] = nextColumnCorner->v.ob[AXIS_Z];
+                            firstTriangle.corners[AXIS_Z][2] = nextRowCorner->v.ob[AXIS_Z];
+                            secondTriangle.corners[AXIS_X][0] = nextColumnCorner->v.ob[AXIS_X];
+                            secondTriangle.corners[AXIS_X][1] = oppositeCorner->v.ob[AXIS_X];
+                            secondTriangle.corners[AXIS_X][2] = nextRowCorner->v.ob[AXIS_X];
+                            secondTriangle.corners[AXIS_Z][0] = nextColumnCorner->v.ob[AXIS_Z];
+                            secondTriangle.corners[AXIS_Z][1] = oppositeCorner->v.ob[AXIS_Z];
+                            secondTriangle.corners[AXIS_Z][2] = nextRowCorner->v.ob[AXIS_Z];
+                            firstTriangle.corners[AXIS_X][1] -= firstTriangle.corners[AXIS_X][0];
+                            firstTriangle.corners[AXIS_X][2] -= firstTriangle.corners[AXIS_X][0];
+                            firstTriangle.corners[AXIS_X][0] = 0;
+                            firstTriangle.corners[AXIS_Z][1] -= firstTriangle.corners[AXIS_Z][0];
+                            firstTriangle.corners[AXIS_Z][2] -= firstTriangle.corners[AXIS_Z][0];
+                            firstTriangle.corners[AXIS_Z][0] = 0;
+                            secondTriangle.corners[AXIS_X][1] -= secondTriangle.corners[AXIS_X][0];
+                            secondTriangle.corners[AXIS_X][2] -= secondTriangle.corners[AXIS_X][0];
+                            secondTriangle.corners[AXIS_X][0] = 0;
+                            secondTriangle.corners[AXIS_Z][1] -= secondTriangle.corners[AXIS_Z][0];
+                            secondTriangle.corners[AXIS_Z][2] -= secondTriangle.corners[AXIS_Z][0];
+                            secondTriangle.corners[AXIS_Z][0] = 0;
+                            plane.normal[AXIS_Z] = 0;
+                            plane.normal[AXIS_X] = 0;
+                            GetTriangleIntegerPlane(&firstTriangle, &plane);
+                            sTriangleSlopes[slopeIndex].normalX = plane.normal[AXIS_X] * 2;
+                            sTriangleSlopes[slopeIndex].normalZ = plane.normal[AXIS_Z] * 2;
+                            sTriangleSlopes[slopeIndex].shade = IntLength2D(plane.normal[AXIS_X], plane.normal[AXIS_Z]);
+                            if (sTriangleSlopes[slopeIndex].shade != 0) {
+                                if (sTriangleSlopes[slopeIndex].shade < SLOPE_SHADE_MAX - SLOPE_SHADE_OFFSET) {
+                                    sTriangleSlopes[slopeIndex].shade += SLOPE_SHADE_OFFSET;
+                                } else {
+                                    sTriangleSlopes[slopeIndex].shade = SLOPE_SHADE_MAX;
+                                }
+                            }
+                            slopeIndex++;
+                            GetTriangleIntegerPlane(&secondTriangle, &plane);
+                            sTriangleSlopes[slopeIndex].normalX = plane.normal[AXIS_X] * 2;
+                            sTriangleSlopes[slopeIndex].normalZ = plane.normal[AXIS_Z] * 2;
+                            sTriangleSlopes[slopeIndex].shade = IntLength2D(plane.normal[AXIS_X], plane.normal[AXIS_Z]);
+                            if (sTriangleSlopes[slopeIndex].shade != 0) {
+                                if (sTriangleSlopes[slopeIndex].shade < SLOPE_SHADE_MAX - SLOPE_SHADE_OFFSET) {
+                                    sTriangleSlopes[slopeIndex].shade += SLOPE_SHADE_OFFSET;
+                                } else {
+                                    sTriangleSlopes[slopeIndex].shade = SLOPE_SHADE_MAX;
+                                }
+                            }
+                            slopeIndex++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 /*
  * Fills D_80491A60 with the cube of cos(column * pi/4) * sin(row * pi/4),
