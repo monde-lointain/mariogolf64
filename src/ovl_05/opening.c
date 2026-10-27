@@ -36,13 +36,13 @@
 #define OPENING_NAME_LOGO_SIZE 0x2208
 
 typedef struct OpeningNameLogo {
-  s32 assetId;
-  s32 unk04;
-  s32 unk08;
-  s32 unk0C;
-  s32 unk10;
-  s32 unk14;
-  s32 unk18;
+  /* 0x00 */ s32 assetId;
+  /* 0x04 */ s32 width;
+  /* 0x08 */ s32 height;
+  /* 0x0C */ s32 x;
+  /* 0x10 */ s32 y;
+  /* 0x14 */ s32 shownWidth; /* As the logo unfolds and flips */
+  /* 0x18 */ s32 shownHeight;
 } OpeningNameLogo; /* size = 0x1C */
 
 extern s32 D_8020AC4C_ovl_05;
@@ -52,11 +52,17 @@ extern s32 D_8020AC60_ovl_05;
 extern s32 D_8020AC64_ovl_05;
 extern u8 D_80212830_ovl_05[];
 extern u8 D_80213A40_ovl_05[];
+/* The steps that a name logo's animation starts each phase at */
+#define NAME_LOGO_UNFOLD 0     /* Widens over 8 frames */
+#define NAME_LOGO_FLIP_DOWN 10 /* Flattens over 4 frames */
+#define NAME_LOGO_FLIP_UP 20   /* Grows back over 4 frames */
+#define NAME_LOGO_STILL 30
+
 extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
 extern u8 D_8020E400_ovl_05[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
-extern s32 D_80212810_ovl_05[OPENING_NAME_SLOT_COUNT];
-extern s32 D_80212818_ovl_05[OPENING_NAME_SLOT_COUNT];
-extern s32 D_80212820_ovl_05[OPENING_NAME_SLOT_COUNT];
+extern s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
+extern s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
+extern s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
 extern s32 D_8020AD70_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern f32 D_8020AD80_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern s32 f_OpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
@@ -270,14 +276,64 @@ void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
 
   OpenEncodedAsset(f_OpeningNameLogos[logoIndex].assetId, &asset);
   ReadEncodedAsset(D_8020E400_ovl_05[slot], &asset);
-  D_80212810_ovl_05[slot] = logoIndex;
-  D_80212818_ovl_05[slot] = 0;
-  D_80212820_ovl_05[slot] = 0;
+  f_NameSlotLogoIndices[slot] = logoIndex;
+  f_NameSlotSteps[slot] = 0;
+  f_IsNameSlotShown[slot] = 0;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA8D8_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FB864_ovl_05);
+/* Steps the shown name logos' animations: each unfolds, flips over, then
+ * stays */
+void AnimateNameLogos(void) {
+  s32 slot;
+
+  for (slot = 0; slot != OPENING_NAME_SLOT_COUNT; slot++) {
+    if (!f_IsNameSlotShown[slot]) {
+      continue;
+    }
+    if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_DOWN) {
+      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth +=
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width / 8;
+      f_NameSlotSteps[slot]++;
+      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth >
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width) {
+        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
+      }
+      if (f_NameSlotSteps[slot] == NAME_LOGO_UNFOLD + 8) {
+        f_NameSlotSteps[slot] = NAME_LOGO_FLIP_DOWN;
+      }
+    } else if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
+      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight -=
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
+      f_NameSlotSteps[slot]++;
+      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight <= 0) {
+        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight = 1;
+      }
+      if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_DOWN + 4) {
+        f_NameSlotSteps[slot] = NAME_LOGO_FLIP_UP;
+      }
+    } else if (f_NameSlotSteps[slot] < NAME_LOGO_STILL) {
+      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight +=
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height / 4;
+      f_NameSlotSteps[slot]++;
+      if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight >
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height) {
+        f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
+            f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
+      }
+      if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_UP + 4) {
+        f_NameSlotSteps[slot] = NAME_LOGO_STILL;
+      }
+    } else {
+      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
+      f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
+          f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
+    }
+  }
+}
 
 /* Loads ball image ballIndex into slot and resets the slot */
 void func_801FBB10_ovl_05(s32 ballIndex, s32 slot) {
