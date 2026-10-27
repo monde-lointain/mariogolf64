@@ -124,7 +124,6 @@ extern s32 f_IsLakituFlying;
 extern s32 f_LakituAngle;
 extern s32 f_LookAtEaseMode;
 extern f32 f_LookAtEaseRate;
-extern CoursePoint f_LookAtTarget;
 
 /* A 48x432 CI8 image of the letters, one above the next */
 #define ASSET_LOGO_LETTER_IMAGES 0x945
@@ -2259,10 +2258,13 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
   s32 bottom;
 
   if (f_ShotBallScale != 0) {
-    f_ShotBallPosition[0] = f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE;
-    f_ShotBallPosition[2] = f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[0] =
+        f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+    f_ShotBallPosition[2] =
+        f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
     f_ShotBallPosition[1] =
-        f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE + SHOT_BALL_LIFT;
+        f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE +
+        SHOT_BALL_LIFT;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2392,10 +2394,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningShotBall);
 #endif
 
 /* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
-#define LOOK_AT_EASE_FAST                                                    \
-  1                         /* To f_LookAtTarget, a tenth of the way a frame \
-                             */
-#define LOOK_AT_EASE_SLOW 2 /* To f_LookAtTarget, a hundredth of the way */
+/* To the shot ball, a tenth of the way a frame */
+#define LOOK_AT_EASE_FAST 1
+#define LOOK_AT_EASE_SLOW 2 /* To the shot ball, a hundredth of the way */
 /* Near f_OpeningBallPositions[1], at a rate that grows to a tenth */
 #define LOOK_AT_EASE_SPEEDING_UP 3
 
@@ -2404,30 +2405,30 @@ void EaseOpeningLookAt(void) {
   switch (f_LookAtEaseMode) {
     case LOOK_AT_EASE_FAST:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          (f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          (f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          (f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.1f;
       func_80203620_ovl_05();
       break;
     case LOOK_AT_EASE_SLOW:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          (f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          (f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          (f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE -
+          (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.01f;
       func_80203620_ovl_05();

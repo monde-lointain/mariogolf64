@@ -3314,7 +3314,6 @@ f_LakituTrailMatrices = 0x8021B4C0; // size:0xA00 segment:ovl_05
 f_LakituTrailStart = 0x8021BEC0; // type:f32 size:0x8 segment:ovl_05
 EaseOpeningLookAt = 0x802008D8; // type:func segment:ovl_05
 f_LookAtEaseMode = 0x8020AD68; // type:s32 size:0x4 segment:ovl_05
-f_LookAtTarget = 0x8022BF08; // type:s32 size:0xC segment:ovl_05
 f_LookAtEaseRate = 0x8020B260; // type:f32 size:0x4 segment:ovl_05
 LoadOpeningLogo = 0x80200B18; // type:func segment:ovl_05
 f_LogoLetters = 0x80224698; // size:0x6C segment:ovl_05
