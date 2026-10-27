@@ -23,7 +23,7 @@
 #define NO_BUTTONS (-1)
 
 /* ovl_01 sets this to the held buttons of each player's menu reading, ORed together */
-extern s32 D_800C2000;
+extern s32 g_MenuRepeatButtons;
 
 void func_8005C674(s32, s32);
 
@@ -121,9 +121,9 @@ void UpdateUnusedButtonCode(void) {
     s32 index;
 
     index = 0;
-    if (D_800C2000 > 0) {
+    if (g_MenuRepeatButtons > 0) {
         if (sUnusedCodeLength < UNUSED_CODE_LENGTH) {
-            sUnusedCodeEntered[sUnusedCodeLength] = D_800C2000;
+            sUnusedCodeEntered[sUnusedCodeLength] = g_MenuRepeatButtons;
             sUnusedCodeLength++;
         }
         for (; index != sUnusedCodeLength; index++) {

@@ -72,9 +72,9 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 #define LISTED_TOPIC_COUNT 5
 
 
-extern s32 D_800C2000;
+extern s32 g_MenuRepeatButtons;
 extern s32 D_800FE334;
-extern s32 D_801EFFA0;
+extern s32 g_MenuScreen;
 extern void *sHandImages;
 extern void *sArrowImages;
 extern void *sUnusedImage;
@@ -309,7 +309,7 @@ void UpdateHelpBoard(void) {
     if (IsHudAnimationDone() != 1) {
         return;
     }
-    if (D_800C2000 & A_BUTTON) {
+    if (g_MenuRepeatButtons & A_BUTTON) {
         if (sOpenTopic == 0) {
             sOpenTopic = memory->helpTopicIndex + 1;
             ClearHelpText();
@@ -333,14 +333,14 @@ void UpdateHelpBoard(void) {
             RevealTextSlot(HELP_TEXT_SLOT_TITLE);
             RevealTextSlot(HELP_TEXT_SLOT_PAGE);
         }
-    } else if (D_800C2000 & B_BUTTON) {
+    } else if (g_MenuRepeatButtons & B_BUTTON) {
         PlaySound(0x5F, 0xF, 0x7F);
         if (sOpenTopic <= 0) {
             StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
             if (memory->unk46 == 0) {
-                D_801EFFA0 = 0x1C;
+                g_MenuScreen = 0x1C;
             } else {
-                D_801EFFA0 = 2;
+                g_MenuScreen = 2;
             }
             StopLoaderThread();
             FreeAllCharacterSlots();
@@ -355,7 +355,7 @@ void UpdateHelpBoard(void) {
             RevealTextSlot(HELP_TEXT_SLOT_TITLE);
             RevealTextSlot(HELP_TEXT_SLOT_PAGE);
         }
-    } else if (D_800C2000 & U_JPAD) {
+    } else if (g_MenuRepeatButtons & U_JPAD) {
         if (sOpenTopic == 0) {
             PlaySound(0x5C, 0xF, 0x64);
             if (sFirstListedTopic == memory->helpTopicIndex) {
@@ -368,7 +368,7 @@ void UpdateHelpBoard(void) {
             }
             ClearHelpText();
         }
-    } else if (D_800C2000 & D_JPAD) {
+    } else if (g_MenuRepeatButtons & D_JPAD) {
         if (sOpenTopic == 0) {
             PlaySound(0x5C, 0xF, 0x64);
             if (sFirstListedTopic + LISTED_TOPIC_COUNT - 1 == memory->helpTopicIndex) {

@@ -118,7 +118,7 @@ extern s8 D_801B70F2;
 extern s8 D_801B70F3;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
-extern s32 D_801EFFA0;
+extern s32 g_MenuScreen;
 extern u8 g_MapCamera[];
 extern void *D_801F4A20;
 extern void *D_8012D3AC;
@@ -238,7 +238,7 @@ void LoadMenuResources(void) {
     ReadEncodedAsset(D_8012D420[0], &asset);
     OpenEncodedAsset(*D_800C2014, &asset);
     ReadEncodedAsset(D_8012D424, &asset);
-    if (D_801EFFA0 == 5) {
+    if (g_MenuScreen == 5) {
         OpenEncodedAsset(0x528, &asset);
         ReadEncodedAsset(D_801B5CD0[0], &asset);
         OpenEncodedAsset(0x528, &asset);
@@ -254,14 +254,14 @@ void LoadMenuResources(void) {
     D_801052BC[1] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
     ReadEncodedAsset(D_801052BC[1], &asset);
     for (index = 0; index != ARRAY_COUNT(D_801049A0); index++) {
-        if (D_801EFFA0 == 5) {
+        if (g_MenuScreen == 5) {
             size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
         } else {
             size = OpenEncodedAsset(D_800C2064[index], &asset);
         }
         D_801049A0[index] = AllocMemory(size);
         ReadEncodedAsset(D_801049A0[index], &asset);
-        if (D_801EFFA0 == 5) {
+        if (g_MenuScreen == 5) {
             size = OpenEncodedAsset(D_800C20E0[D_80105B68][index], &asset);
         } else {
             size = OpenEncodedAsset(D_800C2064[index], &asset);
@@ -1519,7 +1519,7 @@ void func_8005D9A0(void) {
 
     D_800C2BD0 = 6;
     D_800FE334 = 0;
-    D_801EFFA0 = 0;
+    g_MenuScreen = 0;
     D_80105B68 = 0;
     D_801B7070 = 0;
     D_8012F480 = -1;
@@ -1601,7 +1601,7 @@ void func_8005DAFC(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_801EFFA0 = 6;
+    g_MenuScreen = 6;
 }
 
 void func_8005DC50(void) {
@@ -1618,7 +1618,7 @@ void func_8005DC50(void) {
     D_800C1FF5 = -1;
     D_800C1FF6 = -1;
     D_800C1FF7 = -1;
-    D_801EFFA0 = 0;
+    g_MenuScreen = 0;
 }
 
 void func_8005DCDC(void) {
@@ -1626,7 +1626,7 @@ void func_8005DCDC(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_801EFFA0 = 0x17;
+    g_MenuScreen = 0x17;
 }
 
 void func_8005DD10(void) {
@@ -1634,7 +1634,7 @@ void func_8005DD10(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_801EFFA0 = 5;
+    g_MenuScreen = 5;
 }
 
 void func_8005DD44(void) {
@@ -1642,7 +1642,7 @@ void func_8005DD44(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_801EFFA0 = 0x12;
+    g_MenuScreen = 0x12;
 }
 
 void func_8005DD78(void) {
@@ -1650,7 +1650,7 @@ void func_8005DD78(void) {
     D_801B9410 = 1;
     D_800FE334 = 0;
     D_800C2BD4 = 0;
-    D_801EFFA0 = 0xD;
+    g_MenuScreen = 0xD;
 }
 
 void func_8005DDAC(void) {
@@ -1660,7 +1660,7 @@ void func_8005DDAC(void) {
     D_801B9410 = 1;
     g_GameState.unk31 = 0;
     ClearGameFlag(GAME_FLAG_UNK1E);
-    D_801EFFA0 = 0xC;
+    g_MenuScreen = 0xC;
 }
 
 s8 func_8005DE00(void) {
