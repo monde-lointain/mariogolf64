@@ -38,7 +38,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210D94_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210DF4_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210E3C_ovl_01);
+INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", DrawMenuNumber);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80211A5C_ovl_01);
 
