@@ -77,11 +77,27 @@ extern f32 sMenuBobPhase;
 #define NARROW_BOARD_TOP 36
 #define NARROW_BOARD_SHOWN_WIDTH 170
 
+/*
+ * func_801FC754 draws the course backdrop of D_801F4A20 at double size. Each
+ * strip loads a row either side of the rows it shows, so that the filtering
+ * blends across the seams.
+ */
+#define BACKDROP_WIDTH 152
+#define BACKDROP_SCALE 2
+#define BACKDROP_SEAM_ROW_COUNT 2
+#define BACKDROP_SECOND_ROW_START (1 << 5)
+#define BACKDROP_STRIP_ROW_COUNT 11
+#define BACKDROP_STRIP_COUNT 11
+#define BACKDROP_LEFT 8
+#define BACKDROP_FIRST_TOP 8
+#define BACKDROP_TOP 10
+
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern void *D_800FF420[2];
 extern s32 D_801051F0;
 extern void *D_801052BC[2];
 extern void *D_801B60D0;
+extern void *D_801F4A20;
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
@@ -724,7 +740,52 @@ void func_801FC60C_ovl_01(Gfx **displayListHead, s32 layers) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FC754_ovl_01);
+void func_801FC754_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 shownRowCount;
+    s32 stripTop;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_801F4A20 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != BACKDROP_STRIP_COUNT; stripIndex++) {
+        /* The image ends in a strip of one row */
+        shownRowCount = (stripIndex != BACKDROP_STRIP_COUNT - 1) ? BACKDROP_STRIP_ROW_COUNT : 1;
+        if (stripIndex == 0) {
+            /* The first strip has no row above it, so it shows its first row too */
+            gDPLoadTextureBlock(gfx++, ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                                G_IM_SIZ_8b, BACKDROP_WIDTH, BACKDROP_STRIP_ROW_COUNT + BACKDROP_SEAM_ROW_COUNT, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, BACKDROP_FIRST_TOP << 2,
+                                    (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
+                                    (BACKDROP_FIRST_TOP + (BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE) << 2,
+                                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
+                                    TEXEL_STEP_ONE / BACKDROP_SCALE);
+        } else {
+            gDPPipeSync(gfx++);
+            gDPLoadTextureBlock(gfx++,
+                                ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
+                                 stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT) & ~7,
+                                G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH, shownRowCount + BACKDROP_SEAM_ROW_COUNT, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            stripTop = BACKDROP_TOP + stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE;
+            gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
+                                    (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
+                                    (BACKDROP_TOP + stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE +
+                                     shownRowCount * BACKDROP_SCALE)
+                                        << 2,
+                                    G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START, TEXEL_STEP_ONE / BACKDROP_SCALE,
+                                    TEXEL_STEP_ONE / BACKDROP_SCALE);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void func_801FCB74_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
