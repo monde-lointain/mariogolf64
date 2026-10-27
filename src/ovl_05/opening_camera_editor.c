@@ -1,16 +1,16 @@
 #include "common.h"
 #include "math_util.h"
 
-/* The camera that the opening's camera editor moves */
-typedef struct EditedCamera {
+/* The state of the opening's camera editor, starting with the camera it moves */
+typedef struct CameraEditor {
     /* 0x00 */ Vec3 eye;
     /* 0x0C */ Vec3 lookAt;
     /* 0x18 */ f32 heading;  /* In radians, of the look direction across the ground */
     /* 0x1C */ f32 pitch;    /* In radians, of the look direction above the ground */
     /* 0x20 */ f32 distance; /* From the eye to the look-at point */
-} EditedCamera;
+} CameraEditor;
 
-extern EditedCamera D_8022BE30_ovl_05;
+extern CameraEditor D_8022BE30_ovl_05;
 extern f32 D_8022BEB0_ovl_05;
 extern f32 D_8022BEB4_ovl_05;
 extern f32 D_8022BEB8_ovl_05;
