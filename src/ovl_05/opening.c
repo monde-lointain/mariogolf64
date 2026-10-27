@@ -83,10 +83,10 @@ extern Mtx f_LookAtMarkerScaling;
 
 extern s32 f_IsCometFlying;
 extern s32 f_CometAngle;
-extern s32 D_8020AD68_ovl_05;
-extern f32 D_8020B260_ovl_05;
+extern s32 f_LookAtEaseMode;
+extern f32 f_LookAtEaseRate;
 extern Vec3 D_8021706C_ovl_05;
-extern CoursePoint D_8022BF08_ovl_05;
+extern CoursePoint f_LookAtTarget;
 
 void AssignCharacterBuffers(void);
 void func_801F5454_ovl_05(CameraMatrices* matrices);
@@ -322,7 +322,67 @@ void func_801FFC10_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FFC40_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_802008D8_ovl_05);
+/* f_LookAtEaseMode values: how EaseOpeningLookAt moves the look-at point */
+#define LOOK_AT_EASE_FAST 1 /* To f_LookAtTarget, a tenth of the way a frame \
+                             */
+#define LOOK_AT_EASE_SLOW 2 /* To f_LookAtTarget, a hundredth of the way */
+/* Near D_8021706C_ovl_05, at a rate that grows to a tenth */
+#define LOOK_AT_EASE_SPEEDING_UP 3
+
+/* Eases the camera's look-at point as f_LookAtEaseMode says */
+void EaseOpeningLookAt(void) {
+  switch (f_LookAtEaseMode) {
+    case LOOK_AT_EASE_FAST:
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+          (f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+          0.1f;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+          (f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+          0.1f;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+          (f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+          0.1f;
+      func_80203620_ovl_05();
+      break;
+    case LOOK_AT_EASE_SLOW:
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+          (f_LookAtTarget[0] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+          0.01f;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+          (f_LookAtTarget[1] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+          0.01f;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+          (f_LookAtTarget[2] * COURSE_TO_WORLD_SCALE -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+          0.01f;
+      func_80203620_ovl_05();
+      break;
+    case LOOK_AT_EASE_SPEEDING_UP:
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
+          ((D_8021706C_ovl_05[0] + 38.1f) -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
+          f_LookAtEaseRate;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
+          ((D_8021706C_ovl_05[1] - 4.5f) -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
+          f_LookAtEaseRate;
+      g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
+          ((D_8021706C_ovl_05[2] - 4.795f) -
+           g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
+          f_LookAtEaseRate;
+      func_80203620_ovl_05();
+      f_LookAtEaseRate += 0.002f;
+      if (f_LookAtEaseRate > 0.1f) {
+        f_LookAtEaseRate = 0.1f;
+      }
+      break;
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200B18_ovl_05);
 
