@@ -31,6 +31,18 @@
 #define MENU_UNKE_PRESET_SECOND 5
 #define MENU_UNKE_PRESET_SECOND_FOUR_PLAYER 6
 
+/*
+ * The rows of the stats panel slide across together: D_80230784 holds their
+ * offsets, and D_802307A8 holds where each slide after the first sends them
+ */
+#define STATS_SLIDE_ROW_COUNT 9
+#define STATS_SLIDE_CURRENT 0
+#define STATS_SLIDE_OUT_RIGHT 1
+#define STATS_SLIDE_OUT_LEFT 2
+#define STATS_SLIDE_IN_FROM_RIGHT 3
+#define STATS_SLIDE_IN_FROM_LEFT 4
+#define STATS_SLIDE_COUNT 5
+
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -46,7 +58,14 @@ extern void *D_8023B638_ovl_01;
 extern u8 *D_8023B63C_ovl_01;
 extern void *D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
+extern s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT];
+extern s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT];
+extern s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT];
+extern s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT];
+extern u8 D_80230838_ovl_01;
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
+
+void func_8021B87C_ovl_01(Gfx **displayListHead, u8 slide);
 extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT][PLAYER_STATS_FILE_SIZE];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
@@ -93,7 +112,62 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B1E0_ovl_01);
 
+/* Doesn't match: the original keeps the slide's first target and the first offset in each other's registers */
+#ifdef NON_MATCHING
+s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
+    Gfx *gfx = *displayListHead;
+    s32 index;
+    s32 rowIndex;
+    s32 target;
+    s32 first;
+
+    if ((slide != STATS_SLIDE_CURRENT && slide < STATS_SLIDE_COUNT) == FALSE) {
+        return -1;
+    }
+    target = D_802307A8_ovl_01[slide - 1][0];
+    first = D_80230784_ovl_01[0];
+    for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
+        if (D_80230784_ovl_01[index] != target && first != D_80230784_ovl_01[index]) {
+            break;
+        }
+    }
+    if (index == STATS_SLIDE_ROW_COUNT && D_80230838_ovl_01 != slide) {
+        D_80230838_ovl_01 = slide;
+        switch (slide) {
+            case STATS_SLIDE_OUT_RIGHT:
+                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
+                    D_80230784_ovl_01[rowIndex] = D_802307A8_ovl_01[STATS_SLIDE_OUT_RIGHT - 1][rowIndex];
+                    D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+                }
+                break;
+            case STATS_SLIDE_OUT_LEFT:
+                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
+                    D_80230784_ovl_01[rowIndex] = D_802307A8_ovl_01[STATS_SLIDE_OUT_LEFT - 1][rowIndex];
+                    D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+                }
+                break;
+            case STATS_SLIDE_IN_FROM_RIGHT:
+            case STATS_SLIDE_IN_FROM_LEFT:
+                for (rowIndex = 0; rowIndex != STATS_SLIDE_ROW_COUNT; rowIndex++) {
+                    D_80230784_ovl_01[rowIndex] = D_802307A8_ovl_01[D_80230838_ovl_01 - 1][rowIndex];
+                    D_8023073C_ovl_01[rowIndex] = D_80230718_ovl_01[rowIndex];
+                }
+                break;
+        }
+    }
+    func_8021B87C_ovl_01(&gfx, D_80230838_ovl_01);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+    for (index = 0; index != STATS_SLIDE_ROW_COUNT; index++) {
+        if (D_80230784_ovl_01[0] != D_80230784_ovl_01[index]) {
+            break;
+        }
+    }
+    return index != STATS_SLIDE_ROW_COUNT;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B618_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B87C_ovl_01);
 
