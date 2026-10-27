@@ -90,6 +90,39 @@ extern f32 f_LookAtEaseRate;
 extern Vec3 D_8021706C_ovl_05;
 extern CoursePoint f_LookAtTarget;
 
+/* A 48x432 CI8 image of the letters, one above the next */
+#define ASSET_LOGO_LETTER_IMAGES 0x945
+/* 152x78 CI8 */
+#define ASSET_LOGO_CLUB_IMAGE 0x946
+/* 24x24 CI8 */
+#define ASSET_LOGO_MARIO_IMAGE 0x94B
+/* A 64x192 CI8 image of three golf balls */
+#define ASSET_LOGO_BALL_IMAGES 0x94E
+/* A 64x64 I8 gradient that sweeps across the logo */
+#define ASSET_LOGO_SHINE_IMAGE 0x6A4
+
+/* "MARIO GOLF" */
+#define LOGO_LETTER_COUNT 9
+/* Where a letter starts, off the screen */
+#define LOGO_LETTER_HIDDEN (-1000)
+
+typedef struct LogoLetter {
+  s32 unk0;
+  s32 unk4;
+  s32 unk8;
+} LogoLetter; /* size = 0xC */
+
+extern u8 f_LogoLetterImages[];
+extern u8 f_LogoClubImage[];
+extern u8 f_LogoMarioImage[];
+extern u8 f_LogoBallImages[];
+extern u8 f_LogoShineImage[];
+extern LogoLetter f_LogoLetters[LOGO_LETTER_COUNT];
+extern s32 D_80224708_ovl_05[LOGO_LETTER_COUNT];
+extern f32 D_80224730_ovl_05[LOGO_LETTER_COUNT];
+extern f32 D_80224758_ovl_05[LOGO_LETTER_COUNT][2];
+extern s32 D_802247A0_ovl_05[LOGO_LETTER_COUNT];
+
 void AssignCharacterBuffers(void);
 void func_801F5454_ovl_05(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
@@ -100,7 +133,6 @@ void func_801FF70C_ovl_05(Gfx** displayListHead);
 void func_801FFC40_ovl_05(Gfx** displayListHead);
 void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
 void func_80202D34_ovl_05(Gfx** displayListHead);
-void func_80200B18_ovl_05(void);
 
 void func_801F4A40_ovl_05(void) {
   D_8020AC4C_ovl_05++;
@@ -137,7 +169,7 @@ void LoadOpening(void) {
   ReadEncodedAsset(g_ShadowTexture, &asset);
   D_8020AC64_ovl_05 = 0;
   LoadEffectImages();
-  func_80200B18_ovl_05();
+  LoadOpeningLogo();
 }
 
 void FreeOpening(void) {
@@ -407,7 +439,40 @@ void EaseOpeningLookAt(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200B18_ovl_05);
+/* Loads the title logo's images and lines its letters up, off the screen */
+void LoadOpeningLogo(void) {
+  EncodedAsset asset;
+  s32 letterIndex;
+
+  OpenEncodedAsset(ASSET_LOGO_LETTER_IMAGES, &asset);
+  ReadEncodedAsset(f_LogoLetterImages, &asset);
+  OpenEncodedAsset(ASSET_LOGO_CLUB_IMAGE, &asset);
+  ReadEncodedAsset(f_LogoClubImage, &asset);
+  for (letterIndex = 0; letterIndex < LOGO_LETTER_COUNT; letterIndex++) {
+    D_80224708_ovl_05[letterIndex] = 0;
+    D_80224730_ovl_05[letterIndex] = -14.0f;
+    f_LogoLetters[letterIndex].unk0 = LOGO_LETTER_HIDDEN;
+    f_LogoLetters[letterIndex].unk4 = LOGO_LETTER_HIDDEN;
+    D_80224758_ovl_05[letterIndex][0] = 0.1f;
+    D_80224758_ovl_05[letterIndex][1] = 0.1f;
+    D_802247A0_ovl_05[letterIndex] = 0;
+  }
+  f_LogoLetters[0].unk8 = 8;
+  f_LogoLetters[1].unk8 = 12;
+  f_LogoLetters[2].unk8 = 16;
+  f_LogoLetters[3].unk8 = 20;
+  f_LogoLetters[4].unk8 = 24;
+  f_LogoLetters[5].unk8 = 28;
+  f_LogoLetters[6].unk8 = 36;
+  f_LogoLetters[7].unk8 = 40;
+  f_LogoLetters[8].unk8 = 44;
+  OpenEncodedAsset(ASSET_LOGO_MARIO_IMAGE, &asset);
+  ReadEncodedAsset(f_LogoMarioImage, &asset);
+  OpenEncodedAsset(ASSET_LOGO_BALL_IMAGES, &asset);
+  ReadEncodedAsset(f_LogoBallImages, &asset);
+  OpenEncodedAsset(ASSET_LOGO_SHINE_IMAGE, &asset);
+  ReadEncodedAsset(f_LogoShineImage, &asset);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_80200CBC_ovl_05);
 
