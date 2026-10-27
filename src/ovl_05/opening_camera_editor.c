@@ -8,20 +8,36 @@ typedef struct CameraEditor {
     /* 0x18 */ f32 heading;  /* In radians, of the look direction across the ground */
     /* 0x1C */ f32 pitch;    /* In radians, of the look direction above the ground */
     /* 0x20 */ f32 distance; /* From the eye to the look-at point */
-} CameraEditor;
+    /* 0x24 */ f32 unk24;
+    /* 0x28 */ Vec3 unk28[2];
+    /* 0x40 */ Vec3 unk40[2];
+    /* 0x58 */ f32 unk58;
+    /* 0x5C */ f32 unk5C;
+    /* 0x60 */ f32 unk60;
+    /* 0x64 */ f32 unk64;
+    /* 0x68 */ f32 unk68;
+    /* 0x6C */ f32 unk6C;
+    /* 0x70 */ f32 unk70[2];
+    /* 0x78 */ f32 unk78[2];
+    /* 0x80 */ f32 unk80;
+    /* 0x84 */ f32 unk84;
+    /* 0x88 */ f32 unk88;
+    /* 0x8C */ f32 unk8C;
+    /* 0x90 */ f32 unk90;
+    /* 0x94 */ f32 unk94;
+    /* 0x98 */ f32 unk98[2];
+    /* 0xA0 */ f32 unkA0;
+    /* 0xA4 */ f32 unkA4;
+    /* 0xA8 */ f32 unkA8;
+    /* 0xAC */ s32 flags[2]; /* EDITOR_FLAG_* bits */
+    /* 0xB4 */ s32 unkB4[2];
+} CameraEditor; /* size = 0xBC */
 
-extern CameraEditor D_8022BE30_ovl_05;
-extern f32 D_8022BEB0_ovl_05;
-extern f32 D_8022BEB4_ovl_05;
-extern f32 D_8022BEB8_ovl_05;
-extern f32 D_8022BEBC_ovl_05;
-extern f32 D_8022BEC0_ovl_05;
-extern f32 D_8022BEC4_ovl_05;
-/* D_8022BEDC_ovl_05 bits */
+/* CameraEditor flags bits */
 #define EDITOR_FLAG_UNK8 0x8
 #define EDITOR_FLAG_UNK80 0x80
 
-extern s32 D_8022BEDC_ovl_05[2];
+extern CameraEditor D_8022BE30_ovl_05;
 
 void func_80203620_ovl_05(void);
 void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
@@ -41,18 +57,18 @@ void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035BC_ovl_05);
 
 void func_802035E4_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BEB0_ovl_05 = arg1;
-    D_8022BEB4_ovl_05 = arg2;
+    D_8022BE30_ovl_05.unk80 = arg1;
+    D_8022BE30_ovl_05.unk84 = arg2;
 }
 
 void func_802035F8_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BEB8_ovl_05 = arg1;
-    D_8022BEBC_ovl_05 = arg2;
+    D_8022BE30_ovl_05.unk88 = arg1;
+    D_8022BE30_ovl_05.unk8C = arg2;
 }
 
 void func_8020360C_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BEC0_ovl_05 = arg1;
-    D_8022BEC4_ovl_05 = arg2;
+    D_8022BE30_ovl_05.unk90 = arg1;
+    D_8022BE30_ovl_05.unk94 = arg2;
 }
 
 /* Works out the camera's heading, pitch and distance from its eye and look-at point */
@@ -77,19 +93,19 @@ void func_80203620_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_05);
 
-/* Sets the flags of entry index and clears them in the other before calling func_8020370C */
+/* Sets two flags in entry index and clears them in the other before calling func_8020370C */
 void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
-    if (!(D_8022BEDC_ovl_05[index] & EDITOR_FLAG_UNK80)) {
-        D_8022BEDC_ovl_05[index] ^= EDITOR_FLAG_UNK80;
+    if (!(D_8022BE30_ovl_05.flags[index] & EDITOR_FLAG_UNK80)) {
+        D_8022BE30_ovl_05.flags[index] ^= EDITOR_FLAG_UNK80;
     }
-    if (D_8022BEDC_ovl_05[index ^ 1] & EDITOR_FLAG_UNK80) {
-        D_8022BEDC_ovl_05[index ^ 1] ^= EDITOR_FLAG_UNK80;
+    if (D_8022BE30_ovl_05.flags[index ^ 1] & EDITOR_FLAG_UNK80) {
+        D_8022BE30_ovl_05.flags[index ^ 1] ^= EDITOR_FLAG_UNK80;
     }
-    if (!(D_8022BEDC_ovl_05[index] & EDITOR_FLAG_UNK8)) {
-        D_8022BEDC_ovl_05[index] ^= EDITOR_FLAG_UNK8;
+    if (!(D_8022BE30_ovl_05.flags[index] & EDITOR_FLAG_UNK8)) {
+        D_8022BE30_ovl_05.flags[index] ^= EDITOR_FLAG_UNK8;
     }
-    if (D_8022BEDC_ovl_05[index ^ 1] & EDITOR_FLAG_UNK8) {
-        D_8022BEDC_ovl_05[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    if (D_8022BE30_ovl_05.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
+        D_8022BE30_ovl_05.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
     }
     func_8020370C_ovl_05(index, x, y, z, frameCount);
 }
@@ -101,14 +117,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203B60_ovl_0
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203C90_ovl_05);
 
 s32 func_80203DC4_ovl_05(void) {
-    if (D_8022BEDC_ovl_05[0] == 0 && D_8022BEDC_ovl_05[1] == 0) {
+    if (D_8022BE30_ovl_05.flags[0] == 0 && D_8022BE30_ovl_05.flags[1] == 0) {
         return TRUE;
     }
     return FALSE;
 }
 
 s32 func_80203DE8_ovl_05(s32 mask) {
-    if (!(D_8022BEDC_ovl_05[0] & mask) && !(D_8022BEDC_ovl_05[1] & mask)) {
+    if (!(D_8022BE30_ovl_05.flags[0] & mask) && !(D_8022BE30_ovl_05.flags[1] & mask)) {
         return TRUE;
     }
     return FALSE;
