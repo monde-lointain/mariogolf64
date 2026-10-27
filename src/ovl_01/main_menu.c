@@ -427,4 +427,23 @@ void DrawBirdieBadgeLabel(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80209478_ovl_01);
+s32 GetOpenCourseCount(void) {
+    s32 coursePoints = GetSaveData()->coursePoints;
+
+    if (IsGameFlagSet(GAME_FLAG_OPEN_SIX_COURSES)) {
+        return 6;
+    }
+    if (IsGameFlagSet(GAME_FLAG_OPEN_FIVE_COURSES)) {
+        return 5;
+    }
+    if (IsGameFlagSet(GAME_FLAG_OPEN_FOUR_COURSES)) {
+        return 4;
+    }
+    if (IsGameFlagSet(GAME_FLAG_OPEN_THREE_COURSES)) {
+        return 3;
+    }
+    if (IsGameFlagSet(GAME_FLAG_OPEN_TWO_COURSES)) {
+        return 2;
+    }
+    return CountOpenCourses(coursePoints);
+}

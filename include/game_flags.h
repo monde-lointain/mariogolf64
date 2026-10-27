@@ -66,6 +66,13 @@
 /* Opens every course on the hole and Ring Shot selects */
 #define GAME_FLAG_ALL_COURSES 0x5E
 
+/* Open at least this many courses on the main menu, whatever the Course Points */
+#define GAME_FLAG_OPEN_TWO_COURSES 0x58
+#define GAME_FLAG_OPEN_THREE_COURSES 0x59
+#define GAME_FLAG_OPEN_FOUR_COURSES 0x5A
+#define GAME_FLAG_OPEN_FIVE_COURSES 0x5B
+#define GAME_FLAG_OPEN_SIX_COURSES 0x5C
+
 /* Stops the debug text grid from being drawn */
 #define GAME_FLAG_HIDE_DEBUG_TEXT 0x1D
 

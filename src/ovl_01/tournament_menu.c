@@ -28,7 +28,13 @@ extern void *D_80230F48_ovl_01;
 extern void *D_80230F4C_ovl_01;
 extern void *D_80230F50_ovl_01;
 extern void *D_80230F54_ovl_01;
-extern u8 D_80230FD4_ovl_01[8];
+/* The codes that enter club tournaments: how many there are, and their length */
+#define CLUB_TOURNAMENT_CODE_COUNT 36
+#define CLUB_TOURNAMENT_CODE_LENGTH 8
+
+extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
+extern s32 D_80230F6C_ovl_01;
+extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
 extern s8 D_80105DBC[5];
 
 void ResetMenuWindow(void) {
@@ -227,7 +233,30 @@ s32 func_8022B5E0_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B668_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B75C_ovl_01);
+s32 func_8022B75C_ovl_01(void) {
+    s32 foundIndex = -1;
+    s32 codeIndex;
+    s32 matchCount;
+    s32 charIndex;
+
+    for (codeIndex = 0; codeIndex != CLUB_TOURNAMENT_CODE_COUNT; codeIndex++) {
+        matchCount = 0;
+        for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
+            if (D_80230FD4_ovl_01[charIndex] != D_80230FDC_ovl_01[codeIndex][charIndex]) {
+                break;
+            }
+            matchCount++;
+        }
+        if (matchCount == CLUB_TOURNAMENT_CODE_LENGTH) {
+            foundIndex = codeIndex;
+            break;
+        }
+    }
+    if (foundIndex == -1) {
+        D_80230F6C_ovl_01 = TRUE;
+    }
+    return foundIndex;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B7E0_ovl_01);
 
