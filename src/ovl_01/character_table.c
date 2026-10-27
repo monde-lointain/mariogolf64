@@ -24,6 +24,12 @@ void func_8005C674(s32 arg0, s32 arg1);
 #define ASSET_TABLE_ARROWS 0x94A
 #define ASSET_TABLE_STAR 0x5BE
 
+/* func_80217464 squeezes the star's image to fit a table cell */
+#define TABLE_STAR_IMAGE_WIDTH 32
+#define TABLE_STAR_IMAGE_HEIGHT 24
+#define TABLE_STAR_WIDTH 24
+#define TABLE_STAR_HEIGHT 20
+
 /* Where the table's popup goes, and the cursor places that move it */
 #define TABLE_POPUP_TOP_LEFT 0
 #define TABLE_POPUP_TOP_RIGHT 1
@@ -247,7 +253,21 @@ void func_8021730C_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80217464_ovl_01);
+void func_80217464_ovl_01(Gfx **displayListHead, s32 left, s32 top) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023AC70_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_8023AC70_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                           TABLE_STAR_IMAGE_WIDTH, TABLE_STAR_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + TABLE_STAR_WIDTH) << 2, (top + TABLE_STAR_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, (TABLE_STAR_IMAGE_WIDTH << 10) / TABLE_STAR_WIDTH,
+                            (TABLE_STAR_IMAGE_HEIGHT << 10) / TABLE_STAR_HEIGHT);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void func_802177D0_ovl_01(void) {
     EncodedAsset asset;
