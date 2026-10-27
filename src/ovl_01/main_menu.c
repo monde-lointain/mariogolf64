@@ -238,7 +238,7 @@ extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
-extern s8 D_801323A0[];
+extern MenuMemory D_801323A0;
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE28_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
@@ -372,7 +372,7 @@ void StartLoadingChosenHole(void) {
             g_CourseIndex =
                 g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
         } else {
-            g_CourseIndex = ((MenuMemory *)D_801323A0)->courseChoice;
+            g_CourseIndex = D_801323A0.courseChoice;
         }
         g_HoleIndex = GetFirstHoleIndex();
     }
@@ -393,7 +393,7 @@ s32 GetChosenCourseIndex(void) {
     if (g_IsMiniGolf) {
         return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
     }
-    return ((MenuMemory *)D_801323A0)->courseChoice;
+    return D_801323A0.courseChoice;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C78_ovl_01);
@@ -519,8 +519,8 @@ void func_801F6B28_ovl_01(void) {
         player->controllerIndex = D_800C1FF4[index];
         sprintf(player->name, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
         if (D_8012F480[index] >= CHARACTER_KID) {
-            row = *((s8 *)D_801323A0 + index + 7);
-            column = *((s8 *)D_801323A0 + index + 3);
+            row = D_801323A0.characterRows[index];
+            column = D_801323A0.characterColumns[index];
             if (row == GAME_BOY_CHARACTER_ROW) {
                 player->gameBoyCharacterIndex = column;
             }
@@ -599,7 +599,7 @@ void func_801F70F0_ovl_01(void) {
     }
     if (g_MenuPressedButtons & A_BUTTON) {
         PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
-        titleChoice = ((MenuMemory *)D_801323A0)->titleChoice;
+        titleChoice = D_801323A0.titleChoice;
         if (titleChoice == TITLE_CHOICE_NEW_GAME) {
             for (index = 0; index != MAX_PLAYER_COUNT; index++) {
                 *((s8 *)memory + index + 3) = 0;
@@ -617,7 +617,7 @@ void func_801F70F0_ovl_01(void) {
             memory->courseIndex = 0;
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
             g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
-            D_80105B68 = ((MenuMemory *)D_801323A0)->playerCountChoice + 1;
+            D_80105B68 = D_801323A0.playerCountChoice + 1;
             for (index = 0; index != MAX_PLAYER_COUNT; index++) {
                 D_800FBE08[index] = 0;
             }
@@ -647,14 +647,14 @@ void func_801F70F0_ovl_01(void) {
                 g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
             }
         }
-        if (D_801B71CC != g_MenuScreen || D_800FBE2C != ((MenuMemory *)D_801323A0)->playerCountChoice) {
-            ((MenuMemory *)D_801323A0)->modeChoice = 0;
+        if (D_801B71CC != g_MenuScreen || D_800FBE2C != D_801323A0.playerCountChoice) {
+            D_801323A0.modeChoice = 0;
             *(s16 *)D_800FBD40 = 0;
         }
         D_801052E8 = 0;
         D_801B9410 = 0;
         D_801B71CC = g_MenuScreen;
-        D_800FBE2C = ((MenuMemory *)D_801323A0)->playerCountChoice;
+        D_800FBE2C = D_801323A0.playerCountChoice;
         return;
     }
     if (g_MenuPressedButtons & B_BUTTON) {
@@ -669,44 +669,44 @@ void func_801F70F0_ovl_01(void) {
     }
     /* titleChoice is moved through the array's bytes, which keeps its address in a register as the original does */
     if (g_MenuRepeatButtons & U_JPAD) {
-        D_801323A0[1]--;
+        D_801323A0.titleChoice--;
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     } else if (g_MenuRepeatButtons & D_JPAD) {
-        D_801323A0[1]++;
+        D_801323A0.titleChoice++;
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
     }
-    if (D_801323A0[1] < 0) {
-        D_801323A0[1] = TITLE_CHOICE_COUNT - 1;
+    if (D_801323A0.titleChoice < 0) {
+        D_801323A0.titleChoice = TITLE_CHOICE_COUNT - 1;
     }
-    if (D_801323A0[1] >= TITLE_CHOICE_COUNT) {
-        D_801323A0[1] = 0;
+    if (D_801323A0.titleChoice >= TITLE_CHOICE_COUNT) {
+        D_801323A0.titleChoice = 0;
     }
-    if (D_801323A0[1] == TITLE_CHOICE_NEW_GAME) {
+    if (D_801323A0.titleChoice == TITLE_CHOICE_NEW_GAME) {
         if (g_MenuRepeatButtons & L_JPAD) {
-            ((MenuMemory *)D_801323A0)->playerCountChoice--;
+            D_801323A0.playerCountChoice--;
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         } else if (g_MenuRepeatButtons & R_JPAD) {
-            ((MenuMemory *)D_801323A0)->playerCountChoice++;
+            D_801323A0.playerCountChoice++;
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         }
     }
-    if (((MenuMemory *)D_801323A0)->playerCountChoice < 0) {
-        ((MenuMemory *)D_801323A0)->playerCountChoice = MAX_PLAYER_COUNT - 1;
+    if (D_801323A0.playerCountChoice < 0) {
+        D_801323A0.playerCountChoice = MAX_PLAYER_COUNT - 1;
     }
-    if (((MenuMemory *)D_801323A0)->playerCountChoice >= MAX_PLAYER_COUNT) {
-        ((MenuMemory *)D_801323A0)->playerCountChoice = 0;
+    if (D_801323A0.playerCountChoice >= MAX_PLAYER_COUNT) {
+        D_801323A0.playerCountChoice = 0;
     }
 }
 
 void func_801F75EC_ovl_01(void) {
-    D_801323A0[2] = 0;
+    D_801323A0.unk2 = 0;
     if (D_800FBD40[2] == 1) {
         do {
-            D_801323A0[2]++;
-            if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-                D_801323A0[2] = 0;
+            D_801323A0.unk2++;
+            if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+                D_801323A0.unk2 = 0;
             }
-        } while (D_800FBD40[D_801323A0[2] + 2] == 1);
+        } while (D_800FBD40[D_801323A0.unk2 + 2] == 1);
     }
 }
 
@@ -719,41 +719,41 @@ void func_801F75EC_ovl_01(void) {
 
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
     if (D_8022BE28_ovl_01 != 0) {
-        while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-            D_801323A0[2]++;
-            if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-                D_801323A0[2] = 0;
+        while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+            D_801323A0.unk2++;
+            if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+                D_801323A0.unk2 = 0;
             }
         }
         if (g_ControllerStates[0].pressedButtons & U_JPAD) {
-            D_801323A0[2]--;
+            D_801323A0.unk2--;
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]--;
-                if (D_801323A0[2] < 0) {
-                    D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2--;
+                if (D_801323A0.unk2 < 0) {
+                    D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
                 }
             }
         } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
-            D_801323A0[2]++;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]++;
-                if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-                    D_801323A0[2] = 0;
+            D_801323A0.unk2++;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2++;
+                if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+                    D_801323A0.unk2 = 0;
                 }
             }
         }
-        if (D_801323A0[2] < 0) {
-            D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]--;
+        if (D_801323A0.unk2 < 0) {
+            D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2--;
             }
         }
-        if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-            D_801323A0[2] = 0;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]++;
+        if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+            D_801323A0.unk2 = 0;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2++;
             }
         }
     } else if (D_8022BE2C_ovl_01 == 1) {
@@ -764,8 +764,8 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
             }
         }
     } else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
-        if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) && D_800FBD40[D_801323A0[2] + 2] == 0) {
-            PlayCharacterSound(D_801323A0[2], 0, CHOSEN_CHARACTER_VOICE, MENU_VOLUME_SOFT, CHOSEN_CHARACTER_PAN);
+        if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) && D_800FBD40[D_801323A0.unk2 + 2] == 0) {
+            PlayCharacterSound(D_801323A0.unk2, 0, CHOSEN_CHARACTER_VOICE, MENU_VOLUME_SOFT, CHOSEN_CHARACTER_PAN);
             D_8022BE2C_ovl_01 = 1;
             SetAnimationSpeed(0, 1.0f);
             return 0;
@@ -774,41 +774,41 @@ s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
             PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
             return -1;
         }
-        while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-            D_801323A0[2]++;
-            if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-                D_801323A0[2] = 0;
+        while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+            D_801323A0.unk2++;
+            if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+                D_801323A0.unk2 = 0;
             }
         }
         if (g_MenuRepeatButtons & U_JPAD) {
-            D_801323A0[2]--;
+            D_801323A0.unk2--;
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]--;
-                if (D_801323A0[2] < 0) {
-                    D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2--;
+                if (D_801323A0.unk2 < 0) {
+                    D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
                 }
             }
         } else if (g_MenuRepeatButtons & D_JPAD) {
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
-            D_801323A0[2]++;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]++;
-                if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-                    D_801323A0[2] = 0;
+            D_801323A0.unk2++;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2++;
+                if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+                    D_801323A0.unk2 = 0;
                 }
             }
         }
-        if (D_801323A0[2] < 0) {
-            D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]--;
+        if (D_801323A0.unk2 < 0) {
+            D_801323A0.unk2 = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2--;
             }
         }
-        if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
-            D_801323A0[2] = 0;
-            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
-                D_801323A0[2]++;
+        if (D_801323A0.unk2 > D_8022BE0C_ovl_01 - 1) {
+            D_801323A0.unk2 = 0;
+            while (D_800FBD40[D_801323A0.unk2 + 2] == 1) {
+                D_801323A0.unk2++;
             }
         }
     }
@@ -1237,8 +1237,8 @@ void func_801FADBC_ovl_01(void) {
     }
     if (g_MenuPressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
-        if (D_801323A0[0xB] == MENU_SCREEN_UNK5) {
-            g_MenuScreen = D_801323A0[0xB];
+        if (D_801323A0.modeChoice == MENU_SCREEN_UNK5) {
+            g_MenuScreen = D_801323A0.modeChoice;
         } else {
             g_MenuScreen = MENU_SCREEN_UNK6;
         }
@@ -1689,7 +1689,7 @@ void func_802004A0_ovl_01(Gfx **displayListHead) {
     }
     D_8022F8C5_ovl_01++;
     if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
-        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][((MenuMemory *)D_801323A0)->modeChoice];
+        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice];
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01++;
         if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
@@ -1729,7 +1729,7 @@ void func_80200A40_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 halfSize
     }
     D_8022F8C5_ovl_01++;
     if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
-        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][((MenuMemory *)D_801323A0)->modeChoice];
+        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice];
         D_8022F8C5_ovl_01 = 0;
         D_8022F8C0_ovl_01++;
         if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
