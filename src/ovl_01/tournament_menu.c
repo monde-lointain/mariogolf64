@@ -147,6 +147,17 @@ extern s8 D_80230FAC_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT]
 #define CLUB_CODE_CHAR_WIDTH 24
 #define CLUB_CODE_NO_CHAR 0xFF
 
+/* func_8022B7E0 marks the next character to type with a shrunken menu cursor */
+#define CODE_CURSOR_FIRST_X -42
+#define CODE_CURSOR_Y -50.0f
+#define CODE_CURSOR_SCALE 0.6f
+extern Vtx D_80231138_ovl_01[MENU_CURSOR_VERTEX_COUNT];
+extern f32 D_80231180_ovl_01[MENU_CURSOR_VERTEX_COUNT]; /* The phase of each corner's colour */
+extern Mtx D_8023BE40_ovl_01;
+extern Mtx D_8023BE80_ovl_01;
+extern Mtx D_8023BEC0_ovl_01;
+extern Mtx D_8023BF80_ovl_01;
+
 /* Where the prompt's two messages are drawn */
 #define CLUB_CODE_PROMPT_X 56
 #define CLUB_CODE_INCORRECT_X 24
@@ -1080,7 +1091,71 @@ s32 func_8022B75C_ovl_01(void) {
     return foundIndex;
 }
 
+/*
+ * Doesn't match: the stack slots of the pointers to the second pipe sync
+ * after the image and the cycle type are swapped.
+ */
+#ifdef NON_MATCHING
+void func_8022B7E0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 vertexIndex;
+    s32 red;
+    s32 blue;
+    s32 green;
+    s32 charIndex;
+
+    for (vertexIndex = 0; vertexIndex != MENU_CURSOR_VERTEX_COUNT; vertexIndex++) {
+        D_80231180_ovl_01[vertexIndex] += MENU_CURSOR_PHASE_STEP;
+        red = (s32)(sinf(D_80231180_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) + MENU_CURSOR_COLOR_MIDDLE;
+        blue = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI / 2) * MENU_CURSOR_COLOR_SWING) +
+               MENU_CURSOR_COLOR_MIDDLE;
+        green = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI) * MENU_CURSOR_COLOR_SWING) +
+                MENU_CURSOR_COLOR_MIDDLE;
+        D_80231138_ovl_01[vertexIndex].v.cn[0] = red;
+        D_80231138_ovl_01[vertexIndex].v.cn[2] = blue;
+        D_80231138_ovl_01[vertexIndex].v.cn[1] = green;
+    }
+    guOrtho(&D_8023BE40_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
+            MENU_CURSOR_NEAR, MENU_CURSOR_FAR, 1.0f);
+    charIndex = D_80230F68_ovl_01;
+    if (charIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
+        charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
+    }
+    guTranslate(&D_8023BE80_ovl_01, charIndex * CLUB_CODE_CHAR_WIDTH + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
+                MENU_CURSOR_Z);
+    guRotate(&D_8023BEC0_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
+    guScale(&D_8023BF80_ovl_01, CODE_CURSOR_SCALE, CODE_CURSOR_SCALE, 1.0f);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_80230F54_ovl_01 + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_IA, MENU_CURSOR_SIZE,
+                           MENU_CURSOR_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetCombineMode(gfx++, G_CC_SHADEDECALA, G_CC_SHADEDECALA);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE40_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BE80_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BEC0_ovl_01), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BF80_ovl_01), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    gSPVertex(gfx++, D_80231138_ovl_01, MENU_CURSOR_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B7E0_ovl_01);
+#endif
 
 s32 func_8022BDB0_ovl_01(void) {
     return D_80105DBC[4] == -1;
