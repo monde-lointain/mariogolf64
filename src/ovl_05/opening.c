@@ -66,15 +66,15 @@ extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
 extern s32 D_8022BFA8_ovl_05;
 extern u8* g_ShadowTexture;
-extern s32 f_CometScreenPoint[2];
+extern s32 f_LakituScreenPoint[2];
 /* A 32x32 CI8 image with its header and palette */
-extern u8 f_CometHeadImage[];
+extern u8 f_LakituImage[];
 /* A 48x128 I4 image with its header */
-extern u8 f_CometTrailImage[];
-#define COMET_TRAIL_SEGMENT_COUNT 40
-extern Mtx f_CometTrailMatrices[COMET_TRAIL_SEGMENT_COUNT];
-extern f32 f_CometTrailStartX;
-extern f32 f_CometTrailStartY;
+extern u8 f_LakituTrailImage[];
+#define LAKITU_TRAIL_SEGMENT_COUNT 40
+extern Mtx f_LakituTrailMatrices[LAKITU_TRAIL_SEGMENT_COUNT];
+extern f32 f_LakituTrailStartX;
+extern f32 f_LakituTrailStartY;
 
 extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
@@ -83,8 +83,8 @@ extern Vtx f_LookAtMarkerVertices[6][4];
 extern Mtx f_LookAtMarkerTranslation;
 extern Mtx f_LookAtMarkerScaling;
 
-extern s32 f_IsCometFlying;
-extern s32 f_CometAngle;
+extern s32 f_IsLakituFlying;
+extern s32 f_LakituAngle;
 extern s32 f_LookAtEaseMode;
 extern f32 f_LookAtEaseRate;
 extern Vec3 D_8021706C_ovl_05;
@@ -300,61 +300,61 @@ void func_801FE270_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE2A0_ovl_05);
 
-#define ASSET_COMET_HEAD_IMAGE 0x64B
-#define ASSET_COMET_TRAIL_IMAGE 0x6AF
-/* How far in front of the camera the comet's trail is drawn */
-#define COMET_TRAIL_DEPTH 300.0f
+#define ASSET_LAKITU_IMAGE 0x64B
+#define ASSET_LAKITU_TRAIL_IMAGE 0x6AF
+/* How far in front of the camera Lakitu's trail is drawn */
+#define LAKITU_TRAIL_DEPTH 300.0f
 
-/* Loads the comet's images and gathers its trail at the comet */
-void LoadComet(void) {
+/* Loads Lakitu's images and gathers his trail behind him */
+void LoadLakitu(void) {
   EncodedAsset asset;
   s32 pass;
   s32 segmentIndex;
 
-  OpenEncodedAsset(ASSET_COMET_HEAD_IMAGE, &asset);
-  ReadEncodedAsset(f_CometHeadImage, &asset);
-  OpenEncodedAsset(ASSET_COMET_TRAIL_IMAGE, &asset);
-  ReadEncodedAsset(f_CometTrailImage, &asset);
+  OpenEncodedAsset(ASSET_LAKITU_IMAGE, &asset);
+  ReadEncodedAsset(f_LakituImage, &asset);
+  OpenEncodedAsset(ASSET_LAKITU_TRAIL_IMAGE, &asset);
+  ReadEncodedAsset(f_LakituTrailImage, &asset);
   /* The game places the trail twice over */
   for (pass = 0; pass < 2; pass++) {
-    for (segmentIndex = 0; segmentIndex < COMET_TRAIL_SEGMENT_COUNT;
+    for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT;
          segmentIndex++) {
-      guTranslate(&f_CometTrailMatrices[segmentIndex],
-                  f_CometScreenPoint[0] - SCREEN_WIDTH / 2,
-                  SCREEN_HEIGHT / 2 - f_CometScreenPoint[1],
-                  -COMET_TRAIL_DEPTH);
+      guTranslate(&f_LakituTrailMatrices[segmentIndex],
+                  f_LakituScreenPoint[0] - SCREEN_WIDTH / 2,
+                  SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1],
+                  -LAKITU_TRAIL_DEPTH);
     }
   }
-  f_CometTrailStartX = f_CometScreenPoint[0] - SCREEN_WIDTH;
-  f_CometTrailStartY = SCREEN_HEIGHT / 2 - f_CometScreenPoint[1];
+  f_LakituTrailStartX = f_LakituScreenPoint[0] - SCREEN_WIDTH;
+  f_LakituTrailStartY = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
 
-/* Flies the comet across the screen in loops until it has turned through 540
+/* Flies Lakitu across the screen in loops until it has turned through 540
  * degrees */
-#define COMET_TURN_STEP 12 /* In degrees a frame */
-#define COMET_LAST_ANGLE 540
+#define LAKITU_TURN_STEP 12 /* In degrees a frame */
+#define LAKITU_LAST_ANGLE 540
 /* In pixels a frame, besides the loops */
-#define COMET_DRIFT_X 8
-#define COMET_DRIFT_Y 2
-/* The radii of the comet's loops, in pixels */
-#define COMET_LOOP_RADIUS_X 20.0
-#define COMET_LOOP_RADIUS_Y 16.0
+#define LAKITU_DRIFT_X 8
+#define LAKITU_DRIFT_Y 2
+/* The radii of Lakitu's loops, in pixels */
+#define LAKITU_LOOP_RADIUS_X 20.0
+#define LAKITU_LOOP_RADIUS_Y 16.0
 
-void MoveComet(void) {
+void MoveLakitu(void) {
   f32 angle;
 
-  if (f_IsCometFlying) {
-    angle = DEGREES_TO_RADIANS(f_CometAngle);
-    f_CometAngle += COMET_TURN_STEP;
-    if (f_CometAngle > COMET_LAST_ANGLE) {
-      f_IsCometFlying = FALSE;
+  if (f_IsLakituFlying) {
+    angle = DEGREES_TO_RADIANS(f_LakituAngle);
+    f_LakituAngle += LAKITU_TURN_STEP;
+    if (f_LakituAngle > LAKITU_LAST_ANGLE) {
+      f_IsLakituFlying = FALSE;
     }
-    f_CometScreenPoint[0] +=
-        COMET_DRIFT_X + (s32)(cos(angle) * COMET_LOOP_RADIUS_X);
-    f_CometScreenPoint[1] -=
-        COMET_DRIFT_Y + (s32)(sin(angle) * COMET_LOOP_RADIUS_Y);
+    f_LakituScreenPoint[0] +=
+        LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
+    f_LakituScreenPoint[1] -=
+        LAKITU_DRIFT_Y + (s32)(sin(angle) * LAKITU_LOOP_RADIUS_Y);
   }
 }
 
