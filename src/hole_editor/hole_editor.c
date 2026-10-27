@@ -1,6 +1,7 @@
 #include "common.h"
 #include "heap.h"
 #include "host_file.h"
+#include "libc.h"
 #include "main.h"
 #include "screen.h"
 #include "terrain.h"
@@ -40,6 +41,20 @@
 #define KSEG1_OFFSET 0x20000000
 
 extern u8 D_80451A60[];
+
+/* func_80407D64's 32x32 IA8 wave pattern */
+#define WAVE_TEXTURE_WIDTH 32
+#define WAVE_TEXTURE_HEIGHT 32
+/* A texel step's angle, pi/16, times the texel steps between samples */
+#define WAVE_ANGLE_STEP 0.19635
+#define WAVE_TEXEL_STEP 4
+#define WAVE_AMPLITUDE 256.0
+/* Cubing the amplitude-256 wave gives 24 bits; the top four are the level */
+#define WAVE_LEVEL_SHIFT 20
+#define WAVE_LEVEL_MIN 1
+#define WAVE_LEVEL_MAX 15
+#define IA8_ALPHA_SHIFT 4
+extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 s32 GetTerrainCode(s32 column, s32 row);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
@@ -249,7 +264,33 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804077B0_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804079B8_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80407D64_hole_editor);
+/*
+ * Fills D_80491A60 with the cube of cos(column * pi/4) * sin(row * pi/4),
+ * as matching IA8 intensity and alpha levels from 1 to 15
+ */
+void func_80407D64_hole_editor(void) {
+    s32 row;
+    s32 column;
+    s32 texelIndex;
+    s32 level;
+
+    texelIndex = 0;
+    for (row = 0; row < WAVE_TEXTURE_HEIGHT; row++) {
+        for (column = 0; column < WAVE_TEXTURE_WIDTH; column++) {
+            level = cos((f32)(column * WAVE_TEXEL_STEP) * WAVE_ANGLE_STEP) *
+                    sin((f32)(row * WAVE_TEXEL_STEP) * WAVE_ANGLE_STEP) * WAVE_AMPLITUDE;
+            level *= level * level;
+            level /= 1 << WAVE_LEVEL_SHIFT;
+            if (level <= 0) {
+                level = WAVE_LEVEL_MIN;
+            }
+            if (level > WAVE_LEVEL_MAX) {
+                level = WAVE_LEVEL_MAX;
+            }
+            D_80491A60[texelIndex++] = (level << IA8_ALPHA_SHIFT) | level;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80407EC4_hole_editor);
 
