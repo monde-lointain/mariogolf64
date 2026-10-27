@@ -1023,7 +1023,7 @@ s32 UpdateAimControls(void) {
                     D_800C308C = LETTERBOX_STATE_NONE;
                     ResetAimCamera();
                 } else if (g_TurnController.pressedButtons & B_BUTTON) {
-                    g_RoundHud.unk10++;
+                    g_RoundHud.greenGridState++;
                 }
                 TurnAim(0);
                 break;
@@ -1039,7 +1039,7 @@ s32 UpdateAimControls(void) {
                     D_800C3070 = 0;
                     ResetAimCamera();
                 } else if (g_TurnController.pressedButtons & B_BUTTON) {
-                    g_RoundHud.unk10++;
+                    g_RoundHud.greenGridState++;
                 }
                 TurnAim(0);
                 break;
@@ -1053,7 +1053,7 @@ s32 UpdateAimControls(void) {
                     D_800C308C = LETTERBOX_STATE_NONE;
                     ResetAimCamera();
                 } else if (g_TurnController.pressedButtons & B_BUTTON) {
-                    g_RoundHud.unk10++;
+                    g_RoundHud.greenGridState++;
                 }
                 TurnAim(0);
                 break;
@@ -1173,8 +1173,8 @@ s32 UpdateAimControls(void) {
                 break;
         }
     }
-    if (g_RoundHud.unk10 >= AIM_VIEW_TOGGLE_COUNT) {
-        g_RoundHud.unk10 = 0;
+    if (g_RoundHud.greenGridState >= AIM_VIEW_TOGGLE_COUNT) {
+        g_RoundHud.greenGridState = 0;
     }
     if (D_800C3074 != 1) {
         if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {

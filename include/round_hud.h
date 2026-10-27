@@ -45,7 +45,7 @@ typedef struct RoundHud {
     /* 0x0D */ s8 unkD;
     /* 0x0E */ u8 unkE;
     /* 0x0F */ s8 unkF;
-    /* 0x10 */ s8 unk10;
+    /* 0x10 */ s8 greenGridState; /* Whether the grid over the ground shows; B toggles it while aiming */
     /* 0x11 */ u8 unk11;
     /* 0x12 */ s8 unk12;
     /* 0x13 */ s8 unk13;
