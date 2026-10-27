@@ -686,8 +686,10 @@ segments:
     symbol_name_format: $VRAM_$SEG
     subsegments:
       - [0x150990, c, ovl_09/scorecard]
+      - [0x153560, c, ovl_09/scorecard_drawing]
       - [0x15B5E0, data]
       - [0x15B780, .rodata, ovl_09/scorecard]
+      - [0x15B940, .rodata, ovl_09/scorecard_drawing]
       - { start: 0x15BB50, type: bss, vram: 0x8024C9C0 }
 
   - name: ovl_10
