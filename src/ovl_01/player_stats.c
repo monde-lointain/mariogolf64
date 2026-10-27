@@ -6,6 +6,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "sram.h"
@@ -57,6 +58,16 @@
 
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
+
+/* The blinking pair of arrows that func_8021CBDC draws above and below a point */
+#define STATS_ARROW_COUNT 2
+#define STATS_ARROW_SIZE 16
+#define STATS_ARROW_IMAGE_SIZE (STATS_ARROW_SIZE * STATS_ARROW_SIZE / 2)
+#define STATS_ARROW_BLINK_STRIDE (4 * STATS_ARROW_IMAGE_SIZE)
+#define STATS_ARROW_BLINK_FRAME_COUNT 4
+#define STATS_ARROW_LEFT 152
+#define STATS_UP_ARROW_OFFSET (-52)
+#define STATS_DOWN_ARROW_OFFSET 36
 
 /* The directions that func_8021E340 moves the cursor in, which index D_802309C4 */
 #define STATS_DIRECTION_LEFT 0
@@ -138,6 +149,8 @@ extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern u8 D_8022F8C5_ovl_01;
 extern u8 D_802303A0_ovl_01;
+extern s16 D_802303A2_ovl_01;
+extern s16 D_802303A4_ovl_01;
 extern u8 D_802308A0_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
@@ -397,7 +410,50 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C200_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C67C_ovl_01);
 
+/*
+ * Doesn't match: the original adds the texel offset to the blink frame's
+ * offset before the arrow's, and adds the arrow size to the centre first.
+ */
+#ifdef NON_MATCHING
+void func_8021CBDC_ovl_01(Gfx **displayListHead, s32 centerY) {
+    Gfx *gfx = *displayListHead;
+    s32 left = 0;
+    s32 offsetY = 0;
+    s32 arrowIndex;
+
+    D_802303A4_ovl_01++;
+    if (D_802303A4_ovl_01 == STATS_ARROW_BLINK_FRAME_COUNT) {
+        D_802303A4_ovl_01 = 0;
+        D_802303A2_ovl_01 ^= 1;
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B358_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (arrowIndex = 0; arrowIndex != STATS_ARROW_COUNT; arrowIndex++) {
+        gDPLoadTextureTile_4b(gfx++,
+                              ((u32)D_8023B358_ovl_01 + PALETTED_TEXELS_OFFSET +
+                               (D_802303A2_ovl_01 * STATS_ARROW_BLINK_STRIDE + arrowIndex * STATS_ARROW_IMAGE_SIZE)) &
+                                  ~7,
+                              G_IM_FMT_CI, STATS_ARROW_SIZE, STATS_ARROW_SIZE, 0, 0, STATS_ARROW_SIZE - 1,
+                              STATS_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        if (arrowIndex == 0) {
+            left = STATS_ARROW_LEFT;
+            offsetY = STATS_UP_ARROW_OFFSET;
+        } else if (arrowIndex == 1) {
+            left = STATS_ARROW_LEFT;
+            offsetY = STATS_DOWN_ARROW_OFFSET;
+        }
+        gSPScisTextureRectangle(gfx++, left << 2, (offsetY + centerY) << 2, (left + STATS_ARROW_SIZE) << 2,
+                                (offsetY + (centerY + STATS_ARROW_SIZE)) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CBDC_ovl_01);
+#endif
 
 void func_8021CF10_ovl_01(void **buffers) {
     EncodedAsset asset;
