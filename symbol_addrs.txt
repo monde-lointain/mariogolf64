@@ -3222,3 +3222,4 @@ D_802309F0_ovl_01 = 0x802309F0; // type:s32 size:0x40 segment:ovl_01
 D_80231138_ovl_01 = 0x80231138; // type:s32 size:0x40 segment:ovl_01
 D_80230D18_ovl_01 = 0x80230D18; // type:f32 size:0xC segment:ovl_01
 D_80230D28_ovl_01 = 0x80230D28; // type:f32 size:0xC0 segment:ovl_01
+D_80230DE8_ovl_01 = 0x80230DE8; // type:s32 size:0x80 segment:ovl_01
