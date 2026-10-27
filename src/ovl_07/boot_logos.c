@@ -99,8 +99,6 @@ extern CamelotLogo f_CamelotLogo;
 extern NintendoLogo f_NintendoLogo;
 extern N64Logo f_N64Logo;
 
-extern s32 D_800B6808;
-
 /* The frames since the stage began */
 static s32 f_BootLogoFrame = 0;
 static s32 f_BootLogoStage = BOOT_LOGO_N64;
@@ -140,7 +138,7 @@ void LoadBootLogos(void) {
 
 /* Swaps this module for the next scene's and clears the image slots */
 void LeaveBootLogos(void) {
-  D_800B6808 = 2;
+  g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_BOOT_LOGOS;
   if (HasGameBoyPak() && IsBootTransmitPending()) {
     ClearBootTransmitPending();
     g_Scene = SCENE_SWAPPING_MODULES;

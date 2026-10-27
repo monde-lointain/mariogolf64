@@ -115,6 +115,19 @@ extern s32 g_SubModuleState;
 /* The kind of game the player chose, such as a tournament or a match */
 extern u32 g_GameMode;
 
+/*
+ * The scene that last led to the title screen. The title screen fades in from
+ * white after the opening and from black otherwise.
+ */
+typedef enum TitleScreenEntrance {
+  TITLE_ENTRANCE_FROM_OPENING = 1,
+  TITLE_ENTRANCE_FROM_BOOT_LOGOS,
+  /* Set as the title screen fades in, so that any later return is from black */
+  TITLE_ENTRANCE_SHOWN
+} TitleScreenEntrance;
+
+extern s32 g_TitleScreenEntrance;
+
 void UpdateOverlays(void);
 s32 IsSubModuleLoaded(void);
 void RequestSubModule(void);

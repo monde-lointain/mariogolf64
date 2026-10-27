@@ -940,7 +940,6 @@ extern CoursePoint D_8020C404_ovl_05;
 extern s32 D_8020E3F0_ovl_05;
 extern s32 D_8020E3F4_ovl_05;
 extern f32 D_80217078_ovl_05;
-extern s32 D_800B6808;
 
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
@@ -2204,7 +2203,7 @@ void UpdateOpening(void) {
       case 999:
         if (HasScreenFadeEnded()) {
           StopEditorMoves();
-          D_800B6808 = 1;
+          g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
           g_Scene = 0x19;
           g_NextScene = 0x15;
           g_SceneModuleToUnload = 3;
@@ -2213,8 +2212,9 @@ void UpdateOpening(void) {
           StopWipe();
           FreeAllCharacterSlots();
           for (channel = 0; channel < 0xD; channel++) {
-            if (D_800B6808 != 1 || (channel != D_8020E3F0_ovl_05 &&
-                                    channel != D_8020E3F4_ovl_05)) {
+            if (g_TitleScreenEntrance != TITLE_ENTRANCE_FROM_OPENING ||
+                (channel != D_8020E3F0_ovl_05 &&
+                 channel != D_8020E3F4_ovl_05)) {
               StopSound(channel);
             }
           }

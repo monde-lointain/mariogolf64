@@ -104,8 +104,6 @@ extern TitleImage f_TitleImage;
 extern JapaneseLogo f_JapaneseLogo;
 extern PressStartText f_PressStartText;
 
-extern s32 D_800B6808;
-
 void func_8005DC50(void);
 
 void OnUnlockCodeEntered(void);
@@ -275,13 +273,12 @@ void UpdateTitleScreen(void) {
   }
   UpdateButtonCodes();
   if (f_TitleFrame == 0) {
-    /* StartScreenFadeIn is given white when D_800B6808 is 1, else black */
-    if (D_800B6808 == 1) {
+    if (g_TitleScreenEntrance == TITLE_ENTRANCE_FROM_OPENING) {
       StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
     } else {
       StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
     }
-    D_800B6808 = 3;
+    g_TitleScreenEntrance = TITLE_ENTRANCE_SHOWN;
   }
   switch (f_TitleStage) {
     case TITLE_SHOWING:

@@ -1163,6 +1163,7 @@ g_VertexListHead = 0x801B93D8; // size:0x4
 g_ExpansionVertexBuffers = 0x8049C860; // size:0x27100
 f_HasThreeFrameBuffers = 0x800B67CC; // size:0x4
 f_FadeAlpha = 0x800B6804; // size:0x4
+g_TitleScreenEntrance = 0x800B6808; // size:0x4
 f_FadeColor = 0x800B774C; // size:0x4
 f_UnreadDebugSwitch = 0x800C42C0; // size:0x4
 ReportMathError = 0x800B37E0; // type:func
