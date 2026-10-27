@@ -1815,6 +1815,19 @@ void func_801FD7B0_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/* The chosen label grows two pixels a frame until it passes the limit, then shrinks until it passes 0 */
+#define CHOSEN_LABEL_GROWTH_LIMIT 6
+#define CHOSEN_LABEL_GROWTH_STEP 2
+#define LABEL_GROWING 0
+#define LABEL_SHRINKING 1
+
+extern s16 D_8022BE8E_ovl_01;
+extern s16 D_8022BE90_ovl_01;
+extern void *D_8012D420[2];
+extern void *D_801B5CD0[2];
+extern s16 D_800FE33C;
+extern u8 D_800FBDB9;
+
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FE4D0_ovl_01);
@@ -2188,19 +2201,8 @@ void DrawContinueLabel(Gfx **displayListHead) {
 #define MAIN_CHOICE_LABEL_WIDTH 128
 #define MAIN_CHOICE_LABEL_HEIGHT 20
 #define MAIN_CHOICE_LABEL_IMAGE_SIZE (MAIN_CHOICE_LABEL_WIDTH * MAIN_CHOICE_LABEL_HEIGHT / 2)
-/* The chosen label grows two pixels a frame until it passes the limit, then shrinks until it passes 0 */
-#define CHOSEN_LABEL_GROWTH_LIMIT 6
-#define CHOSEN_LABEL_GROWTH_STEP 2
-#define LABEL_GROWING 0
-#define LABEL_SHRINKING 1
 
-extern s16 D_8022BE8E_ovl_01;
-extern s16 D_8022BE90_ovl_01;
 extern s32 D_8022FDF4_ovl_01[MAIN_CHOICE_COUNT][2];
-extern void *D_8012D420[2];
-extern void *D_801B5CD0[2];
-extern s16 D_800FE33C;
-extern u8 D_800FBDB9;
 
 void func_80205038_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
