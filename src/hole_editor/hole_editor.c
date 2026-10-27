@@ -29,7 +29,7 @@
 
 extern u8 D_80451A60[];
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
-extern s32 D_8040C70C_hole_editor;
+extern s32 sScreenCaptureNumber;
 extern u8 D_8040C710_hole_editor[CAPTURE_HEADER_SIZE];
 extern u8 D_8040C748_hole_editor[CAPTURE_HEADER_SIZE];
 
@@ -186,10 +186,10 @@ void func_8040C124_hole_editor(void) {
                                     << RGBA16_CHANNEL_WIDEN_SHIFT;
         }
     }
-    sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", D_8040C70C_hole_editor);
+    sprintf(g_PrintBuffer, "x:/usgolf64/capture/cap%02d.bmp", sScreenCaptureNumber);
     WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
     FreeMemory(&capture);
-    D_8040C70C_hole_editor++;
+    sScreenCaptureNumber++;
 }
 
 /*
