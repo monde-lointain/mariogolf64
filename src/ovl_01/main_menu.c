@@ -5,6 +5,7 @@
 #include "character.h"
 #include "character_slot.h"
 #include "club.h"
+#include "controller.h"
 #include "course.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -216,6 +217,8 @@ extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s8 D_801323A0[];
 extern s32 D_8022BE0C_ovl_01;
+extern s32 D_8022BE28_ovl_01;
+extern s32 D_8022BE2C_ovl_01;
 extern s32 D_801B7070;
 extern s32 D_8022BE84_ovl_01;
 extern u8 D_8022BE88_ovl_01;
@@ -249,7 +252,7 @@ s32 func_8021E468_ovl_01(void);
 void LoadRingShotRecord(RingShotRecord *record);
 void LoadSuperShotReplay(PlayRecord *record);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
-s32 func_801F7660_ovl_01(s32, s32);
+s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
@@ -648,7 +651,110 @@ void func_801F75EC_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F7660_ovl_01);
+/*
+ * func_801F7660 moves the character cursor past the characters marked as taken, and plays the voice of the one
+ * chosen. Nothing reads arg0.
+ */
+#define CHOSEN_CHARACTER_VOICE 24
+#define CHOSEN_CHARACTER_PAN 127
+
+s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber) {
+    if (D_8022BE28_ovl_01 != 0) {
+        while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+            D_801323A0[2]++;
+            if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+                D_801323A0[2] = 0;
+            }
+        }
+        if (g_ControllerStates[0].pressedButtons & U_JPAD) {
+            D_801323A0[2]--;
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]--;
+                if (D_801323A0[2] < 0) {
+                    D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+                }
+            }
+        } else if (g_ControllerStates[0].pressedButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            D_801323A0[2]++;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]++;
+                if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+                    D_801323A0[2] = 0;
+                }
+            }
+        }
+        if (D_801323A0[2] < 0) {
+            D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]--;
+            }
+        }
+        if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+            D_801323A0[2] = 0;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]++;
+            }
+        }
+    } else if (D_8022BE2C_ovl_01 == 1) {
+        if (GetCurrentAnimationEndFrame(0) == GetAnimationFrame(0)) {
+            D_8022BE2C_ovl_01 = 0;
+            if (D_801B7070 == playerNumber) {
+                return 1;
+            }
+        }
+    } else if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
+        if ((g_MenuPressedButtons & (A_BUTTON | R_TRIG)) && D_800FBD40[D_801323A0[2] + 2] == 0) {
+            PlayCharacterSound(D_801323A0[2], 0, CHOSEN_CHARACTER_VOICE, MENU_VOLUME_SOFT, CHOSEN_CHARACTER_PAN);
+            D_8022BE2C_ovl_01 = 1;
+            SetAnimationSpeed(0, 1.0f);
+            return 0;
+        }
+        if (g_MenuPressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            return -1;
+        }
+        while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+            D_801323A0[2]++;
+            if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+                D_801323A0[2] = 0;
+            }
+        }
+        if (g_MenuRepeatButtons & U_JPAD) {
+            D_801323A0[2]--;
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]--;
+                if (D_801323A0[2] < 0) {
+                    D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+                }
+            }
+        } else if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            D_801323A0[2]++;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]++;
+                if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+                    D_801323A0[2] = 0;
+                }
+            }
+        }
+        if (D_801323A0[2] < 0) {
+            D_801323A0[2] = D_8022BE0C_ovl_01 - 1;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]--;
+            }
+        }
+        if (D_801323A0[2] > D_8022BE0C_ovl_01 - 1) {
+            D_801323A0[2] = 0;
+            while (D_800FBD40[D_801323A0[2] + 2] == 1) {
+                D_801323A0[2]++;
+            }
+        }
+    }
+    return 0;
+}
 
 void func_801F7CD0_ovl_01(void) {
     s32 isDone = IsHudAnimationDone();

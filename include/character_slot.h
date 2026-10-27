@@ -293,6 +293,7 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind);
 void SetCharacterAnimation(u32 slotIndex, s32 id);
 void SetAnimationLooping(u32 slotIndex, s32 value);
 void SetNextAnimation(u32 slotIndex, s32 value);
+s32 GetCurrentAnimationEndFrame(u32 slotIndex);
 s32 GetAnimationEndFrame(u32 slotIndex, s32 id);
 s32 GetAnimationFrame(u32 slotIndex);
 void SkipToAnimationEnd(u32 slotIndex);
