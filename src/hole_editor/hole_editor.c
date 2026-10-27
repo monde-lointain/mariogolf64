@@ -20,6 +20,8 @@
 #define SIDE_CODE_COUNT 2
 #define NO_TERRAIN_CODE (-1)
 #define HOLE_EDITOR_DIAGONAL_ASSERT_LINE 2046
+/* The vertex units in a terrain code column or row */
+#define VERTEX_UNITS_PER_CODE 16
 
 /* The screen captures, 24-bit BMPs; the corner capture covers the frame's top-left corner */
 #define CAPTURE_HEADER_SIZE 54
@@ -202,7 +204,40 @@ void func_80405C94_hole_editor(Vtx *vertices, s32 column, s32 row, s32 weight) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80405DB0_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406570_hole_editor);
+/*
+ * Sets each ground tile's unk992 bits, one for each of its cells, to
+ * func_80405870 of the codes between the cell's opposite corners
+ */
+void func_80406570_hole_editor(void) {
+    s32 tileRow;
+    s32 tileColumn;
+    s32 cellRow;
+    s32 cellColumn;
+    s32 tileIndex;
+    s32 cellBits;
+    Vtx *corners[2];
+
+    for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
+        for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
+            cellBits = 0;
+            tileIndex = tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn;
+            for (cellRow = 0; cellRow < GROUND_TILE_POINT_SPAN; cellRow++) {
+                for (cellColumn = 0; cellColumn < GROUND_TILE_POINT_SPAN; cellColumn++) {
+                    corners[0] = GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + cellColumn,
+                                                tileRow * GROUND_TILE_POINT_SPAN + cellRow);
+                    corners[1] = GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + cellColumn + 1,
+                                                tileRow * GROUND_TILE_POINT_SPAN + cellRow + 1);
+                    cellBits |= func_80405870_hole_editor(corners[0]->v.ob[0] / VERTEX_UNITS_PER_CODE,
+                                                          corners[0]->v.ob[2] / VERTEX_UNITS_PER_CODE,
+                                                          corners[1]->v.ob[0] / VERTEX_UNITS_PER_CODE,
+                                                          corners[1]->v.ob[2] / VERTEX_UNITS_PER_CODE)
+                                << (cellRow * GROUND_TILE_POINT_SPAN + cellColumn);
+                }
+            }
+            g_WorkArea.hole.tiles[tileIndex].unk992 = cellBits;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804066C8_hole_editor);
 
