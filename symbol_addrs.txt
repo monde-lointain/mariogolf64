@@ -3331,3 +3331,4 @@ BuildOpeningShotPath = 0x801F51F0; // type:func segment:ovl_05
 f_OpeningShotDashCount = 0x8020AEAC; // type:s32 size:4 segment:ovl_05
 f_OpeningShotSimulation = 0x8022BEF0; // segment:ovl_05
 f_OpeningShotDashMatrices = 0x80225A10; // segment:ovl_05
+g_ShotPreviewDashImage = 0x8012D428; // 

@@ -251,8 +251,6 @@
 #define AIM_VIEW_TOGGLE_COUNT 2
 /* Draws the shot preview in the RDP's time */
 #define MODULE_UNK10 10
-/* The shot preview's dash image is this many texels on a side */
-#define SHOT_PREVIEW_IMAGE_SIZE 32
 /* Half the putt preview line's width, in screen pixels */
 #define PUTT_PREVIEW_HALF_WIDTH 10.0f
 /* Hides the shot preview */
@@ -313,11 +311,9 @@ extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing
                                  was stopped */
 extern s32
     D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
-extern s32 D_80223E40_ovl_00; /* Set once the shot preview has been built */
-extern f32 D_80223E48_ovl_00; /* A debug tilt of the aim camera, which the C
-                                 buttons tune */
-extern void*
-    D_8012D428; /* The shot preview's dash image, which round_hud.c loads */
+extern s32 D_80223E40_ovl_00;    /* Set once the shot preview has been built */
+extern f32 D_80223E48_ovl_00;    /* A debug tilt of the aim camera, which the C
+                                    buttons tune */
 extern Vtx D_80223E60_ovl_00[4]; /* A dash of the shot preview */
 extern Vtx D_80223EB0_ovl_00[4]; /* The putt preview's line, placed on screen */
 extern Mtx D_80227110_ovl_00;    /* An identity matrix for the putt preview */
@@ -1801,9 +1797,11 @@ void DrawShotPreview(CameraMatrices* matrices) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(
-      g_DisplayListHead++, TEXTURE_ADDRESS((u8*)D_8012D428 + IMAGE_HEADER_SIZE),
-      G_IM_FMT_I, G_IM_SIZ_8b, 32, 32, 0, G_TX_NOMIRROR | G_TX_WRAP,
-      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+      g_DisplayListHead++,
+      TEXTURE_ADDRESS((u8*)g_ShotPreviewDashImage + IMAGE_HEADER_SIZE),
+      G_IM_FMT_I, G_IM_SIZ_8b, SHOT_PREVIEW_IMAGE_SIZE, SHOT_PREVIEW_IMAGE_SIZE,
+      0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD,
+      G_TX_NOLOD);
   gDPSetTileSize(
       g_DisplayListHead++, G_TX_RENDERTILE, D_80223EAC_ovl_00, 0,
       D_80223EAC_ovl_00 + (SHOT_PREVIEW_IMAGE_SIZE << G_TEXTURE_IMAGE_FRAC),

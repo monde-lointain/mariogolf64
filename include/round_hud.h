@@ -127,6 +127,9 @@ extern void* g_LeaderLineImage;
 extern void* g_DistanceSignImage;
 /* The frames of the flag that marks the pin */
 extern void* g_PinFlagImages;
+/* The I8 dash that shot previews are drawn with, this many texels on a side */
+#define SHOT_PREVIEW_IMAGE_SIZE 32
+extern void* g_ShotPreviewDashImage;
 
 void StartLandingReaction(s32 reaction);
 void StartShotEffect(s32 effect);

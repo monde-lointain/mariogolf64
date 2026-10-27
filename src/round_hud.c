@@ -60,7 +60,7 @@
 #define ASSET_PLAYER_TAG_IMAGES 0x5E3
 #define ASSET_LEADER_LINE_IMAGE 0x972
 #define ASSET_BACKDROP_PATTERN_IMAGE 0x93C
-#define ASSET_ROUND_IMAGE_4DB 0x4DB
+#define ASSET_SHOT_PREVIEW_DASH_IMAGE 0x4DB
 #define ASSET_SHADOW_TEXTURE 0x4C3
 #define ASSET_ROUND_IMAGE_722 0x722
 #define ASSET_BLENDED_TEXTURE_SCROLLING_LAYER 0x4D7
@@ -384,7 +384,6 @@ extern s32 f_ShotEffect;
 
 extern void* f_SceneryBillboardHeap;
 extern void* f_WindIconImage;
-extern void* D_8012D428;
 extern void* g_ShadowTexture;
 /* The image asset of the club's head that the HUD shows, loaded into
  * f_ClubHeadImage */
@@ -700,8 +699,9 @@ void LoadSceneryImages(void) {
   g_BackdropPatternImage =
       AllocMemory(OpenEncodedAsset(ASSET_BACKDROP_PATTERN_IMAGE, &asset));
   ReadEncodedAsset(g_BackdropPatternImage, &asset);
-  D_8012D428 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_4DB, &asset));
-  ReadEncodedAsset(D_8012D428, &asset);
+  g_ShotPreviewDashImage =
+      AllocMemory(OpenEncodedAsset(ASSET_SHOT_PREVIEW_DASH_IMAGE, &asset));
+  ReadEncodedAsset(g_ShotPreviewDashImage, &asset);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
   f_ClubHeadImageAsset = -1;
@@ -765,7 +765,7 @@ void FreeSceneryImages(void) {
     FreeMemory(&g_PlayerTagImages);
     FreeMemory(&g_LeaderLineImage);
     FreeMemory(&g_BackdropPatternImage);
-    FreeMemory(&D_8012D428);
+    FreeMemory(&g_ShotPreviewDashImage);
     FreeMemory(&g_ShadowTexture);
     FreeMemory(&f_ClubHeadImage);
     FreeMemory(&f_ClubNameImages[0]);
