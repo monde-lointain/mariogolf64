@@ -154,6 +154,12 @@ $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) -I binary -O elf32-tradbigmips -B mips $< $@
 
+# The sources are UTF-8, but the game's strings are Shift-JIS. KMC GCC
+# compiles a Shift-JIS copy, and the line marker keeps its messages
+# pointing at the source. -I adds back the source's own directory, which
+# GCC searches first for quoted includes.
+ICONV := iconv -f UTF-8 -t SHIFT_JIS
+
 # A C file is rebuilt whenever the assembly it includes with INCLUDE_ASM changes
 .SECONDEXPANSION:
 $(BUILD_DIR)/%.c.o: %.c $$(wildcard asm/nonmatchings/$$(subst src/,,$$*)/*.s)
@@ -161,7 +167,8 @@ $(BUILD_DIR)/%.c.o: %.c $$(wildcard asm/nonmatchings/$$(subst src/,,$$*)/*.s)
 ifneq ($(RUN_CC_CHECK),0)
 	$(CC_CHECK) $(INCLUDES) $(DEFINES) $<
 endif
-	$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) -o $@ $<
+	{ echo '# 1 "$<"'; $(ICONV) $<; } > $(BUILD_DIR)/$*.sjis.c
+	$(CC) -c $(CFLAGS) -I$(dir $<) $(INCLUDES) $(DEFINES) -o $@ $(BUILD_DIR)/$*.sjis.c
 
 # KMC GCC reads VR4300MUL from the environment to work around the VR4300
 # multiplication bug, as ultralib's build does
