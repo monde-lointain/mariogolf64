@@ -89,7 +89,7 @@ $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1 -fno-fast-math
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format
+.PHONY: all extract clean distclean setup tools format lint
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -106,6 +106,23 @@ FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h')
 
 format:
 	$(CLANG_FORMAT) -i $(FORMAT_FILES)
+
+CLANG_TIDY ?= run-clang-tidy-23
+# src/libkmc is KMC's C library, which keeps the C library's names
+LINT_FILES := $(filter-out src/libkmc/%,$(filter %.c,$(FORMAT_FILES)))
+
+$(BUILD_DIR)/compile_commands.json: tools/compile_commands.py Makefile
+	@mkdir -p $(BUILD_DIR)
+	@python3 tools/compile_commands.py $@ $(INCLUDES) $(DEFINES) -- $(LINT_FILES)
+
+LINT_JOBS ?= 4
+
+# clang can't parse everything GCC 2.7 accepts, such as nested functions,
+# so only the naming diagnostics fail the check. The rest stay in the log.
+lint: $(BUILD_DIR)/compile_commands.json
+	@$(CLANG_TIDY) -p $(BUILD_DIR) -j $(LINT_JOBS) -quiet $(LINT_FILES) \
+		> $(BUILD_DIR)/lint.log 2>&1 || true
+	@! grep -A2 '\[readability-identifier-naming' $(BUILD_DIR)/lint.log
 
 tools: $(KMC_DIR)/gcc $(KMC_DIR)/as
 

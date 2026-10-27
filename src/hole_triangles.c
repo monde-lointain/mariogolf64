@@ -8,6 +8,8 @@
 #include "variables.h"
 #include "work_area.h"
 
+/* Named like the file-local data it stands in for */
+/* NOLINTNEXTLINE(readability-identifier-naming) */
 #define sHoleTriangles (g_WorkArea.hole.triangles)
 
 /* The size and texture scale of the blended texture on the triangles */

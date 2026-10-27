@@ -29,6 +29,9 @@ The sources follow the Google style through clang-format 23. Run
 `make format` before committing. The SDK sources in `lib/` keep their
 own formatting.
 
+`make lint` checks the names against the naming scheme in
+`.clang-tidy` with clang-tidy 23.
+
 ## Layout
 
 | Path | Contents |
