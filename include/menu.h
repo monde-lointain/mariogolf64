@@ -18,6 +18,7 @@
 #define MENU_SCREEN_RING_SHOT_RECORDS 13
 #define MENU_SCREEN_BIRDIE_BADGES 14
 #define MENU_SCREEN_CHARACTER_TABLE 15
+#define MENU_SCREEN_UNK16 16
 #define MENU_SCREEN_HELP 17
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
 #define MENU_SCREEN_UNK20 20

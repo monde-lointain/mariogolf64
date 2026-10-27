@@ -303,8 +303,22 @@ extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
 extern u8 D_8022F8DC_ovl_01;  /* Which way it turns */
 extern u8 D_8022F8DD_ovl_01;  /* Which buffers it shows */
 
+/*
+ * The course select. Its wheel shows the open courses and the next one
+ * still shut, and turns from one to the next; the chosen course's image
+ * is read into the one of D_800FBDFC's buffers not shown, and its trophy
+ * files into D_800FBE38.
+ */
+#define COURSE_SELECT_TURN 90
+#define COURSE_SELECT_SPIN_SPEED 18
+#define COURSE_SELECT_TEXT_SLOT_COUNT 4
+
+extern void *D_800FBDFC[2];
+extern u8 D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course */
+
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
+s32 GetOpenCourseCount(void);
 s32 func_8022BDC4_ovl_01(void);
 s32 func_8022BDD0_ovl_01(void);
 s32 func_8021E468_ovl_01(void);
@@ -827,7 +841,158 @@ void func_801F7CD0_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F7D28_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F8BAC_ovl_01);
+void func_801F8BAC_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    /* The open courses, and then those on the wheel */
+    s32 courseCount = GetOpenCourseCount();
+    s32 openCourseCount;
+    s32 isDone;
+    s32 index;
+    s32 direction;
+    s32 step;
+
+    courseCount = courseCount < COURSE_COUNT ? courseCount + 1 : COURSE_COUNT;
+    if (IsHudAnimationDone() != TRUE) {
+        return;
+    }
+    if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
+        PlaySong(SONG_UNK17, 0);
+        g_MenuScreen = MENU_SCREEN_UNK22;
+        D_8022BE88_ovl_01 = 1;
+        D_8022BE89_ovl_01 = 0;
+        return;
+    }
+    if (D_8022BE89_ovl_01 != 0 || D_8022BE88_ovl_01 != 0) {
+        return;
+    }
+    if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
+        if (GetWipeProgress() == 0) {
+            g_MenuScreen = MENU_SCREEN_EXIT;
+        }
+        return;
+    }
+    isDone = IsHudAnimationDone();
+    if (isDone != TRUE) {
+        return;
+    }
+    if (g_MenuPressedButtons & A_BUTTON) {
+        if (D_801323A0.courseSpin != 0) {
+            D_801323A0.courseSpin = 0;
+            OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+            ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
+            for (index = 0; index != COURSE_FILE_COUNT; index++) {
+                OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+                ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+            }
+            D_8022BE80_ovl_01 ^= 1;
+            return;
+        }
+        if (D_801323A0.courseChoice < D_800C2BD0) {
+            openCourseCount = GetOpenCourseCount();
+            if (openCourseCount < COURSE_COUNT && openCourseCount == D_801323A0.courseChoice) {
+                PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                return;
+            }
+            for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+            D_801B9410 = 0;
+            FreeAllCharacterSlots();
+            LoadWipeShape(D_801323A0.courseChoice);
+            StartWipe(WIPE_CLOSING);
+            D_801052E8 = 0;
+        }
+        PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        D_801323A0.courseSpin = 0;
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+        if (D_8022BEBC_ovl_01[D_80105B68 - 1][D_801323A0.modeChoice] == MODE_ICON_GET_CHARACTER) {
+            g_MenuScreen = MENU_SCREEN_UNK16;
+            D_801B7070--;
+            D_800FBD40[D_8012F480[D_801B7070] + 2] = 0;
+        } else {
+            g_MenuScreen = MENU_SCREEN_UNK5;
+        }
+        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 0;
+        D_800FE334 = 0;
+        StopLoaderThread();
+        FreeAllCharacterSlots();
+        for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
+            SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        }
+        return;
+    }
+    /* isDone is still TRUE, and the C-up test compares with it */
+    if (D_801323A0.courseSpin == 0) {
+        if (g_MenuRepeatButtons & L_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            if (--D_801323A0.courseChoice < 0) {
+                D_801323A0.courseChoice = courseCount - 1;
+            }
+            D_801323A0.courseSpin = COURSE_SELECT_TURN / courseCount;
+            for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+        } else if (g_MenuRepeatButtons & R_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            if (++D_801323A0.courseChoice > courseCount - 1) {
+                D_801323A0.courseChoice = 0;
+            }
+            D_801323A0.courseSpin = -COURSE_SELECT_TURN / courseCount;
+            for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+            }
+        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == isDone) {
+            if (D_800C2BD5 != ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C]) {
+                PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                D_8022BE88_ovl_01 = 1;
+                D_8022BE89_ovl_01 = 1;
+            } else {
+                PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            }
+        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+            g_SkippedNines = 0;
+            StartLoadingChosenHole();
+        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+            g_SkippedNines = BACK_NINE_SKIPPED;
+            StartLoadingChosenHole();
+        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
+            g_SkippedNines = FRONT_NINE_SKIPPED;
+            StartLoadingChosenHole();
+        }
+    }
+    if (ABS(D_801323A0.courseSpin) != 0) {
+        step = COURSE_SELECT_SPIN_SPEED / courseCount;
+        direction = D_801323A0.courseSpin < 0 ? -1 : 1;
+        if (step == 0) {
+            step = 1;
+        }
+        D_801323A0.courseSpin -= direction * step;
+        /* Stop on reaching the course rather than turning past it */
+        if ((D_801323A0.courseSpin < 0 ? -1 : 1) != direction) {
+            D_801323A0.courseSpin = 0;
+        }
+        if (D_801323A0.courseSpin == 0) {
+            OpenEncodedAsset(D_800C21B8[D_801323A0.courseChoice][0], &asset);
+            ReadEncodedAsset(D_800FBDFC[D_8022BE80_ovl_01 ^ 1], &asset);
+            for (index = 0; index != COURSE_FILE_COUNT; index++) {
+                OpenAssetFile(D_800C2278[D_801323A0.courseChoice][index], &file);
+                ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+            }
+            D_8022BE80_ovl_01 ^= 1;
+        }
+    }
+}
 
 /*
  * Doesn't match: the original loads the -1 and 1 that the last sign test
