@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera.h"
 #include "heap.h"
 #include "host_file.h"
 #include "libc.h"
@@ -41,6 +42,12 @@
 #define KSEG1_OFFSET 0x20000000
 
 extern u8 D_80451A60[];
+
+/* func_8040C360's pole: two crossed quads, one in the x-y plane and one in the z-y plane */
+#define POLE_QUAD_COUNT 2
+#define POLE_QUAD_VERTEX_COUNT 4
+extern Vtx sPoleVertices[POLE_QUAD_COUNT][POLE_QUAD_VERTEX_COUNT];
+extern Mtx D_8040CC98;
 
 /* func_80407D64's 32x32 IA8 wave pattern */
 #define WAVE_TEXTURE_WIDTH 32
@@ -387,4 +394,28 @@ void func_8040C260_hole_editor(s32 captureIndex) {
     WriteHostFile(g_PrintBuffer, SCREEN_CAPTURE_SIZE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040C360_hole_editor);
+/*
+ * Draws a pole, red at the foot and blue at the top, at the map camera's
+ * look-at point
+ */
+void func_8040C360_hole_editor(CameraMatrices *matrices, Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    guTranslate(&D_8040CC98, g_MapCamera.view.lookAt[0], g_MapCamera.view.lookAt[1], g_MapCamera.view.lookAt[2]);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8040CC98), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sPoleVertices[0], POLE_QUAD_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
+    gSPVertex(gfx++, sPoleVertices[1], POLE_QUAD_VERTEX_COUNT, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 1, 3, 2, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
