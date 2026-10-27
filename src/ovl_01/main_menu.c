@@ -157,7 +157,7 @@ extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
 
 /* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
 #define CLUBHOUSE_CHOICE_COUNT 5
-#define CLUBHOUSE_ROOM_UNK11 0
+#define CLUBHOUSE_ROOM_COURSE_STATS 0
 #define CLUBHOUSE_ROOM_UNK12 1
 #define CLUBHOUSE_ROOM_UNK13 2
 #define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
@@ -624,9 +624,9 @@ void func_801F9FF8_ovl_01(void) {
     if (isDone == TRUE) {
         if (g_MenuPressedButtons & A_BUTTON) {
             switch (D_8022BF1C_ovl_01[g_MenuChoices.clubhouseChoice]) {
-                case CLUBHOUSE_ROOM_UNK11:
+                case CLUBHOUSE_ROOM_COURSE_STATS:
                     StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                    g_MenuScreen = MENU_SCREEN_UNK11;
+                    g_MenuScreen = MENU_SCREEN_COURSE_STATS;
                     break;
                 case CLUBHOUSE_ROOM_UNK12:
                     StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
@@ -871,7 +871,7 @@ void DrawMenuScreen(Gfx **displayListHead) {
         case MENU_SCREEN_RING_SHOT_RECORDS:
             func_8021FC5C_ovl_01(&gfx);
             break;
-        case MENU_SCREEN_UNK11:
+        case MENU_SCREEN_COURSE_STATS:
             func_8020E898_ovl_01(&gfx);
             break;
         case MENU_SCREEN_BEST_TIMES:
