@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "character.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "menu_memory.h"
@@ -19,6 +20,9 @@ extern void *D_8023B678_ovl_01;
 extern void *D_8023B67C_ovl_01;
 /* The slots that the save menu steps through, which hold -1 when empty */
 #define SAVE_MENU_SLOT_COUNT 5
+
+/* The most bytes of each palette file that func_80220BB0 keeps */
+#define SAVE_MENU_FILE_SIZE 0x200
 
 /* The images of D_800C2064 that func_8021F6E0 reads, before one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
@@ -46,6 +50,9 @@ typedef struct {
 
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
+extern void *D_8012D430[CHARACTER_COUNT];
+extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
+extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
 extern s8 D_80230B4D_ovl_01;
@@ -57,6 +64,8 @@ extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void **D_8023BD70_ovl_01;
 extern void **D_8023BD74_ovl_01;
 extern void *D_8023BD78_ovl_01;
+extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
+extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 extern void *D_8023BD7C_ovl_01;
 
 void func_8021F5F0_ovl_01(void *buffer, s16 bufferKind) {
@@ -130,7 +139,44 @@ void func_80220A30_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220BB0_ovl_01);
+void func_80220BB0_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    SaveData *save = GetSaveData();
+    s32 index;
+    s32 character;
+    s32 palette;
+
+    for (index = 0; index != CHARACTER_COUNT; index++) {
+        OpenEncodedAsset(D_802308A4_ovl_01[index], &asset);
+        ReadEncodedAsset(D_8012D430[index], &asset);
+        OpenAssetFile(D_802308C8_ovl_01[index][0], &file);
+        ReadAssetFile(D_8023BFF0_ovl_01[index], GetAssetFileSize(&file), &file);
+    }
+    for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
+        if (D_8023B684_ovl_01[index] != -1) {
+            character = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk37;
+            palette = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk39;
+            if (character < 0) {
+                character = 0;
+            }
+            if (character >= CHARACTER_COUNT) {
+                character = CHARACTER_COUNT - 1;
+            }
+            if (palette < 0) {
+                palette = 0;
+            }
+            if (palette >= CHARACTER_PALETTE_COUNT) {
+                palette = CHARACTER_PALETTE_COUNT - 1;
+            }
+        } else {
+            palette = 0;
+            character = 0;
+        }
+        OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
+        ReadAssetFile(D_8023E3F0_ovl_01[index], GetAssetFileSize(&file), &file);
+    }
+}
 
 s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
     s32 slot = startSlot;
