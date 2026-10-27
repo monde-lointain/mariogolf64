@@ -176,7 +176,83 @@ void func_801F4A6C_ovl_05(void) {
   }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F4AEC_ovl_05);
+extern s32 D_8020AC68_ovl_05;
+extern s32 D_8020AC6C_ovl_05;
+extern s32 D_8020AC70_ovl_05;
+extern s32 D_8020AC74_ovl_05;
+extern s32 D_8020AC78_ovl_05;
+extern s32 D_8020AC7C_ovl_05;
+extern s32 D_8020AC80_ovl_05;
+extern s32 D_8020AC84_ovl_05;
+extern s32 D_8020AC88_ovl_05;
+extern s32 D_8020AC8C_ovl_05;
+
+void func_801F4AEC_ovl_05(void) {
+  if (D_8020AC64_ovl_05 == 1) {
+    if ((u32)(g_CameraEditor.distance * 0.5f) < 127) {
+      if (D_8020AC68_ovl_05 == 0 && (rand() & 100) < 80) {
+        if (D_8020AC74_ovl_05 == 2) {
+          D_8020AC74_ovl_05 = 1;
+          D_8020AC68_ovl_05 = D_8020AC7C_ovl_05;
+        } else {
+          D_8020AC74_ovl_05 = 2;
+          D_8020AC68_ovl_05 = D_8020AC80_ovl_05;
+        }
+      }
+      if (D_8020AC6C_ovl_05 == 0 && (rand() & 100) < 80) {
+        D_8020AC6C_ovl_05 = D_8020AC84_ovl_05;
+      }
+      if (D_8020AC70_ovl_05 == 0 && (rand() & 100) < 80) {
+        switch (rand() & 3) {
+          case 0:
+            D_8020AC78_ovl_05 = 1;
+            D_8020AC70_ovl_05 = D_8020AC88_ovl_05;
+            break;
+          case 1:
+            D_8020AC78_ovl_05 = 2;
+            D_8020AC70_ovl_05 = D_8020AC8C_ovl_05;
+            break;
+        }
+      }
+    }
+    if (D_8020AC68_ovl_05 != 0) {
+      if (D_8020AC74_ovl_05 == 1 && D_8020AC68_ovl_05 == D_8020AC7C_ovl_05) {
+        PlaySoundWithEffects(0x184, 13,
+                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
+                             0x9D);
+      }
+      if (D_8020AC74_ovl_05 == 2 && D_8020AC68_ovl_05 == D_8020AC80_ovl_05) {
+        PlaySoundWithEffects(0x185, 13,
+                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
+                             0x9D);
+      }
+      D_8020AC68_ovl_05--;
+    }
+    if (D_8020AC6C_ovl_05 != 0) {
+      if (D_8020AC6C_ovl_05 == D_8020AC84_ovl_05) {
+        PlaySoundWithEffects(0x18B, 14,
+                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
+                             0x75);
+      }
+      D_8020AC6C_ovl_05--;
+    }
+    if (D_8020AC70_ovl_05 != 0) {
+      if (D_8020AC78_ovl_05 == 1 && D_8020AC70_ovl_05 == D_8020AC88_ovl_05) {
+        PlaySoundWithEffects(0x1A3, 15,
+                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
+                             0x61);
+      }
+      if (D_8020AC78_ovl_05 == 2 && D_8020AC70_ovl_05 == D_8020AC8C_ovl_05) {
+        PlaySoundWithEffects(0x1BA, 15,
+                             127 - (u32)(g_CameraEditor.distance * 0.5f), 0,
+                             0x61);
+      }
+      if (--D_8020AC70_ovl_05 == 0) {
+        D_8020AC78_ovl_05 = 0;
+      }
+    }
+  }
+}
 
 void LoadOpening(void) {
   EncodedAsset asset;
