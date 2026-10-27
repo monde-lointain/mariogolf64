@@ -17,6 +17,11 @@
 
 #define ASSET_SHADOW_TEXTURE 0x4C3
 
+/* The face-printed golf balls that the opening shows, two at a time */
+#define OPENING_BALL_IMAGE_COUNT 5
+#define OPENING_BALL_SLOT_COUNT 2
+#define OPENING_BALL_IMAGE_SIZE 0x1208 /* A 64x64 CI8 image with its header and palette */
+
 extern s32 D_8020AC4C_ovl_05;
 extern s32 D_8020AC50_ovl_05;
 extern f32 D_8020AC5C_ovl_05;
@@ -24,6 +29,10 @@ extern s32 D_8020AC60_ovl_05;
 extern s32 D_8020AC64_ovl_05;
 extern u8 D_80212830_ovl_05[];
 extern u8 D_80213A40_ovl_05[];
+extern s32 D_8020AD70_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern f32 D_8020AD80_ovl_05[OPENING_BALL_SLOT_COUNT];
+extern s32 sOpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
+extern u8 D_80214C50_ovl_05[OPENING_BALL_SLOT_COUNT][OPENING_BALL_IMAGE_SIZE];
 /* The buffers of character slots 1 and 2 */
 extern u8 *sOpeningCharacterBuffers[2];
 extern void *sOpeningBillboardHeap;
@@ -108,7 +117,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA8D8_ovl_05);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FB864_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FBB10_ovl_05);
+/* Loads ball image ballIndex into slot and resets the slot */
+void func_801FBB10_ovl_05(s32 ballIndex, s32 slot) {
+    EncodedAsset asset;
+
+    OpenEncodedAsset(sOpeningBallAssets[ballIndex], &asset);
+    ReadEncodedAsset(D_80214C50_ovl_05[slot], &asset);
+    D_8020AD70_ovl_05[slot] = 0;
+    D_8020AD80_ovl_05[slot] = 1.0f;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FBB94_ovl_05);
 
