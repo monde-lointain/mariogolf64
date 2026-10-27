@@ -3110,3 +3110,4 @@ g_WasMapleUnlocked = 0x801321F8;
 g_WasMetalMarioUnlocked = 0x8010A2C0;
 g_HadEveryRingShotStar = 0x8012D3C4;
 g_RingShotCourseOpenedAtStart = 0x801B6078;
+g_TeePositionY = 0x800BA9E8; // size:0x4
