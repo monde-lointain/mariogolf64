@@ -48,7 +48,7 @@ Overlay g_Overlays[OVERLAY_COUNT] = {
     OVERLAY_ENTRY(ovl_02, sModuleIdsOfOverlay04, NULL, NULL),
     OVERLAY_ENTRY(ovl_03, sModuleIdsOfOverlay05, NULL, NULL),
     OVERLAY_ENTRY(ovl_04, sModuleIdsOfOverlay06, NULL, NULL),
-    OVERLAY_ENTRY(ovl_05, sModuleIdsOfOverlay07, OnLoadOverlay7, func_801F5100_ovl_05),
+    OVERLAY_ENTRY(ovl_05, sModuleIdsOfOverlay07, OnLoadOverlay7, FreeOpening),
     OVERLAY_ENTRY(ovl_06, sModuleIdsOfOverlay08, LoadTitleScreen, UnloadTitleScreen),
     OVERLAY_ENTRY(ovl_07, sModuleIdsOfOverlay09, LoadBootLogos, NULL),
     OVERLAY_ENTRY(ovl_08, sModuleIdsOfOverlay10, NULL, NULL),
@@ -70,7 +70,7 @@ void OnLoadOverlay2(void) {
 
 void OnLoadOverlay7(void) {
     func_802033B0_ovl_05();
-    func_801F5018_ovl_05();
+    LoadOpening();
 }
 
 s32 GetOverlayOfModule(s32 moduleId) {

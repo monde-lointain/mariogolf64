@@ -37,8 +37,8 @@ void func_80216FC4_ovl_00(s32 *position);
 void func_80216FCC_ovl_00(s32 *position);
 
 /* ovl_05 */
-void func_801F5018_ovl_05(void);
-void func_801F5100_ovl_05(void);
+void LoadOpening(void);
+void FreeOpening(void);
 void func_802033B0_ovl_05(void);
 
 /* ovl_06 */

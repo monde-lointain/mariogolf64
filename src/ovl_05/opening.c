@@ -1,19 +1,37 @@
 #include "common.h"
 #include "asset.h"
+#include "billboard.h"
 #include "camera.h"
 #include "character_slot.h"
+#include "effects.h"
+#include "functions.h"
+#include "heap.h"
 #include "sound.h"
 #include "variables.h"
 
 /* The view that the opening draws its characters through */
 #define OPENING_VIEW_INDEX 2
 
+/* The size of the heap that the opening's billboards are allocated from */
+#define OPENING_BILLBOARD_HEAP_SIZE 0x7038
+
+#define ASSET_SHADOW_TEXTURE 0x4C3
+
 extern s32 D_8020AC4C_ovl_05;
 extern s32 D_8020AC50_ovl_05;
 extern f32 D_8020AC5C_ovl_05;
 extern s32 D_8020AC60_ovl_05;
+extern s32 D_8020AC64_ovl_05;
 extern u8 D_80212830_ovl_05[];
 extern u8 D_80213A40_ovl_05[];
+/* The buffers of character slots 1 and 2 */
+extern u8 *sOpeningCharacterBuffers[2];
+extern void *sOpeningBillboardHeap;
+extern s32 D_8022BFA8_ovl_05;
+extern u8 *g_ShadowTexture;
+
+void AssignCharacterBuffers(void);
+void func_80200B18_ovl_05(void);
 
 void func_801F4A40_ovl_05(void) {
     D_8020AC4C_ovl_05++;
@@ -30,9 +48,38 @@ void func_801F4A6C_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F4AEC_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F5018_ovl_05);
+void LoadOpening(void) {
+    EncodedAsset asset;
+    s32 bufferIndex;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F5100_ovl_05);
+    osSyncPrintf("ConstOpening\n");
+    sOpeningBillboardHeap = AllocMemory(OPENING_BILLBOARD_HEAP_SIZE);
+    InitBillboardManager(sOpeningBillboardHeap, OPENING_BILLBOARD_HEAP_SIZE);
+    D_8022BFA8_ovl_05 = 31;
+    for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(sOpeningCharacterBuffers); bufferIndex++) {
+        sOpeningCharacterBuffers[bufferIndex] = AllocMemory(GetCharacterBufferSize());
+        SetCharacterBuffer(bufferIndex + 1, sOpeningCharacterBuffers[bufferIndex]);
+    }
+    SetCharacterBuffer(3, (u8 *)g_DepthBuffer);
+    g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
+    ReadEncodedAsset(g_ShadowTexture, &asset);
+    D_8020AC64_ovl_05 = 0;
+    LoadEffectImages();
+    func_80200B18_ovl_05();
+}
+
+void FreeOpening(void) {
+    s32 bufferIndex;
+
+    FreeMemory(&g_ShadowTexture);
+    for (bufferIndex = 0; bufferIndex < ARRAY_COUNT(sOpeningCharacterBuffers); bufferIndex++) {
+        FreeMemory(&sOpeningCharacterBuffers[bufferIndex]);
+    }
+    AssignCharacterBuffers();
+    FreeMemory(&sOpeningBillboardHeap);
+    SetFillColor(255, 255, 255);
+    FreeEffectImages();
+}
 
 void DrawOpeningCharacters(CameraMatrices *matrices, Gfx **displayListHead) {
     s32 slotIndex = 0;
