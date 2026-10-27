@@ -86,8 +86,8 @@ void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
 /* The cell that scene 9's cursor is on, and the cell it hands to scene 10 */
-extern s32 D_8040C5A8_hole_editor;
-extern s32 D_8040C5AC_hole_editor;
+extern s32 sCellCursorColumn;
+extern s32 sCellCursorRow;
 extern s32 D_8040C5B0_hole_editor;
 extern s32 D_8040C5B4_hole_editor;
 
@@ -111,28 +111,28 @@ void func_8040000C_hole_editor(void) {
     Vtx *oppositeCorner;
 
     if (g_MenuControllerData[0].button & R_JPAD) {
-        D_8040C5A8_hole_editor++;
+        sCellCursorColumn++;
     }
     if (g_MenuControllerData[0].button & L_JPAD) {
-        D_8040C5A8_hole_editor--;
+        sCellCursorColumn--;
     }
     if (g_MenuControllerData[0].button & D_JPAD) {
-        D_8040C5AC_hole_editor--;
+        sCellCursorRow--;
     }
     if (g_MenuControllerData[0].button & U_JPAD) {
-        D_8040C5AC_hole_editor++;
+        sCellCursorRow++;
     }
-    if (D_8040C5A8_hole_editor < 0) {
-        D_8040C5A8_hole_editor = 0;
+    if (sCellCursorColumn < 0) {
+        sCellCursorColumn = 0;
     }
-    if (D_8040C5A8_hole_editor >= CELL_COLUMN_COUNT) {
-        D_8040C5A8_hole_editor = CELL_COLUMN_COUNT - 1;
+    if (sCellCursorColumn >= CELL_COLUMN_COUNT) {
+        sCellCursorColumn = CELL_COLUMN_COUNT - 1;
     }
-    if (D_8040C5AC_hole_editor < 0) {
-        D_8040C5AC_hole_editor = 0;
+    if (sCellCursorRow < 0) {
+        sCellCursorRow = 0;
     }
-    if (D_8040C5AC_hole_editor >= CELL_ROW_COUNT) {
-        D_8040C5AC_hole_editor = CELL_ROW_COUNT - 1;
+    if (sCellCursorRow >= CELL_ROW_COUNT) {
+        sCellCursorRow = CELL_ROW_COUNT - 1;
     }
     if (g_ControllerData[0].button & R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
@@ -147,16 +147,16 @@ void func_8040000C_hole_editor(void) {
         }
     }
     if (g_MenuControllerData[0].button & A_BUTTON) {
-        func_80405AF4_hole_editor(D_8040C5A8_hole_editor, D_8040C5AC_hole_editor);
+        func_80405AF4_hole_editor(sCellCursorColumn, sCellCursorRow);
     }
     if (g_MenuControllerData[0].trigger & Z_TRIG) {
-        D_8040C5B0_hole_editor = D_8040C5A8_hole_editor;
-        D_8040C5B4_hole_editor = D_8040C5AC_hole_editor;
+        D_8040C5B0_hole_editor = sCellCursorColumn;
+        D_8040C5B4_hole_editor = sCellCursorRow;
         ClearDebugText();
         g_Scene = SCENE_UNK10;
     }
-    corner = GetGroundPoint(D_8040C5A8_hole_editor, D_8040C5AC_hole_editor);
-    oppositeCorner = GetGroundPoint(D_8040C5A8_hole_editor + 1, D_8040C5AC_hole_editor + 1);
+    corner = GetGroundPoint(sCellCursorColumn, sCellCursorRow);
+    oppositeCorner = GetGroundPoint(sCellCursorColumn + 1, sCellCursorRow + 1);
     g_MapCamera.view.eye[0] = (corner->v.ob[0] + oppositeCorner->v.ob[0]) / 2;
     g_MapCamera.view.eye[2] = (corner->v.ob[2] + oppositeCorner->v.ob[2]) / 2;
 }
