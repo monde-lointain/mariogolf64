@@ -498,7 +498,59 @@ void func_8021BE88_ovl_01(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021BE88_ovl_01);
 #endif
 
+/*
+ * Doesn't match: the original keeps the mirrored arrow's texture start in
+ * the register it computes it in, where this moves it to another.
+ */
+#ifdef NON_MATCHING
+void func_8021C200_ovl_01(Gfx **displayListHead, s32 gap, s32 centerY) {
+    Gfx *gfx = *displayListHead;
+    s32 arrowIndex;
+    s32 left;
+
+    D_802303A8_ovl_01++;
+    if (D_802303A8_ovl_01 >= PAGE_ARROW_FRAME_DURATION) {
+        D_802303A6_ovl_01++;
+        if (D_802303A6_ovl_01 >= PAGE_ARROW_FRAME_COUNT) {
+            D_802303A6_ovl_01 = 0;
+        }
+        D_802303A8_ovl_01 = 0;
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B35C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
+        if (arrowIndex == PAGE_ARROW_RIGHT) {
+            /* The right arrow is the left one's image, mirrored */
+            gDPLoadTextureTile_4b(gfx++,
+                                  ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                   D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+                                      ~7,
+                                  G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0, PAGE_ARROW_SIZE - 1,
+                                  PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
+                                  PAGE_ARROW_MASK, PAGE_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+            left = (SCREEN_WIDTH / 2) + gap / 2;
+        } else {
+            gDPLoadTextureTile_4b(gfx++,
+                                  ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                   D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+                                      ~7,
+                                  G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0, PAGE_ARROW_SIZE - 1,
+                                  PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            left = (SCREEN_WIDTH / 2) - PAGE_ARROW_SIZE - gap / 2;
+        }
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, (centerY - PAGE_ARROW_SIZE / 2) << 2,
+                                (left + PAGE_ARROW_SIZE) << 2, (centerY + PAGE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE,
+                                (arrowIndex == PAGE_ARROW_RIGHT) << 10, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C200_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C67C_ovl_01);
 
