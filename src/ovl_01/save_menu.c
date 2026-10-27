@@ -1,14 +1,18 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "character_slot.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "libc.h"
+#include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "round_hud.h"
 #include "save.h"
+#include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
 #include "sram.h"
@@ -124,7 +128,28 @@ extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
-extern s8 D_801B70F0[MAXCONTROLLERS];
+extern u8 D_801B70F0[MAXCONTROLLERS];
+
+/* How func_80225358 views a saved game's characters */
+#define SAVED_CHARACTERS_NEAR 1.0f
+#define SAVED_CHARACTERS_FAR 3000.0f
+#define SAVED_CHARACTERS_ORTHO_SCALE 10.0f
+#define SAVED_CHARACTERS_EYE_Y 70.0f
+#define SAVED_CHARACTERS_EYE_Z 60.0f
+/* Baby Mario stands higher to look as tall as the others */
+#define BABY_MARIO_RAISE 24
+#define MENU_ANIMATION_STANDING 16
+#define MENU_ANIMATION_FIDGET 17
+/* The most frames a character stands before it fidgets again */
+#define FIDGET_DELAY_RANGE 128
+
+extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets, or -1 while it does */
+extern f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */
+extern Mtx D_8023BCE0_ovl_01;
+extern LookAt D_8023BD30_ovl_01[2];
+extern Mtx D_8023BAE0_ovl_01[MAX_PLAYER_COUNT][2];
+extern f32 D_80230D18_ovl_01[3];
+extern Vec3 D_80230D28_ovl_01[MAX_PLAYER_COUNT][MAX_PLAYER_COUNT];
 extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
 extern s16 D_80230B48_ovl_01;
 extern s16 D_80230B4A_ovl_01;
@@ -837,7 +862,117 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80224AFC_ovl_01);
 
+/*
+ * Doesn't match: the original computes each fidget timer's address with
+ * the table's address in $v1 and the scaled index in $v0, the other way
+ * round.
+ */
+#ifdef NON_MATCHING
+void func_80225358_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s16 playerCount = save->savedGames[memory->savedGameIndex].state.playerCount;
+    UnkB8 *players = save->savedPlayers[memory->savedGameIndex];
+    u16 playerIndex;
+    s32 *fidgetTimer;
+    s32 raise;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    s32 unused[12];
+    Mat4 transform;
+    Mat4 viewing;
+
+    if (!save->savedGames[memory->savedGameIndex].isValid) {
+        return;
+    }
+    switch (playerCount) {
+        case 1:
+            D_8023BD20_ovl_01[0] = 5.0f;
+            break;
+        case 2:
+            D_8023BD20_ovl_01[0] = 4.0f;
+            D_8023BD20_ovl_01[1] = 4.0f;
+            break;
+        case 3:
+        case 4:
+            D_8023BD20_ovl_01[0] = 3.5f;
+            D_8023BD20_ovl_01[1] = 3.4f;
+            D_8023BD20_ovl_01[2] = 3.4f;
+            D_8023BD20_ovl_01[3] = 3.5f;
+            break;
+        default:
+            D_8023BD20_ovl_01[0] = 4.0f;
+            D_8023BD20_ovl_01[1] = 4.0f;
+            D_8023BD20_ovl_01[2] = 4.0f;
+            D_8023BD20_ovl_01[3] = 4.0f;
+            break;
+    }
+    guOrtho(&D_8023BCE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
+            SAVED_CHARACTERS_NEAR, SAVED_CHARACTERS_FAR, SAVED_CHARACTERS_ORTHO_SCALE);
+    guLookAtReflectF(viewing, &D_8023BD30_ovl_01[g_DrawBufferIndex], 0.0f, SAVED_CHARACTERS_EYE_Y,
+                     SAVED_CHARACTERS_EYE_Z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    gSPLookAt(gfx++, &D_8023BD30_ovl_01[g_DrawBufferIndex]);
+    for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+        fidgetTimer = &D_8023BFC0_ovl_01[playerIndex];
+        if (*fidgetTimer > 0) {
+            (*fidgetTimer)--;
+        }
+        if (*fidgetTimer == 0) {
+            *fidgetTimer = -1;
+            SetAnimationLooping(playerIndex, FALSE);
+            SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
+        }
+        if (*fidgetTimer == -1) {
+            if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) == GetAnimationFrame(playerIndex)) {
+                SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
+                SetAnimationLooping(playerIndex, TRUE);
+                *fidgetTimer = guRandom() % FIDGET_DELAY_RANGE;
+            }
+        }
+        if (!D_801B70F0[playerIndex]) {
+            if (IsCharacterSlotBusy(playerIndex)) {
+                FreeCharacterSlot(playerIndex);
+            } else {
+                LoadCharacter(playerIndex, (s8)players[playerIndex].characterIndex + CHARACTER_COUNT,
+                              (s8)players[playerIndex].paletteIndex);
+                D_801B70F0[playerIndex] = TRUE;
+                SetCharacterAnimation(playerIndex, MENU_ANIMATION_STANDING);
+                SetAnimationSpeed(playerIndex, 1.0f);
+            }
+        }
+        rotation[0] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[0]);
+        rotation[1] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[1]);
+        rotation[2] = 0.0f;
+        raise = ((s8)players[playerIndex].characterIndex == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
+        translation[0] = D_80230D28_ovl_01[playerCount - 1][playerIndex][0];
+        translation[1] = D_80230D28_ovl_01[playerCount - 1][playerIndex][1] + raise;
+        translation[2] = D_80230D28_ovl_01[playerCount - 1][playerIndex][2];
+        scale[0] = D_8023BD20_ovl_01[playerIndex];
+        scale[1] = D_8023BD20_ovl_01[playerIndex];
+        scale[2] = D_8023BD20_ovl_01[playerIndex];
+        BuildTransformMatrix(transform, rotation, translation, scale);
+        ConvertMatrixToFixed(transform, &D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]);
+        AnimateCharacter(playerIndex);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BCE0_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023BAE0_ovl_01[playerIndex][g_DrawBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+        g_DisplayListHead = gfx;
+        DrawCharacter(playerIndex);
+        *displayListHead = g_DisplayListHead;
+        gfx = *displayListHead;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225960_ovl_01);
 
