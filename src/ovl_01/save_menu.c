@@ -19,7 +19,12 @@
 #define SAVE_GAME_BUFFER_COURSE 6
 #define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
 
-/* The saved game's 64 by 64 course image, shrunk in two strips by func_8022644C */
+/*
+ * The saved game's 64 by 64 course image, shrunk in two strips; func_80226190
+ * draws one with its own palette, func_8022644C one without
+ */
+#define COURSE_THUMBNAIL_PALETTE_SIZE (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
+#define COURSE_THUMBNAIL_TEXELS_OFFSET (IMAGE_HEADER_SIZE + COURSE_THUMBNAIL_PALETTE_SIZE)
 #define COURSE_THUMBNAIL_WIDTH 64
 #define COURSE_THUMBNAIL_STRIP_HEIGHT 32
 #define COURSE_THUMBNAIL_STRIP_COUNT 2
@@ -639,7 +644,32 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225358_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80225960_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80226190_ovl_01);
+void func_80226190_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+
+    GetSaveData();
+    func_8005AF74();
+    gDPLoadTLUT_pal256(gfx++, ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != COURSE_THUMBNAIL_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] + COURSE_THUMBNAIL_TEXELS_OFFSET +
+                             stripIndex * COURSE_THUMBNAIL_WIDTH * COURSE_THUMBNAIL_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH, COURSE_THUMBNAIL_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = COURSE_THUMBNAIL_TOP + stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT;
+        gSPScisTextureRectangle(gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
+                                (COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH) << 2,
+                                (stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (COURSE_THUMBNAIL_WIDTH << 10) / COURSE_THUMBNAIL_SHOWN_WIDTH,
+                                (COURSE_THUMBNAIL_STRIP_HEIGHT << 10) / COURSE_THUMBNAIL_SHOWN_HEIGHT);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 void func_8022644C_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
