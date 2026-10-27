@@ -136,12 +136,6 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 #define SAVED_CHARACTERS_ORTHO_SCALE 10.0f
 #define SAVED_CHARACTERS_EYE_Y 70.0f
 #define SAVED_CHARACTERS_EYE_Z 60.0f
-/* Baby Mario stands higher to look as tall as the others */
-#define BABY_MARIO_RAISE 24
-#define MENU_ANIMATION_STANDING 16
-#define MENU_ANIMATION_FIDGET 17
-/* The most frames a character stands before it fidgets again */
-#define FIDGET_DELAY_RANGE 128
 
 extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT]; /* Frames until each character fidgets, or -1 while it does */
 extern f32 D_8023BD20_ovl_01[MAX_PLAYER_COUNT]; /* Each character's scale */

@@ -97,6 +97,14 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT
  */
 #define NO_CONTROLLER_INDEX 4
 
+/* The menus' character models */
+/* Baby Mario stands higher to look as tall as the others */
+#define BABY_MARIO_RAISE 24
+#define MENU_ANIMATION_STANDING 16
+#define MENU_ANIMATION_FIDGET 17
+/* The most frames a character stands before it fidgets again */
+#define FIDGET_DELAY_RANGE 128
+
 /* Indices of the game-mode icon animations in g_ModeIconAnimations */
 #define MODE_ICON_TOURNAMENT 0
 #define MODE_ICON_GET_CHARACTER 1
