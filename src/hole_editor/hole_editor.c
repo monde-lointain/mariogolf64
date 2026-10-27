@@ -1,6 +1,10 @@
 #include "common.h"
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80400000_hole_editor);
+extern u8 D_80451A60[];
+
+void *func_80400000_hole_editor(void) {
+    return D_80451A60;
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040000C_hole_editor);
 
