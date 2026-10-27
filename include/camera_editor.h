@@ -25,28 +25,32 @@ typedef struct CameraEditor {
   /* 0x24 */ f32 fieldOfView; /* In degrees */
   /* 0x28 */ Vec3 targets[EDITOR_POINT_COUNT]; /* Where MoveEditorPoint moves
                                                   the points to */
-  /* 0x40 */ Vec3 unk40[2];
-  /* 0x58 */ f32 unk58;
-  /* 0x5C */ f32 unk5C;
-  /* 0x60 */ f32 unk60;
-  /* 0x64 */ f32 unk64;
-  /* 0x68 */ f32 unk68;
+  /* 0x40 */ Vec3
+      pointVelocities[EDITOR_POINT_COUNT]; /* Added to each point every frame */
+  /* 0x58 */ f32 tiltSpeed;                /* The pitch change this frame */
+  /* 0x5C */ f32 turnSpeed;                /* The heading change this frame */
+  /* 0x60 */ f32 zoomSpeed;                /* The distance change this frame */
+  /* 0x64 */ f32 tiltLeft;                 /* The pitch change still to make */
+  /* 0x68 */ f32 turnLeft; /* The heading change still to make */
   /* 0x6C */ f32 unk6C;
-  /* 0x70 */ f32 unk70[2];
-  /* 0x78 */ f32 unk78[2];
-  /* 0x80 */ f32 unk80;
-  /* 0x84 */ f32 unk84;
-  /* 0x88 */ f32 unk88;
-  /* 0x8C */ f32 unk8C;
-  /* 0x90 */ f32 unk90;
-  /* 0x94 */ f32 unk94;
-  /* 0x98 */ f32 unk98[2];
-  /* 0xA0 */ f32 unkA0;
-  /* 0xA4 */ f32 unkA4;
-  /* 0xA8 */ f32 unkA8;
-  /* 0xAC */ s32 flags[2]; /* EDITOR_FLAG_* bits */
-  /* 0xB4 */ s32 unkB4[2];
-} CameraEditor; /* size = 0xBC */
+  /* 0x70 */ f32 pointTopSpeeds[EDITOR_POINT_COUNT]; /* Lowered while braking */
+  /* 0x78 */ f32 pointAccelerations[EDITOR_POINT_COUNT];
+  /* 0x80 */ f32 turnTopSpeed;
+  /* 0x84 */ f32 turnAcceleration;
+  /* 0x88 */ f32 tiltTopSpeed;
+  /* 0x8C */ f32 tiltAcceleration;
+  /* 0x90 */ f32 zoomTopSpeed;
+  /* 0x94 */ f32 zoomAcceleration;
+  /* 0x98 */ f32
+      pointBrakingDistances[EDITOR_POINT_COUNT]; /* Within which a moving point
+                                                    starts braking */
+  /* 0xA0 */ f32 tiltBrakingAngle;    /* Within which a tilt starts braking */
+  /* 0xA4 */ f32 turnBrakingAngle;    /* Within which a turn starts braking */
+  /* 0xA8 */ f32 zoomBrakingDistance; /* Within which a zoom starts braking */
+  /* 0xAC */ s32 flags[EDITOR_POINT_COUNT];    /* EDITOR_FLAG_* bits */
+  /* 0xB4 */ s32 moveAxes[EDITOR_POINT_COUNT]; /* EDITOR_MOVE_AXIS_*, along
+                                                  which a move ends */
+} CameraEditor;                                /* size = 0xBC */
 
 /* CameraEditor flags bits, kept for each point */
 /* The point moves to its target at speeds set from a frame count */

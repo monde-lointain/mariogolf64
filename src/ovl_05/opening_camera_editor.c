@@ -19,28 +19,28 @@ void ResetCameraEditor(void) {
     g_CameraEditor.targets[i][0] = 0.0f;
     g_CameraEditor.targets[i][1] = 0.0f;
     g_CameraEditor.targets[i][2] = 0.0f;
-    g_CameraEditor.unk40[i][0] = 0.0f;
-    g_CameraEditor.unk40[i][1] = 0.0f;
-    g_CameraEditor.unk40[i][2] = 0.0f;
+    g_CameraEditor.pointVelocities[i][0] = 0.0f;
+    g_CameraEditor.pointVelocities[i][1] = 0.0f;
+    g_CameraEditor.pointVelocities[i][2] = 0.0f;
     /* The game clears these twice */
-    g_CameraEditor.unk40[i][0] = 0.0f;
-    g_CameraEditor.unk40[i][1] = 0.0f;
-    g_CameraEditor.unk40[i][2] = 0.0f;
-    g_CameraEditor.unk70[i] = 30.0f;
-    g_CameraEditor.unk78[i] = 3.0f;
-    g_CameraEditor.unk98[i] = 0.0f;
-    g_CameraEditor.unkB4[i] = 0;
+    g_CameraEditor.pointVelocities[i][0] = 0.0f;
+    g_CameraEditor.pointVelocities[i][1] = 0.0f;
+    g_CameraEditor.pointVelocities[i][2] = 0.0f;
+    g_CameraEditor.pointTopSpeeds[i] = 30.0f;
+    g_CameraEditor.pointAccelerations[i] = 3.0f;
+    g_CameraEditor.pointBrakingDistances[i] = 0.0f;
+    g_CameraEditor.moveAxes[i] = 0;
     g_CameraEditor.flags[i] = 0;
   }
-  g_CameraEditor.unkA0 = 0.0f;
-  g_CameraEditor.unkA4 = 0.0f;
-  g_CameraEditor.unkA8 = 0.0f;
-  g_CameraEditor.unk80 = DEGREES_TO_RADIANS(6.0f);
-  g_CameraEditor.unk84 = DEGREES_TO_RADIANS(2.0f);
-  g_CameraEditor.unk88 = DEGREES_TO_RADIANS(3.0f);
-  g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
-  g_CameraEditor.unk90 = 10.0f;
-  g_CameraEditor.unk94 = 1.0f;
+  g_CameraEditor.tiltBrakingAngle = 0.0f;
+  g_CameraEditor.turnBrakingAngle = 0.0f;
+  g_CameraEditor.zoomBrakingDistance = 0.0f;
+  g_CameraEditor.turnTopSpeed = DEGREES_TO_RADIANS(6.0f);
+  g_CameraEditor.turnAcceleration = DEGREES_TO_RADIANS(2.0f);
+  g_CameraEditor.tiltTopSpeed = DEGREES_TO_RADIANS(3.0f);
+  g_CameraEditor.tiltAcceleration = DEGREES_TO_RADIANS(1.0f);
+  g_CameraEditor.zoomTopSpeed = 10.0f;
+  g_CameraEditor.zoomAcceleration = 1.0f;
   MeasureEditorCamera();
   g_LookAtMarkerScale = 1.0f;
 }
@@ -60,26 +60,26 @@ void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY,
 /* Sets the top speed and acceleration of point index's moves. Nothing calls
  * it */
 void SetEditorPointSpeeds(s32 index, f32 topSpeed, f32 acceleration) {
-  g_CameraEditor.unk70[index] = topSpeed;
-  g_CameraEditor.unk78[index] = acceleration;
+  g_CameraEditor.pointTopSpeeds[index] = topSpeed;
+  g_CameraEditor.pointAccelerations[index] = acceleration;
 }
 
 /* Sets the top speed and acceleration of turns. Nothing calls it */
 void SetEditorTurnSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
-  g_CameraEditor.unk80 = topSpeed;
-  g_CameraEditor.unk84 = acceleration;
+  g_CameraEditor.turnTopSpeed = topSpeed;
+  g_CameraEditor.turnAcceleration = acceleration;
 }
 
 /* Sets the top speed and acceleration of tilts. Nothing calls it */
 void SetEditorTiltSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
-  g_CameraEditor.unk88 = topSpeed;
-  g_CameraEditor.unk8C = acceleration;
+  g_CameraEditor.tiltTopSpeed = topSpeed;
+  g_CameraEditor.tiltAcceleration = acceleration;
 }
 
 /* Sets the top speed and acceleration of zooms. Nothing calls it */
 void SetEditorZoomSpeeds(s32 unusedIndex, f32 topSpeed, f32 acceleration) {
-  g_CameraEditor.unk90 = topSpeed;
-  g_CameraEditor.unk94 = acceleration;
+  g_CameraEditor.zoomTopSpeed = topSpeed;
+  g_CameraEditor.zoomAcceleration = acceleration;
 }
 
 /* Works out the camera's heading, pitch and distance from its eye and look-at
@@ -138,9 +138,9 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = distance / (frameCount - easeFrameCount);
-    g_CameraEditor.unk70[index] = speed;
-    g_CameraEditor.unk78[index] = speed / (easeFrameCount + 1);
-    g_CameraEditor.unk98[index] = distance * 0.25;
+    g_CameraEditor.pointTopSpeeds[index] = speed;
+    g_CameraEditor.pointAccelerations[index] = speed / (easeFrameCount + 1);
+    g_CameraEditor.pointBrakingDistances[index] = distance * 0.25;
     if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
       if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE)) {
         g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
@@ -164,13 +164,13 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   x -= g_CameraEditor.points[index][0];
   y -= g_CameraEditor.points[index][1];
   z -= g_CameraEditor.points[index][2];
-  g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_X;
+  g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_X;
   if (fabsf(x) < fabsf(z)) {
-    g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_Z;
+    g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Z;
     x = z;
   }
   if (fabsf(x) < fabsf(y)) {
-    g_CameraEditor.unkB4[index] = EDITOR_MOVE_AXIS_Y;
+    g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Y;
   }
 }
 
@@ -209,11 +209,11 @@ void TurnEditorCamera(s32 index, f32 angle, s32 frameCount) {
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = angle / (frameCount - easeFrameCount);
-    g_CameraEditor.unkA4 = angle * 0.25;
-    g_CameraEditor.unk80 = speed;
-    g_CameraEditor.unk84 = speed / (easeFrameCount + 1);
+    g_CameraEditor.turnBrakingAngle = angle * 0.25;
+    g_CameraEditor.turnTopSpeed = speed;
+    g_CameraEditor.turnAcceleration = speed / (easeFrameCount + 1);
   }
-  g_CameraEditor.unk68 = angle;
+  g_CameraEditor.turnLeft = angle;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
@@ -248,11 +248,11 @@ void TiltEditorCamera(s32 index, f32 angle, s32 frameCount) {
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = angle / (frameCount - easeFrameCount);
-    g_CameraEditor.unkA0 = angle * 0.25;
-    g_CameraEditor.unk88 = speed;
-    g_CameraEditor.unk8C = speed / (easeFrameCount + 1);
+    g_CameraEditor.tiltBrakingAngle = angle * 0.25;
+    g_CameraEditor.tiltTopSpeed = speed;
+    g_CameraEditor.tiltAcceleration = speed / (easeFrameCount + 1);
   }
-  g_CameraEditor.unk64 = angle;
+  g_CameraEditor.tiltLeft = angle;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
@@ -288,9 +288,9 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = change / (frameCount - easeFrameCount);
-    g_CameraEditor.unk90 = speed;
-    g_CameraEditor.unk94 = speed / (easeFrameCount + 1);
-    g_CameraEditor.unkA8 = fabsf(change) * 0.25;
+    g_CameraEditor.zoomTopSpeed = speed;
+    g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
+    g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
   }
   g_CameraEditor.unk6C = change;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
@@ -334,28 +334,28 @@ void StopEditorMoves(void) {
     g_CameraEditor.targets[i][0] = 0.0f;
     g_CameraEditor.targets[i][1] = 0.0f;
     g_CameraEditor.targets[i][2] = 0.0f;
-    g_CameraEditor.unk40[i][0] = 0.0f;
-    g_CameraEditor.unk40[i][1] = 0.0f;
-    g_CameraEditor.unk40[i][2] = 0.0f;
+    g_CameraEditor.pointVelocities[i][0] = 0.0f;
+    g_CameraEditor.pointVelocities[i][1] = 0.0f;
+    g_CameraEditor.pointVelocities[i][2] = 0.0f;
     /* The game clears these twice */
-    g_CameraEditor.unk40[i][0] = 0.0f;
-    g_CameraEditor.unk40[i][1] = 0.0f;
-    g_CameraEditor.unk40[i][2] = 0.0f;
-    g_CameraEditor.unk70[i] = 30.0f;
-    g_CameraEditor.unk78[i] = 3.0f;
-    g_CameraEditor.unk98[i] = 0.0f;
-    g_CameraEditor.unkB4[i] = 0;
+    g_CameraEditor.pointVelocities[i][0] = 0.0f;
+    g_CameraEditor.pointVelocities[i][1] = 0.0f;
+    g_CameraEditor.pointVelocities[i][2] = 0.0f;
+    g_CameraEditor.pointTopSpeeds[i] = 30.0f;
+    g_CameraEditor.pointAccelerations[i] = 3.0f;
+    g_CameraEditor.pointBrakingDistances[i] = 0.0f;
+    g_CameraEditor.moveAxes[i] = 0;
     g_CameraEditor.flags[i] = 0;
   }
-  g_CameraEditor.unkA0 = 0.0f;
-  g_CameraEditor.unkA4 = 0.0f;
-  g_CameraEditor.unkA8 = 0.0f;
-  g_CameraEditor.unk80 = DEGREES_TO_RADIANS(6.0f);
-  g_CameraEditor.unk84 = DEGREES_TO_RADIANS(2.0f);
-  g_CameraEditor.unk88 = DEGREES_TO_RADIANS(3.0f);
-  g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
-  g_CameraEditor.unk90 = 10.0f;
-  g_CameraEditor.unk94 = 1.0f;
+  g_CameraEditor.tiltBrakingAngle = 0.0f;
+  g_CameraEditor.turnBrakingAngle = 0.0f;
+  g_CameraEditor.zoomBrakingDistance = 0.0f;
+  g_CameraEditor.turnTopSpeed = DEGREES_TO_RADIANS(6.0f);
+  g_CameraEditor.turnAcceleration = DEGREES_TO_RADIANS(2.0f);
+  g_CameraEditor.tiltTopSpeed = DEGREES_TO_RADIANS(3.0f);
+  g_CameraEditor.tiltAcceleration = DEGREES_TO_RADIANS(1.0f);
+  g_CameraEditor.zoomTopSpeed = 10.0f;
+  g_CameraEditor.zoomAcceleration = 1.0f;
   MeasureEditorCamera();
 }
 
