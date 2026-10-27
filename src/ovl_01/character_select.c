@@ -10,6 +10,14 @@
 
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
+/* func_80209568 lets the cursor stop on slots below this only when asked to */
+#define CHOOSABLE_MARK_LIMIT (-20)
+
+/* The directions that func_80209568 moves a player's cursor through the grid */
+#define GRID_MOVE_UP 1
+#define GRID_MOVE_DOWN 2
+#define GRID_MOVE_LEFT 3
+#define GRID_MOVE_RIGHT 4
 
 /* The diagonals of any controller's stick that func_80209BE0 reports, each once per hold of four frames */
 #define STICK_DIAGONAL_NONE 0
@@ -49,6 +57,9 @@ extern s32 D_8022FFA4_ovl_01;
 extern s32 D_8023BFD4_ovl_01;
 extern s32 D_8023BFD8_ovl_01;
 extern u8 D_8022FF01_ovl_01;
+extern s8 D_8022FF04_ovl_01;
+extern u8 D_8022FF05_ovl_01;
+extern u8 D_8022FF06_ovl_01;
 extern s32 D_8022FF2C_ovl_01[];
 extern void *D_8023A568_ovl_01;
 extern void *D_8023A570_ovl_01;
@@ -76,7 +87,88 @@ void func_80209500_ovl_01(void) {
     D_8022FF1C_ovl_01[3] = fourthSlot;
 }
 
+/*
+ * Doesn't match: the original sign-extends the slot and character afresh at
+ * each use, and adds the player number to the menu memory's address the
+ * other way round.
+ */
+#ifdef NON_MATCHING
+s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
+    EncodedAsset asset;
+    AssetFile file;
+    MenuMemory *memory = func_8005AF74();
+    s16 oldColumn = (s8)(&memory->characterColumn)[playerNumber - 1];
+    s16 oldRow = (s8)(&memory->characterRow)[playerNumber - 1];
+    s16 column = oldColumn;
+    s16 row = oldRow;
+    u16 slot;
+    u16 character;
+    void *faceImage;
+    s32 unused[2];
+    u16(*faceAssets)[8];
+
+    do {
+        if (direction == GRID_MOVE_UP) {
+            row--;
+        }
+        if (direction == GRID_MOVE_DOWN) {
+            row++;
+        }
+        if (direction == GRID_MOVE_LEFT) {
+            column--;
+        }
+        if (direction == GRID_MOVE_RIGHT) {
+            column++;
+        }
+        if (row < 0) {
+            row = CHARACTER_GRID_ROW_COUNT - 1;
+        }
+        if (row >= CHARACTER_GRID_ROW_COUNT) {
+            row = 0;
+        }
+        if (column < 0) {
+            column = CHARACTER_GRID_COLUMN_COUNT - 1;
+        }
+        if (column >= CHARACTER_GRID_COLUMN_COUNT) {
+            column = 0;
+        }
+        if (column == oldColumn && row == oldRow) {
+            break;
+        }
+    } while (g_CharacterGrid[row][column] < 0 &&
+             (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT && canChooseMarked == TRUE) == FALSE);
+    (&memory->characterColumn)[playerNumber - 1] = column;
+    (&memory->characterRow)[playerNumber - 1] = row;
+    if (column != oldColumn || row != oldRow) {
+        character = g_CharacterGrid[oldRow][oldColumn];
+        D_8022FF04_ovl_01 = 0;
+        D_8022FF06_ovl_01 = 0;
+        D_8022FF05_ovl_01 ^= 1;
+        if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
+            character += MARKED_CHARACTER_OFFSET;
+        }
+        slot = character;
+        if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
+            character = g_ImportedCharacters[(s16)slot - FIRST_IMPORTED_CHARACTER].character;
+        } else {
+            character = slot;
+        }
+        faceImage = D_8012D430[(s16)slot];
+        if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+            faceAssets = D_800C2780;
+        } else {
+            faceAssets = D_800C2650;
+        }
+        OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
+        ReadEncodedAsset(faceImage, &asset);
+        OpenAssetFile(D_800C2590[(s16)character].assetId, &file);
+        ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
+    }
+    return -(column == oldColumn && row == oldRow);
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209568_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_80209894_ovl_01);
 
@@ -194,6 +286,7 @@ void func_8020B438_ovl_01(void) {
     u8 *images = GetMenuImageBuffer();
     s32 slotIndex;
     void *faceImage;
+    s32 unused[2];
     void *characterFile;
     u16 faceAsset;
 
