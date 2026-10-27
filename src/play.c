@@ -631,7 +631,7 @@ s32 func_801F8A30();
 s32 func_802436C8();
 void func_80216B74();
 void func_801F4AA4();
-void func_802088B0(void);
+void UpdateTurns(void);
 s32 func_8024216C(void);
 s32 func_80242374(void);
 void func_80241EE8(void);
@@ -1083,7 +1083,7 @@ void UpdatePlay(void) {
                 g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
                 g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
                 if (g_IsModuleAlive[MODULE_UNK10] || ReportModuleNotAlive(MODULE_UNK10)) {
-                    func_802088B0();
+                    UpdateTurns();
                 }
                 PlayContestMovies();
                 if (func_8005FCB8()) {

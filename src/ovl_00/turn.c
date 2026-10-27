@@ -2340,7 +2340,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
 }
 
 /*
- * func_802088B0 holds ten functions nested in it, a GNU C extension. GCC
+ * UpdateTurns holds ten functions nested in it, a GNU C extension. GCC
  * passes them the parent's frame in $v0, its static chain, and they read
  * the parent's playerIndex through it. The debug helpers before it are
  * inline: inlined, their buffers share one stack slot, as in the
@@ -2489,7 +2489,7 @@ static inline void FrameBallAndShot(void) {
     GetFramedView(g_Cameras[0].view.eye, g_Cameras[0].view.lookAt);
 }
 
-void func_802088B0_ovl_00(void) {
+void UpdateTurns(void) {
     s32 playerIndex;
     s32 state;
     s32 nextState;
@@ -4106,7 +4106,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", GiveUpHole);
 
 /* Shows or hides the HUD's parts, apart from the club panel and the letterbox */
 void SetRoundHudPartsShown(s8 isShown) {
-    /* Stands in for the static chain that the original, nested in func_802088B0, saves */
+    /* Stands in for the static chain that the original, nested in UpdateTurns, saves */
     volatile s32 unused;
     s32 garbage;
 
@@ -4123,5 +4123,5 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", DoesImpactRumble);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", PlayImpactClickSound);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", func_802088B0_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/turn", UpdateTurns);
 #endif

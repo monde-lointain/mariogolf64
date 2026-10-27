@@ -3144,3 +3144,4 @@ sCurrentBallDepth = 0x80225818; // size:0x4 segment:ovl_00
 g_SavedPlayers = 0x80104B88; // size:0x2E0
 g_SavedShots = 0x80132200; // size:0x160
 g_PreviousBallSurfaceInfo = 0x801B5680; // size:0x20
+UpdateTurns = 0x802088B0; // type:func segment:ovl_00
