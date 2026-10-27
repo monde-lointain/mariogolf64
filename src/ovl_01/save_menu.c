@@ -3,11 +3,16 @@
 #include "character.h"
 #include "course.h"
 #include "game_flags.h"
+#include "hole_display.h"
 #include "libc.h"
+#include "menu.h"
 #include "menu_memory.h"
 #include "round_hud.h"
 #include "save.h"
+#include "screen_layers.h"
+#include "sound.h"
 #include "sram.h"
+#include "text.h"
 
 /* The image listing the game modes, in orange */
 /* The buffers of func_802218C0, and what it reads into them */
@@ -85,6 +90,13 @@ typedef struct {
     /* 0x2 */ u16 assetId;
 } SaveMenuModeImage; /* size = 0x4 */
 
+/* The Ring Shot records' text slots */
+#define RING_SHOT_TEXT_SLOT_COUNT 6
+/* The row after the courses, for the saved Ring Shot replays */
+#define RING_SHOT_REPLAY_ROW RING_SHOT_COURSE_COUNT
+/* The furthest a course's list of characters scrolls */
+#define RING_SHOT_LAST_FIRST_CHARACTER 14
+
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
 extern u16 D_800C208C[];
@@ -122,6 +134,13 @@ extern s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 extern void *D_8023BD7C_ovl_01;
+extern u8 D_801052E8;
+extern s32 D_800FE334;
+extern s8 D_801B60B9;
+
+s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward);
+s16 func_80220DF8_ovl_01(void);
+s32 func_8022181C_ovl_01(void);
 
 void func_8021F5F0_ovl_01(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
@@ -164,7 +183,111 @@ void func_8021F6E0_ovl_01(void **buffers) {
     ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021F79C_ovl_01);
+void func_8021F79C_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    SaveData *save = GetSaveData();
+    s32 openCourseCount = func_8022181C_ovl_01();
+    s32 index;
+    s32 movedSlot;
+
+    if (openCourseCount <= 0) {
+        openCourseCount = 1;
+    }
+    if (openCourseCount > RING_SHOT_COURSE_COUNT) {
+        openCourseCount = RING_SHOT_COURSE_COUNT;
+    }
+    if (IsHudAnimationDone() == TRUE) {
+        if (GetWipeKind() != WIPE_NONE && D_801052E8 == 0) {
+            if (GetWipeProgress() == 0) {
+                for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+                g_MenuScreen = MENU_SCREEN_EXIT;
+                D_801B60B9 = 2;
+                SetGameFlag(GAME_FLAG_UNK1E);
+            }
+        } else if (GetWipeKind() == WIPE_NONE || D_801052E8 != 1) {
+            if (g_MenuPressedButtons & A_BUTTON) {
+                if (memory->ringShotRow == RING_SHOT_REPLAY_ROW && func_80220DF8_ovl_01() != -1) {
+                    PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                    index = memory->ringShotReplaySlot;
+                    memory->holeIndex = save->unk1DF0[D_8023B684_ovl_01[index]].unk35;
+                    memory->courseIndex = save->unk1DF0[D_8023B684_ovl_01[index]].unk34;
+                    D_800FE334 = 0;
+                    LoadWipeShape((s8)save->unk1DF0[index].unk34);
+                    StartWipe(WIPE_CLOSING);
+                    D_801052E8 = 0;
+                }
+            } else if (g_MenuPressedButtons & B_BUTTON) {
+                StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+                StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+                g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+                for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, index, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+            } else if (g_MenuRepeatButtons & L_JPAD) {
+                for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
+                    memory->ringShotRow = openCourseCount - 1;
+                    return;
+                }
+                memory->ringShotRow--;
+                if (memory->ringShotRow < 0) {
+                    memory->ringShotRow = RING_SHOT_REPLAY_ROW;
+                }
+            } else if (g_MenuRepeatButtons & R_JPAD) {
+                for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
+                    SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                }
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                memory->ringShotRow++;
+                if (memory->ringShotRow > RING_SHOT_REPLAY_ROW) {
+                    memory->ringShotRow = 0;
+                    return;
+                }
+                if (memory->ringShotRow > openCourseCount - 1) {
+                    memory->ringShotRow = RING_SHOT_REPLAY_ROW;
+                }
+            } else if (g_MenuRepeatButtons & U_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                index = memory->ringShotRow;
+                if (index == RING_SHOT_REPLAY_ROW) {
+                    if (memory->ringShotReplaySlot > 0) {
+                        movedSlot = func_80220D68_ovl_01(memory->ringShotReplaySlot, FALSE);
+                        if (movedSlot != -1) {
+                            memory->ringShotReplaySlot = movedSlot;
+                        }
+                        if (memory->ringShotReplaySlot < 0) {
+                            memory->ringShotReplaySlot = SAVE_MENU_SLOT_COUNT - 1;
+                        }
+                    }
+                } else if (memory->ringShotFirstCharacters[index] > 0) {
+                    memory->ringShotFirstCharacters[index]--;
+                }
+            } else if (g_MenuRepeatButtons & D_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                index = memory->ringShotRow;
+                if (index == RING_SHOT_REPLAY_ROW) {
+                    if (memory->ringShotReplaySlot < SAVE_MENU_SLOT_COUNT - 1) {
+                        movedSlot = func_80220D68_ovl_01(memory->ringShotReplaySlot, TRUE);
+                        if (movedSlot != -1) {
+                            memory->ringShotReplaySlot = movedSlot;
+                        }
+                        if (memory->ringShotReplaySlot >= SAVE_MENU_SLOT_COUNT) {
+                            memory->ringShotReplaySlot = 0;
+                        }
+                    }
+                } else if (memory->ringShotFirstCharacters[index] < RING_SHOT_LAST_FIRST_CHARACTER) {
+                    memory->ringShotFirstCharacters[index]++;
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_8021FC5C_ovl_01);
 
