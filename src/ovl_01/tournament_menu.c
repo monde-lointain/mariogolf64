@@ -4,6 +4,7 @@
 #include "menu_memory.h"
 #include "save.h"
 #include "text.h"
+#include "variables.h"
 
 extern s32 g_MenuWindowState;
 /* How far the window has opened across and down, from 0 to 1 */
@@ -53,6 +54,12 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 
 /* "Please enter a code.", which "The code entered is incorrect." follows */
 #define MESSAGE_ENTER_CODE 0x165
+
+/* Where the entered code is drawn, and the value of its characters not yet entered */
+#define CLUB_CODE_FIRST_X 97
+#define CLUB_CODE_Y 150
+#define CLUB_CODE_CHAR_WIDTH 24
+#define CLUB_CODE_NO_CHAR 0xFF
 
 /* Where the prompt's two messages are drawn */
 #define CLUB_CODE_PROMPT_X 56
@@ -243,7 +250,7 @@ void func_80228B60_ovl_01(void) {
     memory->unk48 = 0;
     D_80230F74_ovl_01 = 0;
     for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
-        D_80230FD4_ovl_01[charIndex] = 0xFF;
+        D_80230FD4_ovl_01[charIndex] = CLUB_CODE_NO_CHAR;
     }
     D_80230F68_ovl_01 = 0;
     D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
@@ -273,7 +280,23 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A8F4_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022ADE8_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B360_ovl_01);
+void func_8022B360_ovl_01(Gfx **displayListHead) {
+    s32 charIndex;
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
+        if (D_80230FD4_ovl_01[charIndex] != CLUB_CODE_NO_CHAR) {
+            sprintf(g_PrintBuffer, "%c", D_80230FD4_ovl_01[charIndex]);
+            DrawLargeTextWithShadow(&gfx, charIndex * CLUB_CODE_CHAR_WIDTH + CLUB_CODE_FIRST_X, CLUB_CODE_Y,
+                                    g_PrintBuffer, -1, -1, 0);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022B46C_ovl_01);
 
