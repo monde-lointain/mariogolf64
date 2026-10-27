@@ -5,7 +5,9 @@
 
 /* The screens that the menu overlay shows, which g_MenuScreen picks */
 #define MENU_SCREEN_TITLE 0
+#define MENU_SCREEN_CHARACTER_SELECT 1
 #define MENU_SCREEN_MAIN 2
+#define MENU_SCREEN_SAVED_GAMES 3
 #define MENU_SCREEN_OPTIONS 4
 #define MENU_SCREEN_UNK5 5
 #define MENU_SCREEN_UNK6 6

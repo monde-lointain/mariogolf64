@@ -37,6 +37,7 @@
 #define SCENE_RINGS 16
 #define SCENE_BOOT_LOGOS 27
 #define SCENE_WALLS 28
+#define SCENE_TRANSMIT 29 /* Trades data with Mario Golf for Game Boy */
 #define SCENE_STAFF_ROLL 30
 
 /* The current scene while UpdateOverlays swaps the scene's modules */
@@ -44,7 +45,9 @@
 
 /* The modules that g_SceneModuleToLoad names for the next scene */
 #define SCENE_MODULE_MENU 0x02
+#define SCENE_MODULE_TITLE_SCREEN 0x04
 #define SCENE_MODULE_PLAY 0x0A
+#define SCENE_MODULE_TRANSMIT 0x1B
 #define SCENE_MODULE_STAFF_ROLL 0x1F
 
 /* g_SubModuleState values */

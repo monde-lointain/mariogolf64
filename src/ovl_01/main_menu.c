@@ -17,6 +17,7 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "text.h"
+#include "transfer_pak.h"
 #include "variables.h"
 
 /* The wind and light of the hole that loads behind the menus */
@@ -27,6 +28,21 @@
 
 /* The module that the menus draw as */
 #define MODULE_MENU 2
+
+/* The title screen's rows, which func_801F70F0 moves between */
+#define TITLE_CHOICE_NEW_GAME 0
+#define TITLE_CHOICE_SAVED_GAMES 1
+#define TITLE_CHOICE_MENUS 2
+#define TITLE_CHOICE_COUNT 3
+/* Holding these as A is pressed on the menus row shows the Transmit choice in the main menu */
+#define TRANSMIT_BUTTONS (A_BUTTON | L_TRIG | R_TRIG)
+#define TRANSMIT_OTHER_BUTTONS (A_BUTTON | Z_TRIG | R_TRIG)
+#define SOUND_TRANSMIT_SHOWN 0x73
+#define TRANSMIT_SOUND_CHANNEL 14
+/* The wipe that leaves for the Transmit scene from the saved games row */
+#define TRANSMIT_WIPE_SHAPE 12
+/* Where the title scene's text goes; pressing B clears it before going back there */
+#define TITLE_SCREEN_TEXT_Y 114
 
 /* How the menus' bobbing items move: the phase step per frame, and the height in pixels */
 #define MENU_BOB_PHASE_STEP 0.13f
@@ -178,6 +194,19 @@ extern s32 D_800FBD40[];
 extern s8 D_801323A0[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_801B7070;
+extern s32 D_8022BE84_ovl_01;
+extern u8 D_8022BE88_ovl_01;
+extern u8 D_8022BE89_ovl_01;
+extern s32 D_8023BFD0_ovl_01;
+extern s32 D_802322F0_ovl_01;
+extern s32 D_802322F4_ovl_01;
+extern s8 D_801B60B8;
+extern s32 D_801B60A0;
+extern s32 D_801B60A8;
+extern s32 D_800C42D0;
+extern s8 D_800FBE08[MAX_PLAYER_COUNT];
+extern s16 D_801B71CC;
+extern s16 D_800FBE2C;
 extern u8 D_801B9410;
 extern s8 D_800FF4C0;
 extern s8 D_801B5634;
@@ -302,7 +331,139 @@ void func_801F6B20_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F6B28_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F70F0_ovl_01);
+void func_801F70F0_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 index;
+    s8 titleChoice;
+
+    if (IsHudAnimationDone() != TRUE) {
+        return;
+    }
+    D_8022BE84_ovl_01 = 0;
+    D_8022BE88_ovl_01 = 0;
+    D_8022BE89_ovl_01 = 0;
+    D_8023BFD0_ovl_01 = 0;
+    D_802322F0_ovl_01 = 0;
+    D_802322F4_ovl_01 = 0;
+    D_801B60B8 = 0;
+    D_801B60A0 = 0;
+    g_IsMiniGolf = FALSE;
+    D_801B60B9 = 0;
+    D_801B60A8 = 0;
+    if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
+        if (GetWipeProgress() == 0) {
+            g_Scene = SCENE_SWAPPING_MODULES;
+            g_SceneModuleToUnload = SCENE_MODULE_MENU;
+            g_NextScene = SCENE_TRANSMIT;
+            g_SceneModuleToLoad = SCENE_MODULE_TRANSMIT;
+            ResetGameBoyTransfer(TRANSFER_MODE_FROM_MENU);
+            StartWipe(WIPE_OPENING);
+        }
+        return;
+    }
+    if (GetWipeKind() != WIPE_NONE && D_801B9410 == 1) {
+        return;
+    }
+    if (g_MenuPressedButtons & A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        titleChoice = ((MenuMemory *)D_801323A0)->titleChoice;
+        if (titleChoice == TITLE_CHOICE_NEW_GAME) {
+            for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+                *((s8 *)memory + index + 3) = 0;
+                *((s8 *)memory + index + 7) = 0;
+            }
+            memory->modeChoice = 0;
+            memory->unkC = 0;
+            memory->unkD = 0;
+            for (index = 0; index != MENU_UNKE_COUNT; index++) {
+                memory->unkE[index] = 0;
+            }
+            memory->unk16[0] = 0;
+            memory->unk16[1] = 0;
+            memory->holeIndex = 0;
+            memory->courseIndex = 0;
+            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+            g_MenuScreen = MENU_SCREEN_CHARACTER_SELECT;
+            D_80105B68 = ((MenuMemory *)D_801323A0)->playerCountChoice + 1;
+            for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+                D_800FBE08[index] = 0;
+            }
+            D_801B7070 = 0;
+            for (index = 0; index != D_8022BE0C_ovl_01; index++) {
+                D_800FBD40[index + 2] = 0;
+            }
+        } else if (titleChoice == TITLE_CHOICE_SAVED_GAMES) {
+            if (D_800C42D0) {
+                D_801B9410 = 0;
+                LoadWipeShape(TRANSMIT_WIPE_SHAPE);
+                StartWipe(WIPE_CLOSING);
+                D_801052E8 = 0;
+            } else {
+                D_80105B68 = titleChoice;
+                StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                g_MenuScreen = MENU_SCREEN_SAVED_GAMES;
+            }
+        } else if (titleChoice == TITLE_CHOICE_MENUS) {
+            D_80105B68 = 1;
+            if ((g_MenuRepeatButtons == TRANSMIT_BUTTONS) | (g_MenuRepeatButtons == TRANSMIT_OTHER_BUTTONS)) {
+                PlaySound(SOUND_TRANSMIT_SHOWN, TRANSMIT_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                D_801323E6 = 1;
+                g_MenuScreen = titleChoice;
+            } else {
+                D_801323E6 = 0;
+                g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
+            }
+        }
+        if (D_801B71CC != g_MenuScreen || D_800FBE2C != ((MenuMemory *)D_801323A0)->playerCountChoice) {
+            ((MenuMemory *)D_801323A0)->modeChoice = 0;
+            *(s16 *)D_800FBD40 = 0;
+        }
+        D_801052E8 = 0;
+        D_801B9410 = 0;
+        D_801B71CC = g_MenuScreen;
+        D_800FBE2C = ((MenuMemory *)D_801323A0)->playerCountChoice;
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        StartHudAnimation(HUD_ANIMATION_SPIRAL);
+        g_Scene = SCENE_SWAPPING_MODULES;
+        g_NextScene = SCENE_TITLE_SCREEN;
+        g_SceneModuleToUnload = SCENE_MODULE_MENU;
+        g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        SetTextSlot(SCREEN_WIDTH / 2, TITLE_SCREEN_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
+        return;
+    }
+    /* titleChoice is moved through the array's bytes, which keeps its address in a register as the original does */
+    if (g_MenuRepeatButtons & U_JPAD) {
+        D_801323A0[1]--;
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    } else if (g_MenuRepeatButtons & D_JPAD) {
+        D_801323A0[1]++;
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    }
+    if (D_801323A0[1] < 0) {
+        D_801323A0[1] = TITLE_CHOICE_COUNT - 1;
+    }
+    if (D_801323A0[1] >= TITLE_CHOICE_COUNT) {
+        D_801323A0[1] = 0;
+    }
+    if (D_801323A0[1] == TITLE_CHOICE_NEW_GAME) {
+        if (g_MenuRepeatButtons & L_JPAD) {
+            ((MenuMemory *)D_801323A0)->playerCountChoice--;
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        } else if (g_MenuRepeatButtons & R_JPAD) {
+            ((MenuMemory *)D_801323A0)->playerCountChoice++;
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        }
+    }
+    if (((MenuMemory *)D_801323A0)->playerCountChoice < 0) {
+        ((MenuMemory *)D_801323A0)->playerCountChoice = MAX_PLAYER_COUNT - 1;
+    }
+    if (((MenuMemory *)D_801323A0)->playerCountChoice >= MAX_PLAYER_COUNT) {
+        ((MenuMemory *)D_801323A0)->playerCountChoice = 0;
+    }
+}
 
 void func_801F75EC_ovl_01(void) {
     D_801323A0[2] = 0;
