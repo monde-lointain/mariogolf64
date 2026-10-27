@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "game_flags.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -8,9 +9,17 @@
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
 
+/* The bytes of the first of the two images that func_8020B438 reads into the menu's buffer */
+#define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
+
 /* The buffer that func_8020B2C4 keeps without reading an image into it */
 #define CHARACTER_SELECT_UNREAD_KIND 10
 
+/* The characters' faces, the first set of them shown with GAME_FLAG_UNK64 set */
+extern u16 D_800C2650[][8];
+extern u16 D_800C2780[][8];
+extern void *D_80105B78[CHARACTER_COUNT];
+extern void *D_8012D430[CHARACTER_COUNT];
 extern s32 D_801B7070;
 extern u8 D_8022FF01_ovl_01;
 extern s32 D_8022FF2C_ovl_01[];
@@ -101,7 +110,49 @@ void func_8020B3CC_ovl_01(void) {
     }
 }
 
+/*
+ * Doesn't match: the original indexes D_80105B78 afresh in each pass,
+ * where this steps a pointer through it and needs one more saved register.
+ */
+#ifdef NON_MATCHING
+void func_8020B438_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    s32 character = 0;
+    u8 *images = GetMenuImageBuffer();
+    s32 slotIndex;
+    void *faceImage;
+    void *characterFile;
+    u16 faceAsset;
+
+    OpenEncodedAsset(0x979, &asset);
+    ReadEncodedAsset(images, &asset);
+    OpenEncodedAsset(0x978, &asset);
+    ReadEncodedAsset(images + CHARACTER_SELECT_FIRST_IMAGE_SIZE, &asset);
+    for (slotIndex = 0; slotIndex != CHARACTER_COUNT; slotIndex++) {
+        faceImage = D_8012D430[slotIndex];
+        characterFile = D_80105B78[slotIndex];
+        if (slotIndex >= FIRST_IMPORTED_CHARACTER) {
+            if (g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].character >= 0) {
+                character = g_ImportedCharacters[slotIndex - FIRST_IMPORTED_CHARACTER].character;
+            }
+        } else {
+            character = slotIndex;
+        }
+        if (IsGameFlagSet(GAME_FLAG_UNK64)) {
+            faceAsset = D_800C2780[character][0];
+        } else {
+            faceAsset = D_800C2650[character][0];
+        }
+        OpenEncodedAsset(faceAsset, &asset);
+        ReadEncodedAsset(faceImage, &asset);
+        OpenAssetFile(D_800C2590[character].assetId, &file);
+        ReadAssetFile(characterFile, GetAssetFileSize(&file), &file);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
 
