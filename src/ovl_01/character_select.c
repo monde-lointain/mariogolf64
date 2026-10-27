@@ -1,12 +1,15 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "club.h"
 #include "controller.h"
 #include "game_flags.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
 #include "screen.h"
+#include "text.h"
+#include "variables.h"
 
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
@@ -50,6 +53,17 @@
 #define LEFTY_ICON_LEFT 18
 #define LEFTY_ICON_OFFSET (BUTTON_ICON_WIDTH * BUTTON_ICON_HEIGHT / 2)
 
+/* What func_8020B590 writes below the board */
+#define MESSAGE_CHOOSE_PLAYER_CHARACTER 0x12
+#define MESSAGE_CHOOSE_CHARACTER 0x14
+#define MESSAGE_FIRST_CHARACTER_NAME 0xA9
+#define PROMPT_X 25
+#define PROMPT_Y 180
+#define CHARACTER_NAME_X 238
+#define CHARACTER_NAME_Y 156
+#define DRIVE_DISTANCE_X 246
+#define DRIVE_DISTANCE_Y 200
+
 /* The buffer that func_8020B2C4 keeps without reading an image into it */
 #define CHARACTER_SELECT_UNREAD_KIND 10
 
@@ -78,6 +92,20 @@ extern void *D_8023A580_ovl_01;
 extern void *D_8023A584_ovl_01;
 extern s32 D_8022FF1C_ovl_01[4];
 extern s32 D_8022FF50_ovl_01[];
+extern char D_800C2A00[][IMPORTED_CHARACTER_NAME_LENGTH];
+extern s32 D_80105B68;
+extern u8 D_8022FF00_ovl_01;
+extern s8 D_8022FF07_ovl_01;
+extern s8 D_8022FF08_ovl_01;
+void func_801FC754_ovl_01(Gfx **displayListHead);
+void func_801FD7B0_ovl_01(Gfx **displayListHead);
+void func_8020BA08_ovl_01(Gfx **displayListHead, u8 isSinglePlayer);
+void func_8020C3B8_ovl_01(Gfx **displayListHead);
+void func_8020C6D8_ovl_01(Gfx **displayListHead, s32 arg1);
+/* The original passes these a second argument that they ignore */
+void func_8020D338_ovl_01();
+void func_8020D734_ovl_01();
+void func_8020DB30_ovl_01(Gfx **displayListHead, s32 character);
 
 void func_80209500_ovl_01(void) {
     s32 firstSlot = g_CharacterGrid[2][0];
@@ -426,7 +454,102 @@ void func_8020B438_ovl_01(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B438_ovl_01);
 #endif
 
+/*
+ * Doesn't match: the original adds the player number to the menu memory's
+ * address the other way round and keeps the grid slot in another register.
+ */
+#ifdef NON_MATCHING
+void func_8020B590_ovl_01(Gfx **displayListHead, s32 isSinglePlayer) {
+    Gfx *gfx = *displayListHead;
+    s32 playerNumber;
+    s16 column;
+    s32 slot;
+    s16 choiceIndex;
+    s32 *character;
+    s16 clubSet;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+    func_801FC754_ovl_01(&gfx);
+    func_801FD7B0_ovl_01(&gfx);
+    func_8020C3B8_ovl_01(&gfx);
+    func_8020BA08_ovl_01(&gfx, (u8)isSinglePlayer);
+    if ((u8)isSinglePlayer == TRUE) {
+        func_8020C6D8_ovl_01(&gfx, 2);
+    } else {
+        func_8020C6D8_ovl_01(&gfx, 1);
+    }
+    if ((D_8022FF07_ovl_01 == TRUE) & ((u8)isSinglePlayer == FALSE)) {
+        func_8020D338_ovl_01(&gfx, 0);
+    }
+    if (D_8022FF08_ovl_01 == TRUE) {
+        func_8020D734_ovl_01(&gfx, 0);
+    }
+    gDPPipeSync(gfx++);
+    if ((u8)isSinglePlayer == FALSE) {
+        playerNumber = D_801B7070;
+        if (playerNumber >= D_80105B68) {
+            playerNumber = D_80105B68 - 1;
+        }
+    } else {
+        playerNumber = 1;
+    }
+    column = (&func_8005AF74()->characterColumn)[(s16)playerNumber - 1];
+    slot = g_CharacterGrid[(&func_8005AF74()->characterRow)[(s16)playerNumber - 1]][column];
+    if (slot < CHOOSABLE_MARK_LIMIT) {
+        choiceIndex = slot + MARKED_CHARACTER_OFFSET;
+    } else {
+        choiceIndex = slot;
+    }
+    character = &D_8022FF50_ovl_01[choiceIndex];
+    func_8020DB30_ovl_01(&gfx, *character);
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    SetTextName(D_800C2A00[choiceIndex]);
+    SetTextSlot(CHARACTER_NAME_X, CHARACTER_NAME_Y, MESSAGE_FIRST_CHARACTER_NAME + choiceIndex, 1, 1,
+                TEXT_FLAG_CENTERED, 255, 255, 255, 255);
+    clubSet = *character;
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    sprintf(g_PrintBuffer, "%dY", g_Clubs[clubSet * CLUB_SET_SIZE + CLUB_TYPE_DRIVER].distance);
+    DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
+    if (D_8022FF00_ovl_01 == FALSE) {
+        s32 unused[2];
+
+        if ((u8)isSinglePlayer == TRUE) {
+            SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_CHARACTER, 1, 0, 1, 255, 255, 255, 255);
+        } else {
+            SetTextSlotValue(D_801B7070 + 1, 0, 0);
+            /* The prompt names the player in the player's own colour */
+            if (D_801B7070 == 0) {
+                SetTextPaletteColor(255, 127, 127, 0);
+            }
+            if (D_801B7070 == 1) {
+                SetTextPaletteColor(0, 255, 255, 0);
+            }
+            if (D_801B7070 == 2) {
+                SetTextPaletteColor(255, 255, 0, 0);
+            }
+            if (D_801B7070 == 3) {
+                SetTextPaletteColor(63, 255, 63, 0);
+            }
+            SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_PLAYER_CHARACTER, 1, 0, 1, 255, 255, 255, 255);
+        }
+        D_8022FF00_ovl_01 = TRUE;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020B590_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020BA08_ovl_01);
 
