@@ -1,3 +1,9 @@
+/*
+ * Play: setting up the players, their tee order and the clubs usable on the
+ * surface, replays of super shots and Ring Shot records, and UpdatePlay, which
+ * runs each hole and what comes between holes. It also sets the scene's fog and
+ * draws the ground.
+ */
 #include "common.h"
 
 #include "camera.h"

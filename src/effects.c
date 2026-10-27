@@ -1,3 +1,8 @@
+/*
+ * The small effects of play: drops, tears, divots and their marks, ripples,
+ * sparkles, spreading circles and rising clumps. The rain, the Rumble Paks'
+ * rumbles and the birdie badge count are here too.
+ */
 #include "common.h"
 
 #include "effects.h"

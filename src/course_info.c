@@ -1,3 +1,7 @@
+/*
+ * Facts about the courses and their holes: where their records are kept, and
+ * which holes are par threes or are marked as par fives.
+ */
 #include "common.h"
 
 #include "billboard.h"

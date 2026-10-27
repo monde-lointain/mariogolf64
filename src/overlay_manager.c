@@ -1,3 +1,6 @@
+/*
+ * Loads and unloads the overlays that hold the game's modules.
+ */
 #include "common.h"
 
 #include "overlay_manager.h"

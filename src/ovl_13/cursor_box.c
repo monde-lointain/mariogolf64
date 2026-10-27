@@ -1,3 +1,6 @@
+/*
+ * Loads the cursor box's image and draws it around a point.
+ */
 #include "common.h"
 
 #include "asset.h"

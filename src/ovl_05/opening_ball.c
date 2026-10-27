@@ -1,3 +1,8 @@
+/*
+ * The opening's copies of the ball simulation's routines, with which it
+ * simulates its shot, and a routine that loads one of the other characters with
+ * its birdie animation.
+ */
 #include "common.h"
 
 #include "ball_simulation.h"

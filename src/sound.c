@@ -1,3 +1,8 @@
+/*
+ * Sound effects, songs and the character sounds that wait for an
+ * animation, all played through libmus, with the interrupts masked around
+ * each libmus call that changes a sound.
+ */
 #include "common.h"
 
 #include "sound.h"
@@ -10,12 +15,6 @@
 #include "game_flags.h"
 #include "save.h"
 #include "variables.h"
-
-/*
- * Sound effects, songs and the character sounds that wait for an
- * animation, all played through libmus, with the interrupts masked around
- * each libmus call that changes a sound.
- */
 
 /* A channel's or the song's handle when there is nothing to control */
 #define NO_HANDLE -1

@@ -1,3 +1,8 @@
+/*
+ * Reads assets out of the asset archive. Files from a pool are opened on an
+ * asset and read a part at a time, and encoded assets are decoded from runs of
+ * bytes or of halfwords.
+ */
 #include "common.h"
 
 #include "asset.h"

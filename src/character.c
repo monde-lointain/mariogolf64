@@ -1,3 +1,8 @@
+/*
+ * The characters' models: loading them, playing their animations and texture
+ * animations, posing, lighting, placing and drawing them. It also measures how
+ * far to the side of the ball each character stands for each club.
+ */
 #include "common.h"
 
 #include "character.h"

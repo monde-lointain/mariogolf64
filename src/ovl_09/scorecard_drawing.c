@@ -1,3 +1,7 @@
+/*
+ * Draws the scorecard's pages: the standings, the match, the skins, the bets,
+ * Speed Golf, the leaderboard and the scores.
+ */
 #include "common.h"
 
 #include "asset.h"

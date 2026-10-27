@@ -1,3 +1,8 @@
+/*
+ * The hole editor's scenes, which edit a hole's ground cells, points, heights,
+ * triangles, rings and billboards over its map. They also load and save holes
+ * and write captures of the frame to the host.
+ */
 #include "common.h"
 
 #include "billboard.h"

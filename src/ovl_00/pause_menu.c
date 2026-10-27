@@ -1,3 +1,7 @@
+/*
+ * The pause menu over a round, and the choice box that asks the player to
+ * pick between a few options during a turn.
+ */
 #include "common.h"
 
 #include "pause_menu.h"
@@ -21,11 +25,6 @@
 #include "text.h"
 #include "turn.h"
 #include "variables.h"
-
-/*
- * The pause menu over a round, and the choice box that asks the player to
- * pick between a few options during a turn.
- */
 
 #define PAUSE_CURSOR_IMAGE_ASSET 0x70F /* A pointing glove and two tees */
 /* The wide cloud behind the pause menu */

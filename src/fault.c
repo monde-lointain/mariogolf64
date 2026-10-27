@@ -1,3 +1,6 @@
+/*
+ * Waits for CPU faults and prints the faulted thread's registers.
+ */
 #include "common.h"
 
 #include "PR/R4300.h"

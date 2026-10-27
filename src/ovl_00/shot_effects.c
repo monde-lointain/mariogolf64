@@ -1,3 +1,8 @@
+/*
+ * The sparks thrown off the ball by a driven shot or a hit on the flagstick,
+ * and the trail that the club leaves through the swing. Each burst of sparks
+ * spreads from a point that stays fixed in the world.
+ */
 #include "common.h"
 
 #include "shot_effects.h"
@@ -17,12 +22,6 @@
 #include "round_hud.h"
 #include "screen.h"
 #include "sound.h"
-
-/*
- * The sparks thrown off the ball by a driven shot or a hit on the flagstick,
- * and the trail that the club leaves through the swing. Each burst of sparks
- * spreads from a point that stays fixed in the world.
- */
 
 #define SPARK_COUNT 30
 #define SPARK_BURST_COUNT 5

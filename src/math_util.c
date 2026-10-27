@@ -1,3 +1,7 @@
+/*
+ * Math helpers: vector lengths in floats and integers, the random number
+ * generator and a CRC-16.
+ */
 #include "common.h"
 
 #include "math_util.h"

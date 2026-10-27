@@ -1,3 +1,10 @@
+/*
+ * The title screen, module 0x04, which LeaveBootLogos can swap in. A or
+ * Start on any controller swaps in module 0x02; otherwise it goes back to
+ * the logos after a while. Without a controller, it shows a screen asking
+ * for one and stays there. Button codes entered on the first controller
+ * unlock parts of the save or enable debugging.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -13,14 +20,6 @@
 #include "transfer_pak.h"
 #include "unlocks.h"
 #include "variables.h"
-
-/*
- * The title screen, module 0x04, which LeaveBootLogos can swap in. A or
- * Start on any controller swaps in module 0x02; otherwise it goes back to
- * the logos after a while. Without a controller, it shows a screen asking
- * for one and stays there. Button codes entered on the first controller
- * unlock parts of the save or enable debugging.
- */
 
 /* f_TitleStage values */
 #define TITLE_SHOWING 0

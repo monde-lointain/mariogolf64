@@ -1,3 +1,8 @@
+/*
+ * The hole intro camera starts in front of the ball and swings round behind it
+ * on the first hole; on later holes it starts behind the ball. Either way it
+ * closes in and drops to the shot's camera.
+ */
 #include "common.h"
 
 #include "camera.h"
@@ -11,11 +16,6 @@
 #include "sound.h"
 #include "variables.h"
 
-/*
- * The hole intro camera starts in front of the ball and swings round behind it
- * on the first hole; on later holes it starts behind the ball. Either way it
- * closes in and drops to the shot's camera.
- */
 #define INTRO_CAMERA_START_DISTANCE -768000.0f
 #define INTRO_CAMERA_START_HEIGHT -153600.0f
 /* The look-at point sits this far below the ball */

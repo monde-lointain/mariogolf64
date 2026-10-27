@@ -1,3 +1,6 @@
+/*
+ * Sets up the RCP, and clears the depth buffer and the frame.
+ */
 #include "common.h"
 
 #include "cpu_projection.h"

@@ -1,14 +1,14 @@
+/*
+ * A copy of the camera's projection and viewing matrices kept on the CPU, so
+ * the game can work out where points land on the screen without asking the RSP.
+ * The file also builds and multiplies matrices and converts them to the RSP's
+ * fixed point.
+ */
 #include "common.h"
 
 #include "cpu_projection.h"
 
 #include "screen.h"
-
-/*
- * A copy of the camera's projection and viewing matrices kept on the CPU,
- * so the game can work out where points land on the screen without asking
- * the RSP
- */
 
 /* The screen depth of the far plane over two, in a viewport's depth units */
 #define SCREEN_DEPTH_SCALE 16352.0f

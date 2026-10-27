@@ -1,3 +1,7 @@
+/*
+ * Text: the fonts, the message table and the text slots that show messages, and
+ * drawing text in each font.
+ */
 #include "common.h"
 
 #include "text.h"

@@ -1,14 +1,14 @@
+/*
+ * Encodes the score passwords and decodes the tournament passwords. Passwords
+ * are strings of symbols from a 28-symbol alphabet. A symbol's character also
+ * depends on its position in the password, and the last symbols are checksums
+ * of the others.
+ */
 #include "common.h"
 
 #include "password.h"
 
 #include "libc.h"
-
-/*
- * Passwords are strings of symbols from a 28-symbol alphabet. A symbol's
- * character also depends on its position in the password, and the last
- * symbols are checksums of the others.
- */
 
 #define PASSWORD_SYMBOL_COUNT 28
 #define BITS_PER_BYTE 8

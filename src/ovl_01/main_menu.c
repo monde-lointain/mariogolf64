@@ -1,3 +1,9 @@
+/*
+ * The menus' update, which loads each screen and runs it, and their drawing,
+ * which hands each screen to its draw routine. It holds the title scene of the
+ * menus, the main menu, the clubhouse, the options, the course select and the
+ * mini-golf course select, and the wipes that leave the menus.
+ */
 #include "common.h"
 
 #include "main_menu.h"

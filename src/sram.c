@@ -1,3 +1,6 @@
+/*
+ * Sets up NuSystem's access to the cartridge's SRAM.
+ */
 #include "common.h"
 
 #include "sram.h"

@@ -1,3 +1,8 @@
+/*
+ * The slots that hold the loaded characters: their alpha and highlights, their
+ * joint matrices, freeing them once no display list uses them, and the
+ * positions of points on their models.
+ */
 #include "common.h"
 
 #include "character_slot.h"

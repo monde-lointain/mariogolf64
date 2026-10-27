@@ -1,3 +1,7 @@
+/*
+ * The pin: the cup, the flagstick, the flag that turns to the wind, and their
+ * shadow.
+ */
 #include "common.h"
 
 #include "pin.h"

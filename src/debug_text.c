@@ -1,3 +1,9 @@
+/*
+ * Debug text is kept in a character grid that is drawn over each frame.
+ * Characters with the high bit set are drawn highlighted. A ring buffer of
+ * lines, the log, can be copied into the grid. Messages are also drawn
+ * straight into the framebuffers; the fault handler prints with them.
+ */
 #include "common.h"
 
 #include "debug_text.h"
@@ -6,13 +12,6 @@
 #include "game_flags.h"
 #include "text.h"
 #include "variables.h"
-
-/*
- * Debug text is kept in a character grid that is drawn over each frame.
- * Characters with the high bit set are drawn highlighted. A ring buffer of
- * lines, the log, can be copied into the grid. Messages are also drawn
- * straight into the framebuffers; the fault handler prints with them.
- */
 
 #define TEXT_COLUMN_COUNT 40
 #define TEXT_ROW_COUNT 30

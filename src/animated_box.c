@@ -1,3 +1,8 @@
+/*
+ * Boxes of flat colour that open and close over a few frames. A box is queued
+ * for each frame it shows, and drawing empties the queue. The debug scene menu
+ * draws its box with them.
+ */
 #include "common.h"
 
 #include "animated_box.h"

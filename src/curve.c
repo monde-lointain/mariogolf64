@@ -1,3 +1,7 @@
+/*
+ * Curves: periodic splines, Hermite interpolation, and stepping along a path of
+ * points at a pace.
+ */
 #include "common.h"
 
 /* The splines have this many segments, between one more knots */

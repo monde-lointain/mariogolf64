@@ -1,3 +1,8 @@
+/*
+ * The pause screens kept in this overlay: the save menu, which lists either
+ * the three saved games or the five replay records beside each one's
+ * mode icon, and the Controls screen, a picture of the controller.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -16,12 +21,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
-
-/*
- * The pause screens kept in this overlay: the save menu, which lists either
- * the three saved games or the five replay records beside each one's
- * mode icon, and the Controls screen, a picture of the controller.
- */
 
 /* What OpenSaveMenu lists, and f_MenuKind */
 #define SAVE_MENU_CLOSED 0

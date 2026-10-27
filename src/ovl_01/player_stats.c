@@ -1,3 +1,8 @@
+/*
+ * The clubhouse's screen 12, a grid of stats over a brick wall with ranked
+ * records and page arrows. The file also holds the bet settings screen and
+ * screen 20, where each player makes a choice.
+ */
 #include "common.h"
 
 #include "asset.h"

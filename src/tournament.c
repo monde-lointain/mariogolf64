@@ -1,3 +1,7 @@
+/*
+ * The tournament's computer contestants: their random numbers, simulating their
+ * scores, ranking the field and naming them.
+ */
 #include "common.h"
 
 #include "tournament.h"

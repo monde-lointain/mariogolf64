@@ -1,3 +1,8 @@
+/*
+ * The round overlay. It begins with the results that slide in when a
+ * round ends: the players' portraits and scores, the course points the
+ * round earned and the notices of what those points unlocked.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -22,12 +27,6 @@
 #include "tournament.h"
 #include "transfer_pak.h"
 #include "variables.h"
-/*
- * The round overlay. It begins with the results that slide in when a
- * round ends: the players' portraits and scores, the course points the
- * round earned and the notices of what those points unlocked.
- */
-
 /* OpenRoundResults's request that frees the results */
 #define CLOSE_ROUND_RESULTS -1
 

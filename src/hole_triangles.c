@@ -1,3 +1,7 @@
+/*
+ * Draws the hole triangles, making the shaded ones see-through, and builds and
+ * draws Ring Shot's rings, which are kept among them.
+ */
 #include "common.h"
 
 #include "hole_triangles.h"

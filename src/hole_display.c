@@ -1,3 +1,9 @@
+/*
+ * Draws what surrounds the course: the sky, the sun's glare and lens flare, the
+ * course's backdrop and the menus' backdrops. It also draws the HUD animations
+ * that fade, spiral, tile, turn away or slice the whole frame, and sets up the
+ * hole behind the title screen.
+ */
 #include "common.h"
 
 #include "hole_display.h"

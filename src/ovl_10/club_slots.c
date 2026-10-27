@@ -1,3 +1,10 @@
+/*
+ * Club Slots: before play, each player in turn spins a slot machine of
+ * three reels. The first reel holds woods, the second long irons and the
+ * third short irons and wedges, among stars. Each reel the player stops
+ * on a club adds that club to the bag beside the putter; three stars give
+ * every club.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -13,14 +20,6 @@
 #include "screen_layers.h"
 #include "sound.h"
 #include "variables.h"
-/*
- * Club Slots: before play, each player in turn spins a slot machine of
- * three reels. The first reel holds woods, the second long irons and the
- * third short irons and wedges, among stars. Each reel the player stops
- * on a club adds that club to the bag beside the putter; three stars give
- * every club.
- */
-
 /* f_ClubSlotsState values */
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1 /* Before the reels speed up */

@@ -1,3 +1,8 @@
+/*
+ * The character select screen, which screens 16 and 24 draw as well. Each
+ * player moves a cursor over the character grid, and the chosen character's
+ * shot curve shows as a meter.
+ */
 #include "common.h"
 
 #include "asset.h"

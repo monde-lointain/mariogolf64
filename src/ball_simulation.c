@@ -1,3 +1,8 @@
+/*
+ * The ball simulation. It launches the ball with a shot's velocity and wind,
+ * then moves it a step at a time as it flies, bounces and rolls over the
+ * course. It plays the sounds of the ball's impacts and spawns their effects.
+ */
 #include "common.h"
 
 #include "ball_simulation.h"

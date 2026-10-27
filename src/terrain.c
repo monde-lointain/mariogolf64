@@ -1,3 +1,8 @@
+/*
+ * The terrain: its codes and their colours, the surface at a point, and the
+ * ground's grid vertices, tiles, triangles and heights. The debug scene menu
+ * and the flag panel are here too.
+ */
 #include "common.h"
 
 #include "terrain.h"

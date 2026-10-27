@@ -1,13 +1,12 @@
-#include "common.h"
-
-#include "heap.h"
-
 /*
  * The heaps and the general memory pool share one allocator: each keeps
  * its blocks, used and free, in a circular list in address order, around
  * a block of its own that is never free. Allocations take the smallest
  * free block that fits, and frees merge a block with free neighbours.
  */
+#include "common.h"
+
+#include "heap.h"
 
 #define HEAP_COUNT 3
 

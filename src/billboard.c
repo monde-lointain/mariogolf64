@@ -1,3 +1,8 @@
+/*
+ * The billboards that stand for a hole's trees: placing them on the ground,
+ * sorting them by depth and drawing them, translucent close to the camera. The
+ * file also reads and writes files on the host.
+ */
 #include "common.h"
 
 #include "billboard.h"

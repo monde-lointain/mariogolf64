@@ -1,3 +1,7 @@
+/*
+ * Plays a character's sounds from its table of sound IDs and volumes, on a
+ * channel for each character slot.
+ */
 #include "common.h"
 
 #include "sound.h"

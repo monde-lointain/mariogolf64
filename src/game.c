@@ -1,3 +1,8 @@
+/*
+ * The game's frame: updating the current scene and drawing it, with the screen
+ * effects, the dynamic textures and the inset view, and loading and unloading
+ * the overlays' modules.
+ */
 #include "common.h"
 
 #include <lib/libnusys/nusys.h>

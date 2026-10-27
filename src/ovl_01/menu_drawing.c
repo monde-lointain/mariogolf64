@@ -1,3 +1,10 @@
+/*
+ * Draws most of the menu screens: the main menu, the clubhouse, the options,
+ * the help and birdie badge screens, and screens 5, 6, 8, 18, 20, 22, 23 and
+ * 26. It also draws the menus' labels, the chosen mode's icon, the players'
+ * characters and the waving Toad, and holds a debug character viewer and a
+ * debug caddy select.
+ */
 #include "common.h"
 
 #include "asset.h"

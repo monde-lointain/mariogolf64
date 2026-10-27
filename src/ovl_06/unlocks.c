@@ -1,3 +1,7 @@
+/*
+ * The parts of the save that the title screen's button codes unlock, and a
+ * code of this file's own that nothing reads
+ */
 #include "common.h"
 
 #include "unlocks.h"
@@ -6,11 +10,6 @@
 #include "save.h"
 #include "sound.h"
 #include "sram.h"
-
-/*
- * The parts of the save that the title screen's button codes unlock, and a
- * code of this file's own that nothing reads
- */
 
 /* GrantWinsStarsAndBadges gives a win, where there is none, in this many of the
  * first rows of unkAF0 */

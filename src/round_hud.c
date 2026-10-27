@@ -1,3 +1,8 @@
+/*
+ * The round's HUD: loading its images and the scenery's, the shot panel, the
+ * wind, the landing reaction, the green's grid, the ball's trail and the hole
+ * intro's images.
+ */
 #include "common.h"
 
 #include "round_hud.h"

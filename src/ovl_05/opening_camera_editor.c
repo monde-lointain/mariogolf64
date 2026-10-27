@@ -1,3 +1,7 @@
+/*
+ * The camera editor that moves the opening's camera: its eye and look-at point
+ * move, turn, tilt and zoom at set speeds.
+ */
 #include "common.h"
 
 #include "camera_editor.h"

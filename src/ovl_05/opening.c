@@ -1,3 +1,9 @@
+/*
+ * The opening: its script of scenes and cues, the camera, the characters and
+ * their shots, the sounds, and what it draws over the course: the name logos,
+ * the balls, Lakitu, the impact lines, the burst, the sparks and the title
+ * logo.
+ */
 #include "common.h"
 
 #include "asset.h"

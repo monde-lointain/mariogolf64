@@ -1,3 +1,8 @@
+/*
+ * Builds a hole from its files: reading the map and its terrain codes, painting
+ * the ground tiles, shaping and shading the ground, building its display lists,
+ * and placing the billboards and their shadows.
+ */
 #include "common.h"
 
 #include "hole_builder.h"

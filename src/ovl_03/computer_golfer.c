@@ -1,3 +1,7 @@
+/*
+ * The computer golfer, which plans its shot on a thread of its own by trying
+ * shots in the ball simulation.
+ */
 #include "common.h"
 
 #include "ball_simulation.h"

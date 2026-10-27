@@ -1,3 +1,8 @@
+/*
+ * The cameras of a hole: the flyover, and the flight camera that follows the
+ * shot with the sounds and reactions that go with it. The file also measures
+ * the ground's slope around the ball and builds the noise textures.
+ */
 #include "common.h"
 
 #include "ball_simulation.h"

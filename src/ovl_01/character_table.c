@@ -1,3 +1,7 @@
+/*
+ * The clubhouse's character table, screen 15: the characters' wins against each
+ * other, and a popup of two characters' faces with their wins.
+ */
 #include "common.h"
 
 #include "asset.h"

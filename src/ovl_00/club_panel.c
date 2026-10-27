@@ -1,3 +1,8 @@
+/*
+ * The panel that shows the selected club and the shot mode. Switching the
+ * shot mode animates the panel over a few frames, by loading one image per
+ * frame into whichever of two buffers is not being shown.
+ */
 #include "common.h"
 
 #include "club_panel.h"
@@ -12,12 +17,6 @@
 #include "round_hud.h"
 #include "scene.h"
 #include "variables.h"
-
-/*
- * The panel that shows the selected club and the shot mode. Switching the
- * shot mode animates the panel over a few frames, by loading one image per
- * frame into whichever of two buffers is not being shown.
- */
 
 /* Shows the debug value, which the second controller's D-pad changes */
 #define GAME_FLAG_CLUB_PANEL_DEBUG 0x6E

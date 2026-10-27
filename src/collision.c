@@ -1,3 +1,8 @@
+/*
+ * Finds what the moving ball hits: the ground, the billboards, the pin, the
+ * hole triangles, the walls and the rings. It also pushes the ball out of
+ * walls, and out to the cup's edge when it comes too close.
+ */
 #include "common.h"
 
 #include "collision.h"

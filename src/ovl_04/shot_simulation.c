@@ -1,3 +1,6 @@
+/*
+ * Simulates the shot from the ball's position and records its path.
+ */
 #include "common.h"
 
 #include "shot_simulation.h"

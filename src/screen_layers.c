@@ -1,3 +1,7 @@
+/*
+ * What is drawn over the whole screen: the wipes, the fades, the yes-or-no
+ * prompts and the Half Turn picture.
+ */
 #include "common.h"
 
 #include "screen_layers.h"

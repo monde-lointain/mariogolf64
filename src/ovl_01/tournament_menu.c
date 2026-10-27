@@ -1,3 +1,7 @@
+/*
+ * The window that opens over the menus, and the Club Tournament screen with its
+ * code entry.
+ */
 #include "common.h"
 
 #include "asset.h"

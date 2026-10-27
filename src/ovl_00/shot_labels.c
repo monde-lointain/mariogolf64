@@ -1,3 +1,10 @@
+/*
+ * Draws what helps aim the shot: the players' tags, the sign over the target,
+ * the flag over the pin and the shot preview. Each player's tag, "1P" or "1C"
+ * and so on, is drawn beside their ball with a line joining the two. It sits
+ * off one of the ball's corners, and moves to another corner when it would
+ * cover a tag drawn before it.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -12,12 +19,6 @@
 #include "screen.h"
 #include "surface.h"
 #include "variables.h"
-
-/*
- * Each player's tag, "1P" or "1C" and so on, is drawn beside their ball with a
- * line joining the two. It sits off one of the ball's corners, and moves to
- * another corner when it would cover a tag drawn before it.
- */
 
 #define GAME_STATE_UNK6 6
 #define PLAYER_STATE_UNK2 2

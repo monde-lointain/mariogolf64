@@ -1,3 +1,8 @@
+/*
+ * The scorecard: between holes it slides in over the course with the
+ * players' scores, and with each game mode's own pages, such as the
+ * tournament's leaderboard and a match's results.
+ */
 #include "common.h"
 
 #include "scorecard.h"
@@ -24,12 +29,6 @@
 #include "text.h"
 #include "tournament.h"
 #include "variables.h"
-/*
- * The scorecard: between holes it slides in over the course with the
- * players' scores, and with each game mode's own pages, such as the
- * tournament's leaderboard and a match's results.
- */
-
 /* f_ScorecardState values */
 #define SCORECARD_OPENING 0 /* Sliding in */
 #define SCORECARD_CLOSING 1 /* Sliding out */

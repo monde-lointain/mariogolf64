@@ -1,3 +1,7 @@
+/*
+ * The fireworks that the turn starts in sudden death. Each one bursts from a
+ * random point into the outline of a character, picked by the course.
+ */
 #include "common.h"
 
 #include "fireworks.h"

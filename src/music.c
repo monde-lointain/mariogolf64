@@ -1,3 +1,7 @@
+/*
+ * Starts the music player and its audio tasks, and loads the songs, the sound
+ * effect banks and the sample bank.
+ */
 #include "common.h"
 
 #include <PR/libmus.h>

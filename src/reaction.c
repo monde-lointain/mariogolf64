@@ -1,3 +1,8 @@
+/*
+ * After a hole, the golfer reacts to the score with an animation. These
+ * routines frame the golfer for it, cue its sounds, and pick a flat spot
+ * for it to play on.
+ */
 #include "common.h"
 
 #include "reaction.h"
@@ -16,12 +21,6 @@
 #include "pin.h"
 #include "scene.h"
 #include "sound.h"
-
-/*
- * After a hole, the golfer reacts to the score with an animation. These
- * routines frame the golfer for it, cue its sounds, and pick a flat spot
- * for it to play on.
- */
 
 /* EaseReactionView's easedParts bits */
 #define EASE_LOOK_AT (1 << 0)

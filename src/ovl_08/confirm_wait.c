@@ -1,3 +1,8 @@
+/*
+ * Module 0x0D, which UpdateGame runs in scene 26. On A or Start it swaps itself
+ * for the boot logos' module and enters their scene, scene 27. Its draw
+ * routine, RewriteWord, draws nothing. No code found enters scene 26.
+ */
 #include "common.h"
 
 #include "controller.h"

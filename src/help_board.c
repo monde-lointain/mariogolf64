@@ -1,3 +1,7 @@
+/*
+ * The help board that the menus show: a chalkboard listing the topics, with a
+ * hand and arrows, and each topic's pages of text.
+ */
 #include "common.h"
 
 #include "help_board.h"

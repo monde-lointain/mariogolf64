@@ -1,3 +1,8 @@
+/*
+ * The clubs: their reach and power in each shot mode, generating a set's
+ * parameters from its stats, how well each plays from each surface, and
+ * choosing the club and the shot mode with the controller.
+ */
 #include "common.h"
 
 #include "club.h"

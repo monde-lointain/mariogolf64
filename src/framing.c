@@ -1,3 +1,7 @@
+/*
+ * Places the first camera so that its view takes in a set of spheres, looking
+ * from a given direction.
+ */
 #include "common.h"
 
 #include "framing.h"

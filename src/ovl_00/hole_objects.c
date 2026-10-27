@@ -1,3 +1,7 @@
+/*
+ * The creatures that appear on a hole: Cheep Cheeps that leap out of the
+ * water where the ball lands, and a monkey that drops onto the cup.
+ */
 #include "common.h"
 
 #include "hole_objects.h"
@@ -14,11 +18,6 @@
 #include "sound.h"
 #include "terrain.h"
 #include "variables.h"
-
-/*
- * The creatures that appear on a hole: Cheep Cheeps that leap out of the
- * water where the ball lands, and a monkey that drops onto the cup.
- */
 
 #define HOLE_CREATURE_COUNT 10
 

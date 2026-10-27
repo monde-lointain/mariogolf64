@@ -1,3 +1,8 @@
+/*
+ * The save data and what is kept in it: reading and writing the save, the
+ * records and best times, what is unlocked, the Club Tournaments and the round
+ * statistics. It also loads the menus' resources.
+ */
 #include "common.h"
 
 #include "menu.h"

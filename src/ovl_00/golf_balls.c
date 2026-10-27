@@ -1,3 +1,7 @@
+/*
+ * The golf balls on the course, one for each player, and the fading
+ * afterimages that the ball in play leaves behind it.
+ */
 #include "common.h"
 
 #include "golf_balls.h"
@@ -18,11 +22,6 @@
 #include "surface.h"
 #include "terrain.h"
 #include "variables.h"
-
-/*
- * The golf balls on the course, one for each player, and the fading
- * afterimages that the ball in play leaves behind it.
- */
 
 #define GOLF_BALL_COUNT 32
 #define AFTERIMAGE_MAX_LENGTH 60

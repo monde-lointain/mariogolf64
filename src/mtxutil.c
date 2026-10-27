@@ -1,11 +1,10 @@
-#include "common.h"
-
 /*
  * The game's copy of libultra's matrix utilities, which sits among the
  * game's code and was built at -O2 like it, where libultra is built at
  * -O3. Unlike libultra's, guMtxF2L clamps each element to between
  * MIN_FIXED_ELEMENT and MAX_FIXED_ELEMENT before converting it.
  */
+#include "common.h"
 
 /* Converts between floats and the 16.16 fixed point of a Mtx */
 #define FLOAT_TO_FIXED(value) (s32)((value) * (f32)0x10000)

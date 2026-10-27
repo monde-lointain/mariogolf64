@@ -1,3 +1,7 @@
+/*
+ * The round's statistics and the course's records of rounds, with the skins,
+ * the bets and Nassau, and the longest drive and nearest pin contests.
+ */
 #include "common.h"
 
 #include "round_stats.h"

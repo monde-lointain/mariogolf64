@@ -1,3 +1,7 @@
+/*
+ * The clubhouse's course statistics: a wheel of the open courses that turns
+ * from one to the next, and the chosen course's panel of statistics.
+ */
 #include "common.h"
 
 #include "asset.h"

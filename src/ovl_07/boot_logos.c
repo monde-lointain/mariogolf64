@@ -1,3 +1,9 @@
+/*
+ * The logos that the game starts with, and that the title screen, the staff
+ * roll and the confirm wait go back to: the Nintendo 64 logo, then Nintendo's,
+ * then Camelot's. The first two fade in and out through the primitive alpha;
+ * Camelot's only fades in.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -14,12 +20,6 @@
 #include "text.h"
 #include "transfer_pak.h"
 #include "variables.h"
-
-/*
- * The logos shown once ovl_08's confirm screen swaps in this module: the
- * Nintendo 64 logo, then Nintendo's, then Camelot's. The first two fade in
- * and out through the primitive alpha; Camelot's only fades in.
- */
 
 /* f_BootLogoStage values */
 #define BOOT_LOGO_N64 0

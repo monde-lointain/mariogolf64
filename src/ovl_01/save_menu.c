@@ -1,3 +1,8 @@
+/*
+ * Two of the menus' screens: the clubhouse's Ring Shot records, which list each
+ * course's records and saved replays, and the saved games to continue, on
+ * numbered boards with each game's mode, course and players.
+ */
 #include "common.h"
 
 #include "asset.h"

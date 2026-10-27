@@ -1,3 +1,8 @@
+/*
+ * What the round shows between shots: the banners, the flip messages, the
+ * movies such as Lakitu's countdown, the contact effects and the Fly Guy that
+ * warns of a strong wind.
+ */
 #include "common.h"
 
 #include "round_events.h"

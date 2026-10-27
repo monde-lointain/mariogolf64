@@ -1,3 +1,7 @@
+/*
+ * Scoring: the round's holes, handicaps and net scores, and who wins a hole of
+ * a match or of a group.
+ */
 #include "common.h"
 
 #include "scoring.h"

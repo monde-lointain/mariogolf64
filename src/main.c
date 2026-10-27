@@ -1,3 +1,8 @@
+/*
+ * The game's entry, mainproc, which sets up the framebuffers and runs the
+ * heartbeat loop. The file also keeps the game flags, reads the controllers and
+ * prepares for a reset.
+ */
 #include "common.h"
 
 #include "main.h"

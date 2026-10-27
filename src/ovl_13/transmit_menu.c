@@ -1,3 +1,7 @@
+/*
+ * The Transmit menu, which brings characters over from Game Boy cartridges and
+ * writes status and experience to them.
+ */
 #include "common.h"
 
 #include "asset.h"

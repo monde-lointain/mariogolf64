@@ -1,3 +1,9 @@
+/*
+ * Two screens for choosing where to play, which share the course image
+ * that turns over to the next course. The Ring Shot select draws a
+ * backdrop of planks and a star for each hole, gold once its rings are
+ * cleared. The hole select draws a sign with the course's name and hole.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -14,13 +20,6 @@
 #include "sound.h"
 #include "text.h"
 #include "variables.h"
-/*
- * Two screens for choosing where to play, which share the course image
- * that turns over to the next course. The Ring Shot select draws a
- * backdrop of planks and a star for each hole, gold once its rings are
- * cleared. The hole select draws a sign with the course's name and hole.
- */
-
 /* f_LoadedScreen values */
 #define COURSE_SELECT_UNLOADED 0
 #define COURSE_SELECT_RING_SHOT 1

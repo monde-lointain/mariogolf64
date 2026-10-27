@@ -1,3 +1,8 @@
+/*
+ * Each player's turn: the aim camera and the aim controls, setting up and
+ * taking the shot, the shot preview, Course Points, records of holes and Ring
+ * Shot, picking the next player, and the round's debug tools.
+ */
 #include "common.h"
 
 #include "turn.h"

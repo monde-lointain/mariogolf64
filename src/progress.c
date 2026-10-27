@@ -1,3 +1,7 @@
+/*
+ * Records the player's progress in the save: wins and losses against the
+ * characters, birdie badges and tournament places.
+ */
 #include "common.h"
 
 #include "course.h"

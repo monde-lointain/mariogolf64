@@ -1,3 +1,8 @@
+/*
+ * The staff roll, module 0x1F, shown in scene 30. It scrolls the staff
+ * text a pixel a frame, has characters from the cast swing on Yoshi's
+ * Island's seventh hole, and ends on a closing picture.
+ */
 #include "common.h"
 
 #include "asset.h"
@@ -25,12 +30,6 @@
 #include "screen.h"
 #include "sound.h"
 #include "variables.h"
-
-/*
- * The staff roll, module 0x1F, shown in scene 30. It scrolls the staff
- * text a pixel a frame, has characters from the cast swing on Yoshi's
- * Island's seventh hole, and ends on a closing picture.
- */
 
 /* The cast leaves out one character, the one after the start ShuffleCastOrder
  * is given */
