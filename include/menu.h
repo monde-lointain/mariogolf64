@@ -20,6 +20,7 @@
 #define MENU_SCREEN_CHARACTER_TABLE 15
 #define MENU_SCREEN_HELP 17
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
+#define MENU_SCREEN_UNK20 20
 #define MENU_SCREEN_UNK22 22
 #define MENU_SCREEN_UNK23 23
 #define MENU_SCREEN_UNK24 24

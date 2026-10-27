@@ -125,7 +125,20 @@
 #define MENU_PHASE_CHOOSING 5
 #define MENU_PHASE_CANCELLED 6
 #define MENU_PHASE_CONFIRMED 7
+#define MENU_UNK89_UNK3 3
 #define MENU_UNK89_UNK4 4
+/* The bet settings screen's phases in D_8022BE88 */
+#define BET_PHASE_CHOOSING 2
+#define BET_PHASE_CANCELLED 3
+#define BET_PHASE_CONFIRMED 4
+/* Each bet's stake is one of these levels, which D_802304F4 turns into an amount */
+#define BET_STAKE_LEVEL_COUNT 6
+/* Where func_80217D20 types the chosen bet's explanation, and its first message */
+#define BET_HELP_X 36
+#define BET_HELP_Y 186
+#define BET_HELP_MESSAGE 0x15
+/* The random numbers chosen on starting the bets lie below this */
+#define RANDOM_SEED_RANGE 128
 
 /* Each player's choice on screen 20, and where the screen's slide starts */
 #define PLAYER_OPTION_COUNT 37
@@ -139,6 +152,15 @@ extern s32 D_80105B68;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
 extern u8 D_802304F4_ovl_01[];
+/* Which of unkE's bets each column of D_8023040C sets */
+extern s16 D_80230460_ovl_01[][STATS_INDEX_COLUMN_COUNT];
+/* How many columns of D_8023040C each row uses */
+extern u8 D_802304B4_ovl_01[];
+extern s32 D_8023BFC0_ovl_01;
+extern s32 D_8023BFC4_ovl_01;
+extern s32 D_8023BFC8_ovl_01;
+extern s32 D_8023BFCC_ovl_01;
+extern s8 D_801B70F0[MAXCONTROLLERS];
 extern s8 D_802309C4_ovl_01[][2];
 extern void **D_8023B630_ovl_01;
 extern void *D_8023B634_ovl_01;
@@ -308,7 +330,101 @@ void func_80217B88_ovl_01(s32 requestedPreset) {
     memory->unk2A = 0;
 }
 
+/* Doesn't match: the bet icon's index and the frame swap registers ($v0 and $v1) before OpenEncodedAsset. */
+#ifdef NON_MATCHING
+void func_80217D20_ovl_01(void) {
+    EncodedAsset asset;
+    MenuMemory *memory;
+    s16 index;
+
+    GetSaveData();
+    memory = func_8005AF74();
+    if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
+        PlaySong(SONG_TITLE, 0);
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_8022BE89_ovl_01 = MENU_UNK89_UNK3;
+    }
+    if (D_8022BE88_ovl_01 != BET_PHASE_CHOOSING) {
+        return;
+    }
+    if (g_MenuPressedButtons & A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        D_8023BFC0_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
+        D_8023BFC4_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
+        D_8023BFC8_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
+        D_8023BFCC_ovl_01 = guRandom() % RANDOM_SEED_RANGE;
+        for (index = 0; index != MAXCONTROLLERS; index++) {
+            D_801B70F0[index] = 0;
+        }
+        D_8022BE88_ovl_01 = BET_PHASE_CONFIRMED;
+        FreeAllCharacterSlots();
+        g_MenuScreen = MENU_SCREEN_UNK20;
+        D_802303A0_ovl_01 = 0;
+        SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        for (index = 0; index != MENU_UNKE_COUNT; index++) {
+            if (memory->unkE[index] != -1) {
+                D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+            } else {
+                D_801B60BA[index] = -1;
+            }
+        }
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        D_8022BE88_ovl_01 = BET_PHASE_CANCELLED;
+        D_802303A0_ovl_01 = 0;
+        SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        for (index = 0; index != MENU_UNKE_COUNT; index++) {
+            if (memory->unkE[index] != -1) {
+                D_801B60BA[index] = D_802304F4_ovl_01[memory->unkE[index]];
+            } else {
+                D_801B60BA[index] = -1;
+            }
+        }
+        return;
+    }
+    if (g_MenuRepeatButtons & U_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
+        if (memory->unkE[index] < BET_STAKE_LEVEL_COUNT - 1) {
+            memory->unkE[index]++;
+        }
+    } else if (g_MenuRepeatButtons & D_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        index = D_80230460_ovl_01[D_801B5634 - 1][memory->unkD];
+        if (memory->unkE[index] > 0) {
+            memory->unkE[index]--;
+        }
+    } else if (g_MenuRepeatButtons & L_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        memory->unkD--;
+        if (memory->unkD < 0) {
+            memory->unkD = D_802304B4_ovl_01[D_801B5634 - 1] - 1;
+        }
+        SetTextSlot(BET_HELP_X, BET_HELP_Y, D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE, 1, 0,
+                    TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]][D_8022F8C0_ovl_01],
+                         &asset);
+        ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01 ^ 1], &asset);
+        D_8022F8C4_ovl_01 ^= 1;
+    } else if (g_MenuRepeatButtons & R_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        memory->unkD++;
+        if (memory->unkD > D_802304B4_ovl_01[D_801B5634 - 1] - 1) {
+            memory->unkD = 0;
+        }
+        SetTextSlot(BET_HELP_X, BET_HELP_Y, D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD] + BET_HELP_MESSAGE, 1, 0,
+                    TEXT_FLAG_TYPED, 255, 255, 255, 255);
+        OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[D_801B5634 - 1][memory->unkD]][D_8022F8C0_ovl_01],
+                         &asset);
+        ReadEncodedAsset(D_8023B350_ovl_01[D_8022F8C4_ovl_01 ^ 1], &asset);
+        D_8022F8C4_ovl_01 ^= 1;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80217D20_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021826C_ovl_01);
 
