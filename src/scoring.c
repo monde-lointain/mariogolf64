@@ -1,36 +1,40 @@
 #include "common.h"
+
+#include "scoring.h"
+
 #include "course.h"
 #include "game_flags.h"
 #include "save.h"
 #include "scene.h"
-#include "scoring.h"
 
 #define DEBUG_ROUND_HOLE_COUNT 2
 /* Above any score, so the first player compared sets the best one */
 #define NO_BEST_SCORE 0x40000000
 
-void SortIndicesDescending(s32 *values, s32 *order, s32 count);
+void SortIndicesDescending(s32* values, s32* order, s32 count);
 
 s32 GetFirstHoleIndex(void) {
-    return (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) ? HOLES_PER_NINE : 0;
+  return (g_GameState.holeSelection & HOLE_SELECTION_BACK_NINE) ? HOLES_PER_NINE
+                                                                : 0;
 }
 
 s32 GetRoundHoleCount(void) {
-    if (IsGameFlagSet(GAME_FLAG_TWO_HOLE_ROUNDS)) {
-        return DEBUG_ROUND_HOLE_COUNT;
-    }
-    if (g_GameState.holeSelection & (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE)) {
-        return HOLES_PER_NINE;
-    }
-    return COURSE_HOLE_COUNT;
+  if (IsGameFlagSet(GAME_FLAG_TWO_HOLE_ROUNDS)) {
+    return DEBUG_ROUND_HOLE_COUNT;
+  }
+  if (g_GameState.holeSelection &
+      (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE)) {
+    return HOLES_PER_NINE;
+  }
+  return COURSE_HOLE_COUNT;
 }
 
 s32 GetLastHoleIndex(void) {
-    return GetFirstHoleIndex() + GetRoundHoleCount() - 1;
+  return GetFirstHoleIndex() + GetRoundHoleCount() - 1;
 }
 
 s32 IsOnDrivingRange(void) {
-    return g_CourseIndex == DRIVING_RANGE_COURSE_INDEX;
+  return g_CourseIndex == DRIVING_RANGE_COURSE_INDEX;
 }
 
 /*
@@ -40,66 +44,77 @@ s32 IsOnDrivingRange(void) {
  * g_CourseIndex.
  */
 s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
-    return -handicap / COURSE_HOLE_COUNT
-           - (handicap % COURSE_HOLE_COUNT >= g_CourseRecords[GetCourseRecordIndex(courseIndex)].holes[holeIndex].handicap);
+  return -handicap / COURSE_HOLE_COUNT -
+         (handicap % COURSE_HOLE_COUNT >=
+          g_CourseRecords[GetCourseRecordIndex(courseIndex)]
+              .holes[holeIndex]
+              .handicap);
 }
 
-/* strokeCount with the current hole's handicap offset, which the matches compare */
+/* strokeCount with the current hole's handicap offset, which the matches
+ * compare */
 s32 GetNetScore(s32 playerIndex) {
-    return g_Players[playerIndex].strokeCount
-           + GetHandicapOffset(g_CourseIndex, g_HoleIndex, g_Players[playerIndex].handicap);
+  return g_Players[playerIndex].strokeCount +
+         GetHandicapOffset(g_CourseIndex, g_HoleIndex,
+                           g_Players[playerIndex].handicap);
 }
 
 /* Numbers each course's holes from 1 to 18, keeping the handicaps' order */
 void RenumberHoleHandicaps(void) {
-    s32 handicaps[COURSE_HOLE_COUNT];
-    s32 order[COURSE_HOLE_COUNT];
-    s32 recordIndex;
-    s32 holeIndex;
+  s32 handicaps[COURSE_HOLE_COUNT];
+  s32 order[COURSE_HOLE_COUNT];
+  s32 recordIndex;
+  s32 holeIndex;
 
-    for (recordIndex = 0; recordIndex < COURSE_RECORD_DRIVING_RANGE; recordIndex++) {
-        for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
-            handicaps[holeIndex] = g_CourseRecords[recordIndex].holes[holeIndex].handicap;
-        }
-        SortIndicesDescending(handicaps, order, COURSE_HOLE_COUNT);
-        for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
-            g_CourseRecords[recordIndex].holes[order[holeIndex]].handicap = COURSE_HOLE_COUNT - holeIndex;
-        }
+  for (recordIndex = 0; recordIndex < COURSE_RECORD_DRIVING_RANGE;
+       recordIndex++) {
+    for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
+      handicaps[holeIndex] =
+          g_CourseRecords[recordIndex].holes[holeIndex].handicap;
     }
+    SortIndicesDescending(handicaps, order, COURSE_HOLE_COUNT);
+    for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
+      g_CourseRecords[recordIndex].holes[order[holeIndex]].handicap =
+          COURSE_HOLE_COUNT - holeIndex;
+    }
+  }
 }
 
 /* Compares the holes before g_HoleIndex by strokes, without handicaps */
 s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
-    s32 holesAfterCurrent;
-    s32 lead;
-    s32 holeIndex;
+  s32 holesAfterCurrent;
+  s32 lead;
+  s32 holeIndex;
 
-    lead = 0;
-    holesAfterCurrent = GetFirstHoleIndex() + GetRoundHoleCount();
-    if (g_GameState.unk18) {
-        return MATCH_STANDING_DECIDING_HOLE;
+  lead = 0;
+  holesAfterCurrent = GetFirstHoleIndex() + GetRoundHoleCount();
+  if (g_GameState.unk18) {
+    return MATCH_STANDING_DECIDING_HOLE;
+  }
+  holesAfterCurrent = holesAfterCurrent - g_HoleIndex - 1;
+  for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
+       holeIndex++) {
+    if (g_Players[playerIndex].holes[holeIndex].strokes <
+        g_Players[opponentIndex].holes[holeIndex].strokes) {
+      lead++;
+    } else if (g_Players[opponentIndex].holes[holeIndex].strokes <
+               g_Players[playerIndex].holes[holeIndex].strokes) {
+      lead--;
     }
-    holesAfterCurrent = holesAfterCurrent - g_HoleIndex - 1;
-    for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-        if (g_Players[playerIndex].holes[holeIndex].strokes < g_Players[opponentIndex].holes[holeIndex].strokes) {
-            lead++;
-        } else if (g_Players[opponentIndex].holes[holeIndex].strokes < g_Players[playerIndex].holes[holeIndex].strokes) {
-            lead--;
-        }
+  }
+  if (ABS(lead) == holesAfterCurrent + 1) {
+    if (lead < 0) {
+      return MATCH_STANDING_OPPONENT_DORMIE;
     }
-    if (ABS(lead) == holesAfterCurrent + 1) {
-        if (lead < 0) {
-            return MATCH_STANDING_OPPONENT_DORMIE;
-        }
-        return MATCH_STANDING_PLAYER_DORMIE;
-    }
-    if (holesAfterCurrent + 1 < ABS(lead)) {
-        return MATCH_STANDING_DECIDED;
-    }
-    if (ABS(lead) == holesAfterCurrent && holesAfterCurrent == 0) {
-        return MATCH_STANDING_DECIDING_HOLE;
-    }
-    return MATCH_STANDING_OPEN;
+    return MATCH_STANDING_PLAYER_DORMIE;
+  }
+  if (holesAfterCurrent + 1 < ABS(lead)) {
+    return MATCH_STANDING_DECIDED;
+  }
+  if (ABS(lead) == holesAfterCurrent && holesAfterCurrent == 0) {
+    return MATCH_STANDING_DECIDING_HOLE;
+  }
+  return MATCH_STANDING_OPEN;
 }
 
 /*
@@ -107,46 +122,52 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
  * first hole that either player wins decides.
  */
 s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
-    s32 endHoleIndex;
-    s32 holesAfterCurrent;
-    s32 lead;
-    s32 holeIndex;
-    s32 playerScore;
-    s32 opponentScore;
+  s32 endHoleIndex;
+  s32 holesAfterCurrent;
+  s32 lead;
+  s32 holeIndex;
+  s32 playerScore;
+  s32 opponentScore;
 
-    endHoleIndex = GetFirstHoleIndex() + GetRoundHoleCount();
-    lead = 0;
-    if (g_GameState.unk18) {
-        for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-            playerScore = g_Players[playerIndex].holes[holeIndex].strokes
-                          + GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[playerIndex].handicap);
-            opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes
-                            + GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[opponentIndex].handicap);
-            if (playerScore < opponentScore) {
-                return MATCH_SIDE_PLAYER;
-            }
-            if (opponentScore < playerScore) {
-                return MATCH_SIDE_OPPONENT;
-            }
-        }
-        return MATCH_SIDE_NONE;
-    }
-    holesAfterCurrent = endHoleIndex - g_HoleIndex - 1;
-    for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex; holeIndex++) {
-        playerScore = g_Players[playerIndex].holes[holeIndex].strokes
-                      + GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[playerIndex].handicap);
-        opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes
-                        + GetHandicapOffset(g_GameState.courseIndex, holeIndex, g_Players[opponentIndex].handicap);
-        lead += playerScore < opponentScore;
-        lead -= opponentScore < playerScore;
-    }
-    if (ABS(lead) > holesAfterCurrent + 1) {
-        if (lead > 0) {
-            return MATCH_SIDE_PLAYER;
-        }
+  endHoleIndex = GetFirstHoleIndex() + GetRoundHoleCount();
+  lead = 0;
+  if (g_GameState.unk18) {
+    for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
+         holeIndex++) {
+      playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
+                    GetHandicapOffset(g_GameState.courseIndex, holeIndex,
+                                      g_Players[playerIndex].handicap);
+      opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes +
+                      GetHandicapOffset(g_GameState.courseIndex, holeIndex,
+                                        g_Players[opponentIndex].handicap);
+      if (playerScore < opponentScore) {
+        return MATCH_SIDE_PLAYER;
+      }
+      if (opponentScore < playerScore) {
         return MATCH_SIDE_OPPONENT;
+      }
     }
     return MATCH_SIDE_NONE;
+  }
+  holesAfterCurrent = endHoleIndex - g_HoleIndex - 1;
+  for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
+       holeIndex++) {
+    playerScore = g_Players[playerIndex].holes[holeIndex].strokes +
+                  GetHandicapOffset(g_GameState.courseIndex, holeIndex,
+                                    g_Players[playerIndex].handicap);
+    opponentScore = g_Players[opponentIndex].holes[holeIndex].strokes +
+                    GetHandicapOffset(g_GameState.courseIndex, holeIndex,
+                                      g_Players[opponentIndex].handicap);
+    lead += playerScore < opponentScore;
+    lead -= opponentScore < playerScore;
+  }
+  if (ABS(lead) > holesAfterCurrent + 1) {
+    if (lead > 0) {
+      return MATCH_SIDE_PLAYER;
+    }
+    return MATCH_SIDE_OPPONENT;
+  }
+  return MATCH_SIDE_NONE;
 }
 
 /*
@@ -155,9 +176,9 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
  * more than one over the other side's. It is a macro, as an inline
  * function compiles differently from the original.
  */
-#define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex)                                          \
-    (((standing) == (dormieStanding)) && (g_Players[dormieIndex].unk26 != 0) &&                                       \
-     !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
+#define IsHalvedForDormie(standing, dormieStanding, dormieIndex, otherIndex)  \
+  (((standing) == (dormieStanding)) && (g_Players[dormieIndex].unk26 != 0) && \
+   !(GetNetScore(dormieIndex) > GetNetScore(otherIndex) + 1))
 
 /*
  * Scores a player whose unk26 is 0 as if they need at least one more
@@ -165,33 +186,38 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
  * as halved once the trailing player can't win it.
  */
 s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
-    s32 standing;
+  s32 standing;
 
-    if (g_Players[playerIndex].unk26 != 0 || g_Players[opponentIndex].unk26 != 0) {
-        if (g_Players[playerIndex].unk26 != 0) {
-            if (g_Players[opponentIndex].unk26 != 0) {
-                if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
-                    return MATCH_SIDE_PLAYER;
-                }
-                return (GetNetScore(opponentIndex) < GetNetScore(playerIndex)) ? MATCH_SIDE_OPPONENT
-                                                                               : MATCH_HOLE_HALVED;
-            }
-            if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1) {
-                return MATCH_SIDE_PLAYER;
-            }
+  if (g_Players[playerIndex].unk26 != 0 ||
+      g_Players[opponentIndex].unk26 != 0) {
+    if (g_Players[playerIndex].unk26 != 0) {
+      if (g_Players[opponentIndex].unk26 != 0) {
+        if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
+          return MATCH_SIDE_PLAYER;
         }
-        if (g_Players[opponentIndex].unk26 != 0 && GetNetScore(opponentIndex) < GetNetScore(playerIndex) + 1) {
-            return MATCH_SIDE_OPPONENT;
-        }
-        standing = GetMatchStanding(playerIndex, opponentIndex);
-        if (IsHalvedForDormie(standing, MATCH_STANDING_PLAYER_DORMIE, playerIndex, opponentIndex)) {
-            return MATCH_HOLE_HALVED;
-        }
-        if (IsHalvedForDormie(standing, MATCH_STANDING_OPPONENT_DORMIE, opponentIndex, playerIndex)) {
-            return MATCH_HOLE_HALVED;
-        }
+        return (GetNetScore(opponentIndex) < GetNetScore(playerIndex))
+                   ? MATCH_SIDE_OPPONENT
+                   : MATCH_HOLE_HALVED;
+      }
+      if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1) {
+        return MATCH_SIDE_PLAYER;
+      }
     }
-    return MATCH_SIDE_NONE;
+    if (g_Players[opponentIndex].unk26 != 0 &&
+        GetNetScore(opponentIndex) < GetNetScore(playerIndex) + 1) {
+      return MATCH_SIDE_OPPONENT;
+    }
+    standing = GetMatchStanding(playerIndex, opponentIndex);
+    if (IsHalvedForDormie(standing, MATCH_STANDING_PLAYER_DORMIE, playerIndex,
+                          opponentIndex)) {
+      return MATCH_HOLE_HALVED;
+    }
+    if (IsHalvedForDormie(standing, MATCH_STANDING_OPPONENT_DORMIE,
+                          opponentIndex, playerIndex)) {
+      return MATCH_HOLE_HALVED;
+    }
+  }
+  return MATCH_SIDE_NONE;
 }
 
 /*
@@ -199,73 +225,76 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
  * when it isn't NULL. Players whose unk26 is 1 set the best score, and
  * those whose unk26 is 0 are scored as if they need another stroke.
  */
-s32 GetGroupHoleResult(s8 *playerResults) {
-    s8 ignoredResults[MAX_PLAYER_COUNT];
-    s32 bestScore;
-    s32 bestPlayerIndex;
-    s32 tieCount;
-    s32 isDecided;
-    s32 outCount;
-    s32 playerIndex;
+s32 GetGroupHoleResult(s8* playerResults) {
+  s8 ignoredResults[MAX_PLAYER_COUNT];
+  s32 bestScore;
+  s32 bestPlayerIndex;
+  s32 tieCount;
+  s32 isDecided;
+  s32 outCount;
+  s32 playerIndex;
 
-    bestScore = NO_BEST_SCORE;
-    bestPlayerIndex = -1;
-    isDecided = FALSE;
-    tieCount = 0;
-    outCount = 0;
-    if (playerResults == NULL) {
-        playerResults = ignoredResults;
+  bestScore = NO_BEST_SCORE;
+  bestPlayerIndex = -1;
+  isDecided = FALSE;
+  tieCount = 0;
+  outCount = 0;
+  if (playerResults == NULL) {
+    playerResults = ignoredResults;
+  }
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+    if (g_Players[playerIndex].unk26 == 1) {
+      if (GetNetScore(playerIndex) < bestScore) {
+        bestScore = GetNetScore(playerIndex);
+        bestPlayerIndex = playerIndex;
+        tieCount = 0;
+      } else {
+        tieCount += (bestScore == GetNetScore(playerIndex));
+      }
+    } else {
+      outCount += (g_Players[playerIndex].unk26 == 3);
     }
-    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-        if (g_Players[playerIndex].unk26 == 1) {
-            if (GetNetScore(playerIndex) < bestScore) {
-                bestScore = GetNetScore(playerIndex);
-                bestPlayerIndex = playerIndex;
-                tieCount = 0;
-            } else {
-                tieCount += (bestScore == GetNetScore(playerIndex));
-            }
-        } else {
-            outCount += (g_Players[playerIndex].unk26 == 3);
-        }
+  }
+  if (bestPlayerIndex == -1) {
+    for (playerIndex = 0; playerIndex < g_GameState.playerCount;
+         playerIndex++) {
+      playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
     }
-    if (bestPlayerIndex == -1) {
-        for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-            playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
-        }
-        if (outCount == g_GameState.playerCount) {
-            return GROUP_HOLE_NO_WINNER;
-        }
-        return isDecided;
+    if (outCount == g_GameState.playerCount) {
+      return GROUP_HOLE_NO_WINNER;
     }
-    isDecided = TRUE;
-    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-        playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
-        if (g_Players[playerIndex].unk26 == 0) {
-            if (GetNetScore(playerIndex) >= bestScore) {
-                playerResults[playerIndex] = GROUP_PLAYER_OUT;
-            } else if (GetNetScore(playerIndex) < bestScore - 1) {
-                isDecided = FALSE;
-            } else if (tieCount == 0) {
-                /* Holing the next stroke would tie the lone leader */
-                isDecided = FALSE;
-            }
-        } else if (bestScore < GetNetScore(playerIndex) || g_Players[playerIndex].unk26 >= 2) {
-            playerResults[playerIndex] = GROUP_PLAYER_OUT;
-        }
+    return isDecided;
+  }
+  isDecided = TRUE;
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+    playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
+    if (g_Players[playerIndex].unk26 == 0) {
+      if (GetNetScore(playerIndex) >= bestScore) {
+        playerResults[playerIndex] = GROUP_PLAYER_OUT;
+      } else if (GetNetScore(playerIndex) < bestScore - 1) {
+        isDecided = FALSE;
+      } else if (tieCount == 0) {
+        /* Holing the next stroke would tie the lone leader */
+        isDecided = FALSE;
+      }
+    } else if (bestScore < GetNetScore(playerIndex) ||
+               g_Players[playerIndex].unk26 >= 2) {
+      playerResults[playerIndex] = GROUP_PLAYER_OUT;
     }
-    if (!isDecided) {
-        return GROUP_HOLE_OPEN;
+  }
+  if (!isDecided) {
+    return GROUP_HOLE_OPEN;
+  }
+  if (tieCount > 0) {
+    return GROUP_HOLE_NO_WINNER;
+  }
+  for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
+    if (g_Players[playerIndex].unk26 == 1 &&
+        GetNetScore(playerIndex) == bestScore) {
+      playerResults[playerIndex] = GROUP_PLAYER_WINNER;
     }
-    if (tieCount > 0) {
-        return GROUP_HOLE_NO_WINNER;
-    }
-    for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
-        if (g_Players[playerIndex].unk26 == 1 && GetNetScore(playerIndex) == bestScore) {
-            playerResults[playerIndex] = GROUP_PLAYER_WINNER;
-        }
-    }
-    return GROUP_HOLE_WON;
+  }
+  return GROUP_HOLE_WON;
 }
 
 /*
@@ -275,68 +304,74 @@ s32 GetGroupHoleResult(s8 *playerResults) {
  * and 11 with every player.
  */
 s32 GetHolingOutStakes(s32 playerIndex) {
-    s32 stakes;
-    s32 opponentIndex;
-    s32 hasAnyFinished;
-    s32 bestScore;
-    s32 otherIndex;
+  s32 stakes;
+  s32 opponentIndex;
+  s32 hasAnyFinished;
+  s32 bestScore;
+  s32 otherIndex;
 
-    stakes = HOLING_OUT_STAKES_NONE;
-    switch (g_GameMode) {
-        case 2:
-        case 4:
-            opponentIndex = playerIndex ^ 1;
-            if (GetNetScore(playerIndex) == GetNetScore(opponentIndex) - 1 && g_Players[opponentIndex].unk26 != 0) {
-                stakes = HOLING_OUT_HALVES_HOLE;
-                if (GetMatchStanding(playerIndex, opponentIndex) == MATCH_STANDING_PLAYER_DORMIE) {
-                    stakes = HOLING_OUT_WINS_MATCH;
-                }
-            } else if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
-                stakes = (GetMatchStanding(playerIndex, opponentIndex) == MATCH_STANDING_DECIDING_HOLE)
-                             ? HOLING_OUT_WINS_MATCH
-                             : HOLING_OUT_WINS_HOLE;
-            } else if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1 && g_Players[opponentIndex].unk26 != 1
-                       && GetMatchStanding(playerIndex, opponentIndex) == MATCH_STANDING_PLAYER_DORMIE) {
-                stakes = HOLING_OUT_WINS_MATCH;
-            }
+  stakes = HOLING_OUT_STAKES_NONE;
+  switch (g_GameMode) {
+    case 2:
+    case 4:
+      opponentIndex = playerIndex ^ 1;
+      if (GetNetScore(playerIndex) == GetNetScore(opponentIndex) - 1 &&
+          g_Players[opponentIndex].unk26 != 0) {
+        stakes = HOLING_OUT_HALVES_HOLE;
+        if (GetMatchStanding(playerIndex, opponentIndex) ==
+            MATCH_STANDING_PLAYER_DORMIE) {
+          stakes = HOLING_OUT_WINS_MATCH;
+        }
+      } else if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
+        stakes = (GetMatchStanding(playerIndex, opponentIndex) ==
+                  MATCH_STANDING_DECIDING_HOLE)
+                     ? HOLING_OUT_WINS_MATCH
+                     : HOLING_OUT_WINS_HOLE;
+      } else if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1 &&
+                 g_Players[opponentIndex].unk26 != 1 &&
+                 GetMatchStanding(playerIndex, opponentIndex) ==
+                     MATCH_STANDING_PLAYER_DORMIE) {
+        stakes = HOLING_OUT_WINS_MATCH;
+      }
+      break;
+    case 10:
+    case 11:
+      hasAnyFinished = FALSE;
+      bestScore = NO_BEST_SCORE;
+      stakes = HOLING_OUT_WINS_HOLE;
+      for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
+        if (g_Players[otherIndex].unk26 == 1) {
+          hasAnyFinished = TRUE;
+          if (GetNetScore(otherIndex) < bestScore) {
+            bestScore = GetNetScore(otherIndex);
+          }
+        }
+      }
+      for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
+        if (otherIndex != playerIndex && g_Players[otherIndex].unk26 == 0) {
+          if (GetNetScore(otherIndex) < GetNetScore(playerIndex)) {
+            stakes = HOLING_OUT_STAKES_NONE;
             break;
-        case 10:
-        case 11:
-            hasAnyFinished = FALSE;
-            bestScore = NO_BEST_SCORE;
-            stakes = HOLING_OUT_WINS_HOLE;
-            for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
-                if (g_Players[otherIndex].unk26 == 1) {
-                    hasAnyFinished = TRUE;
-                    if (GetNetScore(otherIndex) < bestScore) {
-                        bestScore = GetNetScore(otherIndex);
-                    }
-                }
-            }
-            for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
-                if (otherIndex != playerIndex && g_Players[otherIndex].unk26 == 0) {
-                    if (GetNetScore(otherIndex) < GetNetScore(playerIndex)) {
-                        stakes = HOLING_OUT_STAKES_NONE;
-                        break;
-                    }
-                    if (GetNetScore(otherIndex) == GetNetScore(playerIndex)) {
-                        stakes = HOLING_OUT_TIES;
-                    }
-                }
-            }
-            if (stakes != HOLING_OUT_STAKES_NONE) {
-                if (hasAnyFinished) {
-                    if (GetNetScore(playerIndex) + 1 == bestScore) {
-                        stakes = HOLING_OUT_TIES;
-                    }
-                    if (GetNetScore(playerIndex) + 1 < bestScore && stakes == HOLING_OUT_TIES) {
-                        stakes = HOLING_OUT_STAKES_NONE;
-                    }
-                } else if (stakes == HOLING_OUT_TIES) {
-                    stakes = HOLING_OUT_STAKES_NONE;
-                }
-            }
-            break;
-    }
-    return stakes;
+          }
+          if (GetNetScore(otherIndex) == GetNetScore(playerIndex)) {
+            stakes = HOLING_OUT_TIES;
+          }
+        }
+      }
+      if (stakes != HOLING_OUT_STAKES_NONE) {
+        if (hasAnyFinished) {
+          if (GetNetScore(playerIndex) + 1 == bestScore) {
+            stakes = HOLING_OUT_TIES;
+          }
+          if (GetNetScore(playerIndex) + 1 < bestScore &&
+              stakes == HOLING_OUT_TIES) {
+            stakes = HOLING_OUT_STAKES_NONE;
+          }
+        } else if (stakes == HOLING_OUT_TIES) {
+          stakes = HOLING_OUT_STAKES_NONE;
+        }
+      }
+      break;
+  }
+  return stakes;
 }

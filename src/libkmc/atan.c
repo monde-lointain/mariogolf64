@@ -29,76 +29,76 @@ long long g_CordicAngles[64] = {
  * Turns the vector (x, y), in fixed point with x > 0, onto the x axis
  * through ever smaller known angles, summing them into atan(y / x)
  */
-void CordicAngle(long long x, long long y, double *angle) {
-    long long sum;
-    long long rotatedX;
-    long long currentX;
-    int i;
+void CordicAngle(long long x, long long y, double* angle) {
+  long long sum;
+  long long rotatedX;
+  long long currentX;
+  int i;
 
-    currentX = x;
-    sum = 0;
-    for (i = 0; i < CORDIC_ITERATION_COUNT; i++) {
-        if (y >= 0) {
-            rotatedX = currentX + (y >> i);
-            y -= currentX >> i;
-            sum += g_CordicAngles[i];
-        } else {
-            rotatedX = currentX - (y >> i);
-            y += currentX >> i;
-            sum -= g_CordicAngles[i];
-        }
-        currentX = rotatedX;
+  currentX = x;
+  sum = 0;
+  for (i = 0; i < CORDIC_ITERATION_COUNT; i++) {
+    if (y >= 0) {
+      rotatedX = currentX + (y >> i);
+      y -= currentX >> i;
+      sum += g_CordicAngles[i];
+    } else {
+      rotatedX = currentX - (y >> i);
+      y += currentX >> i;
+      sum -= g_CordicAngles[i];
     }
-    *angle = sum / FIXED_POINT_ONE_F;
+    currentX = rotatedX;
+  }
+  *angle = sum / FIXED_POINT_ONE_F;
 }
 
 double atan(double x) {
-    int sign;
-    long long cordicX;
-    long long cordicY;
-    double angle;
+  int sign;
+  long long cordicX;
+  long long cordicY;
+  double angle;
 
-    if (x < 0.0) {
-        x = -x;
-        sign = -1;
+  if (x < 0.0) {
+    x = -x;
+    sign = -1;
+  } else {
+    sign = 1;
+  }
+  /* atan(x) is x this close to 0 */
+  if (x > 1e-7) {
+    /* Keeps both coordinates within the fixed point's range */
+    if (x >= 1.0) {
+      cordicY = FIXED_POINT_ONE;
+      cordicX = (1.0 / x) * FIXED_POINT_ONE_F;
     } else {
-        sign = 1;
+      cordicX = FIXED_POINT_ONE;
+      cordicY = x * FIXED_POINT_ONE_F;
     }
-    /* atan(x) is x this close to 0 */
-    if (x > 1e-7) {
-        /* Keeps both coordinates within the fixed point's range */
-        if (x >= 1.0) {
-            cordicY = FIXED_POINT_ONE;
-            cordicX = (1.0 / x) * FIXED_POINT_ONE_F;
-        } else {
-            cordicX = FIXED_POINT_ONE;
-            cordicY = x * FIXED_POINT_ONE_F;
-        }
-        CordicAngle(cordicX, cordicY, &angle);
-    } else {
-        angle = x;
-    }
-    return (sign < 0) ? -angle : angle;
+    CordicAngle(cordicX, cordicY, &angle);
+  } else {
+    angle = x;
+  }
+  return (sign < 0) ? -angle : angle;
 }
 
 double atan2(double y, double x) {
-    double angle;
+  double angle;
 
-    if (x == 0.0 && y == 0.0) {
-        return ReportMathError(DOMAIN, "atan2", x, y, 0.0);
-    }
-    if (x == 0.0) {
-        return (y > 0.0) ? M_PI / 2 : -M_PI / 2;
-    }
-    angle = atan(y / x);
-    if (x > 0.0) {
-        return angle;
-    }
-    if (y == 0.0) {
-        return M_PI;
-    }
-    if (y > 0.0) {
-        return angle + M_PI;
-    }
-    return angle - M_PI;
+  if (x == 0.0 && y == 0.0) {
+    return ReportMathError(DOMAIN, "atan2", x, y, 0.0);
+  }
+  if (x == 0.0) {
+    return (y > 0.0) ? M_PI / 2 : -M_PI / 2;
+  }
+  angle = atan(y / x);
+  if (x > 0.0) {
+    return angle;
+  }
+  if (y == 0.0) {
+    return M_PI;
+  }
+  if (y > 0.0) {
+    return angle + M_PI;
+  }
+  return angle - M_PI;
 }

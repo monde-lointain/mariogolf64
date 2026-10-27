@@ -19,8 +19,8 @@
 #define GAME_FLAG_LOG_VERTICAL_VELOCITY 0x02
 
 /*
- * Lets controller 1's C-left and C-right tilt the aim camera, and controller 2's A and B play
- * the drive record movie and movie 15
+ * Lets controller 1's C-left and C-right tilt the aim camera, and controller
+ * 2's A and B play the drive record movie and movie 15
  */
 #define GAME_FLAG_TEST_AIM_TILT_AND_MOVIES 0x21
 
@@ -30,10 +30,12 @@
 /* Adds a ring at a fixed place, once each time the flag is set */
 #define GAME_FLAG_TEST_RING 0x25
 
-/* Lets controller 1's C-up and C-down cycle isRaining and the scene color index */
+/* Lets controller 1's C-up and C-down cycle isRaining and the scene color index
+ */
 #define GAME_FLAG_CYCLE_SKY_CONDITIONS 0x20
 
-/* Lets controller 2 edit the sky colors and fog, and draws the fog from g_DebugFog */
+/* Lets controller 2 edit the sky colors and fog, and draws the fog from
+ * g_DebugFog */
 #define GAME_FLAG_SKY_EDITOR 0x2D
 
 /* Hides the billboards */
@@ -69,7 +71,8 @@
 /* Opens every course on the hole and Ring Shot selects */
 #define GAME_FLAG_ALL_COURSES 0x5E
 
-/* Open at least this many courses on the main menu, whatever the Course Points */
+/* Open at least this many courses on the main menu, whatever the Course Points
+ */
 #define GAME_FLAG_OPEN_TWO_COURSES 0x58
 #define GAME_FLAG_OPEN_THREE_COURSES 0x59
 #define GAME_FLAG_OPEN_FOUR_COURSES 0x5A
@@ -82,13 +85,15 @@
 /* Set when a saved game is continued, among other places */
 #define GAME_FLAG_UNK1E 0x1E
 
-/* Makes InitClubs generate every club's parameters, then call WriteClubParameters */
+/* Makes InitClubs generate every club's parameters, then call
+ * WriteClubParameters */
 #define GAME_FLAG_GENERATE_CLUBS 0x1F
 
 /* Logs the ID of each encoded asset that is opened */
 #define GAME_FLAG_LOG_ENCODED_ASSETS 0x49
 
-/* Lets the player with the fewest strokes play next, instead of the farthest from the cup */
+/* Lets the player with the fewest strokes play next, instead of the farthest
+ * from the cup */
 #define GAME_FLAG_FEWEST_STROKES_FIRST 0x3F
 /* Draws through two or three framebuffers at random, while aiming */
 #define GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT 0x9F
@@ -96,7 +101,8 @@
 #define GAME_FLAG_TWO_HOLE_ROUNDS 0x3D
 /* Logs LoadCharacter's progress */
 #define GAME_FLAG_LOG_CHARACTER_SETUP 0x41
-/* Measures ball distances from the character models instead of reading them from a table */
+/* Measures ball distances from the character models instead of reading them
+ * from a table */
 #define GAME_FLAG_GENERATE_BALL_DISTANCES 0x36
 /* Prints each character slot's animation frame */
 #define GAME_FLAG_SHOW_ANIMATION_FRAMES 0x38
@@ -129,10 +135,12 @@
 /* Keeps DrawGround from drawing the ground */
 #define GAME_FLAG_HIDE_GROUND 0x0D
 
-/* Shows the ground's clip ratio, which the second controller's A button cycles */
+/* Shows the ground's clip ratio, which the second controller's A button cycles
+ */
 #define GAME_FLAG_CYCLE_CLIP_RATIO 0x10
 
-/* Rebuilds the ground texture coordinates every frame and tries other noise texture scales */
+/* Rebuilds the ground texture coordinates every frame and tries other noise
+ * texture scales */
 #define GAME_FLAG_TEST_GROUND_TEXTURE 0x27
 
 /* Logs the detail of each fine row of ground tiles */
@@ -147,7 +155,8 @@
 /* Ends the round after the current hole */
 #define GAME_FLAG_END_ROUND_AFTER_HOLE 0x44
 
-/* Lets the second controller's L and R pick the cup position the hole intro circles */
+/* Lets the second controller's L and R pick the cup position the hole intro
+ * circles */
 #define GAME_FLAG_CHOOSE_CUP 0x47
 
 /* Starts the round over from its first hole instead of ending it */
@@ -167,7 +176,8 @@
 /* Debug cheats that pad the first player's round points */
 #define GAME_FLAG_ADD_500_POINTS 0x66
 #define GAME_FLAG_ADD_9999_POINTS 0x6C
-/* Lets the match results choose a character with the D-Pad and show its unlock notice with B */
+/* Lets the match results choose a character with the D-Pad and show its unlock
+ * notice with B */
 #define GAME_FLAG_CHOOSE_UNLOCK_NOTICE 0x6E
 #define GAME_FLAG_UNK6A 0x6A
 #define GAME_FLAG_UNK6B 0x6B
@@ -176,13 +186,15 @@
 
 /* Has BuildHole read the hole's files from the host instead of its assets */
 #define GAME_FLAG_READ_HOST_HOLE 0x50
-/* Has BuildHole keep the hole already in memory once instead of reading the host files */
+/* Has BuildHole keep the hole already in memory once instead of reading the
+ * host files */
 #define GAME_FLAG_SKIP_HOST_HOLE_READ 0x52
 
 /* Prints the frame number of the golfer's reaction */
 #define GAME_FLAG_SHOW_REACTION_FRAME 0x3E
 
-/* Lets the four C buttons on controller 1 dump the cartridge RAM from the Transmit menu */
+/* Lets the four C buttons on controller 1 dump the cartridge RAM from the
+ * Transmit menu */
 #define GAME_FLAG_ALLOW_CARTRIDGE_DUMP 0x7E
 
 /* Read by the reaction framing, whose purpose is not yet known */
@@ -198,13 +210,16 @@
 #define GAME_FLAG_UNK32 0x32
 #define GAME_FLAG_UNK55 0x55
 
-/* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is not yet known */
+/* Makes ChooseHoleStrokeTarget plan no strokes for each hole; its purpose is
+ * not yet known */
 #define GAME_FLAG_UNK3C 0x3C
 
-/* Sets unk1A of each Game Boy character read through the Transfer Pak to 1; its purpose is not yet known */
+/* Sets unk1A of each Game Boy character read through the Transfer Pak to 1; its
+ * purpose is not yet known */
 #define GAME_FLAG_UNK6F 0x6F
 
-/* Give Game Boy characters read through the Transfer Pak that ball type, the lowest set flag winning */
+/* Give Game Boy characters read through the Transfer Pak that ball type, the
+ * lowest set flag winning */
 #define GAME_FLAG_BALL_TYPE_1 0x88
 #define GAME_FLAG_BALL_TYPE_2 0x89
 #define GAME_FLAG_BALL_TYPE_3 0x8A
@@ -213,10 +228,12 @@
 #define GAME_FLAG_BALL_TYPE_6 0x8D
 #define GAME_FLAG_BALL_TYPE_7 0x8E
 
-/* Lets the second controller edit the club tournament code and skips checking it */
+/* Lets the second controller edit the club tournament code and skips checking
+ * it */
 #define GAME_FLAG_EDIT_TOURNAMENT_CODE 0x90
 
-/* Sets the stopwatch to an hour when the scorecard starts a Speed Golf hole's tally */
+/* Sets the stopwatch to an hour when the scorecard starts a Speed Golf hole's
+ * tally */
 #define GAME_FLAG_STOPWATCH_HOUR 0x91
 
 s32 IsGameFlagSet(u32 flag);

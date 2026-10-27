@@ -2,20 +2,24 @@
 #define ROUND_EVENTS_H
 
 #include <ultra64.h>
+
 #include "save.h"
 
 /* ShowWindFlyGuy's argument that hides the Fly Guy */
 #define FLY_GUY_HIDDEN (-1)
 
-/* The contact effects that StartContactEffect shows where the club meets the ball */
+/* The contact effects that StartContactEffect shows where the club meets the
+ * ball */
 #define CONTACT_EFFECT_NONE (-1)
 #define CONTACT_EFFECT_POWER_WOOD 0 /* In the character's own style */
 #define CONTACT_EFFECT_POWER_IRON 1 /* Only for the longer irons */
 #define CONTACT_EFFECT_SHOT 2
 #define CONTACT_EFFECT_PUTT 3
-#define CONTACT_EFFECT_FADE 10 /* Or any other value: fades the shown effect out */
+/* Or any other value: fades the shown effect out */
+#define CONTACT_EFFECT_FADE 10
 
-/* The styles of contact effect; each character has one, and Game Boy characters one for their ball */
+/* The styles of contact effect; each character has one, and Game Boy characters
+ * one for their ball */
 #define CONTACT_STYLE_MARIO 0 /* For Mario, Baby Mario and Metal Mario */
 #define CONTACT_STYLE_BOWSER 1
 #define CONTACT_STYLE_WARIO 2
@@ -30,7 +34,8 @@
 #define CONTACT_STYLE_GAME_BOY_BALL_7 10
 
 /* The word banners that StartBanner flies in, named after their text */
-#define BANNER_HIDE_NICE_SHOT (-2) /* Hides the banner only if it is BANNER_NICE_SHOT */
+/* Hides the banner only if it is BANNER_NICE_SHOT */
+#define BANNER_HIDE_NICE_SHOT (-2)
 #define BANNER_NONE (-1)
 #define BANNER_NICE_SHOT 0
 #define BANNER_NICE_ON 1
@@ -56,8 +61,8 @@ extern s32 g_ContactEffect;
 
 void StartBanner(s32 banner);
 void ShowWindFlyGuy(s32 show);
-s32 GetContactStyle(UnkB8 *player);
-void LoadContactImages(UnkB8 *player);
+s32 GetContactStyle(UnkB8* player);
+void LoadContactImages(UnkB8* player);
 s32 IsContactEffectShown(void);
 void StartContactEffect(s32 effect);
 

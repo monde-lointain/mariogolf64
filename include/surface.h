@@ -3,7 +3,8 @@
 
 #include <ultra64.h>
 
-/* Indexes into the surface table. Names with UNKNN share another's kind or name. */
+/* Indexes into the surface table. Names with UNKNN share another's kind or
+ * name. */
 #define SURFACE_OUT_OF_BOUNDS 0
 #define SURFACE_FAIRWAY 1
 #define SURFACE_ROUGH 2
@@ -28,7 +29,8 @@
 #define SURFACE_ROUGH_POOR_LIE 21
 #define SURFACE_OUT_OF_COURSE 22
 #define SURFACE_TEE_UP 23
-/* The surfaces a mini-golf course has in place of the green, fairway and cart way */
+/* The surfaces a mini-golf course has in place of the green, fairway and cart
+ * way */
 #define SURFACE_MINI_GOLF_GREEN 24
 #define SURFACE_MINI_GOLF_FAIRWAY 25
 #define SURFACE_MINI_GOLF_CART_WAY 26
@@ -49,7 +51,8 @@
 #define SURFACE_KIND_BUNKER 0x6
 #define SURFACE_KIND_BUNKER_FAIR_LIE 0x7 /* Half buried */
 #define SURFACE_KIND_BUNKER_POOR_LIE 0x8 /* Mostly buried */
-#define SURFACE_KIND_BUNKER_UNK9 0x9 /* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */
+/* Has BUNKER_POOR_LIE's image, but the default ratings and clubs */
+#define SURFACE_KIND_BUNKER_UNK9 0x9
 #define SURFACE_KIND_WATER_HAZARD 0xA
 #define SURFACE_KIND_GREEN 0xB
 #define SURFACE_KIND_GREEN_EDGE 0xC
@@ -66,19 +69,20 @@
 #define SURFACE_KIND_WASTE_AREA 0x17
 
 typedef struct SurfaceInfo {
-    /* 0x00 */ s32 kind;
-    /* 0x04 */ char *name; /* As the lie is shown */
-    /* 0x08 */ s8 minPercent;
-    /* 0x09 */ s8 maxPercent;
-    /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not meant for the surface */
-    /* 0x0C */ s16 unkC;
-    /* 0x0E */ s16 unkE;
-    /* 0x10 */ s32 unk10;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
+  /* 0x00 */ s32 kind;
+  /* 0x04 */ char* name; /* As the lie is shown */
+  /* 0x08 */ s8 minPercent;
+  /* 0x09 */ s8 maxPercent;
+  /* 0x0A */ s8 wrongClubPenalty; /* Taken off both percents for a club not
+                                     meant for the surface */
+  /* 0x0C */ s16 unkC;
+  /* 0x0E */ s16 unkE;
+  /* 0x10 */ s32 unk10;
+  /* 0x14 */ s32 unk14;
+  /* 0x18 */ s32 unk18;
 } SurfaceInfo; /* size = 0x1C */
 
-SurfaceInfo *GetSurfaceInfo(s32 surface);
-SurfaceInfo *GetSurfaceInfoAt(s32 x, s32 z);
+SurfaceInfo* GetSurfaceInfo(s32 surface);
+SurfaceInfo* GetSurfaceInfoAt(s32 x, s32 z);
 
 #endif

@@ -6,7 +6,7 @@
 /* Routines whose defining file is not decompiled yet */
 
 /* NuSystem */
-void nuPiReadRom(u32 romAddr, void *buffer, u32 size);
+void nuPiReadRom(u32 romAddr, void* buffer, u32 size);
 
 /* Main segment */
 void RunBootHook(void);
@@ -15,7 +15,7 @@ void InitRumblePaks(void);
 void StopAllRumble(void);
 void ResetCharacterSlots(void);
 s32 GetCharacterBufferSize(void);
-void SetCharacterBuffer(s32 slotIndex, u8 *buffer);
+void SetCharacterBuffer(s32 slotIndex, u8* buffer);
 void InitTerrainTextures(void);
 void InitExpansionPakFeatures(void);
 void StartGame(void);
@@ -33,8 +33,8 @@ s32 IsDebugBButtonView(void);
 
 /* ovl_00 */
 void func_80216B10_ovl_00(void);
-void func_80216FC4_ovl_00(s32 *position);
-void func_80216FCC_ovl_00(s32 *position);
+void func_80216FC4_ovl_00(s32* position);
+void func_80216FCC_ovl_00(s32* position);
 
 /* ovl_05 */
 void LoadOpening(void);
@@ -57,11 +57,13 @@ void LoadStaffRoll(void);
 void UnloadStaffRoll(void);
 
 /* RCP setup, in the file at 0xDCE0 */
-#define BUFFER_CLEAR_DEPTH_ONLY 0 /* Clears the depth buffer and keeps the frame */
-#define BUFFER_CLEAR_BY_LINE 1    /* Also fills the frame black, a line at a time */
-#define BUFFER_CLEAR_WHOLE 2      /* Also fills the frame black at once */
-void AppendRcpInit(s32 viewportIndex, Gfx **displayListHead);
-void AppendBufferClear(s32 clearMode, Gfx **displayListHead);
+/* Clears the depth buffer and keeps the frame */
+#define BUFFER_CLEAR_DEPTH_ONLY 0
+/* Also fills the frame black, a line at a time */
+#define BUFFER_CLEAR_BY_LINE 1
+#define BUFFER_CLEAR_WHOLE 2 /* Also fills the frame black at once */
+void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead);
+void AppendBufferClear(s32 clearMode, Gfx** displayListHead);
 void InitRcp(s32 viewportIndex);
 void SetFillColor(s32 red, s32 green, s32 blue);
 void FillScreen(void);
@@ -80,46 +82,49 @@ s32 GetGroundHeight(s32 x, s32 z);
 
 #define TRIANGLE_CORNER_COUNT 3
 
-/* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner */
+/* A triangle as GetTrianglePlane takes it: each axis's coordinates, by corner
+ */
 typedef struct PlaneTriangle {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
+  /* 0x00 */ s32 unk0;
+  /* 0x04 */ s16 corners[AXIS_COUNT][TRIANGLE_CORNER_COUNT];
 } PlaneTriangle; /* size = 0x18 */
 
-/* The plane through a triangle: normal . point + distance = 0, with the normal's y at least 0 */
+/* The plane through a triangle: normal . point + distance = 0, with the
+ * normal's y at least 0 */
 typedef struct TrianglePlane {
-    /* 0x00 */ f32 normal[AXIS_COUNT];
-    /* 0x0C */ f32 distance;
-    /* 0x10 */ f32 unk10; /* Always 1 */
-} TrianglePlane; /* size = 0x14 */
+  /* 0x00 */ f32 normal[AXIS_COUNT];
+  /* 0x0C */ f32 distance;
+  /* 0x10 */ f32 unk10; /* Always 1 */
+} TrianglePlane;        /* size = 0x14 */
 
 /* Returns 0, or -1 for a triangle without area, whose plane is then level */
-s32 GetTrianglePlane(PlaneTriangle *triangle, TrianglePlane *plane);
+s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane);
 /*
  * Finds the nearest hole triangle that a path hits. It sets the triangle,
  * whose unk0 then holds the HOLE_TRIANGLE_KIND_*, and the fraction along
  * the path, and returns whether one is hit.
  */
-s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
-                        f32 *fraction);
+s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
+                        s32 endZ, PlaneTriangle* hit, f32* fraction);
 /*
  * Finds the nearest ground triangle that a path hits, and sets the triangle
  * and the fraction along the path. It returns whether one is hit.
  */
-s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ, PlaneTriangle *hit,
-                  f32 *fraction);
+s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
+                  s32 endZ, PlaneTriangle* hit, f32* fraction);
 /* Sets the fog factor and fog color */
-void SetSceneFog(Gfx **displayListHead);
+void SetSceneFog(Gfx** displayListHead);
 
 /* Set a character's position, rotation and scale for a shot */
 void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale);
 void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale);
 
-/* Sets the two lights and a third when that is enabled, returning whether it set them */
-s32 AddReactionLight(Gfx **displayListHead, Lights2 *lights);
+/* Sets the two lights and a third when that is enabled, returning whether it
+ * set them */
+s32 AddReactionLight(Gfx** displayListHead, Lights2* lights);
 
 /* Draws the textures the course model reads through RSP segments */
-void BuildDynamicTextures(Gfx **displayListHead);
+void BuildDynamicTextures(Gfx** displayListHead);
 
 void BuildNoiseTexture(void);
 void StepNoiseTexture(void);

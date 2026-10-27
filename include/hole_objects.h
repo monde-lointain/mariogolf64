@@ -10,6 +10,6 @@ s32 IsMonkeyShown(void);
 void StartMonkeyDrop(f32 cameraYaw);
 void ClearHoleCreatures(void);
 void StartCheepCheepLeap(s32 arg0);
-void DrawHoleCreatures(Gfx **displayListHead);
+void DrawHoleCreatures(Gfx** displayListHead);
 
 #endif

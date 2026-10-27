@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "camera.h"
 #include "character.h"
 #include "club.h"
@@ -81,43 +82,41 @@ void FillRandomGrid(s32 range, s32 base);
 void SetUpPlayers(void);
 void WriteBallDistancesIfEnabled(void);
 void InitExpansionPakFeatures(void);
-void LoadSuperShotReplay(PlayRecord *record);
+void LoadSuperShotReplay(PlayRecord* record);
 
-s32 func_8005F180(void) {
-    return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B);
-}
+s32 func_8005F180(void) { return IsGameFlagSet(0x32) || IsGameFlagSet(0x9B); }
 
 void func_8005F1C8(void) {
-    g_PauseScreen = PAUSE_SCREEN_NONE;
-    D_800C3070 = 0;
-    D_800C3074 = 0;
-    D_800C3078 = 0;
-    D_800C3084 = 0;
-    D_800C3088 = 0;
-    D_800C308C = 0;
-    g_IsSettingImpactPoint = 0;
-    D_800C307A = 0;
-    D_800C307C = 0;
-    D_800C3080 = 0;
+  g_PauseScreen = PAUSE_SCREEN_NONE;
+  D_800C3070 = 0;
+  D_800C3074 = 0;
+  D_800C3078 = 0;
+  D_800C3084 = 0;
+  D_800C3088 = 0;
+  D_800C308C = 0;
+  g_IsSettingImpactPoint = 0;
+  D_800C307A = 0;
+  D_800C307C = 0;
+  D_800C3080 = 0;
 }
 
 s32 func_8005F224(void) {
-    s32 value = g_CurrentShot.unk40;
+  s32 value = g_CurrentShot.unk40;
 
-    if (value >= 31) {
-        value = 60 - value;
-    }
-    return value;
+  if (value >= 31) {
+    value = 60 - value;
+  }
+  return value;
 }
 
 s32 func_8005F248(s32 value) {
-    if (value >= 31) {
-        value = 60 - value;
-    }
-    if (value < 0) {
-        value = 0;
-    }
-    return (value << 8) / 30;
+  if (value >= 31) {
+    value = 60 - value;
+  }
+  if (value < 0) {
+    value = 0;
+  }
+  return (value << 8) / 30;
 }
 
 /*
@@ -125,82 +124,85 @@ s32 func_8005F248(s32 value) {
  * surface allows the club, and returns the set's size. The first argument
  * is not read.
  */
-s32 MarkUsableClubs(s32 unused, s16 *clubs, s8 *isUsable) {
-    s32 i;
+s32 MarkUsableClubs(s32 unused, s16* clubs, s8* isUsable) {
+  s32 i;
 
-    for (i = 0; i < CLUB_SET_SIZE; i++) {
-        isUsable[i] = (GetClub(clubs[i])->surfaceMask & GetCurrentSurfaceClubMask(TRUE)) != 0;
-    }
-    return CLUB_SET_SIZE;
+  for (i = 0; i < CLUB_SET_SIZE; i++) {
+    isUsable[i] =
+        (GetClub(clubs[i])->surfaceMask & GetCurrentSurfaceClubMask(TRUE)) != 0;
+  }
+  return CLUB_SET_SIZE;
 }
 
 s32 func_8005F30C(s32 x, s32 z) {
-    s32 height = GetGroundOrWaterHeight(x, z);
-    s32 ballHeight;
+  s32 height = GetGroundOrWaterHeight(x, z);
+  s32 ballHeight;
 
-    if (!g_GameState.isMiniGolf & (height > 0)) {
-        ballHeight = g_CurrentShot.ballPosition[AXIS_Y];
-        if (ballHeight <= 0) {
-            ballHeight = 0;
-        }
-        height = ballHeight;
+  if (!g_GameState.isMiniGolf & (height > 0)) {
+    ballHeight = g_CurrentShot.ballPosition[AXIS_Y];
+    if (ballHeight <= 0) {
+      ballHeight = 0;
     }
-    return height;
+    height = ballHeight;
+  }
+  return height;
 }
 
 void func_8005F360(void) {
-    switch (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34)) {
-        case 0:
-            g_GameState.courseIndex = 0;
-            g_GameState.holeIndex = 0;
-            g_GameState.unk14 = 0;
-            g_GameState.playerCount = IsGameFlagSet(0x30) * 2 + IsGameFlagSet(0x31) + 1;
-            g_GameState.unk0 = 0;
-            g_GameState.gameMode = 0;
-            break;
-        case 1:
-            g_GameState.courseIndex = 0;
-            g_GameState.holeIndex = 0;
-            g_GameState.unk14 = 0;
-            g_GameState.playerCount = 1;
-            g_GameState.unk0 = 0;
-            g_GameState.gameMode = 3;
-            break;
-        case 2:
-            g_GameState.courseIndex = 0;
-            g_GameState.holeIndex = 0;
-            g_GameState.unk14 = 0;
-            g_GameState.playerCount = 2;
-            g_GameState.unk0 = 0;
-            g_GameState.gameMode = 2;
-            /* The original has no break here, so the default case overrides this one */
-        default:
-            g_GameState.playerCount = 3;
-            g_GameState.courseIndex = 0;
-            g_GameState.holeIndex = 0;
-            g_GameState.unk14 = 0;
-            g_GameState.unk0 = 0;
-            g_GameState.gameMode = 10;
-            break;
-    }
+  switch (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34)) {
+    case 0:
+      g_GameState.courseIndex = 0;
+      g_GameState.holeIndex = 0;
+      g_GameState.unk14 = 0;
+      g_GameState.playerCount =
+          IsGameFlagSet(0x30) * 2 + IsGameFlagSet(0x31) + 1;
+      g_GameState.unk0 = 0;
+      g_GameState.gameMode = 0;
+      break;
+    case 1:
+      g_GameState.courseIndex = 0;
+      g_GameState.holeIndex = 0;
+      g_GameState.unk14 = 0;
+      g_GameState.playerCount = 1;
+      g_GameState.unk0 = 0;
+      g_GameState.gameMode = 3;
+      break;
+    case 2:
+      g_GameState.courseIndex = 0;
+      g_GameState.holeIndex = 0;
+      g_GameState.unk14 = 0;
+      g_GameState.playerCount = 2;
+      g_GameState.unk0 = 0;
+      g_GameState.gameMode = 2;
+      /* The original has no break here, so the default case overrides this one
+       */
+    default:
+      g_GameState.playerCount = 3;
+      g_GameState.courseIndex = 0;
+      g_GameState.holeIndex = 0;
+      g_GameState.unk14 = 0;
+      g_GameState.unk0 = 0;
+      g_GameState.gameMode = 10;
+      break;
+  }
 }
 
 void func_8005F4AC(void) {
-    g_GameState.courseIndex = 0;
-    g_GameState.playerCount = 1;
-    g_GameState.holeIndex = 0;
-    g_GameState.unk14 = 0;
-    g_GameState.unk0 = 11;
-    if (IsGameFlagSet(0x35)) {
-        g_GameState.gameMode = 9;
-    } else {
-        g_GameState.gameMode = 0;
-    }
+  g_GameState.courseIndex = 0;
+  g_GameState.playerCount = 1;
+  g_GameState.holeIndex = 0;
+  g_GameState.unk14 = 0;
+  g_GameState.unk0 = 11;
+  if (IsGameFlagSet(0x35)) {
+    g_GameState.gameMode = 9;
+  } else {
+    g_GameState.gameMode = 0;
+  }
 }
 
 /* Writes the name a player of the given index has by default */
-void FormatDefaultPlayerName(s32 index, char *name) {
-    sprintf(name, "MARIO%d", index + 1);
+void FormatDefaultPlayerName(s32 index, char* name) {
+  sprintf(name, "MARIO%d", index + 1);
 }
 
 /*
@@ -211,99 +213,103 @@ void FormatDefaultPlayerName(s32 index, char *name) {
  * cleared scores.
  */
 void SetUpPlayers(void) {
-    s32 i;
-    s32 hole;
-    s32 slot;
+  s32 i;
+  s32 hole;
+  s32 slot;
 
-    if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
-        if (g_GameMode == GAME_MODE_RING_SHOT) {
-            g_Players[0].unk1E[0] = 0;
-            g_Players[0].teeOrder = 0;
-            g_Players[0].characterIndex = D_80105F40->characterIndex;
-            g_Players[0].unk22 = D_80105F40->unk38;
-            g_Players[0].paletteIndex = D_80105F40->paletteIndex;
-            g_Players[0].unk88 = D_80105F40->unk3C;
-        } else {
-            g_Players[0].unk1E[0] = 0;
-            g_Players[0].teeOrder = 0;
-            g_Players[0].characterIndex = D_800FEDD8->characterIndex;
-            g_Players[0].unk22 = D_800FEDD8->unk3C;
-            g_Players[0].paletteIndex = D_800FEDD8->paletteIndex;
-            g_Players[0].unk88 = D_800FEDD8->unk40;
-        }
-        for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-            g_Players[0].holes[hole].strokes = 0;
-            g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
-        }
-        g_Players[0].unk28 = -1;
-        LoadPlayerFace(0, (s8)g_Players[0].characterIndex, (s8)g_Players[0].paletteIndex);
-        for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
-            if (slot >= CLUB_SET_SIZE) {
-                g_Players[0].clubs[slot] = NO_CLUB;
-            } else {
-                g_Players[0].clubs[slot] = slot + (s8)g_Players[0].characterIndex * CLUB_SET_SIZE;
-            }
-        }
-        /* The index variable is there to match */
-        i = 0;
-        for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
-            g_Players[i].unkAA[slot] = 0;
-        }
+  if (g_Scene == SCENE_PLAY_UNK13 || g_GameMode == GAME_MODE_UNK8 ||
+      g_GameState.unk31) {
+    if (g_GameMode == GAME_MODE_RING_SHOT) {
+      g_Players[0].unk1E[0] = 0;
+      g_Players[0].teeOrder = 0;
+      g_Players[0].characterIndex = D_80105F40->characterIndex;
+      g_Players[0].unk22 = D_80105F40->unk38;
+      g_Players[0].paletteIndex = D_80105F40->paletteIndex;
+      g_Players[0].unk88 = D_80105F40->unk3C;
     } else {
-        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-            FormatDefaultPlayerName(i, g_Players[i].name);
-            g_Players[i].characterIndex = i;
-            g_Players[i].unk22 = 0;
-            g_Players[i].unk1E[0] = 0;
-            g_Players[i].teeOrder = 0;
-            g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
-            for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
-                g_Players[i].holes[hole].strokes = 0;
-                g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;
-            }
-            for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
-                g_Players[i].unkAA[slot] = 0;
-            }
-            for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
-                if (slot >= CLUB_SET_SIZE) {
-                    g_Players[i].clubs[slot] = NO_CLUB;
-                } else {
-                    g_Players[i].clubs[slot] = slot + (s8)g_Players[i].characterIndex * CLUB_SET_SIZE;
-                }
-            }
-            g_Players[i].stopwatchFrameCount = 0;
-            g_Players[i].unk88 = NextRandom();
-        }
+      g_Players[0].unk1E[0] = 0;
+      g_Players[0].teeOrder = 0;
+      g_Players[0].characterIndex = D_800FEDD8->characterIndex;
+      g_Players[0].unk22 = D_800FEDD8->unk3C;
+      g_Players[0].paletteIndex = D_800FEDD8->paletteIndex;
+      g_Players[0].unk88 = D_800FEDD8->unk40;
     }
+    for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
+      g_Players[0].holes[hole].strokes = 0;
+      g_Players[0].holes[hole].putts = UNCOUNTED_PUTTS;
+    }
+    g_Players[0].unk28 = -1;
+    LoadPlayerFace(0, (s8)g_Players[0].characterIndex,
+                   (s8)g_Players[0].paletteIndex);
+    for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+      if (slot >= CLUB_SET_SIZE) {
+        g_Players[0].clubs[slot] = NO_CLUB;
+      } else {
+        g_Players[0].clubs[slot] =
+            slot + (s8)g_Players[0].characterIndex * CLUB_SET_SIZE;
+      }
+    }
+    /* The index variable is there to match */
+    i = 0;
+    for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
+      g_Players[i].unkAA[slot] = 0;
+    }
+  } else {
+    for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+      FormatDefaultPlayerName(i, g_Players[i].name);
+      g_Players[i].characterIndex = i;
+      g_Players[i].unk22 = 0;
+      g_Players[i].unk1E[0] = 0;
+      g_Players[i].teeOrder = 0;
+      g_Players[i].gridColor = GetSaveData()->options[SAVE_OPTION_GRID_COLOR];
+      for (hole = 0; hole < COURSE_HOLE_COUNT; hole++) {
+        g_Players[i].holes[hole].strokes = 0;
+        g_Players[i].holes[hole].putts = UNCOUNTED_PUTTS;
+      }
+      for (slot = PLAYER_UNKAA_COUNT - 1; slot >= 0; slot--) {
+        g_Players[i].unkAA[slot] = 0;
+      }
+      for (slot = 0; slot < CLUB_SLOT_COUNT; slot++) {
+        if (slot >= CLUB_SET_SIZE) {
+          g_Players[i].clubs[slot] = NO_CLUB;
+        } else {
+          g_Players[i].clubs[slot] =
+              slot + (s8)g_Players[i].characterIndex * CLUB_SET_SIZE;
+        }
+      }
+      g_Players[i].stopwatchFrameCount = 0;
+      g_Players[i].unk88 = NextRandom();
+    }
+  }
 }
 
 void InitPlay(s32 kind) {
-    if (kind == 1) {
-        func_8005F360();
-    } else if (kind == 0) {
-        func_8005F4AC();
-    } else if (kind == 2) {
-        LoadSuperShotReplay(D_800FED40);
-        g_GameState.unk14 = 0;
-        g_GameState.playerCount = 1;
-        g_GameState.unk0 = 0;
-        g_GameState.gameMode = GAME_MODE_STROKE;
-        g_GameState.courseIndex = D_800FEE10;
-        g_GameState.holeIndex = D_800FEE11;
-    }
-    RenumberHoleHandicaps();
-    if (!g_GameState.unk30) {
-        SetUpPlayers();
-    }
-    if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
-        g_Players[1].unk1E[0] = 1;
-    }
-    InitExpansionPakFeatures();
-    if (kind != 3) {
-        PrepareHoleDisplay();
-    }
-    WriteBallDistancesIfEnabled();
-    osSyncPrintf("PlayInitComplete\n");
+  if (kind == 1) {
+    func_8005F360();
+  } else if (kind == 0) {
+    func_8005F4AC();
+  } else if (kind == 2) {
+    LoadSuperShotReplay(D_800FED40);
+    g_GameState.unk14 = 0;
+    g_GameState.playerCount = 1;
+    g_GameState.unk0 = 0;
+    g_GameState.gameMode = GAME_MODE_STROKE;
+    g_GameState.courseIndex = D_800FEE10;
+    g_GameState.holeIndex = D_800FEE11;
+  }
+  RenumberHoleHandicaps();
+  if (!g_GameState.unk30) {
+    SetUpPlayers();
+  }
+  if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
+    g_Players[1].unk1E[0] = 1;
+  }
+  InitExpansionPakFeatures();
+  if (kind != 3) {
+    PrepareHoleDisplay();
+  }
+  WriteBallDistancesIfEnabled();
+  osSyncPrintf("PlayInitComplete\n");
 }
 
 /*
@@ -311,41 +317,43 @@ void InitPlay(s32 kind) {
  * with the hole's per-player state cleared
  */
 void PlacePlayersOnTee(void) {
-    s32 i;
-    s32 ring;
-    f32 teeHeight;
+  s32 i;
+  s32 ring;
+  f32 teeHeight;
 
-    D_800C3094 = 0;
-    D_800C3098 = 0;
-    if (g_GameState.unk30 != 2) {
-        for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-            g_Players[i].unkC = PLAYER_STATE_UNK11;
-            g_Players[i].ballPosition[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
-            teeHeight = D_800BA9D8.teePosition[AXIS_Y];
-            g_Players[i].ballPosition[AXIS_Y] = !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
-            g_Players[i].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
-            g_Players[i].strokeCount = 0;
-            g_Players[i].unk24 = 0;
-            g_Players[i].unk26 = 0;
-            g_Players[i].ballSurface = SURFACE_TEE_UP;
-            if (g_GameState.isMiniGolf) {
-                g_Players[i].ballSurface =
-                    GetSurface(g_Players[i].ballPosition[AXIS_X], g_Players[i].ballPosition[AXIS_Z]);
-            }
-            g_Players[i].driveDistance = UNMEASURED_DISTANCE;
-            g_Players[i].pinDistance = UNMEASURED_DISTANCE;
-            g_Players[i].unk9C = 0;
-            for (ring = RING_COUNT - 1; ring >= 0; ring--) {
-                g_Players[i].ringStates[ring] = 0;
-            }
-            if (g_GameMode == GAME_MODE_RING_SHOT) {
-                g_Players[i].unk28 = 1;
-            }
-        }
+  D_800C3094 = 0;
+  D_800C3098 = 0;
+  if (g_GameState.unk30 != 2) {
+    for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+      g_Players[i].unkC = PLAYER_STATE_UNK11;
+      g_Players[i].ballPosition[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
+      teeHeight = D_800BA9D8.teePosition[AXIS_Y];
+      g_Players[i].ballPosition[AXIS_Y] =
+          !g_GameState.isMiniGolf ? teeHeight - TEE_HEIGHT : teeHeight;
+      g_Players[i].ballPosition[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
+      g_Players[i].strokeCount = 0;
+      g_Players[i].unk24 = 0;
+      g_Players[i].unk26 = 0;
+      g_Players[i].ballSurface = SURFACE_TEE_UP;
+      if (g_GameState.isMiniGolf) {
+        g_Players[i].ballSurface =
+            GetSurface(g_Players[i].ballPosition[AXIS_X],
+                       g_Players[i].ballPosition[AXIS_Z]);
+      }
+      g_Players[i].driveDistance = UNMEASURED_DISTANCE;
+      g_Players[i].pinDistance = UNMEASURED_DISTANCE;
+      g_Players[i].unk9C = 0;
+      for (ring = RING_COUNT - 1; ring >= 0; ring--) {
+        g_Players[i].ringStates[ring] = 0;
+      }
+      if (g_GameMode == GAME_MODE_RING_SHOT) {
+        g_Players[i].unk28 = 1;
+      }
     }
-    if (g_GameMode == GAME_MODE_RING_SHOT) {
-        InitRings();
-    }
+  }
+  if (g_GameMode == GAME_MODE_RING_SHOT) {
+    InitRings();
+  }
 }
 
 /*
@@ -353,75 +361,82 @@ void PlacePlayersOnTee(void) {
  * contests won on it, then waits for them to finish
  */
 void PlayContestMovies(void) {
-    s32 i;
+  s32 i;
 
-    if (D_800FBDB8 == 0) {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            if (g_Players[i].strokeCount == 0) {
-                break;
-            }
-            if (g_Players[i].unkC != PLAYER_STATE_UNK11 && g_Players[i].unkC != PLAYER_STATE_UNK14) {
-                break;
-            }
-        }
-        if (!g_GameState.unk31 && i == g_GameState.playerCount) {
-            if (IsMarkedParFive(g_CourseIndex, g_HoleIndex) && GetContestWinner() != NO_CONTEST_WINNER) {
-                StartMovie(MOVIE_LONGEST_DRIVE);
-            }
-            if (IsParThree(g_CourseIndex, g_HoleIndex) && GetContestWinner() != NO_CONTEST_WINNER) {
-                StartMovie(MOVIE_NEAREST_PIN);
-            }
-            if (g_GameMode == GAME_MODE_TOURNAMENT && RecordDrive()) {
-                StartMovie(MOVIE_DRIVE_RECORD);
-            }
-            D_800FBDB8 = 60;
-        }
-    } else if (IsMovieFinished()) {
-        D_800FBDB8 = -1;
+  if (D_800FBDB8 == 0) {
+    for (i = 0; i < g_GameState.playerCount; i++) {
+      if (g_Players[i].strokeCount == 0) {
+        break;
+      }
+      if (g_Players[i].unkC != PLAYER_STATE_UNK11 &&
+          g_Players[i].unkC != PLAYER_STATE_UNK14) {
+        break;
+      }
     }
+    if (!g_GameState.unk31 && i == g_GameState.playerCount) {
+      if (IsMarkedParFive(g_CourseIndex, g_HoleIndex) &&
+          GetContestWinner() != NO_CONTEST_WINNER) {
+        StartMovie(MOVIE_LONGEST_DRIVE);
+      }
+      if (IsParThree(g_CourseIndex, g_HoleIndex) &&
+          GetContestWinner() != NO_CONTEST_WINNER) {
+        StartMovie(MOVIE_NEAREST_PIN);
+      }
+      if (g_GameMode == GAME_MODE_TOURNAMENT && RecordDrive()) {
+        StartMovie(MOVIE_DRIVE_RECORD);
+      }
+      D_800FBDB8 = 60;
+    }
+  } else if (IsMovieFinished()) {
+    D_800FBDB8 = -1;
+  }
 }
 
 #ifdef NON_MATCHING
 s32 func_8005FCB8(void) {
-    s32 isDone = FALSE;
-    s32 i;
+  s32 isDone = FALSE;
+  s32 i;
 
-    if (D_800FBDB8 == 60) {
+  if (D_800FBDB8 == 60) {
+    return FALSE;
+  }
+  if (!g_GameState.unk31) {
+    if (g_GameMode == GAME_MODE_SKINS_MATCH ||
+        g_GameMode == GAME_MODE_CLUB_SLOTS) {
+      if (!GetGroupHoleResult(NULL)) {
         return FALSE;
-    }
-    if (!g_GameState.unk31) {
-        if (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
-            if (!GetGroupHoleResult(NULL)) {
-                return FALSE;
-            }
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                if (g_Players[i].unkC != PLAYER_STATE_UNK14 && g_Players[i].unkC != PLAYER_STATE_UNK11) {
-                    break;
-                }
-            }
-            return i == g_GameState.playerCount;
+      }
+      for (i = 0; i < g_GameState.playerCount; i++) {
+        if (g_Players[i].unkC != PLAYER_STATE_UNK14 &&
+            g_Players[i].unkC != PLAYER_STATE_UNK11) {
+          break;
         }
-        if (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) {
-            if (!GetMatchHoleResult(0, 1)) {
-                return FALSE;
-            }
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                if (g_Players[i].unkC != PLAYER_STATE_UNK14 && g_Players[i].unkC != PLAYER_STATE_UNK11) {
-                    break;
-                }
-            }
-            return i == g_GameState.playerCount;
+      }
+      return i == g_GameState.playerCount;
+    }
+    if (g_GameMode == GAME_MODE_MATCH_GAME ||
+        g_GameMode == GAME_MODE_GET_CHARACTER) {
+      if (!GetMatchHoleResult(0, 1)) {
+        return FALSE;
+      }
+      for (i = 0; i < g_GameState.playerCount; i++) {
+        if (g_Players[i].unkC != PLAYER_STATE_UNK14 &&
+            g_Players[i].unkC != PLAYER_STATE_UNK11) {
+          break;
         }
+      }
+      return i == g_GameState.playerCount;
     }
-    for (i = 0; i < g_GameState.playerCount; i++) {
-        if (g_Players[i].unkC != PLAYER_STATE_UNK14) {
-            break;
-        }
+  }
+  for (i = 0; i < g_GameState.playerCount; i++) {
+    if (g_Players[i].unkC != PLAYER_STATE_UNK14) {
+      break;
     }
-    if (i == g_GameState.playerCount) {
-        isDone = TRUE;
-    }
-    return isDone;
+  }
+  if (i == g_GameState.playerCount) {
+    isDone = TRUE;
+  }
+  return isDone;
 }
 
 #else
@@ -433,10 +448,10 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
  * It is a macro, as an inline function compiles differently from the
  * original.
  */
-#define TeesAfter(player, other)                                                   \
-    (g_Players[player].strokeCount > g_Players[other].strokeCount                  \
-     || (g_Players[player].strokeCount == g_Players[other].strokeCount             \
-         && g_Players[player].teeOrder > g_Players[other].teeOrder))
+#define TeesAfter(player, other)                                     \
+  (g_Players[player].strokeCount > g_Players[other].strokeCount ||   \
+   (g_Players[player].strokeCount == g_Players[other].strokeCount && \
+    g_Players[player].teeOrder > g_Players[other].teeOrder))
 
 /*
  * Sets each player's teeOrder for the next hole. In the group modes a
@@ -444,133 +459,132 @@ INCLUDE_ASM("asm/nonmatchings/play", func_8005FCB8);
  * players go in order of strokeCount, ties keeping their previous order.
  */
 void SetNextTeeOrder(void) {
-    s32 orders[MAX_PLAYER_COUNT];
-    s8 results[MAX_PLAYER_COUNT];
-    s32 i;
-    s32 j;
+  s32 orders[MAX_PLAYER_COUNT];
+  s8 results[MAX_PLAYER_COUNT];
+  s32 i;
+  s32 j;
 
-    if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS)) {
-        if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                orders[i] = g_Players[i].teeOrder;
-            }
-        } else {
-            for (i = 0; i < g_GameState.playerCount; i++) {
-                if (results[i] != GROUP_PLAYER_WINNER) {
-                    orders[i] = g_Players[i].teeOrder + 1;
-                } else {
-                    orders[i] = 0;
-                }
-            }
-        }
+  if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH ||
+                             g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+    if (GetGroupHoleResult(results) != GROUP_HOLE_WON) {
+      for (i = 0; i < g_GameState.playerCount; i++) {
+        orders[i] = g_Players[i].teeOrder;
+      }
     } else {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            orders[i] = 0;
-            for (j = 0; j < g_GameState.playerCount; j++) {
-                if (j != i && TeesAfter(i, j)) {
-                    orders[i]++;
-                }
-            }
+      for (i = 0; i < g_GameState.playerCount; i++) {
+        if (results[i] != GROUP_PLAYER_WINNER) {
+          orders[i] = g_Players[i].teeOrder + 1;
+        } else {
+          orders[i] = 0;
         }
+      }
     }
-    /* The do-while is there to match */
-    do {
-        for (i = 0; i < g_GameState.playerCount; i++) {
-            g_Players[i].teeOrder = orders[i];
+  } else {
+    for (i = 0; i < g_GameState.playerCount; i++) {
+      orders[i] = 0;
+      for (j = 0; j < g_GameState.playerCount; j++) {
+        if (j != i && TeesAfter(i, j)) {
+          orders[i]++;
         }
-    } while (0);
+      }
+    }
+  }
+  /* The do-while is there to match */
+  do {
+    for (i = 0; i < g_GameState.playerCount; i++) {
+      g_Players[i].teeOrder = orders[i];
+    }
+  } while (0);
 }
 
 void func_800600C0(s32 index) {
-
-    D_80104F78 = D_800FEDD8->shots[index].heading;
-    D_80104F7C = D_800FEDD8->shots[index].unk2;
-    D_80104F80 = D_800FEDD8->shots[index].unk3;
-    D_80104F84 = D_800FEDD8->shots[index].shotMode;
-    D_80104F88 = D_800FEDD8->shots[index].clubSlot;
-    D_80104F8C = D_800FEDD8->shots[index].unk6;
-    D_80104F90 = D_800FEDD8->shots[index].unk7;
+  D_80104F78 = D_800FEDD8->shots[index].heading;
+  D_80104F7C = D_800FEDD8->shots[index].unk2;
+  D_80104F80 = D_800FEDD8->shots[index].unk3;
+  D_80104F84 = D_800FEDD8->shots[index].shotMode;
+  D_80104F88 = D_800FEDD8->shots[index].clubSlot;
+  D_80104F8C = D_800FEDD8->shots[index].unk6;
+  D_80104F90 = D_800FEDD8->shots[index].unk7;
 }
 
 void func_80060128(s32 index) {
-    D_80104F78 = D_80105F40->shots[index].heading;
-    D_80104F7C = D_80105F40->shots[index].unk2;
-    D_80104F80 = D_80105F40->shots[index].unk3;
-    D_80104F84 = D_80105F40->shots[index].shotMode;
-    D_80104F88 = D_80105F40->shots[index].clubSlot;
-    D_80104F8C = D_80105F40->shots[index].unk6;
-    D_80104F90 = D_80105F40->shots[index].unk7;
+  D_80104F78 = D_80105F40->shots[index].heading;
+  D_80104F7C = D_80105F40->shots[index].unk2;
+  D_80104F80 = D_80105F40->shots[index].unk3;
+  D_80104F84 = D_80105F40->shots[index].shotMode;
+  D_80104F88 = D_80105F40->shots[index].clubSlot;
+  D_80104F8C = D_80105F40->shots[index].unk6;
+  D_80104F90 = D_80105F40->shots[index].unk7;
 }
 
 s32 func_80060190(s32 strokes) {
-    s32 toPar = strokes - g_HolePar;
+  s32 toPar = strokes - g_HolePar;
 
-    if (strokes == 1) {
-        return 0x80;
-    }
-    switch (toPar) {
-        case -3:
-            return 0x81;
-        case -2:
-            return 0x82;
-        case -1:
-            return 0x83;
-        case 0:
-            if (g_GameMode == GAME_MODE_RING_SHOT) {
-                return 0x84;
-            }
-            break;
-    }
-    return 0;
+  if (strokes == 1) {
+    return 0x80;
+  }
+  switch (toPar) {
+    case -3:
+      return 0x81;
+    case -2:
+      return 0x82;
+    case -1:
+      return 0x83;
+    case 0:
+      if (g_GameMode == GAME_MODE_RING_SHOT) {
+        return 0x84;
+      }
+      break;
+  }
+  return 0;
 }
 
 /* Sets play up to replay a super shot record */
-void LoadSuperShotReplay(PlayRecord *record) {
-    D_800FEDD8[0] = *record;
-    g_GameMode = record->gameMode;
-    g_CourseIndex = record->courseIndex;
-    g_HoleIndex = record->holeIndex;
-    D_800FE330 = record->strokeCount;
-    SetUpPlayers();
-    osSyncPrintf("SetSuperShotReplay\n");
+void LoadSuperShotReplay(PlayRecord* record) {
+  D_800FEDD8[0] = *record;
+  g_GameMode = record->gameMode;
+  g_CourseIndex = record->courseIndex;
+  g_HoleIndex = record->holeIndex;
+  D_800FE330 = record->strokeCount;
+  SetUpPlayers();
+  osSyncPrintf("SetSuperShotReplay\n");
 }
 
 /* Sets play up for the Ring Shot hole of a record */
-void LoadRingShotRecord(RingShotRecord *record) {
-    D_80105F40[0] = *record;
-    g_GameMode = GAME_MODE_RING_SHOT;
-    g_CourseIndex = record->courseIndex;
-    g_HoleIndex = record->holeIndex;
-    D_800FE330 = record->strokeCount;
-    SetUpPlayers();
+void LoadRingShotRecord(RingShotRecord* record) {
+  D_80105F40[0] = *record;
+  g_GameMode = GAME_MODE_RING_SHOT;
+  g_CourseIndex = record->courseIndex;
+  g_HoleIndex = record->holeIndex;
+  D_800FE330 = record->strokeCount;
+  SetUpPlayers();
 }
 
-void func_8006034C(s8 value) {
-    D_800C30A4 = value;
-}
+void func_8006034C(s8 value) { D_800C30A4 = value; }
 
 void func_80060358(void) {
-    g_PauseScreen = PAUSE_SCREEN_NONE;
-    SaveOrContinueGameByMode(FALSE);
-    ClearShotEffects(0);
-    g_GameState.unk0 = 7;
-    g_PlayExit = 3;
-    g_HoleEndStep = 9;
+  g_PauseScreen = PAUSE_SCREEN_NONE;
+  SaveOrContinueGameByMode(FALSE);
+  ClearShotEffects(0);
+  g_GameState.unk0 = 7;
+  g_PlayExit = 3;
+  g_HoleEndStep = 9;
 }
 
 s32 func_800603A8(void) {
-    return (IsGameFlagSet(0x82) << 4) | (IsGameFlagSet(0x83) << 3) | (IsGameFlagSet(0x84) << 2) |
-           (IsGameFlagSet(0x85) << 1) | IsGameFlagSet(0x86);
+  return (IsGameFlagSet(0x82) << 4) | (IsGameFlagSet(0x83) << 3) |
+         (IsGameFlagSet(0x84) << 2) | (IsGameFlagSet(0x85) << 1) |
+         IsGameFlagSet(0x86);
 }
 
 /* Copies the game state and players to D_801B55F0 and D_8012D0C8 */
 void BackUpPlayState(void) {
-    s32 i;
+  s32 i;
 
-    D_801B55F0 = g_GameState;
-    for (i = 0; i < MAX_PLAYER_COUNT; i++) {
-        D_8012D0C8[i] = g_Players[i];
-    }
+  D_801B55F0 = g_GameState;
+  for (i = 0; i < MAX_PLAYER_COUNT; i++) {
+    D_8012D0C8[i] = g_Players[i];
+  }
 }
 
 /*
@@ -578,29 +592,33 @@ void BackUpPlayState(void) {
  * won first place in a Boo Valley or Mario's Star tournament
  */
 s32 HasWonFinalChallenge(void) {
-    s32 firstHole;
-    TournamentStanding *standing;
-    s32 i;
+  s32 firstHole;
+  TournamentStanding* standing;
+  s32 i;
 
-    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
-        if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
-            if ((s8)g_Players[1].characterIndex == CHARACTER_BOWSER) {
-                return TRUE;
-            }
-        }
-    } else if (g_GameMode == GAME_MODE_TOURNAMENT) {
-        if (g_CourseIndex == COURSE_RECORD_BOO_VALLEY || g_CourseIndex == COURSE_RECORD_MARIOS_STAR) {
-            firstHole = GetFirstHoleIndex();
-            RankTournament(COURSE_HOLE_COUNT, 0, GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0), D_801B60B4);
-            for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
-                standing = &g_TournamentStandings[i];
-                if (standing->contestantId == PLAYER_CONTESTANT && (standing->place & PLACE_MASK) == 1) {
-                    return TRUE;
-                }
-            }
-        }
+  if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+    if (GetMatchWinner(0, 1) == MATCH_SIDE_PLAYER) {
+      if ((s8)g_Players[1].characterIndex == CHARACTER_BOWSER) {
+        return TRUE;
+      }
     }
-    return FALSE;
+  } else if (g_GameMode == GAME_MODE_TOURNAMENT) {
+    if (g_CourseIndex == COURSE_RECORD_BOO_VALLEY ||
+        g_CourseIndex == COURSE_RECORD_MARIOS_STAR) {
+      firstHole = GetFirstHoleIndex();
+      RankTournament(COURSE_HOLE_COUNT, 0,
+                     GetNetScoreToPar(firstHole + GetRoundHoleCount(), 0),
+                     D_801B60B4);
+      for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
+        standing = &g_TournamentStandings[i];
+        if (standing->contestantId == PLAYER_CONTESTANT &&
+            (standing->place & PLACE_MASK) == 1) {
+          return TRUE;
+        }
+      }
+    }
+  }
+  return FALSE;
 }
 
 extern s32 g_HoleResultsKind;
@@ -666,7 +684,8 @@ void func_8005DDAC(void);
 
 /* g_HoleEndStep, the step of the sequence between holes */
 #define HOLE_END_STEP_START 0
-#define HOLE_END_STEP_FREE_SLOT 1 /* Frees the character slot, then loads the next hole */
+/* Frees the character slot, then loads the next hole */
+#define HOLE_END_STEP_FREE_SLOT 1
 #define HOLE_END_STEP_SCORECARD 2
 #define HOLE_END_STEP_WIPE_OUT 3
 #define HOLE_END_STEP_LOAD_NEXT_HOLE 4
@@ -747,12 +766,16 @@ void func_8005DDAC(void);
 #define AUTO_ADVANCE_FRAMES 10
 #define AUTO_ADVANCE_RESULTS_FRAMES 90
 
-/* Whether the round has played its last hole, once g_HoleIndex has moved past it */
-#define HAS_PLAYED_LAST_HOLE() (g_HoleIndex == GetFirstHoleIndex() + GetRoundHoleCount())
+/* Whether the round has played its last hole, once g_HoleIndex has moved past
+ * it */
+#define HAS_PLAYED_LAST_HOLE() \
+  (g_HoleIndex == GetFirstHoleIndex() + GetRoundHoleCount())
 #define IS_A_PRESSED() (g_MergedController.pressedButtons & A_BUTTON)
-/* Whether the Ring Shot hole has just earned the last star, which rolls the staff */
-#define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT() \
-    ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
+/* Whether the Ring Shot hole has just earned the last star, which rolls the
+ * staff */
+#define IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()               \
+  ((HasEveryRingShotStar() && !g_HadEveryRingShotStar) || \
+   IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL))
 
 /* The debug cup picker's text position */
 #define DEBUG_CUP_TEXT_COLUMN 3
@@ -760,8 +783,10 @@ void func_8005DDAC(void);
 
 /* The hole intro camera circles the hole at these distances */
 #define INTRO_ORBIT_ANGLE_PER_FRAME 256 /* In binary angle units */
-#define INTRO_ORBIT_ANGLE() \
-    (((g_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & BINARY_ANGLE_MASK) * BINARY_ANGLE_TO_RADIANS)
+#define INTRO_ORBIT_ANGLE()                                 \
+  (((g_PlayStateFrameCount * INTRO_ORBIT_ANGLE_PER_FRAME) & \
+    BINARY_ANGLE_MASK) *                                    \
+   BINARY_ANGLE_TO_RADIANS)
 #define DEBUG_ORBIT_RADIUS 1500.0f
 #define DEBUG_ORBIT_HEIGHT (-1500.0f)
 #define INTRO_ORBIT_RADIUS 3000.0f
@@ -775,781 +800,823 @@ void func_8005DDAC(void);
  * holes until the round ends and play returns to a menu or the staff roll.
  */
 void UpdatePlay(void) {
-    s32 repeat;
-    s32 again;
-    s32 anyHuman;
-    s32 i;
-    s32 result;
-    s32 clearHud;
-    s32 nextStep;
+  s32 repeat;
+  s32 again;
+  s32 anyHuman;
+  s32 i;
+  s32 result;
+  s32 clearHud;
+  s32 nextStep;
 
+  repeat = FALSE;
+  g_PlayFrameCount++;
+  if (g_Players[0].controllerIndex < MAXCONTROLLERS) {
+    g_TurnController = g_ControllerStates[g_Players[0].controllerIndex];
+  } else {
+    g_TurnController.stickX = 0;
+    g_TurnController.stickY = 0;
+    g_TurnController.buttons = 0;
+    g_TurnController.repeatedButtons = 0;
+    g_TurnController.pressedButtons = 0;
+  }
+  /* Menus between holes answer to any human player */
+  anyHuman = FALSE;
+  g_MergedController.buttons = 0;
+  g_MergedController.heldButtons = 0;
+  g_MergedController.pressedButtons = 0;
+  g_MergedController.repeatedButtons = 0;
+  for (i = 0; i != g_PlayerCount; i++) {
+    if (g_Players[i].controllerIndex < MAXCONTROLLERS) {
+      g_MergedController.buttons |=
+          g_ControllerStates[g_Players[i].controllerIndex].buttons;
+      g_MergedController.heldButtons |=
+          g_ControllerStates[g_Players[i].controllerIndex].heldButtons;
+      g_MergedController.pressedButtons |=
+          g_ControllerStates[g_Players[i].controllerIndex].pressedButtons;
+      g_MergedController.repeatedButtons |=
+          g_ControllerStates[g_Players[i].controllerIndex].repeatedButtons;
+      anyHuman = TRUE;
+    }
+  }
+  if (!anyHuman) {
+    g_MergedController.buttons = g_ControllerStates[0].buttons;
+    g_MergedController.heldButtons = g_ControllerStates[0].heldButtons;
+    g_MergedController.pressedButtons = g_ControllerStates[0].pressedButtons;
+    g_MergedController.repeatedButtons = g_ControllerStates[0].repeatedButtons;
+  }
+  /* A step that hands over to another within the same frame sets repeat */
+  again = repeat;
+  do {
+    if (again) {
+      osSyncPrintf("noexit\n");
+    }
     repeat = FALSE;
-    g_PlayFrameCount++;
-    if (g_Players[0].controllerIndex < MAXCONTROLLERS) {
-        g_TurnController = g_ControllerStates[g_Players[0].controllerIndex];
-    } else {
-        g_TurnController.stickX = 0;
-        g_TurnController.stickY = 0;
-        g_TurnController.buttons = 0;
-        g_TurnController.repeatedButtons = 0;
-        g_TurnController.pressedButtons = 0;
-    }
-    /* Menus between holes answer to any human player */
-    anyHuman = FALSE;
-    g_MergedController.buttons = 0;
-    g_MergedController.heldButtons = 0;
-    g_MergedController.pressedButtons = 0;
-    g_MergedController.repeatedButtons = 0;
-    for (i = 0; i != g_PlayerCount; i++) {
-        if (g_Players[i].controllerIndex < MAXCONTROLLERS) {
-            g_MergedController.buttons |= g_ControllerStates[g_Players[i].controllerIndex].buttons;
-            g_MergedController.heldButtons |= g_ControllerStates[g_Players[i].controllerIndex].heldButtons;
-            g_MergedController.pressedButtons |= g_ControllerStates[g_Players[i].controllerIndex].pressedButtons;
-            g_MergedController.repeatedButtons |= g_ControllerStates[g_Players[i].controllerIndex].repeatedButtons;
-            anyHuman = TRUE;
+    switch (g_GameState.unk0) {
+      case GAME_STATE_START:
+        g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
+      case GAME_STATE_LOAD_HOLE:
+        StopLoaderThread();
+        StartLoaderThread();
+        g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
+        osSyncPrintf("MAKEHOLE2\n");
+        break;
+      case GAME_STATE_RELOAD_HOLE:
+        if (g_HasLoaderFinished == TRUE) {
+          g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
         }
-    }
-    if (!anyHuman) {
-        g_MergedController.buttons = g_ControllerStates[0].buttons;
-        g_MergedController.heldButtons = g_ControllerStates[0].heldButtons;
-        g_MergedController.pressedButtons = g_ControllerStates[0].pressedButtons;
-        g_MergedController.repeatedButtons = g_ControllerStates[0].repeatedButtons;
-    }
-    /* A step that hands over to another within the same frame sets repeat */
-    again = repeat;
-    do {
-        if (again) {
-            osSyncPrintf("noexit\n");
+        break;
+      case GAME_STATE_WAIT_FOR_HOLE:
+        if (g_HasLoaderFinished == TRUE) {
+          if (!IsSubModuleLoaded()) {
+            break;
+          }
+          g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
+          func_801FDA04();
+          SetGameFlag(GAME_FLAG_HOLE_LOADED);
+          if (g_GameMode == GAME_MODE_RING_SHOT) {
+            if (GetWipeKind() == WIPE_CLOSING) {
+              StartWipe(WIPE_OPENING_FAST);
+            }
+            func_80242384(TRUE);
+          } else {
+            StartWipe(WIPE_OPENING_FAST);
+          }
+          memset(&g_RoundHud, 0, sizeof(RoundHud));
+          StartHoleIntro();
+          StartHoleCamerasAndSong();
+          g_PlayStateFrameCount = 0;
+        } else {
+          g_PlayStateFrameCount++;
+          if (g_GameMode == GAME_MODE_TRAINING) {
+            if (g_IsModuleAlive[MODULE_UNK21] &&
+                func_80241FF0(g_MergedController.pressedButtons,
+                              g_MergedController.repeatedButtons) ==
+                    HOLE_MENU_RELOAD) {
+              LoadWipeShape(g_CourseIndex);
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+              if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
+                StartWipe(WIPE_CLOSING);
+              }
+              g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
+              repeat = TRUE;
+            }
+          } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31 &&
+                     g_IsModuleAlive[MODULE_UNK21]) {
+            result = func_80241DF0(g_MergedController.pressedButtons,
+                                   g_MergedController.repeatedButtons);
+            if (result == HOLE_MENU_RELOAD) {
+              LoadWipeShape(g_CourseIndex);
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+              func_80242384(FALSE);
+              g_GameState.unk0 = result;
+              repeat = TRUE;
+            }
+          }
         }
-        repeat = FALSE;
-        switch (g_GameState.unk0) {
-            case GAME_STATE_START:
-                g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
-            case GAME_STATE_LOAD_HOLE:
-                StopLoaderThread();
-                StartLoaderThread();
-                g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
-                osSyncPrintf("MAKEHOLE2\n");
+        break;
+      case GAME_STATE_HOLE_INTRO:
+        g_IsPlayStateBackedUp = 0;
+        nuGfxDisplayOn();
+        if (g_GameMode == GAME_MODE_TRAINING) {
+          if (g_IsModuleAlive[MODULE_UNK21]) {
+            result = func_80241FF0(g_MergedController.pressedButtons,
+                                   g_MergedController.repeatedButtons);
+            switch (result) {
+              case HOLE_MENU_RELOAD:
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                StartWipe(WIPE_CLOSING);
+                repeat = TRUE;
+                LoadWipeShape(g_CourseIndex);
+                g_GameState.unk0 = result;
                 break;
-            case GAME_STATE_RELOAD_HOLE:
-                if (g_HasLoaderFinished == TRUE) {
-                    g_GameState.unk0 = GAME_STATE_WAIT_FOR_HOLE;
+              case HOLE_MENU_QUIT:
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                g_PlayExit = PLAY_EXIT_QUIT;
+                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
+                g_GameState.unk0 = GAME_STATE_HOLE_END;
+                g_HoleEndStep = HOLE_END_STEP_START;
+                ClearHoleIntroText();
+                break;
+              case HOLE_MENU_NONE:
+                if (GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
+                  g_GameState.unk0 = GAME_STATE_END_INTRO;
+                  StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
                 }
                 break;
-            case GAME_STATE_WAIT_FOR_HOLE:
-                if (g_HasLoaderFinished == TRUE) {
-                    if (!IsSubModuleLoaded()) {
-                        break;
-                    }
-                    g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
-                    func_801FDA04();
-                    SetGameFlag(GAME_FLAG_HOLE_LOADED);
-                    if (g_GameMode == GAME_MODE_RING_SHOT) {
-                        if (GetWipeKind() == WIPE_CLOSING) {
-                            StartWipe(WIPE_OPENING_FAST);
-                        }
-                        func_80242384(TRUE);
-                    } else {
-                        StartWipe(WIPE_OPENING_FAST);
-                    }
-                    memset(&g_RoundHud, 0, sizeof(RoundHud));
-                    StartHoleIntro();
-                    StartHoleCamerasAndSong();
-                    g_PlayStateFrameCount = 0;
+            }
+          }
+        } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31) {
+          if (g_IsModuleAlive[MODULE_UNK21]) {
+            result = func_80241DF0(g_MergedController.pressedButtons,
+                                   g_MergedController.repeatedButtons);
+            switch (result) {
+              case HOLE_MENU_RELOAD:
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                func_80242384(FALSE);
+                g_GameState.unk0 = result;
+                repeat = TRUE;
+                LoadWipeShape(g_CourseIndex);
+                break;
+              case HOLE_MENU_QUIT:
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                g_PlayExit = PLAY_EXIT_QUIT;
+                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
+                g_GameState.unk0 = GAME_STATE_HOLE_END;
+                g_HoleEndStep = HOLE_END_STEP_START;
+                ClearHoleIntroText();
+                break;
+              case HOLE_MENU_NONE:
+                if (func_80242374() &&
+                    GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
+                  g_GameState.unk0 = GAME_STATE_END_INTRO;
+                  StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                }
+                break;
+            }
+          }
+        } else if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
+          if (g_IsModuleAlive[MODULE_UNK26] &&
+              (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
+               IS_A_PRESSED())) {
+            if (!g_GameState.unk30) {
+              g_GameState.unk0 = GAME_STATE_SLOTS;
+              func_80241800();
+            } else {
+              StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+              g_GameState.unk0 = GAME_STATE_END_INTRO;
+            }
+          }
+        } else if (g_GameState.unk31) {
+          if (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES ||
+              IS_A_PRESSED()) {
+            if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+              StartHoleFlyover();
+              EndHoleIntro();
+              g_GameState.unk0 = GAME_STATE_UNK6;
+              EndHoleFlyover();
+              StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+              g_PlayStateFrameCount = 0;
+            } else {
+              StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+              g_GameState.unk0 = GAME_STATE_END_INTRO;
+            }
+          }
+        } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
+                   (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES ||
+                    IS_A_PRESSED() ||
+                    (func_8005F180() &&
+                     g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
+          if (g_GameMode == GAME_MODE_SPEED_GOLF) {
+            StartHoleFlyover();
+            EndHoleIntro();
+            g_GameState.unk0 = GAME_STATE_UNK6;
+            EndHoleFlyover();
+            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+            g_PlayStateFrameCount = 0;
+          } else {
+            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+            g_GameState.unk0 = GAME_STATE_END_INTRO;
+          }
+        }
+        g_PlayStateFrameCount++;
+        /* The camera circles the hole while its intro is shown */
+        {
+          Vec3 lookAt;
+          Vec3 eye;
+          char text[0x80];
+
+          /* Debug: circles the chosen cup position instead, and moves the cup
+           * there */
+          if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
+            if (g_ControllerData[1].button & L_TRIG) {
+              g_DebugCupIndex--;
+            }
+            if (g_ControllerData[1].button & R_TRIG) {
+              g_DebugCupIndex++;
+            }
+            g_DebugCupIndex &= CUP_POSITION_COUNT - 1;
+            sprintf(text, "PinNo%d ", g_DebugCupIndex);
+            PrintDebugText(text, DEBUG_CUP_TEXT_COLUMN, DEBUG_CUP_TEXT_ROW);
+            D_800BA9D8.cupPosition[AXIS_X] =
+                g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_X];
+            g_CupPositionZ = g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_Z];
+            g_CupPositionY =
+                GetGroundHeight(D_800BA9D8.cupPosition[AXIS_X], g_CupPositionZ);
+            lookAt[AXIS_X] =
+                D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+            lookAt[AXIS_Y] = g_CupPositionY * COURSE_TO_WORLD_SCALE;
+            lookAt[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
+            eye[AXIS_X] =
+                cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_X];
+            eye[AXIS_Y] = lookAt[AXIS_Y] + DEBUG_ORBIT_HEIGHT;
+            eye[AXIS_Z] =
+                sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_Z];
+          } else {
+            lookAt[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
+                             (COURSE_TO_WORLD_SCALE / 2);
+            lookAt[AXIS_Y] =
+                (g_CupPositionY + g_TeePositionY) * (COURSE_TO_WORLD_SCALE / 2);
+            lookAt[AXIS_Z] =
+                (g_CupPositionZ + g_TeePositionZ) * (COURSE_TO_WORLD_SCALE / 2);
+            if (!g_GameState.isMiniGolf) {
+              eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
+                            lookAt[AXIS_X];
+              eye[AXIS_Y] = lookAt[AXIS_Y] + INTRO_ORBIT_HEIGHT;
+              eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
+                            lookAt[AXIS_Z];
+            } else {
+              eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
+                            lookAt[AXIS_X];
+              eye[AXIS_Y] = lookAt[AXIS_Y] + MINI_GOLF_ORBIT_HEIGHT;
+              eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
+                            lookAt[AXIS_Z];
+            }
+          }
+          g_Cameras[0].view.mode = CAMERA_MODE_UNK8;
+          g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
+          g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
+          g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
+          g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X];
+          g_Cameras[0].view.lookAt[AXIS_Y] = lookAt[AXIS_Y];
+          g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z];
+        }
+        break;
+      case GAME_STATE_SLOTS:
+        if (func_8024216C() == TRUE) {
+          StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+          if (g_GameMode == GAME_MODE_CLUB_SLOTS && !g_GameState.unk30) {
+            func_80241EE8();
+          }
+          g_GameState.unk0 = GAME_STATE_END_INTRO;
+        }
+        break;
+      case GAME_STATE_END_INTRO:
+        StepHoleFlyover();
+        g_GameState.unk0 = GAME_STATE_FLYOVER;
+        EndHoleIntro();
+        StartHoleFlyover();
+        break;
+      case GAME_STATE_FLYOVER:
+        g_RoundHud.isHoleIntroTextShown = FALSE;
+        D_800C3068 = 0;
+        g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        if (StepHoleFlyover() ||
+            (IsHudAnimationDone() && (IS_A_PRESSED() || func_8005F180()))) {
+          g_GameState.unk0 = GAME_STATE_UNK6;
+          EndHoleFlyover();
+        }
+        g_PlayStateFrameCount = 0;
+        break;
+      case GAME_STATE_UNK5:
+        g_PlayStateFrameCount++;
+        break;
+      case GAME_STATE_UNK6:
+        UnloadOverlay(GetOverlayOfModule(MODULE_UNK6));
+      case GAME_STATE_UNK11:
+        if (!g_IsPlayStateBackedUp) {
+          D_800FBDB8 = 0;
+          ClearContestWinner();
+          g_IsPlayStateBackedUp = TRUE;
+          BackUpPlayState();
+          g_WasDonkeyKongUnlocked = IsDonkeyKongUnlocked();
+          g_WasMapleUnlocked = IsMapleUnlocked();
+          g_WasMetalMarioUnlocked = IsMetalMarioUnlocked();
+          g_HadEveryRingShotStar = HasEveryRingShotStar();
+          g_RingShotCourseOpenedAtStart = GetRingShotCourseOpenedAtStarCount();
+        }
+        g_GameState.unk30 = 0;
+        g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
+        if (g_IsModuleAlive[MODULE_UNK10] ||
+            ReportModuleNotAlive(MODULE_UNK10)) {
+          UpdateTurns();
+        }
+        PlayContestMovies();
+        if (func_8005FCB8()) {
+          if (g_GameState.unk0 == GAME_STATE_UNK11) {
+            ChooseConditionsAndInitHole();
+          } else {
+            g_GameState.unk0 = GAME_STATE_HOLE_END;
+            g_HoleEndStep = HOLE_END_STEP_START;
+            g_PlayStateFrameCount = 0;
+          }
+        }
+        if (g_GameState.unk0 == GAME_STATE_HOLE_END) {
+          UnloadOverlay(GetOverlayOfModule(MODULE_UNK8));
+          SetNextTeeOrder();
+          UpdateContest(TRUE);
+          if (g_GameMode == GAME_MODE_TOURNAMENT &&
+              g_Players[0].unk26 == TRUE) {
+            RecordHoleStats();
+            if (g_Players[0].strokeCount < g_HolePar) {
+              AddBirdieBadge();
+            }
+          }
+          if (!g_GameState.unk31 && (g_GameMode == GAME_MODE_SKINS_MATCH ||
+                                     g_GameMode == GAME_MODE_CLUB_SLOTS)) {
+            s8 results[MAX_PLAYER_COUNT];
+
+            if (GetGroupHoleResult(results) != TRUE) {
+              for (i = 0; i < g_GameState.playerCount; i++) {
+                g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
+              }
+            } else {
+              for (i = 0; i < g_GameState.playerCount; i++) {
+                if (results[i] != TRUE) {
+                  g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
                 } else {
-                    g_PlayStateFrameCount++;
-                    if (g_GameMode == GAME_MODE_TRAINING) {
-                        if (g_IsModuleAlive[MODULE_UNK21] &&
-                            func_80241FF0(g_MergedController.pressedButtons, g_MergedController.repeatedButtons) ==
-                                HOLE_MENU_RELOAD) {
-                            LoadWipeShape(g_CourseIndex);
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                            if (GetWipeProgress() == WIPE_OPEN_PROGRESS) {
-                                StartWipe(WIPE_CLOSING);
-                            }
-                            g_GameState.unk0 = GAME_STATE_LOAD_HOLE;
-                            repeat = TRUE;
-                        }
-                    } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31 &&
-                               g_IsModuleAlive[MODULE_UNK21]) {
-                        result = func_80241DF0(g_MergedController.pressedButtons, g_MergedController.repeatedButtons);
-                        if (result == HOLE_MENU_RELOAD) {
-                            LoadWipeShape(g_CourseIndex);
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                            func_80242384(FALSE);
-                            g_GameState.unk0 = result;
-                            repeat = TRUE;
-                        }
-                    }
+                  g_Players[i].holes[g_GameState.holeIndex].strokes = TRUE;
                 }
-                break;
-            case GAME_STATE_HOLE_INTRO:
-                g_IsPlayStateBackedUp = 0;
-                nuGfxDisplayOn();
-                if (g_GameMode == GAME_MODE_TRAINING) {
-                    if (g_IsModuleAlive[MODULE_UNK21]) {
-                        result = func_80241FF0(g_MergedController.pressedButtons, g_MergedController.repeatedButtons);
-                        switch (result) {
-                            case HOLE_MENU_RELOAD:
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                StartWipe(WIPE_CLOSING);
-                                repeat = TRUE;
-                                LoadWipeShape(g_CourseIndex);
-                                g_GameState.unk0 = result;
-                                break;
-                            case HOLE_MENU_QUIT:
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                g_PlayExit = PLAY_EXIT_QUIT;
-                                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
-                                g_GameState.unk0 = GAME_STATE_HOLE_END;
-                                g_HoleEndStep = HOLE_END_STEP_START;
-                                ClearHoleIntroText();
-                                break;
-                            case HOLE_MENU_NONE:
-                                if (GetWipeProgress() == WIPE_OPEN_PROGRESS && IS_A_PRESSED()) {
-                                    g_GameState.unk0 = GAME_STATE_END_INTRO;
-                                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                                }
-                                break;
-                        }
-                    }
-                } else if (g_GameMode == GAME_MODE_RING_SHOT && !g_GameState.unk31) {
-                    if (g_IsModuleAlive[MODULE_UNK21]) {
-                        result = func_80241DF0(g_MergedController.pressedButtons, g_MergedController.repeatedButtons);
-                        switch (result) {
-                            case HOLE_MENU_RELOAD:
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                func_80242384(FALSE);
-                                g_GameState.unk0 = result;
-                                repeat = TRUE;
-                                LoadWipeShape(g_CourseIndex);
-                                break;
-                            case HOLE_MENU_QUIT:
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                g_PlayExit = PLAY_EXIT_QUIT;
-                                PlaySound(SOUND_CANCEL, SOUND_CHANNEL, SOUND_VOLUME);
-                                g_GameState.unk0 = GAME_STATE_HOLE_END;
-                                g_HoleEndStep = HOLE_END_STEP_START;
-                                ClearHoleIntroText();
-                                break;
-                            case HOLE_MENU_NONE:
-                                if (func_80242374() && GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-                                    IS_A_PRESSED()) {
-                                    g_GameState.unk0 = GAME_STATE_END_INTRO;
-                                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                                }
-                                break;
-                        }
-                    }
-                } else if (g_GameMode == GAME_MODE_CLUB_SLOTS) {
-                    if (g_IsModuleAlive[MODULE_UNK26] &&
-                        (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES || IS_A_PRESSED())) {
-                        if (!g_GameState.unk30) {
-                            g_GameState.unk0 = GAME_STATE_SLOTS;
-                            func_80241800();
-                        } else {
-                            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                            g_GameState.unk0 = GAME_STATE_END_INTRO;
-                        }
-                    }
-                } else if (g_GameState.unk31) {
-                    if (g_PlayStateFrameCount >= SHORT_HOLE_INTRO_FRAMES || IS_A_PRESSED()) {
-                        if (g_GameMode == GAME_MODE_SPEED_GOLF) {
-                            StartHoleFlyover();
-                            EndHoleIntro();
-                            g_GameState.unk0 = GAME_STATE_UNK6;
-                            EndHoleFlyover();
-                            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                            g_PlayStateFrameCount = 0;
-                        } else {
-                            StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                            g_GameState.unk0 = GAME_STATE_END_INTRO;
-                        }
-                    }
-                } else if (GetWipeProgress() == WIPE_OPEN_PROGRESS &&
-                           (g_PlayStateFrameCount >= HOLE_INTRO_FRAMES || IS_A_PRESSED() ||
-                            (func_8005F180() && g_PlayStateFrameCount >= AUTO_ADVANCE_FRAMES))) {
-                    if (g_GameMode == GAME_MODE_SPEED_GOLF) {
-                        StartHoleFlyover();
-                        EndHoleIntro();
-                        g_GameState.unk0 = GAME_STATE_UNK6;
-                        EndHoleFlyover();
-                        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                        g_PlayStateFrameCount = 0;
-                    } else {
-                        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                        g_GameState.unk0 = GAME_STATE_END_INTRO;
-                    }
-                }
-                g_PlayStateFrameCount++;
-                /* The camera circles the hole while its intro is shown */
-                {
-                    Vec3 lookAt;
-                    Vec3 eye;
-                    char text[0x80];
-
-                    /* Debug: circles the chosen cup position instead, and moves the cup there */
-                    if (IsGameFlagSet(GAME_FLAG_CHOOSE_CUP)) {
-                        if (g_ControllerData[1].button & L_TRIG) {
-                            g_DebugCupIndex--;
-                        }
-                        if (g_ControllerData[1].button & R_TRIG) {
-                            g_DebugCupIndex++;
-                        }
-                        g_DebugCupIndex &= CUP_POSITION_COUNT - 1;
-                        sprintf(text, "PinNo%d ", g_DebugCupIndex);
-                        PrintDebugText(text, DEBUG_CUP_TEXT_COLUMN, DEBUG_CUP_TEXT_ROW);
-                        D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_X];
-                        g_CupPositionZ = g_HolePoints.cupPositions[g_DebugCupIndex][AXIS_Z];
-                        g_CupPositionY = GetGroundHeight(D_800BA9D8.cupPosition[AXIS_X], g_CupPositionZ);
-                        lookAt[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-                        lookAt[AXIS_Y] = g_CupPositionY * COURSE_TO_WORLD_SCALE;
-                        lookAt[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
-                        eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_X];
-                        eye[AXIS_Y] = lookAt[AXIS_Y] + DEBUG_ORBIT_HEIGHT;
-                        eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_Z];
-                    } else {
-                        lookAt[AXIS_X] =
-                            (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) * (COURSE_TO_WORLD_SCALE / 2);
-                        lookAt[AXIS_Y] = (g_CupPositionY + g_TeePositionY) * (COURSE_TO_WORLD_SCALE / 2);
-                        lookAt[AXIS_Z] = (g_CupPositionZ + g_TeePositionZ) * (COURSE_TO_WORLD_SCALE / 2);
-                        if (!g_GameState.isMiniGolf) {
-                            eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS + lookAt[AXIS_X];
-                            eye[AXIS_Y] = lookAt[AXIS_Y] + INTRO_ORBIT_HEIGHT;
-                            eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS + lookAt[AXIS_Z];
-                        } else {
-                            eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS + lookAt[AXIS_X];
-                            eye[AXIS_Y] = lookAt[AXIS_Y] + MINI_GOLF_ORBIT_HEIGHT;
-                            eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS + lookAt[AXIS_Z];
-                        }
-                    }
-                    g_Cameras[0].view.mode = CAMERA_MODE_UNK8;
-                    g_Cameras[0].view.eye[AXIS_X] = eye[AXIS_X];
-                    g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
-                    g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
-                    g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X];
-                    g_Cameras[0].view.lookAt[AXIS_Y] = lookAt[AXIS_Y];
-                    g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z];
-                }
-                break;
-            case GAME_STATE_SLOTS:
-                if (func_8024216C() == TRUE) {
-                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-                    if (g_GameMode == GAME_MODE_CLUB_SLOTS && !g_GameState.unk30) {
-                        func_80241EE8();
-                    }
-                    g_GameState.unk0 = GAME_STATE_END_INTRO;
-                }
-                break;
-            case GAME_STATE_END_INTRO:
-                StepHoleFlyover();
-                g_GameState.unk0 = GAME_STATE_FLYOVER;
-                EndHoleIntro();
-                StartHoleFlyover();
-                break;
-            case GAME_STATE_FLYOVER:
-                g_RoundHud.isHoleIntroTextShown = FALSE;
-                D_800C3068 = 0;
-                g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-                g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-                if (StepHoleFlyover() ||
-                    (IsHudAnimationDone() && (IS_A_PRESSED() || func_8005F180()))) {
-                    g_GameState.unk0 = GAME_STATE_UNK6;
-                    EndHoleFlyover();
-                }
-                g_PlayStateFrameCount = 0;
-                break;
-            case GAME_STATE_UNK5:
-                g_PlayStateFrameCount++;
-                break;
-            case GAME_STATE_UNK6:
-                UnloadOverlay(GetOverlayOfModule(MODULE_UNK6));
-            case GAME_STATE_UNK11:
-                if (!g_IsPlayStateBackedUp) {
-                    D_800FBDB8 = 0;
-                    ClearContestWinner();
-                    g_IsPlayStateBackedUp = TRUE;
-                    BackUpPlayState();
-                    g_WasDonkeyKongUnlocked = IsDonkeyKongUnlocked();
-                    g_WasMapleUnlocked = IsMapleUnlocked();
-                    g_WasMetalMarioUnlocked = IsMetalMarioUnlocked();
-                    g_HadEveryRingShotStar = HasEveryRingShotStar();
-                    g_RingShotCourseOpenedAtStart = GetRingShotCourseOpenedAtStarCount();
-                }
-                g_GameState.unk30 = 0;
-                g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-                g_Cameras[1].view.mode = CAMERA_MODE_BEHIND_GOLFER;
-                if (g_IsModuleAlive[MODULE_UNK10] || ReportModuleNotAlive(MODULE_UNK10)) {
-                    UpdateTurns();
-                }
-                PlayContestMovies();
-                if (func_8005FCB8()) {
-                    if (g_GameState.unk0 == GAME_STATE_UNK11) {
-                        ChooseConditionsAndInitHole();
-                    } else {
-                        g_GameState.unk0 = GAME_STATE_HOLE_END;
-                        g_HoleEndStep = HOLE_END_STEP_START;
-                        g_PlayStateFrameCount = 0;
-                    }
-                }
-                if (g_GameState.unk0 == GAME_STATE_HOLE_END) {
-                    UnloadOverlay(GetOverlayOfModule(MODULE_UNK8));
-                    SetNextTeeOrder();
-                    UpdateContest(TRUE);
-                    if (g_GameMode == GAME_MODE_TOURNAMENT && g_Players[0].unk26 == TRUE) {
-                        RecordHoleStats();
-                        if (g_Players[0].strokeCount < g_HolePar) {
-                            AddBirdieBadge();
-                        }
-                    }
-                    if (!g_GameState.unk31 &&
-                        (g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS)) {
-                        s8 results[MAX_PLAYER_COUNT];
-
-                        if (GetGroupHoleResult(results) != TRUE) {
-                            for (i = 0; i < g_GameState.playerCount; i++) {
-                                g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
-                            }
-                        } else {
-                            for (i = 0; i < g_GameState.playerCount; i++) {
-                                if (results[i] != TRUE) {
-                                    g_Players[i].holes[g_GameState.holeIndex].strokes = 0;
-                                } else {
-                                    g_Players[i].holes[g_GameState.holeIndex].strokes = TRUE;
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            case GAME_STATE_HOLE_END:
-                g_PlayStateFrameCount++;
-                clearHud = TRUE;
-                switch (g_HoleEndStep) {
-                    case HOLE_END_STEP_START:
-                        g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-                        g_PlayStateFrameCount = 0;
-                        g_RoundHud.scorecardPage = -1;
-                        g_RoundHud.isHoleIntroTextShown = FALSE;
-                        EndHoleIntro();
-                        for (i = 0; i < g_GameState.playerCount; i++) {
-                            g_Players[i].unk26 = 0;
-                        }
-                        if (g_GameMode == GAME_MODE_TRAINING) {
-                            if (g_PlayExit == PLAY_EXIT_NONE) {
-                                g_HoleIndex = (g_HoleIndex + 1) % COURSE_HOLE_COUNT;
-                            }
-                        } else {
-                            g_HoleIndex++;
-                        }
-                        if (g_GameState.gameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
-                            g_GameState.unk31 = 0;
-                            func_80060358();
-                            if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                                g_PlayExit = PLAY_EXIT_RING_SHOT;
-                            } else {
-                                g_PlayExit = PLAY_EXIT_UNK4;
-                            }
-                            StartWipe(WIPE_CLOSING);
-                            clearHud = FALSE;
-                            g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                        } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-                            if (g_PlayExit == PLAY_EXIT_NONE) {
-                                g_HoleIndex %= RING_SHOT_HOLE_COUNT;
-                                func_8005D1E4();
-                            }
-                            if (g_PlayExit == PLAY_EXIT_NONE) {
-                                if (!D_800C30A4) {
-                                    nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-                                } else if ((IsDonkeyKongUnlocked() && !g_WasDonkeyKongUnlocked) ||
-                                           IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
-                                    func_801F5C24(UNLOCK_NOTICE_DONKEY_KONG);
-                                    nextStep = HOLE_END_STEP_DONKEY_KONG_NOTICE;
-                                } else if (!g_RingShotCourseOpenedAtStart && GetRingShotCourseOpenedAtStarCount()) {
-                                    func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
-                                                  UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
-                                    nextStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
-                                } else if (D_800C42D0) {
-                                    nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-                                } else {
-                                    g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
-                                    g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                                    g_PendingSubModuleId = SUB_MODULE_UNK22;
-                                    goto dimBackdrop;
-                                }
-                                g_HoleEndStep = nextStep;
-                            dimBackdrop:
-                                SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                                clearHud = FALSE;
-                            } else {
-                                clearHud = FALSE;
-                                if (g_PlayExit == PLAY_EXIT_QUIT) {
-                                    g_HoleEndStep = HOLE_END_STEP_QUIT;
-                                }
-                            }
-                        } else if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
-                            g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                            g_PendingSubModuleId = SUB_MODULE_SCORECARD;
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                            g_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
-                            if (IsMapleUnlocked() && !g_WasMapleUnlocked) {
-                                func_801F5C24(UNLOCK_NOTICE_MAPLE);
-                                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
-                            } else if (IsMetalMarioUnlocked() && !g_WasMetalMarioUnlocked) {
-                                func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
-                                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
-                            } else if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
-                                func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
-                                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
-                            } else if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
-                                       HAS_PLAYED_LAST_HOLE()) {
-                                RecordCourseRound();
-                                RecordTournamentPlace();
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                            }
-                        } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                            g_PendingSubModuleId = SUB_MODULE_SCORECARD;
-                            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                            g_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
-                            if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) || HAS_PLAYED_LAST_HOLE()) {
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                                InsertBestTime(g_GameState.courseIndex, g_GameState.stopwatchFrameCount,
-                                               GetNetScoreToPar(COURSE_HOLE_COUNT, 0), (s8)g_Players[0].characterIndex,
-                                               (s8)g_Players[0].paletteIndex);
-                            }
-                        } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
-                            g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-                            clearHud = FALSE;
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                            StartWipe(WIPE_CLOSING);
-                        } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
-                                   g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                            g_PendingSubModuleId = SUB_MODULE_SCORECARD;
-                            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                            g_HoleResultsKind = HOLE_RESULTS_MATCH;
-                            if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) || GetMatchWinner(0, 1) != 0) {
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                            }
-                        } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
-                                   g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                            g_PendingSubModuleId = SUB_MODULE_SCORECARD;
-                            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                            g_HoleResultsKind = HOLE_RESULTS_SKINS;
-                            if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) || HAS_PLAYED_LAST_HOLE()) {
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                            }
-                        } else {
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                            g_PendingSubModuleId = SUB_MODULE_SCORECARD;
-                            SetMenuBackdrop(MENU_BACKDROP_DIMMING);
-                            g_HoleResultsKind = HOLE_RESULTS_STROKE;
-                            if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE)) {
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                            } else if (HAS_PLAYED_LAST_HOLE()) {
-                                if (IsGameFlagSet(GAME_FLAG_REPEAT_ROUND)) {
-                                    g_HoleIndex = GetFirstHoleIndex();
-                                } else {
-                                    g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                                }
-                            }
-                        }
-                        if (clearHud) {
-                            g_RoundHud.isWindIndicatorShown = FALSE;
-                            g_RoundHud.unk8 = 0;
-                            g_RoundHud.isLieIconShown = FALSE;
-                            g_RoundHud.isClubHeadIconShown = FALSE;
-                            g_RoundHud.unkB = 0;
-                            g_RoundHud.unkC = 0;
-                            g_RoundHud.unk13 = 0;
-                            g_RoundHud.unkD = 0;
-                        }
-                        g_PauseScreen = PAUSE_SCREEN_UNK2;
-                        break;
-                    case HOLE_END_STEP_DONKEY_KONG_NOTICE:
-                        if (func_801F5F2C()) {
-                            func_801F5E9C();
-                            if (!g_RingShotCourseOpenedAtStart && GetRingShotCourseOpenedAtStarCount()) {
-                                func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
-                                              UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
-                            } else if (D_800C42D0) {
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-                            } else {
-                                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
-                                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                                g_PendingSubModuleId = SUB_MODULE_UNK22;
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_RING_SHOT_COURSE_NOTICE:
-                        if (func_801F5F2C()) {
-                            func_801F5E9C();
-                            if (D_800C42D0) {
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-                            } else {
-                                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
-                                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
-                                g_PendingSubModuleId = SUB_MODULE_UNK22;
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_UNLOCK_NOTICE:
-                        if (func_801F5F2C()) {
-                            func_801F5E9C();
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
-                            if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) || HAS_PLAYED_LAST_HOLE()) {
-                                RecordCourseRound();
-                                RecordTournamentPlace();
-                                g_PlayExit = PLAY_EXIT_ROUND_OVER;
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_UNK5:
-                        if (IS_A_PRESSED() ||
-                            (func_8005F180() && g_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                            g_PauseScreen = PAUSE_SCREEN_UNK2;
-                            func_8020FAE8(-2);
-                            g_HoleEndStep = HOLE_END_STEP_SCORECARD;
-                            g_RoundHud.unk2 = 0;
-                            func_8024407C();
-                            func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
-                            func_80242334(0);
-                            if (g_PlayExit == PLAY_EXIT_NONE) {
-                                StartLoaderThread();
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_LOAD_SCORECARD:
-                        if (IsSubModuleLoaded()) {
-                            g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
-                            func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
-                            func_80242334(g_HoleResultsKind);
-                        }
-                        break;
-                    case HOLE_END_STEP_FREE_SLOT:
-                        if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
-                            FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
-                            break;
-                        }
-                        if (g_PlayExit == PLAY_EXIT_NONE) {
-                            if (!g_GameState.unk31 &&
-                                (g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_GET_CHARACTER) &&
-                                HAS_PLAYED_LAST_HOLE()) {
-                                g_HoleIndex = GetFirstHoleIndex();
-                                D_801B60A0 = TRUE;
-                            }
-                            StartLoaderThread();
-                        }
-                        if (g_RoundHud.scorecardPage != 0) {
-                            g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                        } else {
-                            g_HoleEndStep = HOLE_END_STEP_SCORECARD;
-                        }
-                        break;
-                    case HOLE_END_STEP_LOAD_RING_SHOT:
-                        if (IsSubModuleLoaded()) {
-                            g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
-                            func_8024186C(RING_SHOT_RESULTS_MODE_UNK2);
-                        }
-                        break;
-                    case HOLE_END_STEP_RING_SHOT_FREE_SLOT:
-                        if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
-                            FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
-                            break;
-                        }
-                        if (g_PlayExit == PLAY_EXIT_NONE) {
-                            StartLoaderThread();
-                            if (D_800C30A4 && !D_800C42D0) {
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
-                            } else {
-                                StartWipe(WIPE_CLOSING);
-                                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
-                                    g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
-                                } else {
-                                    g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                                }
-                            }
-                        } else {
-                            g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                            StartWipe(WIPE_CLOSING);
-                        }
-                        break;
-                    case HOLE_END_STEP_RING_SHOT_RESULTS:
-                        switch (func_80243E28(&g_ControllerStates[g_CurrentShot.controllerIndex])) {
-                            case RING_SHOT_RESULTS_DONE:
-                                StartWipe(WIPE_CLOSING);
-                                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
-                                    g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
-                                } else {
-                                    g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                                }
-                                break;
-                            case RING_SHOT_RESULTS_SAVE:
-                                g_HoleEndStep = HOLE_END_STEP_PROMPT;
-                                break;
-                        }
-                        break;
-                    case HOLE_END_STEP_PROMPT:
-                        result = UpdatePrompt(&g_TurnController);
-                        switch (result) {
-                            case PROMPT_RESULT_UNK7:
-                                func_802439B0();
-                                g_HoleEndStep = result;
-                                OpenPrompt(NO_PROMPT);
-                                break;
-                            case PROMPT_RESULT_UNK1:
-                                func_80243898();
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
-                                OpenPrompt(NO_PROMPT);
-                                break;
-                            case PROMPT_RESULT_UNK2:
-                                g_PauseScreen = PAUSE_SCREEN_UNK5;
-                                OpenPrompt(NO_PROMPT);
-                                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
-                                break;
-                        }
-                        break;
-                    case HOLE_END_STEP_SCORECARD:
-                        if (func_802436C8(g_MergedController.repeatedButtons) &&
-                            (IS_A_PRESSED() ||
-                             (func_8005F180() && g_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
-                              g_PlayExit != PLAY_EXIT_ROUND_OVER))) {
-                            if (g_PlayExit == PLAY_EXIT_ROUND_OVER) {
-                                g_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
-                                func_80205C78();
-                                func_80242074();
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                func_801F4AA4(FALSE);
-                            } else {
-                                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                                func_80242074();
-                                SetMenuBackdrop(MENU_BACKDROP_STILL);
-                                if (g_GameMode == GAME_MODE_TOURNAMENT && g_HoleIndex == TOURNAMENT_HALF_TURN_HOLE) {
-                                    ShowHalfTurn();
-                                } else {
-                                    StartWipe(WIPE_CLOSING);
-                                }
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_FINAL_RESULTS:
-                        if (func_801F8A30(&g_MergedController)) {
-                            if (HasWonFinalChallenge() || IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL)) {
-                                g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
-                            } else {
-                                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                            }
-                            StartWipe(WIPE_CLOSING);
-                            SetMenuBackdrop(MENU_BACKDROP_STILL);
-                            g_PlayExit = PLAY_EXIT_UNK3;
-                        }
-                        break;
-                    case HOLE_END_STEP_STAFF_ROLL:
-                        if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
-                            StartWipe(WIPE_OPENING);
-                            ClearTextSlots();
-                            g_HoleEndStep = HOLE_END_STEP_START;
-                            func_80216B74(TRUE);
-                            g_Scene = SCENE_SWAPPING_MODULES;
-                            g_NextScene = SCENE_STAFF_ROLL;
-                            g_SceneModuleToUnload = SCENE_MODULE_PLAY;
-                            g_SceneModuleToLoad = SCENE_MODULE_STAFF_ROLL;
-                            UnloadSubModule();
-                            func_8005DC50();
-                            StopLoaderThread();
-                            g_PlayExit = PLAY_EXIT_NONE;
-                            SetMenuBackdrop(MENU_BACKDROP_NONE);
-                            SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
-                            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-                        }
-                        break;
-                    case HOLE_END_STEP_WIPE_OUT:
-                        if (GetWipeProgress() == WIPE_CLOSED_PROGRESS && IsHalfTurnDismissed(&g_MergedController)) {
-                            ForceStopRumble();
-                            g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
-                            if (g_PlayExit != PLAY_EXIT_NONE) {
-                                StartWipe(WIPE_OPENING);
-                                ClearTextSlots();
-                                g_HoleEndStep = HOLE_END_STEP_START;
-                                func_80216B74(TRUE);
-                                g_Scene = SCENE_SWAPPING_MODULES;
-                                g_NextScene = SCENE_MENU;
-                                g_SceneModuleToUnload = SCENE_MODULE_PLAY;
-                                g_SceneModuleToLoad = SCENE_MODULE_MENU;
-                                UnloadSubModule();
-                                switch (g_PlayExit) {
-                                    case PLAY_EXIT_QUIT:
-                                        func_8005DD10();
-                                        break;
-                                    case PLAY_EXIT_UNK1:
-                                        func_8005DAFC();
-                                        break;
-                                    case PLAY_EXIT_UNK2:
-                                        func_8005DD44();
-                                        break;
-                                    case PLAY_EXIT_UNK3:
-                                        func_8005DC50();
-                                        break;
-                                    case PLAY_EXIT_UNK4:
-                                        func_8005DDAC();
-                                        break;
-                                    case PLAY_EXIT_RING_SHOT:
-                                        func_8005DD78();
-                                        break;
-                                }
-                                StopLoaderThread();
-                                g_PlayExit = PLAY_EXIT_NONE;
-                                SetMenuBackdrop(MENU_BACKDROP_NONE);
-                                SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
-                                SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-                            } else {
-                                RequestSubModule();
-                            }
-                        }
-                        break;
-                    case HOLE_END_STEP_LOAD_NEXT_HOLE:
-                        if (g_HasLoaderFinished == TRUE && IsSubModuleLoaded()) {
-                            g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
-                            SetGameFlag(GAME_FLAG_HOLE_LOADED);
-                            memset(&g_RoundHud, 0, sizeof(RoundHud));
-                            SetMenuBackdrop(MENU_BACKDROP_NONE);
-                            g_PauseScreen = PAUSE_SCREEN_NONE;
-                            SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
-                            SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-                            StartHoleIntro();
-                            StartHoleCamerasAndSong();
-                            if (g_GameMode == GAME_MODE_RING_SHOT) {
-                                func_80242384(TRUE);
-                            }
-                            StartWipe(WIPE_OPENING);
-                            g_PlayStateFrameCount = 0;
-                            g_HoleEndStep = HOLE_END_STEP_START;
-                        }
-                        break;
-                    case HOLE_END_STEP_QUIT:
-                        if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
-                            FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
-                            break;
-                        }
-                        StartWipe(WIPE_CLOSING);
-                        g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
-                        break;
-                }
-                break;
+              }
+            }
+          }
         }
-        again = repeat;
-    } while (again);
+        break;
+      case GAME_STATE_HOLE_END:
+        g_PlayStateFrameCount++;
+        clearHud = TRUE;
+        switch (g_HoleEndStep) {
+          case HOLE_END_STEP_START:
+            g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+            g_PlayStateFrameCount = 0;
+            g_RoundHud.scorecardPage = -1;
+            g_RoundHud.isHoleIntroTextShown = FALSE;
+            EndHoleIntro();
+            for (i = 0; i < g_GameState.playerCount; i++) {
+              g_Players[i].unk26 = 0;
+            }
+            if (g_GameMode == GAME_MODE_TRAINING) {
+              if (g_PlayExit == PLAY_EXIT_NONE) {
+                g_HoleIndex = (g_HoleIndex + 1) % COURSE_HOLE_COUNT;
+              }
+            } else {
+              g_HoleIndex++;
+            }
+            if (g_GameState.gameMode == GAME_MODE_UNK8 || g_GameState.unk31) {
+              g_GameState.unk31 = 0;
+              func_80060358();
+              if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+                g_PlayExit = PLAY_EXIT_RING_SHOT;
+              } else {
+                g_PlayExit = PLAY_EXIT_UNK4;
+              }
+              StartWipe(WIPE_CLOSING);
+              clearHud = FALSE;
+              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+            } else if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+              if (g_PlayExit == PLAY_EXIT_NONE) {
+                g_HoleIndex %= RING_SHOT_HOLE_COUNT;
+                func_8005D1E4();
+              }
+              if (g_PlayExit == PLAY_EXIT_NONE) {
+                if (!D_800C30A4) {
+                  nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+                } else if ((IsDonkeyKongUnlocked() &&
+                            !g_WasDonkeyKongUnlocked) ||
+                           IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
+                  func_801F5C24(UNLOCK_NOTICE_DONKEY_KONG);
+                  nextStep = HOLE_END_STEP_DONKEY_KONG_NOTICE;
+                } else if (!g_RingShotCourseOpenedAtStart &&
+                           GetRingShotCourseOpenedAtStarCount()) {
+                  func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
+                                UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
+                  nextStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
+                } else if (D_800C42D0) {
+                  nextStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+                } else {
+                  g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                  g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                  g_PendingSubModuleId = SUB_MODULE_UNK22;
+                  goto dimBackdrop;
+                }
+                g_HoleEndStep = nextStep;
+              dimBackdrop:
+                SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+                clearHud = FALSE;
+              } else {
+                clearHud = FALSE;
+                if (g_PlayExit == PLAY_EXIT_QUIT) {
+                  g_HoleEndStep = HOLE_END_STEP_QUIT;
+                }
+              }
+            } else if (g_GameState.gameMode == GAME_MODE_TOURNAMENT) {
+              g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+              g_HoleResultsKind = HOLE_RESULTS_TOURNAMENT;
+              if (IsMapleUnlocked() && !g_WasMapleUnlocked) {
+                func_801F5C24(UNLOCK_NOTICE_MAPLE);
+                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+              } else if (IsMetalMarioUnlocked() && !g_WasMetalMarioUnlocked) {
+                func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
+                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+              } else if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
+                func_801F5C24(UNLOCK_NOTICE_METAL_MARIO);
+                g_HoleEndStep = HOLE_END_STEP_UNLOCK_NOTICE;
+              } else if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
+                         HAS_PLAYED_LAST_HOLE()) {
+                RecordCourseRound();
+                RecordTournamentPlace();
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+              }
+            } else if (g_GameState.gameMode == GAME_MODE_SPEED_GOLF) {
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+              g_HoleResultsKind = HOLE_RESULTS_SPEED_GOLF;
+              if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
+                  HAS_PLAYED_LAST_HOLE()) {
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                InsertBestTime(g_GameState.courseIndex,
+                               g_GameState.stopwatchFrameCount,
+                               GetNetScoreToPar(COURSE_HOLE_COUNT, 0),
+                               (s8)g_Players[0].characterIndex,
+                               (s8)g_Players[0].paletteIndex);
+              }
+            } else if (g_GameState.gameMode == GAME_MODE_TRAINING) {
+              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              clearHud = FALSE;
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+              StartWipe(WIPE_CLOSING);
+            } else if (g_GameState.gameMode == GAME_MODE_MATCH_GAME ||
+                       g_GameState.gameMode == GAME_MODE_GET_CHARACTER) {
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+              g_HoleResultsKind = HOLE_RESULTS_MATCH;
+              if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
+                  GetMatchWinner(0, 1) != 0) {
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+              }
+            } else if (g_GameState.gameMode == GAME_MODE_SKINS_MATCH ||
+                       g_GameState.gameMode == GAME_MODE_CLUB_SLOTS) {
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+              g_HoleResultsKind = HOLE_RESULTS_SKINS;
+              if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
+                  HAS_PLAYED_LAST_HOLE()) {
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+              }
+            } else {
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+              g_PendingSubModuleId = SUB_MODULE_SCORECARD;
+              SetMenuBackdrop(MENU_BACKDROP_DIMMING);
+              g_HoleResultsKind = HOLE_RESULTS_STROKE;
+              if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE)) {
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+              } else if (HAS_PLAYED_LAST_HOLE()) {
+                if (IsGameFlagSet(GAME_FLAG_REPEAT_ROUND)) {
+                  g_HoleIndex = GetFirstHoleIndex();
+                } else {
+                  g_PlayExit = PLAY_EXIT_ROUND_OVER;
+                }
+              }
+            }
+            if (clearHud) {
+              g_RoundHud.isWindIndicatorShown = FALSE;
+              g_RoundHud.unk8 = 0;
+              g_RoundHud.isLieIconShown = FALSE;
+              g_RoundHud.isClubHeadIconShown = FALSE;
+              g_RoundHud.unkB = 0;
+              g_RoundHud.unkC = 0;
+              g_RoundHud.unk13 = 0;
+              g_RoundHud.unkD = 0;
+            }
+            g_PauseScreen = PAUSE_SCREEN_UNK2;
+            break;
+          case HOLE_END_STEP_DONKEY_KONG_NOTICE:
+            if (func_801F5F2C()) {
+              func_801F5E9C();
+              if (!g_RingShotCourseOpenedAtStart &&
+                  GetRingShotCourseOpenedAtStarCount()) {
+                func_801F5C24(GetRingShotCourseOpenedAtStarCount() +
+                              UNLOCK_NOTICE_RING_SHOT_COURSE_BASE);
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_COURSE_NOTICE;
+              } else if (D_800C42D0) {
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+              } else {
+                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                g_PendingSubModuleId = SUB_MODULE_UNK22;
+              }
+            }
+            break;
+          case HOLE_END_STEP_RING_SHOT_COURSE_NOTICE:
+            if (func_801F5F2C()) {
+              func_801F5E9C();
+              if (D_800C42D0) {
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+              } else {
+                g_HoleEndStep = HOLE_END_STEP_LOAD_RING_SHOT;
+                g_SubModuleState = SUB_MODULE_SWAP_PENDING;
+                g_PendingSubModuleId = SUB_MODULE_UNK22;
+              }
+            }
+            break;
+          case HOLE_END_STEP_UNLOCK_NOTICE:
+            if (func_801F5F2C()) {
+              func_801F5E9C();
+              g_HoleEndStep = HOLE_END_STEP_LOAD_SCORECARD;
+              if (IsGameFlagSet(GAME_FLAG_END_ROUND_AFTER_HOLE) ||
+                  HAS_PLAYED_LAST_HOLE()) {
+                RecordCourseRound();
+                RecordTournamentPlace();
+                g_PlayExit = PLAY_EXIT_ROUND_OVER;
+              }
+            }
+            break;
+          case HOLE_END_STEP_UNK5:
+            if (IS_A_PRESSED() ||
+                (func_8005F180() &&
+                 g_PlayStateFrameCount > AUTO_ADVANCE_RESULTS_FRAMES)) {
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+              g_PauseScreen = PAUSE_SCREEN_UNK2;
+              func_8020FAE8(-2);
+              g_HoleEndStep = HOLE_END_STEP_SCORECARD;
+              g_RoundHud.unk2 = 0;
+              func_8024407C();
+              func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
+              func_80242334(0);
+              if (g_PlayExit == PLAY_EXIT_NONE) {
+                StartLoaderThread();
+              }
+            }
+            break;
+          case HOLE_END_STEP_LOAD_SCORECARD:
+            if (IsSubModuleLoaded()) {
+              g_HoleEndStep = HOLE_END_STEP_FREE_SLOT;
+              func_80241800(GetCourseRecordIndex(g_CourseIndex), g_HoleIndex);
+              func_80242334(g_HoleResultsKind);
+            }
+            break;
+          case HOLE_END_STEP_FREE_SLOT:
+            if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
+              FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
+              break;
+            }
+            if (g_PlayExit == PLAY_EXIT_NONE) {
+              if (!g_GameState.unk31 &&
+                  (g_GameMode == GAME_MODE_MATCH_GAME ||
+                   g_GameMode == GAME_MODE_GET_CHARACTER) &&
+                  HAS_PLAYED_LAST_HOLE()) {
+                g_HoleIndex = GetFirstHoleIndex();
+                D_801B60A0 = TRUE;
+              }
+              StartLoaderThread();
+            }
+            if (g_RoundHud.scorecardPage != 0) {
+              g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+            } else {
+              g_HoleEndStep = HOLE_END_STEP_SCORECARD;
+            }
+            break;
+          case HOLE_END_STEP_LOAD_RING_SHOT:
+            if (IsSubModuleLoaded()) {
+              g_HoleEndStep = HOLE_END_STEP_RING_SHOT_FREE_SLOT;
+              func_8024186C(RING_SHOT_RESULTS_MODE_UNK2);
+            }
+            break;
+          case HOLE_END_STEP_RING_SHOT_FREE_SLOT:
+            if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
+              FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
+              break;
+            }
+            if (g_PlayExit == PLAY_EXIT_NONE) {
+              StartLoaderThread();
+              if (D_800C30A4 && !D_800C42D0) {
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+              } else {
+                StartWipe(WIPE_CLOSING);
+                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
+                  g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+                } else {
+                  g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                }
+              }
+            } else {
+              g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+              StartWipe(WIPE_CLOSING);
+            }
+            break;
+          case HOLE_END_STEP_RING_SHOT_RESULTS:
+            switch (func_80243E28(
+                &g_ControllerStates[g_CurrentShot.controllerIndex])) {
+              case RING_SHOT_RESULTS_DONE:
+                StartWipe(WIPE_CLOSING);
+                if (IS_STAFF_ROLL_DUE_AFTER_RING_SHOT()) {
+                  g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+                } else {
+                  g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                }
+                break;
+              case RING_SHOT_RESULTS_SAVE:
+                g_HoleEndStep = HOLE_END_STEP_PROMPT;
+                break;
+            }
+            break;
+          case HOLE_END_STEP_PROMPT:
+            result = UpdatePrompt(&g_TurnController);
+            switch (result) {
+              case PROMPT_RESULT_UNK7:
+                func_802439B0();
+                g_HoleEndStep = result;
+                OpenPrompt(NO_PROMPT);
+                break;
+              case PROMPT_RESULT_UNK1:
+                func_80243898();
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+                OpenPrompt(NO_PROMPT);
+                break;
+              case PROMPT_RESULT_UNK2:
+                g_PauseScreen = PAUSE_SCREEN_UNK5;
+                OpenPrompt(NO_PROMPT);
+                g_HoleEndStep = HOLE_END_STEP_RING_SHOT_RESULTS;
+                break;
+            }
+            break;
+          case HOLE_END_STEP_SCORECARD:
+            if (func_802436C8(g_MergedController.repeatedButtons) &&
+                (IS_A_PRESSED() ||
+                 (func_8005F180() &&
+                  g_PlayStateFrameCount > AUTO_ADVANCE_FRAMES &&
+                  g_PlayExit != PLAY_EXIT_ROUND_OVER))) {
+              if (g_PlayExit == PLAY_EXIT_ROUND_OVER) {
+                g_HoleEndStep = HOLE_END_STEP_FINAL_RESULTS;
+                func_80205C78();
+                func_80242074();
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                func_801F4AA4(FALSE);
+              } else {
+                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+                func_80242074();
+                SetMenuBackdrop(MENU_BACKDROP_STILL);
+                if (g_GameMode == GAME_MODE_TOURNAMENT &&
+                    g_HoleIndex == TOURNAMENT_HALF_TURN_HOLE) {
+                  ShowHalfTurn();
+                } else {
+                  StartWipe(WIPE_CLOSING);
+                }
+              }
+            }
+            break;
+          case HOLE_END_STEP_FINAL_RESULTS:
+            if (func_801F8A30(&g_MergedController)) {
+              if (HasWonFinalChallenge() ||
+                  IsGameFlagSet(GAME_FLAG_SHOW_STAFF_ROLL)) {
+                g_HoleEndStep = HOLE_END_STEP_STAFF_ROLL;
+              } else {
+                g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+              }
+              StartWipe(WIPE_CLOSING);
+              SetMenuBackdrop(MENU_BACKDROP_STILL);
+              g_PlayExit = PLAY_EXIT_UNK3;
+            }
+            break;
+          case HOLE_END_STEP_STAFF_ROLL:
+            if (GetWipeProgress() == WIPE_CLOSED_PROGRESS) {
+              g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
+              StartWipe(WIPE_OPENING);
+              ClearTextSlots();
+              g_HoleEndStep = HOLE_END_STEP_START;
+              func_80216B74(TRUE);
+              g_Scene = SCENE_SWAPPING_MODULES;
+              g_NextScene = SCENE_STAFF_ROLL;
+              g_SceneModuleToUnload = SCENE_MODULE_PLAY;
+              g_SceneModuleToLoad = SCENE_MODULE_STAFF_ROLL;
+              UnloadSubModule();
+              func_8005DC50();
+              StopLoaderThread();
+              g_PlayExit = PLAY_EXIT_NONE;
+              SetMenuBackdrop(MENU_BACKDROP_NONE);
+              SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+              SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+            }
+            break;
+          case HOLE_END_STEP_WIPE_OUT:
+            if (GetWipeProgress() == WIPE_CLOSED_PROGRESS &&
+                IsHalfTurnDismissed(&g_MergedController)) {
+              ForceStopRumble();
+              g_HoleEndStep = HOLE_END_STEP_LOAD_NEXT_HOLE;
+              if (g_PlayExit != PLAY_EXIT_NONE) {
+                StartWipe(WIPE_OPENING);
+                ClearTextSlots();
+                g_HoleEndStep = HOLE_END_STEP_START;
+                func_80216B74(TRUE);
+                g_Scene = SCENE_SWAPPING_MODULES;
+                g_NextScene = SCENE_MENU;
+                g_SceneModuleToUnload = SCENE_MODULE_PLAY;
+                g_SceneModuleToLoad = SCENE_MODULE_MENU;
+                UnloadSubModule();
+                switch (g_PlayExit) {
+                  case PLAY_EXIT_QUIT:
+                    func_8005DD10();
+                    break;
+                  case PLAY_EXIT_UNK1:
+                    func_8005DAFC();
+                    break;
+                  case PLAY_EXIT_UNK2:
+                    func_8005DD44();
+                    break;
+                  case PLAY_EXIT_UNK3:
+                    func_8005DC50();
+                    break;
+                  case PLAY_EXIT_UNK4:
+                    func_8005DDAC();
+                    break;
+                  case PLAY_EXIT_RING_SHOT:
+                    func_8005DD78();
+                    break;
+                }
+                StopLoaderThread();
+                g_PlayExit = PLAY_EXIT_NONE;
+                SetMenuBackdrop(MENU_BACKDROP_NONE);
+                SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+                SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+              } else {
+                RequestSubModule();
+              }
+            }
+            break;
+          case HOLE_END_STEP_LOAD_NEXT_HOLE:
+            if (g_HasLoaderFinished == TRUE && IsSubModuleLoaded()) {
+              g_GameState.unk0 = GAME_STATE_HOLE_INTRO;
+              SetGameFlag(GAME_FLAG_HOLE_LOADED);
+              memset(&g_RoundHud, 0, sizeof(RoundHud));
+              SetMenuBackdrop(MENU_BACKDROP_NONE);
+              g_PauseScreen = PAUSE_SCREEN_NONE;
+              SetFramebufferCount(ROUND_FRAMEBUFFER_COUNT);
+              SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+              StartHoleIntro();
+              StartHoleCamerasAndSong();
+              if (g_GameMode == GAME_MODE_RING_SHOT) {
+                func_80242384(TRUE);
+              }
+              StartWipe(WIPE_OPENING);
+              g_PlayStateFrameCount = 0;
+              g_HoleEndStep = HOLE_END_STEP_START;
+            }
+            break;
+          case HOLE_END_STEP_QUIT:
+            if (IsCharacterSlotBusy(PLAYER_CHARACTER_SLOT)) {
+              FreeCharacterSlot(PLAYER_CHARACTER_SLOT);
+              break;
+            }
+            StartWipe(WIPE_CLOSING);
+            g_HoleEndStep = HOLE_END_STEP_WIPE_OUT;
+            break;
+        }
+        break;
+    }
+    again = repeat;
+  } while (again);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
@@ -1557,49 +1624,51 @@ INCLUDE_ASM("asm/nonmatchings/play", UpdatePlay);
 
 /* Fills D_800E12B0 with random values from base up, capped at 255 */
 void FillRandomGrid(s32 range, s32 base) {
-    s32 cell = 0;
-    s32 row;
-    s32 column;
-    s32 value;
+  s32 cell = 0;
+  s32 row;
+  s32 column;
+  s32 value;
 
-    for (row = 0; row < RANDOM_GRID_SIZE; row++) {
-        for (column = 0; column < RANDOM_GRID_SIZE; column++) {
-            value = rand() % range + base;
-            if (value >= 256) {
-                value = 255;
-            }
-            D_800E12B0[cell++] = value;
-        }
+  for (row = 0; row < RANDOM_GRID_SIZE; row++) {
+    for (column = 0; column < RANDOM_GRID_SIZE; column++) {
+      value = rand() % range + base;
+      if (value >= 256) {
+        value = 255;
+      }
+      D_800E12B0[cell++] = value;
     }
+  }
 }
 
 void InitExpansionPakFeatures(void) {
-    if (g_HasExpansionPak) {
-        func_80407D64();
-    }
-    FillRandomGrid(0x60, 0xBE);
+  if (g_HasExpansionPak) {
+    func_80407D64();
+  }
+  FillRandomGrid(0x60, 0xBE);
 }
 
 /*
  * Sets the fog range and color from g_SceneFog, or from g_DebugFog,
  * with no fog alpha, while GAME_FLAG_SKY_EDITOR is set
  */
-void SetSceneFog(Gfx **displayListHead) {
-    Gfx *gfx = *displayListHead;
+void SetSceneFog(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
 
-    if (IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
-        gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
-        gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1], g_DebugFog.color[2], 0);
-    } else {
-        gSPFogPosition(gfx++, g_SceneFog.near, g_SceneFog.far);
-        gDPSetFogColor(gfx++, g_SceneFog.color[0], g_SceneFog.color[1], g_SceneFog.color[2], 0xFF);
-    }
-    *displayListHead = gfx;
+  if (IsGameFlagSet(GAME_FLAG_SKY_EDITOR)) {
+    gSPFogPosition(gfx++, g_DebugFog.near, g_DebugFog.far);
+    gDPSetFogColor(gfx++, g_DebugFog.color[0], g_DebugFog.color[1],
+                   g_DebugFog.color[2], 0);
+  } else {
+    gSPFogPosition(gfx++, g_SceneFog.near, g_SceneFog.far);
+    gDPSetFogColor(gfx++, g_SceneFog.color[0], g_SceneFog.color[1],
+                   g_SceneFog.color[2], 0xFF);
+  }
+  *displayListHead = gfx;
 }
 
-void CopyDoublePair(f64 *from, f64 *to) {
-    to[0] = from[0];
-    to[1] = from[1];
+void CopyDoublePair(f64* from, f64* to) {
+  to[0] = from[0];
+  to[1] = from[1];
 }
 
 /*
@@ -1607,71 +1676,73 @@ void CopyDoublePair(f64 *from, f64 *to) {
  * and the tiles around it in g_IsGroundTileNearby
  */
 void MarkNearbyGroundTiles(u32 x, u32 z) {
-    u32 column;
-    u32 row;
-    s32 i;
-    s32 j;
+  u32 column;
+  u32 row;
+  s32 i;
+  s32 j;
 
-    if (!g_GameState.isMiniGolf) {
-        column = x >> GROUND_TILE_SHIFT;
-        row = z >> GROUND_TILE_SHIFT;
-        if (column < GROUND_TILE_COLUMN_COUNT) {
-            if (row < GROUND_TILE_ROW_COUNT) {
-                for (i = -1; i < 2; i++) {
-                    for (j = -1; j < 2; j++) {
-                        if (column + j < GROUND_TILE_COLUMN_COUNT && row + i < GROUND_TILE_ROW_COUNT) {
-                            g_IsGroundTileNearby[(row + i) * GROUND_TILE_COLUMN_COUNT + (column + j)] = TRUE;
-                        }
-                    }
-                }
+  if (!g_GameState.isMiniGolf) {
+    column = x >> GROUND_TILE_SHIFT;
+    row = z >> GROUND_TILE_SHIFT;
+    if (column < GROUND_TILE_COLUMN_COUNT) {
+      if (row < GROUND_TILE_ROW_COUNT) {
+        for (i = -1; i < 2; i++) {
+          for (j = -1; j < 2; j++) {
+            if (column + j < GROUND_TILE_COLUMN_COUNT &&
+                row + i < GROUND_TILE_ROW_COUNT) {
+              g_IsGroundTileNearby[(row + i) * GROUND_TILE_COLUMN_COUNT +
+                                   (column + j)] = TRUE;
             }
+          }
         }
+      }
     }
+  }
 }
 
 void ClearNearbyGroundTiles(void) {
-    bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
+  bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
 }
 
 static inline s32 GetMirroredOffset(s32 coordinate) {
-    s32 tile = coordinate / 512;
-    s32 offset;
+  s32 tile = coordinate / 512;
+  s32 offset;
 
-    offset = coordinate - tile * 512;
-    if (tile % 2) {
-        offset = 512 - offset;
-    }
-    return offset;
+  offset = coordinate - tile * 512;
+  if (tile % 2) {
+    offset = 512 - offset;
+  }
+  return offset;
 }
 
 #ifdef NON_MATCHING
 void func_800628C4(void) {
-    Vtx_t point;
-    s32 row;
-    s32 column;
-    s32 offset;
+  Vtx_t point;
+  s32 row;
+  s32 column;
+  s32 offset;
 
-    ClearGameFlag(7);
-    for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
-        for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
-            point = GetGroundPoint(column, row)->v;
-            offset = GetMirroredOffset(point.ob[0]);
-            if (offset != 512) {
-                point.tc[0] = offset << 5;
-            } else {
-                point.tc[0] = 0x4000;
-            }
-            point.tc[0] += 0x100;
-            offset = GetMirroredOffset(point.ob[2]);
-            if (offset != 512) {
-                point.tc[1] = offset << 5;
-            } else {
-                point.tc[1] = 0x4000;
-            }
-            point.tc[1] += 0x100;
-            SetGroundPoint(column, row, &point);
-        }
+  ClearGameFlag(7);
+  for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+    for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+      point = GetGroundPoint(column, row)->v;
+      offset = GetMirroredOffset(point.ob[0]);
+      if (offset != 512) {
+        point.tc[0] = offset << 5;
+      } else {
+        point.tc[0] = 0x4000;
+      }
+      point.tc[0] += 0x100;
+      offset = GetMirroredOffset(point.ob[2]);
+      if (offset != 512) {
+        point.tc[1] = offset << 5;
+      } else {
+        point.tc[1] = 0x4000;
+      }
+      point.tc[1] += 0x100;
+      SetGroundPoint(column, row, &point);
     }
+  }
 }
 
 #else
@@ -1707,7 +1778,8 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #define TERRAIN_STYLE_MAP 2
 #define TERRAIN_STYLE_TOP_DOWN_MAP 3
 
-/* The vertex cache slots of a row's three vertex rows, which rotate from row to row */
+/* The vertex cache slots of a row's three vertex rows, which rotate from row to
+ * row */
 #define FIRST_TOP_SLOT 9
 #define FIRST_MIDDLE_SLOT 18
 #define FIRST_BOTTOM_SLOT 0
@@ -1717,8 +1789,11 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 /* A tile whose unk990 is positive is drawn a second time */
 #define GROUND_TILE_MAX_PASSES 2
 
-/* The noise texture sits in TMEM after a tile's texels, and is blended in by this */
-#define NOISE_TMEM (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * G_IM_SIZ_16b_BYTES / 8)
+/* The noise texture sits in TMEM after a tile's texels, and is blended in by
+ * this */
+#define NOISE_TMEM                                              \
+  (GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH * \
+   G_IM_SIZ_16b_BYTES / 8)
 #define NOISE_BLEND_ALPHA 110
 
 #define CLIP_RATIO_COUNT 6
@@ -1730,67 +1805,78 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #define GROUND_TIMING_ROW 11
 
 /* The grid vertex at a vertex column and row, as GetGridVertex finds it */
-#define GRID_VERTEX(column, row) \
-    (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + ((u32)(column) & 1) * 9])
+#define GRID_VERTEX(column, row)                                     \
+  (&g_WorkArea.hole.gridVertices[(row) * 17 + ((u32)(column) >> 1) + \
+                                 ((u32)(column) & 1) * 9])
 
-/* Whether a fine tile's neighbor makes it snap the vertices of their shared edge's middle */
-#define IS_COARSE(tileIndex) (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
+/* Whether a fine tile's neighbor makes it snap the vertices of their shared
+ * edge's middle */
+#define IS_COARSE(tileIndex) \
+  (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 /* Whether the neighbor makes it snap the edge's midpoints */
-#define IS_COARSER_THAN_FINE(tileIndex) \
-    (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
-     g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
+#define IS_COARSER_THAN_FINE(tileIndex)                               \
+  (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE || \
+   g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_MEDIUM)
 
 /* Sets a vertex halfway between two others */
-#define SET_AVERAGE_VERTEX(midpoint, from, to)                       \
-    {                                                                \
-        (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
-        (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
-        (midpoint)->v.ob[2] = ((from)->v.ob[2] + (to)->v.ob[2]) / 2; \
-        (midpoint)->v.flag = 0;                                      \
-        (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
-        (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \
-    }
+#define SET_AVERAGE_VERTEX(midpoint, from, to)                   \
+  {                                                              \
+    (midpoint)->v.ob[0] = ((from)->v.ob[0] + (to)->v.ob[0]) / 2; \
+    (midpoint)->v.ob[1] = ((from)->v.ob[1] + (to)->v.ob[1]) / 2; \
+    (midpoint)->v.ob[2] = ((from)->v.ob[2] + (to)->v.ob[2]) / 2; \
+    (midpoint)->v.flag = 0;                                      \
+    (midpoint)->v.tc[0] = ((from)->v.tc[0] + (to)->v.tc[0]) / 2; \
+    (midpoint)->v.tc[1] = ((from)->v.tc[1] + (to)->v.tc[1]) / 2; \
+  }
 
-/* Loads a row's odd vertices as averages of its even ones, so that they line up with a coarse row */
-#define LOAD_AVERAGED_ROW(row, slot)                          \
-    {                                                         \
-        Vtx *even = (row);                                    \
-        SET_AVERAGE_VERTEX(&vertices[0], &even[0], &even[1]); \
-        SET_AVERAGE_VERTEX(&vertices[1], &even[1], &even[2]); \
-        SET_AVERAGE_VERTEX(&vertices[2], &even[2], &even[3]); \
-        SET_AVERAGE_VERTEX(&vertices[3], &even[3], &even[4]); \
-        gSPVertex(gfx++, vertices, 4, slot);                  \
-        vertices += 4;                                        \
-    }
+/* Loads a row's odd vertices as averages of its even ones, so that they line up
+ * with a coarse row */
+#define LOAD_AVERAGED_ROW(row, slot)                      \
+  {                                                       \
+    Vtx* even = (row);                                    \
+    SET_AVERAGE_VERTEX(&vertices[0], &even[0], &even[1]); \
+    SET_AVERAGE_VERTEX(&vertices[1], &even[1], &even[2]); \
+    SET_AVERAGE_VERTEX(&vertices[2], &even[2], &even[3]); \
+    SET_AVERAGE_VERTEX(&vertices[3], &even[3], &even[4]); \
+    gSPVertex(gfx++, vertices, 4, slot);                  \
+    vertices += 4;                                        \
+  }
 
 /* Loads a tile's texture, skipping its one-texel border */
-#define LOAD_TILE_TEXTURE(tileIndex, column, row)                                                           \
-    {                                                                                                       \
-        gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, G_IM_FMT_RGBA,  \
-                          G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, GROUND_TILE_TEXEL_ROW_COUNT, 0,      \
-                          G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, \
-                          G_TX_NOLOD);                                                                      \
-        gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2, (column) * 128 + 0x86,              \
-                       (row) * 128 + 0x82);                                                                 \
-    }
+#define LOAD_TILE_TEXTURE(tileIndex, column, row)                            \
+  {                                                                          \
+    gDPLoadMultiBlock(                                                       \
+        gfx++, TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1,     \
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH,           \
+        GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP,             \
+        G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
+    gDPSetTileSize(gfx++, 1, (column) * 128 + 2, (row) * 128 + 2,            \
+                   (column) * 128 + 0x86, (row) * 128 + 0x82);               \
+  }
 
 /* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DRAW_TILE_QUADS(top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
-    {                                                                                             \
-        gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0);               \
-        gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0);      \
-        gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0);            \
-        gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, bottomOdd, 0);   \
-    }
+#define DRAW_TILE_QUADS(top, topOdd, top1, middle, middleOdd, middle1, bottom, \
+                        bottomOdd, bottom1)                                    \
+  {                                                                            \
+    gSP2Triangles(gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle,    \
+                  0);                                                          \
+    gSP2Triangles(gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd,   \
+                  bottom, 0);                                                  \
+    gSP2Triangles(gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, \
+                  0);                                                          \
+    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1,   \
+                  bottomOdd, 0);                                               \
+  }
 
 /* Loads the noise texture that DrawGround blends over the tiles */
-#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                                                                \
-    gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, G_TX_RENDERTILE, G_IM_FMT_I,        \
-                      G_IM_SIZ_8b, RANDOM_GRID_SIZE, RANDOM_GRID_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, \
-                      shiftS, shiftT)
+#define LOAD_NOISE_TEXTURE(shiftS, shiftT)                              \
+  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM,     \
+                    G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b,           \
+                    RANDOM_GRID_SIZE, RANDOM_GRID_SIZE, 0, G_TX_MIRROR, \
+                    G_TX_MIRROR, 5, 5, shiftS, shiftT)
 
 extern s32 g_GroundClipRatio;
-extern Vtx *g_VertexListHead;
+extern Vtx* g_VertexListHead;
 extern f32 g_GroundFarthestDepth;
 extern f32 g_GroundNearDepthEighth;
 extern s32 g_GroundTimingRow;
@@ -1802,406 +1888,433 @@ void func_804083E0();
  * tiles go down two halves in rows of four, and a fine tile snaps the edge
  * vertices it shares with coarser neighbors so that no gaps open between them.
  */
-void DrawGround(CameraMatrices *matrices, s32 terrainStyle) {
-    u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last fine tile */
-    Gfx *gfx;
-    s32 half;
-    Vtx *vertices;
-    u32 start;
-    u8 current;
-    f32 fineScale;
-    f32 radius;
-    s32 visibility;
-    s32 detail;
-    s32 maxDetail;
-    s32 groupDetail;
-    s32 previousDetail;
-    s32 i;
-    s32 j;
-    s32 row;
-    s32 k;
-    s32 pass;
-    s32 tileIndex;
-    s32 tileColumn;
-    s32 column;
-    s32 topSlot;
-    s32 middleSlot;
-    s32 bottomSlot;
-    s32 spareSlot;
-    s32 *offsets;
-    GroundTile *tiles;
+void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
+  u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
+                                                 fine tile */
+  Gfx* gfx;
+  s32 half;
+  Vtx* vertices;
+  u32 start;
+  u8 current;
+  f32 fineScale;
+  f32 radius;
+  s32 visibility;
+  s32 detail;
+  s32 maxDetail;
+  s32 groupDetail;
+  s32 previousDetail;
+  s32 i;
+  s32 j;
+  s32 row;
+  s32 k;
+  s32 pass;
+  s32 tileIndex;
+  s32 tileColumn;
+  s32 column;
+  s32 topSlot;
+  s32 middleSlot;
+  s32 bottomSlot;
+  s32 spareSlot;
+  s32* offsets;
+  GroundTile* tiles;
 
-    /*
-     * SetGroundCombineMode is a nested function, a GNU C extension. It
-     * blends the noise texture over the tile texture.
-     */
-    void SetGroundCombineMode(s32 unused0, s32 unused1) {
-        gDPPipeSync(gfx++);
-        gDPSetAlphaCompare(gfx++, G_AC_NONE);
-        gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE, TEXEL1, ENVIRONMENT, COMBINED, TEXEL0,
-                          COMBINED_ALPHA, TEXEL0, 0, 0, 0, 1);
-    }
-
-    current = 0;
-    vertices = g_VertexListHead;
-    gfx = g_DisplayListHead;
-    start = osGetCount();
-    if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-        func_804083E0(matrices, terrainStyle);
-        return;
-    }
-    if (!g_HasLoaderFinished) {
-        return;
-    }
-    g_GroundDrawFrame = g_FrameCount;
-    if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-        func_800628C4();
-    }
-    if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
-        char text[0x98];
-
-        sprintf(text, "CLIPRATIO=%d", g_GroundClipRatio);
-        PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);
-        switch (g_GroundClipRatio) {
-            case 1:
-                gSPClipRatio(gfx++, FRUSTRATIO_1);
-                break;
-            case 2:
-                gSPClipRatio(gfx++, FRUSTRATIO_2);
-                break;
-            case 3:
-                gSPClipRatio(gfx++, FRUSTRATIO_3);
-                break;
-            case 4:
-                gSPClipRatio(gfx++, FRUSTRATIO_4);
-                break;
-            case 5:
-                gSPClipRatio(gfx++, FRUSTRATIO_5);
-                break;
-            case 6:
-                gSPClipRatio(gfx++, FRUSTRATIO_6);
-                break;
-        }
-        if (g_ControllerData[1].trigger & A_BUTTON) {
-            g_GroundClipRatio = g_GroundClipRatio % CLIP_RATIO_COUNT + 1;
-        }
-    } else {
-        gSPClipRatio(gfx++, FRUSTRATIO_1);
-    }
-    if (IsGameFlagSet(GAME_FLAG_HIDE_GROUND)) {
-        return;
-    }
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPPipelineMode(gfx++, G_PM_1PRIMITIVE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gSPLoadGeometryMode(gfx++, 0);
-    if (g_GameState.isMiniGolf) {
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_POINT);
-    } else {
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    }
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLOD(gfx++, G_TL_TILE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureDetail(gfx++, G_TD_CLAMP);
-    gDPPipeSync(gfx++);
-    gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-    if (terrainStyle == TERRAIN_STYLE_NORMAL) {
-        gDPPipeSync(gfx++);
-        gDPPipeSync(gfx++);
-        gDPSetCycleType(gfx++, G_CYC_2CYCLE);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
-        gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_SHADING_SMOOTH);
-        SetSceneFog(&gfx);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-        gDPPipeSync(gfx++);
-        gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-        if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-            if (g_GameState.isMiniGolf) {
-                LOAD_NOISE_TEXTURE(15, G_TX_NOLOD);
-            } else {
-                LOAD_NOISE_TEXTURE(13, 13);
-            }
-        } else {
-            LOAD_NOISE_TEXTURE(13, 15);
-        }
-        SetGroundCombineMode(0, 0);
-        gDPSetEnvColor(gfx++, 0, 0, 0, NOISE_BLEND_ALPHA);
-        gDPPipeSync(gfx++);
-    }
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    g_GroundFarthestDepth = 0.0f;
-    g_GroundNearDepthEighth = NO_NEAR_DEPTH;
-    fineScale = FINE_DEPTH_SCALE;
-    if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 || g_Cameras[0].view.mode == CAMERA_MODE_UNK8) {
-        fineScale = ZOOMED_FINE_DEPTH_SCALE;
-    }
-    maxDetail = GROUND_DETAIL_COARSE;
-    tiles = g_WorkArea.hole.tiles;
-    for (i = 0; i < GROUND_TILE_COUNT; i++) {
-        radius = (g_GroundTileHeightRanges[i] >= MIN_GROUND_TILE_RADIUS) ? g_GroundTileHeightRanges[i]
-                                                                         : MIN_GROUND_TILE_RADIUS;
-        visibility = GetSphereVisibility(tiles[i].center[0], tiles[i].center[1], tiles[i].center[2], radius);
-        detail = GROUND_DETAIL_HIDDEN;
-        if (visibility < 0) {
-            if (tiles[i].midpointBlockIndex >= 0 &&
-                (g_IsGroundTileNearby[i] || visibility * fineScale < g_GroundTileHeightRanges[i])) {
-                detail = GROUND_DETAIL_FINE;
-            } else if (visibility * MEDIUM_DEPTH_SCALE < g_GroundTileHeightRanges[i]) {
-                detail = GROUND_DETAIL_MEDIUM;
-            } else {
-                detail = GROUND_DETAIL_COARSE;
-            }
-        }
-        /* The map scenes draw every visible tile finely */
-        if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
-            (terrainStyle == TERRAIN_STYLE_MAP || terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
-            detail != GROUND_DETAIL_HIDDEN) {
-            detail = GROUND_DETAIL_FINE;
-        }
-        if (maxDetail < detail) {
-            maxDetail = detail;
-        }
-        tiles[i].detail = detail;
-        if ((i & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
-            /* Coarse tiles in a group with finer ones are drawn at medium detail */
-            if (maxDetail > GROUND_DETAIL_COARSE) {
-                for (j = 0; j < GROUND_TILE_GROUP_SIZE; j++) {
-                    if (tiles[i - j].detail == GROUND_DETAIL_COARSE) {
-                        tiles[i - j].detail = GROUND_DETAIL_MEDIUM;
-                    }
-                }
-            }
-            maxDetail = GROUND_DETAIL_COARSE;
-        }
-        if (detail >= 0) {
-            if (visibility < g_GroundFarthestDepth) {
-                g_GroundFarthestDepth = visibility;
-            }
-            if (g_GroundNearDepthEighth < visibility / NEAR_DEPTH_DIVISOR) {
-                g_GroundNearDepthEighth = visibility / NEAR_DEPTH_DIVISOR;
-            }
-        }
-    }
-    ClearNearbyGroundTiles();
-    if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
-        osSyncPrintf("%f\n", g_GroundFarthestDepth);
-    }
-    for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
-        for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-            snapsEdge[i][j] = FALSE;
-        }
-    }
-    gSPSegment(gfx++, 1, 0);
-    gSPSegment(gfx++, 2, 0);
-    gSPSegment(gfx++, 3, 0);
-    gSPSegment(gfx++, 4, 0);
-    gSPSegment(gfx++, 5, 0);
-    gSPSegment(gfx++, 6, 0);
-    gSPSegment(gfx++, 7, 0);
-    gSPSegment(gfx++, 8, 0);
+  /*
+   * SetGroundCombineMode is a nested function, a GNU C extension. It
+   * blends the noise texture over the tile texture.
+   */
+  void SetGroundCombineMode(s32 unused0, s32 unused1) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE, TEXEL1,
+                      ENVIRONMENT, COMBINED, TEXEL0, COMBINED_ALPHA, TEXEL0, 0,
+                      0, 0, 1);
+  }
+
+  current = 0;
+  vertices = g_VertexListHead;
+  gfx = g_DisplayListHead;
+  start = osGetCount();
+  if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
+    func_804083E0(matrices, terrainStyle);
+    return;
+  }
+  if (!g_HasLoaderFinished) {
+    return;
+  }
+  g_GroundDrawFrame = g_FrameCount;
+  if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+    func_800628C4();
+  }
+  if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
+    char text[0x98];
+
+    sprintf(text, "CLIPRATIO=%d", g_GroundClipRatio);
+    PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);
+    switch (g_GroundClipRatio) {
+      case 1:
+        gSPClipRatio(gfx++, FRUSTRATIO_1);
+        break;
+      case 2:
+        gSPClipRatio(gfx++, FRUSTRATIO_2);
+        break;
+      case 3:
+        gSPClipRatio(gfx++, FRUSTRATIO_3);
+        break;
+      case 4:
+        gSPClipRatio(gfx++, FRUSTRATIO_4);
+        break;
+      case 5:
+        gSPClipRatio(gfx++, FRUSTRATIO_5);
+        break;
+      case 6:
+        gSPClipRatio(gfx++, FRUSTRATIO_6);
+        break;
+    }
+    if (g_ControllerData[1].trigger & A_BUTTON) {
+      g_GroundClipRatio = g_GroundClipRatio % CLIP_RATIO_COUNT + 1;
+    }
+  } else {
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+  }
+  if (IsGameFlagSet(GAME_FLAG_HIDE_GROUND)) {
+    return;
+  }
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPPipelineMode(gfx++, G_PM_1PRIMITIVE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gSPLoadGeometryMode(gfx++, 0);
+  if (g_GameState.isMiniGolf) {
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+  } else {
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  }
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLOD(gfx++, G_TL_TILE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureDetail(gfx++, G_TD_CLAMP);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  if (terrainStyle == TERRAIN_STYLE_NORMAL) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gSPSetGeometryMode(
+        gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_SHADING_SMOOTH);
+    SetSceneFog(&gfx);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+      if (g_GameState.isMiniGolf) {
+        LOAD_NOISE_TEXTURE(15, G_TX_NOLOD);
+      } else {
+        LOAD_NOISE_TEXTURE(13, 13);
+      }
+    } else {
+      LOAD_NOISE_TEXTURE(13, 15);
+    }
     SetGroundCombineMode(0, 0);
-    for (half = 0; half < GROUND_HALF_COUNT; half++) {
-        previousDetail = GROUND_DETAIL_HIDDEN;
-        topSlot = FIRST_TOP_SLOT;
-        bottomSlot = FIRST_BOTTOM_SLOT;
-        middleSlot = FIRST_MIDDLE_SLOT;
-        tileIndex = half * GROUND_TILE_GROUP_SIZE;
-        if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
-            osSyncPrintf("DG[");
-            if (half != 0) {
+    gDPSetEnvColor(gfx++, 0, 0, 0, NOISE_BLEND_ALPHA);
+    gDPPipeSync(gfx++);
+  }
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  g_GroundFarthestDepth = 0.0f;
+  g_GroundNearDepthEighth = NO_NEAR_DEPTH;
+  fineScale = FINE_DEPTH_SCALE;
+  if (g_Cameras[0].view.mode == CAMERA_MODE_UNK2 ||
+      g_Cameras[0].view.mode == CAMERA_MODE_UNK8) {
+    fineScale = ZOOMED_FINE_DEPTH_SCALE;
+  }
+  maxDetail = GROUND_DETAIL_COARSE;
+  tiles = g_WorkArea.hole.tiles;
+  for (i = 0; i < GROUND_TILE_COUNT; i++) {
+    radius = (g_GroundTileHeightRanges[i] >= MIN_GROUND_TILE_RADIUS)
+                 ? g_GroundTileHeightRanges[i]
+                 : MIN_GROUND_TILE_RADIUS;
+    visibility = GetSphereVisibility(tiles[i].center[0], tiles[i].center[1],
+                                     tiles[i].center[2], radius);
+    detail = GROUND_DETAIL_HIDDEN;
+    if (visibility < 0) {
+      if (tiles[i].midpointBlockIndex >= 0 &&
+          (g_IsGroundTileNearby[i] ||
+           visibility * fineScale < g_GroundTileHeightRanges[i])) {
+        detail = GROUND_DETAIL_FINE;
+      } else if (visibility * MEDIUM_DEPTH_SCALE <
+                 g_GroundTileHeightRanges[i]) {
+        detail = GROUND_DETAIL_MEDIUM;
+      } else {
+        detail = GROUND_DETAIL_COARSE;
+      }
+    }
+    /* The map scenes draw every visible tile finely */
+    if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
+        (terrainStyle == TERRAIN_STYLE_MAP ||
+         terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
+        detail != GROUND_DETAIL_HIDDEN) {
+      detail = GROUND_DETAIL_FINE;
+    }
+    if (maxDetail < detail) {
+      maxDetail = detail;
+    }
+    tiles[i].detail = detail;
+    if ((i & (GROUND_TILE_GROUP_SIZE - 1)) == GROUND_TILE_GROUP_SIZE - 1) {
+      /* Coarse tiles in a group with finer ones are drawn at medium detail */
+      if (maxDetail > GROUND_DETAIL_COARSE) {
+        for (j = 0; j < GROUND_TILE_GROUP_SIZE; j++) {
+          if (tiles[i - j].detail == GROUND_DETAIL_COARSE) {
+            tiles[i - j].detail = GROUND_DETAIL_MEDIUM;
+          }
+        }
+      }
+      maxDetail = GROUND_DETAIL_COARSE;
+    }
+    if (detail >= 0) {
+      if (visibility < g_GroundFarthestDepth) {
+        g_GroundFarthestDepth = visibility;
+      }
+      if (g_GroundNearDepthEighth < visibility / NEAR_DEPTH_DIVISOR) {
+        g_GroundNearDepthEighth = visibility / NEAR_DEPTH_DIVISOR;
+      }
+    }
+  }
+  ClearNearbyGroundTiles();
+  if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+    osSyncPrintf("%f\n", g_GroundFarthestDepth);
+  }
+  for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
+    for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+      snapsEdge[i][j] = FALSE;
+    }
+  }
+  gSPSegment(gfx++, 1, 0);
+  gSPSegment(gfx++, 2, 0);
+  gSPSegment(gfx++, 3, 0);
+  gSPSegment(gfx++, 4, 0);
+  gSPSegment(gfx++, 5, 0);
+  gSPSegment(gfx++, 6, 0);
+  gSPSegment(gfx++, 7, 0);
+  gSPSegment(gfx++, 8, 0);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  SetGroundCombineMode(0, 0);
+  for (half = 0; half < GROUND_HALF_COUNT; half++) {
+    previousDetail = GROUND_DETAIL_HIDDEN;
+    topSlot = FIRST_TOP_SLOT;
+    bottomSlot = FIRST_BOTTOM_SLOT;
+    middleSlot = FIRST_MIDDLE_SLOT;
+    tileIndex = half * GROUND_TILE_GROUP_SIZE;
+    if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+      osSyncPrintf("DG[");
+      if (half != 0) {
+        break;
+      }
+    }
+    column = half * GROUND_HALF_VERTEX_COLUMNS;
+    for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+      groupDetail = GROUND_DETAIL_COARSE;
+      for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+        if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
+          groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
+        }
+      }
+      if (groupDetail >= GROUND_DETAIL_FINE) {
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+            osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
+          }
+          tileColumn = half * GROUND_TILE_GROUP_SIZE + k;
+          if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
+              g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
+            if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
+              if (tileColumn != 0) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
+                    IS_COARSE(tileIndex - 1);
+                snapsEdge[current][TILE_EDGE_LEFT] =
+                    IS_COARSER_THAN_FINE(tileIndex - 1);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
+                snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
+              }
+              if (row != 0) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
+                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                snapsEdge[current][TILE_EDGE_TOP] =
+                    IS_COARSER_THAN_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
+                snapsEdge[current][TILE_EDGE_TOP] = FALSE;
+              }
+              if (row != GROUND_TILE_ROW_COUNT - 1) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
+                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                snapsEdge[current][TILE_EDGE_BOTTOM] =
+                    IS_COARSER_THAN_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
+                snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
+              }
+              if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
+                    IS_COARSE(tileIndex + 1);
+                snapsEdge[current][TILE_EDGE_RIGHT] =
+                    IS_COARSER_THAN_FINE(tileIndex + 1);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
+                snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
+              }
+              offsets = g_CoarseVertexOffsets[tileIndex];
+              for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+                /* Moves a snapped edge's vertices, or moves back those snapped
+                 * for the last tile */
+                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
+                  gSPSegment(gfx++, j + 1,
+                             snapsEdge[current][j] ? offsets[j] : 0);
+                }
+              }
+              current ^= 1;
+              gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
+            }
+          } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            /* A medium tile among fine ones loads only its own vertices */
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2), 2, 0);
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2), 1, 2);
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 1), 2, 3);
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1,
+                      5);
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 2), 2, 6);
+            gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1,
+                      8);
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
+              DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
                 break;
+              }
             }
+          }
+          tileIndex++;
         }
-        column = half * GROUND_HALF_VERTEX_COLUMNS;
-        for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
-            groupDetail = GROUND_DETAIL_COARSE;
-            for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-                if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
-                    groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
-                }
-            }
-            if (groupDetail >= GROUND_DETAIL_FINE) {
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-                    if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
-                        osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
-                    }
-                    tileColumn = half * GROUND_TILE_GROUP_SIZE + k;
-                    if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
-                        g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
-                        if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
-                            if (tileColumn != 0) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
-                                    IS_COARSE(tileIndex - 1);
-                                snapsEdge[current][TILE_EDGE_LEFT] =
-                                    IS_COARSER_THAN_FINE(tileIndex - 1);
-                            } else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
-                                snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
-                            }
-                            if (row != 0) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
-                                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
-                                snapsEdge[current][TILE_EDGE_TOP] =
-                                    IS_COARSER_THAN_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
-                            } else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
-                                snapsEdge[current][TILE_EDGE_TOP] = FALSE;
-                            }
-                            if (row != GROUND_TILE_ROW_COUNT - 1) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
-                                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
-                                snapsEdge[current][TILE_EDGE_BOTTOM] =
-                                    IS_COARSER_THAN_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
-                            } else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
-                                snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
-                            }
-                            if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
-                                    IS_COARSE(tileIndex + 1);
-                                snapsEdge[current][TILE_EDGE_RIGHT] =
-                                    IS_COARSER_THAN_FINE(tileIndex + 1);
-                            } else {
-                                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
-                                snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
-                            }
-                            offsets = g_CoarseVertexOffsets[tileIndex];
-                            for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
-                                /* Moves a snapped edge's vertices, or moves back those snapped for the last tile */
-                                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
-                                    gSPSegment(gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
-                                }
-                            }
-                            current ^= 1;
-                            gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
-                        }
-                    } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        /* A medium tile among fine ones loads only its own vertices */
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2), 2, 0);
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2), 1, 2);
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 1), 2, 3);
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 1), 1, 5);
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2, row * 2 + 2), 2, 6);
-                        gSPVertex(gfx++, GRID_VERTEX(column + k * 2 + 1, row * 2 + 2), 1, 8);
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                            LOAD_TILE_TEXTURE(tileIndex, tileColumn, row);
-                            DRAW_TILE_QUADS(0, 2, 1, 3, 5, 4, 6, 8, 7);
-                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
-                                break;
-                            }
-                        }
-                    }
-                    tileIndex++;
-                }
-            } else if (groupDetail > GROUND_DETAIL_COARSE) {
-                spareSlot = middleSlot;
-                middleSlot = topSlot;
-                topSlot = bottomSlot;
-                bottomSlot = spareSlot;
-                gDPPipeSync(gfx++);
-                /* The last row's bottom vertices are still in the cache, unless it was fine or skipped */
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-                    gSPVertex(gfx++, GRID_VERTEX(column, row * 2), GROUND_TILE_GROUP_SIZE + 1, topSlot);
-                    gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2), GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
-                } else if (previousDetail == GROUND_DETAIL_COARSE) {
-                    LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
-                }
-                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 1), GROUND_TILE_GROUP_SIZE + 1, middleSlot);
-                gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 1), GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
-                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2), GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
-                if (row != GROUND_TILE_ROW_COUNT - 1 &&
-                    g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT].detail == GROUND_DETAIL_COARSE) {
-                    LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2 + 2), bottomSlot + ODD_SLOT);
-                } else {
-                    gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 2), GROUND_TILE_GROUP_SIZE,
-                              bottomSlot + ODD_SLOT);
-                }
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                            LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
-                            DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1, middleSlot, middleSlot + ODD_SLOT,
-                                            middleSlot + 1, bottomSlot, bottomSlot + ODD_SLOT, bottomSlot + 1);
-                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
-                                break;
-                            }
-                        }
-                    }
-                    topSlot++;
-                    bottomSlot++;
-                    middleSlot++;
-                    tileIndex++;
-                }
-                topSlot -= GROUND_TILE_GROUP_SIZE;
-                bottomSlot -= GROUND_TILE_GROUP_SIZE;
-                middleSlot -= GROUND_TILE_GROUP_SIZE;
-            } else if (groupDetail < GROUND_DETAIL_COARSE) {
-                tileIndex += GROUND_TILE_GROUP_SIZE;
-            } else {
-                spareSlot = middleSlot;
-                middleSlot = topSlot;
-                topSlot = bottomSlot;
-                bottomSlot = spareSlot;
-                if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
-                    gSPVertex(gfx++, GRID_VERTEX(column, row * 2), GROUND_TILE_GROUP_SIZE + 1, topSlot);
-                }
-                gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2), GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
-                for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
-                    if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
-                        for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
-                            LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k, row);
-                            gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0, topSlot + 1, bottomSlot + 1,
-                                          bottomSlot, 0);
-                            if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
-                                break;
-                            }
-                        }
-                    }
-                    topSlot++;
-                    bottomSlot++;
-                    tileIndex++;
-                }
-                topSlot -= GROUND_TILE_GROUP_SIZE;
-                bottomSlot -= GROUND_TILE_GROUP_SIZE;
-            }
-            previousDetail = groupDetail;
-            /* Skips the other half's group */
-            tileIndex += GROUND_TILE_GROUP_SIZE;
-            if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
-                osSyncPrintf("]\n");
-            }
+      } else if (groupDetail > GROUND_DETAIL_COARSE) {
+        spareSlot = middleSlot;
+        middleSlot = topSlot;
+        topSlot = bottomSlot;
+        bottomSlot = spareSlot;
+        gDPPipeSync(gfx++);
+        /* The last row's bottom vertices are still in the cache, unless it was
+         * fine or skipped */
+        if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+                    GROUND_TILE_GROUP_SIZE + 1, topSlot);
+          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2),
+                    GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
+        } else if (previousDetail == GROUND_DETAIL_COARSE) {
+          LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
         }
+        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 1),
+                  GROUND_TILE_GROUP_SIZE + 1, middleSlot);
+        gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 1),
+                  GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
+        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
+                  GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+        if (row != GROUND_TILE_ROW_COUNT - 1 &&
+            g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
+                    .detail == GROUND_DETAIL_COARSE) {
+          LOAD_AVERAGED_ROW(GRID_VERTEX(column, row * 2 + 2),
+                            bottomSlot + ODD_SLOT);
+        } else {
+          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2 + 2),
+                    GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
+        }
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k,
+                                row);
+              DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
+                              middleSlot, middleSlot + ODD_SLOT, middleSlot + 1,
+                              bottomSlot, bottomSlot + ODD_SLOT,
+                              bottomSlot + 1);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                break;
+              }
+            }
+          }
+          topSlot++;
+          bottomSlot++;
+          middleSlot++;
+          tileIndex++;
+        }
+        topSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
+        middleSlot -= GROUND_TILE_GROUP_SIZE;
+      } else if (groupDetail < GROUND_DETAIL_COARSE) {
+        tileIndex += GROUND_TILE_GROUP_SIZE;
+      } else {
+        spareSlot = middleSlot;
+        middleSlot = topSlot;
+        topSlot = bottomSlot;
+        bottomSlot = spareSlot;
+        if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+                    GROUND_TILE_GROUP_SIZE + 1, topSlot);
+        }
+        gSPVertex(gfx++, GRID_VERTEX(column, row * 2 + 2),
+                  GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_TILE_TEXTURE(tileIndex, half * GROUND_TILE_GROUP_SIZE + k,
+                                row);
+              gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
+                            topSlot + 1, bottomSlot + 1, bottomSlot, 0);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                break;
+              }
+            }
+          }
+          topSlot++;
+          bottomSlot++;
+          tileIndex++;
+        }
+        topSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
+      }
+      previousDetail = groupDetail;
+      /* Skips the other half's group */
+      tileIndex += GROUND_TILE_GROUP_SIZE;
+      if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
+        osSyncPrintf("]\n");
+      }
     }
-    g_VertexListHead = vertices;
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPPipelineMode(gfx++, G_PM_NPRIMITIVE);
-    gDPPipeSync(gfx++);
-    g_DisplayListHead = gfx;
-    if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
-        start = osGetCount() - start;
-        PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN, g_GroundTimingRow + GROUND_TIMING_ROW);
-        g_GroundTimingRow = 1 - g_GroundTimingRow;
-    }
+  }
+  g_VertexListHead = vertices;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPPipelineMode(gfx++, G_PM_NPRIMITIVE);
+  gDPPipeSync(gfx++);
+  g_DisplayListHead = gfx;
+  if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
+    start = osGetCount() - start;
+    PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN,
+                        g_GroundTimingRow + GROUND_TIMING_ROW);
+    g_GroundTimingRow = 1 - g_GroundTimingRow;
+  }
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/play", SetGroundCombineMode);
 
 INCLUDE_ASM("asm/nonmatchings/play", DrawGround);
 #endif
-

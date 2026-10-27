@@ -13,18 +13,19 @@ extern volatile s32 g_FrameCount;
 extern u8 __libmus_output_muted;
 
 /* The next free command of the display list being built this frame */
-extern Gfx *g_DisplayListHead;
+extern Gfx* g_DisplayListHead;
 
 /* The depth buffer, which the screen effects also use to hold a saved frame */
-extern u16 *g_DepthBuffer;
+extern u16* g_DepthBuffer;
 
 /* NuSystem's buffers, declared in lib/libnusys/nusys.h */
-extern u16 *nuGfxCfb_ptr;
-extern u16 *nuGfxZBuffer;
+extern u16* nuGfxCfb_ptr;
+extern u16* nuGfxZBuffer;
 
 #define DRAW_BUFFER_COUNT 2
 
-/* Which of DRAW_BUFFER_COUNT sets of per-frame matrices and vertices the frame builds */
+/* Which of DRAW_BUFFER_COUNT sets of per-frame matrices and vertices the frame
+ * builds */
 extern s32 g_DrawBufferIndex;
 
 /* The scene light's direction, in binary angles */
@@ -47,18 +48,19 @@ extern Gfx g_DisplayLists[2][DISPLAY_LIST_LENGTH];
 
 /* The weather and light that a hole is played in */
 typedef struct HoleConditions {
-    /* 0x00 */ s32 windSpeed;      /* As the ball's flight feels it */
-    /* 0x04 */ u16 windDirection;  /* A full turn is 0x10000 */
-    /* 0x08 */ s32 isRaining;      /* Shortens shots and changes the scene's colors */
-    /* 0x0C */ u32 sceneColorIndex; /* With isRaining, picks DeriveSceneColors' colors */
-    /* 0x10 */ u16 lightYaw;   /* g_LightYaw */
-    /* 0x12 */ u16 lightPitch; /* g_LightPitch */
-} HoleConditions; /* size = 0x14 */
+  /* 0x00 */ s32 windSpeed;     /* As the ball's flight feels it */
+  /* 0x04 */ u16 windDirection; /* A full turn is 0x10000 */
+  /* 0x08 */ s32 isRaining; /* Shortens shots and changes the scene's colors */
+  /* 0x0C */ u32
+      sceneColorIndex;     /* With isRaining, picks DeriveSceneColors' colors */
+  /* 0x10 */ u16 lightYaw; /* g_LightYaw */
+  /* 0x12 */ u16 lightPitch; /* g_LightPitch */
+} HoleConditions;            /* size = 0x14 */
 
 typedef struct Fog {
-    /* 0x00 */ s32 color[3];
-    /* 0x0C */ s32 near;
-    /* 0x10 */ s32 far;
+  /* 0x00 */ s32 color[3];
+  /* 0x0C */ s32 near;
+  /* 0x10 */ s32 far;
 } Fog; /* size = 0x14 */
 
 extern Fog g_SceneFog;
@@ -91,18 +93,19 @@ extern s32 g_PauseScreen;
  * vertices; DeriveSceneColors also derives other colors from them.
  */
 typedef struct SkyColors {
-    /* 0x00 */ s32 unk0; /* UpdateSkyEditor shows it as "CC" */
-    /* 0x04 */ u8 unk4[3];
-    /* 0x07 */ u8 unk7[3];
-    /* 0x0A */ u8 unkA[3];
-    /* 0x0D */ u8 unkD[3];
-    /* 0x10 */ u8 unk10; /* Percent of unkD that InitSkyColors mixes into g_CourseSkyImage */
-    /* 0x11 */ u8 hasLensFlare;
-    /* 0x12 */ u8 unk12[2];
-    /* 0x14 */ struct Unk800C5F34 *unk14;
-    /* 0x18 */ u8 fogColor[3];
-    /* 0x1C */ s16 fogNear;
-    /* 0x1E */ s16 fogFar;
+  /* 0x00 */ s32 unk0; /* UpdateSkyEditor shows it as "CC" */
+  /* 0x04 */ u8 unk4[3];
+  /* 0x07 */ u8 unk7[3];
+  /* 0x0A */ u8 unkA[3];
+  /* 0x0D */ u8 unkD[3];
+  /* 0x10 */ u8 unk10; /* Percent of unkD that InitSkyColors mixes into
+                          g_CourseSkyImage */
+  /* 0x11 */ u8 hasLensFlare;
+  /* 0x12 */ u8 unk12[2];
+  /* 0x14 */ struct Unk800C5F34* unk14;
+  /* 0x18 */ u8 fogColor[3];
+  /* 0x1C */ s16 fogNear;
+  /* 0x1E */ s16 fogFar;
 } SkyColors; /* size = 0x20 */
 
 /* Each course has colors for each time of day, dry and in the rain */
@@ -112,16 +115,17 @@ typedef struct SkyColors {
 extern SkyColors g_SkyColors[][SKY_WEATHER_COUNT * SKY_TIME_COUNT];
 
 typedef struct Unk800C5F34 {
-    /* 0x00 */ u8 unk0[4];
-    /* 0x04 */ s32 sunHeight; /* Above the horizon */
-    /* 0x08 */ u8 sunPrimColor[3];
-    /* 0x0B */ u8 sunEnvColor[3];
-    /* 0x0E */ u8 unkE[2];
-    /* 0x10 */ s32 sunRadius;
-    /* 0x14 */ s16 unk14;
-    /* 0x16 */ s16 sunTexelStep;
-    /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
-    /* 0x1C */ u8 imageKind; /* Which images InitSkyColors loads into g_SkyImage */
+  /* 0x00 */ u8 unk0[4];
+  /* 0x04 */ s32 sunHeight; /* Above the horizon */
+  /* 0x08 */ u8 sunPrimColor[3];
+  /* 0x0B */ u8 sunEnvColor[3];
+  /* 0x0E */ u8 unkE[2];
+  /* 0x10 */ s32 sunRadius;
+  /* 0x14 */ s16 unk14;
+  /* 0x16 */ s16 sunTexelStep;
+  /* 0x18 */ f32 maxSunGlare; /* The most that DrawLensFlare's glare grows to */
+  /* 0x1C */ u8
+      imageKind; /* Which images InitSkyColors loads into g_SkyImage */
 } Unk800C5F34;
 
 /* Images that InitSkyColors loads and recolors with the sky's colors */
@@ -131,10 +135,11 @@ typedef struct Unk800C5F34 {
 #define ASSET_SKY_IMAGE_2_SECOND_HALF 0x707
 #define SKY_IMAGE_HALF_OFFSET 0x808
 #define ASSET_COURSE_SKY_IMAGE_0 0x4BA
-extern u8 *g_SkyImage;
-extern u8 *g_CourseSkyImage;
+extern u8* g_SkyImage;
+extern u8* g_CourseSkyImage;
 
-/* HoleConditions.sceneColorIndex values; over a round it rises from start to end */
+/* HoleConditions.sceneColorIndex values; over a round it rises from start to
+ * end */
 #define SCENE_COLOR_INDEX_ROUND_START 0
 #define SCENE_COLOR_INDEX_DRIVING_RANGE 6
 #define SCENE_COLOR_INDEX_UNK8 8
@@ -147,18 +152,23 @@ extern u8 *g_CourseSkyImage;
 
 extern HoleConditions g_HoleConditions;
 
-/* What UpdateSky works out about the main and inset cameras, for drawing the sky */
+/* What UpdateSky works out about the main and inset cameras, for drawing the
+ * sky */
 #define SKY_VIEW_COUNT 2
 typedef struct SkyState {
-    /* 0x00 */ f32 horizonLevels[SKY_VIEW_COUNT];
-    /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky sets them */
-    /* 0x10 */ f32 lookAtLevels[SKY_VIEW_COUNT];
-    /* 0x18 */ f32 pitches[SKY_VIEW_COUNT]; /* In radians */
-    /* 0x20 */ f32 yaws[SKY_VIEW_COUNT];
-    /* 0x28 */ f32 scrollX; /* How far the sky's texture has scrolled with the wind */
-    /* 0x2C */ f32 scrollY;
-    /* 0x30 */ f32 viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera sees it, in radians */
-} SkyState; /* size = 0x38 */
+  /* 0x00 */ f32 horizonLevels[SKY_VIEW_COUNT];
+  /* 0x08 */ f32 screenHeights[SKY_VIEW_COUNT]; /* SCREEN_HEIGHT once UpdateSky
+                                                   sets them */
+  /* 0x10 */ f32 lookAtLevels[SKY_VIEW_COUNT];
+  /* 0x18 */ f32 pitches[SKY_VIEW_COUNT]; /* In radians */
+  /* 0x20 */ f32 yaws[SKY_VIEW_COUNT];
+  /* 0x28 */ f32
+      scrollX; /* How far the sky's texture has scrolled with the wind */
+  /* 0x2C */ f32 scrollY;
+  /* 0x30 */ f32
+      viewedWindAngles[SKY_VIEW_COUNT]; /* The wind's direction as each camera
+                                           sees it, in radians */
+} SkyState;                             /* size = 0x38 */
 extern SkyState g_SkyState;
 
 /* HoleConditions.windDirection's units per radian */
@@ -168,9 +178,10 @@ extern SkyState g_SkyState;
  * The wind's direction as seen from a camera: the arrow turns with the
  * camera's direction of view
  */
-#define VIEWED_WIND_ANGLE(windDirection, view)            \
-    ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
-     atan2((view)->eye[2] - (view)->lookAt[2], (view)->eye[0] - (view)->lookAt[0]))
+#define VIEWED_WIND_ANGLE(windDirection, view)          \
+  ((windDirection) * WIND_DIRECTION_TO_RADIANS + M_PI - \
+   atan2((view)->eye[2] - (view)->lookAt[2],            \
+         (view)->eye[0] - (view)->lookAt[0]))
 
 /*
  * Textures that are drawn every frame and that the course model reads
@@ -185,12 +196,12 @@ extern u16 g_BlendedTexture[]; /* Two loaded textures, one scrolling */
 #define SECOND_TEXTURE_TMEM 0x100
 
 /* The loaded textures that g_BlendedTexture blends, after 8-byte headers */
-extern u8 *g_BlendedTextureScrollingLayer;
-extern u8 *g_BlendedTextureStillLayer;
+extern u8* g_BlendedTextureScrollingLayer;
+extern u8* g_BlendedTextureStillLayer;
 
 #define NOISE_GRID_SIZE 64
 /* An I8 texture of NOISE_GRID_SIZE x NOISE_GRID_SIZE texels */
-extern u8 *g_NoiseTexels;
+extern u8* g_NoiseTexels;
 
 /*
  * The screen row of the horizon in the main view, from its pitch and zoom.

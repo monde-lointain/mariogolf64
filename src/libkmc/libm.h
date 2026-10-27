@@ -20,19 +20,20 @@
 
 /* What went wrong in a math routine, for matherr */
 struct exception {
-    int type;
-    char *name;
-    double arg1;
-    double arg2;
-    double retval; /* What the routine returns; matherr may change it */
+  int type;
+  char* name;
+  double arg1;
+  double arg2;
+  double retval; /* What the routine returns; matherr may change it */
 };
 
 extern int errno;
 
-int matherr(struct exception *exc);
+int matherr(struct exception* exc);
 extern long long g_CordicAngles[64];
 
-double ReportMathError(int type, char *name, double arg1, double arg2, double retval);
+double ReportMathError(int type, char* name, double arg1, double arg2,
+                       double retval);
 
 double atan(double x);
 double atan2(double y, double x);

@@ -6,7 +6,8 @@
 /* GetMatchStanding's results, from the first player's side */
 #define MATCH_STANDING_DECIDED -1 /* The lead is more than the holes left */
 #define MATCH_STANDING_OPEN 0
-#define MATCH_STANDING_PLAYER_DORMIE 1 /* The player leads by the holes left */
+/* The player leads by the holes left */
+#define MATCH_STANDING_PLAYER_DORMIE 1
 #define MATCH_STANDING_OPPONENT_DORMIE 2
 #define MATCH_STANDING_DECIDING_HOLE 3 /* Whoever wins the next hole wins */
 
@@ -41,7 +42,7 @@ void RenumberHoleHandicaps(void);
 s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex);
 s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex);
 s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex);
-s32 GetGroupHoleResult(s8 *playerResults);
+s32 GetGroupHoleResult(s8* playerResults);
 s32 GetHolingOutStakes(s32 playerIndex);
 
 #endif

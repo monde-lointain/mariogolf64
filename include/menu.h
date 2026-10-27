@@ -20,16 +20,20 @@
 #define MENU_SCREEN_CHARACTER_TABLE 15
 #define MENU_SCREEN_UNK16 16
 #define MENU_SCREEN_HELP 17
-#define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
+/* Loads what the chosen game needs and leaves the menu */
+#define MENU_SCREEN_EXIT 19
 #define MENU_SCREEN_UNK20 20
 #define MENU_SCREEN_UNK22 22
 #define MENU_SCREEN_UNK23 23
 #define MENU_SCREEN_UNK24 24
-#define MENU_SCREEN_CLUB_TOURNAMENT 27       /* A tournament entered with a code */
-#define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28 /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
+/* A tournament entered with a code */
+#define MENU_SCREEN_CLUB_TOURNAMENT 27
+/* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
+#define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28
 extern s32 g_MenuScreen;
 
-/* The buttons of every controller: those repeating while held, and those just pressed */
+/* The buttons of every controller: those repeating while held, and those just
+ * pressed */
 extern s32 g_MenuRepeatButtons;
 extern s32 g_MenuPressedButtons;
 
@@ -44,31 +48,32 @@ extern s32 g_MenuPressedButtons;
 
 /* The choices that the menus remember */
 typedef struct MenuChoices {
-    /* 0x00 */ s8 unk0;
-    /* 0x01 */ s8 unk1;
-    /* 0x02 */ s8 unk2;
-    /* 0x03 */ s8 mainChoice;
-    /* 0x04 */ s8 mainChoiceWithoutTransmit;
-    /* 0x05 */ s8 clubhouseChoice;
-    /* 0x06 */ s8 unk6[0xD];
-    /* 0x13 */ s8 unk13;
-    /* 0x14 */ s8 unk14;
-    /* 0x15 */ s8 unk15;
-    /* 0x16 */ s8 holeIndex;
-    /* 0x17 */ s8 courseIndex;
+  /* 0x00 */ s8 unk0;
+  /* 0x01 */ s8 unk1;
+  /* 0x02 */ s8 unk2;
+  /* 0x03 */ s8 mainChoice;
+  /* 0x04 */ s8 mainChoiceWithoutTransmit;
+  /* 0x05 */ s8 clubhouseChoice;
+  /* 0x06 */ s8 unk6[0xD];
+  /* 0x13 */ s8 unk13;
+  /* 0x14 */ s8 unk14;
+  /* 0x15 */ s8 unk15;
+  /* 0x16 */ s8 holeIndex;
+  /* 0x17 */ s8 courseIndex;
 } MenuChoices; /* size = 0x18 */
 extern MenuChoices g_MenuChoices;
 
-/* Each course's images for the menus' turning wheel of courses, and the trophy files read with them */
+/* Each course's images for the menus' turning wheel of courses, and the trophy
+ * files read with them */
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
 extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
-extern void *D_800FBE38[COURSE_FILE_COUNT];
+extern void* D_800FBE38[COURSE_FILE_COUNT];
 
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
-void *GetMenuImageBuffer(void);
+void* GetMenuImageBuffer(void);
 
 /* The states of the menus' popup window, which opens and closes by scaling */
 #define MENU_WINDOW_OPENING 0
@@ -96,10 +101,12 @@ void LoadMenuWindowImage(s32 imageIndex);
  * func_80200EF0 shows that character as the rival.
  */
 #define MARKED_CHARACTER_OFFSET 50
-/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
+/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones
+ * hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
 
-extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT]
+                          [CHARACTER_GRID_COLUMN_COUNT];
 
 /*
  * D_800C1FF4 holds this for a player with no controller of their own. The

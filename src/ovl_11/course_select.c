@@ -1,6 +1,7 @@
+#include "common.h"
+
 #include "asset.h"
 #include "billboard.h"
-#include "common.h"
 #include "course.h"
 #include "game_flags.h"
 #include "heap.h"
@@ -47,7 +48,8 @@
 
 /* Each four stars open one more Ring Shot course */
 #define STARS_PER_OPENED_COURSE 4
-#define STARS_TO_OPEN(courseCount) (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
+#define STARS_TO_OPEN(courseCount) \
+  (((courseCount) - 1) * STARS_PER_OPENED_COURSE)
 
 /* The asset IDs of the images */
 #define NAME_PLATE_ASSET 0x521
@@ -60,7 +62,8 @@
 #define SPINNING_STAR_ASSET 0x5BE
 #define SPINNING_EMPTY_STAR_ASSET 0x5E5
 
-/* The stars spin through this many frames, each shown for STAR_FRAME_TIME frames */
+/* The stars spin through this many frames, each shown for STAR_FRAME_TIME
+ * frames */
 #define STAR_FRAME_COUNT 15
 #define STAR_FRAME_TIME 2
 /* One star image is read while the other is drawn */
@@ -90,7 +93,8 @@
 #define COURSE_IMAGE_LEFT 128
 #define RING_SHOT_COURSE_IMAGE_TOP 144
 #define HOLE_COURSE_IMAGE_TOP 152
-/* The images of a course turning, in sCourseImageAssets' order, before its front */
+/* The images of a course turning, in sCourseImageAssets' order, before its
+ * front */
 #define COURSE_IMAGE_FRONT 2
 /* sCourseTurnFrames' entry for the image between two courses */
 #define COURSE_IMAGE_BLANK -1
@@ -106,7 +110,8 @@
 #define ARROW_FRAME_TIME 4
 #define ARROW_LEFT 152
 #define ARROW_SIZE 16
-/* The up arrow moves back this far while up repeats, and the down arrow this far down */
+/* The up arrow moves back this far while up repeats, and the down arrow this
+ * far down */
 #define ARROW_PUSH_UP -6
 #define ARROW_PUSH_DOWN 6
 /* A chosen direction's arrow moves out this far */
@@ -134,7 +139,8 @@
 #define PLANK_STRIP_HEIGHT 6
 #define PLANK_STRIP_COUNT 38
 #define PLANK_LAST_STRIP_HEIGHT 2
-/* Each half of the planks slides in from its side until they meet in the middle */
+/* Each half of the planks slides in from its side until they meet in the middle
+ */
 #define PLANKS_MIDDLE (SCREEN_WIDTH / 2)
 #define PLANKS_MIN_SLIDE SCREEN_BORDER
 /* Each group of strips trails the one above by PLANK_GROUP_LAG */
@@ -148,37 +154,42 @@
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_TEXT_SLOT 2
 
-void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY);
-void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY);
+void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY);
+void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY);
 
 extern Gfx D_800C3FC0[];
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
 
-extern u8 *sBoardImage; /* The name plate or the hole sign */
-extern u8 *sCourseBadges[COURSE_INDEX_COUNT];
-extern u8 *sCourseImage;
-extern u16 *sCourseImagePalette;
-extern u8 *sArrowsImage;
-extern u8 *sStarImages[STAR_IMAGE_COUNT];
-extern u8 *sEmptyStarImages[STAR_IMAGE_COUNT];
-extern u8 *sPlanksImage;
+extern u8* sBoardImage; /* The name plate or the hole sign */
+extern u8* sCourseBadges[COURSE_INDEX_COUNT];
+extern u8* sCourseImage;
+extern u16* sCourseImagePalette;
+extern u8* sArrowsImage;
+extern u8* sStarImages[STAR_IMAGE_COUNT];
+extern u8* sEmptyStarImages[STAR_IMAGE_COUNT];
+extern u8* sPlanksImage;
 extern s32 sPressedButtons;
 extern u32 sRepeatedButtons;
 
 static u16 sStarFrameAssets[STAR_FRAME_COUNT] = {
-    0x5BE, 0x5BF, 0x5C0, 0x5C1, 0x5C2, 0x5C3, 0x5C4, 0x5C5, 0x5C6, 0x5C7, 0x5C8, 0x5C9, 0x5CA, 0x5CB, 0x5CC,
+    0x5BE, 0x5BF, 0x5C0, 0x5C1, 0x5C2, 0x5C3, 0x5C4, 0x5C5,
+    0x5C6, 0x5C7, 0x5C8, 0x5C9, 0x5CA, 0x5CB, 0x5CC,
 };
 static u16 sEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
-    0x5E5, 0x5E6, 0x5E7, 0x5E8, 0x5E9, 0x5EA, 0x5EB, 0x5EC, 0x5ED, 0x5EE, 0x5EF, 0x5F0, 0x5F1, 0x5F2, 0x5F3,
+    0x5E5, 0x5E6, 0x5E7, 0x5E8, 0x5E9, 0x5EA, 0x5EB, 0x5EC,
+    0x5ED, 0x5EE, 0x5EF, 0x5F0, 0x5F1, 0x5F2, 0x5F3,
 };
-/* "COURSE" badges, numbered for the main courses; read in, but never drawn here */
+/* "COURSE" badges, numbered for the main courses; read in, but never drawn here
+ */
 static u16 sCourseBadgeAssets[COURSE_INDEX_COUNT] = {
-    0x733, 0x734, 0x735, 0x736, 0x737, 0x738, 0x738, 0x738, 0x738, 0x738, 0x738, 0x738, 0x738,
+    0x733, 0x734, 0x735, 0x736, 0x737, 0x738, 0x738,
+    0x738, 0x738, 0x738, 0x738, 0x738, 0x738,
 };
 /* Each course has five images of turning, the third its front */
 static u16 sCourseImageAssets[COURSE_INDEX_COUNT] = {
-    0x835, 0x83A, 0x83F, 0x844, 0x849, 0x84E, 0x853, 0x858, 0x85D, 0x862, 0x867, 0x86C, 0x871,
+    0x835, 0x83A, 0x83F, 0x844, 0x849, 0x84E, 0x853,
+    0x858, 0x85D, 0x862, 0x867, 0x86C, 0x871,
 };
 static s32 sStarFrameIndex = 0;
 static u8 sStarBufferIndex = 0;
@@ -192,156 +203,165 @@ static s32 sSlideOffset = 0;
 static s32 sShownCourse = 0;
 static s32 sNextCourse = 0;
 static s32 sCourseTurnIndex = 0;
-static s32 sCourseTurnStep = 0; /* 1 or -1 through sCourseTurnFrames, or 0 when still */
+static s32 sCourseTurnStep =
+    0; /* 1 or -1 through sCourseTurnFrames, or 0 when still */
 static u8 sPressedDirection = 0;
-static s32 sCourseTurnFrames[COURSE_TURN_FRAME_COUNT] = { 2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2 };
+static s32 sCourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {
+    2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
 static s32 sPlankSlide = 0;
 static s32 sPlankMotion = PLANKS_SHUT;
 
 s32 CountOpenRingShotCourses(void) {
-    SaveData *save = GetSaveData();
-    s32 starCount = 0;
-    s32 course;
-    s32 hole;
+  SaveData* save = GetSaveData();
+  s32 starCount = 0;
+  s32 course;
+  s32 hole;
 
-    for (course = 0; course != RING_SHOT_COURSE_COUNT; course++) {
-        for (hole = 0; hole != RING_SHOT_HOLE_COUNT; hole++) {
-            starCount += save->hasRingShotStar[course][hole] > 0;
-        }
+  for (course = 0; course != RING_SHOT_COURSE_COUNT; course++) {
+    for (hole = 0; hole != RING_SHOT_HOLE_COUNT; hole++) {
+      starCount += save->hasRingShotStar[course][hole] > 0;
     }
-    if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
-        return RING_SHOT_COURSE_COUNT;
-    }
-    if (starCount >= STARS_TO_OPEN(6)) {
-        return 6;
-    }
-    if (starCount >= STARS_TO_OPEN(5)) {
-        return 5;
-    }
-    if (starCount >= STARS_TO_OPEN(4)) {
-        return 4;
-    }
-    if (starCount >= STARS_TO_OPEN(3)) {
-        return 3;
-    }
-    if (starCount >= STARS_TO_OPEN(2)) {
-        return 2;
-    }
-    return 1;
+  }
+  if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
+    return RING_SHOT_COURSE_COUNT;
+  }
+  if (starCount >= STARS_TO_OPEN(6)) {
+    return 6;
+  }
+  if (starCount >= STARS_TO_OPEN(5)) {
+    return 5;
+  }
+  if (starCount >= STARS_TO_OPEN(4)) {
+    return 4;
+  }
+  if (starCount >= STARS_TO_OPEN(3)) {
+    return 3;
+  }
+  if (starCount >= STARS_TO_OPEN(2)) {
+    return 2;
+  }
+  return 1;
 }
 
 void LoadCourseSelect(s32 isHoleSelect) {
-    EncodedAsset asset;
-    AssetFile file;
-    s32 i;
-    s32 size;
+  EncodedAsset asset;
+  AssetFile file;
+  s32 i;
+  s32 size;
 
-    if (sLoadedScreen != COURSE_SELECT_UNLOADED) {
-        osSyncPrintf("ring const err !");
-        return;
-    }
-    sPressedDirection = 0;
-    if (!isHoleSelect) {
-        sLoadedScreen = COURSE_SELECT_RING_SHOT;
-        sBoardImage = AllocMemory(OpenEncodedAsset(NAME_PLATE_ASSET, &asset));
-        ReadEncodedAsset(sBoardImage, &asset);
-        sStarImages[0] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-        ReadEncodedAsset(sStarImages[0], &asset);
-        sStarImages[1] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-        ReadEncodedAsset(sStarImages[1], &asset);
-        sStarImages[STILL_STAR_IMAGE] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-        ReadEncodedAsset(sStarImages[STILL_STAR_IMAGE], &asset);
-        sEmptyStarImages[0] = AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-        ReadEncodedAsset(sEmptyStarImages[0], &asset);
-        sEmptyStarImages[1] = AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-        ReadEncodedAsset(sEmptyStarImages[1], &asset);
-        sEmptyStarImages[STILL_STAR_IMAGE] = AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-        ReadEncodedAsset(sEmptyStarImages[STILL_STAR_IMAGE], &asset);
-        sPlanksImage = AllocMemory(OpenEncodedAsset(PLANKS_ASSET, &asset));
-        ReadEncodedAsset(sPlanksImage, &asset);
-    } else {
-        sLoadedScreen = COURSE_SELECT_HOLES;
-        sSlideOffset = HOLE_SELECT_SLIDE_START;
-        sBoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
-        ReadEncodedAsset(sBoardImage, &asset);
-    }
-    sCourseTurnIndex = 0;
-    sCourseTurnStep = 0;
-    sShownCourse = g_CourseIndex;
-    sNextCourse = g_CourseIndex;
-    for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-        sCourseBadges[i] = AllocMemory(OpenEncodedAsset(sCourseBadgeAssets[i], &asset));
-        ReadEncodedAsset(sCourseBadges[i], &asset);
-    }
-    sCourseImage = AllocMemory(OpenEncodedAsset(sCourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
-    ReadEncodedAsset(sCourseImage, &asset);
-    OpenAssetFile(COURSE_IMAGE_PALETTE_ASSET, &file);
-    size = GetAssetFileSize(&file);
-    sCourseImagePalette = AllocMemory(size);
-    ReadAssetFile(sCourseImagePalette, size, &file);
-    sArrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset));
-    ReadEncodedAsset(sArrowsImage, &asset);
-    sStarFrameIndex = 0;
-    sStarBufferIndex = 0;
-    sStarFrameTime = 0;
+  if (sLoadedScreen != COURSE_SELECT_UNLOADED) {
+    osSyncPrintf("ring const err !");
+    return;
+  }
+  sPressedDirection = 0;
+  if (!isHoleSelect) {
+    sLoadedScreen = COURSE_SELECT_RING_SHOT;
+    sBoardImage = AllocMemory(OpenEncodedAsset(NAME_PLATE_ASSET, &asset));
+    ReadEncodedAsset(sBoardImage, &asset);
+    sStarImages[0] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+    ReadEncodedAsset(sStarImages[0], &asset);
+    sStarImages[1] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+    ReadEncodedAsset(sStarImages[1], &asset);
+    sStarImages[STILL_STAR_IMAGE] =
+        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+    ReadEncodedAsset(sStarImages[STILL_STAR_IMAGE], &asset);
+    sEmptyStarImages[0] =
+        AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+    ReadEncodedAsset(sEmptyStarImages[0], &asset);
+    sEmptyStarImages[1] =
+        AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+    ReadEncodedAsset(sEmptyStarImages[1], &asset);
+    sEmptyStarImages[STILL_STAR_IMAGE] =
+        AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
+    ReadEncodedAsset(sEmptyStarImages[STILL_STAR_IMAGE], &asset);
+    sPlanksImage = AllocMemory(OpenEncodedAsset(PLANKS_ASSET, &asset));
+    ReadEncodedAsset(sPlanksImage, &asset);
+  } else {
+    sLoadedScreen = COURSE_SELECT_HOLES;
+    sSlideOffset = HOLE_SELECT_SLIDE_START;
+    sBoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
+    ReadEncodedAsset(sBoardImage, &asset);
+  }
+  sCourseTurnIndex = 0;
+  sCourseTurnStep = 0;
+  sShownCourse = g_CourseIndex;
+  sNextCourse = g_CourseIndex;
+  for (i = 0; i != COURSE_INDEX_COUNT; i++) {
+    sCourseBadges[i] =
+        AllocMemory(OpenEncodedAsset(sCourseBadgeAssets[i], &asset));
+    ReadEncodedAsset(sCourseBadges[i], &asset);
+  }
+  sCourseImage = AllocMemory(OpenEncodedAsset(
+      sCourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
+  ReadEncodedAsset(sCourseImage, &asset);
+  OpenAssetFile(COURSE_IMAGE_PALETTE_ASSET, &file);
+  size = GetAssetFileSize(&file);
+  sCourseImagePalette = AllocMemory(size);
+  ReadAssetFile(sCourseImagePalette, size, &file);
+  sArrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset));
+  ReadEncodedAsset(sArrowsImage, &asset);
+  sStarFrameIndex = 0;
+  sStarBufferIndex = 0;
+  sStarFrameTime = 0;
 }
 
 /* Reads the next image of the course image's turn, if it is turning */
 void TurnCourseImage(void) {
-    EncodedAsset asset;
-    s32 frame;
+  EncodedAsset asset;
+  s32 frame;
 
-    if (sCourseTurnStep != 0) {
-        frame = sCourseTurnFrames[sCourseTurnIndex];
-        if (frame == COURSE_IMAGE_BLANK) {
-            OpenEncodedAsset(BLANK_COURSE_IMAGE_ASSET, &asset);
+  if (sCourseTurnStep != 0) {
+    frame = sCourseTurnFrames[sCourseTurnIndex];
+    if (frame == COURSE_IMAGE_BLANK) {
+      OpenEncodedAsset(BLANK_COURSE_IMAGE_ASSET, &asset);
+    } else {
+      if (sCourseTurnIndex < COURSE_TURN_MIDDLE) {
+        if (sCourseTurnStep != -1) {
+          OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
         } else {
-            if (sCourseTurnIndex < COURSE_TURN_MIDDLE) {
-                if (sCourseTurnStep != -1) {
-                    OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
-                } else {
-                    OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
-                }
-            } else if (sCourseTurnStep == -1) {
-                OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
-            } else {
-                OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
-            }
+          OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
         }
-        ReadEncodedAsset(sCourseImage, &asset);
-        sCourseTurnIndex += sCourseTurnStep;
-        if (sCourseTurnIndex != ((sCourseTurnStep == 1) ? COURSE_TURN_FRAME_COUNT : -1)) {
-            return;
-        }
-        sCourseTurnStep = 0;
-        sShownCourse = sNextCourse;
+      } else if (sCourseTurnStep == -1) {
+        OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
+      } else {
+        OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
+      }
     }
+    ReadEncodedAsset(sCourseImage, &asset);
+    sCourseTurnIndex += sCourseTurnStep;
+    if (sCourseTurnIndex !=
+        ((sCourseTurnStep == 1) ? COURSE_TURN_FRAME_COUNT : -1)) {
+      return;
+    }
+    sCourseTurnStep = 0;
+    sShownCourse = sNextCourse;
+  }
 }
 
 void FreeCourseSelect(void) {
-    s32 i;
+  s32 i;
 
-    if (sLoadedScreen == COURSE_SELECT_UNLOADED) {
-        osSyncPrintf("ring dest err");
-        return;
-    }
-    FreeMemory(&sBoardImage);
-    for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-        FreeMemory(&sCourseBadges[i]);
-    }
-    FreeMemory(&sCourseImage);
-    FreeMemory(&sCourseImagePalette);
-    FreeMemory(&sArrowsImage);
-    if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
-        FreeMemory(&sStarImages[0]);
-        FreeMemory(&sStarImages[1]);
-        FreeMemory(&sStarImages[STILL_STAR_IMAGE]);
-        FreeMemory(&sEmptyStarImages[0]);
-        FreeMemory(&sEmptyStarImages[1]);
-        FreeMemory(&sEmptyStarImages[STILL_STAR_IMAGE]);
-        FreeMemory(&sPlanksImage);
-    }
-    sLoadedScreen = COURSE_SELECT_UNLOADED;
+  if (sLoadedScreen == COURSE_SELECT_UNLOADED) {
+    osSyncPrintf("ring dest err");
+    return;
+  }
+  FreeMemory(&sBoardImage);
+  for (i = 0; i != COURSE_INDEX_COUNT; i++) {
+    FreeMemory(&sCourseBadges[i]);
+  }
+  FreeMemory(&sCourseImage);
+  FreeMemory(&sCourseImagePalette);
+  FreeMemory(&sArrowsImage);
+  if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
+    FreeMemory(&sStarImages[0]);
+    FreeMemory(&sStarImages[1]);
+    FreeMemory(&sStarImages[STILL_STAR_IMAGE]);
+    FreeMemory(&sEmptyStarImages[0]);
+    FreeMemory(&sEmptyStarImages[1]);
+    FreeMemory(&sEmptyStarImages[STILL_STAR_IMAGE]);
+    FreeMemory(&sPlanksImage);
+  }
+  sLoadedScreen = COURSE_SELECT_UNLOADED;
 }
 
 /*
@@ -349,59 +369,59 @@ void FreeCourseSelect(void) {
  * Returns SELECT_MOVED, SELECT_BACK for B, or SELECT_IDLE.
  */
 s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
-    MenuMemory *memory = func_8005AF74();
-    s32 openCourseCount = CountOpenRingShotCourses();
-    s32 result = SELECT_IDLE;
+  MenuMemory* memory = func_8005AF74();
+  s32 openCourseCount = CountOpenRingShotCourses();
+  s32 result = SELECT_IDLE;
 
-    sPressedButtons = pressedButtons;
-    sRepeatedButtons = repeatedButtons;
-    sPressedDirection = 0;
-    if (sCourseTurnStep == 0 && !(pressedButtons & A_BUTTON)) {
-        if (pressedButtons & B_BUTTON) {
-            result = SELECT_BACK;
-        } else if ((repeatedButtons & U_JPAD) && openCourseCount >= 2) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            result = SELECT_MOVED;
-            memory->holeIndex = 0;
-            memory->courseIndex--;
-            sCourseTurnStep = 1;
-            sCourseTurnIndex = 1;
-            sPressedDirection = DIRECTION_UP;
-        } else if ((repeatedButtons & D_JPAD) && openCourseCount >= 2) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            result = SELECT_MOVED;
-            memory->holeIndex = 0;
-            memory->courseIndex++;
-            sCourseTurnStep = -1;
-            sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
-            sPressedDirection = DIRECTION_DOWN;
-        } else if (repeatedButtons & L_JPAD) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            result = SELECT_MOVED;
-            memory->holeIndex--;
-            sPressedDirection = DIRECTION_LEFT;
-        } else if (repeatedButtons & R_JPAD) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            result = SELECT_MOVED;
-            memory->holeIndex++;
-            sPressedDirection = DIRECTION_RIGHT;
-        }
+  sPressedButtons = pressedButtons;
+  sRepeatedButtons = repeatedButtons;
+  sPressedDirection = 0;
+  if (sCourseTurnStep == 0 && !(pressedButtons & A_BUTTON)) {
+    if (pressedButtons & B_BUTTON) {
+      result = SELECT_BACK;
+    } else if ((repeatedButtons & U_JPAD) && openCourseCount >= 2) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      result = SELECT_MOVED;
+      memory->holeIndex = 0;
+      memory->courseIndex--;
+      sCourseTurnStep = 1;
+      sCourseTurnIndex = 1;
+      sPressedDirection = DIRECTION_UP;
+    } else if ((repeatedButtons & D_JPAD) && openCourseCount >= 2) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      result = SELECT_MOVED;
+      memory->holeIndex = 0;
+      memory->courseIndex++;
+      sCourseTurnStep = -1;
+      sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+      sPressedDirection = DIRECTION_DOWN;
+    } else if (repeatedButtons & L_JPAD) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      result = SELECT_MOVED;
+      memory->holeIndex--;
+      sPressedDirection = DIRECTION_LEFT;
+    } else if (repeatedButtons & R_JPAD) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      result = SELECT_MOVED;
+      memory->holeIndex++;
+      sPressedDirection = DIRECTION_RIGHT;
     }
-    if (memory->courseIndex < 0) {
-        memory->courseIndex = openCourseCount - 1;
-    }
-    if (memory->courseIndex > openCourseCount - 1) {
-        memory->courseIndex = 0;
-    }
-    if (memory->holeIndex < 0) {
-        memory->holeIndex = RING_SHOT_HOLE_COUNT - 1;
-    }
-    if (memory->holeIndex >= RING_SHOT_HOLE_COUNT) {
-        memory->holeIndex = 0;
-    }
-    g_HoleIndex = memory->holeIndex;
-    sNextCourse = g_CourseIndex = memory->courseIndex;
-    return result;
+  }
+  if (memory->courseIndex < 0) {
+    memory->courseIndex = openCourseCount - 1;
+  }
+  if (memory->courseIndex > openCourseCount - 1) {
+    memory->courseIndex = 0;
+  }
+  if (memory->holeIndex < 0) {
+    memory->holeIndex = RING_SHOT_HOLE_COUNT - 1;
+  }
+  if (memory->holeIndex >= RING_SHOT_HOLE_COUNT) {
+    memory->holeIndex = 0;
+  }
+  g_HoleIndex = memory->holeIndex;
+  sNextCourse = g_CourseIndex = memory->courseIndex;
+  return result;
 }
 
 /*
@@ -411,177 +431,191 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
  */
 #ifdef NON_MATCHING
 s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
-    s32 result = SELECT_IDLE;
-    s32 openCourseCount;
+  s32 result = SELECT_IDLE;
+  s32 openCourseCount;
 
-    func_8005AF74();
-    openCourseCount = CountOpenCourses(GetSaveData()->coursePoints);
-    if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
-        openCourseCount = COURSE_COUNT;
-    }
-    sPressedDirection = 0;
-    if (pressedButtons & A_BUTTON) {
-        return result;
-    }
-    if (pressedButtons & B_BUTTON) {
-        return SELECT_BACK;
-    }
-    if (sCourseTurnStep == 0) {
-        if (repeatedButtons & L_JPAD) {
-            if (!IsOnDrivingRange()) {
-                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-                result = SELECT_MOVED;
-                sPressedDirection = DIRECTION_LEFT;
-                g_GameState.holeIndex--;
-            } else {
-                PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            }
-        } else if (repeatedButtons & R_JPAD) {
-            if (IsOnDrivingRange()) {
-                PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            } else {
-                PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-                result = SELECT_MOVED;
-                sPressedDirection = DIRECTION_RIGHT;
-                g_GameState.holeIndex++;
-            }
-        } else if (repeatedButtons & U_JPAD) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            g_GameState.courseIndex = (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) % COURSE_INDEX_COUNT;
-            if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
-                g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-                g_IsMiniGolf = TRUE;
-            } else {
-                g_IsMiniGolf = FALSE;
-            }
-            if (g_GameState.courseIndex > openCourseCount - 1 && g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
-                g_GameState.courseIndex = openCourseCount - 1;
-            }
-            result = SELECT_MOVED;
-            sPressedDirection = DIRECTION_UP;
-            sCourseTurnStep = 1;
-            sCourseTurnIndex = 1;
-        } else if (repeatedButtons & D_JPAD) {
-            PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
-            g_GameState.courseIndex = (g_GameState.courseIndex + COURSE_INDEX_COUNT + 1) % COURSE_INDEX_COUNT;
-            if (g_GameState.courseIndex > openCourseCount - 1 && g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
-                g_GameState.courseIndex = MINI_GOLF_COURSE_INDEX;
-            }
-            if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
-                g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
-                g_IsMiniGolf = TRUE;
-            } else {
-                g_IsMiniGolf = FALSE;
-            }
-            result = SELECT_MOVED;
-            sPressedDirection = DIRECTION_DOWN;
-            sCourseTurnStep = -1;
-            sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
-        }
-    }
-    g_GameState.courseIndex = (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
-    sNextCourse = g_GameState.courseIndex;
-    if (IsOnDrivingRange()) {
-        g_GameState.holeIndex = 0;
-    } else {
-        g_GameState.holeIndex = (g_GameState.holeIndex + COURSE_HOLE_COUNT) % COURSE_HOLE_COUNT;
-    }
+  func_8005AF74();
+  openCourseCount = CountOpenCourses(GetSaveData()->coursePoints);
+  if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
+    openCourseCount = COURSE_COUNT;
+  }
+  sPressedDirection = 0;
+  if (pressedButtons & A_BUTTON) {
     return result;
+  }
+  if (pressedButtons & B_BUTTON) {
+    return SELECT_BACK;
+  }
+  if (sCourseTurnStep == 0) {
+    if (repeatedButtons & L_JPAD) {
+      if (!IsOnDrivingRange()) {
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        result = SELECT_MOVED;
+        sPressedDirection = DIRECTION_LEFT;
+        g_GameState.holeIndex--;
+      } else {
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      }
+    } else if (repeatedButtons & R_JPAD) {
+      if (IsOnDrivingRange()) {
+        PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      } else {
+        PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+        result = SELECT_MOVED;
+        sPressedDirection = DIRECTION_RIGHT;
+        g_GameState.holeIndex++;
+      }
+    } else if (repeatedButtons & U_JPAD) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      g_GameState.courseIndex =
+          (g_GameState.courseIndex + COURSE_INDEX_COUNT - 1) %
+          COURSE_INDEX_COUNT;
+      if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
+          g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
+        g_IsMiniGolf = TRUE;
+      } else {
+        g_IsMiniGolf = FALSE;
+      }
+      if (g_GameState.courseIndex > openCourseCount - 1 &&
+          g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
+        g_GameState.courseIndex = openCourseCount - 1;
+      }
+      result = SELECT_MOVED;
+      sPressedDirection = DIRECTION_UP;
+      sCourseTurnStep = 1;
+      sCourseTurnIndex = 1;
+    } else if (repeatedButtons & D_JPAD) {
+      PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
+      g_GameState.courseIndex =
+          (g_GameState.courseIndex + COURSE_INDEX_COUNT + 1) %
+          COURSE_INDEX_COUNT;
+      if (g_GameState.courseIndex > openCourseCount - 1 &&
+          g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
+        g_GameState.courseIndex = MINI_GOLF_COURSE_INDEX;
+      }
+      if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
+          g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
+        g_IsMiniGolf = TRUE;
+      } else {
+        g_IsMiniGolf = FALSE;
+      }
+      result = SELECT_MOVED;
+      sPressedDirection = DIRECTION_DOWN;
+      sCourseTurnStep = -1;
+      sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+    }
+  }
+  g_GameState.courseIndex =
+      (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
+  sNextCourse = g_GameState.courseIndex;
+  if (IsOnDrivingRange()) {
+    g_GameState.holeIndex = 0;
+  } else {
+    g_GameState.holeIndex =
+        (g_GameState.holeIndex + COURSE_HOLE_COUNT) % COURSE_HOLE_COUNT;
+  }
+  return result;
 }
 
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", UpdateHoleSelect);
 #endif
 
-s32 ArePlanksOpen(void) {
-    return sPlankSlide == 0;
-}
+s32 ArePlanksOpen(void) { return sPlankSlide == 0; }
 
 void SetPlankMotion(s32 motion) {
-    if (sPlankMotion != motion) {
-        sPlankMotion = motion;
-    }
+  if (sPlankMotion != motion) {
+    sPlankMotion = motion;
+  }
 }
 
 #ifdef NON_MATCHING
-void DrawPlanks(Gfx **displayListHead) {
-    Gfx *gfx = *displayListHead;
-    s32 stripIndex;
-    s32 stripHeight;
-    s32 groupIndex;
-    s32 slide;
-    s32 top;
-    s32 bottom;
+void DrawPlanks(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s32 stripIndex;
+  s32 stripHeight;
+  s32 groupIndex;
+  s32 slide;
+  s32 top;
+  s32 bottom;
 
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetColorDither(gfx++, G_CD_DISABLE);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, sPlanksImage + IMAGE_HEADER_SIZE);
-    switch (sPlankMotion) {
-        case PLANKS_SHUT:
-            break;
-        case PLANKS_OPENING:
-            if (sPlankSlide > 0) {
-                sPlankSlide -= PLANK_SLIDE_STEP;
-            }
-            if (sPlankSlide < 0) {
-                sPlankSlide = 0;
-            }
-            break;
-        case PLANKS_CLOSING:
-            if (sPlankSlide < PLANK_SLIDE_MAX) {
-                sPlankSlide += PLANK_SLIDE_STEP;
-            }
-            if (sPlankSlide > PLANK_SLIDE_MAX) {
-                sPlankSlide = PLANK_SLIDE_MAX;
-            }
-            break;
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_DISABLE);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  LoadLargePalette(&gfx, sPlanksImage + IMAGE_HEADER_SIZE);
+  switch (sPlankMotion) {
+    case PLANKS_SHUT:
+      break;
+    case PLANKS_OPENING:
+      if (sPlankSlide > 0) {
+        sPlankSlide -= PLANK_SLIDE_STEP;
+      }
+      if (sPlankSlide < 0) {
+        sPlankSlide = 0;
+      }
+      break;
+    case PLANKS_CLOSING:
+      if (sPlankSlide < PLANK_SLIDE_MAX) {
+        sPlankSlide += PLANK_SLIDE_STEP;
+      }
+      if (sPlankSlide > PLANK_SLIDE_MAX) {
+        sPlankSlide = PLANK_SLIDE_MAX;
+      }
+      break;
+  }
+  for (stripIndex = 0; stripIndex != PLANK_STRIP_COUNT; stripIndex++) {
+    stripHeight = (stripIndex != PLANK_STRIP_COUNT - 1)
+                      ? PLANK_STRIP_HEIGHT
+                      : PLANK_LAST_STRIP_HEIGHT;
+    if (sPlankMotion == PLANKS_SHUT) {
+      slide = PLANKS_MIDDLE;
+    } else {
+      groupIndex = stripIndex / PLANK_GROUP_STRIP_COUNT;
+      if (groupIndex > PLANK_LAST_GROUP) {
+        groupIndex = PLANK_LAST_GROUP;
+      }
+      slide = sPlankSlide - groupIndex * PLANK_GROUP_LAG;
+      if (slide > PLANKS_MIDDLE) {
+        slide = PLANKS_MIDDLE;
+      }
+      if (slide < PLANKS_MIN_SLIDE) {
+        slide = PLANKS_MIN_SLIDE;
+      }
     }
-    for (stripIndex = 0; stripIndex != PLANK_STRIP_COUNT; stripIndex++) {
-        stripHeight = (stripIndex != PLANK_STRIP_COUNT - 1) ? PLANK_STRIP_HEIGHT : PLANK_LAST_STRIP_HEIGHT;
-        if (sPlankMotion == PLANKS_SHUT) {
-            slide = PLANKS_MIDDLE;
-        } else {
-            groupIndex = stripIndex / PLANK_GROUP_STRIP_COUNT;
-            if (groupIndex > PLANK_LAST_GROUP) {
-                groupIndex = PLANK_LAST_GROUP;
-            }
-            slide = sPlankSlide - groupIndex * PLANK_GROUP_LAG;
-            if (slide > PLANKS_MIDDLE) {
-                slide = PLANKS_MIDDLE;
-            }
-            if (slide < PLANKS_MIN_SLIDE) {
-                slide = PLANKS_MIN_SLIDE;
-            }
-        }
-        gDPPipeSync(gfx++);
-        LoadTextureBlock(&gfx,
-                      sPlanksImage + LARGE_PALETTED_TEXELS_OFFSET + stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
-                      G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0, 0);
-        top = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT) << 2;
-        bottom = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT + stripHeight) << 2;
-        DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom, G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5,
-                      1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top, (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom,
-                      G_TX_RENDERTILE, (PLANKS_WIDTH / 2) << 5, 1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    }
-    *displayListHead = gfx;
+    gDPPipeSync(gfx++);
+    LoadTextureBlock(&gfx,
+                     sPlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
+                         stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
+                     G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0,
+                     0, 0, 0, 0, 0);
+    top = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT) << 2;
+    bottom = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT + stripHeight)
+             << 2;
+    DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom,
+                    G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5, 1 << 5,
+                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    DrawTextureRect(&gfx, (SCREEN_WIDTH - slide) << 2, top,
+                    (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom,
+                    G_TX_RENDERTILE, (PLANKS_WIDTH / 2) << 5, 1 << 5,
+                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+  }
+  *displayListHead = gfx;
 }
 
 #else
@@ -589,73 +623,85 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawPlanks);
 #endif
 
 #ifdef NON_MATCHING
-void DrawRingShotSelect(Gfx **displayListHead) {
-    Gfx *gfx = *displayListHead;
-    MenuMemory *memory = func_8005AF74();
-    s32 stripIndex;
-    s32 arrowFrame;
-    s32 push;
-    u8 unusedBuffer[0x1C]; /* Unused; it is there to match */
+void DrawRingShotSelect(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  MenuMemory* memory = func_8005AF74();
+  s32 stripIndex;
+  s32 arrowFrame;
+  s32 push;
+  u8 unusedBuffer[0x1C]; /* Unused; it is there to match */
 
-    if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
-        DrawPlanks(&gfx);
-        DrawNamePlate(&gfx, SCREEN_WIDTH / 2, 48);
-        TurnCourseImage();
-        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_POINT);
-        LoadLargePalette(&gfx, sCourseImagePalette);
-        for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
-            LoadTextureBlock(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
-                          COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + RING_SHOT_COURSE_IMAGE_TOP) << 2,
-                          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + RING_SHOT_COURSE_IMAGE_TOP +
-                           COURSE_IMAGE_STRIP_HEIGHT) << 2,
-                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
-        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_BILERP);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
-        if (g_GameState.unk31 == 0 && CountOpenRingShotCourses() >= 2) {
-            arrowFrame = sCourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
-            LoadNibbleTextureBlock(&gfx, sArrowsImage + PALETTED_TEXELS_OFFSET + arrowFrame * ARROWS_FRAME_SIZE,
-                          G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-            DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                          (sPressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
-                          (ARROW_LEFT + ARROW_SIZE) << 2,
-                          (sPressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2, G_TX_RENDERTILE, 0, 0,
-                          TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-            DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                          (sPressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
-                          (ARROW_LEFT + ARROW_SIZE) << 2,
-                          (sPressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2, G_TX_RENDERTILE, 0,
-                          ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
-        DrawRingShotStars(&gfx, SCREEN_WIDTH / 2, 150);
-        gDPPipeSync(gfx++);
-        SetUpTextDrawing(&gfx);
-        SetTextColor(&gfx, 255, 255, 255);
-        SetTextSlot(SCREEN_WIDTH / 2, 42,
-                    memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex + RING_SHOT_TEXT_FIRST_IMAGE, 1,
-                    RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
-        DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
-        *displayListHead = gfx;
+  if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
+    DrawPlanks(&gfx);
+    DrawNamePlate(&gfx, SCREEN_WIDTH / 2, 48);
+    TurnCourseImage();
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    LoadLargePalette(&gfx, sCourseImagePalette);
+    for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
+      LoadTextureBlock(&gfx,
+                       sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
+                       G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
+                       COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                       RING_SHOT_COURSE_IMAGE_TOP)
+                          << 2,
+                      (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                       RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
+                          << 2,
+                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
     }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+    if (g_GameState.unk31 == 0 && CountOpenRingShotCourses() >= 2) {
+      arrowFrame =
+          sCourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
+      LoadNibbleTextureBlock(&gfx,
+                             sArrowsImage + PALETTED_TEXELS_OFFSET +
+                                 arrowFrame * ARROWS_FRAME_SIZE,
+                             G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0,
+                             0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
+      DrawTextureRect(
+          &gfx, ARROW_LEFT << 2,
+          (sPressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
+          (ARROW_LEFT + ARROW_SIZE) << 2,
+          (sPressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
+      DrawTextureRect(
+          &gfx, ARROW_LEFT << 2,
+          (sPressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
+          (ARROW_LEFT + ARROW_SIZE) << 2,
+          (sPressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
+          G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+    DrawRingShotStars(&gfx, SCREEN_WIDTH / 2, 150);
+    gDPPipeSync(gfx++);
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    SetTextSlot(SCREEN_WIDTH / 2, 42,
+                memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex +
+                    RING_SHOT_TEXT_FIRST_IMAGE,
+                1, RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
+    DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
+    *displayListHead = gfx;
+  }
 }
 
 #else
@@ -663,122 +709,153 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotSelect);
 #endif
 
 #ifdef NON_MATCHING
-void DrawHoleSelect(Gfx **displayListHead) {
-    Gfx *gfx = *displayListHead;
-    s32 stripIndex;
-    s32 arrowFrame;
-    s32 push;
-    s32 colorIndex;
+void DrawHoleSelect(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s32 stripIndex;
+  s32 arrowFrame;
+  s32 push;
+  s32 colorIndex;
 
-    func_8005AF74();
-    sSlideOffset -= HOLE_SELECT_SLIDE_STEP;
-    if (sSlideOffset < 0) {
-        sSlideOffset = 0;
+  func_8005AF74();
+  sSlideOffset -= HOLE_SELECT_SLIDE_STEP;
+  if (sSlideOffset < 0) {
+    sSlideOffset = 0;
+  }
+  if (sLoadedScreen == COURSE_SELECT_HOLES) {
+    gDPPipeSync(gfx++);
+    gSPDisplayList(gfx++, D_800C3FC0);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+    for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
+      gDPLoadTextureTile(
+          gfx++,
+          sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+              stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
+          G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0,
+          HOLE_SIGN_WIDTH - 1, HOLE_SIGN_STRIP_HEIGHT - 1, 0,
+          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(
+          &gfx, HOLE_SIGN_LEFT << 2,
+          (stripIndex * HOLE_SIGN_STRIP_HEIGHT - (sSlideOffset - HOLE_SIGN_TOP))
+              << 2,
+          (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
+          (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
+           (sSlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
     }
-    if (sLoadedScreen == COURSE_SELECT_HOLES) {
-        gDPPipeSync(gfx++);
-        gSPDisplayList(gfx++, D_800C3FC0);
-        gDPPipeSync(gfx++);
-        gDPSetTexturePersp(gfx++, G_TP_NONE);
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_BILERP);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
-        for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
-            gDPLoadTextureTile(gfx++,
-                               sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
-                                   stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
-                               G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0, HOLE_SIGN_WIDTH - 1,
-                               HOLE_SIGN_STRIP_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                               G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-            gDPPipeSync(gfx++);
-            DrawTextureRect(&gfx, HOLE_SIGN_LEFT << 2,
-                          (stripIndex * HOLE_SIGN_STRIP_HEIGHT - (sSlideOffset - HOLE_SIGN_TOP)) << 2,
-                          (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
-                          (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
-                           (sSlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT))) << 2,
-                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
-        TurnCourseImage();
-        LoadLargePalette(&gfx, sCourseImagePalette);
-        for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
-            LoadTextureBlock(&gfx, sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI, G_IM_SIZ_8b,
-                          COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + HOLE_COURSE_IMAGE_TOP) << 2,
-                          (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset + HOLE_COURSE_IMAGE_TOP +
-                           COURSE_IMAGE_STRIP_HEIGHT) << 2,
-                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
-        arrowFrame = sCourseArrowFrameTime++;
-        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPPipeSync(gfx++);
-        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-        gDPPipeSync(gfx++);
-        gDPSetTextureFilter(gfx++, G_TF_BILERP);
-        gDPPipeSync(gfx++);
-        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-        LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
-        LoadNibbleTextureBlock(&gfx,
-                      sArrowsImage + PALETTED_TEXELS_OFFSET +
-                          ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) * ARROWS_FRAME_SIZE),
-                      G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-        gDPPipeSync(gfx++);
-        push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
-        DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                      (sPressedDirection != DIRECTION_UP ? push + 140 + sSlideOffset
-                                                         : push + 140 + sSlideOffset - ARROW_STEP) << 2,
-                      (ARROW_LEFT + ARROW_SIZE) << 2,
-                      (sPressedDirection != DIRECTION_UP ? push + 156 + sSlideOffset
-                                                         : push + 156 + sSlideOffset - ARROW_STEP) << 2,
+    TurnCourseImage();
+    LoadLargePalette(&gfx, sCourseImagePalette);
+    for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
+      LoadTextureBlock(&gfx,
+                       sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
+                       G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
+                       COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                       HOLE_COURSE_IMAGE_TOP)
+                          << 2,
+                      (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                       HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
+                          << 2,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
-        DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                      (sPressedDirection != DIRECTION_DOWN ? push + 212 + sSlideOffset
-                                                           : push + 212 + sSlideOffset + ARROW_STEP) << 2,
-                      (ARROW_LEFT + ARROW_SIZE) << 2,
-                      (sPressedDirection != DIRECTION_DOWN ? push + 228 + sSlideOffset
-                                                           : push + 228 + sSlideOffset + ARROW_STEP) << 2,
-                      G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        gDPPipeSync(gfx++);
-        if (!IsOnDrivingRange()) {
-            DrawTextureRect(&gfx, (sPressedDirection == DIRECTION_LEFT ? 100 : 104) << 2, (44 - sSlideOffset) << 2,
-                          (sPressedDirection == DIRECTION_LEFT ? 116 : 120) << 2, (60 - sSlideOffset) << 2,
-                          G_TX_RENDERTILE, 0, 3 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-            DrawTextureRect(&gfx, (sPressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2, (44 - sSlideOffset) << 2,
-                          (sPressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2, (60 - sSlideOffset) << 2,
-                          G_TX_RENDERTILE, 0, 2 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
-        gDPPipeSync(gfx++);
-        SetUpGradientTextDrawing(&gfx, 0);
-        SetTextColor(&gfx, 255, 255, 255);
-        colorIndex = g_CourseIndex;
-        if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
-            colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
-        }
-        sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-        DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset, g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
-                                g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
-        if (!IsOnDrivingRange()) {
-            sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
-            DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset, g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
-                                    g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
-        }
-        gDPPipeSync(gfx++);
-        gDPPipeSync(gfx++);
-        gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-        gDPPipeSync(gfx++);
-        *displayListHead = gfx;
+      gDPPipeSync(gfx++);
     }
+    arrowFrame = sCourseArrowFrameTime++;
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(
+        &gfx,
+        sArrowsImage + PALETTED_TEXELS_OFFSET +
+            ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
+             ARROWS_FRAME_SIZE),
+        G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    gDPPipeSync(gfx++);
+    push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
+    DrawTextureRect(&gfx, ARROW_LEFT << 2,
+                    (sPressedDirection != DIRECTION_UP
+                         ? push + 140 + sSlideOffset
+                         : push + 140 + sSlideOffset - ARROW_STEP)
+                        << 2,
+                    (ARROW_LEFT + ARROW_SIZE) << 2,
+                    (sPressedDirection != DIRECTION_UP
+                         ? push + 156 + sSlideOffset
+                         : push + 156 + sSlideOffset - ARROW_STEP)
+                        << 2,
+                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
+    DrawTextureRect(&gfx, ARROW_LEFT << 2,
+                    (sPressedDirection != DIRECTION_DOWN
+                         ? push + 212 + sSlideOffset
+                         : push + 212 + sSlideOffset + ARROW_STEP)
+                        << 2,
+                    (ARROW_LEFT + ARROW_SIZE) << 2,
+                    (sPressedDirection != DIRECTION_DOWN
+                         ? push + 228 + sSlideOffset
+                         : push + 228 + sSlideOffset + ARROW_STEP)
+                        << 2,
+                    G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE,
+                    TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    if (!IsOnDrivingRange()) {
+      DrawTextureRect(&gfx,
+                      (sPressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
+                      (44 - sSlideOffset) << 2,
+                      (sPressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
+                      (60 - sSlideOffset) << 2, G_TX_RENDERTILE, 0,
+                      3 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(&gfx,
+                      (sPressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
+                      (44 - sSlideOffset) << 2,
+                      (sPressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
+                      (60 - sSlideOffset) << 2, G_TX_RENDERTILE, 0,
+                      2 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    SetUpGradientTextDrawing(&gfx, 0);
+    SetTextColor(&gfx, 255, 255, 255);
+    colorIndex = g_CourseIndex;
+    if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
+      colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
+    }
+    sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
+    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset,
+                            g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+                            g_CourseNamePrimColors[colorIndex],
+                            TEXT_FLAG_CENTERED);
+    if (!IsOnDrivingRange()) {
+      sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
+      DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset,
+                              g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
+                              g_CourseNamePrimColors[colorIndex],
+                              TEXT_FLAG_CENTERED);
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+  }
 }
 
 #else
@@ -786,116 +863,136 @@ INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawHoleSelect);
 #endif
 
 #ifdef NON_MATCHING
-void DrawNamePlate(Gfx **displayListHead, s32 centerX, s32 centerY) {
-    Gfx *gfx = *displayListHead;
-    s32 stripIndex;
-    s32 top = centerY;
+void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
+  Gfx* gfx = *displayListHead;
+  s32 stripIndex;
+  s32 top = centerY;
 
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+  for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
+    LoadTextureBlock(
+        &gfx,
+        sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+            stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
+        G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
+        0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
-    for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
-        LoadTextureBlock(&gfx, sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
-                                stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
-                      G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-        gDPPipeSync(gfx++);
-        DrawTextureRect(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2, (top - 15) << 2,
-                      (centerX + NAME_PLATE_HALF_WIDTH) << 2, (top - 5) << 2, G_TX_RENDERTILE, 0, 0,
-                      NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
-        top += NAME_PLATE_STRIP_HEIGHT;
-        gDPPipeSync(gfx++);
-    }
-    *displayListHead = gfx;
+    DrawTextureRect(&gfx, (centerX - NAME_PLATE_HALF_WIDTH) << 2,
+                    (top - 15) << 2, (centerX + NAME_PLATE_HALF_WIDTH) << 2,
+                    (top - 5) << 2, G_TX_RENDERTILE, 0, 0,
+                    NAME_PLATE_TEXEL_STEP, TEXEL_STEP_ONE);
+    top += NAME_PLATE_STRIP_HEIGHT;
+    gDPPipeSync(gfx++);
+  }
+  *displayListHead = gfx;
 }
 
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawNamePlate);
 #endif
 
-/* Spins the chosen hole's star; the position is unused, the stars are always in one place */
+/* Spins the chosen hole's star; the position is unused, the stars are always in
+ * one place */
 #ifdef NON_MATCHING
-void DrawRingShotStars(Gfx **displayListHead, s32 centerX, s32 centerY) {
-    EncodedAsset asset;
-    SaveData *save = GetSaveData();
-    MenuMemory *memory = func_8005AF74();
-    Gfx *gfx = *displayListHead;
-    /* Unused */
-    f32 hexagon[6][2] = {
-        { 0.0f, -1.0f }, { 0.89f, -0.45f }, { 0.89f, 0.45f }, { 0.0f, 1.0f }, { -0.89f, 0.45f }, { -0.89f, -0.45f },
-    };
-    u8 hole;
-    s32 width;
-    s32 height;
-    s32 left;
-    s32 tile;
-    u8 *starImage = sStarImages[sStarBufferIndex];
-    u8 *emptyStarImage;
+void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
+  EncodedAsset asset;
+  SaveData* save = GetSaveData();
+  MenuMemory* memory = func_8005AF74();
+  Gfx* gfx = *displayListHead;
+  /* Unused */
+  f32 hexagon[6][2] = {
+      {0.0f, -1.0f}, {0.89f, -0.45f}, {0.89f, 0.45f},
+      {0.0f, 1.0f},  {-0.89f, 0.45f}, {-0.89f, -0.45f},
+  };
+  u8 hole;
+  s32 width;
+  s32 height;
+  s32 left;
+  s32 tile;
+  u8* starImage = sStarImages[sStarBufferIndex];
+  u8* emptyStarImage;
 
-    LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
-    gDPLoadTextureBlock_4b(gfx++, starImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT,
-                           TILE_SPINNING_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gDPPipeSync(gfx++);
-    emptyStarImage = sEmptyStarImages[sStarBufferIndex];
-    LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR, emptyStarImage + IMAGE_HEADER_SIZE);
-    gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
-                         STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR,
-                         TILE_SPINNING_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
-                         G_TX_NOLOD);
-    LoadSmallPalette(&gfx, TILE_STILL_STAR, sStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
-    gDPLoadMultiBlock_4b(gfx++, sStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
-                         STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR, G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT,
-                         TILE_STILL_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
-                         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR, sEmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
-    gDPLoadMultiBlock_4b(gfx++, sEmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
-                         STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH,
-                         STAR_HEIGHT, TILE_STILL_EMPTY_STAR, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+  LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
+  gDPLoadTextureBlock_4b(gfx++, starImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+                         STAR_WIDTH, STAR_HEIGHT, TILE_SPINNING_STAR,
+                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPPipeSync(gfx++);
+  emptyStarImage = sEmptyStarImages[sStarBufferIndex];
+  LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR,
+                   emptyStarImage + IMAGE_HEADER_SIZE);
+  gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
+                       STAR_TMEM_STEP * TILE_SPINNING_EMPTY_STAR,
+                       TILE_SPINNING_EMPTY_STAR, G_IM_FMT_CI, STAR_WIDTH,
+                       STAR_HEIGHT, TILE_SPINNING_EMPTY_STAR,
+                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  LoadSmallPalette(&gfx, TILE_STILL_STAR,
+                   sStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+  gDPLoadMultiBlock_4b(gfx++,
+                       sStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+                       STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR,
+                       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR,
+                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR,
+                   sEmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+  gDPLoadMultiBlock_4b(
+      gfx++, sEmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+      STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR,
+      G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_EMPTY_STAR,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+  gDPPipeSync(gfx++);
+  for (hole = 0; hole < RING_SHOT_HOLE_COUNT; hole++) {
+    if (hole == memory->holeIndex) {
+      width = STAR_GROWTH;
+      height = STAR_GROWTH;
+    } else {
+      width = 0;
+      height = 0;
+    }
+    left = hole * STAR_SPACING + STARS_LEFT;
+    if (hole == memory->holeIndex) {
+      tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
+                 ? TILE_SPINNING_EMPTY_STAR
+                 : TILE_SPINNING_STAR;
+    } else {
+      tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
+                 ? TILE_STILL_EMPTY_STAR
+                 : TILE_STILL_STAR;
+    }
+    DrawTextureRect(&gfx, (left - width / 2) << 2,
+                    (STARS_TOP - height / 2) << 2,
+                    (left + width / 2 + STAR_WIDTH) << 2,
+                    (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
+                    (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
+                    (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
-    for (hole = 0; hole < RING_SHOT_HOLE_COUNT; hole++) {
-        if (hole == memory->holeIndex) {
-            width = STAR_GROWTH;
-            height = STAR_GROWTH;
-        } else {
-            width = 0;
-            height = 0;
-        }
-        left = hole * STAR_SPACING + STARS_LEFT;
-        if (hole == memory->holeIndex) {
-            tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0) ? TILE_SPINNING_EMPTY_STAR
-                                                                           : TILE_SPINNING_STAR;
-        } else {
-            tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0) ? TILE_STILL_EMPTY_STAR
-                                                                           : TILE_STILL_STAR;
-        }
-        DrawTextureRect(&gfx, (left - width / 2) << 2, (STARS_TOP - height / 2) << 2,
-                      (left + width / 2 + STAR_WIDTH) << 2, (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
-                      (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
-                      (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
-        gDPPipeSync(gfx++);
+  }
+  sStarFrameTime++;
+  if (sStarFrameTime == STAR_FRAME_TIME) {
+    sStarFrameTime = 0;
+    sStarFrameIndex++;
+    if (sStarFrameIndex >= STAR_FRAME_COUNT) {
+      sStarFrameIndex = 0;
     }
-    sStarFrameTime++;
-    if (sStarFrameTime == STAR_FRAME_TIME) {
-        sStarFrameTime = 0;
-        sStarFrameIndex++;
-        if (sStarFrameIndex >= STAR_FRAME_COUNT) {
-            sStarFrameIndex = 0;
-        }
-        sStarBufferIndex = sStarBufferIndex == 0;
-        OpenEncodedAsset(sStarFrameAssets[sStarFrameIndex], &asset);
-        ReadEncodedAsset(sStarImages[sStarBufferIndex], &asset);
-        OpenEncodedAsset(sEmptyStarFrameAssets[sStarFrameIndex], &asset);
-        ReadEncodedAsset(sEmptyStarImages[sStarBufferIndex], &asset);
-    }
-    *displayListHead = gfx;
+    sStarBufferIndex = sStarBufferIndex == 0;
+    OpenEncodedAsset(sStarFrameAssets[sStarFrameIndex], &asset);
+    ReadEncodedAsset(sStarImages[sStarBufferIndex], &asset);
+    OpenEncodedAsset(sEmptyStarFrameAssets[sStarFrameIndex], &asset);
+    ReadEncodedAsset(sEmptyStarImages[sStarBufferIndex], &asset);
+  }
+  *displayListHead = gfx;
 }
 
 #else
 /* The hexagon above, which the asm copies to the stack */
 static const f32 sUnusedHexagon[6][2] = {
-    { 0.0f, -1.0f }, { 0.89f, -0.45f }, { 0.89f, 0.45f }, { 0.0f, 1.0f }, { -0.89f, 0.45f }, { -0.89f, -0.45f },
+    {0.0f, -1.0f}, {0.89f, -0.45f}, {0.89f, 0.45f},
+    {0.0f, 1.0f},  {-0.89f, 0.45f}, {-0.89f, -0.45f},
 };
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", DrawRingShotStars);
 #endif

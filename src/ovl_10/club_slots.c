@@ -1,6 +1,7 @@
+#include "common.h"
+
 #include "asset.h"
 #include "club.h"
-#include "common.h"
 #include "controller.h"
 #include "cpu_projection.h"
 #include "game_flags.h"
@@ -41,14 +42,16 @@
 #define SYMBOL_STAR CLUB_SYMBOL_COUNT
 #define SYMBOL_COUNT (CLUB_SYMBOL_COUNT + 1)
 #define NO_SYMBOL -1
-/* The reel shows the symbol this many places before its position in the middle */
+/* The reel shows the symbol this many places before its position in the middle
+ */
 #define SHOWN_SYMBOL_OFFSET 3
 
 /* A reel moves on a symbol each time it turns this far */
 #define SYMBOL_ANGLE DEGREES_TO_RADIANS(35)
 /* A stopping reel turns this far each frame until its next symbol */
 #define STOPPING_REEL_SPEED DEGREES_TO_RADIANS(2)
-/* A spinning reel speeds up by this many degrees a frame, times the reels from its right */
+/* A spinning reel speeds up by this many degrees a frame, times the reels from
+ * its right */
 #define REEL_SPEED_STEP 0.5f
 #define MAX_REEL_SPEED DEGREES_TO_RADIANS(18)
 /* A reel clicks each time sTickTime reaches this */
@@ -105,7 +108,8 @@
 #define START_STRIP_HEIGHT 12
 #define START_LAST_STRIP_HEIGHT 4
 #define START_SHOWN_HEIGHT 50
-/* START! grows as sStartAngle turns this far each frame, up to START_MAX_ANGLE */
+/* START! grows as sStartAngle turns this far each frame, up to START_MAX_ANGLE
+ */
 #define START_ANGLE_STEP DEGREES_TO_RADIANS(20)
 #define START_MAX_ANGLE DEGREES_TO_RADIANS(120)
 
@@ -119,10 +123,12 @@
 #define OTHER_FACE_LEFT 264
 #define OTHER_FACE_TOP 76
 #define OTHER_FACE_HEIGHT 24
-/* The spinning player's face changes every FACE_FRAME_TIME frames to the next of its frames */
+/* The spinning player's face changes every FACE_FRAME_TIME frames to the next
+ * of its frames */
 #define FACE_FRAME_TIME 3
 #define FACE_LAST_FRAME 4
-/* ...then stays on the last one for this many changes before the next player spins */
+/* ...then stays on the last one for this many changes before the next player
+ * spins */
 #define FACE_HOLD_COUNT 9
 
 /* The logo, 256 by 72 texels drawn in strips 8 high */
@@ -140,7 +146,8 @@
 #define SHINE_START_TIME 16
 #define SHINE_SPEED 18
 
-/* The first fourteen characters have their own club sets; the others use the sets after them */
+/* The first fourteen characters have their own club sets; the others use the
+ * sets after them */
 #define CHARACTER_CLUB_SET_COUNT 14
 /* Players whose controllerIndex is this read the first controller */
 #define CONTROLLER_INDEX_UNK4 4
@@ -163,34 +170,38 @@
 #define SHINE_ASSET 0x6A4
 
 typedef struct ClubSlots {
-    /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into sReelStrips */
-    /* 0x0C */ s32 stoppedSymbols[REEL_COUNT]; /* NO_SYMBOL until the reel stops */
-    /* 0x18 */ s32 stoppedReelCount;
-    /* 0x1C */ f32 reelAngles[REEL_COUNT]; /* How far each reel has turned toward its next symbol */
-    /* 0x28 */ f32 reelSpeeds[REEL_COUNT];
-    /* 0x34 */ s32 pressCount; /* The reels told to stop */
-    /* 0x38 */ s32 playerIndex; /* The player spinning */
-    /* 0x3C */ s32 resultTime;
-    /* 0x40 */ Vtx *reelVertices;
-    /* 0x44 */ Vtx *shadeVertices;
-    /* 0x48 */ u8 *machineImage;
-    /* 0x4C */ u8 *buttonsImage;
-    /* 0x50 */ u8 *startImage;
-    /* 0x54 */ u8 *symbolImages;
-    /* 0x58 */ u8 *faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
+  /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into sReelStrips */
+  /* 0x0C */ s32
+      stoppedSymbols[REEL_COUNT]; /* NO_SYMBOL until the reel stops */
+  /* 0x18 */ s32 stoppedReelCount;
+  /* 0x1C */ f32 reelAngles[REEL_COUNT]; /* How far each reel has turned toward
+                                            its next symbol */
+  /* 0x28 */ f32 reelSpeeds[REEL_COUNT];
+  /* 0x34 */ s32 pressCount;  /* The reels told to stop */
+  /* 0x38 */ s32 playerIndex; /* The player spinning */
+  /* 0x3C */ s32 resultTime;
+  /* 0x40 */ Vtx* reelVertices;
+  /* 0x44 */ Vtx* shadeVertices;
+  /* 0x48 */ u8* machineImage;
+  /* 0x4C */ u8* buttonsImage;
+  /* 0x50 */ u8* startImage;
+  /* 0x54 */ u8* symbolImages;
+  /* 0x58 */ u8* faceImages[MAX_PLAYER_COUNT][FACE_BUFFER_COUNT];
 } ClubSlots; /* size = 0x78 */
 
 void SetFramebufferCount(s32 count);
-void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale);
+void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
+                       f32 scale);
 
-/* The faces of the characters, by row of sCharacterFaceRows, after three stars and after fewer */
+/* The faces of the characters, by row of sCharacterFaceRows, after three stars
+ * and after fewer */
 extern u16 D_800C2650[][FACE_FRAME_COUNT];
 extern u16 D_800C2780[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
 
 extern Mtx sReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
 extern Mtx sShadeMatrix;
-extern ClubSlots *sSlots;
+extern ClubSlots* sSlots;
 extern u8 sLogoImage[];
 extern u8 sShineImage[];
 
@@ -206,12 +217,13 @@ static s16 sCharacterFaceRows[CLUB_SET_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17,
 };
 static u8 sReelStrips[REEL_COUNT][REEL_SYMBOL_COUNT] = {
-    { 0, 2, 1, 13, 0, 2, 1, 13, 0, 1, 0, 2, 13, 1, 13, 0, 2, 0, 1, 13 },
-    { 5, 7, 4, 6, 3, 13, 5, 7, 4, 6, 5, 7, 13, 3, 4, 3, 13, 5, 3, 4 },
-    { 10, 12, 13, 9, 11, 8, 13, 10, 13, 12, 9, 11, 13, 9, 13, 13, 12, 11, 8, 13 },
+    {0, 2, 1, 13, 0, 2, 1, 13, 0, 1, 0, 2, 13, 1, 13, 0, 2, 0, 1, 13},
+    {5, 7, 4, 6, 3, 13, 5, 7, 4, 6, 5, 7, 13, 3, 4, 3, 13, 5, 3, 4},
+    {10, 12, 13, 9, 11, 8, 13, 10, 13, 12, 9, 11, 13, 9, 13, 13, 12, 11, 8, 13},
 };
 static u16 sSymbolAssets[SYMBOL_COUNT] = {
-    0x583, 0x584, 0x585, 0x586, 0x587, 0x588, 0x589, 0x58A, 0x58B, 0x58C, 0x58D, 0x58E, 0x58F, 0x582,
+    0x583, 0x584, 0x585, 0x586, 0x587, 0x588, 0x589,
+    0x58A, 0x58B, 0x58C, 0x58D, 0x58E, 0x58F, 0x582,
 };
 static s32 sStateTime = 0;
 static s32 sStopWaitTime = 0;
@@ -224,166 +236,175 @@ static f32 sLogoBob = 0.0f;
 static s32 sLogoUnusedWord = 0; /* Only ever cleared */
 
 void LoadClubSlots(void) {
-    EncodedAsset asset;
-    s32 index;
-    s32 row;
-    f32 angle;
+  EncodedAsset asset;
+  s32 index;
+  s32 row;
+  f32 angle;
 
-    sSlots = AllocMemory(sizeof(ClubSlots));
-    SetMenuBackdrop(MENU_BACKDROP_STILL);
-    sSlots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
-    sSlots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
-    sSlots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
-    for (index = 0; index != SYMBOL_COUNT; index++) {
-        ReadEncodedAsset(sSlots->symbolImages + OpenEncodedAsset(sSymbolAssets[index], &asset) * index, &asset);
+  sSlots = AllocMemory(sizeof(ClubSlots));
+  SetMenuBackdrop(MENU_BACKDROP_STILL);
+  sSlots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
+  sSlots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
+  sSlots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
+  for (index = 0; index != SYMBOL_COUNT; index++) {
+    ReadEncodedAsset(sSlots->symbolImages +
+                         OpenEncodedAsset(sSymbolAssets[index], &asset) * index,
+                     &asset);
+  }
+  sSlots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
+  ReadEncodedAsset(sSlots->machineImage, &asset);
+  sSlots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
+  ReadEncodedAsset(sSlots->buttonsImage, &asset);
+  sSlots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
+  ReadEncodedAsset(sSlots->startImage, &asset);
+  for (index = 0; index != g_GameState.playerCount; index++) {
+    row = sCharacterFaceRows[(s8)g_Players[index].characterIndex];
+    sSlots->faceImages[index][0] =
+        AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
+    ReadEncodedAsset(sSlots->faceImages[index][0], &asset);
+    sSlots->faceImages[index][1] =
+        AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
+    ReadEncodedAsset(sSlots->faceImages[index][1], &asset);
+  }
+  sFaceBufferIndex = 0;
+  sFaceFrameIndex = 0;
+  sFaceFrameTime = 0;
+  sFaceHoldCount = 0;
+  sIsShowingResult = FALSE;
+  sStarCount = 0;
+  OpenEncodedAsset(LOGO_ASSET, &asset);
+  ReadEncodedAsset(sLogoImage, &asset);
+  OpenEncodedAsset(SHINE_ASSET, &asset);
+  ReadEncodedAsset(sShineImage, &asset);
+  sSlots->reelPositions[0] = guRandom() % REEL_SYMBOL_COUNT;
+  sSlots->reelPositions[1] = guRandom() % REEL_SYMBOL_COUNT;
+  sSlots->reelPositions[2] = guRandom() % REEL_SYMBOL_COUNT;
+  sClubSlotsState = CLUB_SLOTS_STARTING;
+  sSlots->stoppedSymbols[0] = NO_SYMBOL;
+  sSlots->stoppedSymbols[1] = NO_SYMBOL;
+  sSlots->stoppedSymbols[2] = NO_SYMBOL;
+  sSlots->stoppedReelCount = 0;
+  sSlots->reelAngles[0] = DEGREES_TO_RADIANS(10);
+  sSlots->reelAngles[1] = DEGREES_TO_RADIANS(20);
+  sSlots->reelAngles[2] = DEGREES_TO_RADIANS(30);
+  sSlots->reelSpeeds[0] = DEGREES_TO_RADIANS(4);
+  sSlots->reelSpeeds[1] = DEGREES_TO_RADIANS(2);
+  sSlots->reelSpeeds[2] = 0;
+  sSlots->pressCount = 0;
+  sSlots->playerIndex = 0;
+  for (index = 0; index != REEL_EDGE_COUNT; index++) {
+    sSlots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
+    sSlots->reelVertices[index * 2 + 1].v.ob[0] = REEL_HALF_WIDTH;
+    angle = DEGREES_TO_RADIANS((f32)((index - 1) * REEL_EDGE_SPACING));
+    sSlots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
+    sSlots->reelVertices[index * 2 + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
+    sSlots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    sSlots->reelVertices[index * 2 + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    sSlots->reelVertices[index * 2].v.cn[0] = 0xFF;
+    sSlots->reelVertices[index * 2 + 1].v.cn[0] = 0xFF;
+    sSlots->reelVertices[index * 2].v.cn[1] = 0xFF;
+    sSlots->reelVertices[index * 2 + 1].v.cn[1] = 0xFF;
+    sSlots->reelVertices[index * 2].v.cn[2] = 0xFF;
+    sSlots->reelVertices[index * 2 + 1].v.cn[2] = 0xFF;
+    sSlots->reelVertices[index * 2].v.cn[3] = 0xFF;
+    sSlots->reelVertices[index * 2 + 1].v.cn[3] = 0xFF;
+  }
+  for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
+    if (index & 2) {
+      sSlots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
+    } else {
+      sSlots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
     }
-    sSlots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
-    ReadEncodedAsset(sSlots->machineImage, &asset);
-    sSlots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
-    ReadEncodedAsset(sSlots->buttonsImage, &asset);
-    sSlots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
-    ReadEncodedAsset(sSlots->startImage, &asset);
-    for (index = 0; index != g_GameState.playerCount; index++) {
-        row = sCharacterFaceRows[(s8)g_Players[index].characterIndex];
-        sSlots->faceImages[index][0] = AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
-        ReadEncodedAsset(sSlots->faceImages[index][0], &asset);
-        sSlots->faceImages[index][1] = AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
-        ReadEncodedAsset(sSlots->faceImages[index][1], &asset);
-    }
-    sFaceBufferIndex = 0;
-    sFaceFrameIndex = 0;
-    sFaceFrameTime = 0;
-    sFaceHoldCount = 0;
-    sIsShowingResult = FALSE;
-    sStarCount = 0;
-    OpenEncodedAsset(LOGO_ASSET, &asset);
-    ReadEncodedAsset(sLogoImage, &asset);
-    OpenEncodedAsset(SHINE_ASSET, &asset);
-    ReadEncodedAsset(sShineImage, &asset);
-    sSlots->reelPositions[0] = guRandom() % REEL_SYMBOL_COUNT;
-    sSlots->reelPositions[1] = guRandom() % REEL_SYMBOL_COUNT;
-    sSlots->reelPositions[2] = guRandom() % REEL_SYMBOL_COUNT;
-    sClubSlotsState = CLUB_SLOTS_STARTING;
-    sSlots->stoppedSymbols[0] = NO_SYMBOL;
-    sSlots->stoppedSymbols[1] = NO_SYMBOL;
-    sSlots->stoppedSymbols[2] = NO_SYMBOL;
-    sSlots->stoppedReelCount = 0;
-    sSlots->reelAngles[0] = DEGREES_TO_RADIANS(10);
-    sSlots->reelAngles[1] = DEGREES_TO_RADIANS(20);
-    sSlots->reelAngles[2] = DEGREES_TO_RADIANS(30);
-    sSlots->reelSpeeds[0] = DEGREES_TO_RADIANS(4);
-    sSlots->reelSpeeds[1] = DEGREES_TO_RADIANS(2);
-    sSlots->reelSpeeds[2] = 0;
-    sSlots->pressCount = 0;
-    sSlots->playerIndex = 0;
-    for (index = 0; index != REEL_EDGE_COUNT; index++) {
-        sSlots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
-        sSlots->reelVertices[index * 2 + 1].v.ob[0] = REEL_HALF_WIDTH;
-        angle = DEGREES_TO_RADIANS((f32)((index - 1) * REEL_EDGE_SPACING));
-        sSlots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
-        sSlots->reelVertices[index * 2 + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
-        sSlots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
-        sSlots->reelVertices[index * 2 + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
-        sSlots->reelVertices[index * 2].v.cn[0] = 0xFF;
-        sSlots->reelVertices[index * 2 + 1].v.cn[0] = 0xFF;
-        sSlots->reelVertices[index * 2].v.cn[1] = 0xFF;
-        sSlots->reelVertices[index * 2 + 1].v.cn[1] = 0xFF;
-        sSlots->reelVertices[index * 2].v.cn[2] = 0xFF;
-        sSlots->reelVertices[index * 2 + 1].v.cn[2] = 0xFF;
-        sSlots->reelVertices[index * 2].v.cn[3] = 0xFF;
-        sSlots->reelVertices[index * 2 + 1].v.cn[3] = 0xFF;
-    }
-    for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
-        if (index & 2) {
-            sSlots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
-        } else {
-            sSlots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
-        }
-        sSlots->shadeVertices[index].v.ob[2] = SHADE_Z;
-        sSlots->shadeVertices[index].v.cn[0] = 0;
-        sSlots->shadeVertices[index].v.cn[1] = 0;
-        sSlots->shadeVertices[index].v.cn[2] = 0;
-        sSlots->shadeVertices[index].v.cn[3] = 0;
-    }
-    sSlots->shadeVertices[0].v.ob[1] = 48;
-    sSlots->shadeVertices[1].v.ob[1] = 16;
-    sSlots->shadeVertices[2].v.ob[1] = 16;
-    sSlots->shadeVertices[3].v.ob[1] = 48;
-    sSlots->shadeVertices[4].v.ob[1] = -16;
-    sSlots->shadeVertices[5].v.ob[1] = -48;
-    sSlots->shadeVertices[6].v.ob[1] = -48;
-    sSlots->shadeVertices[7].v.ob[1] = -16;
-    sSlots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
-    sSlots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
-    sSlots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
-    sSlots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
-    PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+    sSlots->shadeVertices[index].v.ob[2] = SHADE_Z;
+    sSlots->shadeVertices[index].v.cn[0] = 0;
+    sSlots->shadeVertices[index].v.cn[1] = 0;
+    sSlots->shadeVertices[index].v.cn[2] = 0;
+    sSlots->shadeVertices[index].v.cn[3] = 0;
+  }
+  sSlots->shadeVertices[0].v.ob[1] = 48;
+  sSlots->shadeVertices[1].v.ob[1] = 16;
+  sSlots->shadeVertices[2].v.ob[1] = 16;
+  sSlots->shadeVertices[3].v.ob[1] = 48;
+  sSlots->shadeVertices[4].v.ob[1] = -16;
+  sSlots->shadeVertices[5].v.ob[1] = -48;
+  sSlots->shadeVertices[6].v.ob[1] = -48;
+  sSlots->shadeVertices[7].v.ob[1] = -16;
+  sSlots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
+  sSlots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
+  sSlots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
+  sSlots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
+  PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
 }
 
 void FreeClubSlots(void) {
-    s32 playerIndex;
+  s32 playerIndex;
 
-    SetMenuBackdrop(MENU_BACKDROP_NONE);
-    SetFramebufferCount(3);
-    SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-    FreeMemory(&sSlots->symbolImages);
-    FreeMemory(&sSlots->machineImage);
-    FreeMemory(&sSlots->buttonsImage);
-    FreeMemory(&sSlots->startImage);
-    FreeMemory(&sSlots->reelVertices);
-    FreeMemory(&sSlots->shadeVertices);
-    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        FreeMemory(&sSlots->faceImages[playerIndex][0]);
-        FreeMemory(&sSlots->faceImages[playerIndex][1]);
-    }
-    FreeMemory(&sSlots);
+  SetMenuBackdrop(MENU_BACKDROP_NONE);
+  SetFramebufferCount(3);
+  SetScreenEffect(SCREEN_EFFECT_NONE, 0);
+  FreeMemory(&sSlots->symbolImages);
+  FreeMemory(&sSlots->machineImage);
+  FreeMemory(&sSlots->buttonsImage);
+  FreeMemory(&sSlots->startImage);
+  FreeMemory(&sSlots->reelVertices);
+  FreeMemory(&sSlots->shadeVertices);
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+    FreeMemory(&sSlots->faceImages[playerIndex][0]);
+    FreeMemory(&sSlots->faceImages[playerIndex][1]);
+  }
+  FreeMemory(&sSlots);
 }
 
 /* Fills the player's bag from the stopped reels */
 void GiveSlotClubs(s32 playerIndex) {
-    UnkB8 *player;
-    s32 starCount;
-    s32 index; /* Counts the slots, then the reels; it is reused to match */
-    s32 slot;
-    s32 symbolIndex;
-    s32 symbol;
-    s32 clubSet;
+  UnkB8* player;
+  s32 starCount;
+  s32 index; /* Counts the slots, then the reels; it is reused to match */
+  s32 slot;
+  s32 symbolIndex;
+  s32 symbol;
+  s32 clubSet;
 
-    starCount = 0;
-    player = &g_Players[playerIndex];
-    for (index = 0; index != CLUB_SLOT_COUNT; index++) {
-        player->clubs[index] = NO_CLUB;
+  starCount = 0;
+  player = &g_Players[playerIndex];
+  for (index = 0; index != CLUB_SLOT_COUNT; index++) {
+    player->clubs[index] = NO_CLUB;
+  }
+  player->clubs[CLUB_TYPE_PUTTER] =
+      (s8)player->characterIndex * CLUB_SET_SIZE + CLUB_TYPE_PUTTER;
+  sStarCount = 0;
+  for (index = 0; index != REEL_COUNT; index++) {
+    symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
+    if (symbolIndex < 0) {
+      symbolIndex += REEL_SYMBOL_COUNT;
     }
-    player->clubs[CLUB_TYPE_PUTTER] = (s8)player->characterIndex * CLUB_SET_SIZE + CLUB_TYPE_PUTTER;
-    sStarCount = 0;
-    for (index = 0; index != REEL_COUNT; index++) {
-        symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
-        if (symbolIndex < 0) {
-            symbolIndex += REEL_SYMBOL_COUNT;
-        }
-        symbol = sReelStrips[index][symbolIndex];
-        if (symbol != SYMBOL_STAR) {
-            if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
-                player->clubs[symbol] = (player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) * CLUB_SET_SIZE + symbol;
-            } else {
-                player->clubs[symbol] = (s8)player->characterIndex * CLUB_SET_SIZE + symbol;
-            }
-        } else {
-            starCount++;
-            sStarCount++;
-        }
+    symbol = sReelStrips[index][symbolIndex];
+    if (symbol != SYMBOL_STAR) {
+      if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
+        player->clubs[symbol] =
+            (player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) *
+                CLUB_SET_SIZE +
+            symbol;
+      } else {
+        player->clubs[symbol] =
+            (s8)player->characterIndex * CLUB_SET_SIZE + symbol;
+      }
+    } else {
+      starCount++;
+      sStarCount++;
     }
-    if (starCount == REEL_COUNT) {
-        for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
-            clubSet = (s8)player->characterIndex;
-            if (clubSet >= CHARACTER_CLUB_SET_COUNT) {
-                clubSet = player->gameBoyCharacterIndex;
-                clubSet += CHARACTER_CLUB_SET_COUNT;
-            }
-            player->clubs[slot] = clubSet * CLUB_SET_SIZE + slot;
-        }
-        PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+  }
+  if (starCount == REEL_COUNT) {
+    for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
+      clubSet = (s8)player->characterIndex;
+      if (clubSet >= CHARACTER_CLUB_SET_COUNT) {
+        clubSet = player->gameBoyCharacterIndex;
+        clubSet += CHARACTER_CLUB_SET_COUNT;
+      }
+      player->clubs[slot] = clubSet * CLUB_SET_SIZE + slot;
     }
+    PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
+  }
 }
 
 /*
@@ -391,441 +412,488 @@ void GiveSlotClubs(s32 playerIndex) {
  * player's unk1E is set, or while GAME_FLAG_UNK32 is. It is a macro, as
  * an inline function compiles differently from the original.
  */
-#define IsReelStopping(controllerIndex, player)                                                                       \
-    ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) || (sStopWaitTime > REEL_STOP_WAIT_TIME) ||      \
-     ((s8)(player)->unk1E[0] != 0) || IsGameFlagSet(GAME_FLAG_UNK32))
+#define IsReelStopping(controllerIndex, player)                              \
+  ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) ||        \
+   (sStopWaitTime > REEL_STOP_WAIT_TIME) || ((s8)(player)->unk1E[0] != 0) || \
+   IsGameFlagSet(GAME_FLAG_UNK32))
 
 /* Returns TRUE once every player has spun */
 s32 UpdateClubSlots(void) {
-    UnkB8 *player;
-    s32 controllerIndex;
+  UnkB8* player;
+  s32 controllerIndex;
 
-    player = &g_Players[sSlots->playerIndex];
-    if (sIsShowingResult != FALSE) {
-        return FALSE;
-    }
-    if (sSlots->playerIndex == g_GameState.playerCount) {
-        sClubSlotsState = CLUB_SLOTS_DONE;
-        return TRUE;
-    }
-    switch (sClubSlotsState) {
-        case CLUB_SLOTS_STARTING:
-            if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
-                sStateTime = 0;
-                sClubSlotsState = CLUB_SLOTS_SPEEDING;
-                PlaySound(SOUND_REELS_START, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
-            }
-            break;
-        case CLUB_SLOTS_SPEEDING:
-            if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
-                sStateTime = 0;
-                sClubSlotsState = CLUB_SLOTS_STOPPING;
-                sStopWaitTime = 0;
-            }
-            break;
-        case CLUB_SLOTS_STOPPING:
-            if (player->controllerIndex == CONTROLLER_INDEX_UNK4) {
-                controllerIndex = 0;
-            } else {
-                controllerIndex = player->controllerIndex;
-            }
-            sStopWaitTime++;
-            if (sSlots->pressCount < REEL_COUNT) {
-                if (IsReelStopping(controllerIndex, player)) {
-                    sStopWaitTime = 0;
-                    PlaySoundWithEffects(SOUND_REEL_STOP, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME, 0,
-                                         sSlots->pressCount++ * REEL_STOP_PAN_STEP);
-                }
-            } else if (sSlots->stoppedReelCount == REEL_COUNT) {
-                sClubSlotsState = CLUB_SLOTS_STOPPED;
-                sSlots->resultTime = 0;
-            }
-            break;
-        case CLUB_SLOTS_STOPPED:
-            if (++sSlots->resultTime == CLUB_SLOTS_RESULT_DELAY) {
-                GiveSlotClubs(sSlots->playerIndex);
-                sIsShowingResult = TRUE;
-                if (sSlots->playerIndex + 1 != g_GameState.playerCount) {
-                    sClubSlotsState = CLUB_SLOTS_STARTING;
-                    sSlots->pressCount = 0;
-                    sSlots->stoppedReelCount = 0;
-                    sSlots->stoppedSymbols[0] = NO_SYMBOL;
-                    sSlots->stoppedSymbols[1] = NO_SYMBOL;
-                    sSlots->stoppedSymbols[2] = NO_SYMBOL;
-                    PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
-                }
-            }
-            break;
-    }
+  player = &g_Players[sSlots->playerIndex];
+  if (sIsShowingResult != FALSE) {
     return FALSE;
+  }
+  if (sSlots->playerIndex == g_GameState.playerCount) {
+    sClubSlotsState = CLUB_SLOTS_DONE;
+    return TRUE;
+  }
+  switch (sClubSlotsState) {
+    case CLUB_SLOTS_STARTING:
+      if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
+        sStateTime = 0;
+        sClubSlotsState = CLUB_SLOTS_SPEEDING;
+        PlaySound(SOUND_REELS_START, g_NextSoundChannel,
+                  CLUB_SLOTS_SOUND_VOLUME);
+      }
+      break;
+    case CLUB_SLOTS_SPEEDING:
+      if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
+        sStateTime = 0;
+        sClubSlotsState = CLUB_SLOTS_STOPPING;
+        sStopWaitTime = 0;
+      }
+      break;
+    case CLUB_SLOTS_STOPPING:
+      if (player->controllerIndex == CONTROLLER_INDEX_UNK4) {
+        controllerIndex = 0;
+      } else {
+        controllerIndex = player->controllerIndex;
+      }
+      sStopWaitTime++;
+      if (sSlots->pressCount < REEL_COUNT) {
+        if (IsReelStopping(controllerIndex, player)) {
+          sStopWaitTime = 0;
+          PlaySoundWithEffects(SOUND_REEL_STOP, g_NextSoundChannel,
+                               CLUB_SLOTS_SOUND_VOLUME, 0,
+                               sSlots->pressCount++ * REEL_STOP_PAN_STEP);
+        }
+      } else if (sSlots->stoppedReelCount == REEL_COUNT) {
+        sClubSlotsState = CLUB_SLOTS_STOPPED;
+        sSlots->resultTime = 0;
+      }
+      break;
+    case CLUB_SLOTS_STOPPED:
+      if (++sSlots->resultTime == CLUB_SLOTS_RESULT_DELAY) {
+        GiveSlotClubs(sSlots->playerIndex);
+        sIsShowingResult = TRUE;
+        if (sSlots->playerIndex + 1 != g_GameState.playerCount) {
+          sClubSlotsState = CLUB_SLOTS_STARTING;
+          sSlots->pressCount = 0;
+          sSlots->stoppedReelCount = 0;
+          sSlots->stoppedSymbols[0] = NO_SYMBOL;
+          sSlots->stoppedSymbols[1] = NO_SYMBOL;
+          sSlots->stoppedSymbols[2] = NO_SYMBOL;
+          PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel,
+                    CLUB_SLOTS_SOUND_VOLUME);
+        }
+      }
+      break;
+  }
+  return FALSE;
 }
 
-s32 GetClubSlotsState(void) {
-    return sClubSlotsState;
-}
+s32 GetClubSlotsState(void) { return sClubSlotsState; }
 
 #ifdef NON_MATCHING
-void DrawClubSlots(Gfx **displayListHead) {
-    Mat4 matrix;
-    Vec3 translation;
-    Vec3 rotation;
-    Vec3 scale;
-    EncodedAsset asset;
-    Gfx *gfx;
-    s32 isStripLoaded;
-    s32 reelIndex;
-    s32 quadIndex;
-    s32 symbolIndex;
-    s32 top;
-    s32 stripHeight;
-    s32 texelOffset;
-    s32 buttonIndex;
-    s32 stripIndex;
-    s32 playerIndex;
-    s32 row;
-    f32 halfWidth;
-    f32 dsdx;
-    f32 startStripHeight;
-    f32 halfHeight;
-    f32 dtdy;
+void DrawClubSlots(Gfx** displayListHead) {
+  Mat4 matrix;
+  Vec3 translation;
+  Vec3 rotation;
+  Vec3 scale;
+  EncodedAsset asset;
+  Gfx* gfx;
+  s32 isStripLoaded;
+  s32 reelIndex;
+  s32 quadIndex;
+  s32 symbolIndex;
+  s32 top;
+  s32 stripHeight;
+  s32 texelOffset;
+  s32 buttonIndex;
+  s32 stripIndex;
+  s32 playerIndex;
+  s32 row;
+  f32 halfWidth;
+  f32 dsdx;
+  f32 startStripHeight;
+  f32 halfHeight;
+  f32 dtdy;
 
-    gfx = *displayListHead;
-    isStripLoaded = FALSE;
-    for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
-        if (reelIndex < sSlots->pressCount) {
-            if (sSlots->stoppedSymbols[reelIndex] == NO_SYMBOL) {
-                if (reelIndex == LAST_REEL) {
-                    sTickTime++;
-                }
-                if (sSlots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
-                    sSlots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
-                    if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-                        sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
-                        sSlots->reelPositions[reelIndex]++;
-                        if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
-                            sSlots->reelPositions[reelIndex] = 0;
-                        }
-                        symbolIndex = sSlots->reelPositions[reelIndex] - SHOWN_SYMBOL_OFFSET;
-                        if (symbolIndex < 0) {
-                            symbolIndex += REEL_SYMBOL_COUNT;
-                        }
-                        /* The last reel stops on a star only after two others */
-                        if (reelIndex == LAST_REEL) {
-                            if (sSlots->stoppedReelCount == reelIndex) {
-                                if (sSlots->stoppedSymbols[0] == SYMBOL_STAR
-                                    && sSlots->stoppedSymbols[1] == SYMBOL_STAR) {
-                                    if (sReelStrips[LAST_REEL][symbolIndex] == SYMBOL_STAR) {
-                                        sSlots->stoppedSymbols[LAST_REEL] = SYMBOL_STAR;
-                                        sSlots->stoppedReelCount++;
-                                    }
-                                } else if (sReelStrips[reelIndex][symbolIndex] != SYMBOL_STAR) {
-                                    sSlots->stoppedSymbols[reelIndex] = sReelStrips[reelIndex][symbolIndex];
-                                    sSlots->stoppedReelCount++;
-                                }
-                            }
-                        } else {
-                            sSlots->stoppedSymbols[reelIndex] = sReelStrips[reelIndex][symbolIndex];
-                            sSlots->stoppedReelCount++;
-                        }
-                        sTickTime = 0;
-                    }
-                }
-            }
-        } else {
-            if (reelIndex == LAST_REEL) {
-                sTickTime += 2;
-            }
-            sSlots->reelAngles[reelIndex] += sSlots->reelSpeeds[reelIndex];
-            sSlots->reelSpeeds[reelIndex] += DEGREES_TO_RADIANS((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
-            if (sSlots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
-                sSlots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
-            }
-            if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-                sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
-                sSlots->reelPositions[reelIndex]++;
-                if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
-                    sSlots->reelPositions[reelIndex] = 0;
-                }
-            }
+  gfx = *displayListHead;
+  isStripLoaded = FALSE;
+  for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
+    if (reelIndex < sSlots->pressCount) {
+      if (sSlots->stoppedSymbols[reelIndex] == NO_SYMBOL) {
+        if (reelIndex == LAST_REEL) {
+          sTickTime++;
         }
-        rotation[0] = sSlots->reelAngles[reelIndex];
-        rotation[1] = 0;
-        rotation[2] = 0;
-        translation[0] = reelIndex * REEL_SPACING + FIRST_REEL_X;
-        translation[1] = SLOTS_Y;
-        translation[2] = SLOTS_Z;
-        scale[0] = REEL_SCALE;
-        scale[1] = REEL_SCALE;
-        scale[2] = REEL_SCALE;
-        BuildTransformMatrix(matrix, rotation, translation, scale);
-        ConvertMatrixToFixed(matrix, &sReelMatrices[reelIndex][g_MatrixBufferIndex]);
+        if (sSlots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
+          sSlots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
+          if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
+            sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
+            sSlots->reelPositions[reelIndex]++;
+            if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
+              sSlots->reelPositions[reelIndex] = 0;
+            }
+            symbolIndex =
+                sSlots->reelPositions[reelIndex] - SHOWN_SYMBOL_OFFSET;
+            if (symbolIndex < 0) {
+              symbolIndex += REEL_SYMBOL_COUNT;
+            }
+            /* The last reel stops on a star only after two others */
+            if (reelIndex == LAST_REEL) {
+              if (sSlots->stoppedReelCount == reelIndex) {
+                if (sSlots->stoppedSymbols[0] == SYMBOL_STAR &&
+                    sSlots->stoppedSymbols[1] == SYMBOL_STAR) {
+                  if (sReelStrips[LAST_REEL][symbolIndex] == SYMBOL_STAR) {
+                    sSlots->stoppedSymbols[LAST_REEL] = SYMBOL_STAR;
+                    sSlots->stoppedReelCount++;
+                  }
+                } else if (sReelStrips[reelIndex][symbolIndex] != SYMBOL_STAR) {
+                  sSlots->stoppedSymbols[reelIndex] =
+                      sReelStrips[reelIndex][symbolIndex];
+                  sSlots->stoppedReelCount++;
+                }
+              }
+            } else {
+              sSlots->stoppedSymbols[reelIndex] =
+                  sReelStrips[reelIndex][symbolIndex];
+              sSlots->stoppedReelCount++;
+            }
+            sTickTime = 0;
+          }
+        }
+      }
+    } else {
+      if (reelIndex == LAST_REEL) {
+        sTickTime += 2;
+      }
+      sSlots->reelAngles[reelIndex] += sSlots->reelSpeeds[reelIndex];
+      sSlots->reelSpeeds[reelIndex] +=
+          DEGREES_TO_RADIANS((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
+      if (sSlots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
+        sSlots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
+      }
+      if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
+        sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
+        sSlots->reelPositions[reelIndex]++;
+        if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
+          sSlots->reelPositions[reelIndex] = 0;
+        }
+      }
     }
-    gDPPipeSync(gfx++);
-    sTickTime %= REEL_TICK_TIME;
-    if (sSlots->stoppedReelCount < REEL_COUNT && sTickTime == 0) {
-        PlaySound(SOUND_REEL_CLICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
-    }
-    rotation[0] = 0;
+    rotation[0] = sSlots->reelAngles[reelIndex];
     rotation[1] = 0;
     rotation[2] = 0;
-    translation[0] = 0.0f;
+    translation[0] = reelIndex * REEL_SPACING + FIRST_REEL_X;
     translation[1] = SLOTS_Y;
     translation[2] = SLOTS_Z;
-    scale[0] = 1.0f;
-    scale[1] = 1.0f;
-    scale[2] = 1.0f;
+    scale[0] = REEL_SCALE;
+    scale[1] = REEL_SCALE;
+    scale[2] = REEL_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
-    ConvertMatrixToFixed(matrix, &sShadeMatrix);
+    ConvertMatrixToFixed(matrix,
+                         &sReelMatrices[reelIndex][g_MatrixBufferIndex]);
+  }
+  gDPPipeSync(gfx++);
+  sTickTime %= REEL_TICK_TIME;
+  if (sSlots->stoppedReelCount < REEL_COUNT && sTickTime == 0) {
+    PlaySound(SOUND_REEL_CLICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
+  }
+  rotation[0] = 0;
+  rotation[1] = 0;
+  rotation[2] = 0;
+  translation[0] = 0.0f;
+  translation[1] = SLOTS_Y;
+  translation[2] = SLOTS_Z;
+  scale[0] = 1.0f;
+  scale[1] = 1.0f;
+  scale[2] = 1.0f;
+  BuildTransformMatrix(matrix, rotation, translation, scale);
+  ConvertMatrixToFixed(matrix, &sShadeMatrix);
 
-    /* The black behind the reels */
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gSPLoadGeometryMode(gfx++, 0);
-    gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
-    gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                  TEXEL_STEP_ONE);
+  /* The black behind the reels */
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+  gSPLoadGeometryMode(gfx++, 0);
+  gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+  gDPPipeSync(gfx++);
+  DrawTextureRect(&gfx, 96 << 2, 56 << 2, 224 << 2, 168 << 2, G_TX_RENDERTILE,
+                  0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 
-    /* The reels */
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_PERSP);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gDPPipeSync(gfx++);
-    for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
-        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sReelMatrices[reelIndex][g_MatrixBufferIndex]),
-                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPVertex(gfx++, sSlots->reelVertices, REEL_VERTEX_COUNT, 0);
-        for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
-            symbolIndex = sSlots->reelPositions[reelIndex] - quadIndex;
-            if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
-                symbolIndex -= REEL_SYMBOL_COUNT;
-            }
-            if (symbolIndex < 0) {
-                symbolIndex += REEL_SYMBOL_COUNT;
-            }
-            LoadTextureBlock(&gfx,
-                          sSlots->symbolImages + sReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE
-                              + IMAGE_HEADER_SIZE,
-                          G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            gSPModifyVertex(gfx++, quadIndex * 2, G_MWO_POINT_ST, 0);
-            gSPModifyVertex(gfx++, quadIndex * 2 + 1, G_MWO_POINT_ST, SYMBOL_ST_END << 16);
-            gSPModifyVertex(gfx++, quadIndex * 2 + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
-            gSPModifyVertex(gfx++, quadIndex * 2 + 3, G_MWO_POINT_ST, (SYMBOL_ST_END << 16) | SYMBOL_ST_END);
-            gSP2Triangles(gfx++, quadIndex * 2 + 1, quadIndex * 2, quadIndex * 2 + 2, 0, quadIndex * 2 + 1,
-                          quadIndex * 2 + 2, quadIndex * 2 + 3, 0);
-            gDPPipeSync(gfx++);
-        }
+  /* The reels */
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+  gDPPipeSync(gfx++);
+  for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
+    gSPMatrix(gfx++,
+              OS_K0_TO_PHYSICAL(&sReelMatrices[reelIndex][g_MatrixBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sSlots->reelVertices, REEL_VERTEX_COUNT, 0);
+    for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
+      symbolIndex = sSlots->reelPositions[reelIndex] - quadIndex;
+      if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
+        symbolIndex -= REEL_SYMBOL_COUNT;
+      }
+      if (symbolIndex < 0) {
+        symbolIndex += REEL_SYMBOL_COUNT;
+      }
+      LoadTextureBlock(
+          &gfx,
+          sSlots->symbolImages +
+              sReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE +
+              IMAGE_HEADER_SIZE,
+          G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0,
+          0, 0);
+      gDPPipeSync(gfx++);
+      gSPModifyVertex(gfx++, quadIndex * 2, G_MWO_POINT_ST, 0);
+      gSPModifyVertex(gfx++, quadIndex * 2 + 1, G_MWO_POINT_ST,
+                      SYMBOL_ST_END << 16);
+      gSPModifyVertex(gfx++, quadIndex * 2 + 2, G_MWO_POINT_ST, SYMBOL_ST_END);
+      gSPModifyVertex(gfx++, quadIndex * 2 + 3, G_MWO_POINT_ST,
+                      (SYMBOL_ST_END << 16) | SYMBOL_ST_END);
+      gSP2Triangles(gfx++, quadIndex * 2 + 1, quadIndex * 2, quadIndex * 2 + 2,
+                    0, quadIndex * 2 + 1, quadIndex * 2 + 2, quadIndex * 2 + 3,
+                    0);
+      gDPPipeSync(gfx++);
     }
+  }
 
-    /* The shading over the reels' edges and the line across their middle */
-    gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gDPPipeSync(gfx++);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sShadeMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sSlots->shadeVertices, SHADE_VERTEX_COUNT, 0);
-    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
-    gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
-    gDPPipeSync(gfx++);
-    DrawTextureRect(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
-                  TEXEL_STEP_ONE);
+  /* The shading over the reels' edges and the line across their middle */
+  gDPPipeSync(gfx++);
+  gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+  gDPPipeSync(gfx++);
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sShadeMatrix),
+            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+  gSPVertex(gfx++, sSlots->shadeVertices, SHADE_VERTEX_COUNT, 0);
+  gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+  gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
+  gDPPipeSync(gfx++);
+  gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+  gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, 255);
+  gDPPipeSync(gfx++);
+  DrawTextureRect(&gfx, 96 << 2, 112 << 2, 224 << 2, 113 << 2, G_TX_RENDERTILE,
+                  0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
 
-    /* The slot machine */
+  /* The slot machine */
+  gDPPipeSync(gfx++);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_COPY);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+  gDPSetBlendColor(gfx++, 255, 255, 255, 1);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_NONE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  LoadLargePalette(&gfx, sSlots->machineImage + IMAGE_HEADER_SIZE);
+  for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER;
+       top < MACHINE_BOTTOM; top += MACHINE_STRIP_HEIGHT,
+      texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
+    stripHeight = (top + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM)
+                      ? MACHINE_STRIP_HEIGHT
+                      : MACHINE_LAST_STRIP_HEIGHT;
+    if (!isStripLoaded) {
+      isStripLoaded = TRUE;
+      LoadTextureBlock(&gfx, sSlots->machineImage + texelOffset, G_IM_FMT_CI,
+                       G_IM_SIZ_8b, MACHINE_WIDTH, stripHeight, 0, 0, 0, 0, 0,
+                       0, 0);
+    } else {
+      /* The tiles stay as the first strip set them */
+      gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
+                         ((u32)sSlots->machineImage + texelOffset) & ~7);
+      gDPLoadSync(gfx++);
+      gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
+                   ((stripHeight * MACHINE_WIDTH + G_IM_SIZ_8b_INCR) >>
+                    G_IM_SIZ_8b_SHIFT) -
+                       1,
+                   CALC_DXT(MACHINE_WIDTH, G_IM_SIZ_8b_BYTES));
+    }
     gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGB, G_CC_DECALRGB);
+    DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2,
+                    (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2,
+                    (top + stripHeight - 1) << 2, G_TX_RENDERTILE, 0, 0,
+                    4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  }
+
+  /* The stop buttons pushed so far */
+  LoadLargePalette(&gfx, sSlots->buttonsImage + IMAGE_HEADER_SIZE);
+  for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
+    if (buttonIndex > sSlots->pressCount - 1) {
+      break;
+    }
+    for (stripIndex = 0; stripIndex != BUTTON_STRIP_COUNT; stripIndex++) {
+      LoadTextureBlock(&gfx,
+                       sSlots->buttonsImage +
+                           (LARGE_PALETTED_TEXELS_OFFSET +
+                            buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH +
+                            stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH),
+                       G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH,
+                       BUTTON_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      DrawTextureRect(
+          &gfx, (buttonIndex * BUTTON_WIDTH + BUTTON_LEFT) << 2,
+          (BUTTON_TOP + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
+          (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + buttonIndex * BUTTON_WIDTH)
+              << 2,
+          (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
+           stripIndex * BUTTON_STRIP_HEIGHT)
+              << 2,
+          G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      gDPPipeSync(gfx++);
+    }
+  }
+  gDPPipeSync(gfx++);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+
+  /* START!, growing while the reels speed up */
+  halfWidth = sinf(sStartAngle) * 64.0f + 20.0f;
+  startStripHeight = (sinf(sStartAngle) * 50.0f + 13.75f) * 0.2f;
+  dsdx = (START_WIDTH * TEXEL_STEP_ONE / 2) / halfWidth;
+  halfHeight = startStripHeight * 2.5f + 2.0f;
+  dtdy = (START_SHOWN_HEIGHT * TEXEL_STEP_ONE / 2) / halfHeight;
+  if (sClubSlotsState == CLUB_SLOTS_STARTING) {
+    sStartAngle = 0.0f;
+  }
+  if (sClubSlotsState == CLUB_SLOTS_SPEEDING) {
+    sStartAngle += START_ANGLE_STEP;
+    if (sStartAngle > START_MAX_ANGLE) {
+      sStartAngle = START_MAX_ANGLE;
+    }
     gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_COPY);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
-    gDPSetBlendColor(gfx++, 255, 255, 255, 1);
-    gDPPipeSync(gfx++);
-    gDPSetTexturePersp(gfx++, G_TP_NONE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, sSlots->machineImage + IMAGE_HEADER_SIZE);
-    for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER; top < MACHINE_BOTTOM;
-         top += MACHINE_STRIP_HEIGHT, texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
-        stripHeight = (top + MACHINE_STRIP_HEIGHT <= MACHINE_BOTTOM) ? MACHINE_STRIP_HEIGHT : MACHINE_LAST_STRIP_HEIGHT;
-        if (!isStripLoaded) {
-            isStripLoaded = TRUE;
-            LoadTextureBlock(&gfx, sSlots->machineImage + texelOffset, G_IM_FMT_CI, G_IM_SIZ_8b, MACHINE_WIDTH,
-                          stripHeight, 0, 0, 0, 0, 0, 0, 0);
+    LoadLargePalette(&gfx, sSlots->startImage + IMAGE_HEADER_SIZE);
+    for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
+         stripIndex != START_STRIP_COUNT;
+         stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
+      stripHeight = (stripIndex != START_STRIP_COUNT - 1)
+                        ? START_STRIP_HEIGHT
+                        : START_LAST_STRIP_HEIGHT;
+      gDPLoadTextureTile(gfx++, ((u32)sSlots->startImage + texelOffset) & ~7,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, START_WIDTH, stripHeight, 0,
+                         0, START_WIDTH - 1, stripHeight - 1, 0, G_TX_WRAP,
+                         G_TX_WRAP, 0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      gSPScisTextureRectangle(
+          gfx++, (s32)(SCREEN_WIDTH / 2 - halfWidth) << 2,
+          (s32)((SCREEN_HEIGHT / 2 - halfHeight) +
+                stripIndex * startStripHeight)
+              << 2,
+          (s32)(halfWidth + SCREEN_WIDTH / 2) << 2,
+          (s32)((SCREEN_HEIGHT / 2 - halfHeight) +
+                stripIndex * startStripHeight + startStripHeight)
+              << 2,
+          G_TX_RENDERTILE, 0, 1 << 5, dsdx, dtdy);
+    }
+  }
+
+  /* The players' faces */
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+  gDPPipeSync(gfx++);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
+    LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
+    if (playerIndex == sSlots->playerIndex) {
+      LoadTextureBlock(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex],
+                       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
+                       0, 0, 0, 0);
+      gDPPipeSync(gfx++);
+      gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+      DrawTextureRect(&gfx, FACE_LEFT << 2,
+                      (FACE_TOP + playerIndex * FACE_SPACING) << 2,
+                      (FACE_LEFT + FACE_SIZE) << 2,
+                      (FACE_TOP + FACE_SIZE + playerIndex * FACE_SPACING) << 2,
+                      G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+      if (sIsShowingResult == TRUE && ++sFaceFrameTime >= FACE_FRAME_TIME) {
+        sFaceFrameTime = 0;
+        if (++sFaceFrameIndex >= FACE_LAST_FRAME + 1) {
+          if (++sFaceHoldCount >= FACE_HOLD_COUNT) {
+            row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+            if (sStarCount == REEL_COUNT) {
+              OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
+              ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
+              OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
+            } else {
+              OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
+              ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
+              OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
+            }
+            ReadEncodedAsset(sSlots->faceImages[playerIndex][1], &asset);
+            /* sFaceBufferIndex is cleared twice; it is there to match */
+            sFaceBufferIndex = 0;
+            sStarCount = 0;
+            sIsShowingResult = FALSE;
+            sFaceFrameTime = 0;
+            sFaceFrameIndex = 0;
+            sFaceBufferIndex = 0;
+            sFaceHoldCount = 0;
+            sSlots->playerIndex++;
+          }
         } else {
-            /* The tiles stay as the first strip set them */
-            gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, ((u32)sSlots->machineImage + texelOffset) & ~7);
-            gDPLoadSync(gfx++);
-            gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
-                         ((stripHeight * MACHINE_WIDTH + G_IM_SIZ_8b_INCR) >> G_IM_SIZ_8b_SHIFT) - 1,
-                         CALC_DXT(MACHINE_WIDTH, G_IM_SIZ_8b_BYTES));
+          row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+          OpenEncodedAsset(
+              ((sStarCount == REEL_COUNT) ? D_800C2650
+                                          : D_800C2780)[row][sFaceFrameIndex],
+              &asset);
+          ReadEncodedAsset(
+              sSlots->faceImages[playerIndex][sFaceBufferIndex ^ 1], &asset);
+          sFaceBufferIndex ^= 1;
         }
-        gDPPipeSync(gfx++);
-        DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2, (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2,
-                      (top + stripHeight - 1) << 2, G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        gDPPipeSync(gfx++);
-    }
-
-    /* The stop buttons pushed so far */
-    LoadLargePalette(&gfx, sSlots->buttonsImage + IMAGE_HEADER_SIZE);
-    for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
-        if (buttonIndex > sSlots->pressCount - 1) {
-            break;
-        }
-        for (stripIndex = 0; stripIndex != BUTTON_STRIP_COUNT; stripIndex++) {
-            LoadTextureBlock(&gfx,
-                          sSlots->buttonsImage
-                              + (LARGE_PALETTED_TEXELS_OFFSET + buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH
-                                 + stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH),
-                          G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            DrawTextureRect(&gfx, (buttonIndex * BUTTON_WIDTH + BUTTON_LEFT) << 2,
-                          (BUTTON_TOP + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
-                          (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + buttonIndex * BUTTON_WIDTH) << 2,
-                          (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
-                          G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            gDPPipeSync(gfx++);
-        }
+      }
+    } else {
+      LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI,
+                       G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
+      DrawTextureRect(
+          &gfx, OTHER_FACE_LEFT << 2,
+          (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,
+          (OTHER_FACE_LEFT + FACE_SIZE) << 2,
+          (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + playerIndex * FACE_SPACING)
+              << 2,
+          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
     gDPPipeSync(gfx++);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-
-    /* START!, growing while the reels speed up */
-    halfWidth = sinf(sStartAngle) * 64.0f + 20.0f;
-    startStripHeight = (sinf(sStartAngle) * 50.0f + 13.75f) * 0.2f;
-    dsdx = (START_WIDTH * TEXEL_STEP_ONE / 2) / halfWidth;
-    halfHeight = startStripHeight * 2.5f + 2.0f;
-    dtdy = (START_SHOWN_HEIGHT * TEXEL_STEP_ONE / 2) / halfHeight;
-    if (sClubSlotsState == CLUB_SLOTS_STARTING) {
-        sStartAngle = 0.0f;
-    }
-    if (sClubSlotsState == CLUB_SLOTS_SPEEDING) {
-        sStartAngle += START_ANGLE_STEP;
-        if (sStartAngle > START_MAX_ANGLE) {
-            sStartAngle = START_MAX_ANGLE;
-        }
-        gDPPipeSync(gfx++);
-        LoadLargePalette(&gfx, sSlots->startImage + IMAGE_HEADER_SIZE);
-        for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0; stripIndex != START_STRIP_COUNT;
-             stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
-            stripHeight = (stripIndex != START_STRIP_COUNT - 1) ? START_STRIP_HEIGHT : START_LAST_STRIP_HEIGHT;
-            gDPLoadTextureTile(gfx++, ((u32)sSlots->startImage + texelOffset) & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
-                               START_WIDTH, stripHeight, 0, 0, START_WIDTH - 1, stripHeight - 1, 0, G_TX_WRAP,
-                               G_TX_WRAP, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            gSPScisTextureRectangle(gfx++, (s32)(SCREEN_WIDTH / 2 - halfWidth) << 2,
-                                    (s32)((SCREEN_HEIGHT / 2 - halfHeight) + stripIndex * startStripHeight) << 2,
-                                    (s32)(halfWidth + SCREEN_WIDTH / 2) << 2,
-                                    (s32)((SCREEN_HEIGHT / 2 - halfHeight) + stripIndex * startStripHeight
-                                          + startStripHeight)
-                                        << 2,
-                                    G_TX_RENDERTILE, 0, 1 << 5, dsdx, dtdy);
-        }
-    }
-
-    /* The players' faces */
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPPipeSync(gfx++);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
-    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-        LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
-        if (playerIndex == sSlots->playerIndex) {
-            LoadTextureBlock(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex], G_IM_FMT_CI, G_IM_SIZ_8b,
-                          FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
-            gDPPipeSync(gfx++);
-            gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-            DrawTextureRect(&gfx, FACE_LEFT << 2, (FACE_TOP + playerIndex * FACE_SPACING) << 2,
-                          (FACE_LEFT + FACE_SIZE) << 2, (FACE_TOP + FACE_SIZE + playerIndex * FACE_SPACING) << 2,
-                          G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-            if (sIsShowingResult == TRUE && ++sFaceFrameTime >= FACE_FRAME_TIME) {
-                sFaceFrameTime = 0;
-                if (++sFaceFrameIndex >= FACE_LAST_FRAME + 1) {
-                    if (++sFaceHoldCount >= FACE_HOLD_COUNT) {
-                        row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
-                        if (sStarCount == REEL_COUNT) {
-                            OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
-                            ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
-                            OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
-                        } else {
-                            OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
-                            ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
-                            OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
-                        }
-                        ReadEncodedAsset(sSlots->faceImages[playerIndex][1], &asset);
-                        /* sFaceBufferIndex is cleared twice; it is there to match */
-                        sFaceBufferIndex = 0;
-                        sStarCount = 0;
-                        sIsShowingResult = FALSE;
-                        sFaceFrameTime = 0;
-                        sFaceFrameIndex = 0;
-                        sFaceBufferIndex = 0;
-                        sFaceHoldCount = 0;
-                        sSlots->playerIndex++;
-                    }
-                } else {
-                    row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
-                    OpenEncodedAsset(((sStarCount == REEL_COUNT) ? D_800C2650 : D_800C2780)[row][sFaceFrameIndex],
-                                     &asset);
-                    ReadEncodedAsset(sSlots->faceImages[playerIndex][sFaceBufferIndex ^ 1], &asset);
-                    sFaceBufferIndex ^= 1;
-                }
-            }
-        } else {
-            LoadTextureBlock(&gfx, g_PlayerFaceImages[playerIndex], G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0,
-                          0, 0, 0);
-            gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
-            DrawTextureRect(&gfx, OTHER_FACE_LEFT << 2, (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,
-                          (OTHER_FACE_LEFT + FACE_SIZE) << 2,
-                          (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + playerIndex * FACE_SPACING) << 2, G_TX_RENDERTILE, 0,
-                          0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        }
-        gDPPipeSync(gfx++);
-    }
-    gDPPipeSync(gfx++);
-    DrawClubSlotsLogo(&gfx, LOGO_X, LOGO_Y, 1.0f);
-    *displayListHead = gfx;
+  }
+  gDPPipeSync(gfx++);
+  DrawClubSlotsLogo(&gfx, LOGO_X, LOGO_Y, 1.0f);
+  *displayListHead = gfx;
 }
 
 #else
@@ -833,154 +901,166 @@ INCLUDE_ASM("asm/nonmatchings/ovl_10/club_slots", DrawClubSlots);
 #endif
 
 /* Draws the logo centered there, bobbing until the result, and its shine */
-void DrawClubSlotsLogo(Gfx **displayListHead, s32 centerX, s32 centerY, f32 scale) {
-    Gfx *gfx;
-    s32 starCount;
-    s32 symbolIndex;
-    s32 index; /* Counts the reels, then the strips; it is reused to match */
-    s32 shineTime;
-    f32 width;
-    f32 stripHeight;
-    f32 halfWidth;
-    f32 halfHeight;
-    f32 dsdx;
-    f32 dtdy;
-    f32 shineWidth;
-    f32 shineHeight;
-    f32 shineHalfWidth;
-    f32 shineHalfHeight;
-    f32 shineDsdx;
-    f32 shineDtdy;
+void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
+                       f32 scale) {
+  Gfx* gfx;
+  s32 starCount;
+  s32 symbolIndex;
+  s32 index; /* Counts the reels, then the strips; it is reused to match */
+  s32 shineTime;
+  f32 width;
+  f32 stripHeight;
+  f32 halfWidth;
+  f32 halfHeight;
+  f32 dsdx;
+  f32 dtdy;
+  f32 shineWidth;
+  f32 shineHeight;
+  f32 shineHalfWidth;
+  f32 shineHalfHeight;
+  f32 shineDsdx;
+  f32 shineDtdy;
 
-    gfx = *displayListHead;
-    starCount = 0;
-    if (sSlots->pressCount == LAST_REEL) {
-        for (index = 0; index != LAST_REEL; index++) {
-            symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
-            if (symbolIndex < 0) {
-                symbolIndex += REEL_SYMBOL_COUNT;
-            }
-            starCount += sReelStrips[index][symbolIndex] == SYMBOL_STAR;
-        }
-        if (IsGameFlagSet(GAME_FLAG_UNK55)) {
-            starCount = LAST_REEL;
-        }
+  gfx = *displayListHead;
+  starCount = 0;
+  if (sSlots->pressCount == LAST_REEL) {
+    for (index = 0; index != LAST_REEL; index++) {
+      symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
+      if (symbolIndex < 0) {
+        symbolIndex += REEL_SYMBOL_COUNT;
+      }
+      starCount += sReelStrips[index][symbolIndex] == SYMBOL_STAR;
     }
-    if (sIsShowingResult == FALSE) {
-        if (starCount == LAST_REEL) {
-            sLogoBobAngle += LOGO_BOB_STEP;
-            sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
-        } else {
-            sLogoBobAngle += LOGO_BOB_STEP;
-            sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
-            sLogoUnusedWord = 0;
-        }
+    if (IsGameFlagSet(GAME_FLAG_UNK55)) {
+      starCount = LAST_REEL;
+    }
+  }
+  if (sIsShowingResult == FALSE) {
+    if (starCount == LAST_REEL) {
+      sLogoBobAngle += LOGO_BOB_STEP;
+      sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
     } else {
-        sLogoUnusedWord = 0;
-        sLogoBobAngle = 0.0f;
-        sLogoBob = 0.0f;
+      sLogoBobAngle += LOGO_BOB_STEP;
+      sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
+      sLogoUnusedWord = 0;
     }
-    width = scale * LOGO_WIDTH;
-    stripHeight = scale * LOGO_STRIP_HEIGHT;
-    halfWidth = scale * (LOGO_WIDTH / 2);
-    halfHeight = scale * (LOGO_HEIGHT / 2);
-    if (width != 0.0f) {
-        dsdx = (LOGO_WIDTH * TEXEL_STEP_ONE) / width;
-    } else {
-        dsdx = 0.0f;
-    }
-    if (stripHeight != 0.0f) {
-        dtdy = (LOGO_STRIP_HEIGHT * TEXEL_STEP_ONE) / stripHeight;
-    } else {
-        dtdy = 0.0f;
-    }
-    shineWidth = scale * LOGO_WIDTH;
-    shineHeight = scale * LOGO_HEIGHT;
-    shineHalfWidth = scale * (LOGO_WIDTH / 2);
-    shineHalfHeight = scale * (LOGO_HEIGHT / 2);
-    if (shineWidth != 0.0f) {
-        shineDsdx = (SHINE_SIZE * TEXEL_STEP_ONE) / shineWidth;
-    } else {
-        shineDsdx = 0.0f;
-    }
-    if (shineHeight != 0.0f) {
-        shineDtdy = (SHINE_SIZE * TEXEL_STEP_ONE) / shineHeight;
-    } else {
-        shineDtdy = 0.0f;
-    }
+  } else {
+    sLogoUnusedWord = 0;
+    sLogoBobAngle = 0.0f;
+    sLogoBob = 0.0f;
+  }
+  width = scale * LOGO_WIDTH;
+  stripHeight = scale * LOGO_STRIP_HEIGHT;
+  halfWidth = scale * (LOGO_WIDTH / 2);
+  halfHeight = scale * (LOGO_HEIGHT / 2);
+  if (width != 0.0f) {
+    dsdx = (LOGO_WIDTH * TEXEL_STEP_ONE) / width;
+  } else {
+    dsdx = 0.0f;
+  }
+  if (stripHeight != 0.0f) {
+    dtdy = (LOGO_STRIP_HEIGHT * TEXEL_STEP_ONE) / stripHeight;
+  } else {
+    dtdy = 0.0f;
+  }
+  shineWidth = scale * LOGO_WIDTH;
+  shineHeight = scale * LOGO_HEIGHT;
+  shineHalfWidth = scale * (LOGO_WIDTH / 2);
+  shineHalfHeight = scale * (LOGO_HEIGHT / 2);
+  if (shineWidth != 0.0f) {
+    shineDsdx = (SHINE_SIZE * TEXEL_STEP_ONE) / shineWidth;
+  } else {
+    shineDsdx = 0.0f;
+  }
+  if (shineHeight != 0.0f) {
+    shineDtdy = (SHINE_SIZE * TEXEL_STEP_ONE) / shineHeight;
+  } else {
+    shineDtdy = 0.0f;
+  }
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+  gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_POINT);
+  gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
+  for (index = 0; index != LOGO_STRIP_COUNT; index++) {
+    gDPLoadTextureBlock(gfx++,
+                        ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+                         index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
+                            ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT,
+                        0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gSPScisTextureRectangle(
+        gfx++, (s32)(centerX - halfWidth) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
+        (s32)(centerX + halfWidth) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
+              sLogoBob)
+            << 2,
+        G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+  }
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PRIM);
+  gDPSetPrimDepth(gfx++, 16383, 0);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
+                    1, TEXEL0, 1);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++,
+                   GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
+                   G_RM_AA_ZB_TEX_EDGE2);
+  gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
+  for (index = 0; index != LOGO_STRIP_COUNT; index++) {
+    gDPLoadTextureBlock(gfx++,
+                        ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+                         index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
+                            ~7,
+                        G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT,
+                        0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gSPScisTextureRectangle(
+        gfx++, (s32)(centerX - halfWidth) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
+        (s32)(centerX + halfWidth) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
+              sLogoBob)
+            << 2,
+        G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
-    gDPSetTextureFilter(gfx++, G_TF_POINT);
-    gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
-    for (index = 0; index != LOGO_STRIP_COUNT; index++) {
-        gDPLoadTextureBlock(gfx++,
-                            ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET + index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)
-                                & ~7,
-                            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0,
-                            0);
-        gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-                                (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
-                                (s32)(centerX + halfWidth) << 2,
-                                (s32)((centerY - halfHeight) + index * stripHeight + stripHeight + sLogoBob) << 2,
-                                G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
-        gDPPipeSync(gfx++);
-    }
-    gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    gDPSetPrimDepth(gfx++, 16383, 0);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM), G_RM_AA_ZB_TEX_EDGE2);
-    gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
-    for (index = 0; index != LOGO_STRIP_COUNT; index++) {
-        gDPLoadTextureBlock(gfx++,
-                            ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET + index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)
-                                & ~7,
-                            G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP, 0, 0, 0,
-                            0);
-        gDPPipeSync(gfx++);
-        gSPScisTextureRectangle(gfx++, (s32)(centerX - halfWidth) << 2,
-                                (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
-                                (s32)(centerX + halfWidth) << 2,
-                                (s32)((centerY - halfHeight) + index * stripHeight + stripHeight + sLogoBob) << 2,
-                                G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
-        gDPPipeSync(gfx++);
-    }
-    gDPSetPrimDepth(gfx++, 16423, 0);
-    gDPPipeSync(gfx++);
-    gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-    gDPPipeSync(gfx++);
-    gDPSetTextureLUT(gfx++, G_TT_NONE);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
-    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0,
-                      0);
-    gDPPipeSync(gfx++);
-    gDPSetAlphaCompare(gfx++, G_AC_NONE);
-    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    LoadTextureBlock(&gfx, sShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I, G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0,
-                  0, 0, 0);
-    gDPPipeSync(gfx++);
-    shineTime = sShineTime++;
-    if (sShineTime >= SHINE_DELAY) {
-        gSPScisTextureRectangle(gfx++, (s32)(centerX - shineHalfWidth) << 2,
-                                (s32)((centerY - shineHalfHeight) + sLogoBob) << 2,
-                                (s32)(centerX + shineHalfWidth) << 2,
-                                (s32)(centerY + shineHalfHeight + sLogoBob) << 2, G_TX_RENDERTILE,
-                                (SHINE_SIZE - (shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED) << 5, 0,
-                                (s32)shineDsdx, (s32)shineDtdy);
-    }
-    gDPPipeSync(gfx++);
-    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
-    *displayListHead = gfx;
+  }
+  gDPSetPrimDepth(gfx++, 16423, 0);
+  gDPPipeSync(gfx++);
+  gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLUT(gfx++, G_TT_NONE);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+  gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
+                    PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
+  gDPPipeSync(gfx++);
+  gDPSetAlphaCompare(gfx++, G_AC_NONE);
+  gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+  LoadTextureBlock(&gfx, sShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+                   G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+  gDPPipeSync(gfx++);
+  shineTime = sShineTime++;
+  if (sShineTime >= SHINE_DELAY) {
+    gSPScisTextureRectangle(
+        gfx++, (s32)(centerX - shineHalfWidth) << 2,
+        (s32)((centerY - shineHalfHeight) + sLogoBob) << 2,
+        (s32)(centerX + shineHalfWidth) << 2,
+        (s32)(centerY + shineHalfHeight + sLogoBob) << 2, G_TX_RENDERTILE,
+        (SHINE_SIZE - (shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED) << 5, 0,
+        (s32)shineDsdx, (s32)shineDtdy);
+  }
+  gDPPipeSync(gfx++);
+  gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+  *displayListHead = gfx;
 }
 
-void DoNothingInClubSlots(void) {
-}
+void DoNothingInClubSlots(void) {}

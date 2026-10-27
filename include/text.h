@@ -13,9 +13,9 @@
  * The render mode for text, blending it over the frame by its coverage.
  * It is a macro, as it pastes the cycle number into the blender macro.
  */
-#define TextRenderMode(cycle)                                                \
-    (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA |          \
-     GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
+#define TextRenderMode(cycle)                                     \
+  (IM_RD | CLR_ON_CVG | CVG_DST_CLAMP | ZMODE_OPA | CVG_X_ALPHA | \
+   GBL_c##cycle(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM))
 
 #define TEXT_SLOT_COUNT 12
 #define TEXT_SLOT_VALUE_COUNT 4
@@ -62,17 +62,17 @@
 #define TEXT_PALETTE_COLOR_COUNT 4
 
 typedef struct TextSlot {
-    /* 0x00 */ s32 x;
-    /* 0x04 */ s32 y;
-    /* 0x08 */ s32 fontSize;
-    /* 0x0C */ s32 shownCount;
-    /* 0x10 */ s32 flags;
-    /* 0x14 */ s32 messageId;
-    /* 0x18 */ u8 red;
-    /* 0x19 */ u8 green;
-    /* 0x1A */ u8 blue;
-    /* 0x1B */ u8 alpha;
-    /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
+  /* 0x00 */ s32 x;
+  /* 0x04 */ s32 y;
+  /* 0x08 */ s32 fontSize;
+  /* 0x0C */ s32 shownCount;
+  /* 0x10 */ s32 flags;
+  /* 0x14 */ s32 messageId;
+  /* 0x18 */ u8 red;
+  /* 0x19 */ u8 green;
+  /* 0x1A */ u8 blue;
+  /* 0x1B */ u8 alpha;
+  /* 0x1C */ s32 values[TEXT_SLOT_VALUE_COUNT];
 } TextSlot; /* size = 0x2C */
 
 /*
@@ -101,44 +101,46 @@ typedef struct TextSlot {
 #define NO_FONT_SIZE (-1)
 
 /* The font that DrawShadowedText and its kin draw */
-extern void *g_ShadowedFontImage;
+extern void* g_ShadowedFontImage;
 
 void LoadTextAssets(void);
 void FreeTextAssets(void);
 void ClearTextSlots(void);
-void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y, char *text);
+void PlaceGlyphGroup(s32 group, s32 fontSize, s32 flags, s32 x, s32 y,
+                     char* text);
 void SetTextPaletteColor(s32 red, s32 green, s32 blue, s32 colorIndex);
 void SetTextSlotValue(s32 value, s32 slot, s32 valueIndex);
-void SetTextName(char *name);
-void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags, u8 red, u8 green, u8 blue,
-                 u8 alpha);
-void SetUpTextDrawing(Gfx **displayListHead);
-void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
-void SetUpGradientTextDrawing(Gfx **displayListHead, s32 gradient);
-void DrawTextSlots(Gfx **displayListHead);
-void DrawLargeTextSlot(Gfx **displayListHead, s32 slot);
-void DrawLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawTextStub(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawFixedWidthLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCenteredLargeText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCenteredMediumText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawGlyphGroup(Gfx **displayListHead, s32 group);
-void SetUpPerspectiveTextDrawing(Gfx **displayListHead);
+void SetTextName(char* name);
+void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
+                 u8 red, u8 green, u8 blue, u8 alpha);
+void SetUpTextDrawing(Gfx** displayListHead);
+void SetTextColor(Gfx** displayListHead, s32 red, s32 green, s32 blue);
+void SetUpGradientTextDrawing(Gfx** displayListHead, s32 gradient);
+void DrawTextSlots(Gfx** displayListHead);
+void DrawLargeTextSlot(Gfx** displayListHead, s32 slot);
+void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawTextStub(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawGlyphGroup(Gfx** displayListHead, s32 group);
+void SetUpPerspectiveTextDrawing(Gfx** displayListHead);
 void RevealTextSlot(s32 slot);
 s32 IsTextSlotRevealed(s32 slot);
-s32 MeasureText(char *text, s32 fontSize, s32 flags);
-void MeasureMessage(s32 messageId, s32 fontSize, s32 *width, s32 *height, s32 slot);
-void DrawSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void BeginShadowedText(Gfx **displayListHead);
-void DrawCenteredSmallText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCondensedShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCenteredNarrowText(Gfx **displayListHead, s16 x, s16 y, char *text);
-void DrawCenteredShadowedText(Gfx **displayListHead, s16 x, s16 y, char *text);
+s32 MeasureText(char* text, s32 fontSize, s32 flags);
+void MeasureMessage(s32 messageId, s32 fontSize, s32* width, s32* height,
+                    s32 slot);
+void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void BeginShadowedText(Gfx** displayListHead);
+void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCondensedShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text);
+void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text);
 s32 GetDigitGlyphTop(char code);
-void DrawDigitText(Gfx **displayListHead, s32 x, s32 y, char *text);
-void DrawLargeTextWithShadow(Gfx **displayListHead, s32 x, s32 y, char *text, s32 envColor, s32 primColor,
-                             s32 flags);
+void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text);
+void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
+                             s32 envColor, s32 primColor, s32 flags);
 
 #endif

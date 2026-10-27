@@ -2,9 +2,11 @@
 #define PIN_H
 
 #include <ultra64.h>
+
 #include "camera.h"
 
-/* How many times its model's size the pin, the cup and the ball's trail are drawn */
+/* How many times its model's size the pin, the cup and the ball's trail are
+ * drawn */
 extern s32 g_PinVertexScale;
 /* Set while the camera shows the cup up close, at twice the distance from it */
 extern s32 g_IsCupViewShown;
@@ -17,6 +19,6 @@ void FreePinTextures(void);
 void TakePinOut(void);
 void SkipNextPinDraw(void);
 s32 IsPinInCup(void);
-void DrawPin(CameraMatrices *matrices, CameraView *view, s32 cameraIndex);
+void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex);
 
 #endif

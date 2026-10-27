@@ -15,7 +15,7 @@ typedef s64 M2C_UNK64;
 #define M2C_BREAK() (0)
 #define M2C_SYNC() (0)
 #define M2C_CARRY 0
-#define M2C_FIELD(expr, type, offset) (*(type)((s8 *)(expr) + (offset)))
+#define M2C_FIELD(expr, type, offset) (*(type)((s8*)(expr) + (offset)))
 #define M2C_BITWISE(type, expr) ((type)(expr))
 #define M2C_STRUCT_COPY(dst, src) (*(dst) = *(src))
 #define M2C_LWL(expr) (expr)

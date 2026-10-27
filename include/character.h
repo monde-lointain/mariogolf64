@@ -29,9 +29,11 @@
 
 /* The first of each character's image assets, of which its face is first */
 extern u16 g_CharacterImageAssets[CHARACTER_COUNT];
-/* Added to a character's g_CharacterImageAssets entry for the face that menus show */
+/* Added to a character's g_CharacterImageAssets entry for the face that menus
+ * show */
 #define CHARACTER_FACE_IMAGE_OFFSET 9
-/* The asset file of each character's first palette, followed by those of its other colours */
+/* The asset file of each character's first palette, followed by those of its
+ * other colours */
 extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 #define CHARACTER_PALETTE_COUNT 4
 
@@ -42,17 +44,18 @@ extern s16 g_CharacterPaletteAssets[CHARACTER_COUNT];
 
 /* A character imported from the Game Boy Color version */
 typedef struct ImportedCharacter {
-    /* 0x00 */ s16 character;
-    /* 0x02 */ s16 unk2;
-    /* 0x04 */ s16 unk4;
-    /* 0x06 */ s16 unk6;
-    /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
-    /* 0x14 */ s8 unk14;
+  /* 0x00 */ s16 character;
+  /* 0x02 */ s16 unk2;
+  /* 0x04 */ s16 unk4;
+  /* 0x06 */ s16 unk6;
+  /* 0x08 */ s8 name[IMPORTED_CHARACTER_NAME_LENGTH];
+  /* 0x14 */ s8 unk14;
 } ImportedCharacter; /* size = 0x16 */
 
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
-/* Each character's face palette file in each of the character's colour schemes */
+/* Each character's face palette file in each of the character's colour schemes
+ */
 extern s16 D_800C2590[][CHARACTER_PALETTE_COUNT];
 
 #endif

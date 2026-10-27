@@ -9,7 +9,8 @@
 /* The sound of confirming a choice */
 #define SOUND_CONFIRM 0x5D
 
-/* The sound of a menu choice that cannot be made, or a cursor that cannot move that way */
+/* The sound of a menu choice that cannot be made, or a cursor that cannot move
+ * that way */
 #define SOUND_MENU_BLOCKED 0x63
 
 /*
@@ -28,9 +29,12 @@
 #define SONG_MATCH_RESULT 10
 
 /* PlaySong's flags */
-#define SONG_FLAG_UNREAD 0x01  /* Passed by some callers, but PlaySong never tests it */
-#define SONG_FLAG_UNK10 0x10   /* Stops the song instead when SAVE_OPTION_UNK0 is set */
-#define SONG_FLAG_RESTART 0x80 /* Restarts the song if it is already playing */
+/* Passed by some callers, but PlaySong never tests it */
+#define SONG_FLAG_UNREAD 0x01
+/* Stops the song instead when SAVE_OPTION_UNK0 is set */
+#define SONG_FLAG_UNK10 0x10
+/* Restarts the song if it is already playing */
+#define SONG_FLAG_RESTART 0x80
 
 /* The song id when no song is playing */
 #define NO_SONG -1
@@ -39,15 +43,18 @@
 extern s32 g_NextSoundChannel;
 
 void PlaySound(s32 soundId, s32 channel, s32 volume);
-void PlaySoundWithEffects(s32 soundId, s32 channel, s32 volume, s32 reverb, s32 pan);
+void PlaySoundWithEffects(s32 soundId, s32 channel, s32 volume, s32 reverb,
+                          s32 pan);
 void StopSound(s32 channel);
 void SetSoundPan(s32 channel, s32 pan);
 void SetSoundVolume(s32 channel, s32 volume);
 void SetSoundReverb(s32 channel, s32 reverb);
 void FadeOutSound(s32 channel, u32 frameCount);
 void SetSoundTempo(s32 channel, s32 tempo);
-void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan);
-void QueueCharacterSound(s32 character, s32 slot, s32 kind, s32 volume, s32 pan);
+void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume,
+                        s32 pan);
+void QueueCharacterSound(s32 character, s32 slot, s32 kind, s32 volume,
+                         s32 pan);
 void SetSoundFrequencyOffset(s32 channel, f32 offset);
 s32 UpdateAudio(void);
 void StopSong(s32 fadeFrameCount);

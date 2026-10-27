@@ -24,16 +24,16 @@
 #define MODULE_UNK1 1
 
 typedef struct Overlay {
-    /* 0x00 */ s8 isLoaded;
-    /* 0x04 */ s8 *moduleIds; /* Terminated by MODULE_ID_END */
-    /* 0x08 */ u32 romStart;
-    /* 0x0C */ u32 romEnd;
-    /* 0x10 */ u8 *vramStart;
-    /* 0x14 */ u8 *textEnd;
-    /* 0x18 */ u8 *bssStart;
-    /* 0x1C */ u8 *bssEnd;
-    /* 0x20 */ void (*onLoad)(void);
-    /* 0x24 */ void (*onUnload)(void);
+  /* 0x00 */ s8 isLoaded;
+  /* 0x04 */ s8* moduleIds; /* Terminated by MODULE_ID_END */
+  /* 0x08 */ u32 romStart;
+  /* 0x0C */ u32 romEnd;
+  /* 0x10 */ u8* vramStart;
+  /* 0x14 */ u8* textEnd;
+  /* 0x18 */ u8* bssStart;
+  /* 0x1C */ u8* bssEnd;
+  /* 0x20 */ void (*onLoad)(void);
+  /* 0x24 */ void (*onUnload)(void);
 } Overlay; /* size = 0x28 */
 
 void OnLoadOverlay2(void);

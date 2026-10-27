@@ -19,18 +19,18 @@
  * in the hole_editor overlay, and the hole-editor names below follow the
  * menu's labels until those routines are decompiled.
  */
-#define SCENE_MAP_OVERVIEW 0    /* Moves the camera over the miniature map */
+#define SCENE_MAP_OVERVIEW 0 /* Moves the camera over the miniature map */
 #define SCENE_HEIGHTS 1
-#define SCENE_GROUND_CAMERA 2   /* Flies the camera just above the ground */
+#define SCENE_GROUND_CAMERA 2 /* Flies the camera just above the ground */
 #define SCENE_TREES 3
 #define SCENE_PIN 5
-#define SCENE_PLAY_HOLE 7       /* Picks the conditions and starts a hole */
+#define SCENE_PLAY_HOLE 7 /* Picks the conditions and starts a hole */
 #define SCENE_FLAG_PANEL 8
-#define SCENE_UNK9 9            /* A top-down map scene */
-#define SCENE_UNK10 10          /* A top-down map scene */
+#define SCENE_UNK9 9   /* A top-down map scene */
+#define SCENE_UNK10 10 /* A top-down map scene */
 #define SCENE_UNK11 11
-#define SCENE_PLAY_UNK12 12     /* Updates like SCENE_PLAY_HOLE */
-#define SCENE_PLAY_UNK13 13     /* Updates like SCENE_PLAY_HOLE */
+#define SCENE_PLAY_UNK12 12 /* Updates like SCENE_PLAY_HOLE */
+#define SCENE_PLAY_UNK13 13 /* Updates like SCENE_PLAY_HOLE */
 #define SCENE_MENU 14
 #define SCENE_TITLE_SCREEN 21
 #define SCENE_TRIANGLES 15
@@ -89,9 +89,9 @@ extern s32 g_SubModuleState;
 #define GAME_MODE_UNK6 6
 
 /*
- * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount in this
- * mode, and its scorecard page shows each hole's time and the round's score.
- * EndHoleFlyover skips its call for a strong wind in it.
+ * The walkthrough's Speed Golf: the HUD shows g_GameState.stopwatchFrameCount
+ * in this mode, and its scorecard page shows each hole's time and the round's
+ * score. EndHoleFlyover skips its call for a strong wind in it.
  */
 #define GAME_MODE_SPEED_GOLF 7
 

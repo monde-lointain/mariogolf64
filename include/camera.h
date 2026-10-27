@@ -14,41 +14,41 @@
 
 /* What a camera sees and where on the screen it draws */
 typedef struct CameraView {
-    /* 0x00 */ Vec3 eye;
-    /* 0x0C */ Vec3 lookAt;
-    /* 0x18 */ f32 heading; /* In radians; the map camera turns by it */
-    /* 0x1C */ s32 scissorX;
-    /* 0x20 */ s32 scissorY;
-    /* 0x24 */ s32 scissorWidth;
-    /* 0x28 */ s32 scissorHeight;
-    /* 0x2C */ s32 unreadSettings[2]; /* Set by StartGame, never read */
-    /* 0x34 */ s32 viewportCenterX;   /* In half pixels */
-    /* 0x38 */ s32 viewportCenterY;
-    /* 0x3C */ f32 zoom;
-    /* 0x40 */ s32 drawFlags; /* CAMERA_DRAW_* bits */
-    /* 0x44 */ f32 fieldOfView; /* In degrees */
-    /* 0x48 */ s32 mode;
+  /* 0x00 */ Vec3 eye;
+  /* 0x0C */ Vec3 lookAt;
+  /* 0x18 */ f32 heading; /* In radians; the map camera turns by it */
+  /* 0x1C */ s32 scissorX;
+  /* 0x20 */ s32 scissorY;
+  /* 0x24 */ s32 scissorWidth;
+  /* 0x28 */ s32 scissorHeight;
+  /* 0x2C */ s32 unreadSettings[2]; /* Set by StartGame, never read */
+  /* 0x34 */ s32 viewportCenterX;   /* In half pixels */
+  /* 0x38 */ s32 viewportCenterY;
+  /* 0x3C */ f32 zoom;
+  /* 0x40 */ s32 drawFlags;   /* CAMERA_DRAW_* bits */
+  /* 0x44 */ f32 fieldOfView; /* In degrees */
+  /* 0x48 */ s32 mode;
 } CameraView; /* size = 0x4C */
 
 typedef struct Camera {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ CameraView view;
+  /* 0x00 */ s32 unk0;
+  /* 0x04 */ CameraView view;
 } Camera; /* size = 0x50 */
 
 extern Camera g_Cameras[];
 
 /* The matrices that DrawGame builds for one camera in one frame */
 typedef struct CameraMatrices {
-    /* 0x000 */ Mtx perspective;
-    /* 0x040 */ Mtx viewing;
-    /* 0x080 */ Mtx placement;     /* Between the projection and the view */
-    /* 0x0C0 */ Mtx billboard;     /* Turns billboards to face the camera */
-    /* 0x100 */ Mtx antiBillboard; /* The opposite turn */
-    /* 0x140 */ Mat4 perspectiveF;
-    /* 0x180 */ Mat4 viewingF;
-    /* 0x1C0 */ Mtx projection; /* perspectiveF and viewingF combined */
-    /* 0x200 */ LookAt lookAt;
-    /* 0x220 */ u8 unk220[0x10];
+  /* 0x000 */ Mtx perspective;
+  /* 0x040 */ Mtx viewing;
+  /* 0x080 */ Mtx placement;     /* Between the projection and the view */
+  /* 0x0C0 */ Mtx billboard;     /* Turns billboards to face the camera */
+  /* 0x100 */ Mtx antiBillboard; /* The opposite turn */
+  /* 0x140 */ Mat4 perspectiveF;
+  /* 0x180 */ Mat4 viewingF;
+  /* 0x1C0 */ Mtx projection; /* perspectiveF and viewingF combined */
+  /* 0x200 */ LookAt lookAt;
+  /* 0x220 */ u8 unk220[0x10];
 } CameraMatrices; /* size = 0x230 */
 
 /* The camera of the inset view, a window over the main view */
@@ -61,17 +61,17 @@ typedef struct CameraMatrices {
 
 /* How the inset view opens and closes */
 typedef struct InsetView {
-    /* 0x00 */ s32 animation; /* INSET_VIEW_* */
-    /* 0x04 */ s32 step;
-    /* 0x08 */ s32 unk8;
-    /* 0x0C */ s32 unkC;
+  /* 0x00 */ s32 animation; /* INSET_VIEW_* */
+  /* 0x04 */ s32 step;
+  /* 0x08 */ s32 unk8;
+  /* 0x0C */ s32 unkC;
 } InsetView; /* size = 0x10 */
 
 extern InsetView g_InsetView;
 
 void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height);
 void SetLandingWaitFrameCount(s32 frameCount);
-void BuildRingTexels(u8 *texels, s32 width, s32 height, s32 outerRadius);
+void BuildRingTexels(u8* texels, s32 width, s32 height, s32 outerRadius);
 void UpdateInsetView(void);
 
 /* Looks down on the course for the map views */

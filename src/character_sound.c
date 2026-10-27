@@ -1,4 +1,5 @@
 #include "common.h"
+
 #include "sound.h"
 
 #define CHARACTER_COUNT 18
@@ -17,15 +18,20 @@
 
 extern s16 sCharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT];
 
-/* Plays a character's sound, where soundIndex is the sound's pair's first value */
-void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume, s32 pan) {
-    s32 reverb = (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
+/* Plays a character's sound, where soundIndex is the sound's pair's first value
+ */
+void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume,
+                        s32 pan) {
+  s32 reverb = (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
 
-    if (volume == CHARACTER_SOUND_VOLUME) {
-        PlaySoundWithEffects(sCharacterSounds[character][soundIndex], slot + FIRST_CHARACTER_SOUND_CHANNEL,
-                             sCharacterSounds[character][soundIndex + 1], reverb, pan);
-    } else {
-        PlaySoundWithEffects(sCharacterSounds[character][soundIndex], slot + FIRST_CHARACTER_SOUND_CHANNEL, volume,
-                             reverb, pan);
-    }
+  if (volume == CHARACTER_SOUND_VOLUME) {
+    PlaySoundWithEffects(sCharacterSounds[character][soundIndex],
+                         slot + FIRST_CHARACTER_SOUND_CHANNEL,
+                         sCharacterSounds[character][soundIndex + 1], reverb,
+                         pan);
+  } else {
+    PlaySoundWithEffects(sCharacterSounds[character][soundIndex],
+                         slot + FIRST_CHARACTER_SOUND_CHANNEL, volume, reverb,
+                         pan);
+  }
 }

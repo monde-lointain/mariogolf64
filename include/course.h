@@ -31,7 +31,8 @@
 #define COURSE_YOSHIS_ISLAND 3
 #define COURSE_MARIOS_STAR 5
 
-/* HoleRecord.flags; the main courses mark three or four par 5s and every par 3 */
+/* HoleRecord.flags; the main courses mark three or four par 5s and every par 3
+ */
 #define HOLE_FLAG_MARKED_PAR_FIVE (1 << 0)
 #define HOLE_FLAG_PAR_THREE (1 << 1)
 
@@ -40,22 +41,22 @@
 #define TOURNAMENT_NAME_SIZE 25
 
 typedef struct HoleRecord {
-    /* 0x0 */ u8 par;
-    /* 0x1 */ s8 handicap; /* Ranks a course's holes from 1 to 18 */
-    /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
-    /* 0x8 */ u8 flags;
-    /* 0x9 */ u8 unk9;
+  /* 0x0 */ u8 par;
+  /* 0x1 */ s8 handicap;     /* Ranks a course's holes from 1 to 18 */
+  /* 0x2 */ u16 yardages[3]; /* The three are equal in every hole */
+  /* 0x8 */ u8 flags;
+  /* 0x9 */ u8 unk9;
 } HoleRecord; /* size = 0xA */
 
 typedef struct CourseRecord {
-    /* 0x00 */ char name[20];
-    /* 0x14 */ HoleRecord holes[18];
+  /* 0x00 */ char name[20];
+  /* 0x14 */ HoleRecord holes[18];
 } CourseRecord; /* size = 0xC8 */
 
 /* A Ring Shot hole is one of the holes of a course record */
 typedef struct RingShotHole {
-    /* 0x0 */ u8 courseRecordIndex;
-    /* 0x1 */ u8 holeIndex;
+  /* 0x0 */ u8 courseRecordIndex;
+  /* 0x1 */ u8 holeIndex;
 } RingShotHole; /* size = 0x2 */
 
 extern s32 g_CourseIndex;

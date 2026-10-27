@@ -2,6 +2,7 @@
 #define SAVE_H
 
 #include <ultra64.h>
+
 #include "character.h"
 #include "club.h"
 #include "variables.h"
@@ -15,9 +16,10 @@
 /* The games saved partway through, to continue later */
 #define SAVED_GAME_COUNT 3
 #define MAX_PLAYER_COUNT 4
-/* The face of each player's character, and its palette in the player's colours */
-extern u8 *g_PlayerFaceImages[MAX_PLAYER_COUNT];
-extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
+/* The face of each player's character, and its palette in the player's colours
+ */
+extern u8* g_PlayerFaceImages[MAX_PLAYER_COUNT];
+extern u16* g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 
 /* The most rings that a hole of Ring Shot has */
 #define RING_COUNT 3
@@ -26,7 +28,8 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
    the frames of the ring fading out, while sparkles circle it */
 #define RING_STATE_NONE 0
 #define RING_STATE_SHOWN 1
-/* The state a ring takes when the ball passes through it, the first frame of its fade */
+/* The state a ring takes when the ball passes through it, the first frame of
+ * its fade */
 #define RING_STATE_PASSED 2
 #define RING_STATE_FADED 32
 
@@ -58,7 +61,8 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
-#define SAVE_OPTION_GRID_COLOR 2 /* Copied into each player's UnkB8.gridColor */
+/* Copied into each player's UnkB8.gridColor */
+#define SAVE_OPTION_GRID_COLOR 2
 #define SAVE_OPTION_UNK3 3
 #define SAVE_OPTION_COUNT 4
 
@@ -85,20 +89,20 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define SAVE_UNK1344_ENTRY_COUNT 18
 
 typedef struct Unk68 {
-    /* 0x00 */ s32 unk0[0x2C / 4];
-    /* 0x2C */ s8 unk2C;
-    /* 0x2D */ u8 unk2D[0x34 - 0x2D];
-    /* 0x34 */ u8 unk34;
-    /* 0x35 */ u8 unk35;
-    /* 0x36 */ s8 unk36;
-    /* 0x37 */ u8 unk37;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 unk3D;
-    /* 0x3E */ u8 unk3E[0x68 - 0x3E];
+  /* 0x00 */ s32 unk0[0x2C / 4];
+  /* 0x2C */ s8 unk2C;
+  /* 0x2D */ u8 unk2D[0x34 - 0x2D];
+  /* 0x34 */ u8 unk34;
+  /* 0x35 */ u8 unk35;
+  /* 0x36 */ s8 unk36;
+  /* 0x37 */ u8 unk37;
+  /* 0x38 */ u8 unk38;
+  /* 0x39 */ u8 unk39;
+  /* 0x3A */ u8 unk3A;
+  /* 0x3B */ u8 unk3B;
+  /* 0x3C */ u8 unk3C;
+  /* 0x3D */ u8 unk3D;
+  /* 0x3E */ u8 unk3E[0x68 - 0x3E];
 } Unk68; /* size = 0x68 */
 
 /* GameState.holeSelection values; code tests the nines as bits */
@@ -110,10 +114,12 @@ typedef struct Unk68 {
 #define BET_LONGEST_DRIVE 0 /* On marked par 5 holes */
 #define BET_NEAREST_PIN 1   /* On par 3 holes */
 #define BET_STROKES 2       /* Paid per stroke, between each pair of players */
-#define BET_NASSAU 3        /* Paid on the front nine, the back nine and the round */
-#define BET_UNK4 4          /* Settled on each hole; a tie carries the pot over */
-#define BET_UNK5 5          /* Settled as BET_UNK4, when that bet is not set */
-#define BET_LAS_VEGAS 6     /* Paid per stroke, between the two teams of two */
+/* Paid on the front nine, the back nine and the round */
+#define BET_NASSAU 3
+/* Settled on each hole; a tie carries the pot over */
+#define BET_UNK4 4
+#define BET_UNK5 5      /* Settled as BET_UNK4, when that bet is not set */
+#define BET_LAS_VEGAS 6 /* Paid per stroke, between the two teams of two */
 #define BET_COUNT 7
 /* The rate of a bet that is not played */
 #define UNSET_BET_RATE (-1)
@@ -134,79 +140,82 @@ typedef struct Unk68 {
  * of them on their own, such as g_GameMode, g_CourseIndex and g_HoleIndex.
  */
 typedef struct GameState {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 gameMode;
-    /* 0x08 */ s32 playerCount;
-    /* 0x0C */ s32 courseIndex;
-    /* 0x10 */ s32 holeIndex;
-    /* 0x14 */ s32 unk14;
-    /* 0x18 */ s32 unk18;
-    /* 0x1C */ s32 unk1C;
-    /* 0x20 */ s32 unk20;
-    /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
-    /* 0x28 */ s32 stopwatchFrameCount; /* The time the stopwatch modes show, in frames */
-    /* 0x2C */ s32 unk2C;
-    /* 0x30 */ s8 unk30;
-    /* 0x31 */ s8 unk31;
-    /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
-    /* 0x39 */ u8 unk39;
-    /* 0x3A */ s8 isMiniGolf;
-    /* 0x3B */ u8 unk3B[0x3D - 0x3B];
-    /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
-    /* 0x3E */ s16 carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */
-} GameState; /* size = 0x44 */
+  /* 0x00 */ s32 unk0;
+  /* 0x04 */ s32 gameMode;
+  /* 0x08 */ s32 playerCount;
+  /* 0x0C */ s32 courseIndex;
+  /* 0x10 */ s32 holeIndex;
+  /* 0x14 */ s32 unk14;
+  /* 0x18 */ s32 unk18;
+  /* 0x1C */ s32 unk1C;
+  /* 0x20 */ s32 unk20;
+  /* 0x24 */ s32 holeSelection; /* A HOLE_SELECTION_* value */
+  /* 0x28 */ s32
+      stopwatchFrameCount; /* The time the stopwatch modes show, in frames */
+  /* 0x2C */ s32 unk2C;
+  /* 0x30 */ s8 unk30;
+  /* 0x31 */ s8 unk31;
+  /* 0x32 */ s8 betRates[BET_COUNT]; /* What each BET_* bet is worth */
+  /* 0x39 */ u8 unk39;
+  /* 0x3A */ s8 isMiniGolf;
+  /* 0x3B */ u8 unk3B[0x3D - 0x3B];
+  /* 0x3D */ s8 saveCount; /* Raised by one, up to 99, when the game is saved */
+  /* 0x3E */ s16
+      carriedPots[CARRIED_POT_COUNT]; /* The pots that tied holes carry over */
+} GameState;                          /* size = 0x44 */
 
 typedef struct Unk800BA9D8 {
-    /* 0x00 */ CoursePoint cupPosition;
-    /* 0x0C */ CoursePoint teePosition;    /* Where each player starts the hole */
-    /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
-    /* 0x2C */ s8 par;                     /* g_HolePar */
-    /* 0x2D */ s8 nextCupIndex;            /* sNextCupIndex */
-    /* 0x2E */ u8 unk2E[0x34 - 0x2E];
+  /* 0x00 */ CoursePoint cupPosition;
+  /* 0x0C */ CoursePoint teePosition;   /* Where each player starts the hole */
+  /* 0x18 */ HoleConditions conditions; /* g_HoleConditions */
+  /* 0x2C */ s8 par;                    /* g_HolePar */
+  /* 0x2D */ s8 nextCupIndex;           /* sNextCupIndex */
+  /* 0x2E */ u8 unk2E[0x34 - 0x2E];
 } Unk800BA9D8; /* size = 0x34 */
 
 /* A shot as a record keeps it, from the CurrentShot it was played with */
 typedef struct RecordedShot {
-    /* 0x0 */ u16 heading;
-    /* 0x2 */ s8 unk2;
-    /* 0x3 */ s8 unk3;
-    /* 0x4 */ s8 shotMode;
-    /* 0x5 */ s8 clubSlot;
-    /* 0x6 */ s8 unk6;
-    /* 0x7 */ s8 unk7;
+  /* 0x0 */ u16 heading;
+  /* 0x2 */ s8 unk2;
+  /* 0x3 */ s8 unk3;
+  /* 0x4 */ s8 shotMode;
+  /* 0x5 */ s8 clubSlot;
+  /* 0x6 */ s8 unk6;
+  /* 0x7 */ s8 unk7;
 } RecordedShot; /* size = 0x8 */
 
 /* A hole that a player finished in few strokes, kept to be replayed */
 typedef struct PlayRecord {
-    /* 0x00 */ Unk800BA9D8 hole;
-    /* 0x34 */ s32 gameMode;
-    /* 0x38 */ s8 courseIndex;
-    /* 0x39 */ s8 holeIndex;
-    /* 0x3A */ u8 scoreKind; /* What func_80060190 returns for the strokes */
-    /* 0x3B */ u8 characterIndex;
-    /* 0x3C */ u8 unk3C;
-    /* 0x3D */ u8 paletteIndex;
-    /* 0x3E */ u8 strokeCount;
-    /* 0x3F */ u8 unk3F;
-    /* 0x40 */ s32 unk40;
-    /* 0x44 */ RecordedShot shots[4]; /* RecordHoleOut writes a fifth past the end */
-    /* 0x64 */ u8 unk64[0x68 - 0x64];
+  /* 0x00 */ Unk800BA9D8 hole;
+  /* 0x34 */ s32 gameMode;
+  /* 0x38 */ s8 courseIndex;
+  /* 0x39 */ s8 holeIndex;
+  /* 0x3A */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+  /* 0x3B */ u8 characterIndex;
+  /* 0x3C */ u8 unk3C;
+  /* 0x3D */ u8 paletteIndex;
+  /* 0x3E */ u8 strokeCount;
+  /* 0x3F */ u8 unk3F;
+  /* 0x40 */ s32 unk40;
+  /* 0x44 */ RecordedShot
+      shots[4]; /* RecordHoleOut writes a fifth past the end */
+  /* 0x64 */ u8 unk64[0x68 - 0x64];
 } PlayRecord; /* size = 0x68 */
 
 /* A Ring Shot hole as a player played it, kept to be replayed */
 typedef struct RingShotRecord {
-    /* 0x00 */ Unk800BA9D8 hole;
-    /* 0x34 */ s8 courseIndex;
-    /* 0x35 */ s8 holeIndex;
-    /* 0x36 */ u8 scoreKind; /* What func_80060190 returns for the strokes */
-    /* 0x37 */ u8 characterIndex;
-    /* 0x38 */ u8 unk38;
-    /* 0x39 */ u8 paletteIndex;
-    /* 0x3A */ u8 strokeCount;
-    /* 0x3B */ u8 unk3B;
-    /* 0x3C */ s32 unk3C;
-    /* 0x40 */ RecordedShot shots[4]; /* RecordRingShotHole writes up to six */
-    /* 0x60 */ u8 unk60[0x68 - 0x60];
+  /* 0x00 */ Unk800BA9D8 hole;
+  /* 0x34 */ s8 courseIndex;
+  /* 0x35 */ s8 holeIndex;
+  /* 0x36 */ u8 scoreKind; /* What func_80060190 returns for the strokes */
+  /* 0x37 */ u8 characterIndex;
+  /* 0x38 */ u8 unk38;
+  /* 0x39 */ u8 paletteIndex;
+  /* 0x3A */ u8 strokeCount;
+  /* 0x3B */ u8 unk3B;
+  /* 0x3C */ s32 unk3C;
+  /* 0x40 */ RecordedShot shots[4]; /* RecordRingShotHole writes up to six */
+  /* 0x60 */ u8 unk60[0x68 - 0x60];
 } RingShotRecord; /* size = 0x68 */
 
 extern Unk800BA9D8 D_800BA9D8;
@@ -224,14 +233,14 @@ extern s32 g_TeePositionZ;
 
 /* The current round's statistics, for the course's records */
 typedef struct RoundStats {
-    /* 0x00 */ s32 unk0;
-    /* 0x04 */ s32 unk4;
-    /* 0x08 */ s32 measuredDriveCount;
-    /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
-    /* 0x10 */ s32 averagedDriveTotal;
-    /* 0x14 */ s32 averagedDriveCount;
-    /* 0x18 */ s32 isDriveAveraged; /* Whether the drive was hit with the 1W */
-} RoundStats; /* size = 0x1C */
+  /* 0x00 */ s32 unk0;
+  /* 0x04 */ s32 unk4;
+  /* 0x08 */ s32 measuredDriveCount;
+  /* 0x0C */ s32 longestDrive; /* Starts as the course's record */
+  /* 0x10 */ s32 averagedDriveTotal;
+  /* 0x14 */ s32 averagedDriveCount;
+  /* 0x18 */ s32 isDriveAveraged; /* Whether the drive was hit with the 1W */
+} RoundStats;                     /* size = 0x1C */
 
 /* Indices of UnkE98.hasPlace */
 #define THIRD_PLACE_INDEX 0
@@ -240,31 +249,35 @@ typedef struct RoundStats {
 #define TOURNAMENT_PLACE_COUNT 3
 
 typedef struct UnkE98 {
-    /* 0x00 */ s32 roundCount;
-    /* 0x04 */ s32 bestScore;          /* The lowest net score to par over a round */
-    /* 0x08 */ s32 strokeTotal;
-    /* 0x0C */ s32 longestDrive;
-    /* 0x10 */ s32 averageDrive;
-    /* 0x14 */ s32 averagedDriveCount;
-    /* 0x18 */ s32 measuredDriveTotal; /* The sum of RoundStats.measuredDriveCount */
-    /* 0x1C */ s32 puttTotal;
-    /* 0x20 */ s32 parOrBetterCount;   /* Holes played in par or fewer strokes */
-    /* 0x24 */ s32 parOnCount;         /* Holes whose green was reached with two strokes to spare */
-    /* 0x28 */ s32 unk28;              /* The sum of RoundStats.unk0 */
-    /* 0x2C */ s32 unk2C;              /* The sum of RoundStats.unk4 */
-    /* 0x30 */ s32 hasPlace[TOURNAMENT_PLACE_COUNT]; /* In a tournament on the course */
-    /* 0x3C */ s16 characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
-    /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
-    /* 0x72 */ u8 unk72[0x74 - 0x72];
+  /* 0x00 */ s32 roundCount;
+  /* 0x04 */ s32 bestScore; /* The lowest net score to par over a round */
+  /* 0x08 */ s32 strokeTotal;
+  /* 0x0C */ s32 longestDrive;
+  /* 0x10 */ s32 averageDrive;
+  /* 0x14 */ s32 averagedDriveCount;
+  /* 0x18 */ s32
+      measuredDriveTotal; /* The sum of RoundStats.measuredDriveCount */
+  /* 0x1C */ s32 puttTotal;
+  /* 0x20 */ s32 parOrBetterCount; /* Holes played in par or fewer strokes */
+  /* 0x24 */ s32
+      parOnCount; /* Holes whose green was reached with two strokes to spare */
+  /* 0x28 */ s32 unk28; /* The sum of RoundStats.unk0 */
+  /* 0x2C */ s32 unk2C; /* The sum of RoundStats.unk4 */
+  /* 0x30 */ s32
+      hasPlace[TOURNAMENT_PLACE_COUNT]; /* In a tournament on the course */
+  /* 0x3C */ s16
+      characterBestScores[CHARACTER_COUNT]; /* bestScore, by character */
+  /* 0x60 */ u8 hasCharacterBestScore[CHARACTER_COUNT];
+  /* 0x72 */ u8 unk72[0x74 - 0x72];
 } UnkE98; /* size = 0x74 */
 
 typedef struct SavedGame {
-    /* 0x00 */ s32 isValid;
-    /* 0x04 */ u8 unk4[4];
-    /* 0x08 */ Unk800BA9D8 unk8;
-    /* 0x3C */ GameState state;
-    /* 0x80 */ RoundStats roundStats;
-    /* 0x9C */ u8 unk9C[4];
+  /* 0x00 */ s32 isValid;
+  /* 0x04 */ u8 unk4[4];
+  /* 0x08 */ Unk800BA9D8 unk8;
+  /* 0x3C */ GameState state;
+  /* 0x80 */ RoundStats roundStats;
+  /* 0x9C */ u8 unk9C[4];
 } SavedGame; /* size = 0xA0 */
 
 /* PlayerHole.putts when they were not counted */
@@ -272,9 +285,9 @@ typedef struct SavedGame {
 
 /* A player's results on one hole */
 typedef struct PlayerHole {
-    /* 0x0 */ s8 strokes;
-    /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
-} PlayerHole; /* size = 0x2 */
+  /* 0x0 */ s8 strokes;
+  /* 0x1 */ s8 putts; /* Or UNCOUNTED_PUTTS */
+} PlayerHole;         /* size = 0x2 */
 
 /* The size of UnkB8.name, with its terminator */
 #define PLAYER_NAME_SIZE 12
@@ -282,43 +295,48 @@ typedef struct PlayerHole {
 #define PLAYER_UNKAA_COUNT 12
 
 typedef struct UnkB8 {
-    /* 0x00 */ char name[PLAYER_NAME_SIZE];
-    /* 0x0C */ s32 unkC;
-    /* 0x10 */ CoursePoint ballPosition;
-    /* 0x1C */ u8 ballSurface; /* A SURFACE_* value */
-    /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
-    /* 0x1E */ u8 unk1E[0x22 - 0x1E];
-    /* 0x22 */ s8 unk22;
-    /* 0x23 */ s8 strokeCount; /* On the current hole */
-    /* 0x24 */ s8 unk24;
-    /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
-    /* 0x26 */ s8 unk26;
-    /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below MAXCONTROLLERS */
-    /* 0x28 */ s8 unk28;
-    /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
-    /* 0x2A */ s8 soundPan;
-    /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
-    /* 0x4F */ u8 unk4F[0x52 - 0x4F];
-    /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
-    /* 0x72 */ u8 unk72[0x74 - 0x72];
-    /* 0x74 */ s32 stopwatchFrameCount; /* The player's time in the stopwatch modes */
-    /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
-    /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
-    /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from CHARACTER_KID on */
-    /* 0x7D */ u8 unk7D[3];
-    /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
-    /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
-    /* 0x88 */ s32 unk88;
-    /* 0x8C */ u8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
-    /* 0x8D */ u8 unk8D;
-    /* 0x8E */ s16 betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
-    /* 0x9C */ s8 unk9C;
-    /* 0x9D */ u8 unk9D[3];
-    /* 0xA0 */ s32 lastDriveDistance; /* The driveDistance that RecordDrive took */
-    /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
-    /* 0xA8 */ s16 unkA8;
-    /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
-    /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
+  /* 0x00 */ char name[PLAYER_NAME_SIZE];
+  /* 0x0C */ s32 unkC;
+  /* 0x10 */ CoursePoint ballPosition;
+  /* 0x1C */ u8 ballSurface;    /* A SURFACE_* value */
+  /* 0x1D */ u8 characterIndex; /* Also the index of the character's club set */
+  /* 0x1E */ u8 unk1E[0x22 - 0x1E];
+  /* 0x22 */ s8 unk22;
+  /* 0x23 */ s8 strokeCount; /* On the current hole */
+  /* 0x24 */ s8 unk24;
+  /* 0x25 */ s8 teeOrder; /* From 0, the player's turn on the next tee */
+  /* 0x26 */ s8 unk26;
+  /* 0x27 */ s8 controllerIndex; /* Into g_PlayerControllerPorts, when below
+                                    MAXCONTROLLERS */
+  /* 0x28 */ s8 unk28;
+  /* 0x29 */ s8 handicap; /* Gives strokes on the holes it ranks within */
+  /* 0x2A */ s8 soundPan;
+  /* 0x2B */ PlayerHole holes[COURSE_HOLE_COUNT];
+  /* 0x4F */ u8 unk4F[0x52 - 0x4F];
+  /* 0x52 */ s16 clubs[CLUB_SLOT_COUNT]; /* Indices into g_Clubs, by bag slot */
+  /* 0x72 */ u8 unk72[0x74 - 0x72];
+  /* 0x74 */ s32
+      stopwatchFrameCount; /* The player's time in the stopwatch modes */
+  /* 0x78 */ s8 ringStates[RING_COUNT]; /* RING_STATE_* values, for Ring Shot */
+  /* 0x7B */ u8 paletteIndex; /* Which of the character's palettes it wears */
+  /* 0x7C */ s8 gameBoyCharacterIndex; /* For the Game Boy characters, from
+                                          CHARACTER_KID on */
+  /* 0x7D */ u8 unk7D[3];
+  /* 0x80 */ s32 driveDistance; /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
+  /* 0x84 */ s32 pinDistance;   /* UNMEASURED_DISTANCE, or UNCOUNTED_DISTANCE */
+  /* 0x88 */ s32 unk88;
+  /* 0x8C */ u8 gridColor; /* GRID_COLOR_*, for the grid drawn over the green */
+  /* 0x8D */ u8 unk8D;
+  /* 0x8E */ s16
+      betTallies[BET_COUNT]; /* What the player has won on each BET_* bet */
+  /* 0x9C */ s8 unk9C;
+  /* 0x9D */ u8 unk9D[3];
+  /* 0xA0 */ s32
+      lastDriveDistance; /* The driveDistance that RecordDrive took */
+  /* 0xA4 */ s32 points; /* Earned in the round, towards opening courses */
+  /* 0xA8 */ s16 unkA8;
+  /* 0xAA */ s8 unkAA[PLAYER_UNKAA_COUNT];
+  /* 0xB6 */ u8 unkB6[0xB8 - 0xB6];
 } UnkB8; /* size = 0xB8 */
 
 /* The best times kept for each course, with what was recorded alongside */
@@ -332,8 +350,8 @@ typedef struct UnkB8 {
 #define UNKAF0_FLAG 0x80
 
 typedef struct UnkAF0 {
-    /* 0x0 */ u8 unk0;
-    /* 0x1 */ u8 unk1;
+  /* 0x0 */ u8 unk0;
+  /* 0x1 */ u8 unk1;
 } UnkAF0; /* size = 0x2 */
 
 /*
@@ -341,48 +359,54 @@ typedef struct UnkAF0 {
  * this; where it ends is unknown
  */
 typedef struct Unk990 {
-    /* 0x000 */ u8 unk0[0xF4];
-    /* 0x0F4 */ s8 birdieBadgeCounts[COURSE_COUNT][COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
-    /* 0x160 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
+  /* 0x000 */ u8 unk0[0xF4];
+  /* 0x0F4 */ s8
+      birdieBadgeCounts[COURSE_COUNT]
+                       [COURSE_HOLE_COUNT]; /* Nonzero holds the badge */
+  /* 0x160 */ UnkAF0 unkAF0[SAVE_UNKAF0_ROW_COUNT][SAVE_UNKAF0_COLUMN_COUNT];
 } Unk990; /* size = 0x3E8 */
 
 typedef struct SaveData {
-    /* 0x0000 */ u32 magic;
-    /* 0x0004 */ u32 longestDisplayListLength; /* In commands, over every frame drawn */
-    /* 0x0008 */ u8 invertedBuildDate[0x20];   /* The writing build's date, with each bit inverted */
-    /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
-    /* 0x002C */ u8 unk2C[0x38 - 0x2C];
-    /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
-    /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
-    /* 0x0720 */ Unk68 modeRecords[MODE_RECORD_COUNT];
-    /* 0x0990 */ Unk990 unk990;
-    /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
-    /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT][BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
-    /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
-    /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
-    /* 0x0E98 */ UnkE98 unkE98[COURSE_COUNT];
-    /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
-    /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
-    /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT][SAVE_UNK1344_ENTRY_COUNT];
-    /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
-    /* 0x15D0 */ Unk68 rankedRecords[RANKED_RECORD_COUNT];
-    /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];
-    /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
-    /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
+  /* 0x0000 */ u32 magic;
+  /* 0x0004 */ u32
+      longestDisplayListLength; /* In commands, over every frame drawn */
+  /* 0x0008 */ u8 invertedBuildDate[0x20]; /* The writing build's date, with
+                                              each bit inverted */
+  /* 0x0028 */ s8 options[SAVE_OPTION_COUNT];
+  /* 0x002C */ u8 unk2C[0x38 - 0x2C];
+  /* 0x0038 */ SavedGame modeGames[MODE_GAME_COUNT];
+  /* 0x0218 */ UnkB8 modePlayers[MODE_PLAYER_COUNT];
+  /* 0x0720 */ Unk68 modeRecords[MODE_RECORD_COUNT];
+  /* 0x0990 */ Unk990 unk990;
+  /* 0x0D78 */ s32 unkD78[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x0DC0 */ s32 bestTimes[COURSE_COUNT]
+                            [BEST_TIME_COUNT]; /* Fastest first; unset is -1 */
+  /* 0x0E08 */ s32 unkE08[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x0E50 */ s32 unkE50[COURSE_COUNT][BEST_TIME_COUNT];
+  /* 0x0E98 */ UnkE98 unkE98[COURSE_COUNT];
+  /* 0x1150 */ u8 unk1150[0x1320 - 0x1150];
+  /* 0x1320 */ s8 hasRingShotStar[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT];
+  /* 0x1344 */ s8 unk1344[RING_SHOT_COURSE_COUNT][RING_SHOT_HOLE_COUNT]
+                         [SAVE_UNK1344_ENTRY_COUNT];
+  /* 0x15CC */ s32 coursePoints; /* Earned in total, so it never goes down */
+  /* 0x15D0 */ Unk68 rankedRecords[RANKED_RECORD_COUNT];
+  /* 0x1DF0 */ Unk68 unk1DF0[SAVE_RECORD_COUNT];
+  /* 0x1FF8 */ SavedGame savedGames[SAVED_GAME_COUNT];
+  /* 0x21D8 */ UnkB8 savedPlayers[SAVED_GAME_COUNT][MAX_PLAYER_COUNT];
 } SaveData; /* size = 0x2A78 */
 
 /* Each copy is stored with this, to check that it was read back intact */
 typedef struct SaveCheck {
-    /* 0x0 */ u16 key; /* Random */
-    /* 0x2 */ u16 keyedCrc; /* The data's CRC-16 exclusive-ored with the key */
+  /* 0x0 */ u16 key;      /* Random */
+  /* 0x2 */ u16 keyedCrc; /* The data's CRC-16 exclusive-ored with the key */
 } SaveCheck;
 
 /* Where a copy of the save data and its check are kept */
 typedef struct SaveCopyLocation {
-    /* 0x0 */ char *dataFileName;  /* On the development host */
-    /* 0x4 */ char *checkFileName; /* On the development host */
-    /* 0x8 */ u32 dataSramAddress;
-    /* 0xC */ u32 checkSramAddress;
+  /* 0x0 */ char* dataFileName;  /* On the development host */
+  /* 0x4 */ char* checkFileName; /* On the development host */
+  /* 0x8 */ u32 dataSramAddress;
+  /* 0xC */ u32 checkSramAddress;
 } SaveCopyLocation;
 
 extern SaveData g_SaveData;
@@ -394,18 +418,18 @@ extern UnkB8 g_Players[MAX_PLAYER_COUNT];
 
 /* The figures D_80105C38 holds for each course, then for all of them */
 typedef struct Unk80105C38 {
-    /* 0x00 */ f32 roundCount;
-    /* 0x04 */ f32 bestScore;
-    /* 0x08 */ f32 averageScore;
-    /* 0x0C */ f32 bestDrive;
-    /* 0x10 */ f32 averageDrive;
-    /* 0x14 */ f32 unk14;
-    /* 0x18 */ f32 fairwayPercent;
-    /* 0x1C */ f32 averagePutts;
-    /* 0x20 */ f32 parSavePercent;
-    /* 0x24 */ f32 parOnPercent;
-    /* 0x28 */ f32 sandSavePercent;
-    /* 0x2C */ s32 hasPlace[TOURNAMENT_PLACE_COUNT];
+  /* 0x00 */ f32 roundCount;
+  /* 0x04 */ f32 bestScore;
+  /* 0x08 */ f32 averageScore;
+  /* 0x0C */ f32 bestDrive;
+  /* 0x10 */ f32 averageDrive;
+  /* 0x14 */ f32 unk14;
+  /* 0x18 */ f32 fairwayPercent;
+  /* 0x1C */ f32 averagePutts;
+  /* 0x20 */ f32 parSavePercent;
+  /* 0x24 */ f32 parOnPercent;
+  /* 0x28 */ f32 sandSavePercent;
+  /* 0x2C */ s32 hasPlace[TOURNAMENT_PLACE_COUNT];
 } Unk80105C38; /* size = 0x38 */
 
 extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
@@ -415,8 +439,8 @@ extern Unk80105C38 D_80105C38[COURSE_COUNT + 1];
 /* Applied to the save's 0x0C and 0x10 figures; what it converts is unknown */
 #define UNK_SCALE 0.00007119878f
 
-SaveData *GetSaveData(void);
-void TransferSaveData(SaveData *save, u8 isWrite);
+SaveData* GetSaveData(void);
+void TransferSaveData(SaveData* save, u8 isWrite);
 void ResetSaveData(void);
 void InitSaveData(void);
 void RecordDisplayListLength(u32 commandCount);

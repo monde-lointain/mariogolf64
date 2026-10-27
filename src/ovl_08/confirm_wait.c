@@ -1,10 +1,10 @@
 #include "common.h"
+
 #include "controller.h"
 #include "hole_display.h"
 #include "scene.h"
 #include "sound.h"
 #include "text.h"
-
 
 /*
  * On A or Start, clears the image in slot 0 and swaps this overlay's module
@@ -12,18 +12,16 @@
  * in scene 26.
  */
 void WaitForConfirmButton(void) {
-    if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
-        StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
-        g_Scene = SCENE_SWAPPING_MODULES;
-        g_NextScene = 27;
-        g_SceneModuleToUnload = 0x0D;
-        g_SceneModuleToLoad = 0x0C;
-        PlaySound(0x5D, 0xF, 0x7F);
-        /* The position goes unused with NO_MESSAGE */
-        SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
-    }
+  if (g_ControllerStates[0].pressedButtons & (A_BUTTON | START_BUTTON)) {
+    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+    g_Scene = SCENE_SWAPPING_MODULES;
+    g_NextScene = 27;
+    g_SceneModuleToUnload = 0x0D;
+    g_SceneModuleToLoad = 0x0C;
+    PlaySound(0x5D, 0xF, 0x7F);
+    /* The position goes unused with NO_MESSAGE */
+    SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
+  }
 }
 
-void RewriteWord(s32 *word) {
-    *word = *word;
-}
+void RewriteWord(s32* word) { *word = *word; }
