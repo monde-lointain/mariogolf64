@@ -53,7 +53,7 @@
 #define STEP_NOISE_BIT (HEIGHT_STEP * 2)
 /* The second editor pad's B lowers it by 0 or 0x10 */
 #define DIP_NOISE_BIT 0x10
-/* What a frame did, kept in D_8040C674 */
+/* What a frame did, kept in sLastHeightEditKind */
 #define HEIGHT_EDIT_NONE 0
 #define HEIGHT_EDIT_POINT 1
 #define HEIGHT_EDIT_MOVE 2
@@ -199,16 +199,16 @@ typedef struct TriangleSlope {
 extern TriangleSlope sTriangleSlopes[CELL_COLUMN_COUNT * CELL_ROW_COUNT * 2];
 
 /* func_80404B84's state */
-extern s32 D_8040C644_hole_editor; /* The cursor's ground point column */
-extern s32 D_8040C648_hole_editor; /* And its row */
-extern f32 D_8040C654_hole_editor; /* The camera's pitch, in radians */
-extern f32 D_8040C658_hole_editor; /* The camera's heading, in radians */
-extern s32 D_8040C660_hole_editor; /* The camera's heading, as a binary angle */
-extern s32 D_8040C664_hole_editor; /* The height C-up or C-down last set */
+extern s32 sHeightCursorColumn;
+extern s32 sHeightCursorRow;
+extern f32 sHeightCameraPitch;   /* In radians */
+extern f32 sHeightCameraHeading; /* In radians, from sHeightCameraHeadingAngle */
+extern s32 sHeightCameraHeadingAngle;
+extern s32 sLastSetHeight; /* The height C-up or C-down last set */
 extern s32 D_8040C668_hole_editor; /* Copied to D_800C30D1 */
-extern s32 D_8040C66C_hole_editor; /* Heights picked up by the second editor pad */
-extern s32 D_8040C670_hole_editor;
-extern s32 D_8040C674_hole_editor; /* The last frame's HEIGHT_EDIT_* */
+extern s32 sCLeftPickedHeight; /* Heights picked up by the second editor pad */
+extern s32 sCUpPickedHeight;
+extern s32 sLastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
 
 extern s8 D_800C30D1;
 
@@ -403,28 +403,28 @@ void func_80404B84_hole_editor(void) {
         func_80404850_hole_editor();
     }
     if (g_MenuControllerData[SECOND_EDITOR_PAD].button & L_CBUTTONS) {
-        D_8040C66C_hole_editor = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        sCLeftPickedHeight = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
     }
     if (g_MenuControllerData[SECOND_EDITOR_PAD].button & U_CBUTTONS) {
-        D_8040C670_hole_editor = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        sCUpPickedHeight = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
     }
     if (g_MenuControllerData[SECOND_EDITOR_PAD].button & R_CBUTTONS) {
-        s32 change = D_8040C670_hole_editor - D_8040C66C_hole_editor;
+        s32 change = sCUpPickedHeight - sCLeftPickedHeight;
 
         editKind = HEIGHT_EDIT_POINT;
         SetGroundPointHeightAndShade(
-            D_8040C644_hole_editor, D_8040C648_hole_editor,
-            GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] + change,
+            sHeightCursorColumn, sHeightCursorRow,
+            GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y] + change,
             EDITED_POINT_SHADE);
         MeasureGroundTiles();
     }
     if (g_MenuControllerData[SECOND_EDITOR_PAD].button & D_CBUTTONS) {
-        s32 change = D_8040C66C_hole_editor - D_8040C670_hole_editor;
+        s32 change = sCLeftPickedHeight - sCUpPickedHeight;
 
         editKind = HEIGHT_EDIT_POINT;
         SetGroundPointHeightAndShade(
-            D_8040C644_hole_editor, D_8040C648_hole_editor,
-            GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] + change,
+            sHeightCursorColumn, sHeightCursorRow,
+            GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y] + change,
             EDITED_POINT_SHADE);
         MeasureGroundTiles();
     }
@@ -442,11 +442,11 @@ void func_80404B84_hole_editor(void) {
         if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
             ChangeGroundHeight(-HEIGHT_STEP);
         } else {
-            s32 height = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+            s32 height = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
 
             height -= HEIGHT_STEP;
-            D_8040C664_hole_editor = height;
-            SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, height, EDITED_POINT_SHADE);
+            sLastSetHeight = height;
+            SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow, height, EDITED_POINT_SHADE);
         }
         editKind = HEIGHT_EDIT_POINT;
         MeasureGroundTiles();
@@ -455,48 +455,48 @@ void func_80404B84_hole_editor(void) {
         if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
             ChangeGroundHeight(HEIGHT_STEP);
         } else {
-            s32 height = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+            s32 height = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
 
             height += HEIGHT_STEP;
-            D_8040C664_hole_editor = height;
-            SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, height, EDITED_POINT_SHADE);
+            sLastSetHeight = height;
+            SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow, height, EDITED_POINT_SHADE);
         }
         editKind = HEIGHT_EDIT_POINT;
         MeasureGroundTiles();
     }
     if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
-        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor, D_8040C664_hole_editor,
+        SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow, sLastSetHeight,
                                      EDITED_POINT_SHADE);
         editKind = HEIGHT_EDIT_POINT;
         MeasureGroundTiles();
     }
     if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
-        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
-                                     D_8040C664_hole_editor + (rand() & COARSE_NOISE_MASK) - COARSE_NOISE_OFFSET,
+        SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow,
+                                     sLastSetHeight + (rand() & COARSE_NOISE_MASK) - COARSE_NOISE_OFFSET,
                                      EDITED_POINT_SHADE);
         editKind = HEIGHT_EDIT_POINT;
         MeasureGroundTiles();
     }
     if (g_MenuControllerData[EDITOR_PAD].button & A_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
-        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        baseHeight = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
         baseHeight -= ROUGH_NOISE_OFFSET;
-        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+        SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow,
                                      baseHeight + (rand() & ROUGH_NOISE_MASK), EDITED_POINT_SHADE);
         MeasureGroundTiles();
     }
     if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
-        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
+        baseHeight = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
         baseHeight -= HEIGHT_STEP;
-        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+        SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow,
                                      baseHeight + (rand() & STEP_NOISE_BIT), EDITED_POINT_SHADE);
         MeasureGroundTiles();
     }
     if (g_MenuControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
         editKind = HEIGHT_EDIT_POINT;
-        baseHeight = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
-        SetGroundPointHeightAndShade(D_8040C644_hole_editor, D_8040C648_hole_editor,
+        baseHeight = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
+        SetGroundPointHeightAndShade(sHeightCursorColumn, sHeightCursorRow,
                                      baseHeight - (rand() & DIP_NOISE_BIT), EDITED_POINT_SHADE);
         MeasureGroundTiles();
     }
@@ -561,23 +561,23 @@ void func_80404B84_hole_editor(void) {
         }
     }
     if (direction != CURSOR_DIRECTION_NONE) {
-        columnStep = cos((direction * BINARY_ANGLE_EIGHTH_TURN + D_8040C660_hole_editor) * EDITOR_ANGLE_TO_RADIANS) *
+        columnStep = cos((direction * BINARY_ANGLE_EIGHTH_TURN + sHeightCameraHeadingAngle) * EDITOR_ANGLE_TO_RADIANS) *
                      CURSOR_STEP_LENGTH;
-        rowStep = sin((direction * BINARY_ANGLE_EIGHTH_TURN + D_8040C660_hole_editor) * EDITOR_ANGLE_TO_RADIANS) *
+        rowStep = sin((direction * BINARY_ANGLE_EIGHTH_TURN + sHeightCameraHeadingAngle) * EDITOR_ANGLE_TO_RADIANS) *
                   CURSOR_STEP_LENGTH;
-        D_8040C644_hole_editor += columnStep;
-        D_8040C648_hole_editor += rowStep;
-        if (D_8040C644_hole_editor < 0) {
-            D_8040C644_hole_editor = 0;
+        sHeightCursorColumn += columnStep;
+        sHeightCursorRow += rowStep;
+        if (sHeightCursorColumn < 0) {
+            sHeightCursorColumn = 0;
         }
-        if (D_8040C648_hole_editor < 0) {
-            D_8040C648_hole_editor = 0;
+        if (sHeightCursorRow < 0) {
+            sHeightCursorRow = 0;
         }
-        if (D_8040C644_hole_editor >= GROUND_POINT_COLUMN_COUNT) {
-            D_8040C644_hole_editor = GROUND_POINT_COLUMN_COUNT - 1;
+        if (sHeightCursorColumn >= GROUND_POINT_COLUMN_COUNT) {
+            sHeightCursorColumn = GROUND_POINT_COLUMN_COUNT - 1;
         }
-        if (D_8040C648_hole_editor >= GROUND_POINT_ROW_COUNT) {
-            D_8040C648_hole_editor = GROUND_POINT_ROW_COUNT - 1;
+        if (sHeightCursorRow >= GROUND_POINT_ROW_COUNT) {
+            sHeightCursorRow = GROUND_POINT_ROW_COUNT - 1;
         }
     }
     if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
@@ -594,8 +594,8 @@ void func_80404B84_hole_editor(void) {
         }
     }
     if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
-        D_8040C660_hole_editor -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
-        D_8040C654_hole_editor -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+        sHeightCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        sHeightCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
     if ((g_ControllerData[SECOND_EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
         g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
@@ -611,36 +611,36 @@ void func_80404B84_hole_editor(void) {
         }
     }
     if (g_ControllerData[SECOND_EDITOR_PAD].button & Z_TRIG) {
-        D_8040C660_hole_editor -=
+        sHeightCameraHeadingAngle -=
             g_MenuControllerData[SECOND_EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
-        D_8040C654_hole_editor -=
+        sHeightCameraPitch -=
             g_MenuControllerData[SECOND_EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
     }
-    if (D_8040C654_hole_editor > 0.0f) {
-        D_8040C654_hole_editor = 0.0f;
+    if (sHeightCameraPitch > 0.0f) {
+        sHeightCameraPitch = 0.0f;
     }
-    if (D_8040C654_hole_editor < HEIGHT_EDITOR_PITCH_MIN) {
-        D_8040C654_hole_editor = HEIGHT_EDITOR_PITCH_MIN;
+    if (sHeightCameraPitch < HEIGHT_EDITOR_PITCH_MIN) {
+        sHeightCameraPitch = HEIGHT_EDITOR_PITCH_MIN;
     }
-    D_8040C658_hole_editor = D_8040C660_hole_editor * EDITOR_ANGLE_TO_RADIANS;
-    if (D_8040C674_hole_editor && editKind == HEIGHT_EDIT_NONE) {
+    sHeightCameraHeading = sHeightCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    if (sLastHeightEditKind && editKind == HEIGHT_EDIT_NONE) {
         func_804079B8_hole_editor();
     }
-    D_8040C674_hole_editor = editKind;
+    sLastHeightEditKind = editKind;
     cameraDistance = HEIGHT_EDITOR_CAMERA_DISTANCE;
-    g_MapCamera.view.lookAt[AXIS_X] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_X];
-    g_MapCamera.view.lookAt[AXIS_Y] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y];
-    g_MapCamera.view.lookAt[AXIS_Z] = GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Z];
-    g_MapCamera.view.eye[AXIS_X] = cos(D_8040C654_hole_editor) * cos(D_8040C658_hole_editor) *
+    g_MapCamera.view.lookAt[AXIS_X] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Y] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y];
+    g_MapCamera.view.lookAt[AXIS_Z] = GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_X] = cos(sHeightCameraPitch) * cos(sHeightCameraHeading) *
                                        (g_MapCamera.view.zoom * cameraDistance) +
                                    g_MapCamera.view.lookAt[AXIS_X];
-    g_MapCamera.view.eye[AXIS_Z] = cos(D_8040C654_hole_editor) * sin(D_8040C658_hole_editor) *
+    g_MapCamera.view.eye[AXIS_Z] = cos(sHeightCameraPitch) * sin(sHeightCameraHeading) *
                                        (g_MapCamera.view.zoom * cameraDistance) +
                                    g_MapCamera.view.lookAt[AXIS_Z];
     g_MapCamera.view.eye[AXIS_Y] =
-        sin(D_8040C654_hole_editor) * (g_MapCamera.view.zoom * cameraDistance) + g_MapCamera.view.lookAt[AXIS_Y];
+        sin(sHeightCameraPitch) * (g_MapCamera.view.zoom * cameraDistance) + g_MapCamera.view.lookAt[AXIS_Y];
     sprintf(text, "%fm  ",
-            -(f32)GetGroundPoint(D_8040C644_hole_editor, D_8040C648_hole_editor)->v.ob[AXIS_Y] *
+            -(f32)GetGroundPoint(sHeightCursorColumn, sHeightCursorRow)->v.ob[AXIS_Y] *
                 METERS_PER_HEIGHT_UNIT);
     PrintDebugText(text, HEIGHT_TEXT_COLUMN, HEIGHT_TEXT_ROW);
 }
