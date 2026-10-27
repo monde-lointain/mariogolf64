@@ -3172,3 +3172,4 @@ D_8020C0A8_ovl_05 = 0x8020C0A8; // type:f64 size:0x8 segment:ovl_05 force_migrat
 g_MenuRepeatButtons = 0x800C2000; // size:0x4
 g_MenuPressedButtons = 0x800C2004; // size:0x4
 g_MenuScreen = 0x801EFFA0; // size:0x4
+g_MenuChoices = 0x801323B8; // size:0x18

@@ -9,6 +9,7 @@
 #include "host_file.h"
 #include "libc.h"
 #include "math_util.h"
+#include "menu.h"
 #include "password.h"
 #include "round_stats.h"
 #include "save.h"
@@ -109,7 +110,6 @@ extern s32 D_8012F484;
 extern s32 D_8012F488;
 extern s32 D_8012F48C;
 extern u8 D_801323A0[0x49];
-extern s8 D_801323B8;
 extern s8 D_801323D0;
 extern s32 D_801B7070;
 extern s8 D_801B70F0;
@@ -118,7 +118,6 @@ extern s8 D_801B70F2;
 extern s8 D_801B70F3;
 extern s16 D_801B71CC;
 extern s8 D_801B9410;
-extern s32 g_MenuScreen;
 extern u8 g_MapCamera[];
 extern void *D_801F4A20;
 extern void *D_8012D3AC;
@@ -1541,7 +1540,7 @@ void func_8005D9A0(void) {
     for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {
         D_800FBE08[index] = 0;
     }
-    D_801323B8 = 3;
+    g_MenuChoices.unk0 = 3;
     g_GameState.holeSelection = HOLE_SELECTION_ALL;
     D_801323D0 = 6;
     D_801052E8 = 0;
