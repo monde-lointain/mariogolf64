@@ -26,7 +26,7 @@
 /* WORLD_TO_COURSE_SCALE as a shift */
 #define WORLD_TO_COURSE_SHIFT 10
 
-/* func_80406818's steps, in D_8040C680 */
+/* func_80406818's steps, in sHoleFileStep */
 #define HOLE_FILE_STEP_ACTION 0
 #define HOLE_FILE_STEP_COURSE 1
 #define HOLE_FILE_STEP_HOLE 2
@@ -123,11 +123,11 @@ extern s32 D_8040C5B4_hole_editor;
 void func_80405AF4_hole_editor(s32 column, s32 row);
 
 /* func_80406818's menu */
-extern s32 D_8040C67C_hole_editor; /* TRUE when it saves rather than loads */
-extern s32 D_8040C680_hole_editor; /* Its HOLE_FILE_STEP_* */
-extern s32 D_8040C684_hole_editor; /* The hole number, from 1 */
-extern s32 D_8040C688_hole_editor; /* The course number, from 1 */
-extern s32 D_8040C68C_hole_editor; /* Frames the prompt has shown */
+extern s32 sIsSavingHoleFiles;
+extern s32 sHoleFileStep; /* A HOLE_FILE_STEP_* */
+extern s32 sHoleFileHoleNumber; /* From 1 */
+extern s32 sHoleFileCourseNumber; /* From 1 */
+extern s32 sHoleFilePromptFrames;
 
 void BuildHole(s32 course, s32 hole);
 void SaveHoleFiles(s32 course, s32 hole);
@@ -447,90 +447,90 @@ void func_80406818_hole_editor(void) {
     char holeText[DEBUG_TEXT_BUFFER_SIZE];
 
     ClearDebugText();
-    if (D_8040C680_hole_editor == HOLE_FILE_STEP_ACTION) {
+    if (sHoleFileStep == HOLE_FILE_STEP_ACTION) {
         if (g_MenuControllerData[0].button & (U_JPAD | D_JPAD)) {
-            D_8040C67C_hole_editor ^= 1;
+            sIsSavingHoleFiles ^= 1;
         }
         if (g_MenuControllerData[0].button & A_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_COURSE;
+            sHoleFileStep = HOLE_FILE_STEP_COURSE;
         }
-        if (!D_8040C67C_hole_editor) {
+        if (!sIsSavingHoleFiles) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText("->", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_LOAD_ROW);
         }
-        if (D_8040C67C_hole_editor) {
+        if (sIsSavingHoleFiles) {
             SetDebugTextHighlight(TRUE);
             PrintDebugText("->", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_SAVE_ROW);
         }
-    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_COURSE) {
+    } else if (sHoleFileStep == HOLE_FILE_STEP_COURSE) {
         if (g_MenuControllerData[0].button & (L_JPAD | D_JPAD)) {
-            D_8040C688_hole_editor--;
+            sHoleFileCourseNumber--;
         }
         if (g_MenuControllerData[0].button & (R_JPAD | U_JPAD)) {
-            D_8040C688_hole_editor++;
+            sHoleFileCourseNumber++;
         }
-        D_8040C688_hole_editor = (D_8040C688_hole_editor + HOLE_FILE_COURSE_COUNT - 1) % HOLE_FILE_COURSE_COUNT + 1;
+        sHoleFileCourseNumber = (sHoleFileCourseNumber + HOLE_FILE_COURSE_COUNT - 1) % HOLE_FILE_COURSE_COUNT + 1;
         if (g_MenuControllerData[0].trigger & A_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_HOLE;
+            sHoleFileStep = HOLE_FILE_STEP_HOLE;
         }
         if (g_MenuControllerData[0].trigger & B_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+            sHoleFileStep = HOLE_FILE_STEP_ACTION;
         }
-    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_HOLE) {
+    } else if (sHoleFileStep == HOLE_FILE_STEP_HOLE) {
         if (g_MenuControllerData[0].button & (L_JPAD | D_JPAD)) {
-            D_8040C684_hole_editor--;
+            sHoleFileHoleNumber--;
         }
         if (g_MenuControllerData[0].button & (R_JPAD | U_JPAD)) {
-            D_8040C684_hole_editor++;
+            sHoleFileHoleNumber++;
         }
-        D_8040C684_hole_editor = (D_8040C684_hole_editor + COURSE_HOLE_COUNT - 1) % COURSE_HOLE_COUNT + 1;
+        sHoleFileHoleNumber = (sHoleFileHoleNumber + COURSE_HOLE_COUNT - 1) % COURSE_HOLE_COUNT + 1;
         if (g_MenuControllerData[0].trigger & A_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_CONFIRM;
+            sHoleFileStep = HOLE_FILE_STEP_CONFIRM;
         }
         if (g_MenuControllerData[0].trigger & B_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_COURSE;
+            sHoleFileStep = HOLE_FILE_STEP_COURSE;
         }
-    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_CONFIRM) {
-        if (D_8040C68C_hole_editor & HOLE_FILE_BLINK_BIT) {
+    } else if (sHoleFileStep == HOLE_FILE_STEP_CONFIRM) {
+        if (sHoleFilePromptFrames & HOLE_FILE_BLINK_BIT) {
             SetDebugTextHighlight(TRUE);
         }
         PrintDebugText("Are you sure? (Exec -> A_BUTTON)", HOLE_FILE_PROMPT_COLUMN, HOLE_FILE_PROMPT_ROW);
-        D_8040C68C_hole_editor++;
+        sHoleFilePromptFrames++;
         if (g_MenuControllerData[0].trigger & A_BUTTON) {
-            if (D_8040C67C_hole_editor) {
+            if (sIsSavingHoleFiles) {
                 if (g_WorkArea.hole.tiles[0]
                         .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1]) {
                     ToggleGroundTileBorders();
                 }
-                SaveHoleFiles(D_8040C688_hole_editor, D_8040C684_hole_editor);
+                SaveHoleFiles(sHoleFileCourseNumber, sHoleFileHoleNumber);
             } else {
-                BuildHole(D_8040C688_hole_editor, D_8040C684_hole_editor);
+                BuildHole(sHoleFileCourseNumber, sHoleFileHoleNumber);
             }
-            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+            sHoleFileStep = HOLE_FILE_STEP_ACTION;
         }
         if (g_MenuControllerData[0].trigger & B_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_HOLE;
+            sHoleFileStep = HOLE_FILE_STEP_HOLE;
         }
         if (g_MenuControllerData[0].trigger & START_BUTTON) {
-            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+            sHoleFileStep = HOLE_FILE_STEP_ACTION;
         }
     }
-    if (!D_8040C67C_hole_editor) {
+    if (!sIsSavingHoleFiles) {
         SetDebugTextHighlight(TRUE);
     }
     PrintDebugText("Load HoleData", HOLE_FILE_LABEL_COLUMN, HOLE_FILE_LOAD_ROW);
-    if (D_8040C67C_hole_editor) {
+    if (sIsSavingHoleFiles) {
         SetDebugTextHighlight(TRUE);
     }
     PrintDebugText("Save HoleData", HOLE_FILE_LABEL_COLUMN, HOLE_FILE_SAVE_ROW);
-    if (D_8040C680_hole_editor >= HOLE_FILE_STEP_COURSE) {
+    if (sHoleFileStep >= HOLE_FILE_STEP_COURSE) {
         PrintDebugText("Course : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_COURSE_ROW);
-        sprintf(courseText, "%d", D_8040C688_hole_editor);
+        sprintf(courseText, "%d", sHoleFileCourseNumber);
         PrintDebugText(courseText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_COURSE_ROW);
     }
-    if (D_8040C680_hole_editor >= HOLE_FILE_STEP_HOLE) {
+    if (sHoleFileStep >= HOLE_FILE_STEP_HOLE) {
         PrintDebugText("Hole   : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_HOLE_ROW);
-        sprintf(holeText, "%d", D_8040C684_hole_editor);
+        sprintf(holeText, "%d", sHoleFileHoleNumber);
         PrintDebugText(holeText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_HOLE_ROW);
     }
 }
