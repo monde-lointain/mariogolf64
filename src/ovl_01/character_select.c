@@ -6,6 +6,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen.h"
 
 /* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
 #define MARKED_CHARACTER_LIMIT (-10)
@@ -21,6 +22,18 @@
 
 /* The bytes of the first of the two images that func_8020B438 reads into the menu's buffer */
 #define CHARACTER_SELECT_FIRST_IMAGE_SIZE 0x628
+
+/* func_8020C3B8 draws D_8023A568 in strips, then the right half of the second image */
+#define BOARD_WIDTH 288
+#define BOARD_STRIP_HEIGHT 11
+#define BOARD_STRIP_COUNT 16
+#define BOARD_LEFT 16
+#define BOARD_TOP 48
+#define LABEL_IMAGE_WIDTH 80
+#define LABEL_IMAGE_HEIGHT 8
+#define LABEL_SHOWN_WIDTH 40
+#define LABEL_LEFT 200
+#define LABEL_TOP 200
 
 /* The buffer that func_8020B2C4 keeps without reading an image into it */
 #define CHARACTER_SELECT_UNREAD_KIND 10
@@ -254,7 +267,37 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C2D8_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C3B8_ovl_01);
+void func_8020C3B8_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+    u8 *labelImage;
+
+    GetMenuImageBuffer();
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023A568_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != BOARD_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock_4b(gfx++,
+                               ((u32)D_8023A568_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                stripIndex * BOARD_WIDTH * BOARD_STRIP_HEIGHT / 2) & ~7,
+                               G_IM_FMT_CI, BOARD_WIDTH, BOARD_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = BOARD_TOP + stripIndex * BOARD_STRIP_HEIGHT;
+        gSPScisTextureRectangle(gfx++, BOARD_LEFT << 2, stripTop << 2, (BOARD_LEFT + BOARD_WIDTH) << 2,
+                                (stripTop + BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    labelImage = GetMenuImageBuffer();
+    labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
+    LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI, LABEL_IMAGE_WIDTH,
+                           LABEL_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+    DrawTextureRect(&gfx, LABEL_LEFT << 2, LABEL_TOP << 2, (LABEL_LEFT + LABEL_SHOWN_WIDTH) << 2,
+                    (LABEL_TOP + LABEL_IMAGE_HEIGHT) << 2, G_TX_RENDERTILE, LABEL_SHOWN_WIDTH << 5, 0,
+                    TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020C6D8_ovl_01);
 
