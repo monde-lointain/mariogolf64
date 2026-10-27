@@ -1,23 +1,27 @@
 #include "common.h"
 
-extern f32 D_8022BE30_ovl_05;
-extern f32 D_8022BE34_ovl_05;
-extern f32 D_8022BE38_ovl_05;
-extern f32 D_8022BE3C_ovl_05;
-extern f32 D_8022BE40_ovl_05;
-extern f32 D_8022BE44_ovl_05;
+/* The camera that the opening's camera editor moves */
+typedef struct EditedCamera {
+    /* 0x00 */ Vec3 eye;
+    /* 0x0C */ Vec3 lookAt;
+    /* 0x18 */ f32 heading;  /* In radians, of the look direction across the ground */
+    /* 0x1C */ f32 pitch;    /* In radians, of the look direction above the ground */
+    /* 0x20 */ f32 distance; /* From the eye to the look-at point */
+} EditedCamera;
+
+extern EditedCamera D_8022BE30_ovl_05;
 
 void func_80203620_ovl_05(void);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
 
 void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
-    D_8022BE30_ovl_05 = arg0;
-    D_8022BE34_ovl_05 = arg1;
-    D_8022BE38_ovl_05 = arg2;
-    D_8022BE3C_ovl_05 = arg3;
-    D_8022BE40_ovl_05 = arg4;
-    D_8022BE44_ovl_05 = arg5;
+    D_8022BE30_ovl_05.eye[0] = arg0;
+    D_8022BE30_ovl_05.eye[1] = arg1;
+    D_8022BE30_ovl_05.eye[2] = arg2;
+    D_8022BE30_ovl_05.lookAt[0] = arg3;
+    D_8022BE30_ovl_05.lookAt[1] = arg4;
+    D_8022BE30_ovl_05.lookAt[2] = arg5;
     func_80203620_ovl_05();
 }
 
