@@ -18,7 +18,9 @@ typedef struct MenuMemory {
     /* 0x0C */ u8 unkC;
     /* 0x0D */ s8 unkD;
     /* 0x0E */ s8 unkE[MENU_UNKE_COUNT]; /* Set from one of func_80217B88's presets */
-    /* 0x16 */ u8 unk16[0x20 - 0x16];
+    /* 0x16 */ s8 courseChoice; /* The course select's course: an open one, or the next one still shut */
+    /* 0x17 */ s8 courseSpin;   /* How far the courses still have to turn to reach it */
+    /* 0x18 */ u8 unk18[0x20 - 0x18];
     /* 0x20 */ s8 helpTopicIndex;
     /* 0x21 */ u8 unk21[0x29 - 0x21];
     /* 0x29 */ s8 unk29;

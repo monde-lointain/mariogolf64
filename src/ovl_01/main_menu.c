@@ -372,7 +372,7 @@ void StartLoadingChosenHole(void) {
             g_CourseIndex =
                 g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
         } else {
-            g_CourseIndex = D_801323A0[0x16];
+            g_CourseIndex = ((MenuMemory *)D_801323A0)->courseChoice;
         }
         g_HoleIndex = GetFirstHoleIndex();
     }
@@ -393,7 +393,7 @@ s32 GetChosenCourseIndex(void) {
     if (g_IsMiniGolf) {
         return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
     }
-    return D_801323A0[0x16];
+    return ((MenuMemory *)D_801323A0)->courseChoice;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F4C78_ovl_01);
@@ -611,8 +611,8 @@ void func_801F70F0_ovl_01(void) {
             for (index = 0; index != MENU_UNKE_COUNT; index++) {
                 memory->unkE[index] = 0;
             }
-            memory->unk16[0] = 0;
-            memory->unk16[1] = 0;
+            memory->courseChoice = 0;
+            memory->courseSpin = 0;
             memory->holeIndex = 0;
             memory->courseIndex = 0;
             StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
