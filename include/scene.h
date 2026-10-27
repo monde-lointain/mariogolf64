@@ -42,6 +42,11 @@
 /* The current scene while UpdateOverlays swaps the scene's modules */
 #define SCENE_SWAPPING_MODULES 0x19
 
+/* The modules that g_SceneModuleToLoad names for the next scene */
+#define SCENE_MODULE_MENU 0x02
+#define SCENE_MODULE_PLAY 0x0A
+#define SCENE_MODULE_STAFF_ROLL 0x1F
+
 /* g_SubModuleState values */
 #define SUB_MODULE_LOADED 0
 #define SUB_MODULE_SWAP_PENDING 1
