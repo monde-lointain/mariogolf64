@@ -65,6 +65,7 @@
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
+#define STATS_ICON_FRAME_COUNT 2
 
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
@@ -160,8 +161,8 @@ extern void *D_8023B340_ovl_01;
 extern void *D_8023B344_ovl_01;
 extern void *D_8023B348_ovl_01;
 extern void *D_8023B34C_ovl_01;
-extern void *D_8023B350_ovl_01;
-extern void *D_8023B354_ovl_01;
+/* The two frames of the stats icon that func_80219460 animates */
+extern void *D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
 extern void *D_8023B358_ovl_01;
 extern void *D_8023B35C_ovl_01;
 extern void *D_8023B360_ovl_01;
@@ -214,14 +215,14 @@ void func_802178B0_ovl_01(void *buffer, s16 bufferKind) {
             break;
         case PLAYER_STATS_BUFFER_UNK4:
             rowNumber = D_801B5634;
-            imageSlot = &D_8023B350_ovl_01;
+            imageSlot = &D_8023B350_ovl_01[0];
             *imageSlot = buffer;
             OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][0], &asset);
             ReadEncodedAsset(*imageSlot, &asset);
             break;
         case PLAYER_STATS_BUFFER_UNK5:
             rowNumber = D_801B5634;
-            imageSlot = &D_8023B354_ovl_01;
+            imageSlot = &D_8023B350_ovl_01[1];
             *imageSlot = buffer;
             OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][1], &asset);
             ReadEncodedAsset(*imageSlot, &asset);
