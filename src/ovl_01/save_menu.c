@@ -160,6 +160,9 @@ extern void **D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void **D_8023BD70_ovl_01;
 extern void **D_8023BD74_ovl_01;
+extern s32 D_8022F8C0_ovl_01;
+extern u8 D_8022F8C4_ovl_01;
+extern s8 D_8022F8C5_ovl_01;
 extern void *D_8023BD78_ovl_01;
 extern s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
@@ -856,7 +859,85 @@ const char D_80231A3C_ovl_01[] = "%s";
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802230C0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80224AFC_ovl_01);
+/* The numbered boards of D_8023BD98, 64 by 64 CI8 images loaded in two strips */
+#define GAME_BOARD_WIDTH 64
+#define GAME_BOARD_STRIP_HEIGHT 32
+#define GAME_BOARD_STRIP_COUNT 2
+/* The animated mode icon of D_8023BD74, drawn on the board */
+#define MODE_ICON_WIDTH 64
+#define MODE_ICON_STRIP_HEIGHT 32
+#define MODE_ICON_STRIP_COUNT 2
+#define MODE_ICON_FRAME_DURATION 4
+/* Where the mode icon sits on the board */
+#define MODE_ICON_OFFSET_X 8
+#define MODE_ICON_OFFSET_Y 14
+
+/* The mode icon of each save menu mode, mini golf last */
+extern s32 D_80230BB0_ovl_01[SAVE_MENU_MODE_MINI_GOLF + 1];
+extern s32 D_8023BDAC_ovl_01;
+extern s32 D_8023BDB0_ovl_01;
+
+void func_80224AFC_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
+    MenuMemory *memory = func_8005AF74();
+    Gfx *gfx = *displayListHead;
+    s32 iconHalfSize = D_8023BDB0_ovl_01;
+    s32 iconScale = D_8023BDAC_ovl_01;
+    EncodedAsset asset;
+    s32 stripIndex;
+    void *image;
+    u8 iconIndex;
+
+    gDPPipeSync(gfx++);
+    gDPLoadTLUT_pal256(gfx++, ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != GAME_BOARD_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, (top + stripIndex * halfSize) << 2, (left + halfSize + halfSize) << 2,
+                                (top + halfSize + stripIndex * halfSize) << 2, G_TX_RENDERTILE, 0, 0, scale, scale);
+        gDPPipeSync(gfx++);
+    }
+    if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
+        image = D_8023BD74_ovl_01[D_8022F8C4_ovl_01];
+        gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+        for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
+            gDPLoadTextureBlock(gfx++,
+                                ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+                                 stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) & ~7,
+                                G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, (left + MODE_ICON_OFFSET_X) << 2,
+                                    (top + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y) << 2,
+                                    (left + iconHalfSize + iconHalfSize + MODE_ICON_OFFSET_X) << 2,
+                                    (top + iconHalfSize + stripIndex * iconHalfSize + MODE_ICON_OFFSET_Y)
+                                        << 2,
+                                    G_TX_RENDERTILE, 0, 0, iconScale, iconScale);
+            gDPPipeSync(gfx++);
+        }
+        D_8022F8C5_ovl_01++;
+        if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+            iconIndex = D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]];
+            D_8022F8C5_ovl_01 = 0;
+            D_8022F8C0_ovl_01++;
+            if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
+                D_8022F8C0_ovl_01 = 0;
+            }
+            if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] == END_OF_ICON_FRAMES) {
+                D_8022F8C0_ovl_01 = 0;
+            }
+            D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+            OpenEncodedAsset(g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
+            ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset);
+        }
+    }
+    *displayListHead = gfx;
+}
 
 /*
  * Doesn't match: the original computes each fidget timer's address with
