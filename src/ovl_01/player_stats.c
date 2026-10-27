@@ -3,6 +3,7 @@
 #include "character.h"
 #include "game_flags.h"
 #include "hole_display.h"
+#include "libc.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -11,6 +12,7 @@
 #include "sound.h"
 #include "sram.h"
 #include "text.h"
+#include "variables.h"
 
 /* The images of D_800C2064 that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
@@ -19,6 +21,9 @@
 #define PLAYER_STATS_IMAGE_SIZE 0x258
 /* They are Japanese score labels (assets 0x82D, 0x82F, 0x82E and 0x830), such as birdie and albatross */
 #define SCORE_LABEL_COUNT 4
+
+/* func_8021F124 writes names beside the faces of these first characters only */
+#define NAMED_CHARACTER_COUNT 14
 
 /* The most bytes of each ranked record holder's palette file that func_8021EF64 keeps */
 #define PLAYER_STATS_FILE_SIZE 0x200
@@ -135,6 +140,9 @@ extern void **D_8023B630_ovl_01;
 extern void *D_8023B634_ovl_01;
 extern void *D_8023B638_ovl_01;
 extern u8 *D_8023B63C_ovl_01;
+extern s32 D_80230A48_ovl_01[CHARACTER_COUNT];
+extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
+extern const char D_802319E0_ovl_01[];
 extern void *D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
 extern s32 D_80230718_ovl_01[STATS_SLIDE_ROW_COUNT];
@@ -974,4 +982,45 @@ void func_8021EF64_ovl_01(void) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021EF64_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021F124_ovl_01);
+void func_8021F124_ovl_01(Gfx **displayListHead, void *texels, void *palette, s32 left, s32 top, s16 character,
+                          u8 drawMode) {
+    Gfx *gfx = *displayListHead;
+
+    if (character < 0) {
+        character = 0;
+    }
+    if (character >= CHARACTER_COUNT) {
+        character = CHARACTER_COUNT - 1;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (drawMode == FACE_DARKENED) {
+        gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
+        gDPSetPrimColor(gfx++, 0, 0, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE, FACE_DARKENED_SHADE, 255);
+    } else {
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    }
+    gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
+    gDPLoadTextureBlock(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0,
+                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                        G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + FACE_WIDTH) << 2, (top + FACE_HEIGHT) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    if (drawMode == FACE_WITH_NAME) {
+        if (character < NAMED_CHARACTER_COUNT) {
+            SetUpTextDrawing(&gfx);
+            SetTextColor(&gfx, 255, 255, 255);
+            sprintf(g_PrintBuffer, D_802319E0_ovl_01, D_8022BF70_ovl_01[D_80230A48_ovl_01[character]]);
+            DrawLargeText(&gfx, left + FACE_NAME_OFFSET_X, top + FACE_NAME_OFFSET_Y, g_PrintBuffer);
+            gDPPipeSync(gfx++);
+        }
+    }
+    *displayListHead = gfx;
+}
