@@ -23,6 +23,12 @@ extern void *D_8023B67C_ovl_01;
 /* The images of D_800C2064 that func_8021F6E0 reads, before one of its own */
 #define SAVE_MENU_IMAGE_COUNT 6
 
+/* The game modes that have an image of their own, in image order, then mini golf's */
+#define SAVE_MENU_MODE_COUNT 10
+#define SAVE_MENU_MODE_MINI_GOLF 10
+
+void func_80221CC0_ovl_01(void);
+
 /* The Ring Shot stars that each level of func_8022181C takes */
 #define RING_SHOT_STARS_PER_LEVEL 4
 
@@ -42,7 +48,9 @@ extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
 extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
+extern s8 D_80230B4D_ovl_01;
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
+extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
 extern SaveMenuModeImage D_80230B5C_ovl_01[];
 extern void **D_8023B680_ovl_01;
 extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
@@ -198,7 +206,44 @@ s32 func_8022181C_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802218C0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221B20_ovl_01);
+void func_80221B20_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s8 gameIndex;
+    s8 modeIndex;
+
+    for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
+        D_80230B50_ovl_01[gameIndex] = -1;
+    }
+    D_80230B4D_ovl_01 = 0;
+    InitSram();
+    TransferSaveData(save, FALSE);
+    for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
+        if (save->savedGames[gameIndex].isValid) {
+            if (save->savedGames[gameIndex].state.isMiniGolf) {
+                D_80230B50_ovl_01[gameIndex] = SAVE_MENU_MODE_MINI_GOLF;
+            } else {
+                for (modeIndex = 0; modeIndex != SAVE_MENU_MODE_COUNT; modeIndex++) {
+                    if (save->savedGames[gameIndex].state.gameMode == D_80230B88_ovl_01[modeIndex]) {
+                        D_80230B50_ovl_01[gameIndex] = modeIndex;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
+        if (D_80230B50_ovl_01[gameIndex] != -1) {
+            break;
+        }
+    }
+    if (gameIndex == SAVED_GAME_COUNT) {
+        memory->savedGameIndex = 0;
+    } else {
+        memory->savedGameIndex = gameIndex;
+    }
+    func_80221CC0_ovl_01();
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221CC0_ovl_01);
 
