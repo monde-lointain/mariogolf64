@@ -568,23 +568,6 @@ void InsertRankedRecord(Unk68 *record) {
 #define PLAYER_STATE_UNK20 20
 #define PLAYER_STATE_UNK21 21
 
-/*
- * Where each game mode keeps its game in the save's mode tables. Mode 4's
- * two records overlap mode 5's one.
- */
-#define MODE4_GAME_INDEX 0
-#define MODE4_PLAYER_INDEX 0
-#define MODE4_RECORD_INDEX 0
-#define MODE4_PLAYER_COUNT 2
-#define MODE5_GAME_INDEX 1
-#define MODE5_PLAYER_INDEX 2
-#define MODE5_RECORD_INDEX 1
-#define MODE5_PLAYER_COUNT 1
-#define MODE0_GAME_INDEX 2
-#define MODE0_PLAYER_INDEX 3
-#define MODE0_RECORD_INDEX 2
-#define MODE0_PLAYER_COUNT 4
-
 s32 SaveOrContinueGameByMode(s32 isContinuing) {
     UnkB8 *players;
     Unk68 *records;

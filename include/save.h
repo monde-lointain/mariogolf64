@@ -38,6 +38,23 @@ extern u16 *g_PlayerFacePalettes[MAX_PLAYER_COUNT];
 #define MODE_PLAYER_COUNT 7
 #define MODE_RECORD_COUNT 6
 
+/*
+ * Where each game mode keeps its game in the save's mode tables. Mode 4's
+ * two records overlap mode 5's one.
+ */
+#define MODE4_GAME_INDEX 0
+#define MODE4_PLAYER_INDEX 0
+#define MODE4_RECORD_INDEX 0
+#define MODE4_PLAYER_COUNT 2
+#define MODE5_GAME_INDEX 1
+#define MODE5_PLAYER_INDEX 2
+#define MODE5_RECORD_INDEX 1
+#define MODE5_PLAYER_COUNT 1
+#define MODE0_GAME_INDEX 2
+#define MODE0_PLAYER_INDEX 3
+#define MODE0_RECORD_INDEX 2
+#define MODE0_PLAYER_COUNT 4
+
 /* Indices of SaveData's options */
 #define SAVE_OPTION_UNK0 0
 #define SAVE_OPTION_MONO 1 /* Plays the sound in mono instead of stereo */
