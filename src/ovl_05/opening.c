@@ -148,13 +148,16 @@ extern s8 f_IsOpeningShotPathRed;
 extern s32 f_OpeningShotPathScroll; /* Of the dash image, in texels */
 extern Vtx f_OpeningShotDashVertices[4];
 
+extern s32 f_IsBurstShown;
+extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
+
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
 void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
 void func_801FE2A0_ovl_05(Gfx** displayListHead);
 void func_801FE8F8_ovl_05(Gfx** displayListHead);
-void func_801FF70C_ovl_05(Gfx** displayListHead);
+void DrawOpeningBurst(Gfx** displayListHead);
 void func_801FFC40_ovl_05(Gfx** displayListHead);
 void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
 void func_80202D34_ovl_05(Gfx** displayListHead);
@@ -370,7 +373,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   gfx = g_DisplayListHead;
   DrawLensFlare(&gfx);
   func_801FE2A0_ovl_05(&gfx);
-  func_801FF70C_ovl_05(&gfx);
+  DrawOpeningBurst(&gfx);
   func_801FE8F8_ovl_05(&gfx);
   func_801FBB94_ovl_05(&gfx, matrices);
   func_801FFC40_ovl_05(&gfx);
@@ -524,14 +527,80 @@ void MoveLakitu(void) {
   }
 }
 
-void func_801FF6DC_ovl_05(void) {
+/* A 32x32 CI4 image of a yellow burst */
+#define ASSET_BURST_IMAGE 0x93D
+
+void LoadOpeningBurst(void) {
   EncodedAsset asset;
 
-  OpenEncodedAsset(0x93D, &asset);
+  OpenEncodedAsset(ASSET_BURST_IMAGE, &asset);
   ReadEncodedAsset(D_80212830_ovl_05, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FF70C_ovl_05);
+/* The burst's corners on the screen, in pixels */
+#define BURST_LEFT 227
+#define BURST_TOP 55
+#define BURST_RIGHT 255
+#define BURST_BOTTOM 81
+#define BURST_IMAGE_SIZE 32
+/* How many frames the burst shows for, once f_IsBurstShown is set */
+#define BURST_FRAME_COUNT 4
+
+/*
+ * Draws a yellow burst for a few frames, stretched over the burst's corners.
+ *
+ * The original divides for the texture's steps at run time, where this folds
+ * them into constants. GCC keeps such a division when the size is set the
+ * same way in both arms of an if, which CSE cannot see through but
+ * cross-jumping later merges, so the original likely chose the size by some
+ * condition. Placing such an if here keeps the divisions, but its arms spill
+ * the size differently and are not merged.
+ */
+#ifdef NON_MATCHING
+void DrawOpeningBurst(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s32 left = BURST_LEFT;
+  s32 top = BURST_TOP;
+  s32 right = BURST_RIGHT;
+  s32 bottom = BURST_BOTTOM;
+
+  if (f_IsBurstShown && ++f_BurstFrame < BURST_FRAME_COUNT) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetColorDither(gfx++, G_CD_DISABLE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, D_80212830_ovl_05 + IMAGE_HEADER_SIZE);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, D_80212830_ovl_05 + PALETTED_TEXELS_OFFSET,
+                           G_IM_FMT_CI, BURST_IMAGE_SIZE, BURST_IMAGE_SIZE, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
+                        G_TX_RENDERTILE, 0, 0,
+                        (BURST_IMAGE_SIZE << 10) / (right - left),
+                        (BURST_IMAGE_SIZE << 10) / (bottom - top));
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+  }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningBurst);
+#endif
 
 void func_801FFC10_ovl_05(void) {
   EncodedAsset asset;

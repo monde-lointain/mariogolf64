@@ -3338,3 +3338,7 @@ f_OpeningShotPathDashCount = 0x8020AEB0; // type:s32 size:0x4 segment:ovl_05
 f_IsOpeningShotPathRed = 0x8020AEB4; // type:s8 size:0x4 segment:ovl_05
 f_OpeningShotPathScroll = 0x8020AEB8; // type:s32 size:0x4 segment:ovl_05
 f_OpeningShotDashVertices = 0x8020AE68; // type:Vtx size:0x40 segment:ovl_05
+DrawOpeningBurst = 0x801FF70C; // type:func segment:ovl_05
+LoadOpeningBurst = 0x801FF6DC; // type:func segment:ovl_05
+f_IsBurstShown = 0x8020AD60; // type:s32 size:0x4 segment:ovl_05
+f_BurstFrame = 0x8020B214; // type:s32 size:0x4 segment:ovl_05
