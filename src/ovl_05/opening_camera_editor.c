@@ -1,4 +1,5 @@
 #include "common.h"
+#include "math_util.h"
 
 /* The camera that the opening's camera editor moves */
 typedef struct EditedCamera {
@@ -49,7 +50,25 @@ void func_8020360C_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
     D_8022BEC4_ovl_05 = arg2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203620_ovl_05);
+/* Works out the camera's heading, pitch and distance from its eye and look-at point */
+void func_80203620_ovl_05(void) {
+    f32 offsetX;
+    f32 offsetY;
+    f32 offsetZ;
+
+    offsetX = D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0];
+    D_8022BE30_ovl_05.pitch = atan2f(D_8022BE30_ovl_05.lookAt[1] - D_8022BE30_ovl_05.eye[1],
+                     sqrtf(offsetX * offsetX +
+                           (D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2]) *
+                               (D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2])));
+    D_8022BE30_ovl_05.heading = atan2f(D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2],
+                       D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]);
+    offsetY = D_8022BE30_ovl_05.lookAt[1] - D_8022BE30_ovl_05.eye[1];
+    offsetZ = D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2];
+    D_8022BE30_ovl_05.distance = sqrtf((D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]) *
+                           (D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]) +
+                       offsetY * offsetY + offsetZ * offsetZ);
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_05);
 
