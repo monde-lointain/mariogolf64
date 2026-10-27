@@ -1,15 +1,19 @@
 #include "common.h"
 #include "math_util.h"
 
+/* The points of the camera that the editor moves */
+#define EDITOR_POINT_EYE 0
+#define EDITOR_POINT_LOOK_AT 1
+#define EDITOR_POINT_COUNT 2
+
 /* The state of the opening's camera editor, starting with the camera it moves */
 typedef struct CameraEditor {
-    /* 0x00 */ Vec3 eye;
-    /* 0x0C */ Vec3 lookAt;
+    /* 0x00 */ Vec3 points[EDITOR_POINT_COUNT]; /* The eye, then the look-at point */
     /* 0x18 */ f32 heading;  /* In radians, of the look direction across the ground */
     /* 0x1C */ f32 pitch;    /* In radians, of the look direction above the ground */
     /* 0x20 */ f32 distance; /* From the eye to the look-at point */
     /* 0x24 */ f32 unk24;
-    /* 0x28 */ Vec3 unk28[2];
+    /* 0x28 */ Vec3 targets[EDITOR_POINT_COUNT]; /* Where func_8020370C moves the points to */
     /* 0x40 */ Vec3 unk40[2];
     /* 0x58 */ f32 unk58;
     /* 0x5C */ f32 unk5C;
@@ -45,12 +49,12 @@ void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
 
 void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
-    g_CameraEditor.eye[0] = arg0;
-    g_CameraEditor.eye[1] = arg1;
-    g_CameraEditor.eye[2] = arg2;
-    g_CameraEditor.lookAt[0] = arg3;
-    g_CameraEditor.lookAt[1] = arg4;
-    g_CameraEditor.lookAt[2] = arg5;
+    g_CameraEditor.points[EDITOR_POINT_EYE][0] = arg0;
+    g_CameraEditor.points[EDITOR_POINT_EYE][1] = arg1;
+    g_CameraEditor.points[EDITOR_POINT_EYE][2] = arg2;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = arg3;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = arg4;
+    g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = arg5;
     func_80203620_ovl_05();
 }
 
@@ -77,18 +81,22 @@ void func_80203620_ovl_05(void) {
     f32 offsetY;
     f32 offsetZ;
 
-    offsetX = g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0];
-    g_CameraEditor.pitch = atan2f(g_CameraEditor.lookAt[1] - g_CameraEditor.eye[1],
-                     sqrtf(offsetX * offsetX +
-                           (g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2]) *
-                               (g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2])));
-    g_CameraEditor.heading = atan2f(g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2],
-                       g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]);
-    offsetY = g_CameraEditor.lookAt[1] - g_CameraEditor.eye[1];
-    offsetZ = g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2];
-    g_CameraEditor.distance = sqrtf((g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]) *
-                           (g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]) +
-                       offsetY * offsetY + offsetZ * offsetZ);
+    offsetX = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0];
+    g_CameraEditor.pitch =
+        atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] - g_CameraEditor.points[EDITOR_POINT_EYE][1],
+               sqrtf(offsetX * offsetX +
+                     (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] - g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
+                         (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
+                          g_CameraEditor.points[EDITOR_POINT_EYE][2])));
+    g_CameraEditor.heading =
+        atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] - g_CameraEditor.points[EDITOR_POINT_EYE][2],
+               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0]);
+    offsetY = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] - g_CameraEditor.points[EDITOR_POINT_EYE][1];
+    offsetZ = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] - g_CameraEditor.points[EDITOR_POINT_EYE][2];
+    g_CameraEditor.distance =
+        sqrtf((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
+                  (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] - g_CameraEditor.points[EDITOR_POINT_EYE][0]) +
+              offsetY * offsetY + offsetZ * offsetZ);
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_05);
