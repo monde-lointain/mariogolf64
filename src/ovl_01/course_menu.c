@@ -1,5 +1,8 @@
 #include "common.h"
 #include "asset.h"
+#include "libc.h"
+#include "text.h"
+#include "variables.h"
 
 /* The images of D_800C2064 that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
@@ -7,6 +10,7 @@
 extern u16 D_800C2064[];
 extern void **D_8023A820_ovl_01;
 
+void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
 void func_8020E010_ovl_01(void **buffers) {
@@ -35,9 +39,31 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F794_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F9B8_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FD48_ovl_01);
+const char D_802318E0_ovl_01[] = "%c";
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FE20_ovl_01);
+void func_8020FD48_ovl_01(Gfx **displayListHead, s16 x, s16 y) {
+    Gfx *gfx = *displayListHead;
+
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 63, 255, 63);
+    sprintf(g_PrintBuffer, D_802318E0_ovl_01, 'Y');
+    DrawLargeText(&gfx, x, y, g_PrintBuffer);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+void func_8020FE20_ovl_01(Gfx **displayListHead, s16 x, s16 y) {
+    Gfx *gfx = *displayListHead;
+
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 64, 192);
+    sprintf(g_PrintBuffer, D_802318E0_ovl_01, '%');
+    DrawLargeText(&gfx, x, y, g_PrintBuffer);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FEF8_ovl_01);
 
