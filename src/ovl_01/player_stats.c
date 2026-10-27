@@ -8,6 +8,7 @@
 #include "save.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "sram.h"
 #include "text.h"
 
 /* The images of D_800C2064 that func_8021CF10 reads */
@@ -23,6 +24,11 @@
 #define STATS_GRID_COLUMN_COUNT 5
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
+/* The bit and the kind field in a ranked record's unk3A */
+#define RANKED_RECORD_SAVED 0x80
+#define RANKED_RECORD_KIND_MASK 0xF
+/* func_8021E01C lists each kind's records in rows one longer than the grid */
+#define STATS_KIND_LIST_SIZE (STATS_GRID_COLUMN_COUNT + 1)
 
 /* The buffers that func_802178B0 fills, and the assets it reads into them */
 #define PLAYER_STATS_BUFFER_ICONS 1
@@ -132,6 +138,7 @@ extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern u8 D_8022F8C5_ovl_01;
 extern u8 D_802303A0_ovl_01;
+extern u8 D_802308A0_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s8 D_801B60B9;
@@ -499,7 +506,135 @@ void func_8021D0B8_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D3AC_ovl_01);
 
+/*
+ * Doesn't match: the original copies the chosen row's zero into the column
+ * rather than loading zero, and so reads the last row into a1 instead of v1.
+ */
+#ifdef NON_MATCHING
+void func_8021E01C_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    s32 kindRecords[STATS_GRID_ROW_COUNT][STATS_KIND_LIST_SIZE];
+    s32 index;
+    s32 recordIndex;
+    s32 kindThreeCount;
+    s32 kindTwoCount;
+    s32 kindOneCount;
+    s32 kindZeroCount;
+    s32 flags;
+    u8 row;
+    s32 column;
+    MenuMemory *memory;
+
+    InitSram();
+    TransferSaveData(save, FALSE);
+    for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
+        kindRecords[0][recordIndex] = STATS_CELL_EMPTY;
+        kindRecords[1][recordIndex] = STATS_CELL_EMPTY;
+        kindRecords[2][recordIndex] = STATS_CELL_EMPTY;
+        kindRecords[3][recordIndex] = STATS_CELL_EMPTY;
+    }
+    kindThreeCount = 0;
+    kindTwoCount = 0;
+    kindZeroCount = 0;
+    kindOneCount = 0;
+    for (recordIndex = 0; recordIndex != RANKED_RECORD_COUNT; recordIndex++) {
+        flags = (s8)save->rankedRecords[recordIndex].unk3A;
+        if (flags & RANKED_RECORD_SAVED) {
+            switch (flags & RANKED_RECORD_KIND_MASK) {
+                case 3:
+                    if (kindThreeCount < STATS_GRID_COLUMN_COUNT) {
+                        kindRecords[0][kindThreeCount++] = recordIndex;
+                    }
+                    break;
+                case 2:
+                    if (kindTwoCount < STATS_GRID_COLUMN_COUNT) {
+                        kindRecords[1][kindTwoCount++] = recordIndex;
+                    }
+                    break;
+                case 1:
+                    if (kindOneCount < STATS_GRID_COLUMN_COUNT) {
+                        kindRecords[3][kindOneCount++] = recordIndex;
+                    }
+                    break;
+                case 0:
+                    if (kindZeroCount < STATS_GRID_COLUMN_COUNT) {
+                        kindRecords[2][kindZeroCount++] = recordIndex;
+                    }
+                    break;
+            }
+        }
+    }
+    row = 0;
+    memory = func_8005AF74();
+    column = row;
+    if (kindThreeCount == 0) {
+        if (kindTwoCount != 0) {
+            row = 1;
+        } else if (kindOneCount != 0) {
+            row = 2;
+        } else if (kindZeroCount != 0) {
+            row = 3;
+        }
+    }
+    switch (memory->unk3A) {
+        case 0:
+            if (kindThreeCount != 0) {
+                row = 0;
+                if (memory->unk39 < kindThreeCount && memory->unk39 >= 0) {
+                    column = memory->unk39;
+                }
+            }
+            break;
+        case 1:
+            if (kindTwoCount != 0) {
+                row = 1;
+                if (memory->unk39 < kindTwoCount && memory->unk39 >= 0) {
+                    column = memory->unk39;
+                }
+            }
+            break;
+        case 2:
+            if (kindOneCount != 0) {
+                row = 2;
+                if (memory->unk39 < kindOneCount && memory->unk39 >= 0) {
+                    column = memory->unk39;
+                }
+            }
+            break;
+        case 3:
+            if (kindZeroCount != 0) {
+                row = 3;
+                if (memory->unk39 < kindZeroCount && memory->unk39 >= 0) {
+                    column = memory->unk39;
+                }
+            }
+            break;
+    }
+    memory->unk39 = column;
+    memory->unk3A = row;
+    for (recordIndex = 0; recordIndex != STATS_GRID_COLUMN_COUNT; recordIndex++) {
+        D_8023B640_ovl_01[0][recordIndex] = kindRecords[0][recordIndex];
+        D_8023B640_ovl_01[1][recordIndex] = kindRecords[1][recordIndex];
+        D_8023B640_ovl_01[2][recordIndex] = kindRecords[3][recordIndex];
+        D_8023B640_ovl_01[3][recordIndex] = kindRecords[2][recordIndex];
+    }
+    recordIndex = 0;
+    D_802308A0_ovl_01 = 0;
+    for (; recordIndex != STATS_GRID_ROW_COUNT; recordIndex++) {
+        for (index = 0; index != STATS_GRID_COLUMN_COUNT; index++) {
+            if (D_8023B640_ovl_01[recordIndex][index] != STATS_CELL_EMPTY) {
+                D_802308A0_ovl_01++;
+                break;
+            }
+        }
+        if (D_802308A0_ovl_01 != 0) {
+            break;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E01C_ovl_01);
+#endif
 
 s8 func_8021E340_ovl_01(s8 column, s8 row, u8 direction) {
     s32 stepCount;
