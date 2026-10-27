@@ -74,6 +74,19 @@ extern void *D_80230F48_ovl_01;
 extern void *D_80230F4C_ovl_01;
 extern void *D_80230F50_ovl_01;
 extern void *D_80230F54_ovl_01;
+/*
+ * func_8022A8F4 points at the chosen key with the 24x24 hand of asset 0x70F
+ * in D_80230F50, which sways a pixel to the right each frame and back
+ */
+#define CODE_HAND_SIZE 24
+#define CODE_HAND_FIRST_X 16
+#define CODE_HAND_FIRST_Y 56
+#define CODE_KEY_SPACING_X 25
+#define CODE_KEY_SPACING_Y 19
+#define CODE_HAND_STEP_FRAMES 1
+#define CODE_HAND_REACH 4
+#define CODE_HAND_MOVING_RIGHT 0
+#define CODE_HAND_MOVING_LEFT 1
 /* The codes that enter club tournaments: how many there are, and their length */
 #define CLUB_TOURNAMENT_CODE_COUNT 36
 #define CLUB_TOURNAMENT_CODE_LENGTH 8
@@ -820,7 +833,54 @@ void func_8022A43C_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A8F4_ovl_01);
+void func_8022A8F4_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    MenuMemory *memory = func_8005AF74();
+    s32 left;
+    s32 top;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_80230F50_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureTile_4b(gfx++, ((u32)D_80230F50_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                          CODE_HAND_SIZE, CODE_HAND_SIZE, 0, 0, CODE_HAND_SIZE - 1, CODE_HAND_SIZE - 1, 0,
+                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                          G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    D_80230F64_ovl_01++;
+    if (D_80230F64_ovl_01 == CODE_HAND_STEP_FRAMES) {
+        D_80230F64_ovl_01 = 0;
+        switch (D_80230F5C_ovl_01) {
+            case CODE_HAND_MOVING_RIGHT:
+                D_80230F60_ovl_01++;
+                if (D_80230F60_ovl_01 == CODE_HAND_REACH) {
+                    D_80230F5C_ovl_01 = CODE_HAND_MOVING_LEFT;
+                }
+                break;
+            case CODE_HAND_MOVING_LEFT:
+                D_80230F60_ovl_01--;
+                if (D_80230F60_ovl_01 == 0) {
+                    D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
+                }
+                break;
+            default:
+                D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
+                D_80230F60_ovl_01 = 0;
+                break;
+        }
+    }
+    left = memory->codeKeyColumn * CODE_KEY_SPACING_X + CODE_HAND_FIRST_X + D_80230F60_ovl_01;
+    top = memory->codeKeyRow * CODE_KEY_SPACING_Y + CODE_HAND_FIRST_Y;
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + CODE_HAND_SIZE) << 2, (top + CODE_HAND_SIZE) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022ADE8_ovl_01);
 
