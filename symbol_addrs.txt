@@ -3484,3 +3484,6 @@ f_OpeningFrameCount = 0x8020AC44; // size:0x4 segment:ovl_05
 f_HasLogoStarted = 0x8020AC48; // size:0x4 segment:ovl_05
 f_DonkeyKongSoundChannel = 0x8020E3F0; // size:0x4 segment:ovl_05
 f_ClosingSoundChannel = 0x8020E3F4; // size:0x4 segment:ovl_05
+f_OpeningSoundChannel = 0x8020AC4C; // size:0x4 segment:ovl_05
+AdvanceOpeningSoundChannel = 0x801F4A40; // type:func segment:ovl_05
+PlayLogoClubSound = 0x801F4A6C; // type:func segment:ovl_05

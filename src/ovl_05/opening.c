@@ -72,7 +72,8 @@ typedef struct OpeningNameLogo {
   /* 0x18 */ s32 shownHeight;
 } OpeningNameLogo; /* size = 0x1C */
 
-extern s32 D_8020AC4C_ovl_05;
+/* The channel for the script's next sound */
+extern s32 f_OpeningSoundChannel;
 extern s32 f_LogoClubPosition[3];
 extern f32 f_LogoClubOrbitRadius;
 extern s32 f_IsLogoClubSwinging;
@@ -246,18 +247,37 @@ void DrawOpeningShotBall(Gfx** displayListHead);
 void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn);
 void DrawOpeningSparks(Gfx** displayListHead);
 
-void func_801F4A40_ovl_05(void) {
-  D_8020AC4C_ovl_05++;
-  if (D_8020AC4C_ovl_05 == 11) {
-    D_8020AC4C_ovl_05 = 0;
+/* The script plays most of its sounds on the next of these channels in turn,
+ * so that each can overlap the last few */
+#define ROTATING_SOUND_CHANNEL_COUNT 11
+#define OPENING_SOUND_PAN_CENTRE 127
+
+/* Moves f_OpeningSoundChannel on to the next of the rotating channels */
+void AdvanceOpeningSoundChannel(void) {
+  f_OpeningSoundChannel++;
+  if (f_OpeningSoundChannel == ROTATING_SOUND_CHANNEL_COUNT) {
+    f_OpeningSoundChannel = 0;
   }
 }
 
-void func_801F4A6C_ovl_05(void) {
+#define LOGO_CLUB_SOUND_CHANNEL 12
+/* The club sounds quieter the wider it orbits, losing this much volume per
+ * pixel of radius */
+#define LOGO_CLUB_SOUND_LOUDEST_VOLUME 48
+#define LOGO_CLUB_SOUND_FADE_RATE 0.2f
+/* The pan moves one step for every two pixels from the screen's centre */
+#define LOGO_CLUB_PIXELS_PER_PAN_STEP 2
+
+/* Plays the title logo's club striking while it swings round */
+void PlayLogoClubSound(void) {
   if (f_IsLogoClubSwinging != 0) {
-    PlaySoundWithEffects(SOUND_CONTACT_PLAIN, 12,
-                         48 - (s32)(f_LogoClubOrbitRadius * 0.2f), 0,
-                         127 - (f_LogoClubPosition[0] - 160) / 2);
+    PlaySoundWithEffects(
+        SOUND_CONTACT_PLAIN, LOGO_CLUB_SOUND_CHANNEL,
+        LOGO_CLUB_SOUND_LOUDEST_VOLUME -
+            (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
+        0,
+        OPENING_SOUND_PAN_CENTRE - (f_LogoClubPosition[0] - SCREEN_WIDTH / 2) /
+                                       LOGO_CLUB_PIXELS_PER_PAN_STEP);
   }
 }
 
@@ -951,6 +971,8 @@ extern CoursePoint D_8020C404_ovl_05;
  */
 extern s32 f_DonkeyKongSoundChannel;
 extern s32 f_ClosingSoundChannel;
+/* The first channel after the rotating ones */
+#define CLOSING_SOUND_CHANNEL ROTATING_SOUND_CHANNEL_COUNT
 extern f32 D_80217078_ovl_05;
 
 void LaunchDrop(CoursePoint point);
@@ -1095,12 +1117,12 @@ void UpdateOpening(void) {
         break;
       case 0x3:
         if (f_OpeningSceneFramesLeft == 0x1C) {
-          PlaySound(SOUND_CONTACT_PLAIN, D_8020AC4C_ovl_05, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x18) {
-          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+          AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
@@ -1133,16 +1155,16 @@ void UpdateOpening(void) {
       case 0x15:
         switch (f_OpeningSceneFramesLeft) {
           case 25:
-            PlaySound(0x196, D_8020AC4C_ovl_05, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySound(0x196, f_OpeningSoundChannel, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 23:
-            PlaySoundWithEffects(0x1AE, D_8020AC4C_ovl_05, 0x46, 0, 0xBB);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1AE, f_OpeningSoundChannel, 0x46, 0, 0xBB);
+            AdvanceOpeningSoundChannel();
             break;
           case 20:
-            PlaySoundWithEffects(0x177, D_8020AC4C_ovl_05, 0x46, 0, 0x57);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x177, f_OpeningSoundChannel, 0x46, 0, 0x57);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (AreEditorMovesDone()) {
@@ -1188,8 +1210,8 @@ void UpdateOpening(void) {
         break;
       case 0x29:
         if (f_OpeningSceneFramesLeft == 0xE) {
-          PlaySoundWithEffects(0x148, D_8020AC4C_ovl_05, 0x7F, 0, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x148, f_OpeningSoundChannel, 0x7F, 0, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_LookAtEaseMode = 1;
@@ -1229,12 +1251,12 @@ void UpdateOpening(void) {
         break;
       case 0x33:
         if (f_OpeningSceneFramesLeft == 0x18) {
-          PlaySound(0x50, D_8020AC4C_ovl_05, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySound(0x50, f_OpeningSoundChannel, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x14) {
-          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+          AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
@@ -1264,23 +1286,23 @@ void UpdateOpening(void) {
         f_IsNameSlotShown[0] = 0;
         D_8020AE44_ovl_05 = 0;
         f_ShotBallScale = 0;
-        PlaySoundWithEffects(0x197, D_8020AC4C_ovl_05, 0x32, 0, 0x2F);
-        func_801F4A40_ovl_05();
+        PlaySoundWithEffects(0x197, f_OpeningSoundChannel, 0x32, 0, 0x2F);
+        AdvanceOpeningSoundChannel();
         ClearEffects();
         break;
       case 0x46:
         switch (f_OpeningSceneFramesLeft) {
           case 0x23:
-            PlaySoundWithEffects(0x177, D_8020AC4C_ovl_05, 0x50, 0, 0xA7);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x177, f_OpeningSoundChannel, 0x50, 0, 0xA7);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x21:
-            PlaySound(0x1AF, D_8020AC4C_ovl_05, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySound(0x1AF, f_OpeningSoundChannel, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x1F:
-            PlaySoundWithEffects(0x146, D_8020AC4C_ovl_05, 0x50, 0, 0xBB);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x146, f_OpeningSoundChannel, 0x50, 0, 0xBB);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0x14) {
@@ -1302,7 +1324,7 @@ void UpdateOpening(void) {
           f_LookAtEaseMode = 1;
           f_OpeningSceneFramesLeft = 0x46;
           f_OpeningScene++;
-          func_801F4A40_ovl_05();
+          AdvanceOpeningSoundChannel();
         }
         break;
       case 0x47:
@@ -1337,12 +1359,12 @@ void UpdateOpening(void) {
         break;
       case 0x51:
         if (f_OpeningSceneFramesLeft == 0x18) {
-          PlaySound(0x50, D_8020AC4C_ovl_05, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySound(0x50, f_OpeningSoundChannel, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x14) {
-          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+          AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
@@ -1378,16 +1400,16 @@ void UpdateOpening(void) {
       case 0x64:
         switch (f_OpeningSceneFramesLeft) {
           case 40:
-            PlaySound(0x176, D_8020AC4C_ovl_05, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySound(0x176, f_OpeningSoundChannel, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 38:
-            PlaySoundWithEffects(0x147, D_8020AC4C_ovl_05, 0x46, 0, 0xBB);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x147, f_OpeningSoundChannel, 0x46, 0, 0xBB);
+            AdvanceOpeningSoundChannel();
             break;
           case 35:
-            PlaySoundWithEffects(0x196, D_8020AC4C_ovl_05, 0x36, 0, 0x57);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x196, f_OpeningSoundChannel, 0x36, 0, 0x57);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1434,8 +1456,8 @@ void UpdateOpening(void) {
         break;
       case 0x6F:
         if (f_OpeningSceneFramesLeft == 4) {
-          PlaySound(SOUND_CONTACT_PLAIN, D_8020AC4C_ovl_05, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningShotSimulation.playerIndex = 0;
@@ -1448,8 +1470,8 @@ void UpdateOpening(void) {
           ZoomEditorCamera(1, 33.056084f, 0x28);
           f_OpeningSceneFramesLeft = 5;
           f_OpeningScene++;
-          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
+          AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
@@ -1471,28 +1493,28 @@ void UpdateOpening(void) {
         break;
       case 0x71:
         if (f_OpeningSceneFramesLeft == 0x37) {
-          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0xA, 0x9F);
-          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -9.0f);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0xA, 0x9F);
+          SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x2D) {
-          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x14, 0x9F);
-          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -10.0f);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
+          SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x23) {
-          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x1E, 0x9F);
-          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -11.0f);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
+          SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x19) {
-          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x28, 0x9F);
-          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -12.0f);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
+          SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0xF) {
-          PlaySound(5, D_8020AC4C_ovl_05, 0x30);
-          func_801F4A40_ovl_05();
+          PlaySound(5, f_OpeningSoundChannel, 0x30);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x78;
@@ -1530,8 +1552,8 @@ void UpdateOpening(void) {
           f_OpeningScene = 0x82;
         }
         if (f_OpeningFrameCount == 0x375) {
-          PlaySound(0x4F, D_8020AC4C_ovl_05, 0x3C);
-          func_801F4A40_ovl_05();
+          PlaySound(0x4F, f_OpeningSoundChannel, 0x3C);
+          AdvanceOpeningSoundChannel();
         }
         break;
       case 0x82:
@@ -1556,24 +1578,24 @@ void UpdateOpening(void) {
           case 0x5E:
           case 0x68:
           case 0x73:
-            PlaySound(0x4E, D_8020AC4C_ovl_05, 0x46);
-            func_801F4A40_ovl_05();
+            PlaySound(0x4E, f_OpeningSoundChannel, 0x46);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x6A:
-            PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x48, -6, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x2A, f_OpeningSoundChannel, 0x48, -6, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x64:
-            PlaySound(0x18A, D_8020AC4C_ovl_05, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySound(0x18A, f_OpeningSoundChannel, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x46:
             if (f_IsDonkeyKongShown) {
-              PlaySound(0x188, D_8020AC4C_ovl_05, 0x7F);
+              PlaySound(0x188, f_OpeningSoundChannel, 0x7F);
             } else {
-              PlaySound(0x187, D_8020AC4C_ovl_05, 0x7F);
+              PlaySound(0x187, f_OpeningSoundChannel, 0x7F);
             }
-            func_801F4A40_ovl_05();
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (AreEditorMovesDone()) {
@@ -1590,11 +1612,11 @@ void UpdateOpening(void) {
           TurnEditorCamera(1, 0.3807652f, 0x32);
           ZoomEditorCamera(1, 34.2068f, 0x32);
           if (f_IsDonkeyKongShown) {
-            PlaySoundWithEffects(0x1A2, D_8020AC4C_ovl_05, 0x7F, 0, 0x3F);
+            PlaySoundWithEffects(0x1A2, f_OpeningSoundChannel, 0x7F, 0, 0x3F);
           } else {
-            PlaySoundWithEffects(0x1A1, D_8020AC4C_ovl_05, 0x50, 0, 0x3F);
+            PlaySoundWithEffects(0x1A1, f_OpeningSoundChannel, 0x50, 0, 0x3F);
           }
-          func_801F4A40_ovl_05();
+          AdvanceOpeningSoundChannel();
         }
         break;
       case 0x8D:
@@ -1621,25 +1643,25 @@ void UpdateOpening(void) {
       case 0x97:
         switch (f_OpeningSceneFramesLeft) {
           case 0x57:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0xA7);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0xA7);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x4D:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x4C, 0, 0x9D);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x4C, 0, 0x9D);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x43:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x48, 0, 0x93);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x48, 0, 0x93);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x39:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x3A, 0, 0x89);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x3A, 0, 0x89);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x2A:
-            PlaySound(0x35, D_8020AC4C_ovl_05, 0x46);
-            SetSoundFrequencyOffset(D_8020AC4C_ovl_05, 7.0f);
-            func_801F4A40_ovl_05();
+            PlaySound(0x35, f_OpeningSoundChannel, 0x46);
+            SetSoundFrequencyOffset(f_OpeningSoundChannel, 7.0f);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft >= 0x17 &&
@@ -1671,8 +1693,8 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           TiltEditorCamera(1, -0.166897f, 0x32);
           f_OpeningScene++;
-          PlaySound(0x60, D_8020AC4C_ovl_05, 0x32);
-          func_801F4A40_ovl_05();
+          PlaySound(0x60, f_OpeningSoundChannel, 0x32);
+          AdvanceOpeningSoundChannel();
         }
         break;
       case 0x98:
@@ -1697,8 +1719,8 @@ void UpdateOpening(void) {
           case 0x35:
           case 0x2A:
           case 0x1A:
-            PlaySound(0x4E, D_8020AC4C_ovl_05, 0x30);
-            func_801F4A40_ovl_05();
+            PlaySound(0x4E, f_OpeningSoundChannel, 0x30);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1706,8 +1728,8 @@ void UpdateOpening(void) {
                             2366.292f);
           ZoomEditorCamera(1, 16.721228f, 0x28);
           f_OpeningScene++;
-          PlaySound(0x60, D_8020AC4C_ovl_05, 0x3C);
-          func_801F4A40_ovl_05();
+          PlaySound(0x60, f_OpeningSoundChannel, 0x3C);
+          AdvanceOpeningSoundChannel();
           g_LightPitch = 0x1000;
           g_LightYaw = 0x6800;
           if (f_IsDonkeyKongShown) {
@@ -1746,8 +1768,8 @@ void UpdateOpening(void) {
         break;
       case 0xB5:
         if (f_OpeningSceneFramesLeft == 0xA) {
-          PlaySoundWithEffects(0xC5, D_8020AC4C_ovl_05, 0x40, 0x14, 0xCF);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xC5, f_OpeningSoundChannel, 0x40, 0x14, 0xCF);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 0x12;
@@ -1760,8 +1782,8 @@ void UpdateOpening(void) {
         break;
       case 0xB6:
         if (f_OpeningFrameCount == 0x5C5) {
-          PlaySoundWithEffects(0x189, D_8020AC4C_ovl_05, 0x7F, 0, 0x89);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x189, f_OpeningSoundChannel, 0x7F, 0, 0x89);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 0x13;
@@ -1819,19 +1841,19 @@ void UpdateOpening(void) {
             (handPoint[2] - f_OpeningBallPositions[1][2]) * D_80217078_ovl_05;
         switch (f_OpeningSceneFramesLeft) {
           case 0x61:
-            PlaySoundWithEffects(2, D_8020AC4C_ovl_05, 0x7F, 0, 0xA7);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(2, f_OpeningSoundChannel, 0x7F, 0, 0xA7);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x45:
-            PlaySoundWithEffects(2, D_8020AC4C_ovl_05, 0x7F, 0, 0x93);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(2, f_OpeningSoundChannel, 0x7F, 0, 0x93);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x37:
-            PlaySoundWithEffects(0x14, D_8020AC4C_ovl_05, 0x40, 0x7F, 0x7F);
+            PlaySoundWithEffects(0x14, f_OpeningSoundChannel, 0x40, 0x7F, 0x7F);
             break;
           case 0xF:
-            StopSound(D_8020AC4C_ovl_05);
-            func_801F4A40_ovl_05();
+            StopSound(f_OpeningSoundChannel);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1853,8 +1875,8 @@ void UpdateOpening(void) {
           f_IsLogoBallSlot[1] = 0;
           f_ShotBallScale = 0;
           f_LookAtEaseMode = 0;
-          PlaySound(0x60, D_8020AC4C_ovl_05, 0x50);
-          func_801F4A40_ovl_05();
+          PlaySound(0x60, f_OpeningSoundChannel, 0x50);
+          AdvanceOpeningSoundChannel();
         }
         break;
       case 0xC9:
@@ -1867,16 +1889,16 @@ void UpdateOpening(void) {
       case 0xCA:
         if (f_IsDonkeyKongShown) {
           if (f_OpeningSceneFramesLeft == 0x12) {
-            PlaySoundWithEffects(0x41, D_8020AC4C_ovl_05, 0x7F, 7, 0x7F);
-            SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -4.0f);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x41, f_OpeningSoundChannel, 0x7F, 7, 0x7F);
+            SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
+            AdvanceOpeningSoundChannel();
           }
         } else {
           switch (f_OpeningSceneFramesLeft) {
             case 0x13:
             case 9:
-              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x43);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4F, f_OpeningSoundChannel, 0x43);
+              AdvanceOpeningSoundChannel();
               break;
           }
         }
@@ -1903,29 +1925,29 @@ void UpdateOpening(void) {
             case 0x2E:
             case 0x42:
             case 0x56:
-              PlaySoundWithEffects(0x41, D_8020AC4C_ovl_05, 0x7F, 7, 0x7F);
-              SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -4.0f);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0x41, f_OpeningSoundChannel, 0x7F, 7, 0x7F);
+              SetSoundFrequencyOffset(f_OpeningSoundChannel, -4.0f);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x43:
-              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x28);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4D, f_OpeningSoundChannel, 0x28);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x2F:
-              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x60);
-              func_801F4A40_ovl_05();
+              PlaySound(0x2A, f_OpeningSoundChannel, 0x60);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x1F:
-              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x30);
-              func_801F4A40_ovl_05();
+              PlaySound(0x2A, f_OpeningSoundChannel, 0x30);
+              AdvanceOpeningSoundChannel();
               break;
             case 0xC:
-              PlaySoundWithEffects(0xCA, D_8020AC4C_ovl_05, 0x7F, 0, 0x93);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0xCA, f_OpeningSoundChannel, 0x7F, 0, 0x93);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x8:
-              PlaySoundWithEffects(0xEA, D_8020AC4C_ovl_05, 0x7F, 0, 0x6B);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0xEA, f_OpeningSoundChannel, 0x7F, 0, 0x6B);
+              AdvanceOpeningSoundChannel();
               break;
           }
         } else {
@@ -1933,36 +1955,36 @@ void UpdateOpening(void) {
             case 0x45:
             case 0x4F:
             case 0x59:
-              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x57);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4F, f_OpeningSoundChannel, 0x57);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x2A:
-              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x61);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4F, f_OpeningSoundChannel, 0x61);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x3B:
-              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x51);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4D, f_OpeningSoundChannel, 0x51);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x22:
-              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x5B);
-              func_801F4A40_ovl_05();
+              PlaySound(0x4D, f_OpeningSoundChannel, 0x5B);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x1D:
-              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x6B);
-              func_801F4A40_ovl_05();
+              PlaySound(0x2A, f_OpeningSoundChannel, 0x6B);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x27:
-              PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x30, 0, 0x65);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0x2A, f_OpeningSoundChannel, 0x30, 0, 0x65);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x16:
-              PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x18, 0, 0x5B);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0x2A, f_OpeningSoundChannel, 0x18, 0, 0x5B);
+              AdvanceOpeningSoundChannel();
               break;
             case 0x4:
-              PlaySoundWithEffects(0x20B, D_8020AC4C_ovl_05, 0x7F, 0, 0x6B);
-              func_801F4A40_ovl_05();
+              PlaySoundWithEffects(0x20B, f_OpeningSoundChannel, 0x7F, 0, 0x6B);
+              AdvanceOpeningSoundChannel();
               break;
           }
         }
@@ -1973,8 +1995,8 @@ void UpdateOpening(void) {
         break;
       case 0xD2:
         if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 0x10) {
-          PlaySoundWithEffects(0xC3, D_8020AC4C_ovl_05, 0x60, 0, 0x93);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0xC3, f_OpeningSoundChannel, 0x60, 0, 0x93);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f,
@@ -1990,20 +2012,20 @@ void UpdateOpening(void) {
       case 0xD3:
         switch (f_OpeningSceneFramesLeft) {
           case 0x3C:
-            PlaySound(0x184, D_8020AC4C_ovl_05, 0x60);
-            func_801F4A40_ovl_05();
+            PlaySound(0x184, f_OpeningSoundChannel, 0x60);
+            AdvanceOpeningSoundChannel();
             /* fallthrough */
           case 0x32:
-            PlaySound(0x18B, D_8020AC4C_ovl_05, 0x60);
-            func_801F4A40_ovl_05();
+            PlaySound(0x18B, f_OpeningSoundChannel, 0x60);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x28:
-            PlaySound(0x18B, D_8020AC4C_ovl_05, 0x60);
-            func_801F4A40_ovl_05();
+            PlaySound(0x18B, f_OpeningSoundChannel, 0x60);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x25:
-            PlaySound(0x184, D_8020AC4C_ovl_05, 0x60);
-            func_801F4A40_ovl_05();
+            PlaySound(0x184, f_OpeningSoundChannel, 0x60);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2045,33 +2067,33 @@ void UpdateOpening(void) {
         }
         switch (f_OpeningSceneFramesLeft) {
           case 0x93:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x61);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0x61);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x89:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x6B);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0x6B);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x7F:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x75);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0x75);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x74:
-            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x1E:
-            PlaySound(0x36, D_8020AC4C_ovl_05, 0x46);
-            func_801F4A40_ovl_05();
+            PlaySound(0x36, f_OpeningSoundChannel, 0x46);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x1C:
             if (f_IsDonkeyKongShown) {
-              PlaySound(0x141, D_8020AC4C_ovl_05, 0x7F);
-              f_DonkeyKongSoundChannel = D_8020AC4C_ovl_05;
+              PlaySound(0x141, f_OpeningSoundChannel, 0x7F);
+              f_DonkeyKongSoundChannel = f_OpeningSoundChannel;
             } else {
-              PlaySound(0x152, D_8020AC4C_ovl_05, 0x7F);
+              PlaySound(0x152, f_OpeningSoundChannel, 0x7F);
             }
-            func_801F4A40_ovl_05();
+            AdvanceOpeningSoundChannel();
             break;
           case 0x14:
             if (f_IsDonkeyKongShown) {
@@ -2091,8 +2113,8 @@ void UpdateOpening(void) {
         break;
       case 0xE7:
         if (f_OpeningSceneFramesLeft == 6) {
-          PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
-          func_801F4A40_ovl_05();
+          PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0xA7);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
@@ -2104,20 +2126,20 @@ void UpdateOpening(void) {
         g_CameraEditor.fieldOfView += 0.2666666f;
         switch (f_OpeningSceneFramesLeft) {
           case 0x36:
-            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0x57);
+            AdvanceOpeningSoundChannel();
             break;
           case 0xA:
-            PlaySound(0x77, D_8020AC4C_ovl_05, 0x7F);
-            func_801F4A40_ovl_05();
+            PlaySound(0x77, f_OpeningSoundChannel, 0x7F);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x24:
-            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0xA7);
+            AdvanceOpeningSoundChannel();
             break;
           case 0x6:
-            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0x57);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (AreEditorMovesDone()) {
@@ -2128,12 +2150,12 @@ void UpdateOpening(void) {
       case 0xF0:
         switch (f_OpeningSceneFramesLeft) {
           case 0x24:
-            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0xA7);
+            AdvanceOpeningSoundChannel();
             /* fallthrough */
           case 0x6:
-            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
-            func_801F4A40_ovl_05();
+            PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0x57);
+            AdvanceOpeningSoundChannel();
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2150,12 +2172,12 @@ void UpdateOpening(void) {
       case 0xFA:
         if (f_OpeningSceneFramesLeft == 0x2E) {
           f_IsBurstShown = 1;
-          PlaySound(0x34, D_8020AC4C_ovl_05, 0x50);
-          func_801F4A40_ovl_05();
+          PlaySound(0x34, f_OpeningSoundChannel, 0x50);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x1A) {
-          PlaySound(0x141, D_8020AC4C_ovl_05, 0x7F);
-          func_801F4A40_ovl_05();
+          PlaySound(0x141, f_OpeningSoundChannel, 0x7F);
+          AdvanceOpeningSoundChannel();
         }
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_AreAmbientSoundsOn = 1;
@@ -2197,8 +2219,8 @@ void UpdateOpening(void) {
           f_IsLakituFlying = 1;
           f_OpeningSceneFramesLeft = 1000;
           f_OpeningScene++;
-          PlaySound(0x28, D_8020AC4C_ovl_05, 0x3F);
-          func_801F4A40_ovl_05();
+          PlaySound(0x28, f_OpeningSoundChannel, 0x3F);
+          AdvanceOpeningSoundChannel();
           f_AreAmbientSoundsOn = 0;
         }
         break;
@@ -2217,8 +2239,8 @@ void UpdateOpening(void) {
           case 0x3E3:
           case 0x3E5:
           case 0x3E6:
-            PlaySound(0x27, D_8020AC4C_ovl_05, 0x40);
-            func_801F4A40_ovl_05();
+            PlaySound(0x27, f_OpeningSoundChannel, 0x40);
+            AdvanceOpeningSoundChannel();
             break;
         }
         switch (f_OpeningSceneFramesLeft) {
@@ -2231,14 +2253,14 @@ void UpdateOpening(void) {
           case 0x3C5:
           case 0x3C6:
           case 0x3C8:
-            PlaySound(0x4D, D_8020AC4C_ovl_05, 0x60);
-            func_801F4A40_ovl_05();
+            PlaySound(0x4D, f_OpeningSoundChannel, 0x60);
+            AdvanceOpeningSoundChannel();
             break;
         }
-        func_801F4A6C_ovl_05();
+        PlayLogoClubSound();
         if (f_OpeningSceneFramesLeft == 0x3CF) {
-          PlaySoundWithEffects(0x211, 0xB, 0x7F, 0, 0x7F);
-          f_ClosingSoundChannel = 0xB;
+          PlaySoundWithEffects(0x211, CLOSING_SOUND_CHANNEL, 0x7F, 0, 0x7F);
+          f_ClosingSoundChannel = CLOSING_SOUND_CHANNEL;
         }
         break;
       case OPENING_SCENE_SKIPPED:
