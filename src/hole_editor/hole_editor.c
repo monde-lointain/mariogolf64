@@ -37,6 +37,9 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_804066C8 rejects cell triangles whose cross product is below this */
+#define MIN_CELL_CROSS_PRODUCT 16
+
 /* func_80404850's out-of-bounds slope searches this many nearest offsets */
 #define SLOPE_OFFSET_COUNT 400
 #define SLOPE_OFFSET_SPAN 10
@@ -191,6 +194,7 @@ extern Mtx D_8040CC98;
 extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 s32 GetTerrainCode(s32 column, s32 row);
+s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
@@ -874,7 +878,38 @@ void func_80406570_hole_editor(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804066C8_hole_editor);
+/*
+ * Returns -1 if either triangle of any of the four ground cells around a
+ * ground point has a cross product below MIN_CELL_CROSS_PRODUCT, so is
+ * too thin or turned over, or 0 if none does
+ */
+s32 func_804066C8_hole_editor(s32 column, s32 row) {
+    Vtx *corners[4];
+    s32 rowOffset;
+    s32 columnOffset;
+
+    rowOffset = -1;
+    do {
+        columnOffset = -1;
+        do {
+            corners[0] = GetGroundPoint(column + columnOffset, row + rowOffset);
+            corners[1] = GetGroundPoint(column + columnOffset + 1, row + rowOffset);
+            corners[2] = GetGroundPoint(column + columnOffset, row + rowOffset + 1);
+            corners[3] = GetGroundPoint(column + columnOffset + 1, row + rowOffset + 1);
+            if (CrossProductXZ(corners[0]->v.ob[AXIS_X], corners[0]->v.ob[AXIS_Z], corners[1]->v.ob[AXIS_X],
+                               corners[1]->v.ob[AXIS_Z], corners[2]->v.ob[AXIS_X],
+                               corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT ||
+                CrossProductXZ(corners[1]->v.ob[AXIS_X], corners[1]->v.ob[AXIS_Z], corners[3]->v.ob[AXIS_X],
+                               corners[3]->v.ob[AXIS_Z], corners[2]->v.ob[AXIS_X],
+                               corners[2]->v.ob[AXIS_Z]) < MIN_CELL_CROSS_PRODUCT) {
+                return -1;
+            }
+            columnOffset++;
+        } while (columnOffset <= 0);
+        rowOffset++;
+    } while (rowOffset <= 0);
+    return 0;
+}
 
 /*
  * Runs scene 11's menu, which loads a hole with BuildHole or saves the
