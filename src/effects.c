@@ -2574,10 +2574,10 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
 
           splashStep = ((RAIN_SPLASH_FRAME_SIZE * 2) << 10) / splashSize;
           gSPScisTextureRectangle(gfx++,
-              splashPoint.x * QUARTER_PIXELS_PER_PIXEL - splashSize,
-              splashPoint.y * QUARTER_PIXELS_PER_PIXEL - splashSize,
-              splashPoint.x * QUARTER_PIXELS_PER_PIXEL + splashSize,
-              splashPoint.y * QUARTER_PIXELS_PER_PIXEL + splashSize,
+              (splashPoint.x * QUARTER_PIXELS_PER_PIXEL) - splashSize,
+              (splashPoint.y * QUARTER_PIXELS_PER_PIXEL) - splashSize,
+              (splashPoint.x * QUARTER_PIXELS_PER_PIXEL) + splashSize,
+              (splashPoint.y * QUARTER_PIXELS_PER_PIXEL) + splashSize,
               G_TX_RENDERTILE, splash->column << RAIN_SPLASH_FRAME_SHIFT,
               (splash->frameCount / RAIN_SPLASH_FRAME_DURATION)
                   << RAIN_SPLASH_FRAME_SHIFT,

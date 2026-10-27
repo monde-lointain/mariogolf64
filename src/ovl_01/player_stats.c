@@ -640,7 +640,7 @@ void func_8021B1E0_ovl_01(
       gfx++, 0, ((u32)D_8023B364_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8023B364_ovl_01 + PALETTED_TEXELS_OFFSET +
-          labelIndex * GAME_LABEL_IMAGE_SIZE) &
+          (labelIndex * GAME_LABEL_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, GAME_LABEL_WIDTH, GAME_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -779,7 +779,7 @@ void func_8021B87C_ovl_01(Gfx** displayListHead, u8 slide) {
     gSPScisTextureRectangle(gfx++, D_80230784_ovl_01[rowIndex] << 2,
         (rowIndex * STATS_WALL_ROW_HEIGHT) << 2,
         (D_80230784_ovl_01[rowIndex] + SCREEN_WIDTH) << 2,
-        (rowIndex * STATS_WALL_ROW_HEIGHT + STATS_WALL_ROW_HEIGHT) << 2,
+        ((rowIndex * STATS_WALL_ROW_HEIGHT) + STATS_WALL_ROW_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, (STATS_WALL_IMAGE_WIDTH << 10) / SCREEN_WIDTH,
         (stripHeight << 10) / STATS_WALL_ROW_HEIGHT);
   }
@@ -959,7 +959,7 @@ void func_8021C67C_ovl_01(Gfx** displayListHead, s32 spacing, s32 y) {
         gfx++, 0, ((u32)D_8023B35C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureTile_4b(gfx++,
         ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+            (D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE)) &
             ~7,
         G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0,
         PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP,

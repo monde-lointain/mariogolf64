@@ -177,7 +177,7 @@ void DrawScorecardLabel(
   LoadSmallPalette(&gfx, 0, g_Scorecard.labelsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(gfx++,
       (u32)(g_Scorecard.labelsImage + PALETTED_TEXELS_OFFSET +
-          labelIndex * LABEL_SIZE) &
+          (labelIndex * LABEL_SIZE)) &
           ~7,
       G_IM_FMT_CI, LABEL_WIDTH, LABEL_HEIGHT, 0, 0, LABEL_WIDTH - 1,
       LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,

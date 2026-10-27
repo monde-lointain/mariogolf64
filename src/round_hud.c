@@ -3100,16 +3100,16 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
-        (u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
-                IMAGE_HEADER_SIZE &
+        ((u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
+            IMAGE_HEADER_SIZE) &
             ~7);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(
         gfx++, HOLE_INTRO_IMAGE_RENDER_MODE, HOLE_INTRO_IMAGE_RENDER_MODE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTextureBlock(gfx++,
-        (u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
-                LARGE_PALETTED_TEXELS_OFFSET &
+        ((u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
+            LARGE_PALETTED_TEXELS_OFFSET) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -3130,9 +3130,9 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     }
 
     gDPLoadTLUT_pal16(gfx++, 0,
-        (u32)f_AnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE & ~7);
+        ((u32)f_AnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureBlock_4b(gfx++,
-        (u32)f_AnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET & ~7,
+        ((u32)f_AnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET) & ~7,
         G_IM_FMT_CI, ANIMATED_ICON_LABEL_WIDTH, ANIMATED_ICON_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);

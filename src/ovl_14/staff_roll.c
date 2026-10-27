@@ -1767,9 +1767,9 @@ void DrawStaffRoll(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + index * IMAGE_STRIP_STEP) << 2,
+          (SCREEN_BORDER + (index * IMAGE_STRIP_STEP)) << 2,
           (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
-          (SCREEN_BORDER + index * IMAGE_STRIP_STEP + stripHeight) << 2,
+          (SCREEN_BORDER + (index * IMAGE_STRIP_STEP) + stripHeight) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -1938,8 +1938,8 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
           IMAGE_STRIP_OVERLAP;
       gDPLoadTextureTile(gfx++,
           (u32) &
-              ((u8*)&f_StaffRollImage)[stripIndex * IMAGE_STRIP_STEP *
-                      STAFF_ROLL_IMAGE_WIDTH +
+              ((u8*)&f_StaffRollImage)[(stripIndex * IMAGE_STRIP_STEP *
+                                           STAFF_ROLL_IMAGE_WIDTH) +
                   texelOffset] &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, STAFF_ROLL_IMAGE_WIDTH, 0, 0, 0,
@@ -1948,9 +1948,9 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + stripIndex * IMAGE_STRIP_STEP) << 2,
+          (SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP)) << 2,
           (SCREEN_BORDER + STAFF_ROLL_IMAGE_WIDTH) << 2,
-          (SCREEN_BORDER + stripIndex * IMAGE_STRIP_STEP + stripHeight) << 2,
+          (SCREEN_BORDER + (stripIndex * IMAGE_STRIP_STEP) + stripHeight) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }

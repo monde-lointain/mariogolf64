@@ -561,7 +561,7 @@ void func_8020F2D0_ovl_01(
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_8023A824_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1160,15 +1160,15 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
 
     gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            (digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+            ((digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)) &
             ~7,
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
-        (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+        (x + shift + (digitIndex * MENU_GLYPH_SIZE)) << 2, y << 2,
+        (x + shift + (digitIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE) << 2,
         (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
@@ -1183,10 +1183,10 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET)
+      (x + shift + ((digitIndex - 1) * MENU_GLYPH_SIZE) + DECIMAL_POINT_OFFSET)
           << 2,
       y << 2,
-      (x + shift + (digitIndex - 1) * MENU_GLYPH_SIZE + DECIMAL_POINT_OFFSET +
+      (x + shift + ((digitIndex - 1) * MENU_GLYPH_SIZE) + DECIMAL_POINT_OFFSET +
           MENU_GLYPH_SIZE)
           << 2,
       (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
@@ -1194,15 +1194,15 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   gDPPipeSync(gfx++);
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          (fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
+          ((fraction + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++,
-      (x + shift + digitIndex * MENU_GLYPH_SIZE) << 2, y << 2,
-      (x + shift + digitIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+      (x + shift + (digitIndex * MENU_GLYPH_SIZE)) << 2, y << 2,
+      (x + shift + (digitIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE) << 2,
       (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
       TEXEL_STEP_ONE);
   gDPPipeSync(gfx++);
@@ -1242,7 +1242,7 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
       gfx++, 0, ((u32)D_8023A82C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-          glyphIndex * MENU_GLYPH_IMAGE_SIZE) &
+          (glyphIndex * MENU_GLYPH_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1273,14 +1273,14 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   for (glyphIndex = 0; glyphIndex != OFF_GLYPH_COUNT; glyphIndex++) {
     gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
-            (OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE) &
+            ((OFF_FIRST_GLYPH + glyphIndex) * MENU_GLYPH_IMAGE_SIZE)) &
             ~7,
         G_IM_FMT_CI, MENU_GLYPH_SIZE, MENU_GLYPH_SIZE, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (x + glyphIndex * MENU_GLYPH_SIZE) << 2,
-        y << 2, (x + glyphIndex * MENU_GLYPH_SIZE + MENU_GLYPH_SIZE) << 2,
+    gSPScisTextureRectangle(gfx++, (x + (glyphIndex * MENU_GLYPH_SIZE)) << 2,
+        y << 2, (x + (glyphIndex * MENU_GLYPH_SIZE) + MENU_GLYPH_SIZE) << 2,
         (y + MENU_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);

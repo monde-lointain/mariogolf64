@@ -569,23 +569,23 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         gSPModifyVertex(g_DisplayListHead++, 11, G_MWO_POINT_XYSCREEN,
             (((top.x * SCREEN_SUBPIXEL_COUNT) - SCREEN_FLAGSTICK_HALF_WIDTH)
                 << 16) +
-                top.y * SCREEN_SUBPIXEL_COUNT);
+                (top.y * SCREEN_SUBPIXEL_COUNT));
         gSPModifyVertex(g_DisplayListHead++, 10, G_MWO_POINT_XYSCREEN,
             (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) -
                  SCREEN_FLAGSTICK_HALF_WIDTH)
                 << 16) +
-                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
-                    SCREEN_SUBPIXEL_COUNT);
+                ((stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+                    SCREEN_SUBPIXEL_COUNT));
         gSPModifyVertex(g_DisplayListHead++, 9, G_MWO_POINT_XYSCREEN,
             (((stickFoot.x * SCREEN_SUBPIXEL_COUNT) +
                  SCREEN_FLAGSTICK_HALF_WIDTH)
                 << 16) +
-                (stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
-                    SCREEN_SUBPIXEL_COUNT);
+                ((stickFoot.y - SCREEN_FLAGSTICK_FOOT_RISE) *
+                    SCREEN_SUBPIXEL_COUNT));
         gSPModifyVertex(g_DisplayListHead++, 8, G_MWO_POINT_XYSCREEN,
             (((top.x * SCREEN_SUBPIXEL_COUNT) + SCREEN_FLAGSTICK_HALF_WIDTH)
                 << 16) +
-                top.y * SCREEN_SUBPIXEL_COUNT);
+                (top.y * SCREEN_SUBPIXEL_COUNT));
       }
 
       if (g_IsCupViewShown == 1) {

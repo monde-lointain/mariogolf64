@@ -356,10 +356,10 @@ void DrawTiledImageEffect(Gfx** displayListHead, CameraView* view) {
     texelPairOffset += TILED_IMAGE_STRIP_HEIGHT * SCREEN_WIDTH / 2;
     for (copyIndex = 0; copyIndex != TILED_IMAGE_COPY_COUNT; copyIndex++) {
       gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-          (SCREEN_BORDER + copyIndex * TILED_IMAGE_COPY_SPACING + stripTop)
+          (SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) + stripTop)
               << 2,
           (SCREEN_WIDTH - SCREEN_BORDER) << 2,
-          (SCREEN_BORDER + copyIndex * TILED_IMAGE_COPY_SPACING + stripTop +
+          (SCREEN_BORDER + (copyIndex * TILED_IMAGE_COPY_SPACING) + stripTop +
               TILED_IMAGE_STRIP_SCREEN_HEIGHT)
               << 2,
           G_TX_RENDERTILE, TILED_IMAGE_LEFT << 5, 0, TILED_IMAGE_SCALE,
@@ -391,12 +391,12 @@ void DrawSpinMesh(Gfx** displayListHead) {
     if (batchIndex == SPIN_BATCH_COUNT - 1) {
       gSPVertex(gfx++,
           &f_SpinVertices[g_DrawBufferIndex] +
-              batchIndex * SPIN_BATCH_VERTEX_COUNT,
+              (batchIndex * SPIN_BATCH_VERTEX_COUNT),
           SPIN_LAST_BATCH_VERTEX_COUNT, 0);
     } else {
       gSPVertex(gfx++,
           &f_SpinVertices[g_DrawBufferIndex] +
-              batchIndex * SPIN_BATCH_VERTEX_COUNT,
+              (batchIndex * SPIN_BATCH_VERTEX_COUNT),
           SPIN_BATCH_VERTEX_COUNT, 0);
     }
 
@@ -489,7 +489,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         : SAVED_FRAME_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
         (u32)(f_SavedFrameBuffer +
-            stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) &
+            (stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH)) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER,
         SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER - 1,
@@ -498,9 +498,9 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
         (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight -
+        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
         G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,
@@ -517,7 +517,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         : SAVED_FRAME_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
         (u32)(g_DepthBuffer +
-            stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) &
+            (stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH)) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER,
         SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER - 1,
@@ -526,9 +526,9 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
         (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight -
+        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
         G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,
@@ -731,20 +731,20 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
       for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
         gDPLoadTextureTile(gfx++, frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
             SCREEN_WIDTH, 0,
-            MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING,
-            sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING,
-            MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING +
+            MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING),
+            sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING),
+            MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING) +
                 MIRROR_BLOCK_WIDTH - 1,
-            sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING, 0,
+            sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING), 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gSPScisTextureRectangle(gfx++, (blockIndex * MIRROR_BLOCK_WIDTH) << 2,
             (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset) << 2,
-            (blockIndex * MIRROR_BLOCK_WIDTH + MIRROR_BLOCK_WIDTH) << 2,
+            ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
             (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex - destOffset + 1) << 2,
             G_TX_RENDERTILE,
-            (MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING) << 5,
-            (sourceTop + HORIZON_FIRST_ROW + rowIndex * HORIZON_ROW_SPACING)
+            (MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)) << 5,
+            (sourceTop + HORIZON_FIRST_ROW + (rowIndex * HORIZON_ROW_SPACING))
                 << 5,
             1 << 10, 1 << 10);
       }
@@ -856,20 +856,20 @@ void BuildDynamicTextures(Gfx** displayListHead) {
     for (blockIndex = 0; blockIndex != MIRROR_BLOCK_COUNT; blockIndex++) {
       gDPLoadTextureTile(gfx++, frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
           SCREEN_WIDTH, 0,
-          MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING,
-          MIRROR_SOURCE_TOP + rowIndex * MIRROR_ROW_SPACING,
-          MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING +
+          MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING),
+          MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING),
+          MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING) +
               MIRROR_BLOCK_WIDTH - 1,
-          MIRROR_SOURCE_TOP + rowIndex * MIRROR_ROW_SPACING +
+          MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING) +
               MIRROR_ROW_SPACING,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPScisTextureRectangle(gfx++, (blockIndex * MIRROR_BLOCK_WIDTH) << 2,
           (DYNAMIC_TEXTURE_SIZE - 1 - rowIndex) << 2,
-          (blockIndex * MIRROR_BLOCK_WIDTH + MIRROR_BLOCK_WIDTH) << 2,
+          ((blockIndex * MIRROR_BLOCK_WIDTH) + MIRROR_BLOCK_WIDTH) << 2,
           (DYNAMIC_TEXTURE_SIZE - rowIndex) << 2, G_TX_RENDERTILE,
-          (MIRROR_SOURCE_LEFT + blockIndex * MIRROR_BLOCK_SPACING) << 5,
-          (MIRROR_SOURCE_TOP + rowIndex * MIRROR_ROW_SPACING) << 5, 1 << 10,
+          (MIRROR_SOURCE_LEFT + (blockIndex * MIRROR_BLOCK_SPACING)) << 5,
+          (MIRROR_SOURCE_TOP + (rowIndex * MIRROR_ROW_SPACING)) << 5, 1 << 10,
           1 << 10);
     }
   }
@@ -2144,7 +2144,7 @@ void CopyPreviousFrame(Gfx** displayListHead) {
         : SAVED_FRAME_STRIP_HEIGHT;
     gDPLoadTextureTile(gfx++,
         (u32)(f_CopySourceFrame +
-            stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) &
+            (stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH)) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER,
         SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER - 1,
@@ -2153,9 +2153,9 @@ void CopyPreviousFrame(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + stripIndex * SAVED_FRAME_STRIP_HEIGHT) << 2,
+        (SCREEN_BORDER + (stripIndex * SAVED_FRAME_STRIP_HEIGHT)) << 2,
         (SCREEN_WIDTH - SCREEN_BORDER - 1) << 2,
-        (stripIndex * SAVED_FRAME_STRIP_HEIGHT + SCREEN_BORDER + stripHeight -
+        ((stripIndex * SAVED_FRAME_STRIP_HEIGHT) + SCREEN_BORDER + stripHeight -
             1)
             << 2,
         G_TX_RENDERTILE, SCREEN_BORDER << 5, SCREEN_BORDER << 5, 4 << 10,

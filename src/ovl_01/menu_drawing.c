@@ -143,17 +143,17 @@ void func_802004A0_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) &
+            (stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, MODE_ICON_LEFT << 2,
-        (MODE_ICON_TOP + stripIndex * MODE_ICON_STRIP_HEIGHT) << 2,
+        (MODE_ICON_TOP + (stripIndex * MODE_ICON_STRIP_HEIGHT)) << 2,
         (MODE_ICON_LEFT + MODE_ICON_WIDTH) << 2,
         (MODE_ICON_TOP + MODE_ICON_STRIP_HEIGHT +
-            stripIndex * MODE_ICON_STRIP_HEIGHT)
+            (stripIndex * MODE_ICON_STRIP_HEIGHT))
             << 2,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
@@ -196,7 +196,7 @@ void func_80200A40_ovl_01(
   for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) &
+            (stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -840,7 +840,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
     if (g_MenuChoices.mainChoice != choiceIndex) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET +
-              choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE) &
+              (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)) &
               ~7,
           G_IM_FMT_CI, MAIN_CHOICE_LABEL_WIDTH, MAIN_CHOICE_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -860,7 +860,7 @@ void func_80205038_ovl_01(Gfx** displayListHead) {
   choiceIndex = g_MenuChoices.mainChoice;
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
-          choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE) &
+          (choiceIndex * MAIN_CHOICE_LABEL_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, MAIN_CHOICE_LABEL_WIDTH, MAIN_CHOICE_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1029,7 +1029,7 @@ void func_80206180_ovl_01(Gfx** displayListHead) {
   choiceIndex = g_MenuChoices.clubhouseChoice;
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
-          D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE) &
+          (D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, ROOM_LABEL_WIDTH, ROOM_LABEL_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1120,7 +1120,7 @@ void func_80207E28_ovl_01(Gfx** displayListHead, void* image, s32 x, s32 y) {
   gDPPipeSync(gfx++);
   gDPLoadTextureTile_4b(gfx++,
       ((u32)image + PALETTED_TEXELS_OFFSET +
-          D_8022F8C8_ovl_01 * ANIMATED_ICON_IMAGE_SIZE) &
+          (D_8022F8C8_ovl_01 * ANIMATED_ICON_IMAGE_SIZE)) &
           ~7,
       G_IM_FMT_CI, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0, 0,
       ANIMATED_ICON_SIZE - 1, ANIMATED_ICON_SIZE - 1, 0,
@@ -1335,16 +1335,16 @@ void func_80208F8C_ovl_01(Gfx** displayListHead, s32 left, s32 top) {
 
     gDPLoadTextureBlock(gfx++,
         ((u32)D_800FBE30[D_8022F8CE_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * TOAD_WIDTH * TOAD_STRIP_HEIGHT) &
+            (stripIndex * TOAD_WIDTH * TOAD_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, TOAD_WIDTH, rowCount, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-        (top + stripIndex * TOAD_STRIP_HEIGHT) << 2, (left + TOAD_WIDTH) << 2,
-        (top + stripIndex * TOAD_STRIP_HEIGHT + rowCount) << 2, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        (top + (stripIndex * TOAD_STRIP_HEIGHT)) << 2, (left + TOAD_WIDTH) << 2,
+        (top + (stripIndex * TOAD_STRIP_HEIGHT) + rowCount) << 2,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
 

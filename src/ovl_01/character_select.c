@@ -1191,16 +1191,16 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   for (cellIndex = firstCell; cellIndex != endCell; cellIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_8023A584_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE) &
+            (cellIndex * CURVE_METER_CELL_SIZE * CURVE_METER_CELL_SIZE)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CURVE_METER_CELL_SIZE, CURVE_METER_CELL_SIZE,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++,
-        (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE) << 2,
+        (CURVE_METER_LEFT + (cellIndex * CURVE_METER_CELL_SIZE)) << 2,
         CURVE_METER_TOP << 2,
-        (CURVE_METER_LEFT + cellIndex * CURVE_METER_CELL_SIZE +
+        (CURVE_METER_LEFT + (cellIndex * CURVE_METER_CELL_SIZE) +
             CURVE_METER_CELL_SIZE)
             << 2,
         (CURVE_METER_TOP + CURVE_METER_CELL_SIZE) << 2, G_TX_RENDERTILE, 0, 0,

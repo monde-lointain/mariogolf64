@@ -1725,7 +1725,8 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2,
           BACKDROP_FIRST_TOP << 2,
           (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
-          (BACKDROP_FIRST_TOP + (BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE)
+          (BACKDROP_FIRST_TOP +
+              ((BACKDROP_STRIP_ROW_COUNT + 1) * BACKDROP_SCALE))
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / BACKDROP_SCALE,
           TEXEL_STEP_ONE / BACKDROP_SCALE);
@@ -1733,7 +1734,7 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
           ((u32)D_801F4A20 + LARGE_PALETTED_TEXELS_OFFSET +
-              stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT) &
+              (stripIndex * BACKDROP_WIDTH * BACKDROP_STRIP_ROW_COUNT)) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_WIDTH,
           shownRowCount + BACKDROP_SEAM_ROW_COUNT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1745,8 +1746,8 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
       gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
           (BACKDROP_LEFT + (BACKDROP_WIDTH * BACKDROP_SCALE)) << 2,
           (BACKDROP_TOP +
-              stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE +
-              shownRowCount * BACKDROP_SCALE)
+              (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE) +
+              (shownRowCount * BACKDROP_SCALE))
               << 2,
           G_TX_RENDERTILE, 0, BACKDROP_SECOND_ROW_START,
           TEXEL_STEP_ONE / BACKDROP_SCALE, TEXEL_STEP_ONE / BACKDROP_SCALE);
@@ -1774,7 +1775,7 @@ void func_801FCB74_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != NARROW_BOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_800FF420[D_8022BE92_ovl_01] + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT) &
+            (stripIndex * NARROW_BOARD_WIDTH * NARROW_BOARD_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, NARROW_BOARD_WIDTH, NARROW_BOARD_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1804,7 +1805,7 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1866,7 +1867,7 @@ void func_801FD4F0_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1894,7 +1895,7 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

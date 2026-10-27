@@ -529,8 +529,8 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
     } else if (code < MESSAGE_CODE_CONTROL) {
       gDPLoadTextureBlock(gfx++,
           ((u32)g_MessageGlyphs + FILE_HEADER_SIZE +
-              (code - MESSAGE_CODE_GLYPH) * MESSAGE_GLYPH_WIDTH *
-                  MESSAGE_GLYPH_HEIGHT) &
+              ((code - MESSAGE_CODE_GLYPH) * MESSAGE_GLYPH_WIDTH *
+                  MESSAGE_GLYPH_HEIGHT)) &
               ~7,
           G_IM_FMT_I, G_IM_SIZ_8b, MESSAGE_GLYPH_WIDTH, MESSAGE_GLYPH_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

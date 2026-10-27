@@ -2011,18 +2011,18 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
       gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
           SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
           tileRow * SPIRAL_TILE_HEIGHT,
-          tileColumn * SPIRAL_TILE_WIDTH + SPIRAL_TILE_WIDTH - 1,
-          tileRow * SPIRAL_TILE_HEIGHT + SPIRAL_TILE_HEIGHT - 1, 0,
+          (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
+          (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++,
-          (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS) << 2,
-          (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS) << 2,
-          (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS +
+          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS) << 2,
+          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS) << 2,
+          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_WIDTH)
               << 2,
-          (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS +
+          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_HEIGHT)
               << 2,
           G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,
@@ -2045,20 +2045,20 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
       gDPLoadTextureTile(gfx++, (u32)frame & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
           SPIRAL_FRAME_WIDTH, 0, tileColumn * SPIRAL_TILE_WIDTH,
           tileRow * SPIRAL_TILE_HEIGHT,
-          tileColumn * SPIRAL_TILE_WIDTH + SPIRAL_TILE_WIDTH - 1,
-          tileRow * SPIRAL_TILE_HEIGHT + SPIRAL_TILE_HEIGHT - 1, 0,
+          (tileColumn * SPIRAL_TILE_WIDTH) + SPIRAL_TILE_WIDTH - 1,
+          (tileRow * SPIRAL_TILE_HEIGHT) + SPIRAL_TILE_HEIGHT - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPSetPrimColor(gfx++, 0, 0, SPIRAL_OPAQUE_ALPHA, SPIRAL_OPAQUE_ALPHA,
           SPIRAL_OPAQUE_ALPHA, alpha);
       gDPPipeSync(gfx++);
       gSPTextureRectangle(gfx++,
-          (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS) << 2,
-          (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS) << 2,
-          (tileColumn * SPIRAL_TILE_WIDTH + FRAME_MARGIN_ROWS +
+          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS) << 2,
+          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS) << 2,
+          ((tileColumn * SPIRAL_TILE_WIDTH) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_WIDTH)
               << 2,
-          (tileRow * SPIRAL_TILE_HEIGHT + FRAME_MARGIN_ROWS +
+          ((tileRow * SPIRAL_TILE_HEIGHT) + FRAME_MARGIN_ROWS +
               SPIRAL_TILE_HEIGHT)
               << 2,
           G_TX_RENDERTILE, (tileColumn * SPIRAL_TILE_WIDTH) << 5,

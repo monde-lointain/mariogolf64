@@ -1064,7 +1064,7 @@ void DrawClubSlotsLogo(
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
-            index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
+            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, 0, 0, 0, 0);
@@ -1092,7 +1092,7 @@ void DrawClubSlotsLogo(
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
-            index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
+            (index * LOGO_STRIP_HEIGHT * LOGO_WIDTH)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT, 0, G_TX_WRAP,
         G_TX_WRAP, 0, 0, 0, 0);
@@ -1128,8 +1128,8 @@ void DrawClubSlotsLogo(
         (s32)((centerY - shineHalfHeight) + f_LogoBob) << 2,
         (s32)(centerX + shineHalfWidth) << 2,
         (s32)(centerY + shineHalfHeight + f_LogoBob) << 2, G_TX_RENDERTILE,
-        (SHINE_SIZE - (shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED) << 5, 0,
-        (s32)shineDsdx, (s32)shineDtdy);
+        (SHINE_SIZE - ((shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED)) << 5,
+        0, (s32)shineDsdx, (s32)shineDtdy);
   }
 
   gDPPipeSync(gfx++);

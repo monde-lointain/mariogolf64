@@ -1201,7 +1201,7 @@ void func_8022A090_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != CODE_ENTRY_BAR_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_80230F48_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT) &
+            (stripIndex * CODE_ENTRY_BAR_WIDTH * CODE_ENTRY_BAR_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CODE_ENTRY_BAR_WIDTH,
         CODE_ENTRY_BAR_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1209,9 +1209,9 @@ void func_8022A090_ovl_01(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, CODE_ENTRY_BAR_LEFT << 2,
-        (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT) << 2,
+        (CODE_ENTRY_BAR_TOP + (stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT)) << 2,
         (CODE_ENTRY_BAR_LEFT + CODE_ENTRY_BAR_WIDTH) << 2,
-        (CODE_ENTRY_BAR_TOP + stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT +
+        (CODE_ENTRY_BAR_TOP + (stripIndex * CODE_ENTRY_BAR_STRIP_HEIGHT) +
             CODE_ENTRY_BAR_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1238,17 +1238,17 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
   for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_80230F44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) &
+            (stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT,
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, CODE_UPPER_PANEL_LEFT << 2,
-        (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT)
+        (CODE_UPPER_PANEL_TOP + (stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT))
             << 2,
         (CODE_UPPER_PANEL_LEFT + CODE_UPPER_PANEL_WIDTH) << 2,
-        (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT +
+        (CODE_UPPER_PANEL_TOP + (stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT) +
             CODE_UPPER_PANEL_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0,
@@ -1256,10 +1256,10 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
         (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_UPPER_PANEL_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, CODE_LOWER_PANEL_LEFT << 2,
-        (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT)
+        (CODE_LOWER_PANEL_TOP + (stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT))
             << 2,
         (CODE_LOWER_PANEL_LEFT + CODE_LOWER_PANEL_WIDTH) << 2,
-        (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT +
+        (CODE_LOWER_PANEL_TOP + (stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT) +
             CODE_LOWER_PANEL_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0,
@@ -1373,12 +1373,12 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gSPScisTextureRectangle(gfx++,
-          (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X - grow) << 2,
-          (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y - grow) << 2,
-          (column * CODE_KEY_SPACING_X + CODE_GLYPH_FIRST_X + CODE_GLYPH_SIZE +
-              grow)
+          ((column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X - grow) << 2,
+          ((row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y - grow) << 2,
+          ((column * CODE_KEY_SPACING_X) + CODE_GLYPH_FIRST_X +
+              CODE_GLYPH_SIZE + grow)
               << 2,
-          (row * CODE_KEY_SPACING_Y + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE +
+          ((row * CODE_KEY_SPACING_Y) + CODE_GLYPH_FIRST_Y + CODE_GLYPH_SIZE +
               grow)
               << 2,
           G_TX_RENDERTILE, 0, 0, (CODE_GLYPH_SIZE << 10) / size,

@@ -385,9 +385,9 @@ void DrawTitleScreen(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + stripIndex * TITLE_STRIP_HEIGHT) << 2,
+        (SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT)) << 2,
         (SCREEN_BORDER + TITLE_IMAGE_WIDTH) << 2,
-        (SCREEN_BORDER + stripIndex * TITLE_STRIP_HEIGHT + stripHeight) << 2,
+        (SCREEN_BORDER + (stripIndex * TITLE_STRIP_HEIGHT) + stripHeight) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }

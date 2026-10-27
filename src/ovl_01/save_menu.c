@@ -529,16 +529,16 @@ void func_802213C8_ovl_01(
   for (stripIndex = 0; stripIndex != SAVE_ICON_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(gfx++,
         ((u32)D_8023B680_ovl_01[imageIndex] + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT) &
+            (stripIndex * SAVE_ICON_WIDTH * SAVE_ICON_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, SAVE_ICON_WIDTH, SAVE_ICON_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
-        (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT) << 2,
+        (top + (stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT)) << 2,
         (left + SAVE_ICON_SHOWN_WIDTH) << 2,
-        (top + stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT +
+        (top + (stripIndex * SAVE_ICON_SHOWN_STRIP_HEIGHT) +
             SAVE_ICON_SHOWN_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, (SAVE_ICON_WIDTH << 10) / SAVE_ICON_SHOWN_WIDTH,
@@ -993,7 +993,7 @@ void func_80224AFC_ovl_01(
     gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD98_ovl_01)[memory->savedGameIndex] +
             LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT) &
+            (stripIndex * GAME_BOARD_WIDTH * GAME_BOARD_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, GAME_BOARD_WIDTH, GAME_BOARD_STRIP_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1012,7 +1012,7 @@ void func_80224AFC_ovl_01(
     for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureBlock(gfx++,
           ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-              stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) &
+              (stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT)) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1228,7 +1228,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       if (controller != COMPUTER_CONTROLLER) {
         gDPLoadTextureBlock(gfx++,
             ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
-                controller * CONTROLLER_ICON_IMAGE_SIZE) &
+                (controller * CONTROLLER_ICON_IMAGE_SIZE)) &
                 ~7,
             G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLLER_ICON_SIZE,
             CONTROLLER_ICON_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1259,7 +1259,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
 
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)image + PALETTED_TEXELS_OFFSET +
-              labelIndex * PLAYER_LABEL_IMAGE_SIZE) &
+              (labelIndex * PLAYER_LABEL_IMAGE_SIZE)) &
               ~7,
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1267,7 +1267,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
     } else {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)image + PALETTED_TEXELS_OFFSET +
-              playerIndex * PLAYER_LABEL_IMAGE_SIZE) &
+              (playerIndex * PLAYER_LABEL_IMAGE_SIZE)) &
               ~7,
           G_IM_FMT_CI, PLAYER_LABEL_WIDTH, PLAYER_LABEL_HEIGHT, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1300,8 +1300,8 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
     gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
             LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * COURSE_THUMBNAIL_WIDTH *
-                COURSE_THUMBNAIL_STRIP_HEIGHT) &
+            (stripIndex * COURSE_THUMBNAIL_WIDTH *
+                COURSE_THUMBNAIL_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
         COURSE_THUMBNAIL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -1337,8 +1337,8 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
      */
     gDPLoadTextureBlock(gfx++,
         ((u32)(&D_8023BD8C_ovl_01)[D_80230B4E_ovl_01] +
-            stripIndex * COURSE_THUMBNAIL_WIDTH *
-                COURSE_THUMBNAIL_STRIP_HEIGHT) &
+            (stripIndex * COURSE_THUMBNAIL_WIDTH *
+                COURSE_THUMBNAIL_STRIP_HEIGHT)) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_THUMBNAIL_WIDTH,
         COURSE_THUMBNAIL_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,

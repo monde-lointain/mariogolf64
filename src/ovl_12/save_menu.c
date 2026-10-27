@@ -747,17 +747,17 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
       gDPLoadTextureTile(gfx++,
           ((u32)f_SaveMenuTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
-              row * TITLE_STRIP_SIZE) &
+              (row * TITLE_STRIP_SIZE)) &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_IMAGE_WIDTH, TITLE_STRIP_DRAWN_HEIGHT,
           0, 0, TITLE_IMAGE_WIDTH - 1, TITLE_STRIP_DRAWN_HEIGHT - 1, 0, 0, 0, 0,
           0, 0, 0);
       gSPTextureRectangle(gfx++,
           (titleLeft + imageLeft - f_SlideOffsets[1]) << 2,
-          (titleTop + row * TITLE_STRIP_HEIGHT) << 2,
+          (titleTop + (row * TITLE_STRIP_HEIGHT)) << 2,
           (titleLeft + (imageLeft + TITLE_IMAGE_WIDTH) - f_SlideOffsets[1])
               << 2,
-          (row * TITLE_STRIP_HEIGHT + drawnHeight + titleTop) << 2,
+          ((row * TITLE_STRIP_HEIGHT) + drawnHeight + titleTop) << 2,
           G_TX_RENDERTILE, titleTexelLeft + TEXEL_COORDINATE_ONE,
           titleTexelTop + TEXEL_COORDINATE_ONE, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }

@@ -649,16 +649,16 @@ OPAQUE:
       if (tintYards > 0) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-            255 - tintYards * TINT_PER_YARD, 255 - tintYards * TINT_PER_YARD,
-            255);
+            255 - (tintYards * TINT_PER_YARD),
+            255 - (tintYards * TINT_PER_YARD), 255);
         gDPPipeSync(g_DisplayListHead++);
         sprintf(g_PrintBuffer, "%dyUP", heightYards);
       } else if (tintYards < 0) {
         sprintf(g_PrintBuffer, "%dyDW", -heightYards);
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0,
-            255 + tintYards * TINT_PER_YARD, 255 + tintYards * TINT_PER_YARD,
-            255, 255);
+            255 + (tintYards * TINT_PER_YARD),
+            255 + (tintYards * TINT_PER_YARD), 255, 255);
         gDPPipeSync(g_DisplayListHead++);
       } else {
         gDPPipeSync(g_DisplayListHead++);
@@ -692,14 +692,14 @@ OPAQUE:
       if (tintYards > 0) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255,
-            255 - tintYards * TINT_PER_YARD, 255 - tintYards * TINT_PER_YARD,
-            TEXT_SHADOW_ALPHA);
+            255 - (tintYards * TINT_PER_YARD),
+            255 - (tintYards * TINT_PER_YARD), TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       } else if (tintYards < 0) {
         gDPPipeSync(g_DisplayListHead++);
         gDPSetPrimColor(g_DisplayListHead++, 0, 0,
-            255 + tintYards * TINT_PER_YARD, 255 + tintYards * TINT_PER_YARD,
-            255, TEXT_SHADOW_ALPHA);
+            255 + (tintYards * TINT_PER_YARD),
+            255 + (tintYards * TINT_PER_YARD), 255, TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       } else {
         gDPPipeSync(g_DisplayListHead++);
@@ -799,7 +799,7 @@ OPAQUE:
           gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
           gDPLoadTextureBlock_4b(g_DisplayListHead++,
               ((u32)g_PinFlagImages + PALETTED_TEXELS_OFFSET +
-                  flagImage * PIN_FLAG_IMAGE_SIZE) &
+                  (flagImage * PIN_FLAG_IMAGE_SIZE)) &
                   ~7,
               G_IM_FMT_CI, PIN_FLAG_IMAGE_WIDTH, PIN_FLAG_IMAGE_HEIGHT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

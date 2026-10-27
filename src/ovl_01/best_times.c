@@ -213,7 +213,7 @@ void func_802144E4_ovl_01(
   gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AA44_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock(gfx++,
       ((u32)D_8023AA44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-          D_8023013C_ovl_01[character] * FACE_WIDTH * FACE_HEIGHT) &
+          (D_8023013C_ovl_01[character] * FACE_WIDTH * FACE_HEIGHT)) &
           ~7,
       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_WIDTH, FACE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -331,8 +331,8 @@ void func_8021508C_ovl_01(
     for (digit = 0; digit != TIME_GROUP_DIGIT_COUNT; digit++) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_8023AA48_ovl_01 + PALETTED_TEXELS_OFFSET +
-              (digits[group][digit] + TIME_FIRST_DIGIT_GLYPH) *
-                  TIME_GLYPH_BYTES) &
+              ((digits[group][digit] + TIME_FIRST_DIGIT_GLYPH) *
+                  TIME_GLYPH_BYTES)) &
               ~7,
           G_IM_FMT_CI, TIME_GLYPH_SIZE, TIME_GLYPH_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -340,11 +340,12 @@ void func_8021508C_ovl_01(
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
           (separatorShift + left +
-              (group * TIME_GROUP_DIGIT_COUNT + digit) * TIME_DIGIT_SPACING)
+              (((group * TIME_GROUP_DIGIT_COUNT) + digit) * TIME_DIGIT_SPACING))
               << 2,
           top << 2,
           (separatorShift + left +
-              (group * TIME_GROUP_DIGIT_COUNT + digit) * TIME_DIGIT_SPACING +
+              (((group * TIME_GROUP_DIGIT_COUNT) + digit) *
+                  TIME_DIGIT_SPACING) +
               TIME_GLYPH_SIZE)
               << 2,
           (top + TIME_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
@@ -363,14 +364,14 @@ void func_8021508C_ovl_01(
       gDPPipeSync(gfx++);
       gSPScisTextureRectangle(gfx++,
           (separatorShift + left +
-              (group * TIME_GROUP_DIGIT_COUNT + TIME_GROUP_DIGIT_COUNT) *
-                  TIME_DIGIT_SPACING -
+              (((group * TIME_GROUP_DIGIT_COUNT) + TIME_GROUP_DIGIT_COUNT) *
+                  TIME_DIGIT_SPACING) -
               TIME_SEPARATOR_SHIFT_LEFT)
               << 2,
           top << 2,
           (separatorShift + left +
-              (group * TIME_GROUP_DIGIT_COUNT + TIME_GROUP_DIGIT_COUNT) *
-                  TIME_DIGIT_SPACING -
+              (((group * TIME_GROUP_DIGIT_COUNT) + TIME_GROUP_DIGIT_COUNT) *
+                  TIME_DIGIT_SPACING) -
               TIME_SEPARATOR_SHIFT_LEFT + TIME_GLYPH_SIZE)
               << 2,
           (top + TIME_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
