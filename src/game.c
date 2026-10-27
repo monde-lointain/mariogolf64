@@ -918,7 +918,7 @@ void DrawAnimatedBoxes(void);
 void func_80062A8C(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
-void func_80082534(Gfx **displayListHead, CameraMatrices *matrices);
+void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawShotEffect(Gfx **displayListHead);
 void func_80089094(CameraView *view);
 void DrawHoleIntroText(Gfx **displayListHead);
@@ -1498,7 +1498,7 @@ s32 DrawGame(void) {
                             DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
-                                func_80082534(&g_DisplayListHead, matrices);
+                                DrawGreenGrid(&g_DisplayListHead, matrices);
                             }
                             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             SetSceneFog(&g_DisplayListHead);
@@ -1526,7 +1526,7 @@ s32 DrawGame(void) {
                             DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             if (viewIndex == 0) {
                                 BuildHorizonDynamicTextures(&g_DisplayListHead);
-                                func_80082534(&g_DisplayListHead, matrices);
+                                DrawGreenGrid(&g_DisplayListHead, matrices);
                             }
                             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
                             SetSceneFog(&g_DisplayListHead);

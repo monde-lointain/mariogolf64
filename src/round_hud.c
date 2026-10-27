@@ -1180,9 +1180,455 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
     return (red << 24) | (green << 16) | (blue << 8) | (alpha & 0xFF);
 }
 
+/*
+ * The grid drawn over the ground around a shot's target, as GREEN_GRID_COLUMN_COUNT
+ * columns of points that run along the aim. Each point is tinted by how far
+ * it is above or below the target, and the grid's lines scroll towards the
+ * target while it shows.
+ */
+#define GREEN_GRID_COLUMN_COUNT 8
+#define GREEN_GRID_MAX_ROW_COUNT 32
+#define GREEN_GRID_POINT_COUNT (GREEN_GRID_MAX_ROW_COUNT * GREEN_GRID_COLUMN_COUNT)
+#define GREEN_GRID_SHORT_ROW_COUNT 8 /* For the longest putt */
+#define GREEN_GRID_LANDING_ROW_COUNT 16
+/* With GREEN_GRID_MAX_ROW_COUNT rows, only every other row is sampled, up to here */
+#define GREEN_GRID_FIRST_FULL_ROW 30
+#define GREEN_GRID_MAX_PUTT_DISTANCE 30
+/* Shots shorter than this show the grid at the ball, longer ones at the landing point */
+#define GREEN_GRID_LANDING_DISTANCE 61
+#define GREEN_GRID_PUTT_ROW_SHIFT 2.2f
+#define GREEN_GRID_LANDING_ROW_SHIFT 12.0f
+#define GREEN_GRID_PUTT_COLUMN_SPACING 18000.0f
+#define GREEN_GRID_LANDING_WIDTH 307200.0f
+#define GREEN_GRID_SHORT_ROW_SPACING 25600.0f
+#define GREEN_GRID_PUTT_ROW_SPACING 4681.728f
+#define GREEN_GRID_ROW_SPACING 15360.0f
+#define GREEN_GRID_LANDING_ROW_SPACING 28800.0f
+#define GREEN_GRID_SCROLL_STEP 0.025f
+#define GREEN_GRID_SLOPE_SCALE 1.5f
+#define GREEN_GRID_MAX_SLOPE 255
+#define GREEN_GRID_LINE_HALF_WIDTH 4.5f
+#define GREEN_GRID_DEPTH_BIAS 15.0f
+#define GREEN_GRID_ALPHA 0x7F
+#define GREEN_GRID_DIM_ALPHA 0x3F
+#define GREEN_GRID_FADE_STEP 8
+#define GREEN_GRID_FADE_END_ALPHA 0x48
+#define GAME_FLAG_HIDE_GREEN_GRID 0x79
+#define GAME_STATE_UNK6 6
+#define GAME_STATE_UNK11 11
+/* g_RoundHud.greenGridState values */
+#define GREEN_GRID_HIDDEN 0
+#define GREEN_GRID_SHOWN 1 /* Samples the ground and scrolls */
+#define GREEN_GRID_FADING 2
+#define TINT_CHANNEL_MAX 0xFF
+
+typedef struct GridScreenPoint {
+    /* 0x00 */ s32 x; /* In quarter pixels */
+    /* 0x04 */ s32 y;
+    /* 0x08 */ s32 isVisible;
+    /* 0x0C */ s32 depth;
+} GridScreenPoint; /* size = 0x10 */
+
+extern s32 D_800BB0E8;
+extern s32 D_800BE69C;
+/* The quad that each segment of the ball trail, and of the green grid, moves into place on the screen */
+extern Vtx sBallTrailVertices[4];
+extern s32 sGreenGridAlpha;
+extern f32 sGreenGridScroll;
+extern Mtx sGreenGridMatrix;
+extern s32 sGreenGridHeights[GREEN_GRID_POINT_COUNT];
+
+#ifdef NON_MATCHING
+/*
+ * Sets red, green and blue for a point of the grid from its slope. White
+ * lines warm towards red where the ground rises and cool towards blue where
+ * it falls; black lines turn red or blue.
+ */
+#define SET_GREEN_GRID_TINT(slope)                                                 \
+    if ((s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_WHITE) { \
+        blue = TINT_CHANNEL_MAX;                                                   \
+        if ((slope) == 0) {                                                        \
+            green = TINT_CHANNEL_MAX;                                              \
+            red = TINT_CHANNEL_MAX;                                                \
+        } else if ((slope) > 0) {                                                  \
+            red = TINT_CHANNEL_MAX;                                                \
+            blue = (slope);                                                        \
+            blue = red - blue;                                                     \
+            green = blue;                                                          \
+        } else {                                                                   \
+            green = (slope) + TINT_CHANNEL_MAX;                                    \
+            red = green;                                                           \
+        }                                                                          \
+    } else {                                                                       \
+        blue = 0;                                                                  \
+        if ((slope) == 0) {                                                        \
+            green = 0;                                                             \
+            red = 0;                                                               \
+        } else if ((slope) > 0) {                                                  \
+            red = (slope);                                                         \
+            blue = 0;                                                              \
+            green = 0;                                                             \
+        } else {                                                                   \
+            blue = -(slope);                                                       \
+            green = 0;                                                             \
+            red = 0;                                                               \
+        }                                                                          \
+    }
+
+void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices) {
+    f32 points[GREEN_GRID_POINT_COUNT][3];
+    GridScreenPoint screenPoints[GREEN_GRID_POINT_COUNT];
+    s32 slopes[GREEN_GRID_POINT_COUNT];
+    s32 unused[GREEN_GRID_POINT_COUNT * 3];
+    CoursePoint center;
+    ScreenPoint projected;
+    Gfx *gfx = *displayListHead;
+    Club *club;
+    s32 distance;
+    s32 worldDistance;
+    s32 rowCount;
+    s32 columnCount = GREEN_GRID_COLUMN_COUNT;
+    s32 maxPuttDistance;
+    s32 row;
+    s32 column;
+    s32 i;
+    s32 rowStart;
+    s32 point;
+    s32 rowPosition;
+    s32 isUnscrolledRow;
+    s32 neighbor;
+    s32 red;
+    s32 green;
+    s32 blue;
+    f32 yaw;
+    f32 sideAngle;
+    f32 rowShift;
+    f32 columnSpacing;
+    f32 rowSpacing;
+    f32 forwardX;
+    f32 forwardZ;
+    f32 sideX;
+    f32 sideZ;
+    f32 shift;
+    f32 centering;
+    f32 originX;
+    f32 originZ;
+    f32 stepX;
+    f32 stepZ;
+    f32 scrollX;
+    f32 scrollZ;
+    f32 height;
+    f32 dx;
+    f32 dy;
+    f32 scale;
+
+    if (g_RoundHud.greenGridState == GREEN_GRID_HIDDEN || D_800BE69C == 1 || IsGameFlagSet(GAME_FLAG_HIDE_GREEN_GRID) ||
+        (g_GameState.unk0 != GAME_STATE_UNK6 && g_GameState.unk0 != GAME_STATE_UNK11)) {
+        return;
+    }
+    club = GetSelectedClub();
+    yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
+    distance = GetSelectedShotDistance();
+    worldDistance = GetSelectedShotWorldDistance();
+    if (club->surfaceMask & CLUB_SURFACE_GREEN) {
+        maxPuttDistance = GREEN_GRID_MAX_PUTT_DISTANCE;
+        if (distance == maxPuttDistance) {
+            rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+            columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+            rowSpacing = GREEN_GRID_SHORT_ROW_SPACING;
+            rowCount = GREEN_GRID_SHORT_ROW_COUNT;
+            center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+            center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+            center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        } else {
+            rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+            columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+            rowCount = GREEN_GRID_MAX_ROW_COUNT;
+            center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+            center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+            center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+            rowSpacing = distance * GREEN_GRID_PUTT_ROW_SPACING / maxPuttDistance;
+        }
+    } else if (distance < GREEN_GRID_LANDING_DISTANCE) {
+        rowShift = GREEN_GRID_PUTT_ROW_SHIFT;
+        columnSpacing = GREEN_GRID_PUTT_COLUMN_SPACING;
+        rowCount = GREEN_GRID_MAX_ROW_COUNT;
+        center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+        center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+        center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+        rowSpacing = distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
+    } else {
+        center[AXIS_X] = cosf(yaw) * worldDistance + g_CurrentShot.ballPosition[AXIS_X];
+        rowShift = GREEN_GRID_LANDING_ROW_SHIFT;
+        rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
+        center[AXIS_Z] = sinf(yaw) * worldDistance + g_CurrentShot.ballPosition[AXIS_Z];
+        D_800BB0E8 = 1;
+        center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
+        rowCount = GREEN_GRID_LANDING_ROW_COUNT;
+        columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
+    }
+    forwardX = -cosf(yaw);
+    forwardZ = -sinf(yaw);
+    sideAngle = yaw + M_PI / 2;
+    sideX = -cosf(sideAngle) * columnSpacing;
+    sideZ = -sinf(sideAngle) * columnSpacing;
+    shift = (rowShift - rowCount) * rowSpacing;
+    centering = 0.5f - columnCount * 0.5f;
+    originX = forwardX * shift + sideX * centering;
+    originZ = forwardZ * shift + sideZ * centering;
+    stepX = -cosf(yaw) * rowSpacing;
+    stepZ = -sinf(yaw) * rowSpacing;
+    if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+        sGreenGridScroll -= GREEN_GRID_SCROLL_STEP;
+        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+            if (sGreenGridScroll < 0.0f) {
+                sGreenGridScroll += 1.0f;
+            }
+        } else if (sGreenGridScroll < -1.0f) {
+            sGreenGridScroll += 2.0f;
+        }
+    }
+    scrollX = stepX * sGreenGridScroll;
+    scrollZ = stepZ * sGreenGridScroll;
+
+    for (row = 0, rowStart = 0; row != rowCount;) {
+        for (column = 0; column != columnCount; column++) {
+            i = rowStart + column;
+            isUnscrolledRow = row == rowCount - 1 || row == 0;
+            rowPosition = row;
+            if (row != 0) {
+                rowPosition = row - 1;
+            }
+            if (isUnscrolledRow || (sGreenGridScroll < 0.0f && row == 1)) {
+                points[i][AXIS_X] = center[AXIS_X] + originX + stepX * rowPosition + sideX * column;
+                points[i][AXIS_Z] = center[AXIS_Z] + originZ + stepZ * rowPosition + sideZ * column;
+            } else {
+                points[i][AXIS_X] = center[AXIS_X] + originX + stepX * rowPosition + sideX * column + scrollX;
+                points[i][AXIS_Z] = center[AXIS_Z] + originZ + stepZ * rowPosition + sideZ * column + scrollZ;
+            }
+            if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
+                D_800BB0E8 = 1;
+                points[i][AXIS_Y] = GetGroundHeight(points[i][AXIS_X], points[i][AXIS_Z]);
+                sGreenGridHeights[i] = points[i][AXIS_Y];
+            } else {
+                points[i][AXIS_Y] = sGreenGridHeights[i];
+            }
+        }
+        if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+            rowStart += columnCount;
+            row++;
+        } else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
+            rowStart += columnCount;
+            row++;
+        } else {
+            rowStart += columnCount * 2;
+            row += 2;
+        }
+    }
+    /* Fills in the rows that were skipped from their neighbors */
+    if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
+        for (row = 1; row != rowCount - 1; row += 2) {
+            for (column = 0; column != columnCount; column++) {
+                points[row * columnCount + column][AXIS_X] = (points[(row - 1) * columnCount + column][AXIS_X] +
+                                                              points[(row + 1) * columnCount + column][AXIS_X]) *
+                                                             0.5f;
+                points[row * columnCount + column][AXIS_Y] = (points[(row - 1) * columnCount + column][AXIS_Y] +
+                                                              points[(row + 1) * columnCount + column][AXIS_Y]) *
+                                                             0.5f;
+                points[row * columnCount + column][AXIS_Z] = (points[(row - 1) * columnCount + column][AXIS_Z] +
+                                                              points[(row + 1) * columnCount + column][AXIS_Z]) *
+                                                             0.5f;
+            }
+        }
+    }
+    for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
+        for (column = 0; column != columnCount; column++) {
+            i = rowStart + column;
+            if (ProjectPoint(points[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                             points[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                             points[i][AXIS_Z] * COURSE_TO_WORLD_SCALE, &projected) < 0) {
+                screenPoints[i].x = projected.x * 4;
+                screenPoints[i].y = projected.y * 4;
+                screenPoints[i].isVisible = TRUE;
+                screenPoints[i].depth = projected.depth - projected.depthStep * GREEN_GRID_DEPTH_BIAS;
+            } else {
+                screenPoints[i].isVisible = FALSE;
+            }
+            height = points[i][AXIS_Y] - center[AXIS_Y];
+            if (height < 0.0f) {
+                slopes[i] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
+            } else if (height > 0.0f) {
+                slopes[i] = -sqrtf(height) * GREEN_GRID_SLOPE_SCALE;
+            } else {
+                slopes[i] = 0;
+            }
+            if (slopes[i] > GREEN_GRID_MAX_SLOPE) {
+                slopes[i] = GREEN_GRID_MAX_SLOPE;
+            }
+            if (slopes[i] < -GREEN_GRID_MAX_SLOPE) {
+                slopes[i] = -GREEN_GRID_MAX_SLOPE;
+            }
+        }
+    }
+
+    guMtxIdent(&sGreenGridMatrix);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gfx++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sGreenGridMatrix), G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, sBallTrailVertices, ARRAY_COUNT(sBallTrailVertices), 0);
+    if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
+        sGreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    } else if (g_RoundHud.greenGridState != GREEN_GRID_FADING) {
+        sGreenGridAlpha = GREEN_GRID_ALPHA;
+    } else if (sGreenGridAlpha < GREEN_GRID_FADE_END_ALPHA) {
+        sGreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    } else {
+        sGreenGridAlpha -= GREEN_GRID_FADE_STEP;
+    }
+    if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
+        /* The lines across the aim, one quad between each pair of points in a row */
+        for (row = 0, rowStart = 0; row != rowCount;) {
+            for (column = 0; column != columnCount; column++) {
+                point = rowStart + column;
+                if (screenPoints[point].isVisible != TRUE) {
+                    continue;
+                }
+                if (!(column & 1)) {
+                    neighbor = point + 1;
+                } else {
+                    neighbor = point - 1;
+                }
+                dx = screenPoints[point].x - screenPoints[neighbor].x;
+                dy = screenPoints[point].y - screenPoints[neighbor].y;
+                if (dx == 0.0f && dy == 0.0f) {
+                    screenPoints[point].isVisible = FALSE;
+                    continue;
+                }
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+                dx *= scale;
+                dy *= scale;
+                SET_GREEN_GRID_TINT(slopes[point]);
+                if (column & 1) {
+                    gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
+                                    (screenPoints[point].x << 16) + screenPoints[point].y);
+                    gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
+                                    ((screenPoints[point].x + (s32)dy) << 16) + (screenPoints[point].y - (s32)dx));
+                    gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
+                                    (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                    gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
+                                    (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                    if (screenPoints[point - 1].isVisible == TRUE) {
+                        gDPPipeSync(gfx++);
+                        if (screenPoints[point].depth < screenPoints[point - 1].depth) {
+                            gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+                        } else {
+                            gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
+                        }
+                        gDPPipeSync(gfx++);
+                        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+                    }
+                } else {
+                    gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
+                                    (screenPoints[point].x << 16) + screenPoints[point].y);
+                    gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
+                                    ((screenPoints[point].x + (s32)dy) << 16) + (screenPoints[point].y - (s32)dx));
+                    gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
+                                    (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                    gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
+                                    (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                    if (column != 0 && screenPoints[point - 1].isVisible == TRUE) {
+                        gDPPipeSync(gfx++);
+                        if (screenPoints[point].depth < screenPoints[point - 1].depth) {
+                            gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+                        } else {
+                            gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
+                        }
+                        gDPPipeSync(gfx++);
+                        gSP2Triangles(gfx++, 2, 1, 0, 0, 3, 2, 0, 0);
+                    }
+                }
+            }
+            if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
+                rowStart += columnCount;
+                row++;
+            } else if (row >= GREEN_GRID_FIRST_FULL_ROW) {
+                rowStart += columnCount;
+                row++;
+            } else {
+                rowStart += columnCount * 2;
+                row += 2;
+            }
+        }
+        /* The lines along the aim, one quad between each pair of points in a column */
+        for (column = 0; column != columnCount; column++) {
+            for (row = 0; row != rowCount - 1; row++) {
+                point = row * columnCount + column;
+
+                if (screenPoints[point].isVisible != TRUE || screenPoints[point + columnCount].isVisible != TRUE) {
+                    continue;
+                }
+                dx = screenPoints[point].x - screenPoints[point + columnCount].x;
+                dy = screenPoints[point].y - screenPoints[point + columnCount].y;
+                if (dx == 0.0f && dy == 0.0f) {
+                    continue;
+                }
+                scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+                dx *= scale;
+                dy *= scale;
+                SET_GREEN_GRID_TINT(slopes[point]);
+                gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
+                                (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                gSPModifyVertex(gfx++, 1, G_MWO_POINT_RGBA,
+                                (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                SET_GREEN_GRID_TINT(slopes[point + columnCount]);
+                gSPModifyVertex(gfx++, 2, G_MWO_POINT_RGBA,
+                                (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
+                                (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+                gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN, (screenPoints[point].x << 16) + screenPoints[point].y);
+                gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
+                                ((screenPoints[point].x - (s32)dy) << 16) + (screenPoints[point].y + (s32)dx));
+                gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
+                                (screenPoints[point + columnCount].x << 16) + screenPoints[point + columnCount].y);
+                gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
+                                ((screenPoints[point + columnCount].x - (s32)dy) << 16) +
+                                    (screenPoints[point + columnCount].y + (s32)dx));
+                gDPPipeSync(gfx++);
+                if (screenPoints[point].depth < screenPoints[point + columnCount].depth) {
+                    gDPSetPrimDepth(gfx++, screenPoints[point].depth, 0);
+                } else {
+                    gDPSetPrimDepth(gfx++, screenPoints[point + columnCount].depth, 0);
+                }
+                gDPPipeSync(gfx++);
+                gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
+                gDPPipeSync(gfx++);
+            }
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1B10);
 
-INCLUDE_ASM("asm/nonmatchings/round_hud", func_80082534);
+INCLUDE_ASM("asm/nonmatchings/round_hud", DrawGreenGrid);
+#endif
 
 /* Gathers the whole ball trail at the ball, so it starts out empty */
 void ResetBallTrail(void) {
@@ -1220,11 +1666,8 @@ typedef struct TrailPoint {
 } TrailPoint; /* size = 0x0C */
 
 extern s32 D_800C5AAC;
-extern s32 D_800BE69C;
 extern TrailPoint sBallTrailPoints[BALL_TRAIL_LENGTH];
 extern Mtx sBallTrailMatrix;
-/* The quad that each segment of the trail moves into place on the screen */
-extern Vtx sBallTrailVertices[4];
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads
