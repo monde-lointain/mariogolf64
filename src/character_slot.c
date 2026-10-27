@@ -37,9 +37,9 @@
 
 /* The slot's first rotation is taken away from this roll */
 /* Data still in the unsplit data and bss files */
-extern u8 sEnvColors[ENV_COLOR_COUNT][3];
-extern LookAt sHiliteLookAts[DRAW_BUFFER_COUNT];
-extern Hilite sHilites[DRAW_BUFFER_COUNT];
+extern u8 f_EnvColors[ENV_COLOR_COUNT][3];
+extern LookAt f_HiliteLookAts[DRAW_BUFFER_COUNT];
+extern Hilite f_Hilites[DRAW_BUFFER_COUNT];
 
 /* Sets the characters' alpha, drawing them translucent below 0xFF, and their
  * combiner for the weather */
@@ -49,8 +49,8 @@ void SetCharacterAlpha(s32 alpha) {
 
   gfx = &g_CharacterEnvColorDisplayLists[0][0];
   for (i = 0; i != ENV_COLOR_COUNT; i++) {
-    gDPSetEnvColor(gfx++, sEnvColors[i][0], sEnvColors[i][1], sEnvColors[i][2],
-                   alpha);
+    gDPSetEnvColor(gfx++, f_EnvColors[i][0], f_EnvColors[i][1],
+                   f_EnvColors[i][2], alpha);
     gSPEndDisplayList(gfx++);
   }
   gfx = g_CharacterRenderModeDisplayList;
@@ -91,8 +91,8 @@ void SetCharacterHilite(CameraMatrices* matrices) {
   lightDirection[1] = -cosf(lightPitch) * LIGHT_DIRECTION_SCALE;
   lightDirection[2] =
       -sinf(lightPitch) * sinf(lightYaw) * LIGHT_DIRECTION_SCALE;
-  guLookAtHiliteF(lookAtMatrix, &sHiliteLookAts[g_DrawBufferIndex],
-                  &sHilites[g_DrawBufferIndex], g_Cameras[0].view.eye[0],
+  guLookAtHiliteF(lookAtMatrix, &f_HiliteLookAts[g_DrawBufferIndex],
+                  &f_Hilites[g_DrawBufferIndex], g_Cameras[0].view.eye[0],
                   g_Cameras[0].view.eye[1], g_Cameras[0].view.eye[2],
                   g_Cameras[0].view.lookAt[0], g_Cameras[0].view.lookAt[1],
                   g_Cameras[0].view.lookAt[2], 0.0f, -1.0f, 0.0f,
@@ -101,9 +101,9 @@ void SetCharacterHilite(CameraMatrices* matrices) {
                   (s8)lightDirection[1], (s8)lightDirection[2],
                   HILITE_TEXTURE_SIZE, HILITE_TEXTURE_SIZE);
   gfx = g_CharacterHiliteDisplayList;
-  gDPSetHilite1Tile(gfx++, G_TX_RENDERTILE, &sHilites[g_DrawBufferIndex],
+  gDPSetHilite1Tile(gfx++, G_TX_RENDERTILE, &f_Hilites[g_DrawBufferIndex],
                     HILITE_TEXTURE_SIZE, HILITE_TEXTURE_SIZE);
-  gDPSetHilite2Tile(gfx++, HILITE_SECOND_TILE, &sHilites[g_DrawBufferIndex],
+  gDPSetHilite2Tile(gfx++, HILITE_SECOND_TILE, &f_Hilites[g_DrawBufferIndex],
                     HILITE_TEXTURE_SIZE, HILITE_TEXTURE_SIZE);
   gSPEndDisplayList(gfx++);
 }

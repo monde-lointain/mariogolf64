@@ -123,22 +123,22 @@ typedef struct LzStream {
 extern Vec3 g_MiniGolfScale;
 extern OSPiHandle* nuPiCartHandle;
 extern s32 D_800BB0E8;
-extern s32 sHoleSeed;
+extern s32 f_HoleSeed;
 /*
  * hole_loader.h declares this without volatile, as the files that only read
  * it were compiled; the loader thread waits on it, so here it is volatile
  */
 extern volatile s32 g_HasLoaderFinished;
-extern OSThread sLoaderThread;
+extern OSThread f_LoaderThread;
 extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
 extern s32 D_801B60A0;
 extern s32 D_801B60B4;
-extern s32 sCycledCupIndex;
+extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
-extern s8 sNextCupIndex;
+extern s8 f_NextCupIndex;
 extern Unk800BA9D8 D_80105F40;
 /* menu.c declares this as Unk68[MAX_PLAYER_COUNT]; only its first bytes are
  * copied here */
@@ -570,10 +570,10 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
 
 /* A pseudo-random number that is the same each time for a seed and a hole */
 s32 GetHoleRandom(s32 seed, s32 holeIndex) {
-  void SetHoleSeed(s32 value) { sHoleSeed = value; }
+  void SetHoleSeed(s32 value) { f_HoleSeed = value; }
   s32 NextHoleRandom(void) {
-    return sHoleSeed =
-               sHoleSeed * HOLE_RANDOM_MULTIPLIER + HOLE_RANDOM_INCREMENT;
+    return f_HoleSeed =
+               f_HoleSeed * HOLE_RANDOM_MULTIPLIER + HOLE_RANDOM_INCREMENT;
   }
 
   SetHoleSeed(holeIndex);
@@ -808,7 +808,7 @@ s32 ChooseHoleConditions(void) {
     cupIndex =
         (g_CourseIndex - MINI_GOLF_COURSE_INDEX) % MINI_GOLF_COURSES_PER_RECORD;
   } else if (g_GameMode == GAME_MODE_TRAINING) {
-    cupIndex = sCycledCupIndex++ & (CUP_POSITION_COUNT - 1);
+    cupIndex = f_CycledCupIndex++ & (CUP_POSITION_COUNT - 1);
   } else {
     /* The cups are drawn three, three, two and one times in nine */
     random = (u32)GetHoleRandom(D_801B60B4, g_HoleIndex) >> CUP_DRAW_SHIFT;
@@ -846,7 +846,7 @@ s32 ChooseHoleConditions(void) {
       break;
     }
   }
-  sNextCupIndex = cupIndex;
+  f_NextCupIndex = cupIndex;
 }
 
 /*
@@ -947,7 +947,7 @@ void RunLoaderThread(void) {
       }
     }
     g_HasLoaderFinished = TRUE;
-    osDestroyThread(&sLoaderThread);
+    osDestroyThread(&f_LoaderThread);
   }
 }
 
@@ -956,17 +956,17 @@ void ResetLoaderThread(void) { g_HasLoaderFinished = TRUE; }
 void StartLoaderThread(void) {
   UnloadOverlay(GetOverlayOfModule(LOADER_REPLACED_MODULE_ID));
   LoadOverlay(GetOverlayOfModule(LOADER_MODULE_ID));
-  osCreateThread(&sLoaderThread, LOADER_THREAD_ID,
+  osCreateThread(&f_LoaderThread, LOADER_THREAD_ID,
                  (void (*)(void*))RunLoaderThread, NULL, D_8025D350,
                  LOADER_THREAD_PRIORITY);
-  osStartThread(&sLoaderThread);
+  osStartThread(&f_LoaderThread);
   g_HasLoaderFinished = FALSE;
   BuildNoiseTexture();
 }
 
 void StopLoaderThread(void) {
   if (!g_HasLoaderFinished) {
-    osDestroyThread(&sLoaderThread);
+    osDestroyThread(&f_LoaderThread);
     g_HasLoaderFinished = TRUE;
   }
 }

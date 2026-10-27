@@ -16,8 +16,8 @@
 
 /* Set until the boot logos, finding a Game Boy Pak, have once gone to the Game
  * Boy Pak transfer module */
-extern s32 sIsBootTransmitPending;
-extern s32 sHasRumblePak[MAXCONTROLLERS];
+extern s32 f_IsBootTransmitPending;
+extern s32 f_HasRumblePak[MAXCONTROLLERS];
 
 #define HELP_BOARD_IMAGE_HAND 1
 #define HELP_BOARD_IMAGE_ARROWS 2
@@ -78,35 +78,35 @@ extern s32 sHasRumblePak[MAXCONTROLLERS];
 extern s32 g_MenuRepeatButtons;
 extern s32 D_800FE334;
 extern s32 g_MenuScreen;
-extern void* sHandImages;
-extern void* sArrowImages;
-extern void* sUnusedImage;
-extern void* sChalkboardImage;
+extern void* f_HandImages;
+extern void* f_ArrowImages;
+extern void* f_UnusedImage;
+extern void* f_ChalkboardImage;
 /* The open topic, counted from 1, or 0 while the list shows */
-extern s8 sOpenTopic;
-extern s8 sTopicPage;
-extern s32 sHandOffset;
-extern s32 sIsHandReturning;
-extern s32 sArrowFrame;
-extern s32 sArrowFrameTime;
+extern s8 f_OpenTopic;
+extern s8 f_TopicPage;
+extern s32 f_HandOffset;
+extern s32 f_IsHandReturning;
+extern s32 f_ArrowFrame;
+extern s32 f_ArrowFrameTime;
 extern s32 D_800C42F4;
 extern s32 D_800C42F8;
-extern s32 sFirstListedTopic;
-extern f32 sListColorPhase;
+extern s32 f_FirstListedTopic;
+extern f32 f_ListColorPhase;
 
 typedef struct TextListLayout {
   /* 0x0 */ s32 top;
   /* 0x4 */ s32 rowSpacing;
 } TextListLayout;
 
-extern TextListLayout sHelpListLayout;
+extern TextListLayout f_HelpListLayout;
 
 void func_801FB54C(Gfx** displayListHead, s32);
 void DrawChalkboard(Gfx** displayListHead);
 /* Indexed by topic; each topic's pages are the messages that follow its title
  */
-extern s8 sTopicPageCounts[];
-extern s16 sTopicTitleMessages[];
+extern s8 f_TopicPageCounts[];
+extern s16 f_TopicTitleMessages[];
 
 /* Adds experience that a Game Boy character earned, up to what the Game Boy
  * Color version holds */
@@ -157,9 +157,9 @@ void ResetGameBoyTransfer(s32 transferMode) {
 INCLUDE_ASM("asm/nonmatchings/rumble", ResetGameBoyTransfer);
 #endif
 
-void ClearBootTransmitPending(void) { sIsBootTransmitPending = FALSE; }
+void ClearBootTransmitPending(void) { f_IsBootTransmitPending = FALSE; }
 
-s32 IsBootTransmitPending(void) { return sIsBootTransmitPending; }
+s32 IsBootTransmitPending(void) { return f_IsBootTransmitPending; }
 
 /* Sets hasGameBoyPak if any controller holds a Transfer Pak with a Game Boy
  * cartridge in it */
@@ -198,15 +198,15 @@ void InitRumblePaks(void) {
     result = nuContRmbCheck(g_PlayerControllerPorts[index]);
     if (result == PFS_ERR_NOPACK) {
       osSyncPrintf("PFS_ERR_NOPACK\n");
-      sHasRumblePak[index] = FALSE;
+      f_HasRumblePak[index] = FALSE;
     } else if (result == PFS_ERR_DEVICE) {
       osSyncPrintf("PFS_ERR_DEVICE\n");
-      sHasRumblePak[index] = FALSE;
+      f_HasRumblePak[index] = FALSE;
     } else if (result == PFS_ERR_CONTRFAIL) {
       osSyncPrintf("PFS_ERR_CONTRFAIL\n");
-      sHasRumblePak[index] = FALSE;
+      f_HasRumblePak[index] = FALSE;
     } else {
-      sHasRumblePak[index] = TRUE;
+      f_HasRumblePak[index] = TRUE;
     }
   }
   DetectGameBoyPaks();
@@ -241,36 +241,36 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
 
   switch (image) {
     case HELP_BOARD_IMAGE_HAND:
-      sHandImages = buffer;
+      f_HandImages = buffer;
       OpenEncodedAsset(ASSET_HELP_BOARD_HAND, &asset);
-      ReadEncodedAsset(sHandImages, &asset);
+      ReadEncodedAsset(f_HandImages, &asset);
       break;
     case HELP_BOARD_IMAGE_ARROWS:
-      sArrowImages = buffer;
+      f_ArrowImages = buffer;
       OpenEncodedAsset(ASSET_HELP_BOARD_ARROWS, &asset);
-      ReadEncodedAsset(sArrowImages, &asset);
+      ReadEncodedAsset(f_ArrowImages, &asset);
       break;
     case HELP_BOARD_IMAGE_CHALKBOARD:
-      sChalkboardImage = buffer;
+      f_ChalkboardImage = buffer;
       OpenEncodedAsset(ASSET_HELP_BOARD_CHALKBOARD, &asset);
-      ReadEncodedAsset(sChalkboardImage, &asset);
+      ReadEncodedAsset(f_ChalkboardImage, &asset);
       break;
   }
-  sOpenTopic = 0;
-  sTopicPage = 0;
-  sHandOffset = 0;
-  sIsHandReturning = FALSE;
-  sArrowFrame = 0;
-  sArrowFrameTime = 0;
+  f_OpenTopic = 0;
+  f_TopicPage = 0;
+  f_HandOffset = 0;
+  f_IsHandReturning = FALSE;
+  f_ArrowFrame = 0;
+  f_ArrowFrameTime = 0;
   D_800C42F4 = 0;
   D_800C42F8 = 0;
   if (memory->helpTopicIndex < LISTED_TOPIC_COUNT) {
-    sFirstListedTopic = 0;
+    f_FirstListedTopic = 0;
   } else if (memory->helpTopicIndex + LISTED_TOPIC_COUNT - 1 <
              HELP_TOPIC_COUNT - 1) {
-    sFirstListedTopic = memory->helpTopicIndex;
+    f_FirstListedTopic = memory->helpTopicIndex;
   } else {
-    sFirstListedTopic = HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT;
+    f_FirstListedTopic = HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT;
   }
   ClearTextSlots();
 }
@@ -298,11 +298,11 @@ static inline void ShowTopicPage(void) {
   SetTextSlot(0, 0, NO_MESSAGE, 1, HELP_TEXT_SLOT_PAGE, 1, 0xFF, 0xFF, 0xFF,
               0xFF);
   SetHelpTextColors();
-  SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, sTopicTitleMessages[sOpenTopic], 1,
-              HELP_TEXT_SLOT_TITLE, 2, 0xFF, 0xFF, 0xFF, 0xFF);
+  SetTextSlot(TOPIC_TITLE_X, TOPIC_TITLE_Y, f_TopicTitleMessages[f_OpenTopic],
+              1, HELP_TEXT_SLOT_TITLE, 2, 0xFF, 0xFF, 0xFF, 0xFF);
   SetHelpTextColors();
   SetTextSlot(TOPIC_PAGE_X, TOPIC_PAGE_Y,
-              sTopicTitleMessages[sOpenTopic] + sTopicPage, 1,
+              f_TopicTitleMessages[f_OpenTopic] + f_TopicPage, 1,
               HELP_TEXT_SLOT_PAGE, 3, 0xFF, 0xFF, 0xFF, 0xFF);
 }
 
@@ -316,16 +316,16 @@ void UpdateHelpBoard(void) {
     return;
   }
   if (g_MenuRepeatButtons & A_BUTTON) {
-    if (sOpenTopic == 0) {
-      sOpenTopic = memory->helpTopicIndex + 1;
+    if (f_OpenTopic == 0) {
+      f_OpenTopic = memory->helpTopicIndex + 1;
       ClearHelpText();
       PlaySound(0x5D, 0xF, 0x50);
-      sTopicPage++;
+      f_TopicPage++;
       ShowTopicPage();
-    } else if (sTopicPage < sTopicPageCounts[sOpenTopic]) {
+    } else if (f_TopicPage < f_TopicPageCounts[f_OpenTopic]) {
       if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
         PlaySound(0x5D, 0xF, 0x50);
-        sTopicPage++;
+        f_TopicPage++;
         ShowTopicPage();
       } else {
         RevealTextSlot(HELP_TEXT_SLOT_TITLE);
@@ -333,15 +333,15 @@ void UpdateHelpBoard(void) {
       }
     } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
       ClearHelpText();
-      sOpenTopic = 0;
-      sTopicPage = 0;
+      f_OpenTopic = 0;
+      f_TopicPage = 0;
     } else {
       RevealTextSlot(HELP_TEXT_SLOT_TITLE);
       RevealTextSlot(HELP_TEXT_SLOT_PAGE);
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
     PlaySound(0x5F, 0xF, 0x7F);
-    if (sOpenTopic <= 0) {
+    if (f_OpenTopic <= 0) {
       StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
       if (memory->unk46 == 0) {
         g_MenuScreen = 0x1C;
@@ -351,23 +351,23 @@ void UpdateHelpBoard(void) {
       StopLoaderThread();
       FreeAllCharacterSlots();
       D_800FE334 = 0;
-      sOpenTopic = 0;
+      f_OpenTopic = 0;
       ClearHelpText();
     } else if (IsTextSlotRevealed(HELP_TEXT_SLOT_TITLE) &&
                IsTextSlotRevealed(HELP_TEXT_SLOT_PAGE)) {
-      sOpenTopic = 0;
-      sTopicPage = 0;
+      f_OpenTopic = 0;
+      f_TopicPage = 0;
       ClearHelpText();
     } else {
       RevealTextSlot(HELP_TEXT_SLOT_TITLE);
       RevealTextSlot(HELP_TEXT_SLOT_PAGE);
     }
   } else if (g_MenuRepeatButtons & U_JPAD) {
-    if (sOpenTopic == 0) {
+    if (f_OpenTopic == 0) {
       PlaySound(0x5C, 0xF, 0x64);
-      if (sFirstListedTopic == memory->helpTopicIndex) {
-        if (sFirstListedTopic != 0) {
-          sFirstListedTopic--;
+      if (f_FirstListedTopic == memory->helpTopicIndex) {
+        if (f_FirstListedTopic != 0) {
+          f_FirstListedTopic--;
           memory->helpTopicIndex--;
         }
       } else {
@@ -376,12 +376,13 @@ void UpdateHelpBoard(void) {
       ClearHelpText();
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
-    if (sOpenTopic == 0) {
+    if (f_OpenTopic == 0) {
       PlaySound(0x5C, 0xF, 0x64);
-      if (sFirstListedTopic + LISTED_TOPIC_COUNT - 1 ==
+      if (f_FirstListedTopic + LISTED_TOPIC_COUNT - 1 ==
           memory->helpTopicIndex) {
-        if (sFirstListedTopic + LISTED_TOPIC_COUNT - 1 < HELP_TOPIC_COUNT - 1) {
-          sFirstListedTopic++;
+        if (f_FirstListedTopic + LISTED_TOPIC_COUNT - 1 <
+            HELP_TOPIC_COUNT - 1) {
+          f_FirstListedTopic++;
           memory->helpTopicIndex++;
         }
       } else {
@@ -397,10 +398,10 @@ void UpdateHelpBoard(void) {
  * list, down while some are below. It is a macro, as an inline function
  * compiles differently from the original.
  */
-#define IsTopicArrowShown(index)                         \
-  ((((index) == ARROW_UP) && (sFirstListedTopic > 0)) || \
-   (((index) == ARROW_DOWN) &&                           \
-    (sFirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
+#define IsTopicArrowShown(index)                          \
+  ((((index) == ARROW_UP) && (f_FirstListedTopic > 0)) || \
+   (((index) == ARROW_DOWN) &&                            \
+    (f_FirstListedTopic < HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT)))
 
 /* Draws the chalkboard, the topic list with its hand and arrows, and the text
  */
@@ -430,45 +431,45 @@ void DrawHelpBoard(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
-  if (sOpenTopic == 0) {
+  if (f_OpenTopic == 0) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal16(gfx++, 0, ((u32)sHandImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_HandImages + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureTile_4b(
-        gfx++, ((u32)sHandImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+        gfx++, ((u32)f_HandImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
         HAND_SIZE, 0, 0, 0, HAND_SIZE - 1, HAND_SIZE - 1, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    if (sIsHandReturning == FALSE) {
-      sHandOffset++;
-      if (sHandOffset == HAND_SWING) {
-        sIsHandReturning = TRUE;
+    if (f_IsHandReturning == FALSE) {
+      f_HandOffset++;
+      if (f_HandOffset == HAND_SWING) {
+        f_IsHandReturning = TRUE;
       }
-    } else if (sIsHandReturning == TRUE) {
-      sHandOffset--;
-      if (sHandOffset == 0) {
-        sIsHandReturning = FALSE;
+    } else if (f_IsHandReturning == TRUE) {
+      f_HandOffset--;
+      if (f_HandOffset == 0) {
+        f_IsHandReturning = FALSE;
       }
     } else {
-      sHandOffset = 0;
-      sIsHandReturning = FALSE;
+      f_HandOffset = 0;
+      f_IsHandReturning = FALSE;
     }
-    handLeft = sHandOffset + HAND_LEFT;
+    handLeft = f_HandOffset + HAND_LEFT;
     handTop =
-        sHelpListLayout.top + (memory->helpTopicIndex - sFirstListedTopic) *
-                                  sHelpListLayout.rowSpacing;
+        f_HelpListLayout.top + (memory->helpTopicIndex - f_FirstListedTopic) *
+                                   f_HelpListLayout.rowSpacing;
     gSPScisTextureRectangle(gfx++, handLeft << 2, handTop << 2,
                             (handLeft + HAND_SIZE) << 2,
                             (handTop + HAND_SIZE) << 2, G_TX_RENDERTILE, 0, 0,
                             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
-    sArrowFrameTime++;
-    if (sArrowFrameTime == ARROW_FRAME_TIME) {
-      sArrowFrameTime = 0;
-      sArrowFrame ^= 1;
+    f_ArrowFrameTime++;
+    if (f_ArrowFrameTime == ARROW_FRAME_TIME) {
+      f_ArrowFrameTime = 0;
+      f_ArrowFrame ^= 1;
     }
     if (D_800C42F4 == 0) {
       D_800C42F8 += 2;
@@ -485,13 +486,13 @@ void DrawHelpBoard(Gfx** displayListHead) {
       D_800C42F4 = 0;
     }
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-    gDPLoadTLUT_pal16(gfx++, 0, ((u32)sArrowImages + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_ArrowImages + IMAGE_HEADER_SIZE) & ~7);
     for (index = 0; index != ARROW_COUNT; index++) {
       if (IsTopicArrowShown(index)) {
         gDPLoadTextureTile_4b(
             gfx++,
-            (u32)((u8*)sArrowImages +
-                  (index * ARROW_IMAGE_SIZE + sArrowFrame * ARROW_FRAME_SIZE +
+            (u32)((u8*)f_ArrowImages +
+                  (index * ARROW_IMAGE_SIZE + f_ArrowFrame * ARROW_FRAME_SIZE +
                    PALETTED_TEXELS_OFFSET)) &
                 ~7,
             G_IM_FMT_CI, ARROW_SIZE, 0, 0, 0, ARROW_SIZE - 1, ARROW_SIZE - 1, 0,
@@ -514,22 +515,22 @@ void DrawHelpBoard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
-  if (sOpenTopic == 0) {
-    for (index = 0, topic = sFirstListedTopic; index != LISTED_TOPIC_COUNT;
+  if (f_OpenTopic == 0) {
+    for (index = 0, topic = f_FirstListedTopic; index != LISTED_TOPIC_COUNT;
          index++, topic++) {
-      sListColorPhase += DEGREES_TO_RADIANS(5);
-      red = (s32)(sinf(sListColorPhase) * 127.0f) + 127;
-      blue = (s32)(sinf(sListColorPhase + M_PI / 2) * 127.0f) + 127;
-      green = (s32)(sinf(sListColorPhase + M_PI) * 127.0f) + 127;
+      f_ListColorPhase += DEGREES_TO_RADIANS(5);
+      red = (s32)(sinf(f_ListColorPhase) * 127.0f) + 127;
+      blue = (s32)(sinf(f_ListColorPhase + M_PI / 2) * 127.0f) + 127;
+      green = (s32)(sinf(f_ListColorPhase + M_PI) * 127.0f) + 127;
       if (topic == memory->helpTopicIndex) {
         SetTextSlot(LIST_LEFT,
-                    sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
-                    sTopicTitleMessages[0] + topic, 1, index, 0x10, red, green,
+                    f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+                    f_TopicTitleMessages[0] + topic, 1, index, 0x10, red, green,
                     blue, 0xFF);
       } else {
         SetTextSlot(LIST_LEFT,
-                    sHelpListLayout.top + index * sHelpListLayout.rowSpacing,
-                    sTopicTitleMessages[sOpenTopic] + topic, 1, index, 0x10,
+                    f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+                    f_TopicTitleMessages[f_OpenTopic] + topic, 1, index, 0x10,
                     0xFF, 0xFF, 0xFF, 0xFF);
       }
     }
@@ -559,7 +560,7 @@ void DrawUnusedHelpBoardImage(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
                     TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-  gDPLoadTextureBlock_4b(gfx++, ((u32)sUnusedImage + IMAGE_HEADER_SIZE) & ~7,
+  gDPLoadTextureBlock_4b(gfx++, ((u32)f_UnusedImage + IMAGE_HEADER_SIZE) & ~7,
                          G_IM_FMT_I, UNUSED_IMAGE_WIDTH, UNUSED_IMAGE_HEIGHT, 0,
                          G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -591,11 +592,11 @@ void DrawChalkboard(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);
-  gDPLoadTLUT_pal256(gfx++, ((u32)sChalkboardImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(gfx++, ((u32)f_ChalkboardImage + IMAGE_HEADER_SIZE) & ~7);
   for (stripIndex = 0; stripIndex != CHALKBOARD_STRIP_COUNT; stripIndex++) {
     gDPLoadTextureBlock(
         gfx++,
-        ((u32)sChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
+        ((u32)f_ChalkboardImage + CHALKBOARD_TEXELS_OFFSET +
          stripIndex * CHALKBOARD_WIDTH * CHALKBOARD_STRIP_HEIGHT) &
             ~7,
         G_IM_FMT_CI, G_IM_SIZ_8b, CHALKBOARD_WIDTH, CHALKBOARD_STRIP_HEIGHT, 0,

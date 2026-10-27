@@ -183,11 +183,11 @@ typedef struct GlyphSprite {
 
 extern GlyphSprite g_GlyphSprites[GLYPH_SPRITE_COUNT];
 /* The quads glyph sprites are drawn with, centred on the sprite */
-extern Vtx sLargeGlyphVertices[4];
-extern Vtx sLargeGlyphTopVertices[4];
-extern Vtx sLargeGlyphBottomVertices[4];
-extern Vtx sMediumGlyphVertices[4];
-extern Vtx sSmallGlyphVertices[4];
+extern Vtx f_LargeGlyphVertices[4];
+extern Vtx f_LargeGlyphTopVertices[4];
+extern Vtx f_LargeGlyphBottomVertices[4];
+extern Vtx f_MediumGlyphVertices[4];
+extern Vtx f_SmallGlyphVertices[4];
 /* How many glyphs each group has */
 extern u8 g_GlyphGroupSizes[];
 /* The width of each character of the large font */
@@ -1952,19 +1952,19 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
       bottom = fontSize;
       if (fontSize == FONT_SIZE_LARGE) {
         if (g_GlyphSprites[i].flags & GLYPH_FLAG_TOP_PART) {
-          gSPVertex(gfx++, sLargeGlyphTopVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphTopVertices, 4, 0);
           bottom = LARGE_GLYPH_PART_ROW;
         } else if (g_GlyphSprites[i].flags & GLYPH_FLAG_BOTTOM_PART) {
-          gSPVertex(gfx++, sLargeGlyphBottomVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphBottomVertices, 4, 0);
           bottom = g_GlyphSprites[i].fontSize;
           top = LARGE_GLYPH_PART_ROW;
         } else {
-          gSPVertex(gfx++, sLargeGlyphVertices, 4, 0);
+          gSPVertex(gfx++, f_LargeGlyphVertices, 4, 0);
         }
       } else if (fontSize == FONT_SIZE_MEDIUM) {
-        gSPVertex(gfx++, sMediumGlyphVertices, 4, 0);
+        gSPVertex(gfx++, f_MediumGlyphVertices, 4, 0);
       } else {
-        gSPVertex(gfx++, sSmallGlyphVertices, 4, 0);
+        gSPVertex(gfx++, f_SmallGlyphVertices, 4, 0);
       }
       gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST,
                       PackTextureCoords(left + s, top + t));

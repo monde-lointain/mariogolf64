@@ -9,11 +9,11 @@
 #define MAX_DEPTH 0x3FFF
 
 /* Set up the RDP and the RSP for a frame */
-extern Gfx sRdpInitList[];
-extern Gfx sRspInitList[];
+extern Gfx f_RdpInitList[];
+extern Gfx f_RspInitList[];
 
 /* The red, green and blue FillScreen fills with, 8 bits each */
-extern s32 sFillColor[3];
+extern s32 f_FillColor[3];
 
 void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -22,8 +22,8 @@ void AppendRcpInit(s32 viewportIndex, Gfx** displayListHead) {
   gSPSegment(gfx++, 0, 0);
   gSPViewport(gfx++, &g_Viewports[viewportIndex]);
   SetCpuProjection(NULL, NULL, &g_Viewports[viewportIndex]);
-  gSPDisplayList(gfx++, sRdpInitList);
-  gSPDisplayList(gfx++, sRspInitList);
+  gSPDisplayList(gfx++, f_RdpInitList);
+  gSPDisplayList(gfx++, f_RspInitList);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -33,9 +33,9 @@ void InitRcp(s32 viewportIndex) {
 }
 
 void SetFillColor(s32 red, s32 green, s32 blue) {
-  sFillColor[0] = red;
-  sFillColor[1] = green;
-  sFillColor[2] = blue;
+  f_FillColor[0] = red;
+  f_FillColor[1] = green;
+  f_FillColor[2] = blue;
 }
 
 /* Fills the screen inside its border with the color from SetFillColor */
@@ -47,8 +47,8 @@ void FillScreen(void) {
   gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
   gDPSetFillColor(
       g_DisplayListHead++,
-      GPACK_RGBA5551(sFillColor[0], sFillColor[1], sFillColor[2], 1) << 16 |
-          GPACK_RGBA5551(sFillColor[0], sFillColor[1], sFillColor[2], 1));
+      GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1) << 16 |
+          GPACK_RGBA5551(f_FillColor[0], f_FillColor[1], f_FillColor[2], 1));
   gDPPipeSync(g_DisplayListHead++);
   gDPFillRectangle(g_DisplayListHead++, SCREEN_BORDER, SCREEN_BORDER,
                    SCREEN_WIDTH - SCREEN_BORDER - 1,

@@ -96,24 +96,24 @@ typedef struct EasedView {
 } EasedView; /* size = 0x1C */
 
 /* Frames since the reaction began */
-s32 sReactionFrame = 0;
-s32 sUnusedReactionWord = 0; /* Unused; it is there to match */
+s32 f_ReactionFrame = 0;
+s32 f_UnusedReactionWord = 0; /* Unused; it is there to match */
 
 /* The third light is set by the framing routines that light the golfer */
-Lights3 sReactionLights = gdSPDefLights3(
+Lights3 f_ReactionLights = gdSPDefLights3(
     0x60, 0x60, 0x60, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78, 0xFF, 0xDC, 0xDC,
     0x00, 0x88, 0x78, 0xFF, 0xDC, 0xDC, 0x00, 0x88, 0x78);
 
-s32 sReactionChannel = FIRST_REACTION_CHANNEL;
+s32 f_ReactionChannel = FIRST_REACTION_CHANNEL;
 
-extern s32 sReactionCharacter;
-extern s32 sReactionAnimation;
-extern s32 sReactionFrameCount;
-extern s32 sHasReactionLight;
-extern EasedView sEasedView;
-extern CoursePoint sReactionSpot;
-extern s32 sReactionSpotRoughness;
-extern s8 sHasReactionSpot;
+extern s32 f_ReactionCharacter;
+extern s32 f_ReactionAnimation;
+extern s32 f_ReactionFrameCount;
+extern s32 f_HasReactionLight;
+extern EasedView f_EasedView;
+extern CoursePoint f_ReactionSpot;
+extern s32 f_ReactionSpotRoughness;
+extern s8 f_HasReactionSpot;
 
 extern s32 D_801B60A0;
 
@@ -148,10 +148,10 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading);
  * not smooth enough. It is a macro, as an inline function compiles
  * differently from the original.
  */
-#define IsBetterReactionSpot(roughness)           \
-  (!sHasReactionSpot ||                           \
-   (((roughness) * 2 < sReactionSpotRoughness) && \
-    (sReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)))
+#define IsBetterReactionSpot(roughness)            \
+  (!f_HasReactionSpot ||                           \
+   (((roughness) * 2 < f_ReactionSpotRoughness) && \
+    (f_ReactionSpotRoughness > SPOT_SMOOTH_ENOUGH_ROUGHNESS)))
 
 /* Blends from one value to another by the weight, limited to 0 to 1 */
 f32 BlendClamped(f32 from, f32 to, f32 weight) {
@@ -171,32 +171,32 @@ f32 BlendClamped(f32 from, f32 to, f32 weight) {
  */
 void EaseReactionView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
   if (easedParts & EASE_EYE) {
-    if (!sEasedView.isEyeEased) {
-      sEasedView.eye[AXIS_X] = eye[AXIS_X];
-      sEasedView.eye[AXIS_Y] = eye[AXIS_Y];
-      sEasedView.eye[AXIS_Z] = eye[AXIS_Z];
-      sEasedView.isEyeEased = TRUE;
+    if (!f_EasedView.isEyeEased) {
+      f_EasedView.eye[AXIS_X] = eye[AXIS_X];
+      f_EasedView.eye[AXIS_Y] = eye[AXIS_Y];
+      f_EasedView.eye[AXIS_Z] = eye[AXIS_Z];
+      f_EasedView.isEyeEased = TRUE;
     }
-    sEasedView.eye[AXIS_X] = eye[AXIS_X] =
-        BlendClamped(sEasedView.eye[AXIS_X], eye[AXIS_X], rate);
-    sEasedView.eye[AXIS_Y] = eye[AXIS_Y] =
-        BlendClamped(sEasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
-    sEasedView.eye[AXIS_Z] = eye[AXIS_Z] =
-        BlendClamped(sEasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
+    f_EasedView.eye[AXIS_X] = eye[AXIS_X] =
+        BlendClamped(f_EasedView.eye[AXIS_X], eye[AXIS_X], rate);
+    f_EasedView.eye[AXIS_Y] = eye[AXIS_Y] =
+        BlendClamped(f_EasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
+    f_EasedView.eye[AXIS_Z] = eye[AXIS_Z] =
+        BlendClamped(f_EasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
   }
   if (easedParts & EASE_LOOK_AT) {
-    if (!sEasedView.isLookAtEased) {
-      sEasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
-      sEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
-      sEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
-      sEasedView.isLookAtEased = TRUE;
+    if (!f_EasedView.isLookAtEased) {
+      f_EasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
+      f_EasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
+      f_EasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
+      f_EasedView.isLookAtEased = TRUE;
     }
-    sEasedView.lookAt[AXIS_X] = lookAt[AXIS_X] =
-        BlendClamped(sEasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
-    sEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] =
-        BlendClamped(sEasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
-    sEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] =
-        BlendClamped(sEasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
+    f_EasedView.lookAt[AXIS_X] = lookAt[AXIS_X] =
+        BlendClamped(f_EasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
+    f_EasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] =
+        BlendClamped(f_EasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
+    f_EasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] =
+        BlendClamped(f_EasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
   }
 }
 
@@ -207,10 +207,10 @@ void EaseReactionView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
 s32 AddReactionLight(Gfx** displayListHead, Lights2* lights) {
   Gfx* gfx = *displayListHead;
 
-  if (sHasReactionLight) {
-    sReactionLights.l[0] = lights->l[0];
-    sReactionLights.l[1] = lights->l[1];
-    gSPSetLights3(gfx++, sReactionLights);
+  if (f_HasReactionLight) {
+    f_ReactionLights.l[0] = lights->l[0];
+    f_ReactionLights.l[1] = lights->l[1];
+    gSPSetLights3(gfx++, f_ReactionLights);
     *displayListHead = gfx;
     return TRUE;
   }
@@ -220,24 +220,24 @@ s32 AddReactionLight(Gfx** displayListHead, Lights2* lights) {
 
 /* Starts the character's reaction in the slot with the animation */
 void StartReaction(u32 slotIndex, s32 character, s32 animation) {
-  sReactionCharacter = character;
-  sHasReactionLight = FALSE;
-  sReactionFrame = 0;
-  sEasedView.isEyeEased = FALSE;
-  sEasedView.isLookAtEased = FALSE;
-  sReactionAnimation = animation;
-  sReactionFrameCount = GetAnimationFrameCount(slotIndex, animation);
+  f_ReactionCharacter = character;
+  f_HasReactionLight = FALSE;
+  f_ReactionFrame = 0;
+  f_EasedView.isEyeEased = FALSE;
+  f_EasedView.isLookAtEased = FALSE;
+  f_ReactionAnimation = animation;
+  f_ReactionFrameCount = GetAnimationFrameCount(slotIndex, animation);
 }
 
-void TurnOffReactionLight(void) { sHasReactionLight = FALSE; }
+void TurnOffReactionLight(void) { f_HasReactionLight = FALSE; }
 
 /* Plays the sound if this is the frame after the given one */
 void CueReactionSound(s32 frame, s32 soundId) {
-  if (soundId != NO_REACTION_SOUND && sReactionFrame - 1 == frame) {
-    PlaySound(soundId, sReactionChannel, REACTION_SOUND_VOLUME);
-    sReactionChannel++;
-    if (sReactionChannel > LAST_REACTION_CHANNEL) {
-      sReactionChannel = FIRST_REACTION_CHANNEL;
+  if (soundId != NO_REACTION_SOUND && f_ReactionFrame - 1 == frame) {
+    PlaySound(soundId, f_ReactionChannel, REACTION_SOUND_VOLUME);
+    f_ReactionChannel++;
+    if (f_ReactionChannel > LAST_REACTION_CHANNEL) {
+      f_ReactionChannel = FIRST_REACTION_CHANNEL;
     }
   }
 }
@@ -250,9 +250,9 @@ s32 PlayReactionSounds(void) {
   if (g_Scene == SCENE_STAFF_ROLL) {
     return;
   }
-  switch (sReactionCharacter) {
+  switch (f_ReactionCharacter) {
     case CHARACTER_PLUM:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(8, 0x1AC);
           CueReactionSound(62, 0x3B);
@@ -269,7 +269,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_CHARLIE:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0xCC);
           break;
@@ -286,7 +286,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_PEACH:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(44, 0x15D);
           CueReactionSound(92, 0x3D);
@@ -303,7 +303,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_BABY_MARIO:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(15, 0xC6);
           break;
@@ -320,7 +320,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_LUIGI:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(2, 0x150);
           break;
@@ -336,7 +336,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_YOSHI:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0x1A0);
           CueReactionSound(56, 0x3B);
@@ -355,7 +355,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_SONNY:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(14, 0x1C4);
           break;
@@ -371,7 +371,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_WARIO:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0x1FF);
           CueReactionSound(21, 0x3C);
@@ -390,7 +390,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_HARRY:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(20, 0x105);
           CueReactionSound(55, 0x3B);
@@ -408,7 +408,7 @@ s32 PlayReactionSounds(void) {
       break;
     case CHARACTER_MARIO:
     case CHARACTER_METAL_MARIO:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0x180);
           CueReactionSound(0, 0x3C);
@@ -426,7 +426,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_MAPLE:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(66, 0x200);
           CueReactionSound(38, 0x3E);
@@ -451,7 +451,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_DONKEY_KONG:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(7, 0x42);
           CueReactionSound(30, 0xE2);
@@ -478,7 +478,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_BOWSER:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(29, 0x12F);
           break;
@@ -497,7 +497,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_KID:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0x123);
           CueReactionSound(66, 0x12E);
@@ -514,7 +514,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_SHERRY:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(0, 0x1DE);
           CueReactionSound(6, 0x3C);
@@ -531,7 +531,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_AZALEA:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(25, 0xA7);
           break;
@@ -547,7 +547,7 @@ s32 PlayReactionSounds(void) {
       }
       break;
     case CHARACTER_JOE:
-      switch (sReactionAnimation) {
+      switch (f_ReactionAnimation) {
         case REACTION_ANIMATION_EAGLE:
           CueReactionSound(15, 0x11B);
           break;
@@ -592,15 +592,15 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
   f32 length;
   f32 highestHeight;
 
-  if (sReactionAnimation == REACTION_ANIMATION_PAR) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_PAR) {
     distance =
-        BlendClamped(107520.0f, 30720.0f, sReactionFrame * REACTION_ZOOM_RATE);
+        BlendClamped(107520.0f, 30720.0f, f_ReactionFrame * REACTION_ZOOM_RATE);
   } else {
     distance =
-        BlendClamped(107520.0f, 38400.0f, sReactionFrame * REACTION_ZOOM_RATE);
+        BlendClamped(107520.0f, 38400.0f, f_ReactionFrame * REACTION_ZOOM_RATE);
   }
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
-    if (sReactionFrame >= MARIO_EFFECT_START_FRAME) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
+    if (f_ReactionFrame >= MARIO_EFFECT_START_FRAME) {
       SpawnSparkleNearPoint(slotIndex, 3);
       GetCharacterPointPosition(0, 3, lightDirection);
       GetCharacterPointPosition(0, REACTION_FOCUS_POINT, lightOrigin);
@@ -615,17 +615,17 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
         lightDirection[AXIS_X] *= length;
         lightDirection[AXIS_Y] *= length;
         lightDirection[AXIS_Z] *= length;
-        sHasReactionLight = TRUE;
+        f_HasReactionLight = TRUE;
         SetCharacterLighting(slotIndex, CHARACTER_LIGHTING_SCENE_THIRD);
-        sReactionLights.l[2].l.col[0] = 0xFF;
-        sReactionLights.l[2].l.col[1] = 0xFF;
-        sReactionLights.l[2].l.col[2] = 0x7F;
-        sReactionLights.l[2].l.colc[0] = 0xFF;
-        sReactionLights.l[2].l.colc[1] = 0xFF;
-        sReactionLights.l[2].l.colc[2] = 0x7F;
-        sReactionLights.l[2].l.dir[0] = lightDirection[AXIS_X];
-        sReactionLights.l[2].l.dir[1] = lightDirection[AXIS_Y];
-        sReactionLights.l[2].l.dir[2] = lightDirection[AXIS_Z];
+        f_ReactionLights.l[2].l.col[0] = 0xFF;
+        f_ReactionLights.l[2].l.col[1] = 0xFF;
+        f_ReactionLights.l[2].l.col[2] = 0x7F;
+        f_ReactionLights.l[2].l.colc[0] = 0xFF;
+        f_ReactionLights.l[2].l.colc[1] = 0xFF;
+        f_ReactionLights.l[2].l.colc[2] = 0x7F;
+        f_ReactionLights.l[2].l.dir[0] = lightDirection[AXIS_X];
+        f_ReactionLights.l[2].l.dir[1] = lightDirection[AXIS_Y];
+        f_ReactionLights.l[2].l.dir[2] = lightDirection[AXIS_Z];
       }
     }
   }
@@ -637,7 +637,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
   if (highestHeight < focus[AXIS_Y]) {
     focus[AXIS_Y] = highestHeight;
   }
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
     focus[AXIS_Y] -= 4.5f;
   }
   view->lookAt[AXIS_X] = focus[AXIS_X];
@@ -647,7 +647,7 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
       focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
                           distance * COURSE_TO_WORLD_SCALE;
   view->eye[AXIS_Y] = focus[AXIS_Y] + (-1.5f);
-  if (sReactionAnimation == REACTION_ANIMATION_PAR) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_PAR) {
     view->eye[AXIS_Y] = focus[AXIS_Y] + (-7.5f);
   }
   view->eye[AXIS_Z] =
@@ -673,24 +673,24 @@ void FrameWarioReaction(u32 slotIndex, CameraView* view) {
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
 
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
     distance =
-        BlendClamped(107520.0f, 46080.0f, sReactionFrame * REACTION_ZOOM_RATE);
-  } else if (sReactionAnimation == REACTION_ANIMATION_BIRDIE) {
+        BlendClamped(107520.0f, 46080.0f, f_ReactionFrame * REACTION_ZOOM_RATE);
+  } else if (f_ReactionAnimation == REACTION_ANIMATION_BIRDIE) {
     distance =
-        BlendClamped(107520.0f, 23040.0f, sReactionFrame * REACTION_ZOOM_RATE);
+        BlendClamped(107520.0f, 23040.0f, f_ReactionFrame * REACTION_ZOOM_RATE);
   } else {
     distance =
-        BlendClamped(92160.0f, 38400.0f, sReactionFrame * REACTION_ZOOM_RATE);
+        BlendClamped(92160.0f, 38400.0f, f_ReactionFrame * REACTION_ZOOM_RATE);
   }
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
-    if (sReactionFrame >= WARIO_EFFECT_START_FRAME) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
+    if (f_ReactionFrame >= WARIO_EFFECT_START_FRAME) {
       SpawnSparkleNearPoint(slotIndex, 3);
     }
   }
   GetCharacterPointPosition(slotIndex, CHARACTER_POINT_SHADOW, focus);
   focus[AXIS_Y] -= 15.0f;
-  if (sReactionAnimation == REACTION_ANIMATION_BIRDIE) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_BIRDIE) {
     focus[AXIS_Y] += 1.5f;
   }
   highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -709,7 +709,7 @@ void FrameWarioReaction(u32 slotIndex, CameraView* view) {
   view->eye[AXIS_Z] =
       focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
                           distance * COURSE_TO_WORLD_SCALE;
-  switch (sReactionAnimation) {
+  switch (f_ReactionAnimation) {
     case REACTION_ANIMATION_EAGLE:
       view->eye[AXIS_Y] = focus[AXIS_Y];
       break;
@@ -736,7 +736,7 @@ void FrameWarioReaction(u32 slotIndex, CameraView* view) {
 void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance =
-      BlendClamped(61440.0f, REACTION_END_DISTANCE, sReactionFrame * 0.0125f);
+      BlendClamped(61440.0f, REACTION_END_DISTANCE, f_ReactionFrame * 0.0125f);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 eastward;
@@ -765,8 +765,8 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   KeepAboveGround(view->eye);
   EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE,
                    EASE_EYE | EASE_LOOK_AT);
-  if (sReactionAnimation == REACTION_ANIMATION_BOGEY &&
-      sReactionFrame >= BABY_MARIO_EFFECT_START_FRAME) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY &&
+      f_ReactionFrame >= BABY_MARIO_EFFECT_START_FRAME) {
     eastward = view->lookAt[AXIS_X] - view->eye[AXIS_X];
     southward = view->lookAt[AXIS_Z] - view->eye[AXIS_Z];
     if ((s32)eastward != 0 || (s32)southward != 0) {
@@ -774,7 +774,7 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
     } else {
       heading = 0.0f;
     }
-    if (!(sReactionFrame & 1)) {
+    if (!(f_ReactionFrame & 1)) {
       SpawnTear(slotIndex, 3, heading + M_PI / 2);
     } else {
       SpawnTear(slotIndex, 4, heading - M_PI / 2);
@@ -791,13 +791,13 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
 void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
 
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
-    if (sReactionFrame % 3 == 0) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
+    if (f_ReactionFrame % 3 == 0) {
       SpawnSparkleNearPoint(slotIndex, 3);
     }
   }
@@ -815,7 +815,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   view->eye[AXIS_X] =
       focus[AXIS_X] + cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
                           distance * COURSE_TO_WORLD_SCALE;
-  if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
     view->eye[AXIS_Y] = focus[AXIS_Y];
   } else {
     view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
@@ -827,7 +827,7 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE,
                    EASE_EYE | EASE_LOOK_AT);
   if (IsReactionViewLow()) {
-    if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
+    if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
       view->lookAt[AXIS_Y] -= 4.5f;
       view->eye[AXIS_Y] += 3.0f;
     } else {
@@ -843,13 +843,14 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
 void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
 
-  if (sReactionAnimation == REACTION_ANIMATION_BOGEY) {
-    if (sReactionFrame == 10 || sReactionFrame == 24 || sReactionFrame == 33) {
+  if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
+    if (f_ReactionFrame == 10 || f_ReactionFrame == 24 ||
+        f_ReactionFrame == 33) {
       SpawnSpreadingCircle(0, 3);
     }
   }
@@ -870,7 +871,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   view->eye[AXIS_Z] =
       focus[AXIS_Z] + sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
                           distance * COURSE_TO_WORLD_SCALE;
-  switch (sReactionAnimation) {
+  switch (f_ReactionAnimation) {
     case REACTION_ANIMATION_EAGLE:
       view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
       break;
@@ -887,7 +888,7 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   EaseReactionView(view->eye, view->lookAt, REACTION_EASE_RATE,
                    EASE_EYE | EASE_LOOK_AT);
   if (IsReactionViewLow()) {
-    if (sReactionAnimation == REACTION_ANIMATION_EAGLE) {
+    if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE) {
       view->lookAt[AXIS_Y] -= 7.5f;
       view->eye[AXIS_Y] += 9.0f;
     } else {
@@ -905,7 +906,7 @@ INCLUDE_ASM("asm/nonmatchings/reaction", FrameBowserReaction);
 void FrameAzaleaReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(107520.0f, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
@@ -942,7 +943,7 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView* view) {
 void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
@@ -977,7 +978,7 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view) {
 void FrameReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
@@ -1013,7 +1014,7 @@ void FrameReaction(u32 slotIndex, CameraView* view) {
 void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
@@ -1026,7 +1027,7 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   if (highestHeight < focus[AXIS_Y]) {
     focus[AXIS_Y] = highestHeight;
   }
-  if (sReactionAnimation != REACTION_ANIMATION_BOGEY) {
+  if (f_ReactionAnimation != REACTION_ANIMATION_BOGEY) {
     focus[AXIS_Y] += 4.5f;
   }
   view->lookAt[AXIS_X] = focus[AXIS_X];
@@ -1052,16 +1053,16 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
 void FrameSherryReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, 46080.0f,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
   f32 highestHeight;
 
-  if (sReactionAnimation == REACTION_ANIMATION_EAGLE &&
-      (u32)(sReactionFrame - SHERRY_EFFECT_START_FRAME) <
+  if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE &&
+      (u32)(f_ReactionFrame - SHERRY_EFFECT_START_FRAME) <
           SHERRY_EFFECT_FRAME_COUNT) {
-    SpawnSparkleNearPoint(slotIndex, sReactionFrame % 3 + 3);
-    SpawnSparkleNearPoint(slotIndex, sReactionFrame % 3 + 6);
+    SpawnSparkleNearPoint(slotIndex, f_ReactionFrame % 3 + 3);
+    SpawnSparkleNearPoint(slotIndex, f_ReactionFrame % 3 + 6);
   }
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
   highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -1094,10 +1095,10 @@ void FrameSherryReaction(u32 slotIndex, CameraView* view) {
 void FrameKidReaction(u32 slotIndex, CameraView* view) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   f32 distance = BlendClamped(REACTION_START_DISTANCE, REACTION_END_DISTANCE,
-                              sReactionFrame * REACTION_ZOOM_RATE);
+                              f_ReactionFrame * REACTION_ZOOM_RATE);
   f32 focus[AXIS_COUNT];
   u8 unusedBuffer[0x40]; /* Unused; it is there to match */
-  f32 turn = (sReactionFrame - sReactionFrameCount) * KID_TURN_STEP;
+  f32 turn = (f_ReactionFrame - f_ReactionFrameCount) * KID_TURN_STEP;
   f32 highestHeight;
 
   if (turn > 0.0f) {
@@ -1141,11 +1142,11 @@ s32 UpdateReaction(u32 slotIndex) {
   CharacterSlot* slot = GetUsedCharacterSlot(slotIndex);
   CameraView* view;
 
-  sReactionFrame++;
+  f_ReactionFrame++;
   DimNextTranslucentTriangles();
   TakePinOut();
   if (IsGameFlagSet(GAME_FLAG_SHOW_REACTION_FRAME)) {
-    sprintf(text, "FRAME %d  ", sReactionFrame);
+    sprintf(text, "FRAME %d  ", f_ReactionFrame);
     PrintDebugText(text, REACTION_FRAME_COLUMN, REACTION_FRAME_ROW);
   }
   PlayReactionSounds();
@@ -1197,7 +1198,7 @@ s32 UpdateReaction(u32 slotIndex) {
 }
 
 /* Forgets the reaction spot, so that the next spot considered is taken */
-void ClearReactionSpot(void) { sHasReactionSpot = FALSE; }
+void ClearReactionSpot(void) { f_HasReactionSpot = FALSE; }
 
 /*
  * Takes the point as the reaction spot if there is none, or if the ground
@@ -1233,7 +1234,7 @@ s32 ConsiderReactionSpot(CoursePoint point) {
     }
   }
   roughness *= 2;
-  if (!sHasReactionSpot) {
+  if (!f_HasReactionSpot) {
     isNearBillboard = FALSE;
     for (i = 0; i < BILLBOARD_COUNT; i++) {
       billboard = &g_Billboards[i];
@@ -1250,18 +1251,18 @@ s32 ConsiderReactionSpot(CoursePoint point) {
     }
   }
   if (IsBetterReactionSpot(roughness)) {
-    sReactionSpotRoughness = roughness;
-    sReactionSpot[AXIS_X] = point[AXIS_X];
-    sReactionSpot[AXIS_Y] = point[AXIS_Y];
-    sReactionSpot[AXIS_Z] = point[AXIS_Z];
-    sHasReactionSpot = TRUE;
+    f_ReactionSpotRoughness = roughness;
+    f_ReactionSpot[AXIS_X] = point[AXIS_X];
+    f_ReactionSpot[AXIS_Y] = point[AXIS_Y];
+    f_ReactionSpot[AXIS_Z] = point[AXIS_Z];
+    f_HasReactionSpot = TRUE;
   }
 }
 
 void GetReactionSpot(CoursePoint point) {
-  point[AXIS_X] = sReactionSpot[AXIS_X];
-  point[AXIS_Y] = sReactionSpot[AXIS_Y];
-  point[AXIS_Z] = sReactionSpot[AXIS_Z];
+  point[AXIS_X] = f_ReactionSpot[AXIS_X];
+  point[AXIS_Y] = f_ReactionSpot[AXIS_Y];
+  point[AXIS_Z] = f_ReactionSpot[AXIS_Z];
 }
 
 /*
@@ -1284,9 +1285,9 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   f32 absRadius;
   f32 radius = SPOT_PLACE_DISTANCE;
 
-  spot[AXIS_X] = sReactionSpot[AXIS_X];
-  spot[AXIS_Y] = sReactionSpot[AXIS_Y];
-  spot[AXIS_Z] = sReactionSpot[AXIS_Z];
+  spot[AXIS_X] = f_ReactionSpot[AXIS_X];
+  spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
+  spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
   ahead[AXIS_X] = cosf(heading) * radius + spot[AXIS_X];
   ahead[AXIS_Z] = sinf(heading) * radius + spot[AXIS_Z];
   ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
@@ -1319,7 +1320,7 @@ INCLUDE_ASM("asm/nonmatchings/reaction", PlaceAtReactionSpot);
 s32 IsEasedEyeHeightZero(void) {
   s32 isZero = FALSE;
 
-  if (fabsf(sEasedView.eye[AXIS_Y]) == 0.0f) {
+  if (fabsf(f_EasedView.eye[AXIS_Y]) == 0.0f) {
     isZero = TRUE;
   }
   return isZero;
@@ -1330,5 +1331,5 @@ INCLUDE_ASM("asm/nonmatchings/reaction", IsEasedEyeHeightZero);
 #endif
 
 __asm__(".section .rodata");
-static const char sUnusedFloatFormat[] = "            %f";
-static const char sUnusedEmptyText[] = "";
+static const char f_UnusedFloatFormat[] = "            %f";
+static const char f_UnusedEmptyText[] = "";

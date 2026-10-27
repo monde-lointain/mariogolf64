@@ -22,13 +22,13 @@ g_SoundPointerBankRomEnd = 0x18BE00;
 
 /* The hole file path formats, which BuildHole has as string literals and
    the asm of SaveHoleFiles reads under these names */
-sVerticesPathFormat = 0x80255168;
-sMidpointsPathFormat = 0x80255188;
-sTreesPathFormat = 0x802551A8;
-sUnk6PathFormat = 0x802551C8;
-sPointsPathFormat = 0x802551E8;
-sTrianglesPathFormat = 0x80255208;
-sAttributesPathFormat = 0x80255228;
+f_VerticesPathFormat = 0x80255168;
+f_MidpointsPathFormat = 0x80255188;
+f_TreesPathFormat = 0x802551A8;
+f_Unk6PathFormat = 0x802551C8;
+f_PointsPathFormat = 0x802551E8;
+f_TrianglesPathFormat = 0x80255208;
+f_AttributesPathFormat = 0x80255228;
 
 /* D_800BA9D8.cupPosition's x, which PlanShot reads under a symbol of its
    own, as g_CupPositionY and g_CupPositionZ are for y and z */

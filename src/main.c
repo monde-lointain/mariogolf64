@@ -82,12 +82,12 @@
 #define STATE_STICK_DIRECTION_MIN 30
 
 extern volatile u8 g_DebugHaltState;
-extern u16* sFramebuffers[FRAMEBUFFER_COUNT];
-extern s32 sRetraceCount;
-extern s32 sFramesThisSecond;
-extern s32 sIsOddRetrace;
+extern u16* f_Framebuffers[FRAMEBUFFER_COUNT];
+extern s32 f_RetraceCount;
+extern s32 f_FramesThisSecond;
+extern s32 f_IsOddRetrace;
 extern volatile s32 g_MainLoopState;
-extern u8 sGameFlagBits[GAME_FLAG_COUNT / 8];
+extern u8 f_GameFlagBits[GAME_FLAG_COUNT / 8];
 extern u16* g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
@@ -119,11 +119,11 @@ void guNormalize(f32* x, f32* y, f32* z) {
   }
 }
 
-void InitFramebuffers(void) { nuGfxSetCfb(sFramebuffers, FRAMEBUFFER_COUNT); }
+void InitFramebuffers(void) { nuGfxSetCfb(f_Framebuffers, FRAMEBUFFER_COUNT); }
 
 s32 IsGameFlagSet(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    if (sGameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
+    if (f_GameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
       return TRUE;
     }
     return FALSE;
@@ -133,19 +133,19 @@ s32 IsGameFlagSet(u32 flag) {
 
 void SetGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    sGameFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
+    f_GameFlagBits[flag >> 3] |= 0x80 >> (flag & 7);
   }
 }
 
 void ClearGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    sGameFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
+    f_GameFlagBits[flag >> 3] &= 0xFF7F >> (flag & 7);
   }
 }
 
 void ToggleGameFlag(u32 flag) {
   if (flag < GAME_FLAG_COUNT) {
-    sGameFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
+    f_GameFlagBits[flag >> 3] ^= 0x80 >> (flag & 7);
   }
 }
 
@@ -153,7 +153,7 @@ void ClearAllGameFlags(void) {
   s32 byteIndex;
 
   for (byteIndex = 0; byteIndex < GAME_FLAG_COUNT / 8; byteIndex++) {
-    sGameFlagBits[byteIndex] = 0;
+    f_GameFlagBits[byteIndex] = 0;
   }
 }
 
@@ -466,15 +466,15 @@ void ReadControllers(void) {
 
 void HandleGfxRetrace(s32 pendingTaskCount) {
   if (nuScPreNMIFlag & NU_SC_PRENMI_GET) {
-    sIsOddRetrace ^= 1;
-    if (!sIsOddRetrace) {
+    f_IsOddRetrace ^= 1;
+    if (!f_IsOddRetrace) {
       DrawResetFade();
     }
     return;
   }
 
-  sIsOddRetrace ^= 1;
-  if (!sIsOddRetrace) {
+  f_IsOddRetrace ^= 1;
+  if (!f_IsOddRetrace) {
     if ((g_FramePacingMode != 0) ? pendingTaskCount < PENDING_TASK_MAX_RELAXED
                                  : pendingTaskCount < PENDING_TASK_MAX) {
       UpdateAudio();
@@ -490,7 +490,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
           }
         }
         g_FrameCount++;
-        sFramesThisSecond++;
+        f_FramesThisSecond++;
         if (g_FrameStepState == FRAME_STEP_ONE_FRAME) {
           g_FrameStepState = FRAME_STEP_PAUSED;
         }
@@ -506,13 +506,13 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
       }
     } else {
       /* Skip this frame and try again on the next retrace */
-      sIsOddRetrace ^= 1;
+      f_IsOddRetrace ^= 1;
     }
   }
 
-  if (++sRetraceCount >= RETRACES_PER_SECOND) {
-    g_FramesPerSecond = sFramesThisSecond;
-    sRetraceCount = 0;
-    sFramesThisSecond = 0;
+  if (++f_RetraceCount >= RETRACES_PER_SECOND) {
+    g_FramesPerSecond = f_FramesThisSecond;
+    f_RetraceCount = 0;
+    f_FramesThisSecond = 0;
   }
 }

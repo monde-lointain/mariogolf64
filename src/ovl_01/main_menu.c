@@ -61,8 +61,8 @@
 #define MENU_BOB_HEIGHT 5.0f
 
 /* The bobbing of the menus' items: its phase, and the offset that it gives */
-extern f32 sMenuBobOffset;
-extern f32 sMenuBobPhase;
+extern f32 f_MenuBobOffset;
+extern f32 f_MenuBobPhase;
 
 /* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and
  * D_801B60D0 */
@@ -1455,8 +1455,8 @@ void DrawMenuScreen(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
-  sMenuBobPhase += MENU_BOB_PHASE_STEP;
-  sMenuBobOffset = sinf(sMenuBobPhase) * MENU_BOB_HEIGHT;
+  f_MenuBobPhase += MENU_BOB_PHASE_STEP;
+  f_MenuBobOffset = sinf(f_MenuBobPhase) * MENU_BOB_HEIGHT;
   switch (g_MenuScreen) {
     case MENU_SCREEN_TITLE:
       SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 255, 255, 255, 255);

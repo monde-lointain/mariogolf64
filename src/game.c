@@ -48,59 +48,59 @@
 /* Steps that the inset view takes to open or close fully */
 #define INSET_VIEW_STEP_COUNT 8
 
-extern s32 sInsetViewCenterX;
-extern s32 sInsetViewCenterY;
-extern s32 sInsetViewWidth;
-extern s32 sInsetViewHeight;
+extern s32 f_InsetViewCenterX;
+extern s32 f_InsetViewCenterY;
+extern s32 f_InsetViewWidth;
+extern s32 f_InsetViewHeight;
 void DrawSpinEffect(Gfx** displayListHead, CameraView* view);
 void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view);
 
 /*
  * The spin effect's mesh and its rotation, one per draw buffer. Each draw
  * buffer's vertices start one vertex after the other's, so most are shared,
- * and sSpinVertices runs on over sSpinMatrices, so a frame's vertex updates
+ * and f_SpinVertices runs on over f_SpinMatrices, so a frame's vertex updates
  * overwrite parts of the matrices.
  */
-extern Vtx sSpinVertices[];
-extern Mtx sSpinMatrices[];
+extern Vtx f_SpinVertices[];
+extern Mtx f_SpinMatrices[];
 
-extern f32 sSpinAngle; /* In radians */
+extern f32 f_SpinAngle; /* In radians */
 
 /* The frame CopyPreviousFrame copies, and the one shown last */
-extern u16* sCopySourceFrame;
-extern u16* sPreviousFrame;
+extern u16* f_CopySourceFrame;
+extern u16* f_PreviousFrame;
 
 /* When the last graphics task started, in microseconds */
-extern u32 sGfxTaskStartTime;
+extern u32 f_GfxTaskStartTime;
 
 /* When UpdateGame last started and finished, in microseconds */
-extern u32 sUpdateStartTime;
-extern u32 sUpdateEndTime;
+extern u32 f_UpdateStartTime;
+extern u32 f_UpdateEndTime;
 
 /* Values a debug menu edits; nothing reads them */
 #define DEBUG_MENU_VALUE_COUNT 3
 #define DEBUG_MENU_VALUE_MAX 128
-extern s32 sDebugMenuValues[DEBUG_MENU_VALUE_COUNT];
-extern s32 sDebugMenuValueIndex;
+extern s32 f_DebugMenuValues[DEBUG_MENU_VALUE_COUNT];
+extern s32 f_DebugMenuValueIndex;
 
 /* The sources of g_FlameTexture */
-extern u8 sNoiseTexture[];
-extern u16 sFlameGradientTexture[];
+extern u8 f_NoiseTexture[];
+extern u16 f_FlameGradientTexture[];
 
 /* How far BuildDynamicTextures has scrolled its textures */
-extern s32 sDynamicTextureScroll;
+extern s32 f_DynamicTextureScroll;
 
 /* How far BuildHorizonDynamicTextures has scrolled its textures */
-extern s32 sHorizonTextureScroll;
+extern s32 f_HorizonTextureScroll;
 
 /* Holds a frame for the saved-frame effect */
-extern u16* sSavedFrameBuffer;
+extern u16* f_SavedFrameBuffer;
 /* The effect's length in frames; the tiled image counts it down */
-extern s32 sScreenEffectFrameCount;
+extern s32 f_ScreenEffectFrameCount;
 /* Set when the effects stop, never read */
-extern s32 sUnreadEffectSetting;
-extern s32 sHasUnloadedSceneModule;
-extern s32 sHasUnloadedSubModule;
+extern s32 f_UnreadEffectSetting;
+extern s32 f_HasUnloadedSceneModule;
+extern s32 f_HasUnloadedSubModule;
 
 /* How the saved-frame effect splits the screen into strips, in rows */
 #define SAVED_FRAME_STRIP_HEIGHT 6
@@ -297,10 +297,10 @@ void ScaleMatrix(Mtx* matrix, f32 x, f32 y, f32 z) {
 
 void SetScreenEffect(s32 effect, s32 frameCount) {
   g_ScreenEffect = effect;
-  sScreenEffectFrameCount = frameCount;
+  f_ScreenEffectFrameCount = frameCount;
   if (effect == SCREEN_EFFECT_NONE) {
     g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE;
-    sUnreadEffectSetting = -640;
+    f_UnreadEffectSetting = -640;
   } else {
     g_Cameras[0].view.drawFlags = CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT;
   }
@@ -316,8 +316,8 @@ void DrawTiledImageEffect(Gfx** displayListHead, CameraView* view) {
   s32 texelPairOffset;
   s32 copyIndex;
 
-  sScreenEffectFrameCount--;
-  if (sScreenEffectFrameCount == 0) {
+  f_ScreenEffectFrameCount--;
+  if (f_ScreenEffectFrameCount == 0) {
     view->drawFlags = CAMERA_DRAW_SCENE;
   }
   gDPPipeSync(gfx++);
@@ -380,17 +380,17 @@ void DrawSpinMesh(Gfx** displayListHead) {
 
   gSPMatrix(gfx++, &g_ScreenEffectProjection,
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, &sSpinMatrices[g_DrawBufferIndex],
+  gSPMatrix(gfx++, &f_SpinMatrices[g_DrawBufferIndex],
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
   for (batchIndex = 0; batchIndex != SPIN_BATCH_COUNT; batchIndex++) {
     if (batchIndex == SPIN_BATCH_COUNT - 1) {
       gSPVertex(gfx++,
-                &sSpinVertices[g_DrawBufferIndex] +
+                &f_SpinVertices[g_DrawBufferIndex] +
                     batchIndex * SPIN_BATCH_VERTEX_COUNT,
                 SPIN_LAST_BATCH_VERTEX_COUNT, 0);
     } else {
       gSPVertex(gfx++,
-                &sSpinVertices[g_DrawBufferIndex] +
+                &f_SpinVertices[g_DrawBufferIndex] +
                     batchIndex * SPIN_BATCH_VERTEX_COUNT,
                 SPIN_BATCH_VERTEX_COUNT, 0);
     }
@@ -447,7 +447,7 @@ void DrawSpinMesh(Gfx** displayListHead) {
 }
 
 /*
- * Copies the frame kept in sSavedFrameBuffer to the screen, through the
+ * Copies the frame kept in f_SavedFrameBuffer to the screen, through the
  * depth buffer's memory, a strip at a time in copy mode
  */
 void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
@@ -455,7 +455,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
   s32 stripIndex;
   s16 stripHeight;
 
-  sScreenEffectFrameCount = 1;
+  f_ScreenEffectFrameCount = 1;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
@@ -480,7 +480,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
                       : SAVED_FRAME_STRIP_HEIGHT;
     gDPLoadTextureTile(
         gfx++,
-        (u32)(sSavedFrameBuffer +
+        (u32)(f_SavedFrameBuffer +
               stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER,
@@ -536,7 +536,7 @@ void DrawSavedFrameEffect(Gfx** displayListHead, CameraView* view) {
 
 /*
  * Turns the frame saved in the depth buffer about the vertical axis, a half
- * turn over sScreenEffectFrameCount frames, then shows the scene again
+ * turn over f_ScreenEffectFrameCount frames, then shows the scene again
  */
 void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   Mat4 transform;
@@ -549,7 +549,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   s32 rowIndex;
 
   rotation[0] = 0.0f;
-  rotation[1] = sSpinAngle;
+  rotation[1] = f_SpinAngle;
   rotation[2] = 0.0f;
   translation[0] = 0.0f;
   translation[1] = 0.0f;
@@ -558,20 +558,20 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   scale[1] = SPIN_MESH_SCALE;
   scale[2] = SPIN_MESH_SCALE;
   BuildTransformMatrix(transform, rotation, translation, scale);
-  ConvertMatrixToFixed(transform, &sSpinMatrices[g_DrawBufferIndex]);
+  ConvertMatrixToFixed(transform, &f_SpinMatrices[g_DrawBufferIndex]);
 
-  angleStep = M_PI / sScreenEffectFrameCount;
-  sSpinAngle += angleStep;
+  angleStep = M_PI / f_ScreenEffectFrameCount;
+  f_SpinAngle += angleStep;
   /* Skips the half turn in which the frame's back would face the camera */
-  if (sSpinAngle > M_PI / 2 && sSpinAngle < angleStep + M_PI / 2) {
-    sSpinAngle += M_PI;
+  if (f_SpinAngle > M_PI / 2 && f_SpinAngle < angleStep + M_PI / 2) {
+    f_SpinAngle += M_PI;
   }
-  if (sSpinAngle > 2 * M_PI) {
-    sSpinAngle = 0.0f;
+  if (f_SpinAngle > 2 * M_PI) {
+    f_SpinAngle = 0.0f;
     view->drawFlags = CAMERA_DRAW_SCENE;
   }
 
-  vertex = &sSpinVertices[g_DrawBufferIndex];
+  vertex = &f_SpinVertices[g_DrawBufferIndex];
   for (rowIndex = 0; rowIndex != SPIN_MESH_ROW_COUNT; rowIndex++) {
     vertex[0].v.ob[0] = -SPIN_MESH_HALF_WIDTH;
     vertex[1].v.ob[0] = SPIN_MESH_HALF_WIDTH;
@@ -738,8 +738,8 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
   gDPSetCombineLERP(gfx++, TEXEL0, TEXEL1, PRIMITIVE_ALPHA, TEXEL1, 0, 0, 0,
                     PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
-  sHorizonTextureScroll++;
-  gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
+  f_HorizonTextureScroll++;
+  gDPLoadTextureBlock(gfx++, (u32)f_NoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
                       DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5,
                       5, G_TX_NOLOD, G_TX_NOLOD);
@@ -759,17 +759,18 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
                     PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
                    osVirtualToPhysical(g_FlameTexture) & ~7);
-  gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
+  gDPLoadTextureBlock(gfx++, (u32)f_NoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
                       DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5,
                       5, G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(gfx++, (u32)sFlameGradientTexture & ~7, SECOND_TEXTURE_TMEM,
-                    1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
-                    DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                    G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock(gfx++, (u32)f_FlameGradientTexture & ~7,
+                    SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
+                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
+                    G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, FLAME_NOISE_ALPHA);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, sHorizonTextureScroll, 32,
-                 sHorizonTextureScroll + 32);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_HorizonTextureScroll, 32,
+                 f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
                       DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
@@ -786,9 +787,9 @@ void BuildHorizonDynamicTextures(Gfx** displayListHead) {
                     DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
                     G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
                     G_TX_NOLOD, G_TX_NOLOD);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, sHorizonTextureScroll,
-                 sHorizonTextureScroll, sHorizonTextureScroll + 32,
-                 sHorizonTextureScroll + 32);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, f_HorizonTextureScroll,
+                 f_HorizonTextureScroll, f_HorizonTextureScroll + 32,
+                 f_HorizonTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
                       DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
@@ -814,7 +815,7 @@ void BuildDynamicTextures(Gfx** displayListHead) {
   s32 rowIndex;
   s32 blockIndex;
 
-  sDynamicTextureScroll++;
+  f_DynamicTextureScroll++;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -862,7 +863,7 @@ void BuildDynamicTextures(Gfx** displayListHead) {
           1 << 10);
     }
   }
-  gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
+  gDPLoadTextureBlock(gfx++, (u32)f_NoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
                       DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                       G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -882,17 +883,18 @@ void BuildDynamicTextures(Gfx** displayListHead) {
                     PRIMITIVE, PRIMITIVE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
                    osVirtualToPhysical(g_FlameTexture) & ~7);
-  gDPLoadTextureBlock(gfx++, (u32)sNoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
+  gDPLoadTextureBlock(gfx++, (u32)f_NoiseTexture & ~7, G_IM_FMT_I, G_IM_SIZ_8b,
                       DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5,
                       5, G_TX_NOLOD, G_TX_NOLOD);
-  gDPLoadMultiBlock(gfx++, (u32)sFlameGradientTexture & ~7, SECOND_TEXTURE_TMEM,
-                    1, G_IM_FMT_RGBA, G_IM_SIZ_16b, DYNAMIC_TEXTURE_SIZE,
-                    DYNAMIC_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                    G_TX_NOMIRROR | G_TX_WRAP, 5, 5, G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadMultiBlock(gfx++, (u32)f_FlameGradientTexture & ~7,
+                    SECOND_TEXTURE_TMEM, 1, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                    DYNAMIC_TEXTURE_SIZE, DYNAMIC_TEXTURE_SIZE, 0,
+                    G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
+                    G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, FLAME_NOISE_ALPHA);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, sDynamicTextureScroll, 32,
-                 sDynamicTextureScroll + 32);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_DynamicTextureScroll, 32,
+                 f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
                       DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
@@ -909,9 +911,9 @@ void BuildDynamicTextures(Gfx** displayListHead) {
                     G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 5, 5,
                     G_TX_NOLOD, G_TX_NOLOD);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, BLENDED_TEXTURE_ALPHA);
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, sDynamicTextureScroll,
-                 sDynamicTextureScroll, sDynamicTextureScroll + 32,
-                 sDynamicTextureScroll + 32);
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, f_DynamicTextureScroll,
+                 f_DynamicTextureScroll, f_DynamicTextureScroll + 32,
+                 f_DynamicTextureScroll + 32);
   gDPSetTileSize(gfx++, 1, 0, 0, 32, 32);
   gSPTextureRectangle(gfx++, 0, 0, DYNAMIC_TEXTURE_SIZE << 2,
                       DYNAMIC_TEXTURE_SIZE << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
@@ -963,7 +965,7 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 #define CLOSE_UP_NEAR_CLIP 200.0f
 #define SHORT_FAR_CLIP 500.0f
 
-/* Values of sFadeColor */
+/* Values of f_FadeColor */
 #define FADE_COLOR_NONE 0
 #define FADE_COLOR_WHITE 1
 #define FADE_COLOR_NOISE 2
@@ -983,21 +985,21 @@ void BuildDynamicTextures(Gfx** displayListHead) {
 #define GFX_TASK_FLAGS (NU_SC_TASK_DP_WAIT | NU_SC_SWAPBUFFER)
 
 /* When DrawGame last started, in microseconds */
-extern u32 sDrawStartTime;
-extern f32 sMapFieldOfView; /* In degrees */
-extern s8 sNeedsIdentityMatrix;
-extern Mtx sIdentityMatrix;
+extern u32 f_DrawStartTime;
+extern f32 f_MapFieldOfView; /* In degrees */
+extern s8 f_NeedsIdentityMatrix;
+extern Mtx f_IdentityMatrix;
 /* Indexed by view, then by draw buffer */
-extern CameraMatrices sCameraMatrices[2 * 2];
+extern CameraMatrices f_CameraMatrices[2 * 2];
 extern s32 g_PerspectiveNormalization;
 /* The next free vertex of the frame's vertex buffer */
 extern Vtx* g_VertexListHead;
 extern Vtx g_ExpansionVertexBuffers[2][EXPANSION_VERTEX_BUFFER_LENGTH];
-extern s32 sHasThreeFrameBuffers;
-extern s32 sFadeAlpha;
-extern s32 sFadeColor;
+extern s32 f_HasThreeFrameBuffers;
+extern s32 f_FadeAlpha;
+extern s32 f_FadeColor;
 /* Toggled by a debug button; nothing reads it */
-extern s32 sUnreadDebugSwitch;
+extern s32 f_UnreadDebugSwitch;
 /*
  * The hole flyover's frame; DrawGame fades the screen out over its last
  * frames, and back in while it is -1
@@ -1109,7 +1111,7 @@ s32 DrawGame(void) {
     }
   }
 
-  sDrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
+  f_DrawStartTime = OS_CYCLES_TO_USEC(osGetTime());
   if (IsGameFlagSet(0x28)) {
     PrintDebugPaddedHex(_mus_cpu_last, 20, 10);
     PrintDebugPaddedHex(_mus_cpu_worst, 20, 11);
@@ -1213,7 +1215,7 @@ s32 DrawGame(void) {
       }
       InitRcp(g_DrawBufferIndex);
     }
-    matrices = &sCameraMatrices[viewIndex * 2 + g_DrawBufferIndex];
+    matrices = &f_CameraMatrices[viewIndex * 2 + g_DrawBufferIndex];
 
     switch (drawMode) {
       case DRAW_MODE_BLANK:
@@ -1237,7 +1239,7 @@ s32 DrawGame(void) {
                 -(g_MapCamera.view.lookAt[1] - g_MapCamera.view.eye[1]),
                 -(g_MapCamera.view.lookAt[2] - g_MapCamera.view.eye[2]));
         terrainStyle = 2;
-        guPerspective(&matrices->perspective, &mapPerspNorm, sMapFieldOfView,
+        guPerspective(&matrices->perspective, &mapPerspNorm, f_MapFieldOfView,
                       ASPECT_RATIO, MAP_NEAR_CLIP, MAP_FAR_CLIP, 1.0f);
         gSPPerspNormalize(g_DisplayListHead++, mapPerspNorm);
         guTranslate(&matrices->placement, 0.0f, 0.0f, 0.0f);
@@ -1485,7 +1487,7 @@ s32 DrawGame(void) {
             if (g_Cameras[0].view.drawFlags ==
                 (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT)) {
               if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-                  sScreenEffectFrameCount == 2) {
+                  f_ScreenEffectFrameCount == 2) {
                 gDPPipeSync(g_DisplayListHead++);
                 gDPSetRenderMode(g_DisplayListHead++, G_RM_NOOP, G_RM_NOOP2);
                 gDPPipeSync(g_DisplayListHead++);
@@ -1493,7 +1495,7 @@ s32 DrawGame(void) {
                 gDPSetCycleType(g_DisplayListHead++, G_CYC_FILL);
                 gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA,
                                  G_IM_SIZ_16b, SCREEN_WIDTH,
-                                 (u32)sSavedFrameBuffer & ~7);
+                                 (u32)f_SavedFrameBuffer & ~7);
                 gDPSetFillColor(
                     g_DisplayListHead++,
                     GPACK_ZDZ(G_MAXFBZ, 0) << 16 | GPACK_ZDZ(G_MAXFBZ, 0));
@@ -1508,7 +1510,7 @@ s32 DrawGame(void) {
               gDPPipeSync(g_DisplayListHead++);
               if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME) {
                 gDPSetDepthImage(g_DisplayListHead++,
-                                 (u32)sSavedFrameBuffer & ~7);
+                                 (u32)f_SavedFrameBuffer & ~7);
               }
             } else {
               gDPPipeSync(g_DisplayListHead++);
@@ -1534,7 +1536,7 @@ s32 DrawGame(void) {
             if ((g_Cameras[0].view.drawFlags !=
                      (CAMERA_DRAW_SCENE | CAMERA_DRAW_SCREEN_EFFECT) ||
                  g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME ||
-                 sScreenEffectFrameCount != 1) &&
+                 f_ScreenEffectFrameCount != 1) &&
                 g_PauseScreen != PAUSE_SCREEN_UNK4) {
               UsePrimitiveDepth(0);
               if (!IsGameFlagSet(0x15)) {
@@ -1624,11 +1626,11 @@ s32 DrawGame(void) {
         break;
     }
 
-    if (sNeedsIdentityMatrix) {
-      sNeedsIdentityMatrix = FALSE;
-      guTranslate(&sIdentityMatrix, 0.0f, 0.0f, 0.0f);
+    if (f_NeedsIdentityMatrix) {
+      f_NeedsIdentityMatrix = FALSE;
+      guTranslate(&f_IdentityMatrix, 0.0f, 0.0f, 0.0f);
     }
-    gSPMatrix(g_DisplayListHead++, &sIdentityMatrix,
+    gSPMatrix(g_DisplayListHead++, &f_IdentityMatrix,
               G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     if (g_MenuBackdropStyle != 0) {
       if (viewIndex == 0) {
@@ -1642,7 +1644,7 @@ s32 DrawGame(void) {
           (g_MenuBackdropStyle == 0 || g_PauseScreen == PAUSE_SCREEN_UNK4)) {
         if (g_Cameras[viewIndex].view.drawFlags != 0) {
           if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-              sScreenEffectFrameCount == 1) {
+              f_ScreenEffectFrameCount == 1) {
             gDPPipeSync(g_DisplayListHead++);
             gDPSetColorImage(g_DisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
                              SCREEN_WIDTH,
@@ -1687,7 +1689,7 @@ s32 DrawGame(void) {
               DrawPin(matrices, &camera->view, viewIndex);
             }
             if (g_ScreenEffect == SCREEN_EFFECT_SAVED_FRAME &&
-                sScreenEffectFrameCount == 1) {
+                f_ScreenEffectFrameCount == 1) {
               DrawRings(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
               if (viewIndex == 0) {
                 BuildHorizonDynamicTextures(&g_DisplayListHead);
@@ -1848,33 +1850,33 @@ s32 DrawGame(void) {
   gDPPipeSync(g_DisplayListHead++);
 
   if (g_HoleFlyoverFrame > 0xAA) {
-    sFadeAlpha = (g_HoleFlyoverFrame - 0xAA) * 16;
-    if (sFadeColor == FADE_COLOR_NONE) {
+    f_FadeAlpha = (g_HoleFlyoverFrame - 0xAA) * 16;
+    if (f_FadeColor == FADE_COLOR_NONE) {
       SetScreenEffect(SCREEN_EFFECT_SPIN, 30);
     }
   } else if (g_HoleFlyoverFrame == -1) {
-    sFadeAlpha -= 32;
-    if (sFadeAlpha < 0) {
-      sFadeAlpha = 0;
+    f_FadeAlpha -= 32;
+    if (f_FadeAlpha < 0) {
+      f_FadeAlpha = 0;
       g_HoleFlyoverFrame = 0;
     }
   } else {
-    sFadeAlpha = 0;
+    f_FadeAlpha = 0;
   }
-  if (sFadeAlpha != 0) {
-    if (sFadeColor == FADE_COLOR_BLACK) {
-      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 0, sFadeAlpha);
+  if (f_FadeAlpha != 0) {
+    if (f_FadeColor == FADE_COLOR_BLACK) {
+      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0, 0, 0, f_FadeAlpha);
       gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    } else if (sFadeColor == FADE_COLOR_WHITE) {
-      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, sFadeAlpha);
+    } else if (f_FadeColor == FADE_COLOR_WHITE) {
+      gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, f_FadeAlpha);
       gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    } else if (sFadeColor == FADE_COLOR_NOISE) {
+    } else if (f_FadeColor == FADE_COLOR_NOISE) {
       gDPSetPrimColor(g_DisplayListHead++, 0, 0, FADE_NOISE_GREY,
-                      FADE_NOISE_GREY, FADE_NOISE_GREY, sFadeAlpha);
+                      FADE_NOISE_GREY, FADE_NOISE_GREY, f_FadeAlpha);
       gDPSetCombineLERP(g_DisplayListHead++, NOISE, 0, PRIMITIVE, 0, 0, 0, 0,
                         PRIMITIVE, NOISE, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE);
     }
-    if (sFadeColor != FADE_COLOR_NONE) {
+    if (f_FadeColor != FADE_COLOR_NONE) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
       gSPTextureRectangle(
@@ -1903,22 +1905,22 @@ s32 DrawGame(void) {
       SetScreenEffect(SCREEN_EFFECT_EMPTY, 64);
     }
     if (g_ControllerStates[1].buttons & D_CBUTTONS) {
-      sFadeAlpha -= 8;
+      f_FadeAlpha -= 8;
     }
     if (g_ControllerStates[1].buttons & U_CBUTTONS) {
-      sFadeAlpha += 8;
+      f_FadeAlpha += 8;
     }
-    if (sFadeAlpha > 0xFF) {
-      sFadeAlpha = 0xFF;
+    if (f_FadeAlpha > 0xFF) {
+      f_FadeAlpha = 0xFF;
     }
-    if (sFadeAlpha < 0) {
-      sFadeAlpha = 0;
+    if (f_FadeAlpha < 0) {
+      f_FadeAlpha = 0;
     }
     if (g_ControllerStates[1].pressedButtons & B_BUTTON) {
       g_FrameStepState = FRAME_STEP_PAUSED;
     }
     if (g_ControllerStates[1].pressedButtons & D_JPAD) {
-      sUnreadDebugSwitch ^= 1;
+      f_UnreadDebugSwitch ^= 1;
     }
     if (g_ControllerStates[1].pressedButtons & U_JPAD) {
       g_Cameras[INSET_CAMERA].view.drawFlags ^= CAMERA_DRAW_SCENE;
@@ -1947,8 +1949,8 @@ s32 DrawGame(void) {
     DrawStaffRoll(&g_DisplayListHead);
   }
   if (IsGameFlagSet(1)) {
-    PrintDebugText(!sHasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer",
-                   3, 4);
+    PrintDebugText(
+        !f_HasThreeFrameBuffers ? "2 Frame Buffer" : "3 Frame Buffer", 3, 4);
     sprintf(g_PrintBuffer, "%2d draw/sec", g_FramesPerSecond);
     PrintDebugText(g_PrintBuffer, 3, 5);
   }
@@ -1998,7 +2000,7 @@ s32 DrawGame(void) {
     }
   }
 
-  sGfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
+  f_GfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
   if (g_FramePacingMode == PACING_MODE_NORMAL) {
     nuGfxTaskStart(
         g_DisplayLists[g_DrawBufferIndex],
@@ -2012,9 +2014,9 @@ s32 DrawGame(void) {
             sizeof(Gfx),
         NU_GFX_UCODE_F3DEX, NU_SC_TASK_DP_WAIT | NU_SC_NOSWAPBUFFER);
     DrawPerformanceMeter(
-        2, 200, sDrawStartTime,
-        sGfxTaskStartTime + (sUpdateEndTime - sUpdateStartTime), GFX_TASK_FLAGS,
-        METER_READOUT_FREE_MEMORY);
+        2, 200, f_DrawStartTime,
+        f_GfxTaskStartTime + (f_UpdateEndTime - f_UpdateStartTime),
+        GFX_TASK_FLAGS, METER_READOUT_FREE_MEMORY);
   } else {
     nuGfxTaskStart(
         g_DisplayLists[g_DrawBufferIndex],
@@ -2041,12 +2043,12 @@ void CopyPreviousFrame(Gfx** displayListHead) {
   s32 stripIndex;
   s16 stripHeight;
 
-  if (sCopySourceFrame == NULL) {
-    sCopySourceFrame = osViGetNextFramebuffer();
+  if (f_CopySourceFrame == NULL) {
+    f_CopySourceFrame = osViGetNextFramebuffer();
   } else {
-    sCopySourceFrame = sPreviousFrame;
+    f_CopySourceFrame = f_PreviousFrame;
   }
-  sPreviousFrame = nuGfxCfb_ptr;
+  f_PreviousFrame = nuGfxCfb_ptr;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_NOOP, G_RM_NOOP2);
@@ -2071,7 +2073,7 @@ void CopyPreviousFrame(Gfx** displayListHead) {
                       : SAVED_FRAME_STRIP_HEIGHT;
     gDPLoadTextureTile(
         gfx++,
-        (u32)(sCopySourceFrame +
+        (u32)(f_CopySourceFrame +
               stripIndex * SAVED_FRAME_STRIP_HEIGHT * SCREEN_WIDTH) &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0, SCREEN_BORDER,
@@ -2129,7 +2131,7 @@ void DrawResetFade(void) {
     gSPEndDisplayList(gfx++);
     nuGfxTaskStart(displayList, (s32)(gfx - displayList) * sizeof(Gfx),
                    NU_GFX_UCODE_F3DEX, NU_SC_SWAPBUFFER);
-    sGfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
+    f_GfxTaskStartTime = OS_CYCLES_TO_USEC(osGetTime());
   }
   g_DrawBufferIndex ^= 1;
 }
@@ -2142,7 +2144,7 @@ void UpdateGame(void) {
   s32* animation;
   u16* windDirection;
 
-  sUpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
+  f_UpdateStartTime = OS_CYCLES_TO_USEC(osGetTime());
   if (g_Scene == SCENE_GROUND_CAMERA) {
     if (g_ControllerData[0].button & U_CBUTTONS) {
       g_MapCamera.view.eye[2] += MAP_CAMERA_STEP;
@@ -2258,33 +2260,33 @@ void UpdateGame(void) {
     g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
     func_801F4C78();
     if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
-      sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[0]);
+      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[0]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW);
-      sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[1]);
+      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[1]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 1);
-      sprintf(g_PrintBuffer, "%3d", sDebugMenuValues[2]);
+      sprintf(g_PrintBuffer, "%3d", f_DebugMenuValues[2]);
       PrintDebugText(g_PrintBuffer, DEBUG_MENU_COLUMN, DEBUG_MENU_ROW + 2);
       PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW);
       PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 1);
       PrintDebugText(" ", DEBUG_MENU_CURSOR_COLUMN, DEBUG_MENU_ROW + 2);
       PrintDebugText(">", DEBUG_MENU_CURSOR_COLUMN,
-                     DEBUG_MENU_ROW + sDebugMenuValueIndex);
+                     DEBUG_MENU_ROW + f_DebugMenuValueIndex);
       if ((g_ControllerStates[0].repeatedButtons & U_CBUTTONS) &&
-          sDebugMenuValueIndex > 0) {
-        sDebugMenuValueIndex--;
+          f_DebugMenuValueIndex > 0) {
+        f_DebugMenuValueIndex--;
       }
       if ((g_ControllerStates[0].repeatedButtons & D_CBUTTONS) &&
-          sDebugMenuValueIndex < DEBUG_MENU_VALUE_COUNT - 1) {
-        sDebugMenuValueIndex++;
+          f_DebugMenuValueIndex < DEBUG_MENU_VALUE_COUNT - 1) {
+        f_DebugMenuValueIndex++;
       }
       if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
-        if (sDebugMenuValues[sDebugMenuValueIndex] > 0) {
-          sDebugMenuValues[sDebugMenuValueIndex]--;
+        if (f_DebugMenuValues[f_DebugMenuValueIndex] > 0) {
+          f_DebugMenuValues[f_DebugMenuValueIndex]--;
         }
       }
       if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
-        if (sDebugMenuValues[sDebugMenuValueIndex] < DEBUG_MENU_VALUE_MAX) {
-          sDebugMenuValues[sDebugMenuValueIndex]++;
+        if (f_DebugMenuValues[f_DebugMenuValueIndex] < DEBUG_MENU_VALUE_MAX) {
+          f_DebugMenuValues[f_DebugMenuValueIndex]++;
         }
       }
     }
@@ -2318,30 +2320,30 @@ void UpdateGame(void) {
       g_Cameras[INSET_CAMERA].view.viewportCenterX * 2;
   g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vtrans[1] =
       g_Cameras[INSET_CAMERA].view.viewportCenterY * 2;
-  sUpdateEndTime = OS_CYCLES_TO_USEC(osGetTime());
+  f_UpdateEndTime = OS_CYCLES_TO_USEC(osGetTime());
 }
 
 void UpdateOverlays(void) {
   if (g_Scene == SCENE_SWAPPING_MODULES) {
-    if (!sHasUnloadedSceneModule) {
-      sHasUnloadedSceneModule = TRUE;
+    if (!f_HasUnloadedSceneModule) {
+      f_HasUnloadedSceneModule = TRUE;
       UnloadOverlay(GetOverlayOfModule(g_SceneModuleToUnload));
     } else if (CanLoadOverlay(GetOverlayOfModule(g_SceneModuleToLoad))) {
       LoadOverlay(GetOverlayOfModule(g_SceneModuleToLoad));
-      sHasUnloadedSceneModule = FALSE;
+      f_HasUnloadedSceneModule = FALSE;
       g_Scene = g_NextScene;
     }
   }
   if (g_SubModuleState == SUB_MODULE_SWAP_PENDING) {
-    if (!sHasUnloadedSubModule) {
-      sHasUnloadedSubModule = g_SubModuleState;
+    if (!f_HasUnloadedSubModule) {
+      f_HasUnloadedSubModule = g_SubModuleState;
       UnloadOverlay(GetOverlayOfModule(g_SubModuleId));
       return;
     }
     if (CanLoadOverlay(GetOverlayOfModule(g_PendingSubModuleId))) {
       LoadOverlay(GetOverlayOfModule(g_PendingSubModuleId));
       g_SubModuleState = SUB_MODULE_LOADED;
-      sHasUnloadedSubModule = FALSE;
+      f_HasUnloadedSubModule = FALSE;
       g_SubModuleId = g_PendingSubModuleId;
     }
   }
@@ -2372,10 +2374,10 @@ void UnloadSubModule(void) {
 }
 
 void SetInsetViewRect(s32 centerX, s32 centerY, s32 width, s32 height) {
-  sInsetViewWidth = width;
-  sInsetViewHeight = height;
-  sInsetViewCenterX = centerX;
-  sInsetViewCenterY = centerY;
+  f_InsetViewWidth = width;
+  f_InsetViewHeight = height;
+  f_InsetViewCenterX = centerX;
+  f_InsetViewCenterY = centerY;
 }
 
 /* Grows or shrinks the inset view's window by a step and centres it */
@@ -2408,14 +2410,14 @@ void UpdateInsetView(void) {
     }
   }
   g_Cameras[INSET_CAMERA].view.scissorWidth =
-      g_InsetView.step * sInsetViewWidth / INSET_VIEW_STEP_COUNT;
+      g_InsetView.step * f_InsetViewWidth / INSET_VIEW_STEP_COUNT;
   g_Cameras[INSET_CAMERA].view.scissorHeight =
-      g_InsetView.step * sInsetViewHeight / INSET_VIEW_STEP_COUNT;
+      g_InsetView.step * f_InsetViewHeight / INSET_VIEW_STEP_COUNT;
   g_Cameras[INSET_CAMERA].view.scissorX =
-      sInsetViewCenterX -
-      g_InsetView.step * sInsetViewWidth / (2 * INSET_VIEW_STEP_COUNT);
+      f_InsetViewCenterX -
+      g_InsetView.step * f_InsetViewWidth / (2 * INSET_VIEW_STEP_COUNT);
   g_Cameras[INSET_CAMERA].view.scissorY =
-      sInsetViewCenterY -
-      g_InsetView.step * sInsetViewHeight / (2 * INSET_VIEW_STEP_COUNT);
+      f_InsetViewCenterY -
+      g_InsetView.step * f_InsetViewHeight / (2 * INSET_VIEW_STEP_COUNT);
   g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
 }

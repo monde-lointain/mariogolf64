@@ -35,16 +35,16 @@ void func_8005C674(s32, s32);
 void GrantWinsStarsAndBadges(void);
 void GrantRingShotProgressAndPoints(void);
 
-static s32 sUnusedCodeButtons[UNUSED_CODE_LENGTH] = {
+static s32 f_UnusedCodeButtons[UNUSED_CODE_LENGTH] = {
     L_CBUTTONS, R_CBUTTONS, D_CBUTTONS, U_CBUTTONS, L_TRIG, R_TRIG, L_TRIG,
     R_TRIG,     U_JPAD,     D_JPAD,     L_JPAD,     R_JPAD, Z_TRIG,
 };
-static s32 sUnusedCodeEntered[UNUSED_CODE_LENGTH] = {
+static s32 f_UnusedCodeEntered[UNUSED_CODE_LENGTH] = {
     NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
     NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
     NO_BUTTONS, NO_BUTTONS, NO_BUTTONS,
 };
-static s32 sUnusedCodeLength = 0;
+static s32 f_UnusedCodeLength = 0;
 
 void UnlockEverything(void) {
   SaveData* save = GetSaveData();
@@ -121,7 +121,7 @@ void GrantEveryTournamentPlace(void) {
 
 /*
  * No code calls this. Every frame that any button is held, the held buttons
- * are added to the sequence; once it matches sUnusedCodeButtons, the save
+ * are added to the sequence; once it matches f_UnusedCodeButtons, the save
  * is unlocked as by UnlockEverything.
  */
 void UpdateUnusedButtonCode(void) {
@@ -129,28 +129,28 @@ void UpdateUnusedButtonCode(void) {
 
   index = 0;
   if (g_MenuRepeatButtons > 0) {
-    if (sUnusedCodeLength < UNUSED_CODE_LENGTH) {
-      sUnusedCodeEntered[sUnusedCodeLength] = g_MenuRepeatButtons;
-      sUnusedCodeLength++;
+    if (f_UnusedCodeLength < UNUSED_CODE_LENGTH) {
+      f_UnusedCodeEntered[f_UnusedCodeLength] = g_MenuRepeatButtons;
+      f_UnusedCodeLength++;
     }
-    for (; index != sUnusedCodeLength; index++) {
-      if (sUnusedCodeButtons[index] != sUnusedCodeEntered[index]) {
+    for (; index != f_UnusedCodeLength; index++) {
+      if (f_UnusedCodeButtons[index] != f_UnusedCodeEntered[index]) {
         break;
       }
     }
-    if (index == sUnusedCodeLength) {
-      if (sUnusedCodeLength == UNUSED_CODE_LENGTH) {
-        sUnusedCodeLength = 0;
+    if (index == f_UnusedCodeLength) {
+      if (f_UnusedCodeLength == UNUSED_CODE_LENGTH) {
+        f_UnusedCodeLength = 0;
         for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
-          sUnusedCodeEntered[index] = NO_BUTTONS;
+          f_UnusedCodeEntered[index] = NO_BUTTONS;
         }
         PlaySound(0x69, 0xD, 0x50);
         UnlockEverything();
       }
     } else {
-      sUnusedCodeLength = 0;
+      f_UnusedCodeLength = 0;
       for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
-        sUnusedCodeEntered[index] = NO_BUTTONS;
+        f_UnusedCodeEntered[index] = NO_BUTTONS;
       }
     }
   }

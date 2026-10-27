@@ -42,13 +42,13 @@
 
 #define HEX_DIGIT_COUNT 8
 
-extern u16 sDebugFont[];
-extern s8 sDebugTextHighlight;
-extern s32 sDebugLogShownLineCount;
+extern u16 f_DebugFont[];
+extern s8 f_DebugTextHighlight;
+extern s32 f_DebugLogShownLineCount;
 extern u16* g_MessageFramebuffer;
-extern u8 sDebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
-extern u8 sDebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
-extern s32 sDebugLogCursor;
+extern u8 f_DebugText[TEXT_ROW_COUNT * TEXT_COLUMN_COUNT];
+extern u8 f_DebugLog[LOG_LINE_COUNT * TEXT_COLUMN_COUNT];
+extern s32 f_DebugLogCursor;
 
 void SetUpDebugTextDrawing(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -72,7 +72,7 @@ void SetUpDebugTextDrawing(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
-  gDPLoadTextureBlock_4b(gfx++, (u32)sDebugFont & ~7, G_IM_FMT_IA, FONT_WIDTH,
+  gDPLoadTextureBlock_4b(gfx++, (u32)f_DebugFont & ~7, G_IM_FMT_IA, FONT_WIDTH,
                          FONT_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                          G_TX_NOLOD, G_TX_NOLOD);
@@ -115,7 +115,7 @@ void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
       rowIndex = textureIndex * 2;
       rowFontIndex = fontIndex;
       for (x = 0; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
-        texture[rowIndex + x] = sDebugFont[rowFontIndex + x];
+        texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
       }
       fontIndex += FONT_ROW_WORD_COUNT;
       textureIndex += length;
@@ -170,7 +170,7 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   fontIndex = glyphStart;
   for (; y < GLYPH_SIZE; y++) {
     for (x = 0; x < GLYPH_SIZE; x++) {
-      color = ((sDebugFont[fontIndex + x / PIXELS_PER_FONT_WORD] >>
+      color = ((f_DebugFont[fontIndex + x / PIXELS_PER_FONT_WORD] >>
                 ((3 - (x & 3)) * 4)) &
                0xF) == FONT_INK
                   ? MESSAGE_INK_COLOR
@@ -195,7 +195,7 @@ void ClearDebugText(void) {
   s32 index;
   u8* cell;
 
-  for (index = ARRAY_COUNT(sDebugText) - 1, cell = &sDebugText[index];
+  for (index = ARRAY_COUNT(f_DebugText) - 1, cell = &f_DebugText[index];
        index >= 0; index--) {
     *cell-- = 0;
   }
@@ -219,7 +219,7 @@ void DrawDebugText(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   for (row = 0; row < TEXT_ROW_COUNT; row++) {
     for (column = 0; column < TEXT_COLUMN_COUNT; index++, column++) {
-      character = sDebugText[index];
+      character = f_DebugText[index];
       if (character <= ' ') {
         continue;
       }
@@ -249,15 +249,15 @@ void DrawDebugText(Gfx** displayListHead) {
 /* Highlights the next text put in the grid */
 void SetDebugTextHighlight(s32 isHighlighted) {
   if (isHighlighted) {
-    sDebugTextHighlight = HIGHLIGHT_BIT;
+    f_DebugTextHighlight = HIGHLIGHT_BIT;
   } else {
-    sDebugTextHighlight = 0;
+    f_DebugTextHighlight = 0;
   }
 }
 
 void PutDebugText(s8* text, s32 column, s32 row) {
-  s8 highlight = sDebugTextHighlight;
-  u8* cell = &sDebugText[row * TEXT_COLUMN_COUNT + column];
+  s8 highlight = f_DebugTextHighlight;
+  u8* cell = &f_DebugText[row * TEXT_COLUMN_COUNT + column];
   s32 character;
 
   while (TRUE) {
@@ -265,12 +265,12 @@ void PutDebugText(s8* text, s32 column, s32 row) {
     if (character == '\0') {
       break;
     }
-    if (cell >= sDebugText && cell < sDebugText + ARRAY_COUNT(sDebugText)) {
+    if (cell >= f_DebugText && cell < f_DebugText + ARRAY_COUNT(f_DebugText)) {
       *cell = highlight | character;
     }
     cell++;
   }
-  sDebugTextHighlight = 0;
+  f_DebugTextHighlight = 0;
 }
 
 void PrintDebugText(char* text, s32 column, s32 row) {
@@ -334,37 +334,37 @@ void AddToDebugLog(char* text) {
       break;
     }
     if (character == '\r' || character == '\n') {
-      sDebugLogCursor =
-          ((sDebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT +
+      f_DebugLogCursor =
+          ((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT +
            TEXT_COLUMN_COUNT) %
-          ARRAY_COUNT(sDebugLog);
+          ARRAY_COUNT(f_DebugLog);
       for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
-        sDebugLog[sDebugLogCursor++] = ' ';
+        f_DebugLog[f_DebugLogCursor++] = ' ';
       }
-      sDebugLogCursor -= TEXT_COLUMN_COUNT;
+      f_DebugLogCursor -= TEXT_COLUMN_COUNT;
     } else {
-      sDebugLog[sDebugLogCursor++] = character;
+      f_DebugLog[f_DebugLogCursor++] = character;
     }
-    sDebugLogCursor %= ARRAY_COUNT(sDebugLog);
+    f_DebugLogCursor %= ARRAY_COUNT(f_DebugLog);
   }
 }
 
 /* Copies the last lines of the log into the grid */
 void ShowDebugLog(void) {
   s32 textIndex =
-      ARRAY_COUNT(sDebugText) -
-      (sDebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT;
+      ARRAY_COUNT(f_DebugText) -
+      (f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT;
   /* The line is reused for the cursor's line, to match */
-  s32 line = sDebugLogCursor / TEXT_COLUMN_COUNT;
-  s32 logIndex = ((line - sDebugLogShownLineCount) * TEXT_COLUMN_COUNT +
-                  ARRAY_COUNT(sDebugLog)) %
-                 ARRAY_COUNT(sDebugLog);
+  s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
+  s32 logIndex = ((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT +
+                  ARRAY_COUNT(f_DebugLog)) %
+                 ARRAY_COUNT(f_DebugLog);
   s32 column;
 
-  for (line = 0; line < sDebugLogShownLineCount; line++) {
+  for (line = 0; line < f_DebugLogShownLineCount; line++) {
     for (column = 0; column < TEXT_COLUMN_COUNT; column++) {
-      sDebugText[textIndex++] = sDebugLog[logIndex++];
+      f_DebugText[textIndex++] = f_DebugLog[logIndex++];
     }
-    logIndex %= ARRAY_COUNT(sDebugLog);
+    logIndex %= ARRAY_COUNT(f_DebugLog);
   }
 }

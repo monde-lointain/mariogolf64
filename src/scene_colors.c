@@ -14,7 +14,7 @@
 
 extern Vtx g_TexturePlaneVertices[6];
 extern Vtx g_ShadedVertices[2][2 * QUAD_VERTEX_COUNT];
-extern s32 sPlaneTextureScroll;
+extern s32 f_PlaneTextureScroll;
 extern s32 D_800E1C10;
 extern s32 D_800E1C14;
 extern u8 D_800E1C18;
@@ -94,9 +94,9 @@ void DrawTexturePlane(Gfx** displayListHead) {
   gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PLANE_TILE_SIZE << 2,
                  PLANE_TILE_SIZE << 2);
-  sPlaneTextureScroll++;
-  gDPSetTileSize(gfx++, 1, sPlaneTextureScroll, 0,
-                 sPlaneTextureScroll + (PLANE_TILE_SIZE << 2),
+  f_PlaneTextureScroll++;
+  gDPSetTileSize(gfx++, 1, f_PlaneTextureScroll, 0,
+                 f_PlaneTextureScroll + (PLANE_TILE_SIZE << 2),
                  PLANE_TILE_SIZE << 2);
   gDPPipeSync(gfx++);
   gSPVertex(gfx++, g_TexturePlaneVertices, ARRAY_COUNT(g_TexturePlaneVertices),

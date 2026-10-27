@@ -30,7 +30,7 @@
  * tournament's leaderboard and a match's results.
  */
 
-/* sScorecardState values */
+/* f_ScorecardState values */
 #define SCORECARD_OPENING 0  /* Sliding in */
 #define SCORECARD_CLOSING 1  /* Sliding out */
 #define SCORECARD_SHOWN 2    /* The player can turn its pages */
@@ -92,7 +92,7 @@
 #define SOUND_ROW_FLIPPED 0x5B
 #define ROW_FLIP_SOUND_CHANNEL 13
 
-extern s32 sScorecardState;
+extern s32 f_ScorecardState;
 void SetFramebufferCount(s32 count);
 void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page);
 
@@ -119,7 +119,7 @@ void SetScorecardState(s32 state);
 #define TOTAL_HEADING_IMAGE_ASSET 0x696
 #define GRID_IMAGE_ASSET 0x69D
 
-/* The rows of sPageTitleAssets */
+/* The rows of f_PageTitleAssets */
 #define PAGE_TITLES_SPEED_GOLF 0
 #define PAGE_TITLES_SOLO 1
 #define PAGE_TITLES_VERSUS 2
@@ -128,9 +128,9 @@ void SetScorecardState(s32 state);
 #define PAGE_TITLES_ROW_COUNT 5
 #define PAGE_TITLE_COUNT 3
 
-extern u16 sPageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT];
+extern u16 f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT];
 /* Each bet's two images */
-extern u16 sBetImageAssets[BET_COUNT][2];
+extern u16 f_BetImageAssets[BET_COUNT][2];
 extern s32 D_801B60A0;
 extern s32 D_801B60B4;
 
@@ -336,17 +336,17 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
 
   for (i = 0; i != PAGE_TITLE_COUNT; i++) {
     g_Scorecard.pageTitleImages[i] = AllocMemory(
-        OpenEncodedAsset(sPageTitleAssets[pageTitlesRow][i], &asset));
+        OpenEncodedAsset(f_PageTitleAssets[pageTitlesRow][i], &asset));
     ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
   }
   /* Only the bets being played have images */
   for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] != UNSET_BET_RATE) {
       g_Scorecard.betImages[imageIndex][0] =
-          AllocMemory(OpenEncodedAsset(sBetImageAssets[i][0], &asset));
+          AllocMemory(OpenEncodedAsset(f_BetImageAssets[i][0], &asset));
       ReadEncodedAsset(g_Scorecard.betImages[imageIndex][0], &asset);
       g_Scorecard.betImages[imageIndex][1] =
-          AllocMemory(OpenEncodedAsset(sBetImageAssets[i][1], &asset));
+          AllocMemory(OpenEncodedAsset(f_BetImageAssets[i][1], &asset));
       ReadEncodedAsset(g_Scorecard.betImages[imageIndex][1], &asset);
       imageIndex++;
     }
@@ -377,8 +377,8 @@ void FreeScorecard(void) {
   s32 i;
   s32 imageIndex;
 
-  if (sScorecardState != SCORECARD_CLOSED) {
-    sScorecardState = SCORECARD_CLOSED;
+  if (f_ScorecardState != SCORECARD_CLOSED) {
+    f_ScorecardState = SCORECARD_CLOSED;
     g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
     g_RoundHud.unk1 = 0;
     g_RoundHud.unk3 = 0;
@@ -804,7 +804,7 @@ void SetScorecardState(s32 state) {
     g_Scorecard.x = SCREEN_WIDTH;
     g_Scorecard.y = 0;
   }
-  sScorecardState = state;
+  f_ScorecardState = state;
   g_Scorecard.stateTime = 0;
 }
 
@@ -815,10 +815,10 @@ void AnimateScorecard(void) {
   s32 i;
   s32 slideSpeed;
 
-  switch (sScorecardState) {
+  switch (f_ScorecardState) {
     case SCORECARD_TALLYING:
       if (TallyScorecardSkins()) {
-        sScorecardState = SCORECARD_SHOWN;
+        f_ScorecardState = SCORECARD_SHOWN;
       }
       g_Scorecard.stateTime++;
       break;
@@ -827,9 +827,9 @@ void AnimateScorecard(void) {
       if (g_Scorecard.stateTime == SCORECARD_OPEN_TIME) {
         g_Scorecard.stateTime = 0;
         if (g_Scorecard.isTallied) {
-          sScorecardState = SCORECARD_SHOWN;
+          f_ScorecardState = SCORECARD_SHOWN;
         } else {
-          sScorecardState = SCORECARD_TALLYING;
+          f_ScorecardState = SCORECARD_TALLYING;
         }
       }
       if (g_Scorecard.x > 0) {
@@ -977,7 +977,7 @@ void ScrollLeaderboard(u16 buttons) {
 
 void UpdateScorecard(u16 buttons, u16 pressedButtons) {
   AnimateScorecard();
-  if (sScorecardState == SCORECARD_SHOWN) {
+  if (f_ScorecardState == SCORECARD_SHOWN) {
     if (pressedButtons & (A_BUTTON | B_BUTTON)) {
       SetScorecardState(SCORECARD_CLOSING);
       return;
@@ -1005,7 +1005,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
 
 s32 UpdateShownScorecard(u16 buttons) {
   AnimateScorecard();
-  if (sScorecardState != SCORECARD_SHOWN) {
+  if (f_ScorecardState != SCORECARD_SHOWN) {
     return FALSE;
   }
   switch (g_GameMode) {
@@ -1080,10 +1080,10 @@ void DrawScorecard(Gfx** displayListHead) {
   s32 i;
   s32 dropY;
 
-  if (sScorecardState == SCORECARD_MATCH_RESULT) {
+  if (f_ScorecardState == SCORECARD_MATCH_RESULT) {
     DrawMatchResult(&gfx);
-  } else if (sScorecardState != SCORECARD_UNK6) {
-    if (sScorecardState != SCORECARD_CLOSED) {
+  } else if (f_ScorecardState != SCORECARD_UNK6) {
+    if (f_ScorecardState != SCORECARD_CLOSED) {
       DrawScorecardTable(&gfx, g_Scorecard.pageCount, g_RoundHud.scorecardPage);
       gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
       for (i = 0; i != g_Scorecard.pageCount; i++) {
@@ -1299,7 +1299,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", DrawScorecardTable);
 void FreeResultCharacters(void) {
   FreeCharacterSlot(0);
   FreeCharacterSlot(1);
-  sResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
+  f_ResultCharactersLoadStep = RESULT_CHARACTERS_IDLE;
 }
 
 /*

@@ -77,7 +77,7 @@
 #define STAFF_ROLL_LIGHT_PITCH 0x1000
 #define STAFF_ROLL_LIGHT_YAW 0x5800
 
-/* sStaffRollFrame values at which UpdateStaffRoll acts */
+/* f_StaffRollFrame values at which UpdateStaffRoll acts */
 #define STAFF_SONG_FRAME 60
 #define TIMELINE_START_FRAME 280
 #define CLOSING_PICTURE_READ_FRAME 1000
@@ -279,16 +279,16 @@ extern u8 g_StaffTextRomStart[];
 extern u8* g_ShadowTexture;
 extern s32 D_801B609C;
 
-extern StaffRollImage sStaffRollImage;
-extern StaffText* sStaffText;
-extern u8* sStaffFont;
-extern void* sBillboardHeap;
-extern u8* sCastBuffers[CAST_BUFFER_CAPACITY];
-extern StaffRollEasedView sStaffRollEasedView;
-extern s32 sCastOrder[CAST_MEMBER_COUNT];
-extern s32 sFadeFramesLeft;
-extern s32 sCastSlot; /* The slot of the character shown, 0 or 1 */
-extern CoursePoint sNearCupPoint;
+extern StaffRollImage f_StaffRollImage;
+extern StaffText* f_StaffText;
+extern u8* f_StaffFont;
+extern void* f_BillboardHeap;
+extern u8* f_CastBuffers[CAST_BUFFER_CAPACITY];
+extern StaffRollEasedView f_StaffRollEasedView;
+extern s32 f_CastOrder[CAST_MEMBER_COUNT];
+extern s32 f_FadeFramesLeft;
+extern s32 f_CastSlot; /* The slot of the character shown, 0 or 1 */
+extern CoursePoint f_NearCupPoint;
 
 void AssignCharacterBuffers(void);
 void SetFramebufferCount(s32 count);
@@ -297,25 +297,25 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex);
 void DrawStaffRollPainting(Gfx** displayListHead);
 void LoadEffectImages(void);
 
-u8 sIsPaintingShown = TRUE;
-s32 sStaffRollFrame = 0;
-s32 sIsLeavingStaffRoll = FALSE;
-s32 sTextScrollOffset = 0;
-s32 sTopLineIndex = 0;
-s32 sShownSceneColorIndex = -1;
-s32 sIsTextScrolling = TRUE;
-s32 sDebugRestartCount = 0;
+u8 f_IsPaintingShown = TRUE;
+s32 f_StaffRollFrame = 0;
+s32 f_IsLeavingStaffRoll = FALSE;
+s32 f_TextScrollOffset = 0;
+s32 f_TopLineIndex = 0;
+s32 f_ShownSceneColorIndex = -1;
+s32 f_IsTextScrolling = TRUE;
+s32 f_DebugRestartCount = 0;
 /* Negative while fading out; zero when not fading */
-s32 sFadeLength = 0;
-f32 sCastFramingYaw = 0.0f;
-f32 sCastFramingPitch = 0.0f;
-s32 sCastIndex = 0;
-s32 sIsReactionShown = 0;
-f32 sUnreadValue = 0.0f;
-s32 sViewShrinkStartFrame = NEVER_FRAME;
-s32 sUnusedWord = 0; /* Unused */
+s32 f_FadeLength = 0;
+f32 f_CastFramingYaw = 0.0f;
+f32 f_CastFramingPitch = 0.0f;
+s32 f_CastIndex = 0;
+s32 f_IsReactionShown = 0;
+f32 f_UnreadValue = 0.0f;
+s32 f_ViewShrinkStartFrame = NEVER_FRAME;
+s32 f_UnusedWord = 0; /* Unused */
 /* How far right each character moves the next one */
-u8 sStaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
+u8 f_StaffGlyphAdvances[STAFF_CHARACTER_LIMIT] = {
     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
     12, 12, 12, 12, 12, 12, 12, 12, 12, 6,  12, 6,  12, 8,  12, 12, 12, 12, 12,
     12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
@@ -339,7 +339,7 @@ s32 GetCastModelKind(void) {
 }
 
 /*
- * Fills sCastOrder with the characters that follow start, leaving out the
+ * Fills f_CastOrder with the characters that follow start, leaving out the
  * one just after it, then shuffles all but the last unless
  * GAME_FLAG_UNK99 is set. SwapCastMembers is a nested function, a GNU C
  * extension.
@@ -350,14 +350,15 @@ void ShuffleCastOrder(s32 start) {
   s32 round;
 
   void SwapCastMembers(s32 first, s32 second) {
-    s32 member = sCastOrder[first];
+    s32 member = f_CastOrder[first];
 
-    sCastOrder[first] = sCastOrder[second];
-    sCastOrder[second] = member;
+    f_CastOrder[first] = f_CastOrder[second];
+    f_CastOrder[second] = member;
   }
 
   for (member = 0; member < CAST_MEMBER_COUNT; member++) {
-    sCastOrder[member] = (member + start + FIRST_CAST_OFFSET) % CHARACTER_COUNT;
+    f_CastOrder[member] =
+        (member + start + FIRST_CAST_OFFSET) % CHARACTER_COUNT;
   }
   if (!IsGameFlagSet(GAME_FLAG_UNK99)) {
     for (round = 0; round < SHUFFLE_ROUND_COUNT; round++) {
@@ -370,17 +371,17 @@ void ShuffleCastOrder(s32 start) {
 
 /* Fades the screen to black over frameCount frames */
 void StartFadeOut(s32 frameCount) {
-  sFadeLength = -frameCount;
-  sFadeFramesLeft = frameCount;
+  f_FadeLength = -frameCount;
+  f_FadeFramesLeft = frameCount;
 }
 
 /* Fades the screen in from black over frameCount frames */
 void StartFadeIn(s32 frameCount) {
-  sFadeLength = frameCount;
-  sFadeFramesLeft = frameCount;
+  f_FadeLength = frameCount;
+  f_FadeFramesLeft = frameCount;
 }
 
-void StopFade(void) { sFadeLength = 0; }
+void StopFade(void) { f_FadeLength = 0; }
 
 /*
  * Module 0x1F's onLoad. It reads the painting, the font and the staff
@@ -394,28 +395,28 @@ void LoadStaffRoll(void) {
   s32 index;
   s32 textSize;
 
-  sShownSceneColorIndex = 11;
+  f_ShownSceneColorIndex = 11;
   ShuffleCastOrder((s8)g_Players[0].characterIndex);
   FreeAllCharacterSlots();
   for (index = 0; index < CAST_BUFFER_COUNT; index++) {
-    sCastBuffers[index] = AllocMemory(GetCharacterBufferSize());
-    SetCharacterBuffer(index + FIRST_CAST_SLOT, sCastBuffers[index]);
+    f_CastBuffers[index] = AllocMemory(GetCharacterBufferSize());
+    SetCharacterBuffer(index + FIRST_CAST_SLOT, f_CastBuffers[index]);
   }
   OpenEncodedAsset(PAINTING_ASSET, &asset);
-  ReadEncodedAsset(&sStaffRollImage, &asset);
-  sStaffFont = AllocMemory(OpenEncodedAsset(STAFF_FONT_ASSET, &asset));
-  ReadEncodedAsset(sStaffFont, &asset);
+  ReadEncodedAsset(&f_StaffRollImage, &asset);
+  f_StaffFont = AllocMemory(OpenEncodedAsset(STAFF_FONT_ASSET, &asset));
+  ReadEncodedAsset(f_StaffFont, &asset);
   header = AllocMemory(STAFF_TEXT_HEADER_SIZE);
   nuPiReadRom((u32)g_StaffTextRomStart, header, STAFF_TEXT_HEADER_SIZE);
   textSize = header[0] << 8 | header[1];
   FreeMemory(&header);
-  sStaffText = AllocMemory(textSize);
-  nuPiReadRom((u32)g_StaffTextRomStart, sStaffText, textSize);
+  f_StaffText = AllocMemory(textSize);
+  nuPiReadRom((u32)g_StaffTextRomStart, f_StaffText, textSize);
   g_ShadowTexture =
       AllocMemory(OpenEncodedAsset(SHADOW_TEXTURE_ASSET, &shadowAsset));
   ReadEncodedAsset(g_ShadowTexture, &shadowAsset);
-  sBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
-  InitBillboardManager(sBillboardHeap, BILLBOARD_HEAP_SIZE);
+  f_BillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
+  InitBillboardManager(f_BillboardHeap, BILLBOARD_HEAP_SIZE);
   memset(&g_GameState, 0, sizeof(g_GameState));
   g_CourseIndex = COURSE_YOSHIS_ISLAND;
   g_HoleIndex = STAFF_ROLL_HOLE_INDEX;
@@ -439,9 +440,9 @@ void LoadStaffRoll(void) {
   StopLoaderThread();
   StartLoaderThread();
   SetFramebufferCount(STAFF_ROLL_FRAMEBUFFER_COUNT);
-  sIsLeavingStaffRoll = FALSE;
-  sTextScrollOffset = 0;
-  sTopLineIndex = FIRST_TOP_LINE_INDEX;
+  f_IsLeavingStaffRoll = FALSE;
+  f_TextScrollOffset = 0;
+  f_TopLineIndex = FIRST_TOP_LINE_INDEX;
   LoadEffectImages();
 }
 
@@ -457,13 +458,13 @@ void UnloadStaffRoll(void) {
   g_Cameras[0].view.zoom = 1.0f;
   FreeAllCharacterSlots();
   for (index = 0; index < CAST_BUFFER_COUNT; index++) {
-    FreeMemory(&sCastBuffers[index]);
+    FreeMemory(&f_CastBuffers[index]);
   }
   AssignCharacterBuffers();
   SetFillColor(0, 0, 0);
-  FreeMemory(&sBillboardHeap);
-  FreeMemory(&sStaffText);
-  FreeMemory(&sStaffFont);
+  FreeMemory(&f_BillboardHeap);
+  FreeMemory(&f_StaffText);
+  FreeMemory(&f_StaffFont);
   FreeMemory(&g_ShadowTexture);
 }
 
@@ -479,39 +480,42 @@ f32 BlendStaffRollClamped(f32 from, f32 to, f32 weight) {
 }
 
 void ResetStaffRollEase(void) {
-  sStaffRollEasedView.isEyeEased = FALSE;
-  sStaffRollEasedView.isLookAtEased = FALSE;
+  f_StaffRollEasedView.isEyeEased = FALSE;
+  f_StaffRollEasedView.isLookAtEased = FALSE;
 }
 
 /* EaseReactionView again, with its own EasedView */
 void EaseStaffRollView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
   if (easedParts & EASE_EYE) {
-    if (!sStaffRollEasedView.isEyeEased) {
-      sStaffRollEasedView.eye[AXIS_X] = eye[AXIS_X];
-      sStaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y];
-      sStaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z];
-      sStaffRollEasedView.isEyeEased = TRUE;
+    if (!f_StaffRollEasedView.isEyeEased) {
+      f_StaffRollEasedView.eye[AXIS_X] = eye[AXIS_X];
+      f_StaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y];
+      f_StaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z];
+      f_StaffRollEasedView.isEyeEased = TRUE;
     }
-    sStaffRollEasedView.eye[AXIS_X] = eye[AXIS_X] = BlendStaffRollClamped(
-        sStaffRollEasedView.eye[AXIS_X], eye[AXIS_X], rate);
-    sStaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y] = BlendStaffRollClamped(
-        sStaffRollEasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
-    sStaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z] = BlendStaffRollClamped(
-        sStaffRollEasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
+    f_StaffRollEasedView.eye[AXIS_X] = eye[AXIS_X] = BlendStaffRollClamped(
+        f_StaffRollEasedView.eye[AXIS_X], eye[AXIS_X], rate);
+    f_StaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y] = BlendStaffRollClamped(
+        f_StaffRollEasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
+    f_StaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z] = BlendStaffRollClamped(
+        f_StaffRollEasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
   }
   if (easedParts & EASE_LOOK_AT) {
-    if (!sStaffRollEasedView.isLookAtEased) {
-      sStaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
-      sStaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
-      sStaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
-      sStaffRollEasedView.isLookAtEased = TRUE;
+    if (!f_StaffRollEasedView.isLookAtEased) {
+      f_StaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
+      f_StaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
+      f_StaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
+      f_StaffRollEasedView.isLookAtEased = TRUE;
     }
-    sStaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X] = BlendStaffRollClamped(
-        sStaffRollEasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
-    sStaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] = BlendStaffRollClamped(
-        sStaffRollEasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
-    sStaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] = BlendStaffRollClamped(
-        sStaffRollEasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
+    f_StaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X] =
+        BlendStaffRollClamped(f_StaffRollEasedView.lookAt[AXIS_X],
+                              lookAt[AXIS_X], rate);
+    f_StaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] =
+        BlendStaffRollClamped(f_StaffRollEasedView.lookAt[AXIS_Y],
+                              lookAt[AXIS_Y], rate);
+    f_StaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] =
+        BlendStaffRollClamped(f_StaffRollEasedView.lookAt[AXIS_Z],
+                              lookAt[AXIS_Z], rate);
   }
 }
 
@@ -639,33 +643,33 @@ void RunStaffRollTimeline(s32 frame) {
   CameraView* view;
 
   void PickFramingPitch(void) {
-    sCastFramingPitch = ((rand() & RANDOM_PITCH_MASK) - RANDOM_PITCH_BIAS) *
-                        RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
+    f_CastFramingPitch = ((rand() & RANDOM_PITCH_MASK) - RANDOM_PITCH_BIAS) *
+                         RANDOM_PITCH_SCALE * PITCH_UNIT_TO_RADIANS;
   }
 
   /* The GetAnimationEventFrame calls whose results are dropped are there to
    * match */
-  sCastFramingPitch +=
+  f_CastFramingPitch +=
       g_ControllerStates[PITCH_CONTROLLER].stickY * PITCH_STICK_RATE;
   SetCharacterLights();
   if (frame == 0) {
     SetGameFlag(GAME_FLAG_UNK9A);
     StopFade();
-    sNearCupPoint[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
-    sNearCupPoint[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
-    sNearCupPoint[AXIS_Y] =
-        GetGroundHeight(sNearCupPoint[AXIS_X], sNearCupPoint[AXIS_Z]);
+    f_NearCupPoint[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + NEAR_CUP_DISTANCE;
+    f_NearCupPoint[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
+    f_NearCupPoint[AXIS_Y] =
+        GetGroundHeight(f_NearCupPoint[AXIS_X], f_NearCupPoint[AXIS_Z]);
     ClearEffects();
-    sViewShrinkStartFrame = NEVER_FRAME;
-    sUnreadValue = 0.0f;
-    sCastFramingPitch = 0.0f;
-    sIsReactionShown = FALSE;
-    sCastIndex = 0;
+    f_ViewShrinkStartFrame = NEVER_FRAME;
+    f_UnreadValue = 0.0f;
+    f_CastFramingPitch = 0.0f;
+    f_IsReactionShown = FALSE;
+    f_CastIndex = 0;
     g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     FreeAllCharacterSlots();
     ResetStaffRollEase();
-    sCastSlot = 0;
-    LoadCharacter(0, sCastOrder[0], GetCastModelKind());
+    f_CastSlot = 0;
+    LoadCharacter(0, f_CastOrder[0], GetCastModelKind());
     SetCharacterLighting(0, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(0, TEE_CLUB);
     SetStanceAnimation(0, TEE_CLUB, SHOT_MODE_NORMAL);
@@ -673,22 +677,22 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
     point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
     PlaceCharacter(0, point, GOLFER_HEADING);
-    sCastSlot = 0;
+    f_CastSlot = 0;
   }
   if (frame == FIRST_SWING_FRAME) {
-    SetSwingAnimation(sCastSlot, TEE_CLUB, SHOT_MODE_NORMAL);
-    sCastIndex = 1;
+    SetSwingAnimation(f_CastSlot, TEE_CLUB, SHOT_MODE_NORMAL);
+    f_CastIndex = 1;
   }
   if (frame == VIEW_SHRINK_FRAME) {
-    sViewShrinkStartFrame = frame;
+    f_ViewShrinkStartFrame = frame;
   }
   if (frame == VIEW_SHRINK_FRAME || frame == 190 || frame == 240) {
     PickFramingPitch();
-    sCastFramingYaw = (sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
-    FreeCharacterSlot(sCastSlot);
+    f_CastFramingYaw = (f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, TEE_CLUB);
     SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
@@ -701,20 +705,20 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
     point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == TEE_REACTIONS_FRAME || frame == 360 || frame == 420 ||
       frame == 480) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
+    slot = f_CastSlot ^ 1;
+    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
                          RADIANS_TO_BINARY_ANGLE;
     if (frame == TEE_REACTIONS_FRAME) {
-      sCastIndex -= SHOTS_PER_STAGE;
+      f_CastIndex -= SHOTS_PER_STAGE;
     }
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
@@ -725,15 +729,15 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(D_800BA9D8.teePosition);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
     point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
     point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
     PlaceCharacter(slot, point,
-                   DEGREES_TO_RADIANS(-(sCastIndex * CAST_YAW_STEP)));
-    sCastSlot = slot;
-    sCastIndex++;
+                   DEGREES_TO_RADIANS(-(f_CastIndex * CAST_YAW_STEP)));
+    f_CastSlot = slot;
+    f_CastIndex++;
   }
   if (frame == FAIRWAY_FADE_OUT_FRAME) {
     StartFadeOut(CAST_FADE_FRAMES);
@@ -746,13 +750,13 @@ void RunStaffRollTimeline(s32 frame) {
     ClearEffects();
     PickFramingPitch();
     g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK8;
-    sCastFramingYaw =
-        ((sCastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
-    FreeCharacterSlot(sCastSlot);
+    f_CastFramingYaw = ((f_CastIndex - SHOTS_PER_STAGE) * CAST_YAW_STEP) *
+                       DEGREES_TO_RADIANS_F;
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, FAIRWAY_CLUB);
     if (frame == FAIRWAY_SHOTS_FRAME) {
@@ -769,23 +773,23 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == FAIRWAY_SWING_FRAME) {
-    SetSwingAnimation(sCastSlot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
+    SetSwingAnimation(f_CastSlot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
   }
   if (frame == FAIRWAY_REACTIONS_FRAME || frame == 1000 || frame == 1060 ||
       frame == 1120) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
+    slot = f_CastSlot ^ 1;
+    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
                          RADIANS_TO_BINARY_ANGLE;
     if (frame == FAIRWAY_REACTIONS_FRAME) {
-      sCastIndex -= SHOTS_PER_STAGE;
+      f_CastIndex -= SHOTS_PER_STAGE;
     }
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
@@ -796,15 +800,15 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[0]);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BOGEY);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
     PlaceCharacter(slot, point,
-                   -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
-    sCastSlot = slot;
-    sCastIndex++;
+                   -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+    f_CastSlot = slot;
+    f_CastIndex++;
   }
   if (frame == APPROACH_FADE_OUT_FRAME) {
     StartFadeOut(CAST_FADE_FRAMES);
@@ -817,13 +821,13 @@ void RunStaffRollTimeline(s32 frame) {
     ClearEffects();
     PickFramingPitch();
     g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
-    sCastFramingYaw = ((sCastIndex - 2 * SHOTS_PER_STAGE) * CAST_YAW_STEP) *
-                      DEGREES_TO_RADIANS_F;
-    FreeCharacterSlot(sCastSlot);
+    f_CastFramingYaw = ((f_CastIndex - 2 * SHOTS_PER_STAGE) * CAST_YAW_STEP) *
+                       DEGREES_TO_RADIANS_F;
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, APPROACH_CLUB);
     if (frame == APPROACH_SHOTS_FRAME) {
@@ -840,23 +844,23 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == APPROACH_SWING_FRAME) {
-    SetSwingAnimation(sCastSlot, APPROACH_CLUB, SHOT_MODE_NORMAL);
+    SetSwingAnimation(f_CastSlot, APPROACH_CLUB, SHOT_MODE_NORMAL);
   }
   if (frame == APPROACH_REACTIONS_FRAME || frame == 1680 || frame == 1760 ||
       frame == 1840) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
+    slot = f_CastSlot ^ 1;
+    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
                          RADIANS_TO_BINARY_ANGLE;
     if (frame == APPROACH_REACTIONS_FRAME) {
-      sCastIndex -= SHOTS_PER_STAGE;
+      f_CastIndex -= SHOTS_PER_STAGE;
     }
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
@@ -867,15 +871,15 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[1]);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BIRDIE);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
     PlaceCharacter(slot, point,
-                   -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
-    sCastSlot = slot;
-    sCastIndex++;
+                   -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F);
+    f_CastSlot = slot;
+    f_CastIndex++;
   }
   if (frame == PUTT_FADE_OUT_FRAME) {
     StartFadeOut(CAST_FADE_FRAMES);
@@ -886,16 +890,16 @@ void RunStaffRollTimeline(s32 frame) {
   if (frame == PUTT_SHOTS_FRAME || frame == 2060 || frame == 2100 ||
       frame == 2150) {
     ClearEffects();
-    sCastFramingYaw =
-        ((sCastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F;
+    f_CastFramingYaw = ((f_CastIndex - PUTT_YAW_OFFSET) * CAST_YAW_STEP) *
+                       DEGREES_TO_RADIANS_F;
     PickFramingPitch();
     g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
-    sUnreadValue = 15.0f;
-    FreeCharacterSlot(sCastSlot);
+    f_UnreadValue = 15.0f;
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex++], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex++], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, CLUB_TYPE_PUTTER);
     if (frame == PUTT_SHOTS_FRAME) {
@@ -908,27 +912,27 @@ void RunStaffRollTimeline(s32 frame) {
                                                     ANIMATION_EVENT_UNK6) -
                                  CAST_SWING_LEAD_FRAMES);
     }
-    point[AXIS_X] = sNearCupPoint[AXIS_X];
-    point[AXIS_Y] = sNearCupPoint[AXIS_Y];
-    point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+    point[AXIS_X] = f_NearCupPoint[AXIS_X];
+    point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
+    point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == PUTT_SWING_FRAME) {
-    SetSwingAnimation(sCastSlot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
+    SetSwingAnimation(f_CastSlot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
   }
   if (frame == PUTT_REACTIONS_FRAME || frame == 2300 || frame == 2400 ||
       frame == 2500) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    g_CurrentShot.unk0 = -(sCastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
+    slot = f_CastSlot ^ 1;
+    g_CurrentShot.unk0 = -(f_CastIndex * CAST_YAW_STEP) * DEGREES_TO_RADIANS_F *
                          RADIANS_TO_BINARY_ANGLE;
     if (frame == PUTT_REACTIONS_FRAME) {
-      sCastIndex -= SHOTS_PER_STAGE;
+      f_CastIndex -= SHOTS_PER_STAGE;
     }
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
@@ -938,30 +942,30 @@ void RunStaffRollTimeline(s32 frame) {
                           GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
-    ConsiderReactionSpot(sNearCupPoint);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_EAGLE);
-    sIsReactionShown = TRUE;
-    point[AXIS_X] = sNearCupPoint[AXIS_X];
-    point[AXIS_Y] = sNearCupPoint[AXIS_Y];
-    point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+    ConsiderReactionSpot(f_NearCupPoint);
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
+    f_IsReactionShown = TRUE;
+    point[AXIS_X] = f_NearCupPoint[AXIS_X];
+    point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
+    point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
     PlaceCharacter(slot, point,
-                   DEGREES_TO_RADIANS(-(sCastIndex * CAST_YAW_STEP)));
-    sCastSlot = slot;
-    sCastIndex++;
+                   DEGREES_TO_RADIANS(-(f_CastIndex * CAST_YAW_STEP)));
+    f_CastSlot = slot;
+    f_CastIndex++;
   }
   if (frame == FINALE_FADE_OUT_FRAME) {
     StartFadeOut(CAST_FADE_FRAMES);
   }
   if (frame == FINALE_FRAME) {
     StartFadeIn(CAST_FADE_FRAMES);
-    sCastFramingYaw = 0.0f;
+    f_CastFramingYaw = 0.0f;
     ClearEffects();
     PickFramingPitch();
-    sIsReactionShown = FALSE;
-    FreeCharacterSlot(sCastSlot);
+    f_IsReactionShown = FALSE;
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, TEE_CLUB);
     SetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL);
@@ -974,14 +978,14 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
     point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 2740) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_PAR);
@@ -992,23 +996,23 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(D_800BA9D8.teePosition);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_PAR);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_PAR);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = D_800BA9D8.teePosition[AXIS_X];
     point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y];
     point[AXIS_Z] = D_800BA9D8.teePosition[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 2800) {
     ClearEffects();
-    sCastFramingYaw = 0.0f;
+    f_CastFramingYaw = 0.0f;
     PickFramingPitch();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, FAIRWAY_CLUB);
     SetSwingAnimation(slot, FAIRWAY_CLUB, SHOT_MODE_NORMAL);
@@ -1021,14 +1025,14 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 2950) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_BOGEY);
@@ -1039,23 +1043,23 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[0]);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BOGEY);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BOGEY);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = g_HolePoints.unk60[0][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[0][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[0][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 3030) {
-    sCastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
+    f_CastFramingYaw = DEGREES_TO_RADIANS_F * CAST_YAW_STEP;
     ClearEffects();
     PickFramingPitch();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, APPROACH_CLUB);
     SetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL);
@@ -1068,14 +1072,14 @@ void RunStaffRollTimeline(s32 frame) {
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 3100) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_BIRDIE);
@@ -1086,22 +1090,22 @@ void RunStaffRollTimeline(s32 frame) {
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
     ConsiderReactionSpot(g_HolePoints.unk60[1]);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_BIRDIE);
-    sIsReactionShown = TRUE;
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_BIRDIE);
+    f_IsReactionShown = TRUE;
     point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 3180) {
     ClearEffects();
     PickFramingPitch();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    sIsReactionShown = FALSE;
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex], GetCastModelKind());
+    f_IsReactionShown = FALSE;
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex], GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterClub(slot, CLUB_TYPE_PUTTER);
     SetSwingAnimation(slot, CLUB_TYPE_PUTTER, SHOT_MODE_NORMAL);
@@ -1110,18 +1114,18 @@ void RunStaffRollTimeline(s32 frame) {
     AdvanceAnimation(slot, GetAnimationEventFrame(slot, swingAnimation,
                                                   ANIMATION_EVENT_UNK6) -
                                FINAL_PUTT_LEAD_FRAMES);
-    point[AXIS_X] = sNearCupPoint[AXIS_X];
-    point[AXIS_Y] = sNearCupPoint[AXIS_Y];
-    point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+    point[AXIS_X] = f_NearCupPoint[AXIS_X];
+    point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
+    point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == 3240) {
     ClearEffects();
-    FreeCharacterSlot(sCastSlot);
+    FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
-    slot = sCastSlot ^ 1;
-    LoadCharacter(slot, sCastOrder[sCastIndex] + CHARACTER_COUNT,
+    slot = f_CastSlot ^ 1;
+    LoadCharacter(slot, f_CastOrder[f_CastIndex] + CHARACTER_COUNT,
                   GetCastModelKind());
     SetCharacterLighting(slot, CHARACTER_LIGHTING_SCENE);
     SetCharacterAnimation(slot, REACTION_ANIMATION_EAGLE);
@@ -1131,34 +1135,34 @@ void RunStaffRollTimeline(s32 frame) {
                           GetSwingAnimation(slot, TEE_CLUB, SHOT_MODE_NORMAL)),
         ANIMATION_EVENT_UNK6);
     ClearReactionSpot();
-    ConsiderReactionSpot(sNearCupPoint);
-    StartReaction(slot, sCastOrder[sCastIndex], REACTION_ANIMATION_EAGLE);
-    sIsReactionShown = TRUE;
-    point[AXIS_X] = sNearCupPoint[AXIS_X];
-    point[AXIS_Y] = sNearCupPoint[AXIS_Y];
-    point[AXIS_Z] = sNearCupPoint[AXIS_Z];
+    ConsiderReactionSpot(f_NearCupPoint);
+    StartReaction(slot, f_CastOrder[f_CastIndex], REACTION_ANIMATION_EAGLE);
+    f_IsReactionShown = TRUE;
+    point[AXIS_X] = f_NearCupPoint[AXIS_X];
+    point[AXIS_Y] = f_NearCupPoint[AXIS_Y];
+    point[AXIS_Z] = f_NearCupPoint[AXIS_Z];
     PlaceCharacter(slot, point, GOLFER_HEADING);
-    sCastSlot = slot;
+    f_CastSlot = slot;
   }
   if (frame == LAST_FADE_OUT_FRAME) {
     StartFadeOut(LAST_FADE_FRAMES);
   }
   TakePinOut();
   UpdateEffects();
-  if (sShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
+  if (f_ShownSceneColorIndex != g_HoleConditions.sceneColorIndex) {
     InitSkyColors();
-    sShownSceneColorIndex = g_HoleConditions.sceneColorIndex;
+    f_ShownSceneColorIndex = g_HoleConditions.sceneColorIndex;
   }
   g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
   AnimateAllCharacters();
-  if (sIsReactionShown) {
-    PlaceAndViewCharacter(sCastSlot);
-    UpdateReaction(sCastSlot);
+  if (f_IsReactionShown) {
+    PlaceAndViewCharacter(f_CastSlot);
+    UpdateReaction(f_CastSlot);
   } else {
-    character = GetUsedCharacterSlot(sCastSlot);
+    character = GetUsedCharacterSlot(f_CastSlot);
     ClearFramedSpheres();
-    SetFramingAngles(sCastFramingPitch, sCastFramingYaw);
-    GetCharacterPointPosition(sCastSlot, CAST_FOCUS_POINT, focus);
+    SetFramingAngles(f_CastFramingPitch, f_CastFramingYaw);
+    GetCharacterPointPosition(f_CastSlot, CAST_FOCUS_POINT, focus);
     if (character != NULL) {
       radius = character->shadowScale * SHADOW_SCALE_TO_RADIUS;
     } else {
@@ -1166,14 +1170,14 @@ void RunStaffRollTimeline(s32 frame) {
     }
     AddFramedSphere(focus, radius);
     FrameSpheres(0.0f);
-    BisectFramingPitch(sCastFramingPitch, sCastFramingYaw, 0.0f);
+    BisectFramingPitch(f_CastFramingPitch, f_CastFramingYaw, 0.0f);
     view = &g_Cameras[0].view;
     GetFramedView(view->eye, view->lookAt);
     EaseStaffRollView(view->eye, view->lookAt, CAST_EASE_RATE,
                       EASE_LOOK_AT | EASE_EYE);
   }
   g_Cameras[0].view.fieldOfView = STAFF_ROLL_FIELD_OF_VIEW;
-  CLAMP_FRAMES(shrink, frame - sViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
+  CLAMP_FRAMES(shrink, frame - f_ViewShrinkStartFrame, VIEW_SHRINK_FRAMES);
   SHRINK_VIEW(g_Cameras[0].view, shrink);
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[0] =
       g_Cameras[0].view.scissorWidth * 4;
@@ -1196,7 +1200,7 @@ void RunStaffRollTimeline(s32 frame) {
 void UpdateStaffRoll(void) {
   EncodedAsset asset;
   s32 pressedButtons = 0;
-  s32 lineCount = sStaffText->lineCount;
+  s32 lineCount = f_StaffText->lineCount;
   s32 controllerIndex;
 
   for (controllerIndex = 0; controllerIndex != g_ControllerCount;
@@ -1204,63 +1208,63 @@ void UpdateStaffRoll(void) {
     pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
   }
   if (g_ControllerCount != 0 && g_HasLoaderFinished == TRUE) {
-    if (sStaffRollFrame == 0) {
-      sIsPaintingShown = TRUE;
-      sIsTextScrolling = TRUE;
+    if (f_StaffRollFrame == 0) {
+      f_IsPaintingShown = TRUE;
+      f_IsTextScrolling = TRUE;
       StopSong(EARLIER_SONG_FADE_FRAMES);
     }
-    if (sStaffRollFrame == STAFF_SONG_FRAME) {
+    if (f_StaffRollFrame == STAFF_SONG_FRAME) {
       PlaySong(STAFF_SONG, SONG_FLAG_RESTART);
     }
-    if (sStaffRollFrame == STAFF_SONG_END_FRAME) {
-      sIsTextScrolling = FALSE;
+    if (f_StaffRollFrame == STAFF_SONG_END_FRAME) {
+      f_IsTextScrolling = FALSE;
       StopSong(STAFF_SONG_FADE_FRAMES);
     }
-    if (sStaffRollFrame == lineCount * STAFF_LINE_HEIGHT + SCROLL_END_DELAY) {
-      sIsTextScrolling = FALSE;
+    if (f_StaffRollFrame == lineCount * STAFF_LINE_HEIGHT + SCROLL_END_DELAY) {
+      f_IsTextScrolling = FALSE;
     }
-    if (sStaffRollFrame == CLOSING_PICTURE_READ_FRAME) {
+    if (f_StaffRollFrame == CLOSING_PICTURE_READ_FRAME) {
       OpenEncodedAsset(CLOSING_PICTURE_ASSET, &asset);
-      ReadEncodedAsset(&sStaffRollImage, &asset);
+      ReadEncodedAsset(&f_StaffRollImage, &asset);
     }
-    if (sStaffRollFrame == CLOSING_FRAME) {
+    if (f_StaffRollFrame == CLOSING_FRAME) {
       PlaySong(CLOSING_SONG, SONG_FLAG_RESTART);
     }
     if ((pressedButtons & (A_BUTTON | START_BUTTON)) &&
-        sStaffRollFrame >= FIRST_LEAVING_FRAME) {
+        f_StaffRollFrame >= FIRST_LEAVING_FRAME) {
       RequestSongStop();
       StartHudAnimation(HUD_ANIMATION_SPIRAL);
       g_Scene = SCENE_SWAPPING_MODULES;
       g_NextScene = SCENE_BOOT_LOGOS;
       g_SceneModuleToUnload = 0x1F;
       g_SceneModuleToLoad = 0x0C;
-      sStaffRollFrame = 0;
-      sIsLeavingStaffRoll = TRUE;
+      f_StaffRollFrame = 0;
+      f_IsLeavingStaffRoll = TRUE;
       PlaySound(0x5D, 0xF, 0x7F);
     }
     if (g_IsDebugEnabled) {
       if (pressedButtons & B_BUTTON) {
         OpenEncodedAsset(PAINTING_ASSET, &asset);
-        ReadEncodedAsset(&sStaffRollImage, &asset);
+        ReadEncodedAsset(&f_StaffRollImage, &asset);
         g_Players[0].characterIndex =
             ((s8)g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
         ShuffleCastOrder((s8)g_Players[0].characterIndex);
-        sTopLineIndex = FIRST_TOP_LINE_INDEX;
-        sStaffRollFrame = -1;
-        sIsLeavingStaffRoll = FALSE;
-        sTextScrollOffset = 0;
-        sIsPaintingShown = TRUE;
-        sDebugRestartCount++;
+        f_TopLineIndex = FIRST_TOP_LINE_INDEX;
+        f_StaffRollFrame = -1;
+        f_IsLeavingStaffRoll = FALSE;
+        f_TextScrollOffset = 0;
+        f_IsPaintingShown = TRUE;
+        f_DebugRestartCount++;
       }
       if (g_IsDebugEnabled && (pressedButtons & D_CBUTTONS)) {
-        sStaffRollFrame += DEBUG_SKIPPED_FRAMES;
+        f_StaffRollFrame += DEBUG_SKIPPED_FRAMES;
       }
     }
-    if (sStaffRollFrame >= TIMELINE_START_FRAME) {
-      RunStaffRollTimeline(sStaffRollFrame - TIMELINE_START_FRAME);
+    if (f_StaffRollFrame >= TIMELINE_START_FRAME) {
+      RunStaffRollTimeline(f_StaffRollFrame - TIMELINE_START_FRAME);
     }
-    if (sStaffRollFrame < MAX_STAFF_ROLL_FRAME) {
-      sStaffRollFrame++;
+    if (f_StaffRollFrame < MAX_STAFF_ROLL_FRAME) {
+      f_StaffRollFrame++;
     }
     sprintf(g_PrintBuffer, "MAX:%d    ", lineCount);
     PrintDebugText(g_PrintBuffer, LINE_COUNT_TEXT_COLUMN, LINE_COUNT_TEXT_ROW);
@@ -1283,7 +1287,7 @@ void UpdateStaffRoll(void) {
  */
 void DrawStaffRoll(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 lineCount = sStaffText->lineCount;
+  s32 lineCount = f_StaffText->lineCount;
   s32 fadeAlpha;
   s32 closingAlpha;
   s32 pass;
@@ -1313,12 +1317,12 @@ void DrawStaffRoll(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
   gDPSetBlendColor(gfx++, 255, 255, 255, 1);
   gDPPipeSync(gfx++);
-  if (sFadeLength != 0) {
-    if (sFadeFramesLeft != 0) {
-      sFadeFramesLeft--;
+  if (f_FadeLength != 0) {
+    if (f_FadeFramesLeft != 0) {
+      f_FadeFramesLeft--;
     }
-    fadeAlpha = (sFadeFramesLeft << 8) / sFadeLength;
-    if (sFadeLength < 0) {
+    fadeAlpha = (f_FadeFramesLeft << 8) / f_FadeLength;
+    if (f_FadeLength < 0) {
       fadeAlpha += 0x100;
     }
     if (fadeAlpha > 255) {
@@ -1328,7 +1332,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
       fadeAlpha = 0;
     }
     if (fadeAlpha == 0) {
-      sFadeLength = 0;
+      f_FadeLength = 0;
     }
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, fadeAlpha);
     gDPSetCombineLERP(gfx++, 0, 0, 0, 0, 0, 0, 0, PRIMITIVE, 0, 0, 0, 0, 0, 0,
@@ -1367,26 +1371,26 @@ void DrawStaffRoll(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
                     PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
-  if (sIsPaintingShown) {
+  if (f_IsPaintingShown) {
     DrawStaffRollPainting(&gfx);
   }
-  if (sStaffRollFrame < CLOSING_FRAME) {
+  if (f_StaffRollFrame < CLOSING_FRAME) {
     closingAlpha = 0;
-    if (!sIsPaintingShown && sIsTextScrolling) {
-      if (--sTextScrollOffset == -STAFF_LINE_HEIGHT) {
-        sTextScrollOffset = 0;
-        sTopLineIndex++;
+    if (!f_IsPaintingShown && f_IsTextScrolling) {
+      if (--f_TextScrollOffset == -STAFF_LINE_HEIGHT) {
+        f_TextScrollOffset = 0;
+        f_TopLineIndex++;
       }
     }
   } else {
-    closingAlpha = (sStaffRollFrame - CLOSING_FRAME) * CLOSING_FADE_RATE;
+    closingAlpha = (f_StaffRollFrame - CLOSING_FRAME) * CLOSING_FADE_RATE;
     if (closingAlpha > 255) {
       closingAlpha = 255;
     }
   }
   sprintf(g_PrintBuffer, "alpha:%d    ", closingAlpha);
   PrintDebugText(g_PrintBuffer, ALPHA_TEXT_COLUMN, ALPHA_TEXT_ROW);
-  if (!sIsPaintingShown) {
+  if (!f_IsPaintingShown) {
     for (pass = 0; pass < TEXT_PASS_COUNT; pass++) {
       if (pass == TEXT_SHADOW_PASS) {
         gDPSetCombineLERP(gfx++, 0, 0, 0, 0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
@@ -1396,11 +1400,11 @@ void DrawStaffRoll(Gfx** displayListHead) {
                           0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
       }
       for (index = 0; index != STAFF_ROW_COUNT; index++) {
-        lineIndex = index + sTopLineIndex;
+        lineIndex = index + f_TopLineIndex;
         if (lineIndex >= 0) {
           if (lineIndex < lineCount) {
             DrawStaffLine(&gfx, STAFF_TEXT_LEFT - pass,
-                          index * STAFF_LINE_HEIGHT + sTextScrollOffset - pass,
+                          index * STAFF_LINE_HEIGHT + f_TextScrollOffset - pass,
                           lineIndex);
           }
         }
@@ -1408,7 +1412,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
     }
   }
   if (g_IsDebugEnabled) {
-    sprintf(g_PrintBuffer, "%5d", sStaffRollFrame);
+    sprintf(g_PrintBuffer, "%5d", f_StaffRollFrame);
     PrintDebugText(g_PrintBuffer, FRAME_TEXT_COLUMN, FRAME_TEXT_ROW);
   }
   gDPPipeSync(gfx++);
@@ -1440,7 +1444,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
       gDPLoadTextureTile(
           gfx++,
           (u32) &
-              ((u16*)sStaffRollImage
+              ((u16*)f_StaffRollImage
                    .texels)[index * IMAGE_STRIP_STEP * STAFF_ROLL_IMAGE_WIDTH] &
               ~7,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, STAFF_ROLL_IMAGE_WIDTH, 0, 0, 0,
@@ -1466,7 +1470,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
 void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {
   s32 lineWidth = 0;
   s32 index = 0;
-  StaffText* text = sStaffText;
+  StaffText* text = f_StaffText;
   s32 start;
   s32 length;
   s32 character;
@@ -1491,10 +1495,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_14/staff_roll", MeasureStaffLine);
 /* Draws a line of the staff text from left and top, a glyph per character */
 void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   Gfx* gfx = *displayListHead;
-  s32 start = (sStaffText->lines + lineIndex)->start;
-  s32 length = (sStaffText->lines + lineIndex)->length;
+  s32 start = (f_StaffText->lines + lineIndex)->start;
+  s32 length = (f_StaffText->lines + lineIndex)->length;
   /* In u16s, past the size, the line count and the lines */
-  s32 firstCharacter = sStaffText->lineCount * 2 + 2;
+  s32 firstCharacter = f_StaffText->lineCount * 2 + 2;
   s32 width;  /* Unused; it is there to match */
   s32 height; /* Unused; it is there to match */
   s32 index;
@@ -1507,7 +1511,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   MeasureStaffLine(lineIndex, &width, &height);
   gDPPipeSync(gfx++);
   for (index = 0; index != length; index++) {
-    character = ((u16*)sStaffText)[start + index + firstCharacter];
+    character = ((u16*)f_StaffText)[start + index + firstCharacter];
     if (character < STAFF_CHARACTER_LIMIT) {
       row = character / STAFF_FONT_COLUMN_COUNT;
       column = character - row * STAFF_FONT_COLUMN_COUNT;
@@ -1515,7 +1519,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
       glyphTop = row * STAFF_GLYPH_HEIGHT;
       gDPPipeSync(gfx++);
       gDPLoadTextureTile_4b(
-          gfx++, (u32)(sStaffFont + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
+          gfx++, (u32)(f_StaffFont + IMAGE_HEADER_SIZE) & ~7, G_IM_FMT_I,
           STAFF_FONT_WIDTH, 0, glyphLeft, glyphTop,
           glyphLeft + STAFF_GLYPH_WIDTH - 1, glyphTop + STAFF_GLYPH_HEIGHT - 1,
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -1535,7 +1539,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
             gfx++, left << 2, top << 2, (left + STAFF_GLYPH_WIDTH) << 2,
             (top + STAFF_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE, (glyphLeft) << 5,
             (glyphTop) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        left += sStaffGlyphAdvances[character];
+        left += f_StaffGlyphAdvances[character];
       }
     }
   }
@@ -1546,7 +1550,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
 /*
  * Draws the painting in strips, scrolled down it by a row a frame from
  * PAINTING_SCROLL_FRAME. It fades in at the start, and fades out once the
- * timeline starts; when it has faded out, sIsPaintingShown is cleared.
+ * timeline starts; when it has faded out, f_IsPaintingShown is cleared.
  */
 void DrawStaffRollPainting(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
@@ -1556,11 +1560,11 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
   s32 scrolledRows;
   s32 texelOffset;
 
-  if (sStaffRollFrame > TIMELINE_START_FRAME) {
+  if (f_StaffRollFrame > TIMELINE_START_FRAME) {
     alpha = OPAQUE_ALPHA -
-            (sStaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE;
+            (f_StaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE;
     if (alpha < 0) {
-      sIsPaintingShown = FALSE;
+      f_IsPaintingShown = FALSE;
       alpha = 0;
     }
   } else {
@@ -1572,9 +1576,9 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      if (sStaffRollFrame < PAINTING_FADE_IN_FRAMES) {
+      if (f_StaffRollFrame < PAINTING_FADE_IN_FRAMES) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                        sStaffRollFrame * PAINTING_FADE_RATE);
+                        f_StaffRollFrame * PAINTING_FADE_RATE);
         gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1,
                           TEXEL0, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1);
       }
@@ -1597,9 +1601,9 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(gfx++, (u32)sStaffRollImage.texels & ~7);
+    gDPLoadTLUT_pal256(gfx++, (u32)f_StaffRollImage.texels & ~7);
     for (stripIndex = 0; stripIndex != IMAGE_STRIP_COUNT; stripIndex++) {
-      scrolledRows = sStaffRollFrame - PAINTING_SCROLL_FRAME;
+      scrolledRows = f_StaffRollFrame - PAINTING_SCROLL_FRAME;
       if (scrolledRows > PAINTING_SCROLL_LIMIT) {
         scrolledRows = PAINTING_SCROLL_LIMIT;
       }
@@ -1614,9 +1618,9 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
       gDPLoadTextureTile(
           gfx++,
           (u32) &
-              ((u8*)&sStaffRollImage)[stripIndex * IMAGE_STRIP_STEP *
-                                          STAFF_ROLL_IMAGE_WIDTH +
-                                      texelOffset] &
+              ((u8*)&f_StaffRollImage)[stripIndex * IMAGE_STRIP_STEP *
+                                           STAFF_ROLL_IMAGE_WIDTH +
+                                       texelOffset] &
               ~7,
           G_IM_FMT_CI, G_IM_SIZ_8b, STAFF_ROLL_IMAGE_WIDTH, 0, 0, 0,
           STAFF_ROLL_IMAGE_WIDTH - 1, stripHeight - 1, 0,

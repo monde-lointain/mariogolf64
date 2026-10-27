@@ -36,21 +36,21 @@ float fabsf(float x);
  * acos and atan2 split pi into a float and the error left over, so that
  * adding the error last keeps the result accurate to the last bit.
  */
-static const float sOne = 1.0f;
-static const float sPi = 3.1415925026e+00f;
-static const float sHalfPiHigh = 1.5707962513e+00f;
-static const float sHalfPiLow = 7.5497894159e-08f;
+static const float f_One = 1.0f;
+static const float f_Pi = 3.1415925026e+00f;
+static const float f_HalfPiHigh = 1.5707962513e+00f;
+static const float f_HalfPiLow = 7.5497894159e-08f;
 /* asin(sqrt(z)) ~ sqrt(z) + sqrt(z) * P(z) / Q(z) for z <= 1/4 */
-static const float sAsinP0 = 1.6666667163e-01f;
-static const float sAsinP1 = -3.2556581497e-01f;
-static const float sAsinP2 = 2.0121252537e-01f;
-static const float sAsinP3 = -4.0055535734e-02f;
-static const float sAsinP4 = 7.9153501429e-04f;
-static const float sAsinP5 = 3.4793309169e-05f;
-static const float sAsinQ1 = -2.4033949375e+00f;
-static const float sAsinQ2 = 2.0209457874e+00f;
-static const float sAsinQ3 = -6.8828397989e-01f;
-static const float sAsinQ4 = 7.7038154006e-02f;
+static const float f_AsinP0 = 1.6666667163e-01f;
+static const float f_AsinP1 = -3.2556581497e-01f;
+static const float f_AsinP2 = 2.0121252537e-01f;
+static const float f_AsinP3 = -4.0055535734e-02f;
+static const float f_AsinP4 = 7.9153501429e-04f;
+static const float f_AsinP5 = 3.4793309169e-05f;
+static const float f_AsinQ1 = -2.4033949375e+00f;
+static const float f_AsinQ2 = 2.0209457874e+00f;
+static const float f_AsinQ3 = -6.8828397989e-01f;
+static const float f_AsinQ4 = 7.7038154006e-02f;
 
 float fabsf(float x) {
   s32 word;
@@ -78,7 +78,7 @@ float acosf(float x) {
     if (word > 0) {
       return 0.0f;
     } else {
-      return sPi + 2.0f * sHalfPiLow;
+      return f_Pi + 2.0f * f_HalfPiLow;
     }
   } else if (magnitude > ONE_WORD) {
     /* NaN without fast math; the game's flags fold this to 0 */
@@ -86,38 +86,41 @@ float acosf(float x) {
   }
   if (magnitude < 0x3F000000) {    /* |x| < 0.5 */
     if (magnitude <= 0x23000000) { /* |x| <= 2^-57 */
-      return sHalfPiHigh + sHalfPiLow;
+      return f_HalfPiHigh + f_HalfPiLow;
     }
     z = x * x;
-    p = z * (sAsinP0 +
-             z * (sAsinP1 +
-                  z * (sAsinP2 + z * (sAsinP3 + z * (sAsinP4 + z * sAsinP5)))));
-    q = sOne + z * (sAsinQ1 + z * (sAsinQ2 + z * (sAsinQ3 + z * sAsinQ4)));
+    p = z *
+        (f_AsinP0 +
+         z * (f_AsinP1 +
+              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     r = p / q;
-    return sHalfPiHigh - (x - (sHalfPiLow - x * r));
+    return f_HalfPiHigh - (x - (f_HalfPiLow - x * r));
   } else if (word < 0) {
-    z = (sOne + x) * 0.5f;
-    p = z * (sAsinP0 +
-             z * (sAsinP1 +
-                  z * (sAsinP2 + z * (sAsinP3 + z * (sAsinP4 + z * sAsinP5)))));
-    q = sOne + z * (sAsinQ1 + z * (sAsinQ2 + z * (sAsinQ3 + z * sAsinQ4)));
+    z = (f_One + x) * 0.5f;
+    p = z *
+        (f_AsinP0 +
+         z * (f_AsinP1 +
+              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     s = sqrtf(z);
     r = p / q;
-    w = r * s - sHalfPiLow;
-    return sPi - 2.0f * (s + w);
+    w = r * s - f_HalfPiLow;
+    return f_Pi - 2.0f * (s + w);
   } else {
     s32 sqrtHighWord;
 
-    z = (sOne - x) * 0.5f;
+    z = (f_One - x) * 0.5f;
     s = sqrtf(z);
     sqrtHigh = s;
     GET_FLOAT_WORD(sqrtHighWord, sqrtHigh);
     SET_FLOAT_WORD(sqrtHigh, sqrtHighWord & 0xFFFFF000);
     c = (z - sqrtHigh * sqrtHigh) / (s + sqrtHigh);
-    p = z * (sAsinP0 +
-             z * (sAsinP1 +
-                  z * (sAsinP2 + z * (sAsinP3 + z * (sAsinP4 + z * sAsinP5)))));
-    q = sOne + z * (sAsinQ1 + z * (sAsinQ2 + z * (sAsinQ3 + z * sAsinQ4)));
+    p = z *
+        (f_AsinP0 +
+         z * (f_AsinP1 +
+              z * (f_AsinP2 + z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
+    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
     r = p / q;
     w = r * s + c;
     return 2.0f * (sqrtHigh + w);
@@ -128,11 +131,11 @@ float acosf(float x) {
  * fdlibm adds this to results to raise the inexact exception, but the
  * compiler folds the sums, which round to the other constant alone.
  */
-static const float sTiny = 1.0e-30f;
-static const float sZero = 0.0f;
-static const float sQuarterPi = 7.8539818525e-01f;
-static const float sHalfPi = 1.5707963705e+00f;
-static const float sPiLow = 1.5099578832e-07f;
+static const float f_Tiny = 1.0e-30f;
+static const float f_Zero = 0.0f;
+static const float f_QuarterPi = 7.8539818525e-01f;
+static const float f_HalfPi = 1.5707963705e+00f;
+static const float f_PiLow = 1.5099578832e-07f;
 
 float atan2f(float y, float x) {
   float z;
@@ -162,46 +165,46 @@ float atan2f(float y, float x) {
       case 1:
         return y;
       case 2:
-        return sPi + sTiny;
+        return f_Pi + f_Tiny;
       case 3:
-        return -sPi - sTiny;
+        return -f_Pi - f_Tiny;
     }
   }
   if (xMagnitude == 0) {
-    return (yWord < 0) ? -sHalfPi - sTiny : sHalfPi + sTiny;
+    return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
   }
   if (xMagnitude == INFINITY_WORD) {
     if (yMagnitude == INFINITY_WORD) {
       switch (quadrant) {
         case 0:
-          return sQuarterPi + sTiny;
+          return f_QuarterPi + f_Tiny;
         case 1:
-          return -sQuarterPi - sTiny;
+          return -f_QuarterPi - f_Tiny;
         case 2:
-          return 3.0f * sQuarterPi + sTiny;
+          return 3.0f * f_QuarterPi + f_Tiny;
         case 3:
-          return -3.0f * sQuarterPi - sTiny;
+          return -3.0f * f_QuarterPi - f_Tiny;
       }
     } else {
       switch (quadrant) {
         case 0:
-          return sZero;
+          return f_Zero;
         case 1:
-          return -sZero;
+          return -f_Zero;
         case 2:
-          return sPi + sTiny;
+          return f_Pi + f_Tiny;
         case 3:
-          return -sPi - sTiny;
+          return -f_Pi - f_Tiny;
       }
     }
   }
   if (yMagnitude == INFINITY_WORD) {
-    return (yWord < 0) ? -sHalfPi - sTiny : sHalfPi + sTiny;
+    return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
   }
 
   exponentDifference = (yMagnitude - xMagnitude) >> 23;
   if (exponentDifference > 60) {
-    z = sHalfPi + 0.5f * sPiLow;
+    z = f_HalfPi + 0.5f * f_PiLow;
   } else if (xWord < 0 && exponentDifference < -60) {
     z = 0.0f;
   } else {
@@ -218,34 +221,34 @@ float atan2f(float y, float x) {
     }
       return z;
     case 2:
-      return sPi - (z - sPiLow);
+      return f_Pi - (z - f_PiLow);
     default:
-      return (z - sPiLow) - sPi;
+      return (z - f_PiLow) - f_Pi;
   }
 }
 
 /* atan of 0.5, 1, 1.5 and infinity, split into a float and the error left over
  */
-static const float sAtanHigh[] = {
+static const float f_AtanHigh[] = {
     4.6364760399e-01f,
     7.8539812565e-01f,
     9.8279368877e-01f,
     1.5707962513e+00f,
 };
-static const float sAtanLow[] = {
+static const float f_AtanLow[] = {
     5.0121582440e-09f,
     3.7748947079e-08f,
     3.4473217170e-08f,
     7.5497894159e-08f,
 };
-/* atan(x) ~ x - x * (sum of sAtanTerms[i] * x^(2i+2)) for |x| <= 7/16 */
-static const float sAtanTerms[] = {
+/* atan(x) ~ x - x * (sum of f_AtanTerms[i] * x^(2i+2)) for |x| <= 7/16 */
+static const float f_AtanTerms[] = {
     3.3333334327e-01f,  -2.0000000298e-01f, 1.4285714924e-01f,
     -1.1111110449e-01f, 9.0908870101e-02f,  -7.6918758452e-02f,
     6.6610731184e-02f,  -5.8335702866e-02f, 4.9768779427e-02f,
     -3.6531571299e-02f, 1.6285819933e-02f,
 };
-static const float sHuge = 1.0e30f;
+static const float f_Huge = 1.0e30f;
 
 float atanf(float x) {
   float w;
@@ -263,14 +266,14 @@ float atanf(float x) {
       return x + x;
     }
     if (word > 0) {
-      return sAtanHigh[3] + sAtanLow[3];
+      return f_AtanHigh[3] + f_AtanLow[3];
     } else {
-      return -sAtanHigh[3] - sAtanLow[3];
+      return -f_AtanHigh[3] - f_AtanLow[3];
     }
   }
   if (magnitude < 0x3EE00000) {   /* |x| < 7/16 */
     if (magnitude < 0x31000000) { /* |x| < 2^-29 */
-      if (sHuge + x > sOne) {
+      if (f_Huge + x > f_One) {
         return x;
       }
     }
@@ -280,15 +283,15 @@ float atanf(float x) {
     if (magnitude < 0x3F980000) {   /* |x| < 19/16 */
       if (magnitude < 0x3F300000) { /* |x| < 11/16 */
         reductionIndex = 0;
-        x = (2.0f * x - sOne) / (2.0f + x);
+        x = (2.0f * x - f_One) / (2.0f + x);
       } else {
         reductionIndex = 1;
-        x = (x - sOne) / (x + sOne);
+        x = (x - f_One) / (x + f_One);
       }
     } else {
       if (magnitude < 0x401C0000) { /* |x| < 39/16 */
         reductionIndex = 2;
-        x = (x - 1.5f) / (sOne + 1.5f * x);
+        x = (x - 1.5f) / (f_One + 1.5f * x);
       } else {
         reductionIndex = 3;
         x = -1.0f / x;
@@ -297,20 +300,21 @@ float atanf(float x) {
   }
   z = x * x;
   w = z * z;
-  oddSum = z * (sAtanTerms[0] +
-                w * (sAtanTerms[2] +
-                     w * (sAtanTerms[4] +
-                          w * (sAtanTerms[6] +
-                               w * (sAtanTerms[8] + w * sAtanTerms[10])))));
+  oddSum = z * (f_AtanTerms[0] +
+                w * (f_AtanTerms[2] +
+                     w * (f_AtanTerms[4] +
+                          w * (f_AtanTerms[6] +
+                               w * (f_AtanTerms[8] + w * f_AtanTerms[10])))));
   evenSum =
-      w * (sAtanTerms[1] +
-           w * (sAtanTerms[3] +
-                w * (sAtanTerms[5] + w * (sAtanTerms[7] + w * sAtanTerms[9]))));
+      w *
+      (f_AtanTerms[1] +
+       w * (f_AtanTerms[3] +
+            w * (f_AtanTerms[5] + w * (f_AtanTerms[7] + w * f_AtanTerms[9]))));
   if (reductionIndex < 0) {
     return x - x * (oddSum + evenSum);
   } else {
-    z = sAtanHigh[reductionIndex] -
-        ((x * (oddSum + evenSum) - sAtanLow[reductionIndex]) - x);
+    z = f_AtanHigh[reductionIndex] -
+        ((x * (oddSum + evenSum) - f_AtanLow[reductionIndex]) - x);
     return (word < 0) ? -z : z;
   }
 }

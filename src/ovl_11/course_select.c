@@ -21,7 +21,7 @@
  * cleared. The hole select draws a sign with the course's name and hole.
  */
 
-/* sLoadedScreen values */
+/* f_LoadedScreen values */
 #define COURSE_SELECT_UNLOADED 0
 #define COURSE_SELECT_RING_SHOT 1
 #define COURSE_SELECT_HOLES 2
@@ -31,13 +31,13 @@
 #define SELECT_MOVED 1
 #define SELECT_BACK 2
 
-/* sPressedDirection values */
+/* f_PressedDirection values */
 #define DIRECTION_UP 1
 #define DIRECTION_DOWN 2
 #define DIRECTION_LEFT 4
 #define DIRECTION_RIGHT 8
 
-/* sPlankMotion values */
+/* f_PlankMotion values */
 #define PLANKS_SHUT -1
 #define PLANKS_CLOSING 0
 #define PLANKS_OPENING 1
@@ -93,10 +93,10 @@
 #define COURSE_IMAGE_LEFT 128
 #define RING_SHOT_COURSE_IMAGE_TOP 144
 #define HOLE_COURSE_IMAGE_TOP 152
-/* The images of a course turning, in sCourseImageAssets' order, before its
+/* The images of a course turning, in f_CourseImageAssets' order, before its
  * front */
 #define COURSE_IMAGE_FRONT 2
-/* sCourseTurnFrames' entry for the image between two courses */
+/* f_CourseTurnFrames' entry for the image between two courses */
 #define COURSE_IMAGE_BLANK -1
 #define COURSE_TURN_FRAME_COUNT 7
 /* The turn shows the course it leaves until this entry */
@@ -161,55 +161,55 @@ extern Gfx D_800C3FC0[];
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
 
-extern u8* sBoardImage; /* The name plate or the hole sign */
-extern u8* sCourseBadges[COURSE_INDEX_COUNT];
-extern u8* sCourseImage;
-extern u16* sCourseImagePalette;
-extern u8* sArrowsImage;
-extern u8* sStarImages[STAR_IMAGE_COUNT];
-extern u8* sEmptyStarImages[STAR_IMAGE_COUNT];
-extern u8* sPlanksImage;
-extern s32 sPressedButtons;
-extern u32 sRepeatedButtons;
+extern u8* f_BoardImage; /* The name plate or the hole sign */
+extern u8* f_CourseBadges[COURSE_INDEX_COUNT];
+extern u8* f_CourseImage;
+extern u16* f_CourseImagePalette;
+extern u8* f_ArrowsImage;
+extern u8* f_StarImages[STAR_IMAGE_COUNT];
+extern u8* f_EmptyStarImages[STAR_IMAGE_COUNT];
+extern u8* f_PlanksImage;
+extern s32 f_PressedButtons;
+extern u32 f_RepeatedButtons;
 
-static u16 sStarFrameAssets[STAR_FRAME_COUNT] = {
+static u16 f_StarFrameAssets[STAR_FRAME_COUNT] = {
     0x5BE, 0x5BF, 0x5C0, 0x5C1, 0x5C2, 0x5C3, 0x5C4, 0x5C5,
     0x5C6, 0x5C7, 0x5C8, 0x5C9, 0x5CA, 0x5CB, 0x5CC,
 };
-static u16 sEmptyStarFrameAssets[STAR_FRAME_COUNT] = {
+static u16 f_EmptyStarFrameAssets[STAR_FRAME_COUNT] = {
     0x5E5, 0x5E6, 0x5E7, 0x5E8, 0x5E9, 0x5EA, 0x5EB, 0x5EC,
     0x5ED, 0x5EE, 0x5EF, 0x5F0, 0x5F1, 0x5F2, 0x5F3,
 };
 /* "COURSE" badges, numbered for the main courses; read in, but never drawn here
  */
-static u16 sCourseBadgeAssets[COURSE_INDEX_COUNT] = {
+static u16 f_CourseBadgeAssets[COURSE_INDEX_COUNT] = {
     0x733, 0x734, 0x735, 0x736, 0x737, 0x738, 0x738,
     0x738, 0x738, 0x738, 0x738, 0x738, 0x738,
 };
 /* Each course has five images of turning, the third its front */
-static u16 sCourseImageAssets[COURSE_INDEX_COUNT] = {
+static u16 f_CourseImageAssets[COURSE_INDEX_COUNT] = {
     0x835, 0x83A, 0x83F, 0x844, 0x849, 0x84E, 0x853,
     0x858, 0x85D, 0x862, 0x867, 0x86C, 0x871,
 };
-static s32 sStarFrameIndex = 0;
-static u8 sStarBufferIndex = 0;
-static s8 sStarFrameTime = 0;
-static s32 sCourseArrowFrameTime = 0;
+static s32 f_StarFrameIndex = 0;
+static u8 f_StarBufferIndex = 0;
+static s8 f_StarFrameTime = 0;
+static s32 f_CourseArrowFrameTime = 0;
 /* Never read or written */
 s32 g_CourseSelectUnusedWord = 0;
-static s32 sLoadedScreen = COURSE_SELECT_UNLOADED;
-static s32 sSlideOffset = 0;
-/* While the course image turns, it turns from sShownCourse to sNextCourse */
-static s32 sShownCourse = 0;
-static s32 sNextCourse = 0;
-static s32 sCourseTurnIndex = 0;
-static s32 sCourseTurnStep =
-    0; /* 1 or -1 through sCourseTurnFrames, or 0 when still */
-static u8 sPressedDirection = 0;
-static s32 sCourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {
+static s32 f_LoadedScreen = COURSE_SELECT_UNLOADED;
+static s32 f_SlideOffset = 0;
+/* While the course image turns, it turns from f_ShownCourse to f_NextCourse */
+static s32 f_ShownCourse = 0;
+static s32 f_NextCourse = 0;
+static s32 f_CourseTurnIndex = 0;
+static s32 f_CourseTurnStep =
+    0; /* 1 or -1 through f_CourseTurnFrames, or 0 when still */
+static u8 f_PressedDirection = 0;
+static s32 f_CourseTurnFrames[COURSE_TURN_FRAME_COUNT] = {
     2, 3, 4, COURSE_IMAGE_BLANK, 0, 1, 2};
-static s32 sPlankSlide = 0;
-static s32 sPlankMotion = PLANKS_SHUT;
+static s32 f_PlankSlide = 0;
+static s32 f_PlankMotion = PLANKS_SHUT;
 
 s32 CountOpenRingShotCourses(void) {
   SaveData* save = GetSaveData();
@@ -249,60 +249,62 @@ void LoadCourseSelect(s32 isHoleSelect) {
   s32 i;
   s32 size;
 
-  if (sLoadedScreen != COURSE_SELECT_UNLOADED) {
+  if (f_LoadedScreen != COURSE_SELECT_UNLOADED) {
     osSyncPrintf("ring const err !");
     return;
   }
-  sPressedDirection = 0;
+  f_PressedDirection = 0;
   if (!isHoleSelect) {
-    sLoadedScreen = COURSE_SELECT_RING_SHOT;
-    sBoardImage = AllocMemory(OpenEncodedAsset(NAME_PLATE_ASSET, &asset));
-    ReadEncodedAsset(sBoardImage, &asset);
-    sStarImages[0] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-    ReadEncodedAsset(sStarImages[0], &asset);
-    sStarImages[1] = AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-    ReadEncodedAsset(sStarImages[1], &asset);
-    sStarImages[STILL_STAR_IMAGE] =
+    f_LoadedScreen = COURSE_SELECT_RING_SHOT;
+    f_BoardImage = AllocMemory(OpenEncodedAsset(NAME_PLATE_ASSET, &asset));
+    ReadEncodedAsset(f_BoardImage, &asset);
+    f_StarImages[0] =
         AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
-    ReadEncodedAsset(sStarImages[STILL_STAR_IMAGE], &asset);
-    sEmptyStarImages[0] =
+    ReadEncodedAsset(f_StarImages[0], &asset);
+    f_StarImages[1] =
+        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+    ReadEncodedAsset(f_StarImages[1], &asset);
+    f_StarImages[STILL_STAR_IMAGE] =
+        AllocMemory(OpenEncodedAsset(SPINNING_STAR_ASSET, &asset));
+    ReadEncodedAsset(f_StarImages[STILL_STAR_IMAGE], &asset);
+    f_EmptyStarImages[0] =
         AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-    ReadEncodedAsset(sEmptyStarImages[0], &asset);
-    sEmptyStarImages[1] =
+    ReadEncodedAsset(f_EmptyStarImages[0], &asset);
+    f_EmptyStarImages[1] =
         AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-    ReadEncodedAsset(sEmptyStarImages[1], &asset);
-    sEmptyStarImages[STILL_STAR_IMAGE] =
+    ReadEncodedAsset(f_EmptyStarImages[1], &asset);
+    f_EmptyStarImages[STILL_STAR_IMAGE] =
         AllocMemory(OpenEncodedAsset(SPINNING_EMPTY_STAR_ASSET, &asset));
-    ReadEncodedAsset(sEmptyStarImages[STILL_STAR_IMAGE], &asset);
-    sPlanksImage = AllocMemory(OpenEncodedAsset(PLANKS_ASSET, &asset));
-    ReadEncodedAsset(sPlanksImage, &asset);
+    ReadEncodedAsset(f_EmptyStarImages[STILL_STAR_IMAGE], &asset);
+    f_PlanksImage = AllocMemory(OpenEncodedAsset(PLANKS_ASSET, &asset));
+    ReadEncodedAsset(f_PlanksImage, &asset);
   } else {
-    sLoadedScreen = COURSE_SELECT_HOLES;
-    sSlideOffset = HOLE_SELECT_SLIDE_START;
-    sBoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
-    ReadEncodedAsset(sBoardImage, &asset);
+    f_LoadedScreen = COURSE_SELECT_HOLES;
+    f_SlideOffset = HOLE_SELECT_SLIDE_START;
+    f_BoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
+    ReadEncodedAsset(f_BoardImage, &asset);
   }
-  sCourseTurnIndex = 0;
-  sCourseTurnStep = 0;
-  sShownCourse = g_CourseIndex;
-  sNextCourse = g_CourseIndex;
+  f_CourseTurnIndex = 0;
+  f_CourseTurnStep = 0;
+  f_ShownCourse = g_CourseIndex;
+  f_NextCourse = g_CourseIndex;
   for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-    sCourseBadges[i] =
-        AllocMemory(OpenEncodedAsset(sCourseBadgeAssets[i], &asset));
-    ReadEncodedAsset(sCourseBadges[i], &asset);
+    f_CourseBadges[i] =
+        AllocMemory(OpenEncodedAsset(f_CourseBadgeAssets[i], &asset));
+    ReadEncodedAsset(f_CourseBadges[i], &asset);
   }
-  sCourseImage = AllocMemory(OpenEncodedAsset(
-      sCourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
-  ReadEncodedAsset(sCourseImage, &asset);
+  f_CourseImage = AllocMemory(OpenEncodedAsset(
+      f_CourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
+  ReadEncodedAsset(f_CourseImage, &asset);
   OpenAssetFile(COURSE_IMAGE_PALETTE_ASSET, &file);
   size = GetAssetFileSize(&file);
-  sCourseImagePalette = AllocMemory(size);
-  ReadAssetFile(sCourseImagePalette, size, &file);
-  sArrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset));
-  ReadEncodedAsset(sArrowsImage, &asset);
-  sStarFrameIndex = 0;
-  sStarBufferIndex = 0;
-  sStarFrameTime = 0;
+  f_CourseImagePalette = AllocMemory(size);
+  ReadAssetFile(f_CourseImagePalette, size, &file);
+  f_ArrowsImage = AllocMemory(OpenEncodedAsset(ARROWS_ASSET, &asset));
+  ReadEncodedAsset(f_ArrowsImage, &asset);
+  f_StarFrameIndex = 0;
+  f_StarBufferIndex = 0;
+  f_StarFrameTime = 0;
 }
 
 /* Reads the next image of the course image's turn, if it is turning */
@@ -310,58 +312,58 @@ void TurnCourseImage(void) {
   EncodedAsset asset;
   s32 frame;
 
-  if (sCourseTurnStep != 0) {
-    frame = sCourseTurnFrames[sCourseTurnIndex];
+  if (f_CourseTurnStep != 0) {
+    frame = f_CourseTurnFrames[f_CourseTurnIndex];
     if (frame == COURSE_IMAGE_BLANK) {
       OpenEncodedAsset(BLANK_COURSE_IMAGE_ASSET, &asset);
     } else {
-      if (sCourseTurnIndex < COURSE_TURN_MIDDLE) {
-        if (sCourseTurnStep != -1) {
-          OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
+      if (f_CourseTurnIndex < COURSE_TURN_MIDDLE) {
+        if (f_CourseTurnStep != -1) {
+          OpenEncodedAsset(f_CourseImageAssets[f_ShownCourse] + frame, &asset);
         } else {
-          OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
+          OpenEncodedAsset(f_CourseImageAssets[f_NextCourse] + frame, &asset);
         }
-      } else if (sCourseTurnStep == -1) {
-        OpenEncodedAsset(sCourseImageAssets[sShownCourse] + frame, &asset);
+      } else if (f_CourseTurnStep == -1) {
+        OpenEncodedAsset(f_CourseImageAssets[f_ShownCourse] + frame, &asset);
       } else {
-        OpenEncodedAsset(sCourseImageAssets[sNextCourse] + frame, &asset);
+        OpenEncodedAsset(f_CourseImageAssets[f_NextCourse] + frame, &asset);
       }
     }
-    ReadEncodedAsset(sCourseImage, &asset);
-    sCourseTurnIndex += sCourseTurnStep;
-    if (sCourseTurnIndex !=
-        ((sCourseTurnStep == 1) ? COURSE_TURN_FRAME_COUNT : -1)) {
+    ReadEncodedAsset(f_CourseImage, &asset);
+    f_CourseTurnIndex += f_CourseTurnStep;
+    if (f_CourseTurnIndex !=
+        ((f_CourseTurnStep == 1) ? COURSE_TURN_FRAME_COUNT : -1)) {
       return;
     }
-    sCourseTurnStep = 0;
-    sShownCourse = sNextCourse;
+    f_CourseTurnStep = 0;
+    f_ShownCourse = f_NextCourse;
   }
 }
 
 void FreeCourseSelect(void) {
   s32 i;
 
-  if (sLoadedScreen == COURSE_SELECT_UNLOADED) {
+  if (f_LoadedScreen == COURSE_SELECT_UNLOADED) {
     osSyncPrintf("ring dest err");
     return;
   }
-  FreeMemory(&sBoardImage);
+  FreeMemory(&f_BoardImage);
   for (i = 0; i != COURSE_INDEX_COUNT; i++) {
-    FreeMemory(&sCourseBadges[i]);
+    FreeMemory(&f_CourseBadges[i]);
   }
-  FreeMemory(&sCourseImage);
-  FreeMemory(&sCourseImagePalette);
-  FreeMemory(&sArrowsImage);
-  if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
-    FreeMemory(&sStarImages[0]);
-    FreeMemory(&sStarImages[1]);
-    FreeMemory(&sStarImages[STILL_STAR_IMAGE]);
-    FreeMemory(&sEmptyStarImages[0]);
-    FreeMemory(&sEmptyStarImages[1]);
-    FreeMemory(&sEmptyStarImages[STILL_STAR_IMAGE]);
-    FreeMemory(&sPlanksImage);
+  FreeMemory(&f_CourseImage);
+  FreeMemory(&f_CourseImagePalette);
+  FreeMemory(&f_ArrowsImage);
+  if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
+    FreeMemory(&f_StarImages[0]);
+    FreeMemory(&f_StarImages[1]);
+    FreeMemory(&f_StarImages[STILL_STAR_IMAGE]);
+    FreeMemory(&f_EmptyStarImages[0]);
+    FreeMemory(&f_EmptyStarImages[1]);
+    FreeMemory(&f_EmptyStarImages[STILL_STAR_IMAGE]);
+    FreeMemory(&f_PlanksImage);
   }
-  sLoadedScreen = COURSE_SELECT_UNLOADED;
+  f_LoadedScreen = COURSE_SELECT_UNLOADED;
 }
 
 /*
@@ -373,10 +375,10 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
   s32 openCourseCount = CountOpenRingShotCourses();
   s32 result = SELECT_IDLE;
 
-  sPressedButtons = pressedButtons;
-  sRepeatedButtons = repeatedButtons;
-  sPressedDirection = 0;
-  if (sCourseTurnStep == 0 && !(pressedButtons & A_BUTTON)) {
+  f_PressedButtons = pressedButtons;
+  f_RepeatedButtons = repeatedButtons;
+  f_PressedDirection = 0;
+  if (f_CourseTurnStep == 0 && !(pressedButtons & A_BUTTON)) {
     if (pressedButtons & B_BUTTON) {
       result = SELECT_BACK;
     } else if ((repeatedButtons & U_JPAD) && openCourseCount >= 2) {
@@ -384,27 +386,27 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
       result = SELECT_MOVED;
       memory->holeIndex = 0;
       memory->courseIndex--;
-      sCourseTurnStep = 1;
-      sCourseTurnIndex = 1;
-      sPressedDirection = DIRECTION_UP;
+      f_CourseTurnStep = 1;
+      f_CourseTurnIndex = 1;
+      f_PressedDirection = DIRECTION_UP;
     } else if ((repeatedButtons & D_JPAD) && openCourseCount >= 2) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       result = SELECT_MOVED;
       memory->holeIndex = 0;
       memory->courseIndex++;
-      sCourseTurnStep = -1;
-      sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
-      sPressedDirection = DIRECTION_DOWN;
+      f_CourseTurnStep = -1;
+      f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+      f_PressedDirection = DIRECTION_DOWN;
     } else if (repeatedButtons & L_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       result = SELECT_MOVED;
       memory->holeIndex--;
-      sPressedDirection = DIRECTION_LEFT;
+      f_PressedDirection = DIRECTION_LEFT;
     } else if (repeatedButtons & R_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       result = SELECT_MOVED;
       memory->holeIndex++;
-      sPressedDirection = DIRECTION_RIGHT;
+      f_PressedDirection = DIRECTION_RIGHT;
     }
   }
   if (memory->courseIndex < 0) {
@@ -420,7 +422,7 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     memory->holeIndex = 0;
   }
   g_HoleIndex = memory->holeIndex;
-  sNextCourse = g_CourseIndex = memory->courseIndex;
+  f_NextCourse = g_CourseIndex = memory->courseIndex;
   return result;
 }
 
@@ -439,19 +441,19 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
     openCourseCount = COURSE_COUNT;
   }
-  sPressedDirection = 0;
+  f_PressedDirection = 0;
   if (pressedButtons & A_BUTTON) {
     return result;
   }
   if (pressedButtons & B_BUTTON) {
     return SELECT_BACK;
   }
-  if (sCourseTurnStep == 0) {
+  if (f_CourseTurnStep == 0) {
     if (repeatedButtons & L_JPAD) {
       if (!IsOnDrivingRange()) {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
         result = SELECT_MOVED;
-        sPressedDirection = DIRECTION_LEFT;
+        f_PressedDirection = DIRECTION_LEFT;
         g_GameState.holeIndex--;
       } else {
         PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
@@ -462,7 +464,7 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
       } else {
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
         result = SELECT_MOVED;
-        sPressedDirection = DIRECTION_RIGHT;
+        f_PressedDirection = DIRECTION_RIGHT;
         g_GameState.holeIndex++;
       }
     } else if (repeatedButtons & U_JPAD) {
@@ -481,9 +483,9 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
         g_GameState.courseIndex = openCourseCount - 1;
       }
       result = SELECT_MOVED;
-      sPressedDirection = DIRECTION_UP;
-      sCourseTurnStep = 1;
-      sCourseTurnIndex = 1;
+      f_PressedDirection = DIRECTION_UP;
+      f_CourseTurnStep = 1;
+      f_CourseTurnIndex = 1;
     } else if (repeatedButtons & D_JPAD) {
       PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       g_GameState.courseIndex =
@@ -500,14 +502,14 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
         g_IsMiniGolf = FALSE;
       }
       result = SELECT_MOVED;
-      sPressedDirection = DIRECTION_DOWN;
-      sCourseTurnStep = -1;
-      sCourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
+      f_PressedDirection = DIRECTION_DOWN;
+      f_CourseTurnStep = -1;
+      f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
     }
   }
   g_GameState.courseIndex =
       (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
-  sNextCourse = g_GameState.courseIndex;
+  f_NextCourse = g_GameState.courseIndex;
   if (IsOnDrivingRange()) {
     g_GameState.holeIndex = 0;
   } else {
@@ -521,11 +523,11 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
 INCLUDE_ASM("asm/nonmatchings/ovl_11/course_select", UpdateHoleSelect);
 #endif
 
-s32 ArePlanksOpen(void) { return sPlankSlide == 0; }
+s32 ArePlanksOpen(void) { return f_PlankSlide == 0; }
 
 void SetPlankMotion(s32 motion) {
-  if (sPlankMotion != motion) {
-    sPlankMotion = motion;
+  if (f_PlankMotion != motion) {
+    f_PlankMotion = motion;
   }
 }
 
@@ -558,24 +560,24 @@ void DrawPlanks(Gfx** displayListHead) {
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, sPlanksImage + IMAGE_HEADER_SIZE);
-  switch (sPlankMotion) {
+  LoadLargePalette(&gfx, f_PlanksImage + IMAGE_HEADER_SIZE);
+  switch (f_PlankMotion) {
     case PLANKS_SHUT:
       break;
     case PLANKS_OPENING:
-      if (sPlankSlide > 0) {
-        sPlankSlide -= PLANK_SLIDE_STEP;
+      if (f_PlankSlide > 0) {
+        f_PlankSlide -= PLANK_SLIDE_STEP;
       }
-      if (sPlankSlide < 0) {
-        sPlankSlide = 0;
+      if (f_PlankSlide < 0) {
+        f_PlankSlide = 0;
       }
       break;
     case PLANKS_CLOSING:
-      if (sPlankSlide < PLANK_SLIDE_MAX) {
-        sPlankSlide += PLANK_SLIDE_STEP;
+      if (f_PlankSlide < PLANK_SLIDE_MAX) {
+        f_PlankSlide += PLANK_SLIDE_STEP;
       }
-      if (sPlankSlide > PLANK_SLIDE_MAX) {
-        sPlankSlide = PLANK_SLIDE_MAX;
+      if (f_PlankSlide > PLANK_SLIDE_MAX) {
+        f_PlankSlide = PLANK_SLIDE_MAX;
       }
       break;
   }
@@ -583,14 +585,14 @@ void DrawPlanks(Gfx** displayListHead) {
     stripHeight = (stripIndex != PLANK_STRIP_COUNT - 1)
                       ? PLANK_STRIP_HEIGHT
                       : PLANK_LAST_STRIP_HEIGHT;
-    if (sPlankMotion == PLANKS_SHUT) {
+    if (f_PlankMotion == PLANKS_SHUT) {
       slide = PLANKS_MIDDLE;
     } else {
       groupIndex = stripIndex / PLANK_GROUP_STRIP_COUNT;
       if (groupIndex > PLANK_LAST_GROUP) {
         groupIndex = PLANK_LAST_GROUP;
       }
-      slide = sPlankSlide - groupIndex * PLANK_GROUP_LAG;
+      slide = f_PlankSlide - groupIndex * PLANK_GROUP_LAG;
       if (slide > PLANKS_MIDDLE) {
         slide = PLANKS_MIDDLE;
       }
@@ -600,7 +602,7 @@ void DrawPlanks(Gfx** displayListHead) {
     }
     gDPPipeSync(gfx++);
     LoadTextureBlock(&gfx,
-                     sPlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
+                     f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
                          stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
                      G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0,
                      0, 0, 0, 0, 0);
@@ -631,7 +633,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
   s32 push;
   u8 unusedBuffer[0x1C]; /* Unused; it is there to match */
 
-  if (sLoadedScreen == COURSE_SELECT_RING_SHOT) {
+  if (f_LoadedScreen == COURSE_SELECT_RING_SHOT) {
     DrawPlanks(&gfx);
     DrawNamePlate(&gfx, SCREEN_WIDTH / 2, 48);
     TurnCourseImage();
@@ -640,19 +642,19 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
-    LoadLargePalette(&gfx, sCourseImagePalette);
+    LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-                       sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
+                       f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
                        G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
                        COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
                        RING_SHOT_COURSE_IMAGE_TOP)
                           << 2,
                       (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
                        RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
                           << 2,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -665,29 +667,29 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
     if (g_GameState.unk31 == 0 && CountOpenRingShotCourses() >= 2) {
       arrowFrame =
-          sCourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
+          f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,
-                             sArrowsImage + PALETTED_TEXELS_OFFSET +
+                             f_ArrowsImage + PALETTED_TEXELS_OFFSET +
                                  arrowFrame * ARROWS_FRAME_SIZE,
                              G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0,
                              0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
+      push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
       DrawTextureRect(
           &gfx, ARROW_LEFT << 2,
-          (sPressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
+          (f_PressedDirection == DIRECTION_UP ? push + 128 : push + 132) << 2,
           (ARROW_LEFT + ARROW_SIZE) << 2,
-          (sPressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2,
+          (f_PressedDirection == DIRECTION_UP ? push + 144 : push + 148) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
+      push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
       DrawTextureRect(
           &gfx, ARROW_LEFT << 2,
-          (sPressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
+          (f_PressedDirection == DIRECTION_DOWN ? push + 208 : push + 204) << 2,
           (ARROW_LEFT + ARROW_SIZE) << 2,
-          (sPressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
+          (f_PressedDirection == DIRECTION_DOWN ? push + 224 : push + 220) << 2,
           G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -717,11 +719,11 @@ void DrawHoleSelect(Gfx** displayListHead) {
   s32 colorIndex;
 
   func_8005AF74();
-  sSlideOffset -= HOLE_SELECT_SLIDE_STEP;
-  if (sSlideOffset < 0) {
-    sSlideOffset = 0;
+  f_SlideOffset -= HOLE_SELECT_SLIDE_STEP;
+  if (f_SlideOffset < 0) {
+    f_SlideOffset = 0;
   }
-  if (sLoadedScreen == COURSE_SELECT_HOLES) {
+  if (f_LoadedScreen == COURSE_SELECT_HOLES) {
     gDPPipeSync(gfx++);
     gSPDisplayList(gfx++, D_800C3FC0);
     gDPPipeSync(gfx++);
@@ -732,11 +734,11 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
     for (stripIndex = 0; stripIndex != HOLE_SIGN_STRIP_COUNT; stripIndex++) {
       gDPLoadTextureTile(
           gfx++,
-          sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
               stripIndex * HOLE_SIGN_STRIP_HEIGHT * HOLE_SIGN_WIDTH,
           G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_SIGN_WIDTH, 0, 0, 0,
           HOLE_SIGN_WIDTH - 1, HOLE_SIGN_STRIP_HEIGHT - 1, 0,
@@ -745,35 +747,36 @@ void DrawHoleSelect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       DrawTextureRect(
           &gfx, HOLE_SIGN_LEFT << 2,
-          (stripIndex * HOLE_SIGN_STRIP_HEIGHT - (sSlideOffset - HOLE_SIGN_TOP))
+          (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
+           (f_SlideOffset - HOLE_SIGN_TOP))
               << 2,
           (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
           (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
-           (sSlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
+           (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
     TurnCourseImage();
-    LoadLargePalette(&gfx, sCourseImagePalette);
+    LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-                       sCourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
+                       f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE,
                        G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_IMAGE_WIDTH,
                        COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
                        HOLE_COURSE_IMAGE_TOP)
                           << 2,
                       (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + sSlideOffset +
+                      (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
                        HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
                           << 2,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
-    arrowFrame = sCourseArrowFrameTime++;
+    arrowFrame = f_CourseArrowFrameTime++;
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -781,53 +784,53 @@ void DrawHoleSelect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    LoadSmallPalette(&gfx, 0, sArrowsImage + IMAGE_HEADER_SIZE);
+    LoadSmallPalette(&gfx, 0, f_ArrowsImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(
         &gfx,
-        sArrowsImage + PALETTED_TEXELS_OFFSET +
+        f_ArrowsImage + PALETTED_TEXELS_OFFSET +
             ((arrowFrame % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME) *
              ARROWS_FRAME_SIZE),
         G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
-    push = (sRepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
+    push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
     DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                    (sPressedDirection != DIRECTION_UP
-                         ? push + 140 + sSlideOffset
-                         : push + 140 + sSlideOffset - ARROW_STEP)
+                    (f_PressedDirection != DIRECTION_UP
+                         ? push + 140 + f_SlideOffset
+                         : push + 140 + f_SlideOffset - ARROW_STEP)
                         << 2,
                     (ARROW_LEFT + ARROW_SIZE) << 2,
-                    (sPressedDirection != DIRECTION_UP
-                         ? push + 156 + sSlideOffset
-                         : push + 156 + sSlideOffset - ARROW_STEP)
+                    (f_PressedDirection != DIRECTION_UP
+                         ? push + 156 + f_SlideOffset
+                         : push + 156 + f_SlideOffset - ARROW_STEP)
                         << 2,
                     G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-    push = (sRepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
+    push = (f_RepeatedButtons & D_JPAD) ? ARROW_PUSH_DOWN : 0;
     DrawTextureRect(&gfx, ARROW_LEFT << 2,
-                    (sPressedDirection != DIRECTION_DOWN
-                         ? push + 212 + sSlideOffset
-                         : push + 212 + sSlideOffset + ARROW_STEP)
+                    (f_PressedDirection != DIRECTION_DOWN
+                         ? push + 212 + f_SlideOffset
+                         : push + 212 + f_SlideOffset + ARROW_STEP)
                         << 2,
                     (ARROW_LEFT + ARROW_SIZE) << 2,
-                    (sPressedDirection != DIRECTION_DOWN
-                         ? push + 228 + sSlideOffset
-                         : push + 228 + sSlideOffset + ARROW_STEP)
+                    (f_PressedDirection != DIRECTION_DOWN
+                         ? push + 228 + f_SlideOffset
+                         : push + 228 + f_SlideOffset + ARROW_STEP)
                         << 2,
                     G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE,
                     TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
     if (!IsOnDrivingRange()) {
       DrawTextureRect(&gfx,
-                      (sPressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
-                      (44 - sSlideOffset) << 2,
-                      (sPressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
-                      (60 - sSlideOffset) << 2, G_TX_RENDERTILE, 0,
+                      (f_PressedDirection == DIRECTION_LEFT ? 100 : 104) << 2,
+                      (44 - f_SlideOffset) << 2,
+                      (f_PressedDirection == DIRECTION_LEFT ? 116 : 120) << 2,
+                      (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
                       3 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx,
-                      (sPressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
-                      (44 - sSlideOffset) << 2,
-                      (sPressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
-                      (60 - sSlideOffset) << 2, G_TX_RENDERTILE, 0,
+                      (f_PressedDirection == DIRECTION_RIGHT ? 204 : 200) << 2,
+                      (44 - f_SlideOffset) << 2,
+                      (f_PressedDirection == DIRECTION_RIGHT ? 220 : 216) << 2,
+                      (60 - f_SlideOffset) << 2, G_TX_RENDERTILE, 0,
                       2 * ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
@@ -839,13 +842,13 @@ void DrawHoleSelect(Gfx** displayListHead) {
       colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
     }
     sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
-    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - sSlideOffset,
+    DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - f_SlideOffset,
                             g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
                             g_CourseNamePrimColors[colorIndex],
                             TEXT_FLAG_CENTERED);
     if (!IsOnDrivingRange()) {
       sprintf(g_PrintBuffer, "Hole %d", g_HoleIndex + 1);
-      DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - sSlideOffset,
+      DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 44 - f_SlideOffset,
                               g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
                               g_CourseNamePrimColors[colorIndex],
                               TEXT_FLAG_CENTERED);
@@ -870,11 +873,11 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
 
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, sBoardImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_BoardImage + IMAGE_HEADER_SIZE);
   for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
     LoadTextureBlock(
         &gfx,
-        sBoardImage + LARGE_PALETTED_TEXELS_OFFSET +
+        f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
             stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
@@ -911,7 +914,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   s32 height;
   s32 left;
   s32 tile;
-  u8* starImage = sStarImages[sStarBufferIndex];
+  u8* starImage = f_StarImages[f_StarBufferIndex];
   u8* emptyStarImage;
 
   LoadSmallPalette(&gfx, TILE_SPINNING_STAR, starImage + IMAGE_HEADER_SIZE);
@@ -920,7 +923,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  emptyStarImage = sEmptyStarImages[sStarBufferIndex];
+  emptyStarImage = f_EmptyStarImages[f_StarBufferIndex];
   LoadSmallPalette(&gfx, TILE_SPINNING_EMPTY_STAR,
                    emptyStarImage + IMAGE_HEADER_SIZE);
   gDPLoadMultiBlock_4b(gfx++, emptyStarImage + PALETTED_TEXELS_OFFSET,
@@ -930,17 +933,17 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_STAR,
-                   sStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+                   f_StarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
   gDPLoadMultiBlock_4b(gfx++,
-                       sStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+                       f_StarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
                        STAR_TMEM_STEP * TILE_STILL_STAR, TILE_STILL_STAR,
                        G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_STAR,
                        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                        G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   LoadSmallPalette(&gfx, TILE_STILL_EMPTY_STAR,
-                   sEmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
+                   f_EmptyStarImages[STILL_STAR_IMAGE] + IMAGE_HEADER_SIZE);
   gDPLoadMultiBlock_4b(
-      gfx++, sEmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
+      gfx++, f_EmptyStarImages[STILL_STAR_IMAGE] + PALETTED_TEXELS_OFFSET,
       STAR_TMEM_STEP * TILE_STILL_EMPTY_STAR, TILE_STILL_EMPTY_STAR,
       G_IM_FMT_CI, STAR_WIDTH, STAR_HEIGHT, TILE_STILL_EMPTY_STAR,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -972,25 +975,25 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
                     (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
-  sStarFrameTime++;
-  if (sStarFrameTime == STAR_FRAME_TIME) {
-    sStarFrameTime = 0;
-    sStarFrameIndex++;
-    if (sStarFrameIndex >= STAR_FRAME_COUNT) {
-      sStarFrameIndex = 0;
+  f_StarFrameTime++;
+  if (f_StarFrameTime == STAR_FRAME_TIME) {
+    f_StarFrameTime = 0;
+    f_StarFrameIndex++;
+    if (f_StarFrameIndex >= STAR_FRAME_COUNT) {
+      f_StarFrameIndex = 0;
     }
-    sStarBufferIndex = sStarBufferIndex == 0;
-    OpenEncodedAsset(sStarFrameAssets[sStarFrameIndex], &asset);
-    ReadEncodedAsset(sStarImages[sStarBufferIndex], &asset);
-    OpenEncodedAsset(sEmptyStarFrameAssets[sStarFrameIndex], &asset);
-    ReadEncodedAsset(sEmptyStarImages[sStarBufferIndex], &asset);
+    f_StarBufferIndex = f_StarBufferIndex == 0;
+    OpenEncodedAsset(f_StarFrameAssets[f_StarFrameIndex], &asset);
+    ReadEncodedAsset(f_StarImages[f_StarBufferIndex], &asset);
+    OpenEncodedAsset(f_EmptyStarFrameAssets[f_StarFrameIndex], &asset);
+    ReadEncodedAsset(f_EmptyStarImages[f_StarBufferIndex], &asset);
   }
   *displayListHead = gfx;
 }
 
 #else
 /* The hexagon above, which the asm copies to the stack */
-static const f32 sUnusedHexagon[6][2] = {
+static const f32 f_UnusedHexagon[6][2] = {
     {0.0f, -1.0f}, {0.89f, -0.45f}, {0.89f, 0.45f},
     {0.0f, 1.0f},  {-0.89f, 0.45f}, {-0.89f, -0.45f},
 };

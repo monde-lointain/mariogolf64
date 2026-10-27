@@ -47,41 +47,41 @@ typedef struct Heap {
                                      last allocation */
 } Heap;                           /* size = 0x18 */
 
-extern Heap sHeaps[HEAP_COUNT];
-extern Heap sMemory;
+extern Heap f_Heaps[HEAP_COUNT];
+extern Heap f_Memory;
 
 void AddHeapRegion(s32 heapIndex, void* start, void* end) {
   MemoryBlock* block = start;
   u32 size = (u8*)end - (u8*)start;
 
   block->size = size;
-  sHeaps[heapIndex].freeSize += size;
+  f_Heaps[heapIndex].freeSize += size;
   block->tag = BLOCK_FREE;
-  block->next = &sHeaps[heapIndex].sentinel;
-  block->prev = sHeaps[heapIndex].sentinel.prev;
-  sHeaps[heapIndex].sentinel.prev->next = block;
-  sHeaps[heapIndex].sentinel.prev = block;
+  block->next = &f_Heaps[heapIndex].sentinel;
+  block->prev = f_Heaps[heapIndex].sentinel.prev;
+  f_Heaps[heapIndex].sentinel.prev->next = block;
+  f_Heaps[heapIndex].sentinel.prev = block;
 }
 
 void ResetHeap(s32 heapIndex) {
-  Heap* heap = &sHeaps[heapIndex];
+  Heap* heap = &f_Heaps[heapIndex];
 
-  sHeaps[heapIndex].freeSize = 0;
-  sHeaps[heapIndex].sentinel.size = 0;
-  sHeaps[heapIndex].sentinel.tag = BLOCK_SENTINEL;
+  f_Heaps[heapIndex].freeSize = 0;
+  f_Heaps[heapIndex].sentinel.size = 0;
+  f_Heaps[heapIndex].sentinel.tag = BLOCK_SENTINEL;
   heap->sentinel.prev = &heap->sentinel;
-  sHeaps[heapIndex].sentinel.next = &heap->sentinel;
-  sHeaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
+  f_Heaps[heapIndex].sentinel.next = &heap->sentinel;
+  f_Heaps[heapIndex].largestFreeSize = UNMEASURED_SIZE;
 }
 
-s32 GetHeapFreeSize(s32 heapIndex) { return sHeaps[heapIndex].freeSize; }
+s32 GetHeapFreeSize(s32 heapIndex) { return f_Heaps[heapIndex].freeSize; }
 
 s32 GetHeapLargestFreeSize(s32 heapIndex) {
-  return sHeaps[heapIndex].largestFreeSize;
+  return f_Heaps[heapIndex].largestFreeSize;
 }
 
 /* "Unable to allocate memory %x" */
-static const char sOutOfMemoryMessage[] = "メモリが確保できません %x\n";
+static const char f_OutOfMemoryMessage[] = "メモリが確保できません %x\n";
 
 void* AllocFromHeap(s32 heapIndex, s32 size) {
   u32 callerAddress;
@@ -95,7 +95,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
 
   GET_RETURN_ADDRESS(callerAddress);
   largestFreeSize = 0;
-  heap = &sHeaps[heapIndex];
+  heap = &f_Heaps[heapIndex];
   mask = osSetIntMask(OS_IM_NONE);
   /* The size is reused for the block's, to match */
   size = (size + sizeof(MemoryBlock) + 7) & ~7;
@@ -119,14 +119,14 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
       }
     }
   }
-  sHeaps[heapIndex].largestFreeSize = largestFreeSize;
+  f_Heaps[heapIndex].largestFreeSize = largestFreeSize;
   if (bestBlock == NULL) {
     osSetIntMask(mask);
-    osSyncPrintf(sOutOfMemoryMessage, callerAddress);
+    osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
     return NULL;
   }
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
-    sHeaps[heapIndex].freeSize -= size;
+    f_Heaps[heapIndex].freeSize -= size;
     rest = (MemoryBlock*)((u8*)bestBlock + size);
     rest->size = bestBlock->size - size;
     rest->tag = BLOCK_FREE;
@@ -136,7 +136,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
     rest->prev = bestBlock;
     bestBlock->size = size;
   } else {
-    sHeaps[heapIndex].freeSize -= bestSize;
+    f_Heaps[heapIndex].freeSize -= bestSize;
   }
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
@@ -159,7 +159,7 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
     return;
   }
   block = (MemoryBlock*)pointer - 1;
-  sHeaps[heapIndex].freeSize += block->size;
+  f_Heaps[heapIndex].freeSize += block->size;
   if (block->prev->tag == BLOCK_FREE &&
       (MemoryBlock*)((u8*)block->prev + block->prev->size) == block) {
     block->next->prev = block->prev;
@@ -190,23 +190,23 @@ void InitHeapRegions(s32 hasExpansionPak) {
 
     block->size = size;
     block->tag = BLOCK_FREE;
-    block->next = &sMemory.sentinel;
-    block->prev = sMemory.sentinel.prev;
-    sMemory.freeSize += size;
-    sMemory.sentinel.prev->next = block;
-    sMemory.sentinel.prev = block;
+    block->next = &f_Memory.sentinel;
+    block->prev = f_Memory.sentinel.prev;
+    f_Memory.freeSize += size;
+    f_Memory.sentinel.prev->next = block;
+    f_Memory.sentinel.prev = block;
   }
 
-  sMemory.sentinel.size = 0;
-  sMemory.sentinel.tag = BLOCK_SENTINEL;
-  sMemory.sentinel.prev = &sMemory.sentinel;
-  sMemory.freeSize = 0;
-  sMemory.sentinel.next = sMemory.sentinel.prev;
+  f_Memory.sentinel.size = 0;
+  f_Memory.sentinel.tag = BLOCK_SENTINEL;
+  f_Memory.sentinel.prev = &f_Memory.sentinel;
+  f_Memory.freeSize = 0;
+  f_Memory.sentinel.next = f_Memory.sentinel.prev;
   AddMemoryRegion((void*)MAIN_REGION_START, (void*)MAIN_REGION_END);
   if (hasExpansionPak == TRUE) {
     AddMemoryRegion((void*)EXPANSION_REGION_START, (void*)EXPANSION_REGION_END);
   }
-  sMemory.largestFreeSize = UNMEASURED_SIZE;
+  f_Memory.largestFreeSize = UNMEASURED_SIZE;
 }
 
 #else
@@ -215,18 +215,18 @@ INCLUDE_ASM("asm/nonmatchings/heap", AddMemoryRegion);
 INCLUDE_ASM("asm/nonmatchings/heap", InitHeapRegions);
 #endif
 
-u32 GetFreeMemorySize(void) { return sMemory.freeSize; }
+u32 GetFreeMemorySize(void) { return f_Memory.freeSize; }
 
 u32 FindLargestFreeMemorySize(void) {
-  MemoryBlock* block = sMemory.sentinel.next;
+  MemoryBlock* block = f_Memory.sentinel.next;
   u32 largestFreeSize = 0;
 
-  for (; block != &sMemory.sentinel; block = block->next) {
+  for (; block != &f_Memory.sentinel; block = block->next) {
     if (block->tag == BLOCK_FREE && largestFreeSize < block->size) {
       largestFreeSize = block->size;
     }
   }
-  sMemory.largestFreeSize = largestFreeSize;
+  f_Memory.largestFreeSize = largestFreeSize;
   return largestFreeSize;
 }
 
@@ -248,8 +248,8 @@ void* AllocMemory(u32 size) {
   size = (size + sizeof(MemoryBlock) + 7) & ~7;
   bestSize = NO_BLOCK_SIZE;
   bestBlock = NULL;
-  block = sMemory.sentinel.next;
-  for (; block != &sMemory.sentinel; block = block->next) {
+  block = f_Memory.sentinel.next;
+  for (; block != &f_Memory.sentinel; block = block->next) {
     if (block->tag == BLOCK_FREE && block->size >= size) {
       if (block->size < bestSize) {
         if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
@@ -265,10 +265,10 @@ void* AllocMemory(u32 size) {
       }
     }
   }
-  sMemory.largestFreeSize = largestFreeSize;
+  f_Memory.largestFreeSize = largestFreeSize;
   if (bestBlock == NULL) {
     osSetIntMask(mask);
-    osSyncPrintf(sOutOfMemoryMessage, callerAddress);
+    osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
     return NULL;
   }
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
@@ -277,13 +277,13 @@ void* AllocMemory(u32 size) {
     rest->size = bestBlock->size - size;
     bestBlock->next->prev = rest;
     next = bestBlock->next;
-    sMemory.freeSize -= size;
+    f_Memory.freeSize -= size;
     rest->next = next;
     bestBlock->next = rest;
     rest->prev = bestBlock;
     bestBlock->size = size;
   } else {
-    sMemory.freeSize -= bestSize;
+    f_Memory.freeSize -= bestSize;
   }
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
@@ -295,7 +295,7 @@ INCLUDE_ASM("asm/nonmatchings/heap", AllocMemory);
 #endif
 
 /* "A NULL pointer was passed to free(). Called from %x" */
-static const char sFreeNullMessage[] =
+static const char f_FreeNullMessage[] =
     "NULLポインタがfree()に渡されました. call from %x\n";
 
 /* Frees the block that *pointerToBlock points to and clears the pointer */
@@ -312,12 +312,12 @@ void FreeMemory(void* pointerToBlock) {
   pointer = *(void**)pointerToBlock;
   if (pointer == NULL) {
     osSetIntMask(mask);
-    osSyncPrintf(sFreeNullMessage, callerAddress);
+    osSyncPrintf(f_FreeNullMessage, callerAddress);
     return;
   }
   block = (MemoryBlock*)pointer - 1;
   prev = block->prev;
-  sMemory.freeSize += block->size;
+  f_Memory.freeSize += block->size;
   if (prev->tag == BLOCK_FREE &&
       (MemoryBlock*)((u8*)prev + prev->size) == block) {
     block->next->prev = prev;

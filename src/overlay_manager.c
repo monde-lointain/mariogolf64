@@ -24,53 +24,53 @@
    name##_VRAM, name##_TEXT_END, name##_BSS_START,      name##_BSS_END,      \
    onLoad,      onUnload}
 
-static s8 sUnusedModuleIds[] = {0x00, MODULE_ID_END};
-static s8 sModuleIdsOfOverlays00To02[] = {
+static s8 f_UnusedModuleIds[] = {0x00, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlays00To02[] = {
     0x0F, 0x09, 0x01, 0x0A, 0x0B, 0x11,
     0x12, 0x14, 0x17, 0x18, 0x19, MODULE_ID_END,
 };
-static s8 sModuleIdsOfOverlay03[] = {0x02, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay04[] = {0x06, 0x1C, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay05[] = {0x07, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay06[] = {0x08, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay07[] = {0x03, 0x10, 0x13, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay08[] = {0x04, 0x1E, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay09[] = {0x0C, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay10[] = {0x0D, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay11[] = {0x05, 0x0E, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay12[] = {0x1A, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay13[] = {0x15, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay14[] = {0x16, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay15[] = {0x1B, 0x1D, 0x20, MODULE_ID_END};
-static s8 sModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay03[] = {0x02, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay04[] = {0x06, 0x1C, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay05[] = {0x07, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay06[] = {0x08, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay07[] = {0x03, 0x10, 0x13, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay08[] = {0x04, 0x1E, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay09[] = {0x0C, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay10[] = {0x0D, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay11[] = {0x05, 0x0E, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay12[] = {0x1A, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay13[] = {0x15, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay14[] = {0x16, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay15[] = {0x1B, 0x1D, 0x20, MODULE_ID_END};
+static s8 f_ModuleIdsOfOverlay16[] = {0x1F, MODULE_ID_END};
 
 Overlay g_Overlays[OVERLAY_COUNT] = {
-    OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, NULL, NULL),
-    OVERLAY_ENTRY(ovl_00, sModuleIdsOfOverlays00To02, OnLoadOverlay2,
+    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
+    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, NULL, NULL),
+    OVERLAY_ENTRY(ovl_00, f_ModuleIdsOfOverlays00To02, OnLoadOverlay2,
                   FreeScenery),
-    OVERLAY_ENTRY(ovl_01, sModuleIdsOfOverlay03, LoadMenuResources,
+    OVERLAY_ENTRY(ovl_01, f_ModuleIdsOfOverlay03, LoadMenuResources,
                   FreeMenuResources),
-    OVERLAY_ENTRY(ovl_02, sModuleIdsOfOverlay04, NULL, NULL),
-    OVERLAY_ENTRY(ovl_03, sModuleIdsOfOverlay05, NULL, NULL),
-    OVERLAY_ENTRY(ovl_04, sModuleIdsOfOverlay06, NULL, NULL),
-    OVERLAY_ENTRY(ovl_05, sModuleIdsOfOverlay07, OnLoadOverlay7, FreeOpening),
-    OVERLAY_ENTRY(ovl_06, sModuleIdsOfOverlay08, LoadTitleScreen,
+    OVERLAY_ENTRY(ovl_02, f_ModuleIdsOfOverlay04, NULL, NULL),
+    OVERLAY_ENTRY(ovl_03, f_ModuleIdsOfOverlay05, NULL, NULL),
+    OVERLAY_ENTRY(ovl_04, f_ModuleIdsOfOverlay06, NULL, NULL),
+    OVERLAY_ENTRY(ovl_05, f_ModuleIdsOfOverlay07, OnLoadOverlay7, FreeOpening),
+    OVERLAY_ENTRY(ovl_06, f_ModuleIdsOfOverlay08, LoadTitleScreen,
                   UnloadTitleScreen),
-    OVERLAY_ENTRY(ovl_07, sModuleIdsOfOverlay09, LoadBootLogos, NULL),
-    OVERLAY_ENTRY(ovl_08, sModuleIdsOfOverlay10, NULL, NULL),
-    OVERLAY_ENTRY(ovl_09, sModuleIdsOfOverlay11, NULL, NULL),
-    OVERLAY_ENTRY(ovl_10, sModuleIdsOfOverlay12, NULL, NULL),
-    OVERLAY_ENTRY(ovl_11, sModuleIdsOfOverlay13, NULL, NULL),
-    OVERLAY_ENTRY(ovl_12, sModuleIdsOfOverlay14, NULL, NULL),
-    OVERLAY_ENTRY(ovl_13, sModuleIdsOfOverlay15, LoadTransmitMenu,
+    OVERLAY_ENTRY(ovl_07, f_ModuleIdsOfOverlay09, LoadBootLogos, NULL),
+    OVERLAY_ENTRY(ovl_08, f_ModuleIdsOfOverlay10, NULL, NULL),
+    OVERLAY_ENTRY(ovl_09, f_ModuleIdsOfOverlay11, NULL, NULL),
+    OVERLAY_ENTRY(ovl_10, f_ModuleIdsOfOverlay12, NULL, NULL),
+    OVERLAY_ENTRY(ovl_11, f_ModuleIdsOfOverlay13, NULL, NULL),
+    OVERLAY_ENTRY(ovl_12, f_ModuleIdsOfOverlay14, NULL, NULL),
+    OVERLAY_ENTRY(ovl_13, f_ModuleIdsOfOverlay15, LoadTransmitMenu,
                   FreeTransmitMenu),
-    OVERLAY_ENTRY(ovl_14, sModuleIdsOfOverlay16, LoadStaffRoll,
+    OVERLAY_ENTRY(ovl_14, f_ModuleIdsOfOverlay16, LoadStaffRoll,
                   UnloadStaffRoll),
 };
 
 /* The index of the overlay that holds each module, or -1 for none */
-static s8 sOverlayIndexOfModule[MODULE_COUNT];
+static s8 f_OverlayIndexOfModule[MODULE_COUNT];
 
 void OnLoadOverlay2(void) {
   InitScenery();
@@ -83,7 +83,7 @@ void OnLoadOverlay7(void) {
 }
 
 s32 GetOverlayOfModule(s32 moduleId) {
-  return sOverlayIndexOfModule[moduleId] | OVERLAY_ID_BASE;
+  return f_OverlayIndexOfModule[moduleId] | OVERLAY_ID_BASE;
 }
 
 void InitOverlayManager(void) {
@@ -92,7 +92,7 @@ void InitOverlayManager(void) {
   s32 moduleIndex;
 
   for (i = 0; i < MODULE_COUNT; i++) {
-    sOverlayIndexOfModule[i] = -1;
+    f_OverlayIndexOfModule[i] = -1;
     g_IsModuleAlive[i] = FALSE;
     g_ModuleRdpRequestFrames[i] = RDP_REQUEST_FRAME_NEVER;
   }
@@ -101,16 +101,16 @@ void InitOverlayManager(void) {
     moduleIds = g_Overlays[i].moduleIds;
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
-      if (sOverlayIndexOfModule[moduleIds[moduleIndex]] != -1 &&
+      if (f_OverlayIndexOfModule[moduleIds[moduleIndex]] != -1 &&
           !IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("OverlayManager\n");
       }
-      sOverlayIndexOfModule[moduleIds[moduleIndex++]] = i;
+      f_OverlayIndexOfModule[moduleIds[moduleIndex++]] = i;
     }
   }
 
   for (i = 0; i < MODULE_COUNT; i++) {
-    if (sOverlayIndexOfModule[i] == -1) {
+    if (f_OverlayIndexOfModule[i] == -1) {
       g_IsModuleAlive[i] = TRUE;
     }
   }

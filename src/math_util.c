@@ -14,8 +14,8 @@
 #define CRC16_REFLECTED_POLYNOMIAL 0x8408
 #define CRC16_INITIAL_VALUE 0xFFFF
 
-extern s32 sRandomSeed;
-extern f32 sZeroDivisor;
+extern s32 f_RandomSeed;
+extern f32 f_ZeroDivisor;
 
 /* Halves the components until they are small enough, and doubles the length
  * back */
@@ -56,9 +56,9 @@ u32 IntLength2D(s32 x, s32 y) {
   return (u32)sqrt((f64)x * x + (f64)y * y) << shiftCount;
 }
 
-void SetRandomSeed(s32 seed) { sRandomSeed = seed; }
+void SetRandomSeed(s32 seed) { f_RandomSeed = seed; }
 
-s32 NextRandom(void) { return sRandomSeed = sRandomSeed * 0x5D588B65 + 1; }
+s32 NextRandom(void) { return f_RandomSeed = f_RandomSeed * 0x5D588B65 + 1; }
 
 f32 Length2D(f32 x, f32 y) { return sqrtf(x * x + y * y); }
 
@@ -100,5 +100,5 @@ s32 ReportDivisionError(void) {
 
   asm volatile("move %0, $31" : "=r"(returnAddress));
   osSyncPrintf("kDivError %x\n", returnAddress);
-  return 1.0f / sZeroDivisor;
+  return 1.0f / f_ZeroDivisor;
 }

@@ -59,22 +59,22 @@ enum SparkKind { SPARK_KIND_FLAGSTICK, SPARK_KIND_IMPACT };
 #define SHARED_EFFECT_SECOND_IMAGE_OFFSET 0x648
 
 /* Counts the frames from the last impact flash, back to 0 after 100 */
-extern s32 sImpactFrameCount;
+extern s32 f_ImpactFrameCount;
 
 /* Each spark's offset from its burst's point on screen, and its speed */
-extern f32 sSparkOffsets[SPARK_COUNT][2];
-extern f32 sSparkVelocities[SPARK_COUNT][2];
-extern f32 sSparkAngles[SPARK_COUNT];
+extern f32 f_SparkOffsets[SPARK_COUNT][2];
+extern f32 f_SparkVelocities[SPARK_COUNT][2];
+extern f32 f_SparkAngles[SPARK_COUNT];
 /* The frames each spark has left; 0 when unused */
-extern u8 sSparkLives[SPARK_COUNT];
-extern u8 sSparkKinds[SPARK_COUNT];
-extern u8 sSparkBursts[SPARK_COUNT];
+extern u8 f_SparkLives[SPARK_COUNT];
+extern u8 f_SparkKinds[SPARK_COUNT];
+extern u8 f_SparkBursts[SPARK_COUNT];
 /* Each burst's age in frames, or NO_SPARK_BURST */
-extern s8 sSparkBurstAges[SPARK_BURST_COUNT];
-extern u8 sSparkBurstTimers[SPARK_BURST_COUNT];
-extern CoursePoint sSparkBurstPoints[SPARK_BURST_COUNT];
-extern u8* sSparkImage;
-extern u8* sSwingTrailImage;
+extern s8 f_SparkBurstAges[SPARK_BURST_COUNT];
+extern u8 f_SparkBurstTimers[SPARK_BURST_COUNT];
+extern CoursePoint f_SparkBurstPoints[SPARK_BURST_COUNT];
+extern u8* f_SparkImage;
+extern u8* f_SwingTrailImage;
 
 /* The arguments of StartSwingTrail */
 #define SWING_TRAIL_CLEAR -1
@@ -104,36 +104,36 @@ enum SwingTrailState {
 /* The S coordinate across the whole trail, in 10.5 fixed point */
 #define SWING_TRAIL_TEXTURE_LENGTH 0x800
 
-extern s32 sSwingTrailPathLength;
-extern s32 sSwingTrailSampleCount;
-/* The ring of matrices that sSwingTrailHead turns backwards through */
-extern s32 sSwingTrailHead;
-extern s32 sSwingTrailKind;
-extern s32 sSwingTrailPathIndex;
-extern s32 sSwingTrailLength;
-extern s32 sSwingTrailState;
-extern s32 sSwingTrailAlpha;
+extern s32 f_SwingTrailPathLength;
+extern s32 f_SwingTrailSampleCount;
+/* The ring of matrices that f_SwingTrailHead turns backwards through */
+extern s32 f_SwingTrailHead;
+extern s32 f_SwingTrailKind;
+extern s32 f_SwingTrailPathIndex;
+extern s32 f_SwingTrailLength;
+extern s32 f_SwingTrailState;
+extern s32 f_SwingTrailAlpha;
 /* A vertex at the origin for each edge of the trail */
-extern Vtx sSwingTrailVertices[2];
-extern Mtx sSwingTrailOrigin;
-extern Mtx sSwingTrailProjections[DRAW_BUFFER_COUNT];
-extern Mtx sSwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
-extern f32 sSwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
-extern f32 sSwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
+extern Vtx f_SwingTrailVertices[2];
+extern Mtx f_SwingTrailOrigin;
+extern Mtx f_SwingTrailProjections[DRAW_BUFFER_COUNT];
+extern Mtx f_SwingTrailMatrices[SWING_TRAIL_MATRIX_COUNT][2];
+extern f32 f_SwingTrailOuterPath[SWING_TRAIL_PATH_LENGTH][3];
+extern f32 f_SwingTrailInnerPath[SWING_TRAIL_PATH_LENGTH][3];
 
 f32 InterpolateHermite(f32 values[], f32 position);
 
 void ResetShotEffects(void) {
   s32 i;
 
-  sImpactFrameCount = 0;
+  f_ImpactFrameCount = 0;
   g_ImpactFlashState = IMPACT_FLASH_NONE;
   g_ContactEffect = CONTACT_EFFECT_NONE;
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
-    sSparkBurstAges[i] = NO_SPARK_BURST;
+    f_SparkBurstAges[i] = NO_SPARK_BURST;
   }
   for (i = 0; i != SPARK_COUNT; i++) {
-    sSparkLives[i] = 0;
+    f_SparkLives[i] = 0;
   }
 }
 
@@ -142,7 +142,7 @@ void ClearShotEffects(s32 kind) {
   ShowWindFlyGuy(FLY_GUY_HIDDEN);
   StartShotEffect(-1);
   ClearEffects();
-  sImpactFrameCount = 0;
+  f_ImpactFrameCount = 0;
   g_ImpactFlashState = IMPACT_FLASH_NONE;
   ClearHoleCreatures();
   StartContactEffect(CONTACT_EFFECT_NONE);
@@ -172,10 +172,10 @@ s32 StartSparkBurst(void) {
   s32 i;
 
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
-    if (sSparkBurstAges[i] == NO_SPARK_BURST) {
+    if (f_SparkBurstAges[i] == NO_SPARK_BURST) {
       found = i;
-      sSparkBurstAges[i] = 1;
-      sSparkBurstTimers[found] = SPARK_BURST_TIME;
+      f_SparkBurstAges[i] = 1;
+      f_SparkBurstTimers[found] = SPARK_BURST_TIME;
       break;
     }
   }
@@ -188,27 +188,27 @@ void StartImpactSparks(void) {
   s32 burst;
   s32 i;
 
-  sImpactFrameCount = 1;
+  f_ImpactFrameCount = 1;
   burst = StartSparkBurst();
   if (burst != NO_SPARK_BURST) {
-    sSparkBurstPoints[burst][AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
-    sSparkBurstPoints[burst][AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-    sSparkBurstPoints[burst][AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
+    f_SparkBurstPoints[burst][AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
+    f_SparkBurstPoints[burst][AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
+    f_SparkBurstPoints[burst][AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     for (i = 0; i != SPARK_COUNT; i++) {
-      if (sSparkLives[i] == 0) {
+      if (f_SparkLives[i] == 0) {
         f32 speed;
 
-        sSparkOffsets[i][0] = 0;
-        sSparkOffsets[i][1] = 0;
-        sSparkAngles[i] = (f32)count * IMPACT_SPARK_SPACING +
-                          DEGREES_TO_RADIANS(guRandom() % 20 - 10);
-        sSparkKinds[i] = SPARK_KIND_IMPACT;
+        f_SparkOffsets[i][0] = 0;
+        f_SparkOffsets[i][1] = 0;
+        f_SparkAngles[i] = (f32)count * IMPACT_SPARK_SPACING +
+                           DEGREES_TO_RADIANS(guRandom() % 20 - 10);
+        f_SparkKinds[i] = SPARK_KIND_IMPACT;
         speed = guRandom() % IMPACT_SPARK_SPEED_RANGE + IMPACT_SPARK_MIN_SPEED;
-        sSparkVelocities[i][0] = sinf(sSparkAngles[i]) * speed;
+        f_SparkVelocities[i][0] = sinf(f_SparkAngles[i]) * speed;
         count++;
-        sSparkVelocities[i][1] = -cosf(sSparkAngles[i]) * speed;
-        sSparkLives[i] = SPARK_LIFE;
-        sSparkBursts[i] = burst;
+        f_SparkVelocities[i][1] = -cosf(f_SparkAngles[i]) * speed;
+        f_SparkLives[i] = SPARK_LIFE;
+        f_SparkBursts[i] = burst;
       }
       if (count == IMPACT_SPARK_COUNT) {
         break;
@@ -222,11 +222,11 @@ void StartImpactSparks(void) {
 void LoadShotEffectImages(void) {
   EncodedAsset asset;
 
-  sSparkImage = AllocMemory(OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(sSparkImage, &asset);
-  sSwingTrailImage =
+  f_SparkImage = AllocMemory(OpenEncodedAsset(SPARK_IMAGE_ASSET, &asset));
+  ReadEncodedAsset(f_SparkImage, &asset);
+  f_SwingTrailImage =
       AllocMemory(OpenEncodedAsset(SWING_TRAIL_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(sSwingTrailImage, &asset);
+  ReadEncodedAsset(f_SwingTrailImage, &asset);
   g_SharedEffectImages = AllocMemory(SHARED_EFFECT_IMAGES_SIZE);
   OpenEncodedAsset(SHARED_EFFECT_IMAGE_ASSET, &asset);
   ReadEncodedAsset(g_SharedEffectImages, &asset);
@@ -236,8 +236,8 @@ void LoadShotEffectImages(void) {
 }
 
 void FreeShotEffectImages(void) {
-  FreeMemory(&sSparkImage);
-  FreeMemory(&sSwingTrailImage);
+  FreeMemory(&f_SparkImage);
+  FreeMemory(&f_SwingTrailImage);
   FreeMemory(&g_SharedEffectImages);
 }
 
@@ -251,20 +251,22 @@ void StartFlagstickSparks(CoursePoint point) {
   s32 i;
 
   if (burst != NO_SPARK_BURST) {
-    sSparkBurstPoints[burst][AXIS_X] = point[AXIS_X];
-    sSparkBurstPoints[burst][AXIS_Y] = point[AXIS_Y];
-    sSparkBurstPoints[burst][AXIS_Z] = point[AXIS_Z];
+    f_SparkBurstPoints[burst][AXIS_X] = point[AXIS_X];
+    f_SparkBurstPoints[burst][AXIS_Y] = point[AXIS_Y];
+    f_SparkBurstPoints[burst][AXIS_Z] = point[AXIS_Z];
     for (i = 0; i != SPARK_COUNT; i++) {
-      if (sSparkLives[i] == 0) {
-        sSparkOffsets[i][0] = 0;
-        sSparkOffsets[i][1] = 0;
-        sSparkAngles[i] = (f32)count * FLAGSTICK_SPARK_SPACING;
-        sSparkKinds[i] = SPARK_KIND_FLAGSTICK;
+      if (f_SparkLives[i] == 0) {
+        f_SparkOffsets[i][0] = 0;
+        f_SparkOffsets[i][1] = 0;
+        f_SparkAngles[i] = (f32)count * FLAGSTICK_SPARK_SPACING;
+        f_SparkKinds[i] = SPARK_KIND_FLAGSTICK;
         count++;
-        sSparkVelocities[i][0] = sinf(sSparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
-        sSparkVelocities[i][1] = -cosf(sSparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
-        sSparkLives[i] = SPARK_LIFE;
-        sSparkBursts[i] = burst;
+        f_SparkVelocities[i][0] =
+            sinf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
+        f_SparkVelocities[i][1] =
+            -cosf(f_SparkAngles[i]) * FLAGSTICK_SPARK_SPEED;
+        f_SparkLives[i] = SPARK_LIFE;
+        f_SparkBursts[i] = burst;
       }
       if (count == FLAGSTICK_SPARK_COUNT) {
         break;
@@ -298,8 +300,8 @@ void StartFlagstickSparks(CoursePoint point) {
 /* Texture rectangles beyond these screen coordinates would overflow */
 #define SPARK_MAX_SCREEN_COORD 511
 
-extern Vtx sSparkVertices[3];
-extern Mtx sSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
+extern Vtx f_SparkVertices[3];
+extern Mtx f_SparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
 
 #ifdef NON_MATCHING
 /*
@@ -326,9 +328,9 @@ void DrawSparks(Gfx** displayListHead) {
   s32 top;
   s32 i;
 
-  if (sImpactFrameCount != 0) {
-    if (++sImpactFrameCount == IMPACT_FRAME_COUNT_END) {
-      sImpactFrameCount = 0;
+  if (f_ImpactFrameCount != 0) {
+    if (++f_ImpactFrameCount == IMPACT_FRAME_COUNT_END) {
+      f_ImpactFrameCount = 0;
     }
     if (g_ImpactFlashState == IMPACT_FLASH_RISING) {
       g_ImpactFlashLevel += IMPACT_FLASH_RISE_STEP;
@@ -345,12 +347,12 @@ void DrawSparks(Gfx** displayListHead) {
     }
   }
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
-    if (sSparkBurstAges[i] != NO_SPARK_BURST) {
-      if (ProjectPoint(sSparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
-                       sSparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
-                       sSparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
+    if (f_SparkBurstAges[i] != NO_SPARK_BURST) {
+      if (ProjectPoint(f_SparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
+                       f_SparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                       f_SparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
                        &point) < 0) {
-        size = sSparkBurstAges[i] * SPARK_AGE_GROWTH + SPARK_START_SIZE;
+        size = f_SparkBurstAges[i] * SPARK_AGE_GROWTH + SPARK_START_SIZE;
         burstShown[i] = SPARK_BURST_SHOWN;
         burstPoints[i][0] = point.x;
         burstPoints[i][1] = point.y;
@@ -370,8 +372,8 @@ void DrawSparks(Gfx** displayListHead) {
       } else {
         burstShown[i] = SPARK_BURST_HIDDEN;
       }
-      if (sSparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
-        sSparkBurstAges[i]++;
+      if (f_SparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
+        f_SparkBurstAges[i]++;
       }
     } else {
       burstShown[i] = SPARK_BURST_HIDDEN;
@@ -397,44 +399,45 @@ void DrawSparks(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
-  gDPLoadTextureBlock_4b(gfx++, ((u32)sSparkImage + IMAGE_HEADER_SIZE) & ~7,
+  gDPLoadTextureBlock_4b(gfx++, ((u32)f_SparkImage + IMAGE_HEADER_SIZE) & ~7,
                          G_IM_FMT_I, SPARK_IMAGE_SIZE, SPARK_IMAGE_SIZE, 0,
                          G_TX_CLAMP, G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
                          G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(gfx++);
   for (i = 0; i != SPARK_COUNT; i++) {
-    if (sSparkLives[i] != 0) {
-      burst = sSparkBursts[i];
-      sSparkOffsets[i][0] += sSparkVelocities[i][0];
-      sSparkOffsets[i][1] += sSparkVelocities[i][1];
-      sSparkVelocities[i][0] *= SPARK_DRAG;
-      sSparkVelocities[i][1] *= SPARK_DRAG;
-      sSparkLives[i]--;
+    if (f_SparkLives[i] != 0) {
+      burst = f_SparkBursts[i];
+      f_SparkOffsets[i][0] += f_SparkVelocities[i][0];
+      f_SparkOffsets[i][1] += f_SparkVelocities[i][1];
+      f_SparkVelocities[i][0] *= SPARK_DRAG;
+      f_SparkVelocities[i][1] *= SPARK_DRAG;
+      f_SparkLives[i]--;
       if (burstShown[burst] == SPARK_BURST_SHOWN) {
         rotation[AXIS_X] = 0;
         rotation[AXIS_Y] = 0;
-        rotation[AXIS_Z] = sSparkAngles[i];
-        translation[AXIS_X] = sSparkOffsets[i][0] * burstScales[burst] +
+        rotation[AXIS_Z] = f_SparkAngles[i];
+        translation[AXIS_X] = f_SparkOffsets[i][0] * burstScales[burst] +
                               burstPoints[burst][0] - SCREEN_WIDTH / 2;
-        translation[AXIS_Y] = sSparkOffsets[i][1] * burstScales[burst] -
+        translation[AXIS_Y] = f_SparkOffsets[i][1] * burstScales[burst] -
                               burstPoints[burst][1] + SCREEN_HEIGHT / 2;
         translation[AXIS_Z] = SPARK_MODEL_Z;
         scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
         scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
         scale[AXIS_Z] = burstScales[burst] * SPARK_MODEL_SCALE;
-        if (sSparkKinds[i] == SPARK_KIND_IMPACT) {
+        if (f_SparkKinds[i] == SPARK_KIND_IMPACT) {
           BuildTransformMatrix(matrix, rotation, translation, scale);
-          ConvertMatrixToFixed(matrix, &sSparkMatrices[g_MatrixBufferIndex][i]);
+          ConvertMatrixToFixed(matrix,
+                               &f_SparkMatrices[g_MatrixBufferIndex][i]);
         }
-        if (sSparkKinds[i] == SPARK_KIND_FLAGSTICK &&
+        if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
             burstPoints[burst][0] >= -SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] >= -SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] <= SPARK_MAX_SCREEN_COORD) {
           left =
-              sSparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0];
+              f_SparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0];
           top =
-              sSparkOffsets[i][1] * burstScales[burst] + burstPoints[burst][1];
+              f_SparkOffsets[i][1] * burstScales[burst] + burstPoints[burst][1];
           gSPScisTextureRectangle(
               gfx++, (left - burstHalfSizes[burst]) << 2,
               (top - burstHalfSizes[burst]) << 2,
@@ -462,14 +465,14 @@ void DrawSparks(Gfx** displayListHead) {
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   for (i = 0; i != SPARK_COUNT; i++) {
-    if (sSparkKinds[i] == SPARK_KIND_IMPACT &&
-        burstShown[sSparkBursts[i]] == SPARK_BURST_SHOWN) {
-      gDPSetPrimDepth(gfx++, burstPoints[sSparkBursts[i]][2], 0);
-      if (sSparkLives[i] != 0) {
+    if (f_SparkKinds[i] == SPARK_KIND_IMPACT &&
+        burstShown[f_SparkBursts[i]] == SPARK_BURST_SHOWN) {
+      gDPSetPrimDepth(gfx++, burstPoints[f_SparkBursts[i]][2], 0);
+      if (f_SparkLives[i] != 0) {
         gSPMatrix(gfx++,
-                  OS_K0_TO_PHYSICAL(&sSparkMatrices[g_MatrixBufferIndex][i]),
+                  OS_K0_TO_PHYSICAL(&f_SparkMatrices[g_MatrixBufferIndex][i]),
                   G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        gSPVertex(gfx++, sSparkVertices, 3, 0);
+        gSPVertex(gfx++, f_SparkVertices, 3, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
       }
     }
@@ -479,10 +482,10 @@ void DrawSparks(Gfx** displayListHead) {
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gDPPipeSync(gfx++);
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
-    if (sSparkBurstTimers[i] == 0) {
-      sSparkBurstAges[i] = NO_SPARK_BURST;
+    if (f_SparkBurstTimers[i] == 0) {
+      f_SparkBurstAges[i] = NO_SPARK_BURST;
     } else {
-      sSparkBurstTimers[i]--;
+      f_SparkBurstTimers[i]--;
     }
   }
   *displayListHead = gfx;
@@ -510,16 +513,16 @@ void StartSwingTrail(s32 kind) {
   f32 position;
 
   if (kind == SWING_TRAIL_CLEAR) {
-    sSwingTrailState = SWING_TRAIL_NONE;
+    f_SwingTrailState = SWING_TRAIL_NONE;
   } else if (kind == SWING_TRAIL_KIND_UNK1 || kind == SWING_TRAIL_KIND_UNK2) {
-    sSwingTrailState = SWING_TRAIL_SHOWN;
-    sSwingTrailHead = 0;
-    sSwingTrailPathIndex = 0;
-    sSwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
-    sSwingTrailLength = 0;
-    sSwingTrailKind = kind;
-    sSwingTrailSampleCount = SWING_TRAIL_SAMPLES;
-    for (i = 0; i != sSwingTrailSampleCount; i++) {
+    f_SwingTrailState = SWING_TRAIL_SHOWN;
+    f_SwingTrailHead = 0;
+    f_SwingTrailPathIndex = 0;
+    f_SwingTrailAlpha = SWING_TRAIL_FULL_ALPHA;
+    f_SwingTrailLength = 0;
+    f_SwingTrailKind = kind;
+    f_SwingTrailSampleCount = SWING_TRAIL_SAMPLES;
+    for (i = 0; i != f_SwingTrailSampleCount; i++) {
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, point);
       samples[0][i] = point[AXIS_X];
       samples[1][i] = point[AXIS_Y];
@@ -531,36 +534,36 @@ void StartSwingTrail(s32 kind) {
       AnimateCharacterInSameCopy(0);
     }
     /* Rewinds the swing to where it was */
-    SetAnimationSpeed(0, -sSwingTrailSampleCount);
+    SetAnimationSpeed(0, -f_SwingTrailSampleCount);
     AnimateCharacterInSameCopy(0);
     SetAnimationSpeed(0, 1.0f);
     position = 0.0f;
-    sSwingTrailPathLength = sSwingTrailSampleCount * 2 - 4;
-    for (i = 0; i != sSwingTrailPathLength; i++) {
-      sSwingTrailOuterPath[i][AXIS_X] =
+    f_SwingTrailPathLength = f_SwingTrailSampleCount * 2 - 4;
+    for (i = 0; i != f_SwingTrailPathLength; i++) {
+      f_SwingTrailOuterPath[i][AXIS_X] =
           InterpolateHermite(samples[0], position);
-      sSwingTrailOuterPath[i][AXIS_Y] =
+      f_SwingTrailOuterPath[i][AXIS_Y] =
           InterpolateHermite(samples[1], position);
-      sSwingTrailOuterPath[i][AXIS_Z] =
+      f_SwingTrailOuterPath[i][AXIS_Z] =
           InterpolateHermite(samples[2], position);
-      sSwingTrailInnerPath[i][AXIS_X] =
+      f_SwingTrailInnerPath[i][AXIS_X] =
           InterpolateHermite(samples[3], position);
-      sSwingTrailInnerPath[i][AXIS_Y] =
+      f_SwingTrailInnerPath[i][AXIS_Y] =
           InterpolateHermite(samples[4], position);
-      sSwingTrailInnerPath[i][AXIS_Z] =
+      f_SwingTrailInnerPath[i][AXIS_Z] =
           InterpolateHermite(samples[5], position);
       position += 0.5f;
     }
     for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
-      guTranslate(&sSwingTrailMatrices[i][0], sSwingTrailOuterPath[0][AXIS_X],
-                  sSwingTrailOuterPath[0][AXIS_Y],
-                  sSwingTrailOuterPath[0][AXIS_Z]);
-      guTranslate(&sSwingTrailMatrices[i][1], sSwingTrailInnerPath[0][AXIS_X],
-                  sSwingTrailInnerPath[0][AXIS_Y],
-                  sSwingTrailInnerPath[0][AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[i][0], f_SwingTrailOuterPath[0][AXIS_X],
+                  f_SwingTrailOuterPath[0][AXIS_Y],
+                  f_SwingTrailOuterPath[0][AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[i][1], f_SwingTrailInnerPath[0][AXIS_X],
+                  f_SwingTrailInnerPath[0][AXIS_Y],
+                  f_SwingTrailInnerPath[0][AXIS_Z]);
     }
-  } else if (sSwingTrailState == SWING_TRAIL_SHOWN) {
-    sSwingTrailState = SWING_TRAIL_FADING;
+  } else if (f_SwingTrailState == SWING_TRAIL_SHOWN) {
+    f_SwingTrailState = SWING_TRAIL_FADING;
   }
 }
 #else
@@ -588,22 +591,22 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   void LoadSwingTrailSegments(s32 first, s32 last, s32 increment) {
     last += increment;
     for (step = first; step != last; step += increment) {
-      s32 matrixIndex = (sSwingTrailHead + segment) % SWING_TRAIL_MATRIX_COUNT;
+      s32 matrixIndex = (f_SwingTrailHead + segment) % SWING_TRAIL_MATRIX_COUNT;
       s32 alpha;
       f32 nearness;
       f32 fade;
 
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSwingTrailMatrices[matrixIndex][0]),
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][0]),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, &sSwingTrailVertices[0], 1, step * 2);
+      gSPVertex(gfx++, &f_SwingTrailVertices[0], 1, step * 2);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSwingTrailMatrices[matrixIndex][1]),
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailMatrices[matrixIndex][1]),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, &sSwingTrailVertices[1], 1, step * 2 + 1);
+      gSPVertex(gfx++, &f_SwingTrailVertices[1], 1, step * 2 + 1);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       /* Fades the segments towards the tail of the trail */
       nearness = (SWING_TRAIL_SEGMENTS - segment) / 255.0f;
-      fade = sSwingTrailAlpha * nearness / SWING_TRAIL_SEGMENTS;
+      fade = f_SwingTrailAlpha * nearness / SWING_TRAIL_SEGMENTS;
       alpha = fade * 191.0f;
       gSPModifyVertex(gfx++, step * 2, G_MWO_POINT_RGBA, 0xFFFFFF00);
       if (alpha > 255) {
@@ -623,48 +626,48 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   }
 
-  if (sSwingTrailState == SWING_TRAIL_NONE) {
+  if (f_SwingTrailState == SWING_TRAIL_NONE) {
     return;
   }
-  sSwingTrailAlpha = (sSwingTrailState == SWING_TRAIL_FADING)
-                         ? sSwingTrailAlpha - 16
-                         : sSwingTrailAlpha - 4;
-  if (sSwingTrailAlpha < 0) {
-    sSwingTrailState = SWING_TRAIL_NONE;
+  f_SwingTrailAlpha = (f_SwingTrailState == SWING_TRAIL_FADING)
+                          ? f_SwingTrailAlpha - 16
+                          : f_SwingTrailAlpha - 4;
+  if (f_SwingTrailAlpha < 0) {
+    f_SwingTrailState = SWING_TRAIL_NONE;
     return;
   }
   step = 0;
   do {
-    sSwingTrailPathIndex++;
-    if (sSwingTrailPathIndex > sSwingTrailPathLength - 1) {
-      sSwingTrailPathIndex = sSwingTrailPathLength - 1;
+    f_SwingTrailPathIndex++;
+    if (f_SwingTrailPathIndex > f_SwingTrailPathLength - 1) {
+      f_SwingTrailPathIndex = f_SwingTrailPathLength - 1;
       GetCharacterPointPosition(0, SWING_TRAIL_OUTER_POINT, outerPoint);
       GetCharacterPointPosition(0, SWING_TRAIL_INNER_POINT, innerPoint);
-      guTranslate(&sSwingTrailMatrices[sSwingTrailHead][0], outerPoint[AXIS_X],
-                  outerPoint[AXIS_Y], outerPoint[AXIS_Z]);
-      guTranslate(&sSwingTrailMatrices[sSwingTrailHead][1], innerPoint[AXIS_X],
-                  innerPoint[AXIS_Y], innerPoint[AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][0],
+                  outerPoint[AXIS_X], outerPoint[AXIS_Y], outerPoint[AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][1],
+                  innerPoint[AXIS_X], innerPoint[AXIS_Y], innerPoint[AXIS_Z]);
     } else {
-      guTranslate(&sSwingTrailMatrices[sSwingTrailHead][0],
-                  sSwingTrailOuterPath[sSwingTrailPathIndex][AXIS_X],
-                  sSwingTrailOuterPath[sSwingTrailPathIndex][AXIS_Y],
-                  sSwingTrailOuterPath[sSwingTrailPathIndex][AXIS_Z]);
-      guTranslate(&sSwingTrailMatrices[sSwingTrailHead][1],
-                  sSwingTrailInnerPath[sSwingTrailPathIndex][AXIS_X],
-                  sSwingTrailInnerPath[sSwingTrailPathIndex][AXIS_Y],
-                  sSwingTrailInnerPath[sSwingTrailPathIndex][AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][0],
+                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_X],
+                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Y],
+                  f_SwingTrailOuterPath[f_SwingTrailPathIndex][AXIS_Z]);
+      guTranslate(&f_SwingTrailMatrices[f_SwingTrailHead][1],
+                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_X],
+                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Y],
+                  f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Z]);
     }
-    sSwingTrailLength++;
-    if (sSwingTrailLength > SWING_TRAIL_SEGMENTS - 1) {
-      sSwingTrailLength = SWING_TRAIL_SEGMENTS - 1;
+    f_SwingTrailLength++;
+    if (f_SwingTrailLength > SWING_TRAIL_SEGMENTS - 1) {
+      f_SwingTrailLength = SWING_TRAIL_SEGMENTS - 1;
     }
-    textureStep = SWING_TRAIL_TEXTURE_LENGTH / sSwingTrailLength;
+    textureStep = SWING_TRAIL_TEXTURE_LENGTH / f_SwingTrailLength;
     if (step == 1) {
       break;
     }
-    sSwingTrailHead--;
-    if (sSwingTrailHead < 0) {
-      sSwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
+    f_SwingTrailHead--;
+    if (f_SwingTrailHead < 0) {
+      f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
     }
     step++;
   } while (TRUE);
@@ -685,14 +688,14 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  gDPLoadTLUT_pal256(gfx++, ((u32)sSwingTrailImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(gfx++, ((u32)f_SwingTrailImage + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock(
-      gfx++, ((u32)sSwingTrailImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+      gfx++, ((u32)f_SwingTrailImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
       G_IM_FMT_CI, G_IM_SIZ_8b, SWING_TRAIL_IMAGE_WIDTH,
       SWING_TRAIL_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
-  if (sSwingTrailKind == SWING_TRAIL_KIND_UNK1) {
+  if (f_SwingTrailKind == SWING_TRAIL_KIND_UNK1) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, TEXEL0, 0, SHADE, 0, 0, 0, 0,
                       TEXEL0, TEXEL0, 0, SHADE, 0);
   } else {
@@ -703,16 +706,16 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x00, 0xFF);
-  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, sSwingTrailAlpha);
+  gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, f_SwingTrailAlpha);
   /* Draws the trail a little nearer than it is, so that the club does not hide
    * it */
   guMtxL2F(projection, &matrices->projection);
   projection[3][2] -= 2.0f;
-  guMtxF2L(projection, &sSwingTrailProjections[g_DrawBufferIndex]);
+  guMtxF2L(projection, &f_SwingTrailProjections[g_DrawBufferIndex]);
   segment = 0;
-  gSPMatrix(gfx++, &sSwingTrailProjections[g_DrawBufferIndex],
+  gSPMatrix(gfx++, &f_SwingTrailProjections[g_DrawBufferIndex],
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSwingTrailOrigin),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SwingTrailOrigin),
             G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
   LoadSwingTrailSegments(0, SWING_TRAIL_SEGMENTS, 1);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
@@ -722,9 +725,9 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
-  sSwingTrailHead--;
-  if (sSwingTrailHead < 0) {
-    sSwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
+  f_SwingTrailHead--;
+  if (f_SwingTrailHead < 0) {
+    f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
   }
   *displayListHead = gfx;
 }

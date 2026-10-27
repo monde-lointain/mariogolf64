@@ -10,7 +10,7 @@
 
 /* Named like the file-local data it stands in for */
 /* NOLINTNEXTLINE(readability-identifier-naming) */
-#define sHoleTriangles (g_WorkArea.hole.triangles)
+#define f_HoleTriangles (g_WorkArea.hole.triangles)
 
 /* The size and texture scale of the blended texture on the triangles */
 #define BLENDED_TEXTURE_SIZE 32
@@ -69,14 +69,14 @@ typedef struct RingCorners {
  */
 #define KEEP_RING_STATES 2
 
-extern s8 sDimsTranslucentTriangles;
-extern s32 sHasTestRing;
-extern s32 sTextureScroll;
-extern f32 sRingAngle;
-extern Lights1 sRingLights;
-extern Mtx sRingSpinMatrices[2];
-extern Vtx sRingVertices[RING_VERTEX_COUNT];
-extern Mtx sRingMatrices[];
+extern s8 f_DimsTranslucentTriangles;
+extern s32 f_HasTestRing;
+extern s32 f_TextureScroll;
+extern f32 f_RingAngle;
+extern Lights1 f_RingLights;
+extern Mtx f_RingSpinMatrices[2];
+extern Vtx f_RingVertices[RING_VERTEX_COUNT];
+extern Mtx f_RingMatrices[];
 extern s32 g_IsCupViewShown;
 extern u8* g_BlendedTextureScrollingLayer;
 extern u8* g_BlendedTextureStillLayer;
@@ -86,7 +86,7 @@ static void AddTestRing(void);
 static s32 BuildRingMatrices(void);
 
 /* Makes the shaded triangles more see-through for the next frame */
-void DimNextTranslucentTriangles(void) { sDimsTranslucentTriangles = TRUE; }
+void DimNextTranslucentTriangles(void) { f_DimsTranslucentTriangles = TRUE; }
 
 /* Draws the hole's triangles other than the rings */
 #ifdef NON_MATCHING
@@ -102,12 +102,12 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
   s32 alpha;
 
   if (IsGameFlagSet(GAME_FLAG_TEST_RING)) {
-    if (!sHasTestRing) {
+    if (!f_HasTestRing) {
       AddTestRing();
-      sHasTestRing = TRUE;
+      f_HasTestRing = TRUE;
     }
   } else {
-    sHasTestRing = FALSE;
+    f_HasTestRing = FALSE;
   }
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -144,42 +144,42 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
   gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xA1);
   gDPSetEnvColor(gfx++, 0x3F, 0x7F, 0x9F, 0xFF);
   gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-  sTextureScroll++;
-  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, sTextureScroll,
-                 BLENDED_TEXTURE_SIZE, sTextureScroll + BLENDED_TEXTURE_SIZE);
-  gDPSetTileSize(gfx++, 1, sTextureScroll, 0,
-                 sTextureScroll + BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE);
+  f_TextureScroll++;
+  gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, f_TextureScroll,
+                 BLENDED_TEXTURE_SIZE, f_TextureScroll + BLENDED_TEXTURE_SIZE);
+  gDPSetTileSize(gfx++, 1, f_TextureScroll, 0,
+                 f_TextureScroll + BLENDED_TEXTURE_SIZE, BLENDED_TEXTURE_SIZE);
   for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
-    switch (sHoleTriangles[index].kind) {
+    switch (f_HoleTriangles[index].kind) {
       case HOLE_TRIANGLE_KIND_FLAT:
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
              vertexIndex++) {
-          sHoleTriangles[index].vertices[vertexIndex].v.tc[0] =
-              sHoleTriangles[index].vertices[vertexIndex].v.ob[0] *
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
+              f_HoleTriangles[index].vertices[vertexIndex].v.ob[0] *
               TEXTURE_COORDINATE_SCALE;
-          sHoleTriangles[index].vertices[vertexIndex].v.tc[1] =
-              (sHoleTriangles[index].vertices[vertexIndex].v.ob[2] +
-               sHoleTriangles[index].vertices[vertexIndex].v.ob[1]) *
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
+              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[2] +
+               f_HoleTriangles[index].vertices[vertexIndex].v.ob[1]) *
               TEXTURE_COORDINATE_SCALE;
         }
-        gSPVertex(gfx++, sHoleTriangles[index].vertices,
+        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
                   HOLE_TRIANGLE_VERTEX_COUNT, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         break;
       case HOLE_TRIANGLE_KIND_UPRIGHT:
         for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
              vertexIndex++) {
-          sHoleTriangles[index].vertices[vertexIndex].v.tc[0] =
-              (sHoleTriangles[index].vertices[vertexIndex].v.ob[0] +
-               sHoleTriangles[index].vertices[vertexIndex].v.ob[2]) *
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[0] =
+              (f_HoleTriangles[index].vertices[vertexIndex].v.ob[0] +
+               f_HoleTriangles[index].vertices[vertexIndex].v.ob[2]) *
               TEXTURE_COORDINATE_SCALE;
-          sHoleTriangles[index].vertices[vertexIndex].v.tc[1] =
-              sHoleTriangles[index].vertices[vertexIndex].v.ob[1] *
+          f_HoleTriangles[index].vertices[vertexIndex].v.tc[1] =
+              f_HoleTriangles[index].vertices[vertexIndex].v.ob[1] *
               TEXTURE_COORDINATE_SCALE;
         }
         gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0xFF, 0x40);
         gDPSetEnvColor(gfx++, 0x80, 0xBE, 0xFF, 0x10);
-        gSPVertex(gfx++, sHoleTriangles[index].vertices,
+        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
                   HOLE_TRIANGLE_VERTEX_COUNT, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         break;
@@ -188,10 +188,10 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
           break;
         }
         edgeY = 0.0f;
-        edgeX = sHoleTriangles[index].vertices[1].v.ob[0] -
-                sHoleTriangles[index].vertices[2].v.ob[0];
-        edgeZ = sHoleTriangles[index].vertices[1].v.ob[2] -
-                sHoleTriangles[index].vertices[2].v.ob[2];
+        edgeX = f_HoleTriangles[index].vertices[1].v.ob[0] -
+                f_HoleTriangles[index].vertices[2].v.ob[0];
+        edgeZ = f_HoleTriangles[index].vertices[1].v.ob[2] -
+                f_HoleTriangles[index].vertices[2].v.ob[2];
         if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
           break;
         }
@@ -212,7 +212,7 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_AA_ZB_XLU_INTER2);
-        if (sDimsTranslucentTriangles) {
+        if (f_DimsTranslucentTriangles) {
           gDPSetCombineLERP(gfx++, PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 0, 0, 0, 1,
                             PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, ENVIRONMENT, 0,
                             SHADE, 0);
@@ -224,7 +224,7 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
         gDPSetPrimColor(gfx++, 0, 0, 0xE0, 0xE0, 0x00, alpha);
         gDPSetEnvColor(gfx++, 0xE0, 0xE0, 0x00, 0x40);
         gDPPipeSync(gfx++);
-        gSPVertex(gfx++, sHoleTriangles[index].vertices,
+        gSPVertex(gfx++, f_HoleTriangles[index].vertices,
                   HOLE_TRIANGLE_VERTEX_COUNT, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
         gDPPipeSync(gfx++);
@@ -235,7 +235,7 @@ void DrawHoleTriangles(Gfx** displayListHead, CameraMatrices* matrices,
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
-  sDimsTranslucentTriangles = FALSE;
+  f_DimsTranslucentTriangles = FALSE;
   *displayListHead = gfx;
 }
 #else
@@ -267,7 +267,7 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices,
   f32 turn;
 
   gDPPipeSync(gfx++);
-  gSPSetLights1(gfx++, sRingLights);
+  gSPSetLights1(gfx++, f_RingLights);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -309,16 +309,16 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices,
     blue = RING_BLUE;
   }
   gDPSetEnvColor(gfx++, 0x78, 0x78, 0x20, 0xBF);
-  matrix = sRingMatrices;
-  sRingAngle += RING_SPIN_SPEED;
-  guRotateRPY(&sRingSpinMatrices[g_DrawBufferIndex], 0.0f, 0.0f, sRingAngle);
+  matrix = f_RingMatrices;
+  f_RingAngle += RING_SPIN_SPEED;
+  guRotateRPY(&f_RingSpinMatrices[g_DrawBufferIndex], 0.0f, 0.0f, f_RingAngle);
   ringIndex = 0;
   for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
        triangleIndex++) {
     if (ringIndex >= RING_COUNT) {
       break;
     }
-    if (sHoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
+    if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
       state = g_Players[g_GameState.unk20].ringStates[ringIndex];
       if (state > RING_STATE_NONE) {
         if (state != RING_STATE_SHOWN) {
@@ -358,9 +358,9 @@ void DrawRings(Gfx** displayListHead, CameraMatrices* matrices,
         }
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
         gSPMatrix(gfx++, matrix, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-        gSPMatrix(gfx++, &sRingSpinMatrices[g_DrawBufferIndex],
+        gSPMatrix(gfx++, &f_RingSpinMatrices[g_DrawBufferIndex],
                   G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-        gSPVertex(gfx++, sRingVertices, RING_VERTEX_COUNT, 0);
+        gSPVertex(gfx++, f_RingVertices, RING_VERTEX_COUNT, 0);
         for (section = 0; section < RING_SECTION_COUNT; section++) {
           nextSection = (section + 1) % RING_SECTION_COUNT;
           for (side = 0; side < RING_SIDE_COUNT; side++) {
@@ -400,7 +400,7 @@ static void BuildRingVertices(void) {
   f32 y;
 
   for (index = 0; index < RING_VERTEX_COUNT; index++) {
-    vertex = &sRingVertices[index];
+    vertex = &f_RingVertices[index];
     isOuter = (index & 2) >> 1;
     isRaised = (index & 1) ^ isOuter;
     angle = (index / RING_SIDE_COUNT) * RING_SECTION_ANGLE;
@@ -422,16 +422,16 @@ static void BuildRingVertices(void) {
 
 /* Puts a ring at a fixed place in the first triangle */
 static void AddTestRing(void) {
-  sHoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
-  sHoleTriangles[0].vertices[0].v.ob[0] = 0x800;
-  sHoleTriangles[0].vertices[0].v.ob[1] = -0x100;
-  sHoleTriangles[0].vertices[0].v.ob[2] = 0x1000;
-  sHoleTriangles[0].vertices[1].v.ob[0] = 0x800;
-  sHoleTriangles[0].vertices[1].v.ob[1] = -0x100;
-  sHoleTriangles[0].vertices[1].v.ob[2] = 0xF00;
-  sHoleTriangles[0].vertices[2].v.ob[0] = 0x700;
-  sHoleTriangles[0].vertices[2].v.ob[1] = -0x100;
-  sHoleTriangles[0].vertices[2].v.ob[2] = 0xF00;
+  f_HoleTriangles[0].kind = HOLE_TRIANGLE_KIND_RING;
+  f_HoleTriangles[0].vertices[0].v.ob[0] = 0x800;
+  f_HoleTriangles[0].vertices[0].v.ob[1] = -0x100;
+  f_HoleTriangles[0].vertices[0].v.ob[2] = 0x1000;
+  f_HoleTriangles[0].vertices[1].v.ob[0] = 0x800;
+  f_HoleTriangles[0].vertices[1].v.ob[1] = -0x100;
+  f_HoleTriangles[0].vertices[1].v.ob[2] = 0xF00;
+  f_HoleTriangles[0].vertices[2].v.ob[0] = 0x700;
+  f_HoleTriangles[0].vertices[2].v.ob[1] = -0x100;
+  f_HoleTriangles[0].vertices[2].v.ob[2] = 0xF00;
   InitRings();
 }
 
@@ -451,7 +451,7 @@ static s32 BuildRingMatrices(void) {
   HoleTriangle* triangle;
 
   for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
-    triangle = &sHoleTriangles[index];
+    triangle = &f_HoleTriangles[index];
     if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
       continue;
     }
@@ -492,7 +492,7 @@ static s32 BuildRingMatrices(void) {
     } else {
       guMtxIdentF(rotation);
     }
-    guMtxF2L(rotation, &sRingMatrices[ringCount]);
+    guMtxF2L(rotation, &f_RingMatrices[ringCount]);
     ringCount++;
   }
   return ringCount;

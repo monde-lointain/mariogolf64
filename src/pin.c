@@ -118,22 +118,22 @@
 #define GAME_STATE_UNK6 6
 #define GAME_STATE_UNK7 7
 
-extern Vtx sPinShadowVertices[PIN_SHADOW_VERTEX_COUNT];
+extern Vtx f_PinShadowVertices[PIN_SHADOW_VERTEX_COUNT];
 /* Set by TakePinOut and cleared when the pin is next drawn */
-extern s8 sIsPinOut;
+extern s8 f_IsPinOut;
 /* Set by SkipNextPinDraw and cleared by the draw it skips */
-extern s8 sSkipsNextPinDraw;
+extern s8 f_SkipsNextPinDraw;
 
-extern u8* sSmallCupTexture;
-extern u8* sCupTexture;
-extern u8* sFlagstickTexture;
-extern u8* sPinShadowTexture;
-extern Mtx sPinMatrices[][DRAW_BUFFER_COUNT];
-extern Mtx sPinShadowMatrix;
-extern Mtx sFlagMatrices[DRAW_BUFFER_COUNT];
-extern Vtx sPinVertices[PIN_VERTEX_COUNT];
-extern Vtx sLargePinVertices[PIN_VERTEX_COUNT];
-extern f32 sFlagWavePhase;
+extern u8* f_SmallCupTexture;
+extern u8* f_CupTexture;
+extern u8* f_FlagstickTexture;
+extern u8* f_PinShadowTexture;
+extern Mtx f_PinMatrices[][DRAW_BUFFER_COUNT];
+extern Mtx f_PinShadowMatrix;
+extern Mtx f_FlagMatrices[DRAW_BUFFER_COUNT];
+extern Vtx f_PinVertices[PIN_VERTEX_COUNT];
+extern Vtx f_LargePinVertices[PIN_VERTEX_COUNT];
+extern f32 f_FlagWavePhase;
 
 /*
  * Returns the length of (x, z), less CUP_DISTANCE_OFFSET but at least 0.
@@ -187,11 +187,11 @@ void BuildPinShadow(void) {
         D_800BA9D8.cupPosition[AXIS_Y];
   }
   for (i = 0; i != PIN_SHADOW_VERTEX_COUNT; i++) {
-    sPinShadowVertices[i].v.ob[AXIS_X] =
+    f_PinShadowVertices[i].v.ob[AXIS_X] =
         points[i][AXIS_X] / COURSE_UNITS_PER_VERTEX_UNIT;
-    sPinShadowVertices[i].v.ob[AXIS_Y] =
+    f_PinShadowVertices[i].v.ob[AXIS_Y] =
         points[i][AXIS_Y] / COURSE_UNITS_PER_VERTEX_UNIT;
-    sPinShadowVertices[i].v.ob[AXIS_Z] =
+    f_PinShadowVertices[i].v.ob[AXIS_Z] =
         points[i][AXIS_Z] / COURSE_UNITS_PER_VERTEX_UNIT;
   }
 }
@@ -207,7 +207,7 @@ void DrawPinShadow(void) {
   gDPSetCombineLERP(g_DisplayListHead++, 0, 0, 0, SHADE, SHADE, 0, TEXEL0, 0, 0,
                     0, 0, SHADE, SHADE, 0, TEXEL0, 0);
   gDPPipeSync(g_DisplayListHead++);
-  gSPVertex(g_DisplayListHead++, sPinShadowVertices, PIN_SHADOW_VERTEX_COUNT,
+  gSPVertex(g_DisplayListHead++, f_PinShadowVertices, PIN_SHADOW_VERTEX_COUNT,
             0);
   for (i = 0; i != PIN_SHADOW_ROW_COUNT - 1; i++) {
     gSP2Triangles(g_DisplayListHead++, i * 2, i * 2 + 2, i * 2 + 1, 0,
@@ -218,24 +218,24 @@ void DrawPinShadow(void) {
 void LoadPinTextures(void) {
   EncodedAsset asset;
 
-  sCupTexture = AllocMemory(OpenEncodedAsset(ASSET_CUP_TEXTURE, &asset));
-  ReadEncodedAsset(sCupTexture, &asset);
-  sSmallCupTexture =
+  f_CupTexture = AllocMemory(OpenEncodedAsset(ASSET_CUP_TEXTURE, &asset));
+  ReadEncodedAsset(f_CupTexture, &asset);
+  f_SmallCupTexture =
       AllocMemory(OpenEncodedAsset(ASSET_SMALL_CUP_TEXTURE, &asset));
-  ReadEncodedAsset(sSmallCupTexture, &asset);
-  sFlagstickTexture =
+  ReadEncodedAsset(f_SmallCupTexture, &asset);
+  f_FlagstickTexture =
       AllocMemory(OpenEncodedAsset(ASSET_FLAGSTICK_TEXTURE, &asset));
-  ReadEncodedAsset(sFlagstickTexture, &asset);
-  sPinShadowTexture =
+  ReadEncodedAsset(f_FlagstickTexture, &asset);
+  f_PinShadowTexture =
       AllocMemory(OpenEncodedAsset(ASSET_PIN_SHADOW_TEXTURE, &asset));
-  ReadEncodedAsset(sPinShadowTexture, &asset);
+  ReadEncodedAsset(f_PinShadowTexture, &asset);
 }
 
 void FreePinTextures(void) {
-  FreeMemory(&sSmallCupTexture);
-  FreeMemory(&sCupTexture);
-  FreeMemory(&sFlagstickTexture);
-  FreeMemory(&sPinShadowTexture);
+  FreeMemory(&f_SmallCupTexture);
+  FreeMemory(&f_CupTexture);
+  FreeMemory(&f_FlagstickTexture);
+  FreeMemory(&f_PinShadowTexture);
 }
 
 /* Places the pin at the cup, turned to face the main camera */
@@ -259,21 +259,21 @@ void SetPinMatrix(s32 cameraIndex) {
   scale[AXIS_Z] = PIN_SCALE;
   rotation[AXIS_Y] = heading + PIN_HEADING_OFFSET;
   BuildTransformMatrix(matrix, rotation, translation, scale);
-  ConvertMatrixToFixed(matrix, &sPinMatrices[cameraIndex][g_DrawBufferIndex]);
+  ConvertMatrixToFixed(matrix, &f_PinMatrices[cameraIndex][g_DrawBufferIndex]);
 }
 
 /* Takes the pin out of the cup until it is next drawn */
-void TakePinOut(void) { sIsPinOut = TRUE; }
+void TakePinOut(void) { f_IsPinOut = TRUE; }
 
 /* Makes the next DrawPin draw nothing */
-void SkipNextPinDraw(void) { sSkipsNextPinDraw = TRUE; }
+void SkipNextPinDraw(void) { f_SkipsNextPinDraw = TRUE; }
 
 /*
  * Returns whether the pin stands in the cup. During GameState.unk0 6 and 7 it
  * is taken out while the shot is from the green, except in mini-golf.
  */
 s32 IsPinInCup(void) {
-  if (sIsPinOut || sSkipsNextPinDraw) {
+  if (f_IsPinOut || f_SkipsNextPinDraw) {
     return FALSE;
   }
   if (g_GameState.unk0 == GAME_STATE_UNK6 ||
@@ -342,9 +342,9 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   footOffsetX = 2.0f * (sinf(heading) * STICK_FOOT_HALF_DISTANCE);
   footOffsetZ = 2.0f * (cosf(heading) * STICK_FOOT_HALF_DISTANCE);
   isPinOut = !IsPinInCup();
-  sIsPinOut = FALSE;
-  if (sSkipsNextPinDraw) {
-    sSkipsNextPinDraw = FALSE;
+  f_IsPinOut = FALSE;
+  if (f_SkipsNextPinDraw) {
+    f_SkipsNextPinDraw = FALSE;
     return;
   }
   if (!isPinOut) {
@@ -368,7 +368,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     }
     BuildTransformMatrix(shadowMatrix, shadowRotation, shadowTranslation,
                          shadowScale);
-    ConvertMatrixToFixed(shadowMatrix, &sPinShadowMatrix);
+    ConvertMatrixToFixed(shadowMatrix, &f_PinShadowMatrix);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPPipeSync(g_DisplayListHead++);
@@ -379,11 +379,11 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
     gDPLoadTextureBlock_4b(
-        g_DisplayListHead++, ((u32)sPinShadowTexture + IMAGE_HEADER_SIZE) & ~7,
+        g_DisplayListHead++, ((u32)f_PinShadowTexture + IMAGE_HEADER_SIZE) & ~7,
         G_IM_FMT_I, PIN_SHADOW_TEXTURE_WIDTH, PIN_SHADOW_TEXTURE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sPinShadowMatrix),
+    gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&f_PinShadowMatrix),
               G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawPinShadow();
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
@@ -439,21 +439,21 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
     gDPSetBlendColor(g_DisplayListHead++, 0xFF, 0xFF, 0xFF, 0x01);
     gSPMatrix(g_DisplayListHead++,
-              OS_K0_TO_PHYSICAL(&sPinMatrices[cameraIndex][g_DrawBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_PinMatrices[cameraIndex][g_DrawBufferIndex]),
               G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     if (g_IsCupViewShown == 1) {
-      gSPVertex(g_DisplayListHead++, sLargePinVertices, PIN_VERTEX_COUNT, 0);
+      gSPVertex(g_DisplayListHead++, f_LargePinVertices, PIN_VERTEX_COUNT, 0);
     } else {
-      gSPVertex(g_DisplayListHead++, sPinVertices, PIN_VERTEX_COUNT, 0);
+      gSPVertex(g_DisplayListHead++, f_PinVertices, PIN_VERTEX_COUNT, 0);
     }
     if (cupDepth < SMALL_CUP_DEPTH) {
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)sSmallCupTexture + IMAGE_HEADER_SIZE) & ~7);
+                        ((u32)f_SmallCupTexture + IMAGE_HEADER_SIZE) & ~7);
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPLoadTextureBlock_4b(
           g_DisplayListHead++,
-          ((u32)sSmallCupTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+          ((u32)f_SmallCupTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           SMALL_CUP_TEXTURE_SIZE, SMALL_CUP_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
           G_TX_NOLOD, G_TX_NOLOD);
@@ -465,7 +465,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
                       SMALL_CUP_TEXCOORDS(8, 0));
     } else {
       gDPLoadTextureBlock(
-          g_DisplayListHead++, ((u32)sCupTexture + IMAGE_HEADER_SIZE) & ~7,
+          g_DisplayListHead++, ((u32)f_CupTexture + IMAGE_HEADER_SIZE) & ~7,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, CUP_TEXTURE_WIDTH, CUP_TEXTURE_HEIGHT, 0,
           G_TX_MIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_CLAMP, 5, 6, G_TX_NOLOD,
           G_TX_NOLOD);
@@ -604,10 +604,10 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       gDPPipeSync(g_DisplayListHead++);
       gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)sFlagstickTexture + IMAGE_HEADER_SIZE) & ~7);
+                        ((u32)f_FlagstickTexture + IMAGE_HEADER_SIZE) & ~7);
       gDPLoadTextureBlock_4b(
           g_DisplayListHead++,
-          ((u32)sFlagstickTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+          ((u32)f_FlagstickTexture + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
           FLAGSTICK_TEXTURE_SIZE, FLAGSTICK_TEXTURE_SIZE, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 4,
           G_TX_NOLOD, G_TX_NOLOD);
@@ -622,17 +622,17 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   }
   if (!isPinOut) {
     if (g_HoleConditions.windSpeed != 0) {
-      sFlagWavePhase += DEGREES_TO_RADIANS(FLAG_WAVE_STEP_DEGREES);
-      if (sFlagWavePhase > 2 * M_PI) {
-        sFlagWavePhase -= 2 * M_PI;
+      f_FlagWavePhase += DEGREES_TO_RADIANS(FLAG_WAVE_STEP_DEGREES);
+      if (f_FlagWavePhase > 2 * M_PI) {
+        f_FlagWavePhase -= 2 * M_PI;
       }
-      if (sFlagWavePhase < 0.0f) {
-        sFlagWavePhase += 2 * M_PI;
+      if (f_FlagWavePhase < 0.0f) {
+        f_FlagWavePhase += 2 * M_PI;
       }
       wave = ((g_HoleConditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
                   FLAG_WAVE_PER_WIND +
               MIN_FLAG_WAVE) *
-             sinf(sFlagWavePhase);
+             sinf(f_FlagWavePhase);
     } else {
       wave = 0.0f;
     }
@@ -651,7 +651,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     flagRotation[AXIS_Y] =
         wave - g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS;
     BuildTransformMatrix(flagMatrix, flagRotation, flagTranslation, flagScale);
-    ConvertMatrixToFixed(flagMatrix, &sFlagMatrices[g_DrawBufferIndex]);
+    ConvertMatrixToFixed(flagMatrix, &f_FlagMatrices[g_DrawBufferIndex]);
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
@@ -659,7 +659,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_OPA_SURF,
                      G_RM_AA_ZB_OPA_SURF2);
     gSPMatrix(g_DisplayListHead++,
-              OS_K0_TO_PHYSICAL(&sFlagMatrices[g_DrawBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_FlagMatrices[g_DrawBufferIndex]),
               G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     DrawHoleFlag(TRUE);
     gDPPipeSync(g_DisplayListHead++);

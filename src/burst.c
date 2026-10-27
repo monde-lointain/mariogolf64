@@ -11,13 +11,13 @@
 #include "sound.h"
 #include "variables.h"
 
-/* How many bursts sBursts has room for */
+/* How many bursts f_Bursts has room for */
 #define BURST_CAPACITY 4
 
 /* How many of them LoadBursts sets up */
 #define BURST_COUNT 1
 
-/* sBurstState's value while the bursts' memory is allocated */
+/* f_BurstState's value while the bursts' memory is allocated */
 #define BURSTS_LOADED 1
 
 /* Frames of a burst's timer at which it plays a sound and launches */
@@ -58,21 +58,21 @@ typedef struct Burst {
   /* 0x28 */ BurstShape* shape;
 } Burst; /* size = 0x2C */
 
-extern s32 sBurstCount;
-extern s32 sBurstState;
-extern Vtx sBurstParticleVertices[3];
-extern u16 sBurstShapeAssetIds[8];
-extern f32 sBurstHue;
-extern BurstShape* sBurstShape;
-extern Burst sBursts[BURST_CAPACITY];
+extern s32 f_BurstCount;
+extern s32 f_BurstState;
+extern Vtx f_BurstParticleVertices[3];
+extern u16 f_BurstShapeAssetIds[8];
+extern f32 f_BurstHue;
+extern BurstShape* f_BurstShape;
+extern Burst f_Bursts[BURST_CAPACITY];
 
 /* Makes the first burst launch in 70 frames */
 void StartBursts(void) {
-  sBursts[0].timer = 150;
-  sBursts[0].isActive = TRUE;
+  f_Bursts[0].timer = 150;
+  f_Bursts[0].isActive = TRUE;
 }
 
-void StopBursts(void) { sBursts[0].isActive = FALSE; }
+void StopBursts(void) { f_Bursts[0].isActive = FALSE; }
 
 /* Loads the shape for the course record and allocates the bursts' particles */
 #ifdef NON_MATCHING
@@ -85,21 +85,22 @@ void LoadBursts(s32 courseRecordIndex) {
   s32 row;
   s32 column;
 
-  sBurstShape = AllocMemory(OpenEncodedAsset(
-      sBurstShapeAssetIds[courseRecordIndex % ARRAY_COUNT(sBurstShapeAssetIds)],
-      &asset));
-  ReadEncodedAsset(sBurstShape, &asset);
+  f_BurstShape = AllocMemory(
+      OpenEncodedAsset(f_BurstShapeAssetIds[courseRecordIndex %
+                                            ARRAY_COUNT(f_BurstShapeAssetIds)],
+                       &asset));
+  ReadEncodedAsset(f_BurstShape, &asset);
   for (index = 0; index != BURST_COUNT; index++) {
-    sBursts[index].unk24 = 0;
-    sBursts[index].isActive = FALSE;
-    sBursts[index].timer = 159 - index * 50;
-    sBursts[index].unkC = 0xFF;
-    sBursts[index].particleCount = 0;
-    sBursts[index].shape = sBurstShape;
+    f_Bursts[index].unk24 = 0;
+    f_Bursts[index].isActive = FALSE;
+    f_Bursts[index].timer = 159 - index * 50;
+    f_Bursts[index].unkC = 0xFF;
+    f_Bursts[index].particleCount = 0;
+    f_Bursts[index].shape = f_BurstShape;
   }
-  sBurstCount = index;
-  for (index = 0; index != sBurstCount; index++) {
-    burst = &sBursts[index];
+  f_BurstCount = index;
+  for (index = 0; index != f_BurstCount; index++) {
+    burst = &f_Bursts[index];
     width = burst->shape->width;
     height = burst->shape->height;
     for (row = 0; row != height; row++) {
@@ -115,7 +116,7 @@ void LoadBursts(s32 courseRecordIndex) {
       burst->particles[row].life = 0;
     }
   }
-  sBurstState = BURSTS_LOADED;
+  f_BurstState = BURSTS_LOADED;
 }
 
 #else
@@ -125,13 +126,13 @@ INCLUDE_ASM("asm/nonmatchings/burst", LoadBursts);
 void FreeBursts(void) {
   s32 index;
 
-  if (sBurstState == BURSTS_LOADED) {
-    FreeMemory(&sBurstShape);
-    for (index = 0; index != sBurstCount; index++) {
-      FreeMemory(&sBursts[index].particles);
+  if (f_BurstState == BURSTS_LOADED) {
+    FreeMemory(&f_BurstShape);
+    for (index = 0; index != f_BurstCount; index++) {
+      FreeMemory(&f_Bursts[index].particles);
     }
   }
-  sBurstState = 0;
+  f_BurstState = 0;
 }
 
 /*
@@ -139,11 +140,11 @@ void FreeBursts(void) {
  * third call after FreeBursts on. Nothing calls it.
  */
 s32 HaveBurstsStayedFreed(void) {
-  if (sBurstState > 0) {
+  if (f_BurstState > 0) {
     return FALSE;
   }
-  sBurstState--;
-  return sBurstState < -2;
+  f_BurstState--;
+  return f_BurstState < -2;
 }
 
 /* Sends every particle of the burst out from one random point */
@@ -212,18 +213,18 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   s32 alpha;
 
   gfx = *displayListHead;
-  if (sBurstState <= 0) {
+  if (f_BurstState <= 0) {
     return;
   }
-  for (burstIndex = 0; burstIndex != sBurstCount; burstIndex++) {
-    if (sBursts[burstIndex].isActive == TRUE) {
-      timer = sBursts[burstIndex].timer + 1;
-      sBursts[burstIndex].timer = timer;
+  for (burstIndex = 0; burstIndex != f_BurstCount; burstIndex++) {
+    if (f_Bursts[burstIndex].isActive == TRUE) {
+      timer = f_Bursts[burstIndex].timer + 1;
+      f_Bursts[burstIndex].timer = timer;
       if (timer == BURST_SOUND_FRAME) {
         PlaySound(0x31, 8, 0x7F);
       } else if (timer == BURST_LAUNCH_FRAME) {
-        sBursts[burstIndex].timer = 0;
-        LaunchBurst(&sBursts[burstIndex], burstIndex);
+        f_Bursts[burstIndex].timer = 0;
+        LaunchBurst(&f_Bursts[burstIndex], burstIndex);
         PlaySound(0x32, 8, 0x7F);
       }
     }
@@ -237,11 +238,11 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   transform[2][3] = 0.0f;
   transform[2][2] = 0.1f;
   transform[3][3] = 1.0f;
-  for (index = 0; index != sBurstCount; index++) {
-    if (sBursts[index].isActive == TRUE) {
-      for (particleIndex = 0; particleIndex != sBursts[index].particleCount;
+  for (index = 0; index != f_BurstCount; index++) {
+    if (f_Bursts[index].isActive == TRUE) {
+      for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
            particleIndex++) {
-        particle = &sBursts[index].particles[particleIndex];
+        particle = &f_Bursts[index].particles[particleIndex];
         if (particle->life > 0) {
           particle->x += particle->velocityX;
           particle->y += particle->velocityY;
@@ -261,7 +262,7 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
             directionY = 0.1f;
             speed = 0.5f;
           }
-          timer = sBursts[index].timer;
+          timer = f_Bursts[index].timer;
           if (timer < 8) {
             length = speed * 0.5f * timer;
           } else if (timer > 64) {
@@ -304,14 +305,14 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  sBurstHue += DEGREES_TO_RADIANS(3);
-  /* index is sBurstCount here, so every burst shares one color */
-  red = (s32)(sinf(sBurstHue + index) * 64.0f) + 127;
-  green = (s32)(sinf(sBurstHue + 2.0f + index) * 64.0f) + 127;
-  blue = (s32)(sinf(sBurstHue + 4.0f + index) * 64.0f) + 127;
-  for (index = 0; index != sBurstCount; index++) {
-    if (sBursts[index].isActive == TRUE) {
-      timer = sBursts[index].timer;
+  f_BurstHue += DEGREES_TO_RADIANS(3);
+  /* index is f_BurstCount here, so every burst shares one color */
+  red = (s32)(sinf(f_BurstHue + index) * 64.0f) + 127;
+  green = (s32)(sinf(f_BurstHue + 2.0f + index) * 64.0f) + 127;
+  blue = (s32)(sinf(f_BurstHue + 4.0f + index) * 64.0f) + 127;
+  for (index = 0; index != f_BurstCount; index++) {
+    if (f_Bursts[index].isActive == TRUE) {
+      timer = f_Bursts[index].timer;
       alpha = 0xFF;
       /* Fades out from frame 40, flickering on odd frames */
       if (timer >= 40) {
@@ -327,16 +328,16 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
         alpha = 0xFF;
       }
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
-      for (particleIndex = 0; particleIndex != sBursts[index].particleCount;
+      for (particleIndex = 0; particleIndex != f_Bursts[index].particleCount;
            particleIndex++) {
-        particle = &sBursts[index].particles[particleIndex];
+        particle = &f_Bursts[index].particles[particleIndex];
         if (particle->life > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++,
                     OS_K0_TO_PHYSICAL(&particle->matrices[g_MatrixBufferIndex]),
                     G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, sBurstParticleVertices,
-                    ARRAY_COUNT(sBurstParticleVertices), 0);
+          gSPVertex(gfx++, f_BurstParticleVertices,
+                    ARRAY_COUNT(f_BurstParticleVertices), 0);
           gSP1Triangle(gfx++, 0, 1, 2, 0);
         }
       }

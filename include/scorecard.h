@@ -63,7 +63,7 @@ typedef struct Scorecard {
   /* 0xC4 */ s32 x; /* The scorecard's offset from its place on the screen */
   /* 0xC8 */ s32 y;
   /* 0xCC */ s32 unkCC;
-  /* 0xD0 */ s32 stateTime; /* Frames since sScorecardState changed */
+  /* 0xD0 */ s32 stateTime; /* Frames since f_ScorecardState changed */
   /* 0xD4 */ s32
       isTallied; /* The last hole's result is already on the scorecard */
   /* 0xD8 */ s32 holeWinnerIndex; /* The player who won the last hole, or a
@@ -97,13 +97,13 @@ extern Scorecard g_Scorecard;
 #define MATCH_PLAYER_COUNT 2
 
 /*
- * The match result's characters: sResultCharactersLoadStep counts up to
+ * The match result's characters: f_ResultCharactersLoadStep counts up to
  * LOADING, then waits for LoadResultCharacters
  */
 #define RESULT_CHARACTERS_IDLE (-1) /* No characters are loading */
 #define RESULT_CHARACTERS_LOADING 2
 #define RESULT_CHARACTERS_LOADED 3
-extern s32 sResultCharactersLoadStep;
+extern s32 f_ResultCharactersLoadStep;
 s32 LoadResultCharacters(void);
 
 extern Gfx D_800C3FC0[];

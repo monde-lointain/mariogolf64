@@ -25,10 +25,10 @@ typedef struct RegisterFieldValue {
   char* text;
 } RegisterFieldValue;
 
-extern OSMesgQueue sFaultMessageQueue;
-extern OSThread* sFaultedThread;
-extern s32 sFaultThreadUnk;
-extern char sFaultText[];
+extern OSMesgQueue f_FaultMessageQueue;
+extern OSThread* f_FaultedThread;
+extern s32 f_FaultThreadUnk;
+extern char f_FaultText[];
 
 OSThread* __osGetCurrFaultedThread(void);
 void RunFaultThread(void* arg);
@@ -37,9 +37,9 @@ void PrintFaultContext(OSThread* thread);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields);
 
 /* Only cleared; nothing in the code reads it */
-s32 sFaultUnk = 0;
+s32 f_FaultUnk = 0;
 /* The debug text row of the next line of the fault report */
-s32 sFaultTextRow = 7;
+s32 f_FaultTextRow = 7;
 
 /*
  * Does nothing. The fault thread's start-up messages are in the ROM and
@@ -61,22 +61,22 @@ void RunBootHook(void) {
 void RunFaultThread(void* arg) {
   OSMesg message;
 
-  osSetEventMesg(OS_EVENT_FAULT, &sFaultMessageQueue, (OSMesg)FAULT_MESSAGE);
-  sFaultThreadUnk = 0;
+  osSetEventMesg(OS_EVENT_FAULT, &f_FaultMessageQueue, (OSMesg)FAULT_MESSAGE);
+  f_FaultThreadUnk = 0;
   while (TRUE) {
     osSyncPrintf("\n=>fp-wait for msg\n");
-    osRecvMesg(&sFaultMessageQueue, &message, OS_MESG_BLOCK);
+    osRecvMesg(&f_FaultMessageQueue, &message, OS_MESG_BLOCK);
     osSyncPrintf("\n=> fltproc - got a flt msg.\n");
-    sFaultedThread = __osGetCurrFaultedThread();
-    if (sFaultedThread != NULL) {
+    f_FaultedThread = __osGetCurrFaultedThread();
+    if (f_FaultedThread != NULL) {
       PlaySound(SOUND_FAULT, FAULT_SOUND_CHANNEL, FAULT_SOUND_VOLUME);
-      PrintFaultContext(sFaultedThread);
+      PrintFaultContext(f_FaultedThread);
     }
   }
 }
 
 /* The fields of the cause register, ending with an empty mask */
-RegisterFieldValue sCauseFields[] = {
+RegisterFieldValue f_CauseFields[] = {
     {CAUSE_BD, CAUSE_BD, "BD"},
     {CAUSE_IP8, CAUSE_IP8, "IP8"},
     {CAUSE_IP7, CAUSE_IP7, "IP7"},
@@ -109,7 +109,7 @@ RegisterFieldValue sCauseFields[] = {
 };
 
 /* The fields of the status register */
-RegisterFieldValue sStatusFields[] = {
+RegisterFieldValue f_StatusFields[] = {
     {SR_CU3, SR_CU3, "CU3"},
     {SR_CU2, SR_CU2, "CU2"},
     {SR_CU1, SR_CU1, "CU1"},
@@ -144,7 +144,7 @@ RegisterFieldValue sStatusFields[] = {
 };
 
 /* The fields of the floating-point control and status register */
-RegisterFieldValue sFloatStatusFields[] = {
+RegisterFieldValue f_FloatStatusFields[] = {
     {FPCSR_FS, FPCSR_FS, "FS"},
     {FPCSR_C, FPCSR_C, "C"},
     {FPCSR_CE, FPCSR_CE, "Unimplemented operation"},
@@ -171,7 +171,7 @@ RegisterFieldValue sFloatStatusFields[] = {
 };
 
 /* Prints the fault text to the host */
-void PrintFaultText(void) { osSyncPrintf(sFaultText); }
+void PrintFaultText(void) { osSyncPrintf(f_FaultText); }
 
 /*
  * Prints the faulted thread's registers to the host, and all but the
@@ -181,94 +181,96 @@ void PrintFaultText(void) { osSyncPrintf(sFaultText); }
 void PrintFaultContext(OSThread* thread) {
   __OSThreadContext* context = &thread->context;
 
-  sFaultUnk = 0;
-  sprintf(sFaultText, "\nFault in thread %d:\n\n", thread->id);
+  f_FaultUnk = 0;
+  sprintf(f_FaultText, "\nFault in thread %d:\n\n", thread->id);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
-  sprintf(sFaultText, "epc\t\t0x%08x\n", context->pc);
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, FAULT_TITLE_ROW);
+  sprintf(f_FaultText, "epc\t\t0x%08x\n", context->pc);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, FAULT_PC_ROW);
-  PrintRegisterFields(context->cause, "cause", sCauseFields);
-  PrintRegisterFields(context->sr, "sr", sStatusFields);
-  sprintf(sFaultText, "badvaddr\t0x%08.8x\n\n", context->badvaddr);
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, FAULT_PC_ROW);
+  PrintRegisterFields(context->cause, "cause", f_CauseFields);
+  PrintRegisterFields(context->sr, "sr", f_StatusFields);
+  sprintf(f_FaultText, "badvaddr\t0x%08.8x\n\n", context->badvaddr);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "at 0x%08.8x v0 0x%08.8x v1 0x%08.8x\n", context->at,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "at 0x%08.8x v0 0x%08.8x v1 0x%08.8x\n", context->at,
           context->v0, context->v1);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "a0 0x%08.8x a1 0x%08.8x a2 0x%08.8x\n", context->a0,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "a0 0x%08.8x a1 0x%08.8x a2 0x%08.8x\n", context->a0,
           context->a1, context->a2);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "a3 0x%08.8x t0 0x%08.8x t1 0x%08.8x\n", context->a3,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "a3 0x%08.8x t0 0x%08.8x t1 0x%08.8x\n", context->a3,
           context->t0, context->t1);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "t2 0x%08.8x t3 0x%08.8x t4 0x%08.8x\n", context->t2,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "t2 0x%08.8x t3 0x%08.8x t4 0x%08.8x\n", context->t2,
           context->t3, context->t4);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "t5 0x%08.8x t6 0x%08.8x t7 0x%08.8x\n", context->t5,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "t5 0x%08.8x t6 0x%08.8x t7 0x%08.8x\n", context->t5,
           context->t6, context->t7);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "s0 0x%08.8x s1 0x%08.8x s2 0x%08.8x\n", context->s0,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "s0 0x%08.8x s1 0x%08.8x s2 0x%08.8x\n", context->s0,
           context->s1, context->s2);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "s3 0x%08.8x s4 0x%08.8x s5 0x%08.8x\n", context->s3,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "s3 0x%08.8x s4 0x%08.8x s5 0x%08.8x\n", context->s3,
           context->s4, context->s5);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "s6 0x%08.8x s7 0x%08.8x t8 0x%08.8x\n", context->s6,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "s6 0x%08.8x s7 0x%08.8x t8 0x%08.8x\n", context->s6,
           context->s7, context->t8);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "t9 0x%08.8x gp 0x%08.8x sp 0x%08.8x\n", context->t9,
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "t9 0x%08.8x gp 0x%08.8x sp 0x%08.8x\n", context->t9,
           context->gp, context->sp);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  sprintf(sFaultText, "s8 0x%08.8x ra 0x%08.8x\n\n", context->s8, context->ra);
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  sprintf(f_FaultText, "s8 0x%08.8x ra 0x%08.8x\n\n", context->s8, context->ra);
   PrintFaultText();
-  PrintMessage(sFaultText, FAULT_TEXT_COLUMN, sFaultTextRow++);
-  PrintRegisterFields(context->fpcsr, "fpcsr", sFloatStatusFields);
-  sprintf(sFaultText, "\nf0  %.7e f2  %.7e f4  %.7e f6  %.7e\n",
+  PrintMessage(f_FaultText, FAULT_TEXT_COLUMN, f_FaultTextRow++);
+  PrintRegisterFields(context->fpcsr, "fpcsr", f_FloatStatusFields);
+  sprintf(f_FaultText, "\nf0  %.7e f2  %.7e f4  %.7e f6  %.7e\n",
           context->fp0.f.f_even, context->fp2.f.f_even, context->fp4.f.f_even,
           context->fp6.f.f_even);
   PrintFaultText();
-  sprintf(sFaultText, "f8  %.7e f10 %.7e f12 %.7e f14 %.7e\n",
+  sprintf(f_FaultText, "f8  %.7e f10 %.7e f12 %.7e f14 %.7e\n",
           context->fp8.f.f_even, context->fp10.f.f_even, context->fp12.f.f_even,
           context->fp14.f.f_even);
   PrintFaultText();
-  sprintf(sFaultText, "f16 %.7e f18 %.7e f20 %.7e f22 %.7e\n",
+  sprintf(f_FaultText, "f16 %.7e f18 %.7e f20 %.7e f22 %.7e\n",
           context->fp16.f.f_even, context->fp18.f.f_even,
           context->fp20.f.f_even, context->fp22.f.f_even);
   PrintFaultText();
-  sprintf(sFaultText, "f24 %.7e f26 %.7e f28 %.7e f30 %.7e\n\n",
+  sprintf(f_FaultText, "f24 %.7e f26 %.7e f28 %.7e f30 %.7e\n\n",
           context->fp24.f.f_even, context->fp26.f.f_even,
           context->fp28.f.f_even, context->fp30.f.f_even);
   PrintFaultText();
-  sprintf(sFaultText, "d0  %.15e\td2  %.15e\n", context->fp0.d, context->fp2.d);
+  sprintf(f_FaultText, "d0  %.15e\td2  %.15e\n", context->fp0.d,
+          context->fp2.d);
   PrintFaultText();
-  sprintf(sFaultText, "d4  %.15e\td6  %.15e\n", context->fp4.d, context->fp6.d);
+  sprintf(f_FaultText, "d4  %.15e\td6  %.15e\n", context->fp4.d,
+          context->fp6.d);
   PrintFaultText();
-  sprintf(sFaultText, "d8  %.15e\td10 %.15e\n", context->fp8.d,
+  sprintf(f_FaultText, "d8  %.15e\td10 %.15e\n", context->fp8.d,
           context->fp10.d);
   PrintFaultText();
-  sprintf(sFaultText, "d12 %.15e\td14 %.15e\n", context->fp12.d,
+  sprintf(f_FaultText, "d12 %.15e\td14 %.15e\n", context->fp12.d,
           context->fp14.d);
   PrintFaultText();
-  sprintf(sFaultText, "d16 %.15e\td18 %.15e\n", context->fp16.d,
+  sprintf(f_FaultText, "d16 %.15e\td18 %.15e\n", context->fp16.d,
           context->fp18.d);
   PrintFaultText();
-  sprintf(sFaultText, "d20 %.15e\td22 %.15e\n", context->fp20.d,
+  sprintf(f_FaultText, "d20 %.15e\td22 %.15e\n", context->fp20.d,
           context->fp22.d);
   PrintFaultText();
-  sprintf(sFaultText, "d24 %.15e\td26 %.15e\n", context->fp24.d,
+  sprintf(f_FaultText, "d24 %.15e\td26 %.15e\n", context->fp24.d,
           context->fp26.d);
   PrintFaultText();
-  sprintf(sFaultText, "d28 %.15e\td30 %.15e\n", context->fp28.d,
+  sprintf(f_FaultText, "d28 %.15e\td30 %.15e\n", context->fp28.d,
           context->fp30.d);
   PrintFaultText();
 }
@@ -284,24 +286,24 @@ INCLUDE_ASM("asm/nonmatchings/fault", PrintFaultContext);
 void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields) {
   s32 isFirst = TRUE;
 
-  sprintf(sFaultText, "%s\t\t0x%08x ", name, value);
+  sprintf(f_FaultText, "%s\t\t0x%08x ", name, value);
   PrintFaultText();
-  sprintf(sFaultText, "<");
+  sprintf(f_FaultText, "<");
   PrintFaultText();
   while (fields->mask != 0) {
     if ((value & fields->mask) == fields->value) {
       if (isFirst) {
         isFirst = FALSE;
       } else {
-        sprintf(sFaultText, ",");
+        sprintf(f_FaultText, ",");
         PrintFaultText();
       }
-      sprintf(sFaultText, "%s", fields->text);
+      sprintf(f_FaultText, "%s", fields->text);
       PrintFaultText();
-      PrintMessage(sFaultText, FIELD_TEXT_COLUMN, sFaultTextRow++);
+      PrintMessage(f_FaultText, FIELD_TEXT_COLUMN, f_FaultTextRow++);
     }
     fields++;
   }
-  sprintf(sFaultText, ">\n");
+  sprintf(f_FaultText, ">\n");
   PrintFaultText();
 }

@@ -21,14 +21,14 @@ typedef struct AssetTableEntry {
 /* The archive in ROM starts with a table of each asset's AssetTableEntry */
 extern u8 g_AssetArchiveRomStart[];
 #define ASSET_TABLE ((AssetTableEntry*)g_AssetArchiveRomStart)
-extern AssetFile sAssetFilePool[ASSET_FILE_POOL_SIZE];
-extern s32 sLastOpenedAssetId;
+extern AssetFile f_AssetFilePool[ASSET_FILE_POOL_SIZE];
+extern s32 f_LastOpenedAssetId;
 
 void InitAssetFiles(void) {
   s32 index;
   AssetFile* file;
 
-  for (index = 0, file = sAssetFilePool; index != ASSET_FILE_POOL_SIZE;
+  for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
        index++) {
     file->cursor = 0;
     file++;
@@ -47,7 +47,7 @@ void ReadAssetFileBounds(s32 assetId, AssetFile* file) {
   file->cursor = file->romStart = (u32)g_AssetArchiveRomStart + *offset;
   file->romEnd = file->romStart + *size;
   file->size = *size;
-  sLastOpenedAssetId = assetId;
+  f_LastOpenedAssetId = assetId;
 }
 
 void OpenAssetFile(s32 assetId, AssetFile* file) {
@@ -60,7 +60,7 @@ AssetFile* OpenPooledAssetFile(s32 assetId) {
   s32 index;
   AssetFile* file;
 
-  for (index = 0, file = sAssetFilePool; index != ASSET_FILE_POOL_SIZE;
+  for (index = 0, file = f_AssetFilePool; index != ASSET_FILE_POOL_SIZE;
        index++) {
     if (file->cursor == 0) {
       ReadAssetFileBounds(assetId, file);
@@ -87,7 +87,7 @@ s32 GetAssetFileSize(AssetFile* file) { return file->size; }
 void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {
   if (file->romEnd < file->cursor + size) {
     size = file->romEnd - file->cursor;
-    osSyncPrintf("size error %d \n", sLastOpenedAssetId);
+    osSyncPrintf("size error %d \n", f_LastOpenedAssetId);
   }
   nuPiReadRom(file->cursor, buffer, (size + 1) & ~1);
   file->cursor += size;

@@ -31,13 +31,13 @@
 /* Drives are compared at this scale, so those nearly as long tie */
 #define DRIVE_COMPARISON_SCALE 7.119878e-05f
 
-extern s32 sIsContestDecided;
+extern s32 f_IsContestDecided;
 
 /*
  * The player who won the hole's contest: the longest drive on a marked par
  * 5, or the shot nearest the pin on a par 3
  */
-extern s32 sContestWinner;
+extern s32 f_ContestWinner;
 
 /*
  * Sums the player's net strokes over par from the round's first hole to
@@ -134,8 +134,8 @@ void StartBets(void) {
       g_Players[player].betTallies[bet] = g_BetTallies[player][bet];
     }
   }
-  sIsContestDecided = FALSE;
-  sContestWinner = NO_CONTEST_WINNER;
+  f_IsContestDecided = FALSE;
+  f_ContestWinner = NO_CONTEST_WINNER;
   g_LongestDrivePot = g_GameState.betRates[BET_LONGEST_DRIVE];
   g_NearestPinPot = g_GameState.betRates[BET_NEAREST_PIN];
   if (g_GameState.betRates[BET_UNK5] != UNSET_BET_RATE) {
@@ -159,16 +159,16 @@ void ResumeBets(void) {
       g_BetTallies[player][bet] = g_Players[player].betTallies[bet];
     }
   }
-  sIsContestDecided = FALSE;
-  sContestWinner = NO_CONTEST_WINNER;
+  f_IsContestDecided = FALSE;
+  f_ContestWinner = NO_CONTEST_WINNER;
   g_LongestDrivePot = g_GameState.carriedPots[CARRIED_POT_LONGEST_DRIVE];
   g_NearestPinPot = g_GameState.carriedPots[CARRIED_POT_NEAREST_PIN];
   g_HolePot = g_GameState.carriedPots[CARRIED_POT_HOLE];
 }
 
-s32 GetContestWinner(void) { return sContestWinner; }
+s32 GetContestWinner(void) { return f_ContestWinner; }
 
-void SetContestWinner(s32 playerIndex) { sContestWinner = playerIndex; }
+void SetContestWinner(s32 playerIndex) { f_ContestWinner = playerIndex; }
 
 /* The longest drive wins the pot from each other player */
 void SettleLongestDrive(void) {
@@ -178,25 +178,25 @@ void SettleLongestDrive(void) {
 
   if (g_GameState.betRates[BET_LONGEST_DRIVE] > 0) {
     longest = -1;
-    sContestWinner = NO_CONTEST_WINNER;
+    f_ContestWinner = NO_CONTEST_WINNER;
     for (player = 0; player != g_GameState.playerCount; player++) {
       if (g_Players[player].driveDistance != UNCOUNTED_DISTANCE) {
         distance = g_Players[player].driveDistance * DRIVE_COMPARISON_SCALE;
         if (longest < distance) {
-          sContestWinner = player;
+          f_ContestWinner = player;
           longest = distance;
         } else if (distance == longest) {
-          sContestWinner = NO_CONTEST_WINNER;
+          f_ContestWinner = NO_CONTEST_WINNER;
         }
       }
     }
-    if (sContestWinner == NO_CONTEST_WINNER) {
+    if (f_ContestWinner == NO_CONTEST_WINNER) {
       g_LongestDrivePot += g_GameState.betRates[BET_LONGEST_DRIVE];
     } else {
-      g_BetTallies[sContestWinner][BET_LONGEST_DRIVE] +=
+      g_BetTallies[f_ContestWinner][BET_LONGEST_DRIVE] +=
           g_LongestDrivePot * (g_GameState.playerCount - 1);
       for (player = 0; player != g_GameState.playerCount; player++) {
-        if (player != sContestWinner) {
+        if (player != f_ContestWinner) {
           g_BetTallies[player][BET_LONGEST_DRIVE] -= g_LongestDrivePot;
         }
       }
@@ -213,25 +213,25 @@ void SettleNearestPin(void) {
 
   if (g_GameState.betRates[BET_NEAREST_PIN] > 0) {
     nearest = 0x3FFFFFFF;
-    sContestWinner = NO_CONTEST_WINNER;
+    f_ContestWinner = NO_CONTEST_WINNER;
     for (player = 0; player != g_GameState.playerCount; player++) {
       distance = g_Players[player].pinDistance;
       if (distance != UNCOUNTED_DISTANCE) {
         if (distance < nearest) {
-          sContestWinner = player;
+          f_ContestWinner = player;
           nearest = distance;
         } else if (distance == nearest) {
-          sContestWinner = NO_CONTEST_WINNER;
+          f_ContestWinner = NO_CONTEST_WINNER;
         }
       }
     }
-    if (sContestWinner == NO_CONTEST_WINNER) {
+    if (f_ContestWinner == NO_CONTEST_WINNER) {
       g_NearestPinPot += g_GameState.betRates[BET_NEAREST_PIN];
     } else {
-      g_BetTallies[sContestWinner][BET_NEAREST_PIN] +=
+      g_BetTallies[f_ContestWinner][BET_NEAREST_PIN] +=
           g_NearestPinPot * (g_GameState.playerCount - 1);
       for (player = 0; player != g_GameState.playerCount; player++) {
-        if (player != sContestWinner) {
+        if (player != f_ContestWinner) {
           g_BetTallies[player][BET_NEAREST_PIN] -= g_NearestPinPot;
         }
       }
@@ -240,7 +240,7 @@ void SettleNearestPin(void) {
   }
 }
 
-void ClearContestWinner(void) { sContestWinner = NO_CONTEST_WINNER; }
+void ClearContestWinner(void) { f_ContestWinner = NO_CONTEST_WINNER; }
 
 /*
  * Settles the hole's contest once every player's distance is measured.
@@ -251,7 +251,7 @@ void UpdateContest(s32 isHoleOver) {
   s32 player;
   s32 measuredCount;
 
-  if (!sIsContestDecided) {
+  if (!f_IsContestDecided) {
     if (IsMarkedParFive(g_GameState.courseIndex, holeIndex)) {
       if (isHoleOver == TRUE) {
         for (player = 0; player != g_GameState.playerCount; player++) {
@@ -266,7 +266,7 @@ void UpdateContest(s32 isHoleOver) {
       }
       if (measuredCount == g_GameState.playerCount) {
         SettleLongestDrive();
-        sIsContestDecided = TRUE;
+        f_IsContestDecided = TRUE;
       }
     } else if (IsParThree(g_GameState.courseIndex, holeIndex)) {
       if (isHoleOver == TRUE) {
@@ -282,10 +282,10 @@ void UpdateContest(s32 isHoleOver) {
       }
       if (measuredCount == g_GameState.playerCount) {
         SettleNearestPin();
-        sIsContestDecided = TRUE;
+        f_IsContestDecided = TRUE;
       }
     } else {
-      sContestWinner = NO_CONTEST_WINNER;
+      f_ContestWinner = NO_CONTEST_WINNER;
     }
   }
 }
@@ -703,7 +703,7 @@ void SettleHoleBets(void) {
       g_Players[i].betTallies[j] = g_BetTallies[i][j];
     }
   }
-  sIsContestDecided = FALSE;
+  f_IsContestDecided = FALSE;
 }
 
 #else

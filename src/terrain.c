@@ -75,22 +75,22 @@ typedef struct MapOverviewControls {
 #define WATER_BIAS 0x266
 #define LOWERED_WATER_BIAS (-0x600)
 
-extern u8 sPointSlots[GROUND_TILE_POINT_SPAN + 1][8];
-extern TerrainColor sTerrainColors[11];
+extern u8 f_PointSlots[GROUND_TILE_POINT_SPAN + 1][8];
+extern TerrainColor f_TerrainColors[11];
 extern u16 g_TerrainCodeColors[];
-extern s8 sCellSearchOffsets[4];
-extern s32 sFlagPanelFirstRow;
-extern s32 sFlagPanelColumn;
-extern s32 sFlagPanelRow;
+extern s8 f_CellSearchOffsets[4];
+extern s32 f_FlagPanelFirstRow;
+extern s32 f_FlagPanelColumn;
+extern s32 f_FlagPanelRow;
 extern char g_RomBuildDate[];
 extern char g_SaveBuildDate[];
-extern s32 sSceneBeforeFlags;
-extern MapOverviewControls sMapOverviewControls;
-extern s32 sIsSceneMenuOpen;
-extern AnimatedBox sSceneMenuBox;
-extern s32 sSceneMenuScenes[SCENE_MENU_LENGTH];
-extern s32 sIsFirstDebugUpdate;
-extern s32 sSceneMenuSelection;
+extern s32 f_SceneBeforeFlags;
+extern MapOverviewControls f_MapOverviewControls;
+extern s32 f_IsSceneMenuOpen;
+extern AnimatedBox f_SceneMenuBox;
+extern s32 f_SceneMenuScenes[SCENE_MENU_LENGTH];
+extern s32 f_IsFirstDebugUpdate;
+extern s32 f_SceneMenuSelection;
 extern s8 D_800C30D1;
 
 void func_8005D9A0(void);
@@ -174,15 +174,15 @@ s32 FindNearestTerrainColor(s32 color) {
   s32 distance;
 
   for (i = 0; i < 11; i++) {
-    red = colorRed - sTerrainColors[i].red;
+    red = colorRed - f_TerrainColors[i].red;
     if (red < 0) {
       red = -red;
     }
-    green = colorGreen - sTerrainColors[i].green;
+    green = colorGreen - f_TerrainColors[i].green;
     if (green < 0) {
       green = -green;
     }
-    blue = colorBlue - sTerrainColors[i].blue;
+    blue = colorBlue - f_TerrainColors[i].blue;
     distance = red + green + ABS(blue);
     if (distance < nearestDistance) {
       nearestDistance = distance;
@@ -228,10 +228,10 @@ s32 GetTerrainCodeColor(s32 code) {
       colorIndex = 10;
       break;
   }
-  return (sTerrainColors[colorIndex].red << 11) |
-         (sTerrainColors[colorIndex].green << 6) |
-         (sTerrainColors[colorIndex].blue << 1) |
-         sTerrainColors[colorIndex].alpha;
+  return (f_TerrainColors[colorIndex].red << 11) |
+         (f_TerrainColors[colorIndex].green << 6) |
+         (f_TerrainColors[colorIndex].blue << 1) |
+         f_TerrainColors[colorIndex].alpha;
 }
 
 /* Returns the terrain code whose colour is nearest an RGBA16 colour */
@@ -805,7 +805,7 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
       slotColumn = column & 3;
     }
     return &g_WorkArea.hole.midpoints[tileRow * 8 + tileColumn]
-                                     [sPointSlots[slotRow][slotColumn]];
+                                     [f_PointSlots[slotRow][slotColumn]];
   }
   return GetGridVertex(column >> 1, row >> 1);
 }
@@ -840,7 +840,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[sPointSlots[row & 3][column & 3]];
+        midpoint = &midpoints[f_PointSlots[row & 3][column & 3]];
         midpoint->v = *point;
       }
     }
@@ -849,7 +849,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[sPointSlots[4][column & 3]];
+        midpoint = &midpoints[f_PointSlots[4][column & 3]];
         midpoint->v = *point;
       }
     }
@@ -858,7 +858,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        midpoint = &midpoints[sPointSlots[row & 3][4]];
+        midpoint = &midpoints[f_PointSlots[row & 3][4]];
         midpoint->v = *point;
       }
     }
@@ -881,7 +881,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[sPointSlots[row & 3][column & 3]];
+        point = &midpoints[f_PointSlots[row & 3][column & 3]];
         point->v.ob[1] = height;
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
@@ -891,7 +891,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[sPointSlots[4][column & 3]];
+        point = &midpoints[f_PointSlots[4][column & 3]];
         point->v.ob[1] = height;
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
@@ -901,7 +901,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
-        point = &midpoints[sPointSlots[row & 3][4]];
+        point = &midpoints[f_PointSlots[row & 3][4]];
         point->v.ob[1] = height;
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
@@ -1008,8 +1008,8 @@ void UpdateFlagPanel(void) {
   s32 textColumn;
 
   s32 GetSelectedFlag(void) {
-    return (sFlagPanelFirstRow + sFlagPanelRow) * FLAG_PANEL_COLUMN_COUNT +
-           sFlagPanelColumn;
+    return (f_FlagPanelFirstRow + f_FlagPanelRow) * FLAG_PANEL_COLUMN_COUNT +
+           f_FlagPanelColumn;
   }
 
   ClearDebugText();
@@ -1018,7 +1018,7 @@ void UpdateFlagPanel(void) {
   PrintDebugText("SRAM:", 3, 5);
   PrintDebugText(g_SaveBuildDate, 8, 5);
   for (row = 0; row < FLAG_PANEL_ROW_COUNT; row++) {
-    sprintf(text, "%x0|", row + sFlagPanelFirstRow);
+    sprintf(text, "%x0|", row + f_FlagPanelFirstRow);
     PrintDebugText(text, 3, row + 14);
     for (column = 0, textColumn = 6; column < FLAG_PANEL_COLUMN_COUNT;
          column++, textColumn += 2) {
@@ -1028,56 +1028,56 @@ void UpdateFlagPanel(void) {
       }
       sprintf(
           text, "%X",
-          IsGameFlagSet((row + sFlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT +
+          IsGameFlagSet((row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT +
                         column));
-      if (row == sFlagPanelRow && column == sFlagPanelColumn) {
+      if (row == f_FlagPanelRow && column == f_FlagPanelColumn) {
         SetDebugTextHighlight(TRUE);
       }
       PrintDebugText(text, textColumn, row + 14);
     }
   }
   if (g_MenuControllerData[0].button & R_JPAD) {
-    sFlagPanelColumn++;
+    f_FlagPanelColumn++;
   }
   if (g_MenuControllerData[0].button & L_JPAD) {
-    sFlagPanelColumn--;
+    f_FlagPanelColumn--;
   }
-  if (sFlagPanelColumn < 0) {
-    sFlagPanelColumn = FLAG_PANEL_COLUMN_COUNT - 1;
-    sFlagPanelRow--;
+  if (f_FlagPanelColumn < 0) {
+    f_FlagPanelColumn = FLAG_PANEL_COLUMN_COUNT - 1;
+    f_FlagPanelRow--;
   }
-  if (sFlagPanelColumn >= FLAG_PANEL_COLUMN_COUNT) {
-    sFlagPanelColumn = 0;
-    sFlagPanelRow++;
+  if (f_FlagPanelColumn >= FLAG_PANEL_COLUMN_COUNT) {
+    f_FlagPanelColumn = 0;
+    f_FlagPanelRow++;
   }
   if (g_MenuControllerData[0].button & U_JPAD) {
-    sFlagPanelRow--;
+    f_FlagPanelRow--;
   }
   if (g_MenuControllerData[0].button & D_JPAD) {
-    sFlagPanelRow++;
+    f_FlagPanelRow++;
   }
   if (g_MenuControllerData[0].button & R_TRIG) {
-    sFlagPanelFirstRow += FLAG_PANEL_ROW_COUNT;
+    f_FlagPanelFirstRow += FLAG_PANEL_ROW_COUNT;
   }
   if (g_MenuControllerData[0].button & L_TRIG) {
-    sFlagPanelFirstRow -= FLAG_PANEL_ROW_COUNT;
+    f_FlagPanelFirstRow -= FLAG_PANEL_ROW_COUNT;
   }
   while (TRUE) {
-    if (sFlagPanelRow < 0) {
-      sFlagPanelRow++;
-      sFlagPanelFirstRow--;
-    } else if (sFlagPanelRow >= FLAG_PANEL_ROW_COUNT) {
-      sFlagPanelRow--;
-      sFlagPanelFirstRow++;
+    if (f_FlagPanelRow < 0) {
+      f_FlagPanelRow++;
+      f_FlagPanelFirstRow--;
+    } else if (f_FlagPanelRow >= FLAG_PANEL_ROW_COUNT) {
+      f_FlagPanelRow--;
+      f_FlagPanelFirstRow++;
     } else {
       break;
     }
   }
-  if (sFlagPanelFirstRow > FLAG_PANEL_FIRST_ROW_MAX) {
-    sFlagPanelFirstRow = FLAG_PANEL_FIRST_ROW_MAX;
+  if (f_FlagPanelFirstRow > FLAG_PANEL_FIRST_ROW_MAX) {
+    f_FlagPanelFirstRow = FLAG_PANEL_FIRST_ROW_MAX;
   }
-  if (sFlagPanelFirstRow < 0) {
-    sFlagPanelFirstRow = 0;
+  if (f_FlagPanelFirstRow < 0) {
+    f_FlagPanelFirstRow = 0;
   }
   if (g_MenuControllerData[0].button & A_BUTTON) {
     SetGameFlag(GetSelectedFlag());
@@ -1141,14 +1141,14 @@ s32 UpdateDebugSceneMenu(void) {
   D_800C30D1 = 0;
   if (g_MenuControllerData[0].button & START_BUTTON) {
     ClearDebugText();
-    sIsSceneMenuOpen = FALSE;
-    sSceneMenuBox.state = BOX_CLOSING;
-    sSceneMenuBox.frameIndex = 0;
+    f_IsSceneMenuOpen = FALSE;
+    f_SceneMenuBox.state = BOX_CLOSING;
+    f_SceneMenuBox.frameIndex = 0;
     PlaySound(0x5F, 15, 127);
     return;
   }
   for (selectedIndex = 0; selectedIndex < SCENE_MENU_LENGTH; selectedIndex++) {
-    if (sSceneMenuScenes[selectedIndex] == sSceneMenuSelection) {
+    if (f_SceneMenuScenes[selectedIndex] == f_SceneMenuSelection) {
       break;
     }
   }
@@ -1159,26 +1159,26 @@ s32 UpdateDebugSceneMenu(void) {
     } else {
       PrintDebugText("  ", 10, row);
     }
-    PrintDebugText(GetDebugSceneLabel(sSceneMenuScenes[i]), 12, row);
+    PrintDebugText(GetDebugSceneLabel(f_SceneMenuScenes[i]), 12, row);
   }
   if (g_MenuControllerData[0].button & U_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH - 1) % SCENE_MENU_LENGTH;
-    sSceneMenuSelection = sSceneMenuScenes[selectedIndex];
+    f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
     PlaySound(0x5C, 15, 127);
   }
   if (g_MenuControllerData[0].button & D_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH + 1) % SCENE_MENU_LENGTH;
-    sSceneMenuSelection = sSceneMenuScenes[selectedIndex];
+    f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
     PlaySound(0x5C, 15, 127);
   }
   if (g_MenuControllerData[0].button & A_BUTTON) {
     ClearDebugText();
-    sIsSceneMenuOpen = FALSE;
-    sSceneMenuBox.state = BOX_CLOSING;
-    sSceneMenuBox.frameIndex = 0;
-    g_Scene = sSceneMenuSelection;
+    f_IsSceneMenuOpen = FALSE;
+    f_SceneMenuBox.state = BOX_CLOSING;
+    f_SceneMenuBox.frameIndex = 0;
+    g_Scene = f_SceneMenuSelection;
     PlaySound(0x5D, 15, 127);
-    if (sSceneMenuSelection == SCENE_MENU) {
+    if (f_SceneMenuSelection == SCENE_MENU) {
       func_8005D9A0();
     } else {
       PlaySong(1, 0);
@@ -1287,8 +1287,8 @@ void UpdateDebugScenes(void) {
   s32 openState = BOX_OPEN; /* A local, rather than the constant, to match */
   s32 stickStep;
 
-  if (sIsFirstDebugUpdate) {
-    sIsFirstDebugUpdate = FALSE;
+  if (f_IsFirstDebugUpdate) {
+    f_IsFirstDebugUpdate = FALSE;
     if (g_ControllerData[0].button & L_TRIG) {
       g_IsDebugEnabled = FALSE;
     }
@@ -1301,37 +1301,37 @@ void UpdateDebugScenes(void) {
                        ->name,
                    2, 4);
   }
-  if (sIsSceneMenuOpen && sSceneMenuBox.state == openState) {
+  if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
     UpdateDebugSceneMenu();
-    QueueAnimatedBox(&sSceneMenuBox);
+    QueueAnimatedBox(&f_SceneMenuBox);
     return;
   }
   if (IsSceneMenuRequested()) {
     if (IsOverlayInExpansionMemory()) {
-      sIsSceneMenuOpen = TRUE;
+      f_IsSceneMenuOpen = TRUE;
       ClearGameFlag(GAME_FLAG_HIDE_DEBUG_TEXT);
       FreeAllCharacterSlots();
-      sSceneMenuBox.state = BOX_OPENING;
-      sSceneMenuBox.frameIndex = 0;
-      QueueAnimatedBox(&sSceneMenuBox);
+      f_SceneMenuBox.state = BOX_OPENING;
+      f_SceneMenuBox.frameIndex = 0;
+      QueueAnimatedBox(&f_SceneMenuBox);
       PlaySound(0x66, 15, 127);
       MarkBillboardsOnMap();
       return;
     }
     if (g_Scene == SCENE_FLAG_PANEL) {
       ClearDebugText();
-      g_Scene = sSceneBeforeFlags;
+      g_Scene = f_SceneBeforeFlags;
       InitClubs();
       if (IsGameFlagSet(0x9E)) {
         nuContRmbMgrRemove();
       }
     } else {
-      sSceneBeforeFlags = g_Scene;
+      f_SceneBeforeFlags = g_Scene;
       g_Scene = SCENE_FLAG_PANEL;
     }
     return;
   }
-  QueueAnimatedBox(&sSceneMenuBox);
+  QueueAnimatedBox(&f_SceneMenuBox);
   if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
     SetDebugTextHighlight(TRUE);
     PrintDebugText(GetDebugSceneLabel(g_Scene), 2, 3);
@@ -1361,53 +1361,54 @@ void UpdateDebugScenes(void) {
   }
   if (g_Scene == SCENE_MAP_OVERVIEW) {
     if (g_MenuControllerData[0].button & R_JPAD) {
-      sMapOverviewControls.cameraZ -= MAP_OVERVIEW_CAMERA_STEP;
+      f_MapOverviewControls.cameraZ -= MAP_OVERVIEW_CAMERA_STEP;
     }
     if (g_MenuControllerData[0].button & L_JPAD) {
-      sMapOverviewControls.cameraZ += MAP_OVERVIEW_CAMERA_STEP;
+      f_MapOverviewControls.cameraZ += MAP_OVERVIEW_CAMERA_STEP;
     }
     if (g_MenuControllerData[0].button & D_JPAD) {
-      sMapOverviewControls.cameraX -= MAP_OVERVIEW_CAMERA_STEP;
+      f_MapOverviewControls.cameraX -= MAP_OVERVIEW_CAMERA_STEP;
     }
     if (g_MenuControllerData[0].button & U_JPAD) {
-      sMapOverviewControls.cameraX += MAP_OVERVIEW_CAMERA_STEP;
+      f_MapOverviewControls.cameraX += MAP_OVERVIEW_CAMERA_STEP;
     }
     stickStep = g_MenuControllerData[0].stick_y / STICK_STEP_SIZE;
     if (stickStep != 0) {
-      sMapOverviewControls.cameraX += stickStep;
+      f_MapOverviewControls.cameraX += stickStep;
     }
     stickStep = g_MenuControllerData[0].stick_x / STICK_STEP_SIZE;
     if (stickStep != 0) {
-      sMapOverviewControls.cameraZ -= stickStep;
+      f_MapOverviewControls.cameraZ -= stickStep;
     }
     if (g_MenuControllerData[0].button & L_TRIG) {
-      sMapOverviewControls.adjustment -= MAP_OVERVIEW_ADJUSTMENT_STEP;
-      if (sMapOverviewControls.adjustment < MAP_OVERVIEW_ADJUSTMENT_MIN) {
-        sMapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MIN;
+      f_MapOverviewControls.adjustment -= MAP_OVERVIEW_ADJUSTMENT_STEP;
+      if (f_MapOverviewControls.adjustment < MAP_OVERVIEW_ADJUSTMENT_MIN) {
+        f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MIN;
       }
     }
     if (g_MenuControllerData[0].button & R_TRIG) {
-      sMapOverviewControls.adjustment += MAP_OVERVIEW_ADJUSTMENT_STEP;
-      if (sMapOverviewControls.adjustment > MAP_OVERVIEW_ADJUSTMENT_MAX) {
-        sMapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MAX;
+      f_MapOverviewControls.adjustment += MAP_OVERVIEW_ADJUSTMENT_STEP;
+      if (f_MapOverviewControls.adjustment > MAP_OVERVIEW_ADJUSTMENT_MAX) {
+        f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MAX;
       }
     }
     if (g_MenuControllerData[0].button & Z_TRIG) {
-      sMapOverviewControls.isToggled ^= TRUE;
+      f_MapOverviewControls.isToggled ^= TRUE;
     }
     if (g_MenuControllerData[0].button & A_BUTTON) {
-      sMapOverviewControls.selectionIndex++;
-      if (sMapOverviewControls.selectionIndex >= MAP_OVERVIEW_SELECTION_COUNT) {
-        sMapOverviewControls.selectionIndex = 0;
+      f_MapOverviewControls.selectionIndex++;
+      if (f_MapOverviewControls.selectionIndex >=
+          MAP_OVERVIEW_SELECTION_COUNT) {
+        f_MapOverviewControls.selectionIndex = 0;
       }
-      sMapOverviewControls.isToggled = FALSE;
+      f_MapOverviewControls.isToggled = FALSE;
     }
     if (g_MenuControllerData[0].button & B_BUTTON) {
-      sMapOverviewControls.selectionIndex--;
-      if (sMapOverviewControls.selectionIndex < 0) {
-        sMapOverviewControls.selectionIndex = MAP_OVERVIEW_SELECTION_COUNT - 1;
+      f_MapOverviewControls.selectionIndex--;
+      if (f_MapOverviewControls.selectionIndex < 0) {
+        f_MapOverviewControls.selectionIndex = MAP_OVERVIEW_SELECTION_COUNT - 1;
       }
-      sMapOverviewControls.isToggled = FALSE;
+      f_MapOverviewControls.isToggled = FALSE;
     }
     if (g_MenuControllerData[0].trigger & D_CBUTTONS) {
       func_8024F7B0();
@@ -1424,9 +1425,9 @@ void UpdateDebugScenes(void) {
       ToggleGroundTileBorders();
     }
     g_MapCamera.view.eye[0] =
-        sMapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
+        f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
     g_MapCamera.view.eye[2] =
-        sMapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
+        f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
   }
   if (g_Scene == SCENE_HEIGHTS) {
     func_80404B84();
@@ -1523,10 +1524,10 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
   for (rowIndex = 0; rowIndex < 4; rowIndex++) {
     Vtx* corners[4];
 
-    row = baseRow + ((slotRow + sCellSearchOffsets[rowIndex]) & 3);
+    row = baseRow + ((slotRow + f_CellSearchOffsets[rowIndex]) & 3);
     for (columnIndex = 0; columnIndex < 4; columnIndex++) {
       column =
-          baseColumn + ((slotColumn + sCellSearchOffsets[columnIndex]) & 3);
+          baseColumn + ((slotColumn + f_CellSearchOffsets[columnIndex]) & 3);
       corners[0] = GetGroundPoint(column, row);
       corners[1] = GetGroundPoint(column + 1, row);
       corners[2] = GetGroundPoint(column, row + 1);
@@ -1774,4 +1775,4 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
 
 /* The original ends its rodata with 8 zero bytes that nothing in the ROM
  * references */
-static const char sUnreferencedRodata[8] = {0};
+static const char f_UnreferencedRodata[8] = {0};

@@ -31,7 +31,7 @@
 /* OpenRoundResults's request that frees the results */
 #define CLOSE_ROUND_RESULTS -1
 
-/* sResultsState values */
+/* f_ResultsState values */
 #define RESULTS_SLIDING_IN 0
 #define RESULTS_SHOWN 1
 #define RESULTS_CLOSING 2 /* Saves and frees them */
@@ -42,7 +42,7 @@
 #define UNLOCK_NOTICE_METAL_MARIO 2
 #define UNLOCK_NOTICE_COURSES 3 /* The first of the courses' unlocks */
 
-/* sUnlockNoticeKind values */
+/* f_UnlockNoticeKind values */
 #define UNLOCK_NOTICE_KIND_NONE 0
 #define UNLOCK_NOTICE_KIND_COURSE 1
 #define UNLOCK_NOTICE_KIND_CHARACTER 2
@@ -53,7 +53,7 @@
 #define SOUND_TALLY_TICK 0x20
 #define SOUND_TALLY_DONE 0x22
 #define TALLY_DONE_SOUND_VOLUME 127
-/* sTallySpeed while A is held */
+/* f_TallySpeed while A is held */
 #define FAST_TALLY_SPEED 10
 #define CONFIRM_SOUND_CHANNEL 15
 #define CONFIRM_SOUND_VOLUME 100
@@ -97,7 +97,7 @@
 /* Course points are clamped there rather than overflow */
 #define MAX_COURSE_POINTS 0x7FFFFFFF
 
-/* The places of sTournamentPrizes's columns after the trophy winners' */
+/* The places of f_TournamentPrizes's columns after the trophy winners' */
 #define TROPHY_PLACE_COUNT 3
 #define PRIZE_TOP_TEN 10
 #define PRIZE_TOP_TWENTY 20
@@ -125,84 +125,84 @@
 #define MATCH_STANDING_WORDS_ASSET 0x8FE
 #define TOURNAMENT_UNK6A1_ASSET 0x6A1
 
-extern s32 sAreResultsLoaded;
-extern s32 sResultsState;
-extern s32 sResultsSlide;
-extern s32 sResultsTop;
-extern s32 sTallySpeed;
-extern s32 sTallySoundCount;
-extern f32 sCoursePointRates[];
-extern s32 sOpenCourseCount;
-extern s32 sPointsToNextCourse;
-extern s32 sCourseNoticeAssets[];
-extern const char sNumberFormat[];
-extern const char sPlaceNumberFormat[];
+extern s32 f_AreResultsLoaded;
+extern s32 f_ResultsState;
+extern s32 f_ResultsSlide;
+extern s32 f_ResultsTop;
+extern s32 f_TallySpeed;
+extern s32 f_TallySoundCount;
+extern f32 f_CoursePointRates[];
+extern s32 f_OpenCourseCount;
+extern s32 f_PointsToNextCourse;
+extern s32 f_CourseNoticeAssets[];
+extern const char f_NumberFormat[];
+extern const char f_PlaceNumberFormat[];
 
-extern s32 sUnlockNoticeKind;
-extern s32 sNoticeStage;
-extern s32 sNoticeFrameCount;
-extern s32 sNoticeSwing;
-extern s32 sNoticeUnk54;
-extern f32 sNoticeAngle;
-extern s32 sIsNoticeHeld;
-extern s32 sNoticeTime;
-extern s32 sNoticeFaceIndex;
-extern s32 sNoticeLift;
-extern s32 sNoticeUnk6C;
+extern s32 f_UnlockNoticeKind;
+extern s32 f_NoticeStage;
+extern s32 f_NoticeFrameCount;
+extern s32 f_NoticeSwing;
+extern s32 f_NoticeUnk54;
+extern f32 f_NoticeAngle;
+extern s32 f_IsNoticeHeld;
+extern s32 f_NoticeTime;
+extern s32 f_NoticeFaceIndex;
+extern s32 f_NoticeLift;
+extern s32 f_NoticeUnk6C;
 
-extern u8* sResultsCourseImage;
-extern u8* sPortraitImage;
-extern u8* sPortraitPalette;
-extern u8* sPlayerPortraitImages[MAX_PLAYER_COUNT];
-extern u8* sPlayerPortraitPalettes[MAX_PLAYER_COUNT];
-extern u8* sNameplateImage;
-extern u8* sNoticeTitleImage;
-extern u8* sResultsShineImage;
-extern u8* sDigitsImage;
-extern u8* sResultsBackdropImage;
-extern u8* sResultsHandImage;
-extern u8* sResultsLabelsImage;
-extern u8* sResultsLargeDigitsImage;
-extern u8* sResultsCloudImage;
-extern u8* sResultsPlacesImage;
-extern u8* sFinalResultsTitleImage;
+extern u8* f_ResultsCourseImage;
+extern u8* f_PortraitImage;
+extern u8* f_PortraitPalette;
+extern u8* f_PlayerPortraitImages[MAX_PLAYER_COUNT];
+extern u8* f_PlayerPortraitPalettes[MAX_PLAYER_COUNT];
+extern u8* f_NameplateImage;
+extern u8* f_NoticeTitleImage;
+extern u8* f_ResultsShineImage;
+extern u8* f_DigitsImage;
+extern u8* f_ResultsBackdropImage;
+extern u8* f_ResultsHandImage;
+extern u8* f_ResultsLabelsImage;
+extern u8* f_ResultsLargeDigitsImage;
+extern u8* f_ResultsCloudImage;
+extern u8* f_ResultsPlacesImage;
+extern u8* f_FinalResultsTitleImage;
 extern u8* D_80225708_ovl_00;
 extern u8* D_80225718_ovl_00;
 extern u8* D_8022571C_ovl_00;
-extern u8* sTrophyImage;
-extern u8* sTrophyPalette;
-extern u8* sMatchStandingWordsImage;
-extern u8* sNintendoBadgeImage;
-extern u8* sPlaceDigitsImage;
-extern s32 sPortraitCharacterIndex;
-extern s32 sPlayerResults[MAX_PLAYER_COUNT];
-extern s32 sPlayerPoints[MAX_PLAYER_COUNT];
-extern s32 sPlayerBetTotals[MAX_PLAYER_COUNT];
-extern s32 sPlayerRanks[MAX_PLAYER_COUNT];
-extern s32 sPointsEarned;
-extern s32 sPointsShown;
-extern s32 sPortraitAnimations[MAX_PLAYER_COUNT];
-extern s32 sPortraitFrames[MAX_PLAYER_COUNT];
-extern s32 sPortraitTimers[MAX_PLAYER_COUNT];
-extern s32 sHasBets;
+extern u8* f_TrophyImage;
+extern u8* f_TrophyPalette;
+extern u8* f_MatchStandingWordsImage;
+extern u8* f_NintendoBadgeImage;
+extern u8* f_PlaceDigitsImage;
+extern s32 f_PortraitCharacterIndex;
+extern s32 f_PlayerResults[MAX_PLAYER_COUNT];
+extern s32 f_PlayerPoints[MAX_PLAYER_COUNT];
+extern s32 f_PlayerBetTotals[MAX_PLAYER_COUNT];
+extern s32 f_PlayerRanks[MAX_PLAYER_COUNT];
+extern s32 f_PointsEarned;
+extern s32 f_PointsShown;
+extern s32 f_PortraitAnimations[MAX_PLAYER_COUNT];
+extern s32 f_PortraitFrames[MAX_PLAYER_COUNT];
+extern s32 f_PortraitTimers[MAX_PLAYER_COUNT];
+extern s32 f_HasBets;
 /*
  * Each course's tournament prizes, in course points: first to third
  * place, then up to PRIZE_TOP_TEN, PRIZE_TOP_TWENTY and the rest
  */
-extern s32 sTournamentPrizes[][TROPHY_PLACE_COUNT + 3];
-extern s32 sPrizePoints;
-extern s32 sPrizeShown;
-extern s32 sBannerState;
-extern s32 sBannerKind;
+extern s32 f_TournamentPrizes[][TROPHY_PLACE_COUNT + 3];
+extern s32 f_PrizePoints;
+extern s32 f_PrizeShown;
+extern s32 f_BannerState;
+extern s32 f_BannerKind;
 /* The pressing hand shows while the results wait for A */
-extern s32 sIsAwaitingConfirm;
-extern s32 sResultsUnk78;
-extern s32 sResultsUnk7C;
+extern s32 f_IsAwaitingConfirm;
+extern s32 f_ResultsUnk78;
+extern s32 f_ResultsUnk7C;
 /* The score password of a round of a tournament entered by password */
-extern char sScorePassword[];
-extern s32 sBannerX;
-extern s32 sBannerY;
-extern s32 sTournamentOpenCourseCount;
+extern char f_ScorePassword[];
+extern s32 f_BannerX;
+extern s32 f_BannerY;
+extern s32 f_TournamentOpenCourseCount;
 extern u16 D_800C2074[];
 extern s32 D_801B60B4;
 
@@ -213,9 +213,9 @@ typedef struct TrophyAssets {
   /* 0x8 */ s32 frameCount; /* Of image, as the trophy turns */
 } TrophyAssets;             /* size = 0xC */
 
-extern TrophyAssets sTrophyAssets[];
+extern TrophyAssets f_TrophyAssets[];
 
-/* sPlayerRanks of a match's players */
+/* f_PlayerRanks of a match's players */
 #define MATCH_RANK_WON 100
 #define MATCH_RANK_LOST 101
 
@@ -255,8 +255,8 @@ void OpenRoundResults(s32 request) {
     return;
   }
   LoadRoundResults();
-  sResultsSlide = SCREEN_WIDTH;
-  sResultsState = RESULTS_SLIDING_IN;
+  f_ResultsSlide = SCREEN_WIDTH;
+  f_ResultsState = RESULTS_SLIDING_IN;
 }
 
 #ifdef NON_MATCHING
@@ -265,38 +265,38 @@ void OpenRoundResults(s32 request) {
  * scaled by the course's rate. A macro, since the original repeats it
  * for each mode.
  */
-#define AddRoundPoints(save)                                                \
-  {                                                                         \
-    s32 counted_;                                                           \
-    s32 total_;                                                             \
-    s32 i_;                                                                 \
-                                                                            \
-    sOpenCourseCount = CountOpenCourses((save)->coursePoints);              \
-    if (sOpenCourseCount < COURSE_COUNT) {                                  \
-      counted_ = 0;                                                         \
-      sPointsToNextCourse =                                                 \
-          GetCoursePointsNeeded(sOpenCourseCount) - (save)->coursePoints;   \
-      sPointsEarned = 0;                                                    \
-      for (i_ = 0; i_ != g_PlayerCount; i_++) {                             \
-        if (sPlayerPoints[i_] >= 0) {                                       \
-          counted_++;                                                       \
-          sPointsEarned += sPlayerPoints[i_];                               \
-        }                                                                   \
-      }                                                                     \
-      if (counted_ == 0) {                                                  \
-        counted_ = 1;                                                       \
-      }                                                                     \
-      sPointsEarned = sPointsEarned *                                       \
-                      sCoursePointRates[GetCourseRecordIndex()] / counted_; \
-      sPointsShown = sPointsEarned;                                         \
-      sPointsToNextCourse -= sPointsEarned;                                 \
-    }                                                                       \
-    total_ = (save)->coursePoints + sPointsEarned;                          \
-    if (total_ > MAX_COURSE_POINTS) {                                       \
-      (save)->coursePoints = MAX_COURSE_POINTS;                             \
-    } else {                                                                \
-      (save)->coursePoints = total_;                                        \
-    }                                                                       \
+#define AddRoundPoints(save)                                                  \
+  {                                                                           \
+    s32 counted_;                                                             \
+    s32 total_;                                                               \
+    s32 i_;                                                                   \
+                                                                              \
+    f_OpenCourseCount = CountOpenCourses((save)->coursePoints);               \
+    if (f_OpenCourseCount < COURSE_COUNT) {                                   \
+      counted_ = 0;                                                           \
+      f_PointsToNextCourse =                                                  \
+          GetCoursePointsNeeded(f_OpenCourseCount) - (save)->coursePoints;    \
+      f_PointsEarned = 0;                                                     \
+      for (i_ = 0; i_ != g_PlayerCount; i_++) {                               \
+        if (f_PlayerPoints[i_] >= 0) {                                        \
+          counted_++;                                                         \
+          f_PointsEarned += f_PlayerPoints[i_];                               \
+        }                                                                     \
+      }                                                                       \
+      if (counted_ == 0) {                                                    \
+        counted_ = 1;                                                         \
+      }                                                                       \
+      f_PointsEarned = f_PointsEarned *                                       \
+                       f_CoursePointRates[GetCourseRecordIndex()] / counted_; \
+      f_PointsShown = f_PointsEarned;                                         \
+      f_PointsToNextCourse -= f_PointsEarned;                                 \
+    }                                                                         \
+    total_ = (save)->coursePoints + f_PointsEarned;                           \
+    if (total_ > MAX_COURSE_POINTS) {                                         \
+      (save)->coursePoints = MAX_COURSE_POINTS;                               \
+    } else {                                                                  \
+      (save)->coursePoints = total_;                                          \
+    }                                                                         \
   }
 
 void LoadRoundResults(void) {
@@ -309,16 +309,16 @@ void LoadRoundResults(void) {
   u32 size;
 
   save = GetSaveData();
-  if (sAreResultsLoaded == TRUE) {
+  if (f_AreResultsLoaded == TRUE) {
     return;
   }
   StopSound(RAIN_SOUND_CHANNEL);
-  sAreResultsLoaded = TRUE;
-  sUnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
-  sBannerState = 3;
-  sBannerKind = 0;
-  sTallySpeed = 1;
-  sIsAwaitingConfirm = 0;
+  f_AreResultsLoaded = TRUE;
+  f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
+  f_BannerState = 3;
+  f_BannerKind = 0;
+  f_TallySpeed = 1;
+  f_IsAwaitingConfirm = 0;
   if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
     g_Players[0].points += 500;
   }
@@ -326,45 +326,46 @@ void LoadRoundResults(void) {
     g_Players[0].points += 9999;
   }
 
-  sResultsBackdropImage = AllocMemory(
+  f_ResultsBackdropImage = AllocMemory(
       OpenEncodedAsset(g_IsClubTournament ? CLUB_TOURNAMENT_BACKDROP_ASSET
                                           : RESULTS_BACKDROP_ASSET,
                        &asset));
-  ReadEncodedAsset(sResultsBackdropImage, &asset);
-  sResultsHandImage =
+  ReadEncodedAsset(f_ResultsBackdropImage, &asset);
+  f_ResultsHandImage =
       AllocMemory(OpenEncodedAsset(PRESSING_HAND_ASSET, &asset));
-  ReadEncodedAsset(sResultsHandImage, &asset);
-  sDigitsImage = AllocMemory(OpenEncodedAsset(RESULTS_DIGITS_ASSET, &asset));
-  ReadEncodedAsset(sDigitsImage, &asset);
-  sPlaceDigitsImage = AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
-  ReadEncodedAsset(sPlaceDigitsImage, &asset);
+  ReadEncodedAsset(f_ResultsHandImage, &asset);
+  f_DigitsImage = AllocMemory(OpenEncodedAsset(RESULTS_DIGITS_ASSET, &asset));
+  ReadEncodedAsset(f_DigitsImage, &asset);
+  f_PlaceDigitsImage =
+      AllocMemory(OpenEncodedAsset(PLACE_DIGITS_ASSET, &asset));
+  ReadEncodedAsset(f_PlaceDigitsImage, &asset);
   if (g_IsClubTournament) {
-    sNintendoBadgeImage =
+    f_NintendoBadgeImage =
         AllocMemory(OpenEncodedAsset(NINTENDO_BADGE_ASSET, &asset));
-    ReadEncodedAsset(sNintendoBadgeImage, &asset);
-    sResultsCourseImage = AllocMemory(
+    ReadEncodedAsset(f_NintendoBadgeImage, &asset);
+    f_ResultsCourseImage = AllocMemory(
         OpenEncodedAsset(D_800C2074[GetClubTournamentCourse()], &asset));
-    ReadEncodedAsset(sResultsCourseImage, &asset);
+    ReadEncodedAsset(f_ResultsCourseImage, &asset);
   } else {
-    sFinalResultsTitleImage =
+    f_FinalResultsTitleImage =
         AllocMemory(OpenEncodedAsset(FINAL_RESULTS_TITLE_ASSET, &asset));
-    ReadEncodedAsset(sFinalResultsTitleImage, &asset);
-    sResultsLabelsImage =
+    ReadEncodedAsset(f_FinalResultsTitleImage, &asset);
+    f_ResultsLabelsImage =
         AllocMemory(OpenEncodedAsset(LABELS_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(sResultsLabelsImage, &asset);
-    sResultsLargeDigitsImage =
+    ReadEncodedAsset(f_ResultsLabelsImage, &asset);
+    f_ResultsLargeDigitsImage =
         AllocMemory(OpenEncodedAsset(LARGE_DIGITS_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(sResultsLargeDigitsImage, &asset);
-    sResultsCloudImage =
+    ReadEncodedAsset(f_ResultsLargeDigitsImage, &asset);
+    f_ResultsCloudImage =
         AllocMemory(OpenEncodedAsset(NOTICE_CLOUD_ASSET, &asset));
-    ReadEncodedAsset(sResultsCloudImage, &asset);
-    sResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[0], &asset));
-    ReadEncodedAsset(sResultsCourseImage, &asset);
-    sNoticeTitleImage =
+    ReadEncodedAsset(f_ResultsCloudImage, &asset);
+    f_ResultsCourseImage = AllocMemory(OpenEncodedAsset(D_800C2074[0], &asset));
+    ReadEncodedAsset(f_ResultsCourseImage, &asset);
+    f_NoticeTitleImage =
         AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
-    ReadEncodedAsset(sNoticeTitleImage, &asset);
-    sResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
-    ReadEncodedAsset(sResultsShineImage, &asset);
+    ReadEncodedAsset(f_NoticeTitleImage, &asset);
+    f_ResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
+    ReadEncodedAsset(f_ResultsShineImage, &asset);
     D_80225718_ovl_00 =
         AllocMemory(OpenEncodedAsset(RESULTS_UNK72C_IMAGE_ASSET, &asset));
     ReadEncodedAsset(D_80225718_ovl_00, &asset);
@@ -375,60 +376,60 @@ void LoadRoundResults(void) {
   }
 
   for (i = 0; i != g_PlayerCount; i++) {
-    sPlayerPortraitImages[i] = AllocMemory(OpenEncodedAsset(
+    f_PlayerPortraitImages[i] = AllocMemory(OpenEncodedAsset(
         g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &asset));
-    ReadEncodedAsset(sPlayerPortraitImages[i], &asset);
+    ReadEncodedAsset(f_PlayerPortraitImages[i], &asset);
     OpenAssetFile(g_CharacterPaletteAssets[(s8)g_Players[i].characterIndex] +
                       (s8)g_Players[i].paletteIndex,
                   &file);
     size = GetAssetFileSize(&file);
-    sPlayerPortraitPalettes[i] = AllocMemory(size);
-    ReadAssetFile(sPlayerPortraitPalettes[i], size, &file);
-    sPlayerPoints[i] =
+    f_PlayerPortraitPalettes[i] = AllocMemory(size);
+    ReadAssetFile(f_PlayerPortraitPalettes[i], size, &file);
+    f_PlayerPoints[i] =
         (s8)g_Players[i].unk1E[0] == 0 ? g_Players[i].points : -1;
-    sPlayerBetTotals[i] = 0;
+    f_PlayerBetTotals[i] = 0;
     for (j = 0; j != BET_COUNT; j++) {
-      sPlayerBetTotals[i] += g_Players[i].betTallies[j];
+      f_PlayerBetTotals[i] += g_Players[i].betTallies[j];
     }
   }
 
   if (!g_IsClubTournament) {
     if (g_GameMode == GAME_MODE_MATCH_GAME ||
         g_GameMode == GAME_MODE_GET_CHARACTER) {
-      sResultsPlacesImage =
+      f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(MATCH_PLACES_IMAGE_ASSET, &asset));
-      ReadEncodedAsset(sResultsPlacesImage, &asset);
+      ReadEncodedAsset(f_ResultsPlacesImage, &asset);
       D_80225708_ovl_00 =
           AllocMemory(OpenEncodedAsset(MATCH_UNK6A3_ASSET, &asset));
       ReadEncodedAsset(D_80225708_ovl_00, &asset);
-      sNameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
-      ReadEncodedAsset(sNameplateImage, &asset);
-      sMatchStandingWordsImage =
+      f_NameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
+      ReadEncodedAsset(f_NameplateImage, &asset);
+      f_MatchStandingWordsImage =
           AllocMemory(OpenEncodedAsset(MATCH_STANDING_WORDS_ASSET, &asset));
-      ReadEncodedAsset(sMatchStandingWordsImage, &asset);
-      sPortraitCharacterIndex = (s8)g_Players[1].characterIndex;
+      ReadEncodedAsset(f_MatchStandingWordsImage, &asset);
+      f_PortraitCharacterIndex = (s8)g_Players[1].characterIndex;
     } else {
-      sResultsPlacesImage =
+      f_ResultsPlacesImage =
           AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
-      ReadEncodedAsset(sResultsPlacesImage, &asset);
+      ReadEncodedAsset(f_ResultsPlacesImage, &asset);
     }
   }
 
-  sHasBets = FALSE;
+  f_HasBets = FALSE;
   for (i = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] > 0) {
-      sHasBets = TRUE;
+      f_HasBets = TRUE;
     }
   }
   for (i = 0; i != g_PlayerCount; i++) {
-    sPortraitAnimations[i] = 0;
-    sPortraitFrames[i] = -1;
-    sPortraitTimers[i] = 0;
+    f_PortraitAnimations[i] = 0;
+    f_PortraitFrames[i] = -1;
+    f_PortraitTimers[i] = 0;
   }
 
   if (g_IsClubTournament) {
     for (i = 0; i != g_PlayerCount; i++) {
-      sPlayerResults[i] =
+      f_PlayerResults[i] =
           GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
     }
   } else {
@@ -436,14 +437,14 @@ void LoadRoundResults(void) {
       case GAME_MODE_STROKE:
       case GAME_MODE_SPEED_GOLF:
         for (i = 0; i != g_PlayerCount; i++) {
-          sPlayerResults[i] =
+          f_PlayerResults[i] =
               GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
         }
         for (i = 0; i != g_PlayerCount; i++) {
-          rank = &sPlayerRanks[i];
+          rank = &f_PlayerRanks[i];
           *rank = 0;
           for (j = 0; j != g_PlayerCount; j++) {
-            if (i != j && sPlayerResults[j] < sPlayerResults[i]) {
+            if (i != j && f_PlayerResults[j] < f_PlayerResults[i]) {
               (*rank)++;
             }
           }
@@ -452,35 +453,35 @@ void LoadRoundResults(void) {
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
-        sPlayerResults[1] = 0;
-        sPlayerResults[0] = 0;
+        f_PlayerResults[1] = 0;
+        f_PlayerResults[0] = 0;
         for (i = GetFirstHoleIndex(); i != g_HoleIndex; i++) {
           if (g_Players[0].holes[i].strokes < g_Players[1].holes[i].strokes) {
-            sPlayerResults[0]++;
-            sPlayerResults[1]--;
+            f_PlayerResults[0]++;
+            f_PlayerResults[1]--;
           } else if (g_Players[1].holes[i].strokes <
                      g_Players[0].holes[i].strokes) {
-            sPlayerResults[0]--;
-            sPlayerResults[1]++;
+            f_PlayerResults[0]--;
+            f_PlayerResults[1]++;
           }
         }
-        if (sPlayerResults[1] < sPlayerResults[0]) {
-          sPlayerRanks[0] = MATCH_RANK_WON;
-          sPlayerRanks[1] = MATCH_RANK_LOST;
+        if (f_PlayerResults[1] < f_PlayerResults[0]) {
+          f_PlayerRanks[0] = MATCH_RANK_WON;
+          f_PlayerRanks[1] = MATCH_RANK_LOST;
         } else {
-          sPlayerRanks[0] = MATCH_RANK_LOST;
-          sPlayerRanks[1] = MATCH_RANK_WON;
+          f_PlayerRanks[0] = MATCH_RANK_LOST;
+          f_PlayerRanks[1] = MATCH_RANK_WON;
         }
-        sPortraitImage = AllocMemory(OpenEncodedAsset(
+        f_PortraitImage = AllocMemory(OpenEncodedAsset(
             g_CharacterImageAssets[(s8)g_Players[1].characterIndex], &asset));
-        ReadEncodedAsset(sPortraitImage, &asset);
+        ReadEncodedAsset(f_PortraitImage, &asset);
         OpenAssetFile(
             g_CharacterPaletteAssets[(s8)g_Players[1].characterIndex] +
                 (s8)g_Players[1].paletteIndex,
             &file);
         size = GetAssetFileSize(&file);
-        sPortraitPalette = AllocMemory(size);
-        ReadAssetFile(sPortraitPalette, size, &file);
+        f_PortraitPalette = AllocMemory(size);
+        ReadAssetFile(f_PortraitPalette, size, &file);
         AddRoundPoints(save);
         break;
       case GAME_MODE_UNK1:
@@ -492,13 +493,13 @@ void LoadRoundResults(void) {
       case GAME_MODE_CLUB_SLOTS:
         TallySkins(GetFirstHoleIndex() + GetRoundHoleCount());
         for (i = 0; i != g_PlayerCount; i++) {
-          sPlayerResults[i] = g_RoundHud.skinsTotals[i];
+          f_PlayerResults[i] = g_RoundHud.skinsTotals[i];
         }
         for (i = 0; i != g_PlayerCount; i++) {
-          rank = &sPlayerRanks[i];
+          rank = &f_PlayerRanks[i];
           *rank = 0;
           for (j = 0; j != g_PlayerCount; j++) {
-            if (i != j && sPlayerResults[i] < sPlayerResults[j]) {
+            if (i != j && f_PlayerResults[i] < f_PlayerResults[j]) {
               (*rank)++;
             }
           }
@@ -509,52 +510,53 @@ void LoadRoundResults(void) {
         D_80225708_ovl_00 =
             AllocMemory(OpenEncodedAsset(TOURNAMENT_UNK6A1_ASSET, &asset));
         ReadEncodedAsset(D_80225708_ovl_00, &asset);
-        sPlayerResults[0] =
+        f_PlayerResults[0] =
             GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), 0);
-        RankTournament(COURSE_HOLE_COUNT, 0, sPlayerResults[0], D_801B60B4);
+        RankTournament(COURSE_HOLE_COUNT, 0, f_PlayerResults[0], D_801B60B4);
         for (i = 0; i != TOURNAMENT_CONTESTANT_COUNT; i++) {
           if (g_TournamentStandings[i].contestantId == -1) {
-            sPlayerRanks[0] = g_TournamentStandings[i].place & PLACE_MASK;
+            f_PlayerRanks[0] = g_TournamentStandings[i].place & PLACE_MASK;
             break;
           }
         }
-        if (sPlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-          sPrizePoints = sTournamentPrizes[g_CourseIndex][sPlayerRanks[0] - 1];
-        } else if (sPlayerRanks[0] <= PRIZE_TOP_TEN) {
-          sPrizePoints = sTournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT];
-        } else if (sPlayerRanks[0] <= PRIZE_TOP_TWENTY) {
-          sPrizePoints =
-              sTournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 1];
+        if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+          f_PrizePoints =
+              f_TournamentPrizes[g_CourseIndex][f_PlayerRanks[0] - 1];
+        } else if (f_PlayerRanks[0] <= PRIZE_TOP_TEN) {
+          f_PrizePoints = f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT];
+        } else if (f_PlayerRanks[0] <= PRIZE_TOP_TWENTY) {
+          f_PrizePoints =
+              f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 1];
         } else {
-          sPrizePoints =
-              sTournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 2];
+          f_PrizePoints =
+              f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 2];
         }
-        sPrizeShown = sPrizePoints;
-        if (sPlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-          sTrophyImage = AllocMemory(
-              OpenEncodedAsset(sTrophyAssets[g_CourseIndex].image, &asset));
-          ReadEncodedAsset(sTrophyImage, &asset);
+        f_PrizeShown = f_PrizePoints;
+        if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+          f_TrophyImage = AllocMemory(
+              OpenEncodedAsset(f_TrophyAssets[g_CourseIndex].image, &asset));
+          ReadEncodedAsset(f_TrophyImage, &asset);
           OpenAssetFile(
-              sTrophyAssets[g_CourseIndex].palette + sPlayerRanks[0] - 1,
+              f_TrophyAssets[g_CourseIndex].palette + f_PlayerRanks[0] - 1,
               &file);
           size = GetAssetFileSize(&file);
-          sTrophyPalette = AllocMemory(size);
-          ReadAssetFile(sTrophyPalette, size, &file);
+          f_TrophyPalette = AllocMemory(size);
+          ReadAssetFile(f_TrophyPalette, size, &file);
         }
-        sPointsEarned = sPlayerPoints[0] * sCoursePointRates[g_CourseIndex];
-        sPointsShown = sPointsEarned;
-        sTournamentOpenCourseCount = sOpenCourseCount =
+        f_PointsEarned = f_PlayerPoints[0] * f_CoursePointRates[g_CourseIndex];
+        f_PointsShown = f_PointsEarned;
+        f_TournamentOpenCourseCount = f_OpenCourseCount =
             CountOpenCourses(save->coursePoints);
-        if (sOpenCourseCount < COURSE_COUNT) {
-          sPointsToNextCourse = GetCoursePointsNeeded(sOpenCourseCount) -
-                                save->coursePoints - sPrizePoints -
-                                sPointsEarned;
+        if (f_OpenCourseCount < COURSE_COUNT) {
+          f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
+                                 save->coursePoints - f_PrizePoints -
+                                 f_PointsEarned;
         }
-        if (save->coursePoints + sPrizePoints + sPointsEarned >
+        if (save->coursePoints + f_PrizePoints + f_PointsEarned >
             MAX_COURSE_POINTS) {
           save->coursePoints = MAX_COURSE_POINTS;
         } else {
-          save->coursePoints += sPrizePoints + sPointsEarned;
+          save->coursePoints += f_PrizePoints + f_PointsEarned;
         }
         break;
     }
@@ -562,9 +564,9 @@ void LoadRoundResults(void) {
 
   for (i = 0; i != g_PlayerCount; i++) {
     if ((s8)g_Players[i].characterIndex >= CHARACTER_KID &&
-        sPlayerPoints[i] > 0) {
+        f_PlayerPoints[i] > 0) {
       AddGameBoyExperience(g_Players[i].gameBoyCharacterIndex,
-                           sPlayerPoints[i]);
+                           f_PlayerPoints[i]);
     }
   }
   switch (g_GameMode) {
@@ -606,67 +608,67 @@ void LoadUnlockNotice(s32 unlock) {
   u32 size;
 
   GetSaveData();
-  sIsNoticeHeld = FALSE;
-  sNoticeTime = 0;
-  sNoticeFaceIndex = 0;
-  sNoticeLift = 0;
-  sNoticeUnk6C = 0;
-  sNoticeFrameCount = 0;
-  sNoticeStage = 0;
-  sNoticeSwing = 0;
-  sNoticeUnk54 = 0;
-  sNoticeAngle = 0;
+  f_IsNoticeHeld = FALSE;
+  f_NoticeTime = 0;
+  f_NoticeFaceIndex = 0;
+  f_NoticeLift = 0;
+  f_NoticeUnk6C = 0;
+  f_NoticeFrameCount = 0;
+  f_NoticeStage = 0;
+  f_NoticeSwing = 0;
+  f_NoticeUnk54 = 0;
+  f_NoticeAngle = 0;
   courseIndex = 0;
   if (unlock == UNLOCK_NOTICE_DONKEY_KONG) {
-    sPortraitCharacterIndex = CHARACTER_DONKEY_KONG;
-    sUnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    f_PortraitCharacterIndex = CHARACTER_DONKEY_KONG;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else if (unlock == UNLOCK_NOTICE_PEACH) {
-    sPortraitCharacterIndex = CHARACTER_PEACH;
-    sUnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    f_PortraitCharacterIndex = CHARACTER_PEACH;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else if (unlock == UNLOCK_NOTICE_METAL_MARIO) {
-    sPortraitCharacterIndex = CHARACTER_METAL_MARIO;
-    sUnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
+    f_PortraitCharacterIndex = CHARACTER_METAL_MARIO;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_CHARACTER;
   } else {
     courseIndex = unlock - UNLOCK_NOTICE_COURSES;
-    sUnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
+    f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
   }
-  sResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
-  ReadEncodedAsset(sResultsShineImage, &asset);
-  if (sUnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    sNoticeTitleImage =
+  f_ResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
+  ReadEncodedAsset(f_ResultsShineImage, &asset);
+  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+    f_NoticeTitleImage =
         AllocMemory(OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset));
-    ReadEncodedAsset(sNoticeTitleImage, &asset);
-    sResultsCourseImage =
-        AllocMemory(OpenEncodedAsset(sCourseNoticeAssets[courseIndex], &asset));
-    ReadEncodedAsset(sResultsCourseImage, &asset);
+    ReadEncodedAsset(f_NoticeTitleImage, &asset);
+    f_ResultsCourseImage = AllocMemory(
+        OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
+    ReadEncodedAsset(f_ResultsCourseImage, &asset);
   }
-  if (sUnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-    sNoticeTitleImage = AllocMemory(OpenEncodedAsset(0x560, &asset));
-    ReadEncodedAsset(sNoticeTitleImage, &asset);
-    sNameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
-    ReadEncodedAsset(sNameplateImage, &asset);
-    sPortraitImage = AllocMemory(OpenEncodedAsset(
-        g_CharacterImageAssets[sPortraitCharacterIndex], &asset));
-    ReadEncodedAsset(sPortraitImage, &asset);
-    OpenAssetFile(g_CharacterPaletteAssets[sPortraitCharacterIndex], &file);
+  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
+    f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(0x560, &asset));
+    ReadEncodedAsset(f_NoticeTitleImage, &asset);
+    f_NameplateImage = AllocMemory(OpenEncodedAsset(NAMEPLATE_ASSET, &asset));
+    ReadEncodedAsset(f_NameplateImage, &asset);
+    f_PortraitImage = AllocMemory(OpenEncodedAsset(
+        g_CharacterImageAssets[f_PortraitCharacterIndex], &asset));
+    ReadEncodedAsset(f_PortraitImage, &asset);
+    OpenAssetFile(g_CharacterPaletteAssets[f_PortraitCharacterIndex], &file);
     size = GetAssetFileSize(&file);
-    sPortraitPalette = AllocMemory(size);
-    ReadAssetFile(sPortraitPalette, size, &file);
+    f_PortraitPalette = AllocMemory(size);
+    ReadAssetFile(f_PortraitPalette, size, &file);
   }
 }
 
 void FreeUnlockNotice(void) {
-  FreeMemory(&sNoticeTitleImage);
-  FreeMemory(&sResultsShineImage);
-  if (sUnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    FreeMemory(&sResultsCourseImage);
+  FreeMemory(&f_NoticeTitleImage);
+  FreeMemory(&f_ResultsShineImage);
+  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+    FreeMemory(&f_ResultsCourseImage);
   }
-  if (sUnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
-    FreeMemory(&sNameplateImage);
-    FreeMemory(&sPortraitImage);
-    FreeMemory(&sPortraitPalette);
+  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
+    FreeMemory(&f_NameplateImage);
+    FreeMemory(&f_PortraitImage);
+    FreeMemory(&f_PortraitPalette);
   }
-  sUnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
+  f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
 }
 
 /* Swings the course in, or raises the character's face; returns whether the
@@ -675,50 +677,50 @@ void FreeUnlockNotice(void) {
 s32 UpdateUnlockNotice(void) {
   EncodedAsset asset;
 
-  if (sUnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
-    sNoticeFrameCount++;
-    switch (sNoticeStage) {
+  if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
+    f_NoticeFrameCount++;
+    switch (f_NoticeStage) {
       case 0:
-        sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
-        sNoticeUnk54 = 0;
-        sNoticeAngle += NOTICE_SWING_STEP;
-        if (sNoticeAngle > M_PI) {
-          sNoticeAngle = M_PI;
+        f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+        f_NoticeUnk54 = 0;
+        f_NoticeAngle += NOTICE_SWING_STEP;
+        if (f_NoticeAngle > M_PI) {
+          f_NoticeAngle = M_PI;
         }
-        if (sNoticeFrameCount >= NOTICE_SWING_FRAMES) {
-          sNoticeStage = 1;
+        if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
+          f_NoticeStage = 1;
         }
         break;
       case 1:
-        sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
-        sNoticeAngle += NOTICE_SWING_STEP;
-        if (sNoticeFrameCount < NOTICE_DONE_FRAME) {
+        f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+        f_NoticeAngle += NOTICE_SWING_STEP;
+        if (f_NoticeFrameCount < NOTICE_DONE_FRAME) {
           break;
         }
         return TRUE;
     }
     return FALSE;
   }
-  sNoticeTime++;
-  if (sIsNoticeHeld) {
+  f_NoticeTime++;
+  if (f_IsNoticeHeld) {
     return FALSE;
   }
-  if (sNoticeTime > NOTICE_FACE_DELAY &&
-      !(sNoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-      sNoticeFaceIndex < NOTICE_LAST_FACE) {
-    sNoticeFaceIndex++;
+  if (f_NoticeTime > NOTICE_FACE_DELAY &&
+      !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+      f_NoticeFaceIndex < NOTICE_LAST_FACE) {
+    f_NoticeFaceIndex++;
     OpenEncodedAsset(
-        g_CharacterImageAssets[sPortraitCharacterIndex] + sNoticeFaceIndex,
+        g_CharacterImageAssets[f_PortraitCharacterIndex] + f_NoticeFaceIndex,
         &asset);
-    ReadEncodedAsset(sPortraitImage, &asset);
+    ReadEncodedAsset(f_PortraitImage, &asset);
   }
-  if (sNoticeTime > NOTICE_LIFT_DELAY) {
-    if (sNoticeLift > -2) {
-      sNoticeLift -= NOTICE_LIFT_START_SPEED;
+  if (f_NoticeTime > NOTICE_LIFT_DELAY) {
+    if (f_NoticeLift > -2) {
+      f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
-      sNoticeLift += sNoticeLift * 2 / 3;
+      f_NoticeLift += f_NoticeLift * 2 / 3;
     }
-    if (sNoticeLift < NOTICE_LIFT_EXIT) {
+    if (f_NoticeLift < NOTICE_LIFT_EXIT) {
       return TRUE;
     }
   }
@@ -732,39 +734,39 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateUnlockNotice);
 void FreeRoundResults(void) {
   s32 i;
 
-  if (sAreResultsLoaded) {
-    sAreResultsLoaded = FALSE;
-    FreeMemory(&sResultsBackdropImage);
-    FreeMemory(&sResultsHandImage);
-    FreeMemory(&sDigitsImage);
-    FreeMemory(&sPlaceDigitsImage);
+  if (f_AreResultsLoaded) {
+    f_AreResultsLoaded = FALSE;
+    FreeMemory(&f_ResultsBackdropImage);
+    FreeMemory(&f_ResultsHandImage);
+    FreeMemory(&f_DigitsImage);
+    FreeMemory(&f_PlaceDigitsImage);
     if (g_IsClubTournament) {
-      FreeMemory(&sNintendoBadgeImage);
-      FreeMemory(&sResultsCourseImage);
+      FreeMemory(&f_NintendoBadgeImage);
+      FreeMemory(&f_ResultsCourseImage);
     } else {
-      FreeMemory(&sFinalResultsTitleImage);
-      FreeMemory(&sResultsLabelsImage);
-      FreeMemory(&sResultsLargeDigitsImage);
-      FreeMemory(&sResultsCloudImage);
-      FreeMemory(&sResultsCourseImage);
-      FreeMemory(&sNoticeTitleImage);
-      FreeMemory(&sResultsShineImage);
+      FreeMemory(&f_FinalResultsTitleImage);
+      FreeMemory(&f_ResultsLabelsImage);
+      FreeMemory(&f_ResultsLargeDigitsImage);
+      FreeMemory(&f_ResultsCloudImage);
+      FreeMemory(&f_ResultsCourseImage);
+      FreeMemory(&f_NoticeTitleImage);
+      FreeMemory(&f_ResultsShineImage);
       FreeMemory(&D_80225718_ovl_00);
       FreeMemory(&D_8022571C_ovl_00);
     }
     for (i = 0; i != g_PlayerCount; i++) {
-      FreeMemory(&sPlayerPortraitImages[i]);
-      FreeMemory(&sPlayerPortraitPalettes[i]);
+      FreeMemory(&f_PlayerPortraitImages[i]);
+      FreeMemory(&f_PlayerPortraitPalettes[i]);
     }
     if (!g_IsClubTournament) {
       if (g_GameMode == GAME_MODE_MATCH_GAME ||
           g_GameMode == GAME_MODE_GET_CHARACTER) {
-        FreeMemory(&sResultsPlacesImage);
+        FreeMemory(&f_ResultsPlacesImage);
         FreeMemory(&D_80225708_ovl_00);
-        FreeMemory(&sNameplateImage);
-        FreeMemory(&sMatchStandingWordsImage);
+        FreeMemory(&f_NameplateImage);
+        FreeMemory(&f_MatchStandingWordsImage);
       } else {
-        FreeMemory(&sResultsPlacesImage);
+        FreeMemory(&f_ResultsPlacesImage);
       }
       switch (g_GameMode) {
         case GAME_MODE_STROKE:
@@ -779,14 +781,14 @@ void FreeRoundResults(void) {
           break;
         case GAME_MODE_MATCH_GAME:
         case GAME_MODE_GET_CHARACTER:
-          FreeMemory(&sPortraitImage);
-          FreeMemory(&sPortraitPalette);
+          FreeMemory(&f_PortraitImage);
+          FreeMemory(&f_PortraitPalette);
           break;
         case GAME_MODE_TOURNAMENT:
           FreeMemory(&D_80225708_ovl_00);
-          if (sPlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-            FreeMemory(&sTrophyImage);
-            FreeMemory(&sTrophyPalette);
+          if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+            FreeMemory(&f_TrophyImage);
+            FreeMemory(&f_TrophyPalette);
           }
           break;
       }
@@ -795,32 +797,32 @@ void FreeRoundResults(void) {
 }
 
 void StartPortraitAnimation(s32 animation, s32 playerIndex) {
-  sPortraitAnimations[playerIndex] = animation;
-  sPortraitFrames[playerIndex] = 0;
-  sPortraitTimers[playerIndex] = 0;
+  f_PortraitAnimations[playerIndex] = animation;
+  f_PortraitFrames[playerIndex] = 0;
+  f_PortraitTimers[playerIndex] = 0;
 }
 
-/* Ticks as the points count up, on every fourth call while sTallySpeed is 1 */
+/* Ticks as the points count up, on every fourth call while f_TallySpeed is 1 */
 void PlayTallySound(void) {
-  sTallySoundCount++;
-  if (sTallySpeed != 1 || !(sTallySoundCount & 3)) {
+  f_TallySoundCount++;
+  if (f_TallySpeed != 1 || !(f_TallySoundCount & 3)) {
     PlaySound(SOUND_TALLY_TICK, g_NextSoundChannel, 0x7F);
   }
 }
 
-/* Draws value right-aligned in four of the 8 by 12 digits of sDigitsImage */
+/* Draws value right-aligned in four of the 8 by 12 digits of f_DigitsImage */
 void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   Gfx* gfx = *displayListHead;
   u8* c;
   u8 ch;
   s32 offset;
 
-  sprintf(g_PrintBuffer, sNumberFormat, value);
-  LoadSmallPalette(&gfx, 0, sDigitsImage + IMAGE_HEADER_SIZE);
+  sprintf(g_PrintBuffer, f_NumberFormat, value);
+  LoadSmallPalette(&gfx, 0, f_DigitsImage + IMAGE_HEADER_SIZE);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)sDigitsImage + PALETTED_TEXELS_OFFSET) & ~7,
+                         ((u32)f_DigitsImage + PALETTED_TEXELS_OFFSET) & ~7,
                          G_IM_FMT_CI, 128, RESULTS_DIGIT_HEIGHT, 0,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -844,7 +846,7 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
   *displayListHead = gfx;
 }
 
-/* sPlaceDigitsImage holds 24-pixel glyphs: the digits, then the st, nd, rd and
+/* f_PlaceDigitsImage holds 24-pixel glyphs: the digits, then the st, nd, rd and
  * th suffixes */
 #define PLACE_GLYPH_SIZE 24
 #define PLACE_GLYPH_SPACING 20
@@ -856,20 +858,20 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
 #define PLACES_PER_HUNDRED 100
 #define PLACE_NUMBER_X_OFFSET (-12)
 
-/* Loads glyph from sPlaceDigitsImage and draws it at x, y */
-#define DRAW_PLACE_GLYPH(gfx, x, y, glyph)                                   \
-  {                                                                          \
-    gDPLoadTextureTile(                                                      \
-        gfx++, (u32)(sPlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
-        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0,                    \
-        (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,                    \
-        (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,                \
-        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,   \
-        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);                                \
-    gSPScisTextureRectangle(                                                 \
-        gfx++, (x) << 2, (y) << 2, ((x) + PLACE_GLYPH_SIZE) << 2,            \
-        ((y) + PLACE_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,                   \
-        ((glyph) * PLACE_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);  \
+/* Loads glyph from f_PlaceDigitsImage and draws it at x, y */
+#define DRAW_PLACE_GLYPH(gfx, x, y, glyph)                                    \
+  {                                                                           \
+    gDPLoadTextureTile(                                                       \
+        gfx++, (u32)(f_PlaceDigitsImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7, \
+        G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_GLYPH_SIZE, 0, 0,                     \
+        (glyph) * PLACE_GLYPH_SIZE, PLACE_GLYPH_SIZE - 1,                     \
+        (glyph) * PLACE_GLYPH_SIZE + PLACE_GLYPH_SIZE - 1, 0,                 \
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,    \
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);                                 \
+    gSPScisTextureRectangle(                                                  \
+        gfx++, (x) << 2, (y) << 2, ((x) + PLACE_GLYPH_SIZE) << 2,             \
+        ((y) + PLACE_GLYPH_SIZE) << 2, G_TX_RENDERTILE, 0,                    \
+        ((glyph) * PLACE_GLYPH_SIZE) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);   \
   }
 
 #ifdef NON_MATCHING
@@ -884,10 +886,10 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   s32 glyph;
   s32 left;
 
-  sprintf(g_PrintBuffer, sPlaceNumberFormat, place);
+  sprintf(g_PrintBuffer, f_PlaceNumberFormat, place);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, sPlaceDigitsImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_PlaceDigitsImage + IMAGE_HEADER_SIZE);
   width = 0;
   for (c = g_PrintBuffer; *c != '\0'; c++) {
     width += PLACE_GLYPH_SPACING;
@@ -930,11 +932,11 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlaceNumber);
 void DrawPlaceIcon(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   Gfx* gfx = *displayListHead;
 
-  LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
   LoadTextureBlock(
       &gfx,
-      sResultsPlacesImage + ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
-                             LARGE_PALETTED_TEXELS_OFFSET),
+      f_ResultsPlacesImage + ((place * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
+                              LARGE_PALETTED_TEXELS_OFFSET),
       G_IM_FMT_CI, G_IM_SIZ_8b, PLACE_ICON_SIZE, PLACE_ICON_SIZE, 0, 0, 0, 0, 0,
       0, 0);
   DrawTextureRect(&gfx, x * 4, y * 4, (x + PLACE_ICON_SIZE) * 4,
@@ -992,10 +994,10 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         suffix = PLACE_SUFFIX_TH;
       }
     }
-    LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
     LoadTextureBlock(
         &gfx,
-        sResultsPlacesImage +
+        f_ResultsPlacesImage +
             ((suffix * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
              LARGE_PALETTED_TEXELS_OFFSET +
              PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE),
@@ -1006,7 +1008,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
                     (y + PLACE_ICON_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
                     TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     if (rank >= PLACE_SUFFIX_TH) {
-      sprintf(g_PrintBuffer, sPlaceNumberFormat, rank + 1);
+      sprintf(g_PrintBuffer, f_PlaceNumberFormat, rank + 1);
       LoadSmallPalette(&gfx, 0, D_80225708_ovl_00 + IMAGE_HEADER_SIZE);
       if (rank >= PLACE_TENTH) {
         x -= PLACE_TWO_DIGIT_SHIFT;
@@ -1032,7 +1034,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
     }
   } else if (rank >= RANK_BANNER) {
     if (rank == RANK_BANNER) {
-      image = sResultsPlacesImage;
+      image = f_ResultsPlacesImage;
     } else {
       image = D_80225708_ovl_00;
     }
@@ -1050,10 +1052,10 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
       offset += RANK_BANNER_WIDTH * RANK_BANNER_STRIP_HEIGHT;
     }
   } else {
-    LoadLargePalette(&gfx, sResultsPlacesImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
     LoadTextureBlock(
         &gfx,
-        sResultsPlacesImage +
+        f_ResultsPlacesImage +
             ((rank * PLACE_ICON_SIZE * PLACE_ICON_SIZE) +
              LARGE_PALETTED_TEXELS_OFFSET +
              PLACE_SUFFIX_ICON_FIRST * PLACE_ICON_SIZE * PLACE_ICON_SIZE),
@@ -1074,10 +1076,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRank);
 void DrawResultsLabel(Gfx** displayListHead, s32 x, s32 y, s32 label) {
   Gfx* gfx = *displayListHead;
 
-  LoadSmallPalette(&gfx, 0, sResultsLabelsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_ResultsLabelsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(
       gfx++,
-      (u32)(sResultsLabelsImage +
+      (u32)(f_ResultsLabelsImage +
             (label * (RESULTS_LABEL_STORED_WIDTH * RESULTS_LABEL_HEIGHT / 2) +
              PALETTED_TEXELS_OFFSET)) &
           ~7,
@@ -1099,8 +1101,8 @@ void DrawPlayerPortrait(Gfx** displayListHead, s32 x, s32 y, s32 playerIndex,
                         s32 isMirrored) {
   Gfx* gfx = *displayListHead;
 
-  LoadLargePalette(&gfx, sPlayerPortraitPalettes[playerIndex]);
-  LoadTextureBlock(&gfx, sPlayerPortraitImages[playerIndex], G_IM_FMT_CI,
+  LoadLargePalette(&gfx, f_PlayerPortraitPalettes[playerIndex]);
+  LoadTextureBlock(&gfx, f_PlayerPortraitImages[playerIndex], G_IM_FMT_CI,
                    G_IM_SIZ_8b, PORTRAIT_SIZE, PORTRAIT_SIZE, 0, G_TX_MIRROR,
                    G_TX_NOMIRROR, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   DrawTextureRect(&gfx, x * 4, y * 4, (x + PORTRAIT_SIZE) * 4,
@@ -1111,57 +1113,57 @@ void DrawPlayerPortrait(Gfx** displayListHead, s32 x, s32 y, s32 playerIndex,
 }
 
 void StartResultsNotice(s32 kind) {
-  sUnlockNoticeKind = kind;
+  f_UnlockNoticeKind = kind;
   switch (kind) {
     case UNLOCK_NOTICE_KIND_NONE:
       break;
     case UNLOCK_NOTICE_KIND_COURSE:
-      sNoticeStage = 0;
-      sNoticeFrameCount = 0;
-      sNoticeSwing = SCREEN_WIDTH;
-      sNoticeUnk54 = 0;
-      sNoticeAngle = -1.57f;
+      f_NoticeStage = 0;
+      f_NoticeFrameCount = 0;
+      f_NoticeSwing = SCREEN_WIDTH;
+      f_NoticeUnk54 = 0;
+      f_NoticeAngle = -1.57f;
       break;
     case UNLOCK_NOTICE_KIND_CHARACTER:
-      sIsNoticeHeld = FALSE;
-      sNoticeTime = 0;
-      sNoticeFaceIndex = 0;
-      sNoticeLift = 0;
-      sNoticeUnk6C = 0;
+      f_IsNoticeHeld = FALSE;
+      f_NoticeTime = 0;
+      f_NoticeFaceIndex = 0;
+      f_NoticeLift = 0;
+      f_NoticeUnk6C = 0;
       break;
   }
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNumberFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NumberFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sPlaceNumberFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_PlaceNumberFormat);
 
 /* Swings the notice in, then counts the course it opened */
 void UpdateCourseResultsNotice(void) {
   SaveData* save = GetSaveData();
 
-  sNoticeFrameCount++;
-  switch (sNoticeStage) {
+  f_NoticeFrameCount++;
+  switch (f_NoticeStage) {
     case 0:
-      sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
-      sNoticeUnk54 = 0;
-      sNoticeAngle += NOTICE_SWING_STEP;
-      if (sNoticeAngle > M_PI) {
-        sNoticeAngle = M_PI;
+      f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+      f_NoticeUnk54 = 0;
+      f_NoticeAngle += NOTICE_SWING_STEP;
+      if (f_NoticeAngle > M_PI) {
+        f_NoticeAngle = M_PI;
       }
-      if (sNoticeFrameCount >= NOTICE_SWING_FRAMES) {
-        sNoticeStage = 1;
+      if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
+        f_NoticeStage = 1;
       }
       break;
     case 1:
-      sNoticeSwing = -sinf(sNoticeAngle) * NOTICE_SWING_HEIGHT;
-      sNoticeAngle += NOTICE_SWING_STEP;
-      if (sNoticeFrameCount >= NOTICE_DONE_FRAME) {
+      f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
+      f_NoticeAngle += NOTICE_SWING_STEP;
+      if (f_NoticeFrameCount >= NOTICE_DONE_FRAME) {
         StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
-        sOpenCourseCount++;
-        if (sOpenCourseCount < COURSE_COUNT) {
-          sPointsToNextCourse =
-              GetCoursePointsNeeded(sOpenCourseCount) - save->coursePoints;
+        f_OpenCourseCount++;
+        if (f_OpenCourseCount < COURSE_COUNT) {
+          f_PointsToNextCourse =
+              GetCoursePointsNeeded(f_OpenCourseCount) - save->coursePoints;
         }
       }
       break;
@@ -1231,46 +1233,47 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   /* Once the swing settles the picture is drawn at full size, where point
    * sampling is sharper */
-  if (sNoticeAngle == M_PI) {
+  if (f_NoticeAngle == M_PI) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
   } else {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
   }
-  LoadLargePalette(&gfx, sResultsCourseImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_ResultsCourseImage + IMAGE_HEADER_SIZE);
   for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
-    size = (cosf(sNoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
+    size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
            NOTICE_COURSE_STRIP_HEIGHT;
     step = (NOTICE_COURSE_STRIP_HEIGHT << 10) / size;
     LoadTextureBlock(
         &gfx,
-        sResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+        f_ResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
             i * NOTICE_COURSE_STRIP_WIDTH * NOTICE_COURSE_STRIP_HEIGHT,
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_COURSE_STRIP_WIDTH,
         NOTICE_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = i * size + NOTICE_COURSE_CENTRE_Y - size;
-    centreX = sNoticeSwing + NOTICE_COURSE_CENTRE_X;
-    DrawTextureRect(&gfx, (centreX - size) * 4, (top + sNoticeUnk54) * 4,
-                    (size + centreX) * 4, (top + size + sNoticeUnk54) * 4,
+    centreX = f_NoticeSwing + NOTICE_COURSE_CENTRE_X;
+    DrawTextureRect(&gfx, (centreX - size) * 4, (top + f_NoticeUnk54) * 4,
+                    (size + centreX) * 4, (top + size + f_NoticeUnk54) * 4,
                     G_TX_RENDERTILE, 0, 0, step, step);
   }
-  LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
     lift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(
         &gfx,
-        sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+        f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
             i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = lift + NOTICE_TITLE_TOP + i * NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(
-        &gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4, (top + sNoticeUnk54) * 4,
-        (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-        (top + (sNoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        &gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
+        (top + f_NoticeUnk54) * 4,
+        (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+        (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   /* The title again, into the depth buffer alone */
   gDPPipeSync(gfx++);
@@ -1282,22 +1285,23 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++,
                    GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
                    G_RM_AA_ZB_TEX_EDGE2);
-  LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
-    lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+    lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
     lift -= (s32)NOTICE_TITLE_LIFT;
     LoadTextureBlock(
         &gfx,
-        sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+        f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
             i * NOTICE_TITLE_STRIP_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
         G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_TITLE_STRIP_WIDTH,
         NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     top = lift + NOTICE_TITLE_TOP + i * NOTICE_TITLE_STRIP_HEIGHT;
     DrawTextureRect(
-        &gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4, (top + sNoticeUnk54) * 4,
-        (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-        (top + (sNoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4, G_TX_RENDERTILE,
-        0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        &gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
+        (top + f_NoticeUnk54) * 4,
+        (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+        (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
+        G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
   gDPPipeSync(gfx++);
@@ -1311,23 +1315,23 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+  LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
                    G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0,
                    0, 0, 0, 0);
-  if (sNoticeFrameCount == NOTICE_SHINE_START) {
+  if (f_NoticeFrameCount == NOTICE_SHINE_START) {
     PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
                          NOTICE_SHINE_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
   }
-  if (sNoticeFrameCount == 2) {
+  if (f_NoticeFrameCount == 2) {
     PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
                          NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_RIGHT);
     PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL,
               NOTICE_CHEER_SOUND_VOLUME);
   }
   /* The swing sound follows the notice across the screen */
-  if (sNoticeFrameCount >= NOTICE_PAN_START &&
-      sNoticeFrameCount < NOTICE_PAN_END) {
-    pan = (sNoticeSwing + NOTICE_COURSE_CENTRE_X) * NOTICE_PAN_RANGE /
+  if (f_NoticeFrameCount >= NOTICE_PAN_START &&
+      f_NoticeFrameCount < NOTICE_PAN_END) {
+    pan = (f_NoticeSwing + NOTICE_COURSE_CENTRE_X) * NOTICE_PAN_RANGE /
           NOTICE_COURSE_CENTRE_X;
     if (pan < 0) {
       pan = 0;
@@ -1337,18 +1341,18 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     }
     SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
   }
-  lift = -(s32)(cosf(sNoticeAngle) * NOTICE_TITLE_LIFT);
+  lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
   lift -= (s32)NOTICE_TITLE_LIFT;
-  if (sNoticeFrameCount >= NOTICE_SHINE_START) {
-    if (sNoticeFrameCount < NOTICE_SHINE_END) {
+  if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
+    if (f_NoticeFrameCount < NOTICE_SHINE_END) {
       DrawTextureRect(
-          &gfx, (sNoticeSwing + NOTICE_TITLE_LEFT) * 4,
-          (lift + (sNoticeUnk54 + NOTICE_TITLE_TOP)) * 4,
-          (sNoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
-          (lift + (sNoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)) * 4,
+          &gfx, (f_NoticeSwing + NOTICE_TITLE_LEFT) * 4,
+          (lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP)) * 4,
+          (f_NoticeSwing + NOTICE_TITLE_LEFT + NOTICE_TITLE_STRIP_WIDTH) * 4,
+          (lift + (f_NoticeUnk54 + NOTICE_TITLE_TOP + NOTICE_SHINE_SIZE)) * 4,
           G_TX_RENDERTILE,
           (NOTICE_SHINE_SIZE -
-           (sNoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+           (f_NoticeFrameCount - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
               << 5,
           0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
@@ -1366,26 +1370,26 @@ void UpdateCharacterResultsNotice(void) {
   EncodedAsset asset;
 
   GetSaveData();
-  sNoticeTime++;
-  if (sIsNoticeHeld) {
+  f_NoticeTime++;
+  if (f_IsNoticeHeld) {
     return;
   }
-  if (sNoticeTime > NOTICE_FACE_DELAY &&
-      !(sNoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
-      sNoticeFaceIndex < NOTICE_LAST_FACE) {
-    sNoticeFaceIndex++;
+  if (f_NoticeTime > NOTICE_FACE_DELAY &&
+      !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
+      f_NoticeFaceIndex < NOTICE_LAST_FACE) {
+    f_NoticeFaceIndex++;
     OpenEncodedAsset(g_CharacterImageAssets[(s8)g_Players[1].characterIndex] +
-                         sNoticeFaceIndex,
+                         f_NoticeFaceIndex,
                      &asset);
-    ReadEncodedAsset(sPortraitImage, &asset);
+    ReadEncodedAsset(f_PortraitImage, &asset);
   }
-  if (sNoticeTime > NOTICE_LIFT_DELAY) {
-    if (sNoticeLift > -2) {
-      sNoticeLift -= NOTICE_LIFT_START_SPEED;
+  if (f_NoticeTime > NOTICE_LIFT_DELAY) {
+    if (f_NoticeLift > -2) {
+      f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
-      sNoticeLift += sNoticeLift * 2 / 3;
+      f_NoticeLift += f_NoticeLift * 2 / 3;
     }
-    if (sNoticeLift < NOTICE_LIFT_EXIT) {
+    if (f_NoticeLift < NOTICE_LIFT_EXIT) {
       StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
     }
   }
@@ -1434,8 +1438,8 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   s32 centreY;
   s32 i;
 
-  if (sNoticeTime < NOTICE_POP_FRAMES) {
-    angle = sNoticeTime * NOTICE_POP_STEP * (M_PI / 2);
+  if (f_NoticeTime < NOTICE_POP_FRAMES) {
+    angle = f_NoticeTime * NOTICE_POP_STEP * (M_PI / 2);
   } else {
     angle = NOTICE_POP_SETTLE_ANGLE;
   }
@@ -1448,26 +1452,26 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   size = pop * NOTICE_NAMEPLATE_POP_SIZE;
   if (size > 0) {
-    LoadSmallPalette(&gfx, 0, sNameplateImage + IMAGE_HEADER_SIZE);
-    LoadNibbleTextureBlock(&gfx, sNameplateImage + PALETTED_TEXELS_OFFSET,
+    LoadSmallPalette(&gfx, 0, f_NameplateImage + IMAGE_HEADER_SIZE);
+    LoadNibbleTextureBlock(&gfx, f_NameplateImage + PALETTED_TEXELS_OFFSET,
                            G_IM_FMT_CI, NOTICE_NAMEPLATE_SIZE,
                            NOTICE_NAMEPLATE_SIZE, 0, 0, 0, 0, 0, 0, 0);
     step = ((NOTICE_NAMEPLATE_SIZE / 2) << 10) / size;
-    centreX = sNoticeLift + NOTICE_CENTRE_X;
-    centreY = sNoticeUnk6C + NOTICE_CENTRE_Y;
+    centreX = f_NoticeLift + NOTICE_CENTRE_X;
+    centreY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
     DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4,
                     (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE,
                     0, 0, step, step);
   }
   size = pop * NOTICE_PORTRAIT_POP_SIZE;
   if (size > 0) {
-    LoadLargePalette(&gfx, sPortraitPalette);
-    LoadTextureBlock(&gfx, sPortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
+    LoadLargePalette(&gfx, f_PortraitPalette);
+    LoadTextureBlock(&gfx, f_PortraitImage, G_IM_FMT_CI, G_IM_SIZ_8b,
                      NOTICE_PORTRAIT_SIZE, NOTICE_PORTRAIT_SIZE, 0, 0, 0, 0, 0,
                      0, 0);
     step = ((NOTICE_PORTRAIT_SIZE / 2) << 10) / size;
-    centreX = sNoticeLift + NOTICE_CENTRE_X;
-    centreY = sNoticeUnk6C + NOTICE_CENTRE_Y;
+    centreX = f_NoticeLift + NOTICE_CENTRE_X;
+    centreY = f_NoticeUnk6C + NOTICE_CENTRE_Y;
     DrawTextureRect(&gfx, (centreX - size) * 4, (centreY - size) * 4,
                     (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE,
                     0, 0, step, step);
@@ -1477,21 +1481,21 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
   width = pop * NOTICE_CHARACTER_TITLE_POP_WIDTH;
   if (width > 0 && height > 0) {
-    LoadLargePalette(&gfx, sNoticeTitleImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
     for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
       LoadTextureBlock(
           &gfx,
-          sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
               i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       top = NOTICE_CHARACTER_TITLE_TOP -
             height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2 + i * height;
       /* This pass mirrors the slide, unlike the depth pass and the shine */
-      DrawTextureRect(&gfx, (NOTICE_CENTRE_X - (sNoticeLift + width)) * 4,
-                      (top + sNoticeUnk6C) * 4,
-                      (width - (sNoticeLift - NOTICE_CENTRE_X)) * 4,
-                      (top + height + sNoticeUnk6C) * 4,
+      DrawTextureRect(&gfx, (NOTICE_CENTRE_X - (f_NoticeLift + width)) * 4,
+                      (top + f_NoticeUnk6C) * 4,
+                      (width - (f_NoticeLift - NOTICE_CENTRE_X)) * 4,
+                      (top + height + f_NoticeUnk6C) * 4,
 
                       G_TX_RENDERTILE, 0, 0,
                       ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
@@ -1511,15 +1515,15 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     for (i = 0; i != NOTICE_CHARACTER_TITLE_STRIP_COUNT; i++) {
       LoadTextureBlock(
           &gfx,
-          sNoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_NoticeTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
               i * NOTICE_CHARACTER_TITLE_WIDTH * NOTICE_TITLE_STRIP_HEIGHT,
           G_IM_FMT_CI, G_IM_SIZ_8b, NOTICE_CHARACTER_TITLE_WIDTH,
           NOTICE_TITLE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       top = NOTICE_CHARACTER_TITLE_TOP -
             height * NOTICE_CHARACTER_TITLE_STRIP_COUNT / 2 + i * height;
-      centreX = sNoticeLift + NOTICE_CENTRE_X;
-      DrawTextureRect(&gfx, (centreX - width) * 4, (top + sNoticeUnk6C) * 4,
-                      (width + centreX) * 4, (top + height + sNoticeUnk6C) * 4,
+      centreX = f_NoticeLift + NOTICE_CENTRE_X;
+      DrawTextureRect(&gfx, (centreX - width) * 4, (top + f_NoticeUnk6C) * 4,
+                      (width + centreX) * 4, (top + height + f_NoticeUnk6C) * 4,
                       G_TX_RENDERTILE, 0, 0,
                       ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
                       (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
@@ -1536,40 +1540,40 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_NONE);
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-    LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+    LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
                      G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0, 0,
                      0, 0, 0, 0);
-    if (sNoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
-      PlayCharacterSound(sPortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
+    if (f_NoticeTime == NOTICE_CHARACTER_VOICE_FRAME) {
+      PlayCharacterSound(f_PortraitCharacterIndex, NOTICE_CHARACTER_VOICE_SLOT,
                          NOTICE_CHARACTER_VOICE, NOTICE_CHARACTER_VOICE_VOLUME,
                          NOTICE_SOUND_PAN_CENTRE);
     }
-    if (sNoticeTime == NOTICE_SHINE_START) {
+    if (f_NoticeTime == NOTICE_SHINE_START) {
       PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
                            NOTICE_SHINE_SOUND_VOLUME, 0,
                            NOTICE_SOUND_PAN_CENTRE);
     }
-    if (sNoticeTime == 2) {
+    if (f_NoticeTime == 2) {
       PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
                            NOTICE_SWING_SOUND_VOLUME, 0,
                            NOTICE_SOUND_PAN_CENTRE);
     }
-    if (sNoticeTime >= NOTICE_SHINE_START) {
-      if (sNoticeTime < NOTICE_SHINE_END) {
-        DrawTextureRect(&gfx, (sNoticeLift + NOTICE_CHARACTER_SHINE_LEFT) * 4,
-                        (sNoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP) * 4,
-                        (sNoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
-                         NOTICE_CHARACTER_TITLE_WIDTH) *
-                            4,
-                        (sNoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
-                         NOTICE_CHARACTER_SHINE_HEIGHT) *
-                            4,
-                        G_TX_RENDERTILE,
-                        (NOTICE_SHINE_SIZE -
-                         (sNoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
-                            << 5,
-                        0, NOTICE_CHARACTER_SHINE_DSDX,
-                        NOTICE_CHARACTER_SHINE_DTDY);
+    if (f_NoticeTime >= NOTICE_SHINE_START) {
+      if (f_NoticeTime < NOTICE_SHINE_END) {
+        DrawTextureRect(
+            &gfx, (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT) * 4,
+            (f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP) * 4,
+            (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT +
+             NOTICE_CHARACTER_TITLE_WIDTH) *
+                4,
+            (f_NoticeUnk6C + NOTICE_CHARACTER_SHINE_TOP +
+             NOTICE_CHARACTER_SHINE_HEIGHT) *
+                4,
+            G_TX_RENDERTILE,
+            (NOTICE_SHINE_SIZE -
+             (f_NoticeTime - NOTICE_SHINE_START) * NOTICE_SHINE_STEP)
+                << 5,
+            0, NOTICE_CHARACTER_SHINE_DSDX, NOTICE_CHARACTER_SHINE_DTDY);
       }
     }
     gDPPipeSync(gfx++);
@@ -1585,16 +1589,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawCharacterResultsNotice)
 s32 UpdateRoundResults(void) {
   s32 isDone;
 
-  switch (sResultsState) {
+  switch (f_ResultsState) {
     case RESULTS_SLIDING_IN:
-      if (sResultsSlide == 1) {
-        sResultsState = RESULTS_SHOWN;
-        sResultsSlide = 0;
-        sResultsUnk78 = 0;
-        sResultsUnk7C = 0;
+      if (f_ResultsSlide == 1) {
+        f_ResultsState = RESULTS_SHOWN;
+        f_ResultsSlide = 0;
+        f_ResultsUnk78 = 0;
+        f_ResultsUnk7C = 0;
         break;
       }
-      sResultsSlide += -sResultsSlide / 2;
+      f_ResultsSlide += -f_ResultsSlide / 2;
       break;
     case RESULTS_SHOWN:
       if (g_IsClubTournament) {
@@ -1620,7 +1624,7 @@ s32 UpdateRoundResults(void) {
         }
       }
       if (isDone) {
-        sResultsState = RESULTS_CLOSING;
+        f_ResultsState = RESULTS_CLOSING;
       }
       break;
     case RESULTS_CLOSING:
@@ -1631,14 +1635,14 @@ s32 UpdateRoundResults(void) {
   return FALSE;
 }
 
-s32 GetBannerState(void) { return sBannerState; }
+s32 GetBannerState(void) { return f_BannerState; }
 
 void SetResultsBanner(s32 state, s32 kind) {
-  sBannerState = state;
-  sBannerKind = kind;
+  f_BannerState = state;
+  f_BannerKind = kind;
   if (state == 0) {
-    sBannerX = SCREEN_WIDTH;
-    sBannerY = 0;
+    f_BannerX = SCREEN_WIDTH;
+    f_BannerY = 0;
   }
 }
 
@@ -1651,9 +1655,9 @@ void SetResultsBanner(s32 state, s32 kind) {
 #define TROPHY_SHINE_HEIGHT 3
 #define TROPHY_SIZE_COUNT 4
 
-extern s32 sTrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT];
-extern s32 sTrophyShineFrame;
-extern s32 sTrophyFrame;
+extern s32 f_TrophySizes[COURSE_COUNT][TROPHY_SIZE_COUNT];
+extern s32 f_TrophyShineFrame;
+extern s32 f_TrophyFrame;
 
 #define BANNER_KIND_TOURNAMENT_PLACE 1
 #define BANNER_KIND_UNK2 2
@@ -1734,46 +1738,46 @@ void DrawResultsBanner(Gfx** displayListHead) {
 
   gfx = *displayListHead;
 
-  switch (sBannerState) {
+  switch (f_BannerState) {
     case BANNER_SHOWN:
     case BANNER_HIDDEN:
       break;
     case BANNER_SLIDING_IN:
-      if (sBannerX == 1) {
-        sBannerState = BANNER_SHOWN;
+      if (f_BannerX == 1) {
+        f_BannerState = BANNER_SHOWN;
       } else {
-        sBannerX += -sBannerX / 2;
+        f_BannerX += -f_BannerX / 2;
       }
       break;
     case BANNER_SLIDING_OUT:
-      if (sBannerX >= -1) {
-        sBannerX -= BANNER_SLIDE_OUT_SPEED;
+      if (f_BannerX >= -1) {
+        f_BannerX -= BANNER_SLIDE_OUT_SPEED;
       } else {
-        sBannerX += sBannerX / 2;
+        f_BannerX += f_BannerX / 2;
       }
-      if (sBannerX < BANNER_GONE_X) {
-        sBannerState = BANNER_HIDDEN;
+      if (f_BannerX < BANNER_GONE_X) {
+        f_BannerState = BANNER_HIDDEN;
       }
       break;
   }
-  switch (sBannerKind) {
+  switch (f_BannerKind) {
     case BANNER_KIND_UNK2:
     case BANNER_KIND_UNK4:
       break;
     case BANNER_KIND_POINTS:
-      SetTextSlotValue(sPointsShown, BANNER_TEXT_SLOT, 0);
-      SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y,
+      SetTextSlotValue(f_PointsShown, BANNER_TEXT_SLOT, 0);
+      SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
                   MESSAGE_POINTS_EARNED, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
                   TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
                   BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
     case BANNER_KIND_TOURNAMENT_PLACE:
-      rank = sPlayerRanks[0];
+      rank = f_PlayerRanks[0];
       place = rank - 1;
-      if (sTournamentOpenCourseCount < COURSE_COUNT) {
+      if (f_TournamentOpenCourseCount < COURSE_COUNT) {
         if (place < TROPHY_PLACE_COUNT) {
-          SetTextSlotValue(sPrizeShown, BANNER_TEXT_SLOT, 0);
-          SetTextSlot(sBannerX + PRIZE_TEXT_X, sBannerY + PRIZE_TEXT_Y,
+          SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 0);
+          SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
                       rank + MESSAGE_TROPHY_PRIZE, BANNER_TEXT_FONT,
                       BANNER_TEXT_SLOT, TEXT_FLAG_UNK20, BANNER_TEXT_RED,
                       BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
@@ -1788,34 +1792,34 @@ void DrawResultsBanner(Gfx** displayListHead) {
             sprintf(g_PrintBuffer, "%drd", rank);
           }
           SetTextName(g_PrintBuffer);
-          SetTextSlotValue(sPrizeShown, BANNER_TEXT_SLOT, 1);
-          SetTextSlot(sBannerX + PRIZE_TEXT_X, sBannerY + PRIZE_TEXT_Y,
+          SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
+          SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
                       MESSAGE_PLACE_PRIZE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
                       TEXT_FLAG_UNK20, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
                       BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
         }
       } else if (place < TROPHY_PLACE_COUNT) {
-        SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y,
+        SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
                     rank + MESSAGE_TROPHY_PLACE, BANNER_TEXT_FONT,
                     BANNER_TEXT_SLOT, TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED,
                     BANNER_TEXT_RED, BANNER_TEXT_GREEN, BANNER_TEXT_BLUE,
                     BANNER_TEXT_ALPHA);
       } else {
         SetTextSlotValue(rank, BANNER_TEXT_SLOT, 0);
-        SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y,
+        SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
                     MESSAGE_PLACE, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
                     TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
                     BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       }
       break;
     case BANNER_KIND_UNK5:
-      SetTextSlot(sBannerX + BANNER_TEXT_X, sBannerY + BANNER_TEXT_Y,
+      SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
                   MESSAGE_UNK48, BANNER_TEXT_FONT, BANNER_TEXT_SLOT,
                   TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
                   BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
   }
-  if (sBannerState == BANNER_HIDDEN) {
+  if (f_BannerState == BANNER_HIDDEN) {
     return;
   }
   gDPPipeSync(gfx++);
@@ -1835,24 +1839,25 @@ void DrawResultsBanner(Gfx** displayListHead) {
   for (i = 0; i != BANNER_CLOUD_STRIP_COUNT; i++) {
     LoadNibbleTextureBlock(
         &gfx,
-        sResultsCloudImage + IMAGE_HEADER_SIZE + i * BANNER_CLOUD_STRIP_SIZE,
+        f_ResultsCloudImage + IMAGE_HEADER_SIZE + i * BANNER_CLOUD_STRIP_SIZE,
         G_IM_FMT_I, BANNER_CLOUD_WIDTH, BANNER_CLOUD_HEIGHT, 0, G_TX_CLAMP,
         G_TX_CLAMP, 0, 0, 0, 0);
-    if (sBannerKind == BANNER_KIND_POINTS) {
+    if (f_BannerKind == BANNER_KIND_POINTS) {
       DrawTextureRect(
-          &gfx, (sBannerX + BANNER_CLOUD_LEFT) * 4,
-          (sBannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT) * 4,
-          (sBannerX + BANNER_CLOUD_RIGHT) * 4,
-          (sBannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT +
+          &gfx, (f_BannerX + BANNER_CLOUD_LEFT) * 4,
+          (f_BannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT) *
+              4,
+          (f_BannerX + BANNER_CLOUD_RIGHT) * 4,
+          (f_BannerY + TALL_BANNER_CLOUD_TOP + i * TALL_BANNER_CLOUD_HEIGHT +
            TALL_BANNER_CLOUD_HEIGHT) *
               4,
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TALL_BANNER_CLOUD_DTDY);
     } else {
       DrawTextureRect(
-          &gfx, (sBannerX + BANNER_CLOUD_LEFT) * 4,
-          (sBannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT) * 4,
-          (sBannerX + BANNER_CLOUD_RIGHT) * 4,
-          (sBannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT +
+          &gfx, (f_BannerX + BANNER_CLOUD_LEFT) * 4,
+          (f_BannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT) * 4,
+          (f_BannerX + BANNER_CLOUD_RIGHT) * 4,
+          (f_BannerY + BANNER_CLOUD_TOP + i * BANNER_CLOUD_HEIGHT +
            BANNER_CLOUD_HEIGHT) *
               4,
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TEXEL_STEP_ONE);
@@ -1862,54 +1867,54 @@ void DrawResultsBanner(Gfx** displayListHead) {
   gDPSetPrimColor(gfx++, 0, 0, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
                   BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
   DrawLargeTextSlot(&gfx, BANNER_TEXT_SLOT);
-  if (sBannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
+  if (f_BannerKind == BANNER_KIND_TOURNAMENT_PLACE) {
     course = g_CourseIndex;
-    if (sPlayerRanks[0] <= TROPHY_PLACE_COUNT) {
-      sTrophyShineFrame = (sTrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
-      if (sTallySpeed == FAST_TALLY_SPEED ||
-          sTrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
+    if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
+      f_TrophyShineFrame = (f_TrophyShineFrame + 1) % TROPHY_SHINE_CYCLE;
+      if (f_TallySpeed == FAST_TALLY_SPEED ||
+          f_TrophyShineFrame % TROPHY_FRAME_TICKS == 0) {
         EncodedAsset asset;
 
-        sTrophyFrame++;
-        if (sTrophyFrame == sTrophyAssets[course].frameCount) {
-          sTrophyFrame = 0;
+        f_TrophyFrame++;
+        if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
+          f_TrophyFrame = 0;
         }
-        OpenEncodedAsset(sTrophyAssets[course].image + sTrophyFrame, &asset);
-        ReadEncodedAsset(sTrophyImage, &asset);
+        OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
+        ReadEncodedAsset(f_TrophyImage, &asset);
       }
       gSPDisplayList(gfx++, D_800C3FC0);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPPipeSync(gfx++);
       gDPSetTextureFilter(gfx++, G_TF_POINT);
-      LoadLargePalette(&gfx, sTrophyPalette);
-      top = -sTrophySizes[course][TROPHY_PART_HEIGHTS] -
-            sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+      LoadLargePalette(&gfx, f_TrophyPalette);
+      top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
+            f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
-                           ((u32)sTrophyImage +
-                            i * sTrophySizes[course][TROPHY_WIDTH] *
-                                sTrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                           ((u32)f_TrophyImage +
+                            i * f_TrophySizes[course][TROPHY_WIDTH] *
+                                f_TrophySizes[course][TROPHY_PART_HEIGHTS]) &
                                ~7,
                            G_IM_FMT_CI, G_IM_SIZ_8b,
-                           sTrophySizes[course][TROPHY_WIDTH],
-                           sTrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
-                           sTrophySizes[course][TROPHY_WIDTH] - 1,
-                           sTrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0,
-                           0, 0, 0, 0, 0, 0);
+                           f_TrophySizes[course][TROPHY_WIDTH],
+                           f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
+                           f_TrophySizes[course][TROPHY_WIDTH] - 1,
+                           f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                           0, 0, 0, 0, 0, 0, 0);
         DrawTextureRect(&gfx,
-                        (TROPHY_CENTRE_X + sBannerX -
-                         sTrophySizes[course][TROPHY_WIDTH] / 2) *
+                        (TROPHY_CENTRE_X + f_BannerX -
+                         f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                             4,
                         (top + TROPHY_BOTTOM) * 4,
-                        (TROPHY_CENTRE_X + sBannerX +
-                         sTrophySizes[course][TROPHY_WIDTH] / 2) *
+                        (TROPHY_CENTRE_X + f_BannerX +
+                         f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                             4,
-                        (sTrophySizes[course][TROPHY_PART_HEIGHTS + i] +
+                        (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
                          TROPHY_BOTTOM + top) *
                             4,
                         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        top += sTrophySizes[course][TROPHY_PART_HEIGHTS + i];
+        top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
       /* The trophy again, into the depth buffer alone */
       gDPPipeSync(gfx++);
@@ -1921,33 +1926,33 @@ void DrawResultsBanner(Gfx** displayListHead) {
       gDPSetRenderMode(
           gfx++, GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
           G_RM_AA_ZB_TEX_EDGE2);
-      top = -sTrophySizes[course][TROPHY_PART_HEIGHTS] -
-            sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+      top = -f_TrophySizes[course][TROPHY_PART_HEIGHTS] -
+            f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
       for (i = 0; i != TROPHY_PART_COUNT; i++) {
         gDPLoadTextureTile(gfx++,
-                           ((u32)sTrophyImage +
-                            i * sTrophySizes[course][TROPHY_WIDTH] *
-                                sTrophySizes[course][TROPHY_PART_HEIGHTS]) &
+                           ((u32)f_TrophyImage +
+                            i * f_TrophySizes[course][TROPHY_WIDTH] *
+                                f_TrophySizes[course][TROPHY_PART_HEIGHTS]) &
                                ~7,
                            G_IM_FMT_CI, G_IM_SIZ_8b,
-                           sTrophySizes[course][TROPHY_WIDTH],
-                           sTrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
-                           sTrophySizes[course][TROPHY_WIDTH] - 1,
-                           sTrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1, 0,
-                           0, 0, 0, 0, 0, 0);
+                           f_TrophySizes[course][TROPHY_WIDTH],
+                           f_TrophySizes[course][TROPHY_PART_HEIGHTS + i], 0, 0,
+                           f_TrophySizes[course][TROPHY_WIDTH] - 1,
+                           f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] - 1,
+                           0, 0, 0, 0, 0, 0, 0);
         DrawTextureRect(&gfx,
-                        (TROPHY_CENTRE_X + sBannerX -
-                         sTrophySizes[course][TROPHY_WIDTH] / 2) *
+                        (TROPHY_CENTRE_X + f_BannerX -
+                         f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                             4,
                         (top + TROPHY_BOTTOM) * 4,
-                        (TROPHY_CENTRE_X + sBannerX +
-                         sTrophySizes[course][TROPHY_WIDTH] / 2) *
+                        (TROPHY_CENTRE_X + f_BannerX +
+                         f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                             4,
-                        (sTrophySizes[course][TROPHY_PART_HEIGHTS + i] +
+                        (f_TrophySizes[course][TROPHY_PART_HEIGHTS + i] +
                          TROPHY_BOTTOM + top) *
                             4,
                         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-        top += sTrophySizes[course][TROPHY_PART_HEIGHTS + i];
+        top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
       gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
       gDPPipeSync(gfx++);
@@ -1961,33 +1966,33 @@ void DrawResultsBanner(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, TROPHY_SHINE_TEXT_ALPHA);
-      LoadTextureBlock(&gfx, sResultsShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
-                       G_IM_SIZ_8b, NOTICE_SHINE_SIZE, NOTICE_SHINE_SIZE, 0, 0,
-                       0, 0, 0, 0, 0);
-      if (sTrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
+      LoadTextureBlock(&gfx, f_ResultsShineImage + IMAGE_HEADER_SIZE,
+                       G_IM_FMT_I, G_IM_SIZ_8b, NOTICE_SHINE_SIZE,
+                       NOTICE_SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
+      if (f_TrophyShineFrame == TROPHY_SHINE_SOUND_FRAME) {
         PlaySoundWithEffects(NOTICE_SHINE_SOUND, TROPHY_SHINE_SOUND_CHANNEL,
                              TROPHY_SHINE_SOUND_VOLUME,
                              TROPHY_SHINE_SOUND_REVERB, TROPHY_SHINE_SOUND_PAN);
       }
-      if (sTrophyShineFrame >= TROPHY_SHINE_START) {
-        if (sTrophyShineFrame < TROPHY_SHINE_CYCLE) {
-          top = sTrophySizes[course][TROPHY_PART_HEIGHTS] +
-                sTrophySizes[course][TROPHY_PART_HEIGHTS + 1];
+      if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
+        if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
+          top = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
+                f_TrophySizes[course][TROPHY_PART_HEIGHTS + 1];
           DrawTextureRect(
               &gfx,
-              (TROPHY_CENTRE_X + sBannerX -
-               sTrophySizes[course][TROPHY_WIDTH] / 2) *
+              (TROPHY_CENTRE_X + f_BannerX -
+               f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                   4,
               (TROPHY_BOTTOM - top) * 4,
-              (TROPHY_CENTRE_X + sBannerX +
-               sTrophySizes[course][TROPHY_WIDTH] / 2) *
+              (TROPHY_CENTRE_X + f_BannerX +
+               f_TrophySizes[course][TROPHY_WIDTH] / 2) *
                   4,
               (TROPHY_BOTTOM - top +
-               sTrophySizes[course][TROPHY_SHINE_HEIGHT]) *
+               f_TrophySizes[course][TROPHY_SHINE_HEIGHT]) *
                   4,
               G_TX_RENDERTILE,
               (NOTICE_SHINE_SIZE -
-               (sTrophyShineFrame - TROPHY_SHINE_START) * TROPHY_SHINE_SPEED)
+               (f_TrophyShineFrame - TROPHY_SHINE_START) * TROPHY_SHINE_SPEED)
                   << 5,
               0, TROPHY_SHINE_DSDX, TEXEL_STEP_ONE);
         }
@@ -2002,7 +2007,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawResultsBanner);
 #endif
 
-/* sResultsUnk78 values while UpdateTournamentResults runs */
+/* f_ResultsUnk78 values while UpdateTournamentResults runs */
 #define TOURNAMENT_STEP_START 0
 #define TOURNAMENT_STEP_SLIDING_IN_PRIZE 1
 #define TOURNAMENT_STEP_TALLYING_PRIZE 2
@@ -2030,47 +2035,47 @@ s32 UpdateTournamentResults(ControllerState* controller) {
   s32 overshoot;
 
   GetSaveData();
-  switch (sUnlockNoticeKind) {
+  switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_COURSE:
       UpdateCourseResultsNotice();
       break;
     case UNLOCK_NOTICE_KIND_CHARACTER:
       break;
     case UNLOCK_NOTICE_KIND_NONE:
-      if (sOpenCourseCount < COURSE_COUNT &&
-          sPointsToNextCourse + sPrizePoints + sPointsEarned == 0) {
+      if (f_OpenCourseCount < COURSE_COUNT &&
+          f_PointsToNextCourse + f_PrizePoints + f_PointsEarned == 0) {
         StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
-        ReadEncodedAsset(sResultsCourseImage, &asset);
+        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(sNoticeTitleImage, &asset);
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
-      switch (sResultsUnk78) {
+      switch (f_ResultsUnk78) {
         case TOURNAMENT_STEP_START:
           record = &GetSaveData()->unkE98[g_CourseIndex];
-          sResultsUnk78 = TOURNAMENT_STEP_SHOWN;
+          f_ResultsUnk78 = TOURNAMENT_STEP_SHOWN;
           if (record->roundCount <= 0 ||
-              record->bestScore >= sPlayerResults[0]) {
+              record->bestScore >= f_PlayerResults[0]) {
             PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL,
                       TALLY_DONE_SOUND_VOLUME);
           }
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           break;
         case TOURNAMENT_STEP_SHOWN:
           if (controller->buttons & A_BUTTON) {
-            sIsAwaitingConfirm = FALSE;
+            f_IsAwaitingConfirm = FALSE;
             SetResultsBanner(0, 1);
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
-            sResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
+            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
           }
           break;
         case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
           if (GetBannerState() == 1) {
-            sResultsUnk78 = TOURNAMENT_STEP_TALLYING_PRIZE;
-            if (sPlayerRanks[0] == 1) {
+            f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_PRIZE;
+            if (f_PlayerRanks[0] == 1) {
               StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
               PlayCharacterSound((s8)g_Players[0].characterIndex, 0,
                                  CHARACTER_SOUND_WIN, TALLY_DONE_SOUND_VOLUME,
@@ -2080,19 +2085,19 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_TALLYING_PRIZE:
           if (controller->buttons & A_BUTTON) {
-            sTallySpeed = FAST_TALLY_SPEED;
+            f_TallySpeed = FAST_TALLY_SPEED;
           }
           {
-            s32* points = &sPrizePoints;
+            s32* points = &f_PrizePoints;
 
-            *points -= sTallySpeed;
+            *points -= f_TallySpeed;
             if (*points > 0) {
               PlayTallySound();
             }
-            if (sOpenCourseCount == COURSE_COUNT) {
+            if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
-              sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
-              if (sTournamentOpenCourseCount < COURSE_COUNT) {
+              f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+              if (f_TournamentOpenCourseCount < COURSE_COUNT) {
                 PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                           TALLY_DONE_SOUND_VOLUME);
               }
@@ -2100,15 +2105,15 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             }
             /* Stop on the points that open the next course, so that its notice
              * shows */
-            overshoot = sPointsToNextCourse + *points + sPointsEarned;
+            overshoot = f_PointsToNextCourse + *points + f_PointsEarned;
             if (overshoot < 0) {
               *points -= overshoot;
             }
             if (*points < 0) {
-              sResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
+              f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
               *points = 0;
-              sIsAwaitingConfirm = TRUE;
-              if (sTournamentOpenCourseCount < COURSE_COUNT) {
+              f_IsAwaitingConfirm = TRUE;
+              if (f_TournamentOpenCourseCount < COURSE_COUNT) {
                 PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                           TALLY_DONE_SOUND_VOLUME);
               }
@@ -2119,9 +2124,9 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           if (controller->buttons & A_BUTTON) {
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
-            sTallySpeed = 1;
-            sIsAwaitingConfirm = FALSE;
-            sResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
+            f_TallySpeed = 1;
+            f_IsAwaitingConfirm = FALSE;
+            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
           }
           /* A debugging shortcut to the course notice */
           if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
@@ -2130,51 +2135,51 @@ s32 UpdateTournamentResults(ControllerState* controller) {
           break;
         case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
           SetResultsBanner(4, 1);
-          sResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
+          f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_PRIZE;
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_PRIZE:
           if (GetBannerState() == 3) {
-            if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
-              sResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_POINTS;
+            if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+              f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_POINTS;
               SetResultsBanner(0, 3);
             } else {
-              sResultsUnk78 = TOURNAMENT_STEP_WAITING;
+              f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
             }
           }
           break;
         case TOURNAMENT_STEP_SLIDING_IN_POINTS:
           if (GetBannerState() == 1) {
-            sResultsUnk78 = TOURNAMENT_STEP_TALLYING_POINTS;
+            f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_POINTS;
           }
           break;
         case TOURNAMENT_STEP_TALLYING_POINTS:
           if (controller->buttons & A_BUTTON) {
-            sTallySpeed = FAST_TALLY_SPEED;
+            f_TallySpeed = FAST_TALLY_SPEED;
           }
           {
-            s32* points = &sPointsEarned;
+            s32* points = &f_PointsEarned;
 
             if (*points > 0) {
               PlayTallySound();
             }
-            *points -= sTallySpeed;
+            *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
-            if (sOpenCourseCount == COURSE_COUNT) {
+            if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
-              overshoot = sPointsToNextCourse + sPrizePoints + *points;
+              overshoot = f_PointsToNextCourse + f_PrizePoints + *points;
               if (overshoot < 0) {
                 *points -= overshoot;
               }
             }
           }
-          if (sPointsEarned == 0) {
+          if (f_PointsEarned == 0) {
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                       TALLY_DONE_SOUND_VOLUME);
-            sResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
-            sIsAwaitingConfirm = TRUE;
+            f_ResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
+            f_IsAwaitingConfirm = TRUE;
           }
           break;
         case TOURNAMENT_STEP_POINTS_TALLIED:
@@ -2182,17 +2187,17 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
             SetResultsBanner(4, 3);
-            sResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
+            f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
           }
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
           if (GetBannerState() == 3) {
-            sIsAwaitingConfirm = TRUE;
-            sResultsUnk78 = TOURNAMENT_STEP_WAITING;
+            f_IsAwaitingConfirm = TRUE;
+            f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
           }
           break;
         case TOURNAMENT_STEP_WAITING:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
@@ -2205,7 +2210,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
   return FALSE;
 }
 
-/* The steps of ShowScorePassword, in sResultsUnk78 */
+/* The steps of ShowScorePassword, in f_ResultsUnk78 */
 #define SCORE_PASSWORD_STEP_START 0
 #define SCORE_PASSWORD_STEP_SHOWN 1
 #define SCORE_PASSWORD_STEP_ASKING 2
@@ -2221,24 +2226,24 @@ s32 ShowScorePassword(ControllerState* controller) {
   s32 unused[2];
 
   GetSaveData();
-  sResultsUnk7C++;
-  switch (sResultsUnk78) {
+  f_ResultsUnk7C++;
+  switch (f_ResultsUnk78) {
     case SCORE_PASSWORD_STEP_START:
-      sResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+      f_ResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
       StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
       CopyTournamentCode(report.tournamentCode);
       report.characterIndex = g_Players[0].characterIndex;
-      report.score = sPlayerResults[0];
+      report.score = f_PlayerResults[0];
       report.time = g_GameState.stopwatchFrameCount;
       report.gameBoyLevel =
           g_GameBoyCharacters[g_Players[0].gameBoyCharacterIndex].level;
-      EncodeScorePassword(&report, sScorePassword);
-      sIsAwaitingConfirm = TRUE;
+      EncodeScorePassword(&report, f_ScorePassword);
+      f_IsAwaitingConfirm = TRUE;
       break;
     case SCORE_PASSWORD_STEP_SHOWN:
       if (controller->buttons & A_BUTTON) {
-        sIsAwaitingConfirm = FALSE;
-        sResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
+        f_IsAwaitingConfirm = FALSE;
+        f_ResultsUnk78 = SCORE_PASSWORD_STEP_ASKING;
         OpenPrompt(PROMPT_SCORE_PASSWORD);
         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
       }
@@ -2246,22 +2251,22 @@ s32 ShowScorePassword(ControllerState* controller) {
     case SCORE_PASSWORD_STEP_ASKING:
       switch (UpdatePrompt(controller)) {
         case SCORE_PASSWORD_PROMPT_YES:
-          sResultsUnk78 = SCORE_PASSWORD_STEP_DONE;
+          f_ResultsUnk78 = SCORE_PASSWORD_STEP_DONE;
           break;
         case SCORE_PASSWORD_PROMPT_NO:
-          sResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
-          sIsAwaitingConfirm = TRUE;
+          f_ResultsUnk78 = SCORE_PASSWORD_STEP_SHOWN;
+          f_IsAwaitingConfirm = TRUE;
           break;
       }
       break;
     case SCORE_PASSWORD_STEP_DONE:
-      sIsAwaitingConfirm = FALSE;
+      f_IsAwaitingConfirm = FALSE;
       return TRUE;
   }
   return FALSE;
 }
 
-/* sResultsUnk78 values while UpdateCoursePointsResults runs */
+/* f_ResultsUnk78 values while UpdateCoursePointsResults runs */
 #define POINTS_STEP_SHOWN 0
 #define POINTS_STEP_SLIDING_IN_TALLY 1
 #define POINTS_STEP_TALLIED 2
@@ -2282,8 +2287,8 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
   s32 overshoot;
 
   GetSaveData();
-  sResultsUnk7C++;
-  switch (sUnlockNoticeKind) {
+  f_ResultsUnk7C++;
+  switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_COURSE:
       UpdateCourseResultsNotice();
       break;
@@ -2291,39 +2296,39 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
       break;
 
     case UNLOCK_NOTICE_KIND_NONE:
-      if (sOpenCourseCount < COURSE_COUNT &&
-          sPointsToNextCourse + sPointsEarned == 0) {
+      if (f_OpenCourseCount < COURSE_COUNT &&
+          f_PointsToNextCourse + f_PointsEarned == 0) {
         for (i = 0; i != g_PlayerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
-        ReadEncodedAsset(sResultsCourseImage, &asset);
+        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(sNoticeTitleImage, &asset);
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
-      switch (sResultsUnk78) {
+      switch (f_ResultsUnk78) {
         case POINTS_STEP_SHOWN:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
-            sIsAwaitingConfirm = FALSE;
-            sResultsUnk78 = POINTS_STEP_START_TALLY;
+            f_IsAwaitingConfirm = FALSE;
+            f_ResultsUnk78 = POINTS_STEP_START_TALLY;
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
           }
           break;
         case POINTS_STEP_START_TALLY:
-          if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
-            sResultsUnk78 = POINTS_STEP_SLIDING_IN_TALLY;
+          if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+            f_ResultsUnk78 = POINTS_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(0, 3);
           } else {
-            sResultsUnk78 = POINTS_STEP_WAITING;
+            f_ResultsUnk78 = POINTS_STEP_WAITING;
           }
           for (i = 0; i != g_PlayerCount; i++) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
             for (j = 0; j != g_PlayerCount; j++) {
-              if (i != j && sPlayerRanks[j] < sPlayerRanks[i]) {
+              if (i != j && f_PlayerRanks[j] < f_PlayerRanks[i]) {
                 StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, i);
               }
             }
@@ -2331,60 +2336,60 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           break;
         case POINTS_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == 1) {
-            sResultsUnk78 = POINTS_STEP_TALLYING;
+            f_ResultsUnk78 = POINTS_STEP_TALLYING;
           }
           break;
         case POINTS_STEP_TALLYING:
           if (controller->buttons & A_BUTTON) {
-            sTallySpeed = FAST_TALLY_SPEED;
+            f_TallySpeed = FAST_TALLY_SPEED;
           }
           {
-            s32* points = &sPointsEarned;
+            s32* points = &f_PointsEarned;
 
             if (*points > 0) {
               PlayTallySound();
             }
-            *points -= sTallySpeed;
+            *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
-            if (sOpenCourseCount == COURSE_COUNT) {
+            if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
               /* Stop on the points that open the next course, so that its
                * notice shows */
-              overshoot = sPointsToNextCourse + *points;
+              overshoot = f_PointsToNextCourse + *points;
               if (overshoot < 0) {
                 *points -= overshoot;
               }
             }
           }
-          if (sPointsEarned == 0) {
-            sResultsUnk7C = 0;
+          if (f_PointsEarned == 0) {
+            f_ResultsUnk7C = 0;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                       TALLY_DONE_SOUND_VOLUME);
-            sResultsUnk78 = POINTS_STEP_TALLIED;
-            sIsAwaitingConfirm = TRUE;
+            f_ResultsUnk78 = POINTS_STEP_TALLIED;
+            f_IsAwaitingConfirm = TRUE;
           }
           break;
         case POINTS_STEP_TALLIED:
           if (controller->buttons & A_BUTTON) {
             SetResultsBanner(4, 3);
-            sResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
-            sIsAwaitingConfirm = FALSE;
+            f_ResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
+            f_IsAwaitingConfirm = FALSE;
           }
           break;
         case POINTS_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == 3) {
-            sResultsUnk78 = POINTS_STEP_WAITING;
+            f_ResultsUnk78 = POINTS_STEP_WAITING;
           }
           break;
         case POINTS_STEP_WAITING:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           if (controller->pressedButtons & A_BUTTON) {
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
-            sIsAwaitingConfirm = FALSE;
+            f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }
           break;
@@ -2397,7 +2402,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #endif
 
-/* sResultsUnk78 values while UpdateMatchResults runs */
+/* f_ResultsUnk78 values while UpdateMatchResults runs */
 #define MATCH_STEP_SHOWN 0
 #define MATCH_STEP_SLIDING_IN_TALLY 1
 #define MATCH_STEP_TALLYING 2
@@ -2411,10 +2416,10 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", UpdateCoursePointsResults);
 #define MATCH_STEP_START_TALLY 10
 #define CHARACTER_NOTICE_TITLE_ASSET 0x560
 #define CHARACTER_NOTICE_WAIT_FRAMES 8
-/* sPlayerRanks[0] when the first player wins the match */
+/* f_PlayerRanks[0] when the first player wins the match */
 #define MATCH_RANK_WON RANK_BANNER
 
-extern s32 sDebugUnlockCharacter;
+extern s32 f_DebugUnlockCharacter;
 
 /*
  * Counts the earned course points into the save, then in Get Character
@@ -2427,8 +2432,8 @@ s32 UpdateMatchResults(ControllerState* controller) {
   s32 overshoot;
 
   GetSaveData();
-  sResultsUnk7C++;
-  switch (sUnlockNoticeKind) {
+  f_ResultsUnk7C++;
+  switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_COURSE:
       UpdateCourseResultsNotice();
       break;
@@ -2436,36 +2441,36 @@ s32 UpdateMatchResults(ControllerState* controller) {
       UpdateCharacterResultsNotice();
       break;
     case UNLOCK_NOTICE_KIND_NONE:
-      if (sOpenCourseCount < COURSE_COUNT &&
-          sPointsToNextCourse + sPointsEarned == 0) {
+      if (f_OpenCourseCount < COURSE_COUNT &&
+          f_PointsToNextCourse + f_PointsEarned == 0) {
         for (i = 0; i != g_PlayerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
-        OpenEncodedAsset(D_800C2074[sOpenCourseCount], &asset);
-        ReadEncodedAsset(sResultsCourseImage, &asset);
+        OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
+        ReadEncodedAsset(f_ResultsCourseImage, &asset);
         OpenEncodedAsset(NOTICE_TITLE_ASSET, &asset);
-        ReadEncodedAsset(sNoticeTitleImage, &asset);
+        ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
-      switch (sResultsUnk78) {
+      switch (f_ResultsUnk78) {
         case MATCH_STEP_SHOWN:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
-            sIsAwaitingConfirm = FALSE;
-            sResultsUnk78 = MATCH_STEP_START_TALLY;
+            f_IsAwaitingConfirm = FALSE;
+            f_ResultsUnk78 = MATCH_STEP_START_TALLY;
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
           }
           break;
         case MATCH_STEP_START_TALLY:
-          if (sPointsEarned > 0 && sOpenCourseCount < COURSE_COUNT) {
-            sResultsUnk78 = MATCH_STEP_SLIDING_IN_TALLY;
+          if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
+            f_ResultsUnk78 = MATCH_STEP_SLIDING_IN_TALLY;
             SetResultsBanner(0, 3);
           } else {
-            sResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+            f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
           }
-          if (sPlayerRanks[0] == MATCH_RANK_WON) {
+          if (f_PlayerRanks[0] == MATCH_RANK_WON) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 1);
           } else {
@@ -2475,60 +2480,60 @@ s32 UpdateMatchResults(ControllerState* controller) {
           break;
         case MATCH_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == 1) {
-            sResultsUnk78 = MATCH_STEP_TALLYING;
+            f_ResultsUnk78 = MATCH_STEP_TALLYING;
           }
           break;
         case MATCH_STEP_TALLYING:
           if (controller->buttons & A_BUTTON) {
-            sTallySpeed = FAST_TALLY_SPEED;
+            f_TallySpeed = FAST_TALLY_SPEED;
           }
           {
-            s32* points = &sPointsEarned;
+            s32* points = &f_PointsEarned;
 
             if (*points > 0) {
               PlayTallySound();
             }
-            *points -= sTallySpeed;
+            *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
-            if (sOpenCourseCount == COURSE_COUNT) {
+            if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
               /* Stop on the points that open the next course, so that its
                * notice shows */
-              overshoot = sPointsToNextCourse + *points;
+              overshoot = f_PointsToNextCourse + *points;
               if (overshoot < 0) {
                 *points -= overshoot;
               }
             }
           }
-          if (sPointsEarned == 0) {
-            sResultsUnk78 = MATCH_STEP_TALLIED;
+          if (f_PointsEarned == 0) {
+            f_ResultsUnk78 = MATCH_STEP_TALLIED;
             PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                       TALLY_DONE_SOUND_VOLUME);
           }
           break;
         case MATCH_STEP_TALLIED:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           if (controller->buttons & A_BUTTON) {
             SetResultsBanner(4, 3);
-            sResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
-            sIsAwaitingConfirm = FALSE;
+            f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+            f_IsAwaitingConfirm = FALSE;
           }
           break;
         case MATCH_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == 3) {
-            sResultsUnk78 = MATCH_STEP_RECORD_RESULT;
+            f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
           }
           break;
         case MATCH_STEP_RECORD_RESULT:
-          sResultsUnk78 = MATCH_STEP_WAITING;
-          sResultsUnk7C = 0;
+          f_ResultsUnk78 = MATCH_STEP_WAITING;
+          f_ResultsUnk7C = 0;
           if (g_GameMode == GAME_MODE_GET_CHARACTER) {
             /* Beating a still locked opponent unlocks them, except those that
              * other feats unlock */
-            if (sPlayerRanks[0] == MATCH_RANK_WON &&
+            if (f_PlayerRanks[0] == MATCH_RANK_WON &&
                 func_8005CEE0((s8)g_Players[1].characterIndex) == -1 &&
                 (s8)g_Players[1].characterIndex != CHARACTER_PLUM &&
                 (s8)g_Players[1].characterIndex != CHARACTER_CHARLIE &&
@@ -2537,7 +2542,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
                 (s8)g_Players[1].characterIndex != CHARACTER_YOSHI &&
                 (s8)g_Players[1].characterIndex != CHARACTER_DONKEY_KONG &&
                 (s8)g_Players[1].characterIndex < CHARACTER_METAL_MARIO) {
-              sResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
+              f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
             }
             RecordComCharacterResult((s8)g_Players[0].characterIndex,
                                      (s8)g_Players[1].characterIndex,
@@ -2549,59 +2554,59 @@ s32 UpdateMatchResults(ControllerState* controller) {
 
           StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
           OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &titleAsset);
-          ReadEncodedAsset(sNoticeTitleImage, &titleAsset);
-          sResultsUnk78 = MATCH_STEP_START_NOTICE_WAIT;
+          ReadEncodedAsset(f_NoticeTitleImage, &titleAsset);
+          f_ResultsUnk78 = MATCH_STEP_START_NOTICE_WAIT;
           break;
         }
         case MATCH_STEP_START_NOTICE_WAIT:
-          sResultsUnk78 = MATCH_STEP_NOTICE_WAIT;
-          sResultsUnk7C = 0;
+          f_ResultsUnk78 = MATCH_STEP_NOTICE_WAIT;
+          f_ResultsUnk7C = 0;
           break;
         case MATCH_STEP_NOTICE_WAIT:
-          if (sResultsUnk7C == CHARACTER_NOTICE_WAIT_FRAMES) {
-            sResultsUnk78 = MATCH_STEP_WAITING;
+          if (f_ResultsUnk7C == CHARACTER_NOTICE_WAIT_FRAMES) {
+            f_ResultsUnk78 = MATCH_STEP_WAITING;
           }
           break;
         case MATCH_STEP_WAITING:
-          sIsAwaitingConfirm = TRUE;
+          f_IsAwaitingConfirm = TRUE;
           /* A debugging aid: up and down choose a character, and B shows its
            * notice */
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
             if ((g_ControllerStates[0].repeatedButtons & U_JPAD) &&
-                sDebugUnlockCharacter > 0) {
-              sDebugUnlockCharacter--;
+                f_DebugUnlockCharacter > 0) {
+              f_DebugUnlockCharacter--;
             }
             if ((g_ControllerStates[0].repeatedButtons & D_JPAD) &&
-                sDebugUnlockCharacter < CHARACTER_COUNT - 1) {
-              sDebugUnlockCharacter++;
+                f_DebugUnlockCharacter < CHARACTER_COUNT - 1) {
+              f_DebugUnlockCharacter++;
             }
-            sprintf(g_PrintBuffer, "CHARA:%2d", sDebugUnlockCharacter);
+            sprintf(g_PrintBuffer, "CHARA:%2d", f_DebugUnlockCharacter);
             PrintDebugText(g_PrintBuffer, 25, 5);
             if (controller->pressedButtons & B_BUTTON) {
               EncodedAsset portraitAsset;
               AssetFile file;
 
               StartResultsNotice(UNLOCK_NOTICE_KIND_CHARACTER);
-              g_Players[1].characterIndex = sDebugUnlockCharacter;
-              sPortraitCharacterIndex = (s8)sDebugUnlockCharacter;
+              g_Players[1].characterIndex = f_DebugUnlockCharacter;
+              f_PortraitCharacterIndex = (s8)f_DebugUnlockCharacter;
               OpenEncodedAsset(
-                  g_CharacterImageAssets[(s8)sDebugUnlockCharacter],
+                  g_CharacterImageAssets[(s8)f_DebugUnlockCharacter],
                   &portraitAsset);
-              ReadEncodedAsset(sPortraitImage, &portraitAsset);
+              ReadEncodedAsset(f_PortraitImage, &portraitAsset);
               OpenAssetFile(
                   g_CharacterPaletteAssets[(s8)g_Players[1].characterIndex] +
                       (s8)g_Players[1].paletteIndex,
                   &file);
-              ReadAssetFile(sPortraitPalette, GetAssetFileSize(&file), &file);
+              ReadAssetFile(f_PortraitPalette, GetAssetFileSize(&file), &file);
               OpenEncodedAsset(CHARACTER_NOTICE_TITLE_ASSET, &portraitAsset);
-              ReadEncodedAsset(sNoticeTitleImage, &portraitAsset);
-              sResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
+              ReadEncodedAsset(f_NoticeTitleImage, &portraitAsset);
+              f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
             }
           }
           if (controller->buttons & A_BUTTON) {
             PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL,
                       CONFIRM_SOUND_VOLUME);
-            sIsAwaitingConfirm = FALSE;
+            f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }
           break;
@@ -2626,11 +2631,11 @@ s32 UpdateMatchResults(ControllerState* controller) {
 #define POINTS_TOTAL_Y 201
 
 /* The digit font draws '#' as a plus-minus sign, for an even score */
-extern const char sEvenScoreFormat[];
-extern const char sScoreFormat[];
-extern const char sPointsFormat[];
-extern const char sTimeFormat[];
-extern const char sTimeLabel[];
+extern const char f_EvenScoreFormat[];
+extern const char f_ScoreFormat[];
+extern const char f_PointsFormat[];
+extern const char f_TimeFormat[];
+extern const char f_TimeLabel[];
 
 /* The tournament results: place, portrait, score, Course Points and the points
  * to the next course */
@@ -2641,49 +2646,50 @@ void DrawTournamentResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 80,
-           (sPlayerRanks[0] - 1) | RANK_AS_PLACE);
-  DrawPlayerPortrait(&gfx, sResultsSlide + 100, sResultsTop + 80, 0, FALSE);
-  DrawResultsLabel(&gfx, sResultsSlide + 144, sResultsTop + 60,
+  DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 80,
+           (f_PlayerRanks[0] - 1) | RANK_AS_PLACE);
+  DrawPlayerPortrait(&gfx, f_ResultsSlide + 100, f_ResultsTop + 80, 0, FALSE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + 144, f_ResultsTop + 60,
                    RESULTS_LABEL_SCORE);
-  DrawResultsLabel(&gfx, sResultsSlide + 232, sResultsTop + 60,
+  DrawResultsLabel(&gfx, f_ResultsSlide + 232, f_ResultsTop + 60,
                    RESULTS_LABEL_POINTS);
-  if (sOpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(sResultsSlide + 32, sResultsTop + 192, MESSAGE_ALL_COURSES_OPEN,
-                RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-                RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+  if (f_OpenCourseCount == COURSE_COUNT) {
+    SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 192,
+                MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT,
+                0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+                RESULTS_TEXT_ALPHA);
   } else {
-    DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y,
-                      sPointsToNextCourse + sPrizePoints + sPointsEarned);
-    SetTextSlot(sResultsSlide + 64, sResultsTop + 200,
+    DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
+                      f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
+    SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
                 MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
                 RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN,
                 RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   }
-  LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(
-      &gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      &gfx, f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  if (sPlayerResults[0] == 0) {
-    sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+  if (f_PlayerResults[0] == 0) {
+    sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
-    sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[0]);
+    sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
-  DrawDigitText(&gfx, sResultsSlide + 152, sResultsTop + 88, g_PrintBuffer);
-  sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[0]);
-  DrawDigitText(&gfx, sResultsSlide + 232, sResultsTop + 88, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + 152, f_ResultsTop + 88, g_PrintBuffer);
+  sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+  DrawDigitText(&gfx, f_ResultsSlide + 232, f_ResultsTop + 88, g_PrintBuffer);
   *displayListHead = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sEvenScoreFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_EvenScoreFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sScoreFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_ScoreFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sPointsFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_PointsFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sTimeFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeFormat);
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sTimeLabel);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_TimeLabel);
 
 /* The minutes wrap here, since the time shows two digits */
 #define SHOWN_MINUTES_LIMIT 99
@@ -2701,50 +2707,51 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  DrawPlayerPortrait(&gfx, sResultsSlide + 40, sResultsTop + 88, 0, FALSE);
-  DrawResultsLabel(&gfx, sResultsSlide + 82, sResultsTop + 56,
+  DrawPlayerPortrait(&gfx, f_ResultsSlide + 40, f_ResultsTop + 88, 0, FALSE);
+  DrawResultsLabel(&gfx, f_ResultsSlide + 82, f_ResultsTop + 56,
                    RESULTS_LABEL_SCORE);
-  DrawResultsLabel(&gfx, sResultsSlide + 232, sResultsTop + 56,
+  DrawResultsLabel(&gfx, f_ResultsSlide + 232, f_ResultsTop + 56,
                    RESULTS_LABEL_POINTS);
-  if (sOpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(sResultsSlide + 32, sResultsTop + 192, MESSAGE_ALL_COURSES_OPEN,
-                RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-                RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+  if (f_OpenCourseCount == COURSE_COUNT) {
+    SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 192,
+                MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT,
+                0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+                RESULTS_TEXT_ALPHA);
   } else {
-    DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y,
-                      sPointsToNextCourse + sPrizePoints + sPointsEarned);
-    SetTextSlot(sResultsSlide + 64, sResultsTop + 200,
+    DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
+                      f_PointsToNextCourse + f_PrizePoints + f_PointsEarned);
+    SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
                 MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
                 RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN,
                 RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
   }
-  LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(
-      &gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      &gfx, f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  if (sPlayerResults[0] == 0) {
-    sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+  if (f_PlayerResults[0] == 0) {
+    sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
   } else {
-    sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[0]);
+    sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
-  DrawDigitText(&gfx, sResultsSlide + 90, sResultsTop + 132, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + 90, f_ResultsTop + 132, g_PrintBuffer);
   seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
   hundredths = (s32)(g_GameState.stopwatchFrameCount *
                      ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
                HUNDREDTHS_PER_SECOND;
-  sprintf(g_PrintBuffer, sTimeFormat,
+  sprintf(g_PrintBuffer, f_TimeFormat,
           seconds / SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT,
           seconds % SECONDS_PER_MINUTE, hundredths);
-  DrawDigitText(&gfx, sResultsSlide + 90, sResultsTop + 94, g_PrintBuffer);
-  sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[0]);
-  DrawDigitText(&gfx, sResultsSlide + 228, sResultsTop + 88, g_PrintBuffer);
+  DrawDigitText(&gfx, f_ResultsSlide + 90, f_ResultsTop + 94, g_PrintBuffer);
+  sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
+  DrawDigitText(&gfx, f_ResultsSlide + 228, f_ResultsTop + 88, g_PrintBuffer);
   SetUpGradientTextDrawing(&gfx, 0);
-  sprintf(g_PrintBuffer, sTimeLabel);
-  DrawLargeTextWithShadow(&gfx, sResultsSlide + 86, sResultsTop + 76,
+  sprintf(g_PrintBuffer, f_TimeLabel);
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 86, f_ResultsTop + 76,
                           g_PrintBuffer, RESULTS_HEADING_ENV_COLOR,
                           RESULTS_HEADING_PRIM_COLOR, 0);
   sprintf(g_PrintBuffer, "Stroke");
-  DrawLargeTextWithShadow(&gfx, sResultsSlide + 86, sResultsTop + 114,
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 86, f_ResultsTop + 114,
                           g_PrintBuffer, RESULTS_HEADING_ENV_COLOR,
                           RESULTS_HEADING_PRIM_COLOR, 0);
   gDPPipeSync(gfx++);
@@ -2765,7 +2772,7 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
 #define FOUR_DIGIT_BET_MAX 9999
 
 /* Computer players earn no Course Points, which shows as a dash */
-extern const char sNoPointsText[];
+extern const char f_NoPointsText[];
 
 #ifdef NON_MATCHING
 /* The results of several players: place, portrait, score, any bet totals and
@@ -2776,10 +2783,10 @@ void DrawPlayersResults(Gfx** displayListHead) {
   s32 i;
 
   for (i = 0; i != g_PlayerCount; i++) {
-    if (sPlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+    if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
-    if (sPlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+    if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
       betShift = 0;
     }
   }
@@ -2787,100 +2794,102 @@ void DrawPlayersResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  if (sHasBets) {
-    DrawResultsLabel(&gfx, sResultsSlide + 88, sResultsTop + RESULTS_HEADING_Y,
-                     RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, sResultsSlide + 192, sResultsTop + RESULTS_HEADING_Y,
-                     RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, sResultsSlide + 248, sResultsTop + RESULTS_HEADING_Y,
-                     RESULTS_LABEL_POINTS);
+  if (f_HasBets) {
+    DrawResultsLabel(&gfx, f_ResultsSlide + 88,
+                     f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 192,
+                     f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_BETS);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 248,
+                     f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
     for (i = 0; i != g_PlayerCount; i++) {
       if (g_PlayerCount >= 2) {
-        DrawPlaceIcon(&gfx, sResultsSlide + 18,
-                      sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
-                      sPlayerRanks[i]);
+        DrawPlaceIcon(
+            &gfx, f_ResultsSlide + 18,
+            f_ResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
+            f_PlayerRanks[i]);
       }
       DrawPlayerPortrait(
-          &gfx, sResultsSlide + 50,
-          sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i, FALSE);
+          &gfx, f_ResultsSlide + 50,
+          f_ResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i, FALSE);
     }
   } else {
-    DrawResultsLabel(&gfx, sResultsSlide + 144, sResultsTop + RESULTS_HEADING_Y,
-                     RESULTS_LABEL_SCORE);
-    DrawResultsLabel(&gfx, sResultsSlide + 234, sResultsTop + RESULTS_HEADING_Y,
-                     RESULTS_LABEL_POINTS);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 144,
+                     f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_SCORE);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 234,
+                     f_ResultsTop + RESULTS_HEADING_Y, RESULTS_LABEL_POINTS);
     for (i = 0; i != g_PlayerCount; i++) {
       if (g_PlayerCount >= 2) {
-        DrawRank(&gfx, sResultsSlide + 32,
-                 sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
-                 sPlayerRanks[i]);
+        DrawRank(&gfx, f_ResultsSlide + 32,
+                 f_ResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT,
+                 f_PlayerRanks[i]);
       }
       DrawPlayerPortrait(
-          &gfx, sResultsSlide + 96,
-          sResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i, FALSE);
+          &gfx, f_ResultsSlide + 96,
+          f_ResultsTop + RESULTS_ICON_ROW_Y + i * RESULTS_ROW_HEIGHT, i, FALSE);
     }
   }
-  LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(
-      &gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      &gfx, f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-  if (sHasBets) {
+  if (f_HasBets) {
     for (i = 0; i != g_PlayerCount; i++) {
       if (g_GameMode == GAME_MODE_SKINS_MATCH ||
           g_GameMode == GAME_MODE_CLUB_SLOTS) {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerResults[i]);
-      } else if (sPlayerResults[i] == 0) {
-        sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+      } else if (f_PlayerResults[i] == 0) {
+        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
       } else {
-        sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[i]);
+        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 96,
-                    sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+      DrawDigitText(&gfx, f_ResultsSlide + 96,
+                    f_ResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
                     g_PrintBuffer);
-      sprintf(g_PrintBuffer, "%5d", sPlayerBetTotals[i]);
-      DrawDigitText(&gfx, sResultsSlide + 156 + betShift,
-                    sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+      sprintf(g_PrintBuffer, "%5d", f_PlayerBetTotals[i]);
+      DrawDigitText(&gfx, f_ResultsSlide + 156 + betShift,
+                    f_ResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
                     g_PrintBuffer);
-      if (sPlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+      if (f_PlayerPoints[i] < 0) {
+        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 242,
-                    sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+      DrawDigitText(&gfx, f_ResultsSlide + 242,
+                    f_ResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
                     g_PrintBuffer);
     }
   } else {
     for (i = 0; i != g_PlayerCount; i++) {
       if (g_GameMode == GAME_MODE_SKINS_MATCH ||
           g_GameMode == GAME_MODE_CLUB_SLOTS) {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerResults[i]);
-      } else if (sPlayerResults[i] == 0) {
-        sprintf(g_PrintBuffer, sEvenScoreFormat, 0);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerResults[i]);
+      } else if (f_PlayerResults[i] == 0) {
+        sprintf(g_PrintBuffer, f_EvenScoreFormat, 0);
       } else {
-        sprintf(g_PrintBuffer, sScoreFormat, sPlayerResults[i]);
+        sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 152,
-                    sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+      DrawDigitText(&gfx, f_ResultsSlide + 152,
+                    f_ResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
                     g_PrintBuffer);
-      if (sPlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+      if (f_PlayerPoints[i] < 0) {
+        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 232,
-                    sResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
+      DrawDigitText(&gfx, f_ResultsSlide + 232,
+                    f_ResultsTop + RESULTS_TEXT_ROW_Y + i * RESULTS_ROW_HEIGHT,
                     g_PrintBuffer);
     }
   }
-  if (sOpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(sResultsSlide + 32, sResultsTop + 200, MESSAGE_ALL_COURSES_OPEN,
-                RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-                RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+  if (f_OpenCourseCount == COURSE_COUNT) {
+    SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 200,
+                MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT,
+                0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+                RESULTS_TEXT_ALPHA);
   } else {
-    DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y,
-                      sPointsToNextCourse + sPointsEarned);
-    SetTextSlot(sResultsSlide + 64, sResultsTop + 200,
+    DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
+                      f_PointsToNextCourse + f_PointsEarned);
+    SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
                 MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
                 RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN,
                 RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
@@ -2891,7 +2900,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawPlayersResults);
 #endif
 
-INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", sNoPointsText);
+INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", f_NoPointsText);
 
 #define MATCH_PLAYER_COUNT 2
 #define MATCH_ROW_HEIGHT 72
@@ -2920,10 +2929,10 @@ void DrawMatchResults(Gfx** displayListHead) {
   s32 i;
 
   for (i = 0; i != g_PlayerCount; i++) {
-    if (sPlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
+    if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
-    if (sPlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
+    if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
       betShift = 0;
     }
   }
@@ -2931,40 +2940,42 @@ void DrawMatchResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  if (sHasBets) {
-    DrawResultsLabel(&gfx, sResultsSlide + 152,
-                     sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_BETS);
-    DrawResultsLabel(&gfx, sResultsSlide + 240,
-                     sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 48, sPlayerRanks[0]);
-    DrawRank(&gfx, sResultsSlide + 40, sResultsTop + 48 + MATCH_ROW_HEIGHT,
-             sPlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, sResultsSlide + 62, sResultsTop + 76, 0, FALSE);
-    DrawPlayerPortrait(&gfx, sResultsSlide + 62,
-                       sResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+  if (f_HasBets) {
+    DrawResultsLabel(&gfx, f_ResultsSlide + 152,
+                     f_ResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_BETS);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 240,
+                     f_ResultsTop + RESULTS_HEADING_Y + 8,
+                     RESULTS_LABEL_POINTS);
+    DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 48, f_PlayerRanks[0]);
+    DrawRank(&gfx, f_ResultsSlide + 40, f_ResultsTop + 48 + MATCH_ROW_HEIGHT,
+             f_PlayerRanks[1]);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 62, f_ResultsTop + 76, 0, FALSE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 62,
+                       f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
   } else {
-    DrawResultsLabel(&gfx, sResultsSlide + 220,
-                     sResultsTop + RESULTS_HEADING_Y + 8, RESULTS_LABEL_POINTS);
-    DrawRank(&gfx, sResultsSlide + 56, sResultsTop + 48, sPlayerRanks[0]);
-    DrawRank(&gfx, sResultsSlide + 56, sResultsTop + 48 + MATCH_ROW_HEIGHT,
-             sPlayerRanks[1]);
-    DrawPlayerPortrait(&gfx, sResultsSlide + 78, sResultsTop + 76, 0, FALSE);
-    DrawPlayerPortrait(&gfx, sResultsSlide + 78,
-                       sResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
+    DrawResultsLabel(&gfx, f_ResultsSlide + 220,
+                     f_ResultsTop + RESULTS_HEADING_Y + 8,
+                     RESULTS_LABEL_POINTS);
+    DrawRank(&gfx, f_ResultsSlide + 56, f_ResultsTop + 48, f_PlayerRanks[0]);
+    DrawRank(&gfx, f_ResultsSlide + 56, f_ResultsTop + 48 + MATCH_ROW_HEIGHT,
+             f_PlayerRanks[1]);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 78, f_ResultsTop + 76, 0, FALSE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 78,
+                       f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
   }
-  LoadSmallPalette(&gfx, 0, sMatchStandingWordsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_MatchStandingWordsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(
-      &gfx, sMatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      &gfx, f_MatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       STANDING_WORDS_SIZE, STANDING_WORDS_SIZE, 0, 0, 0, 0, 0, 0, 0);
   for (i = 0; i != g_PlayerCount; i++) {
-    if (sPlayerResults[i] > 0) {
-      if (sPlayerResults[i] < 10) {
+    if (f_PlayerResults[i] > 0) {
+      if (f_PlayerResults[i] < 10) {
         standingShift[i] = STANDING_ONE_DIGIT_UP_SHIFT;
       } else {
         standingShift[i] = 0;
       }
-    } else if (sPlayerResults[i] < 0) {
-      if (sPlayerResults[i] < -9) {
+    } else if (f_PlayerResults[i] < 0) {
+      if (f_PlayerResults[i] < -9) {
         standingShift[i] = STANDING_TWO_DIGIT_DOWN_SHIFT;
       } else {
         standingShift[i] = STANDING_ONE_DIGIT_DOWN_SHIFT;
@@ -2972,84 +2983,85 @@ void DrawMatchResults(Gfx** displayListHead) {
     }
   }
   for (i = 0; i != g_PlayerCount; i++) {
-    if (sPlayerResults[i] > 0) {
+    if (f_PlayerResults[i] > 0) {
       standingRow = STANDING_WORD_UP_ROW;
-    } else if (sPlayerResults[i] < 0) {
+    } else if (f_PlayerResults[i] < 0) {
       standingRow = STANDING_WORD_DOWN_ROW;
     } else {
       standingRow = STANDING_WORD_EVEN_ROW;
     }
-    if (sHasBets) {
+    if (f_HasBets) {
       DrawTextureRect(
-          &gfx, (standingShift[i] + 80 + sResultsSlide) << 2,
-          (sResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
-          (standingShift[i] + 80 + STANDING_WORD_WIDTH + sResultsSlide) << 2,
-          (sResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT)
+          &gfx, (standingShift[i] + 80 + f_ResultsSlide) << 2,
+          (f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
+          (standingShift[i] + 80 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
+          (f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     } else {
       DrawTextureRect(
-          &gfx, (standingShift[i] + 96 + sResultsSlide) << 2,
-          (sResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
-          (standingShift[i] + 96 + STANDING_WORD_WIDTH + sResultsSlide) << 2,
-          (sResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT)
+          &gfx, (standingShift[i] + 96 + f_ResultsSlide) << 2,
+          (f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT) << 2,
+          (standingShift[i] + 96 + STANDING_WORD_WIDTH + f_ResultsSlide) << 2,
+          (f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT + STANDING_WORD_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
-  LoadSmallPalette(&gfx, 0, sResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(
-      &gfx, sResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
+      &gfx, f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       LARGE_DIGIT_WIDTH, LARGE_DIGITS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   for (i = 0; i != g_PlayerCount; i++) {
-    if (sHasBets) {
+    if (f_HasBets) {
       /* An even match draws only the word */
-      if (sPlayerResults[0] != 0) {
-        holeCount = sPlayerResults[i];
+      if (f_PlayerResults[0] != 0) {
+        holeCount = f_PlayerResults[i];
         if (holeCount < 0) {
           holeCount = -holeCount;
         }
         sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx, standingShift[i] + sResultsSlide + 48,
-                      sResultsTop + 108 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
+        DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 48,
+                      f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
       }
-      sprintf(g_PrintBuffer, sNumberFormat, sPlayerBetTotals[i]);
-      DrawDigitText(&gfx, betShift + 128 + sResultsSlide,
-                    sResultsTop + 92 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
-      if (sPlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+      sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
+      DrawDigitText(&gfx, betShift + 128 + f_ResultsSlide,
+                    f_ResultsTop + 92 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
+      if (f_PlayerPoints[i] < 0) {
+        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 234,
-                    sResultsTop + 92 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
+      DrawDigitText(&gfx, f_ResultsSlide + 234,
+                    f_ResultsTop + 92 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
     } else {
-      if (sPlayerResults[0] != 0) {
-        holeCount = sPlayerResults[i];
+      if (f_PlayerResults[0] != 0) {
+        holeCount = f_PlayerResults[i];
         if (holeCount < 0) {
           holeCount = -holeCount;
         }
         sprintf(g_PrintBuffer, "%2d", holeCount);
-        DrawDigitText(&gfx, standingShift[i] + sResultsSlide + 64,
-                      sResultsTop + 108 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
+        DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 64,
+                      f_ResultsTop + 108 + i * MATCH_ROW_HEIGHT, g_PrintBuffer);
       }
-      if (sPlayerPoints[i] < 0) {
-        sprintf(g_PrintBuffer, sNoPointsText, sPlayerPoints[i]);
+      if (f_PlayerPoints[i] < 0) {
+        sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
-        sprintf(g_PrintBuffer, sPointsFormat, sPlayerPoints[i]);
+        sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
-      DrawDigitText(&gfx, sResultsSlide + 218, sResultsTop + 92 + i * 64,
+      DrawDigitText(&gfx, f_ResultsSlide + 218, f_ResultsTop + 92 + i * 64,
                     g_PrintBuffer);
     }
   }
-  if (sOpenCourseCount == COURSE_COUNT) {
-    SetTextSlot(sResultsSlide + 32, sResultsTop + 204, MESSAGE_ALL_COURSES_OPEN,
-                RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED,
-                RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
+  if (f_OpenCourseCount == COURSE_COUNT) {
+    SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 204,
+                MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT,
+                0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
+                RESULTS_TEXT_ALPHA);
   } else {
-    DrawResultsNumber(&gfx, sResultsSlide + 29, POINTS_TOTAL_Y,
-                      sPointsToNextCourse + sPointsEarned);
-    SetTextSlot(sResultsSlide + 64, sResultsTop + 200,
+    DrawResultsNumber(&gfx, f_ResultsSlide + 29, POINTS_TOTAL_Y,
+                      f_PointsToNextCourse + f_PointsEarned);
+    SetTextSlot(f_ResultsSlide + 64, f_ResultsTop + 200,
                 MESSAGE_POINTS_TO_NEXT_COURSE, RESULTS_TEXT_FONT,
                 RESULTS_TEXT_SLOT, 0, RESULTS_TEXT_RED, RESULTS_TEXT_GREEN,
                 RESULTS_TEXT_BLUE, RESULTS_TEXT_ALPHA);
@@ -3087,7 +3099,7 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/round_results", D_80224E10_ovl_00);
 #define SCORE_PASSWORD_LINE_LENGTH 10
 
 /* The text colour of each text slot, from slot 1 */
-extern u8 sTextSlotColors[][3];
+extern u8 f_TextSlotColors[][3];
 
 #ifdef NON_MATCHING
 /* The results of a club tournament: its course, number, name and mode, the
@@ -3111,40 +3123,40 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gameMode = GetClubTournamentGameMode();
-  LoadLargePalette(&gfx, sResultsCourseImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_ResultsCourseImage + IMAGE_HEADER_SIZE);
   for (i = 0; i < CLUB_TOURNAMENT_COURSE_STRIP_COUNT; i++) {
     LoadTextureBlock(&gfx,
-                     sResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
+                     f_ResultsCourseImage + LARGE_PALETTED_TEXELS_OFFSET +
                          i * CLUB_TOURNAMENT_COURSE_STRIP_WIDTH *
                              CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT,
                      G_IM_FMT_CI, G_IM_SIZ_8b,
                      CLUB_TOURNAMENT_COURSE_STRIP_WIDTH,
                      CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(
-        &gfx, (sResultsSlide + 28) * 4,
-        (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT + (sResultsTop + 104)) * 4,
-        (sResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH) * 4,
+        &gfx, (f_ResultsSlide + 28) * 4,
+        (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT + (f_ResultsTop + 104)) * 4,
+        (f_ResultsSlide + 28 + CLUB_TOURNAMENT_COURSE_STRIP_WIDTH) * 4,
         (i * CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT +
-         (sResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)) *
+         (f_ResultsTop + 104 + CLUB_TOURNAMENT_COURSE_STRIP_HEIGHT)) *
             4,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
   if (isNintendo) {
     lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
-    DrawPlayerPortrait(&gfx, sResultsSlide + 96, sResultsTop + 136, 0, TRUE);
-    LoadLargePalette(&gfx, sNintendoBadgeImage + IMAGE_HEADER_SIZE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 96, f_ResultsTop + 136, 0, TRUE);
+    LoadLargePalette(&gfx, f_NintendoBadgeImage + IMAGE_HEADER_SIZE);
     for (i = 0; i != NINTENDO_BADGE_STRIP_COUNT; i++) {
       LoadTextureBlock(
           &gfx,
-          sNintendoBadgeImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_NintendoBadgeImage + LARGE_PALETTED_TEXELS_OFFSET +
               i * NINTENDO_BADGE_STRIP_WIDTH * NINTENDO_BADGE_STRIP_HEIGHT,
           G_IM_FMT_CI, G_IM_SIZ_8b, NINTENDO_BADGE_STRIP_WIDTH,
           NINTENDO_BADGE_STRIP_HEIGHT, 0, G_TX_MIRROR, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (sResultsSlide + 88) * 4,
-                      (sResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT) * 4,
-                      (sResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH) * 4,
-                      (sResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT +
+      DrawTextureRect(&gfx, (f_ResultsSlide + 88) * 4,
+                      (f_ResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT) * 4,
+                      (f_ResultsSlide + 88 + NINTENDO_BADGE_STRIP_WIDTH) * 4,
+                      (f_ResultsTop + 54 + i * NINTENDO_BADGE_STRIP_HEIGHT +
                        NINTENDO_BADGE_STRIP_HEIGHT) *
                           4,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -3152,9 +3164,9 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   } else {
     detailsTop = CLUB_TOURNAMENT_UNBADGED_DETAILS_TOP;
     lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
-    DrawPlayerPortrait(&gfx, sResultsSlide + 96, sResultsTop + 128, 0, TRUE);
+    DrawPlayerPortrait(&gfx, f_ResultsSlide + 96, f_ResultsTop + 128, 0, TRUE);
   }
-  DrawPlaceNumber(&gfx, sResultsSlide + 160, sResultsTop + detailsTop,
+  DrawPlaceNumber(&gfx, f_ResultsSlide + 160, f_ResultsTop + detailsTop,
                   GetClubTournamentNumber());
   SetUpTextDrawing(&gfx);
   MeasureMessage(GetClubTournamentNameMessage(), FONT_SIZE_LARGE, &width,
@@ -3163,39 +3175,42 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
                  &height, 0);
   MeasureMessage(GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width,
                  &height, 0);
-  SetTextSlot(sResultsSlide + 160, sResultsTop + detailsTop + lineHeight + 8,
+  SetTextSlot(f_ResultsSlide + 160, f_ResultsTop + detailsTop + lineHeight + 8,
               GetClubTournamentNameMessage(), RESULTS_TEXT_FONT,
               CLUB_TOURNAMENT_NAME_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 127, 191,
               255, 255);
-  SetTextSlot(sResultsSlide + 160,
-              sResultsTop + detailsTop + lineHeight * 2 + 8,
+  SetTextSlot(f_ResultsSlide + 160,
+              f_ResultsTop + detailsTop + lineHeight * 2 + 8,
               GetClubTournamentCourseTitleMessage(), RESULTS_TEXT_FONT,
               CLUB_TOURNAMENT_COURSE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 43, 255,
               75, 255);
   SetTextSlot(
-      sResultsSlide + 160, sResultsTop + detailsTop + lineHeight * 3 + 8,
+      f_ResultsSlide + 160, f_ResultsTop + detailsTop + lineHeight * 3 + 8,
       GetClubTournamentModeMessage(), RESULTS_TEXT_FONT,
       CLUB_TOURNAMENT_MODE_SLOT, CLUB_TOURNAMENT_TEXT_FLAGS, 255, 63, 127, 255);
   for (i = CLUB_TOURNAMENT_NAME_SLOT; i != CLUB_TOURNAMENT_MODE_SLOT + 1; i++) {
-    gDPSetPrimColor(gfx++, 0, 0, sTextSlotColors[i - 1][0],
-                    sTextSlotColors[i - 1][1], sTextSlotColors[i - 1][2], 255);
+    gDPSetPrimColor(gfx++, 0, 0, f_TextSlotColors[i - 1][0],
+                    f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2],
+                    255);
     DrawLargeTextSlot(&gfx, i);
   }
   SetUpGradientTextDrawing(&gfx, 0);
   sprintf(g_PrintBuffer, "Score");
-  DrawLargeTextWithShadow(
-      &gfx, sResultsSlide + 144, sResultsTop + detailsTop + lineHeight * 4 + 8,
-      g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-      CLUB_TOURNAMENT_LABEL_PRIM_COLOR, CLUB_TOURNAMENT_LABEL_FLAGS);
-  if (sPlayerResults[0] == 0) {
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 144,
+                          f_ResultsTop + detailsTop + lineHeight * 4 + 8,
+                          g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+                          CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+                          CLUB_TOURNAMENT_LABEL_FLAGS);
+  if (f_PlayerResults[0] == 0) {
     sprintf(g_PrintBuffer, "#0", 0);
   } else {
-    sprintf(g_PrintBuffer, "%+d", sPlayerResults[0]);
+    sprintf(g_PrintBuffer, "%+d", f_PlayerResults[0]);
   }
-  DrawLargeTextWithShadow(
-      &gfx, sResultsSlide + 192, sResultsTop + detailsTop + lineHeight * 4 + 8,
-      g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
-      CLUB_TOURNAMENT_LABEL_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 192,
+                          f_ResultsTop + detailsTop + lineHeight * 4 + 8,
+                          g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
+                          CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
+                          TEXT_FLAG_FIXED_WIDTH);
   if (gameMode == GAME_MODE_SPEED_GOLF) {
     hundredths = (s32)(g_GameState.stopwatchFrameCount *
                        ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
@@ -3204,31 +3219,31 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
               SECONDS_PER_MINUTE;
     minutes = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND /
               SECONDS_PER_MINUTE % SHOWN_MINUTES_LIMIT;
-    sprintf(g_PrintBuffer, sTimeLabel);
-    DrawLargeTextWithShadow(&gfx, sResultsSlide + 144,
-                            sResultsTop + detailsTop + lineHeight * 5 + 8,
+    sprintf(g_PrintBuffer, f_TimeLabel);
+    DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 144,
+                            f_ResultsTop + detailsTop + lineHeight * 5 + 8,
                             g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
                             CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
                             CLUB_TOURNAMENT_LABEL_FLAGS);
-    sprintf(g_PrintBuffer, sTimeFormat, minutes, seconds, hundredths);
-    DrawLargeTextWithShadow(&gfx, sResultsSlide + 192,
-                            sResultsTop + detailsTop + lineHeight * 5 + 8,
+    sprintf(g_PrintBuffer, f_TimeFormat, minutes, seconds, hundredths);
+    DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 192,
+                            f_ResultsTop + detailsTop + lineHeight * 5 + 8,
                             g_PrintBuffer, CLUB_TOURNAMENT_LABEL_ENV_COLOR,
                             CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
                             TEXT_FLAG_FIXED_WIDTH);
   }
   for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-    g_PrintBuffer[i] = sScorePassword[i];
+    g_PrintBuffer[i] = f_ScorePassword[i];
   }
   g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
-  DrawLargeTextWithShadow(&gfx, sResultsSlide + 116, sResultsTop + 182,
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 116, f_ResultsTop + 182,
                           g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR,
                           SCORE_PASSWORD_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
   for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
-    g_PrintBuffer[i] = sScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
+    g_PrintBuffer[i] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
   }
   g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
-  DrawLargeTextWithShadow(&gfx, sResultsSlide + 116, sResultsTop + 200,
+  DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 116, f_ResultsTop + 200,
                           g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR,
                           SCORE_PASSWORD_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
   *displayListHead = gfx;
@@ -3269,8 +3284,8 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawClubTournamentResults);
 
 /* Counts up through the pressing hand's frames, HAND_FRAME_DRAWS draws to a
  * frame */
-extern s32 sHandFrame;
-extern f32 sTitleBobAngle;
+extern s32 f_HandFrame;
+extern f32 f_TitleBobAngle;
 #ifdef NON_MATCHING
 /* The results card, its game mode's results, the bobbing title and the players'
  * portraits */
@@ -3286,7 +3301,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   s32 textureT;
   s32 i;
 
-  if (!sAreResultsLoaded) {
+  if (!f_AreResultsLoaded) {
     return;
   }
   gSPDisplayList(gfx++, D_800C3FC0);
@@ -3294,52 +3309,52 @@ void DrawRoundResults(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  LoadLargePalette(&gfx, sResultsBackdropImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_ResultsBackdropImage + IMAGE_HEADER_SIZE);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   if (g_IsClubTournament) {
     for (i = 0; i != CLUB_TOURNAMENT_BACKDROP_STRIP_COUNT; i++) {
       LoadTextureBlock(
           &gfx,
-          sResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_ResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
               i * BACKDROP_STRIP_WIDTH * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT,
           G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(
-          &gfx, (sResultsSlide + 16) * 4,
-          (sResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8)) * 4,
-          (sResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
-          (sResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8 +
-                          CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)) *
+          &gfx, (f_ResultsSlide + 16) * 4,
+          (f_ResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8)) * 4,
+          (f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+          (f_ResultsTop + (i * CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT + 8 +
+                           CLUB_TOURNAMENT_BACKDROP_STRIP_HEIGHT)) *
               4,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   } else {
     for (i = 0; i != BACKDROP_STRIP_COUNT; i++) {
       LoadTextureBlock(&gfx,
-                       sResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
+                       f_ResultsBackdropImage + LARGE_PALETTED_TEXELS_OFFSET +
                            i * BACKDROP_STRIP_WIDTH * BACKDROP_STRIP_HEIGHT,
                        G_IM_FMT_CI, G_IM_SIZ_8b, BACKDROP_STRIP_WIDTH,
                        BACKDROP_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&gfx, (sResultsSlide + 16) * 4,
-                      (i * BACKDROP_STRIP_HEIGHT + 24 + sResultsTop) * 4,
-                      (sResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
+      DrawTextureRect(&gfx, (f_ResultsSlide + 16) * 4,
+                      (i * BACKDROP_STRIP_HEIGHT + 24 + f_ResultsTop) * 4,
+                      (f_ResultsSlide + 16 + BACKDROP_STRIP_WIDTH) * 4,
                       (i * BACKDROP_STRIP_HEIGHT + 24 + BACKDROP_STRIP_HEIGHT +
-                       sResultsTop) *
+                       f_ResultsTop) *
                           4,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
-  if (sIsAwaitingConfirm == TRUE) {
-    sHandFrame = (sHandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
-    LoadLargePalette(&gfx, sResultsHandImage + IMAGE_HEADER_SIZE);
+  if (f_IsAwaitingConfirm == TRUE) {
+    f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
+    LoadLargePalette(&gfx, f_ResultsHandImage + IMAGE_HEADER_SIZE);
     LoadTextureBlock(&gfx,
-                     sResultsHandImage + LARGE_PALETTED_TEXELS_OFFSET +
-                         sHandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE,
+                     f_ResultsHandImage + LARGE_PALETTED_TEXELS_OFFSET +
+                         f_HandFrame / HAND_FRAME_DRAWS * HAND_SIZE * HAND_SIZE,
                      G_IM_FMT_CI, G_IM_SIZ_8b, HAND_SIZE, HAND_SIZE, 0, 0, 0, 0,
                      0, 0, 0);
-    DrawTextureRect(&gfx, (sResultsSlide + 272) * 4, (sResultsTop + 192) * 4,
-                    (sResultsSlide + 272 + HAND_SIZE) * 4,
-                    (sResultsTop + 192 + HAND_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
+    DrawTextureRect(&gfx, (f_ResultsSlide + 272) * 4, (f_ResultsTop + 192) * 4,
+                    (f_ResultsSlide + 272 + HAND_SIZE) * 4,
+                    (f_ResultsTop + 192 + HAND_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
                     TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   if (g_IsClubTournament) {
@@ -3369,10 +3384,10 @@ void DrawRoundResults(Gfx** displayListHead) {
     }
   }
   if (!g_IsClubTournament) {
-    titleX = cosf(sTitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB +
+    titleX = cosf(f_TitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB +
              FINAL_RESULTS_TITLE_X;
     titleY =
-        sinf(sTitleBobAngle) * FINAL_RESULTS_TITLE_BOB + FINAL_RESULTS_TITLE_Y;
+        sinf(f_TitleBobAngle) * FINAL_RESULTS_TITLE_BOB + FINAL_RESULTS_TITLE_Y;
     left = titleX < 0.0f ? titleX + 0.5f : titleX - 0.5f;
     top = titleY < 0.0f ? titleY + 0.5f : titleY - 0.5f;
     gSPDisplayList(gfx++, D_800C3FC0);
@@ -3383,8 +3398,8 @@ void DrawRoundResults(Gfx** displayListHead) {
     textureS = (s32)(SUBTEXEL_STEPS - (titleX - left) * SUBTEXEL_STEPS) * 2;
     textureT = (s32)(SUBTEXEL_STEPS - (titleY - top) * SUBTEXEL_STEPS) * 2 +
                TEXEL_UNITS;
-    sTitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
-    LoadLargePalette(&gfx, sFinalResultsTitleImage + IMAGE_HEADER_SIZE);
+    f_TitleBobAngle += FINAL_RESULTS_TITLE_BOB_STEP;
+    LoadLargePalette(&gfx, f_FinalResultsTitleImage + IMAGE_HEADER_SIZE);
     right = left + FINAL_RESULTS_TITLE_WIDTH;
     for (i = 0; i != FINAL_RESULTS_TITLE_STRIP_COUNT; i++) {
       stripHeight = FINAL_RESULTS_TITLE_STRIP_HEIGHT;
@@ -3393,15 +3408,15 @@ void DrawRoundResults(Gfx** displayListHead) {
       }
       LoadTextureBlock(
           &gfx,
-          sFinalResultsTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
+          f_FinalResultsTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
               i * FINAL_RESULTS_TITLE_WIDTH * FINAL_RESULTS_TITLE_STRIP_HEIGHT,
           G_IM_FMT_CI, G_IM_SIZ_8b, FINAL_RESULTS_TITLE_WIDTH,
           FINAL_RESULTS_TITLE_LOADED_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gSPTextureRectangle(
-          gfx++, (left - sResultsSlide) * 4,
-          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + sResultsTop + top) * 4,
-          (right - sResultsSlide) * 4,
-          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + sResultsTop +
+          gfx++, (left - f_ResultsSlide) * 4,
+          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + f_ResultsTop + top) * 4,
+          (right - f_ResultsSlide) * 4,
+          (i * FINAL_RESULTS_TITLE_STRIP_HEIGHT + stripHeight + f_ResultsTop +
            top) *
               4,
           G_TX_RENDERTILE, textureS, textureT, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -3411,24 +3426,24 @@ void DrawRoundResults(Gfx** displayListHead) {
     AssetFile file;
     s32 unused[4];
 
-    if (sPortraitFrames[i] != NO_PORTRAIT_FRAME) {
-      if (!(sPortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
-        switch (sPortraitAnimations[i]) {
+    if (f_PortraitFrames[i] != NO_PORTRAIT_FRAME) {
+      if (!(f_PortraitTimers[i] & PORTRAIT_FRAME_DRAWS_MASK)) {
+        switch (f_PortraitAnimations[i]) {
           case PORTRAIT_ANIMATION_REST:
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex], &file);
-            ReadEncodedAsset(sPlayerPortraitImages[i], &file);
-            sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+            f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             break;
           case PORTRAIT_ANIMATION_UNK1:
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
-                    sPortraitFrames[i],
+                    f_PortraitFrames[i],
                 &file);
-            ReadEncodedAsset(sPlayerPortraitImages[i], &file);
-            sPortraitFrames[i]++;
-            if (sPortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-              sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+            f_PortraitFrames[i]++;
+            if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+              f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             }
             break;
           case PORTRAIT_ANIMATION_UNK4: {
@@ -3436,18 +3451,18 @@ void DrawRoundResults(Gfx** displayListHead) {
 
             OpenEncodedAsset(
                 g_CharacterImageAssets[(s8)g_Players[i].characterIndex] +
-                    unk4Faces[sPortraitFrames[i]],
+                    unk4Faces[f_PortraitFrames[i]],
                 &file);
-            ReadEncodedAsset(sPlayerPortraitImages[i], &file);
-            sPortraitFrames[i]++;
-            if (sPortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
-              sPortraitFrames[i] = NO_PORTRAIT_FRAME;
+            ReadEncodedAsset(f_PlayerPortraitImages[i], &file);
+            f_PortraitFrames[i]++;
+            if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
+              f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             }
             break;
           }
         }
       }
-      sPortraitTimers[i]++;
+      f_PortraitTimers[i]++;
     }
   }
   DrawResultsBanner(&gfx);
@@ -3462,7 +3477,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/round_results", DrawRoundResults);
 void DrawResultsNotice(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  switch (sUnlockNoticeKind) {
+  switch (f_UnlockNoticeKind) {
     case UNLOCK_NOTICE_KIND_NONE:
       break;
     case UNLOCK_NOTICE_KIND_COURSE:

@@ -6,19 +6,19 @@
 /* The X, Y and Z of a point */
 #define AXIS_COUNT 3
 
-extern s32 sPathPointIndex;
-extern s32 sPathStepIndex;
-extern f32 sPathPosition[AXIS_COUNT];
+extern s32 f_PathPointIndex;
+extern s32 f_PathStepIndex;
+extern f32 f_PathPosition[AXIS_COUNT];
 extern f32
-    sPathSegment[2][AXIS_COUNT]; /* The start and end of the target's line */
-extern f32 sPathProgress;
-extern f32 sPathProgressStep;
-extern f32 sPathStepsPerSegment;
-extern f32 sPathCatchUp;
+    f_PathSegment[2][AXIS_COUNT]; /* The start and end of the target's line */
+extern f32 f_PathProgress;
+extern f32 f_PathProgressStep;
+extern f32 f_PathStepsPerSegment;
+extern f32 f_PathCatchUp;
 
 void ResetPath(void) {
-  sPathStepIndex = 0;
-  sPathPointIndex = 0;
+  f_PathStepIndex = 0;
+  f_PathPointIndex = 0;
 }
 
 #ifdef NON_MATCHING
@@ -39,104 +39,104 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
   f32 progress;
   f32 catchUpFraction;
 
-  if (sPathPointIndex >= pointCount - 1) {
+  if (f_PathPointIndex >= pointCount - 1) {
     position[0] = points[pointCount - 1][0];
     position[1] = points[pointCount - 1][1];
-    sPathStepIndex = 0;
-    sPathPointIndex = 0;
+    f_PathStepIndex = 0;
+    f_PathPointIndex = 0;
     position[2] = points[pointCount - 1][2];
     return 1;
   }
-  if (sPathPointIndex == 0 && sPathStepIndex == 0) {
+  if (f_PathPointIndex == 0 && f_PathStepIndex == 0) {
     switch (pace) {
       case 12:
-        sPathCatchUp = 1.0f;
-        sPathStepsPerSegment = 2.0f;
+        f_PathCatchUp = 1.0f;
+        f_PathStepsPerSegment = 2.0f;
         break;
       case 14:
-        sPathCatchUp = 1.0f;
-        sPathStepsPerSegment = 4.0f;
+        f_PathCatchUp = 1.0f;
+        f_PathStepsPerSegment = 4.0f;
         break;
       case 18:
-        sPathCatchUp = 1.0f;
-        sPathStepsPerSegment = 8.0f;
+        f_PathCatchUp = 1.0f;
+        f_PathStepsPerSegment = 8.0f;
         break;
       case 24:
-        sPathCatchUp = 2.0f;
-        sPathStepsPerSegment = 4.0f;
+        f_PathCatchUp = 2.0f;
+        f_PathStepsPerSegment = 4.0f;
         break;
       case 28:
-        sPathCatchUp = 2.0f;
-        sPathStepsPerSegment = 8.0f;
+        f_PathCatchUp = 2.0f;
+        f_PathStepsPerSegment = 8.0f;
         break;
       case 216:
-        sPathCatchUp = 2.0f;
-        sPathStepsPerSegment = 16.0f;
+        f_PathCatchUp = 2.0f;
+        f_PathStepsPerSegment = 16.0f;
         break;
       case 34:
-        sPathCatchUp = 3.0f;
-        sPathStepsPerSegment = 4.0f;
+        f_PathCatchUp = 3.0f;
+        f_PathStepsPerSegment = 4.0f;
         break;
       case 48:
-        sPathCatchUp = 4.0f;
-        sPathStepsPerSegment = 8.0f;
+        f_PathCatchUp = 4.0f;
+        f_PathStepsPerSegment = 8.0f;
         break;
       case 416:
-        sPathCatchUp = 4.0f;
-        sPathStepsPerSegment = 16.0f;
+        f_PathCatchUp = 4.0f;
+        f_PathStepsPerSegment = 16.0f;
         break;
     }
-    sPathPosition[0] = points[0][0];
-    sPathPosition[1] = points[0][1];
-    sPathPointIndex = 1;
-    sPathPosition[2] = points[0][2];
-    sPathProgressStep = 1.0f / sPathStepsPerSegment;
+    f_PathPosition[0] = points[0][0];
+    f_PathPosition[1] = points[0][1];
+    f_PathPointIndex = 1;
+    f_PathPosition[2] = points[0][2];
+    f_PathProgressStep = 1.0f / f_PathStepsPerSegment;
   }
-  if (sPathStepIndex == 0) {
-    sPathSegment[0][0] = points[sPathPointIndex][0];
-    sPathSegment[0][1] = points[sPathPointIndex][1];
-    sPathSegment[0][2] = points[sPathPointIndex][2];
-    sPathSegment[1][0] = points[sPathPointIndex + 1][0];
-    sPathSegment[1][1] = points[sPathPointIndex + 1][1];
-    sPathProgress = 0.0f;
-    sPathSegment[1][2] = points[sPathPointIndex + 1][2];
+  if (f_PathStepIndex == 0) {
+    f_PathSegment[0][0] = points[f_PathPointIndex][0];
+    f_PathSegment[0][1] = points[f_PathPointIndex][1];
+    f_PathSegment[0][2] = points[f_PathPointIndex][2];
+    f_PathSegment[1][0] = points[f_PathPointIndex + 1][0];
+    f_PathSegment[1][1] = points[f_PathPointIndex + 1][1];
+    f_PathProgress = 0.0f;
+    f_PathSegment[1][2] = points[f_PathPointIndex + 1][2];
   }
-  stepsPerSegment = sPathStepsPerSegment;
-  catchUpFraction = (1.0f / stepsPerSegment) * sPathCatchUp;
-  progress = sPathProgress;
-  sPathPosition[0] +=
-      (s32)((sPathSegment[0][0] +
-             (sPathSegment[1][0] - sPathSegment[0][0]) * progress -
-             sPathPosition[0]) *
+  stepsPerSegment = f_PathStepsPerSegment;
+  catchUpFraction = (1.0f / stepsPerSegment) * f_PathCatchUp;
+  progress = f_PathProgress;
+  f_PathPosition[0] +=
+      (s32)((f_PathSegment[0][0] +
+             (f_PathSegment[1][0] - f_PathSegment[0][0]) * progress -
+             f_PathPosition[0]) *
             catchUpFraction);
-  sPathPosition[1] +=
-      (s32)((sPathSegment[0][1] +
-             (sPathSegment[1][1] - sPathSegment[0][1]) * progress -
-             sPathPosition[1]) *
+  f_PathPosition[1] +=
+      (s32)((f_PathSegment[0][1] +
+             (f_PathSegment[1][1] - f_PathSegment[0][1]) * progress -
+             f_PathPosition[1]) *
             catchUpFraction);
-  sPathPosition[2] +=
-      (s32)((sPathSegment[0][2] +
-             (sPathSegment[1][2] - sPathSegment[0][2]) * progress -
-             sPathPosition[2]) *
+  f_PathPosition[2] +=
+      (s32)((f_PathSegment[0][2] +
+             (f_PathSegment[1][2] - f_PathSegment[0][2]) * progress -
+             f_PathPosition[2]) *
             catchUpFraction);
-  position[0] = sPathPosition[0];
-  position[1] = sPathPosition[1];
-  position[2] = sPathPosition[2];
-  sPathStepIndex++;
-  sPathProgress = progress + sPathProgressStep;
-  if (stepsPerSegment <= sPathStepIndex) {
-    nextPointIndex = sPathPointIndex + 1;
-    sPathSegment[0][0] = points[nextPointIndex][0];
-    sPathSegment[0][1] = points[nextPointIndex][1];
-    sPathSegment[0][2] = points[nextPointIndex][2];
-    sPathSegment[1][0] = points[nextPointIndex + 1][0];
-    sPathSegment[1][1] = points[nextPointIndex + 1][1];
-    sPathSegment[1][2] = points[nextPointIndex + 1][2];
-    sPathStepIndex = 0;
-    sPathPointIndex = nextPointIndex;
+  position[0] = f_PathPosition[0];
+  position[1] = f_PathPosition[1];
+  position[2] = f_PathPosition[2];
+  f_PathStepIndex++;
+  f_PathProgress = progress + f_PathProgressStep;
+  if (stepsPerSegment <= f_PathStepIndex) {
+    nextPointIndex = f_PathPointIndex + 1;
+    f_PathSegment[0][0] = points[nextPointIndex][0];
+    f_PathSegment[0][1] = points[nextPointIndex][1];
+    f_PathSegment[0][2] = points[nextPointIndex][2];
+    f_PathSegment[1][0] = points[nextPointIndex + 1][0];
+    f_PathSegment[1][1] = points[nextPointIndex + 1][1];
+    f_PathSegment[1][2] = points[nextPointIndex + 1][2];
+    f_PathStepIndex = 0;
+    f_PathPointIndex = nextPointIndex;
   }
-  /* At most 0 here, since sPathPointIndex is at least 1 */
-  return 1 - sPathPointIndex;
+  /* At most 0 here, since f_PathPointIndex is at least 1 */
+  return 1 - f_PathPointIndex;
 }
 
 #else

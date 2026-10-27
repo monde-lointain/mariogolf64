@@ -37,7 +37,7 @@
 #define ROUND_FRAMEBUFFER_COUNT 3
 #define FULL_SONG_VOLUME 0x7F
 
-/* Values of sPauseMenuRequest, which the pause menu's drawing carries out */
+/* Values of f_PauseMenuRequest, which the pause menu's drawing carries out */
 #define PAUSE_MENU_REQUEST_FREE (-1)
 #define PAUSE_MENU_REQUEST_NONE 0
 #define PAUSE_MENU_REQUEST_LOAD 1
@@ -62,16 +62,16 @@
 #define PAUSE_MENU_SONG_VOLUME 0x60
 
 extern s32 D_800C42D0; /* Set once a Game Boy character has been brought over */
-extern s32 sIsPauseMenuLoaded;
-extern s32 sPauseSelection;
-extern s32 sPauseLayout;
-extern s32 sPauseMenuRequest;
-extern s32 sPauseMenuUnkD678;
-extern u8* sPauseCursorImage;
-extern u8* sMenuCloudImage; /* The pause menu's cloud, or the choice box's */
-extern u8* sPauseArrowsImage;
-extern s32 sPauseArrowsTick;
-extern u8* sChoiceBoxCursorImage;
+extern s32 f_IsPauseMenuLoaded;
+extern s32 f_PauseSelection;
+extern s32 f_PauseLayout;
+extern s32 f_PauseMenuRequest;
+extern s32 f_PauseMenuUnkD678;
+extern u8* f_PauseCursorImage;
+extern u8* f_MenuCloudImage; /* The pause menu's cloud, or the choice box's */
+extern u8* f_PauseArrowsImage;
+extern s32 f_PauseArrowsTick;
+extern u8* f_ChoiceBoxCursorImage;
 
 #define CHOICE_BOX_MAX_OPTIONS 4
 #define CHOICE_BOX_OPEN_SOUND 0x64
@@ -80,7 +80,7 @@ extern u8* sChoiceBoxCursorImage;
 #define CHOICE_BOX_CHOOSE_SOUND 0x5D
 #define MENU_SOUND_VOLUME 100
 
-/* Values of sChoiceBoxState */
+/* Values of f_ChoiceBoxState */
 #define CHOICE_BOX_CLOSED (-1)
 #define CHOICE_BOX_CHOOSING 0
 #define CHOICE_BOX_CHOSEN 1 /* Waits a frame before the box closes */
@@ -91,17 +91,17 @@ typedef struct ChoiceBox {
   /* 0x04 */ s32 halfWidth; /* Widened to fit the longest label */
   /* 0x08 */ s32 isVertical;
   /* 0x0C */ u8
-      labels[CHOICE_BOX_MAX_OPTIONS]; /* Indexes into sChoiceBoxLabels */
+      labels[CHOICE_BOX_MAX_OPTIONS]; /* Indexes into f_ChoiceBoxLabels */
   /* 0x10 */ u8 results[CHOICE_BOX_MAX_OPTIONS];
 } ChoiceBox; /* size = 0x14 */
 
-extern ChoiceBox sChoiceBoxes[];
-extern char* sChoiceBoxLabels[];
-extern s32 sChoiceBoxState;
-extern s32 sChoiceBoxIndex;
-extern s32 sChoiceBoxSelection;
-extern f32 sChoiceGlowAngle;   /* Cycles the selected label's colour */
-extern f32 sChoiceCursorAngle; /* Bobs the cursor from side to side */
+extern ChoiceBox f_ChoiceBoxes[];
+extern char* f_ChoiceBoxLabels[];
+extern s32 f_ChoiceBoxState;
+extern s32 f_ChoiceBoxIndex;
+extern s32 f_ChoiceBoxSelection;
+extern f32 f_ChoiceGlowAngle;   /* Cycles the selected label's colour */
+extern f32 f_ChoiceCursorAngle; /* Bobs the cursor from side to side */
 
 #define CHOICE_BOX_CENTER_X (SCREEN_WIDTH / 2)
 #define CHOICE_BOX_MARGIN 32
@@ -158,9 +158,9 @@ void ResumeRound(void) {
 }
 
 void RequestPauseMenu(s32 unkD678, s32 isClosing) {
-  sPauseMenuRequest =
+  f_PauseMenuRequest =
       isClosing == FALSE ? PAUSE_MENU_REQUEST_LOAD : PAUSE_MENU_REQUEST_FREE;
-  sPauseMenuUnkD678 = unkD678;
+  f_PauseMenuUnkD678 = unkD678;
 }
 
 INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_80225440_ovl_00);
@@ -188,87 +188,87 @@ INCLUDE_RODATA("asm/nonmatchings/ovl_00/pause_menu", D_802254A0_ovl_00);
 void LoadPauseMenu(void) {
   EncodedAsset asset;
 
-  if (!sIsPauseMenuLoaded) {
-    sIsPauseMenuLoaded = TRUE;
-    sPauseSelection = 0;
+  if (!f_IsPauseMenuLoaded) {
+    f_IsPauseMenuLoaded = TRUE;
+    f_PauseSelection = 0;
     if (g_IsClubTournament) {
       if (g_GameMode == GAME_MODE_SPEED_GOLF) {
-        sPauseLayout = PAUSE_LAYOUT_UNK3B_SPEED_GOLF;
+        f_PauseLayout = PAUSE_LAYOUT_UNK3B_SPEED_GOLF;
       } else {
-        sPauseLayout = PAUSE_LAYOUT_UNK3B;
+        f_PauseLayout = PAUSE_LAYOUT_UNK3B;
       }
     } else if (D_800C42D0) {
       if (g_GameMode == GAME_MODE_SPEED_GOLF) {
-        sPauseLayout = PAUSE_LAYOUT_UNK42D0_SPEED_GOLF;
+        f_PauseLayout = PAUSE_LAYOUT_UNK42D0_SPEED_GOLF;
       } else if (g_GameMode == GAME_MODE_RING_SHOT) {
-        sPauseLayout = PAUSE_LAYOUT_RING_SHOT;
+        f_PauseLayout = PAUSE_LAYOUT_RING_SHOT;
       } else if (g_GameMode == GAME_MODE_TRAINING) {
         if (g_IsMiniGolf == TRUE) {
-          sPauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
+          f_PauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
         } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {
-          sPauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
+          f_PauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
         } else {
-          sPauseLayout = PAUSE_LAYOUT_TRAINING;
+          f_PauseLayout = PAUSE_LAYOUT_TRAINING;
         }
       } else {
-        sPauseLayout = PAUSE_LAYOUT_UNK42D0;
+        f_PauseLayout = PAUSE_LAYOUT_UNK42D0;
       }
     } else {
       switch (g_GameMode) {
         case GAME_MODE_SPEED_GOLF:
-          sPauseLayout = PAUSE_LAYOUT_SPEED_GOLF;
+          f_PauseLayout = PAUSE_LAYOUT_SPEED_GOLF;
           break;
         case GAME_MODE_TRAINING:
           if (g_IsMiniGolf == TRUE) {
-            sPauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
+            f_PauseLayout = PAUSE_LAYOUT_TRAINING_MINI_GOLF;
           } else if (GetCourseRecordIndex() == COURSE_RECORD_DRIVING_RANGE) {
-            sPauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
+            f_PauseLayout = PAUSE_LAYOUT_DRIVING_RANGE;
           } else {
-            sPauseLayout = PAUSE_LAYOUT_TRAINING;
+            f_PauseLayout = PAUSE_LAYOUT_TRAINING;
           }
           break;
         case GAME_MODE_RING_SHOT:
-          sPauseLayout = PAUSE_LAYOUT_RING_SHOT;
+          f_PauseLayout = PAUSE_LAYOUT_RING_SHOT;
           break;
         case GAME_MODE_MATCH_GAME:
         case GAME_MODE_GET_CHARACTER:
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
-          sPauseLayout = PAUSE_LAYOUT_VERSUS;
+          f_PauseLayout = PAUSE_LAYOUT_VERSUS;
           break;
         case GAME_MODE_UNK8:
-          sPauseLayout = PAUSE_LAYOUT_NONE;
+          f_PauseLayout = PAUSE_LAYOUT_NONE;
           break;
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
         case GAME_MODE_TOURNAMENT:
         case GAME_MODE_UNK6:
-          sPauseLayout = PAUSE_LAYOUT_STROKE;
+          f_PauseLayout = PAUSE_LAYOUT_STROKE;
           break;
       }
     }
-    sPauseCursorImage =
+    f_PauseCursorImage =
         AllocMemory(OpenEncodedAsset(PAUSE_CURSOR_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(sPauseCursorImage, &asset);
-    sMenuCloudImage =
+    ReadEncodedAsset(f_PauseCursorImage, &asset);
+    f_MenuCloudImage =
         AllocMemory(OpenEncodedAsset(PAUSE_CLOUD_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(sMenuCloudImage, &asset);
+    ReadEncodedAsset(f_MenuCloudImage, &asset);
     g_WindPanelPosition[AXIS_X] = SCREEN_WIDTH;
     g_WindPanelPosition[AXIS_Y] = SCREEN_HEIGHT;
     g_LiePanelPosition[AXIS_X] = SCREEN_HEIGHT;
-    sPauseArrowsImage =
+    f_PauseArrowsImage =
         AllocMemory(OpenEncodedAsset(PAUSE_ARROWS_IMAGE_ASSET, &asset));
-    ReadEncodedAsset(sPauseArrowsImage, &asset);
+    ReadEncodedAsset(f_PauseArrowsImage, &asset);
     SetSongVolume(PAUSE_MENU_SONG_VOLUME);
   }
 }
 
 void FreePauseMenu(void) {
-  if (sIsPauseMenuLoaded == TRUE) {
-    sIsPauseMenuLoaded = FALSE;
-    FreeMemory(&sPauseCursorImage);
-    FreeMemory(&sMenuCloudImage);
-    FreeMemory(&sPauseArrowsImage);
+  if (f_IsPauseMenuLoaded == TRUE) {
+    f_IsPauseMenuLoaded = FALSE;
+    FreeMemory(&f_PauseCursorImage);
+    FreeMemory(&f_MenuCloudImage);
+    FreeMemory(&f_PauseArrowsImage);
   }
   SetSongVolume(FULL_SONG_VOLUME);
 }
@@ -282,10 +282,10 @@ void FreePauseMenu(void) {
 #define PAUSE_OPTION_KIND_WIND_SPEED 3
 #define PAUSE_OPTION_KIND_WIND_DIRECTION 4
 #define PAUSE_OPTION_KIND_LIE 5
-/* Shows another label while sPauseMenuUnkD678 is clear */
+/* Shows another label while f_PauseMenuUnkD678 is clear */
 #define PAUSE_OPTION_KIND_UNKD678 7
 
-/* The option that is greyed out while sPauseMenuUnkD678 is clear */
+/* The option that is greyed out while f_PauseMenuUnkD678 is clear */
 #define PAUSE_OPTION_UNKD678 2
 
 #define PAUSE_LAYOUT_MAX_OPTIONS 9
@@ -299,22 +299,22 @@ typedef struct PauseOption {
   /* 0x4 */ u16 kind;
 } PauseOption; /* size = 0x6 */
 
-extern PauseOption sPauseOptions[];
-extern s8 sPauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
-extern s8 sPauseLayoutOptionCounts[];
-extern char* sClearText;
-extern char* sRainText;
-extern char* sBlackText;
-extern char* sWhiteText;
+extern PauseOption f_PauseOptions[];
+extern s8 f_PauseLayoutOptions[][PAUSE_LAYOUT_MAX_OPTIONS];
+extern s8 f_PauseLayoutOptionCounts[];
+extern char* f_ClearText;
+extern char* f_RainText;
+extern char* f_BlackText;
+extern char* f_WhiteText;
 /* Written once the menu is drawn and cleared by its input, but never read */
-extern s32 sPauseMenuDrawnMarker;
-extern f32 sPauseGlowAngle;
-extern f32 sPauseCursorAngle;
+extern s32 f_PauseMenuDrawnMarker;
+extern f32 f_PauseGlowAngle;
+extern f32 f_PauseCursorAngle;
 
 /* What choosing a pause option does, as its PauseOption.action */
 #define PAUSE_ACTION_FREE_LOOK 0
 #define PAUSE_ACTION_SCORECARD 1
-/* Only while debugging or with sPauseMenuUnkD678 set */
+/* Only while debugging or with f_PauseMenuUnkD678 set */
 #define PAUSE_ACTION_UNKD678 2
 #define PAUSE_ACTION_UNK3 3
 #define PAUSE_ACTION_UNK4 4
@@ -393,8 +393,9 @@ s32 UpdatePauseMenu(ControllerState* controller) {
   s32 surface;
 
   if (controller->repeatedButtons & A_BUTTON) {
-    action = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]]
-                 .action;
+    action =
+        f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
+            .action;
     switch (action) {
       case PAUSE_ACTION_UNK4:
         PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -429,7 +430,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         g_PendingSubModuleId = PAUSE_SUB_MODULE_UNK16;
         break;
       case PAUSE_ACTION_UNKD678:
-        if (g_IsDebugEnabled || sPauseMenuUnkD678) {
+        if (g_IsDebugEnabled || f_PauseMenuUnkD678) {
           PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           RequestPauseMenu(0, -1);
           g_PauseScreen = PAUSE_SCREEN_UNK6;
@@ -459,20 +460,21 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     return action;
   }
   if (controller->repeatedButtons & U_JPAD) {
-    sPauseSelection--;
+    f_PauseSelection--;
     PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
   } else if (controller->repeatedButtons & D_JPAD) {
-    sPauseSelection++;
+    f_PauseSelection++;
     PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
   }
-  if (sPauseSelection > sPauseLayoutOptionCounts[sPauseLayout] - 1) {
-    sPauseSelection = 0;
+  if (f_PauseSelection > f_PauseLayoutOptionCounts[f_PauseLayout] - 1) {
+    f_PauseSelection = 0;
   }
-  if (sPauseSelection < 0) {
-    sPauseSelection = sPauseLayoutOptionCounts[sPauseLayout] - 1;
+  if (f_PauseSelection < 0) {
+    f_PauseSelection = f_PauseLayoutOptionCounts[f_PauseLayout] - 1;
   }
-  kind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
-  sPauseMenuDrawnMarker = 0;
+  kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
+             .kind;
+  f_PauseMenuDrawnMarker = 0;
   g_RoundHud.areLieArrowsShown = 0;
   g_RoundHud.areWindSpeedArrowsShown = 0;
   g_RoundHud.areWindDirectionArrowsShown = 0;
@@ -687,7 +689,7 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   s32 top;
   s32 bottom;
 
-  sPauseArrowsTick = (sPauseArrowsTick + 1) % PAUSE_ARROWS_TICK_COUNT;
+  f_PauseArrowsTick = (f_PauseArrowsTick + 1) % PAUSE_ARROWS_TICK_COUNT;
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
   gDPPipeSync(gfx++);
@@ -695,10 +697,10 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  LoadSmallPalette(&gfx, 0, sPauseArrowsImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_PauseArrowsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
-                         sPauseArrowsImage + PALETTED_TEXELS_OFFSET +
-                             sPauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
+                         f_PauseArrowsImage + PALETTED_TEXELS_OFFSET +
+                             f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
                                  PAUSE_ARROWS_FRAME_SIZE,
                          G_IM_FMT_CI, PAUSE_ARROW_SIZE,
                          PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -766,14 +768,14 @@ void DrawPauseMenu(Gfx** displayListHead) {
   s32 sway;
   s32 teeFrame;
 
-  if (sPauseMenuRequest == PAUSE_MENU_REQUEST_LOAD) {
+  if (f_PauseMenuRequest == PAUSE_MENU_REQUEST_LOAD) {
     LoadPauseMenu();
-    sPauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
-  } else if (sPauseMenuRequest == PAUSE_MENU_REQUEST_FREE) {
+    f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+  } else if (f_PauseMenuRequest == PAUSE_MENU_REQUEST_FREE) {
     FreePauseMenu();
-    sPauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
+    f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
   }
-  if (!sIsPauseMenuLoaded) {
+  if (!f_IsPauseMenuLoaded) {
     return;
   }
   gDPPipeSync(gfx++);
@@ -791,8 +793,8 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
                     TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-  labelsHeight = sPauseLayoutOptionCounts[sPauseLayout] * PAUSE_LABEL_SPACING;
-  LoadNibbleTextureBlock(&gfx, sMenuCloudImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+  labelsHeight = f_PauseLayoutOptionCounts[f_PauseLayout] * PAUSE_LABEL_SPACING;
+  LoadNibbleTextureBlock(&gfx, f_MenuCloudImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
                          PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0,
                          G_TX_CLAMP, G_TX_CLAMP, 0, 0, 0, 0);
   cloudMiddle = (labelsHeight + PAUSE_CLOUD_TOP) * 4;
@@ -800,7 +802,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
                   PAUSE_CLOUD_RIGHT * 4, cloudMiddle, G_TX_RENDERTILE, 0, 0,
                   1 << 10, 1 << 10);
   LoadNibbleTextureBlock(
-      &gfx, sMenuCloudImage + IMAGE_HEADER_SIZE + PAUSE_CLOUD_PART_SIZE,
+      &gfx, f_MenuCloudImage + IMAGE_HEADER_SIZE + PAUSE_CLOUD_PART_SIZE,
       G_IM_FMT_I, PAUSE_CLOUD_PART_WIDTH, PAUSE_CLOUD_PART_HEIGHT, 0, 0, 0, 0,
       0, 0, 0);
   DrawTextureRect(
@@ -810,20 +812,21 @@ void DrawPauseMenu(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  sPauseGlowAngle += M_PI / 18;
-  glowRed = (s32)(sinf(sPauseGlowAngle) * PAUSE_RED_WAVE_AMPLITUDE) +
+  f_PauseGlowAngle += M_PI / 18;
+  glowRed = (s32)(sinf(f_PauseGlowAngle) * PAUSE_RED_WAVE_AMPLITUDE) +
             PAUSE_RED_WAVE_MIDDLE;
-  glowGreen = (s32)(sinf(sPauseGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
+  glowGreen = (s32)(sinf(f_PauseGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
               COLOR_WAVE_MIDDLE;
-  glowBlue = (s32)(sinf(sPauseGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
+  glowBlue = (s32)(sinf(f_PauseGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
              COLOR_WAVE_MIDDLE;
   SetUpTextDrawing(&gfx);
-  for (i = 0, y = PAUSE_LABELS_TOP; i != sPauseLayoutOptionCounts[sPauseLayout];
+  for (i = 0, y = PAUSE_LABELS_TOP;
+       i != f_PauseLayoutOptionCounts[f_PauseLayout];
        i++, y += PAUSE_LABEL_SPACING) {
-    message = sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].message;
-    kind = sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].kind;
+    message = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].message;
+    kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind;
     red = PAUSE_LABEL_RED;
-    if (sPauseSelection == i) {
+    if (f_PauseSelection == i) {
       red = glowRed;
       green = glowGreen;
       blue = glowBlue;
@@ -831,9 +834,9 @@ void DrawPauseMenu(Gfx** displayListHead) {
       green = PAUSE_LABEL_GREEN;
       blue = PAUSE_LABEL_BLUE;
     }
-    if (sPauseOptions[sPauseLayoutOptions[sPauseLayout][i]].kind ==
+    if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
         PAUSE_OPTION_KIND_UNKD678) {
-      if (!sPauseMenuUnkD678) {
+      if (!f_PauseMenuUnkD678) {
         message = PAUSE_OPTION_UNKD678_OFF_MESSAGE;
       }
     }
@@ -845,41 +848,42 @@ void DrawPauseMenu(Gfx** displayListHead) {
       DrawLargeText(
           &gfx, PAUSE_VALUE_X, y,
           (s8)g_Players[g_CurrentShot.playerIndex].gridColor == GRID_COLOR_BLACK
-              ? sBlackText
-              : sWhiteText);
+              ? f_BlackText
+              : f_WhiteText);
     }
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       DrawLargeText(
           &gfx, PAUSE_VALUE_X, y,
-          g_HoleConditions.isRaining == TRUE ? sRainText : sClearText);
+          g_HoleConditions.isRaining == TRUE ? f_RainText : f_ClearText);
     }
   }
-  sPauseCursorAngle += M_PI / 12;
-  if (sPauseCursorAngle > M_PI) {
-    sPauseCursorAngle -= M_PI;
+  f_PauseCursorAngle += M_PI / 12;
+  if (f_PauseCursorAngle > M_PI) {
+    f_PauseCursorAngle -= M_PI;
   }
-  sway = sinf(sPauseCursorAngle) * PAUSE_CURSOR_SWAY;
+  sway = sinf(f_PauseCursorAngle) * PAUSE_CURSOR_SWAY;
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   teeFrame = sway >= PAUSE_TEE_LEAN_SWAY;
-  LoadSmallPalette(&gfx, 0, sPauseCursorImage + IMAGE_HEADER_SIZE);
+  LoadSmallPalette(&gfx, 0, f_PauseCursorImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(
-      gfx++, TEXTURE_ADDRESS(sPauseCursorImage + PALETTED_TEXELS_OFFSET),
+      gfx++, TEXTURE_ADDRESS(f_PauseCursorImage + PALETTED_TEXELS_OFFSET),
       G_IM_FMT_CI, PAUSE_CURSOR_SIZE, 0, 0, 0, PAUSE_CURSOR_SIZE - 1,
       PAUSE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
-  if (sPauseLayoutOptions[sPauseLayout][sPauseSelection] ==
+  if (f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection] ==
           PAUSE_OPTION_UNKD678 &&
-      !sPauseMenuUnkD678) {
+      !f_PauseMenuUnkD678) {
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0,
                       TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
   }
   selectedKind =
-      sPauseOptions[sPauseLayoutOptions[sPauseLayout][sPauseSelection]].kind;
+      f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
+          .kind;
   if (selectedKind == PAUSE_OPTION_KIND_WEATHER ||
       selectedKind == PAUSE_OPTION_KIND_GRID_COLOR ||
       selectedKind == PAUSE_OPTION_KIND_WIND_SPEED ||
@@ -887,9 +891,9 @@ void DrawPauseMenu(Gfx** displayListHead) {
       selectedKind == PAUSE_OPTION_KIND_LIE) {
     DrawTextureRect(
         &gfx, PAUSE_TEE_X * 4,
-        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
+        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
         PAUSE_CURSOR_RIGHT * 4,
-        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 +
+        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 +
          PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0, PAUSE_TEES_T + teeFrame * (PAUSE_CURSOR_SIZE << 5),
@@ -897,14 +901,14 @@ void DrawPauseMenu(Gfx** displayListHead) {
   } else {
     DrawTextureRect(
         &gfx, (PAUSE_TEE_X - sway) * 4,
-        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4) * 4,
+        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4) * 4,
         (PAUSE_CURSOR_RIGHT - sway) * 4,
-        (sPauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4 +
+        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4 +
          PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
-  sPauseMenuDrawnMarker = 0xFFFFFF;
+  f_PauseMenuDrawnMarker = 0xFFFFFF;
   *displayListHead = gfx;
 }
 #else
@@ -914,30 +918,30 @@ INCLUDE_ASM("asm/nonmatchings/ovl_00/pause_menu", DrawPauseMenu);
 void LoadChoiceBoxImages(void) {
   EncodedAsset asset;
 
-  sChoiceBoxCursorImage =
+  f_ChoiceBoxCursorImage =
       AllocMemory(OpenEncodedAsset(PAUSE_CURSOR_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(sChoiceBoxCursorImage, &asset);
-  sMenuCloudImage =
+  ReadEncodedAsset(f_ChoiceBoxCursorImage, &asset);
+  f_MenuCloudImage =
       AllocMemory(OpenEncodedAsset(CHOICE_BOX_CLOUD_IMAGE_ASSET, &asset));
-  ReadEncodedAsset(sMenuCloudImage, &asset);
+  ReadEncodedAsset(f_MenuCloudImage, &asset);
 }
 
 void FreeChoiceBoxImages(void) {
-  FreeMemory(&sChoiceBoxCursorImage);
-  FreeMemory(&sMenuCloudImage);
+  FreeMemory(&f_ChoiceBoxCursorImage);
+  FreeMemory(&f_MenuCloudImage);
 }
 
 /* Opens the choice box of the given index, or closes the box with
  * CHOICE_BOX_CLOSED */
 void OpenChoiceBox(s32 choiceBoxIndex) {
-  sChoiceBoxIndex = choiceBoxIndex;
+  f_ChoiceBoxIndex = choiceBoxIndex;
   if (choiceBoxIndex == CHOICE_BOX_CLOSED) {
-    sChoiceBoxState = choiceBoxIndex;
+    f_ChoiceBoxState = choiceBoxIndex;
     FreeChoiceBoxImages();
     PlaySound(CHOICE_BOX_CLOSE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
   } else {
-    sChoiceBoxSelection = 0;
-    sChoiceBoxState = CHOICE_BOX_CHOOSING;
+    f_ChoiceBoxSelection = 0;
+    f_ChoiceBoxState = CHOICE_BOX_CHOOSING;
     LoadChoiceBoxImages();
     PlaySound(CHOICE_BOX_OPEN_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
   }
@@ -946,33 +950,33 @@ void OpenChoiceBox(s32 choiceBoxIndex) {
 /* Moves the choice box's selection, and returns the chosen option's result once
  * the box closes */
 s32 UpdateChoiceBox(ControllerState* controller) {
-  ChoiceBox* box = &sChoiceBoxes[sChoiceBoxIndex];
+  ChoiceBox* box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
 
-  if (sChoiceBoxIndex == CHOICE_BOX_CLOSED) {
+  if (f_ChoiceBoxIndex == CHOICE_BOX_CLOSED) {
     return -1;
   }
-  switch (sChoiceBoxState) {
+  switch (f_ChoiceBoxState) {
     case CHOICE_BOX_CHOSEN:
-      sChoiceBoxState = CHOICE_BOX_CLOSING;
+      f_ChoiceBoxState = CHOICE_BOX_CLOSING;
       return -1;
     case CHOICE_BOX_CLOSING:
       OpenChoiceBox(CHOICE_BOX_CLOSED);
-      return box->results[sChoiceBoxSelection];
+      return box->results[f_ChoiceBoxSelection];
     case CHOICE_BOX_CHOOSING:
       if (controller->pressedButtons == A_BUTTON) {
         PlaySound(CHOICE_BOX_CHOOSE_SOUND, g_NextSoundChannel,
                   MENU_SOUND_VOLUME);
-        sChoiceBoxState = CHOICE_BOX_CHOSEN;
+        f_ChoiceBoxState = CHOICE_BOX_CHOSEN;
         return -1;
       }
       if (!box->isVertical) {
         if (controller->repeatedButtons & L_JPAD) {
-          sChoiceBoxSelection--;
+          f_ChoiceBoxSelection--;
           PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
                     MENU_SOUND_VOLUME);
         }
         if (controller->repeatedButtons & R_JPAD) {
-          sChoiceBoxSelection++;
+          f_ChoiceBoxSelection++;
           PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
                     MENU_SOUND_VOLUME);
         }
@@ -980,19 +984,19 @@ s32 UpdateChoiceBox(ControllerState* controller) {
         if (controller->repeatedButtons & U_JPAD) {
           PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
                     MENU_SOUND_VOLUME);
-          sChoiceBoxSelection--;
+          f_ChoiceBoxSelection--;
         }
         if (controller->repeatedButtons & D_JPAD) {
           PlaySound(CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel,
                     MENU_SOUND_VOLUME);
-          sChoiceBoxSelection++;
+          f_ChoiceBoxSelection++;
         }
       }
-      if (sChoiceBoxSelection > box->optionCount - 1) {
-        sChoiceBoxSelection = 0;
+      if (f_ChoiceBoxSelection > box->optionCount - 1) {
+        f_ChoiceBoxSelection = 0;
       }
-      if (sChoiceBoxSelection < 0) {
-        sChoiceBoxSelection = box->optionCount - 1;
+      if (f_ChoiceBoxSelection < 0) {
+        f_ChoiceBoxSelection = box->optionCount - 1;
       }
       return -1;
   }
@@ -1002,7 +1006,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
 #ifdef NON_MATCHING
 void DrawChoiceBox(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  ChoiceBox* box = &sChoiceBoxes[sChoiceBoxIndex];
+  ChoiceBox* box = &f_ChoiceBoxes[f_ChoiceBoxIndex];
   s32 halfWidth;
   s32 red;
   s32 green;
@@ -1015,16 +1019,16 @@ void DrawChoiceBox(Gfx** displayListHead) {
   s32 labelsTop;
   s16 labelY;
 
-  sChoiceGlowAngle += M_PI / 18;
+  f_ChoiceGlowAngle += M_PI / 18;
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
   red =
-      (s32)(sinf(sChoiceGlowAngle) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
-  blue = (s32)(sinf(sChoiceGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
+      (s32)(sinf(f_ChoiceGlowAngle) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
+  blue = (s32)(sinf(f_ChoiceGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
          COLOR_WAVE_MIDDLE;
-  green = (s32)(sinf(sChoiceGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
+  green = (s32)(sinf(f_ChoiceGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
           COLOR_WAVE_MIDDLE;
   textWidth = 0;
-  if (sChoiceBoxIndex != CHOICE_BOX_CLOSED) {
+  if (f_ChoiceBoxIndex != CHOICE_BOX_CLOSED) {
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, 0x1F, 0x1F, 0x1F, 0xBF);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xBF);
@@ -1035,7 +1039,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     for (i = 0; i != box->optionCount; i++) {
-      labelWidth = MeasureText(sChoiceBoxLabels[box->labels[i]],
+      labelWidth = MeasureText(f_ChoiceBoxLabels[box->labels[i]],
                                FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
       if (textWidth < labelWidth) {
         textWidth = labelWidth;
@@ -1045,7 +1049,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
     for (i = 0; i != CHOICE_BOX_CLOUD_PART_COUNT; i++) {
       LoadNibbleTextureBlock(
           &gfx,
-          sMenuCloudImage + IMAGE_HEADER_SIZE + i * CHOICE_BOX_CLOUD_PART_SIZE,
+          f_MenuCloudImage + IMAGE_HEADER_SIZE + i * CHOICE_BOX_CLOUD_PART_SIZE,
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       DrawTextureRect(
@@ -1061,7 +1065,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
                   (box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2);
       for (i = 0, labelY = labelsTop; i != box->optionCount;
            i++, labelY += CHOICE_LABEL_SPACING) {
-        if (i == sChoiceBoxSelection) {
+        if (i == f_ChoiceBoxSelection) {
           gDPPipeSync(gfx++);
           gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
           gDPPipeSync(gfx++);
@@ -1071,28 +1075,28 @@ void DrawChoiceBox(Gfx** displayListHead) {
           gDPPipeSync(gfx++);
         }
         DrawCenteredLargeText(&gfx, CHOICE_BOX_CENTER_X, labelY,
-                              sChoiceBoxLabels[box->labels[i]]);
+                              f_ChoiceBoxLabels[box->labels[i]]);
       }
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
       gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-      sChoiceCursorAngle += M_PI / 12;
-      if (sChoiceCursorAngle > M_PI) {
-        sChoiceCursorAngle -= M_PI;
+      f_ChoiceCursorAngle += M_PI / 12;
+      if (f_ChoiceCursorAngle > M_PI) {
+        f_ChoiceCursorAngle -= M_PI;
       }
       labelWidth =
-          MeasureText(sChoiceBoxLabels[box->labels[sChoiceBoxSelection]],
+          MeasureText(f_ChoiceBoxLabels[box->labels[f_ChoiceBoxSelection]],
                       FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
-      cursorX = (s32)(sinf(sChoiceCursorAngle) * CHOICE_CURSOR_SWAY) +
+      cursorX = (s32)(sinf(f_ChoiceCursorAngle) * CHOICE_CURSOR_SWAY) +
                 CHOICE_CURSOR_X;
       cursorX -= textWidth / 2;
-      LoadSmallPalette(&gfx, 0, sChoiceBoxCursorImage + IMAGE_HEADER_SIZE);
-      cursorY = labelsTop + sChoiceBoxSelection * CHOICE_LABEL_SPACING;
+      LoadSmallPalette(&gfx, 0, f_ChoiceBoxCursorImage + IMAGE_HEADER_SIZE);
+      cursorY = labelsTop + f_ChoiceBoxSelection * CHOICE_LABEL_SPACING;
       gDPLoadTextureTile_4b(
           gfx++,
-          TEXTURE_ADDRESS(sChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
+          TEXTURE_ADDRESS(f_ChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,
           CHOICE_CURSOR_LOADED_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&gfx, cursorX << 2, (cursorY - 2) << 2,

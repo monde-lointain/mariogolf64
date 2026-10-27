@@ -21,7 +21,7 @@
  * every club.
  */
 
-/* sClubSlotsState values */
+/* f_ClubSlotsState values */
 #define CLUB_SLOTS_DONE 0
 #define CLUB_SLOTS_STARTING 1 /* Before the reels speed up */
 #define CLUB_SLOTS_SPEEDING 2 /* The reels speed up while START! grows */
@@ -54,7 +54,7 @@
  * its right */
 #define REEL_SPEED_STEP 0.5f
 #define MAX_REEL_SPEED DEGREES_TO_RADIANS(18)
-/* A reel clicks each time sTickTime reaches this */
+/* A reel clicks each time f_TickTime reaches this */
 #define REEL_TICK_TIME 8
 
 /*
@@ -108,7 +108,7 @@
 #define START_STRIP_HEIGHT 12
 #define START_LAST_STRIP_HEIGHT 4
 #define START_SHOWN_HEIGHT 50
-/* START! grows as sStartAngle turns this far each frame, up to START_MAX_ANGLE
+/* START! grows as f_StartAngle turns this far each frame, up to START_MAX_ANGLE
  */
 #define START_ANGLE_STEP DEGREES_TO_RADIANS(20)
 #define START_MAX_ANGLE DEGREES_TO_RADIANS(120)
@@ -170,7 +170,7 @@
 #define SHINE_ASSET 0x6A4
 
 typedef struct ClubSlots {
-  /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into sReelStrips */
+  /* 0x00 */ s32 reelPositions[REEL_COUNT]; /* Indices into f_ReelStrips */
   /* 0x0C */ s32
       stoppedSymbols[REEL_COUNT]; /* NO_SYMBOL until the reel stops */
   /* 0x18 */ s32 stoppedReelCount;
@@ -193,47 +193,47 @@ void SetFramebufferCount(s32 count);
 void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
                        f32 scale);
 
-/* The faces of the characters, by row of sCharacterFaceRows, after three stars
+/* The faces of the characters, by row of f_CharacterFaceRows, after three stars
  * and after fewer */
 extern u16 D_800C2650[][FACE_FRAME_COUNT];
 extern u16 D_800C2780[][FACE_FRAME_COUNT];
 /* The faces of the players and their palettes */
 
-extern Mtx sReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
-extern Mtx sShadeMatrix;
-extern ClubSlots* sSlots;
-extern u8 sLogoImage[];
-extern u8 sShineImage[];
+extern Mtx f_ReelMatrices[REEL_COUNT][DRAW_BUFFER_COUNT];
+extern Mtx f_ShadeMatrix;
+extern ClubSlots* f_Slots;
+extern u8 f_LogoImage[];
+extern u8 f_ShineImage[];
 
-static s32 sClubSlotsState = CLUB_SLOTS_DONE;
-static u8 sFaceBufferIndex = 0;
-static u8 sFaceFrameIndex = 0;
-static u8 sFaceFrameTime = 0;
-static u8 sFaceHoldCount = 0;
-static u8 sIsShowingResult = FALSE;
-static s16 sStarCount = 0;
+static s32 f_ClubSlotsState = CLUB_SLOTS_DONE;
+static u8 f_FaceBufferIndex = 0;
+static u8 f_FaceFrameIndex = 0;
+static u8 f_FaceFrameTime = 0;
+static u8 f_FaceHoldCount = 0;
+static u8 f_IsShowingResult = FALSE;
+static s16 f_StarCount = 0;
 /* The rows of D_800C2650 and D_800C2780 by character */
-static s16 sCharacterFaceRows[CLUB_SET_COUNT] = {
+static s16 f_CharacterFaceRows[CLUB_SET_COUNT] = {
     0, 1, 10, 3, 4, 2, 6, 7, 8, 9, 5, 11, 12, 13, 14, 15, 16, 17,
 };
-static u8 sReelStrips[REEL_COUNT][REEL_SYMBOL_COUNT] = {
+static u8 f_ReelStrips[REEL_COUNT][REEL_SYMBOL_COUNT] = {
     {0, 2, 1, 13, 0, 2, 1, 13, 0, 1, 0, 2, 13, 1, 13, 0, 2, 0, 1, 13},
     {5, 7, 4, 6, 3, 13, 5, 7, 4, 6, 5, 7, 13, 3, 4, 3, 13, 5, 3, 4},
     {10, 12, 13, 9, 11, 8, 13, 10, 13, 12, 9, 11, 13, 9, 13, 13, 12, 11, 8, 13},
 };
-static u16 sSymbolAssets[SYMBOL_COUNT] = {
+static u16 f_SymbolAssets[SYMBOL_COUNT] = {
     0x583, 0x584, 0x585, 0x586, 0x587, 0x588, 0x589,
     0x58A, 0x58B, 0x58C, 0x58D, 0x58E, 0x58F, 0x582,
 };
-static s32 sStateTime = 0;
-static s32 sStopWaitTime = 0;
-static s32 sTickTime = 0;
-static f32 sStartAngle = 0.0f;
+static s32 f_StateTime = 0;
+static s32 f_StopWaitTime = 0;
+static s32 f_TickTime = 0;
+static f32 f_StartAngle = 0.0f;
 s32 g_ClubSlotsUnusedWord = 0; /* Nothing reads or writes it */
-static s32 sShineTime = 0;
-static f32 sLogoBobAngle = 0.0f;
-static f32 sLogoBob = 0.0f;
-static s32 sLogoUnusedWord = 0; /* Only ever cleared */
+static s32 f_ShineTime = 0;
+static f32 f_LogoBobAngle = 0.0f;
+static f32 f_LogoBob = 0.0f;
+static s32 f_LogoUnusedWord = 0; /* Only ever cleared */
 
 void LoadClubSlots(void) {
   EncodedAsset asset;
@@ -241,98 +241,99 @@ void LoadClubSlots(void) {
   s32 row;
   f32 angle;
 
-  sSlots = AllocMemory(sizeof(ClubSlots));
+  f_Slots = AllocMemory(sizeof(ClubSlots));
   SetMenuBackdrop(MENU_BACKDROP_STILL);
-  sSlots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
-  sSlots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
-  sSlots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
+  f_Slots->reelVertices = AllocMemory(REEL_VERTEX_BUFFER_SIZE);
+  f_Slots->shadeVertices = AllocMemory(SHADE_VERTEX_COUNT * sizeof(Vtx));
+  f_Slots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
   for (index = 0; index != SYMBOL_COUNT; index++) {
-    ReadEncodedAsset(sSlots->symbolImages +
-                         OpenEncodedAsset(sSymbolAssets[index], &asset) * index,
-                     &asset);
+    ReadEncodedAsset(
+        f_Slots->symbolImages +
+            OpenEncodedAsset(f_SymbolAssets[index], &asset) * index,
+        &asset);
   }
-  sSlots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
-  ReadEncodedAsset(sSlots->machineImage, &asset);
-  sSlots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
-  ReadEncodedAsset(sSlots->buttonsImage, &asset);
-  sSlots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
-  ReadEncodedAsset(sSlots->startImage, &asset);
+  f_Slots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
+  ReadEncodedAsset(f_Slots->machineImage, &asset);
+  f_Slots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
+  ReadEncodedAsset(f_Slots->buttonsImage, &asset);
+  f_Slots->startImage = AllocMemory(OpenEncodedAsset(START_ASSET, &asset));
+  ReadEncodedAsset(f_Slots->startImage, &asset);
   for (index = 0; index != g_GameState.playerCount; index++) {
-    row = sCharacterFaceRows[(s8)g_Players[index].characterIndex];
-    sSlots->faceImages[index][0] =
+    row = f_CharacterFaceRows[(s8)g_Players[index].characterIndex];
+    f_Slots->faceImages[index][0] =
         AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
-    ReadEncodedAsset(sSlots->faceImages[index][0], &asset);
-    sSlots->faceImages[index][1] =
+    ReadEncodedAsset(f_Slots->faceImages[index][0], &asset);
+    f_Slots->faceImages[index][1] =
         AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
-    ReadEncodedAsset(sSlots->faceImages[index][1], &asset);
+    ReadEncodedAsset(f_Slots->faceImages[index][1], &asset);
   }
-  sFaceBufferIndex = 0;
-  sFaceFrameIndex = 0;
-  sFaceFrameTime = 0;
-  sFaceHoldCount = 0;
-  sIsShowingResult = FALSE;
-  sStarCount = 0;
+  f_FaceBufferIndex = 0;
+  f_FaceFrameIndex = 0;
+  f_FaceFrameTime = 0;
+  f_FaceHoldCount = 0;
+  f_IsShowingResult = FALSE;
+  f_StarCount = 0;
   OpenEncodedAsset(LOGO_ASSET, &asset);
-  ReadEncodedAsset(sLogoImage, &asset);
+  ReadEncodedAsset(f_LogoImage, &asset);
   OpenEncodedAsset(SHINE_ASSET, &asset);
-  ReadEncodedAsset(sShineImage, &asset);
-  sSlots->reelPositions[0] = guRandom() % REEL_SYMBOL_COUNT;
-  sSlots->reelPositions[1] = guRandom() % REEL_SYMBOL_COUNT;
-  sSlots->reelPositions[2] = guRandom() % REEL_SYMBOL_COUNT;
-  sClubSlotsState = CLUB_SLOTS_STARTING;
-  sSlots->stoppedSymbols[0] = NO_SYMBOL;
-  sSlots->stoppedSymbols[1] = NO_SYMBOL;
-  sSlots->stoppedSymbols[2] = NO_SYMBOL;
-  sSlots->stoppedReelCount = 0;
-  sSlots->reelAngles[0] = DEGREES_TO_RADIANS(10);
-  sSlots->reelAngles[1] = DEGREES_TO_RADIANS(20);
-  sSlots->reelAngles[2] = DEGREES_TO_RADIANS(30);
-  sSlots->reelSpeeds[0] = DEGREES_TO_RADIANS(4);
-  sSlots->reelSpeeds[1] = DEGREES_TO_RADIANS(2);
-  sSlots->reelSpeeds[2] = 0;
-  sSlots->pressCount = 0;
-  sSlots->playerIndex = 0;
+  ReadEncodedAsset(f_ShineImage, &asset);
+  f_Slots->reelPositions[0] = guRandom() % REEL_SYMBOL_COUNT;
+  f_Slots->reelPositions[1] = guRandom() % REEL_SYMBOL_COUNT;
+  f_Slots->reelPositions[2] = guRandom() % REEL_SYMBOL_COUNT;
+  f_ClubSlotsState = CLUB_SLOTS_STARTING;
+  f_Slots->stoppedSymbols[0] = NO_SYMBOL;
+  f_Slots->stoppedSymbols[1] = NO_SYMBOL;
+  f_Slots->stoppedSymbols[2] = NO_SYMBOL;
+  f_Slots->stoppedReelCount = 0;
+  f_Slots->reelAngles[0] = DEGREES_TO_RADIANS(10);
+  f_Slots->reelAngles[1] = DEGREES_TO_RADIANS(20);
+  f_Slots->reelAngles[2] = DEGREES_TO_RADIANS(30);
+  f_Slots->reelSpeeds[0] = DEGREES_TO_RADIANS(4);
+  f_Slots->reelSpeeds[1] = DEGREES_TO_RADIANS(2);
+  f_Slots->reelSpeeds[2] = 0;
+  f_Slots->pressCount = 0;
+  f_Slots->playerIndex = 0;
   for (index = 0; index != REEL_EDGE_COUNT; index++) {
-    sSlots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
-    sSlots->reelVertices[index * 2 + 1].v.ob[0] = REEL_HALF_WIDTH;
+    f_Slots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
+    f_Slots->reelVertices[index * 2 + 1].v.ob[0] = REEL_HALF_WIDTH;
     angle = DEGREES_TO_RADIANS((f32)((index - 1) * REEL_EDGE_SPACING));
-    sSlots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
-    sSlots->reelVertices[index * 2 + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
-    sSlots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
-    sSlots->reelVertices[index * 2 + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
-    sSlots->reelVertices[index * 2].v.cn[0] = 0xFF;
-    sSlots->reelVertices[index * 2 + 1].v.cn[0] = 0xFF;
-    sSlots->reelVertices[index * 2].v.cn[1] = 0xFF;
-    sSlots->reelVertices[index * 2 + 1].v.cn[1] = 0xFF;
-    sSlots->reelVertices[index * 2].v.cn[2] = 0xFF;
-    sSlots->reelVertices[index * 2 + 1].v.cn[2] = 0xFF;
-    sSlots->reelVertices[index * 2].v.cn[3] = 0xFF;
-    sSlots->reelVertices[index * 2 + 1].v.cn[3] = 0xFF;
+    f_Slots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2 + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2 + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[index * 2].v.cn[0] = 0xFF;
+    f_Slots->reelVertices[index * 2 + 1].v.cn[0] = 0xFF;
+    f_Slots->reelVertices[index * 2].v.cn[1] = 0xFF;
+    f_Slots->reelVertices[index * 2 + 1].v.cn[1] = 0xFF;
+    f_Slots->reelVertices[index * 2].v.cn[2] = 0xFF;
+    f_Slots->reelVertices[index * 2 + 1].v.cn[2] = 0xFF;
+    f_Slots->reelVertices[index * 2].v.cn[3] = 0xFF;
+    f_Slots->reelVertices[index * 2 + 1].v.cn[3] = 0xFF;
   }
   for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
     if (index & 2) {
-      sSlots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
+      f_Slots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
     } else {
-      sSlots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
+      f_Slots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
     }
-    sSlots->shadeVertices[index].v.ob[2] = SHADE_Z;
-    sSlots->shadeVertices[index].v.cn[0] = 0;
-    sSlots->shadeVertices[index].v.cn[1] = 0;
-    sSlots->shadeVertices[index].v.cn[2] = 0;
-    sSlots->shadeVertices[index].v.cn[3] = 0;
+    f_Slots->shadeVertices[index].v.ob[2] = SHADE_Z;
+    f_Slots->shadeVertices[index].v.cn[0] = 0;
+    f_Slots->shadeVertices[index].v.cn[1] = 0;
+    f_Slots->shadeVertices[index].v.cn[2] = 0;
+    f_Slots->shadeVertices[index].v.cn[3] = 0;
   }
-  sSlots->shadeVertices[0].v.ob[1] = 48;
-  sSlots->shadeVertices[1].v.ob[1] = 16;
-  sSlots->shadeVertices[2].v.ob[1] = 16;
-  sSlots->shadeVertices[3].v.ob[1] = 48;
-  sSlots->shadeVertices[4].v.ob[1] = -16;
-  sSlots->shadeVertices[5].v.ob[1] = -48;
-  sSlots->shadeVertices[6].v.ob[1] = -48;
-  sSlots->shadeVertices[7].v.ob[1] = -16;
-  sSlots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
-  sSlots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
-  sSlots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
-  sSlots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
+  f_Slots->shadeVertices[0].v.ob[1] = 48;
+  f_Slots->shadeVertices[1].v.ob[1] = 16;
+  f_Slots->shadeVertices[2].v.ob[1] = 16;
+  f_Slots->shadeVertices[3].v.ob[1] = 48;
+  f_Slots->shadeVertices[4].v.ob[1] = -16;
+  f_Slots->shadeVertices[5].v.ob[1] = -48;
+  f_Slots->shadeVertices[6].v.ob[1] = -48;
+  f_Slots->shadeVertices[7].v.ob[1] = -16;
+  f_Slots->shadeVertices[0].v.cn[3] = SHADE_ALPHA;
+  f_Slots->shadeVertices[3].v.cn[3] = SHADE_ALPHA;
+  f_Slots->shadeVertices[5].v.cn[3] = SHADE_ALPHA;
+  f_Slots->shadeVertices[6].v.cn[3] = SHADE_ALPHA;
   PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
 }
 
@@ -342,17 +343,17 @@ void FreeClubSlots(void) {
   SetMenuBackdrop(MENU_BACKDROP_NONE);
   SetFramebufferCount(3);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
-  FreeMemory(&sSlots->symbolImages);
-  FreeMemory(&sSlots->machineImage);
-  FreeMemory(&sSlots->buttonsImage);
-  FreeMemory(&sSlots->startImage);
-  FreeMemory(&sSlots->reelVertices);
-  FreeMemory(&sSlots->shadeVertices);
+  FreeMemory(&f_Slots->symbolImages);
+  FreeMemory(&f_Slots->machineImage);
+  FreeMemory(&f_Slots->buttonsImage);
+  FreeMemory(&f_Slots->startImage);
+  FreeMemory(&f_Slots->reelVertices);
+  FreeMemory(&f_Slots->shadeVertices);
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
-    FreeMemory(&sSlots->faceImages[playerIndex][0]);
-    FreeMemory(&sSlots->faceImages[playerIndex][1]);
+    FreeMemory(&f_Slots->faceImages[playerIndex][0]);
+    FreeMemory(&f_Slots->faceImages[playerIndex][1]);
   }
-  FreeMemory(&sSlots);
+  FreeMemory(&f_Slots);
 }
 
 /* Fills the player's bag from the stopped reels */
@@ -372,13 +373,13 @@ void GiveSlotClubs(s32 playerIndex) {
   }
   player->clubs[CLUB_TYPE_PUTTER] =
       (s8)player->characterIndex * CLUB_SET_SIZE + CLUB_TYPE_PUTTER;
-  sStarCount = 0;
+  f_StarCount = 0;
   for (index = 0; index != REEL_COUNT; index++) {
-    symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
+    symbolIndex = f_Slots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
     if (symbolIndex < 0) {
       symbolIndex += REEL_SYMBOL_COUNT;
     }
-    symbol = sReelStrips[index][symbolIndex];
+    symbol = f_ReelStrips[index][symbolIndex];
     if (symbol != SYMBOL_STAR) {
       if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
         player->clubs[symbol] =
@@ -391,7 +392,7 @@ void GiveSlotClubs(s32 playerIndex) {
       }
     } else {
       starCount++;
-      sStarCount++;
+      f_StarCount++;
     }
   }
   if (starCount == REEL_COUNT) {
@@ -412,9 +413,9 @@ void GiveSlotClubs(s32 playerIndex) {
  * player's unk1E is set, or while GAME_FLAG_UNK32 is. It is a macro, as
  * an inline function compiles differently from the original.
  */
-#define IsReelStopping(controllerIndex, player)                              \
-  ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) ||        \
-   (sStopWaitTime > REEL_STOP_WAIT_TIME) || ((s8)(player)->unk1E[0] != 0) || \
+#define IsReelStopping(controllerIndex, player)                               \
+  ((g_ControllerStates[controllerIndex].pressedButtons & A_BUTTON) ||         \
+   (f_StopWaitTime > REEL_STOP_WAIT_TIME) || ((s8)(player)->unk1E[0] != 0) || \
    IsGameFlagSet(GAME_FLAG_UNK32))
 
 /* Returns TRUE once every player has spun */
@@ -422,28 +423,28 @@ s32 UpdateClubSlots(void) {
   UnkB8* player;
   s32 controllerIndex;
 
-  player = &g_Players[sSlots->playerIndex];
-  if (sIsShowingResult != FALSE) {
+  player = &g_Players[f_Slots->playerIndex];
+  if (f_IsShowingResult != FALSE) {
     return FALSE;
   }
-  if (sSlots->playerIndex == g_GameState.playerCount) {
-    sClubSlotsState = CLUB_SLOTS_DONE;
+  if (f_Slots->playerIndex == g_GameState.playerCount) {
+    f_ClubSlotsState = CLUB_SLOTS_DONE;
     return TRUE;
   }
-  switch (sClubSlotsState) {
+  switch (f_ClubSlotsState) {
     case CLUB_SLOTS_STARTING:
-      if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
-        sStateTime = 0;
-        sClubSlotsState = CLUB_SLOTS_SPEEDING;
+      if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
+        f_StateTime = 0;
+        f_ClubSlotsState = CLUB_SLOTS_SPEEDING;
         PlaySound(SOUND_REELS_START, g_NextSoundChannel,
                   CLUB_SLOTS_SOUND_VOLUME);
       }
       break;
     case CLUB_SLOTS_SPEEDING:
-      if (++sStateTime == CLUB_SLOTS_STATE_TIME) {
-        sStateTime = 0;
-        sClubSlotsState = CLUB_SLOTS_STOPPING;
-        sStopWaitTime = 0;
+      if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
+        f_StateTime = 0;
+        f_ClubSlotsState = CLUB_SLOTS_STOPPING;
+        f_StopWaitTime = 0;
       }
       break;
     case CLUB_SLOTS_STOPPING:
@@ -452,30 +453,30 @@ s32 UpdateClubSlots(void) {
       } else {
         controllerIndex = player->controllerIndex;
       }
-      sStopWaitTime++;
-      if (sSlots->pressCount < REEL_COUNT) {
+      f_StopWaitTime++;
+      if (f_Slots->pressCount < REEL_COUNT) {
         if (IsReelStopping(controllerIndex, player)) {
-          sStopWaitTime = 0;
+          f_StopWaitTime = 0;
           PlaySoundWithEffects(SOUND_REEL_STOP, g_NextSoundChannel,
                                CLUB_SLOTS_SOUND_VOLUME, 0,
-                               sSlots->pressCount++ * REEL_STOP_PAN_STEP);
+                               f_Slots->pressCount++ * REEL_STOP_PAN_STEP);
         }
-      } else if (sSlots->stoppedReelCount == REEL_COUNT) {
-        sClubSlotsState = CLUB_SLOTS_STOPPED;
-        sSlots->resultTime = 0;
+      } else if (f_Slots->stoppedReelCount == REEL_COUNT) {
+        f_ClubSlotsState = CLUB_SLOTS_STOPPED;
+        f_Slots->resultTime = 0;
       }
       break;
     case CLUB_SLOTS_STOPPED:
-      if (++sSlots->resultTime == CLUB_SLOTS_RESULT_DELAY) {
-        GiveSlotClubs(sSlots->playerIndex);
-        sIsShowingResult = TRUE;
-        if (sSlots->playerIndex + 1 != g_GameState.playerCount) {
-          sClubSlotsState = CLUB_SLOTS_STARTING;
-          sSlots->pressCount = 0;
-          sSlots->stoppedReelCount = 0;
-          sSlots->stoppedSymbols[0] = NO_SYMBOL;
-          sSlots->stoppedSymbols[1] = NO_SYMBOL;
-          sSlots->stoppedSymbols[2] = NO_SYMBOL;
+      if (++f_Slots->resultTime == CLUB_SLOTS_RESULT_DELAY) {
+        GiveSlotClubs(f_Slots->playerIndex);
+        f_IsShowingResult = TRUE;
+        if (f_Slots->playerIndex + 1 != g_GameState.playerCount) {
+          f_ClubSlotsState = CLUB_SLOTS_STARTING;
+          f_Slots->pressCount = 0;
+          f_Slots->stoppedReelCount = 0;
+          f_Slots->stoppedSymbols[0] = NO_SYMBOL;
+          f_Slots->stoppedSymbols[1] = NO_SYMBOL;
+          f_Slots->stoppedSymbols[2] = NO_SYMBOL;
           PlaySound(SOUND_CLUB_SLOTS_TURN, g_NextSoundChannel,
                     CLUB_SLOTS_SOUND_VOLUME);
         }
@@ -485,7 +486,7 @@ s32 UpdateClubSlots(void) {
   return FALSE;
 }
 
-s32 GetClubSlotsState(void) { return sClubSlotsState; }
+s32 GetClubSlotsState(void) { return f_ClubSlotsState; }
 
 #ifdef NON_MATCHING
 void DrawClubSlots(Gfx** displayListHead) {
@@ -515,67 +516,68 @@ void DrawClubSlots(Gfx** displayListHead) {
   gfx = *displayListHead;
   isStripLoaded = FALSE;
   for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
-    if (reelIndex < sSlots->pressCount) {
-      if (sSlots->stoppedSymbols[reelIndex] == NO_SYMBOL) {
+    if (reelIndex < f_Slots->pressCount) {
+      if (f_Slots->stoppedSymbols[reelIndex] == NO_SYMBOL) {
         if (reelIndex == LAST_REEL) {
-          sTickTime++;
+          f_TickTime++;
         }
-        if (sSlots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
-          sSlots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
-          if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-            sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
-            sSlots->reelPositions[reelIndex]++;
-            if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
-              sSlots->reelPositions[reelIndex] = 0;
+        if (f_Slots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
+          f_Slots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
+          if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
+            f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
+            f_Slots->reelPositions[reelIndex]++;
+            if (f_Slots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
+              f_Slots->reelPositions[reelIndex] = 0;
             }
             symbolIndex =
-                sSlots->reelPositions[reelIndex] - SHOWN_SYMBOL_OFFSET;
+                f_Slots->reelPositions[reelIndex] - SHOWN_SYMBOL_OFFSET;
             if (symbolIndex < 0) {
               symbolIndex += REEL_SYMBOL_COUNT;
             }
             /* The last reel stops on a star only after two others */
             if (reelIndex == LAST_REEL) {
-              if (sSlots->stoppedReelCount == reelIndex) {
-                if (sSlots->stoppedSymbols[0] == SYMBOL_STAR &&
-                    sSlots->stoppedSymbols[1] == SYMBOL_STAR) {
-                  if (sReelStrips[LAST_REEL][symbolIndex] == SYMBOL_STAR) {
-                    sSlots->stoppedSymbols[LAST_REEL] = SYMBOL_STAR;
-                    sSlots->stoppedReelCount++;
+              if (f_Slots->stoppedReelCount == reelIndex) {
+                if (f_Slots->stoppedSymbols[0] == SYMBOL_STAR &&
+                    f_Slots->stoppedSymbols[1] == SYMBOL_STAR) {
+                  if (f_ReelStrips[LAST_REEL][symbolIndex] == SYMBOL_STAR) {
+                    f_Slots->stoppedSymbols[LAST_REEL] = SYMBOL_STAR;
+                    f_Slots->stoppedReelCount++;
                   }
-                } else if (sReelStrips[reelIndex][symbolIndex] != SYMBOL_STAR) {
-                  sSlots->stoppedSymbols[reelIndex] =
-                      sReelStrips[reelIndex][symbolIndex];
-                  sSlots->stoppedReelCount++;
+                } else if (f_ReelStrips[reelIndex][symbolIndex] !=
+                           SYMBOL_STAR) {
+                  f_Slots->stoppedSymbols[reelIndex] =
+                      f_ReelStrips[reelIndex][symbolIndex];
+                  f_Slots->stoppedReelCount++;
                 }
               }
             } else {
-              sSlots->stoppedSymbols[reelIndex] =
-                  sReelStrips[reelIndex][symbolIndex];
-              sSlots->stoppedReelCount++;
+              f_Slots->stoppedSymbols[reelIndex] =
+                  f_ReelStrips[reelIndex][symbolIndex];
+              f_Slots->stoppedReelCount++;
             }
-            sTickTime = 0;
+            f_TickTime = 0;
           }
         }
       }
     } else {
       if (reelIndex == LAST_REEL) {
-        sTickTime += 2;
+        f_TickTime += 2;
       }
-      sSlots->reelAngles[reelIndex] += sSlots->reelSpeeds[reelIndex];
-      sSlots->reelSpeeds[reelIndex] +=
+      f_Slots->reelAngles[reelIndex] += f_Slots->reelSpeeds[reelIndex];
+      f_Slots->reelSpeeds[reelIndex] +=
           DEGREES_TO_RADIANS((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
-      if (sSlots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
-        sSlots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
+      if (f_Slots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
+        f_Slots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
       }
-      if (sSlots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
-        sSlots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
-        sSlots->reelPositions[reelIndex]++;
-        if (sSlots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
-          sSlots->reelPositions[reelIndex] = 0;
+      if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
+        f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
+        f_Slots->reelPositions[reelIndex]++;
+        if (f_Slots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
+          f_Slots->reelPositions[reelIndex] = 0;
         }
       }
     }
-    rotation[0] = sSlots->reelAngles[reelIndex];
+    rotation[0] = f_Slots->reelAngles[reelIndex];
     rotation[1] = 0;
     rotation[2] = 0;
     translation[0] = reelIndex * REEL_SPACING + FIRST_REEL_X;
@@ -586,11 +588,11 @@ void DrawClubSlots(Gfx** displayListHead) {
     scale[2] = REEL_SCALE;
     BuildTransformMatrix(matrix, rotation, translation, scale);
     ConvertMatrixToFixed(matrix,
-                         &sReelMatrices[reelIndex][g_MatrixBufferIndex]);
+                         &f_ReelMatrices[reelIndex][g_MatrixBufferIndex]);
   }
   gDPPipeSync(gfx++);
-  sTickTime %= REEL_TICK_TIME;
-  if (sSlots->stoppedReelCount < REEL_COUNT && sTickTime == 0) {
+  f_TickTime %= REEL_TICK_TIME;
+  if (f_Slots->stoppedReelCount < REEL_COUNT && f_TickTime == 0) {
     PlaySound(SOUND_REEL_CLICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
   }
   rotation[0] = 0;
@@ -603,7 +605,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   scale[1] = 1.0f;
   scale[2] = 1.0f;
   BuildTransformMatrix(matrix, rotation, translation, scale);
-  ConvertMatrixToFixed(matrix, &sShadeMatrix);
+  ConvertMatrixToFixed(matrix, &f_ShadeMatrix);
 
   /* The black behind the reels */
   gDPPipeSync(gfx++);
@@ -638,12 +640,13 @@ void DrawClubSlots(Gfx** displayListHead) {
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
   for (reelIndex = 0; reelIndex != REEL_COUNT; reelIndex++) {
-    gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&sReelMatrices[reelIndex][g_MatrixBufferIndex]),
-              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sSlots->reelVertices, REEL_VERTEX_COUNT, 0);
+    gSPMatrix(
+        gfx++,
+        OS_K0_TO_PHYSICAL(&f_ReelMatrices[reelIndex][g_MatrixBufferIndex]),
+        G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, f_Slots->reelVertices, REEL_VERTEX_COUNT, 0);
     for (quadIndex = 0; quadIndex != REEL_QUAD_COUNT; quadIndex++) {
-      symbolIndex = sSlots->reelPositions[reelIndex] - quadIndex;
+      symbolIndex = f_Slots->reelPositions[reelIndex] - quadIndex;
       if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
         symbolIndex -= REEL_SYMBOL_COUNT;
       }
@@ -652,8 +655,8 @@ void DrawClubSlots(Gfx** displayListHead) {
       }
       LoadTextureBlock(
           &gfx,
-          sSlots->symbolImages +
-              sReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE +
+          f_Slots->symbolImages +
+              f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE +
               IMAGE_HEADER_SIZE,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0,
           0, 0);
@@ -677,9 +680,9 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPPipeSync(gfx++);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sShadeMatrix),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ShadeMatrix),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, sSlots->shadeVertices, SHADE_VERTEX_COUNT, 0);
+  gSPVertex(gfx++, f_Slots->shadeVertices, SHADE_VERTEX_COUNT, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
   gDPPipeSync(gfx++);
@@ -706,7 +709,7 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-  LoadLargePalette(&gfx, sSlots->machineImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_Slots->machineImage + IMAGE_HEADER_SIZE);
   for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, top = SCREEN_BORDER;
        top < MACHINE_BOTTOM; top += MACHINE_STRIP_HEIGHT,
       texelOffset += MACHINE_STRIP_HEIGHT * MACHINE_WIDTH) {
@@ -715,13 +718,13 @@ void DrawClubSlots(Gfx** displayListHead) {
                       : MACHINE_LAST_STRIP_HEIGHT;
     if (!isStripLoaded) {
       isStripLoaded = TRUE;
-      LoadTextureBlock(&gfx, sSlots->machineImage + texelOffset, G_IM_FMT_CI,
+      LoadTextureBlock(&gfx, f_Slots->machineImage + texelOffset, G_IM_FMT_CI,
                        G_IM_SIZ_8b, MACHINE_WIDTH, stripHeight, 0, 0, 0, 0, 0,
                        0, 0);
     } else {
       /* The tiles stay as the first strip set them */
       gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
-                         ((u32)sSlots->machineImage + texelOffset) & ~7);
+                         ((u32)f_Slots->machineImage + texelOffset) & ~7);
       gDPLoadSync(gfx++);
       gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0,
                    ((stripHeight * MACHINE_WIDTH + G_IM_SIZ_8b_INCR) >>
@@ -738,14 +741,14 @@ void DrawClubSlots(Gfx** displayListHead) {
   }
 
   /* The stop buttons pushed so far */
-  LoadLargePalette(&gfx, sSlots->buttonsImage + IMAGE_HEADER_SIZE);
+  LoadLargePalette(&gfx, f_Slots->buttonsImage + IMAGE_HEADER_SIZE);
   for (buttonIndex = 0; buttonIndex != REEL_COUNT; buttonIndex++) {
-    if (buttonIndex > sSlots->pressCount - 1) {
+    if (buttonIndex > f_Slots->pressCount - 1) {
       break;
     }
     for (stripIndex = 0; stripIndex != BUTTON_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-                       sSlots->buttonsImage +
+                       f_Slots->buttonsImage +
                            (LARGE_PALETTED_TEXELS_OFFSET +
                             buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH +
                             stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH),
@@ -776,28 +779,28 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
 
   /* START!, growing while the reels speed up */
-  halfWidth = sinf(sStartAngle) * 64.0f + 20.0f;
-  startStripHeight = (sinf(sStartAngle) * 50.0f + 13.75f) * 0.2f;
+  halfWidth = sinf(f_StartAngle) * 64.0f + 20.0f;
+  startStripHeight = (sinf(f_StartAngle) * 50.0f + 13.75f) * 0.2f;
   dsdx = (START_WIDTH * TEXEL_STEP_ONE / 2) / halfWidth;
   halfHeight = startStripHeight * 2.5f + 2.0f;
   dtdy = (START_SHOWN_HEIGHT * TEXEL_STEP_ONE / 2) / halfHeight;
-  if (sClubSlotsState == CLUB_SLOTS_STARTING) {
-    sStartAngle = 0.0f;
+  if (f_ClubSlotsState == CLUB_SLOTS_STARTING) {
+    f_StartAngle = 0.0f;
   }
-  if (sClubSlotsState == CLUB_SLOTS_SPEEDING) {
-    sStartAngle += START_ANGLE_STEP;
-    if (sStartAngle > START_MAX_ANGLE) {
-      sStartAngle = START_MAX_ANGLE;
+  if (f_ClubSlotsState == CLUB_SLOTS_SPEEDING) {
+    f_StartAngle += START_ANGLE_STEP;
+    if (f_StartAngle > START_MAX_ANGLE) {
+      f_StartAngle = START_MAX_ANGLE;
     }
     gDPPipeSync(gfx++);
-    LoadLargePalette(&gfx, sSlots->startImage + IMAGE_HEADER_SIZE);
+    LoadLargePalette(&gfx, f_Slots->startImage + IMAGE_HEADER_SIZE);
     for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
          stripIndex != START_STRIP_COUNT;
          stripIndex++, texelOffset += START_STRIP_SPACING * START_WIDTH) {
       stripHeight = (stripIndex != START_STRIP_COUNT - 1)
                         ? START_STRIP_HEIGHT
                         : START_LAST_STRIP_HEIGHT;
-      gDPLoadTextureTile(gfx++, ((u32)sSlots->startImage + texelOffset) & ~7,
+      gDPLoadTextureTile(gfx++, ((u32)f_Slots->startImage + texelOffset) & ~7,
                          G_IM_FMT_CI, G_IM_SIZ_8b, START_WIDTH, stripHeight, 0,
                          0, START_WIDTH - 1, stripHeight - 1, 0, G_TX_WRAP,
                          G_TX_WRAP, 0, 0, 0, 0);
@@ -830,10 +833,10 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   for (playerIndex = 0; playerIndex != g_GameState.playerCount; playerIndex++) {
     LoadLargePalette(&gfx, g_PlayerFacePalettes[playerIndex]);
-    if (playerIndex == sSlots->playerIndex) {
-      LoadTextureBlock(&gfx, sSlots->faceImages[playerIndex][sFaceBufferIndex],
-                       G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0,
-                       0, 0, 0, 0);
+    if (playerIndex == f_Slots->playerIndex) {
+      LoadTextureBlock(
+          &gfx, f_Slots->faceImages[playerIndex][f_FaceBufferIndex],
+          G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       DrawTextureRect(&gfx, FACE_LEFT << 2,
@@ -841,40 +844,41 @@ void DrawClubSlots(Gfx** displayListHead) {
                       (FACE_LEFT + FACE_SIZE) << 2,
                       (FACE_TOP + FACE_SIZE + playerIndex * FACE_SPACING) << 2,
                       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
-      if (sIsShowingResult == TRUE && ++sFaceFrameTime >= FACE_FRAME_TIME) {
-        sFaceFrameTime = 0;
-        if (++sFaceFrameIndex >= FACE_LAST_FRAME + 1) {
-          if (++sFaceHoldCount >= FACE_HOLD_COUNT) {
-            row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
-            if (sStarCount == REEL_COUNT) {
+      if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_TIME) {
+        f_FaceFrameTime = 0;
+        if (++f_FaceFrameIndex >= FACE_LAST_FRAME + 1) {
+          if (++f_FaceHoldCount >= FACE_HOLD_COUNT) {
+            row =
+                f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+            if (f_StarCount == REEL_COUNT) {
               OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
+              ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
               OpenEncodedAsset(D_800C2650[row][FACE_LAST_FRAME], &asset);
             } else {
               OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
-              ReadEncodedAsset(sSlots->faceImages[playerIndex][0], &asset);
+              ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
               OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
             }
-            ReadEncodedAsset(sSlots->faceImages[playerIndex][1], &asset);
-            /* sFaceBufferIndex is cleared twice; it is there to match */
-            sFaceBufferIndex = 0;
-            sStarCount = 0;
-            sIsShowingResult = FALSE;
-            sFaceFrameTime = 0;
-            sFaceFrameIndex = 0;
-            sFaceBufferIndex = 0;
-            sFaceHoldCount = 0;
-            sSlots->playerIndex++;
+            ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
+            /* f_FaceBufferIndex is cleared twice; it is there to match */
+            f_FaceBufferIndex = 0;
+            f_StarCount = 0;
+            f_IsShowingResult = FALSE;
+            f_FaceFrameTime = 0;
+            f_FaceFrameIndex = 0;
+            f_FaceBufferIndex = 0;
+            f_FaceHoldCount = 0;
+            f_Slots->playerIndex++;
           }
         } else {
-          row = sCharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
+          row = f_CharacterFaceRows[(s8)g_Players[playerIndex].characterIndex];
           OpenEncodedAsset(
-              ((sStarCount == REEL_COUNT) ? D_800C2650
-                                          : D_800C2780)[row][sFaceFrameIndex],
+              ((f_StarCount == REEL_COUNT) ? D_800C2650
+                                           : D_800C2780)[row][f_FaceFrameIndex],
               &asset);
           ReadEncodedAsset(
-              sSlots->faceImages[playerIndex][sFaceBufferIndex ^ 1], &asset);
-          sFaceBufferIndex ^= 1;
+              f_Slots->faceImages[playerIndex][f_FaceBufferIndex ^ 1], &asset);
+          f_FaceBufferIndex ^= 1;
         }
       }
     } else {
@@ -923,31 +927,31 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
 
   gfx = *displayListHead;
   starCount = 0;
-  if (sSlots->pressCount == LAST_REEL) {
+  if (f_Slots->pressCount == LAST_REEL) {
     for (index = 0; index != LAST_REEL; index++) {
-      symbolIndex = sSlots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
+      symbolIndex = f_Slots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
       if (symbolIndex < 0) {
         symbolIndex += REEL_SYMBOL_COUNT;
       }
-      starCount += sReelStrips[index][symbolIndex] == SYMBOL_STAR;
+      starCount += f_ReelStrips[index][symbolIndex] == SYMBOL_STAR;
     }
     if (IsGameFlagSet(GAME_FLAG_UNK55)) {
       starCount = LAST_REEL;
     }
   }
-  if (sIsShowingResult == FALSE) {
+  if (f_IsShowingResult == FALSE) {
     if (starCount == LAST_REEL) {
-      sLogoBobAngle += LOGO_BOB_STEP;
-      sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
+      f_LogoBobAngle += LOGO_BOB_STEP;
+      f_LogoBob = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
     } else {
-      sLogoBobAngle += LOGO_BOB_STEP;
-      sLogoBob = sinf(sLogoBobAngle) * LOGO_BOB_HEIGHT;
-      sLogoUnusedWord = 0;
+      f_LogoBobAngle += LOGO_BOB_STEP;
+      f_LogoBob = sinf(f_LogoBobAngle) * LOGO_BOB_HEIGHT;
+      f_LogoUnusedWord = 0;
     }
   } else {
-    sLogoUnusedWord = 0;
-    sLogoBobAngle = 0.0f;
-    sLogoBob = 0.0f;
+    f_LogoUnusedWord = 0;
+    f_LogoBobAngle = 0.0f;
+    f_LogoBob = 0.0f;
   }
   width = scale * LOGO_WIDTH;
   stripHeight = scale * LOGO_STRIP_HEIGHT;
@@ -986,10 +990,10 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
-  gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(gfx++, ((u32)f_LogoImage + IMAGE_HEADER_SIZE) & ~7);
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-                        ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+                        ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
                          index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
                             ~7,
                         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT,
@@ -997,10 +1001,10 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(
         gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + f_LogoBob) << 2,
         (s32)(centerX + halfWidth) << 2,
         (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
-              sLogoBob)
+              f_LogoBob)
             << 2,
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
@@ -1014,10 +1018,10 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
   gDPSetRenderMode(gfx++,
                    GBL_c1(G_BL_CLR_MEM, G_BL_A_IN, G_BL_CLR_MEM, G_BL_A_MEM),
                    G_RM_AA_ZB_TEX_EDGE2);
-  gDPLoadTLUT_pal256(gfx++, ((u32)sLogoImage + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal256(gfx++, ((u32)f_LogoImage + IMAGE_HEADER_SIZE) & ~7);
   for (index = 0; index != LOGO_STRIP_COUNT; index++) {
     gDPLoadTextureBlock(gfx++,
-                        ((u32)sLogoImage + LARGE_PALETTED_TEXELS_OFFSET +
+                        ((u32)f_LogoImage + LARGE_PALETTED_TEXELS_OFFSET +
                          index * LOGO_STRIP_HEIGHT * LOGO_WIDTH) &
                             ~7,
                         G_IM_FMT_CI, G_IM_SIZ_8b, LOGO_WIDTH, LOGO_STRIP_HEIGHT,
@@ -1025,10 +1029,10 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(
         gfx++, (s32)(centerX - halfWidth) << 2,
-        (s32)((centerY - halfHeight) + index * stripHeight + sLogoBob) << 2,
+        (s32)((centerY - halfHeight) + index * stripHeight + f_LogoBob) << 2,
         (s32)(centerX + halfWidth) << 2,
         (s32)((centerY - halfHeight) + index * stripHeight + stripHeight +
-              sLogoBob)
+              f_LogoBob)
             << 2,
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
@@ -1045,16 +1049,16 @@ void DrawClubSlotsLogo(Gfx** displayListHead, s32 centerX, s32 centerY,
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
-  LoadTextureBlock(&gfx, sShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
+  LoadTextureBlock(&gfx, f_ShineImage + IMAGE_HEADER_SIZE, G_IM_FMT_I,
                    G_IM_SIZ_8b, SHINE_SIZE, SHINE_SIZE, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
-  shineTime = sShineTime++;
-  if (sShineTime >= SHINE_DELAY) {
+  shineTime = f_ShineTime++;
+  if (f_ShineTime >= SHINE_DELAY) {
     gSPScisTextureRectangle(
         gfx++, (s32)(centerX - shineHalfWidth) << 2,
-        (s32)((centerY - shineHalfHeight) + sLogoBob) << 2,
+        (s32)((centerY - shineHalfHeight) + f_LogoBob) << 2,
         (s32)(centerX + shineHalfWidth) << 2,
-        (s32)(centerY + shineHalfHeight + sLogoBob) << 2, G_TX_RENDERTILE,
+        (s32)(centerY + shineHalfHeight + f_LogoBob) << 2, G_TX_RENDERTILE,
         (SHINE_SIZE - (shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED) << 5, 0,
         (s32)shineDsdx, (s32)shineDtdy);
   }

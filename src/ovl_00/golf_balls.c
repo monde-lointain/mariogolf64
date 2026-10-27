@@ -77,54 +77,54 @@ typedef struct BallAfterimage {
 /* g_GameState.unk20, under a symbol of its own */
 extern s32 D_801B60A8;
 
-extern GolfBall sGolfBalls[GOLF_BALL_COUNT];
-extern BallAfterimage sBallAfterimages[AFTERIMAGE_MAX_LENGTH];
-extern f32 sBallAfterimageOrigin[3];
+extern GolfBall f_GolfBalls[GOLF_BALL_COUNT];
+extern BallAfterimage f_BallAfterimages[AFTERIMAGE_MAX_LENGTH];
+extern f32 f_BallAfterimageOrigin[3];
 /* The point that the next one is written over */
-extern s32 sBallAfterimageHead;
-extern s32 sIsBallAfterimageShown;
-extern s32 sBallAfterimageFrameCount;
+extern s32 f_BallAfterimageHead;
+extern s32 f_IsBallAfterimageShown;
+extern s32 f_BallAfterimageFrameCount;
 /* Whether the points are scaled for the close view of the cup */
-extern s32 sIsBallAfterimageZoomed;
+extern s32 f_IsBallAfterimageZoomed;
 /* Set for the few afterimages that fade quickly */
-extern s32 sIsBallAfterimageFast;
-extern s32 sBallAfterimageLength;
-extern u8* sBallImages[BALL_IMAGE_COUNT];
-extern u8 sBallImageHeap[BALL_IMAGE_HEAP_SIZE];
-extern u16 sPikaBallTexture[];
+extern s32 f_IsBallAfterimageFast;
+extern s32 f_BallAfterimageLength;
+extern u8* f_BallImages[BALL_IMAGE_COUNT];
+extern u8 f_BallImageHeap[BALL_IMAGE_HEAP_SIZE];
+extern u16 f_PikaBallTexture[];
 /* How the ball has turned as it rolled */
-extern Mat4 sBallRotation;
-extern s32 sGolfBallUnk100;
+extern Mat4 f_BallRotation;
+extern s32 f_GolfBallUnk100;
 /* The ball's position when last rolled */
-extern s32 sLastRolledBallPosition[3];
+extern s32 f_LastRolledBallPosition[3];
 
 void func_801FD5F0_ovl_00(void) {}
 
 void DrawPikaBallTexture(void) {
-  DrawTextIntoTexture("PIKA", 4, sPikaBallTexture);
+  DrawTextIntoTexture("PIKA", 4, f_PikaBallTexture);
 }
 
 void LoadGolfBallImages(void) {
   EncodedAsset asset;
 
   ResetHeap(HEAP_BALL_IMAGES);
-  AddHeapRegion(HEAP_BALL_IMAGES, sBallImageHeap,
-                sBallImageHeap + BALL_IMAGE_HEAP_SIZE);
-  sBallImages[0] =
+  AddHeapRegion(HEAP_BALL_IMAGES, f_BallImageHeap,
+                f_BallImageHeap + BALL_IMAGE_HEAP_SIZE);
+  f_BallImages[0] =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C7, &asset));
-  ReadEncodedAsset(sBallImages[0], &asset);
-  sBallImages[1] =
+  ReadEncodedAsset(f_BallImages[0], &asset);
+  f_BallImages[1] =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C8, &asset));
-  ReadEncodedAsset(sBallImages[1], &asset);
-  sBallImages[2] =
+  ReadEncodedAsset(f_BallImages[1], &asset);
+  f_BallImages[2] =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4DA, &asset));
-  ReadEncodedAsset(sBallImages[2], &asset);
-  sBallImages[3] =
+  ReadEncodedAsset(f_BallImages[2], &asset);
+  f_BallImages[3] =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x4C6, &asset));
-  ReadEncodedAsset(sBallImages[3], &asset);
-  sBallImages[4] =
+  ReadEncodedAsset(f_BallImages[3], &asset);
+  f_BallImages[4] =
       AllocFromHeap(HEAP_BALL_IMAGES, OpenEncodedAsset(0x6BB, &asset));
-  ReadEncodedAsset(sBallImages[4], &asset);
+  ReadEncodedAsset(f_BallImages[4], &asset);
   osSyncPrintf("HEAP_BALLTEX LEFT%d\n", GetHeapFreeSize(HEAP_BALL_IMAGES));
   DrawPikaBallTexture();
   ResetGolfBalls();
@@ -141,12 +141,12 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
 
   if (simulation->isRunning == BALL_STATE_FLYING ||
       simulation->isRunning == BALL_STATE_ROLLING) {
-    movement[0] = simulation->position[0] - sLastRolledBallPosition[0];
-    movement[1] = simulation->position[1] - sLastRolledBallPosition[1];
-    movement[2] = simulation->position[2] - sLastRolledBallPosition[2];
-    sLastRolledBallPosition[0] = simulation->position[0];
-    sLastRolledBallPosition[1] = simulation->position[1];
-    sLastRolledBallPosition[2] = simulation->position[2];
+    movement[0] = simulation->position[0] - f_LastRolledBallPosition[0];
+    movement[1] = simulation->position[1] - f_LastRolledBallPosition[1];
+    movement[2] = simulation->position[2] - f_LastRolledBallPosition[2];
+    f_LastRolledBallPosition[0] = simulation->position[0];
+    f_LastRolledBallPosition[1] = simulation->position[1];
+    f_LastRolledBallPosition[2] = simulation->position[2];
   } else {
     movement[0] = simulation->velocity[0];
     movement[1] = simulation->velocity[1];
@@ -157,7 +157,7 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
     if (movement[2] != 0 || movement[0] != 0) {
       guRotateF(rotation, distance * BALL_ROLL_DEGREES_PER_UNIT, -movement[2],
                 0.0f, movement[0]);
-      guMtxCatF(sBallRotation, rotation, sBallRotation);
+      guMtxCatF(f_BallRotation, rotation, f_BallRotation);
     }
   }
 }
@@ -166,39 +166,39 @@ void ResetBallAfterimage(void) {
   s32 i;
 
   for (i = 0; i != AFTERIMAGE_MAX_LENGTH; i++) {
-    sBallAfterimages[i].alpha = AFTERIMAGE_UNUSED;
-    sBallAfterimages[i].isInCup = FALSE;
+    f_BallAfterimages[i].alpha = AFTERIMAGE_UNUSED;
+    f_BallAfterimages[i].isInCup = FALSE;
   }
-  sBallAfterimages[0].position[0] = sGolfBalls[g_GameState.unk20].position[0];
-  sBallAfterimages[0].position[1] = sGolfBalls[g_GameState.unk20].position[1];
-  sBallAfterimages[0].position[2] = sGolfBalls[g_GameState.unk20].position[2];
-  sBallAfterimageOrigin[0] = sGolfBalls[g_GameState.unk20].position[0];
-  sBallAfterimageOrigin[1] = sGolfBalls[g_GameState.unk20].position[1];
-  sBallAfterimageHead = 0;
-  sIsBallAfterimageShown = FALSE;
-  sBallAfterimageFrameCount = 0;
-  sIsBallAfterimageZoomed = FALSE;
-  sBallAfterimageOrigin[2] = sGolfBalls[g_GameState.unk20].position[2];
+  f_BallAfterimages[0].position[0] = f_GolfBalls[g_GameState.unk20].position[0];
+  f_BallAfterimages[0].position[1] = f_GolfBalls[g_GameState.unk20].position[1];
+  f_BallAfterimages[0].position[2] = f_GolfBalls[g_GameState.unk20].position[2];
+  f_BallAfterimageOrigin[0] = f_GolfBalls[g_GameState.unk20].position[0];
+  f_BallAfterimageOrigin[1] = f_GolfBalls[g_GameState.unk20].position[1];
+  f_BallAfterimageHead = 0;
+  f_IsBallAfterimageShown = FALSE;
+  f_BallAfterimageFrameCount = 0;
+  f_IsBallAfterimageZoomed = FALSE;
+  f_BallAfterimageOrigin[2] = f_GolfBalls[g_GameState.unk20].position[2];
 }
 
 void StartFastBallAfterimage(void) {
-  sIsBallAfterimageShown = TRUE;
-  sIsBallAfterimageFast = TRUE;
-  sBallAfterimageLength = AFTERIMAGE_FAST_LENGTH;
+  f_IsBallAfterimageShown = TRUE;
+  f_IsBallAfterimageFast = TRUE;
+  f_BallAfterimageLength = AFTERIMAGE_FAST_LENGTH;
 }
 
-void ResetBallRotation(void) { guMtxIdentF(sBallRotation); }
+void ResetBallRotation(void) { guMtxIdentF(f_BallRotation); }
 
 void ResetGolfBalls(void) {
   s32 i;
 
   for (i = 0; i < GOLF_BALL_COUNT; i++) {
-    sGolfBalls[i].alpha = BALL_HIDDEN;
-    sGolfBalls[i].state = BALL_STATE_STOPPED;
+    f_GolfBalls[i].alpha = BALL_HIDDEN;
+    f_GolfBalls[i].state = BALL_STATE_STOPPED;
   }
   ResetBallAfterimage();
   ResetBallRotation();
-  sGolfBallUnk100 = 0;
+  f_GolfBallUnk100 = 0;
 }
 
 #ifdef NON_MATCHING
@@ -222,7 +222,7 @@ void UpdateGolfBalls(void) {
   if (g_GameState.unk0 == GAME_STATE_UNK6) {
     currentIndex = D_801B60A8;
   }
-  for (i = 0, player = g_Players, ball = sGolfBalls;
+  for (i = 0, player = g_Players, ball = f_GolfBalls;
        i < g_GameState.playerCount; i++, player++, ball++) {
     if (player->unk26 != 0 || player->strokeCount == 0) {
       ball->alpha = BALL_HIDDEN;
@@ -240,7 +240,7 @@ void UpdateGolfBalls(void) {
   }
   if (g_GameState.unk0 == GAME_STATE_UNK6 ||
       g_GameState.unk0 == GAME_STATE_UNK11) {
-    ball = &sGolfBalls[currentIndex];
+    ball = &f_GolfBalls[currentIndex];
     for (i = 0; i < BALL_SIMULATION_COUNT; i++) {
       simulation = &g_BallSimulations[i];
       ball->isInCup = FALSE;
@@ -292,7 +292,7 @@ void UpdateGolfBalls(void) {
         ball->markerPlayerIndex = markerPlayerIndex;
         scale = g_PinVertexScale * BALL_MODEL_SCALE;
         guScaleF(scaling, scale, scale, scale);
-        guMtxCatF(sBallRotation, scaling, rotated);
+        guMtxCatF(f_BallRotation, scaling, rotated);
         guTranslateF(
             translation, ball->position[0],
             ball->position[1] - (g_PinVertexScale * BALL_RADIUS) / 5120.0,
@@ -302,11 +302,11 @@ void UpdateGolfBalls(void) {
       }
     }
   }
-  if (sIsBallAfterimageShown == TRUE) {
+  if (f_IsBallAfterimageShown == TRUE) {
     if (g_IsCupViewShown == TRUE) {
-      if (!sIsBallAfterimageZoomed) {
-        sIsBallAfterimageZoomed = TRUE;
-        for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength;
+      if (!f_IsBallAfterimageZoomed) {
+        f_IsBallAfterimageZoomed = TRUE;
+        for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
              i++, afterimage++) {
           if (afterimage->alpha != AFTERIMAGE_UNUSED) {
             s32 coursePosition[3];
@@ -326,9 +326,9 @@ void UpdateGolfBalls(void) {
           }
         }
       }
-    } else if (sIsBallAfterimageZoomed == TRUE) {
-      sIsBallAfterimageZoomed = FALSE;
-      for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength;
+    } else if (f_IsBallAfterimageZoomed == TRUE) {
+      f_IsBallAfterimageZoomed = FALSE;
+      for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
            i++, afterimage++) {
         if (afterimage->alpha != AFTERIMAGE_UNUSED) {
           afterimage->position[0] -=
@@ -346,12 +346,12 @@ void UpdateGolfBalls(void) {
         }
       }
     }
-    head = &sBallAfterimages[sBallAfterimageHead];
-    ball = &sGolfBalls[currentIndex];
-    if (sBallAfterimageHead == 0) {
-      previous = &sBallAfterimages[sBallAfterimageLength - 1];
+    head = &f_BallAfterimages[f_BallAfterimageHead];
+    ball = &f_GolfBalls[currentIndex];
+    if (f_BallAfterimageHead == 0) {
+      previous = &f_BallAfterimages[f_BallAfterimageLength - 1];
     } else {
-      previous = &sBallAfterimages[sBallAfterimageHead - 1];
+      previous = &f_BallAfterimages[f_BallAfterimageHead - 1];
     }
     {
       f32 offset[3];
@@ -362,7 +362,7 @@ void UpdateGolfBalls(void) {
       distance = sqrtf(offset[0] * offset[0] + offset[1] * offset[1] +
                        offset[2] * offset[2]);
     }
-    if (sIsBallAfterimageFast == TRUE) {
+    if (f_IsBallAfterimageFast == TRUE) {
       if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
           g_BallSimulations[0].isRunning == BALL_STATE_ROLLING) {
         head->alpha = AFTERIMAGE_FAST_ALPHA;
@@ -374,12 +374,12 @@ void UpdateGolfBalls(void) {
         } else {
           head->isInCup = TRUE;
         }
-        sBallAfterimageHead++;
-        if (sBallAfterimageHead == sBallAfterimageLength) {
-          sBallAfterimageHead = 0;
+        f_BallAfterimageHead++;
+        if (f_BallAfterimageHead == f_BallAfterimageLength) {
+          f_BallAfterimageHead = 0;
         }
       }
-      for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength;
+      for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
            i++, afterimage++) {
         if (afterimage->alpha > 0) {
           afterimage->alpha -= AFTERIMAGE_FAST_FADE;
@@ -396,13 +396,13 @@ void UpdateGolfBalls(void) {
         } else {
           head->isInCup = ball->isInCup;
         }
-        sBallAfterimageHead++;
-        if (sBallAfterimageHead == sBallAfterimageLength) {
-          sBallAfterimageHead = 0;
+        f_BallAfterimageHead++;
+        if (f_BallAfterimageHead == f_BallAfterimageLength) {
+          f_BallAfterimageHead = 0;
         }
       }
-      if (sBallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
-        for (i = 0, afterimage = sBallAfterimages; i != sBallAfterimageLength;
+      if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
+        for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
              i++, afterimage++) {
           if (afterimage->alpha > 0) {
             afterimage->alpha--;
@@ -410,7 +410,7 @@ void UpdateGolfBalls(void) {
         }
       }
     }
-    sBallAfterimageFrameCount++;
+    f_BallAfterimageFrameCount++;
   }
 }
 #else
@@ -422,14 +422,14 @@ s32 IsAnyBallInCup(void) {
   s32 i;
 
   for (i = 0; i != GOLF_BALL_COUNT; i++) {
-    if (sGolfBalls[i].isInCup == TRUE && sGolfBalls[i].alpha != BALL_HIDDEN) {
+    if (f_GolfBalls[i].isInCup == TRUE && f_GolfBalls[i].alpha != BALL_HIDDEN) {
       isInCup = TRUE;
     }
   }
   return isInCup;
 }
 
-/* The images in sBallImages */
+/* The images in f_BallImages */
 #define BALL_IMAGE_SHADOW 0
 #define BALL_IMAGE_ROLLING 1
 #define BALL_IMAGE_SPARKLE 2
@@ -471,15 +471,15 @@ s32 IsAnyBallInCup(void) {
  * this */
 #define PIKA_BALL_DEPTH 20000
 
-extern Vtx sPikaBallVertices[];
-/* sBallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through nine
- * unused ones */
-extern s32 sUnusedBallFrame;
-extern s32 sBallRollFrame;
+extern Vtx f_PikaBallVertices[];
+/* f_BallRollFrame cycles through BALL_ROLL_FRAME_COUNT frames, this through
+ * nine unused ones */
+extern s32 f_UnusedBallFrame;
+extern s32 f_BallRollFrame;
 /* Where the ball of the player whose turn it is was last drawn */
-extern s32 sCurrentBallScreenX;
-extern s32 sCurrentBallScreenY;
-extern s32 sCurrentBallDepth;
+extern s32 f_CurrentBallScreenX;
+extern s32 f_CurrentBallScreenY;
+extern s32 f_CurrentBallDepth;
 
 /* Like G_RM_ZB_XLU_SURF and G_RM_AA_ZB_XLU_SURF, but also updating the depth
  * buffer */
@@ -551,52 +551,52 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, 0x01);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
-    sBallRollFrame = (sBallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
-    sUnusedBallFrame = (sUnusedBallFrame + 1) % 9;
+    f_BallRollFrame = (f_BallRollFrame + 1) & (BALL_ROLL_FRAME_COUNT - 1);
+    f_UnusedBallFrame = (f_UnusedBallFrame + 1) % 9;
     gDPLoadTextureBlock(
         gfx++,
         TEXTURE_ADDRESS(
-            sBallImages[BALL_IMAGE_ROLLING] +
-            (sBallRollFrame / 4 * BALL_ROLL_FRAME_SIZE + IMAGE_HEADER_SIZE)),
+            f_BallImages[BALL_IMAGE_ROLLING] +
+            (f_BallRollFrame / 4 * BALL_ROLL_FRAME_SIZE + IMAGE_HEADER_SIZE)),
         G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock(
         gfx++,
-        TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_ROLLING] + IMAGE_HEADER_SIZE),
+        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_ROLLING] + IMAGE_HEADER_SIZE),
         0x80, BALL_TILE_STILL, G_IM_FMT_I, G_IM_SIZ_8b, BALL_TEXTURE_SIZE,
         BALL_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_CLAMP,
         G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(
         gfx++,
-        TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_SPARKLE] + IMAGE_HEADER_SIZE),
+        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_SPARKLE] + IMAGE_HEADER_SIZE),
         0x100, BALL_TILE_SHADOW, G_IM_FMT_I, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(
         gfx++,
-        TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_MARKER] + IMAGE_HEADER_SIZE),
+        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_MARKER] + IMAGE_HEADER_SIZE),
         0x140, BALL_TILE_MARKER, G_IM_FMT_I, 16, 16, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
     gDPLoadMultiBlock_4b(
         gfx++,
-        TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_SHADOW] + IMAGE_HEADER_SIZE),
+        TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_SHADOW] + IMAGE_HEADER_SIZE),
         0x150, BALL_TILE_SMALL, G_IM_FMT_I, 16, 16, 0,
         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
         G_TX_NOLOD, G_TX_NOLOD);
-    gDPLoadMultiBlock_4b(
-        gfx++,
-        TEXTURE_ADDRESS(sBallImages[BALL_IMAGE_AFTERIMAGE] + IMAGE_HEADER_SIZE),
-        0x190, BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0,
-        G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, 6, 6,
-        G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadMultiBlock_4b(gfx++,
+                         TEXTURE_ADDRESS(f_BallImages[BALL_IMAGE_AFTERIMAGE] +
+                                         IMAGE_HEADER_SIZE),
+                         0x190, BALL_TILE_AFTERIMAGE, G_IM_FMT_I, 16, 64, 0,
+                         G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
+                         6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTexturePersp(gfx++, G_TP_NONE);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     gDPPipeSync(gfx++);
     for (i = 0; i < GOLF_BALL_COUNT; i++) {
-      ball = &sGolfBalls[i];
+      ball = &f_GolfBalls[i];
       if (ball->alpha > 0) {
         surface = ball->surface;
         groundHeight =
@@ -688,9 +688,9 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             primDepth &= ~3;
             if (D_801B60A8 == i) {
               isCurrentBallAboveGround = isAboveGround;
-              sCurrentBallDepth = primDepth;
-              sCurrentBallScreenX = ballPoint.x;
-              sCurrentBallScreenY = ballPoint.y;
+              f_CurrentBallDepth = primDepth;
+              f_CurrentBallScreenX = ballPoint.x;
+              f_CurrentBallScreenY = ballPoint.y;
             }
             if (primDepth < 0) {
               primDepth = 0;
@@ -913,8 +913,8 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                       TEXEL0, 0, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE,
                       0, TEXEL0, 0);
     gDPSetEnvColor(gfx++, 0x00, 0x00, 0x80, 0x1E);
-    for (i = 0; i != sBallAfterimageLength; i++) {
-      afterimage = &sBallAfterimages[i];
+    for (i = 0; i != f_BallAfterimageLength; i++) {
+      afterimage = &f_BallAfterimages[i];
       if (afterimage->alpha > 0) {
         ballDepth =
             ProjectPoint(afterimage->position[0],
@@ -942,7 +942,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             } else {
               continue;
             }
-            if (sIsBallAfterimageFast == TRUE) {
+            if (f_IsBallAfterimageFast == TRUE) {
               gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF,
                               afterimage->alpha / 2);
             } else {
@@ -966,7 +966,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           if (halfHeight < 4) {
             halfHeight = 4;
           }
-          if (sIsBallAfterimageFast == TRUE) {
+          if (f_IsBallAfterimageFast == TRUE) {
             gSPStretchedTextureRectangle(
                 gfx++, (ballPoint.x << 2) - halfWidth - 1,
                 (ballPoint.y << 2) - halfHeight - 1,
@@ -987,7 +987,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     }
     if (IsGameFlagSet(0x4C)) {
       for (i = 0; i != ROUTE_POINT_COUNT; i++) {
-        afterimage = &sBallAfterimages[i];
+        afterimage = &f_BallAfterimages[i];
         shadowDepth = ProjectPoint(
             g_HolePoints.routePoints[i][0] * COURSE_TO_WORLD_SCALE,
             g_HolePoints.routePoints[i][1] * COURSE_TO_WORLD_SCALE -
@@ -1008,7 +1008,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           } else {
             continue;
           }
-          if (sIsBallAfterimageFast == TRUE) {
+          if (f_IsBallAfterimageFast == TRUE) {
             gDPSetPrimColor(gfx++, 0, 0, 0xA0, 0xA0, 0xFF,
                             afterimage->alpha / 2);
           } else {
@@ -1031,7 +1031,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           if (halfHeight < 4) {
             halfHeight = 4;
           }
-          if (sIsBallAfterimageFast == TRUE) {
+          if (f_IsBallAfterimageFast == TRUE) {
             gSPStretchedTextureRectangle(
                 gfx++, (shadowPoint.x << 2) - halfWidth - 1,
                 (shadowPoint.y << 2) - halfHeight - 1,
@@ -1067,23 +1067,23 @@ void DrawGolfBalls(CameraMatrices* matrices) {
     gDPSetCombineLERP(gfx++, 0, 0, 0, SHADE, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
                       SHADE, PRIMITIVE, 0, TEXEL0, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0x7F, 0x00, 0x60);
-    gDPLoadTextureBlock_4b(gfx++, sPikaBallTexture, G_IM_FMT_IA, 32, 8, 0,
+    gDPLoadTextureBlock_4b(gfx++, f_PikaBallTexture, G_IM_FMT_IA, 32, 8, 0,
                            G_TX_NOMIRROR | G_TX_CLAMP,
                            G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK, G_TX_NOMASK,
                            G_TX_NOLOD, G_TX_NOLOD);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetPrimDepth(gfx++, sCurrentBallDepth - 4, 0);
-    if (sCurrentBallDepth < PIKA_BALL_DEPTH) {
-      for (i = 0, ball = sGolfBalls; i < GOLF_BALL_COUNT; i++, ball++) {
+    gDPSetPrimDepth(gfx++, f_CurrentBallDepth - 4, 0);
+    if (f_CurrentBallDepth < PIKA_BALL_DEPTH) {
+      for (i = 0, ball = f_GolfBalls; i < GOLF_BALL_COUNT; i++, ball++) {
         if (ball->markerPlayerIndex == BALL_NO_MARKER &&
-            sGolfBalls[i].alpha == BALL_SHOWN &&
+            f_GolfBalls[i].alpha == BALL_SHOWN &&
             (g_IsCupViewShown || ball->isInCup != TRUE) &&
             (!isCurrentBallAboveGround || ball->surface->unk14 == 0) &&
             ball->alpha > 0) {
           gDPPipeSync(gfx++);
           gSPMatrix(gfx++, &ball->matrices[g_DrawBufferIndex],
                     G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-          gSPVertex(gfx++, sPikaBallVertices, 16, 0);
+          gSPVertex(gfx++, f_PikaBallVertices, 16, 0);
           gSP2Triangles(gfx++, 0, 2, 1, 0, 1, 2, 3, 0);
           gSP2Triangles(gfx++, 4, 6, 5, 0, 5, 6, 7, 0);
           gSP2Triangles(gfx++, 8, 9, 10, 0, 9, 11, 10, 0);

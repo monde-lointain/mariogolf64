@@ -11,8 +11,8 @@
  * do */
 #define ONE_TEXEL_PER_PIXEL (1 << 10)
 
-extern s32 sQueuedBoxCount;
-extern AnimatedBox* sQueuedBoxes[QUEUED_BOX_CAPACITY];
+extern s32 f_QueuedBoxCount;
+extern AnimatedBox* f_QueuedBoxes[QUEUED_BOX_CAPACITY];
 
 static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
   Gfx* gfx;
@@ -64,8 +64,8 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
 /* DrawAnimatedBoxes empties the queue, so a box is queued again for each draw;
  * nothing checks the capacity */
 void QueueAnimatedBox(AnimatedBox* box) {
-  sQueuedBoxes[sQueuedBoxCount] = box;
-  sQueuedBoxCount++;
+  f_QueuedBoxes[f_QueuedBoxCount] = box;
+  f_QueuedBoxCount++;
 }
 
 void DrawAnimatedBoxes(void) {
@@ -80,8 +80,8 @@ void DrawAnimatedBoxes(void) {
   gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
   gDPSetCombineMode(g_DisplayListHead++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
   gDPPipeSync(g_DisplayListHead++);
-  for (i = 0; i != sQueuedBoxCount; i++) {
-    DrawAnimatedBox(&g_DisplayListHead, sQueuedBoxes[i]);
+  for (i = 0; i != f_QueuedBoxCount; i++) {
+    DrawAnimatedBox(&g_DisplayListHead, f_QueuedBoxes[i]);
   }
-  sQueuedBoxCount = 0;
+  f_QueuedBoxCount = 0;
 }

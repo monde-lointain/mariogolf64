@@ -21,7 +21,7 @@
 #define TRANSFER_MODE_COUNT 2
 #define MODE_OPTION_COUNT 3
 
-/* sModeOptions entries, counted from the message naming each */
+/* f_ModeOptions entries, counted from the message naming each */
 #define TRANSMIT_OPTION_MESSAGES 0x13F
 #define TRANSMIT_OPTION_NONE -1
 #define TRANSMIT_OPTION_STATUS 0
@@ -75,7 +75,7 @@
 #define SEND_EXPERIENCE_CONFIRMING 10
 #define SEND_EXPERIENCE_NOTHING_TO_SEND 11
 
-/* sNoticeState: the notice cloud grows, shows its message, then shrinks */
+/* f_NoticeState: the notice cloud grows, shows its message, then shrinks */
 #define NOTICE_HIDDEN 0
 #define NOTICE_OPENING 1
 #define NOTICE_CLOSING 2
@@ -414,7 +414,7 @@ s32 GetNoticeState(void);
 
 /* The buttons of every controller together, which any player may use on the
  * menu */
-extern ControllerState sTransmitController;
+extern ControllerState f_TransmitController;
 
 extern s32 D_800C42D0;
 
@@ -598,7 +598,7 @@ void UpdateBringCharacters(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
@@ -632,13 +632,13 @@ void UpdateBringCharacters(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
                       MENU_SOUND_VOLUME);
-          } else if (sTransmitController.pressedButtons & B_BUTTON) {
+          } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
@@ -688,28 +688,28 @@ void UpdateBringCharacters(void) {
       }
       break;
     case BRING_CHOOSING_SLOT:
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->listingStates
             [transfer->listedCharacters[transfer->listedCharacterIndex]] =
             LISTING_BRINGING;
         transfer->screenStep = BRING_BRINGING;
         transfer->bringingFrame = 0;
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = BRING_CHOOSING;
-      } else if ((sTransmitController.repeatedButtons & L_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
                  transfer->characterIndex > 0) {
         transfer->characterIndex--;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
-      } else if ((sTransmitController.repeatedButtons & R_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
                  transfer->characterIndex < GAME_BOY_GOLFER_COUNT - 1) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
       break;
     case BRING_CHOOSING:
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         if (transfer->characterCount == GAME_BOY_GOLFER_COUNT) {
           transfer->screenStep = BRING_CHOOSING_SLOT;
@@ -721,17 +721,17 @@ void UpdateBringCharacters(void) {
               LISTING_BRINGING;
           transfer->bringingFrame = 0;
         }
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
-      } else if ((sTransmitController.repeatedButtons & L_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
                  transfer->listedCharacterIndex > 0) {
         transfer->listedCharacterIndex--;
         if (transfer->listedCharacterIndex < transfer->unk7B8) {
           transfer->unk7B8--;
         }
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
-      } else if ((sTransmitController.repeatedButtons & R_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
                  transfer->listedCharacterIndex <
                      transfer->listedCharacterCount - 1) {
         transfer->listedCharacterIndex++;
@@ -743,7 +743,7 @@ void UpdateBringCharacters(void) {
       break;
     case BRING_BROUGHT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         if (transfer->characterCount != GAME_BOY_GOLFER_COUNT) {
@@ -755,7 +755,7 @@ void UpdateBringCharacters(void) {
       }
       break;
     case BRING_ASKING:
-      switch (UpdatePrompt(&sTransmitController)) {
+      switch (UpdatePrompt(&f_TransmitController)) {
         case BRING_MORE_CHARACTERS_YES:
           transfer->screenStep = BRING_NEXT_CARTRIDGE;
           break;
@@ -847,7 +847,7 @@ void UpdateSendStatus(void) {
         case NOTICE_SHOWN:
           transfer->isAccessing = FALSE;
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
@@ -882,13 +882,13 @@ void UpdateSendStatus(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
                       MENU_SOUND_VOLUME);
-          } else if (sTransmitController.pressedButtons & B_BUTTON) {
+          } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
@@ -909,17 +909,17 @@ void UpdateSendStatus(void) {
       }
       break;
     case SEND_STATUS_CHOOSING:
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_STATUS_READY;
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
-      } else if ((sTransmitController.repeatedButtons & L_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
                  transfer->chosenCartridgeIndex > 0) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->chosenCartridgeIndex--;
-      } else if ((sTransmitController.repeatedButtons & R_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
                  transfer->chosenCartridgeIndex <
                      transfer->taggedCartridgeCount - 1) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -928,12 +928,12 @@ void UpdateSendStatus(void) {
       break;
     case SEND_STATUS_READY:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         transfer->isAccessing = TRUE;
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_STATUS_CHECKING;
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_STATUS_CHOOSING;
@@ -958,7 +958,7 @@ void UpdateSendStatus(void) {
       }
       break;
     case SEND_STATUS_ASKING:
-      switch (UpdatePrompt(&sTransmitController)) {
+      switch (UpdatePrompt(&f_TransmitController)) {
         case OVERWRITE_RECORDS_YES:
           transfer->isAccessing = TRUE;
           transfer->screenStep = SEND_STATUS_WRITING;
@@ -989,7 +989,7 @@ void UpdateSendStatus(void) {
       break;
     case SEND_STATUS_SENT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
@@ -1021,7 +1021,7 @@ void UpdateSendExperience(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
@@ -1031,7 +1031,7 @@ void UpdateSendExperience(void) {
       }
       break;
     case SEND_EXPERIENCE_CHOOSING:
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         if (g_GameBoyCharacters[transfer->characterIndex].experience == 0) {
           transfer->screenStep = SEND_EXPERIENCE_NOTHING_TO_SEND;
           SetNoticeState(NOTICE_OPENING, NO_EXPERIENCE_MESSAGE);
@@ -1041,14 +1041,14 @@ void UpdateSendExperience(void) {
           SetNoticeState(NOTICE_OPENING, PAK_CHECK_MESSAGE);
           PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
-      } else if ((sTransmitController.repeatedButtons & L_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & L_JPAD) &&
                  transfer->characterIndex > 0) {
         transfer->characterIndex--;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
-      } else if ((sTransmitController.repeatedButtons & R_JPAD) &&
+      } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
                  transfer->characterIndex < transfer->characterCount - 1) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -1070,13 +1070,13 @@ void UpdateSendExperience(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = FALSE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
                       MENU_SOUND_VOLUME);
-          } else if (sTransmitController.pressedButtons & B_BUTTON) {
+          } else if (f_TransmitController.pressedButtons & B_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             transfer->isCancelled = TRUE;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
@@ -1108,7 +1108,7 @@ void UpdateSendExperience(void) {
       break;
     case SEND_EXPERIENCE_SENT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_EXPERIENCE_DONE;
@@ -1127,7 +1127,7 @@ void UpdateSendExperience(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
@@ -1168,14 +1168,14 @@ void UpdateTransmitMenu(void) {
   GameBoyTransfer* transfer = &g_GameBoyTransfer;
   s32 controller;
 
-  sTransmitController.repeatedButtons = 0;
-  sTransmitController.buttons = 0;
-  sTransmitController.pressedButtons = 0;
+  f_TransmitController.repeatedButtons = 0;
+  f_TransmitController.buttons = 0;
+  f_TransmitController.pressedButtons = 0;
   for (controller = 0; controller != g_ControllerCount; controller++) {
-    sTransmitController.repeatedButtons |=
+    f_TransmitController.repeatedButtons |=
         g_ControllerStates[controller].repeatedButtons;
-    sTransmitController.buttons |= g_ControllerStates[controller].buttons;
-    sTransmitController.pressedButtons |=
+    f_TransmitController.buttons |= g_ControllerStates[controller].buttons;
+    f_TransmitController.pressedButtons |=
         g_ControllerStates[controller].pressedButtons;
   }
   if (IsGameFlagSet(GAME_FLAG_ALLOW_CARTRIDGE_DUMP) &&
@@ -1187,7 +1187,7 @@ void UpdateTransmitMenu(void) {
       if (GetWipeProgress() != 20) {
         break;
       }
-      if (sTransmitController.pressedButtons & A_BUTTON) {
+      if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         if (transfer->optionIndex == 0) {
           transfer->screen = TRANSMIT_SCREEN_SEND_STATUS;
@@ -1214,7 +1214,7 @@ void UpdateTransmitMenu(void) {
             StartWipe(WIPE_CLOSING);
           }
         }
-      } else if (sTransmitController.pressedButtons & B_BUTTON) {
+      } else if (f_TransmitController.pressedButtons & B_BUTTON) {
         if (transfer->transferMode == TRANSFER_MODE_FROM_MENU) {
           if (!HaveAllRumblePaks()) {
             transfer->isCancelled = TRUE;
@@ -1225,14 +1225,14 @@ void UpdateTransmitMenu(void) {
             StartWipe(WIPE_CLOSING);
           }
         }
-      } else if (sTransmitController.repeatedButtons & U_JPAD) {
+      } else if (f_TransmitController.repeatedButtons & U_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
           transfer->optionIndex = (transfer->optionIndex + 2) % 3;
         } else {
           transfer->optionIndex ^= 1;
         }
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
-      } else if (sTransmitController.repeatedButtons & D_JPAD) {
+      } else if (f_TransmitController.repeatedButtons & D_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
           transfer->optionIndex = (transfer->optionIndex + 4) % 3;
         } else {
@@ -1265,7 +1265,7 @@ void UpdateTransmitMenu(void) {
           break;
         case NOTICE_SHOWN:
           transfer->pressingHandPosition = PRESSING_HAND_FOR_NOTICE;
-          if (sTransmitController.pressedButtons & A_BUTTON) {
+          if (f_TransmitController.pressedButtons & A_BUTTON) {
             transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel,
@@ -1397,27 +1397,27 @@ s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
 
 /* The menu's options, each the offset of its name from TRANSMIT_OPTION_MESSAGES
  */
-s32 sModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
+s32 f_ModeOptions[TRANSFER_MODE_COUNT][MODE_OPTION_COUNT] = {
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_CHARACTERS,
      TRANSMIT_OPTION_MAIN_MENU},
     {TRANSMIT_OPTION_STATUS, TRANSMIT_OPTION_EXPERIENCE, TRANSMIT_OPTION_NONE},
 };
-char* sUnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
-char sUnusedDriveName[8] = "Drive";
-f32 sStatusPointerAngle = 0.0f;
-s32 sCharacterArrowFrame = 0;
-f32 sOptionPointerAngle = 0.0f;
+char* f_UnusedShotTypeNames[] = {"Straight", "Draw", "Fade"};
+char f_UnusedDriveName[8] = "Drive";
+f32 f_StatusPointerAngle = 0.0f;
+s32 f_CharacterArrowFrame = 0;
+f32 f_OptionPointerAngle = 0.0f;
 /* The title in the Game Boy cartridge header, then its game code */
-char sGameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
+char f_GameBoyCartridgeTitle[16] = "MARIO GOLF\0AWXE";
 /* Begins every save in the Game Boy cartridge RAM */
-char sCartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
-s32 sNoticeState = NOTICE_HIDDEN;
-s32 sNoticeMessage = 0;
-s32 sNoticeSize = 0;
-s32 sPressingHandFrame = 0;
-s32 sUnusedZeros[2] = {0, 0};
-s32 sStatusHoleOrder[COURSE_HOLE_COUNT] = {0, 1,  2,  3,  4,  5,  6,  7,  8,
-                                           9, 10, 11, 12, 13, 14, 15, 16, 17};
+char f_CartridgeSaveSignature[16] = "CAMELOT GAMEBOY";
+s32 f_NoticeState = NOTICE_HIDDEN;
+s32 f_NoticeMessage = 0;
+s32 f_NoticeSize = 0;
+s32 f_PressingHandFrame = 0;
+s32 f_UnusedZeros[2] = {0, 0};
+s32 f_StatusHoleOrder[COURSE_HOLE_COUNT] = {0, 1,  2,  3,  4,  5,  6,  7,  8,
+                                            9, 10, 11, 12, 13, 14, 15, 16, 17};
 
 void BringOverCharacter(s32 listedIndex, s32 slot) {
   /* The transfer pointer is there to match */
@@ -1744,11 +1744,11 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     /* An if-chain rather than a switch is there to match */
     if (transfer->screenStep == SEND_STATUS_CHOOSING) {
       /* The pointer swings in and out over half a turn of the angle */
-      sStatusPointerAngle += DEGREES_TO_RADIANS(10);
-      if (sStatusPointerAngle > M_PI) {
-        sStatusPointerAngle -= M_PI;
+      f_StatusPointerAngle += DEGREES_TO_RADIANS(10);
+      if (f_StatusPointerAngle > M_PI) {
+        f_StatusPointerAngle -= M_PI;
       }
-      pointerSwing = sinf(sStatusPointerAngle) * 8.0f;
+      pointerSwing = sinf(f_StatusPointerAngle) * 8.0f;
       gDPPipeSync(displayList++);
       gDPSetTextureLUT(displayList++, G_TT_RGBA16);
       LoadSmallPalette(&displayList, 0,
@@ -1932,12 +1932,12 @@ void DrawBringCharactersScreen(Gfx** displayListHead,
   gDPPipeSync(displayList++);
   gDPSetTexturePersp(displayList++, G_TP_NONE);
   if (transfer->screenStep == BRING_CHOOSING) {
-    sCharacterArrowFrame = (sCharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
+    f_CharacterArrowFrame = (f_CharacterArrowFrame + 1) % ARROW_FRAME_COUNT;
     LoadSmallPalette(&displayList, 0,
                      (u8*)transfer->arrowsImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(&displayList,
                            (u8*)transfer->arrowsImage +
-                               (sCharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE +
+                               (f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE +
                                 PALETTED_TEXELS_OFFSET),
                            G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0,
                            0, 0, 0);
@@ -2120,15 +2120,16 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       break;
   }
   if (transfer->screen == TRANSMIT_SCREEN_OPTIONS) {
-    MeasureMessage(sModeOptions[transfer->transferMode][transfer->optionIndex] +
-                       TRANSMIT_OPTION_MESSAGES,
-                   FONT_SIZE_LARGE, &width, &height, 0);
+    MeasureMessage(
+        f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
+            TRANSMIT_OPTION_MESSAGES,
+        FONT_SIZE_LARGE, &width, &height, 0);
     /* The pointer swings in and out over half a turn of the angle */
-    sOptionPointerAngle += DEGREES_TO_RADIANS(10);
-    if (sOptionPointerAngle > M_PI) {
-      sOptionPointerAngle -= M_PI;
+    f_OptionPointerAngle += DEGREES_TO_RADIANS(10);
+    if (f_OptionPointerAngle > M_PI) {
+      f_OptionPointerAngle -= M_PI;
     }
-    pointerSwing = sinf(sOptionPointerAngle) * 8.0f;
+    pointerSwing = sinf(f_OptionPointerAngle) * 8.0f;
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
     LoadSmallPalette(&displayList, 0,
@@ -2156,7 +2157,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       transfer->screen == TRANSMIT_SCREEN_UNK6 ||
       transfer->screen == TRANSMIT_SCREEN_RUMBLE_PAK_PROMPT) {
     for (index = 0; index != MODE_OPTION_COUNT; index++) {
-      option = sModeOptions[transfer->transferMode][index];
+      option = f_ModeOptions[transfer->transferMode][index];
       if (option != TRANSMIT_OPTION_NONE) {
         SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + index * OPTION_SPACING,
                     option + TRANSMIT_OPTION_MESSAGES, 1, index,
@@ -2165,7 +2166,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       }
     }
     SetTextSlot(HINT_LEFT, HINT_TOP,
-                sModeOptions[transfer->transferMode][transfer->optionIndex] +
+                f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
                     TRANSMIT_OPTION_HINTS,
                 1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
@@ -2280,7 +2281,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
       osSyncPrintf("PHASE 2\n");
       for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
         if (save[SAVE_SIGNATURE_OFFSET + index] !=
-            sCartridgeSaveSignature[index]) {
+            f_CartridgeSaveSignature[index]) {
           isSignatureWrong = TRUE;
         }
       }
@@ -2421,15 +2422,15 @@ INCLUDE_ASM("asm/nonmatchings/ovl_13/transmit_menu", WriteExperienceToCartridge)
 
 /* WriteExperienceToCartridge and WriteStatusToCartridge share one copy of this
  */
-extern const char sWriteSumFormat[];
+extern const char f_WriteSumFormat[];
 
 #ifndef NON_MATCHING
-INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", sWriteSumFormat);
+INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", f_WriteSumFormat);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF18_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF24_ovl_13);
 INCLUDE_RODATA("asm/nonmatchings/ovl_13/transmit_menu", D_801FBF30_ovl_13);
 #else
-const char sWriteSumFormat[] = "write sum %04x\n";
+const char f_WriteSumFormat[] = "write sum %04x\n";
 #endif
 
 /*
@@ -2467,7 +2468,8 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     return STATUS_CHECK_READ_FAILED;
   }
   for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
-    if (save[SAVE_SIGNATURE_OFFSET + index] != sCartridgeSaveSignature[index]) {
+    if (save[SAVE_SIGNATURE_OFFSET + index] !=
+        f_CartridgeSaveSignature[index]) {
       isSignatureWrong = TRUE;
     }
   }
@@ -2577,7 +2579,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     sum += status[index];
   }
   sum &= 0xFFFF;
-  osSyncPrintf(sWriteSumFormat, sum);
+  osSyncPrintf(f_WriteSumFormat, sum);
   save[SAVE_STATUS_SUM_OFFSET] = sum;
   save[SAVE_STATUS_SUM_OFFSET + 1] = sum >> 8;
   result = nuContGBPakFwrite(&transfer->pakFile,
@@ -2690,7 +2692,7 @@ s32 ReadCartridgeCharacters(void) {
         isSignatureWrong = FALSE;
         for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
           if (save[SAVE_SIGNATURE_OFFSET + index] !=
-              sCartridgeSaveSignature[index]) {
+              f_CartridgeSaveSignature[index]) {
             isSignatureWrong = TRUE;
             transfer->unk7D0 = TRUE;
           }
@@ -2907,7 +2909,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
             return PAK_RESULT_REMOVED_RETRYING;
           }
           for (index = 0; index != GAME_BOY_TITLE_CHECKED_LENGTH; index++) {
-            if (header->game_title[index] != sGameBoyCartridgeTitle[index]) {
+            if (header->game_title[index] != f_GameBoyCartridgeTitle[index]) {
               isMarioGolf = FALSE;
             }
           }
@@ -3055,17 +3057,17 @@ s32 TagCartridges(void) {
 }
 
 void SetNoticeState(s32 state, s32 message) {
-  sNoticeState = state;
+  f_NoticeState = state;
   if (state == NOTICE_OPENING) {
-    sNoticeSize = 0;
-    sNoticeMessage = message;
+    f_NoticeSize = 0;
+    f_NoticeMessage = message;
   }
   if (state == NOTICE_CLOSING) {
-    sNoticeSize = NOTICE_FULL_SIZE;
+    f_NoticeSize = NOTICE_FULL_SIZE;
   }
 }
 
-s32 GetNoticeState(void) { return sNoticeState; }
+s32 GetNoticeState(void) { return f_NoticeState; }
 
 /*
  * Steps the notice cloud's size and draws it from its centre, with its message
@@ -3080,20 +3082,20 @@ void DrawNotice(Gfx** displayListHead) {
   s32 stripHeight = 0;
   s32 bottom;
 
-  if (sNoticeState == NOTICE_HIDDEN) {
+  if (f_NoticeState == NOTICE_HIDDEN) {
     return;
   }
-  if (sNoticeState == NOTICE_OPENING) {
-    if (sNoticeSize < NOTICE_FULL_SIZE) {
-      sNoticeSize++;
+  if (f_NoticeState == NOTICE_OPENING) {
+    if (f_NoticeSize < NOTICE_FULL_SIZE) {
+      f_NoticeSize++;
     } else {
-      sNoticeState = NOTICE_SHOWN;
+      f_NoticeState = NOTICE_SHOWN;
     }
-  } else if (sNoticeState == NOTICE_CLOSING) {
-    if (sNoticeSize > 0) {
-      sNoticeSize--;
+  } else if (f_NoticeState == NOTICE_CLOSING) {
+    if (f_NoticeSize > 0) {
+      f_NoticeSize--;
     } else {
-      sNoticeState = NOTICE_HIDDEN;
+      f_NoticeState = NOTICE_HIDDEN;
     }
   }
   gDPPipeSync(displayList++);
@@ -3110,10 +3112,10 @@ void DrawNotice(Gfx** displayListHead) {
   gDPPipeSync(displayList++);
   gDPSetAlphaCompare(displayList++, G_AC_NONE);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 240);
-  if (sNoticeSize > 0) {
+  if (f_NoticeSize > 0) {
     for (strip = 0; strip != NOTICE_STRIP_COUNT; strip++) {
-      halfHeight = sNoticeSize * NOTICE_HALF_HEIGHT_STEP;
-      halfWidth = sNoticeSize * NOTICE_HALF_WIDTH_STEP;
+      halfHeight = f_NoticeSize * NOTICE_HALF_HEIGHT_STEP;
+      halfWidth = f_NoticeSize * NOTICE_HALF_WIDTH_STEP;
       LoadNibbleTextureBlock(&displayList,
                              (u8*)g_GameBoyTransfer.noticeCloudImage +
                                  IMAGE_HEADER_SIZE + strip * NOTICE_STRIP_SIZE,
@@ -3129,11 +3131,11 @@ void DrawNotice(Gfx** displayListHead) {
                       (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
     }
   }
-  if (sNoticeState == NOTICE_SHOWN) {
+  if (f_NoticeState == NOTICE_SHOWN) {
     /* The unused array is there to match */
     s32 unused[2];
 
-    SetTextSlot(NOTICE_CENTRE_X, NOTICE_TEXT_TOP, sNoticeMessage, 1,
+    SetTextSlot(NOTICE_CENTRE_X, NOTICE_TEXT_TOP, f_NoticeMessage, 1,
                 NOTICE_TEXT_SLOT, TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255,
                 255, 255, 255);
     gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
@@ -3169,11 +3171,11 @@ void DrawAccessingSign(Gfx** displayListHead) {
 void DrawPressingHand(Gfx** displayListHead) {
   Gfx* displayList = *displayListHead;
 
-  sPressingHandFrame = (sPressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
+  f_PressingHandFrame = (f_PressingHandFrame + 1) % PRESSING_HAND_FRAME_COUNT;
   LoadLargePalette(&displayList, (u8*)g_PressingHandImage + IMAGE_HEADER_SIZE);
   LoadTextureBlock(&displayList,
                    (u8*)g_PressingHandImage + LARGE_PALETTED_TEXELS_OFFSET +
-                       sPressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
+                       f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
                            PRESSING_HAND_IMAGE_SIZE,
                    G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE,
                    PRESSING_HAND_SIZE, 0, 0, 0, 0, 0, 0, 0);
@@ -3436,7 +3438,7 @@ void BuildStatusData(u8* status) {
   for (courseIndex = 0; courseIndex != SAVE_UNKAF0_ROW_COUNT; courseIndex++) {
     /* The bits array, zeroed from its end, and courseIndex as row index are
      * there to match */
-    row = sStatusHoleOrder[courseIndex];
+    row = f_StatusHoleOrder[courseIndex];
     bits[1] = 0;
     bits[0] = 0;
     for (index = 0; index != STATUS_UNKAF0_COLUMN_COUNT; index++) {

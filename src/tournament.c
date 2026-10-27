@@ -24,17 +24,17 @@ typedef struct ContestantProfile {
   /* 0x3 */ s8 holeOffset; /* Holes played ahead of the player */
 } ContestantProfile;       /* size = 0x4 */
 
-extern s32 sTournamentSeed;
-extern ContestantProfile sContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1];
+extern s32 f_TournamentSeed;
+extern ContestantProfile f_ContestantProfiles[TOURNAMENT_CONTESTANT_COUNT - 1];
 
 void SortIndicesDescending(s32* values, s32* order, s32 count);
 double sin(double angle);
 void NameContestants(void);
 
-void SeedTournamentRandom(s32 seed) { sTournamentSeed = seed; }
+void SeedTournamentRandom(s32 seed) { f_TournamentSeed = seed; }
 
 u32 NextTournamentRandom(void) {
-  return sTournamentSeed = sTournamentSeed * RANDOM_MULTIPLIER + 1;
+  return f_TournamentSeed = f_TournamentSeed * RANDOM_MULTIPLIER + 1;
 }
 
 /*
@@ -66,12 +66,12 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
         swing = 9;
       }
     }
-    holesPlayed = holeCount + (sContestantProfiles[index - 1].holeOffset +
+    holesPlayed = holeCount + (f_ContestantProfiles[index - 1].holeOffset +
                                (lastAheadIndex < 0 | lastAheadIndex >= index));
     if (holesPlayed > COURSE_HOLE_COUNT) {
       holesPlayed = COURSE_HOLE_COUNT;
     }
-    finalScore = sContestantProfiles[index - 1].baseScore - g_CourseIndex * 2;
+    finalScore = f_ContestantProfiles[index - 1].baseScore - g_CourseIndex * 2;
     jitter = ((NextTournamentRandom() >> 28) & 5) - 2;
     otherJitter = ((NextTournamentRandom() >> 28) & 5) - 2;
     finalScore += (jitter + otherJitter) / 2;

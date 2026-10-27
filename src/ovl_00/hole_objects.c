@@ -73,16 +73,16 @@ typedef struct HoleCreature {
   /* 0xA7 */ u8 state;
 } HoleCreature; /* size = 0xA8 */
 
-extern u16 sMonkeyFrameAssets[MONKEY_FRAME_COUNT];
-extern s32 sAreCheepCheepsLeaping;
-extern s32 sCheepCheepLeapUnk38;
-extern s32 sCheepCheepLeapUnk3C;
-extern s32 sCheepCheepLeapUnk40;
-extern Vtx sCheepCheepVertices[4];
-extern Vtx sMonkeyVertices[8];
-extern u8* sCheepCheepImages[2];
-extern u8* sMonkeyImage;
-extern HoleCreature sHoleCreatures[HOLE_CREATURE_COUNT];
+extern u16 f_MonkeyFrameAssets[MONKEY_FRAME_COUNT];
+extern s32 f_AreCheepCheepsLeaping;
+extern s32 f_CheepCheepLeapUnk38;
+extern s32 f_CheepCheepLeapUnk3C;
+extern s32 f_CheepCheepLeapUnk40;
+extern Vtx f_CheepCheepVertices[4];
+extern Vtx f_MonkeyVertices[8];
+extern u8* f_CheepCheepImages[2];
+extern u8* f_MonkeyImage;
+extern HoleCreature f_HoleCreatures[HOLE_CREATURE_COUNT];
 extern Gfx D_800C3FC0[];
 
 void SpawnRipple(CoursePoint position);
@@ -90,21 +90,21 @@ void SpawnRipple(CoursePoint position);
 void LoadHoleCreatureImages(void) {
   EncodedAsset asset;
 
-  sCheepCheepImages[0] =
+  f_CheepCheepImages[0] =
       AllocMemory(OpenEncodedAsset(CHEEP_CHEEP_ASSET, &asset));
-  ReadEncodedAsset(sCheepCheepImages[0], &asset);
-  sCheepCheepImages[1] =
+  ReadEncodedAsset(f_CheepCheepImages[0], &asset);
+  f_CheepCheepImages[1] =
       AllocMemory(OpenEncodedAsset(GOLD_CHEEP_CHEEP_ASSET, &asset));
-  ReadEncodedAsset(sCheepCheepImages[1], &asset);
-  sMonkeyImage = AllocMemory(OpenEncodedAsset(MONKEY_ASSET, &asset));
-  ReadEncodedAsset(sMonkeyImage, &asset);
-  sAreCheepCheepsLeaping = FALSE;
+  ReadEncodedAsset(f_CheepCheepImages[1], &asset);
+  f_MonkeyImage = AllocMemory(OpenEncodedAsset(MONKEY_ASSET, &asset));
+  ReadEncodedAsset(f_MonkeyImage, &asset);
+  f_AreCheepCheepsLeaping = FALSE;
 }
 
 void FreeHoleCreatureImages(void) {
-  FreeMemory(&sCheepCheepImages[0]);
-  FreeMemory(&sCheepCheepImages[1]);
-  FreeMemory(&sMonkeyImage);
+  FreeMemory(&f_CheepCheepImages[0]);
+  FreeMemory(&f_CheepCheepImages[1]);
+  FreeMemory(&f_MonkeyImage);
 }
 
 /* The yaw the camera looks along, or 0 when it looks straight up or down */
@@ -124,7 +124,7 @@ s32 IsMonkeyShown(void) {
   HoleCreature* creature;
 
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-    creature = &sHoleCreatures[i];
+    creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_MONKEY) {
       return TRUE;
     }
@@ -145,10 +145,10 @@ void StartMonkeyDrop(f32 cameraYaw) {
   if (IsMonkeyShown()) {
     return;
   }
-  OpenEncodedAsset(sMonkeyFrameAssets[0], &asset);
-  ReadEncodedAsset(sMonkeyImage, &asset);
+  OpenEncodedAsset(f_MonkeyFrameAssets[0], &asset);
+  ReadEncodedAsset(f_MonkeyImage, &asset);
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-    creature = &sHoleCreatures[i];
+    creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {
       creature->state = HOLE_CREATURE_MONKEY;
       creature->isGold = FALSE;
@@ -181,7 +181,7 @@ void ClearHoleCreatures(void) {
   HoleCreature* creature;
 
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-    creature = &sHoleCreatures[i];
+    creature = &f_HoleCreatures[i];
     creature->state = HOLE_CREATURE_NONE;
   }
 }
@@ -198,12 +198,12 @@ void StartCheepCheepLeap(s32 arg0) {
   HoleCreature* creature;
   f32 speed;
 
-  sCheepCheepLeapUnk38 = arg0;
-  sAreCheepCheepsLeaping = TRUE;
-  sCheepCheepLeapUnk3C = 0;
-  sCheepCheepLeapUnk40 = 0;
+  f_CheepCheepLeapUnk38 = arg0;
+  f_AreCheepCheepsLeaping = TRUE;
+  f_CheepCheepLeapUnk3C = 0;
+  f_CheepCheepLeapUnk40 = 0;
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-    creature = &sHoleCreatures[i];
+    creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {
       s32 random = guRandom();
 
@@ -218,10 +218,10 @@ void StartCheepCheepLeap(s32 arg0) {
       creature->isGold = guRandom() % 2;
       if (!creature->isGold) {
         OpenEncodedAsset(CHEEP_CHEEP_ASSET, &asset);
-        ReadEncodedAsset(sCheepCheepImages[0], &asset);
+        ReadEncodedAsset(f_CheepCheepImages[0], &asset);
       } else {
         OpenEncodedAsset(GOLD_CHEEP_CHEEP_ASSET, &asset);
-        ReadEncodedAsset(sCheepCheepImages[1], &asset);
+        ReadEncodedAsset(f_CheepCheepImages[1], &asset);
       }
       creature->yaw = g_SkyState.yaws[0];
       if (creature->isFacingBack) {
@@ -286,7 +286,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
-    creature = &sHoleCreatures[i];
+    creature = &f_HoleCreatures[i];
     if (creature->state == HOLE_CREATURE_NONE) {
     } else if (creature->state == HOLE_CREATURE_CHEEP_CHEEP) {
       wasUnderwater = g_BallPosition[1] < creature->position[1];
@@ -350,7 +350,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         creature->state = HOLE_CREATURE_NONE;
       }
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(sCheepCheepImages[creature->isGold] +
+                          TEXTURE_ADDRESS(f_CheepCheepImages[creature->isGold] +
                                           IMAGE_HEADER_SIZE),
                           G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 32, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
@@ -359,7 +359,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSPMatrix(gfx++,
                 OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, sCheepCheepVertices, 4, 0);
+      gSPVertex(gfx++, f_CheepCheepVertices, 4, 0);
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     } else if (creature->state == HOLE_CREATURE_MONKEY) {
@@ -367,16 +367,16 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       creature->position[1] += creature->velocity[1];
       switch (++creature->frameCount) {
         case MONKEY_SECOND_FRAME:
-          OpenEncodedAsset(sMonkeyFrameAssets[1], &asset);
-          ReadEncodedAsset(sMonkeyImage, &asset);
+          OpenEncodedAsset(f_MonkeyFrameAssets[1], &asset);
+          ReadEncodedAsset(f_MonkeyImage, &asset);
           break;
         case MONKEY_THIRD_FRAME:
-          OpenEncodedAsset(sMonkeyFrameAssets[2], &asset);
-          ReadEncodedAsset(sMonkeyImage, &asset);
+          OpenEncodedAsset(f_MonkeyFrameAssets[2], &asset);
+          ReadEncodedAsset(f_MonkeyImage, &asset);
           break;
         case MONKEY_LAST_FRAME:
-          OpenEncodedAsset(sMonkeyFrameAssets[3], &asset);
-          ReadEncodedAsset(sMonkeyImage, &asset);
+          OpenEncodedAsset(f_MonkeyFrameAssets[3], &asset);
+          ReadEncodedAsset(f_MonkeyImage, &asset);
           PlaySound(MONKEY_SOUND, SOUND_CHANNEL, MONKEY_SOUND_VOLUME);
           break;
       }
@@ -402,9 +402,9 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSPMatrix(gfx++,
                 OS_K0_TO_PHYSICAL(&creature->matrices[g_MatrixBufferIndex]),
                 G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, sMonkeyVertices, 8, 0);
+      gSPVertex(gfx++, f_MonkeyVertices, 8, 0);
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(sMonkeyImage + IMAGE_HEADER_SIZE),
+                          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE),
                           G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -412,7 +412,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
       gDPPipeSync(gfx++);
       gDPLoadTextureBlock(gfx++,
-                          TEXTURE_ADDRESS(sMonkeyImage + IMAGE_HEADER_SIZE +
+                          TEXTURE_ADDRESS(f_MonkeyImage + IMAGE_HEADER_SIZE +
                                           MONKEY_HALF_IMAGE_SIZE),
                           G_IM_FMT_RGBA, G_IM_SIZ_16b, 64, 32, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,

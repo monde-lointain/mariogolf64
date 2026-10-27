@@ -31,13 +31,13 @@ typedef struct BillboardTexture {
   /* 0xC */ u16* pixels;
 } BillboardTexture; /* size = 0x10 */
 
-extern BillboardTexture sBillboardTextures[BILLBOARD_TEXTURE_COUNT];
-extern Vtx sBillboardVertices[][SHAPE_VERTEX_COUNT];
-extern s32 sLoadedTextureIndex;
-extern s8 sIsHeapReady;
-extern u8* sHeapStart;
-extern u8* sHeapEnd;
-extern u16 sDrawOrder[BILLBOARD_COUNT];
+extern BillboardTexture f_BillboardTextures[BILLBOARD_TEXTURE_COUNT];
+extern Vtx f_BillboardVertices[][SHAPE_VERTEX_COUNT];
+extern s32 f_LoadedTextureIndex;
+extern s8 f_IsHeapReady;
+extern u8* f_HeapStart;
+extern u8* f_HeapEnd;
+extern u16 f_DrawOrder[BILLBOARD_COUNT];
 s32 GetGroundHeight(s32 x, s32 z);
 
 /* Billboards this close to the course's edges are hidden */
@@ -76,12 +76,12 @@ void DestroyBillboardManager(void) {
   u32 offset;
 
   osSyncPrintf("DestBillMan\n");
-  for (offset = 0; offset < sizeof(sBillboardTextures);
+  for (offset = 0; offset < sizeof(f_BillboardTextures);
        offset += sizeof(BillboardTexture)) {
-    ((BillboardTexture*)((u8*)sBillboardTextures + offset))->pixels = NULL;
+    ((BillboardTexture*)((u8*)f_BillboardTextures + offset))->pixels = NULL;
   }
   ResetHeap(HEAP_BILLBOARD);
-  sIsHeapReady = FALSE;
+  f_IsHeapReady = FALSE;
 }
 
 void InitBillboardManager(void* heapStart, s32 heapSize) {
@@ -90,17 +90,17 @@ void InitBillboardManager(void* heapStart, s32 heapSize) {
   osSyncPrintf("InitBillMan\n");
   heapEnd = (u8*)heapStart + heapSize;
   DestroyBillboardManager();
-  sHeapStart = heapStart;
-  sHeapEnd = heapEnd;
+  f_HeapStart = heapStart;
+  f_HeapEnd = heapEnd;
   AddHeapRegion(HEAP_BILLBOARD, heapStart, heapEnd);
-  sIsHeapReady = TRUE;
+  f_IsHeapReady = TRUE;
 }
 
 void RevertBillboardManager(void) {
   osSyncPrintf("RevertBillMan\n");
   DestroyBillboardManager();
-  AddHeapRegion(HEAP_BILLBOARD, sHeapStart, sHeapEnd);
-  sIsHeapReady = TRUE;
+  AddHeapRegion(HEAP_BILLBOARD, f_HeapStart, f_HeapEnd);
+  f_IsHeapReady = TRUE;
 }
 
 #ifndef NON_MATCHING
@@ -129,7 +129,7 @@ void PlaceBillboards(void) {
   f32 y;
 
   for (i = 0; i != BILLBOARD_COUNT; i++) {
-    sDrawOrder[i] = i;
+    f_DrawOrder[i] = i;
   }
   for (i = 0; i < BILLBOARD_COUNT; i++) {
     if (g_Billboards[i].textureIndex >= 0) {
@@ -166,15 +166,15 @@ void SortBillboardsByDepth(void) {
 
   /* Insertion sort, farthest first */
   for (i = 1; i != BILLBOARD_COUNT; i++) {
-    insertedIndex = sDrawOrder[i];
+    insertedIndex = f_DrawOrder[i];
     for (sortedIndex = i - 1;
          sortedIndex >= 0 &&
-         g_BillboardTransforms[sDrawOrder[sortedIndex]].viewDepth <
+         g_BillboardTransforms[f_DrawOrder[sortedIndex]].viewDepth <
              g_BillboardTransforms[insertedIndex].viewDepth;
          sortedIndex--) {
-      sDrawOrder[sortedIndex + 1] = sDrawOrder[sortedIndex];
+      f_DrawOrder[sortedIndex + 1] = f_DrawOrder[sortedIndex];
     }
-    sDrawOrder[sortedIndex + 1] = insertedIndex;
+    f_DrawOrder[sortedIndex + 1] = insertedIndex;
   }
 }
 
@@ -183,10 +183,10 @@ void SortBillboardsByDepth(void) {
  * and is not the one loaded for drawing. It is a macro, as an inline function
  * compiles differently from the original.
  */
-#define NeedsTextureLoad(billboard, textureIndex)                         \
-  (((billboard)->textureIndex != sLoadedTextureIndex) &&                  \
-   (sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
-   (sBillboardTextures[textureIndex].pixels != NULL))
+#define NeedsTextureLoad(billboard, textureIndex)                          \
+  (((billboard)->textureIndex != f_LoadedTextureIndex) &&                  \
+   (f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) && \
+   (f_BillboardTextures[textureIndex].pixels != NULL))
 
 void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
                    BillboardTransform* transform, s32 textureIndex,
@@ -195,24 +195,24 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
   AssetFile file;
   s32 texelSize;
 
-  if (sBillboardTextures[textureIndex].pixels == NULL &&
-      sBillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
-    texelSize = sBillboardTextures[textureIndex].width *
-                sBillboardTextures[textureIndex].height * sizeof(u16);
-    sBillboardTextures[textureIndex].pixels =
+  if (f_BillboardTextures[textureIndex].pixels == NULL &&
+      f_BillboardTextures[textureIndex].type == TEXTURE_LOADED_ON_DEMAND) {
+    texelSize = f_BillboardTextures[textureIndex].width *
+                f_BillboardTextures[textureIndex].height * sizeof(u16);
+    f_BillboardTextures[textureIndex].pixels =
         AllocFromHeap(HEAP_BILLBOARD, texelSize + TEXTURE_HEADER_SIZE);
-    if (sBillboardTextures[textureIndex].pixels != NULL) {
-      OpenAssetFile(sBillboardTextures[textureIndex].assetId, &file);
-      ReadAssetFile(sBillboardTextures[textureIndex].pixels,
+    if (f_BillboardTextures[textureIndex].pixels != NULL) {
+      OpenAssetFile(f_BillboardTextures[textureIndex].assetId, &file);
+      ReadAssetFile(f_BillboardTextures[textureIndex].pixels,
                     TEXTURE_HEADER_SIZE, &file);
-      ReadAssetFile(sBillboardTextures[textureIndex].pixels, texelSize, &file);
+      ReadAssetFile(f_BillboardTextures[textureIndex].pixels, texelSize, &file);
     }
   }
   if (NeedsTextureLoad(billboard, textureIndex)) {
     gDPLoadTextureBlock(
-        gfx++, (u32)sBillboardTextures[textureIndex].pixels & ~7, G_IM_FMT_RGBA,
-        G_IM_SIZ_16b, sBillboardTextures[textureIndex].width,
-        sBillboardTextures[textureIndex].height, 0, G_TX_NOMIRROR | G_TX_WRAP,
+        gfx++, (u32)f_BillboardTextures[textureIndex].pixels & ~7,
+        G_IM_FMT_RGBA, G_IM_SIZ_16b, f_BillboardTextures[textureIndex].width,
+        f_BillboardTextures[textureIndex].height, 0, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_MIRROR | G_TX_WRAP, 5, 6, 2, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -226,11 +226,11 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
   gSPMatrix(gfx++, &transform->scale,
             G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
   gDPPipeSync(gfx++);
-  gSPVertex(gfx++, sBillboardVertices[billboard->shapeIndex], 4, 0);
+  gSPVertex(gfx++, f_BillboardVertices[billboard->shapeIndex], 4, 0);
   gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   gDPPipeSync(gfx++);
   gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
-  sLoadedTextureIndex = billboard->textureIndex;
+  f_LoadedTextureIndex = billboard->textureIndex;
   *gfxPtr = gfx;
 }
 
@@ -258,7 +258,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   s32 orderIndex;
   s32 billboardIndex;
 
-  if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady) {
+  if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady) {
     return;
   }
   gDPPipeSync(gfx++);
@@ -295,29 +295,29 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
       if (rightAlignment < -lightHeight) {
         rightAlignment = -lightHeight;
       }
-      sBillboardVertices[0][0].v.cn[0] =
+      f_BillboardVertices[0][0].v.cn[0] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][0].v.cn[1] =
+      f_BillboardVertices[0][0].v.cn[1] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][0].v.cn[2] =
+      f_BillboardVertices[0][0].v.cn[2] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][1].v.cn[0] =
+      f_BillboardVertices[0][1].v.cn[0] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][1].v.cn[1] =
+      f_BillboardVertices[0][1].v.cn[1] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][1].v.cn[2] =
+      f_BillboardVertices[0][1].v.cn[2] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
-      sBillboardVertices[0][2].v.cn[0] =
+      f_BillboardVertices[0][2].v.cn[0] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
-      sBillboardVertices[0][2].v.cn[1] =
+      f_BillboardVertices[0][2].v.cn[1] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
-      sBillboardVertices[0][2].v.cn[2] =
+      f_BillboardVertices[0][2].v.cn[2] =
           (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
-      sBillboardVertices[0][3].v.cn[0] =
+      f_BillboardVertices[0][3].v.cn[0] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
-      sBillboardVertices[0][3].v.cn[1] =
+      f_BillboardVertices[0][3].v.cn[1] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
-      sBillboardVertices[0][3].v.cn[2] =
+      f_BillboardVertices[0][3].v.cn[2] =
           (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
     }
   }
@@ -350,7 +350,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   }
   SortBillboardsByDepth();
 
-  sLoadedTextureIndex = -1;
+  f_LoadedTextureIndex = -1;
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -359,7 +359,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   for (orderIndex = 0; orderIndex < BILLBOARD_COUNT; orderIndex++) {
     s32 textureIndex;
 
-    billboardIndex = sDrawOrder[orderIndex];
+    billboardIndex = f_DrawOrder[orderIndex];
     textureIndex = g_Billboards[billboardIndex].textureIndex;
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
@@ -386,7 +386,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     s32 viewDepth;
     s32 alpha;
 
-    billboardIndex = sDrawOrder[orderIndex];
+    billboardIndex = f_DrawOrder[orderIndex];
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
     }
@@ -442,8 +442,8 @@ INCLUDE_ASM("asm/nonmatchings/billboard", DrawBillboards);
  * is not ready, or by the debug view. It is a macro, as an inline
  * function compiles differently from the original.
  */
-#define AreBillboardsHidden()                                   \
-  (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !sIsHeapReady || \
+#define AreBillboardsHidden()                                    \
+  (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady || \
    IsDebugBButtonView())
 
 /*
@@ -499,7 +499,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     ballDepth = VIEW_DEPTH_BALL_HIDDEN;
   }
 
-  sLoadedTextureIndex = -1;
+  f_LoadedTextureIndex = -1;
   gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, 0xFF);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -515,7 +515,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
 
   hasTranslucentMode = FALSE;
   for (orderIndex = BILLBOARD_COUNT - 1; orderIndex >= 0; orderIndex--) {
-    billboardIndex = sDrawOrder[orderIndex];
+    billboardIndex = f_DrawOrder[orderIndex];
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
     }

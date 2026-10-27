@@ -37,11 +37,11 @@
 /* A test shot is stopped after this many steps */
 #define MAX_TEST_SHOT_STEP_COUNT 900
 
-/* The stock club sets, whose parameters are in sClubParameters */
+/* The stock club sets, whose parameters are in f_ClubParameters */
 #define STOCK_CLUB_SET_COUNT 14
 /* The sets after the stock ones are generated, with GenerateClubSet */
 
-/* sPutterPowers has a power for each 1/30 of each shot mode's reach */
+/* f_PutterPowers has a power for each 1/30 of each shot mode's reach */
 #define PUTT_STEP_COUNT 30
 /* GetPuttPower's fraction is out of this */
 #define PUTT_FRACTION_ONE 256
@@ -90,21 +90,21 @@ typedef struct ClubChoice {
   /* 0x10 */ s32 clubSlot;
 } ClubChoice;
 
-extern s32 sPutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT];
+extern s32 f_PutterPowers[SHOT_MODE_COUNT][PUTT_STEP_COUNT];
 /* GetClub returns this for an index past the last club */
-extern Club sNoClub;
-extern Unk20 sClubTestShot;
-extern u8 sUnk14Values[9];
-extern s8 sStockCurves[CLUB_SET_COUNT];
-extern Unk20 sPutterTestShot;
-extern s32 sClubChoiceDelay;
+extern Club f_NoClub;
+extern Unk20 f_ClubTestShot;
+extern u8 f_Unk14Values[9];
+extern s8 f_StockCurves[CLUB_SET_COUNT];
+extern Unk20 f_PutterTestShot;
+extern s32 f_ClubChoiceDelay;
 extern s8 g_IsMiniGolf;
 
 /*
  * Each set's clubs' parameters for each shot mode. WriteClubParameters
  * writes generated parameters as source with this table's layout.
  */
-static const ClubParameters sClubParameters[CLUB_COUNT] = {
+static const ClubParameters f_ClubParameters[CLUB_COUNT] = {
     {{91273, 81148, 20488}, {10, 10, 15}},
     {{80352, 71517, 20154}, {11, 10, 13}},
     {{71104, 63580, 19613}, {12, 16, 12}},
@@ -360,7 +360,7 @@ static const ClubParameters sClubParameters[CLUB_COUNT] = {
 };
 
 const ClubParameters* GetClubParameters(s32 clubIndex) {
-  return &sClubParameters[clubIndex];
+  return &f_ClubParameters[clubIndex];
 }
 
 /* Has no callers */
@@ -415,7 +415,7 @@ INCLUDE_ASM("asm/nonmatchings/club", GetShotWorldDistance);
 #endif
 
 /*
- * Builds the source of sClubParameters and sPutterPowers from the clubs,
+ * Builds the source of f_ClubParameters and f_PutterPowers from the clubs,
  * then hands WriteHostFile the name clubpara.c and the text's size.
  * AppendText is a nested function, a GNU C extension.
  */
@@ -513,9 +513,9 @@ void GenerateClub(s32 clubIndex) {
   }
 
   club = &g_Clubs[clubIndex];
-  sClubTestShot.clubIndex = clubIndex;
+  f_ClubTestShot.clubIndex = clubIndex;
   for (shotMode = 0; shotMode < SHOT_MODE_COUNT; shotMode++) {
-    sClubTestShot.shotMode = shotMode;
+    f_ClubTestShot.shotMode = shotMode;
     /* The target distance is in yards until it is scaled below; the reuse
      * matches */
     targetDistance = GetShotDistance(club, shotMode);
@@ -539,7 +539,7 @@ void GenerateClub(s32 clubIndex) {
       simulation.position[1] = 0;
       simulation.position[2] = 0;
       LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST,
-                           &sClubTestShot);
+                           &f_ClubTestShot);
       for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
         if (!simulation.isRunning) {
           break;
@@ -622,10 +622,10 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
     if (club->sideSpin < -100) {
       club->sideSpin = -100;
     }
-    if ((u8)(stats->unk1E + 4) >= ARRAY_COUNT(sUnk14Values)) {
+    if ((u8)(stats->unk1E + 4) >= ARRAY_COUNT(f_Unk14Values)) {
       club->unk14 = 100;
     } else {
-      club->unk14 = sUnk14Values[stats->unk1E + 4];
+      club->unk14 = f_Unk14Values[stats->unk1E + 4];
     }
     club->unk0 = 110 - stats->unk1F * 9;
     club->curve = stats->curve;
@@ -647,7 +647,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
 }
 
 /*
- * Fills in the stock sets' parameters from sClubParameters; with
+ * Fills in the stock sets' parameters from f_ClubParameters; with
  * GAME_FLAG_GENERATE_CLUBS set, generates every club's instead and passes
  * the results to WriteClubParameters. GetStockCurve is a nested function, a
  * GNU C extension.
@@ -663,7 +663,7 @@ void InitClubs(void) {
     if (setIndex >= CLUB_SET_COUNT) {
       setIndex = 0;
     }
-    return sStockCurves[setIndex];
+    return f_StockCurves[setIndex];
   }
 
   if (!IsGameFlagSet(GAME_FLAG_GENERATE_CLUBS)) {
@@ -725,10 +725,10 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
       index = 1;
     }
     index--;
-    return sPutterPowers[shotMode][index];
+    return f_PutterPowers[shotMode][index];
   }
-  sPutterTestShot.clubIndex = CLUB_TYPE_PUTTER;
-  sPutterTestShot.shotMode = shotMode;
+  f_PutterTestShot.clubIndex = CLUB_TYPE_PUTTER;
+  f_PutterTestShot.shotMode = shotMode;
   reach = GetShotDistance(&g_Clubs[CLUB_TYPE_PUTTER], shotMode);
   putter = &g_Clubs[CLUB_TYPE_PUTTER];
   shortDistance = 0;
@@ -747,7 +747,7 @@ s32 GetPuttPower(s32 fraction, s32 shotMode) {
     simulation.position[2] = 0;
     simulation.surface = PUTT_TEST_SURFACE;
     LaunchBallSimulation(&simulation, LAUNCH_PURPOSE_CLUB_TEST,
-                         &sPutterTestShot);
+                         &f_PutterTestShot);
     for (step = 0; step < MAX_TEST_SHOT_STEP_COUNT; step++) {
       if (!simulation.isRunning) {
         break;
@@ -799,7 +799,7 @@ INCLUDE_ASM("asm/nonmatchings/club", GetPuttPower);
 s32 GetClubPower(Club* club, s32 shotMode) { return club->power[shotMode]; }
 
 Club* GetClub(u32 clubIndex) {
-  return (clubIndex < CLUB_COUNT) ? &g_Clubs[clubIndex] : &sNoClub;
+  return (clubIndex < CLUB_COUNT) ? &g_Clubs[clubIndex] : &f_NoClub;
 }
 
 /* Returns the club in the current player's selected slot */
@@ -872,45 +872,46 @@ s32 GetCurrentSurfaceClubMask(s32 distinguishesKinds) {
  * putter is not rated. Several surface kinds share each group's ratings.
  */
 #define LIE_RATING_LENGTH CLUB_TYPE_PUTTER
-static const char sTeeUpLieRatings[LIE_RATING_LENGTH + 1] = "3444444555555";
-static const char sTeeUpApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_TeeUpLieRatings[LIE_RATING_LENGTH + 1] = "3444444555555";
+static const char f_TeeUpApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "5555555555555";
-static const char sFairwayLieRatings[LIE_RATING_LENGTH + 1] = "3334444445555";
-static const char sFairwayApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_FairwayLieRatings[LIE_RATING_LENGTH + 1] = "3334444445555";
+static const char f_FairwayApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "4444555555555";
-static const char sFairwayFairLieLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_FairwayFairLieLieRatings[LIE_RATING_LENGTH + 1] =
     "2333344444455";
-static const char sFairwayFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_FairwayFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "3344445555555";
-static const char sFairwayPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_FairwayPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
     "1222333344445";
-static const char sFairwayPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_FairwayPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "2333334444455";
-static const char sRoughLieRatings[LIE_RATING_LENGTH + 1] = "1223333444455";
-static const char sRoughApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_RoughLieRatings[LIE_RATING_LENGTH + 1] = "1223333444455";
+static const char f_RoughApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "2233344445555";
-static const char sRoughPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_RoughPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
     "1112223334445";
-static const char sRoughPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_RoughPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "2222333444455";
-static const char sDeepRoughLieRatings[LIE_RATING_LENGTH + 1] = "1111222233334";
-static const char sDeepRoughApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_DeepRoughLieRatings[LIE_RATING_LENGTH + 1] =
+    "1111222233334";
+static const char f_DeepRoughApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "1112222333344";
-static const char sBunkerLieRatings[LIE_RATING_LENGTH + 1] = "1112223333445";
-static const char sBunkerApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_BunkerLieRatings[LIE_RATING_LENGTH + 1] = "1112223333445";
+static const char f_BunkerApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "2223333444455";
-static const char sBunkerFairLieLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_BunkerFairLieLieRatings[LIE_RATING_LENGTH + 1] =
     "1111122222334";
-static const char sBunkerFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_BunkerFairLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "1112223333444";
-static const char sBunkerPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_BunkerPoorLieLieRatings[LIE_RATING_LENGTH + 1] =
     "1111111222223";
-static const char sBunkerPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_BunkerPoorLieApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "1111112223334";
-static const char sCartWayLieRatings[LIE_RATING_LENGTH + 1] = "1112223333344";
-static const char sCartWayApproachLieRatings[LIE_RATING_LENGTH + 1] =
+static const char f_CartWayLieRatings[LIE_RATING_LENGTH + 1] = "1112223333344";
+static const char f_CartWayApproachLieRatings[LIE_RATING_LENGTH + 1] =
     "2223333333444";
-static const char sDefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
+static const char f_DefaultLieRatings[LIE_RATING_LENGTH + 1] = "3333333333333";
 
 /*
  * Rates how well the club plays from the surface, from 1 to MAX_LIE_RATING,
@@ -925,57 +926,57 @@ s32 GetLieRating(Club* club, s32 surface, s32 shotMode) {
 
   switch (GetSurfaceInfo(surface)->kind) {
     case SURFACE_KIND_TEE_UP:
-      ratings = sTeeUpLieRatings;
-      approachRatings = sTeeUpApproachLieRatings;
+      ratings = f_TeeUpLieRatings;
+      approachRatings = f_TeeUpApproachLieRatings;
       break;
     case SURFACE_KIND_FAIRWAY:
     case SURFACE_KIND_GREEN_EDGE:
     case SURFACE_KIND_TEE_GROUND:
-      ratings = sFairwayLieRatings;
-      approachRatings = sFairwayApproachLieRatings;
+      ratings = f_FairwayLieRatings;
+      approachRatings = f_FairwayApproachLieRatings;
       break;
     case SURFACE_KIND_FAIRWAY_FAIR_LIE:
     case SURFACE_KIND_SEMI_ROUGH:
-      ratings = sFairwayFairLieLieRatings;
-      approachRatings = sFairwayFairLieApproachLieRatings;
+      ratings = f_FairwayFairLieLieRatings;
+      approachRatings = f_FairwayFairLieApproachLieRatings;
       break;
     case SURFACE_KIND_FAIRWAY_POOR_LIE:
-      ratings = sFairwayPoorLieLieRatings;
-      approachRatings = sFairwayPoorLieApproachLieRatings;
+      ratings = f_FairwayPoorLieLieRatings;
+      approachRatings = f_FairwayPoorLieApproachLieRatings;
       break;
     case SURFACE_KIND_ROUGH:
     case SURFACE_KIND_ROCK:
     case SURFACE_KIND_BARE_GROUND:
-      ratings = sRoughLieRatings;
-      approachRatings = sRoughApproachLieRatings;
+      ratings = f_RoughLieRatings;
+      approachRatings = f_RoughApproachLieRatings;
       break;
     case SURFACE_KIND_ROUGH_POOR_LIE:
-      ratings = sRoughPoorLieLieRatings;
-      approachRatings = sRoughPoorLieApproachLieRatings;
+      ratings = f_RoughPoorLieLieRatings;
+      approachRatings = f_RoughPoorLieApproachLieRatings;
       break;
     case SURFACE_KIND_DEEP_ROUGH:
     case SURFACE_KIND_WASTE_AREA:
-      ratings = sDeepRoughLieRatings;
-      approachRatings = sDeepRoughApproachLieRatings;
+      ratings = f_DeepRoughLieRatings;
+      approachRatings = f_DeepRoughApproachLieRatings;
       break;
     case SURFACE_KIND_BUNKER:
-      ratings = sBunkerLieRatings;
-      approachRatings = sBunkerApproachLieRatings;
+      ratings = f_BunkerLieRatings;
+      approachRatings = f_BunkerApproachLieRatings;
       break;
     case SURFACE_KIND_BUNKER_FAIR_LIE:
-      ratings = sBunkerFairLieLieRatings;
-      approachRatings = sBunkerFairLieApproachLieRatings;
+      ratings = f_BunkerFairLieLieRatings;
+      approachRatings = f_BunkerFairLieApproachLieRatings;
       break;
     case SURFACE_KIND_BUNKER_POOR_LIE:
-      ratings = sBunkerPoorLieLieRatings;
-      approachRatings = sBunkerPoorLieApproachLieRatings;
+      ratings = f_BunkerPoorLieLieRatings;
+      approachRatings = f_BunkerPoorLieApproachLieRatings;
       break;
     case SURFACE_KIND_CART_WAY:
-      ratings = sCartWayLieRatings;
-      approachRatings = sCartWayApproachLieRatings;
+      ratings = f_CartWayLieRatings;
+      approachRatings = f_CartWayApproachLieRatings;
       break;
     default:
-      ratings = sDefaultLieRatings;
+      ratings = f_DefaultLieRatings;
       approachRatings = ratings;
       break;
   }
@@ -1026,14 +1027,14 @@ s32 StepToClubChoice(ClubChoice* choice) {
       g_CurrentShot.clubSlot == choice->clubSlot) {
     return TRUE;
   }
-  if (sClubChoiceDelay > CLUB_CHOICE_STEP_DELAY) {
-    sClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
+  if (f_ClubChoiceDelay > CLUB_CHOICE_STEP_DELAY) {
+    f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
   }
-  if (sClubChoiceDelay != 0) {
-    sClubChoiceDelay--;
+  if (f_ClubChoiceDelay != 0) {
+    f_ClubChoiceDelay--;
     return FALSE;
   }
-  sClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
+  f_ClubChoiceDelay = CLUB_CHOICE_STEP_DELAY;
   if (hasStepped) {
     return !hasStepped;
   }

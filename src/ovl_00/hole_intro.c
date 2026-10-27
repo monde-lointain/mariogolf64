@@ -46,11 +46,11 @@
 #define INTRO_FRAME_TEXT_COLUMN 20
 #define INTRO_FRAME_TEXT_ROW 2
 
-extern s32 sIntroFrame;
+extern s32 f_IntroFrame;
 /* How far in front of the ball the camera is; negative when behind it */
-extern f32 sIntroCameraDistance;
+extern f32 f_IntroCameraDistance;
 /* How far above the ball the camera is; negative values are above */
-extern f32 sIntroCameraHeight;
+extern f32 f_IntroCameraHeight;
 
 #ifdef NON_MATCHING
 /* Places the camera for the start of the hole intro */
@@ -60,9 +60,9 @@ void StartHoleIntroCamera(void) {
   f32 offsetX;
   f32 scale = COURSE_TO_WORLD_SCALE;
 
-  sIntroFrame = 0;
-  sIntroCameraDistance = INTRO_CAMERA_START_DISTANCE;
-  sIntroCameraHeight = INTRO_CAMERA_START_HEIGHT;
+  f_IntroFrame = 0;
+  f_IntroCameraDistance = INTRO_CAMERA_START_DISTANCE;
+  f_IntroCameraHeight = INTRO_CAMERA_START_HEIGHT;
   (*lookAt)[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] * scale;
   (*lookAt)[AXIS_Y] =
       (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
@@ -90,48 +90,48 @@ s32 UpdateHoleIntroCamera(void) {
   Vec3 offset;
   f32 heading;
 
-  if (sIntroFrame < INTRO_FRAME_COUNT_MAX) {
-    sIntroFrame++;
+  if (f_IntroFrame < INTRO_FRAME_COUNT_MAX) {
+    f_IntroFrame++;
   }
   if (g_HoleIndex == GetFirstHoleIndex()) {
-    if (sIntroFrame < FIRST_HOLE_INTRO_FRAMES) {
-      sIntroCameraDistance =
+    if (f_IntroFrame < FIRST_HOLE_INTRO_FRAMES) {
+      f_IntroCameraDistance =
           FIRST_HOLE_INTRO_START_DISTANCE -
-          sIntroFrame *
+          f_IntroFrame *
               (FIRST_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
               FIRST_HOLE_INTRO_FRAMES;
-      sIntroCameraHeight =
+      f_IntroCameraHeight =
           FIRST_HOLE_INTRO_START_HEIGHT -
-          sIntroFrame *
+          f_IntroFrame *
               (FIRST_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
               FIRST_HOLE_INTRO_FRAMES;
     } else {
-      sIntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
-      sIntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
+      f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
+      f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
     /* The swing comes first, then the shot's heading is added to it */
     heading =
-        -(f32)sIntroFrame * DEGREES_TO_RADIANS(FIRST_HOLE_INTRO_SWING_DEGREES);
+        -(f32)f_IntroFrame * DEGREES_TO_RADIANS(FIRST_HOLE_INTRO_SWING_DEGREES);
     if (heading < -M_PI) {
       heading = -(f32)M_PI;
     }
     heading = heading +
               ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2);
   } else {
-    if (sIntroFrame < LATER_HOLE_INTRO_FRAMES) {
-      sIntroCameraDistance =
+    if (f_IntroFrame < LATER_HOLE_INTRO_FRAMES) {
+      f_IntroCameraDistance =
           LATER_HOLE_INTRO_START_DISTANCE -
-          sIntroFrame *
+          f_IntroFrame *
               (LATER_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
               LATER_HOLE_INTRO_FRAMES;
-      sIntroCameraHeight =
+      f_IntroCameraHeight =
           LATER_HOLE_INTRO_START_HEIGHT -
-          sIntroFrame *
+          f_IntroFrame *
               (LATER_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
               LATER_HOLE_INTRO_FRAMES;
     } else {
-      sIntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
-      sIntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
+      f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
+      f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
     heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2 +
               -(f32)M_PI;
@@ -144,35 +144,36 @@ s32 UpdateHoleIntroCamera(void) {
   g_Cameras[1].view.lookAt[AXIS_Z] =
       g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   offset[AXIS_X] =
-      -sinf(heading) * sIntroCameraDistance * COURSE_TO_WORLD_SCALE;
-  offset[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] + sIntroCameraHeight) *
+      -sinf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
+  offset[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] + f_IntroCameraHeight) *
                    COURSE_TO_WORLD_SCALE;
-  offset[AXIS_Z] = cosf(heading) * sIntroCameraDistance * COURSE_TO_WORLD_SCALE;
+  offset[AXIS_Z] =
+      cosf(heading) * f_IntroCameraDistance * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.eye[AXIS_Y] = offset[AXIS_Y];
   g_Cameras[0].view.eye[AXIS_X] =
       g_Cameras[1].view.lookAt[AXIS_X] + offset[AXIS_X];
   g_Cameras[0].view.eye[AXIS_Z] =
       g_Cameras[1].view.lookAt[AXIS_Z] + offset[AXIS_Z];
   if (g_HoleIndex == GetFirstHoleIndex()) {
-    if (sIntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
+    if (f_IntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
       StartMovie(MOVIE_LAKITU);
     }
-    if (sIntroFrame > FIRST_HOLE_INTRO_MOVIE_FRAME && IsMoviePastCue()) {
+    if (f_IntroFrame > FIRST_HOLE_INTRO_MOVIE_FRAME && IsMoviePastCue()) {
       return TRUE;
     }
   } else {
-    if (sIntroFrame == LATER_HOLE_INTRO_MOVIE_FRAME) {
+    if (f_IntroFrame == LATER_HOLE_INTRO_MOVIE_FRAME) {
       StartMovie(MOVIE_READY_GO);
     }
-    if (sIntroFrame == LATER_HOLE_INTRO_SOUND_FRAME) {
+    if (f_IntroFrame == LATER_HOLE_INTRO_SOUND_FRAME) {
       PlaySound(SOUND_HOLE_INTRO, HOLE_INTRO_SOUND_CHANNEL,
                 HOLE_INTRO_SOUND_VOLUME);
     }
-    if (sIntroFrame == LATER_HOLE_INTRO_FRAMES) {
+    if (f_IntroFrame == LATER_HOLE_INTRO_FRAMES) {
       return TRUE;
     }
   }
-  sprintf(g_PrintBuffer, "%3d", sIntroFrame);
+  sprintf(g_PrintBuffer, "%3d", f_IntroFrame);
   PrintDebugText(g_PrintBuffer, INTRO_FRAME_TEXT_COLUMN, INTRO_FRAME_TEXT_ROW);
   return FALSE;
 }

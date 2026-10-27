@@ -357,10 +357,10 @@ extern s32
 extern CurrentShot D_80104F78; /* The replayed shot */
 extern s32 D_800C3074; /* Set once A has been pressed to take the shot */
 extern s32 D_800C307C;
-extern s32 sTurnTimerStart; /* Nothing reads it */
+extern s32 f_TurnTimerStart; /* Nothing reads it */
 /* How many times the shot's flight has been shown; StartFlightCamera gets the
  * earlier count */
-extern s32 sShotFlightCount;
+extern s32 f_ShotFlightCount;
 
 void SetCharacterTranslucent(u32 slotIndex, s32 value);
 void PlaceAimCamera(void);
@@ -1425,7 +1425,7 @@ void UpdateShotFlags(void) {
   }
 }
 
-void StartTurnTimer(void) { sTurnTimerStart = osGetCount(); }
+void StartTurnTimer(void) { f_TurnTimerStart = osGetCount(); }
 
 /* Always FALSE; maybe once a debug check */
 s32 func_8020561C_ovl_00(s32 arg0) { return FALSE; }
@@ -1572,7 +1572,7 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
     return;
   }
   if (g_GameMode == GAME_MODE_RING_SHOT ||
-      sShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
+      f_ShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
     return;
   }
   if (g_IsMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
@@ -2943,7 +2943,7 @@ void UpdateTurns(void) {
       case 0:
         D_80223FF7_ovl_00 = 0;
         UnloadOverlay(GetOverlayOfModule(8));
-        sShotFlightCount = 0;
+        f_ShotFlightCount = 0;
         D_80227184_ovl_00 = 127.0f;
         UpdateContest(FALSE);
         func_8005F1C8();
@@ -3773,7 +3773,7 @@ void UpdateTurns(void) {
         D_80224004_ovl_00 = 0;
         SetAnimationSpeed(0, 1.0f);
         nextState = 8;
-        StartFlightCamera(sShotFlightCount++);
+        StartFlightCamera(f_ShotFlightCount++);
         D_80223FFC_ovl_00 = 0;
         break;
       }

@@ -40,16 +40,16 @@
  * Each symbol's characters. The first one is the one written; the others
  * are accepted because they look alike.
  */
-static char* sPasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
+static char* f_PasswordAlphabet[PASSWORD_SYMBOL_COUNT] = {
     "4", "6", "X", "Y", "17I", "2Z", "5S", "8B", "0OD", "VU",
     "9", "A", "C", "E", "R",   "T",  "W",  "L",  "M",   "N",
     "P", "J", "K", "Q", "3",   "F",  "G",  "H",
 };
 
 /* XORed with the tournament password's bytes */
-static u8 sTournamentKey[] = "evi";
+static u8 f_TournamentKey[] = "evi";
 
-static TournamentRules sTournamentRules[TOURNAMENT_RULES_COUNT] = {
+static TournamentRules f_TournamentRules[TOURNAMENT_RULES_COUNT] = {
     {-1, 0, 0}, {-1, 0, 1}, {-1, 0, 2}, {-1, 0, 3}, {-1, 0, 4},  {-1, 0, 5},
     {-1, 0, 6}, {-1, 0, 7}, {-1, 0, 8}, {-1, 0, 9}, {-1, 0, 10}, {-1, 0, 11},
     {-1, 1, 0}, {-1, 1, 1}, {-1, 1, 2}, {-1, 1, 3}, {-1, 1, 4},  {-1, 1, 5},
@@ -116,7 +116,7 @@ s32 WritePasswordSymbols(u8* symbols, char* password, s32 symbolCount,
       return -1;
     }
     password[i] =
-        sPasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
+        f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
   }
   return 0;
 }
@@ -133,7 +133,7 @@ static s32 ReadPasswordSymbols(u8* symbols, char* password, s32 symbolCount) {
 
   for (i = 0; i < symbolCount; i++) {
     for (symbol = 0; symbol < PASSWORD_SYMBOL_COUNT; symbol++) {
-      char* characters = sPasswordAlphabet[symbol];
+      char* characters = f_PasswordAlphabet[symbol];
       s32 isFound = FALSE;
 
       for (characterIndex = 0; characters[characterIndex] != '\0';
@@ -195,7 +195,7 @@ s32 DecodeTournamentPassword(u8* code, char* password) {
   bytes[1] = number >> 8;
   bytes[2] = number;
   for (i = 0; i < TOURNAMENT_CODE_SIZE; i++) {
-    code[i] = ReverseBits(bytes[i] ^ sTournamentKey[i]);
+    code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
   }
   return 0;
 }
@@ -262,7 +262,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
 
 TournamentRules* GetTournamentRules(u8 rulesIndex) {
   if (rulesIndex >= TOURNAMENT_RULES_COUNT) {
-    return &sTournamentRules[0];
+    return &f_TournamentRules[0];
   }
-  return &sTournamentRules[rulesIndex];
+  return &f_TournamentRules[rulesIndex];
 }

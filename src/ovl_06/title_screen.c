@@ -21,14 +21,14 @@
  * unlock parts of the save or enable debugging.
  */
 
-/* sTitleStage values */
+/* f_TitleStage values */
 #define TITLE_SHOWING 0
 #define TITLE_SWAPPING_MODULES 1
 #define TITLE_GOING_TO_LOGOS 2
 
 /* After this many frames, the title screen goes back to the logos */
 #define TITLE_IDLE_FRAME_COUNT 630
-/* sTitleFrame stops rising at this */
+/* f_TitleFrame stops rising at this */
 #define TITLE_FRAME_LIMIT 900
 /* The count given to StartScreenFadeIn as the screen first appears */
 #define TITLE_ENTERING_COUNTDOWN 8
@@ -81,8 +81,8 @@ typedef struct PressStartText {
 /* ButtonCode.progress once the code has been entered, after which it is ignored
  */
 #define CODE_ENTERED (-1)
-/* This entry of sButtonCodes is only read while the first controller holds Z, L
- * and R */
+/* This entry of f_ButtonCodes is only read while the first controller holds Z,
+ * L and R */
 #define DEBUG_CODE_INDEX 3
 #define DEBUG_CODE_HELD_BUTTONS (Z_TRIG | L_TRIG | R_TRIG)
 
@@ -100,9 +100,9 @@ typedef struct ButtonCode {
 #define GAME_FLAG_UNK44 0x44
 #define GAME_FLAG_UNK65 0x65
 
-extern TitleImage sTitleImage;
-extern JapaneseLogo sJapaneseLogo;
-extern PressStartText sPressStartText;
+extern TitleImage f_TitleImage;
+extern JapaneseLogo f_JapaneseLogo;
+extern PressStartText f_PressStartText;
 
 extern s32 D_800B6808;
 
@@ -112,9 +112,9 @@ void OnUnlockCodeEntered(void);
 void EnableDebug(void);
 
 /* The frames since the title screen appeared */
-static s32 sTitleFrame = 0;
-static s32 sTitleStage = TITLE_SHOWING;
-static ButtonCode sButtonCodes[] = {
+static s32 f_TitleFrame = 0;
+static s32 f_TitleStage = TITLE_SHOWING;
+static ButtonCode f_ButtonCodes[] = {
     {"AABAUUDULRlr", 0, OnUnlockCodeEntered},
     {"DDLLLRRRddlllrrr", 0, OnUnlockCodeEntered},
     {"UUDUDDUDLLRLRRLR", 0, GrantEveryTournamentPlace},
@@ -123,7 +123,7 @@ static ButtonCode sButtonCodes[] = {
 /* Never read or written */
 s32 g_TitleUnusedWord = 0;
 /* "PRESS START" turns from red to green and back as this goes round */
-static f32 sPressStartPhase = 0.0f;
+static f32 f_PressStartPhase = 0.0f;
 
 void OnUnlockCodeEntered(void) { UnlockEverything(); }
 
@@ -138,8 +138,8 @@ void SetUnknownGameFlags(void) {
 void ResetButtonCodes(void) {
   u32 codeIndex;
 
-  for (codeIndex = 0; codeIndex < ARRAY_COUNT(sButtonCodes); codeIndex++) {
-    sButtonCodes[codeIndex].progress = 0;
+  for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
+    f_ButtonCodes[codeIndex].progress = 0;
   }
 }
 
@@ -153,8 +153,8 @@ void UpdateButtonCodes(void) {
   s32 progress;
   s32 isMatched;
 
-  for (codeIndex = 0; codeIndex < ARRAY_COUNT(sButtonCodes); codeIndex++) {
-    progress = sButtonCodes[codeIndex].progress;
+  for (codeIndex = 0; codeIndex < ARRAY_COUNT(f_ButtonCodes); codeIndex++) {
+    progress = f_ButtonCodes[codeIndex].progress;
     isMatched = FALSE;
     if (progress == CODE_ENTERED) {
       continue;
@@ -165,7 +165,7 @@ void UpdateButtonCodes(void) {
         continue;
       }
     }
-    switch (sButtonCodes[codeIndex].sequence[progress]) {
+    switch (f_ButtonCodes[codeIndex].sequence[progress]) {
       case 'A':
         if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
           isMatched = TRUE;
@@ -221,11 +221,11 @@ void UpdateButtonCodes(void) {
       progress = 0;
     }
     progress += isMatched;
-    if (sButtonCodes[codeIndex].sequence[progress] == '\0') {
+    if (f_ButtonCodes[codeIndex].sequence[progress] == '\0') {
       progress = CODE_ENTERED;
-      sButtonCodes[codeIndex].onEntered();
+      f_ButtonCodes[codeIndex].onEntered();
     }
-    sButtonCodes[codeIndex].progress = progress;
+    f_ButtonCodes[codeIndex].progress = progress;
   }
 }
 
@@ -237,18 +237,18 @@ void LoadTitleScreen(void) {
   func_8005DC50();
   if (g_ControllerCount == 0) {
     OpenEncodedAsset(NO_CONTROLLER_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(&sTitleImage, &asset);
+    ReadEncodedAsset(&f_TitleImage, &asset);
     PlaySong(5, SONG_FLAG_RESTART);
   } else {
     OpenEncodedAsset(TITLE_IMAGE_ASSET, &asset);
-    ReadEncodedAsset(&sTitleImage, &asset);
+    ReadEncodedAsset(&f_TitleImage, &asset);
     PlaySong(0x2A, SONG_FLAG_RESTART);
   }
   OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
-  ReadEncodedAsset(&sJapaneseLogo, &asset);
+  ReadEncodedAsset(&f_JapaneseLogo, &asset);
   OpenEncodedAsset(PRESS_START_TEXT_ASSET, &asset);
-  ReadEncodedAsset(&sPressStartText, &asset);
-  sTitleStage = TITLE_SHOWING;
+  ReadEncodedAsset(&f_PressStartText, &asset);
+  f_TitleStage = TITLE_SHOWING;
 }
 
 void UnloadTitleScreen(void) {
@@ -263,7 +263,7 @@ void UnloadTitleScreen(void) {
  */
 #define IsLeavingForLogos(pressedButtons)                 \
   ((((pressedButtons) & B_BUTTON) && g_IsDebugEnabled) || \
-   (sTitleFrame == TITLE_IDLE_FRAME_COUNT))
+   (f_TitleFrame == TITLE_IDLE_FRAME_COUNT))
 
 /* With g_IsDebugEnabled set, B also starts going back to the logos */
 void UpdateTitleScreen(void) {
@@ -274,7 +274,7 @@ void UpdateTitleScreen(void) {
     return;
   }
   UpdateButtonCodes();
-  if (sTitleFrame == 0) {
+  if (f_TitleFrame == 0) {
     /* StartScreenFadeIn is given white when D_800B6808 is 1, else black */
     if (D_800B6808 == 1) {
       StartScreenFadeIn(255, 255, 255, TITLE_ENTERING_COUNTDOWN);
@@ -283,7 +283,7 @@ void UpdateTitleScreen(void) {
     }
     D_800B6808 = 3;
   }
-  switch (sTitleStage) {
+  switch (f_TitleStage) {
     case TITLE_SHOWING:
       if (HasScreenFadeEnded() && IsHudAnimationDone()) {
         pressedButtons = 0;
@@ -297,11 +297,11 @@ void UpdateTitleScreen(void) {
           g_NextScene = 14;
           g_SceneModuleToUnload = 0x04;
           g_SceneModuleToLoad = 0x02;
-          sTitleFrame = 0;
-          sTitleStage = TITLE_SWAPPING_MODULES;
+          f_TitleFrame = 0;
+          f_TitleStage = TITLE_SWAPPING_MODULES;
           PlaySound(0x5D, 0xF, 0x7F);
         } else if (IsLeavingForLogos(pressedButtons)) {
-          sTitleStage = TITLE_GOING_TO_LOGOS;
+          f_TitleStage = TITLE_GOING_TO_LOGOS;
           StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
         }
       }
@@ -312,12 +312,12 @@ void UpdateTitleScreen(void) {
         g_NextScene = 27;
         g_SceneModuleToUnload = 0x04;
         g_SceneModuleToLoad = 0x0C;
-        sTitleFrame = 0;
+        f_TitleFrame = 0;
       }
       break;
   }
-  if (sTitleFrame < TITLE_FRAME_LIMIT) {
-    sTitleFrame++;
+  if (f_TitleFrame < TITLE_FRAME_LIMIT) {
+    f_TitleFrame++;
   }
 }
 
@@ -355,7 +355,7 @@ void DrawTitleScreen(Gfx** displayListHead) {
                       : TITLE_STRIP_HEIGHT;
     gDPLoadTextureTile(
         gfx++,
-        (u32)&sTitleImage
+        (u32)&f_TitleImage
                 .texels[stripIndex * TITLE_STRIP_HEIGHT * TITLE_IMAGE_WIDTH] &
             ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, TITLE_IMAGE_WIDTH, 0, 0, 0,
@@ -372,15 +372,15 @@ void DrawTitleScreen(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
   }
   if (g_ControllerCount != 0) {
-    sPressStartPhase += DEGREES_TO_RADIANS(20);
-    red = sinf(sPressStartPhase) * 127.0f + 127.0f;
-    green = sinf(sPressStartPhase + M_PI) * 127.0f + 127.0f;
+    f_PressStartPhase += DEGREES_TO_RADIANS(20);
+    red = sinf(f_PressStartPhase) * 127.0f + 127.0f;
+    green = sinf(f_PressStartPhase + M_PI) * 127.0f + 127.0f;
     gDPSetPrimColor(gfx++, 0, 0, red, green, 64, 255);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gDPSetCombineLERP(gfx++, TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0,
                       TEXEL0, 0, PRIMITIVE, 0, PRIMITIVE, 0, TEXEL0, 0);
-    gDPLoadTextureTile_4b(gfx++, (u32)sPressStartText.texels & ~7, G_IM_FMT_I,
+    gDPLoadTextureTile_4b(gfx++, (u32)f_PressStartText.texels & ~7, G_IM_FMT_I,
                           PRESS_START_WIDTH, PRESS_START_HEIGHT, 0, 0,
                           PRESS_START_WIDTH - 1, PRESS_START_HEIGHT - 1, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,

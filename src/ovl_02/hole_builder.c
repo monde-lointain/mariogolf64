@@ -141,7 +141,7 @@ typedef struct GroundLightColor {
 /* Scales a step per ground unit to a step per map row in HEIGHT_FRACTION_BITS
  * fixed point */
 #define HEIGHT_ROW_STEP_SCALE 65536.0f
-/* sHeightStepScales holds 65536 / n for the counts below this */
+/* f_HeightStepScales holds 65536 / n for the counts below this */
 #define HEIGHT_STEP_SCALE_COUNT 32
 
 /* The points of a tile's grid, edges included, that MeasureGroundTiles averages
@@ -183,20 +183,20 @@ typedef struct HoleAssetIds {
   /* 0xC */ u16 attributes;
 } HoleAssetIds; /* size = 0xE */
 
-extern HoleAssetIds sHoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
-extern AssetFile sHoleAsset;
-extern u32 sPaintSeed;
-extern s32 sIsCodeMapCleaned;
-extern u8* sReadCursor;
-extern u8* sBuildBuffer;
-extern u8* sBuildCursor;
+extern HoleAssetIds f_HoleAssetIds[HOLE_ASSET_COURSE_COUNT][COURSE_HOLE_COUNT];
+extern AssetFile f_HoleAsset;
+extern u32 f_PaintSeed;
+extern s32 f_IsCodeMapCleaned;
+extern u8* f_ReadCursor;
+extern u8* f_BuildBuffer;
+extern u8* f_BuildCursor;
 extern s32 g_TerrainCodeBlockCount;
-extern f32 sHeightStepScales[];
-extern s32 sPaintLogic;
-extern PaintLogic sPaintLogics[];
+extern f32 f_HeightStepScales[];
+extern s32 f_PaintLogic;
+extern PaintLogic f_PaintLogics[];
 extern Vec3 g_MiniGolfScale;
-extern s32 sHolePaintLogics[][COURSE_HOLE_COUNT];
-extern s8 sTileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
+extern s32 f_HolePaintLogics[][COURSE_HOLE_COUNT];
+extern s8 f_TileVertexSlots[TILE_POINT_SPAN][TILE_POINT_SPAN];
 
 void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
                                 Vtx** vertexCursor);
@@ -214,17 +214,17 @@ void FillRandomGrid(s32 range, s32 base);
 /* Copies bytes from the read cursor and advances it past them */
 static inline void ReadFileBytes(void* destination, s32 size) {
   u8* byte = destination;
-  u8* source = sReadCursor;
-  u8* end = sReadCursor + size;
+  u8* source = f_ReadCursor;
+  u8* end = f_ReadCursor + size;
 
   while (source != end) {
     *byte++ = *source++;
   }
-  sReadCursor = end;
+  f_ReadCursor = end;
 }
 
 /* Seeds the random numbers that paint logic draws */
-void SetPaintSeed(u32 seed) { sPaintSeed = seed; }
+void SetPaintSeed(u32 seed) { f_PaintSeed = seed; }
 
 /*
  * Fills offsets with up to maxCount column and row offsets less than span
@@ -379,7 +379,7 @@ void DrawBandHeights(s16* heights, s32 band) {
       count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
       direction = (fromX < toX) ? 1 : -1;
       if (count < HEIGHT_STEP_SCALE_COUNT) {
-        texelHeightStep = sHeightStepScales[count] * (toHeight - fromHeight);
+        texelHeightStep = f_HeightStepScales[count] * (toHeight - fromHeight);
       } else {
         texelHeightStep = ((toHeight - fromHeight) << 16) / count;
       }
@@ -587,8 +587,8 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
         } else {
@@ -602,8 +602,8 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = (sPaintSeed >> 16) & 7;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -618,8 +618,8 @@ s32 PaintMainCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -684,8 +684,8 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 14) << 11) | 0x4CE;
         } else {
@@ -700,7 +700,7 @@ s32 PaintPaleRoughCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
         /* The random value is unused */
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
         color = 0xDFB7;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
@@ -791,8 +791,8 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 19) << 11) | 0x688;
         } else {
@@ -806,8 +806,8 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = ((sPaintSeed >> 16) & 3) + 10;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = ((f_PaintSeed >> 16) & 3) + 10;
         green = red + 3;
         color = (red << 11) | (green << 6) | 5;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -822,8 +822,8 @@ s32 PaintShyGuyDesert(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -885,8 +885,8 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
         } else {
@@ -900,8 +900,8 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = (sPaintSeed >> 16) & 7;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -916,8 +916,8 @@ s32 PaintBooValley(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -978,8 +978,8 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x4D4;
         } else {
@@ -993,8 +993,8 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = (sPaintSeed >> 16) & 7;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 0xD;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -1009,8 +1009,8 @@ s32 PaintYoshisIsland(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -1074,8 +1074,8 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        fairwayRandom = sPaintSeed >> 16;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
         } else {
@@ -1089,8 +1089,8 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = (sPaintSeed >> 16) & 7;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -1105,8 +1105,8 @@ s32 PaintUnlistedCourse(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
       break;
     case TERRAIN_CODE_GREEN:
@@ -1162,8 +1162,8 @@ s32 PaintFirstMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
       break;
     case TERRAIN_CODE_GREEN:
@@ -1211,8 +1211,8 @@ s32 PaintSecondMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -1259,8 +1259,8 @@ s32 PaintThirdMiniGolfCourse(s32 code, s32 nearestCode, s32 nearestDistance,
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -1317,8 +1317,8 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-        red = (sPaintSeed >> 16) & 7;
+        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
         paintedCode = TERRAIN_CODE_ROUGH;
@@ -1333,8 +1333,8 @@ s32 PaintDrivingRange(s32 code, s32 nearestCode, s32 nearestDistance, s32 x,
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      sPaintSeed = sPaintSeed * 0x5D588B65 + 1;
-      random = sPaintSeed >> 16;
+      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
     case TERRAIN_CODE_GREEN:
@@ -1414,11 +1414,11 @@ void EncodeCodeMap(void) {
   s32 column;
   s32 row;
 
-  sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-      *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
 }
@@ -1460,10 +1460,10 @@ void LoadCodeMap(char* path) {
   s32 row;
   u16 color;
 
-  sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   if (ReadHostFile(path, &size) == HOST_FILE_OK &&
       size == MAP_COLUMN_COUNT * MAP_ROW_COUNT) {
-    sBuildCursor = sBuildBuffer;
+    f_BuildCursor = f_BuildBuffer;
   }
   for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
     for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_ROW_COUNT *
@@ -1474,8 +1474,8 @@ void LoadCodeMap(char* path) {
   }
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-      color = GetTerrainCodeColor(*sBuildCursor);
+      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      color = GetTerrainCodeColor(*f_BuildCursor);
       WriteMapTexel(column, row, color);
     }
   }
@@ -1490,21 +1490,21 @@ void LoadBackupCodeMap(void) { LoadCodeMap("c:/golf64/attr.tmp"); }
 /* Repaints the ground tiles from the tool's code map */
 void LoadToolCodeMap(void) {
   LoadCodeMap("tool/golf64.att");
-  sIsCodeMapCleaned = FALSE;
+  f_IsCodeMapCleaned = FALSE;
 }
 
 /* Returns the code at a column and row of the code map, pointing the build
  * cursor at it */
 static inline u8 GetCode(s32 column, s32 row) {
-  sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-  return *sBuildCursor;
+  f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+  return *f_BuildCursor;
 }
 
 /* Sets the code at a column and row of the code map, pointing the build cursor
  * at it */
 static inline void SetCode(s32 column, s32 row, u8 code) {
-  sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-  *sBuildCursor = code;
+  f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+  *f_BuildCursor = code;
 }
 
 /*
@@ -1540,11 +1540,11 @@ void CleanCodeMap(void) {
   s32 column;
   s32 row;
 
-  sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-      *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
   for (; passCount != 0; passCount--) {
@@ -1676,7 +1676,7 @@ void PaintGroundTiles(void) {
   u32 codePaintings[TERRAIN_CODE_COUNT];
   u8* codes;
   s8* searchSpans;
-  PaintRoutine paint = sPaintLogics[sPaintLogic].paint;
+  PaintRoutine paint = f_PaintLogics[f_PaintLogic].paint;
   u8* nextCode;
   u16* texel;
   s32 offsetCount;
@@ -1696,8 +1696,8 @@ void PaintGroundTiles(void) {
   offsetCount =
       ListOffsetsByDistance(PAINT_OFFSET_SPAN, offsets, PAINT_OFFSET_COUNT);
   osSyncPrintf("MakeTex..");
-  nextCode = sBuildCursor = codes = sBuildBuffer;
-  searchSpans = sPaintLogics[sPaintLogic].searchSpans;
+  nextCode = f_BuildCursor = codes = f_BuildBuffer;
+  searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
   /* row is there to match */
   for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
     codePaintings[row] = paint(row, row, 0, 0, 0);
@@ -1749,7 +1749,7 @@ void PaintGroundTiles(void) {
     }
   }
   osSyncPrintf("Comp\n");
-  sBuildCursor = sBuildBuffer;
+  f_BuildCursor = f_BuildBuffer;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", PaintGroundTiles);
@@ -1763,15 +1763,15 @@ void ToggleCodeMapCleanup(void) {
   /* Unused; it is there to match */
   u8 unused[0x640];
 
-  if (!sIsCodeMapCleaned) {
+  if (!f_IsCodeMapCleaned) {
     EncodeCodeMap();
-    sIsCodeMapCleaned = TRUE;
+    f_IsCodeMapCleaned = TRUE;
     CleanCodeMap();
     PaintGroundTiles();
     FinishCodeMapCleanup();
   } else {
     LoadBackupCodeMap();
-    sIsCodeMapCleaned = FALSE;
+    f_IsCodeMapCleaned = FALSE;
   }
 }
 
@@ -1926,23 +1926,23 @@ void BuildHole(s32 course, s32 hole) {
     FillRandomGrid(0x60, 0xBE);
   }
   if (g_IsMiniGolf) {
-    sPaintLogic = g_CourseIndex;
+    f_PaintLogic = g_CourseIndex;
     if (g_CourseIndex > LAST_MINI_GOLF_PAINT_LOGIC) {
-      sPaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
+      f_PaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
     }
     FillRandomGrid(0x40, 0xD2);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
-    sPaintLogic = sHolePaintLogics[course][hole - 1];
+    f_PaintLogic = f_HolePaintLogics[course][hole - 1];
     if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
-      sPaintLogic++;
+      f_PaintLogic++;
     }
     if (IsGameFlagSet(GAME_FLAG_UNK6B)) {
-      sPaintLogic++;
+      f_PaintLogic++;
     }
   } else {
-    sPaintLogic = GetCoursePaintLogic(course);
+    f_PaintLogic = GetCoursePaintLogic(course);
   }
-  osSyncPrintf("PaintLogic%d\n", sPaintLogic);
+  osSyncPrintf("PaintLogic%d\n", f_PaintLogic);
   if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     if (IsGameFlagSet(GAME_FLAG_UNK51) && hole == 0) {
       hole = COURSE_HOLE_COUNT;
@@ -1958,14 +1958,14 @@ void BuildHole(s32 course, s32 hole) {
       if (g_GameMode == GAME_MODE_UNK12) {
         OpenAssetFile(UNK12_UNK6_ASSET, &asset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].unk6, &asset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].unk6, &asset);
       }
       ReadAssetFile(&D_800BA9D8, GetAssetFileSize(&asset), &asset);
     }
     if (g_GameMode == GAME_MODE_UNK12) {
       OpenAssetFile(UNK12_POINTS_ASSET, &asset);
     } else {
-      OpenAssetFile(sHoleAssetIds[course][hole].points, &asset);
+      OpenAssetFile(f_HoleAssetIds[course][hole].points, &asset);
     }
     pointsSize = GetAssetFileSize(&asset);
     ReadAssetFile(&g_HolePoints, pointsSize, &asset);
@@ -1976,7 +1976,7 @@ void BuildHole(s32 course, s32 hole) {
     OpenHoleAsset(course, hole, HOLE_ASSET_ATTRIBUTES);
     MeasureGroundTiles();
     PrepareHoleTriangles();
-    sIsCodeMapCleaned = TRUE;
+    f_IsCodeMapCleaned = TRUE;
     osSyncPrintf("GT..\n");
     PaintGroundTiles();
     osSyncPrintf("OK!\n");
@@ -2006,7 +2006,7 @@ void BuildHole(s32 course, s32 hole) {
   }
   osSyncPrintf("@1\n");
   MeasureGroundTiles();
-  sIsCodeMapCleaned = TRUE;
+  f_IsCodeMapCleaned = TRUE;
   PaintGroundTiles();
   PlaceBillboards();
   osSyncPrintf("Ok!\n");
@@ -2035,20 +2035,20 @@ void SaveHoleFiles(s32 course, s32 hole) {
   WriteHostFile(path, HOLE_POINTS_FILE_SIZE);
   sprintf(path, "bin/course%d/hole%d%2.2d.tri", course, course, hole);
   WriteHostFile(path, HOLE_TRIANGLES_FILE_SIZE);
-  if (sIsCodeMapCleaned) {
+  if (f_IsCodeMapCleaned) {
     LoadBackupCodeMap();
-    sIsCodeMapCleaned = FALSE;
+    f_IsCodeMapCleaned = FALSE;
   }
-  sBuildBuffer = sBuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      sBuildCursor = &sBuildBuffer[row * MAP_COLUMN_COUNT + column];
-      *sBuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
+      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
   sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
   if (WriteHostFile(path, MAP_COLUMN_COUNT * MAP_ROW_COUNT) == HOST_FILE_OK) {
-    sBuildCursor = sBuildBuffer;
+    f_BuildCursor = f_BuildBuffer;
   }
 }
 #else
@@ -2122,7 +2122,7 @@ void ClearHolePoints(void) {
 
 /* Points the build buffer and its cursor at the start of the file area */
 void ResetBuildBuffer(void) {
-  sBuildCursor = sBuildBuffer = sBuildCursor = BUILD_BUFFER_START;
+  f_BuildCursor = f_BuildBuffer = f_BuildCursor = BUILD_BUFFER_START;
 }
 
 /* Marks every billboard unused */
@@ -2274,8 +2274,8 @@ void ReadAttributeRuns(void) {
   u16* runEnd;
   s32 value;
 
-  attribute = (u16*)sBuildCursor;
-  end = (u16*)(sBuildCursor + ATTRIBUTE_BUFFER_SIZE);
+  attribute = (u16*)f_BuildCursor;
+  end = (u16*)(f_BuildCursor + ATTRIBUTE_BUFFER_SIZE);
   while (TRUE) {
     ReadFileBytes(&count, sizeof(count));
     if (count == 0) {
@@ -2298,7 +2298,7 @@ void ReadAttributeRuns(void) {
   while (attribute < end) {
     *attribute++ = 0;
   }
-  sBuildCursor = sBuildBuffer;
+  f_BuildCursor = f_BuildBuffer;
 }
 
 /* Reads the billboards from the hole's tree file */
@@ -2517,47 +2517,47 @@ void ReadVertexZ(s16* coord, s32 flags) {
  * unpacks the attributes into the build buffer
  */
 void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
-  sReadCursor = HOLE_FILE_BUFFER;
+  f_ReadCursor = HOLE_FILE_BUFFER;
   switch (kind) {
     case HOLE_ASSET_VERTICES:
       if (g_GameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_VERTICES_ASSET, &sHoleAsset);
+        OpenAssetFile(UNK12_VERTICES_ASSET, &f_HoleAsset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].vertices, &sHoleAsset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].vertices, &f_HoleAsset);
       }
       break;
     case HOLE_ASSET_MIDPOINTS:
       if (g_GameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_MIDPOINTS_ASSET, &sHoleAsset);
+        OpenAssetFile(UNK12_MIDPOINTS_ASSET, &f_HoleAsset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].midpoints, &sHoleAsset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].midpoints, &f_HoleAsset);
       }
       break;
     case HOLE_ASSET_TREES:
       if (g_GameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_TREES_ASSET, &sHoleAsset);
+        OpenAssetFile(UNK12_TREES_ASSET, &f_HoleAsset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].trees, &sHoleAsset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].trees, &f_HoleAsset);
       }
       break;
     case HOLE_ASSET_TRIANGLES:
       if (g_GameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_TRIANGLES_ASSET, &sHoleAsset);
+        OpenAssetFile(UNK12_TRIANGLES_ASSET, &f_HoleAsset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].triangles, &sHoleAsset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].triangles, &f_HoleAsset);
       }
       break;
     case HOLE_ASSET_ATTRIBUTES:
       if (g_GameMode == GAME_MODE_UNK12) {
-        OpenAssetFile(UNK12_ATTRIBUTES_ASSET, &sHoleAsset);
+        OpenAssetFile(UNK12_ATTRIBUTES_ASSET, &f_HoleAsset);
       } else {
-        OpenAssetFile(sHoleAssetIds[course][hole].attributes, &sHoleAsset);
+        OpenAssetFile(f_HoleAssetIds[course][hole].attributes, &f_HoleAsset);
       }
-      GetAssetFileSize(&sHoleAsset);
-      LoadLzData(sHoleAsset.romStart, sBuildCursor, sHoleAsset.size);
+      GetAssetFileSize(&f_HoleAsset);
+      LoadLzData(f_HoleAsset.romStart, f_BuildCursor, f_HoleAsset.size);
       return;
   }
-  ReadAssetFile(sReadCursor, GetAssetFileSize(&sHoleAsset), &sHoleAsset);
+  ReadAssetFile(f_ReadCursor, GetAssetFileSize(&f_HoleAsset), &f_HoleAsset);
 }
 
 /* An RGBA 5551 texel's channels */
@@ -2597,7 +2597,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
 #define SHADOW_SCALE_FRACTION_BITS 16
 #define SHADOW_SCALE_ONE (1 << SHADOW_SCALE_FRACTION_BITS)
 
-extern s8 sShadowlessTextures[];
+extern s8 f_ShadowlessTextures[];
 
 static inline u16* GetShadowedTexel(u32 column, u32 row) {
   return &g_WorkArea.hole
@@ -2615,7 +2615,7 @@ static inline u16* GetShadowedTexel(u32 column, u32 row) {
  * light, and within a diamond around the base, more toward the base. Dark
  * texels are kept, and bright ones are darkened the most. A row with no texel
  * within the width ends the shadow once one has started. Billboards with a
- * texture in sShadowlessTextures cast no shadow.
+ * texture in f_ShadowlessTextures cast no shadow.
  * It does not match: ours keeps heightScale in a float register and loads
  * SHADOW_LIGHT_DISTANCE again for each use, where the original keeps them in
  * $s2 and $f22, and the other registers differ from there.
@@ -2672,11 +2672,11 @@ void CastBillboardShadows(void) {
       continue;
     }
     for (listIndex = 0;; listIndex++) {
-      if (g_Billboards[index].textureIndex == sShadowlessTextures[listIndex]) {
+      if (g_Billboards[index].textureIndex == f_ShadowlessTextures[listIndex]) {
         listIndex = -1;
         break;
       }
-      if (sShadowlessTextures[listIndex] < 0) {
+      if (f_ShadowlessTextures[listIndex] < 0) {
         break;
       }
     }
@@ -3208,7 +3208,7 @@ void ShadeGroundTiles(void) {
   }
 }
 #else
-INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", sDefaultGroundLight);
+INCLUDE_RODATA("asm/nonmatchings/ovl_02/hole_builder", f_DefaultGroundLight);
 INCLUDE_ASM("asm/nonmatchings/ovl_02/hole_builder", ShadeGroundTiles);
 #endif
 
@@ -3560,12 +3560,12 @@ void BuildGroundTileDisplayList(s32 column, s32 row, Gfx** gfxCursor,
       for (pointRow = rowBlock; pointRow < rowBlock + 2; pointRow++) {
         for (pointColumn = columnBlock; pointColumn < columnBlock + 2;
              pointColumn++) {
-          gSP2Triangles(gfx++, sTileVertexSlots[pointRow][pointColumn],
-                        sTileVertexSlots[pointRow][pointColumn + 1],
-                        sTileVertexSlots[pointRow + 1][pointColumn], 0,
-                        sTileVertexSlots[pointRow][pointColumn + 1],
-                        sTileVertexSlots[pointRow + 1][pointColumn + 1],
-                        sTileVertexSlots[pointRow + 1][pointColumn], 0);
+          gSP2Triangles(gfx++, f_TileVertexSlots[pointRow][pointColumn],
+                        f_TileVertexSlots[pointRow][pointColumn + 1],
+                        f_TileVertexSlots[pointRow + 1][pointColumn], 0,
+                        f_TileVertexSlots[pointRow][pointColumn + 1],
+                        f_TileVertexSlots[pointRow + 1][pointColumn + 1],
+                        f_TileVertexSlots[pointRow + 1][pointColumn], 0);
         }
       }
     }

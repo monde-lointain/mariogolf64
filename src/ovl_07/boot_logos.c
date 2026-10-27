@@ -21,7 +21,7 @@
  * and out through the primitive alpha; Camelot's only fades in.
  */
 
-/* sBootLogoStage values */
+/* f_BootLogoStage values */
 #define BOOT_LOGO_N64 0
 #define BOOT_LOGO_NINTENDO 1
 #define BOOT_LOGO_CAMELOT 2
@@ -95,29 +95,29 @@ typedef struct N64Logo {
 #define NINTENDO_LOGO_ASSET 0x6F6
 #define N64_LOGO_ASSET 0x97F
 
-extern CamelotLogo sCamelotLogo;
-extern NintendoLogo sNintendoLogo;
-extern N64Logo sN64Logo;
+extern CamelotLogo f_CamelotLogo;
+extern NintendoLogo f_NintendoLogo;
+extern N64Logo f_N64Logo;
 
 extern s32 D_800B6808;
 
 /* The frames since the stage began */
-static s32 sBootLogoFrame = 0;
-static s32 sBootLogoStage = BOOT_LOGO_N64;
+static s32 f_BootLogoFrame = 0;
+static s32 f_BootLogoStage = BOOT_LOGO_N64;
 /* Never read or written */
 s32 g_BootLogoUnusedWord = 0;
 /* Whether SetUpTitleHole has reset g_GameState during the Camelot logo */
-static s32 sHasResetGameState = FALSE;
+static s32 f_HasResetGameState = FALSE;
 
 void LoadBootLogos(void) {
   EncodedAsset asset;
 
   OpenEncodedAsset(CAMELOT_LOGO_ASSET, &asset);
-  ReadEncodedAsset(&sCamelotLogo, &asset);
+  ReadEncodedAsset(&f_CamelotLogo, &asset);
   OpenEncodedAsset(NINTENDO_LOGO_ASSET, &asset);
-  ReadEncodedAsset(&sNintendoLogo, &asset);
+  ReadEncodedAsset(&f_NintendoLogo, &asset);
   OpenEncodedAsset(N64_LOGO_ASSET, &asset);
-  ReadEncodedAsset(&sN64Logo, &asset);
+  ReadEncodedAsset(&f_N64Logo, &asset);
   RequestSongStop();
   g_Cameras[0].view.scissorX = SCREEN_BORDER;
   g_Cameras[0].view.scissorY = SCREEN_BORDER;
@@ -149,7 +149,7 @@ void LeaveBootLogos(void) {
     g_SceneModuleToLoad = 0x1B;
     ResetGameBoyTransfer(0);
     StartWipe(WIPE_OPENING);
-  } else if (sHasResetGameState && g_HasLoaderFinished == 1 &&
+  } else if (f_HasResetGameState && g_HasLoaderFinished == 1 &&
              g_ControllerCount != 0) {
     g_Scene = SCENE_SWAPPING_MODULES;
     g_SceneModuleToUnload = 0x0C;
@@ -180,18 +180,18 @@ void UpdateBootLogos(void) {
   s32 pressedButtons;
   s32 controllerIndex;
 
-  switch (sBootLogoStage) {
+  switch (f_BootLogoStage) {
     case BOOT_LOGO_N64:
-      sBootLogoFrame++;
-      if (sBootLogoFrame == LOGO_FRAME_COUNT) {
-        sBootLogoFrame = 0;
-        sBootLogoStage = BOOT_LOGO_NINTENDO;
+      f_BootLogoFrame++;
+      if (f_BootLogoFrame == LOGO_FRAME_COUNT) {
+        f_BootLogoFrame = 0;
+        f_BootLogoStage = BOOT_LOGO_NINTENDO;
       }
       break;
     case BOOT_LOGO_NINTENDO:
-      sBootLogoFrame++;
+      f_BootLogoFrame++;
       pressedButtons = 0;
-      if (sBootLogoFrame == NINTENDO_SOUND_FRAME) {
+      if (f_BootLogoFrame == NINTENDO_SOUND_FRAME) {
         PlaySound(0x62, 0xF, 0x7F);
       }
       for (controllerIndex = 0; controllerIndex != g_ControllerCount;
@@ -199,50 +199,50 @@ void UpdateBootLogos(void) {
         pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
       }
       if ((pressedButtons & (A_BUTTON | START_BUTTON)) && g_IsDebugEnabled) {
-        sBootLogoFrame = 0;
-        sBootLogoStage = BOOT_LOGO_LEAVING_NINTENDO;
-      } else if (sBootLogoFrame == LOGO_FRAME_COUNT) {
-        sBootLogoFrame = 0;
-        sBootLogoStage = BOOT_LOGO_CAMELOT;
+        f_BootLogoFrame = 0;
+        f_BootLogoStage = BOOT_LOGO_LEAVING_NINTENDO;
+      } else if (f_BootLogoFrame == LOGO_FRAME_COUNT) {
+        f_BootLogoFrame = 0;
+        f_BootLogoStage = BOOT_LOGO_CAMELOT;
       }
       break;
     case BOOT_LOGO_CAMELOT:
-      if (sBootLogoFrame == 0) {
+      if (f_BootLogoFrame == 0) {
         if (IsCharacterSlotBusy(0)) {
           FreeCharacterSlot(0);
         } else {
           SetUpTitleHole();
-          sHasResetGameState = TRUE;
+          f_HasResetGameState = TRUE;
         }
       }
-      if (sBootLogoFrame < CAMELOT_FRAME_LIMIT) {
-        sBootLogoFrame++;
+      if (f_BootLogoFrame < CAMELOT_FRAME_LIMIT) {
+        f_BootLogoFrame++;
       }
       if (g_IsDebugEnabled &&
           (g_ControllerStates[0].pressedButtons & A_BUTTON) &&
-          sBootLogoFrame < CAMELOT_SKIP_FRAME_LIMIT) {
-        sBootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
-        sBootLogoFrame = 0;
+          f_BootLogoFrame < CAMELOT_SKIP_FRAME_LIMIT) {
+        f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
+        f_BootLogoFrame = 0;
       } else if (g_HasLoaderFinished == 1 &&
-                 sBootLogoFrame >= CAMELOT_LEAVE_FRAME) {
-        if (sBootLogoFrame > 0) {
-          sBootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
-          sBootLogoFrame = 0;
+                 f_BootLogoFrame >= CAMELOT_LEAVE_FRAME) {
+        if (f_BootLogoFrame > 0) {
+          f_BootLogoStage = BOOT_LOGO_LEAVING_CAMELOT;
+          f_BootLogoFrame = 0;
         }
       }
       break;
     case BOOT_LOGO_LEAVING_NINTENDO:
     case BOOT_LOGO_LEAVING_CAMELOT:
-      if (sBootLogoFrame == 0) {
+      if (f_BootLogoFrame == 0) {
         StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
       }
       if (HasScreenFadeEnded()) {
-        sBootLogoStage = BOOT_LOGO_N64;
-        sBootLogoFrame = 0;
+        f_BootLogoStage = BOOT_LOGO_N64;
+        f_BootLogoFrame = 0;
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         LeaveBootLogos();
       }
-      sBootLogoFrame++;
+      f_BootLogoFrame++;
       break;
   }
 }
@@ -276,20 +276,20 @@ void DrawBootLogos(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPPipeSync(gfx++);
-  switch (sBootLogoStage) {
+  switch (f_BootLogoStage) {
     case BOOT_LOGO_N64:
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_NONE);
-      if (sBootLogoFrame > FADE_OUT_FIRST_FRAME) {
+      if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                        MAX(FADE_OUT_ALPHA(sBootLogoFrame), 0));
-      } else if (sBootLogoFrame < FADE_IN_FRAME_COUNT) {
+                        MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+      } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                        MIN(FADE_IN_ALPHA(sBootLogoFrame), 255));
+                        MIN(FADE_IN_ALPHA(f_BootLogoFrame), 255));
       }
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
                         0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
-      n64Texels = sN64Logo.texels;
+      n64Texels = f_N64Logo.texels;
       top = N64_LOGO_TOP << 2;
       bottom = (N64_LOGO_TOP + N64_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != N64_LOGO_STRIP_COUNT; stripIndex++) {
@@ -306,12 +306,12 @@ void DrawBootLogos(Gfx** displayListHead) {
       break;
     case BOOT_LOGO_NINTENDO:
     case BOOT_LOGO_LEAVING_NINTENDO:
-      if (sBootLogoStage == BOOT_LOGO_NINTENDO) {
-        if (sBootLogoFrame > FADE_OUT_FIRST_FRAME) {
+      if (f_BootLogoStage == BOOT_LOGO_NINTENDO) {
+        if (f_BootLogoFrame > FADE_OUT_FIRST_FRAME) {
           gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
-                          MAX(FADE_OUT_ALPHA(sBootLogoFrame), 0));
-        } else if (sBootLogoFrame < FADE_IN_FRAME_COUNT) {
-          alpha = FADE_IN_ALPHA(sBootLogoFrame);
+                          MAX(FADE_OUT_ALPHA(f_BootLogoFrame), 0));
+        } else if (f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
+          alpha = FADE_IN_ALPHA(f_BootLogoFrame);
           if (alpha > 255) {
             alpha = 255;
           }
@@ -326,7 +326,7 @@ void DrawBootLogos(Gfx** displayListHead) {
       for (stripIndex = 0; stripIndex != NINTENDO_LOGO_STRIP_COUNT;
            stripIndex++) {
         gDPLoadTextureTile(
-            gfx++, (u32)&sNintendoLogo.texels[texelOffset] & ~7, G_IM_FMT_I,
+            gfx++, (u32)&f_NintendoLogo.texels[texelOffset] & ~7, G_IM_FMT_I,
             G_IM_SIZ_8b, NINTENDO_LOGO_WIDTH, NINTENDO_LOGO_STRIP_HEIGHT, 0, 0,
             NINTENDO_LOGO_WIDTH - 1, NINTENDO_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -341,9 +341,9 @@ void DrawBootLogos(Gfx** displayListHead) {
       break;
     case BOOT_LOGO_CAMELOT:
     case BOOT_LOGO_LEAVING_CAMELOT:
-      if (sBootLogoStage == BOOT_LOGO_CAMELOT &&
-          sBootLogoFrame < FADE_IN_FRAME_COUNT) {
-        alpha = FADE_IN_ALPHA(sBootLogoFrame);
+      if (f_BootLogoStage == BOOT_LOGO_CAMELOT &&
+          f_BootLogoFrame < FADE_IN_FRAME_COUNT) {
+        alpha = FADE_IN_ALPHA(f_BootLogoFrame);
         if (alpha > 255) {
           alpha = 255;
         }
@@ -353,14 +353,14 @@ void DrawBootLogos(Gfx** displayListHead) {
                         0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-      LoadSmallPalette(&gfx, 0, sCamelotLogo.palette);
+      LoadSmallPalette(&gfx, 0, f_CamelotLogo.palette);
       texelOffset = 0;
       top = CAMELOT_LOGO_TOP << 2;
       bottom = (CAMELOT_LOGO_TOP + CAMELOT_LOGO_STRIP_HEIGHT) << 2;
       for (stripIndex = 0; stripIndex != CAMELOT_LOGO_STRIP_COUNT;
            stripIndex++) {
         gDPLoadTextureTile_4b(
-            gfx++, (u32)&sCamelotLogo.texels[texelOffset] & ~7, G_IM_FMT_CI,
+            gfx++, (u32)&f_CamelotLogo.texels[texelOffset] & ~7, G_IM_FMT_CI,
             CAMELOT_LOGO_WIDTH, CAMELOT_LOGO_STRIP_HEIGHT, 0, 0,
             CAMELOT_LOGO_WIDTH - 1, CAMELOT_LOGO_STRIP_HEIGHT - 1, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,

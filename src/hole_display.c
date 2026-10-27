@@ -46,21 +46,21 @@
 #define SUN_GLARE_FLARE_STRENGTH 1.5f
 #define SUN_GLARE_FULL_STRENGTH 1.0f
 
-extern f32 sSunScreenX[SKY_VIEW_COUNT]; /* For each view */
-extern f32 sSunScreenY[SKY_VIEW_COUNT];
-extern u16 sSunDepth;
-extern s32 sIsSunGlareSettled;
-extern f32 sSunGlareStrength;
+extern f32 f_SunScreenX[SKY_VIEW_COUNT]; /* For each view */
+extern f32 f_SunScreenY[SKY_VIEW_COUNT];
+extern u16 f_SunDepth;
+extern s32 f_IsSunGlareSettled;
+extern f32 f_SunGlareStrength;
 
 /* The sky's vertices, for each view and each matrix buffer */
 #define SKY_VERTEX_COUNT 10
 #define SKY_COLORED_VERTEX_COUNT 5
-#define SKY_BLEND_STEP_COUNT 1000 /* sSkyBlendStep counts to this at most */
+#define SKY_BLEND_STEP_COUNT 1000 /* f_SkyBlendStep counts to this at most */
 
-extern Vtx sSkyVertices[SKY_VIEW_COUNT * 2][SKY_VERTEX_COUNT];
-extern s32 sSkyTimeIndex;
-extern s32 sSkyBlendStep;
-extern s32 sSkyBlendStepCount;
+extern Vtx f_SkyVertices[SKY_VIEW_COUNT * 2][SKY_VERTEX_COUNT];
+extern s32 f_SkyTimeIndex;
+extern s32 f_SkyBlendStep;
+extern s32 f_SkyBlendStepCount;
 
 /*
  * Each scene color index has a time of day for the sky's colors, and a time
@@ -79,19 +79,19 @@ extern s32 sSkyBlendStepCount;
 #define SKY_IMAGE_UNK7_PARTS 5
 #define SKY_IMAGE_DIVISOR (6 * 8)
 #define RGB_CHANNEL_COUNT 3
-extern s32 sSkyColorTimeIndex;
-extern s8 sSceneSkyColorTimes[];
-extern s8 sSceneSkyBlendTimes[];
-extern s8 sSceneSkyBlendPercents[];
-extern s32 sSkyHorizonColor[RGB_CHANNEL_COUNT];
-extern s32 sCourseSkyImageAssets[];
+extern s32 f_SkyColorTimeIndex;
+extern s8 f_SceneSkyColorTimes[];
+extern s8 f_SceneSkyBlendTimes[];
+extern s8 f_SceneSkyBlendPercents[];
+extern s32 f_SkyHorizonColor[RGB_CHANNEL_COUNT];
+extern s32 f_CourseSkyImageAssets[];
 
 extern s32 D_801B609C;
-extern s32 sIsPrimitiveDepthSet;
-extern s32 sMenuBackdrop;
-extern s32 sHudAnimationFramesLeft;
+extern s32 f_IsPrimitiveDepthSet;
+extern s32 f_MenuBackdrop;
+extern s32 f_HudAnimationFramesLeft;
 
-extern s32 sHudAnimation;
+extern s32 f_HudAnimation;
 /*
  * The frame that the HUD animations break apart, copied two pixels to a word
  * from inside the HUD's margins. The tile animations copy it as a grid of
@@ -140,16 +140,16 @@ extern s32 sHudAnimation;
 #define TILE_GRID_SPACING 64
 #define TILE_GRID_ROW_SPACING 32
 
-extern u32* sCapturedFrame;
-extern Vtx sTileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT];
-extern s32 sIsFrameCapturePending;
-extern s32 sHudAnimationFrame;
+extern u32* f_CapturedFrame;
+extern Vtx f_TileGridVertices[2][TILE_GRID_ROW_COUNT * TILE_GRID_COLUMN_COUNT];
+extern s32 f_IsFrameCapturePending;
+extern s32 f_HudAnimationFrame;
 /* The frame buffer of the last frame, kept for the next frame's captures */
-extern u16* sLastFrameBuffer;
+extern u16* f_LastFrameBuffer;
 
 /*
  * The plain backdrop copies the last frame, inside a border, into
- * sCapturedFrame in strips. Each strip loads two rows more than it steps,
+ * f_CapturedFrame in strips. Each strip loads two rows more than it steps,
  * and the last loads only the rows that are left.
  */
 #define BACKDROP_BORDER 8
@@ -171,7 +171,7 @@ extern u16* sLastFrameBuffer;
  * BACKDROP_LAST_FADE_LEVEL */
 #define BACKDROP_FADE_STEP 32
 #define BACKDROP_LAST_FADE_LEVEL 128
-extern s32 sBackdropFadeLevel;
+extern s32 f_BackdropFadeLevel;
 
 /*
  * HUD_ANIMATION_SPIRAL cuts the frame inside the margins into a square grid.
@@ -207,9 +207,9 @@ extern s32 sBackdropFadeLevel;
 #define TILE_ANIMATION_SPEED_Z 2
 #define TILE_ANIMATION_UNUSED_ANGLE_OFFSET 0.2f
 #define TILE_VERTEX_COUNT 4
-extern Mtx sTileMatrices[2][FRAME_TILE_COUNT];
-extern Vtx sTileVertices[TILE_VERTEX_COUNT];
-extern Vtx sLastColumnTileVertices[TILE_VERTEX_COUNT];
+extern Mtx f_TileMatrices[2][FRAME_TILE_COUNT];
+extern Vtx f_TileVertices[TILE_VERTEX_COUNT];
+extern Vtx f_LastColumnTileVertices[TILE_VERTEX_COUNT];
 
 void CaptureHudAnimationFrame(void);
 void DrawTileAnimation(void);
@@ -244,37 +244,37 @@ void SetUpTitleHole(void) {
 void UpdateSunGlare(void) {
   u16* zBuffer;
 
-  if (sSunScreenX[0] >= SUN_DEPTH_MARGIN &&
-      sSunScreenX[0] <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
-      sSunScreenY[0] >= SUN_DEPTH_MARGIN &&
-      sSunScreenY[0] <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
+  if (f_SunScreenX[0] >= SUN_DEPTH_MARGIN &&
+      f_SunScreenX[0] <= SCREEN_WIDTH - SUN_DEPTH_MARGIN &&
+      f_SunScreenY[0] >= SUN_DEPTH_MARGIN &&
+      f_SunScreenY[0] <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
     zBuffer = nuGfxZBuffer;
-    sSunDepth =
-        zBuffer[(s32)sSunScreenY[0] * SCREEN_WIDTH + (s32)sSunScreenX[0]];
-    if (sSunDepth >= SUN_SKY_DEPTH) {
+    f_SunDepth =
+        zBuffer[(s32)f_SunScreenY[0] * SCREEN_WIDTH + (s32)f_SunScreenX[0]];
+    if (f_SunDepth >= SUN_SKY_DEPTH) {
       goto grow;
     }
-    sIsSunGlareSettled = FALSE;
-    sSunGlareStrength -= SUN_GLARE_FADE_STEP;
-    if (sSunGlareStrength < 0.0f) {
-      sSunGlareStrength = 0.0f;
+    f_IsSunGlareSettled = FALSE;
+    f_SunGlareStrength -= SUN_GLARE_FADE_STEP;
+    if (f_SunGlareStrength < 0.0f) {
+      f_SunGlareStrength = 0.0f;
     }
-  } else if (sSunScreenX[0] > -SUN_GLARE_MARGIN &&
-             sSunScreenX[0] < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
-             sSunScreenY[0] > -SUN_GLARE_MARGIN &&
-             sSunScreenY[0] < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
+  } else if (f_SunScreenX[0] > -SUN_GLARE_MARGIN &&
+             f_SunScreenX[0] < SCREEN_WIDTH + SUN_GLARE_MARGIN &&
+             f_SunScreenY[0] > -SUN_GLARE_MARGIN &&
+             f_SunScreenY[0] < SCREEN_HEIGHT + SUN_GLARE_MARGIN) {
   grow:
-    if (!sIsSunGlareSettled) {
-      sSunGlareStrength += SUN_GLARE_GROWTH_STEP;
+    if (!f_IsSunGlareSettled) {
+      f_SunGlareStrength += SUN_GLARE_GROWTH_STEP;
     }
-    if (sSunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !sIsSunGlareSettled) {
-      sIsSunGlareSettled = TRUE;
-      sSunGlareStrength = SUN_GLARE_FULL_STRENGTH;
+    if (f_SunGlareStrength > SUN_GLARE_FLARE_STRENGTH && !f_IsSunGlareSettled) {
+      f_IsSunGlareSettled = TRUE;
+      f_SunGlareStrength = SUN_GLARE_FULL_STRENGTH;
     }
   } else {
-    sSunDepth = 0;
-    sIsSunGlareSettled = FALSE;
-    sSunGlareStrength = 0.0f;
+    f_SunDepth = 0;
+    f_IsSunGlareSettled = FALSE;
+    f_SunGlareStrength = 0.0f;
   }
 }
 
@@ -310,7 +310,7 @@ typedef struct LensFlare {
       position; /* Along the line, 0 at the sun and 1 at its axis point */
 } LensFlare;    /* size = 0x14 */
 
-extern LensFlare sLensFlares[LENS_FLARE_COUNT];
+extern LensFlare f_LensFlares[LENS_FLARE_COUNT];
 
 /*
  * Draws the sun's lens flare, as rings along a line through the sun.
@@ -323,7 +323,7 @@ void DrawLensFlare(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
   SkyColors* colors = &g_SkyColors[GetCourseRecordIndex()]
                                   [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                                   sSkyColorTimeIndex];
+                                   f_SkyColorTimeIndex];
   f32 edgeDistanceX;
   f32 edgeDistanceY;
   f32 glare;
@@ -337,26 +337,26 @@ void DrawLensFlare(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
-  if (!colors->hasLensFlare || sSunScreenX[0] <= SUN_DEPTH_MARGIN ||
-      sSunScreenX[0] >= SCREEN_WIDTH - SUN_DEPTH_MARGIN ||
-      sSunScreenY[0] <= SUN_DEPTH_MARGIN ||
-      sSunScreenY[0] >= SCREEN_HEIGHT - SUN_DEPTH_MARGIN ||
-      sSunScreenY[0] < -LENS_FLARE_TOP_MARGIN ||
-      sSunScreenY[0] > SCREEN_HEIGHT + SUN_GLARE_MARGIN ||
-      sSunScreenX[0] < -SUN_GLARE_MARGIN ||
-      sSunScreenX[0] > SCREEN_WIDTH + SUN_GLARE_MARGIN ||
+  if (!colors->hasLensFlare || f_SunScreenX[0] <= SUN_DEPTH_MARGIN ||
+      f_SunScreenX[0] >= SCREEN_WIDTH - SUN_DEPTH_MARGIN ||
+      f_SunScreenY[0] <= SUN_DEPTH_MARGIN ||
+      f_SunScreenY[0] >= SCREEN_HEIGHT - SUN_DEPTH_MARGIN ||
+      f_SunScreenY[0] < -LENS_FLARE_TOP_MARGIN ||
+      f_SunScreenY[0] > SCREEN_HEIGHT + SUN_GLARE_MARGIN ||
+      f_SunScreenX[0] < -SUN_GLARE_MARGIN ||
+      f_SunScreenX[0] > SCREEN_WIDTH + SUN_GLARE_MARGIN ||
       g_Cameras[INSET_CAMERA].view.drawFlags == CAMERA_DRAW_SCENE) {
     return;
   }
-  edgeDistanceX = SCREEN_WIDTH - sSunScreenX[0];
+  edgeDistanceX = SCREEN_WIDTH - f_SunScreenX[0];
   if (edgeDistanceX > SCREEN_WIDTH / 2) {
     edgeDistanceX = SCREEN_WIDTH - edgeDistanceX;
   }
-  edgeDistanceY = SCREEN_HEIGHT - sSunScreenY[0];
+  edgeDistanceY = SCREEN_HEIGHT - f_SunScreenY[0];
   if (edgeDistanceY > GLARE_BOTTOM_ROWS) {
     edgeDistanceY = SCREEN_HEIGHT - edgeDistanceY;
   }
-  glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * sSunGlareStrength;
+  glare = (edgeDistanceX + edgeDistanceY + GLARE_BASE) * f_SunGlareStrength;
   if (glare < MIN_VISIBLE_GLARE) {
     return;
   }
@@ -391,16 +391,17 @@ void DrawLensFlare(Gfx** displayListHead) {
                       G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 6, 6,
                       G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != LENS_FLARE_COUNT; i++) {
-    centerX = sSunScreenX[0] +
-              (LENS_FLARE_AXIS_X - sSunScreenX[0]) * sLensFlares[i].position;
-    centerY = sSunScreenY[0] +
-              (LENS_FLARE_AXIS_Y - sSunScreenY[0]) * sLensFlares[i].position;
+    centerX = f_SunScreenX[0] +
+              (LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position;
+    centerY = f_SunScreenY[0] +
+              (LENS_FLARE_AXIS_Y - f_SunScreenY[0]) * f_LensFlares[i].position;
     gDPPipeSync(gfx++);
-    gDPSetPrimColor(gfx++, 0, 0, sLensFlares[i].color[0],
-                    sLensFlares[i].color[1], sLensFlares[i].color[2], glare);
-    gDPSetEnvColor(gfx++, sLensFlares[i].envColor[0],
-                   sLensFlares[i].envColor[1], sLensFlares[i].envColor[2], 255);
-    size = sLensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) *
+    gDPSetPrimColor(gfx++, 0, 0, f_LensFlares[i].color[0],
+                    f_LensFlares[i].color[1], f_LensFlares[i].color[2], glare);
+    gDPSetEnvColor(gfx++, f_LensFlares[i].envColor[0],
+                   f_LensFlares[i].envColor[1], f_LensFlares[i].envColor[2],
+                   255);
+    size = f_LensFlares[i].size * (glare + LENS_FLARE_SIZE_BIAS) *
            LENS_FLARE_SIZE_SCALE;
     texelStep = (RING_TEXTURE_SIZE << 10) / size;
     gSPScisTextureRectangle(
@@ -429,43 +430,43 @@ void BlendSkyColors(void) {
   s32 group;
   s32 channel;
 
-  if (sSkyBlendStep < sSkyBlendStepCount) {
-    sSkyBlendStep++;
+  if (f_SkyBlendStep < f_SkyBlendStepCount) {
+    f_SkyBlendStep++;
   }
-  from =
-      &g_SkyColors[GetCourseRecordIndex()]
-                  [g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex];
+  from = &g_SkyColors[GetCourseRecordIndex()]
+                     [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                      f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
                    [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                    sSkyTimeIndex + 1];
+                    f_SkyTimeIndex + 1];
   for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
     for (channel = 0; channel != 3; channel++) {
-      sSkyVertices[group][0].v.cn[channel] =
+      f_SkyVertices[group][0].v.cn[channel] =
           from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) *
-                                    sSkyBlendStep / SKY_BLEND_STEP_COUNT;
-      sSkyVertices[group][1].v.cn[channel] =
+                                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      f_SkyVertices[group][1].v.cn[channel] =
           from->unk7[channel] + (to->unk7[channel] - from->unk7[channel]) *
-                                    sSkyBlendStep / SKY_BLEND_STEP_COUNT;
-      sSkyVertices[group][2].v.cn[channel] =
+                                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      f_SkyVertices[group][2].v.cn[channel] =
           from->unk7[channel] + (to->unk7[channel] - from->unk7[channel]) *
-                                    sSkyBlendStep / SKY_BLEND_STEP_COUNT;
-      sSkyVertices[group][3].v.cn[channel] =
+                                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      f_SkyVertices[group][3].v.cn[channel] =
           from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) *
-                                    sSkyBlendStep / SKY_BLEND_STEP_COUNT;
-      sSkyVertices[group][4].v.cn[channel] =
+                                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      f_SkyVertices[group][4].v.cn[channel] =
           from->unk4[channel] + (to->unk4[channel] - from->unk4[channel]) *
-                                    sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+                                    f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
     }
   }
   for (channel = 0; channel != 3; channel++) {
     g_SceneFog.color[channel] =
         from->fogColor[channel] +
-        (to->fogColor[channel] - from->fogColor[channel]) * sSkyBlendStep /
+        (to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
             SKY_BLEND_STEP_COUNT;
   }
   g_SceneFog.near = from->fogNear + (to->fogNear - from->fogNear) *
-                                        sSkyBlendStep / SKY_BLEND_STEP_COUNT;
-  g_SceneFog.far = from->fogFar + (to->fogFar - from->fogFar) * sSkyBlendStep /
+                                        f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+  g_SceneFog.far = from->fogFar + (to->fogFar - from->fogFar) * f_SkyBlendStep /
                                       SKY_BLEND_STEP_COUNT;
 }
 
@@ -501,44 +502,44 @@ void InitSkyColors(void) {
     return start * (1.0f - fraction) + end * fraction;
   }
 
-  sSkyColorTimeIndex = sSceneSkyColorTimes[g_HoleConditions.sceneColorIndex];
-  sSkyTimeIndex = sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex];
-  sSkyBlendStep = sSceneSkyBlendPercents[g_HoleConditions.sceneColorIndex] *
-                  SKY_PERCENT_TO_STEPS;
-  sSkyBlendStepCount =
-      sSceneSkyBlendPercents[g_HoleConditions.sceneColorIndex + 1] *
+  f_SkyColorTimeIndex = f_SceneSkyColorTimes[g_HoleConditions.sceneColorIndex];
+  f_SkyTimeIndex = f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex];
+  f_SkyBlendStep = f_SceneSkyBlendPercents[g_HoleConditions.sceneColorIndex] *
+                   SKY_PERCENT_TO_STEPS;
+  f_SkyBlendStepCount =
+      f_SceneSkyBlendPercents[g_HoleConditions.sceneColorIndex + 1] *
       SKY_PERCENT_TO_STEPS;
-  if (sSkyBlendStepCount == 0 &&
-      sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex] !=
-          sSceneSkyBlendTimes[g_HoleConditions.sceneColorIndex + 1]) {
-    sSkyBlendStepCount = SKY_BLEND_STEP_COUNT;
+  if (f_SkyBlendStepCount == 0 &&
+      f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex] !=
+          f_SceneSkyBlendTimes[g_HoleConditions.sceneColorIndex + 1]) {
+    f_SkyBlendStepCount = SKY_BLEND_STEP_COUNT;
   }
   colors = &g_SkyColors[GetCourseRecordIndex()]
                        [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                        sSkyColorTimeIndex];
-  from =
-      &g_SkyColors[GetCourseRecordIndex()]
-                  [g_HoleConditions.isRaining * SKY_TIME_COUNT + sSkyTimeIndex];
+                        f_SkyColorTimeIndex];
+  from = &g_SkyColors[GetCourseRecordIndex()]
+                     [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                      f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
                    [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                    sSkyTimeIndex + 1];
+                    f_SkyTimeIndex + 1];
   g_SkyState.scrollX = 0.0f;
   g_SkyState.scrollY = 0.0f;
   for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      sSkyVertices[group][0].v.cn[channel] = colors->unk4[channel];
-      sSkyVertices[group][1].v.cn[channel] = colors->unk7[channel];
-      sSkyVertices[group][2].v.cn[channel] = colors->unk7[channel];
-      sSkyVertices[group][3].v.cn[channel] = colors->unk4[channel];
-      sSkyVertices[group][4].v.cn[channel] = colors->unk4[channel];
+      f_SkyVertices[group][0].v.cn[channel] = colors->unk4[channel];
+      f_SkyVertices[group][1].v.cn[channel] = colors->unk7[channel];
+      f_SkyVertices[group][2].v.cn[channel] = colors->unk7[channel];
+      f_SkyVertices[group][3].v.cn[channel] = colors->unk4[channel];
+      f_SkyVertices[group][4].v.cn[channel] = colors->unk4[channel];
       innerMix = (colors->unk4[channel] + colors->unk7[channel]) * 0.5f;
-      outerMix = (colors->unk4[channel] + sSkyHorizonColor[channel]) * 0.5f;
-      innerMix = (innerMix + sSkyHorizonColor[channel]) * 0.5f;
-      sSkyVertices[group][5].v.cn[channel] = outerMix;
-      sSkyVertices[group][6].v.cn[channel] = innerMix;
-      sSkyVertices[group][7].v.cn[channel] = innerMix;
-      sSkyVertices[group][8].v.cn[channel] = outerMix;
-      sSkyVertices[group][9].v.cn[channel] = outerMix;
+      outerMix = (colors->unk4[channel] + f_SkyHorizonColor[channel]) * 0.5f;
+      innerMix = (innerMix + f_SkyHorizonColor[channel]) * 0.5f;
+      f_SkyVertices[group][5].v.cn[channel] = outerMix;
+      f_SkyVertices[group][6].v.cn[channel] = innerMix;
+      f_SkyVertices[group][7].v.cn[channel] = innerMix;
+      f_SkyVertices[group][8].v.cn[channel] = outerMix;
+      f_SkyVertices[group][9].v.cn[channel] = outerMix;
     }
   }
   if (colors->unk14->imageKind == SKY_IMAGE_KIND_0) {
@@ -553,7 +554,7 @@ void InitSkyColors(void) {
     OpenEncodedAsset(ASSET_SKY_IMAGE_2_SECOND_HALF, &asset);
     ReadEncodedAsset(g_SkyImage + SKY_IMAGE_HALF_OFFSET, &asset);
   }
-  OpenEncodedAsset((u16)sCourseSkyImageAssets[GetCourseRecordIndex()], &asset);
+  OpenEncodedAsset((u16)f_CourseSkyImageAssets[GetCourseRecordIndex()], &asset);
   ReadEncodedAsset(g_CourseSkyImage, &asset);
   for (colorIndex = 0; colorIndex != LARGE_PALETTE_COLOR_COUNT; colorIndex++) {
     color = ((u16*)g_CourseSkyImage)[PALETTE_START + colorIndex];
@@ -570,11 +571,11 @@ void InitSkyColors(void) {
              SKY_IMAGE_DIVISOR;
     } else {
       blended[0] = from->unkD[0] + (to->unkD[0] - from->unkD[0]) *
-                                       sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+                                       f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
       blended[1] = from->unkD[1] + (to->unkD[1] - from->unkD[1]) *
-                                       sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+                                       f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
       blended[2] = from->unkD[2] + (to->unkD[2] - from->unkD[2]) *
-                                       sSkyBlendStep / SKY_BLEND_STEP_COUNT;
+                                       f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
       red =
           (red * (PERCENT_COUNT - colors->unk10) + blended[0] * colors->unk10) /
           PERCENT_COUNT;
@@ -640,12 +641,12 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", InitSkyColors);
 #define BYTE_VALUE_COUNT 256
 #define FOG_COLOR_MAX 255
 #define FOG_DEPTH_MAX 1200
-/* sSkyHorizonColor's starting value in each channel */
+/* f_SkyHorizonColor's starting value in each channel */
 #define SKY_HORIZON_LEVEL 63
 
-extern s32 sSkyEditorColumn;
-extern s32 sSkyEditorRow;
-extern SkyColors* sEditedSkyColors;
+extern s32 f_SkyEditorColumn;
+extern s32 f_SkyEditorRow;
+extern SkyColors* f_EditedSkyColors;
 
 /*
  * While GAME_FLAG_SKY_EDITOR is set, lets controller 2 edit the current sky
@@ -672,107 +673,108 @@ s32 UpdateSkyEditor(void) {
     return FALSE;
   }
   PrintDebugText(
-      " ", sSkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_ERASE_COLUMN,
-      sSkyEditorRow + SKY_EDITOR_ERASE_ROW);
-  sEditedSkyColors = &g_SkyColors[GetCourseRecordIndex()]
-                                 [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                                  sSkyColorTimeIndex];
+      " ",
+      f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_ERASE_COLUMN,
+      f_SkyEditorRow + SKY_EDITOR_ERASE_ROW);
+  f_EditedSkyColors = &g_SkyColors[GetCourseRecordIndex()]
+                                  [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                                   f_SkyColorTimeIndex];
   if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
        (L_JPAD | L_CBUTTONS)) &&
-      sSkyEditorColumn > 0) {
-    sSkyEditorColumn--;
+      f_SkyEditorColumn > 0) {
+    f_SkyEditorColumn--;
   }
   if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
        (R_JPAD | R_CBUTTONS)) &&
-      sSkyEditorColumn < SKY_EDITOR_FOG) {
-    sSkyEditorColumn++;
+      f_SkyEditorColumn < SKY_EDITOR_FOG) {
+    f_SkyEditorColumn++;
   }
   pressedButtons = g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons;
   if (pressedButtons & (U_JPAD | U_CBUTTONS)) {
-    sSkyEditorRow--;
+    f_SkyEditorRow--;
   }
   if (pressedButtons & (D_JPAD | D_CBUTTONS)) {
-    sSkyEditorRow++;
+    f_SkyEditorRow++;
   }
-  if (sSkyEditorRow < 0) {
-    sSkyEditorRow = 0;
+  if (f_SkyEditorRow < 0) {
+    f_SkyEditorRow = 0;
   }
-  if (sSkyEditorColumn == SKY_EDITOR_BACKGROUND) {
-    if (sSkyEditorRow > SKY_EDITOR_ALPHA_ROW) {
-      sSkyEditorRow = SKY_EDITOR_ALPHA_ROW;
+  if (f_SkyEditorColumn == SKY_EDITOR_BACKGROUND) {
+    if (f_SkyEditorRow > SKY_EDITOR_ALPHA_ROW) {
+      f_SkyEditorRow = SKY_EDITOR_ALPHA_ROW;
     }
-  } else if (sSkyEditorColumn == SKY_EDITOR_FOG) {
-    if (sSkyEditorRow > SKY_EDITOR_FAR_ROW) {
-      sSkyEditorRow = SKY_EDITOR_FAR_ROW;
+  } else if (f_SkyEditorColumn == SKY_EDITOR_FOG) {
+    if (f_SkyEditorRow > SKY_EDITOR_FAR_ROW) {
+      f_SkyEditorRow = SKY_EDITOR_FAR_ROW;
     }
-  } else if (sSkyEditorRow > SKY_EDITOR_LAST_COLOR_ROW) {
-    sSkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
+  } else if (f_SkyEditorRow > SKY_EDITOR_LAST_COLOR_ROW) {
+    f_SkyEditorRow = SKY_EDITOR_LAST_COLOR_ROW;
   }
 
   /* The rows of the fog column run past g_DebugFog.color into near and far */
   if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & A_BUTTON) {
-    switch (sSkyEditorColumn) {
+    switch (f_SkyEditorColumn) {
       case SKY_EDITOR_TOP:
-        sEditedSkyColors->unk4[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unk4[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unk4[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unk4[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BOTTOM:
-        sEditedSkyColors->unk7[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unk7[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unk7[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unk7[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_UNKA:
-        sEditedSkyColors->unkA[sSkyEditorRow] += SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unkA[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unkA[f_SkyEditorRow] += SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
-        sEditedSkyColors->unkD[sSkyEditorRow]++;
+        f_EditedSkyColors->unkD[f_SkyEditorRow]++;
         isImageChanged = TRUE;
-        if (sSkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+        if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
           /* Wraps the percent past either end */
-          if (sEditedSkyColors->unkD[sSkyEditorRow] == PERCENT_COUNT + 1) {
-            sEditedSkyColors->unkD[sSkyEditorRow] = 0;
+          if (f_EditedSkyColors->unkD[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+            f_EditedSkyColors->unkD[f_SkyEditorRow] = 0;
           }
-          if (sEditedSkyColors->unkD[sSkyEditorRow] > PERCENT_COUNT + 1) {
-            sEditedSkyColors->unkD[sSkyEditorRow] = PERCENT_COUNT;
+          if (f_EditedSkyColors->unkD[f_SkyEditorRow] > PERCENT_COUNT + 1) {
+            f_EditedSkyColors->unkD[f_SkyEditorRow] = PERCENT_COUNT;
           }
         } else {
-          sEditedSkyColors->unkD[sSkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+          f_EditedSkyColors->unkD[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
         }
         break;
       case SKY_EDITOR_FOG:
-        g_DebugFog.color[sSkyEditorRow] += SKY_EDITOR_FOG_STEP;
+        g_DebugFog.color[f_SkyEditorRow] += SKY_EDITOR_FOG_STEP;
         break;
     }
   } else if (g_ControllerStates[SKY_EDITOR_CONTROLLER].buttons & B_BUTTON) {
-    switch (sSkyEditorColumn) {
+    switch (f_SkyEditorColumn) {
       case SKY_EDITOR_TOP:
-        sEditedSkyColors->unk4[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unk4[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unk4[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unk4[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BOTTOM:
-        sEditedSkyColors->unk7[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unk7[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unk7[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unk7[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_UNKA:
-        sEditedSkyColors->unkA[sSkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
-        sEditedSkyColors->unkA[sSkyEditorRow] %= BYTE_VALUE_COUNT;
+        f_EditedSkyColors->unkA[f_SkyEditorRow] -= SKY_EDITOR_COLOR_STEP;
+        f_EditedSkyColors->unkA[f_SkyEditorRow] %= BYTE_VALUE_COUNT;
         break;
       case SKY_EDITOR_BACKGROUND:
-        sEditedSkyColors->unkD[sSkyEditorRow]--;
+        f_EditedSkyColors->unkD[f_SkyEditorRow]--;
         isImageChanged = TRUE;
-        if (sSkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
-          if (sEditedSkyColors->unkD[sSkyEditorRow] == PERCENT_COUNT + 1) {
-            sEditedSkyColors->unkD[sSkyEditorRow] = 0;
+        if (f_SkyEditorRow == SKY_EDITOR_ALPHA_ROW) {
+          if (f_EditedSkyColors->unkD[f_SkyEditorRow] == PERCENT_COUNT + 1) {
+            f_EditedSkyColors->unkD[f_SkyEditorRow] = 0;
           }
-          if (sEditedSkyColors->unkD[sSkyEditorRow] > PERCENT_COUNT + 1) {
-            sEditedSkyColors->unkD[sSkyEditorRow] = PERCENT_COUNT;
+          if (f_EditedSkyColors->unkD[f_SkyEditorRow] > PERCENT_COUNT + 1) {
+            f_EditedSkyColors->unkD[f_SkyEditorRow] = PERCENT_COUNT;
           }
         } else {
-          sEditedSkyColors->unkD[sSkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
+          f_EditedSkyColors->unkD[f_SkyEditorRow] &= SKY_IMAGE_CHANNEL_MAX;
         }
         break;
       case SKY_EDITOR_FOG:
-        g_DebugFog.color[sSkyEditorRow] -= SKY_EDITOR_FOG_STEP;
+        g_DebugFog.color[f_SkyEditorRow] -= SKY_EDITOR_FOG_STEP;
         break;
     }
   }
@@ -809,26 +811,26 @@ s32 UpdateSkyEditor(void) {
 
   for (index = 0; index != SKY_VIEW_COUNT * 2; index++) {
     for (channel = 0; channel != RGB_CHANNEL_COUNT; channel++) {
-      sSkyVertices[index][0].v.cn[channel] = sEditedSkyColors->unk4[channel];
-      sSkyVertices[index][1].v.cn[channel] = sEditedSkyColors->unk7[channel];
-      sSkyVertices[index][2].v.cn[channel] = sEditedSkyColors->unk7[channel];
-      sSkyVertices[index][3].v.cn[channel] = sEditedSkyColors->unk4[channel];
-      sSkyVertices[index][4].v.cn[channel] = sEditedSkyColors->unk4[channel];
-      innerMix = (u16)(sEditedSkyColors->unk4[channel] +
-                       sEditedSkyColors->unk7[channel]) *
+      f_SkyVertices[index][0].v.cn[channel] = f_EditedSkyColors->unk4[channel];
+      f_SkyVertices[index][1].v.cn[channel] = f_EditedSkyColors->unk7[channel];
+      f_SkyVertices[index][2].v.cn[channel] = f_EditedSkyColors->unk7[channel];
+      f_SkyVertices[index][3].v.cn[channel] = f_EditedSkyColors->unk4[channel];
+      f_SkyVertices[index][4].v.cn[channel] = f_EditedSkyColors->unk4[channel];
+      innerMix = (u16)(f_EditedSkyColors->unk4[channel] +
+                       f_EditedSkyColors->unk7[channel]) *
                  0.5f;
-      outerMix = (sEditedSkyColors->unk4[channel] + SKY_HORIZON_LEVEL) * 0.5f;
+      outerMix = (f_EditedSkyColors->unk4[channel] + SKY_HORIZON_LEVEL) * 0.5f;
       innerMix = (innerMix + SKY_HORIZON_LEVEL) * 0.5f;
-      sSkyVertices[index][5].v.cn[channel] = outerMix;
-      sSkyVertices[index][6].v.cn[channel] = innerMix;
-      sSkyVertices[index][7].v.cn[channel] = innerMix;
-      sSkyVertices[index][8].v.cn[channel] = outerMix;
-      sSkyVertices[index][9].v.cn[channel] = outerMix;
+      f_SkyVertices[index][5].v.cn[channel] = outerMix;
+      f_SkyVertices[index][6].v.cn[channel] = innerMix;
+      f_SkyVertices[index][7].v.cn[channel] = innerMix;
+      f_SkyVertices[index][8].v.cn[channel] = outerMix;
+      f_SkyVertices[index][9].v.cn[channel] = outerMix;
     }
   }
 
   if (isImageChanged) {
-    OpenEncodedAsset((u16)sCourseSkyImageAssets[GetCourseRecordIndex()],
+    OpenEncodedAsset((u16)f_CourseSkyImageAssets[GetCourseRecordIndex()],
                      &asset);
     ReadEncodedAsset(g_CourseSkyImage, &asset);
     for (index = 0; index != LARGE_PALETTE_COLOR_COUNT; index++) {
@@ -838,24 +840,24 @@ s32 UpdateSkyEditor(void) {
       blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
       alpha = color & 1;
       if (!alpha) {
-        red = (sEditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS +
-               sEditedSkyColors->unk4[0]) /
+        red = (f_EditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS +
+               f_EditedSkyColors->unk4[0]) /
               SKY_IMAGE_DIVISOR;
-        green = (sEditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS +
-                 sEditedSkyColors->unk4[1]) /
+        green = (f_EditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS +
+                 f_EditedSkyColors->unk4[1]) /
                 SKY_IMAGE_DIVISOR;
-        blue = (sEditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS +
-                sEditedSkyColors->unk4[2]) /
+        blue = (f_EditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS +
+                f_EditedSkyColors->unk4[2]) /
                SKY_IMAGE_DIVISOR;
       } else {
-        red = (red * (PERCENT_COUNT - sEditedSkyColors->unk10) +
-               sEditedSkyColors->unkD[0] * sEditedSkyColors->unk10) /
+        red = (red * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
+               f_EditedSkyColors->unkD[0] * f_EditedSkyColors->unk10) /
               PERCENT_COUNT;
-        green = (green * (PERCENT_COUNT - sEditedSkyColors->unk10) +
-                 sEditedSkyColors->unkD[1] * sEditedSkyColors->unk10) /
+        green = (green * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
+                 f_EditedSkyColors->unkD[1] * f_EditedSkyColors->unk10) /
                 PERCENT_COUNT;
-        blue = (blue * (PERCENT_COUNT - sEditedSkyColors->unk10) +
-                sEditedSkyColors->unkD[2] * sEditedSkyColors->unk10) /
+        blue = (blue * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
+                f_EditedSkyColors->unkD[2] * f_EditedSkyColors->unk10) /
                PERCENT_COUNT;
       }
       if (red < 0) {
@@ -883,33 +885,33 @@ s32 UpdateSkyEditor(void) {
 
   PrintDebugText("   T   B   C   BG  FOG", SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW);
-  sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[0],
-          sEditedSkyColors->unk7[0], sEditedSkyColors->unkA[0],
-          sEditedSkyColors->unkD[0], g_DebugFog.color[0]);
+  sprintf(g_PrintBuffer, "R: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[0],
+          f_EditedSkyColors->unk7[0], f_EditedSkyColors->unkA[0],
+          f_EditedSkyColors->unkD[0], g_DebugFog.color[0]);
   PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW + 1);
-  sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[1],
-          sEditedSkyColors->unk7[1], sEditedSkyColors->unkA[1],
-          sEditedSkyColors->unkD[1], g_DebugFog.color[1]);
+  sprintf(g_PrintBuffer, "G: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[1],
+          f_EditedSkyColors->unk7[1], f_EditedSkyColors->unkA[1],
+          f_EditedSkyColors->unkD[1], g_DebugFog.color[1]);
   PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW + 2);
-  sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", sEditedSkyColors->unk4[2],
-          sEditedSkyColors->unk7[2], sEditedSkyColors->unkA[2],
-          sEditedSkyColors->unkD[2], g_DebugFog.color[2]);
+  sprintf(g_PrintBuffer, "B: %3d %3d %3d %3d %4d  ", f_EditedSkyColors->unk4[2],
+          f_EditedSkyColors->unk7[2], f_EditedSkyColors->unkA[2],
+          f_EditedSkyColors->unkD[2], g_DebugFog.color[2]);
   PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW + 3);
-  sprintf(g_PrintBuffer, "A:             %3d %4d  ", sEditedSkyColors->unk10,
+  sprintf(g_PrintBuffer, "A:             %3d %4d  ", f_EditedSkyColors->unk10,
           g_DebugFog.near);
   PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW + 4);
-  sprintf(g_PrintBuffer, "CC:%d               %4d  ", sEditedSkyColors->unk0,
+  sprintf(g_PrintBuffer, "CC:%d               %4d  ", f_EditedSkyColors->unk0,
           g_DebugFog.far);
   PrintDebugText(g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN,
                  SKY_EDITOR_TEXT_ROW + 5);
   PrintDebugText(
       ">",
-      sSkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_TEXT_COLUMN + 2,
-      sSkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
+      f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_TEXT_COLUMN + 2,
+      f_SkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
   SetFramebufferCount(SKY_EDITOR_FRAMEBUFFER_COUNT);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   return TRUE;
@@ -966,7 +968,7 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   direction[0] = view->lookAt[0] - view->eye[0];
   direction[1] = view->lookAt[1] - view->eye[1];
   direction[2] = view->lookAt[2] - view->eye[2];
-  vertices = sSkyVertices[g_MatrixBufferIndex + viewIndex * 2];
+  vertices = f_SkyVertices[g_MatrixBufferIndex + viewIndex * 2];
   g_SkyState.yaws[viewIndex] = atan2(direction[0], direction[2]);
   g_SkyState.pitches[viewIndex] =
       -atan2(direction[1],
@@ -1145,7 +1147,7 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
 void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
-  sIsPrimitiveDepthSet = isPrimitiveDepthSet;
+  f_IsPrimitiveDepthSet = isPrimitiveDepthSet;
 }
 
 /* The sky dome is drawn this far in front of the camera */
@@ -1166,7 +1168,7 @@ void UsePrimitiveDepth(s32 isPrimitiveDepthSet) {
 #define SUN_GLOW_MASK 6
 #define SUN_MASK_TMEM 0x100
 #define LIGHT_YAW_TO_RADIANS ((f32)(2 * M_PI / 0x10000))
-extern Mtx sSkyModelMatrix;
+extern Mtx f_SkyModelMatrix;
 
 /*
  * Draws the sky dome around the camera and, when the scene has one, the sun.
@@ -1186,7 +1188,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   /* Unlike the other lookups of g_SkyColors, this steps by three times, not
    * SKY_TIME_COUNT, in the rain */
   colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [g_HoleConditions.isRaining * 3 + sSkyColorTimeIndex];
+                       [g_HoleConditions.isRaining * 3 + f_SkyColorTimeIndex];
   translation[0] = 0.0f;
   translation[1] = 0.0f;
   rotation[0] = 0.0f;
@@ -1194,12 +1196,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   rotation[2] = 0.0f;
   translation[2] = SKY_DOME_DISTANCE;
   BuildRotationMatrix(matrix, rotation, translation);
-  ConvertMatrixToFixed(matrix, &sSkyModelMatrix);
+  ConvertMatrixToFixed(matrix, &f_SkyModelMatrix);
   gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 255);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-  if (sIsPrimitiveDepthSet) {
+  if (f_IsPrimitiveDepthSet) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
     gDPPipeSync(gfx++);
@@ -1235,10 +1237,10 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
             G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sSkyModelMatrix),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_SkyModelMatrix),
             G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
   gSPPerspNormalize(gfx++, g_ScreenEffectPerspNorm);
-  gSPVertex(gfx++, sSkyVertices[g_MatrixBufferIndex + cameraIndex * 2],
+  gSPVertex(gfx++, f_SkyVertices[g_MatrixBufferIndex + cameraIndex * 2],
             SKY_VERTEX_COUNT, 0);
   gDPPipeSync(gfx++);
   gSP1Triangle(gfx++, 0, 1, 4, 0);
@@ -1260,16 +1262,16 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
     if (angle < 0.0f) {
       angle += 2 * M_PI;
     }
-    sSunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
-    sSunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
-                               colors->unk14->sunHeight + SUN_HORIZON_Y;
-    if (sSunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
-      sSunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
+    f_SunScreenX[cameraIndex] = angle * SUN_TURN_WIDTH * (1 / (2 * M_PI));
+    f_SunScreenY[cameraIndex] = -g_SkyState.horizonLevels[cameraIndex] -
+                                colors->unk14->sunHeight + SUN_HORIZON_Y;
+    if (f_SunScreenX[cameraIndex] > SUN_TURN_WIDTH / 2) {
+      f_SunScreenX[cameraIndex] -= SUN_TURN_WIDTH;
     }
-    if (sSunScreenX[cameraIndex] > -SUN_CULL_MARGIN &&
-        sSunScreenX[cameraIndex] < SCREEN_WIDTH + SUN_CULL_MARGIN &&
-        sSunScreenY[cameraIndex] > -SUN_CULL_MARGIN &&
-        sSunScreenY[cameraIndex] < SCREEN_HEIGHT + SUN_CULL_MARGIN) {
+    if (f_SunScreenX[cameraIndex] > -SUN_CULL_MARGIN &&
+        f_SunScreenX[cameraIndex] < SCREEN_WIDTH + SUN_CULL_MARGIN &&
+        f_SunScreenY[cameraIndex] > -SUN_CULL_MARGIN &&
+        f_SunScreenY[cameraIndex] < SCREEN_HEIGHT + SUN_CULL_MARGIN) {
       gDPPipeSync(gfx++);
       gDPSetAlphaCompare(gfx++, G_AC_NONE);
       gDPPipeSync(gfx++);
@@ -1283,7 +1285,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
       gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
       gDPPipeSync(gfx++);
       gDPSetColorDither(gfx++, G_CD_MAGICSQ);
-      if (sIsPrimitiveDepthSet) {
+      if (f_IsPrimitiveDepthSet) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF | Z_UPD, G_RM_ZB_XLU_SURF2);
         gDPSetPrimDepth(gfx++, SUN_DEPTH, 0);
@@ -1313,10 +1315,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            ((s32)sSunScreenX[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
-            ((s32)sSunScreenY[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
-            ((s32)sSunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
-            ((s32)sSunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
+            ((s32)f_SunScreenX[cameraIndex] - colors->unk14->sunRadius + 1)
+                << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->unk14->sunRadius + 1)
+                << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
             G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
             colors->unk14->sunTexelStep);
         gDPPipeSync(gfx++);
@@ -1340,10 +1344,12 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
         gDPPipeSync(gfx++);
         gSPScisTextureRectangle(
             gfx++,
-            ((s32)sSunScreenX[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
-            ((s32)sSunScreenY[cameraIndex] - colors->unk14->sunRadius + 1) << 2,
-            ((s32)sSunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
-            ((s32)sSunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
+            ((s32)f_SunScreenX[cameraIndex] - colors->unk14->sunRadius + 1)
+                << 2,
+            ((s32)f_SunScreenY[cameraIndex] - colors->unk14->sunRadius + 1)
+                << 2,
+            ((s32)f_SunScreenX[cameraIndex] + colors->unk14->sunRadius) << 2,
+            ((s32)f_SunScreenY[cameraIndex] + colors->unk14->sunRadius) << 2,
             G_TX_RENDERTILE, 0, 0, colors->unk14->sunTexelStep,
             colors->unk14->sunTexelStep);
         gDPPipeSync(gfx++);
@@ -1367,10 +1373,10 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
 #define BACKDROP_ABOVE_SCREEN 32
 #define FULL_VIEW_WIDTH (SCREEN_WIDTH - 2 * SCREEN_BORDER)
 #define FULL_VIEW_HEIGHT (SCREEN_HEIGHT - 2 * SCREEN_BORDER)
-extern s32 sBackdropStripCount;
-extern s32 sBackdropStripHeight;
-extern s32 sBackdropImageWidth;
-extern s32 sBackdropWidthMask;
+extern s32 f_BackdropStripCount;
+extern s32 f_BackdropStripHeight;
+extern s32 f_BackdropImageWidth;
+extern s32 f_BackdropWidthMask;
 
 #ifdef NON_MATCHING
 /* Draws the sky and, below it, the course's backdrop in strips that follow the
@@ -1429,10 +1435,10 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gDPLoadTLUT_pal256(gfx++, ((u32)g_CourseSkyImage + IMAGE_HEADER_SIZE) & ~7);
-  sBackdropStripCount = BACKDROP_STRIP_COUNT;
-  sBackdropStripHeight = BACKDROP_STRIP_HEIGHT;
-  sBackdropImageWidth = BACKDROP_IMAGE_WIDTH;
-  sBackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
+  f_BackdropStripCount = BACKDROP_STRIP_COUNT;
+  f_BackdropStripHeight = BACKDROP_STRIP_HEIGHT;
+  f_BackdropImageWidth = BACKDROP_IMAGE_WIDTH;
+  f_BackdropWidthMask = BACKDROP_IMAGE_WIDTH_MASK;
   if (view->scissorWidth == FULL_VIEW_WIDTH &&
       view->scissorHeight == FULL_VIEW_HEIGHT) {
     /* The full screen copies the strips unscaled */
@@ -1446,51 +1452,53 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_COPY);
-    for (row = 0;; row++, y += sBackdropStripHeight) {
+    for (row = 0;; row++, y += f_BackdropStripHeight) {
       s32 clip;
 
       if (y >= BACKDROP_FIRST_CULLED_ROW) {
         break;
       }
-      if (y < -sBackdropStripHeight - BACKDROP_ABOVE_SCREEN) {
+      if (y < -f_BackdropStripHeight - BACKDROP_ABOVE_SCREEN) {
         continue;
       }
-      if (row < sBackdropStripCount - 1) {
+      if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = sBackdropImageWidth * row * sBackdropStripHeight +
+        texelByte = f_BackdropImageWidth * row * f_BackdropStripHeight +
                     LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
       } else {
-        texelByte = sBackdropImageWidth * (sBackdropStripCount - 1) *
-                        sBackdropStripHeight +
+        texelByte = f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                        f_BackdropStripHeight +
                     LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
-        imageRow = sBackdropStripCount - 1;
+        imageRow = f_BackdropStripCount - 1;
       }
       texelWord = texelByte / 2;
       if (!isNibbleImage) {
         gDPLoadTextureBlock(
             gfx++,
             (u32)((u16*)g_CourseSkyImage + PALETTE_START + texelWord) & ~7,
-            G_IM_FMT_CI, G_IM_SIZ_8b, sBackdropImageWidth, sBackdropStripHeight,
-            0, G_TX_WRAP, G_TX_WRAP, sBackdropWidthMask, 0, 0, 0);
+            G_IM_FMT_CI, G_IM_SIZ_8b, f_BackdropImageWidth,
+            f_BackdropStripHeight, 0, G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask,
+            0, 0, 0);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
                            (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
         gDPLoadSync(gfx++);
         gDPLoadBlock(
             gfx++, G_TX_LOADTILE, 0, 0,
-            ((sBackdropImageWidth * sBackdropStripHeight + 3) >> 2) - 1,
-            CALC_DXT_4b(sBackdropImageWidth));
+            ((f_BackdropImageWidth * f_BackdropStripHeight + 3) >> 2) - 1,
+            CALC_DXT_4b(f_BackdropImageWidth));
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
-                   ((sBackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-                   imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, sBackdropWidthMask, 0);
+                   ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
+                   imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, f_BackdropWidthMask,
+                   0);
       }
       clip = 0;
       if (y < 0) {
         clip = -y;
       }
-      if (row < sBackdropStripCount - 1) {
-        bottom = sBackdropStripHeight + y + SCREEN_BORDER - 1;
+      if (row < f_BackdropStripCount - 1) {
+        bottom = f_BackdropStripHeight + y + SCREEN_BORDER - 1;
         if (bottom > SCREEN_HEIGHT - SCREEN_BORDER) {
           bottom = SCREEN_HEIGHT - SCREEN_BORDER;
         }
@@ -1513,7 +1521,7 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     inverseZoom = 1.0f / view->zoom;
     texelStepX = inverseZoom * 1024.0f;
     texelStepY = inverseZoom * 2048.0f;
-    if (sIsPrimitiveDepthSet) {
+    if (f_IsPrimitiveDepthSet) {
       gDPSetPrimDepth(gfx++, 0x7FF3, 0);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
@@ -1534,42 +1542,43 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
                                  16.0f / zoom);
     top = y + view->scissorY - centreShift;
     bottom =
-        (f32)y + sBackdropStripHeight * zoom + view->scissorY - centreShift;
+        (f32)y + f_BackdropStripHeight * zoom + view->scissorY - centreShift;
     for (row = 0;; row++, top = bottom,
-        bottom = bottom + sBackdropStripHeight * view->zoom) {
-      if (top < view->scissorY - sBackdropStripHeight * view->zoom) {
+        bottom = bottom + f_BackdropStripHeight * view->zoom) {
+      if (top < view->scissorY - f_BackdropStripHeight * view->zoom) {
         continue;
       }
-      if (row < sBackdropStripCount - 1) {
+      if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = sBackdropImageWidth * row * sBackdropStripHeight +
+        texelByte = f_BackdropImageWidth * row * f_BackdropStripHeight +
                     LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
       } else {
-        texelByte = sBackdropImageWidth * (sBackdropStripCount - 1) *
-                        sBackdropStripHeight +
+        texelByte = f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                        f_BackdropStripHeight +
                     LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
-        imageRow = sBackdropStripCount - 1;
+        imageRow = f_BackdropStripCount - 1;
       }
       texelWord = texelByte / 2;
       if (!isNibbleImage) {
         gDPLoadTextureBlock(
             gfx++, (u32)((u16*)g_CourseSkyImage + texelWord) & ~7, G_IM_FMT_CI,
-            G_IM_SIZ_8b, sBackdropImageWidth, sBackdropStripHeight, 0,
-            G_TX_WRAP, G_TX_WRAP, sBackdropWidthMask, 0, 0, 0);
+            G_IM_SIZ_8b, f_BackdropImageWidth, f_BackdropStripHeight, 0,
+            G_TX_WRAP, G_TX_WRAP, f_BackdropWidthMask, 0, 0, 0);
       } else {
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_16b, 1,
                            (u32)((u16*)g_CourseSkyImage + texelWord) & ~7);
         gDPLoadSync(gfx++);
         gDPLoadBlock(
             gfx++, G_TX_LOADTILE, 0, 0,
-            ((sBackdropImageWidth * sBackdropStripHeight + 3) >> 2) - 1,
-            CALC_DXT_4b(sBackdropImageWidth));
+            ((f_BackdropImageWidth * f_BackdropStripHeight + 3) >> 2) - 1,
+            CALC_DXT_4b(f_BackdropImageWidth));
         gDPPipeSync(gfx++);
         gDPSetTile(gfx++, G_IM_FMT_CI, G_IM_SIZ_4b,
-                   ((sBackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
-                   imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, sBackdropWidthMask, 0);
+                   ((f_BackdropImageWidth >> 1) + 7) >> 3, 0, G_TX_RENDERTILE,
+                   imageRow, G_TX_WRAP, 0, 0, G_TX_WRAP, f_BackdropWidthMask,
+                   0);
       }
-      if (row < sBackdropStripCount - 1) {
+      if (row < f_BackdropStripCount - 1) {
         if (bottom > view->scissorY + view->scissorHeight) {
           bottom = view->scissorY + view->scissorHeight;
         }
@@ -1604,8 +1613,8 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawBackdrop);
  * stops it with HUD_ANIMATION_NONE */
 void StartHudAnimation(s32 animation) {
   if (animation == HUD_ANIMATION_NONE) {
-    sIsFrameCapturePending = FALSE;
-    sHudAnimationFramesLeft = 0;
+    f_IsFrameCapturePending = FALSE;
+    f_HudAnimationFramesLeft = 0;
     return;
   }
   if (animation != HUD_ANIMATION_SLICE_CAPTURE &&
@@ -1614,41 +1623,41 @@ void StartHudAnimation(s32 animation) {
   }
   switch (animation) {
     case HUD_ANIMATION_UNK0:
-      sHudAnimationFramesLeft = 352;
+      f_HudAnimationFramesLeft = 352;
       break;
     case HUD_ANIMATION_FADE_OUT:
     case HUD_ANIMATION_FAST_FADE_OUT:
-      sHudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = 255;
       break;
     case HUD_ANIMATION_TURN_AWAY:
-      sHudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = 255;
       break;
     case HUD_ANIMATION_SLIDE_APART:
-      sHudAnimationFramesLeft = 160;
+      f_HudAnimationFramesLeft = 160;
       break;
     case HUD_ANIMATION_SPIRAL:
-      sHudAnimationFramesLeft = 72;
+      f_HudAnimationFramesLeft = 72;
       break;
     case HUD_ANIMATION_TILES:
-      sHudAnimationFramesLeft = 255;
+      f_HudAnimationFramesLeft = 255;
       break;
     case HUD_ANIMATION_SLICES:
-      sHudAnimationFramesLeft = 64;
+      f_HudAnimationFramesLeft = 64;
       break;
     case HUD_ANIMATION_NEGATIVE:
     case HUD_ANIMATION_MOTION_BLUR:
-      sHudAnimationFramesLeft = 32;
+      f_HudAnimationFramesLeft = 32;
       break;
   }
-  sHudAnimation = animation;
-  sIsFrameCapturePending = TRUE;
-  sHudAnimationFrame = 0;
+  f_HudAnimation = animation;
+  f_IsFrameCapturePending = TRUE;
+  f_HudAnimationFrame = 0;
 }
 
 void HandleFrameBufferSwap(void) {}
 
 /*
- * The fading animations draw sCapturedFrame, which holds the frame inside
+ * The fading animations draw f_CapturedFrame, which holds the frame inside
  * the border, in strips. Each strip is loaded as a block, and the tiles are
  * set up with the first.
  */
@@ -1702,20 +1711,20 @@ extern s32 D_800C7308;
  * splitting the frame into halves that slide apart. When a fade ends,
  * D_800C7308 counts up, wrapping at FADE_COUNT_PERIOD.
  *
- * Doesn't match: registers are allocated differently, and sCapturedFrame is
+ * Doesn't match: registers are allocated differently, and f_CapturedFrame is
  * kept in a saved register and on the stack.
  */
 #ifdef NON_MATCHING
 void DrawFadeAnimation(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  u32* frame = sCapturedFrame;
+  u32* frame = f_CapturedFrame;
   s32 isTileSet;
   s32 strip;
   s32 row;
   s32 height;
   u16* source;
 
-  if (sHudAnimationFramesLeft > 0) {
+  if (f_HudAnimationFramesLeft > 0) {
     isTileSet = FALSE;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -1727,22 +1736,22 @@ void DrawFadeAnimation(Gfx** displayListHead) {
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
     if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_NONE) {
-      if (sHudAnimation == HUD_ANIMATION_NEGATIVE) {
+      if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, RM_FORCED_PASS, RM_FORCED_PASS2);
         gDPSetPrimColor(gfx++, 0, 0, NEGATIVE_BRIGHTNESS, NEGATIVE_BRIGHTNESS,
                         NEGATIVE_BRIGHTNESS, 255);
-      } else if (sHudAnimation == HUD_ANIMATION_FADE_OUT |
-                 sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+      } else if (f_HudAnimation == HUD_ANIMATION_FADE_OUT |
+                 f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, sHudAnimationFramesLeft);
-      } else if (sHudAnimation == HUD_ANIMATION_MOTION_BLUR) {
+        gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, f_HudAnimationFramesLeft);
+      } else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, MOTION_BLUR_ALPHA);
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
         gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-        source = sLastFrameBuffer;
+        source = f_LastFrameBuffer;
         for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
           height = STRIP_HEIGHT(strip);
           gDPLoadTextureTile(
@@ -1762,8 +1771,8 @@ void DrawFadeAnimation(Gfx** displayListHead) {
         }
         *displayListHead = gfx;
         return;
-      } else if (sHudAnimation == HUD_ANIMATION_SLIDE_APART |
-                 sHudAnimation == HUD_ANIMATION_SPIRAL) {
+      } else if (f_HudAnimation == HUD_ANIMATION_SLIDE_APART |
+                 f_HudAnimation == HUD_ANIMATION_SPIRAL) {
         /* DrawHudAnimation draws HUD_ANIMATION_SPIRAL with DrawSpiralAnimation
          * instead */
         gDPPipeSync(gfx++);
@@ -1781,13 +1790,13 @@ void DrawFadeAnimation(Gfx** displayListHead) {
           gSPScisTextureRectangle(
               gfx++, BACKDROP_BORDER << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
-              sHudAnimationFramesLeft << 2,
+              f_HudAnimationFramesLeft << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
               G_TX_RENDERTILE,
-              (SCREEN_WIDTH / 2 - sHudAnimationFramesLeft) << 5, 0, 1 << 10,
+              (SCREEN_WIDTH / 2 - f_HudAnimationFramesLeft) << 5, 0, 1 << 10,
               1 << 10);
           gSPScisTextureRectangle(
-              gfx++, (SCREEN_WIDTH - sHudAnimationFramesLeft) << 2,
+              gfx++, (SCREEN_WIDTH - f_HudAnimationFramesLeft) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER) << 2,
               (BACKDROP_RIGHT + 1) << 2,
               (strip * BACKDROP_STRIP_STEP + BACKDROP_BORDER + height) << 2,
@@ -1795,7 +1804,7 @@ void DrawFadeAnimation(Gfx** displayListHead) {
               1 << 10);
           gDPPipeSync(gfx++);
         }
-        sHudAnimationFramesLeft -= FADE_STEP;
+        f_HudAnimationFramesLeft -= FADE_STEP;
         *displayListHead = gfx;
         return;
       }
@@ -1813,12 +1822,12 @@ void DrawFadeAnimation(Gfx** displayListHead) {
                           G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
       frame += BACKDROP_STRIP_STEP * FADE_FRAME_WORDS_PER_ROW;
     }
-    if (sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
-      sHudAnimationFramesLeft -= FAST_FADE_STEP;
+    if (f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT) {
+      f_HudAnimationFramesLeft -= FAST_FADE_STEP;
     } else {
-      sHudAnimationFramesLeft -= FADE_STEP;
+      f_HudAnimationFramesLeft -= FADE_STEP;
     }
-    if (sHudAnimationFramesLeft < 0) {
+    if (f_HudAnimationFramesLeft < 0) {
       D_800C7308 = (D_800C7308 + 1) % FADE_COUNT_PERIOD;
     }
   }
@@ -1843,7 +1852,7 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
   s32 bottomRow;
   s32 leftColumn;
   Gfx* gfx = *displayListHead;
-  u32* frame = sCapturedFrame;
+  u32* frame = f_CapturedFrame;
   s32 tileCount;
   s32 tileIndex;
   s32 alpha;
@@ -1883,8 +1892,8 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
     }
   }
 
-  if (sHudAnimationFramesLeft > 0) {
-    tileCount = sHudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
+  if (f_HudAnimationFramesLeft > 0) {
+    tileCount = f_HudAnimationFramesLeft - SPIRAL_FADING_TILE_COUNT;
     alpha = SPIRAL_OPAQUE_ALPHA;
     bottomRow = SPIRAL_GRID_SIZE - 1;
     rightColumn = SPIRAL_GRID_SIZE - 1;
@@ -1966,7 +1975,7 @@ void DrawSpiralAnimation(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       StepSpiral();
     }
-    sHudAnimationFramesLeft -= SPIRAL_FADING_TILE_COUNT;
+    f_HudAnimationFramesLeft -= SPIRAL_FADING_TILE_COUNT;
   }
   *displayListHead = gfx;
 }
@@ -1979,12 +1988,12 @@ void SetMenuBackdrop(s32 backdrop) {
     return;
   }
   if (backdrop == MENU_BACKDROP_PATTERN) {
-    sMenuBackdrop = backdrop;
+    f_MenuBackdrop = backdrop;
     g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
     return;
   }
   g_MenuBackdropStyle = MENU_BACKDROP_STYLE_PLAIN;
-  sMenuBackdrop = backdrop;
+  f_MenuBackdrop = backdrop;
 }
 
 /* Starts the plain menu backdrop by capturing the last frame for it */
@@ -2016,12 +2025,12 @@ void CaptureMenuBackdrop(Gfx** displayListHead, s32 unused) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   if (g_MenuBackdropStyle == MENU_BACKDROP_STYLE_PLAIN) {
     g_MenuBackdropStyle = MENU_BACKDROP_STYLE_UNK2;
-    sBackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
+    f_BackdropFadeLevel = BACKDROP_START_FADE_LEVEL;
     gDPPipeSync(gfx++);
     gDPSetColorImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH,
-                     OS_K0_TO_PHYSICAL(sCapturedFrame) & ~7);
+                     OS_K0_TO_PHYSICAL(f_CapturedFrame) & ~7);
     gDPPipeSync(gfx++);
-    source = sLastFrameBuffer;
+    source = f_LastFrameBuffer;
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = STRIP_HEIGHT(strip);
       gDPLoadTextureTile(gfx++, (u32)source & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
@@ -2056,7 +2065,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureMenuBackdrop);
 /* MENU_BACKDROP_PATTERN's image, which scrolls diagonally by a texel a frame */
 #define BACKDROP_PATTERN_SIZE 64
 #define BACKDROP_PATTERN_MASK 6 /* log2(BACKDROP_PATTERN_SIZE) */
-extern s32 sBackdropPatternScroll;
+extern s32 f_BackdropPatternScroll;
 
 /*
  * Draws the menu backdrop that SetMenuBackdrop chose, inside the backdrop's
@@ -2071,16 +2080,16 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
   s32 strip;
   s32 height;
 
-  if (sBackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
-    sBackdropFadeLevel -= BACKDROP_FADE_STEP;
+  if (f_BackdropFadeLevel > BACKDROP_LAST_FADE_LEVEL) {
+    f_BackdropFadeLevel -= BACKDROP_FADE_STEP;
   }
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
-  if (sMenuBackdrop == MENU_BACKDROP_PATTERN) {
-    sBackdropPatternScroll++;
+  if (f_MenuBackdrop == MENU_BACKDROP_PATTERN) {
+    f_BackdropPatternScroll++;
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(
@@ -2096,27 +2105,27 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     gSPTextureRectangle(gfx++, BACKDROP_BORDER << 2, BACKDROP_BORDER << 2,
                         (SCREEN_WIDTH - BACKDROP_BORDER) << 2,
                         (SCREEN_HEIGHT - BACKDROP_BORDER) << 2, G_TX_RENDERTILE,
-                        sBackdropPatternScroll << 5,
-                        sBackdropPatternScroll << 5, 1 << 10, 1 << 10);
+                        f_BackdropPatternScroll << 5,
+                        f_BackdropPatternScroll << 5, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPPipeSync(gfx++);
-  } else if (sMenuBackdrop == MENU_BACKDROP_STILL |
-             sMenuBackdrop == MENU_BACKDROP_DIMMING) {
-    if (sMenuBackdrop == MENU_BACKDROP_STILL) {
+  } else if (f_MenuBackdrop == MENU_BACKDROP_STILL |
+             f_MenuBackdrop == MENU_BACKDROP_DIMMING) {
+    if (f_MenuBackdrop == MENU_BACKDROP_STILL) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     } else {
-      gDPSetPrimColor(gfx++, 0, 0, (u8)sBackdropFadeLevel,
-                      (u8)sBackdropFadeLevel, (u8)sBackdropFadeLevel, 255);
+      gDPSetPrimColor(gfx++, 0, 0, (u8)f_BackdropFadeLevel,
+                      (u8)f_BackdropFadeLevel, (u8)f_BackdropFadeLevel, 255);
     }
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = STRIP_HEIGHT(strip);
       gDPLoadTextureTile(gfx++,
-                         (u32)&sCapturedFrame[strip * BACKDROP_STRIP_STEP *
-                                              FRAME_WORDS_PER_ROW] &
+                         (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
+                                               FRAME_WORDS_PER_ROW] &
                              ~7,
                          G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, 0,
                          BACKDROP_BORDER, BACKDROP_BORDER, BACKDROP_RIGHT,
@@ -2138,8 +2147,8 @@ void DrawMenuBackdrop(Gfx** displayListHead) {
     for (strip = 0; strip != BACKDROP_STRIP_COUNT; strip++) {
       height = STRIP_HEIGHT(strip);
       gDPLoadTextureTile(gfx++,
-                         (u32)&sCapturedFrame[strip * BACKDROP_STRIP_STEP *
-                                              FRAME_WORDS_PER_ROW] &
+                         (u32)&f_CapturedFrame[strip * BACKDROP_STRIP_STEP *
+                                               FRAME_WORDS_PER_ROW] &
                              ~7,
                          G_IM_FMT_IA, G_IM_SIZ_16b, SCREEN_WIDTH, 0,
                          BACKDROP_BORDER, BACKDROP_BORDER, BACKDROP_RIGHT,
@@ -2176,8 +2185,8 @@ void DrawTileAnimation(void) {
   s32 tileColumn;
   s32 wordIndex = 0;
 
-  if (sHudAnimationFramesLeft > 0) {
-    angle = (f32)(M_PI / 2 - sHudAnimationFramesLeft *
+  if (f_HudAnimationFramesLeft > 0) {
+    angle = (f32)(M_PI / 2 - f_HudAnimationFramesLeft *
                                  (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT)) +
             TILE_ANIMATION_UNUSED_ANGLE_OFFSET;
     unusedSine = sinf(angle);
@@ -2201,13 +2210,13 @@ void DrawTileAnimation(void) {
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(g_DisplayListHead++);
     rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = M_PI / 2 - sHudAnimationFramesLeft *
+    rotation[AXIS_Y] = M_PI / 2 - f_HudAnimationFramesLeft *
                                       (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
     rotation[AXIS_Z] = rotation[AXIS_Y];
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
            tileColumn++) {
-        progress = TILE_ANIMATION_FRAME_COUNT - sHudAnimationFramesLeft;
+        progress = TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
         translation[AXIS_Z] =
             TILE_ANIMATION_DEPTH - progress * TILE_ANIMATION_SPEED_Z;
         translation[AXIS_X] = (progress + TILE_ANIMATION_GAP_X) *
@@ -2218,22 +2227,22 @@ void DrawTileAnimation(void) {
         BuildRotationMatrix(matrix, rotation, translation);
         ConvertMatrixToFixed(
             matrix,
-            &sTileMatrices[g_MatrixBufferIndex]
-                          [tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]);
-        gSPMatrix(
-            g_DisplayListHead++,
-            OS_K0_TO_PHYSICAL(
-                &sTileMatrices[g_MatrixBufferIndex]
-                              [tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]),
-            G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            &f_TileMatrices[g_MatrixBufferIndex]
+                           [tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]);
+        gSPMatrix(g_DisplayListHead++,
+                  OS_K0_TO_PHYSICAL(
+                      &f_TileMatrices[g_MatrixBufferIndex]
+                                     [tileRow * FRAME_TILE_COLUMN_COUNT +
+                                      tileColumn]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         if (tileColumn == FRAME_TILE_COLUMN_COUNT - 1) {
-          gSPVertex(g_DisplayListHead++, sLastColumnTileVertices,
+          gSPVertex(g_DisplayListHead++, f_LastColumnTileVertices,
                     TILE_VERTEX_COUNT, 0);
         } else {
-          gSPVertex(g_DisplayListHead++, sTileVertices, TILE_VERTEX_COUNT, 0);
+          gSPVertex(g_DisplayListHead++, f_TileVertices, TILE_VERTEX_COUNT, 0);
         }
         gDPLoadTextureBlock(
-            g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7,
+            g_DisplayListHead++, (u32)&f_CapturedFrame[wordIndex] & ~7,
             G_IM_FMT_RGBA, G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2243,7 +2252,7 @@ void DrawTileAnimation(void) {
       }
     }
     gDPPipeSync(g_DisplayListHead++);
-    sHudAnimationFramesLeft -= TILE_ANIMATION_STEP;
+    f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
   }
 }
 #else
@@ -2264,7 +2273,7 @@ INCLUDE_ASM("asm/nonmatchings/hole_display", DrawTileAnimation);
 /* The lower rows' texture coordinates stop a quarter texel short, in 10.5 fixed
  * point */
 #define LOWER_TILE_TEXCOORD_INSET 8
-extern Mtx sTurnAwayMatrices[2];
+extern Mtx f_TurnAwayMatrices[2];
 
 /*
  * Draws HUD_ANIMATION_TURN_AWAY.
@@ -2283,17 +2292,17 @@ void DrawTurnAwayAnimation(void) {
   s32 width;
   s32 vertex;
 
-  if (sHudAnimationFramesLeft > 0) {
+  if (f_HudAnimationFramesLeft > 0) {
     rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = M_PI / 2 - sHudAnimationFramesLeft *
+    rotation[AXIS_Y] = M_PI / 2 - f_HudAnimationFramesLeft *
                                       (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
     rotation[AXIS_Z] = rotation[AXIS_Y];
     translation[AXIS_X] = 0.0f;
     translation[AXIS_Y] = 0.0f;
     translation[AXIS_Z] = TILE_ANIMATION_DEPTH - (TILE_ANIMATION_FRAME_COUNT -
-                                                  sHudAnimationFramesLeft);
+                                                  f_HudAnimationFramesLeft);
     BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &sTurnAwayMatrices[g_MatrixBufferIndex]);
+    ConvertMatrixToFixed(matrix, &f_TurnAwayMatrices[g_MatrixBufferIndex]);
     gDPPipeSync(g_DisplayListHead++);
     gDPPipeSync(g_DisplayListHead++);
     gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
@@ -2311,16 +2320,16 @@ void DrawTurnAwayAnimation(void) {
     gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(g_DisplayListHead++,
-              OS_K0_TO_PHYSICAL(&sTurnAwayMatrices[g_MatrixBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_TurnAwayMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(g_DisplayListHead++, sTileGridVertices[g_MatrixBufferIndex],
+    gSPVertex(g_DisplayListHead++, f_TileGridVertices[g_MatrixBufferIndex],
               (TURN_AWAY_UPPER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
     gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
     gDPPipeSync(g_DisplayListHead++);
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(
-            g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7,
+            g_DisplayListHead++, (u32)&f_CapturedFrame[wordIndex] & ~7,
             G_IM_FMT_RGBA, G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2362,13 +2371,13 @@ void DrawTurnAwayAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     gSPVertex(
         g_DisplayListHead++,
-        &sTileGridVertices[g_MatrixBufferIndex]
-                          [TURN_AWAY_UPPER_ROW_COUNT * TILE_GRID_COLUMN_COUNT],
+        &f_TileGridVertices[g_MatrixBufferIndex]
+                           [TURN_AWAY_UPPER_ROW_COUNT * TILE_GRID_COLUMN_COUNT],
         (TURN_AWAY_LOWER_ROW_COUNT + 1) * TILE_GRID_COLUMN_COUNT, 0);
     for (row = 0; row != TURN_AWAY_LOWER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
         gDPLoadTextureBlock(
-            g_DisplayListHead++, (u32)&sCapturedFrame[wordIndex] & ~7,
+            g_DisplayListHead++, (u32)&f_CapturedFrame[wordIndex] & ~7,
             G_IM_FMT_RGBA, G_IM_SIZ_16b, FRAME_TILE_WIDTH, FRAME_TILE_ROWS, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2400,7 +2409,7 @@ void DrawTurnAwayAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetCombineMode(g_DisplayListHead++, G_CC_SHADE, G_CC_SHADE);
     gDPPipeSync(g_DisplayListHead++);
-    sHudAnimationFramesLeft -= TILE_ANIMATION_STEP;
+    f_HudAnimationFramesLeft -= TILE_ANIMATION_STEP;
   }
 }
 #else
@@ -2421,14 +2430,14 @@ void CaptureHudAnimationFrame(void) {
   s32 y;
   s32 x;
 
-  if (!sIsFrameCapturePending) {
+  if (!f_IsFrameCapturePending) {
     return;
   }
   frame = (u32*)nuGfxCfb_ptr;
-  sIsFrameCapturePending = FALSE;
+  f_IsFrameCapturePending = FALSE;
   wordIndex = 0;
-  if (sHudAnimation == HUD_ANIMATION_TURN_AWAY ||
-      sHudAnimation == HUD_ANIMATION_TILES) {
+  if (f_HudAnimation == HUD_ANIMATION_TURN_AWAY ||
+      f_HudAnimation == HUD_ANIMATION_TILES) {
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
            tileColumn++) {
@@ -2436,7 +2445,7 @@ void CaptureHudAnimationFrame(void) {
              row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
           for (column = FRAME_MARGIN_WORDS;
                column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
-            sCapturedFrame[wordIndex++] =
+            f_CapturedFrame[wordIndex++] =
                 frame[row * FRAME_WORDS_PER_ROW + column +
                       tileColumn * FRAME_TILE_WORDS +
                       tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW];
@@ -2444,8 +2453,8 @@ void CaptureHudAnimationFrame(void) {
         }
       }
     }
-    vertex = sTileGridVertices[0];
-    nextVertex = sTileGridVertices[1];
+    vertex = f_TileGridVertices[0];
+    nextVertex = f_TileGridVertices[1];
     for (row = 0, y = TILE_GRID_TOP; row != TILE_GRID_ROW_COUNT;
          row++, y -= TILE_GRID_ROW_SPACING) {
       for (column = 0, x = TILE_GRID_LEFT; column != TILE_GRID_COLUMN_COUNT - 1;
@@ -2472,42 +2481,43 @@ void CaptureHudAnimationFrame(void) {
         nextVertex++;
       }
     }
-  } else if (sHudAnimation == HUD_ANIMATION_FADE_OUT ||
-             sHudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
-             sHudAnimation == HUD_ANIMATION_SLIDE_APART ||
-             sHudAnimation == HUD_ANIMATION_SPIRAL) {
+  } else if (f_HudAnimation == HUD_ANIMATION_FADE_OUT ||
+             f_HudAnimation == HUD_ANIMATION_FAST_FADE_OUT ||
+             f_HudAnimation == HUD_ANIMATION_SLIDE_APART ||
+             f_HudAnimation == HUD_ANIMATION_SPIRAL) {
     for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
          row++) {
       for (column = FRAME_MARGIN_WORDS;
            column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
-        sCapturedFrame[wordIndex++] = frame[row * FRAME_WORDS_PER_ROW + column];
+        f_CapturedFrame[wordIndex++] =
+            frame[row * FRAME_WORDS_PER_ROW + column];
       }
     }
-  } else if (sHudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
+  } else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
     if (g_CapturedSliceCount < FRAME_SLICE_COUNT) {
       wordIndex = 0;
       for (row = FRAME_SLICE_TOP; row != FRAME_SLICE_BOTTOM; row++) {
         for (column = FRAME_SLICE_LEFT_WORD;
              column != FRAME_SLICE_RIGHT_WORD;) {
-          sCapturedFrame[g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT +
-                         wordIndex++] =
+          f_CapturedFrame[g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT +
+                          wordIndex++] =
               frame[row * FRAME_WORDS_PER_ROW + column++];
         }
       }
       g_CapturedSliceCount++;
     }
-  } else if (sHudAnimation == HUD_ANIMATION_MOTION_BLUR) {
-  } else if (sHudAnimation == HUD_ANIMATION_NEGATIVE) {
+  } else if (f_HudAnimation == HUD_ANIMATION_MOTION_BLUR) {
+  } else if (f_HudAnimation == HUD_ANIMATION_NEGATIVE) {
     for (row = FRAME_MARGIN_ROWS; row != SCREEN_HEIGHT - FRAME_MARGIN_ROWS;
          row++) {
       for (column = FRAME_MARGIN_WORDS;
            column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
-        sCapturedFrame[wordIndex++] =
+        f_CapturedFrame[wordIndex++] =
             ~frame[row * FRAME_WORDS_PER_ROW + column];
       }
     }
   }
-  sHudAnimationFrame = 1;
+  f_HudAnimationFrame = 1;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", CaptureHudAnimationFrame);
@@ -2526,7 +2536,7 @@ void DrawSliceAnimation(void) {
   s32 sliceY;
   s32 y;
 
-  if (sHudAnimationFramesLeft <= 0) {
+  if (f_HudAnimationFramesLeft <= 0) {
     return;
   }
   gDPPipeSync(g_DisplayListHead++);
@@ -2540,7 +2550,7 @@ void DrawSliceAnimation(void) {
   gDPPipeSync(g_DisplayListHead++);
   column = 0;
   wordIndex = 0;
-  frame = SLICE_ANIMATION_FRAME_COUNT - sHudAnimationFramesLeft;
+  frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
   sliceCount = frame / SLICE_FRAME_COUNT + 1;
   if (frame % SLICE_FRAME_COUNT == 0) {
     PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SLICE_SOUND_VOLUME);
@@ -2550,7 +2560,7 @@ void DrawSliceAnimation(void) {
     y = sliceY;
     for (strip = 0; strip != SLICE_STRIP_COUNT; strip++) {
       gDPLoadTextureBlock(g_DisplayListHead++,
-                          (u32)&sCapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA,
+                          (u32)&f_CapturedFrame[wordIndex] & ~7, G_IM_FMT_RGBA,
                           G_IM_SIZ_16b, SLICE_WIDTH, SLICE_STRIP_HEIGHT, 0,
                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2568,7 +2578,7 @@ void DrawSliceAnimation(void) {
       sliceY += SLICE_HEIGHT;
     }
   }
-  sHudAnimationFramesLeft--;
+  f_HudAnimationFramesLeft--;
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_display", DrawSliceAnimation);
@@ -2579,7 +2589,7 @@ void DrawHudAnimation(void) {
   CaptureHudAnimationFrame();
   gDPPipeSync(g_DisplayListHead++);
   gDPSetColorDither(g_DisplayListHead++, G_CD_DISABLE);
-  switch (sHudAnimation) {
+  switch (f_HudAnimation) {
     case HUD_ANIMATION_FADE_OUT:
     case HUD_ANIMATION_NEGATIVE:
     case HUD_ANIMATION_MOTION_BLUR:
@@ -2600,7 +2610,7 @@ void DrawHudAnimation(void) {
       DrawSpiralAnimation(&g_DisplayListHead);
       break;
   }
-  sLastFrameBuffer = nuGfxCfb_ptr;
+  f_LastFrameBuffer = nuGfxCfb_ptr;
 }
 
 /* Lets the HUD draw over the whole screen again */
@@ -2615,4 +2625,4 @@ void ResetHudScissor(void) {
 }
 
 /* Whether the animation that StartHudAnimation started has finished */
-s32 IsHudAnimationDone(void) { return sHudAnimationFramesLeft <= 0; }
+s32 IsHudAnimationDone(void) { return f_HudAnimationFramesLeft <= 0; }

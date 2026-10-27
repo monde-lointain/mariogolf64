@@ -39,7 +39,7 @@
 #include "text.h"
 #include "variables.h"
 
-/* sSceneryState values */
+/* f_SceneryState values */
 #define SCENERY_UNLOADED 0
 #define SCENERY_BILLBOARDS_READY 1 /* The billboard heap is set up */
 /* The images of the hole's scenery are loaded too */
@@ -86,14 +86,14 @@
 #define ASSET_PAR_FIVE_IMAGE 0x567
 
 /* The first asset of each course record's hole images, one per hole */
-extern u16 sHoleImageAssets[COURSE_RECORD_COUNT];
-extern void* sHoleImage;
+extern u16 f_HoleImageAssets[COURSE_RECORD_COUNT];
+extern void* f_HoleImage;
 #define HOLE_IMAGE_WIDTH 48
 #define HOLE_IMAGE_HEIGHT 42
-extern void* sParImage;
+extern void* f_ParImage;
 
 /* Set while the overlay of the course selection is loaded for the hole */
-extern s32 sIsCourseSelectLoaded;
+extern s32 f_IsCourseSelectLoaded;
 
 /*
  * The hole's flag, which shows the hole image, is a grid of vertices. pin.c
@@ -111,11 +111,11 @@ extern s32 sIsCourseSelectLoaded;
 #define HOLE_FLAG_TEXEL_ROW_STEP 0x2A0
 #define HOLE_FLAG_BACK_TEXEL_START 0xC00
 #define HOLE_FLAG_START_SHADE 0xB7
-#define HOLE_FLAG_VERTEX(row, column)       \
-  sHoleFlagVertices[0][g_MatrixBufferIndex] \
-                   [(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+#define HOLE_FLAG_VERTEX(row, column)        \
+  f_HoleFlagVertices[0][g_MatrixBufferIndex] \
+                    [(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
 #define HOLE_FLAG_SHADE(row, column) \
-  sHoleFlagShades[(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
+  f_HoleFlagShades[(row) * HOLE_FLAG_COLUMN_COUNT + (column)]
 
 /* The flag can be skewed by HOLE_FLAG_SKEW per column, but it is zero */
 #define HOLE_FLAG_SKEW 0.0f
@@ -139,16 +139,16 @@ extern s32 sIsCourseSelectLoaded;
 #define HOLE_FLAG_BULGE_ROW_SCALE 10.0f
 #define HOLE_FLAG_FIRST_PULLED_COLUMN 2
 #define HOLE_FLAG_DEPTH_PER_PULL 4
-extern f32 sHoleFlagWavePhase;
+extern f32 f_HoleFlagWavePhase;
 
 /* The near and far planes of the screen's orthographic projection */
 #define SCREEN_ORTHO_NEAR 1.0f
 #define SCREEN_ORTHO_FAR 1000.0f
 
-extern Vtx sHoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
-                            [HOLE_FLAG_VERTEX_COUNT];
+extern Vtx f_HoleFlagVertices[HOLE_FLAG_SIDE_COUNT][MATRIX_BUFFER_COUNT]
+                             [HOLE_FLAG_VERTEX_COUNT];
 /* s8 because WaveHoleFlag loads them as signed bytes when it spreads them */
-extern s8 sHoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
+extern s8 f_HoleFlagShades[HOLE_FLAG_VERTEX_COUNT];
 extern s32 D_800C5478;
 extern Mtx D_80105278;
 
@@ -170,7 +170,7 @@ typedef struct ArrowShape {
   /* 0x0E0 */ Vtx outline[ARROW_VERTEX_COUNT];
 } ArrowShape; /* size = 0x1C0 */
 
-extern ArrowShape sArrows[ARROW_COUNT];
+extern ArrowShape f_Arrows[ARROW_COUNT];
 
 /*
  * The marker of the current shot's offset, with the positions it had in the
@@ -181,8 +181,8 @@ extern ArrowShape sArrows[ARROW_COUNT];
 #define SHOT_OFFSET_MAX_RADIUS 56.0f
 #define SHOT_OFFSET_UNITS_PER_PIXEL 4
 
-extern s32 sShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
-extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
+extern s32 f_ShotOffsetMarkerXs[SHOT_OFFSET_MARKER_COUNT + 1];
+extern s32 f_ShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
 
 /*
  * The marker is an animated 16x16 image, drawn at an offset from the shot
@@ -196,11 +196,11 @@ extern s32 sShotOffsetMarkerYs[SHOT_OFFSET_MARKER_COUNT + 1];
 #define SHOT_OFFSET_MARKER_X 264
 #define SHOT_OFFSET_MARKER_Y 174
 
-extern s32 sShotPanelOffsetY;
-extern s32 sShotPanelOffsetX;
-extern s32 sShotOffsetMarkerFrame;
-extern s32 sShotOffsetMarkerTexelOffset;
-extern void* sShotOffsetMarkerImage;
+extern s32 f_ShotPanelOffsetY;
+extern s32 f_ShotPanelOffsetX;
+extern s32 f_ShotOffsetMarkerFrame;
+extern s32 f_ShotOffsetMarkerTexelOffset;
+extern void* f_ShotOffsetMarkerImage;
 
 /* The images that a hole's intro shows for the bets and the match standing */
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
@@ -230,15 +230,15 @@ extern void* sShotOffsetMarkerImage;
 #define MATCH_IMAGE_X ((SCREEN_WIDTH - MATCH_IMAGE_WIDTH) / 2)
 #define MATCH_IMAGE_Y 140
 
-extern s32 sLoadedHoleIntroImages;
-extern void* sHoleContestImage;
-extern void* sMatchStandingImage;
+extern s32 f_LoadedHoleIntroImages;
+extern void* f_HoleContestImage;
+extern void* f_MatchStandingImage;
 extern s32 D_801B60A0;
 
 /* The ball's recent world positions, which its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
-extern f32 sBallTrail[BALL_TRAIL_LENGTH][3];
-extern s32 sBallTrailHead; /* The latest position */
+extern f32 f_BallTrail[BALL_TRAIL_LENGTH][3];
+extern s32 f_BallTrailHead; /* The latest position */
 
 /*
  * The scrolling of the wind arrow's texture, a step for every
@@ -270,19 +270,19 @@ extern s32 sBallTrailHead; /* The latest position */
 #define COLOR_TEST_TEXT_ROW 5
 /* Columns from one channel's value to the next */
 #define COLOR_TEST_COLUMN_WIDTH 5
-extern s32 sTestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT];
-extern s32 sTestTextX;
-extern s32 sTestTextY;
-extern s32 sTestChannelIndex;
-extern s32 sTestColorIndex;
-extern s32 sIsTestGradientShown;
+extern s32 f_TestColors[COLOR_TEST_COLOR_COUNT][COLOR_TEST_CHANNEL_COUNT];
+extern s32 f_TestTextX;
+extern s32 f_TestTextY;
+extern s32 f_TestChannelIndex;
+extern s32 f_TestColorIndex;
+extern s32 f_IsTestGradientShown;
 /* "Sample" in half-width katakana, then "ABCDEFG" */
-extern char sColorTestSampleText[];
+extern char f_ColorTestSampleText[];
 /* Printed over a cursor to erase it */
-extern char sBlankText[];
+extern char f_BlankText[];
 #define HUD_OFFSET_TEXT_COLUMN 20
 #define HUD_OFFSET_TEXT_ROW 6
-extern s32 sHudOffsetY;
+extern s32 f_HudOffsetY;
 
 /* How long the shot camera waits after the ball lands, in frames */
 #define LANDING_WAIT_FRAME_COUNT 40
@@ -305,8 +305,8 @@ extern s32 sHudOffsetY;
 #define LANDING_GLYPH_GROUP_FIRST 0
 #define LANDING_GLYPH_GROUP_SECOND 1
 
-extern s32 sLandingReaction;
-extern s32 sLandingReactionFrame;
+extern s32 f_LandingReaction;
+extern s32 f_LandingReactionFrame;
 /* The reaction stops counting its frames here */
 #define LANDING_REACTION_FRAME_COUNT 30
 #define LANDING_NAME_GLYPH_Y 8
@@ -325,15 +325,15 @@ extern s32 sLandingReactionFrame;
 #define LANDING_PANEL_Z (-100.0f)
 #define LANDING_PANEL_PIVOT_X 72.0f
 #define LANDING_PANEL_PIVOT_Y (-20.0f)
-extern Vtx sLandingPanelVertices[4];
-extern Mtx sLandingPanelMatrices[MATRIX_BUFFER_COUNT];
+extern Vtx f_LandingPanelVertices[4];
+extern Mtx f_LandingPanelMatrices[MATRIX_BUFFER_COUNT];
 
 #define RING_TEXTURE_OUTER_RADIUS 62
 
 /* The HUD keeps this far in from the edges of the screen */
 #define HUD_MARGIN 8
 
-extern void* sDistanceFont;
+extern void* f_DistanceFont;
 extern s32 D_800E21BC;
 
 /* The black bars that grow over the top and bottom of the HUD's area */
@@ -350,7 +350,7 @@ extern s32 D_800C308C;
 #define HOLE_IMAGE_MODEL_Z (-500.0f)
 #define HOLE_IMAGE_MODEL_SCALE 0.1f
 
-extern Mtx sHoleImageMatrix;
+extern Mtx f_HoleImageMatrix;
 
 /*
  * StartShotEffect's long shot effect, which DrawShotEffect draws, plays a
@@ -366,8 +366,8 @@ extern Mtx sHoleImageMatrix;
 #define LONG_SHOT_SOUND_REVERB 30
 #define LONG_SHOT_SOUND_PAN 127
 
-extern f32 sShotEffectTime;
-extern s32 sShotEffect;
+extern f32 f_ShotEffectTime;
+extern s32 f_ShotEffect;
 
 /*
  * The loaded texture of distance glyphs: the digits, then the units and the
@@ -382,35 +382,35 @@ extern s32 sShotEffect;
 #define DISTANCE_POINT_S 112
 #define DISTANCE_POINT_WIDTH 4
 
-extern void* sSceneryBillboardHeap;
-extern void* sWindIconImage;
+extern void* f_SceneryBillboardHeap;
+extern void* f_WindIconImage;
 extern void* D_8012D428;
 extern void* g_ShadowTexture;
 /* The image asset of the club's head that the HUD shows, loaded into
- * sClubHeadImage */
-extern s32 sClubHeadImageAsset;
-extern void* sClubHeadImage;
+ * f_ClubHeadImage */
+extern s32 f_ClubHeadImageAsset;
+extern void* f_ClubHeadImage;
 /* The selected club's name image, loaded into each buffer in turn as
- * sClubNameImageIndex alternates */
-extern void* sClubNameImages[2];
-/* The image asset of the lie that the HUD shows, loaded into sLieImage */
-extern s32 sLieImageAsset;
-extern void* sLieImage;
+ * f_ClubNameImageIndex alternates */
+extern void* f_ClubNameImages[2];
+/* The image asset of the lie that the HUD shows, loaded into f_LieImage */
+extern s32 f_LieImageAsset;
+extern void* f_LieImage;
 #define ANIMATED_ICON_LABEL_COUNT 3
 /* The images of the animated icon and its labels; see DrawAnimatedIcon */
-extern void* sAnimatedIconImages[];
-extern void* sAnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
+extern void* f_AnimatedIconImages[];
+extern void* f_AnimatedIconLabelImages[ANIMATED_ICON_LABEL_COUNT];
 
-extern void* sWindSpeedFont;
-extern void* sRingImages;
-extern void* sRestLabelImage;
-extern void* sFlatLabelImage;
-extern void* sDownLabelImage;
-extern void* sUpLabelImage;
+extern void* f_WindSpeedFont;
+extern void* f_RingImages;
+extern void* f_RestLabelImage;
+extern void* f_FlatLabelImage;
+extern void* f_DownLabelImage;
+extern void* f_UpLabelImage;
 extern void* D_800E2178;
 
 /*
- * The wind indicator is a model in module 9, lit by sWindArrowLights. It
+ * The wind indicator is a model in module 9, lit by f_WindArrowLights. It
  * sits in front of the camera, tilted to its pitch and turned to the wind.
  */
 #define MODULE_UNK9 9
@@ -418,13 +418,13 @@ extern void* D_800E2178;
 #define WIND_INDICATOR_TILT 0.3f
 #define WIND_INDICATOR_SCALE -0.07f
 #define WIND_INDICATOR_FACING_DEGREES 180.0
-extern Lights1 sWindArrowLights;
+extern Lights1 f_WindArrowLights;
 
 /*
  * The wind speed display's icon pulses around these half sizes, and is wider
  * for two-digit speeds. Its texture is WIND_ICON_TEXTURE_WIDTH by HEIGHT.
  */
-extern f32 sWindIconPulseAngle;
+extern f32 f_WindIconPulseAngle;
 #define WIND_ICON_PULSE_STEP (M_PI / 18)
 #define WIND_SPEED_TO_METERS_SCALE 3600
 #define WIND_SPEED_TO_METERS_DIVISOR 104857600
@@ -469,10 +469,10 @@ extern f32 sWindIconPulseAngle;
 #define WIND_TEXT_ENV_RED 0x00
 #define WIND_TEXT_ENV_GREEN 0x20
 #define WIND_TEXT_ENV_BLUE 0x7F
-extern Mtx sWindIndicatorMatrices[2];
+extern Mtx f_WindIndicatorMatrices[2];
 extern Gfx D_80222400[];
 void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y);
-extern s32 sSceneryState;
+extern s32 f_SceneryState;
 
 /* Heights in meters or feet nearer zero than this */
 #define LEVEL_HEIGHT 0.01f
@@ -513,12 +513,12 @@ void PrepareHoleDisplay(void) {
 
   g_MatrixBufferIndex = 0;
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    sArrows[0].body[i].v.tc[1] =
-        (sArrows[0].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
+    f_Arrows[0].body[i].v.tc[1] =
+        (f_Arrows[0].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
          ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
-    sArrows[1].body[i].v.tc[1] =
-        (sArrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
+    f_Arrows[1].body[i].v.tc[1] =
+        (f_Arrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
          ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
   }
@@ -536,7 +536,7 @@ void InitRoundHud(void) {
 
   D_800C5478 = 0;
   for (grid = 0; grid != HOLE_FLAG_SIDE_COUNT * MATRIX_BUFFER_COUNT; grid++) {
-    vertex = sHoleFlagVertices[0][grid];
+    vertex = f_HoleFlagVertices[0][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
         vertex->v.ob[0] = column * HOLE_FLAG_CELL_SIZE;
@@ -553,7 +553,7 @@ void InitRoundHud(void) {
     }
   }
   for (grid = 0; grid != MATRIX_BUFFER_COUNT; grid++) {
-    vertex = sHoleFlagVertices[1][grid];
+    vertex = f_HoleFlagVertices[1][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
         vertex->v.tc[0] =
@@ -563,7 +563,7 @@ void InitRoundHud(void) {
     }
   }
   for (column = 0; column != HOLE_FLAG_VERTEX_COUNT; column++) {
-    sHoleFlagShades[column] = HOLE_FLAG_START_SHADE;
+    f_HoleFlagShades[column] = HOLE_FLAG_START_SHADE;
   }
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
           -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
@@ -608,19 +608,19 @@ void LoadPlayerFace(s32 playerIndex, s32 character, s32 paletteIndex) {
  * are not loaded */
 void EndHoleIntro(void) {
   if (g_GameMode == GAME_MODE_RING_SHOT) {
-    if (sIsCourseSelectLoaded == TRUE) {
-      sIsCourseSelectLoaded = FALSE;
+    if (f_IsCourseSelectLoaded == TRUE) {
+      f_IsCourseSelectLoaded = FALSE;
       FreeCourseSelect();
     }
   } else if (g_GameMode == GAME_MODE_TRAINING) {
-    if (sIsCourseSelectLoaded == TRUE) {
-      sIsCourseSelectLoaded = FALSE;
+    if (f_IsCourseSelectLoaded == TRUE) {
+      f_IsCourseSelectLoaded = FALSE;
       FreeCourseSelect();
     }
   } else {
     FreeHoleIntroImages();
   }
-  if (sSceneryState == SCENERY_BILLBOARDS_READY) {
+  if (f_SceneryState == SCENERY_BILLBOARDS_READY) {
     LoadSceneryImages();
   }
 }
@@ -639,9 +639,9 @@ void StartHoleIntro(void) {
   }
   RevertBillboardManager();
   OpenEncodedAsset(
-      sHoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(),
+      f_HoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(),
       &asset);
-  ReadEncodedAsset(sHoleImage, &asset);
+  ReadEncodedAsset(f_HoleImage, &asset);
   switch ((s8)g_CourseRecords[GetCourseRecordIndex()]
               .holes[GetHoleRecordIndex()]
               .par) {
@@ -655,18 +655,18 @@ void StartHoleIntro(void) {
       OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset);
       break;
   }
-  ReadEncodedAsset(sParImage, &asset);
-  if (sSceneryState == SCENERY_LOADED) {
+  ReadEncodedAsset(f_ParImage, &asset);
+  if (f_SceneryState == SCENERY_LOADED) {
     FreeSceneryImages();
   }
   if (g_GameMode == GAME_MODE_RING_SHOT) {
-    if (sIsCourseSelectLoaded == FALSE) {
-      sIsCourseSelectLoaded = TRUE;
+    if (f_IsCourseSelectLoaded == FALSE) {
+      f_IsCourseSelectLoaded = TRUE;
       LoadCourseSelect(0);
     }
   } else if (g_GameMode == GAME_MODE_TRAINING) {
-    if (sIsCourseSelectLoaded == FALSE) {
-      sIsCourseSelectLoaded = TRUE;
+    if (f_IsCourseSelectLoaded == FALSE) {
+      f_IsCourseSelectLoaded = TRUE;
       LoadCourseSelect(1);
     }
   } else {
@@ -678,7 +678,7 @@ void StartHoleIntro(void) {
 void LoadSceneryImages(void) {
   EncodedAsset asset;
 
-  sSceneryState = SCENERY_LOADED;
+  f_SceneryState = SCENERY_LOADED;
   LoadGolfBallImages();
   LoadEffectImages();
   LoadHoleCreatureImages();
@@ -688,8 +688,9 @@ void LoadSceneryImages(void) {
   g_PinFlagImages =
       AllocMemory(OpenEncodedAsset(ASSET_PIN_FLAG_IMAGES, &asset));
   ReadEncodedAsset(g_PinFlagImages, &asset);
-  sWindIconImage = AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
-  ReadEncodedAsset(sWindIconImage, &asset);
+  f_WindIconImage =
+      AllocMemory(OpenEncodedAsset(ASSET_WIND_ICON_IMAGE, &asset));
+  ReadEncodedAsset(f_WindIconImage, &asset);
   g_PlayerTagImages =
       AllocMemory(OpenEncodedAsset(ASSET_PLAYER_TAG_IMAGES, &asset));
   ReadEncodedAsset(g_PlayerTagImages, &asset);
@@ -703,44 +704,45 @@ void LoadSceneryImages(void) {
   ReadEncodedAsset(D_8012D428, &asset);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
-  sClubHeadImageAsset = -1;
-  sClubHeadImage =
+  f_ClubHeadImageAsset = -1;
+  f_ClubHeadImage =
       AllocMemory(OpenEncodedAsset(ASSET_DRIVER_HEAD_IMAGE, &asset));
-  ReadEncodedAsset(sClubHeadImage, &asset);
-  sClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-  sClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
-  sLieImageAsset = -1;
-  sLieImage = AllocMemory(LIE_IMAGE_SIZE);
-  sAnimatedIconImages[0] =
+  ReadEncodedAsset(f_ClubHeadImage, &asset);
+  f_ClubNameImages[0] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+  f_ClubNameImages[1] = AllocMemory(SCENERY_BUFFER_A_SIZE);
+  f_LieImageAsset = -1;
+  f_LieImage = AllocMemory(LIE_IMAGE_SIZE);
+  f_AnimatedIconImages[0] =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_648, &asset));
-  ReadEncodedAsset(sAnimatedIconImages[0], &asset);
-  sAnimatedIconLabelImages[0] =
+  ReadEncodedAsset(f_AnimatedIconImages[0], &asset);
+  f_AnimatedIconLabelImages[0] =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_563, &asset));
-  ReadEncodedAsset(sAnimatedIconLabelImages[0], &asset);
-  sAnimatedIconLabelImages[1] =
+  ReadEncodedAsset(f_AnimatedIconLabelImages[0], &asset);
+  f_AnimatedIconLabelImages[1] =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_564, &asset));
-  ReadEncodedAsset(sAnimatedIconLabelImages[1], &asset);
-  sAnimatedIconLabelImages[2] =
+  ReadEncodedAsset(f_AnimatedIconLabelImages[1], &asset);
+  f_AnimatedIconLabelImages[2] =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_562, &asset));
-  ReadEncodedAsset(sAnimatedIconLabelImages[2], &asset);
-  sShotOffsetMarkerImage =
+  ReadEncodedAsset(f_AnimatedIconLabelImages[2], &asset);
+  f_ShotOffsetMarkerImage =
       AllocMemory(OpenEncodedAsset(ASSET_SHOT_OFFSET_MARKER_IMAGE, &asset));
-  ReadEncodedAsset(sShotOffsetMarkerImage, &asset);
-  sWindSpeedFont = AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
-  ReadEncodedAsset(sWindSpeedFont, &asset);
-  sRingImages = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
-  ReadEncodedAsset(sRingImages, &asset);
-  sRestLabelImage =
+  ReadEncodedAsset(f_ShotOffsetMarkerImage, &asset);
+  f_WindSpeedFont =
+      AllocMemory(OpenEncodedAsset(ASSET_WIND_SPEED_FONT, &asset));
+  ReadEncodedAsset(f_WindSpeedFont, &asset);
+  f_RingImages = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_725, &asset));
+  ReadEncodedAsset(f_RingImages, &asset);
+  f_RestLabelImage =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_568, &asset));
-  ReadEncodedAsset(sRestLabelImage, &asset);
-  sFlatLabelImage =
+  ReadEncodedAsset(f_RestLabelImage, &asset);
+  f_FlatLabelImage =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56B, &asset));
-  ReadEncodedAsset(sFlatLabelImage, &asset);
-  sDownLabelImage =
+  ReadEncodedAsset(f_FlatLabelImage, &asset);
+  f_DownLabelImage =
       AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_56A, &asset));
-  ReadEncodedAsset(sDownLabelImage, &asset);
-  sUpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
-  ReadEncodedAsset(sUpLabelImage, &asset);
+  ReadEncodedAsset(f_DownLabelImage, &asset);
+  f_UpLabelImage = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_569, &asset));
+  ReadEncodedAsset(f_UpLabelImage, &asset);
   D_800E2178 = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_723, &asset));
   ReadEncodedAsset(D_800E2178, &asset);
   g_DistanceSignImage =
@@ -751,35 +753,35 @@ void LoadSceneryImages(void) {
 
 /* Frees what LoadSceneryImages loaded */
 void FreeSceneryImages(void) {
-  if (sSceneryState == SCENERY_LOADED) {
-    sSceneryState = SCENERY_BILLBOARDS_READY;
+  if (f_SceneryState == SCENERY_LOADED) {
+    f_SceneryState = SCENERY_BILLBOARDS_READY;
     FreeEffectImages();
     FreeHoleCreatureImages();
     func_80216F8C();
     FreeMovieBuffer();
     FreeClubPanelImages();
     FreeMemory(&g_PinFlagImages);
-    FreeMemory(&sWindIconImage);
+    FreeMemory(&f_WindIconImage);
     FreeMemory(&g_PlayerTagImages);
     FreeMemory(&g_LeaderLineImage);
     FreeMemory(&g_BackdropPatternImage);
     FreeMemory(&D_8012D428);
     FreeMemory(&g_ShadowTexture);
-    FreeMemory(&sClubHeadImage);
-    FreeMemory(&sClubNameImages[0]);
-    FreeMemory(&sClubNameImages[1]);
-    FreeMemory(&sLieImage);
-    FreeMemory(&sAnimatedIconImages[0]);
-    FreeMemory(&sAnimatedIconLabelImages[0]);
-    FreeMemory(&sAnimatedIconLabelImages[1]);
-    FreeMemory(&sAnimatedIconLabelImages[2]);
-    FreeMemory(&sShotOffsetMarkerImage);
-    FreeMemory(&sWindSpeedFont);
-    FreeMemory(&sRingImages);
-    FreeMemory(&sRestLabelImage);
-    FreeMemory(&sFlatLabelImage);
-    FreeMemory(&sDownLabelImage);
-    FreeMemory(&sUpLabelImage);
+    FreeMemory(&f_ClubHeadImage);
+    FreeMemory(&f_ClubNameImages[0]);
+    FreeMemory(&f_ClubNameImages[1]);
+    FreeMemory(&f_LieImage);
+    FreeMemory(&f_AnimatedIconImages[0]);
+    FreeMemory(&f_AnimatedIconLabelImages[0]);
+    FreeMemory(&f_AnimatedIconLabelImages[1]);
+    FreeMemory(&f_AnimatedIconLabelImages[2]);
+    FreeMemory(&f_ShotOffsetMarkerImage);
+    FreeMemory(&f_WindSpeedFont);
+    FreeMemory(&f_RingImages);
+    FreeMemory(&f_RestLabelImage);
+    FreeMemory(&f_FlatLabelImage);
+    FreeMemory(&f_DownLabelImage);
+    FreeMemory(&f_UpLabelImage);
     FreeMemory(&D_800E2178);
     FreeMemory(&g_DistanceSignImage);
     FreeBursts();
@@ -790,22 +792,22 @@ void FreeSceneryImages(void) {
 void InitScenery(void) {
   EncodedAsset unusedAsset; /* Left from code that loaded assets here */
 
-  if (sSceneryState == SCENERY_UNLOADED) {
-    sSceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
-    InitBillboardManager(sSceneryBillboardHeap, BILLBOARD_HEAP_SIZE);
-    sSceneryState = SCENERY_BILLBOARDS_READY;
+  if (f_SceneryState == SCENERY_UNLOADED) {
+    f_SceneryBillboardHeap = AllocMemory(BILLBOARD_HEAP_SIZE);
+    InitBillboardManager(f_SceneryBillboardHeap, BILLBOARD_HEAP_SIZE);
+    f_SceneryState = SCENERY_BILLBOARDS_READY;
   }
 }
 
 /* Frees everything the round's scenery holds, when its overlay is unloaded */
 void FreeScenery(void) {
-  if (sSceneryState != SCENERY_UNLOADED) {
+  if (f_SceneryState != SCENERY_UNLOADED) {
     DestroyBillboardManager();
-    FreeMemory(&sSceneryBillboardHeap);
+    FreeMemory(&f_SceneryBillboardHeap);
     EndWeather();
     ClearShotEffects(1);
     FreeSceneryImages();
-    sSceneryState = SCENERY_UNLOADED;
+    f_SceneryState = SCENERY_UNLOADED;
     memset(&g_RoundHud, 0, sizeof(g_RoundHud));
   }
 }
@@ -854,16 +856,16 @@ void StartShotPanel(void) {
   g_RoundHud.cupDistance = (f32)GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
       g_CurrentShot.ballPosition[AXIS_Z] - g_CupPositionZ);
-  if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != sLieImageAsset) {
-    sLieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
+  if (GetSurfaceInfo(g_CurrentShot.surface)->unk10 != f_LieImageAsset) {
+    f_LieImageAsset = GetSurfaceInfo(g_CurrentShot.surface)->unk10;
     if (GetSurfaceInfo(g_CurrentShot.surface)->kind ==
         SURFACE_KIND_TEE_GROUND) {
-      sShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
+      f_ShotPanelOffsetY = TEE_GROUND_PANEL_OFFSET_Y;
     } else {
-      sShotPanelOffsetY = 0;
+      f_ShotPanelOffsetY = 0;
     }
-    OpenEncodedAsset(sLieImageAsset, &asset);
-    ReadEncodedAsset(sLieImage, &asset);
+    OpenEncodedAsset(f_LieImageAsset, &asset);
+    ReadEncodedAsset(f_LieImage, &asset);
   }
   if (D_801B60B9) {
     g_RoundHud.skinsTotals[0] = 0;
@@ -898,7 +900,7 @@ void StartShotPanel(void) {
         break;
     }
   }
-  sShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
+  f_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
   ResetShotModeChange();
   LoadContactImages(&g_Players[g_RoundHud.unk87]);
 }
@@ -922,18 +924,18 @@ void LoadRoundHud(void) {
   ReadEncodedAsset(g_CourseSkyImage, &asset);
   g_SkyImage = AllocMemory(OpenEncodedAsset(ASSET_SKY_IMAGE_0, &asset));
   ReadEncodedAsset(g_SkyImage, &asset);
-  sHoleImage = AllocMemory(OpenEncodedAsset(sHoleImageAssets[0], &asset));
-  ReadEncodedAsset(sHoleImage, &asset);
-  sParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
-  ReadEncodedAsset(sParImage, &asset);
-  sDistanceFont = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
-  ReadEncodedAsset(sDistanceFont, &asset);
+  f_HoleImage = AllocMemory(OpenEncodedAsset(f_HoleImageAssets[0], &asset));
+  ReadEncodedAsset(f_HoleImage, &asset);
+  f_ParImage = AllocMemory(OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset));
+  ReadEncodedAsset(f_ParImage, &asset);
+  f_DistanceFont = AllocMemory(OpenEncodedAsset(ASSET_ROUND_IMAGE_722, &asset));
+  ReadEncodedAsset(f_DistanceFont, &asset);
   g_RingTexels = AllocMemory(RING_TEXTURE_SIZE * RING_TEXTURE_SIZE);
   BuildRingTexels(g_RingTexels, RING_TEXTURE_SIZE, RING_TEXTURE_SIZE,
                   RING_TEXTURE_OUTER_RADIUS);
   for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
-    sShotOffsetMarkerXs[i] = 0;
-    sShotOffsetMarkerYs[i] = 0;
+    f_ShotOffsetMarkerXs[i] = 0;
+    f_ShotOffsetMarkerYs[i] = 0;
   }
   g_HudScissor.left = HUD_MARGIN;
   g_HudScissor.top = HUD_MARGIN;
@@ -974,7 +976,7 @@ void FreeRoundHudTextures(void) { FreePinTextures(); }
 #define INSET_FRAME_SIDE_HALF_WIDTH 2
 #define INSET_FRAME_BORDER_OUTSIDE 1
 #define INSET_FRAME_BORDER_INSIDE 2
-extern u8 sInsetFrameTexture[];
+extern u8 f_InsetFrameTexture[];
 
 /* Draws the frame around the inset view */
 void DrawInsetViewFrame(void) {
@@ -1001,7 +1003,7 @@ void DrawInsetViewFrame(void) {
   gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
                     G_CC_MODULATEIDECALA_PRIM);
   gDPLoadTextureBlock_4b(
-      g_DisplayListHead++, (u32)sInsetFrameTexture & ~7, G_IM_FMT_I,
+      g_DisplayListHead++, (u32)f_InsetFrameTexture & ~7, G_IM_FMT_I,
       INSET_FRAME_TEXTURE_WIDTH, INSET_FRAME_TEXTURE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
       INSET_FRAME_TEXTURE_MASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1033,7 +1035,7 @@ void DrawInsetViewFrame(void) {
   }
   gDPPipeSync(g_DisplayListHead++);
   gDPLoadTextureBlock_4b(
-      g_DisplayListHead++, (u32)sInsetFrameTexture & ~7, G_IM_FMT_I,
+      g_DisplayListHead++, (u32)f_InsetFrameTexture & ~7, G_IM_FMT_I,
       INSET_FRAME_TEXTURE_WIDTH, INSET_FRAME_SIDE_TEXTURE_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMASK,
       INSET_FRAME_TEXTURE_MASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -1075,12 +1077,12 @@ void ScrollWindArrow(void) {
   s32 i;
 
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-    sArrows[g_MatrixBufferIndex].body[i].v.tc[1] += step;
+    f_Arrows[g_MatrixBufferIndex].body[i].v.tc[1] += step;
   }
-  if (sArrows[g_MatrixBufferIndex].body[0].v.tc[1] >
+  if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[1] >
       ARROW_TEXTURE_COORDINATE_LIMIT) {
     for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
-      sArrows[g_MatrixBufferIndex].body[i].v.tc[1] -= ARROW_TEXTURE_PERIOD;
+      f_Arrows[g_MatrixBufferIndex].body[i].v.tc[1] -= ARROW_TEXTURE_PERIOD;
     }
   }
 }
@@ -1093,24 +1095,24 @@ void ScrollWindArrow(void) {
 void StartLandingReaction(s32 reaction) {
   s32 previousReaction;
 
-  sLandingReactionFrame = 0;
+  f_LandingReactionFrame = 0;
   if (reaction == LANDING_REACTION_NONE) {
-    sLandingReaction = reaction;
+    f_LandingReaction = reaction;
     PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, NO_FONT_SIZE, 0, 0, 0, NULL);
     PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, NO_FONT_SIZE, 0, 0, 0, NULL);
     StartMovie(MOVIE_NONE);
     return;
   }
-  previousReaction = sLandingReaction;
+  previousReaction = f_LandingReaction;
   if (previousReaction != LANDING_REACTION_NONE) {
     return;
   }
-  sLandingReaction = reaction;
+  f_LandingReaction = reaction;
   switch ((u32)GetSurfaceInfo(g_BallSurface)->kind) {
     case SURFACE_KIND_OUT_OF_BOUNDS:
       g_InsetView.animation = INSET_VIEW_OPENING;
       g_InsetView.unk8 = LANDING_INSET_UNK8;
-      sLandingReaction = previousReaction;
+      f_LandingReaction = previousReaction;
       g_InsetView.unkC = MOVIE_INSET_UNKC;
       SetInsetViewRect(MOVIE_INSET_CENTER_X, MOVIE_INSET_CENTER_Y,
                        MOVIE_INSET_SIZE, MOVIE_INSET_SIZE);
@@ -1120,7 +1122,7 @@ void StartLandingReaction(s32 reaction) {
       break;
     case SURFACE_KIND_OUT_OF_COURSE:
     case SURFACE_KIND_WATER_HAZARD:
-      sLandingReaction = LANDING_REACTION_UNK2;
+      f_LandingReaction = LANDING_REACTION_UNK2;
       SetLandingWaitFrameCount(LANDING_WAIT_LONG_FRAME_COUNT);
       break;
     case SURFACE_KIND_GREEN:
@@ -1160,13 +1162,13 @@ void DrawLandingReaction(Gfx** displayListHead) {
   f32 angle;
   f32 size;
 
-  if (sLandingReaction != LANDING_REACTION_NONE) {
+  if (f_LandingReaction != LANDING_REACTION_NONE) {
     surface = GetSurfaceInfo(g_BallSurface);
-    if (sLandingReactionFrame == 1) {
+    if (f_LandingReactionFrame == 1) {
       PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, FONT_SIZE_LARGE, 0, 0,
                       LANDING_NAME_GLYPH_Y, surface->name);
     }
-    if (sLandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+    if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
       distance = GetCupDistance(
           g_BallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
           g_BallPosition[AXIS_Z] - g_CupPositionZ);
@@ -1183,13 +1185,13 @@ void DrawLandingReaction(Gfx** displayListHead) {
                 hundredths / HUNDREDTHS_PER_UNIT,
                 hundredths % HUNDREDTHS_PER_UNIT, YARDS_GLYPH);
       }
-      if (sLandingReactionFrame == 1) {
+      if (f_LandingReactionFrame == 1) {
         PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, FONT_SIZE_MEDIUM, 0, 0,
                         LANDING_DISTANCE_GLYPH_Y, g_PrintBuffer);
       }
     }
-    if (sLandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
-      sLandingReactionFrame++;
+    if (f_LandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
+      f_LandingReactionFrame++;
     }
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -1203,13 +1205,13 @@ void DrawLandingReaction(Gfx** displayListHead) {
     gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, LANDING_PANEL_ALPHA);
     gDPPipeSync(gfx++);
-    angle = DEGREES_TO_RADIANS(sLandingReactionFrame *
+    angle = DEGREES_TO_RADIANS(f_LandingReactionFrame *
                                    LANDING_PANEL_DEGREES_PER_FRAME +
                                LANDING_PANEL_START_DEGREES);
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
     }
-    size = sLandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
+    size = f_LandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
     if (size > 1.0f) {
       size = 1.0f;
     }
@@ -1226,19 +1228,19 @@ void DrawLandingReaction(Gfx** displayListHead) {
     /* Spins the panel around a point away from its center */
     guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
     guMtxCatF(offset, matrix, matrix);
-    ConvertMatrixToFixed(matrix, &sLandingPanelMatrices[g_MatrixBufferIndex]);
+    ConvertMatrixToFixed(matrix, &f_LandingPanelMatrices[g_MatrixBufferIndex]);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&sLandingPanelMatrices[g_MatrixBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_LandingPanelMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sLandingPanelVertices, ARRAY_COUNT(sLandingPanelVertices),
-              0);
+    gSPVertex(gfx++, f_LandingPanelVertices,
+              ARRAY_COUNT(f_LandingPanelVertices), 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
-    if (sLandingReactionFrame < LANDING_PANEL_GROWTH_FRAME_COUNT) {
+    if (f_LandingReactionFrame < LANDING_PANEL_GROWTH_FRAME_COUNT) {
       SetUpPerspectiveTextDrawing(&gfx);
       DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_FIRST);
-      if (sLandingReaction == LANDING_REACTION_REST) {
+      if (f_LandingReaction == LANDING_REACTION_REST) {
         DrawGlyphGroup(&gfx, LANDING_GLYPH_GROUP_SECOND);
       }
     } else {
@@ -1246,7 +1248,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, LANDING_NAME_Y,
                             surface->name);
-      if (sLandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
+      if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
         DrawCenteredMediumText(&gfx, SCREEN_WIDTH / 2, LANDING_DISTANCE_Y,
                                g_PrintBuffer);
       }
@@ -1338,11 +1340,11 @@ typedef struct GridScreenPoint {
 extern s32 D_800BB0E8;
 /* The quad that each segment of the ball trail, and of the green grid, moves
  * into place on the screen */
-extern Vtx sBallTrailVertices[4];
-extern s32 sGreenGridAlpha;
-extern f32 sGreenGridScroll;
-extern Mtx sGreenGridMatrix;
-extern s32 sGreenGridHeights[GREEN_GRID_POINT_COUNT];
+extern Vtx f_BallTrailVertices[4];
+extern s32 f_GreenGridAlpha;
+extern f32 f_GreenGridScroll;
+extern Mtx f_GreenGridMatrix;
+extern s32 f_GreenGridHeights[GREEN_GRID_POINT_COUNT];
 
 #ifdef NON_MATCHING
 /*
@@ -1491,17 +1493,17 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   stepX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
   if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
-    sGreenGridScroll -= GREEN_GRID_SCROLL_STEP;
+    f_GreenGridScroll -= GREEN_GRID_SCROLL_STEP;
     if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
-      if (sGreenGridScroll < 0.0f) {
-        sGreenGridScroll += 1.0f;
+      if (f_GreenGridScroll < 0.0f) {
+        f_GreenGridScroll += 1.0f;
       }
-    } else if (sGreenGridScroll < -1.0f) {
-      sGreenGridScroll += 2.0f;
+    } else if (f_GreenGridScroll < -1.0f) {
+      f_GreenGridScroll += 2.0f;
     }
   }
-  scrollX = stepX * sGreenGridScroll;
-  scrollZ = stepZ * sGreenGridScroll;
+  scrollX = stepX * f_GreenGridScroll;
+  scrollZ = stepZ * f_GreenGridScroll;
 
   for (row = 0, rowStart = 0; row != rowCount;) {
     for (column = 0; column != columnCount; column++) {
@@ -1511,7 +1513,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       if (row != 0) {
         rowPosition = row - 1;
       }
-      if (isUnscrolledRow || (sGreenGridScroll < 0.0f && row == 1)) {
+      if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
         points[i][AXIS_X] =
             center[AXIS_X] + originX + stepX * rowPosition + sideX * column;
         points[i][AXIS_Z] =
@@ -1526,9 +1528,9 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         D_800BB0E8 = 1;
         points[i][AXIS_Y] =
             GetGroundHeight(points[i][AXIS_X], points[i][AXIS_Z]);
-        sGreenGridHeights[i] = points[i][AXIS_Y];
+        f_GreenGridHeights[i] = points[i][AXIS_Y];
       } else {
-        points[i][AXIS_Y] = sGreenGridHeights[i];
+        points[i][AXIS_Y] = f_GreenGridHeights[i];
       }
     }
     if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
@@ -1593,7 +1595,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   }
 
-  guMtxIdent(&sGreenGridMatrix);
+  guMtxIdent(&f_GreenGridMatrix);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1610,17 +1612,17 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sGreenGridMatrix),
+  gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_GreenGridMatrix),
             G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPVertex(gfx++, sBallTrailVertices, ARRAY_COUNT(sBallTrailVertices), 0);
+  gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices), 0);
   if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
-    sGreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
   } else if (g_RoundHud.greenGridState != GREEN_GRID_FADING) {
-    sGreenGridAlpha = GREEN_GRID_ALPHA;
-  } else if (sGreenGridAlpha < GREEN_GRID_FADE_END_ALPHA) {
-    sGreenGridAlpha = GREEN_GRID_DIM_ALPHA;
+    f_GreenGridAlpha = GREEN_GRID_ALPHA;
+  } else if (f_GreenGridAlpha < GREEN_GRID_FADE_END_ALPHA) {
+    f_GreenGridAlpha = GREEN_GRID_DIM_ALPHA;
   } else {
-    sGreenGridAlpha -= GREEN_GRID_FADE_STEP;
+    f_GreenGridAlpha -= GREEN_GRID_FADE_STEP;
   }
   if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
     /* The lines across the aim, one quad between each pair of points in a row
@@ -1655,10 +1657,10 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
                               (screenPoints[point].y - (s32)dx));
           gSPModifyVertex(
               gfx++, 2, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
           gSPModifyVertex(
               gfx++, 3, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
           if (screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
@@ -1678,10 +1680,10 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
                               (screenPoints[point].y - (s32)dx));
           gSPModifyVertex(
               gfx++, 0, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
           gSPModifyVertex(
               gfx++, 1, G_MWO_POINT_RGBA,
-              (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+              (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
           if (column != 0 && screenPoints[point - 1].isVisible == TRUE) {
             gDPPipeSync(gfx++);
             if (screenPoints[point].depth < screenPoints[point - 1].depth) {
@@ -1726,17 +1728,17 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         SET_GREEN_GRID_TINT(slopes[point]);
         gSPModifyVertex(
             gfx++, 0, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         gSPModifyVertex(
             gfx++, 1, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         SET_GREEN_GRID_TINT(slopes[point + columnCount]);
         gSPModifyVertex(
             gfx++, 2, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         gSPModifyVertex(
             gfx++, 3, G_MWO_POINT_RGBA,
-            (red << 24) | (green << 16) | (blue << 8) | sGreenGridAlpha);
+            (red << 24) | (green << 16) | (blue << 8) | f_GreenGridAlpha);
         gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
                         (screenPoints[point].x << 16) + screenPoints[point].y);
         gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
@@ -1779,11 +1781,11 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawGreenGrid);
 void ResetBallTrail(void) {
   s32 i;
 
-  sBallTrailHead = 0;
+  f_BallTrailHead = 0;
   for (i = 0; i != BALL_TRAIL_LENGTH; i++) {
-    sBallTrail[i][AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-    sBallTrail[i][AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
-    sBallTrail[i][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_X] = g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_Y] = g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE;
+    f_BallTrail[i][AXIS_Z] = g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   }
 }
 
@@ -1814,8 +1816,8 @@ typedef struct TrailPoint {
 } TrailPoint; /* size = 0x0C */
 
 extern s32 D_800C5AAC;
-extern TrailPoint sBallTrailPoints[BALL_TRAIL_LENGTH];
-extern Mtx sBallTrailMatrix;
+extern TrailPoint f_BallTrailPoints[BALL_TRAIL_LENGTH];
+extern Mtx f_BallTrailMatrix;
 
 /*
  * Draws the ball's trail through its recent positions as screen-space quads
@@ -1839,36 +1841,36 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
 
   if (D_800C5AAC != 0 && g_RoundHud.unk17) {
     if (D_800C5AAC == BALL_TRAIL_RECORDING) {
-      if (++sBallTrailHead == BALL_TRAIL_LENGTH) {
-        sBallTrailHead = 0;
+      if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
+        f_BallTrailHead = 0;
       }
-      sBallTrail[sBallTrailHead][AXIS_X] =
+      f_BallTrail[f_BallTrailHead][AXIS_X] =
           g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
-      sBallTrail[sBallTrailHead][AXIS_Y] =
+      f_BallTrail[f_BallTrailHead][AXIS_Y] =
           g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
           g_PinVertexScale * BALL_TRAIL_DROP;
-      sBallTrail[sBallTrailHead][AXIS_Z] =
+      f_BallTrail[f_BallTrailHead][AXIS_Z] =
           g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
     if (g_IsCupViewShown != 1) {
       /* Projects the trail from its newest position back */
-      index = sBallTrailHead;
+      index = f_BallTrailHead;
       for (i = 0; i != BALL_TRAIL_LENGTH; i++, index--) {
         if (index == -1) {
           index = BALL_TRAIL_LENGTH - 1;
         }
-        if (ProjectPoint(sBallTrail[index][AXIS_X], sBallTrail[index][AXIS_Y],
-                         sBallTrail[index][AXIS_Z], &point) < 0) {
-          sBallTrailPoints[i].x = point.x * 4;
-          sBallTrailPoints[i].y = point.y * 4;
-          sBallTrailPoints[i].depth =
+        if (ProjectPoint(f_BallTrail[index][AXIS_X], f_BallTrail[index][AXIS_Y],
+                         f_BallTrail[index][AXIS_Z], &point) < 0) {
+          f_BallTrailPoints[i].x = point.x * 4;
+          f_BallTrailPoints[i].y = point.y * 4;
+          f_BallTrailPoints[i].depth =
               point.depth -
               point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS);
         } else {
-          sBallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
+          f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
         }
       }
-      guMtxIdent(&sBallTrailMatrix);
+      guMtxIdent(&f_BallTrailMatrix);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1889,14 +1891,15 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
                 G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sBallTrailMatrix),
+      gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_BallTrailMatrix),
                 G_MTX_PUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-      gSPVertex(gfx++, sBallTrailVertices, ARRAY_COUNT(sBallTrailVertices), 0);
+      gSPVertex(gfx++, f_BallTrailVertices, ARRAY_COUNT(f_BallTrailVertices),
+                0);
       for (i = 0; i != BALL_TRAIL_LENGTH - 1; i++) {
-        if (sBallTrailPoints[i].depth != BALL_TRAIL_HIDDEN &&
-            sBallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
-          deltaX = sBallTrailPoints[i].x - sBallTrailPoints[i + 1].x;
-          deltaY = sBallTrailPoints[i].y - sBallTrailPoints[i + 1].y;
+        if (f_BallTrailPoints[i].depth != BALL_TRAIL_HIDDEN &&
+            f_BallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
+          deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
+          deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
           /* The empty branch for a segment of no length is there to match */
           if (deltaX == 0.0f & deltaY == 0.0f) {
           } else {
@@ -1905,7 +1908,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             offsetX = deltaY * scale;
             offsetY = deltaX * scale;
             gDPPipeSync(gfx++);
-            gDPSetPrimDepth(gfx++, sBallTrailPoints[i].depth, 0);
+            gDPSetPrimDepth(gfx++, f_BallTrailPoints[i].depth, 0);
             gDPPipeSync(gfx++);
             gSPModifyVertex(gfx++, 0, G_MWO_POINT_RGBA,
                             BALL_TRAIL_SEGMENT_COLOR(i));
@@ -1916,17 +1919,19 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPModifyVertex(gfx++, 3, G_MWO_POINT_RGBA,
                             BALL_TRAIL_SEGMENT_COLOR(i));
             gSPModifyVertex(gfx++, 0, G_MWO_POINT_XYSCREEN,
-                            ((sBallTrailPoints[i].x + (s32)offsetX) << 16) +
-                                (sBallTrailPoints[i].y - (s32)offsetY));
+                            ((f_BallTrailPoints[i].x + (s32)offsetX) << 16) +
+                                (f_BallTrailPoints[i].y - (s32)offsetY));
             gSPModifyVertex(gfx++, 1, G_MWO_POINT_XYSCREEN,
-                            ((sBallTrailPoints[i].x - (s32)offsetX) << 16) +
-                                (sBallTrailPoints[i].y + (s32)offsetY));
-            gSPModifyVertex(gfx++, 2, G_MWO_POINT_XYSCREEN,
-                            ((sBallTrailPoints[i + 1].x + (s32)offsetX) << 16) +
-                                (sBallTrailPoints[i + 1].y - (s32)offsetY));
-            gSPModifyVertex(gfx++, 3, G_MWO_POINT_XYSCREEN,
-                            ((sBallTrailPoints[i + 1].x - (s32)offsetX) << 16) +
-                                (sBallTrailPoints[i + 1].y + (s32)offsetY));
+                            ((f_BallTrailPoints[i].x - (s32)offsetX) << 16) +
+                                (f_BallTrailPoints[i].y + (s32)offsetY));
+            gSPModifyVertex(
+                gfx++, 2, G_MWO_POINT_XYSCREEN,
+                ((f_BallTrailPoints[i + 1].x + (s32)offsetX) << 16) +
+                    (f_BallTrailPoints[i + 1].y - (s32)offsetY));
+            gSPModifyVertex(
+                gfx++, 3, G_MWO_POINT_XYSCREEN,
+                ((f_BallTrailPoints[i + 1].x - (s32)offsetX) << 16) +
+                    (f_BallTrailPoints[i + 1].y + (s32)offsetY));
             gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
           }
         }
@@ -1998,15 +2003,15 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
     }
   }
 
-  sWindIconPulseAngle += WIND_ICON_PULSE_STEP;
+  f_WindIconPulseAngle += WIND_ICON_PULSE_STEP;
   speed = (u32)g_HoleConditions.windSpeed * WIND_SPEED_TO_METERS_SCALE /
           WIND_SPEED_TO_METERS_DIVISOR;
   if (speed >= WIND_SPEED_TWO_DIGITS) {
-    halfWidth = sinf(sWindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
+    halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_WIDE_HALF_WIDTH;
   } else {
-    halfWidth = sinf(sWindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
+    halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
   }
-  halfHeight = sinf(sWindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
+  halfHeight = sinf(f_WindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
   halfWidthRounded = halfWidth + 0.5f;
   halfHeightRounded = halfHeight + 0.5f;
   dsdx = (WIND_ICON_TEXTURE_WIDTH / 2 << 10) / halfWidth;
@@ -2038,7 +2043,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
   gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, TEXEL0, 0, 0, 0,
                     PRIMITIVE, 0, 0, 0, TEXEL0);
-  gDPLoadTextureBlock_4b(gfx++, ((u32)sWindIconImage + IMAGE_HEADER_SIZE) & ~7,
+  gDPLoadTextureBlock_4b(gfx++, ((u32)f_WindIconImage + IMAGE_HEADER_SIZE) & ~7,
                          G_IM_FMT_I, WIND_ICON_TEXTURE_WIDTH,
                          WIND_ICON_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -2079,11 +2084,11 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetEnvColor(gfx++, WIND_TEXT_ENV_RED, WIND_TEXT_ENV_GREEN,
                  WIND_TEXT_ENV_BLUE, 255);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-  gDPLoadTLUT_pal16(gfx++, 0, ((u32)sWindSpeedFont + IMAGE_HEADER_SIZE) & ~7);
+  gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_WindSpeedFont + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPLoadTextureBlock_4b(gfx++,
-                         ((u32)sWindSpeedFont + PALETTED_TEXELS_OFFSET) & ~7,
+                         ((u32)f_WindSpeedFont + PALETTED_TEXELS_OFFSET) & ~7,
                          G_IM_FMT_CI, WIND_FONT_WIDTH, WIND_FONT_HEIGHT, 0,
                          G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -2153,7 +2158,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE,
            WIND_INDICATOR_SCALE);
   guMtxCatF(transform, matrix, matrix);
-  guMtxF2L(matrix, &sWindIndicatorMatrices[g_MatrixBufferIndex]);
+  guMtxF2L(matrix, &f_WindIndicatorMatrices[g_MatrixBufferIndex]);
   if (!(g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
         g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
     DrawWindSpeed(&gfx, x, y);
@@ -2167,9 +2172,9 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   gDPPipeSync(gfx++);
   gSPMatrix(gfx++,
-            OS_K0_TO_PHYSICAL(&sWindIndicatorMatrices[g_MatrixBufferIndex]),
+            OS_K0_TO_PHYSICAL(&f_WindIndicatorMatrices[g_MatrixBufferIndex]),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-  gSPSetLights1(gfx++, sWindArrowLights);
+  gSPSetLights1(gfx++, f_WindArrowLights);
   if (g_IsModuleAlive[MODULE_UNK9]) {
     g_ModuleRdpRequestFrames[MODULE_UNK9] = g_FrameCount;
     gSPDisplayList(gfx++, D_80222400);
@@ -2186,12 +2191,12 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
 void AdjustHudOffset(void) {
   if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
     if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
-      sHudOffsetY--;
+      f_HudOffsetY--;
     }
     if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS) {
-      sHudOffsetY++;
+      f_HudOffsetY++;
     }
-    sprintf(g_PrintBuffer, "%3d", sHudOffsetY);
+    sprintf(g_PrintBuffer, "%3d", f_HudOffsetY);
     PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
   }
 }
@@ -2224,13 +2229,13 @@ void AdjustHudOffset(void) {
 #define LIE_IMAGE_HALF_HEIGHT 24
 #define LIE_IMAGE_HALF_SIZE (LIE_IMAGE_WIDTH * LIE_IMAGE_HALF_HEIGHT * 2)
 
-extern Vtx sClubHeadIconVertices[4];
-extern Vtx sLieIconVertices[8];
-extern Mtx sClubHeadIconMatrices[2];
-extern Mtx sLieIconMatrices[2];
-extern s32 sClubNameImageIndex;
+extern Vtx f_ClubHeadIconVertices[4];
+extern Vtx f_LieIconVertices[8];
+extern Mtx f_ClubHeadIconMatrices[2];
+extern Mtx f_LieIconMatrices[2];
+extern s32 f_ClubNameImageIndex;
 /* The name image of each club slot */
-extern u16 sClubNameAssets[];
+extern u16 f_ClubNameAssets[];
 
 /*
  * Draws the shot panel's wind indicator, club head and lie, or the wind
@@ -2275,7 +2280,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
              GetSurfaceInfo(g_CurrentShot.surface)->kind !=
                  SURFACE_KIND_GREEN &&
              g_IsCupViewShown == 0) {
-    DrawWindIndicator(&gfx, sShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
+    DrawWindIndicator(&gfx, f_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
                       SHOT_PANEL_WIND_INDICATOR_Y);
   }
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
@@ -2289,15 +2294,15 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   if (g_RoundHud.isClubHeadIconShown && g_IsCupViewShown == 0) {
     club = GetClub(
         g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
-    if (club->headImageAsset != sClubHeadImageAsset) {
+    if (club->headImageAsset != f_ClubHeadImageAsset) {
       EncodedAsset asset;
 
-      sClubHeadImageAsset = club->headImageAsset;
+      f_ClubHeadImageAsset = club->headImageAsset;
       OpenEncodedAsset(club->headImageAsset, &asset);
-      ReadEncodedAsset(sClubHeadImage, &asset);
-      sClubNameImageIndex ^= 1;
-      OpenEncodedAsset(sClubNameAssets[g_CurrentShot.clubSlot], &asset);
-      ReadEncodedAsset(sClubNameImages[sClubNameImageIndex], &asset);
+      ReadEncodedAsset(f_ClubHeadImage, &asset);
+      f_ClubNameImageIndex ^= 1;
+      OpenEncodedAsset(f_ClubNameAssets[g_CurrentShot.clubSlot], &asset);
+      ReadEncodedAsset(f_ClubNameImages[f_ClubNameImageIndex], &asset);
     }
     clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
     if (clubHeadAngle > M_PI) {
@@ -2306,11 +2311,11 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     rotation[AXIS_X] = 0;
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
-    translation[AXIS_X] = CLUB_HEAD_ICON_X - sShotPanelOffsetX;
-    translation[AXIS_Y] = CLUB_HEAD_ICON_Y - sHudOffsetY;
+    translation[AXIS_X] = CLUB_HEAD_ICON_X - f_ShotPanelOffsetX;
+    translation[AXIS_Y] = CLUB_HEAD_ICON_Y - f_HudOffsetY;
     translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
     BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &sClubHeadIconMatrices[g_MatrixBufferIndex]);
+    ConvertMatrixToFixed(matrix, &f_ClubHeadIconMatrices[g_MatrixBufferIndex]);
     gDPPipeSync(gfx++);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
@@ -2326,15 +2331,15 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     }
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gDPLoadTextureBlock(gfx++, ((u32)sClubHeadImage + IMAGE_HEADER_SIZE) & ~7,
+    gDPLoadTextureBlock(gfx++, ((u32)f_ClubHeadImage + IMAGE_HEADER_SIZE) & ~7,
                         G_IM_FMT_RGBA, G_IM_SIZ_16b, CLUB_HEAD_IMAGE_SIZE,
                         CLUB_HEAD_IMAGE_SIZE, 0, G_TX_WRAP, G_TX_WRAP,
                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&sClubHeadIconMatrices[g_MatrixBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_ClubHeadIconMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sClubHeadIconVertices, 4, 0);
+    gSPVertex(gfx++, f_ClubHeadIconVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPPipeSync(gfx++);
   }
@@ -2348,8 +2353,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
     if (g_RoundHud.isLieIconShown) {
-      translation[AXIS_X] = sShotPanelOffsetX + LIE_ICON_X;
-      translation[AXIS_Y] = LIE_ICON_Y - sHudOffsetY;
+      translation[AXIS_X] = f_ShotPanelOffsetX + LIE_ICON_X;
+      translation[AXIS_Y] = LIE_ICON_Y - f_HudOffsetY;
       translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
     } else if (g_IsModuleAlive[MODULE_PAUSE_MENU]) {
       translation[AXIS_X] = g_LiePanelPosition[AXIS_X];
@@ -2360,7 +2365,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
                       PAUSE_PANEL_ARROWS_GAP);
     }
     BuildRotationMatrix(matrix, rotation, translation);
-    ConvertMatrixToFixed(matrix, &sLieIconMatrices[g_MatrixBufferIndex]);
+    ConvertMatrixToFixed(matrix, &f_LieIconMatrices[g_MatrixBufferIndex]);
     if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     } else {
@@ -2371,23 +2376,23 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
-    gDPLoadTLUT_pal16(gfx++, 0, ((u32)sLieImage + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_LieImage + IMAGE_HEADER_SIZE) & ~7);
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_NONE);
     gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&sLieIconMatrices[g_MatrixBufferIndex]),
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LieIconMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sLieIconVertices, 8, 0);
-    gDPLoadTextureBlock(gfx++, ((u32)sLieImage + IMAGE_HEADER_SIZE) & ~7,
+    gSPVertex(gfx++, f_LieIconVertices, 8, 0);
+    gDPLoadTextureBlock(gfx++, ((u32)f_LieImage + IMAGE_HEADER_SIZE) & ~7,
                         G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH,
                         LIE_IMAGE_HALF_HEIGHT, 0, G_TX_WRAP, G_TX_WRAP,
                         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPLoadTextureBlock(
-        gfx++, ((u32)sLieImage + IMAGE_HEADER_SIZE + LIE_IMAGE_HALF_SIZE) & ~7,
+        gfx++, ((u32)f_LieImage + IMAGE_HEADER_SIZE + LIE_IMAGE_HALF_SIZE) & ~7,
         G_IM_FMT_RGBA, G_IM_SIZ_16b, LIE_IMAGE_WIDTH, LIE_IMAGE_HALF_HEIGHT, 0,
         G_TX_WRAP, G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
@@ -2423,7 +2428,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
   gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
   gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
   gDPLoadTLUT_pal256(g_DisplayListHead++,
-                     ((u32)sHoleImage + IMAGE_HEADER_SIZE) & ~7);
+                     ((u32)f_HoleImage + IMAGE_HEADER_SIZE) & ~7);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
   gDPPipeSync(g_DisplayListHead++);
@@ -2432,13 +2437,13 @@ void DrawHoleFlag(s32 isBackDrawn) {
   gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
   gDPLoadTextureBlock(g_DisplayListHead++,
-                      ((u32)sHoleImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+                      ((u32)f_HoleImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
                       G_IM_FMT_CI, G_IM_SIZ_8b, HOLE_IMAGE_WIDTH,
                       HOLE_IMAGE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
                       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                       G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
-  gSPVertex(g_DisplayListHead++, sHoleFlagVertices[0][g_MatrixBufferIndex],
+  gSPVertex(g_DisplayListHead++, f_HoleFlagVertices[0][g_MatrixBufferIndex],
             HOLE_FLAG_VERTEX_COUNT, 0);
   for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
     for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
@@ -2450,7 +2455,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
   }
   if (isBackDrawn == TRUE) {
     index = 0;
-    vertex = sHoleFlagVertices[0][g_MatrixBufferIndex];
+    vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT;
            column++, index++, vertex++) {
@@ -2501,7 +2506,7 @@ void DrawHoleImageModel(void) {
   scale[AXIS_Y] = HOLE_IMAGE_MODEL_SCALE;
   scale[AXIS_Z] = HOLE_IMAGE_MODEL_SCALE;
   BuildTransformMatrix(matrix, rotation, translation, scale);
-  ConvertMatrixToFixed(matrix, &sHoleImageMatrix);
+  ConvertMatrixToFixed(matrix, &f_HoleImageMatrix);
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
@@ -2515,7 +2520,7 @@ void DrawHoleImageModel(void) {
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_PERSP);
   gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&g_ScreenEffectProjection),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-  gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&sHoleImageMatrix),
+  gSPMatrix(g_DisplayListHead++, OS_K0_TO_PHYSICAL(&f_HoleImageMatrix),
             G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   DrawHoleFlag(FALSE);
   gDPPipeSync(g_DisplayListHead++);
@@ -2527,7 +2532,7 @@ void StartShotEffect(s32 effect) {
   s32 contactStyle;
 
   if (effect == SHOT_EFFECT_NONE) {
-    sShotEffectTime = SHOT_EFFECT_TIME_OFF;
+    f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
     return;
   }
   if (effect == SHOT_EFFECT_LONG_SHOT) {
@@ -2543,8 +2548,8 @@ void StartShotEffect(s32 effect) {
                            LONG_SHOT_SOUND_PAN);
     }
   }
-  sShotEffect = effect;
-  sShotEffectTime = 0.0f;
+  f_ShotEffect = effect;
+  f_ShotEffectTime = 0.0f;
 }
 
 /* The effect grows and shrinks over half a turn of its time */
@@ -2566,19 +2571,19 @@ void StartShotEffect(s32 effect) {
 #define LONG_SHOT_GROUP_COUNT 4
 #define HEAVY_LONG_SHOT_QUAD_COUNT 2
 
-extern Mtx sShotEffectMatrices[2];
-extern Vec3 sShotEffectTranslation;
-extern Vec3 sShotEffectScale;
-extern Vec3 sShotEffectRotation;
+extern Mtx f_ShotEffectMatrices[2];
+extern Vec3 f_ShotEffectTranslation;
+extern Vec3 f_ShotEffectScale;
+extern Vec3 f_ShotEffectRotation;
 /* Four groups of eight vertices, each three pairs of triangles */
-extern Vtx sLongShotVertices[LONG_SHOT_GROUP_COUNT * 8];
-extern Vtx sHeavyLongShotVertices[16];
-extern s32 sHeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT];
-extern s32 sHeavyLongShotFrame;
-extern s32 sHeavyLongShotFrameTimer;
+extern Vtx f_LongShotVertices[LONG_SHOT_GROUP_COUNT * 8];
+extern Vtx f_HeavyLongShotVertices[16];
+extern s32 f_HeavyLongShotFrameAssets[HEAVY_LONG_SHOT_FRAME_COUNT];
+extern s32 f_HeavyLongShotFrame;
+extern s32 f_HeavyLongShotFrameTimer;
 /* The two frame buffers in g_SharedEffectImages, each loaded in turn and both
  * drawn */
-extern s32 sHeavyLongShotBufferIndex;
+extern s32 f_HeavyLongShotBufferIndex;
 
 /* Draws the effect that StartShotEffect started at the ball, until its time
  * runs out */
@@ -2591,12 +2596,12 @@ void DrawShotEffect(Gfx** displayListHead) {
   f32 scale;
   s32 i;
 
-  if (sShotEffectTime < 0.0f) {
+  if (f_ShotEffectTime < 0.0f) {
     return;
   }
-  sShotEffectTime += SHOT_EFFECT_TIME_STEP;
-  if (sShotEffectTime > M_PI) {
-    sShotEffectTime = SHOT_EFFECT_TIME_OFF;
+  f_ShotEffectTime += SHOT_EFFECT_TIME_STEP;
+  if (f_ShotEffectTime > M_PI) {
+    f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
     return;
   }
   if (ProjectPoint(g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -2608,26 +2613,26 @@ void DrawShotEffect(Gfx** displayListHead) {
   contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
   if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
       contactStyle != CONTACT_STYLE_WARIO) {
-    scale = sinf(sShotEffectTime) * SHOT_EFFECT_SCALE;
-    sShotEffectRotation[AXIS_X] = 0.0f;
-    sShotEffectRotation[AXIS_Y] = 0.0f;
-    sShotEffectRotation[AXIS_Z] =
-        (sShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
+    scale = sinf(f_ShotEffectTime) * SHOT_EFFECT_SCALE;
+    f_ShotEffectRotation[AXIS_X] = 0.0f;
+    f_ShotEffectRotation[AXIS_Y] = 0.0f;
+    f_ShotEffectRotation[AXIS_Z] =
+        (f_ShotEffectTime + SHOT_EFFECT_SPIN_START) * SHOT_EFFECT_SPIN_RATE;
   } else {
-    scale = sinf(sShotEffectTime) * HEAVY_LONG_SHOT_SCALE;
-    sShotEffectRotation[AXIS_X] = 0.0f;
-    sShotEffectRotation[AXIS_Y] = 0.0f;
-    sShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
+    scale = sinf(f_ShotEffectTime) * HEAVY_LONG_SHOT_SCALE;
+    f_ShotEffectRotation[AXIS_X] = 0.0f;
+    f_ShotEffectRotation[AXIS_Y] = 0.0f;
+    f_ShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
   }
-  sShotEffectScale[AXIS_X] = scale;
-  sShotEffectScale[AXIS_Y] = scale;
-  sShotEffectScale[AXIS_Z] = scale;
-  sShotEffectTranslation[AXIS_X] = point.x - SCREEN_WIDTH / 2;
-  sShotEffectTranslation[AXIS_Y] = -point.y + SCREEN_HEIGHT / 2;
-  sShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
-  BuildTransformMatrix(matrix, sShotEffectRotation, sShotEffectTranslation,
-                       sShotEffectScale);
-  ConvertMatrixToFixed(matrix, &sShotEffectMatrices[g_MatrixBufferIndex]);
+  f_ShotEffectScale[AXIS_X] = scale;
+  f_ShotEffectScale[AXIS_Y] = scale;
+  f_ShotEffectScale[AXIS_Z] = scale;
+  f_ShotEffectTranslation[AXIS_X] = point.x - SCREEN_WIDTH / 2;
+  f_ShotEffectTranslation[AXIS_Y] = -point.y + SCREEN_HEIGHT / 2;
+  f_ShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
+  BuildTransformMatrix(matrix, f_ShotEffectRotation, f_ShotEffectTranslation,
+                       f_ShotEffectScale);
+  ConvertMatrixToFixed(matrix, &f_ShotEffectMatrices[g_MatrixBufferIndex]);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2649,7 +2654,7 @@ void DrawShotEffect(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
     gDPSetPrimColor(gfx++, 0, 0, 0, 0, 255, 255);
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
-    if (sShotEffect == SHOT_EFFECT_LONG_SHOT) {
+    if (f_ShotEffect == SHOT_EFFECT_LONG_SHOT) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     } else {
@@ -2660,9 +2665,9 @@ void DrawShotEffect(Gfx** displayListHead) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&sShotEffectMatrices[g_MatrixBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sLongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
+    gSPVertex(gfx++, f_LongShotVertices, LONG_SHOT_GROUP_COUNT * 8, 0);
     for (i = 0; i != LONG_SHOT_GROUP_COUNT; i++) {
       gSP2Triangles(gfx++, i * 8, i * 8 + 1, i * 8 + 2, 0, i * 8, i * 8 + 2,
                     i * 8 + 3, 0);
@@ -2672,16 +2677,17 @@ void DrawShotEffect(Gfx** displayListHead) {
                     i * 8 + 7, i * 8 + 5, 0);
     }
   } else {
-    if (++sHeavyLongShotFrameTimer == HEAVY_LONG_SHOT_FRAME_TICKS) {
-      sHeavyLongShotFrameTimer = 0;
-      sHeavyLongShotFrame =
-          (sHeavyLongShotFrame + 1) % HEAVY_LONG_SHOT_FRAME_COUNT;
-      OpenEncodedAsset(sHeavyLongShotFrameAssets[sHeavyLongShotFrame], &asset);
+    if (++f_HeavyLongShotFrameTimer == HEAVY_LONG_SHOT_FRAME_TICKS) {
+      f_HeavyLongShotFrameTimer = 0;
+      f_HeavyLongShotFrame =
+          (f_HeavyLongShotFrame + 1) % HEAVY_LONG_SHOT_FRAME_COUNT;
+      OpenEncodedAsset(f_HeavyLongShotFrameAssets[f_HeavyLongShotFrame],
+                       &asset);
       ReadEncodedAsset(
           g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET +
-              sHeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE,
+              f_HeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE,
           &asset);
-      sHeavyLongShotBufferIndex ^= 1;
+      f_HeavyLongShotBufferIndex ^= 1;
     }
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
@@ -2702,9 +2708,9 @@ void DrawShotEffect(Gfx** displayListHead) {
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gSPMatrix(gfx++,
-              OS_K0_TO_PHYSICAL(&sShotEffectMatrices[g_MatrixBufferIndex]),
+              OS_K0_TO_PHYSICAL(&f_ShotEffectMatrices[g_MatrixBufferIndex]),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPVertex(gfx++, sHeavyLongShotVertices, 16, 0);
+    gSPVertex(gfx++, f_HeavyLongShotVertices, 16, 0);
     gDPLoadTextureBlock_4b(gfx++,
                            ((u32)g_SharedEffectImages +
                             HEAVY_LONG_SHOT_FRAMES_OFFSET + IMAGE_HEADER_SIZE) &
@@ -2801,23 +2807,23 @@ void WaveHoleFlag(void) {
       /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
        * the code */
       shade =
-          sHoleFlagShades[row * HOLE_FLAG_COLUMN_COUNT + column - 1] * factor +
+          f_HoleFlagShades[row * HOLE_FLAG_COLUMN_COUNT + column - 1] * factor +
           HOLE_FLAG_SHADE(row, column) * otherFactor;
       HOLE_FLAG_SHADE(row, column) = shade;
     }
   }
-  sHoleFlagWavePhase += (HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed +
-                         HOLE_FLAG_MIN_SWING_DEGREES) *
-                        DEGREES_TO_RADIANS(1);
-  if (sHoleFlagWavePhase > 2 * M_PI) {
-    sHoleFlagWavePhase -= 2 * M_PI;
+  f_HoleFlagWavePhase += (HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed +
+                          HOLE_FLAG_MIN_SWING_DEGREES) *
+                         DEGREES_TO_RADIANS(1);
+  if (f_HoleFlagWavePhase > 2 * M_PI) {
+    f_HoleFlagWavePhase -= 2 * M_PI;
   }
-  if (sHoleFlagWavePhase < 0.0f) {
-    sHoleFlagWavePhase += 2 * M_PI;
+  if (f_HoleFlagWavePhase < 0.0f) {
+    f_HoleFlagWavePhase += 2 * M_PI;
   }
   /* factor is the swing's amplitude here */
   factor = windSpeed + rand() % HOLE_FLAG_SWING_JITTER_RANGE;
-  shade = (s32)(sinf(sHoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
+  shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     if ((s32)windSpeed == 0) {
       rowShade = shade;
@@ -2871,8 +2877,8 @@ void ResetShotOffsetMarker(void) {
   s32 i;
 
   for (i = 0; i != SHOT_OFFSET_MARKER_COUNT; i++) {
-    sShotOffsetMarkerXs[i] = 0;
-    sShotOffsetMarkerYs[i] = 0;
+    f_ShotOffsetMarkerXs[i] = 0;
+    f_ShotOffsetMarkerYs[i] = 0;
   }
 }
 
@@ -2895,8 +2901,8 @@ void SetShotOffsetMarker(s32 x, s32 y) {
     x = x * scale;
     y = y * scale;
   }
-  sShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
-  sShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
+  f_ShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
+  f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
 
 /* Draws the shot offset marker, animated while HUD_FLAG_ANIMATE_OFFSET_MARKER
@@ -2905,38 +2911,38 @@ void SetShotOffsetMarker(s32 x, s32 y) {
 void DrawShotOffsetMarker(void) {
   gDPPipeSync(g_DisplayListHead++);
   gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                    ((u32)sShotOffsetMarkerImage + IMAGE_HEADER_SIZE) & ~7);
-  sShotOffsetMarkerFrame =
-      (sShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
+                    ((u32)f_ShotOffsetMarkerImage + IMAGE_HEADER_SIZE) & ~7);
+  f_ShotOffsetMarkerFrame =
+      (f_ShotOffsetMarkerFrame + 1) % SHOT_OFFSET_MARKER_FRAME_COUNT;
   if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
-    sShotOffsetMarkerTexelOffset =
-        sShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
+    f_ShotOffsetMarkerTexelOffset =
+        f_ShotOffsetMarkerFrame * SHOT_OFFSET_MARKER_FRAME_SIZE;
   } else {
-    sShotOffsetMarkerTexelOffset =
+    f_ShotOffsetMarkerTexelOffset =
         SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
   }
-  gDPLoadTextureBlock_4b(g_DisplayListHead++,
-                         ((u32)sShotOffsetMarkerImage + PALETTED_TEXELS_OFFSET +
-                          sShotOffsetMarkerTexelOffset) &
-                             ~7,
-                         G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE,
-                         SHOT_OFFSET_MARKER_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
-                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
-                         G_TX_NOLOD, G_TX_NOLOD);
+  gDPLoadTextureBlock_4b(
+      g_DisplayListHead++,
+      ((u32)f_ShotOffsetMarkerImage + PALETTED_TEXELS_OFFSET +
+       f_ShotOffsetMarkerTexelOffset) &
+          ~7,
+      G_IM_FMT_CI, SHOT_OFFSET_MARKER_SIZE, SHOT_OFFSET_MARKER_SIZE, 0,
+      G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+      G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   gDPPipeSync(g_DisplayListHead++);
   gSPScisTextureRectangle(
       g_DisplayListHead++,
-      (sShotOffsetMarkerXs[0] + (sShotPanelOffsetX + SHOT_OFFSET_MARKER_X))
+      (f_ShotOffsetMarkerXs[0] + (f_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X))
           << 2,
-      (sShotOffsetMarkerYs[0] + (sShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) +
-       sHudOffsetY)
+      (f_ShotOffsetMarkerYs[0] + (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y) +
+       f_HudOffsetY)
           << 2,
-      (sShotOffsetMarkerXs[0] + (sShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
+      (f_ShotOffsetMarkerXs[0] + (f_ShotPanelOffsetX + SHOT_OFFSET_MARKER_X) +
        SHOT_OFFSET_MARKER_SIZE)
           << 2,
-      (sShotOffsetMarkerYs[0] +
-       (sShotPanelOffsetY + SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE) +
-       sHudOffsetY)
+      (f_ShotOffsetMarkerYs[0] +
+       (f_ShotPanelOffsetY + SHOT_OFFSET_MARKER_Y + SHOT_OFFSET_MARKER_SIZE) +
+       f_HudOffsetY)
           << 2,
       G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 }
@@ -2960,12 +2966,12 @@ INCLUDE_ASM("asm/nonmatchings/round_hud", DrawShotOffsetMarker);
 #define ANIMATED_ICON_LABEL_UNK0 0
 #define ANIMATED_ICON_LABEL_UNK1 1
 #define ANIMATED_ICON_LABEL_UNK2 2
-extern u32 sAnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT];
-extern s32 sAnimatedIconFrameTime;
-extern s32 sAnimatedIconFrame;
-extern s32 sAnimatedIconImageIndex;
-extern f32 sAnimatedIconX;
-extern f32 sAnimatedIconY;
+extern u32 f_AnimatedIconFrameAssets[ANIMATED_ICON_FRAME_COUNT];
+extern s32 f_AnimatedIconFrameTime;
+extern s32 f_AnimatedIconFrame;
+extern s32 f_AnimatedIconImageIndex;
+extern f32 f_AnimatedIconX;
+extern f32 f_AnimatedIconY;
 
 /*
  * Draws an animated icon that eases into place, with a label beside it that
@@ -2977,34 +2983,35 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
   EncodedAsset asset;
   s32 label;
 
-  if (sSceneryState == SCENERY_LOADED) {
+  if (f_SceneryState == SCENERY_LOADED) {
     if (mode == ANIMATED_ICON_MODE_UNK2) {
-      sAnimatedIconX = 0.0f;
-      sAnimatedIconY = 0.0f;
+      f_AnimatedIconX = 0.0f;
+      f_AnimatedIconY = 0.0f;
     } else {
-      sAnimatedIconX +=
-          (ANIMATED_ICON_X - sAnimatedIconX) * ANIMATED_ICON_EASING;
-      sAnimatedIconY +=
-          (ANIMATED_ICON_Y - sAnimatedIconY) * ANIMATED_ICON_EASING;
+      f_AnimatedIconX +=
+          (ANIMATED_ICON_X - f_AnimatedIconX) * ANIMATED_ICON_EASING;
+      f_AnimatedIconY +=
+          (ANIMATED_ICON_Y - f_AnimatedIconY) * ANIMATED_ICON_EASING;
     }
-    if (++sAnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
-      sAnimatedIconFrameTime = 0;
-      sAnimatedIconFrame = (sAnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
-      OpenEncodedAsset(sAnimatedIconFrameAssets[sAnimatedIconFrame], &asset);
-      ReadEncodedAsset(sAnimatedIconImages[sAnimatedIconImageIndex], &asset);
+    if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
+      f_AnimatedIconFrameTime = 0;
+      f_AnimatedIconFrame =
+          (f_AnimatedIconFrame + 1) % ANIMATED_ICON_FRAME_COUNT;
+      OpenEncodedAsset(f_AnimatedIconFrameAssets[f_AnimatedIconFrame], &asset);
+      ReadEncodedAsset(f_AnimatedIconImages[f_AnimatedIconImageIndex], &asset);
     }
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
-    gDPLoadTLUT_pal256(
-        gfx++,
-        (u32)sAnimatedIconImages[sAnimatedIconImageIndex] + IMAGE_HEADER_SIZE &
-            ~7);
+    gDPLoadTLUT_pal256(gfx++,
+                       (u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
+                               IMAGE_HEADER_SIZE &
+                           ~7);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, HOLE_INTRO_IMAGE_RENDER_MODE,
                      HOLE_INTRO_IMAGE_RENDER_MODE2);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTextureBlock(gfx++,
-                        (u32)sAnimatedIconImages[sAnimatedIconImageIndex] +
+                        (u32)f_AnimatedIconImages[f_AnimatedIconImageIndex] +
                                 LARGE_PALETTED_TEXELS_OFFSET &
                             ~7,
                         G_IM_FMT_CI, G_IM_SIZ_8b, ANIMATED_ICON_SIZE,
@@ -3012,10 +3019,10 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
                         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                         G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    gSPScisTextureRectangle(gfx++, (s32)sAnimatedIconX << 2,
-                            (s32)sAnimatedIconY << 2,
-                            ((s32)sAnimatedIconX + ANIMATED_ICON_SIZE) << 2,
-                            ((s32)sAnimatedIconY + ANIMATED_ICON_SIZE) << 2,
+    gSPScisTextureRectangle(gfx++, (s32)f_AnimatedIconX << 2,
+                            (s32)f_AnimatedIconY << 2,
+                            ((s32)f_AnimatedIconX + ANIMATED_ICON_SIZE) << 2,
+                            ((s32)f_AnimatedIconY + ANIMATED_ICON_SIZE) << 2,
                             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
     if (D_800C308C == 1) {
@@ -3027,21 +3034,21 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     }
     gDPLoadTLUT_pal16(
         gfx++, 0,
-        (u32)sAnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE & ~7);
+        (u32)f_AnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE & ~7);
     gDPLoadTextureBlock_4b(
         gfx++,
-        (u32)sAnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET & ~7,
+        (u32)f_AnimatedIconLabelImages[label] + PALETTED_TEXELS_OFFSET & ~7,
         G_IM_FMT_CI, ANIMATED_ICON_LABEL_WIDTH, ANIMATED_ICON_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(
-        gfx++, ((s32)sAnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X) << 2,
-        (s32)sAnimatedIconY << 2,
-        ((s32)sAnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
+        gfx++, ((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X) << 2,
+        (s32)f_AnimatedIconY << 2,
+        ((s32)f_AnimatedIconX + ANIMATED_ICON_LABEL_OFFSET_X +
          ANIMATED_ICON_LABEL_WIDTH)
             << 2,
-        ((s32)sAnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT) << 2,
+        ((s32)f_AnimatedIconY + ANIMATED_ICON_LABEL_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
     *displayListHead = gfx;
   }
@@ -3128,82 +3135,82 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
   *gfxP = gfx;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", sColorTestSampleText);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", f_ColorTestSampleText);
 
-INCLUDE_RODATA("asm/nonmatchings/round_hud", sBlankText);
+INCLUDE_RODATA("asm/nonmatchings/round_hud", f_BlankText);
 
 /* Draws the colour test screen and handles its controls */
 void DrawColorTest(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
 
-  SetUpGradientTextDrawing(&gfx, sIsTestGradientShown);
-  gDPSetPrimColor(gfx++, 0, 0, sTestColors[COLOR_TEST_PRIM][0],
-                  sTestColors[COLOR_TEST_PRIM][1],
-                  sTestColors[COLOR_TEST_PRIM][2], COLOR_CHANNEL_MAX);
-  gDPSetEnvColor(gfx++, sTestColors[COLOR_TEST_ENV][0],
-                 sTestColors[COLOR_TEST_ENV][1], sTestColors[COLOR_TEST_ENV][2],
-                 COLOR_CHANNEL_MAX);
+  SetUpGradientTextDrawing(&gfx, f_IsTestGradientShown);
+  gDPSetPrimColor(gfx++, 0, 0, f_TestColors[COLOR_TEST_PRIM][0],
+                  f_TestColors[COLOR_TEST_PRIM][1],
+                  f_TestColors[COLOR_TEST_PRIM][2], COLOR_CHANNEL_MAX);
+  gDPSetEnvColor(gfx++, f_TestColors[COLOR_TEST_ENV][0],
+                 f_TestColors[COLOR_TEST_ENV][1],
+                 f_TestColors[COLOR_TEST_ENV][2], COLOR_CHANNEL_MAX);
   gDPPipeSync(gfx++);
   /* The casts read only the low halves, as the target does */
-  DrawCenteredLargeText(&gfx, (s16)sTestTextX, (s16)sTestTextY,
-                        sColorTestSampleText);
+  DrawCenteredLargeText(&gfx, (s16)f_TestTextX, (s16)f_TestTextY,
+                        f_ColorTestSampleText);
   gDPPipeSync(gfx++);
   PrintDebugText(
-      sBlankText,
-      sTestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
-      sTestColorIndex + COLOR_TEST_TEXT_ROW);
+      f_BlankText,
+      f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+      f_TestColorIndex + COLOR_TEST_TEXT_ROW);
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
-    sTestColorIndex ^= 1;
+    f_TestColorIndex ^= 1;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & D_CBUTTONS) {
-    sTestColorIndex ^= 1;
+    f_TestColorIndex ^= 1;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & L_CBUTTONS) {
-    sTestChannelIndex = (sTestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) %
-                        COLOR_TEST_CHANNEL_COUNT;
+    f_TestChannelIndex = (f_TestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) %
+                         COLOR_TEST_CHANNEL_COUNT;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & R_CBUTTONS) {
-    sTestChannelIndex = (sTestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
+    f_TestChannelIndex = (f_TestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & A_BUTTON) {
-    sTestColors[sTestColorIndex][sTestChannelIndex] += COLOR_TEST_STEP;
+    f_TestColors[f_TestColorIndex][f_TestChannelIndex] += COLOR_TEST_STEP;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & B_BUTTON) {
-    sTestColors[sTestColorIndex][sTestChannelIndex] -= COLOR_TEST_STEP;
+    f_TestColors[f_TestColorIndex][f_TestChannelIndex] -= COLOR_TEST_STEP;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
-    sIsTestGradientShown ^= 1;
+    f_IsTestGradientShown ^= 1;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {
-    sTestTextY -= COLOR_TEST_STEP;
+    f_TestTextY -= COLOR_TEST_STEP;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & D_JPAD) {
-    sTestTextY += COLOR_TEST_STEP;
+    f_TestTextY += COLOR_TEST_STEP;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & L_JPAD) {
-    sTestTextX -= COLOR_TEST_STEP;
+    f_TestTextX -= COLOR_TEST_STEP;
   }
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & R_JPAD) {
-    sTestTextX += COLOR_TEST_STEP;
+    f_TestTextX += COLOR_TEST_STEP;
   }
-  if (sTestColors[sTestColorIndex][sTestChannelIndex] > COLOR_CHANNEL_MAX) {
-    sTestColors[sTestColorIndex][sTestChannelIndex] = COLOR_CHANNEL_MAX;
+  if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] > COLOR_CHANNEL_MAX) {
+    f_TestColors[f_TestColorIndex][f_TestChannelIndex] = COLOR_CHANNEL_MAX;
   }
-  if (sTestColors[sTestColorIndex][sTestChannelIndex] < 0) {
-    sTestColors[sTestColorIndex][sTestChannelIndex] = 0;
+  if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] < 0) {
+    f_TestColors[f_TestColorIndex][f_TestChannelIndex] = 0;
   }
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", sTestColors[COLOR_TEST_PRIM][0],
-          sTestColors[COLOR_TEST_PRIM][1], sTestColors[COLOR_TEST_PRIM][2]);
+  sprintf(g_PrintBuffer, "%3d  %3d  %3d", f_TestColors[COLOR_TEST_PRIM][0],
+          f_TestColors[COLOR_TEST_PRIM][1], f_TestColors[COLOR_TEST_PRIM][2]);
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
                  COLOR_TEST_TEXT_ROW + COLOR_TEST_PRIM);
-  sprintf(g_PrintBuffer, "%3d  %3d  %3d", sTestColors[COLOR_TEST_ENV][0],
-          sTestColors[COLOR_TEST_ENV][1], sTestColors[COLOR_TEST_ENV][2]);
+  sprintf(g_PrintBuffer, "%3d  %3d  %3d", f_TestColors[COLOR_TEST_ENV][0],
+          f_TestColors[COLOR_TEST_ENV][1], f_TestColors[COLOR_TEST_ENV][2]);
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
                  COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
   PrintDebugText(
       ">",
-      sTestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
-      sTestColorIndex + COLOR_TEST_TEXT_ROW);
+      f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+      f_TestColorIndex + COLOR_TEST_TEXT_ROW);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -3211,7 +3218,7 @@ void DrawColorTest(Gfx** displayListHead) {
 }
 
 /* The HUD's letterbox height, which DrawLetterbox grows each frame */
-extern s32 sLetterboxHeight;
+extern s32 f_LetterboxHeight;
 /* The shot panel slides in from the left by this much a frame */
 #define SHOT_PANEL_SLIDE_STEP 4
 /*
@@ -3243,7 +3250,7 @@ extern s32 sLetterboxHeight;
 #define SMALL_FACE_STEP ((1 << 10) * 3 / 2)
 /* The pin flag beside the distance to the cup waves through four frames side by
  * side */
-extern s32 sPinFlagTime;
+extern s32 f_PinFlagTime;
 #define PIN_FLAG_TIME_COUNT 16
 #define PIN_FLAG_FRAME_LENGTH 4
 #define PIN_FLAG_IMAGE_SIZE 32
@@ -3261,8 +3268,8 @@ extern s32 sPinFlagTime;
 #define HEIGHT_LABEL_Y 80
 #define SHOT_PANEL_DISTANCE_X 64
 /* In Ring Shot, a spinning ring beside the count of rings still to pass */
-extern s32 sRingFrame;
-extern s32 sRingFrameTime;
+extern s32 f_RingFrame;
+extern s32 f_RingFrameTime;
 #define RING_FRAME_COUNT 3
 #define RING_FRAME_LENGTH 6
 #define RING_IMAGE_SIZE 32
@@ -3272,7 +3279,7 @@ extern s32 sRingFrameTime;
 #define RING_COUNT_X 46
 #define RING_COUNT_Y 112
 #define DISTANCE_FONT_WIDTH 128
-extern u16 sWhiteDistancePalette[];
+extern u16 f_WhiteDistancePalette[];
 #define HOLE_YARDAGE_X 60
 #define HOLE_YARDAGE_Y 56
 #define PAR_IMAGE_X 24
@@ -3345,8 +3352,8 @@ void DrawRoundHud(CameraView* view) {
   club = GetClub(
       g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
   hasHandicap = FALSE;
-  if (sShotPanelOffsetX > 0) {
-    sShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
+  if (f_ShotPanelOffsetX > 0) {
+    f_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
   }
   WaveHoleFlag();
   gDPPipeSync(g_DisplayListHead++);
@@ -3357,10 +3364,10 @@ void DrawRoundHud(CameraView* view) {
   gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
-  sLetterboxHeight = DrawLetterbox(&g_DisplayListHead, sLetterboxHeight);
+  f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
   /* The faces move out of the letterbox's way */
-  scoreboardX = sLetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT +
-                (SCOREBOARD_X + sShotPanelOffsetX);
+  scoreboardX = f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT +
+                (SCOREBOARD_X + f_ShotPanelOffsetX);
   for (i = 0; i != g_PlayerCount; i++) {
     if (g_Players[i].handicap > 0) {
       hasHandicap = TRUE;
@@ -3453,7 +3460,7 @@ void DrawRoundHud(CameraView* view) {
     DrawShotOffsetMarker();
   }
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
-    sPinFlagTime = (sPinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
+    f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
                       ((u32)g_PinFlagImages + IMAGE_HEADER_SIZE) & ~7);
@@ -3465,25 +3472,26 @@ void DrawRoundHud(CameraView* view) {
                            G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (PIN_FLAG_X - sShotPanelOffsetX) << 2,
-        PIN_FLAG_Y << 2, (PIN_FLAG_X + PIN_FLAG_WIDTH - sShotPanelOffsetX) << 2,
+        g_DisplayListHead++, (PIN_FLAG_X - f_ShotPanelOffsetX) << 2,
+        PIN_FLAG_Y << 2,
+        (PIN_FLAG_X + PIN_FLAG_WIDTH - f_ShotPanelOffsetX) << 2,
         (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
-        (sPinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
+        (f_PinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
         PIN_FLAG_IMAGE_T << 5, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                      ((u32)sRestLabelImage + IMAGE_HEADER_SIZE) & ~7);
-    gDPLoadTextureBlock_4b(g_DisplayListHead++,
-                           ((u32)sRestLabelImage + PALETTED_TEXELS_OFFSET) & ~7,
-                           G_IM_FMT_CI, SHOT_PANEL_LABEL_WIDTH,
-                           SHOT_PANEL_LABEL_HEIGHT, 0,
-                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-                           G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+                      ((u32)f_RestLabelImage + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(
+        g_DisplayListHead++,
+        ((u32)f_RestLabelImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+        SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
+        G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+        G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (SHOT_PANEL_LABEL_X - sShotPanelOffsetX) << 2,
+        g_DisplayListHead++, (SHOT_PANEL_LABEL_X - f_ShotPanelOffsetX) << 2,
         REST_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
         (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
@@ -3492,32 +3500,32 @@ void DrawRoundHud(CameraView* view) {
     if ((club->surfaceMask & CLUB_SURFACE_GREEN)
             ? g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL
             : g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
-      LOAD_SHOT_PANEL_LABEL(sFlatLabelImage);
+      LOAD_SHOT_PANEL_LABEL(f_FlatLabelImage);
     } else if (g_RoundHud.ballHeightMetersDirection == HEIGHT_ABOVE) {
-      LOAD_SHOT_PANEL_LABEL(sUpLabelImage);
+      LOAD_SHOT_PANEL_LABEL(f_UpLabelImage);
     } else {
-      LOAD_SHOT_PANEL_LABEL(sDownLabelImage);
+      LOAD_SHOT_PANEL_LABEL(f_DownLabelImage);
     }
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (SHOT_PANEL_LABEL_X - sShotPanelOffsetX) << 2,
+        g_DisplayListHead++, (SHOT_PANEL_LABEL_X - f_ShotPanelOffsetX) << 2,
         HEIGHT_LABEL_Y << 2,
-        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+        (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
         (HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
-      if (sRingFrameTime++ % RING_FRAME_LENGTH == 0) {
-        sRingFrame = (sRingFrame + 1) % RING_FRAME_COUNT;
+      if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
+        f_RingFrame = (f_RingFrame + 1) % RING_FRAME_COUNT;
       }
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE,
                        G_RM_AA_ZB_TEX_EDGE2);
       gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                        ((u32)sRingImages + IMAGE_HEADER_SIZE) & ~7);
+                        ((u32)f_RingImages + IMAGE_HEADER_SIZE) & ~7);
       gDPLoadTextureBlock_4b(g_DisplayListHead++,
-                             ((u32)sRingImages + PALETTED_TEXELS_OFFSET +
-                              sRingFrame * RING_FRAME_SIZE) &
+                             ((u32)f_RingImages + PALETTED_TEXELS_OFFSET +
+                              f_RingFrame * RING_FRAME_SIZE) &
                                  ~7,
                              G_IM_FMT_CI, RING_IMAGE_SIZE, RING_IMAGE_SIZE, 0,
                              G_TX_NOMIRROR | G_TX_WRAP,
@@ -3525,9 +3533,9 @@ void DrawRoundHud(CameraView* view) {
                              G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(g_DisplayListHead++);
       gSPScisTextureRectangle(
-          g_DisplayListHead++, (RING_ICON_X - sShotPanelOffsetX) << 2,
+          g_DisplayListHead++, (RING_ICON_X - f_ShotPanelOffsetX) << 2,
           RING_ICON_Y << 2,
-          (RING_ICON_X + RING_IMAGE_SIZE - sShotPanelOffsetX) << 2,
+          (RING_ICON_X + RING_IMAGE_SIZE - f_ShotPanelOffsetX) << 2,
           (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
           1 << 10);
       gDPPipeSync(g_DisplayListHead++);
@@ -3536,9 +3544,9 @@ void DrawRoundHud(CameraView* view) {
     }
   }
   gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                    ((u32)sDistanceFont + IMAGE_HEADER_SIZE) & ~7);
+                    ((u32)f_DistanceFont + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock_4b(
-      g_DisplayListHead++, ((u32)sDistanceFont + PALETTED_TEXELS_OFFSET) & ~7,
+      g_DisplayListHead++, ((u32)f_DistanceFont + PALETTED_TEXELS_OFFSET) & ~7,
       G_IM_FMT_CI, DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
       G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
@@ -3548,12 +3556,12 @@ void DrawRoundHud(CameraView* view) {
             (s16)g_CourseRecords[GetCourseRecordIndex()]
                 .holes[GetHoleRecordIndex()]
                 .yardages[0]);
-    DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - sShotPanelOffsetX,
+    DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - f_ShotPanelOffsetX,
                      HOLE_YARDAGE_Y, g_PrintBuffer);
   }
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
     /* The shot panel's distances are white, rather than the font's yellow */
-    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, (u32)sWhiteDistancePalette & ~7);
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, (u32)f_WhiteDistancePalette & ~7);
     ringCount = 0;
     if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
       shooter = &g_Players[g_RoundHud.unk87];
@@ -3561,7 +3569,7 @@ void DrawRoundHud(CameraView* view) {
         ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
       }
       sprintf(g_PrintBuffer, "%d", ringCount);
-      DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - sShotPanelOffsetX,
+      DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - f_ShotPanelOffsetX,
                        RING_COUNT_Y, g_PrintBuffer);
     }
     if (g_IsDebugEnabled &&
@@ -3578,19 +3586,19 @@ void DrawRoundHud(CameraView* view) {
       sprintf(g_PrintBuffer, "%3d.%02df", hundredths / HUNDREDTHS_PER_UNIT,
               hundredths % HUNDREDTHS_PER_UNIT);
       DrawDistanceText(&g_DisplayListHead,
-                       SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, REST_LABEL_Y,
+                       SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, REST_LABEL_Y,
                        g_PrintBuffer);
       if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
         sprintf(g_PrintBuffer, "%6.2ff", fabsf(g_RoundHud.ballHeightFeet));
         DrawDistanceText(&g_DisplayListHead,
-                         SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX,
+                         SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX,
                          HEIGHT_LABEL_Y, g_PrintBuffer);
       }
     } else {
       sprintf(g_PrintBuffer, "%3dy",
               (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
       DrawDistanceText(&g_DisplayListHead,
-                       SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, REST_LABEL_Y,
+                       SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, REST_LABEL_Y,
                        g_PrintBuffer);
       if (g_RoundHud.ballHeightYardsDirection != HEIGHT_LEVEL) {
         height = g_RoundHud.ballHeightYards;
@@ -3599,7 +3607,7 @@ void DrawRoundHud(CameraView* view) {
         }
         sprintf(g_PrintBuffer, "%3dy", height);
         DrawDistanceText(&g_DisplayListHead,
-                         SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX,
+                         SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX,
                          HEIGHT_LABEL_Y, g_PrintBuffer);
       }
     }
@@ -3627,51 +3635,51 @@ void DrawRoundHud(CameraView* view) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (CLUB_PANEL_X - sShotPanelOffsetX) << 2,
-        (sHudOffsetY + CLUB_PANEL_Y) << 2,
-        (CLUB_PANEL_X + CLUB_PANEL_WIDTH - sShotPanelOffsetX) << 2,
-        (sHudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE,
+        g_DisplayListHead++, (CLUB_PANEL_X - f_ShotPanelOffsetX) << 2,
+        (f_HudOffsetY + CLUB_PANEL_Y) << 2,
+        (CLUB_PANEL_X + CLUB_PANEL_WIDTH - f_ShotPanelOffsetX) << 2,
+        (f_HudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE,
         0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0,
-        ((u32)sClubNameImages[sClubNameImageIndex] + IMAGE_HEADER_SIZE) & ~7);
+        ((u32)f_ClubNameImages[f_ClubNameImageIndex] + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureBlock_4b(
         g_DisplayListHead++,
-        ((u32)sClubNameImages[sClubNameImageIndex] + PALETTED_TEXELS_OFFSET) &
+        ((u32)f_ClubNameImages[f_ClubNameImageIndex] + PALETTED_TEXELS_OFFSET) &
             ~7,
         G_IM_FMT_CI, CLUB_NAME_WIDTH, CLUB_NAME_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (CLUB_NAME_X - sShotPanelOffsetX) << 2,
-        (sHudOffsetY + CLUB_NAME_Y) << 2,
-        (CLUB_NAME_X + CLUB_NAME_WIDTH - sShotPanelOffsetX) << 2,
-        (sHudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE, 0,
-        0, 1 << 10, 1 << 10);
+        g_DisplayListHead++, (CLUB_NAME_X - f_ShotPanelOffsetX) << 2,
+        (f_HudOffsetY + CLUB_NAME_Y) << 2,
+        (CLUB_NAME_X + CLUB_NAME_WIDTH - f_ShotPanelOffsetX) << 2,
+        (f_HudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE,
+        0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
   }
   if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange()) {
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
-                      ((u32)sParImage + IMAGE_HEADER_SIZE) & ~7);
+                      ((u32)f_ParImage + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureBlock_4b(
-        g_DisplayListHead++, ((u32)sParImage + PALETTED_TEXELS_OFFSET) & ~7,
+        g_DisplayListHead++, ((u32)f_ParImage + PALETTED_TEXELS_OFFSET) & ~7,
         G_IM_FMT_CI, SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(
-        g_DisplayListHead++, (PAR_IMAGE_X - sShotPanelOffsetX) << 2,
+        g_DisplayListHead++, (PAR_IMAGE_X - f_ShotPanelOffsetX) << 2,
         PAR_IMAGE_Y << 2,
-        (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+        (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - f_ShotPanelOffsetX) << 2,
         (PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
   }
   if ((D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) &&
       g_RoundHud.isLetterboxShown) {
-    DrawAnimatedIcon(&g_DisplayListHead, sLetterboxHeight);
+    DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
   }
   BeginShadowedText(&g_DisplayListHead);
   SetTextColor(&g_DisplayListHead, 255, 255, 255);
@@ -3680,8 +3688,8 @@ void DrawRoundHud(CameraView* view) {
     surface = GetSurfaceInfo(g_CurrentShot.surface);
     GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
     sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
-    DrawShadowedText(&g_DisplayListHead, sShotPanelOffsetX + LIE_PERCENT_X,
-                     sHudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
+    DrawShadowedText(&g_DisplayListHead, f_ShotPanelOffsetX + LIE_PERCENT_X,
+                     f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
   }
   if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
     selectedClub = GetSelectedClub();
@@ -3692,15 +3700,15 @@ void DrawRoundHud(CameraView* view) {
     } else {
       sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
     }
-    DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - sShotPanelOffsetX,
-                     sHudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
+    DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - f_ShotPanelOffsetX,
+                     f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
         !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
         g_IsModuleAlive[MODULE_UNK25] && IsShotModeChangeDone() &&
         player->unk28 != -1) {
       sprintf(g_PrintBuffer, "%d", player->unk28);
-      DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - sShotPanelOffsetX,
-                       sHudOffsetY + UNK28_TEXT_Y, g_PrintBuffer);
+      DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - f_ShotPanelOffsetX,
+                       f_HudOffsetY + UNK28_TEXT_Y, g_PrintBuffer);
     }
   }
   if (g_RoundHud.unk13 && !g_IsCupViewShown) {
@@ -3738,7 +3746,7 @@ void DrawRoundHud(CameraView* view) {
       }
       SetTextColor(&g_DisplayListHead, 255, 230, 0);
       if (D_801B60B9 != 0) {
-        sprintf(g_PrintBuffer, sBlankText);
+        sprintf(g_PrintBuffer, f_BlankText);
       } else {
         switch (g_GameMode) {
           case GAME_MODE_STROKE:
@@ -3768,7 +3776,7 @@ void DrawRoundHud(CameraView* view) {
           case GAME_MODE_TRAINING:
           case GAME_MODE_UNK8:
           case GAME_MODE_RING_SHOT:
-            sprintf(g_PrintBuffer, sBlankText);
+            sprintf(g_PrintBuffer, f_BlankText);
             break;
         }
       }
@@ -3819,7 +3827,7 @@ void DrawRoundHud(CameraView* view) {
     totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
     sprintf(g_PrintBuffer, D_800D1C84, totalSeconds / SECONDS_PER_MINUTE,
             totalSeconds % SECONDS_PER_MINUTE, hundredths);
-    DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - sShotPanelOffsetX,
+    DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - f_ShotPanelOffsetX,
                      PANEL_STOPWATCH_Y, g_PrintBuffer);
   }
   DrawNothing(&g_DisplayListHead);
@@ -3881,35 +3889,35 @@ void LoadHoleIntroImages(void) {
   EncodedAsset asset;
   s32 standing;
 
-  sLoadedHoleIntroImages = 0;
+  f_LoadedHoleIntroImages = 0;
   if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
       IsMarkedParFive(g_CourseIndex, g_HoleIndex)) {
-    sHoleContestImage =
+    f_HoleContestImage =
         AllocMemory(OpenEncodedAsset(ASSET_LONGEST_DRIVE_IMAGE, &asset));
-    ReadEncodedAsset(sHoleContestImage, &asset);
-    sLoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
+    ReadEncodedAsset(f_HoleContestImage, &asset);
+    f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   } else if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
              IsParThree(g_CourseIndex, g_HoleIndex)) {
-    sHoleContestImage =
+    f_HoleContestImage =
         AllocMemory(OpenEncodedAsset(ASSET_NEAREST_PIN_IMAGE, &asset));
-    ReadEncodedAsset(sHoleContestImage, &asset);
-    sLoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
+    ReadEncodedAsset(f_HoleContestImage, &asset);
+    f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   }
   if (g_GameMode == GAME_MODE_MATCH_GAME ||
       g_GameMode == GAME_MODE_GET_CHARACTER) {
     if (D_801B60A0 != 0) {
-      sMatchStandingImage =
+      f_MatchStandingImage =
           AllocMemory(OpenEncodedAsset(ASSET_UNK8FF_IMAGE, &asset));
-      ReadEncodedAsset(sMatchStandingImage, &asset);
-      sLoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+      ReadEncodedAsset(f_MatchStandingImage, &asset);
+      f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
     } else {
       standing = GetMatchStanding(0, 1);
       if (standing == MATCH_STANDING_PLAYER_DORMIE ||
           standing == MATCH_STANDING_OPPONENT_DORMIE) {
-        sMatchStandingImage =
+        f_MatchStandingImage =
             AllocMemory(OpenEncodedAsset(ASSET_DORMIE_IMAGE, &asset));
-        ReadEncodedAsset(sMatchStandingImage, &asset);
-        sLoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
+        ReadEncodedAsset(f_MatchStandingImage, &asset);
+        f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
       }
     }
   }
@@ -3917,13 +3925,13 @@ void LoadHoleIntroImages(void) {
 
 /* Frees the images that LoadHoleIntroImages loaded */
 void FreeHoleIntroImages(void) {
-  if (sLoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
-    FreeMemory(&sHoleContestImage);
+  if (f_LoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
+    FreeMemory(&f_HoleContestImage);
   }
-  if (sLoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
-    FreeMemory(&sMatchStandingImage);
+  if (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
+    FreeMemory(&f_MatchStandingImage);
   }
-  sLoadedHoleIntroImages = 0;
+  f_LoadedHoleIntroImages = 0;
 }
 
 /*
@@ -3957,11 +3965,11 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
           (g_GameState.betRates[BET_NEAREST_PIN] > 0 &&
            IsParThree(GetCourseRecordIndex(), g_HoleIndex))) {
         gDPLoadTLUT_pal256(gfx++,
-                           (u32)sHoleContestImage + IMAGE_HEADER_SIZE & ~7);
+                           (u32)f_HoleContestImage + IMAGE_HEADER_SIZE & ~7);
         for (strip = 0; strip != CONTEST_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureBlock(
               gfx++,
-              (u32)sHoleContestImage + LARGE_PALETTED_TEXELS_OFFSET +
+              (u32)f_HoleContestImage + LARGE_PALETTED_TEXELS_OFFSET +
                       strip *
                           (CONTEST_IMAGE_WIDTH * CONTEST_IMAGE_STRIP_HEIGHT) &
                   ~7,
@@ -3980,13 +3988,13 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
       }
       if ((g_GameMode == GAME_MODE_MATCH_GAME ||
            g_GameMode == GAME_MODE_GET_CHARACTER) &&
-          (sLoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
+          (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
         gDPLoadTLUT_pal256(gfx++,
-                           (u32)sMatchStandingImage + IMAGE_HEADER_SIZE & ~7);
+                           (u32)f_MatchStandingImage + IMAGE_HEADER_SIZE & ~7);
         for (strip = 0; strip != MATCH_IMAGE_STRIP_COUNT; strip++) {
           gDPLoadTextureTile(
               gfx++,
-              (u32)sMatchStandingImage + LARGE_PALETTED_TEXELS_OFFSET +
+              (u32)f_MatchStandingImage + LARGE_PALETTED_TEXELS_OFFSET +
                       strip * (MATCH_IMAGE_WIDTH * MATCH_IMAGE_STRIP_HEIGHT) &
                   ~7,
               G_IM_FMT_CI, G_IM_SIZ_8b, MATCH_IMAGE_WIDTH,

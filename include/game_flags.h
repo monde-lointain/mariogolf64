@@ -59,7 +59,7 @@
 /* Lets the second and fourth controllers open and close the inset view */
 #define GAME_FLAG_INSET_VIEW_BUTTONS 0x2F
 
-/* Shows and edits UpdateGame's sDebugMenuValues in one scene */
+/* Shows and edits UpdateGame's f_DebugMenuValues in one scene */
 #define GAME_FLAG_DEBUG_MENU_VALUES 0x57
 
 /* Makes every character selectable */

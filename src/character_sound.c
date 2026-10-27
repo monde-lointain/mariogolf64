@@ -16,7 +16,7 @@
 #define DRY_CHARACTER 3
 #define CHARACTER_SOUND_REVERB 0x14
 
-extern s16 sCharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT];
+extern s16 f_CharacterSounds[CHARACTER_COUNT][CHARACTER_SOUND_VALUE_COUNT];
 
 /* Plays a character's sound, where soundIndex is the sound's pair's first value
  */
@@ -25,12 +25,12 @@ void PlayCharacterSound(s32 character, s32 slot, s32 soundIndex, s32 volume,
   s32 reverb = (character != DRY_CHARACTER) ? CHARACTER_SOUND_REVERB : 0;
 
   if (volume == CHARACTER_SOUND_VOLUME) {
-    PlaySoundWithEffects(sCharacterSounds[character][soundIndex],
+    PlaySoundWithEffects(f_CharacterSounds[character][soundIndex],
                          slot + FIRST_CHARACTER_SOUND_CHANNEL,
-                         sCharacterSounds[character][soundIndex + 1], reverb,
+                         f_CharacterSounds[character][soundIndex + 1], reverb,
                          pan);
   } else {
-    PlaySoundWithEffects(sCharacterSounds[character][soundIndex],
+    PlaySoundWithEffects(f_CharacterSounds[character][soundIndex],
                          slot + FIRST_CHARACTER_SOUND_CHANNEL, volume, reverb,
                          pan);
   }
