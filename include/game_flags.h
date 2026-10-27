@@ -119,6 +119,18 @@
 /* Halts the loader thread after it sets up the hole's state */
 #define GAME_FLAG_HALT_HOLE_LOADER 0x43
 
+/* Ends the round after the current hole */
+#define GAME_FLAG_END_ROUND_AFTER_HOLE 0x44
+
+/* Lets the second controller's L and R pick the cup position the hole intro circles */
+#define GAME_FLAG_CHOOSE_CUP 0x47
+
+/* Starts the round over from its first hole instead of ending it */
+#define GAME_FLAG_REPEAT_ROUND 0x4F
+
+/* Shows the staff roll after the hole even if the final challenge is not won */
+#define GAME_FLAG_SHOW_STAFF_ROLL 0x65
+
 /* Flags that the hole loader reads or sets, whose purpose is not yet known */
 #define GAME_FLAG_UNK11 0x11
 #define GAME_FLAG_UNK12 0x12
