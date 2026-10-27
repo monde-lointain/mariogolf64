@@ -7,10 +7,12 @@
 #include "club.h"
 #include "controller.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "game_flags.h"
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "overlay_manager.h"
@@ -149,6 +151,27 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MODE_CHOICE_LIMIT 12
 
 extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
+
+/* func_80200EF0 draws the players' characters, and in Get Character the rival as a spinning silhouette */
+#define NO_RIVAL -1
+#define RIVAL_SLOT 1
+#define RIVAL_SPIN_STEP 10.0f
+#define MENU_CHARACTERS_NEAR 1.0f
+#define MENU_CHARACTERS_FAR 3000.0f
+#define MENU_CHARACTERS_ORTHO_SCALE 10.0f
+#define MENU_CHARACTER_LAYOUT_COUNT 4
+#define MENU_CHARACTER_SLOT_COUNT 5
+
+extern f32 D_8022FA54_ovl_01;
+extern f32 D_8022FA58_ovl_01;
+extern f32 D_8022FA5C_ovl_01;
+extern f32 D_8022FA68_ovl_01[MENU_CHARACTER_LAYOUT_COUNT][MENU_CHARACTER_SLOT_COUNT][3];
+extern s32 D_8022FB58_ovl_01[CHARACTER_COUNT]; /* The character for each grid mark */
+extern Mtx D_80231D60_ovl_01[MAX_PLAYER_COUNT][2];
+extern Mtx D_80231F60_ovl_01;
+extern f32 D_80231FA0_ovl_01[MAX_PLAYER_COUNT];
+extern s32 D_8023BFC0_ovl_01[MAX_PLAYER_COUNT];
+extern u8 D_801B70F0[MAXCONTROLLERS];
 
 /* func_80208F8C draws a frame of the waving Toad (assets 0x710 onward), 48x51 CI8, in two strips */
 #define TOAD_WIDTH 48
@@ -1489,7 +1512,143 @@ void func_80200A40_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 halfSize
     *displayListHead = gfx;
 }
 
+/*
+ * Doesn't match: the original fills the delay slot of the rival test before
+ * SetCharacterLighting with its first argument, and this leaves it empty.
+ */
+#ifdef NON_MATCHING
+void func_80200EF0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 rival = NO_RIVAL;
+    MenuMemory *memory;
+    s32 characterCount;
+    s32 row;
+    s32 column;
+    s32 layout;
+    s32 character;
+    s32 palette;
+    s32 raise;
+    u16 slot;
+    Vec3 translation;
+    Vec3 rotation;
+    Vec3 scale;
+    s32 unused[12];
+    Mat4 transform;
+
+    memory = func_8005AF74();
+    characterCount = D_80105B68;
+    if (D_8022BEBC_ovl_01[characterCount - 1][memory->modeChoice] == MODE_ICON_GET_CHARACTER) {
+        if (characterCount == 1) {
+        for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
+            for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
+                if (g_CharacterGrid[row][column] < MARKED_CHARACTER_LIMIT) {
+                    rival = D_8022FB58_ovl_01[g_CharacterGrid[row][column] + MARKED_CHARACTER_OFFSET];
+                }
+            }
+        }
+    }
+    }
+    characterCount += (rival >= 0);
+    switch (characterCount) {
+        case 1:
+            D_80231FA0_ovl_01[0] = 5.0f;
+            break;
+        case 2:
+            D_80231FA0_ovl_01[0] = (rival >= 0) ? 5.0f : 4.0f;
+            D_80231FA0_ovl_01[1] = 4.0f;
+            break;
+        case 3:
+        case 4:
+            D_80231FA0_ovl_01[0] = 3.5f;
+            D_80231FA0_ovl_01[1] = 3.4f;
+            D_80231FA0_ovl_01[2] = 3.4f;
+            D_80231FA0_ovl_01[3] = 3.5f;
+            break;
+        default:
+            D_80231FA0_ovl_01[0] = 4.0f;
+            D_80231FA0_ovl_01[1] = 4.0f;
+            D_80231FA0_ovl_01[2] = 4.0f;
+            D_80231FA0_ovl_01[3] = 4.0f;
+            break;
+    }
+    guOrtho(&D_80231F60_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2,
+            MENU_CHARACTERS_NEAR, MENU_CHARACTERS_FAR, MENU_CHARACTERS_ORTHO_SCALE);
+    for (slot = 0; slot != characterCount; slot++) {
+        if (D_8023BFC0_ovl_01[slot] > 0) {
+            D_8023BFC0_ovl_01[slot]--;
+        }
+        if (D_8023BFC0_ovl_01[slot] == 0) {
+            D_8023BFC0_ovl_01[slot] = -1;
+            SetAnimationLooping(slot, FALSE);
+            SetNextAnimation(slot, MENU_ANIMATION_FIDGET);
+        }
+        if (D_8023BFC0_ovl_01[slot] == -1) {
+            if (GetAnimationEndFrame(slot, MENU_ANIMATION_FIDGET) == GetAnimationFrame(slot)) {
+                SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
+                SetAnimationLooping(slot, TRUE);
+                D_8023BFC0_ovl_01[slot] = guRandom() % FIDGET_DELAY_RANGE;
+            }
+        }
+        if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+            character = rival;
+            palette = 1;
+        } else {
+            character = (s8)g_Players[slot].characterIndex;
+            palette = (s8)g_Players[slot].paletteIndex;
+        }
+        if (!D_801B70F0[slot]) {
+            if (IsCharacterSlotBusy(slot)) {
+                FreeCharacterSlot(slot);
+            } else {
+                LoadCharacter(slot, character + CHARACTER_COUNT, palette);
+                D_801B70F0[slot] = TRUE;
+                SetCharacterAnimation(slot, MENU_ANIMATION_STANDING);
+                SetAnimationSpeed(slot, 1.0f);
+                if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+                    SetCharacterLighting(RIVAL_SLOT, CHARACTER_LIGHTING_BLACK);
+                }
+            }
+        }
+        layout = 0;
+        if (rival < 0) {
+            layout = characterCount - 1;
+        }
+        if ((characterCount == 2) & (rival >= 0) && slot == RIVAL_SLOT) {
+            D_8022FA5C_ovl_01 -= RIVAL_SPIN_STEP;
+            D_8022FA58_ovl_01 = D_8022FA5C_ovl_01;
+        } else {
+            D_8022FA58_ovl_01 = 0.0f;
+        }
+        rotation[0] = DEGREES_TO_RADIANS(D_8022FA54_ovl_01);
+        rotation[1] = DEGREES_TO_RADIANS(D_8022FA58_ovl_01);
+        rotation[2] = 0.0f;
+        translation[0] = D_8022FA68_ovl_01[layout][slot][0];
+        raise = (character == CHARACTER_BABY_MARIO) ? BABY_MARIO_RAISE : 0;
+        translation[1] = D_8022FA68_ovl_01[layout][slot][1] + raise;
+        translation[2] = D_8022FA68_ovl_01[layout][slot][2];
+        scale[0] = D_80231FA0_ovl_01[slot];
+        scale[1] = D_80231FA0_ovl_01[slot];
+        scale[2] = D_80231FA0_ovl_01[slot];
+        BuildTransformMatrix(transform, rotation, translation, scale);
+        ConvertMatrixToFixed(transform, &D_80231D60_ovl_01[slot][g_DrawBufferIndex]);
+        gDPPipeSync(gfx++);
+        gDPSetTexturePersp(gfx++, G_TP_PERSP);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80231F60_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80231D60_ovl_01[slot][g_DrawBufferIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        g_DisplayListHead = gfx;
+        DrawCharacter(slot);
+        *displayListHead = g_DisplayListHead;
+        gfx = *displayListHead;
+        AnimateCharacter(slot);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80201574_ovl_01);
 
