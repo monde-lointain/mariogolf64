@@ -130,6 +130,9 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MODE_ICON_STRIP_HEIGHT 32
 #define MODE_ICON_STRIP_COUNT 2
 #define MODE_ICON_FRAME_DURATION 4
+/* Where func_802004A0 draws the mode icon, unscaled */
+#define MODE_ICON_LEFT 168
+#define MODE_ICON_TOP 96
 /* The most modes the mode select offers for a player count */
 #define MODE_CHOICE_LIMIT 12
 
@@ -1115,7 +1118,62 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FDA40_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FE4D0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802004A0_ovl_01);
+/* Nothing calls this */
+void func_802004A0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 stripIndex;
+    void *image;
+    u8 iconIndex;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_POINT);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    image = D_8010526C[D_8022F8C4_ovl_01];
+    gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, MODE_ICON_LEFT << 2,
+                                (MODE_ICON_TOP + stripIndex * MODE_ICON_STRIP_HEIGHT) << 2,
+                                (MODE_ICON_LEFT + MODE_ICON_WIDTH) << 2,
+                                (MODE_ICON_TOP + MODE_ICON_STRIP_HEIGHT + stripIndex * MODE_ICON_STRIP_HEIGHT) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    D_8022F8C5_ovl_01++;
+    if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][((MenuMemory *)D_801323A0)->modeChoice];
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01++;
+        if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] == END_OF_ICON_FRAMES) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+        OpenEncodedAsset(g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+    }
+    *displayListHead = gfx;
+}
 
 void func_80200A40_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
     Gfx *gfx = *displayListHead;
