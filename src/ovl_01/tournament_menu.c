@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen_layers.h"
 #include "text.h"
 #include "variables.h"
 
@@ -24,6 +25,11 @@ extern void *D_80230E78_ovl_01;
 extern void *D_80230E7C_ovl_01;
 extern void *D_80230E84_ovl_01;
 /* The table of images that func_802269AC picks from */
+/* The intensity image of D_80230E70 that func_802287EC draws, in two strips */
+#define TOURNAMENT_BANNER_WIDTH 256
+#define TOURNAMENT_BANNER_STRIP_HEIGHT 32
+#define TOURNAMENT_BANNER_STRIP_COUNT 2
+
 #define TOURNAMENT_IMAGE_ROW_COUNT 15
 #define TOURNAMENT_IMAGE_COLUMN_COUNT 4
 
@@ -223,7 +229,44 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
 
+/* Doesn't match: the original keeps the strip height constant in a saved register instead of the step's numerator */
+#ifdef NON_MATCHING
+/* The original never stores the list's end back through displayListHead */
+void func_802287EC_ovl_01(Gfx **displayListHead, s32 centerX, s32 centerY, s32 halfWidth, s32 stripHeight,
+                          s32 width, s32 shownStripHeight) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop = centerY - stripHeight;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+    for (stripIndex = 0; stripIndex != TOURNAMENT_BANNER_STRIP_COUNT; stripIndex++) {
+        LoadNibbleTextureBlock(&gfx,
+                               (u8 *)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
+                                   stripIndex * TOURNAMENT_BANNER_WIDTH * TOURNAMENT_BANNER_STRIP_HEIGHT / 2,
+                               G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0, 0, 0, 0, 0,
+                               0, 0);
+        DrawTextureRect(&gfx, (centerX - halfWidth) << 2, stripTop << 2, (centerX + halfWidth) << 2,
+                        (stripTop + stripHeight) << 2, G_TX_RENDERTILE, 0, 0,
+                        (TOURNAMENT_BANNER_WIDTH << 10) / width,
+                        (TOURNAMENT_BANNER_STRIP_HEIGHT << 10) / shownStripHeight);
+        stripTop += stripHeight;
+        gDPPipeSync(gfx++);
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802287EC_ovl_01);
+#endif
 
 void func_80228A80_ovl_01(void *buffer, s32 bufferKind) {
     EncodedAsset asset;
