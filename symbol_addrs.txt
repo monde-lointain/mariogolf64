@@ -3385,3 +3385,6 @@ f_OpeningCue = 0x8022BFA8; // type:s32 size:0x4 segment:ovl_05
 f_CueSlotIndex = 0x8020C400; // type:s32 size:0x4 segment:ovl_05
 f_LastPlacedSlotIndex = 0x8020AC40; // type:s32 size:0x4 segment:ovl_05
 f_IsDonkeyKongShown = 0x8020AD9C; // type:s32 size:0x4 segment:ovl_05
+DrawNameLogos = 0x801FA8D8; // type:func segment:ovl_05
+LoadNameLogo = 0x801FA83C; // type:func segment:ovl_05
+f_NameSlotImages = 0x8020E400; // type:u8 size:0x4410 segment:ovl_05

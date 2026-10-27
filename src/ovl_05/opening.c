@@ -63,7 +63,7 @@ extern u8 f_ShotBallImage[];
 #define NAME_LOGO_STILL 30
 
 extern OpeningNameLogo f_OpeningNameLogos[OPENING_NAME_LOGO_COUNT];
-extern u8 D_8020E400_ovl_05[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
+extern u8 f_NameSlotImages[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
 extern s32 f_NameSlotLogoIndices[OPENING_NAME_SLOT_COUNT];
 extern s32 f_NameSlotSteps[OPENING_NAME_SLOT_COUNT];
 extern s32 f_IsNameSlotShown[OPENING_NAME_SLOT_COUNT];
@@ -162,7 +162,7 @@ extern s32 f_BurstFrame; /* Starts at -1, before the burst's first frame */
 
 void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
-void func_801FA8D8_ovl_05(Gfx** displayListHead);
+void DrawNameLogos(Gfx** displayListHead);
 void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
 void DrawOpeningImpactLines(Gfx** displayListHead);
 void DrawLakitu(Gfx** displayListHead);
@@ -858,23 +858,28 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   func_801FBB94_ovl_05(&gfx, matrices);
   DrawOpeningShotBall(&gfx);
   DrawOpeningSparks(&gfx);
-  func_801FA8D8_ovl_05(&gfx);
+  DrawNameLogos(&gfx);
   func_80200CBC_ovl_05(&gfx, 0);
   *displayListHead = gfx;
 }
 
 /* Loads name logo logoIndex into slot and resets the slot */
-void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
+void LoadNameLogo(s32 logoIndex, s32 slot) {
   EncodedAsset asset;
 
   OpenEncodedAsset(f_OpeningNameLogos[logoIndex].assetId, &asset);
-  ReadEncodedAsset(D_8020E400_ovl_05[slot], &asset);
+  ReadEncodedAsset(f_NameSlotImages[slot], &asset);
   f_NameSlotLogoIndices[slot] = logoIndex;
   f_NameSlotSteps[slot] = 0;
   f_IsNameSlotShown[slot] = 0;
 }
 
-#define LOGO f_OpeningNameLogos[f_NameSlotLogoIndices[slot]]
+/* The logo shown in the name slot SLOT */
+#define SLOT_LOGO f_OpeningNameLogos[f_NameSlotLogoIndices[slot]]
+#define NAME_LOGO_STRIP_COUNT 4
+/* The rows that a strip of a logo's image holds, and their log2 */
+#define NAME_LOGO_STRIP_ROWS 8
+#define NAME_LOGO_STRIP_ROWS_SHIFT 3
 
 #ifdef NON_MATCHING
 /*
@@ -885,10 +890,10 @@ void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
  * Differs from the original only in stack slots: the pointers of the second
  * and third commands swap slots, as in the opening's sparks.
  */
-void func_801FA8D8_ovl_05(Gfx** displayListHead) {
+void DrawNameLogos(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  s32 x[2];
-  s32 y[5];
+  s32 xEdges[2];                         /* Left and right */
+  s32 yEdges[NAME_LOGO_STRIP_COUNT + 1]; /* Top to bottom of each strip */
   s32 strip;
   s32 slot;
   s32 stripHeight;
@@ -914,62 +919,69 @@ void func_801FA8D8_ovl_05(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPLoadTLUT_pal256(
-          gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + IMAGE_HEADER_SIZE));
+          gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + IMAGE_HEADER_SIZE));
       gDPPipeSync(gfx++);
-      for (strip = 0; strip != 4; strip++) {
-        texelsOffset = LARGE_PALETTED_TEXELS_OFFSET + strip * LOGO.width * 8;
-        stripHeight = LOGO.shownHeight / 4;
-        x[0] = LOGO.x - LOGO.shownWidth / 2;
-        x[1] = LOGO.x + LOGO.shownWidth / 2;
-        y[0] = LOGO.y - LOGO.shownHeight / 2;
-        y[1] = y[0] + stripHeight;
-        y[2] = y[1] + stripHeight;
-        y[3] = y[2] + stripHeight;
-        y[4] = y[3] + stripHeight;
+      for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
+        texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
+                       strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS;
+        stripHeight = SLOT_LOGO.shownHeight / NAME_LOGO_STRIP_COUNT;
+        xEdges[0] = SLOT_LOGO.x - SLOT_LOGO.shownWidth / 2;
+        xEdges[1] = SLOT_LOGO.x + SLOT_LOGO.shownWidth / 2;
+        yEdges[0] = SLOT_LOGO.y - SLOT_LOGO.shownHeight / 2;
+        yEdges[1] = yEdges[0] + stripHeight;
+        yEdges[2] = yEdges[1] + stripHeight;
+        yEdges[3] = yEdges[2] + stripHeight;
+        yEdges[4] = yEdges[3] + stripHeight;
         if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_UP) {
           s32 drawnWidth;
           s32 drawnHeight;
 
           gDPLoadTextureBlock(
-              gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + texelsOffset),
-              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO.width, LOGO.height / 4, 0,
+              gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+              G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
+              SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK,
-              3, G_TX_NOLOD, G_TX_NOLOD);
+              NAME_LOGO_STRIP_ROWS_SHIFT, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          drawnWidth = x[1] - x[0];
+          drawnWidth = xEdges[1] - xEdges[0];
           if (drawnWidth <= 0) {
             drawnWidth = 1;
           }
-          drawnHeight = y[4 - strip] - y[3 - strip];
+          drawnHeight = yEdges[NAME_LOGO_STRIP_COUNT - strip] -
+                        yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
           if (drawnHeight <= 0) {
             drawnHeight = 1;
           }
-          gSPScisTextureRectangle(gfx++, x[0] << 2, y[3 - strip] << 2,
-                                  x[1] << 2, y[4 - strip] << 2, G_TX_RENDERTILE,
-                                  0, 8 << 5, (LOGO.width << 10) / drawnWidth,
-                                  (LOGO.height << 8) / drawnHeight);
+          gSPScisTextureRectangle(
+              gfx++, xEdges[0] << 2,
+              yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2, xEdges[1] << 2,
+              yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
+              NAME_LOGO_STRIP_ROWS << 5, (SLOT_LOGO.width << 10) / drawnWidth,
+              (SLOT_LOGO.height << 8) / drawnHeight);
         } else {
           s32 drawnWidth;
           s32 drawnHeight;
 
           gDPLoadTextureBlock(
-              gfx++, TEXTURE_ADDRESS(D_8020E400_ovl_05[slot] + texelsOffset),
-              G_IM_FMT_CI, G_IM_SIZ_8b, LOGO.width, LOGO.height / 4, 0,
+              gfx++, TEXTURE_ADDRESS(f_NameSlotImages[slot] + texelsOffset),
+              G_IM_FMT_CI, G_IM_SIZ_8b, SLOT_LOGO.width,
+              SLOT_LOGO.height / NAME_LOGO_STRIP_COUNT, 0,
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(gfx++);
-          drawnWidth = x[1] - x[0];
+          drawnWidth = xEdges[1] - xEdges[0];
           if (drawnWidth <= 0) {
             drawnWidth = 1;
           }
-          drawnHeight = y[strip + 1] - y[strip];
+          drawnHeight = yEdges[strip + 1] - yEdges[strip];
           if (drawnHeight <= 0) {
             drawnHeight = 1;
           }
-          gSPScisTextureRectangle(gfx++, x[0] << 2, y[strip] << 2, x[1] << 2,
-                                  y[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
-                                  (LOGO.width << 10) / drawnWidth,
-                                  (LOGO.height << 8) / drawnHeight);
+          gSPScisTextureRectangle(gfx++, xEdges[0] << 2, yEdges[strip] << 2,
+                                  xEdges[1] << 2, yEdges[strip + 1] << 2,
+                                  G_TX_RENDERTILE, 0, 0,
+                                  (SLOT_LOGO.width << 10) / drawnWidth,
+                                  (SLOT_LOGO.height << 8) / drawnHeight);
         }
         gDPPipeSync(gfx++);
       }
@@ -978,7 +990,7 @@ void func_801FA8D8_ovl_05(Gfx** displayListHead) {
   *displayListHead = gfx;
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA8D8_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawNameLogos);
 #endif
 
 /* Steps the shown name logos' animations: each unfolds, flips over, then
