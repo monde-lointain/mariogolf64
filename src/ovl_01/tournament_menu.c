@@ -368,7 +368,194 @@ void func_80226A34_ovl_01(void) {
     func_8005AF74();
 }
 
+/* func_80226A58 draws a cloud window with Yes and No buttons, the chosen one pulsing */
+#define MENU_WINDOW_SCALE_STEP 0.4f
+#define MENU_WINDOW_CLOSED_SCALE 0.1f
+#define MENU_WINDOW_STRIP_COUNT 2
+#define MENU_WINDOW_IMAGE_WIDTH 256
+#define MENU_WINDOW_STRIP_HEIGHT 32
+#define YES_NO_BUTTON_COUNT 2
+#define YES_NO_BUTTON_WIDTH 72
+#define YES_NO_BUTTON_HEIGHT 24
+/* The size the buttons are drawn at, smaller than their images */
+#define YES_NO_BUTTON_SHOWN_WIDTH 48.0f
+#define YES_NO_BUTTON_SHOWN_HEIGHT 16.0f
+/* How far the buttons sit from the window's centre across and from its bottom */
+#define YES_NO_BUTTON_OFFSET 30.0f
+#define YES_NO_PULSE_STEP 2
+#define YES_NO_PULSE_LIMIT 16
+#define YES_NO_PULSE_GROWING 0
+#define YES_NO_PULSE_SHRINKING 1
+#define MESSAGE_OK 0x16B
+#define OK_TEXT_OFFSET_X 8
+#define OK_TEXT_OFFSET_Y 30
+#define OK_TEXT_SLOT 10
+#define OK_TEXT_RED 95
+#define OK_TEXT_GREEN 63
+#define OK_TEXT_BLUE 255
+#define OK_TEXT_ALPHA 255
+#define NO_OK_TEXT -1
+
+/*
+ * Doesn't match: GCC hoists the window's left and right edges out of the strip loop and keeps centerX in a saved
+ * register, where the original works them out in the loop from centerX on the stack (188 diff lines, 24 opcodes).
+ * Copying the left edge through the right edge's variable stops the hoist and matches, but nothing suggests the
+ * original did that.
+ */
+#ifdef NON_MATCHING
+void func_80226A58_ovl_01(Gfx **displayListHead, s32 width, s32 height, s32 centerX, s32 centerY, s32 okTextShown,
+                          s32 chosenButton) {
+    Gfx *gfx = *displayListHead;
+    f32 windowWidth;
+    f32 windowHalfHeight;
+    f32 buttonWidth;
+    f32 buttonHeight;
+    s32 halfWidth;
+    s32 halfHeight;
+    s32 buttonHalfWidth;
+    s32 buttonHalfHeight;
+    s32 windowTop;
+    s32 windowLeft;
+    s32 windowRight;
+    s16 index;
+    s32 buttonX;
+    s32 buttonY;
+    s32 pulse;
+    s32 growth;
+
+    func_8005AF74();
+    switch (g_MenuWindowState) {
+        case MENU_WINDOW_OPENING:
+            g_MenuWindowScaleX += MENU_WINDOW_SCALE_STEP;
+            g_MenuWindowScaleY += MENU_WINDOW_SCALE_STEP;
+            if (g_MenuWindowScaleX > 1.0f) {
+                g_MenuWindowScaleX = 1.0f;
+            }
+            if (g_MenuWindowScaleY > 1.0f) {
+                g_MenuWindowScaleY = 1.0f;
+            }
+            windowWidth = width * g_MenuWindowScaleX;
+            windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
+            buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+            buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+            if (g_MenuWindowScaleX == 1.0f && g_MenuWindowScaleY == 1.0f) {
+                g_MenuWindowState = MENU_WINDOW_OPEN;
+            }
+            break;
+        case MENU_WINDOW_OPEN:
+            windowWidth = width;
+            windowHalfHeight = height / 2;
+            buttonWidth = YES_NO_BUTTON_SHOWN_WIDTH;
+            buttonHeight = YES_NO_BUTTON_SHOWN_HEIGHT;
+            break;
+        case MENU_WINDOW_CLOSING:
+            g_MenuWindowScaleX -= MENU_WINDOW_SCALE_STEP;
+            g_MenuWindowScaleY -= MENU_WINDOW_SCALE_STEP;
+            if (g_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
+                g_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
+            }
+            if (g_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
+                g_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
+            }
+            windowWidth = width * g_MenuWindowScaleX;
+            windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
+            buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
+            buttonHeight = g_MenuWindowScaleY * YES_NO_BUTTON_SHOWN_HEIGHT;
+            if (g_MenuWindowScaleX <= MENU_WINDOW_CLOSED_SCALE && g_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
+                g_MenuWindowState = MENU_WINDOW_CLOSED;
+            }
+            break;
+        default:
+            return;
+    }
+    halfWidth = (s32)windowWidth / 2;
+    halfHeight = windowHalfHeight;
+    buttonHalfWidth = (s32)buttonWidth / 2;
+    buttonHalfHeight = (s32)buttonHeight / 2;
+    halfWidth = (halfWidth <= 0) ? 1 : halfWidth;
+    halfHeight = (halfHeight <= 0) ? 1 : halfHeight;
+    buttonHalfWidth = (buttonHalfWidth <= 0) ? 1 : buttonHalfWidth;
+    buttonHalfHeight = (buttonHalfHeight <= 0) ? 1 : buttonHalfHeight;
+    windowWidth = (windowWidth <= 0.0f) ? 1.0f : windowWidth;
+    windowHalfHeight = (windowHalfHeight <= 0.0f) ? 1.0f : windowHalfHeight;
+    buttonWidth = (buttonWidth <= 0.0f) ? 1.0f : buttonWidth;
+    buttonHeight = (buttonHeight <= 0.0f) ? 1.0f : buttonHeight;
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
+    gDPSetEnvColor(gfx++, 191, 191, 191, 255);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_BLENDPEDECALA, G_CC_BLENDPEDECALA);
+    for (index = 0, windowTop = centerY - halfHeight; index != MENU_WINDOW_STRIP_COUNT; index++) {
+        LoadNibbleTextureBlock(&gfx,
+                               (u8 *)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
+                                   index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2,
+                               G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        windowLeft = centerX - halfWidth;
+        windowRight = centerX + halfWidth;
+        DrawTextureRect(&gfx, windowLeft << 2, (windowTop + index * halfHeight) << 2, windowRight << 2,
+                        (windowTop + index * halfHeight + halfHeight) << 2,
+                        G_TX_RENDERTILE, 0, 0, (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
+                        (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    LoadLargePalette(&gfx, (u8 *)D_80230E74_ovl_01 + IMAGE_HEADER_SIZE);
+    for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
+        LoadTextureBlock(&gfx,
+                         (u8 *)D_80230E74_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT,
+                         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
+        if (index == 0) {
+            buttonX = centerX - (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+        } else {
+            buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
+        }
+        buttonY = centerY + windowHalfHeight - (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
+        growth = 0;
+        if (index == chosenButton) {
+            pulse = D_80230E9C_ovl_01;
+            growth = pulse / 2;
+        } else {
+            pulse = 0;
+        }
+        DrawTextureRect(&gfx, (buttonX - buttonHalfWidth - growth) << 2, (buttonY - buttonHalfHeight - growth) << 2,
+                        (buttonX + buttonHalfWidth + growth) << 2, (buttonY + buttonHalfHeight + growth) << 2,
+                        G_TX_RENDERTILE, 0, 0, (YES_NO_BUTTON_WIDTH << 10) / (s32)(buttonWidth + pulse),
+                        (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
+        gDPPipeSync(gfx++);
+    }
+    if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
+        D_80230E9C_ovl_01 += YES_NO_PULSE_STEP;
+    }
+    if (D_80230EA0_ovl_01 == YES_NO_PULSE_SHRINKING) {
+        D_80230E9C_ovl_01 -= YES_NO_PULSE_STEP;
+    }
+    if (D_80230E9C_ovl_01 == YES_NO_PULSE_LIMIT) {
+        D_80230EA0_ovl_01 = YES_NO_PULSE_SHRINKING;
+    }
+    if (D_80230E9C_ovl_01 == 0) {
+        D_80230EA0_ovl_01 = YES_NO_PULSE_GROWING;
+    }
+    if (okTextShown != NO_OK_TEXT && IsMenuWindowOpen()) {
+        SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y, MESSAGE_OK, 1, OK_TEXT_SLOT,
+                    TEXT_FLAG_CENTERED, OK_TEXT_RED, OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226A58_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
 
