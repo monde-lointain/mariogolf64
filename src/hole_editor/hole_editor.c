@@ -8,8 +8,10 @@
 #include "billboard.h"
 #include "camera.h"
 #include "controller.h"
+#include "cpu_projection.h"
 #include "debug_text.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "heap.h"
 #include "hole_builder.h"
 #include "hole_loader.h"
@@ -346,6 +348,187 @@ extern Mtx D_8040CC98;
 #define IA8_ALPHA_SHIFT 4
 extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
+/* DrawHoleEditorGround's display list, one for each draw buffer */
+#define EDITOR_GROUND_LIST_LENGTH 15000
+extern Gfx f_EditorGroundDisplayLists[DRAW_BUFFER_COUNT]
+                                     [EDITOR_GROUND_LIST_LENGTH];
+extern s32 f_EditorClipRatio;
+extern s32 f_EditorGroundTimingRow;
+
+/* An I8 texture as large as DrawGround's noise, all white */
+#define WHITE_TEXTURE_SIZE 32
+#define WHITE_TEXEL 0xFF
+/* DrawGround's clip ratio text buffer is as large */
+#define CLIP_RATIO_TEXT_SIZE 0x98
+extern u8 f_WhiteNoiseTexels[WHITE_TEXTURE_SIZE * WHITE_TEXTURE_SIZE];
+
+/* Where the wave texture goes in TMEM, past a tile's texels */
+#define WAVE_TMEM 0x180
+/* A half's wave tile starts at its first triangle's scroll over this */
+#define WAVE_SCROLL_DIVISOR 32
+#define WAVE_TILE_SPAN 0x40
+
+/* The maps' blend colors' alphas, and that of a tile's second pass */
+#define MAP_BLEND_ALPHA 0xFE
+#define SECOND_PASS_BLEND_ALPHA 0xF7
+
+/*
+ * A fine tile is 4 by 4 cells of two triangles each, drawn in blocks of 2 by
+ * 2 cells. When the editor builds a tile, 17 of its 5 by 5 points go in the
+ * vertex list and 8 come from its midpoints, and f_FineTilePointSlots gives
+ * each point's vertex cache slot.
+ */
+#define FINE_TILE_CELL_SPAN 4
+#define FINE_TILE_BLOCK_SPAN 2
+#define FINE_TILE_POINT_SPAN (FINE_TILE_CELL_SPAN + 1)
+#define FINE_TILE_BUILT_VERTEX_COUNT 17
+#define TILE_TRIANGLE_COUNT (FINE_TILE_CELL_SPAN * FINE_TILE_CELL_SPAN * 2)
+extern s8 f_FineTilePointSlots[FINE_TILE_POINT_SPAN][FINE_TILE_POINT_SPAN];
+
+/*
+ * A tile's place in the tile size coordinates, in quarter texels, and the
+ * corners of its tile within it. A tile with borders starts half a texel in;
+ * one without starts a texel in.
+ */
+#define TILE_COORDINATE_SPAN (GROUND_TILE_TEXEL_SPAN * 4)
+#define BORDERED_TILE_FIRST_COORDINATE 2
+#define BORDERED_TILE_LAST_S 0x86
+#define BORDERED_TILE_LAST_T 0x82
+#define BORDERLESS_TILE_FIRST_COORDINATE 4
+#define BORDERLESS_TILE_LAST_COORDINATE 0x84
+/* GAME_FLAG_TEST_GROUND_TEXTURE's fixed tile, 34 texels square */
+#define TEST_TILE_SIZE 0x88
+
+/*
+ * A mirrored cell's points have their S reflected about a line, in the
+ * halved texture coordinates that its vertex changes write
+ */
+#define MIRROR_S_OFFSET 0x100
+#define MIRROR_S_SCALE 16
+#define MIRRORED_TEST_S 0x2100
+#define MIRRORED_TEST_FIRST_S 0x88
+#define MIRRORED_TEST_LAST_S 0x8A
+
+/* The maps' cell and triangle shades */
+#define SHADED_TRIANGLE_LEVEL 0x96
+#define CELL_LEVEL 0xDC
+#define MIRRORED_CELL_LEVEL 0xA0
+
+/* SetEditorCombineMode's pass of a tile drawn once or twice */
+enum TilePass {
+  TILE_PASS_ONLY,
+  TILE_PASS_FIRST,
+  TILE_PASS_SECOND
+};
+
+/* What SetEditorCombineMode blends over a tile; g_ShowsGroundWaves picks
+ * the noise or waves */
+enum GroundOverlay {
+  GROUND_OVERLAY_NOISE,
+  GROUND_OVERLAY_WAVES,
+  GROUND_OVERLAY_NONE
+};
+
+/* The combiner mode that DrawHoleEditorGround last set */
+enum EditorCombineMode {
+  EDITOR_COMBINE_NONE = -1,
+  EDITOR_COMBINE_WAVES_ONLY,
+  EDITOR_COMBINE_NOISE_ONLY,
+  EDITOR_COMBINE_WAVES_FIRST,
+  EDITOR_COMBINE_NOISE_FIRST,
+  EDITOR_COMBINE_WAVES_SECOND,
+  EDITOR_COMBINE_NOISE_SECOND,
+  EDITOR_COMBINE_TILE_ONLY,
+  EDITOR_COMBINE_TILE_TWICE
+};
+
+/* Whether ToggleGroundTileBorders has given a tile its bordered layout */
+#define TILE_HAS_BORDERS(tileIndex) \
+  (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT - \
+       1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0)
+
+/* Whether a fine tile's neighbor makes it snap the vertices of their shared
+ * edge; unlike DrawGround's test, a hidden neighbor counts */
+#define IS_NOT_FINE(tileIndex) \
+  (g_WorkArea.hole.tiles[tileIndex].detail < GROUND_DETAIL_FINE)
+
+/* Loads the wave texture where DrawGround loads its noise texture */
+#define LOAD_WAVE_TEXTURE() \
+  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_80491A60), WAVE_TMEM, \
+      G_TX_RENDERTILE, G_IM_FMT_IA, G_IM_SIZ_8b, WAVE_TEXTURE_WIDTH, \
+      WAVE_TEXTURE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, \
+      G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 15, 15)
+
+/* Loads the white texture where DrawGround loads its noise texture */
+#define LOAD_WHITE_NOISE_TEXTURE(shiftS, shiftT) \
+  gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(f_WhiteNoiseTexels), NOISE_TMEM, \
+      G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE, \
+      WHITE_TEXTURE_SIZE, 0, G_TX_MIRROR, G_TX_MIRROR, 5, 5, shiftS, shiftT)
+
+/*
+ * Loads a tile's texture in either layout. A bordered tile picks its combiner
+ * mode for the pass, and its second pass reuses the loaded texels.
+ */
+#define LOAD_EDITOR_TILE_TEXTURE(tileIndex, tileColumn, row, pass, overlay) \
+  { \
+    s32 tileS = (tileColumn) * TILE_COORDINATE_SPAN; \
+    s32 tileT = (row) * TILE_COORDINATE_SPAN; \
+\
+    if (TILE_HAS_BORDERS(tileIndex)) { \
+      if ((pass) == 0 || g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) { \
+        SetEditorCombineMode((g_WorkArea.hole.tiles[tileIndex].unk990 != 0) \
+                ? TILE_PASS_FIRST \
+                : TILE_PASS_ONLY, \
+            overlay); \
+        gDPLoadMultiBlock(gfx++, \
+            TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+            G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
+            GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
+            G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOMASK, G_TX_NOLOD, \
+            G_TX_NOLOD); \
+      } else { \
+        SetEditorCombineMode(TILE_PASS_SECOND, overlay); \
+      } \
+\
+      if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) { \
+        gDPLoadMultiBlock(gfx++, \
+            TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+            G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_ROW_LENGTH, \
+            GROUND_TILE_TEXEL_ROW_COUNT, 0, G_TX_MIRROR | G_TX_WRAP, \
+            G_TX_NOMIRROR | G_TX_CLAMP, 6, 6, 3, 3); \
+        gDPSetTileSize(gfx++, 1, 0, 0, TEST_TILE_SIZE, TEST_TILE_SIZE); \
+      } else { \
+        gDPSetTileSize(gfx++, 1, tileS + BORDERED_TILE_FIRST_COORDINATE, \
+            tileT + BORDERED_TILE_FIRST_COORDINATE, \
+            tileS + BORDERED_TILE_LAST_S, tileT + BORDERED_TILE_LAST_T); \
+      } \
+    } else { \
+      gDPLoadMultiBlock(gfx++, \
+          TEXTURE_ADDRESS(&g_WorkArea.hole.tiles[tileIndex]), 0, 1, \
+          G_IM_FMT_RGBA, G_IM_SIZ_16b, GROUND_TILE_TEXEL_SPAN, \
+          GROUND_TILE_TEXEL_SPAN, 0, G_TX_MIRROR | G_TX_WRAP, \
+          G_TX_NOMIRROR | G_TX_CLAMP, 5, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD); \
+      gDPSetTileSize(gfx++, 1, tileS + BORDERLESS_TILE_FIRST_COORDINATE, \
+          tileT + BORDERLESS_TILE_FIRST_COORDINATE, \
+          tileS + BORDERLESS_TILE_LAST_COORDINATE, \
+          tileT + BORDERLESS_TILE_LAST_COORDINATE); \
+    } \
+  }
+
+/* Loads a row's odd vertices as midpoints of its even ones, so that they line
+ * up with a coarse row */
+#define LOAD_EDITOR_AVERAGED_ROW(row, slot) \
+  { \
+    Vtx* even = (row); \
+\
+    GetMidpointVertex(&even[0].v, &even[1].v, &vertices[0].v); \
+    GetMidpointVertex(&even[1].v, &even[2].v, &vertices[1].v); \
+    GetMidpointVertex(&even[2].v, &even[3].v, &vertices[2].v); \
+    GetMidpointVertex(&even[3].v, &even[4].v, &vertices[3].v); \
+    gSPVertex(gfx++, vertices, 4, slot); \
+    vertices += 4; \
+  }
+
 s32 GetTerrainCode(s32 column, s32 row);
 void BuildAllTileMidpoints(void);
 s32 CrossProductXZ(
@@ -405,8 +588,9 @@ void func_80405AF4_hole_editor(s32 column, s32 row);
 
 /* A ground triangle's slope, from func_804079B8 */
 typedef struct TriangleSlope {
-  /* 0x0 */ s16 unk0;
-  /* 0x2 */ s16 unk2;
+  /* 0x0 */ s16 waveS; /* The wave texture's scroll, which moves by the
+                         normal each frame */
+  /* 0x2 */ s16 waveT;
   /* 0x4 */ s16 normalX; /* Twice the normal's x, of a normal 256 long */
   /* 0x6 */ s16 normalZ;
   /* 0x8 */ u8 shade; /* 0 when flat, from SLOPE_SHADE_OFFSET up for slopes */
@@ -3543,31 +3727,838 @@ void func_80407F08_hole_editor(u32* words, s32 byteCount, char* fileName) {
 }
 
 /*
- * Doesn't match: the original opens with an 8-byte frame and stores an unset
- * $v0 into it, and it clears the flag only after loading ob[2].
+ * The hole editor's copy of DrawGround, which DrawGround hands off to while
+ * GAME_FLAG_READ_HOST_HOLE is set. It draws into a display list of its own,
+ * which the frame's list calls. Unless GAME_FLAG_HOLE_LOADED is set, it builds
+ * fine tiles from their grid vertices and midpoints itself, and when
+ * g_ShowsGroundWaves is set it blends in a scrolling wave texture.
+ *
+ * GetMidpointVertex and SetEditorCombineMode are nested functions, a GNU C
+ * extension.
  */
 #ifdef NON_MATCHING
-void GetMidpointVertex(Vtx_t* first, Vtx_t* second, Vtx_t* midpoint) {
-  s32 unused;
+void DrawHoleEditorGround(CameraMatrices* matrices, s32 terrainStyle) {
+  u8 snapsEdge[2][TILE_VERTEX_SEGMENT_COUNT]; /* For the current and the last
+                                                 fine tile */
+  s32 keepsCombineMode;
+  s32 combineMode; /* An EDITOR_COMBINE_* */
+  Gfx* gfx;
+  u8 current;
+  Vtx* vertices;
+  u32 start;
+  s32 visibility;
+  s32 detail;
+  s32 groupDetail;
+  s32 previousDetail;
+  s32 slopeIndex;
+  s32 half;
+  s32 row;
+  s32 k;
+  s32 i;
+  s32 j;
+  s32 pass;
+  s32 tileIndex;
+  s32 tileColumn;
+  s32 column;
+  s32 topSlot;
+  s32 middleSlot;
+  s32 bottomSlot;
+  s32 spareSlot;
+  s32 blockColumn;
+  s32 blockRow;
+  s32 cellColumn;
+  s32 cellRow;
+  s32 vertexColumn;
+  s32 pointColumn;
+  s32 pointRow;
+  s32 isMirrored;
+  s32 mirroredS;
+  s32 st;
+  s32* offsets;
+  Vtx* midpoints;
+  Vtx* point;
+  GroundTile* tile;
 
-  midpoint->ob[0] = (first->ob[0] + second->ob[0]) / 2;
-  midpoint->ob[1] = (first->ob[1] + second->ob[1]) / 2;
-  midpoint->flag = 0;
-  midpoint->ob[2] = (first->ob[2] + second->ob[2]) / 2;
-  midpoint->tc[0] = (first->tc[0] + second->tc[0]) / 2;
-  midpoint->tc[1] = (first->tc[1] + second->tc[1]) / 2;
-  midpoint->cn[0] = (first->cn[0] + second->cn[0]) / 2;
-  midpoint->cn[1] = (first->cn[1] + second->cn[1]) / 2;
-  midpoint->cn[2] = (first->cn[2] + second->cn[2]) / 2;
-  midpoint->cn[3] = (first->cn[3] + second->cn[3]) / 2;
+  /* Sets a vertex halfway between two others */
+  void GetMidpointVertex(Vtx_t * first, Vtx_t * second, Vtx_t * midpoint) {
+    midpoint->ob[0] = (first->ob[0] + second->ob[0]) / 2;
+    midpoint->ob[1] = (first->ob[1] + second->ob[1]) / 2;
+    midpoint->ob[2] = (first->ob[2] + second->ob[2]) / 2;
+    midpoint->flag = 0;
+    midpoint->tc[0] = (first->tc[0] + second->tc[0]) / 2;
+    midpoint->tc[1] = (first->tc[1] + second->tc[1]) / 2;
+    midpoint->cn[0] = (first->cn[0] + second->cn[0]) / 2;
+    midpoint->cn[1] = (first->cn[1] + second->cn[1]) / 2;
+    midpoint->cn[2] = (first->cn[2] + second->cn[2]) / 2;
+    midpoint->cn[3] = (first->cn[3] + second->cn[3]) / 2;
+  }
+
+  /*
+   * Picks how a tile's texture and the overlay in TMEM combine, for a pass
+   * of a tile drawn once or twice. It writes nothing when the mode is
+   * already set, or when the map's white overlay keeps its own mode.
+   */
+  void SetEditorCombineMode(s32 tilePass, s32 overlay) {
+    if (!keepsCombineMode) {
+      switch (tilePass) {
+        case TILE_PASS_ONLY:
+          if (overlay == GROUND_OVERLAY_NONE) {
+            if (combineMode != EDITOR_COMBINE_TILE_ONLY) {
+              combineMode = EDITOR_COMBINE_TILE_ONLY;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, 0, 0, 0, TEXEL1, 0, 0,
+                  0, COMBINED, 0, 0, 0, 1);
+            }
+          } else if (overlay == GROUND_OVERLAY_WAVES) {
+            if (combineMode != EDITOR_COMBINE_WAVES_ONLY) {
+              combineMode = EDITOR_COMBINE_WAVES_ONLY;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
+                  PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0, 1);
+            }
+          } else if (combineMode != EDITOR_COMBINE_NOISE_ONLY) {
+            combineMode = EDITOR_COMBINE_NOISE_ONLY;
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, ENVIRONMENT, SHADE,
+                TEXEL1, ENVIRONMENT, COMBINED, TEXEL0, COMBINED_ALPHA, TEXEL0,
+                0, 0, 0, 1);
+          }
+          break;
+
+        case TILE_PASS_FIRST:
+          if (overlay == GROUND_OVERLAY_NONE) {
+            if (combineMode != EDITOR_COMBINE_TILE_TWICE) {
+              combineMode = EDITOR_COMBINE_TILE_TWICE;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, 0, 0, 0, TEXEL1, 0, 0,
+                  0, COMBINED, 0, 0, 0, COMBINED);
+            }
+          } else if (overlay == GROUND_OVERLAY_WAVES) {
+            if (combineMode != EDITOR_COMBINE_WAVES_FIRST) {
+              combineMode = EDITOR_COMBINE_WAVES_FIRST;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
+                  PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0,
+                  TEXEL0);
+            }
+          } else if (combineMode != EDITOR_COMBINE_NOISE_FIRST) {
+            combineMode = EDITOR_COMBINE_NOISE_FIRST;
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, 1, SHADE,
+                ENVIRONMENT, ENVIRONMENT, COMBINED, TEXEL0, COMBINED_ALPHA,
+                TEXEL0, 0, 0, 0, TEXEL0);
+          }
+          break;
+
+        case TILE_PASS_SECOND:
+        default:
+          if (overlay == GROUND_OVERLAY_NONE) {
+            if (combineMode != EDITOR_COMBINE_TILE_TWICE) {
+              combineMode = EDITOR_COMBINE_TILE_TWICE;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, 0, 0, 0, TEXEL1, 0, 0,
+                  0, COMBINED, 0, 0, 0, COMBINED);
+            }
+          } else if (overlay == GROUND_OVERLAY_WAVES) {
+            if (combineMode != EDITOR_COMBINE_WAVES_SECOND) {
+              combineMode = EDITOR_COMBINE_WAVES_SECOND;
+              gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
+                  PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0,
+                  TEXEL0);
+            }
+          } else if (combineMode != EDITOR_COMBINE_NOISE_SECOND) {
+            combineMode = EDITOR_COMBINE_NOISE_SECOND;
+            gDPPipeSync(gfx++);
+            gDPSetAlphaCompare(gfx++, G_AC_NONE);
+            gDPSetCombineLERP(gfx++, TEXEL0, 0, TEXEL1, 0, 0, 0, 0, ENVIRONMENT,
+                COMBINED, TEXEL0, COMBINED_ALPHA, TEXEL0, 0, 0, 0, TEXEL0);
+            gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, SECOND_PASS_BLEND_ALPHA);
+          }
+          break;
+      }
+    }
+  }
+
+  current = 0;
+  vertices = g_VertexListHead;
+  gfx = f_EditorGroundDisplayLists[g_DrawBufferIndex];
+  start = osGetCount();
+  combineMode = EDITOR_COMBINE_NONE;
+  keepsCombineMode = FALSE;
+  if (!g_HasLoaderFinished) {
+    return;
+  }
+
+  memset(f_WhiteNoiseTexels, WHITE_TEXEL, sizeof(f_WhiteNoiseTexels));
+  if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+    func_800628C4();
+  }
+
+  if (IsGameFlagSet(GAME_FLAG_CYCLE_CLIP_RATIO)) {
+    char text[CLIP_RATIO_TEXT_SIZE];
+
+    sprintf(text, "CLIPRATIO=%d", f_EditorClipRatio);
+    PrintDebugText(text, CLIP_RATIO_TEXT_COLUMN, CLIP_RATIO_TEXT_ROW);
+    switch (f_EditorClipRatio) {
+      case 1:
+        gSPClipRatio(gfx++, FRUSTRATIO_1);
+        break;
+      case 2:
+        gSPClipRatio(gfx++, FRUSTRATIO_2);
+        break;
+      case 3:
+        gSPClipRatio(gfx++, FRUSTRATIO_3);
+        break;
+      case 4:
+        gSPClipRatio(gfx++, FRUSTRATIO_4);
+        break;
+      case 5:
+        gSPClipRatio(gfx++, FRUSTRATIO_5);
+        break;
+      case 6:
+        gSPClipRatio(gfx++, FRUSTRATIO_6);
+        break;
+    }
+
+    if (g_ControllerData[1].trigger & A_BUTTON) {
+      f_EditorClipRatio = (f_EditorClipRatio % CLIP_RATIO_COUNT) + 1;
+    }
+  } else {
+    gSPClipRatio(gfx++, FRUSTRATIO_1);
+  }
+
+  if (IsGameFlagSet(GAME_FLAG_EDITOR_GROUND_NPRIMITIVE)) {
+    gDPPipeSync(gfx++);
+    gDPPipelineMode(gfx++, G_PM_NPRIMITIVE);
+  } else {
+    gDPPipeSync(gfx++);
+    gDPPipelineMode(gfx++, G_PM_1PRIMITIVE);
+  }
+
+  if (IsGameFlagSet(GAME_FLAG_HIDE_GROUND)) {
+    return;
+  }
+
+  gDPPipeSync(gfx++);
+  gSPLoadGeometryMode(gfx++, 0);
+  gDPPipeSync(gfx++);
+  gDPSetTextureFilter(gfx++, G_TF_BILERP);
+  gDPPipeSync(gfx++);
+  gDPSetTexturePersp(gfx++, G_TP_PERSP);
+  gDPPipeSync(gfx++);
+  gDPSetTextureLOD(gfx++, G_TL_TILE);
+  gDPPipeSync(gfx++);
+  gDPSetTextureDetail(gfx++, G_TD_CLAMP);
+  gDPPipeSync(gfx++);
+  gDPSetColorDither(gfx++, G_CD_MAGICSQ);
+  if (terrainStyle == TERRAIN_STYLE_MAP ||
+      terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(
+        gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gDPSetBlendColor(gfx++, 0xFF, 0xFF, 0xFF, MAP_BLEND_ALPHA);
+    if (g_ShowsGroundWaves) {
+      LOAD_WAVE_TEXTURE();
+      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
+          PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0, 1);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+    } else {
+      gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(f_WhiteNoiseTexels), NOISE_TMEM,
+          G_TX_RENDERTILE, G_IM_FMT_I, G_IM_SIZ_8b, WHITE_TEXTURE_SIZE,
+          WHITE_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+          G_TX_NOMIRROR | G_TX_WRAP, 5, 5, 12, 12);
+      gDPSetCombineLERP(gfx++, TEXEL1, ENVIRONMENT, PRIMITIVE, ENVIRONMENT, 0,
+          0, 0, TEXEL1, 0, 0, 0, COMBINED, 0, 0, 0, COMBINED);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      keepsCombineMode = TRUE;
+    }
+  }
+
+  if (terrainStyle == TERRAIN_STYLE_NORMAL) {
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_2CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_AA_ZB_TEX_EDGE2);
+    gSPSetGeometryMode(
+        gfx++, G_ZBUFFER | G_SHADE | G_CULL_BACK | G_FOG | G_SHADING_SMOOTH);
+    SetSceneFog(&gfx);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
+    gDPPipeSync(gfx++);
+    gDPSetAlphaDither(gfx++, G_AD_PATTERN);
+    if (g_ShowsGroundWaves) {
+      LOAD_WAVE_TEXTURE();
+      gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL1, PRIMITIVE, 0, TEXEL0, 0,
+          PRIMITIVE, COMBINED, COMBINED_ALPHA, COMBINED, 0, 0, 0, COMBINED);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      SetEditorCombineMode(TILE_PASS_ONLY, GROUND_OVERLAY_WAVES);
+    } else {
+      if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+        LOAD_WHITE_NOISE_TEXTURE(13, 13);
+      } else {
+        LOAD_WHITE_NOISE_TEXTURE(13, 15);
+      }
+
+      SetEditorCombineMode(TILE_PASS_ONLY, GROUND_OVERLAY_NOISE);
+      gDPSetEnvColor(gfx++, 0, 0, 0, NOISE_BLEND_ALPHA);
+    }
+
+    gDPPipeSync(gfx++);
+  }
+
+  gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+  g_GroundFarthestDepth = 0.0f;
+  g_GroundNearDepthEighth = NO_NEAR_DEPTH;
+  for (i = 0; i < GROUND_TILE_COUNT; i++) {
+    tile = &g_WorkArea.hole.tiles[i];
+    visibility = GetSphereVisibility(tile->center[0], tile->center[1],
+        tile->center[2], MIN_GROUND_TILE_RADIUS);
+    detail = GROUND_DETAIL_HIDDEN;
+    if (visibility < 0) {
+      if (tile->midpointBlockIndex >= 0 &&
+          visibility * FINE_DEPTH_SCALE < g_GroundTileHeightRanges[i]) {
+        detail = GROUND_DETAIL_FINE;
+      } else if (visibility * MEDIUM_DEPTH_SCALE <
+          g_GroundTileHeightRanges[i]) {
+        detail = GROUND_DETAIL_MEDIUM;
+      } else {
+        detail = GROUND_DETAIL_COARSE;
+      }
+    }
+
+    /* The map scenes draw every visible tile finely */
+    if ((g_Scene == SCENE_UNK9 || g_Scene == SCENE_UNK10) &&
+        (terrainStyle == TERRAIN_STYLE_MAP ||
+            terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) &&
+        detail != GROUND_DETAIL_HIDDEN) {
+      detail = GROUND_DETAIL_FINE;
+    }
+
+    tile->detail = detail;
+    if (detail >= 0) {
+      if (visibility < g_GroundFarthestDepth) {
+        g_GroundFarthestDepth = visibility;
+      }
+
+      if (g_GroundNearDepthEighth < visibility / NEAR_DEPTH_DIVISOR) {
+        g_GroundNearDepthEighth = visibility / NEAR_DEPTH_DIVISOR;
+      }
+    }
+  }
+
+  if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+    osSyncPrintf("%f\n", g_GroundFarthestDepth);
+  }
+
+  /* The waves move down each triangle's slope */
+  if (g_ShowsGroundWaves) {
+    for (i = 0; i < ARRAY_COUNT(f_TriangleSlopes); i++) {
+      f_TriangleSlopes[i].waveS -= f_TriangleSlopes[i].normalX;
+      f_TriangleSlopes[i].waveT -= f_TriangleSlopes[i].normalZ;
+    }
+  }
+
+  slopeIndex = 0;
+  for (i = 0; i < ARRAY_COUNT(snapsEdge); i++) {
+    for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+      snapsEdge[i][j] = FALSE;
+    }
+  }
+
+  gSPSegment(gfx++, 1, 0);
+  gSPSegment(gfx++, 2, 0);
+  gSPSegment(gfx++, 3, 0);
+  gSPSegment(gfx++, 4, 0);
+  gSPSegment(gfx++, 5, 0);
+  gSPSegment(gfx++, 6, 0);
+  gSPSegment(gfx++, 7, 0);
+  gSPSegment(gfx++, 8, 0);
+  for (half = 0; half < GROUND_HALF_COUNT; half++) {
+    previousDetail = GROUND_DETAIL_HIDDEN;
+    topSlot = FIRST_TOP_SLOT;
+    middleSlot = FIRST_MIDDLE_SLOT;
+    bottomSlot = FIRST_BOTTOM_SLOT;
+    tileIndex = half * GROUND_TILE_GROUP_SIZE;
+    gDPSetPrimColor(
+        gfx++, 0, 0, 0xFF, 0xFF, 0, f_TriangleSlopes[slopeIndex].shade);
+    gDPSetTileSize(gfx++, G_TX_RENDERTILE,
+        f_TriangleSlopes[slopeIndex].waveS / WAVE_SCROLL_DIVISOR,
+        f_TriangleSlopes[slopeIndex].waveT / WAVE_SCROLL_DIVISOR,
+        (f_TriangleSlopes[slopeIndex].waveS / WAVE_SCROLL_DIVISOR) +
+            WAVE_TILE_SPAN,
+        (f_TriangleSlopes[slopeIndex].waveT / WAVE_SCROLL_DIVISOR) +
+            WAVE_TILE_SPAN);
+    gDPPipeSync(gfx++);
+    column = half * GROUND_HALF_VERTEX_COLUMNS;
+    for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+      groupDetail = GROUND_DETAIL_COARSE;
+      for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+        if (groupDetail < g_WorkArea.hole.tiles[tileIndex + k].detail) {
+          groupDetail = g_WorkArea.hole.tiles[tileIndex + k].detail;
+        }
+      }
+
+      if (groupDetail >= GROUND_DETAIL_FINE) {
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          tileColumn = (half * GROUND_TILE_GROUP_SIZE) + k;
+          midpoints = g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex]
+                  .midpointBlockIndex];
+          mirroredS = ((tileColumn * TILE_COORDINATE_SPAN) + MIRROR_S_OFFSET) *
+              MIRROR_S_SCALE;
+
+          /* The maps tell each tile from its neighbors by color */
+          if (terrainStyle == TERRAIN_STYLE_MAP ||
+              terrainStyle == TERRAIN_STYLE_TOP_DOWN_MAP) {
+            s32 isOdd = (row + k) & 1;
+
+            gDPSetEnvColor(gfx++, isOdd * 0xFF, 0, 0xFF - (isOdd * 0xFF), 0xFF);
+          }
+
+          if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
+              g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
+            if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {
+              if (tileColumn != 0) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] =
+                    IS_COARSE(tileIndex - 1);
+                snapsEdge[current][TILE_EDGE_LEFT] = IS_NOT_FINE(tileIndex - 1);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_LEFT] = FALSE;
+                snapsEdge[current][TILE_EDGE_LEFT] = FALSE;
+              }
+
+              if (row != 0) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] =
+                    IS_COARSE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+                snapsEdge[current][TILE_EDGE_TOP] =
+                    IS_NOT_FINE(tileIndex - GROUND_TILE_COLUMN_COUNT);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_TOP] = FALSE;
+                snapsEdge[current][TILE_EDGE_TOP] = FALSE;
+              }
+
+              if (row != GROUND_TILE_ROW_COUNT - 1) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] =
+                    IS_COARSE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+                snapsEdge[current][TILE_EDGE_BOTTOM] =
+                    IS_NOT_FINE(tileIndex + GROUND_TILE_COLUMN_COUNT);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_BOTTOM] = FALSE;
+                snapsEdge[current][TILE_EDGE_BOTTOM] = FALSE;
+              }
+
+              if (tileColumn != GROUND_TILE_COLUMN_COUNT - 1) {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] =
+                    IS_COARSE(tileIndex + 1);
+                snapsEdge[current][TILE_EDGE_RIGHT] =
+                    IS_NOT_FINE(tileIndex + 1);
+              } else {
+                snapsEdge[current][TILE_EDGE_COUNT + TILE_EDGE_RIGHT] = FALSE;
+                snapsEdge[current][TILE_EDGE_RIGHT] = FALSE;
+              }
+
+              offsets = g_CoarseVertexOffsets[tileIndex];
+              for (j = 0; j < TILE_VERTEX_SEGMENT_COUNT; j++) {
+                /* Moves a snapped edge's vertices, or moves back those snapped
+                 * for the last tile */
+                if (snapsEdge[current][j] || snapsEdge[current ^ 1][j]) {
+                  gSPSegment(
+                      gfx++, j + 1, snapsEdge[current][j] ? offsets[j] : 0);
+                }
+              }
+
+              current ^= 1;
+              gSPDisplayList(gfx++, g_GroundTileDisplayLists[tileIndex]);
+            } else {
+              /* Builds the tile's 5 by 5 points: its grid vertices, then the
+               * edge midpoints, which line up with a medium neighbor */
+              vertexColumn = column + (k * 2);
+              CopyDoublePair(
+                  (f64*)GRID_VERTEX(vertexColumn, row * 2), (f64*)&vertices[0]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn, (row * 2) + 1),
+                  (f64*)&vertices[2]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn, (row * 2) + 2),
+                  (f64*)&vertices[4]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, row * 2),
+                  (f64*)&vertices[7]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, (row * 2) + 1),
+                  (f64*)&vertices[8]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 1, (row * 2) + 2),
+                  (f64*)&vertices[9]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, row * 2),
+                  (f64*)&vertices[12]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, (row * 2) + 1),
+                  (f64*)&vertices[14]);
+              CopyDoublePair((f64*)GRID_VERTEX(vertexColumn + 2, (row * 2) + 2),
+                  (f64*)&vertices[16]);
+              if (tileColumn == 0 ||
+                  g_WorkArea.hole.tiles[tileIndex - 1].detail !=
+                      GROUND_DETAIL_MEDIUM) {
+                CopyDoublePair((f64*)&midpoints[2], (f64*)&vertices[1]);
+                CopyDoublePair((f64*)&midpoints[4], (f64*)&vertices[3]);
+              } else {
+                GetMidpointVertex(
+                    &vertices[0].v, &vertices[2].v, &vertices[1].v);
+                GetMidpointVertex(
+                    &vertices[2].v, &vertices[4].v, &vertices[3].v);
+              }
+
+              if (row == 0 ||
+                  g_WorkArea.hole.tiles[tileIndex - GROUND_TILE_COLUMN_COUNT]
+                          .detail != GROUND_DETAIL_MEDIUM) {
+                CopyDoublePair((f64*)&midpoints[0], (f64*)&vertices[5]);
+                CopyDoublePair((f64*)&midpoints[1], (f64*)&vertices[10]);
+              } else {
+                GetMidpointVertex(
+                    &vertices[0].v, &vertices[7].v, &vertices[5].v);
+                GetMidpointVertex(
+                    &vertices[7].v, &vertices[12].v, &vertices[10].v);
+              }
+
+              if (row == GROUND_TILE_ROW_COUNT - 1 ||
+                  g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
+                          .detail != GROUND_DETAIL_MEDIUM) {
+                CopyDoublePair((f64*)&midpoints[6], (f64*)&vertices[6]);
+                CopyDoublePair((f64*)&midpoints[7], (f64*)&vertices[11]);
+              } else {
+                GetMidpointVertex(
+                    &vertices[4].v, &vertices[9].v, &vertices[6].v);
+                GetMidpointVertex(
+                    &vertices[9].v, &vertices[16].v, &vertices[11].v);
+              }
+
+              if (tileColumn == GROUND_TILE_COLUMN_COUNT - 1 ||
+                  g_WorkArea.hole.tiles[tileIndex + 1].detail !=
+                      GROUND_DETAIL_MEDIUM) {
+                CopyDoublePair((f64*)&midpoints[3], (f64*)&vertices[13]);
+                CopyDoublePair((f64*)&midpoints[5], (f64*)&vertices[15]);
+              } else {
+                GetMidpointVertex(
+                    &vertices[12].v, &vertices[14].v, &vertices[13].v);
+                GetMidpointVertex(
+                    &vertices[14].v, &vertices[16].v, &vertices[15].v);
+              }
+
+              gSPVertex(gfx++, &vertices[0], 5, 0);
+              gSPVertex(gfx++, &vertices[5], 7, 5);
+              gSPVertex(gfx++, &midpoints[8], 8, 12);
+              gSPVertex(gfx++, &vertices[12], 5, 20);
+              vertices += FINE_TILE_BUILT_VERTEX_COUNT;
+              for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+                LOAD_EDITOR_TILE_TEXTURE(
+                    tileIndex, tileColumn, row, pass, g_ShowsGroundWaves);
+
+                /* Goes over the 4 by 4 cells in blocks of 2 by 2 */
+                for (blockColumn = 0; blockColumn < FINE_TILE_CELL_SPAN;
+                    blockColumn += FINE_TILE_BLOCK_SPAN) {
+                  for (blockRow = 0; blockRow < FINE_TILE_CELL_SPAN;
+                      blockRow += FINE_TILE_BLOCK_SPAN) {
+                    for (cellRow = blockRow;
+                        cellRow < blockRow + FINE_TILE_BLOCK_SPAN; cellRow++) {
+                      for (cellColumn = blockColumn;
+                          cellColumn < blockColumn + FINE_TILE_BLOCK_SPAN;
+                          cellColumn++) {
+                        if (IsGameFlagSet(GAME_FLAG_TEST_GROUND_TEXTURE)) {
+                          isMirrored = g_WorkArea.hole.tiles[tileIndex].unk992;
+                        } else {
+                          isMirrored = g_WorkArea.hole.tiles[tileIndex].unk992;
+                        }
+
+                        isMirrored &= 1
+                            << (cellColumn + (cellRow * FINE_TILE_CELL_SPAN));
+                        if (isMirrored) {
+                          for (pointRow = 0; pointRow < FINE_TILE_BLOCK_SPAN;
+                              pointRow++) {
+                            for (pointColumn = 0;
+                                pointColumn < FINE_TILE_BLOCK_SPAN;
+                                pointColumn++) {
+                              point = GetGroundPoint(
+                                  (tileColumn * FINE_TILE_CELL_SPAN) +
+                                      cellColumn + pointColumn,
+                                  (row * FINE_TILE_CELL_SPAN) + cellRow +
+                                      pointRow);
+                              if (IsGameFlagSet(
+                                      GAME_FLAG_TEST_GROUND_TEXTURE)) {
+                                gDPSetTileSize(gfx++, 1, MIRRORED_TEST_FIRST_S,
+                                    0, MIRRORED_TEST_LAST_S, TEST_TILE_SIZE);
+                                st = ((MIRRORED_TEST_S - (point->v.tc[0] / 2))
+                                         << 16) |
+                                    ((point->v.tc[1] / 2) & 0xFFFF);
+                              } else {
+                                st =
+                                    ((mirroredS - (point->v.tc[0] / 2)) << 16) |
+                                    (point->v.tc[1] / 2);
+                              }
+
+                              gSPModifyVertex(gfx++,
+                                  f_FineTilePointSlots[cellRow +
+                                      pointRow][cellColumn + pointColumn],
+                                  G_MWO_POINT_ST, st);
+                            }
+                          }
+                        }
+
+                        if ((terrainStyle != TERRAIN_STYLE_TOP_DOWN_MAP &&
+                                terrainStyle == TERRAIN_STYLE_MAP) ||
+                            g_ShowsGroundWaves) {
+                          /* Each cell's two triangles are lit differently */
+                          if (!g_ShowsGroundWaves) {
+                            if (terrainStyle != TERRAIN_STYLE_NORMAL) {
+                              gDPSetPrimColor(
+                                  gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                            }
+                          }
+
+                          gSP1Triangle(gfx++,
+                              f_FineTilePointSlots[cellRow][cellColumn],
+                              f_FineTilePointSlots[cellRow][cellColumn + 1],
+                              f_FineTilePointSlots[cellRow + 1][cellColumn], 0);
+                          slopeIndex++;
+                          if (!g_ShowsGroundWaves) {
+                            if (terrainStyle != TERRAIN_STYLE_NORMAL) {
+                              gDPSetPrimColor(gfx++, 0, 0,
+                                  SHADED_TRIANGLE_LEVEL, SHADED_TRIANGLE_LEVEL,
+                                  SHADED_TRIANGLE_LEVEL, 0xFF);
+                            }
+                          }
+
+                          gSP1Triangle(gfx++,
+                              f_FineTilePointSlots[cellRow + 1][cellColumn + 1],
+                              f_FineTilePointSlots[cellRow + 1][cellColumn],
+                              f_FineTilePointSlots[cellRow][cellColumn + 1], 0);
+                          slopeIndex++;
+                        } else {
+                          /* The other maps show the cells in a checkerboard,
+                           * the mirrored ones darker */
+                          if (terrainStyle != TERRAIN_STYLE_NORMAL) {
+                            if ((cellColumn ^ cellRow) & 1) {
+                              gDPSetEnvColor(gfx++, 0xFF, 0, 0, 0xFF);
+                            } else {
+                              gDPSetEnvColor(gfx++, 0, 0, 0xFF, 0xFF);
+                            }
+
+                            if (isMirrored) {
+                              gDPSetPrimColor(gfx++, 0, 0, MIRRORED_CELL_LEVEL,
+                                  MIRRORED_CELL_LEVEL, MIRRORED_CELL_LEVEL,
+                                  0xFF);
+                            } else {
+                              gDPSetPrimColor(gfx++, 0, 0, CELL_LEVEL,
+                                  CELL_LEVEL, CELL_LEVEL, 0xFF);
+                            }
+                          }
+
+                          gSP2Triangles(gfx++,
+                              f_FineTilePointSlots[cellRow][cellColumn],
+                              f_FineTilePointSlots[cellRow][cellColumn + 1],
+                              f_FineTilePointSlots[cellRow + 1][cellColumn], 0,
+                              f_FineTilePointSlots[cellRow][cellColumn + 1],
+                              f_FineTilePointSlots[cellRow + 1][cellColumn + 1],
+                              f_FineTilePointSlots[cellRow + 1][cellColumn], 0);
+                          slopeIndex += 2;
+                        }
+
+                        /* Puts back the texture coordinates */
+                        if (isMirrored) {
+                          for (pointRow = 0; pointRow < FINE_TILE_BLOCK_SPAN;
+                              pointRow++) {
+                            for (pointColumn = 0;
+                                pointColumn < FINE_TILE_BLOCK_SPAN;
+                                pointColumn++) {
+                              point = GetGroundPoint(
+                                  (tileColumn * FINE_TILE_CELL_SPAN) +
+                                      cellColumn + pointColumn,
+                                  (row * FINE_TILE_CELL_SPAN) + cellRow +
+                                      pointRow);
+                              st = ((point->v.tc[0] / 2) << 16) |
+                                  (point->v.tc[1] / 2);
+                              if (IsGameFlagSet(
+                                      GAME_FLAG_TEST_GROUND_TEXTURE)) {
+                                gDPSetTileSize(gfx++, 1, 0, 0, TEST_TILE_SIZE,
+                                    TEST_TILE_SIZE);
+                              }
+
+                              gSPModifyVertex(gfx++,
+                                  f_FineTilePointSlots[cellRow +
+                                      pointRow][cellColumn + pointColumn],
+                                  G_MWO_POINT_ST, st);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                  break;
+                }
+
+                slopeIndex -= TILE_TRIANGLE_COUNT;
+              }
+            }
+          } else if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            /* A medium tile among fine ones loads only its own vertices */
+            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2), row * 2), 2, 0);
+            gSPVertex(gfx++, GRID_VERTEX(column + (k * 2) + 1, row * 2), 1, 2);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 1), 2, 3);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 1), 1, 5);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2), (row * 2) + 2), 2, 6);
+            gSPVertex(
+                gfx++, GRID_VERTEX(column + (k * 2) + 1, (row * 2) + 2), 1, 8);
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_EDITOR_TILE_TEXTURE(
+                  tileIndex, tileColumn, row, pass, GROUND_OVERLAY_NOISE);
+              gSP2Triangles(gfx++, 0, 2, 3, 0, 2, 5, 3, 0);
+              gSP2Triangles(gfx++, 2, 1, 5, 0, 1, 4, 5, 0);
+              gSP2Triangles(gfx++, 3, 5, 6, 0, 5, 8, 6, 0);
+              gSP2Triangles(gfx++, 5, 4, 8, 0, 4, 7, 8, 0);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                break;
+              }
+            }
+
+            slopeIndex += TILE_TRIANGLE_COUNT;
+          } else {
+            slopeIndex += TILE_TRIANGLE_COUNT;
+          }
+
+          tileIndex++;
+        }
+      } else if (groupDetail > GROUND_DETAIL_COARSE) {
+        spareSlot = middleSlot;
+        middleSlot = topSlot;
+        topSlot = bottomSlot;
+        bottomSlot = spareSlot;
+        gDPPipeSync(gfx++);
+
+        /* The last row's bottom vertices are still in the cache, unless it was
+         * fine or skipped */
+        if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+              GROUND_TILE_GROUP_SIZE + 1, topSlot);
+          gSPVertex(gfx++, GRID_VERTEX(column + 1, row * 2),
+              GROUND_TILE_GROUP_SIZE, topSlot + ODD_SLOT);
+        } else if (previousDetail == GROUND_DETAIL_COARSE) {
+          LOAD_EDITOR_AVERAGED_ROW(
+              GRID_VERTEX(column, row * 2), topSlot + ODD_SLOT);
+        }
+
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 1),
+            GROUND_TILE_GROUP_SIZE + 1, middleSlot);
+        gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 1),
+            GROUND_TILE_GROUP_SIZE, middleSlot + ODD_SLOT);
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+            GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+        if (row != GROUND_TILE_ROW_COUNT - 1 &&
+            g_WorkArea.hole.tiles[tileIndex + GROUND_TILE_COLUMN_COUNT]
+                    .detail == GROUND_DETAIL_COARSE) {
+          LOAD_EDITOR_AVERAGED_ROW(
+              GRID_VERTEX(column, (row * 2) + 2), bottomSlot + ODD_SLOT);
+        } else {
+          gSPVertex(gfx++, GRID_VERTEX(column + 1, (row * 2) + 2),
+              GROUND_TILE_GROUP_SIZE, bottomSlot + ODD_SLOT);
+        }
+
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_EDITOR_TILE_TEXTURE(tileIndex,
+                  (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
+                  GROUND_OVERLAY_NOISE);
+              DRAW_TILE_QUADS(topSlot, topSlot + ODD_SLOT, topSlot + 1,
+                  middleSlot, middleSlot + ODD_SLOT, middleSlot + 1, bottomSlot,
+                  bottomSlot + ODD_SLOT, bottomSlot + 1);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                break;
+              }
+            }
+          }
+
+          topSlot++;
+          bottomSlot++;
+          middleSlot++;
+          tileIndex++;
+          slopeIndex += TILE_TRIANGLE_COUNT;
+        }
+
+        topSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
+        middleSlot -= GROUND_TILE_GROUP_SIZE;
+      } else if (groupDetail < GROUND_DETAIL_COARSE) {
+        slopeIndex += GROUND_TILE_GROUP_SIZE * TILE_TRIANGLE_COUNT;
+        tileIndex += GROUND_TILE_GROUP_SIZE;
+      } else {
+        spareSlot = middleSlot;
+        middleSlot = topSlot;
+        topSlot = bottomSlot;
+        bottomSlot = spareSlot;
+        if (previousDetail < 0 || previousDetail == GROUND_DETAIL_FINE) {
+          gSPVertex(gfx++, GRID_VERTEX(column, row * 2),
+              GROUND_TILE_GROUP_SIZE + 1, topSlot);
+        }
+
+        gSPVertex(gfx++, GRID_VERTEX(column, (row * 2) + 2),
+            GROUND_TILE_GROUP_SIZE + 1, bottomSlot);
+        for (k = 0; k < GROUND_TILE_GROUP_SIZE; k++) {
+          if (g_WorkArea.hole.tiles[tileIndex].detail >= 0) {
+            for (pass = 0; pass < GROUND_TILE_MAX_PASSES; pass++) {
+              LOAD_EDITOR_TILE_TEXTURE(tileIndex,
+                  (half * GROUND_TILE_GROUP_SIZE) + k, row, pass,
+                  GROUND_OVERLAY_NOISE);
+              gSP2Triangles(gfx++, topSlot, topSlot + 1, bottomSlot, 0,
+                  topSlot + 1, bottomSlot + 1, bottomSlot, 0);
+              if (g_WorkArea.hole.tiles[tileIndex].unk990 <= 0) {
+                break;
+              }
+            }
+          }
+
+          topSlot++;
+          bottomSlot++;
+          tileIndex++;
+          slopeIndex += TILE_TRIANGLE_COUNT;
+        }
+
+        topSlot -= GROUND_TILE_GROUP_SIZE;
+        bottomSlot -= GROUND_TILE_GROUP_SIZE;
+      }
+
+      previousDetail = groupDetail;
+
+      /* Skips the other half's group */
+      tileIndex += GROUND_TILE_GROUP_SIZE;
+    }
+  }
+
+  g_VertexListHead = vertices;
+  gDPPipeSync(gfx++);
+  gSPEndDisplayList(gfx++);
+  gSPDisplayList(
+      g_DisplayListHead++, f_EditorGroundDisplayLists[g_DrawBufferIndex]);
+  if (IsGameFlagSet(GAME_FLAG_TIME_GROUND)) {
+    start = osGetCount() - start;
+    PrintDebugPaddedHex(start / GROUND_TIMING_TICKS, GROUND_TIMING_COLUMN,
+        f_EditorGroundTimingRow + GROUND_TIMING_ROW);
+    f_EditorGroundTimingRow = 1 - f_EditorGroundTimingRow;
+  }
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", GetMidpointVertex);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", SetEditorCombineMode);
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", DrawHoleEditorGround);
+#endif
 
 /*
  * Marks the billboards on the map, then writes the whole map image to

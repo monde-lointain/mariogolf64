@@ -140,6 +140,9 @@
 /* Keeps DrawGround from drawing the ground */
 #define GAME_FLAG_HIDE_GROUND 0x0D
 
+/* Has DrawHoleEditorGround draw in G_PM_NPRIMITIVE pipeline mode */
+#define GAME_FLAG_EDITOR_GROUND_NPRIMITIVE 0x05
+
 /* Shows the ground's clip ratio, which the second controller's A button cycles
  */
 #define GAME_FLAG_CYCLE_CLIP_RATIO 0x10
