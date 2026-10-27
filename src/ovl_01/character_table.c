@@ -80,6 +80,37 @@ typedef struct TableCorner {
 /* The most bytes of each character's file that func_802177D0 keeps */
 #define MENU_SCENE_FILE_SIZE 0x200
 
+/* func_80215DC4 draws the table over a dimmed panel, with a face beside each shown row and above each column */
+#define TABLE_BOARD_KIND 11
+#define TABLE_PANEL_LEFT 24
+#define TABLE_PANEL_TOP 50
+#define TABLE_PANEL_RIGHT 302
+#define TABLE_PANEL_BOTTOM 230
+#define TABLE_CELL_WIDTH 35
+#define TABLE_CELL_HEIGHT 30
+#define TABLE_ROW_FACE_X 28
+#define TABLE_FIRST_ROW_FACE_Y 82
+#define TABLE_FIRST_COLUMN_FACE_X 62
+#define TABLE_COLUMN_FACE_Y 52
+#define TABLE_FIRST_STAR_Y 85
+#define TABLE_FIRST_SIGN_X 67
+#define TABLE_FIRST_SIGN_Y 86
+#define TABLE_FIRST_PLUS_Y 88
+#define TABLE_CURSOR_X 74
+#define TABLE_CURSOR_Y 93
+/* The arrows that show the table goes on past the screen, as func_80212FEC numbers them */
+#define TABLE_ARROW_UP 0
+#define TABLE_ARROW_DOWN 1
+#define TABLE_ARROW_RIGHT 2
+#define TABLE_ARROW_LEFT 3
+#define TABLE_ROW_ARROW_X 40
+#define TABLE_UP_ARROW_Y 88
+#define TABLE_DOWN_ARROW_Y 222
+#define TABLE_COLUMN_ARROW_Y 68
+#define TABLE_LEFT_ARROW_X 64
+#define TABLE_RIGHT_ARROW_X 296
+#define TABLE_ARROW_BLINK_FRAMES 4
+
 extern void *D_8012D430[CHARACTER_COUNT];
 extern s32 D_80230190_ovl_01;
 extern s32 D_80230194_ovl_01;
@@ -109,7 +140,14 @@ extern u8 D_80230310_ovl_01[TABLE_POPUP_CORNER_COUNT][TABLE_SHOWN_ROW_COUNT][TAB
 void func_8021F124_ovl_01(Gfx **displayListHead, void *texels, void *palette, s32 left, s32 top, s32 character,
                           u8 drawMode);
 void func_80210DF4_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
+void func_801FB54C_ovl_01(Gfx **displayListHead, s32 kind);
 void func_802123E0_ovl_01(Gfx **displayListHead, s32 x, s32 y, u8 sign);
+void func_80212FEC_ovl_01(Gfx **displayListHead, void *image, s32 blinkFrame, s32 direction, s32 centerX,
+                          s32 centerY);
+void func_8021640C_ovl_01(Gfx **displayListHead, s32 x, s32 y);
+void func_802169CC_ovl_01(Gfx **displayListHead);
+void func_80216C14_ovl_01(Gfx **displayListHead);
+void func_80217464_ovl_01(Gfx **displayListHead, s32 left, s32 top);
 
 void func_802159C0_ovl_01(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
@@ -221,7 +259,113 @@ void func_80215B84_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_80215DC4_ovl_01);
+void func_80215DC4_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s16 shownRow;
+    s16 shownColumn;
+    s16 row;
+    s16 column;
+    s16 rowCharacter;
+    s16 columnCharacter;
+    s32 columnWins;
+    s32 rowWins;
+    u8 drawMode;
+
+    func_801FB54C_ovl_01(&gfx, TABLE_BOARD_KIND);
+    gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, TABLE_PANEL_LEFT << 2, TABLE_PANEL_TOP << 2, TABLE_PANEL_RIGHT << 2,
+                        TABLE_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    func_802169CC_ovl_01(&gfx);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    shownRow = 0;
+    row = memory->tableFirstRow;
+    do {
+        rowCharacter = D_802301A8_ovl_01[row];
+        drawMode = FACE_DARKENED;
+        if (D_8023AC78_ovl_01[row] == TABLE_CHARACTER_SHOWN) {
+            drawMode = FACE_PLAIN;
+        }
+        func_8021F124_ovl_01(&gfx, D_8012D430[rowCharacter], D_8023BFF0_ovl_01[rowCharacter], TABLE_ROW_FACE_X,
+                             shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_ROW_FACE_Y, rowCharacter, drawMode);
+        shownColumn = 0;
+        column = memory->tableFirstColumn;
+        do {
+            columnCharacter = D_802301A8_ovl_01[column];
+            drawMode = FACE_DARKENED;
+            if (D_8023AC78_ovl_01[column] != TABLE_CHARACTER_HIDDEN) {
+                drawMode = FACE_PLAIN;
+            }
+            if (shownRow == 0) {
+                func_8021F124_ovl_01(&gfx, D_8012D430[columnCharacter], D_8023BFF0_ovl_01[columnCharacter],
+                                     shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_COLUMN_FACE_X, TABLE_COLUMN_FACE_Y,
+                                     columnCharacter, drawMode);
+            }
+            columnWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk0 & WIN_COUNT_MASK;
+            rowWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 & WIN_COUNT_MASK;
+            /* A pairing with the flag set shows the star, and the others show who has won more */
+            if (save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 & UNKAF0_FLAG) {
+                func_80217464_ovl_01(&gfx, shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_COLUMN_FACE_X,
+                                     shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_STAR_Y);
+            } else if (columnWins != 0) {
+                func_802123E0_ovl_01(&gfx, shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
+                                     shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_SIGN_Y, MENU_SIGN_TIMES);
+            } else if (rowWins != 0) {
+                func_802123E0_ovl_01(&gfx, shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
+                                     shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_SIGN_Y, MENU_SIGN_PLUS_MINUS);
+            } else {
+                func_802123E0_ovl_01(&gfx, shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
+                                     shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_PLUS_Y, MENU_SIGN_PLUS);
+            }
+            shownColumn++;
+            column++;
+        } while (shownColumn != TABLE_SHOWN_COLUMN_COUNT);
+        row++;
+        shownRow++;
+    } while (shownRow != TABLE_SHOWN_ROW_COUNT);
+    if (memory->tableFirstRow > 0) {
+        func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, TABLE_ARROW_UP, TABLE_ROW_ARROW_X,
+                             TABLE_UP_ARROW_Y);
+    }
+    if (memory->tableFirstRow < TABLE_ROW_COUNT - TABLE_SHOWN_ROW_COUNT) {
+        func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, TABLE_ARROW_DOWN, TABLE_ROW_ARROW_X,
+                             TABLE_DOWN_ARROW_Y);
+    }
+    if (memory->tableFirstColumn > 0) {
+        func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, TABLE_ARROW_LEFT, TABLE_LEFT_ARROW_X,
+                             TABLE_COLUMN_ARROW_Y);
+    }
+    if (memory->tableFirstColumn < TABLE_COLUMN_COUNT - TABLE_SHOWN_COLUMN_COUNT) {
+        func_80212FEC_ovl_01(&gfx, D_8023AC6C_ovl_01, D_8023019C_ovl_01, TABLE_ARROW_RIGHT, TABLE_RIGHT_ARROW_X,
+                             TABLE_COLUMN_ARROW_Y);
+    }
+    D_802301A0_ovl_01++;
+    if (D_802301A0_ovl_01 == TABLE_ARROW_BLINK_FRAMES) {
+        D_802301A0_ovl_01 = 0;
+        D_8023019C_ovl_01 = D_8023019C_ovl_01 == 0;
+    }
+    func_80216C14_ovl_01(&gfx);
+    func_8021640C_ovl_01(&gfx, memory->tableColumn * TABLE_CELL_WIDTH + TABLE_CURSOR_X,
+                         memory->tableRow * TABLE_CELL_HEIGHT + TABLE_CURSOR_Y);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 /*
  * Doesn't match: the stack slots of the pointers to the second pipe sync
