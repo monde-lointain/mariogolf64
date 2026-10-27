@@ -3213,6 +3213,7 @@ sHoleFileStep = 0x8040C680; // type:s32 size:0x4 segment:hole_editor
 sHoleFileHoleNumber = 0x8040C684; // type:s32 size:0x4 segment:hole_editor
 sHoleFileCourseNumber = 0x8040C688; // type:s32 size:0x4 segment:hole_editor
 sHoleFilePromptFrames = 0x8040C68C; // type:s32 size:0x4 segment:hole_editor
+sTriangleSlopes = 0x8040D0E0; // size:0xA000
 sMapCaptureNumber = 0x8040C6D0; // type:s32 size:0x4 segment:hole_editor
 sMapCaptureHeader = 0x8040C6D4; // type:u8 size:0x36 segment:hole_editor
 sScreenCaptureNumber = 0x8040C70C; // type:s32 size:0x4 segment:hole_editor
