@@ -43,14 +43,7 @@ extern f32 sMenuBobPhase;
 /* Players whose D_800C1FF4 holds this never clash with the others */
 #define UNSHARED_SLOT_INDEX 4
 
-/*
- * The 256 color images of D_801052BC and D_801B60D0 that func_801FD7B0 and
- * func_801FCEF8 draw, in strips that fit the texture memory
- */
-#define MENU_BANNER_WIDTH 200
-#define MENU_BANNER_STRIP_HEIGHT 10
-#define MENU_BANNER_STRIP_COUNT 3
-#define MENU_BANNER_LEFT 60
+/* Where func_801FD7B0 and func_801FCEF8 draw the banners of D_801052BC and D_801B60D0 */
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 

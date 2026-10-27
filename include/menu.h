@@ -103,6 +103,15 @@ extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT
 
 extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 
+/*
+ * The menu banners, 256 color images such as asset 0x521, drawn in strips
+ * that fit the texture memory
+ */
+#define MENU_BANNER_WIDTH 200
+#define MENU_BANNER_STRIP_HEIGHT 10
+#define MENU_BANNER_STRIP_COUNT 3
+#define MENU_BANNER_LEFT 60
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
