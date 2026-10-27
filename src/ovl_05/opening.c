@@ -3,11 +3,14 @@
 #include "asset.h"
 #include "billboard.h"
 #include "camera.h"
+#include "camera_editor.h"
 #include "character_slot.h"
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
 #include "hole_display.h"
+#include "libc.h"
+#include "math_util.h"
 #include "sound.h"
 #include "variables.h"
 
@@ -62,12 +65,14 @@ extern u8* f_OpeningCharacterBuffers[2];
 extern void* f_OpeningBillboardHeap;
 extern s32 D_8022BFA8_ovl_05;
 extern u8* g_ShadowTexture;
-extern s32 D_8020ADA0_ovl_05[2];
-extern u8 D_8021A2A0_ovl_05[];
-extern u8 D_8021A8B0_ovl_05[];
-extern Mtx D_8021B4C0_ovl_05[40];
-extern f32 D_8021BEC0_ovl_05;
-extern f32 D_8021BEC4_ovl_05;
+extern s32 f_CometScreenPoint[2];
+/* A 32x32 CI8 image with its header and palette */
+extern u8 f_CometHeadImage[];
+/* A 48x128 I4 image with its header */
+extern u8 f_CometTrailImage[];
+extern Mtx f_CometTrailMatrices[40];
+extern f32 f_CometTrailStartX;
+extern f32 f_CometTrailStartY;
 
 extern s32 f_OpeningFrameParity;
 extern s32 f_IsLookAtMarkerShown;
@@ -75,6 +80,13 @@ extern f32 g_LookAtMarkerScale;
 extern Vtx f_LookAtMarkerVertices[6][4];
 extern Mtx f_LookAtMarkerTranslation;
 extern Mtx f_LookAtMarkerScaling;
+
+extern s32 f_IsCometFlying;
+extern s32 f_CometAngle;
+extern s32 D_8020AD68_ovl_05;
+extern f32 D_8020B260_ovl_05;
+extern Vec3 D_8021706C_ovl_05;
+extern CoursePoint D_8022BF08_ovl_05;
 
 void AssignCharacterBuffers(void);
 void func_801F5454_ovl_05(CameraMatrices* matrices);
@@ -254,30 +266,43 @@ void func_801FE270_ovl_05(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE2A0_ovl_05);
 
-/* Loads two images and places 40 matrices at D_8020ADA0_ovl_05's screen point
- */
-void func_801FE7B4_ovl_05(void) {
+/* Loads the comet's images and gathers its trail at the comet */
+void LoadComet(void) {
   EncodedAsset asset;
   s32 pass;
   s32 i;
 
   OpenEncodedAsset(0x64B, &asset);
-  ReadEncodedAsset(D_8021A2A0_ovl_05, &asset);
+  ReadEncodedAsset(f_CometHeadImage, &asset);
   OpenEncodedAsset(0x6AF, &asset);
-  ReadEncodedAsset(D_8021A8B0_ovl_05, &asset);
+  ReadEncodedAsset(f_CometTrailImage, &asset);
   for (pass = 0; pass < 2; pass++) {
     for (i = 0; i < 40; i++) {
-      guTranslate(&D_8021B4C0_ovl_05[i], D_8020ADA0_ovl_05[0] - 160,
-                  120 - D_8020ADA0_ovl_05[1], -300.0f);
+      guTranslate(&f_CometTrailMatrices[i], f_CometScreenPoint[0] - 160,
+                  120 - f_CometScreenPoint[1], -300.0f);
     }
   }
-  D_8021BEC0_ovl_05 = D_8020ADA0_ovl_05[0] - 320;
-  D_8021BEC4_ovl_05 = 120 - D_8020ADA0_ovl_05[1];
+  f_CometTrailStartX = f_CometScreenPoint[0] - 320;
+  f_CometTrailStartY = 120 - f_CometScreenPoint[1];
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE8F8_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FF5E8_ovl_05);
+/* Flies the comet across the screen in loops until it has turned through 540
+ * degrees */
+void MoveComet(void) {
+  f32 angle;
+
+  if (f_IsCometFlying) {
+    angle = DEGREES_TO_RADIANS(f_CometAngle);
+    f_CometAngle += 12;
+    if (f_CometAngle >= 541) {
+      f_IsCometFlying = FALSE;
+    }
+    f_CometScreenPoint[0] += 8 + (s32)(cos(angle) * 20.0);
+    f_CometScreenPoint[1] -= 2 + (s32)(sin(angle) * 16.0);
+  }
+}
 
 void func_801FF6DC_ovl_05(void) {
   EncodedAsset asset;
