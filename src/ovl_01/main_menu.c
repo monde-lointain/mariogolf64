@@ -55,6 +55,13 @@ extern f32 sMenuBobPhase;
 #define MENU_BANNER_TOP 18
 #define UNUSED_BANNER_TOP 16
 
+/* func_801FD4F0 stretches D_801B60D0; its strips overlap, as they are taller than their spacing */
+#define LARGE_BANNER_LEFT 26
+#define LARGE_BANNER_TOP 174
+#define LARGE_BANNER_WIDTH 270
+#define LARGE_BANNER_STRIP_HEIGHT 20
+#define LARGE_BANNER_STRIP_SPACING 16
+
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801051F0;
 extern void *D_801052BC[2];
@@ -733,7 +740,33 @@ void func_801FCEF8_ovl_01(Gfx **displayListHead) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD4F0_ovl_01);
+/* Nothing in the menu calls this either */
+void func_801FD4F0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = LARGE_BANNER_TOP + stripIndex * LARGE_BANNER_STRIP_SPACING;
+        gSPScisTextureRectangle(gfx++, LARGE_BANNER_LEFT << 2, stripTop << 2,
+                                (LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH) << 2,
+                                (stripTop + LARGE_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                (MENU_BANNER_WIDTH << 10) / LARGE_BANNER_WIDTH,
+                                (MENU_BANNER_STRIP_HEIGHT << 10) / LARGE_BANNER_STRIP_HEIGHT);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 void func_801FD7B0_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
