@@ -22,6 +22,11 @@ extern void *D_80230E78_ovl_01;
 extern void *D_80230E7C_ovl_01;
 extern void *D_80230E84_ovl_01;
 extern s16 D_80230F34_ovl_01;
+extern void *D_80230F44_ovl_01;
+extern void *D_80230F48_ovl_01;
+extern void *D_80230F4C_ovl_01;
+extern void *D_80230F50_ovl_01;
+extern void *D_80230F54_ovl_01;
 extern u8 D_80230FD4_ovl_01[8];
 extern s8 D_80105DBC[5];
 
@@ -148,7 +153,37 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022747C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802287EC_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228A80_ovl_01);
+void func_80228A80_ovl_01(void *buffer, s32 bufferKind) {
+    EncodedAsset asset;
+
+    switch (bufferKind) {
+        case 1:
+            D_80230F44_ovl_01 = buffer;
+            OpenEncodedAsset(0x521, &asset);
+            ReadEncodedAsset(D_80230F44_ovl_01, &asset);
+            break;
+        case 2:
+            D_80230F48_ovl_01 = buffer;
+            OpenEncodedAsset(0x93E, &asset);
+            ReadEncodedAsset(D_80230F48_ovl_01, &asset);
+            break;
+        case 3:
+            D_80230F4C_ovl_01 = buffer;
+            OpenEncodedAsset(0x942, &asset);
+            ReadEncodedAsset(D_80230F4C_ovl_01, &asset);
+            break;
+        case 4:
+            D_80230F50_ovl_01 = buffer;
+            OpenEncodedAsset(0x70F, &asset);
+            ReadEncodedAsset(D_80230F50_ovl_01, &asset);
+            break;
+        case 5:
+            D_80230F54_ovl_01 = buffer;
+            OpenEncodedAsset(0x6EF, &asset);
+            ReadEncodedAsset(D_80230F54_ovl_01, &asset);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228B60_ovl_01);
 
