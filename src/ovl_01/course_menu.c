@@ -1,11 +1,13 @@
 #include "common.h"
 #include "asset.h"
 #include "course.h"
+#include "hole_display.h"
 #include "libc.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
 #include "screen.h"
+#include "sound.h"
 #include "text.h"
 #include "variables.h"
 
@@ -28,6 +30,10 @@
 #define COURSE_NAME_Y 116
 
 /* The course's statistics: the panel behind them, and the rows of it that show */
+/* How far func_8020E390 turns the course wheel for each move, and how fast */
+#define STATS_TURN 90
+#define STATS_SPIN_SPEED 18
+
 #define STATS_COUNT 10
 #define STATS_SHOWN_ROW_COUNT 4
 #define STATS_PANEL_LEFT 24
@@ -103,6 +109,9 @@ extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
 extern void *D_800FBE38[COURSE_FILE_COUNT];
 extern s16 D_802300A0_ovl_01;
+extern s16 D_802300A2_ovl_01;
+extern s16 D_802300A4_ovl_01; /* Which of D_8023A814's buffers holds the course image shown */
+extern s16 D_802300A6_ovl_01;
 extern s32 D_802300A8_ovl_01;
 extern s32 D_802300AC_ovl_01;
 extern const char *D_802300B4_ovl_01[STATS_COUNT];
@@ -217,7 +226,97 @@ void func_8020E26C_ovl_01(void *buffer, s16 bufferKind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E390_ovl_01);
+void func_8020E390_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    MenuMemory *memory = func_8005AF74();
+    s32 courseCount = GetOpenCourseCount();
+    s32 isDone;
+    s32 index;
+    s32 direction;
+    s32 step;
+
+    if (courseCount < 1) {
+        courseCount = 1;
+    }
+    if (courseCount > COURSE_COUNT) {
+        courseCount = COURSE_COUNT;
+    }
+    isDone = IsHudAnimationDone();
+    if (isDone == TRUE) {
+        if (g_MenuPressedButtons & B_BUTTON) {
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+            SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+            g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+            return;
+        }
+        if (memory->statsSpin == 0) {
+            if (g_MenuRepeatButtons & R_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+                memory->statsCourse++;
+                if (memory->statsCourse > courseCount) {
+                    memory->statsCourse = 0;
+                }
+                memory->statsSpin = -STATS_TURN / (courseCount + 1);
+                if (memory->statsCourse != courseCount) {
+                    D_802300A6_ovl_01 = 0;
+                    D_802300A2_ovl_01 = 0;
+                    D_802300A4_ovl_01 ^= 1;
+                    OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
+                    ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+                    for (index = 0; index != COURSE_FILE_COUNT; index++) {
+                        OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
+                        ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+                    }
+                }
+            } else if (g_MenuRepeatButtons & L_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                SetTextSlot(0, 0, NO_MESSAGE, 1, 0, TEXT_FLAG_TYPED, 255, 255, 255, 255);
+                memory->statsCourse--;
+                if (memory->statsCourse < 0) {
+                    memory->statsCourse = courseCount;
+                }
+                memory->statsSpin = STATS_TURN / (courseCount + 1);
+                if (memory->statsCourse != courseCount) {
+                    D_802300A6_ovl_01 = 0;
+                    D_802300A2_ovl_01 = 0;
+                    D_802300A4_ovl_01 ^= 1;
+                    OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
+                    ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
+                    for (index = 0; index != COURSE_FILE_COUNT; index++) {
+                        OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
+                        ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+                    }
+                }
+            } else if (g_MenuRepeatButtons & U_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                if (D_802300A0_ovl_01 > 0) {
+                    D_802300A0_ovl_01--;
+                }
+            } else if (g_MenuRepeatButtons & D_JPAD) {
+                PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                if (D_802300A0_ovl_01 < STATS_COUNT - STATS_SHOWN_ROW_COUNT) {
+                    D_802300A0_ovl_01++;
+                }
+            }
+        }
+        if (ABS(memory->statsSpin) != 0) {
+            direction = memory->statsSpin < 0 ? -1 : 1;
+            step = STATS_SPIN_SPEED / (courseCount + 1);
+            if (step == 0) {
+                step = 1;
+            }
+            memory->statsSpin -= direction * step;
+            /* Stop on reaching the course rather than turning past it */
+            if ((memory->statsSpin < 0 ? -1 : 1) != direction) {
+                memory->statsSpin = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
 
