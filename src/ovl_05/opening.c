@@ -10,6 +10,7 @@
 #include "current_shot.h"
 #include "effects.h"
 #include "functions.h"
+#include "game_flags.h"
 #include "heap.h"
 #include "hole_display.h"
 #include "libc.h"
@@ -19,6 +20,7 @@
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
+#include "text.h"
 #include "variables.h"
 
 /* The view that the opening draws its characters through */
@@ -916,7 +918,6 @@ extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
 extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
 extern s32 f_AreImpactLinesShown;
 extern s32 f_ShotBallScale;
-extern s32 D_8020AC48_ovl_05;
 
 /* What the sparks are doing */
 typedef enum SparksState {
@@ -928,7 +929,14 @@ typedef enum SparksState {
 extern s32 f_OpeningSparksState;
 extern Vec3 f_OpeningSparksOrigin;
 
-extern s32 D_8020AC44_ovl_05;
+/* The frames since the opening started, after which it ends itself */
+extern s32 f_OpeningFrameCount;
+#define OPENING_FRAME_LIMIT 9000
+/*
+ * Set once the title logo starts forming. The opening can no longer be skipped
+ * after that, and it ends without the confirm sound.
+ */
+extern s32 f_HasLogoStarted;
 extern Unk20 D_8020ADB8_ovl_05;
 extern Unk20 D_8020ADD8_ovl_05;
 extern Unk20 D_8020ADF8_ovl_05;
@@ -937,8 +945,12 @@ extern s32 D_8020AE44_ovl_05;
 extern f32 D_8020AEBC_ovl_05;
 extern f32 D_8020AEC0_ovl_05;
 extern CoursePoint D_8020C404_ovl_05;
-extern s32 D_8020E3F0_ovl_05;
-extern s32 D_8020E3F4_ovl_05;
+/*
+ * The channels of two sounds that keep playing into the title screen: Donkey
+ * Kong's, when he is shown, and the one the last scene starts
+ */
+extern s32 f_DonkeyKongSoundChannel;
+extern s32 f_ClosingSoundChannel;
 extern f32 D_80217078_ovl_05;
 
 void LaunchDrop(CoursePoint point);
@@ -952,6 +964,36 @@ void LoadLakitu(void);
 void LoadOpeningImpactLines(void);
 void EaseOpeningLookAt(void);
 void LoadOpeningBall(s32 imageIndex, s32 slot);
+
+/* Fades the screen to white when a button skips the rest of the opening */
+#define OPENING_SCENE_SKIPPED 998
+#define SKIP_FADE_WHITE_LEVEL 0xFF
+#define SKIP_FADE_FRAME_COUNT 4
+/* Any controller's A, B or Start skips; the debug build takes only the first's
+ * A or Start */
+#define SKIP_BUTTONS (A_BUTTON | B_BUTTON | START_BUTTON)
+#define DEBUG_SKIP_BUTTONS (A_BUTTON | START_BUTTON)
+#define OPENING_DEBUG_SKIP_CONTROLLER 0
+/* In the debug build, this controller's R ends the scene's wait */
+#define OPENING_SCENE_CONTROLLER 1
+/* In the debug build, this controller's A starts the camera editor and B
+ * leaves it */
+#define OPENING_EDITOR_CONTROLLER 2
+#define OPENING_MENU_SOUND_CHANNEL 15
+#define OPENING_SOUND_FULL_VOLUME 127
+/* The channels that the script's sounds play on. The ambient sounds' channels
+ * follow, and are left playing when the opening ends */
+#define SCRIPT_SOUND_CHANNEL_COUNT ALTERNATING_SOUND_CHANNEL
+/* Where the opening leaves the first text slot as it clears it */
+#define CLEARED_TEXT_X (SCREEN_WIDTH / 2)
+#define CLEARED_TEXT_Y 114
+/* Where the debug build prints the frame count, the scene and its frames left
+ */
+#define FRAME_COUNT_TEXT_COLUMN 30
+#define FRAME_COUNT_TEXT_ROW 26
+#define SCENE_TEXT_COLUMN 4
+#define FRAMES_LEFT_TEXT_COLUMN 29
+#define SCENE_TEXT_ROW 2
 
 /*
  * Runs the opening's script: steps through its scenes, moving the camera,
@@ -969,27 +1011,30 @@ void UpdateOpening(void) {
   s32 pressedButtons;
   s32 skipButtons;
 
-  if (IsGameFlagSet(0x62)) {
+  if (IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
     EditOpeningCamera();
-    if (g_ControllerStates[2].pressedButtons & 0x4000) {
-      PlaySound(0x63, 0xF, 0x7F);
-      ClearGameFlag(0x62);
+    if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
+        B_BUTTON) {
+      PlaySound(SOUND_MENU_BLOCKED, OPENING_MENU_SOUND_CHANNEL,
+                OPENING_SOUND_FULL_VOLUME);
+      ClearGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
       f_IsLookAtMarkerShown = 0;
       ClearDebugText();
     }
   } else {
-    if (D_8020AC44_ovl_05 < 9000) {
-      D_8020AC44_ovl_05++;
+    if (f_OpeningFrameCount < OPENING_FRAME_LIMIT) {
+      f_OpeningFrameCount++;
     } else {
-      f_OpeningScene = 999;
+      f_OpeningScene = OPENING_SCENE_END;
     }
     if (g_IsDebugEnabled) {
-      sprintf(g_PrintBuffer, "%04d", D_8020AC44_ovl_05);
-      PrintDebugText(g_PrintBuffer, 0x1E, 0x1A);
+      sprintf(g_PrintBuffer, "%04d", f_OpeningFrameCount);
+      PrintDebugText(g_PrintBuffer, FRAME_COUNT_TEXT_COLUMN,
+                     FRAME_COUNT_TEXT_ROW);
       sprintf(g_PrintBuffer, "CAMERA:%d    ", f_OpeningScene);
-      PrintDebugText(g_PrintBuffer, 4, 2);
+      PrintDebugText(g_PrintBuffer, SCENE_TEXT_COLUMN, SCENE_TEXT_ROW);
       sprintf(g_PrintBuffer, "(%d)    ", f_OpeningSceneFramesLeft);
-      PrintDebugText(g_PrintBuffer, 0x1D, 2);
+      PrintDebugText(g_PrintBuffer, FRAMES_LEFT_TEXT_COLUMN, SCENE_TEXT_ROW);
     }
     switch (f_OpeningScene) {
       case 0x0:
@@ -1484,7 +1529,7 @@ void UpdateOpening(void) {
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0x82;
         }
-        if (D_8020AC44_ovl_05 == 0x375) {
+        if (f_OpeningFrameCount == 0x375) {
           PlaySound(0x4F, D_8020AC4C_ovl_05, 0x3C);
           func_801F4A40_ovl_05();
         }
@@ -1714,7 +1759,7 @@ void UpdateOpening(void) {
         }
         break;
       case 0xB6:
-        if (D_8020AC44_ovl_05 == 0x5C5) {
+        if (f_OpeningFrameCount == 0x5C5) {
           PlaySoundWithEffects(0x189, D_8020AC4C_ovl_05, 0x7F, 0, 0x89);
           func_801F4A40_ovl_05();
         }
@@ -2022,7 +2067,7 @@ void UpdateOpening(void) {
           case 0x1C:
             if (f_IsDonkeyKongShown) {
               PlaySound(0x141, D_8020AC4C_ovl_05, 0x7F);
-              D_8020E3F0_ovl_05 = D_8020AC4C_ovl_05;
+              f_DonkeyKongSoundChannel = D_8020AC4C_ovl_05;
             } else {
               PlaySound(0x152, D_8020AC4C_ovl_05, 0x7F);
             }
@@ -2030,7 +2075,7 @@ void UpdateOpening(void) {
             break;
           case 0x14:
             if (f_IsDonkeyKongShown) {
-              StopSound(D_8020E3F0_ovl_05);
+              StopSound(f_DonkeyKongSoundChannel);
             }
             break;
         }
@@ -2193,35 +2238,38 @@ void UpdateOpening(void) {
         func_801F4A6C_ovl_05();
         if (f_OpeningSceneFramesLeft == 0x3CF) {
           PlaySoundWithEffects(0x211, 0xB, 0x7F, 0, 0x7F);
-          D_8020E3F4_ovl_05 = 0xB;
+          f_ClosingSoundChannel = 0xB;
         }
         break;
-      case 998:
-        StartScreenFadeOut(0xFF, 0xFF, 0xFF, 4);
-        f_OpeningScene = 999;
+      case OPENING_SCENE_SKIPPED:
+        StartScreenFadeOut(SKIP_FADE_WHITE_LEVEL, SKIP_FADE_WHITE_LEVEL,
+                           SKIP_FADE_WHITE_LEVEL, SKIP_FADE_FRAME_COUNT);
+        f_OpeningScene = OPENING_SCENE_END;
         break;
-      case 999:
+      case OPENING_SCENE_END:
         if (HasScreenFadeEnded()) {
           StopEditorMoves();
           g_TitleScreenEntrance = TITLE_ENTRANCE_FROM_OPENING;
-          g_Scene = 0x19;
-          g_NextScene = 0x15;
-          g_SceneModuleToUnload = 3;
-          g_SceneModuleToLoad = 4;
+          g_Scene = SCENE_SWAPPING_MODULES;
+          g_NextScene = SCENE_TITLE_SCREEN;
+          g_SceneModuleToUnload = SCENE_MODULE_OPENING;
+          g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
           ClearDebugText();
           StopWipe();
           FreeAllCharacterSlots();
-          for (channel = 0; channel < 0xD; channel++) {
+          for (channel = 0; channel < SCRIPT_SOUND_CHANNEL_COUNT; channel++) {
             if (g_TitleScreenEntrance != TITLE_ENTRANCE_FROM_OPENING ||
-                (channel != D_8020E3F0_ovl_05 &&
-                 channel != D_8020E3F4_ovl_05)) {
+                (channel != f_DonkeyKongSoundChannel &&
+                 channel != f_ClosingSoundChannel)) {
               StopSound(channel);
             }
           }
-          if (!D_8020AC48_ovl_05) {
-            PlaySound(0x5D, 0xF, 0x7F);
+          if (!f_HasLogoStarted) {
+            PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
+                      OPENING_SOUND_FULL_VOLUME);
           }
-          SetTextSlot(0xA0, 0x72, -1, 1, 0, 0, 0, 0, 0, 0);
+          SetTextSlot(CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0,
+                      0, 0);
           return;
         }
         break;
@@ -2232,7 +2280,7 @@ void UpdateOpening(void) {
   }
   UpdateCameraEditor();
   EaseOpeningLookAt();
-  g_Cameras[0].view.mode = 1;
+  g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
   g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
   g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
   g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];
@@ -2255,36 +2303,43 @@ void UpdateOpening(void) {
   } else if (D_8020AE44_ovl_05 == 2) {
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
   }
-  if (f_OpeningScene != 999 && !D_8020AC48_ovl_05 && !IsGameFlagSet(0x62)) {
-    if (f_OpeningScene != 998) {
+  if (f_OpeningScene != OPENING_SCENE_END && !f_HasLogoStarted &&
+      !IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
+    if (f_OpeningScene != OPENING_SCENE_SKIPPED) {
       pressedButtons = 0;
       for (i = 0; i != g_ControllerCount; i++) {
         pressedButtons |= g_ControllerStates[i].pressedButtons;
       }
       if (g_IsDebugEnabled) {
-        skipButtons = g_ControllerStates[0].pressedButtons & 0x9000;
+        skipButtons =
+            g_ControllerStates[OPENING_DEBUG_SKIP_CONTROLLER].pressedButtons &
+            DEBUG_SKIP_BUTTONS;
       } else {
-        skipButtons = pressedButtons & 0xD000;
+        skipButtons = pressedButtons & SKIP_BUTTONS;
       }
       if (skipButtons) {
-        f_OpeningScene = 998;
+        f_OpeningScene = OPENING_SCENE_SKIPPED;
       }
     }
     if (g_IsDebugEnabled) {
-      if (g_ControllerStates[2].pressedButtons & 0x8000) {
-        PlaySound(0x5D, 0xF, 0x7F);
-        SetGameFlag(0x62);
+      if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
+          A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
+                  OPENING_SOUND_FULL_VOLUME);
+        SetGameFlag(GAME_FLAG_EDIT_OPENING_CAMERA);
         f_IsLookAtMarkerShown = 1;
         f_LookAtEaseMode = 0;
       }
-      if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & 0x10)) {
+      if (g_IsDebugEnabled &&
+          (g_ControllerStates[OPENING_SCENE_CONTROLLER].pressedButtons &
+           R_TRIG)) {
         f_OpeningSceneFramesLeft = 0;
         StopEditorMoves();
       }
     }
   }
   if (UpdateOpeningCharacters()) {
-    f_OpeningScene = 999;
+    f_OpeningScene = OPENING_SCENE_END;
   }
   AnimateAllCharacters();
   AnimateNameLogos();
@@ -4117,7 +4172,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
         LOGO_FADE_GRAY_LEVEL;
     f_LogoFadeStage = LOGO_FADE_GRAYING;
-    D_8020AC48_ovl_05 = 1;
+    f_HasLogoStarted = 1;
   }
   if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_A_DROP_X) {

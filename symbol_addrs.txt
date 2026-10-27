@@ -3480,3 +3480,7 @@ UpdateCameraEditor = 0x80203F70; // type:func segment:ovl_05
 EditOpeningCamera = 0x80204EA8; // type:func segment:ovl_05
 StopEditorMoves = 0x80203E14; // type:func segment:ovl_05
 UpdateOpening = 0x801F6788; // type:func segment:ovl_05
+f_OpeningFrameCount = 0x8020AC44; // size:0x4 segment:ovl_05
+f_HasLogoStarted = 0x8020AC48; // size:0x4 segment:ovl_05
+f_DonkeyKongSoundChannel = 0x8020E3F0; // size:0x4 segment:ovl_05
+f_ClosingSoundChannel = 0x8020E3F4; // size:0x4 segment:ovl_05

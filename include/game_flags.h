@@ -236,6 +236,10 @@
  * tally */
 #define GAME_FLAG_STOPWATCH_HOUR 0x91
 
+/* Stops the opening's script so that the first and third controllers can move
+ * its camera. The debug build sets it when the third presses A */
+#define GAME_FLAG_EDIT_OPENING_CAMERA 0x62
+
 s32 IsGameFlagSet(u32 flag);
 void SetGameFlag(u32 flag);
 void ClearGameFlag(u32 flag);
