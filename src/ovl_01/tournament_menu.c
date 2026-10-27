@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "controller.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
@@ -97,6 +98,41 @@ extern s32 D_80230F6C_ovl_01;
 extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT];
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
 extern s8 D_80105DBC[5];
+extern s32 D_80105DC8;
+extern s32 D_80105DCC;
+/* The first club tournament's name; D_80105DC8 picks the tournament */
+#define MESSAGE_FIRST_CLUB_TOURNAMENT_NAME 0x16F
+#define CLUB_TOURNAMENT_BOARD_KIND 11
+/* The club tournament's details window and the text in it */
+#define CLUB_WINDOW_WIDTH 280
+#define CLUB_WINDOW_HEIGHT 180
+#define CLUB_WINDOW_CENTER_X 160
+#define CLUB_WINDOW_CENTER_Y 120
+#define CLUB_WINDOW_STYLE_PLAIN 0
+#define CLUB_WINDOW_STYLE_NINTENDO 1
+#define CLUB_WINDOW_STYLE_PICTURE 2
+#define CLUB_NUMBER_Y 68
+#define CLUB_TEXT_X 160
+#define CLUB_NAME_Y 94
+#define CLUB_COURSE_Y 112
+#define CLUB_MODE_Y 128
+#define CLUB_NAME_SLOT 2
+#define CLUB_COURSE_SLOT 4
+#define CLUB_MODE_SLOT 5
+
+s32 IsNintendoClubTournament(void);
+s32 GetClubTournamentCourseTitleMessage(void);
+s32 GetClubTournamentModeMessage(void);
+void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
+void func_8022747C_ovl_01(Gfx **displayListHead, s32, s32, s32, s32, s32, s32, s32);
+void func_802296C4_ovl_01(Gfx **displayListHead, s32, s32, s32);
+void func_8022A43C_ovl_01(Gfx **displayListHead);
+void func_8022A8F4_ovl_01(Gfx **displayListHead);
+void func_8022ADE8_ovl_01(Gfx **displayListHead);
+void func_8022B360_ovl_01(Gfx **displayListHead);
+void func_8022B668_ovl_01(Gfx **displayListHead);
+void func_8022B7E0_ovl_01(Gfx **displayListHead);
+s32 func_8022BDC4_ovl_01(void);
 
 void ResetMenuWindow(void) {
     g_MenuWindowState = MENU_WINDOW_OPENING;
@@ -335,7 +371,76 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80229278_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802296C4_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80229CB0_ovl_01);
+void func_80229CB0_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 width = 0;
+    s32 height = 0;
+    s32 windowStyle;
+    u16 buttons;
+
+    func_801FB54C_ovl_01(&gfx, CLUB_TOURNAMENT_BOARD_KIND);
+    func_8022A43C_ovl_01(&gfx);
+    func_8022A090_ovl_01(&gfx);
+    func_8022ADE8_ovl_01(&gfx);
+    func_8022B360_ovl_01(&gfx);
+    func_8022A8F4_ovl_01(&gfx);
+    func_8022B7E0_ovl_01(&gfx);
+    func_8022B668_ovl_01(&gfx);
+    if (D_80230F70_ovl_01 == 1) {
+        if (IsNintendoClubTournament()) {
+            windowStyle = (func_8022BDC4_ovl_01() != -1) ? CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO
+                                                          : CLUB_WINDOW_STYLE_NINTENDO;
+            /* The held C buttons pick which of the tournament's pictures shows */
+            if (windowStyle == (CLUB_WINDOW_STYLE_PICTURE | CLUB_WINDOW_STYLE_NINTENDO) && GetWipeKind() == WIPE_NONE) {
+                buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
+                          g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+                if (buttons & L_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
+                } else if (buttons & D_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 2);
+                } else if (buttons & R_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 3);
+                } else {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+                }
+            }
+            func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT, CLUB_WINDOW_CENTER_X,
+                                 CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01, windowStyle);
+            func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+        } else {
+            windowStyle = (func_8022BDC4_ovl_01() != -1) ? CLUB_WINDOW_STYLE_PICTURE : CLUB_WINDOW_STYLE_PLAIN;
+            if (windowStyle != CLUB_WINDOW_STYLE_PLAIN && GetWipeKind() == WIPE_NONE) {
+                buttons = g_ControllerStates[0].buttons | g_ControllerStates[1].buttons |
+                          g_ControllerStates[2].buttons | g_ControllerStates[3].buttons;
+                if (buttons & L_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 1);
+                } else if (buttons & D_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 2);
+                } else if (buttons & R_CBUTTONS) {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 3);
+                } else {
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+                }
+            }
+            func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT, CLUB_WINDOW_CENTER_X,
+                                 CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01, windowStyle);
+            func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
+        }
+        if (IsMenuWindowOpen() != -1 && !IsMenuWindowClosed()) {
+            MeasureMessage(D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, FONT_SIZE_LARGE, &width, &height, 0);
+            MeasureMessage(GetClubTournamentCourseTitleMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+            MeasureMessage(GetClubTournamentModeMessage(), FONT_SIZE_LARGE, &width, &height, 0);
+            SetTextSlot(CLUB_TEXT_X, CLUB_NAME_Y, D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME, 1, CLUB_NAME_SLOT,
+                        TEXT_FLAG_CENTERED, 95, 63, 255, 255);
+            SetTextSlot(CLUB_TEXT_X, CLUB_COURSE_Y, GetClubTournamentCourseTitleMessage(), 1, CLUB_COURSE_SLOT,
+                        TEXT_FLAG_CENTERED, 43, 255, 75, 255);
+            SetTextSlot(CLUB_TEXT_X, CLUB_MODE_Y, GetClubTournamentModeMessage(), 1, CLUB_MODE_SLOT,
+                        TEXT_FLAG_CENTERED, 255, 63, 127, 255);
+        }
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void func_8022A090_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
