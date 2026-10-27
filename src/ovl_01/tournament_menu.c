@@ -1,8 +1,12 @@
 #include "common.h"
 #include "asset.h"
 #include "billboard.h"
+#include "character.h"
 #include "controller.h"
+#include "debug_text.h"
+#include "game_flags.h"
 #include "hole_display.h"
+#include "libc.h"
 #include "menu.h"
 #include "menu_memory.h"
 #include "password.h"
@@ -78,9 +82,28 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 #define CODE_KEYBOARD_COLUMN_COUNT 10
 #define CODE_KEYBOARD_END_ROW 3
 #define CODE_KEYBOARD_END_COLUMN 9
+#define CODE_KEYBOARD_FIRST_BLANK_COLUMN 6
+#define CODE_KEYBOARD_BACK_COLUMN 8
 #define CODE_KEY_BLANK 0xFD
 #define CODE_KEY_BACK 0xFE
 #define CODE_KEY_END 0xFF
+
+/* What func_80228C00 is doing, in D_80230F70 */
+#define CLUB_CODE_PHASE_TYPING 0
+#define CLUB_CODE_PHASE_DETAILS 1
+#define CLUB_CODE_PHASE_INCORRECT 2
+
+/* A tournament code's first byte: the tournament's name, and whether Nintendo holds it */
+#define CLUB_CODE_NAME_MASK 0x7F
+#define CLUB_CODE_NINTENDO_SHIFT 7
+#define CLUB_TOURNAMENT_NAME_COUNT 124
+
+/* Where func_80228C00 prints the tournament code when it can be edited */
+#define CODE_DEBUG_TEXT_COLUMN 2
+#define CODE_DEBUG_TEXT_FIRST_ROW 3
+
+#define SOUND_CODE_ACCEPTED 0x4A
+#define SOUND_CODE_INCORRECT 0x63
 
 /* What func_8022B46C reports after a key is pressed */
 #define CODE_KEY_RESULT_TOO_SHORT -1
@@ -101,7 +124,9 @@ extern u8 D_80230FD4_ovl_01[CLUB_TOURNAMENT_CODE_LENGTH];
 extern s32 D_80230F6C_ovl_01;
 extern u8 D_80230F84_ovl_01[CODE_KEYBOARD_ROW_COUNT][CODE_KEYBOARD_COLUMN_COUNT];
 extern u8 D_80230FDC_ovl_01[CLUB_TOURNAMENT_CODE_COUNT][CLUB_TOURNAMENT_CODE_LENGTH];
-extern s8 D_80105DBC[5];
+extern s8 D_80105DBC[7];
+extern s32 D_80105DC4;
+extern s32 D_80231134_ovl_01; /* The tournament code byte being edited */
 extern s32 D_80105B68;
 extern s32 D_80105DC8;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
@@ -150,6 +175,8 @@ void func_8022B360_ovl_01(Gfx **displayListHead);
 void func_8022B668_ovl_01(Gfx **displayListHead);
 void func_8022B7E0_ovl_01(Gfx **displayListHead);
 s32 func_8022BDC4_ovl_01(void);
+s32 func_8022B46C_ovl_01(void);
+s32 func_8022B5E0_ovl_01(void);
 
 void ResetMenuWindow(void) {
     g_MenuWindowState = MENU_WINDOW_OPENING;
@@ -382,7 +409,157 @@ void func_80228B60_ovl_01(void) {
     D_80230F7C_ovl_01 = 0;
 }
 
+/*
+ * Doesn't match: when the cursor moves, the original reads the other
+ * coordinate before it stores the new one, and adds it to the key's
+ * address last.
+ */
+#ifdef NON_MATCHING
+void func_80228C00_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 index;
+    s32 result;
+    s32 isInvalid;
+    TournamentRules *rules;
+    char debugText[128];
+
+    if (IsHudAnimationDone() != TRUE) {
+        return;
+    }
+    if (D_80230F70_ovl_01 == CLUB_CODE_PHASE_INCORRECT) {
+        if (!IsTextSlotRevealed(0)) {
+            return;
+        }
+        if (g_MenuRepeatButtons & A_BUTTON) {
+            D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
+            D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+            func_80228B60_ovl_01();
+        } else if (g_MenuRepeatButtons & B_BUTTON) {
+            D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
+            D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
+        }
+        return;
+    }
+    if (D_80230F70_ovl_01 != CLUB_CODE_PHASE_TYPING) {
+        func_80229278_ovl_01();
+        return;
+    }
+    /* The second controller edits the tournament code digit by digit */
+    if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
+        if (g_MenuControllerData[1].button & L_JPAD) {
+            D_80231134_ovl_01 = (D_80231134_ovl_01 + TOURNAMENT_CODE_SIZE - 1) % TOURNAMENT_CODE_SIZE;
+        }
+        if (g_MenuControllerData[1].button & R_JPAD) {
+            D_80231134_ovl_01 = (D_80231134_ovl_01 + 1) % TOURNAMENT_CODE_SIZE;
+        }
+        /* The original's unconditional steps cancel out, so a held direction changes the digit every frame */
+        if (g_MenuControllerData[1].button & U_JPAD) {
+            g_TournamentCode[D_80231134_ovl_01]++;
+        }
+        g_TournamentCode[D_80231134_ovl_01]++;
+        if (g_MenuControllerData[1].button & D_JPAD) {
+            g_TournamentCode[D_80231134_ovl_01]--;
+        }
+        g_TournamentCode[D_80231134_ovl_01]--;
+        for (index = 0; index < TOURNAMENT_CODE_SIZE; index++) {
+            if (D_80231134_ovl_01 == index) {
+                SetDebugTextHighlight(TRUE);
+            }
+            sprintf(debugText, "P%d[%d]  ", index, g_TournamentCode[index]);
+            PrintDebugText(debugText, CODE_DEBUG_TEXT_COLUMN, index + CODE_DEBUG_TEXT_FIRST_ROW);
+        }
+    }
+    if (g_MenuRepeatButtons & A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        result = func_8022B46C_ovl_01();
+        if (result == CODE_KEY_RESULT_DONE) {
+            if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
+                isInvalid = FALSE;
+            } else {
+                isInvalid = DecodeTournamentPassword(g_TournamentCode, (char *)D_80230FD4_ovl_01);
+            }
+            if (!isInvalid) {
+                D_80230F74_ovl_01 = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
+                if (D_80230F74_ovl_01 >= CLUB_TOURNAMENT_NAME_COUNT) {
+                    D_80230F74_ovl_01 = 0;
+                }
+                D_80105DC4 = g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
+                D_80105DC8 = D_80230F74_ovl_01;
+                rules = GetTournamentRules(g_TournamentCode[1]);
+                *(TournamentRules *)&D_80105DBC[4] = *rules;
+                D_80105DCC = g_TournamentCode[2] + 1;
+                osSyncPrintf("bkTour %x, %x, %x\n", g_TournamentCode[0], g_TournamentCode[1], g_TournamentCode[2]);
+                PlaySound(SOUND_CODE_ACCEPTED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                ResetMenuWindow();
+                func_80226904_ovl_01(GetClubTournamentCourse());
+                D_80230F70_ovl_01 = CLUB_CODE_PHASE_DETAILS;
+                if (func_8022BDC4_ovl_01() >= 0) {
+                    LoadMenuWindowImage(func_8022BDC4_ovl_01());
+                    func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
+                } else {
+                    LoadMenuWindowImage(CHARACTER_KID);
+                    func_802269AC_ovl_01(CHARACTER_KID, 0);
+                }
+                return;
+            }
+            PlaySound(SOUND_CODE_INCORRECT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
+            D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
+        } else if (result == CODE_KEY_RESULT_TOO_SHORT) {
+            PlaySound(SOUND_CODE_INCORRECT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
+            D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
+        }
+    } else if (g_MenuRepeatButtons & B_BUTTON) {
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        /* B first deletes the code's characters, and leaves only once the code is empty */
+        if (func_8022B5E0_ovl_01()) {
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+            g_MenuScreen = MENU_SCREEN_MAIN;
+            D_80230F40_ovl_01 = FALSE;
+            D_80105DC4 = FALSE;
+            for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
+                SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
+            }
+        }
+    } else if (g_MenuRepeatButtons & U_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        memory->codeKeyRow--;
+        if (memory->codeKeyRow < 0) {
+            memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
+        }
+        if (D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn] == CODE_KEY_BLANK) {
+            memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
+        }
+    } else if (g_MenuRepeatButtons & D_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        if (D_80230F84_ovl_01[++memory->codeKeyRow][memory->codeKeyColumn] == CODE_KEY_BLANK) {
+            memory->codeKeyRow = 0;
+        }
+        if (memory->codeKeyRow >= CODE_KEYBOARD_ROW_COUNT) {
+            memory->codeKeyRow = 0;
+        }
+    } else if (g_MenuRepeatButtons & L_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        if (D_80230F84_ovl_01[memory->codeKeyRow][--memory->codeKeyColumn] == CODE_KEY_BLANK) {
+            memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
+        }
+        if (memory->codeKeyColumn < 0) {
+            memory->codeKeyColumn = CODE_KEYBOARD_COLUMN_COUNT - 1;
+        }
+    } else if (g_MenuRepeatButtons & R_JPAD) {
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+        if (D_80230F84_ovl_01[memory->codeKeyRow][++memory->codeKeyColumn] == CODE_KEY_BLANK) {
+            memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
+        }
+        if (memory->codeKeyColumn >= CODE_KEYBOARD_COLUMN_COUNT) {
+            memory->codeKeyColumn = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80228C00_ovl_01);
+#endif
 
 void func_80229278_ovl_01(void) {
     s32 isHudAnimationDone;

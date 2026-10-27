@@ -213,6 +213,9 @@
 #define GAME_FLAG_BALL_TYPE_6 0x8D
 #define GAME_FLAG_BALL_TYPE_7 0x8E
 
+/* Lets the second controller edit the club tournament code and skips checking it */
+#define GAME_FLAG_EDIT_TOURNAMENT_CODE 0x90
+
 /* Sets the stopwatch to an hour when the scorecard starts a Speed Golf hole's tally */
 #define GAME_FLAG_STOPWATCH_HOUR 0x91
 
