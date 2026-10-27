@@ -8,7 +8,10 @@
 #define MENU_SCREEN_MAIN 2
 #define MENU_SCREEN_OPTIONS 4
 #define MENU_SCREEN_CLUBHOUSE 9
+#define MENU_SCREEN_UNK13 13
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
+#define MENU_SCREEN_UNK23 23
+#define MENU_SCREEN_CLUB_TOURNAMENT 27       /* A tournament entered with a code */
 #define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28 /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */
 extern s32 g_MenuScreen;
 
@@ -33,9 +36,12 @@ typedef struct MenuChoices {
     /* 0x03 */ s8 mainChoice;
     /* 0x04 */ s8 mainChoiceWithoutTransmit;
     /* 0x05 */ s8 clubhouseChoice;
-    /* 0x06 */ s8 unk6[0x10];
-    /* 0x16 */ s8 unk16;
-    /* 0x17 */ s8 wipeShape; /* The course whose shape the closing wipe takes */
+    /* 0x06 */ s8 unk6[0xD];
+    /* 0x13 */ s8 unk13;
+    /* 0x14 */ s8 unk14;
+    /* 0x15 */ s8 unk15;
+    /* 0x16 */ s8 holeIndex;
+    /* 0x17 */ s8 courseIndex;
 } MenuChoices; /* size = 0x18 */
 extern MenuChoices g_MenuChoices;
 

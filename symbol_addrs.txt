@@ -3193,3 +3193,4 @@ LoadMenuWindowImage = 0x80226958; // type:func segment:ovl_01
 DrawOpeningCharacters = 0x801F5180; // type:func segment:ovl_05
 IsMenuWindowOpen = 0x80226764; // type:func segment:ovl_01
 IsMenuWindowClosed = 0x80226788; // type:func segment:ovl_01
+StartLoadingChosenHole = 0x801F4A4C; // type:func segment:ovl_01
