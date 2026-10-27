@@ -54,7 +54,11 @@ extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern s8 D_801B70F0[MAXCONTROLLERS];
 extern u16 D_80230B40_ovl_01[MAX_PLAYER_COUNT];
+extern s16 D_80230B48_ovl_01;
+extern s16 D_80230B4A_ovl_01;
+extern u8 D_80230B4C_ovl_01;
 extern s8 D_80230B4D_ovl_01;
 extern s32 D_80230B50_ovl_01[SAVED_GAME_COUNT];
 extern s32 D_80230B88_ovl_01[SAVE_MENU_MODE_COUNT];
@@ -64,6 +68,7 @@ extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void **D_8023BD70_ovl_01;
 extern void **D_8023BD74_ovl_01;
 extern void *D_8023BD78_ovl_01;
+extern s16 D_8023BDA4_ovl_01[MAX_PLAYER_COUNT];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][SAVE_MENU_FILE_SIZE];
 extern u8 D_8023E3F0_ovl_01[SAVE_MENU_SLOT_COUNT][SAVE_MENU_FILE_SIZE];
 extern void *D_8023BD7C_ovl_01;
@@ -291,7 +296,50 @@ void func_80221B20_ovl_01(void) {
     func_80221CC0_ovl_01();
 }
 
+/* Doesn't match: the original sets the first loop's counter later and keeps the player count in other registers */
+#ifdef NON_MATCHING
+void func_80221CC0_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s8 playerIndex;
+    s8 playerCount;
+    s8 humanCount;
+    s8 gameIndex;
+    UnkB8 *savedPlayers;
+
+    for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
+        D_80230B40_ovl_01[playerIndex] = -1;
+        D_8023BDA4_ovl_01[playerIndex] = -1;
+    }
+    D_80230B48_ovl_01 = 0;
+    gameIndex = memory->savedGameIndex;
+    playerCount = save->savedGames[gameIndex].state.playerCount;
+    savedPlayers = save->savedPlayers[gameIndex];
+    D_80230B4A_ovl_01 = save->savedGames[gameIndex].state.playerCount;
+    for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+        if ((s8)savedPlayers[playerIndex].unk1E[0]) {
+            D_80230B40_ovl_01[playerIndex] = MAXCONTROLLERS;
+            D_80230B4A_ovl_01--;
+        } else {
+            D_80230B40_ovl_01[playerIndex] = -1;
+        }
+    }
+    humanCount = 0;
+    for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
+        if (D_80230B40_ovl_01[playerIndex] != MAXCONTROLLERS) {
+            D_8023BDA4_ovl_01[humanCount] = playerIndex;
+            humanCount++;
+        }
+    }
+    D_80230B48_ovl_01 = 0;
+    D_80230B4C_ovl_01 = 0;
+    for (playerIndex = 0; playerIndex != MAXCONTROLLERS; playerIndex++) {
+        D_801B70F0[playerIndex] = 0;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80221CC0_ovl_01);
+#endif
 
 /*
  * Doesn't match: the menu memory pointer and the mode image table take
