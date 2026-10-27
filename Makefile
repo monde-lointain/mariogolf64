@@ -89,7 +89,7 @@ $(BUILD_DIR)/src/libkmc/%.o:   OPTFLAGS := -O1 -fno-fast-math
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nuboot.c.o: LIBNUSYS_OPTFLAGS :=
 $(BUILD_DIR)/$(LIBNUSYS_DIR)/nusched.c.o: LIBNUSYS_DEFINES += -DNU_DEBUG
 
-.PHONY: all extract clean distclean setup tools format lint
+.PHONY: all extract clean distclean setup tools format lint pycheck
 
 all: $(ROM)
 ifneq ($(COMPARE),0)
@@ -106,6 +106,14 @@ FORMAT_FILES := $(shell git ls-files 'src/*.c' 'src/*.h' 'include/*.h')
 
 format:
 	$(CLANG_FORMAT) -i $(FORMAT_FILES)
+	.venv/bin/ruff format --quiet
+
+# Lints and type-checks the Python tools, with the settings in pyproject.toml
+pycheck:
+	.venv/bin/ruff format --check --quiet
+	.venv/bin/ruff check --quiet
+	.venv/bin/basedpyright --level warning
+	.venv/bin/vulture
 
 CLANG_TIDY ?= run-clang-tidy-23
 # src/libkmc is KMC's C library, which keeps the C library's names

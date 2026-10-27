@@ -38,6 +38,11 @@ escapes.
 `make lint` checks the names against the naming scheme in
 `.clang-tidy` with clang-tidy 23.
 
+The Python tools in `tools/` are formatted with ruff, which `make format`
+also runs. `make pycheck` lints them with ruff, type-checks them with
+basedpyright and looks for dead code with vulture, using the settings in
+`pyproject.toml`.
+
 ## Layout
 
 | Path | Contents |

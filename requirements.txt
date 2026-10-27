@@ -12,3 +12,7 @@ cxxfilt
 pyelftools
 # decode_asset.py
 pillow
+# make pycheck
+ruff
+basedpyright
+vulture

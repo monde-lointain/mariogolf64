@@ -1,0 +1,43 @@
+# Settings for the checks on the Python tools, which `make pycheck` runs
+[project]
+name = "mariogolf64-tools"
+version = "0"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+include = ["tools/*.py"]
+extend-exclude = ["tools/asm-differ"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  # The formatter handles these; ruff warns that they conflict with it.
+  "COM812",
+  "ISC001",
+  # These conflict with D211 and D212, which are kept.
+  "D203",
+  "D213",
+  # The tools are command-line programs, whose output is what they print.
+  "T201",
+  # The project has no copyright notices.
+  "CPY001",
+  # The tools run the build's own programs, found on PATH, with arguments
+  # they build themselves.
+  "S603",
+  "S607",
+]
+
+[tool.basedpyright]
+include = ["tools"]
+exclude = ["tools/asm-differ", "**/__pycache__"]
+pythonVersion = "3.10"
+typeCheckingMode = "all"
+venvPath = "."
+venv = ".venv"
+
+[tool.vulture]
+paths = ["tools"]
+exclude = ["tools/asm-differ/"]
+min_confidence = 60
+sort_by_size = true
