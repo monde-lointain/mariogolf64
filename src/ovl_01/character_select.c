@@ -47,6 +47,8 @@
 #define BUTTON_ICON_HEIGHT 24
 #define BUTTON_ICON_TOP 20
 #define COMPUTER_ICON_LEFT 270
+#define LEFTY_ICON_LEFT 18
+#define LEFTY_ICON_OFFSET (BUTTON_ICON_WIDTH * BUTTON_ICON_HEIGHT / 2)
 
 /* The buffer that func_8020B2C4 keeps without reading an image into it */
 #define CHARACTER_SELECT_UNREAD_KIND 10
@@ -532,7 +534,36 @@ void func_8020D338_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020D734_ovl_01);
+void func_8020D734_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_801B69EC + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)D_801B69EC + PALETTED_TEXELS_OFFSET + LEFTY_ICON_OFFSET) & ~7, G_IM_FMT_CI,
+                           BUTTON_ICON_WIDTH, BUTTON_ICON_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, LEFTY_ICON_LEFT << 2, BUTTON_ICON_TOP << 2,
+                        (LEFTY_ICON_LEFT + BUTTON_ICON_WIDTH) << 2,
+                        (BUTTON_ICON_TOP + BUTTON_ICON_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                        TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/character_select", func_8020DB30_ovl_01);
 
