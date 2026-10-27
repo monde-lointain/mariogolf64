@@ -13,15 +13,97 @@
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
+/* The buffers that func_802159C0 keeps, by the kind its caller gives */
+#define TABLE_BUFFER_CURSOR 1
+#define TABLE_BUFFER_UNREAD 2
+#define TABLE_BUFFER_ARROWS 3
+#define TABLE_BUFFER_STAR 4
+#define ASSET_TABLE_CURSOR 0x6EF
+#define ASSET_TABLE_ARROWS 0x94A
+#define ASSET_TABLE_STAR 0x5BE
+
+/* Where the table's popup goes, and the cursor places that move it */
+#define TABLE_POPUP_TOP_LEFT 0
+#define TABLE_POPUP_TOP_RIGHT 1
+#define TABLE_POPUP_BOTTOM_LEFT 2
+#define TABLE_POPUP_BOTTOM_RIGHT 3
+#define TABLE_POPUP_LEFT_X 68
+#define TABLE_POPUP_RIGHT_X 164
+#define TABLE_POPUP_TOP_Y 84
+#define TABLE_POPUP_BOTTOM_Y 170
+#define TABLE_POPUP_LEFT_COLUMN_LIMIT 4
+#define TABLE_POPUP_RIGHT_COLUMN 3
+#define TABLE_POPUP_TOP_ROW_LIMIT 2
+#define TABLE_POPUP_BOTTOM_ROW 3
+
 /* The most bytes of each character's file that func_802177D0 keeps */
 #define MENU_SCENE_FILE_SIZE 0x200
 
 extern void *D_8012D430[CHARACTER_COUNT];
+extern s32 D_80230190_ovl_01;
+extern s32 D_80230194_ovl_01;
+extern s32 D_80230198_ovl_01;
+extern s32 D_8023019C_ovl_01;
+extern s32 D_802301A0_ovl_01;
+extern s32 D_802301A4_ovl_01;
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
+extern void *D_8023AC64_ovl_01;
+extern void *D_8023AC68_ovl_01;
+extern void *D_8023AC6C_ovl_01;
+extern void *D_8023AC70_ovl_01;
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/character_table", func_802159C0_ovl_01);
+void func_802159C0_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+    MenuMemory *memory = func_8005AF74();
+    s32 x;
+    s32 y;
+
+    switch (bufferKind) {
+        case TABLE_BUFFER_CURSOR:
+            D_8023AC64_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_TABLE_CURSOR, &asset);
+            ReadEncodedAsset(D_8023AC64_ovl_01, &asset);
+            break;
+        case TABLE_BUFFER_UNREAD:
+            D_8023AC68_ovl_01 = buffer;
+            break;
+        case TABLE_BUFFER_ARROWS:
+            D_8023AC6C_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_TABLE_ARROWS, &asset);
+            ReadEncodedAsset(D_8023AC6C_ovl_01, &asset);
+            D_8023019C_ovl_01 = 0;
+            D_802301A0_ovl_01 = 0;
+            D_802301A4_ovl_01 = 0;
+            break;
+        case TABLE_BUFFER_STAR:
+            D_8023AC70_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_TABLE_STAR, &asset);
+            ReadEncodedAsset(D_8023AC70_ovl_01, &asset);
+            break;
+    }
+    /* The popup goes to the quarter of the screen away from the cursor */
+    if (memory->tableColumn < TABLE_POPUP_LEFT_COLUMN_LIMIT && memory->tableRow < TABLE_POPUP_TOP_ROW_LIMIT) {
+        x = TABLE_POPUP_RIGHT_X;
+        y = TABLE_POPUP_BOTTOM_Y;
+        D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_RIGHT;
+    } else if (memory->tableColumn >= TABLE_POPUP_RIGHT_COLUMN && memory->tableRow < TABLE_POPUP_TOP_ROW_LIMIT) {
+        x = TABLE_POPUP_LEFT_X;
+        y = TABLE_POPUP_BOTTOM_Y;
+        D_80230198_ovl_01 = TABLE_POPUP_BOTTOM_LEFT;
+    } else if (memory->tableColumn < TABLE_POPUP_LEFT_COLUMN_LIMIT && memory->tableRow >= TABLE_POPUP_BOTTOM_ROW) {
+        x = TABLE_POPUP_RIGHT_X;
+        y = TABLE_POPUP_TOP_Y;
+        D_80230198_ovl_01 = TABLE_POPUP_TOP_RIGHT;
+    } else {
+        x = TABLE_POPUP_LEFT_X;
+        y = TABLE_POPUP_TOP_Y;
+        D_80230198_ovl_01 = TABLE_POPUP_TOP_LEFT;
+    }
+    D_80230190_ovl_01 = x;
+    D_80230194_ovl_01 = y;
+}
 
 void func_80215B84_ovl_01(void) {
     MenuMemory *memory = func_8005AF74();
