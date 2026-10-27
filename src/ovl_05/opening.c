@@ -5,6 +5,7 @@
 #include "billboard.h"
 #include "camera.h"
 #include "camera_editor.h"
+#include "character.h"
 #include "character_slot.h"
 #include "cpu_projection.h"
 #include "effects.h"
@@ -452,7 +453,337 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   gDPPipeSync(g_DisplayListHead++);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F58EC_ovl_05);
+s32 func_80206680_ovl_05(u32 slotIndex, s32 character);
+
+extern s32 D_8020AC40_ovl_05;
+extern s32 D_8020AD9C_ovl_05;
+extern s32 D_8020C400_ovl_05;
+
+#define PLACE(point, x, z, heading) \
+  point[0] = x;                     \
+  point[2] = z;                     \
+  PlaceCharacter(D_8020C400_ovl_05, point, DEGREES_TO_RADIANS(heading))
+
+s32 func_801F58EC_ovl_05(void) {
+  CoursePoint point0;
+  CoursePoint point1;
+  CoursePoint point2;
+  CoursePoint point3;
+  CoursePoint point4;
+  CoursePoint point5;
+  CoursePoint point6;
+  CoursePoint point7;
+  CoursePoint point8;
+  CoursePoint point9;
+  CoursePoint point10;
+  CoursePoint point11;
+  CoursePoint point12;
+  CoursePoint point13;
+  CoursePoint point14;
+  CoursePoint point15;
+  CoursePoint point16;
+  CoursePoint point17;
+  CoursePoint point18;
+  CoursePoint point19;
+  CoursePoint point20;
+  CoursePoint point21;
+  CoursePoint point22;
+  CoursePoint point23;
+  CoursePoint point24;
+  CoursePoint point25;
+  CoursePoint point26;
+  CoursePoint point27;
+  CoursePoint point28;
+  CoursePoint point29;
+
+  switch (D_8022BFA8_ovl_05) {
+    case 0:
+      SetCharacterLights();
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        PLACE(point0, 0xF3400, 0x490000, -30);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 1:
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        PLACE(point1, 0xA0B58, 0x4A28BF, 80);
+        D_8022BFA8_ovl_05 = 31;
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05++;
+      break;
+    case 2:
+      D_8020C400_ovl_05 = 2;
+      if (func_80206680_ovl_05(2, CHARACTER_KID)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        PLACE(point2, 0x1368A0, 0x49D208, 0);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 4:
+      FreeCharacterSlot(0);
+      FreeCharacterSlot(1);
+      FreeCharacterSlot(2);
+      D_8020C400_ovl_05 = 3;
+      if (func_80206680_ovl_05(3, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+        PLACE(point3, 0xF3400, 0x490000, -30);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 5:
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_BOWSER)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+        PLACE(point4, 0xB2A34, 0x4F9800, 10);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 7:
+      FreeCharacterSlot(0);
+      FreeCharacterSlot(3);
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+        PLACE(point5, 0xF3400, 0x490000, 0);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 8:
+      D_8020C400_ovl_05 = 2;
+      if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+        PLACE(point6, 0x1610CF, 0x4AFA34, 0);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 9:
+      FreeCharacterSlot(1);
+      FreeCharacterSlot(2);
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_KID)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+        PLACE(point7, 0xF3400, 0x490000, -45);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 11:
+      FreeCharacterSlot(0);
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
+        PLACE(point8, 0x29EB94, 0x26DDDA, 0);
+      }
+      D_8020C400_ovl_05 = 2;
+      if (func_80206680_ovl_05(2, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
+        PLACE(point9, 0x29EB94, 0x26DDDA, 0);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 12:
+      FreeCharacterSlot(1);
+      FreeCharacterSlot(2);
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
+        PLACE(point10, 0x2709F8, 0x1CF4B4, 10);
+      }
+      D_8020C400_ovl_05 = 3;
+      if (func_80206680_ovl_05(3, CHARACTER_KID)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x12);
+        PLACE(point11, 0x2709F8, 0x1CF4B4, 55);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 13:
+      FreeCharacterSlot(0);
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
+        PLACE(point12, 0x2709F8, 0x1CF4B4, 10);
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 14:
+      FreeCharacterSlot(1);
+      FreeCharacterSlot(3);
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
+        PLACE(point13, 0x2CA5D3, 0x22A928, -98);
+      }
+      D_8020C400_ovl_05 = 2;
+      if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
+        PLACE(point14, 0x2C42D6, 0x22A832, -98);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 15:
+      FreeCharacterSlot(0);
+      FreeCharacterSlot(2);
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
+        PLACE(point15, 0x2B1194, 0x249320, -98);
+      }
+      D_8020C400_ovl_05 = 3;
+      if (func_80206680_ovl_05(3, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x15);
+        PLACE(point16, 0x2B1194, 0x249320, -98);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 17:
+      FreeCharacterSlot(1);
+      FreeCharacterSlot(3);
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x15);
+        PLACE(point17, 0x2B1194, 0x249320, -98);
+      }
+      D_8020C400_ovl_05 = 2;
+      if (func_80206680_ovl_05(2, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x16);
+        PLACE(point18, 0x2B1194, 0x249320, -98);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 18:
+      FreeCharacterSlot(2);
+      D_8020C400_ovl_05 = 1;
+      func_80206680_ovl_05(1, CHARACTER_BABY_MARIO);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x17);
+      PLACE(point19, 0x2B1194, 0x249320, -98);
+      D_8022BFA8_ovl_05 = 31;
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      break;
+    case 19:
+      SetAnimationSpeed(0, 0.0f);
+      SetAnimationSpeed(1, 0.0f);
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 20:
+      SetAnimationSpeed(0, 1.0f);
+      SetAnimationSpeed(1, 1.0f);
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 21:
+      FreeCharacterSlot(0);
+      FreeCharacterSlot(1);
+      D_8020C400_ovl_05 = 2;
+      if (D_8020AD9C_ovl_05) {
+        func_80206680_ovl_05(2, CHARACTER_DONKEY_KONG);
+      } else {
+        func_80206680_ovl_05(2, CHARACTER_MARIO);
+      }
+      SetAnimationSpeed(2, 0.0f);
+      if (D_8020AD9C_ovl_05 != 0) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+      } else {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+      }
+      PLACE(point20, 0x202B29, 0xCE7DA, -165);
+      D_8020C400_ovl_05 = 3;
+      func_80206680_ovl_05(3, CHARACTER_MAPLE);
+      SetAnimationSpeed(3, 0.0f);
+      if (D_8020AD9C_ovl_05 != 0) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x11);
+      } else {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+      }
+      PLACE(point21, 0x202B29, 0xCE7DA, -165);
+      D_8022BFA8_ovl_05 = 31;
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      break;
+    case 22:
+      SetAnimationSpeed(2, 1.0f);
+      SetAnimationSpeed(3, 1.0f);
+      break;
+    case 23:
+      D_8020C400_ovl_05 = 0;
+      func_80206680_ovl_05(0, CHARACTER_METAL_MARIO);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x16);
+      PLACE(point22, 0x2B1194, 0x249320, -98);
+      D_8020C400_ovl_05 = 1;
+      func_80206680_ovl_05(1, CHARACTER_BABY_MARIO);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x18);
+      PLACE(point23, 0x2B1194, 0x249320, -98);
+      D_8022BFA8_ovl_05 = 31;
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      break;
+    case 24:
+      FreeAllCharacterSlots();
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    case 25:
+      D_8020C400_ovl_05 = 0;
+      func_80206680_ovl_05(0, CHARACTER_KID);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
+      PLACE(point24, 0x16308C, 0x183EDA, 170);
+      D_8022BFA8_ovl_05 = 31;
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      break;
+    case 26:
+      D_8020C400_ovl_05 = 1;
+      func_80206680_ovl_05(1, CHARACTER_AZALEA);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x10);
+      PLACE(point25, 0xE3F2C, 0x1D98E6, 70);
+      D_8022BFA8_ovl_05 = 31;
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      break;
+    case 27:
+      FreeCharacterSlot(0);
+      FreeCharacterSlot(1);
+      D_8020C400_ovl_05 = 2;
+      func_80206680_ovl_05(2, CHARACTER_KID);
+      SetCharacterAnimation(D_8020C400_ovl_05, 0x14);
+      PLACE(point26, 0x16308C, 0x183EDA, 185);
+      D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      D_8020C400_ovl_05 = 3;
+      if (func_80206680_ovl_05(3, CHARACTER_METAL_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x17);
+        PLACE(point27, 0x16806D, 0x17E632, 200);
+      }
+      D_8022BFA8_ovl_05++;
+      break;
+    case 28:
+      D_8020C400_ovl_05 = 0;
+      if (func_80206680_ovl_05(0, CHARACTER_BABY_MARIO)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x19);
+        PLACE(point28, 0x15E14D, 0x18155C, 170);
+      }
+      D_8020C400_ovl_05 = 1;
+      if (func_80206680_ovl_05(1, CHARACTER_BOWSER)) {
+        SetCharacterAnimation(D_8020C400_ovl_05, 0x13);
+        PLACE(point29, 0x166EDF, 0x1838C7, 200);
+        D_8020AC40_ovl_05 = D_8020C400_ovl_05;
+      }
+      D_8022BFA8_ovl_05 = 31;
+      break;
+    default:
+      D_8022BFA8_ovl_05 = 29;
+      break;
+  }
+  return D_8022BFA8_ovl_05 == 30;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F6788_ovl_05);
 
