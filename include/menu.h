@@ -18,6 +18,7 @@
 #define MENU_SCREEN_CHARACTER_TABLE 15
 #define MENU_SCREEN_HELP 17
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
+#define MENU_SCREEN_UNK22 22
 #define MENU_SCREEN_UNK23 23
 #define MENU_SCREEN_CLUB_TOURNAMENT 27       /* A tournament entered with a code */
 #define MENU_SCREEN_MAIN_WITHOUT_TRANSMIT 28 /* The main menu when no Transfer Pak holds Mario Golf for Game Boy */

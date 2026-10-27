@@ -1,8 +1,11 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "sound.h"
+#include "text.h"
 
 /* The images of D_800C2064 that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
@@ -43,6 +46,17 @@
 #define STATS_SLIDE_IN_FROM_LEFT 4
 #define STATS_SLIDE_COUNT 5
 
+/* The phases of the screen 20 handler, which D_8022BE88 holds */
+#define MENU_PHASE_START 0
+#define MENU_PHASE_CHOOSING 5
+#define MENU_PHASE_CANCELLED 6
+#define MENU_PHASE_CONFIRMED 7
+#define MENU_UNK89_UNK4 4
+
+/* Each player's choice on screen 20, and where the screen's slide starts */
+#define PLAYER_OPTION_COUNT 37
+#define PLAYER_OPTION_SLIDE_START -512
+
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
@@ -63,6 +77,10 @@ extern s32 D_8023073C_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_80230784_ovl_01[STATS_SLIDE_ROW_COUNT];
 extern s32 D_802307A8_ovl_01[STATS_SLIDE_COUNT - 1][STATS_SLIDE_ROW_COUNT];
 extern u8 D_80230838_ovl_01;
+extern u8 D_8022BE88_ovl_01;
+extern u8 D_8022BE89_ovl_01;
+extern u8 D_802303A1_ovl_01;
+extern s32 D_8023BFD0_ovl_01;
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 
 void func_8021B87C_ovl_01(Gfx **displayListHead, u8 slide);
@@ -106,7 +124,68 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021826C_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219460_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219948_ovl_01);
+/* Returns nothing, but is declared to return a value, which leaves v0 live at its end */
+s32 func_80219948_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+
+    if (D_8022BE88_ovl_01 == MENU_PHASE_START) {
+        PlaySong(SONG_TITLE, 0);
+        g_MenuScreen = MENU_SCREEN_UNK6;
+        D_8022BE89_ovl_01 = MENU_UNK89_UNK4;
+        FreeAllCharacterSlots();
+    }
+    if (D_8022BE88_ovl_01 == MENU_PHASE_CHOOSING) {
+        if (g_MenuPressedButtons & A_BUTTON) {
+            PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+            D_8023BFD0_ovl_01 = PLAYER_OPTION_SLIDE_START;
+            D_802303A1_ovl_01 = 0;
+            D_8022BE88_ovl_01 = MENU_PHASE_CONFIRMED;
+            return;
+        }
+        if (g_MenuPressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            g_MenuScreen = MENU_SCREEN_UNK22;
+            SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF);
+            D_802303A1_ovl_01 = 0;
+            D_8022BE88_ovl_01 = MENU_PHASE_CANCELLED;
+            return;
+        }
+        if (g_MenuRepeatButtons & L_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            memory->unk29--;
+            if (memory->unk29 < 0) {
+                memory->unk29 = D_80105B68 - 1;
+            }
+            D_802303A1_ovl_01 = 0;
+            return;
+        }
+        if (g_MenuRepeatButtons & R_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            memory->unk29++;
+            if (memory->unk29 > D_80105B68 - 1) {
+                memory->unk29 = 0;
+            }
+            D_802303A1_ovl_01 = 0;
+            return;
+        }
+        if (g_MenuRepeatButtons & U_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            D_8023BFDC_ovl_01[memory->unk29]++;
+            if (D_8023BFDC_ovl_01[memory->unk29] >= PLAYER_OPTION_COUNT) {
+                D_8023BFDC_ovl_01[memory->unk29] = 0;
+            }
+            return;
+        }
+        if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            D_8023BFDC_ovl_01[memory->unk29]--;
+            if (D_8023BFDC_ovl_01[memory->unk29] < 0) {
+                D_8023BFDC_ovl_01[memory->unk29] = PLAYER_OPTION_COUNT - 1;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_80219BD4_ovl_01);
 
