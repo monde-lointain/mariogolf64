@@ -601,12 +601,12 @@ void GenerateClubSet(s32 setIndex, ClubSetStats *stats) {
         if (club->pitch < -45) {
             club->pitch = -45;
         }
-        club->unk26 = stats->clubs[type].unk5;
-        if (club->unk26 > 100) {
-            club->unk26 = 100;
+        club->sideSpin = stats->clubs[type].unk5;
+        if (club->sideSpin > 100) {
+            club->sideSpin = 100;
         }
-        if (club->unk26 < -100) {
-            club->unk26 = -100;
+        if (club->sideSpin < -100) {
+            club->sideSpin = -100;
         }
         if ((u8)(stats->unk1E + 4) >= ARRAY_COUNT(sUnk14Values)) {
             club->unk14 = 100;

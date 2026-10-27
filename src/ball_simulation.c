@@ -1899,9 +1899,9 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, Unk20 *shot) {
         yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
     }
     if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
-        simulation->unk38 = (sideSign * (club->unk26 * 2) * speed) * 0.00078125f;
+        simulation->unk38 = (sideSign * (club->sideSpin * 2) * speed) * 0.00078125f;
         simulation->unk40 = 0.0f;
-        spinBase = club->unk12 * 0.5f;
+        spinBase = club->spin * 0.5f;
         simulation->unk34 = ((spinBase + 25.0f) * 0.006f * shot->unk14 - spinBase) * (speed / launchScale) * 0.0078125f;
         simulation->unk3C = yawRadians;
         if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
@@ -1913,11 +1913,11 @@ s32 LaunchBallSimulation(BallSimulation *simulation, s32 purpose, Unk20 *shot) {
     } else {
         GetSurfaceInfo(simulation->unkA2); /* The original has it */
         simulation->unk38 = ((sideSign * entry->unk3 * club->unk0) / 64 + shot->unk10 * (club->unk0 * 0.0078125f)
-                             + slopeSpin + sideSign * 2 * club->unk26)
+                             + slopeSpin + sideSign * 2 * club->sideSpin)
                           * (speed * launchScale * launchScale) * 0.00078125f;
         if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
             simulation->unk34 =
-                ((club->unk12 * 0.8f + 10.0f) * 0.004f * (entry->unk4 + shot->unk14) - club->unk12 * 0.5f) * speed
+                ((club->spin * 0.8f + 10.0f) * 0.004f * (entry->unk4 + shot->unk14) - club->spin * 0.5f) * speed
                 * 0.0078125f;
             speed = speed * launchScale;
             if (g_HoleConditions.isRaining == TRUE) {

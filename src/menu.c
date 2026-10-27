@@ -1064,13 +1064,13 @@ void func_8005CA48(void) {
                 g_ImportedCharacters[index].unk4 = D_800C2B50[index];
                 g_ImportedCharacters[index].unk6 = D_800C2B58[index];
                 g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance = D_800C2B48[index];
-                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12 = D_800C2B50[index];
-                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26 = D_800C2B58[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin = D_800C2B50[index];
+                g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin = D_800C2B58[index];
             } else {
                 g_ImportedCharacters[index].character = g_GameBoyCharacters[index].character + FIRST_IMPORTED_CHARACTER;
                 g_ImportedCharacters[index].unk2 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].distance;
-                g_ImportedCharacters[index].unk4 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk12;
-                g_ImportedCharacters[index].unk6 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].unk26;
+                g_ImportedCharacters[index].unk4 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].spin;
+                g_ImportedCharacters[index].unk6 = g_Clubs[(FIRST_IMPORTED_CHARACTER + index) * CLUB_SET_SIZE].sideSpin;
             }
         }
     }

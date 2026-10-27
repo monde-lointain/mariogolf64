@@ -67,12 +67,12 @@ typedef struct Club {
     /* 0x0C */ s16 distance; /* In yards */
     /* 0x0E */ s16 pitch;    /* In degrees, from -45 to -7 */
     /* 0x10 */ s16 unk10;
-    /* 0x12 */ s16 unk12;
+    /* 0x12 */ s16 spin;     /* Shown as SPIN beside the debug character viewer */
     /* 0x14 */ s16 unk14;
     /* 0x16 */ s16 type; /* The club's place in its set */
     /* 0x18 */ s32 power[SHOT_MODE_COUNT];
     /* 0x24 */ s16 kind;
-    /* 0x26 */ s16 unk26;
+    /* 0x26 */ s16 sideSpin; /* From -100, a fade, to 100, a draw */
     /* 0x28 */ s16 deflection[SHOT_MODE_COUNT]; /* 0x1000 less the test shot's landing direction */
     /* 0x2E */ u16 headImageAsset; /* The image of the club's head that the HUD shows */
     /* 0x30 */ s8 curve; /* From -4, the strongest fade, to 4, the strongest draw */
