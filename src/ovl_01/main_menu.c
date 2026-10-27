@@ -44,6 +44,9 @@ extern f32 sMenuBobPhase;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801051F0;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
+/* The choices of the list that func_801FAFEC runs, which no menu screen dispatches to */
+#define UNUSED_LIST_CHOICE_COUNT 21
+
 /* The debug caddy select: its two caddies, and where it draws its title and names */
 #define CADDY_COUNT 2
 #define CADDY_SELECT_TITLE_X 64
@@ -56,6 +59,9 @@ extern char *D_8022C0D0_ovl_01[CADDY_COUNT];
 extern const char D_8023176C_ovl_01[];
 extern s8 D_801052E8;
 extern s32 D_800FE334;
+extern s8 D_801B60B9;
+extern u8 D_801323E6;
+extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
 extern s8 D_801323A0[];
@@ -269,7 +275,38 @@ void LeaveMenuWithCourseWipe(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FAFEC_ovl_01);
+void func_801FAFEC_ovl_01(void) {
+    GetSaveData();
+    if (g_MenuPressedButtons & A_BUTTON) {
+        PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        g_MenuScreen = MENU_SCREEN_EXIT;
+        D_800FE334 = 0;
+        D_801B60B9 = 2;
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        if (D_801323E6) {
+            g_MenuScreen = MENU_SCREEN_MAIN;
+        } else {
+            g_MenuScreen = MENU_SCREEN_MAIN_WITHOUT_TRANSMIT;
+        }
+        return;
+    }
+    if (g_MenuRepeatButtons & U_JPAD) {
+        D_8022BE18_ovl_01--;
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    } else if (g_MenuRepeatButtons & D_JPAD) {
+        D_8022BE18_ovl_01++;
+        PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+    }
+    if (D_8022BE18_ovl_01 < 0) {
+        D_8022BE18_ovl_01 = UNUSED_LIST_CHOICE_COUNT - 1;
+    }
+    if (D_8022BE18_ovl_01 >= UNUSED_LIST_CHOICE_COUNT) {
+        D_8022BE18_ovl_01 = 0;
+    }
+}
 
 void func_801FB11C_ovl_01(void) {
     if (g_MenuPressedButtons & B_BUTTON) {
