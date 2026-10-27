@@ -73,9 +73,10 @@
 #define STANDINGS_HOLE_LEFT 40
 #define STANDINGS_HOLE_TOP 48
 #define SCORE_LABEL 2 /* Drawn over the score column */
-#define M_PI 3.14159265358979323846
-#define BET_TALLY_LEFT 53
-#define BET_TALLY_TOP 112
+/* Where the bets page draws each player's tallies, from the scorecard's left
+ * and top */
+#define BETS_PAGE_TALLY_LEFT 53
+#define BETS_PAGE_TALLY_TOP 112
 
 extern s32 f_MatchResultFrameCount;
 extern Mtx f_ResultCharacterMatrices[MATCH_PLAYER_COUNT];
@@ -1267,22 +1268,24 @@ void DrawBetsPage(Gfx** displayListHead) {
       if (g_GameState.betRates[j] == 0) {
         column++;
         DrawShadowedText(&gfx, g_Scorecard.x + left + NO_TALLY_LEFT,
-            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BET_TALLY_TOP, "-");
+            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP, "-");
         left += BET_COLUMN_SPACING;
       } else if (g_GameState.betRates[j] != UNSET_BET_RATE) {
         column++;
         total += g_BetTallies[i][j];
         sprintf(g_PrintBuffer, f_WideTotalFormat, g_BetTallies[i][j]);
-        DrawCondensedShadowedText(&gfx, g_Scorecard.x + left + BET_TALLY_LEFT,
-            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BET_TALLY_TOP,
+        DrawCondensedShadowedText(&gfx,
+            g_Scorecard.x + left + BETS_PAGE_TALLY_LEFT,
+            g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP,
             g_PrintBuffer);
         left += BET_COLUMN_SPACING;
       }
     }
     sprintf(g_PrintBuffer, f_WideTotalFormat, total);
     DrawCondensedShadowedText(&gfx,
-        g_Scorecard.x + (column * BET_COLUMN_SPACING) + BET_TALLY_LEFT,
-        g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BET_TALLY_TOP, g_PrintBuffer);
+        g_Scorecard.x + (column * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT,
+        g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP,
+        g_PrintBuffer);
   }
   *displayListHead = gfx;
 }
