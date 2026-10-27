@@ -3197,6 +3197,7 @@ StartLoadingChosenHole = 0x801F4A4C; // type:func segment:ovl_01
 sOpeningCharacterBuffers = 0x802259F8; // size:0x8 segment:ovl_05
 sOpeningBillboardHeap = 0x80225A04; // size:0x4 segment:ovl_05
 LoadOpening = 0x801F5018; // type:func segment:ovl_05
+g_CameraEditor = 0x8022BE30; // size:0xBC segment:ovl_05
 FreeOpening = 0x801F5100; // type:func segment:ovl_05
 GetMidpointVertex = 0x80408080; // type:func segment:hole_editor
 DrawMenuScreen = 0x801FB198; // type:func segment:ovl_01

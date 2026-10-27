@@ -37,7 +37,7 @@ typedef struct CameraEditor {
 #define EDITOR_FLAG_UNK8 0x8
 #define EDITOR_FLAG_UNK80 0x80
 
-extern CameraEditor D_8022BE30_ovl_05;
+extern CameraEditor g_CameraEditor;
 
 void func_80203620_ovl_05(void);
 void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
@@ -45,30 +45,30 @@ void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802033B0_ovl_05);
 
 void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
-    D_8022BE30_ovl_05.eye[0] = arg0;
-    D_8022BE30_ovl_05.eye[1] = arg1;
-    D_8022BE30_ovl_05.eye[2] = arg2;
-    D_8022BE30_ovl_05.lookAt[0] = arg3;
-    D_8022BE30_ovl_05.lookAt[1] = arg4;
-    D_8022BE30_ovl_05.lookAt[2] = arg5;
+    g_CameraEditor.eye[0] = arg0;
+    g_CameraEditor.eye[1] = arg1;
+    g_CameraEditor.eye[2] = arg2;
+    g_CameraEditor.lookAt[0] = arg3;
+    g_CameraEditor.lookAt[1] = arg4;
+    g_CameraEditor.lookAt[2] = arg5;
     func_80203620_ovl_05();
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_802035BC_ovl_05);
 
 void func_802035E4_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BE30_ovl_05.unk80 = arg1;
-    D_8022BE30_ovl_05.unk84 = arg2;
+    g_CameraEditor.unk80 = arg1;
+    g_CameraEditor.unk84 = arg2;
 }
 
 void func_802035F8_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BE30_ovl_05.unk88 = arg1;
-    D_8022BE30_ovl_05.unk8C = arg2;
+    g_CameraEditor.unk88 = arg1;
+    g_CameraEditor.unk8C = arg2;
 }
 
 void func_8020360C_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
-    D_8022BE30_ovl_05.unk90 = arg1;
-    D_8022BE30_ovl_05.unk94 = arg2;
+    g_CameraEditor.unk90 = arg1;
+    g_CameraEditor.unk94 = arg2;
 }
 
 /* Works out the camera's heading, pitch and distance from its eye and look-at point */
@@ -77,17 +77,17 @@ void func_80203620_ovl_05(void) {
     f32 offsetY;
     f32 offsetZ;
 
-    offsetX = D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0];
-    D_8022BE30_ovl_05.pitch = atan2f(D_8022BE30_ovl_05.lookAt[1] - D_8022BE30_ovl_05.eye[1],
+    offsetX = g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0];
+    g_CameraEditor.pitch = atan2f(g_CameraEditor.lookAt[1] - g_CameraEditor.eye[1],
                      sqrtf(offsetX * offsetX +
-                           (D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2]) *
-                               (D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2])));
-    D_8022BE30_ovl_05.heading = atan2f(D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2],
-                       D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]);
-    offsetY = D_8022BE30_ovl_05.lookAt[1] - D_8022BE30_ovl_05.eye[1];
-    offsetZ = D_8022BE30_ovl_05.lookAt[2] - D_8022BE30_ovl_05.eye[2];
-    D_8022BE30_ovl_05.distance = sqrtf((D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]) *
-                           (D_8022BE30_ovl_05.lookAt[0] - D_8022BE30_ovl_05.eye[0]) +
+                           (g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2]) *
+                               (g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2])));
+    g_CameraEditor.heading = atan2f(g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2],
+                       g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]);
+    offsetY = g_CameraEditor.lookAt[1] - g_CameraEditor.eye[1];
+    offsetZ = g_CameraEditor.lookAt[2] - g_CameraEditor.eye[2];
+    g_CameraEditor.distance = sqrtf((g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]) *
+                           (g_CameraEditor.lookAt[0] - g_CameraEditor.eye[0]) +
                        offsetY * offsetY + offsetZ * offsetZ);
 }
 
@@ -95,17 +95,17 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_8020370C_ovl_0
 
 /* Sets two flags in entry index and clears them in the other before calling func_8020370C */
 void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
-    if (!(D_8022BE30_ovl_05.flags[index] & EDITOR_FLAG_UNK80)) {
-        D_8022BE30_ovl_05.flags[index] ^= EDITOR_FLAG_UNK80;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK80)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK80;
     }
-    if (D_8022BE30_ovl_05.flags[index ^ 1] & EDITOR_FLAG_UNK80) {
-        D_8022BE30_ovl_05.flags[index ^ 1] ^= EDITOR_FLAG_UNK80;
+    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK80) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK80;
     }
-    if (!(D_8022BE30_ovl_05.flags[index] & EDITOR_FLAG_UNK8)) {
-        D_8022BE30_ovl_05.flags[index] ^= EDITOR_FLAG_UNK8;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
     }
-    if (D_8022BE30_ovl_05.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
-        D_8022BE30_ovl_05.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
     }
     func_8020370C_ovl_05(index, x, y, z, frameCount);
 }
@@ -117,14 +117,14 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203B60_ovl_0
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203C90_ovl_05);
 
 s32 func_80203DC4_ovl_05(void) {
-    if (D_8022BE30_ovl_05.flags[0] == 0 && D_8022BE30_ovl_05.flags[1] == 0) {
+    if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
         return TRUE;
     }
     return FALSE;
 }
 
 s32 func_80203DE8_ovl_05(s32 mask) {
-    if (!(D_8022BE30_ovl_05.flags[0] & mask) && !(D_8022BE30_ovl_05.flags[1] & mask)) {
+    if (!(g_CameraEditor.flags[0] & mask) && !(g_CameraEditor.flags[1] & mask)) {
         return TRUE;
     }
     return FALSE;
