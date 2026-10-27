@@ -56,6 +56,11 @@
 /* Silences the overlay manager's log */
 #define GAME_FLAG_QUIET_OVERLAY_LOG 0x4D
 
+/* Prints the opening's ball speed in km/h each step, down a column of eight
+ * rows */
+#define GAME_FLAG_SHOW_OPENING_BALL_SPEED 0x09
+/* Prints how far the opening's ball is above where it was struck, in yards */
+#define GAME_FLAG_SHOW_OPENING_BALL_HEIGHT 0x0B
 /* Lets the second and fourth controllers open and close the inset view */
 #define GAME_FLAG_INSET_VIEW_BUTTONS 0x2F
 
