@@ -563,7 +563,7 @@ segments:
     exclusive_ram_id: debug
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x11BA50, asm]
+      - [0x11BA50, c, hole_editor/hole_editor]
       - [0x127FD0, data]
 
   - name: ovl_02
@@ -613,7 +613,10 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0x1370B0, asm]
+      - [0x1370B0, hasm, ovl_05/padding]
+      - [0x1370C0, c, ovl_05/opening]
+      - [0x145A30, c, ovl_05/opening_camera_editor]
+      - [0x148D00, c, ovl_05/opening_ball]
       - [0x14D2C0, data]
       - { start: 0x14EA70, type: bss, vram: 0x8020C3F0 }
 
