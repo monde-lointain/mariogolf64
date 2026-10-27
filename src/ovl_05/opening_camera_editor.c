@@ -197,7 +197,38 @@ s32 func_80203DE8_ovl_05(s32 mask) {
     return FALSE;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203E14_ovl_05);
+/* Stops the editor's moves and puts its speeds back to their starting values */
+void func_80203E14_ovl_05(void) {
+    s32 i;
+
+    for (i = 0; i != EDITOR_POINT_COUNT; i++) {
+        g_CameraEditor.targets[i][0] = 0.0f;
+        g_CameraEditor.targets[i][1] = 0.0f;
+        g_CameraEditor.targets[i][2] = 0.0f;
+        g_CameraEditor.unk40[i][0] = 0.0f;
+        g_CameraEditor.unk40[i][1] = 0.0f;
+        g_CameraEditor.unk40[i][2] = 0.0f;
+        /* The game clears these twice */
+        g_CameraEditor.unk40[i][0] = 0.0f;
+        g_CameraEditor.unk40[i][1] = 0.0f;
+        g_CameraEditor.unk40[i][2] = 0.0f;
+        g_CameraEditor.unk70[i] = 30.0f;
+        g_CameraEditor.unk78[i] = 3.0f;
+        g_CameraEditor.unk98[i] = 0.0f;
+        g_CameraEditor.unkB4[i] = 0;
+        g_CameraEditor.flags[i] = 0;
+    }
+    g_CameraEditor.unkA0 = 0.0f;
+    g_CameraEditor.unkA4 = 0.0f;
+    g_CameraEditor.unkA8 = 0.0f;
+    g_CameraEditor.unk80 = DEGREES_TO_RADIANS(6.0f);
+    g_CameraEditor.unk84 = DEGREES_TO_RADIANS(2.0f);
+    g_CameraEditor.unk88 = DEGREES_TO_RADIANS(3.0f);
+    g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
+    g_CameraEditor.unk90 = 10.0f;
+    g_CameraEditor.unk94 = 1.0f;
+    func_80203620_ovl_05();
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203F70_ovl_05);
 
