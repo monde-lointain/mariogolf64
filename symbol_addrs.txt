@@ -3198,3 +3198,4 @@ sOpeningCharacterBuffers = 0x802259F8; // size:0x8 segment:ovl_05
 sOpeningBillboardHeap = 0x80225A04; // size:0x4 segment:ovl_05
 LoadOpening = 0x801F5018; // type:func segment:ovl_05
 FreeOpening = 0x801F5100; // type:func segment:ovl_05
+GetMidpointVertex = 0x80408080; // type:func segment:hole_editor
