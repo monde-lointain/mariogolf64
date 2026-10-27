@@ -12,6 +12,7 @@
 #include "hole_display.h"
 #include "hole_loader.h"
 #include "libc.h"
+#include "main_menu.h"
 #include "math_util.h"
 #include "menu.h"
 #include "menu_memory.h"
@@ -111,7 +112,6 @@ extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern void *D_800FF420[2];
 extern s32 D_801051F0;
 extern void *D_801052BC[2];
-extern void *D_801B60D0;
 extern void *D_801F4A20;
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
@@ -121,7 +121,6 @@ extern u8 D_8022F8CC_ovl_01; /* Which of D_801B93E0's buffers holds the star fra
 extern void *D_801B93E0[];
 extern s32 D_8022F848_ovl_01[]; /* The star's frames */
 extern u8 D_8022F8CE_ovl_01;
-extern s32 D_80105B68;
 extern s32 D_8022F8C0_ovl_01;
 extern u8 D_8022F8C4_ovl_01;
 extern s8 D_8022F8C5_ovl_01;
@@ -147,10 +146,6 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 /* Where func_802004A0 draws the mode icon, unscaled */
 #define MODE_ICON_LEFT 168
 #define MODE_ICON_TOP 96
-/* The most modes the mode select offers for a player count */
-#define MODE_CHOICE_LIMIT 12
-
-extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
 
 /* func_80200EF0 draws the players' characters, and in Get Character the rival as a spinning silhouette */
 #define NO_RIVAL -1
@@ -184,33 +179,9 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 #define MENU_LAYER_UNK8 (1 << 3)
 #define MENU_LAYER_UNK10 (1 << 4)
 
-/* The choices of both main menus; the one without Transmit stops at its options */
-#define MAIN_CHOICE_CLUBHOUSE 0
-#define MAIN_CHOICE_HELP 1
-#define MAIN_CHOICE_OPTIONS 2
-#define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
-#define MAIN_CHOICE_CLUB_TOURNAMENT 2
-#define MAIN_CHOICE_FULL_OPTIONS 3
-#define MAIN_CHOICE_COUNT 4
-
-/* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
-#define CLUBHOUSE_CHOICE_COUNT 5
-#define CLUBHOUSE_ROOM_COURSE_STATS 0
-#define CLUBHOUSE_ROOM_UNK12 1
-#define CLUBHOUSE_ROOM_UNK13 2
-#define CLUBHOUSE_ROOM_BIRDIE_BADGES 3
-#define CLUBHOUSE_ROOM_CHARACTER_TABLE 4
-#define CLUBHOUSE_ROOM_BEST_TIMES 5
-
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
-/*
- * The menus set the top byte of g_MapCamera's view mode. Reading it as a
- * byte of the field rather than of the whole camera lets the compiler move
- * the read past display list words, as the original does.
- */
-#define MAP_CAMERA_MODE_TOP_BYTE (*(u8 *)&g_MapCamera.view.mode)
 /* Values of D_801B60B9, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
@@ -224,8 +195,7 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 /* The choices of the list that func_801FAFEC runs, which no menu screen dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
-/* The debug caddy select: its two caddies, and where it draws its title and names */
-#define CADDY_COUNT 2
+/* Where the debug caddy select draws its title and names */
 #define CADDY_SELECT_TITLE_X 64
 #define CADDY_SELECT_TITLE_Y 32
 #define CADDY_SELECT_NAME_X 96
@@ -238,19 +208,15 @@ extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s8 D_801B60B9;
 extern u8 D_801323E6;
-extern s16 D_8022BF1C_ovl_01[CLUBHOUSE_CHOICE_COUNT];
 extern s32 D_8022BE18_ovl_01;
 extern s32 D_801B609C;
 extern s32 D_800FBD40[];
-extern MenuMemory D_801323A0;
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_8022BE28_ovl_01;
 extern s32 D_8022BE2C_ovl_01;
 extern s32 D_801B7070;
 extern s32 D_8022BE84_ovl_01;
-extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
-extern s32 D_8023BFD0_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
 extern s8 D_801B60B8;
@@ -261,7 +227,6 @@ extern s8 D_800FBE08[MAX_PLAYER_COUNT];
 extern s16 D_801B71CC;
 extern s16 D_800FBE2C;
 extern u8 D_801B9410;
-extern u8 D_800FF4C0;
 extern s8 D_801B5634;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
@@ -277,7 +242,6 @@ extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
  * into the buffers of D_801049A0 not shown; the courses face the screen at
  * the middle frame. Changing record slides the screen across instead.
  */
-#define MINI_GOLF_RECORD_COUNT 2
 #define MINI_GOLF_TURN_FRAME_COUNT 5
 #define MINI_GOLF_FACING_FRAME 2
 #define MINI_GOLF_TURN_FRAME_DURATION 2
@@ -324,7 +288,6 @@ extern u8 D_8022BE80_ovl_01; /* Which of D_800FBDFC's buffers shows the course *
 
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
-s32 GetOpenCourseCount(void);
 s32 func_8022BDC4_ovl_01(void);
 s32 func_8022BDD0_ovl_01(void);
 s32 func_8021E468_ovl_01(void);
@@ -334,22 +297,11 @@ s32 SaveOrContinueGameByMode(s32 isContinuing);
 s32 func_801F7660_ovl_01(s32 arg0, s32 playerNumber);
 void func_80217B88_ovl_01(s32 requestedPreset);
 void func_80228B60_ovl_01(void);
-void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
 void func_801FC754_ovl_01(Gfx **displayListHead);
 void func_801FCB74_ovl_01(Gfx **displayListHead);
 void func_801FD4F0_ovl_01(Gfx **displayListHead);
 void func_801FD7B0_ovl_01(Gfx **displayListHead);
 void func_801FDA40_ovl_01(Gfx **displayListHead);
-void func_801FE4D0_ovl_01(Gfx **displayListHead);
-void func_80201574_ovl_01(Gfx **displayListHead);
-void func_80202000_ovl_01(Gfx **displayListHead);
-void func_80205038_ovl_01(Gfx **displayListHead);
-void func_802058B8_ovl_01(Gfx **displayListHead);
-void func_80206180_ovl_01(Gfx **displayListHead);
-void func_80206A68_ovl_01(Gfx **displayListHead);
-void func_80207D08_ovl_01(Gfx **displayListHead);
-void func_80207E18_ovl_01(Gfx **displayListHead);
-void DrawBirdieBadgeLabel(Gfx **displayListHead);
 void func_8020B590_ovl_01(Gfx **displayListHead, u8 isSinglePlayer);
 void func_8020E898_ovl_01(Gfx **displayListHead);
 void func_80213748_ovl_01(Gfx **displayListHead);
@@ -1814,19 +1766,6 @@ void func_801FD7B0_ovl_01(Gfx **displayListHead) {
     }
     *displayListHead = gfx;
 }
-
-/* The chosen label grows two pixels a frame until it passes the limit, then shrinks until it passes 0 */
-#define CHOSEN_LABEL_GROWTH_LIMIT 6
-#define CHOSEN_LABEL_GROWTH_STEP 2
-#define LABEL_GROWING 0
-#define LABEL_SHRINKING 1
-
-extern s16 D_8022BE8E_ovl_01;
-extern s16 D_8022BE90_ovl_01;
-extern void *D_8012D420[2];
-extern void *D_801B5CD0[2];
-extern s16 D_800FE33C;
-extern u8 D_800FBDB9;
 
 /* The title screen's labels, 128 by 20 each, plain in D_801B5CD0 and lit in D_8012D420 */
 #define TITLE_LABEL_COUNT 7
