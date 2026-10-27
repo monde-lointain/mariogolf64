@@ -1907,20 +1907,6 @@ INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
         ((column) * 128) + 0x86, ((row) * 128) + 0x82); \
   }
 
-/* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
-#define DRAW_TILE_QUADS( \
-    top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
-  { \
-    gSP2Triangles( \
-        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
-    gSP2Triangles( \
-        gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
-    gSP2Triangles( \
-        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
-    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, \
-        bottomOdd, 0); \
-  }
-
 /* Loads the noise texture that DrawGround blends over the tiles */
 #define LOAD_NOISE_TEXTURE(shiftS, shiftT) \
   gDPLoadMultiBlock(gfx++, TEXTURE_ADDRESS(D_800E12B0), NOISE_TMEM, \

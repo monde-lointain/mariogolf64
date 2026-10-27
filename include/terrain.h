@@ -198,6 +198,20 @@ typedef struct IntegerPlane {
 #define IS_COARSE(tileIndex) \
   (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_COARSE)
 
+/* Draws a tile's 2 by 2 quads from the cache slots of its three vertex rows */
+#define DRAW_TILE_QUADS( \
+    top, topOdd, top1, middle, middleOdd, middle1, bottom, bottomOdd, bottom1) \
+  { \
+    gSP2Triangles( \
+        gfx++, top, topOdd, middle, 0, topOdd, middleOdd, middle, 0); \
+    gSP2Triangles( \
+        gfx++, middle, middleOdd, bottom, 0, middleOdd, bottomOdd, bottom, 0); \
+    gSP2Triangles( \
+        gfx++, topOdd, top1, middleOdd, 0, top1, middle1, middleOdd, 0); \
+    gSP2Triangles(gfx++, middleOdd, middle1, bottomOdd, 0, middle1, bottom1, \
+        bottomOdd, 0); \
+  }
+
 extern Vtx* g_VertexListHead;
 extern f32 g_GroundFarthestDepth;
 extern f32 g_GroundNearDepthEighth;
