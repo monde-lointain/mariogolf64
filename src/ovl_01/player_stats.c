@@ -59,6 +59,18 @@
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
 
+/* The animated arrows that func_8021BE88 draws either side of the page */
+#define PAGE_ARROW_COUNT 2
+#define PAGE_ARROW_RIGHT 1
+#define PAGE_ARROW_SIZE 32
+#define PAGE_ARROW_MASK 5
+#define PAGE_ARROW_IMAGE_SIZE (PAGE_ARROW_SIZE * PAGE_ARROW_SIZE / 2)
+#define PAGE_ARROW_FRAME_COUNT 8
+#define PAGE_ARROW_FRAME_DURATION 3
+#define PAGE_ARROW_LEFT_X 76
+#define PAGE_ARROW_RIGHT_X 212
+#define PAGE_ARROW_TOP 122
+
 /* The blinking pair of arrows that func_8021CBDC draws above and below a point */
 #define STATS_ARROW_COUNT 2
 #define STATS_ARROW_SIZE 16
@@ -128,6 +140,8 @@ extern u8 D_80230838_ovl_01;
 extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern u8 D_802303A1_ovl_01;
+extern s16 D_802303A6_ovl_01;
+extern s16 D_802303A8_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
 extern void *D_8023B340_ovl_01;
 extern void *D_8023B344_ovl_01;
@@ -404,7 +418,60 @@ s32 func_8021B618_ovl_01(Gfx **displayListHead, u8 slide) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021B87C_ovl_01);
 
+/*
+ * Doesn't match: the original computes the mirrored arrow's start without a
+ * branch, and keeps the display list head in its argument slot.
+ */
+#ifdef NON_MATCHING
+void func_8021BE88_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 arrowIndex;
+    s32 left;
+    s32 unused[4];
+
+    D_802303A8_ovl_01++;
+    if (D_802303A8_ovl_01 >= PAGE_ARROW_FRAME_DURATION) {
+        D_802303A6_ovl_01++;
+        if (D_802303A6_ovl_01 >= PAGE_ARROW_FRAME_COUNT) {
+            D_802303A6_ovl_01 = 0;
+        }
+        D_802303A8_ovl_01 = 0;
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B35C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
+        if (arrowIndex == PAGE_ARROW_RIGHT) {
+            /* The right arrow is the left one's image, mirrored */
+            gDPLoadTextureTile_4b(gfx++,
+                                  ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                   D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+                                      ~7,
+                                  G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0, PAGE_ARROW_SIZE - 1,
+                                  PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP,
+                                  PAGE_ARROW_MASK, PAGE_ARROW_MASK, G_TX_NOLOD, G_TX_NOLOD);
+            left = PAGE_ARROW_RIGHT_X;
+        } else {
+            gDPLoadTextureTile_4b(gfx++,
+                                  ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                                   D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+                                      ~7,
+                                  G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0, PAGE_ARROW_SIZE - 1,
+                                  PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                                  G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            left = PAGE_ARROW_LEFT_X;
+        }
+        gDPPipeSync(gfx++);
+        gSPTextureRectangle(gfx++, left << 2, PAGE_ARROW_TOP << 2, (left + PAGE_ARROW_SIZE) << 2,
+                            (PAGE_ARROW_TOP + PAGE_ARROW_SIZE) << 2, G_TX_RENDERTILE,
+                            (arrowIndex == PAGE_ARROW_RIGHT) << 10, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021BE88_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C200_ovl_01);
 
