@@ -545,7 +545,14 @@ segments:
     exclusive_ram_id: overlay_801F4A30
     symbol_name_format: $VRAM_$SEG
     subsegments:
-      - [0xDE9B0, asm]
+      - [0xDE9B0, hasm, ovl_01/padding]
+      - [0xDE9C0, c, ovl_01/main_menu]
+      - [0xF3480, c, ovl_01/character_select]
+      - [0xF7F90, c, ovl_01/course_menu]
+      - [0xFD310, c, ovl_01/menu_scene]
+      - [0x101830, c, ovl_01/player_stats]
+      - [0x109570, c, ovl_01/save_menu]
+      - [0x110670, c, ovl_01/tournament_menu]
       - [0x115D80, data]
       - { start: 0x11BA50, type: bss, vram: 0x80231AD0 }
 
