@@ -29,6 +29,13 @@ typedef struct ControllerState {
     /* 0xD */ s8 stickY;
 } ControllerState; /* size = 0xE */
 
+typedef struct MenuRepeatState {
+    /* 0x0 */ s16 repeatDelay;       /* Frames until the buttons repeat */
+    /* 0x2 */ s8 stickDirectionX;    /* -1, 0 or 1 */
+    /* 0x3 */ s8 stickDirectionY;
+    /* 0x4 */ u16 previousButtons;
+} MenuRepeatState; /* size = 0x6 */
+
 /* The game's view of the controller in each port */
 extern ControllerState g_ControllerStates[MAXCONTROLLERS];
 
@@ -39,6 +46,7 @@ extern NUContData g_PreviousControllerData[MAXCONTROLLERS];
 /* Readings for menus, this frame and the last */
 extern NUContData g_MenuControllerData[MAXCONTROLLERS];
 extern NUContData g_PreviousMenuControllerData[MAXCONTROLLERS];
+extern MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
 
 /* One bit for each port with a controller plugged in, from bit 0 */
 extern u8 g_ConnectedControllerBits;

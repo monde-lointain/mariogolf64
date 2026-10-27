@@ -78,13 +78,6 @@
 /* A ControllerState counts the stick as pressing a direction past this */
 #define STATE_STICK_DIRECTION_MIN 30
 
-typedef struct MenuRepeatState {
-    /* 0x0 */ s16 repeatDelay;       /* Frames until the buttons repeat */
-    /* 0x2 */ s8 stickDirectionX;    /* -1, 0 or 1 */
-    /* 0x3 */ s8 stickDirectionY;
-    /* 0x4 */ u16 previousButtons;
-} MenuRepeatState; /* size = 0x6 */
-
 extern volatile u8 g_DebugHaltState;
 extern u16 *sFramebuffers[FRAMEBUFFER_COUNT];
 extern s32 sRetraceCount;
@@ -92,7 +85,6 @@ extern s32 sFramesThisSecond;
 extern s32 sIsOddRetrace;
 extern volatile s32 g_MainLoopState;
 extern u8 sGameFlagBits[GAME_FLAG_COUNT / 8];
-extern MenuRepeatState g_MenuRepeatStates[MAXCONTROLLERS];
 extern u16 *g_MessageFramebuffer;
 extern char g_RomBuildDate[BUILD_DATE_LENGTH_MAX + 1];
 extern char g_SaveBuildDate[];
