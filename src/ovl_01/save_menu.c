@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "course.h"
 #include "game_flags.h"
 #include "libc.h"
 #include "menu_memory.h"
@@ -9,6 +10,20 @@
 #include "sram.h"
 
 /* The image listing the game modes, in orange */
+/* The buffers of func_802218C0, and what it reads into them */
+#define SAVE_GAME_BUFFER_UNK1 1
+#define SAVE_GAME_BUFFER_PLAYER_LABELS 2
+#define SAVE_GAME_BUFFER_UNK3 3
+#define SAVE_GAME_BUFFER_UNK4 4
+#define SAVE_GAME_BUFFER_UNK5 5
+#define SAVE_GAME_BUFFER_COURSE 6
+#define SAVE_GAME_BUFFER_CHOSEN_COURSE 7
+#define ASSET_SAVE_GAME_UNK1 0x63D
+#define ASSET_PLAYER_LABELS 0x5E3 /* 1P to 4P, 1C to 4C and Com */
+#define ASSET_SAVE_GAME_UNK3 0x82A
+#define ASSET_SAVE_GAME_UNK4 0x82B
+#define ASSET_SAVE_GAME_UNK5 0x82C
+
 /* The games that func_80222CDC continues from the save's mode tables, by the save menu's slot */
 #define SAVE_MENU_GAME_TOURNAMENT 0
 #define SAVE_MENU_GAME_GET_CHARACTER 1
@@ -55,6 +70,17 @@ typedef struct {
 
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern u16 D_800C2064[];
+extern u16 D_800C208C[];
+extern s16 D_800C20D4[];
+extern void *D_801052C4[2];
+extern void *D_8023BD80_ovl_01;
+extern void *D_8023BD84_ovl_01;
+extern void *D_8023BD8C_ovl_01;
+extern void *D_8023BD90_ovl_01;
+extern void *D_8023BD98_ovl_01;
+extern void *D_8023BD9C_ovl_01;
+extern void *D_8023BDA0_ovl_01;
+extern u8 D_80230B4E_ovl_01;
 extern void *D_8012D430[CHARACTER_COUNT];
 extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
@@ -262,7 +288,101 @@ s32 func_8022181C_ovl_01(void) {
     return 1;
 }
 
+/* Doesn't match: the original keeps the saved game's place in a saved register */
+#ifdef NON_MATCHING
+void func_802218C0_ovl_01(void *buffer, u8 bufferKind) {
+    EncodedAsset asset;
+    AssetFile file;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s32 gameIndex;
+    void **bufferSlot;
+    void **imageSlot;
+    s32 miniGolfIndex;
+
+    switch (bufferKind) {
+        case SAVE_GAME_BUFFER_UNK1:
+            D_8023BD80_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_SAVE_GAME_UNK1, &asset);
+            ReadEncodedAsset(D_8023BD80_ovl_01, &asset);
+            break;
+        case SAVE_GAME_BUFFER_PLAYER_LABELS:
+            D_8023BD84_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
+            ReadEncodedAsset(D_8023BD84_ovl_01, &asset);
+            break;
+        case SAVE_GAME_BUFFER_UNK3:
+            imageSlot = &D_8023BD98_ovl_01;
+            *imageSlot = buffer;
+            OpenEncodedAsset(ASSET_SAVE_GAME_UNK3, &asset);
+            ReadEncodedAsset(*imageSlot, &asset);
+            break;
+        case SAVE_GAME_BUFFER_UNK4:
+            imageSlot = &D_8023BD9C_ovl_01;
+            *imageSlot = buffer;
+            OpenEncodedAsset(ASSET_SAVE_GAME_UNK4, &asset);
+            ReadEncodedAsset(*imageSlot, &asset);
+            break;
+        case SAVE_GAME_BUFFER_UNK5:
+            imageSlot = &D_8023BDA0_ovl_01;
+            *imageSlot = buffer;
+            OpenEncodedAsset(ASSET_SAVE_GAME_UNK5, &asset);
+            ReadEncodedAsset(*imageSlot, &asset);
+            break;
+        case SAVE_GAME_BUFFER_COURSE:
+            bufferSlot = &D_8023BD8C_ovl_01;
+            *bufferSlot = buffer;
+            gameIndex = memory->savedGameIndex;
+            if (gameIndex < 0) {
+                gameIndex = 0;
+            }
+            if (gameIndex >= SAVED_GAME_COUNT) {
+                gameIndex = SAVED_GAME_COUNT - 1;
+            }
+            if (!save->savedGames[gameIndex].isValid) {
+                break;
+            }
+            if (!save->savedGames[gameIndex].state.isMiniGolf) {
+                OpenEncodedAsset(D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
+                ReadEncodedAsset(*bufferSlot, &asset);
+            } else {
+                miniGolfIndex = save->savedGames[gameIndex].state.courseIndex - MINI_GOLF_COURSE_INDEX;
+                OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
+                ReadEncodedAsset(*bufferSlot, &asset);
+                OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
+                ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
+            }
+            break;
+        case SAVE_GAME_BUFFER_CHOSEN_COURSE:
+            bufferSlot = &D_8023BD90_ovl_01;
+            *bufferSlot = buffer;
+            gameIndex = memory->savedGameIndex;
+            if (gameIndex < 0) {
+                gameIndex = 0;
+            }
+            if (gameIndex >= SAVED_GAME_COUNT) {
+                gameIndex = SAVED_GAME_COUNT - 1;
+            }
+            if (!save->savedGames[gameIndex].isValid) {
+                break;
+            }
+            if (!save->savedGames[gameIndex].state.isMiniGolf) {
+                OpenEncodedAsset(D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
+                ReadEncodedAsset(*bufferSlot, &asset);
+            } else {
+                miniGolfIndex = save->savedGames[gameIndex].state.courseIndex - MINI_GOLF_COURSE_INDEX;
+                OpenEncodedAsset(D_800C208C[miniGolfIndex], &asset);
+                ReadEncodedAsset(*bufferSlot, &asset);
+                OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
+                ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
+            }
+            break;
+    }
+    D_80230B4E_ovl_01 = 0;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_802218C0_ovl_01);
+#endif
 
 void func_80221B20_ovl_01(void) {
     SaveData *save = GetSaveData();
