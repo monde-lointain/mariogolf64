@@ -53,7 +53,7 @@ extern s32 D_800C308C;
 extern s8 D_800C30A4;
 extern s32 g_PlayExit;
 extern s32 g_HoleEndStep;
-extern u8 D_80104EB8[GROUND_TILE_COUNT];
+extern u8 g_IsGroundTileNearby[GROUND_TILE_COUNT];
 extern u8 D_800E12B0[RANDOM_GRID_SIZE * RANDOM_GRID_SIZE];
 extern s16 D_80104F78;
 extern s32 D_80104F7C;
@@ -1605,7 +1605,7 @@ void CopyDoublePair(f64 *from, f64 *to) {
 
 /*
  * Unless on a mini-golf course, marks the ground tile holding a point
- * and the tiles around it in D_80104EB8
+ * and the tiles around it in g_IsGroundTileNearby
  */
 void MarkNearbyGroundTiles(u32 x, u32 z) {
     u32 column;
@@ -1621,7 +1621,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
                 for (i = -1; i < 2; i++) {
                     for (j = -1; j < 2; j++) {
                         if (column + j < GROUND_TILE_COLUMN_COUNT && row + i < GROUND_TILE_ROW_COUNT) {
-                            D_80104EB8[(row + i) * GROUND_TILE_COLUMN_COUNT + (column + j)] = TRUE;
+                            g_IsGroundTileNearby[(row + i) * GROUND_TILE_COLUMN_COUNT + (column + j)] = TRUE;
                         }
                     }
                 }
@@ -1630,8 +1630,8 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
     }
 }
 
-void func_800628A0(void) {
-    bzero(D_80104EB8, sizeof(D_80104EB8));
+void ClearNearbyGroundTiles(void) {
+    bzero(g_IsGroundTileNearby, sizeof(g_IsGroundTileNearby));
 }
 
 static inline s32 GetMirroredOffset(s32 coordinate) {
@@ -1679,7 +1679,7 @@ void func_800628C4(void) {
 INCLUDE_ASM("asm/nonmatchings/play", func_800628C4);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80062A24);
+INCLUDE_ASM("asm/nonmatchings/play", SetGroundCombineMode);
 
-INCLUDE_ASM("asm/nonmatchings/play", func_80062A8C);
+INCLUDE_ASM("asm/nonmatchings/play", DrawGround);
 

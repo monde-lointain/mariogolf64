@@ -905,7 +905,7 @@ extern s32 sUnreadDebugSwitch;
  * frames, and back in while it is -1
  */
 extern s32 g_HoleFlyoverFrame;
-extern f32 D_800C30D4;
+extern f32 g_GroundFarthestDepth;
 extern s32 D_8022BE08;
 extern s32 _mus_cpu_last;
 extern s32 _mus_cpu_worst;
@@ -915,7 +915,7 @@ s32 __MusIntMemRemaining(void);
 void DrawBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawFadingBillboards(CameraMatrices *matrices, s32 cameraIndex);
 void DrawAnimatedBoxes(void);
-void func_80062A8C(CameraMatrices *matrices, s32);
+void DrawGround(CameraMatrices *matrices, s32);
 void DrawEffects(CameraMatrices *matrices, Gfx **displayListHead);
 void DrawRain(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawGreenGrid(Gfx **displayListHead, CameraMatrices *matrices);
@@ -1308,7 +1308,7 @@ s32 DrawGame(void) {
                     usesFloatMatrices = TRUE;
                     if (g_Cameras[viewIndex].view.drawFlags != 0) {
                         nearZ = -COURSE_NEAR_CLIP;
-                        farClip = -D_800C30D4 * 1.2f;
+                        farClip = -g_GroundFarthestDepth * 1.2f;
                         if (g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK8
                             || g_Cameras[viewIndex].view.mode == CAMERA_MODE_UNK2) {
                             nearZ = -CLOSE_UP_NEAR_CLIP;
@@ -1491,7 +1491,7 @@ s32 DrawGame(void) {
                     } else {
                         SetSceneFog(&g_DisplayListHead);
                         if (!IsGameFlagSet(6)) {
-                            func_80062A8C(matrices, terrainStyle);
+                            DrawGround(matrices, terrainStyle);
                         }
                         DrawBillboards(matrices, viewIndex);
                         if (g_ScreenEffect != SCREEN_EFFECT_SAVED_FRAME) {
@@ -1602,7 +1602,7 @@ s32 DrawGame(void) {
         } else if (drawMode == DRAW_MODE_INSET_SCREEN) {
             if (D_8022BE08 != 0 && viewIndex == 1 && g_HasLoaderFinished == 1) {
                 SetSceneFog(&g_DisplayListHead);
-                func_80062A8C(matrices, terrainStyle);
+                DrawGround(matrices, terrainStyle);
                 DrawBillboards(matrices, viewIndex);
                 if (!IsGameFlagSet(0x17)) {
                     DrawPin(matrices, &camera->view, viewIndex);
@@ -1613,7 +1613,7 @@ s32 DrawGame(void) {
             }
         } else if (drawsScene && IsOverlayInExpansionMemory()) {
             if (!IsGameFlagSet(6)) {
-                func_80062A8C(matrices, terrainStyle);
+                DrawGround(matrices, terrainStyle);
             }
             DrawHoleTriangles(&g_DisplayListHead, matrices, &g_Cameras[viewIndex]);
             DrawPin(matrices, &g_MapCamera.view, viewIndex);

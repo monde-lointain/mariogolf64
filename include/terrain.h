@@ -49,7 +49,7 @@ typedef struct GroundTile {
     /* 0x000 */ u16 texels[GROUND_TILE_TEXEL_ROW_COUNT][GROUND_TILE_TEXEL_ROW_LENGTH]; /* RGBA16 */
     /* 0x990 */ s16 unk990;
     /* 0x992 */ u16 unk992;
-    /* 0x994 */ s32 unk994;
+    /* 0x994 */ s32 detail; /* How finely the tile is drawn this frame, negative when hidden */
     /* 0x998 */ Vec3 center; /* The tile's middle grid vertex */
     /* 0x9A4 */ s32 midpointBlockIndex; /* Negative when the tile has no midpoints */
     /* 0x9A8 */ u8 unk9A8[0xA00 - 0x9A8];

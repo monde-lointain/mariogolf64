@@ -883,7 +883,7 @@ void InitTerrainTextures(void) {
     for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
         tile = &g_WorkArea.hole.tiles[tileIndex];
         g_GroundTileHeightRanges[tileIndex] = 1.0f;
-        tile->unk994 = 1;
+        tile->detail = 1;
         tile->midpointBlockIndex = -1;
         tile->unk990 = 0;
         for (texelRow = 0; texelRow < 32; texelRow++) {

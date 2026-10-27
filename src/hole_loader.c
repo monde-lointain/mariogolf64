@@ -59,7 +59,7 @@
 #define MINI_GOLF_SHADED_RAISE 30.0f
 #define MINI_GOLF_SHADED_DROP 6.0f
 
-/* The loader thread waits this many frames after D_80105318's frame before loading */
+/* The loader thread waits this many frames after the ground was last drawn before loading */
 #define LOADER_FRAME_DELAY 3
 
 #define LOADER_THREAD_ID 10
@@ -124,7 +124,7 @@ extern s32 sHoleSeed;
 extern volatile s32 g_HasLoaderFinished;
 extern OSThread sLoaderThread;
 extern u8 D_8025D350[];
-extern u32 D_80105318;
+extern u32 g_GroundDrawFrame;
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
 extern s32 D_801B60A0;
@@ -872,7 +872,7 @@ void RunLoaderThread(void) {
     while (TRUE) {
         while (g_HasLoaderFinished) {}
         courseRecordIndex = GetCourseRecordIndex();
-        while (g_FrameCount - D_80105318 < LOADER_FRAME_DELAY) {}
+        while (g_FrameCount - g_GroundDrawFrame < LOADER_FRAME_DELAY) {}
         osSyncPrintf("MPSTART\n");
         while (IsAnyCharacterSlotBusy()) {
             osSyncPrintf("Wow! Polychar is alive\n");
