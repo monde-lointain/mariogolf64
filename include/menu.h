@@ -88,6 +88,8 @@ void LoadMenuWindowImage(s32 imageIndex);
  * unknown.
  */
 #define MARKED_CHARACTER_OFFSET 50
+/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
+#define MARKED_CHARACTER_LIMIT (-10)
 
 extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 

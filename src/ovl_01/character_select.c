@@ -11,8 +11,6 @@
 #include "text.h"
 #include "variables.h"
 
-/* Slots marked with MARKED_CHARACTER_OFFSET hold values below this; empty ones hold -1 */
-#define MARKED_CHARACTER_LIMIT (-10)
 /* func_80209568 lets the cursor stop on slots below this only when asked to */
 #define CHOOSABLE_MARK_LIMIT (-20)
 
