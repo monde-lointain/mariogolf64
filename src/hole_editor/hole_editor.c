@@ -26,6 +26,26 @@
 /* WORLD_TO_COURSE_SCALE as a shift */
 #define WORLD_TO_COURSE_SHIFT 10
 
+/* func_80406818's steps, in D_8040C680 */
+#define HOLE_FILE_STEP_ACTION 0
+#define HOLE_FILE_STEP_COURSE 1
+#define HOLE_FILE_STEP_HOLE 2
+#define HOLE_FILE_STEP_CONFIRM 3
+/* The course numbers it offers run from 1 to this */
+#define HOLE_FILE_COURSE_COUNT 9
+/* The prompt shows highlighted while this bit of its frame count is set */
+#define HOLE_FILE_BLINK_BIT 4
+#define HOLE_FILE_ARROW_COLUMN 7
+#define HOLE_FILE_LABEL_COLUMN 10
+#define HOLE_FILE_NUMBER_COLUMN 16
+#define HOLE_FILE_PROMPT_COLUMN 5
+#define HOLE_FILE_LOAD_ROW 10
+#define HOLE_FILE_SAVE_ROW 11
+#define HOLE_FILE_COURSE_ROW 15
+#define HOLE_FILE_HOLE_ROW 16
+#define HOLE_FILE_PROMPT_ROW 18
+#define DEBUG_TEXT_BUFFER_SIZE 0x80
+
 /* The ground cells, between neighbouring ground points */
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
@@ -101,6 +121,17 @@ extern s32 D_8040C5B0_hole_editor;
 extern s32 D_8040C5B4_hole_editor;
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
+
+/* func_80406818's menu */
+extern s32 D_8040C67C_hole_editor; /* TRUE when it saves rather than loads */
+extern s32 D_8040C680_hole_editor; /* Its HOLE_FILE_STEP_* */
+extern s32 D_8040C684_hole_editor; /* The hole number, from 1 */
+extern s32 D_8040C688_hole_editor; /* The course number, from 1 */
+extern s32 D_8040C68C_hole_editor; /* Frames the prompt has shown */
+
+void BuildHole(s32 course, s32 hole);
+void SaveHoleFiles(s32 course, s32 hole);
+void ToggleGroundTileBorders(void);
 extern s32 sMapCaptureNumber;
 extern u8 sMapCaptureHeader[CAPTURE_HEADER_SIZE];
 extern u8 sScreenCaptureHeader[CAPTURE_HEADER_SIZE];
@@ -406,7 +437,103 @@ void func_80406570_hole_editor(void) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804066C8_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406818_hole_editor);
+/*
+ * Runs scene 11's menu, which loads a hole with BuildHole or saves the
+ * one in memory with SaveHoleFiles. The D-pad picks the action, then the
+ * course and the hole; A goes on to the next step and B goes back.
+ */
+void func_80406818_hole_editor(void) {
+    char courseText[DEBUG_TEXT_BUFFER_SIZE];
+    char holeText[DEBUG_TEXT_BUFFER_SIZE];
+
+    ClearDebugText();
+    if (D_8040C680_hole_editor == HOLE_FILE_STEP_ACTION) {
+        if (g_MenuControllerData[0].button & (U_JPAD | D_JPAD)) {
+            D_8040C67C_hole_editor ^= 1;
+        }
+        if (g_MenuControllerData[0].button & A_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_COURSE;
+        }
+        if (!D_8040C67C_hole_editor) {
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText("->", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_LOAD_ROW);
+        }
+        if (D_8040C67C_hole_editor) {
+            SetDebugTextHighlight(TRUE);
+            PrintDebugText("->", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_SAVE_ROW);
+        }
+    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_COURSE) {
+        if (g_MenuControllerData[0].button & (L_JPAD | D_JPAD)) {
+            D_8040C688_hole_editor--;
+        }
+        if (g_MenuControllerData[0].button & (R_JPAD | U_JPAD)) {
+            D_8040C688_hole_editor++;
+        }
+        D_8040C688_hole_editor = (D_8040C688_hole_editor + HOLE_FILE_COURSE_COUNT - 1) % HOLE_FILE_COURSE_COUNT + 1;
+        if (g_MenuControllerData[0].trigger & A_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_HOLE;
+        }
+        if (g_MenuControllerData[0].trigger & B_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+        }
+    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_HOLE) {
+        if (g_MenuControllerData[0].button & (L_JPAD | D_JPAD)) {
+            D_8040C684_hole_editor--;
+        }
+        if (g_MenuControllerData[0].button & (R_JPAD | U_JPAD)) {
+            D_8040C684_hole_editor++;
+        }
+        D_8040C684_hole_editor = (D_8040C684_hole_editor + COURSE_HOLE_COUNT - 1) % COURSE_HOLE_COUNT + 1;
+        if (g_MenuControllerData[0].trigger & A_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_CONFIRM;
+        }
+        if (g_MenuControllerData[0].trigger & B_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_COURSE;
+        }
+    } else if (D_8040C680_hole_editor == HOLE_FILE_STEP_CONFIRM) {
+        if (D_8040C68C_hole_editor & HOLE_FILE_BLINK_BIT) {
+            SetDebugTextHighlight(TRUE);
+        }
+        PrintDebugText("Are you sure? (Exec -> A_BUTTON)", HOLE_FILE_PROMPT_COLUMN, HOLE_FILE_PROMPT_ROW);
+        D_8040C68C_hole_editor++;
+        if (g_MenuControllerData[0].trigger & A_BUTTON) {
+            if (D_8040C67C_hole_editor) {
+                if (g_WorkArea.hole.tiles[0]
+                        .texels[GROUND_TILE_TEXEL_ROW_COUNT - 1][GROUND_TILE_TEXEL_ROW_LENGTH - 1]) {
+                    ToggleGroundTileBorders();
+                }
+                SaveHoleFiles(D_8040C688_hole_editor, D_8040C684_hole_editor);
+            } else {
+                BuildHole(D_8040C688_hole_editor, D_8040C684_hole_editor);
+            }
+            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+        }
+        if (g_MenuControllerData[0].trigger & B_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_HOLE;
+        }
+        if (g_MenuControllerData[0].trigger & START_BUTTON) {
+            D_8040C680_hole_editor = HOLE_FILE_STEP_ACTION;
+        }
+    }
+    if (!D_8040C67C_hole_editor) {
+        SetDebugTextHighlight(TRUE);
+    }
+    PrintDebugText("Load HoleData", HOLE_FILE_LABEL_COLUMN, HOLE_FILE_LOAD_ROW);
+    if (D_8040C67C_hole_editor) {
+        SetDebugTextHighlight(TRUE);
+    }
+    PrintDebugText("Save HoleData", HOLE_FILE_LABEL_COLUMN, HOLE_FILE_SAVE_ROW);
+    if (D_8040C680_hole_editor >= HOLE_FILE_STEP_COURSE) {
+        PrintDebugText("Course : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_COURSE_ROW);
+        sprintf(courseText, "%d", D_8040C688_hole_editor);
+        PrintDebugText(courseText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_COURSE_ROW);
+    }
+    if (D_8040C680_hole_editor >= HOLE_FILE_STEP_HOLE) {
+        PrintDebugText("Hole   : ", HOLE_FILE_ARROW_COLUMN, HOLE_FILE_HOLE_ROW);
+        sprintf(holeText, "%d", D_8040C684_hole_editor);
+        PrintDebugText(holeText, HOLE_FILE_NUMBER_COLUMN, HOLE_FILE_HOLE_ROW);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406C3C_hole_editor);
 
