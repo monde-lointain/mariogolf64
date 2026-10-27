@@ -84,6 +84,12 @@
 #define PAGE_ARROW_LEFT_X 76
 #define PAGE_ARROW_RIGHT_X 212
 #define PAGE_ARROW_TOP 122
+/* func_8021C67C turns the page arrows a quarter turn each way, and draws them as squares away from the camera */
+#define TURNED_ARROW_ANGLE 90.0f
+#define TURNED_ARROW_Z -100.0f
+#define TURNED_ARROW_NEAR 10.0f
+#define TURNED_ARROW_FAR 2000.0f
+#define TURNED_ARROW_VERTEX_COUNT 4
 
 /* The blinking pair of arrows that func_8021CBDC draws above and below a point */
 #define STATS_ARROW_COUNT 2
@@ -190,6 +196,11 @@ extern void *D_8023B34C_ovl_01;
 extern void *D_8023B350_ovl_01[STATS_ICON_FRAME_COUNT];
 extern void *D_8023B358_ovl_01;
 extern void *D_8023B35C_ovl_01;
+extern Mtx D_8023B040_ovl_01[PAGE_ARROW_COUNT];
+extern Mtx D_8023B0C0_ovl_01[PAGE_ARROW_COUNT];
+extern Mtx D_8023B140_ovl_01[PAGE_ARROW_COUNT];
+extern Mtx D_8023B2C0_ovl_01[PAGE_ARROW_COUNT];
+extern Vtx D_80230840_ovl_01[TURNED_ARROW_VERTEX_COUNT];
 extern void *D_8023B360_ovl_01;
 extern void *D_8023B364_ovl_01;
 extern void *D_8023B368_ovl_01;
@@ -714,7 +725,68 @@ void func_8021C200_ovl_01(Gfx **displayListHead, s32 gap, s32 centerY) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C200_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021C67C_ovl_01);
+/* Nothing calls this */
+void func_8021C67C_ovl_01(Gfx **displayListHead, s32 spacing, s32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 arrowIndex;
+    s32 x;
+    f32 angle;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gSPClearGeometryMode(gfx++, 0xFFFFFFFF);
+    gDPPipeSync(gfx++);
+    for (arrowIndex = 0; arrowIndex != PAGE_ARROW_COUNT; arrowIndex++) {
+        guOrtho(&D_8023B040_ovl_01[arrowIndex], -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2, -(SCREEN_HEIGHT / 2),
+                SCREEN_HEIGHT / 2, TURNED_ARROW_NEAR, TURNED_ARROW_FAR, 1.0f);
+        if (arrowIndex == 0) {
+            x = -spacing / 2;
+        } else {
+            x = spacing / 2;
+        }
+        angle = TURNED_ARROW_ANGLE;
+        if (arrowIndex == 0) {
+            angle = -TURNED_ARROW_ANGLE;
+        }
+        guTranslate(&D_8023B0C0_ovl_01[arrowIndex], x, y, TURNED_ARROW_Z);
+        guRotate(&D_8023B140_ovl_01[arrowIndex], angle, 0.0f, 0.0f, 1.0f);
+        guScale(&D_8023B2C0_ovl_01[arrowIndex], 1.0f, 1.0f, 1.0f);
+        gDPPipeSync(gfx++);
+        gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B35C_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureTile_4b(gfx++,
+                              ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
+                               D_802303A6_ovl_01 * PAGE_ARROW_IMAGE_SIZE) &
+                                  ~7,
+                              G_IM_FMT_CI, PAGE_ARROW_SIZE, PAGE_ARROW_SIZE, 0, 0, PAGE_ARROW_SIZE - 1,
+                              PAGE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                              G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B040_ovl_01[arrowIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B0C0_ovl_01[arrowIndex]),
+                  G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B140_ovl_01[arrowIndex]),
+                  G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_8023B2C0_ovl_01[arrowIndex]),
+                  G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        gDPPipeSync(gfx++);
+        gSPVertex(gfx++, D_80230840_ovl_01, TURNED_ARROW_VERTEX_COUNT, 0);
+        gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 /*
  * Doesn't match: the original adds the texel offset to the blink frame's
