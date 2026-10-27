@@ -205,8 +205,12 @@ extern u8 D_801B70F0[MAXCONTROLLERS];
 /* Past func_80217B88's presets, so that it clears the values instead */
 #define MENU_UNKE_PRESET_NONE 10
 
-/* A byte of g_MapCamera that the menus set: the top of its view's mode */
-#define MAP_CAMERA_UNK4C 0x4C
+/*
+ * The menus set the top byte of g_MapCamera's view mode. Reading it as a
+ * byte of the field rather than of the whole camera lets the compiler move
+ * the read past display list words, as the original does.
+ */
+#define MAP_CAMERA_MODE_TOP_BYTE (*(u8 *)&g_MapCamera.view.mode)
 /* Values of D_801B60B9, the replay that leaving the menus starts */
 #define REPLAY_KIND_NONE 0
 #define REPLAY_KIND_RING_SHOT 2
@@ -495,7 +499,7 @@ void func_801F6B28_ovl_01(void) {
             /* Through a pointer, as the original keeps the address in a register for every store */
             skippedNines = &g_SkippedNines;
             *skippedNines = D_8022BE1C_ovl_01;
-            if (((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            if (MAP_CAMERA_MODE_TOP_BYTE == 1) {
                 switch (g_MenuChoices.unk0) {
                     case 0:
                         *skippedNines = 0;
@@ -917,7 +921,7 @@ void func_801F8BAC_ovl_01(void) {
         } else {
             g_MenuScreen = MENU_SCREEN_UNK5;
         }
-        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 0;
+        MAP_CAMERA_MODE_TOP_BYTE = 0;
         D_800FE334 = 0;
         StopLoaderThread();
         FreeAllCharacterSlots();
@@ -946,25 +950,25 @@ void func_801F8BAC_ovl_01(void) {
             for (index = 0; index != COURSE_SELECT_TEXT_SLOT_COUNT; index++) {
                 SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
             }
-        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == isDone) {
-            if (D_800C2BD5 != ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C]) {
+        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == isDone) {
+            if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
                 PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                 D_8022BE88_ovl_01 = 1;
                 D_8022BE89_ovl_01 = 1;
             } else {
                 PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             }
-        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
             g_SkippedNines = 0;
             StartLoadingChosenHole();
-        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
             g_SkippedNines = BACK_NINE_SKIPPED;
             StartLoadingChosenHole();
-        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
             g_SkippedNines = FRONT_NINE_SKIPPED;
@@ -1128,7 +1132,7 @@ void func_801F93D8_ovl_01(void) {
         PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
         g_IsMiniGolf = FALSE;
         g_MenuScreen = MENU_SCREEN_UNK5;
-        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 0;
+        MAP_CAMERA_MODE_TOP_BYTE = 0;
         D_800FE334 = 0;
         StopLoaderThread();
         FreeAllCharacterSlots();
@@ -1154,25 +1158,25 @@ void func_801F93D8_ovl_01(void) {
         } else if (g_MenuRepeatButtons & D_JPAD) {
             PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
             D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_NEXT;
-        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == isDone) {
-            if (D_800C2BD5 != ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C]) {
+        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == isDone) {
+            if (D_800C2BD5 != MAP_CAMERA_MODE_TOP_BYTE) {
                 PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                 D_8022BE88_ovl_01 = 1;
                 D_8022BE89_ovl_01 = 1;
             } else {
                 PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             }
-        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
             g_SkippedNines = 0;
             StartLoadingChosenHole();
-        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
             g_SkippedNines = BACK_NINE_SKIPPED;
             StartLoadingChosenHole();
-        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && MAP_CAMERA_MODE_TOP_BYTE == 1) {
             PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
             g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
             g_SkippedNines = FRONT_NINE_SKIPPED;
@@ -1230,7 +1234,7 @@ void func_801F9C58_ovl_01(void) {
                         g_GameMode = GAME_MODE_GET_CHARACTER;
                         g_PlayerCount = 2;
                         D_800FF4C0 = 1;
-                        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 2;
+                        MAP_CAMERA_MODE_TOP_BYTE = 2;
                         D_801B5634 = 0;
                         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
                     }
@@ -1281,7 +1285,7 @@ void func_801F9E38_ovl_01(void) {
                         g_GameMode = GAME_MODE_GET_CHARACTER;
                         g_PlayerCount = 2;
                         D_800FF4C0 = 1;
-                        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 2;
+                        MAP_CAMERA_MODE_TOP_BYTE = 2;
                         D_801B5634 = 0;
                         func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
                     }
