@@ -125,16 +125,15 @@ void func_80209500_ovl_01(void) {
 
 /*
  * Doesn't match: the original sign-extends the slot and character afresh at
- * each use, and adds the player number to the menu memory's address the
- * other way round.
+ * each use.
  */
 #ifdef NON_MATCHING
 s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     EncodedAsset asset;
     AssetFile file;
     MenuMemory *memory = func_8005AF74();
-    s16 oldColumn = (s8)(&memory->characterColumn)[playerNumber - 1];
-    s16 oldRow = (s8)(&memory->characterRow)[playerNumber - 1];
+    s16 oldColumn = (s8)*((s8 *)memory + playerNumber + 3);
+    s16 oldRow = (s8)*((s8 *)memory + playerNumber + 7);
     s16 column = oldColumn;
     s16 row = oldRow;
     u16 slot;
@@ -173,8 +172,8 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
         }
     } while (g_CharacterGrid[row][column] < 0 &&
              (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT && canChooseMarked == TRUE) == FALSE);
-    (&memory->characterColumn)[playerNumber - 1] = column;
-    (&memory->characterRow)[playerNumber - 1] = row;
+    *((s8 *)memory + playerNumber + 3) = column;
+    *((s8 *)memory + playerNumber + 7) = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         D_8022FF04_ovl_01 = 0;
@@ -216,8 +215,8 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     AssetFile file;
     MenuMemory *memory = func_8005AF74();
     s32 retryCount = 0;
-    s16 oldRow = (s8)(&memory->characterRow)[playerNumber - 1];
-    s16 oldColumn = (s8)(&memory->characterColumn)[playerNumber - 1];
+    s16 oldRow = (s8)*((s8 *)memory + playerNumber + 7);
+    s16 oldColumn = (s8)*((s8 *)memory + playerNumber + 3);
     s32 column = oldColumn;
     s32 row = oldRow;
     u16 slot;
@@ -274,8 +273,8 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         }
         retryCount++;
     }
-    (&memory->characterColumn)[playerNumber - 1] = column;
-    (&memory->characterRow)[playerNumber - 1] = row;
+    *((s8 *)memory + playerNumber + 3) = column;
+    *((s8 *)memory + playerNumber + 7) = row;
     if (column != oldColumn || row != oldRow) {
         character = g_CharacterGrid[oldRow][oldColumn];
         D_8022FF04_ovl_01 = 0;
