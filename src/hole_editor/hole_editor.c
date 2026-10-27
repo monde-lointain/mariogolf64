@@ -153,6 +153,16 @@
 #define EDIT_KIND_TEXT_ROW 10
 #define CORNER_HEIGHT_TEXT_ROW 11
 
+/* func_80402E1C's ring editor; its corners hold a ring's position, direction and scale */
+#define RING_DIRECTION_CORNER 1
+#define RING_SCALE_CORNER 2 /* In the corner's x, 1024 for the ring's own size */
+#define RING_SCALE_STEP 16
+#define RING_SCALE_MIN 16
+#define RING_SCALE_MAX 0x2000
+#define RING_DIRECTION_LENGTH 8192.0f
+#define RING_TEXT_COLUMN 19
+#define RING_TEXT_ROW 4
+
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
@@ -265,6 +275,14 @@ extern s32 sEditedCornerIndex;
 extern s32 sSavedCornerIndex;
 extern s32 sLastTriangleEditKind; /* A TRIANGLE_EDIT_* */
 extern CoursePoint sSavedCorners[SAVED_CORNER_COUNT];
+
+/* func_80402E1C's state */
+extern f32 sRingCameraPitch;   /* In radians */
+extern f32 sRingCameraHeading; /* In radians, from sRingCameraHeadingAngle */
+extern s32 sRingCameraHeadingAngle;
+extern s32 sRingTriangleIndex;
+extern s32 sRingCornerIndex; /* Always 0 */
+extern s32 sLastRingEditKind; /* A TRIANGLE_EDIT_* */
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
 
@@ -559,7 +577,226 @@ void func_80402428_hole_editor(void) {
                                    g_MapCamera.view.lookAt[AXIS_Y];
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80402E1C_hole_editor);
+/*
+ * Scene SCENE_RINGS's editor for the rings of Ring Shot, which are kept in
+ * the last RING_COUNT hole triangles. On the editor pad, the C-buttons move
+ * the ring across the ground, relative to the camera's heading, or with Z
+ * held C-up and C-down scale it. A turns the triangle into a ring facing
+ * along the camera's view. The option pad's C-down and C-up move it along
+ * y, and the second editor pad's B clears the triangle. Right and left on
+ * the control pad pick the ring. R zooms in, L or Z with R zooms out, and
+ * Z with the stick orbits the camera around the ring.
+ */
+void func_80402E1C_hole_editor(void) {
+    Vec3 direction;
+    f32 stepRight;
+    f32 stepUp;
+    f32 stepY;
+    f32 stepX;
+    f32 stepZ;
+    f32 moveY; /* The scaled y step; stepY itself would compile differently */
+    s32 editKind;
+    s32 corner;
+    f64 cameraDistance; /* As a literal, GCC would fold it into the angles before the zoom */
+    Vtx_t *lookAtVertex;
+
+    editKind = TRIANGLE_EDIT_NONE;
+    stepY = 0.0f;
+    D_800C30D1 = FALSE;
+    sprintf(g_PrintBuffer, "EditNo : %d   ", sRingTriangleIndex);
+    PrintDebugText(g_PrintBuffer, RING_TEXT_COLUMN, RING_TEXT_ROW);
+    stepUp = stepRight = 0.0f;
+    if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
+        if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+            editKind = TRIANGLE_EDIT_MOVE;
+            stepUp = 1.0f;
+        }
+        if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+            editKind = TRIANGLE_EDIT_MOVE;
+            stepUp = -1.0f;
+        }
+        if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+            editKind = TRIANGLE_EDIT_MOVE;
+            stepRight = 1.0f;
+        }
+        if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+            editKind = TRIANGLE_EDIT_MOVE;
+            stepRight = -1.0f;
+        }
+    } else {
+        Vtx_t *scaleVertex = &g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[RING_SCALE_CORNER].v;
+
+        if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+            scaleVertex->ob[AXIS_X] += RING_SCALE_STEP;
+            if (scaleVertex->ob[AXIS_X] >= RING_SCALE_MAX) {
+                scaleVertex->ob[AXIS_X] = RING_SCALE_MAX;
+            }
+            PrepareHoleTriangles();
+        }
+        if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+            scaleVertex->ob[AXIS_X] -= RING_SCALE_STEP;
+            if (scaleVertex->ob[AXIS_X] < RING_SCALE_MIN) {
+                scaleVertex->ob[AXIS_X] = RING_SCALE_MIN;
+            }
+            PrepareHoleTriangles();
+        }
+    }
+    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = 1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = -1.0f;
+    }
+    PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
+    if (editKind == TRIANGLE_EDIT_MOVE) {
+        stepX = -cos((u16)sRingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp -
+                sin((u16)sRingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        stepZ = -sin((u16)sRingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp +
+                cos((u16)sRingCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        /* Scaled in two steps; in one expression GCC would multiply 10 by the zoom first */
+        {
+            f32 scaledX = stepX * CORNER_STEP_SCALE;
+            f32 scaledY = stepY * CORNER_STEP_SCALE;
+            f32 scaledZ = stepZ * CORNER_STEP_SCALE;
+
+            stepX = scaledX * g_MapCamera.view.zoom;
+            moveY = scaledY * g_MapCamera.view.zoom;
+            stepZ = scaledZ * g_MapCamera.view.zoom;
+        }
+        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+            if (sRingCornerIndex == corner) {
+                Vtx_t *vertex;
+
+                vertex = &g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[corner].v;
+                vertex->ob[AXIS_X] = vertex->ob[AXIS_X] + stepX;
+                vertex->ob[AXIS_Y] = vertex->ob[AXIS_Y] + moveY;
+                vertex->ob[AXIS_Z] = vertex->ob[AXIS_Z] + stepZ;
+            }
+        }
+        PrepareHoleTriangles();
+    }
+    if (g_ControllerData[EDITOR_PAD].button & A_BUTTON) {
+        Vtx_t *directionVertex;
+
+        g_WorkArea.hole.triangles[sRingTriangleIndex].kind = HOLE_TRIANGLE_KIND_RING;
+        directionVertex = &g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[RING_DIRECTION_CORNER].v;
+        direction[AXIS_X] = g_MapCamera.view.lookAt[AXIS_X] - g_MapCamera.view.eye[AXIS_X];
+        direction[AXIS_Y] = g_MapCamera.view.lookAt[AXIS_Y] - g_MapCamera.view.eye[AXIS_Y];
+        direction[AXIS_Z] = g_MapCamera.view.lookAt[AXIS_Z] - g_MapCamera.view.eye[AXIS_Z];
+        guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
+        directionVertex->ob[AXIS_X] = direction[AXIS_X] * RING_DIRECTION_LENGTH;
+        directionVertex->ob[AXIS_Y] = direction[AXIS_Y] * RING_DIRECTION_LENGTH;
+        directionVertex->ob[AXIS_Z] = direction[AXIS_Z] * RING_DIRECTION_LENGTH;
+        PrepareHoleTriangles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sRingTriangleIndex++;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sRingTriangleIndex--;
+    }
+    if (sRingTriangleIndex < FIRST_RING_TRIANGLE) {
+        sRingTriangleIndex = HOLE_TRIANGLE_COUNT - 1;
+    }
+    if (sRingTriangleIndex >= HOLE_TRIANGLE_COUNT) {
+        sRingTriangleIndex = FIRST_RING_TRIANGLE;
+    }
+    if (g_ControllerData[SECOND_EDITOR_PAD].button & B_BUTTON) {
+        /* Clears every field but unk4 and unk5C */
+        g_WorkArea.hole.triangles[sRingTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.ob[AXIS_X] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.ob[AXIS_Y] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.ob[AXIS_Z] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.flag = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.tc[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.tc[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.cn[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.cn[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.cn[2] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[0].v.cn[3] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.ob[AXIS_X] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.ob[AXIS_Y] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.ob[AXIS_Z] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.flag = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.tc[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.tc[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.cn[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.cn[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.cn[2] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[1].v.cn[3] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.ob[AXIS_X] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.ob[AXIS_Y] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.ob[AXIS_Z] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.flag = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.tc[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.tc[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.cn[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.cn[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.cn[2] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[2].v.cn[3] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_X][0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_X][1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_Y][0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_Y][1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_Z][0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].bounds[AXIS_Z][1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].center[AXIS_X] = 0.0f;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].center[AXIS_Y] = 0.0f;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].center[AXIS_Z] = 0.0f;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].unk50[0] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].unk50[1] = 0;
+        g_WorkArea.hole.triangles[sRingTriangleIndex].unk50[2] = 0;
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        sRingCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        sRingCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (sRingCameraPitch > 0.0f) {
+        sRingCameraPitch = 0.0f;
+    }
+    if (sRingCameraPitch < EDITOR_PITCH_MIN) {
+        sRingCameraPitch = EDITOR_PITCH_MIN;
+    }
+    sRingCameraHeading = sRingCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    /* The first frame without an edit rebuilds the slopes */
+    if ((sLastRingEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
+        func_804079B8_hole_editor();
+    }
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
+    lookAtVertex = &g_WorkArea.hole.triangles[sRingTriangleIndex].vertices[sRingCornerIndex].v;
+    g_MapCamera.view.lookAt[AXIS_X] = lookAtVertex->ob[AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
+    sLastRingEditKind = editKind;
+    g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_X] = cos(sRingCameraPitch) * cos(sRingCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(sRingCameraPitch) * sin(sRingCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] = sin(sRingCameraPitch) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Y];
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_editor);
 
