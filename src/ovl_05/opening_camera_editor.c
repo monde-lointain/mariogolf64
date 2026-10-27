@@ -57,7 +57,8 @@ typedef struct CameraEditor {
 #define EDITOR_FLAG_UNK80 0x80
 
 extern CameraEditor g_CameraEditor;
-extern f32 D_8020AE3C_ovl_05; /* A scale that the opening passes to guScale */
+/* The size of the box that marks the camera's look-at point */
+extern f32 g_LookAtMarkerScale;
 
 void func_80203620_ovl_05(void);
 void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
@@ -101,7 +102,7 @@ void func_802033B0_ovl_05(void) {
   g_CameraEditor.unk90 = 10.0f;
   g_CameraEditor.unk94 = 1.0f;
   func_80203620_ovl_05();
-  D_8020AE3C_ovl_05 = 1.0f;
+  g_LookAtMarkerScale = 1.0f;
 }
 
 void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,

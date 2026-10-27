@@ -7,6 +7,7 @@
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
+#include "hole_display.h"
 #include "sound.h"
 #include "variables.h"
 
@@ -62,7 +63,23 @@ extern void* f_OpeningBillboardHeap;
 extern s32 D_8022BFA8_ovl_05;
 extern u8* g_ShadowTexture;
 
+extern s32 f_OpeningFrameParity;
+extern s32 f_IsLookAtMarkerShown;
+extern f32 g_LookAtMarkerScale;
+extern Vtx f_LookAtMarkerVertices[6][4];
+extern Mtx f_LookAtMarkerTranslation;
+extern Mtx f_LookAtMarkerScaling;
+
 void AssignCharacterBuffers(void);
+void func_801F5454_ovl_05(CameraMatrices* matrices);
+void func_801FA8D8_ovl_05(Gfx** displayListHead);
+void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
+void func_801FE2A0_ovl_05(Gfx** displayListHead);
+void func_801FE8F8_ovl_05(Gfx** displayListHead);
+void func_801FF70C_ovl_05(Gfx** displayListHead);
+void func_801FFC40_ovl_05(Gfx** displayListHead);
+void func_80200CBC_ovl_05(Gfx** displayListHead, s32 arg1);
+void func_80202D34_ovl_05(Gfx** displayListHead);
 void func_80200B18_ovl_05(void);
 
 void func_801F4A40_ovl_05(void) {
@@ -117,7 +134,9 @@ void FreeOpening(void) {
   FreeEffectImages();
 }
 
-void DrawOpeningCharacters(CameraMatrices* matrices, Gfx** displayListHead) {
+/* The caller passes the frame parity too, which goes unused */
+void DrawOpeningCharacters(CameraMatrices* matrices, Gfx** displayListHead,
+                           s32 frameParity) {
   s32 slotIndex = 0;
 
   g_DisplayListHead = *displayListHead;
@@ -136,7 +155,62 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F58EC_ovl_05);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F6788_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA4EC_ovl_05);
+/* Draws the camera editor's look-at marker, the characters and the opening's
+ * overlays */
+void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
+  /* Unused; they give the stack frame the original's size */
+  Mat4 unusedMatrix;
+  Vec3 unusedPoints[4];
+  Gfx* gfx = *displayListHead;
+
+  f_OpeningFrameParity ^= 1;
+  if (f_IsLookAtMarkerShown) {
+    guTranslate(&f_LookAtMarkerTranslation, g_Cameras[0].view.lookAt[0],
+                g_Cameras[0].view.lookAt[1], g_Cameras[0].view.lookAt[2]);
+    guScale(&f_LookAtMarkerScaling, g_LookAtMarkerScale, g_LookAtMarkerScale,
+            g_LookAtMarkerScale);
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPLoadGeometryMode(gfx++, 0);
+    gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerTranslation),
+              G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_LookAtMarkerScaling),
+              G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[0], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[1], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[2], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[3], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[4], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPVertex(gfx++, f_LookAtMarkerVertices[5], 4, 0);
+    gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+  }
+  DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
+  g_DisplayListHead = gfx;
+  func_801F5454_ovl_05(matrices);
+  gfx = g_DisplayListHead;
+  DrawLensFlare(&gfx);
+  func_801FE2A0_ovl_05(&gfx);
+  func_801FF70C_ovl_05(&gfx);
+  func_801FE8F8_ovl_05(&gfx);
+  func_801FBB94_ovl_05(&gfx, matrices);
+  func_801FFC40_ovl_05(&gfx);
+  func_80202D34_ovl_05(&gfx);
+  func_801FA8D8_ovl_05(&gfx);
+  func_80200CBC_ovl_05(&gfx, 0);
+  *displayListHead = gfx;
+}
 
 /* Loads name logo logoIndex into slot and resets the slot */
 void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
