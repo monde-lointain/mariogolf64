@@ -51,6 +51,9 @@ extern u8 g_MenuImageBuffer[];
 void ResetMenuWindow(void);
 void ShowMenuWindow(void);
 void CloseMenuWindow(void);
+/* These return -1 while the window is still moving */
+s32 IsMenuWindowOpen(void);
+s32 IsMenuWindowClosed(void);
 void LoadMenuWindowImage(s32 imageIndex);
 
 /* The title screen's song */

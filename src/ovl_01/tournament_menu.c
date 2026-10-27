@@ -15,6 +15,13 @@ extern u16 g_MenuWindowImageAssets[15];
 extern void *g_MenuWindowImage;
 
 extern s32 D_80230F68_ovl_01;
+extern u16 D_800C2074[];
+extern void *D_80230E70_ovl_01;
+extern void *D_80230E74_ovl_01;
+extern void *D_80230E78_ovl_01;
+extern void *D_80230E7C_ovl_01;
+extern void *D_80230E84_ovl_01;
+extern s16 D_80230F34_ovl_01;
 extern u8 D_80230FD4_ovl_01[8];
 extern s8 D_80105DBC[5];
 
@@ -38,13 +45,82 @@ void CloseMenuWindow(void) {
     g_MenuWindowState = MENU_WINDOW_CLOSING;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226764_ovl_01);
+s32 IsMenuWindowOpen(void) {
+    s32 isOpen;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226788_ovl_01);
+    if (g_MenuWindowState == MENU_WINDOW_OPENING) {
+        isOpen = -1;
+    } else {
+        isOpen = g_MenuWindowState == MENU_WINDOW_OPEN;
+    }
+    return isOpen;
+}
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802267B0_ovl_01);
+s32 IsMenuWindowClosed(void) {
+    s32 isClosed;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_80226904_ovl_01);
+    if (g_MenuWindowState == MENU_WINDOW_CLOSING) {
+        isClosed = -1;
+    } else {
+        isClosed = g_MenuWindowState == MENU_WINDOW_CLOSED;
+    }
+    return isClosed;
+}
+
+void func_802267B0_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+    AssetFile file;
+
+    func_8005AF74();
+    switch (bufferKind) {
+        case 1:
+            D_80230E70_ovl_01 = buffer;
+            OpenEncodedAsset(0x70B, &asset);
+            ReadEncodedAsset(D_80230E70_ovl_01, &asset);
+            break;
+        case 2:
+            D_80230E74_ovl_01 = buffer;
+            OpenEncodedAsset(0x70C, &asset);
+            ReadEncodedAsset(D_80230E74_ovl_01, &asset);
+            break;
+        case 3:
+            D_80230E78_ovl_01 = buffer;
+            OpenEncodedAsset(0x949, &asset);
+            ReadEncodedAsset(D_80230E78_ovl_01, &asset);
+            break;
+        case 4:
+            D_80230E7C_ovl_01 = buffer;
+            OpenEncodedAsset(D_800C2074[0], &asset);
+            ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
+            break;
+        case 5:
+            g_MenuWindowImage = buffer;
+            OpenEncodedAsset(g_MenuWindowImageAssets[ARRAY_COUNT(g_MenuWindowImageAssets) - 1], &asset);
+            ReadEncodedAsset(g_MenuWindowImage, &asset);
+            break;
+        case 6:
+            D_80230E84_ovl_01 = buffer;
+            OpenAssetFile(D_80230F34_ovl_01, &file);
+            ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
+            break;
+    }
+    ResetMenuWindow();
+}
+
+const s32 D_80231A68_ovl_01[2] = { 0, 0 };
+
+void func_80226904_ovl_01(s32 imageIndex) {
+    EncodedAsset asset;
+
+    if (imageIndex < 0) {
+        imageIndex = 0;
+    }
+    if (imageIndex >= 10) {
+        imageIndex = 9;
+    }
+    OpenEncodedAsset(D_800C2074[imageIndex], &asset);
+    ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
+}
 
 void LoadMenuWindowImage(s32 imageIndex) {
     EncodedAsset asset;
