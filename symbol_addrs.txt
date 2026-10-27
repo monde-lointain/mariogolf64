@@ -3490,3 +3490,4 @@ PlayLogoClubSound = 0x801F4A6C; // type:func segment:ovl_05
 GetSurfaceInfo = 0x802066F0; // type:func segment:ovl_05 allow_duplicated:True
 ResetBallSimulations = 0x80206718; // type:func segment:ovl_05 allow_duplicated:True
 D_8020B86C_ovl_05 = 0x8020B86C; // size:0x18C segment:ovl_05
+g_IsSuddenDeath = 0x801B60A0; // size:0x4

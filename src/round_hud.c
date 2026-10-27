@@ -209,7 +209,7 @@ extern void* f_ShotOffsetMarkerImage;
 #define ASSET_LONGEST_DRIVE_IMAGE 0x554
 #define ASSET_NEAREST_PIN_IMAGE 0x555
 #define ASSET_DORMIE_IMAGE 0x8FC
-#define ASSET_UNK8FF_IMAGE 0x8FF
+#define ASSET_SUDDEN_DEATH_IMAGE 0x8FF
 
 /* Which of the hole intro's images are loaded */
 #define HOLE_INTRO_CONTEST_IMAGE_LOADED (1 << 0)
@@ -236,7 +236,7 @@ extern void* f_ShotOffsetMarkerImage;
 extern s32 f_LoadedHoleIntroImages;
 extern void* f_HoleContestImage;
 extern void* f_MatchStandingImage;
-extern s32 D_801B60A0;
+extern s32 g_IsSuddenDeath;
 
 /* The ball's recent world positions, which its trail is drawn through */
 #define BALL_TRAIL_LENGTH 128
@@ -3865,9 +3865,9 @@ void LoadHoleIntroImages(void) {
   }
   if (g_GameMode == GAME_MODE_MATCH_GAME ||
       g_GameMode == GAME_MODE_GET_CHARACTER) {
-    if (D_801B60A0 != 0) {
+    if (g_IsSuddenDeath) {
       f_MatchStandingImage =
-          AllocMemory(OpenEncodedAsset(ASSET_UNK8FF_IMAGE, &asset));
+          AllocMemory(OpenEncodedAsset(ASSET_SUDDEN_DEATH_IMAGE, &asset));
       ReadEncodedAsset(f_MatchStandingImage, &asset);
       f_LoadedHoleIntroImages |= HOLE_INTRO_MATCH_IMAGE_LOADED;
     } else {

@@ -145,7 +145,8 @@ extern u8* g_CourseSkyImage;
 #define SCENE_COLOR_INDEX_UNK8 8
 #define SCENE_COLOR_INDEX_ROUND_LATE 9
 #define SCENE_COLOR_INDEX_ROUND_END 10
-#define SCENE_COLOR_INDEX_UNK11 11
+/* Every hole of a sudden death, whatever its place in the round */
+#define SCENE_COLOR_INDEX_SUDDEN_DEATH 11
 
 /* HoleConditions.windSpeed is fixed point, with this as one unit */
 #define WIND_SPEED_UNIT 0x10000

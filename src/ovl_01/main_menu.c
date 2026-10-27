@@ -156,7 +156,7 @@ extern u8 D_8022BE89_ovl_01;
 extern s32 D_802322F0_ovl_01;
 extern s32 D_802322F4_ovl_01;
 extern s8 D_801B60B8;
-extern s32 D_801B60A0;
+extern s32 g_IsSuddenDeath;
 extern s32 D_801B60A8;
 extern s32 D_800C42D0;
 extern s8 D_800FBE08[MAX_PLAYER_COUNT];
@@ -500,7 +500,7 @@ void func_801F70F0_ovl_01(void) {
   D_802322F0_ovl_01 = 0;
   D_802322F4_ovl_01 = 0;
   D_801B60B8 = 0;
-  D_801B60A0 = 0;
+  g_IsSuddenDeath = 0;
   g_IsMiniGolf = FALSE;
   D_801B60B9 = 0;
   D_801B60A8 = 0;

@@ -135,7 +135,7 @@ void SetScorecardState(s32 state);
 extern u16 f_PageTitleAssets[PAGE_TITLES_ROW_COUNT][PAGE_TITLE_COUNT];
 /* Each bet's two images */
 extern u16 f_BetImageAssets[BET_COUNT][2];
-extern s32 D_801B60A0;
+extern s32 g_IsSuddenDeath;
 extern s32 D_801B60B4;
 
 /*
@@ -165,7 +165,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
 
   g_Scorecard.content.courseIndex = courseIndex;
   g_Scorecard.content.holeIndex = holeIndex;
-  g_Scorecard.content.isSuddenDeath = D_801B60A0;
+  g_Scorecard.content.isSuddenDeath = g_IsSuddenDeath;
   osSyncPrintf("SP Address = %x\n", stackPointer);
   g_Scorecard.tableImage =
       AllocMemory(OpenEncodedAsset(TABLE_IMAGE_ASSET, &asset));

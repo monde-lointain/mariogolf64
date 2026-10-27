@@ -2855,7 +2855,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
     return (to - from) * fraction + from;
   }
 
-  if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_UNK11) {
+  if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_SUDDEN_DEATH) {
     keyIndexes[0] = g_HoleConditions.sceneColorIndex;
     keyIndexes[1] = keyIndexes[0];
   } else if ((s32)g_HoleConditions.sceneColorIndex >=
@@ -2893,12 +2893,12 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
         keyShades[i] = startShade;
         break;
       }
-      case SCENE_COLOR_INDEX_UNK11: {
-        static const GroundLightColor unk11Light = {20, 20, 2};
-        static const GroundLightColor unk11Shade = {0, 0, 0};
+      case SCENE_COLOR_INDEX_SUDDEN_DEATH: {
+        static const GroundLightColor suddenDeathLight = {20, 20, 2};
+        static const GroundLightColor suddenDeathShade = {0, 0, 0};
 
-        keyLights[i] = unk11Light;
-        keyShades[i] = unk11Shade;
+        keyLights[i] = suddenDeathLight;
+        keyShades[i] = suddenDeathShade;
         break;
       }
     }

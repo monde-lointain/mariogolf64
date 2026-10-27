@@ -636,7 +636,7 @@ extern s8 g_WasMetalMarioUnlocked;
 extern s8 g_HadEveryRingShotStar;
 extern s8 g_RingShotCourseOpenedAtStart;
 extern s8 D_800C3068;
-extern s32 D_801B60A0;
+extern s32 g_IsSuddenDeath;
 void func_80241800();
 void func_80242384();
 s32 func_80241FF0();
@@ -1414,7 +1414,7 @@ DIM_BACKDROP:
                       g_GameMode == GAME_MODE_GET_CHARACTER) &&
                   HAS_PLAYED_LAST_HOLE()) {
                 g_HoleIndex = GetFirstHoleIndex();
-                D_801B60A0 = TRUE;
+                g_IsSuddenDeath = TRUE;
               }
               StartLoaderThread();
             }

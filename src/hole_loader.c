@@ -134,7 +134,7 @@ extern u8 D_8025D350[];
 extern u32 g_GroundDrawFrame;
 extern s8 D_80104B6D;
 extern s8 D_801B60B8;
-extern s32 D_801B60A0;
+extern s32 g_IsSuddenDeath;
 extern s32 D_801B60B4;
 extern s32 f_CycledCupIndex;
 /* The cup index after the chosen one; nothing reads it */
@@ -786,8 +786,8 @@ s32 ChooseHoleConditions(void) {
       if (g_IsMiniGolf) {
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
       }
-      if (D_801B60A0 != 0) {
-        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_UNK11;
+      if (g_IsSuddenDeath) {
+        g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
       }
     }
     courseRecordIndex = GetCourseRecordIndex();
