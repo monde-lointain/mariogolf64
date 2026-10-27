@@ -2120,7 +2120,8 @@ void PlayAmbientSound(void) {
     }
 }
 
-void FreeCharacterAndReactionLight(void) {
+/* The slot to free is always the golfer's, whatever the caller passes */
+void FreeCharacterAndReactionLight(s32 slotIndex) {
     FreeCharacterSlot(0);
     TurnOffReactionLight();
 }
