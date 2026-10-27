@@ -2029,7 +2029,7 @@ extern u16 sClubNameAssets[];
  * Draws the shot panel's wind indicator, club head and lie, or the wind
  * and lie panels beside the pause menu while it sets them
  */
-void DrawShotPanelIcons(Gfx **displayListHead) {
+void DrawShotPanelIcons(Gfx **displayListHead, CameraView *view) {
     Vec3 rotation;
     Vec3 translation;
     Vec3 unusedScale;
@@ -2874,13 +2874,574 @@ void DrawColorTest(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
+/* The HUD's letterbox height, which DrawLetterbox grows each frame */
+extern s32 sLetterboxHeight;
+/* The shot panel slides in from the left by this much a frame */
+#define SHOT_PANEL_SLIDE_STEP 4
+/*
+ * The scoreboard shows each player's face and strokes, their score in the game
+ * mode and their contest distances, in rows down the right of the screen. It
+ * moves right as the letterbox grows, and left to make room for handicaps.
+ */
+#define SCOREBOARD_X 246
+#define SCOREBOARD_Y 68
+#define SCOREBOARD_ROW_HEIGHT 26
+#define SCOREBOARD_LETTERBOX_SHIFT 8
+#define SCOREBOARD_HANDICAP_SHIFT 10
+#define SCOREBOARD_TEXT_X 22
+#define SCOREBOARD_SCORE_Y 76
+#define SCOREBOARD_CONTEST_Y 84
+#define HANDICAP_COLON_X 38
+#define HANDICAP_X 42
+#define DRIVE_DISTANCE_X 16
+#define PIN_DISTANCE_X 8
+/* The face of the player whose turn it is sits up and to the left of the others */
+#define FACE_WIDTH 32
+#define FACE_HEIGHT 24
+#define FACE_INSET_X 4
+#define FACE_INSET_Y 4
+#define SMALL_FACE_WIDTH 24
+#define SMALL_FACE_HEIGHT 16
+/* The others are shrunk to two-thirds, a texel and a half to a pixel */
+#define SMALL_FACE_STEP ((1 << 10) * 3 / 2)
+/* The pin flag beside the distance to the cup waves through four frames side by side */
+extern s32 sPinFlagTime;
+#define PIN_FLAG_TIME_COUNT 16
+#define PIN_FLAG_FRAME_LENGTH 4
+#define PIN_FLAG_IMAGE_SIZE 32
+#define PIN_FLAG_IMAGE_T 16
+#define PIN_FLAG_X 24
+#define PIN_FLAG_Y 72
+#define PIN_FLAG_WIDTH 8
+#define PIN_FLAG_HEIGHT 16
+/* Where the labels "REST", by the distance to the cup, and "UP", "DOWN" or "FLAT", by the height, sit */
+#define SHOT_PANEL_LABEL_X 34
+#define SHOT_PANEL_LABEL_WIDTH 32
+#define SHOT_PANEL_LABEL_HEIGHT 12
+#define REST_LABEL_Y 68
+#define HEIGHT_LABEL_Y 80
+#define SHOT_PANEL_DISTANCE_X 64
+/* In Ring Shot, a spinning ring beside the count of rings still to pass */
+extern s32 sRingFrame;
+extern s32 sRingFrameTime;
+#define RING_FRAME_COUNT 3
+#define RING_FRAME_LENGTH 6
+#define RING_IMAGE_SIZE 32
+#define RING_FRAME_SIZE (RING_IMAGE_SIZE * RING_IMAGE_SIZE / 2)
+#define RING_ICON_X 18
+#define RING_ICON_Y 92
+#define RING_COUNT_X 46
+#define RING_COUNT_Y 112
+#define DISTANCE_FONT_WIDTH 128
+extern u16 sWhiteDistancePalette[];
+#define HOLE_YARDAGE_X 60
+#define HOLE_YARDAGE_Y 56
+#define PAR_IMAGE_X 24
+#define PAR_IMAGE_Y 56
+/* The club panel, which module 25 updates, and the selected club's name below it */
+#define CLUB_PANEL_X 14
+#define CLUB_PANEL_Y 150
+#define CLUB_PANEL_WIDTH 48
+#define CLUB_PANEL_HEIGHT 42
+#define CLUB_NAME_X 22
+#define CLUB_NAME_Y 200
+#define CLUB_NAME_WIDTH 32
+#define CLUB_NAME_HEIGHT 16
+#define SHOT_PANEL_TEXT_Y 216
+#define CLUB_DISTANCE_X 21
+#define LIE_PERCENT_X 240
+#define UNK28_TEXT_X 36
+#define UNK28_TEXT_Y 176
+/* How far the ball has gone from where the shot was played */
+#define SHOT_LENGTH_X 132
+#define SHOT_LENGTH_Y 200
+#define PANEL_STOPWATCH_X 32
+#define PANEL_STOPWATCH_Y 92
+#define MIRROR_TEXTURE_SIZE 32
+#define MIRROR_TEXTURE_SIZE_LOG2 5
+#define MIRROR_TEXTURE_X 32
+#define MIRROR_TEXTURE_Y 122
+#define MODULE_UNK18 18
+/* A debugging aid that shows the texture the mirror effects draw */
+#define GAME_FLAG_SHOW_MIRROR_TEXTURE 0x70
+/* The shadowed font draws "ft" for this character */
+#define SHADOWED_FEET_GLYPH '['
+void func_80217F54(Gfx **displayListHead);
+
+/* Loads one of the shot panel's labels, which DrawRoundHud does in each branch that picks one */
+#define LOAD_SHOT_PANEL_LABEL(image)                                                                            \
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)(image) + IMAGE_HEADER_SIZE) & ~7);                         \
+    gDPLoadTextureBlock_4b(g_DisplayListHead++, ((u32)(image) + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,       \
+                           SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,      \
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD)
+
+/*
+ * Draws the round's HUD over the course: the letterbox, the players' faces
+ * and scores, the shot panel's labels, distances and club, and the debugging
+ * aids that game flags turn on
+ */
+#ifdef NON_MATCHING
+void DrawRoundHud(CameraView *view) {
+    s32 percentRange[2];
+    Club *club;
+    s32 hasHandicap;
+    s32 scoreboardX;
+    s32 i;
+    s32 ringCount;
+    s32 hundredths;
+    s32 height;
+    UnkB8 *player;
+    UnkB8 *shooter;
+    Club *selectedClub;
+    SurfaceInfo *surface;
+    f32 shotLength;
+    s32 contestDistance;
+    s32 totalSeconds;
+
+    club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
+    hasHandicap = FALSE;
+    if (sShotPanelOffsetX > 0) {
+        sShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
+    }
+    WaveHoleFlag();
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaDither(g_DisplayListHead++, G_AD_DISABLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
+    sLetterboxHeight = DrawLetterbox(&g_DisplayListHead, sLetterboxHeight);
+    /* The faces move out of the letterbox's way */
+    scoreboardX = sLetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT + (SCOREBOARD_X + sShotPanelOffsetX);
+    for (i = 0; i != g_PlayerCount; i++) {
+        if (g_Players[i].handicap > 0) {
+            hasHandicap = TRUE;
+            scoreboardX -= SCOREBOARD_HANDICAP_SHIFT;
+            break;
+        }
+    }
+    gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 128);
+    gDPPipeSync(g_DisplayListHead++);
+    gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetAlphaCompare(g_DisplayListHead++, G_AC_NONE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+    gDPSetBlendColor(g_DisplayListHead++, 255, 255, 255, 1);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(g_DisplayListHead++);
+    if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+        for (i = 0; i != g_GameState.playerCount; i++) {
+            gDPLoadTLUT_pal256(g_DisplayListHead++, (u32)g_PlayerFacePalettes[i] & ~7);
+            gDPLoadTextureBlock(g_DisplayListHead++, (u32)g_PlayerFaceImages[i] & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
+                                FACE_WIDTH, FACE_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            /* The face of the player whose turn it is shows full size and bright */
+            if (i == g_CurrentShot.playerIndex) {
+                gDPPipeSync(g_DisplayListHead++);
+                gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+                gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 255);
+                gDPPipeSync(g_DisplayListHead++);
+                gSPScisTextureRectangle(g_DisplayListHead++, (scoreboardX - FACE_INSET_X) << 2,
+                                        (SCOREBOARD_Y - FACE_INSET_Y + i * SCOREBOARD_ROW_HEIGHT) << 2,
+                                        (scoreboardX - FACE_INSET_X + FACE_WIDTH) << 2,
+                                        (SCOREBOARD_Y - FACE_INSET_Y + FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT) << 2,
+                                        G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            } else {
+                gDPPipeSync(g_DisplayListHead++);
+                gDPSetTextureFilter(g_DisplayListHead++, G_TF_BILERP);
+                gDPSetPrimColor(g_DisplayListHead++, 0, 0, 127, 127, 127, 127);
+                gDPPipeSync(g_DisplayListHead++);
+                gSPScisTextureRectangle(g_DisplayListHead++, scoreboardX << 2,
+                                        (SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT) << 2,
+                                        (scoreboardX + SMALL_FACE_WIDTH) << 2,
+                                        (SCOREBOARD_Y + SMALL_FACE_HEIGHT + i * SCOREBOARD_ROW_HEIGHT) << 2,
+                                        G_TX_RENDERTILE, 0, 0, SMALL_FACE_STEP, SMALL_FACE_STEP);
+            }
+        }
+        gDPPipeSync(g_DisplayListHead++);
+    }
+    if (g_RoundHud.unk8 && !g_IsCupViewShown) {
+        DrawHoleImageModel();
+    }
+    DrawShotPanelIcons(&g_DisplayListHead, view);
+    DrawLandingReaction(&g_DisplayListHead);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+    gDPPipeSync(g_DisplayListHead++);
+    gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+    if (g_RoundHud.isLieIconShown && !g_IsCupViewShown && !(club->surfaceMask & CLUB_SURFACE_GREEN)) {
+        DrawShotOffsetMarker();
+    }
+    if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        sPinFlagTime = (sPinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)g_PinFlagImages + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureBlock_4b(g_DisplayListHead++, ((u32)g_PinFlagImages + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                               PIN_FLAG_IMAGE_SIZE, PIN_FLAG_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (PIN_FLAG_X - sShotPanelOffsetX) << 2, PIN_FLAG_Y << 2,
+                                (PIN_FLAG_X + PIN_FLAG_WIDTH - sShotPanelOffsetX) << 2,
+                                (PIN_FLAG_Y + PIN_FLAG_HEIGHT) << 2, G_TX_RENDERTILE,
+                                (sPinFlagTime / PIN_FLAG_FRAME_LENGTH) * (PIN_FLAG_WIDTH << 5),
+                                PIN_FLAG_IMAGE_T << 5, 1 << 10, 1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sRestLabelImage + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureBlock_4b(g_DisplayListHead++, ((u32)sRestLabelImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                               SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (SHOT_PANEL_LABEL_X - sShotPanelOffsetX) << 2,
+                                REST_LABEL_Y << 2,
+                                (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+                                (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+        /* A putt's height is labelled by its height in meters, which the feet are measured from */
+        if ((club->surfaceMask & CLUB_SURFACE_GREEN) ? g_RoundHud.ballHeightMetersDirection == HEIGHT_LEVEL
+                                                     : g_RoundHud.ballHeightYardsDirection == HEIGHT_LEVEL) {
+            LOAD_SHOT_PANEL_LABEL(sFlatLabelImage);
+        } else if (g_RoundHud.ballHeightMetersDirection == HEIGHT_ABOVE) {
+            LOAD_SHOT_PANEL_LABEL(sUpLabelImage);
+        } else {
+            LOAD_SHOT_PANEL_LABEL(sDownLabelImage);
+        }
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (SHOT_PANEL_LABEL_X - sShotPanelOffsetX) << 2,
+                                HEIGHT_LABEL_Y << 2,
+                                (SHOT_PANEL_LABEL_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+                                (HEIGHT_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+            if (sRingFrameTime++ % RING_FRAME_LENGTH == 0) {
+                sRingFrame = (sRingFrame + 1) % RING_FRAME_COUNT;
+            }
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+            gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sRingImages + IMAGE_HEADER_SIZE) & ~7);
+            gDPLoadTextureBlock_4b(g_DisplayListHead++,
+                                   ((u32)sRingImages + PALETTED_TEXELS_OFFSET + sRingFrame * RING_FRAME_SIZE) & ~7,
+                                   G_IM_FMT_CI, RING_IMAGE_SIZE, RING_IMAGE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(g_DisplayListHead++);
+            gSPScisTextureRectangle(g_DisplayListHead++, (RING_ICON_X - sShotPanelOffsetX) << 2, RING_ICON_Y << 2,
+                                    (RING_ICON_X + RING_IMAGE_SIZE - sShotPanelOffsetX) << 2,
+                                    (RING_ICON_Y + RING_IMAGE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+            gDPPipeSync(g_DisplayListHead++);
+            gDPPipeSync(g_DisplayListHead++);
+            gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        }
+    }
+    gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sDistanceFont + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureBlock_4b(g_DisplayListHead++, ((u32)sDistanceFont + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                           DISTANCE_FONT_WIDTH, DISTANCE_GLYPH_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange() && !g_IsMiniGolf) {
+        sprintf(g_PrintBuffer, "%3dy",
+                (s16)g_CourseRecords[GetCourseRecordIndex()].holes[GetHoleRecordIndex()].yardages[0]);
+        DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - sShotPanelOffsetX, HOLE_YARDAGE_Y, g_PrintBuffer);
+    }
+    if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        /* The shot panel's distances are white, rather than the font's yellow */
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, (u32)sWhiteDistancePalette & ~7);
+        ringCount = 0;
+        if (g_GameState.gameMode == GAME_MODE_RING_SHOT) {
+            shooter = &g_Players[g_RoundHud.unk87];
+            for (i = 0; i != RING_COUNT; i++) {
+                ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
+            }
+            sprintf(g_PrintBuffer, "%d", ringCount);
+            DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - sShotPanelOffsetX, RING_COUNT_Y, g_PrintBuffer);
+        }
+        if (g_IsDebugEnabled && (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS)) {
+            shooter = &g_Players[g_RoundHud.unk87];
+            for (i = 0; i != RING_COUNT; i++) {
+                shooter->ringStates[i] = RING_STATE_NONE;
+            }
+        }
+        if (club->surfaceMask & CLUB_SURFACE_GREEN) {
+            hundredths = g_RoundHud.cupDistance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+            sprintf(g_PrintBuffer, "%3d.%02df", hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT);
+            DrawDistanceText(&g_DisplayListHead, SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, REST_LABEL_Y,
+                             g_PrintBuffer);
+            if (g_RoundHud.ballHeightMetersDirection != HEIGHT_LEVEL) {
+                sprintf(g_PrintBuffer, "%6.2ff", fabsf(g_RoundHud.ballHeightFeet));
+                DrawDistanceText(&g_DisplayListHead, SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, HEIGHT_LABEL_Y,
+                                 g_PrintBuffer);
+            }
+        } else {
+            sprintf(g_PrintBuffer, "%3dy", (s32)(g_RoundHud.cupDistance * YARDS_PER_UNIT));
+            DrawDistanceText(&g_DisplayListHead, SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, REST_LABEL_Y,
+                             g_PrintBuffer);
+            if (g_RoundHud.ballHeightYardsDirection != HEIGHT_LEVEL) {
+                height = g_RoundHud.ballHeightYards;
+                if (height < 0) {
+                    height = -height;
+                }
+                sprintf(g_PrintBuffer, "%3dy", height);
+                DrawDistanceText(&g_DisplayListHead, SHOT_PANEL_DISTANCE_X - sShotPanelOffsetX, HEIGHT_LABEL_Y,
+                                 g_PrintBuffer);
+            }
+        }
+    }
+    if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_RGBA16);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+        if (g_IsModuleAlive[MODULE_UNK25]) {
+            UpdateClubPanelImages();
+        }
+        gDPLoadTLUT_pal256(g_DisplayListHead++, ((u32)g_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureBlock(g_DisplayListHead++, ((u32)g_ClubPanelImage + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, CLUB_PANEL_WIDTH, CLUB_PANEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (CLUB_PANEL_X - sShotPanelOffsetX) << 2,
+                                (sHudOffsetY + CLUB_PANEL_Y) << 2,
+                                (CLUB_PANEL_X + CLUB_PANEL_WIDTH - sShotPanelOffsetX) << 2,
+                                (sHudOffsetY + CLUB_PANEL_Y + CLUB_PANEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                1 << 10, 1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
+                          ((u32)sClubNameImages[sClubNameImageIndex] + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureBlock_4b(g_DisplayListHead++,
+                               ((u32)sClubNameImages[sClubNameImageIndex] + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                               CLUB_NAME_WIDTH, CLUB_NAME_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (CLUB_NAME_X - sShotPanelOffsetX) << 2,
+                                (sHudOffsetY + CLUB_NAME_Y) << 2,
+                                (CLUB_NAME_X + CLUB_NAME_WIDTH - sShotPanelOffsetX) << 2,
+                                (sHudOffsetY + CLUB_NAME_Y + CLUB_NAME_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+    }
+    if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        gDPLoadTLUT_pal16(g_DisplayListHead++, 0, ((u32)sParImage + IMAGE_HEADER_SIZE) & ~7);
+        gDPLoadTextureBlock_4b(g_DisplayListHead++, ((u32)sParImage + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                               SHOT_PANEL_LABEL_WIDTH, SHOT_PANEL_LABEL_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(g_DisplayListHead++);
+        gSPScisTextureRectangle(g_DisplayListHead++, (PAR_IMAGE_X - sShotPanelOffsetX) << 2, PAR_IMAGE_Y << 2,
+                                (PAR_IMAGE_X + SHOT_PANEL_LABEL_WIDTH - sShotPanelOffsetX) << 2,
+                                (PAR_IMAGE_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10,
+                                1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+    }
+    if ((D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) && g_RoundHud.isLetterboxShown) {
+        DrawAnimatedIcon(&g_DisplayListHead, sLetterboxHeight);
+    }
+    BeginShadowedText(&g_DisplayListHead);
+    SetTextColor(&g_DisplayListHead, 255, 255, 255);
+    SetTextColor(&g_DisplayListHead, 255, 255, 255);
+    if (g_RoundHud.isLieIconShown && !g_IsCupViewShown) {
+        surface = GetSurfaceInfo(g_CurrentShot.surface);
+        GetSurfacePercentRange(surface, GetSelectedClub(), percentRange);
+        sprintf(g_PrintBuffer, "%3d-%3d", percentRange[0], percentRange[1]);
+        DrawShadowedText(&g_DisplayListHead, sShotPanelOffsetX + LIE_PERCENT_X, sHudOffsetY + SHOT_PANEL_TEXT_Y,
+                         g_PrintBuffer);
+    }
+    if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
+        selectedClub = GetSelectedClub();
+        player = &g_Players[g_RoundHud.unk87];
+        if (selectedClub->surfaceMask & CLUB_SURFACE_GREEN) {
+            sprintf(g_PrintBuffer, "%3d%c", GetSelectedShotDistance(), SHADOWED_FEET_GLYPH);
+        } else {
+            sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
+        }
+        DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - sShotPanelOffsetX, sHudOffsetY + SHOT_PANEL_TEXT_Y,
+                         g_PrintBuffer);
+        if (g_CurrentShot.shotMode == SHOT_MODE_POWER && !(selectedClub->surfaceMask & CLUB_SURFACE_GREEN) &&
+            g_IsModuleAlive[MODULE_UNK25] && IsShotModeChangeDone() && player->unk28 != -1) {
+            sprintf(g_PrintBuffer, "%d", player->unk28);
+            DrawShadowedText(&g_DisplayListHead, UNK28_TEXT_X - sShotPanelOffsetX, sHudOffsetY + UNK28_TEXT_Y,
+                             g_PrintBuffer);
+        }
+    }
+    if (g_RoundHud.unk13 && !g_IsCupViewShown) {
+        player = &g_Players[g_RoundHud.unk87];
+        shotLength = IntLength2D(g_CurrentShot.ballPosition[AXIS_X] - g_BallPosition[AXIS_X],
+                                 g_CurrentShot.ballPosition[AXIS_Z] - g_BallPosition[AXIS_Z]);
+        SetTextColor(&g_DisplayListHead, 255, 255, 63);
+        if (GetClub(player->clubs[g_CurrentShot.clubSlot])->surfaceMask & CLUB_SURFACE_GREEN) {
+            sprintf(g_PrintBuffer, "%5.2f%c", shotLength * (FEET_PER_YARD * YARDS_PER_UNIT), SHADOWED_FEET_GLYPH);
+        } else {
+            sprintf(g_PrintBuffer, "%5.2fy", shotLength * YARDS_PER_UNIT);
+        }
+        DrawShadowedText(&g_DisplayListHead, SHOT_LENGTH_X, SHOT_LENGTH_Y, g_PrintBuffer);
+    }
+    if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
+        for (i = 0; i < g_PlayerCount; i++) {
+            SetTextColor(&g_DisplayListHead, 255, 255, 255);
+            sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
+            DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
+                             SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+            if (hasHandicap) {
+                DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_COLON_X,
+                                 SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, ":");
+                sprintf(g_PrintBuffer, "%2d", GetHandicapOffset(GetCourseRecordIndex(), g_HoleIndex,
+                                                                 g_Players[i].handicap));
+                DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_X,
+                                 SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+            }
+            SetTextColor(&g_DisplayListHead, 255, 230, 0);
+            if (D_801B60B9 != 0) {
+                sprintf(g_PrintBuffer, sBlankText);
+            } else {
+                switch (g_GameMode) {
+                    case GAME_MODE_STROKE:
+                    case GAME_MODE_UNK1:
+                    case GAME_MODE_TOURNAMENT:
+                    case GAME_MODE_SPEED_GOLF:
+                        if ((s16)g_RoundHud.skinsTotals[i] == 0) {
+                            sprintf(g_PrintBuffer, "#0");
+                        } else {
+                            sprintf(g_PrintBuffer, "%+d", (s16)g_RoundHud.skinsTotals[i]);
+                        }
+                        break;
+                    case GAME_MODE_MATCH_GAME:
+                    case GAME_MODE_GET_CHARACTER:
+                        if ((s16)g_RoundHud.skinsTotals[i] == 0) {
+                            sprintf(g_PrintBuffer, "EVEN");
+                        } else if ((s16)g_RoundHud.skinsTotals[i] < 0) {
+                            sprintf(g_PrintBuffer, "%dUP", -(s16)g_RoundHud.skinsTotals[i]);
+                        } else {
+                            sprintf(g_PrintBuffer, "%dDW", (s16)g_RoundHud.skinsTotals[i]);
+                        }
+                        break;
+                    case GAME_MODE_SKINS_MATCH:
+                    case GAME_MODE_CLUB_SLOTS:
+                        sprintf(g_PrintBuffer, "%dP", (s16)g_RoundHud.skinsTotals[i]);
+                        break;
+                    case GAME_MODE_TRAINING:
+                    case GAME_MODE_UNK8:
+                    case GAME_MODE_RING_SHOT:
+                        sprintf(g_PrintBuffer, sBlankText);
+                        break;
+                }
+            }
+            DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
+                             SCOREBOARD_SCORE_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+            SetTextColor(&g_DisplayListHead, 255, 255, 255);
+            if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
+                IsMarkedParFive(GetCourseRecordIndex(), g_HoleIndex)) {
+                contestDistance = g_Players[i].driveDistance;
+                if (contestDistance != UNMEASURED_DISTANCE) {
+                    if (contestDistance == UNCOUNTED_DISTANCE) {
+                        sprintf(g_PrintBuffer, "miss");
+                    } else {
+                        sprintf(g_PrintBuffer, "%3dy", (s32)(contestDistance * YARDS_PER_UNIT));
+                    }
+                    DrawShadowedText(&g_DisplayListHead, scoreboardX + DRIVE_DISTANCE_X,
+                                     SCOREBOARD_CONTEST_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+                }
+            }
+            if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
+                IsParThree(GetCourseRecordIndex(), g_HoleIndex)) {
+                contestDistance = g_Players[i].pinDistance;
+                if (contestDistance != UNMEASURED_DISTANCE) {
+                    if (contestDistance == UNCOUNTED_DISTANCE) {
+                        sprintf(g_PrintBuffer, "miss");
+                    } else {
+                        hundredths = contestDistance * (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
+                        sprintf(g_PrintBuffer, "%2d.%02d%c", hundredths / HUNDREDTHS_PER_UNIT,
+                                hundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
+                    }
+                    DrawShadowedText(&g_DisplayListHead, scoreboardX + PIN_DISTANCE_X,
+                                     SCOREBOARD_CONTEST_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+                }
+            }
+        }
+    }
+    if (g_RoundHud.unkD && !IsOnDrivingRange() && g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
+        hundredths = (s32)(g_GameState.stopwatchFrameCount * ((f32)HUNDREDTHS_PER_SECOND / FRAMES_PER_SECOND)) %
+                     HUNDREDTHS_PER_SECOND;
+        totalSeconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
+        sprintf(g_PrintBuffer, D_800D1C84, totalSeconds / SECONDS_PER_MINUTE, totalSeconds % SECONDS_PER_MINUTE,
+                hundredths);
+        DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - sShotPanelOffsetX, PANEL_STOPWATCH_Y,
+                         g_PrintBuffer);
+    }
+    DrawNothing(&g_DisplayListHead);
+    SetUpTextDrawing(&g_DisplayListHead);
+    DrawBirdieBadgeCount(&g_DisplayListHead);
+    if (IsGameFlagSet(GAME_FLAG_SHOW_MIRROR_TEXTURE)) {
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureLUT(g_DisplayListHead++, G_TT_NONE);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetTextureFilter(g_DisplayListHead++, G_TF_POINT);
+        gDPPipeSync(g_DisplayListHead++);
+        gDPSetRenderMode(g_DisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        gDPSetCombineMode(g_DisplayListHead++, G_CC_DECALRGB, G_CC_DECALRGB);
+        gDPLoadTextureBlock(g_DisplayListHead++, (u32)g_MirrorTexture & ~7, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                            MIRROR_TEXTURE_SIZE, MIRROR_TEXTURE_SIZE, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                            G_TX_MIRROR | G_TX_WRAP, G_TX_NOMASK, MIRROR_TEXTURE_SIZE_LOG2, G_TX_NOLOD, G_TX_NOLOD);
+        gSPScisTextureRectangle(g_DisplayListHead++, MIRROR_TEXTURE_X << 2, MIRROR_TEXTURE_Y << 2,
+                                (MIRROR_TEXTURE_X + MIRROR_TEXTURE_SIZE) << 2,
+                                (MIRROR_TEXTURE_Y + MIRROR_TEXTURE_SIZE) << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gDPPipeSync(g_DisplayListHead++);
+    }
+    if (g_IsModuleAlive[MODULE_UNK18]) {
+        func_80217F54(&g_DisplayListHead);
+    }
+    /* A debugging aid: B changes the first player's character, and A plays the contest winner's movie */
+    if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & B_BUTTON) {
+            g_Players[0].characterIndex = (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
+        }
+        if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & A_BUTTON) {
+            SetContestWinner(0);
+            StartMovie(MOVIE_LONGEST_DRIVE);
+        }
+    }
+    AdjustHudOffset();
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/round_hud", DrawRoundHud);
+#endif
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C84);
 
+/* DrawRoundHud's, which the C version generates itself */
+#ifndef NON_MATCHING
 INCLUDE_RODATA("asm/nonmatchings/round_hud", D_800D1C98);
 
 INCLUDE_RODATA("asm/nonmatchings/round_hud", jtbl_800D1CA0);
+#endif
 
 /* Loads the images that the hole's intro shows for its contest bet and the match standing */
 void LoadHoleIntroImages(void) {
