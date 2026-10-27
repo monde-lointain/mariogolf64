@@ -24,6 +24,31 @@
 #define STATS_GRID_ROW_COUNT 4
 #define STATS_CELL_EMPTY -1
 
+/* The buffers that func_802178B0 fills, and the assets it reads into them */
+#define PLAYER_STATS_BUFFER_ICONS 1
+#define PLAYER_STATS_BUFFER_UNK2 2
+#define PLAYER_STATS_BUFFER_UNK3 3
+#define PLAYER_STATS_BUFFER_UNK4 4
+#define PLAYER_STATS_BUFFER_UNK5 5
+#define PLAYER_STATS_BUFFER_UNK6 6
+#define PLAYER_STATS_BUFFER_UNK7 7
+#define PLAYER_STATS_BUFFER_UNK8 8
+#define PLAYER_STATS_BUFFER_UNK9 9
+#define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
+#define PLAYER_STATS_BUFFER_UNK11 11
+#define PLAYER_STATS_BUFFER_UNK12 12
+#define PLAYER_STATS_BUFFER_UNK13 13
+#define PLAYER_STATS_ICON_COUNT 8
+#define PLAYER_STATS_ICON_SIZE 0x218
+#define ASSET_PLAYER_STATS_UNK2 0x671
+#define ASSET_PLAYER_STATS_UNK7 0x720
+#define ASSET_PLAYER_STATS_UNK8 0x6C4
+#define ASSET_PLAYER_STATS_UNK9 0x6E8
+#define ASSET_PLAYER_STATS_UNK11 0x721
+#define ASSET_PLAYER_STATS_UNK12 0x828
+#define ASSET_PLAYER_STATS_UNK13 0x829
+#define STATS_INDEX_COLUMN_COUNT 6
+
 /* The text slots that screen 12 clears on leaving */
 #define STATS_TEXT_SLOT_COUNT 4
 
@@ -87,6 +112,26 @@ extern u8 D_8022BE88_ovl_01;
 extern u8 D_8022BE89_ovl_01;
 extern u8 D_802303A1_ovl_01;
 extern s32 D_8023BFD0_ovl_01;
+extern void *D_8023B340_ovl_01;
+extern void *D_8023B344_ovl_01;
+extern void *D_8023B348_ovl_01;
+extern void *D_8023B34C_ovl_01;
+extern void *D_8023B350_ovl_01;
+extern void *D_8023B354_ovl_01;
+extern void *D_8023B358_ovl_01;
+extern void *D_8023B35C_ovl_01;
+extern void *D_8023B360_ovl_01;
+extern void *D_8023B364_ovl_01;
+extern void *D_8023B368_ovl_01;
+extern void *D_8023B36C_ovl_01;
+extern u32 D_802303AC_ovl_01[PLAYER_STATS_ICON_COUNT];
+extern u32 D_802303CC_ovl_01[][2];
+extern s16 D_8023040C_ovl_01[][STATS_INDEX_COLUMN_COUNT];
+extern u8 D_801B5634;
+extern s32 D_8022F8C0_ovl_01;
+extern u8 D_8022F8C4_ovl_01;
+extern u8 D_8022F8C5_ovl_01;
+extern u8 D_802303A0_ovl_01;
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s8 D_801B60B9;
@@ -96,7 +141,91 @@ extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
 void func_8021B87C_ovl_01(Gfx **displayListHead, u8 slide);
 extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT][PLAYER_STATS_FILE_SIZE];
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
+void func_802178B0_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+    MenuMemory *memory = func_8005AF74();
+    s16 iconIndex;
+    u8 rowNumber; /* D_801B5634 counts the index tables' rows from 1 */
+    u16 assetId;
+    void **imageSlot;
+
+    switch (bufferKind) {
+        case PLAYER_STATS_BUFFER_ICONS:
+            D_8023B340_ovl_01 = buffer;
+            for (iconIndex = 0; iconIndex != PLAYER_STATS_ICON_COUNT; iconIndex++) {
+                OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
+                ReadEncodedAsset((u8 *)D_8023B340_ovl_01 + iconIndex * PLAYER_STATS_ICON_SIZE, &asset);
+            }
+            break;
+        case PLAYER_STATS_BUFFER_UNK2:
+            D_8023B348_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK2, &asset);
+            ReadEncodedAsset(D_8023B348_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK3:
+            D_8023B34C_ovl_01 = buffer;
+            break;
+        case PLAYER_STATS_BUFFER_UNK4:
+            rowNumber = D_801B5634;
+            imageSlot = &D_8023B350_ovl_01;
+            *imageSlot = buffer;
+            OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][0], &asset);
+            ReadEncodedAsset(*imageSlot, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK5:
+            rowNumber = D_801B5634;
+            imageSlot = &D_8023B354_ovl_01;
+            *imageSlot = buffer;
+            OpenEncodedAsset(D_802303CC_ovl_01[D_8023040C_ovl_01[rowNumber - 1][memory->unkD]][1], &asset);
+            ReadEncodedAsset(*imageSlot, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK6:
+            D_8023B344_ovl_01 = buffer;
+            break;
+        case PLAYER_STATS_BUFFER_UNK7:
+            D_8023B358_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK7, &asset);
+            ReadEncodedAsset(D_8023B358_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK8:
+            D_8023B360_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK8, &asset);
+            ReadEncodedAsset(D_8023B360_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK9:
+            D_8023B364_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK9, &asset);
+            ReadEncodedAsset(D_8023B364_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_PLAYER_LABELS:
+            D_8023B368_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
+            ReadEncodedAsset(D_8023B368_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK11:
+            D_8023B36C_ovl_01 = buffer;
+            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK11, &asset);
+            ReadEncodedAsset(D_8023B36C_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK12:
+            assetId = ASSET_PLAYER_STATS_UNK12;
+            D_8023B35C_ovl_01 = buffer;
+            OpenEncodedAsset(assetId, &asset);
+            ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
+            break;
+        case PLAYER_STATS_BUFFER_UNK13:
+            assetId = ASSET_PLAYER_STATS_UNK13;
+            D_8023B35C_ovl_01 = buffer;
+            OpenEncodedAsset(assetId, &asset);
+            ReadEncodedAsset(D_8023B35C_ovl_01, &asset);
+            break;
+    }
+    D_8022F8C5_ovl_01 = 0;
+    D_8022F8C0_ovl_01 = 0;
+    D_8022F8C4_ovl_01 = 0;
+    D_802303A0_ovl_01 = 0;
+    D_802303A1_ovl_01 = 0;
+}
 
 void func_80217B88_ovl_01(s32 requestedPreset) {
     s8 presetIndex = requestedPreset;
