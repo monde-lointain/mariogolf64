@@ -22,6 +22,21 @@
 #define OPENING_BALL_SLOT_COUNT 2
 #define OPENING_BALL_IMAGE_SIZE 0x1208 /* A 64x64 CI8 image with its header and palette */
 
+/* The character name logos that the opening shows, two at a time */
+#define OPENING_NAME_LOGO_COUNT 7
+#define OPENING_NAME_SLOT_COUNT 2
+#define OPENING_NAME_LOGO_SIZE 0x2208 /* A 128x64 CI8 image with its header and palette */
+
+typedef struct OpeningNameLogo {
+    s32 assetId;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+} OpeningNameLogo; /* size = 0x1C */
+
 extern s32 D_8020AC4C_ovl_05;
 extern s32 D_8020AC50_ovl_05;
 extern f32 D_8020AC5C_ovl_05;
@@ -29,6 +44,11 @@ extern s32 D_8020AC60_ovl_05;
 extern s32 D_8020AC64_ovl_05;
 extern u8 D_80212830_ovl_05[];
 extern u8 D_80213A40_ovl_05[];
+extern OpeningNameLogo sOpeningNameLogos[OPENING_NAME_LOGO_COUNT];
+extern u8 D_8020E400_ovl_05[OPENING_NAME_SLOT_COUNT][OPENING_NAME_LOGO_SIZE];
+extern s32 D_80212810_ovl_05[OPENING_NAME_SLOT_COUNT];
+extern s32 D_80212818_ovl_05[OPENING_NAME_SLOT_COUNT];
+extern s32 D_80212820_ovl_05[OPENING_NAME_SLOT_COUNT];
 extern s32 D_8020AD70_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern f32 D_8020AD80_ovl_05[OPENING_BALL_SLOT_COUNT];
 extern s32 sOpeningBallAssets[OPENING_BALL_IMAGE_COUNT];
@@ -111,7 +131,16 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F6788_ovl_05);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA4EC_ovl_05);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA83C_ovl_05);
+/* Loads name logo logoIndex into slot and resets the slot */
+void func_801FA83C_ovl_05(s32 logoIndex, s32 slot) {
+    EncodedAsset asset;
+
+    OpenEncodedAsset(sOpeningNameLogos[logoIndex].assetId, &asset);
+    ReadEncodedAsset(D_8020E400_ovl_05[slot], &asset);
+    D_80212810_ovl_05[slot] = logoIndex;
+    D_80212818_ovl_05[slot] = 0;
+    D_80212820_ovl_05[slot] = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FA8D8_ovl_05);
 
