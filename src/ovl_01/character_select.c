@@ -230,7 +230,7 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
         }
         OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(D_800C2590[(s16)character].assetId, &file);
+        OpenAssetFile(D_800C2590[(s16)character][0], &file);
         ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
     }
     return -(column == oldColumn && row == oldRow);
@@ -331,7 +331,7 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         }
         OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(D_800C2590[(s16)character].assetId, &file);
+        OpenAssetFile(D_800C2590[(s16)character][0], &file);
         ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
     }
     return -(column == oldColumn && row == oldRow);
@@ -479,7 +479,7 @@ void func_8020B438_ovl_01(void) {
         }
         OpenEncodedAsset(faceAsset, &asset);
         ReadEncodedAsset(faceImage, &asset);
-        OpenAssetFile(D_800C2590[character].assetId, &file);
+        OpenAssetFile(D_800C2590[character][0], &file);
         ReadAssetFile(characterFile, GetAssetFileSize(&file), &file);
     }
 }

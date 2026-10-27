@@ -52,11 +52,7 @@ typedef struct ImportedCharacter {
 
 extern ImportedCharacter g_ImportedCharacters[IMPORTED_CHARACTER_COUNT];
 
-typedef struct Unk800C2590 {
-    /* 0x0 */ s16 assetId;
-    /* 0x2 */ u8 unk2[6];
-} Unk800C2590; /* size = 0x8 */
-
-extern Unk800C2590 D_800C2590[];
+/* Each character's face palette file in each of the character's colour schemes */
+extern s16 D_800C2590[][CHARACTER_PALETTE_COUNT];
 
 #endif

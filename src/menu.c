@@ -268,7 +268,7 @@ void LoadMenuResources(void) {
         ReadEncodedAsset(D_8012D430[index], &asset);
     }
     for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
-        OpenAssetFile(D_800C2590[index].assetId, &file);
+        OpenAssetFile(D_800C2590[index][0], &file);
         size = GetAssetFileSize(&file);
         D_80105B78[index] = AllocMemory(size);
         ReadAssetFile(D_80105B78[index], size, &file);
@@ -1005,7 +1005,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
                 arg0 = g_ImportedCharacters[index].character;
                 OpenEncodedAsset(D_800C2650[arg0].assetId, &asset);
                 ReadEncodedAsset(D_8012D468[index], &asset);
-                OpenAssetFile(D_800C2590[arg0].assetId, &file);
+                OpenAssetFile(D_800C2590[arg0][0], &file);
                 ReadAssetFile(D_80105BB0[index], GetAssetFileSize(&file), &file);
             }
         }
