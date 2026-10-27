@@ -3,6 +3,7 @@
 #include "billboard.h"
 #include "character.h"
 #include "character_slot.h"
+#include "controller.h"
 #include "course.h"
 #include "cpu_projection.h"
 #include "game_flags.h"
@@ -327,7 +328,254 @@ void func_80200EF0_ovl_01(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80200EF0_ovl_01);
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80201574_ovl_01);
+/*
+ * A debug character viewer. START hides the board and turns on the controls: the stick turns the character, the C
+ * buttons move it, A and B scale it, left and right pick an animation, R plays it, Z with the C buttons steps through
+ * it and L changes the character's kind.
+ */
+#define VIEWER_BOARD_KIND 11
+#define VIEWER_NAME_X 32
+#define VIEWER_NAME_Y 192
+#define VIEWER_PLAYER_NUMBER_X 144
+#define VIEWER_PLAYER_NAME_X 176
+#define VIEWER_PLAYER_TOP 64
+#define VIEWER_PLAYER_SPACING 18
+#define VIEWER_ANIMATION_X 64
+#define VIEWER_ANIMATION_Y 56
+#define VIEWER_CLUB_X 144
+#define VIEWER_POWER_Y 184
+#define VIEWER_SPIN_Y 192
+#define VIEWER_SIDE_SPIN_Y 200
+#define VIEWER_STICK_DEAD_ZONE 20
+#define VIEWER_STICK_DIVISOR 4
+#define VIEWER_SCALE_STEP 0.05f
+#define VIEWER_LAST_ANIMATION 34
+/* From this animation on, the character's second model plays it */
+#define VIEWER_FIRST_SECOND_MODEL_ANIMATION 12
+#define VIEWER_SECOND_MODEL_OFFSET 18
+#define VIEWER_KIND_COUNT 5
+#define VIEWER_HALF_WIDTH 160.0f
+#define VIEWER_HALF_HEIGHT 120.0f
+#define VIEWER_NEAR 1.0f
+#define VIEWER_FAR 3000.0f
+#define VIEWER_PERSPECTIVE_SCALE 10.0f
+#define VIEWER_BASE_SCALE 5.0f
+#define VIEWER_BASE_OFFSET -64.0f
+#define VIEWER_DEPTH -1000.0f
+
+extern s32 D_8022BE24_ovl_01;
+extern s8 D_8022BE81_ovl_01;
+extern u8 D_8022BE94_ovl_01;
+extern s32 D_8022FBA0_ovl_01;
+extern s32 D_8022FBA4_ovl_01;
+extern f32 D_8022FBA8_ovl_01;
+extern f32 D_8022FBAC_ovl_01;
+extern f32 D_8022FBB0_ovl_01;
+extern u32 D_8022FBB4_ovl_01;
+extern f32 D_8022FBB8_ovl_01;
+extern f32 D_8022FBBC_ovl_01;
+extern char D_802312E0_ovl_01[];
+extern char D_802312E8_ovl_01[];
+extern char D_802312F0_ovl_01[];
+extern Mtx D_80231FB0_ovl_01[2];
+extern Mtx D_80232030_ovl_01;
+
+const char D_80231660_ovl_01[] = "%d:%s";
+const char D_80231668_ovl_01[] = "%d:";
+const char D_8023166C_ovl_01[] = "%d";
+const char D_80231670_ovl_01[] = "POWER:%3d";
+const char D_8023167C_ovl_01[] = "SPIN :%3d";
+
+void func_80201574_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx;
+    s32 index;
+    s32 stickX;
+    s32 stickY;
+    s32 character;
+
+    gfx = *displayListHead;
+
+    if (g_ControllerStates[0].pressedButtons & START_BUTTON) {
+        D_8022BE28_ovl_01 ^= 1;
+    }
+    if (D_8022BE28_ovl_01 == 0) {
+        func_801FB54C_ovl_01(&gfx, VIEWER_BOARD_KIND);
+    }
+    SetUpTextDrawing(&gfx);
+    gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0x7F, 0xFF, 0xFF);
+    gDPSetEnvColor(gfx++, 0x00, 0x10, 0x40, 0xFF);
+    sprintf(g_PrintBuffer, D_80231660_ovl_01, D_801323A0.unk2 + 1, D_8022BF70_ovl_01[D_801323A0.unk2]);
+    DrawLargeText(&gfx, VIEWER_NAME_X, VIEWER_NAME_Y, g_PrintBuffer);
+    for (index = 0; index != D_80105B68; index++) {
+        sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
+        DrawTextStub(&gfx, VIEWER_PLAYER_NUMBER_X, VIEWER_PLAYER_TOP + index * VIEWER_PLAYER_SPACING, g_PrintBuffer);
+    }
+    for (index = 0; index != D_801B7070; index++) {
+        sprintf(g_PrintBuffer, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8012F480[index]]);
+        DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X, VIEWER_PLAYER_TOP + index * VIEWER_PLAYER_SPACING, g_PrintBuffer);
+    }
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    sprintf(g_PrintBuffer, D_8023166C_ovl_01, D_8022BE24_ovl_01);
+    DrawShadowedText(&gfx, VIEWER_ANIMATION_X, VIEWER_ANIMATION_Y, g_PrintBuffer);
+    sprintf(g_PrintBuffer, D_80231670_ovl_01, g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].distance);
+    DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_POWER_Y, g_PrintBuffer);
+    sprintf(g_PrintBuffer, D_8023167C_ovl_01, g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].spin);
+    DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SPIN_Y, g_PrintBuffer);
+    if (g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].sideSpin > 0) {
+        DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312E8_ovl_01);
+    } else if (g_Clubs[D_801323A0.unk2 * CLUB_SET_SIZE].sideSpin < 0) {
+        DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312E0_ovl_01);
+    } else {
+        DrawShadowedText(&gfx, VIEWER_CLUB_X, VIEWER_SIDE_SPIN_Y, D_802312F0_ovl_01);
+    }
+    if (D_8022BE28_ovl_01 == 0) {
+        ClearGameFlag(GAME_FLAG_SHOW_ANIMATION_FRAMES);
+    } else {
+        stickX = g_ControllerStates[0].stickX;
+        stickY = g_ControllerStates[0].stickY;
+        SetGameFlag(GAME_FLAG_SHOW_ANIMATION_FRAMES);
+        if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
+            if (stickX > 0) {
+                stickX -= VIEWER_STICK_DEAD_ZONE;
+                if (stickX < 0) {
+                    stickX = 0;
+                }
+                stickX /= VIEWER_STICK_DIVISOR;
+            } else if (stickX < 0) {
+                stickX += VIEWER_STICK_DEAD_ZONE;
+                if (stickX > 0) {
+                    stickX = 0;
+                }
+                stickX /= VIEWER_STICK_DIVISOR;
+            }
+            if (stickY > 0) {
+                stickY -= VIEWER_STICK_DEAD_ZONE;
+                if (stickY < 0) {
+                    stickY = 0;
+                }
+                stickY /= VIEWER_STICK_DIVISOR;
+            } else if (stickY < 0) {
+                stickY += VIEWER_STICK_DEAD_ZONE;
+                if (stickY > 0) {
+                    stickY = 0;
+                }
+                stickY /= VIEWER_STICK_DIVISOR;
+            }
+            D_8022FBA8_ovl_01 += stickY;
+            D_8022FBAC_ovl_01 += stickX;
+            if (g_ControllerStates[0].buttons & L_CBUTTONS) {
+                D_8022FBB8_ovl_01 -= 1.0f;
+            }
+            if (g_ControllerStates[0].buttons & R_CBUTTONS) {
+                D_8022FBB8_ovl_01 += 1.0f;
+            }
+            if (g_ControllerStates[0].buttons & U_CBUTTONS) {
+                D_8022FBBC_ovl_01 += 1.0f;
+            }
+            if (g_ControllerStates[0].buttons & D_CBUTTONS) {
+                D_8022FBBC_ovl_01 -= 1.0f;
+            }
+            if (g_ControllerStates[0].buttons & B_BUTTON) {
+                D_8022FBB0_ovl_01 -= VIEWER_SCALE_STEP;
+            }
+            if (g_ControllerStates[0].buttons & A_BUTTON) {
+                D_8022FBB0_ovl_01 += VIEWER_SCALE_STEP;
+            }
+        }
+        if ((g_MenuPressedButtons & L_JPAD) && D_8022BE24_ovl_01 > 0) {
+            D_8022BE24_ovl_01--;
+            D_8022FBA4_ovl_01 = TRUE;
+        }
+        if ((g_MenuPressedButtons & R_JPAD) && D_8022BE24_ovl_01 < VIEWER_LAST_ANIMATION) {
+            D_8022BE24_ovl_01++;
+            D_8022FBA4_ovl_01 = TRUE;
+        }
+        if (g_ControllerStates[0].buttons & Z_TRIG) {
+            SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+            if (g_ControllerStates[0].repeatedButtons & L_CBUTTONS) {
+                SetAnimationSpeed(D_8022FBB4_ovl_01, -1.0f);
+            }
+            if (g_ControllerStates[0].repeatedButtons & R_CBUTTONS) {
+                SetAnimationSpeed(D_8022FBB4_ovl_01, 1.0f);
+            }
+            if (g_ControllerStates[0].buttons & U_CBUTTONS) {
+                SetAnimationSpeed(D_8022FBB4_ovl_01, 4.0f);
+            }
+            if (g_ControllerStates[0].buttons & D_CBUTTONS) {
+                SetAnimationSpeed(D_8022FBB4_ovl_01, -4.0f);
+            }
+            AnimateAllCharacters();
+            SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+        }
+        if (g_ControllerStates[0].buttons & R_TRIG) {
+            if (!(g_ControllerStates[0].buttons & Z_TRIG)) {
+                SetCharacterAnimation(D_8022FBB4_ovl_01, D_8022BE24_ovl_01);
+            }
+            SetAnimationSpeed(D_8022FBB4_ovl_01, 1.0f);
+        }
+        if ((g_MenuRepeatButtons & L_TRIG) && D_8022BE94_ovl_01 == FALSE) {
+            D_8022BE81_ovl_01++;
+            if (D_8022BE81_ovl_01 >= VIEWER_KIND_COUNT) {
+                D_8022BE81_ovl_01 = 0;
+            }
+            if (D_8022BE81_ovl_01 < 0) {
+                D_8022BE81_ovl_01 = VIEWER_KIND_COUNT - 1;
+            }
+            D_8022BE94_ovl_01 = TRUE;
+        }
+    }
+    if (D_8022FBA0_ovl_01 != D_801323A0.unk2 || D_8022FBA4_ovl_01 == TRUE || D_8022BE94_ovl_01 == TRUE) {
+        if (IsCharacterSlotBusy(D_8022FBB4_ovl_01)) {
+            FreeCharacterSlot(D_8022FBB4_ovl_01);
+        } else {
+            character = D_801323A0.unk2;
+            D_8022BE94_ovl_01 = FALSE;
+            D_8022FBA4_ovl_01 = FALSE;
+            D_8022FBA0_ovl_01 = character;
+            if (D_8022BE24_ovl_01 >= VIEWER_FIRST_SECOND_MODEL_ANIMATION) {
+                LoadCharacter(D_8022FBB4_ovl_01, character + VIEWER_SECOND_MODEL_OFFSET, D_8022BE81_ovl_01);
+            } else {
+                LoadCharacter(D_8022FBB4_ovl_01, character, D_8022BE81_ovl_01);
+            }
+            SetCharacterAnimation(D_8022FBB4_ovl_01, D_8022BE24_ovl_01);
+            SetAnimationSpeed(D_8022FBB4_ovl_01, 0.0f);
+        }
+    }
+    AnimateAllCharacters();
+    guOrtho(&D_80232030_ovl_01, -VIEWER_HALF_WIDTH, VIEWER_HALF_WIDTH, -VIEWER_HALF_HEIGHT, VIEWER_HALF_HEIGHT,
+            VIEWER_NEAR, VIEWER_FAR, VIEWER_PERSPECTIVE_SCALE);
+    {
+        Vec3 translation;
+        Vec3 rotation;
+        Vec3 scale;
+        Mat4 matrix;
+
+    rotation[2] = 0;
+    rotation[0] = DEGREES_TO_RADIANS(D_8022FBA8_ovl_01);
+    rotation[1] = DEGREES_TO_RADIANS(D_8022FBAC_ovl_01);
+    translation[0] = D_8022FBB8_ovl_01 + VIEWER_BASE_OFFSET;
+    translation[1] = D_8022FBBC_ovl_01 + VIEWER_BASE_OFFSET;
+    translation[2] = VIEWER_DEPTH;
+    scale[0] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
+    scale[1] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
+    scale[2] = D_8022FBB0_ovl_01 + VIEWER_BASE_SCALE;
+    BuildTransformMatrix(matrix, rotation, translation, scale);
+    ConvertMatrixToFixed(matrix, &D_80231FB0_ovl_01[g_DrawBufferIndex]);
+    }
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_PERSP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80232030_ovl_01), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&D_80231FB0_ovl_01[g_DrawBufferIndex]),
+              G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gDPPipeSync(gfx++);
+    g_DisplayListHead = gfx;
+    DrawCharacter(D_8022FBB4_ovl_01);
+    gfx = *displayListHead = g_DisplayListHead;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80202000_ovl_01);
 
@@ -350,7 +598,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80202000_ovl_01);
 #define HOLES_CHOICE_MESSAGE_BASE 0xC3
 #define HOLES_CHOICE_TEXT_SLOT 1
 
-extern const char D_80231660_ovl_01[];
 extern char *D_8022FDEC_ovl_01[MINI_GOLF_RECORD_COUNT];
 extern s32 g_CourseNameEnvColors[];
 extern s32 g_CourseNamePrimColors[];
