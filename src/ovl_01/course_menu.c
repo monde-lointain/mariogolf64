@@ -3,6 +3,7 @@
 #include "libc.h"
 #include "menu_memory.h"
 #include "save.h"
+#include "screen.h"
 #include "text.h"
 #include "variables.h"
 
@@ -29,6 +30,15 @@
 #define STATS_LABEL_X 30
 #define STATS_FIRST_Y 154
 #define STATS_LINE_HEIGHT 16
+
+/* The arrows beside the statistics that show there are more rows above or below */
+#define STATS_FIRST_ARROW_IMAGE 16
+#define STATS_ARROW_WIDTH 16
+#define STATS_ARROW_HEIGHT 9
+#define STATS_ARROW_IMAGE_SIZE (STATS_ARROW_WIDTH * STATS_ARROW_HEIGHT / 2)
+#define STATS_ARROW_LEFT 32
+#define STATS_UP_ARROW_TOP 144
+#define STATS_DOWN_ARROW_TOP 216
 
 /* The birdie badge icon of D_8023A810 and the count beside it */
 #define BADGE_ICON_X 222
@@ -269,7 +279,61 @@ void func_8020FEF8_ovl_01(Gfx **displayListHead) {
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FEF8_ovl_01);
 #endif
 
+/*
+ * Doesn't match: the original counts the arrows and picks the first one with
+ * branches, where this version computes them without, so the registers and
+ * the spills to the stack differ.
+ */
+#ifdef NON_MATCHING
+void func_80210190_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 hasRowsAbove = D_802300A0_ovl_01 > 0;
+    s32 hasRowsBelow = D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT < STATS_COUNT;
+    s16 arrowCount = hasRowsAbove;
+    s32 firstArrow;
+    s16 arrowIndex;
+    s32 top;
+    s32 unused[4];
+
+    if (hasRowsBelow) {
+        arrowCount++;
+    }
+    if (arrowCount != 0) {
+        firstArrow = 0;
+        if (arrowCount == 1) {
+            firstArrow = hasRowsBelow;
+        }
+        gDPPipeSync(gfx++);
+        gDPPipeSync(gfx++);
+        gDPSetTextureFilter(gfx++, G_TF_BILERP);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+        gDPPipeSync(gfx++);
+        gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+        gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023A828_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+        for (arrowIndex = 0; arrowIndex != arrowCount; arrowIndex++) {
+            top = (arrowIndex != 0) ? STATS_DOWN_ARROW_TOP : STATS_UP_ARROW_TOP;
+            if (arrowCount == 1 && firstArrow) {
+                top = STATS_DOWN_ARROW_TOP;
+            }
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_8023A828_ovl_01 + (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
+                                    (PALETTED_TEXELS_OFFSET + STATS_FIRST_ARROW_IMAGE * STATS_ARROW_IMAGE_SIZE)) &
+                                       ~7,
+                                   G_IM_FMT_CI, STATS_ARROW_WIDTH, STATS_ARROW_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPTextureRectangle(gfx++, STATS_ARROW_LEFT << 2, top << 2, (STATS_ARROW_LEFT + STATS_ARROW_WIDTH) << 2,
+                                (top + STATS_ARROW_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                                TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+        }
+    }
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210190_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802104F0_ovl_01);
 
