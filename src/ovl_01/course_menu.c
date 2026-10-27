@@ -30,6 +30,13 @@
 #define STATS_FIRST_Y 154
 #define STATS_LINE_HEIGHT 16
 
+/* The birdie badge icon of D_8023A810 and the count beside it */
+#define BADGE_ICON_X 222
+#define BADGE_ICON_Y 144
+#define BADGE_COUNT_X 250
+#define BADGE_COUNT_Y 146
+#define BADGE_COUNT_DIGIT_WIDTH 16
+
 extern u16 D_800C2064[];
 extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
@@ -52,6 +59,8 @@ extern void *D_8023A830_ovl_01;
 s32 GetOpenCourseCount(void);
 void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
+void func_80207E28_ovl_01(Gfx **displayListHead, void *image, s32 x, s32 y);
+void func_80210DF4_ovl_01(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
 void func_8020E010_ovl_01(void **buffers) {
@@ -206,7 +215,59 @@ void func_8020FE20_ovl_01(Gfx **displayListHead, s16 x, s16 y) {
     *displayListHead = gfx;
 }
 
+/* Doesn't match: the original keeps the badge count in a1 and copies it to s1 after counting */
+#ifdef NON_MATCHING
+void func_8020FEF8_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    s16 badgeCount = 0;
+    s16 index; /* A hole, then a course, then where the count moves to */
+    s16 holeIndex;
+
+    if (GetOpenCourseCount() != memory->unk30) {
+        for (index = 0; index != COURSE_HOLE_COUNT; index++) {
+            if (save->unk990.birdieBadgeCounts[memory->unk30][index]) {
+                badgeCount++;
+            }
+        }
+    } else {
+        for (index = 0; index != COURSE_COUNT; index++) {
+            for (holeIndex = 0; holeIndex != COURSE_HOLE_COUNT; holeIndex++) {
+                if (save->unk990.birdieBadgeCounts[index][holeIndex]) {
+                    badgeCount++;
+                }
+            }
+        }
+    }
+    /* Centers the count by its number of digits */
+    if (badgeCount < 10) {
+        index = BADGE_COUNT_DIGIT_WIDTH;
+    }
+    if (badgeCount >= 10 && badgeCount < 100) {
+        index = 0;
+    }
+    if (badgeCount >= 100) {
+        index = -BADGE_COUNT_DIGIT_WIDTH;
+    }
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    func_80207E28_ovl_01(&gfx, D_8023A810_ovl_01, BADGE_ICON_X + index, BADGE_ICON_Y);
+    func_80210DF4_ovl_01(&gfx, BADGE_COUNT_X + index, BADGE_COUNT_Y, badgeCount, 1);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020FEF8_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80210190_ovl_01);
 
