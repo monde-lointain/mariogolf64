@@ -1,6 +1,7 @@
 #include "common.h"
 #include "heap.h"
 #include "host_file.h"
+#include "main.h"
 #include "screen.h"
 #include "terrain.h"
 #include "variables.h"
@@ -10,6 +11,15 @@
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
 /* An interpolation weight runs from 0, all the first end, to this, all the second */
 #define EDGE_WEIGHT_MAX 16
+
+/* func_80405870 gathers the terrain codes of cells at least this far from a diagonal */
+#define DIAGONAL_MIN_DISTANCE 3.0f
+/* The sides of the two diagonals that func_80405870 gathers codes for */
+#define DIAGONAL_SIDE_COUNT 4
+/* How many different codes each side keeps */
+#define SIDE_CODE_COUNT 2
+#define NO_TERRAIN_CODE (-1)
+#define HOLE_EDITOR_DIAGONAL_ASSERT_LINE 2046
 
 /* The screen captures, 24-bit BMPs; the corner capture covers the frame's top-left corner */
 #define CAPTURE_HEADER_SIZE 54
@@ -28,6 +38,8 @@
 #define KSEG1_OFFSET 0x20000000
 
 extern u8 D_80451A60[];
+
+s32 GetTerrainCode(s32 column, s32 row);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
 extern u8 D_8040C710_hole_editor[CAPTURE_HEADER_SIZE];
@@ -57,9 +69,85 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404B04_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404B84_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040582C_hole_editor);
+static const char sEditorAssertionText[] = "EX";
+static const char sEditorFileName[] = "c:/usgolf64/hiedit.c";
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80405870_hole_editor);
+/* A plain if leaves GCC to invert the condition, which the game's code does not */
+#define EDITOR_ASSERT(condition, lineNumber) \
+    ((condition) ? (void)0 : ReportFailedAssertion(sEditorAssertionText, sEditorFileName, lineNumber))
+
+/*
+ * Gathers the terrain codes on each side of the two diagonals of the
+ * rectangle from code column and row (column, row) to (endColumn,
+ * endRow), keeping up to two different codes a side and skipping cells
+ * within DIAGONAL_MIN_DISTANCE of the diagonal. Sides 0 and 1 are those
+ * of the diagonal through offsets (0, 0) and (width, height), and sides 2
+ * and 3 those of the one through (0, height) and (width, 0). Returns
+ * whether sides 0 and 1 both have two codes while side 2 or 3 does not.
+ */
+s32 func_80405870_hole_editor(s32 column, s32 row, s32 endColumn, s32 endRow) {
+    s32 sideCodes[DIAGONAL_SIDE_COUNT][SIDE_CODE_COUNT];
+    s32 width;
+    s32 height;
+    s32 i;
+    s32 rowOffset;
+    s32 columnOffset;
+    s32 code;
+    f32 inverseLength;
+    f32 distance;
+    f32 absDistance;
+
+    void AddSideCode(s32 *codes, s32 code) {
+        s32 i;
+
+        for (i = 0; i < SIDE_CODE_COUNT; i++) {
+            if (codes[i] == code) {
+                return;
+            }
+            if (codes[i] == NO_TERRAIN_CODE) {
+                codes[i] = code;
+                return;
+            }
+        }
+    }
+
+    width = endColumn - column;
+    height = endRow - row;
+    EDITOR_ASSERT(width > 0 && height > 0, HOLE_EDITOR_DIAGONAL_ASSERT_LINE);
+    for (i = 0; i < DIAGONAL_SIDE_COUNT; i++) {
+        sideCodes[i][0] = NO_TERRAIN_CODE;
+        sideCodes[i][1] = NO_TERRAIN_CODE;
+    }
+    inverseLength = 1.0f / sqrtf(width * width + height * height);
+    for (rowOffset = 0; rowOffset < height; rowOffset++) {
+        for (columnOffset = 0; columnOffset < width; columnOffset++) {
+            code = GetTerrainCode(column + columnOffset, row + rowOffset);
+            distance = (width * (rowOffset - height) + columnOffset * height) * inverseLength;
+            absDistance = distance < 0.0f ? -distance : distance;
+            if (absDistance >= DIAGONAL_MIN_DISTANCE) {
+                if (distance >= 0.0f) {
+                    AddSideCode(sideCodes[2], code);
+                } else {
+                    AddSideCode(sideCodes[3], code);
+                }
+            }
+            distance = (-height * columnOffset + rowOffset * width) * inverseLength;
+            absDistance = distance < 0.0f ? -distance : distance;
+            if (absDistance >= DIAGONAL_MIN_DISTANCE) {
+                if (distance >= 0.0f) {
+                    AddSideCode(sideCodes[0], code);
+                } else {
+                    AddSideCode(sideCodes[1], code);
+                }
+            }
+        }
+    }
+    if (sideCodes[0][1] != NO_TERRAIN_CODE && sideCodes[1][1] != NO_TERRAIN_CODE &&
+        (sideCodes[2][1] == NO_TERRAIN_CODE || sideCodes[3][1] == NO_TERRAIN_CODE)) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
 /*
  * Toggles the unk992 bit of one cell of the ground. The cells are
