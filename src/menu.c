@@ -153,17 +153,7 @@ extern u16 D_800C21B8[1];
 extern s16 D_800C2278[3];
 extern u16 D_800C28B0[1];
 void SetFramebufferCount(s32 count);
-#define CHARACTER_GRID_ROW_COUNT 3
-#define CHARACTER_GRID_COLUMN_COUNT 7
-/* The rows of the grid that hold the characters to choose from */
-#define CHARACTER_CHOICE_ROW_COUNT 2
 
-/*
- * The first empty slot gets a negative mark: the id of the character that
- * slot holds in g_EveryCharacterGrid, less this offset. What reads it is
- * unknown.
- */
-#define MARKED_CHARACTER_OFFSET 50
 /* D_800C29B8 lists slots in id order up to this count */
 #define MARKABLE_CHARACTER_COUNT 10
 
@@ -179,7 +169,6 @@ typedef struct Unk800C2650 {
 
 extern Unk800C2590 D_800C2590[];
 extern Unk800C2650 D_800C2650[];
-extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 extern s16 g_EveryCharacterGrid[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 extern s16 D_800C293C[CHARACTER_CHOICE_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 extern s16 D_800C2968[13];

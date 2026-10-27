@@ -62,6 +62,21 @@ s32 IsMenuWindowOpen(void);
 s32 IsMenuWindowClosed(void);
 void LoadMenuWindowImage(s32 imageIndex);
 
+/* The character select's grid of slots */
+#define CHARACTER_GRID_ROW_COUNT 3
+#define CHARACTER_GRID_COLUMN_COUNT 7
+/* The rows of the grid that hold the characters to choose from */
+#define CHARACTER_CHOICE_ROW_COUNT 2
+
+/*
+ * The first empty slot gets a negative mark: the id of the character that
+ * slot holds in g_EveryCharacterGrid, less this offset. What reads it is
+ * unknown.
+ */
+#define MARKED_CHARACTER_OFFSET 50
+
+extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
