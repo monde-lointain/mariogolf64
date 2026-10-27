@@ -256,7 +256,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
   }
   for (row = 0; row < span; row++) {
     for (column = 0; column < span; column++) {
-      distances[row * span + column] = sqrtf(squares[column] + squares[row]);
+      distances[(row * span) + column] = sqrtf(squares[column] + squares[row]);
     }
   }
   for (count = 0; count < maxCount;) {
@@ -589,7 +589,7 @@ s32 PaintMainCourse(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
@@ -604,7 +604,7 @@ s32 PaintMainCourse(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
@@ -620,7 +620,7 @@ s32 PaintMainCourse(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -686,7 +686,7 @@ s32 PaintPaleRoughCourse(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 14) << 11) | 0x4CE;
@@ -702,7 +702,7 @@ s32 PaintPaleRoughCourse(
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
         /* The random value is unused */
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         color = 0xDFB7;
         paintedCode = TERRAIN_CODE_ROUGH;
       } else {
@@ -793,7 +793,7 @@ s32 PaintShyGuyDesert(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 19) << 11) | 0x688;
@@ -808,7 +808,7 @@ s32 PaintShyGuyDesert(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = ((f_PaintSeed >> 16) & 3) + 10;
         green = red + 3;
         color = (red << 11) | (green << 6) | 5;
@@ -824,7 +824,7 @@ s32 PaintShyGuyDesert(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -887,7 +887,7 @@ s32 PaintBooValley(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
@@ -902,7 +902,7 @@ s32 PaintBooValley(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
@@ -918,7 +918,7 @@ s32 PaintBooValley(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -980,7 +980,7 @@ s32 PaintYoshisIsland(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x4D4;
@@ -995,7 +995,7 @@ s32 PaintYoshisIsland(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 0xD;
@@ -1011,7 +1011,7 @@ s32 PaintYoshisIsland(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -1076,7 +1076,7 @@ s32 PaintUnlistedCourse(
     case TERRAIN_CODE_FAIRWAY:
       if (nearestDistance >= 2 || nearestCode == TERRAIN_CODE_GREEN ||
           nearestCode == TERRAIN_CODE_FAIRWAY) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         fairwayRandom = f_PaintSeed >> 16;
         if ((x + 2) & 4) {
           color = (((fairwayRandom & 3) + 9) << 11) | 0x4C4;
@@ -1091,7 +1091,7 @@ s32 PaintUnlistedCourse(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
@@ -1107,7 +1107,7 @@ s32 PaintUnlistedCourse(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
       break;
@@ -1164,7 +1164,7 @@ s32 PaintFirstMiniGolfCourse(
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 7) + 4) << 11) | ((4 - ((random >> 5) & 3)) << 6);
       break;
@@ -1213,7 +1213,7 @@ s32 PaintSecondMiniGolfCourse(
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -1261,7 +1261,7 @@ s32 PaintThirdMiniGolfCourse(
   switch (code) {
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -1319,7 +1319,7 @@ s32 PaintDrivingRange(
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
-        f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+        f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
         red = (f_PaintSeed >> 16) & 7;
         green = 16 - (red >> 1);
         color = (red << 11) | (green << 6) | 1;
@@ -1335,7 +1335,7 @@ s32 PaintDrivingRange(
       break;
     case TERRAIN_CODE_UNK3:
       paintedCode = TERRAIN_CODE_UNK3;
-      f_PaintSeed = f_PaintSeed * 0x5D588B65 + 1;
+      f_PaintSeed = (f_PaintSeed * 0x5D588B65) + 1;
       random = f_PaintSeed >> 16;
       color = (((random & 4) + 2) << 11) | ((4 - ((random >> 5) & 3)) << 6) | 1;
       break;
@@ -1379,10 +1379,10 @@ s32 PaintDrivingRange(
 static inline u16* GetMapTexel(s32 column, s32 row) {
   /* tileRow is there to match */
   s32 tileRow = row >> MAP_TILE_SHIFT;
-  u16* texels = (u16*)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
-      tileRow * GROUND_TILE_COLUMN_COUNT];
+  u16* texels = (u16*)&g_WorkArea.hole.tiles[(column / GROUND_TILE_TEXEL_SPAN) +
+      (tileRow * GROUND_TILE_COLUMN_COUNT)];
 
-  return &texels[(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN +
+  return &texels[((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
       (column & MAP_TILE_MASK)];
 }
 
@@ -1418,7 +1418,7 @@ void EncodeCodeMap(void) {
   f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
       *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
@@ -1475,7 +1475,7 @@ void LoadCodeMap(char* path) {
   }
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
       color = GetTerrainCodeColor(*f_BuildCursor);
       WriteMapTexel(column, row, color);
     }
@@ -1499,14 +1499,14 @@ void LoadToolCodeMap(void) {
 /* Returns the code at a column and row of the code map, pointing the build
  * cursor at it */
 static inline u8 GetCode(s32 column, s32 row) {
-  f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+  f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
   return *f_BuildCursor;
 }
 
 /* Sets the code at a column and row of the code map, pointing the build cursor
  * at it */
 static inline void SetCode(s32 column, s32 row, u8 code) {
-  f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+  f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
   *f_BuildCursor = code;
 }
 
@@ -1546,7 +1546,7 @@ void CleanCodeMap(void) {
   f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
       *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
@@ -1572,15 +1572,15 @@ void FinishCodeMapCleanup(void) {}
 
 /* The byte offset of a map texel's terrain code cell */
 static inline s32 GetCellOffset(u32 column, u32 row) {
-  return (column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE +
-      (row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE;
+  return ((column / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_SIZE) +
+      ((row / TERRAIN_CODE_CELL_SPAN) * TERRAIN_CODE_CELL_ROW_SIZE);
 }
 
 /* The offset of a map texel's code in the packed codes */
 static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
-  return (column % TERRAIN_CODE_CELL_SPAN) / 2 +
-      (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
-      block * TERRAIN_CODE_BLOCK_SIZE;
+  return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
+      ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+      (block * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 /*
@@ -1588,9 +1588,9 @@ static inline s32 GetPackedCodeOffset(s32 block, u32 column, u32 row) {
  * the cell's block marker
  */
 static inline s32 GetCellCodeOffset(s32 cell, u32 column, u32 row) {
-  return (column % TERRAIN_CODE_CELL_SPAN) / 2 +
-      (row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2) +
-      (cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE;
+  return ((column % TERRAIN_CODE_CELL_SPAN) / 2) +
+      ((row % TERRAIN_CODE_CELL_SPAN) * (TERRAIN_CODE_CELL_SPAN / 2)) +
+      ((cell & (TERRAIN_CODE_CELL_BLOCK - 1)) * TERRAIN_CODE_BLOCK_SIZE);
 }
 
 /*
@@ -1709,10 +1709,9 @@ void PaintGroundTiles(void) {
   }
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT;) {
-      texel = &((u16*)&g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
-          row / GROUND_TILE_TEXEL_SPAN *
-              GROUND_TILE_COLUMN_COUNT])[(row & MAP_TILE_MASK) *
-          GROUND_TILE_TEXEL_SPAN];
+      texel = &((u16*)&g_WorkArea.hole.tiles[(column / GROUND_TILE_TEXEL_SPAN) +
+          (row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT)])
+                  [(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
       for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++) {
         nearestCode = code = *nextCode++;
         nearestDistance = searchSpans[code];
@@ -1732,7 +1731,7 @@ void PaintGroundTiles(void) {
             if (neighborColumn < MAP_COLUMN_COUNT &&
                 neighborRow < MAP_ROW_COUNT) {
               nearestCode =
-                  codes[neighborRow * MAP_COLUMN_COUNT + neighborColumn];
+                  codes[(neighborRow * MAP_COLUMN_COUNT) + neighborColumn];
               if (nearestCode != code) {
                 break;
               }
@@ -1809,9 +1808,9 @@ f32 MeasureGroundTiles(void) {
       for (pointRow = 0; pointRow <= GROUND_TILE_POINT_SPAN; pointRow++) {
         for (pointColumn = 0; pointColumn <= GROUND_TILE_POINT_SPAN;
             pointColumn++) {
-          point =
-              GetGroundPoint(tileColumn * GROUND_TILE_POINT_SPAN + pointColumn,
-                  tileRow * GROUND_TILE_POINT_SPAN + pointRow);
+          point = GetGroundPoint(
+              (tileColumn * GROUND_TILE_POINT_SPAN) + pointColumn,
+              (tileRow * GROUND_TILE_POINT_SPAN) + pointRow);
           sumX += point->v.ob[0];
           sumY += point->v.ob[1];
           sumZ += point->v.ob[2];
@@ -2045,7 +2044,7 @@ void SaveHoleFiles(s32 course, s32 hole) {
   f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
-      f_BuildCursor = &f_BuildBuffer[row * MAP_COLUMN_COUNT + column];
+      f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
       *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
@@ -2174,12 +2173,12 @@ void InitGridVertices(void) {
   for (i = 0; i < GRID_VERTEX_COUNT; i++) {
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
     g_WorkArea.hole.gridVertices[i].v.tc[0] =
-        x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = 0;
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
     g_WorkArea.hole.gridVertices[i].v.flag = 0;
     g_WorkArea.hole.gridVertices[i].v.tc[1] =
-        z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+        (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     g_WorkArea.hole.gridVertices[i].v.cn[0] = 0;
     g_WorkArea.hole.gridVertices[i].v.cn[1] = 0;
     g_WorkArea.hole.gridVertices[i].v.cn[2] = 0;
@@ -2188,7 +2187,7 @@ void InitGridVertices(void) {
     if (x == (GROUND_TILE_COLUMN_COUNT + 1) * TILE_SPAN) {
       x = HALF_TILE_SPAN;
     }
-    if (x == GROUND_TILE_COLUMN_COUNT * TILE_SPAN + HALF_TILE_SPAN) {
+    if (x == (GROUND_TILE_COLUMN_COUNT * TILE_SPAN) + HALF_TILE_SPAN) {
       x = 0;
       z += HALF_TILE_SPAN;
     }
@@ -2248,9 +2247,9 @@ void InitTileMidpoints(void) {
       g_WorkArea.hole.midpoints[tile][i].v.ob[AXIS_Z] = z + offsets[i][1];
       g_WorkArea.hole.midpoints[tile][i].v.flag = 0;
       g_WorkArea.hole.midpoints[tile][i].v.tc[0] =
-          (x + offsets[i][0]) * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          ((x + offsets[i][0]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
       g_WorkArea.hole.midpoints[tile][i].v.tc[1] =
-          (z + offsets[i][1]) * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          ((z + offsets[i][1]) * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
       g_WorkArea.hole.midpoints[tile][i].v.cn[0] = 0;
       g_WorkArea.hole.midpoints[tile][i].v.cn[1] = 0;
       g_WorkArea.hole.midpoints[tile][i].v.cn[2] = 0;
@@ -2386,7 +2385,7 @@ void ReadGridVertices(void) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
       g_WorkArea.hole.gridVertices[i].v.tc[0] =
-          x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
     ReadVertexY(&y, flags);
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = y;
@@ -2394,7 +2393,7 @@ void ReadGridVertices(void) {
       ReadVertexZ(&z, flags);
       g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Z] = z;
       g_WorkArea.hole.gridVertices[i].v.tc[1] =
-          z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
   }
 }
@@ -2420,7 +2419,7 @@ void ReadTileMidpoints(void) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_X] = x;
       g_WorkArea.hole.midpoints[tile][midpoint].v.tc[0] =
-          x * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
     ReadVertexY(&y, flags);
     g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Y] = y;
@@ -2428,7 +2427,7 @@ void ReadTileMidpoints(void) {
       ReadVertexZ(&z, flags);
       g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Z] = z;
       g_WorkArea.hole.midpoints[tile][midpoint].v.tc[1] =
-          z * GRID_TEXTURE_SCALE + GRID_TEXTURE_BORDER;
+          (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
     midpoint++;
     if (midpoint >= TILE_MIDPOINT_COUNT) {
@@ -2604,9 +2603,9 @@ extern s8 f_ShadowlessTextures[];
 
 static inline u16* GetShadowedTexel(u32 column, u32 row) {
   return &g_WorkArea.hole
-              .tiles[column / GROUND_TILE_TEXEL_SPAN +
-                  (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
-              .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN +
+              .tiles[(column / GROUND_TILE_TEXEL_SPAN) +
+                  ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
+              .texels[0][((row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN) +
                   (column & MAP_TILE_MASK)];
 }
 
@@ -2704,9 +2703,9 @@ void CastBillboardShadows(void) {
     x = g_Billboards[index].x;
     z = g_Billboards[index].z;
     lightPoint[0] =
-        cosf(lightPitch) * cosf(lightYaw) * SHADOW_LIGHT_DISTANCE + x;
+        (cosf(lightPitch) * cosf(lightYaw) * SHADOW_LIGHT_DISTANCE) + x;
     lightPoint[2] =
-        cosf(lightPitch) * sinf(lightYaw) * SHADOW_LIGHT_DISTANCE + z;
+        (cosf(lightPitch) * sinf(lightYaw) * SHADOW_LIGHT_DISTANCE) + z;
     lightPoint[1] = sinf(lightPitch) * SHADOW_LIGHT_DISTANCE;
     guLookAtF(lightView, x, 0.0f, z, lightPoint[0], lightPoint[1],
         lightPoint[2], 0.0f, -1.0f, 0.0f);
@@ -2727,9 +2726,9 @@ void CastBillboardShadows(void) {
       rowEnd = MAP_ROW_COUNT - 1;
     }
     for (; row < rowEnd; row++) {
-      rowPoint[0] = lightView[2][0] * row + lightView[3][0];
-      rowPoint[1] = lightView[2][1] * row + lightView[3][1];
-      rowPoint[2] = lightView[2][2] * row + lightView[3][2];
+      rowPoint[0] = (lightView[2][0] * row) + lightView[3][0];
+      rowPoint[1] = (lightView[2][1] * row) + lightView[3][1];
+      rowPoint[2] = (lightView[2][2] * row) + lightView[3][2];
       isRowInWidth = FALSE;
       column = centerColumn - SHADOW_COLUMN_REACH;
       columnEnd = centerColumn + SHADOW_COLUMN_REACH;
@@ -2740,7 +2739,7 @@ void CastBillboardShadows(void) {
         columnEnd = MAP_COLUMN_COUNT - 1;
       }
       for (; column < columnEnd; column++) {
-        viewX = lightView[0][0] * column + rowPoint[0];
+        viewX = (lightView[0][0] * column) + rowPoint[0];
         if (width <= fabsf(viewX)) {
           if (!isRowInWidth) {
             continue;
@@ -2748,7 +2747,7 @@ void CastBillboardShadows(void) {
           break;
         }
         isRowInWidth = TRUE;
-        viewY = lightView[0][1] * column + rowPoint[1];
+        viewY = (lightView[0][1] * column) + rowPoint[1];
         if (((-width <= viewY) & (viewY < height)) == 0) {
           continue;
         }
@@ -2756,9 +2755,9 @@ void CastBillboardShadows(void) {
         heightFraction = viewY * heightScale;
         widthFraction = fabsf(viewX) * widthScale;
         if (widthFraction + fabsf(heightFraction * 2) < 1.0f) {
-          litPercent = sqrtf(widthFraction * widthFraction +
-                           heightFraction * heightFraction * 4.0f) *
-                  LIT_PERCENT_AT_BASE +
+          litPercent = (sqrtf((widthFraction * widthFraction) +
+                            (heightFraction * heightFraction * 4.0f)) *
+                           LIT_PERCENT_AT_BASE) +
               LIT_PERCENT_AT_BASE;
         }
         if (viewY >= 0.0f) {
@@ -2767,10 +2766,10 @@ void CastBillboardShadows(void) {
               (s32)(widthFraction * BILLBOARD_MASK_SIZE)];
           if (solidity != 0) {
             nearness = SHADOW_NEARNESS_LIMIT -
-                fabsf(lightView[0][2] * column + rowPoint[2]) * heightScale;
+                (fabsf((lightView[0][2] * column) + rowPoint[2]) * heightScale);
             if (nearness > SHADOW_NEARNESS_MIN) {
               solidLitPercent = LIT_PERCENT_FULL -
-                  solidity * nearness * SHADOW_SOLIDITY_SCALE;
+                  (solidity * nearness * SHADOW_SOLIDITY_SCALE);
               if (solidLitPercent < litPercent) {
                 litPercent = solidLitPercent;
               }
@@ -2792,8 +2791,8 @@ void CastBillboardShadows(void) {
           brightness = SHADOW_BRIGHTNESS_MAX;
         }
         scale = SHADOW_SCALE_ONE -
-            (LIT_PERCENT_FULL - litPercent) * brightness *
-                SHADOW_DARKENING_SCALE;
+            ((LIT_PERCENT_FULL - litPercent) * brightness *
+                SHADOW_DARKENING_SCALE);
         red = (red * scale) >> SHADOW_SCALE_FRACTION_BITS;
         green = (green * scale) >> SHADOW_SCALE_FRACTION_BITS;
         blue = (blue * scale) >> SHADOW_SCALE_FRACTION_BITS;
@@ -3019,17 +3018,17 @@ void ShadeGroundTiles(void) {
   cosf(pitch);
   sinf(pitch);
   for (slope = LIGHT_SLOPE_MIN; slope <= LIGHT_SLOPE_MAX; slope++) {
-    scale = LIGHT_SCALE_ONE + slope * LIGHT_SCALE_SLOPE_STEP;
+    scale = LIGHT_SCALE_ONE + (slope * LIGHT_SCALE_SLOPE_STEP);
     if (scale < LIGHT_SCALE_MIN) {
       scale = LIGHT_SCALE_MIN;
     } else if (scale > LIGHT_SCALE_MAX) {
       scale = LIGHT_SCALE_MAX;
     }
-    slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
+    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_RED] = light.red * scale;
-    slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
+    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_GREEN] = light.green * scale;
-    slopeLights[(slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT +
+    slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_BLUE] = light.blue * scale;
   }
   lightColumnOffset =
@@ -3056,8 +3055,8 @@ void ShadeGroundTiles(void) {
     do {
       texel =
           &g_WorkArea.hole
-               .tiles[column / GROUND_TILE_TEXEL_SPAN +
-                   (row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT]
+               .tiles[(column / GROUND_TILE_TEXEL_SPAN) +
+                   ((row / GROUND_TILE_TEXEL_SPAN) * GROUND_TILE_COLUMN_COUNT)]
                .texels[0][(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
       /* The offset heights can be off the map only in the edge tiles */
       isMapEdge =
@@ -3095,8 +3094,8 @@ void ShadeGroundTiles(void) {
         texelColor = *texel;
         if (*heights < 0) {
           color = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
-                      slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                              SLOPE_LIGHT_WORD_COUNT +
+                      slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                      SLOPE_LIGHT_WORD_COUNT) +
                           SLOPE_LIGHT_RED]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
           if (color > TEXEL_CHANNEL_MAX) {
@@ -3104,8 +3103,8 @@ void ShadeGroundTiles(void) {
           }
           color <<= TEXEL_RED_SHIFT;
           channel = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
-                        slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                                SLOPE_LIGHT_WORD_COUNT +
+                        slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                        SLOPE_LIGHT_WORD_COUNT) +
                             SLOPE_LIGHT_GREEN]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_GREEN_SHIFT);
@@ -3114,8 +3113,8 @@ void ShadeGroundTiles(void) {
           }
           color |= channel << TEXEL_GREEN_SHIFT;
           channel = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
-                        slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                                SLOPE_LIGHT_WORD_COUNT +
+                        slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                        SLOPE_LIGHT_WORD_COUNT) +
                             SLOPE_LIGHT_BLUE]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_BLUE_SHIFT);
@@ -3126,16 +3125,16 @@ void ShadeGroundTiles(void) {
           *texel = color | (texelColor & TEXEL_ALPHA_MASK);
         } else {
           red = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
-                    slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                            SLOPE_LIGHT_WORD_COUNT +
+                    slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                    SLOPE_LIGHT_WORD_COUNT) +
                         SLOPE_LIGHT_RED]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS);
           if ((shaded.red = red) > TEXEL_CHANNEL_MAX) {
             shaded.red = TEXEL_CHANNEL_MAX;
           }
           green = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
-                      slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                              SLOPE_LIGHT_WORD_COUNT +
+                      slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                      SLOPE_LIGHT_WORD_COUNT) +
                           SLOPE_LIGHT_GREEN]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_GREEN_SHIFT);
@@ -3143,8 +3142,8 @@ void ShadeGroundTiles(void) {
             shaded.green = TEXEL_CHANNEL_MAX;
           }
           blue = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
-                     slopeLights[(slope - LIGHT_SLOPE_MIN) *
-                             SLOPE_LIGHT_WORD_COUNT +
+                     slopeLights[((slope - LIGHT_SLOPE_MIN) *
+                                     SLOPE_LIGHT_WORD_COUNT) +
                          SLOPE_LIGHT_BLUE]) >>
               (LIGHT_SCALE_FRACTION_BITS + LIGHT_COLOR_FRACTION_BITS +
                   TEXEL_BLUE_SHIFT);
@@ -3175,14 +3174,14 @@ FADED:
             fadedRed = shaded.red;
             fadedGreen = shaded.green;
             fadedBlue = shaded.blue;
-            fadedRed = fadedRed * keptWeight + fadeColor.red * fadeWeight;
+            fadedRed = (fadedRed * keptWeight) + (fadeColor.red * fadeWeight);
             if (fadedRed > TEXEL_RED_MASK) {
               fadedRed = TEXEL_RED_MASK;
             } else {
               fadedRed &= TEXEL_RED_MASK;
             }
             fadedGreen =
-                (fadedGreen * keptWeight + fadeColor.green * fadeWeight) >>
+                ((fadedGreen * keptWeight) + (fadeColor.green * fadeWeight)) >>
                 (LIGHT_SCALE_FRACTION_BITS - TEXEL_GREEN_SHIFT);
             if (fadedGreen > TEXEL_GREEN_MASK) {
               fadedGreen = TEXEL_GREEN_MASK;
@@ -3190,7 +3189,7 @@ FADED:
               fadedGreen &= TEXEL_GREEN_MASK;
             }
             fadedBlue =
-                (fadedBlue * keptWeight + fadeColor.blue * fadeWeight) >>
+                ((fadedBlue * keptWeight) + (fadeColor.blue * fadeWeight)) >>
                 (LIGHT_SCALE_FRACTION_BITS - TEXEL_BLUE_SHIFT);
             if (fadedBlue > TEXEL_BLUE_MASK) {
               fadedBlue = TEXEL_BLUE_MASK;
@@ -3257,7 +3256,7 @@ static inline u16 ReadTileTexel(
     tileRow = GROUND_TILE_ROW_COUNT - 1;
     texelRow = -1;
   }
-  tileIndex = tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn;
+  tileIndex = (tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn;
   if (texelColumn > GROUND_TILE_TEXEL_SPAN) {
     texelColumn = GROUND_TILE_TEXEL_SPAN;
   }
@@ -3266,11 +3265,11 @@ static inline u16 ReadTileTexel(
   tile = &g_WorkArea.hole.tiles[tileIndex];
   if (g_WorkArea.hole.tiles[tileIndex].texels[GROUND_TILE_TEXEL_ROW_COUNT -
           1][GROUND_TILE_TEXEL_ROW_LENGTH - 1] != 0) {
-    texel = &tile->texels[0][(texelRow + TILE_BORDER_BEFORE) *
-            GROUND_TILE_TEXEL_ROW_LENGTH +
+    texel = &tile->texels[0][((texelRow + TILE_BORDER_BEFORE) *
+                                 GROUND_TILE_TEXEL_ROW_LENGTH) +
         texelColumn + TILE_BORDER_BEFORE];
   } else {
-    texel = &tile->texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn];
+    texel = &tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn];
   }
   return *texel;
 }
@@ -3303,14 +3302,15 @@ void ToggleGroundTileBorders(void) {
         for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
           for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
               texelColumn++) {
-            texels[0][texelRow * GROUND_TILE_TEXEL_SPAN + texelColumn] =
+            texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn] =
                 ReadTileTexel(tileColumn, tileRow, texelColumn, texelRow);
           }
         }
         texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
               [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
         for (i = 0; i < BORDERED_TILE_TEXEL_COUNT; i++) {
-          g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn]
+          g_WorkArea.hole
+              .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
               .texels[0][i] = texels[0][i];
         }
       }
@@ -3320,9 +3320,9 @@ void ToggleGroundTileBorders(void) {
   for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
     for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
       texel = &texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE];
-      tileTexel =
-          g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn]
-              .texels[0];
+      tileTexel = g_WorkArea.hole
+                      .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
+                      .texels[0];
       for (texelRow = 0; texelRow < GROUND_TILE_TEXEL_SPAN; texelRow++) {
         for (texelColumn = 0; texelColumn < GROUND_TILE_TEXEL_SPAN;
             texelColumn++) {
@@ -3352,14 +3352,15 @@ void ToggleGroundTileBorders(void) {
       texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
             [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
       source = (f64*)texels;
-      destination = (f64*)g_WorkArea.hole
-                        .tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn]
-                        .texels;
+      destination =
+          (f64*)g_WorkArea.hole
+              .tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
+              .texels;
       while (source != (f64*)&texels[GROUND_TILE_TEXEL_ROW_COUNT]) {
         *destination++ = *source++;
         *destination++ = *source++;
       }
-      g_WorkArea.hole.tiles[tileRow * GROUND_TILE_COLUMN_COUNT + tileColumn]
+      g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
           .unk990 = 0;
     }
   }
@@ -3378,13 +3379,13 @@ void SetMiniGolfTileTextureCoords(
   s32 coord;
 
   for (vertex = start; vertex < end; vertex++) {
-    coord = ((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X -
+    coord = (((vertex->ob[AXIS_X] * MINI_GOLF_TEXTURE_SCALE_X) -
                  (column << TILE_ORIGIN_SHIFT))
                 << TEXTURE_COORD_FRACTION_BITS) +
         TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
     /* The second coordinate's two steps are there to match */
-    coord = vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z -
+    coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) -
         (row << TILE_ORIGIN_SHIFT);
     coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
     vertex->tc[1] = coord;
@@ -3452,7 +3453,7 @@ void BuildGroundTileDisplayList(
   }
   Gfx* gfx = *gfxCursor;
   Vtx* vertex = *vertexCursor;
-  s32 tileIndex = row * GROUND_TILE_COLUMN_COUNT + column;
+  s32 tileIndex = (row * GROUND_TILE_COLUMN_COUNT) + column;
   Vtx* midpoints;
   s32* coarseOffsets;
   s32 segmentIndex = 0;
@@ -3492,60 +3493,60 @@ void BuildGroundTileDisplayList(
   gSPVertex(gfx++, SegmentedVertex(1, &midpoints[0]), 2, 12);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)midpoints;
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-      &GetGridVertex(column * 2 + 1, row * 2)->v, &vertex++->v);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2)->v, &vertex++->v);
+      &GetGridVertex((column * 2) + 1, row * 2)->v, &vertex++->v);
+  SetTileVertexMidpoint(&GetGridVertex((column * 2) + 1, row * 2)->v,
+      &GetGridVertex((column * 2) + 2, row * 2)->v, &vertex++->v);
   gSPVertex(gfx++, SegmentedVertex(2, &midpoints[2]), 1, 14);
   gSPVertex(gfx++, SegmentedVertex(2, &midpoints[4]), 1, 15);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[3]), 1, 16);
   gSPVertex(gfx++, SegmentedVertex(3, &midpoints[5]), 1, 17);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 2);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-      &GetGridVertex(column * 2, row * 2 + 1)->v, &vertex[0].v);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 1)->v,
-      &GetGridVertex(column * 2, row * 2 + 2)->v, &vertex[2].v);
+      &GetGridVertex(column * 2, (row * 2) + 1)->v, &vertex[0].v);
+  SetTileVertexMidpoint(&GetGridVertex(column * 2, (row * 2) + 1)->v,
+      &GetGridVertex(column * 2, (row * 2) + 2)->v, &vertex[2].v);
   vertex++;
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 3);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2 + 1)->v, &vertex[0].v);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2 + 1)->v,
-      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex[2].v);
+  SetTileVertexMidpoint(&GetGridVertex((column * 2) + 2, row * 2)->v,
+      &GetGridVertex((column * 2) + 2, (row * 2) + 1)->v, &vertex[0].v);
+  SetTileVertexMidpoint(&GetGridVertex((column * 2) + 2, (row * 2) + 1)->v,
+      &GetGridVertex((column * 2) + 2, (row * 2) + 2)->v, &vertex[2].v);
   vertex += 3;
   gSPVertex(gfx++, SegmentedVertex(4, &midpoints[6]), 2, 18);
   coarseOffsets[segmentIndex++] = (u8*)vertex - (u8*)(midpoints + 6);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v,
-      &GetGridVertex(column * 2 + 1, row * 2 + 2)->v, &vertex++->v);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2 + 1, row * 2 + 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
+  SetTileVertexMidpoint(&GetGridVertex(column * 2, (row * 2) + 2)->v,
+      &GetGridVertex((column * 2) + 1, (row * 2) + 2)->v, &vertex++->v);
+  SetTileVertexMidpoint(&GetGridVertex((column * 2) + 1, (row * 2) + 2)->v,
+      &GetGridVertex((column * 2) + 2, (row * 2) + 2)->v, &vertex++->v);
 
   /* The grid vertices at the middles of the edges and at the center */
-  CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2), 1);
+  CopyVertices(vertex, GetGridVertex((column * 2) + 1, row * 2), 1);
   gSPVertex(gfx++, SegmentedVertex(5, vertex), 1, 20);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2)->v, &vertex++->v);
-  CopyVertices(vertex, GetGridVertex(column * 2, row * 2 + 1), 1);
+      &GetGridVertex((column * 2) + 2, row * 2)->v, &vertex++->v);
+  CopyVertices(vertex, GetGridVertex(column * 2, (row * 2) + 1), 1);
   gSPVertex(gfx++, SegmentedVertex(6, vertex), 1, 21);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
   SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2)->v,
-      &GetGridVertex(column * 2, row * 2 + 2)->v, &vertex++->v);
-  CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 1), 1);
+      &GetGridVertex(column * 2, (row * 2) + 2)->v, &vertex++->v);
+  CopyVertices(vertex, GetGridVertex((column * 2) + 1, (row * 2) + 1), 1);
   gSPVertex(gfx++, vertex, 1, 22);
   vertex++;
-  CopyVertices(vertex, GetGridVertex(column * 2 + 2, row * 2 + 1), 1);
+  CopyVertices(vertex, GetGridVertex((column * 2) + 2, (row * 2) + 1), 1);
   gSPVertex(gfx++, SegmentedVertex(7, vertex), 1, 23);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2 + 2, row * 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
-  CopyVertices(vertex, GetGridVertex(column * 2 + 1, row * 2 + 2), 1);
+  SetTileVertexMidpoint(&GetGridVertex((column * 2) + 2, row * 2)->v,
+      &GetGridVertex((column * 2) + 2, (row * 2) + 2)->v, &vertex++->v);
+  CopyVertices(vertex, GetGridVertex((column * 2) + 1, (row * 2) + 2), 1);
   gSPVertex(gfx++, SegmentedVertex(8, vertex), 1, 24);
   vertex++;
   coarseOffsets[segmentIndex++] = sizeof(Vtx);
-  SetTileVertexMidpoint(&GetGridVertex(column * 2, row * 2 + 2)->v,
-      &GetGridVertex(column * 2 + 2, row * 2 + 2)->v, &vertex++->v);
+  SetTileVertexMidpoint(&GetGridVertex(column * 2, (row * 2) + 2)->v,
+      &GetGridVertex((column * 2) + 2, (row * 2) + 2)->v, &vertex++->v);
 
   for (columnBlock = 0; columnBlock < TILE_POINT_SPAN - 1; columnBlock += 2) {
     for (rowBlock = 0; rowBlock < TILE_POINT_SPAN - 1; rowBlock += 2) {

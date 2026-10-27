@@ -378,8 +378,9 @@ void RecordCourseRound(void) {
       record->averageDrive = 0;
     }
   } else if (stats->averagedDriveCount > 0) {
-    record->averageDrive = (record->averageDrive * record->averagedDriveCount +
-                               stats->averagedDriveTotal) /
+    record->averageDrive =
+        ((record->averageDrive * record->averagedDriveCount) +
+            stats->averagedDriveTotal) /
         (record->averagedDriveCount + stats->averagedDriveCount);
     record->averagedDriveCount += stats->averagedDriveCount;
   }

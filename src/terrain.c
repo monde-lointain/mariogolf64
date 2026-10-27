@@ -142,14 +142,14 @@ s32 GetTerrainCode(s32 column, s32 row) {
   } else if (row >= 512) {
     row = 511;
   }
-  block = (g_TerrainCodeCells[0] + column / 16)[(row / 16) * 16];
+  block = (g_TerrainCodeCells[0] + (column / 16))[(row / 16) * 16];
   if (block == -1) {
     return -1;
   }
   if (block >= 0) {
     return block;
   }
-  offset = ((column & 0xF) >> 1) + (row & 0xF) * 8 + (block & 0x7FFF) * 128;
+  offset = ((column & 0xF) >> 1) + ((row & 0xF) * 8) + ((block & 0x7FFF) * 128);
   if (!(column & 1)) {
     return g_WorkArea.hole.terrainCodes[offset] >> 4;
   }
@@ -713,24 +713,24 @@ void BlendVertices(Vtx* first, Vtx* second, Vtx* result, s32 weight) {
   s32 firstWeight = 16 - weight;
 
   result->v.ob[0] =
-      (first->v.ob[0] * firstWeight + second->v.ob[0] * weight) / 16;
+      ((first->v.ob[0] * firstWeight) + (second->v.ob[0] * weight)) / 16;
   result->v.ob[1] =
-      (first->v.ob[1] * firstWeight + second->v.ob[1] * weight) / 16;
+      ((first->v.ob[1] * firstWeight) + (second->v.ob[1] * weight)) / 16;
   result->v.ob[2] =
-      (first->v.ob[2] * firstWeight + second->v.ob[2] * weight) / 16;
+      ((first->v.ob[2] * firstWeight) + (second->v.ob[2] * weight)) / 16;
   result->v.flag = 0;
   result->v.tc[0] =
-      (first->v.tc[0] * firstWeight + second->v.tc[0] * weight) / 16;
+      ((first->v.tc[0] * firstWeight) + (second->v.tc[0] * weight)) / 16;
   result->v.tc[1] =
-      (first->v.tc[1] * firstWeight + second->v.tc[1] * weight) / 16;
+      ((first->v.tc[1] * firstWeight) + (second->v.tc[1] * weight)) / 16;
   result->v.cn[0] =
-      (first->v.cn[0] * firstWeight + second->v.cn[0] * weight) / 16;
+      ((first->v.cn[0] * firstWeight) + (second->v.cn[0] * weight)) / 16;
   result->v.cn[1] =
-      (first->v.cn[1] * firstWeight + second->v.cn[1] * weight) / 16;
+      ((first->v.cn[1] * firstWeight) + (second->v.cn[1] * weight)) / 16;
   result->v.cn[2] =
-      (first->v.cn[2] * firstWeight + second->v.cn[2] * weight) / 16;
+      ((first->v.cn[2] * firstWeight) + (second->v.cn[2] * weight)) / 16;
   result->v.cn[3] =
-      (first->v.cn[3] * firstWeight + second->v.cn[3] * weight) / 16;
+      ((first->v.cn[3] * firstWeight) + (second->v.cn[3] * weight)) / 16;
 }
 
 /* Returns the grid vertex at a vertex column and row, or the first one off the
@@ -742,8 +742,9 @@ Vtx* GetGridVertex(u32 column, u32 row) {
       row >= GROUND_GRID_VERTEX_ROW_COUNT) {
     vertex = &g_WorkArea.hole.gridVertices[0];
   } else {
-    vertex = &g_WorkArea.hole
-                  .gridVertices[row * 17 + (column >> 1) + (column & 1) * 9];
+    vertex =
+        &g_WorkArea.hole
+             .gridVertices[(row * 17) + (column >> 1) + ((column & 1) * 9)];
   }
   return vertex;
 }
@@ -810,7 +811,7 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
       tileColumn = column >> 2;
       slotColumn = column & 3;
     }
-    return &g_WorkArea.hole.midpoints[tileRow * 8 + tileColumn]
+    return &g_WorkArea.hole.midpoints[(tileRow * 8) + tileColumn]
                                      [f_PointSlots[slotRow][slotColumn]];
   }
   return GetGridVertex(column >> 1, row >> 1);
@@ -842,7 +843,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
 
   if ((column | row) & 1) {
     if (row < 64 && column < 32) {
-      tileIndex = (row / 4) * 8 + column / 4;
+      tileIndex = ((row / 4) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -851,7 +852,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
       }
     }
     if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = (row / 4 - 1) * 8 + column / 4;
+      tileIndex = (((row / 4) - 1) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -860,7 +861,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
       }
     }
     if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = (row / 4) * 8 + (column / 4 - 1);
+      tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -883,7 +884,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
 
   if ((column | row) & 1) {
     if (row < 64 && column < 32) {
-      tileIndex = (row / 4) * 8 + column / 4;
+      tileIndex = ((row / 4) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -893,7 +894,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       }
     }
     if (IsSharedWithPreviousTileRow(column, row)) {
-      tileIndex = (row / 4 - 1) * 8 + column / 4;
+      tileIndex = (((row / 4) - 1) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -903,7 +904,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
       }
     }
     if (IsSharedWithPreviousTileColumn(column, row)) {
-      tileIndex = (row / 4) * 8 + (column / 4 - 1);
+      tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
       if (blockIndex >= 0) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
@@ -933,7 +934,7 @@ void InitTerrainTextures(void) {
     tile->unk990 = 0;
     for (texelRow = 0; texelRow < 32; texelRow++) {
       for (texelColumn = 0; texelColumn < 32; texelColumn++) {
-        tile->texels[0][texelRow * 32 + texelColumn] = 0x7C1;
+        tile->texels[0][(texelRow * 32) + texelColumn] = 0x7C1;
       }
     }
   }
@@ -958,7 +959,7 @@ void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
   for (row = 0; row < 3; row++) {
     for (column = 0; column < 3; column++) {
       corners[cornerIndex++] =
-          GetGridVertex(tileColumn * 2 + column, tileRow * 2 + row);
+          GetGridVertex((tileColumn * 2) + column, (tileRow * 2) + row);
     }
   }
   SetVertexMidpoint(CORNER(0, 0), CORNER(0, 1), &midpoints[0]);
@@ -991,7 +992,7 @@ void BuildAllTileMidpoints(void) {
     for (tileColumn = 0; tileColumn < 8; tileColumn++) {
       g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex = tileIndex;
       midpoints = g_WorkArea.hole.midpoints[tileIndex];
-      center = GetGridVertex(tileColumn * 2 + 1, tileRow * 2 + 1);
+      center = GetGridVertex((tileColumn * 2) + 1, (tileRow * 2) + 1);
       g_WorkArea.hole.tiles[tileIndex].center[0] = center->v.ob[0];
       g_WorkArea.hole.tiles[tileIndex].center[1] = center->v.ob[1];
       g_WorkArea.hole.tiles[tileIndex].center[2] = center->v.ob[2];
@@ -1034,7 +1035,8 @@ void UpdateFlagPanel(void) {
       }
       sprintf(text, "%X",
           IsGameFlagSet(
-              (row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT + column));
+              ((row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT) +
+              column));
       if (row == f_FlagPanelRow && column == f_FlagPanelColumn) {
         SetDebugTextHighlight(TRUE);
       }
@@ -1453,7 +1455,7 @@ Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
 
   if (slot & 0x80) {
     vertex = GetGridVertex(
-        tileColumn * 2 + ((slot >> 2) & 3), tileRow * 2 + (slot & 3));
+        (tileColumn * 2) + ((slot >> 2) & 3), (tileRow * 2) + (slot & 3));
   } else {
     vertex = &midpoints[slot];
   }
@@ -1463,8 +1465,8 @@ Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
 /* Returns the cross product of two points' offsets from an origin */
 s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ,
     s32 secondX, s32 secondZ) {
-  return (firstX - originX) * (secondZ - originZ) -
-      (firstZ - originZ) * (secondX - originX);
+  return ((firstX - originX) * (secondZ - originZ)) -
+      ((firstZ - originZ) * (secondX - originX));
 }
 
 /*
@@ -1600,19 +1602,20 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
   firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
   firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
   secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
-  normalX = firstY * secondZ - secondY * firstZ;
-  normalY = -firstX * secondZ + secondX * firstZ;
-  normalZ = -firstY * secondX + secondY * firstX;
-  distance = -(normalX * triangle->corners[AXIS_X][0] +
-      normalY * triangle->corners[AXIS_Y][0] +
-      normalZ * triangle->corners[AXIS_Z][0]);
+  normalX = (firstY * secondZ) - (secondY * firstZ);
+  normalY = (-firstX * secondZ) + (secondX * firstZ);
+  normalZ = (-firstY * secondX) + (secondY * firstX);
+  distance = -((normalX * triangle->corners[AXIS_X][0]) +
+      (normalY * triangle->corners[AXIS_Y][0]) +
+      (normalZ * triangle->corners[AXIS_Z][0]));
   while (IsNormalTooLong(normalX, normalY, normalZ)) {
     normalX /= 256;
     normalY /= 256;
     normalZ /= 256;
     distance /= 256;
   }
-  length = sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
+  length =
+      sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
   if (length == 0) {
     PrintDebugText("NormalError", 3, 15);
     plane->normal[AXIS_X] = 0;
@@ -1655,13 +1658,14 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
   firstZ = triangle->corners[AXIS_Z][1] - triangle->corners[AXIS_Z][0];
   firstX = triangle->corners[AXIS_X][1] - triangle->corners[AXIS_X][0];
   secondX = triangle->corners[AXIS_X][2] - triangle->corners[AXIS_X][0];
-  normalX = firstY * secondZ - secondY * firstZ;
-  normalY = -firstX * secondZ + secondX * firstZ;
-  normalZ = -firstY * secondX + secondY * firstX;
-  length = sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
-  distance = -(normalX * triangle->corners[AXIS_X][0] +
-      normalY * triangle->corners[AXIS_Y][0] +
-      normalZ * triangle->corners[AXIS_Z][0]);
+  normalX = (firstY * secondZ) - (secondY * firstZ);
+  normalY = (-firstX * secondZ) + (secondX * firstZ);
+  normalZ = (-firstY * secondX) + (secondY * firstX);
+  length =
+      sqrtf((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
+  distance = -((normalX * triangle->corners[AXIS_X][0]) +
+      (normalY * triangle->corners[AXIS_Y][0]) +
+      (normalZ * triangle->corners[AXIS_Z][0]));
   if (length == 0.0f) {
     if (g_IsDebugEnabled) {
       PrintDebugText("NormalFError", 3, 15);
@@ -1742,14 +1746,15 @@ s32 GetTerrainHeight(s32 x, s32 z) {
   firstZ = triangle.corners[AXIS_Z][1] - triangle.corners[AXIS_Z][0];
   firstX = triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0];
   secondX = triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][0];
-  normalX = firstY * secondZ + secondY * -firstZ;
-  normalY = firstX * -secondZ + secondX * firstZ;
-  normalZ = firstY * -secondX + secondY * firstX;
+  normalX = (firstY * secondZ) + (secondY * -firstZ);
+  normalY = (firstX * -secondZ) + (secondX * firstZ);
+  normalZ = (firstY * -secondX) + (secondY * firstX);
   height = triangle.corners[AXIS_Y][0] << 10;
   offsetX = x - (triangle.corners[AXIS_X][0] << 10);
   offsetZ = z - (triangle.corners[AXIS_Z][0] << 10);
   if ((s32)normalY != 0) {
-    return height + (s32)((-normalX * offsetX - normalZ * offsetZ) / normalY);
+    return height +
+        (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
   }
   return 0;
 }

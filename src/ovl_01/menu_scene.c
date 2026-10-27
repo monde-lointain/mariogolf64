@@ -396,7 +396,7 @@ void func_8021585C_ovl_01(void) {
         palette = 0;
       }
       OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
-      ReadAssetFile(D_8023BFF0_ovl_01[courseIndex * BEST_TIME_COUNT + rank],
+      ReadAssetFile(D_8023BFF0_ovl_01[(courseIndex * BEST_TIME_COUNT) + rank],
           GetAssetFileSize(&file), &file);
     }
   }

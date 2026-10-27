@@ -93,11 +93,11 @@ void MeasureEditorCamera(void) {
       g_CameraEditor.points[EDITOR_POINT_EYE][0];
   g_CameraEditor.pitch = atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] -
           g_CameraEditor.points[EDITOR_POINT_EYE][1],
-      sqrtf(offsetX * offsetX +
-          (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-              g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
+      sqrtf((offsetX * offsetX) +
+          ((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
+               g_CameraEditor.points[EDITOR_POINT_EYE][2]) *
               (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
-                  g_CameraEditor.points[EDITOR_POINT_EYE][2])));
+                  g_CameraEditor.points[EDITOR_POINT_EYE][2]))));
   g_CameraEditor.heading =
       atan2f(g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
               g_CameraEditor.points[EDITOR_POINT_EYE][2],
@@ -108,11 +108,11 @@ void MeasureEditorCamera(void) {
   offsetZ = g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] -
       g_CameraEditor.points[EDITOR_POINT_EYE][2];
   g_CameraEditor.distance =
-      sqrtf((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-                g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
-              (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
-                  g_CameraEditor.points[EDITOR_POINT_EYE][0]) +
-          offsetY * offsetY + offsetZ * offsetZ);
+      sqrtf(((g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
+                 g_CameraEditor.points[EDITOR_POINT_EYE][0]) *
+                (g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] -
+                    g_CameraEditor.points[EDITOR_POINT_EYE][0])) +
+          (offsetY * offsetY) + (offsetZ * offsetZ));
 }
 
 /* Starts moving point index to (x, y, z) over frameCount frames, or snaps it
@@ -122,12 +122,12 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
 
-  distance = sqrtf((x - g_CameraEditor.points[index][0]) *
-          (x - g_CameraEditor.points[index][0]) +
-      (y - g_CameraEditor.points[index][1]) *
-          (y - g_CameraEditor.points[index][1]) +
-      (z - g_CameraEditor.points[index][2]) *
-          (z - g_CameraEditor.points[index][2]));
+  distance = sqrtf(((x - g_CameraEditor.points[index][0]) *
+                       (x - g_CameraEditor.points[index][0])) +
+      ((y - g_CameraEditor.points[index][1]) *
+          (y - g_CameraEditor.points[index][1])) +
+      ((z - g_CameraEditor.points[index][2]) *
+          (z - g_CameraEditor.points[index][2])));
   if (distance < 0.1f) {
     g_CameraEditor.points[index][0] = x;
     g_CameraEditor.points[index][1] = y;

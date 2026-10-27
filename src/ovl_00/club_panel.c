@@ -472,7 +472,7 @@ void DrawClubPanel(Gfx** displayListHead) {
     markerOffset = value * GAUGE_LENGTH / GAUGE_MAX_VALUE;
   }
   f_MarkerPulseAngle += MARKER_PULSE_STEP;
-  pulse = sinf(f_MarkerPulseAngle) * MARKER_PULSE_LEVEL + MARKER_PULSE_LEVEL;
+  pulse = (sinf(f_MarkerPulseAngle) * MARKER_PULSE_LEVEL) + MARKER_PULSE_LEVEL;
   gDPPipeSync(gfx++);
   gDPSetPrimColor(gfx++, 0, 0, 191, 191, 191, 255);
   if (playerState == PLAYER_STATE_UNK2 || playerState == PLAYER_STATE_UNK4 ||

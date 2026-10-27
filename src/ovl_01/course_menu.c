@@ -444,8 +444,8 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != courseCount + 1; index++) {
     ScreenPoint point;
 
-    angle = -((((statsCourse - index) % (courseCount + 1)) * angleStep +
-                  spin * DEGREES_PER_SPIN_STEP) *
+    angle = -(((((statsCourse - index) % (courseCount + 1)) * angleStep) +
+                  (spin * DEGREES_PER_SPIN_STEP)) *
         DEGREES_TO_RADIANS);
     wheelX = sinf(angle) * WHEEL_RADIUS_X;
     if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) < 0) {
@@ -543,7 +543,7 @@ void func_8020F2D0_ovl_01(
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = COURSE_BANNER_TOP + stripIndex * COURSE_BANNER_STRIP_SPACING;
+    stripTop = COURSE_BANNER_TOP + (stripIndex * COURSE_BANNER_STRIP_SPACING);
     gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
         (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
         (stripTop + COURSE_BANNER_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0,
@@ -597,7 +597,7 @@ void func_8020F794_ovl_01(Gfx** displayListHead) {
     SetTextColor(&gfx, 255, 255, 255);
     sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
     DrawLargeText(&gfx, STATS_LABEL_X,
-        STATS_FIRST_Y + (s16)row * STATS_LINE_HEIGHT, g_PrintBuffer);
+        STATS_FIRST_Y + ((s16)row * STATS_LINE_HEIGHT), g_PrintBuffer);
     func_8020F9B8_ovl_01(&gfx, statIndex, row);
     row++;
   }
@@ -627,78 +627,78 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
   switch (statIndex) {
     case STAT_ROUND_COUNT:
       func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].roundCount, 0);
       break;
     case STAT_BEST_SCORE:
       bestScore = D_80105C38[courseIndex].bestScore;
       if (bestScore >= -9 && bestScore <= 9) {
         func_80210DF4_ovl_01(&gfx, STATS_ONE_DIGIT_X,
-            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_UNK2);
       } else if ((bestScore >= 10 && bestScore <= 99) ||
           (bestScore >= -99 && bestScore <= -10)) {
         func_80210DF4_ovl_01(&gfx, STATS_TWO_DIGIT_X,
-            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_UNK2);
       } else {
         func_80210D34_ovl_01(&gfx, STATS_VALUE_X,
-            STATS_FIRST_Y + row * STATS_LINE_HEIGHT, bestScore,
+            STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_UNK2);
       }
       break;
     case STAT_AVERAGE_SCORE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].averageScore);
       break;
     case STAT_BEST_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].bestDrive);
       gDPSetCombineMode(gfx++, G_CC_MODULATERGBA_PRIM, G_CC_MODULATERGBA_PRIM);
       func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_DRIVE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].averageDrive);
       func_8020FD48_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_FAIRWAY_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].fairwayPercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_AVERAGE_PUTTS:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].averagePutts);
       break;
     case STAT_PAR_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].parSavePercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_PAR_ON_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].parOnPercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
     case STAT_SAND_SAVE_PERCENT:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT,
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT),
           D_80105C38[courseIndex].sandSavePercent);
       func_8020FE20_ovl_01(&gfx, STATS_UNIT_X,
-          STATS_FIRST_Y + row * STATS_LINE_HEIGHT + STATS_UNIT_OFFSET_Y);
+          STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
   }
   gDPPipeSync(gfx++);
@@ -910,7 +910,7 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
             G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gDPPipeSync(gfx++);
-        left = place * TROPHY_SPACING + -TROPHY_SHIFT_LEFT;
+        left = (place * TROPHY_SPACING) + -TROPHY_SHIFT_LEFT;
         gSPScisTextureRectangle(gfx++,
             (D_80230100_ovl_01[memory->statsCourse].x + left) << 2,
             D_80230100_ovl_01[memory->statsCourse].y << 2,
@@ -1242,7 +1242,8 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
   }
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
-  frameOffset = *blinkFrame * SIDE_ARROW_BLINK_STRIDE + PALETTED_TEXELS_OFFSET;
+  frameOffset =
+      (*blinkFrame * SIDE_ARROW_BLINK_STRIDE) + PALETTED_TEXELS_OFFSET;
   for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
     gDPLoadTextureTile_4b(gfx++,
         ((u32)image +
@@ -1255,10 +1256,10 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     if (arrowIndex == SIDE_ARROW_RIGHT) {
-      left = centerX + width / 2;
+      left = centerX + (width / 2);
     }
     if (arrowIndex == SIDE_ARROW_LEFT) {
-      left = centerX - width / 2 - SIDE_ARROW_SIZE;
+      left = centerX - (width / 2) - SIDE_ARROW_SIZE;
     }
     gSPScisTextureRectangle(gfx++, left << 2,
         (centerY - SIDE_ARROW_SIZE / 2) << 2, (left + SIDE_ARROW_SIZE) << 2,
@@ -1309,8 +1310,8 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
       G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
       G_TX_NOLOD);
   gDPPipeSync(gfx++);
-  left = centerX - SIDE_ARROW_SIZE / 2;
-  top = centerY - SIDE_ARROW_SIZE / 2;
+  left = centerX - (SIDE_ARROW_SIZE / 2);
+  top = centerY - (SIDE_ARROW_SIZE / 2);
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,
       (centerX + SIDE_ARROW_SIZE / 2) << 2,
       (centerY + SIDE_ARROW_SIZE / 2) << 2, G_TX_RENDERTILE, 0, 0,

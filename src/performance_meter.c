@@ -178,10 +178,10 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
       G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
 
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_FrameDisplayList));
-  f_FrameVertices[1].v.ob[0] = FRAME_WIDTH * (extraFrameCount + 1) + 2;
-  f_FrameVertices[2].v.ob[0] = FRAME_WIDTH * (extraFrameCount + 1) + 2;
+  f_FrameVertices[1].v.ob[0] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
+  f_FrameVertices[2].v.ob[0] = (FRAME_WIDTH * (extraFrameCount + 1)) + 2;
   for (i = 0; i < extraFrameCount + 1; i++) {
-    vertexIndex = i * 4 + 4;
+    vertexIndex = (i * 4) + 4;
     gSP2Triangles(gfx++, vertexIndex + 0, vertexIndex + 1, vertexIndex + 2, 0,
         vertexIndex + 2, vertexIndex + 3, vertexIndex + 0, 0);
   }
@@ -385,15 +385,15 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
 
   if (readoutMode & METER_READOUT_CURRENT) {
     sprintf(f_ReadoutText, "%05d", rdpBarLength);
-    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
+    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_MAXIMUM) {
     sprintf(f_ReadoutText, "%05d", f_RdpBarMaximum);
-    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
+    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   } else if (readoutMode & METER_READOUT_AVERAGE) {
     sprintf(f_ReadoutText, "%05d", f_RdpBarAverage);
-    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + READOUT_LINE_HEIGHT * 2,
+    DrawDigits(&gfx, READOUT_X, y + READOUT_TOP_Y + (READOUT_LINE_HEIGHT * 2),
         f_ReadoutText);
   }
 

@@ -455,12 +455,13 @@ void OpenSaveMenu(s32 kind) {
                   CHARACTER_FACE_IMAGE_OFFSET,
               &encodedAsset);
           ReadEncodedAsset(
-              f_CharacterImages[slot * MAX_PLAYER_COUNT + playerIndex],
+              f_CharacterImages[(slot * MAX_PLAYER_COUNT) + playerIndex],
               &encodedAsset);
           OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
                   (s8)player->paletteIndex,
               &file);
-          ReadAssetFile(f_CharacterFiles[slot * MAX_PLAYER_COUNT + playerIndex],
+          ReadAssetFile(
+              f_CharacterFiles[(slot * MAX_PLAYER_COUNT) + playerIndex],
               GetAssetFileSize(&file), &file);
         }
       }
@@ -650,7 +651,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     for (strip = 0; strip != PANEL_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
           (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              strip * PANEL_STRIP_SIZE,
+              (strip * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       for (index = 0; index != SAVED_GAME_COUNT; index++) {
@@ -663,12 +664,12 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         }
         stripHeight = GAME_PANEL_STRIP_HEIGHT;
         DrawTextureRect(&gfx, (f_SlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
-            (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-                strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
+            (GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
+                (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2))
                 << 2,
             (f_SlideOffsets[index] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
-            (GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-                strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
+            (GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
+                (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2) +
                 stripHeight)
                 << 2,
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
@@ -683,12 +684,12 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
       }
       stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
       DrawTextureRect(&gfx, (f_SlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
-          (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-              strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2)
+          (END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
+              (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2))
               << 2,
           (f_SlideOffsets[index] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
-          (END_GAME_PANEL_MIDDLE + index * GAME_ROW_SPACING +
-              strip * stripHeight - stripHeight * PANEL_STRIP_COUNT / 2 +
+          (END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
+              (strip * stripHeight) - (stripHeight * PANEL_STRIP_COUNT / 2) +
               stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
@@ -699,17 +700,17 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
 
     /* The title, swaying to a fraction of a pixel */
     titleLeftExact =
-        cosf(f_TitleSwayAngle * 0.5f) * TITLE_SWAY_DISTANCE + TITLE_SWAY_LEFT;
+        (cosf(f_TitleSwayAngle * 0.5f) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_LEFT;
     titleTopExact =
-        sinf(f_TitleSwayAngle) * TITLE_SWAY_DISTANCE + TITLE_SWAY_TOP;
+        (sinf(f_TitleSwayAngle) * TITLE_SWAY_DISTANCE) + TITLE_SWAY_TOP;
     titleLeft =
         titleLeftExact < 0.0f ? titleLeftExact + 0.5f : titleLeftExact - 0.5f;
     titleTop =
         titleTopExact < 0.0f ? titleTopExact + 0.5f : titleTopExact - 0.5f;
     titleTexelLeft = (s32)(HALF_TEXEL_COORDINATE -
-        (titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE);
+        ((titleLeftExact - titleLeft) * HALF_TEXEL_COORDINATE));
     titleTexelTop = (s32)(HALF_TEXEL_COORDINATE -
-        (titleTopExact - titleTop) * HALF_TEXEL_COORDINATE);
+        ((titleTopExact - titleTop) * HALF_TEXEL_COORDINATE));
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_AVERAGE);
     f_TitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
@@ -757,17 +758,18 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           LoadTextureBlock(&gfx,
               (u8*)f_ModeIconImages[row][f_IconImageIndex ^ 1] +
                   LARGE_PALETTED_TEXELS_OFFSET +
-                  index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE,
+                  (index * MODE_ICON_PART_HEIGHT * MODE_ICON_SIZE),
               G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_SIZE, MODE_ICON_PART_HEIGHT,
               0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
           DrawTextureRect(&gfx, (f_SlideOffsets[row] + MODE_ICON_LEFT) << 2,
-              (MODE_ICON_TOP + row * GAME_ROW_SPACING +
-                  index * (MODE_ICON_PART_HEIGHT / 2))
+              (MODE_ICON_TOP + (row * GAME_ROW_SPACING) +
+                  (index * (MODE_ICON_PART_HEIGHT / 2)))
                   << 2,
-              (f_SlideOffsets[row] + MODE_ICON_LEFT + MODE_ICON_SIZE / 2) << 2,
-              (MODE_ICON_TOP + row * GAME_ROW_SPACING +
-                  index * (MODE_ICON_PART_HEIGHT / 2) +
-                  MODE_ICON_PART_HEIGHT / 2)
+              (f_SlideOffsets[row] + MODE_ICON_LEFT + (MODE_ICON_SIZE / 2))
+                  << 2,
+              (MODE_ICON_TOP + (row * GAME_ROW_SPACING) +
+                  (index * (MODE_ICON_PART_HEIGHT / 2)) +
+                  (MODE_ICON_PART_HEIGHT / 2))
                   << 2,
               G_TX_RENDERTILE, 0, 0, HALF_SIZE_TEXEL_STEP,
               HALF_SIZE_TEXEL_STEP);
@@ -797,20 +799,20 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         for (index = 0; index != state->playerCount; index++) {
           LoadLargePalette(
-              &gfx, f_CharacterFiles[row * MAX_PLAYER_COUNT + index]);
+              &gfx, f_CharacterFiles[(row * MAX_PLAYER_COUNT) + index]);
           LoadTextureBlock(&gfx,
-              f_CharacterImages[row * MAX_PLAYER_COUNT + index], G_IM_FMT_CI,
+              f_CharacterImages[(row * MAX_PLAYER_COUNT) + index], G_IM_FMT_CI,
               G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0,
               0, 0, 0, 0, 0);
           DrawTextureRect(&gfx,
-              (index * GOLFER_SPACING + (f_SlideOffsets[row] + golfersLeft) -
-                  state->playerCount * (GOLFER_SPACING / 2))
+              ((index * GOLFER_SPACING) + (f_SlideOffsets[row] + golfersLeft) -
+                  (state->playerCount * (GOLFER_SPACING / 2)))
                   << 2,
-              (GOLFER_TOP + row * GAME_ROW_SPACING) << 2,
-              (index * GOLFER_SPACING + (f_SlideOffsets[row] + golfersRight) -
-                  state->playerCount * (GOLFER_SPACING / 2))
+              (GOLFER_TOP + (row * GAME_ROW_SPACING)) << 2,
+              ((index * GOLFER_SPACING) + (f_SlideOffsets[row] + golfersRight) -
+                  (state->playerCount * (GOLFER_SPACING / 2)))
                   << 2,
-              (GOLFER_TOP + row * GAME_ROW_SPACING + CHARACTER_IMAGE_HEIGHT)
+              (GOLFER_TOP + (row * GAME_ROW_SPACING) + CHARACTER_IMAGE_HEIGHT)
                   << 2,
               G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
@@ -837,11 +839,11 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           (f_SlideOffsets[f_CursorIndex] + centerX -
               rowHalfWidths[f_CursorIndex])
               << 2,
-          (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
+          (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) << 2,
           (rowHalfWidths[f_CursorIndex] +
               (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
-          (rowTop + f_CursorIndex * GAME_ROW_SPACING + CURSOR_FRAME_THICKNESS)
+          (rowTop + (f_CursorIndex * GAME_ROW_SPACING) + CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       DrawTextureRect(&gfx,
@@ -849,13 +851,13 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               rowHalfWidths[f_CursorIndex])
               << 2,
           (rowHeights[f_CursorIndex] +
-              (rowTop + f_CursorIndex * GAME_ROW_SPACING))
+              (rowTop + (f_CursorIndex * GAME_ROW_SPACING)))
               << 2,
           (rowHalfWidths[f_CursorIndex] +
               (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
           (rowHeights[f_CursorIndex] +
-              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) +
               CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -863,12 +865,12 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           (f_SlideOffsets[f_CursorIndex] + centerX -
               rowHalfWidths[f_CursorIndex])
               << 2,
-          (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
+          (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) << 2,
           (f_SlideOffsets[f_CursorIndex] + centerX -
               rowHalfWidths[f_CursorIndex] + CURSOR_FRAME_THICKNESS)
               << 2,
           (rowHeights[f_CursorIndex] +
-              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) +
               CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -877,12 +879,12 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               (f_SlideOffsets[f_CursorIndex] + centerX) -
               CURSOR_FRAME_THICKNESS)
               << 2,
-          (rowTop + f_CursorIndex * GAME_ROW_SPACING) << 2,
+          (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) << 2,
           (rowHalfWidths[f_CursorIndex] +
               (f_SlideOffsets[f_CursorIndex] + centerX))
               << 2,
           (rowHeights[f_CursorIndex] +
-              (rowTop + f_CursorIndex * GAME_ROW_SPACING) +
+              (rowTop + (f_CursorIndex * GAME_ROW_SPACING)) +
               CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -928,7 +930,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           }
         }
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
-            MODE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer, 0xFFFF9300,
+            MODE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer, 0xFFFF9300,
             0x44FF0000, 0);
         if (state->isMiniGolf) {
           if (state->courseIndex ==
@@ -969,19 +971,19 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         }
         MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
-            COURSE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer, 0x00FFFF00,
-            0xFFFFFF00, 0);
+            COURSE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer,
+            0x00FFFF00, 0xFFFFFF00, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0xFF, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         sprintf(g_PrintBuffer, "Hole%d", state->holeIndex + 1);
         DrawLargeText(&gfx, f_SlideOffsets[row] + GAME_HOLE_TEXT_LEFT,
-            GAME_HOLE_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
+            GAME_HOLE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
       } else {
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
-        DrawCenteredLargeText(&gfx, f_SlideOffsets[row] + SCREEN_WIDTH / 2,
-            EMPTY_GAME_TEXT_TOP + row * GAME_ROW_SPACING, g_PrintBuffer);
+        DrawCenteredLargeText(&gfx, f_SlideOffsets[row] + (SCREEN_WIDTH / 2),
+            EMPTY_GAME_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
       }
     }
     gDPPipeSync(gfx++);
@@ -1024,13 +1026,13 @@ void SaveGameToSlot(void) {
               CHARACTER_FACE_IMAGE_OFFSET,
           &encodedAsset);
       ReadEncodedAsset(
-          f_CharacterImages[f_CursorIndex * MAX_PLAYER_COUNT + playerIndex],
+          f_CharacterImages[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
           &encodedAsset);
       OpenAssetFile(g_CharacterPaletteAssets[(s8)player->characterIndex] +
               (s8)player->paletteIndex,
           &file);
       ReadAssetFile(
-          f_CharacterFiles[f_CursorIndex * MAX_PLAYER_COUNT + playerIndex],
+          f_CharacterFiles[(f_CursorIndex * MAX_PLAYER_COUNT) + playerIndex],
           GetAssetFileSize(&file), &file);
     }
   } else {
@@ -1347,7 +1349,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       stripHeight = RECORD_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              index * PANEL_STRIP_SIZE,
+              (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
@@ -1360,12 +1362,12 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
               OTHER_PANEL_SHADE, 0xFF);
         }
         DrawTextureRect(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
-            (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-                index * stripHeight)
+            (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
+                (index * stripHeight))
                 << 2,
             (rowOffsets[row] + WIDE_PANEL_LEFT + WIDE_PANEL_WIDTH) << 2,
-            (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-                index * stripHeight + stripHeight)
+            (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
+                (index * stripHeight) + stripHeight)
                 << 2,
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
             (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
@@ -1380,12 +1382,12 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             OTHER_PANEL_SHADE, 0xFF);
       }
       DrawTextureRect(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
-          (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-              index * stripHeight)
+          (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
+              (index * stripHeight))
               << 2,
           (rowOffsets[row] + NARROW_PANEL_LEFT + NARROW_PANEL_WIDTH) << 2,
-          (FIRST_REPLAY_ROW_TOP + row * REPLAY_ROW_SPACING +
-              index * stripHeight + stripHeight)
+          (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
+              (index * stripHeight) + stripHeight)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / NARROW_PANEL_WIDTH,
           (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
@@ -1413,19 +1415,19 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         }
         gDPPipeSync(gfx++);
         DrawTextureRect(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
-            (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
+            (COURSE_TOP + (index * REPLAY_ROW_SPACING)) << 2,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
-            (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT)
+            (COURSE_TOP + (index * REPLAY_ROW_SPACING) + COURSE_NUMBERS_HEIGHT)
                 << 2,
             G_TX_RENDERTILE, COURSE_WORD_TEXEL_LEFT << 5, 0, TEXEL_STEP_ONE,
             TEXEL_STEP_ONE);
         DrawTextureRect(&gfx,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH) << 2,
-            (COURSE_TOP + index * REPLAY_ROW_SPACING) << 2,
+            (COURSE_TOP + (index * REPLAY_ROW_SPACING)) << 2,
             (rowOffsets[index] + COURSE_WORD_LEFT + COURSE_WORD_WIDTH +
                 COURSE_DIGIT_WIDTH)
                 << 2,
-            (COURSE_TOP + index * REPLAY_ROW_SPACING + COURSE_NUMBERS_HEIGHT)
+            (COURSE_TOP + (index * REPLAY_ROW_SPACING) + COURSE_NUMBERS_HEIGHT)
                 << 2,
             G_TX_RENDERTILE, ((s8)record->unk34 * COURSE_DIGIT_WIDTH) << 5, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1471,9 +1473,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             G_IM_FMT_CI, labelWidth, labelHeight, 0, G_TX_MIRROR, G_TX_MIRROR,
             0, 0, 0, 0);
         DrawTextureRect(&gfx, (rowOffsets[index] + LABEL_LEFT) << 2,
-            (LABEL_TOP + index * REPLAY_ROW_SPACING) << 2,
+            (LABEL_TOP + (index * REPLAY_ROW_SPACING)) << 2,
             (rowOffsets[index] + LABEL_LEFT + labelWidth) << 2,
-            (LABEL_TOP + index * REPLAY_ROW_SPACING + labelHeight) << 2,
+            (LABEL_TOP + (index * REPLAY_ROW_SPACING) + labelHeight) << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
     }
@@ -1500,9 +1502,9 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             G_IM_SIZ_8b, CHARACTER_IMAGE_WIDTH, CHARACTER_IMAGE_HEIGHT, 0, 0, 0,
             0, 0, 0, 0);
         DrawTextureRect(&gfx, (rowOffsets[index] + CHARACTER_LEFT) << 2,
-            (CHARACTER_TOP + index * REPLAY_ROW_SPACING) << 2,
+            (CHARACTER_TOP + (index * REPLAY_ROW_SPACING)) << 2,
             (rowOffsets[index] + CHARACTER_LEFT + CHARACTER_IMAGE_WIDTH) << 2,
-            (CHARACTER_TOP + index * REPLAY_ROW_SPACING +
+            (CHARACTER_TOP + (index * REPLAY_ROW_SPACING) +
                 CHARACTER_IMAGE_HEIGHT)
                 << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1523,33 +1525,33 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING)) << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING) +
               CURSOR_FRAME_THICKNESS)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING) +
               rowHeights[f_CursorIndex] - CURSOR_FRAME_THICKNESS)
               << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING) +
               rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       DrawTextureRect(&gfx,
           (rowOffsets[f_CursorIndex] - (rowHalfWidths[f_CursorIndex] - centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING)) << 2,
           (rowOffsets[f_CursorIndex] -
               (rowHalfWidths[f_CursorIndex] - centerX) + CURSOR_FRAME_THICKNESS)
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING) +
               rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1557,10 +1559,10 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           (rowOffsets[f_CursorIndex] +
               (rowHalfWidths[f_CursorIndex] + centerX) - CURSOR_FRAME_THICKNESS)
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING) << 2,
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING)) << 2,
           (rowOffsets[f_CursorIndex] + (rowHalfWidths[f_CursorIndex] + centerX))
               << 2,
-          (FIRST_REPLAY_ROW_TOP + f_CursorIndex * REPLAY_ROW_SPACING +
+          (FIRST_REPLAY_ROW_TOP + (f_CursorIndex * REPLAY_ROW_SPACING) +
               rowHeights[f_CursorIndex])
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1581,14 +1583,15 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       stripHeight = TITLE_PANEL_STRIP_HEIGHT;
       LoadTextureBlock(&gfx,
           (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              index * PANEL_STRIP_SIZE,
+              (index * PANEL_STRIP_SIZE),
           G_IM_FMT_CI, G_IM_SIZ_8b, PANEL_IMAGE_WIDTH, PANEL_STRIP_HEIGHT, 0,
           G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       titleHeight = TITLE_PANEL_STRIP_HEIGHT * PANEL_STRIP_COUNT;
       DrawTextureRect(&gfx, (rowOffsets[1] + TITLE_PANEL_LEFT) << 2,
-          (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT) << 2,
+          (titleBob + TITLE_PANEL_TOP + (index * TITLE_PANEL_STRIP_HEIGHT))
+              << 2,
           (rowOffsets[1] + TITLE_PANEL_LEFT + TITLE_PANEL_WIDTH) << 2,
-          (titleBob + TITLE_PANEL_TOP + index * TITLE_PANEL_STRIP_HEIGHT +
+          (titleBob + TITLE_PANEL_TOP + (index * TITLE_PANEL_STRIP_HEIGHT) +
               TITLE_PANEL_STRIP_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / TITLE_PANEL_WIDTH,
@@ -1615,13 +1618,13 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
         /* The saved-game message is printed but never drawn */
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
-        DrawCenteredLargeText(&gfx, rowOffsets[index] + SCREEN_WIDTH / 2,
-            EMPTY_TEXT_TOP + index * REPLAY_ROW_SPACING, f_NoReplayText);
+        DrawCenteredLargeText(&gfx, rowOffsets[index] + (SCREEN_WIDTH / 2),
+            EMPTY_TEXT_TOP + (index * REPLAY_ROW_SPACING), f_NoReplayText);
       } else {
-        text = (s8)record->unk34 * RING_SHOT_HOLE_COUNT + (s8)record->unk35;
+        text = ((s8)record->unk34 * RING_SHOT_HOLE_COUNT) + (s8)record->unk35;
         SetUpTextDrawing(&gfx);
         SetTextSlot(rowOffsets[index] + HOLE_TEXT_LEFT,
-            HOLE_TEXT_TOP + index * REPLAY_ROW_SPACING,
+            HOLE_TEXT_TOP + (index * REPLAY_ROW_SPACING),
             text + RING_SHOT_TEXT_FIRST_IMAGE, 1,
             FIRST_RECORD_TEXT_SLOT + index, 32, 0xFF, 0xFF, 0xFF, 0xFF);
         DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
@@ -1692,7 +1695,7 @@ void DrawControlsScreen(Gfx** displayListHead) {
     for (strip = 0; strip != CONTROLS_STRIP_COUNT; strip++) {
       LoadTextureBlock(&gfx,
           (u8*)f_PanelImage + LARGE_PALETTED_TEXELS_OFFSET +
-              strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH,
+              (strip * CONTROLS_STRIP_HEIGHT * CONTROLS_PICTURE_WIDTH),
           G_IM_FMT_CI, G_IM_SIZ_8b, CONTROLS_PICTURE_WIDTH,
           CONTROLS_STRIP_HEIGHT, 0, G_TX_MIRROR, G_TX_MIRROR, 0, 0, 0, 0);
       /* How far above the screen top the first strip's top and bottom edges sit
@@ -1700,9 +1703,9 @@ void DrawControlsScreen(Gfx** displayListHead) {
       topRaise = f_SlideOffsets[0] - SCREEN_BORDER;
       bottomRaise = f_SlideOffsets[0] - (SCREEN_BORDER + CONTROLS_STRIP_HEIGHT);
       DrawTextureRect(&gfx, CONTROLS_PICTURE_LEFT << 2,
-          (strip * CONTROLS_STRIP_HEIGHT - topRaise) << 2,
+          ((strip * CONTROLS_STRIP_HEIGHT) - topRaise) << 2,
           (CONTROLS_PICTURE_LEFT + CONTROLS_PICTURE_WIDTH) << 2,
-          (strip * CONTROLS_STRIP_HEIGHT - bottomRaise) << 2, G_TX_RENDERTILE,
+          ((strip * CONTROLS_STRIP_HEIGHT) - bottomRaise) << 2, G_TX_RENDERTILE,
           0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
     *displayListHead = gfx;

@@ -436,21 +436,26 @@ void SpawnTear(u32 slotIndex, s32 pointId, f32 heading) {
       effect = &f_Effects[index];
       if (effect->kind == EFFECT_KIND_NONE) {
         effect->position[AXIS_X] = point[AXIS_X] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                TEAR_OFFSET_SCALE);
         effect->position[AXIS_Y] = point[AXIS_Y] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                TEAR_OFFSET_SCALE);
         effect->position[AXIS_Z] = point[AXIS_Z] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) * TEAR_OFFSET_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                TEAR_OFFSET_SCALE);
         /* Overwritten at once; the original has it */
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_X] = cosf(heading) *
-            (guRandom() % TEAR_SPEED_RANGE + TEAR_SPEED_RANGE * 0.4) / 1024.0;
-        effect->velocity[AXIS_Y] =
-            (-TEAR_SPEED_RANGE * 0.7 - guRandom() % TEAR_SPEED_RANGE * 0.3f) /
+            ((guRandom() % TEAR_SPEED_RANGE) + (TEAR_SPEED_RANGE * 0.4)) /
+            1024.0;
+        effect->velocity[AXIS_Y] = ((-TEAR_SPEED_RANGE * 0.7) -
+                                       (guRandom() % TEAR_SPEED_RANGE * 0.3f)) /
             1024.0;
         effect->velocity[AXIS_Z] = sinf(heading) *
-            (guRandom() % TEAR_SPEED_RANGE + TEAR_SPEED_RANGE * 0.4) / 1024.0;
+            ((guRandom() % TEAR_SPEED_RANGE) + (TEAR_SPEED_RANGE * 0.4)) /
+            1024.0;
         effect->position[AXIS_X] += effect->velocity[AXIS_X];
         effect->position[AXIS_Y] += effect->velocity[AXIS_Y];
         effect->position[AXIS_Z] += effect->velocity[AXIS_Z];
@@ -490,14 +495,14 @@ void SpawnSparkleNearPoint(u32 slotIndex, s32 pointId) {
       effect = &f_Effects[index];
       if (effect->kind == EFFECT_KIND_NONE) {
         effect->position[AXIS_X] = point[AXIS_X] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                COURSE_TO_WORLD_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                COURSE_TO_WORLD_SCALE);
         effect->position[AXIS_Y] = point[AXIS_Y] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                COURSE_TO_WORLD_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                COURSE_TO_WORLD_SCALE);
         effect->position[AXIS_Z] = point[AXIS_Z] +
-            (guRandom() % POINT_SPREAD - POINT_SPREAD / 2) *
-                COURSE_TO_WORLD_SCALE;
+            (((guRandom() % POINT_SPREAD) - (POINT_SPREAD / 2)) *
+                COURSE_TO_WORLD_SCALE);
         effect->velocity[AXIS_X] = 0;
         effect->velocity[AXIS_Y] = SPARKLE_FALL_SPEED;
         effect->velocity[AXIS_Z] = 0;
@@ -591,11 +596,11 @@ void LaunchDrop(CoursePoint point) {
       random = guRandom() % DROP_HEADING_COUNT;
       speedOffset = random * DROP_SPEED_STEP;
       speed = speedOffset + DROP_SLOWEST_SPEED;
-      heading = (f32)(random * (M_PI / 2 / DROP_HEADING_COUNT)) - M_PI / 4;
+      heading = (f32)(random * (M_PI / 2 / DROP_HEADING_COUNT)) - (M_PI / 4);
       effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Y] =
-          -DROP_SLOWEST_RISE_SPEED - speedOffset * COURSE_TO_WORLD_SCALE;
+          -DROP_SLOWEST_RISE_SPEED - (speedOffset * COURSE_TO_WORLD_SCALE);
       effect->unk24 = 0;
       effect->kind = EFFECT_KIND_DROP;
       effect->alphaStep = 0;
@@ -834,12 +839,12 @@ void SpawnRisingClumps(CoursePoint unusedPoint) {
           g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_X] = 0;
       effect->velocity[AXIS_Y] =
-          (spawnCount * 0.3f + 0.1f + guRandom() % 10 * 0.01f) * -1.5f;
+          ((spawnCount * 0.3f) + 0.1f + (guRandom() % 10 * 0.01f)) * -1.5f;
       effect->velocity[AXIS_Z] = 0;
       effect->alpha = 255.0f;
       effect->alphaStep = -1.0f;
-      effect->scale = guRandom() % 30 * 0.1f + 1.0f;
-      effect->scaleStep = guRandom() % 10 * 0.001f + 0.04;
+      effect->scale = (guRandom() % 30 * 0.1f) + 1.0f;
+      effect->scaleStep = (guRandom() % 10 * 0.001f) + 0.04;
       effect->unk3B = 0;
       effect->kind = EFFECT_KIND_RISING_CLUMP;
       spawnCount++;
@@ -1074,17 +1079,17 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       effect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       effect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
-      speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
+      speed = (headingIndex * DROP_SPEED_STEP) + DROP_SLOWEST_SPEED;
       heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) +
-          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - M_PI / 4;
+          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) - (M_PI / 4);
       effect->velocity[AXIS_X] = cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       effect->velocity[AXIS_Z] = sinf(heading) * speed * COURSE_TO_WORLD_SCALE;
       if (f_ShotDebris.clubKind == CLUB_KIND_PUTTER) {
         effect->velocity[AXIS_Y] = -PUTTED_DROP_SLOWEST_RISE_SPEED -
-            headingIndex * PUTTED_DROP_RISE_STEP * COURSE_TO_WORLD_SCALE;
+            (headingIndex * PUTTED_DROP_RISE_STEP * COURSE_TO_WORLD_SCALE);
       } else {
         effect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
-            headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
+            (headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE);
       }
       effect->unk24 = 0.0f;
       effect->kind = EFFECT_KIND_DROP;
@@ -1119,9 +1124,9 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       divotEffect->position[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       divotEffect->position[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
       headingIndex = g_CurrentShot.unk0 & (DROP_HEADING_COUNT - 1);
-      speed = headingIndex * DROP_SPEED_STEP + DROP_SLOWEST_SPEED;
+      speed = (headingIndex * DROP_SPEED_STEP) + DROP_SLOWEST_SPEED;
       heading = (f32)((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) -
-          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) + M_PI / 4;
+          (f32)(headingIndex * (M_PI / 2 / DROP_HEADING_COUNT)) + (M_PI / 4);
       divotEffect->velocity[AXIS_X] =
           cosf(heading) * speed * COURSE_TO_WORLD_SCALE;
       divotEffect->velocity[AXIS_Z] =
@@ -1131,7 +1136,7 @@ void SpawnShotDebris(CoursePoint point, f32 pitch, f32 yaw, s32 launchSpeed) {
       divotEffect->alphaStep = 0;
       divotEffect->alpha = 255.0f;
       divotEffect->velocity[AXIS_Y] = -DROP_SLOWEST_RISE_SPEED -
-          headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE;
+          (headingIndex * DROP_SPEED_STEP * COURSE_TO_WORLD_SCALE);
       divotEffect->scale = debrisAmount * DIVOT_SCALE_PER_AMOUNT;
       if (divotEffect->scale < DIVOT_SMALLEST_SCALE) {
         divotEffect->scale = DIVOT_SMALLEST_SCALE;
@@ -1887,7 +1892,7 @@ void DrawDivot(Gfx** displayListHead, Effect* effect) {
       /* Texels per pixel, in s5.10 fixed point */
       textureStep = ((DIVOT_IMAGE_SIZE / 2) << 10) / halfSize;
       /* Half a step on, so that each frame is centered on its step */
-      angle = effect->unk24 + M_PI / DIVOT_SPIN_STEP_COUNT;
+      angle = effect->unk24 + (M_PI / DIVOT_SPIN_STEP_COUNT);
       if (angle > 2 * M_PI) {
         angle -= 2 * M_PI;
       }
@@ -2071,7 +2076,7 @@ void PlaceRainCenter(void) {
   viewX = g_Cameras[0].view.lookAt[AXIS_X] - g_Cameras[0].view.eye[AXIS_X];
   viewZ = g_Cameras[0].view.lookAt[AXIS_Z] - g_Cameras[0].view.eye[AXIS_Z];
   /* Holding the view's length in scale is there to match */
-  scale = sqrtf(viewX * viewX + viewZ * viewZ);
+  scale = sqrtf((viewX * viewX) + (viewZ * viewZ));
   f_RainCenter[0] = viewX;
   f_RainCenter[1] = viewZ;
   if ((s32)scale != 0.0f) {
@@ -2080,8 +2085,8 @@ void PlaceRainCenter(void) {
     osSyncPrintf("Rain Pos Error");
     scale = 0.0f;
   }
-  f_RainCenter[0] = f_RainCenter[0] * scale + g_Cameras[0].view.eye[AXIS_X];
-  f_RainCenter[1] = f_RainCenter[1] * scale + g_Cameras[0].view.eye[AXIS_Z];
+  f_RainCenter[0] = (f_RainCenter[0] * scale) + g_Cameras[0].view.eye[AXIS_X];
+  f_RainCenter[1] = (f_RainCenter[1] * scale) + g_Cameras[0].view.eye[AXIS_Z];
 }
 
 #define RAIN_SPREAD_STEP_COUNT 200
@@ -2102,16 +2107,17 @@ void ResetRaindrop(Raindrop* drop) {
   f32 fallFrameCount;
 
   drop->head[AXIS_X] =
-      (rand() % RAIN_SPREAD_STEP_COUNT - RAIN_SPREAD_STEP_COUNT / 2) *
-          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+      (((rand() % RAIN_SPREAD_STEP_COUNT) - (RAIN_SPREAD_STEP_COUNT / 2)) *
+          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
       f_RainCenter[0];
   /* Course y points down */
-  drop->head[AXIS_Y] = (-RAINDROP_LOWEST_RISE -
-                           rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP) *
+  drop->head[AXIS_Y] =
+      (-RAINDROP_LOWEST_RISE -
+          (rand() % RAIN_SPREAD_STEP_COUNT * RAIN_SPREAD_STEP)) *
       COURSE_TO_WORLD_SCALE;
   drop->head[AXIS_Z] =
-      (rand() % RAIN_SPREAD_STEP_COUNT - RAIN_SPREAD_STEP_COUNT / 2) *
-          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+      (((rand() % RAIN_SPREAD_STEP_COUNT) - (RAIN_SPREAD_STEP_COUNT / 2)) *
+          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
       f_RainCenter[1];
   fallFrameCount = drop->head[AXIS_Y] / f_RainVelocity[AXIS_Y];
   drop->head[AXIS_Y] += g_Cameras[0].view.eye[AXIS_Y] + RAIN_TOP_BELOW_EYE;
@@ -2123,8 +2129,8 @@ void ResetRaindrop(Raindrop* drop) {
   drop->splashColumn = 0;
   drop->tailScale = 1.0f;
   drop->tail[AXIS_Y] = drop->head[AXIS_Y] + RAINDROP_LENGTH;
-  drop->tail[AXIS_X] = drop->head[AXIS_X] + f_RainDriftX * RAINDROP_LENGTH;
-  drop->tail[AXIS_Z] = drop->head[AXIS_Z] + f_RainDriftZ * RAINDROP_LENGTH;
+  drop->tail[AXIS_X] = drop->head[AXIS_X] + (f_RainDriftX * RAINDROP_LENGTH);
+  drop->tail[AXIS_Z] = drop->head[AXIS_Z] + (f_RainDriftZ * RAINDROP_LENGTH);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
@@ -2132,13 +2138,13 @@ INCLUDE_ASM("asm/nonmatchings/effects", ResetRaindrop);
 
 /* Moves a splash to a random spot on the ground around the rain's center */
 void ResetRainSplash(RainSplash* splash) {
-  splash->position[AXIS_X] = (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT -
-                                 RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
-          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+  splash->position[AXIS_X] = (((rand() % RAIN_SPLASH_SPREAD_STEP_COUNT) -
+                                  (RAIN_SPLASH_SPREAD_STEP_COUNT / 2)) *
+                                 RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
       f_RainCenter[0];
-  splash->position[AXIS_Z] = (rand() % RAIN_SPLASH_SPREAD_STEP_COUNT -
-                                 RAIN_SPLASH_SPREAD_STEP_COUNT / 2) *
-          RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE +
+  splash->position[AXIS_Z] = (((rand() % RAIN_SPLASH_SPREAD_STEP_COUNT) -
+                                  (RAIN_SPLASH_SPREAD_STEP_COUNT / 2)) *
+                                 RAIN_SPREAD_STEP * COURSE_TO_WORLD_SCALE) +
       f_RainCenter[1];
   splash->position[AXIS_Y] =
       GetGroundHeight(splash->position[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -2170,7 +2176,7 @@ void StartRain(void) {
   for (index = 0; index != RAIN_SPLASH_COUNT; index++) {
     ResetRainSplash(&f_RainSplashes[index]);
     f_RainSplashes[index].unkC = 1.0f;
-    f_RainSplashes[index].frameCount = index % 9 - 1;
+    f_RainSplashes[index].frameCount = (index % 9) - 1;
     f_RainSplashes[index].unk17 = 0;
   }
 }
@@ -2215,7 +2221,8 @@ void UpdateRain(void) {
     PlaceRainCenter();
     shiftX = g_Cameras[0].view.eye[AXIS_X] - f_LastRainEye[AXIS_X];
     shiftZ = g_Cameras[0].view.eye[AXIS_Z] - f_LastRainEye[AXIS_Z];
-    if (sqrtf(shiftX * shiftX + shiftZ * shiftZ) > RAIN_CAMERA_JUMP_DISTANCE) {
+    if (sqrtf((shiftX * shiftX) + (shiftZ * shiftZ)) >
+        RAIN_CAMERA_JUMP_DISTANCE) {
       cameraShift[AXIS_X] += shiftX;
       cameraShift[AXIS_Z] += shiftZ;
     } else if (f_LastRainEye[AXIS_Y] < g_Cameras[0].view.eye[AXIS_Y]) {
@@ -2262,11 +2269,11 @@ void UpdateRain(void) {
         if (drop->tail[AXIS_Y] > drop->groundHeight) {
           drop->landedFrameCount = 0;
           drop->tail[AXIS_X] = drop->head[AXIS_X] +
-              (drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftX;
+              ((drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftX);
           drop->tail[AXIS_Y] =
               drop->head[AXIS_Y] + (drop->groundHeight - drop->head[AXIS_Y]);
           drop->tail[AXIS_Z] = drop->head[AXIS_Z] +
-              (drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftZ;
+              ((drop->groundHeight - drop->head[AXIS_Y]) * f_RainDriftZ);
         }
       } else {
         drop->landedFrameCount++;
@@ -2387,7 +2394,7 @@ void DrawRain(Gfx** displayListHead, CameraMatrices* matrices) {
           /* The empty branch is there to match */
         } else {
           widthScale =
-              RAINDROP_WIDTH / sqrtf(lengthX * lengthX + lengthY * lengthY);
+              RAINDROP_WIDTH / sqrtf((lengthX * lengthX) + (lengthY * lengthY));
           gDPPipeSync(gfx++);
           gDPSetPrimDepth(gfx++, streak->tailDepth, 0);
           gDPPipeSync(gfx++);
@@ -2544,7 +2551,7 @@ void DrawBirdieBadgeCount(Gfx** displayListHead) {
     gDPSetTextureFilter(gfx++, G_TF_POINT);
     spinFrame = f_BadgeCountFrame / 2 % BADGE_SPIN_FRAME_COUNT;
     if (f_BadgeCountFrame < BADGE_COUNT_RISE_FRAME) {
-      offsetY = f_BadgeCountFrame * 4 - 24;
+      offsetY = (f_BadgeCountFrame * 4) - 24;
       if (offsetY > 0) {
         offsetY = 0;
       }

@@ -517,15 +517,15 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       index != MENU_WINDOW_STRIP_COUNT; index++) {
     LoadNibbleTextureBlock(&gfx,
         (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
-            index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2,
+            (index * MENU_WINDOW_IMAGE_WIDTH * MENU_WINDOW_STRIP_HEIGHT / 2),
         G_IM_FMT_I, MENU_WINDOW_IMAGE_WIDTH, MENU_WINDOW_STRIP_HEIGHT, 0, 0, 0,
         0, 0, 0, 0);
     windowLeft = centerX - halfWidth;
     windowRight = centerX + halfWidth;
     DrawTextureRect(&gfx, windowLeft << 2,
-        (windowTop + index * halfHeight) << 2, windowRight << 2,
-        (windowTop + index * halfHeight + halfHeight) << 2, G_TX_RENDERTILE, 0,
-        0, (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
+        (windowTop + (index * halfHeight)) << 2, windowRight << 2,
+        (windowTop + (index * halfHeight) + halfHeight) << 2, G_TX_RENDERTILE,
+        0, 0, (MENU_WINDOW_IMAGE_WIDTH << 10) / (s32)windowWidth,
         (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
     gDPPipeSync(gfx++);
   }
@@ -538,7 +538,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
   for (index = 0; index != YES_NO_BUTTON_COUNT; index++) {
     LoadTextureBlock(&gfx,
         (u8*)D_80230E74_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
-            index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT,
+            (index * YES_NO_BUTTON_WIDTH * YES_NO_BUTTON_HEIGHT),
         G_IM_FMT_CI, G_IM_SIZ_8b, YES_NO_BUTTON_WIDTH, YES_NO_BUTTON_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     if (index == 0) {
@@ -614,8 +614,8 @@ void func_802287EC_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY,
       stripIndex++) {
     LoadNibbleTextureBlock(&gfx,
         (u8*)D_80230E70_ovl_01 + IMAGE_HEADER_SIZE +
-            stripIndex * TOURNAMENT_BANNER_WIDTH *
-                TOURNAMENT_BANNER_STRIP_HEIGHT / 2,
+            (stripIndex * TOURNAMENT_BANNER_WIDTH *
+                TOURNAMENT_BANNER_STRIP_HEIGHT / 2),
         G_IM_FMT_I, TOURNAMENT_BANNER_WIDTH, TOURNAMENT_BANNER_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, (centerX - halfWidth) << 2, stripTop << 2,
@@ -971,7 +971,7 @@ void func_802296C4_ovl_01(
   for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
     width += ORDINAL_DIGIT_SPACING;
   }
-  left = centerX - ORDINAL_GLYPH_SIZE / 2;
+  left = centerX - (ORDINAL_GLYPH_SIZE / 2);
   left -= width / 2;
   width = 0;
   for (digit = g_PrintBuffer; *digit != '\0';
@@ -1242,9 +1242,9 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
         break;
     }
   }
-  left = memory->codeKeyColumn * CODE_KEY_SPACING_X + CODE_HAND_FIRST_X +
+  left = (memory->codeKeyColumn * CODE_KEY_SPACING_X) + CODE_HAND_FIRST_X +
       D_80230F60_ovl_01;
-  top = memory->codeKeyRow * CODE_KEY_SPACING_Y + CODE_HAND_FIRST_Y;
+  top = (memory->codeKeyRow * CODE_KEY_SPACING_Y) + CODE_HAND_FIRST_Y;
   gSPScisTextureRectangle(gfx++, left << 2, top << 2,
       (left + CODE_HAND_SIZE) << 2, (top + CODE_HAND_SIZE) << 2,
       G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -1324,7 +1324,7 @@ void func_8022B360_ovl_01(Gfx** displayListHead) {
     if (D_80230FD4_ovl_01[charIndex] != CLUB_CODE_NO_CHAR) {
       sprintf(g_PrintBuffer, "%c", D_80230FD4_ovl_01[charIndex]);
       DrawLargeTextWithShadow(&gfx,
-          charIndex * CLUB_CODE_CHAR_WIDTH + CLUB_CODE_FIRST_X, CLUB_CODE_Y,
+          (charIndex * CLUB_CODE_CHAR_WIDTH) + CLUB_CODE_FIRST_X, CLUB_CODE_Y,
           g_PrintBuffer, -1, -1, 0);
     }
   }
@@ -1474,7 +1474,7 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
     red =
         (s32)(sinf(D_80231180_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI / 2) *
+    blue = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80231180_ovl_01[vertexIndex] + M_PI) *
@@ -1492,7 +1492,7 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
     charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
   }
   guTranslate(&D_8023BE80_ovl_01,
-      charIndex * CLUB_CODE_CHAR_WIDTH + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
+      (charIndex * CLUB_CODE_CHAR_WIDTH) + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
       MENU_CURSOR_Z);
   guRotate(&D_8023BEC0_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023BF80_ovl_01, CODE_CURSOR_SCALE, CODE_CURSOR_SCALE, 1.0f);

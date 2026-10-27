@@ -250,7 +250,7 @@ void UpdateSunGlare(void) {
       f_SunScreenY[0] <= SCREEN_HEIGHT - SUN_DEPTH_MARGIN) {
     zBuffer = nuGfxZBuffer;
     f_SunDepth =
-        zBuffer[(s32)f_SunScreenY[0] * SCREEN_WIDTH + (s32)f_SunScreenX[0]];
+        zBuffer[((s32)f_SunScreenY[0] * SCREEN_WIDTH) + (s32)f_SunScreenX[0]];
     if (f_SunDepth >= SUN_SKY_DEPTH) {
       goto GROW;
     }
@@ -322,9 +322,10 @@ extern LensFlare f_LensFlares[LENS_FLARE_COUNT];
 #ifdef NON_MATCHING
 void DrawLensFlare(Gfx** displayListHead) {
   Gfx* gfx = *displayListHead;
-  SkyColors* colors = &g_SkyColors[GetCourseRecordIndex()]
-                                  [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                                      f_SkyColorTimeIndex];
+  SkyColors* colors =
+      &g_SkyColors[GetCourseRecordIndex()]
+                  [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                      f_SkyColorTimeIndex];
   f32 edgeDistanceX;
   f32 edgeDistanceY;
   f32 glare;
@@ -392,9 +393,9 @@ void DrawLensFlare(Gfx** displayListHead) {
       G_TX_MIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
   for (i = 0; i != LENS_FLARE_COUNT; i++) {
     centerX = f_SunScreenX[0] +
-        (LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position;
+        ((LENS_FLARE_AXIS_X - f_SunScreenX[0]) * f_LensFlares[i].position);
     centerY = f_SunScreenY[0] +
-        (LENS_FLARE_AXIS_Y - f_SunScreenY[0]) * f_LensFlares[i].position;
+        ((LENS_FLARE_AXIS_Y - f_SunScreenY[0]) * f_LensFlares[i].position);
     gDPPipeSync(gfx++);
     gDPSetPrimColor(gfx++, 0, 0, f_LensFlares[i].color[0],
         f_LensFlares[i].color[1], f_LensFlares[i].color[2], glare);
@@ -433,39 +434,39 @@ void BlendSkyColors(void) {
     f_SkyBlendStep++;
   }
   from = &g_SkyColors[GetCourseRecordIndex()]
-                     [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                     [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
                          f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
-                   [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                   [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
   for (group = 0; group != SKY_VIEW_COUNT * 2; group++) {
     for (channel = 0; channel != 3; channel++) {
       f_SkyVertices[group][0].v.cn[channel] = from->unk4[channel] +
-          (to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT;
+          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       f_SkyVertices[group][1].v.cn[channel] = from->unk7[channel] +
-          (to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT;
+          ((to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       f_SkyVertices[group][2].v.cn[channel] = from->unk7[channel] +
-          (to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT;
+          ((to->unk7[channel] - from->unk7[channel]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       f_SkyVertices[group][3].v.cn[channel] = from->unk4[channel] +
-          (to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT;
+          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       f_SkyVertices[group][4].v.cn[channel] = from->unk4[channel] +
-          (to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
-              SKY_BLEND_STEP_COUNT;
+          ((to->unk4[channel] - from->unk4[channel]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
     }
   }
   for (channel = 0; channel != 3; channel++) {
     g_SceneFog.color[channel] = from->fogColor[channel] +
-        (to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
-            SKY_BLEND_STEP_COUNT;
+        ((to->fogColor[channel] - from->fogColor[channel]) * f_SkyBlendStep /
+            SKY_BLEND_STEP_COUNT);
   }
   g_SceneFog.near = from->fogNear +
-      (to->fogNear - from->fogNear) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      ((to->fogNear - from->fogNear) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
   g_SceneFog.far = from->fogFar +
-      (to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+      ((to->fogFar - from->fogFar) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT);
 }
 
 /*
@@ -513,13 +514,13 @@ void InitSkyColors(void) {
     f_SkyBlendStepCount = SKY_BLEND_STEP_COUNT;
   }
   colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                       [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
                            f_SkyColorTimeIndex];
   from = &g_SkyColors[GetCourseRecordIndex()]
-                     [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                     [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
                          f_SkyTimeIndex];
   to = &g_SkyColors[GetCourseRecordIndex()]
-                   [g_HoleConditions.isRaining * SKY_TIME_COUNT +
+                   [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
                        f_SkyTimeIndex + 1];
   g_SkyState.scrollX = 0.0f;
   g_SkyState.scrollY = 0.0f;
@@ -561,27 +562,30 @@ void InitSkyColors(void) {
     blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
     alpha = color & 1;
     if (!alpha) {
-      red = (colors->unk7[0] * SKY_IMAGE_UNK7_PARTS + colors->unk4[0]) /
+      red = ((colors->unk7[0] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[0]) /
           SKY_IMAGE_DIVISOR;
-      green = (colors->unk7[1] * SKY_IMAGE_UNK7_PARTS + colors->unk4[1]) /
+      green = ((colors->unk7[1] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[1]) /
           SKY_IMAGE_DIVISOR;
-      blue = (colors->unk7[2] * SKY_IMAGE_UNK7_PARTS + colors->unk4[2]) /
+      blue = ((colors->unk7[2] * SKY_IMAGE_UNK7_PARTS) + colors->unk4[2]) /
           SKY_IMAGE_DIVISOR;
     } else {
       blended[0] = from->unkD[0] +
-          (to->unkD[0] - from->unkD[0]) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+          ((to->unkD[0] - from->unkD[0]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       blended[1] = from->unkD[1] +
-          (to->unkD[1] - from->unkD[1]) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
+          ((to->unkD[1] - from->unkD[1]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
       blended[2] = from->unkD[2] +
-          (to->unkD[2] - from->unkD[2]) * f_SkyBlendStep / SKY_BLEND_STEP_COUNT;
-      red =
-          (red * (PERCENT_COUNT - colors->unk10) + blended[0] * colors->unk10) /
+          ((to->unkD[2] - from->unkD[2]) * f_SkyBlendStep /
+              SKY_BLEND_STEP_COUNT);
+      red = ((red * (PERCENT_COUNT - colors->unk10)) +
+                (blended[0] * colors->unk10)) /
           PERCENT_COUNT;
-      green = (green * (PERCENT_COUNT - colors->unk10) +
-                  blended[1] * colors->unk10) /
+      green = ((green * (PERCENT_COUNT - colors->unk10)) +
+                  (blended[1] * colors->unk10)) /
           PERCENT_COUNT;
-      blue = (blue * (PERCENT_COUNT - colors->unk10) +
-                 blended[2] * colors->unk10) /
+      blue = ((blue * (PERCENT_COUNT - colors->unk10)) +
+                 (blended[2] * colors->unk10)) /
           PERCENT_COUNT;
     }
     if (red < 0) {
@@ -671,11 +675,12 @@ s32 UpdateSkyEditor(void) {
     return FALSE;
   }
   PrintDebugText(" ",
-      f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_ERASE_COLUMN,
+      (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_ERASE_COLUMN,
       f_SkyEditorRow + SKY_EDITOR_ERASE_ROW);
-  f_EditedSkyColors = &g_SkyColors[GetCourseRecordIndex()]
-                                  [g_HoleConditions.isRaining * SKY_TIME_COUNT +
-                                      f_SkyColorTimeIndex];
+  f_EditedSkyColors =
+      &g_SkyColors[GetCourseRecordIndex()]
+                  [(g_HoleConditions.isRaining * SKY_TIME_COUNT) +
+                      f_SkyColorTimeIndex];
   if ((g_ControllerStates[SKY_EDITOR_CONTROLLER].pressedButtons &
           (L_JPAD | L_CBUTTONS)) &&
       f_SkyEditorColumn > 0) {
@@ -837,24 +842,24 @@ s32 UpdateSkyEditor(void) {
       blue = (color >> 1) & SKY_IMAGE_CHANNEL_MAX;
       alpha = color & 1;
       if (!alpha) {
-        red = (f_EditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS +
+        red = ((f_EditedSkyColors->unk7[0] * SKY_IMAGE_UNK7_PARTS) +
                   f_EditedSkyColors->unk4[0]) /
             SKY_IMAGE_DIVISOR;
-        green = (f_EditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS +
+        green = ((f_EditedSkyColors->unk7[1] * SKY_IMAGE_UNK7_PARTS) +
                     f_EditedSkyColors->unk4[1]) /
             SKY_IMAGE_DIVISOR;
-        blue = (f_EditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS +
+        blue = ((f_EditedSkyColors->unk7[2] * SKY_IMAGE_UNK7_PARTS) +
                    f_EditedSkyColors->unk4[2]) /
             SKY_IMAGE_DIVISOR;
       } else {
-        red = (red * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
-                  f_EditedSkyColors->unkD[0] * f_EditedSkyColors->unk10) /
+        red = ((red * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
+                  (f_EditedSkyColors->unkD[0] * f_EditedSkyColors->unk10)) /
             PERCENT_COUNT;
-        green = (green * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
-                    f_EditedSkyColors->unkD[1] * f_EditedSkyColors->unk10) /
+        green = ((green * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
+                    (f_EditedSkyColors->unkD[1] * f_EditedSkyColors->unk10)) /
             PERCENT_COUNT;
-        blue = (blue * (PERCENT_COUNT - f_EditedSkyColors->unk10) +
-                   f_EditedSkyColors->unkD[2] * f_EditedSkyColors->unk10) /
+        blue = ((blue * (PERCENT_COUNT - f_EditedSkyColors->unk10)) +
+                   (f_EditedSkyColors->unkD[2] * f_EditedSkyColors->unk10)) /
             PERCENT_COUNT;
       }
       if (red < 0) {
@@ -906,7 +911,8 @@ s32 UpdateSkyEditor(void) {
   PrintDebugText(
       g_PrintBuffer, SKY_EDITOR_TEXT_COLUMN, SKY_EDITOR_TEXT_ROW + 5);
   PrintDebugText(">",
-      f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH + SKY_EDITOR_TEXT_COLUMN + 2,
+      (f_SkyEditorColumn * SKY_EDITOR_COLUMN_WIDTH) + SKY_EDITOR_TEXT_COLUMN +
+          2,
       f_SkyEditorRow + SKY_EDITOR_TEXT_ROW + 1);
   SetFramebufferCount(SKY_EDITOR_FRAMEBUFFER_COUNT);
   SetScreenEffect(SCREEN_EFFECT_NONE, 0);
@@ -964,10 +970,10 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   direction[0] = view->lookAt[0] - view->eye[0];
   direction[1] = view->lookAt[1] - view->eye[1];
   direction[2] = view->lookAt[2] - view->eye[2];
-  vertices = f_SkyVertices[g_MatrixBufferIndex + viewIndex * 2];
+  vertices = f_SkyVertices[g_MatrixBufferIndex + (viewIndex * 2)];
   g_SkyState.yaws[viewIndex] = atan2(direction[0], direction[2]);
   g_SkyState.pitches[viewIndex] = -atan2(direction[1],
-      sqrtf(direction[0] * direction[0] + direction[2] * direction[2]));
+      sqrtf((direction[0] * direction[0]) + (direction[2] * direction[2])));
   if (g_SkyState.pitches[viewIndex] < -SKY_PITCH_LIMIT) {
     g_SkyState.pitches[viewIndex] = -SKY_PITCH_LIMIT;
   }
@@ -976,17 +982,17 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   }
   slope = (view->lookAt[1] - view->eye[1]) *
       (SKY_SLOPE_DISTANCE /
-          sqrtf(direction[0] * direction[0] + direction[2] * direction[2]));
+          sqrtf((direction[0] * direction[0]) + (direction[2] * direction[2])));
   pitchScale = SKY_REFERENCE_FIELD_OF_VIEW / view->fieldOfView * SCREEN_HEIGHT;
   g_SkyState.horizonLevels[viewIndex] =
-      -g_SkyState.pitches[viewIndex] * pitchScale +
-      view->eye[1] * SKY_EYE_HEIGHT_SCALE;
+      (-g_SkyState.pitches[viewIndex] * pitchScale) +
+      (view->eye[1] * SKY_EYE_HEIGHT_SCALE);
   if (g_SkyState.horizonLevels[viewIndex] < SKY_HORIZON_LEVEL_MIN) {
     g_SkyState.horizonLevels[viewIndex] = SKY_HORIZON_LEVEL_MIN;
   }
   g_SkyState.screenHeights[viewIndex] = SCREEN_HEIGHT;
   g_SkyState.lookAtLevels[viewIndex] = g_SkyState.horizonLevels[viewIndex] -
-      (view->lookAt[1] * slope - view->eye[1]) * SKY_EYE_HEIGHT_SCALE;
+      (((view->lookAt[1] * slope) - view->eye[1]) * SKY_EYE_HEIGHT_SCALE);
 
   if (IsGameFlagSet(GAME_FLAG_CYCLE_SKY_CONDITIONS)) {
     if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
@@ -1024,12 +1030,12 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   /* Vertices 1, 2, 6 and 7 follow the horizon level; 0, 3 and 4 follow the
    * pitch alone */
   if (g_SkyState.pitches[viewIndex] < 0.0f) {
-    vertices[0].v.ob[1] =
-        SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
-    vertices[3].v.ob[1] =
-        SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
-    vertices[4].v.ob[1] =
-        SCREEN_HEIGHT / 2 - g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2);
+    vertices[0].v.ob[1] = (SCREEN_HEIGHT / 2) -
+        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
+    vertices[3].v.ob[1] = (SCREEN_HEIGHT / 2) -
+        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
+    vertices[4].v.ob[1] = (SCREEN_HEIGHT / 2) -
+        (g_SkyState.pitches[viewIndex] * (SCREEN_HEIGHT / 2));
   } else {
     vertices[0].v.ob[1] = SCREEN_HEIGHT / 2;
     vertices[3].v.ob[1] = SCREEN_HEIGHT / 2;
@@ -1042,13 +1048,13 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
       (g_SkyState.horizonLevels[viewIndex] + SKY_HORIZON_BIAS) *
       SKY_HORIZON_TO_HEIGHT;
   vertices[1].v.ob[2] =
-      SKY_TOP_DEPTH - g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+      SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
   vertices[2].v.ob[2] =
-      SKY_TOP_DEPTH - g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+      SKY_TOP_DEPTH - (g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
   vertices[6].v.ob[2] =
-      SKY_TOP_DEPTH - -g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+      SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
   vertices[7].v.ob[2] =
-      SKY_TOP_DEPTH - -g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH;
+      SKY_TOP_DEPTH - (-g_SkyState.pitches[viewIndex] * SKY_PITCH_TO_DEPTH);
   if (vertices[1].v.ob[1] < -SKY_HEIGHT_LIMIT) {
     clippedHeight = (vertices[1].v.ob[1] + SKY_HEIGHT_LIMIT) /
         (1 << SKY_CLIPPED_HEIGHT_SHIFT);
@@ -1071,72 +1077,72 @@ void UpdateSky(CameraView* view, s32 viewIndex) {
   sine = sinf(g_SkyState.viewedWindAngles[viewIndex]);
   cosine = cosf(g_SkyState.viewedWindAngles[viewIndex]);
   distance = clippedHeight + SKY_TEXTURE_FAR_DISTANCE;
-  coordinate = sine * distance - cosine * SKY_TEXTURE_HALF_WIDTH;
+  coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
   vertices[1].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance + sine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
   vertices[1].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-  coordinate = sine * distance + cosine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+  coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
   vertices[2].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance - sine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
   pitches = g_SkyState.pitches;
   vertices[2].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   horizonHalfWidth = SCREEN_WIDTH;
   distance = SKY_TEXTURE_NEAR_DISTANCE -
-      pitches[viewIndex] * horizonHalfWidth * (2 / M_PI) + clippedHeight;
-  coordinate = sine * distance - cosine * SKY_TEXTURE_HALF_WIDTH;
+      (pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) + clippedHeight;
+  coordinate = (sine * distance) - (cosine * SKY_TEXTURE_HALF_WIDTH);
   vertices[0].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance + sine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) + (sine * SKY_TEXTURE_HALF_WIDTH);
   vertices[0].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-  coordinate = sine * distance + cosine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+  coordinate = (sine * distance) + (cosine * SKY_TEXTURE_HALF_WIDTH);
   vertices[3].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance - sine * SKY_TEXTURE_HALF_WIDTH;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) - (sine * SKY_TEXTURE_HALF_WIDTH);
   vertices[3].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   vertices[4].v.tc[0] =
-      (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+      ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   vertices[4].v.tc[1] =
-      (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   distance = (SKY_TEXTURE_HORIZON_DISTANCE -
-                 -pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+                 (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
       horizonHalfWidth / SCREEN_WIDTH;
-  coordinate = sine * distance - cosine * horizonHalfWidth;
+  coordinate = (sine * distance) - (cosine * horizonHalfWidth);
   vertices[6].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance + sine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) + (sine * horizonHalfWidth);
   vertices[6].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-  coordinate = sine * distance + cosine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+  coordinate = (sine * distance) + (cosine * horizonHalfWidth);
   vertices[7].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance - sine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) - (sine * horizonHalfWidth);
   vertices[7].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   distance = (SKY_TEXTURE_NEAR_DISTANCE -
-                 -pitches[viewIndex] * horizonHalfWidth * (2 / M_PI)) *
+                 (-pitches[viewIndex] * horizonHalfWidth * (2 / M_PI))) *
       horizonHalfWidth / SCREEN_WIDTH;
-  coordinate = sine * distance - cosine * horizonHalfWidth;
+  coordinate = (sine * distance) - (cosine * horizonHalfWidth);
   vertices[5].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance + sine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) + (sine * horizonHalfWidth);
   vertices[5].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
-  coordinate = sine * distance + cosine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
+  coordinate = (sine * distance) + (cosine * horizonHalfWidth);
   vertices[8].v.tc[0] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
-  coordinate = cosine * distance - sine * horizonHalfWidth;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
+  coordinate = (cosine * distance) - (sine * horizonHalfWidth);
   vertices[8].v.tc[1] =
-      (s32)coordinate * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)coordinate * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
   vertices[9].v.tc[0] =
-      (s32)(sine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollX;
+      ((s32)(sine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollX;
   vertices[9].v.tc[1] =
-      (s32)(cosine * distance) * SKY_TEXTURE_SCALE + g_SkyState.scrollY;
+      ((s32)(cosine * distance) * SKY_TEXTURE_SCALE) + g_SkyState.scrollY;
 }
 
 /* Sets whether the course's drawing gives its primitives a fixed depth */
@@ -1182,7 +1188,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   /* Unlike the other lookups of g_SkyColors, this steps by three times, not
    * SKY_TIME_COUNT, in the rain */
   colors = &g_SkyColors[GetCourseRecordIndex()]
-                       [g_HoleConditions.isRaining * 3 + f_SkyColorTimeIndex];
+                       [(g_HoleConditions.isRaining * 3) + f_SkyColorTimeIndex];
   translation[0] = 0.0f;
   translation[1] = 0.0f;
   rotation[0] = 0.0f;
@@ -1242,7 +1248,7 @@ void DrawSky(Gfx** displayListHead, f32 eyeY, s32 arg2, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   if (colors->hasLensFlare == TRUE) {
     angle = -g_SkyState.yaws[cameraIndex] - SUN_YAW_OFFSET -
-        g_LightYaw * LIGHT_YAW_TO_RADIANS;
+        (g_LightYaw * LIGHT_YAW_TO_RADIANS);
     if (angle > 2 * M_PI) {
       angle -= 2 * M_PI;
     }
@@ -1391,8 +1397,8 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetColorDither(gfx++, G_CD_BAYER);
-  centreShift = (view->zoom * FULL_VIEW_HEIGHT -
-                    (view->viewportCenterY - view->scissorY * 2)) *
+  centreShift = ((view->zoom * FULL_VIEW_HEIGHT) -
+                    (view->viewportCenterY - (view->scissorY * 2))) *
       0.5f;
   DrawSky(&gfx, view->eye[1], 1, cameraIndex);
   isNibbleImage = FALSE;
@@ -1451,12 +1457,12 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
       }
       if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = f_BackdropImageWidth * row * f_BackdropStripHeight +
-            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+        texelByte = (f_BackdropImageWidth * row * f_BackdropStripHeight) +
+            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
       } else {
-        texelByte = f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                f_BackdropStripHeight +
-            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+        texelByte = (f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                        f_BackdropStripHeight) +
+            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
         imageRow = f_BackdropStripCount - 1;
       }
       texelWord = texelByte / 2;
@@ -1524,23 +1530,23 @@ void DrawBackdrop(Gfx** displayListHead, CameraView* view, s32 cameraIndex) {
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     zoom = view->zoom;
     textureX = yawOffset +
-        (s32)((zoom * FULL_VIEW_WIDTH - view->scissorWidth) * 16.0f / zoom);
+        (s32)(((zoom * FULL_VIEW_WIDTH) - view->scissorWidth) * 16.0f / zoom);
     top = y + view->scissorY - centreShift;
     bottom =
-        (f32)y + f_BackdropStripHeight * zoom + view->scissorY - centreShift;
+        (f32)y + (f_BackdropStripHeight * zoom) + view->scissorY - centreShift;
     for (row = 0;; row++, top = bottom,
-        bottom = bottom + f_BackdropStripHeight * view->zoom) {
-      if (top < view->scissorY - f_BackdropStripHeight * view->zoom) {
+        bottom = bottom + (f_BackdropStripHeight * view->zoom)) {
+      if (top < view->scissorY - (f_BackdropStripHeight * view->zoom)) {
         continue;
       }
       if (row < f_BackdropStripCount - 1) {
         imageRow = row;
-        texelByte = f_BackdropImageWidth * row * f_BackdropStripHeight +
-            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+        texelByte = (f_BackdropImageWidth * row * f_BackdropStripHeight) +
+            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
       } else {
-        texelByte = f_BackdropImageWidth * (f_BackdropStripCount - 1) *
-                f_BackdropStripHeight +
-            LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE;
+        texelByte = (f_BackdropImageWidth * (f_BackdropStripCount - 1) *
+                        f_BackdropStripHeight) +
+            (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE);
         imageRow = f_BackdropStripCount - 1;
       }
       texelWord = texelByte / 2;
@@ -2157,9 +2163,9 @@ void DrawTileAnimation(void) {
   s32 wordIndex = 0;
 
   if (f_HudAnimationFramesLeft > 0) {
-    angle = (f32)(M_PI / 2 -
-                f_HudAnimationFramesLeft *
-                    (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT)) +
+    angle = (f32)((M_PI / 2) -
+                (f_HudAnimationFramesLeft *
+                    (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT))) +
         TILE_ANIMATION_UNUSED_ANGLE_OFFSET;
     unusedSine = sinf(angle);
     unusedCosine = cosf(angle);
@@ -2182,24 +2188,25 @@ void DrawTileAnimation(void) {
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
     gDPPipeSync(g_DisplayListHead++);
     rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = M_PI / 2 -
-        f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
+    rotation[AXIS_Y] = (M_PI / 2) -
+        (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
     rotation[AXIS_Z] = rotation[AXIS_Y];
     for (tileRow = 0; tileRow != FRAME_TILE_ROW_COUNT; tileRow++) {
       for (tileColumn = 0; tileColumn != FRAME_TILE_COLUMN_COUNT;
           tileColumn++) {
         progress = TILE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
         translation[AXIS_Z] =
-            TILE_ANIMATION_DEPTH - progress * TILE_ANIMATION_SPEED_Z;
-        translation[AXIS_X] = (progress + TILE_ANIMATION_GAP_X) *
-                (tileColumn - FRAME_TILE_COLUMN_COUNT / 2) +
+            TILE_ANIMATION_DEPTH - (progress * TILE_ANIMATION_SPEED_Z);
+        translation[AXIS_X] =
+            ((progress + TILE_ANIMATION_GAP_X) *
+                (tileColumn - (FRAME_TILE_COLUMN_COUNT / 2))) +
             TILE_ANIMATION_OFFSET_X;
         translation[AXIS_Y] = -(progress + TILE_ANIMATION_GAP_Y) *
-            (tileRow - FRAME_TILE_ROW_COUNT / 2);
+            (tileRow - (FRAME_TILE_ROW_COUNT / 2));
         BuildRotationMatrix(matrix, rotation, translation);
         ConvertMatrixToFixed(matrix,
             &f_TileMatrices[g_MatrixBufferIndex]
-                           [tileRow * FRAME_TILE_COLUMN_COUNT + tileColumn]);
+                           [(tileRow * FRAME_TILE_COLUMN_COUNT) + tileColumn]);
         gSPMatrix(g_DisplayListHead++,
             OS_K0_TO_PHYSICAL(&f_TileMatrices[g_MatrixBufferIndex][tileRow *
                     FRAME_TILE_COLUMN_COUNT +
@@ -2264,8 +2271,8 @@ void DrawTurnAwayAnimation(void) {
 
   if (f_HudAnimationFramesLeft > 0) {
     rotation[AXIS_X] = 0.0f;
-    rotation[AXIS_Y] = M_PI / 2 -
-        f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT);
+    rotation[AXIS_Y] = (M_PI / 2) -
+        (f_HudAnimationFramesLeft * (M_PI / 2 / TILE_ANIMATION_FRAME_COUNT));
     rotation[AXIS_Z] = rotation[AXIS_Y];
     translation[AXIS_X] = 0.0f;
     translation[AXIS_Y] = 0.0f;
@@ -2308,7 +2315,7 @@ void DrawTurnAwayAnimation(void) {
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
           width = LAST_TILE_TEXEL_WIDTH;
         }
-        vertex = row * TILE_GRID_COLUMN_COUNT + column;
+        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
         gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
         gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
             G_MWO_POINT_ST, FRAME_TILE_ROWS << 5);
@@ -2330,7 +2337,7 @@ void DrawTurnAwayAnimation(void) {
     gDPPipeSync(g_DisplayListHead++);
     for (row = 0; row != TURN_AWAY_UPPER_ROW_COUNT; row++) {
       for (column = 0; column != FRAME_TILE_COLUMN_COUNT; column++) {
-        vertex = row * TILE_GRID_COLUMN_COUNT + column;
+        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
         gSP2Triangles(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT + 1,
             vertex + TILE_GRID_COLUMN_COUNT, vertex, 0, vertex + 1,
             vertex + TILE_GRID_COLUMN_COUNT + 1, vertex, 0);
@@ -2355,7 +2362,7 @@ void DrawTurnAwayAnimation(void) {
         if (column == FRAME_TILE_COLUMN_COUNT - 1) {
           width = LAST_TILE_TEXEL_WIDTH;
         }
-        vertex = row * TILE_GRID_COLUMN_COUNT + column;
+        vertex = (row * TILE_GRID_COLUMN_COUNT) + column;
         gDPPipeSync(g_DisplayListHead++);
         gSPModifyVertex(g_DisplayListHead++, vertex, G_MWO_POINT_ST, 0);
         gSPModifyVertex(g_DisplayListHead++, vertex + TILE_GRID_COLUMN_COUNT,
@@ -2412,9 +2419,9 @@ void CaptureHudAnimationFrame(void) {
             row != FRAME_MARGIN_ROWS + FRAME_TILE_ROWS; row++) {
           for (column = FRAME_MARGIN_WORDS;
               column != FRAME_MARGIN_WORDS + FRAME_TILE_WORDS; column++) {
-            f_CapturedFrame[wordIndex++] = frame[row * FRAME_WORDS_PER_ROW +
-                column + tileColumn * FRAME_TILE_WORDS +
-                tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW];
+            f_CapturedFrame[wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) +
+                column + (tileColumn * FRAME_TILE_WORDS) +
+                (tileRow * FRAME_TILE_ROWS * FRAME_WORDS_PER_ROW)];
           }
         }
       }
@@ -2456,7 +2463,7 @@ void CaptureHudAnimationFrame(void) {
       for (column = FRAME_MARGIN_WORDS;
           column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
         f_CapturedFrame[wordIndex++] =
-            frame[row * FRAME_WORDS_PER_ROW + column];
+            frame[(row * FRAME_WORDS_PER_ROW) + column];
       }
     }
   } else if (f_HudAnimation == HUD_ANIMATION_SLICE_CAPTURE) {
@@ -2465,8 +2472,8 @@ void CaptureHudAnimationFrame(void) {
       for (row = FRAME_SLICE_TOP; row != FRAME_SLICE_BOTTOM; row++) {
         for (column = FRAME_SLICE_LEFT_WORD;
             column != FRAME_SLICE_RIGHT_WORD;) {
-          f_CapturedFrame[g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT +
-              wordIndex++] = frame[row * FRAME_WORDS_PER_ROW + column++];
+          f_CapturedFrame[(g_CapturedSliceCount * FRAME_SLICE_WORD_COUNT) +
+              wordIndex++] = frame[(row * FRAME_WORDS_PER_ROW) + column++];
         }
       }
       g_CapturedSliceCount++;
@@ -2478,7 +2485,7 @@ void CaptureHudAnimationFrame(void) {
       for (column = FRAME_MARGIN_WORDS;
           column != FRAME_WORDS_PER_ROW - FRAME_MARGIN_WORDS; column++) {
         f_CapturedFrame[wordIndex++] =
-            ~frame[row * FRAME_WORDS_PER_ROW + column];
+            ~frame[(row * FRAME_WORDS_PER_ROW) + column];
       }
     }
   }
@@ -2516,7 +2523,7 @@ void DrawSliceAnimation(void) {
   column = 0;
   wordIndex = 0;
   frame = SLICE_ANIMATION_FRAME_COUNT - f_HudAnimationFramesLeft;
-  sliceCount = frame / SLICE_FRAME_COUNT + 1;
+  sliceCount = (frame / SLICE_FRAME_COUNT) + 1;
   if (frame % SLICE_FRAME_COUNT == 0) {
     PlaySound(SOUND_SLICE, SLICE_SOUND_CHANNEL, SLICE_SOUND_VOLUME);
   }

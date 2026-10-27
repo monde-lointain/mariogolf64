@@ -35,11 +35,11 @@ void guMtxF2L(f32 mf[4][4], Mtx* m) {
       if (mf[row][pair * 2] > MAX_FIXED_ELEMENT) {
         mf[row][pair * 2] = MAX_FIXED_ELEMENT;
       }
-      if (mf[row][pair * 2 + 1] < MIN_FIXED_ELEMENT) {
-        mf[row][pair * 2 + 1] = MIN_FIXED_ELEMENT;
+      if (mf[row][(pair * 2) + 1] < MIN_FIXED_ELEMENT) {
+        mf[row][(pair * 2) + 1] = MIN_FIXED_ELEMENT;
       }
-      if (mf[row][pair * 2 + 1] > MAX_FIXED_ELEMENT) {
-        mf[row][pair * 2 + 1] = MAX_FIXED_ELEMENT;
+      if (mf[row][(pair * 2) + 1] > MAX_FIXED_ELEMENT) {
+        mf[row][(pair * 2) + 1] = MAX_FIXED_ELEMENT;
       }
       first = FLOAT_TO_FIXED(mf[row][pair * 2]);
       second = FLOAT_TO_FIXED(mf[row][pair * 2 + 1]);
@@ -70,7 +70,7 @@ void guMtxL2F(f32 mf[4][4], Mtx* m) {
       signedFirst = *((s32*)&first);
       signedSecond = *((s32*)&second);
       mf[row][pair * 2] = FIXED_TO_FLOAT(signedFirst);
-      mf[row][pair * 2 + 1] = FIXED_TO_FLOAT(signedSecond);
+      mf[row][(pair * 2) + 1] = FIXED_TO_FLOAT(signedSecond);
     }
   }
 }

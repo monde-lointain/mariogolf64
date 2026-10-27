@@ -44,7 +44,7 @@ s32 IsOnDrivingRange(void) {
  * g_CourseIndex.
  */
 s32 GetHandicapOffset(s32 courseIndex, s32 holeIndex, s32 handicap) {
-  return -handicap / COURSE_HOLE_COUNT -
+  return (-handicap / COURSE_HOLE_COUNT) -
       (handicap % COURSE_HOLE_COUNT >=
           g_CourseRecords[GetCourseRecordIndex(courseIndex)]
               .holes[holeIndex]

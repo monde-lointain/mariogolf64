@@ -277,7 +277,7 @@ void LoadClubSlots(void) {
   f_Slots->symbolImages = AllocMemory(SYMBOL_COUNT * SYMBOL_IMAGE_SIZE);
   for (index = 0; index != SYMBOL_COUNT; index++) {
     ReadEncodedAsset(f_Slots->symbolImages +
-            OpenEncodedAsset(f_SymbolAssets[index], &asset) * index,
+            (OpenEncodedAsset(f_SymbolAssets[index], &asset) * index),
         &asset);
   }
   f_Slots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
@@ -323,20 +323,20 @@ void LoadClubSlots(void) {
   f_Slots->playerIndex = 0;
   for (index = 0; index != REEL_EDGE_COUNT; index++) {
     f_Slots->reelVertices[index * 2].v.ob[0] = -REEL_HALF_WIDTH;
-    f_Slots->reelVertices[index * 2 + 1].v.ob[0] = REEL_HALF_WIDTH;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[0] = REEL_HALF_WIDTH;
     angle = DEGREES_TO_RADIANS((f32)((index - 1) * REEL_EDGE_SPACING));
     f_Slots->reelVertices[index * 2].v.ob[1] = cosf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[index * 2 + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[1] = cosf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[index * 2].v.ob[2] = sinf(angle) * REEL_RADIUS;
-    f_Slots->reelVertices[index * 2 + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
+    f_Slots->reelVertices[(index * 2) + 1].v.ob[2] = sinf(angle) * REEL_RADIUS;
     f_Slots->reelVertices[index * 2].v.cn[0] = 0xFF;
-    f_Slots->reelVertices[index * 2 + 1].v.cn[0] = 0xFF;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[0] = 0xFF;
     f_Slots->reelVertices[index * 2].v.cn[1] = 0xFF;
-    f_Slots->reelVertices[index * 2 + 1].v.cn[1] = 0xFF;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[1] = 0xFF;
     f_Slots->reelVertices[index * 2].v.cn[2] = 0xFF;
-    f_Slots->reelVertices[index * 2 + 1].v.cn[2] = 0xFF;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[2] = 0xFF;
     f_Slots->reelVertices[index * 2].v.cn[3] = 0xFF;
-    f_Slots->reelVertices[index * 2 + 1].v.cn[3] = 0xFF;
+    f_Slots->reelVertices[(index * 2) + 1].v.cn[3] = 0xFF;
   }
   for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
     if (index & 2) {
@@ -400,7 +400,7 @@ void GiveSlotClubs(s32 playerIndex) {
     player->clubs[index] = NO_CLUB;
   }
   player->clubs[CLUB_TYPE_PUTTER] =
-      (s8)player->characterIndex * CLUB_SET_SIZE + CLUB_TYPE_PUTTER;
+      ((s8)player->characterIndex * CLUB_SET_SIZE) + CLUB_TYPE_PUTTER;
   f_StarCount = 0;
   for (index = 0; index != REEL_COUNT; index++) {
     symbolIndex = f_Slots->reelPositions[index] - SHOWN_SYMBOL_OFFSET;
@@ -411,12 +411,12 @@ void GiveSlotClubs(s32 playerIndex) {
     if (symbol != SYMBOL_STAR) {
       if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
         player->clubs[symbol] =
-            (player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) *
-                CLUB_SET_SIZE +
+            ((player->gameBoyCharacterIndex + CHARACTER_CLUB_SET_COUNT) *
+                CLUB_SET_SIZE) +
             symbol;
       } else {
         player->clubs[symbol] =
-            (s8)player->characterIndex * CLUB_SET_SIZE + symbol;
+            ((s8)player->characterIndex * CLUB_SET_SIZE) + symbol;
       }
     } else {
       starCount++;
@@ -430,7 +430,7 @@ void GiveSlotClubs(s32 playerIndex) {
         clubSet = player->gameBoyCharacterIndex;
         clubSet += CHARACTER_CLUB_SET_COUNT;
       }
-      player->clubs[slot] = clubSet * CLUB_SET_SIZE + slot;
+      player->clubs[slot] = (clubSet * CLUB_SET_SIZE) + slot;
     }
     PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
   }
@@ -610,7 +610,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     rotation[0] = f_Slots->reelAngles[reelIndex];
     rotation[1] = 0;
     rotation[2] = 0;
-    translation[0] = reelIndex * REEL_SPACING + FIRST_REEL_X;
+    translation[0] = (reelIndex * REEL_SPACING) + FIRST_REEL_X;
     translation[1] = SLOTS_Y;
     translation[2] = SLOTS_Z;
     scale[0] = REEL_SCALE;
@@ -684,7 +684,7 @@ void DrawClubSlots(Gfx** displayListHead) {
       }
       LoadTextureBlock(&gfx,
           f_Slots->symbolImages +
-              f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE +
+              (f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE) +
               IMAGE_HEADER_SIZE,
           G_IM_FMT_RGBA, G_IM_SIZ_16b, SYMBOL_SIZE, SYMBOL_SIZE, 0, 0, 0, 0, 0,
           0, 0);
@@ -775,17 +775,17 @@ void DrawClubSlots(Gfx** displayListHead) {
       LoadTextureBlock(&gfx,
           f_Slots->buttonsImage +
               (LARGE_PALETTED_TEXELS_OFFSET +
-                  buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH +
-                  stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH),
+                  (buttonIndex * BUTTON_HEIGHT * BUTTON_WIDTH) +
+                  (stripIndex * BUTTON_STRIP_HEIGHT * BUTTON_WIDTH)),
           G_IM_FMT_CI, G_IM_SIZ_8b, BUTTON_WIDTH, BUTTON_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
-      DrawTextureRect(&gfx, (buttonIndex * BUTTON_WIDTH + BUTTON_LEFT) << 2,
-          (BUTTON_TOP + stripIndex * BUTTON_STRIP_HEIGHT) << 2,
-          (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + buttonIndex * BUTTON_WIDTH)
+      DrawTextureRect(&gfx, ((buttonIndex * BUTTON_WIDTH) + BUTTON_LEFT) << 2,
+          (BUTTON_TOP + (stripIndex * BUTTON_STRIP_HEIGHT)) << 2,
+          (BUTTON_LEFT + BUTTON_SHOWN_WIDTH - 1 + (buttonIndex * BUTTON_WIDTH))
               << 2,
           (BUTTON_TOP + BUTTON_STRIP_HEIGHT - 1 +
-              stripIndex * BUTTON_STRIP_HEIGHT)
+              (stripIndex * BUTTON_STRIP_HEIGHT))
               << 2,
           G_TX_RENDERTILE, 0, 0, 4 * TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
@@ -803,10 +803,10 @@ void DrawClubSlots(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
 
   /* START!, growing while the reels speed up */
-  halfWidth = sinf(f_StartAngle) * 64.0f + 20.0f;
-  startStripHeight = (sinf(f_StartAngle) * 50.0f + 13.75f) * 0.2f;
+  halfWidth = (sinf(f_StartAngle) * 64.0f) + 20.0f;
+  startStripHeight = ((sinf(f_StartAngle) * 50.0f) + 13.75f) * 0.2f;
   dsdx = (START_WIDTH * TEXEL_STEP_ONE / 2) / halfWidth;
-  halfHeight = startStripHeight * 2.5f + 2.0f;
+  halfHeight = (startStripHeight * 2.5f) + 2.0f;
   dtdy = (START_SHOWN_HEIGHT * TEXEL_STEP_ONE / 2) / halfHeight;
   if (f_ClubSlotsState == CLUB_SLOTS_STARTING) {
     f_StartAngle = 0.0f;
@@ -863,9 +863,9 @@ void DrawClubSlots(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
       DrawTextureRect(&gfx, FACE_LEFT << 2,
-          (FACE_TOP + playerIndex * FACE_SPACING) << 2,
+          (FACE_TOP + (playerIndex * FACE_SPACING)) << 2,
           (FACE_LEFT + FACE_SIZE) << 2,
-          (FACE_TOP + FACE_SIZE + playerIndex * FACE_SPACING) << 2,
+          (FACE_TOP + FACE_SIZE + (playerIndex * FACE_SPACING)) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       if (f_IsShowingResult == TRUE && ++f_FaceFrameTime >= FACE_FRAME_TIME) {
         f_FaceFrameTime = 0;
@@ -909,9 +909,9 @@ void DrawClubSlots(Gfx** displayListHead) {
           G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
       gDPSetPrimColor(gfx++, 0, 0, 127, 127, 127, 127);
       DrawTextureRect(&gfx, OTHER_FACE_LEFT << 2,
-          (OTHER_FACE_TOP + playerIndex * FACE_SPACING) << 2,
+          (OTHER_FACE_TOP + (playerIndex * FACE_SPACING)) << 2,
           (OTHER_FACE_LEFT + FACE_SIZE) << 2,
-          (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + playerIndex * FACE_SPACING)
+          (OTHER_FACE_TOP + OTHER_FACE_HEIGHT + (playerIndex * FACE_SPACING))
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }

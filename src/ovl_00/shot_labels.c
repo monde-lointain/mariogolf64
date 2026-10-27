@@ -332,7 +332,7 @@ void DrawShotLabels(Gfx** displayListHead) {
       } else {
         while (TRUE) {
           overlaps = FALSE;
-          corner = (f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT +
+          corner = ((f_ShotLabels[i].corner + tries) % UPPER_CORNER_COUNT) +
               CORNER_UPPER_LEFT;
           if (cup.isHidden == SPOT_SHOWN &&
               cup.x - TAG_WIDTH < point.x + f_TagOffsetsX[corner] &&
@@ -543,8 +543,8 @@ OPAQUE:
 
           alpha = 255;
         } else {
-          alpha = (depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
-                  SIGN_FADE_DEPTH_RANGE +
+          alpha = ((depth - SIGN_FADE_START_DEPTH) * SIGN_FADE_ALPHA_RANGE /
+                      SIGN_FADE_DEPTH_RANGE) +
               SIGN_MIN_ALPHA;
         }
       }

@@ -151,13 +151,13 @@ s32 func_8005F30C(s32 x, s32 z) {
 }
 
 void func_8005F360(void) {
-  switch (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34)) {
+  switch ((IsGameFlagSet(0x33) * 2) + IsGameFlagSet(0x34)) {
     case 0:
       g_GameState.courseIndex = 0;
       g_GameState.holeIndex = 0;
       g_GameState.unk14 = 0;
       g_GameState.playerCount =
-          IsGameFlagSet(0x30) * 2 + IsGameFlagSet(0x31) + 1;
+          (IsGameFlagSet(0x30) * 2) + IsGameFlagSet(0x31) + 1;
       g_GameState.unk0 = 0;
       g_GameState.gameMode = 0;
       break;
@@ -248,7 +248,7 @@ void SetUpPlayers(void) {
         g_Players[0].clubs[slot] = NO_CLUB;
       } else {
         g_Players[0].clubs[slot] =
-            slot + (s8)g_Players[0].characterIndex * CLUB_SET_SIZE;
+            slot + ((s8)g_Players[0].characterIndex * CLUB_SET_SIZE);
       }
     }
     /* The index variable is there to match */
@@ -276,7 +276,7 @@ void SetUpPlayers(void) {
           g_Players[i].clubs[slot] = NO_CLUB;
         } else {
           g_Players[i].clubs[slot] =
-              slot + (s8)g_Players[i].characterIndex * CLUB_SET_SIZE;
+              slot + ((s8)g_Players[i].characterIndex * CLUB_SET_SIZE);
         }
       }
       g_Players[i].stopwatchFrameCount = 0;
@@ -303,7 +303,7 @@ void InitPlay(s32 kind) {
   if (!g_GameState.unk30) {
     SetUpPlayers();
   }
-  if (IsGameFlagSet(0x33) * 2 + IsGameFlagSet(0x34) == 2) {
+  if ((IsGameFlagSet(0x33) * 2) + IsGameFlagSet(0x34) == 2) {
     g_Players[1].unk1E[0] = 1;
   }
   InitExpansionPakFeatures();
@@ -1047,11 +1047,11 @@ void UpdatePlay(void) {
                 D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
             lookAt[AXIS_Y] = g_CupPositionY * COURSE_TO_WORLD_SCALE;
             lookAt[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
-            eye[AXIS_X] =
-                cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_X];
+            eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
+                lookAt[AXIS_X];
             eye[AXIS_Y] = lookAt[AXIS_Y] + DEBUG_ORBIT_HEIGHT;
-            eye[AXIS_Z] =
-                sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS + lookAt[AXIS_Z];
+            eye[AXIS_Z] = (sinf(INTRO_ORBIT_ANGLE()) * DEBUG_ORBIT_RADIUS) +
+                lookAt[AXIS_Z];
           } else {
             lookAt[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] + g_TeePositionX) *
                 (COURSE_TO_WORLD_SCALE / 2);
@@ -1060,16 +1060,18 @@ void UpdatePlay(void) {
             lookAt[AXIS_Z] =
                 (g_CupPositionZ + g_TeePositionZ) * (COURSE_TO_WORLD_SCALE / 2);
             if (!g_GameState.isMiniGolf) {
-              eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
+              eye[AXIS_X] = (cosf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS) +
                   lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + INTRO_ORBIT_HEIGHT;
-              eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS +
+              eye[AXIS_Z] = (sinf(INTRO_ORBIT_ANGLE()) * INTRO_ORBIT_RADIUS) +
                   lookAt[AXIS_Z];
             } else {
-              eye[AXIS_X] = cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
+              eye[AXIS_X] =
+                  (cosf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS) +
                   lookAt[AXIS_X];
               eye[AXIS_Y] = lookAt[AXIS_Y] + MINI_GOLF_ORBIT_HEIGHT;
-              eye[AXIS_Z] = sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS +
+              eye[AXIS_Z] =
+                  (sinf(INTRO_ORBIT_ANGLE()) * MINI_GOLF_ORBIT_RADIUS) +
                   lookAt[AXIS_Z];
             }
           }
@@ -1635,7 +1637,7 @@ void FillRandomGrid(s32 range, s32 base) {
 
   for (row = 0; row < RANDOM_GRID_SIZE; row++) {
     for (column = 0; column < RANDOM_GRID_SIZE; column++) {
-      value = rand() % range + base;
+      value = (rand() % range) + base;
       if (value >= 256) {
         value = 255;
       }
@@ -1694,7 +1696,7 @@ void MarkNearbyGroundTiles(u32 x, u32 z) {
           for (j = -1; j < 2; j++) {
             if (column + j < GROUND_TILE_COLUMN_COUNT &&
                 row + i < GROUND_TILE_ROW_COUNT) {
-              g_IsGroundTileNearby[(row + i) * GROUND_TILE_COLUMN_COUNT +
+              g_IsGroundTileNearby[((row + i) * GROUND_TILE_COLUMN_COUNT) +
                   (column + j)] = TRUE;
             }
           }
@@ -1712,7 +1714,7 @@ static inline s32 GetMirroredOffset(s32 coordinate) {
   s32 tile = coordinate / 512;
   s32 offset;
 
-  offset = coordinate - tile * 512;
+  offset = coordinate - (tile * 512);
   if (tile % 2) {
     offset = 512 - offset;
   }
@@ -1973,7 +1975,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
         break;
     }
     if (g_ControllerData[1].trigger & A_BUTTON) {
-      g_GroundClipRatio = g_GroundClipRatio % CLIP_RATIO_COUNT + 1;
+      g_GroundClipRatio = (g_GroundClipRatio % CLIP_RATIO_COUNT) + 1;
     }
   } else {
     gSPClipRatio(gfx++, FRUSTRATIO_1);
@@ -2133,7 +2135,7 @@ void DrawGround(CameraMatrices* matrices, s32 terrainStyle) {
           if (IsGameFlagSet(GAME_FLAG_LOG_GROUND_ROWS)) {
             osSyncPrintf("%d", g_WorkArea.hole.tiles[tileIndex].detail);
           }
-          tileColumn = half * GROUND_TILE_GROUP_SIZE + k;
+          tileColumn = (half * GROUND_TILE_GROUP_SIZE) + k;
           if (g_WorkArea.hole.tiles[tileIndex].detail == GROUND_DETAIL_FINE &&
               g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
             if (IsGameFlagSet(GAME_FLAG_HOLE_LOADED)) {

@@ -417,29 +417,30 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
     number /= PASSWORD_SYMBOL_COUNT;
   }
   number =
-      clamped->gameBoyLevel * TIME_RANGE + clamped->time + TIME_NUMBER_SALT;
+      (clamped->gameBoyLevel * TIME_RANGE) + clamped->time + TIME_NUMBER_SALT;
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
-  number = clamped->characterIndex * SCORE_RANGE + (s16)clamped->score +
-      (rand() % SCORE_NOISE_RANGE) * (PASSWORD_CHARACTER_COUNT * SCORE_RANGE) +
+  number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
+      ((rand() % SCORE_NOISE_RANGE) *
+          (PASSWORD_CHARACTER_COUNT * SCORE_RANGE)) +
       SCORE_NUMBER_SALT;
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
-    symbols[i] = (symbols[i] + symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
+    symbols[i] = (symbols[i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
     symbols[NUMBER_SYMBOL_COUNT + i] =
         (symbols[NUMBER_SYMBOL_COUNT + i] +
-            symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
+            symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
   }
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
-                                 symbols[2 * NUMBER_SYMBOL_COUNT + i]) %
+                                 symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
   }
   WritePasswordSymbols(symbols, password, SCORE_PASSWORD_LENGTH, 0);

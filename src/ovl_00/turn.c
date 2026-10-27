@@ -472,39 +472,39 @@ void PlaceShotCamera(void) {
     heading = (u16)D_800C307A * BINARY_ANGLE_TO_RADIANS;
     if (!g_IsMiniGolf) {
       g_Cameras[0].view.lookAt[AXIS_X] =
-          (point[AXIS_X] + cosf(heading) * PAUSE_CAMERA_RADIUS) *
+          (point[AXIS_X] + (cosf(heading) * PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-              sinf(heading) * PAUSE_CAMERA_RADIUS) *
+              (sinf(heading) * PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_X] =
-          (point[AXIS_X] + cosf(heading) * -PAUSE_CAMERA_RADIUS) *
+          (point[AXIS_X] + (cosf(heading) * -PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Y] =
           (point[AXIS_Y] - PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Z] =
           (point[AXIS_Z] - g_CurrentShot.aimCameraDistance +
-              sinf(heading) * -PAUSE_CAMERA_RADIUS) *
+              (sinf(heading) * -PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
     } else {
       point[AXIS_X] = MINI_GOLF_CENTER_X;
       point[AXIS_Z] = MINI_GOLF_CENTER_Z;
       point[AXIS_Y] = D_800BA9D8.teePosition[AXIS_Y] +
-          (g_CupPositionY - D_800BA9D8.teePosition[AXIS_Y]) * 0.5f;
+          ((g_CupPositionY - D_800BA9D8.teePosition[AXIS_Y]) * 0.5f);
       g_Cameras[0].view.lookAt[AXIS_X] =
-          (point[AXIS_X] + cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+          (point[AXIS_X] + (cosf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.lookAt[AXIS_Z] =
           (point[AXIS_Z] -
               (g_CurrentShot.aimCameraDistance +
                   MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
-              sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+              (sinf(heading) * MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_X] =
-          (point[AXIS_X] + cosf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+          (point[AXIS_X] + (cosf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
       g_Cameras[0].view.eye[AXIS_Y] =
           (point[AXIS_Y] - MINI_GOLF_PAUSE_CAMERA_RISE) * COURSE_TO_WORLD_SCALE;
@@ -512,7 +512,7 @@ void PlaceShotCamera(void) {
           (point[AXIS_Z] -
               (g_CurrentShot.aimCameraDistance +
                   MINI_GOLF_PAUSE_CAMERA_DISTANCE) +
-              sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS) *
+              (sinf(heading) * -MINI_GOLF_PAUSE_CAMERA_RADIUS)) *
           COURSE_TO_WORLD_SCALE;
     }
   } else if (D_800C308C == LETTERBOX_STATE_NONE ||
@@ -529,9 +529,9 @@ void PlaceShotCamera(void) {
 
     heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
     KeepAimCameraOnCourse();
-    point[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
+    point[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
         g_CurrentShot.ballPosition[AXIS_X];
-    point[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
+    point[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) +
         g_CurrentShot.ballPosition[AXIS_Z];
     if (point[AXIS_X] < AIM_CAMERA_MIN_COORD) {
       point[AXIS_X] = AIM_CAMERA_MIN_COORD;
@@ -552,10 +552,10 @@ void PlaceShotCamera(void) {
     for (probe = 0; probe < AIM_GROUND_PROBE_COUNT; probe++) {
       offset = probe * AIM_GROUND_PROBE_STEP;
       point[AXIS_X] =
-          cosf(heading) * (g_CurrentShot.aimCameraDistance + offset) +
+          (cosf(heading) * (g_CurrentShot.aimCameraDistance + offset)) +
           g_CurrentShot.ballPosition[AXIS_X];
       point[AXIS_Z] =
-          sinf(heading) * (g_CurrentShot.aimCameraDistance + offset) +
+          (sinf(heading) * (g_CurrentShot.aimCameraDistance + offset)) +
           g_CurrentShot.ballPosition[AXIS_Z];
       ground = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
       if (ground < lowestGround) {
@@ -564,26 +564,28 @@ void PlaceShotCamera(void) {
     }
     if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
       point[AXIS_Y] = lowestGround - NO_IMPACT_POINT_DROP +
-          g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE;
+          (g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE);
     } else {
       point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
     }
     rise = g_CurrentShot.aimCameraDistance / 1000;
     if (g_CurrentShot.ballPosition[AXIS_Y] +
-            rise * rise / AIM_CAMERA_RISE_DIVISOR <
+            (rise * rise / AIM_CAMERA_RISE_DIVISOR) <
         point[AXIS_Y]) {
       point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] +
-          rise * rise / AIM_CAMERA_RISE_DIVISOR;
+          (rise * rise / AIM_CAMERA_RISE_DIVISOR);
     }
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
       point[AXIS_X] =
-          cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
+          (cosf(heading) *
+              (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
           g_CurrentShot.ballPosition[AXIS_X];
       point[AXIS_Y] = (lowestGround - GREEN_LOOK_RISE) -
-          g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE;
+          (g_CurrentShot.aimCameraHeight * GREEN_LOOK_HEIGHT_SCALE);
       point[AXIS_Z] =
-          sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
+          (sinf(heading) *
+              (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
           g_CurrentShot.ballPosition[AXIS_Z];
       g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     } else {
@@ -592,17 +594,19 @@ void PlaceShotCamera(void) {
       if (tilt < 0.0f) {
         tilt = 0.0f;
       }
-      point[AXIS_X] = cosf(heading) *
-              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+      point[AXIS_X] =
+          (cosf(heading) *
+              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
           g_CurrentShot.ballPosition[AXIS_X];
-      point[AXIS_Z] = sinf(heading) *
-              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+      point[AXIS_Z] =
+          (sinf(heading) *
+              (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
           g_CurrentShot.ballPosition[AXIS_Z];
       point[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
       g_Cameras[0].view.lookAt[AXIS_Y] =
-          g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE -
-          g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE) +
-          D_80223E48_ovl_00 * AIM_CAMERA_DEBUG_TILT_SCALE;
+          (g_Cameras[0].view.eye[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+          (g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE)) +
+          (D_80223E48_ovl_00 * AIM_CAMERA_DEBUG_TILT_SCALE);
     }
     g_Cameras[0].view.heading = heading;
     g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -612,31 +616,31 @@ void PlaceShotCamera(void) {
     /* The middle of the ball and the cup is worked out, but the ball is used */
     center[AXIS_Y] = g_CupPositionY;
     center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
-    heading = (u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS + M_PI;
+    heading = ((u16)D_800C3078 * BINARY_ANGLE_TO_RADIANS) + M_PI;
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X] +
-        (D_800BA9D8.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) *
-            0.5f;
+        ((D_800BA9D8.cupPosition[AXIS_X] - g_CurrentShot.ballPosition[AXIS_X]) *
+            0.5f);
     center[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] +
-        (g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z]) * 0.5f;
+        ((g_CupPositionZ - g_CurrentShot.ballPosition[AXIS_Z]) * 0.5f);
     center[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
     point[AXIS_X] =
-        cosf(heading) * g_CurrentShot.aimCameraDistance + center[AXIS_X];
+        (cosf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_X];
     point[AXIS_Y] = g_CurrentShot.aimCameraHeight + center[AXIS_Y];
     point[AXIS_Z] =
-        sinf(heading) * g_CurrentShot.aimCameraDistance + center[AXIS_Z];
+        (sinf(heading) * g_CurrentShot.aimCameraDistance) + center[AXIS_Z];
     point[AXIS_Y] = func_8005F30C(point[AXIS_X], point[AXIS_Z]) +
         g_CurrentShot.aimCameraHeight;
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     point[AXIS_X] =
-        cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
+        (cosf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
         center[AXIS_X];
     point[AXIS_Y] = (g_CurrentShot.ballPosition[AXIS_Y] - LOOK_BACK_RISE) -
-        g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE;
+        (g_CurrentShot.aimCameraHeight * LOOK_BACK_HEIGHT_SCALE);
     point[AXIS_Z] =
-        sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD) +
+        (sinf(heading) * (g_CurrentShot.aimCameraDistance + GREEN_LOOK_AHEAD)) +
         center[AXIS_Z];
     g_Cameras[0].view.heading = heading;
     g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -668,33 +672,35 @@ void AimDownRange(void) {
     g_CurrentShot.aimCameraDistance = DOWN_RANGE_DISTANCE;
   }
   heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
-  lookAt[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
+  lookAt[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
   if (lookAt[AXIS_X] < 0.0f) {
     lookAt[AXIS_X] = 0.0f;
   } else if (lookAt[AXIS_X] >= AIM_CAMERA_MAX_X) {
     lookAt[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
-  lookAt[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
+  lookAt[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_Z];
   if (lookAt[AXIS_Z] < 0.0f) {
     lookAt[AXIS_Z] = 0.0f;
   } else if (lookAt[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
     lookAt[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
   }
-  lookAt[AXIS_X] = cosf(heading) *
-          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+  lookAt[AXIS_X] =
+      (cosf(heading) *
+          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
       g_CurrentShot.ballPosition[AXIS_X];
-  lookAt[AXIS_Z] = sinf(heading) *
-          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD) +
+  lookAt[AXIS_Z] =
+      (sinf(heading) *
+          (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
       g_CurrentShot.ballPosition[AXIS_Z];
   lookAt[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
   GetGroundHeight(lookAt[AXIS_X], lookAt[AXIS_Z]);
   g_Cameras[0].view.heading = heading;
   g_Cameras[0].view.lookAt[AXIS_X] = lookAt[AXIS_X] * COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Z] = lookAt[AXIS_Z] * COURSE_TO_WORLD_SCALE;
-  g_Cameras[0].view.lookAt[AXIS_Y] = lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE -
-      g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE;
+  g_Cameras[0].view.lookAt[AXIS_Y] = (lookAt[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+      (g_CurrentShot.aimCameraHeight * COURSE_TO_WORLD_SCALE);
 }
 
 /* Places the aim camera on the aim line, looking at the ball */
@@ -703,14 +709,14 @@ void PlaceAimCamera(void) {
   Vec3 eye;
   f32 heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
 
-  eye[AXIS_X] = cosf(heading) * g_CurrentShot.aimCameraDistance +
+  eye[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
   if (eye[AXIS_X] < 0.0f) {
     eye[AXIS_X] = 0.0f;
   } else if (eye[AXIS_X] >= AIM_CAMERA_MAX_X) {
     eye[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
-  eye[AXIS_Z] = sinf(heading) * g_CurrentShot.aimCameraDistance +
+  eye[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_Z];
   if (eye[AXIS_Z] < 0.0f) {
     eye[AXIS_Z] = 0.0f;
@@ -731,9 +737,9 @@ void PlaceAimCamera(void) {
   g_Cameras[0].view.eye[AXIS_Y] = eye[AXIS_Y];
   g_Cameras[0].view.eye[AXIS_Z] = eye[AXIS_Z];
   g_Cameras[0].view.lookAt[AXIS_Y] =
-      func_8005F30C(g_CurrentShot.ballPosition[AXIS_X],
-          g_CurrentShot.ballPosition[AXIS_Z]) *
-          COURSE_TO_WORLD_SCALE -
+      (func_8005F30C(g_CurrentShot.ballPosition[AXIS_X],
+           g_CurrentShot.ballPosition[AXIS_Z]) *
+          COURSE_TO_WORLD_SCALE) -
       AIM_LOOK_AT_RISE;
   g_Cameras[0].view.lookAt[AXIS_X] *= COURSE_TO_WORLD_SCALE;
   g_Cameras[0].view.lookAt[AXIS_Z] *= COURSE_TO_WORLD_SCALE;
@@ -1024,7 +1030,7 @@ void TurnAim(s32 turnsAltHeading) {
   dpad = D_80223E50_ovl_00;
   dpadSpeed = (dpad < 0) ? -dpad : dpad;
   g_CurrentShot.unk0 +=
-      dpad * (dpadSpeed / AIM_DPAD_SPEED_DIVISOR + AIM_DPAD_BASE_SPEED);
+      dpad * ((dpadSpeed / AIM_DPAD_SPEED_DIVISOR) + AIM_DPAD_BASE_SPEED);
   if (!IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (D_800C308C == LETTERBOX_STATE_NONE ||
         D_800C308C == LETTERBOX_STATE_UNK5) {
@@ -1115,8 +1121,8 @@ s32 UpdateAimControls(void) {
             D_800C3078 = (atan2(toCup[AXIS_Z], toCup[AXIS_X]) + M_PI) *
                 RADIANS_TO_BINARY_ANGLE;
             g_CurrentShot.aimCameraDistance =
-                -sqrtf(toCup[AXIS_X] * toCup[AXIS_X] +
-                    toCup[AXIS_Z] * toCup[AXIS_Z]) -
+                -sqrtf((toCup[AXIS_X] * toCup[AXIS_X]) +
+                    (toCup[AXIS_Z] * toCup[AXIS_Z])) -
                 LOOK_BACK_EXTRA_DISTANCE;
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
           } else {
@@ -1222,8 +1228,8 @@ s32 UpdateAimControls(void) {
             g_CurrentShot.aimCameraHeight = LOOK_BACK_START_HEIGHT;
             D_800C3078 = g_CurrentShot.unk0;
             g_CurrentShot.aimCameraDistance =
-                -sqrtf(toCup[AXIS_X] * toCup[AXIS_X] +
-                    toCup[AXIS_Z] * toCup[AXIS_Z]) -
+                -sqrtf((toCup[AXIS_X] * toCup[AXIS_X]) +
+                    (toCup[AXIS_Z] * toCup[AXIS_Z])) -
                 LOOK_BACK_EXTRA_DISTANCE;
           } else {
             D_800C308C = LETTERBOX_STATE_UNK2;
@@ -1835,7 +1841,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
     dx = end.x - ball.x;
     dy = end.y - ball.y;
     if (fabsf(dx) > 1.0f || fabsf(dy) > 1.0f) {
-      scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+      scale = PUTT_PREVIEW_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
       gSPLoadGeometryMode(g_DisplayListHead++, 0);
       gSPSetGeometryMode(g_DisplayListHead++, G_SHADE | G_SHADING_SMOOTH);
       gDPSetCombineMode(g_DisplayListHead++, G_CC_MODULATEIDECALA_PRIM,
@@ -2599,9 +2605,9 @@ static inline void DebugPlaceBall(s32 playerIndex) {
   ClearGameFlag(0x9F);
   if (g_ControllerData[1].button & Z_TRIG) {
     g_CurrentShot.ballPosition[0] += g_ControllerStates[1].stickX *
-        (ABS(g_ControllerStates[1].stickX) * 2 + 1);
+        ((ABS(g_ControllerStates[1].stickX) * 2) + 1);
     g_CurrentShot.ballPosition[2] += g_ControllerStates[1].stickY *
-        (ABS(g_ControllerStates[1].stickY) * 2 + 1);
+        ((ABS(g_ControllerStates[1].stickY) * 2) + 1);
     g_CurrentShot.ballPosition[1] = GetGroundHeight(
         g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
     g_Players[playerIndex].ballPosition[0] = g_CurrentShot.ballPosition[0];
@@ -3342,8 +3348,8 @@ void UpdateTurns(void) {
             break;
           }
           SetCharacterSlotAlpha(0,
-              sinf(g_Players[playerIndex].stopwatchFrameCount * 0.20933335f) *
-                      32.0f +
+              (sinf(g_Players[playerIndex].stopwatchFrameCount * 0.20933335f) *
+                  32.0f) +
                   64.0f);
           isReady = TRUE;
           tempo = 0x7F;
@@ -3712,7 +3718,7 @@ void UpdateTurns(void) {
 
                 D_80224008_ovl_00 = 3;
                 D_80227180_ovl_00 = speed;
-                D_8022400C_ovl_00 = 3.0f / speed - 3.0f;
+                D_8022400C_ovl_00 = (3.0f / speed) - 3.0f;
               }
             }
             if (D_80223FF8_ovl_00 < 2) {
@@ -4427,9 +4433,9 @@ void UpdateTurns(void) {
       scale = 14045.184f;
     }
     length = distance * scale;
-    g_CurrentShot.unk44[0] = cosine * length + g_CurrentShot.ballPosition[0];
+    g_CurrentShot.unk44[0] = (cosine * length) + g_CurrentShot.ballPosition[0];
     g_CurrentShot.unk44[2] =
-        sinf(angle) * length + g_CurrentShot.ballPosition[2];
+        (sinf(angle) * length) + g_CurrentShot.ballPosition[2];
     g_CurrentShot.unk44[1] =
         GetGroundHeight(g_CurrentShot.unk44[0], g_CurrentShot.unk44[2]);
   }

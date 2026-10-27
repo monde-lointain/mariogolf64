@@ -642,7 +642,7 @@ void DrawPlanks(Gfx** displayListHead) {
       if (groupIndex > PLANK_LAST_GROUP) {
         groupIndex = PLANK_LAST_GROUP;
       }
-      slide = f_PlankSlide - groupIndex * PLANK_GROUP_LAG;
+      slide = f_PlankSlide - (groupIndex * PLANK_GROUP_LAG);
       if (slide > PLANKS_MIDDLE) {
         slide = PLANKS_MIDDLE;
       }
@@ -653,11 +653,11 @@ void DrawPlanks(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     LoadTextureBlock(&gfx,
         f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH,
+            (stripIndex * PLANK_STRIP_HEIGHT * PLANKS_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, PLANKS_WIDTH, stripHeight, 0, 0, 0, 0, 0, 0,
         0);
-    top = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT) << 2;
-    bottom = (SCREEN_BORDER + stripIndex * PLANK_STRIP_HEIGHT + stripHeight)
+    top = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT)) << 2;
+    bottom = (SCREEN_BORDER + (stripIndex * PLANK_STRIP_HEIGHT) + stripHeight)
         << 2;
     DrawTextureRect(&gfx, SCREEN_BORDER << 2, top, slide << 2, bottom,
         G_TX_RENDERTILE, (PLANKS_MIDDLE - slide) << 5, 1 << 5, TEXEL_STEP_ONE,
@@ -694,16 +694,16 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-          f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI,
+          f_CourseImage + (stripIndex * COURSE_IMAGE_STRIP_SIZE), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
               RING_SHOT_COURSE_IMAGE_TOP)
               << 2,
           (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
               RING_SHOT_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -722,7 +722,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           f_CourseArrowFrameTime++ % (2 * ARROW_FRAME_TIME) >= ARROW_FRAME_TIME;
       LoadNibbleTextureBlock(&gfx,
           f_ArrowsImage + PALETTED_TEXELS_OFFSET +
-              arrowFrame * ARROWS_FRAME_SIZE,
+              (arrowFrame * ARROWS_FRAME_SIZE),
           G_IM_FMT_CI, ARROWS_WIDTH, ARROWS_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
       gDPPipeSync(gfx++);
       push = (f_RepeatedButtons & U_JPAD) ? ARROW_PUSH_UP : 0;
@@ -744,7 +744,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     SetTextColor(&gfx, 255, 255, 255);
     SetTextSlot(SCREEN_WIDTH / 2, 42,
-        memory->courseIndex * RING_SHOT_HOLE_COUNT + memory->holeIndex +
+        (memory->courseIndex * RING_SHOT_HOLE_COUNT) + memory->holeIndex +
             RING_SHOT_TEXT_FIRST_IMAGE,
         1, RING_SHOT_TEXT_SLOT, 48, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, RING_SHOT_TEXT_SLOT);
@@ -791,11 +791,11 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, HOLE_SIGN_LEFT << 2,
-          (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
+          ((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
               (f_SlideOffset - HOLE_SIGN_TOP))
               << 2,
           (HOLE_SIGN_LEFT + HOLE_SIGN_WIDTH) << 2,
-          (stripIndex * HOLE_SIGN_STRIP_HEIGHT -
+          ((stripIndex * HOLE_SIGN_STRIP_HEIGHT) -
               (f_SlideOffset - (HOLE_SIGN_TOP + HOLE_SIGN_STRIP_HEIGHT)))
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -805,16 +805,16 @@ void DrawHoleSelect(Gfx** displayListHead) {
     LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
-          f_CourseImage + stripIndex * COURSE_IMAGE_STRIP_SIZE, G_IM_FMT_CI,
+          f_CourseImage + (stripIndex * COURSE_IMAGE_STRIP_SIZE), G_IM_FMT_CI,
           G_IM_SIZ_8b, COURSE_IMAGE_WIDTH, COURSE_IMAGE_STRIP_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       gDPPipeSync(gfx++);
       DrawTextureRect(&gfx, COURSE_IMAGE_LEFT << 2,
-          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
               HOLE_COURSE_IMAGE_TOP)
               << 2,
           (COURSE_IMAGE_LEFT + COURSE_IMAGE_WIDTH) << 2,
-          (stripIndex * COURSE_IMAGE_STRIP_HEIGHT + f_SlideOffset +
+          ((stripIndex * COURSE_IMAGE_STRIP_HEIGHT) + f_SlideOffset +
               HOLE_COURSE_IMAGE_TOP + COURSE_IMAGE_STRIP_HEIGHT)
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -917,7 +917,7 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
   for (stripIndex = 0; stripIndex != NAME_PLATE_STRIP_COUNT; stripIndex++) {
     LoadTextureBlock(&gfx,
         f_BoardImage + LARGE_PALETTED_TEXELS_OFFSET +
-            stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH,
+            (stripIndex * NAME_PLATE_STRIP_HEIGHT * NAME_PLATE_WIDTH),
         G_IM_FMT_CI, G_IM_SIZ_8b, NAME_PLATE_WIDTH, NAME_PLATE_STRIP_HEIGHT, 0,
         0, 0, 0, 0, 0, 0);
     gDPPipeSync(gfx++);
@@ -998,7 +998,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
       width = 0;
       height = 0;
     }
-    left = hole * STAR_SPACING + STARS_LEFT;
+    left = (hole * STAR_SPACING) + STARS_LEFT;
     if (hole == memory->holeIndex) {
       tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
           ? TILE_SPINNING_EMPTY_STAR
@@ -1008,9 +1008,9 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
           ? TILE_STILL_EMPTY_STAR
           : TILE_STILL_STAR;
     }
-    DrawTextureRect(&gfx, (left - width / 2) << 2,
-        (STARS_TOP - height / 2) << 2, (left + width / 2 + STAR_WIDTH) << 2,
-        (height / 2 + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
+    DrawTextureRect(&gfx, (left - (width / 2)) << 2,
+        (STARS_TOP - (height / 2)) << 2, (left + (width / 2) + STAR_WIDTH) << 2,
+        ((height / 2) + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
         (STAR_WIDTH * TEXEL_STEP_ONE) / (width + STAR_WIDTH),
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);

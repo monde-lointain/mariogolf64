@@ -201,7 +201,7 @@ void DrawHoleTriangles(
         if (along < 0.0f) {
           along = -along;
         }
-        alpha = along * SHADED_ALPHA_SCALE + SHADED_ALPHA_BASE;
+        alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
         if (alpha > MAX_SHADED_ALPHA) {
           alpha = MAX_SHADED_ALPHA;
         }
@@ -328,7 +328,7 @@ void DrawRings(
             guMtxL2F(transform, matrix);
             for (; section < RING_SECTION_COUNT;
                 section += RING_SPARKLE_SPACING) {
-              angle = turn + section * RING_SECTION_ANGLE;
+              angle = turn + (section * RING_SECTION_ANGLE);
               ringPoint[0] = cosf(angle) * RING_RADIUS;
               ringPoint[1] = sinf(angle) * RING_RADIUS;
               ringPoint[2] = 0;
@@ -344,7 +344,7 @@ void DrawRings(
           if (state > RING_STATE_FADED) {
             state = RING_STATE_FADED;
           }
-          alpha = 0xFF - state * RING_FADE_STEP;
+          alpha = 0xFF - (state * RING_FADE_STEP);
           if (alpha < 0) {
             alpha = 0;
           }
@@ -405,8 +405,8 @@ static void BuildRingVertices(void) {
     angle = (index / RING_SIDE_COUNT) * RING_SECTION_ANGLE;
     offsetX = cosf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
     offsetZ = sinf(angle) * (isOuter - 0.5f) * RING_THICKNESS;
-    x = cosf(angle) * RING_RADIUS + offsetX;
-    y = sinf(angle) * RING_RADIUS + offsetZ;
+    x = (cosf(angle) * RING_RADIUS) + offsetX;
+    y = (sinf(angle) * RING_RADIUS) + offsetZ;
     offsetY = (isRaised - 0.5f) * RING_THICKNESS;
     vertex->n.ob[0] = x;
     vertex->n.ob[1] = y;

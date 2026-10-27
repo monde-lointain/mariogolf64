@@ -697,8 +697,8 @@ void UnloadStaffRoll(void) {
   FreeEffectImages();
   g_Cameras[0].view.scissorX = SCREEN_BORDER;
   g_Cameras[0].view.scissorY = SCREEN_BORDER;
-  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
+  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
   g_Cameras[0].view.zoom = 1.0f;
   FreeAllCharacterSlots();
   for (index = 0; index < CAST_BUFFER_COUNT; index++) {
@@ -720,7 +720,7 @@ f32 BlendStaffRollClamped(f32 from, f32 to, f32 weight) {
   if (weight > 1.0f) {
     weight = 1.0f;
   }
-  return from * (1.0f - weight) + to * weight;
+  return (from * (1.0f - weight)) + (to * weight);
 }
 
 void ResetStaffRollEase(void) {
@@ -1063,7 +1063,7 @@ void RunStaffRollTimeline(s32 frame) {
     ClearEffects();
     PickFramingPitch();
     g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_LATE;
-    f_CastFramingYaw = ((f_CastIndex - 2 * SHOTS_PER_STAGE) * CAST_YAW_STEP) *
+    f_CastFramingYaw = ((f_CastIndex - (2 * SHOTS_PER_STAGE)) * CAST_YAW_STEP) *
         DEGREES_TO_RADIANS_F;
     FreeCharacterSlot(f_CastSlot);
     ResetStaffRollEase();
@@ -1303,7 +1303,7 @@ void RunStaffRollTimeline(s32 frame) {
         slot, GetSwingAnimation(slot, APPROACH_CLUB, SHOT_MODE_NORMAL));
     AdvanceAnimation(slot,
         GetAnimationEventFrame(slot, swingAnimation, ANIMATION_EVENT_UNK6) -
-            2 * CAST_SWING_LEAD_FRAMES);
+            (2 * CAST_SWING_LEAD_FRAMES));
     point[AXIS_X] = g_HolePoints.unk60[1][AXIS_X];
     point[AXIS_Y] = g_HolePoints.unk60[1][AXIS_Y];
     point[AXIS_Z] = g_HolePoints.unk60[1][AXIS_Z];
@@ -1418,9 +1418,9 @@ void RunStaffRollTimeline(s32 frame) {
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vscale[1] =
       g_Cameras[0].view.scissorHeight * 4;
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[0] =
-      (g_Cameras[0].view.scissorX + g_Cameras[0].view.scissorWidth / 2) * 4;
+      (g_Cameras[0].view.scissorX + (g_Cameras[0].view.scissorWidth / 2)) * 4;
   g_Viewports[VIEWPORT_STAFF_ROLL + g_DrawBufferIndex].vp.vtrans[1] =
-      (g_Cameras[0].view.scissorY + g_Cameras[0].view.scissorHeight / 2) * 4;
+      (g_Cameras[0].view.scissorY + (g_Cameras[0].view.scissorHeight / 2)) * 4;
 }
 
 /*
@@ -1454,7 +1454,8 @@ void UpdateStaffRoll(void) {
       f_IsTextScrolling = FALSE;
       StopSong(STAFF_SONG_FADE_FRAMES);
     }
-    if (f_StaffRollFrame == lineCount * STAFF_LINE_HEIGHT + SCROLL_END_DELAY) {
+    if (f_StaffRollFrame ==
+        (lineCount * STAFF_LINE_HEIGHT) + SCROLL_END_DELAY) {
       f_IsTextScrolling = FALSE;
     }
     if (f_StaffRollFrame == CLOSING_PICTURE_READ_FRAME) {
@@ -1638,7 +1639,7 @@ void DrawStaffRoll(Gfx** displayListHead) {
         if (lineIndex >= 0) {
           if (lineIndex < lineCount) {
             DrawStaffLine(&gfx, STAFF_TEXT_LEFT - pass,
-                index * STAFF_LINE_HEIGHT + f_TextScrollOffset - pass,
+                (index * STAFF_LINE_HEIGHT) + f_TextScrollOffset - pass,
                 lineIndex);
           }
         }
@@ -1707,7 +1708,7 @@ void MeasureStaffLine(s32 lineIndex, s32* width, s32* height) {
   s32 length;
   s32 character;
 
-  start = text->lineCount * 2 + 2 + text->lines[lineIndex].start;
+  start = (text->lineCount * 2) + 2 + text->lines[lineIndex].start;
   length = text->lines[lineIndex].length;
   for (; index != length; index++) {
     character = ((u16*)text)[start + index];
@@ -1730,7 +1731,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
   s32 start = (f_StaffText->lines + lineIndex)->start;
   s32 length = (f_StaffText->lines + lineIndex)->length;
   /* In u16s, past the size, the line count and the lines */
-  s32 firstCharacter = f_StaffText->lineCount * 2 + 2;
+  s32 firstCharacter = (f_StaffText->lineCount * 2) + 2;
   s32 width; /* Unused; it is there to match */
   s32 height; /* Unused; it is there to match */
   s32 index;
@@ -1746,7 +1747,7 @@ void DrawStaffLine(Gfx** displayListHead, s32 left, s32 top, s32 lineIndex) {
     character = ((u16*)f_StaffText)[start + index + firstCharacter];
     if (character < STAFF_CHARACTER_LIMIT) {
       row = character / STAFF_FONT_COLUMN_COUNT;
-      column = character - row * STAFF_FONT_COLUMN_COUNT;
+      column = character - (row * STAFF_FONT_COLUMN_COUNT);
       glyphLeft = column * STAFF_GLYPH_WIDTH;
       glyphTop = row * STAFF_GLYPH_HEIGHT;
       gDPPipeSync(gfx++);
@@ -1792,7 +1793,7 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
 
   if (f_StaffRollFrame > TIMELINE_START_FRAME) {
     alpha = OPAQUE_ALPHA -
-        (f_StaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE;
+        ((f_StaffRollFrame - TIMELINE_START_FRAME) * PAINTING_FADE_RATE);
     if (alpha < 0) {
       f_IsPaintingShown = FALSE;
       alpha = 0;
@@ -1840,8 +1841,8 @@ void DrawStaffRollPainting(Gfx** displayListHead) {
       if (scrolledRows < 0) {
         scrolledRows = 0;
       }
-      texelOffset =
-          scrolledRows * STAFF_ROLL_IMAGE_WIDTH + LARGE_PALETTED_TEXELS_OFFSET;
+      texelOffset = (scrolledRows * STAFF_ROLL_IMAGE_WIDTH) +
+          LARGE_PALETTED_TEXELS_OFFSET;
       stripHeight =
           ((stripIndex != IMAGE_STRIP_COUNT - 1) ? IMAGE_STRIP_STEP : 0) |
           IMAGE_STRIP_OVERLAP;

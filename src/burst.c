@@ -95,7 +95,7 @@ void LoadBursts(s32 courseRecordIndex) {
   for (index = 0; index != BURST_COUNT; index++) {
     f_Bursts[index].unk24 = 0;
     f_Bursts[index].isActive = FALSE;
-    f_Bursts[index].timer = 159 - index * 50;
+    f_Bursts[index].timer = 159 - (index * 50);
     f_Bursts[index].unkC = 0xFF;
     f_Bursts[index].particleCount = 0;
     f_Bursts[index].shape = f_BurstShape;
@@ -107,7 +107,7 @@ void LoadBursts(s32 courseRecordIndex) {
     height = burst->shape->height;
     for (row = 0; row != height; row++) {
       for (column = 0; column != width; column++) {
-        if (burst->shape->cells[column + row * width] == 0) {
+        if (burst->shape->cells[column + (row * width)] == 0) {
           burst->particleCount++;
         }
       }
@@ -172,15 +172,16 @@ void LaunchBurst(Burst* burst, s32 burstIndex) {
   halfWidth = width / 2;
   for (row = 0; row != height; row++) {
     for (column = 0; column != width; column++) {
-      if (burst->shape->cells[column + row * width] == 0) {
+      if (burst->shape->cells[column + (row * width)] == 0) {
         burst->particles[particleIndex].x = originX;
         burst->particles[particleIndex].y = originY;
         burst->particles[particleIndex].velocityX =
-            (column - halfWidth) * 0.1f + (guRandom() % 64 - 32) * 0.0005f;
+            ((column - halfWidth) * 0.1f) +
+            (((guRandom() % 64) - 32) * 0.0005f);
         burst->particles[particleIndex].velocityY =
-            (s32)(height / 2 - row) * 0.1f - 0.5 +
-            (guRandom() % 64 - 32) * 0.0005f;
-        burst->particles[particleIndex].life = guRandom() % 128 + 192;
+            ((s32)((height / 2) - row) * 0.1f) - 0.5 +
+            (((guRandom() % 64) - 32) * 0.0005f);
+        burst->particles[particleIndex].life = (guRandom() % 128) + 192;
         particleIndex++;
       }
     }
@@ -249,12 +250,12 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
           particle->x += particle->velocityX;
           particle->y += particle->velocityY;
           particle->velocityX *= 0.94f;
-          particle->velocityY = particle->velocityY * 0.94f - 0.0005f;
+          particle->velocityY = (particle->velocityY * 0.94f) - 0.0005f;
           if (--particle->life < PARTICLE_FADE_LIFE) {
             particle->life -= 4;
           }
-          speed = sqrtf(particle->velocityX * particle->velocityX +
-              particle->velocityY * particle->velocityY);
+          speed = sqrtf((particle->velocityX * particle->velocityX) +
+              (particle->velocityY * particle->velocityY));
           directionX = 0.0f;
           if (speed != 0.0f) {
             inverseSpeed = 1.0f / speed;
@@ -268,9 +269,9 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
           if (timer < 8) {
             length = speed * 0.5f * timer;
           } else if (timer > 64) {
-            length = (timer - 64) * 0.04f + 1.0f;
+            length = ((timer - 64) * 0.04f) + 1.0f;
           } else {
-            length = speed * (4.0f - (timer - 8) * 0.5f);
+            length = speed * (4.0f - ((timer - 8) * 0.5f));
           }
           if (length < 1.0f) {
             length = 1.0f;
@@ -318,7 +319,7 @@ void UpdateAndDrawBursts(Gfx** displayListHead) {
       alpha = 0xFF;
       /* Fades out from frame 40, flickering on odd frames */
       if (timer >= 40) {
-        alpha = 0xFF - (timer - 40) * 8;
+        alpha = 0xFF - ((timer - 40) * 8);
         if (timer & 1) {
           alpha += 0x18;
         }

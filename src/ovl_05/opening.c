@@ -276,8 +276,8 @@ void PlayLogoClubSound(void) {
             (s32)(f_LogoClubOrbitRadius * LOGO_CLUB_SOUND_FADE_RATE),
         0,
         OPENING_SOUND_PAN_CENTRE -
-            (f_LogoClubPosition[0] - SCREEN_WIDTH / 2) /
-                LOGO_CLUB_PIXELS_PER_PAN_STEP);
+            ((f_LogoClubPosition[0] - (SCREEN_WIDTH / 2)) /
+                LOGO_CLUB_PIXELS_PER_PAN_STEP));
   }
 }
 
@@ -2481,11 +2481,11 @@ void DrawNameLogos(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       for (strip = 0; strip != NAME_LOGO_STRIP_COUNT; strip++) {
         texelsOffset = LARGE_PALETTED_TEXELS_OFFSET +
-            strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS;
+            (strip * SLOT_LOGO.width * NAME_LOGO_STRIP_ROWS);
         stripHeight = SLOT_LOGO.shownHeight / NAME_LOGO_STRIP_COUNT;
-        xEdges[0] = SLOT_LOGO.x - SLOT_LOGO.shownWidth / 2;
-        xEdges[1] = SLOT_LOGO.x + SLOT_LOGO.shownWidth / 2;
-        yEdges[0] = SLOT_LOGO.y - SLOT_LOGO.shownHeight / 2;
+        xEdges[0] = SLOT_LOGO.x - (SLOT_LOGO.shownWidth / 2);
+        xEdges[1] = SLOT_LOGO.x + (SLOT_LOGO.shownWidth / 2);
+        yEdges[0] = SLOT_LOGO.y - (SLOT_LOGO.shownHeight / 2);
         yEdges[1] = yEdges[0] + stripHeight;
         yEdges[2] = yEdges[1] + stripHeight;
         yEdges[3] = yEdges[2] + stripHeight;
@@ -2870,8 +2870,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             movement[1] = 0.0f;
             movement[2] = 0.0f;
           }
-          rollAngle = sqrtf(movement[0] * movement[0] +
-              movement[1] * movement[1] + movement[2] * movement[2]);
+          rollAngle = sqrtf((movement[0] * movement[0]) +
+              (movement[1] * movement[1]) + (movement[2] * movement[2]));
           rollAngle *= (f32)RADIANS_TO_DEGREES;
           f_LogoBallLastPosition[0] = f_OpeningBallPositions[slot][0];
           f_LogoBallLastPosition[1] = f_OpeningBallPositions[slot][1];
@@ -3100,18 +3100,18 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                     ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
                 f_ProjectedBallRight = ballPoint.x + halfSize;
                 f_ProjectedBallTop = ballPoint.y -
-                    halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
+                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
                     f_ProjectedBallExtraPixel;
                 f_ProjectedBallBottom =
-                    ballPoint.y + stripIndex * halfSize - halfSize;
+                    ballPoint.y + (stripIndex * halfSize) - halfSize;
               } else {
                 f_ProjectedBallLeft =
                     ballPoint.x - halfSize - f_ProjectedBallExtraPixel;
                 f_ProjectedBallRight = ballPoint.x + halfSize;
                 f_ProjectedBallTop = ballPoint.y -
-                    halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex) -
+                    (halfSize * (OPENING_BALL_STRIP_COUNT - stripIndex)) -
                     f_ProjectedBallExtraPixel + PROJECTED_BALL_DROP;
-                f_ProjectedBallBottom = ballPoint.y + stripIndex * halfSize -
+                f_ProjectedBallBottom = ballPoint.y + (stripIndex * halfSize) -
                     halfSize + PROJECTED_BALL_DROP;
               }
               f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
@@ -3143,8 +3143,8 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               movement[1] = 0.0f;
               movement[2] = 0.0f;
             }
-            rollAngle = sqrtf(movement[0] * movement[0] +
-                movement[1] * movement[1] + movement[2] * movement[2]);
+            rollAngle = sqrtf((movement[0] * movement[0]) +
+                (movement[1] * movement[1]) + (movement[2] * movement[2]));
             rollAngle *= (f32)RADIANS_TO_DEGREES;
             f_ProjectedLogoBallLastPosition[0] =
                 f_OpeningBallPositions[slot][0];
@@ -3312,7 +3312,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       row = IMPACT_LINES_STRIP_COUNT - 1;
       for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
           stripIndex++) {
-        bottom = IMPACT_LINES_BOTTOM - row * IMPACT_LINES_STRIP_HEIGHT;
+        bottom = IMPACT_LINES_BOTTOM - (row * IMPACT_LINES_STRIP_HEIGHT);
         gDPLoadTextureBlock(gfx++, (u32)(D_80212830_ovl_05 + texelOffset) & ~7,
             G_IM_FMT_I, G_IM_SIZ_8b, IMPACT_LINES_SIZE,
             IMPACT_LINES_STRIP_HEIGHT, 0, G_TX_NOMIRROR | G_TX_WRAP,
@@ -3355,12 +3355,12 @@ void LoadLakitu(void) {
     for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT;
         segmentIndex++) {
       guTranslate(&f_LakituTrailMatrices[segmentIndex],
-          f_LakituScreenPoint[0] - SCREEN_WIDTH / 2,
-          SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1], -LAKITU_TRAIL_DEPTH);
+          f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2),
+          (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1], -LAKITU_TRAIL_DEPTH);
     }
   }
   f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
-  f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+  f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
 }
 
 extern s32 f_LakituTrailNewestIndex;
@@ -3440,17 +3440,17 @@ void DrawLakitu(Gfx** displayListHead) {
     rotation[0] = 0.0f;
     rotation[1] = 0.0f;
     rotation[2] = atan2(f_LakituTrailStart[0] -
-            (f32)(f_LakituScreenPoint[0] - SCREEN_WIDTH / 2),
+            (f32)(f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2)),
         f_LakituTrailStart[1] -
-            (f32)(SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1]));
-    translation[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
-    translation[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+            (f32)((SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1]));
+    translation[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
+    translation[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
     translation[2] = -LAKITU_TRAIL_DEPTH;
     BuildRotationMatrix(matrix, rotation, translation);
     ConvertMatrixToFixed(
         matrix, &f_LakituTrailMatrices[f_LakituTrailNewestIndex]);
-    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH / 2;
-    f_LakituTrailStart[1] = SCREEN_HEIGHT / 2 - f_LakituScreenPoint[1];
+    f_LakituTrailStart[0] = f_LakituScreenPoint[0] - (SCREEN_WIDTH / 2);
+    f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
     gSPLoadGeometryMode(gfx++, 0);
     gSPSetGeometryMode(gfx++, G_SHADE | G_SHADING_SMOOTH);
     gDPPipeSync(gfx++);
@@ -3704,7 +3704,7 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
     f_ShotBallPosition[2] =
         f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
     f_ShotBallPosition[1] =
-        f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE +
+        (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) +
         SHOT_BALL_LIFT;
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -3799,10 +3799,10 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           size = f_ShotBallScale * SHOT_BALL_HALF_WIDTH_PER_SCALE;
           left = ballPoint.x - size;
           right = left + SHOT_BALL_DOT_SIZE;
-          top = ballPoint.y - (SHOT_BALL_STRIP_COUNT - stripIndex) * size;
+          top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
           bottom = top + SHOT_BALL_DOT_SIZE;
           f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA -
-              (u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE;
+              ((u32)g_CameraEditor.distance * SHOT_BALL_FADE_RATE);
           if (f_ShotBallAlpha < 0) {
             f_ShotBallAlpha = 0;
           }
@@ -3811,8 +3811,8 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           f_ShotBallAlpha = SHOT_BALL_OPAQUE_ALPHA;
           left = ballPoint.x - size;
           right = ballPoint.x + size;
-          top = ballPoint.y - (SHOT_BALL_STRIP_COUNT - stripIndex) * size;
-          bottom = ballPoint.y + stripIndex * size - size;
+          top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
+          bottom = ballPoint.y + (stripIndex * size) - size;
         }
         gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
             G_TX_RENDERTILE, 0, 0,
@@ -3844,30 +3844,30 @@ void EaseOpeningLookAt(void) {
   switch (f_LookAtEaseMode) {
     case LOOK_AT_EASE_FAST:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.1f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.1f;
       MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SLOW:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
-          (f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] +=
-          (f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1]) *
           0.01f;
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] +=
-          (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
+          ((f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE) -
               g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.01f;
       MeasureEditorCamera();
@@ -4220,15 +4220,15 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
   if (isDrawn == 1) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
-          f_LogoLetters[i].x - SCREEN_WIDTH / 2.0f,
-          (SCREEN_HEIGHT - f_LogoLetters[i].y) - SCREEN_HEIGHT / 2.0f,
+          f_LogoLetters[i].x - (SCREEN_WIDTH / 2.0f),
+          (SCREEN_HEIGHT - f_LogoLetters[i].y) - (SCREEN_HEIGHT / 2.0f),
           f_LogoLetters[i].depth + LOGO_Z);
       guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
           f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
     }
     guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
-        f_LogoClubPosition[0] - SCREEN_WIDTH / 2.0f,
-        f_LogoClubPosition[1] - SCREEN_HEIGHT / 2.0f,
+        f_LogoClubPosition[0] - (SCREEN_WIDTH / 2.0f),
+        f_LogoClubPosition[1] - (SCREEN_HEIGHT / 2.0f),
         f_LogoClubPosition[2] + LOGO_Z);
     guRotate(&f_LogoClubRotations[g_DrawBufferIndex], f_LogoClubAngle, 0.0f,
         0.0f, 1.0f);
@@ -4647,12 +4647,13 @@ void DrawOpeningSparks(Gfx** displayListHead) {
     if (depth < 0) {
       f_OpeningSparkScale = SPARK_SCALE_DEPTH / (f32)-depth;
       for (sparkIndex = 0; sparkIndex < SPARK_COUNT; sparkIndex++) {
-        f_OpeningSparkPositions[sparkIndex][0] = origin.x - SCREEN_WIDTH / 2;
-        f_OpeningSparkPositions[sparkIndex][1] = SCREEN_HEIGHT / 2 - origin.y;
-        f_OpeningSparkAngles[sparkIndex] = (f32)sparkIndex * SPARK_ANGLE_STEP +
+        f_OpeningSparkPositions[sparkIndex][0] = origin.x - (SCREEN_WIDTH / 2);
+        f_OpeningSparkPositions[sparkIndex][1] = (SCREEN_HEIGHT / 2) - origin.y;
+        f_OpeningSparkAngles[sparkIndex] =
+            ((f32)sparkIndex * SPARK_ANGLE_STEP) +
             (f32)DEGREES_TO_RADIANS(guRandom() % SPARK_ANGLE_JITTER_RANGE -
                 SPARK_ANGLE_JITTER_RANGE / 2);
-        speed = (guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale +
+        speed = ((guRandom() % SPARK_SPEED_RANGE) * f_OpeningSparkScale) +
             SPARK_MIN_SPEED;
         f_OpeningSparkVelocities[sparkIndex][0] =
             sinf(f_OpeningSparkAngles[sparkIndex]) * speed *

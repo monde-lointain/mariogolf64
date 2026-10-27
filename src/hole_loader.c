@@ -472,7 +472,7 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
     otherIndex = receiveIndex ^ 1;
     osInvalDCache(buffers[otherIndex], ioMesgs[otherIndex].size);
     stream.nextInput = buffers[receiveIndex];
-    stream.inputEnd = buffers[otherIndex] + LZ_CHUNK_SIZE / sizeof(u16);
+    stream.inputEnd = buffers[otherIndex] + (LZ_CHUNK_SIZE / sizeof(u16));
     if (pendingCount == 0 && size == 0) {
       stream.flags |= LZ_STREAM_FLAG_LAST;
     }
@@ -555,7 +555,8 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
     otherIndex = receiveIndex ^ 1;
     osInvalDCache(buffers[otherIndex], ioMesgs[otherIndex].size);
     stream.nextInput = buffers[receiveIndex];
-    stream.inputEnd = buffers[otherIndex] + PATCHED_LZ_CHUNK_SIZE / sizeof(u16);
+    stream.inputEnd =
+        buffers[otherIndex] + (PATCHED_LZ_CHUNK_SIZE / sizeof(u16));
     if (pendingCount == 0 && size == 0) {
       stream.flags |= LZ_STREAM_FLAG_LAST;
     }

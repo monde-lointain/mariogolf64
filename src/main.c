@@ -104,7 +104,7 @@ void guNormalize(f32* x, f32* y, f32* z) {
   f32 yValue = *y;
   f32 zValue = *z;
   /* The squared length, and then the inverse of the length */
-  f32 length = xValue * xValue + yValue * yValue + zValue * zValue;
+  f32 length = (xValue * xValue) + (yValue * yValue) + (zValue * zValue);
 
   if (length < 0.0f) {
     osSyncPrintf("NormalizeError\n");
@@ -174,8 +174,9 @@ void AssignCharacterBuffers(void) {
 
   SetCharacterBuffer(CHARACTER_SLOT_PARTNER, g_WorkArea.bytes);
   SetCharacterBuffer(CHARACTER_SLOT_GOLFER, g_WorkArea.bytes + bufferSize);
-  SetCharacterBuffer(CHARACTER_SLOT_CADDIE, g_WorkArea.bytes + bufferSize * 2);
-  osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - bufferSize * 3);
+  SetCharacterBuffer(
+      CHARACTER_SLOT_CADDIE, g_WorkArea.bytes + (bufferSize * 2));
+  osSyncPrintf("GMemLeft=%x\n", WORK_AREA_SIZE - (bufferSize * 3));
 }
 
 void PrepareForReset(void) {

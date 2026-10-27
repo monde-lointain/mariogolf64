@@ -145,7 +145,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     speed = GetPuttPower(shot->unk8, shot->shotMode);
   } else {
     speed = GetClubPower(club, shot->shotMode) *
-        (shot->unk8 + entry->unk0 * 2) / 256;
+        (shot->unk8 + (entry->unk0 * 2)) / 256;
     if (speed <= 0) {
       speed = 10;
     }
@@ -155,7 +155,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
     blend = PickLieBlend();
     GetSurfacePercentRange(info, club, percentRange);
-    speed = (percentRange[0] * blend + percentRange[1] * (1.0f - blend)) *
+    speed = ((percentRange[0] * blend) + (percentRange[1] * (1.0f - blend))) *
         speed * 0.01f;
   } else {
     s32 percent = 198; /* The local is there to match */
@@ -166,15 +166,16 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
-  simulation->unk38 = (((sideSign * entry->unk3 + shot->unk10) * 2 +
-                           (club->sideSpin * 2) * sideSign) *
+  simulation->unk38 = (((((sideSign * entry->unk3) + shot->unk10) * 2) +
+                           ((club->sideSpin * 2) * sideSign)) *
                           speed) *
       0.00078125f;
   pitch += (f32)club->unk10 * shot->unk14 * 0.00054541545f;
   yawRadians = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
   spinBase = club->spin * 0.5f;
-  simulation->unk34 = ((spinBase + 25.0f) * (shot->unk14 * 0.006f) - spinBase) *
-      speed * 0.0078125f;
+  simulation->unk34 =
+      (((spinBase + 25.0f) * (shot->unk14 * 0.006f)) - spinBase) * speed *
+      0.0078125f;
   simulation->unk40 = 0.0f;
   simulation->unk3C = yawRadians;
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {

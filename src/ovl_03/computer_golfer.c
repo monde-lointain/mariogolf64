@@ -189,8 +189,8 @@ s32 GetSideSlope(void) {
       sampleIndex < (s32)(distance * (1.0f / SIDE_SLOPE_SAMPLE_SPACING));
       sampleIndex++) {
     sampleX = f_Shot.ballPosition[AXIS_X] +
-        (along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X];
-    sampleZ = f_Shot.ballPosition[AXIS_Z] + along * direction[AXIS_Z];
+        ((along = sampleIndex * SIDE_SLOPE_SAMPLE_SPACING) * direction[AXIS_X]);
+    sampleZ = f_Shot.ballPosition[AXIS_Z] + (along * direction[AXIS_Z]);
     reachHeight = GetGroundHeight(sampleX + reachX, sampleZ + reachZ);
     oppositeHeight = GetGroundHeight(sampleX - reachX, sampleZ - reachZ);
     if (reachHeight > oppositeHeight) {
@@ -519,7 +519,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
             missDistance = missDistance * 0.5f;
             missX = cosf(missAngle) * missDistance;
             missZ = sinf(missAngle) * missDistance;
-            along = (missX * cosf(aimAngle) + missZ * sinf(aimAngle)) *
+            along = ((missX * cosf(aimAngle)) + (missZ * sinf(aimAngle))) *
                 MISS_STRETCH;
             missX += cosf(aimAngle) * along;
             missZ += sinf(aimAngle) * along;
@@ -559,7 +559,7 @@ s32 PlanShot(CurrentShot* plannedShot) {
       reach = reach * (percentRange[1] + percentRange[0]) /
           (2 * FULL_PERCENT * SHOT_UNK4_MAX);
       /* Holding f_Shot.unk4 in distance is there to match */
-      distance = (rand() & 3) + distance / reach;
+      distance = (rand() & 3) + (distance / reach);
       if (GetGolferTraitUnk2() >= 2) {
         distance = distance * SHOT_UNK4_BOOST;
       }
@@ -770,7 +770,7 @@ s32 PlanCupDistance(s32 unused) {
           f_Shot.ballPosition[AXIS_Z] - g_CupPositionZ);
   cupX = D_800BA9D8.cupPosition[AXIS_X] - f_Shot.ballPosition[AXIS_X];
   cupZ = g_CupPositionZ - f_Shot.ballPosition[AXIS_Z];
-  length = sqrtf(cupX * cupX + cupZ * cupZ);
+  length = sqrtf((cupX * cupX) + (cupZ * cupZ));
   windAngle = g_HoleConditions.windDirection * WIND_DIRECTION_TO_RADIANS;
   if (length >= WIND_ALLOWANCE_MIN_DISTANCE) {
     inverseLength = 1.0f / length;
@@ -778,10 +778,10 @@ s32 PlanCupDistance(s32 unused) {
     cupZ *= inverseLength;
     windX = cosf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
     windZ = sinf(windAngle) * g_HoleConditions.windSpeed * WIND_SPEED_SCALE;
-    windFollow = cupX * windX + cupZ * windZ;
+    windFollow = (cupX * windX) + (cupZ * windZ);
     osSyncPrintf("WindFollow%f\n", windFollow);
     /* Turning windFollow into the distance ratio is there to match */
-    windFollow = -windFollow * WIND_FOLLOW_FRACTION + 1.0f;
+    windFollow = (-windFollow * WIND_FOLLOW_FRACTION) + 1.0f;
     osSyncPrintf("WindCareRatio%f\n", windFollow);
     if (windFollow < WIND_DISTANCE_RATIO_MIN) {
       windFollow = WIND_DISTANCE_RATIO_MIN;
@@ -792,7 +792,8 @@ s32 PlanCupDistance(s32 unused) {
     distance = distance * windFollow;
   }
   return distance +
-      (f_Shot.ballPosition[AXIS_Y] - g_CupPositionY) * HEIGHT_DISTANCE_FRACTION;
+      ((f_Shot.ballPosition[AXIS_Y] - g_CupPositionY) *
+          HEIGHT_DISTANCE_FRACTION);
 }
 
 /* Shots from farther than this are long shots */
@@ -946,7 +947,7 @@ s32 GetScoreToParSoFar(s32 playerIndex) {
   for (hole = 0; hole < g_GameState.holeIndex; hole++) {
     strokes = g_Players[playerIndex].holes[hole].strokes;
     par = (s8)g_CourseRecords[g_GameState.courseIndex].holes[hole].par;
-    if (par * 2 + 1 < strokes) {
+    if ((par * 2) + 1 < strokes) {
       strokes = par - 1;
     }
     if (strokes > 0) {
@@ -1569,11 +1570,11 @@ void ChooseLandingTarget(
   osSyncPrintf("TALevel %d\n", endRating);
   /* Counting the steps in index is there to match */
   for (index = 0;
-      index < reach * TARGET_STEPS_PER_UNIT + EXTRA_TARGET_STEP_COUNT;
+      index < (reach * TARGET_STEPS_PER_UNIT) + EXTRA_TARGET_STEP_COUNT;
       index++) {
     along = TARGET_STEP_YARDS * (index * UNITS_PER_YARD);
-    alongX = along * cosAngle + endX;
-    alongZ = along * sinAngle + endZ;
+    alongX = (along * cosAngle) + endX;
+    alongZ = (along * sinAngle) + endZ;
     for (side = 0; side < sideCount; side++) {
       offsetX = -sinAngle * side * TARGET_SIDE_SPACING;
       offsetZ = cosAngle * side * TARGET_SIDE_SPACING;
@@ -1617,7 +1618,8 @@ void ChooseLandingTarget(
       if (cupDistance >= MIN_TESTED_ROLL) {
         if (FindGroundHit(candidateX, height - PATH_GROUND_CLEARANCE,
                 candidateZ, D_800BA9D8.cupPosition[AXIS_X],
-                height - cupDistance / 2, g_CupPositionZ, &hit, &hitFraction)) {
+                height - (cupDistance / 2), g_CupPositionZ, &hit,
+                &hitFraction)) {
           continue;
         }
       }
@@ -1632,9 +1634,9 @@ void ChooseLandingTarget(
               continue;
             }
             if (GetLandingRating(GetSurfaceInfoAt(candidateX +
-                        column * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD,
+                        (column * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD),
                     candidateZ +
-                        row * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD)
+                        (row * TARGET_NEIGHBOUR_SPACING * UNITS_PER_YARD))
                         ->kind) < endRating - 1) {
               isPoorlySurrounded = TRUE;
               break;
@@ -1716,8 +1718,8 @@ s32 IsLineOffFairway(CoursePoint from, CoursePoint to) {
   for (step = 0; step < distance * YARDS_PER_UNIT; step++) {
     /* Setting stepLength in the loop is there to match */
     stepLength = UNITS_PER_YARD;
-    x = step * (cosf(angle) * stepLength) + from[AXIS_X];
-    z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
     kind = GetSurfaceInfoAt(x, z)->kind;
     if (IsOffFairway(kind)) {
       return TRUE;
@@ -1748,11 +1750,11 @@ s32 FindGreenEdgeOnLine(CoursePoint from, CoursePoint to, CoursePoint edge) {
       atan2((f32)(to[AXIS_Z] - from[AXIS_Z]), (f32)(to[AXIS_X] - from[AXIS_X]));
   osSyncPrintf("StartPoint = (%d, %d)\n", from[AXIS_X], from[AXIS_Z]);
   osSyncPrintf("EndPoint = (%d, %d)\n", to[AXIS_X], to[AXIS_Z]);
-  for (step = 1; step < distance * YARDS_PER_UNIT + 1; step++) {
+  for (step = 1; step < (distance * YARDS_PER_UNIT) + 1; step++) {
     /* Setting stepLength in the loop is there to match */
     stepLength = UNITS_PER_YARD;
-    x = step * (cosf(angle) * stepLength) + from[AXIS_X];
-    z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
     if (GetSurfaceInfoAt(x, z)->kind == SURFACE_KIND_GREEN_EDGE) {
       edge[AXIS_X] = x;
       edge[AXIS_Z] = z;
@@ -1805,8 +1807,8 @@ void FindPeakOnLine(CoursePoint from, CoursePoint to, CoursePoint peak) {
   for (step = 1; step < distance * YARDS_PER_UNIT; step++) {
     /* Setting stepLength in the loop is there to match */
     stepLength = UNITS_PER_YARD;
-    x = step * (cosf(angle) * stepLength) + from[AXIS_X];
-    z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
     height = GetGroundHeight(x, z);
     height = ABS(height);
     if (peakHeight < height) {
@@ -1923,7 +1925,7 @@ s32 ScaleToShotUnk4(s32 amount) {
    */
   *(&unused) = uninitialized;
 
-  value = amount * SHOT_UNK4_SCALE + 0.5f;
+  value = (amount * SHOT_UNK4_SCALE) + 0.5f;
   if (value < SHOT_UNK4_MIN) {
     value = SHOT_UNK4_MIN;
   }
@@ -2010,9 +2012,9 @@ s32 StepTrialShot(void) {
     f_IsPutting = GetClub(f_Shot.clubSlot)->surfaceMask & CLUB_SURFACE_GREEN;
     if (!IsGameFlagSet(GAME_FLAG_UNK3C)) {
       if (f_IsPutting) {
-        f_AcceptableEvaluation = f_AcceptableEvaluation * 1.1f + 0.2f;
+        f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 0.2f;
       } else {
-        f_AcceptableEvaluation = f_AcceptableEvaluation * 1.1f + 20.0f;
+        f_AcceptableEvaluation = (f_AcceptableEvaluation * 1.1f) + 20.0f;
       }
     }
     f_TrialSimulation.position[AXIS_X] = f_Shot.ballPosition[AXIS_X];
@@ -2146,7 +2148,7 @@ EVALUATE:
       }
       heightMiss = f_PlanTarget[AXIS_Y] - f_TrialSimulation.position[AXIS_Y];
       f_TrialEvaluation +=
-          (targetMiss + ABS(heightMiss) / 2) * MISS_EVALUATION_SCALE;
+          (targetMiss + (ABS(heightMiss) / 2)) * MISS_EVALUATION_SCALE;
     }
     osSyncPrintf("BestEval = %d\n", f_BestEvaluation);
     if (f_TrialEvaluation < f_BestEvaluation) {
@@ -2184,12 +2186,12 @@ EVALUATE:
               APPROACH_TOLERANCE_SCALE;
           if (strokesOver >= -1) {
             if (f_BestEvaluation <=
-                approachDistance * 0.3f + f_AcceptableEvaluation) {
+                (approachDistance * 0.3f) + f_AcceptableEvaluation) {
               f_IsTrialAccepted = TRUE;
               return 1;
             }
           } else if (f_BestEvaluation <=
-              approachDistance * 0.4f + f_AcceptableEvaluation) {
+              (approachDistance * 0.4f) + f_AcceptableEvaluation) {
             f_IsTrialAccepted = TRUE;
             return 1;
           }
@@ -2201,9 +2203,9 @@ EVALUATE:
     }
     if (!f_IsPutting) {
       flyDistance = IntLength2D(
-          (f_TrialSimulation.position[AXIS_X] + f_TrialEndPoint[AXIS_X]) / 2 -
+          ((f_TrialSimulation.position[AXIS_X] + f_TrialEndPoint[AXIS_X]) / 2) -
               f_Shot.ballPosition[AXIS_X],
-          (f_TrialSimulation.position[AXIS_Z] + f_TrialEndPoint[AXIS_Z]) / 2 -
+          ((f_TrialSimulation.position[AXIS_Z] + f_TrialEndPoint[AXIS_Z]) / 2) -
               f_Shot.ballPosition[AXIS_Z]);
       targetDistance =
           IntLength2D(f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X],
@@ -2211,19 +2213,19 @@ EVALUATE:
     } else {
       aimCos = cosf((u16)f_Shot.unk0 * BINARY_ANGLE_TO_RADIANS);
       aimSin = sinf((u16)f_Shot.unk0 * BINARY_ANGLE_TO_RADIANS);
-      flyDistance = aimCos *
-              ((f_TrialSimulation.position[AXIS_X] * 3 +
-                   f_TrialEndPoint[AXIS_X]) /
-                      4 -
-                  f_Shot.ballPosition[AXIS_X]) +
-          aimSin *
-              ((f_TrialSimulation.position[AXIS_Z] * 3 +
-                   f_TrialEndPoint[AXIS_Z]) /
-                      4 -
-                  f_Shot.ballPosition[AXIS_Z]);
+      flyDistance = (aimCos *
+                        ((((f_TrialSimulation.position[AXIS_X] * 3) +
+                              f_TrialEndPoint[AXIS_X]) /
+                             4) -
+                            f_Shot.ballPosition[AXIS_X])) +
+          (aimSin *
+              ((((f_TrialSimulation.position[AXIS_Z] * 3) +
+                    f_TrialEndPoint[AXIS_Z]) /
+                   4) -
+                  f_Shot.ballPosition[AXIS_Z]));
       targetDistance =
-          aimCos * (f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X]) +
-          aimSin * (f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]);
+          (aimCos * (f_PlanTarget[AXIS_X] - f_Shot.ballPosition[AXIS_X])) +
+          (aimSin * (f_PlanTarget[AXIS_Z] - f_Shot.ballPosition[AXIS_Z]));
       if (flyDistance <= 0) {
         flyDistance = 1;
       }
@@ -2266,12 +2268,12 @@ EVALUATE:
         } else if (f_HasUnk3Contact || ratio >= 10.0f) {
           f_AimChangeCount++;
           f_Shot.unk0 = !(f_AimChangeCount & 1)
-              ? f_Shot.unk0 - f_AimChangeCount * AIM_CHANGE_STEP
-              : f_Shot.unk0 + f_AimChangeCount * AIM_CHANGE_STEP;
+              ? f_Shot.unk0 - (f_AimChangeCount * AIM_CHANGE_STEP)
+              : f_Shot.unk0 + (f_AimChangeCount * AIM_CHANGE_STEP);
           osSyncPrintf("Angle Change3\n");
           for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
             f_IsDirectionExcluded[(u8)((f_Shot.unk0 >> DIRECTION_SECTOR_SHIFT) +
-                index - EXCLUDED_SECTOR_COUNT / 2)] = TRUE;
+                index - (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
           }
           if (f_AimChangeCount >= 17) {
             osSyncPrintf("Level Down\n");
@@ -2332,7 +2334,7 @@ EVALUATE:
   f_AimChangeCount++;
   for (index = 0; index < EXCLUDED_SECTOR_COUNT; index++) {
     f_IsDirectionExcluded[(u8)((f_Shot.unk0 >> DIRECTION_SECTOR_SHIFT) + index -
-        EXCLUDED_SECTOR_COUNT / 2)] = TRUE;
+        (EXCLUDED_SECTOR_COUNT / 2))] = TRUE;
   }
   f_ShotOffset = SHOT_OFFSET_MINUS_LARGE;
   if (!(f_AimChangeCount & 1)) {
@@ -2619,8 +2621,8 @@ s32 IsLineMostlyLost(CoursePoint from, CoursePoint to) {
   for (step = 1; step < distance * TENS_OF_YARDS_PER_UNIT; step++) {
     /* Setting stepLength in the loop is there to match */
     stepLength = UNITS_PER_YARD;
-    x = step * (cosf(angle) * stepLength) + from[AXIS_X];
-    z = step * (sinf(angle) * stepLength) + from[AXIS_Z];
+    x = (step * (cosf(angle) * stepLength)) + from[AXIS_X];
+    z = (step * (sinf(angle) * stepLength)) + from[AXIS_Z];
     kind = GetSurfaceInfoAt(x, z)->kind;
     if (IsLostBallKind(kind)) {
       lostCount++;

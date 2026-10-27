@@ -215,10 +215,10 @@ void StartGame(void) {
   g_MapCamera.view.heading = 0.0f;
   g_MapCamera.view.scissorX = SCREEN_BORDER;
   g_MapCamera.view.scissorY = SCREEN_BORDER;
-  g_MapCamera.view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
-  g_MapCamera.view.scissorHeight = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_MapCamera.view.unreadSettings[0] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_MapCamera.view.unreadSettings[1] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
+  g_MapCamera.view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+  g_MapCamera.view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_MapCamera.view.unreadSettings[0] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_MapCamera.view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
   g_MapCamera.view.viewportCenterX = SCREEN_WIDTH;
   g_MapCamera.view.viewportCenterY = SCREEN_HEIGHT;
   g_MapCamera.view.zoom = 1.0f;
@@ -247,10 +247,10 @@ void StartGame(void) {
   g_Cameras[0].view.lookAt[2] = -100.0f;
   g_Cameras[0].view.scissorX = SCREEN_BORDER;
   g_Cameras[0].view.scissorY = SCREEN_BORDER;
-  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
+  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
   g_Cameras[0].view.zoom = 1.0f;
   g_Cameras[0].view.viewportCenterX = SCREEN_WIDTH;
   g_Cameras[0].view.viewportCenterY = SCREEN_HEIGHT;
@@ -392,7 +392,7 @@ void DrawSpinMesh(Gfx** displayListHead) {
               batchIndex * SPIN_BATCH_VERTEX_COUNT,
           SPIN_BATCH_VERTEX_COUNT, 0);
     }
-    for (stripIndex = 0; stripIndex != SPIN_BATCH_VERTEX_COUNT / 2 - 1;
+    for (stripIndex = 0; stripIndex != (SPIN_BATCH_VERTEX_COUNT / 2) - 1;
         stripIndex++) {
       isLastStrip = IS_LAST_SPIN_STRIP(batchIndex, stripIndex);
       stripHeight = isLastStrip ? SAVED_FRAME_LAST_STRIP_HEIGHT
@@ -558,7 +558,7 @@ void DrawSpinEffect(Gfx** displayListHead, CameraView* view) {
   angleStep = M_PI / f_ScreenEffectFrameCount;
   f_SpinAngle += angleStep;
   /* Skips the half turn in which the frame's back would face the camera */
-  if (f_SpinAngle > M_PI / 2 && f_SpinAngle < angleStep + M_PI / 2) {
+  if (f_SpinAngle > M_PI / 2 && f_SpinAngle < angleStep + (M_PI / 2)) {
     f_SpinAngle += M_PI;
   }
   if (f_SpinAngle > 2 * M_PI) {
@@ -1168,7 +1168,7 @@ s32 DrawGame(void) {
     g_VertexListHead = g_ExpansionVertexBuffers[g_DrawBufferIndex];
   } else {
     g_VertexListHead = (Vtx*)&g_WorkArea.bytes[WORK_AREA_VERTEX_OFFSET] +
-        g_DrawBufferIndex * VERTEX_BUFFER_LENGTH;
+        (g_DrawBufferIndex * VERTEX_BUFFER_LENGTH);
   }
 
   for (viewIndex = 0, camera = g_Cameras; viewIndex < 2;
@@ -1186,16 +1186,16 @@ s32 DrawGame(void) {
           SCREEN_BORDER, SCREEN_WIDTH - SCREEN_BORDER,
           SCREEN_HEIGHT - SCREEN_BORDER);
     } else if (drawMode == 2) {
-      InitRcp(viewIndex * 2 + g_DrawBufferIndex);
+      InitRcp((viewIndex * 2) + g_DrawBufferIndex);
     } else if (drawMode < 2) {
-      InitRcp(viewIndex * 2 + g_DrawBufferIndex);
+      InitRcp((viewIndex * 2) + g_DrawBufferIndex);
     } else {
       if (viewIndex == 1) {
         break;
       }
       InitRcp(g_DrawBufferIndex);
     }
-    matrices = &f_CameraMatrices[viewIndex * 2 + g_DrawBufferIndex];
+    matrices = &f_CameraMatrices[(viewIndex * 2) + g_DrawBufferIndex];
 
     switch (drawMode) {
       case DRAW_MODE_BLANK:
@@ -1948,7 +1948,7 @@ s32 DrawGame(void) {
   if (!g_HasExpansionPak &&
       g_VertexListHead -
               ((Vtx*)&g_WorkArea.bytes[WORK_AREA_VERTEX_OFFSET] +
-                  g_DrawBufferIndex * VERTEX_BUFFER_LENGTH) >=
+                  (g_DrawBufferIndex * VERTEX_BUFFER_LENGTH)) >=
           VERTEX_BUFFER_LENGTH) {
     ReportFailedAssertion("EX", "c:/usgolf64/stage00.c", 2637);
   }
@@ -2124,14 +2124,14 @@ void UpdateGame(void) {
     g_MapCamera.view.eye[1] =
         (f32)(-g_ControllerData[0].stick_y * MAP_CAMERA_LIFT_PER_STICK) -
         MAP_CAMERA_HEIGHT +
-        (f32)GetGroundHeight(g_MapCamera.view.eye[0] * GROUND_UNITS_PER_UNIT,
-            g_MapCamera.view.eye[2] * GROUND_UNITS_PER_UNIT) /
-            GROUND_UNITS_PER_UNIT;
+        ((f32)GetGroundHeight(g_MapCamera.view.eye[0] * GROUND_UNITS_PER_UNIT,
+             g_MapCamera.view.eye[2] * GROUND_UNITS_PER_UNIT) /
+            GROUND_UNITS_PER_UNIT);
     g_MapCamera.view.lookAt[0] = g_MapCamera.view.eye[0] +
-        cosf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
+        (cosf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
     g_MapCamera.view.lookAt[1] = 0.0f;
     g_MapCamera.view.lookAt[2] = g_MapCamera.view.eye[2] +
-        sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE;
+        (sinf(g_MapCamera.view.heading) * MAP_CAMERA_LOOK_DISTANCE);
   }
   if (g_Scene == SCENE_OPENING) {
     StepNoiseTexture();
@@ -2211,9 +2211,9 @@ void UpdateGame(void) {
     g_Cameras[INSET_CAMERA].view.scissorHeight =
         g_InsetView.step * LARGE_INSET_VIEW_GROWTH_PER_STEP;
     g_Cameras[INSET_CAMERA].view.scissorX = LARGE_INSET_VIEW_CENTER_X -
-        g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+        (g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2));
     g_Cameras[INSET_CAMERA].view.scissorY = LARGE_INSET_VIEW_CENTER_Y -
-        g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2);
+        (g_InsetView.step * (LARGE_INSET_VIEW_GROWTH_PER_STEP / 2));
     g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
     func_801F4C78();
     if (IsGameFlagSet(GAME_FLAG_DEBUG_MENU_VALUES)) {
@@ -2264,10 +2264,10 @@ void UpdateGame(void) {
     func_801F5F1C();
   }
   g_Cameras[INSET_CAMERA].view.viewportCenterX =
-      g_Cameras[INSET_CAMERA].view.scissorX * 2 +
+      (g_Cameras[INSET_CAMERA].view.scissorX * 2) +
       g_Cameras[INSET_CAMERA].view.scissorWidth;
   g_Cameras[INSET_CAMERA].view.viewportCenterY =
-      g_Cameras[INSET_CAMERA].view.scissorY * 2 +
+      (g_Cameras[INSET_CAMERA].view.scissorY * 2) +
       g_Cameras[INSET_CAMERA].view.scissorHeight;
   g_Viewports[VIEWPORT_INSET + g_DrawBufferIndex].vp.vscale[0] =
       2.0f * (g_Cameras[INSET_CAMERA].view.zoom * SCREEN_WIDTH);
@@ -2373,8 +2373,8 @@ void UpdateInsetView(void) {
   g_Cameras[INSET_CAMERA].view.scissorHeight =
       g_InsetView.step * f_InsetViewHeight / INSET_VIEW_STEP_COUNT;
   g_Cameras[INSET_CAMERA].view.scissorX = f_InsetViewCenterX -
-      g_InsetView.step * f_InsetViewWidth / (2 * INSET_VIEW_STEP_COUNT);
+      (g_InsetView.step * f_InsetViewWidth / (2 * INSET_VIEW_STEP_COUNT));
   g_Cameras[INSET_CAMERA].view.scissorY = f_InsetViewCenterY -
-      g_InsetView.step * f_InsetViewHeight / (2 * INSET_VIEW_STEP_COUNT);
+      (g_InsetView.step * f_InsetViewHeight / (2 * INSET_VIEW_STEP_COUNT));
   g_Cameras[INSET_CAMERA].view.zoom = 0.9f;
 }

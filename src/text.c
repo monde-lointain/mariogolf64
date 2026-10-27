@@ -250,7 +250,7 @@ void LoadTextAssets(void) {
   ReadEncodedAsset(g_TextGradientImages[1], &asset);
   header = AllocMemory(FILE_HEADER_SIZE);
   nuPiReadRom((u32)g_GlyphFileRomStart, header, FILE_HEADER_SIZE);
-  size = ((header[2] << 8) | header[3]) * ((header[4] << 8) | header[5]) +
+  size = (((header[2] << 8) | header[3]) * ((header[4] << 8) | header[5])) +
       FILE_HEADER_SIZE;
   g_MessageGlyphs = AllocMemory(size);
   nuPiReadRom((u32)g_GlyphFileRomStart, g_MessageGlyphs, size);
@@ -260,7 +260,7 @@ void LoadTextAssets(void) {
   g_Messages = AllocMemory(size);
   nuPiReadRom((u32)g_MessageFileRomStart, g_Messages, size);
   /* The halfwords of the table's header and its entries come first */
-  g_MessageCodesStart = g_Messages->messageCount * 2 + 2;
+  g_MessageCodesStart = (g_Messages->messageCount * 2) + 2;
   ClearTextSlots();
   ClearGlyphSprites();
 }
@@ -1437,8 +1437,8 @@ void DrawCenteredLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawLargeText(&gfx,
-      x - MeasureText(text, FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL) / 2, y,
-      text);
+      x - (MeasureText(text, FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL) / 2),
+      y, text);
   *displayListHead = gfx;
 }
 
@@ -1447,8 +1447,8 @@ void DrawCenteredMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawMediumText(&gfx,
-      x - MeasureText(text, FONT_SIZE_MEDIUM, MEASURE_TEXT_PROPORTIONAL) / 2, y,
-      text);
+      x - (MeasureText(text, FONT_SIZE_MEDIUM, MEASURE_TEXT_PROPORTIONAL) / 2),
+      y, text);
   *displayListHead = gfx;
 }
 
@@ -1457,8 +1457,8 @@ void DrawCenteredSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
 
   DrawSmallText(&gfx,
-      x - MeasureText(text, FONT_SIZE_SMALL, MEASURE_TEXT_PROPORTIONAL) / 2, y,
-      text);
+      x - (MeasureText(text, FONT_SIZE_SMALL, MEASURE_TEXT_PROPORTIONAL) / 2),
+      y, text);
   *displayListHead = gfx;
 }
 
@@ -1561,7 +1561,7 @@ void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       right += SHADOWED_GLYPH_WIDTH;
     }
   }
-  DrawShadowedText(&gfx, left - (right - left) / 2, y, text);
+  DrawShadowedText(&gfx, left - ((right - left) / 2), y, text);
   *displayListHead = gfx;
 }
 

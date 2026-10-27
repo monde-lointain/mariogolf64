@@ -68,17 +68,17 @@ void StartHoleIntroCamera(void) {
       (g_CurrentShot.ballPosition[AXIS_Y] - INTRO_LOOK_AT_DROP) * scale;
   (*lookAt)[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z] * scale;
   if (g_HoleIndex == GetFirstHoleIndex()) {
-    heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2;
+    heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
   } else {
     heading =
-        (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2 - M_PI;
+        ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
   }
   offsetX = -sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
   g_Cameras[0].view.eye[AXIS_Y] =
       (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) * scale;
   g_Cameras[0].view.eye[AXIS_X] = (*lookAt)[AXIS_X] + offsetX;
   g_Cameras[0].view.eye[AXIS_Z] =
-      (*lookAt)[AXIS_Z] + cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
+      (*lookAt)[AXIS_Z] + (cosf(heading) * INTRO_CAMERA_FIRST_DISTANCE);
 }
 #else
 INCLUDE_ASM("asm/nonmatchings/ovl_00/hole_intro", StartHoleIntroCamera);
@@ -96,13 +96,13 @@ s32 UpdateHoleIntroCamera(void) {
   if (g_HoleIndex == GetFirstHoleIndex()) {
     if (f_IntroFrame < FIRST_HOLE_INTRO_FRAMES) {
       f_IntroCameraDistance = FIRST_HOLE_INTRO_START_DISTANCE -
-          f_IntroFrame *
+          (f_IntroFrame *
               (FIRST_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
-              FIRST_HOLE_INTRO_FRAMES;
+              FIRST_HOLE_INTRO_FRAMES);
       f_IntroCameraHeight = FIRST_HOLE_INTRO_START_HEIGHT -
-          f_IntroFrame *
+          (f_IntroFrame *
               (FIRST_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
-              FIRST_HOLE_INTRO_FRAMES;
+              FIRST_HOLE_INTRO_FRAMES);
     } else {
       f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
@@ -114,22 +114,22 @@ s32 UpdateHoleIntroCamera(void) {
       heading = -(f32)M_PI;
     }
     heading = heading +
-        ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2);
+        (((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2));
   } else {
     if (f_IntroFrame < LATER_HOLE_INTRO_FRAMES) {
       f_IntroCameraDistance = LATER_HOLE_INTRO_START_DISTANCE -
-          f_IntroFrame *
+          (f_IntroFrame *
               (LATER_HOLE_INTRO_START_DISTANCE - INTRO_CAMERA_END_DISTANCE) /
-              LATER_HOLE_INTRO_FRAMES;
+              LATER_HOLE_INTRO_FRAMES);
       f_IntroCameraHeight = LATER_HOLE_INTRO_START_HEIGHT -
-          f_IntroFrame *
+          (f_IntroFrame *
               (LATER_HOLE_INTRO_START_HEIGHT - INTRO_CAMERA_END_HEIGHT) /
-              LATER_HOLE_INTRO_FRAMES;
+              LATER_HOLE_INTRO_FRAMES);
     } else {
       f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
-    heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS + M_PI / 2 +
+    heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) +
         -(f32)M_PI;
   }
   g_Cameras[1].view.lookAt[AXIS_X] =

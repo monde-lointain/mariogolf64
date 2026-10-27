@@ -105,9 +105,10 @@ void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
     }
     character -= FIRST_GLYPH;
     y = 0;
-    fontIndex = (character & (GLYPHS_PER_FONT_ROW - 1)) *
-            (GLYPH_SIZE / PIXELS_PER_FONT_WORD) |
-        (character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT);
+    fontIndex = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
+                    (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) |
+        ((character / GLYPHS_PER_FONT_ROW) *
+            (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
     textureIndex = index;
     for (; y < GLYPH_SIZE; y++) {
       rowIndex = textureIndex * 2;
@@ -157,9 +158,9 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
     character = FIRST_GLYPH;
   }
   character -= FIRST_GLYPH;
-  glyphStart = (character & (GLYPHS_PER_FONT_ROW - 1)) *
-          (GLYPH_SIZE / PIXELS_PER_FONT_WORD) +
-      (character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT);
+  glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
+                   (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
+      ((character / GLYPHS_PER_FONT_ROW) * (GLYPH_SIZE * FONT_ROW_WORD_COUNT));
   y = 0;
   if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
     return;
@@ -167,14 +168,14 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   fontIndex = glyphStart;
   for (; y < GLYPH_SIZE; y++) {
     for (x = 0; x < GLYPH_SIZE; x++) {
-      color = ((f_DebugFont[fontIndex + x / PIXELS_PER_FONT_WORD] >>
+      color = ((f_DebugFont[fontIndex + (x / PIXELS_PER_FONT_WORD)] >>
                    ((3 - (x & 3)) * 4)) &
                   0xF) == FONT_INK
           ? MESSAGE_INK_COLOR
           : MESSAGE_PAPER_COLOR;
       /* The glyph start is reused for the pixel row, to match */
-      glyphStart =
-          (row * GLYPH_SIZE + y) * MESSAGE_SCREEN_WIDTH + column * GLYPH_SIZE;
+      glyphStart = (((row * GLYPH_SIZE) + y) * MESSAGE_SCREEN_WIDTH) +
+          (column * GLYPH_SIZE);
       pixelIndex = glyphStart + x;
       currentFramebuffer[pixelIndex] = color;
       nextFramebuffer[pixelIndex] = color;
@@ -253,7 +254,7 @@ void SetDebugTextHighlight(s32 isHighlighted) {
 
 void PutDebugText(s8* text, s32 column, s32 row) {
   s8 highlight = f_DebugTextHighlight;
-  u8* cell = &f_DebugText[row * TEXT_COLUMN_COUNT + column];
+  u8* cell = &f_DebugText[(row * TEXT_COLUMN_COUNT) + column];
   s32 character;
 
   while (TRUE) {
@@ -331,7 +332,7 @@ void AddToDebugLog(char* text) {
     }
     if (character == '\r' || character == '\n') {
       f_DebugLogCursor =
-          ((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT +
+          (((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT) +
               TEXT_COLUMN_COUNT) %
           ARRAY_COUNT(f_DebugLog);
       for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
@@ -348,10 +349,10 @@ void AddToDebugLog(char* text) {
 /* Copies the last lines of the log into the grid */
 void ShowDebugLog(void) {
   s32 textIndex = ARRAY_COUNT(f_DebugText) -
-      (f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT;
+      ((f_DebugLogShownLineCount + LOG_BOTTOM_MARGIN) * TEXT_COLUMN_COUNT);
   /* The line is reused for the cursor's line, to match */
   s32 line = f_DebugLogCursor / TEXT_COLUMN_COUNT;
-  s32 logIndex = ((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT +
+  s32 logIndex = (((line - f_DebugLogShownLineCount) * TEXT_COLUMN_COUNT) +
                      ARRAY_COUNT(f_DebugLog)) %
       ARRAY_COUNT(f_DebugLog);
   s32 column;

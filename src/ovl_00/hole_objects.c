@@ -211,7 +211,7 @@ void StartCheepCheepLeap(s32 arg0) {
       creature->position[0] = g_BallPosition[0];
       creature->position[1] = g_BallPosition[1] + CHEEP_CHEEP_DEPTH;
       creature->position[2] = g_BallPosition[2];
-      speed = random % CHEEP_CHEEP_SPEED_RANGE + CHEEP_CHEEP_MIN_SPEED;
+      speed = (random % CHEEP_CHEEP_SPEED_RANGE) + CHEEP_CHEEP_MIN_SPEED;
       creature->groundHeight =
           GetGroundOrWaterHeight(g_BallPosition[0], g_BallPosition[2]);
       creature->isFacingBack = guRandom() % 2;
@@ -236,7 +236,7 @@ void StartCheepCheepLeap(s32 arg0) {
       translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
       translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
       rotation[1] = creature->yaw;
-      rotation[2] = creature->pitch + M_PI / 2;
+      rotation[2] = creature->pitch + (M_PI / 2);
       scale[0] = 1.0f;
       scale[1] = 1.0f;
       scale[2] = 1.0f;
@@ -295,8 +295,8 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       creature->position[1] += creature->velocity[1];
       creature->position[2] += creature->velocity[2];
       horizontalSpeed = 0.0f;
-      horizontalSpeedSquared = creature->velocity[0] * creature->velocity[0] +
-          creature->velocity[2] * creature->velocity[2];
+      horizontalSpeedSquared = (creature->velocity[0] * creature->velocity[0]) +
+          (creature->velocity[2] * creature->velocity[2]);
       if ((s32)horizontalSpeedSquared > 0) {
         horizontalSpeed = sqrtf(horizontalSpeedSquared);
       }

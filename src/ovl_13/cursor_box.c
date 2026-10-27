@@ -87,8 +87,8 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
   guOrtho(&f_CursorBoxProjection, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, 10.0f, 2000.0f, 1.0f);
   guTranslate(&f_CursorBoxTranslations[g_DrawBufferIndex],
-      (f32)(left + CURSOR_BOX_HALF_SIZE - SCREEN_WIDTH / 2) - 0.5f,
-      (f32)(SCREEN_HEIGHT / 2 - CURSOR_BOX_HALF_SIZE - top) + 0.5f, -100.0f);
+      (f32)(left + CURSOR_BOX_HALF_SIZE - (SCREEN_WIDTH / 2)) - 0.5f,
+      (f32)((SCREEN_HEIGHT / 2) - CURSOR_BOX_HALF_SIZE - top) + 0.5f, -100.0f);
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);

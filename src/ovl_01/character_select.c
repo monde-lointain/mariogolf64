@@ -577,7 +577,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   sprintf(g_PrintBuffer, "%dY",
-      g_Clubs[clubSet * CLUB_SET_SIZE + CLUB_TYPE_DRIVER].distance);
+      g_Clubs[(clubSet * CLUB_SET_SIZE) + CLUB_TYPE_DRIVER].distance);
   DrawShadowedText(&gfx, DRIVE_DISTANCE_X, DRIVE_DISTANCE_Y, g_PrintBuffer);
   if (D_8022FF00_ovl_01 == FALSE) {
     if ((u8)isSinglePlayer == TRUE) {
@@ -808,7 +808,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = BOARD_TOP + stripIndex * BOARD_STRIP_HEIGHT;
+    stripTop = BOARD_TOP + (stripIndex * BOARD_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, BOARD_LEFT << 2, stripTop << 2,
         (BOARD_LEFT + BOARD_WIDTH) << 2, (stripTop + BOARD_STRIP_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -878,9 +878,9 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
     if (tagMode != PLAYER_TAG_LINED_UP) {
       shiftX = 0;
       left = D_8022FFCC_ovl_01[playerIndex][0] +
-          memory->characterColumns[playerIndex] * GRID_CELL_SIZE;
+          (memory->characterColumns[playerIndex] * GRID_CELL_SIZE);
       top = D_8022FFCC_ovl_01[playerIndex][1] +
-          memory->characterRows[playerIndex] * GRID_CELL_SIZE;
+          (memory->characterRows[playerIndex] * GRID_CELL_SIZE);
     } else {
       left = D_8022FFD4_ovl_01[tagCount - 1][playerIndex];
       top = ((playerIndex & 1) == 0) ? PLAYER_TAG_RAISE : 0;
@@ -932,10 +932,10 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   if (g_MenuScreen != MENU_SCREEN_UNK24) {
     playerIndex = D_801B7070;
   }
-  cursorLeft = memory->characterColumns[playerIndex] * GRID_CELL_SIZE -
+  cursorLeft = (memory->characterColumns[playerIndex] * GRID_CELL_SIZE) -
       GRID_CURSOR_SHIFT_LEFT;
   func_8020CD20_ovl_01(&gfx, cursorLeft + GRID_LEFT,
-      memory->characterRows[playerIndex] * GRID_CELL_SIZE + GRID_TOP);
+      (memory->characterRows[playerIndex] * GRID_CELL_SIZE) + GRID_TOP);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -959,7 +959,7 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
     red =
         (s32)(sinf(D_80230080_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI / 2) *
+    blue = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80230080_ovl_01[vertexIndex] + M_PI) *

@@ -452,7 +452,7 @@ void DrawScreenFade(Gfx** displayListHead) {
   if (g_ScreenFadeKind != FADE_NONE) {
     if (g_ScreenFadeKind == FADE_OUT) {
       alpha = FADE_ALPHA_RANGE -
-          (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
+          ((g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration);
     } else {
       alpha =
           (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
@@ -642,10 +642,10 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     texelOffset += PROMPT_CLOUD_WIDTH * PROMPT_CLOUD_HALF_TEXELS / 2;
     DrawTextureRect(&gfx, (PROMPT_CENTER_X - halfWidth) << 2,
-        (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight - halfHeight) << 2,
+        (PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight) - halfHeight) << 2,
         (PROMPT_CENTER_X + halfWidth) << 2,
-        (PROMPT_CLOUD_MIDDLE_Y + half * halfHeight) << 2, G_TX_RENDERTILE, 0, 0,
-        PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+        (PROMPT_CLOUD_MIDDLE_Y + (half * halfHeight)) << 2, G_TX_RENDERTILE, 0,
+        0, PROMPT_CLOUD_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         PROMPT_CLOUD_HALF_TEXELS * TEXEL_STEP_ONE / halfHeight);
     half++;
   } while (half != 2);
@@ -655,9 +655,10 @@ void DrawPrompt(Gfx** displayListHead) {
 
     f_ChoiceBobAngle += DEGREES_TO_RADIANS(CHOICE_BOB_STEP_DEGREES);
     if (f_PromptChoice == PROMPT_CHOICE_YES) {
-      halfWidth = sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB + CHOSEN_HALF_WIDTH;
+      halfWidth =
+          (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
       halfHeight =
-          CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle) + CHOSEN_HALF_HEIGHT;
+          (CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle)) + CHOSEN_HALF_HEIGHT;
     } else {
       halfWidth = CHOICE_HALF_WIDTH;
       halfHeight = CHOICE_HALF_HEIGHT;
@@ -673,15 +674,17 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (YES_CENTER_X - halfWidth) << 2,
-        (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+        ((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight) << 2,
         (YES_CENTER_X + halfWidth) << 2,
-        (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2, G_TX_RENDERTILE,
-        0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+        ((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight) << 2,
+        G_TX_RENDERTILE, 0, 0,
+        CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
     if (f_PromptChoice == PROMPT_CHOICE_NO) {
-      halfWidth = sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB + CHOSEN_HALF_WIDTH;
+      halfWidth =
+          (sinf(f_ChoiceBobAngle) * CHOSEN_WIDTH_BOB) + CHOSEN_HALF_WIDTH;
       halfHeight =
-          CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle) + CHOSEN_HALF_HEIGHT;
+          (CHOSEN_HEIGHT_BOB * sinf(f_ChoiceBobAngle)) + CHOSEN_HALF_HEIGHT;
     } else {
       halfWidth = CHOICE_HALF_WIDTH;
       halfHeight = CHOICE_HALF_HEIGHT;
@@ -691,10 +694,11 @@ void DrawPrompt(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     DrawTextureRect(&gfx, (NO_CENTER_X - halfWidth) << 2,
-        (cloudHeight / 4 + CHOICES_MIDDLE_Y - halfHeight) << 2,
+        ((cloudHeight / 4) + CHOICES_MIDDLE_Y - halfHeight) << 2,
         (NO_CENTER_X + halfWidth) << 2,
-        (cloudHeight / 4 + CHOICES_MIDDLE_Y + halfHeight) << 2, G_TX_RENDERTILE,
-        0, 0, CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
+        ((cloudHeight / 4) + CHOICES_MIDDLE_Y + halfHeight) << 2,
+        G_TX_RENDERTILE, 0, 0,
+        CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
   }
   *displayListHead = gfx;
@@ -842,9 +846,9 @@ void DrawHalfTurn(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
         G_TX_NOLOD);
     DrawTextureRect(&gfx, SCREEN_BORDER << 2,
-        (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS) << 2,
+        (SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS)) << 2,
         (SCREEN_BORDER + HALF_TURN_WIDTH) << 2,
-        (SCREEN_BORDER + i * HALF_TURN_STRIP_ROWS + stripRows) << 2,
+        (SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS) + stripRows) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   *displayListHead = gfx;

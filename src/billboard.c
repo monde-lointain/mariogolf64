@@ -277,7 +277,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   if ((f32)fabs(viewDir[0]) + (f32)fabs(viewDir[2]) >= 1.0f) {
     guNormalize(&viewDir[0], &viewDir[1], &viewDir[2]);
     guNormalize(&lightDir[0], &lightDir[1], &lightDir[2]);
-    alignment = viewDir[0] * lightDir[0] + viewDir[2] * lightDir[2];
+    alignment = (viewDir[0] * lightDir[0]) + (viewDir[2] * lightDir[2]);
     lightHeight = cosf(lightPitch);
     if (lightHeight >= LIGHT_HEIGHT_MIN) {
       leftAlignment = alignment;
@@ -295,29 +295,29 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
         rightAlignment = -lightHeight;
       }
       f_BillboardVertices[0][0].v.cn[0] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][0].v.cn[1] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][0].v.cn[2] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][1].v.cn[0] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][1].v.cn[1] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][1].v.cn[2] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 127.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][2].v.cn[0] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
       f_BillboardVertices[0][2].v.cn[1] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
       f_BillboardVertices[0][2].v.cn[2] =
-          (-lightHeight * 0.5f + rightAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (rightAlignment * 0.5f)) * 255.0f) + 255.0f;
       f_BillboardVertices[0][3].v.cn[0] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
       f_BillboardVertices[0][3].v.cn[1] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
       f_BillboardVertices[0][3].v.cn[2] =
-          (-lightHeight * 0.5f + leftAlignment * 0.5f) * 255.0f + 255.0f;
+          (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 255.0f) + 255.0f;
     }
   }
 

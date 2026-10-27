@@ -203,10 +203,11 @@ void StartImpactSparks(void) {
 
         f_SparkOffsets[i][0] = 0;
         f_SparkOffsets[i][1] = 0;
-        f_SparkAngles[i] = (f32)count * IMPACT_SPARK_SPACING +
+        f_SparkAngles[i] = ((f32)count * IMPACT_SPARK_SPACING) +
             DEGREES_TO_RADIANS(guRandom() % 20 - 10);
         f_SparkKinds[i] = SPARK_KIND_IMPACT;
-        speed = guRandom() % IMPACT_SPARK_SPEED_RANGE + IMPACT_SPARK_MIN_SPEED;
+        speed =
+            (guRandom() % IMPACT_SPARK_SPEED_RANGE) + IMPACT_SPARK_MIN_SPEED;
         f_SparkVelocities[i][0] = sinf(f_SparkAngles[i]) * speed;
         count++;
         f_SparkVelocities[i][1] = -cosf(f_SparkAngles[i]) * speed;
@@ -355,7 +356,7 @@ void DrawSparks(Gfx** displayListHead) {
               f_SparkBurstPoints[i][AXIS_Y] * COURSE_TO_WORLD_SCALE,
               f_SparkBurstPoints[i][AXIS_Z] * COURSE_TO_WORLD_SCALE,
               &point) < 0) {
-        size = f_SparkBurstAges[i] * SPARK_AGE_GROWTH + SPARK_START_SIZE;
+        size = (f_SparkBurstAges[i] * SPARK_AGE_GROWTH) + SPARK_START_SIZE;
         burstShown[i] = SPARK_BURST_SHOWN;
         burstPoints[i][0] = point.x;
         burstPoints[i][1] = point.y;
@@ -418,10 +419,10 @@ void DrawSparks(Gfx** displayListHead) {
         rotation[AXIS_X] = 0;
         rotation[AXIS_Y] = 0;
         rotation[AXIS_Z] = f_SparkAngles[i];
-        translation[AXIS_X] = f_SparkOffsets[i][0] * burstScales[burst] +
-            burstPoints[burst][0] - SCREEN_WIDTH / 2;
-        translation[AXIS_Y] = f_SparkOffsets[i][1] * burstScales[burst] -
-            burstPoints[burst][1] + SCREEN_HEIGHT / 2;
+        translation[AXIS_X] = (f_SparkOffsets[i][0] * burstScales[burst]) +
+            burstPoints[burst][0] - (SCREEN_WIDTH / 2);
+        translation[AXIS_Y] = (f_SparkOffsets[i][1] * burstScales[burst]) -
+            burstPoints[burst][1] + (SCREEN_HEIGHT / 2);
         translation[AXIS_Z] = SPARK_MODEL_Z;
         scale[AXIS_X] = burstScales[burst] * SPARK_MODEL_SCALE;
         scale[AXIS_Y] = burstScales[burst] * SPARK_MODEL_SCALE;
@@ -436,10 +437,10 @@ void DrawSparks(Gfx** displayListHead) {
             burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] >= -SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][1] <= SPARK_MAX_SCREEN_COORD) {
-          left =
-              f_SparkOffsets[i][0] * burstScales[burst] + burstPoints[burst][0];
-          top =
-              f_SparkOffsets[i][1] * burstScales[burst] + burstPoints[burst][1];
+          left = (f_SparkOffsets[i][0] * burstScales[burst]) +
+              burstPoints[burst][0];
+          top = (f_SparkOffsets[i][1] * burstScales[burst]) +
+              burstPoints[burst][1];
           gSPScisTextureRectangle(gfx++, (left - burstHalfSizes[burst]) << 2,
               (top - burstHalfSizes[burst]) << 2,
               (left + burstHalfSizes[burst]) << 2,
@@ -539,7 +540,7 @@ void StartSwingTrail(s32 kind) {
     AnimateCharacterInSameCopy(0);
     SetAnimationSpeed(0, 1.0f);
     position = 0.0f;
-    f_SwingTrailPathLength = f_SwingTrailSampleCount * 2 - 4;
+    f_SwingTrailPathLength = (f_SwingTrailSampleCount * 2) - 4;
     for (i = 0; i != f_SwingTrailPathLength; i++) {
       f_SwingTrailOuterPath[i][AXIS_X] =
           InterpolateHermite(samples[0], position);

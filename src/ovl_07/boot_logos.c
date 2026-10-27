@@ -119,10 +119,10 @@ void LoadBootLogos(void) {
   RequestSongStop();
   g_Cameras[0].view.scissorX = SCREEN_BORDER;
   g_Cameras[0].view.scissorY = SCREEN_BORDER;
-  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
-  g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - 2 * SCREEN_BORDER;
+  g_Cameras[0].view.scissorWidth = SCREEN_WIDTH - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.scissorHeight = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.unreadSettings[0] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
+  g_Cameras[0].view.unreadSettings[1] = SCREEN_HEIGHT - (2 * SCREEN_BORDER);
   g_Cameras[0].view.viewportCenterX = SCREEN_WIDTH;
   g_Cameras[0].view.viewportCenterY = SCREEN_HEIGHT;
   g_Cameras[0].view.eye[0] = 0.0f;

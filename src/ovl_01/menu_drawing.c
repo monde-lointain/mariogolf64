@@ -438,13 +438,13 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   for (index = 0; index != D_80105B68; index++) {
     sprintf(g_PrintBuffer, D_80231668_ovl_01, index + 1);
     DrawTextStub(&gfx, VIEWER_PLAYER_NUMBER_X,
-        VIEWER_PLAYER_TOP + index * VIEWER_PLAYER_SPACING, g_PrintBuffer);
+        VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }
   for (index = 0; index != D_801B7070; index++) {
     sprintf(
         g_PrintBuffer, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8012F480[index]]);
     DrawTextStub(&gfx, VIEWER_PLAYER_NAME_X,
-        VIEWER_PLAYER_TOP + index * VIEWER_PLAYER_SPACING, g_PrintBuffer);
+        VIEWER_PLAYER_TOP + (index * VIEWER_PLAYER_SPACING), g_PrintBuffer);
   }
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
@@ -676,7 +676,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
           0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      stripTop = HOLES_BANNER_TOP + stripIndex * HOLES_BANNER_STRIP_HEIGHT;
+      stripTop = HOLES_BANNER_TOP + (stripIndex * HOLES_BANNER_STRIP_HEIGHT);
       gSPScisTextureRectangle(gfx++, HOLES_BANNER_LEFT << 2,
           (slide + stripTop) << 2,
           (HOLES_BANNER_LEFT + HOLES_BANNER_WIDTH) << 2,
@@ -696,7 +696,7 @@ void func_802047F0_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = COURSE_NAME_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
+    stripTop = COURSE_NAME_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, (COURSE_NAME_BANNER_LEFT + squeeze / 2) << 2,
         (slide + stripTop) << 2,
         (COURSE_NAME_BANNER_LEFT + COURSE_NAME_BANNER_WIDTH - squeeze / 2) << 2,
@@ -1011,7 +1011,7 @@ void func_80207D08_ovl_01(Gfx** displayListHead) {
       SetTextColor(&gfx, 255, 255, 255);
     }
     DrawShadowedText(&gfx, CADDY_SELECT_NAME_X,
-        caddyIndex * CADDY_SELECT_LINE_HEIGHT + CADDY_SELECT_FIRST_Y,
+        (caddyIndex * CADDY_SELECT_LINE_HEIGHT) + CADDY_SELECT_FIRST_Y,
         D_8022C0D0_ovl_01[caddyIndex]);
   }
   gDPPipeSync(gfx++);
@@ -1186,8 +1186,8 @@ void func_8020879C_ovl_01(Gfx** displayListHead, s32 centerX, s32 centerY) {
     }
     left = starPositions[holeIndex][0] * RING_SHOT_STAR_RADIUS;
     top = starPositions[holeIndex][1] * RING_SHOT_STAR_RADIUS;
-    left += centerX - RING_SHOT_STAR_WIDTH / 2;
-    top += centerY - RING_SHOT_STAR_HEIGHT / 2;
+    left += centerX - (RING_SHOT_STAR_WIDTH / 2);
+    top += centerY - (RING_SHOT_STAR_HEIGHT / 2);
     /* A hole without its star draws from the silver star's tile */
     tile = save->hasRingShotStar[g_MenuChoices.courseIndex][holeIndex] == FALSE;
     gSPScisTextureRectangle(gfx++, (left - growWidth / 2) << 2,

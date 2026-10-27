@@ -1299,7 +1299,7 @@ void DecodeCartridgeCharacter(
     u8* save, s32 cartridgeIndex, s32 saveIndex, s32 unk34) {
   GameBoyCharacter* character =
       &g_GameBoyTransfer
-           .cartridgeCharacters[cartridgeIndex * CARTRIDGE_SAVE_COUNT +
+           .cartridgeCharacters[(cartridgeIndex * CARTRIDGE_SAVE_COUNT) +
                saveIndex];
   s32 index;
 
@@ -1355,11 +1355,11 @@ void DecodeCartridgeCharacter(
       character->shotCurve);
   for (index = 0; index != GAME_BOY_CHARACTER_UNK3C_COUNT; index++) {
     character->unk3C[index].unk0 =
-        save[0x100 + index * 6] | (save[0x101 + index * 6] << 8);
+        save[0x100 + (index * 6)] | (save[0x101 + (index * 6)] << 8);
     character->unk3C[index].unk2 =
-        save[0x102 + index * 6] | (save[0x103 + index * 6] << 8);
-    character->unk3C[index].unk4 = save[0x104 + index * 6];
-    character->unk3C[index].unk5 = save[0x105 + index * 6];
+        save[0x102 + (index * 6)] | (save[0x103 + (index * 6)] << 8);
+    character->unk3C[index].unk4 = save[0x104 + (index * 6)];
+    character->unk3C[index].unk5 = save[0x105 + (index * 6)];
     osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0,
         character->unk3C[index].unk2);
   }
@@ -1597,9 +1597,9 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
       continue;
     }
     DrawTextureRect(&displayList,
-        (CURVE_BAR_LEFT + segment * CURVE_SEGMENT_WIDTH) << 2,
+        (CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)) << 2,
         CURVE_BAR_TOP << 2,
-        (CURVE_BAR_LEFT + (segment + 1) * CURVE_SEGMENT_WIDTH) << 2,
+        (CURVE_BAR_LEFT + ((segment + 1) * CURVE_SEGMENT_WIDTH)) << 2,
         (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
         (segment * CURVE_SEGMENT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
@@ -1631,7 +1631,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     DrawCharacterStats(&displayList, character, transfer);
   }
   SetUpTextDrawing(&displayList);
-  if (transfer->unk7A0 == g_ControllerCount * 4 - 1) {
+  if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
     message = NO_MESSAGE;
     switch (transfer->screenStep) {
       case BRING_CHOOSING:
@@ -1664,7 +1664,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     GameBoyCharacter* character = &g_GameBoyCharacters[slot];
 
     sprintf(g_PrintBuffer, "%4d", character->experience);
-    DrawSmallText(&displayList, EXPERIENCE_LEFT + slot * FACE_SPACING,
+    DrawSmallText(&displayList, EXPERIENCE_LEFT + (slot * FACE_SPACING),
         EXPERIENCE_TOP, g_PrintBuffer);
   }
   DrawCharacterStats(
@@ -1721,9 +1721,9 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
     DrawTextureRect(&displayList,
-        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
+        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
         CONTROLLER_ICONS_TOP << 2,
-        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING +
+        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
             CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
@@ -1757,7 +1757,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
           POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
       /* Subtracting the swing in each coordinate is there to match */
       pointerRestLeft =
-          transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING +
+          (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING) +
           (CONTROLLER_ICONS_LEFT - POINTER_WIDTH);
       DrawTextureRect(&displayList, (pointerRestLeft - pointerSwing) << 2,
           POINTER_TOP << 2,
@@ -1767,7 +1767,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     } else if (transfer->screenStep == SEND_STATUS_READY) {
       DrawCursorBox(&displayList,
           CONTROLLER_ICONS_LEFT - CONTROLLER_CURSOR_MARGIN +
-              transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING,
+              (transfer->chosenCartridgeIndex * CONTROLLER_ICON_SPACING),
           CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN);
     }
   }
@@ -1787,8 +1787,8 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
           G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
-      DrawTextureRect(&displayList, (FACES_LEFT + slot * FACE_SPACING) << 2,
-          FACES_TOP << 2, (FACES_LEFT + slot * FACE_SPACING + FACE_SIZE) << 2,
+      DrawTextureRect(&displayList, (FACES_LEFT + (slot * FACE_SPACING)) << 2,
+          FACES_TOP << 2, (FACES_LEFT + (slot * FACE_SPACING) + FACE_SIZE) << 2,
           (FACES_TOP + FACE_SIZE) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }
@@ -1841,9 +1841,9 @@ void DrawBringCharactersScreen(
                 .status == GAME_BOY_CHARACTER_STATUS_PRESENT &&
         IsListed(transfer->listingStates[transfer->listedCharacters[index]])) {
       DrawTextureRect(&displayList,
-          (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING) << 2,
+          (LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING)) << 2,
           LISTED_ICONS_TOP << 2,
-          (LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING +
+          (LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING) +
               CONTROLLER_ICON_SIZE)
               << 2,
           (LISTED_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
@@ -1874,10 +1874,10 @@ void DrawBringCharactersScreen(
             GAME_BOY_CHARACTER_STATUS_PRESENT &&
         IsListed(transfer->listingStates[listed])) {
       character = transfer->cartridgeCharacters[listed].character;
-      left = LISTED_FACES_LEFT + shownCount * LISTED_FACE_SPACING;
+      left = LISTED_FACES_LEFT + (shownCount * LISTED_FACE_SPACING);
       top = LISTED_FACES_TOP;
       if (transfer->listingStates[listed] == LISTING_BRINGING) {
-        slotLeft = FACES_LEFT + transfer->characterIndex * FACE_SPACING;
+        slotLeft = FACES_LEFT + (transfer->characterIndex * FACE_SPACING);
         left += (slotLeft - left) * transfer->bringingFrame /
             (BRINGING_FRAME_COUNT - 1);
         top += (FACES_TOP - top) * transfer->bringingFrame /
@@ -1899,13 +1899,13 @@ void DrawBringCharactersScreen(
     if (transfer->screenStep == BRING_CHOOSING) {
       DrawCursorBox(&displayList,
           LISTED_FACES_LEFT - BRING_CURSOR_MARGIN +
-              (transfer->listedCharacterIndex - transfer->unk7B8) *
-                  LISTED_FACE_SPACING,
+              ((transfer->listedCharacterIndex - transfer->unk7B8) *
+                  LISTED_FACE_SPACING),
           LISTED_FACES_TOP - BRING_CURSOR_MARGIN);
     } else if (transfer->screenStep == BRING_CHOOSING_SLOT) {
       DrawCursorBox(&displayList,
           FACES_LEFT - BRING_CURSOR_MARGIN +
-              transfer->characterIndex * FACE_SPACING,
+              (transfer->characterIndex * FACE_SPACING),
           FACES_TOP - BRING_CURSOR_MARGIN);
     }
   }
@@ -1920,7 +1920,7 @@ void DrawBringCharactersScreen(
         &displayList, 0, (u8*)transfer->arrowsImage + IMAGE_HEADER_SIZE);
     LoadNibbleTextureBlock(&displayList,
         (u8*)transfer->arrowsImage +
-            (f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE +
+            ((f_CharacterArrowFrame / 4 * ARROWS_IMAGE_SIZE) +
                 PALETTED_TEXELS_OFFSET),
         G_IM_FMT_CI, ARROW_SIZE, ARROW_SIZE * 4, 0, 0, 0, 0, 0, 0, 0);
     gDPPipeSync(displayList++);
@@ -1952,7 +1952,7 @@ void DrawSendExperienceScreen(
   if (transfer->screenStep == 0) {
     DrawCursorBox(&displayList,
         FACES_LEFT - FACE_CURSOR_MARGIN +
-            transfer->characterIndex * FACE_SPACING,
+            (transfer->characterIndex * FACE_SPACING),
         FACES_TOP - FACE_CURSOR_MARGIN);
     gDPPipeSync(displayList++);
     gDPSetTexturePersp(displayList++, G_TP_NONE);
@@ -1974,9 +1974,9 @@ void DrawSendExperienceScreen(
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
     DrawTextureRect(&displayList,
-        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING) << 2,
+        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
         CONTROLLER_ICONS_TOP << 2,
-        (CONTROLLER_ICONS_LEFT + slot * CONTROLLER_ICON_SPACING +
+        (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING) +
             CONTROLLER_ICON_SIZE)
             << 2,
         (CONTROLLER_ICONS_TOP + CONTROLLER_ICON_SIZE) << 2, G_TX_RENDERTILE, 0,
@@ -2029,20 +2029,20 @@ void DrawTransmitMenu(Gfx** displayListHead) {
           COURSE_SCENE_STRIP_ROWS + 2, 0, 0, 0, 0, 0, 0, 0);
       DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
           COURSE_SCENE_TOP << 2,
-          (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
-          (COURSE_SCENE_TOP + (COURSE_SCENE_STRIP_ROWS + 1) * 2) << 2,
+          (COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)) << 2,
+          (COURSE_SCENE_TOP + ((COURSE_SCENE_STRIP_ROWS + 1) * 2)) << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     } else {
       LoadTextureBlock(&displayList,
           (u8*)transfer->courseSceneImage + LARGE_PALETTED_TEXELS_OFFSET +
-              index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS),
+              (index * (COURSE_SCENE_WIDTH * COURSE_SCENE_STRIP_ROWS)),
           G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_SCENE_WIDTH, rowCount + 2, 0, 0, 0,
           0, 0, 0, 0);
       DrawTextureRect(&displayList, COURSE_SCENE_LEFT << 2,
-          (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2) << 2,
-          (COURSE_SCENE_LEFT + COURSE_SCENE_WIDTH * 2) << 2,
-          (COURSE_SCENE_TOP + 2 + index * COURSE_SCENE_STRIP_ROWS * 2 +
-              rowCount * 2)
+          (COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2)) << 2,
+          (COURSE_SCENE_LEFT + (COURSE_SCENE_WIDTH * 2)) << 2,
+          (COURSE_SCENE_TOP + 2 + (index * COURSE_SCENE_STRIP_ROWS * 2) +
+              (rowCount * 2))
               << 2,
           G_TX_RENDERTILE, 0, 1 << 5, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     }
@@ -2056,9 +2056,9 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         G_IM_FMT_CI, G_IM_SIZ_8b, TITLE_WIDTH, 0, 0, 0, TITLE_WIDTH - 1,
         TITLE_STRIP_ROWS - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, TITLE_LEFT << 2,
-        (TITLE_TOP + index * TITLE_STRIP_ROWS) << 2,
+        (TITLE_TOP + (index * TITLE_STRIP_ROWS)) << 2,
         (TITLE_LEFT + TITLE_WIDTH) << 2,
-        (TITLE_TOP + index * TITLE_STRIP_ROWS + TITLE_STRIP_ROWS) << 2,
+        (TITLE_TOP + (index * TITLE_STRIP_ROWS) + TITLE_STRIP_ROWS) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   gDPPipeSync(displayList++);
@@ -2073,9 +2073,9 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         G_IM_FMT_RGBA, G_IM_SIZ_16b, WOOD_PANEL_WIDTH, 0, 0, 0,
         WOOD_PANEL_WIDTH - 1, panelRowCount - 1, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, WOOD_PANEL_LEFT << 2,
-        (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS) << 2,
+        (WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS)) << 2,
         (WOOD_PANEL_LEFT + WOOD_PANEL_WIDTH) << 2,
-        (WOOD_PANEL_TOP + index * WOOD_PANEL_STRIP_ROWS + panelRowCount) << 2,
+        (WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS) + panelRowCount) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
   switch (transfer->screen) {
@@ -2112,11 +2112,11 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         G_IM_FMT_CI, POINTER_WIDTH, 0, 0, 0, POINTER_WIDTH - 1,
         POINTER_IMAGE_HEIGHT - 1, 0, 0, 0, 0, 0, 0, 0);
     pointerLeft = OPTIONS_CENTRE_X - OPTION_POINTER_GAP - POINTER_WIDTH -
-        width / 2 - pointerSwing;
+        (width / 2) - pointerSwing;
     DrawTextureRect(&displayList, pointerLeft << 2,
-        (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING) << 2,
+        (OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING)) << 2,
         (pointerLeft + POINTER_WIDTH) << 2,
-        (OPTION_POINTER_TOP + transfer->optionIndex * OPTION_SPACING +
+        (OPTION_POINTER_TOP + (transfer->optionIndex * OPTION_SPACING) +
             POINTER_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -2130,7 +2130,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     for (index = 0; index != MODE_OPTION_COUNT; index++) {
       option = f_ModeOptions[transfer->transferMode][index];
       if (option != TRANSMIT_OPTION_NONE) {
-        SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + index * OPTION_SPACING,
+        SetTextSlot(OPTIONS_CENTRE_X, OPTIONS_TOP + (index * OPTION_SPACING),
             option + TRANSMIT_OPTION_MESSAGES, 1, index,
             TEXT_FLAG_CENTERED | TEXT_FLAG_UNK20, 255, 255, 255, 255);
         DrawLargeTextSlot(&displayList, index);
@@ -2177,9 +2177,10 @@ void ClearCartridgeCharacters(void) {
     ResetBringCharacters();
     for (controller = 0; controller != MAXCONTROLLERS; controller++) {
       for (save = 0; save != CARTRIDGE_SAVE_COUNT; save++) {
-        transfer->listingStates[controller * CARTRIDGE_SAVE_COUNT + save] =
+        transfer->listingStates[(controller * CARTRIDGE_SAVE_COUNT) + save] =
             LISTING_NONE;
-        transfer->cartridgeCharacters[controller * CARTRIDGE_SAVE_COUNT + save]
+        transfer
+            ->cartridgeCharacters[(controller * CARTRIDGE_SAVE_COUNT) + save]
             .status = 0;
       }
     }
@@ -2271,7 +2272,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
         }
         if (saveIndex == 2) {
-          recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE * 2;
+          recordOffset = SAVE_RECORDS_OFFSET + (SAVE_RECORD_SIZE * 2);
         }
         osSyncPrintf("PHASE 5\n");
         dataAddress = save[recordOffset + RECORD_ADDRESS_OFFSET] +
@@ -2636,7 +2637,7 @@ s32 ReadCartridgeCharacters(void) {
       transfer->unk7CC = TRUE;
     }
   } else if (transfer->transferResult == PAK_RESULT_OK) {
-    saveIndex = transfer->unk7A0 % 4 - 1;
+    saveIndex = (transfer->unk7A0 % 4) - 1;
     /* The original starts the offset at 0xA042, which every save index replaces
      */
     recordOffset = 0xA042;
@@ -2652,7 +2653,7 @@ s32 ReadCartridgeCharacters(void) {
       recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
     }
     if (saveIndex == 2) {
-      recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE * 2;
+      recordOffset = SAVE_RECORDS_OFFSET + (SAVE_RECORD_SIZE * 2);
     }
     for (attempt = 0; attempt != SAVE_READ_ATTEMPTS; attempt++) {
       result = nuContGBPakFread(
@@ -2719,8 +2720,8 @@ s32 ReadCartridgeCharacters(void) {
                     &g_GameBoyCharacters[slot], characterData)) {
               isAlreadyBrought = TRUE;
               transfer
-                  ->cartridgeCharacters[transfer->unk7A0 / 4 *
-                          CARTRIDGE_SAVE_COUNT +
+                  ->cartridgeCharacters[(transfer->unk7A0 / 4 *
+                                            CARTRIDGE_SAVE_COUNT) +
                       saveIndex]
                   .status = GAME_BOY_CHARACTER_STATUS_BROUGHT_OVER;
               ListPresentCharacters();
@@ -2738,7 +2739,7 @@ s32 ReadCartridgeCharacters(void) {
                   saveIndex, transfer->cartridgeHeader.company_code);
             }
             transfer
-                ->listingStates[transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT +
+                ->listingStates[(transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT) +
                     saveIndex] = LISTING_SHOWN;
             transfer->listedCharacterCount++;
             ListPresentCharacters();
@@ -2769,7 +2770,7 @@ s32 ReadCartridgeCharacters(void) {
   if (transfer->unk7A0 % 4 == 3) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
-  if (transfer->unk7A0 == g_ControllerCount * 4 - 1) {
+  if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
     /* Repeating the results for one cartridge is there to match */
     if (transfer->unk7BC == 1) {
       if (transfer->unk7D0 == TRUE) {
@@ -3090,11 +3091,11 @@ void DrawNotice(Gfx** displayListHead) {
       halfWidth = f_NoticeSize * NOTICE_HALF_WIDTH_STEP;
       LoadNibbleTextureBlock(&displayList,
           (u8*)g_GameBoyTransfer.noticeCloudImage + IMAGE_HEADER_SIZE +
-              strip * NOTICE_STRIP_SIZE,
+              (strip * NOTICE_STRIP_SIZE),
           G_IM_FMT_I, NOTICE_WIDTH, NOTICE_STRIP_HEIGHT, 0, G_TX_CLAMP,
           G_TX_CLAMP, 0, 0, 0, 0);
       stripHeight = halfHeight;
-      bottom = strip * stripHeight + NOTICE_CENTRE_Y;
+      bottom = (strip * stripHeight) + NOTICE_CENTRE_Y;
       DrawTextureRect(&displayList, (NOTICE_CENTRE_X - halfWidth) << 2,
           (bottom - stripHeight) << 2, (NOTICE_CENTRE_X + halfWidth) << 2,
           bottom << 2, G_TX_RENDERTILE, 0, 0,
@@ -3124,13 +3125,13 @@ void DrawAccessingSign(Gfx** displayListHead) {
   for (strip = 0; strip != ACCESSING_STRIP_COUNT; strip++) {
     LoadTextureBlock(&displayList,
         (u8*)g_GameBoyTransfer.accessingImage + LARGE_PALETTED_TEXELS_OFFSET +
-            strip * ACCESSING_STRIP_SIZE,
+            (strip * ACCESSING_STRIP_SIZE),
         G_IM_FMT_CI, G_IM_SIZ_8b, ACCESSING_WIDTH, ACCESSING_STRIP_HEIGHT, 0, 0,
         0, 0, 0, 0, 0);
     DrawTextureRect(&displayList, ACCESSING_LEFT << 2,
-        (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT) << 2,
+        (ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT)) << 2,
         (ACCESSING_LEFT + ACCESSING_WIDTH) << 2,
-        (ACCESSING_TOP + strip * ACCESSING_STRIP_HEIGHT +
+        (ACCESSING_TOP + (strip * ACCESSING_STRIP_HEIGHT) +
             ACCESSING_STRIP_HEIGHT)
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -3145,8 +3146,8 @@ void DrawPressingHand(Gfx** displayListHead) {
   LoadLargePalette(&displayList, (u8*)g_PressingHandImage + IMAGE_HEADER_SIZE);
   LoadTextureBlock(&displayList,
       (u8*)g_PressingHandImage + LARGE_PALETTED_TEXELS_OFFSET +
-          f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
-              PRESSING_HAND_IMAGE_SIZE,
+          (f_PressingHandFrame / PRESSING_HAND_FRAMES_PER_IMAGE *
+              PRESSING_HAND_IMAGE_SIZE),
       G_IM_FMT_CI, G_IM_SIZ_8b, PRESSING_HAND_SIZE, PRESSING_HAND_SIZE, 0, 0, 0,
       0, 0, 0, 0);
   if (g_GameBoyTransfer.pressingHandPosition == PRESSING_HAND_LOW) {
@@ -3198,7 +3199,7 @@ static inline s32 PackTenths(f32 value) {
       fraction = 9;
     }
   }
-  return wholePart * 10 + fraction;
+  return (wholePart * 10) + fraction;
 }
 
 /*

@@ -131,13 +131,13 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   f32 viewY;
   f32 perspective;
 
-  depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2] - radius;
+  depth = (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
+      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2] - radius;
   if ((s32)depth >= 0) {
     return 0;
   }
-  viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[1][0] * y +
-      g_CpuViewingMatrix[2][0] * z + g_CpuViewingMatrix[3][0];
+  viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[1][0] * y) +
+      (g_CpuViewingMatrix[2][0] * z) + g_CpuViewingMatrix[3][0];
   if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
     perspective = 1.0f;
   } else {
@@ -149,8 +149,8 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
               -g_CpuViewportCenterX) {
     return 1;
   }
-  viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y +
-      g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
+  viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
+      (g_CpuViewingMatrix[2][1] * z) + g_CpuViewingMatrix[3][1];
   if ((viewY > 0.0f) ? g_CpuScreenScaleY * (viewY - radius) * perspective <
               -g_CpuViewportCenterY
                      : g_CpuViewportCenterY <
@@ -165,8 +165,8 @@ INCLUDE_ASM("asm/nonmatchings/cpu_projection", GetSphereVisibility);
 #endif
 
 s32 GetViewDepth(f32 x, f32 y, f32 z) {
-  return g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
+  return (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
+      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2];
 }
 
 /* Returns the view depth, which is negative when the point is in front of the
@@ -207,14 +207,15 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   if (point->y > SCREEN_COORDINATE_LIMIT) {
     point->y = SCREEN_COORDINATE_LIMIT;
   }
-  depth = (-g_CpuProjectionMatrix[2][2] - g_CpuProjectionMatrix[3][2] / viewZ) *
-          SCREEN_DEPTH_SCALE +
+  depth =
+      ((-g_CpuProjectionMatrix[2][2] - (g_CpuProjectionMatrix[3][2] / viewZ)) *
+          SCREEN_DEPTH_SCALE) +
       SCREEN_DEPTH_SCALE;
   point->depth = depth;
-  point->depthStep = fabsf(((g_CpuProjectionMatrix[2][2] * (viewZ - 1.0f) +
-                                g_CpuProjectionMatrix[3][2]) /
-                               (1.0f - viewZ)) *
-          SCREEN_DEPTH_SCALE +
+  point->depthStep = fabsf(((((g_CpuProjectionMatrix[2][2] * (viewZ - 1.0f)) +
+                                 g_CpuProjectionMatrix[3][2]) /
+                                (1.0f - viewZ)) *
+                               SCREEN_DEPTH_SCALE) +
       SCREEN_DEPTH_SCALE - depth);
   return viewZ;
 }
@@ -234,15 +235,15 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   f32 viewY;
   f32 perspective;
 
-  depth = g_CpuViewingMatrix[0][2] * x + g_CpuViewingMatrix[1][2] * y +
-      g_CpuViewingMatrix[2][2] * z + g_CpuViewingMatrix[3][2];
+  depth = (g_CpuViewingMatrix[0][2] * x) + (g_CpuViewingMatrix[1][2] * y) +
+      (g_CpuViewingMatrix[2][2] * z) + g_CpuViewingMatrix[3][2];
   if ((s32)depth == 0) {
     return 0;
   }
-  viewX = g_CpuViewingMatrix[0][0] * x + g_CpuViewingMatrix[2][0] * z +
+  viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[2][0] * z) +
       g_CpuViewingMatrix[3][0];
-  viewY = g_CpuViewingMatrix[0][1] * x + g_CpuViewingMatrix[1][1] * y +
-      g_CpuViewingMatrix[2][1] * z + g_CpuViewingMatrix[3][1];
+  viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
+      (g_CpuViewingMatrix[2][1] * z) + g_CpuViewingMatrix[3][1];
   perspective = 1.0f / depth;
   point->scaleX = g_CpuScreenScaleX * perspective;
   point->scaleY = g_CpuScreenScaleY * perspective;
@@ -280,12 +281,12 @@ void BuildRotationMatrix(Mat4 matrix, Vec3 rotation, Vec3 translation) {
   matrix[0][1] = cosY * sinZ;
   matrix[0][2] = -sinY;
   matrix[0][3] = 0;
-  matrix[1][0] = sinX * sinY * cosZ - cosX * sinZ;
-  matrix[1][1] = sinX * sinY * sinZ + cosX * cosZ;
+  matrix[1][0] = (sinX * sinY * cosZ) - (cosX * sinZ);
+  matrix[1][1] = (sinX * sinY * sinZ) + (cosX * cosZ);
   matrix[1][2] = sinX * cosY;
   matrix[1][3] = 0;
-  matrix[2][0] = cosX * sinY * cosZ + sinX * sinZ;
-  matrix[2][1] = cosX * sinY * sinZ - sinX * cosZ;
+  matrix[2][0] = (cosX * sinY * cosZ) + (sinX * sinZ);
+  matrix[2][1] = (cosX * sinY * sinZ) - (sinX * cosZ);
   matrix[2][2] = cosX * cosY;
   matrix[2][3] = 0;
   matrix[3][0] = translation[0];
@@ -307,12 +308,12 @@ void BuildTransformMatrix(
   matrix[0][1] = cosY * sinZ * scale[0];
   matrix[0][2] = -sinY * scale[0];
   matrix[0][3] = 0;
-  matrix[1][0] = (sinX * sinY * cosZ - cosX * sinZ) * scale[1];
-  matrix[1][1] = (sinX * sinY * sinZ + cosX * cosZ) * scale[1];
+  matrix[1][0] = ((sinX * sinY * cosZ) - (cosX * sinZ)) * scale[1];
+  matrix[1][1] = ((sinX * sinY * sinZ) + (cosX * cosZ)) * scale[1];
   matrix[1][2] = sinX * cosY * scale[1];
   matrix[1][3] = 0;
-  matrix[2][0] = (cosX * sinY * cosZ + sinX * sinZ) * scale[2];
-  matrix[2][1] = (cosX * sinY * sinZ - sinX * cosZ) * scale[2];
+  matrix[2][0] = ((cosX * sinY * cosZ) + (sinX * sinZ)) * scale[2];
+  matrix[2][1] = ((cosX * sinY * sinZ) - (sinX * cosZ)) * scale[2];
   matrix[2][2] = cosX * cosY * scale[2];
   matrix[2][3] = 0;
   matrix[3][0] = translation[0];
@@ -327,9 +328,9 @@ void MultiplyMatrices(Mat4 a, Mat4 b, Mat4 product) {
 
   for (row = 0; row != 4; row++) {
     for (column = 0; column != 4; column++) {
-      product[row][column] = a[row][0] * b[0][column] +
-          a[row][1] * b[1][column] + a[row][2] * b[2][column] +
-          a[row][3] * b[3][column];
+      product[row][column] = (a[row][0] * b[0][column]) +
+          (a[row][1] * b[1][column]) + (a[row][2] * b[2][column]) +
+          (a[row][3] * b[3][column]);
     }
   }
 }
@@ -346,7 +347,7 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx* fixedMatrix) {
   for (row = 0; row != 4; row++) {
     for (pairIndex = 0; pairIndex != 2; pairIndex++) {
       first = matrix[row][pairIndex * 2] * 65536.0f;
-      second = matrix[row][pairIndex * 2 + 1] * 65536.0f;
+      second = matrix[row][(pairIndex * 2) + 1] * 65536.0f;
       *integerPart++ = (first & 0xFFFF0000) | ((u32)second >> 16);
       *fractionPart++ = (first << 16) | (second & 0xFFFF);
     }
@@ -357,20 +358,20 @@ void ConvertMatrixToFixed(Mat4 matrix, Mtx* fixedMatrix) {
 #ifdef NON_MATCHING
 void SetTriangleNormal(Vtx* vertices, s32 firstIndex, s32 secondIndex,
     s32 thirdIndex, s32 target) {
-  Vtx_tn* first = (Vtx_tn*)(firstIndex * sizeof(Vtx) + (u32)vertices);
-  Vtx_tn* second = (Vtx_tn*)(secondIndex * sizeof(Vtx) + (u32)vertices);
-  Vtx_tn* third = (Vtx_tn*)(thirdIndex * sizeof(Vtx) + (u32)vertices);
+  Vtx_tn* first = (Vtx_tn*)((firstIndex * sizeof(Vtx)) + (u32)vertices);
+  Vtx_tn* second = (Vtx_tn*)((secondIndex * sizeof(Vtx)) + (u32)vertices);
+  Vtx_tn* third = (Vtx_tn*)((thirdIndex * sizeof(Vtx)) + (u32)vertices);
   s32 firstEdgeX = second->ob[0] - first->ob[0];
   s32 firstEdgeY = second->ob[1] - first->ob[1];
   s32 firstEdgeZ = second->ob[2] - first->ob[2];
   s32 secondEdgeX = third->ob[0] - second->ob[0];
   s32 secondEdgeY = third->ob[1] - second->ob[1];
   s32 secondEdgeZ = third->ob[2] - second->ob[2];
-  f32 normalX = firstEdgeY * secondEdgeZ - firstEdgeZ * secondEdgeY;
-  f32 normalY = firstEdgeZ * secondEdgeX - firstEdgeX * secondEdgeZ;
-  f32 normalZ = firstEdgeX * secondEdgeY - secondEdgeX * firstEdgeY;
+  f32 normalX = (firstEdgeY * secondEdgeZ) - (firstEdgeZ * secondEdgeY);
+  f32 normalY = (firstEdgeZ * secondEdgeX) - (firstEdgeX * secondEdgeZ);
+  f32 normalZ = (firstEdgeX * secondEdgeY) - (secondEdgeX * firstEdgeY);
   f32 scale = NORMAL_LENGTH /
-      sqrtf(normalX * normalX + normalY * normalY + normalZ * normalZ);
+      sqrtf((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
   s8 scaledX;
   s8 scaledY;
   s8 scaledZ;

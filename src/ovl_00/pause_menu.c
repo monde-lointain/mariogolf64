@@ -700,18 +700,18 @@ void DrawPauseArrows(Gfx** displayListHead, s32 x, s32 y, s32 gap) {
   LoadSmallPalette(&gfx, 0, f_PauseArrowsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_PauseArrowsImage + PALETTED_TEXELS_OFFSET +
-          f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
-              PAUSE_ARROWS_FRAME_SIZE,
+          (f_PauseArrowsTick / PAUSE_ARROWS_TICKS_PER_FRAME *
+              PAUSE_ARROWS_FRAME_SIZE),
       G_IM_FMT_CI, PAUSE_ARROW_SIZE, PAUSE_ARROWS_FRAME_HEIGHT, 0, 0, 0, 0, 0,
       0, 0);
-  top = (y - PAUSE_ARROW_SIZE / 2) << 2;
-  bottom = (y + PAUSE_ARROW_SIZE / 2) << 2;
+  top = (y - (PAUSE_ARROW_SIZE / 2)) << 2;
+  bottom = (y + (PAUSE_ARROW_SIZE / 2)) << 2;
   gDPPipeSync(gfx++);
-  DrawTextureRect(&gfx, (x - gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top,
-      (x - gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom, G_TX_RENDERTILE, 0,
+  DrawTextureRect(&gfx, (x - (gap / 2) - (PAUSE_ARROW_SIZE / 2)) << 2, top,
+      (x - (gap / 2) + (PAUSE_ARROW_SIZE / 2)) << 2, bottom, G_TX_RENDERTILE, 0,
       PAUSE_LEFT_ARROW_T, 1 << 10, 1 << 10);
-  DrawTextureRect(&gfx, (x + gap / 2 - PAUSE_ARROW_SIZE / 2) << 2, top,
-      (x + gap / 2 + PAUSE_ARROW_SIZE / 2) << 2, bottom, G_TX_RENDERTILE, 0,
+  DrawTextureRect(&gfx, (x + (gap / 2) - (PAUSE_ARROW_SIZE / 2)) << 2, top,
+      (x + (gap / 2) + (PAUSE_ARROW_SIZE / 2)) << 2, bottom, G_TX_RENDERTILE, 0,
       PAUSE_RIGHT_ARROW_T, 1 << 10, 1 << 10);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -816,7 +816,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
       PAUSE_RED_WAVE_MIDDLE;
   glowGreen = (s32)(sinf(f_PauseGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
       COLOR_WAVE_MIDDLE;
-  glowBlue = (s32)(sinf(f_PauseGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
+  glowBlue = (s32)(sinf(f_PauseGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) +
       COLOR_WAVE_MIDDLE;
   SetUpTextDrawing(&gfx);
   for (i = 0, y = PAUSE_LABELS_TOP;
@@ -887,18 +887,18 @@ void DrawPauseMenu(Gfx** displayListHead) {
       selectedKind == PAUSE_OPTION_KIND_WIND_DIRECTION ||
       selectedKind == PAUSE_OPTION_KIND_LIE) {
     DrawTextureRect(&gfx, PAUSE_TEE_X * 4,
-        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8) * 4,
+        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8) * 4,
         PAUSE_CURSOR_RIGHT * 4,
-        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 8 +
+        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 8 +
             PAUSE_CURSOR_SIZE) *
             4,
-        G_TX_RENDERTILE, 0, PAUSE_TEES_T + teeFrame * (PAUSE_CURSOR_SIZE << 5),
-        1 << 10, 1 << 10);
+        G_TX_RENDERTILE, 0,
+        PAUSE_TEES_T + (teeFrame * (PAUSE_CURSOR_SIZE << 5)), 1 << 10, 1 << 10);
   } else {
     DrawTextureRect(&gfx, (PAUSE_TEE_X - sway) * 4,
-        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4) * 4,
+        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4) * 4,
         (PAUSE_CURSOR_RIGHT - sway) * 4,
-        (f_PauseSelection * PAUSE_LABEL_SPACING + PAUSE_LABELS_TOP - 4 +
+        ((f_PauseSelection * PAUSE_LABEL_SPACING) + PAUSE_LABELS_TOP - 4 +
             PAUSE_CURSOR_SIZE) *
             4,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
@@ -1018,7 +1018,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
   halfWidth = box->halfWidth + CHOICE_BOX_MARGIN;
   red =
       (s32)(sinf(f_ChoiceGlowAngle) * COLOR_WAVE_AMPLITUDE) + COLOR_WAVE_MIDDLE;
-  blue = (s32)(sinf(f_ChoiceGlowAngle + M_PI / 2) * COLOR_WAVE_AMPLITUDE) +
+  blue = (s32)(sinf(f_ChoiceGlowAngle + (M_PI / 2)) * COLOR_WAVE_AMPLITUDE) +
       COLOR_WAVE_MIDDLE;
   green = (s32)(sinf(f_ChoiceGlowAngle + M_PI) * COLOR_WAVE_AMPLITUDE) +
       COLOR_WAVE_MIDDLE;
@@ -1039,11 +1039,12 @@ void DrawChoiceBox(Gfx** displayListHead) {
       if (textWidth < labelWidth) {
         textWidth = labelWidth;
       }
-      halfWidth = textWidth / 2 + CHOICE_BOX_MARGIN;
+      halfWidth = (textWidth / 2) + CHOICE_BOX_MARGIN;
     }
     for (i = 0; i != CHOICE_BOX_CLOUD_PART_COUNT; i++) {
       LoadNibbleTextureBlock(&gfx,
-          f_MenuCloudImage + IMAGE_HEADER_SIZE + i * CHOICE_BOX_CLOUD_PART_SIZE,
+          f_MenuCloudImage + IMAGE_HEADER_SIZE +
+              (i * CHOICE_BOX_CLOUD_PART_SIZE),
           G_IM_FMT_I, CHOICE_BOX_CLOUD_WIDTH, CHOICE_BOX_CLOUD_HEIGHT, 0, 0, 0,
           0, 0, 0, 0);
       DrawTextureRect(&gfx, (CHOICE_BOX_CENTER_X - halfWidth) << 2,
@@ -1056,7 +1057,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
     SetUpTextDrawing(&gfx);
     if (box->isVertical) {
       labelsTop = CHOICE_LABELS_MIDDLE_Y -
-          (box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2);
+          ((box->optionCount - 1) * (CHOICE_LABEL_SPACING / 2));
       for (i = 0, labelY = labelsTop; i != box->optionCount;
           i++, labelY += CHOICE_LABEL_SPACING) {
         if (i == f_ChoiceBoxSelection) {
@@ -1087,7 +1088,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
           CHOICE_CURSOR_X;
       cursorX -= textWidth / 2;
       LoadSmallPalette(&gfx, 0, f_ChoiceBoxCursorImage + IMAGE_HEADER_SIZE);
-      cursorY = labelsTop + f_ChoiceBoxSelection * CHOICE_LABEL_SPACING;
+      cursorY = labelsTop + (f_ChoiceBoxSelection * CHOICE_LABEL_SPACING);
       gDPLoadTextureTile_4b(gfx++,
           TEXTURE_ADDRESS(f_ChoiceBoxCursorImage + PALETTED_TEXELS_OFFSET),
           G_IM_FMT_CI, CHOICE_CURSOR_SIZE, 0, 0, 0, CHOICE_CURSOR_SIZE - 1,

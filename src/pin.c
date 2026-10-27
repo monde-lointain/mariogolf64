@@ -156,29 +156,30 @@ void BuildPinShadow(void) {
   s32 points[PIN_SHADOW_VERTEX_COUNT][AXIS_COUNT];
   s32 i;
   f32 heading =
-      D_800BA9D8.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS + M_PI / 2;
+      (D_800BA9D8.conditions.lightYaw * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2);
 
   for (i = 0; i != PIN_SHADOW_ROW_COUNT; i++) {
-    points[i * 2][AXIS_X] = sinf(heading) * i * PIN_SHADOW_ROW_SPACING +
-        sinf(heading - M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
-            PIN_SHADOW_WIDTH_STEP;
-    points[i * 2][AXIS_Z] = -cosf(heading) * i * PIN_SHADOW_ROW_SPACING -
-        cosf(heading - M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
-            PIN_SHADOW_WIDTH_STEP;
-    points[i * 2 + 1][AXIS_X] = sinf(heading) * i * PIN_SHADOW_ROW_SPACING +
-        sinf(heading + M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
-            PIN_SHADOW_WIDTH_STEP;
-    points[i * 2 + 1][AXIS_Z] = -cosf(heading) * i * PIN_SHADOW_ROW_SPACING -
-        cosf(heading + M_PI / 2) * (PIN_SHADOW_ROW_COUNT - i) *
-            PIN_SHADOW_WIDTH_STEP;
+    points[i * 2][AXIS_X] = (sinf(heading) * i * PIN_SHADOW_ROW_SPACING) +
+        (sinf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP);
+    points[i * 2][AXIS_Z] = (-cosf(heading) * i * PIN_SHADOW_ROW_SPACING) -
+        (cosf(heading - (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP);
+    points[(i * 2) + 1][AXIS_X] = (sinf(heading) * i * PIN_SHADOW_ROW_SPACING) +
+        (sinf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP);
+    points[(i * 2) + 1][AXIS_Z] =
+        (-cosf(heading) * i * PIN_SHADOW_ROW_SPACING) -
+        (cosf(heading + (M_PI / 2)) * (PIN_SHADOW_ROW_COUNT - i) *
+            PIN_SHADOW_WIDTH_STEP);
     points[i * 2][AXIS_Y] =
         GetGroundHeight(D_800BA9D8.cupPosition[AXIS_X] + points[i * 2][AXIS_X],
             D_800BA9D8.cupPosition[AXIS_Z] + points[i * 2][AXIS_Z]) -
         D_800BA9D8.cupPosition[AXIS_Y];
-    points[i * 2 + 1][AXIS_Y] =
+    points[(i * 2) + 1][AXIS_Y] =
         GetGroundHeight(
-            D_800BA9D8.cupPosition[AXIS_X] + points[i * 2 + 1][AXIS_X],
-            D_800BA9D8.cupPosition[AXIS_Z] + points[i * 2 + 1][AXIS_Z]) -
+            D_800BA9D8.cupPosition[AXIS_X] + points[(i * 2) + 1][AXIS_X],
+            D_800BA9D8.cupPosition[AXIS_Z] + points[(i * 2) + 1][AXIS_Z]) -
         D_800BA9D8.cupPosition[AXIS_Y];
   }
   for (i = 0; i != PIN_SHADOW_VERTEX_COUNT; i++) {
@@ -239,9 +240,9 @@ void SetPinMatrix(s32 cameraIndex) {
   Vec3 rotation;
   Vec3 scale;
   Mat4 matrix;
-  f32 heading = atan2(D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
+  f32 heading = atan2((D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
           g_Cameras[0].view.eye[AXIS_X],
-      D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
+      (D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
           g_Cameras[0].view.eye[AXIS_Z]);
 
   translation[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
@@ -321,15 +322,15 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
   gDPPipeSync(g_DisplayListHead++);
-  offset[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE -
+  offset[AXIS_X] = (D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE) -
       view->eye[AXIS_X];
-  offset[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
+  offset[AXIS_Y] = (D_800BA9D8.cupPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
       view->eye[AXIS_Y];
-  offset[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE -
+  offset[AXIS_Z] = (D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE) -
       view->eye[AXIS_Z];
   cupHalfHeight = sinf(atan2(offset[AXIS_Y],
-                      sqrtf(offset[AXIS_X] * offset[AXIS_X] +
-                          offset[AXIS_Z] * offset[AXIS_Z]))) *
+                      sqrtf((offset[AXIS_X] * offset[AXIS_X]) +
+                          (offset[AXIS_Z] * offset[AXIS_Z])))) *
       CUP_MAX_HALF_HEIGHT;
   if (cupHalfHeight < CUP_MIN_HALF_HEIGHT) {
     cupHalfHeight = CUP_MIN_HALF_HEIGHT;
@@ -412,7 +413,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       primDepth = LARGE_CUP_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
-          cup.depthStep * (f64)(g_PinVertexScale * CUP_DEPTH_HEIGHT) +
+          (cup.depthStep * (f64)(g_PinVertexScale * CUP_DEPTH_HEIGHT)) +
           CUP_DEPTH_OFFSET - PART_DEPTH_BIAS;
     }
     gDPSetPrimDepth(g_DisplayListHead++, primDepth & PRIM_DEPTH_MASK, 0);
@@ -504,7 +505,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       primDepth = LARGE_CUP_WALL_PRIM_DEPTH;
     } else {
       primDepth = cup.depth -
-          cup.depthStep * (CUP_WALL_DEPTH_HEIGHT * g_PinVertexScale) +
+          (cup.depthStep * (CUP_WALL_DEPTH_HEIGHT * g_PinVertexScale)) +
           CUP_WALL_DEPTH_OFFSET - PART_DEPTH_BIAS;
       primDepth &= PRIM_DEPTH_MASK;
     }
@@ -567,7 +568,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
         primDepth = cup.depth;
       } else {
         primDepth = cup.depth -
-            cup.depthStep * (g_PinVertexScale * FLAGSTICK_DEPTH_HEIGHT) +
+            (cup.depthStep * (g_PinVertexScale * FLAGSTICK_DEPTH_HEIGHT)) +
             FLAGSTICK_DEPTH_OFFSET - PART_DEPTH_BIAS;
       }
       if (cupDepth < FAR_FLAGSTICK_DEPTH) {
@@ -617,8 +618,8 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
       if (f_FlagWavePhase < 0.0f) {
         f_FlagWavePhase += 2 * M_PI;
       }
-      wave = ((g_HoleConditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
-                     FLAG_WAVE_PER_WIND +
+      wave = (((g_HoleConditions.windSpeed / FLAG_WIND_SPEED_UNIT) *
+                  FLAG_WAVE_PER_WIND) +
                  MIN_FLAG_WAVE) *
           sinf(f_FlagWavePhase);
     } else {
@@ -637,7 +638,7 @@ void DrawPin(CameraMatrices* matrices, CameraView* view, s32 cameraIndex) {
     flagTranslation[AXIS_Z] =
         D_800BA9D8.cupPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     flagRotation[AXIS_Y] =
-        wave - g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS;
+        wave - (g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS);
     BuildTransformMatrix(flagMatrix, flagRotation, flagTranslation, flagScale);
     ConvertMatrixToFixed(flagMatrix, &f_FlagMatrices[g_DrawBufferIndex]);
     gDPPipeSync(g_DisplayListHead++);

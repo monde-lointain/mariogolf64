@@ -278,7 +278,7 @@ void StartLoadingChosenHole(void) {
   } else {
     if (g_IsMiniGolf) {
       g_CourseIndex = g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-          g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
+          (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
     } else {
       g_CourseIndex = D_801323A0.courseChoice;
     }
@@ -301,7 +301,7 @@ void StartLoadingChosenHole(void) {
 s32 GetChosenCourseIndex(void) {
   if (g_IsMiniGolf) {
     return g_MenuChoices.unk14 + MINI_GOLF_COURSE_INDEX +
-        g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD;
+        (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD);
   }
   return D_801323A0.courseChoice;
 }
@@ -463,7 +463,7 @@ void func_801F6B28_ovl_01(void) {
           clubSet = player->gameBoyCharacterIndex;
           clubSet += CHARACTER_KID;
         }
-        player->clubs[slot] = slot + clubSet * CLUB_SET_SIZE;
+        player->clubs[slot] = slot + (clubSet * CLUB_SET_SIZE);
       }
     }
     for (; slot != CLUB_SLOT_COUNT; slot++) {
@@ -951,8 +951,8 @@ void func_801F93D8_ovl_01(void) {
                                        [D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
+                                 1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
@@ -962,8 +962,8 @@ void func_801F93D8_ovl_01(void) {
                                        [D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
+                                 1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
@@ -992,8 +992,8 @@ void func_801F93D8_ovl_01(void) {
                                        [D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
+                                 1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           } else {
@@ -1003,8 +1003,8 @@ void func_801F93D8_ovl_01(void) {
                                        [D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
-            OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1]
-                                       [D_8022F8D4_ovl_01],
+            OpenEncodedAsset(D_800C2098[(course * MINI_GOLF_DISC_IMAGE_COUNT) +
+                                 1][D_8022F8D4_ovl_01],
                 &asset);
             ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
           }
@@ -1049,7 +1049,7 @@ void func_801F93D8_ovl_01(void) {
       D_801B9410 = 0;
       FreeAllCharacterSlots();
       LoadWipeShape(g_MenuChoices.unk14 +
-          g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD +
+          (g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD) +
           MINI_GOLF_COURSE_INDEX);
       StartWipe(WIPE_CLOSING);
       D_801052E8 = 0;
@@ -1604,8 +1604,8 @@ void func_801FC754_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
           G_TX_NOLOD);
       gDPPipeSync(gfx++);
-      stripTop =
-          BACKDROP_TOP + stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE;
+      stripTop = BACKDROP_TOP +
+          (stripIndex * BACKDROP_STRIP_ROW_COUNT * BACKDROP_SCALE);
       gSPScisTextureRectangle(gfx++, BACKDROP_LEFT << 2, stripTop << 2,
           (BACKDROP_LEFT + BACKDROP_WIDTH * BACKDROP_SCALE) << 2,
           (BACKDROP_TOP +
@@ -1643,7 +1643,7 @@ void func_801FCB74_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = NARROW_BOARD_TOP + stripIndex * NARROW_BOARD_STRIP_SPACING;
+    stripTop = NARROW_BOARD_TOP + (stripIndex * NARROW_BOARD_STRIP_SPACING);
     gSPScisTextureRectangle(gfx++, NARROW_BOARD_LEFT << 2, stripTop << 2,
         (NARROW_BOARD_LEFT + NARROW_BOARD_SHOWN_WIDTH) << 2,
         (stripTop + NARROW_BOARD_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1672,7 +1672,7 @@ void func_801FCEF8_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = UNUSED_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
+    stripTop = UNUSED_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
         (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
         (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1732,7 +1732,7 @@ void func_801FD4F0_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = LARGE_BANNER_TOP + stripIndex * LARGE_BANNER_STRIP_SPACING;
+    stripTop = LARGE_BANNER_TOP + (stripIndex * LARGE_BANNER_STRIP_SPACING);
     gSPScisTextureRectangle(gfx++, LARGE_BANNER_LEFT << 2, stripTop << 2,
         (LARGE_BANNER_LEFT + LARGE_BANNER_WIDTH) << 2,
         (stripTop + LARGE_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1759,7 +1759,7 @@ void func_801FD7B0_ovl_01(Gfx** displayListHead) {
         0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = MENU_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
+    stripTop = MENU_BANNER_TOP + (stripIndex * MENU_BANNER_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
         (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
         (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1822,7 +1822,7 @@ void func_801FDA40_ovl_01(Gfx** displayListHead) {
       &gfx, PLAIN_MENU_HEADING_X, PLAIN_MENU_HEADING_Y, D_80231634_ovl_01);
   for (labelIndex = 0; labelIndex != PLAIN_MENU_NAME_COUNT; labelIndex++) {
     DrawShadowedText(&gfx, PLAIN_MENU_NAME_X,
-        PLAIN_MENU_NAME_TOP + labelIndex * PLAIN_MENU_NAME_SPACING,
+        PLAIN_MENU_NAME_TOP + (labelIndex * PLAIN_MENU_NAME_SPACING),
         D_8022BF28_ovl_01[labelIndex]);
   }
   sprintf(g_PrintBuffer, D_80231640_ovl_01, 0x820, 0x208, 0x2A78);

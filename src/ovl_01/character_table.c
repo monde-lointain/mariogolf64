@@ -321,7 +321,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
     }
     func_8021F124_ovl_01(&gfx, D_8012D430[rowCharacter],
         D_8023BFF0_ovl_01[rowCharacter], TABLE_ROW_FACE_X,
-        shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_ROW_FACE_Y, rowCharacter,
+        (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_ROW_FACE_Y, rowCharacter,
         drawMode);
     shownColumn = 0;
     column = memory->tableFirstColumn;
@@ -334,7 +334,7 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
       if (shownRow == 0) {
         func_8021F124_ovl_01(&gfx, D_8012D430[columnCharacter],
             D_8023BFF0_ovl_01[columnCharacter],
-            shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_COLUMN_FACE_X,
+            (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
             TABLE_COLUMN_FACE_Y, columnCharacter, drawMode);
       }
       columnWins = save->unk990.unkAF0[rowCharacter][columnCharacter].unk0 &
@@ -346,21 +346,23 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
       if (save->unk990.unkAF0[rowCharacter][columnCharacter].unk1 &
           UNKAF0_FLAG) {
         func_80217464_ovl_01(&gfx,
-            shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_COLUMN_FACE_X,
-            shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_STAR_Y);
+            (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_COLUMN_FACE_X,
+            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_STAR_Y);
       } else if (columnWins != 0) {
         func_802123E0_ovl_01(&gfx,
-            shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
-            shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_SIGN_Y, MENU_SIGN_TIMES);
+            (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
+            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_SIGN_Y,
+            MENU_SIGN_TIMES);
       } else if (rowWins != 0) {
         func_802123E0_ovl_01(&gfx,
-            shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
-            shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_SIGN_Y,
+            (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
+            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_SIGN_Y,
             MENU_SIGN_PLUS_MINUS);
       } else {
         func_802123E0_ovl_01(&gfx,
-            shownColumn * TABLE_CELL_WIDTH + TABLE_FIRST_SIGN_X,
-            shownRow * TABLE_CELL_HEIGHT + TABLE_FIRST_PLUS_Y, MENU_SIGN_PLUS);
+            (shownColumn * TABLE_CELL_WIDTH) + TABLE_FIRST_SIGN_X,
+            (shownRow * TABLE_CELL_HEIGHT) + TABLE_FIRST_PLUS_Y,
+            MENU_SIGN_PLUS);
       }
       shownColumn++;
       column++;
@@ -392,8 +394,8 @@ void func_80215DC4_ovl_01(Gfx** displayListHead) {
   }
   func_80216C14_ovl_01(&gfx);
   func_8021640C_ovl_01(&gfx,
-      memory->tableColumn * TABLE_CELL_WIDTH + TABLE_CURSOR_X,
-      memory->tableRow * TABLE_CELL_HEIGHT + TABLE_CURSOR_Y);
+      (memory->tableColumn * TABLE_CELL_WIDTH) + TABLE_CURSOR_X,
+      (memory->tableRow * TABLE_CELL_HEIGHT) + TABLE_CURSOR_Y);
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -416,7 +418,7 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
     red =
         (s32)(sinf(D_80230238_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230238_ovl_01[vertexIndex] + M_PI / 2) *
+    blue = (s32)(sinf(D_80230238_ovl_01[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80230238_ovl_01[vertexIndex] + M_PI) *
@@ -429,8 +431,9 @@ void func_8021640C_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
   guOrtho(&D_8023AAE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
-  guTranslate(&D_8023AB20_ovl_01, x - (SCREEN_WIDTH / 2 - MENU_CURSOR_SIZE / 2),
-      (SCREEN_HEIGHT / 2 - MENU_CURSOR_SIZE / 2) - y, MENU_CURSOR_Z);
+  guTranslate(&D_8023AB20_ovl_01,
+      x - ((SCREEN_WIDTH / 2) - (MENU_CURSOR_SIZE / 2)),
+      ((SCREEN_HEIGHT / 2) - (MENU_CURSOR_SIZE / 2)) - y, MENU_CURSOR_Z);
   guRotate(&D_8023AB60_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023AC20_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);
   gDPPipeSync(gfx++);

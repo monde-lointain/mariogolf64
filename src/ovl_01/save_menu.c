@@ -1227,7 +1227,7 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop =
-        COURSE_THUMBNAIL_TOP + stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT;
+        COURSE_THUMBNAIL_TOP + (stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT);
     gSPScisTextureRectangle(gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
         (COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH) << 2,
         (stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
@@ -1263,7 +1263,7 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
         G_TX_NOLOD);
     gDPPipeSync(gfx++);
     stripTop =
-        COURSE_THUMBNAIL_TOP + stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT;
+        COURSE_THUMBNAIL_TOP + (stripIndex * COURSE_THUMBNAIL_SHOWN_HEIGHT);
     gSPScisTextureRectangle(gfx++, COURSE_THUMBNAIL_LEFT << 2, stripTop << 2,
         (COURSE_THUMBNAIL_LEFT + COURSE_THUMBNAIL_SHOWN_WIDTH) << 2,
         (stripTop + COURSE_THUMBNAIL_SHOWN_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,

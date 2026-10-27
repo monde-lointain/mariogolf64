@@ -767,9 +767,9 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
   s32 count;
 
   if (kind < CHARACTER_MODEL_KIND_COUNT) {
-    g_CharacterModelIndex =
-        (kind & (CHARACTER_MODEL_KIND_COUNT - 1)) * CHARACTER_MODELS_PER_KIND +
-        character % CHARACTER_MODELS_PER_KIND;
+    g_CharacterModelIndex = ((kind & (CHARACTER_MODEL_KIND_COUNT - 1)) *
+                                CHARACTER_MODELS_PER_KIND) +
+        (character % CHARACTER_MODELS_PER_KIND);
     slot->model = &g_CharacterModels[0][g_CharacterModelIndex];
   } else {
     g_CharacterModelIndex = (u32)character % OTHER_CHARACTER_MODEL_COUNT;
@@ -1267,12 +1267,12 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         spanIndex = joint->translationSpan.index;
         nextSpanIndex = spanIndex + 1;
         remaining = 1.0 - progress;
-        x = remaining * joint->translations[spanIndex][0] +
-            progress * joint->translations[nextSpanIndex][0];
-        y = remaining * joint->translations[spanIndex][1] +
-            progress * joint->translations[nextSpanIndex][1];
-        z = remaining * joint->translations[spanIndex][2] +
-            progress * joint->translations[nextSpanIndex][2];
+        x = (remaining * joint->translations[spanIndex][0]) +
+            (progress * joint->translations[nextSpanIndex][0]);
+        y = (remaining * joint->translations[spanIndex][1]) +
+            (progress * joint->translations[nextSpanIndex][1]);
+        z = (remaining * joint->translations[spanIndex][2]) +
+            (progress * joint->translations[nextSpanIndex][2]);
       }
     }
     guTranslateF(translationMatrix, x, y, z);
@@ -1321,14 +1321,14 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
       } else {
         spanIndex = joint->rotationSpan.index;
         nextSpanIndex = spanIndex + 1;
-        dot = (joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][0] +
-            (joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][1] +
-            (joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][2] +
-            (joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][3];
+        dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
+                  joint->rotations[spanIndex][0]) +
+            ((joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][1]) +
+            ((joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][2]) +
+            ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][3]);
         progress = (frame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
@@ -1345,20 +1345,20 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         }
         spanWeight *= QUATERNION_SCALE;
         nextWeight *= QUATERNION_SCALE;
-        rotation[0] = spanWeight * joint->rotations[spanIndex][0] +
-            nextWeight * joint->rotations[nextSpanIndex][0];
-        rotation[1] = spanWeight * joint->rotations[spanIndex][1] +
-            nextWeight * joint->rotations[nextSpanIndex][1];
-        rotation[2] = spanWeight * joint->rotations[spanIndex][2] +
-            nextWeight * joint->rotations[nextSpanIndex][2];
-        rotation[3] = spanWeight * joint->rotations[spanIndex][3] +
-            nextWeight * joint->rotations[nextSpanIndex][3];
+        rotation[0] = (spanWeight * joint->rotations[spanIndex][0]) +
+            (nextWeight * joint->rotations[nextSpanIndex][0]);
+        rotation[1] = (spanWeight * joint->rotations[spanIndex][1]) +
+            (nextWeight * joint->rotations[nextSpanIndex][1]);
+        rotation[2] = (spanWeight * joint->rotations[spanIndex][2]) +
+            (nextWeight * joint->rotations[nextSpanIndex][2]);
+        rotation[3] = (spanWeight * joint->rotations[spanIndex][3]) +
+            (nextWeight * joint->rotations[nextSpanIndex][3]);
       }
     }
 
     /* The rotation quaternion (x, y, z, w) as a matrix */
-    lengthSquared = rotation[0] * rotation[0] + rotation[1] * rotation[1] +
-        rotation[2] * rotation[2] + rotation[3] * rotation[3];
+    lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
+        (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
     if (lengthSquared > 0.0f) {
       scale = 2.0f / lengthSquared;
     } else {
@@ -1435,12 +1435,12 @@ void UpdateJointKeyframeSpans(u32 slotIndex) {
         spanIndex = joint->scaleSpan.index;
         nextSpanIndex = spanIndex + 1;
         remaining = 1.0 - progress;
-        x = remaining * joint->scales[spanIndex][0] +
-            progress * joint->scales[nextSpanIndex][0];
-        y = remaining * joint->scales[spanIndex][1] +
-            progress * joint->scales[nextSpanIndex][1];
-        z = remaining * joint->scales[spanIndex][2] +
-            progress * joint->scales[nextSpanIndex][2];
+        x = (remaining * joint->scales[spanIndex][0]) +
+            (progress * joint->scales[nextSpanIndex][0]);
+        y = (remaining * joint->scales[spanIndex][1]) +
+            (progress * joint->scales[nextSpanIndex][1]);
+        z = (remaining * joint->scales[spanIndex][2]) +
+            (progress * joint->scales[nextSpanIndex][2]);
       }
     }
     joint++;
@@ -1566,7 +1566,7 @@ void SetCharacterBuffer(s32 slotIndex, u8* buffer) {
     for (i = 0; i < FRAME_DATA_COPY_COUNT; i++) {
       g_CharacterSlots[slotIndex].frameData[i] =
           (u8*)g_CharacterSlots[slotIndex].modelBuffer + FRAME_DATA_OFFSET +
-          i * FRAME_DATA_COPY_SIZE;
+          (i * FRAME_DATA_COPY_SIZE);
     }
   }
 }
@@ -1653,7 +1653,7 @@ void DrawCharacter(u32 slotIndex) {
     guScale(&f_ModelScaleMatrix, MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
     guRotate(&f_RollMatrix, HALF_TURN_DEGREES, 0.0f, 0.0f, 1.0f);
     guRotate(&f_HeadingMatrix,
-        f_DrawParity * FULL_TURN_DEGREES / BINARY_ANGLE_TURN +
+        (f_DrawParity * FULL_TURN_DEGREES / BINARY_ANGLE_TURN) +
             HALF_TURN_DEGREES,
         0.0f, 1.0f, 0.0f);
   }
@@ -1772,15 +1772,15 @@ void PlaceAndViewCharacter(u32 slotIndex) {
         slot->position[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_X] =
         (slot->position[AXIS_X] +
-            cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
-                VIEW_DISTANCE) *
+            (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
+                VIEW_DISTANCE)) *
         COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Y] =
         (slot->position[AXIS_Y] - VIEW_DROP) * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] =
         (slot->position[AXIS_Z] +
-            sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
-                VIEW_DISTANCE) *
+            (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) *
+                VIEW_DISTANCE)) *
         COURSE_TO_WORLD_SCALE;
   }
 }

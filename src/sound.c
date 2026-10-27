@@ -524,7 +524,7 @@ void PlaySong(s32 songId, s32 flags) {
           songId = LAST_SONG_ID;
         }
         LoadSong(f_SongRomBounds[songId * 2],
-            f_SongRomBounds[songId * 2 + 1] - f_SongRomBounds[songId * 2]);
+            f_SongRomBounds[(songId * 2) + 1] - f_SongRomBounds[songId * 2]);
         MusSetMasterVolume(MUSFLAG_SONGS, SONG_MASTER_VOLUME);
         f_SongHandleCopy = f_SongHandle = StartLoadedSong();
         if (g_SoundOptionBits & OPTION_BIT_MONO) {

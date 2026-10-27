@@ -274,7 +274,7 @@ void func_802178B0_ovl_01(void* buffer, s16 bufferKind) {
       for (iconIndex = 0; iconIndex != PLAYER_STATS_ICON_COUNT; iconIndex++) {
         OpenEncodedAsset(D_802303AC_ovl_01[iconIndex], &asset);
         ReadEncodedAsset(
-            (u8*)D_8023B340_ovl_01 + iconIndex * PLAYER_STATS_ICON_SIZE,
+            (u8*)D_8023B340_ovl_01 + (iconIndex * PLAYER_STATS_ICON_SIZE),
             &asset);
       }
       break;
@@ -834,7 +834,7 @@ void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0, G_TX_MIRROR | G_TX_WRAP,
           G_TX_MIRROR | G_TX_WRAP, PAGE_ARROW_MASK, PAGE_ARROW_MASK, G_TX_NOLOD,
           G_TX_NOLOD);
-      left = (SCREEN_WIDTH / 2) + gap / 2;
+      left = (SCREEN_WIDTH / 2) + (gap / 2);
     } else {
       gDPLoadTextureTile_4b(gfx++,
           ((u32)D_8023B35C_ovl_01 + PALETTED_TEXELS_OFFSET +
@@ -844,7 +844,7 @@ void func_8021C200_ovl_01(Gfx** displayListHead, s32 gap, s32 centerY) {
           PAGE_ARROW_SIZE - 1, PAGE_ARROW_SIZE - 1, 0,
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-      left = (SCREEN_WIDTH / 2) - PAGE_ARROW_SIZE - gap / 2;
+      left = (SCREEN_WIDTH / 2) - PAGE_ARROW_SIZE - (gap / 2);
     }
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, left << 2,
@@ -1005,9 +1005,11 @@ void func_8021CFAC_ovl_01(void* buffer, s16 bufferKind) {
       OpenEncodedAsset(0x82F, &asset);
       ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE, &asset);
       OpenEncodedAsset(0x82E, &asset);
-      ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE * 2, &asset);
+      ReadEncodedAsset(
+          D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 2), &asset);
       OpenEncodedAsset(0x830, &asset);
-      ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE * 3, &asset);
+      ReadEncodedAsset(
+          D_8023B63C_ovl_01 + (PLAYER_STATS_IMAGE_SIZE * 3), &asset);
       break;
   }
 }
@@ -1292,7 +1294,7 @@ void func_8021E4B0_ovl_01(
   if (labelIndex >= SCORE_LABEL_COUNT) {
     labelIndex = SCORE_LABEL_COUNT - 1;
   }
-  image = D_8023B63C_ovl_01 + labelIndex * PLAYER_STATS_IMAGE_SIZE;
+  image = D_8023B63C_ovl_01 + (labelIndex * PLAYER_STATS_IMAGE_SIZE);
   width = image[IMAGE_WIDTH_LOW_BYTE];
   height = image[IMAGE_HEIGHT_LOW_BYTE];
   /* The original passes the palette's first byte, not its address, so the
@@ -1330,7 +1332,7 @@ void func_8021E97C_ovl_01(Gfx** displayListHead) {
     red =
         (s32)(sinf(D_80230A38_ovl_01[vertexIndex]) * MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
-    blue = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + M_PI / 2) *
+    blue = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + (M_PI / 2)) *
                MENU_CURSOR_COLOR_SWING) +
         MENU_CURSOR_COLOR_MIDDLE;
     green = (s32)(sinf(D_80230A38_ovl_01[vertexIndex] + M_PI) *
@@ -1344,8 +1346,8 @@ void func_8021E97C_ovl_01(Gfx** displayListHead) {
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
   guTranslate(&D_8023B450_ovl_01,
-      memory->unk39 * STATS_CURSOR_COLUMN_WIDTH + STATS_CURSOR_LEFT_X,
-      STATS_CURSOR_TOP_Y - memory->unk3A * STATS_CURSOR_ROW_HEIGHT,
+      (memory->unk39 * STATS_CURSOR_COLUMN_WIDTH) + STATS_CURSOR_LEFT_X,
+      STATS_CURSOR_TOP_Y - (memory->unk3A * STATS_CURSOR_ROW_HEIGHT),
       MENU_CURSOR_Z);
   guRotate(&D_8023B490_ovl_01, 0.0f, 0.0f, 1.0f, 0.0f);
   guScale(&D_8023B550_ovl_01, 1.0f, MENU_CURSOR_SCALE_Y, 1.0f);

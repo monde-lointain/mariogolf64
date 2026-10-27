@@ -467,8 +467,8 @@ void DrawHelpBoard(Gfx** displayListHead) {
     }
     handLeft = f_HandOffset + HAND_LEFT;
     handTop = f_HelpListLayout.top +
-        (memory->helpTopicIndex - f_FirstListedTopic) *
-            f_HelpListLayout.rowSpacing;
+        ((memory->helpTopicIndex - f_FirstListedTopic) *
+            f_HelpListLayout.rowSpacing);
     gSPScisTextureRectangle(gfx++, handLeft << 2, handTop << 2,
         (handLeft + HAND_SIZE) << 2, (handTop + HAND_SIZE) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -525,16 +525,16 @@ void DrawHelpBoard(Gfx** displayListHead) {
         index++, topic++) {
       f_ListColorPhase += DEGREES_TO_RADIANS(5);
       red = (s32)(sinf(f_ListColorPhase) * 127.0f) + 127;
-      blue = (s32)(sinf(f_ListColorPhase + M_PI / 2) * 127.0f) + 127;
+      blue = (s32)(sinf(f_ListColorPhase + (M_PI / 2)) * 127.0f) + 127;
       green = (s32)(sinf(f_ListColorPhase + M_PI) * 127.0f) + 127;
       if (topic == memory->helpTopicIndex) {
         SetTextSlot(LIST_LEFT,
-            f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+            f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
             f_TopicTitleMessages[0] + topic, 1, index, 0x10, red, green, blue,
             0xFF);
       } else {
         SetTextSlot(LIST_LEFT,
-            f_HelpListLayout.top + index * f_HelpListLayout.rowSpacing,
+            f_HelpListLayout.top + (index * f_HelpListLayout.rowSpacing),
             f_TopicTitleMessages[f_OpenTopic] + topic, 1, index, 0x10, 0xFF,
             0xFF, 0xFF, 0xFF);
       }
@@ -606,7 +606,7 @@ void DrawChalkboard(Gfx** displayListHead) {
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
         G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     gDPPipeSync(gfx++);
-    stripTop = CHALKBOARD_TOP + stripIndex * CHALKBOARD_DRAWN_STRIP_HEIGHT;
+    stripTop = CHALKBOARD_TOP + (stripIndex * CHALKBOARD_DRAWN_STRIP_HEIGHT);
     gSPScisTextureRectangle(gfx++, CHALKBOARD_LEFT << 2, stripTop << 2,
         (CHALKBOARD_LEFT + CHALKBOARD_WIDTH) << 2,
         (stripTop + CHALKBOARD_DRAWN_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,

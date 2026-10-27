@@ -109,8 +109,8 @@ s32 GetCourseRecordIndex(void) {
     return g_RingShotHoles[g_CourseIndex][g_HoleIndex].courseRecordIndex;
   }
   if (g_IsMiniGolf) {
-    return ((g_CourseIndex - MINI_GOLF_COURSE_INDEX) /
-                   MINI_GOLF_COURSES_PER_RECORD &
+    return (((g_CourseIndex - MINI_GOLF_COURSE_INDEX) /
+                MINI_GOLF_COURSES_PER_RECORD) &
                1) |
         COURSE_RECORD_LUIGIS_GARDEN;
   }

@@ -2405,12 +2405,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
         spanIndex = joint->translationSpan.index;
         nextSpanIndex = spanIndex + 1;
         remaining = 1.0 - progress;
-        x = remaining * joint->translations[spanIndex][0] +
-            progress * joint->translations[nextSpanIndex][0];
-        y = remaining * joint->translations[spanIndex][1] +
-            progress * joint->translations[nextSpanIndex][1];
-        z = remaining * joint->translations[spanIndex][2] +
-            progress * joint->translations[nextSpanIndex][2];
+        x = (remaining * joint->translations[spanIndex][0]) +
+            (progress * joint->translations[nextSpanIndex][0]);
+        y = (remaining * joint->translations[spanIndex][1]) +
+            (progress * joint->translations[nextSpanIndex][1]);
+        z = (remaining * joint->translations[spanIndex][2]) +
+            (progress * joint->translations[nextSpanIndex][2]);
       }
     }
     guTranslateF(translationMatrix, x, y, z);
@@ -2459,14 +2459,14 @@ void AnimateCharacterJoints(u32 slotIndex) {
       } else {
         spanIndex = joint->rotationSpan.index;
         nextSpanIndex = spanIndex + 1;
-        dot = (joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][0] +
-            (joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][1] +
-            (joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][2] +
-            (joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
-                joint->rotations[spanIndex][3];
+        dot = ((joint->rotations[nextSpanIndex][0] * QUATERNION_PRODUCT_SCALE) *
+                  joint->rotations[spanIndex][0]) +
+            ((joint->rotations[nextSpanIndex][1] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][1]) +
+            ((joint->rotations[nextSpanIndex][2] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][2]) +
+            ((joint->rotations[nextSpanIndex][3] * QUATERNION_PRODUCT_SCALE) *
+                joint->rotations[spanIndex][3]);
         progress = (frame - joint->rotationSpan.startFrame) /
             (joint->rotationSpan.endFrame - joint->rotationSpan.startFrame);
         /* Nearly equal rotations are blended linearly, where the sines below
@@ -2483,20 +2483,20 @@ void AnimateCharacterJoints(u32 slotIndex) {
         }
         spanWeight *= QUATERNION_SCALE;
         nextWeight *= QUATERNION_SCALE;
-        rotation[0] = spanWeight * joint->rotations[spanIndex][0] +
-            nextWeight * joint->rotations[nextSpanIndex][0];
-        rotation[1] = spanWeight * joint->rotations[spanIndex][1] +
-            nextWeight * joint->rotations[nextSpanIndex][1];
-        rotation[2] = spanWeight * joint->rotations[spanIndex][2] +
-            nextWeight * joint->rotations[nextSpanIndex][2];
-        rotation[3] = spanWeight * joint->rotations[spanIndex][3] +
-            nextWeight * joint->rotations[nextSpanIndex][3];
+        rotation[0] = (spanWeight * joint->rotations[spanIndex][0]) +
+            (nextWeight * joint->rotations[nextSpanIndex][0]);
+        rotation[1] = (spanWeight * joint->rotations[spanIndex][1]) +
+            (nextWeight * joint->rotations[nextSpanIndex][1]);
+        rotation[2] = (spanWeight * joint->rotations[spanIndex][2]) +
+            (nextWeight * joint->rotations[nextSpanIndex][2]);
+        rotation[3] = (spanWeight * joint->rotations[spanIndex][3]) +
+            (nextWeight * joint->rotations[nextSpanIndex][3]);
       }
     }
 
     /* The rotation quaternion (x, y, z, w) as a matrix */
-    lengthSquared = rotation[0] * rotation[0] + rotation[1] * rotation[1] +
-        rotation[2] * rotation[2] + rotation[3] * rotation[3];
+    lengthSquared = (rotation[0] * rotation[0]) + (rotation[1] * rotation[1]) +
+        (rotation[2] * rotation[2]) + (rotation[3] * rotation[3]);
     if (lengthSquared > 0.0f) {
       scale = 2.0f / lengthSquared;
     } else {
@@ -2573,12 +2573,12 @@ void AnimateCharacterJoints(u32 slotIndex) {
         spanIndex = joint->scaleSpan.index;
         nextSpanIndex = spanIndex + 1;
         remaining = 1.0 - progress;
-        x = remaining * joint->scales[spanIndex][0] +
-            progress * joint->scales[nextSpanIndex][0];
-        y = remaining * joint->scales[spanIndex][1] +
-            progress * joint->scales[nextSpanIndex][1];
-        z = remaining * joint->scales[spanIndex][2] +
-            progress * joint->scales[nextSpanIndex][2];
+        x = (remaining * joint->scales[spanIndex][0]) +
+            (progress * joint->scales[nextSpanIndex][0]);
+        y = (remaining * joint->scales[spanIndex][1]) +
+            (progress * joint->scales[nextSpanIndex][1]);
+        z = (remaining * joint->scales[spanIndex][2]) +
+            (progress * joint->scales[nextSpanIndex][2]);
       }
     }
     guScaleF(scaleMatrix, x, y, z);

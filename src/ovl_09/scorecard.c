@@ -1045,7 +1045,7 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
   height /= stripCount;
   for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
     LoadTextureBlock(&gfx,
-        image + LARGE_PALETTED_TEXELS_OFFSET + stripIndex * width * height,
+        image + LARGE_PALETTED_TEXELS_OFFSET + (stripIndex * width * height),
         G_IM_FMT_CI, G_IM_SIZ_8b, width, height, 0, 0, 0, 0, 0, 0, 0);
     DrawTextureRect(&gfx, left << 2, top << 2, (left + width) << 2,
         (top + height) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
@@ -1094,12 +1094,12 @@ void DrawScorecard(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         if (g_Scorecard.pageCount == THREE_PAGE_COUNT) {
           DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
-              (i * THREE_PAGE_TITLE_SPACING + THREE_PAGE_TITLE_LEFT) +
+              ((i * THREE_PAGE_TITLE_SPACING) + THREE_PAGE_TITLE_LEFT) +
                   g_Scorecard.x,
               g_Scorecard.y + PAGE_TITLE_TOP + dropY);
         } else {
           DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
-              (i * PAGE_TITLE_SPACING + PAGE_TITLE_LEFT) + g_Scorecard.x,
+              ((i * PAGE_TITLE_SPACING) + PAGE_TITLE_LEFT) + g_Scorecard.x,
               g_Scorecard.y + PAGE_TITLE_TOP + dropY);
         }
       }
@@ -1243,7 +1243,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
   gDPSetPrimColor(
       gfx++, 0, 0, TAB_BACK_GRAY, TAB_BACK_GRAY, TAB_BACK_GRAY, 0xFF);
   for (tabIndex = 0; tabIndex != pageCount; tabIndex++) {
-    texelsOffset = tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH +
+    texelsOffset = (tabStrips[tabIndex] * TAB_HEIGHT * TABLE_WIDTH) +
         LARGE_PALETTED_TEXELS_OFFSET;
     dropY = TAB_BACK_DROP;
     if (tabIndex == pageCount - 1) {

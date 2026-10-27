@@ -161,7 +161,7 @@ f32 BlendClamped(f32 from, f32 to, f32 weight) {
   if (weight > 1.0f) {
     weight = 1.0f;
   }
-  return from * (1.0f - weight) + to * weight;
+  return (from * (1.0f - weight)) + (to * weight);
 }
 
 /*
@@ -609,9 +609,9 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
       lightDirection[AXIS_X] -= lightOrigin[AXIS_X];
       lightDirection[AXIS_Y] -= lightOrigin[AXIS_Y];
       lightDirection[AXIS_Z] -= lightOrigin[AXIS_Z];
-      length = sqrtf(lightDirection[AXIS_X] * lightDirection[AXIS_X] +
-          lightDirection[AXIS_Y] * lightDirection[AXIS_Y] +
-          lightDirection[AXIS_Z] * lightDirection[AXIS_Z]);
+      length = sqrtf((lightDirection[AXIS_X] * lightDirection[AXIS_X]) +
+          (lightDirection[AXIS_Y] * lightDirection[AXIS_Y]) +
+          (lightDirection[AXIS_Z] * lightDirection[AXIS_Z]));
       if (length > 1.0f) {
         length = LIGHT_DIRECTION_LENGTH / length;
         lightDirection[AXIS_X] *= length;
@@ -646,15 +646,15 @@ void FrameMarioReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + (-1.5f);
   if (f_ReactionAnimation == REACTION_ANIMATION_PAR) {
     view->eye[AXIS_Y] = focus[AXIS_Y] + (-7.5f);
   }
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -706,11 +706,11 @@ void FrameWarioReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   switch (f_ReactionAnimation) {
     case REACTION_ANIMATION_EAGLE:
       view->eye[AXIS_Y] = focus[AXIS_Y];
@@ -758,12 +758,12 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y];
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -777,9 +777,9 @@ void FrameBabyMarioReaction(u32 slotIndex, CameraView* view) {
       heading = 0.0f;
     }
     if (!(f_ReactionFrame & 1)) {
-      SpawnTear(slotIndex, 3, heading + M_PI / 2);
+      SpawnTear(slotIndex, 3, heading + (M_PI / 2));
     } else {
-      SpawnTear(slotIndex, 4, heading - M_PI / 2);
+      SpawnTear(slotIndex, 4, heading - (M_PI / 2));
     }
   }
   if (IsReactionViewLow()) {
@@ -815,16 +815,16 @@ void FrameMapleReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   if (f_ReactionAnimation == REACTION_ANIMATION_BOGEY) {
     view->eye[AXIS_Y] = focus[AXIS_Y];
   } else {
     view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
   }
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -868,11 +868,11 @@ void FrameBowserReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   switch (f_ReactionAnimation) {
     case REACTION_ANIMATION_EAGLE:
       view->eye[AXIS_Y] = focus[AXIS_Y] + (-15.0f);
@@ -926,12 +926,12 @@ void FrameAzaleaReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + (-7.5f);
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -962,12 +962,12 @@ void FrameDonkeyKongReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(view->eye, view->lookAt, 0.08f, EASE_EYE | EASE_LOOK_AT);
   if (IsReactionViewLow()) {
@@ -997,12 +997,12 @@ void FrameReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -1036,12 +1036,12 @@ void FrameYoshiReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -1063,8 +1063,8 @@ void FrameSherryReaction(u32 slotIndex, CameraView* view) {
   if (f_ReactionAnimation == REACTION_ANIMATION_EAGLE &&
       (u32)(f_ReactionFrame - SHERRY_EFFECT_START_FRAME) <
           SHERRY_EFFECT_FRAME_COUNT) {
-    SpawnSparkleNearPoint(slotIndex, f_ReactionFrame % 3 + 3);
-    SpawnSparkleNearPoint(slotIndex, f_ReactionFrame % 3 + 6);
+    SpawnSparkleNearPoint(slotIndex, (f_ReactionFrame % 3) + 3);
+    SpawnSparkleNearPoint(slotIndex, (f_ReactionFrame % 3) + 6);
   }
   GetCharacterPointPosition(slotIndex, REACTION_FOCUS_POINT, focus);
   highestHeight = (GetGroundHeight(focus[AXIS_X] * WORLD_TO_COURSE_SCALE,
@@ -1078,12 +1078,12 @@ void FrameSherryReaction(u32 slotIndex, CameraView* view) {
   view->lookAt[AXIS_Y] = focus[AXIS_Y];
   view->lookAt[AXIS_Z] = focus[AXIS_Z];
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf(-slot->rotation[AXIS_Y] - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(
       view->eye, view->lookAt, REACTION_EASE_RATE, EASE_EYE | EASE_LOOK_AT);
@@ -1121,12 +1121,12 @@ void FrameKidReaction(u32 slotIndex, CameraView* view) {
     turn = 0.0f;
   }
   view->eye[AXIS_X] = focus[AXIS_X] +
-      cosf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (cosf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   view->eye[AXIS_Y] = focus[AXIS_Y] + REACTION_EYE_DROP;
   view->eye[AXIS_Z] = focus[AXIS_Z] +
-      sinf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance *
-          COURSE_TO_WORLD_SCALE;
+      (sinf((turn - slot->rotation[AXIS_Y]) - QUARTER_TURN_RADIANS) * distance *
+          COURSE_TO_WORLD_SCALE);
   KeepAboveGround(view->eye);
   EaseReactionView(view->eye, view->lookAt, 0.3f, EASE_EYE | EASE_LOOK_AT);
   if (IsReactionViewLow()) {
@@ -1292,8 +1292,8 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
   spot[AXIS_X] = f_ReactionSpot[AXIS_X];
   spot[AXIS_Y] = f_ReactionSpot[AXIS_Y];
   spot[AXIS_Z] = f_ReactionSpot[AXIS_Z];
-  ahead[AXIS_X] = cosf(heading) * radius + spot[AXIS_X];
-  ahead[AXIS_Z] = sinf(heading) * radius + spot[AXIS_Z];
+  ahead[AXIS_X] = (cosf(heading) * radius) + spot[AXIS_X];
+  ahead[AXIS_Z] = (sinf(heading) * radius) + spot[AXIS_Z];
   ahead[AXIS_Y] = GetGroundHeight(ahead[AXIS_X], ahead[AXIS_Z]);
   pitch = atan2(ahead[AXIS_Y] - spot[AXIS_Y], radius);
   for (i = 0; i < PITCH_REFINEMENT_COUNT; i++) {
@@ -1303,8 +1303,8 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
       absRadius = -absRadius;
     }
     distance = cosine * absRadius;
-    position[AXIS_X] = cosf(heading) * distance + spot[AXIS_X];
-    position[AXIS_Z] = sinf(heading) * distance + spot[AXIS_Z];
+    position[AXIS_X] = (cosf(heading) * distance) + spot[AXIS_X];
+    position[AXIS_Z] = (sinf(heading) * distance) + spot[AXIS_Z];
     position[AXIS_Y] = GetGroundHeight(position[AXIS_X], position[AXIS_Z]);
     rotation[AXIS_X] = atan2(position[AXIS_Y] - spot[AXIS_Y], distance);
     pitch = (pitch + rotation[AXIS_X]) * 0.5f;

@@ -513,11 +513,11 @@ void PrepareHoleDisplay(void) {
   g_MatrixBufferIndex = 0;
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
     f_Arrows[0].body[i].v.tc[1] =
-        (f_Arrows[0].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
+        ((f_Arrows[0].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
     f_Arrows[1].body[i].v.tc[1] =
-        (f_Arrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW +
+        ((f_Arrows[1].body[i].v.ob[1] / ARROW_UNITS_PER_TEXEL_ROW) +
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
   }
@@ -556,7 +556,7 @@ void InitRoundHud(void) {
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT; column++) {
         vertex->v.tc[0] =
-            HOLE_FLAG_BACK_TEXEL_START - column * HOLE_FLAG_TEXEL_COLUMN_STEP;
+            HOLE_FLAG_BACK_TEXEL_START - (column * HOLE_FLAG_TEXEL_COLUMN_STEP);
         vertex++;
       }
     }
@@ -1470,11 +1470,11 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         distance * GREEN_GRID_ROW_SPACING / GREEN_GRID_MAX_PUTT_DISTANCE;
   } else {
     center[AXIS_X] =
-        cosf(yaw) * worldDistance + g_CurrentShot.ballPosition[AXIS_X];
+        (cosf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_X];
     rowShift = GREEN_GRID_LANDING_ROW_SHIFT;
     rowSpacing = GREEN_GRID_LANDING_ROW_SPACING;
     center[AXIS_Z] =
-        sinf(yaw) * worldDistance + g_CurrentShot.ballPosition[AXIS_Z];
+        (sinf(yaw) * worldDistance) + g_CurrentShot.ballPosition[AXIS_Z];
     D_800BB0E8 = 1;
     center[AXIS_Y] = GetGroundHeight(center[AXIS_X], center[AXIS_Z]);
     rowCount = GREEN_GRID_LANDING_ROW_COUNT;
@@ -1482,13 +1482,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   }
   forwardX = -cosf(yaw);
   forwardZ = -sinf(yaw);
-  sideAngle = yaw + M_PI / 2;
+  sideAngle = yaw + (M_PI / 2);
   sideX = -cosf(sideAngle) * columnSpacing;
   sideZ = -sinf(sideAngle) * columnSpacing;
   shift = (rowShift - rowCount) * rowSpacing;
-  centering = 0.5f - columnCount * 0.5f;
-  originX = forwardX * shift + sideX * centering;
-  originZ = forwardZ * shift + sideZ * centering;
+  centering = 0.5f - (columnCount * 0.5f);
+  originX = (forwardX * shift) + (sideX * centering);
+  originZ = (forwardZ * shift) + (sideZ * centering);
   stepX = -cosf(yaw) * rowSpacing;
   stepZ = -sinf(yaw) * rowSpacing;
   if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
@@ -1514,14 +1514,14 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
       if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
         points[i][AXIS_X] =
-            center[AXIS_X] + originX + stepX * rowPosition + sideX * column;
+            center[AXIS_X] + originX + (stepX * rowPosition) + (sideX * column);
         points[i][AXIS_Z] =
-            center[AXIS_Z] + originZ + stepZ * rowPosition + sideZ * column;
+            center[AXIS_Z] + originZ + (stepZ * rowPosition) + (sideZ * column);
       } else {
-        points[i][AXIS_X] = center[AXIS_X] + originX + stepX * rowPosition +
-            sideX * column + scrollX;
-        points[i][AXIS_Z] = center[AXIS_Z] + originZ + stepZ * rowPosition +
-            sideZ * column + scrollZ;
+        points[i][AXIS_X] = center[AXIS_X] + originX + (stepX * rowPosition) +
+            (sideX * column) + scrollX;
+        points[i][AXIS_Z] = center[AXIS_Z] + originZ + (stepZ * rowPosition) +
+            (sideZ * column) + scrollZ;
       }
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
         D_800BB0E8 = 1;
@@ -1547,17 +1547,17 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
     for (row = 1; row != rowCount - 1; row += 2) {
       for (column = 0; column != columnCount; column++) {
-        points[row * columnCount + column][AXIS_X] =
-            (points[(row - 1) * columnCount + column][AXIS_X] +
-                points[(row + 1) * columnCount + column][AXIS_X]) *
+        points[(row * columnCount) + column][AXIS_X] =
+            (points[((row - 1) * columnCount) + column][AXIS_X] +
+                points[((row + 1) * columnCount) + column][AXIS_X]) *
             0.5f;
-        points[row * columnCount + column][AXIS_Y] =
-            (points[(row - 1) * columnCount + column][AXIS_Y] +
-                points[(row + 1) * columnCount + column][AXIS_Y]) *
+        points[(row * columnCount) + column][AXIS_Y] =
+            (points[((row - 1) * columnCount) + column][AXIS_Y] +
+                points[((row + 1) * columnCount) + column][AXIS_Y]) *
             0.5f;
-        points[row * columnCount + column][AXIS_Z] =
-            (points[(row - 1) * columnCount + column][AXIS_Z] +
-                points[(row + 1) * columnCount + column][AXIS_Z]) *
+        points[(row * columnCount) + column][AXIS_Z] =
+            (points[((row - 1) * columnCount) + column][AXIS_Z] +
+                points[((row + 1) * columnCount) + column][AXIS_Z]) *
             0.5f;
       }
     }
@@ -1572,7 +1572,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         screenPoints[i].y = projected.y * 4;
         screenPoints[i].isVisible = TRUE;
         screenPoints[i].depth =
-            projected.depth - projected.depthStep * GREEN_GRID_DEPTH_BIAS;
+            projected.depth - (projected.depthStep * GREEN_GRID_DEPTH_BIAS);
       } else {
         screenPoints[i].isVisible = FALSE;
       }
@@ -1642,7 +1642,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
           screenPoints[point].isVisible = FALSE;
           continue;
         }
-        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
         SET_GREEN_GRID_TINT(slopes[point]);
@@ -1703,7 +1703,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
      */
     for (column = 0; column != columnCount; column++) {
       for (row = 0; row != rowCount - 1; row++) {
-        point = row * columnCount + column;
+        point = (row * columnCount) + column;
 
         if (screenPoints[point].isVisible != TRUE ||
             screenPoints[point + columnCount].isVisible != TRUE) {
@@ -1714,7 +1714,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         if (dx == 0.0f && dy == 0.0f) {
           continue;
         }
-        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf(dx * dx + dy * dy);
+        scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
         SET_GREEN_GRID_TINT(slopes[point]);
@@ -1834,8 +1834,8 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       f_BallTrail[f_BallTrailHead][AXIS_X] =
           g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
       f_BallTrail[f_BallTrailHead][AXIS_Y] =
-          g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE -
-          g_PinVertexScale * BALL_TRAIL_DROP;
+          (g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE) -
+          (g_PinVertexScale * BALL_TRAIL_DROP);
       f_BallTrail[f_BallTrailHead][AXIS_Z] =
           g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
@@ -1851,7 +1851,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           f_BallTrailPoints[i].x = point.x * 4;
           f_BallTrailPoints[i].y = point.y * 4;
           f_BallTrailPoints[i].depth = point.depth -
-              point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS);
+              (point.depthStep * (g_PinVertexScale * BALL_TRAIL_DEPTH_BIAS));
         } else {
           f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
         }
@@ -1890,7 +1890,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           if (deltaX == 0.0f & deltaY == 0.0f) {
           } else {
             scale = BALL_TRAIL_HALF_WIDTH /
-                sqrtf(deltaX * deltaX + deltaY * deltaY);
+                sqrtf((deltaX * deltaX) + (deltaY * deltaY));
             offsetX = deltaY * scale;
             offsetY = deltaX * scale;
             gDPPipeSync(gfx++);
@@ -2001,19 +2001,19 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   dtdy = (WIND_ICON_TEXTURE_HEIGHT / 2 << 10) / halfHeight;
   /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
    * in */
-  textureS = HALF_TEXEL - (halfWidthRounded - halfWidth) * HALF_TEXEL;
-  textureT = HALF_TEXEL - (halfHeightRounded - halfHeight) * HALF_TEXEL;
+  textureS = HALF_TEXEL - ((halfWidthRounded - halfWidth) * HALF_TEXEL);
+  textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
   /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by
    * truncation works */
   if (speed >= WIND_SPEED_TWO_DIGITS) {
-    centerX = -sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X +
+    centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_WIDE_LEAN_X) +
         (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
   } else {
-    centerX = -sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X +
+    centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X) +
         (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
   }
-  centerY = -cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y +
-      (SCREEN_HEIGHT / 2 - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
+  centerY = (-cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y) +
+      ((SCREEN_HEIGHT / 2) - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -2122,8 +2122,8 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   viewDirection[AXIS_Y] =
       g_Cameras[0].view.lookAt[AXIS_Y] - g_Cameras[0].view.eye[AXIS_Y];
   rotation[AXIS_X] = atan2(viewDirection[AXIS_Y],
-                         sqrtf(viewDirection[AXIS_X] * viewDirection[AXIS_X] +
-                             viewDirection[AXIS_Z] * viewDirection[AXIS_Z])) +
+                         sqrtf((viewDirection[AXIS_X] * viewDirection[AXIS_X]) +
+                             (viewDirection[AXIS_Z] * viewDirection[AXIS_Z]))) +
       M_PI + WIND_INDICATOR_TILT;
   rotation[AXIS_Y] = 0.0f;
   rotation[AXIS_Z] = 0.0f;
@@ -2133,7 +2133,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
   BuildRotationMatrix(matrix, rotation, translation);
   guRotateRPYF(transform, 0.0f,
       WIND_INDICATOR_FACING_DEGREES -
-          g_SkyState.viewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI)),
+          (g_SkyState.viewedWindAngles[0] * 360.0f * (1.0 / (2 * M_PI))),
       0.0f);
   guMtxCatF(transform, matrix, matrix);
   guScaleF(transform, WIND_INDICATOR_SCALE, WIND_INDICATOR_SCALE,
@@ -2251,8 +2251,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       DrawWindIndicator(
           &gfx, g_WindPanelPosition[AXIS_X], g_WindPanelPosition[AXIS_Y]);
       if (g_RoundHud.areWindDirectionArrowsShown == TRUE) {
-        DrawPauseArrows(&gfx, g_WindPanelPosition[AXIS_X] + SCREEN_WIDTH / 2,
-            SCREEN_HEIGHT / 2 - g_WindPanelPosition[AXIS_Y],
+        DrawPauseArrows(&gfx, g_WindPanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
+            (SCREEN_HEIGHT / 2) - g_WindPanelPosition[AXIS_Y],
             PAUSE_PANEL_ARROWS_GAP);
       }
     }
@@ -2340,8 +2340,8 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       translation[AXIS_X] = g_LiePanelPosition[AXIS_X];
       translation[AXIS_Y] = g_LiePanelPosition[AXIS_Y];
       translation[AXIS_Z] = SHOT_PANEL_ICON_Z;
-      DrawPauseArrows(&gfx, g_LiePanelPosition[AXIS_X] + SCREEN_WIDTH / 2,
-          SCREEN_HEIGHT / 2 - g_LiePanelPosition[AXIS_Y],
+      DrawPauseArrows(&gfx, g_LiePanelPosition[AXIS_X] + (SCREEN_WIDTH / 2),
+          (SCREEN_HEIGHT / 2) - g_LiePanelPosition[AXIS_Y],
           PAUSE_PANEL_ARROWS_GAP);
     }
     BuildRotationMatrix(matrix, rotation, translation);
@@ -2425,7 +2425,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
       HOLE_FLAG_VERTEX_COUNT, 0);
   for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
     for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
-      index = row * HOLE_FLAG_COLUMN_COUNT + column;
+      index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
       gSP2Triangles(g_DisplayListHead++, index, index + HOLE_FLAG_COLUMN_COUNT,
           index + HOLE_FLAG_COLUMN_COUNT + 1, 0, index,
           index + HOLE_FLAG_COLUMN_COUNT + 1, index + 1, 0);
@@ -2453,7 +2453,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
     }
     for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
-        index = row * HOLE_FLAG_COLUMN_COUNT + column;
+        index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
         gSP2Triangles(g_DisplayListHead++, index,
             index + HOLE_FLAG_COLUMN_COUNT + 1, index + HOLE_FLAG_COLUMN_COUNT,
             0, index, index + 1, index + HOLE_FLAG_COLUMN_COUNT + 1, 0);
@@ -2601,8 +2601,8 @@ void DrawShotEffect(Gfx** displayListHead) {
   f_ShotEffectScale[AXIS_X] = scale;
   f_ShotEffectScale[AXIS_Y] = scale;
   f_ShotEffectScale[AXIS_Z] = scale;
-  f_ShotEffectTranslation[AXIS_X] = point.x - SCREEN_WIDTH / 2;
-  f_ShotEffectTranslation[AXIS_Y] = -point.y + SCREEN_HEIGHT / 2;
+  f_ShotEffectTranslation[AXIS_X] = point.x - (SCREEN_WIDTH / 2);
+  f_ShotEffectTranslation[AXIS_Y] = -point.y + (SCREEN_HEIGHT / 2);
   f_ShotEffectTranslation[AXIS_Z] = SHOT_EFFECT_Z;
   BuildTransformMatrix(
       matrix, f_ShotEffectRotation, f_ShotEffectTranslation, f_ShotEffectScale);
@@ -2658,7 +2658,7 @@ void DrawShotEffect(Gfx** displayListHead) {
       OpenEncodedAsset(
           f_HeavyLongShotFrameAssets[f_HeavyLongShotFrame], &asset);
       ReadEncodedAsset(g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET +
-              f_HeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE,
+              (f_HeavyLongShotBufferIndex * HEAVY_LONG_SHOT_FRAME_SIZE),
           &asset);
       f_HeavyLongShotBufferIndex ^= 1;
     }
@@ -2747,13 +2747,13 @@ void WaveHoleFlag(void) {
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
       HOLE_FLAG_VERTEX(row, column).v.ob[0] =
-          (s16)(column * HOLE_FLAG_CELL_SIZE - column * factor) -
-          row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE;
+          (s16)((column * HOLE_FLAG_CELL_SIZE) - (column * factor)) -
+          (row * otherFactor * HOLE_FLAG_ROW_SKEW_SCALE);
       if (HOLE_FLAG_VERTEX(row, column).v.ob[0] < column * otherFactor) {
         HOLE_FLAG_VERTEX(row, column).v.ob[0] = column * otherFactor;
       }
       HOLE_FLAG_VERTEX(row, column).v.ob[1] =
-          -row * HOLE_FLAG_CELL_SIZE - column * factor;
+          (-row * HOLE_FLAG_CELL_SIZE) - (column * factor);
     }
   }
   if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
@@ -2768,22 +2768,22 @@ void WaveHoleFlag(void) {
     factor = 1.0f;
     otherFactor = 0.0f;
   } else {
-    factor = windSpeed * HOLE_FLAG_SPREAD_STEP + HOLE_FLAG_SPREAD_STEP;
+    factor = (windSpeed * HOLE_FLAG_SPREAD_STEP) + HOLE_FLAG_SPREAD_STEP;
     otherFactor =
-        (HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP -
+        ((HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP) -
         HOLE_FLAG_SPREAD_STEP;
   }
   for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
        * the code */
-      shade =
-          f_HoleFlagShades[row * HOLE_FLAG_COLUMN_COUNT + column - 1] * factor +
-          HOLE_FLAG_SHADE(row, column) * otherFactor;
+      shade = (f_HoleFlagShades[(row * HOLE_FLAG_COLUMN_COUNT) + column - 1] *
+                  factor) +
+          (HOLE_FLAG_SHADE(row, column) * otherFactor);
       HOLE_FLAG_SHADE(row, column) = shade;
     }
   }
-  f_HoleFlagWavePhase += (HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed +
+  f_HoleFlagWavePhase += ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) +
                              HOLE_FLAG_MIN_SWING_DEGREES) *
       DEGREES_TO_RADIANS(1);
   if (f_HoleFlagWavePhase > 2 * M_PI) {
@@ -2793,7 +2793,7 @@ void WaveHoleFlag(void) {
     f_HoleFlagWavePhase += 2 * M_PI;
   }
   /* factor is the swing's amplitude here */
-  factor = windSpeed + rand() % HOLE_FLAG_SWING_JITTER_RANGE;
+  factor = windSpeed + (rand() % HOLE_FLAG_SWING_JITTER_RANGE);
   shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     if ((s32)windSpeed == 0) {
@@ -2801,8 +2801,8 @@ void WaveHoleFlag(void) {
     } else {
       rowShade =
           (f32)(shade +
-              rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED)) -
-          HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed;
+              (rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED))) -
+          (HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed);
     }
     HOLE_FLAG_SHADE(row, 0) = rowShade;
   }
@@ -2814,7 +2814,7 @@ void WaveHoleFlag(void) {
     }
   }
   /* Bulges are deeper toward the flag's free edge and its top */
-  factor = windSpeed * HOLE_FLAG_BULGE_PER_SPEED + HOLE_FLAG_MIN_BULGE;
+  factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
       bulge =
@@ -2835,7 +2835,7 @@ void WaveHoleFlag(void) {
       }
       pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
       HOLE_FLAG_VERTEX(row, column).v.ob[0] =
-          column * HOLE_FLAG_CELL_SIZE - pull;
+          (column * HOLE_FLAG_CELL_SIZE) - pull;
     }
   }
 }
@@ -2863,7 +2863,7 @@ void SetShotOffsetMarker(s32 x, s32 y) {
   f32 scale;
 
   if (x == 0 && y == 0) {
-    length = sqrtf(x * x + y * y);
+    length = sqrtf((x * x) + (y * y));
   } else {
     length = 0.0f;
   }
@@ -3122,7 +3122,8 @@ void DrawColorTest(Gfx** displayListHead) {
       &gfx, (s16)f_TestTextX, (s16)f_TestTextY, f_ColorTestSampleText);
   gDPPipeSync(gfx++);
   PrintDebugText(f_BlankText,
-      f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+      (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN -
+          1,
       f_TestColorIndex + COLOR_TEST_TEXT_ROW);
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
     f_TestColorIndex ^= 1;
@@ -3173,7 +3174,8 @@ void DrawColorTest(Gfx** displayListHead) {
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
       COLOR_TEST_TEXT_ROW + COLOR_TEST_ENV);
   PrintDebugText(">",
-      f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH + COLOR_TEST_TEXT_COLUMN - 1,
+      (f_TestChannelIndex * COLOR_TEST_COLUMN_WIDTH) + COLOR_TEST_TEXT_COLUMN -
+          1,
       f_TestColorIndex + COLOR_TEST_TEXT_ROW);
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
@@ -3330,7 +3332,7 @@ void DrawRoundHud(CameraView* view) {
   gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
   f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
   /* The faces move out of the letterbox's way */
-  scoreboardX = f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT +
+  scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
       (SCOREBOARD_X + f_ShotPanelOffsetX);
   for (i = 0; i != g_PlayerCount; i++) {
     if (g_Players[i].handicap > 0) {
@@ -3684,15 +3686,15 @@ void DrawRoundHud(CameraView* view) {
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       sprintf(g_PrintBuffer, "%d", g_Players[i].strokeCount);
       DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
-          SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+          SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       if (hasHandicap) {
         DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_COLON_X,
-            SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, ":");
+            SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), ":");
         sprintf(g_PrintBuffer, "%2d",
             GetHandicapOffset(
                 GetCourseRecordIndex(), g_HoleIndex, g_Players[i].handicap));
         DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_X,
-            SCOREBOARD_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+            SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       }
       SetTextColor(&g_DisplayListHead, 255, 230, 0);
       if (D_801B60B9 != 0) {
@@ -3731,7 +3733,7 @@ void DrawRoundHud(CameraView* view) {
         }
       }
       DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
-          SCOREBOARD_SCORE_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+          SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
       if (g_GameState.betRates[BET_LONGEST_DRIVE] != UNSET_BET_RATE &&
           IsMarkedParFive(GetCourseRecordIndex(), g_HoleIndex)) {
@@ -3744,7 +3746,8 @@ void DrawRoundHud(CameraView* view) {
                 g_PrintBuffer, "%3dy", (s32)(contestDistance * YARDS_PER_UNIT));
           }
           DrawShadowedText(&g_DisplayListHead, scoreboardX + DRIVE_DISTANCE_X,
-              SCOREBOARD_CONTEST_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+              SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
+              g_PrintBuffer);
         }
       }
       if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
@@ -3761,7 +3764,8 @@ void DrawRoundHud(CameraView* view) {
                 hundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
           }
           DrawShadowedText(&g_DisplayListHead, scoreboardX + PIN_DISTANCE_X,
-              SCOREBOARD_CONTEST_Y + i * SCOREBOARD_ROW_HEIGHT, g_PrintBuffer);
+              SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
+              g_PrintBuffer);
         }
       }
     }

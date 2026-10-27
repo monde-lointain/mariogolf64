@@ -599,13 +599,13 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
   Club* club;
 
   for (type = 0; type < CLUB_SET_SIZE; type++) {
-    club = GetClub(setIndex * CLUB_SET_SIZE + type);
+    club = GetClub((setIndex * CLUB_SET_SIZE) + type);
     club->distance = stats->clubs[type].distance;
     if (club->distance > 400) {
       club->distance = 400;
     }
     osSyncPrintf("TargetDist %d\n", club->distance);
-    club->pitch = -(stats->clubs[type].pitch * 360 / 0x10000 + stats->pitch);
+    club->pitch = -((stats->clubs[type].pitch * 360 / 0x10000) + stats->pitch);
     osSyncPrintf("Xang %d\n", club->pitch);
     if (club->pitch > -7) {
       club->pitch = -7;
@@ -625,7 +625,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
     } else {
       club->unk14 = f_Unk14Values[stats->unk1E + 4];
     }
-    club->unk0 = 110 - stats->unk1F * 9;
+    club->unk0 = 110 - (stats->unk1F * 9);
     club->curve = stats->curve;
     if (club->curve < -4) {
       club->curve = -4;
@@ -640,7 +640,7 @@ void GenerateClubSet(s32 setIndex, ClubSetStats* stats) {
       club->unk0 = 70;
     }
     g_IsMiniGolf = FALSE;
-    GenerateClub(setIndex * CLUB_SET_SIZE + type);
+    GenerateClub((setIndex * CLUB_SET_SIZE) + type);
   }
 }
 
@@ -986,7 +986,7 @@ s32 GetLieRating(Club* club, s32 surface, s32 shotMode) {
     } else {
       rating = ratings[club->type] - '0';
     }
-    rating = (rating * club->unk14 + 50) / 100;
+    rating = ((rating * club->unk14) + 50) / 100;
     if (rating <= 0) {
       rating = 1;
     }
@@ -1005,7 +1005,7 @@ void GetLieSpan(Club* club, s32 surface, s32* span, s32 shotMode) {
   s32 rating = GetLieRating(club, surface, shotMode);
 
   if (rating > 0) {
-    span[0] = rating * 2 - 1;
+    span[0] = (rating * 2) - 1;
     span[1] = rating - 1;
   } else {
     span[0] = 0;

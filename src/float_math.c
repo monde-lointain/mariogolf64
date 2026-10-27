@@ -78,7 +78,7 @@ float acosf(float x) {
     if (word > 0) {
       return 0.0f;
     } else {
-      return f_Pi + 2.0f * f_HalfPiLow;
+      return f_Pi + (2.0f * f_HalfPiLow);
     }
   } else if (magnitude > ONE_WORD) {
     /* NaN without fast math; the game's flags fold this to 0 */
@@ -91,28 +91,34 @@ float acosf(float x) {
     z = x * x;
     p = z *
         (f_AsinP0 +
-            z *
+            (z *
                 (f_AsinP1 +
-                    z *
+                    (z *
                         (f_AsinP2 +
-                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
-    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
+                            (z *
+                                (f_AsinP3 +
+                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+    q = f_One +
+        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
     r = p / q;
-    return f_HalfPiHigh - (x - (f_HalfPiLow - x * r));
+    return f_HalfPiHigh - (x - (f_HalfPiLow - (x * r)));
   } else if (word < 0) {
     z = (f_One + x) * 0.5f;
     p = z *
         (f_AsinP0 +
-            z *
+            (z *
                 (f_AsinP1 +
-                    z *
+                    (z *
                         (f_AsinP2 +
-                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
-    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
+                            (z *
+                                (f_AsinP3 +
+                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+    q = f_One +
+        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
     s = sqrtf(z);
     r = p / q;
-    w = r * s - f_HalfPiLow;
-    return f_Pi - 2.0f * (s + w);
+    w = (r * s) - f_HalfPiLow;
+    return f_Pi - (2.0f * (s + w));
   } else {
     s32 sqrtHighWord;
 
@@ -121,17 +127,20 @@ float acosf(float x) {
     sqrtHigh = s;
     GET_FLOAT_WORD(sqrtHighWord, sqrtHigh);
     SET_FLOAT_WORD(sqrtHigh, sqrtHighWord & 0xFFFFF000);
-    c = (z - sqrtHigh * sqrtHigh) / (s + sqrtHigh);
+    c = (z - (sqrtHigh * sqrtHigh)) / (s + sqrtHigh);
     p = z *
         (f_AsinP0 +
-            z *
+            (z *
                 (f_AsinP1 +
-                    z *
+                    (z *
                         (f_AsinP2 +
-                            z * (f_AsinP3 + z * (f_AsinP4 + z * f_AsinP5)))));
-    q = f_One + z * (f_AsinQ1 + z * (f_AsinQ2 + z * (f_AsinQ3 + z * f_AsinQ4)));
+                            (z *
+                                (f_AsinP3 +
+                                    (z * (f_AsinP4 + (z * f_AsinP5))))))))));
+    q = f_One +
+        (z * (f_AsinQ1 + (z * (f_AsinQ2 + (z * (f_AsinQ3 + (z * f_AsinQ4)))))));
     r = p / q;
-    w = r * s + c;
+    w = (r * s) + c;
     return 2.0f * (sqrtHigh + w);
   }
 }
@@ -190,9 +199,9 @@ float atan2f(float y, float x) {
         case 1:
           return -f_QuarterPi - f_Tiny;
         case 2:
-          return 3.0f * f_QuarterPi + f_Tiny;
+          return (3.0f * f_QuarterPi) + f_Tiny;
         case 3:
-          return -3.0f * f_QuarterPi - f_Tiny;
+          return (-3.0f * f_QuarterPi) - f_Tiny;
       }
     } else {
       switch (quadrant) {
@@ -213,7 +222,7 @@ float atan2f(float y, float x) {
 
   exponentDifference = (yMagnitude - xMagnitude) >> 23;
   if (exponentDifference > 60) {
-    z = f_HalfPi + 0.5f * f_PiLow;
+    z = f_HalfPi + (0.5f * f_PiLow);
   } else if (xWord < 0 && exponentDifference < -60) {
     z = 0.0f;
   } else {
@@ -299,7 +308,7 @@ float atanf(float x) {
     if (magnitude < 0x3F980000) { /* |x| < 19/16 */
       if (magnitude < 0x3F300000) { /* |x| < 11/16 */
         reductionIndex = 0;
-        x = (2.0f * x - f_One) / (2.0f + x);
+        x = ((2.0f * x) - f_One) / (2.0f + x);
       } else {
         reductionIndex = 1;
         x = (x - f_One) / (x + f_One);
@@ -307,7 +316,7 @@ float atanf(float x) {
     } else {
       if (magnitude < 0x401C0000) { /* |x| < 39/16 */
         reductionIndex = 2;
-        x = (x - 1.5f) / (f_One + 1.5f * x);
+        x = (x - 1.5f) / (f_One + (1.5f * x));
       } else {
         reductionIndex = 3;
         x = -1.0f / x;
@@ -318,27 +327,27 @@ float atanf(float x) {
   w = z * z;
   oddSum = z *
       (f_AtanTerms[0] +
-          w *
+          (w *
               (f_AtanTerms[2] +
-                  w *
+                  (w *
                       (f_AtanTerms[4] +
-                          w *
+                          (w *
                               (f_AtanTerms[6] +
-                                  w *
+                                  (w *
                                       (f_AtanTerms[8] +
-                                          w * f_AtanTerms[10])))));
+                                          (w * f_AtanTerms[10]))))))))));
   evenSum = w *
       (f_AtanTerms[1] +
-          w *
+          (w *
               (f_AtanTerms[3] +
-                  w *
+                  (w *
                       (f_AtanTerms[5] +
-                          w * (f_AtanTerms[7] + w * f_AtanTerms[9]))));
+                          (w * (f_AtanTerms[7] + (w * f_AtanTerms[9]))))))));
   if (reductionIndex < 0) {
-    return x - x * (oddSum + evenSum);
+    return x - (x * (oddSum + evenSum));
   } else {
     z = f_AtanHigh[reductionIndex] -
-        ((x * (oddSum + evenSum) - f_AtanLow[reductionIndex]) - x);
+        (((x * (oddSum + evenSum)) - f_AtanLow[reductionIndex]) - x);
     return (word < 0) ? -z : z;
   }
 }
