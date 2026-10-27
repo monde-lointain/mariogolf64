@@ -2024,7 +2024,7 @@ void LoadContactImages(UnkB8 *player) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", func_80214250_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/round_events", DrawContactEffect);
 
 /* Shows the Fly Guy that warns of a strong wind, or hides it given FLY_GUY_HIDDEN */
 void ShowWindFlyGuy(s32 show) {

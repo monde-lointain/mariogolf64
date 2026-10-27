@@ -936,7 +936,7 @@ void func_801FE370(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
 void DrawBanner(Gfx **displayListHead);
 void DrawFlipMessage(Gfx **displayListHead);
-void func_80214250(Gfx **displayListHead, CameraMatrices *matrices);
+void DrawContactEffect(Gfx **displayListHead, CameraMatrices *matrices);
 void DrawWindFlyGuy(Gfx **displayListHead);
 void DrawSparks(Gfx **displayListHead);
 void DrawPauseMenu(Gfx **displayListHead);
@@ -1558,7 +1558,7 @@ s32 DrawGame(void) {
                                 DrawAimGuides(matrices);
                             }
                             if (g_IsModuleAlive[17]) {
-                                func_80214250(&g_DisplayListHead, matrices);
+                                DrawContactEffect(&g_DisplayListHead, matrices);
                             }
                             DrawEffects(matrices, &g_DisplayListHead);
                             if (viewIndex == 0 && g_IsModuleAlive[18]) {
