@@ -83,6 +83,16 @@ void func_80221CC0_ovl_01(void);
 #define SAVE_MENU_BUFFER_CHOSEN 2
 #define SAVE_MENU_CHOSEN_IMAGE_COUNT 2
 #define ASSET_SAVE_MENU_FRAME 0x70D
+/*
+ * D_8023B678 holds the digits 1 to 6, 16 wide each, followed by the word COURSE.
+ * func_80220E34 draws the word, then the course's digit overlapping its end.
+ */
+#define COURSE_LABEL_WIDTH 136
+#define COURSE_LABEL_HEIGHT 16
+#define COURSE_DIGIT_WIDTH 16
+#define COURSE_WORD_WIDTH 40
+#define COURSE_WORD_OFFSET_X -5
+#define COURSE_DIGIT_OFFSET_X 33
 
 /* The image of each game mode that a saved game can be in */
 typedef struct {
@@ -395,7 +405,38 @@ s32 func_80220E28_ovl_01(Unk68 *record) {
     return (u8)record->unk36 >> 7;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220E34_ovl_01);
+void func_80220E34_ovl_01(Gfx **displayListHead, s32 courseIndex, s32 left, s32 top, u8 showsCourseWord) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8023B678_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureTile_4b(gfx++, ((u32)D_8023B678_ovl_01 + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI,
+                          COURSE_LABEL_WIDTH, COURSE_LABEL_HEIGHT, 0, 0, COURSE_LABEL_WIDTH - 1,
+                          COURSE_LABEL_HEIGHT - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                          G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    if (showsCourseWord == TRUE) {
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, (left + COURSE_WORD_OFFSET_X) << 2, top << 2,
+                                (left + COURSE_WORD_OFFSET_X + COURSE_WORD_WIDTH) << 2,
+                                (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
+                                (COURSE_DIGIT_WIDTH * COURSE_COUNT) << 5, 0, 1 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+    }
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (left + COURSE_DIGIT_OFFSET_X) << 2, top << 2,
+                            (left + COURSE_DIGIT_OFFSET_X + COURSE_DIGIT_WIDTH) << 2,
+                            (top + COURSE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE,
+                            (courseIndex * COURSE_DIGIT_WIDTH) << 5, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 void func_802213C8_ovl_01(Gfx **displayListHead, s32 imageIndex, s32 left, s32 top) {
     Gfx *gfx = *displayListHead;
