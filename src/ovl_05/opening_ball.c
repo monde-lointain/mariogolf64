@@ -26,8 +26,14 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
   return TRUE;
 }
 
-/* Like GetSurfaceInfo */
-SurfaceInfo* func_802066F0_ovl_05(s32 surface) {
+/*
+ * The opening's copies of the ball simulation's routines keep their names and
+ * are static, so they don't clash with the originals. GCC 2.7 only warns when
+ * a static definition follows the headers' prototypes.
+ */
+
+/* The opening's copy of GetSurfaceInfo, which reads its own surface table */
+static SurfaceInfo* GetSurfaceInfo(s32 surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
@@ -36,7 +42,7 @@ SurfaceInfo* func_802066F0_ovl_05(s32 surface) {
 
 /* An unused copy of ResetBallSimulations, which resets g_BallSimulations as
  * that does */
-void func_80206718_ovl_05(void) {
+static void ResetBallSimulations(void) {
   s32 index;
 
   for (index = 0; index < BALL_SIMULATION_COUNT; index++) {
