@@ -6,6 +6,7 @@
 #include "menu_memory.h"
 #include "save.h"
 #include "sound.h"
+#include "work_area.h"
 
 /* The table of screen 15: its columns and rows, and how many of each fit on the screen */
 #define TABLE_COLUMN_COUNT 14
@@ -25,7 +26,13 @@ extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
 extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][4];
 extern u8 D_8023BFF0_ovl_01[CHARACTER_COUNT][MENU_SCENE_FILE_SIZE];
 extern void **D_8023AA40_ovl_01;
+extern s32 D_80230130_ovl_01;
+extern s32 D_80230134_ovl_01;
+extern s32 D_80230138_ovl_01;
 extern void *D_8023AA44_ovl_01;
+extern void *D_8023AA48_ovl_01;
+extern void *D_8023AA4C_ovl_01;
+extern void *D_8023AA50_ovl_01;
 
 void func_80213390_ovl_01(void **buffers) {
     EncodedAsset asset;
@@ -47,7 +54,33 @@ void func_8021342C_ovl_01(void *buffer) {
     ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213464_ovl_01);
+void func_80213464_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+
+    switch (bufferKind) {
+        case 1:
+            D_8023AA44_ovl_01 = &g_WorkArea;
+            OpenEncodedAsset(0x8E9, &asset);
+            ReadEncodedAsset(D_8023AA44_ovl_01, &asset);
+            break;
+        case 2:
+            D_8023AA48_ovl_01 = buffer;
+            break;
+        case 3:
+            D_8023AA4C_ovl_01 = buffer;
+            OpenEncodedAsset(0x688, &asset);
+            ReadEncodedAsset(D_8023AA4C_ovl_01, &asset);
+            break;
+        case 4:
+            D_8023AA50_ovl_01 = buffer;
+            OpenEncodedAsset(0x720, &asset);
+            ReadEncodedAsset(D_8023AA50_ovl_01, &asset);
+            D_80230130_ovl_01 = 0;
+            D_80230134_ovl_01 = 0;
+            D_80230138_ovl_01 = 0;
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213558_ovl_01);
 

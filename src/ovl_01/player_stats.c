@@ -5,8 +5,14 @@
 /* The images of D_800C2064 that func_8021CF10 reads */
 #define PLAYER_STATS_IMAGE_COUNT 6
 
+/* The bytes of each of the four images that func_8021CFAC reads into one buffer */
+#define PLAYER_STATS_IMAGE_SIZE 0x258
+
 extern u16 D_800C2064[];
 extern void **D_8023B630_ovl_01;
+extern void *D_8023B634_ovl_01;
+extern void *D_8023B638_ovl_01;
+extern u8 *D_8023B63C_ovl_01;
 extern s16 D_8023B640_ovl_01[][5];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
@@ -48,7 +54,31 @@ void func_8021CF10_ovl_01(void **buffers) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021CFAC_ovl_01);
+void func_8021CFAC_ovl_01(void *buffer, s16 bufferKind) {
+    EncodedAsset asset;
+
+    switch (bufferKind) {
+        case 1:
+            D_8023B634_ovl_01 = buffer;
+            break;
+        case 2:
+            D_8023B638_ovl_01 = buffer;
+            OpenEncodedAsset(0x6EF, &asset);
+            ReadEncodedAsset(D_8023B638_ovl_01, &asset);
+            break;
+        case 3:
+            D_8023B63C_ovl_01 = buffer;
+            OpenEncodedAsset(0x82D, &asset);
+            ReadEncodedAsset(D_8023B63C_ovl_01, &asset);
+            OpenEncodedAsset(0x82F, &asset);
+            ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE, &asset);
+            OpenEncodedAsset(0x82E, &asset);
+            ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE * 2, &asset);
+            OpenEncodedAsset(0x830, &asset);
+            ReadEncodedAsset(D_8023B63C_ovl_01 + PLAYER_STATS_IMAGE_SIZE * 3, &asset);
+            break;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D0B8_ovl_01);
 
