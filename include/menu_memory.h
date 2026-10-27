@@ -24,7 +24,9 @@ typedef struct MenuMemory {
     /* 0x2E */ s8 holeIndex;   /* The hole the Ring Shot select points at */
     /* 0x2F */ s8 courseIndex; /* And its course */
     /* 0x30 */ s8 unk30; /* A course, or COURSE_COUNT for none */
-    /* 0x31 */ u8 unk31[0x35 - 0x31];
+    /* 0x31 */ u8 unk31[0x33 - 0x31];
+    /* 0x33 */ s8 bestTimesCourse; /* The open course whose best times show */
+    /* 0x34 */ s8 bestTimesSpin;   /* How far the courses still have to turn to reach it */
     /* 0x35 */ s8 tableColumn;      /* The cursor's place among a table's shown columns */
     /* 0x36 */ s8 tableRow;         /* And among its shown rows */
     /* 0x37 */ s8 tableFirstColumn; /* The first column shown of a table wider than the screen */

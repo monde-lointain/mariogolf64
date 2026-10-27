@@ -1,7 +1,11 @@
 #include "common.h"
 #include "asset.h"
 #include "character.h"
+#include "hole_display.h"
+#include "menu.h"
+#include "menu_memory.h"
 #include "save.h"
+#include "sound.h"
 #include "work_area.h"
 
 /* The images of D_800C2064 that func_80213390 reads */
@@ -9,6 +13,10 @@
 
 /* The bytes kept of each best time holder's palette file */
 #define MENU_SCENE_FILE_SIZE 0x200
+
+/* The best times' courses turn this far in all between one course and the next, and this fast */
+#define BEST_TIMES_TURN 90
+#define BEST_TIMES_SPIN_SPEED 18
 
 extern u16 D_800C2064[];
 extern void *D_8012D430[CHARACTER_COUNT];
@@ -23,6 +31,8 @@ extern void *D_8023AA44_ovl_01;
 extern void *D_8023AA48_ovl_01;
 extern void *D_8023AA4C_ovl_01;
 extern void *D_8023AA50_ovl_01;
+
+s32 GetOpenCourseCount(void);
 
 void func_80213390_ovl_01(void **buffers) {
     EncodedAsset asset;
@@ -72,7 +82,55 @@ void func_80213464_ovl_01(void *buffer, s16 bufferKind) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213558_ovl_01);
+void func_80213558_ovl_01(void) {
+    MenuMemory *memory = func_8005AF74();
+    s32 courseCount = GetOpenCourseCount();
+    s32 direction;
+    s32 step;
+
+    if (IsHudAnimationDone() == TRUE) {
+        if (g_MenuPressedButtons & B_BUTTON) {
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+            g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+            return;
+        }
+        if (memory->bestTimesSpin == 0) {
+            if (g_MenuRepeatButtons & R_JPAD) {
+                if (courseCount >= 2) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->bestTimesCourse++;
+                    if (memory->bestTimesCourse > courseCount - 1) {
+                        memory->bestTimesCourse = 0;
+                    }
+                    memory->bestTimesSpin = -BEST_TIMES_TURN / courseCount;
+                }
+            } else if (g_MenuRepeatButtons & L_JPAD) {
+                if (courseCount >= 2) {
+                    PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+                    memory->bestTimesCourse--;
+                    if (memory->bestTimesCourse < 0) {
+                        memory->bestTimesCourse = courseCount - 1;
+                    }
+                    memory->bestTimesSpin = BEST_TIMES_TURN / courseCount;
+                }
+            }
+        }
+        if (ABS(memory->bestTimesSpin) != 0) {
+            direction = memory->bestTimesSpin < 0 ? -1 : 1;
+            step = BEST_TIMES_SPIN_SPEED / courseCount;
+            if (step == 0) {
+                step = 1;
+            }
+            memory->bestTimesSpin -= direction * step;
+            /* Stop on reaching the course rather than turning past it */
+            if ((memory->bestTimesSpin < 0 ? -1 : 1) != direction) {
+                memory->bestTimesSpin = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213748_ovl_01);
 
