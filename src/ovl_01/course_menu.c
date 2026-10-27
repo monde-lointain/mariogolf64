@@ -1,6 +1,8 @@
 #include "common.h"
 #include "asset.h"
+#include "course.h"
 #include "libc.h"
+#include "menu.h"
 #include "menu_memory.h"
 #include "save.h"
 #include "screen.h"
@@ -19,6 +21,11 @@
 #define COURSE_IMAGE_COPY_COUNT 2
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
+
+/* func_8020F2D0 squeezes the banner's strips under the course menu's title, with the course's name on it */
+#define COURSE_BANNER_TOP 110
+#define COURSE_BANNER_STRIP_SPACING 8
+#define COURSE_NAME_Y 116
 
 /* The course's statistics: the panel behind them, and the rows of it that show */
 #define STATS_COUNT 10
@@ -100,6 +107,7 @@ extern s32 D_802300A8_ovl_01;
 extern s32 D_802300AC_ovl_01;
 extern const char *D_802300B4_ovl_01[STATS_COUNT];
 extern const char D_802318A8_ovl_01[];
+extern const char D_802318AC_ovl_01[];
 extern void *D_8023A810_ovl_01;
 extern void **D_8023A814_ovl_01;
 extern void **D_8023A818_ovl_01;
@@ -214,7 +222,56 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E390_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F2D0_ovl_01);
+void func_8020F2D0_ovl_01(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+
+    func_8005AF74();
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_8023A824_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_8023A824_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = COURSE_BANNER_TOP + stripIndex * COURSE_BANNER_STRIP_SPACING;
+        gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
+                                (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
+                                (stripTop + COURSE_BANNER_STRIP_SPACING) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
+                                (MENU_BANNER_STRIP_HEIGHT << 10) / COURSE_BANNER_STRIP_SPACING);
+        gDPPipeSync(gfx++);
+    }
+    SetUpTextDrawing(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    if (!useCourseNames) {
+        if (courseIndex + 1 == COURSE_COUNT + 1) {
+            sprintf(g_PrintBuffer, D_802318A8_ovl_01, g_TournamentNames[courseIndex]);
+        } else {
+            sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1, g_TournamentNames[courseIndex]);
+        }
+    } else if (courseIndex + 1 == COURSE_COUNT + 1) {
+        sprintf(g_PrintBuffer, D_802318A8_ovl_01, g_CourseRecords[courseIndex].name);
+    } else {
+        sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1, g_CourseRecords[courseIndex].name);
+    }
+    DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, COURSE_NAME_Y, g_PrintBuffer);
+    *displayListHead = gfx;
+}
+
+const char D_802318A8_ovl_01[] = "%s";
+const char D_802318AC_ovl_01[] = "%d:%s";
 
 void func_8020F794_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
