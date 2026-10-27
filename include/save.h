@@ -78,7 +78,10 @@ typedef struct Unk68 {
     /* 0x38 */ u8 unk38;
     /* 0x39 */ u8 unk39;
     /* 0x3A */ u8 unk3A;
-    /* 0x3B */ u8 unk3B[0x68 - 0x3B];
+    /* 0x3B */ u8 unk3B;
+    /* 0x3C */ u8 unk3C;
+    /* 0x3D */ u8 unk3D;
+    /* 0x3E */ u8 unk3E[0x68 - 0x3E];
 } Unk68; /* size = 0x68 */
 
 /* GameState.holeSelection values; code tests the nines as bits */

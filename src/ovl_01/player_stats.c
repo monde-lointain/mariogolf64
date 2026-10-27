@@ -1,5 +1,6 @@
 #include "common.h"
 #include "asset.h"
+#include "character.h"
 #include "menu_memory.h"
 #include "save.h"
 
@@ -8,6 +9,9 @@
 
 /* The bytes of each of the four images that func_8021CFAC reads into one buffer */
 #define PLAYER_STATS_IMAGE_SIZE 0x258
+
+/* The most bytes of each ranked record holder's palette file that func_8021EF64 keeps */
+#define PLAYER_STATS_FILE_SIZE 0x200
 
 /* The grid of stats that the cursor moves over, and the value of its empty cells */
 #define STATS_GRID_COLUMN_COUNT 5
@@ -28,6 +32,9 @@
 #define MENU_UNKE_PRESET_SECOND_FOUR_PLAYER 6
 
 extern u16 D_800C2064[];
+extern void *D_8012D430[CHARACTER_COUNT];
+extern u16 D_802308A4_ovl_01[CHARACTER_COUNT];
+extern s16 D_802308C8_ovl_01[CHARACTER_COUNT][CHARACTER_PALETTE_COUNT];
 extern s32 D_80105B68;
 extern s8 D_801B60BA[MENU_UNKE_COUNT];
 extern u8 D_802304BC_ovl_01[MENU_UNKE_PRESET_COUNT][MENU_UNKE_COUNT];
@@ -37,8 +44,10 @@ extern void **D_8023B630_ovl_01;
 extern void *D_8023B634_ovl_01;
 extern void *D_8023B638_ovl_01;
 extern u8 *D_8023B63C_ovl_01;
+extern void *D_8023B5E0_ovl_01[STATS_GRID_ROW_COUNT][STATS_GRID_COLUMN_COUNT];
 extern s16 D_8023B640_ovl_01[][STATS_GRID_COLUMN_COUNT];
 extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
+extern u8 D_8023BFF0_ovl_01[STATS_GRID_ROW_COUNT * STATS_GRID_COLUMN_COUNT][PLAYER_STATS_FILE_SIZE];
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_802178B0_ovl_01);
 
@@ -190,6 +199,53 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E4B0_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E97C_ovl_01);
 
+/* Doesn't match: the original keeps the row and column counters in other saved registers */
+#ifdef NON_MATCHING
+void func_8021EF64_ovl_01(void) {
+    EncodedAsset asset;
+    AssetFile file;
+    SaveData *save = GetSaveData();
+    s32 index;
+    s32 row;
+    s32 column;
+    s32 character;
+    s32 palette;
+    s32 cell;
+
+    for (index = 0; index != CHARACTER_COUNT; index++) {
+        OpenEncodedAsset(D_802308A4_ovl_01[index], &asset);
+        ReadEncodedAsset(D_8012D430[index], &asset);
+    }
+    for (row = 0; row != STATS_GRID_ROW_COUNT; row++) {
+        cell = row * STATS_GRID_COLUMN_COUNT;
+        for (column = 0; column != STATS_GRID_COLUMN_COUNT; column++, cell++) {
+            if (D_8023B640_ovl_01[row][column] != STATS_CELL_EMPTY) {
+                character = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3B;
+                palette = (s8)save->rankedRecords[D_8023B640_ovl_01[row][column]].unk3D;
+                if (character < 0) {
+                    character = 0;
+                }
+                if (character >= CHARACTER_COUNT) {
+                    character = CHARACTER_COUNT - 1;
+                }
+                if (palette < 0) {
+                    palette = 0;
+                }
+                if (palette >= CHARACTER_PALETTE_COUNT) {
+                    palette = CHARACTER_PALETTE_COUNT - 1;
+                }
+            } else {
+                character = 0;
+                palette = 0;
+            }
+            D_8023B5E0_ovl_01[row][column] = D_8023BFF0_ovl_01[cell];
+            OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
+            ReadAssetFile(D_8023B5E0_ovl_01[row][column], GetAssetFileSize(&file), &file);
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021EF64_ovl_01);
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021F124_ovl_01);
