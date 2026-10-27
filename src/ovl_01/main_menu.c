@@ -2329,7 +2329,73 @@ void func_802058B8_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206180_ovl_01);
+/* The clubhouse's room labels, 192 by 20 each, plain in D_801B5CD0 and lit in D_8012D420 */
+#define ROOM_LABEL_WIDTH 192
+#define ROOM_LABEL_HEIGHT 20
+#define ROOM_LABEL_IMAGE_SIZE (ROOM_LABEL_WIDTH * ROOM_LABEL_HEIGHT / 2)
+
+/* Places for the clubhouse's rows, three more than it shows */
+#define CLUBHOUSE_ROW_PLACE_COUNT 8
+
+extern s32 D_8022FE2C_ovl_01[CLUBHOUSE_ROW_PLACE_COUNT][2];
+
+void func_80206180_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 choiceIndex;
+    s32 labelOffset;
+
+    func_801FB54C_ovl_01(&gfx, 61);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_801B5CD0[D_8022BE90_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    for (choiceIndex = 0; choiceIndex != CLUBHOUSE_CHOICE_COUNT; choiceIndex++) {
+        if (choiceIndex != g_MenuChoices.clubhouseChoice) {
+            labelOffset = D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE;
+            gDPLoadTextureBlock_4b(gfx++,
+                                   ((u32)D_801B5CD0[D_8022BE90_ovl_01] + PALETTED_TEXELS_OFFSET + labelOffset) & ~7,
+                                   G_IM_FMT_CI, ROOM_LABEL_WIDTH, ROOM_LABEL_HEIGHT, 0,
+                                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                   G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, D_8022FE2C_ovl_01[choiceIndex][0] << 2,
+                                    D_8022FE2C_ovl_01[choiceIndex][1] << 2,
+                                    (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH) << 2,
+                                    (D_8022FE2C_ovl_01[choiceIndex][1] + ROOM_LABEL_HEIGHT) << 2,
+                                    G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)D_8012D420[D_8022BE8E_ovl_01] + IMAGE_HEADER_SIZE) & ~7);
+    choiceIndex = g_MenuChoices.clubhouseChoice;
+    gDPLoadTextureBlock_4b(gfx++,
+                           ((u32)D_8012D420[D_8022BE8E_ovl_01] + PALETTED_TEXELS_OFFSET +
+                            D_8022BF1C_ovl_01[choiceIndex] * ROOM_LABEL_IMAGE_SIZE) & ~7,
+                           G_IM_FMT_CI, ROOM_LABEL_WIDTH, ROOM_LABEL_HEIGHT, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                           G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, (D_8022FE2C_ovl_01[choiceIndex][0] - D_800FE33C / 2) << 2,
+                            (D_8022FE2C_ovl_01[choiceIndex][1] - D_800FE33C / 2) << 2,
+                            (D_8022FE2C_ovl_01[choiceIndex][0] + ROOM_LABEL_WIDTH + D_800FE33C / 2)
+                                << 2,
+                            (D_8022FE2C_ovl_01[choiceIndex][1] + (ROOM_LABEL_HEIGHT + D_800FE33C / 2))
+                                << 2,
+                            G_TX_RENDERTILE, 0, 0,
+                            (ROOM_LABEL_WIDTH << 10) / (D_800FE33C + ROOM_LABEL_WIDTH),
+                            (ROOM_LABEL_HEIGHT << 10) / (D_800FE33C + ROOM_LABEL_HEIGHT));
+    gDPPipeSync(gfx++);
+    if (D_800FBDB9 == LABEL_GROWING) {
+        D_800FE33C += CHOSEN_LABEL_GROWTH_STEP;
+    }
+    if (D_800FBDB9 == LABEL_SHRINKING) {
+        D_800FE33C -= CHOSEN_LABEL_GROWTH_STEP;
+    }
+    if (D_800FE33C > CHOSEN_LABEL_GROWTH_LIMIT) {
+        D_800FBDB9 = LABEL_SHRINKING;
+    }
+    if (D_800FE33C < 0) {
+        D_800FBDB9 = LABEL_GROWING;
+    }
+    *displayListHead = gfx;
+}
 
 void func_80206A2C_ovl_01(Gfx **displayListHead) {
     Gfx *gfx = *displayListHead;
