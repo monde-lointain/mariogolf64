@@ -78,7 +78,7 @@ void OnLoadOverlay2(void) {
 }
 
 void OnLoadOverlay7(void) {
-  func_802033B0_ovl_05();
+  ResetCameraEditor();
   LoadOpening();
 }
 

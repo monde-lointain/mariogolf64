@@ -5,7 +5,7 @@
 
 /* Starts the editor with its eye at (0, -100, 100) looking at the origin, and
  * its moves stopped */
-void func_802033B0_ovl_05(void) {
+void ResetCameraEditor(void) {
   s32 i;
 
   g_CameraEditor.points[EDITOR_POINT_EYE][0] = 0.0f;
@@ -14,7 +14,7 @@ void func_802033B0_ovl_05(void) {
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = 0.0f;
   g_CameraEditor.points[EDITOR_POINT_EYE][1] = -100.0f;
   g_CameraEditor.points[EDITOR_POINT_EYE][2] = 100.0f;
-  g_CameraEditor.unk24 = 45.0f;
+  g_CameraEditor.fieldOfView = 45.0f;
   for (i = 0; i != EDITOR_POINT_COUNT; i++) {
     g_CameraEditor.targets[i][0] = 0.0f;
     g_CameraEditor.targets[i][1] = 0.0f;
@@ -41,45 +41,49 @@ void func_802033B0_ovl_05(void) {
   g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
   g_CameraEditor.unk90 = 10.0f;
   g_CameraEditor.unk94 = 1.0f;
-  func_80203620_ovl_05();
+  MeasureEditorCamera();
   g_LookAtMarkerScale = 1.0f;
 }
 
-void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
-                          f32 arg5) {
+/* Puts the camera's eye and look-at point at the given positions */
+void PlaceEditorCamera(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
+                       f32 arg5) {
   g_CameraEditor.points[EDITOR_POINT_EYE][0] = arg0;
   g_CameraEditor.points[EDITOR_POINT_EYE][1] = arg1;
   g_CameraEditor.points[EDITOR_POINT_EYE][2] = arg2;
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] = arg3;
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][1] = arg4;
   g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2] = arg5;
-  func_80203620_ovl_05();
+  MeasureEditorCamera();
 }
 
 /* Sets the speeds of point index's moves. Nothing calls it */
-void func_802035BC_ovl_05(s32 index, f32 speed, f32 easeSpeed) {
+void SetEditorPointSpeeds(s32 index, f32 speed, f32 easeSpeed) {
   g_CameraEditor.unk70[index] = speed;
   g_CameraEditor.unk78[index] = easeSpeed;
 }
 
-void func_802035E4_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+/* Sets the top speed and acceleration of turns. Nothing calls it */
+void SetEditorTurnSpeeds(s32 arg0, f32 arg1, f32 arg2) {
   g_CameraEditor.unk80 = arg1;
   g_CameraEditor.unk84 = arg2;
 }
 
-void func_802035F8_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+/* Sets the top speed and acceleration of tilts. Nothing calls it */
+void SetEditorTiltSpeeds(s32 arg0, f32 arg1, f32 arg2) {
   g_CameraEditor.unk88 = arg1;
   g_CameraEditor.unk8C = arg2;
 }
 
-void func_8020360C_ovl_05(s32 arg0, f32 arg1, f32 arg2) {
+/* Sets the top speed and acceleration of zooms. Nothing calls it */
+void SetEditorZoomSpeeds(s32 arg0, f32 arg1, f32 arg2) {
   g_CameraEditor.unk90 = arg1;
   g_CameraEditor.unk94 = arg2;
 }
 
 /* Works out the camera's heading, pitch and distance from its eye and look-at
  * point */
-void func_80203620_ovl_05(void) {
+void MeasureEditorCamera(void) {
   f32 offsetX;
   f32 offsetY;
   f32 offsetZ;
@@ -113,7 +117,7 @@ void func_80203620_ovl_05(void) {
 
 /* Starts moving point index to (x, y, z) over frameCount frames, or snaps it
  * there when it is close */
-void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
+void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   f32 distance;
   s32 easeFrameCount;
   f32 speed;
@@ -136,20 +140,20 @@ void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
     g_CameraEditor.unk70[index] = speed;
     g_CameraEditor.unk78[index] = speed / (easeFrameCount + 1);
     g_CameraEditor.unk98[index] = distance * 0.25;
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK80)) {
-      if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK2)) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK2;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
+      if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
       }
-      if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK4) {
-        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK4;
+      if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
       }
     }
   } else {
-    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK4)) {
-      g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK4;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE)) {
+      g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
     }
-    if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK2) {
-      g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK2;
+    if (g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE) {
+      g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
     }
   }
   g_CameraEditor.targets[index][0] = x;
@@ -169,30 +173,31 @@ void func_8020370C_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   }
 }
 
-/* Sets two flags in entry index and clears them in the other before calling
- * func_8020370C */
-void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
-  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK80)) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK80;
+/* Moves point index to (x, y, z) over frameCount frames, carrying the other
+ * point with it so that the camera keeps its direction and distance */
+void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
+  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_CARRYING;
   }
-  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK80) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK80;
+  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_CARRYING) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_CARRYING;
   }
-  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
-  func_8020370C_ovl_05(index, x, y, z, frameCount);
+  MoveEditorPoint(index, x, y, z, frameCount);
 }
 
-/* Starts turning the camera's heading by angle over frameCount frames, or turns
- * it at once when angle is tiny */
+/* Starts turning the camera's heading by angle over frameCount frames, with
+ * the other point swinging around point index, or turns it at once when angle
+ * is tiny */
 /* Doesn't match: the original loads the threshold after taking the absolute
  * value; GCC schedules it first */
 #ifdef NON_MATCHING
-void func_80203A30_ovl_05(s32 index, f32 angle, s32 frameCount) {
+void TurnEditorCamera(s32 index, f32 angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
 
@@ -208,29 +213,30 @@ void func_80203A30_ovl_05(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.unk84 = speed / (easeFrameCount + 1);
   }
   g_CameraEditor.unk68 = angle;
-  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK10) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK10;
+  if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_TURNING;
   }
-  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK10)) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK10;
+  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TURNING)) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TURNING;
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203A30_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TurnEditorCamera);
 #endif
 
-/* Starts turning the camera's pitch by angle over frameCount frames, or turns
- * it at once when angle is tiny */
+/* Starts tilting the camera's pitch by angle over frameCount frames, with the
+ * other point swinging around point index, or tilts it at once when angle is
+ * tiny */
 /* Doesn't match: the original loads the threshold after taking the absolute
  * value; GCC schedules it first */
 #ifdef NON_MATCHING
-void func_80203B60_ovl_05(s32 index, f32 angle, s32 frameCount) {
+void TiltEditorCamera(s32 index, f32 angle, s32 frameCount) {
   s32 easeFrameCount;
   f32 speed;
 
@@ -246,29 +252,29 @@ void func_80203B60_ovl_05(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.unk8C = speed / (easeFrameCount + 1);
   }
   g_CameraEditor.unk64 = angle;
-  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK20) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK20;
+  if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_TILTING;
   }
-  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK20)) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK20;
+  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TILTING)) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TILTING;
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203B60_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", TiltEditorCamera);
 #endif
 
-/* Starts moving the camera to distance over frameCount frames, or moves it at
- * once when it is close */
+/* Starts moving the other point to distance from point index over frameCount
+ * frames, or moves it at once when it is close */
 /* Doesn't match: the original loads the threshold after taking the absolute
  * value; GCC schedules it first */
 #ifdef NON_MATCHING
-void func_80203C90_ovl_05(s32 index, f32 distance, s32 frameCount) {
+void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
   s32 easeFrameCount;
   f32 change;
   f32 speed;
@@ -286,31 +292,33 @@ void func_80203C90_ovl_05(s32 index, f32 distance, s32 frameCount) {
     g_CameraEditor.unkA8 = fabsf(change) * 0.25;
   }
   g_CameraEditor.unk6C = change;
-  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+  if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+  if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
-  if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK40) {
-    g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK40;
+  if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
+    g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
   }
-  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK40)) {
-    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK40;
+  if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_ZOOMING)) {
+    g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_ZOOMING;
   }
 }
 #else
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203C90_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", ZoomEditorCamera);
 #endif
 
-s32 func_80203DC4_ovl_05(void) {
+/* Returns whether both points have stopped moving */
+s32 AreEditorMovesDone(void) {
   if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
     return TRUE;
   }
   return FALSE;
 }
 
-s32 func_80203DE8_ovl_05(s32 mask) {
+/* Returns whether neither point has any of the EDITOR_FLAG_* bits in mask */
+s32 AreEditorFlagsClear(s32 mask) {
   if (!(g_CameraEditor.flags[0] & mask) && !(g_CameraEditor.flags[1] & mask)) {
     return TRUE;
   }
@@ -318,7 +326,7 @@ s32 func_80203DE8_ovl_05(s32 mask) {
 }
 
 /* Stops the editor's moves and puts its speeds back to their starting values */
-void func_80203E14_ovl_05(void) {
+void StopEditorMoves(void) {
   s32 i;
 
   for (i = 0; i != EDITOR_POINT_COUNT; i++) {
@@ -347,12 +355,12 @@ void func_80203E14_ovl_05(void) {
   g_CameraEditor.unk8C = DEGREES_TO_RADIANS(1.0f);
   g_CameraEditor.unk90 = 10.0f;
   g_CameraEditor.unk94 = 1.0f;
-  func_80203620_ovl_05();
+  MeasureEditorCamera();
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203F70_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", UpdateCameraEditor);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80204EA8_ovl_05);
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", EditOpeningCamera);
 
 /* Moves the whole camera by offset */
 void func_802065FC_ovl_05(Vec3 offset) {

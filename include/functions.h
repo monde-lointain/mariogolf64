@@ -39,7 +39,7 @@ void func_80216FCC_ovl_00(s32* position);
 /* ovl_05 */
 void LoadOpening(void);
 void FreeOpening(void);
-void func_802033B0_ovl_05(void);
+void ResetCameraEditor(void);
 
 /* ovl_06 */
 void LoadTitleScreen(void);

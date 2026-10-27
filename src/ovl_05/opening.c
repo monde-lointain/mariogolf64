@@ -931,16 +931,16 @@ extern s32 D_800B6808;
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 s32 IsDonkeyKongUnlocked(void);
-void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
-void func_80203A30_ovl_05(s32 index, f32 angle, s32 frameCount);
-void func_80203B60_ovl_05(s32 index, f32 angle, s32 frameCount);
-void func_80203C90_ovl_05(s32 index, f32 distance, s32 frameCount);
-s32 func_80203DC4_ovl_05(void);
-void func_80203E14_ovl_05(void);
-void func_80203F70_ovl_05(void);
-void func_80204EA8_ovl_05(void);
-void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
-                          f32 arg5);
+void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
+void TurnEditorCamera(s32 index, f32 angle, s32 frameCount);
+void TiltEditorCamera(s32 index, f32 angle, s32 frameCount);
+void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount);
+s32 AreEditorMovesDone(void);
+void StopEditorMoves(void);
+void UpdateCameraEditor(void);
+void EditOpeningCamera(void);
+void PlaceEditorCamera(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
+                       f32 arg5);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
 void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
 void LoadOpeningShotBall(void);
@@ -967,7 +967,7 @@ void func_801F6788_ovl_05(void) {
   s32 skipButtons;
 
   if (IsGameFlagSet(0x62)) {
-    func_80204EA8_ovl_05();
+    EditOpeningCamera();
     if (g_ControllerStates[2].pressedButtons & 0x4000) {
       PlaySound(0x63, 0xF, 0x7F);
       ClearGameFlag(0x62);
@@ -1011,11 +1011,11 @@ void func_801F6788_ovl_05(void) {
           LoadNameLogo(0, 0);
           f_OpeningCue = 0;
           StartScreenFadeIn(0, 0, 0, 0x1E);
-          func_8020356C_ovl_05(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f,
-                               4672.0f);
-          func_80203C90_ovl_05(1, 38.01875f, 0x3C);
-          func_80203A30_ovl_05(1, -0.8528241f, 0x28);
-          func_80203B60_ovl_05(1, -0.324127f, 0x28);
+          PlaceEditorCamera(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f,
+                            4672.0f);
+          ZoomEditorCamera(1, 38.01875f, 0x3C);
+          TurnEditorCamera(1, -0.8528241f, 0x28);
+          TiltEditorCamera(1, -0.324127f, 0x28);
           f_OpeningScene++;
           LoadOpeningShotBall();
           f_OpeningShotSimulation.position[0] = 0xF1B96;
@@ -1040,7 +1040,7 @@ void func_801F6788_ovl_05(void) {
           f_IsNameSlotShown[0] = 1;
           PlaySong(0x2F, 0);
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x28;
           f_OpeningScene++;
         }
@@ -1071,10 +1071,10 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x14:
-        func_8020356C_ovl_05(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f,
-                             4746.187f);
-        func_80203C90_ovl_05(1, 18.469883f, 0x1E);
-        func_80203984_ovl_05(1, 642.835f, -100.5f, 4746.187f, 0x1E);
+        PlaceEditorCamera(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f,
+                          4746.187f);
+        ZoomEditorCamera(1, 18.469883f, 0x1E);
+        MoveEditorCamera(1, 642.835f, -100.5f, 4746.187f, 0x1E);
         f_IsNameSlotShown[0] = 0;
         D_8020AE44_ovl_05 = 0;
         f_ShotBallScale = 0;
@@ -1097,8 +1097,8 @@ void func_801F6788_ovl_05(void) {
             func_801F4A40_ovl_05();
             break;
         }
-        if (func_80203DC4_ovl_05()) {
-          func_80203E14_ovl_05();
+        if (AreEditorMovesDone()) {
+          StopEditorMoves();
           f_OpeningScene++;
         }
         break;
@@ -1107,8 +1107,8 @@ void func_801F6788_ovl_05(void) {
         f_OpeningScene = 0x28;
         break;
       case 0x1E:
-        func_8020356C_ovl_05(1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f,
-                             4800.41f);
+        PlaceEditorCamera(1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f,
+                          4800.41f);
         f_OpeningSceneFramesLeft = 0xE;
         f_OpeningScene++;
         break;
@@ -1121,8 +1121,8 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x28:
-        func_8020356C_ovl_05(1269.768f, -127.806f, 4719.564f, 1179.989f,
-                             -111.987f, 4715.451f);
+        PlaceEditorCamera(1269.768f, -127.806f, 4719.564f, 1179.989f, -111.987f,
+                          4715.451f);
         f_OpeningShotSimulation.position[0] = 0xF1B96;
         f_OpeningShotSimulation.position[2] = 0x48CFDC;
         f_OpeningShotSimulation.position[1] =
@@ -1157,8 +1157,8 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x32:
-        func_8020356C_ovl_05(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
-                             4671.789f);
+        PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
+                          4671.789f);
         f_OpeningCue = 4;
         f_LookAtEaseMode = 0;
         f_OpeningSceneFramesLeft = 0x64;
@@ -1206,10 +1206,10 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x3C:
-        func_8020356C_ovl_05(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f,
-                             5094.7f);
-        func_8020370C_ovl_05(1, 713.268f, -102.0f, 5094.7f, 0x28);
-        func_8020370C_ovl_05(0, 708.085f, -98.243f, 5073.215f, 0x28);
+        PlaceEditorCamera(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f,
+                          5094.7f);
+        MoveEditorPoint(1, 713.268f, -102.0f, 5094.7f, 0x28);
+        MoveEditorPoint(0, 708.085f, -98.243f, 5073.215f, 0x28);
         f_OpeningSceneFramesLeft = 0x28;
         f_OpeningScene = 0x46;
         f_OpeningCue = 5;
@@ -1247,9 +1247,9 @@ void func_801F6788_ovl_05(void) {
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
-        if (func_80203DC4_ovl_05()) {
-          func_8020356C_ovl_05(973.156f, -317.049f, 3703.677f, 1276.871f,
-                               -112.538f, 4540.245f);
+        if (AreEditorMovesDone()) {
+          PlaceEditorCamera(973.156f, -317.049f, 3703.677f, 1276.871f,
+                            -112.538f, 4540.245f);
           f_ShotBallScale = 1;
           f_LookAtEaseMode = 1;
           f_OpeningSceneFramesLeft = 0x46;
@@ -1264,8 +1264,8 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x50:
-        func_8020356C_ovl_05(980.776f, -123.436f, 4636.89f, 971.837f, -133.5f,
-                             4671.701f);
+        PlaceEditorCamera(980.776f, -123.436f, 4636.89f, 971.837f, -133.5f,
+                          4671.701f);
         f_OpeningSceneFramesLeft = 0x64;
         f_OpeningCue = 7;
         f_OpeningScene++;
@@ -1315,11 +1315,11 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x5A:
-        func_8020356C_ovl_05(1402.165f, -101.306f, 4774.711f, 1412.049f,
-                             -107.0f, 4798.309f);
-        func_80203B60_ovl_05(1, 0.183044f, 0x32);
-        func_80203A30_ovl_05(1, 1.1519989f, 0x32);
-        func_80203C90_ovl_05(1, 47.392056f, 0x1E);
+        PlaceEditorCamera(1402.165f, -101.306f, 4774.711f, 1412.049f, -107.0f,
+                          4798.309f);
+        TiltEditorCamera(1, 0.183044f, 0x32);
+        TurnEditorCamera(1, 1.1519989f, 0x32);
+        ZoomEditorCamera(1, 47.392056f, 0x1E);
         f_OpeningSceneFramesLeft = 0x32;
         f_OpeningScene = 0x64;
         f_IsNameSlotShown[0] = 0;
@@ -1343,16 +1343,16 @@ void func_801F6788_ovl_05(void) {
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_80203E14_ovl_05();
+          StopEditorMoves();
           StartHudAnimation(9);
           f_OpeningScene++;
         }
         break;
       case 0x65:
-        func_8020356C_ovl_05(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
-                             4671.789f);
-        func_80203A30_ovl_05(1, 1.0471976f, 1);
-        func_80203B60_ovl_05(1, 0.34906584f, 1);
+        PlaceEditorCamera(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
+                          4671.789f);
+        TurnEditorCamera(1, 1.0471976f, 1);
+        TiltEditorCamera(1, 0.34906584f, 1);
         f_OpeningCue = 9;
         f_OpeningScene++;
         LoadNameLogo(1, 0);
@@ -1373,8 +1373,8 @@ void func_801F6788_ovl_05(void) {
             f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
         break;
       case 0x66:
-        func_80203A30_ovl_05(1, -1.0471976f, 0x50);
-        func_80203B60_ovl_05(1, -0.34906584f, 0x50);
+        TurnEditorCamera(1, -1.0471976f, 0x50);
+        TiltEditorCamera(1, -0.34906584f, 0x50);
         f_OpeningScene = 0x6E;
         break;
       case 0x6E:
@@ -1397,7 +1397,7 @@ void func_801F6788_ovl_05(void) {
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020AE18_ovl_05);
           D_8020AE44_ovl_05 = 1;
           f_ShotBallScale = 1;
-          func_80203C90_ovl_05(1, 33.056084f, 0x28);
+          ZoomEditorCamera(1, 33.056084f, 0x28);
           f_OpeningSceneFramesLeft = 5;
           f_OpeningScene++;
           PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
@@ -1408,8 +1408,8 @@ void func_801F6788_ovl_05(void) {
         break;
       case 0x70:
         func_80206AA4_ovl_05(&f_OpeningShotSimulation);
-        if (func_80203DC4_ovl_05()) {
-          func_8020356C_ovl_05(
+        if (AreEditorMovesDone()) {
+          PlaceEditorCamera(
               934.786f, -128.501f, 4716.105f,
               f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE,
               f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE,
@@ -1452,7 +1452,7 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x78:
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           StartHudAnimation(1);
           f_OpeningScene++;
           LoadOpeningBall(4, 0);
@@ -1466,19 +1466,19 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x79:
-        func_8020356C_ovl_05(2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f,
-                             2488.521f);
+        PlaceEditorCamera(2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f,
+                          2488.521f);
         f_OpeningCue = 0xB;
         f_OpeningBallStates[0] = 1;
         f_OpeningBallStates[1] = 1;
         f_OpeningScene++;
         break;
       case 0x7A:
-        func_80203B60_ovl_05(1, -0.22654298f, 0x5A);
+        TiltEditorCamera(1, -0.22654298f, 0x5A);
         f_OpeningScene++;
         break;
       case 0x7B:
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningScene = 0x82;
         }
         if (D_8020AC44_ovl_05 == 0x375) {
@@ -1487,16 +1487,16 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x82:
-        func_8020356C_ovl_05(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f,
-                             1850.029f);
+        PlaceEditorCamera(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f,
+                          1850.029f);
         f_OpeningBallStates[1] = 0;
         f_OpeningBallPositions[0][0] = 2483.922f;
         f_OpeningBallPositions[0][2] = 1800.958f;
         f_OpeningBallScales[0] = 1.0f;
-        func_80203984_ovl_05(1, 2489.032f, -255.774f, 1840.637f, 0x50);
-        func_80203B60_ovl_05(1, -0.116571f, 0x76);
-        func_80203A30_ovl_05(1, 1.366719f, 0x76);
-        func_80203C90_ovl_05(1, 87.87598f, 0x76);
+        MoveEditorCamera(1, 2489.032f, -255.774f, 1840.637f, 0x50);
+        TiltEditorCamera(1, -0.116571f, 0x76);
+        TurnEditorCamera(1, 1.366719f, 0x76);
+        ZoomEditorCamera(1, 87.87598f, 0x76);
         f_OpeningCue = 0xC;
         f_OpeningSceneFramesLeft = 0x76;
         f_OpeningScene++;
@@ -1528,7 +1528,7 @@ void func_801F6788_ovl_05(void) {
             func_801F4A40_ovl_05();
             break;
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningScene = 0x8C;
           f_OpeningSceneFramesLeft = 0x28;
         }
@@ -1537,10 +1537,10 @@ void func_801F6788_ovl_05(void) {
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 0xD;
           f_OpeningScene++;
-          func_80203984_ovl_05(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
-          func_80203B60_ovl_05(1, -0.070194006f, 0x32);
-          func_80203A30_ovl_05(1, 0.3807652f, 0x32);
-          func_80203C90_ovl_05(1, 34.2068f, 0x32);
+          MoveEditorCamera(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
+          TiltEditorCamera(1, -0.070194006f, 0x32);
+          TurnEditorCamera(1, 0.3807652f, 0x32);
+          ZoomEditorCamera(1, 34.2068f, 0x32);
           if (f_IsDonkeyKongShown) {
             PlaySoundWithEffects(0x1A2, D_8020AC4C_ovl_05, 0x7F, 0, 0x3F);
           } else {
@@ -1550,7 +1550,7 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0x8D:
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningScene = 0x96;
           f_OpeningSceneFramesLeft = 0xA;
         }
@@ -1558,10 +1558,10 @@ void func_801F6788_ovl_05(void) {
       case 0x96:
         if (f_OpeningSceneFramesLeft == 0) {
           StartHudAnimation(9);
-          func_8020356C_ovl_05(2801.815f, -255.822f, 2196.813f, 2823.524f,
-                               -256.5f, 2177.502f);
-          func_8020370C_ovl_05(1, 2855.966f, -256.5f, 2213.121f, 0x32);
-          func_8020370C_ovl_05(0, 2702.606f, -279.683f, 2250.851f, 0x32);
+          PlaceEditorCamera(2801.815f, -255.822f, 2196.813f, 2823.524f, -256.5f,
+                            2177.502f);
+          MoveEditorPoint(1, 2855.966f, -256.5f, 2213.121f, 0x32);
+          MoveEditorPoint(0, 2702.606f, -279.683f, 2250.851f, 0x32);
           f_OpeningSceneFramesLeft = 0x5A;
           f_OpeningCue = 0xE;
           g_LightPitch = 0x1000;
@@ -1621,22 +1621,22 @@ void func_801F6788_ovl_05(void) {
           f_OpeningBallStates[0] = 1;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_80203B60_ovl_05(1, -0.166897f, 0x32);
+          TiltEditorCamera(1, -0.166897f, 0x32);
           f_OpeningScene++;
           PlaySound(0x60, D_8020AC4C_ovl_05, 0x32);
           func_801F4A40_ovl_05();
         }
         break;
       case 0x98:
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene = 0xA0;
         }
         break;
       case 0xA0:
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(2712.031f, -270.705f, 2358.303f, 2770.045f,
-                               -250.5f, 2337.548f);
+          PlaceEditorCamera(2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f,
+                            2337.548f);
           f_OpeningCue = 0xF;
           f_OpeningSceneFramesLeft = 0x40;
           f_OpeningScene = 0xAA;
@@ -1654,9 +1654,9 @@ void func_801F6788_ovl_05(void) {
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(2670.074f, -270.531f, 2375.225f, 2692.222f,
-                               -248.0f, 2366.292f);
-          func_80203C90_ovl_05(1, 16.721228f, 0x28);
+          PlaceEditorCamera(2670.074f, -270.531f, 2375.225f, 2692.222f, -248.0f,
+                            2366.292f);
+          ZoomEditorCamera(1, 16.721228f, 0x28);
           f_OpeningScene++;
           PlaySound(0x60, D_8020AC4C_ovl_05, 0x3C);
           func_801F4A40_ovl_05();
@@ -1675,18 +1675,18 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0xAB:
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningScene = 0xB4;
           f_OpeningSceneFramesLeft = 0x14;
         }
         break;
       case 0xB4:
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(2712.031f, -270.705f, 2358.303f, 2770.045f,
-                               -250.5f, 2337.548f);
+          PlaceEditorCamera(2712.031f, -270.705f, 2358.303f, 2770.045f, -250.5f,
+                            2337.548f);
           f_OpeningCue = 0x11;
           f_OpeningSceneFramesLeft = 0x38;
-          g_CameraEditor.unk24 = 45.0f;
+          g_CameraEditor.fieldOfView = 45.0f;
           f_OpeningScene++;
           LoadOpeningBall(4, 0);
           f_OpeningBallStates[0] = 1;
@@ -1727,11 +1727,11 @@ void func_801F6788_ovl_05(void) {
         f_OpeningBallPositions[1][1] = -560.0f;
         f_OpeningBallPositions[1][2] = 342.12f;
         f_OpeningBallScales[1] = 2.0f;
-        func_8020356C_ovl_05(2662.345f, -254.25f, 2376.081f, 2493.599f,
-                             -910.952f, 665.178f);
-        func_8020370C_ovl_05(0, 2671.388f, -257.489f, 2351.288f, 0x28);
-        func_8020370C_ovl_05(1, logoBallPoint[0], logoBallPoint[1] - 4.5f,
-                             logoBallPoint[2], 0x28);
+        PlaceEditorCamera(2662.345f, -254.25f, 2376.081f, 2493.599f, -910.952f,
+                          665.178f);
+        MoveEditorPoint(0, 2671.388f, -257.489f, 2351.288f, 0x28);
+        MoveEditorPoint(1, logoBallPoint[0], logoBallPoint[1] - 4.5f,
+                        logoBallPoint[2], 0x28);
         f_IsLogoBallSlot[1] = 1;
         f_OpeningScene++;
         D_80217078_ovl_05 = 1.0f;
@@ -1750,7 +1750,7 @@ void func_801F6788_ovl_05(void) {
         if (D_80217078_ovl_05 < 0.1f) {
           D_80217078_ovl_05 = 0.1f;
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningCue = 0x14;
           f_OpeningSceneFramesLeft = 0x78;
           f_OpeningScene = 0xC8;
@@ -1788,10 +1788,10 @@ void func_801F6788_ovl_05(void) {
         }
         if (f_OpeningSceneFramesLeft == 0) {
           StartHudAnimation(9);
-          func_8020356C_ovl_05(2878.956f, -391.282f, 2514.85f, 2431.88f,
-                               -315.0f, 992.943f);
-          func_8020370C_ovl_05(0, 2051.33f, -258.127f, 862.423f, 0x28);
-          func_8020370C_ovl_05(1, 2058.79f, -254.0f, 825.963f, 0x28);
+          PlaceEditorCamera(2878.956f, -391.282f, 2514.85f, 2431.88f, -315.0f,
+                            992.943f);
+          MoveEditorPoint(0, 2051.33f, -258.127f, 862.423f, 0x28);
+          MoveEditorPoint(1, 2058.79f, -254.0f, 825.963f, 0x28);
           f_OpeningCue = 0x15;
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene++;
@@ -1832,17 +1832,17 @@ void func_801F6788_ovl_05(void) {
               break;
           }
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_IsNameSlotShown[0] = 1;
           f_IsNameSlotShown[1] = 1;
         }
         if (f_OpeningSceneFramesLeft == 0) {
           if (f_IsDonkeyKongShown) {
-            func_8020370C_ovl_05(1, 2043.766f, -256.5f, 851.89f, 0x5A);
-            func_8020370C_ovl_05(0, 2032.192f, -262.337f, 875.169f, 0x5A);
+            MoveEditorPoint(1, 2043.766f, -256.5f, 851.89f, 0x5A);
+            MoveEditorPoint(0, 2032.192f, -262.337f, 875.169f, 0x5A);
           } else {
-            func_8020370C_ovl_05(1, 2043.767f, -250.0f, 851.891f, 0x5A);
-            func_8020370C_ovl_05(0, 2025.674f, -258.046f, 888.28f, 0x5A);
+            MoveEditorPoint(1, 2043.767f, -250.0f, 851.891f, 0x5A);
+            MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
           }
           f_OpeningSceneFramesLeft = 0x5A;
           f_OpeningScene++;
@@ -1918,7 +1918,7 @@ void func_801F6788_ovl_05(void) {
               break;
           }
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene = 0xD2;
         }
@@ -1929,8 +1929,8 @@ void func_801F6788_ovl_05(void) {
           func_801F4A40_ovl_05();
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(2708.301f, -264.204f, 2343.526f, 2770.098f,
-                               -260.0f, 2337.539f);
+          PlaceEditorCamera(2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f,
+                            2337.539f);
           f_OpeningCue = 0x17;
           f_OpeningSceneFramesLeft = 0x46;
           f_IsNameSlotShown[0] = 0;
@@ -1973,9 +1973,9 @@ void func_801F6788_ovl_05(void) {
         break;
       case 0xDC:
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(1423.923f, -248.221f, 1595.031f, 1450.829f,
-                               -254.0f, 1546.087f);
-          func_8020370C_ovl_05(1, 1420.136f, -250.5f, 1551.713f, 0x32);
+          PlaceEditorCamera(1423.923f, -248.221f, 1595.031f, 1450.829f, -254.0f,
+                            1546.087f);
+          MoveEditorPoint(1, 1420.136f, -250.5f, 1551.713f, 0x32);
           f_OpeningCue = 0x19;
           f_OpeningScene++;
           StartWipe(2);
@@ -2033,12 +2033,12 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0xE6:
-        func_8020356C_ovl_05(956.687f, -259.45f, 1874.671f, 933.391f, -243.5f,
-                             1884.391f);
+        PlaceEditorCamera(956.687f, -259.45f, 1874.671f, 933.391f, -243.5f,
+                          1884.391f);
         f_OpeningSceneFramesLeft = 0x14;
         f_OpeningCue = 0x1A;
         f_AreImpactLinesShown = 0;
-        g_CameraEditor.unk24 = 18.0f;
+        g_CameraEditor.fieldOfView = 18.0f;
         f_OpeningScene++;
         break;
       case 0xE7:
@@ -2047,13 +2047,13 @@ void func_801F6788_ovl_05(void) {
           func_801F4A40_ovl_05();
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020370C_ovl_05(1, 933.391f, -250.5f, 1884.391f, 0x3C);
+          MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
           f_OpeningSceneFramesLeft = 0x3C;
           f_OpeningScene++;
         }
         break;
       case 0xE8:
-        g_CameraEditor.unk24 += 0.2666666f;
+        g_CameraEditor.fieldOfView += 0.2666666f;
         switch (f_OpeningSceneFramesLeft) {
           case 0x36:
             PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
@@ -2072,7 +2072,7 @@ void func_801F6788_ovl_05(void) {
             func_801F4A40_ovl_05();
             break;
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningScene = 0xF0;
           f_OpeningSceneFramesLeft = 0x3C;
         }
@@ -2089,13 +2089,13 @@ void func_801F6788_ovl_05(void) {
             break;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020356C_ovl_05(1423.703f, -250.799f, 1574.041f, 1420.135f,
-                               -252.0f, 1551.713f);
+          PlaceEditorCamera(1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f,
+                            1551.713f);
           f_OpeningScene = 0xFA;
           f_OpeningSceneFramesLeft = 0x50;
           f_OpeningCue = 0x1B;
           f_OpeningBallStates[0] = 0;
-          g_CameraEditor.unk24 = 45.0f;
+          g_CameraEditor.fieldOfView = 45.0f;
           LoadOpeningBurst();
         }
         break;
@@ -2113,37 +2113,37 @@ void func_801F6788_ovl_05(void) {
           f_AreAmbientSoundsOn = 1;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020370C_ovl_05(0, 1404.737f, -250.799f, 1633.633f, 0x50);
+          MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
           f_OpeningScene++;
           LoadLakitu();
           f_OpeningSceneFramesLeft = 0x28;
         }
         break;
       case 0xFB:
-        g_CameraEditor.unk24 += 0.2f;
-        if (g_CameraEditor.unk24 > 100.0f) {
-          g_CameraEditor.unk24 = 100.0f;
+        g_CameraEditor.fieldOfView += 0.2f;
+        if (g_CameraEditor.fieldOfView > 100.0f) {
+          g_CameraEditor.fieldOfView = 100.0f;
         }
-        if (func_80203DC4_ovl_05()) {
+        if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene++;
         }
         break;
       case 0xFC:
-        g_CameraEditor.unk24 += 0.2f;
-        if (g_CameraEditor.unk24 > 100.0f) {
-          g_CameraEditor.unk24 = 100.0f;
+        g_CameraEditor.fieldOfView += 0.2f;
+        if (g_CameraEditor.fieldOfView > 100.0f) {
+          g_CameraEditor.fieldOfView = 100.0f;
         }
         if (f_OpeningSceneFramesLeft == 0) {
-          func_8020370C_ovl_05(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
+          MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
           f_OpeningSceneFramesLeft = 0x28;
           f_OpeningScene++;
         }
         break;
       case 0xFD:
-        g_CameraEditor.unk24 += 0.2f;
-        if (g_CameraEditor.unk24 > 100.0f) {
-          g_CameraEditor.unk24 = 100.0f;
+        g_CameraEditor.fieldOfView += 0.2f;
+        if (g_CameraEditor.fieldOfView > 100.0f) {
+          g_CameraEditor.fieldOfView = 100.0f;
         }
         if (f_OpeningSceneFramesLeft == 0) {
           f_IsLakituFlying = 1;
@@ -2155,9 +2155,9 @@ void func_801F6788_ovl_05(void) {
         }
         break;
       case 0xFE:
-        g_CameraEditor.unk24 += 0.2f;
-        if (g_CameraEditor.unk24 > 100.0f) {
-          g_CameraEditor.unk24 = 100.0f;
+        g_CameraEditor.fieldOfView += 0.2f;
+        if (g_CameraEditor.fieldOfView > 100.0f) {
+          g_CameraEditor.fieldOfView = 100.0f;
         }
         switch (f_OpeningSceneFramesLeft) {
           case 0x3C9:
@@ -2199,7 +2199,7 @@ void func_801F6788_ovl_05(void) {
         break;
       case 999:
         if (HasScreenFadeEnded()) {
-          func_80203E14_ovl_05();
+          StopEditorMoves();
           D_800B6808 = 1;
           g_Scene = 0x19;
           g_NextScene = 0x15;
@@ -2226,7 +2226,7 @@ void func_801F6788_ovl_05(void) {
   if (f_OpeningSceneFramesLeft > 0) {
     f_OpeningSceneFramesLeft--;
   }
-  func_80203F70_ovl_05();
+  UpdateCameraEditor();
   EaseOpeningLookAt();
   g_Cameras[0].view.mode = 1;
   g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
@@ -2235,7 +2235,7 @@ void func_801F6788_ovl_05(void) {
   g_Cameras[0].view.lookAt[0] = g_CameraEditor.points[1][0];
   g_Cameras[0].view.lookAt[1] = g_CameraEditor.points[1][1];
   g_Cameras[0].view.lookAt[2] = g_CameraEditor.points[1][2];
-  g_Cameras[0].view.fieldOfView = g_CameraEditor.unk24;
+  g_Cameras[0].view.fieldOfView = g_CameraEditor.fieldOfView;
   if (D_8020AE44_ovl_05 == 1) {
     D_8020AEBC_ovl_05 += g_ControllerStates[1].stickX * 0.002f;
     D_8020AEC0_ovl_05 += g_ControllerStates[1].stickY * 0.002f;
@@ -2275,7 +2275,7 @@ void func_801F6788_ovl_05(void) {
       }
       if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & 0x10)) {
         f_OpeningSceneFramesLeft = 0;
-        func_80203E14_ovl_05();
+        StopEditorMoves();
       }
     }
   }
@@ -3802,7 +3802,7 @@ void EaseOpeningLookAt(void) {
           (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.1f;
-      func_80203620_ovl_05();
+      MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SLOW:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
@@ -3817,7 +3817,7 @@ void EaseOpeningLookAt(void) {
           (f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           0.01f;
-      func_80203620_ovl_05();
+      MeasureEditorCamera();
       break;
     case LOOK_AT_EASE_SPEEDING_UP:
       g_CameraEditor.points[EDITOR_POINT_LOOK_AT][0] +=
@@ -3832,7 +3832,7 @@ void EaseOpeningLookAt(void) {
           ((f_OpeningBallPositions[1][2] - 4.795f) -
            g_CameraEditor.points[EDITOR_POINT_LOOK_AT][2]) *
           f_LookAtEaseRate;
-      func_80203620_ovl_05();
+      MeasureEditorCamera();
       f_LookAtEaseRate += 0.002f;
       if (f_LookAtEaseRate > 0.1f) {
         f_LookAtEaseRate = 0.1f;
