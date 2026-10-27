@@ -1,7 +1,10 @@
 #include "common.h"
 #include "asset.h"
 #include "billboard.h"
+#include "camera.h"
+#include "character.h"
 #include "character_slot.h"
+#include "club.h"
 #include "course.h"
 #include "game_flags.h"
 #include "hole_display.h"
@@ -10,6 +13,8 @@
 #include "menu.h"
 #include "menu_memory.h"
 #include "overlay_manager.h"
+#include "round_hud.h"
+#include "round_stats.h"
 #include "save.h"
 #include "scene.h"
 #include "scoring.h"
@@ -181,6 +186,15 @@ extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
 
 /* A byte of g_MapCamera that the menus set: the top of its view's mode */
 #define MAP_CAMERA_UNK4C 0x4C
+/* Values of D_801B60B9, the replay that leaving the menus starts */
+#define REPLAY_KIND_NONE 0
+#define REPLAY_KIND_RING_SHOT 2
+#define GAME_STATE_UNK13 13
+/* The character select row of the Game Boy characters, whose column is the character's index */
+#define GAME_BOY_CHARACTER_ROW 2
+#define PLAYER_UNK28_TRAINING (-1)
+#define PLAYER_UNK28_NINE_HOLES 3
+#define PLAYER_UNK28_EIGHTEEN_HOLES 6
 
 /* The choices of the list that func_801FAFEC runs, which no menu screen dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
@@ -222,8 +236,21 @@ extern s16 D_800FBE2C;
 extern u8 D_801B9410;
 extern s8 D_800FF4C0;
 extern s8 D_801B5634;
+extern s8 D_801B60BA[MENU_UNKE_COUNT];
+extern s16 D_8023BFDC_ovl_01[MAX_PLAYER_COUNT];
+extern s32 D_8012F480[MAX_PLAYER_COUNT];
+extern s32 D_8022BE1C_ovl_01;
+extern u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT]; /* Each player's clubs, a bit per slot */
+extern s32 D_8022F8F4_ovl_01[];
+extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
 s32 GetClubTournamentCourse(void);
+s32 GetClubTournamentGameMode(void);
+s32 func_8022BDC4_ovl_01(void);
+s32 func_8022BDD0_ovl_01(void);
+s32 func_8021E468_ovl_01(void);
+void LoadRingShotRecord(RingShotRecord *record);
+void LoadSuperShotReplay(PlayRecord *record);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 s32 func_801F7660_ovl_01(s32, s32);
 void func_80217B88_ovl_01(s32 requestedPreset);
@@ -341,7 +368,142 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F6A38_ovl_01);
 void func_801F6B20_ovl_01(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F6B28_ovl_01);
+const char D_80231514_ovl_01[] = "%s";
+
+void func_801F6B28_ovl_01(void) {
+    SaveData *save = GetSaveData();
+    MenuMemory *memory = func_8005AF74();
+    UnkB8 *player;
+    s32 index;
+    s32 slot;
+    s32 clubSet;
+    s32 *skippedNines;
+    s32 row;
+    s32 column;
+
+    memset(&g_RoundHud, 0, sizeof(g_RoundHud));
+    if (D_801B60B9 != REPLAY_KIND_NONE) {
+        if (D_801B60B9 == REPLAY_KIND_RING_SHOT) {
+            LoadRingShotRecord((RingShotRecord *)&save->unk1DF0[memory->ringShotReplaySlot]);
+        } else {
+            LoadSuperShotReplay((PlayRecord *)&save->rankedRecords[func_8021E468_ovl_01()]);
+        }
+        D_801B609C = 0;
+        g_PlayerCount = 1;
+        g_GameState.unk0 = 0;
+        return;
+    }
+    StartBets();
+    if (func_8022BDD0_ovl_01()) {
+        g_SkippedNines = 0;
+        g_CourseIndex = GetClubTournamentCourse();
+        g_GameMode = GetClubTournamentGameMode();
+        g_IsMiniGolf = g_CourseIndex >= MINI_GOLF_COURSE_INDEX;
+        for (index = 0; index != MENU_UNKE_COUNT; index++) {
+            D_801B60BA[index] = -1;
+        }
+        for (index = 0; index != MAX_PLAYER_COUNT; index++) {
+            D_8023BFDC_ovl_01[index] = 0;
+        }
+        if (func_8022BDC4_ovl_01() != -1) {
+            D_8012F480[0] = func_8022BDC4_ovl_01();
+            D_800FBE08[0] = 0;
+        }
+    } else {
+        if (g_GameMode == GAME_MODE_RING_SHOT) {
+            g_CourseIndex = g_MenuChoices.courseIndex;
+        } else if (g_GameMode == GAME_MODE_TRAINING) {
+            g_CourseIndex = 0;
+        } else {
+            g_CourseIndex = GetChosenCourseIndex();
+        }
+        if (g_GameMode == GAME_MODE_STROKE || g_GameMode == GAME_MODE_MATCH_GAME || g_GameMode == GAME_MODE_RING_SHOT ||
+            g_GameMode == GAME_MODE_SKINS_MATCH || g_GameMode == GAME_MODE_CLUB_SLOTS) {
+            /* Through a pointer, as the original keeps the address in a register for every store */
+            skippedNines = &g_SkippedNines;
+            *skippedNines = D_8022BE1C_ovl_01;
+            if (((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+                switch (g_MenuChoices.unk0) {
+                    case 0:
+                        *skippedNines = 0;
+                        break;
+                    case 1:
+                        *skippedNines = BACK_NINE_SKIPPED;
+                        break;
+                    case 2:
+                        *skippedNines = FRONT_NINE_SKIPPED;
+                        break;
+                    case 3:
+                        *skippedNines = 0;
+                        break;
+                }
+            }
+        } else {
+            g_SkippedNines = 0;
+        }
+    }
+    D_801B609C = 0;
+    g_PlayerCount = D_80105B68;
+    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+        g_PlayerCount = 2;
+    }
+    g_GameState.unk0 = GAME_STATE_UNK13;
+    func_801F6A38_ovl_01();
+    if (g_GameMode == GAME_MODE_TOURNAMENT) {
+        StartRoundStats();
+    }
+    for (index = 0; index != g_PlayerCount; index++) {
+        player = &g_Players[index];
+        player->handicap = D_8023BFDC_ovl_01[index];
+        player->unk22 = D_800FBE08[index];
+        player->characterIndex = D_8012F480[index];
+        player->controllerIndex = D_800C1FF4[index];
+        sprintf(player->name, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+        if (D_8012F480[index] >= CHARACTER_KID) {
+            row = *((s8 *)D_801323A0 + index + 7);
+            column = *((s8 *)D_801323A0 + index + 3);
+            if (row == GAME_BOY_CHARACTER_ROW) {
+                player->gameBoyCharacterIndex = column;
+            }
+            sprintf(player->name, D_80231514_ovl_01, g_GameBoyCharacters[player->gameBoyCharacterIndex].name);
+        } else {
+            player->gameBoyCharacterIndex = -1;
+            sprintf(player->name, D_80231514_ovl_01, D_8022BF70_ovl_01[D_8022F8F4_ovl_01[D_8012F480[index]]]);
+        }
+        if (player->controllerIndex == MAXCONTROLLERS) {
+            g_Players[index].unk1E[0] = 1;
+        } else {
+            g_Players[index].unk1E[0] = 0;
+        }
+        for (slot = 0; slot != CLUB_SET_SIZE; slot++) {
+            if (!((D_8022BE50_ovl_01[index] >> slot) & 1)) {
+                player->clubs[slot] = NO_CLUB;
+            } else {
+                clubSet = D_8012F480[index];
+                if (clubSet >= CHARACTER_KID) {
+                    clubSet = player->gameBoyCharacterIndex;
+                    clubSet += CHARACTER_KID;
+                }
+                player->clubs[slot] = slot + clubSet * CLUB_SET_SIZE;
+            }
+        }
+        for (; slot != CLUB_SLOT_COUNT; slot++) {
+            player->clubs[slot] = NO_CLUB;
+        }
+        if (g_GameMode == GAME_MODE_TRAINING) {
+            player->unk28 = PLAYER_UNK28_TRAINING;
+        } else if (g_SkippedNines == BACK_NINE_SKIPPED || g_SkippedNines == FRONT_NINE_SKIPPED) {
+            player->unk28 = PLAYER_UNK28_NINE_HOLES;
+        } else {
+            player->unk28 = PLAYER_UNK28_EIGHTEEN_HOLES;
+        }
+        LoadPlayerFace(index, (s8)player->characterIndex, (s8)player->paletteIndex);
+    }
+    if (g_GameMode == GAME_MODE_GET_CHARACTER) {
+        g_Players[1].unk1E[0] = 1;
+        g_Players[1].controllerIndex = MAXCONTROLLERS;
+    }
+}
 
 void func_801F70F0_ovl_01(void) {
     MenuMemory *memory = func_8005AF74();
