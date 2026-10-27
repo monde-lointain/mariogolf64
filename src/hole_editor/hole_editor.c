@@ -216,6 +216,22 @@
 /* The ground cells, between neighbouring ground points */
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
 #define CELL_ROW_COUNT (GROUND_POINT_ROW_COUNT - 1)
+
+/* func_804002C0's ground point editor */
+#define POINT_MOVE_COUNT 4 /* One for each C-button */
+#define POINT_MOVE_STEP 0x10
+#define POINT_TEXTURE_STEP 0x40
+#define TILE_POINT_MASK (GROUND_TILE_POINT_SPAN - 1)
+#define UNKNOWN_LIMIT_MIN 2
+#define UNKNOWN_LIMIT_MAX 13
+#define HEIGHT_UNITS_PER_METER 15
+#define POINT_TEXT_COLUMN 2
+#define TILE_TEXT_ROW 4
+#define TILE_POINT_TEXT_ROW 5
+#define X_LIMIT_TEXT_ROW 6
+#define Z_LIMIT_TEXT_ROW 7
+#define POINT_HEIGHT_TEXT_ROW 8
+#define DEAD_TRIANGLE_TEXT_ROW 9
 /* How scene 9's cursor zooms the map camera each frame R or L is held */
 #define CURSOR_ZOOM_IN_FACTOR 1.1f
 #define CURSOR_ZOOM_OUT_FACTOR 0.9f
@@ -289,6 +305,8 @@ extern s32 sCellCursorRow;
 /* The ground point that scene 10's cursor is on, starting at scene 9's cell */
 extern s32 sPointCursorColumn;
 extern s32 sPointCursorRow;
+extern s32 D_8040C5B8_hole_editor;
+extern s32 D_8040C5BC_hole_editor;
 
 /* func_80402428's state */
 extern f32 sTriangleCameraPitch;   /* In radians */
@@ -436,7 +454,198 @@ void func_8040000C_hole_editor(void) {
     g_MapCamera.view.eye[2] = (corner->v.ob[2] + oppositeCorner->v.ob[2]) / 2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804002C0_hole_editor);
+/*
+ * Scene 10's ground point editor. The control pad moves the cursor over the
+ * ground points, and the C-buttons move the point and its texture coordinates
+ * within its tile; a point on a tile's edge stays on that edge. A move
+ * that would make a dead triangle is undone. R and L zoom the map camera, and Z
+ * hands the point back to scene 9.
+ */
+void func_804002C0_hole_editor(void) {
+    Vtx_t points[POINT_MOVE_COUNT + 1]; /* Each move saves its point into the next move's slot */
+    char text[DEBUG_TEXT_BUFFER_SIZE];
+    Vtx_t unusedPoint; /* The game's frame has room for another point */
+    s32 madeDeadTriangle;
+
+    madeDeadTriangle = FALSE;
+    if (g_MenuControllerData[EDITOR_PAD].button & R_JPAD) {
+        sPointCursorColumn++;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & L_JPAD) {
+        sPointCursorColumn--;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & D_JPAD) {
+        sPointCursorRow--;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & U_JPAD) {
+        sPointCursorRow++;
+    }
+    if (sPointCursorColumn < 0) {
+        sPointCursorColumn = 0;
+    }
+    if (sPointCursorColumn >= CELL_COLUMN_COUNT) {
+        sPointCursorColumn = CELL_COLUMN_COUNT - 1;
+    }
+    if (sPointCursorRow < 0) {
+        sPointCursorRow = 0;
+    }
+    if (sPointCursorRow >= CELL_ROW_COUNT) {
+        sPointCursorRow = CELL_ROW_COUNT - 1;
+    }
+    /* B held moves only the texture */
+    if (!(g_MenuControllerData[EDITOR_PAD].button & B_BUTTON)) {
+        if ((g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) && (sPointCursorRow & TILE_POINT_MASK)) {
+            points[0] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[1] = points[0];
+            points[0].ob[AXIS_Z] -= POINT_MOVE_STEP;
+            points[0].tc[1] -= POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[0]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[1]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) && (sPointCursorRow & TILE_POINT_MASK)) {
+            points[1] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[2] = points[1];
+            points[1].ob[AXIS_Z] += POINT_MOVE_STEP;
+            points[1].tc[1] += POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[1]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[2]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) && (sPointCursorColumn & TILE_POINT_MASK)) {
+            points[2] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[3] = points[2];
+            points[2].ob[AXIS_X] -= POINT_MOVE_STEP;
+            points[2].tc[0] -= POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[2]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[3]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) && (sPointCursorColumn & TILE_POINT_MASK)) {
+            points[3] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[4] = points[3];
+            points[3].ob[AXIS_X] += POINT_MOVE_STEP;
+            points[3].tc[0] += POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[3]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[4]);
+            }
+        }
+    } else {
+        if ((g_MenuControllerData[EDITOR_PAD].button & D_CBUTTONS) && (sPointCursorRow & TILE_POINT_MASK)) {
+            points[0] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[1] = points[0];
+            points[0].tc[1] -= POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[0]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[1]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & U_CBUTTONS) && (sPointCursorRow & TILE_POINT_MASK)) {
+            points[1] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[2] = points[1];
+            points[1].tc[1] += POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[1]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[2]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & L_CBUTTONS) && (sPointCursorColumn & TILE_POINT_MASK)) {
+            points[2] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[3] = points[2];
+            points[2].tc[0] -= POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[2]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[3]);
+            }
+        }
+        if ((g_MenuControllerData[EDITOR_PAD].button & R_CBUTTONS) && (sPointCursorColumn & TILE_POINT_MASK)) {
+            points[3] = GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v;
+            points[4] = points[3];
+            points[3].tc[0] += POINT_TEXTURE_STEP;
+            SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[3]);
+            if (func_804066C8_hole_editor(sPointCursorColumn, sPointCursorRow)) {
+                madeDeadTriangle = TRUE;
+                SetGroundPoint(sPointCursorColumn, sPointCursorRow, &points[4]);
+            }
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= CURSOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MAX;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & L_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_MenuControllerData[EDITOR_PAD].trigger & Z_TRIG) {
+        sCellCursorColumn = sPointCursorColumn;
+        sCellCursorRow = sPointCursorRow;
+        ClearDebugText();
+        g_Scene = SCENE_UNK9;
+    }
+    /* Nothing else uses these two */
+    if (D_8040C5B8_hole_editor < UNKNOWN_LIMIT_MIN) {
+        D_8040C5B8_hole_editor = UNKNOWN_LIMIT_MIN;
+    }
+    if (D_8040C5B8_hole_editor > UNKNOWN_LIMIT_MAX) {
+        D_8040C5B8_hole_editor = UNKNOWN_LIMIT_MAX;
+    }
+    if (D_8040C5BC_hole_editor < UNKNOWN_LIMIT_MIN) {
+        D_8040C5BC_hole_editor = UNKNOWN_LIMIT_MIN;
+    }
+    if (D_8040C5BC_hole_editor > UNKNOWN_LIMIT_MAX) {
+        D_8040C5BC_hole_editor = UNKNOWN_LIMIT_MAX;
+    }
+    {
+        Vtx *point = GetGroundPoint(sPointCursorColumn, sPointCursorRow);
+
+        g_MapCamera.view.eye[AXIS_X] = point->v.ob[AXIS_X];
+        g_MapCamera.view.eye[AXIS_Z] = point->v.ob[AXIS_Z];
+    }
+    sprintf(text, "SuperMacro X:%2d Z:%2d", sPointCursorColumn / GROUND_TILE_POINT_SPAN,
+            sPointCursorRow / GROUND_TILE_POINT_SPAN);
+    PrintDebugText(text, POINT_TEXT_COLUMN, TILE_TEXT_ROW);
+    sprintf(text, "SubX:%d SubZ:%d", sPointCursorColumn & TILE_POINT_MASK, sPointCursorRow & TILE_POINT_MASK);
+    PrintDebugText(text, POINT_TEXT_COLUMN, TILE_POINT_TEXT_ROW);
+    SetDebugTextHighlight(TRUE);
+    if (!(sPointCursorColumn & TILE_POINT_MASK)) {
+        sprintf(text, "Can't Move X-Axis");
+    } else {
+        sprintf(text, "                 ");
+    }
+    PrintDebugText(text, POINT_TEXT_COLUMN, X_LIMIT_TEXT_ROW);
+    SetDebugTextHighlight(TRUE);
+    if (!(sPointCursorRow & TILE_POINT_MASK)) {
+        sprintf(text, "Can't Move Z-Axis");
+    } else {
+        sprintf(text, "                 ");
+    }
+    PrintDebugText(text, POINT_TEXT_COLUMN, Z_LIMIT_TEXT_ROW);
+    sprintf(text, "Height:%dM   ",
+            -GetGroundPoint(sPointCursorColumn, sPointCursorRow)->v.ob[AXIS_Y] / HEIGHT_UNITS_PER_METER);
+    PrintDebugText(text, POINT_TEXT_COLUMN, POINT_HEIGHT_TEXT_ROW);
+    if (madeDeadTriangle) {
+        sprintf(text, "DeadTriangle");
+    } else {
+        sprintf(text, "             ");
+    }
+    PrintDebugText(text, POINT_TEXT_COLUMN, DEAD_TRIANGLE_TEXT_ROW);
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80400FBC_hole_editor);
 
