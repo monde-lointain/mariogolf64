@@ -87,6 +87,22 @@ void LoadMenuWindowImage(s32 imageIndex);
 
 extern s16 g_CharacterGrid[CHARACTER_GRID_ROW_COUNT][CHARACTER_GRID_COLUMN_COUNT];
 
+/* Indices of the game-mode icon animations in g_ModeIconAnimations */
+#define MODE_ICON_TOURNAMENT 0
+#define MODE_ICON_GET_CHARACTER 1
+#define MODE_ICON_STROKE 2
+#define MODE_ICON_MINI_GOLF 5
+#define MODE_ICON_MATCH_GAME 6
+#define MODE_ICON_SKINS_MATCH 7
+#define MODE_ICON_CLUB_SLOTS 10
+#define NO_MODE_ICON -1
+#define MODE_ICON_COUNT 11
+/* Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES */
+#define MODE_ICON_FRAME_COUNT 27
+#define END_OF_ICON_FRAMES -1
+
+extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 

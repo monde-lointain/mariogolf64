@@ -7,6 +7,7 @@
 #include "heap.h"
 #include "hole_display.h"
 #include "math_util.h"
+#include "menu.h"
 #include "round_hud.h"
 #include "save.h"
 #include "scene.h"
@@ -34,19 +35,6 @@
 #define SAVE_MENU_STATE_SAVED 4       /* Waits before leaving */
 #define SAVE_MENU_STATE_LEAVING 5     /* The rows slide out, and the menu closes */
 
-/* Indices of the game-mode icon animations in D_800C229C */
-#define MODE_ICON_TOURNAMENT 0
-#define MODE_ICON_GET_CHARACTER 1
-#define MODE_ICON_STROKE 2
-#define MODE_ICON_MINI_GOLF 5
-#define MODE_ICON_MATCH_GAME 6
-#define MODE_ICON_SKINS_MATCH 7
-#define MODE_ICON_CLUB_SLOTS 10
-#define NO_MODE_ICON -1
-#define MODE_ICON_COUNT 11
-/* Each icon's frames are asset ids, ended by END_OF_ICON_FRAMES */
-#define MODE_ICON_FRAME_COUNT 27
-#define END_OF_ICON_FRAMES -1
 /* The frames that each frame of the chosen icon shows for */
 #define ICON_FRAME_PERIOD 5
 
@@ -274,7 +262,6 @@ extern void *sReplayLabelImages[REPLAY_LABEL_COUNT];
 extern void *sCourseNumbersImage;
 extern void *sSaveMenuTitleImage;
 extern s32 sIconFrames[SAVED_GAME_COUNT];
-extern s16 g_ModeIconAnimations[MODE_ICON_COUNT][MODE_ICON_FRAME_COUNT];
 
 void func_8005B28C(s32 recordIndex, Unk68 *record);
 void func_8005D0D8(void);
