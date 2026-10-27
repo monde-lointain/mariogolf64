@@ -8,6 +8,7 @@
 #include "character.h"
 #include "character_slot.h"
 #include "cpu_projection.h"
+#include "current_shot.h"
 #include "effects.h"
 #include "functions.h"
 #include "heap.h"
@@ -15,6 +16,7 @@
 #include "libc.h"
 #include "math_util.h"
 #include "round_hud.h"
+#include "scene.h"
 #include "screen.h"
 #include "screen_layers.h"
 #include "sound.h"
@@ -876,7 +878,1415 @@ s32 UpdateOpeningCharacters(void) {
   return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F6788_ovl_05);
+/* The opening script's current scene */
+extern s32 f_OpeningScene;
+/* Ends the opening */
+#define OPENING_SCENE_END 999
+/* The frames left before the opening's current scene moves on */
+extern s32 f_OpeningSceneFramesLeft;
+/*
+ * Mario shows on the logo ball from this scene on, whenever fewer than this
+ * many of a scene's frames are left
+ */
+#define OPENING_SCENE_LOGO_BALL_MARIO 200
+#define LOGO_BALL_MARIO_FRAMES_LEFT 98
+
+/*
+ * Whether a slot shows the logo ball, the ball in the title logo. Only this
+ * slot's flag is ever set, and setting it also has all balls projected to
+ * the screen
+ */
+extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
+#define LOGO_BALL_SLOT 1
+
+extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
+extern s32 f_AreImpactLinesShown;
+extern s32 f_ShotBallScale;
+extern s32 D_8020AC48_ovl_05;
+
+/* What the sparks are doing */
+typedef enum SparksState {
+  SPARKS_HIDDEN,
+  SPARKS_STARTING, /* Set elsewhere to start the sparks */
+  SPARKS_FLYING
+} SparksState;
+
+extern s32 f_OpeningSparksState;
+extern Vec3 f_OpeningSparksOrigin;
+
+extern s32 D_8020AC44_ovl_05;
+extern Unk20 D_8020ADB8_ovl_05;
+extern Unk20 D_8020ADD8_ovl_05;
+extern Unk20 D_8020ADF8_ovl_05;
+extern Unk20 D_8020AE18_ovl_05;
+extern s32 D_8020AE44_ovl_05;
+extern f32 D_8020AEBC_ovl_05;
+extern f32 D_8020AEC0_ovl_05;
+extern CoursePoint D_8020C404_ovl_05;
+extern s32 D_8020E3F0_ovl_05;
+extern s32 D_8020E3F4_ovl_05;
+extern f32 D_80217078_ovl_05;
+extern s32 D_800B6808;
+
+void LaunchDrop(CoursePoint point);
+void SpawnRisingClumps(CoursePoint point);
+s32 IsDonkeyKongUnlocked(void);
+void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
+void func_80203A30_ovl_05(s32 index, f32 angle, s32 frameCount);
+void func_80203B60_ovl_05(s32 index, f32 angle, s32 frameCount);
+void func_80203C90_ovl_05(s32 index, f32 distance, s32 frameCount);
+s32 func_80203DC4_ovl_05(void);
+void func_80203E14_ovl_05(void);
+void func_80203F70_ovl_05(void);
+void func_80204EA8_ovl_05(void);
+void func_8020356C_ovl_05(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
+                          f32 arg5);
+void func_80206AA4_ovl_05(BallSimulation* simulation);
+void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
+void LoadOpeningShotBall(void);
+void LoadOpeningBurst(void);
+void LoadLakitu(void);
+void LoadOpeningImpactLines(void);
+void EaseOpeningLookAt(void);
+void LoadOpeningBall(s32 imageIndex, s32 slot);
+
+/*
+ * Runs the opening's script: steps through its scenes, moving the camera,
+ * setting up shots and cues, and playing sounds on given frames. Any button
+ * skips to the end, and the debug controllers can stop the script to edit the
+ * camera.
+ */
+void func_801F6788_ovl_05(void) {
+  Vec3 point;
+  Vec3 logoBallPoint;
+  Vec3 handPoint;
+  s32 slot;
+  s32 channel;
+  s32 i;
+  s32 pressedButtons;
+  s32 skipButtons;
+
+  if (IsGameFlagSet(0x62)) {
+    func_80204EA8_ovl_05();
+    if (g_ControllerStates[2].pressedButtons & 0x4000) {
+      PlaySound(0x63, 0xF, 0x7F);
+      ClearGameFlag(0x62);
+      f_IsLookAtMarkerShown = 0;
+      ClearDebugText();
+    }
+  } else {
+    if (D_8020AC44_ovl_05 < 9000) {
+      D_8020AC44_ovl_05++;
+    } else {
+      f_OpeningScene = 999;
+    }
+    if (g_IsDebugEnabled) {
+      sprintf(g_PrintBuffer, "%04d", D_8020AC44_ovl_05);
+      PrintDebugText(g_PrintBuffer, 0x1E, 0x1A);
+      sprintf(g_PrintBuffer, "CAMERA:%d    ", f_OpeningScene);
+      PrintDebugText(g_PrintBuffer, 4, 2);
+      sprintf(g_PrintBuffer, "(%d)    ", f_OpeningSceneFramesLeft);
+      PrintDebugText(g_PrintBuffer, 0x1D, 2);
+    }
+    switch (f_OpeningScene) {
+      case 0x0:
+        g_ScreenFadeDuration = 1;
+        g_ScreenFadeFramesLeft = 1;
+        g_ScreenFadeKind = 1;
+        g_ScreenFadeRed = 0;
+        g_ScreenFadeGreen = 0;
+        g_ScreenFadeBlue = 0;
+        f_OpeningSceneFramesLeft = 0xA;
+        f_OpeningScene++;
+        break;
+      case 0x1:
+        g_ScreenFadeDuration = 1;
+        g_ScreenFadeFramesLeft = 1;
+        g_ScreenFadeKind = 1;
+        g_ScreenFadeRed = 0;
+        g_ScreenFadeGreen = 0;
+        g_ScreenFadeBlue = 0;
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningSceneFramesLeft = 0x1E;
+          LoadNameLogo(0, 0);
+          f_OpeningCue = 0;
+          StartScreenFadeIn(0, 0, 0, 0x1E);
+          func_8020356C_ovl_05(997.598f, -160.581f, 4594.014f, 973.0f, -130.0f,
+                               4672.0f);
+          func_80203C90_ovl_05(1, 38.01875f, 0x3C);
+          func_80203A30_ovl_05(1, -0.8528241f, 0x28);
+          func_80203B60_ovl_05(1, -0.324127f, 0x28);
+          f_OpeningScene++;
+          LoadOpeningShotBall();
+          f_OpeningShotSimulation.position[0] = 0xF1B96;
+          f_OpeningShotSimulation.position[2] = 0x48CFDC;
+          f_OpeningShotSimulation.position[1] =
+              GetGroundHeight(0xF1B96, 0x48CFDC);
+          f_ShotBallScale = 2;
+          f_OpeningSparksOrigin[0] =
+              f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+          f_OpeningSparksOrigin[1] =
+              f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+          f_OpeningSparksOrigin[2] =
+              f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+          ClearEffects();
+          D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
+          D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
+          D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        }
+        break;
+      case 0x2:
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_IsNameSlotShown[0] = 1;
+          PlaySong(0x2F, 0);
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningScene++;
+        }
+        break;
+      case 0x3:
+        if (f_OpeningSceneFramesLeft == 0x1C) {
+          PlaySound(0x51, D_8020AC4C_ovl_05, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x18) {
+          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
+          func_801F4A40_ovl_05();
+          f_OpeningSparksState = 1;
+          LaunchDrop(D_8020C404_ovl_05);
+        }
+        if (f_OpeningSceneFramesLeft == 0x18) {
+          f_OpeningShotSimulation.playerIndex = 0;
+          f_OpeningShotSimulation.unkA0 = 0;
+          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.surface = 0x17;
+          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
+          D_8020AE44_ovl_05 = 1;
+          f_ShotBallScale = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningCue = 1;
+          f_OpeningScene = 0x14;
+        }
+        break;
+      case 0x14:
+        func_8020356C_ovl_05(679.6445f, -98.28f, 4736.7f, 642.835f, -99.0f,
+                             4746.187f);
+        func_80203C90_ovl_05(1, 18.469883f, 0x1E);
+        func_80203984_ovl_05(1, 642.835f, -100.5f, 4746.187f, 0x1E);
+        f_IsNameSlotShown[0] = 0;
+        D_8020AE44_ovl_05 = 0;
+        f_ShotBallScale = 0;
+        f_OpeningSceneFramesLeft = 0x1E;
+        f_OpeningScene++;
+        ClearEffects();
+        break;
+      case 0x15:
+        switch (f_OpeningSceneFramesLeft) {
+          case 25:
+            PlaySound(0x196, D_8020AC4C_ovl_05, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 23:
+            PlaySoundWithEffects(0x1AE, D_8020AC4C_ovl_05, 0x46, 0, 0xBB);
+            func_801F4A40_ovl_05();
+            break;
+          case 20:
+            PlaySoundWithEffects(0x177, D_8020AC4C_ovl_05, 0x46, 0, 0x57);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (func_80203DC4_ovl_05()) {
+          func_80203E14_ovl_05();
+          f_OpeningScene++;
+        }
+        break;
+      case 0x16:
+        f_OpeningCue = 2;
+        f_OpeningScene = 0x28;
+        break;
+      case 0x1E:
+        func_8020356C_ovl_05(1400.411f, -101.306f, 4781.043f, 1414.02f, -107.0f,
+                             4800.41f);
+        f_OpeningSceneFramesLeft = 0xE;
+        f_OpeningScene++;
+        break;
+      case 0x1F:
+        if (f_OpeningSceneFramesLeft == 8) {
+          SetAnimationSpeed(2, 0.0f);
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0x28;
+        }
+        break;
+      case 0x28:
+        func_8020356C_ovl_05(1269.768f, -127.806f, 4719.564f, 1179.989f,
+                             -111.987f, 4715.451f);
+        f_OpeningShotSimulation.position[0] = 0xF1B96;
+        f_OpeningShotSimulation.position[2] = 0x48CFDC;
+        f_OpeningShotSimulation.position[1] =
+            GetGroundHeight(0xF1B96, 0x48CFDC);
+        f_OpeningShotSimulation.playerIndex = 0;
+        f_OpeningShotSimulation.unkA0 = 0;
+        f_OpeningShotSimulation.isRunning = 0;
+        f_OpeningShotSimulation.surface = 0x17;
+        func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADB8_ovl_05);
+        D_8020AE44_ovl_05 = 1;
+        f_ShotBallScale = 1;
+        f_OpeningSparksState = 1;
+        f_OpeningSceneFramesLeft = 0x14;
+        f_OpeningScene++;
+        break;
+      case 0x29:
+        if (f_OpeningSceneFramesLeft == 0xE) {
+          PlaySoundWithEffects(0x148, D_8020AC4C_ovl_05, 0x7F, 0, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_LookAtEaseMode = 1;
+          f_OpeningSceneFramesLeft = 0x32;
+          f_OpeningScene++;
+        }
+        break;
+      case 0x2A:
+        if (f_OpeningSceneFramesLeft == 0) {
+          StartHudAnimation(9);
+          f_OpeningScene = 0x32;
+          LoadNameLogo(2, 0);
+        }
+        break;
+      case 0x32:
+        func_8020356C_ovl_05(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
+                             4671.789f);
+        f_OpeningCue = 4;
+        f_LookAtEaseMode = 0;
+        f_OpeningSceneFramesLeft = 0x64;
+        D_8020AE44_ovl_05 = 0;
+        f_OpeningShotSimulation.position[0] = 0xF1882;
+        f_OpeningShotSimulation.position[2] = 0x48D4C4;
+        f_OpeningScene++;
+        f_OpeningShotSimulation.position[1] =
+            GetGroundHeight(0xF1882, 0x48D4C4);
+        f_ShotBallScale = 2;
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        f_OpeningSparksOrigin[0] =
+            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[1] =
+            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[2] =
+            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+        break;
+      case 0x33:
+        if (f_OpeningSceneFramesLeft == 0x18) {
+          PlaySound(0x50, D_8020AC4C_ovl_05, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x14) {
+          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
+          func_801F4A40_ovl_05();
+          f_OpeningSparksState = 1;
+          LaunchDrop(D_8020C404_ovl_05);
+        }
+        if (f_OpeningSceneFramesLeft == 0x16) {
+          f_OpeningShotSimulation.playerIndex = 0;
+          f_OpeningShotSimulation.unkA0 = 0;
+          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.surface = 0x17;
+          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
+          D_8020AE44_ovl_05 = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0x5A) {
+          f_IsNameSlotShown[0] = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0x3C;
+        }
+        break;
+      case 0x3C:
+        func_8020356C_ovl_05(726.63f, -98.049f, 5063.849f, 713.268f, -96.0f,
+                             5094.7f);
+        func_8020370C_ovl_05(1, 713.268f, -102.0f, 5094.7f, 0x28);
+        func_8020370C_ovl_05(0, 708.085f, -98.243f, 5073.215f, 0x28);
+        f_OpeningSceneFramesLeft = 0x28;
+        f_OpeningScene = 0x46;
+        f_OpeningCue = 5;
+        f_IsNameSlotShown[0] = 0;
+        D_8020AE44_ovl_05 = 0;
+        f_ShotBallScale = 0;
+        PlaySoundWithEffects(0x197, D_8020AC4C_ovl_05, 0x32, 0, 0x2F);
+        func_801F4A40_ovl_05();
+        ClearEffects();
+        break;
+      case 0x46:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x23:
+            PlaySoundWithEffects(0x177, D_8020AC4C_ovl_05, 0x50, 0, 0xA7);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x21:
+            PlaySound(0x1AF, D_8020AC4C_ovl_05, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x1F:
+            PlaySoundWithEffects(0x146, D_8020AC4C_ovl_05, 0x50, 0, 0xBB);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0x14) {
+          f_OpeningShotSimulation.position[0] = 0xF1B96;
+          f_OpeningShotSimulation.position[2] = 0x48CFDC;
+          f_OpeningShotSimulation.position[1] =
+              GetGroundHeight(0xF1B96, 0x48CFDC);
+          f_OpeningShotSimulation.playerIndex = 0;
+          f_OpeningShotSimulation.unkA0 = 0;
+          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.surface = 0x17;
+          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
+          D_8020AE44_ovl_05 = 1;
+        }
+        if (func_80203DC4_ovl_05()) {
+          func_8020356C_ovl_05(973.156f, -317.049f, 3703.677f, 1276.871f,
+                               -112.538f, 4540.245f);
+          f_ShotBallScale = 1;
+          f_LookAtEaseMode = 1;
+          f_OpeningSceneFramesLeft = 0x46;
+          f_OpeningScene++;
+          func_801F4A40_ovl_05();
+        }
+        break;
+      case 0x47:
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0x50;
+          StartHudAnimation(9);
+        }
+        break;
+      case 0x50:
+        func_8020356C_ovl_05(980.776f, -123.436f, 4636.89f, 971.837f, -133.5f,
+                             4671.701f);
+        f_OpeningSceneFramesLeft = 0x64;
+        f_OpeningCue = 7;
+        f_OpeningScene++;
+        LoadNameLogo(3, 0);
+        D_8020AE44_ovl_05 = 0;
+        f_LookAtEaseMode = 0;
+        f_OpeningShotSimulation.position[0] = 0xF3930;
+        f_OpeningShotSimulation.position[2] = 0x48D1D1;
+        f_OpeningShotSimulation.position[1] =
+            GetGroundHeight(0xF3930, 0x48D1D1);
+        f_ShotBallScale = 2;
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        f_OpeningSparksOrigin[0] =
+            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[1] =
+            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[2] =
+            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+        break;
+      case 0x51:
+        if (f_OpeningSceneFramesLeft == 0x18) {
+          PlaySound(0x50, D_8020AC4C_ovl_05, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x14) {
+          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
+          func_801F4A40_ovl_05();
+          f_OpeningSparksState = 1;
+          LaunchDrop(D_8020C404_ovl_05);
+        }
+        if (f_OpeningSceneFramesLeft == 0x14) {
+          f_OpeningShotSimulation.playerIndex = 0;
+          f_OpeningShotSimulation.unkA0 = 0;
+          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.surface = 0x17;
+          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADF8_ovl_05);
+          D_8020AE44_ovl_05 = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0x5A) {
+          f_IsNameSlotShown[0] = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0x5A;
+          f_OpeningCue = 8;
+        }
+        break;
+      case 0x5A:
+        func_8020356C_ovl_05(1402.165f, -101.306f, 4774.711f, 1412.049f,
+                             -107.0f, 4798.309f);
+        func_80203B60_ovl_05(1, 0.183044f, 0x32);
+        func_80203A30_ovl_05(1, 1.1519989f, 0x32);
+        func_80203C90_ovl_05(1, 47.392056f, 0x1E);
+        f_OpeningSceneFramesLeft = 0x32;
+        f_OpeningScene = 0x64;
+        f_IsNameSlotShown[0] = 0;
+        D_8020AE44_ovl_05 = 0;
+        f_ShotBallScale = 0;
+        ClearEffects();
+        break;
+      case 0x64:
+        switch (f_OpeningSceneFramesLeft) {
+          case 40:
+            PlaySound(0x176, D_8020AC4C_ovl_05, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 38:
+            PlaySoundWithEffects(0x147, D_8020AC4C_ovl_05, 0x46, 0, 0xBB);
+            func_801F4A40_ovl_05();
+            break;
+          case 35:
+            PlaySoundWithEffects(0x196, D_8020AC4C_ovl_05, 0x36, 0, 0x57);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_80203E14_ovl_05();
+          StartHudAnimation(9);
+          f_OpeningScene++;
+        }
+        break;
+      case 0x65:
+        func_8020356C_ovl_05(957.619f, -131.446f, 4629.353f, 973.561f, -133.0f,
+                             4671.789f);
+        func_80203A30_ovl_05(1, 1.0471976f, 1);
+        func_80203B60_ovl_05(1, 0.34906584f, 1);
+        f_OpeningCue = 9;
+        f_OpeningScene++;
+        LoadNameLogo(1, 0);
+        f_OpeningSceneFramesLeft = 0xA;
+        f_OpeningShotSimulation.position[0] = 0xF190E;
+        f_OpeningShotSimulation.position[2] = 0x48D416;
+        f_OpeningShotSimulation.position[1] =
+            GetGroundHeight(0xF190E, 0x48D416);
+        f_ShotBallScale = 2;
+        D_8020C404_ovl_05[0] = f_OpeningShotSimulation.position[0];
+        D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
+        D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
+        f_OpeningSparksOrigin[0] =
+            f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[1] =
+            f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+        f_OpeningSparksOrigin[2] =
+            f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+        break;
+      case 0x66:
+        func_80203A30_ovl_05(1, -1.0471976f, 0x50);
+        func_80203B60_ovl_05(1, -0.34906584f, 0x50);
+        f_OpeningScene = 0x6E;
+        break;
+      case 0x6E:
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_IsNameSlotShown[0] = 1;
+          f_OpeningScene = 0x6F;
+          f_OpeningSceneFramesLeft = 0x37;
+        }
+        break;
+      case 0x6F:
+        if (f_OpeningSceneFramesLeft == 4) {
+          PlaySound(0x51, D_8020AC4C_ovl_05, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningShotSimulation.playerIndex = 0;
+          f_OpeningShotSimulation.unkA0 = 0;
+          f_OpeningShotSimulation.isRunning = 0;
+          f_OpeningShotSimulation.surface = 0x17;
+          func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020AE18_ovl_05);
+          D_8020AE44_ovl_05 = 1;
+          f_ShotBallScale = 1;
+          func_80203C90_ovl_05(1, 33.056084f, 0x28);
+          f_OpeningSceneFramesLeft = 5;
+          f_OpeningScene++;
+          PlaySoundWithEffects(0x59, D_8020AC4C_ovl_05, 0x4C, 0, 0xA7);
+          func_801F4A40_ovl_05();
+          f_OpeningSparksState = 1;
+          LaunchDrop(D_8020C404_ovl_05);
+        }
+        break;
+      case 0x70:
+        func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+        if (func_80203DC4_ovl_05()) {
+          func_8020356C_ovl_05(
+              934.786f, -128.501f, 4716.105f,
+              f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE,
+              f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE,
+              f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE);
+          f_LookAtEaseMode = 2;
+          f_OpeningSceneFramesLeft = 0x8C;
+          f_IsNameSlotShown[0] = 0;
+          f_OpeningScene++;
+          ClearEffects();
+        }
+        break;
+      case 0x71:
+        if (f_OpeningSceneFramesLeft == 0x37) {
+          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0xA, 0x9F);
+          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -9.0f);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x2D) {
+          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x14, 0x9F);
+          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -10.0f);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x23) {
+          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x1E, 0x9F);
+          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -11.0f);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x19) {
+          PlaySoundWithEffects(0xB, D_8020AC4C_ovl_05, 0x50, 0x28, 0x9F);
+          SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -12.0f);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0xF) {
+          PlaySound(5, D_8020AC4C_ovl_05, 0x30);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0x78;
+          f_LookAtEaseMode = 0;
+        }
+        break;
+      case 0x78:
+        if (func_80203DC4_ovl_05()) {
+          StartHudAnimation(1);
+          f_OpeningScene++;
+          LoadOpeningBall(4, 0);
+          LoadOpeningBall(4, 1);
+          f_OpeningBallPositions[0][0] = 2709.835f;
+          f_OpeningBallPositions[0][2] = 2465.858f;
+          f_OpeningBallScales[0] = 1.5f;
+          f_OpeningBallPositions[1][0] = 2653.68f;
+          f_OpeningBallPositions[1][2] = 2478.326f;
+          f_OpeningBallScales[1] = 1.5f;
+        }
+        break;
+      case 0x79:
+        func_8020356C_ovl_05(2737.741f, -364.884f, 2368.88f, 2680.325f, -248.5f,
+                             2488.521f);
+        f_OpeningCue = 0xB;
+        f_OpeningBallStates[0] = 1;
+        f_OpeningBallStates[1] = 1;
+        f_OpeningScene++;
+        break;
+      case 0x7A:
+        func_80203B60_ovl_05(1, -0.22654298f, 0x5A);
+        f_OpeningScene++;
+        break;
+      case 0x7B:
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningScene = 0x82;
+        }
+        if (D_8020AC44_ovl_05 == 0x375) {
+          PlaySound(0x4F, D_8020AC4C_ovl_05, 0x3C);
+          func_801F4A40_ovl_05();
+        }
+        break;
+      case 0x82:
+        func_8020356C_ovl_05(2413.141f, -271.41f, 1784.364f, 2503.834f, -245.0f,
+                             1850.029f);
+        f_OpeningBallStates[1] = 0;
+        f_OpeningBallPositions[0][0] = 2483.922f;
+        f_OpeningBallPositions[0][2] = 1800.958f;
+        f_OpeningBallScales[0] = 1.0f;
+        func_80203984_ovl_05(1, 2489.032f, -255.774f, 1840.637f, 0x50);
+        func_80203B60_ovl_05(1, -0.116571f, 0x76);
+        func_80203A30_ovl_05(1, 1.366719f, 0x76);
+        func_80203C90_ovl_05(1, 87.87598f, 0x76);
+        f_OpeningCue = 0xC;
+        f_OpeningSceneFramesLeft = 0x76;
+        f_OpeningScene++;
+        break;
+      case 0x83:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x49:
+          case 0x54:
+          case 0x5E:
+          case 0x68:
+          case 0x73:
+            PlaySound(0x4E, D_8020AC4C_ovl_05, 0x46);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x6A:
+            PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x48, -6, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x64:
+            PlaySound(0x18A, D_8020AC4C_ovl_05, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x46:
+            if (f_IsDonkeyKongShown) {
+              PlaySound(0x188, D_8020AC4C_ovl_05, 0x7F);
+            } else {
+              PlaySound(0x187, D_8020AC4C_ovl_05, 0x7F);
+            }
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningScene = 0x8C;
+          f_OpeningSceneFramesLeft = 0x28;
+        }
+        break;
+      case 0x8C:
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningCue = 0xD;
+          f_OpeningScene++;
+          func_80203984_ovl_05(1, 2489.636f, -257.5f, 1811.529f, 0x1E);
+          func_80203B60_ovl_05(1, -0.070194006f, 0x32);
+          func_80203A30_ovl_05(1, 0.3807652f, 0x32);
+          func_80203C90_ovl_05(1, 34.2068f, 0x32);
+          if (f_IsDonkeyKongShown) {
+            PlaySoundWithEffects(0x1A2, D_8020AC4C_ovl_05, 0x7F, 0, 0x3F);
+          } else {
+            PlaySoundWithEffects(0x1A1, D_8020AC4C_ovl_05, 0x50, 0, 0x3F);
+          }
+          func_801F4A40_ovl_05();
+        }
+        break;
+      case 0x8D:
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningScene = 0x96;
+          f_OpeningSceneFramesLeft = 0xA;
+        }
+        break;
+      case 0x96:
+        if (f_OpeningSceneFramesLeft == 0) {
+          StartHudAnimation(9);
+          func_8020356C_ovl_05(2801.815f, -255.822f, 2196.813f, 2823.524f,
+                               -256.5f, 2177.502f);
+          func_8020370C_ovl_05(1, 2855.966f, -256.5f, 2213.121f, 0x32);
+          func_8020370C_ovl_05(0, 2702.606f, -279.683f, 2250.851f, 0x32);
+          f_OpeningSceneFramesLeft = 0x5A;
+          f_OpeningCue = 0xE;
+          g_LightPitch = 0x1000;
+          /* Stored as a signed value, as the original does */
+          *(s16*)&g_LightYaw = -0x7800;
+          f_OpeningScene++;
+        }
+        break;
+      case 0x97:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x57:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0xA7);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x4D:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x4C, 0, 0x9D);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x43:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x48, 0, 0x93);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x39:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x3A, 0, 0x89);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x2A:
+            PlaySound(0x35, D_8020AC4C_ovl_05, 0x46);
+            SetSoundFrequencyOffset(D_8020AC4C_ovl_05, 7.0f);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft >= 0x17 &&
+            f_OpeningSceneFramesLeft < 0x2A) {
+          GetCharacterPointPosition(2, 2, point);
+          g_CurrentShot.ballPosition[0] = (s32)point[0] * 1024;
+          g_CurrentShot.ballPosition[2] = (s32)point[2] * 1024;
+          g_CurrentShot.ballPosition[1] =
+              GetGroundHeight(g_CurrentShot.ballPosition[0],
+                              g_CurrentShot.ballPosition[2]) +
+              15360.0f;
+          SpawnRisingClumps(D_8020C404_ovl_05);
+        }
+        if (f_OpeningSceneFramesLeft == 0x50) {
+          if (IsDonkeyKongUnlocked()) {
+            if (!(rand() & 0x80)) {
+              f_IsDonkeyKongShown = 1;
+            } else {
+              f_IsDonkeyKongShown = 0;
+            }
+          }
+          LoadOpeningBall(4, 0);
+          f_OpeningBallPositions[0][0] = 2723.423f;
+          f_OpeningBallPositions[0][2] = 2246.086f;
+        }
+        if (f_OpeningSceneFramesLeft == 0x32) {
+          f_OpeningBallStates[0] = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_80203B60_ovl_05(1, -0.166897f, 0x32);
+          f_OpeningScene++;
+          PlaySound(0x60, D_8020AC4C_ovl_05, 0x32);
+          func_801F4A40_ovl_05();
+        }
+        break;
+      case 0x98:
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningScene = 0xA0;
+        }
+        break;
+      case 0xA0:
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(2712.031f, -270.705f, 2358.303f, 2770.045f,
+                               -250.5f, 2337.548f);
+          f_OpeningCue = 0xF;
+          f_OpeningSceneFramesLeft = 0x40;
+          f_OpeningScene = 0xAA;
+          f_OpeningBallPositions[0][0] = 2755.104f;
+          f_OpeningBallPositions[0][2] = 2341.293f;
+        }
+        break;
+      case 0xAA:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x35:
+          case 0x2A:
+          case 0x1A:
+            PlaySound(0x4E, D_8020AC4C_ovl_05, 0x30);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(2670.074f, -270.531f, 2375.225f, 2692.222f,
+                               -248.0f, 2366.292f);
+          func_80203C90_ovl_05(1, 16.721228f, 0x28);
+          f_OpeningScene++;
+          PlaySound(0x60, D_8020AC4C_ovl_05, 0x3C);
+          func_801F4A40_ovl_05();
+          g_LightPitch = 0x1000;
+          g_LightYaw = 0x6800;
+          if (f_IsDonkeyKongShown) {
+            LoadOpeningBall(1, 1);
+          } else {
+            LoadOpeningBall(2, 1);
+          }
+          f_OpeningBallStates[0] = 0;
+          f_OpeningBallStates[1] = 1;
+          f_OpeningBallPositions[1][0] = 2689.998f;
+          f_OpeningBallPositions[1][2] = 2367.191f;
+          f_OpeningBallScales[1] = 3.0f;
+        }
+        break;
+      case 0xAB:
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningScene = 0xB4;
+          f_OpeningSceneFramesLeft = 0x14;
+        }
+        break;
+      case 0xB4:
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(2712.031f, -270.705f, 2358.303f, 2770.045f,
+                               -250.5f, 2337.548f);
+          f_OpeningCue = 0x11;
+          f_OpeningSceneFramesLeft = 0x38;
+          g_CameraEditor.unk24 = 45.0f;
+          f_OpeningScene++;
+          LoadOpeningBall(4, 0);
+          f_OpeningBallStates[0] = 1;
+          f_OpeningBallStates[1] = 0;
+          f_OpeningBallPositions[0][0] = 2755.104f;
+          f_OpeningBallPositions[0][2] = 2341.293f;
+          f_OpeningBallScales[0] = 1.0f;
+        }
+        break;
+      case 0xB5:
+        if (f_OpeningSceneFramesLeft == 0xA) {
+          PlaySoundWithEffects(0xC5, D_8020AC4C_ovl_05, 0x40, 0x14, 0xCF);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningCue = 0x12;
+          f_OpeningSceneFramesLeft = 0x1E;
+          f_OpeningScene++;
+          LoadOpeningBall(4, 1);
+          f_OpeningBallPositions[1][0] = 0.0f;
+          f_OpeningBallPositions[1][2] = 0.0f;
+        }
+        break;
+      case 0xB6:
+        if (D_8020AC44_ovl_05 == 0x5C5) {
+          PlaySoundWithEffects(0x189, D_8020AC4C_ovl_05, 0x7F, 0, 0x89);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningCue = 0x13;
+          f_OpeningScene = 0xBE;
+        }
+        break;
+      case 0xBE:
+        GetCharacterPointPosition(1, 3, logoBallPoint);
+        f_OpeningBallStates[1] = 2;
+        f_OpeningBallPositions[1][0] = 2319.014f;
+        f_OpeningBallPositions[1][1] = -560.0f;
+        f_OpeningBallPositions[1][2] = 342.12f;
+        f_OpeningBallScales[1] = 2.0f;
+        func_8020356C_ovl_05(2662.345f, -254.25f, 2376.081f, 2493.599f,
+                             -910.952f, 665.178f);
+        func_8020370C_ovl_05(0, 2671.388f, -257.489f, 2351.288f, 0x28);
+        func_8020370C_ovl_05(1, logoBallPoint[0], logoBallPoint[1] - 4.5f,
+                             logoBallPoint[2], 0x28);
+        f_IsLogoBallSlot[1] = 1;
+        f_OpeningScene++;
+        D_80217078_ovl_05 = 1.0f;
+        break;
+      case 0xBF:
+        f_OpeningBallPositions[1][0] +=
+            (g_CameraEditor.points[1][0] - f_OpeningBallPositions[1][0]) *
+            D_80217078_ovl_05;
+        f_OpeningBallPositions[1][1] +=
+            (g_CameraEditor.points[1][1] - f_OpeningBallPositions[1][1]) *
+            D_80217078_ovl_05;
+        f_OpeningBallPositions[1][2] +=
+            (g_CameraEditor.points[1][2] - f_OpeningBallPositions[1][2]) *
+            D_80217078_ovl_05;
+        D_80217078_ovl_05 -= 0.02f;
+        if (D_80217078_ovl_05 < 0.1f) {
+          D_80217078_ovl_05 = 0.1f;
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningCue = 0x14;
+          f_OpeningSceneFramesLeft = 0x78;
+          f_OpeningScene = 0xC8;
+          f_LookAtEaseMode = 3;
+        }
+        break;
+      case 0xC8:
+        D_80217078_ovl_05 += 0.02f;
+        if (D_80217078_ovl_05 > 1.0f) {
+          D_80217078_ovl_05 = 1.0f;
+        }
+        GetCharacterPointPosition(1, 3, handPoint);
+        f_OpeningBallPositions[1][0] +=
+            (handPoint[0] - f_OpeningBallPositions[1][0]) * D_80217078_ovl_05;
+        f_OpeningBallPositions[1][1] +=
+            (handPoint[1] - f_OpeningBallPositions[1][1]) * D_80217078_ovl_05;
+        f_OpeningBallPositions[1][2] +=
+            (handPoint[2] - f_OpeningBallPositions[1][2]) * D_80217078_ovl_05;
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x61:
+            PlaySoundWithEffects(2, D_8020AC4C_ovl_05, 0x7F, 0, 0xA7);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x45:
+            PlaySoundWithEffects(2, D_8020AC4C_ovl_05, 0x7F, 0, 0x93);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x37:
+            PlaySoundWithEffects(0x14, D_8020AC4C_ovl_05, 0x40, 0x7F, 0x7F);
+            break;
+          case 0xF:
+            StopSound(D_8020AC4C_ovl_05);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          StartHudAnimation(9);
+          func_8020356C_ovl_05(2878.956f, -391.282f, 2514.85f, 2431.88f,
+                               -315.0f, 992.943f);
+          func_8020370C_ovl_05(0, 2051.33f, -258.127f, 862.423f, 0x28);
+          func_8020370C_ovl_05(1, 2058.79f, -254.0f, 825.963f, 0x28);
+          f_OpeningCue = 0x15;
+          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningScene++;
+          LoadNameLogo(5, 0);
+          if (f_IsDonkeyKongShown) {
+            LoadNameLogo(6, 1);
+          } else {
+            LoadNameLogo(4, 1);
+          }
+          f_OpeningBallStates[1] = 0;
+          f_IsLogoBallSlot[1] = 0;
+          f_ShotBallScale = 0;
+          f_LookAtEaseMode = 0;
+          PlaySound(0x60, D_8020AC4C_ovl_05, 0x50);
+          func_801F4A40_ovl_05();
+        }
+        break;
+      case 0xC9:
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningCue = 0x16;
+          f_OpeningSceneFramesLeft = 0x24;
+          f_OpeningScene++;
+        }
+        break;
+      case 0xCA:
+        if (f_IsDonkeyKongShown) {
+          if (f_OpeningSceneFramesLeft == 0x12) {
+            PlaySoundWithEffects(0x41, D_8020AC4C_ovl_05, 0x7F, 7, 0x7F);
+            SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -4.0f);
+            func_801F4A40_ovl_05();
+          }
+        } else {
+          switch (f_OpeningSceneFramesLeft) {
+            case 0x13:
+            case 9:
+              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x43);
+              func_801F4A40_ovl_05();
+              break;
+          }
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_IsNameSlotShown[0] = 1;
+          f_IsNameSlotShown[1] = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          if (f_IsDonkeyKongShown) {
+            func_8020370C_ovl_05(1, 2043.766f, -256.5f, 851.89f, 0x5A);
+            func_8020370C_ovl_05(0, 2032.192f, -262.337f, 875.169f, 0x5A);
+          } else {
+            func_8020370C_ovl_05(1, 2043.767f, -250.0f, 851.891f, 0x5A);
+            func_8020370C_ovl_05(0, 2025.674f, -258.046f, 888.28f, 0x5A);
+          }
+          f_OpeningSceneFramesLeft = 0x5A;
+          f_OpeningScene++;
+        }
+        break;
+      case 0xCB:
+        if (f_IsDonkeyKongShown) {
+          switch (f_OpeningSceneFramesLeft) {
+            case 0x1A:
+            case 0x2E:
+            case 0x42:
+            case 0x56:
+              PlaySoundWithEffects(0x41, D_8020AC4C_ovl_05, 0x7F, 7, 0x7F);
+              SetSoundFrequencyOffset(D_8020AC4C_ovl_05, -4.0f);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x43:
+              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x28);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x2F:
+              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x60);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x1F:
+              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x30);
+              func_801F4A40_ovl_05();
+              break;
+            case 0xC:
+              PlaySoundWithEffects(0xCA, D_8020AC4C_ovl_05, 0x7F, 0, 0x93);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x8:
+              PlaySoundWithEffects(0xEA, D_8020AC4C_ovl_05, 0x7F, 0, 0x6B);
+              func_801F4A40_ovl_05();
+              break;
+          }
+        } else {
+          switch (f_OpeningSceneFramesLeft) {
+            case 0x45:
+            case 0x4F:
+            case 0x59:
+              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x57);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x2A:
+              PlaySound(0x4F, D_8020AC4C_ovl_05, 0x61);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x3B:
+              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x51);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x22:
+              PlaySound(0x4D, D_8020AC4C_ovl_05, 0x5B);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x1D:
+              PlaySound(0x2A, D_8020AC4C_ovl_05, 0x6B);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x27:
+              PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x30, 0, 0x65);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x16:
+              PlaySoundWithEffects(0x2A, D_8020AC4C_ovl_05, 0x18, 0, 0x5B);
+              func_801F4A40_ovl_05();
+              break;
+            case 0x4:
+              PlaySoundWithEffects(0x20B, D_8020AC4C_ovl_05, 0x7F, 0, 0x6B);
+              func_801F4A40_ovl_05();
+              break;
+          }
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningScene = 0xD2;
+        }
+        break;
+      case 0xD2:
+        if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 0x10) {
+          PlaySoundWithEffects(0xC3, D_8020AC4C_ovl_05, 0x60, 0, 0x93);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(2708.301f, -264.204f, 2343.526f, 2770.098f,
+                               -260.0f, 2337.539f);
+          f_OpeningCue = 0x17;
+          f_OpeningSceneFramesLeft = 0x46;
+          f_IsNameSlotShown[0] = 0;
+          f_IsNameSlotShown[1] = 0;
+          f_OpeningScene++;
+          LoadWipeShape(0xC);
+        }
+        break;
+      case 0xD3:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x3C:
+            PlaySound(0x184, D_8020AC4C_ovl_05, 0x60);
+            func_801F4A40_ovl_05();
+            /* fallthrough */
+          case 0x32:
+            PlaySound(0x18B, D_8020AC4C_ovl_05, 0x60);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x28:
+            PlaySound(0x18B, D_8020AC4C_ovl_05, 0x60);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x25:
+            PlaySound(0x184, D_8020AC4C_ovl_05, 0x60);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          StartWipe(1);
+          f_OpeningScene++;
+        }
+        break;
+      case 0xD4:
+        if (!GetWipeProgress()) {
+          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningScene = 0xDC;
+          f_OpeningCue = 0x18;
+          f_OpeningBallStates[0] = 0;
+        }
+        break;
+      case 0xDC:
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(1423.923f, -248.221f, 1595.031f, 1450.829f,
+                               -254.0f, 1546.087f);
+          func_8020370C_ovl_05(1, 1420.136f, -250.5f, 1551.713f, 0x32);
+          f_OpeningCue = 0x19;
+          f_OpeningScene++;
+          StartWipe(2);
+          f_OpeningSceneFramesLeft = 0xA0;
+          LoadOpeningImpactLines();
+        }
+        break;
+      case 0xDD:
+        if (f_OpeningSceneFramesLeft == 0x1E) {
+          f_AreImpactLinesShown = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_OpeningScene = 0xE6;
+          LoadOpeningBall(3, 0);
+          f_OpeningBallStates[0] = 1;
+          f_OpeningBallPositions[0][0] = 932.978f;
+          f_OpeningBallPositions[0][2] = 1884.644f;
+          f_OpeningBallScales[0] = 1.4f;
+        }
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x93:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x61);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x89:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x6B);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x7F:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x75);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x74:
+            PlaySoundWithEffects(0x4E, D_8020AC4C_ovl_05, 0x50, 0, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x1E:
+            PlaySound(0x36, D_8020AC4C_ovl_05, 0x46);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x1C:
+            if (f_IsDonkeyKongShown) {
+              PlaySound(0x141, D_8020AC4C_ovl_05, 0x7F);
+              D_8020E3F0_ovl_05 = D_8020AC4C_ovl_05;
+            } else {
+              PlaySound(0x152, D_8020AC4C_ovl_05, 0x7F);
+            }
+            func_801F4A40_ovl_05();
+            break;
+          case 0x14:
+            if (f_IsDonkeyKongShown) {
+              StopSound(D_8020E3F0_ovl_05);
+            }
+            break;
+        }
+        break;
+      case 0xE6:
+        func_8020356C_ovl_05(956.687f, -259.45f, 1874.671f, 933.391f, -243.5f,
+                             1884.391f);
+        f_OpeningSceneFramesLeft = 0x14;
+        f_OpeningCue = 0x1A;
+        f_AreImpactLinesShown = 0;
+        g_CameraEditor.unk24 = 18.0f;
+        f_OpeningScene++;
+        break;
+      case 0xE7:
+        if (f_OpeningSceneFramesLeft == 6) {
+          PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020370C_ovl_05(1, 933.391f, -250.5f, 1884.391f, 0x3C);
+          f_OpeningSceneFramesLeft = 0x3C;
+          f_OpeningScene++;
+        }
+        break;
+      case 0xE8:
+        g_CameraEditor.unk24 += 0.2666666f;
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x36:
+            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
+            func_801F4A40_ovl_05();
+            break;
+          case 0xA:
+            PlaySound(0x77, D_8020AC4C_ovl_05, 0x7F);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x24:
+            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
+            func_801F4A40_ovl_05();
+            break;
+          case 0x6:
+            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningScene = 0xF0;
+          f_OpeningSceneFramesLeft = 0x3C;
+        }
+        break;
+      case 0xF0:
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x24:
+            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0xA7);
+            func_801F4A40_ovl_05();
+            /* fallthrough */
+          case 0x6:
+            PlaySoundWithEffects(0x1F, D_8020AC4C_ovl_05, 0x60, 0, 0x57);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020356C_ovl_05(1423.703f, -250.799f, 1574.041f, 1420.135f,
+                               -252.0f, 1551.713f);
+          f_OpeningScene = 0xFA;
+          f_OpeningSceneFramesLeft = 0x50;
+          f_OpeningCue = 0x1B;
+          f_OpeningBallStates[0] = 0;
+          g_CameraEditor.unk24 = 45.0f;
+          LoadOpeningBurst();
+        }
+        break;
+      case 0xFA:
+        if (f_OpeningSceneFramesLeft == 0x2E) {
+          f_IsBurstShown = 1;
+          PlaySound(0x34, D_8020AC4C_ovl_05, 0x50);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x1A) {
+          PlaySound(0x141, D_8020AC4C_ovl_05, 0x7F);
+          func_801F4A40_ovl_05();
+        }
+        if (f_OpeningSceneFramesLeft == 0x14) {
+          f_AreAmbientSoundsOn = 1;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020370C_ovl_05(0, 1404.737f, -250.799f, 1633.633f, 0x50);
+          f_OpeningScene++;
+          LoadLakitu();
+          f_OpeningSceneFramesLeft = 0x28;
+        }
+        break;
+      case 0xFB:
+        g_CameraEditor.unk24 += 0.2f;
+        if (g_CameraEditor.unk24 > 100.0f) {
+          g_CameraEditor.unk24 = 100.0f;
+        }
+        if (func_80203DC4_ovl_05()) {
+          f_OpeningSceneFramesLeft = 0x14;
+          f_OpeningScene++;
+        }
+        break;
+      case 0xFC:
+        g_CameraEditor.unk24 += 0.2f;
+        if (g_CameraEditor.unk24 > 100.0f) {
+          g_CameraEditor.unk24 = 100.0f;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          func_8020370C_ovl_05(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
+          f_OpeningSceneFramesLeft = 0x28;
+          f_OpeningScene++;
+        }
+        break;
+      case 0xFD:
+        g_CameraEditor.unk24 += 0.2f;
+        if (g_CameraEditor.unk24 > 100.0f) {
+          g_CameraEditor.unk24 = 100.0f;
+        }
+        if (f_OpeningSceneFramesLeft == 0) {
+          f_IsLakituFlying = 1;
+          f_OpeningSceneFramesLeft = 1000;
+          f_OpeningScene++;
+          PlaySound(0x28, D_8020AC4C_ovl_05, 0x3F);
+          func_801F4A40_ovl_05();
+          f_AreAmbientSoundsOn = 0;
+        }
+        break;
+      case 0xFE:
+        g_CameraEditor.unk24 += 0.2f;
+        if (g_CameraEditor.unk24 > 100.0f) {
+          g_CameraEditor.unk24 = 100.0f;
+        }
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x3C9:
+          case 0x3CA:
+          case 0x3CB:
+          case 0x3CC:
+          case 0x3E1:
+          case 0x3E2:
+          case 0x3E3:
+          case 0x3E5:
+          case 0x3E6:
+            PlaySound(0x27, D_8020AC4C_ovl_05, 0x40);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        switch (f_OpeningSceneFramesLeft) {
+          case 0x3A8:
+          case 0x3A9:
+          case 0x3AB:
+          case 0x3AC:
+          case 0x3C1:
+          case 0x3C3:
+          case 0x3C5:
+          case 0x3C6:
+          case 0x3C8:
+            PlaySound(0x4D, D_8020AC4C_ovl_05, 0x60);
+            func_801F4A40_ovl_05();
+            break;
+        }
+        func_801F4A6C_ovl_05();
+        if (f_OpeningSceneFramesLeft == 0x3CF) {
+          PlaySoundWithEffects(0x211, 0xB, 0x7F, 0, 0x7F);
+          D_8020E3F4_ovl_05 = 0xB;
+        }
+        break;
+      case 998:
+        StartScreenFadeOut(0xFF, 0xFF, 0xFF, 4);
+        f_OpeningScene = 999;
+        break;
+      case 999:
+        if (HasScreenFadeEnded()) {
+          func_80203E14_ovl_05();
+          D_800B6808 = 1;
+          g_Scene = 0x19;
+          g_NextScene = 0x15;
+          g_SceneModuleToUnload = 3;
+          g_SceneModuleToLoad = 4;
+          ClearDebugText();
+          StopWipe();
+          FreeAllCharacterSlots();
+          for (channel = 0; channel < 0xD; channel++) {
+            if (D_800B6808 != 1 || (channel != D_8020E3F0_ovl_05 &&
+                                    channel != D_8020E3F4_ovl_05)) {
+              StopSound(channel);
+            }
+          }
+          if (!D_8020AC48_ovl_05) {
+            PlaySound(0x5D, 0xF, 0x7F);
+          }
+          SetTextSlot(0xA0, 0x72, -1, 1, 0, 0, 0, 0, 0, 0);
+          return;
+        }
+        break;
+    }
+  }
+  if (f_OpeningSceneFramesLeft > 0) {
+    f_OpeningSceneFramesLeft--;
+  }
+  func_80203F70_ovl_05();
+  EaseOpeningLookAt();
+  g_Cameras[0].view.mode = 1;
+  g_Cameras[0].view.eye[0] = g_CameraEditor.points[0][0];
+  g_Cameras[0].view.eye[1] = g_CameraEditor.points[0][1];
+  g_Cameras[0].view.eye[2] = g_CameraEditor.points[0][2];
+  g_Cameras[0].view.lookAt[0] = g_CameraEditor.points[1][0];
+  g_Cameras[0].view.lookAt[1] = g_CameraEditor.points[1][1];
+  g_Cameras[0].view.lookAt[2] = g_CameraEditor.points[1][2];
+  g_Cameras[0].view.fieldOfView = g_CameraEditor.unk24;
+  if (D_8020AE44_ovl_05 == 1) {
+    D_8020AEBC_ovl_05 += g_ControllerStates[1].stickX * 0.002f;
+    D_8020AEC0_ovl_05 += g_ControllerStates[1].stickY * 0.002f;
+    for (slot = 0; slot < 4; slot++) {
+      if (IsCharacterSlotBusy(slot)) {
+        GetCharacterPointPosition(slot, 1, point);
+      }
+    }
+    point[0] = f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
+    point[1] = f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
+    point[2] = f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
+    func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+  } else if (D_8020AE44_ovl_05 == 2) {
+    func_80206AA4_ovl_05(&f_OpeningShotSimulation);
+  }
+  if (f_OpeningScene != 999 && !D_8020AC48_ovl_05 && !IsGameFlagSet(0x62)) {
+    if (f_OpeningScene != 998) {
+      pressedButtons = 0;
+      for (i = 0; i != g_ControllerCount; i++) {
+        pressedButtons |= g_ControllerStates[i].pressedButtons;
+      }
+      if (g_IsDebugEnabled) {
+        skipButtons = g_ControllerStates[0].pressedButtons & 0x9000;
+      } else {
+        skipButtons = pressedButtons & 0xD000;
+      }
+      if (skipButtons) {
+        f_OpeningScene = 998;
+      }
+    }
+    if (g_IsDebugEnabled) {
+      if (g_ControllerStates[2].pressedButtons & 0x8000) {
+        PlaySound(0x5D, 0xF, 0x7F);
+        SetGameFlag(0x62);
+        f_IsLookAtMarkerShown = 1;
+        f_LookAtEaseMode = 0;
+      }
+      if (g_IsDebugEnabled && (g_ControllerStates[1].pressedButtons & 0x10)) {
+        f_OpeningSceneFramesLeft = 0;
+        func_80203E14_ovl_05();
+      }
+    }
+  }
+  if (UpdateOpeningCharacters()) {
+    f_OpeningScene = 999;
+  }
+  AnimateAllCharacters();
+  AnimateNameLogos();
+  MoveLakitu();
+  PlayOpeningAmbientSounds();
+}
 
 /* Draws the camera editor's look-at marker, the characters and the opening's
  * overlays */
@@ -1127,27 +2537,6 @@ void LoadOpeningBall(s32 ballIndex, s32 slot) {
   f_OpeningBallScales[slot] = OPENING_BALL_NORMAL_SCALE;
 }
 
-/* The opening script's current scene */
-extern s32 f_OpeningScene;
-/* Ends the opening */
-#define OPENING_SCENE_END 999
-/* The frames left before the opening's current scene moves on */
-extern s32 f_OpeningSceneFramesLeft;
-/*
- * Mario shows on the logo ball from this scene on, whenever fewer than this
- * many of a scene's frames are left
- */
-#define OPENING_SCENE_LOGO_BALL_MARIO 200
-#define LOGO_BALL_MARIO_FRAMES_LEFT 98
-
-/*
- * Whether a slot shows the logo ball, the ball in the title logo. Only this
- * slot's flag is ever set, and setting it also has all balls projected to
- * the screen
- */
-extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
-#define LOGO_BALL_SLOT 1
-
 /* f_LogoBallImages holds three 64x64 frames of the ball rolling */
 #define LOGO_BALL_FRAME_COUNT 3
 #define LOGO_BALL_FRAME_SIZE \
@@ -1186,7 +2575,6 @@ extern u8 f_IsLogoBallSlot[OPENING_BALL_SLOT_COUNT];
 /* The balls other than the logo ball are drawn this many pixels lower */
 #define PROJECTED_BALL_DROP 2
 
-extern Vec3 f_OpeningBallPositions[OPENING_BALL_SLOT_COUNT];
 extern Vtx f_OpeningBallStripVertices[OPENING_BALL_STRIP_COUNT][4];
 extern Vtx f_OpeningBallShadowVertices[4];
 extern Mtx f_OpeningBallMatrices[OPENING_BALL_SLOT_COUNT][DRAW_BUFFER_COUNT];
@@ -1798,7 +3186,6 @@ void LoadOpeningImpactLines(void) {
   ReadEncodedAsset(D_80212830_ovl_05, &asset);
 }
 
-extern s32 f_AreImpactLinesShown;
 extern s32 f_ImpactLinesFrame;
 
 /* The impact lines' left and bottom edges on the screen, in pixels */
@@ -2229,7 +3616,6 @@ void LoadOpeningShotBall(void) {
 /* The shadow's scale for each step of f_ShotBallScale */
 #define SHOT_BALL_SHADOW_SCALE 0.5
 
-extern s32 f_ShotBallScale;
 extern s32 f_ShotBallAlpha;
 extern Vtx f_ShotBallShadowVertices[4];
 extern Vec3 f_ShotBallPosition;
@@ -2490,7 +3876,6 @@ void LoadOpeningLogo(void) {
   ReadEncodedAsset(f_LogoShineImage, &asset);
 }
 
-extern s32 D_8020AC48_ovl_05;
 /* What the title logo as a whole is doing */
 typedef enum LogoState {
   LOGO_DROPPING_LETTERS,
@@ -3184,14 +4569,6 @@ INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningLogo);
 /* The depth the sparks are drawn at under the screen's projection */
 #define SPARK_DEPTH -100.0f
 
-/* What the sparks are doing */
-typedef enum SparksState {
-  SPARKS_HIDDEN,
-  SPARKS_STARTING, /* Set elsewhere to start the sparks */
-  SPARKS_FLYING
-} SparksState;
-
-extern s32 f_OpeningSparksState;
 extern Vtx f_OpeningSparkVertices[3];
 extern f32 f_OpeningSparkPositions[SPARK_COUNT][2];
 extern f32 f_OpeningSparkAngles[SPARK_COUNT];
@@ -3199,7 +4576,6 @@ extern f32 f_OpeningSparkVelocities[SPARK_COUNT][2];
 extern f32 f_OpeningSparkScale;
 extern s32 f_OpeningSparkFramesLeft;
 extern Mtx f_OpeningSparkMatrices[DRAW_BUFFER_COUNT][SPARK_COUNT];
-extern Vec3 f_OpeningSparksOrigin;
 
 #ifdef NON_MATCHING
 /*
