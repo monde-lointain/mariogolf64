@@ -155,7 +155,7 @@ void AssignCharacterBuffers(void);
 void DrawOpeningShotPath(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
 void func_801FBB94_ovl_05(Gfx** displayListHead, CameraMatrices* matrices);
-void func_801FE2A0_ovl_05(Gfx** displayListHead);
+void DrawOpeningImpactLines(Gfx** displayListHead);
 void func_801FE8F8_ovl_05(Gfx** displayListHead);
 void DrawOpeningBurst(Gfx** displayListHead);
 void func_801FFC40_ovl_05(Gfx** displayListHead);
@@ -372,7 +372,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
   DrawOpeningShotPath(matrices);
   gfx = g_DisplayListHead;
   DrawLensFlare(&gfx);
-  func_801FE2A0_ovl_05(&gfx);
+  DrawOpeningImpactLines(&gfx);
   DrawOpeningBurst(&gfx);
   func_801FE8F8_ovl_05(&gfx);
   func_801FBB94_ovl_05(&gfx, matrices);
@@ -460,14 +460,107 @@ void func_801FBB10_ovl_05(s32 ballIndex, s32 slot) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FBB94_ovl_05);
 
-void func_801FE270_ovl_05(void) {
+/* A 64x64 CI8 image of yellow and green lines bursting outwards */
+#define ASSET_IMPACT_LINES_IMAGE 0x908
+
+void LoadOpeningImpactLines(void) {
   EncodedAsset asset;
 
-  OpenEncodedAsset(0x908, &asset);
+  OpenEncodedAsset(ASSET_IMPACT_LINES_IMAGE, &asset);
   ReadEncodedAsset(D_80212830_ovl_05, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801FE2A0_ovl_05);
+extern s32 f_AreImpactLinesShown;
+extern s32 f_ImpactLinesFrame;
+
+/* The impact lines' left and bottom edges on the screen, in pixels */
+#define IMPACT_LINES_LEFT 206
+#define IMPACT_LINES_BOTTOM 88
+/* The 64x64 image loads into texture memory in two strips */
+#define IMPACT_LINES_SIZE 64
+#define IMPACT_LINES_STRIP_HEIGHT 32
+#define IMPACT_LINES_STRIP_COUNT 2
+/* The lines blink off for a few frames, twice, then stop showing */
+#define IMPACT_LINES_FIRST_BLINK_FRAME 3
+#define IMPACT_LINES_SECOND_BLINK_FRAME 9
+#define IMPACT_LINES_BLINK_FRAME_COUNT 3
+#define IMPACT_LINES_FRAME_COUNT 19
+
+/*
+ * Draws blinking impact lines around the burst for a few frames, once
+ * f_AreImpactLinesShown is set.
+ *
+ * The original keeps the bottom edge's 88 in one register for both of a
+ * strip's edges, where this folds the top edge into a separate constant.
+ */
+#ifdef NON_MATCHING
+void DrawOpeningImpactLines(Gfx** displayListHead) {
+  Gfx* gfx = *displayListHead;
+  s32 frame;
+  s32 stripIndex;
+  s32 texelOffset;
+  s32 row;
+  /* A variable, so GCC does not fold the right edge into the command */
+  s32 width = IMPACT_LINES_SIZE;
+  s32 bottom;
+
+  if (f_AreImpactLinesShown) {
+    frame = f_ImpactLinesFrame++;
+    if ((frame < IMPACT_LINES_FIRST_BLINK_FRAME ||
+         frame >=
+             IMPACT_LINES_FIRST_BLINK_FRAME + IMPACT_LINES_BLINK_FRAME_COUNT) &&
+        (frame < IMPACT_LINES_SECOND_BLINK_FRAME ||
+         frame >= IMPACT_LINES_SECOND_BLINK_FRAME +
+                      IMPACT_LINES_BLINK_FRAME_COUNT) &&
+        f_ImpactLinesFrame < IMPACT_LINES_FRAME_COUNT) {
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+      gDPPipeSync(gfx++);
+      gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+      gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+      gDPPipeSync(gfx++);
+      gDPSetColorDither(gfx++, G_CD_DISABLE);
+      gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+      gDPPipeSync(gfx++);
+      gDPSetTexturePersp(gfx++, G_TP_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureFilter(gfx++, G_TF_BILERP);
+      gDPPipeSync(gfx++);
+      gDPSetAlphaCompare(gfx++, G_AC_NONE);
+      gDPPipeSync(gfx++);
+      gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+      gDPLoadTLUT_pal256(gfx++,
+                         (u32)(D_80212830_ovl_05 + IMAGE_HEADER_SIZE) & ~7);
+      gDPPipeSync(gfx++);
+      gDPPipeSync(gfx++);
+      texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
+      /* The rows count up from the bottom, so the top strip is row 1 */
+      row = IMPACT_LINES_STRIP_COUNT - 1;
+      for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
+           stripIndex++) {
+        bottom = IMPACT_LINES_BOTTOM - row * IMPACT_LINES_STRIP_HEIGHT;
+        gDPLoadTextureBlock(
+            gfx++, (u32)(D_80212830_ovl_05 + texelOffset) & ~7, G_IM_FMT_I,
+            G_IM_SIZ_8b, IMPACT_LINES_SIZE, IMPACT_LINES_STRIP_HEIGHT, 0,
+            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+            G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, IMPACT_LINES_LEFT << 2,
+                                (bottom - IMPACT_LINES_STRIP_HEIGHT) << 2,
+                                (IMPACT_LINES_LEFT + width) << 2, bottom << 2,
+                                G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+        gDPPipeSync(gfx++);
+        texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
+        row--;
+      }
+      *displayListHead = gfx;
+    }
+  }
+}
+#else
+INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", DrawOpeningImpactLines);
+#endif
 
 #define ASSET_LAKITU_IMAGE 0x64B
 #define ASSET_LAKITU_TRAIL_IMAGE 0x6AF

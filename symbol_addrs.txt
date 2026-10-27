@@ -3342,3 +3342,7 @@ DrawOpeningBurst = 0x801FF70C; // type:func segment:ovl_05
 LoadOpeningBurst = 0x801FF6DC; // type:func segment:ovl_05
 f_IsBurstShown = 0x8020AD60; // type:s32 size:0x4 segment:ovl_05
 f_BurstFrame = 0x8020B214; // type:s32 size:0x4 segment:ovl_05
+DrawOpeningImpactLines = 0x801FE2A0; // type:func segment:ovl_05
+LoadOpeningImpactLines = 0x801FE270; // type:func segment:ovl_05
+f_AreImpactLinesShown = 0x8020AD5C; // type:s32 size:0x4 segment:ovl_05
+f_ImpactLinesFrame = 0x8020B1E8; // type:s32 size:0x4 segment:ovl_05
