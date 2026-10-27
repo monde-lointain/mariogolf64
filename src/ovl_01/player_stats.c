@@ -17,6 +17,8 @@
 
 /* The bytes of each of the four images that func_8021CFAC reads into one buffer */
 #define PLAYER_STATS_IMAGE_SIZE 0x258
+/* They are Japanese score labels (assets 0x82D, 0x82F, 0x82E and 0x830), such as birdie and albatross */
+#define SCORE_LABEL_COUNT 4
 
 /* The most bytes of each ranked record holder's palette file that func_8021EF64 keeps */
 #define PLAYER_STATS_FILE_SIZE 0x200
@@ -883,7 +885,43 @@ s16 func_8021E468_ovl_01(void) {
     return D_8023B640_ovl_01[memory->unk3A][memory->unk39];
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E4B0_ovl_01);
+void func_8021E4B0_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 labelIndex) {
+    Gfx *gfx = *displayListHead;
+    u8 *image;
+    s32 width;
+    s32 height;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    if (labelIndex < 0) {
+        labelIndex = 0;
+    }
+    if (labelIndex >= SCORE_LABEL_COUNT) {
+        labelIndex = SCORE_LABEL_COUNT - 1;
+    }
+    image = D_8023B63C_ovl_01 + labelIndex * PLAYER_STATS_IMAGE_SIZE;
+    width = image[IMAGE_WIDTH_LOW_BYTE];
+    height = image[IMAGE_HEIGHT_LOW_BYTE];
+    /* The original passes the palette's first byte, not its address, so the colors come from low memory */
+    gDPLoadTLUT_pal16(gfx++, 0, image[IMAGE_HEADER_SIZE] & ~7);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureBlock_4b(gfx++, ((u32)image + PALETTED_TEXELS_OFFSET) & ~7, G_IM_FMT_CI, width, height, 0,
+                           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
+                           G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2, (left + width) << 2, (top + height) << 2, G_TX_RENDERTILE, 0,
+                            0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021E97C_ovl_01);
 
