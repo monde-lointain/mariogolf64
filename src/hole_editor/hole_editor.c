@@ -163,6 +163,17 @@
 #define RING_TEXT_COLUMN 19
 #define RING_TEXT_ROW 4
 
+/* func_80403A04's wall editor */
+#define WALL_TRIANGLE_COUNT 2
+#define WALL_BOTTOM_CORNER_COUNT 2 /* Corners 0 and 1; the others follow them */
+#define WALL_TOP_CORNER 2
+#define WALL_HEIGHT 24.0f
+#define WALL_SINK_DEPTH (12 << WORLD_TO_COURSE_SHIFT) /* How far a dropped wall reaches below the ground */
+#define WALL_LIMIT_SOUND 0xE /* Also the ball's flagstick hit */
+#define WALL_LIMIT_SOUND_CHANNEL 11
+#define WALL_TEXT_COLUMN 5
+#define WALL_TEXT_ROW 3
+
 /* func_80407F08's hex dump */
 #define HEX_DUMP_BUFFER_SIZE 0x40000
 #define HEX_DUMP_TEXT_SIZE 0x100
@@ -283,6 +294,17 @@ extern s32 sRingCameraHeadingAngle;
 extern s32 sRingTriangleIndex;
 extern s32 sRingCornerIndex; /* Always 0 */
 extern s32 sLastRingEditKind; /* A TRIANGLE_EDIT_* */
+
+/* func_80403A04's state */
+extern f32 sWallCameraPitch;   /* In radians */
+extern f32 sWallCameraHeading; /* In radians, from sWallCameraHeadingAngle */
+extern s32 sWallCameraHeadingAngle;
+extern s32 sFirstWallTriangle;
+extern s32 sWallTriangleIndex; /* The first of the wall's two triangles */
+extern s32 sWallCornerIndex;
+extern s32 sSavedWallCornerIndex;
+extern s32 sLastWallEditKind; /* A TRIANGLE_EDIT_* */
+extern CoursePoint sSavedWallCorners[SAVED_CORNER_COUNT];
 
 void func_80405AF4_hole_editor(s32 column, s32 row);
 
@@ -798,7 +820,235 @@ void func_80402E1C_hole_editor(void) {
                                    g_MapCamera.view.lookAt[AXIS_Y];
 }
 
+/*
+ * Scene SCENE_WALLS's editor for walls, each a pair of shaded hole triangles
+ * from sFirstWallTriangle up to the rings. The editor pad's C-buttons move
+ * the wall along x and z, the option pad's C-down and C-up along y, and the
+ * option pad's C-left drops it onto the ground. Z limits an edit to the
+ * corner that the editor pad's B picks. The option pad's A saves that corner
+ * and its B restores the last saved one. Right and left on the control pad
+ * pick the wall. R zooms in, L or Z with R zooms out, and Z with the stick
+ * orbits the camera around the corner.
+ */
+/* Doesn't match: the original copies stepUp into stepZ's register before scaling it, where GCC folds the copy */
+#ifdef NON_MATCHING
+void func_80403A04_hole_editor(void) {
+    char text[DEBUG_TEXT_BUFFER_SIZE];
+    Vtx_t *corners[HOLE_TRIANGLE_VERTEX_COUNT];
+    Vtx_t *nextCorners[HOLE_TRIANGLE_VERTEX_COUNT];
+    Mat4 unusedMatrices[2]; /* The game's frame has room for two matrices */
+    f32 stepRight;
+    f32 stepUp;
+    f32 stepY;
+    f32 stepX;
+    f32 stepZ;
+    f32 moveY; /* The scaled y step; stepY itself would compile differently */
+    s32 editKind;
+    s32 isDropping;
+    s32 corner;
+    f64 cameraDistance; /* As a literal, GCC would fold it into the angles before the zoom */
+    Vtx_t *lookAtVertex;
+
+    editKind = TRIANGLE_EDIT_NONE;
+    isDropping = FALSE;
+    D_800C30D1 = FALSE;
+    stepUp = stepRight = stepY = 0.0f;
+    if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepUp = 1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepUp = -1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & R_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepRight = 1.0f;
+    }
+    if (g_ControllerData[EDITOR_PAD].button & L_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepRight = -1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & D_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = 1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & U_CBUTTONS) {
+        editKind = TRIANGLE_EDIT_MOVE;
+        stepY = -1.0f;
+    }
+    if (g_ControllerData[OPTION_PAD].button & L_CBUTTONS) {
+        isDropping = TRUE;
+    }
+    if (g_MenuControllerData[EDITOR_PAD].button & B_BUTTON) {
+        sWallCornerIndex = (sWallCornerIndex + 1) % WALL_BOTTOM_CORNER_COUNT;
+    }
+    PrintDebugHex(editKind, TRIANGLE_TEXT_COLUMN, EDIT_KIND_TEXT_ROW);
+    sprintf(text, "EditNo%d   ", sWallTriangleIndex);
+    PrintDebugText(text, WALL_TEXT_COLUMN, WALL_TEXT_ROW);
+    if ((editKind == TRIANGLE_EDIT_MOVE) | (isDropping == TRUE)) {
+        /* Left over from the triangle editor; walls move along the world axes */
+        stepX = -cos((u16)sWallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp -
+                sin((u16)sWallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        stepZ = -sin((u16)sWallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepUp +
+                cos((u16)sWallCameraHeadingAngle * BINARY_ANGLE_TO_RADIANS) * stepRight;
+        stepZ = stepUp;
+        /* Scaled in two steps; in one expression GCC would multiply 10 by the zoom first */
+        {
+            f32 scaledX = stepRight * CORNER_STEP_SCALE;
+            f32 scaledY = stepY * CORNER_STEP_SCALE;
+            f32 scaledZ = stepZ * CORNER_STEP_SCALE;
+
+            stepX = scaledX * g_MapCamera.view.zoom;
+            moveY = scaledY * g_MapCamera.view.zoom;
+            stepZ = scaledZ * g_MapCamera.view.zoom;
+        }
+        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+            if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG) || sWallCornerIndex == corner) {
+                Vtx_t *vertex;
+
+                vertex = &g_WorkArea.hole.triangles[sWallTriangleIndex].vertices[corner].v;
+                if (isDropping == TRUE) {
+                    s32 height = (GetGroundHeight(vertex->ob[AXIS_X] << WORLD_TO_COURSE_SHIFT,
+                                                  vertex->ob[AXIS_Z] << WORLD_TO_COURSE_SHIFT) -
+                                  WALL_SINK_DEPTH) *
+                                 (1.0f / (1 << WORLD_TO_COURSE_SHIFT));
+
+                    if (corner == WALL_TOP_CORNER) {
+                        height += WALL_HEIGHT;
+                        vertex->ob[AXIS_Y] = height;
+                    } else {
+                        vertex->ob[AXIS_Y] = height;
+                    }
+                } else {
+                    vertex->ob[AXIS_X] = vertex->ob[AXIS_X] + stepX;
+                    vertex->ob[AXIS_Y] = vertex->ob[AXIS_Y] + moveY;
+                    vertex->ob[AXIS_Z] = vertex->ob[AXIS_Z] + stepZ;
+                }
+                PrintDebugHex(vertex->ob[AXIS_Y], TRIANGLE_TEXT_COLUMN, CORNER_HEIGHT_TEXT_ROW);
+            }
+        }
+        for (corner = 0; corner < HOLE_TRIANGLE_VERTEX_COUNT; corner++) {
+            corners[corner] = &g_WorkArea.hole.triangles[sWallTriangleIndex].vertices[corner].v;
+            nextCorners[corner] = &g_WorkArea.hole.triangles[sWallTriangleIndex + 1].vertices[corner].v;
+        }
+        /* The first triangle's top corner stands over its first corner; the second fills in the rest */
+        corners[WALL_TOP_CORNER]->ob[AXIS_X] = corners[0]->ob[AXIS_X];
+        corners[WALL_TOP_CORNER]->ob[AXIS_Z] = corners[0]->ob[AXIS_Z];
+        corners[WALL_TOP_CORNER]->ob[AXIS_Y] = corners[0]->ob[AXIS_Y] + WALL_HEIGHT;
+        nextCorners[0]->ob[AXIS_X] = corners[1]->ob[AXIS_X];
+        nextCorners[0]->ob[AXIS_Y] = corners[1]->ob[AXIS_Y];
+        nextCorners[0]->ob[AXIS_Z] = corners[1]->ob[AXIS_Z];
+        nextCorners[1]->ob[AXIS_X] = corners[1]->ob[AXIS_X];
+        nextCorners[1]->ob[AXIS_Y] = corners[1]->ob[AXIS_Y] + WALL_HEIGHT;
+        nextCorners[1]->ob[AXIS_Z] = corners[1]->ob[AXIS_Z];
+        nextCorners[2]->ob[AXIS_X] = corners[WALL_TOP_CORNER]->ob[AXIS_X];
+        nextCorners[2]->ob[AXIS_Y] = corners[WALL_TOP_CORNER]->ob[AXIS_Y];
+        nextCorners[2]->ob[AXIS_Z] = corners[WALL_TOP_CORNER]->ob[AXIS_Z];
+        PrepareHoleTriangles();
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & A_BUTTON) {
+        Vtx_t *vertex;
+
+        vertex = &g_WorkArea.hole.triangles[sWallTriangleIndex].vertices[sWallCornerIndex].v;
+        sSavedWallCornerIndex = (sSavedWallCornerIndex + 1) % SAVED_CORNER_COUNT;
+        sSavedWallCorners[sSavedWallCornerIndex][AXIS_X] = vertex->ob[AXIS_X];
+        sSavedWallCorners[sSavedWallCornerIndex][AXIS_Y] = vertex->ob[AXIS_Y];
+        sSavedWallCorners[sSavedWallCornerIndex][AXIS_Z] = vertex->ob[AXIS_Z];
+        PrepareHoleTriangles();
+    }
+    if (g_MenuControllerData[OPTION_PAD].button & B_BUTTON) {
+        Vtx_t *vertex;
+
+        vertex = &g_WorkArea.hole.triangles[sWallTriangleIndex].vertices[sWallCornerIndex].v;
+        vertex->ob[AXIS_X] = sSavedWallCorners[sSavedWallCornerIndex][AXIS_X];
+        vertex->ob[AXIS_Y] = sSavedWallCorners[sSavedWallCornerIndex][AXIS_Y];
+        vertex->ob[AXIS_Z] = sSavedWallCorners[sSavedWallCornerIndex][AXIS_Z];
+        sSavedWallCornerIndex = (sSavedWallCornerIndex + SAVED_CORNER_COUNT - 1) % SAVED_CORNER_COUNT;
+        PrepareHoleTriangles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & R_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sWallTriangleIndex += WALL_TRIANGLE_COUNT;
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & L_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_SELECT;
+        sWallTriangleIndex -= WALL_TRIANGLE_COUNT;
+    }
+    if (sWallTriangleIndex < sFirstWallTriangle) {
+        sWallTriangleIndex = sFirstWallTriangle;
+        PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    }
+    if (sWallTriangleIndex >= FIRST_RING_TRIANGLE) {
+        sWallTriangleIndex -= WALL_TRIANGLE_COUNT;
+        PlaySound(WALL_LIMIT_SOUND, WALL_LIMIT_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    }
+    /* Both of the wall's triangles are kept shaded */
+    g_WorkArea.hole.triangles[sWallTriangleIndex].kind = HOLE_TRIANGLE_KIND_SHADED;
+    g_WorkArea.hole.triangles[sWallTriangleIndex + 1].kind = HOLE_TRIANGLE_KIND_SHADED;
+    if ((g_MenuControllerData[EDITOR_PAD].button & U_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_KIND;
+        /* Never true; the triangle editor's kind cycling without the step */
+        if (g_WorkArea.hole.triangles[sWallTriangleIndex].kind >= HOLE_TRIANGLE_KIND_COUNT) {
+            g_WorkArea.hole.triangles[sWallTriangleIndex].kind = HOLE_TRIANGLE_KIND_FLAT;
+        }
+        PrepareHoleTriangles();
+    }
+    if ((g_MenuControllerData[EDITOR_PAD].button & D_JPAD) &&
+        (g_MenuRepeatStates[EDITOR_PAD].stickDirectionX | g_MenuRepeatStates[EDITOR_PAD].stickDirectionY) == 0) {
+        editKind = TRIANGLE_EDIT_KIND;
+        PrepareHoleTriangles();
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == R_TRIG) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_IN_FACTOR;
+        if (g_MapCamera.view.zoom >= EDITOR_ZOOM_MAX) {
+            g_MapCamera.view.zoom = EDITOR_ZOOM_MAX;
+        }
+    }
+    if ((g_ControllerData[EDITOR_PAD].button & L_TRIG) ||
+        (g_ControllerData[EDITOR_PAD].button & (Z_TRIG | R_TRIG)) == (Z_TRIG | R_TRIG)) {
+        g_MapCamera.view.zoom *= CURSOR_ZOOM_OUT_FACTOR;
+        if (g_MapCamera.view.zoom < CURSOR_ZOOM_MIN) {
+            g_MapCamera.view.zoom = CURSOR_ZOOM_MIN;
+        }
+    }
+    if (g_ControllerData[EDITOR_PAD].button & Z_TRIG) {
+        sWallCameraHeadingAngle -= g_MenuControllerData[EDITOR_PAD].stick_x / STICK_STEP_SIZE * HEADING_STICK_SPEED;
+        sWallCameraPitch -= g_MenuControllerData[EDITOR_PAD].stick_y / STICK_STEP_SIZE * PITCH_STICK_SPEED;
+    }
+    if (sWallCameraPitch > 0.0f) {
+        sWallCameraPitch = 0.0f;
+    }
+    if (sWallCameraPitch < EDITOR_PITCH_MIN) {
+        sWallCameraPitch = EDITOR_PITCH_MIN;
+    }
+    sWallCameraHeading = sWallCameraHeadingAngle * EDITOR_ANGLE_TO_RADIANS;
+    /* The first frame without an edit rebuilds the slopes */
+    if ((sLastWallEditKind != TRIANGLE_EDIT_NONE) & (editKind == TRIANGLE_EDIT_NONE)) {
+        func_804079B8_hole_editor();
+    }
+    cameraDistance = EDITOR_CAMERA_DISTANCE;
+    lookAtVertex = &g_WorkArea.hole.triangles[sWallTriangleIndex].vertices[sWallCornerIndex].v;
+    g_MapCamera.view.lookAt[AXIS_X] = lookAtVertex->ob[AXIS_X];
+    g_MapCamera.view.lookAt[AXIS_Y] = lookAtVertex->ob[AXIS_Y];
+    sLastWallEditKind = editKind;
+    g_MapCamera.view.lookAt[AXIS_Z] = lookAtVertex->ob[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_X] = cos(sWallCameraPitch) * cos(sWallCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_X];
+    g_MapCamera.view.eye[AXIS_Z] = cos(sWallCameraPitch) * sin(sWallCameraHeading) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Z];
+    g_MapCamera.view.eye[AXIS_Y] = sin(sWallCameraPitch) *
+                                       (g_MapCamera.view.zoom * cameraDistance) +
+                                   g_MapCamera.view.lookAt[AXIS_Y];
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_editor);
+#endif
 
 /*
  * Sets the billboards and the hole's points back on the ground, and
