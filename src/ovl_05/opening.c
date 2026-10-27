@@ -1,6 +1,7 @@
 #include "common.h"
 
 #include "asset.h"
+#include "ball_simulation.h"
 #include "billboard.h"
 #include "camera.h"
 #include "camera_editor.h"
@@ -129,6 +130,13 @@ extern f32 D_80224730_ovl_05[LOGO_LETTER_COUNT];
 extern f32 D_80224758_ovl_05[LOGO_LETTER_COUNT][2];
 extern s32 D_802247A0_ovl_05[LOGO_LETTER_COUNT];
 
+extern s32 f_OpeningShotDashCount;
+extern BallSimulation f_OpeningShotSimulation;
+/* f_OpeningShotDashCount's starting value, and the most it can be */
+#define OPENING_SHOT_MAX_DASH_COUNT 200
+extern Mtx f_OpeningShotDashMatrices[DRAW_BUFFER_COUNT]
+                                    [OPENING_SHOT_MAX_DASH_COUNT];
+
 void AssignCharacterBuffers(void);
 void func_801F5454_ovl_05(CameraMatrices* matrices);
 void func_801FA8D8_ovl_05(Gfx** displayListHead);
@@ -205,7 +213,44 @@ void DrawOpeningCharacters(CameraMatrices* matrices, Gfx** displayListHead,
   *displayListHead = g_DisplayListHead;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F51F0_ovl_05);
+/*
+ * Steps the opening's shot through its simulation, as BuildShotPreview does,
+ * and stretches a dash between each pair of positions along its path
+ */
+void BuildOpeningShotPath(void) {
+  CoursePoint start;
+  Mat4 dash;
+  Mat4 transform;
+  s32 step;
+  s32 length;
+
+  for (step = 0; step < f_OpeningShotDashCount; step++) {
+    start[AXIS_X] = f_OpeningShotSimulation.position[AXIS_X];
+    start[AXIS_Y] = f_OpeningShotSimulation.position[AXIS_Y];
+    start[AXIS_Z] = f_OpeningShotSimulation.position[AXIS_Z];
+    StepBallSimulation(&f_OpeningShotSimulation);
+    length =
+        IntLength3D(f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
+                    f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
+                    f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
+    guTranslateF(dash, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                 (start[AXIS_Y] - SHOT_PREVIEW_DROP) * COURSE_TO_WORLD_SCALE,
+                 start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+    if (length != 0 && length <= SHOT_PREVIEW_MAX_DASH_LENGTH) {
+      guScaleF(dash, 1.0f, 1.0f, length * COURSE_TO_WORLD_SCALE);
+      guAlignF(transform, 0.0f,
+               f_OpeningShotSimulation.position[AXIS_X] - start[AXIS_X],
+               f_OpeningShotSimulation.position[AXIS_Y] - start[AXIS_Y],
+               f_OpeningShotSimulation.position[AXIS_Z] - start[AXIS_Z]);
+      guMtxCatF(dash, transform, dash);
+      guTranslateF(transform, start[AXIS_X] * COURSE_TO_WORLD_SCALE,
+                   start[AXIS_Y] * COURSE_TO_WORLD_SCALE,
+                   start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
+      guMtxCatF(dash, transform, dash);
+    }
+    guMtxF2L(dash, &f_OpeningShotDashMatrices[g_DrawBufferIndex][step]);
+  }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening", func_801F5454_ovl_05);
 
