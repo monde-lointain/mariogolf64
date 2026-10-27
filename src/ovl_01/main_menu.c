@@ -100,7 +100,14 @@ extern void *D_801B60D0;
 extern void *D_801F4A20;
 extern s16 D_8022BE8C_ovl_01;
 extern s16 D_8022BE92_ovl_01;
+extern s32 D_8022F8C8_ovl_01;
+extern s8 D_8022F8CD_ovl_01;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
+/* The 24x24 icon that func_80207E28 animates, such as the birdie badge; each frame shows for two calls */
+#define ANIMATED_ICON_SIZE 24
+#define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
+#define ANIMATED_ICON_FRAME_COUNT 6
+#define ANIMATED_ICON_FRAME_DURATION 2
 /* The parts of the menu backdrop that func_801FC60C draws */
 #define MENU_LAYER_UNK1 (1 << 0)
 #define MENU_LAYER_UNK4 (1 << 2)
@@ -999,7 +1006,32 @@ void func_80207E18_ovl_01(Gfx **displayListHead) {
 void func_80207E20_ovl_01(void) {
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80207E28_ovl_01);
+void func_80207E28_ovl_01(Gfx **displayListHead, void *image, s32 x, s32 y) {
+    Gfx *gfx = *displayListHead;
+    s32 unused[8];
+
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    gDPLoadTextureTile_4b(gfx++,
+                          ((u32)image + PALETTED_TEXELS_OFFSET + D_8022F8C8_ovl_01 * ANIMATED_ICON_IMAGE_SIZE) & ~7,
+                          G_IM_FMT_CI, ANIMATED_ICON_SIZE, ANIMATED_ICON_SIZE, 0, 0, ANIMATED_ICON_SIZE - 1,
+                          ANIMATED_ICON_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
+                          G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    gSPScisTextureRectangle(gfx++, x << 2, y << 2, (x + ANIMATED_ICON_SIZE) << 2, (y + ANIMATED_ICON_SIZE) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    D_8022F8CD_ovl_01++;
+    if (D_8022F8CD_ovl_01 == ANIMATED_ICON_FRAME_DURATION) {
+        D_8022F8CD_ovl_01 = 0;
+        D_8022F8C8_ovl_01++;
+        if (D_8022F8C8_ovl_01 >= ANIMATED_ICON_FRAME_COUNT) {
+            D_8022F8C8_ovl_01 = 0;
+        }
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802081E8_ovl_01);
 
