@@ -55,6 +55,15 @@ extern s32 D_80230F78_ovl_01;
 extern s32 D_80230F7C_ovl_01;
 extern u8 D_80230F80_ovl_01;
 extern void *D_80230F44_ovl_01;
+/* func_8022A43C stretches the menu banner of D_80230F44 into the two panels behind the code screen */
+#define CODE_UPPER_PANEL_LEFT 28
+#define CODE_UPPER_PANEL_TOP 56
+#define CODE_UPPER_PANEL_WIDTH 264
+#define CODE_UPPER_PANEL_STRIP_HEIGHT 32
+#define CODE_LOWER_PANEL_LEFT 20
+#define CODE_LOWER_PANEL_TOP 160
+#define CODE_LOWER_PANEL_WIDTH 280
+#define CODE_LOWER_PANEL_STRIP_HEIGHT 20
 extern void *D_80230F48_ovl_01;
 /* The "CODE ENTRY" bar of D_80230F48 that func_8022A090 draws, in 8-row strips */
 #define CODE_ENTRY_BAR_WIDTH 256
@@ -767,7 +776,49 @@ void func_8022A090_ovl_01(Gfx **displayListHead) {
     *displayListHead = gfx;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A43C_ovl_01);
+void func_8022A43C_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+
+    gDPPipeSync(gfx++);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_80230F44_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
+    gDPPipeSync(gfx++);
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_80230F44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, CODE_UPPER_PANEL_LEFT << 2,
+                                (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT) << 2,
+                                (CODE_UPPER_PANEL_LEFT + CODE_UPPER_PANEL_WIDTH) << 2,
+                                (CODE_UPPER_PANEL_TOP + stripIndex * CODE_UPPER_PANEL_STRIP_HEIGHT +
+                                 CODE_UPPER_PANEL_STRIP_HEIGHT)
+                                    << 2,
+                                G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / CODE_UPPER_PANEL_WIDTH,
+                                (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_UPPER_PANEL_STRIP_HEIGHT);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, CODE_LOWER_PANEL_LEFT << 2,
+                                (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT) << 2,
+                                (CODE_LOWER_PANEL_LEFT + CODE_LOWER_PANEL_WIDTH) << 2,
+                                (CODE_LOWER_PANEL_TOP + stripIndex * CODE_LOWER_PANEL_STRIP_HEIGHT +
+                                 CODE_LOWER_PANEL_STRIP_HEIGHT)
+                                    << 2,
+                                G_TX_RENDERTILE, 0, 0, (MENU_BANNER_WIDTH << 10) / CODE_LOWER_PANEL_WIDTH,
+                                (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_LOWER_PANEL_STRIP_HEIGHT);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_8022A8F4_ovl_01);
 
