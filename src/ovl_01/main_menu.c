@@ -50,11 +50,14 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MENU_LAYER_UNK8 (1 << 3)
 #define MENU_LAYER_UNK10 (1 << 4)
 
-/* The choices of the main menu without Transmit */
+/* The choices of both main menus; the one without Transmit stops at its options */
 #define MAIN_CHOICE_CLUBHOUSE 0
 #define MAIN_CHOICE_HELP 1
 #define MAIN_CHOICE_OPTIONS 2
 #define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
+#define MAIN_CHOICE_CLUB_TOURNAMENT 2
+#define MAIN_CHOICE_FULL_OPTIONS 3
+#define MAIN_CHOICE_COUNT 4
 
 /* The clubhouse's rows, and the rooms that D_8022BF1C gives each of them */
 #define CLUBHOUSE_CHOICE_COUNT 5
@@ -103,6 +106,7 @@ s32 GetClubTournamentCourse(void);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 s32 func_801F7660_ovl_01(s32, s32);
 void func_80217B88_ovl_01(s32 requestedPreset);
+void func_80228B60_ovl_01(void);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
 void func_801FC754_ovl_01(Gfx **displayListHead);
 void func_801FCB74_ovl_01(Gfx **displayListHead);
@@ -267,7 +271,61 @@ void func_801F9BCC_ovl_01(void) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F9C58_ovl_01);
+void func_801F9C58_ovl_01(void) {
+    s32 isDone = IsHudAnimationDone();
+
+    if (isDone == TRUE) {
+        if (g_MenuPressedButtons & A_BUTTON) {
+            switch (g_MenuChoices.mainChoice) {
+                case MAIN_CHOICE_CLUBHOUSE:
+                    g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+                    break;
+                case MAIN_CHOICE_CLUB_TOURNAMENT:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    func_80228B60_ovl_01();
+                    g_MenuScreen = MENU_SCREEN_CLUB_TOURNAMENT;
+                    break;
+                case MAIN_CHOICE_HELP:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_HELP;
+                    if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+                        g_GameMode = GAME_MODE_GET_CHARACTER;
+                        g_PlayerCount = 2;
+                        D_800FF4C0 = 1;
+                        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 2;
+                        D_801B5634 = 0;
+                        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+                    }
+                    break;
+                case MAIN_CHOICE_FULL_OPTIONS:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_OPTIONS;
+                    break;
+            }
+            PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            return;
+        }
+        if (g_MenuPressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            g_MenuScreen = MENU_SCREEN_TITLE;
+            PlaySong(SONG_TITLE, 0);
+            return;
+        }
+        if (g_MenuRepeatButtons & U_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.mainChoice--;
+        } else if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.mainChoice++;
+        }
+        if (g_MenuChoices.mainChoice >= MAIN_CHOICE_COUNT) {
+            g_MenuChoices.mainChoice = 0;
+        }
+        if (g_MenuChoices.mainChoice < 0) {
+            g_MenuChoices.mainChoice = MAIN_CHOICE_COUNT - 1;
+        }
+    }
+}
 
 void func_801F9E38_ovl_01(void) {
     s32 isDone = IsHudAnimationDone();
