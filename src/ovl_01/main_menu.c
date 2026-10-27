@@ -46,8 +46,6 @@ extern f32 sMenuBobPhase;
  * The 256 color images of D_801052BC and D_801B60D0 that func_801FD7B0 and
  * func_801FCEF8 draw, in strips that fit the texture memory
  */
-#define MENU_BANNER_PALETTE_SIZE (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
-#define MENU_BANNER_TEXELS_OFFSET (IMAGE_HEADER_SIZE + MENU_BANNER_PALETTE_SIZE)
 #define MENU_BANNER_WIDTH 200
 #define MENU_BANNER_STRIP_HEIGHT 10
 #define MENU_BANNER_STRIP_COUNT 3
@@ -725,7 +723,7 @@ void func_801FCEF8_ovl_01(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                            ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
                              stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
                             G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -752,7 +750,7 @@ void func_801FD1B4_ovl_01(Gfx **displayListHead, s16 left, s16 top) {
     gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                            ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
                              stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
                             G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -781,7 +779,7 @@ void func_801FD4F0_ovl_01(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                            ((u32)D_801B60D0 + LARGE_PALETTED_TEXELS_OFFSET +
                              stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
                             G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
@@ -807,7 +805,7 @@ void func_801FD7B0_ovl_01(Gfx **displayListHead) {
     gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
     for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
         gDPLoadTextureBlock(gfx++,
-                            ((u32)image + MENU_BANNER_TEXELS_OFFSET +
+                            ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
                              stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
                             G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
                             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
