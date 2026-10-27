@@ -46,6 +46,9 @@ typedef struct CameraEditor {
 #define EDITOR_FLAG_UNK2 0x2
 #define EDITOR_FLAG_UNK4 0x4
 #define EDITOR_FLAG_UNK8 0x8
+#define EDITOR_FLAG_UNK10 0x10
+#define EDITOR_FLAG_UNK20 0x20
+#define EDITOR_FLAG_UNK40 0x40
 #define EDITOR_FLAG_UNK80 0x80
 
 extern CameraEditor g_CameraEditor;
@@ -217,11 +220,115 @@ void func_80203984_ovl_05(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
     func_8020370C_ovl_05(index, x, y, z, frameCount);
 }
 
+/* Starts turning the camera's heading by angle over frameCount frames, or turns it at once when angle is tiny */
+/* Doesn't match: the original loads the threshold after taking the absolute value; GCC schedules it first */
+#ifdef NON_MATCHING
+void func_80203A30_ovl_05(s32 index, f32 angle, s32 frameCount) {
+    s32 easeFrameCount;
+    f32 speed;
+
+    if (fabsf(angle) < 0.001f) {
+        g_CameraEditor.heading += angle;
+        return;
+    }
+    if (frameCount != 0) {
+        easeFrameCount = frameCount / 4;
+        speed = angle / (frameCount - easeFrameCount);
+        g_CameraEditor.unkA4 = angle * 0.25;
+        g_CameraEditor.unk80 = speed;
+        g_CameraEditor.unk84 = speed / (easeFrameCount + 1);
+    }
+    g_CameraEditor.unk68 = angle;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK10) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK10;
+    }
+    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK10)) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK10;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203A30_ovl_05);
+#endif
 
+/* Starts turning the camera's pitch by angle over frameCount frames, or turns it at once when angle is tiny */
+/* Doesn't match: the original loads the threshold after taking the absolute value; GCC schedules it first */
+#ifdef NON_MATCHING
+void func_80203B60_ovl_05(s32 index, f32 angle, s32 frameCount) {
+    s32 easeFrameCount;
+    f32 speed;
+
+    if (fabsf(angle) < 0.001f) {
+        g_CameraEditor.pitch += angle;
+        return;
+    }
+    if (frameCount != 0) {
+        easeFrameCount = frameCount / 4;
+        speed = angle / (frameCount - easeFrameCount);
+        g_CameraEditor.unkA0 = angle * 0.25;
+        g_CameraEditor.unk88 = speed;
+        g_CameraEditor.unk8C = speed / (easeFrameCount + 1);
+    }
+    g_CameraEditor.unk64 = angle;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK20) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK20;
+    }
+    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK20)) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK20;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203B60_ovl_05);
+#endif
 
+/* Starts moving the camera to distance over frameCount frames, or moves it at once when it is close */
+/* Doesn't match: the original loads the threshold after taking the absolute value; GCC schedules it first */
+#ifdef NON_MATCHING
+void func_80203C90_ovl_05(s32 index, f32 distance, s32 frameCount) {
+    s32 easeFrameCount;
+    f32 change;
+    f32 speed;
+
+    change = distance - g_CameraEditor.distance;
+    if (fabsf(change) < 0.1f) {
+        g_CameraEditor.distance = distance;
+        return;
+    }
+    if (frameCount != 0) {
+        easeFrameCount = frameCount / 4;
+        speed = change / (frameCount - easeFrameCount);
+        g_CameraEditor.unk90 = speed;
+        g_CameraEditor.unk94 = speed / (easeFrameCount + 1);
+        g_CameraEditor.unkA8 = fabsf(change) * 0.25;
+    }
+    g_CameraEditor.unk6C = change;
+    if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNK8)) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK8) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK8;
+    }
+    if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNK40) {
+        g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNK40;
+    }
+    if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_UNK40)) {
+        g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_UNK40;
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_05/opening_camera_editor", func_80203C90_ovl_05);
+#endif
 
 s32 func_80203DC4_ovl_05(void) {
     if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
