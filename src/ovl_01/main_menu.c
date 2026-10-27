@@ -44,6 +44,12 @@ extern f32 sMenuBobPhase;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801051F0;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
+/* The parts of the menu backdrop that func_801FC60C draws */
+#define MENU_LAYER_UNK1 (1 << 0)
+#define MENU_LAYER_UNK4 (1 << 2)
+#define MENU_LAYER_UNK8 (1 << 3)
+#define MENU_LAYER_UNK10 (1 << 4)
+
 /* The choices of the list that func_801FAFEC runs, which no menu screen dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
@@ -73,6 +79,10 @@ s32 GetClubTournamentCourse(void);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 s32 func_801F7660_ovl_01(s32, s32);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
+void func_801FC754_ovl_01(Gfx **displayListHead);
+void func_801FCB74_ovl_01(Gfx **displayListHead);
+void func_801FD4F0_ovl_01(Gfx **displayListHead);
+void func_801FD7B0_ovl_01(Gfx **displayListHead);
 void func_801FDA40_ovl_01(Gfx **displayListHead);
 void func_801FE4D0_ovl_01(Gfx **displayListHead);
 void func_80201574_ovl_01(Gfx **displayListHead);
@@ -457,7 +467,31 @@ void DrawMenuScreen(Gfx **displayListHead) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FB54C_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FC60C_ovl_01);
+void func_801FC60C_ovl_01(Gfx **displayListHead, s32 layers) {
+    Gfx *gfx = *displayListHead;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_NONE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    if (layers & MENU_LAYER_UNK1) {
+        func_801FC754_ovl_01(&gfx);
+    }
+    if (layers & MENU_LAYER_UNK4) {
+        func_801FCB74_ovl_01(&gfx);
+    }
+    if (layers & MENU_LAYER_UNK10) {
+        func_801FD4F0_ovl_01(&gfx);
+    }
+    if (layers & MENU_LAYER_UNK8) {
+        func_801FD7B0_ovl_01(&gfx);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FC754_ovl_01);
 
