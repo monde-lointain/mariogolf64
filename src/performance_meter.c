@@ -120,6 +120,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   s32 rspBarLength;
   s32 rdpBarLength;
   u32 vertexIndex;
+
   /* The readout never prints these lengths; they are kept to match */
   s32 audioBarLength;
   s32 rdpCommandBarLength;
@@ -141,6 +142,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
 
   /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[0] = f_MeterViewport.vp.vtrans[0] = 320 * 2 * scale;
+
   /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = 240 * 2 * scale;
   gSPViewport(gfx++, &f_MeterViewport);
@@ -153,6 +155,7 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   if (posY == 0.0) {
     posY = 0.1f;
   }
+
   if (extraFrameCount > MAX_EXTRA_FRAME_COUNT) {
     extraFrameCount = MAX_EXTRA_FRAME_COUNT;
   }
@@ -197,9 +200,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
   } else {
     f_CpuBarAverage = (f_CpuBarAverage + barLength) >> 1;
   }
+
   if (f_CpuBarMaximum < barLength) {
     f_CpuBarMaximum = barLength;
   }
+
   f_CpuBarVertices[0].v.ob[0] = startX;
   f_CpuBarVertices[1].v.ob[0] = startX + barLength;
   f_CpuBarVertices[2].v.ob[0] = startX + barLength;
@@ -219,9 +224,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_AudioBarAverage = (f_AudioBarAverage + barLength) >> 1;
     }
+
     if (f_AudioBarMaximum < barLength) {
       f_AudioBarMaximum = barLength;
     }
+
     f_AudioBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_AudioBarVertices[vertexIndex + 1].v.ob[0] = startX + barLength;
     f_AudioBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
@@ -244,9 +251,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_RspBarAverage = (f_RspBarAverage + barLength) >> 1;
     }
+
     if (f_RspBarMaximum < barLength) {
       f_RspBarMaximum = barLength;
     }
+
     f_RspBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_RspBarVertices[vertexIndex + 1].v.ob[0] = startX + barLength;
     f_RspBarVertices[vertexIndex + 2].v.ob[0] = startX + barLength;
@@ -269,9 +278,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_RdpBarAverage = (f_RdpBarAverage + barLength) >> 1;
     }
+
     if (f_RdpBarMaximum < barLength) {
       f_RdpBarMaximum = barLength;
     }
+
     f_RdpBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_RdpBarVertices[vertexIndex + 1].v.ob[0] = barLength;
     f_RdpBarVertices[vertexIndex + 2].v.ob[0] = barLength;
@@ -294,9 +305,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_RdpCommandBarAverage = (f_RdpCommandBarAverage + barLength) >> 1;
     }
+
     if (f_RdpCommandBarMaximum < barLength) {
       f_RdpCommandBarMaximum = barLength;
     }
+
     f_RdpCommandBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_RdpCommandBarVertices[vertexIndex + 1].v.ob[0] = barLength;
     f_RdpCommandBarVertices[vertexIndex + 2].v.ob[0] = barLength;
@@ -319,9 +332,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_RdpPipeBarAverage = (f_RdpPipeBarAverage + barLength) >> 1;
     }
+
     if (f_RdpPipeBarMaximum < barLength) {
       f_RdpPipeBarMaximum = barLength;
     }
+
     f_RdpPipeBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_RdpPipeBarVertices[vertexIndex + 1].v.ob[0] = barLength;
     f_RdpPipeBarVertices[vertexIndex + 2].v.ob[0] = barLength;
@@ -344,9 +359,11 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     } else {
       f_RdpTmemBarAverage = (f_RdpTmemBarAverage + barLength) >> 1;
     }
+
     if (f_RdpTmemBarMaximum < barLength) {
       f_RdpTmemBarMaximum = barLength;
     }
+
     f_RdpTmemBarVertices[vertexIndex + 0].v.ob[0] = startX;
     f_RdpTmemBarVertices[vertexIndex + 1].v.ob[0] = barLength;
     f_RdpTmemBarVertices[vertexIndex + 2].v.ob[0] = barLength;

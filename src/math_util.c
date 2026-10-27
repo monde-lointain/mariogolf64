@@ -35,11 +35,13 @@ u32 IntLength3D(s32 x, s32 y, s32 z) {
         }
       }
     }
+
     shiftCount++;
     x >>= 1;
     y >>= 1;
     z >>= 1;
   }
+
   return (u32)sqrt(((f64)x * x) + ((f64)y * y) + ((f64)z * z)) << shiftCount;
 }
 
@@ -53,10 +55,12 @@ u32 IntLength2D(s32 x, s32 y) {
         break;
       }
     }
+
     shiftCount++;
     x >>= 1;
     y >>= 1;
   }
+
   return (u32)sqrt(((f64)x * x) + ((f64)y * y)) << shiftCount;
 }
 
@@ -93,9 +97,11 @@ u16 ComputeCrc16(u8* data, u32 size) {
           crc >>= 1;
         }
       }
+
       data++;
     } while (data < end);
   }
+
   crc = ~crc;
   crc &= 0xFFFF;
   osSyncPrintf("CRC = %x\n", crc);

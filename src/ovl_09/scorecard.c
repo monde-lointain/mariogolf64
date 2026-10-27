@@ -206,6 +206,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
     g_Scorecard.facePalettes[i] = AllocMemory(size);
     ReadAssetFile(g_Scorecard.facePalettes[i], size, &file);
   }
+
   g_Scorecard.unkBC = 0;
   g_Scorecard.faceTime = 0;
   g_Scorecard.faceFrame = 0;
@@ -237,6 +238,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
           g_Scorecard.pageCount = 2;
         }
       }
+
       g_Scorecard.placesImage =
           AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
       ReadEncodedAsset(g_Scorecard.placesImage, &asset);
@@ -249,6 +251,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       } else {
         g_Scorecard.pageCount = 2;
       }
+
       g_Scorecard.matchPanelImage =
           AllocMemory(OpenEncodedAsset(MATCH_PANEL_IMAGE_ASSET, &asset));
       ReadEncodedAsset(g_Scorecard.matchPanelImage, &asset);
@@ -271,6 +274,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       } else {
         g_Scorecard.pageCount = 2;
       }
+
       g_Scorecard.placesImage =
           AllocMemory(OpenEncodedAsset(PLACES_IMAGE_ASSET, &asset));
       ReadEncodedAsset(g_Scorecard.placesImage, &asset);
@@ -300,6 +304,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
               GetNetScoreToPar(g_Scorecard.content.holeIndex - 1, 0),
               D_801B60B4);
         }
+
         oldPlace = -1;
         for (standingIndex = 0, standing = g_TournamentStandings;
             standingIndex != TOURNAMENT_CONTESTANT_COUNT;
@@ -309,6 +314,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             break;
           }
         }
+
         RankTournament(shownHoleCount, 0,
             GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
         for (standingIndex = 0, standing = g_TournamentStandings;
@@ -323,6 +329,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             } else {
               g_Scorecard.placeChange = PLACE_HELD;
             }
+
             break;
           }
         }
@@ -331,6 +338,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
             GetNetScoreToPar(g_Scorecard.content.holeIndex, 0), D_801B60B4);
         g_Scorecard.placeChange = PLACE_HELD;
       }
+
       g_Scorecard.topRow = 0;
       break;
   }
@@ -340,6 +348,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
         OpenEncodedAsset(f_PageTitleAssets[pageTitlesRow][i], &asset));
     ReadEncodedAsset(g_Scorecard.pageTitleImages[i], &asset);
   }
+
   /* Only the bets being played have images */
   for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
     if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -352,6 +361,7 @@ void OpenScorecard(s32 courseIndex, s32 holeIndex) {
       imageIndex++;
     }
   }
+
   g_Scorecard.totalHeadingImage =
       AllocMemory(OpenEncodedAsset(TOTAL_HEADING_IMAGE_ASSET, &asset));
   ReadEncodedAsset(g_Scorecard.totalHeadingImage, &asset);
@@ -383,6 +393,7 @@ void FreeScorecard(void) {
     g_RoundHud.scorecardPage = NO_SCORECARD_PAGE;
     g_RoundHud.unk1 = 0;
     g_RoundHud.unk3 = 0;
+
     /* Only the bets being played have images */
     for (i = 0, imageIndex = 0; i != BET_COUNT; i++) {
       if (g_GameState.betRates[i] != UNSET_BET_RATE) {
@@ -391,6 +402,7 @@ void FreeScorecard(void) {
         imageIndex++;
       }
     }
+
     FreeMemory(&g_Scorecard.totalHeadingImage);
     FreeMemory(&g_Scorecard.pageTitleImages[2]);
     FreeMemory(&g_Scorecard.pageTitleImages[1]);
@@ -424,8 +436,10 @@ void FreeScorecard(void) {
         for (i = 0; i != LEADERBOARD_GLYPH_GROUP_COUNT; i++) {
           PlaceGlyphGroup(i, NO_FONT_SIZE, 0, 0, 0, g_PrintBuffer);
         }
+
         break;
     }
+
     FreeMemory(&g_Scorecard.totalLabelsImage);
     FreeMemory(&g_Scorecard.labelsImage);
     FreeMemory(&g_Scorecard.digitsImage);
@@ -437,9 +451,11 @@ void FreeScorecard(void) {
       FreeMemory(&g_Scorecard.faceImages[i]);
       FreeMemory(&g_Scorecard.facePalettes[i]);
     }
+
     SetTextSlot(0, 0, NO_MESSAGE, 1, 0, 1, 0, 0, 0, 0);
     SetTextSlot(0, 0, NO_MESSAGE, 1, 1, 1, 0, 0, 0, 0);
   }
+
   ForceStopRumble();
 }
 #else
@@ -492,6 +508,7 @@ HALVED:
           song = SONG_HOLE_HALVED;
         }
       }
+
       PlaySong(song, 0);
       if (g_Players[0].holes[holeIndex].strokes ==
           g_Players[1].holes[holeIndex].strokes) {
@@ -502,6 +519,7 @@ HALVED:
       } else {
         g_Scorecard.holeWinnerIndex = 1;
       }
+
       g_Scorecard.skinsCarryover.onLastHole = 0;
       g_Scorecard.skinsCarryover.intoLastHole =
           g_Scorecard.content.holeIndex - 1;
@@ -516,10 +534,12 @@ HALVED:
           g_Scorecard.holeWinnerIndex = i;
         }
       }
+
       song = SONG_HOLE_WON;
       if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
         song = SONG_HOLE_HALVED;
       }
+
       PlaySong(song, 0);
       break;
     case SCORECARD_LAYOUT_TOURNAMENT:
@@ -528,14 +548,17 @@ HALVED:
         g_Scorecard.content.rowFlipAngles[i] = 0;
         g_Scorecard.content.isRowFlipping[i] = TRUE;
       }
+
       break;
     case SCORECARD_LAYOUT_SPEED_GOLF:
       if (IsGameFlagSet(GAME_FLAG_STOPWATCH_HOUR)) {
         g_GameState.stopwatchFrameCount = STOPWATCH_HOUR;
       }
+
       for (i = 0, timedHoleCount = 0; i != COURSE_HOLE_COUNT; i++) {
         timedHoleCount += g_HoleTimeFrames[i] != 0;
       }
+
       if (timedHoleCount > 0) {
         /* The stopwatch runs on through the round, so the last hole's time
          * first takes all of it */
@@ -555,6 +578,7 @@ HALVED:
           g_HoleTimeSeconds[0] = -1;
           g_HoleTimeHundredths[0] = -1;
         }
+
         /* Then loses each earlier hole's time */
         for (i = 0; i < timedHoleCount - 1; i++) {
           if (g_HoleTimeMinutes[timedHoleCount - 1] < 0 ||
@@ -565,6 +589,7 @@ HALVED:
             g_HoleTimeHundredths[timedHoleCount - 1] = -1;
             break;
           }
+
           g_HoleTimeFrames[timedHoleCount - 1] -= g_HoleTimeFrames[i];
           g_HoleTimeMinutes[timedHoleCount - 1] -= g_HoleTimeMinutes[i];
           if (g_HoleTimeSeconds[timedHoleCount - 1] < g_HoleTimeSeconds[i]) {
@@ -574,6 +599,7 @@ HALVED:
           } else {
             g_HoleTimeSeconds[timedHoleCount - 1] -= g_HoleTimeSeconds[i];
           }
+
           if (g_HoleTimeHundredths[timedHoleCount - 1] <
               g_HoleTimeHundredths[i]) {
             if (g_HoleTimeSeconds[timedHoleCount - 1] > 0) {
@@ -582,6 +608,7 @@ HALVED:
               g_HoleTimeMinutes[timedHoleCount - 1]--;
               g_HoleTimeSeconds[timedHoleCount - 1] = SECONDS_PER_MINUTE - 1;
             }
+
             g_HoleTimeHundredths[timedHoleCount - 1] +=
                 HUNDREDTHS_PER_SECOND - g_HoleTimeHundredths[i];
           } else {
@@ -589,6 +616,7 @@ HALVED:
           }
         }
       }
+
       break;
   }
 
@@ -604,11 +632,13 @@ HALVED:
       for (i = 0; i != g_GameState.playerCount; i++) {
         g_Scorecard.content.faceImageOffsets[i] = 0;
       }
+
       break;
     case GAME_MODE_STROKE:
       for (i = 0; i < g_GameState.playerCount; i++) {
         scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
       }
+
       /* The ranks go unused */
       for (i = 0; i != g_GameState.playerCount; i++) {
         ranks[i] = 0;
@@ -618,6 +648,7 @@ HALVED:
           }
         }
       }
+
       /* A player over par on the hole, after their handicap, looks behind */
       for (i = 0; i != g_GameState.playerCount; i++) {
         CourseRecord* course = &g_CourseRecords[GetCourseRecordIndex()];
@@ -632,6 +663,7 @@ HALVED:
           g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
         }
       }
+
       break;
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_GET_CHARACTER:
@@ -647,6 +679,7 @@ HALVED:
         g_Scorecard.content.faceImageOffsets[0] = 0;
         g_Scorecard.content.faceImageOffsets[1] = 0;
       }
+
       break;
     case GAME_MODE_SKINS_MATCH:
     case GAME_MODE_CLUB_SLOTS:
@@ -661,6 +694,7 @@ HALVED:
           }
         }
       }
+
       break;
   }
 }
@@ -704,6 +738,7 @@ void SetScorecardLayout(s32 layout) {
         g_Scorecard.content.rowFlipAngles[i] = 0;
         g_Scorecard.content.isRowFlipping[i] = FALSE;
       }
+
       break;
   }
 
@@ -719,11 +754,13 @@ void SetScorecardLayout(s32 layout) {
       for (i = 0; i != g_GameState.playerCount; i++) {
         g_Scorecard.content.faceImageOffsets[i] = 0;
       }
+
       break;
     case GAME_MODE_STROKE:
       for (i = 0; i < g_GameState.playerCount; i++) {
         scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
       }
+
       /* Each player's rank counts the players ahead of them */
       for (i = 0; i != g_GameState.playerCount; i++) {
         ranks[i] = 0;
@@ -733,6 +770,7 @@ void SetScorecardLayout(s32 layout) {
           }
         }
       }
+
       /* Every rank is below the player count, so this always picks 0 */
       for (i = 0; i != g_GameState.playerCount; i++) {
         if (ranks[i] < g_GameState.playerCount + 1) {
@@ -741,6 +779,7 @@ void SetScorecardLayout(s32 layout) {
           g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
         }
       }
+
       break;
     case GAME_MODE_MATCH_GAME:
     case GAME_MODE_GET_CHARACTER:
@@ -754,6 +793,7 @@ void SetScorecardLayout(s32 layout) {
           holesWon[1]++;
         }
       }
+
       if (holesWon[0] > holesWon[1]) {
         g_Scorecard.content.faceImageOffsets[0] = 0;
         g_Scorecard.content.faceImageOffsets[1] = BEHIND_FACE_IMAGE_OFFSET;
@@ -764,6 +804,7 @@ void SetScorecardLayout(s32 layout) {
         g_Scorecard.content.faceImageOffsets[0] = 0;
         g_Scorecard.content.faceImageOffsets[1] = 0;
       }
+
       break;
     case GAME_MODE_SKINS_MATCH:
     case GAME_MODE_CLUB_SLOTS:
@@ -777,6 +818,7 @@ void SetScorecardLayout(s32 layout) {
           }
         }
       }
+
       /* Every rank is below the player count, so this always picks 0 */
       for (i = 0; i != g_GameState.playerCount; i++) {
         if (skinsRanks[i] < g_GameState.playerCount + 1) {
@@ -785,6 +827,7 @@ void SetScorecardLayout(s32 layout) {
           g_Scorecard.content.faceImageOffsets[i] = BEHIND_FACE_IMAGE_OFFSET;
         }
       }
+
       break;
   }
 }
@@ -799,10 +842,12 @@ void SetScorecardState(s32 state) {
         SCORECARD_SOUND_VOLUME, SCORECARD_SLIDE_SOUND_REVERB,
         SCORECARD_CLOSE_SOUND_PAN);
   }
+
   if (state == SCORECARD_OPENING) {
     g_Scorecard.x = SCREEN_WIDTH;
     g_Scorecard.y = 0;
   }
+
   f_ScorecardState = state;
   g_Scorecard.stateTime = 0;
 }
@@ -819,6 +864,7 @@ void AnimateScorecard(void) {
       if (TallyScorecardSkins()) {
         f_ScorecardState = SCORECARD_SHOWN;
       }
+
       g_Scorecard.stateTime++;
       break;
     case SCORECARD_OPENING:
@@ -831,14 +877,17 @@ void AnimateScorecard(void) {
           f_ScorecardState = SCORECARD_TALLYING;
         }
       }
+
       if (g_Scorecard.x > 0) {
         if (g_Scorecard.x < 2) {
           g_Scorecard.x = 0;
         }
+
         g_Scorecard.x -= g_Scorecard.x / 2;
       } else if (g_Scorecard.x < 0) {
         g_Scorecard.x += SCORECARD_SLIDE_SPEED;
       }
+
       if (g_Scorecard.y > 0) {
         g_Scorecard.y -= SCORECARD_SLIDE_SPEED;
         if (g_Scorecard.y < 0) {
@@ -850,6 +899,7 @@ void AnimateScorecard(void) {
           g_Scorecard.y = 0;
         }
       }
+
       break;
     case SCORECARD_CLOSING:
       g_Scorecard.stateTime++;
@@ -858,8 +908,10 @@ void AnimateScorecard(void) {
         if (slideSpeed > SCORECARD_SLIDE_SPEED * 2) {
           slideSpeed = SCORECARD_SLIDE_SPEED * 2;
         }
+
         g_Scorecard.x -= slideSpeed;
       }
+
       /* The target stores the y offset back unchanged here */
       g_Scorecard.y = g_Scorecard.y;
       if (g_Scorecard.stateTime == SCORECARD_CLOSE_TIME) {
@@ -878,6 +930,7 @@ void AnimateScorecard(void) {
         g_RoundHud.unkB = 1;
         g_RoundHud.unkD = 1;
       }
+
       break;
     case SCORECARD_SHOWN:
       if (g_Scorecard.faceTime++ % FACE_FRAME_TIME == 1) {
@@ -896,6 +949,7 @@ void AnimateScorecard(void) {
           g_Scorecard.faceFrame = FACE_FRAME_COUNT - 1;
         }
       }
+
       break;
   }
 }
@@ -925,6 +979,7 @@ void TurnScorecardPage(u16 buttons) {
     } else {
       return;
     }
+
     /* The sound pans further right on each later page */
     PlaySoundWithEffects(SOUND_SCORECARD_PAGE, g_NextSoundChannel,
         SCORECARD_SOUND_VOLUME, 0,
@@ -944,6 +999,7 @@ void ScrollLeaderboard(u16 buttons) {
   if (g_Scorecard.content.flipTime < ROW_FLIP_TIME) {
     g_Scorecard.content.flipTime++;
   }
+
   for (row = 0; row != LEADERBOARD_ROW_COUNT; row++) {
     if (row * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
         g_Scorecard.content.isRowFlipping[row] == TRUE) {
@@ -958,6 +1014,7 @@ void ScrollLeaderboard(u16 buttons) {
       }
     }
   }
+
   if (g_RoundHud.scorecardPage == 0) {
     if (buttons & U_JPAD) {
       if (g_Scorecard.topRow > 0) {
@@ -966,6 +1023,7 @@ void ScrollLeaderboard(u16 buttons) {
             SOUND_SCORECARD_PAGE, g_NextSoundChannel, SCORECARD_SOUND_VOLUME);
       }
     }
+
     if ((buttons & D_JPAD) && g_Scorecard.topRow < LEADERBOARD_LAST_TOP_ROW) {
       g_Scorecard.topRow++;
       PlaySound(
@@ -981,6 +1039,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
       SetScorecardState(SCORECARD_CLOSING);
       return;
     }
+
     switch (g_GameMode) {
       case GAME_MODE_STROKE:
       case GAME_MODE_UNK1:
@@ -998,6 +1057,7 @@ void UpdateScorecard(u16 buttons, u16 pressedButtons) {
         ScrollLeaderboard(buttons);
         break;
     }
+
     TurnScorecardPage(buttons);
   }
 }
@@ -1007,6 +1067,7 @@ s32 UpdateShownScorecard(u16 buttons) {
   if (f_ScorecardState != SCORECARD_SHOWN) {
     return FALSE;
   }
+
   switch (g_GameMode) {
     case GAME_MODE_STROKE:
     case GAME_MODE_UNK1:
@@ -1024,6 +1085,7 @@ s32 UpdateShownScorecard(u16 buttons) {
       ScrollLeaderboard(buttons);
       break;
   }
+
   TurnScorecardPage(buttons);
   return TRUE;
 }
@@ -1044,6 +1106,7 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
   if (width > MAX_UNSPLIT_IMAGE_WIDTH) {
     stripCount = 2;
   }
+
   LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
   height /= stripCount;
   for (stripIndex = 0; stripIndex != stripCount; stripIndex++) {
@@ -1055,6 +1118,7 @@ void DrawLargeImage(Gfx** displayListHead, u8* image, s32 left, s32 top) {
         TEXEL_STEP_ONE);
     top += height;
   }
+
   *displayListHead = gfx;
 }
 
@@ -1093,6 +1157,7 @@ void DrawScorecard(Gfx** displayListHead) {
               UNSHOWN_PAGE_GRAY, 0xFF);
           dropY = 1;
         }
+
         gDPPipeSync(gfx++);
         if (g_Scorecard.pageCount == THREE_PAGE_COUNT) {
           DrawLargeImage(&gfx, g_Scorecard.pageTitleImages[i],
@@ -1105,6 +1170,7 @@ void DrawScorecard(Gfx** displayListHead) {
               g_Scorecard.y + PAGE_TITLE_TOP + dropY);
         }
       }
+
       switch (g_GameMode) {
         case GAME_MODE_TOURNAMENT:
           if (g_RoundHud.scorecardPage == 0) {
@@ -1112,6 +1178,7 @@ void DrawScorecard(Gfx** displayListHead) {
           } else {
             DrawScoresPage(&gfx);
           }
+
           break;
         case GAME_MODE_SPEED_GOLF:
           if (g_RoundHud.scorecardPage == 0) {
@@ -1119,6 +1186,7 @@ void DrawScorecard(Gfx** displayListHead) {
           } else {
             DrawScoresPage(&gfx);
           }
+
           break;
         case GAME_MODE_SKINS_MATCH:
         case GAME_MODE_CLUB_SLOTS:
@@ -1129,6 +1197,7 @@ void DrawScorecard(Gfx** displayListHead) {
           } else {
             DrawBetsPage(&gfx);
           }
+
           break;
         case GAME_MODE_MATCH_GAME:
         case GAME_MODE_GET_CHARACTER:
@@ -1141,6 +1210,7 @@ void DrawScorecard(Gfx** displayListHead) {
           } else {
             DrawBetsPage(&gfx);
           }
+
           break;
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
@@ -1161,10 +1231,12 @@ void DrawScorecard(Gfx** displayListHead) {
           } else {
             DrawBetsPage(&gfx);
           }
+
           break;
       }
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -1252,6 +1324,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
       gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       dropY = 0;
     }
+
     for (row = 0; row < TAB_HEIGHT; row += TABLE_LOAD_HEIGHT) {
       LoadTextureBlock(&gfx, g_Scorecard.tableImage + texelsOffset, G_IM_FMT_CI,
           G_IM_SIZ_8b, TABLE_WIDTH, TABLE_LOAD_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
@@ -1283,6 +1356,7 @@ void DrawScorecardTable(Gfx** displayListHead, s32 pageCount, s32 page) {
         (row + loadHeight + top) << 2, G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1314,6 +1388,7 @@ s32 LoadResultCharacters(void) {
     FreeCharacterSlot(1);
     return FALSE;
   }
+
   LoadCharacter(0, (s8)g_Players[0].characterIndex + CHARACTER_COUNT,
       (s8)g_Players[0].paletteIndex);
   LoadCharacter(1, (s8)g_Players[1].characterIndex + CHARACTER_COUNT,
@@ -1330,6 +1405,7 @@ s32 LoadResultCharacters(void) {
       song = SONG_HOLE_HALVED;
     }
   }
+
   PlaySong(song, 0);
   if (g_Players[0].holes[holeIndex].strokes <
       g_Players[1].holes[holeIndex].strokes) {
@@ -1343,6 +1419,7 @@ s32 LoadResultCharacters(void) {
     SetCharacterAnimation(0, REACTION_ANIMATION_PAR);
     SetCharacterAnimation(1, REACTION_ANIMATION_PAR);
   }
+
   SetAnimationSpeed(0, 1.0f);
   SetAnimationSpeed(1, 1.0f);
   return TRUE;
@@ -1366,14 +1443,17 @@ s32 TallyScorecardSkins(void) {
           g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
         PlaySound(SOUND_UNK22, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
       }
+
       if (g_Scorecard.stateTime == MATCH_RESULT_TIME) {
         g_Scorecard.skinsCarryover.onLastHole = 1;
         if (g_Scorecard.holeWinnerIndex != HOLE_WINNER_HALVED) {
           PlaySound(
               SOUND_UNK67, MATCH_RESULT_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
         }
+
         return TRUE;
       }
+
       break;
     case SCORECARD_LAYOUT_SKINS:
       if (g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED) {
@@ -1387,17 +1467,21 @@ s32 TallyScorecardSkins(void) {
         if (g_Scorecard.skinsCarryover.onLastHole <= 0) {
           return TRUE;
         }
+
         if ((g_Scorecard.stateTime - SKINS_TALLY_TIME) % SKINS_TALLY_INTERVAL ==
             1) {
           if (g_Scorecard.skinsCarryover.intoLastHole > 0) {
             g_Scorecard.skinsCarryover.intoLastHole--;
           }
+
           g_Scorecard.skinsCarryover.onLastHole--;
           PlaySound(
               SOUND_SKIN_COUNTED, TALLY_SOUND_CHANNEL, SCORECARD_SOUND_VOLUME);
         }
       }
+
       break;
   }
+
   return FALSE;
 }

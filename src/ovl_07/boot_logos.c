@@ -160,6 +160,7 @@ void LeaveBootLogos(void) {
     g_NextScene = 21;
     g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
   }
+
   /* The position goes unused with NO_MESSAGE */
   SetTextSlot(160, 114, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
   SetTextSlot(160, 114, NO_MESSAGE, 1, 1, 0, 0, 0, 0, 0);
@@ -185,6 +186,7 @@ void UpdateBootLogos(void) {
         f_BootLogoFrame = 0;
         f_BootLogoStage = BOOT_LOGO_NINTENDO;
       }
+
       break;
     case BOOT_LOGO_NINTENDO:
       f_BootLogoFrame++;
@@ -192,10 +194,12 @@ void UpdateBootLogos(void) {
       if (f_BootLogoFrame == NINTENDO_SOUND_FRAME) {
         PlaySound(0x62, 0xF, 0x7F);
       }
+
       for (controllerIndex = 0; controllerIndex != g_ControllerCount;
           controllerIndex++) {
         pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
       }
+
       if ((pressedButtons & (A_BUTTON | START_BUTTON)) && g_IsDebugEnabled) {
         f_BootLogoFrame = 0;
         f_BootLogoStage = BOOT_LOGO_LEAVING_NINTENDO;
@@ -203,6 +207,7 @@ void UpdateBootLogos(void) {
         f_BootLogoFrame = 0;
         f_BootLogoStage = BOOT_LOGO_CAMELOT;
       }
+
       break;
     case BOOT_LOGO_CAMELOT:
       if (f_BootLogoFrame == 0) {
@@ -213,9 +218,11 @@ void UpdateBootLogos(void) {
           f_HasResetGameState = TRUE;
         }
       }
+
       if (f_BootLogoFrame < CAMELOT_FRAME_LIMIT) {
         f_BootLogoFrame++;
       }
+
       if (g_IsDebugEnabled &&
           (g_ControllerStates[0].pressedButtons & A_BUTTON) &&
           f_BootLogoFrame < CAMELOT_SKIP_FRAME_LIMIT) {
@@ -228,18 +235,21 @@ void UpdateBootLogos(void) {
           f_BootLogoFrame = 0;
         }
       }
+
       break;
     case BOOT_LOGO_LEAVING_NINTENDO:
     case BOOT_LOGO_LEAVING_CAMELOT:
       if (f_BootLogoFrame == 0) {
         StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
       }
+
       if (HasScreenFadeEnded()) {
         f_BootLogoStage = BOOT_LOGO_N64;
         f_BootLogoFrame = 0;
         SetScreenEffect(SCREEN_EFFECT_NONE, 0);
         LeaveBootLogos();
       }
+
       f_BootLogoFrame++;
       break;
   }
@@ -285,6 +295,7 @@ void DrawBootLogos(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255,
             MIN(FADE_IN_ALPHA(f_BootLogoFrame), 255));
       }
+
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       n64Texels = f_N64Logo.texels;
@@ -300,6 +311,7 @@ void DrawBootLogos(Gfx** displayListHead) {
         top += N64_LOGO_STRIP_HEIGHT << 2;
         n64Texels += N64_LOGO_WIDTH * N64_LOGO_STRIP_HEIGHT;
       }
+
       break;
     case BOOT_LOGO_NINTENDO:
     case BOOT_LOGO_LEAVING_NINTENDO:
@@ -312,9 +324,11 @@ void DrawBootLogos(Gfx** displayListHead) {
           if (alpha > 255) {
             alpha = 255;
           }
+
           gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
         }
       }
+
       gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0, 0,
           0, 0, PRIMITIVE, PRIMITIVE, 0, TEXEL0, 0);
       texelOffset = 0;
@@ -335,6 +349,7 @@ void DrawBootLogos(Gfx** displayListHead) {
         top += NINTENDO_LOGO_STRIP_HEIGHT << 2;
         texelOffset += NINTENDO_LOGO_WIDTH * NINTENDO_LOGO_STRIP_HEIGHT;
       }
+
       break;
     case BOOT_LOGO_CAMELOT:
     case BOOT_LOGO_LEAVING_CAMELOT:
@@ -344,8 +359,10 @@ void DrawBootLogos(Gfx** displayListHead) {
         if (alpha > 255) {
           alpha = 255;
         }
+
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, alpha);
       }
+
       gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0,
           0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
       gDPPipeSync(gfx++);
@@ -370,8 +387,10 @@ void DrawBootLogos(Gfx** displayListHead) {
         texelOffset += CAMELOT_LOGO_WIDTH / 2 * CAMELOT_LOGO_STRIP_HEIGHT;
         gDPPipeSync(gfx++);
       }
+
       break;
   }
+
   *displayListHead = gfx;
 }
 #else

@@ -236,6 +236,7 @@ void LoadPauseMenu(void) {
           } else {
             f_PauseLayout = PAUSE_LAYOUT_TRAINING;
           }
+
           break;
         case GAME_MODE_RING_SHOT:
           f_PauseLayout = PAUSE_LAYOUT_RING_SHOT;
@@ -257,6 +258,7 @@ void LoadPauseMenu(void) {
           break;
       }
     }
+
     f_PauseCursorImage =
         AllocMemory(OpenEncodedAsset(PAUSE_CURSOR_IMAGE_ASSET, &asset));
     ReadEncodedAsset(f_PauseCursorImage, &asset);
@@ -280,6 +282,7 @@ void FreePauseMenu(void) {
     FreeMemory(&f_MenuCloudImage);
     FreeMemory(&f_PauseArrowsImage);
   }
+
   SetSongVolume(FULL_SONG_VOLUME);
 }
 
@@ -437,6 +440,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
           g_PauseScreen = PAUSE_SCREEN_UNK6;
           OpenPrompt(PROMPT_UNK3);
         }
+
         break;
       case PAUSE_ACTION_SCORECARD:
         RequestPauseMenu(0, -1);
@@ -458,8 +462,10 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         break;
     }
+
     return action;
   }
+
   if (controller->repeatedButtons & U_JPAD) {
     f_PauseSelection--;
     PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
@@ -467,12 +473,15 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     f_PauseSelection++;
     PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
   }
+
   if (f_PauseSelection > f_PauseLayoutOptionCounts[f_PauseLayout] - 1) {
     f_PauseSelection = 0;
   }
+
   if (f_PauseSelection < 0) {
     f_PauseSelection = f_PauseLayoutOptionCounts[f_PauseLayout] - 1;
   }
+
   kind = f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
              .kind;
   f_PauseMenuDrawnMarker = 0;
@@ -491,6 +500,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     g_WindPanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
     g_WindPanelPosition[AXIS_Y] = PAUSE_PANEL_HIDDEN_Y;
   }
+
   if (kind == PAUSE_OPTION_KIND_LIE) {
     g_LiePanelPosition[AXIS_X] +=
         (PAUSE_PANEL_SHOWN_X - g_LiePanelPosition[AXIS_X]) * PAUSE_PANEL_EASING;
@@ -500,6 +510,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
     g_LiePanelPosition[AXIS_X] = PAUSE_PANEL_HIDDEN_X;
     g_LiePanelPosition[AXIS_Y] = -PAUSE_PANEL_HIDDEN_Y;
   }
+
   if (kind == PAUSE_OPTION_KIND_LIE) {
     hasLieChanged = FALSE;
     switch (GetSurfaceInfo(g_CurrentShot.surface)->kind) {
@@ -537,6 +548,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
         lie = PAUSE_LIE_BUNKER_POOR_LIE;
         break;
     }
+
     g_RoundHud.areLieArrowsShown = 1;
     if (controller->repeatedButtons & L_JPAD) {
       hasLieChanged = TRUE;
@@ -547,6 +559,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       lie = (lie + 1) % PAUSE_LIE_COUNT;
       PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
+
     if (hasLieChanged) {
       g_Players[0].ballPosition[AXIS_Z] = g_TeePositionZ;
       g_CurrentShot.ballPosition[AXIS_Z] = g_TeePositionZ;
@@ -566,6 +579,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
             g_TeePositionX + PAUSE_BUNKER_LIES_OFFSET_X;
         g_CurrentShot.ballPosition[AXIS_X] = g_Players[0].ballPosition[AXIS_X];
       }
+
       g_CurrentShot.ballPosition[AXIS_Y] =
           GetGroundHeight(g_CurrentShot.ballPosition[AXIS_X],
               g_CurrentShot.ballPosition[AXIS_Z]);
@@ -606,6 +620,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
           surface = SURFACE_BUNKER_POOR_LIE;
           break;
       }
+
       g_Players[0].ballSurface = surface;
       g_CurrentShot.surface = surface;
       g_Players[0].ballPosition[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
@@ -620,6 +635,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       if (controller->buttons & L_JPAD) {
         g_HoleConditions.windDirection -= PAUSE_WIND_TURN_STEP;
       }
+
       if (controller->buttons & R_JPAD) {
         g_HoleConditions.windDirection += PAUSE_WIND_TURN_STEP;
       }
@@ -631,6 +647,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       g_HoleConditions.windSpeed -= PAUSE_WIND_SPEED_STEP;
       PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
+
     if ((controller->repeatedButtons & R_JPAD) &&
         g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_RAISE_LIMIT) {
       if (g_HoleConditions.windSpeed < PAUSE_WIND_SPEED_FIRST_STEP) {
@@ -638,11 +655,14 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       } else {
         g_HoleConditions.windSpeed += PAUSE_WIND_SPEED_STEP;
       }
+
       PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
+
     if (g_HoleConditions.windSpeed <= PAUSE_WIND_SPEED_CALM) {
       g_HoleConditions.windSpeed = 0;
     }
+
     if (g_HoleConditions.windSpeed > PAUSE_WIND_SPEED_MAX) {
       g_HoleConditions.windSpeed = PAUSE_WIND_SPEED_MAX;
     }
@@ -654,6 +674,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
             g_Players[g_CurrentShot.playerIndex].gridColor;
         WriteSaveData();
       }
+
       PlaySound(SOUND_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
     }
   } else if (kind == PAUSE_OPTION_KIND_WEATHER) {
@@ -669,6 +690,7 @@ s32 UpdatePauseMenu(ControllerState* controller) {
       }
     }
   }
+
   return PAUSE_ACTION_NONE;
 }
 
@@ -779,9 +801,11 @@ void DrawPauseMenu(Gfx** displayListHead) {
     FreePauseMenu();
     f_PauseMenuRequest = PAUSE_MENU_REQUEST_NONE;
   }
+
   if (!f_IsPauseMenuLoaded) {
     return;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -837,12 +861,14 @@ void DrawPauseMenu(Gfx** displayListHead) {
       green = PAUSE_LABEL_GREEN;
       blue = PAUSE_LABEL_BLUE;
     }
+
     if (f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][i]].kind ==
         PAUSE_OPTION_KIND_UNKD678) {
       if (!f_PauseMenuUnkD678) {
         message = PAUSE_OPTION_UNKD678_OFF_MESSAGE;
       }
     }
+
     SetTextSlot(PAUSE_LABEL_X, y, message + PAUSE_OPTION_MESSAGE_BASE,
         PAUSE_LABEL_FONT, i, PAUSE_LABEL_FLAGS, red, green, blue, 0xFF);
     gDPSetPrimColor(gfx++, 0, 0, red, green, blue, 0xFF);
@@ -853,15 +879,18 @@ void DrawPauseMenu(Gfx** displayListHead) {
               ? f_BlackText
               : f_WhiteText);
     }
+
     if (kind == PAUSE_OPTION_KIND_WEATHER) {
       DrawLargeText(&gfx, PAUSE_VALUE_X, y,
           g_HoleConditions.isRaining == TRUE ? f_RainText : f_ClearText);
     }
   }
+
   f_PauseCursorAngle += M_PI / 12;
   if (f_PauseCursorAngle > M_PI) {
     f_PauseCursorAngle -= M_PI;
   }
+
   sway = sinf(f_PauseCursorAngle) * PAUSE_CURSOR_SWAY;
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -882,6 +911,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
         TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, PRIMITIVE, 0);
     gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0x7F, 0x7F, 0xFF);
   }
+
   selectedKind =
       f_PauseOptions[f_PauseLayoutOptions[f_PauseLayout][f_PauseSelection]]
           .kind;
@@ -907,6 +937,7 @@ void DrawPauseMenu(Gfx** displayListHead) {
             4,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
+
   f_PauseMenuDrawnMarker = 0xFFFFFF;
   *displayListHead = gfx;
 }
@@ -954,6 +985,7 @@ s32 UpdateChoiceBox(ControllerState* controller) {
   if (f_ChoiceBoxIndex == CHOICE_BOX_CLOSED) {
     return -1;
   }
+
   switch (f_ChoiceBoxState) {
     case CHOICE_BOX_CHOSEN:
       f_ChoiceBoxState = CHOICE_BOX_CLOSING;
@@ -968,12 +1000,14 @@ s32 UpdateChoiceBox(ControllerState* controller) {
         f_ChoiceBoxState = CHOICE_BOX_CHOSEN;
         return -1;
       }
+
       if (!box->isVertical) {
         if (controller->repeatedButtons & L_JPAD) {
           f_ChoiceBoxSelection--;
           PlaySound(
               CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
         }
+
         if (controller->repeatedButtons & R_JPAD) {
           f_ChoiceBoxSelection++;
           PlaySound(
@@ -985,20 +1019,25 @@ s32 UpdateChoiceBox(ControllerState* controller) {
               CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection--;
         }
+
         if (controller->repeatedButtons & D_JPAD) {
           PlaySound(
               CHOICE_BOX_MOVE_SOUND, g_NextSoundChannel, MENU_SOUND_VOLUME);
           f_ChoiceBoxSelection++;
         }
       }
+
       if (f_ChoiceBoxSelection > box->optionCount - 1) {
         f_ChoiceBoxSelection = 0;
       }
+
       if (f_ChoiceBoxSelection < 0) {
         f_ChoiceBoxSelection = box->optionCount - 1;
       }
+
       return -1;
   }
+
   return -1;
 }
 
@@ -1043,8 +1082,10 @@ void DrawChoiceBox(Gfx** displayListHead) {
       if (textWidth < labelWidth) {
         textWidth = labelWidth;
       }
+
       halfWidth = (textWidth / 2) + CHOICE_BOX_MARGIN;
     }
+
     for (i = 0; i != CHOICE_BOX_CLOUD_PART_COUNT; i++) {
       LoadNibbleTextureBlock(&gfx,
           f_MenuCloudImage + IMAGE_HEADER_SIZE +
@@ -1057,6 +1098,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
           (CHOICE_BOX_CLOUD_WIDTH << 10) / 2 / halfWidth,
           CHOICE_BOX_CLOUD_DTDY);
     }
+
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
     if (box->isVertical) {
@@ -1073,9 +1115,11 @@ void DrawChoiceBox(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, 0x5F, 0x3F, 0xFF, 0xFF);
           gDPPipeSync(gfx++);
         }
+
         DrawCenteredLargeText(&gfx, CHOICE_BOX_CENTER_X, labelY,
             f_ChoiceBoxLabels[box->labels[i]]);
       }
+
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
       gDPPipeSync(gfx++);
@@ -1085,6 +1129,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
       if (f_ChoiceCursorAngle > M_PI) {
         f_ChoiceCursorAngle -= M_PI;
       }
+
       labelWidth =
           MeasureText(f_ChoiceBoxLabels[box->labels[f_ChoiceBoxSelection]],
               FONT_SIZE_LARGE, MEASURE_TEXT_PROPORTIONAL);
@@ -1103,6 +1148,7 @@ void DrawChoiceBox(Gfx** displayListHead) {
           1 << 10, 1 << 10);
     }
   }
+
   *displayListHead = gfx;
 }
 #else

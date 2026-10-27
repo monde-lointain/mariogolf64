@@ -111,6 +111,7 @@ void LoadFireworks(s32 courseRecordIndex) {
     f_Fireworks[index].particleCount = 0;
     f_Fireworks[index].shape = f_FireworkShape;
   }
+
   f_FireworkCount = index;
   for (index = 0; index != f_FireworkCount; index++) {
     firework = &f_Fireworks[index];
@@ -123,12 +124,14 @@ void LoadFireworks(s32 courseRecordIndex) {
         }
       }
     }
+
     firework->particles =
         AllocMemory(firework->particleCount * sizeof(FireworkParticle));
     for (row = 0; row != firework->particleCount; row++) {
       firework->particles[row].life = 0;
     }
   }
+
   f_FireworkState = FIREWORKS_LOADED;
 }
 
@@ -145,6 +148,7 @@ void FreeFireworks(void) {
       FreeMemory(&f_Fireworks[index].particles);
     }
   }
+
   f_FireworkState = 0;
 }
 
@@ -156,6 +160,7 @@ s32 HaveFireworksStayedFreed(void) {
   if (f_FireworkState > 0) {
     return FALSE;
   }
+
   f_FireworkState--;
   return f_FireworkState < -2;
 }
@@ -230,6 +235,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   if (f_FireworkState <= 0) {
     return;
   }
+
   for (fireworkIndex = 0; fireworkIndex != f_FireworkCount; fireworkIndex++) {
     if (f_Fireworks[fireworkIndex].isActive == TRUE) {
       timer = f_Fireworks[fireworkIndex].timer + 1;
@@ -243,6 +249,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
       }
     }
   }
+
   transform[0][2] = 0.0f;
   transform[0][3] = 0.0f;
   transform[1][2] = 0.0f;
@@ -265,6 +272,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
           if (--particle->life < PARTICLE_FADE_LIFE) {
             particle->life -= 4;
           }
+
           speed = sqrtf((particle->velocityX * particle->velocityX) +
               (particle->velocityY * particle->velocityY));
           directionX = 0.0f;
@@ -276,6 +284,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
             directionY = 0.1f;
             speed = 0.5f;
           }
+
           timer = f_Fireworks[index].timer;
           if (timer < 8) {
             length = speed * 0.5f * timer;
@@ -284,9 +293,11 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
           } else {
             length = speed * (4.0f - ((timer - 8) * 0.5f));
           }
+
           if (length < 1.0f) {
             length = 1.0f;
           }
+
           transform[0][0] = -directionY * 0.1f;
           transform[0][1] = directionX * 0.1f;
           transform[1][0] = -directionX * (length * 0.1f);
@@ -300,6 +311,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -320,6 +332,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   f_FireworkHue += DEGREES_TO_RADIANS(3);
+
   /* index is f_FireworkCount here, so every firework shares one color */
   red = (s32)(sinf(f_FireworkHue + index) * 64.0f) + 127;
   green = (s32)(sinf(f_FireworkHue + 2.0f + index) * 64.0f) + 127;
@@ -328,6 +341,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
     if (f_Fireworks[index].isActive == TRUE) {
       timer = f_Fireworks[index].timer;
       alpha = 0xFF;
+
       /* Fades out from frame 40, flickering on odd frames */
       if (timer >= 40) {
         alpha = 0xFF - ((timer - 40) * 8);
@@ -335,12 +349,15 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
           alpha += 0x18;
         }
       }
+
       if (alpha < 0) {
         alpha = 0;
       }
+
       if (alpha > 0xFF) {
         alpha = 0xFF;
       }
+
       gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
       for (particleIndex = 0; particleIndex != f_Fireworks[index].particleCount;
           particleIndex++) {
@@ -357,6 +374,7 @@ void UpdateAndDrawFireworks(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 

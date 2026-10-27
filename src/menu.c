@@ -206,6 +206,7 @@ void LoadMenuResources(void) {
     osSyncPrintf("menu const error");
     return;
   }
+
   D_801F4A20 = AllocMemory(OpenEncodedAsset(0x51E, &asset));
   ReadEncodedAsset(D_801F4A20, &asset);
   D_8012D3AC = AllocMemory(OpenEncodedAsset(0x721, &asset));
@@ -235,6 +236,7 @@ void LoadMenuResources(void) {
     OpenEncodedAsset(D_800C2016, &asset);
     ReadEncodedAsset(D_801B5CD0[1], &asset);
   }
+
   D_801052BC[0] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
   ReadEncodedAsset(D_801052BC[0], &asset);
   D_801052BC[1] = AllocMemory(OpenEncodedAsset(*D_800C2028, &asset));
@@ -245,6 +247,7 @@ void LoadMenuResources(void) {
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }
+
     D_801049A0[index] = AllocMemory(size);
     ReadEncodedAsset(D_801049A0[index], &asset);
     if (g_MenuScreen == 5) {
@@ -252,15 +255,18 @@ void LoadMenuResources(void) {
     } else {
       size = OpenEncodedAsset(D_800C2064[index], &asset);
     }
+
     D_8012F4B0[index] = AllocMemory(size);
     ReadEncodedAsset(D_8012F4B0[index], &asset);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_801052C4); index++) {
     OpenAssetFile(D_800C20D4[index], &file);
     size = GetAssetFileSize(&file);
     D_801052C4[index] = AllocMemory(size);
     ReadAssetFile(D_801052C4[index], size, &file);
   }
+
   OpenEncodedAsset(D_800C21B8[0][0], &asset);
   D_800FBDFC[0] = AllocMemory(0xFA0);
   ReadEncodedAsset(D_800FBDFC[0], &asset);
@@ -272,10 +278,12 @@ void LoadMenuResources(void) {
     D_800FF4C4[index] = AllocMemory(0x125C);
     ReadEncodedAsset(D_800FF4C4[index], &asset);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
     D_801B93E0[index] = AllocMemory(OpenEncodedAsset(0x720, &asset));
     ReadEncodedAsset(D_801B93E0[index], &asset);
   }
+
   size = OpenEncodedAsset(0x623, &asset);
   D_8010526C[0] = AllocMemory(size);
   D_8010526C[1] = AllocMemory(size);
@@ -291,18 +299,21 @@ void LoadMenuResources(void) {
         AllocMemory(OpenEncodedAsset(D_800C2650[index].assetId, &asset));
     ReadEncodedAsset(D_8012D430[index], &asset);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
     OpenAssetFile(D_800C2590[index][0], &file);
     size = GetAssetFileSize(&file);
     D_80105B78[index] = AllocMemory(size);
     ReadAssetFile(D_80105B78[index], size, &file);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
     OpenAssetFile(D_800C2278[0][index], &file);
     size = GetAssetFileSize(&file);
     D_800FBE38[index] = AllocMemory(size);
     ReadAssetFile(D_800FBE38[index], size, &file);
   }
+
   D_800FBE30[0] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
   ReadEncodedAsset(D_800FBE30[0], &asset);
   D_800FBE30[1] = AllocMemory(OpenEncodedAsset(*D_800C28B0, &asset) * 2);
@@ -330,6 +341,7 @@ void FreeMenuResources(void) {
     FreeMemory(&D_801049A0[index]);
     FreeMemory(&D_8012F4B0[index]);
   }
+
   FreeMemory(&D_801052C4[0]);
   FreeMemory(&D_801052C4[1]);
   FreeMemory(&D_800FF420[0]);
@@ -346,12 +358,15 @@ void FreeMenuResources(void) {
   for (index = 0; index != ARRAY_COUNT(D_800FF4C4); index++) {
     FreeMemory(&D_800FF4C4[index]);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_800FBE38); index++) {
     FreeMemory(&D_800FBE38[index]);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_801B93E0); index++) {
     FreeMemory(&D_801B93E0[index]);
   }
+
   FreeMemory(&D_8010526C[0]);
   FreeMemory(&D_8010526C[1]);
   FreeMemory(&D_800FF180[0]);
@@ -361,9 +376,11 @@ void FreeMenuResources(void) {
   for (index = 0; index != ARRAY_COUNT(D_8012D430); index++) {
     FreeMemory(&D_8012D430[index]);
   }
+
   for (index = 0; index != ARRAY_COUNT(D_80105B78); index++) {
     FreeMemory(&D_80105B78[index]);
   }
+
   FreeMemory(&D_800FBE30[0]);
   FreeMemory(&D_800FBE30[1]);
   FreeMemory(&D_800FC6A0);
@@ -392,6 +409,7 @@ void ResetSaveData(void) {
       save->bestTimes[row][column] = -1;
     }
   }
+
   TransferSaveData(save, TRUE);
 }
 
@@ -411,6 +429,7 @@ s32 CountOpenCourses(s32 coursePoints) {
       break;
     }
   }
+
   return courseIndex + 1;
 }
 
@@ -437,27 +456,32 @@ s32 GetRecordPriority(Unk68* record) {
         if (bits & 0x40) {
           value = 0x3C;
         }
+
         break;
       case 2:
         value = 0x3C;
         if (bits & 0x40) {
           value = 0x46;
         }
+
         if (unk2C < 5) {
           value += 0xA;
         }
+
         break;
       case 0:
         value = 0x5A;
         if (unk2C < 4) {
           break;
         }
+
         /* fallthrough */
       case 1:
         value = maxValue;
         break;
     }
   }
+
   return value;
 }
 
@@ -474,9 +498,11 @@ void SortIndicesDescending(s32* values, s32* order, s32 count) {
   for (index = 0; index < count; index++) {
     order[index] = index;
   }
+
   for (index = 0; index < count; index++) {
     sortedValues[index] = values[index];
   }
+
   for (index = 0; index < count; index++) {
     value = sortedValues[index];
     valueIndex = order[index];
@@ -485,11 +511,13 @@ void SortIndicesDescending(s32* values, s32* order, s32 count) {
         break;
       }
     }
+
     if (searchIndex < index - 1) {
       for (shiftIndex = index; searchIndex + 1 < shiftIndex; shiftIndex--) {
         sortedValues[shiftIndex] = sortedValues[shiftIndex - 1];
         order[shiftIndex] = order[shiftIndex - 1];
       }
+
       sortedValues[shiftIndex] = value;
       order[shiftIndex] = valueIndex;
     }
@@ -522,6 +550,7 @@ void InsertRankedRecord(Unk68* record) {
     newPriority = GetRecordPriority(record);
     lowestPriority = 0x40000000; /* Above any priority */
     lowestIndex = 0;
+
     /* Every case sets the length, which the original needs to match */
     switch (record->unk3A & 0xF) {
       case 3:
@@ -542,16 +571,19 @@ void InsertRankedRecord(Unk68* record) {
         groupLength = RANKED_GROUP_LENGTH;
         break;
     }
+
     osSyncPrintf("1:prior=%d:", newPriority);
     for (index = 0; index < groupLength; index++) {
       priorities[index] = GetRecordPriority(&records[firstIndex + index]);
     }
+
     for (index = 0; index < groupLength; index++) {
       if (lowestPriority >= priorities[index]) {
         lowestIndex = index;
         lowestPriority = priorities[index];
       }
     }
+
     if (newPriority >= lowestPriority) {
       /*
        * Rank the group with its lowest entry dropped into slots 1 on,
@@ -563,23 +595,28 @@ void InsertRankedRecord(Unk68* record) {
       for (index = 0; index < groupLength; index++) {
         copies[index] = records[firstIndex + index];
       }
+
       for (index = 0; index < groupLength - 1; index++) {
         records[firstIndex + index + 1] = copies[order[index]];
         priorities[index + 1] =
             GetRecordPriority(&records[firstIndex + index + 1]);
       }
+
       priorities[0] = newPriority;
       records[firstIndex] = *record;
       SortIndicesDescending(priorities, order, groupLength);
       for (index = 0; index < groupLength; index++) {
         copies[index] = records[firstIndex + index];
       }
+
       for (index = 0; index < groupLength; index++) {
         records[firstIndex + index] = copies[order[index]];
       }
+
       TransferSaveData(GetSaveData(), TRUE);
     }
   }
+
   osSyncPrintf("\n");
 }
 
@@ -615,12 +652,14 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
       playerCount = MODE4_PLAYER_COUNT;
       break;
   }
+
   if (!isContinuing) {
     hasIllegalState = FALSE;
     if (g_GameState.playerCount > playerCount) {
       osSyncPrintf("Too Many Players\n");
       return -1;
     }
+
     playerCount = g_GameState.playerCount;
     game->isValid = FALSE;
     for (index = 0; index < playerCount; index++) {
@@ -640,31 +679,38 @@ s32 SaveOrContinueGameByMode(s32 isContinuing) {
         case PLAYER_STATE_UNK20:
           break;
       }
+
       records[index] = D_800FEDD8[index];
     }
+
     game->state = g_GameState;
     game->unk8 = D_800BA9D8;
     if (!hasIllegalState) {
       game->isValid = TRUE;
       return 0;
     }
+
     return -1;
   }
+
   if (game->isValid == TRUE) {
     if (game->state.playerCount > playerCount) {
       osSyncPrintf("Too Many Players\n");
       return -1;
     }
+
     playerCount = game->state.playerCount;
     for (index = 0; index < playerCount; index++) {
       g_Players[index] = players[index];
       D_800FEDD8[index] = records[index];
     }
+
     g_GameState = game->state;
     g_GameState.unk0 = 1;
     SetGameFlag(GAME_FLAG_UNK1E);
     D_800BA9D8 = game->unk8;
   }
+
   D_801B60B8 = 2;
   osSyncPrintf("Go Continue\n");
   return 0;
@@ -688,6 +734,7 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
       osSyncPrintf("Too Many Players\n");
       return -1;
     }
+
     playerCount = g_GameState.playerCount;
     game->isValid = FALSE;
     for (index = 0; index < playerCount; index++) {
@@ -708,15 +755,18 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
           break;
       }
     }
+
     game->state = D_801B55F0;
     if (game->state.saveCount < MAX_SAVE_COUNT) {
       game->state.saveCount++;
     }
+
     game->unk8 = D_800BA9D8;
     game->roundStats = g_RoundStats;
     if (hasIllegalState) {
       return -1;
     }
+
     game->isValid = TRUE;
   } else {
     if (game->isValid == TRUE) {
@@ -724,22 +774,27 @@ s32 SaveOrContinueGame(s32 slotIndex, s32 isContinuing) {
         osSyncPrintf("Too Many Players\n");
         return -1;
       }
+
       playerCount = game->state.playerCount;
       for (index = 0; index < playerCount; index++) {
         g_Players[index] = players[index];
       }
+
       g_GameState = game->state;
       g_GameState.unk0 = 1;
       SetGameFlag(GAME_FLAG_UNK1E);
       D_800BA9D8 = game->unk8;
       g_RoundStats = game->roundStats;
     }
+
     D_801B60B8 = 2;
     osSyncPrintf("Go Continue\n");
   }
+
   if (!isContinuing) {
     TransferSaveData(GetSaveData(), TRUE);
   }
+
   return 0;
 }
 
@@ -769,21 +824,26 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
   if (courseIndex < 0) {
     courseIndex = 0;
   }
+
   if (courseIndex >= COURSE_COUNT) {
     courseIndex = COURSE_COUNT - 1;
   }
+
   if (time >= 0) {
     if (time <= MAX_TIME) {
       if (arg4 < 0) {
         arg4 = 0;
       }
+
       if (arg4 > UNKE50_MAX) {
         arg4 = UNKE50_MAX;
       }
+
       count = 0;
       for (index = 0; index != BEST_TIME_COUNT; index++) {
         count += save->bestTimes[courseIndex][index] > 0;
       }
+
       /*
        * Both sorts copy the smaller entry over the larger one instead
        * of swapping them, so the larger one is lost.
@@ -803,6 +863,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           }
         }
       }
+
       for (index = 0; index != count; index++) {
         for (scanIndex = index + 1; scanIndex != count; scanIndex++) {
           if (save->unkD78[courseIndex][index] !=
@@ -810,6 +871,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
             break;
           }
         }
+
         if (index + 1 < scanIndex) {
           for (runIndex = index; runIndex != scanIndex; runIndex++) {
             for (otherIndex = runIndex + 1; otherIndex != scanIndex;
@@ -829,16 +891,19 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
           }
         }
       }
+
       if (count > 0) {
         for (index = 0; index != count; index++) {
           if (time < save->bestTimes[courseIndex][index]) {
             break;
           }
+
           if (time == save->bestTimes[courseIndex][index] &&
               arg2 <= save->unkD78[courseIndex][index]) {
             break;
           }
         }
+
         if (index < BEST_TIME_COUNT) {
           for (scanIndex = BEST_TIME_COUNT - 1; index < scanIndex;
               scanIndex--) {
@@ -851,6 +916,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
             save->unkE50[courseIndex][scanIndex] =
                 save->unkE50[courseIndex][scanIndex - 1];
           }
+
           save->bestTimes[courseIndex][index] = time;
           save->unkE08[courseIndex][index] = arg3;
           save->unkD78[courseIndex][index] = arg2;
@@ -862,6 +928,7 @@ void InsertBestTime(s32 courseIndex, s32 time, s32 arg2, s32 arg3, s32 arg4) {
         save->unkD78[courseIndex][0] = arg2;
         save->unkE50[courseIndex][0] = arg4;
       }
+
       TransferSaveData(save, TRUE);
     }
   }
@@ -880,6 +947,7 @@ s32 HasEveryRingShotStar(void) {
       starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
+
   return starCount == RING_SHOT_COURSE_COUNT * RING_SHOT_HOLE_COUNT;
 }
 
@@ -896,6 +964,7 @@ s32 IsDonkeyKongUnlocked(void) {
       starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
+
   return starCount >= DONKEY_KONG_STAR_COUNT;
 }
 
@@ -914,6 +983,7 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
       starCount += save->hasRingShotStar[courseIndex][holeIndex] != FALSE;
     }
   }
+
   if (starCount == STARS_PER_RING_SHOT_COURSE * 1) {
     return 1;
   } else if (starCount == STARS_PER_RING_SHOT_COURSE * 2) {
@@ -925,6 +995,7 @@ s32 GetRingShotCourseOpenedAtStarCount(void) {
   } else if (starCount == STARS_PER_RING_SHOT_COURSE * 5) {
     return 5;
   }
+
   return 0;
 }
 
@@ -942,6 +1013,7 @@ s32 IsMapleUnlocked(void) {
           save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
     }
   }
+
   return badgeCount >= MAPLE_BADGE_COUNT;
 }
 
@@ -959,6 +1031,7 @@ s32 IsMetalMarioUnlocked(void) {
           save->unk990.birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
     }
   }
+
   return badgeCount == COURSE_COUNT * COURSE_HOLE_COUNT;
 }
 
@@ -978,15 +1051,18 @@ void func_8005C674(s32 arg0, s32 arg1) {
       g_CharacterGrid[row][column] = g_StartingCharacterGrid[row][column];
     }
   }
+
   if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
       for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
         g_CharacterGrid[row][column] = g_EveryCharacterGrid[row][column];
       }
     }
+
     func_8005CA48();
     return;
   }
+
   if (arg0 >= 2) {
     for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
       for (column = 0; column != 5; column++) {
@@ -994,6 +1070,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
       }
     }
   }
+
   for (index = 0; index != ARRAY_COUNT(D_800C2968); index++) {
     recordIndex = 0;
     arg0 = 0;
@@ -1003,6 +1080,7 @@ void func_8005C674(s32 arg0, s32 arg1) {
         break;
       }
     }
+
     if (arg0 > 0) {
       for (row = 0; row != CHARACTER_CHOICE_ROW_COUNT; row++) {
         for (column = 0; column != CHARACTER_GRID_COLUMN_COUNT; column++) {
@@ -1013,15 +1091,19 @@ void func_8005C674(s32 arg0, s32 arg1) {
       }
     }
   }
+
   if (IsMapleUnlocked()) {
     g_CharacterGrid[0][5] = CHARACTER_MAPLE;
   }
+
   if (IsDonkeyKongUnlocked()) {
     g_CharacterGrid[1][5] = CHARACTER_DONKEY_KONG;
   }
+
   if (IsMetalMarioUnlocked()) {
     g_CharacterGrid[1][6] = CHARACTER_METAL_MARIO;
   }
+
   func_8005CA48();
   for (index = 0; index != MARKABLE_CHARACTER_COUNT; index++) {
     row = D_800C29B8[index].row;
@@ -1031,11 +1113,13 @@ void func_8005C674(s32 arg0, s32 arg1) {
       break;
     }
   }
+
   if (index == MARKABLE_CHARACTER_COUNT) {
     if (g_CharacterGrid[0][6] != CHARACTER_BOWSER) {
       g_CharacterGrid[0][6] = CHARACTER_BOWSER - MARKED_CHARACTER_OFFSET;
     }
   }
+
   if ((u8)arg1 != 1) {
     for (index = 0; index != ARRAY_COUNT(g_ImportedCharacters); index++) {
       recordIndex = g_CharacterGrid[2][index];
@@ -1066,11 +1150,13 @@ void func_8005CA48(void) {
       g_ImportedCharacters[index].name[count] = 0;
     }
   }
+
   for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
     for (count = 0; count != IMPORTED_CHARACTER_NAME_LENGTH; count++) {
       D_800C2AA8[index][count] = 0;
     }
   }
+
   count = 0;
   for (index = 0; index != IMPORTED_CHARACTER_COUNT; index++) {
     if (g_GameBoyCharacters[index].status ==
@@ -1078,25 +1164,30 @@ void func_8005CA48(void) {
       count++;
     }
   }
+
   if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
     count = IMPORTED_CHARACTER_COUNT;
   }
+
   if (count > 0) {
     if (count > IMPORTED_CHARACTER_COUNT) {
       count = IMPORTED_CHARACTER_COUNT;
     }
+
     for (index = 0; index != count; index++) {
       if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
         name = D_800C2B60[index];
       } else {
         name = g_GameBoyCharacters[index].name;
       }
+
       for (byteIndex = 0; byteIndex != IMPORTED_CHARACTER_NAME_LENGTH;
           byteIndex++) {
         letter = *name++;
         D_800C2AA8[index][byteIndex] = letter;
         g_ImportedCharacters[index].name[byteIndex] = letter;
       }
+
       g_CharacterGrid[D_800C2B90[index].row][D_800C2B90[index].column] =
           FIRST_IMPORTED_CHARACTER + index;
       if (IsGameFlagSet(GAME_FLAG_ALL_CHARACTERS)) {
@@ -1134,9 +1225,11 @@ s32 func_8005CEE0(s32 index) {
   if (index < 0) {
     return -1;
   }
+
   if (index >= ARRAY_COUNT(D_800C2BB0)) {
     return -1;
   }
+
   func_8005C674(1, 1);
   slot = D_800C2BB0[index];
   row = D_800C29B8[slot].row;
@@ -1159,10 +1252,12 @@ void InvalidateBrokenSavedGames(void) {
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     isInvalid[index] = FALSE;
   }
+
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     if (!save->savedGames[index].isValid) {
       continue;
     }
+
     unk = &save->savedGames[index];
     sub = &unk->state;
     if (sub->isMiniGolf == FALSE) {
@@ -1179,26 +1274,32 @@ void InvalidateBrokenSavedGames(void) {
           break;
       }
     }
+
     if (sub->playerCount < 1 || sub->playerCount > MAX_PLAYER_COUNT) {
       isInvalid[index] = TRUE;
     }
+
     if (sub->courseIndex < 0 ||
         sub->courseIndex >= DRIVING_RANGE_COURSE_INDEX) {
       isInvalid[index] = TRUE;
     }
+
     if (sub->holeIndex < 0 || sub->holeIndex >= COURSE_HOLE_COUNT) {
       isInvalid[index] = TRUE;
     }
+
     for (entryIndex = 0; entryIndex != sub->playerCount; entryIndex++) {
       player = &save->savedPlayers[index][entryIndex];
       if (player->characterIndex >= CHARACTER_COUNT) {
         isInvalid[index] = TRUE;
       }
+
       if (player->paletteIndex >= CHARACTER_PALETTE_COUNT) {
         isInvalid[index] = TRUE;
       }
     }
   }
+
   for (index = 0; index != SAVED_GAME_COUNT; index++) {
     if (isInvalid[index] == TRUE) {
       save->savedGames[index].isValid = FALSE;
@@ -1219,6 +1320,7 @@ void func_8005D0D8(void) {
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     isInvalid[recordIndex] = FALSE;
   }
+
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
     record = &save->unk1DF0[recordIndex];
     kind = record->unk36;
@@ -1228,19 +1330,24 @@ void func_8005D0D8(void) {
         isInvalid[recordIndex] = TRUE;
       }
     }
+
     if (record->unk37 >= COURSE_HOLE_COUNT) {
       isInvalid[recordIndex] = TRUE;
     }
+
     if (record->unk39 >= 4) {
       isInvalid[recordIndex] = TRUE;
     }
+
     if (record->unk34 >= 6) {
       isInvalid[recordIndex] = TRUE;
     }
+
     if (record->unk35 >= 6) {
       isInvalid[recordIndex] = TRUE;
     }
   }
+
   /* Toggling rather than clearing sets the flag on records that fail with it
    * clear */
   for (recordIndex = 0; recordIndex != SAVE_RECORD_COUNT; recordIndex++) {
@@ -1274,6 +1381,7 @@ s32 GetClubTournamentGameMode(void) {
       value = 7;
       break;
   }
+
   return value;
 }
 
@@ -1292,6 +1400,7 @@ s32 GetClubTournamentNameMessage(void) {
   if (value < 0) {
     value = 0;
   }
+
   return value + 0x16F;
 }
 
@@ -1302,6 +1411,7 @@ s32 GetClubTournamentCourseMessage(void) {
   if (value < 0) {
     value = 0;
   }
+
   return value + 0x1EB;
 }
 
@@ -1312,6 +1422,7 @@ s32 GetClubTournamentNumber(void) {
   if (value <= 0) {
     value = 1;
   }
+
   return value;
 }
 
@@ -1335,6 +1446,7 @@ s32 GetClubTournamentModeMessage(void) {
       value = 0x9D;
       break;
   }
+
   return value;
 }
 
@@ -1349,6 +1461,7 @@ s32 GetClubTournamentCourseTitleMessage(void) {
   } else {
     value = D_80105DC2 + 0x1EB;
   }
+
   return value;
 }
 
@@ -1365,6 +1478,7 @@ void func_8005D334(void) {
         byteIndex++) {
       g_ImportedCharacters[index].name[byteIndex] = 0;
     }
+
     g_ImportedCharacters[index].unk14 = 0;
   }
 }
@@ -1428,6 +1542,7 @@ void ComputeRoundStatistics(void) {
         D_80105C38[courseIndex].sandSavePercent =
             ((f32)entry->unk28 / (f32)sum) * 100.0f;
       }
+
       D_80105C38[courseIndex].hasPlace[THIRD_PLACE_INDEX] =
           entry->hasPlace[THIRD_PLACE_INDEX];
       D_80105C38[courseIndex].hasPlace[SECOND_PLACE_INDEX] =
@@ -1464,14 +1579,17 @@ void ComputeRoundStatistics(void) {
         hasPlayedCourse = TRUE;
         D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
       }
+
       if (D_80105C38[COURSE_COUNT].bestScore >
           D_80105C38[courseIndex].bestScore) {
         D_80105C38[COURSE_COUNT].bestScore = D_80105C38[courseIndex].bestScore;
       }
+
       if (D_80105C38[COURSE_COUNT].bestDrive <
           D_80105C38[courseIndex].bestDrive) {
         D_80105C38[COURSE_COUNT].bestDrive = D_80105C38[courseIndex].bestDrive;
       }
+
       D_80105C38[COURSE_COUNT].roundCount += D_80105C38[courseIndex].roundCount;
     }
   }
@@ -1500,12 +1618,14 @@ void ComputeRoundStatistics(void) {
       sum10 += entry->averageDrive * UNK_SCALE * entry->averagedDriveCount;
     }
   }
+
   if (D_80105C38[COURSE_COUNT].roundCount > 0.0f) {
     if (sum28And2C <= 0.0f) {
       D_80105C38[COURSE_COUNT].sandSavePercent = 0.0f;
     } else {
       D_80105C38[COURSE_COUNT].sandSavePercent = (sum28 / sum28And2C) * 100.0f;
     }
+
     holeCount = D_80105C38[COURSE_COUNT].roundCount * HOLES_PER_ROUND;
     D_80105C38[COURSE_COUNT].averagePutts = sum1C / holeCount;
     D_80105C38[COURSE_COUNT].fairwayPercent = (sum18 / holeCount) * 100.0f;
@@ -1548,6 +1668,7 @@ void func_8005D9A0(void) {
   for (index = 0; index != ARRAY_COUNT(D_800FBE08); index++) {
     D_800FBE08[index] = 0;
   }
+
   g_MenuChoices.unk0 = 3;
   g_GameState.holeSelection = HOLE_SELECTION_ALL;
   D_801323D0 = 6;
@@ -1577,6 +1698,7 @@ void func_8005DAFC(void) {
       } else {
         D_801B5634 = 1;
       }
+
       D_800C2BD5 = 1;
       break;
     case 2:
@@ -1604,6 +1726,7 @@ void func_8005DAFC(void) {
       D_801B5634 = 5;
       break;
   }
+
   D_801052E8 = 1;
   D_801B9410 = 1;
   D_800FE334 = 0;
@@ -1700,10 +1823,12 @@ void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
       if (options[SAVE_OPTION_UNK0]) {
         *bits = OPTION_BIT_UNK0;
       }
+
       if (options[SAVE_OPTION_MONO]) {
         *bits |= OPTION_BIT_MONO;
         g_SoundOptionBits = *bits;
       }
+
       if (options[SAVE_OPTION_UNK3]) {
         *bits |= OPTION_BIT_UNK3;
       }
@@ -1714,11 +1839,13 @@ void SyncSaveOptions(SaveData* save, s32 isWrite, s32 readResult) {
     } else {
       options[SAVE_OPTION_UNK0] = FALSE;
     }
+
     if (g_OptionBits & OPTION_BIT_MONO) {
       options[SAVE_OPTION_MONO] = TRUE;
     } else {
       options[SAVE_OPTION_MONO] = FALSE;
     }
+
     if (g_OptionBits & OPTION_BIT_UNK3) {
       options[SAVE_OPTION_UNK3] = TRUE;
     } else {
@@ -1764,6 +1891,7 @@ s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
           size != sizeof(SaveData)) {
         continue;
       }
+
       if (ReadHostFile(g_SaveCopyLocations[copyIndex].checkFileName, &size) !=
               HOST_FILE_OK ||
           size != sizeof(SaveCheck)) {
@@ -1775,21 +1903,26 @@ s32 ReadSaveCopies(SaveData* save, u8 isInSram) {
       nuPiReadSram(g_SaveCopyLocations[copyIndex].checkSramAddress, check,
           sizeof(SaveCheck));
     }
+
     if (save->magic != SAVE_MAGIC) {
       unmarkedCount++;
       continue;
     }
+
     crc = check->keyedCrc ^ check->key;
     if (crc == ComputeCrc16((u8*)save, sizeof(SaveData))) {
       break;
     }
   }
+
   if (copyIndex == 0) {
     return SAVE_READ_FIRST_COPY;
   }
+
   if (copyIndex == 1) {
     return SAVE_READ_SECOND_COPY;
   }
+
   ResetSaveData();
   return (unmarkedCount == SAVE_COPY_COUNT) ? SAVE_READ_NEVER_WRITTEN
                                             : SAVE_READ_FAILED;
@@ -1807,6 +1940,7 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
       dateIndex++) {
     save->invertedBuildDate[dateIndex] = ~g_RomBuildDate[dateIndex];
   }
+
   crc = ComputeCrc16((u8*)save, sizeof(SaveData));
   for (copyIndex = 0; copyIndex < SAVE_COPY_COUNT; copyIndex++) {
     check->key = rand();
@@ -1824,5 +1958,6 @@ s32 WriteSaveCopies(SaveData* save, u8 isInSram) {
           sizeof(SaveCheck));
     }
   }
+
   return TRUE;
 }

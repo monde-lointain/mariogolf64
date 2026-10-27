@@ -29,6 +29,7 @@ f32 f_CursorCornerPhases[] = {0.0f, 1.5707964f, 3.1415927f, 4.712389f};
 /* Reads the cursor box image into the given buffer and sizes the quad to it */
 void LoadCursorBox(void* image) {
   EncodedAsset asset;
+
   /* s32 sizes are there to match */
   s32 width;
   s32 height;
@@ -79,14 +80,17 @@ void DrawCursorBox(Gfx** displayListHead, s32 left, s32 top) {
     if (red > 255) {
       red = 255;
     }
+
     if (red < 0) {
       red = 0;
     }
+
     f_CursorBoxVertices[corner].v.cn[0] = red;
     f_CursorBoxVertices[corner].v.cn[1] = 255;
     f_CursorBoxVertices[corner].v.cn[2] = 32;
     f_CursorBoxVertices[corner].v.cn[3] = 191;
   }
+
   guOrtho(&f_CursorBoxProjection, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, 10.0f, 2000.0f, 1.0f);
   guTranslate(&f_CursorBoxTranslations[g_DrawBufferIndex],

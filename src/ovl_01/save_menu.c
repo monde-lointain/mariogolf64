@@ -230,6 +230,7 @@ void func_8021F6E0_ovl_01(void** buffers) {
     OpenEncodedAsset(D_800C2064[imageIndex], &asset);
     ReadEncodedAsset(D_8023B680_ovl_01[imageIndex], &asset);
   }
+
   OpenEncodedAsset(0x944, &asset);
   ReadEncodedAsset(D_8023B680_ovl_01[SAVE_MENU_IMAGE_COUNT], &asset);
 }
@@ -244,15 +245,18 @@ void func_8021F79C_ovl_01(void) {
   if (openCourseCount <= 0) {
     openCourseCount = 1;
   }
+
   if (openCourseCount > RING_SHOT_COURSE_COUNT) {
     openCourseCount = RING_SHOT_COURSE_COUNT;
   }
+
   if (IsHudAnimationDone() == TRUE) {
     if (GetWipeKind() != WIPE_NONE && D_801052E8 == 0) {
       if (GetWipeProgress() == 0) {
         for (index = 0; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
+
         g_MenuScreen = MENU_SCREEN_EXIT;
         D_801B60B9 = 2;
         SetGameFlag(GAME_FLAG_UNK1E);
@@ -282,11 +286,13 @@ void func_8021F79C_ovl_01(void) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
+
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         if (memory->ringShotRow == RING_SHOT_REPLAY_ROW) {
           memory->ringShotRow = openCourseCount - 1;
           return;
         }
+
         memory->ringShotRow--;
         if (memory->ringShotRow < 0) {
           memory->ringShotRow = RING_SHOT_REPLAY_ROW;
@@ -295,12 +301,14 @@ void func_8021F79C_ovl_01(void) {
         for (index = 1; index != RING_SHOT_TEXT_SLOT_COUNT; index++) {
           SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 0xFF, 0xFF, 0xFF, 0xFF);
         }
+
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
         memory->ringShotRow++;
         if (memory->ringShotRow > RING_SHOT_REPLAY_ROW) {
           memory->ringShotRow = 0;
           return;
         }
+
         if (memory->ringShotRow > openCourseCount - 1) {
           memory->ringShotRow = RING_SHOT_REPLAY_ROW;
         }
@@ -313,6 +321,7 @@ void func_8021F79C_ovl_01(void) {
             if (movedSlot != -1) {
               memory->ringShotReplaySlot = movedSlot;
             }
+
             if (memory->ringShotReplaySlot < 0) {
               memory->ringShotReplaySlot = SAVE_MENU_SLOT_COUNT - 1;
             }
@@ -329,6 +338,7 @@ void func_8021F79C_ovl_01(void) {
             if (movedSlot != -1) {
               memory->ringShotReplaySlot = movedSlot;
             }
+
             if (memory->ringShotReplaySlot >= SAVE_MENU_SLOT_COUNT) {
               memory->ringShotReplaySlot = 0;
             }
@@ -354,6 +364,7 @@ void func_80220A30_ovl_01(void) {
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
     D_8023B684_ovl_01[slot] = -1;
   }
+
   for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
     if ((s16)func_80220E28_ovl_01(&save->unk1DF0[slot])) {
       D_8023B684_ovl_01[slot] = slot;
@@ -361,6 +372,7 @@ void func_80220A30_ovl_01(void) {
       D_8023B684_ovl_01[slot] = -1;
     }
   }
+
   if (D_8023B684_ovl_01[memory->ringShotReplaySlot] == -1) {
     for (slot = 0; slot != SAVE_MENU_SLOT_COUNT; slot++) {
       if (D_8023B684_ovl_01[slot] != -1) {
@@ -384,6 +396,7 @@ void func_80220BB0_ovl_01(void) {
     OpenAssetFile(D_802308C8_ovl_01[index][0], &file);
     ReadAssetFile(D_8023BFF0_ovl_01[index], GetAssetFileSize(&file), &file);
   }
+
   for (index = 0; index != SAVE_MENU_SLOT_COUNT; index++) {
     if (D_8023B684_ovl_01[index] != -1) {
       character = (s8)save->unk1DF0[D_8023B684_ovl_01[index]].unk37;
@@ -391,12 +404,15 @@ void func_80220BB0_ovl_01(void) {
       if (character < 0) {
         character = 0;
       }
+
       if (character >= CHARACTER_COUNT) {
         character = CHARACTER_COUNT - 1;
       }
+
       if (palette < 0) {
         palette = 0;
       }
+
       if (palette >= CHARACTER_PALETTE_COUNT) {
         palette = CHARACTER_PALETTE_COUNT - 1;
       }
@@ -404,6 +420,7 @@ void func_80220BB0_ovl_01(void) {
       palette = 0;
       character = 0;
     }
+
     OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
     ReadAssetFile(D_8023E3F0_ovl_01[index], GetAssetFileSize(&file), &file);
   }
@@ -417,26 +434,33 @@ s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
   if (slot < 0) {
     return -1;
   }
+
   if (slot >= SAVE_MENU_SLOT_COUNT) {
     return -1;
   }
+
   step = isForward ? 1 : -1;
   slot += step;
   for (tryCount = 0; tryCount != SAVE_MENU_SLOT_COUNT - 1; tryCount++) {
     if (slot >= SAVE_MENU_SLOT_COUNT) {
       slot = 0;
     }
+
     if (slot < 0) {
       slot = SAVE_MENU_SLOT_COUNT - 1;
     }
+
     if (D_8023B684_ovl_01[slot] != -1) {
       break;
     }
+
     slot += step;
   }
+
   if (tryCount == SAVE_MENU_SLOT_COUNT - 1) {
     return -1;
   }
+
   return slot;
 }
 
@@ -476,6 +500,7 @@ void func_80220E34_ovl_01(Gfx** displayListHead, s32 courseIndex, s32 left,
         (COURSE_DIGIT_WIDTH * COURSE_COUNT) << 5, 0, 1 << 10, 1 << 10);
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   gSPScisTextureRectangle(gfx++, (left + COURSE_DIGIT_OFFSET_X) << 2, top << 2,
       (left + COURSE_DIGIT_OFFSET_X + COURSE_DIGIT_WIDTH) << 2,
@@ -520,6 +545,7 @@ void func_802213C8_ovl_01(
         (SAVE_ICON_STRIP_HEIGHT << 10) / SAVE_ICON_SHOWN_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -534,21 +560,27 @@ s32 func_8022181C_ovl_01(void) {
       starCount += save->hasRingShotStar[courseIndex][holeIndex] > 0;
     }
   }
+
   if (starCount >= RING_SHOT_STARS_PER_LEVEL * 5) {
     return 6;
   }
+
   if (starCount >= RING_SHOT_STARS_PER_LEVEL * 4) {
     return 5;
   }
+
   if (starCount >= RING_SHOT_STARS_PER_LEVEL * 3) {
     return 4;
   }
+
   if (starCount >= RING_SHOT_STARS_PER_LEVEL * 2) {
     return 3;
   }
+
   if (starCount >= RING_SHOT_STARS_PER_LEVEL) {
     return 2;
   }
+
   return 1;
 }
 
@@ -601,12 +633,15 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
       if (gameIndex < 0) {
         gameIndex = 0;
       }
+
       if (gameIndex >= SAVED_GAME_COUNT) {
         gameIndex = SAVED_GAME_COUNT - 1;
       }
+
       if (!save->savedGames[gameIndex].isValid) {
         break;
       }
+
       if (!save->savedGames[gameIndex].state.isMiniGolf) {
         OpenEncodedAsset(
             D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
@@ -619,6 +654,7 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
         OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
+
       break;
     case SAVE_GAME_BUFFER_CHOSEN_COURSE:
       bufferSlot = &D_8023BD90_ovl_01;
@@ -627,12 +663,15 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
       if (gameIndex < 0) {
         gameIndex = 0;
       }
+
       if (gameIndex >= SAVED_GAME_COUNT) {
         gameIndex = SAVED_GAME_COUNT - 1;
       }
+
       if (!save->savedGames[gameIndex].isValid) {
         break;
       }
+
       if (!save->savedGames[gameIndex].state.isMiniGolf) {
         OpenEncodedAsset(
             D_800C2064[save->savedGames[gameIndex].state.courseIndex], &asset);
@@ -645,8 +684,10 @@ void func_802218C0_ovl_01(void* buffer, u8 bufferKind) {
         OpenAssetFile(D_800C20D4[miniGolfIndex], &file);
         ReadAssetFile(D_801052C4[0], GetAssetFileSize(&file), &file);
       }
+
       break;
   }
+
   D_80230B4E_ovl_01 = 0;
 }
 #else
@@ -662,6 +703,7 @@ void func_80221B20_ovl_01(void) {
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
     D_80230B50_ovl_01[gameIndex] = -1;
   }
+
   D_80230B4D_ovl_01 = 0;
   InitSram();
   TransferSaveData(save, FALSE);
@@ -680,16 +722,19 @@ void func_80221B20_ovl_01(void) {
       }
     }
   }
+
   for (gameIndex = 0; gameIndex != SAVED_GAME_COUNT; gameIndex++) {
     if (D_80230B50_ovl_01[gameIndex] != -1) {
       break;
     }
   }
+
   if (gameIndex == SAVED_GAME_COUNT) {
     memory->savedGameIndex = 0;
   } else {
     memory->savedGameIndex = gameIndex;
   }
+
   func_80221CC0_ovl_01();
 }
 
@@ -709,6 +754,7 @@ void func_80221CC0_ovl_01(void) {
     D_80230B40_ovl_01[playerIndex] = -1;
     D_8023BDA4_ovl_01[playerIndex] = -1;
   }
+
   D_80230B48_ovl_01 = 0;
   gameIndex = memory->savedGameIndex;
   playerCount = save->savedGames[gameIndex].state.playerCount;
@@ -722,6 +768,7 @@ void func_80221CC0_ovl_01(void) {
       D_80230B40_ovl_01[playerIndex] = -1;
     }
   }
+
   humanCount = 0;
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
     if (D_80230B40_ovl_01[playerIndex] != MAXCONTROLLERS) {
@@ -729,6 +776,7 @@ void func_80221CC0_ovl_01(void) {
       humanCount++;
     }
   }
+
   D_80230B48_ovl_01 = 0;
   D_80230B4C_ovl_01 = 0;
   for (playerIndex = 0; playerIndex != MAXCONTROLLERS; playerIndex++) {
@@ -760,9 +808,11 @@ void func_80221EBC_ovl_01(void** buffers, u8 bufferKind) {
         if (mode == -1) {
           mode = 0;
         }
+
         OpenEncodedAsset(modeImages[mode].assetId, &asset);
         ReadEncodedAsset(D_8023BD70_ovl_01[imageIndex], &asset);
       }
+
       OpenEncodedAsset(ASSET_SAVE_MENU_FRAME, &asset);
       ReadEncodedAsset(D_8023BD70_ovl_01[SAVED_GAME_COUNT], &asset);
       break;
@@ -775,9 +825,11 @@ void func_80221EBC_ovl_01(void** buffers, u8 bufferKind) {
         if (mode == -1) {
           mode = 0;
         }
+
         OpenEncodedAsset(modeImages[mode].assetId, &asset);
         ReadEncodedAsset(D_8023BD74_ovl_01[imageIndex], &asset);
       }
+
       break;
   }
 }
@@ -839,17 +891,21 @@ s32 func_80222CDC_ovl_01(void) {
       playerCount = MODE0_PLAYER_COUNT;
       break;
   }
+
   if (!game->isValid) {
     return -1;
   }
+
   if (game->state.playerCount > playerCount) {
     return -1;
   }
+
   playerCount = game->state.playerCount;
   for (index = 0; index != playerCount; index++) {
     g_Players[index] = players[index];
     D_800FEDD8[index] = records[index];
   }
+
   g_GameState = game->state;
   g_GameState.unk0 = 1;
   SetGameFlag(GAME_FLAG_UNK1E);
@@ -869,9 +925,11 @@ s32 func_80222F2C_ovl_01(void) {
   if (D_80230B50_ovl_01[memory->savedGameIndex] == -1) {
     return -1;
   }
+
   if (SaveOrContinueGame(memory->savedGameIndex, TRUE) == -1) {
     return -1;
   }
+
   savedPlayer = save->savedPlayers[memory->savedGameIndex];
   for (playerIndex = 0; playerIndex != MAX_PLAYER_COUNT; playerIndex++) {
     controller = D_80230B40_ovl_01[playerIndex];
@@ -885,9 +943,11 @@ s32 func_80222F2C_ovl_01(void) {
         playerIndex, character, (s8)g_Players[playerIndex].paletteIndex);
     savedPlayer++;
   }
+
   if (!IsGameFlagSet(GAME_FLAG_KEEP_SAVED_GAMES)) {
     memset(&save->savedGames[memory->savedGameIndex], 0, sizeof(SavedGame));
   }
+
   return 0;
 }
 
@@ -945,6 +1005,7 @@ void func_80224AFC_ovl_01(
         scale, scale);
     gDPPipeSync(gfx++);
   }
+
   if (D_80230B50_ovl_01[memory->savedGameIndex] != -1) {
     image = D_8023BD74_ovl_01[D_8022F8C4_ovl_01];
     gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
@@ -966,6 +1027,7 @@ void func_80224AFC_ovl_01(
           G_TX_RENDERTILE, 0, 0, iconScale, iconScale);
       gDPPipeSync(gfx++);
     }
+
     D_8022F8C5_ovl_01++;
     if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
       iconIndex = D_80230BB0_ovl_01[D_80230B50_ovl_01[memory->savedGameIndex]];
@@ -974,16 +1036,19 @@ void func_80224AFC_ovl_01(
       if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
         D_8022F8C0_ovl_01 = 0;
       }
+
       if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] ==
           END_OF_ICON_FRAMES) {
         D_8022F8C0_ovl_01 = 0;
       }
+
       D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
       OpenEncodedAsset(
           g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
       ReadEncodedAsset(D_8023BD74_ovl_01[D_8022F8C4_ovl_01], &asset);
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -1012,6 +1077,7 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
   if (!save->savedGames[memory->savedGameIndex].isValid) {
     return;
   }
+
   switch (playerCount) {
     case 1:
       D_8023BD20_ovl_01[0] = 5.0f;
@@ -1034,6 +1100,7 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
       D_8023BD20_ovl_01[3] = 4.0f;
       break;
   }
+
   guOrtho(&D_8023BCE0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, SAVED_CHARACTERS_NEAR,
       SAVED_CHARACTERS_FAR, SAVED_CHARACTERS_ORTHO_SCALE);
@@ -1046,11 +1113,13 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
     if (*fidgetTimer > 0) {
       (*fidgetTimer)--;
     }
+
     if (*fidgetTimer == 0) {
       *fidgetTimer = -1;
       SetAnimationLooping(playerIndex, FALSE);
       SetNextAnimation(playerIndex, MENU_ANIMATION_FIDGET);
     }
+
     if (*fidgetTimer == -1) {
       if (GetAnimationEndFrame(playerIndex, MENU_ANIMATION_FIDGET) ==
           GetAnimationFrame(playerIndex)) {
@@ -1059,6 +1128,7 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
         *fidgetTimer = guRandom() % FIDGET_DELAY_RANGE;
       }
     }
+
     if (!D_801B70F0[playerIndex]) {
       if (IsCharacterSlotBusy(playerIndex)) {
         FreeCharacterSlot(playerIndex);
@@ -1071,6 +1141,7 @@ void func_80225358_ovl_01(Gfx** displayListHead) {
         SetAnimationSpeed(playerIndex, 1.0f);
       }
     }
+
     rotation[0] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[0]);
     rotation[1] = DEGREES_TO_RADIANS(D_80230D18_ovl_01[1]);
     rotation[2] = 0.0f;
@@ -1172,6 +1243,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       }
     }
   }
+
   image = D_8023BD84_ovl_01;
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   for (playerIndex = 0; playerIndex != playerCount; playerIndex++) {
@@ -1184,6 +1256,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
       } else {
         labelIndex = playerIndex + PLAYER_LABEL_COMPUTER_FIRST;
       }
+
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)image + PALETTED_TEXELS_OFFSET +
               labelIndex * PLAYER_LABEL_IMAGE_SIZE) &
@@ -1200,6 +1273,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
+
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (position[0] + PLAYER_LABEL_OFFSET_X) << 2,
         (position[1] + PLAYER_LABEL_OFFSET_Y) << 2,
@@ -1208,6 +1282,7 @@ void func_80225960_ovl_01(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1242,6 +1317,7 @@ void func_80226190_ovl_01(Gfx** displayListHead) {
         (COURSE_THUMBNAIL_STRIP_HEIGHT << 10) / COURSE_THUMBNAIL_SHOWN_HEIGHT);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1278,5 +1354,6 @@ void func_8022644C_ovl_01(Gfx** displayListHead) {
         (COURSE_THUMBNAIL_STRIP_HEIGHT << 10) / COURSE_THUMBNAIL_SHOWN_HEIGHT);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }

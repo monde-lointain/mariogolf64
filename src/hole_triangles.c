@@ -115,6 +115,7 @@ void DrawHoleTriangles(
   } else {
     f_HasTestRing = FALSE;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
@@ -167,6 +168,7 @@ void DrawHoleTriangles(
                   f_HoleTriangles[index].vertices[vertexIndex].v.ob[1]) *
               TEXTURE_COORDINATE_SCALE;
         }
+
         gSPVertex(gfx++, f_HoleTriangles[index].vertices,
             HOLE_TRIANGLE_VERTEX_COUNT, 0);
         gSP1Triangle(gfx++, 0, 1, 2, 0);
@@ -182,6 +184,7 @@ void DrawHoleTriangles(
               f_HoleTriangles[index].vertices[vertexIndex].v.ob[1] *
               TEXTURE_COORDINATE_SCALE;
         }
+
         gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0xFF, 0x40);
         gDPSetEnvColor(gfx++, 0x80, 0xBE, 0xFF, 0x10);
         gSPVertex(gfx++, f_HoleTriangles[index].vertices,
@@ -192,6 +195,7 @@ void DrawHoleTriangles(
         if (g_IsCupViewShown != 0) {
           break;
         }
+
         edgeY = 0.0f;
         edgeX = f_HoleTriangles[index].vertices[1].v.ob[0] -
             f_HoleTriangles[index].vertices[2].v.ob[0];
@@ -200,18 +204,22 @@ void DrawHoleTriangles(
         if (fabsf(edgeX) + fabsf(edgeZ) < MIN_SHADED_EDGE_LENGTH) {
           break;
         }
+
         guNormalize(&edgeX, &edgeY, &edgeZ);
         along = edgeZ;
         if (along < 0.0f) {
           along = -along;
         }
+
         alpha = (along * SHADED_ALPHA_SCALE) + SHADED_ALPHA_BASE;
         if (alpha > MAX_SHADED_ALPHA) {
           alpha = MAX_SHADED_ALPHA;
         }
+
         if (alpha < 0) {
           alpha = DEFAULT_SHADED_ALPHA;
         }
+
         gSPFogPosition(gfx++, SHADED_FOG_MIN, SHADED_FOG_MAX);
         gDPPipeSync(gfx++);
         gDPSetAlphaDither(gfx++, G_AD_PATTERN);
@@ -225,6 +233,7 @@ void DrawHoleTriangles(
               PRIMITIVE, 0, PRIMITIVE_ALPHA, 0, 1, ENVIRONMENT, SHADE,
               ENVIRONMENT);
         }
+
         gDPSetPrimColor(gfx++, 0, 0, 0xE0, 0xE0, 0x00, alpha);
         gDPSetEnvColor(gfx++, 0xE0, 0xE0, 0x00, 0x40);
         gDPPipeSync(gfx++);
@@ -235,6 +244,7 @@ void DrawHoleTriangles(
         break;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
@@ -312,6 +322,7 @@ void DrawRings(
     green = RING_GREEN;
     blue = RING_BLUE;
   }
+
   gDPSetEnvColor(gfx++, 0x78, 0x78, 0x20, 0xBF);
   matrix = f_RingMatrices;
   f_RingAngle += RING_SPIN_SPEED;
@@ -322,6 +333,7 @@ void DrawRings(
     if (ringIndex >= RING_COUNT) {
       break;
     }
+
     if (f_HoleTriangles[triangleIndex].kind == HOLE_TRIANGLE_KIND_RING) {
       state = g_Players[g_GameState.unk20].ringStates[ringIndex];
       if (state > RING_STATE_NONE) {
@@ -344,14 +356,17 @@ void DrawRings(
               SpawnSparkle(position);
             }
           }
+
           state++;
           if (state > RING_STATE_FADED) {
             state = RING_STATE_FADED;
           }
+
           alpha = 0xFF - (state * RING_FADE_STEP);
           if (alpha < 0) {
             alpha = 0;
           }
+
           g_Players[g_GameState.unk20].ringStates[ringIndex] = state;
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
@@ -360,6 +375,7 @@ void DrawRings(
           gDPPipeSync(gfx++);
           gDPSetRenderMode(gfx++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
         }
+
         gDPSetPrimColor(gfx++, 0, 0, red, green, blue, alpha);
         gSPMatrix(gfx++, matrix, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
         gSPMatrix(gfx++, &f_RingSpinMatrices[g_DrawBufferIndex],
@@ -376,12 +392,15 @@ void DrawRings(
                 nextSection * RING_SIDE_COUNT + side, 0);
           }
         }
+
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
       }
+
       matrix++;
       ringIndex++;
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -458,6 +477,7 @@ static s32 BuildRingMatrices(void) {
     if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
       continue;
     }
+
     corners.coordinates[0][0] = triangle->vertices[0].v.ob[0];
     corners.coordinates[0][1] = triangle->vertices[1].v.ob[0];
     corners.coordinates[0][2] = triangle->vertices[2].v.ob[0];
@@ -495,9 +515,11 @@ static s32 BuildRingMatrices(void) {
     } else {
       guMtxIdentF(rotation);
     }
+
     guMtxF2L(rotation, &f_RingMatrices[ringCount]);
     ringCount++;
   }
+
   return ringCount;
 }
 
@@ -512,6 +534,7 @@ void InitRings(void) {
   if (ringCount >= RING_COUNT) {
     ringCount = RING_COUNT;
   }
+
   if (g_GameState.unk30 != KEEP_RING_STATES) {
     for (playerIndex = 0; playerIndex < MAX_PLAYER_COUNT; playerIndex++) {
       for (ringIndex = 0; ringIndex < RING_COUNT; ringIndex++) {

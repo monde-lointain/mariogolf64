@@ -108,6 +108,7 @@ void guNormalize(f32* x, f32* y, f32* z) {
   f32 xValue = *x;
   f32 yValue = *y;
   f32 zValue = *z;
+
   /* The squared length, and then the inverse of the length */
   f32 length = (xValue * xValue) + (yValue * yValue) + (zValue * zValue);
 
@@ -133,8 +134,10 @@ s32 IsGameFlagSet(u32 flag) {
     if (f_GameFlagBits[flag >> 3] & (0x80 >> (flag & 7))) {
       return TRUE;
     }
+
     return FALSE;
   }
+
   return FALSE;
 }
 
@@ -170,6 +173,7 @@ void RunHeartbeatLoop(void) {
   while (TRUE) {
     for (iteration = 0; iteration != HEARTBEAT_LOOP_COUNT; iteration++) {
     }
+
     osSyncPrintf("thread %d\n", HEARTBEAT_LOOP_COUNT);
   }
 }
@@ -226,6 +230,7 @@ void mainproc(void* arg) {
   if (buildDateSize >= BUILD_DATE_LENGTH_MAX) {
     buildDateSize = BUILD_DATE_LENGTH_MAX;
   }
+
   nuPiReadRom((u32)build_date_ROM_START, g_RomBuildDate, buildDateSize);
   g_RomBuildDate[buildDateSize] = '\0';
   g_SaveBuildDate[0] = '\0';
@@ -250,6 +255,7 @@ void mainproc(void* arg) {
     if ((g_ConnectedControllerBits >> portIndex) & 1) {
       g_PlayerControllerPorts[g_ControllerCount++] = portIndex;
     }
+
     /* This clears the size of the whole array at each state, which
        runs past the end of the array for every port but the first */
     memset(&g_ControllerStates[portIndex], 0, sizeof(g_ControllerStates));
@@ -280,10 +286,12 @@ void mainproc(void* arg) {
       if (g_MessageFramebuffer != NULL) {
         osViSwapBuffer(g_MessageFramebuffer);
       }
+
       if (g_DebugHaltState == HALT_STATE_HALTED) {
         EnterDevelopmentDebugger(100);
       }
     }
+
     nuGfxDisplayOff();
   }
 }
@@ -295,14 +303,17 @@ s32 GetStickDirection(s32 stick, s32 previousDirection, u32 pressThreshold,
   if (stick < 0) {
     magnitude = -stick;
   }
+
   if (magnitude > releaseThreshold) {
     if (magnitude < pressThreshold) {
       stick = previousDirection;
     }
+
     if (stick != 0) {
       goto HAS_DIRECTION;
     }
   }
+
   return 0;
 
 HAS_DIRECTION:
@@ -320,11 +331,14 @@ void UpdateMenuController(
     if (magnitude < STICK_DEAD_ZONE) {
       return 0;
     }
+
     if (magnitude > MENU_STICK_MAX) {
       magnitude = MENU_STICK_MAX;
     }
+
     return (stick < 0) ? -magnitude : magnitude;
   }
+
   s32 repeatDelay = g_MenuRepeatStates[portIndex].repeatDelay;
   NUContData* menuPad = &g_MenuControllerData[portIndex];
 
@@ -343,11 +357,13 @@ void UpdateMenuController(
   } else if (g_MenuRepeatStates[portIndex].stickDirectionX == -1) {
     menuPad->button |= L_JPAD;
   }
+
   if (g_MenuRepeatStates[portIndex].stickDirectionY == 1) {
     menuPad->button |= U_JPAD;
   } else if (g_MenuRepeatStates[portIndex].stickDirectionY == -1) {
     menuPad->button |= D_JPAD;
   }
+
   menuPad->trigger = pad->trigger;
 
   if (menuPad->button == g_MenuRepeatStates[portIndex].previousButtons) {
@@ -355,6 +371,7 @@ void UpdateMenuController(
     if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
       repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
     }
+
     if (repeatDelay == 0) {
       repeatDelay = BUTTON_REPEAT_DELAY_NEXT;
     } else {
@@ -365,6 +382,7 @@ void UpdateMenuController(
     g_MenuRepeatStates[portIndex].previousButtons = menuPad->button;
     repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
   }
+
   g_MenuRepeatStates[portIndex].repeatDelay = repeatDelay;
 }
 
@@ -383,6 +401,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
       if (state->stickX < -STATE_STICK_MAX) {
         state->stickX = -STATE_STICK_MAX;
       }
+
       if (state->stickX < -STATE_STICK_DIRECTION_MIN) {
         state->buttons |= L_JPAD;
       }
@@ -395,6 +414,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
       if (state->stickX > STATE_STICK_MAX) {
         state->stickX = STATE_STICK_MAX;
       }
+
       if (state->stickX > STATE_STICK_DIRECTION_MIN) {
         state->buttons |= R_JPAD;
       }
@@ -409,6 +429,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
       if (state->stickY < -STATE_STICK_MAX) {
         state->stickY = -STATE_STICK_MAX;
       }
+
       if (state->stickY < -STATE_STICK_DIRECTION_MIN) {
         state->buttons |= D_JPAD;
       }
@@ -421,6 +442,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
       if (state->stickY > STATE_STICK_MAX) {
         state->stickY = STATE_STICK_MAX;
       }
+
       if (state->stickY > STATE_STICK_DIRECTION_MIN) {
         state->buttons |= U_JPAD;
       }
@@ -433,6 +455,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
     if (repeatDelay > BUTTON_REPEAT_DELAY_FIRST) {
       repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
     }
+
     if (repeatDelay == 0) {
       repeatDelay = BUTTON_REPEAT_DELAY_NEXT;
     } else {
@@ -442,6 +465,7 @@ void UpdateControllerState(NUContData* pad, ControllerState* state) {
   } else {
     repeatDelay = BUTTON_REPEAT_DELAY_FIRST;
   }
+
   state->repeatDelay = repeatDelay;
   state->previousButtons = state->buttons;
   state->heldButtons = state->buttons;
@@ -480,6 +504,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
     if (!f_IsOddRetrace) {
       DrawResetFade();
     }
+
     return;
   }
 
@@ -499,6 +524,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
             g_DebugHaltState = HALT_STATE_HALTED;
           }
         }
+
         g_FrameCount++;
         f_FramesThisSecond++;
         if (g_FrameStepState == FRAME_STEP_ONE_FRAME) {
@@ -509,6 +535,7 @@ void HandleGfxRetrace(s32 pendingTaskCount) {
         if (g_MenuControllerData[1].trigger & L_JPAD) {
           g_FrameStepState = FRAME_STEP_ONE_FRAME;
         }
+
         if (g_FrameStepState != FRAME_STEP_ONE_FRAME &&
             (g_MenuControllerData[1].trigger & R_JPAD)) {
           g_FrameStepState = FRAME_STEP_RUNNING;

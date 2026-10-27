@@ -58,6 +58,7 @@ void SetCharacterAlpha(s32 alpha) {
         gfx++, f_EnvColors[i][0], f_EnvColors[i][1], f_EnvColors[i][2], alpha);
     gSPEndDisplayList(gfx++);
   }
+
   gfx = g_CharacterRenderModeDisplayList;
   if ((alpha & 0xFF) == 0xFF) {
     gDPPipeSync(gfx++);
@@ -67,6 +68,7 @@ void SetCharacterAlpha(s32 alpha) {
     gDPSetRenderMode(gfx++, CHARACTER_RENDER_MODE_TRANSLUCENT,
         CHARACTER_RENDER_MODE_TRANSLUCENT2);
   }
+
   gfx = g_CharacterCombineDisplayList;
   if (g_HoleConditions.isRaining) {
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, SHADE, 0, ENVIRONMENT, 0, SHADE, 0,
@@ -130,10 +132,12 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     osSyncPrintf("kSetMultiTLB : Invalid Virtual or Physical Address\n");
     return -1;
   }
+
   switch (pageMode) {
     case 1:
       pageSize >>= 1;
       pageCount *= 2;
+
       /* fallthrough */
     case 0:
       pageMask = OS_PM_4K;
@@ -141,6 +145,7 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     case 3:
       pageSize >>= 1;
       pageCount *= 2;
+
       /* fallthrough */
     case 2:
       pageMask = OS_PM_16K;
@@ -148,6 +153,7 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     case 5:
       pageSize >>= 1;
       pageCount *= 2;
+
       /* fallthrough */
     case 4:
       pageMask = OS_PM_64K;
@@ -155,6 +161,7 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     case 7:
       pageSize >>= 1;
       pageCount *= 2;
+
       /* fallthrough */
     case 6:
       pageMask = OS_PM_256K;
@@ -163,6 +170,7 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
       osSyncPrintf("kSetMultiTLB : Invalid Page Mode\n");
       return -1;
   }
+
   /* A TLB entry maps an even and odd page pair, so a lone odd page goes first
    */
   if (virtualAddress & pageSize) {
@@ -181,11 +189,13 @@ s32 SetMultiTlb(s32 firstTlbIndex, s32 pageMode, u32 pageCount,
     pageCount -= 2;
     physicalAddress += pageSize * 2;
   }
+
   if (pageCount != 0) {
     osUnmapTLB(tlbIndex);
     osMapTLB(tlbIndex++, pageMask, (void*)virtualAddress, physicalAddress,
         NO_PHYSICAL_PAGE, NO_TLB_ASID);
   }
+
   return tlbIndex;
 }
 
@@ -2365,6 +2375,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
   if (joint->translationKeyCount == END_OF_JOINT_ANIMATIONS) {
     return;
   }
+
   do {
     frame = g_CurrentAnimationFrame;
     isInterpolated = TRUE;
@@ -2388,6 +2399,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             break;
           }
         }
+
         if (keyIndex == joint->translationKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
@@ -2398,6 +2410,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
         }
       }
     }
+
     if (isInterpolated) {
       if (g_CurrentAnimationEndFrame < joint->translationSpan.endFrame) {
         x = joint->translations[joint->translationSpan.index][0];
@@ -2418,6 +2431,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             (progress * joint->translations[nextSpanIndex][2]);
       }
     }
+
     guTranslateF(translationMatrix, x, y, z);
 
     frame = g_CurrentAnimationFrame;
@@ -2441,6 +2455,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             break;
           }
         }
+
         if (keyIndex == joint->rotationKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
@@ -2451,6 +2466,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
         }
       }
     }
+
     if (isInterpolated) {
       if (g_CurrentAnimationEndFrame < joint->rotationSpan.endFrame) {
         rotation[0] =
@@ -2486,6 +2502,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
           nextWeight = sinf(progress) / sinAngle;
           spanWeight = sinf(angle - progress) / sinAngle;
         }
+
         spanWeight *= QUATERNION_SCALE;
         nextWeight *= QUATERNION_SCALE;
         rotation[0] = (spanWeight * joint->rotations[spanIndex][0]) +
@@ -2507,6 +2524,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
     } else {
       scale = 0.0f;
     }
+
     rotationMatrix = jointMatrix;
     xs = rotation[0] * scale;
     ys = rotation[1] * scale;
@@ -2557,6 +2575,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             break;
           }
         }
+
         if (keyIndex == joint->scaleKeyCount) {
           keyIndex--;
           isInterpolated = FALSE;
@@ -2567,6 +2586,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
         }
       }
     }
+
     if (isInterpolated) {
       if (g_CurrentAnimationEndFrame < joint->scaleSpan.endFrame) {
         x = joint->scales[joint->scaleSpan.index][0];
@@ -2586,6 +2606,7 @@ void AnimateCharacterJoints(u32 slotIndex) {
             (progress * joint->scales[nextSpanIndex][2]);
       }
     }
+
     guScaleF(scaleMatrix, x, y, z);
     guMtxCatF(scaleMatrix, jointMatrix, jointMatrix);
     guMtxCatF(jointMatrix, translationMatrix, jointMatrix);
@@ -2624,12 +2645,14 @@ s32 IsCharacterSlotBusy(u32 slotIndex) {
   if (slotIndex >= CHARACTER_SLOT_COUNT) {
     return TRUE;
   }
+
   isBusy = FALSE;
   if (g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL ||
       g_FrameCount - g_CharacterSlots[slotIndex].lastDrawnFrame <
           BUSY_FRAME_COUNT) {
     isBusy = TRUE;
   }
+
   return isBusy;
 }
 
@@ -2641,6 +2664,7 @@ s32 IsAnyCharacterSlotBusy(void) {
       return TRUE;
     }
   }
+
   return FALSE;
 }
 
@@ -2650,6 +2674,7 @@ CharacterSlot* GetUsedCharacterSlot(u32 slotIndex) {
       g_CharacterSlots[slotIndex].modelIndex != NO_CHARACTER_MODEL) {
     return &g_CharacterSlots[slotIndex];
   }
+
   return NULL;
 }
 
@@ -2678,19 +2703,23 @@ s32 SelectCharacterDisplayList(u32 slotIndex, s32 choiceIndex) {
       CHOSEN_DISPLAY_LIST(slot->model)->words.w1 = 0;
       return 0;
     }
+
     for (; i < choiceIndex; i++) {
       if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
         return -1;
       }
     }
+
     if (DISPLAY_LIST_CHOICES(slot->model)[i] == END_OF_DISPLAY_LIST_CHOICES) {
       return -1;
     }
+
     CHOSEN_DISPLAY_LIST(slot->model)->words.w0 = G_DL << 24;
     CHOSEN_DISPLAY_LIST(slot->model)->words.w1 =
         DISPLAY_LIST_CHOICES(slot->model)[i];
     return 0;
   }
+
   return -1;
 }
 
@@ -2721,6 +2750,7 @@ s32 GetCharacterClubKind(u32 slotIndex, s32 clubIndex) {
         break;
     }
   }
+
   return kind;
 }
 
@@ -2746,14 +2776,17 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position) {
       if (point->id == pointId) {
         break;
       }
+
       point++;
     }
+
     if (point->jointPath != NULL) {
       jointPath = point->jointPath;
       guMtxIdent(&pointMatrix);
       for (; *jointPath != END_OF_JOINT_PATH; jointPath++) {
         guMtxCatL(&slot->jointMatrices[*jointPath], &pointMatrix, &pointMatrix);
       }
+
       guMtxIdent(&offsetMatrix);
       guTranslate(
           &offsetMatrix, point->offset[0], point->offset[1], point->offset[2]);
@@ -2765,10 +2798,12 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position) {
       position[2] *= MODEL_TO_WORLD_SCALE;
       return 0;
     }
+
     /* The chained assignment is there to match */
     position[0] = position[1] = position[2] = 0.0f;
     return 1;
   }
+
   /* The chained assignment is there to match */
   position[0] = position[1] = position[2] = 0.0f;
   return -1;
@@ -2806,6 +2841,7 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32* position) {
     guMtxXFMF(matrix, modelPosition[0], modelPosition[1], modelPosition[2],
         &position[0], &position[1], &position[2]);
   }
+
   return result;
 }
 

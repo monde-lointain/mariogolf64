@@ -153,6 +153,7 @@ void RollGolfBall(GolfBall* ball, BallSimulation* simulation) {
     movement[1] = simulation->velocity[1];
     movement[2] = simulation->velocity[2];
   }
+
   if (simulation->isRunning != BALL_STATE_STOPPED) {
     distance = GetLength(movement[0], movement[1], movement[2]);
     if (movement[2] != 0 || movement[0] != 0) {
@@ -170,6 +171,7 @@ void ResetBallAfterimage(void) {
     f_BallAfterimages[i].alpha = AFTERIMAGE_UNUSED;
     f_BallAfterimages[i].isInCup = FALSE;
   }
+
   f_BallAfterimages[0].position[0] = f_GolfBalls[g_GameState.unk20].position[0];
   f_BallAfterimages[0].position[1] = f_GolfBalls[g_GameState.unk20].position[1];
   f_BallAfterimages[0].position[2] = f_GolfBalls[g_GameState.unk20].position[2];
@@ -199,6 +201,7 @@ void ResetGolfBalls(void) {
     f_GolfBalls[i].alpha = BALL_HIDDEN;
     f_GolfBalls[i].state = BALL_STATE_STOPPED;
   }
+
   ResetBallAfterimage();
   ResetBallRotation();
   f_GolfBallUnk100 = 0;
@@ -225,11 +228,13 @@ void UpdateGolfBalls(void) {
   if (g_GameState.unk0 == GAME_STATE_UNK6) {
     currentIndex = D_801B60A8;
   }
+
   for (i = 0, player = g_Players, ball = f_GolfBalls;
       i < g_GameState.playerCount; i++, player++, ball++) {
     if (player->unk26 != 0 || player->strokeCount == 0) {
       ball->alpha = BALL_HIDDEN;
     }
+
     if (currentIndex != i) {
       ball->state = BALL_STATE_STOPPED;
       if (GetSurfaceInfo((s8)player->ballSurface)->kind == SURFACE_KIND_GREEN) {
@@ -241,6 +246,7 @@ void UpdateGolfBalls(void) {
       }
     }
   }
+
   if (g_GameState.unk0 == GAME_STATE_UNK6 ||
       g_GameState.unk0 == GAME_STATE_UNK11) {
     ball = &f_GolfBalls[currentIndex];
@@ -266,6 +272,7 @@ void UpdateGolfBalls(void) {
           ball->position[1] = simulation->position[1] * COURSE_TO_WORLD_SCALE;
           ball->position[2] = simulation->position[2] * COURSE_TO_WORLD_SCALE;
         }
+
         ball->alpha = BALL_SHOWN;
         ball->surface = GetSurfaceInfo(simulation->surface);
         if (simulation->isRunning != BALL_STATE_IN_CUP) {
@@ -273,6 +280,7 @@ void UpdateGolfBalls(void) {
         } else {
           ball->isInCup = TRUE;
         }
+
         if (GetCupDistance(simulation->position[0] - D_800BA9D8.cupPosition[0],
                 simulation->position[2] - D_800BA9D8.cupPosition[2]) == 0 ||
             simulation->isRunning == BALL_STATE_IN_CUP ||
@@ -281,6 +289,7 @@ void UpdateGolfBalls(void) {
         } else {
           ball->isInCup = FALSE;
         }
+
         RollGolfBall(ball, simulation);
         ball->state = simulation->isRunning;
         ball->unk9E = simulation->unkA1;
@@ -291,6 +300,7 @@ void UpdateGolfBalls(void) {
                 g_IsMiniGolf)) {
           markerPlayerIndex = simulation->playerIndex;
         }
+
         ball->markerPlayerIndex = markerPlayerIndex;
         scale = g_PinVertexScale * BALL_MODEL_SCALE;
         guScaleF(scaling, scale, scale, scale);
@@ -303,6 +313,7 @@ void UpdateGolfBalls(void) {
       }
     }
   }
+
   if (f_IsBallAfterimageShown == TRUE) {
     if (g_IsCupViewShown == TRUE) {
       if (!f_IsBallAfterimageZoomed) {
@@ -344,6 +355,7 @@ void UpdateGolfBalls(void) {
         }
       }
     }
+
     head = &f_BallAfterimages[f_BallAfterimageHead];
     ball = &f_GolfBalls[currentIndex];
     if (f_BallAfterimageHead == 0) {
@@ -360,6 +372,7 @@ void UpdateGolfBalls(void) {
       distance = sqrtf((offset[0] * offset[0]) + (offset[1] * offset[1]) +
           (offset[2] * offset[2]));
     }
+
     if (f_IsBallAfterimageFast == TRUE) {
       if ((f32)(g_PinVertexScale * BALL_RADIUS) * 0.00009765625f < distance &&
           g_BallSimulations[0].isRunning == BALL_STATE_ROLLING) {
@@ -372,11 +385,13 @@ void UpdateGolfBalls(void) {
         } else {
           head->isInCup = TRUE;
         }
+
         f_BallAfterimageHead++;
         if (f_BallAfterimageHead == f_BallAfterimageLength) {
           f_BallAfterimageHead = 0;
         }
       }
+
       for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
           i++, afterimage++) {
         if (afterimage->alpha > 0) {
@@ -394,11 +409,13 @@ void UpdateGolfBalls(void) {
         } else {
           head->isInCup = ball->isInCup;
         }
+
         f_BallAfterimageHead++;
         if (f_BallAfterimageHead == f_BallAfterimageLength) {
           f_BallAfterimageHead = 0;
         }
       }
+
       if (f_BallAfterimageFrameCount % AFTERIMAGE_SLOW_FADE_PERIOD == 0) {
         for (i = 0, afterimage = f_BallAfterimages; i != f_BallAfterimageLength;
             i++, afterimage++) {
@@ -408,6 +425,7 @@ void UpdateGolfBalls(void) {
         }
       }
     }
+
     f_BallAfterimageFrameCount++;
   }
 }
@@ -424,6 +442,7 @@ s32 IsAnyBallInCup(void) {
       isInCup = TRUE;
     }
   }
+
   return isInCup;
 }
 
@@ -598,6 +617,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         if (ball->position[1] * WORLD_TO_COURSE_SCALE < groundHeight - 153.6f) {
           isAboveGround = FALSE;
         }
+
         if (isAboveGround) {
           if (surface->unk14 == 2) {
             exposure = BALL_BURIED;
@@ -609,10 +629,12 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         } else {
           exposure = BALL_EXPOSED;
         }
+
         isAboveCup = FALSE;
         if (groundHeight + 768.0f < ball->position[1] * WORLD_TO_COURSE_SCALE) {
           isAboveCup = ball->isInCup == TRUE;
         }
+
         ballDepth = ProjectPoint(ball->position[0],
             ball->position[1] - (g_PinVertexScale * 0.3f), ball->position[2],
             &ballPoint);
@@ -636,6 +658,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               if (shade < 0) {
                 shade = 0;
               }
+
               gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, shade);
               gDPPipeSync(gfx++);
               gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
@@ -645,6 +668,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                   gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
               gDPSetPrimColor(gfx++, 0, 0, 0xEF, 0xEF, 0xFF, 0xFF);
             }
+
             if (g_IsCupViewShown == TRUE) {
               if (ballDepth < g_CupViewDepth) {
                 primDepth = 0x402F;
@@ -657,6 +681,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               if (isAboveCup == TRUE) {
                 continue;
               }
+
               if (ballDepth < BALL_NEAR_DEPTH) {
                 primDepth = ballPoint.depth;
               } else {
@@ -668,6 +693,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               if (isAboveCup == TRUE) {
                 continue;
               }
+
               if (ballDepth < BALL_NEAR_DEPTH) {
                 primDepth = ballPoint.depth;
               } else {
@@ -676,6 +702,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                     BALL_DEPTH_BIAS;
               }
             }
+
             primDepth &= ~3;
             if (D_801B60A8 == i) {
               isCurrentBallAboveGround = isAboveGround;
@@ -683,9 +710,11 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               f_CurrentBallScreenX = ballPoint.x;
               f_CurrentBallScreenY = ballPoint.y;
             }
+
             if (primDepth < 0) {
               primDepth = 0;
             }
+
             gDPSetPrimDepth(gfx++, primDepth, 0);
             gDPPipeSync(gfx++);
             size = (s32)(ABSF(ballPoint.scaleX) *
@@ -693,6 +722,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             if (size <= 0) {
               size = 1;
             }
+
             if (g_IsCupViewShown == TRUE ||
                 ballDepth >= BALL_FULL_SPRITE_DEPTH) {
               spriteKind = BALL_SPRITE_FULL;
@@ -761,12 +791,14 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                 spriteKind = BALL_SPRITE_FAR_DOT_SHADOWED;
               }
             }
+
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
             gDPSetCombineMode(
                 gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
           }
+
           if (exposure == BALL_EXPOSED && shadowDepth < BALL_NEAREST_DEPTH &&
               !isAboveCup && !ball->unk9E) {
             size = (s32)(ABSF(shadowPoint.scaleX) *
@@ -779,6 +811,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               } else {
                 shadowPrimDepth = 0x400B;
               }
+
               shade = 0x7F -
                   ((s32)(groundHeight -
                        (ball->position[1] * WORLD_TO_COURSE_SCALE)) /
@@ -805,8 +838,10 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                       (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) +
                       16.0f;
                 }
+
                 shadowPrimDepth = depth - BALL_DEPTH_BIAS;
               }
+
               shade = 0x7F -
                   ((s32)(groundHeight -
                        (ball->position[1] * WORLD_TO_COURSE_SCALE)) /
@@ -815,20 +850,25 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                 shade = 0x5F;
               }
             }
+
             if (shade > 0x7F) {
               shade = 0x7F;
             }
+
             size = size * (shade * 0.007874016f);
             if (size <= 0) {
               size = 1;
             }
+
             shadowPrimDepth &= ~3;
             if (shadowPrimDepth < 0) {
               shadowPrimDepth = 0;
             }
+
             if (shadowPrimDepth < primDepth + 8) {
               shadowPrimDepth = primDepth + 8;
             }
+
             gDPSetPrimDepth(gfx++, shadowPrimDepth, 0);
             gDPPipeSync(gfx++);
             gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, shade);
@@ -858,10 +898,12 @@ void DrawGolfBalls(CameraMatrices* matrices) {
               depth = shadowPoint.depth -
                   (shadowPoint.depthStep * (10.5f * g_PinVertexScale)) + 16.0f;
             }
+
             shadowPrimDepth = depth - BALL_DEPTH_BIAS;
             if (size <= 0) {
               size = 1;
             }
+
             gDPSetPrimDepth(gfx++, shadowPrimDepth & ~3, 0);
             gDPPipeSync(gfx++);
             switch (ball->markerPlayerIndex) {
@@ -881,6 +923,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                 gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xBF, 0x7F, 0xFF);
                 break;
             }
+
             gDPPipeSync(gfx++);
             gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
             gDPPipeSync(gfx++);
@@ -891,6 +934,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         }
       }
     }
+
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
     gDPSetCombineLERP(gfx++, PRIMITIVE, 0, TEXEL0, ENVIRONMENT, PRIMITIVE, 0,
@@ -908,6 +952,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             if (ballDepth >= g_CupViewDepth) {
               afterimageDepth = afterimage->isInCup == TRUE ? 0x401F : 0x4007;
             }
+
             gDPSetPrimColor(
                 gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
           } else {
@@ -922,6 +967,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             } else {
               continue;
             }
+
             if (f_IsBallAfterimageFast == TRUE) {
               gDPSetPrimColor(
                   gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
@@ -930,6 +976,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                   gfx++, 0, 0, 0xFF, 0xFF, 0xFF, afterimage->alpha / 2);
             }
           }
+
           gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
           gDPPipeSync(gfx++);
           halfWidth =
@@ -943,9 +990,11 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           if (halfWidth < 4) {
             halfWidth = 4;
           }
+
           if (halfHeight < 4) {
             halfHeight = 4;
           }
+
           if (f_IsBallAfterimageFast == TRUE) {
             gSPStretchedTextureRectangle(gfx++,
                 (ballPoint.x << 2) - halfWidth - 1,
@@ -961,10 +1010,12 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                 (ballPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
                 BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
           }
+
           gDPPipeSync(gfx++);
         }
       }
     }
+
     if (IsGameFlagSet(0x4C)) {
       for (i = 0; i != ROUTE_POINT_COUNT; i++) {
         afterimage = &f_BallAfterimages[i];
@@ -986,6 +1037,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           } else {
             continue;
           }
+
           if (f_IsBallAfterimageFast == TRUE) {
             gDPSetPrimColor(
                 gfx++, 0, 0, 0xA0, 0xA0, 0xFF, afterimage->alpha / 2);
@@ -993,6 +1045,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
             gDPSetPrimColor(
                 gfx++, 0, 0, 0xFF, 0xFF, 0xFF, afterimage->alpha / 2);
           }
+
           gDPSetPrimDepth(gfx++, afterimageDepth & ~3, 0);
           gDPPipeSync(gfx++);
           halfWidth =
@@ -1006,9 +1059,11 @@ void DrawGolfBalls(CameraMatrices* matrices) {
           if (halfWidth < 4) {
             halfWidth = 4;
           }
+
           if (halfHeight < 4) {
             halfHeight = 4;
           }
+
           if (f_IsBallAfterimageFast == TRUE) {
             gSPStretchedTextureRectangle(gfx++,
                 (shadowPoint.x << 2) - halfWidth - 1,
@@ -1024,10 +1079,12 @@ void DrawGolfBalls(CameraMatrices* matrices) {
                 (shadowPoint.y << 2) + halfHeight + 2, BALL_TILE_STILL, 0, 0,
                 BALL_TEXTURE_SIZE, BALL_TEXTURE_SIZE);
           }
+
           gDPPipeSync(gfx++);
         }
       }
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1070,6 +1127,7 @@ void DrawGolfBalls(CameraMatrices* matrices) {
         }
       }
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PIXEL);

@@ -96,12 +96,15 @@ void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
     if (character == '\0') {
       break;
     }
+
     if (character < FIRST_GLYPH) {
       character = FIRST_GLYPH;
     }
+
     if (character > LAST_GLYPH) {
       character = FIRST_GLYPH;
     }
+
     character -= FIRST_GLYPH;
     y = 0;
     fontIndex = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
@@ -115,6 +118,7 @@ void DrawTextIntoTexture(s8* text, s32 length, u16* texture) {
       for (x = 0; x < GLYPH_SIZE / PIXELS_PER_FONT_WORD; x++) {
         texture[rowIndex + x] = f_DebugFont[rowFontIndex + x];
       }
+
       fontIndex += FONT_ROW_WORD_COUNT;
       textureIndex += length;
     }
@@ -153,9 +157,11 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   if (character < FIRST_GLYPH) {
     character = FIRST_GLYPH;
   }
+
   if (character > LAST_GLYPH) {
     character = FIRST_GLYPH;
   }
+
   character -= FIRST_GLYPH;
   glyphStart = ((character & (GLYPHS_PER_FONT_ROW - 1)) *
                    (GLYPH_SIZE / PIXELS_PER_FONT_WORD)) +
@@ -164,6 +170,7 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
   if (column >= TEXT_COLUMN_COUNT || row >= TEXT_ROW_COUNT) {
     return;
   }
+
   fontIndex = glyphStart;
   for (; y < GLYPH_SIZE; y++) {
     for (x = 0; x < GLYPH_SIZE; x++) {
@@ -179,8 +186,10 @@ void DrawMessageCharacter(s8 character, u32 column, u32 row) {
       currentFramebuffer[pixelIndex] = color;
       nextFramebuffer[pixelIndex] = color;
     }
+
     fontIndex += FONT_ROW_WORD_COUNT;
   }
+
   osViBlack(FALSE);
 }
 
@@ -211,6 +220,7 @@ void DrawDebugText(Gfx** displayListHead) {
   if (IsGameFlagSet(GAME_FLAG_HIDE_DEBUG_TEXT)) {
     return;
   }
+
   gfx = *displayListHead;
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPPipeSync(gfx++);
@@ -220,6 +230,7 @@ void DrawDebugText(Gfx** displayListHead) {
       if (character <= ' ') {
         continue;
       }
+
       glyph = (character & CHARACTER_MASK) - FIRST_GLYPH;
       if ((character & HIGHLIGHT_BIT) != highlight) {
         highlight = character & HIGHLIGHT_BIT;
@@ -229,8 +240,10 @@ void DrawDebugText(Gfx** displayListHead) {
         } else {
           gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
         }
+
         gDPPipeSync(gfx++);
       }
+
       gSPTextureRectangle(gfx++, (column * GLYPH_SIZE) << 2,
           (row * GLYPH_SIZE) << 2, (column * GLYPH_SIZE + GLYPH_SIZE) << 2,
           (row * GLYPH_SIZE + GLYPH_SIZE) << 2, G_TX_RENDERTILE,
@@ -238,6 +251,7 @@ void DrawDebugText(Gfx** displayListHead) {
           1 << 10, 1 << 10);
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -261,11 +275,14 @@ void PutDebugText(s8* text, s32 column, s32 row) {
     if (character == '\0') {
       break;
     }
+
     if (cell >= f_DebugText && cell < f_DebugText + ARRAY_COUNT(f_DebugText)) {
       *cell = highlight | character;
     }
+
     cell++;
   }
+
   f_DebugTextHighlight = 0;
 }
 
@@ -291,6 +308,7 @@ void PrintDebugHex(u32 value, s32 column, s32 row) {
     if (character > '9') {
       character = nibble + 'A' - 10;
     }
+
     *--digit = character;
     value >>= 4;
     column--;
@@ -313,6 +331,7 @@ void PrintDebugPaddedHex(u32 value, s32 column, s32 row) {
     if (character > '9') {
       character = nibble + 'A' - 10;
     }
+
     *--digit = character;
     column--;
     value >>= 4;
@@ -329,6 +348,7 @@ void AddToDebugLog(char* text) {
     if (character == '\0') {
       break;
     }
+
     if (character == '\r' || character == '\n') {
       f_DebugLogCursor =
           (((f_DebugLogCursor / TEXT_COLUMN_COUNT) * TEXT_COLUMN_COUNT) +
@@ -337,10 +357,12 @@ void AddToDebugLog(char* text) {
       for (count = TEXT_COLUMN_COUNT; count != 0; count--) {
         f_DebugLog[f_DebugLogCursor++] = ' ';
       }
+
       f_DebugLogCursor -= TEXT_COLUMN_COUNT;
     } else {
       f_DebugLog[f_DebugLogCursor++] = character;
     }
+
     f_DebugLogCursor %= ARRAY_COUNT(f_DebugLog);
   }
 }
@@ -360,6 +382,7 @@ void ShowDebugLog(void) {
     for (column = 0; column < TEXT_COLUMN_COUNT; column++) {
       f_DebugText[textIndex++] = f_DebugLog[logIndex++];
     }
+
     logIndex %= ARRAY_COUNT(f_DebugLog);
   }
 }

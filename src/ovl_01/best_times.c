@@ -139,6 +139,7 @@ void func_80213558_ovl_01(void) {
       g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
       return;
     }
+
     if (memory->bestTimesSpin == 0) {
       if (g_MenuRepeatButtons & R_JPAD) {
         if (courseCount >= 2) {
@@ -147,6 +148,7 @@ void func_80213558_ovl_01(void) {
           if (memory->bestTimesCourse > courseCount - 1) {
             memory->bestTimesCourse = 0;
           }
+
           memory->bestTimesSpin = -BEST_TIMES_TURN / courseCount;
         }
       } else if (g_MenuRepeatButtons & L_JPAD) {
@@ -156,17 +158,21 @@ void func_80213558_ovl_01(void) {
           if (memory->bestTimesCourse < 0) {
             memory->bestTimesCourse = courseCount - 1;
           }
+
           memory->bestTimesSpin = BEST_TIMES_TURN / courseCount;
         }
       }
     }
+
     if (ABS(memory->bestTimesSpin) != 0) {
       direction = memory->bestTimesSpin < 0 ? -1 : 1;
       step = BEST_TIMES_SPIN_SPEED / courseCount;
       if (step == 0) {
         step = 1;
       }
+
       memory->bestTimesSpin -= direction * step;
+
       /* Stop on reaching the course rather than turning past it */
       if ((memory->bestTimesSpin < 0 ? -1 : 1) != direction) {
         memory->bestTimesSpin = 0;
@@ -184,9 +190,11 @@ void func_802144E4_ovl_01(
   if (character < 0) {
     character = 0;
   }
+
   if (character >= CHARACTER_COUNT) {
     character = CHARACTER_COUNT - 1;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -201,6 +209,7 @@ void func_802144E4_ovl_01(
   } else {
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   }
+
   gDPLoadTLUT_pal256(gfx++, ((u32)D_8023AA44_ovl_01 + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock(gfx++,
       ((u32)D_8023AA44_ovl_01 + LARGE_PALETTED_TEXELS_OFFSET +
@@ -223,6 +232,7 @@ void func_802144E4_ovl_01(
         g_PrintBuffer);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -237,9 +247,11 @@ void func_802149A8_ovl_01(Gfx** displayListHead, s32 left, s32 top, s32 place) {
   if (place <= 0) {
     place = 1;
   }
+
   if (place > PLACE_LABEL_LAST_PLACE) {
     place = PLACE_LABEL_LAST_PLACE;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
@@ -339,6 +351,7 @@ void func_8021508C_ovl_01(
           TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     if (group != TIME_GROUP_COUNT - 1) {
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_8023AA48_ovl_01 + (TIME_SEPARATOR_GLYPH * TIME_GLYPH_BYTES) +
@@ -366,6 +379,7 @@ void func_8021508C_ovl_01(
       separatorShift += TIME_SEPARATOR_SPACING;
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -384,6 +398,7 @@ void func_8021585C_ovl_01(void) {
     OpenEncodedAsset(D_802308A4_ovl_01[characterIndex], &asset);
     ReadEncodedAsset(D_8012D430[characterIndex], &asset);
   }
+
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (rank = 0; rank != BEST_TIME_COUNT; rank++) {
       character = save->unkE08[courseIndex][rank];
@@ -391,14 +406,17 @@ void func_8021585C_ovl_01(void) {
         if (character < 0) {
           character = 0;
         }
+
         if (character >= CHARACTER_COUNT) {
           character = CHARACTER_COUNT - 1;
         }
+
         palette = save->unkE50[courseIndex][rank];
       } else {
         character = 0;
         palette = 0;
       }
+
       OpenAssetFile(D_802308C8_ovl_01[character][palette], &file);
       ReadAssetFile(D_8023BFF0_ovl_01[(courseIndex * BEST_TIME_COUNT) + rank],
           GetAssetFileSize(&file), &file);

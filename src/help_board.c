@@ -126,6 +126,7 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
       ReadEncodedAsset(f_ChalkboardImage, &asset);
       break;
   }
+
   f_OpenTopic = 0;
   f_TopicPage = 0;
   f_HandOffset = 0;
@@ -142,6 +143,7 @@ void LoadHelpBoardImage(void* buffer, s32 image) {
   } else {
     f_FirstListedTopic = HELP_TOPIC_COUNT - LISTED_TOPIC_COUNT;
   }
+
   ClearTextSlots();
 }
 
@@ -185,6 +187,7 @@ void UpdateHelpBoard(void) {
   if (IsHudAnimationDone() != 1) {
     return;
   }
+
   if (g_MenuRepeatButtons & A_BUTTON) {
     if (f_OpenTopic == 0) {
       f_OpenTopic = memory->helpTopicIndex + 1;
@@ -218,6 +221,7 @@ void UpdateHelpBoard(void) {
       } else {
         g_MenuScreen = 2;
       }
+
       StopLoaderThread();
       FreeAllCharacterSlots();
       D_800FE334 = 0;
@@ -243,6 +247,7 @@ void UpdateHelpBoard(void) {
       } else {
         memory->helpTopicIndex--;
       }
+
       ClearHelpText();
     }
   } else if (g_MenuRepeatButtons & D_JPAD) {
@@ -258,6 +263,7 @@ void UpdateHelpBoard(void) {
       } else {
         memory->helpTopicIndex++;
       }
+
       ClearHelpText();
     }
   }
@@ -327,6 +333,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
       f_HandOffset = 0;
       f_IsHandReturning = FALSE;
     }
+
     handLeft = f_HandOffset + HAND_LEFT;
     handTop = f_HelpListLayout.top +
         ((memory->helpTopicIndex - f_FirstListedTopic) *
@@ -340,6 +347,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
       f_ArrowFrameTime = 0;
       f_ArrowFrame ^= 1;
     }
+
     if (D_800C42F4 == 0) {
       D_800C42F8 += 2;
       if (D_800C42F8 == 8) {
@@ -354,6 +362,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
       D_800C42F8 = 0;
       D_800C42F4 = 0;
     }
+
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, ((u32)f_ArrowImages + IMAGE_HEADER_SIZE) & ~7);
     for (index = 0; index != ARROW_COUNT; index++) {
@@ -372,6 +381,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
         if (index == ARROW_UP) {
           arrowTop = ARROW_UP_TOP;
         }
+
         gSPScisTextureRectangle(gfx++, arrowLeft << 2, arrowTop << 2,
             (arrowLeft + ARROW_SIZE) << 2, (arrowTop + ARROW_SIZE) << 2,
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
@@ -379,6 +389,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   BeginShadowedText(&gfx);
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
@@ -402,6 +413,7 @@ void DrawHelpBoard(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -476,5 +488,6 @@ void DrawChalkboard(Gfx** displayListHead) {
         (CHALKBOARD_STRIP_HEIGHT << 10) / CHALKBOARD_DRAWN_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }

@@ -134,6 +134,7 @@ void ResetShotEffects(void) {
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
     f_SparkBurstAges[i] = NO_SPARK_BURST;
   }
+
   for (i = 0; i != SPARK_COUNT; i++) {
     f_SparkLives[i] = 0;
   }
@@ -151,10 +152,12 @@ void ClearShotEffects(s32 kind) {
   if (kind == CLEAR_KIND_HOLE_END) {
     StartBanner(BANNER_HIDE_NICE_SHOT);
   }
+
   if (kind == CLEAR_KIND_ROUND_END) {
     StartMovie(-1);
     StartBanner(BANNER_NONE);
   }
+
   ResetBallAfterimage();
   StartSwingTrail(-1);
 }
@@ -181,6 +184,7 @@ s32 StartSparkBurst(void) {
       break;
     }
   }
+
   return found;
 }
 
@@ -213,11 +217,13 @@ void StartImpactSparks(void) {
         f_SparkLives[i] = SPARK_LIFE;
         f_SparkBursts[i] = burst;
       }
+
       if (count == IMPACT_SPARK_COUNT) {
         break;
       }
     }
   }
+
   g_ImpactFlashState = IMPACT_FLASH_FADING;
   g_ImpactFlashLevel = IMPACT_FLASH_FULL_LEVEL;
 }
@@ -271,6 +277,7 @@ void StartFlagstickSparks(CoursePoint point) {
         f_SparkLives[i] = SPARK_LIFE;
         f_SparkBursts[i] = burst;
       }
+
       if (count == FLAGSTICK_SPARK_COUNT) {
         break;
       }
@@ -335,6 +342,7 @@ void DrawSparks(Gfx** displayListHead) {
     if (++f_ImpactFrameCount == IMPACT_FRAME_COUNT_END) {
       f_ImpactFrameCount = 0;
     }
+
     if (g_ImpactFlashState == IMPACT_FLASH_RISING) {
       g_ImpactFlashLevel += IMPACT_FLASH_RISE_STEP;
       if (g_ImpactFlashLevel > IMPACT_FLASH_FULL_LEVEL) {
@@ -349,6 +357,7 @@ void DrawSparks(Gfx** displayListHead) {
       }
     }
   }
+
   for (i = 0; i != SPARK_BURST_COUNT; i++) {
     if (f_SparkBurstAges[i] != NO_SPARK_BURST) {
       if (ProjectPoint(f_SparkBurstPoints[i][AXIS_X] * COURSE_TO_WORLD_SCALE,
@@ -364,6 +373,7 @@ void DrawSparks(Gfx** displayListHead) {
         if (burstScales[i] > SPARK_MAX_SCALE) {
           burstScales[i] = SPARK_MAX_SCALE;
         }
+
         halfSize = size * SPARK_IMAGE_HALF_SIZE;
         burstHalfSizes[i] = burstScales[i] * halfSize;
         if (burstHalfSizes[i] > 0) {
@@ -375,6 +385,7 @@ void DrawSparks(Gfx** displayListHead) {
       } else {
         burstShown[i] = SPARK_BURST_HIDDEN;
       }
+
       if (f_SparkBurstAges[i] < SPARK_BURST_MAX_AGE) {
         f_SparkBurstAges[i]++;
       }
@@ -382,6 +393,7 @@ void DrawSparks(Gfx** displayListHead) {
       burstShown[i] = SPARK_BURST_HIDDEN;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -431,6 +443,7 @@ void DrawSparks(Gfx** displayListHead) {
           ConvertMatrixToFixed(
               matrix, &f_SparkMatrices[g_MatrixBufferIndex][i]);
         }
+
         if (f_SparkKinds[i] == SPARK_KIND_FLAGSTICK &&
             burstPoints[burst][0] >= -SPARK_MAX_SCREEN_COORD &&
             burstPoints[burst][0] <= SPARK_MAX_SCREEN_COORD &&
@@ -449,6 +462,7 @@ void DrawSparks(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetAlphaCompare(gfx++, G_AC_NONE);
@@ -478,6 +492,7 @@ void DrawSparks(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
@@ -489,6 +504,7 @@ void DrawSparks(Gfx** displayListHead) {
       f_SparkBurstTimers[i]--;
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -534,6 +550,7 @@ void StartSwingTrail(s32 kind) {
       samples[5][i] = point[AXIS_Z];
       AnimateCharacterInSameCopy(0);
     }
+
     /* Rewinds the swing to where it was */
     SetAnimationSpeed(0, -f_SwingTrailSampleCount);
     AnimateCharacterInSameCopy(0);
@@ -555,6 +572,7 @@ void StartSwingTrail(s32 kind) {
           InterpolateHermite(samples[5], position);
       position += 0.5f;
     }
+
     for (i = 0; i != SWING_TRAIL_MATRIX_COUNT; i++) {
       guTranslate(&f_SwingTrailMatrices[i][0], f_SwingTrailOuterPath[0][AXIS_X],
           f_SwingTrailOuterPath[0][AXIS_Y], f_SwingTrailOuterPath[0][AXIS_Z]);
@@ -603,6 +621,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
       gSPVertex(gfx++, &f_SwingTrailVertices[1], 1, step * 2 + 1);
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
+
       /* Fades the segments towards the tail of the trail */
       nearness = (SWING_TRAIL_SEGMENTS - segment) / 255.0f;
       fade = f_SwingTrailAlpha * nearness / SWING_TRAIL_SEGMENTS;
@@ -611,6 +630,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       if (alpha > 255) {
         alpha = 255;
       }
+
       gSPModifyVertex(
           gfx++, step * 2 + 1, G_MWO_POINT_RGBA, 0xFFFFFF00 | alpha);
       gSPModifyVertex(gfx++, step * 2, G_MWO_POINT_ST,
@@ -619,6 +639,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           (textureStep * segment - 1) << 16);
       segment++;
     }
+
     for (step = 0; step != SWING_TRAIL_SEGMENTS; step++) {
       gSP2Triangles(gfx++, step * 2, step * 2 + 2, step * 2 + 1, 0,
           step * 2 + 2, step * 2 + 3, step * 2 + 1, 0);
@@ -628,6 +649,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   if (f_SwingTrailState == SWING_TRAIL_NONE) {
     return;
   }
+
   f_SwingTrailAlpha = (f_SwingTrailState == SWING_TRAIL_FADING)
       ? f_SwingTrailAlpha - 16
       : f_SwingTrailAlpha - 4;
@@ -635,6 +657,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
     f_SwingTrailState = SWING_TRAIL_NONE;
     return;
   }
+
   step = 0;
   do {
     f_SwingTrailPathIndex++;
@@ -656,18 +679,22 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Y],
           f_SwingTrailInnerPath[f_SwingTrailPathIndex][AXIS_Z]);
     }
+
     f_SwingTrailLength++;
     if (f_SwingTrailLength > SWING_TRAIL_SEGMENTS - 1) {
       f_SwingTrailLength = SWING_TRAIL_SEGMENTS - 1;
     }
+
     textureStep = SWING_TRAIL_TEXTURE_LENGTH / f_SwingTrailLength;
     if (step == 1) {
       break;
     }
+
     f_SwingTrailHead--;
     if (f_SwingTrailHead < 0) {
       f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
     }
+
     step++;
   } while (TRUE);
 
@@ -699,12 +726,14 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   } else {
     gDPSetCombineMode(gfx++, G_CC_SHADE, G_CC_SHADE);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
   gSPLoadGeometryMode(gfx++, 0);
   gSPSetGeometryMode(gfx++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
   gDPSetEnvColor(gfx++, 0xFF, 0x7F, 0x00, 0xFF);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0x00, f_SwingTrailAlpha);
+
   /* Draws the trail a little nearer than it is, so that the club does not hide
    * it */
   guMtxL2F(projection, &matrices->projection);
@@ -727,6 +756,7 @@ void DrawSwingTrail(Gfx** displayListHead, CameraMatrices* matrices) {
   if (f_SwingTrailHead < 0) {
     f_SwingTrailHead = SWING_TRAIL_MATRIX_COUNT - 1;
   }
+
   *displayListHead = gfx;
 }
 #else

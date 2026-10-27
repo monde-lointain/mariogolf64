@@ -193,27 +193,35 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     if (direction == GRID_MOVE_UP) {
       row--;
     }
+
     if (direction == GRID_MOVE_DOWN) {
       row++;
     }
+
     if (direction == GRID_MOVE_LEFT) {
       column--;
     }
+
     if (direction == GRID_MOVE_RIGHT) {
       column++;
     }
+
     if (row < 0) {
       row = CHARACTER_GRID_ROW_COUNT - 1;
     }
+
     if (row >= CHARACTER_GRID_ROW_COUNT) {
       row = 0;
     }
+
     if (column < 0) {
       column = CHARACTER_GRID_COLUMN_COUNT - 1;
     }
+
     if (column >= CHARACTER_GRID_COLUMN_COUNT) {
       column = 0;
     }
+
     if (column == oldColumn && row == oldRow) {
       break;
     }
@@ -230,6 +238,7 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
     }
+
     slot = character;
     if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
       character =
@@ -237,17 +246,20 @@ s32 func_80209568_ovl_01(s32 playerNumber, u8 direction, u8 canChooseMarked) {
     } else {
       character = slot;
     }
+
     faceImage = D_8012D430[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = D_800C2780;
     } else {
       faceAssets = D_800C2650;
     }
+
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(D_800C2590[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], (s16)GetAssetFileSize(&file), &file);
   }
+
   return -(column == oldColumn && row == oldRow);
 }
 #else
@@ -280,14 +292,17 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
         row--;
         column--;
       }
+
       if (diagonal == STICK_DIAGONAL_UP_RIGHT) {
         row--;
         column++;
       }
+
       if (diagonal == STICK_DIAGONAL_DOWN_LEFT) {
         row++;
         column--;
       }
+
       if (diagonal == STICK_DIAGONAL_DOWN_RIGHT) {
         row++;
         column++;
@@ -298,34 +313,43 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
       column += diagonal == STICK_DIAGONAL_UP_RIGHT ||
           diagonal == STICK_DIAGONAL_DOWN_RIGHT;
     }
+
     if (row < 0) {
       row = CHARACTER_GRID_ROW_COUNT - 1;
     }
+
     if (row >= CHARACTER_GRID_ROW_COUNT) {
       row = 0;
     }
+
     if (column < 0) {
       column = CHARACTER_GRID_COLUMN_COUNT - 1;
     }
+
     if (column >= CHARACTER_GRID_COLUMN_COUNT) {
       column = 0;
     }
+
     if (column == oldColumn && row == oldRow) {
       break;
     }
+
     if (g_CharacterGrid[row][column] >= 0 ||
         (g_CharacterGrid[row][column] < CHOOSABLE_MARK_LIMIT &&
             canChooseMarked == TRUE)) {
       break;
     }
+
     /* After a blocked diagonal, try moving sideways only from where the cursor
      * started */
     if (retryCount == 0) {
       column = oldColumn;
       row = oldRow;
     }
+
     retryCount++;
   }
+
   memory->characterColumns[playerNumber] = column;
   memory->characterRows[playerNumber] = row;
   if (column != oldColumn || row != oldRow) {
@@ -336,6 +360,7 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     if (g_CharacterGrid[oldRow][oldColumn] < CHOOSABLE_MARK_LIMIT) {
       character += MARKED_CHARACTER_OFFSET;
     }
+
     slot = character;
     if ((s16)slot >= FIRST_IMPORTED_CHARACTER) {
       character =
@@ -343,17 +368,20 @@ s32 func_80209894_ovl_01(s32 playerNumber, u8 diagonal, u8 canChooseMarked) {
     } else {
       character = slot;
     }
+
     faceImage = D_8012D430[(s16)slot];
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = D_800C2780;
     } else {
       faceAssets = D_800C2650;
     }
+
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(D_800C2590[(s16)character][0], &file);
     ReadAssetFile(D_80105B78[(s16)slot], GetAssetFileSize(&file), &file);
   }
+
   return -(column == oldColumn && row == oldRow);
 }
 #else
@@ -380,6 +408,7 @@ s32 func_80209BE0_ovl_01(void) {
   } else {
     D_8023BFD4_ovl_01 = stickX;
   }
+
   anyStick = g_ControllerStates[3].stickY |
       (g_ControllerStates[2].stickY |
           (g_ControllerStates[0].stickY | g_ControllerStates[1].stickY));
@@ -394,19 +423,24 @@ s32 func_80209BE0_ovl_01(void) {
   } else {
     D_8023BFD8_ovl_01 = stickY;
   }
+
   if (stickX < -STICK_DIAGONAL_THRESHOLD && stickY > STICK_DIAGONAL_THRESHOLD) {
     return STICK_DIAGONAL_UP_LEFT;
   }
+
   if (stickX > STICK_DIAGONAL_THRESHOLD && stickY > STICK_DIAGONAL_THRESHOLD) {
     return STICK_DIAGONAL_UP_RIGHT;
   }
+
   if (stickX < -STICK_DIAGONAL_THRESHOLD &&
       stickY < -STICK_DIAGONAL_THRESHOLD) {
     return STICK_DIAGONAL_DOWN_LEFT;
   }
+
   if (stickX > STICK_DIAGONAL_THRESHOLD && stickY < -STICK_DIAGONAL_THRESHOLD) {
     return STICK_DIAGONAL_DOWN_RIGHT;
   }
+
   return STICK_DIAGONAL_NONE;
 }
 
@@ -443,10 +477,12 @@ void func_8020B2C4_ovl_01(void* buffer, s16 bufferKind) {
       bufferKind = CHARACTER_SELECT_UNREAD_KIND;
       break;
   }
+
   if (bufferKind != CHARACTER_SELECT_UNREAD_KIND) {
     OpenEncodedAsset(D_8022FF2C_ovl_01[bufferKind], &asset);
     ReadEncodedAsset(image, &asset);
   }
+
   D_8022FF01_ovl_01 = FALSE;
 }
 
@@ -497,11 +533,13 @@ void func_8020B438_ovl_01(void) {
     } else {
       character = slotIndex;
     }
+
     if (IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAsset = D_800C2780[character][0];
     } else {
       faceAsset = D_800C2650[character][0];
     }
+
     OpenEncodedAsset(faceAsset, &asset);
     ReadEncodedAsset(faceImage, &asset);
     OpenAssetFile(D_800C2590[character][0], &file);
@@ -546,12 +584,15 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   } else {
     func_8020C6D8_ovl_01(&gfx, 1);
   }
+
   if ((D_8022FF07_ovl_01 == TRUE) & ((u8)isSinglePlayer == FALSE)) {
     func_8020D338_ovl_01(&gfx, 0);
   }
+
   if (D_8022FF08_ovl_01 == TRUE) {
     func_8020D734_ovl_01(&gfx, 0);
   }
+
   gDPPipeSync(gfx++);
   if ((u8)isSinglePlayer == FALSE) {
     playerNumber = D_801B7070;
@@ -561,6 +602,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   } else {
     playerNumber = 1;
   }
+
   column = *(
       s8*)((s32)&func_8005AF74()->characterColumns[1] + (s16)playerNumber - 1);
   slot = g_CharacterGrid[*(s8*)((s32)&func_8005AF74()->characterRows[1] +
@@ -570,6 +612,7 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
   } else {
     choiceIndex = slot;
   }
+
   character = &D_8022FF50_ovl_01[choiceIndex];
   func_8020DB30_ovl_01(&gfx, *character);
   SetUpTextDrawing(&gfx);
@@ -590,24 +633,31 @@ void func_8020B590_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
           255, 255, 255);
     } else {
       SetTextSlotValue(D_801B7070 + 1, 0, 0);
+
       /* The prompt names the player in the player's own colour */
       if (D_801B7070 == 0) {
         SetTextPaletteColor(255, 127, 127, 0);
       }
+
       if (D_801B7070 == 1) {
         SetTextPaletteColor(0, 255, 255, 0);
       }
+
       if (D_801B7070 == 2) {
         SetTextPaletteColor(255, 255, 0, 0);
       }
+
       if (D_801B7070 == 3) {
         SetTextPaletteColor(63, 255, 63, 0);
       }
+
       SetTextSlot(PROMPT_X, PROMPT_Y, MESSAGE_CHOOSE_PLAYER_CHARACTER, 1, 0, 1,
           255, 255, 255, 255);
     }
+
     D_8022FF00_ovl_01 = TRUE;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -661,10 +711,12 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
           (s8)g_Players[0].characterIndex >= FIRST_IMPORTED_CHARACTER) {
         slot = column + FIRST_IMPORTED_CHARACTER;
       }
+
       if ((s16)slot >= 0) {
         if ((s16)slot >= CHARACTER_COUNT) {
           slot = CHARACTER_COUNT - 1;
         }
+
         faceImage = D_8012D430[(s16)slot];
         facePalette = D_80105B78[(s16)slot];
         gDPLoadTLUT_pal256(gfx++, (u32)facePalette & ~7);
@@ -703,6 +755,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
       }
     }
   }
+
   D_8022FF06_ovl_01++;
   if ((s8)D_8022FF06_ovl_01 == FACE_FRAME_DURATION) {
     D_8022FF06_ovl_01 = 0;
@@ -710,6 +763,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
     if (D_8022FF04_ovl_01 >= FACE_FRAME_COUNT) {
       D_8022FF04_ovl_01 = 0;
     }
+
     D_8022FF05_ovl_01 ^= 1;
     gridMark = g_CharacterGrid[memory->characterRows[D_801B7070]]
                               [memory->characterColumns[D_801B7070]];
@@ -725,6 +779,7 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
     } else {
       slot = character;
     }
+
     faceImage = D_8012D430[(s16)slot];
     facePalette = D_80105B78[(s16)slot];
     if (D_8022FF09_ovl_01 == 0) {
@@ -740,17 +795,20 @@ void func_8020BA08_ovl_01(Gfx** displayListHead, u8 isSinglePlayer) {
           D_800C2590[(s16)character][(s16)func_8020C2D8_ovl_01((s16)character)],
           &file);
     }
+
     ReadAssetFile(facePalette, (s16)GetAssetFileSize(&file), &file);
     if (!IsGameFlagSet(GAME_FLAG_UNK64)) {
       faceAssets = D_800C2650;
     } else {
       faceAssets = D_800C2780;
     }
+
     OpenEncodedAsset(faceAssets[(s16)character][D_8022FF04_ovl_01], &asset);
     ReadEncodedAsset(faceImage, &asset);
     D_8022FFC6_ovl_01 = memory->characterColumns[D_801B7070];
     D_8022FFC8_ovl_01 = memory->characterRows[D_801B7070];
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -775,6 +833,7 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
       samePlayers[sameCount++] = playerIndex;
     }
   }
+
   if (sameCount != 0) {
     for (palette = 0; palette != CHARACTER_PALETTE_COUNT; palette++) {
       for (sameIndex = 0; sameIndex != sameCount; sameIndex++) {
@@ -782,13 +841,16 @@ s32 func_8020C2D8_ovl_01(s32 choiceIndex) {
           break;
         }
       }
+
       if (sameIndex == sameCount) {
         freePalette = palette;
         break;
       }
     }
+
     return freePalette;
   }
+
   return 0;
 }
 #else
@@ -819,6 +881,7 @@ void func_8020C3B8_ovl_01(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   labelImage = GetMenuImageBuffer();
   labelImage += CHARACTER_SELECT_FIRST_IMAGE_SIZE;
   LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
@@ -879,6 +942,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
   if (g_MenuScreen == MENU_SCREEN_UNK24) {
     tagCount = 1;
   }
+
   for (playerIndex = 0; playerIndex != tagCount; playerIndex++) {
     if (tagMode != PLAYER_TAG_LINED_UP) {
       shiftX = 0;
@@ -892,8 +956,10 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
       if ((tagCount == 2) & (playerIndex == 1)) {
         top = PLAYER_TAG_RAISE;
       }
+
       shiftX = 0;
     }
+
     if ((tagMode == PLAYER_TAG_SINGLE_PLAYER) & (playerIndex == 1)) {
       gDPLoadTextureBlock_4b(gfx++,
           PLAYER_TAG_TEXELS(PALETTED_TEXELS_OFFSET +
@@ -923,6 +989,7 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
           G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
     }
+
     left = shiftX + (s16)(left + GRID_LEFT);
     gDPPipeSync(gfx++);
     gSPScisTextureRectangle(gfx++, (left - PLAYER_TAG_SHIFT_LEFT) << 2,
@@ -932,11 +999,13 @@ void func_8020C6D8_ovl_01(Gfx** displayListHead, u8 tagMode) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   /* playerIndex now picks whose cursor to draw */
   playerIndex = 0;
   if (g_MenuScreen != MENU_SCREEN_UNK24) {
     playerIndex = D_801B7070;
   }
+
   cursorLeft = (memory->characterColumns[playerIndex] * GRID_CELL_SIZE) -
       GRID_CURSOR_SHIFT_LEFT;
   func_8020CD20_ovl_01(&gfx, cursorLeft + GRID_LEFT,
@@ -974,6 +1043,7 @@ void func_8020CD20_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
     D_80230038_ovl_01[vertexIndex].v.cn[2] = blue;
     D_80230038_ovl_01[vertexIndex].v.cn[1] = green;
   }
+
   guOrtho(&D_8023A3A0_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
@@ -1104,6 +1174,7 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
     firstCell = CURVE_METER_CENTER;
     endCell = CURVE_METER_CENTER + 1;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1136,6 +1207,7 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   labelImage = GetMenuImageBuffer();
   LoadSmallPalette(&gfx, 0, labelImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx, labelImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -1147,6 +1219,7 @@ void func_8020DB30_ovl_01(Gfx** displayListHead, s32 clubSet) {
   } else {
     labelRow = CURVE_LABEL_STRAIGHT;
   }
+
   DrawTextureRect(&gfx, CURVE_LABEL_LEFT << 2, CURVE_LABEL_TOP << 2,
       (CURVE_LABEL_LEFT + CURVE_LABEL_WIDTH) << 2,
       (CURVE_LABEL_TOP + CURVE_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0,

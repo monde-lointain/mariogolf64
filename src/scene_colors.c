@@ -39,6 +39,7 @@ void DeriveSceneColors(void) {
 
   D_800E1C10 = 0;
   D_800E1C14 = 0;
+
   /* This steps through the table a course of colors at a time, unlike
    * BlendSkyColors */
   entry = g_SkyColors[(g_HoleConditions.isRaining * 3) +
@@ -51,6 +52,7 @@ void DeriveSceneColors(void) {
           (s32)((entry->unk4[channelIndex] + entry->unk7[channelIndex]) * 0.3f);
     }
   }
+
   D_800E1C1B = (s32)((entry->unk4[0] + entry->unk7[0]) * 0.35f);
   D_800E1C1C = (s32)((entry->unk4[1] + entry->unk7[1]) * 0.35f);
   D_800E1C1D = (s32)((entry->unk4[2] + entry->unk7[2]) * 0.35f);

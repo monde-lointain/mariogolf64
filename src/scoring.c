@@ -26,10 +26,12 @@ s32 GetRoundHoleCount(void) {
   if (IsGameFlagSet(GAME_FLAG_TWO_HOLE_ROUNDS)) {
     return DEBUG_ROUND_HOLE_COUNT;
   }
+
   if (g_GameState.holeSelection &
       (HOLE_SELECTION_BACK_NINE | HOLE_SELECTION_FRONT_NINE)) {
     return HOLES_PER_NINE;
   }
+
   return COURSE_HOLE_COUNT;
 }
 
@@ -76,6 +78,7 @@ void RenumberHoleHandicaps(void) {
       handicaps[holeIndex] =
           g_CourseRecords[recordIndex].holes[holeIndex].handicap;
     }
+
     SortIndicesDescending(handicaps, order, COURSE_HOLE_COUNT);
     for (holeIndex = 0; holeIndex < COURSE_HOLE_COUNT; holeIndex++) {
       g_CourseRecords[recordIndex].holes[order[holeIndex]].handicap =
@@ -95,6 +98,7 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
   if (g_GameState.unk18) {
     return MATCH_STANDING_DECIDING_HOLE;
   }
+
   holesAfterCurrent = holesAfterCurrent - g_HoleIndex - 1;
   for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
       holeIndex++) {
@@ -106,18 +110,23 @@ s32 GetMatchStanding(s32 playerIndex, s32 opponentIndex) {
       lead--;
     }
   }
+
   if (ABS(lead) == holesAfterCurrent + 1) {
     if (lead < 0) {
       return MATCH_STANDING_OPPONENT_DORMIE;
     }
+
     return MATCH_STANDING_PLAYER_DORMIE;
   }
+
   if (holesAfterCurrent + 1 < ABS(lead)) {
     return MATCH_STANDING_DECIDED;
   }
+
   if (ABS(lead) == holesAfterCurrent && holesAfterCurrent == 0) {
     return MATCH_STANDING_DECIDING_HOLE;
   }
+
   return MATCH_STANDING_OPEN;
 }
 
@@ -147,12 +156,15 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
       if (playerScore < opponentScore) {
         return MATCH_SIDE_PLAYER;
       }
+
       if (opponentScore < playerScore) {
         return MATCH_SIDE_OPPONENT;
       }
     }
+
     return MATCH_SIDE_NONE;
   }
+
   holesAfterCurrent = endHoleIndex - g_HoleIndex - 1;
   for (holeIndex = GetFirstHoleIndex(); holeIndex < g_GameState.holeIndex;
       holeIndex++) {
@@ -165,12 +177,15 @@ s32 GetMatchWinner(s32 playerIndex, s32 opponentIndex) {
     lead += playerScore < opponentScore;
     lead -= opponentScore < playerScore;
   }
+
   if (ABS(lead) > holesAfterCurrent + 1) {
     if (lead > 0) {
       return MATCH_SIDE_PLAYER;
     }
+
     return MATCH_SIDE_OPPONENT;
   }
+
   return MATCH_SIDE_NONE;
 }
 
@@ -199,28 +214,34 @@ s32 GetMatchHoleResult(s32 playerIndex, s32 opponentIndex) {
         if (GetNetScore(playerIndex) < GetNetScore(opponentIndex)) {
           return MATCH_SIDE_PLAYER;
         }
+
         return (GetNetScore(opponentIndex) < GetNetScore(playerIndex))
             ? MATCH_SIDE_OPPONENT
             : MATCH_HOLE_HALVED;
       }
+
       if (GetNetScore(playerIndex) < GetNetScore(opponentIndex) + 1) {
         return MATCH_SIDE_PLAYER;
       }
     }
+
     if (g_Players[opponentIndex].unk26 != 0 &&
         GetNetScore(opponentIndex) < GetNetScore(playerIndex) + 1) {
       return MATCH_SIDE_OPPONENT;
     }
+
     standing = GetMatchStanding(playerIndex, opponentIndex);
     if (IsHalvedForDormie(standing, MATCH_STANDING_PLAYER_DORMIE, playerIndex,
             opponentIndex)) {
       return MATCH_HOLE_HALVED;
     }
+
     if (IsHalvedForDormie(standing, MATCH_STANDING_OPPONENT_DORMIE,
             opponentIndex, playerIndex)) {
       return MATCH_HOLE_HALVED;
     }
   }
+
   return MATCH_SIDE_NONE;
 }
 
@@ -246,6 +267,7 @@ s32 GetGroupHoleResult(s8* playerResults) {
   if (playerResults == NULL) {
     playerResults = ignoredResults;
   }
+
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     if (g_Players[playerIndex].unk26 == 1) {
       if (GetNetScore(playerIndex) < bestScore) {
@@ -259,16 +281,20 @@ s32 GetGroupHoleResult(s8* playerResults) {
       outCount += (g_Players[playerIndex].unk26 == 3);
     }
   }
+
   if (bestPlayerIndex == -1) {
     for (playerIndex = 0; playerIndex < g_GameState.playerCount;
         playerIndex++) {
       playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
     }
+
     if (outCount == g_GameState.playerCount) {
       return GROUP_HOLE_NO_WINNER;
     }
+
     return isDecided;
   }
+
   isDecided = TRUE;
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     playerResults[playerIndex] = GROUP_PLAYER_CONTENDING;
@@ -286,18 +312,22 @@ s32 GetGroupHoleResult(s8* playerResults) {
       playerResults[playerIndex] = GROUP_PLAYER_OUT;
     }
   }
+
   if (!isDecided) {
     return GROUP_HOLE_OPEN;
   }
+
   if (tieCount > 0) {
     return GROUP_HOLE_NO_WINNER;
   }
+
   for (playerIndex = 0; playerIndex < g_GameState.playerCount; playerIndex++) {
     if (g_Players[playerIndex].unk26 == 1 &&
         GetNetScore(playerIndex) == bestScore) {
       playerResults[playerIndex] = GROUP_PLAYER_WINNER;
     }
   }
+
   return GROUP_HOLE_WON;
 }
 
@@ -337,6 +367,7 @@ s32 GetHolingOutStakes(s32 playerIndex) {
               MATCH_STANDING_PLAYER_DORMIE) {
         stakes = HOLING_OUT_WINS_MATCH;
       }
+
       break;
     case 10:
     case 11:
@@ -351,22 +382,26 @@ s32 GetHolingOutStakes(s32 playerIndex) {
           }
         }
       }
+
       for (otherIndex = 0; otherIndex < g_GameState.playerCount; otherIndex++) {
         if (otherIndex != playerIndex && g_Players[otherIndex].unk26 == 0) {
           if (GetNetScore(otherIndex) < GetNetScore(playerIndex)) {
             stakes = HOLING_OUT_STAKES_NONE;
             break;
           }
+
           if (GetNetScore(otherIndex) == GetNetScore(playerIndex)) {
             stakes = HOLING_OUT_TIES;
           }
         }
       }
+
       if (stakes != HOLING_OUT_STAKES_NONE) {
         if (hasAnyFinished) {
           if (GetNetScore(playerIndex) + 1 == bestScore) {
             stakes = HOLING_OUT_TIES;
           }
+
           if (GetNetScore(playerIndex) + 1 < bestScore &&
               stakes == HOLING_OUT_TIES) {
             stakes = HOLING_OUT_STAKES_NONE;
@@ -375,7 +410,9 @@ s32 GetHolingOutStakes(s32 playerIndex) {
           stakes = HOLING_OUT_STAKES_NONE;
         }
       }
+
       break;
   }
+
   return stakes;
 }

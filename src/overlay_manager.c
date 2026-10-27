@@ -117,6 +117,7 @@ void InitOverlayManager(void) {
           !IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("OverlayManager\n");
       }
+
       f_OverlayIndexOfModule[moduleIds[moduleIndex++]] = i;
     }
   }
@@ -134,8 +135,10 @@ s32 GetOverlayIndex(s32 overlayId) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Illegal ModuleSetNo.\n");
     }
+
     return 0;
   }
+
   return overlayId & 0xFF;
 }
 
@@ -149,6 +152,7 @@ s32 CanLoadOverlay(s32 overlayId) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Already Loaded\n");
     }
+
     return TRUE;
   }
 
@@ -157,21 +161,26 @@ s32 CanLoadOverlay(s32 overlayId) {
     if (otherOverlayIndex == overlayIndex) {
       continue;
     }
+
     if ((u32)g_Overlays[otherOverlayIndex].vramStart >
         (u32)g_Overlays[overlayIndex].bssEnd) {
       continue;
     }
+
     if ((u32)g_Overlays[otherOverlayIndex].bssEnd <
         (u32)g_Overlays[overlayIndex].vramStart) {
       continue;
     }
+
     if (g_Overlays[otherOverlayIndex].isLoaded) {
       if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
         osSyncPrintf("Conflicting %d m.s. and other moduleset[%x] is alive\n",
             overlayIndex, otherOverlayIndex);
       }
+
       return FALSE;
     }
+
     moduleIds = g_Overlays[otherOverlayIndex].moduleIds;
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
@@ -183,11 +192,14 @@ s32 CanLoadOverlay(s32 overlayId) {
               "Conflicting %d m.s. and other module[%x-%x]'s RDP request\n",
               overlayIndex, otherOverlayIndex, moduleIndex);
         }
+
         return FALSE;
       }
+
       moduleIndex++;
     }
   }
+
   return TRUE;
 }
 
@@ -201,6 +213,7 @@ s32 LoadOverlay(s32 overlayId) {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Load ModuleSet %x (absolute No.)\n", overlayId);
     }
+
     overlay = &g_Overlays[overlayId];
     moduleIds = overlay->moduleIds;
     osWritebackDCacheAll();
@@ -212,19 +225,23 @@ s32 LoadOverlay(s32 overlayId) {
     if (overlay->onLoad != NULL) {
       overlay->onLoad();
     }
+
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
       g_IsModuleAlive[moduleIds[moduleIndex++]] = TRUE;
     }
+
     overlay->isLoaded = TRUE;
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Complete Load ModuleSet %x (absolute No.)\n", overlayId);
     }
+
     return TRUE;
   } else {
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Can't Load ModuleSet %x (logical No.)\n", overlayId);
     }
+
     return FALSE;
   }
 }
@@ -240,16 +257,20 @@ void UnloadOverlay(s32 overlayId) {
     if (overlay->onUnload != NULL) {
       overlay->onUnload();
     }
+
     moduleIds = overlay->moduleIds;
     overlay->isLoaded = FALSE;
     if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
       osSyncPrintf("Moduleset %x Disposed\n", overlayId);
     }
+
     moduleIndex = 0;
     while (moduleIds[moduleIndex] != MODULE_ID_END) {
       g_IsModuleAlive[moduleIds[moduleIndex++]] = FALSE;
     }
+
     osWritebackDCacheAll();
+
     /* Clear the code so that stale calls into it fail early */
     if (g_IsDebugEnabled &&
         osVirtualToPhysical(overlay->vramStart) < BASE_RDRAM_SIZE) {
@@ -266,8 +287,10 @@ s32 ReportModuleNotAlive(s32 moduleId) {
   if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
     osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
   }
+
   if (!IsGameFlagSet(GAME_FLAG_QUIET_OVERLAY_LOG)) {
     osSyncPrintf("Module %d not alive !!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
   }
+
   return 0;
 }

@@ -32,9 +32,11 @@ void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport) {
   if (projection != NULL) {
     guMtxL2F(g_CpuProjectionMatrix, projection);
   }
+
   if (viewing != NULL) {
     guMtxL2F(g_CpuViewingMatrix, viewing);
   }
+
   if (viewport != NULL) {
     g_CpuViewportWidthRatio =
         (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
@@ -43,6 +45,7 @@ void SetCpuProjection(Mtx* projection, Mtx* viewing, Vp* viewport) {
     g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
     g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
   }
+
   if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
     reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
     g_CpuProjectionMatrix[0][0] *= reciprocal;
@@ -80,6 +83,7 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
       g_CpuViewingMatrix[row][column] = viewing[row][column];
     }
   }
+
   if (viewport != NULL) {
     g_CpuViewportWidthRatio =
         (viewport->vp.vscale[0] >> 1) * (1.0f / SCREEN_WIDTH);
@@ -88,6 +92,7 @@ void SetCpuProjectionF(Mat4 projection, Mat4 viewing, Vp* viewport) {
     g_CpuViewportCenterX = viewport->vp.vtrans[0] >> 2;
     g_CpuViewportCenterY = viewport->vp.vtrans[1] >> 2;
   }
+
   if ((s32)g_CpuProjectionMatrix[3][0] != 0) {
     reciprocal = 1.0f / g_CpuProjectionMatrix[3][3];
     g_CpuProjectionMatrix[0][0] *= reciprocal;
@@ -136,6 +141,7 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   if ((s32)depth >= 0) {
     return 0;
   }
+
   viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[1][0] * y) +
       (g_CpuViewingMatrix[2][0] * z) + g_CpuViewingMatrix[3][0];
   if ((s32)g_CpuProjectionMatrix[3][3] == 1) {
@@ -143,12 +149,14 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
   } else {
     perspective = 1.0f / depth;
   }
+
   if ((viewX > 0.0f) ? g_CpuViewportCenterX <
               g_CpuScreenScaleX * (viewX - radius) * perspective
                      : g_CpuScreenScaleX * (viewX + radius) * perspective <
               -g_CpuViewportCenterX) {
     return 1;
   }
+
   viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
       (g_CpuViewingMatrix[2][1] * z) + g_CpuViewingMatrix[3][1];
   if ((viewY > 0.0f) ? g_CpuScreenScaleY * (viewY - radius) * perspective <
@@ -157,6 +165,7 @@ s32 GetSphereVisibility(f32 x, f32 y, f32 z, f32 radius) {
               g_CpuScreenScaleY * (viewY + radius) * perspective) {
     return 2;
   }
+
   return depth;
 }
 
@@ -183,6 +192,7 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
   if ((s32)viewZ >= 0) {
     return viewZ;
   }
+
   perspective = 1.0f / viewZ;
   point->scaleX = g_CpuScreenScaleX * perspective;
   point->scaleY = g_CpuScreenScaleY * perspective;
@@ -195,18 +205,23 @@ s32 ProjectPoint(f32 x, f32 y, f32 z, ScreenPoint* point) {
     point->y = (s32)(point->scaleY * viewY * g_CpuViewportHeightRatio) +
         g_CpuViewportCenterY;
   }
+
   if (point->x < -SCREEN_COORDINATE_LIMIT) {
     point->x = -SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->x > SCREEN_COORDINATE_LIMIT) {
     point->x = SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->y < -SCREEN_COORDINATE_LIMIT) {
     point->y = -SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->y > SCREEN_COORDINATE_LIMIT) {
     point->y = SCREEN_COORDINATE_LIMIT;
   }
+
   depth =
       ((-g_CpuProjectionMatrix[2][2] - (g_CpuProjectionMatrix[3][2] / viewZ)) *
           SCREEN_DEPTH_SCALE) +
@@ -240,6 +255,7 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   if ((s32)depth == 0) {
     return 0;
   }
+
   viewX = (g_CpuViewingMatrix[0][0] * x) + (g_CpuViewingMatrix[2][0] * z) +
       g_CpuViewingMatrix[3][0];
   viewY = (g_CpuViewingMatrix[0][1] * x) + (g_CpuViewingMatrix[1][1] * y) +
@@ -252,15 +268,19 @@ s32 ProjectPointToScreen(f32 x, f32 y, f32 z, ScreenPoint* point) {
   if (point->x < -SCREEN_COORDINATE_LIMIT) {
     point->x = -SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->x > SCREEN_COORDINATE_LIMIT) {
     point->x = SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->y < -SCREEN_COORDINATE_LIMIT) {
     point->y = -SCREEN_COORDINATE_LIMIT;
   }
+
   if (point->y > SCREEN_COORDINATE_LIMIT) {
     point->y = SCREEN_COORDINATE_LIMIT;
   }
+
   return depth;
 }
 

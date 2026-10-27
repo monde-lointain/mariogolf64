@@ -396,6 +396,7 @@ void KeepAimCameraOnCourse(void) {
     maxX = AIM_CAMERA_COURSE_MAX_X;
     maxZ = AIM_CAMERA_COURSE_MAX_Z;
   }
+
   heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
   offset = cosf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_X] = offset + g_CurrentShot.ballPosition[AXIS_X];
@@ -406,10 +407,12 @@ void KeepAimCameraOnCourse(void) {
   } else if (eye[AXIS_X] > maxX) {
     overshoot = eye[AXIS_X] - maxX;
   }
+
   if ((s32)offset != 0) {
     g_CurrentShot.aimCameraDistance *=
         (fabsf(offset) - overshoot) / fabsf(offset);
   }
+
   offset = sinf(heading) * g_CurrentShot.aimCameraDistance;
   eye[AXIS_Z] = offset + g_CurrentShot.ballPosition[AXIS_Z];
   overshoot = 0.0f;
@@ -420,10 +423,12 @@ void KeepAimCameraOnCourse(void) {
     D_800C3070 = FALSE;
     overshoot = eye[AXIS_Z] - maxZ;
   }
+
   if ((s32)offset != 0) {
     g_CurrentShot.aimCameraDistance *=
         (fabsf(offset) - overshoot) / fabsf(offset);
   }
+
   if (g_IsMiniGolf) {
     if (oldDistance < g_CurrentShot.aimCameraDistance) {
       if (g_TurnController.buttons & D_CBUTTONS) {
@@ -465,10 +470,12 @@ void PlaceShotCamera(void) {
     if (g_ControllerStates[0].buttons & L_CBUTTONS) {
       D_80223E48_ovl_00 -= 1.0f;
     }
+
     if (g_ControllerStates[0].buttons & R_CBUTTONS) {
       D_80223E48_ovl_00 += 1.0f;
     }
   }
+
   if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
     g_Cameras[0].view.mode = CAMERA_MODE_UNK2;
     point[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
@@ -544,6 +551,7 @@ void PlaceShotCamera(void) {
       point[AXIS_X] = AIM_CAMERA_MAX_X;
       D_800C3070 = 0;
     }
+
     if (point[AXIS_Z] < AIM_CAMERA_MIN_COORD) {
       point[AXIS_Z] = AIM_CAMERA_MIN_COORD;
       D_800C3070 = 0;
@@ -551,6 +559,7 @@ void PlaceShotCamera(void) {
       point[AXIS_Z] = AIM_CAMERA_MAX_Z;
       D_800C3070 = 0;
     }
+
     lowestGround = func_8005F30C(point[AXIS_X], point[AXIS_Z]);
     g_Cameras[0].view.eye[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.eye[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
@@ -567,12 +576,14 @@ void PlaceShotCamera(void) {
         lowestGround = ground;
       }
     }
+
     if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
       point[AXIS_Y] = lowestGround - NO_IMPACT_POINT_DROP +
           (g_CurrentShot.aimCameraHeight * NO_IMPACT_POINT_HEIGHT_SCALE);
     } else {
       point[AXIS_Y] = lowestGround + g_CurrentShot.aimCameraHeight;
     }
+
     rise = g_CurrentShot.aimCameraDistance / 1000;
     if (g_CurrentShot.ballPosition[AXIS_Y] +
             (rise * rise / AIM_CAMERA_RISE_DIVISOR) <
@@ -580,6 +591,7 @@ void PlaceShotCamera(void) {
       point[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y] +
           (rise * rise / AIM_CAMERA_RISE_DIVISOR);
     }
+
     g_Cameras[0].view.eye[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     if (D_800C3084 & SHOT_UNK3084_ON_GREEN) {
       point[AXIS_X] =
@@ -599,6 +611,7 @@ void PlaceShotCamera(void) {
       if (tilt < 0.0f) {
         tilt = 0.0f;
       }
+
       point[AXIS_X] =
           (cosf(heading) *
               (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
@@ -613,11 +626,13 @@ void PlaceShotCamera(void) {
           (g_CurrentShot.aimCameraHeight * (tilt * COURSE_TO_WORLD_SCALE)) +
           (D_80223E48_ovl_00 * AIM_CAMERA_DEBUG_TILT_SCALE);
     }
+
     g_Cameras[0].view.heading = heading;
     g_Cameras[0].view.lookAt[AXIS_X] = point[AXIS_X] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   } else {
     KeepAimCameraOnCourse();
+
     /* The middle of the ball and the cup is worked out, but the ball is used */
     center[AXIS_Y] = g_CupPositionY;
     center[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
@@ -652,6 +667,7 @@ void PlaceShotCamera(void) {
     g_Cameras[0].view.lookAt[AXIS_Y] = point[AXIS_Y] * COURSE_TO_WORLD_SCALE;
     g_Cameras[0].view.lookAt[AXIS_Z] = point[AXIS_Z] * COURSE_TO_WORLD_SCALE;
   }
+
   g_Cameras[0].view.fieldOfView = SHOT_CAMERA_FIELD_OF_VIEW;
   func_8004C6A8();
 }
@@ -676,6 +692,7 @@ void AimDownRange(void) {
     g_CurrentShot.aimCameraHeight = DOWN_RANGE_HEIGHT;
     g_CurrentShot.aimCameraDistance = DOWN_RANGE_DISTANCE;
   }
+
   heading = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
   lookAt[AXIS_X] = (cosf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_X];
@@ -684,6 +701,7 @@ void AimDownRange(void) {
   } else if (lookAt[AXIS_X] >= AIM_CAMERA_MAX_X) {
     lookAt[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
+
   lookAt[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_Z];
   if (lookAt[AXIS_Z] < 0.0f) {
@@ -691,6 +709,7 @@ void AimDownRange(void) {
   } else if (lookAt[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
     lookAt[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
   }
+
   lookAt[AXIS_X] =
       (cosf(heading) *
           (g_CurrentShot.aimCameraDistance + DOWN_RANGE_LOOK_AHEAD)) +
@@ -721,6 +740,7 @@ void PlaceAimCamera(void) {
   } else if (eye[AXIS_X] >= AIM_CAMERA_MAX_X) {
     eye[AXIS_X] = AIM_CAMERA_MAX_X - 1.0f;
   }
+
   eye[AXIS_Z] = (sinf(heading) * g_CurrentShot.aimCameraDistance) +
       g_CurrentShot.ballPosition[AXIS_Z];
   if (eye[AXIS_Z] < 0.0f) {
@@ -728,10 +748,12 @@ void PlaceAimCamera(void) {
   } else if (eye[AXIS_Z] >= AIM_CAMERA_MAX_Z) {
     eye[AXIS_Z] = AIM_CAMERA_MAX_Z - 1.0f;
   }
+
   eye[AXIS_Y] = GetGroundHeight(eye[AXIS_X], eye[AXIS_Z]);
   if (g_CurrentShot.ballPosition[AXIS_Y] < eye[AXIS_Y]) {
     eye[AXIS_Y] = g_CurrentShot.ballPosition[AXIS_Y];
   }
+
   g_Cameras[0].view.lookAt[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
   g_Cameras[0].view.lookAt[AXIS_Z] = g_CurrentShot.ballPosition[AXIS_Z];
   eye[AXIS_X] *= COURSE_TO_WORLD_SCALE;
@@ -770,6 +792,7 @@ void StartFreeLook(void) {
     SetFramebufferCount(FREE_LOOK_FRAMEBUFFER_COUNT);
     SetScreenEffect(SCREEN_EFFECT_NONE, 0);
   }
+
   StopSound(IMPACT_POINT_SOUND_CHANNEL);
 }
 
@@ -781,6 +804,7 @@ void UpdateImpactPointMode(void) {
           IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
           IMPACT_POINT_SOUND_PAN);
     }
+
     g_IsSettingImpactPoint = TRUE;
   } else {
     StopSound(IMPACT_POINT_SOUND_CHANNEL);
@@ -814,6 +838,7 @@ void EaseAimCamera(void) {
         (GetSelectedShotDistance() - AIM_CAMERA_SHOT_BACKOFF_YARDS) *
         UNITS_PER_YARD;
   }
+
   if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
     targetHeight = AIM_CAMERA_PUTT_HEIGHT;
   } else if (D_800C3084 & SHOT_UNK3084_APPROACH) {
@@ -821,6 +846,7 @@ void EaseAimCamera(void) {
   } else {
     targetHeight = AIM_CAMERA_SHOT_HEIGHT;
   }
+
   if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) >
       AIM_CAMERA_MAX_EASE_STEP) {
     if (g_CurrentShot.aimCameraDistance > targetDistance) {
@@ -833,6 +859,7 @@ void EaseAimCamera(void) {
         (targetDistance - g_CurrentShot.aimCameraDistance) *
         AIM_CAMERA_EASE_FRACTION;
   }
+
   g_CurrentShot.aimCameraHeight +=
       (targetHeight - g_CurrentShot.aimCameraHeight) * AIM_CAMERA_EASE_FRACTION;
   if (fabsf(g_CurrentShot.aimCameraDistance - targetDistance) <
@@ -884,6 +911,7 @@ void CraneAimCamera(void) {
     } else {
       stepCount = 15;
     }
+
     if (g_TurnController.buttons & L_CBUTTONS) {
       g_CurrentShot.aimCameraHeight += stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
     } else if (g_TurnController.buttons & R_CBUTTONS) {
@@ -933,6 +961,7 @@ void MoveAimCameraDistanceByUpDown(void) {
     } else {
       stepCount = 20;
     }
+
     if (g_TurnController.buttons & U_CBUTTONS) {
       g_CurrentShot.aimCameraDistance += stepCount * AIM_CAMERA_PUTT_STEP_UNIT;
     } else if (g_TurnController.buttons & D_CBUTTONS) {
@@ -989,15 +1018,18 @@ void TurnAim(s32 turnsAltHeading) {
   if (g_IsSettingImpactPoint) {
     return;
   }
+
   if (!turnsAltHeading) {
     step = stickX / 2;
     speed = stickX / AIM_STICK_SPEED_DIVISOR;
     if (speed < 0) {
       speed = -speed;
     }
+
     if (speed != 0) {
       step *= speed;
     }
+
     g_CurrentShot.unk0 -= step;
   } else {
     step = stickX / 2;
@@ -1005,11 +1037,14 @@ void TurnAim(s32 turnsAltHeading) {
     if (speed < 0) {
       speed = -speed;
     }
+
     if (speed != 0) {
       step *= speed;
     }
+
     D_800C3078 -= step;
   }
+
   dpad = g_TurnController.buttons & (L_JPAD | R_JPAD);
   if (dpad == 0 || dpad == (L_JPAD | R_JPAD)) {
     D_80223E50_ovl_00 = 0;
@@ -1019,6 +1054,7 @@ void TurnAim(s32 turnsAltHeading) {
     if (*dpadFrames < 0) {
       *dpadFrames = 0;
     }
+
     if (++*dpadFrames > AIM_DPAD_MAX_FRAMES) {
       *dpadFrames = AIM_DPAD_MAX_FRAMES;
     }
@@ -1028,10 +1064,12 @@ void TurnAim(s32 turnsAltHeading) {
     if (*dpadFrames > 0) {
       *dpadFrames = 0;
     }
+
     if (--*dpadFrames < -AIM_DPAD_MAX_FRAMES) {
       *dpadFrames = -AIM_DPAD_MAX_FRAMES;
     }
   }
+
   dpad = D_80223E50_ovl_00;
   dpadSpeed = (dpad < 0) ? -dpad : dpad;
   g_CurrentShot.unk0 +=
@@ -1052,6 +1090,7 @@ void TurnAim(s32 turnsAltHeading) {
       SetFramebufferCount(3);
     }
   }
+
   if (IsGameFlagSet(GAME_FLAG_RANDOM_FRAMEBUFFER_COUNT)) {
     if (rand() & 1) {
       SetFramebufferCount(3);
@@ -1088,8 +1127,10 @@ s32 UpdateAimControls(void) {
         SetScreenEffect(SCREEN_EFFECT_SAVED_FRAME, 2);
         SetFramebufferCount(REPLAY_FRAMEBUFFER_COUNT);
       }
+
       return ++D_80223E44_ovl_00 >= REPLAY_AIM_SETTLE_FRAMES;
     }
+
     step = headingLeft / REPLAY_AIM_STEP_DIVISOR;
     turn = ABS(step) + REPLAY_AIM_MIN_STEP;
     heading = g_CurrentShot.unk0;
@@ -1098,8 +1139,10 @@ s32 UpdateAimControls(void) {
       SetFramebufferCount(FREE_LOOK_FRAMEBUFFER_COUNT);
       SetScreenEffect(SCREEN_EFFECT_NONE, 0);
     }
+
     return FALSE;
   }
+
   D_800C3074 = 0;
   if (g_TurnController.buttons == AIM_RESET_BUTTONS) {
     g_CurrentShot.unk0 =
@@ -1108,6 +1151,7 @@ s32 UpdateAimControls(void) {
                 g_CurrentShot.ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
   }
+
   if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
     switch (D_800C308C) {
       case LETTERBOX_STATE_NONE:
@@ -1138,9 +1182,11 @@ s32 UpdateAimControls(void) {
           AimDownRange();
           D_800C308C = LETTERBOX_STATE_UNK1;
         }
+
         if (D_800C3084 & SHOT_UNK3084_NO_IMPACT_POINT) {
           TurnAim(0);
         }
+
         break;
       case LETTERBOX_STATE_UNK1:
         if (g_TurnController.pressedButtons & A_BUTTON) {
@@ -1152,6 +1198,7 @@ s32 UpdateAimControls(void) {
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           g_RoundHud.greenGridState++;
         }
+
         TurnAim(0);
         break;
       case LETTERBOX_STATE_UNK2:
@@ -1168,6 +1215,7 @@ s32 UpdateAimControls(void) {
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           g_RoundHud.greenGridState++;
         }
+
         TurnAim(0);
         break;
       case LETTERBOX_STATE_UNK3:
@@ -1182,9 +1230,11 @@ s32 UpdateAimControls(void) {
         } else if (g_TurnController.pressedButtons & B_BUTTON) {
           g_RoundHud.greenGridState++;
         }
+
         TurnAim(0);
         break;
     }
+
     if (D_800C308C == LETTERBOX_STATE_NONE) {
       g_IsSettingImpactPoint = TRUE;
     } else {
@@ -1200,6 +1250,7 @@ s32 UpdateAimControls(void) {
               IMPACT_POINT_SOUND_VOLUME, IMPACT_POINT_SOUND_REVERB,
               IMPACT_POINT_SOUND_PAN);
         }
+
         g_IsSettingImpactPoint = TRUE;
         D_800C3080 = 0;
       } else {
@@ -1207,6 +1258,7 @@ s32 UpdateAimControls(void) {
         if (g_IsSettingImpactPoint != FALSE) {
           g_IsSettingImpactPoint = -1;
         }
+
         if (D_800C3080 < IMPACT_POINT_LINGER_FRAMES) {
           D_800C3080++;
         } else {
@@ -1214,6 +1266,7 @@ s32 UpdateAimControls(void) {
         }
       }
     }
+
     switch (D_800C308C) {
       case LETTERBOX_STATE_NONE:
       case LETTERBOX_STATE_UNK5:
@@ -1241,9 +1294,11 @@ s32 UpdateAimControls(void) {
             D_800C3070 = 1;
           }
         }
+
         if (D_800C308C == LETTERBOX_STATE_NONE) {
           TurnAim(0);
         }
+
         break;
       case LETTERBOX_STATE_UNK1:
         if (g_TurnController.pressedButtons & A_BUTTON) {
@@ -1257,6 +1312,7 @@ s32 UpdateAimControls(void) {
           PlaySound(SOUND_LOOK_BACK, g_NextSoundChannel, LOOK_SOUND_VOLUME);
           ResetAimCamera();
         }
+
         TurnAim(0);
         break;
       case LETTERBOX_STATE_UNK2:
@@ -1274,6 +1330,7 @@ s32 UpdateAimControls(void) {
           D_800C3070 = 0;
           ResetAimCamera();
         }
+
         TurnAim(0);
         break;
       case LETTERBOX_STATE_UNK3:
@@ -1288,6 +1345,7 @@ s32 UpdateAimControls(void) {
           D_800C308C = LETTERBOX_STATE_NONE;
           ResetAimCamera();
         }
+
         TurnAim(0);
         D_800C3078 = g_CurrentShot.unk0;
         break;
@@ -1303,14 +1361,17 @@ s32 UpdateAimControls(void) {
           ResetAimCamera();
           D_800C307C = 0;
         }
+
         TurnAim(0);
         D_800C3078 = g_CurrentShot.unk0;
         break;
     }
   }
+
   if (g_RoundHud.greenGridState >= AIM_VIEW_TOGGLE_COUNT) {
     g_RoundHud.greenGridState = 0;
   }
+
   if (D_800C3074 != 1) {
     if (g_TurnController.buttons & AIM_CAMERA_BUTTONS) {
       if (D_800C308C == LETTERBOX_STATE_NONE ||
@@ -1319,19 +1380,23 @@ s32 UpdateAimControls(void) {
         D_800C308C = LETTERBOX_STATE_UNK1;
         D_800C3070 = 0;
       }
+
       if (D_800C308C == LETTERBOX_STATE_UNK3) {
         D_800C308C = LETTERBOX_STATE_UNK4;
         D_800C3070 = 0;
       }
     }
+
     if (g_TurnController.pressedButtons & AIM_CAMERA_RAISE_BUTTONS) {
       PlaySound(
           SOUND_AIM_CAMERA_RAISE, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
+
     if (g_TurnController.pressedButtons & AIM_CAMERA_LOWER_BUTTONS) {
       PlaySound(
           SOUND_AIM_CAMERA_LOWER, g_NextSoundChannel, AIM_CAMERA_SOUND_VOLUME);
     }
+
     if (D_800C3070 == 1) {
       EaseAimCamera();
     } else {
@@ -1340,27 +1405,34 @@ s32 UpdateAimControls(void) {
       } else {
         CraneAimCamera();
       }
+
       MoveAimCameraDistanceByUpDown();
     }
+
     if (g_PauseScreen != PAUSE_SCREEN_UNK4 &&
         (g_TurnController.pressedButtons & IMPACT_POINT_BUTTONS) &&
         !(D_800C3084 & SHOT_UNK3084_ON_GREEN)) {
       SpawnRisingClumps(g_CurrentShot.ballPosition);
     }
   }
+
   if (D_800C308C == LETTERBOX_STATE_UNK3) {
     D_800C308C = LETTERBOX_STATE_UNK4;
   }
+
   if (D_800C308C == LETTERBOX_STATE_UNK4) {
     if (g_CurrentShot.aimCameraHeight > GREEN_AIM_CAMERA_MIN_HEIGHT) {
       g_CurrentShot.aimCameraHeight = GREEN_AIM_CAMERA_MIN_HEIGHT;
     }
+
     if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) {
       g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT;
     }
+
     if (g_CurrentShot.aimCameraDistance < LOOK_BACK_MIN_DISTANCE) {
       g_CurrentShot.aimCameraDistance = LOOK_BACK_MIN_DISTANCE;
     }
+
     maxDistance = LOOK_BACK_MAX_DISTANCE;
     if (g_CurrentShot.aimCameraDistance > maxDistance) {
       g_CurrentShot.aimCameraDistance = maxDistance;
@@ -1373,17 +1445,21 @@ s32 UpdateAimControls(void) {
     } else if (g_CurrentShot.aimCameraHeight > AIM_CAMERA_MIN_HEIGHT) {
       g_CurrentShot.aimCameraHeight = AIM_CAMERA_MIN_HEIGHT;
     }
+
     if (g_CurrentShot.aimCameraHeight < AIM_CAMERA_MAX_HEIGHT) {
       g_CurrentShot.aimCameraHeight = AIM_CAMERA_MAX_HEIGHT;
     }
+
     if (g_CurrentShot.aimCameraDistance < AIM_CAMERA_MIN_DISTANCE) {
       g_CurrentShot.aimCameraDistance = AIM_CAMERA_MIN_DISTANCE;
     }
+
     maxDistance = AIM_CAMERA_MAX_DISTANCE;
     if (g_CurrentShot.aimCameraDistance > maxDistance) {
       g_CurrentShot.aimCameraDistance = maxDistance;
     }
   }
+
   g_Cameras[1].view.eye[AXIS_X] = g_Cameras[0].view.eye[AXIS_X];
   g_Cameras[1].view.eye[AXIS_Y] = g_Cameras[0].view.eye[AXIS_Y];
   g_Cameras[1].view.eye[AXIS_Z] = g_Cameras[0].view.eye[AXIS_Z];
@@ -1404,20 +1480,25 @@ void UpdateShotFlags(void) {
   if (surfaceMask & CLUB_SURFACE_GREEN) {
     D_800C3084 = SHOT_UNK3084_NO_IMPACT_POINT;
   }
+
   isMiniGolf = &g_IsMiniGolf;
 
   if (*isMiniGolf) {
     D_800C3084 |= SHOT_UNK3084_NO_IMPACT_POINT;
   }
+
   if (GetSurfaceInfo(g_CurrentShot.surface)->kind == SURFACE_KIND_GREEN) {
     D_800C3084 |= SHOT_UNK3084_ON_GREEN;
   }
+
   if (*isMiniGolf) {
     D_800C3084 |= SHOT_UNK3084_ON_GREEN | SHOT_UNK3084_NO_IMPACT_POINT;
   }
+
   if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
     D_800C3084 |= SHOT_UNK3084_APPROACH;
   }
+
   if (g_CurrentShot.unk50 * SHOT_UNK50_SCALE <= SHOT_UNK8_MAX_UNK50) {
     D_800C3084 |= SHOT_UNK3084_UNK8;
   }
@@ -1463,10 +1544,12 @@ void PickStartingClub(Unk800BA9D8* hole) {
       if (!isUsable[slot]) {
         continue;
       }
+
       club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
       if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
         continue;
       }
+
       if (GetShotWorldDistance(club, PUTT_MODE_SHORT) >= cupDistance) {
         g_CurrentShot.shotMode = PUTT_MODE_SHORT;
       } else if (g_CurrentShot.unk54 &&
@@ -1475,6 +1558,7 @@ void PickStartingClub(Unk800BA9D8* hole) {
       } else {
         g_CurrentShot.shotMode = PUTT_MODE_MIDDLE;
       }
+
       g_CurrentShot.clubSlot = slot;
       break;
     }
@@ -1492,26 +1576,32 @@ void PickStartingClub(Unk800BA9D8* hole) {
       if (minRating < rating) {
         minRating = rating;
       }
+
       if (rating >= STARTING_CLUB_MIN_LIE_RATING) {
         break;
       }
     }
+
     if (minRating > STARTING_CLUB_MIN_LIE_RATING) {
       minRating = STARTING_CLUB_MIN_LIE_RATING;
     }
+
     for (slot = 0; slot < clubCount; slot++) {
       if (!isUsable[slot]) {
         continue;
       }
+
       club = GetClub(g_Players[g_CurrentShot.playerIndex].clubs[slot]);
       if (club->surfaceMask & CLUB_SURFACE_GREEN) {
         continue;
       }
+
       rating = GetLieRating(club, g_CurrentShot.surface, SHOT_MODE_NORMAL);
       distance = GetShotDistance(club, SHOT_MODE_NORMAL) * UNITS_PER_YARD;
       if (rating < minRating) {
         continue;
       }
+
       gap = distance - cupDistance;
       if (ABS(gap) < bestGap && (!reaches || distance >= cupDistance)) {
         bestSlot = slot;
@@ -1521,6 +1611,7 @@ void PickStartingClub(Unk800BA9D8* hole) {
         }
       }
     }
+
     g_CurrentShot.shotMode = SHOT_MODE_NORMAL;
     g_CurrentShot.clubSlot = bestSlot;
   }
@@ -1541,8 +1632,10 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
     if (player->ringStates[i] != RING_STATE_NONE) {
       player->ringStates[i] = RING_STATE_SHOWN;
     }
+
     func_8006034C(0);
   }
+
   player->unkA8 = 0;
   simulation->position[AXIS_X] = player->ballPosition[AXIS_X];
   simulation->position[AXIS_Y] = player->ballPosition[AXIS_Y];
@@ -1555,6 +1648,7 @@ void PlaceBallAtRest(s32 playerIndex, BallSimulation* simulation) {
   if (groundHeight < simulation->position[AXIS_Y]) {
     simulation->position[AXIS_Y] = groundHeight;
   }
+
   simulation->surface = player->ballSurface;
   simulation->purpose = LAUNCH_PURPOSE_UNK3;
   simulation->unkA1 = 0;
@@ -1572,13 +1666,16 @@ void CountNotableShot(s32 playerIndex, s32 shotKind) {
       g_GameMode == GAME_MODE_TRAINING) {
     return;
   }
+
   if (g_GameMode == GAME_MODE_RING_SHOT ||
       f_ShotFlightCount >= MAX_COUNTED_FLIGHT_COUNT) {
     return;
   }
+
   if (g_IsMiniGolf && shotKind != SHOT_KIND_HOLE_IN_ONE) {
     return;
   }
+
   count = (u8*)&g_Players[playerIndex].unkAA[shotKind];
   if (*count < SHOT_KIND_MAX_COUNT) {
     osSyncPrintf("EXP GET type %d\n", shotKind);
@@ -1609,6 +1706,7 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
       } else {
         points = 20;
       }
+
       break;
     case SHOT_KIND_FLAG_SHOT:
     case SHOT_KIND_EAGLE:
@@ -1627,6 +1725,7 @@ s32 GetShotKindPoints(s32 playerIndex, s32 shotKind) {
       points = 0;
       break;
   }
+
   return count * points;
 }
 
@@ -1644,9 +1743,11 @@ s32 TallyCoursePoints(void) {
       points += GetShotKindPoints(playerIndex, shotKind);
       g_Players[playerIndex].unkAA[shotKind] = 0;
     }
+
     total += points;
     g_Players[playerIndex].points = points;
   }
+
   return total;
 }
 
@@ -1661,6 +1762,7 @@ void PrintCoursePoints(void) {
     for (shotKind = 0; shotKind < SHOT_KIND_COUNT; shotKind++) {
       points += GetShotKindPoints(playerIndex, shotKind);
     }
+
     sprintf(text, "Player%d EXP %d\n", playerIndex, points);
     PrintDebugText(text, 2, playerIndex + 3);
   }
@@ -1685,6 +1787,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
       IsGameFlagSet(GAME_FLAG_HIDE_SHOT_PREVIEW)) {
     return;
   }
+
   D_80223E40_ovl_00 = TRUE;
   shot.unk0 = g_CurrentShot.unk0;
   shot.clubIndex = g_CurrentShot.clubSlot;
@@ -1694,27 +1797,33 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
         D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
       D_80223EA0_ovl_00++;
     }
+
     if ((g_ControllerStates[0].pressedButtons & D_JPAD) &&
         D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
       D_80223EA0_ovl_00--;
     }
+
     if ((g_ControllerStates[0].buttons & L_JPAD) &&
         D_80223EA0_ovl_00 < SHOT_PREVIEW_MAX_STEPS) {
       D_80223EA0_ovl_00++;
     }
+
     if ((g_ControllerStates[0].buttons & R_JPAD) &&
         D_80223EA0_ovl_00 > SHOT_PREVIEW_MIN_STEPS) {
       D_80223EA0_ovl_00--;
     }
+
     sprintf(g_PrintBuffer, "prec:%4d", D_80223EA0_ovl_00);
     PrintDebugText(g_PrintBuffer, 10, 3);
   }
+
   if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
       swingPhase == SWING_PHASE_UNK3) {
     shot.unk8 = 0x100;
   } else {
     shot.unk8 = swing->unk8;
   }
+
   shot.unkC = 0;
   if (swingPhase == SWING_PHASE_UNK2 || swingPhase == SWING_PHASE_UNK4 ||
       swingPhase == SWING_PHASE_UNK5 || swingPhase == SWING_PHASE_UNK3) {
@@ -1724,6 +1833,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     shot.unk10 = 0;
     shot.unk14 = 0;
   }
+
   shot.unk18 = g_CurrentShot.playerIndex;
   shot.shotMode = g_CurrentShot.shotMode;
   simulation.position[AXIS_X] = g_CurrentShot.ballPosition[AXIS_X];
@@ -1737,6 +1847,7 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
     if (*isMiniGolf && !simulation.unk94) {
       break;
     }
+
     start[AXIS_X] = simulation.position[AXIS_X];
     start[AXIS_Y] = simulation.position[AXIS_Y];
     start[AXIS_Z] = simulation.position[AXIS_Z];
@@ -1764,15 +1875,18 @@ void BuildShotPreview(Unk20* swing, s32 swingPhase) {
           start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
       guMtxCatF(dash, align, dash);
     }
+
     guMtxF2L(dash, &D_802271A0_ovl_00[g_DrawBufferIndex][step]);
     if (!*isMiniGolf && simulation.unk94) {
       break;
     }
   }
+
   D_80223EA4_ovl_00 = step - 2;
   if (D_80223EA4_ovl_00 <= 0) {
     D_80223EA4_ovl_00 = 1;
   }
+
   if (simulation.unk94) {
     D_80223EA8_ovl_00 = TRUE;
     D_80223EA4_ovl_00 = step + 1;
@@ -1793,6 +1907,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
   if (!D_80223E40_ovl_00) {
     return;
   }
+
   g_ModuleRdpRequestFrames[MODULE_UNK10] = g_FrameCount;
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
@@ -1819,6 +1934,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
   } else {
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
   }
+
   gDPPipeSync(g_DisplayListHead++);
   if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
     f32 dx;
@@ -1833,11 +1949,13 @@ void DrawShotPreview(CameraMatrices* matrices) {
             &ball) >= 0) {
       return;
     }
+
     if (ProjectPoint(D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_X],
             D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Y],
             D_80227BA0_ovl_00[D_80223EA4_ovl_00 - 1][AXIS_Z], &end) >= 0) {
       return;
     }
+
     guMtxIdent(&D_80227110_ovl_00);
     ball.x *= 4;
     ball.y *= 4;
@@ -1886,6 +2004,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
     }
+
     gSPLoadGeometryMode(g_DisplayListHead++, 0);
     gSPSetGeometryMode(
         g_DisplayListHead++, G_ZBUFFER | G_SHADE | G_FOG | G_SHADING_SMOOTH);
@@ -1900,6 +2019,7 @@ void DrawShotPreview(CameraMatrices* matrices) {
       gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
       gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
     }
+
     gDPPipeSync(g_DisplayListHead++);
   }
 }
@@ -1915,23 +2035,29 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
   if (g_GameState.unk31) {
     return FALSE;
   }
+
   if (!IsGameFlagSet(GAME_FLAG_RECORD_ALL_HOLE_OUTS)) {
     if ((s8)g_Players[playerIndex].unk1E[0] != 0) {
       return FALSE;
     }
+
     if (g_GameMode == GAME_MODE_TRAINING) {
       return FALSE;
     }
   }
+
   if (g_Players[playerIndex].strokeCount > MAX_RECORDED_STROKE_COUNT) {
     return FALSE;
   }
+
   if ((s8)g_Players[playerIndex].characterIndex >= CHARACTER_KID) {
     return FALSE;
   }
+
   if (g_IsMiniGolf) {
     return FALSE;
   }
+
   switch (g_GameMode) {
     case GAME_MODE_STROKE:
     case GAME_MODE_UNK1:
@@ -1947,6 +2073,7 @@ s32 IsRecordableHoleOut(s32 playerIndex) {
     case GAME_MODE_SKINS_MATCH:
       return FALSE;
   }
+
   return FALSE;
 }
 
@@ -1954,6 +2081,7 @@ s32 IsRingShotRound(void) {
   if (!g_GameState.unk31) {
     return g_GameMode == GAME_MODE_RING_SHOT;
   }
+
   return FALSE;
 }
 
@@ -2022,6 +2150,7 @@ s32 HasNoRingsLeft(UnkB8* player) {
       return FALSE;
     }
   }
+
   return TRUE;
 }
 
@@ -2033,6 +2162,7 @@ s32 AreAllRingsPassed(UnkB8* player) {
       return FALSE;
     }
   }
+
   return TRUE;
 }
 
@@ -2045,6 +2175,7 @@ void RecordRingShotClear(s32 playerIndex) {
   } else if (*count > MAX_RING_SHOT_CLEAR_COUNT) {
     *count = MAX_RING_SHOT_CLEAR_COUNT;
   }
+
   if ((s8)g_Players[playerIndex].characterIndex < SAVE_UNK1344_ENTRY_COUNT) {
     count = &GetSaveData()->unk1344[g_CourseIndex][g_HoleIndex]
                                    [(s8)g_Players[playerIndex].characterIndex];
@@ -2055,6 +2186,7 @@ void RecordRingShotClear(s32 playerIndex) {
       *count = MAX_RING_SHOT_CLEAR_COUNT;
     }
   }
+
   WriteSaveData();
 }
 
@@ -2094,6 +2226,7 @@ static s32 GetStanceAnimation(u32 slotIndex, s32 club, s32 shotMode) {
       animation = WOOD_ANIMATIONS;
       break;
   }
+
   return animation;
 }
 
@@ -2119,6 +2252,7 @@ static s32 GetSwingAnimation(u32 slotIndex, s32 club, s32 shotMode) {
       animation = 0;
       break;
   }
+
   return animation + (shotMode == SHOT_MODE_APPROACH);
 }
 
@@ -2167,6 +2301,7 @@ void StartPlayerShot(s32 playerIndex) {
       g_HolePoints.unk60[0][AXIS_Y] = g_CupPositionY;
       g_HolePoints.unk60[0][AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
     }
+
     if (g_HolePar != 3 &&
         (surfaceKind == SURFACE_KIND_TEE_UP ||
             surfaceKind == SURFACE_KIND_TEE_GROUND)) {
@@ -2178,11 +2313,13 @@ void StartPlayerShot(s32 playerIndex) {
       target[AXIS_Y] = g_CupPositionY;
       target[AXIS_Z] = g_CupPositionZ;
     }
+
     g_CurrentShot.unk0 = atan2(target[AXIS_Z] - player->ballPosition[AXIS_Z],
                              target[AXIS_X] - player->ballPosition[AXIS_X]) *
         RADIANS_TO_BINARY_ANGLE;
     PickStartingClub(&D_800BA9D8);
   }
+
   D_800C3068 = FALSE;
   if (IsGameFlagSet(GAME_FLAG_AIM_DOWN_RANGE)) {
     AimDownRange();
@@ -2191,6 +2328,7 @@ void StartPlayerShot(s32 playerIndex) {
     ResetAimCamera();
     D_800C308C = LETTERBOX_STATE_NONE;
   }
+
   g_RoundHud.scorecardPage = -1;
   g_RoundHud.isWindIndicatorShown = TRUE;
   g_RoundHud.unk8 = TRUE;
@@ -2231,16 +2369,19 @@ void PickNextPlayer(void) {
   if (D_800FBDB8 == CONTEST_MOVIES_PLAYING) {
     return;
   }
+
   for (finishedCount = 0; finishedCount < g_PlayerCount; finishedCount++) {
     if (g_Players[finishedCount].unkC != PLAYER_STATE_UNK11 &&
         g_Players[finishedCount].unkC != PLAYER_STATE_UNK14) {
       break;
     }
   }
+
   bestDistance = -1;
   if (finishedCount != g_PlayerCount) {
     return;
   }
+
   bestPriority = 0;
   bestTeeOrder = 0x7FFFFFFF;
   nextPlayer = 0;
@@ -2249,6 +2390,7 @@ void PickNextPlayer(void) {
     if (g_Players[i].unk26 != 0) {
       continue;
     }
+
     if (IsGameFlagSet(GAME_FLAG_FEWEST_STROKES_FIRST)) {
       distance = 0;
       priority = STROKE_PRIORITY_BASE - g_Players[i].strokeCount;
@@ -2257,10 +2399,12 @@ void PickNextPlayer(void) {
         priority = GetSurfaceInfo((s8)g_Players[i].ballSurface)->kind !=
             SURFACE_KIND_GREEN;
       }
+
       distance = IntLength2D(
           D_800BA9D8.cupPosition[AXIS_X] - g_Players[i].ballPosition[AXIS_X],
           D_800BA9D8.cupPosition[AXIS_Z] - g_Players[i].ballPosition[AXIS_Z]);
     }
+
     if (priority > bestPriority) {
       bestPriority = priority;
       nextPlayer = i;
@@ -2279,6 +2423,7 @@ void PickNextPlayer(void) {
       }
     }
   }
+
   D_801B60A8 = nextPlayer;
   g_Players[nextPlayer].unkC = 0;
   if (D_800C3098) {
@@ -2346,6 +2491,7 @@ void MeasureTeeShot(s32 playerIndex) {
                 g_SimulatedShot.endPosition[AXIS_Z]);
         break;
     }
+
     g_Players[playerIndex].driveDistance = distance;
     distance = UNCOUNTED_DISTANCE;
     if (g_SimulatedShot.unk2E10) {
@@ -2355,6 +2501,7 @@ void MeasureTeeShot(s32 playerIndex) {
           GetCupDistance(g_CupPositionX - g_SimulatedShot.endPosition[AXIS_X],
               g_CupPositionZ - g_SimulatedShot.endPosition[AXIS_Z]);
     }
+
     g_Players[playerIndex].pinDistance = distance;
   }
 }
@@ -2365,6 +2512,7 @@ void SkipUnmeasuredDistances(s32 playerIndex) {
   if (g_Players[playerIndex].driveDistance == UNMEASURED_DISTANCE) {
     g_Players[playerIndex].driveDistance = UNCOUNTED_DISTANCE;
   }
+
   if (g_Players[playerIndex].pinDistance == UNMEASURED_DISTANCE) {
     g_Players[playerIndex].pinDistance = UNCOUNTED_DISTANCE;
   }
@@ -2412,9 +2560,11 @@ void PlayWaitingPlayersCalls(void) {
         if (controllerIndex == g_Players[g_GameState.unk20].controllerIndex) {
           continue;
         }
+
         if (controllerIndex >= MAXCONTROLLERS) {
           continue;
         }
+
         pressed = g_ControllerStates[controllerIndex].pressedButtons;
         if (pressed & U_JPAD) {
           PlayCharacterSound((s8)g_Players[i].characterIndex, i,
@@ -2544,6 +2694,7 @@ void ShowHoleOutBanner(s32 playerIndex) {
         break;
     }
   }
+
   if (banner >= 0) {
     StartBanner(banner);
   }
@@ -2646,39 +2797,50 @@ static inline void DebugTestGutsMotion(void) {
       motionName = "ERROR  ";
       break;
   }
+
   D_80223FF4_ovl_00 = 1;
   if (g_TurnController.repeatedButtons & L_JPAD) {
     D_80223FF5_ovl_00--;
   }
+
   if (g_TurnController.repeatedButtons & R_JPAD) {
     D_80223FF5_ovl_00++;
   }
+
   if (g_TurnController.repeatedButtons & U_JPAD) {
     D_80223FF6_ovl_00--;
   }
+
   if (g_TurnController.repeatedButtons & D_JPAD) {
     D_80223FF6_ovl_00++;
   }
+
   if (D_80223FF5_ovl_00 < 0) {
     D_80223FF5_ovl_00 = CHARACTER_COUNT - 1;
   }
+
   if (D_80223FF5_ovl_00 >= CHARACTER_COUNT) {
     D_80223FF5_ovl_00 = 0;
   }
+
   if (D_80223FF6_ovl_00 < 12) {
     D_80223FF6_ovl_00 = 15;
   }
+
   if (D_80223FF6_ovl_00 >= 16) {
     D_80223FF6_ovl_00 = 12;
   }
+
   sprintf(text, "GUTS TEST CH[%2.2d] MOTION %s", D_80223FF5_ovl_00, motionName);
   PrintDebugText(text, 3, 3);
   if (!IsCharacterSlotBusy(0)) {
     LoadCharacter(0, D_80223FF5_ovl_00 + CHARACTER_COUNT, 0);
   }
+
   if (g_TurnController.buttons) {
     FreeCharacterAndReactionLight(0);
   }
+
   g_TurnController.repeatedButtons &= ~(U_JPAD | D_JPAD);
 }
 
@@ -2715,6 +2877,7 @@ void UpdateTurns(void) {
     if (g_MergedController.buttons & B_BUTTON) {
       return TRUE;
     }
+
     return FALSE;
   }
 
@@ -2726,9 +2889,11 @@ void UpdateTurns(void) {
     if (g_TurnController.buttons & R_JPAD) {
       x = DPAD_STICK_TILT;
     }
+
     if (x == 0) {
       x = g_TurnController.stickX;
     }
+
     return x;
   }
 
@@ -2740,9 +2905,11 @@ void UpdateTurns(void) {
     if (g_TurnController.buttons & U_JPAD) {
       y = DPAD_STICK_TILT;
     }
+
     if (y == 0) {
       y = g_TurnController.stickY;
     }
+
     return y;
   }
 
@@ -2796,9 +2963,11 @@ void UpdateTurns(void) {
       if (g_Players[playerIndex].stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
         g_Players[playerIndex].stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
       }
+
       if (g_GameState.stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
         g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
       }
+
       if (g_HoleTimeFrames[g_HoleIndex] > STOPWATCH_MAX_FRAMES) {
         g_HoleTimeFrames[g_HoleIndex] = STOPWATCH_MAX_FRAMES;
       }
@@ -2836,6 +3005,7 @@ void UpdateTurns(void) {
           g_HolePar * GIVE_UP_PAR_MULTIPLE;
       g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
     }
+
     SkipUnmeasuredDistances(playerIndex);
     UpdateContest(FALSE);
     if (!g_GameState.unk31) {
@@ -2895,15 +3065,18 @@ void UpdateTurns(void) {
   if (IsGameFlagSet(0x68)) {
     PrintCoursePoints();
   }
+
   D_80223E40_ovl_00 = 0;
   if (!(D_800C308C == 0 || D_800C308C == 5)) {
     SetScreenEffect(4, 0);
   }
+
   if (IsGameFlagSet(0x2C)) {
     for (i = 0; i < g_PlayerCount; i++) {
       PrintDebugPaddedHex(g_Players[i].unkC, 2, i + 10);
     }
   }
+
   PlayAmbientSound();
   PickNextPlayer();
   for (playerIndex = 0; playerIndex < g_PlayerCount; playerIndex++) {
@@ -2919,6 +3092,7 @@ void UpdateTurns(void) {
       g_TurnController.repeatedButtons = 0;
       g_TurnController.pressedButtons = 0;
     }
+
     D_80227170_ovl_00[playerIndex]++;
     nextState = state;
     D_80227168_ovl_00 = playerIndex;
@@ -2927,10 +3101,12 @@ void UpdateTurns(void) {
         (g_PauseScreen == 0 || g_PauseScreen == 4)) {
       TickStopwatches();
     }
+
     if (g_GameMode == GAME_MODE_SPEED_GOLF) {
       g_RoundHud.stopwatchFrameCount =
           g_Players[playerIndex].stopwatchFrameCount;
     }
+
     switch (state) {
       case 0:
         D_80223FF7_ovl_00 = 0;
@@ -2947,12 +3123,14 @@ void UpdateTurns(void) {
           FreeCharacterAndReactionLight(0);
           break;
         }
+
         LoadCharacter(0, g_Players[playerIndex].characterIndex,
             g_Players[playerIndex].paletteIndex);
         if (g_Players[playerIndex].unk22) {
           SetTextureAnimationFrame(0, 1, 1);
           SetCharacterUnk188(0, 1);
         }
+
         SetCharacterLighting(0, 1);
         ClearGameFlag(0xF);
         StartPlayerShot(playerIndex);
@@ -2984,6 +3162,7 @@ void UpdateTurns(void) {
               g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
               g_CurrentShot.shotMode);
         }
+
         PlaceCharacterForShot(0);
         UpdateGolferTranslucency();
         if (D_801B60B9) {
@@ -2992,6 +3171,7 @@ void UpdateTurns(void) {
           } else {
             func_800600C0(g_Players[playerIndex].strokeCount);
           }
+
           D_80227194_ovl_00 = 1;
         } else if (IsGameFlagSet(0x32) || g_Players[playerIndex].unk1E[0] ||
             IsGameFlagSet(0x9B)) {
@@ -3008,6 +3188,7 @@ void UpdateTurns(void) {
         } else {
           D_80227194_ovl_00 = 0;
         }
+
         D_8022B5C0_ovl_00 = 0;
         D_80223E44_ovl_00 = 0;
         if (!D_801B60B9 &&
@@ -3021,6 +3202,7 @@ void UpdateTurns(void) {
           g_RoundHud.skinsTotals[playerIndex] =
               GetNetScoreToPar(g_HoleIndex, playerIndex);
         }
+
         switch (GetHolingOutStakes(playerIndex)) {
           case 3:
             break;
@@ -3035,6 +3217,7 @@ void UpdateTurns(void) {
             if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
               StartMovie(9);
             }
+
             break;
         }
         {
@@ -3149,9 +3332,11 @@ void UpdateTurns(void) {
                 }
               }
             }
+
             PlaySong(song, 0x11);
           }
         }
+
         StartShotPanel();
         nextState = 0x15;
         if (!D_800C3094) {
@@ -3162,6 +3347,7 @@ void UpdateTurns(void) {
             func_8005F1C8();
           }
         }
+
         StartTurnRumble(D_801B60A8);
         break;
       case 0x15:
@@ -3177,24 +3363,29 @@ void UpdateTurns(void) {
             }
           }
         }
+
         nextState = 0x15;
         if (IsHudAnimationDone()) {
           nextState = 2;
         }
+
         break;
       case 1:
         if (g_HoleIndex == GetFirstHoleIndex()) {
           UpdateHoleIntroCamera();
         }
+
         if (UpdateHoleIntroCamera()) {
           nextState = 2;
         }
+
         TurnAim(0);
         PlaceCharacterForShot(0);
         if (g_ScreenEffect == 3) {
           SetFramebufferCount(3);
           SetScreenEffect(4, 0);
         }
+
         break;
       case 2:
         D_80223FF8_ovl_00 = 0;
@@ -3222,6 +3413,7 @@ void UpdateTurns(void) {
           ResumeRound();
           break;
         }
+
         if (g_PauseScreen == 1) {
           s32 choice = UpdatePauseMenu(&g_TurnController);
 
@@ -3338,6 +3530,7 @@ void UpdateTurns(void) {
             SetFramebufferCount(3);
             SetScreenEffect(4, 0);
           }
+
           D_80227160_ovl_00 = 0;
           D_80227164_ovl_00 = 0;
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
@@ -3354,6 +3547,7 @@ void UpdateTurns(void) {
             BuildShotPreview(&D_80227150_ovl_00, state);
             break;
           }
+
           SetCharacterSlotAlpha(0,
               (sinf(g_Players[playerIndex].stopwatchFrameCount * 0.20933335f) *
                   32.0f) +
@@ -3366,12 +3560,15 @@ void UpdateTurns(void) {
             if (D_80227184_ovl_00 > 155.0f) {
               D_80227184_ovl_00 = 155.0f;
             }
+
             if (IsGameFlagSet(0x2A)) {
               sprintf(g_PrintBuffer, "tempo:%5.2f", D_80227184_ovl_00);
               PrintDebugText(g_PrintBuffer, 10, 10);
             }
+
             tempo = D_80227184_ovl_00;
           }
+
           SetSongTempo(tempo);
           replayKind = D_80227194_ovl_00;
           if (replayKind == 2) {
@@ -3379,6 +3576,7 @@ void UpdateTurns(void) {
               SetScreenEffect(3, 2);
               SetFramebufferCount(2);
             }
+
             StartTurnTimer();
             for (i = 0; D_80227194_ovl_00 == 2 && i < 400; i++) {
               D_80227194_ovl_00 = (GetPlannedShot(&D_80104F78) != -1) ? 1 : 2;
@@ -3386,17 +3584,21 @@ void UpdateTurns(void) {
                 break;
               }
             }
+
             D_80223E58_ovl_00 *= 1.05f;
             if (D_80223E58_ovl_00 > 0x800) {
               D_80223E58_ovl_00 = 0x800;
             }
+
             if (D_80227194_ovl_00 == 2) {
               break;
             }
           }
+
           if (replayKind != 0 && D_8022B5C0_ovl_00 < 30) {
             break;
           }
+
           UnloadOverlay(GetOverlayOfModule(7));
           if (D_80227194_ovl_00 == 1) {
             isReady = StepToClubChoice(&D_80104F78);
@@ -3404,8 +3606,10 @@ void UpdateTurns(void) {
             if (!g_IsSettingImpactPoint) {
               HandleClubInput();
             }
+
             HandleShotModeInput();
           }
+
           PoseGolferForShot();
           D_80224000_ovl_00 = GetAnimationEventFrame(0,
               GetAnimationIndex(0,
@@ -3417,15 +3621,18 @@ void UpdateTurns(void) {
           if (IsGameFlagSet(0x47)) {
             DebugPlaceBall(playerIndex);
           }
+
           if (isReady) {
             isReady = UpdateAimControls() && isReady;
           }
+
           D_80227150_ovl_00.unk0 = g_CurrentShot.unk0;
           PlaceCharacterForShot(0);
           UpdateGolferTranslucency();
           if (!(D_800C308C == 0 || D_800C308C == 5) && g_ScreenEffect == 3) {
             SetScreenEffect(4, 0);
           }
+
           if (D_800C308C == 0 || D_800C308C == 5) {
             if (g_CurrentShot.shotMode == SHOT_MODE_APPROACH) {
               SetSwingAnimation(0,
@@ -3441,12 +3648,14 @@ void UpdateTurns(void) {
                 g_CurrentShot.shotMode);
             SetAnimationSpeed(0, 0.0f);
           }
+
           if ((D_80227194_ovl_00 != 0 && isReady) ||
               (D_80227194_ovl_00 == 0 && D_800C3074 == 1)) {
             D_800C30D1 = 0;
             if (g_CurrentShot.shotMode != SHOT_MODE_APPROACH) {
               SkipToAnimationEnd(0);
             }
+
             g_CurrentShot.unk40 = 0;
             g_CurrentShot.unk4 = 0;
             g_CurrentShot.unk8 = 0;
@@ -3458,6 +3667,7 @@ void UpdateTurns(void) {
               SetScreenEffect(3, 2);
             }
           }
+
           g_RoundHud.clubHeadTilt =
               GetAimSlopeAngle(&g_Players[playerIndex], &D_80227150_ovl_00);
           g_RoundHud.lieTilt =
@@ -3467,6 +3677,7 @@ void UpdateTurns(void) {
           } else {
             g_RoundHud.unk84[1] = 0;
           }
+
           if (g_IsSettingImpactPoint == 1) {
             if (D_80227194_ovl_00 == 0) {
               g_CurrentShot.unk14 = GetTurnStickX();
@@ -3479,10 +3690,12 @@ void UpdateTurns(void) {
             g_CurrentShot.unk14 = 0;
             g_CurrentShot.unk18 = 0;
           }
+
           g_CurrentShot.unk40 = 0;
           if (IsGameFlagSet(0x32)) {
             g_CurrentShot.unk40 = D_80104F78.unk4;
           }
+
           SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
           D_80227160_ovl_00 = g_CurrentShot.unk14;
           D_80227164_ovl_00 = g_CurrentShot.unk18;
@@ -3507,12 +3720,15 @@ void UpdateTurns(void) {
             } else {
               g_RoundHud.flags = 0x47;
             }
+
             if (g_IsSettingImpactPoint == 1) {
               g_RoundHud.flags = (g_RoundHud.flags | 8) & ~2;
             }
           }
+
           BuildShotPreview(&D_80227150_ovl_00, state);
         }
+
         break;
       case 4:
         UpdateImpactPointMode();
@@ -3522,6 +3738,7 @@ void UpdateTurns(void) {
         if (g_RoundHud.greenGridState == 1) {
           g_RoundHud.greenGridState = 2;
         }
+
         g_RoundHud.unkF = 0;
         g_RoundHud.unk12 = 0;
         if (D_800C3084 & 2) {
@@ -3529,6 +3746,7 @@ void UpdateTurns(void) {
         } else {
           g_RoundHud.flags = 0x18;
         }
+
         if (D_80227194_ovl_00 == 0) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
@@ -3536,6 +3754,7 @@ void UpdateTurns(void) {
           g_CurrentShot.unk14 = 0;
           g_CurrentShot.unk18 = 0;
         }
+
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
         D_80227160_ovl_00 = g_CurrentShot.unk14;
         D_80227164_ovl_00 = g_CurrentShot.unk18;
@@ -3551,6 +3770,7 @@ void UpdateTurns(void) {
           if (g_Players[playerIndex].strokeCount >= 100) {
             g_Players[playerIndex].strokeCount = 99;
           }
+
           if (GetSelectedClub()->surfaceMask & CLUB_SURFACE_GREEN) {
             if (GetSurfaceInfo(g_CurrentShot.surface)->kind == 0xB) {
               g_Players[playerIndex].unk24++;
@@ -3558,6 +3778,7 @@ void UpdateTurns(void) {
                 g_Players[playerIndex].unk24 = 99;
               }
             }
+
             D_8022715C_ovl_00 = 0;
             D_80227160_ovl_00 = 0;
             D_80227164_ovl_00 = 0;
@@ -3565,6 +3786,7 @@ void UpdateTurns(void) {
             if (g_ScreenEffect == 3) {
               SetScreenEffect(4, 0);
             }
+
             sound = SOUND_IMPACT_OFF_MARK;
           } else {
             nextState = 5;
@@ -3575,6 +3797,7 @@ void UpdateTurns(void) {
               sound = SOUND_IMPACT_OFF_MARK;
             }
           }
+
           PlaySound(sound, g_NextSoundChannel, IMPACT_SOUND_VOLUME);
         } else if (g_CurrentShot.unk40 >= 59 ||
             (D_80227194_ovl_00 == 0 &&
@@ -3587,9 +3810,11 @@ void UpdateTurns(void) {
           if (g_RoundHud.greenGridState != 0) {
             g_RoundHud.greenGridState = 1;
           }
+
           g_RoundHud.unkF = 1;
           g_RoundHud.unk12 = 1;
         }
+
         g_CurrentShot.unk40++;
         break;
       case 5:
@@ -3602,6 +3827,7 @@ void UpdateTurns(void) {
         } else {
           g_RoundHud.flags = 0x28;
         }
+
         if (D_80227194_ovl_00 == 0) {
           g_CurrentShot.unk14 = GetTurnStickX();
           g_CurrentShot.unk18 = GetTurnStickY();
@@ -3619,6 +3845,7 @@ void UpdateTurns(void) {
             g_CurrentShot.unk18 = D_80104F78.unk18 * (10 - framesLeft) / 10;
           }
         }
+
         SetShotOffsetMarker(g_CurrentShot.unk14, g_CurrentShot.unk18);
         D_80227160_ovl_00 = g_CurrentShot.unk14;
         D_80227164_ovl_00 = g_CurrentShot.unk18;
@@ -3631,9 +3858,11 @@ void UpdateTurns(void) {
           if (D_8022715C_ovl_00 > 6) {
             D_8022715C_ovl_00 = 6;
           }
+
           if (D_8022715C_ovl_00 < -6) {
             D_8022715C_ovl_00 = -6;
           }
+
           PlayImpactClickSound();
           StopSound(8);
           nextState = 6;
@@ -3643,6 +3872,7 @@ void UpdateTurns(void) {
               g_Players[playerIndex].unk28--;
             }
           }
+
           if (g_ScreenEffect == 3) {
             SetScreenEffect(4, 0);
           }
@@ -3660,19 +3890,23 @@ void UpdateTurns(void) {
             SetPlaysRandomTextureAnimation(0, 0);
           }
         }
+
         if (g_IsDebugEnabled &&
             (g_TurnController.pressedButtons & (B_BUTTON | D_CBUTTONS))) {
           g_CurrentShot.unk8 = g_CurrentShot.unk40;
           if (g_TurnController.pressedButtons & B_BUTTON) {
             D_80227158_ovl_00 = 0x100;
           }
+
           D_8022715C_ovl_00 = 0;
           if (D_8022715C_ovl_00 > 6) {
             D_8022715C_ovl_00 = 6;
           }
+
           if (D_8022715C_ovl_00 < -6) {
             D_8022715C_ovl_00 = -6;
           }
+
           PlayImpactClickSound();
           StopSound(8);
           nextState = 6;
@@ -3680,6 +3914,7 @@ void UpdateTurns(void) {
             SetScreenEffect(4, 0);
           }
         }
+
         break;
       case 6: {
         s32 shotMode;
@@ -3697,12 +3932,15 @@ void UpdateTurns(void) {
         if (IsRecordableHoleOut(playerIndex)) {
           RecordHoleOut(playerIndex);
         }
+
         if (IsRingShotRound()) {
           RecordRingShotHole(playerIndex);
         }
+
         if (IsGameFlagSet(0x32)) {
           SetGameFlag(0xF);
         }
+
         D_8022400C_ovl_00 = 0;
         D_80224008_ovl_00 = 0;
         if (!D_80224004_ovl_00) {
@@ -3713,9 +3951,11 @@ void UpdateTurns(void) {
             if (D_8022716C_ovl_00 == 0) {
               power *= 6;
             }
+
             if (D_8022716C_ovl_00 == 1) {
               power *= 3;
             }
+
             if (power >= 0x80) {
               shotMode = 1;
             } else {
@@ -3728,6 +3968,7 @@ void UpdateTurns(void) {
                 D_8022400C_ovl_00 = (3.0f / speed) - 3.0f;
               }
             }
+
             if (D_80223FF8_ovl_00 < 2) {
               D_80224000_ovl_00 = GetAnimationEventFrame(0,
                   GetAnimationIndex(0,
@@ -3739,6 +3980,7 @@ void UpdateTurns(void) {
           } else {
             shotMode = g_CurrentShot.shotMode;
           }
+
           SetCharacterAnimation(0,
               GetSwingAnimation(0,
                   g_Players[playerIndex].clubs[g_CurrentShot.clubSlot],
@@ -3753,9 +3995,11 @@ void UpdateTurns(void) {
                 D_80227190_ovl_00 = 0;
               }
             }
+
             AdvanceAnimation(0, D_80227190_ovl_00);
           }
         }
+
         D_80224004_ovl_00 = 0;
         SetAnimationSpeed(0, 1.0f);
         nextState = 8;
@@ -3773,21 +4017,25 @@ void UpdateTurns(void) {
             StartSwingTrail(1);
           }
         }
+
         ReuseLastCharacterMatrices(0);
         if (D_80224008_ovl_00 != 0 &&
             D_80227170_ovl_00[playerIndex] + D_80224008_ovl_00 ==
                 D_80224000_ovl_00) {
           SetAnimationSpeed(0, D_80227180_ovl_00);
         }
+
         if (D_80227170_ovl_00[playerIndex] >=
                 D_80224000_ovl_00 + D_8022400C_ovl_00 ||
             (IsGameFlagSet(0xF) && D_80227170_ovl_00[playerIndex] >= 4)) {
           if (IsBButtonHeld()) {
             D_80223FFC_ovl_00 = 1;
           }
+
           if (g_IsModuleAlive[1] || ReportModuleNotAlive(1)) {
             ResetBallRotation();
           }
+
           LaunchBallSimulation(&g_TurnBallSimulation, 0, &D_80227150_ovl_00);
           nextState = 9;
           if (D_8022715C_ovl_00 == 0 && D_80227158_ovl_00 >= 0x100 &&
@@ -3806,6 +4054,7 @@ void UpdateTurns(void) {
         if (D_80224000_ovl_00 + 10 == D_80227170_ovl_00[playerIndex]) {
           StartSwingTrail(0);
         }
+
         ReuseLastCharacterMatrices(0);
         previousPosition[0] = g_BallPosition[0];
         previousPosition[1] = g_BallPosition[1];
@@ -3816,13 +4065,16 @@ void UpdateTurns(void) {
         if (D_80227170_ovl_00[playerIndex] == 30) {
           SetPlaysRandomTextureAnimation(0, 1);
         }
+
         if (IsBButtonHeld()) {
           D_80223FFC_ovl_00 = 1;
         }
+
         if (D_80223FF8_ovl_00 >= 2 && D_80227170_ovl_00[playerIndex] >= 40 &&
             D_80223FFC_ovl_00) {
           nextState = 6;
         }
+
         if (g_MergedController.buttons & (Z_TRIG | L_TRIG)) {
           u32 previousDistance =
               IntLength2D(previousPosition[0] - D_800BA9D8.cupPosition[0],
@@ -3838,11 +4090,13 @@ void UpdateTurns(void) {
                     (s32)distance < (s32)previousDistance)) {
               break;
             }
+
             StepBallSimulation(&g_TurnBallSimulation);
             TickStopwatches();
             isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
           }
         }
+
         if (D_80223FF8_ovl_00 >= 2 || g_IsDebugEnabled) {
           if (g_IsDebugEnabled) {
             if ((g_MergedController.buttons & (Z_TRIG | L_TRIG)) &&
@@ -3851,6 +4105,7 @@ void UpdateTurns(void) {
               func_80207660_ovl_00(&g_Players[playerIndex]);
               isCameraDone = UpdateFlightCamera(TRUE, g_TurnController.buttons);
             }
+
             if (IsGameFlagSet(0xF) ||
                 (g_TurnController.buttons & (Z_TRIG | L_TRIG))) {
               for (i = 0; i < 3; i++) {
@@ -3862,22 +4117,26 @@ void UpdateTurns(void) {
                       UpdateFlightCamera(TRUE, g_TurnController.buttons);
                 }
               }
+
               if (g_IsDebugEnabled &&
                   (g_TurnController.pressedButtons & (Z_TRIG | L_TRIG))) {
                 ToggleGameFlag(0xF);
               }
             }
           }
+
           if (g_MergedController.buttons & A_BUTTON) {
             while (g_TurnBallSimulation.isRunning) {
               StepBallSimulation(&g_TurnBallSimulation);
               TickStopwatches();
               UpdateFlightCamera(TRUE, g_TurnController.buttons);
             }
+
             ResetShotEffects();
             ClearShotEffects(2);
           }
         }
+
         if (!g_TurnBallSimulation.isRunning) {
           ClearShotEffects(0);
           nextState = 10;
@@ -3885,6 +4144,7 @@ void UpdateTurns(void) {
           D_80227170_ovl_00[playerIndex] = 0;
           ForceStopRumble();
         }
+
         break;
       }
       case 10: {
@@ -3895,9 +4155,11 @@ void UpdateTurns(void) {
             if (D_80227170_ovl_00[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }
+
             if (D_80227170_ovl_00[playerIndex] == 29) {
               StartBanner(-1);
             }
+
             if (D_80227170_ovl_00[playerIndex] == 30) {
               ShowHoleOutBanner(playerIndex);
             }
@@ -3905,6 +4167,7 @@ void UpdateTurns(void) {
             if (D_80227170_ovl_00[playerIndex] == 1) {
               PlayHoleOutSong(playerIndex);
             }
+
             if (D_80227170_ovl_00[playerIndex] == 29) {
               ShowHoleOutBanner(playerIndex);
             }
@@ -3913,9 +4176,11 @@ void UpdateTurns(void) {
             ShowHoleOutBanner(playerIndex);
           }
         }
+
         if (IsBButtonHeld()) {
           D_80223FFC_ovl_00 = 1;
         }
+
         if (D_80223FFC_ovl_00) {
           nextState = 6;
           StartLandingReaction(-1);
@@ -3941,6 +4206,7 @@ void UpdateTurns(void) {
             } else if (g_Players[playerIndex].strokeCount > g_HolePar * 3) {
               g_Players[playerIndex].strokeCount = g_HolePar * 3;
             }
+
             if ((s8)player->ballSurface != 0x17) {
               player->ballSurface =
                   GetSurface(player->ballPosition[0], player->ballPosition[2]);
@@ -3966,10 +4232,12 @@ void UpdateTurns(void) {
             player->ballPosition[2] = g_BallPosition[2];
             player->ballSurface = g_BallSurface;
           }
+
           if ((surfaceInfo->kind == 6 || surfaceInfo->kind == 7) ||
               (surfaceInfo->kind == 8 || surfaceInfo->kind == 9)) {
             player->unk9C = 1;
           }
+
           D_80227170_ovl_00[playerIndex] = 0;
           if (g_TurnBallSimulation.unkA0) {
             g_Players[playerIndex].unk26 = HOLE_STATUS_HOLED_OUT;
@@ -3987,6 +4255,7 @@ void UpdateTurns(void) {
                   GetHandicapOffset(GetCourseRecordIndex(g_GameMode),
                       g_HoleIndex, g_Players[playerIndex].handicap);
             }
+
             nextState = 0xB;
             g_Players[playerIndex]
                 .holes[g_HoleIndex % COURSE_HOLE_COUNT]
@@ -4031,6 +4300,7 @@ void UpdateTurns(void) {
                     .strokes = 0;
                 g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
               }
+
               if (GetGroupHoleResult(results) || results[playerIndex] == 2) {
                 g_Players[playerIndex].unk26 = HOLE_STATUS_OUT;
                 g_Players[playerIndex]
@@ -4058,12 +4328,15 @@ void UpdateTurns(void) {
                   g_Players[playerIndex].stopwatchFrameCount =
                       STOPWATCH_MAX_FRAMES;
                 }
+
                 if (g_GameState.stopwatchFrameCount > STOPWATCH_MAX_FRAMES) {
                   g_GameState.stopwatchFrameCount = STOPWATCH_MAX_FRAMES;
                 }
+
                 if (g_HoleTimeFrames[g_HoleIndex] > STOPWATCH_MAX_FRAMES) {
                   g_HoleTimeFrames[g_HoleIndex] = STOPWATCH_MAX_FRAMES;
                 }
+
                 nextState = 0xB;
               }
             } else {
@@ -4071,10 +4344,12 @@ void UpdateTurns(void) {
               if (!IsGameFlagSet(0x32)) {
                 StartHudAnimation(2);
               }
+
               nextState = 0x10;
             }
           }
         }
+
         break;
       }
       case 0xB: {
@@ -4086,9 +4361,11 @@ void UpdateTurns(void) {
           FreeCharacterAndReactionLight(0);
           break;
         }
+
         if (g_HoleConditions.sceneColorIndex == 0xB) {
           StartFireworks();
         }
+
         ClearReactionSpot();
         ConsiderReactionSpot(g_CurrentShot.ballPosition);
         ConsiderReactionSpot(D_800BA9D8.cupPosition);
@@ -4102,6 +4379,7 @@ void UpdateTurns(void) {
           character = g_Players[playerIndex].characterIndex;
           palette = g_Players[playerIndex].paletteIndex;
         }
+
         LoadCharacter(0, character + CHARACTER_COUNT, palette);
         SetCharacterLighting(0, 1);
         memset(&g_RoundHud, 0, sizeof(g_RoundHud));
@@ -4133,17 +4411,20 @@ void UpdateTurns(void) {
               break;
           }
         }
+
         StartReaction(0, g_Players[playerIndex].characterIndex, reaction);
         SetCharacterAnimation(0, reaction);
         if (IsGameFlagSet(0x3E) && D_80223FF4_ovl_00) {
           SetCharacterAnimation(0, D_80223FF6_ovl_00);
           StartReaction(0, D_80223FF5_ovl_00, D_80223FF6_ovl_00);
         }
+
         D_80224000_ovl_00 =
             GetCurrentAnimationEndFrame(0) - GetAnimationFrame(0) + 10;
         if (IsGameFlagSet(0x32)) {
           D_80224000_ovl_00 = 15;
         }
+
         PlaceAndViewCharacter(0);
         D_80223FF7_ovl_00 = 1;
         if (g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
@@ -4163,9 +4444,11 @@ void UpdateTurns(void) {
             }
           }
         }
+
         if (g_Players[playerIndex].strokeCount - g_HolePar < 0) {
           ReportBirdieBadgeCount();
         }
+
         nextState = 0xC;
         D_80227170_ovl_00[playerIndex] = 0;
         break;
@@ -4177,9 +4460,11 @@ void UpdateTurns(void) {
         if (D_80227170_ovl_00[playerIndex] == D_80224000_ovl_00 - 10) {
           StartBanner(-1);
         }
+
         if (g_HoleConditions.sceneColorIndex == 0xB) {
           D_80224000_ovl_00 = 160;
         }
+
         if (D_80227170_ovl_00[playerIndex] >= D_80224000_ovl_00) {
           StopFireworks();
           if (g_GameMode == GAME_MODE_TRAINING) {
@@ -4197,14 +4482,17 @@ void UpdateTurns(void) {
           } else {
             nextState = 0x12;
           }
+
           D_80227170_ovl_00[playerIndex] = 0;
         }
+
         break;
       case 0xF:
         if (g_GameMode == GAME_MODE_TRAINING) {
           if (IsGameFlagSet(0x3E) && g_Players[playerIndex].unk26 != 0) {
             DebugTestGutsMotion();
           }
+
           switch (UpdateChoiceBox(&g_TurnController)) {
             case 3:
               EndFlightCamera();
@@ -4225,12 +4513,14 @@ void UpdateTurns(void) {
                   IsRecordableHoleOut(playerIndex)) {
                 InsertRankedRecord(&D_800FEDD8[playerIndex]);
               }
+
               nextState = 0x14;
               EndFlightCamera();
               FreeCharacterAndReactionLight(0);
               if (IsGameFlagSet(0x3E)) {
                 nextState = 0xB;
               }
+
               ForceStopRumble();
               break;
             case 7:
@@ -4260,6 +4550,7 @@ void UpdateTurns(void) {
               break;
           }
         }
+
         break;
       case 0x10:
         nextState = 0x11;
@@ -4272,6 +4563,7 @@ void UpdateTurns(void) {
             g_Players[playerIndex].unk26 == HOLE_STATUS_HOLED_OUT) {
           InsertRankedRecord(&D_800FEDD8[playerIndex]);
         }
+
         CheckRingShotClear(playerIndex);
         if (D_80227170_ovl_00[playerIndex] == 1) {
           StartBanner(-1);
@@ -4290,6 +4582,7 @@ void UpdateTurns(void) {
                 isAnyOut = TRUE;
               }
             }
+
             nextState = (!isHoleOver && isAnyOut) ? 0x16 : 0x14;
           } else {
             nextState = 0x14;
@@ -4347,6 +4640,7 @@ void UpdateTurns(void) {
             }
           }
         }
+
         break;
       case 0x16:
         for (i = 0; i < g_PlayerCount; i++) {
@@ -4354,20 +4648,24 @@ void UpdateTurns(void) {
             break;
           }
         }
+
         if (i == g_PlayerCount) {
           nextState = 0x14;
           break;
         }
+
         if (IsCharacterSlotBusy(0)) {
           FreeCharacterAndReactionLight(0);
           break;
         }
+
         for (i = 0; i < g_PlayerCount; i++) {
           if (g_Players[i].unk26 == 2) {
             g_Players[i].unk26 = HOLE_STATUS_OUT;
             break;
           }
         }
+
         nextState = 0x14;
         if (i != g_PlayerCount) {
           ClearReactionSpot();
@@ -4387,6 +4685,7 @@ void UpdateTurns(void) {
           nextState = 0x17;
           D_80227170_ovl_00[playerIndex] = 0;
         }
+
         break;
       case 0x17:
         PlaceAndViewCharacter(0);
@@ -4395,12 +4694,14 @@ void UpdateTurns(void) {
         if (D_80227170_ovl_00[playerIndex] == 80) {
           ShowFlipMessage(-1);
         }
+
         if (D_80227170_ovl_00[playerIndex] == 90) {
           StartBanner(-1);
           nextState = 0x16;
           ClearDebugText();
           D_80227170_ovl_00[playerIndex] = 0;
         }
+
         break;
       default:
         SetDebugTextHighlight(1);
@@ -4408,23 +4709,28 @@ void UpdateTurns(void) {
         nextState = 2;
         break;
     }
+
     g_Players[playerIndex].unkC = nextState;
     g_BallSimulations[0] = g_TurnBallSimulation;
     g_PreviousBallSurfaceInfo = D_80227150_ovl_00;
   }
+
   MarkNearbyGroundTiles(
       g_CurrentShot.ballPosition[0], g_CurrentShot.ballPosition[2]);
   GetBallSurfaceInfo(&g_Players[D_801B60A8], &D_80227150_ovl_00);
   if (areCallsAllowed) {
     PlayWaitingPlayersCalls();
   }
+
   AnimateAllCharacters();
   if (D_80223FF7_ovl_00) {
     UpdateReaction(0);
   }
+
   if (IsGameFlagSet(0x4A)) {
     FrameBallAndShot();
   }
+
   if (g_RoundHud.unkF) {
     s32 distance = GetSelectedShotDistance();
     f32 angle = (u16)g_CurrentShot.unk0 * 0.0000958738f;
@@ -4439,6 +4745,7 @@ void UpdateTurns(void) {
       cosine = cosf(angle);
       scale = 14045.184f;
     }
+
     length = distance * scale;
     g_CurrentShot.unk44[0] = (cosine * length) + g_CurrentShot.ballPosition[0];
     g_CurrentShot.unk44[2] =
@@ -4446,6 +4753,7 @@ void UpdateTurns(void) {
     g_CurrentShot.unk44[1] =
         GetGroundHeight(g_CurrentShot.unk44[0], g_CurrentShot.unk44[2]);
   }
+
   UpdateGolfBalls();
 }
 #else

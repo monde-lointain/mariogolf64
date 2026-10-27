@@ -84,10 +84,12 @@ float acosf(float x) {
     /* NaN without fast math; the game's flags fold this to 0 */
     return (x - x) / (x - x);
   }
+
   if (magnitude < 0x3F000000) { /* |x| < 0.5 */
     if (magnitude <= 0x23000000) { /* |x| <= 2^-57 */
       return f_HalfPiHigh + f_HalfPiLow;
     }
+
     z = x * x;
     p = z *
         (f_AsinP0 +
@@ -171,9 +173,11 @@ float atan2f(float y, float x) {
   if ((xMagnitude > INFINITY_WORD) || (yMagnitude > INFINITY_WORD)) {
     return x + y;
   }
+
   if (xWord == ONE_WORD) {
     return atanf(y);
   }
+
   /* Bit 0 is the sign of y and bit 1 the sign of x */
   quadrant = ((yWord >> 31) & 1) | ((xWord >> 30) & 2);
 
@@ -188,9 +192,11 @@ float atan2f(float y, float x) {
         return -f_Pi - f_Tiny;
     }
   }
+
   if (xMagnitude == 0) {
     return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
   }
+
   if (xMagnitude == INFINITY_WORD) {
     if (yMagnitude == INFINITY_WORD) {
       switch (quadrant) {
@@ -216,6 +222,7 @@ float atan2f(float y, float x) {
       }
     }
   }
+
   if (yMagnitude == INFINITY_WORD) {
     return (yWord < 0) ? -f_HalfPi - f_Tiny : f_HalfPi + f_Tiny;
   }
@@ -228,6 +235,7 @@ float atan2f(float y, float x) {
   } else {
     z = atanf(fabsf(y / x));
   }
+
   switch (quadrant) {
     case 0:
       return z;
@@ -290,18 +298,21 @@ float atanf(float x) {
     if (magnitude > INFINITY_WORD) {
       return x + x;
     }
+
     if (word > 0) {
       return f_AtanHigh[3] + f_AtanLow[3];
     } else {
       return -f_AtanHigh[3] - f_AtanLow[3];
     }
   }
+
   if (magnitude < 0x3EE00000) { /* |x| < 7/16 */
     if (magnitude < 0x31000000) { /* |x| < 2^-29 */
       if (f_Huge + x > f_One) {
         return x;
       }
     }
+
     reductionIndex = -1;
   } else {
     x = fabsf(x);
@@ -323,6 +334,7 @@ float atanf(float x) {
       }
     }
   }
+
   z = x * x;
   w = z * z;
   oddSum = z *

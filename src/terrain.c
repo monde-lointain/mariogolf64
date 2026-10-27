@@ -152,22 +152,27 @@ s32 GetTerrainCode(s32 column, s32 row) {
   } else if (column >= 256) {
     column = 255;
   }
+
   if (row < 0) {
     row = 0;
   } else if (row >= 512) {
     row = 511;
   }
+
   block = (g_TerrainCodeCells[0] + (column / 16))[(row / 16) * 16];
   if (block == -1) {
     return -1;
   }
+
   if (block >= 0) {
     return block;
   }
+
   offset = ((column & 0xF) >> 1) + ((row & 0xF) * 8) + ((block & 0x7FFF) * 128);
   if (!(column & 1)) {
     return g_WorkArea.hole.terrainCodes[offset] >> 4;
   }
+
   return g_WorkArea.hole.terrainCodes[offset] & 0xF;
 }
 
@@ -193,10 +198,12 @@ s32 FindNearestTerrainColor(s32 color) {
     if (red < 0) {
       red = -red;
     }
+
     green = colorGreen - f_TerrainColors[i].green;
     if (green < 0) {
       green = -green;
     }
+
     blue = colorBlue - f_TerrainColors[i].blue;
     distance = red + green + ABS(blue);
     if (distance < nearestDistance) {
@@ -204,6 +211,7 @@ s32 FindNearestTerrainColor(s32 color) {
       nearestIndex = i;
     }
   }
+
   return nearestIndex;
 }
 
@@ -243,6 +251,7 @@ s32 GetTerrainCodeColor(s32 code) {
       colorIndex = 10;
       break;
   }
+
   return (f_TerrainColors[colorIndex].red << 11) |
       (f_TerrainColors[colorIndex].green << 6) |
       (f_TerrainColors[colorIndex].blue << 1) |
@@ -272,6 +281,7 @@ s32 GetColorTerrainCode(s32 color) {
     case 10:
       return TERRAIN_CODE_DEEP_ROUGH;
   }
+
   return TERRAIN_CODE_OUT_OF_BOUNDS;
 }
 
@@ -288,6 +298,7 @@ void GetSurfacePercentRange(SurfaceInfo* info, Club* club, s32* range) {
     if (range[0] < 5) {
       range[0] = 5;
     }
+
     range[1] = info->maxPercent - info->wrongClubPenalty;
     if (range[1] < 5) {
       range[1] = 5;
@@ -323,12 +334,14 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
       (u32)(shiftedZ - 0x3C00) > 0xF87FF) {
     return SURFACE_OUT_OF_COURSE;
   }
+
   if (FindHoleTriangleHit(shiftedX, -MINI_GOLF_WATER_PROBE_REACH, shiftedZ,
           shiftedX, MINI_GOLF_WATER_PROBE_REACH, shiftedZ, &hit, &fraction)) {
     waterBias = WATER_BIAS;
     if (lowersWaterLevel) {
       waterBias = LOWERED_WATER_BIAS;
     }
+
     if (IsGameFlagSet(0x9F)) {
       char text[0x80];
 
@@ -337,6 +350,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
               waterBias));
       PrintDebugText(text, 10, 11);
     }
+
     if (hit.unk0 == HOLE_TRIANGLE_KIND_FLAT) {
       /* Reuses i as the water height to match */
       i = WATER_PROBE_HEIGHT(fraction, MINI_GOLF_WATER_PROBE_REACH) + waterBias;
@@ -345,6 +359,7 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
       }
     }
   }
+
   column = shiftedX / 4096;
   row = shiftedZ / 2048;
   stepColumn = ((shiftedX & 0xFFF) < 0x800) ? -1 : 1;
@@ -413,9 +428,11 @@ s32 GetMiniGolfSurface(s32 x, s32 z, s32 lowersWaterLevel) {
         weight = 0.0f;
         break;
     }
+
     surfaces[i] = surface;
     weights[i] = weight;
   }
+
   return surfaces[0];
 }
 
@@ -452,12 +469,15 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
   if (g_IsMiniGolf) {
     return GetMiniGolfSurface(x, z, lowersWaterLevel);
   }
+
   if ((u32)(x - 0x3C00) > 0x3F87FF) {
     return SURFACE_OUT_OF_COURSE;
   }
+
   if ((u32)(z - 0x3C00) > 0x7F87FF) {
     return SURFACE_OUT_OF_COURSE;
   }
+
   if (FindHoleTriangleHit(
           x, -WATER_PROBE_REACH, z, x, WATER_PROBE_REACH, z, &hit, &fraction)) {
     char unusedText[0x80]; /* Unused, but keeps the stack frame the same size as
@@ -467,11 +487,13 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
     if (lowersWaterLevel) {
       waterBias = LOWERED_WATER_BIAS;
     }
+
     if ((s32)(WATER_PROBE_HEIGHT(fraction, WATER_PROBE_REACH) + waterBias) <
         GetTerrainHeight(x, z)) {
       return SURFACE_WATER_HAZARD;
     }
   }
+
   column = x / 16384;
   row = z / 16384;
   fractionX = x & 0x3FFF;
@@ -542,17 +564,21 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
         weight = 0.0f;
         break;
     }
+
     surfaces[i] = surface;
     weights[i] = weight;
   }
+
   for (i = 1; i < 4; i++) {
     if (surfaces[i] != surfaces[0]) {
       break;
     }
   }
+
   if (i == 4) {
     return surface;
   }
+
   distanceX = ABS(0x2000 - fractionX);
   distanceZ = ABS(0x2000 - fractionZ);
   if (((stepColumn + 1) ^ (stepRow + 1)) == 0) {
@@ -579,19 +605,23 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
         (3.7252903e-9f * ((f32)distanceX * (f32)(0x4000 - distanceZ)));
     weights[2] = weights[3] * (f32)distanceZ * 6.1035156e-5f;
   }
+
   if (surfaces[0] == surfaces[1]) {
     weights[0] += weights[1];
     weights[1] = 0.0f;
   }
+
   if (surfaces[0] == surfaces[2]) {
     weights[0] += weights[2];
     weights[2] = 0.0f;
   }
+
   bestIndex = 0;
   if (surfaces[1] == surfaces[2]) {
     weights[1] += weights[2];
     weights[2] = 0.0f;
   }
+
   bestWeight = 0.0f;
   for (i = 0; i < 3; i++) {
     if (bestWeight < weights[i]) {
@@ -599,6 +629,7 @@ s32 FindSurface(s32 x, s32 z, s32 lowersWaterLevel) {
       bestWeight = weights[i];
     }
   }
+
   return surfaces[bestIndex];
 }
 
@@ -623,9 +654,11 @@ u16 GetMapColor(s32 x, s32 z) {
   if ((u32)x >= 0x400000) {
     return 0;
   }
+
   if ((u32)z >= 0x800000) {
     return 0;
   }
+
   column = x / 16384;
   row = z / 16384;
   return MAP_TEXEL(column, row) | 1;
@@ -685,10 +718,12 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
       code = TERRAIN_CODE_CART_WAY;
       break;
   }
+
   if (code >= 0) {
     groundRed = groundColor >> 11;
     groundGreen = (groundColor >> 6) & 0x1F;
     surfaceColor = g_TerrainCodeColors[code];
+
     /* The original assigns the surface's blue to the ground's and never sets
      * surfaceBlue. */
     groundBlue = (surfaceColor >> 1) & 0x1F;
@@ -701,6 +736,7 @@ s32 BlendSurfaceMapColor(s32 x, s32 z, s32 surface) {
     groundBlue = (groundBlue + surfaceBlue) / 2;
     return (groundRed << 11) | (groundGreen << 6) | (groundBlue << 1) | 1;
   }
+
   return groundColor;
 }
 
@@ -761,6 +797,7 @@ Vtx* GetGridVertex(u32 column, u32 row) {
         &g_WorkArea.hole
              .gridVertices[(row * 17) + (column >> 1) + ((column & 1) * 9)];
   }
+
   return vertex;
 }
 
@@ -780,6 +817,7 @@ void InitGridVertex(s32 column, s32 row, s32 height, u8 shade) {
   if (row == 32) {
     vertex->v.tc[1] = 0x7FFF;
   }
+
   vertex->v.cn[0] = shade;
   vertex->v.cn[1] = shade;
   vertex->v.cn[2] = shade;
@@ -819,6 +857,7 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
     } else {
       slotRow = row & 3;
     }
+
     if (column == 32) {
       tileColumn = 7;
       slotColumn = 4;
@@ -826,9 +865,11 @@ Vtx* GetGroundPoint(u32 column, u32 row) {
       tileColumn = column >> 2;
       slotColumn = column & 3;
     }
+
     return &g_WorkArea.hole.midpoints[(tileRow * 8) + tileColumn]
                                      [f_PointSlots[slotRow][slotColumn]];
   }
+
   return GetGridVertex(column >> 1, row >> 1);
 }
 
@@ -856,6 +897,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
         midpoint->v = *point;
       }
     }
+
     if (IsSharedWithPreviousTileRow(column, row)) {
       tileIndex = (((row / 4) - 1) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
@@ -865,6 +907,7 @@ s32 SetGroundPoint(s32 column, s32 row, Vtx_t* point) {
         midpoint->v = *point;
       }
     }
+
     if (IsSharedWithPreviousTileColumn(column, row)) {
       tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
@@ -895,10 +938,12 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[row & 3][column & 3]];
         point->v.ob[1] = height;
+
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
+
     if (IsSharedWithPreviousTileRow(column, row)) {
       tileIndex = (((row / 4) - 1) * 8) + (column / 4);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
@@ -906,10 +951,12 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[4][column & 3]];
         point->v.ob[1] = height;
+
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
+
     if (IsSharedWithPreviousTileColumn(column, row)) {
       tileIndex = ((row / 4) * 8) + ((column / 4) - 1);
       blockIndex = g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex;
@@ -917,6 +964,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[row & 3][4]];
         point->v.ob[1] = height;
+
         /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
@@ -946,11 +994,13 @@ void InitTerrainTextures(void) {
       }
     }
   }
+
   for (row = 0; row < 33; row++) {
     for (column = 0; column < 17; column++) {
       InitGridVertex(column, row, 0, 0x80);
     }
   }
+
   BuildAllTileMidpoints();
 }
 
@@ -970,6 +1020,7 @@ void BuildTileMidpoints(Vtx* midpoints, s32 tileColumn, s32 tileRow) {
           GetGridVertex((tileColumn * 2) + column, (tileRow * 2) + row);
     }
   }
+
   SetVertexMidpoint(CORNER(0, 0), CORNER(0, 1), &midpoints[0]);
   SetVertexMidpoint(CORNER(0, 1), CORNER(0, 2), &midpoints[1]);
   SetVertexMidpoint(CORNER(0, 0), CORNER(1, 0), &midpoints[2]);
@@ -1007,6 +1058,7 @@ void BuildAllTileMidpoints(void) {
       if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex >= 0) {
         BuildTileMidpoints(midpoints, tileColumn, tileRow);
       }
+
       tileIndex++;
     }
   }
@@ -1041,6 +1093,7 @@ void UpdateFlagPanel(void) {
         sprintf(text, "%X", column);
         PrintDebugText(text, textColumn, 12);
       }
+
       sprintf(text, "%X",
           IsGameFlagSet(
               ((row + f_FlagPanelFirstRow) * FLAG_PANEL_COLUMN_COUNT) +
@@ -1048,32 +1101,41 @@ void UpdateFlagPanel(void) {
       if (row == f_FlagPanelRow && column == f_FlagPanelColumn) {
         SetDebugTextHighlight(TRUE);
       }
+
       PrintDebugText(text, textColumn, row + 14);
     }
   }
+
   if (g_MenuControllerData[0].button & R_JPAD) {
     f_FlagPanelColumn++;
   }
+
   if (g_MenuControllerData[0].button & L_JPAD) {
     f_FlagPanelColumn--;
   }
+
   if (f_FlagPanelColumn < 0) {
     f_FlagPanelColumn = FLAG_PANEL_COLUMN_COUNT - 1;
     f_FlagPanelRow--;
   }
+
   if (f_FlagPanelColumn >= FLAG_PANEL_COLUMN_COUNT) {
     f_FlagPanelColumn = 0;
     f_FlagPanelRow++;
   }
+
   if (g_MenuControllerData[0].button & U_JPAD) {
     f_FlagPanelRow--;
   }
+
   if (g_MenuControllerData[0].button & D_JPAD) {
     f_FlagPanelRow++;
   }
+
   if (g_MenuControllerData[0].button & R_TRIG) {
     f_FlagPanelFirstRow += FLAG_PANEL_ROW_COUNT;
   }
+
   if (g_MenuControllerData[0].button & L_TRIG) {
     f_FlagPanelFirstRow -= FLAG_PANEL_ROW_COUNT;
   }
@@ -1088,15 +1150,19 @@ void UpdateFlagPanel(void) {
       break;
     }
   }
+
   if (f_FlagPanelFirstRow > FLAG_PANEL_FIRST_ROW_MAX) {
     f_FlagPanelFirstRow = FLAG_PANEL_FIRST_ROW_MAX;
   }
+
   if (f_FlagPanelFirstRow < 0) {
     f_FlagPanelFirstRow = 0;
   }
+
   if (g_MenuControllerData[0].button & A_BUTTON) {
     SetGameFlag(GetSelectedFlag());
   }
+
   if (g_MenuControllerData[0].button & B_BUTTON) {
     ClearGameFlag(GetSelectedFlag());
   }
@@ -1162,11 +1228,13 @@ s32 UpdateDebugSceneMenu(void) {
     PlaySound(0x5F, 15, 127);
     return;
   }
+
   for (selectedIndex = 0; selectedIndex < SCENE_MENU_LENGTH; selectedIndex++) {
     if (f_SceneMenuScenes[selectedIndex] == f_SceneMenuSelection) {
       break;
     }
   }
+
   for (i = 0, row = SCENE_MENU_TOP_ROW; i < SCENE_MENU_LENGTH; i++, row++) {
     if (i == selectedIndex) {
       SetDebugTextHighlight(TRUE);
@@ -1174,18 +1242,22 @@ s32 UpdateDebugSceneMenu(void) {
     } else {
       PrintDebugText("  ", 10, row);
     }
+
     PrintDebugText(GetDebugSceneLabel(f_SceneMenuScenes[i]), 12, row);
   }
+
   if (g_MenuControllerData[0].button & U_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH - 1) % SCENE_MENU_LENGTH;
     f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
     PlaySound(0x5C, 15, 127);
   }
+
   if (g_MenuControllerData[0].button & D_JPAD) {
     selectedIndex = (selectedIndex + SCENE_MENU_LENGTH + 1) % SCENE_MENU_LENGTH;
     f_SceneMenuSelection = f_SceneMenuScenes[selectedIndex];
     PlaySound(0x5C, 15, 127);
   }
+
   if (g_MenuControllerData[0].button & A_BUTTON) {
     ClearDebugText();
     f_IsSceneMenuOpen = FALSE;
@@ -1198,6 +1270,7 @@ s32 UpdateDebugSceneMenu(void) {
     } else {
       PlaySong(1, 0);
     }
+
     switch ((u32)g_Scene) {
       case SCENE_PLAY_HOLE:
         InitPlay(0);
@@ -1240,24 +1313,31 @@ void PrepareHoleTriangles(void) {
       if (vertex->ob[0] < lowest[0]) {
         lowest[0] = vertex->ob[0];
       }
+
       if (vertex->ob[0] > highest[0]) {
         highest[0] = vertex->ob[0];
       }
+
       if (vertex->ob[1] < lowest[1]) {
         lowest[1] = vertex->ob[1];
       }
+
       if (vertex->ob[1] > highest[1]) {
         highest[1] = vertex->ob[1];
       }
+
       if (vertex->ob[2] < lowest[2]) {
         lowest[2] = vertex->ob[2];
       }
+
       if (vertex->ob[2] > highest[2]) {
         highest[2] = vertex->ob[2];
       }
+
       vertex->tc[0] = vertex->ob[0];
       vertex->tc[1] = vertex->ob[2];
     }
+
     g_WorkArea.hole.triangles[triangleIndex].bounds[0][0] = lowest[0];
     g_WorkArea.hole.triangles[triangleIndex].bounds[1][0] = lowest[1];
     g_WorkArea.hole.triangles[triangleIndex].bounds[2][0] = lowest[2];
@@ -1265,6 +1345,7 @@ void PrepareHoleTriangles(void) {
     g_WorkArea.hole.triangles[triangleIndex].bounds[1][1] = highest[1];
     g_WorkArea.hole.triangles[triangleIndex].bounds[2][1] = highest[2];
   }
+
   InitRings();
 }
 
@@ -1313,20 +1394,24 @@ void UpdateDebugScenes(void) {
     if (g_ControllerData[0].button & L_TRIG) {
       g_IsDebugEnabled = FALSE;
     }
+
     g_Scene = SCENE_BOOT_LOGOS;
     return;
   }
+
   if (IsGameFlagSet(0x1A)) {
     PrintDebugText(GetSurfaceInfoAt(
                        g_CurrentShot.unk44[AXIS_X], g_CurrentShot.unk44[AXIS_Z])
                        ->name,
         2, 4);
   }
+
   if (f_IsSceneMenuOpen && f_SceneMenuBox.state == openState) {
     UpdateDebugSceneMenu();
     QueueAnimatedBox(&f_SceneMenuBox);
     return;
   }
+
   if (IsSceneMenuRequested()) {
     if (IsOverlayInExpansionMemory()) {
       f_IsSceneMenuOpen = TRUE;
@@ -1339,6 +1424,7 @@ void UpdateDebugScenes(void) {
       MarkBillboardsOnMap();
       return;
     }
+
     if (g_Scene == SCENE_FLAG_PANEL) {
       ClearDebugText();
       g_Scene = f_SceneBeforeFlags;
@@ -1350,109 +1436,138 @@ void UpdateDebugScenes(void) {
       f_SceneBeforeFlags = g_Scene;
       g_Scene = SCENE_FLAG_PANEL;
     }
+
     return;
   }
+
   QueueAnimatedBox(&f_SceneMenuBox);
   if ((g_Scene != SCENE_PLAY_UNK12) & (g_Scene != SCENE_MENU)) {
     SetDebugTextHighlight(TRUE);
     PrintDebugText(GetDebugSceneLabel(g_Scene), 2, 3);
   }
+
   if (g_Scene == SCENE_UNK11) {
     func_80406818();
   }
+
   if (g_Scene == SCENE_FLAG_PANEL) {
     UpdateFlagPanel();
   }
+
   if (g_Scene == SCENE_UNK9) {
     func_8040000C();
   } else if (g_Scene == SCENE_UNK10) {
     func_804002C0();
   }
+
   if (g_Scene == SCENE_TREES) {
     func_80406C3C();
   }
+
   if (g_Scene == SCENE_TRIANGLES) {
     func_80402428();
   }
+
   if (g_Scene == SCENE_RINGS) {
     func_80402E1C();
   }
+
   if (g_Scene == SCENE_WALLS) {
     func_80403A04();
   }
+
   if (g_Scene == SCENE_MAP_OVERVIEW) {
     if (g_MenuControllerData[0].button & R_JPAD) {
       f_MapOverviewControls.cameraZ -= MAP_OVERVIEW_CAMERA_STEP;
     }
+
     if (g_MenuControllerData[0].button & L_JPAD) {
       f_MapOverviewControls.cameraZ += MAP_OVERVIEW_CAMERA_STEP;
     }
+
     if (g_MenuControllerData[0].button & D_JPAD) {
       f_MapOverviewControls.cameraX -= MAP_OVERVIEW_CAMERA_STEP;
     }
+
     if (g_MenuControllerData[0].button & U_JPAD) {
       f_MapOverviewControls.cameraX += MAP_OVERVIEW_CAMERA_STEP;
     }
+
     stickStep = g_MenuControllerData[0].stick_y / STICK_STEP_SIZE;
     if (stickStep != 0) {
       f_MapOverviewControls.cameraX += stickStep;
     }
+
     stickStep = g_MenuControllerData[0].stick_x / STICK_STEP_SIZE;
     if (stickStep != 0) {
       f_MapOverviewControls.cameraZ -= stickStep;
     }
+
     if (g_MenuControllerData[0].button & L_TRIG) {
       f_MapOverviewControls.adjustment -= MAP_OVERVIEW_ADJUSTMENT_STEP;
       if (f_MapOverviewControls.adjustment < MAP_OVERVIEW_ADJUSTMENT_MIN) {
         f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MIN;
       }
     }
+
     if (g_MenuControllerData[0].button & R_TRIG) {
       f_MapOverviewControls.adjustment += MAP_OVERVIEW_ADJUSTMENT_STEP;
       if (f_MapOverviewControls.adjustment > MAP_OVERVIEW_ADJUSTMENT_MAX) {
         f_MapOverviewControls.adjustment = MAP_OVERVIEW_ADJUSTMENT_MAX;
       }
     }
+
     if (g_MenuControllerData[0].button & Z_TRIG) {
       f_MapOverviewControls.isToggled ^= TRUE;
     }
+
     if (g_MenuControllerData[0].button & A_BUTTON) {
       f_MapOverviewControls.selectionIndex++;
       if (f_MapOverviewControls.selectionIndex >=
           MAP_OVERVIEW_SELECTION_COUNT) {
         f_MapOverviewControls.selectionIndex = 0;
       }
+
       f_MapOverviewControls.isToggled = FALSE;
     }
+
     if (g_MenuControllerData[0].button & B_BUTTON) {
       f_MapOverviewControls.selectionIndex--;
       if (f_MapOverviewControls.selectionIndex < 0) {
         f_MapOverviewControls.selectionIndex = MAP_OVERVIEW_SELECTION_COUNT - 1;
       }
+
       f_MapOverviewControls.isToggled = FALSE;
     }
+
     if (g_MenuControllerData[0].trigger & D_CBUTTONS) {
       func_8024F7B0();
     }
+
     if (g_MenuControllerData[0].trigger & R_CBUTTONS) {
       func_8024FF14();
     }
+
     if (g_MenuControllerData[0].trigger & U_CBUTTONS) {
       g_LightPitch = 0x3000;
       g_LightYaw = 0x2000;
       func_80253234(1);
     }
+
     if (g_MenuControllerData[0].trigger & L_CBUTTONS) {
       ToggleGroundTileBorders();
     }
+
     g_MapCamera.view.eye[0] =
         f_MapOverviewControls.cameraX * MAP_OVERVIEW_CAMERA_SCALE;
     g_MapCamera.view.eye[2] =
         f_MapOverviewControls.cameraZ * MAP_OVERVIEW_CAMERA_SCALE;
   }
+
   if (g_Scene == SCENE_HEIGHTS) {
     func_80404B84();
   }
+
   if (g_Scene == SCENE_PIN) {
     func_80400FBC();
   }
@@ -1471,6 +1586,7 @@ Vtx* GetTileCellPoint(Vtx* midpoints, s32 tileColumn, s32 tileRow, s32 slot) {
   } else {
     vertex = &midpoints[slot];
   }
+
   return vertex;
 }
 
@@ -1509,6 +1625,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
         IsOutsideEdge(third, first)) {
       return FALSE;
     }
+
     triangle->corners[AXIS_X][0] = first->v.ob[0];
     triangle->corners[AXIS_X][1] = second->v.ob[0];
     triangle->corners[AXIS_X][2] = third->v.ob[0];
@@ -1525,12 +1642,14 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
     if ((u32)x > 0xFFFFF) {
       return -1;
     }
+
     if ((u32)z > 0xFFFFF) {
       return -1;
     }
   } else if ((u32)x > 0x3FFFFF || (u32)z > 0x7FFFFF) {
     return -1;
   }
+
   if (g_IsMiniGolf) {
     baseColumn = (x >> 17) * 4;
     baseRow = (z >> 16) * 4;
@@ -1542,6 +1661,7 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
     slotColumn = (x >> 17) & 3;
     slotRow = (z >> 17) & 3;
   }
+
   for (rowIndex = 0; rowIndex < 4; rowIndex++) {
     Vtx* corners[4];
 
@@ -1555,12 +1675,14 @@ s32 FindGroundTriangle(s32 x, s32 z, PlaneTriangle* triangle) {
       if (ContainsPoint(corners[0], corners[1], corners[2])) {
         return 0;
       }
+
       corners[3] = GetGroundPoint(column + 1, row + 1);
       if (ContainsPoint(corners[1], corners[3], corners[2])) {
         return 0;
       }
     }
   }
+
   PrintDebugText("GetHeightInfo", 10, 11);
   return -1;
 }
@@ -1579,6 +1701,7 @@ s32 AreTrianglesDifferent(PlaneTriangle* first, PlaneTriangle* second) {
       return TRUE;
     }
   }
+
   return FALSE;
 }
 
@@ -1626,6 +1749,7 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
     normalZ /= 256;
     distance /= 256;
   }
+
   length =
       sqrt((normalX * normalX) + (normalY * normalY) + (normalZ * normalZ));
   if (length == 0) {
@@ -1637,9 +1761,11 @@ s32 GetTriangleIntegerPlane(PlaneTriangle* triangle, IntegerPlane* plane) {
     plane->unk10 = 256;
     return -1;
   }
+
   if (normalY < 0) {
     length = -length;
   }
+
   plane->unk10 = 256;
   plane->normal[AXIS_X] = (normalX << 8) / length;
   plane->normal[AXIS_Y] = (normalY << 8) / length;
@@ -1682,6 +1808,7 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
     if (g_IsDebugEnabled) {
       PrintDebugText("NormalFError", 3, 15);
     }
+
     plane->normal[AXIS_X] = 0.0f;
     plane->normal[AXIS_Z] = 0.0f;
     plane->distance = 0.0f;
@@ -1689,9 +1816,11 @@ s32 GetTrianglePlane(PlaneTriangle* triangle, TrianglePlane* plane) {
     plane->unk10 = 1.0f;
     return -1;
   }
+
   if (normalY < 0.0f) {
     length = -length;
   }
+
   scale = 1.0f / length;
   plane->unk10 = 1.0f;
   plane->normal[AXIS_X] = normalX * scale;
@@ -1726,6 +1855,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
         x = 0xFFFFF;
       }
     }
+
     if ((u32)z > 0xFFFFF) {
       if (z < 0) {
         z = 0;
@@ -1741,6 +1871,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
         x = 0x3FFFFF;
       }
     }
+
     if ((u32)z > 0x7FFFFF) {
       if (z < 0) {
         z = 0;
@@ -1749,9 +1880,11 @@ s32 GetTerrainHeight(s32 x, s32 z) {
       }
     }
   }
+
   if (FindGroundTriangle(x, z, &triangle) < 0) {
     return -300;
   }
+
   firstY = triangle.corners[AXIS_Y][1] - triangle.corners[AXIS_Y][0];
   secondZ = triangle.corners[AXIS_Z][2] - triangle.corners[AXIS_Z][0];
   secondY = triangle.corners[AXIS_Y][2] - triangle.corners[AXIS_Y][0];
@@ -1768,6 +1901,7 @@ s32 GetTerrainHeight(s32 x, s32 z) {
     return height +
         (s32)(((-normalX * offsetX) - (normalZ * offsetZ)) / normalY);
   }
+
   return 0;
 }
 
@@ -1796,6 +1930,7 @@ s32 GetGroundOrWaterHeight(s32 x, s32 z) {
       height = waterHeight;
     }
   }
+
   return height;
 }
 

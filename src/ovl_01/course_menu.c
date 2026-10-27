@@ -192,9 +192,11 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
   if ((s8)requestedKind < 0) {
     bufferKind = COURSE_BUFFER_FIRST;
   }
+
   if (bufferKind > COURSE_BUFFER_LAST) {
     bufferKind = COURSE_BUFFER_LAST;
   }
+
   switch (bufferKind) {
     case COURSE_BUFFER_FIRST:
       D_8023A814_ovl_01 = buffers;
@@ -206,11 +208,13 @@ void func_8020E0AC_ovl_01(void** buffers, s32 requestedKind) {
       D_8023A81C_ovl_01 = buffers;
       break;
   }
+
   if (memory->statsCourse != COURSE_COUNT) {
     for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
       OpenEncodedAsset(D_800C21B8[memory->statsCourse][0], &asset);
       ReadEncodedAsset(buffers[index], &asset);
     }
+
     for (index = 0; index != COURSE_FILE_COUNT; index++) {
       OpenAssetFile(D_800C2278[memory->statsCourse][index], &file);
       ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
@@ -273,9 +277,11 @@ void func_8020E390_ovl_01(void) {
   if (courseCount < 1) {
     courseCount = 1;
   }
+
   if (courseCount > COURSE_COUNT) {
     courseCount = COURSE_COUNT;
   }
+
   isDone = IsHudAnimationDone();
   if (isDone == TRUE) {
     if (g_MenuPressedButtons & B_BUTTON) {
@@ -286,6 +292,7 @@ void func_8020E390_ovl_01(void) {
       g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
       return;
     }
+
     if (memory->statsSpin == 0) {
       if (g_MenuRepeatButtons & R_JPAD) {
         PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
@@ -295,6 +302,7 @@ void func_8020E390_ovl_01(void) {
         if (memory->statsCourse > courseCount) {
           memory->statsCourse = 0;
         }
+
         memory->statsSpin = -STATS_TURN / (courseCount + 1);
         if (memory->statsCourse != courseCount) {
           D_802300A6_ovl_01 = 0;
@@ -315,6 +323,7 @@ void func_8020E390_ovl_01(void) {
         if (memory->statsCourse < 0) {
           memory->statsCourse = courseCount;
         }
+
         memory->statsSpin = STATS_TURN / (courseCount + 1);
         if (memory->statsCourse != courseCount) {
           D_802300A6_ovl_01 = 0;
@@ -339,13 +348,16 @@ void func_8020E390_ovl_01(void) {
         }
       }
     }
+
     if (ABS(memory->statsSpin) != 0) {
       direction = memory->statsSpin < 0 ? -1 : 1;
       step = STATS_SPIN_SPEED / (courseCount + 1);
       if (step == 0) {
         step = 1;
       }
+
       memory->statsSpin -= direction * step;
+
       /* Stop on reaching the course rather than turning past it */
       if ((memory->statsSpin < 0 ? -1 : 1) != direction) {
         memory->statsSpin = 0;
@@ -439,9 +451,11 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
   if (courseCount <= 0) {
     courseCount = 1;
   }
+
   if (courseCount > COURSE_COUNT) {
     courseCount = COURSE_COUNT;
   }
+
   statsCourse = memory->statsCourse;
   spin = memory->statsSpin;
   angleStep = DEGREES_PER_TURN / (courseCount + 1);
@@ -458,9 +472,11 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
       iconScale[index] = point.scaleX;
     }
   }
+
   for (sortIndex = 0; sortIndex != courseCount + 1; sortIndex++) {
     drawOrder[sortIndex] = sortIndex;
   }
+
   /* Draw the farthest images first, so the nearer ones cover them */
   for (sortIndex = 1; sortIndex != courseCount + 1; sortIndex++) {
     key = drawOrder[sortIndex];
@@ -468,11 +484,14 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
         index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
       drawOrder[index + 1] = drawOrder[index];
     }
+
     drawOrder[index + 1] = key;
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
   /* Nothing here reads D_802300DC */
   D_802300DC_ovl_01 += 0.1f;
   for (index = 0; index != courseCount + 1; index++) {
@@ -503,6 +522,7 @@ void func_8020E898_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   func_80212C54_ovl_01(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01,
@@ -555,6 +575,7 @@ void func_8020F2D0_ovl_01(
         (MENU_BANNER_STRIP_HEIGHT << 10) / COURSE_BANNER_STRIP_SPACING);
     gDPPipeSync(gfx++);
   }
+
   SetUpTextDrawing(&gfx);
   SetTextColor(&gfx, 255, 255, 255);
   if (!useCourseNames) {
@@ -571,6 +592,7 @@ void func_8020F2D0_ovl_01(
     sprintf(g_PrintBuffer, D_802318AC_ovl_01, courseIndex + 1,
         g_CourseRecords[courseIndex].name);
   }
+
   DrawCenteredLargeText(&gfx, SCREEN_WIDTH / 2, COURSE_NAME_Y, g_PrintBuffer);
   *displayListHead = gfx;
 }
@@ -605,6 +627,7 @@ void func_8020F794_ovl_01(Gfx** displayListHead) {
     func_8020F9B8_ovl_01(&gfx, statIndex, row);
     row++;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -625,9 +648,11 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
     /* The figures for all the courses together */
     courseIndex = COURSE_COUNT;
   }
+
   if (D_80105C38[courseIndex].roundCount == 0.0f) {
     return;
   }
+
   switch (statIndex) {
     case STAT_ROUND_COUNT:
       func_80210D94_ovl_01(&gfx, STATS_ROUND_COUNT_X,
@@ -650,6 +675,7 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
             STATS_FIRST_Y + (row * STATS_LINE_HEIGHT), bestScore,
             MENU_NUMBER_UNK2);
       }
+
       break;
     case STAT_AVERAGE_SCORE:
       func_80211A5C_ovl_01(&gfx, STATS_VALUE_X,
@@ -705,6 +731,7 @@ void func_8020F9B8_ovl_01(Gfx** displayListHead, s16 statIndex, u8 row) {
           STATS_FIRST_Y + (row * STATS_LINE_HEIGHT) + STATS_UNIT_OFFSET_Y);
       break;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -761,16 +788,20 @@ void func_8020FEF8_ovl_01(Gfx** displayListHead) {
       }
     }
   }
+
   /* Centers the count by its number of digits */
   if (badgeCount < 10) {
     index = BADGE_COUNT_DIGIT_WIDTH;
   }
+
   if (badgeCount >= 10 && badgeCount < 100) {
     index = 0;
   }
+
   if (badgeCount >= 100) {
     index = -BADGE_COUNT_DIGIT_WIDTH;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -811,11 +842,13 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
   if (hasRowsBelow) {
     arrowCount++;
   }
+
   if (arrowCount != 0) {
     firstArrow = 0;
     if (arrowCount == 1) {
       firstArrow = hasRowsBelow;
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -830,6 +863,7 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
       if (arrowCount == 1 && firstArrow) {
         top = STATS_DOWN_ARROW_TOP;
       }
+
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_8023A828_ovl_01 +
               (firstArrow + arrowIndex) * STATS_ARROW_IMAGE_SIZE +
@@ -847,6 +881,7 @@ void func_80210190_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -898,12 +933,15 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         if (place == FIRST_PLACE_INDEX) {
           palette = D_800FBE38[FIRST_PLACE_INDEX];
         }
+
         if (place == SECOND_PLACE_INDEX) {
           palette = D_800FBE38[SECOND_PLACE_INDEX];
         }
+
         if (place == THIRD_PLACE_INDEX) {
           palette = D_800FBE38[THIRD_PLACE_INDEX];
         }
+
         texels = D_8023A814_ovl_01[D_802300A4_ovl_01];
         gDPLoadTLUT_pal256(gfx++, (u32)palette & ~7);
         gDPLoadTextureTile(gfx++, (u32)texels & ~7, G_IM_FMT_CI, G_IM_SIZ_8b,
@@ -928,6 +966,7 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
       }
     }
+
     D_802300A6_ovl_01++;
     if (D_802300A6_ovl_01 >= TROPHY_FRAME_DELAY) {
       D_802300A6_ovl_01 = 0;
@@ -936,15 +975,18 @@ void func_802104F0_ovl_01(Gfx** displayListHead) {
           TROPHY_FRAME_END) {
         D_802300A2_ovl_01 = 0;
       }
+
       if (D_802300A2_ovl_01 >= COURSE_IMAGE_COUNT) {
         D_802300A2_ovl_01 = 0;
       }
+
       D_802300A4_ovl_01 ^= 1;
       OpenEncodedAsset(
           D_800C21B8[memory->statsCourse][D_802300A2_ovl_01], &asset);
       ReadEncodedAsset(D_8023A814_ovl_01[D_802300A4_ovl_01], &asset);
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -958,9 +1000,11 @@ void func_80210C18_ovl_01(
   if (value > 99) {
     value = 99;
   }
+
   if (value < -99) {
     value = -99;
   }
+
   DrawMenuNumber(&gfx, x, y, value, arg4, 0);
   *displayListHead = gfx;
 }
@@ -972,9 +1016,11 @@ void func_80210C74_ovl_01(
   if (value > 9) {
     value = 9;
   }
+
   if (value < -9) {
     value = -9;
   }
+
   DrawMenuNumber(&gfx, x, y, value, arg4, 1);
   *displayListHead = gfx;
 }
@@ -986,9 +1032,11 @@ void func_80210CD4_ovl_01(
   if (value > 99) {
     value = 99;
   }
+
   if (value < -99) {
     value = -99;
   }
+
   DrawMenuNumber(&gfx, x, y, value, arg4, 2);
   *displayListHead = gfx;
 }
@@ -1000,9 +1048,11 @@ void func_80210D34_ovl_01(
   if (value > 999) {
     value = 999;
   }
+
   if (value < -999) {
     value = -999;
   }
+
   DrawMenuNumber(&gfx, x, y, value, arg4, 3);
   *displayListHead = gfx;
 }
@@ -1014,9 +1064,11 @@ void func_80210D94_ovl_01(
   if (value > 9999) {
     value = 9999;
   }
+
   if (value < -9999) {
     value = -9999;
   }
+
   DrawMenuNumber(&gfx, x, y, value, arg4, 4);
   *displayListHead = gfx;
 }
@@ -1057,14 +1109,18 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   if (whole > DECIMAL_WHOLE_LIMIT) {
     whole = DECIMAL_WHOLE_LIMIT;
   }
+
   if (whole < 0) {
     whole = 0;
   }
+
   fraction = (value - whole) * HUNDREDTHS_PER_UNIT;
+
   /* Round the hundredths to tenths */
   if (fraction % DECIMAL_BASE >= DECIMAL_BASE / 2) {
     fraction += DECIMAL_BASE;
   }
+
   fraction /= DECIMAL_BASE;
   if (fraction >= DECIMAL_BASE) {
     whole++;
@@ -1075,6 +1131,7 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
       fraction = 0;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -1089,15 +1146,18 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
   if (whole >= 0 && whole < DECIMAL_BASE) {
     shift = 2 * MENU_GLYPH_SIZE;
   }
+
   if (whole >= DECIMAL_BASE && whole < DECIMAL_BASE * DECIMAL_BASE) {
     shift += MENU_GLYPH_SIZE;
   }
+
   sprintf(g_PrintBuffer, D_802318E4_ovl_01, whole);
   for (digitIndex = 0; digitIndex != DECIMAL_DIGIT_LIMIT; digitIndex++) {
     digit = g_PrintBuffer[digitIndex];
     if (digit == '\0') {
       break;
     }
+
     gDPLoadTextureBlock_4b(gfx++,
         ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
             (digit - '0' + MENU_GLYPH_FIRST_DIGIT) * MENU_GLYPH_IMAGE_SIZE) &
@@ -1113,6 +1173,7 @@ void func_80211A5C_ovl_01(Gfx** displayListHead, s32 x, s32 y, f32 value) {
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   gDPLoadTextureBlock_4b(gfx++,
       ((u32)D_8023A82C_ovl_01 + PALETTED_TEXELS_OFFSET +
           (MENU_GLYPH_POINT * MENU_GLYPH_IMAGE_SIZE)) &
@@ -1168,6 +1229,7 @@ void func_802123E0_ovl_01(Gfx** displayListHead, s32 x, s32 y, u8 sign) {
       glyphIndex = MENU_GLYPH_PLUS_MINUS;
       break;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_BILERP);
@@ -1223,6 +1285,7 @@ void func_80212858_ovl_01(Gfx** displayListHead, s32 x, s32 y) {
         TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1244,6 +1307,7 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
     *blinkFrame = !*blinkFrame;
     *blinkTimer = 0;
   }
+
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   frameOffset =
@@ -1262,15 +1326,18 @@ void func_80212C54_ovl_01(Gfx** displayListHead, void* image, s32* blinkFrame,
     if (arrowIndex == SIDE_ARROW_RIGHT) {
       left = centerX + (width / 2);
     }
+
     if (arrowIndex == SIDE_ARROW_LEFT) {
       left = centerX - (width / 2) - SIDE_ARROW_SIZE;
     }
+
     gSPScisTextureRectangle(gfx++, left << 2,
         (centerY - (SIDE_ARROW_SIZE / 2)) << 2, (left + SIDE_ARROW_SIZE) << 2,
         (centerY + (SIDE_ARROW_SIZE / 2)) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -1292,15 +1359,19 @@ void func_80212FEC_ovl_01(Gfx** displayListHead, void* image, s32 blinkFrame,
   if (blinkFrame < 0) {
     blinkFrame = 0;
   }
+
   if (blinkFrame >= ARROW_BLINK_STATE_COUNT) {
     blinkFrame = ARROW_BLINK_STATE_COUNT - 1;
   }
+
   if (direction < 0) {
     direction = 0;
   }
+
   if (direction >= ARROW_DIRECTION_COUNT) {
     direction = ARROW_DIRECTION_COUNT - 1;
   }
+
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureTile_4b(gfx++,

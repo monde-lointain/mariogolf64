@@ -269,24 +269,31 @@ s32 CountOpenRingShotCourses(void) {
       starCount += save->hasRingShotStar[course][hole] > 0;
     }
   }
+
   if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
     return RING_SHOT_COURSE_COUNT;
   }
+
   if (starCount >= STARS_TO_OPEN(6)) {
     return 6;
   }
+
   if (starCount >= STARS_TO_OPEN(5)) {
     return 5;
   }
+
   if (starCount >= STARS_TO_OPEN(4)) {
     return 4;
   }
+
   if (starCount >= STARS_TO_OPEN(3)) {
     return 3;
   }
+
   if (starCount >= STARS_TO_OPEN(2)) {
     return 2;
   }
+
   return 1;
 }
 
@@ -300,6 +307,7 @@ void LoadCourseSelect(s32 isHoleSelect) {
     osSyncPrintf("ring const err !");
     return;
   }
+
   f_PressedDirection = 0;
   if (!isHoleSelect) {
     f_LoadedScreen = COURSE_SELECT_RING_SHOT;
@@ -331,6 +339,7 @@ void LoadCourseSelect(s32 isHoleSelect) {
     f_BoardImage = AllocMemory(OpenEncodedAsset(HOLE_SIGN_ASSET, &asset));
     ReadEncodedAsset(f_BoardImage, &asset);
   }
+
   f_CourseTurnIndex = 0;
   f_CourseTurnStep = 0;
   f_ShownCourse = g_CourseIndex;
@@ -340,6 +349,7 @@ void LoadCourseSelect(s32 isHoleSelect) {
         AllocMemory(OpenEncodedAsset(f_CourseBadgeAssets[i], &asset));
     ReadEncodedAsset(f_CourseBadges[i], &asset);
   }
+
   f_CourseImage = AllocMemory(OpenEncodedAsset(
       f_CourseImageAssets[g_CourseIndex] + COURSE_IMAGE_FRONT, &asset));
   ReadEncodedAsset(f_CourseImage, &asset);
@@ -376,12 +386,14 @@ void TurnCourseImage(void) {
         OpenEncodedAsset(f_CourseImageAssets[f_NextCourse] + frame, &asset);
       }
     }
+
     ReadEncodedAsset(f_CourseImage, &asset);
     f_CourseTurnIndex += f_CourseTurnStep;
     if (f_CourseTurnIndex !=
         ((f_CourseTurnStep == 1) ? COURSE_TURN_FRAME_COUNT : -1)) {
       return;
     }
+
     f_CourseTurnStep = 0;
     f_ShownCourse = f_NextCourse;
   }
@@ -394,10 +406,12 @@ void FreeCourseSelect(void) {
     osSyncPrintf("ring dest err");
     return;
   }
+
   FreeMemory(&f_BoardImage);
   for (i = 0; i != COURSE_INDEX_COUNT; i++) {
     FreeMemory(&f_CourseBadges[i]);
   }
+
   FreeMemory(&f_CourseImage);
   FreeMemory(&f_CourseImagePalette);
   FreeMemory(&f_ArrowsImage);
@@ -410,6 +424,7 @@ void FreeCourseSelect(void) {
     FreeMemory(&f_EmptyStarImages[STILL_STAR_IMAGE]);
     FreeMemory(&f_PlanksImage);
   }
+
   f_LoadedScreen = COURSE_SELECT_UNLOADED;
 }
 
@@ -456,18 +471,23 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
       f_PressedDirection = DIRECTION_RIGHT;
     }
   }
+
   if (memory->courseIndex < 0) {
     memory->courseIndex = openCourseCount - 1;
   }
+
   if (memory->courseIndex > openCourseCount - 1) {
     memory->courseIndex = 0;
   }
+
   if (memory->holeIndex < 0) {
     memory->holeIndex = RING_SHOT_HOLE_COUNT - 1;
   }
+
   if (memory->holeIndex >= RING_SHOT_HOLE_COUNT) {
     memory->holeIndex = 0;
   }
+
   g_HoleIndex = memory->holeIndex;
   g_CourseIndex = memory->courseIndex;
   f_NextCourse = g_CourseIndex;
@@ -489,13 +509,16 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
   if (IsGameFlagSet(GAME_FLAG_ALL_COURSES)) {
     openCourseCount = COURSE_COUNT;
   }
+
   f_PressedDirection = 0;
   if (pressedButtons & A_BUTTON) {
     return result;
   }
+
   if (pressedButtons & B_BUTTON) {
     return SELECT_BACK;
   }
+
   if (f_CourseTurnStep == 0) {
     if (repeatedButtons & L_JPAD) {
       if (!IsOnDrivingRange()) {
@@ -526,10 +549,12 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
       } else {
         g_IsMiniGolf = FALSE;
       }
+
       if (g_GameState.courseIndex > openCourseCount - 1 &&
           g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
         g_GameState.courseIndex = openCourseCount - 1;
       }
+
       result = SELECT_MOVED;
       f_PressedDirection = DIRECTION_UP;
       f_CourseTurnStep = 1;
@@ -543,18 +568,21 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
           g_GameState.courseIndex < MINI_GOLF_COURSE_INDEX) {
         g_GameState.courseIndex = MINI_GOLF_COURSE_INDEX;
       }
+
       if (g_GameState.courseIndex >= MINI_GOLF_COURSE_INDEX &&
           g_GameState.courseIndex < DRIVING_RANGE_COURSE_INDEX) {
         g_IsMiniGolf = TRUE;
       } else {
         g_IsMiniGolf = FALSE;
       }
+
       result = SELECT_MOVED;
       f_PressedDirection = DIRECTION_DOWN;
       f_CourseTurnStep = -1;
       f_CourseTurnIndex = COURSE_TURN_FRAME_COUNT - 2;
     }
   }
+
   g_GameState.courseIndex =
       (g_GameState.courseIndex + COURSE_INDEX_COUNT) % COURSE_INDEX_COUNT;
   f_NextCourse = g_GameState.courseIndex;
@@ -564,6 +592,7 @@ s32 UpdateHoleSelect(s32 pressedButtons, s32 repeatedButtons) {
     g_GameState.holeIndex =
         (g_GameState.holeIndex + COURSE_HOLE_COUNT) % COURSE_HOLE_COUNT;
   }
+
   return result;
 }
 
@@ -618,19 +647,24 @@ void DrawPlanks(Gfx** displayListHead) {
       if (f_PlankSlide > 0) {
         f_PlankSlide -= PLANK_SLIDE_STEP;
       }
+
       if (f_PlankSlide < 0) {
         f_PlankSlide = 0;
       }
+
       break;
     case PLANKS_CLOSING:
       if (f_PlankSlide < PLANK_SLIDE_MAX) {
         f_PlankSlide += PLANK_SLIDE_STEP;
       }
+
       if (f_PlankSlide > PLANK_SLIDE_MAX) {
         f_PlankSlide = PLANK_SLIDE_MAX;
       }
+
       break;
   }
+
   for (stripIndex = 0; stripIndex != PLANK_STRIP_COUNT; stripIndex++) {
     stripHeight = (stripIndex != PLANK_STRIP_COUNT - 1)
         ? PLANK_STRIP_HEIGHT
@@ -642,14 +676,17 @@ void DrawPlanks(Gfx** displayListHead) {
       if (groupIndex > PLANK_LAST_GROUP) {
         groupIndex = PLANK_LAST_GROUP;
       }
+
       slide = f_PlankSlide - (groupIndex * PLANK_GROUP_LAG);
       if (slide > PLANKS_MIDDLE) {
         slide = PLANKS_MIDDLE;
       }
+
       if (slide < PLANKS_MIN_SLIDE) {
         slide = PLANKS_MIN_SLIDE;
       }
     }
+
     gDPPipeSync(gfx++);
     LoadTextureBlock(&gfx,
         f_PlanksImage + LARGE_PALETTED_TEXELS_OFFSET +
@@ -666,6 +703,7 @@ void DrawPlanks(Gfx** displayListHead) {
         (SCREEN_WIDTH - SCREEN_BORDER) << 2, bottom, G_TX_RENDERTILE,
         (PLANKS_WIDTH / 2) << 5, 1 << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = gfx;
 }
 
@@ -709,6 +747,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -739,6 +778,7 @@ void DrawRingShotSelect(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, ARROW_SIZE << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     DrawRingShotStars(&gfx, SCREEN_WIDTH / 2, 150);
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
@@ -769,6 +809,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
   if (f_SlideOffset < 0) {
     f_SlideOffset = 0;
   }
+
   if (f_LoadedScreen == COURSE_SELECT_HOLES) {
     gDPPipeSync(gfx++);
     gSPDisplayList(gfx++, D_800C3FC0);
@@ -801,6 +842,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     TurnCourseImage();
     LoadLargePalette(&gfx, f_CourseImagePalette);
     for (stripIndex = 0; stripIndex != COURSE_IMAGE_STRIP_COUNT; stripIndex++) {
@@ -820,6 +862,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     arrowFrame = f_CourseArrowFrameTime++;
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
@@ -876,6 +919,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
           TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       gDPPipeSync(gfx++);
     }
+
     gDPPipeSync(gfx++);
     SetUpGradientTextDrawing(&gfx, 0);
     SetTextColor(&gfx, 255, 255, 255);
@@ -883,6 +927,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
     if (colorIndex >= MINI_GOLF_COURSE_INDEX + MINI_GOLF_COURSES_PER_RECORD) {
       colorIndex -= MINI_GOLF_COURSES_PER_RECORD;
     }
+
     sprintf(g_PrintBuffer, "%s", g_CourseRecords[GetCourseRecordIndex()].name);
     DrawLargeTextWithShadow(&gfx, SCREEN_WIDTH / 2, 24 - f_SlideOffset,
         g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
@@ -893,6 +938,7 @@ void DrawHoleSelect(Gfx** displayListHead) {
           g_PrintBuffer, g_CourseNameEnvColors[colorIndex],
           g_CourseNamePrimColors[colorIndex], TEXT_FLAG_CENTERED);
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -927,6 +973,7 @@ void DrawNamePlate(Gfx** displayListHead, s32 centerX, s32 centerY) {
     top += NAME_PLATE_STRIP_HEIGHT;
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -942,6 +989,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
   SaveData* save = GetSaveData();
   MenuMemory* memory = func_8005AF74();
   Gfx* gfx = *displayListHead;
+
   /* Unused */
   f32 hexagon[6][2] = {
       {0.0f, -1.0f},
@@ -998,6 +1046,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
       width = 0;
       height = 0;
     }
+
     left = (hole * STAR_SPACING) + STARS_LEFT;
     if (hole == memory->holeIndex) {
       tile = (save->hasRingShotStar[memory->courseIndex][hole] == 0)
@@ -1008,6 +1057,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
           ? TILE_STILL_EMPTY_STAR
           : TILE_STILL_STAR;
     }
+
     DrawTextureRect(&gfx, (left - (width / 2)) << 2,
         (STARS_TOP - (height / 2)) << 2, (left + (width / 2) + STAR_WIDTH) << 2,
         ((height / 2) + STAR_HEIGHT + STARS_TOP) << 2, tile, 0, 0,
@@ -1015,6 +1065,7 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
         (STAR_HEIGHT * TEXEL_STEP_ONE) / (height + STAR_HEIGHT));
     gDPPipeSync(gfx++);
   }
+
   f_StarFrameTime++;
   if (f_StarFrameTime == STAR_FRAME_TIME) {
     f_StarFrameTime = 0;
@@ -1022,12 +1073,14 @@ void DrawRingShotStars(Gfx** displayListHead, s32 centerX, s32 centerY) {
     if (f_StarFrameIndex >= STAR_FRAME_COUNT) {
       f_StarFrameIndex = 0;
     }
+
     f_StarBufferIndex = f_StarBufferIndex == 0;
     OpenEncodedAsset(f_StarFrameAssets[f_StarFrameIndex], &asset);
     ReadEncodedAsset(f_StarImages[f_StarBufferIndex], &asset);
     OpenEncodedAsset(f_EmptyStarFrameAssets[f_StarFrameIndex], &asset);
     ReadEncodedAsset(f_EmptyStarImages[f_StarBufferIndex], &asset);
   }
+
   *displayListHead = gfx;
 }
 

@@ -31,15 +31,19 @@ void guMtxF2L(f32 mf[4][4], Mtx* m) {
       if (mf[row][pair * 2] < MIN_FIXED_ELEMENT) {
         mf[row][pair * 2] = MIN_FIXED_ELEMENT;
       }
+
       if (mf[row][pair * 2] > MAX_FIXED_ELEMENT) {
         mf[row][pair * 2] = MAX_FIXED_ELEMENT;
       }
+
       if (mf[row][(pair * 2) + 1] < MIN_FIXED_ELEMENT) {
         mf[row][(pair * 2) + 1] = MIN_FIXED_ELEMENT;
       }
+
       if (mf[row][(pair * 2) + 1] > MAX_FIXED_ELEMENT) {
         mf[row][(pair * 2) + 1] = MAX_FIXED_ELEMENT;
       }
+
       first = FLOAT_TO_FIXED(mf[row][pair * 2]);
       second = FLOAT_TO_FIXED(mf[row][(pair * 2) + 1]);
       *(integerParts++) = (first & 0xFFFF0000) | ((second >> 16) & 0xFFFF);

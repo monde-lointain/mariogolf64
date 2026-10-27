@@ -98,6 +98,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
   largestFreeSize = 0;
   heap = &f_Heaps[heapIndex];
   mask = osSetIntMask(OS_IM_NONE);
+
   /* The size is reused for the block's, to match */
   size = (size + sizeof(MemoryBlock) + 7) & ~7;
   bestSize = NO_BLOCK_SIZE;
@@ -110,22 +111,26 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
         if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
           largestFreeSize = bestSize;
         }
+
         bestSize = block->size;
         if (largestFreeSize < bestSize - size) {
           largestFreeSize = bestSize - size;
         }
+
         bestBlock = block;
       } else if (largestFreeSize < block->size) {
         largestFreeSize = block->size;
       }
     }
   }
+
   f_Heaps[heapIndex].largestFreeSize = largestFreeSize;
   if (bestBlock == NULL) {
     osSetIntMask(mask);
     osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
     return NULL;
   }
+
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
     f_Heaps[heapIndex].freeSize -= size;
     rest = (MemoryBlock*)((u8*)bestBlock + size);
@@ -139,6 +144,7 @@ void* AllocFromHeap(s32 heapIndex, s32 size) {
   } else {
     f_Heaps[heapIndex].freeSize -= bestSize;
   }
+
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
   return bestBlock + 1;
@@ -155,10 +161,12 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
 
   if (pointer == NULL) {
     osSetIntMask(mask);
+
     /* "A NULL pointer was passed to kFree()" */
     osSyncPrintf("NULLポインタがkFree()に渡されました");
     return;
   }
+
   block = (MemoryBlock*)pointer - 1;
   f_Heaps[heapIndex].freeSize += block->size;
   if (block->prev->tag == BLOCK_FREE &&
@@ -168,12 +176,14 @@ void FreeFromHeap(s32 heapIndex, void* pointerToBlock) {
     block->prev->size += block->size;
     block = block->prev;
   }
+
   if (block->next->tag == BLOCK_FREE &&
       (MemoryBlock*)((u8*)block + block->size) == block->next) {
     block->next->next->prev = block;
     block->size += block->next->size;
     block->next = block->next->next;
   }
+
   block->tag = BLOCK_FREE;
   *(void**)pointerToBlock = NULL;
   osSetIntMask(mask);
@@ -207,6 +217,7 @@ void InitHeapRegions(s32 hasExpansionPak) {
   if (hasExpansionPak == TRUE) {
     AddMemoryRegion((void*)EXPANSION_REGION_START, (void*)EXPANSION_REGION_END);
   }
+
   f_Memory.largestFreeSize = UNMEASURED_SIZE;
 }
 
@@ -229,6 +240,7 @@ u32 FindLargestFreeMemorySize(void) {
       largestFreeSize = block->size;
     }
   }
+
   f_Memory.largestFreeSize = largestFreeSize;
   return largestFreeSize;
 }
@@ -247,6 +259,7 @@ void* AllocMemory(u32 size) {
   GET_RETURN_ADDRESS(callerAddress);
   largestFreeSize = 0;
   mask = osSetIntMask(OS_IM_NONE);
+
   /* The size is reused for the block's, to match */
   size = (size + sizeof(MemoryBlock) + 7) & ~7;
   bestSize = NO_BLOCK_SIZE;
@@ -258,22 +271,26 @@ void* AllocMemory(u32 size) {
         if (largestFreeSize < bestSize && bestSize != NO_BLOCK_SIZE) {
           largestFreeSize = bestSize;
         }
+
         bestSize = block->size;
         if (largestFreeSize < bestSize - size) {
           largestFreeSize = bestSize - size;
         }
+
         bestBlock = block;
       } else if (largestFreeSize < block->size) {
         largestFreeSize = block->size;
       }
     }
   }
+
   f_Memory.largestFreeSize = largestFreeSize;
   if (bestBlock == NULL) {
     osSetIntMask(mask);
     osSyncPrintf(f_OutOfMemoryMessage, callerAddress);
     return NULL;
   }
+
   if (bestBlock->size - size > sizeof(MemoryBlock)) {
     rest = (MemoryBlock*)((u8*)bestBlock + size);
     rest->tag = BLOCK_FREE;
@@ -288,6 +305,7 @@ void* AllocMemory(u32 size) {
   } else {
     f_Memory.freeSize -= bestSize;
   }
+
   bestBlock->tag = BLOCK_USED;
   osSetIntMask(mask);
   return bestBlock + 1;
@@ -318,6 +336,7 @@ void FreeMemory(void* pointerToBlock) {
     osSyncPrintf(f_FreeNullMessage, callerAddress);
     return;
   }
+
   block = (MemoryBlock*)pointer - 1;
   prev = block->prev;
   f_Memory.freeSize += block->size;
@@ -328,12 +347,14 @@ void FreeMemory(void* pointerToBlock) {
     block->prev->size += block->size;
     block = block->prev;
   }
+
   if (block->next->tag == BLOCK_FREE &&
       (MemoryBlock*)((u8*)block + block->size) == block->next) {
     block->next->next->prev = block;
     block->size += block->next->size;
     block->next = block->next->next;
   }
+
   block->tag = BLOCK_FREE;
   *(void**)pointerToBlock = NULL;
   osSetIntMask(mask);

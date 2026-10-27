@@ -264,6 +264,7 @@ void LoadTextAssets(void) {
   FreeMemory(&header);
   g_Messages = AllocMemory(size);
   nuPiReadRom((u32)g_MessageFileRomStart, g_Messages, size);
+
   /* The halfwords of the table's header and its entries come first */
   g_MessageCodesStart = (g_Messages->messageCount * 2) + 2;
   ClearTextSlots();
@@ -345,10 +346,12 @@ void SetTextName(char* name) {
     if (character >= 'a' && character <= 'z') {
       g_TextName[i] = character + LOWERCASE_CODE_OFFSET;
     }
+
     if (name[i] == '\0') {
       break;
     }
   }
+
   g_TextName[TEXT_NAME_SIZE - 1] = '\0';
 }
 
@@ -370,6 +373,7 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
     if (flags & TEXT_FLAG_CENTERED) {
       MeasureMessage(messageId, FONT_SIZE_LARGE, &width, &height, slot);
     }
+
     /* The pointer, used only for the message comparison, is there to match */
     textSlot = &g_TextSlots[slot];
     halfWidth = width / 2;
@@ -386,6 +390,7 @@ void SetTextSlot(s32 x, s32 y, s32 messageId, s32 fontSize, s32 slot, s32 flags,
       g_TextSlots[slot].shownCount = 0;
     }
   }
+
   g_TextSlots[slot].messageId = messageId;
 }
 
@@ -411,6 +416,7 @@ void DrawTextSlots(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -454,6 +460,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
   isIconLoaded = FALSE;
   x = textSlot->x;
   y = textSlot->y;
+
   /* The operand order is there to match */
   length = (textSlot->messageId + g_Messages->messages)->length;
   start = (textSlot->messageId + g_Messages->messages)->start;
@@ -469,6 +476,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
       }
     }
   }
+
   advance = (textSlot->flags & TEXT_FLAG_WIDE_SPACING) ? WIDE_LARGE_FONT_ADVANCE
                                                        : FONT_SIZE_LARGE;
   gDPPipeSync(gfx++);
@@ -481,6 +489,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
       gDPSetTextureLUT(gfx++, G_TT_NONE);
       isIconLoaded = FALSE;
     }
+
     if (code < MESSAGE_CODE_GLYPH) {
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
@@ -515,6 +524,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
             glyphTop << 5, 1 << 10, 1 << 10);
         x += g_LargeFontWidths[code];
       }
+
       gDPPipeSync(gfx++);
     } else if (code < MESSAGE_CODE_CONTROL) {
       gDPLoadTextureBlock(gfx++,
@@ -632,8 +642,10 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           } else {
             sprintf(g_PrintBuffer, g_ParScoreFormat, score);
           }
+
           break;
       }
+
       if (isPrinted == TRUE) {
         for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
           characterLeft =
@@ -676,6 +688,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           }
         }
       }
+
       if (iconOffset != NO_ICON) {
         if (isIconLoaded == FALSE) {
           gDPPipeSync(gfx++);
@@ -685,6 +698,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           isIconLoaded = TRUE;
         }
+
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, ICON_WIDTH,
             ((u32)g_TextIconImage + LARGE_PALETTED_TEXELS_OFFSET + iconOffset) &
                 ~7);
@@ -709,6 +723,7 @@ void DrawLargeTextSlot(Gfx** displayListHead, s32 slot) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -740,6 +755,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
   isIconLoaded = FALSE;
   x = textSlot->x;
   y = textSlot->y;
+
   /* The operand order is there to match */
   length = (textSlot->messageId + g_Messages->messages)->length;
   start = (textSlot->messageId + g_Messages->messages)->start;
@@ -749,10 +765,12 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
       textSlot->shownCount++;
     }
   }
+
   advance = FONT_SIZE_MEDIUM;
   if (textSlot->flags & TEXT_FLAG_WIDE_SPACING) {
     advance = FONT_SIZE_LARGE;
   }
+
   gDPPipeSync(gfx++);
   for (i = 0; i != length; i++) {
     code = ((u16*)g_Messages)[start + i + g_MessageCodesStart];
@@ -763,6 +781,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
       gDPSetTextureLUT(gfx++, G_TT_NONE);
       isIconLoaded = FALSE;
     }
+
     if (code < MESSAGE_CODE_GLYPH) {
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
@@ -797,6 +816,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
             glyphTop << 5, 1 << 10, 1 << 10);
         x += advance;
       }
+
       gDPPipeSync(gfx++);
     } else if (code < MESSAGE_CODE_CONTROL) {
       gDPPipeSync(gfx++);
@@ -883,8 +903,10 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           } else {
             sprintf(g_PrintBuffer, g_ParScoreFormat, score);
           }
+
           break;
       }
+
       if (isPrinted == TRUE) {
         for (index = 0; g_PrintBuffer[index] != '\0'; index++) {
           characterLeft =
@@ -925,6 +947,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           }
         }
       }
+
       if (iconOffset != NO_ICON) {
         if (isIconLoaded == FALSE) {
           gDPPipeSync(gfx++);
@@ -934,6 +957,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           isIconLoaded = TRUE;
         }
+
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, ICON_WIDTH,
             ((u32)g_TextIconImage + LARGE_PALETTED_TEXELS_OFFSET + iconOffset) &
                 ~7);
@@ -958,6 +982,7 @@ void DrawMediumTextSlot(Gfx** displayListHead, s32 slot) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1017,6 +1042,7 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
         if (code >= 'a' && code <= 'z') {
           code += LOWERCASE_CODE_OFFSET;
         }
+
         switch (code) {
           case CHARACTER_CODE_OTHER_MARK_FIRST:
           case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1029,8 +1055,10 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
             } else {
               width += FONT_SIZE_LARGE;
             }
+
             break;
         }
+
         text++;
       } while (*text != '\0');
     }
@@ -1039,10 +1067,12 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
       if (*text == '\0') {
         break;
       }
+
       code = *text;
       if (code >= 'a' && code <= 'z') {
         code += LOWERCASE_CODE_OFFSET;
       }
+
       switch (code) {
         case CHARACTER_CODE_OTHER_MARK_FIRST:
         case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1053,9 +1083,11 @@ s32 MeasureText(char* text, s32 fontSize, s32 flags) {
           width += fontSize;
           break;
       }
+
       text++;
     }
   }
+
   return width;
 }
 
@@ -1075,6 +1107,7 @@ void MeasureMessage(
   s32 start;
 
   lineCount = 0;
+
   /* The operand order is there to match */
   length = (messageId + g_Messages->messages)->length;
   start = (messageId + g_Messages->messages)->start;
@@ -1128,14 +1161,17 @@ void MeasureMessage(
       }
     }
   }
+
   widest = lineWidths[0];
   if (widest < lineWidths[1]) {
     widest = lineWidths[1];
   }
+
   *width = widest;
   if (widest < lineWidths[2]) {
     widest = lineWidths[2];
   }
+
   *width = widest;
   *height = lineCount;
 }
@@ -1147,6 +1183,7 @@ s32 GetTextLength(char* text) {
     text++;
     length++;
   }
+
   return length;
 }
 
@@ -1177,6 +1214,7 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       if (code >= 'a' && code <= 'z') {
         code += LOWERCASE_CODE_OFFSET;
       }
+
       switch (code) {
         case CHARACTER_CODE_OTHER_MARK_FIRST:
         case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1191,6 +1229,7 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           x -= FONT_SIZE_LARGE - LARGE_POINT_WIDTH;
           break;
       }
+
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
       gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b,
@@ -1221,6 +1260,7 @@ void DrawFixedWidthLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       text++;
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1251,6 +1291,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       if (code >= 'a' && code <= 'z') {
         code += LOWERCASE_CODE_OFFSET;
       }
+
       switch (code) {
         case CHARACTER_CODE_OTHER_MARK_FIRST:
         case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1261,6 +1302,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           x -= FONT_SIZE_LARGE;
           break;
       }
+
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_LARGE;
       gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b,
@@ -1291,6 +1333,7 @@ void DrawLargeText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       x += g_LargeFontWidths[code];
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1322,6 +1365,7 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       if (code >= 'a' && code <= 'z') {
         code += LOWERCASE_CODE_OFFSET;
       }
+
       switch (code) {
         case CHARACTER_CODE_OTHER_MARK_FIRST:
         case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1336,6 +1380,7 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           x -= FONT_SIZE_MEDIUM - MEDIUM_POINT_WIDTH;
           break;
       }
+
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_MEDIUM;
       gDPSetTextureImage(gfx++, G_IM_FMT_I, G_IM_SIZ_8b,
@@ -1363,6 +1408,7 @@ void DrawMediumText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       x += FONT_SIZE_MEDIUM;
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1393,6 +1439,7 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       if (code >= 'a' && code <= 'z') {
         code += LOWERCASE_CODE_OFFSET;
       }
+
       switch (code) {
         case CHARACTER_CODE_OTHER_MARK_FIRST:
         case CHARACTER_CODE_OTHER_MARK_FIRST + 1:
@@ -1406,6 +1453,7 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
           code = SMALL_FONT_MOVED_GLYPH;
           break;
       }
+
       glyphLeft = code % FONT_GLYPHS_PER_ROW * FONT_SIZE_SMALL;
       glyphTop = code / FONT_GLYPHS_PER_ROW * FONT_SIZE_SMALL;
       gDPSetTextureImage(gfx++, G_IM_FMT_IA, G_IM_SIZ_8b,
@@ -1433,6 +1481,7 @@ void DrawSmallText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       x += FONT_SIZE_SMALL;
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1535,6 +1584,7 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
     if (code == '.') {
       x -= SHADOWED_POINT_INSET;
     }
+
     glyphLeft = GetShadowedGlyphLeft(code);
     glyphTop = GetShadowedGlyphTop(code);
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + SHADOWED_GLYPH_SIZE) << 2,
@@ -1545,8 +1595,10 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
     } else {
       x += SHADOWED_GLYPH_WIDTH;
     }
+
     text++;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1554,6 +1606,7 @@ void DrawShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
 /* Draws text in the shadowed font, centred on x */
 void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   Gfx* gfx = *displayListHead;
+
   /* The copy of x and the s16 are there to match */
   s32 left = x;
   s16 right = x;
@@ -1566,6 +1619,7 @@ void DrawCenteredShadowedText(Gfx** displayListHead, s16 x, s16 y, char* text) {
       right += SHADOWED_GLYPH_WIDTH;
     }
   }
+
   DrawShadowedText(&gfx, left - ((right - left) / 2), y, text);
   *displayListHead = gfx;
 }
@@ -1585,6 +1639,7 @@ void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
   while (text[length] != '\0') {
     length++;
   }
+
   x -= length * NARROW_GLYPH_WIDTH / 2;
   while ((code = *text) != '\0') {
     glyphLeft = (code - NARROW_GLYPH_FIRST) * SHADOWED_GLYPH_SIZE;
@@ -1594,6 +1649,7 @@ void DrawCenteredNarrowText(Gfx** displayListHead, s16 x, s16 y, char* text) {
     text++;
     x += NARROW_GLYPH_WIDTH;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1616,6 +1672,7 @@ void DrawCondensedShadowedText(
     text++;
     x += CONDENSED_GLYPH_WIDTH;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1648,8 +1705,10 @@ void PlaceGlyphGroup(
         g_GlyphSprites[i].group = NO_GLYPH_GROUP;
       }
     }
+
     return;
   }
+
   halfWidth = 0;
   if (!(flags & GLYPH_FLAG_LEFT_ALIGNED)) {
     if (flags & TEXT_FLAG_FIXED_WIDTH) {
@@ -1658,12 +1717,14 @@ void PlaceGlyphGroup(
       halfWidth = MeasureText(text, fontSize, MEASURE_TEXT_PROPORTIONAL) / 2;
     }
   }
+
   g_GlyphGroupSizes[group] = GetTextLength(text);
   for (i = 0; i != GLYPH_SPRITE_COUNT; i++) {
     if (g_GlyphSprites[i].group == group) {
       g_GlyphSprites[i].group = NO_GLYPH_GROUP;
     }
   }
+
   for (i = 0, placedCount = 0, advance = 0;
       placedCount != g_GlyphGroupSizes[group] && i != GLYPH_SPRITE_COUNT; i++) {
     if (g_GlyphSprites[i].group == NO_GLYPH_GROUP) {
@@ -1684,6 +1745,7 @@ void PlaceGlyphGroup(
             guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x,
                 y + SMALL_MARK_RISE, 0);
           }
+
           break;
         default:
           guTranslate(&g_GlyphSprites[i].matrix, advance - halfWidth + x, y, 0);
@@ -1696,8 +1758,10 @@ void PlaceGlyphGroup(
           } else {
             advance += fontSize;
           }
+
           break;
       }
+
       g_GlyphSprites[i].code = text[placedCount];
       g_GlyphSprites[i].fontSize = fontSize;
       g_GlyphSprites[i].flags = flags;
@@ -1730,9 +1794,11 @@ s32 PlaceMessageGlyphGroup(
         g_GlyphSprites[i].group = NO_GLYPH_GROUP;
       }
     }
+
     /* It returns no value here; the plain return is there to match */
     return;
   }
+
   /* The operand order is there to match */
   start = (messageId + g_Messages->messages)->start;
   length = (messageId + g_Messages->messages)->length;
@@ -1746,6 +1812,7 @@ s32 PlaceMessageGlyphGroup(
       g_GlyphSprites[i].group = NO_GLYPH_GROUP;
     }
   }
+
   codeIndex = 0;
   advance = 0;
   for (i = 0; codeIndex != length; i++) {
@@ -1761,6 +1828,7 @@ s32 PlaceMessageGlyphGroup(
           guTranslate(&g_GlyphSprites[i].matrix, advance - width + x, y, 0);
           advance += g_LargeFontWidths[code];
         }
+
         g_GlyphSprites[i].code = code;
         g_GlyphSprites[i].fontSize = fontSize;
         g_GlyphSprites[i].group = group;
@@ -1792,9 +1860,11 @@ s32 PlaceMessageGlyphGroup(
             break;
         }
       }
+
       codeIndex++;
     }
   }
+
   return (width << 16) | height;
 }
 
@@ -1834,6 +1904,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
         gDPSetTextureLUT(gfx++, G_TT_NONE);
         isIconLoaded = FALSE;
       }
+
       code = g_GlyphSprites[i].code;
       if (code < MESSAGE_CODE_GLYPH) {
         s = (code % FONT_GLYPHS_PER_ROW) * g_GlyphSprites[i].fontSize;
@@ -1852,6 +1923,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
               FONT_SIZE_SMALL * FONT_GLYPHS_PER_ROW / 2,
               ((u32)g_SmallFontImage + IMAGE_HEADER_SIZE) & ~7);
         }
+
         gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_8b, 1, 0, G_TX_LOADTILE, 0,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
             G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -1901,6 +1973,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
             iconOffset = 5 * ICON_TEXEL_COUNT;
             break;
         }
+
         if (isIconLoaded == FALSE) {
           gDPPipeSync(gfx++);
           gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1909,6 +1982,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
           gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
           isIconLoaded = TRUE;
         }
+
         gDPSetTextureImage(gfx++, G_IM_FMT_CI, G_IM_SIZ_8b, ICON_WIDTH,
             ((u32)g_TextIconImage + LARGE_PALETTED_TEXELS_OFFSET + iconOffset) &
                 ~7);
@@ -1927,6 +2001,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
         s = 0;
         t = 0;
       }
+
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_GlyphSprites[i].matrix),
           G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
@@ -1950,6 +2025,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
       } else {
         gSPVertex(gfx++, f_SmallGlyphVertices, 4, 0);
       }
+
       gSPModifyVertex(
           gfx++, 0, G_MWO_POINT_ST, PackTextureCoords(left + s, top + t));
       gSPModifyVertex(
@@ -1963,6 +2039,7 @@ void DrawGlyphGroup(Gfx** displayListHead, s32 group) {
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -2036,6 +2113,7 @@ void DrawDigitText(Gfx** displayListHead, s32 x, s32 y, char* text) {
         GetDigitGlyphTop(text[index]) << 5, 1 << 10, 1 << 10);
     x += DIGIT_GLYPH_WIDTH;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -2069,6 +2147,7 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
   } else {
     DrawLargeText(&gfx, x + SHADOW_OFFSET, y + SHADOW_OFFSET, text);
   }
+
   gDPSetEnvColor(gfx++, env[0], env[1], env[2], 255);
   gDPSetPrimColor(gfx++, 0, 0, prim[0], prim[1], prim[2], 255);
   if (flags & TEXT_FLAG_CENTERED) {
@@ -2078,6 +2157,7 @@ void DrawLargeTextWithShadow(Gfx** displayListHead, s32 x, s32 y, char* text,
   } else {
     DrawLargeText(&gfx, x, y, text);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }

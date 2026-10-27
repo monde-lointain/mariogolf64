@@ -115,6 +115,7 @@ f32 GetCameraYaw(void) {
   if ((s32)x != 0 || (s32)z != 0) {
     yaw = atan2f(x, z);
   }
+
   return yaw;
 }
 
@@ -128,6 +129,7 @@ s32 IsMonkeyShown(void) {
       return TRUE;
     }
   }
+
   return FALSE;
 }
 
@@ -144,6 +146,7 @@ void StartMonkeyDrop(f32 cameraYaw) {
   if (IsMonkeyShown()) {
     return;
   }
+
   OpenEncodedAsset(f_MonkeyFrameAssets[0], &asset);
   ReadEncodedAsset(f_MonkeyImage, &asset);
   for (i = 0; i != HOLE_CREATURE_COUNT; i++) {
@@ -222,10 +225,12 @@ void StartCheepCheepLeap(s32 arg0) {
         OpenEncodedAsset(GOLD_CHEEP_CHEEP_ASSET, &asset);
         ReadEncodedAsset(f_CheepCheepImages[1], &asset);
       }
+
       creature->yaw = g_SkyState.yaws[0];
       if (creature->isFacingBack) {
         speed = -speed;
       }
+
       creature->velocity[0] = cosf(creature->yaw) * speed;
       creature->velocity[2] = -sinf(creature->yaw) * speed;
       rotation[0] = 0;
@@ -299,6 +304,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       if ((s32)horizontalSpeedSquared > 0) {
         horizontalSpeed = sqrtf(horizontalSpeedSquared);
       }
+
       creature->pitch = ((f32)atan2(creature->velocity[1], horizontalSpeed) -
                             creature->pitch) *
           CHEEP_CHEEP_PITCH_EASING;
@@ -317,6 +323,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         scale[1] = 1.0f;
         scale[2] = 1.0f;
       }
+
       BuildTransformMatrix(transform, rotation, translation, scale);
       guRotateRPYF(roll, 0.0f, 0.0f, -creature->pitch * 360.0f / (2 * M_PI));
       guMtxCatF(roll, transform, transform);
@@ -336,6 +343,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
         SpawnRipple(splashPosition);
         PlaySound(SPLASH_SOUND, SOUND_CHANNEL, SPLASH_SOUND_VOLUME);
       }
+
       if (creature->position[1] < g_BallPosition[1]) {
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       } else {
@@ -348,6 +356,7 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       if (g_BallPosition[1] + CHEEP_CHEEP_DEPTH < creature->position[1]) {
         creature->state = HOLE_CREATURE_NONE;
       }
+
       gDPLoadTextureBlock(gfx++,
           TEXTURE_ADDRESS(
               f_CheepCheepImages[creature->isGold] + IMAGE_HEADER_SIZE),
@@ -378,12 +387,15 @@ void DrawHoleCreatures(Gfx** displayListHead) {
           PlaySound(MONKEY_SOUND, SOUND_CHANNEL, MONKEY_SOUND_VOLUME);
           break;
       }
+
       if (creature->position[1] > g_CupPositionY) {
         creature->position[1] = g_CupPositionY;
       }
+
       if (creature->frameCount >= MONKEY_LIFETIME) {
         creature->state = HOLE_CREATURE_NONE;
       }
+
       translation[0] = creature->position[0] * COURSE_TO_WORLD_SCALE;
       translation[1] = creature->position[1] * COURSE_TO_WORLD_SCALE;
       translation[2] = creature->position[2] * COURSE_TO_WORLD_SCALE;
@@ -420,5 +432,6 @@ void DrawHoleCreatures(Gfx** displayListHead) {
       gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     }
   }
+
   *displayListHead = gfx;
 }

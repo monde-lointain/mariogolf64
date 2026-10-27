@@ -289,6 +289,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     PrintDebugText(
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
+
   if (IsOffMiniGolfGround(startX, startZ) || IsOffMiniGolfGround(endX, endZ)) {
     if (endY >= GetGroundHeight(endX, endZ)) {
       *fraction = 1.0f;
@@ -304,8 +305,10 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       hit->corners[AXIS_Z][2] = LEVEL_TRIANGLE_SIZE;
       return TRUE;
     }
+
     return FALSE;
   }
+
   tileX = startX >> MINI_GOLF_TILE_X_SHIFT;
   tileZ = startZ >> MINI_GOLF_TILE_Z_SHIFT;
   endTileX = endX >> MINI_GOLF_TILE_X_SHIFT;
@@ -320,6 +323,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
     } else {
       pathBottomY = (endY / WHOLE_UNIT_SIZE) + 1;
     }
+
     for (row = 0; row < GROUND_TILE_POINT_SPAN + 1; row++) {
       for (column = 0; column < GROUND_TILE_POINT_SPAN + 1; column++) {
         points[row][column] =
@@ -332,6 +336,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         }
       }
     }
+
     /* Each cell has two triangles; those whose corners are all below the path
      * are left out */
     triangleCount = 0;
@@ -359,6 +364,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
               points[row + 1][column]->v.ob[AXIS_Z];
           triangleCount++;
         }
+
         if (!IsTriangleBelowPath(isBelowPath[row][column + 1],
                 isBelowPath[row + 1][column + 1],
                 isBelowPath[row + 1][column])) {
@@ -384,6 +390,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         }
       }
     }
+
     nearestFraction = NO_PLANE_HIT_FRACTION;
     for (i = 0; i < triangleCount; i++) {
       GetTrianglePlane(&triangles[i], &plane);
@@ -401,6 +408,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         } else {
           hitFraction = 1.0f;
         }
+
         if (hitFraction < nearestFraction) {
           hitZ = (s32)(deltaZ * hitFraction) + startZ;
           hitX = (s32)(deltaX * hitFraction) + startX;
@@ -444,12 +452,15 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         }
       }
     }
+
     if (hitIndex >= 0) {
       break;
     }
+
     if ((tileX == endTileX) & (tileZ == endTileZ)) {
       return FALSE;
     }
+
     /* Finds where the path enters a neighboring tile */
     if ((tileX != endTileX) | (tileZ != endTileZ)) {
       step = (1.0f - tileFraction) * 0.5f;
@@ -463,6 +474,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
         if (tileDistance == 1) {
           break;
         }
+
         step *= 0.5f;
         if (tileDistance == 0) {
           hitFraction += step;
@@ -470,6 +482,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
           hitFraction -= step;
         }
       }
+
       tileX = nextTileX;
       if (steps != TILE_SEARCH_STEP_COUNT) {
         tileZ = nextTileZ;
@@ -481,6 +494,7 @@ s32 FindMiniGolfGroundHit(BallSimulation* simulation, s32 startX, s32 startY,
       }
     }
   }
+
   *hit = triangles[hitIndex];
   hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
   *fraction = nearestFraction;
@@ -542,6 +556,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     PrintDebugText(
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
+
   if (IsOffGround(startX, startZ) || IsOffGround(endX, endZ)) {
     if (endY >= GetGroundHeight(endX, endZ)) {
       *fraction = 1.0f;
@@ -557,8 +572,10 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       hit->corners[AXIS_Z][2] = LEVEL_TRIANGLE_SIZE;
       return TRUE;
     }
+
     return FALSE;
   }
+
   tileX = startX >> GROUND_TILE_SHIFT;
   tileZ = startZ >> GROUND_TILE_SHIFT;
   endTileX = endX >> GROUND_TILE_SHIFT;
@@ -573,6 +590,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     } else {
       pathBottomY = endY / WHOLE_UNIT_SIZE;
     }
+
     for (row = 0; row < GROUND_TILE_POINT_SPAN + 1; row++) {
       for (column = 0; column < GROUND_TILE_POINT_SPAN + 1; column++) {
         points[row][column] =
@@ -585,6 +603,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
       }
     }
+
     /* Each cell has two triangles; those whose corners are all below the path
      * are left out */
     triangleCount = 0;
@@ -612,6 +631,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
               points[row + 1][column]->v.ob[AXIS_Z];
           triangleCount++;
         }
+
         if (!IsTriangleBelowPath(isBelowPath[row][column + 1],
                 isBelowPath[row + 1][column + 1],
                 isBelowPath[row + 1][column])) {
@@ -637,6 +657,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
       }
     }
+
     nearestFraction = NO_PLANE_HIT_FRACTION;
     for (i = 0; i < triangleCount; i++) {
       GetTrianglePlane(&triangles[i], &plane);
@@ -653,6 +674,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         } else {
           hitFraction = 0.0f;
         }
+
         if (hitFraction < nearestFraction) {
           hitZ = (deltaZ * hitFraction) + startZ;
           hitX = (deltaX * hitFraction) + startX;
@@ -696,12 +718,15 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         }
       }
     }
+
     if (hitIndex >= 0) {
       break;
     }
+
     if ((tileX == endTileX) & (tileZ == endTileZ)) {
       return FALSE;
     }
+
     /* Finds where the path enters a neighboring tile */
     if ((tileX != endTileX) | (tileZ != endTileZ)) {
       step = (1.0f - tileFraction) * 0.5f;
@@ -713,6 +738,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         if (tileDistance == 1) {
           break;
         }
+
         step *= 0.5f;
         if (tileDistance == 0) {
           hitFraction += step;
@@ -720,6 +746,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           hitFraction -= step;
         }
       }
+
       tileX = nextTileX;
       if (steps != TILE_SEARCH_STEP_COUNT) {
         tileZ = nextTileZ;
@@ -730,6 +757,7 @@ s32 FindGroundHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
     }
   }
+
   *hit = triangles[hitIndex];
   hit->unk0 = HOLE_TRIANGLE_KIND_FLAT;
   *fraction = nearestFraction;
@@ -754,26 +782,32 @@ s32 GetBillboardCell(s32 textureIndex, f32 across, f32 down) {
   } else if (column >= BILLBOARD_MASK_SIZE) {
     column = BILLBOARD_MASK_SIZE - 1;
   }
+
   if (row < 0) {
     row = 0;
   } else if (row >= BILLBOARD_MASK_SIZE) {
     row = BILLBOARD_MASK_SIZE - 1;
   }
+
   row = BILLBOARD_MASK_SIZE - 1 - row;
   cell = GetBillboardMaskCell(textureIndex, row, column);
   cell -= '0';
   if (cell < 0) {
     cell = 0;
   }
+
   if (cell > BILLBOARD_CELL_LAST) {
     cell = BILLBOARD_CELL_LAST;
   }
+
   if (cell == BILLBOARD_CELL_IGNORED) {
     cell = BILLBOARD_CELL_EMPTY;
   }
+
   if (IsGameFlagSet(GAME_FLAG_FILL_BILLBOARD_MASKS)) {
     cell = BILLBOARD_CELL_UNK1;
   }
+
   return cell;
 }
 
@@ -813,46 +847,56 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (billboard->textureIndex < 0) {
       continue;
     }
+
     if (fromX < billboard->x - billboard->width) {
       if (toX < billboard->x - billboard->width) {
         continue;
       }
     }
+
     if (billboard->x + billboard->width < fromX) {
       if (billboard->x + billboard->width < toX) {
         continue;
       }
     }
+
     if (fromZ < billboard->z - billboard->width) {
       if (toZ < billboard->z - billboard->width) {
         continue;
       }
     }
+
     if (billboard->z + billboard->width < fromZ) {
       if (billboard->z + billboard->width < toZ) {
         continue;
       }
     }
+
     if (billboard->width == 0) {
       continue;
     }
+
     if (billboard->height == 0) {
       continue;
     }
+
     startSide =
         (deltaX * (billboard->x - fromX)) + (deltaZ * (billboard->z - fromZ));
     endSide = (deltaX * (billboard->x - toX)) + (deltaZ * (billboard->z - toZ));
     if ((startSide ^ endSide) >= 0) {
       continue;
     }
+
     if (ABS(endSide) + ABS(startSide) != 0) {
       hitFraction = fabsf(startSide) / (ABS(endSide) + ABS(startSide));
     } else {
       hitFraction = 0.0f;
     }
+
     if (hitFraction > nearestFraction) {
       continue;
     }
+
     hitX = fromX + (deltaX * hitFraction);
     hitY = fromY + ((toY - fromY) * hitFraction);
     hitZ = fromZ + (deltaZ * hitFraction);
@@ -860,13 +904,16 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (depth < 0) {
       continue;
     }
+
     if (depth > billboard->height) {
       continue;
     }
+
     distance = IntLength2D(billboard->x - hitX, billboard->z - hitZ);
     if (distance > billboard->width) {
       continue;
     }
+
     hitCell = GetBillboardCell(billboard->textureIndex,
         (f32)distance / billboard->width, (f32)depth / billboard->height);
     if (hitCell != BILLBOARD_CELL_EMPTY) {
@@ -875,6 +922,7 @@ s32 FindBillboardHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       *cell = hitCell;
     }
   }
+
   *fraction = nearestFraction;
   return isHit;
 }
@@ -906,6 +954,7 @@ void MoveBallToCupEdge(BallSimulation* simulation) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
       offsetX = direction[AXIS_X] * CUP_EDGE_DISTANCE;
       offsetZ = direction[AXIS_Z] * CUP_EDGE_DISTANCE;
+
       /* The pointer is there to match; GCC keeps its stores ahead of the later
        * cup load */
       position = simulation->position;
@@ -956,21 +1005,25 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
         continue;
       }
     }
+
     if ((s32)(D_800BA9D8.cupPosition[AXIS_X] + FLAG_REACH) < startX) {
       if ((s32)(D_800BA9D8.cupPosition[AXIS_X] + FLAG_REACH) < endX) {
         continue;
       }
     }
+
     if (startZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
       if (endZ < (s32)(g_CupPositionZ - FLAG_REACH)) {
         continue;
       }
     }
+
     if ((s32)(g_CupPositionZ + FLAG_REACH) < startZ) {
       if ((s32)(g_CupPositionZ + FLAG_REACH) < endZ) {
         continue;
       }
     }
+
     endToCupX = D_800BA9D8.cupPosition[AXIS_X] - endX;
     endToCupZ = g_CupPositionZ - endZ;
     startSide = (deltaX * (D_800BA9D8.cupPosition[AXIS_X] - startX)) +
@@ -988,10 +1041,12 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       } else {
         hitFraction = 0.0f;
       }
+
       if (hitFraction > nearestFraction) {
         continue;
       }
     }
+
     height = g_CupPositionY - (s32)(startY + (deltaY * hitFraction));
     hitX = startX + (deltaX * hitFraction);
     hitZ = startZ + (deltaZ * hitFraction);
@@ -999,40 +1054,48 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     if (height > FLAGSTICK_HEIGHT) {
       continue;
     }
+
     if (unkB0 == 0) {
       if (height > FLAG_BOTTOM_HEIGHT) {
         isFlagHit = TRUE;
       }
     }
+
     if (deltaY < 0) {
       isFlagHit &= -(IsGameFlagSet(GAME_FLAG_RISING_FLAG_HITS) != 0);
     }
+
     distance = IntLength2D(
         D_800BA9D8.cupPosition[AXIS_X] - hitX, g_CupPositionZ - hitZ);
     if (distance > FLAG_REACH) {
       continue;
     }
+
     if ((distance > FLAGSTICK_RADIUS) & !isFlagHit) {
       continue;
     }
+
     nearestFraction = hitFraction;
     speed = IntLength2D(deltaX, deltaZ);
     hitKind = PIN_HIT_FLAGSTICK;
     if (isFlagHit) {
       hitKind = PIN_HIT_FLAG;
     }
+
     chordSquared = FLAGSTICK_RADIUS_SQUARED - (distance * distance);
     if (chordSquared >= 0.0f) {
       halfChord = sqrtf(chordSquared);
     } else {
       halfChord = FLAGSTICK_RADIUS;
     }
+
     direction[AXIS_X] = startX - hitX;
     direction[AXIS_Y] = 0.0f;
     direction[AXIS_Z] = startZ - hitZ;
     if (direction[AXIS_X] != 0.0f || direction[AXIS_Z] != 0.0f) {
       guNormalize(&direction[AXIS_X], &direction[AXIS_Y], &direction[AXIS_Z]);
     }
+
     direction[AXIS_X] *= halfChord;
     direction[AXIS_Y] *= halfChord;
     direction[AXIS_Z] *= halfChord;
@@ -1042,6 +1105,7 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
     if (contactX != 0 || contactZ != 0) {
       angle = atan2(contactZ, contactX);
     }
+
     if (isFlagHit) {
       velocity[AXIS_X] = 0;
       velocity[AXIS_Y] = FLAG_HIT_SPEED_Y;
@@ -1051,17 +1115,21 @@ s32 FindPinHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY, s32 endZ,
       if (simulation->isRunning == BALL_STATE_FLYING) {
         bounceSpeed *= 0.5f;
       }
+
       if (bounceSpeed > speed * FLAGSTICK_MOST_BOUNCE) {
         bounceSpeed = speed * FLAGSTICK_MOST_BOUNCE;
       }
+
       if (bounceSpeed < speed * FLAGSTICK_LEAST_BOUNCE) {
         bounceSpeed = speed * FLAGSTICK_LEAST_BOUNCE;
       }
+
       velocity[AXIS_Y] = deltaY;
       velocity[AXIS_X] = cosf(angle) * bounceSpeed;
       velocity[AXIS_Z] = sinf(angle) * bounceSpeed;
     }
   }
+
   *fraction = nearestFraction;
   return hitKind;
 }
@@ -1098,27 +1166,33 @@ s32 GetTriangleFacing(s32 firstX, s32 firstY, s32 firstZ, s32 secondX,
   if (normalY < 0) {
     normalY = -normalY;
   }
+
   if (normalY > largest) {
     facing = TRIANGLE_FACING_UP;
     largest = normalY;
   }
+
   secondDeltaY = secondY - firstY;
   thirdDeltaY = thirdY - firstY;
   normalX = (secondDeltaY * thirdDeltaZ) - (secondDeltaZ * thirdDeltaY);
   if (normalX < 0) {
     normalX = -normalX;
   }
+
   if (normalX > largest) {
     facing = TRIANGLE_FACING_X;
     largest = normalX;
   }
+
   normalZ = (secondDeltaX * thirdDeltaY) - (secondDeltaY * thirdDeltaX);
   if (normalZ < 0) {
     normalZ = -normalZ;
   }
+
   if (normalZ > largest) {
     facing = TRIANGLE_FACING_Z;
   }
+
   return facing;
 }
 
@@ -1163,9 +1237,11 @@ s32 GetTrianglePlaneCopy(PlaneTriangle* triangle, TrianglePlane* plane) {
     plane->unk10 = 1.0f;
     return -1;
   }
+
   if (normalY < 0.0f) {
     length = -length;
   }
+
   scale = 1.0f / length;
   plane->unk10 = 1.0f;
   plane->normal[AXIS_X] = normalX * scale;
@@ -1217,15 +1293,19 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     PrintDebugText(
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
+
   if (endY + PATH_MOST_RISE < startY) {
     return FALSE;
   }
+
   if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH) {
     return FALSE;
   }
+
   if ((u32)endX >= GROUND_WIDTH || (u32)endZ >= GROUND_LENGTH) {
     return FALSE;
   }
+
   if (startX < endX) {
     lowestX = startX / WHOLE_UNIT_SIZE;
     highestX = endX / WHOLE_UNIT_SIZE;
@@ -1233,6 +1313,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestX = endX / WHOLE_UNIT_SIZE;
     highestX = startX / WHOLE_UNIT_SIZE;
   }
+
   if (startY < endY) {
     lowestY = startY / WHOLE_UNIT_SIZE;
     highestY = endY / WHOLE_UNIT_SIZE;
@@ -1240,6 +1321,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestY = endY / WHOLE_UNIT_SIZE;
     highestY = startY / WHOLE_UNIT_SIZE;
   }
+
   if (startZ < endZ) {
     lowestZ = startZ / WHOLE_UNIT_SIZE;
     highestZ = endZ / WHOLE_UNIT_SIZE;
@@ -1247,27 +1329,33 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestZ = endZ / WHOLE_UNIT_SIZE;
     highestZ = startZ / WHOLE_UNIT_SIZE;
   }
+
   nearestFraction = NO_PLANE_HIT_FRACTION;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
     candidate = &g_WorkArea.hole.triangles[i];
     if (candidate->kind == HOLE_TRIANGLE_KIND_RING) {
       continue;
     }
+
     if (candidate->kind == HOLE_TRIANGLE_KIND_SHADED) {
       continue;
     }
+
     if (highestY < candidate->bounds[AXIS_Y][0] ||
         candidate->bounds[AXIS_Y][1] < lowestY) {
       continue;
     }
+
     if (highestX < candidate->bounds[AXIS_X][0] ||
         candidate->bounds[AXIS_X][1] < lowestX) {
       continue;
     }
+
     if (highestZ < candidate->bounds[AXIS_Z][0] ||
         candidate->bounds[AXIS_Z][1] < lowestZ) {
       continue;
     }
+
     triangle.corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
     triangle.corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
     triangle.corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];
@@ -1291,9 +1379,11 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       } else {
         hitFraction = 0.0f;
       }
+
       if (hitFraction < nearestFraction) {
         hitZ = ((endZ - startZ) * hitFraction) + startZ;
         hitX = ((endX - startX) * hitFraction) + startX;
+
         /*
          * Each cross product tells which side of an edge the hit is on,
          * seen from above. The third repeats the first edge, so the edge
@@ -1309,6 +1399,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         } else {
           sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
         }
+
         edgeCrosses[1] =
             ((triangle.corners[AXIS_X][2] - triangle.corners[AXIS_X][1]) *
                 (hitZ - (triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT))) -
@@ -1321,6 +1412,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         } else {
           sides &= EDGE_SIDE_POSITIVE;
         }
+
         if (sides != 0) {
           edgeCrosses[2] =
               ((triangle.corners[AXIS_X][1] - triangle.corners[AXIS_X][0]) *
@@ -1334,6 +1426,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           } else {
             sides &= EDGE_SIDE_POSITIVE;
           }
+
           if (sides != 0) {
             nearestFraction = hitFraction;
             hitIndex = i;
@@ -1342,6 +1435,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
     }
   }
+
   if (hitIndex >= 0) {
     hit->corners[AXIS_X][0] =
         g_WorkArea.hole.triangles[hitIndex].vertices[0].v.ob[AXIS_X];
@@ -1365,6 +1459,7 @@ s32 FindHoleTriangleHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     *fraction = nearestFraction;
     return TRUE;
   }
+
   return FALSE;
 }
 
@@ -1432,12 +1527,15 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     PrintDebugText(
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
+
   if ((u32)startX >= GROUND_WIDTH || (u32)startZ >= GROUND_LENGTH) {
     return FALSE;
   }
+
   if ((u32)endX >= GROUND_WIDTH || (u32)endZ >= GROUND_LENGTH) {
     return FALSE;
   }
+
   if (startX < endX) {
     lowestX = startX / WHOLE_UNIT_SIZE;
     highestX = endX / WHOLE_UNIT_SIZE;
@@ -1445,6 +1543,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestX = endX / WHOLE_UNIT_SIZE;
     highestX = startX / WHOLE_UNIT_SIZE;
   }
+
   if (startY < endY) {
     lowestY = startY / WHOLE_UNIT_SIZE;
     highestY = endY / WHOLE_UNIT_SIZE;
@@ -1452,6 +1551,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestY = endY / WHOLE_UNIT_SIZE;
     highestY = startY / WHOLE_UNIT_SIZE;
   }
+
   if (startZ < endZ) {
     lowestZ = startZ / WHOLE_UNIT_SIZE;
     highestZ = endZ / WHOLE_UNIT_SIZE;
@@ -1459,6 +1559,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     lowestZ = endZ / WHOLE_UNIT_SIZE;
     highestZ = startZ / WHOLE_UNIT_SIZE;
   }
+
   nearestFraction = NO_PLANE_HIT_FRACTION;
   deltaX = endX - startX;
   deltaZ = endZ - startZ;
@@ -1468,18 +1569,22 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
       continue;
     }
+
     if (highestY < candidate->bounds[AXIS_Y][0] ||
         candidate->bounds[AXIS_Y][1] < lowestY) {
       continue;
     }
+
     if (highestX < candidate->bounds[AXIS_X][0] ||
         candidate->bounds[AXIS_X][1] < lowestX) {
       continue;
     }
+
     if (highestZ < candidate->bounds[AXIS_Z][0] ||
         candidate->bounds[AXIS_Z][1] < lowestZ) {
       continue;
     }
+
     triangle.corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
     triangle.corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
     triangle.corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];
@@ -1495,18 +1600,22 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (!DoesPathReachWall(startSide, endSide)) {
       continue;
     }
+
     sideChange = startSide - endSide;
     if ((s32)sideChange != 0) {
       hitFraction = (fabsf(startSide) - WALL_HIT_DISTANCE) / fabsf(sideChange);
     } else {
       hitFraction = 0.0f;
     }
+
     if (hitFraction < 0.0f) {
       hitFraction = 0.0f;
     }
+
     if (!(hitFraction < nearestFraction)) {
       continue;
     }
+
     cornersU[0] = triangle.corners[AXIS_X][0];
     cornersU[1] = triangle.corners[AXIS_X][1];
     cornersU[2] = triangle.corners[AXIS_X][2];
@@ -1522,6 +1631,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     } else {
       facing = TRIANGLE_FACING_NONE;
     }
+
     if (facing == TRIANGLE_FACING_Z) {
       /* The wall spans x and y */
       hitPointU = (deltaX * hitFraction) + startX;
@@ -1539,21 +1649,25 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           farEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
           nearEnd = triangle.corners[AXIS_X][2] << COURSE_UNIT_SHIFT;
         }
+
         if (endX < startX) {
           wallEnd = farEnd + WALL_END_DISTANCE;
           if (endX <= wallEnd && wallEnd < startX) {
             endFraction = (startX - wallEnd) / (startX - endX);
           }
         }
+
         if (startX < endX) {
           wallEnd = nearEnd - WALL_END_DISTANCE;
           if (wallEnd <= endX && startX < wallEnd) {
             endFraction = (startX - wallEnd) / (startX - endX);
           }
         }
+
         if (endFraction != 0.0f) {
           osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
         }
+
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
           if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
                   (deltaY * endFraction) + startY,
@@ -1575,6 +1689,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             }
           }
         }
+
         widening = (triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][2]) *
             WALL_WIDENING / edgeLength;
         cornersU[0] += widening;
@@ -1594,21 +1709,25 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           farEnd = triangle.corners[AXIS_X][0] << COURSE_UNIT_SHIFT;
           nearEnd = triangle.corners[AXIS_X][1] << COURSE_UNIT_SHIFT;
         }
+
         if (endX < startX) {
           wallEnd = farEnd + WALL_END_DISTANCE;
           if (endX <= wallEnd && wallEnd < startX) {
             endFraction = (startX - wallEnd) / (startX - endX);
           }
         }
+
         if (startX < endX) {
           wallEnd = nearEnd - WALL_END_DISTANCE;
           if (wallEnd <= endX && startX < wallEnd) {
             endFraction = (startX - wallEnd) / (startX - endX);
           }
         }
+
         if (endFraction != 0.0f) {
           osSyncPrintf("X Adjust? %f,%f\n", hitFraction, endFraction);
         }
+
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
           if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
                   (deltaY * endFraction) + startY,
@@ -1630,6 +1749,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             }
           }
         }
+
         widening = (triangle.corners[AXIS_X][0] - triangle.corners[AXIS_X][1]) *
             WALL_WIDENING / edgeLength;
         cornersU[0] += widening;
@@ -1639,6 +1759,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       } else {
         osSyncPrintf("Illegal Wall!!!!!!!!!\n");
       }
+
       /* A path that starts at the wall beside a corner is taken to hit it
        * before it starts */
       if (hitFraction == 0.0f) {
@@ -1650,10 +1771,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             nearestCorner = cornerDistance;
           }
         }
+
         if (nearestCorner < WALL_END_DISTANCE) {
           hitFraction = CORNER_HIT_FRACTION;
         }
       }
+
       cornersV[0] = triangle.corners[AXIS_Y][0];
       cornersV[1] = triangle.corners[AXIS_Y][1];
       cornersV[2] = triangle.corners[AXIS_Y][2];
@@ -1670,6 +1793,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       if (IsLessThanCorners(hitU, cornersU)) {
         continue;
       }
+
       if (IsMoreThanCorners(hitU, cornersU)) {
         continue;
       }
@@ -1690,6 +1814,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           farEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
           nearEnd = triangle.corners[AXIS_Z][2] << COURSE_UNIT_SHIFT;
         }
+
         /* Unlike along x, the fraction is to the wall's end itself, not past it
          */
         if (endZ < startZ) {
@@ -1698,15 +1823,18 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             endFraction = (startZ - farEnd) / (startZ - endZ);
           }
         }
+
         if (startZ < endZ) {
           wallEnd = nearEnd - WALL_END_DISTANCE;
           if (wallEnd <= endZ && startZ < wallEnd) {
             endFraction = (startZ - nearEnd) / (startZ - endZ);
           }
         }
+
         if (endFraction != 0.0f) {
           osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
         }
+
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
           if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
                   (deltaY * endFraction) + startY,
@@ -1720,6 +1848,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             }
           }
         }
+
         widening = (triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][2]) *
             WALL_WIDENING / edgeLength;
         cornersV[0] += widening;
@@ -1739,21 +1868,25 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
           farEnd = triangle.corners[AXIS_Z][0] << COURSE_UNIT_SHIFT;
           nearEnd = triangle.corners[AXIS_Z][1] << COURSE_UNIT_SHIFT;
         }
+
         if (endZ < startZ) {
           wallEnd = farEnd + WALL_END_DISTANCE;
           if (endZ <= wallEnd && wallEnd < startZ) {
             endFraction = (startZ - farEnd) / (startZ - endZ);
           }
         }
+
         if (startZ < endZ) {
           wallEnd = nearEnd - WALL_END_DISTANCE;
           if (wallEnd <= endZ && startZ < wallEnd) {
             endFraction = (startZ - nearEnd) / (startZ - endZ);
           }
         }
+
         if (endFraction != 0.0f) {
           osSyncPrintf("Z Adjust? %f,%f\n", hitFraction, endFraction);
         }
+
         if ((hitFraction >= 0.0f) & (hitFraction < endFraction)) {
           if (fabsf(GetPlaneSide(plane, (deltaX * endFraction) + startX,
                   (deltaY * endFraction) + startY,
@@ -1767,6 +1900,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             }
           }
         }
+
         widening = (triangle.corners[AXIS_Z][0] - triangle.corners[AXIS_Z][1]) *
             WALL_WIDENING / edgeLength;
         cornersV[0] += widening;
@@ -1776,6 +1910,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       } else {
         osSyncPrintf("Illegal Wall!!!!!!!!!\n");
       }
+
       if (hitFraction == 0.0f) {
         nearestCorner = FARTHEST_CORNER_DISTANCE;
         for (k = 0; k < TRIANGLE_CORNER_COUNT; k++) {
@@ -1785,10 +1920,12 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
             nearestCorner = cornerDistance;
           }
         }
+
         if (nearestCorner < WALL_END_DISTANCE) {
           hitFraction = CORNER_HIT_FRACTION;
         }
       }
+
       cornersU[0] = triangle.corners[AXIS_Y][0];
       cornersU[1] = triangle.corners[AXIS_Y][1];
       cornersU[2] = triangle.corners[AXIS_Y][2];
@@ -1804,6 +1941,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       if (IsLessThanCorners(hitU, cornersV)) {
         continue;
       }
+
       if (IsMoreThanCorners(hitU, cornersV)) {
         continue;
       }
@@ -1811,6 +1949,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       hitPointU = (deltaX * hitFraction) + startX;
       hitPointV = (deltaZ * hitFraction) + startZ;
     }
+
     /* A hit near or below the ground is taken whatever the edges say */
     if (GetGroundHeight(
             (deltaX * hitFraction) + startX, (deltaZ * hitFraction) + startZ) <
@@ -1819,8 +1958,10 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       if (hitIndex != i) {
         osSyncPrintf("New Logic attemped!!!!! ratio %f\n", nearestFraction);
       }
+
       hitIndex = i;
     }
+
     /* The third cross product repeats the first edge, as in FindHoleTriangleHit
      */
     edgeCrosses[0] = ((cornersU[1] - cornersU[0]) *
@@ -1832,6 +1973,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     } else {
       sides = (edgeCrosses[0] == 0) ? EDGE_SIDE_ON : EDGE_SIDE_POSITIVE;
     }
+
     edgeCrosses[1] = ((cornersU[2] - cornersU[1]) *
                          (hitPointV - (cornersV[1] * COURSE_UNITS_PER_UNIT))) -
         ((cornersV[2] - cornersV[1]) *
@@ -1843,6 +1985,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     } else {
       sides &= EDGE_SIDE_POSITIVE;
     }
+
     if (sides != 0) {
       edgeCrosses[2] =
           ((cornersU[1] - cornersU[0]) *
@@ -1856,6 +1999,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       } else {
         sides &= EDGE_SIDE_POSITIVE;
       }
+
       if (sides != 0) {
         nearestFraction = hitFraction;
         hitIndex = i;
@@ -1867,6 +2011,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
     }
   }
+
   if (hitIndex >= 0) {
     candidate = &g_WorkArea.hole.triangles[hitIndex];
     hit->corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
@@ -1882,6 +2027,7 @@ s32 FindWallHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     *fraction = nearestFraction;
     return TRUE;
   }
+
   return FALSE;
 }
 
@@ -1943,26 +2089,33 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       if (candidate->kind != HOLE_TRIANGLE_KIND_SHADED) {
         continue;
       }
+
       if (checksHeight == TRUE) {
         if (highestY < candidate->bounds[AXIS_Y][0]) {
           continue;
         }
+
         if (candidate->bounds[AXIS_Y][1] < lowestY) {
           continue;
         }
       }
+
       if (highestX < candidate->bounds[AXIS_X][0]) {
         continue;
       }
+
       if (candidate->bounds[AXIS_X][1] < lowestX) {
         continue;
       }
+
       if (highestZ < candidate->bounds[AXIS_Z][0]) {
         continue;
       }
+
       if (candidate->bounds[AXIS_Z][1] < lowestZ) {
         continue;
       }
+
       wall.corners[AXIS_X][0] = candidate->vertices[0].v.ob[AXIS_X];
       wall.corners[AXIS_X][1] = candidate->vertices[1].v.ob[AXIS_X];
       wall.corners[AXIS_X][2] = candidate->vertices[2].v.ob[AXIS_X];
@@ -1979,6 +2132,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
       if (!(fabsf(side) < WALL_TOUCH_DISTANCE)) {
         continue;
       }
+
       osSyncPrintf("うっ\n"); /* "Ugh" */
       for (corner = 0; corner < TRIANGLE_CORNER_COUNT; corner++) {
         cornerDistance =
@@ -1995,6 +2149,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
           } else {
             push[AXIS_X] = CORNER_DEFAULT_PUSH_X;
           }
+
           push[AXIS_X] *= WALL_PUSH_DISTANCE;
           push[AXIS_Z] *= WALL_PUSH_DISTANCE;
           x = push[AXIS_X] +
@@ -2006,9 +2161,11 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
           break;
         }
       }
+
       if (isPushed) {
         break;
       }
+
       /* A ball past every corner along the wall is beside it, not in it */
       if (GetTriangleFacing(wall.corners[AXIS_X][0], wall.corners[AXIS_Y][0],
               wall.corners[AXIS_Z][0], wall.corners[AXIS_X][1],
@@ -2021,6 +2178,7 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
         if (IsLessThanCorners((f32)x, cornerXs)) {
           continue;
         }
+
         if (IsMoreThanCorners((f32)x, cornerXs)) {
           continue;
         }
@@ -2031,10 +2189,12 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
         if (IsLessThanCorners((f32)z, cornerZs)) {
           continue;
         }
+
         if (IsMoreThanCorners((f32)z, cornerZs)) {
           continue;
         }
       }
+
       isPushed = TRUE;
       if (side < 0.0f) {
         pushDistance = -WALL_PUSH_DISTANCE - side;
@@ -2045,14 +2205,17 @@ s32 PushBallOutOfWalls(BallSimulation* simulation, s32 checksHeight) {
         x = x + (plane.normal[AXIS_X] * pushDistance);
         z = z + (plane.normal[AXIS_Z] * pushDistance);
       }
+
       if (isPushed) {
         osSyncPrintf("WallInsideOut2!\n");
         break;
       }
     }
+
     if (isPushed) {
       osSyncPrintf("WallInsideOut!\n");
     }
+
     simulation->position[AXIS_X] = x;
     simulation->position[AXIS_Z] = z;
   }
@@ -2098,15 +2261,18 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     PrintDebugText(
         g_PathDebugBlankText, PATH_DEBUG_CLEAR_COLUMN, PATH_DEBUG_CLEAR_ROW);
   }
+
   /* IsOffGround's tests, written out with signed bounds; they are there to
    * match */
   if (startX < 0 || startX >= GROUND_WIDTH || startZ < 0 ||
       startZ >= GROUND_LENGTH) {
     return -1;
   }
+
   if (endX < 0 || endX >= GROUND_WIDTH || endZ < 0 || endZ >= GROUND_LENGTH) {
     return -1;
   }
+
   ringNumber = 0;
   nearestFraction = NO_PLANE_HIT_FRACTION;
   for (i = 0; i < HOLE_TRIANGLE_COUNT; i++) {
@@ -2114,6 +2280,7 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
     if (triangle->kind != HOLE_TRIANGLE_KIND_RING) {
       continue;
     }
+
     ring.corners[AXIS_X][RING_CENTER] =
         triangle->vertices[RING_CENTER].v.ob[AXIS_X];
     ring.corners[AXIS_X][RING_FACING] =
@@ -2154,11 +2321,13 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
         if (sideChange < 0.0f) {
           sideChange = -sideChange;
         }
+
         startSide = fabsf(startSide);
         hitFraction = startSide / sideChange;
       } else {
         hitFraction = 1.0f;
       }
+
       if (hitFraction < nearestFraction) {
         if (Length3D(((s32)(((endX - startX) * hitFraction) + startX) *
                          UNITS_PER_COURSE_UNIT) -
@@ -2176,12 +2345,14 @@ s32 FindRingHit(s32 startX, s32 startY, s32 startZ, s32 endX, s32 endY,
       }
     }
   }
+
   if (hitNumber >= 0) {
     *hitRing = ring;
     hitRing->unk0 = hitNumber - 1;
     *fraction = nearestFraction;
     return 1;
   }
+
   return 0;
 }
 
@@ -2204,25 +2375,31 @@ s32 GetBillboardSolidity(s32 textureIndex, f32 across, f32 down) {
   } else if (column >= BILLBOARD_MASK_SIZE) {
     column = BILLBOARD_MASK_SIZE - 1;
   }
+
   if (row < 0) {
     row = 0;
   } else if (row >= BILLBOARD_MASK_SIZE) {
     row = BILLBOARD_MASK_SIZE - 1;
   }
+
   row = BILLBOARD_MASK_SIZE - 1 - row;
   solidity = (GetBillboardMaskCell(textureIndex, row, column) != '0') *
       BILLBOARD_CENTER_CELL_WEIGHT;
   if (row > 0) {
     solidity += GetBillboardMaskCell(textureIndex, row - 1, column) != '0';
   }
+
   if (row < BILLBOARD_MASK_SIZE - 1) {
     solidity += GetBillboardMaskCell(textureIndex, row + 1, column) != '0';
   }
+
   if (column > 0) {
     solidity += GetBillboardMaskCell(textureIndex, row, column - 1) != '0';
   }
+
   if (column < BILLBOARD_MASK_SIZE - 1) {
     solidity += GetBillboardMaskCell(textureIndex, row, column + 1) != '0';
   }
+
   return solidity;
 }

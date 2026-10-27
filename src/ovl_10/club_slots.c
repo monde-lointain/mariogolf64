@@ -279,6 +279,7 @@ void LoadClubSlots(void) {
             (OpenEncodedAsset(f_SymbolAssets[index], &asset) * index),
         &asset);
   }
+
   f_Slots->machineImage = AllocMemory(OpenEncodedAsset(MACHINE_ASSET, &asset));
   ReadEncodedAsset(f_Slots->machineImage, &asset);
   f_Slots->buttonsImage = AllocMemory(OpenEncodedAsset(BUTTONS_ASSET, &asset));
@@ -294,6 +295,7 @@ void LoadClubSlots(void) {
         AllocMemory(OpenEncodedAsset(D_800C2650[row][0], &asset));
     ReadEncodedAsset(f_Slots->faceImages[index][1], &asset);
   }
+
   f_FaceBufferIndex = 0;
   f_FaceFrameIndex = 0;
   f_FaceFrameTime = 0;
@@ -337,18 +339,21 @@ void LoadClubSlots(void) {
     f_Slots->reelVertices[index * 2].v.cn[3] = 0xFF;
     f_Slots->reelVertices[(index * 2) + 1].v.cn[3] = 0xFF;
   }
+
   for (index = 0; index != SHADE_VERTEX_COUNT; index++) {
     if (index & 2) {
       f_Slots->shadeVertices[index].v.ob[0] = SHADE_HALF_WIDTH;
     } else {
       f_Slots->shadeVertices[index].v.ob[0] = -SHADE_HALF_WIDTH;
     }
+
     f_Slots->shadeVertices[index].v.ob[2] = SHADE_Z;
     f_Slots->shadeVertices[index].v.cn[0] = 0;
     f_Slots->shadeVertices[index].v.cn[1] = 0;
     f_Slots->shadeVertices[index].v.cn[2] = 0;
     f_Slots->shadeVertices[index].v.cn[3] = 0;
   }
+
   f_Slots->shadeVertices[0].v.ob[1] = 48;
   f_Slots->shadeVertices[1].v.ob[1] = 16;
   f_Slots->shadeVertices[2].v.ob[1] = 16;
@@ -380,6 +385,7 @@ void FreeClubSlots(void) {
     FreeMemory(&f_Slots->faceImages[playerIndex][0]);
     FreeMemory(&f_Slots->faceImages[playerIndex][1]);
   }
+
   FreeMemory(&f_Slots);
 }
 
@@ -398,6 +404,7 @@ void GiveSlotClubs(s32 playerIndex) {
   for (index = 0; index != CLUB_SLOT_COUNT; index++) {
     player->clubs[index] = NO_CLUB;
   }
+
   player->clubs[CLUB_TYPE_PUTTER] =
       ((s8)player->characterIndex * CLUB_SET_SIZE) + CLUB_TYPE_PUTTER;
   f_StarCount = 0;
@@ -406,6 +413,7 @@ void GiveSlotClubs(s32 playerIndex) {
     if (symbolIndex < 0) {
       symbolIndex += REEL_SYMBOL_COUNT;
     }
+
     symbol = f_ReelStrips[index][symbolIndex];
     if (symbol != SYMBOL_STAR) {
       if ((s8)player->characterIndex >= CHARACTER_CLUB_SET_COUNT) {
@@ -422,6 +430,7 @@ void GiveSlotClubs(s32 playerIndex) {
       f_StarCount++;
     }
   }
+
   if (starCount == REEL_COUNT) {
     for (slot = 0; slot != CLUB_SYMBOL_COUNT; slot++) {
       clubSet = (s8)player->characterIndex;
@@ -429,8 +438,10 @@ void GiveSlotClubs(s32 playerIndex) {
         clubSet = player->gameBoyCharacterIndex;
         clubSet += CHARACTER_CLUB_SET_COUNT;
       }
+
       player->clubs[slot] = (clubSet * CLUB_SET_SIZE) + slot;
     }
+
     PlaySound(SOUND_THREE_STARS, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
   }
 }
@@ -454,10 +465,12 @@ s32 UpdateClubSlots(void) {
   if (f_IsShowingResult != FALSE) {
     return FALSE;
   }
+
   if (f_Slots->playerIndex == g_GameState.playerCount) {
     f_ClubSlotsState = CLUB_SLOTS_DONE;
     return TRUE;
   }
+
   switch (f_ClubSlotsState) {
     case CLUB_SLOTS_STARTING:
       if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
@@ -466,6 +479,7 @@ s32 UpdateClubSlots(void) {
         PlaySound(
             SOUND_REELS_START, g_NextSoundChannel, CLUB_SLOTS_SOUND_VOLUME);
       }
+
       break;
     case CLUB_SLOTS_SPEEDING:
       if (++f_StateTime == CLUB_SLOTS_STATE_TIME) {
@@ -473,6 +487,7 @@ s32 UpdateClubSlots(void) {
         f_ClubSlotsState = CLUB_SLOTS_STOPPING;
         f_StopWaitTime = 0;
       }
+
       break;
     case CLUB_SLOTS_STOPPING:
       if (player->controllerIndex == CONTROLLER_INDEX_UNK4) {
@@ -480,6 +495,7 @@ s32 UpdateClubSlots(void) {
       } else {
         controllerIndex = player->controllerIndex;
       }
+
       f_StopWaitTime++;
       if (f_Slots->pressCount < REEL_COUNT) {
         if (IsReelStopping(controllerIndex, player)) {
@@ -492,6 +508,7 @@ s32 UpdateClubSlots(void) {
         f_ClubSlotsState = CLUB_SLOTS_STOPPED;
         f_Slots->resultTime = 0;
       }
+
       break;
     case CLUB_SLOTS_STOPPED:
       if (++f_Slots->resultTime == CLUB_SLOTS_RESULT_DELAY) {
@@ -508,8 +525,10 @@ s32 UpdateClubSlots(void) {
               CLUB_SLOTS_SOUND_VOLUME);
         }
       }
+
       break;
   }
+
   return FALSE;
 }
 
@@ -550,6 +569,7 @@ void DrawClubSlots(Gfx** displayListHead) {
         if (reelIndex == LAST_REEL) {
           f_TickTime++;
         }
+
         if (f_Slots->reelAngles[reelIndex] < SYMBOL_ANGLE) {
           f_Slots->reelAngles[reelIndex] += STOPPING_REEL_SPEED;
           if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
@@ -558,11 +578,13 @@ void DrawClubSlots(Gfx** displayListHead) {
             if (f_Slots->reelPositions[reelIndex] >= REEL_SYMBOL_COUNT) {
               f_Slots->reelPositions[reelIndex] = 0;
             }
+
             symbolIndex =
                 f_Slots->reelPositions[reelIndex] - SHOWN_SYMBOL_OFFSET;
             if (symbolIndex < 0) {
               symbolIndex += REEL_SYMBOL_COUNT;
             }
+
             /* The last reel stops on a star only after two others */
             if (reelIndex == LAST_REEL) {
               if (f_Slots->stoppedReelCount == reelIndex) {
@@ -584,6 +606,7 @@ void DrawClubSlots(Gfx** displayListHead) {
                   f_ReelStrips[reelIndex][symbolIndex];
               f_Slots->stoppedReelCount++;
             }
+
             f_TickTime = 0;
           }
         }
@@ -592,12 +615,14 @@ void DrawClubSlots(Gfx** displayListHead) {
       if (reelIndex == LAST_REEL) {
         f_TickTime += 2;
       }
+
       f_Slots->reelAngles[reelIndex] += f_Slots->reelSpeeds[reelIndex];
       f_Slots->reelSpeeds[reelIndex] +=
           DEGREES_TO_RADIANS((REEL_COUNT - reelIndex) * REEL_SPEED_STEP);
       if (f_Slots->reelSpeeds[reelIndex] > MAX_REEL_SPEED) {
         f_Slots->reelSpeeds[reelIndex] = MAX_REEL_SPEED;
       }
+
       if (f_Slots->reelAngles[reelIndex] > SYMBOL_ANGLE) {
         f_Slots->reelAngles[reelIndex] -= SYMBOL_ANGLE;
         f_Slots->reelPositions[reelIndex]++;
@@ -606,6 +631,7 @@ void DrawClubSlots(Gfx** displayListHead) {
         }
       }
     }
+
     rotation[0] = f_Slots->reelAngles[reelIndex];
     rotation[1] = 0;
     rotation[2] = 0;
@@ -619,11 +645,13 @@ void DrawClubSlots(Gfx** displayListHead) {
     ConvertMatrixToFixed(
         matrix, &f_ReelMatrices[reelIndex][g_MatrixBufferIndex]);
   }
+
   gDPPipeSync(gfx++);
   f_TickTime %= REEL_TICK_TIME;
   if (f_Slots->stoppedReelCount < REEL_COUNT && f_TickTime == 0) {
     PlaySound(SOUND_REEL_CLICK, REEL_CLICK_CHANNEL, CLUB_SLOTS_SOUND_VOLUME);
   }
+
   rotation[0] = 0;
   rotation[1] = 0;
   rotation[2] = 0;
@@ -678,9 +706,11 @@ void DrawClubSlots(Gfx** displayListHead) {
       if (symbolIndex >= REEL_SYMBOL_COUNT / 2) {
         symbolIndex -= REEL_SYMBOL_COUNT;
       }
+
       if (symbolIndex < 0) {
         symbolIndex += REEL_SYMBOL_COUNT;
       }
+
       LoadTextureBlock(&gfx,
           f_Slots->symbolImages +
               (f_ReelStrips[reelIndex][symbolIndex] * SYMBOL_IMAGE_SIZE) +
@@ -759,6 +789,7 @@ void DrawClubSlots(Gfx** displayListHead) {
               1,
           CALC_DXT(MACHINE_WIDTH, G_IM_SIZ_8b_BYTES));
     }
+
     gDPPipeSync(gfx++);
     DrawTextureRect(&gfx, SCREEN_BORDER << 2, top << 2,
         (SCREEN_BORDER + MACHINE_WIDTH - 1) << 2, (top + stripHeight - 1) << 2,
@@ -772,6 +803,7 @@ void DrawClubSlots(Gfx** displayListHead) {
     if (buttonIndex > f_Slots->pressCount - 1) {
       break;
     }
+
     for (stripIndex = 0; stripIndex != BUTTON_STRIP_COUNT; stripIndex++) {
       LoadTextureBlock(&gfx,
           f_Slots->buttonsImage +
@@ -792,6 +824,7 @@ void DrawClubSlots(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -812,11 +845,13 @@ void DrawClubSlots(Gfx** displayListHead) {
   if (f_ClubSlotsState == CLUB_SLOTS_STARTING) {
     f_StartAngle = 0.0f;
   }
+
   if (f_ClubSlotsState == CLUB_SLOTS_SPEEDING) {
     f_StartAngle += START_ANGLE_STEP;
     if (f_StartAngle > START_MAX_ANGLE) {
       f_StartAngle = START_MAX_ANGLE;
     }
+
     gDPPipeSync(gfx++);
     LoadLargePalette(&gfx, f_Slots->startImage + IMAGE_HEADER_SIZE);
     for (texelOffset = LARGE_PALETTED_TEXELS_OFFSET, stripIndex = 0;
@@ -883,7 +918,9 @@ void DrawClubSlots(Gfx** displayListHead) {
               ReadEncodedAsset(f_Slots->faceImages[playerIndex][0], &asset);
               OpenEncodedAsset(D_800C2780[row][FACE_LAST_FRAME], &asset);
             }
+
             ReadEncodedAsset(f_Slots->faceImages[playerIndex][1], &asset);
+
             /* f_FaceBufferIndex is cleared twice; it is there to match */
             f_FaceBufferIndex = 0;
             f_StarCount = 0;
@@ -916,8 +953,10 @@ void DrawClubSlots(Gfx** displayListHead) {
               << 2,
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
+
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   DrawClubSlotsLogo(&gfx, LOGO_X, LOGO_Y, 1.0f);
   *displayListHead = gfx;
@@ -956,12 +995,15 @@ void DrawClubSlotsLogo(
       if (symbolIndex < 0) {
         symbolIndex += REEL_SYMBOL_COUNT;
       }
+
       starCount += f_ReelStrips[index][symbolIndex] == SYMBOL_STAR;
     }
+
     if (IsGameFlagSet(GAME_FLAG_UNK55)) {
       starCount = LAST_REEL;
     }
   }
+
   if (f_IsShowingResult == FALSE) {
     if (starCount == LAST_REEL) {
       f_LogoBobAngle += LOGO_BOB_STEP;
@@ -976,6 +1018,7 @@ void DrawClubSlotsLogo(
     f_LogoBobAngle = 0.0f;
     f_LogoBob = 0.0f;
   }
+
   width = scale * LOGO_WIDTH;
   stripHeight = scale * LOGO_STRIP_HEIGHT;
   halfWidth = scale * (LOGO_WIDTH / 2);
@@ -985,11 +1028,13 @@ void DrawClubSlotsLogo(
   } else {
     dsdx = 0.0f;
   }
+
   if (stripHeight != 0.0f) {
     dtdy = (LOGO_STRIP_HEIGHT * TEXEL_STEP_ONE) / stripHeight;
   } else {
     dtdy = 0.0f;
   }
+
   shineWidth = scale * LOGO_WIDTH;
   shineHeight = scale * LOGO_HEIGHT;
   shineHalfWidth = scale * (LOGO_WIDTH / 2);
@@ -999,11 +1044,13 @@ void DrawClubSlotsLogo(
   } else {
     shineDsdx = 0.0f;
   }
+
   if (shineHeight != 0.0f) {
     shineDtdy = (SHINE_SIZE * TEXEL_STEP_ONE) / shineHeight;
   } else {
     shineDtdy = 0.0f;
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -1031,6 +1078,7 @@ void DrawClubSlotsLogo(
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
   gDPSetPrimDepth(gfx++, 16383, 0);
@@ -1058,6 +1106,7 @@ void DrawClubSlotsLogo(
         G_TX_RENDERTILE, 0, 0, (s32)dsdx, (s32)dtdy);
     gDPPipeSync(gfx++);
   }
+
   gDPSetPrimDepth(gfx++, 16423, 0);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -1082,6 +1131,7 @@ void DrawClubSlotsLogo(
         (SHINE_SIZE - (shineTime + 1 - SHINE_START_TIME) * SHINE_SPEED) << 5, 0,
         (s32)shineDsdx, (s32)shineDtdy);
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   *displayListHead = gfx;

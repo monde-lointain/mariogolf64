@@ -33,6 +33,7 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
   if (box->state == BOX_CLOSED) {
     return;
   }
+
   box->frameIndex++;
   if (box->frameIndex == BOX_ANIMATION_FRAME_COUNT) {
     box->frameIndex = 0;
@@ -40,10 +41,12 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
       box->state = BOX_CLOSED;
       return;
     }
+
     if (box->state == BOX_OPENING) {
       box->state = BOX_OPEN;
     }
   }
+
   boxRight = box->right;
   boxLeft = box->left;
   halfWidth = (boxRight - boxLeft) / 2;
@@ -59,6 +62,7 @@ static void DrawAnimatedBox(Gfx** gfxHead, AnimatedBox* box) {
     left = boxLeft;
     right = boxRight;
   }
+
   gDPSetPrimColor(gfx++, 0, 0, box->red, box->green, box->blue, box->alpha);
   gSPTextureRectangle(gfx++, left << 2, box->top << 2, right << 2,
       box->bottom << 2, G_TX_RENDERTILE, 0, 0, ONE_TEXEL_PER_PIXEL,
@@ -88,5 +92,6 @@ void DrawAnimatedBoxes(void) {
   for (i = 0; i != f_QueuedBoxCount; i++) {
     DrawAnimatedBox(&g_DisplayListHead, f_QueuedBoxes[i]);
   }
+
   f_QueuedBoxCount = 0;
 }

@@ -479,6 +479,7 @@ void DumpCartridgeRam(void) {
   PrintDebugText("          ", 10, 3);
   PrintDebugText("          ", 10, 4);
   PrintDebugText("          ", 10, 5);
+
   /* The original takes 0 from OpenGameBoyPakWithRetries as success, which is
    * not PAK_RESULT_OK */
   if (OpenGameBoyPakWithRetries(
@@ -560,6 +561,7 @@ void LoadTransmitMenu(void) {
     ReadAssetFile(
         g_GameBoyTransfer.facePalettes[index] = AllocMemory(size), size, &file);
   }
+
   PlaySong(TRANSMIT_MENU_SONG, 0);
   LoadCursorBox(g_GameBoyTransfer.cursorBoxImage);
   nuContRmbForceStop();
@@ -615,8 +617,10 @@ void UpdateBringCharacters(void) {
             PlaySound(
                 SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case BRING_NEXT_CARTRIDGE:
       SetNoticeState(NOTICE_OPENING, SWAP_GAME_BOY_PAKS_MESSAGE);
@@ -638,6 +642,7 @@ void UpdateBringCharacters(void) {
             transfer->isAccessing = FALSE;
             transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           }
+
           break;
         case NOTICE_CLOSING:
           break;
@@ -655,8 +660,10 @@ void UpdateBringCharacters(void) {
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case BRING_READING:
       result = ReadCartridgeCharacters();
@@ -678,6 +685,7 @@ void UpdateBringCharacters(void) {
           transfer->isAccessing = FALSE;
           break;
       }
+
       break;
     case BRING_BRINGING:
       D_800C42D0 = 1;
@@ -694,9 +702,11 @@ void UpdateBringCharacters(void) {
         if (transfer->characterCount < GAME_BOY_GOLFER_COUNT) {
           transfer->characterCount++;
         }
+
         transfer->screenStep = BRING_BROUGHT;
         ListPresentCharacters();
       }
+
       break;
     case BRING_CHOOSING_SLOT:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
@@ -718,6 +728,7 @@ void UpdateBringCharacters(void) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
+
       break;
     case BRING_CHOOSING:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
@@ -741,6 +752,7 @@ void UpdateBringCharacters(void) {
         if (transfer->listedCharacterIndex < transfer->unk7B8) {
           transfer->unk7B8--;
         }
+
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       } else if ((f_TransmitController.repeatedButtons & R_JPAD) &&
           transfer->listedCharacterIndex < transfer->listedCharacterCount - 1) {
@@ -748,8 +760,10 @@ void UpdateBringCharacters(void) {
         if (transfer->unk7B8 + 5 < transfer->listedCharacterIndex) {
           transfer->unk7B8++;
         }
+
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
+
       break;
     case BRING_BROUGHT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
@@ -763,6 +777,7 @@ void UpdateBringCharacters(void) {
           transfer->screen = TRANSMIT_SCREEN_OPTIONS;
         }
       }
+
       break;
     case BRING_ASKING:
       switch (UpdatePrompt(&f_TransmitController)) {
@@ -773,6 +788,7 @@ void UpdateBringCharacters(void) {
           transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           break;
       }
+
       break;
     case 5: /* Step 5 does nothing */
       break;
@@ -863,6 +879,7 @@ void UpdateSendStatus(void) {
             PlaySound(
                 SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
         case NOTICE_CLOSING:
           break;
@@ -870,6 +887,7 @@ void UpdateSendStatus(void) {
           transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           break;
       }
+
       break;
     case SEND_STATUS_STARTING:
       transfer->screenStep = SEND_STATUS_CONFIRMING;
@@ -887,6 +905,7 @@ void UpdateSendStatus(void) {
             transfer->isAccessing = FALSE;
             transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           }
+
           break;
         case NOTICE_CLOSING:
           break;
@@ -904,8 +923,10 @@ void UpdateSendStatus(void) {
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case SEND_STATUS_TAGGING:
       result = TagCartridges();
@@ -917,6 +938,7 @@ void UpdateSendStatus(void) {
         transfer->isAccessing = FALSE;
         transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
       }
+
       break;
     case SEND_STATUS_CHOOSING:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
@@ -934,6 +956,7 @@ void UpdateSendStatus(void) {
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->chosenCartridgeIndex++;
       }
+
       break;
     case SEND_STATUS_READY:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
@@ -947,6 +970,7 @@ void UpdateSendStatus(void) {
         PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_STATUS_CHOOSING;
       }
+
       break;
     case SEND_STATUS_CHECKING:
       switch (CheckStatusCartridge(transfer->chosenCartridgeIndex)) {
@@ -965,6 +989,7 @@ void UpdateSendStatus(void) {
           transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
           break;
       }
+
       break;
     case SEND_STATUS_ASKING:
       switch (UpdatePrompt(&f_TransmitController)) {
@@ -976,6 +1001,7 @@ void UpdateSendStatus(void) {
           transfer->screenStep = SEND_STATUS_CHOOSING;
           break;
       }
+
       break;
     case SEND_STATUS_WRITING:
       result = WriteStatusToCartridge(transfer->chosenCartridgeIndex);
@@ -989,12 +1015,14 @@ void UpdateSendStatus(void) {
             ShowTransferError(transfer->transferResult);
             transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
           }
+
           break;
         case STATUS_WRITE_PAK_ERROR:
           ShowPakError(transfer->transferResult);
           transfer->screenStep = SEND_STATUS_SHOWING_ERROR;
           break;
       }
+
       break;
     case SEND_STATUS_SENT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
@@ -1003,6 +1031,7 @@ void UpdateSendStatus(void) {
         transfer->pressingHandPosition = PRESSING_HAND_HIDDEN;
         transfer->screen = TRANSMIT_SCREEN_OPTIONS;
       }
+
       break;
   }
 }
@@ -1036,8 +1065,10 @@ void UpdateSendExperience(void) {
             PlaySound(
                 SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case SEND_EXPERIENCE_CHOOSING:
       if (f_TransmitController.pressedButtons & A_BUTTON) {
@@ -1062,6 +1093,7 @@ void UpdateSendExperience(void) {
         transfer->characterIndex++;
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
+
       break;
     case SEND_EXPERIENCE_CONFIRMING:
       switch (GetNoticeState()) {
@@ -1074,6 +1106,7 @@ void UpdateSendExperience(void) {
             transfer->isAccessing = FALSE;
             transfer->screen = TRANSMIT_SCREEN_OPTIONS;
           }
+
           break;
         case NOTICE_CLOSING:
           break;
@@ -1091,8 +1124,10 @@ void UpdateSendExperience(void) {
             SetNoticeState(NOTICE_CLOSING, PAK_CHECK_MESSAGE);
             PlaySound(SOUND_MENU_CANCEL, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case SEND_EXPERIENCE_WRITING:
       transfer->isAccessing = FALSE;
@@ -1114,6 +1149,7 @@ void UpdateSendExperience(void) {
           transfer->screenStep = SEND_EXPERIENCE_FAILED;
           break;
       }
+
       break;
     case SEND_EXPERIENCE_SENT:
       transfer->pressingHandPosition = PRESSING_HAND_LOW;
@@ -1122,6 +1158,7 @@ void UpdateSendExperience(void) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         transfer->screenStep = SEND_EXPERIENCE_DONE;
       }
+
       break;
     case 5: /* Steps 5 to 7 end like a failure */
     case 6:
@@ -1142,8 +1179,10 @@ void UpdateSendExperience(void) {
             PlaySound(
                 SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
   }
 }
@@ -1158,6 +1197,7 @@ s32 HaveAllRumblePaks(void) {
       haveAll = FALSE;
     }
   }
+
   return haveAll;
 }
 
@@ -1187,15 +1227,18 @@ void UpdateTransmitMenu(void) {
     f_TransmitController.pressedButtons |=
         g_ControllerStates[controller].pressedButtons;
   }
+
   if (IsGameFlagSet(GAME_FLAG_ALLOW_CARTRIDGE_DUMP) &&
       AreAllCButtonsHeld(g_ControllerStates[0].buttons)) {
     DumpCartridgeRam();
   }
+
   switch (transfer->screen) {
     case TRANSMIT_SCREEN_OPTIONS:
       if (GetWipeProgress() != 20) {
         break;
       }
+
       if (f_TransmitController.pressedButtons & A_BUTTON) {
         PlaySound(SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
         if (transfer->optionIndex == 0) {
@@ -1213,6 +1256,7 @@ void UpdateTransmitMenu(void) {
             ResetSendExperience();
           }
         }
+
         if (transfer->optionIndex == 2) {
           if (!HaveAllRumblePaks()) {
             transfer->isCancelled = FALSE;
@@ -1240,6 +1284,7 @@ void UpdateTransmitMenu(void) {
         } else {
           transfer->optionIndex ^= 1;
         }
+
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       } else if (f_TransmitController.repeatedButtons & D_JPAD) {
         if (transfer->transferMode == TRANSFER_MODE_AT_BOOT) {
@@ -1247,8 +1292,10 @@ void UpdateTransmitMenu(void) {
         } else {
           transfer->optionIndex ^= 1;
         }
+
         PlaySound(SOUND_MENU_MOVE, g_NextSoundChannel, MENU_SOUND_VOLUME);
       }
+
       break;
     case TRANSMIT_SCREEN_BRING_CHARACTERS:
       UpdateBringCharacters();
@@ -1268,6 +1315,7 @@ void UpdateTransmitMenu(void) {
           } else {
             transfer->screen = TRANSMIT_SCREEN_UNK6;
           }
+
           StartWipe(WIPE_CLOSING);
           break;
         case NOTICE_CLOSING:
@@ -1280,8 +1328,10 @@ void UpdateTransmitMenu(void) {
             PlaySound(
                 SOUND_MENU_CONFIRM, g_NextSoundChannel, MENU_SOUND_VOLUME);
           }
+
           break;
       }
+
       break;
     case TRANSMIT_SCREEN_LEAVING:
       if (GetWipeProgress() == 0) {
@@ -1291,6 +1341,7 @@ void UpdateTransmitMenu(void) {
         g_NextScene = SCENE_TITLE_SCREEN;
         g_SceneModuleToLoad = SCENE_MODULE_TITLE_SCREEN;
       }
+
       break;
     case TRANSMIT_SCREEN_UNK6:
       if (GetWipeProgress() == 0) {
@@ -1301,6 +1352,7 @@ void UpdateTransmitMenu(void) {
         g_NextScene = SCENE_MENU;
         g_SceneModuleToLoad = SCENE_MODULE_MENU;
       }
+
       break;
   }
 }
@@ -1322,20 +1374,24 @@ void DecodeCartridgeCharacter(
       character->name[index] += LOWERCASE_CODE_OFFSET;
     }
   }
+
   character->name[(SAVE_NAME_SIZE - 1)] = '\0';
   character->saveName[(SAVE_NAME_SIZE - 1)] = '\0';
   for (index = 0; index != SAVE_UNKB_SIZE; index++) {
     character->saveUnkB[index] = save[SAVE_UNKB_OFFSET + index];
   }
+
   character->character = save[SAVE_CHARACTER_OFFSET];
   if (character->character >= GAME_BOY_GOLFER_COUNT) {
     character->character = GAME_BOY_GOLFER_COUNT - 1;
   }
+
   if (IsGameFlagSet(GAME_FLAG_UNK6F)) {
     character->unk1A = 1;
   } else {
     character->unk1A = save[0x11];
   }
+
   character->level = save[0x12];
   character->unk1C = save[0x1C];
   character->shotCurve = save[0x1D];
@@ -1358,6 +1414,7 @@ void DecodeCartridgeCharacter(
   } else {
     character->ballType = save[0x3E];
   }
+
   osSyncPrintf("balltype %d\n", character->ballType);
   character->unk24 = (save[0x28] << 16) | (save[0x27] << 8) | save[0x26];
   character->experience = 0;
@@ -1374,6 +1431,7 @@ void DecodeCartridgeCharacter(
     osSyncPrintf("%d, %d %d\n", index, character->unk3C[index].unk0,
         character->unk3C[index].unk2);
   }
+
   character->unk34 = unk34;
   character->unk38 = saveIndex;
 }
@@ -1390,9 +1448,11 @@ s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
       if (FALSE) {
         osSyncPrintf("PHASE b\n");
       }
+
       return FALSE;
     }
   }
+
   osSyncPrintf("PHASE c\n");
   for (index = 0; index != SAVE_UNKB_SIZE; index++) {
     if (character->saveUnkB[index] != save[SAVE_UNKB_OFFSET + index]) {
@@ -1400,6 +1460,7 @@ s32 IsCharacterFromSave(GameBoyCharacter* character, u8* save) {
       return FALSE;
     }
   }
+
   osSyncPrintf("PHASE e\n");
   return TRUE;
 }
@@ -1473,6 +1534,7 @@ s32 ComputeSaveChecksum(u8* save) {
       offset++) {
     sum += save[offset];
   }
+
   return sum;
 }
 
@@ -1488,6 +1550,7 @@ void ListPresentCharacters(void) {
       transfer->listedCharacters[listedCount++] = index;
     }
   }
+
   for (; listedCount != CARTRIDGE_CHARACTER_COUNT; listedCount++) {
     transfer->listedCharacters[listedCount] = -1;
   }
@@ -1508,11 +1571,13 @@ void DrawSendStatusHint(Gfx** displayListHead, GameBoyTransfer* transfer) {
       message = KEEP_POWER_ON_MESSAGE;
       break;
   }
+
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
         TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
+
   *displayListHead = displayList;
 }
 
@@ -1524,6 +1589,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
     GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 segment;
+
   /* Holding the shot type row in segmentCurve first is there to match */
   s32 segmentCurve;
 
@@ -1540,6 +1606,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
   } else {
     segmentCurve = SHOT_TYPE_FADE;
   }
+
   SetTextSlot(HINT_LEFT, HINT_TOP, CHOOSE_CHARACTER_MESSAGE, 1, HINT_TEXT_SLOT,
       TEXT_FLAG_UNK20, 255, 255, 255, 255);
   gDPPipeSync(displayList++);
@@ -1592,21 +1659,26 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
       if (segmentCurve < character->shotCurve) {
         continue;
       }
+
       if (segmentCurve > 0) {
         continue;
       }
     }
+
     if (character->shotCurve > 0) {
       if (segmentCurve > character->shotCurve) {
         continue;
       }
+
       if (segmentCurve < 0) {
         continue;
       }
     }
+
     if (character->shotCurve == 0 && segment != CURVE_SEGMENT_COUNT / 2) {
       continue;
     }
+
     DrawTextureRect(&displayList,
         (CURVE_BAR_LEFT + (segment * CURVE_SEGMENT_WIDTH)) << 2,
         CURVE_BAR_TOP << 2,
@@ -1614,6 +1686,7 @@ void DrawCharacterStats(Gfx** displayListHead, GameBoyCharacter* character,
         (CURVE_BAR_TOP + CURVE_BAR_HEIGHT) << 2, G_TX_RENDERTILE, 0,
         (segment * CURVE_SEGMENT_WIDTH) << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = displayList;
 }
 
@@ -1631,6 +1704,7 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     isCharacterShown = TRUE;
     character = &g_GameBoyCharacters[transfer->characterIndex];
   }
+
   if ((transfer->screenStep == BRING_CHOOSING ||
           transfer->screenStep == BRING_BRINGING) &&
       g_GameBoyTransfer.listedCharacterCount > 0) {
@@ -1638,9 +1712,11 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     character = &transfer->cartridgeCharacters[transfer
             ->listedCharacters[transfer->listedCharacterIndex]];
   }
+
   if (isCharacterShown) {
     DrawCharacterStats(&displayList, character, transfer);
   }
+
   SetUpTextDrawing(&displayList);
   if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
     message = NO_MESSAGE;
@@ -1655,12 +1731,14 @@ void DrawBringCharactersText(Gfx** displayListHead, GameBoyTransfer* transfer) {
         message = CHARACTER_BROUGHT_MESSAGE;
         break;
     }
+
     if (message != NO_MESSAGE) {
       SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
           TEXT_FLAG_UNK20, 255, 255, 255, 255);
       DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
     }
   }
+
   *displayListHead = displayList;
 }
 
@@ -1678,6 +1756,7 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
     DrawSmallText(&displayList, EXPERIENCE_LEFT + (slot * FACE_SPACING),
         EXPERIENCE_TOP, g_PrintBuffer);
   }
+
   DrawCharacterStats(
       &displayList, &g_GameBoyCharacters[transfer->characterIndex], transfer);
   SetUpTextDrawing(&displayList);
@@ -1690,11 +1769,13 @@ void DrawSendExperienceText(Gfx** displayListHead, GameBoyTransfer* transfer) {
       message = EXPERIENCE_SENT_MESSAGE;
       break;
   }
+
   if (message != NO_MESSAGE) {
     SetTextSlot(HINT_LEFT, HINT_TOP, message, 1, HINT_TEXT_SLOT,
         TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
+
   *displayListHead = displayList;
 }
 
@@ -1731,6 +1812,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
     } else {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
+
     DrawTextureRect(&displayList,
         (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
         CONTROLLER_ICONS_TOP << 2,
@@ -1742,6 +1824,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     slot++;
   }
+
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   if (transfer->taggedCartridgeCount != 0) {
     /* An if-chain rather than a switch is there to match */
@@ -1751,6 +1834,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
       if (f_StatusPointerAngle > M_PI) {
         f_StatusPointerAngle -= M_PI;
       }
+
       pointerSwing = sinf(f_StatusPointerAngle) * 8.0f;
       gDPPipeSync(displayList++);
       gDPSetTextureLUT(displayList++, G_TT_RGBA16);
@@ -1782,6 +1866,7 @@ void DrawSendStatusScreen(Gfx** displayListHead, GameBoyTransfer* transfer) {
           CONTROLLER_ICONS_TOP - CONTROLLER_CURSOR_MARGIN);
     }
   }
+
   *displayListHead = displayList;
 }
 
@@ -1804,6 +1889,7 @@ void DrawImportedFaces(Gfx** displayListHead, GameBoyTransfer* transfer) {
           TEXEL_STEP_ONE);
     }
   }
+
   *displayListHead = displayList;
 }
 
@@ -1868,6 +1954,7 @@ void DrawBringCharactersScreen(
       }
     }
   }
+
   LoadSmallPalette(
       &displayList, 0, (u8*)transfer->statBarsImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(displayList++,
@@ -1894,6 +1981,7 @@ void DrawBringCharactersScreen(
         top += (FACES_TOP - top) * transfer->bringingFrame /
             (BRINGING_FRAME_COUNT - 1);
       }
+
       LoadLargePalette(&displayList, transfer->facePalettes[character]);
       LoadTextureBlock(&displayList, transfer->faceImages[character],
           G_IM_FMT_CI, G_IM_SIZ_8b, FACE_SIZE, FACE_SIZE, 0, 0, 0, 0, 0, 0, 0);
@@ -1906,6 +1994,7 @@ void DrawBringCharactersScreen(
       }
     }
   }
+
   if (g_GameBoyTransfer.listedCharacterCount != 0) {
     if (transfer->screenStep == BRING_CHOOSING) {
       DrawCursorBox(&displayList,
@@ -1920,6 +2009,7 @@ void DrawBringCharactersScreen(
           FACES_TOP - BRING_CURSOR_MARGIN);
     }
   }
+
   gSPDisplayList(displayList++, D_800C3FC0);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_RGBA16);
@@ -1941,6 +2031,7 @@ void DrawBringCharactersScreen(
           G_TX_RENDERTILE, 0, LEFT_ARROW_ROW << 5, TEXEL_STEP_ONE,
           TEXEL_STEP_ONE);
     }
+
     if (transfer->unk7B8 <
         transfer->listedCharacterCount - SHOWN_LISTED_COUNT) {
       DrawTextureRect(&displayList, RIGHT_ARROW_LEFT << 2, ARROWS_TOP << 2,
@@ -1949,6 +2040,7 @@ void DrawBringCharactersScreen(
           TEXEL_STEP_ONE);
     }
   }
+
   *displayListHead = displayList;
 }
 
@@ -1956,6 +2048,7 @@ void DrawSendExperienceScreen(
     Gfx** displayListHead, GameBoyTransfer* transfer) {
   Gfx* displayList = *displayListHead;
   s32 index;
+
   /* A second counter alongside index is there to match */
   s32 slot;
 
@@ -1970,6 +2063,7 @@ void DrawSendExperienceScreen(
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
   }
+
   LoadSmallPalette(
       &displayList, 0, (u8*)transfer->controllerIconsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&displayList,
@@ -1984,6 +2078,7 @@ void DrawSendExperienceScreen(
     } else {
       gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
     }
+
     DrawTextureRect(&displayList,
         (CONTROLLER_ICONS_LEFT + (slot * CONTROLLER_ICON_SPACING)) << 2,
         CONTROLLER_ICONS_TOP << 2,
@@ -1995,6 +2090,7 @@ void DrawSendExperienceScreen(
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     slot++;
   }
+
   *displayListHead = displayList;
 }
 
@@ -2058,6 +2154,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 1 << 5, TEXEL_STEP_ONE / 2, TEXEL_STEP_ONE / 2);
     }
   }
+
   LoadLargePalette(&displayList, (u8*)transfer->titleImage + IMAGE_HEADER_SIZE);
   for (index = 0; index != TITLE_STRIP_COUNT; index++) {
     gDPLoadTextureTile(displayList++,
@@ -2072,6 +2169,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         (TITLE_TOP + (index * TITLE_STRIP_ROWS) + TITLE_STRIP_ROWS) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);
   for (index = 0; index != WOOD_PANEL_STRIP_COUNT; index++) {
@@ -2089,6 +2187,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         (WOOD_PANEL_TOP + (index * WOOD_PANEL_STRIP_ROWS) + panelRowCount) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   switch (transfer->screen) {
     case TRANSMIT_SCREEN_OPTIONS:
       DrawOptionsScreen(&displayList, transfer);
@@ -2103,6 +2202,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
       DrawSendExperienceScreen(&displayList, transfer);
       break;
   }
+
   if (transfer->screen == TRANSMIT_SCREEN_OPTIONS) {
     MeasureMessage(
         f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
@@ -2113,6 +2213,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
     if (f_OptionPointerAngle > M_PI) {
       f_OptionPointerAngle -= M_PI;
     }
+
     pointerSwing = sinf(f_OptionPointerAngle) * 8.0f;
     gDPPipeSync(displayList++);
     gDPSetTextureLUT(displayList++, G_TT_RGBA16);
@@ -2132,6 +2233,7 @@ void DrawTransmitMenu(Gfx** displayListHead) {
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   SetUpTextDrawing(&displayList);
   gDPSetPrimColor(displayList++, 0, 0, 255, 255, 255, 255);
   if (transfer->screen == TRANSMIT_SCREEN_OPTIONS ||
@@ -2147,21 +2249,26 @@ void DrawTransmitMenu(Gfx** displayListHead) {
         DrawLargeTextSlot(&displayList, index);
       }
     }
+
     SetTextSlot(HINT_LEFT, HINT_TOP,
         f_ModeOptions[transfer->transferMode][transfer->optionIndex] +
             TRANSMIT_OPTION_HINTS,
         1, HINT_TEXT_SLOT, TEXT_FLAG_UNK20, 255, 255, 255, 255);
     DrawLargeTextSlot(&displayList, HINT_TEXT_SLOT);
   }
+
   if (transfer->screen == TRANSMIT_SCREEN_SEND_STATUS) {
     DrawSendStatusHint(&displayList, transfer);
   }
+
   if (transfer->screen == TRANSMIT_SCREEN_BRING_CHARACTERS) {
     DrawBringCharactersText(&displayList, transfer);
   }
+
   if (transfer->screen == TRANSMIT_SCREEN_SEND_EXPERIENCE) {
     DrawSendExperienceText(&displayList, transfer);
   }
+
   DrawNotice(&displayList);
   gSPDisplayList(displayList++, D_800C3FC0);
   gDPPipeSync(displayList++);
@@ -2171,9 +2278,11 @@ void DrawTransmitMenu(Gfx** displayListHead) {
   if (transfer->isAccessing == TRUE) {
     DrawAccessingSign(&displayList);
   }
+
   if (transfer->pressingHandPosition != 0) {
     DrawPressingHand(&displayList);
   }
+
   *displayListHead = displayList;
 }
 
@@ -2195,6 +2304,7 @@ void ClearCartridgeCharacters(void) {
             .status = 0;
       }
     }
+
     transfer->listedCharacterCount = 0;
   }
 }
@@ -2238,15 +2348,19 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
     if (transfer->transferResult == PAK_RESULT_NO_PAK) {
       transfer->unk7C8 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
       transfer->unk7C4 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
       transfer->unk7C0 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
       transfer->unk7CC = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_OK) {
       recordOffset = SAVE_RECORDS_OFFSET;
       isSignatureWrong = FALSE;
@@ -2261,6 +2375,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
         continue;
       }
+
       osSyncPrintf("PHASE 2\n");
       for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
         if (save[SAVE_SIGNATURE_OFFSET + index] !=
@@ -2268,10 +2383,12 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           isSignatureWrong = TRUE;
         }
       }
+
       osSyncPrintf("PHASE 3\n");
       if (isSignatureWrong == TRUE) {
         fault = CARTRIDGE_FAULT_UNINITIALIZED;
       }
+
       if (ComputeSaveChecksum(save) != GetStoredChecksum(save)) {
         fault = CARTRIDGE_FAULT_CORRUPTED;
       } else {
@@ -2279,12 +2396,15 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         if (saveIndex == 0) {
           recordOffset = SAVE_RECORDS_OFFSET;
         }
+
         if (saveIndex == 1) {
           recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
         }
+
         if (saveIndex == 2) {
           recordOffset = SAVE_RECORDS_OFFSET + (SAVE_RECORD_SIZE * 2);
         }
+
         osSyncPrintf("PHASE 5\n");
         dataAddress = save[recordOffset + RECORD_ADDRESS_OFFSET] +
             (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8);
@@ -2297,6 +2417,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
           continue;
         }
+
         sum = 0;
         osSyncPrintf("PHASE 7\n");
         storedSum = save[recordOffset + RECORD_SUM_OFFSET] |
@@ -2304,6 +2425,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         for (index = 0; index != dataSize; index++) {
           sum += characterData[index];
         }
+
         osSyncPrintf("PHASE 8\n");
         sum &= 0xFFFF;
         if (sum != storedSum) {
@@ -2311,6 +2433,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
           fault = CARTRIDGE_FAULT_CORRUPTED;
           continue;
         }
+
         osSyncPrintf("PHASE 9\n");
         if (IsCharacterFromSave(character, characterData)) {
           osSyncPrintf("PHASE 9.5\n");
@@ -2330,11 +2453,13 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             continue;
           }
+
           sum = 0;
           osSyncPrintf("PHASE 11\n");
           for (index = 0; index != dataSize; index++) {
             sum += characterData[index];
           }
+
           sum &= 0xFFFF;
           osSyncPrintf("write sum %04x\n", sum);
           osSyncPrintf("PHASE 12\n");
@@ -2347,6 +2472,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             continue;
           }
+
           osSyncPrintf("PHASE 13\n");
           sum = ComputeSaveChecksum(save);
           save[SAVE_CHECKSUM_OFFSET] = sum;
@@ -2358,6 +2484,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
             nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
             continue;
           }
+
           nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
           osSyncPrintf("PHASE 14\n");
           character->experience = 0;
@@ -2366,22 +2493,27 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
         }
       }
     }
+
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
+
   if (transfer->unk7BC == 1) {
     if (fault == CARTRIDGE_FAULT_UNINITIALIZED) {
       transfer->transferResult = PAK_RESULT_UNINITIALIZED;
       return EXPERIENCE_WRITE_FAILED;
     }
+
     if (fault == CARTRIDGE_FAULT_CORRUPTED) {
       transfer->transferResult = PAK_RESULT_CORRUPTED;
       return EXPERIENCE_WRITE_FAILED;
     }
   }
+
   if (transfer->unk7BC > 0) {
     transfer->transferResult = PAK_RESULT_NO_CHARACTERS;
     return EXPERIENCE_WRITE_NOT_FROM_CARTRIDGE;
   }
+
   if (transfer->unk7CC == TRUE) {
     transfer->transferResult = PAK_RESULT_WRONG_CARTRIDGE;
   } else if (transfer->unk7C0 == TRUE) {
@@ -2394,6 +2526,7 @@ s32 WriteExperienceToCartridge(s32 characterIndex) {
   } else {
     transfer->transferResult = PAK_RESULT_NO_PAK;
   }
+
   return EXPERIENCE_WRITE_FAILED;
 }
 #else
@@ -2434,6 +2567,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     /* Going to the shared power-off is there to match */
     goto FAILED;
   }
+
   isSignatureWrong = FALSE;
   readResult = nuContGBPakFread(
       &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
@@ -2443,12 +2577,14 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_CHECK_READ_FAILED;
   }
+
   for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
     if (save[SAVE_SIGNATURE_OFFSET + index] !=
         f_CartridgeSaveSignature[index]) {
       isSignatureWrong = TRUE;
     }
   }
+
   for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
     if (save[index] !=
         transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
@@ -2460,6 +2596,7 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
       return STATUS_CHECK_FAILED;
     }
   }
+
   computedSum = ComputeSaveChecksum(save);
   storedSum = GetStoredChecksum(save);
   osSyncPrintf("sum1 %04x\n", computedSum);
@@ -2470,10 +2607,12 @@ s32 CheckStatusCartridge(s32 cartridgeIndex) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_CHECK_FAILED;
   }
+
   if (save[SAVE_HAS_STATUS_OFFSET] == 0) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_CHECK_NO_STATUS;
   }
+
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   return STATUS_CHECK_HAS_STATUS;
 
@@ -2506,6 +2645,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     /* Going to the shared power-off is there to match */
     goto FAILED;
   }
+
   result = nuContGBPakFread(
       &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
   if (result != 0) {
@@ -2513,6 +2653,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     g_GameBoyTransfer.transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
+
   for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
     if (save[index] !=
         transfer->cartridgeTags[transfer->taggedControllers[cartridgeIndex]]
@@ -2524,12 +2665,14 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
       return STATUS_WRITE_FAILED;
     }
   }
+
   sum = ComputeSaveChecksum(save);
   if (sum != GetStoredChecksum(save)) {
     transfer->transferResult = PAK_RESULT_LOOSE_PAK;
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
     return STATUS_WRITE_FAILED;
   }
+
   statusAddress = save[SAVE_STATUS_ADDRESS_OFFSET] +
       (save[SAVE_STATUS_ADDRESS_OFFSET + 1] << 8);
   save[SAVE_HAS_STATUS_OFFSET] = TRUE;
@@ -2543,6 +2686,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
+
   BuildStatusData(status);
   result = nuContGBPakFwrite(&transfer->pakFile,
       statusAddress - STATUS_ADDRESS_BIAS, status, statusSize);
@@ -2551,10 +2695,12 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
+
   sum = 0;
   for (index = 0; index != statusSize; index++) {
     sum += status[index];
   }
+
   sum &= 0xFFFF;
   osSyncPrintf(f_WriteSumFormat, sum);
   save[SAVE_STATUS_SUM_OFFSET] = sum;
@@ -2567,6 +2713,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
+
   sum = ComputeSaveChecksum(save) & 0xFFFF;
   save[SAVE_CHECKSUM_OFFSET] = sum;
   save[SAVE_CHECKSUM_OFFSET + 1] = sum >> 8;
@@ -2579,6 +2726,7 @@ s32 WriteStatusToCartridge(s32 cartridgeIndex) {
     transfer->transferResult = result;
     return STATUS_WRITE_PAK_ERROR;
   }
+
   nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   transfer->transferResult = PAK_RESULT_OK;
   return STATUS_WRITE_DONE;
@@ -2626,6 +2774,7 @@ s32 ReadCartridgeCharacters(void) {
     transfer->unk7CC = FALSE;
     transfer->unk7D0 = FALSE;
   }
+
   if (transfer->unk7A0 % 4 == 0) {
     port = g_PlayerControllerPorts[transfer->unk7A0 / 4];
     transfer->transferResult = OpenGameBoyPakWithRetries(
@@ -2634,17 +2783,21 @@ s32 ReadCartridgeCharacters(void) {
     if (transfer->transferResult == PAK_RESULT_NO_PAK) {
       transfer->unk7C8 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_OTHER_PAK) {
       transfer->unk7C4 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_NO_CARTRIDGE) {
       transfer->unk7C0 = TRUE;
     }
+
     if (transfer->transferResult == PAK_RESULT_WRONG_CARTRIDGE) {
       transfer->unk7CC = TRUE;
     }
   } else if (transfer->transferResult == PAK_RESULT_OK) {
     saveIndex = (transfer->unk7A0 % 4) - 1;
+
     /* The original starts the offset at 0xA042, which every save index replaces
      */
     recordOffset = 0xA042;
@@ -2652,16 +2805,20 @@ s32 ReadCartridgeCharacters(void) {
     for (index = 0; index != CHARACTER_DATA_SIZE; index++) {
       characterData[index] = 0;
     }
+
     transfer->unk7BC++;
     if (saveIndex == 0) {
       recordOffset = SAVE_RECORDS_OFFSET;
     }
+
     if (saveIndex == 1) {
       recordOffset = SAVE_RECORDS_OFFSET + SAVE_RECORD_SIZE;
     }
+
     if (saveIndex == 2) {
       recordOffset = SAVE_RECORDS_OFFSET + (SAVE_RECORD_SIZE * 2);
     }
+
     for (attempt = 0; attempt != SAVE_READ_ATTEMPTS; attempt++) {
       result = nuContGBPakFread(
           &transfer->pakFile, CARTRIDGE_RAM_ADDRESS, save, CARTRIDGE_SAVE_SIZE);
@@ -2676,6 +2833,7 @@ s32 ReadCartridgeCharacters(void) {
             transfer->unk7D0 = TRUE;
           }
         }
+
         if (sum == storedSum && isSignatureWrong == FALSE) {
           checkedState = SAVE_CHECKED;
           osSyncPrintf("checksum1 OK! \n");
@@ -2683,11 +2841,13 @@ s32 ReadCartridgeCharacters(void) {
         }
       }
     }
+
     /* The nested tests are there to match */
     if (checkedState == SAVE_CHECKED) {
       if (result == 0) {
         if (save[recordOffset] == RECORD_PRESENT) {
           checkedState = NOT_CHECKED;
+
           /* Working out the address in storedSum first is there to match */
           storedSum = save[recordOffset + RECORD_ADDRESS_OFFSET] +
               (save[recordOffset + RECORD_ADDRESS_OFFSET + 1] << 8) -
@@ -2704,6 +2864,7 @@ s32 ReadCartridgeCharacters(void) {
             for (index = 0; index != dataSize; index++) {
               sum += characterData[index];
             }
+
             sum &= 0xFFFF;
             if (sum == storedSum) {
               checkedState = DATA_CHECKED;
@@ -2714,10 +2875,12 @@ s32 ReadCartridgeCharacters(void) {
         }
       }
     }
+
     if (checkedState == DATA_CHECKED) {
       switch (result) {
         case 0:
           isAlreadyBrought = FALSE;
+
           /* "Slot %d read successfully" */
           osSyncPrintf("スロット%d 読み込み成功しました  \n", saveIndex);
           for (slot = 0; slot != GAME_BOY_CHARACTER_COUNT; slot++) {
@@ -2735,6 +2898,7 @@ s32 ReadCartridgeCharacters(void) {
               break;
             }
           }
+
           if (!isAlreadyBrought) {
             /* transferResult is OK here, so the original never skips a save */
             if (transfer->transferResult == PAK_RESULT_NO_CHARACTERS) {
@@ -2745,12 +2909,14 @@ s32 ReadCartridgeCharacters(void) {
               DecodeCartridgeCharacter(characterData, transfer->unk7A0 / 4,
                   saveIndex, transfer->cartridgeHeader.company_code);
             }
+
             transfer
                 ->listingStates[(transfer->unk7A0 / 4 * CARTRIDGE_SAVE_COUNT) +
                     saveIndex] = LISTING_SHOWN;
             transfer->listedCharacterCount++;
             ListPresentCharacters();
           }
+
           break;
         case PFS_ERR_NOPACK:
           transfer->unk7C8 = TRUE;
@@ -2774,40 +2940,52 @@ s32 ReadCartridgeCharacters(void) {
       }
     }
   }
+
   if (transfer->unk7A0 % 4 == 3) {
     nuContGBPakPower(&transfer->pakFile, NU_CONT_GBPAK_POWER_OFF);
   }
+
   if (transfer->unk7A0 == (g_ControllerCount * 4) - 1) {
     /* Repeating the results for one cartridge is there to match */
     if (transfer->unk7BC == 1) {
       if (transfer->unk7D0 == TRUE) {
         return PAK_RESULT_UNINITIALIZED;
       }
+
       if (transfer->listedCharacterCount == 0) {
         return PAK_RESULT_NO_CHARACTERS;
       }
+
       return PAK_RESULT_OK;
     }
+
     if (transfer->unk7BC > 0) {
       if (transfer->listedCharacterCount == 0) {
         return PAK_RESULT_NO_CHARACTERS;
       }
+
       return PAK_RESULT_OK;
     }
+
     if (transfer->unk7CC == TRUE) {
       return PAK_RESULT_WRONG_CARTRIDGE;
     }
+
     if (transfer->unk7C0 == TRUE) {
       return PAK_RESULT_NO_CARTRIDGE;
     }
+
     if (transfer->unk7C4 == TRUE) {
       return PAK_RESULT_OTHER_PAK;
     }
+
     if (transfer->unk7C8 == TRUE) {
       return PAK_RESULT_NO_PAK;
     }
+
     return PAK_RESULT_CONNECTOR_PROBLEM;
   }
+
   transfer->unk7A0++;
   return PAK_RESULT_STILL_READING;
 }
@@ -2823,8 +3001,10 @@ s32 OpenGameBoyPakWithRetries(
     if (result == PAK_RESULT_OK) {
       return PAK_RESULT_OK;
     }
+
     nuContGBPakMgrInit();
   }
+
   return result;
 }
 
@@ -2851,6 +3031,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
       osSyncPrintf("1st GB DEFAULT ERROR %d\n", port);
       return -1;
   }
+
   switch (nuContGBPakGetStatus(file, &status)) {
     case 0:
     case PFS_ERR_NEW_GBCART:
@@ -2871,6 +3052,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
             return PAK_RESULT_CONNECTOR_PROBLEM;
         }
       }
+
       switch (nuContGBPakReadID(file, header, &status)) {
         case PFS_ERR_NEW_GBCART:
           /* "4th The GB cartridge was removed and inserted." */
@@ -2881,24 +3063,29 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
             osSyncPrintf("5th ＧＢパックにカセットが刺さってません。\n");
             return PAK_RESULT_CARTRIDGE_REMOVED;
           }
+
           if (status & OS_GBPAK_GBCART_PULL) {
             /* "The cassette was removed and inserted." */
             osSyncPrintf("カセットの抜き差しが行われました。\n");
             return PAK_RESULT_REMOVED_RETRYING;
           }
+
           for (index = 0; index != GAME_BOY_TITLE_CHECKED_LENGTH; index++) {
             if (header->game_title[index] != f_GameBoyCartridgeTitle[index]) {
               isMarioGolf = FALSE;
             }
           }
+
           if (header->company_code != GAME_BOY_COMPANY_CODE) {
             isMarioGolf = FALSE;
           }
+
           osSyncPrintf("%s\n", header->game_title);
           osSyncPrintf("%02x\n", header->company_code);
           if (isMarioGolf != TRUE) {
             return PAK_RESULT_WRONG_CARTRIDGE;
           }
+
           return PAK_RESULT_OK;
         case PFS_ERR_NOPACK:
           /* "4th Nothing is plugged into the given controller" */
@@ -2914,8 +3101,10 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
         case PFS_ERR_CONTRFAIL:
           /* "4th Data transfer with the controller failed." */
           osSyncPrintf("4th コントローラとのデータ転送の失敗です。\n");
+
           /* "The controller is not connected properly, or" */
           osSyncPrintf("コントローラが正しく接続されていないか、\n");
+
           /* "the 64GB pak or controller connector may be faulty. stat = %xH" */
           osSyncPrintf(
               "64GBパックかコントローラコネクタに異常がある可\224\134性がありま"
@@ -2928,6 +3117,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
               "4th 64GBパックにGBカートリッジが差し込まれていません。\n");
           return PAK_RESULT_NO_CARTRIDGE;
       }
+
       break;
     case PFS_ERR_NOPACK:
       /* "2nd Nothing is plugged into the given controller" */
@@ -2948,6 +3138,7 @@ s32 OpenGameBoyPak(s32 port, OSGbpakId* header, NUContPakFile* file) {
       osSyncPrintf("2ndt 64GBパックにGBカートリッジが差し込まれていません。\n");
       return PAK_RESULT_NO_CARTRIDGE;
   }
+
   return -1;
 }
 
@@ -2977,6 +3168,7 @@ s32 TagCartridges(void) {
   for (controller = 0; controller != MAXCONTROLLERS; controller++) {
     transfer->taggedControllers[controller] = 0;
   }
+
   nuContGBPakMgrInit();
   for (controller = 0; controller < g_ControllerCount; controller++) {
     result = OpenGameBoyPakWithRetries(
@@ -2984,20 +3176,25 @@ s32 TagCartridges(void) {
     if (result == PAK_RESULT_NO_PAK) {
       wasNoPak = TRUE;
     }
+
     if (result == PAK_RESULT_OTHER_PAK) {
       wasOtherPak = TRUE;
     }
+
     if (result == PAK_RESULT_NO_CARTRIDGE) {
       wasNoCartridge = TRUE;
     }
+
     if (result == PAK_RESULT_WRONG_CARTRIDGE) {
       wasWrongCartridge = TRUE;
     }
+
     if (result == PAK_RESULT_OK) {
       for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
         tag[index] = guRandom() % 256;
         transfer->cartridgeTags[controller][index] = tag[index];
       }
+
       if (nuContGBPakFwrite(
               &file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0 &&
           nuContGBPakGetStatus(&file, &status) == 0) {
@@ -3011,26 +3208,34 @@ s32 TagCartridges(void) {
         }
       }
     }
+
     nuContGBPakPower(&file, NU_CONT_GBPAK_POWER_OFF);
   }
+
   if (isAnyTagged == TRUE) {
     return PAK_RESULT_OK;
   }
+
   if (wasCartridgePulled == TRUE) {
     return PAK_RESULT_REMOVED_RETRYING;
   }
+
   if (wasWrongCartridge == TRUE) {
     return PAK_RESULT_WRONG_CARTRIDGE;
   }
+
   if (wasNoCartridge == TRUE) {
     return PAK_RESULT_NO_CARTRIDGE;
   }
+
   if (wasOtherPak == TRUE) {
     return PAK_RESULT_OTHER_PAK;
   }
+
   if (wasNoPak == TRUE) {
     return PAK_RESULT_NO_PAK;
   }
+
   return PAK_RESULT_LOOSE_PAK;
 }
 
@@ -3040,6 +3245,7 @@ void SetNoticeState(s32 state, s32 message) {
     f_NoticeSize = 0;
     f_NoticeMessage = message;
   }
+
   if (state == NOTICE_CLOSING) {
     f_NoticeSize = NOTICE_FULL_SIZE;
   }
@@ -3058,6 +3264,7 @@ void DrawNotice(Gfx** displayListHead) {
   s32 strip;
   s32 halfWidth;
   s32 halfHeight;
+
   /* The copy of halfHeight, and its starting value, are there to match */
   s32 stripHeight = 0;
   s32 bottom;
@@ -3065,6 +3272,7 @@ void DrawNotice(Gfx** displayListHead) {
   if (f_NoticeState == NOTICE_HIDDEN) {
     return;
   }
+
   if (f_NoticeState == NOTICE_OPENING) {
     if (f_NoticeSize < NOTICE_FULL_SIZE) {
       f_NoticeSize++;
@@ -3078,6 +3286,7 @@ void DrawNotice(Gfx** displayListHead) {
       f_NoticeState = NOTICE_HIDDEN;
     }
   }
+
   gDPPipeSync(displayList++);
   gDPPipeSync(displayList++);
   gDPSetTextureLUT(displayList++, G_TT_NONE);
@@ -3110,6 +3319,7 @@ void DrawNotice(Gfx** displayListHead) {
           (NOTICE_STRIP_HEIGHT << 10) / stripHeight);
     }
   }
+
   if (f_NoticeState == NOTICE_SHOWN) {
     /* The unused array is there to match */
     s32 unused[2];
@@ -3120,6 +3330,7 @@ void DrawNotice(Gfx** displayListHead) {
     gDPSetPrimColor(displayList++, 0, 0, 32, 64, 255, 255);
     DrawLargeTextSlot(&displayList, NOTICE_TEXT_SLOT);
   }
+
   *displayListHead = displayList;
 }
 
@@ -3143,6 +3354,7 @@ void DrawAccessingSign(Gfx** displayListHead) {
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = displayList;
 }
 
@@ -3170,6 +3382,7 @@ void DrawPressingHand(Gfx** displayListHead) {
         (NOTICE_PRESSING_HAND_TOP + PRESSING_HAND_SIZE) << 2, G_TX_RENDERTILE,
         0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = displayList;
 }
 
@@ -3195,6 +3408,7 @@ static inline s32 PackTenths(f32 value) {
   if (fraction % 10 >= 5) {
     fraction += 10;
   }
+
   fraction /= 10;
   if (fraction >= 10) {
     wholePart++;
@@ -3204,6 +3418,7 @@ static inline s32 PackTenths(f32 value) {
       fraction = 9;
     }
   }
+
   return (wholePart * 10) + fraction;
 }
 
@@ -3216,6 +3431,7 @@ void BuildStatusData(u8* status) {
   SaveData* save = GetSaveData();
   StatusCourse* course;
   StatusProgress* progress;
+
   /* Reading the records through a pointer to unk990 is there to match */
   SaveRecords* records = (SaveRecords*)&save->unk990;
   UnkE98* entry;
@@ -3233,10 +3449,12 @@ void BuildStatusData(u8* status) {
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     entry = &save->unkE98[courseIndex];
     course = &data->courses[courseIndex];
+
     /* Testing for zero first is there to match */
     if (entry->roundCount != 0) {
       if (entry->roundCount > 0) {
         reciprocal = 1.0f / entry->roundCount;
+
         /* Copying the count into value is there to match */
         value = entry->roundCount;
         course->roundCount[0] = value;
@@ -3265,17 +3483,22 @@ void BuildStatusData(u8* status) {
           course->unkC =
               RoundedWholePart(((f32)entry->unk28 / (f32)sum) * 100.0f);
         }
+
         course->places = 0;
+
         /* Setting the first bit with |= is there to match */
         if (entry->hasPlace[THIRD_PLACE_INDEX] > 0) {
           course->places |= STATUS_THIRD_PLACE;
         }
+
         if (entry->hasPlace[SECOND_PLACE_INDEX] > 0) {
           course->places |= STATUS_SECOND_PLACE;
         }
+
         if (entry->hasPlace[FIRST_PLACE_INDEX] > 0) {
           course->places |= STATUS_FIRST_PLACE;
         }
+
         for (index = 0; index != CHARACTER_COUNT; index++) {
           if (entry->hasCharacterBestScore[index] == TRUE) {
             course->characterBestScores[index] =
@@ -3286,6 +3509,7 @@ void BuildStatusData(u8* status) {
         }
       }
     }
+
     for (index = 0; index != BEST_TIME_COUNT; index++) {
       if (records->bestTimes[courseIndex][index] > 0) {
         /* Passing the parts through value is there to match */
@@ -3308,6 +3532,7 @@ void BuildStatusData(u8* status) {
         course->bestTimes[index].unk4 = 0;
       }
     }
+
     course->birdieBadges[0] = 0;
     course->birdieBadges[1] = 0;
     course->birdieBadges[2] = 0;
@@ -3316,11 +3541,13 @@ void BuildStatusData(u8* status) {
         course->birdieBadges[0] |= 1 << (7 - index);
       }
     }
+
     for (index = 0; index != 8; index++) {
       if (records->unk990.birdieBadgeCounts[courseIndex][8 + index] > 0) {
         course->birdieBadges[1] |= 1 << (7 - index);
       }
     }
+
     for (index = 0; index != 2; index++) {
       if (records->unk990.birdieBadgeCounts[courseIndex][16 + index] > 0) {
         course->birdieBadges[2] |= 1 << (7 - index);
@@ -3362,6 +3589,7 @@ void BuildStatusData(u8* status) {
           break;
         }
       }
+
       if (courseIndex < COURSE_COUNT) {
         for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
           scores = &save->unkE98[courseIndex];
@@ -3376,6 +3604,7 @@ void BuildStatusData(u8* status) {
         course->characterBestScores[index] = 0;
       }
     }
+
     for (index = 0; index != BEST_TIME_COUNT; index++) {
       course->bestTimes[index].minutes = 0;
       course->bestTimes[index].seconds = 0;
@@ -3383,6 +3612,7 @@ void BuildStatusData(u8* status) {
       course->bestTimes[index].unk3 = 0;
       course->bestTimes[index].unk4 = 0;
     }
+
     course->birdieBadges[0] = 0;
     course->birdieBadges[1] = 0;
     course->birdieBadges[2] = 0;
@@ -3395,6 +3625,7 @@ void BuildStatusData(u8* status) {
     /* The original keeps only the last course's bit */
     progress->openCourses = 1 << courseIndex;
   }
+
   for (courseIndex = 0; courseIndex != RING_SHOT_COURSE_COUNT; courseIndex++) {
     progress->ringShotStars[courseIndex] = 0;
     for (index = 0; index != RING_SHOT_HOLE_COUNT; index++) {
@@ -3403,6 +3634,7 @@ void BuildStatusData(u8* status) {
       }
     }
   }
+
   progress->birdieBadgeCount = 0;
   for (courseIndex = 0; courseIndex != COURSE_COUNT; courseIndex++) {
     for (index = 0; index != COURSE_HOLE_COUNT; index++) {
@@ -3411,6 +3643,7 @@ void BuildStatusData(u8* status) {
       }
     }
   }
+
   for (courseIndex = 0; courseIndex != SAVE_UNKAF0_ROW_COUNT; courseIndex++) {
     /* The bits array, zeroed from its end, and courseIndex as row index are
      * there to match */
@@ -3421,10 +3654,12 @@ void BuildStatusData(u8* status) {
       if (records->unk990.unkAF0[row][index].unk1 != 0) {
         bits[0] |= 1 << index;
       }
+
       if (records->unk990.unkAF0[row][index].unk1 & UNKAF0_FLAG) {
         bits[1] |= 1 << index;
       }
     }
+
     progress->unkAF0Bits[courseIndex].nonzeroBits[0] = bits[0];
     progress->unkAF0Bits[courseIndex].nonzeroBits[1] = bits[0] >> 8;
     progress->unkAF0Bits[courseIndex].flagBits[0] = bits[1];
@@ -3435,6 +3670,7 @@ void BuildStatusData(u8* status) {
 /* The whole part of value once rounded to tenths, up to MAX_STATUS_VALUE */
 s32 RoundedWholePart(f32 value) {
   s32 wholePart = value;
+
   /* The fraction in hundredths, then in tenths; reusing one variable is there
    * to match */
   s32 fraction = (value - wholePart) * 100.0f;
@@ -3442,6 +3678,7 @@ s32 RoundedWholePart(f32 value) {
   if (fraction % 10 >= 5) {
     fraction += 10;
   }
+
   fraction /= 10;
   if (fraction >= 10) {
     wholePart++;
@@ -3449,5 +3686,6 @@ s32 RoundedWholePart(f32 value) {
       wholePart = MAX_STATUS_VALUE;
     }
   }
+
   return wholePart;
 }

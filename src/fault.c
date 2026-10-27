@@ -303,12 +303,15 @@ void PrintRegisterFields(u32 value, char* name, RegisterFieldValue* fields) {
         sprintf(f_FaultText, ",");
         PrintFaultText();
       }
+
       sprintf(f_FaultText, "%s", fields->text);
       PrintFaultText();
       PrintMessage(f_FaultText, FIELD_TEXT_COLUMN, f_FaultTextRow++);
     }
+
     fields++;
   }
+
   sprintf(f_FaultText, ">\n");
   PrintFaultText();
 }

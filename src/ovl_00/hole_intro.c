@@ -73,6 +73,7 @@ void StartHoleIntroCamera(void) {
     heading =
         ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) - M_PI;
   }
+
   offsetX = -sinf(heading) * INTRO_CAMERA_FIRST_DISTANCE;
   g_Cameras[0].view.eye[AXIS_Y] =
       (g_CurrentShot.ballPosition[AXIS_Y] + INTRO_CAMERA_FIRST_HEIGHT) * scale;
@@ -93,6 +94,7 @@ s32 UpdateHoleIntroCamera(void) {
   if (f_IntroFrame < INTRO_FRAME_COUNT_MAX) {
     f_IntroFrame++;
   }
+
   if (g_HoleIndex == GetFirstHoleIndex()) {
     if (f_IntroFrame < FIRST_HOLE_INTRO_FRAMES) {
       f_IntroCameraDistance = FIRST_HOLE_INTRO_START_DISTANCE -
@@ -107,12 +109,14 @@ s32 UpdateHoleIntroCamera(void) {
       f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
+
     /* The swing comes first, then the shot's heading is added to it */
     heading =
         -(f32)f_IntroFrame * DEGREES_TO_RADIANS(FIRST_HOLE_INTRO_SWING_DEGREES);
     if (heading < -M_PI) {
       heading = -(f32)M_PI;
     }
+
     heading = heading +
         (((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2));
   } else {
@@ -129,9 +133,11 @@ s32 UpdateHoleIntroCamera(void) {
       f_IntroCameraDistance = INTRO_CAMERA_END_DISTANCE;
       f_IntroCameraHeight = INTRO_CAMERA_END_HEIGHT;
     }
+
     heading = ((u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS) + (M_PI / 2) +
         -(f32)M_PI;
   }
+
   g_Cameras[1].view.lookAt[AXIS_X] =
       g_CurrentShot.ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
   g_Cameras[1].view.lookAt[AXIS_Y] =
@@ -154,6 +160,7 @@ s32 UpdateHoleIntroCamera(void) {
     if (f_IntroFrame == FIRST_HOLE_INTRO_MOVIE_FRAME) {
       StartMovie(MOVIE_LAKITU);
     }
+
     if (f_IntroFrame > FIRST_HOLE_INTRO_MOVIE_FRAME && IsMoviePastCue()) {
       return TRUE;
     }
@@ -161,14 +168,17 @@ s32 UpdateHoleIntroCamera(void) {
     if (f_IntroFrame == LATER_HOLE_INTRO_MOVIE_FRAME) {
       StartMovie(MOVIE_READY_GO);
     }
+
     if (f_IntroFrame == LATER_HOLE_INTRO_SOUND_FRAME) {
       PlaySound(
           SOUND_HOLE_INTRO, HOLE_INTRO_SOUND_CHANNEL, HOLE_INTRO_SOUND_VOLUME);
     }
+
     if (f_IntroFrame == LATER_HOLE_INTRO_FRAMES) {
       return TRUE;
     }
   }
+
   sprintf(g_PrintBuffer, "%3d", f_IntroFrame);
   PrintDebugText(g_PrintBuffer, INTRO_FRAME_TEXT_COLUMN, INTRO_FRAME_TEXT_ROW);
   return FALSE;

@@ -286,8 +286,10 @@ static u8 ReverseBits(u8 bits) {
     if (bits & 1) {
       reversed |= 1;
     }
+
     bits >>= 1;
   }
+
   return reversed;
 }
 
@@ -300,9 +302,11 @@ s32 WritePasswordSymbols(
     if (symbols[i] >= PASSWORD_SYMBOL_COUNT) {
       return -1;
     }
+
     password[i] =
         f_PasswordAlphabet[(symbols[i] + i) % PASSWORD_SYMBOL_COUNT][0];
   }
+
   return 0;
 }
 #else
@@ -328,15 +332,19 @@ static s32 ReadPasswordSymbols(u8* symbols, char* password, s32 symbolCount) {
           break;
         }
       }
+
       if (isFound) {
         break;
       }
     }
+
     if (symbol >= PASSWORD_SYMBOL_COUNT) {
       return -1;
     }
+
     symbols[i] = (symbol + PASSWORD_SYMBOL_COUNT - i) % PASSWORD_SYMBOL_COUNT;
   }
+
   return 0;
 }
 
@@ -349,6 +357,7 @@ s32 DecodeTournamentPassword(u8* code, char* password) {
   if (ReadPasswordSymbols(symbols, password, TOURNAMENT_PASSWORD_LENGTH) != 0) {
     return -1;
   }
+
   symbols[0] =
       (symbols[0] + PASSWORD_SYMBOL_COUNT - symbols[5]) % PASSWORD_SYMBOL_COUNT;
   symbols[1] =
@@ -363,25 +372,30 @@ s32 DecodeTournamentPassword(u8* code, char* password) {
       (symbols[4] + symbols[0] + symbols[1]) % (u32)PASSWORD_SYMBOL_COUNT) {
     return -1;
   }
+
   if (symbols[6] !=
       (symbols[1] + symbols[2] + symbols[3]) % (u32)PASSWORD_SYMBOL_COUNT) {
     return -1;
   }
+
   if (symbols[7] !=
       (symbols[2] + symbols[3] + symbols[4]) % (u32)PASSWORD_SYMBOL_COUNT) {
     return -1;
   }
+
   number = 0;
   for (i = NUMBER_SYMBOL_COUNT - 1; i >= 0; i--) {
     number *= PASSWORD_SYMBOL_COUNT;
     number += symbols[i];
   }
+
   bytes[0] = number >> 16;
   bytes[1] = number >> 8;
   bytes[2] = number;
   for (i = 0; i < TOURNAMENT_CODE_SIZE; i++) {
     code[i] = ReverseBits(bytes[i] ^ f_TournamentKey[i]);
   }
+
   return 0;
 }
 
@@ -399,29 +413,35 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
   if (clamped->characterIndex >= PASSWORD_CHARACTER_COUNT) {
     clamped->characterIndex = 0;
   }
+
   clamped->score += SCORE_PASSWORD_BIAS;
   if (clamped->score >= SCORE_RANGE) {
     clamped->score = SCORE_RANGE - 1;
   }
+
   clamped->time--;
   if (clamped->time > TIME_RANGE - 1) {
     clamped->time = TIME_RANGE - 1;
   }
+
   if (clamped->gameBoyLevel >= PASSWORD_GAME_BOY_LEVEL_LIMIT) {
     clamped->gameBoyLevel = PASSWORD_GAME_BOY_LEVEL_LIMIT - 1;
   }
+
   number = (clamped->tournamentCode[0] << 16) |
       (clamped->tournamentCode[1] << 8) | clamped->tournamentCode[2];
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
+
   number =
       (clamped->gameBoyLevel * TIME_RANGE) + clamped->time + TIME_NUMBER_SALT;
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
+
   number = (clamped->characterIndex * SCORE_RANGE) + (s16)clamped->score +
       ((rand() % SCORE_NOISE_RANGE) *
           (PASSWORD_CHARACTER_COUNT * SCORE_RANGE)) +
@@ -430,6 +450,7 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
     symbols[symbolCount++] = number % PASSWORD_SYMBOL_COUNT;
     number /= PASSWORD_SYMBOL_COUNT;
   }
+
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[i] = (symbols[i] + symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
@@ -438,11 +459,13 @@ void EncodeScorePassword(ScoreReport* source, char* password) {
             symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
   }
+
   for (i = 0; i < NUMBER_SYMBOL_COUNT; i++) {
     symbols[symbolCount++] = (symbols[i] + symbols[NUMBER_SYMBOL_COUNT + i] +
                                  symbols[(2 * NUMBER_SYMBOL_COUNT) + i]) %
         PASSWORD_SYMBOL_COUNT;
   }
+
   WritePasswordSymbols(symbols, password, SCORE_PASSWORD_LENGTH, 0);
 }
 
@@ -450,5 +473,6 @@ TournamentRules* GetTournamentRules(u8 rulesIndex) {
   if (rulesIndex >= TOURNAMENT_RULES_COUNT) {
     return &f_TournamentRules[0];
   }
+
   return &f_TournamentRules[rulesIndex];
 }

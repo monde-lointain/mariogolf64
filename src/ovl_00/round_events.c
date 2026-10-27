@@ -386,16 +386,20 @@ void StartBanner(s32 banner) {
   if (f_IsMovieBufferAllocated != TRUE) {
     return;
   }
+
   if (banner == BANNER_HIDE_NICE_SHOT) {
     if (f_CurrentBanner == BANNER_NICE_SHOT) {
       f_BannerFrame = BANNER_FRAME_NONE;
     }
+
     return;
   }
+
   if (banner == BANNER_NONE) {
     f_BannerFrame = BANNER_FRAME_NONE;
     return;
   }
+
   f_CurrentBanner = banner;
   f_BannerFrame = 0;
   if (banner > BANNER_STROKES_OVER_PAR) {
@@ -406,7 +410,9 @@ void StartBanner(s32 banner) {
       OpenEncodedAsset(f_Banners[BANNER_OVER_PAR_NUMBER].imageAsset, &asset);
       ReadEncodedAsset(f_MovieBuffer, &asset);
     }
+
     f_LoadedBanner = f_CurrentBanner;
+
     /* The "+" and the digits */
     if (f_BannerNumber < 10) {
       f_BannerNumberLetterCount = 2;
@@ -415,6 +421,7 @@ void StartBanner(s32 banner) {
     } else {
       f_BannerNumberLetterCount = 4;
     }
+
     for (i = 0; i != f_BannerNumberLetterCount; i++) {
       f_BannerLetters[i].x = (i * BANNER_LETTER_SPACING) -
           ((f_BannerNumberLetterCount - 1) * (BANNER_LETTER_SPACING / 2));
@@ -435,6 +442,7 @@ void StartBanner(s32 banner) {
           matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   }
+
   if ((f_LoadedBanner != f_CurrentBanner &&
           f_CurrentBanner < BANNER_OVER_PAR_NUMBER) ||
       f_LoadedBanner == BANNER_NONE) {
@@ -479,6 +487,7 @@ void DrawNumberBanner(Gfx** displayListHead) {
       imageOffset = ((g_PrintBuffer[i - 1] - '0') * BANNER_LETTER_IMAGE_SIZE) +
           (BANNER_FIRST_DIGIT_IMAGE * BANNER_LETTER_IMAGE_SIZE);
     }
+
     LoadTextureBlock(&gfx,
         f_MovieBuffer + (imageOffset + BANNER_LETTER_IMAGES_OFFSET),
         G_IM_FMT_CI, G_IM_SIZ_8b, BANNER_LETTER_IMAGE_WIDTH,
@@ -489,6 +498,7 @@ void DrawNumberBanner(Gfx** displayListHead) {
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -513,6 +523,7 @@ void DrawBannerLetters(Gfx** displayListHead) {
     gSPVertex(gfx++, f_BannerLetterVertices, 4, 0);
     gSP2Triangles(gfx++, 0, 1, 3, 0, 1, 2, 3, 0);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -583,24 +594,30 @@ void DrawBanner(Gfx** displayListHead) {
     if ((g_ControllerStates[0].pressedButtons & L_JPAD) && f_TestBanner > 0) {
       f_TestBanner--;
     }
+
     if ((g_ControllerStates[0].pressedButtons & R_JPAD) &&
         f_TestBanner < TEST_BANNER_LAST) {
       f_TestBanner++;
     }
+
     if (g_ControllerStates[0].pressedButtons & D_JPAD) {
       StartBanner(f_TestBanner);
     }
   }
+
   if (f_CurrentBanner == BANNER_NONE || f_BannerFrame == BANNER_FRAME_NONE) {
     return;
   }
+
   f_BannerFrame++;
   if (f_BannerFrame > BANNER_LAST_FRAME) {
     f_BannerFrame = BANNER_LAST_FRAME;
   }
+
   if (f_BannerFrame == BANNER_SOUND_FRAME) {
     PlaySound(SOUND_BANNER, BANNER_SOUND_CHANNEL, BANNER_SOUND_VOLUME);
   }
+
   switch (f_Banners[f_CurrentBanner].animation) {
     case BANNER_ANIMATION_ZOOM:
       letterScale =
@@ -608,13 +625,16 @@ void DrawBanner(Gfx** displayListHead) {
       if (letterScale < BANNER_ZOOM_SMALLEST) {
         letterScale = BANNER_ZOOM_SMALLEST;
       }
+
       alpha = f_BannerFrame * f_BannerFrame;
       if (alpha > BANNER_MAX_ALPHA) {
         alpha = BANNER_MAX_ALPHA;
       }
+
       if (f_BannerFrame == BANNER_END_FRAME) {
         f_BannerFrame = BANNER_FRAME_NONE;
       }
+
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = angle;
@@ -632,14 +652,17 @@ void DrawBanner(Gfx** displayListHead) {
       if (letterScale > 1.0f) {
         letterScale = 1.0f;
       }
+
       alpha = f_BannerFrame * f_BannerFrame;
       if (alpha > BANNER_MAX_ALPHA) {
         alpha = BANNER_MAX_ALPHA;
       }
+
       angle = f_BannerFrame * BANNER_SPIN_GROWTH_PER_FRAME * (2 * M_PI);
       if (angle > 2 * M_PI) {
         angle = 0.0f;
       }
+
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = angle;
@@ -657,6 +680,7 @@ void DrawBanner(Gfx** displayListHead) {
       if (slide < 0.0f) {
         slide = 0.0f;
       }
+
       if (f_BannerFrame >= BANNER_SLIDE_FRAMES &&
           f_BannerFrame < BANNER_SLIDE_FRAMES + BANNER_WOBBLE_FRAMES) {
         wobbleDepth = BANNER_WOBBLE_DEPTH -
@@ -664,6 +688,7 @@ void DrawBanner(Gfx** displayListHead) {
         if (wobbleDepth < BANNER_WOBBLE_SMALLEST_DEPTH) {
           wobbleDepth = BANNER_WOBBLE_SMALLEST_DEPTH;
         }
+
         letterScale = ((sinf((f_BannerFrame - BANNER_WOBBLE_FRAMES) *
                             BANNER_WOBBLE_TURN_PER_FRAME) +
                            1.0f) *
@@ -672,6 +697,7 @@ void DrawBanner(Gfx** displayListHead) {
       } else {
         letterScale = 1.0f;
       }
+
       /* Keeps the banner's left edge in place while it stretches */
       slide += f_BannerLayouts[f_CurrentBanner][BANNER_LAYOUT_LEFT] *
           (1.0f - letterScale);
@@ -690,6 +716,7 @@ void DrawBanner(Gfx** displayListHead) {
       if (f_BannerFrame == BANNER_END_FRAME) {
         f_BannerFrame = BANNER_FRAME_NONE;
       }
+
       break;
     case BANNER_ANIMATION_ZOOM_STAY:
       letterScale =
@@ -697,10 +724,12 @@ void DrawBanner(Gfx** displayListHead) {
       if (letterScale < BANNER_ZOOM_STAY_SMALLEST) {
         letterScale = BANNER_ZOOM_STAY_SMALLEST;
       }
+
       alpha = f_BannerFrame * f_BannerFrame;
       if (alpha > BANNER_MAX_ALPHA) {
         alpha = BANNER_MAX_ALPHA;
       }
+
       rotation[AXIS_X] = 0;
       rotation[AXIS_Y] = 0;
       rotation[AXIS_Z] = 0;
@@ -714,6 +743,7 @@ void DrawBanner(Gfx** displayListHead) {
       ConvertMatrixToFixed(matrix, &f_BannerMatrices[g_MatrixBufferIndex]);
       break;
   }
+
   if (f_CurrentBanner < BANNER_OVER_PAR_NUMBER) {
     for (i = 0; i != f_Banners[f_CurrentBanner].letterCount; i++) {
       f_BannerLetters[i].x =
@@ -760,6 +790,7 @@ void DrawBanner(Gfx** displayListHead) {
           matrix, &f_BannerLetters[i].matrices[g_MatrixBufferIndex]);
     }
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -776,6 +807,7 @@ void DrawBanner(Gfx** displayListHead) {
         gDPPipeSync(gfx++);
         gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
       }
+
       break;
     case BANNER_ANIMATION_SPIN:
     case BANNER_ANIMATION_SLIDE:
@@ -784,6 +816,7 @@ void DrawBanner(Gfx** displayListHead) {
       gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
       break;
   }
+
   gDPPipeSync(gfx++);
   gDPSetAlphaDither(gfx++, G_AD_DISABLE);
   gDPPipeSync(gfx++);
@@ -810,6 +843,7 @@ void DrawBanner(Gfx** displayListHead) {
   } else {
     DrawNumberBanner(&gfx);
   }
+
   *displayListHead = gfx;
 }
 
@@ -830,10 +864,12 @@ void ShowFlipMessage(s32 messageId) {
     f_FlipMessageFrame = FLIP_MESSAGE_FRAME_NONE;
     return;
   }
+
   if (messageId == FLIP_MESSAGE_LEAVE) {
     f_IsFlipMessageLeaving = TRUE;
     return;
   }
+
   f_IsFlipMessageLeaving = FALSE;
   f_FlipMessageFrame = 0;
   halfSize = PlaceMessageGlyphGroup(
@@ -886,6 +922,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
     } else if (f_FlipMessageFrame > 0) {
       f_FlipMessageFrame--;
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -904,10 +941,12 @@ void DrawFlipMessage(Gfx** displayListHead) {
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
     }
+
     size = f_FlipMessageFrame * FLIP_MESSAGE_GROWTH_PER_FRAME;
     if (size > 1.0f) {
       size = 1.0f;
     }
+
     scale[AXIS_X] = size;
     scale[AXIS_Y] = size;
     scale[AXIS_Z] = size;
@@ -935,6 +974,7 @@ void DrawFlipMessage(Gfx** displayListHead) {
       DrawGlyphGroup(&gfx, FLIP_MESSAGE_GLYPH_GROUP);
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -950,15 +990,18 @@ void StartMovie(s32 movie) {
   if (f_IsMovieBufferAllocated != TRUE) {
     return;
   }
+
   f_CurrentMovie = movie;
   if (movie == MOVIE_NONE) {
     return;
   }
+
   f_LoadedBanner = BANNER_NONE;
   f_CurrentBanner = BANNER_NONE;
   f_MovieDrawCount = 0;
   f_MovieTick = 0;
   f_MovieBackBuffer = 0;
+
   /* The first frame is loaded here */
   f_MovieFrame = 1;
   switch (movie) {
@@ -1054,14 +1097,17 @@ void DrawMovie(Gfx** displayListHead) {
   if (g_PauseScreen != PAUSE_SCREEN_NONE) {
     return;
   }
+
   if (IsGameFlagSet(GAME_FLAG_TEST_AIM_TILT_AND_MOVIES)) {
     if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & A_BUTTON) {
       StartMovie(MOVIE_DRIVE_RECORD);
     }
+
     if (g_ControllerStates[MOVIE_TEST_CONTROLLER].pressedButtons & B_BUTTON) {
       StartMovie(MOVIE_READY_GO);
     }
   }
+
   switch (f_CurrentMovie) {
     case MOVIE_NONE:
       break;
@@ -1096,9 +1142,11 @@ void DrawMovie(Gfx** displayListHead) {
       DrawReadyGoMovie(&gfx);
       break;
   }
+
   if (f_MovieDrawCount < MOVIE_DRAW_COUNT_MAX) {
     f_MovieDrawCount++;
   }
+
   *displayListHead = gfx;
 }
 
@@ -1196,6 +1244,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
         SHRINKING_IMAGE_SOUND_VOLUME, CONTEST_SOUND_REVERB, CONTEST_PAN_START);
   }
+
   if (f_MovieDrawCount == CONTEST_CHEER_DRAW) {
     if (f_CurrentMovie == MOVIE_LONGEST_DRIVE) {
       PlayCharacterSound((s8)g_Players[GetContestWinner()].characterIndex,
@@ -1207,17 +1256,20 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           CHARACTER_SOUND_VOLUME, CHARACTER_SOUND_PAN);
     }
   }
+
   if (f_MovieDrawCount > CONTEST_SLIDE_DRAW &&
       f_MovieDrawCount < CONTEST_PAN_DRAW_END) {
     SetSoundPan(SHRINKING_IMAGE_SOUND_CHANNEL,
         CONTEST_PAN_START -
             ((f_MovieDrawCount - CONTEST_SLIDE_DRAW) * CONTEST_PAN_STEP));
   }
+
   if (f_MovieDrawCount < CONTEST_MEET_DRAW) {
     slide = CONTEST_START_SLIDE - (f_MovieDrawCount * CONTEST_SLIDE_PER_FRAME);
     if (slide < 0) {
       slide = 0;
     }
+
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPSetEnvColor(gfx++, 255, 255, 255, CONTEST_COPY_ALPHA);
     if (f_MovieDrawCount == 0) {
@@ -1250,6 +1302,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     f_CurrentMovie = MOVIE_NONE;
     halfWidth = 0;
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
@@ -1274,6 +1327,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
       bottom += MOVIE_IMAGE_STRIP_HEIGHT;
     }
   }
+
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   if (f_MovieDrawCount > CONTEST_MEET_DRAW &&
       f_MovieDrawCount <= CONTEST_MEET_DRAW + WINNER_LAST_FRAME) {
@@ -1303,14 +1357,17 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
           &asset);
       ReadEncodedAsset(f_MovieBuffer + WINNER_FACE_OFFSET, &asset);
     }
+
     if (frame == WINNER_FIRST_FRAME) {
       PlaySoundWithEffects(SOUND_WINNER_APPEAR, g_NextSoundChannel,
           WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
     }
+
     if (frame == WINNER_SHRINK_FRAME) {
       PlaySoundWithEffects(SOUND_WINNER_VANISH, g_NextSoundChannel,
           WINNER_SOUND_VOLUME, WINNER_SOUND_REVERB, WINNER_SOUND_PAN);
     }
+
     if (frame >= WINNER_SHRINK_FRAME) {
       frame = WINNER_SHRINK_FRAME + 3 - frame;
       if (frame <= 0) {
@@ -1319,6 +1376,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
     } else if (frame > WINNER_MAX_GROWTH) {
       frame = WINNER_MAX_GROWTH;
     }
+
     growth = frame * WINNER_GROWTH_STEP;
     LoadSmallPalette(
         &gfx, 0, f_MovieBuffer + WINNER_PLAQUE_OFFSET + IMAGE_HEADER_SIZE);
@@ -1341,6 +1399,7 @@ void DrawContestWinnerMovie(Gfx** displayListHead) {
         (WINNER_CENTRE_Y - growth) << 2, (WINNER_CENTRE_X + growth) << 2,
         (WINNER_CENTRE_Y + growth) << 2, G_TX_RENDERTILE, 0, 0, step, step);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1383,6 +1442,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, CAPTION_SOUND_CHANNEL,
         CAPTION_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
   }
+
   stripHeight = MOVIE_IMAGE_STRIP_HEIGHT;
   halfWidth = width >> 1;
   gDPPipeSync(gfx++);
@@ -1414,6 +1474,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
     f_CurrentMovie = MOVIE_NONE;
     halfWidth = 0;
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
@@ -1425,6 +1486,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
       if (slide < 0) {
         slide = 0;
       }
+
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
@@ -1448,9 +1510,11 @@ void DrawDriveRecord(Gfx** displayListHead) {
             (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
+
       bottom += stripHeight;
     }
   }
+
   if (f_MovieDrawCount >= DRIVE_RECORD_DISTANCE_DRAW &&
       f_MovieDrawCount < DRIVE_RECORD_DISTANCE_END_DRAW) {
     SetUpGradientTextDrawing(&gfx, 0);
@@ -1460,6 +1524,7 @@ void DrawDriveRecord(Gfx** displayListHead) {
         DRIVE_RECORD_DISTANCE_Y, g_PrintBuffer, DRIVE_RECORD_DISTANCE_ENV_COLOR,
         DRIVE_RECORD_DISTANCE_PRIM_COLOR, TEXT_FLAG_FIXED_WIDTH);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1498,6 +1563,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_CAPTION_MEET, CAPTION_SOUND_CHANNEL,
         CAPTION_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
   }
+
   if (f_MovieDrawCount < CAPTION_MEET_DRAW) {
     gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
     gDPSetEnvColor(gfx++, 255, 255, 255, CAPTION_COPY_ALPHA);
@@ -1522,6 +1588,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
     f_CurrentMovie = MOVIE_NONE;
     halfWidth = 0;
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
@@ -1533,6 +1600,7 @@ void DrawPuttCaption(Gfx** displayListHead) {
       if (slide < 0) {
         slide = 0;
       }
+
       LoadTextureBlock(&gfx,
           f_MovieBuffer +
               ((i * width * MOVIE_IMAGE_STRIP_HEIGHT) +
@@ -1556,9 +1624,11 @@ void DrawPuttCaption(Gfx** displayListHead) {
             (copyTop + MOVIE_IMAGE_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
+
       bottom += stripHeight;
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1611,10 +1681,12 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_READY, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
         READY_GO_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
+
   if (f_MovieDrawCount == GO_GROW_DRAW) {
     PlaySoundWithEffects(SOUND_GO, g_NextSoundChannel, READY_GO_SOUND_VOLUME,
         READY_GO_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
+
   scale[0] = 1.0f;
   scale[1] = 1.0f;
   scale[2] = 1.0f;
@@ -1643,6 +1715,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     if (alpha < 0) {
       alpha = 0;
     }
+
     /* The chained assignment is there to match */
     rotation[0] = rotation[1] = rotation[2] = 0.0f;
     scale[2] = (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
@@ -1652,6 +1725,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     f_CurrentMovie = MOVIE_NONE;
     return;
   }
+
   translation[0] = 0.0f;
   translation[1] = 0.0f;
   translation[2] = READY_GO_DISTANCE;
@@ -1674,6 +1748,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
   }
+
   if (f_MovieDrawCount < GO_DRAW) {
     gDPLoadTLUT_pal256(
         gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_IMAGE_PALETTE_OFFSET));
@@ -1682,6 +1757,7 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
         TEXTURE_ADDRESS(
             f_MovieBuffer + GO_TEXT_OFFSET + MOVIE_IMAGE_PALETTE_OFFSET));
   }
+
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&f_ReadyGoMatrices[f_MovieBackBuffer]),
@@ -1725,9 +1801,11 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
       gSPModifyVertex(gfx++, (i * 2) + 3, G_MWO_POINT_ST,
           ((TEXEL_COORD(GO_WIDTH) - 1) << 16) + TEXEL_COORD(stripHeight));
     }
+
     gSP2Triangles(gfx++, i * 2, (i * 2) + 2, (i * 2) + 3, 0, i * 2, (i * 2) + 3,
         (i * 2) + 1, 0);
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);
@@ -1760,6 +1838,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_SHRINKING_IMAGE, SHRINKING_IMAGE_SOUND_CHANNEL,
         SHRINKING_IMAGE_SOUND_VOLUME, 0, MOVIE_SOUND_PAN);
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPSetPrimColor(gfx++, 0, 0, 255, 255, 255, 255);
   gDPSetEnvColor(gfx++, 255, 255, 255, 255);
@@ -1773,6 +1852,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
     if (angle > M_PI / 2) {
       angle = M_PI / 2;
     }
+
     halfWidth = (cosf(angle) + 1.0f) * width * 0.5f;
     stripHeight = (cosf(angle) + 1.0f) * MOVIE_IMAGE_STRIP_HEIGHT;
     if (halfWidth > 0 && stripHeight > 0) {
@@ -1796,6 +1876,7 @@ void DrawShrinkingMovieImage(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1820,10 +1901,12 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
       f_CurrentMovie = MOVIE_NONE;
     }
   }
+
   if (f_MovieDrawCount == 1) {
     PlaySoundWithEffects(SOUND_MONTY_MOLE, MOVIE_SOUND_CHANNEL,
         MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
+
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
@@ -1842,6 +1925,7 @@ void DrawMontyMoleMovie(Gfx** displayListHead) {
             << 2,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gDPPipeSync(gfx++);
@@ -1866,10 +1950,12 @@ void DrawGoombaMovie(Gfx** displayListHead) {
       f_CurrentMovie = MOVIE_NONE;
     }
   }
+
   if (f_MovieDrawCount == 1) {
     PlaySoundWithEffects(SOUND_GOOMBA, MOVIE_SOUND_CHANNEL, MOVIE_SOUND_VOLUME,
         MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
+
   gSPDisplayList(gfx++, f_MovieSetupDisplayList);
   gDPLoadTLUT_pal256(
       gfx++, TEXTURE_ADDRESS(f_MovieBuffer + MOVIE_PALETTE_OFFSET));
@@ -1879,6 +1965,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
     } else {
       height = GOOMBA_STRIP_HEIGHT;
     }
+
     gDPLoadTextureTile(gfx++,
         TEXTURE_ADDRESS(
             f_MovieBuffer + (MOVIE_FRAME_OFFSET + (i * GOOMBA_STRIP_SIZE))),
@@ -1891,6 +1978,7 @@ void DrawGoombaMovie(Gfx** displayListHead) {
         (GOOMBA_Y + (i * GOOMBA_STRIP_HEIGHT) + height) << 2, G_TX_RENDERTILE,
         0, 0, 1 << 10, 1 << 10);
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gDPPipeSync(gfx++);
@@ -1916,14 +2004,17 @@ void DrawLakituMovie(Gfx** displayListHead) {
     PlaySound(
         SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
   }
+
   if (f_MovieDrawCount == LAKITU_SECOND_RED_LIGHT_DRAW) {
     PlaySound(
         SOUND_START_LIGHT_RED, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
   }
+
   if (f_MovieDrawCount == LAKITU_GO_LIGHT_DRAW) {
     PlaySound(
         SOUND_START_LIGHT_GO, g_NextSoundChannel, START_LIGHT_SOUND_VOLUME);
   }
+
   if (f_MovieDrawCount < LAKITU_ARRIVE_DRAW) {
     f_Lakitu.x -= (LAKITU_START_X - LAKITU_HOVER_X) / LAKITU_ARRIVE_DRAW;
     f_Lakitu.y += (LAKITU_HOVER_Y - LAKITU_START_Y) / LAKITU_ARRIVE_DRAW;
@@ -1939,6 +2030,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
             f_MovieBuffer + (f_MovieBackBuffer * LAKITU_FRAME_SIZE), &asset);
       }
     }
+
     f_LakituVelocity.x = 0.0f;
     f_LakituVelocity.y = 0.0f;
   } else {
@@ -1951,6 +2043,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
       f_CurrentMovie = MOVIE_NONE;
     }
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -1976,6 +2069,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
     roundedHalfHeight = halfHeight + 0.5f;
     x = f_Lakitu.x;
     y = f_Lakitu.y;
+
     /* Start half a texel in, less the rounding, so that the image stays centred
      * as it scales */
     DrawTextureRect(&gfx, (x - roundedHalfWidth) << 2,
@@ -1988,6 +2082,7 @@ void DrawLakituMovie(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     offset += LAKITU_STRIP_SIZE;
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2010,21 +2105,25 @@ void DrawToadMovie(Gfx** displayListHead) {
           FLAG_SWISH_SOUND_VOLUME, MOVIE_SOUND_REVERB, FLAG_SWISH_LEFT_PAN);
       SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
     }
+
     if (f_MovieFrame == TOAD_SWING_RIGHT_FRAME) {
       PlaySoundWithEffects(SOUND_FLAG_SWISH, FLAG_SWISH_SOUND_CHANNEL,
           FLAG_SWISH_SOUND_VOLUME, MOVIE_SOUND_REVERB, FLAG_SWISH_RIGHT_PAN);
       SetSoundFrequencyOffset(FLAG_SWISH_SOUND_CHANNEL, FLAG_SWISH_PITCH);
     }
+
     f_MovieBackBuffer ^= 1;
     OpenEncodedAsset(f_ToadMovieFrameAssets[f_MovieFrame], &asset);
     ReadEncodedAsset(f_MovieBuffer +
             ((f_MovieBackBuffer * TOAD_FRAME_SIZE) + TOAD_FRAME_OFFSET),
         &asset);
   }
+
   if (f_MovieDrawCount == OUT_OF_BOUNDS_SOUND_DRAW) {
     PlaySoundWithEffects(SOUND_OUT_OF_BOUNDS, OUT_OF_BOUNDS_SOUND_CHANNEL,
         MOVIE_SOUND_VOLUME, MOVIE_SOUND_REVERB, MOVIE_SOUND_PAN);
   }
+
   gSPDisplayList(gfx++, f_MovieImageSetupDisplayList);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
@@ -2053,6 +2152,7 @@ void DrawToadMovie(Gfx** displayListHead) {
         (TOAD_Y + TOAD_STRIP_HEIGHT + (i * TOAD_STRIP_HEIGHT)) << 2,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
+
   gDPPipeSync(gfx++);
   gDPSetScissor(gfx++, G_SC_NON_INTERLACE, g_Cameras[0].view.scissorX,
       g_Cameras[0].view.scissorY,
@@ -2079,6 +2179,7 @@ s32 GetContactStyle(UnkB8* player) {
     if (gameBoyCharacter->status != GAME_BOY_CHARACTER_STATUS_PRESENT) {
       return CONTACT_STYLE_PLAIN;
     }
+
     switch (gameBoyCharacter->ballType) {
       case GAME_BOY_BALL_TYPE_PLAIN:
         return CONTACT_STYLE_PLAIN;
@@ -2100,19 +2201,24 @@ s32 GetContactStyle(UnkB8* player) {
         return CONTACT_STYLE_PLAIN;
     }
   }
+
   if (character == CHARACTER_WARIO) {
     return CONTACT_STYLE_WARIO;
   }
+
   if (character == CHARACTER_MAPLE || character == CHARACTER_DONKEY_KONG) {
     return CONTACT_STYLE_HEAVY_HITTER;
   }
+
   if (character == CHARACTER_BOWSER) {
     return CONTACT_STYLE_BOWSER;
   }
+
   if (character == CHARACTER_BABY_MARIO || character == CHARACTER_MARIO ||
       character == CHARACTER_METAL_MARIO) {
     return CONTACT_STYLE_MARIO;
   }
+
   return CONTACT_STYLE_PLAIN;
 }
 
@@ -2135,6 +2241,7 @@ void StartContactEffect(s32 effect) {
               (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
           g_CurrentShot.ballPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
     }
+
     g_ContactEffect = 0;
     f_IsContactEffectFading = FALSE;
     f_ContactVertices[0].v.ob[1] = 0;
@@ -2151,6 +2258,7 @@ void StartContactEffect(s32 effect) {
   } else {
     f_IsContactEffectFading = TRUE;
   }
+
   if (effect != CONTACT_EFFECT_NONE &&
       (effect == CONTACT_EFFECT_POWER_WOOD ||
           effect == CONTACT_EFFECT_POWER_IRON ||
@@ -2345,6 +2453,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   if (g_ContactEffect == CONTACT_EFFECT_NONE) {
     return;
   }
+
   if (f_IsContactEffectFading == TRUE) {
     g_ContactEffect += CONTACT_FADE_STEP;
     if (g_ContactEffect > CONTACT_AGE_MAX) {
@@ -2353,9 +2462,11 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   } else if (g_ContactEffect < CONTACT_AGE_MAX) {
     g_ContactEffect++;
   }
+
   if (g_IsCupViewShown == 1) {
     return;
   }
+
   if (f_ContactStyle == CONTACT_STYLE_WARIO ||
       f_ContactStyle == CONTACT_STYLE_GAME_BOY_BALL_7) {
     if (g_ContactEffect < CONTACT_WARIO_HOLD_AGE) {
@@ -2397,12 +2508,15 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     alpha = CONTACT_SHARED_ALPHA -
         (CONTACT_SHARED_FADE_PER_AGE * (g_ContactEffect - CONTACT_HOLD_AGE));
   }
+
   if (alpha < CONTACT_MIN_ALPHA) {
     g_ContactEffect = CONTACT_EFFECT_NONE;
   }
+
   if (alpha <= 0) {
     return;
   }
+
   /* The ribbon starts where the ball was hit, then follows it */
   if (g_ContactEffect == 1) {
     f_ContactTrailHead = 0;
@@ -2420,6 +2534,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
             (g_PinVertexScale * CONTACT_DROP_PER_PIN_SCALE),
         g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE);
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -2461,6 +2576,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
   } else {
     gDPSetPrimColor(gfx++, 0, 0, 191, 191, 255, alpha);
   }
+
   /* Bowser's and the heavy hitters' images have their own colours */
   if (f_ContactStyle == CONTACT_STYLE_BOWSER ||
       f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
@@ -2471,6 +2587,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
         PRIMITIVE, 0, TEXEL0, 0);
   }
+
   if (f_ContactStyle == CONTACT_STYLE_HEAVY_HITTER) {
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -2521,6 +2638,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
         32, 100, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
         G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
   }
+
   guScaleF(
       scale, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE, CONTACT_RIBBON_SCALE);
   guMtxL2F(antiBillboard, &matrices->antiBillboard);
@@ -2540,6 +2658,7 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
       DRAW_CONTACT_RIBBON();
     }
   }
+
   if (f_ContactStyle == CONTACT_STYLE_MARIO) {
     /* The chained assignment is there to match */
     translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
@@ -2577,12 +2696,14 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
   }
+
   /* The ring of matrices turns back one so the newest position takes the slot
    * before */
   f_ContactTrailHead--;
   if (f_ContactTrailHead < 0) {
     f_ContactTrailHead = CONTACT_TRAIL_LENGTH - 1;
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -2600,6 +2721,7 @@ void ShowWindFlyGuy(s32 show) {
       f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
       return;
     }
+
     f_WindFlyGuyFrame = 0;
     f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
     OpenEncodedAsset(FLY_GUY_IMAGE_ASSET, &asset);
@@ -2679,10 +2801,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
   if (f_WindFlyGuyFrame == FLY_GUY_HIDDEN || g_PauseScreen) {
     return;
   }
+
   f_WindFlyGuyAsset++;
   if (f_WindFlyGuyAsset == FLY_GUY_IMAGE_ASSET + WIND_FLY_GUY_FRAME_COUNT) {
     f_WindFlyGuyAsset = FLY_GUY_IMAGE_ASSET;
   }
+
   OpenEncodedAsset(f_WindFlyGuyAsset, &asset);
   ReadEncodedAsset(f_MovieBuffer, &asset);
   if (f_WindFlyGuyFrame < WIND_FLY_GUY_ARRIVED) {
@@ -2691,6 +2815,7 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
             &position.x) == 1) {
       f_WindFlyGuyFrame = WIND_FLY_GUY_ARRIVED;
     }
+
     alpha = WIND_STREAK_ALPHA;
   } else {
     f_WindFlyGuyFrame++;
@@ -2698,11 +2823,14 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
     if (alpha < 0) {
       alpha = 0;
     }
+
     if (f_WindFlyGuyFrame == WIND_FLY_GUY_GONE_FRAME) {
       f_WindFlyGuyFrame = FLY_GUY_HIDDEN;
     }
+
     position = f_WindFlyGuyExit;
   }
+
   if (f_WindFlyGuyFrame == WIND_FLY_GUY_STARTING) {
     f_WindFlyGuyLastPosition = f_WindFlyGuyPath[0];
     f_ContactVertices[0].v.ob[0] = -WIND_STREAK_HALF_WIDTH;
@@ -2712,10 +2840,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
       guTranslate(&f_ContactMatrices[i], position.x - (SCREEN_WIDTH / 2),
           (SCREEN_HEIGHT / 2) - position.y, WIND_STREAK_DEPTH);
     }
+
     PlaySound(SOUND_WIND_FLY_GUY, WIND_FLY_GUY_SOUND_CHANNEL,
         WIND_FLY_GUY_SOUND_VOLUME);
     f_WindFlyGuyFrame = WIND_FLY_GUY_FLYING;
   }
+
   rotation[AXIS_X] = 0.0f;
   rotation[AXIS_Y] = 0.0f;
   rotation[AXIS_Z] = atan2(f_WindFlyGuyLastPosition.x - position.x,
@@ -2758,10 +2888,12 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
     gSPModifyVertex(gfx++, (i * 2) + 1, G_MWO_POINT_ST,
         (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
+
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
     gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
         (i * 2) + 2, (i * 2) + 3, 0);
   }
+
   /* The second run reuses the vertex slots backwards from the last vertex of
    * the first */
   for (i = WIND_STREAK_FIRST_RUN, slotsBack = 0;
@@ -2777,14 +2909,17 @@ void DrawWindFlyGuy(Gfx** displayListHead) {
         G_MWO_POINT_ST,
         (WIND_STREAK_TEXTURE_S << 16) + (i << WIND_STREAK_TEXTURE_T_SHIFT));
   }
+
   for (i = 0; i != WIND_STREAK_QUADS_PER_RUN; i++) {
     gSP2Triangles(gfx++, (i * 2) + 1, i * 2, (i * 2) + 2, 0, (i * 2) + 1,
         (i * 2) + 2, (i * 2) + 3, 0);
   }
+
   f_WindStreakHead--;
   if (f_WindStreakHead < 0) {
     f_WindStreakHead = WIND_STREAK_LENGTH - 1;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_NONE);

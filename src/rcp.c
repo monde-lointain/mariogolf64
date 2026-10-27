@@ -89,6 +89,7 @@ void AppendBufferClear(s32 clearMode, Gfx** displayListHead) {
           gfx++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
       gDPFillRectangle(gfx++, 0, line, SCREEN_WIDTH - 1, line);
     }
+
     gDPPipeSync(gfx++);
   } else if (clearMode == BUFFER_CLEAR_WHOLE) {
     gDPSetFillColor(
@@ -97,6 +98,7 @@ void AppendBufferClear(s32 clearMode, Gfx** displayListHead) {
     gDPFillRectangle(gfx++, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_1CYCLE);

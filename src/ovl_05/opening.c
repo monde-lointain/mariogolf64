@@ -389,10 +389,12 @@ void PlayOpeningAmbientSounds(void) {
           f_AlternatingSoundTimer = f_AlternatingSoundSecondLength;
         }
       }
+
       if (f_RepeatingSoundTimer == 0 &&
           (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
         f_RepeatingSoundTimer = f_RepeatingSoundLength;
       }
+
       if (f_RandomSoundTimer == 0 &&
           (rand() & AMBIENT_SOUND_CHANCE_MASK) < AMBIENT_SOUND_CHANCE) {
         switch (rand() & RANDOM_SOUND_CHOICE_MASK) {
@@ -407,6 +409,7 @@ void PlayOpeningAmbientSounds(void) {
         }
       }
     }
+
     if (f_AlternatingSoundTimer != 0) {
       if (f_AlternatingSound == AMBIENT_SOUND_FIRST &&
           f_AlternatingSoundTimer == f_AlternatingSoundFirstLength) {
@@ -416,6 +419,7 @@ void PlayOpeningAmbientSounds(void) {
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, ALTERNATING_SOUND_PAN);
       }
+
       if (f_AlternatingSound == AMBIENT_SOUND_SECOND &&
           f_AlternatingSoundTimer == f_AlternatingSoundSecondLength) {
         PlaySoundWithEffects(SOUND_AMBIENT_ALTERNATING_SECOND,
@@ -424,8 +428,10 @@ void PlayOpeningAmbientSounds(void) {
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, ALTERNATING_SOUND_PAN);
       }
+
       f_AlternatingSoundTimer--;
     }
+
     if (f_RepeatingSoundTimer != 0) {
       if (f_RepeatingSoundTimer == f_RepeatingSoundLength) {
         PlaySoundWithEffects(SOUND_AMBIENT_REPEATING, REPEATING_SOUND_CHANNEL,
@@ -433,8 +439,10 @@ void PlayOpeningAmbientSounds(void) {
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, REPEATING_SOUND_PAN);
       }
+
       f_RepeatingSoundTimer--;
     }
+
     if (f_RandomSoundTimer != 0) {
       if (f_RandomSound == AMBIENT_SOUND_FIRST &&
           f_RandomSoundTimer == f_RandomSoundFirstLength) {
@@ -443,6 +451,7 @@ void PlayOpeningAmbientSounds(void) {
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, RANDOM_SOUND_PAN);
       }
+
       if (f_RandomSound == AMBIENT_SOUND_SECOND &&
           f_RandomSoundTimer == f_RandomSoundSecondLength) {
         PlaySoundWithEffects(SOUND_AMBIENT_RANDOM_SECOND, RANDOM_SOUND_CHANNEL,
@@ -450,6 +459,7 @@ void PlayOpeningAmbientSounds(void) {
                 (u32)(g_CameraEditor.distance * AMBIENT_SOUND_FADE_RATE),
             0, RANDOM_SOUND_PAN);
       }
+
       if (--f_RandomSoundTimer == 0) {
         f_RandomSound = AMBIENT_SOUND_NONE;
       }
@@ -471,6 +481,7 @@ void LoadOpening(void) {
         AllocMemory(GetCharacterBufferSize());
     SetCharacterBuffer(bufferIndex + 1, f_OpeningCharacterBuffers[bufferIndex]);
   }
+
   SetCharacterBuffer(3, (u8*)g_DepthBuffer);
   g_ShadowTexture = AllocMemory(OpenEncodedAsset(ASSET_SHADOW_TEXTURE, &asset));
   ReadEncodedAsset(g_ShadowTexture, &asset);
@@ -487,6 +498,7 @@ void FreeOpening(void) {
       bufferIndex++) {
     FreeMemory(&f_OpeningCharacterBuffers[bufferIndex]);
   }
+
   AssignCharacterBuffers();
   FreeMemory(&f_OpeningBillboardHeap);
   SetFillColor(255, 255, 255);
@@ -541,6 +553,7 @@ void BuildOpeningShotPath(void) {
           start[AXIS_Z] * COURSE_TO_WORLD_SCALE);
       guMtxCatF(dash, transform, dash);
     }
+
     guMtxF2L(dash, &f_OpeningShotDashMatrices[g_DrawBufferIndex][step]);
   }
 }
@@ -552,6 +565,7 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   if (!f_IsOpeningShotPathShown) {
     return;
   }
+
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
   gDPSetCycleType(g_DisplayListHead++, G_CYC_1CYCLE);
@@ -588,6 +602,7 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
   } else {
     gDPSetPrimColor(g_DisplayListHead++, 0, 0, 0xFF, 0xFF, 0xFF, 0x80);
   }
+
   gDPPipeSync(g_DisplayListHead++);
   for (step = 0; step < f_OpeningShotPathDashCount; step++) {
     gSPMatrix(g_DisplayListHead++,
@@ -597,6 +612,7 @@ void DrawOpeningShotPath(CameraMatrices* matrices) {
     gSP2Triangles(g_DisplayListHead++, 0, 1, 2, 0, 0, 2, 3, 0);
     gSPPopMatrix(g_DisplayListHead++, G_MTX_MODELVIEW);
   }
+
   gDPPipeSync(g_DisplayListHead++);
 }
 
@@ -675,6 +691,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point0, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 1:
@@ -685,6 +702,7 @@ s32 UpdateOpeningCharacters(void) {
         f_OpeningCue = OPENING_CUE_DONE;
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue++;
       break;
     case 2:
@@ -694,6 +712,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point2, 0x1368A0, 0x49D208, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 4:
@@ -706,6 +725,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point3, 0xF3400, 0x490000, -30);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 5:
@@ -715,6 +735,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point4, 0xB2A34, 0x4F9800, 10);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 7:
@@ -726,6 +747,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point5, 0xF3400, 0x490000, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 8:
@@ -735,6 +757,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point6, 0x1610CF, 0x4AFA34, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 9:
@@ -746,6 +769,7 @@ s32 UpdateOpeningCharacters(void) {
         PLACE_CUE_CHARACTER(point7, 0xF3400, 0x490000, -45);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 11:
@@ -755,12 +779,14 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PLACE_CUE_CHARACTER(point8, 0x29EB94, 0x26DDDA, 0);
       }
+
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_PEACH)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PLACE_CUE_CHARACTER(point9, 0x29EB94, 0x26DDDA, 0);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 12:
@@ -771,12 +797,14 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PLACE_CUE_CHARACTER(point10, 0x2709F8, 0x1CF4B4, 10);
       }
+
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_LUIGI)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x12);
         PLACE_CUE_CHARACTER(point11, 0x2709F8, 0x1CF4B4, 55);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 13:
@@ -786,6 +814,7 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PLACE_CUE_CHARACTER(point12, 0x2709F8, 0x1CF4B4, 10);
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 14:
@@ -796,12 +825,14 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PLACE_CUE_CHARACTER(point13, 0x2CA5D3, 0x22A928, -98);
       }
+
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
         PLACE_CUE_CHARACTER(point14, 0x2C42D6, 0x22A832, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 15:
@@ -812,12 +843,14 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x14);
         PLACE_CUE_CHARACTER(point15, 0x2B1194, 0x249320, -98);
       }
+
       f_CueSlotIndex = 3;
       if (func_80206680_ovl_05(3, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
         PLACE_CUE_CHARACTER(point16, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 17:
@@ -828,12 +861,14 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x15);
         PLACE_CUE_CHARACTER(point17, 0x2B1194, 0x249320, -98);
       }
+
       f_CueSlotIndex = 2;
       if (func_80206680_ovl_05(2, OPENING_MODEL_MARIO)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x16);
         PLACE_CUE_CHARACTER(point18, 0x2B1194, 0x249320, -98);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     case 18:
@@ -864,12 +899,14 @@ s32 UpdateOpeningCharacters(void) {
       } else {
         func_80206680_ovl_05(2, OPENING_MODEL_YOSHI);
       }
+
       SetAnimationSpeed(2, 0.0f);
       if (f_IsDonkeyKongShown != 0) {
         SetCharacterAnimation(f_CueSlotIndex, 0x11);
       } else {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
+
       PLACE_CUE_CHARACTER(point20, 0x202B29, 0xCE7DA, -165);
       f_CueSlotIndex = 3;
       func_80206680_ovl_05(3, OPENING_MODEL_BABY_MARIO);
@@ -879,6 +916,7 @@ s32 UpdateOpeningCharacters(void) {
       } else {
         SetCharacterAnimation(f_CueSlotIndex, 0x10);
       }
+
       PLACE_CUE_CHARACTER(point21, 0x202B29, 0xCE7DA, -165);
       f_OpeningCue = OPENING_CUE_DONE;
       f_LastPlacedSlotIndex = f_CueSlotIndex;
@@ -932,6 +970,7 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x17);
         PLACE_CUE_CHARACTER(point27, 0x16806D, 0x17E632, 200);
       }
+
       f_OpeningCue++;
       break;
     case 28:
@@ -940,18 +979,21 @@ s32 UpdateOpeningCharacters(void) {
         SetCharacterAnimation(f_CueSlotIndex, 0x19);
         PLACE_CUE_CHARACTER(point28, 0x15E14D, 0x18155C, 170);
       }
+
       f_CueSlotIndex = 1;
       if (func_80206680_ovl_05(1, OPENING_MODEL_PLUM)) {
         SetCharacterAnimation(f_CueSlotIndex, 0x13);
         PLACE_CUE_CHARACTER(point29, 0x166EDF, 0x1838C7, 200);
         f_LastPlacedSlotIndex = f_CueSlotIndex;
       }
+
       f_OpeningCue = OPENING_CUE_DONE;
       break;
     default:
       f_OpeningCue = OPENING_CUE_INVALID;
       break;
   }
+
   return f_OpeningCue == OPENING_CUES_FINISHED;
 }
 
@@ -1062,6 +1104,7 @@ void UpdateOpening(void) {
     } else {
       f_OpeningScene = OPENING_SCENE_END;
     }
+
     if (g_IsDebugEnabled) {
       sprintf(g_PrintBuffer, "%04d", f_OpeningFrameCount);
       PrintDebugText(
@@ -1071,6 +1114,7 @@ void UpdateOpening(void) {
       sprintf(g_PrintBuffer, "(%d)    ", f_OpeningSceneFramesLeft);
       PrintDebugText(g_PrintBuffer, FRAMES_LEFT_TEXT_COLUMN, SCENE_TEXT_ROW);
     }
+
     switch (f_OpeningScene) {
       case 0x0:
         g_ScreenFadeDuration = 1;
@@ -1117,28 +1161,33 @@ void UpdateOpening(void) {
           D_8020C404_ovl_05[1] = f_OpeningShotSimulation.position[1];
           D_8020C404_ovl_05[2] = f_OpeningShotSimulation.position[2];
         }
+
         break;
       case 0x2:
         if (f_OpeningSceneFramesLeft == 0) {
           f_IsNameSlotShown[0] = 1;
           PlaySong(0x2F, 0);
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x28;
           f_OpeningScene++;
         }
+
         break;
       case 0x3:
         if (f_OpeningSceneFramesLeft == 0x1C) {
           PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x18) {
           PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
+
         if (f_OpeningSceneFramesLeft == 0x18) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
@@ -1148,10 +1197,12 @@ void UpdateOpening(void) {
           D_8020AE44_ovl_05 = 1;
           f_ShotBallScale = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 1;
           f_OpeningScene = 0x14;
         }
+
         break;
       case 0x14:
         PlaceEditorCamera(
@@ -1180,10 +1231,12 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (AreEditorMovesDone()) {
           StopEditorMoves();
           f_OpeningScene++;
         }
+
         break;
       case 0x16:
         f_OpeningCue = 2;
@@ -1199,9 +1252,11 @@ void UpdateOpening(void) {
         if (f_OpeningSceneFramesLeft == 8) {
           SetAnimationSpeed(2, 0.0f);
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x28;
         }
+
         break;
       case 0x28:
         PlaceEditorCamera(
@@ -1226,11 +1281,13 @@ void UpdateOpening(void) {
           PlaySoundWithEffects(0x148, f_OpeningSoundChannel, 0x7F, 0, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_LookAtEaseMode = 1;
           f_OpeningSceneFramesLeft = 0x32;
           f_OpeningScene++;
         }
+
         break;
       case 0x2A:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1238,6 +1295,7 @@ void UpdateOpening(void) {
           f_OpeningScene = 0x32;
           LoadNameLogo(2, 0);
         }
+
         break;
       case 0x32:
         PlaceEditorCamera(
@@ -1267,12 +1325,14 @@ void UpdateOpening(void) {
           PlaySound(0x50, f_OpeningSoundChannel, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x14) {
           PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
+
         if (f_OpeningSceneFramesLeft == 0x16) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
@@ -1281,12 +1341,15 @@ void UpdateOpening(void) {
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0x5A) {
           f_IsNameSlotShown[0] = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x3C;
         }
+
         break;
       case 0x3C:
         PlaceEditorCamera(
@@ -1318,6 +1381,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_OpeningShotSimulation.position[0] = 0xF1B96;
           f_OpeningShotSimulation.position[2] = 0x48CFDC;
@@ -1330,6 +1394,7 @@ void UpdateOpening(void) {
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADD8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
+
         if (AreEditorMovesDone()) {
           PlaceEditorCamera(
               973.156f, -317.049f, 3703.677f, 1276.871f, -112.538f, 4540.245f);
@@ -1339,12 +1404,14 @@ void UpdateOpening(void) {
           f_OpeningScene++;
           AdvanceOpeningSoundChannel();
         }
+
         break;
       case 0x47:
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x50;
           StartHudAnimation(9);
         }
+
         break;
       case 0x50:
         PlaceEditorCamera(
@@ -1375,12 +1442,14 @@ void UpdateOpening(void) {
           PlaySound(0x50, f_OpeningSoundChannel, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x14) {
           PlaySoundWithEffects(0x59, f_OpeningSoundChannel, 0x4C, 0, 0xA7);
           AdvanceOpeningSoundChannel();
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
+
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
@@ -1389,13 +1458,16 @@ void UpdateOpening(void) {
           func_8020A488_ovl_05(&f_OpeningShotSimulation, 0, &D_8020ADF8_ovl_05);
           D_8020AE44_ovl_05 = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0x5A) {
           f_IsNameSlotShown[0] = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x5A;
           f_OpeningCue = 8;
         }
+
         break;
       case 0x5A:
         PlaceEditorCamera(
@@ -1425,11 +1497,13 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           StopEditorMoves();
           StartHudAnimation(9);
           f_OpeningScene++;
         }
+
         break;
       case 0x65:
         PlaceEditorCamera(
@@ -1466,12 +1540,14 @@ void UpdateOpening(void) {
           f_OpeningScene = 0x6F;
           f_OpeningSceneFramesLeft = 0x37;
         }
+
         break;
       case 0x6F:
         if (f_OpeningSceneFramesLeft == 4) {
           PlaySound(SOUND_CONTACT_PLAIN, f_OpeningSoundChannel, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningShotSimulation.playerIndex = 0;
           f_OpeningShotSimulation.unkA0 = 0;
@@ -1488,6 +1564,7 @@ void UpdateOpening(void) {
           f_OpeningSparksState = 1;
           LaunchDrop(D_8020C404_ovl_05);
         }
+
         break;
       case 0x70:
         func_80206AA4_ovl_05(&f_OpeningShotSimulation);
@@ -1502,6 +1579,7 @@ void UpdateOpening(void) {
           f_OpeningScene++;
           ClearEffects();
         }
+
         break;
       case 0x71:
         if (f_OpeningSceneFramesLeft == 0x37) {
@@ -1509,29 +1587,35 @@ void UpdateOpening(void) {
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -9.0f);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x2D) {
           PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x14, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -10.0f);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x23) {
           PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x1E, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -11.0f);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x19) {
           PlaySoundWithEffects(0xB, f_OpeningSoundChannel, 0x50, 0x28, 0x9F);
           SetSoundFrequencyOffset(f_OpeningSoundChannel, -12.0f);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0xF) {
           PlaySound(5, f_OpeningSoundChannel, 0x30);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0x78;
           f_LookAtEaseMode = 0;
         }
+
         break;
       case 0x78:
         if (AreEditorMovesDone()) {
@@ -1546,6 +1630,7 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[1][2] = 2478.326f;
           f_OpeningBallScales[1] = 1.5f;
         }
+
         break;
       case 0x79:
         PlaceEditorCamera(
@@ -1563,10 +1648,12 @@ void UpdateOpening(void) {
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0x82;
         }
+
         if (f_OpeningFrameCount == 0x375) {
           PlaySound(0x4F, f_OpeningSoundChannel, 0x3C);
           AdvanceOpeningSoundChannel();
         }
+
         break;
       case 0x82:
         PlaceEditorCamera(
@@ -1607,13 +1694,16 @@ void UpdateOpening(void) {
             } else {
               PlaySound(0x187, f_OpeningSoundChannel, 0x7F);
             }
+
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0x8C;
           f_OpeningSceneFramesLeft = 0x28;
         }
+
         break;
       case 0x8C:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1628,14 +1718,17 @@ void UpdateOpening(void) {
           } else {
             PlaySoundWithEffects(0x1A1, f_OpeningSoundChannel, 0x50, 0, 0x3F);
           }
+
           AdvanceOpeningSoundChannel();
         }
+
         break;
       case 0x8D:
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0x96;
           f_OpeningSceneFramesLeft = 0xA;
         }
+
         break;
       case 0x96:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1647,10 +1740,12 @@ void UpdateOpening(void) {
           f_OpeningSceneFramesLeft = 0x5A;
           f_OpeningCue = 0xE;
           g_LightPitch = 0x1000;
+
           /* Stored as a signed value, as the original does */
           *(s16*)&g_LightYaw = -0x7800;
           f_OpeningScene++;
         }
+
         break;
       case 0x97:
         switch (f_OpeningSceneFramesLeft) {
@@ -1676,6 +1771,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft >= 0x17 &&
             f_OpeningSceneFramesLeft < 0x2A) {
           GetCharacterPointPosition(2, 2, point);
@@ -1687,6 +1783,7 @@ void UpdateOpening(void) {
               15360.0f;
           SpawnRisingClumps(D_8020C404_ovl_05);
         }
+
         if (f_OpeningSceneFramesLeft == 0x50) {
           if (IsDonkeyKongUnlocked()) {
             if (!(rand() & 0x80)) {
@@ -1695,25 +1792,30 @@ void UpdateOpening(void) {
               f_IsDonkeyKongShown = 0;
             }
           }
+
           LoadOpeningBall(4, 0);
           f_OpeningBallPositions[0][0] = 2723.423f;
           f_OpeningBallPositions[0][2] = 2246.086f;
         }
+
         if (f_OpeningSceneFramesLeft == 0x32) {
           f_OpeningBallStates[0] = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           TiltEditorCamera(1, -0.166897f, 0x32);
           f_OpeningScene++;
           PlaySound(0x60, f_OpeningSoundChannel, 0x32);
           AdvanceOpeningSoundChannel();
         }
+
         break;
       case 0x98:
         if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene = 0xA0;
         }
+
         break;
       case 0xA0:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1725,6 +1827,7 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[0][0] = 2755.104f;
           f_OpeningBallPositions[0][2] = 2341.293f;
         }
+
         break;
       case 0xAA:
         switch (f_OpeningSceneFramesLeft) {
@@ -1735,6 +1838,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2670.074f, -270.531f, 2375.225f, 2692.222f, -248.0f, 2366.292f);
@@ -1749,18 +1853,21 @@ void UpdateOpening(void) {
           } else {
             LoadOpeningBall(2, 1);
           }
+
           f_OpeningBallStates[0] = 0;
           f_OpeningBallStates[1] = 1;
           f_OpeningBallPositions[1][0] = 2689.998f;
           f_OpeningBallPositions[1][2] = 2367.191f;
           f_OpeningBallScales[1] = 3.0f;
         }
+
         break;
       case 0xAB:
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0xB4;
           f_OpeningSceneFramesLeft = 0x14;
         }
+
         break;
       case 0xB4:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1777,12 +1884,14 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[0][2] = 2341.293f;
           f_OpeningBallScales[0] = 1.0f;
         }
+
         break;
       case 0xB5:
         if (f_OpeningSceneFramesLeft == 0xA) {
           PlaySoundWithEffects(0xC5, f_OpeningSoundChannel, 0x40, 0x14, 0xCF);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 0x12;
           f_OpeningSceneFramesLeft = 0x1E;
@@ -1791,16 +1900,19 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[1][0] = 0.0f;
           f_OpeningBallPositions[1][2] = 0.0f;
         }
+
         break;
       case 0xB6:
         if (f_OpeningFrameCount == 0x5C5) {
           PlaySoundWithEffects(0x189, f_OpeningSoundChannel, 0x7F, 0, 0x89);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningCue = 0x13;
           f_OpeningScene = 0xBE;
         }
+
         break;
       case 0xBE:
         GetCharacterPointPosition(1, 3, logoBallPoint);
@@ -1832,18 +1944,21 @@ void UpdateOpening(void) {
         if (D_80217078_ovl_05 < 0.1f) {
           D_80217078_ovl_05 = 0.1f;
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningCue = 0x14;
           f_OpeningSceneFramesLeft = 0x78;
           f_OpeningScene = 0xC8;
           f_LookAtEaseMode = 3;
         }
+
         break;
       case 0xC8:
         D_80217078_ovl_05 += 0.02f;
         if (D_80217078_ovl_05 > 1.0f) {
           D_80217078_ovl_05 = 1.0f;
         }
+
         GetCharacterPointPosition(1, 3, handPoint);
         f_OpeningBallPositions[1][0] +=
             (handPoint[0] - f_OpeningBallPositions[1][0]) * D_80217078_ovl_05;
@@ -1868,6 +1983,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           StartHudAnimation(9);
           PlaceEditorCamera(
@@ -1883,6 +1999,7 @@ void UpdateOpening(void) {
           } else {
             LoadNameLogo(4, 1);
           }
+
           f_OpeningBallStates[1] = 0;
           f_IsLogoBallSlot[1] = 0;
           f_ShotBallScale = 0;
@@ -1890,6 +2007,7 @@ void UpdateOpening(void) {
           PlaySound(0x60, f_OpeningSoundChannel, 0x50);
           AdvanceOpeningSoundChannel();
         }
+
         break;
       case 0xC9:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -1897,6 +2015,7 @@ void UpdateOpening(void) {
           f_OpeningSceneFramesLeft = 0x24;
           f_OpeningScene++;
         }
+
         break;
       case 0xCA:
         if (f_IsDonkeyKongShown) {
@@ -1914,10 +2033,12 @@ void UpdateOpening(void) {
               break;
           }
         }
+
         if (AreEditorMovesDone()) {
           f_IsNameSlotShown[0] = 1;
           f_IsNameSlotShown[1] = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           if (f_IsDonkeyKongShown) {
             MoveEditorPoint(1, 2043.766f, -256.5f, 851.89f, 0x5A);
@@ -1926,9 +2047,11 @@ void UpdateOpening(void) {
             MoveEditorPoint(1, 2043.767f, -250.0f, 851.891f, 0x5A);
             MoveEditorPoint(0, 2025.674f, -258.046f, 888.28f, 0x5A);
           }
+
           f_OpeningSceneFramesLeft = 0x5A;
           f_OpeningScene++;
         }
+
         break;
       case 0xCB:
         if (f_IsDonkeyKongShown) {
@@ -2000,16 +2123,19 @@ void UpdateOpening(void) {
               break;
           }
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene = 0xD2;
         }
+
         break;
       case 0xD2:
         if (!f_IsDonkeyKongShown && f_OpeningSceneFramesLeft == 0x10) {
           PlaySoundWithEffects(0xC3, f_OpeningSoundChannel, 0x60, 0, 0x93);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               2708.301f, -264.204f, 2343.526f, 2770.098f, -260.0f, 2337.539f);
@@ -2020,12 +2146,14 @@ void UpdateOpening(void) {
           f_OpeningScene++;
           LoadWipeShape(0xC);
         }
+
         break;
       case 0xD3:
         switch (f_OpeningSceneFramesLeft) {
           case 0x3C:
             PlaySound(0x184, f_OpeningSoundChannel, 0x60);
             AdvanceOpeningSoundChannel();
+
             /* fallthrough */
           case 0x32:
             PlaySound(0x18B, f_OpeningSoundChannel, 0x60);
@@ -2040,10 +2168,12 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           StartWipe(1);
           f_OpeningScene++;
         }
+
         break;
       case 0xD4:
         if (!GetWipeProgress()) {
@@ -2052,6 +2182,7 @@ void UpdateOpening(void) {
           f_OpeningCue = 0x18;
           f_OpeningBallStates[0] = 0;
         }
+
         break;
       case 0xDC:
         if (f_OpeningSceneFramesLeft == 0) {
@@ -2064,11 +2195,13 @@ void UpdateOpening(void) {
           f_OpeningSceneFramesLeft = 0xA0;
           LoadOpeningImpactLines();
         }
+
         break;
       case 0xDD:
         if (f_OpeningSceneFramesLeft == 0x1E) {
           f_AreImpactLinesShown = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_OpeningScene = 0xE6;
           LoadOpeningBall(3, 0);
@@ -2077,6 +2210,7 @@ void UpdateOpening(void) {
           f_OpeningBallPositions[0][2] = 1884.644f;
           f_OpeningBallScales[0] = 1.4f;
         }
+
         switch (f_OpeningSceneFramesLeft) {
           case 0x93:
             PlaySoundWithEffects(0x4E, f_OpeningSoundChannel, 0x50, 0, 0x61);
@@ -2105,14 +2239,17 @@ void UpdateOpening(void) {
             } else {
               PlaySound(0x152, f_OpeningSoundChannel, 0x7F);
             }
+
             AdvanceOpeningSoundChannel();
             break;
           case 0x14:
             if (f_IsDonkeyKongShown) {
               StopSound(f_DonkeyKongSoundChannel);
             }
+
             break;
         }
+
         break;
       case 0xE6:
         PlaceEditorCamera(
@@ -2128,11 +2265,13 @@ void UpdateOpening(void) {
           PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0xA7);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(1, 933.391f, -250.5f, 1884.391f, 0x3C);
           f_OpeningSceneFramesLeft = 0x3C;
           f_OpeningScene++;
         }
+
         break;
       case 0xE8:
         g_CameraEditor.fieldOfView += 0.2666666f;
@@ -2154,22 +2293,26 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningScene = 0xF0;
           f_OpeningSceneFramesLeft = 0x3C;
         }
+
         break;
       case 0xF0:
         switch (f_OpeningSceneFramesLeft) {
           case 0x24:
             PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0xA7);
             AdvanceOpeningSoundChannel();
+
             /* fallthrough */
           case 0x6:
             PlaySoundWithEffects(0x1F, f_OpeningSoundChannel, 0x60, 0, 0x57);
             AdvanceOpeningSoundChannel();
             break;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           PlaceEditorCamera(
               1423.703f, -250.799f, 1574.041f, 1420.135f, -252.0f, 1551.713f);
@@ -2180,6 +2323,7 @@ void UpdateOpening(void) {
           g_CameraEditor.fieldOfView = 45.0f;
           LoadOpeningBurst();
         }
+
         break;
       case 0xFA:
         if (f_OpeningSceneFramesLeft == 0x2E) {
@@ -2187,46 +2331,55 @@ void UpdateOpening(void) {
           PlaySound(0x34, f_OpeningSoundChannel, 0x50);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x1A) {
           PlaySound(0x141, f_OpeningSoundChannel, 0x7F);
           AdvanceOpeningSoundChannel();
         }
+
         if (f_OpeningSceneFramesLeft == 0x14) {
           f_AreAmbientSoundsOn = 1;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(0, 1404.737f, -250.799f, 1633.633f, 0x50);
           f_OpeningScene++;
           LoadLakitu();
           f_OpeningSceneFramesLeft = 0x28;
         }
+
         break;
       case 0xFB:
         g_CameraEditor.fieldOfView += 0.2f;
         if (g_CameraEditor.fieldOfView > 100.0f) {
           g_CameraEditor.fieldOfView = 100.0f;
         }
+
         if (AreEditorMovesDone()) {
           f_OpeningSceneFramesLeft = 0x14;
           f_OpeningScene++;
         }
+
         break;
       case 0xFC:
         g_CameraEditor.fieldOfView += 0.2f;
         if (g_CameraEditor.fieldOfView > 100.0f) {
           g_CameraEditor.fieldOfView = 100.0f;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           MoveEditorPoint(0, 1409.318f, -400.0f, 1609.259f, 0xDC);
           f_OpeningSceneFramesLeft = 0x28;
           f_OpeningScene++;
         }
+
         break;
       case 0xFD:
         g_CameraEditor.fieldOfView += 0.2f;
         if (g_CameraEditor.fieldOfView > 100.0f) {
           g_CameraEditor.fieldOfView = 100.0f;
         }
+
         if (f_OpeningSceneFramesLeft == 0) {
           f_IsLakituFlying = 1;
           f_OpeningSceneFramesLeft = 1000;
@@ -2235,12 +2388,14 @@ void UpdateOpening(void) {
           AdvanceOpeningSoundChannel();
           f_AreAmbientSoundsOn = 0;
         }
+
         break;
       case 0xFE:
         g_CameraEditor.fieldOfView += 0.2f;
         if (g_CameraEditor.fieldOfView > 100.0f) {
           g_CameraEditor.fieldOfView = 100.0f;
         }
+
         switch (f_OpeningSceneFramesLeft) {
           case 0x3C9:
           case 0x3CA:
@@ -2255,6 +2410,7 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         switch (f_OpeningSceneFramesLeft) {
           case 0x3A8:
           case 0x3A9:
@@ -2269,11 +2425,13 @@ void UpdateOpening(void) {
             AdvanceOpeningSoundChannel();
             break;
         }
+
         PlayLogoClubSound();
         if (f_OpeningSceneFramesLeft == 0x3CF) {
           PlaySoundWithEffects(0x211, CLOSING_SOUND_CHANNEL, 0x7F, 0, 0x7F);
           f_ClosingSoundChannel = CLOSING_SOUND_CHANNEL;
         }
+
         break;
       case OPENING_SCENE_SKIPPED:
         StartScreenFadeOut(SKIP_FADE_WHITE_LEVEL, SKIP_FADE_WHITE_LEVEL,
@@ -2298,20 +2456,25 @@ void UpdateOpening(void) {
               StopSound(channel);
             }
           }
+
           if (!f_HasLogoStarted) {
             PlaySound(SOUND_CONFIRM, OPENING_MENU_SOUND_CHANNEL,
                 OPENING_SOUND_FULL_VOLUME);
           }
+
           SetTextSlot(
               CLEARED_TEXT_X, CLEARED_TEXT_Y, NO_MESSAGE, 1, 0, 0, 0, 0, 0, 0);
           return;
         }
+
         break;
     }
   }
+
   if (f_OpeningSceneFramesLeft > 0) {
     f_OpeningSceneFramesLeft--;
   }
+
   UpdateCameraEditor();
   EaseOpeningLookAt();
   g_Cameras[0].view.mode = CAMERA_MODE_BEHIND_GOLFER;
@@ -2330,6 +2493,7 @@ void UpdateOpening(void) {
         GetCharacterPointPosition(slot, 1, point);
       }
     }
+
     point[0] = f_OpeningShotSimulation.position[0] * COURSE_TO_WORLD_SCALE;
     point[1] = f_OpeningShotSimulation.position[1] * COURSE_TO_WORLD_SCALE;
     point[2] = f_OpeningShotSimulation.position[2] * COURSE_TO_WORLD_SCALE;
@@ -2337,6 +2501,7 @@ void UpdateOpening(void) {
   } else if (D_8020AE44_ovl_05 == 2) {
     func_80206AA4_ovl_05(&f_OpeningShotSimulation);
   }
+
   if (f_OpeningScene != OPENING_SCENE_END && !f_HasLogoStarted &&
       !IsGameFlagSet(GAME_FLAG_EDIT_OPENING_CAMERA)) {
     if (f_OpeningScene != OPENING_SCENE_SKIPPED) {
@@ -2344,6 +2509,7 @@ void UpdateOpening(void) {
       for (i = 0; i != g_ControllerCount; i++) {
         pressedButtons |= g_ControllerStates[i].pressedButtons;
       }
+
       if (g_IsDebugEnabled) {
         skipButtons =
             g_ControllerStates[OPENING_DEBUG_SKIP_CONTROLLER].pressedButtons &
@@ -2351,10 +2517,12 @@ void UpdateOpening(void) {
       } else {
         skipButtons = pressedButtons & SKIP_BUTTONS;
       }
+
       if (skipButtons) {
         f_OpeningScene = OPENING_SCENE_SKIPPED;
       }
     }
+
     if (g_IsDebugEnabled) {
       if (g_ControllerStates[OPENING_EDITOR_CONTROLLER].pressedButtons &
           A_BUTTON) {
@@ -2364,6 +2532,7 @@ void UpdateOpening(void) {
         f_IsLookAtMarkerShown = 1;
         f_LookAtEaseMode = 0;
       }
+
       if (g_IsDebugEnabled &&
           (g_ControllerStates[OPENING_SCENE_CONTROLLER].pressedButtons &
               R_TRIG)) {
@@ -2372,9 +2541,11 @@ void UpdateOpening(void) {
       }
     }
   }
+
   if (UpdateOpeningCharacters()) {
     f_OpeningScene = OPENING_SCENE_END;
   }
+
   AnimateAllCharacters();
   AnimateNameLogos();
   MoveLakitu();
@@ -2422,6 +2593,7 @@ void DrawOpening(CameraMatrices* matrices, Gfx** displayListHead) {
     gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
     gDPPipeSync(gfx++);
   }
+
   DrawOpeningCharacters(matrices, &gfx, f_OpeningFrameParity);
   g_DisplayListHead = gfx;
   DrawOpeningShotPath(matrices);
@@ -2522,11 +2694,13 @@ void DrawNameLogos(Gfx** displayListHead) {
           if (drawnWidth <= 0) {
             drawnWidth = 1;
           }
+
           drawnHeight = yEdges[NAME_LOGO_STRIP_COUNT - strip] -
               yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip];
           if (drawnHeight <= 0) {
             drawnHeight = 1;
           }
+
           gSPScisTextureRectangle(gfx++, xEdges[0] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - 1 - strip] << 2, xEdges[1] << 2,
               yEdges[NAME_LOGO_STRIP_COUNT - strip] << 2, G_TX_RENDERTILE, 0,
@@ -2547,19 +2721,23 @@ void DrawNameLogos(Gfx** displayListHead) {
           if (drawnWidth <= 0) {
             drawnWidth = 1;
           }
+
           drawnHeight = yEdges[strip + 1] - yEdges[strip];
           if (drawnHeight <= 0) {
             drawnHeight = 1;
           }
+
           gSPScisTextureRectangle(gfx++, xEdges[0] << 2, yEdges[strip] << 2,
               xEdges[1] << 2, yEdges[strip + 1] << 2, G_TX_RENDERTILE, 0, 0,
               (SLOT_LOGO.width << 10) / drawnWidth,
               (SLOT_LOGO.height << 8) / drawnHeight);
         }
+
         gDPPipeSync(gfx++);
       }
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2575,6 +2753,7 @@ void AnimateNameLogos(void) {
     if (!f_IsNameSlotShown[slot]) {
       continue;
     }
+
     if (f_NameSlotSteps[slot] < NAME_LOGO_FLIP_DOWN) {
       f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth +=
           f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width / 8;
@@ -2584,6 +2763,7 @@ void AnimateNameLogos(void) {
         f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownWidth =
             f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].width;
       }
+
       if (f_NameSlotSteps[slot] == NAME_LOGO_UNFOLD + 8) {
         f_NameSlotSteps[slot] = NAME_LOGO_FLIP_DOWN;
       }
@@ -2594,6 +2774,7 @@ void AnimateNameLogos(void) {
       if (f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight <= 0) {
         f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight = 1;
       }
+
       if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_DOWN + 4) {
         f_NameSlotSteps[slot] = NAME_LOGO_FLIP_UP;
       }
@@ -2606,6 +2787,7 @@ void AnimateNameLogos(void) {
         f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].shownHeight =
             f_OpeningNameLogos[f_NameSlotLogoIndices[slot]].height;
       }
+
       if (f_NameSlotSteps[slot] == NAME_LOGO_FLIP_UP + 4) {
         f_NameSlotSteps[slot] = NAME_LOGO_STILL;
       }
@@ -2759,6 +2941,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           guTranslate(&f_OpeningBallShadowMatrices[slot][g_DrawBufferIndex],
               position[0], position[1], position[2]);
         }
+
         guScale(&f_OpeningBallScaleMatrices[slot],
             f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
             f_OpeningBallScales[slot] * OPENING_BALL_MODEL_SCALE,
@@ -2802,9 +2985,11 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
           position[1] = f_OpeningBallPositions[slot][1];
         }
+
         if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
           position[1] += OPENING_BALL_LARGE_LIFT;
         }
+
         guTranslate(&f_OpeningBallMatrices[slot][g_DrawBufferIndex],
             position[0], position[1], position[2]);
         gDPPipeSync(gfx++);
@@ -2830,6 +3015,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           gDPLoadTLUT_pal256(gfx++,
               TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
         }
+
         for (stripIndex = 0; stripIndex < OPENING_BALL_STRIP_COUNT;
             stripIndex++) {
           gDPPipeSync(gfx++);
@@ -2863,10 +3049,12 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD,
                 G_TX_NOLOD);
           }
+
           gDPPipeSync(gfx++);
           gSPVertex(gfx++, f_OpeningBallStripVertices[stripIndex], 4, 0);
           gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
         }
+
         if (f_IsLogoBallSlot[slot]) {
           if (f_ShouldResetLogoBallRoll) {
             guMtxIdentF(f_LogoBallRoll);
@@ -2874,6 +3062,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             guRotateRPYF(f_LogoBallRoll, LOGO_BALL_START_ROLL,
                 LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
           }
+
           if (f_HasLogoBallLastPosition) {
             movement[0] =
                 f_OpeningBallPositions[slot][0] - f_LogoBallLastPosition[0];
@@ -2887,6 +3076,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             movement[1] = 0.0f;
             movement[2] = 0.0f;
           }
+
           rollAngle = sqrtf((movement[0] * movement[0]) +
               (movement[1] * movement[1]) + (movement[2] * movement[2]));
           rollAngle *= (f32)RADIANS_TO_DEGREES;
@@ -2900,6 +3090,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               f_LogoBallFrameIndex = 0;
             }
           }
+
           guScale(&f_LogoBallMarioScale, LOGO_BALL_MARIO_SCALE,
               LOGO_BALL_MARIO_SCALE, LOGO_BALL_MARIO_SCALE);
           if (movement[2] != 0.0f || movement[0] != 0.0f) {
@@ -2908,6 +3099,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             ConvertMatrixToFixed(
                 f_LogoBallRoll, &f_LogoBallMarioRolls[g_DrawBufferIndex]);
           }
+
           guTranslate(
               &f_LogoBallMarioOffset, 0.0f, LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
           guTranslate(&f_LogoBallMarioTranslations[g_DrawBufferIndex],
@@ -2956,13 +3148,16 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gSPVertex(gfx++, f_LogoBallMarioVertices, 4, 0);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
+
           gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
           gDPPipeSync(gfx++);
         }
+
         gSPPopMatrix(gfx++, G_MTX_MODELVIEW);
         gDPPipeSync(gfx++);
       }
     }
+
     *displayListHead = gfx;
   } else {
     Gfx* gfx;
@@ -2982,12 +3177,14 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                   f_ProjectedBallPosition[2] * WORLD_TO_COURSE_SCALE) *
               COURSE_TO_WORLD_SCALE;
         }
+
         if (ProjectPoint(f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
                 f_ProjectedBallPosition[2], &ballPoint) < 0) {
           screenScale = ballPoint.scaleX;
           if (screenScale < 0.0f) {
             screenScale = -screenScale;
           }
+
           halfSize = screenScale *
               (PROJECTED_BALL_WIDTH_PER_SCALE * f_OpeningBallScales[slot]);
           if (halfSize & 1) {
@@ -2995,6 +3192,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           } else {
             f_ProjectedBallExtraPixel = 0;
           }
+
           halfSize /= 2;
           f_ProjectedBallLeft = ballPoint.x - halfSize;
           f_ProjectedBallRight = ballPoint.x + halfSize;
@@ -3003,6 +3201,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               halfSize = PROJECTED_BALL_MIN_HALF_SIZE;
             }
           }
+
           f_ProjectedBallPosition[1] =
               GetGroundHeight(
                   f_ProjectedBallPosition[0] * WORLD_TO_COURSE_SCALE,
@@ -3011,6 +3210,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
           if (f_OpeningBallScales[slot] == OPENING_BALL_LARGE_SCALE) {
             f_ProjectedBallPosition[1] -= PROJECTED_BALL_LARGE_SHADOW_DROP;
           }
+
           if (f_OpeningBallStates[slot] == OPENING_BALL_IN_AIR) {
             guTranslate(&f_ProjectedShadowMatrices[g_DrawBufferIndex][slot],
                 f_ProjectedBallPosition[0],
@@ -3021,6 +3221,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_ProjectedBallPosition[0], f_ProjectedBallPosition[1],
                 f_ProjectedBallPosition[2]);
           }
+
           guScale(&f_ProjectedShadowScaleMatrices[slot],
               f_OpeningBallScales[slot], f_OpeningBallScales[slot],
               f_OpeningBallScales[slot]);
@@ -3085,6 +3286,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
             gDPLoadTLUT_pal256(gfx++,
                 TEXTURE_ADDRESS(f_OpeningBallImages[slot] + IMAGE_HEADER_SIZE));
           }
+
           gDPPipeSync(gfx++);
           for (stripIndex = 0; stripIndex != OPENING_BALL_STRIP_COUNT;
               stripIndex++) {
@@ -3109,6 +3311,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                   G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
                   G_TX_NOLOD, G_TX_NOLOD);
             }
+
             gDPPipeSync(gfx++);
             gDPPipeSync(gfx++);
             if (halfSize > 0 && halfSize < PROJECTED_BALL_HALF_SIZE_LIMIT) {
@@ -3131,6 +3334,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_ProjectedBallBottom = ballPoint.y + (stripIndex * halfSize) -
                     halfSize + PROJECTED_BALL_DROP;
               }
+
               f_ProjectedBallTexelStep = OPENING_BALL_STRIP_HEIGHT *
                   TEXEL_STEP_ONE / (halfSize + f_ProjectedBallExtraPixel);
               gSPScisTextureRectangle(gfx++, f_ProjectedBallLeft << 2,
@@ -3138,8 +3342,10 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                   f_ProjectedBallBottom << 2, G_TX_RENDERTILE, 0, 0,
                   f_ProjectedBallTexelStep, f_ProjectedBallTexelStep);
             }
+
             gDPPipeSync(gfx++);
           }
+
           if (f_IsLogoBallSlot[slot]) {
             if (f_ShouldResetProjectedLogoBallRoll) {
               guMtxIdentF(f_ProjectedLogoBallRoll);
@@ -3147,6 +3353,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               guRotateRPYF(f_ProjectedLogoBallRoll, LOGO_BALL_START_ROLL,
                   LOGO_BALL_START_PITCH, LOGO_BALL_START_YAW);
             }
+
             if (f_HasProjectedLogoBallLastPosition) {
               movement[0] = f_OpeningBallPositions[slot][0] -
                   f_ProjectedLogoBallLastPosition[0];
@@ -3160,6 +3367,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               movement[1] = 0.0f;
               movement[2] = 0.0f;
             }
+
             rollAngle = sqrtf((movement[0] * movement[0]) +
                 (movement[1] * movement[1]) + (movement[2] * movement[2]));
             rollAngle *= (f32)RADIANS_TO_DEGREES;
@@ -3176,6 +3384,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
                 f_ProjectedLogoBallFrameIndex = 0;
               }
             }
+
             guScale(&f_ProjectedLogoBallMarioScale,
                 PROJECTED_LOGO_BALL_MARIO_SCALE,
                 PROJECTED_LOGO_BALL_MARIO_SCALE,
@@ -3188,6 +3397,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
               ConvertMatrixToFixed(f_ProjectedLogoBallRoll,
                   &f_ProjectedLogoBallMarioRolls[g_DrawBufferIndex]);
             }
+
             guTranslate(&f_ProjectedLogoBallMarioOffset, 0.0f,
                 PROJECTED_LOGO_BALL_MARIO_OFFSET_Y, 0.0f);
             guTranslate(
@@ -3244,6 +3454,7 @@ void DrawOpeningBalls(Gfx** displayListHead, CameraMatrices* matrices) {
         }
       }
     }
+
     *displayListHead = gfx;
   }
 }
@@ -3290,6 +3501,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
   s32 stripIndex;
   s32 texelOffset;
   s32 row;
+
   /* A variable, so GCC does not fold the right edge into the command */
   s32 width = IMPACT_LINES_SIZE;
   s32 bottom;
@@ -3325,6 +3537,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       texelOffset = LARGE_PALETTED_TEXELS_OFFSET;
+
       /* The rows count up from the bottom, so the top strip is row 1 */
       row = IMPACT_LINES_STRIP_COUNT - 1;
       for (stripIndex = 0; stripIndex != IMPACT_LINES_STRIP_COUNT;
@@ -3344,6 +3557,7 @@ void DrawOpeningImpactLines(Gfx** displayListHead) {
         texelOffset += IMPACT_LINES_SIZE * IMPACT_LINES_STRIP_HEIGHT;
         row--;
       }
+
       *displayListHead = gfx;
     }
   }
@@ -3365,6 +3579,7 @@ void LoadLakitu(void) {
   ReadEncodedAsset(f_LakituImage, &asset);
   OpenEncodedAsset(ASSET_LAKITU_TRAIL_IMAGE, &asset);
   ReadEncodedAsset(f_LakituTrailImage, &asset);
+
   /* The game places the trail twice over */
   for (pass = 0; pass < 2; pass++) {
     for (segmentIndex = 0; segmentIndex < LAKITU_TRAIL_SEGMENT_COUNT;
@@ -3374,6 +3589,7 @@ void LoadLakitu(void) {
           (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1], -LAKITU_TRAIL_DEPTH);
     }
   }
+
   f_LakituTrailStart[0] = f_LakituScreenPoint[0] - SCREEN_WIDTH;
   f_LakituTrailStart[1] = (SCREEN_HEIGHT / 2) - f_LakituScreenPoint[1];
 }
@@ -3504,12 +3720,14 @@ void DrawLakitu(Gfx** displayListHead) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
       }
     }
+
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
         drawnIndex++) {
       gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
           (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
           (drawnIndex * 2) + 3, 0);
     }
+
     /*
      * The second batch fills the vertex buffer from the end, keeping the
      * last pair of the first batch in its slots, so the same triangles join
@@ -3531,20 +3749,24 @@ void DrawLakitu(Gfx** displayListHead) {
         segmentIndex = LAKITU_TRAIL_SEGMENT_COUNT - 1;
       }
     }
+
     for (drawnIndex = 0; drawnIndex != LAKITU_TRAIL_BATCH_SEGMENT_COUNT - 1;
         drawnIndex++) {
       gSP2Triangles(gfx++, (drawnIndex * 2) + 1, drawnIndex * 2,
           (drawnIndex * 2) + 2, 0, (drawnIndex * 2) + 1, (drawnIndex * 2) + 2,
           (drawnIndex * 2) + 3, 0);
     }
+
     gDPPipeSync(gfx++);
     if (++f_LakituTrailNewestIndex >= LAKITU_TRAIL_SEGMENT_COUNT) {
       f_LakituTrailNewestIndex = 0;
     }
+
     f_LakituTrailAlpha -= LAKITU_TRAIL_FADE_STEP;
     if (f_LakituTrailAlpha < 0) {
       f_LakituTrailAlpha = 0;
     }
+
     *displayListHead = gfx;
   }
 }
@@ -3572,6 +3794,7 @@ void MoveLakitu(void) {
     if (f_LakituAngle > LAKITU_LAST_ANGLE) {
       f_IsLakituFlying = FALSE;
     }
+
     f_LakituScreenPoint[0] +=
         LAKITU_DRIFT_X + (s32)(cos(angle) * LAKITU_LOOP_RADIUS_X);
     f_LakituScreenPoint[1] -=
@@ -3829,17 +4052,20 @@ void DrawOpeningShotBall(Gfx** displayListHead) {
           top = ballPoint.y - ((SHOT_BALL_STRIP_COUNT - stripIndex) * size);
           bottom = ballPoint.y + (stripIndex * size) - size;
         }
+
         gSPTextureRectangle(gfx++, left << 2, top << 2, right << 2, bottom << 2,
             G_TX_RENDERTILE, 0, 0,
             (SHOT_BALL_IMAGE_SIZE << 10) / (right - left),
             SHOT_BALL_STRIP_ROWS_FIXED / (bottom - top));
         gDPPipeSync(gfx++);
       }
+
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PIXEL);
       gDPPipeSync(gfx++);
     }
+
     *displayListHead = gfx;
   }
 }
@@ -3905,6 +4131,7 @@ void EaseOpeningLookAt(void) {
       if (f_LookAtEaseRate > 0.1f) {
         f_LookAtEaseRate = 0.1f;
       }
+
       break;
   }
 }
@@ -3927,6 +4154,7 @@ void LoadOpeningLogo(void) {
     f_LogoLetterScales[letterIndex][1] = 0.1f;
     f_LogoLetterSquashFrames[letterIndex] = 0;
   }
+
   f_LogoLetters[LOGO_LETTER_M].depth = LOGO_M_DEPTH;
   f_LogoLetters[LOGO_LETTER_A].depth = LOGO_A_DEPTH;
   f_LogoLetters[LOGO_LETTER_R].depth = LOGO_R_DEPTH;
@@ -4128,12 +4356,14 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       if (f_LogoFadeFramesLeft == LOGO_FADE_WHITENING_FRAMES) {
         f_LogoFadeStage++;
       }
+
       break;
     case LOGO_FADE_GRAY:
       g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
       if (f_LogoShineFrame > LOGO_SHINE_FIRST_FRAME) {
         f_LogoFadeStage++;
       }
+
       break;
     case LOGO_FADE_WHITENING:
       g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
@@ -4147,6 +4377,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       if (f_LogoFadeFramesLeft == 0) {
         f_LogoFadeStage++;
       }
+
       break;
     case LOGO_FADE_WHITE:
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
@@ -4158,6 +4389,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       if (f_LogoState == LOGO_SHRINKING) {
         f_LogoFadeStage++;
       }
+
       break;
     case LOGO_FADE_LOGO_OUT:
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
@@ -4173,8 +4405,10 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
         f_LogoClubAlpha = 0;
         f_OpeningScene = OPENING_SCENE_END;
       }
+
       break;
   }
+
   /* Lakitu drops each letter as he passes where it lands */
   if (f_LogoLetterStates[LOGO_LETTER_M] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_M_DROP_X) {
@@ -4190,48 +4424,56 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     f_LogoFadeStage = LOGO_FADE_GRAYING;
     f_HasLogoStarted = 1;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_A] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_A_DROP_X) {
     f_LogoLetters[LOGO_LETTER_A].x = LOGO_A_DROP_X;
     f_LogoLetters[LOGO_LETTER_A].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_A] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_R] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_R_DROP_X) {
     f_LogoLetters[LOGO_LETTER_R].x = LOGO_R_DROP_X;
     f_LogoLetters[LOGO_LETTER_R].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_R] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_I] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_I_DROP_X) {
     f_LogoLetters[LOGO_LETTER_I].x = LOGO_I_DROP_X;
     f_LogoLetters[LOGO_LETTER_I].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_I] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_FIRST_O] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_FIRST_O_DROP_X) {
     f_LogoLetters[LOGO_LETTER_FIRST_O].x = LOGO_FIRST_O_DROP_X;
     f_LogoLetters[LOGO_LETTER_FIRST_O].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_FIRST_O] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_G] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_G_DROP_X) {
     f_LogoLetters[LOGO_LETTER_G].x = LOGO_G_DROP_X;
     f_LogoLetters[LOGO_LETTER_G].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_G] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_SECOND_O] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_SECOND_O_DROP_X) {
     f_LogoLetters[LOGO_LETTER_SECOND_O].x = LOGO_SECOND_O_DROP_X;
     f_LogoLetters[LOGO_LETTER_SECOND_O].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_SECOND_O] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_L] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_L_DROP_X) {
     f_LogoLetters[LOGO_LETTER_L].x = LOGO_L_DROP_X;
     f_LogoLetters[LOGO_LETTER_L].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_FALLING;
   }
+
   if (f_LogoLetterStates[LOGO_LETTER_F] == LOGO_LETTER_WAITING &&
       f_LakituScreenPoint[0] > LOGO_F_DROP_X) {
     f_LogoLetters[LOGO_LETTER_F].x = LOGO_F_DROP_X;
@@ -4239,6 +4481,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     f_LogoLetterStates[LOGO_LETTER_F] = LOGO_LETTER_FALLING;
     f_LogoState = LOGO_CLUB_STARTING;
   }
+
   if (isDrawn == 1) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       guTranslate(&f_LogoLetterTranslations[i][g_DrawBufferIndex],
@@ -4248,6 +4491,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       guScale(&f_LogoLetterScalings[i][g_DrawBufferIndex],
           f_LogoLetterScales[i][0], f_LogoLetterScales[i][1], 1.0f);
     }
+
     guTranslate(&f_LogoClubTranslations[g_DrawBufferIndex],
         f_LogoClubPosition[0] - (SCREEN_WIDTH / 2.0f),
         f_LogoClubPosition[1] - (SCREEN_HEIGHT / 2.0f),
@@ -4277,6 +4521,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
     }
+
     gDPPipeSync(gfx++);
     gDPSetAlphaDither(gfx++, G_AD_DISABLE);
     gDPPipeSync(gfx++);
@@ -4321,6 +4566,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
         gDPPipeSync(gfx++);
       }
     }
+
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, f_LogoClubAlpha);
     gDPLoadTLUT_pal256(
         gfx++, TEXTURE_ADDRESS(f_LogoClubImage + IMAGE_HEADER_SIZE));
@@ -4351,6 +4597,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       gDPPipeSync(gfx++);
     }
   }
+
   if ((f_LogoState == LOGO_SHINING) & (isDrawn == 1)) {
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PRIM);
@@ -4401,6 +4648,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
         gDPPipeSync(gfx++);
       }
     }
+
     if (isDrawn == 1) {
       gDPSetPrimDepth(gfx++, LOGO_SHINE_DEPTH, 0);
       gDPPipeSync(gfx++);
@@ -4423,10 +4671,12 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
           G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
       gDPPipeSync(gfx++);
     }
+
     f_LogoShineFrame++;
     if (f_LogoShineFrame > LOGO_SHINE_LAST_FRAME) {
       f_LogoState = LOGO_SHRINK_STARTING;
     }
+
     if (isDrawn == 1 && f_LogoShineFrame > LOGO_SHINE_FIRST_SHOWN_FRAME &&
         f_LogoShineFrame < LOGO_SHINE_LAST_SHOWN_FRAME) {
       gSPTextureRectangle(gfx++, LOGO_SHINE_LEFT << 2, LOGO_SHINE_TOP << 2,
@@ -4438,6 +4688,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       gDPPipeSync(gfx++);
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   *displayListHead = gfx;
@@ -4455,6 +4706,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
               f_LogoLetterStates[i] = LOGO_LETTER_LANDED;
               continue;
             }
+
             f_LogoLetterSpeeds[i] = -f_LogoLetterSpeeds[i];
             f_LogoLetterStates[i] = LOGO_LETTER_SQUASHING;
             f_LogoLetterSquashFrames[i] = LOGO_LETTER_SQUASH_FRAMES;
@@ -4471,6 +4723,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
               f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_LANDED;
               continue;
             }
+
             f_LogoLetterSpeeds[LOGO_LETTER_L] =
                 -f_LogoLetterSpeeds[LOGO_LETTER_L];
             f_LogoLetterStates[LOGO_LETTER_L] = LOGO_LETTER_SQUASHING;
@@ -4478,6 +4731,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
           }
         }
       }
+
       f_LogoLetters[i].y += (s32)f_LogoLetterSpeeds[i];
       f_LogoLetterSpeeds[i] += LOGO_LETTER_GRAVITY;
       f_LogoLetterScales[i][0] += LOGO_LETTER_GROWTH;
@@ -4485,6 +4739,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       if (f_LogoLetterScales[i][0] > 1.0f) {
         f_LogoLetterScales[i][0] = 1.0f;
       }
+
       if (f_LogoLetterScales[i][1] > 1.0f) {
         f_LogoLetterScales[i][1] = 1.0f;
       }
@@ -4511,6 +4766,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       }
     }
   }
+
   if (f_LogoState == LOGO_CLUB_STARTING) {
     angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
     sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
@@ -4525,6 +4781,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
         LOGO_CLUB_ORBIT_CENTER_Y;
     f_IsLogoClubSwinging = 1;
   }
+
   if (f_LogoState == LOGO_CLUB_CIRCLING) {
     angle = f_LogoClubOrbitAngle * LOGO_DEGREES_TO_RADIANS;
     sinf(f_LogoClubUnusedAngle * LOGO_DEGREES_TO_RADIANS);
@@ -4546,6 +4803,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       f_LogoState = LOGO_CLUB_SPINNING;
     }
   }
+
   if (f_LogoState == LOGO_CLUB_SPINNING) {
     f_LogoClubAngle -= LOGO_CLUB_SPIN_STEP;
     f_LogoClubSpinFramesLeft--;
@@ -4558,8 +4816,10 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       }
     }
   }
+
   if (f_LogoState == LOGO_SHRINK_STARTING) {
     f_LogoState = LOGO_SHRINKING;
+
     /* The letters' shrunk x positions */
     f_LogoLetterSteps[LOGO_LETTER_M] =
         (LOGO_M_SHRUNK_X - f_LogoLetters[LOGO_LETTER_M].x) / LOGO_SHRINK_FRAMES;
@@ -4593,6 +4853,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     f_LogoClubStepY =
         (LOGO_SHRUNK_CLUB_Y - f_LogoClubPosition[1]) / LOGO_SHRINK_FRAMES;
   }
+
   if (f_LogoState == LOGO_SHRINKING) {
     for (i = 0; i < LOGO_LETTER_COUNT; i++) {
       if (i != LOGO_LETTER_L) {
@@ -4602,6 +4863,7 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
         f_LogoLetterScales[i][1] += f_LogoScaleStep;
       }
     }
+
     f_LogoLetters[LOGO_LETTER_L].x += f_LogoLetterSteps[LOGO_LETTER_L];
     f_LogoLetters[LOGO_LETTER_L].y += f_LogoLetterRises[LOGO_LETTER_A];
     f_LogoClubPosition[0] += f_LogoClubStepX;
@@ -4685,11 +4947,13 @@ void DrawOpeningSparks(Gfx** displayListHead) {
             f_OpeningSparkScale;
         f_OpeningSparksState = SPARKS_FLYING;
       }
+
       f_OpeningSparkFramesLeft = SPARK_FRAME_COUNT;
     } else {
       f_OpeningSparksState = SPARKS_HIDDEN;
     }
   }
+
   if (f_OpeningSparksState == SPARKS_FLYING) {
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
@@ -4739,10 +5003,12 @@ void DrawOpeningSparks(Gfx** displayListHead) {
       gSPVertex(gfx++, f_OpeningSparkVertices, 3, 0);
       gSP1Triangle(gfx++, 0, 1, 2, 0);
     }
+
     if (--f_OpeningSparkFramesLeft == 0) {
       f_OpeningSparksState = SPARKS_HIDDEN;
     }
   }
+
   *displayListHead = gfx;
 }
 #else

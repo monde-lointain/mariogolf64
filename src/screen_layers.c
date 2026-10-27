@@ -270,6 +270,7 @@ void LoadTextureBlock(Gfx** displayListHead, void* texels, s32 format, s32 size,
     LOAD_TEXTURE_BLOCK(gfx, texels, format, G_IM_SIZ_16b, size, width, height,
         palette, cms, cmt, masks, maskt, shifts, shiftt);
   }
+
   *displayListHead = gfx;
 }
 
@@ -305,6 +306,7 @@ s32 GetWipeProgress(void) {
   if (!f_IsHalfTurnShown) {
     return f_WipeProgress;
   }
+
   switch (f_HalfTurnState) {
     case HALF_TURN_STATE_UNK1:
     default:
@@ -355,6 +357,7 @@ void DrawWipe(Gfx** displayListHead) {
   if (f_WipeKind == WIPE_NONE) {
     return;
   }
+
   if (f_WipeKind == WIPE_CLOSING) {
     f_WipeProgress -= 1.0f;
     if (f_WipeProgress < 0.0f) {
@@ -419,6 +422,7 @@ void DrawWipe(Gfx** displayListHead) {
         WIPE_SHAPE_TEXELS * TEXEL_STEP_ONE / (f32)shapeSize);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -463,9 +467,11 @@ void DrawScreenFade(Gfx** displayListHead) {
       alpha =
           (g_ScreenFadeFramesLeft * FADE_ALPHA_RANGE) / g_ScreenFadeDuration;
     }
+
     if (alpha >= FADE_ALPHA_RANGE) {
       alpha = FADE_ALPHA_RANGE - 1;
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -493,6 +499,7 @@ void DrawScreenFade(Gfx** displayListHead) {
     if (g_ScreenFadeFramesLeft == 0) {
       g_ScreenFadeKind = FADE_NONE;
     }
+
     *displayListHead = gfx;
   }
 }
@@ -553,14 +560,17 @@ s32 UpdatePrompt(ControllerState* controller) {
       } else {
         PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
       }
+
       return NO_PROMPT_RESULT;
     }
+
     if (controller->pressedButtons == B_BUTTON) {
       f_PromptChoice = PROMPT_CHOICE_NO;
       f_PromptState = PROMPT_STATE_CHOSEN;
       PlaySound(SOUND_CONFIRM, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
       return NO_PROMPT_RESULT;
     }
+
     if (controller->repeatedButtons & (L_JPAD | R_JPAD)) {
       f_PromptChoice ^= 1;
       PlaySound(SOUND_PROMPT_MOVE, g_NextSoundChannel, PROMPT_SOUND_VOLUME);
@@ -575,6 +585,7 @@ s32 UpdatePrompt(ControllerState* controller) {
     FreePromptImages();
     return prompt->results[f_PromptChoice];
   }
+
   return NO_PROMPT_RESULT;
 }
 
@@ -597,12 +608,14 @@ void DrawPrompt(Gfx** displayListHead) {
   if (f_PromptState == PROMPT_STATE_CLOSED) {
     return;
   }
+
   MeasureMessage(
       prompt->messageId, PROMPT_FONT_SIZE, &textWidth, &textHeight, 0);
   cloudHeight = textHeight + PROMPT_CLOUD_MARGIN;
   if (cloudHeight < PROMPT_CLOUD_SMALLEST_HEIGHT) {
     cloudHeight = PROMPT_CLOUD_SMALLEST_HEIGHT;
   }
+
   if (f_PromptState == PROMPT_STATE_OPENING) {
     f_PromptFrame++;
     if (f_PromptFrame == PROMPT_GROWTH_FRAMES) {
@@ -642,6 +655,7 @@ void DrawPrompt(Gfx** displayListHead) {
           f_PromptFrame * (PROMPT_CLOUD_HALF_WIDTH / PROMPT_GROWTH_FRAMES);
       halfHeight = cloudHeight * f_PromptFrame / PROMPT_GROWTH_FRAMES;
     }
+
     LoadNibbleTextureBlock(&gfx, (u8*)f_PromptCloudImage + texelOffset,
         G_IM_FMT_I, PROMPT_CLOUD_WIDTH, PROMPT_CLOUD_HALF_TEXELS, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -669,6 +683,7 @@ void DrawPrompt(Gfx** displayListHead) {
       halfWidth = CHOICE_HALF_WIDTH;
       halfHeight = CHOICE_HALF_HEIGHT;
     }
+
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPPipeSync(gfx++);
@@ -695,6 +710,7 @@ void DrawPrompt(Gfx** displayListHead) {
       halfWidth = CHOICE_HALF_WIDTH;
       halfHeight = CHOICE_HALF_HEIGHT;
     }
+
     LoadTextureBlock(&gfx, (u8*)f_YesNoImage + NO_TEXELS_OFFSET, G_IM_FMT_CI,
         G_IM_SIZ_8b, CHOICE_IMAGE_WIDTH, CHOICE_IMAGE_HEIGHT, 0,
         G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
@@ -707,6 +723,7 @@ void DrawPrompt(Gfx** displayListHead) {
         CHOICE_IMAGE_WIDTH / 2 * TEXEL_STEP_ONE / halfWidth,
         CHOICE_IMAGE_HEIGHT / 2 * TEXEL_STEP_ONE / halfHeight);
   }
+
   *displayListHead = gfx;
 }
 
@@ -721,6 +738,7 @@ void ShowHalfTurn(void) {
     f_HalfTurnImage = AllocMemory(OpenEncodedAsset(HALF_TURN_IMAGE, &asset));
     ReadEncodedAsset(f_HalfTurnImage, &asset);
   }
+
   f_IsHalfTurnShown = TRUE;
   f_HalfTurnState = HALF_TURN_STATE_SHOWING;
   f_HalfTurnTimer = HALF_TURN_FRAMES;
@@ -730,6 +748,7 @@ void HideHalfTurn(void) {
   if (f_IsHalfTurnShown) {
     FreeMemory(&f_HalfTurnImage);
   }
+
   f_IsHalfTurnShown = FALSE;
 }
 
@@ -769,6 +788,7 @@ s32 IsHalfTurnDismissed(ControllerState* controller) {
       !(f_HalfTurnTimer < 0 && (controller->pressedButtons & A_BUTTON))) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -786,6 +806,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
   if (!f_IsHalfTurnShown) {
     return;
   }
+
   if (f_HalfTurnState == HALF_TURN_STATE_SHOWING) {
     if (f_HalfTurnTimer > 0) {
       for (i = 0; i != HALF_TURN_SHOW_STEPS; i++) {
@@ -793,6 +814,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
             HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer--;
       }
+
       if (f_HalfTurnTimer == HALF_TURN_SHOW_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_WIPE_OPEN, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
@@ -803,6 +825,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
       f_HalfTurnState = HALF_TURN_STATE_UNK1;
     }
   }
+
   if (f_HalfTurnState == HALF_TURN_STATE_LEAVING) {
     if (f_HalfTurnTimer < 0) {
       f_HalfTurnTimer++;
@@ -812,12 +835,14 @@ void DrawHalfTurn(Gfx** displayListHead) {
             HALF_TURN_CENTER_COLUMN, HALF_TURN_CENTER_ROW, f_HalfTurnTimer);
         f_HalfTurnTimer++;
       }
+
       if (f_HalfTurnTimer == HALF_TURN_HIDE_SOUND_RADIUS) {
         PlaySoundWithEffects(SOUND_WIPE_CLOSE, WIPE_SOUND_CHANNEL,
             WIPE_SOUND_VOLUME, WIPE_SOUND_REVERB, WIPE_SOUND_PAN);
       }
     } else {
       f_HalfTurnState = HALF_TURN_STATE_DONE;
+
       /* Any nonzero value makes HideHalfTurn free the picture; the state's
        * value is there to match */
       f_IsHalfTurnShown = HALF_TURN_STATE_LEAVING;
@@ -825,6 +850,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
       return;
     }
   }
+
   if (g_IsDebugEnabled) {
     sprintf(g_PrintBuffer, "%3d", f_HalfTurnTimer);
     PrintDebugText(g_PrintBuffer, HALF_TURN_DEBUG_COLUMN, HALF_TURN_DEBUG_ROW);
@@ -835,6 +861,7 @@ void DrawHalfTurn(Gfx** displayListHead) {
   gDPSetTextureLUT(gfx++, G_TT_NONE);
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
+
   /* The texels' alpha is inverted, so texels whose alpha bit is clear are drawn
    */
   gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, 0, 1, TEXEL0, 1, 0, 0, 0, TEXEL0, 0,
@@ -857,5 +884,6 @@ void DrawHalfTurn(Gfx** displayListHead) {
         (SCREEN_BORDER + (i * HALF_TURN_STRIP_ROWS) + stripRows) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = gfx;
 }

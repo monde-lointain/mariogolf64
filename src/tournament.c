@@ -63,6 +63,7 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
   if (holeCount > COURSE_HOLE_COUNT) {
     holeCount = COURSE_HOLE_COUNT;
   }
+
   for (index = firstIndex; index < endIndex; index++) {
     shape = index % 3;
     swing = index % 10;
@@ -72,12 +73,14 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
         swing = 9;
       }
     }
+
     holesPlayed = holeCount +
         (f_ContestantProfiles[index - 1].holeOffset +
             (lastAheadIndex < 0 | lastAheadIndex >= index));
     if (holesPlayed > COURSE_HOLE_COUNT) {
       holesPlayed = COURSE_HOLE_COUNT;
     }
+
     finalScore =
         f_ContestantProfiles[index - 1].baseScore - (g_CourseIndex * 2);
     jitter = ((NextTournamentRandom() >> 28) & 5) - 2;
@@ -87,11 +90,13 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
         finalScore <= -(g_CourseIndex * 2) + 1) {
       finalScore = -(g_CourseIndex * 2) + 1;
     }
+
     if (finalScore < -SCORE_LIMIT) {
       finalScore = -SCORE_LIMIT;
     } else if (finalScore > SCORE_LIMIT) {
       finalScore = SCORE_LIMIT;
     }
+
     switch (shape) {
       case 0:
         score = finalScore * holesPlayed / COURSE_HOLE_COUNT;
@@ -105,6 +110,7 @@ s32 SimulateScores(s32 holeCount, s32 lastAheadIndex, s32 firstIndex,
             (sin(holesPlayed * RADIANS_PER_HOLE) * swing);
         break;
     }
+
     g_TournamentStandings[index].contestantId = index - 1;
     g_TournamentStandings[index].score = score;
     g_TournamentStandings[index].holeCount = holesPlayed;
@@ -137,13 +143,16 @@ u8 RankTournament(
   for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
     keys[index] = -g_TournamentStandings[index].score;
   }
+
   SortIndicesDescending(keys, order, TOURNAMENT_CONTESTANT_COUNT);
   for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
     unsorted[index] = g_TournamentStandings[index];
   }
+
   for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
     g_TournamentStandings[index] = unsorted[order[index]];
   }
+
   for (index = 0; index < TOURNAMENT_CONTESTANT_COUNT; index++) {
     place = 1;
     tieBit = 0;
@@ -156,11 +165,13 @@ u8 RankTournament(
         g_TournamentStandings[otherIndex].place |= PLACE_TIED;
       }
     }
+
     g_TournamentStandings[index].place = tieBit | place;
     if (g_TournamentStandings[index].contestantId == PLAYER_CONTESTANT) {
       playerPlace = tieBit | place;
     }
   }
+
   return playerPlace;
 }
 
@@ -190,6 +201,7 @@ void NameContestants(void) {
       hasSkipped = TRUE;
       nameOffset--;
     }
+
     isFirstName = &g_ContestantNameIndices[1] > nameIndex;
     if (hasSkipped & isFirstName) {
       *nameIndex = lastName + 1;

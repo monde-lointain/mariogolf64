@@ -182,6 +182,7 @@ SurfaceInfo* GetSurfaceInfo(s32 surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
+
   return &g_SurfaceInfo[surface];
 }
 
@@ -254,6 +255,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       if (volume >= 128) {
         volume = 127;
       }
+
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
         PlaySound(sound, g_NextSoundChannel, volume);
       }
@@ -275,6 +277,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       axisZ = 1.0f;
       axisX = 0.0f;
     }
+
     guRotateF(simulation->unk44, 88.0f, -axisX, 0.0f, axisZ);
   }
 
@@ -286,6 +289,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (volume >= 128) {
           volume = 127;
         }
+
         PlaySound(sound, g_NextSoundChannel, volume);
       }
     }
@@ -338,6 +342,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     if (substep != 0 && simulation->purpose == LAUNCH_PURPOSE_UNK5) {
       goto NEXT;
     }
+
     startY = simulation->position[AXIS_Y];
     isNearCup = FALSE;
     startX = simulation->position[AXIS_X];
@@ -349,18 +354,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
     if (simulation->isRunning == BALL_STATE_STOPPED) {
       goto SETTLE;
     }
+
     if (simulation->unk98 == 0) {
       BuildUnk44Rotation();
     }
+
     if (++simulation->unk98 >= MAX_STEP_COUNT) {
       simulation->position[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] + 614.4f;
       simulation->velocity[AXIS_X] = 0;
       simulation->velocity[AXIS_Z] = 0;
       simulation->position[AXIS_Z] = D_800BA9D8.cupPosition[AXIS_Z];
     }
+
     if (simulation->isRunning == BALL_STATE_ROLLING) {
       simulation->unkB2++;
     }
+
     simulation->position[AXIS_X] =
         simulation->position[AXIS_X] + velocity[AXIS_X];
     simulation->position[AXIS_Y] =
@@ -412,14 +421,17 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             StartRingPassRumble(&g_Players[simulation->playerIndex]);
           }
         }
+
         if (simulation->isRunning == BALL_STATE_ROLLING && simulation->unkB4) {
           s32 groundHeight = GetGroundHeight(startX, startZ);
 
           if (groundHeight < startY) {
             startY = groundHeight;
           }
+
           simulation->unkB4 = 0;
         }
+
         if (g_IsMiniGolf) {
           contact = FindMiniGolfGroundHit(simulation, startX, startY, startZ,
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
@@ -443,10 +455,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   simulation->position[AXIS_Z]) < startY) {
             endY = startY;
           }
+
           contact = FindGroundHit(startX, startY, startZ,
               simulation->position[AXIS_X], endY, simulation->position[AXIS_Z],
               &hit, &hitFraction);
         }
+
         hitsBillboard = FALSE;
         if (simulation->isRunning == BALL_STATE_FLYING &&
             (simulation->unk9C < 0 ||
@@ -455,6 +469,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               simulation->position[AXIS_X], simulation->position[AXIS_Y],
               simulation->position[AXIS_Z], &triangle.unk0, &fraction);
         }
+
         if (hitsBillboard && contact == STEP_FLAG_GROUND_HIT) {
           if (hitFraction <= fraction) {
             triangle = hit;
@@ -471,6 +486,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         } else {
           contact = 0;
         }
+
         holeHit = FALSE;
         if (!simulation->unkA1) {
           if (simulation->isRunning == BALL_STATE_FLYING ||
@@ -482,6 +498,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             holeHit = FALSE;
           }
         }
+
         if (holeHit && (contact == 0 || hitFraction <= fraction)) {
           triangle = hit;
           contact = STEP_FLAG_HOLE_TRIANGLE_HIT;
@@ -489,12 +506,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           hitsHoleTriangle = TRUE;
         }
       }
+
       flags |= contact;
       if (printsDebugText) {
         PrintDebugPaddedHex(contact, 2, 6);
         osSyncPrintf("col%d\n", contact);
       }
     }
+
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
       CoursePoint pinVelocity;
       f32 pinFraction;
@@ -518,18 +537,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
               PlaySound(0xF, g_NextSoundChannel, 0x7F);
             }
+
             simulation->unkB0 = 1;
             simulation->windVelocityX = 0.0f;
             simulation->windVelocityZ = 0.0f;
           }
+
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             if (pinHit == PIN_HIT_FLAGSTICK) {
               StartFlagstickSparks(simulation->position);
             }
+
             if (pinHit == PIN_HIT_FLAG) {
               StartFlagSparks(simulation->position);
             }
           }
+
           if (pinHit == PIN_HIT_FLAGSTICK) {
             f32 speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                 (velocity[AXIS_Z] * velocity[AXIS_Z]));
@@ -540,11 +563,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               if (volume >= 127) {
                 volume = 126;
               }
+
               if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                 PlaySound(0xE, g_NextSoundChannel, volume);
               }
             }
           }
+
           if (simulation->isRunning == BALL_STATE_ROLLING) {
             simulation->isRunning = BALL_STATE_FLYING;
             velocity[AXIS_Y] = -sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
@@ -558,6 +583,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             velocity[AXIS_Y] = pinVelocity[AXIS_Y];
             simulation->unk34 = simulation->unk34 * 0.3f;
           }
+
           velocity[AXIS_X] = pinVelocity[AXIS_X];
           velocity[AXIS_Z] = pinVelocity[AXIS_Z];
           if (simulation->purpose != LAUNCH_PURPOSE_UNK5) {
@@ -570,11 +596,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             simulation->position[AXIS_Z] =
                 simulation->position[AXIS_Z] + (rest * velocity[AXIS_Z]);
           }
+
           flags |= STEP_FLAG_PIN_HIT;
           MoveBallToCupEdge(simulation);
           BuildUnk44Rotation();
         }
       }
+
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         s32 cupOffsetX =
             simulation->position[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X];
@@ -597,12 +625,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   SetDebugTextHighlight(1);
                   PrintDebugText("CUPIN!", 0x14, 0xA);
                 }
+
                 simulation->isRunning = BALL_STATE_IN_CUP;
                 if (speed < 1612.7999f) {
                   simulation->unkA8[0] = 1;
                 }
               }
             }
+
             if ((f32)cupDistance < 1996.7999f && (f32)cupDistance >= 1075.2f) {
               isNearCup = TRUE;
               if (simulation->isRunning == BALL_STATE_ROLLING &&
@@ -619,6 +649,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                   SetDebugTextHighlight(1);
                   PrintDebugText("KURU!", 0x14, 0xA);
                 }
+
                 toCup[AXIS_Y] = 0.0f;
                 toCup[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] -
                     simulation->position[AXIS_X];
@@ -635,12 +666,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 if (alignment < 0.0f) {
                   alignment = 0.0f;
                 }
+
                 depth = 1996.7999f - (f32)cupDistance;
                 angle = atan2(toCup[AXIS_Z], toCup[AXIS_X]);
                 alignment = 1.0f - alignment;
                 if (depth > 614.4f) {
                   depth = 614.4f;
                 }
+
                 pull = ((sinf(depth * 0.005113269f) * 307.2f) + 46.079998f) *
                     alignment;
                 velocity[AXIS_X] *= 0.93f;
@@ -650,6 +683,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 flags |= STEP_FLAG_CUP_PULL;
               }
             }
+
             if ((f32)cupDistance >= 1996.7999f &&
                 (f32)IntLength2D(startX - D_800BA9D8.cupPosition[AXIS_X],
                     startZ - D_800BA9D8.cupPosition[AXIS_Z]) < 1996.7999f &&
@@ -688,9 +722,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 if (keep < 0.0f) {
                   keep = 0.0f;
                 }
+
                 if (keep > 1.0f) {
                   keep = 1.0f;
                 }
+
                 velocity[AXIS_Y] =
                     -speed * (sqrtf(1.0f - (keep * keep)) + 0.1f);
                 velocity[AXIS_X] *= keep;
@@ -705,6 +741,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
                   StartFlagstickSparks(simulation->position);
                 }
+
                 PlayStrokeImpactSound(0x10, 711.168f, outwardSpeed);
               }
             }
@@ -712,6 +749,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         }
       }
     }
+
     if (simulation->isRunning == BALL_STATE_IN_WATER) {
       simulation->unkA1 = TRUE;
       velocity[AXIS_X] *= 0.7f;
@@ -732,6 +770,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->isRunning = BALL_STATE_STOPPED;
       }
     }
+
     if (simulation->isRunning == BALL_STATE_ROLLING && simulation->unkA1 &&
         simulation->position[AXIS_Y] >
             GetGroundOrWaterHeight(
@@ -739,6 +778,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 0xB400) {
       simulation->isRunning = BALL_STATE_STOPPED;
     }
+
     if (simulation->isRunning == BALL_STATE_IN_CUP) {
       f32 speed;
       f32 cupDistance;
@@ -781,11 +821,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (volume >= 127) {
             volume = 126;
           }
+
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(0x10, g_NextSoundChannel, volume);
           }
         }
       }
+
       if (simulation->position[AXIS_Y] <
               D_800BA9D8.cupPosition[AXIS_Y] + 768.0f &&
           velocity[AXIS_Y] < -711.168f) {
@@ -803,8 +845,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->position[AXIS_Y] =
               D_800BA9D8.cupPosition[AXIS_Y] + 768.0f;
         }
+
         velocity[AXIS_Y] = AbsoluteValueExpression(velocity[AXIS_Y]);
       }
+
       if (simulation->position[AXIS_Y] >=
           D_800BA9D8.cupPosition[AXIS_Y] + 0xC00) {
         f32 fallSpeed = velocity[AXIS_Y];
@@ -816,10 +860,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->unkA0 = 1;
           simulation->isRunning = BALL_STATE_STOPPED;
         }
+
         if (simulation->unkA8[0] == 1) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(0x12, g_NextSoundChannel, 0x7F);
           }
+
           simulation->unkA8[0] = 2;
         } else if (simulation->unkA8[0] == 0) {
           if (fallSpeed >= 284.4672f) {
@@ -828,16 +874,19 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             if (volume >= 128) {
               volume = 127;
             }
+
             if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
               PlaySound(0x11, g_NextSoundChannel, volume);
             }
           }
         }
+
         simulation->position[AXIS_Y] = D_800BA9D8.cupPosition[AXIS_Y] + 0xC00;
       } else {
         velocity[AXIS_Y] += 131.0f;
       }
     }
+
     if (contact == STEP_FLAG_BILLBOARD_HIT &&
         simulation->isRunning == BALL_STATE_FLYING) {
       simulation->unk94++;
@@ -860,11 +909,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           velocity[AXIS_Z] *= 0.5f;
           break;
       }
+
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
         PlayBillboardHitSound(triangle.unk0,
             IntLength3D(velocity[AXIS_X], velocity[AXIS_Y], velocity[AXIS_Z]));
       }
     }
+
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
         (g_IsMiniGolf || IsGameFlagSet(GAME_FLAG_WALL_HITS))) {
       CoursePoint hitPosition;
@@ -882,6 +933,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else {
         endY = simulation->position[AXIS_Y];
       }
+
       if (FindWallHit(startX, startY, startZ, simulation->position[AXIS_X],
               endY, simulation->position[AXIS_Z], &wall,
               &wallFraction) == TRUE &&
@@ -908,6 +960,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           edgeX = wall.corners[AXIS_X][1];
           edgeZ = wall.corners[AXIS_Z][1];
         }
+
         normalX -= edgeX;
         normalY -= edgeY;
         normalZ -= edgeZ;
@@ -922,6 +975,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (along < 0.0f) {
           along = 0.0f;
         }
+
         hitPosition[AXIS_X] = startX + (along * (velocity[AXIS_X] * 0.9f));
         hitPosition[AXIS_Y] = startY + (along * (velocity[AXIS_Y] * 0.9f));
         hitPosition[AXIS_Z] = startZ + (along * (velocity[AXIS_Z] * 0.9f));
@@ -933,9 +987,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           } else {
             inwardSpeed += 230.40001f;
           }
+
           bounce = speed / (speed + 230.40001f);
           osSyncPrintf("SpecialWallRefrect\n");
         }
+
         simulation->position[AXIS_X] = hitPosition[AXIS_X];
         simulation->position[AXIS_Y] = hitPosition[AXIS_Y];
         simulation->position[AXIS_Z] = hitPosition[AXIS_Z];
@@ -943,6 +999,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             fabsf(inwardSpeed) > 153.6f) {
           StartFlagstickSparks(simulation->position);
         }
+
         reflected[AXIS_X] =
             velocity[AXIS_X] - (-normalZ * (2.0f * inwardSpeed));
         reflected[AXIS_Y] = velocity[AXIS_Y] - (normalY * (2.0f * inwardSpeed));
@@ -962,8 +1019,10 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         PushBallOutOfWalls(simulation, FALSE);
         goto SETTLE;
       }
+
       PushBallOutOfWalls(simulation, FALSE);
     }
+
     if (!simulation->unkA1 &&
         ((contact == STEP_FLAG_HOLE_TRIANGLE_HIT &&
              simulation->isRunning == BALL_STATE_FLYING) ||
@@ -996,6 +1055,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (simulation->unk94 == 1) {
           simulation->unkA7 = simulation->surface;
         }
+
         if (simulation->surface == SURFACE_GREEN ||
             simulation->surface == SURFACE_GREEN_EDGE) {
           plane.normal[AXIS_Y] = (plane.normal[AXIS_Y] * 0.5f) + 0.5f;
@@ -1003,6 +1063,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               &plane.normal[AXIS_Z]);
         }
       }
+
       impact = *simulation;
       impact.position[AXIS_X] = startX + (fraction * velocity[AXIS_X]);
       impact.position[AXIS_Y] = startY + (fraction * velocity[AXIS_Y]);
@@ -1016,12 +1077,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else {
         steepness = 1.0f;
       }
+
       switch (GetSurfaceInfo(simulation->surface)->kind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(5, g_NextSoundChannel, 0x7F);
           }
+
           break;
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
@@ -1030,6 +1093,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(2, g_NextSoundChannel, 0x7F);
           }
+
           break;
         case SURFACE_KIND_ROUGH:
         case SURFACE_KIND_ROUGH_POOR_LIE:
@@ -1038,6 +1102,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(3, g_NextSoundChannel, 0x7F);
           }
+
           break;
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
@@ -1047,11 +1112,13 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(4, g_NextSoundChannel, 0x7F);
           }
+
           break;
         case SURFACE_KIND_WATER_HAZARD:
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(9, g_NextSoundChannel, 0x7F);
           }
+
           break;
         case SURFACE_KIND_OUT_OF_BOUNDS:
         case SURFACE_KIND_CART_WAY:
@@ -1060,13 +1127,16 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
             PlaySound(SOUND_CONTACT_PLAIN, g_NextSoundChannel, 0x7F);
           }
+
           break;
       }
+
       flags |= STEP_FLAG_HOLE_TRIANGLE_BOUNCE;
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
         SpawnImpactEffects(&impact);
         StartCheepCheepLeap(0);
       }
+
       if (simulation->surface == SURFACE_WATER_HAZARD &&
           (simulation->isRunning == BALL_STATE_ROLLING ||
               fabsf(impactSpeed) >= 14223.36f ||
@@ -1079,6 +1149,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         impactSpeed = 0.0f;
         velocity[AXIS_X] = velocity[AXIS_X] * 0.2f * 0.2f;
       }
+
       softness = 1000 - GetSurfaceInfo(simulation->surface)->unkE;
       bounce = 1.0f - (softness * steepness * 0.001f);
       push = (bounce + 1.0f) * impactSpeed;
@@ -1091,6 +1162,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       if (simulation->isRunning == BALL_STATE_IN_WATER) {
         keep = 0.0f;
       }
+
       velocity[AXIS_X] = bounced[AXIS_X] * keep;
       velocity[AXIS_Y] = bounced[AXIS_Y] * keep;
       velocity[AXIS_Z] = bounced[AXIS_Z] * keep;
@@ -1112,9 +1184,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         simulation->unk34 = IntLength2D(unk34X, unk34Z);
         BuildUnk44Rotation();
       }
+
       simulation->unk38 = 0;
       velocity[AXIS_Y] += 262.0f;
     }
+
     if (simulation->isRunning == BALL_STATE_FLYING &&
         contact == STEP_FLAG_GROUND_HIT) {
       TrianglePlane plane;
@@ -1159,10 +1233,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                     (velocity[AXIS_Z] * velocity[AXIS_Z]))) {
           GetTrianglePlane(&triangle, &plane);
         }
+
         osSyncPrintf("Baki\n");
       } else {
         GetTrianglePlane(&triangle, &plane);
       }
+
       substepCount += (fraction < 0.4f) & (substepCount == 1);
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           speed >= 711.168f && !g_IsMiniGolf) {
@@ -1179,6 +1255,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           } else {
             tilt += 0.02f;
           }
+
           guNormalize(&side[AXIS_X], &side[AXIS_Y], &side[AXIS_Z]);
           side[AXIS_X] *= tilt;
           side[AXIS_Z] *= tilt;
@@ -1188,6 +1265,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               &plane.normal[AXIS_Z]);
         }
       }
+
       if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
         simulation->surface = SURFACE_FAIRWAY;
       } else {
@@ -1197,6 +1275,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->unkA7 = simulation->surface;
         }
       }
+
       impactSpeed = (plane.normal[AXIS_X] * velocity[AXIS_X]) +
           (plane.normal[AXIS_Y] * velocity[AXIS_Y]) +
           (plane.normal[AXIS_Z] * velocity[AXIS_Z]);
@@ -1211,6 +1290,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       } else {
         slide = 0.1f;
       }
+
       switch (GetSurfaceInfo(simulation->surface)->kind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
@@ -1241,9 +1321,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           PlayStrokeImpactSound(3, 2844.672f, impactSpeed);
           break;
       }
+
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE && !simulation->unkA1) {
         SpawnImpactEffects(simulation);
       }
+
       info = GetSurfaceInfo(simulation->surface);
       friction = (1000 - info->unkE) * 0.001f;
       if (simulation->surface == SURFACE_BUNKER) {
@@ -1254,6 +1336,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         } else if (impactSpeed >= 7111.68f) {
           burial = 1;
         }
+
         switch (burial) {
           case 1:
             simulation->surface = SURFACE_BUNKER_FAIR_LIE;
@@ -1274,6 +1357,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
               impactSpeed < 1422.336f)) {
         simulation->isRunning = BALL_STATE_STOPPED;
       }
+
       switch (GetSurfaceInfo(simulation->surface)->kind) {
         case SURFACE_KIND_GREEN:
         case SURFACE_KIND_GREEN_EDGE:
@@ -1284,10 +1368,12 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (friction > 0.8f) {
             friction = 0.8f;
           }
+
           friction -= GetStepNoise() * 0.1f;
           if (friction < 0.05f) {
             friction = 0.05f;
           }
+
           spin = 1.0f -
               (sqrtf((speed * speed) -
                    (impactSpeed * (1.0f - friction) * impactSpeed *
@@ -1296,9 +1382,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (spin > 0.01f) {
             spin = 0.01f;
           }
+
           if (spin < -0.2f) {
             spin = -0.2f;
           }
+
           break;
         case SURFACE_KIND_FAIRWAY:
         case SURFACE_KIND_FAIRWAY_FAIR_LIE:
@@ -1311,6 +1399,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (friction > 1.0f) {
             friction = 1.0f;
           }
+
           spin = 1.0f -
               (sqrtf((speed * speed) -
                    (impactSpeed * (1.0f - friction) * impactSpeed *
@@ -1319,9 +1408,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           if (spin > 0.01f) {
             spin = 0.01f;
           }
+
           if (spin < -0.2f) {
             spin = -0.2f;
           }
+
           break;
         case SURFACE_KIND_BUNKER:
         case SURFACE_KIND_BUNKER_FAIR_LIE:
@@ -1343,15 +1434,18 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           friction += friction * GetPositionNoise() * 0.1f;
           break;
       }
+
       if (g_IsMiniGolf) {
         spin = 0.0f;
       }
+
       restitution = 1.0f - friction;
       if (restitution < 0.0f) {
         restitution = 0.0f;
       } else if (restitution > 1.5f) {
         restitution = 1.5f;
       }
+
       if (simulation->isRunning != BALL_STATE_ROLLING &&
           impactSpeed < 7111.68f &&
           simulation->unk98 - 1 == simulation->unk9C) {
@@ -1366,6 +1460,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->position[AXIS_Y] = GetGroundHeight(
               simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         }
+
         unk34X = simulation->unk34 * cosf(simulation->unk3C);
         unk34Z = simulation->unk34 * sinf(simulation->unk3C);
         velocity[AXIS_X] += (unk34X - velocity[AXIS_X]) *
@@ -1388,9 +1483,11 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (keep <= 0.1f) {
           keep = 0.1f;
         }
+
         if (simulation->unk98 < 2 && !g_IsMiniGolf) {
           keep *= 0.25;
         }
+
         normalPart[AXIS_X] = -plane.normal[AXIS_X] * impactSpeed;
         normalPart[AXIS_Y] = -plane.normal[AXIS_Y] * impactSpeed;
         normalPart[AXIS_Z] = -plane.normal[AXIS_Z] * impactSpeed;
@@ -1419,6 +1516,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           driftX = driftX * scale;
           driftZ = driftZ * scale;
         }
+
         unk34X *= 0.9f;
         unk34Z *= 0.9f;
         velocity[AXIS_X] += driftX;
@@ -1432,6 +1530,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         velocity[AXIS_Y] += 262.0f;
       }
     }
+
     if (!simulation->unkA1 && simulation->isRunning == BALL_STATE_ROLLING &&
         contact == 0 && !isNearCup) {
       simulation->isRunning = BALL_STATE_FLYING;
@@ -1439,12 +1538,14 @@ s32 StepBallSimulation(BallSimulation* simulation) {
       simulation->unk34 = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
       BuildUnk44Rotation();
     }
+
     if (simulation->unkA1 && simulation->isRunning == BALL_STATE_ROLLING &&
         contact == 0 &&
         FindGroundTriangle(simulation->position[AXIS_X],
             simulation->position[AXIS_Z], &triangle) == 0) {
       contact = STEP_FLAG_GROUND_HIT;
     }
+
     if (simulation->isRunning == BALL_STATE_ROLLING && !isNearCup &&
         contact == STEP_FLAG_GROUND_HIT) {
       TrianglePlane plane;
@@ -1473,6 +1574,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         if (g_ClubTestMode == CLUB_TEST_SHOT) {
           info = &g_SurfaceInfo[SURFACE_FAIRWAY];
         }
+
         groundHeight = 0;
         GetTrianglePlane(&triangle, &plane);
       } else {
@@ -1492,6 +1594,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             if (!g_IsMiniGolf) {
               damping = 0.1f;
             }
+
             along[AXIS_X] =
                 velocity[AXIS_X] - (plane.normal[AXIS_X] * pressing);
             along[AXIS_Y] =
@@ -1509,6 +1612,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
             velocity[AXIS_Z] = along[AXIS_Z] * damping;
           }
         }
+
         if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST && !g_IsMiniGolf &&
             fabsf(velocity[AXIS_X]) + fabsf(velocity[AXIS_Z]) >= 711.168f) {
           f32 tilt = (GetStepNoise() - 0.5f) * 0.5f;
@@ -1518,6 +1622,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           guNormalize(&plane.normal[AXIS_X], &plane.normal[AXIS_Y],
               &plane.normal[AXIS_Z]);
         }
+
         simulation->surface = GetSurface(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         switch (simulation->surface) {
@@ -1531,18 +1636,22 @@ s32 StepBallSimulation(BallSimulation* simulation) {
                 simulation->surface = SURFACE_FAIRWAY_FAIR_LIE;
               }
             }
+
             break;
           case SURFACE_ROUGH:
             if (GetStepNoise() < 0.35f) {
               simulation->surface = SURFACE_ROUGH_POOR_LIE;
             }
+
             break;
         }
+
         info = GetSurfaceInfo(simulation->surface);
         if (info->kind == SURFACE_KIND_OUT_OF_COURSE) {
           simulation->isRunning = BALL_STATE_STOPPED;
           goto ROLLED;
         }
+
         groundHeight = GetGroundHeight(
             simulation->position[AXIS_X], simulation->position[AXIS_Z]);
         if (!g_IsMiniGolf &&
@@ -1556,6 +1665,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           simulation->isRunning = BALL_STATE_FLYING;
           goto TAKE_OFF;
         }
+
         if (simulation->position[AXIS_Y] + 307.2f < groundHeight) {
           simulation->isRunning = BALL_STATE_FLYING;
 
@@ -1568,6 +1678,7 @@ TAKE_OFF:
           goto ROLLED;
         }
       }
+
       slopeX = (-plane.normal[AXIS_X] * 196.5f) /
           AbsoluteValue(plane.normal[AXIS_Y]);
       slopeZ = (-plane.normal[AXIS_Z] * 196.5f) /
@@ -1579,17 +1690,20 @@ TAKE_OFF:
         slopeX = slopeX * scale;
         slopeZ = slopeZ * scale;
       }
+
       if (plane.normal[AXIS_Y] * plane.normal[AXIS_Y] <=
               (plane.normal[AXIS_X] * plane.normal[AXIS_X]) +
                   (plane.normal[AXIS_Z] * plane.normal[AXIS_Z]) &&
           simulation->unk98 < 800) {
         isSteep = TRUE;
       }
+
       friction = info->unkC * 0.001f;
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST &&
           g_HoleConditions.isRaining == TRUE) {
         friction *= 0.993f;
       }
+
       if (simulation->unkA1 && (u16)simulation->unkB2 < 30) {
         slopeX *= 3;
         slopeZ *= 3;
@@ -1607,6 +1721,7 @@ TAKE_OFF:
           slopeX = slopeX * scale;
           slopeZ = slopeZ * scale;
         }
+
         if (simulation->unk98 >= 600) {
           friction *= 0.5f;
         } else if (simulation->unk98 >= 400) {
@@ -1615,6 +1730,7 @@ TAKE_OFF:
           friction *= 0.99f;
         }
       }
+
       speed = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
           (velocity[AXIS_Z] * velocity[AXIS_Z]));
       if (speed > 15.36f) {
@@ -1628,6 +1744,7 @@ TAKE_OFF:
         slopeX = slopeX * 0.5f;
         slopeZ = slopeZ * 0.5f;
       }
+
       velocity[AXIS_X] =
           (slopeX * friction * 0.4f) + (velocity[AXIS_X] * friction);
       velocity[AXIS_Z] =
@@ -1645,10 +1762,12 @@ TAKE_OFF:
           velocity[AXIS_Y] += 262.0f;
         }
       }
+
       if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
           IsGameFlagSet(GAME_FLAG_LOG_VERTICAL_VELOCITY)) {
         osSyncPrintf("V[1] %d\n", velocity[AXIS_Y]);
       }
+
       if ((u16)simulation->unkB2 >= 16) {
         s32 speed = IntLength2D(velocity[AXIS_X], velocity[AXIS_Z]);
 
@@ -1660,6 +1779,7 @@ TAKE_OFF:
           }
         }
       }
+
       if (!isSteep && info->kind != SURFACE_KIND_GREEN &&
           simulation->unk9C + 90 < simulation->unk98 &&
           sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
@@ -1705,10 +1825,12 @@ ROLLED:
         } else {
           ratio = 0.0f;
         }
+
         weight = 1.0f - (fabsf(ratio - 1.0f) * 0.8f);
         if (weight < 0.0f) {
           weight = 0.0f;
         }
+
         curve = unk38 * (weight * 0.038146973f);
         if (horizontalSpeed < fabsf(curve) * 100.0f) {
           curve = horizontalSpeed * 0.01f;
@@ -1716,12 +1838,14 @@ ROLLED:
             curve = -curve;
           }
         }
+
         if (horizontalSpeed > 1422.336f) {
           f32 scale = (1.0f / horizontalSpeed) * curve;
 
           velocity[AXIS_X] += -relative[AXIS_Z] * scale;
           velocity[AXIS_Z] += relative[AXIS_X] * scale;
         }
+
         simulation->unk38 = simulation->unk38 * 0.995f;
         lift = simulation->unk34 * 0.045776367f;
         if (simulation->unk34 != 0 && airSpeed > 142.2336f) {
@@ -1734,6 +1858,7 @@ ROLLED:
           if (airSpeed < fabsf(lift) * 80.0f) {
             lift = airSpeed * 0.0125f;
           }
+
           scale = lift /
               sqrtf((turned[AXIS_X] * turned[AXIS_X]) +
                   (turned[AXIS_Y] * turned[AXIS_Y]) +
@@ -1746,6 +1871,7 @@ ROLLED:
           velocity[AXIS_Z] += turned[AXIS_Z];
           simulation->unk34 = simulation->unk34 * 0.993f;
         }
+
         height =
             simulation->startPosition[AXIS_Y] - simulation->position[AXIS_Y];
         if (height <= 0.0f) {
@@ -1757,23 +1883,28 @@ ROLLED:
           windX = simulation->windVelocityX * scale;
           windZ = simulation->windVelocityZ * scale;
         }
+
         velocity[AXIS_X] += (windX - velocity[AXIS_X]) * drag;
         velocity[AXIS_Y] += (-velocity[AXIS_Y] * drag) + 262.0f;
         velocity[AXIS_Z] += (windZ - velocity[AXIS_Z]) * drag;
       }
     }
+
     if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
       s32 isOutside = simulation->position[AXIS_Z] > 0x7ED400;
 
       if (simulation->position[AXIS_Z] <= 0x12BFF) {
         isOutside = TRUE;
       }
+
       if (simulation->position[AXIS_X] > 0x3ED400) {
         isOutside = TRUE;
       }
+
       if (simulation->position[AXIS_X] <= 0x12BFF) {
         isOutside = TRUE;
       }
+
       if (isOutside) {
         flags |= STEP_FLAG_OUTSIDE_COURSE;
       }
@@ -1823,12 +1954,15 @@ SETTLE:
           }
         }
       }
+
       if (floor < simulation->position[AXIS_Y]) {
         simulation->position[AXIS_Y] = floor;
       }
+
       if (simulation->position[AXIS_Y] < -0x465000) {
         simulation->position[AXIS_Y] = -0x465000;
       }
+
       if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
         s32 kind;
         PlaneTriangle ground;
@@ -1876,16 +2010,19 @@ NEXT:
         if (rollFrames > 5) {
           rollFrames = 5;
         }
+
         volume = sqrtf((velocity[AXIS_X] * velocity[AXIS_X]) +
                      (velocity[AXIS_Z] * velocity[AXIS_Z])) *
             0.008928973f * (rollFrames + 1);
         if (volume > 0x37) {
           volume = 0x37;
         }
+
         SetSoundVolume(ROLL_SOUND_CHANNEL, volume & ~(volume >> 31));
       }
     }
   }
+
   return flags;
 }
 #else
@@ -1910,15 +2047,19 @@ Unk6* GetUnkCEntry(Club* club, s32 surface, s32 shotMode, s32 unkC) {
   if (row < 0) {
     row = 0;
   }
+
   if (row > MAX_LIE_RATING) {
     row = MAX_LIE_RATING;
   }
+
   if (unkC < -UNKC_ENTRY_LIMIT) {
     return &D_800B7C00;
   }
+
   if (unkC <= UNKC_ENTRY_LIMIT) {
     return &D_800B7C10[row][unkC + UNKC_ENTRY_LIMIT];
   }
+
   return &D_800B7C08;
 }
 
@@ -1982,6 +2123,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       simulation->position[AXIS_Y] = groundHeight;
     }
   }
+
   surface = simulation->surface;
   simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
   simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X];
@@ -1994,12 +2136,14 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   simulation->unkA1 = 0;
   simulation->unkA6 = 0;
   simulation->unkB4 = 0;
+
   /* The tests of purpose, and their senses, are there to match */
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->playerIndex = shot->unk18;
   } else {
     simulation->playerIndex = 0;
   }
+
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     s16* clubs = g_Players[shot->unk18].clubs;
 
@@ -2007,6 +2151,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   } else {
     club = GetClub(shot->clubIndex);
   }
+
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
     entry = &D_800B7C10[0][UNKC_ENTRY_LIMIT];
     rumbles = D_800B7C10[0][UNKC_ENTRY_LIMIT].unk5;
@@ -2017,9 +2162,11 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     if (row < 0) {
       row = 0;
     }
+
     if (row > MAX_LIE_RATING) {
       row = MAX_LIE_RATING;
     }
+
     if (unkC < -UNKC_ENTRY_LIMIT) {
       entry = &D_800B7C00;
     } else if (unkC > UNKC_ENTRY_LIMIT) {
@@ -2027,8 +2174,10 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     } else {
       entry = &D_800B7C10[row][unkC + UNKC_ENTRY_LIMIT];
     }
+
     rumbles = entry->unk5;
   }
+
   if ((club->surfaceMask & CLUB_SURFACE_GREEN) &&
       simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     speed = GetPuttPower(shot->unk8, shot->shotMode);
@@ -2039,6 +2188,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       speed = 10;
     }
   }
+
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     SurfaceInfo* info = GetSurfaceInfo(simulation->unkA2);
 
@@ -2051,10 +2201,12 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
     speed = speed * percent / 200;
   }
+
   pitch = (club->pitch + entry->unk2) * 0.017453294f;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
+
   if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     sinf(pitch); /* The original has it */
     along = pitch - (club->unk10 * 0.017453294f);
@@ -2064,8 +2216,10 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     if (club->kind == CLUB_KIND_WOOD) {
       launchScale *= 2.0f;
     }
+
     launchScale += 1.0f;
   }
+
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     if ((club->surfaceMask & CLUB_SURFACE_GREEN) && !g_IsMiniGolf) {
       pitch += (u16)GetAimSlopeAngle(&g_Players[shot->unk18], shot) *
@@ -2077,6 +2231,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       speed = speed * (1.0f - sinf(slopePitch));
     }
   }
+
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST ||
       (club->surfaceMask & CLUB_SURFACE_GREEN)) {
     yawRadians = (u16)shot->unk0 * BINARY_ANGLE_TO_RADIANS;
@@ -2086,11 +2241,13 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     if (crossSlope < 0) {
       crossSlopeSize = -crossSlope;
     }
+
     curve = sqrtf(crossSlopeSize * 0.25f);
     sideSign = g_Players[shot->unk18].unk22 ? -1 : 1;
     if (crossSlope < 0) {
       curve = -curve;
     }
+
     slopeSpin = curve;
     yaw = shot->unk0 + (crossSlope / 2) +
         (sideSign *
@@ -2098,6 +2255,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
                 (entry->unk1 * club->unk0)));
     yawRadians = (u16)yaw * BINARY_ANGLE_TO_RADIANS;
   }
+
   if (simulation->purpose == LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->unk38 = (sideSign * (club->sideSpin * 2) * speed) * 0.00078125f;
     simulation->unk40 = 0.0f;
@@ -2109,6 +2267,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     if (!(club->surfaceMask & CLUB_SURFACE_GREEN)) {
       speed = speed * launchScale;
     }
+
     if (speed < 0) {
       speed = 0;
     }
@@ -2130,20 +2289,25 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     } else {
       simulation->unk34 = speed;
     }
+
     if (speed < 0) {
       speed = 0;
     }
+
     if (g_HoleConditions.isRaining == TRUE) {
       simulation->unk34 = simulation->unk34 * 0.6f;
       simulation->unk38 = simulation->unk38 * 0.95f;
     }
+
     simulation->unk40 =
         IntLength2D(simulation->unk34, simulation->unk38) * 0.4f;
     simulation->unk3C = yawRadians;
   }
+
   if (speed <= 0) {
     speed = 10;
   }
+
   simulation->velocity[AXIS_Y] = sinf(pitch) * speed;
   simulation->velocity[AXIS_X] = cosf(yawRadians) * speed;
   simulation->velocity[AXIS_Z] = sinf(yawRadians) * speed;
@@ -2153,6 +2317,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   } else {
     simulation->isRunning = 1;
   }
+
   simulation->unk94 = 0;
   simulation->unk98 = 0;
   simulation->unk9C = -2;
@@ -2162,6 +2327,7 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   for (index = 0; index < UNKA8_COUNT; index++) {
     simulation->unkA8[index] = 0;
   }
+
   windScale = 0.0078125f; /* The local is there to match */
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     windAngle = g_HoleConditions.windDirection * BINARY_ANGLE_TO_RADIANS;
@@ -2180,11 +2346,13 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     simulation->windVelocityX = 0.0f;
     simulation->windVelocityZ = 0.0f;
   }
+
   if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
     SpawnShotDebris(simulation->position, pitch, yawRadians, speed);
     if (rumbles) {
       StartPlayerRumble(&g_Players[simulation->playerIndex]);
     }
+
     /* The original tests the purpose again */
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
@@ -2213,5 +2381,6 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       PrintDebugText(text, 3, 14);
     }
   }
+
   return 0;
 }

@@ -281,6 +281,7 @@ s32 IsMenuWindowOpen(void) {
   } else {
     isOpen = g_MenuWindowState == MENU_WINDOW_OPEN;
   }
+
   return isOpen;
 }
 
@@ -292,6 +293,7 @@ s32 IsMenuWindowClosed(void) {
   } else {
     isClosed = g_MenuWindowState == MENU_WINDOW_CLOSED;
   }
+
   return isClosed;
 }
 
@@ -334,6 +336,7 @@ void func_802267B0_ovl_01(void* buffer, s16 bufferKind) {
       ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
       break;
   }
+
   ResetMenuWindow();
 }
 
@@ -345,9 +348,11 @@ void func_80226904_ovl_01(s32 imageIndex) {
   if (imageIndex < 0) {
     imageIndex = 0;
   }
+
   if (imageIndex >= 10) {
     imageIndex = 9;
   }
+
   OpenEncodedAsset(D_800C2074[imageIndex], &asset);
   ReadEncodedAsset(D_80230E7C_ovl_01, &asset);
 }
@@ -358,9 +363,11 @@ void LoadMenuWindowImage(s32 imageIndex) {
   if (imageIndex < 0) {
     imageIndex = 0;
   }
+
   if (imageIndex >= ARRAY_COUNT(g_MenuWindowImageAssets)) {
     imageIndex = ARRAY_COUNT(g_MenuWindowImageAssets) - 1;
   }
+
   OpenEncodedAsset(g_MenuWindowImageAssets[imageIndex], &asset);
   ReadEncodedAsset(g_MenuWindowImage, &asset);
 }
@@ -371,15 +378,19 @@ void func_802269AC_ovl_01(s32 row, s32 column) {
   if (row < 0) {
     row = 0;
   }
+
   if (row >= TOURNAMENT_IMAGE_ROW_COUNT) {
     row = TOURNAMENT_IMAGE_ROW_COUNT - 1;
   }
+
   if (column < 0) {
     column = 0;
   }
+
   if (column >= TOURNAMENT_IMAGE_COLUMN_COUNT) {
     column = TOURNAMENT_IMAGE_COLUMN_COUNT - 1;
   }
+
   OpenAssetFile(D_80230EC4_ovl_01[row][column], &file);
   ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
 }
@@ -455,9 +466,11 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       if (g_MenuWindowScaleX > 1.0f) {
         g_MenuWindowScaleX = 1.0f;
       }
+
       if (g_MenuWindowScaleY > 1.0f) {
         g_MenuWindowScaleY = 1.0f;
       }
+
       windowWidth = width * g_MenuWindowScaleX;
       windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
       buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
@@ -465,6 +478,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       if (g_MenuWindowScaleX == 1.0f && g_MenuWindowScaleY == 1.0f) {
         g_MenuWindowState = MENU_WINDOW_OPEN;
       }
+
       break;
     case MENU_WINDOW_OPEN:
       windowWidth = width;
@@ -478,9 +492,11 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
       if (g_MenuWindowScaleX < MENU_WINDOW_SCALE_STEP) {
         g_MenuWindowScaleX = MENU_WINDOW_CLOSED_SCALE;
       }
+
       if (g_MenuWindowScaleY < MENU_WINDOW_SCALE_STEP) {
         g_MenuWindowScaleY = MENU_WINDOW_CLOSED_SCALE;
       }
+
       windowWidth = width * g_MenuWindowScaleX;
       windowHalfHeight = (height / 2) * g_MenuWindowScaleY;
       buttonWidth = g_MenuWindowScaleX * YES_NO_BUTTON_SHOWN_WIDTH;
@@ -489,10 +505,12 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
           g_MenuWindowScaleY <= MENU_WINDOW_CLOSED_SCALE) {
         g_MenuWindowState = MENU_WINDOW_CLOSED;
       }
+
       break;
     default:
       return;
   }
+
   halfWidth = (s32)windowWidth / 2;
   halfHeight = windowHalfHeight;
   buttonHalfWidth = (s32)buttonWidth / 2;
@@ -533,6 +551,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
         (MENU_WINDOW_STRIP_HEIGHT << 10) / (s32)windowHalfHeight);
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -550,6 +569,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     } else {
       buttonX = centerX + (s32)(g_MenuWindowScaleX * YES_NO_BUTTON_OFFSET);
     }
+
     buttonY = centerY + windowHalfHeight -
         (s32)(g_MenuWindowScaleY * YES_NO_BUTTON_OFFSET);
     growth = 0;
@@ -559,6 +579,7 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
     } else {
       pulse = 0;
     }
+
     DrawTextureRect(&gfx, (buttonX - buttonHalfWidth - growth) << 2,
         (buttonY - buttonHalfHeight - growth) << 2,
         (buttonX + buttonHalfWidth + growth) << 2,
@@ -567,23 +588,29 @@ void func_80226A58_ovl_01(Gfx** displayListHead, s32 width, s32 height,
         (YES_NO_BUTTON_HEIGHT << 10) / (s32)(buttonHeight + pulse));
     gDPPipeSync(gfx++);
   }
+
   if (D_80230EA0_ovl_01 == YES_NO_PULSE_GROWING) {
     D_80230E9C_ovl_01 += YES_NO_PULSE_STEP;
   }
+
   if (D_80230EA0_ovl_01 == YES_NO_PULSE_SHRINKING) {
     D_80230E9C_ovl_01 -= YES_NO_PULSE_STEP;
   }
+
   if (D_80230E9C_ovl_01 == YES_NO_PULSE_LIMIT) {
     D_80230EA0_ovl_01 = YES_NO_PULSE_SHRINKING;
   }
+
   if (D_80230E9C_ovl_01 == 0) {
     D_80230EA0_ovl_01 = YES_NO_PULSE_GROWING;
   }
+
   if (okTextShown != NO_OK_TEXT && IsMenuWindowOpen()) {
     SetTextSlot(centerX + OK_TEXT_OFFSET_X, buttonY - OK_TEXT_OFFSET_Y,
         MESSAGE_OK, 1, OK_TEXT_SLOT, TEXT_FLAG_CENTERED, OK_TEXT_RED,
         OK_TEXT_GREEN, OK_TEXT_BLUE, OK_TEXT_ALPHA);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -676,6 +703,7 @@ void func_80228B60_ovl_01(void) {
   for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
     D_80230FD4_ovl_01[charIndex] = CLUB_CODE_NO_CHAR;
   }
+
   D_80230F68_ovl_01 = 0;
   D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
   D_80230F5C_ovl_01 = 0;
@@ -705,10 +733,12 @@ void func_80228C00_ovl_01(void) {
   if (IsHudAnimationDone() != TRUE) {
     return;
   }
+
   if (D_80230F70_ovl_01 == CLUB_CODE_PHASE_INCORRECT) {
     if (!IsTextSlotRevealed(0)) {
       return;
     }
+
     if (g_MenuRepeatButtons & A_BUTTON) {
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
@@ -717,40 +747,49 @@ void func_80228C00_ovl_01(void) {
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_TYPING;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_ENTERING;
     }
+
     return;
   }
+
   if (D_80230F70_ovl_01 != CLUB_CODE_PHASE_TYPING) {
     func_80229278_ovl_01();
     return;
   }
+
   /* The second controller edits the tournament code digit by digit */
   if (IsGameFlagSet(GAME_FLAG_EDIT_TOURNAMENT_CODE)) {
     if (g_MenuControllerData[1].button & L_JPAD) {
       D_80231134_ovl_01 =
           (D_80231134_ovl_01 + TOURNAMENT_CODE_SIZE - 1) % TOURNAMENT_CODE_SIZE;
     }
+
     if (g_MenuControllerData[1].button & R_JPAD) {
       D_80231134_ovl_01 = (D_80231134_ovl_01 + 1) % TOURNAMENT_CODE_SIZE;
     }
+
     /* The original's unconditional steps cancel out, so a held direction
      * changes the digit every frame */
     if (g_MenuControllerData[1].button & U_JPAD) {
       g_TournamentCode[D_80231134_ovl_01]++;
     }
+
     g_TournamentCode[D_80231134_ovl_01]++;
     if (g_MenuControllerData[1].button & D_JPAD) {
       g_TournamentCode[D_80231134_ovl_01]--;
     }
+
     g_TournamentCode[D_80231134_ovl_01]--;
     for (index = 0; index < TOURNAMENT_CODE_SIZE; index++) {
       if (D_80231134_ovl_01 == index) {
         SetDebugTextHighlight(TRUE);
       }
+
       sprintf(debugText, "P%d[%d]  ", index, g_TournamentCode[index]);
       PrintDebugText(
           debugText, CODE_DEBUG_TEXT_COLUMN, index + CODE_DEBUG_TEXT_FIRST_ROW);
     }
   }
+
   if (g_MenuRepeatButtons & A_BUTTON) {
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
     result = func_8022B46C_ovl_01();
@@ -761,11 +800,13 @@ void func_80228C00_ovl_01(void) {
         isInvalid = DecodeTournamentPassword(
             g_TournamentCode, (char*)D_80230FD4_ovl_01);
       }
+
       if (!isInvalid) {
         D_80230F74_ovl_01 = g_TournamentCode[0] & CLUB_CODE_NAME_MASK;
         if (D_80230F74_ovl_01 >= CLUB_TOURNAMENT_NAME_COUNT) {
           D_80230F74_ovl_01 = 0;
         }
+
         D_80105DC4 = g_TournamentCode[0] >> CLUB_CODE_NINTENDO_SHIFT;
         D_80105DC8 = D_80230F74_ovl_01;
         rules = GetTournamentRules(g_TournamentCode[1]);
@@ -784,8 +825,10 @@ void func_80228C00_ovl_01(void) {
           LoadMenuWindowImage(CHARACTER_KID);
           func_802269AC_ovl_01(CHARACTER_KID, 0);
         }
+
         return;
       }
+
       PlaySound(SOUND_CODE_INCORRECT, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
       D_80230F70_ovl_01 = CLUB_CODE_PHASE_INCORRECT;
       D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
@@ -796,6 +839,7 @@ void func_80228C00_ovl_01(void) {
     }
   } else if (g_MenuRepeatButtons & B_BUTTON) {
     PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+
     /* B first deletes the code's characters, and leaves only once the code is
      * empty */
     if (func_8022B5E0_ovl_01()) {
@@ -813,6 +857,7 @@ void func_80228C00_ovl_01(void) {
     if (memory->codeKeyRow < 0) {
       memory->codeKeyRow = CODE_KEYBOARD_ROW_COUNT - 1;
     }
+
     if (D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn] ==
         CODE_KEY_BLANK) {
       memory->codeKeyRow = CODE_KEYBOARD_END_ROW - 1;
@@ -823,6 +868,7 @@ void func_80228C00_ovl_01(void) {
         CODE_KEY_BLANK) {
       memory->codeKeyRow = 0;
     }
+
     if (memory->codeKeyRow >= CODE_KEYBOARD_ROW_COUNT) {
       memory->codeKeyRow = 0;
     }
@@ -832,6 +878,7 @@ void func_80228C00_ovl_01(void) {
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_FIRST_BLANK_COLUMN - 1;
     }
+
     if (memory->codeKeyColumn < 0) {
       memory->codeKeyColumn = CODE_KEYBOARD_COLUMN_COUNT - 1;
     }
@@ -841,6 +888,7 @@ void func_80228C00_ovl_01(void) {
         CODE_KEY_BLANK) {
       memory->codeKeyColumn = CODE_KEYBOARD_BACK_COLUMN;
     }
+
     if (memory->codeKeyColumn >= CODE_KEYBOARD_COLUMN_COUNT) {
       memory->codeKeyColumn = 0;
     }
@@ -861,33 +909,41 @@ void func_80229278_ovl_01(void) {
   if (isHudAnimationDone != TRUE) {
     return;
   }
+
   if (GetWipeKind() != WIPE_NONE) {
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
       SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
     }
+
     if (GetWipeProgress() == 0) {
       D_801B60B4 = (g_TournamentCode[0] << 16) | (g_TournamentCode[1] << 8) |
           g_TournamentCode[2];
       StartLoadingChosenHole();
       g_MenuScreen = MENU_SCREEN_EXIT;
     }
+
     return;
   }
+
   if (IsMenuWindowOpen() == -1) {
     return;
   }
+
   if (IsMenuWindowClosed() == -1) {
     return;
   }
+
   if (IsMenuWindowClosed()) {
     D_80230F80_ovl_01 = CLUB_CHOICE_NO;
     for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
       SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
     }
+
     D_80230F70_ovl_01 = FALSE;
     D_80230F80_ovl_01 = CLUB_CHOICE_YES;
     return;
   }
+
   pressedButtons = g_MenuRepeatButtons;
   if (pressedButtons & A_BUTTON) {
     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
@@ -906,6 +962,7 @@ void func_80229278_ovl_01(void) {
             break;
           }
         }
+
         StartLoadingChosenHole();
         D_801B7070 = 1;
         g_PlayerCount = 1;
@@ -922,9 +979,11 @@ void func_80229278_ovl_01(void) {
         } else {
           g_Players[0].paletteIndex = 0;
         }
+
         LoadWipeShape(GetClubTournamentCourse());
         StartWipe(WIPE_CLOSING);
       }
+
       for (index = 0; index != CLUB_TEXT_SLOT_COUNT; index++) {
         SetTextSlot(0, 0, NO_MESSAGE, 1, index, 0, 255, 255, 255, 255);
       }
@@ -975,6 +1034,7 @@ void func_802296C4_ovl_01(
   for (digit = g_PrintBuffer; *digit != '\0'; digit++) {
     width += ORDINAL_DIGIT_SPACING;
   }
+
   left = centerX - (ORDINAL_GLYPH_SIZE / 2);
   left -= width / 2;
   width = 0;
@@ -996,10 +1056,12 @@ void func_802296C4_ovl_01(
           TEXEL_STEP_ONE);
     }
   }
+
   suffix = number;
   if (suffix > ORDINAL_PLACE_LIMIT) {
     suffix %= ORDINAL_PLACE_LIMIT;
   }
+
   suffix--;
   if (suffix >= ORDINAL_SUFFIX_TH) {
     if (suffix < ORDINAL_LAST_TEEN) {
@@ -1012,6 +1074,7 @@ void func_802296C4_ovl_01(
       }
     }
   }
+
   gDPLoadTextureTile(gfx++, ((u32)image + LARGE_PALETTED_TEXELS_OFFSET) & ~7,
       G_IM_FMT_CI, G_IM_SIZ_8b, ORDINAL_GLYPH_SIZE, ORDINAL_IMAGE_HEIGHT, 0,
       (suffix + ORDINAL_FIRST_SUFFIX) * ORDINAL_GLYPH_SIZE,
@@ -1069,6 +1132,7 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
           func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
         }
       }
+
       func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
@@ -1091,11 +1155,13 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
           func_802269AC_ovl_01(func_8022BDC4_ovl_01(), 0);
         }
       }
+
       func_8022747C_ovl_01(&gfx, CLUB_WINDOW_WIDTH, CLUB_WINDOW_HEIGHT,
           CLUB_WINDOW_CENTER_X, CLUB_WINDOW_CENTER_Y, 0, D_80230F80_ovl_01,
           windowStyle);
       func_802296C4_ovl_01(&gfx, CLUB_TEXT_X, CLUB_NUMBER_Y, D_80105DCC);
     }
+
     if (IsMenuWindowOpen() != -1 && !IsMenuWindowClosed()) {
       MeasureMessage(D_80105DC8 + MESSAGE_FIRST_CLUB_TOURNAMENT_NAME,
           FONT_SIZE_LARGE, &width, &height, 0);
@@ -1113,6 +1179,7 @@ void func_80229CB0_ovl_01(Gfx** displayListHead) {
           CLUB_MODE_SLOT, TEXT_FLAG_CENTERED, 255, 63, 127, 255);
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1150,6 +1217,7 @@ void func_8022A090_ovl_01(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1199,6 +1267,7 @@ void func_8022A43C_ovl_01(Gfx** displayListHead) {
         (MENU_BANNER_STRIP_HEIGHT << 10) / CODE_LOWER_PANEL_STRIP_HEIGHT);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1233,12 +1302,14 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
         if (D_80230F60_ovl_01 == CODE_HAND_REACH) {
           D_80230F5C_ovl_01 = CODE_HAND_MOVING_LEFT;
         }
+
         break;
       case CODE_HAND_MOVING_LEFT:
         D_80230F60_ovl_01--;
         if (D_80230F60_ovl_01 == 0) {
           D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
         }
+
         break;
       default:
         D_80230F5C_ovl_01 = CODE_HAND_MOVING_RIGHT;
@@ -1246,6 +1317,7 @@ void func_8022A8F4_ovl_01(Gfx** displayListHead) {
         break;
     }
   }
+
   left = (memory->codeKeyColumn * CODE_KEY_SPACING_X) + CODE_HAND_FIRST_X +
       D_80230F60_ovl_01;
   top = (memory->codeKeyRow * CODE_KEY_SPACING_Y) + CODE_HAND_FIRST_Y;
@@ -1278,9 +1350,11 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
       if (glyph == CODE_GLYPH_NONE) {
         continue;
       }
+
       if (memory->codeKeyColumn == column && memory->codeKeyRow == row) {
         gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
         gDPSetPrimColor(gfx++, 0, 0, 255, 255, 0, 255);
+
         /* Both branches set these the same; the chosen key may once have been
          * drawn larger */
         grow = 0;
@@ -1290,6 +1364,7 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
         grow = 0;
         size = CODE_GLYPH_SIZE;
       }
+
       gDPLoadTextureBlock_4b(gfx++,
           ((u32)D_80230F4C_ovl_01 + PALETTED_TEXELS_OFFSET +
               (glyph * (CODE_GLYPH_SIZE * CODE_GLYPH_SIZE / 2))) &
@@ -1311,6 +1386,7 @@ void func_8022ADE8_ovl_01(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
     }
   }
+
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
   gDPPipeSync(gfx++);
   D_80230F78_ovl_01 = D_80230F60_ovl_01 * 2;
@@ -1332,6 +1408,7 @@ void func_8022B360_ovl_01(Gfx** displayListHead) {
           g_PrintBuffer, -1, -1, 0);
     }
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -1350,11 +1427,13 @@ s32 func_8022B46C_ovl_01(void) {
         if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
           D_80230F68_ovl_01 = CLUB_TOURNAMENT_CODE_LENGTH - 1;
         }
+
         D_80230FD4_ovl_01[D_80230F68_ovl_01] = CLUB_CODE_NO_CHAR;
         D_80230F68_ovl_01--;
       } else {
         D_80230FD4_ovl_01[0] = CLUB_CODE_NO_CHAR;
       }
+
       break;
     case CODE_KEY_BLANK:
       break;
@@ -1362,6 +1441,7 @@ s32 func_8022B46C_ovl_01(void) {
       if (D_80230F68_ovl_01 < CLUB_TOURNAMENT_CODE_LENGTH) {
         return CODE_KEY_RESULT_TOO_SHORT;
       }
+
       result = CODE_KEY_RESULT_DONE;
       break;
     default:
@@ -1375,8 +1455,10 @@ s32 func_8022B46C_ovl_01(void) {
       } else {
         D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1] = key;
       }
+
       break;
   }
+
   return result;
 }
 #else
@@ -1390,6 +1472,7 @@ s32 func_8022B5E0_ovl_01(void) {
     if (D_80230F68_ovl_01 == 8) {
       D_80230F68_ovl_01 = 7;
     }
+
     D_80230FD4_ovl_01[D_80230F68_ovl_01] = 0xFF;
     D_80230F68_ovl_01--;
     isEmpty = FALSE;
@@ -1397,6 +1480,7 @@ s32 func_8022B5E0_ovl_01(void) {
     D_80230FD4_ovl_01[0] = 0xFF;
     isEmpty = FALSE;
   }
+
   return isEmpty;
 }
 
@@ -1423,6 +1507,7 @@ void func_8022B668_ovl_01(Gfx** displayListHead) {
       flags = TEXT_FLAG_UNK20 | TEXT_FLAG_TYPED;
       break;
   }
+
   if (messageOffset >= 0) {
     gDPPipeSync(gfx++);
     SetUpTextDrawing(&gfx);
@@ -1430,6 +1515,7 @@ void func_8022B668_ovl_01(Gfx** displayListHead) {
         0, flags, 255, 255, 255, 255);
     DrawLargeTextSlot(&gfx, 0);
   }
+
   *displayListHead = gfx;
 }
 
@@ -1446,16 +1532,20 @@ s32 func_8022B75C_ovl_01(void) {
           D_80230FDC_ovl_01[codeIndex][charIndex]) {
         break;
       }
+
       matchCount++;
     }
+
     if (matchCount == CLUB_TOURNAMENT_CODE_LENGTH) {
       foundIndex = codeIndex;
       break;
     }
   }
+
   if (foundIndex == -1) {
     D_80230F6C_ovl_01 = CLUB_CODE_STATE_INCORRECT;
   }
+
   return foundIndex;
 }
 
@@ -1488,6 +1578,7 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
     D_80231138_ovl_01[vertexIndex].v.cn[2] = blue;
     D_80231138_ovl_01[vertexIndex].v.cn[1] = green;
   }
+
   guOrtho(&D_8023BE40_ovl_01, -(SCREEN_WIDTH / 2), SCREEN_WIDTH / 2,
       -(SCREEN_HEIGHT / 2), SCREEN_HEIGHT / 2, MENU_CURSOR_NEAR,
       MENU_CURSOR_FAR, 1.0f);
@@ -1495,6 +1586,7 @@ void func_8022B7E0_ovl_01(Gfx** displayListHead) {
   if (charIndex >= CLUB_TOURNAMENT_CODE_LENGTH) {
     charIndex = CLUB_TOURNAMENT_CODE_LENGTH - 1;
   }
+
   guTranslate(&D_8023BE80_ovl_01,
       (charIndex * CLUB_CODE_CHAR_WIDTH) + CODE_CURSOR_FIRST_X, CODE_CURSOR_Y,
       MENU_CURSOR_Z);
@@ -1551,6 +1643,7 @@ s32 func_8022BDD0_ovl_01(void) {
     D_80230F40_ovl_01 = FALSE;
     return TRUE;
   }
+
   return FALSE;
 }
 

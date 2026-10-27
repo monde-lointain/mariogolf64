@@ -69,6 +69,7 @@ void AddFramedSphere(Vec3 center, f32 radius) {
           f_FramedSphereCenters[f_FramedSphereCount][1],
           f_FramedSphereCenters[f_FramedSphereCount][2]);
     }
+
     f_FramedSphereCount++;
   }
 }
@@ -82,6 +83,7 @@ void SetFramingAngles(f32 pitch, f32 yaw) {
   if (fabsf(cosf(pitch)) < STEEP_PITCH_COSINE) {
     pitch += FRAMING_DEGREES_TO_RADIANS(20);
   }
+
   f_FramingPitch = pitch;
   f_FramingYaw = yaw;
   guRotateF(
@@ -165,6 +167,7 @@ void FrameSpheres(f32 depthOffset) {
       minX = point[0] - f_FramedSphereRadii[i];
     }
   }
+
   guRotateF(rotation, leftAngle, 0.0f, 1.0f, 0.0f);
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
@@ -173,6 +176,7 @@ void FrameSpheres(f32 depthOffset) {
       maxX = point[0] + f_FramedSphereRadii[i];
     }
   }
+
   guRotateF(rotation, topAngle, -1.0f, 0.0f, 0.0f);
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
@@ -181,6 +185,7 @@ void FrameSpheres(f32 depthOffset) {
       minY = point[1] - f_FramedSphereRadii[i];
     }
   }
+
   guRotateF(rotation, bottomAngle, -1.0f, 0.0f, 0.0f);
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {
@@ -189,6 +194,7 @@ void FrameSpheres(f32 depthOffset) {
       maxY = point[1] + f_FramedSphereRadii[i];
     }
   }
+
   if (g_ControllerData[1].trigger & D_CBUTTONS) {
     osSyncPrintf("maxx %f minx %f maxy %f miny %f\n", maxX, minX, maxY, minY);
   }
@@ -232,22 +238,28 @@ void FrameSpheres(f32 depthOffset) {
     if (g_ControllerData[1].trigger & D_CBUTTONS) {
       osSyncPrintf("rZ %f\n", point[2]);
     }
+
     radius = f_FramedSphereRadii[i];
     if (point[2] - radius < minZ) {
       minZ = point[2] - radius;
     }
+
     if (maxZ < point[2] + radius) {
       maxZ = point[2] + radius;
     }
+
     if (point[0] - radius < minX) {
       minX = point[0] - radius;
     }
+
     if (maxX < point[0] + radius) {
       maxX = point[0] + radius;
     }
+
     if (point[1] - radius < minY) {
       minY = point[1] - radius;
     }
+
     if (maxY < point[1] + radius) {
       maxY = point[1] + radius;
     }
@@ -265,15 +277,19 @@ void FrameSpheres(f32 depthOffset) {
   if (centerX < left) {
     centerX = left;
   }
+
   if (right < centerX) {
     centerX = right;
   }
+
   if (centerY < bottom) {
     centerY = bottom;
   }
+
   if (top < centerY) {
     centerY = top;
   }
+
   eyeX += centerX;
   eyeY += centerY;
 

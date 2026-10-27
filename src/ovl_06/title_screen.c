@@ -159,72 +159,87 @@ void UpdateButtonCodes(void) {
     if (progress == CODE_ENTERED) {
       continue;
     }
+
     if ((g_ControllerData[0].button & DEBUG_CODE_HELD_BUTTONS) !=
         DEBUG_CODE_HELD_BUTTONS) {
       if (codeIndex == DEBUG_CODE_INDEX) {
         continue;
       }
     }
+
     switch (f_ButtonCodes[codeIndex].sequence[progress]) {
       case 'A':
         if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
           isMatched = TRUE;
         }
+
         break;
       case 'B':
         if (g_ControllerStates[0].pressedButtons & B_BUTTON) {
           isMatched = TRUE;
         }
+
         break;
       case 'L':
         if (g_ControllerStates[0].pressedButtons & L_JPAD) {
           isMatched = TRUE;
         }
+
         break;
       case 'R':
         if (g_ControllerStates[0].pressedButtons & R_JPAD) {
           isMatched = TRUE;
         }
+
         break;
       case 'U':
         if (g_ControllerStates[0].pressedButtons & U_JPAD) {
           isMatched = TRUE;
         }
+
         break;
       case 'D':
         if (g_ControllerStates[0].pressedButtons & D_JPAD) {
           isMatched = TRUE;
         }
+
         break;
       case 'l':
         if (g_ControllerStates[0].pressedButtons & L_CBUTTONS) {
           isMatched = TRUE;
         }
+
         break;
       case 'r':
         if (g_ControllerStates[0].pressedButtons & R_CBUTTONS) {
           isMatched = TRUE;
         }
+
         break;
       case 'u':
         if (g_ControllerStates[0].pressedButtons & U_CBUTTONS) {
           isMatched = TRUE;
         }
+
         break;
       case 'd':
         if (g_ControllerStates[0].pressedButtons & D_CBUTTONS) {
           isMatched = TRUE;
         }
+
         break;
     }
+
     if (g_ControllerStates[0].pressedButtons != 0 && !isMatched) {
       progress = 0;
     }
+
     progress += isMatched;
     if (f_ButtonCodes[codeIndex].sequence[progress] == '\0') {
       progress = CODE_ENTERED;
       f_ButtonCodes[codeIndex].onEntered();
     }
+
     f_ButtonCodes[codeIndex].progress = progress;
   }
 }
@@ -244,6 +259,7 @@ void LoadTitleScreen(void) {
     ReadEncodedAsset(&f_TitleImage, &asset);
     PlaySong(0x2A, SONG_FLAG_RESTART);
   }
+
   OpenEncodedAsset(JAPANESE_LOGO_ASSET, &asset);
   ReadEncodedAsset(&f_JapaneseLogo, &asset);
   OpenEncodedAsset(PRESS_START_TEXT_ASSET, &asset);
@@ -273,6 +289,7 @@ void UpdateTitleScreen(void) {
   if (g_ControllerCount == 0) {
     return;
   }
+
   UpdateButtonCodes();
   if (f_TitleFrame == 0) {
     if (g_TitleScreenEntrance == TITLE_ENTRANCE_FROM_OPENING) {
@@ -280,8 +297,10 @@ void UpdateTitleScreen(void) {
     } else {
       StartScreenFadeIn(0, 0, 0, TITLE_ENTERING_COUNTDOWN);
     }
+
     g_TitleScreenEntrance = TITLE_ENTRANCE_SHOWN;
   }
+
   switch (f_TitleStage) {
     case TITLE_SHOWING:
       if (HasScreenFadeEnded() && IsHudAnimationDone()) {
@@ -290,6 +309,7 @@ void UpdateTitleScreen(void) {
             controllerIndex++) {
           pressedButtons |= g_ControllerStates[controllerIndex].pressedButtons;
         }
+
         if (pressedButtons & (A_BUTTON | START_BUTTON)) {
           StartHudAnimation(HUD_ANIMATION_SPIRAL);
           g_Scene = SCENE_SWAPPING_MODULES;
@@ -304,6 +324,7 @@ void UpdateTitleScreen(void) {
           StartScreenFadeOut(0, 0, 0, LEAVING_COUNTDOWN);
         }
       }
+
       break;
     case TITLE_GOING_TO_LOGOS:
       if (HasScreenFadeEnded()) {
@@ -313,8 +334,10 @@ void UpdateTitleScreen(void) {
         g_SceneModuleToLoad = SCENE_MODULE_BOOT_LOGOS;
         f_TitleFrame = 0;
       }
+
       break;
   }
+
   if (f_TitleFrame < TITLE_FRAME_LIMIT) {
     f_TitleFrame++;
   }
@@ -368,6 +391,7 @@ void DrawTitleScreen(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     gDPPipeSync(gfx++);
   }
+
   if (g_ControllerCount != 0) {
     f_PressStartPhase += DEGREES_TO_RADIANS(20);
     red = (sinf(f_PressStartPhase) * 127.0f) + 127.0f;
@@ -388,5 +412,6 @@ void DrawTitleScreen(Gfx** displayListHead) {
         (PRESS_START_TOP + PRESS_START_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   *displayListHead = gfx;
 }

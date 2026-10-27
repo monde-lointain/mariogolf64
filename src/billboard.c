@@ -89,6 +89,7 @@ void DestroyBillboardManager(void) {
       offset += sizeof(BillboardTexture)) {
     ((BillboardTexture*)((u8*)f_BillboardTextures + offset))->pixels = NULL;
   }
+
   ResetHeap(HEAP_BILLBOARD);
   f_IsHeapReady = FALSE;
 }
@@ -140,6 +141,7 @@ void PlaceBillboards(void) {
   for (i = 0; i != BILLBOARD_COUNT; i++) {
     f_DrawOrder[i] = i;
   }
+
   for (i = 0; i < BILLBOARD_COUNT; i++) {
     if (g_Billboards[i].textureIndex >= 0) {
       x = g_Billboards[i].x;
@@ -149,6 +151,7 @@ void PlaceBillboards(void) {
       } else {
         g_Billboards[i].isNearCourseEdge = FALSE;
       }
+
       y = GetGroundHeight(x * GROUND_HEIGHT_SCALE, z * GROUND_HEIGHT_SCALE) /
           GROUND_HEIGHT_SCALE;
       g_Billboards[i].y = y;
@@ -182,6 +185,7 @@ void SortBillboardsByDepth(void) {
         sortedIndex--) {
       f_DrawOrder[sortedIndex + 1] = f_DrawOrder[sortedIndex];
     }
+
     f_DrawOrder[sortedIndex + 1] = insertedIndex;
   }
 }
@@ -216,6 +220,7 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
       ReadAssetFile(f_BillboardTextures[textureIndex].pixels, texelSize, &file);
     }
   }
+
   if (NeedsTextureLoad(billboard, textureIndex)) {
     gDPLoadTextureBlock(gfx++,
         (u32)f_BillboardTextures[textureIndex].pixels & ~7, G_IM_FMT_RGBA,
@@ -227,6 +232,7 @@ void DrawBillboard(Gfx** gfxPtr, Billboard* billboard,
     gDPSetCombineLERP(gfx++, ENVIRONMENT, TEXEL0, ENV_ALPHA, TEXEL0, PRIMITIVE,
         0, TEXEL0, 0, SHADE, 0, COMBINED, 0, 0, 0, 0, COMBINED);
   }
+
   gSPMatrix(
       gfx++, &transform->translation, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
   gSPMatrix(gfx++, &cameraMatrices->billboard,
@@ -269,6 +275,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   if (IsGameFlagSet(GAME_FLAG_HIDE_BILLBOARDS) || !f_IsHeapReady) {
     return;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
@@ -293,16 +300,20 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
       if (leftAlignment > lightHeight) {
         leftAlignment = lightHeight;
       }
+
       if (leftAlignment < -lightHeight) {
         leftAlignment = -lightHeight;
       }
+
       rightAlignment = alignment;
       if (rightAlignment > lightHeight) {
         rightAlignment = lightHeight;
       }
+
       if (rightAlignment < -lightHeight) {
         rightAlignment = -lightHeight;
       }
+
       f_BillboardVertices[0][0].v.cn[0] =
           (((-lightHeight * 0.5f) + (leftAlignment * 0.5f)) * 127.0f) + 255.0f;
       f_BillboardVertices[0][0].v.cn[1] =
@@ -356,6 +367,7 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   } else {
     ballDepth = VIEW_DEPTH_BALL_HIDDEN;
   }
+
   SortBillboardsByDepth();
 
   f_LoadedTextureIndex = -1;
@@ -372,9 +384,11 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
     }
+
     if (textureIndex < 0) {
       continue;
     }
+
     if (g_BillboardTransforms[billboardIndex].viewDepth < VIEW_DEPTH_NEAR) {
       DrawBillboard(&gfx, &g_Billboards[billboardIndex],
           &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
@@ -397,35 +411,44 @@ void DrawBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
     }
+
     textureIndex = g_Billboards[billboardIndex].textureIndex;
     if (textureIndex < 0) {
       continue;
     }
+
     viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
     if (viewDepth < VIEW_DEPTH_NEAR) {
       continue;
     }
+
     if (viewDepth >= 0) {
       continue;
     }
+
     alpha = -viewDepth;
     if (alpha >= 0x100) {
       alpha = 0xFF;
     }
+
     if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
       alpha = NEAR_BILLBOARD_ALPHA_MIN;
     }
+
     if (viewDepth < ballDepth) {
       alpha = 0xFF;
     }
+
     if (IsDebugBButtonView() &&
         g_BillboardTransforms[billboardIndex].viewDepth >
             ballDepth - BALL_CLEARANCE_DEPTH) {
       continue;
     }
+
     if (alpha < 0xFF) {
       continue;
     }
+
     DrawBillboard(&gfx, &g_Billboards[billboardIndex],
         &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
   }
@@ -473,6 +496,7 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
   if (AreBillboardsHidden()) {
     return;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetCycleType(gfx++, G_CYC_2CYCLE);
@@ -525,38 +549,48 @@ void DrawFadingBillboards(CameraMatrices* cameraMatrices, s32 cameraIndex) {
     if (g_Billboards[billboardIndex].isNearCourseEdge) {
       continue;
     }
+
     textureIndex = g_Billboards[billboardIndex].textureIndex;
     if (textureIndex < 0) {
       continue;
     }
+
     viewDepth = g_BillboardTransforms[billboardIndex].viewDepth;
     if (viewDepth < VIEW_DEPTH_NEAR) {
       continue;
     }
+
     if (viewDepth >= 0) {
       continue;
     }
+
     alpha = -viewDepth;
     if (alpha >= 0x100) {
       alpha = 0xFF;
     }
+
     if (alpha < NEAR_BILLBOARD_ALPHA_MIN) {
       alpha = NEAR_BILLBOARD_ALPHA_MIN;
     }
+
     if (viewDepth < ballDepth) {
       alpha = 0xFF;
     }
+
     if (alpha == 0xFF) {
       continue;
     }
+
     if (!hasTranslucentMode && alpha < 0xFF) {
       hasTranslucentMode = TRUE;
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_FOG_SHADE_A, G_RM_ZB_XLU_SURF2);
     }
+
     if (alpha < 0xFF) {
       gDPSetPrimColor(gfx++, 0, 0, 0x3F, 0xB4, 0x00, alpha);
     }
+
     DrawBillboard(&gfx, &g_Billboards[billboardIndex],
         &g_BillboardTransforms[billboardIndex], textureIndex, cameraMatrices);
   }
@@ -593,12 +627,14 @@ s32 WriteHostFile(char* fileName, u32 size) {
     osSyncPrintf("転送サイズが小さいです。");
     return HOST_FILE_SIZE_TOO_SMALL;
   }
+
   nameSize = strlen(fileName);
   if (nameSize == 0) {
     /* "The file name is too short" */
     osSyncPrintf("ファイル名が短すぎます");
     return HOST_FILE_NAME_TOO_SHORT;
   }
+
   nameSize = (nameSize + 3) & ~3;
   if (nameSize < HOST_FILE_NAME_SIZE_MAX) {
     command = AllocMemory(sizeof(u32));
@@ -615,6 +651,7 @@ s32 WriteHostFile(char* fileName, u32 size) {
     osSyncPrintf("ファイル名が長すぎます");
     result = HOST_FILE_NAME_TOO_LONG;
   }
+
   return result;
 }
 
@@ -628,11 +665,13 @@ s32 ReadHostFile(char* fileName, u32* size) {
     osSyncPrintf("ファイル名が短すぎます");
     return HOST_FILE_NAME_TOO_SHORT;
   }
+
   nameSize = (nameSize + 3) & ~3;
   if (nameSize >= HOST_FILE_NAME_SIZE_MAX) {
     osSyncPrintf("ファイル名が長すぎます");
     return HOST_FILE_NAME_TOO_LONG;
   }
+
   command = AllocMemory(sizeof(u32));
   nameBuffer = AllocMemory(nameSize);
   memcpy(nameBuffer, fileName, nameSize);
@@ -643,6 +682,7 @@ s32 ReadHostFile(char* fileName, u32* size) {
     /* "The file has no data." */
     osSyncPrintf("ファイルにデータがありません。");
   }
+
   FreeMemory(&command);
   FreeMemory(&nameBuffer);
   return 1;

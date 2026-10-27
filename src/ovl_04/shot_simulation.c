@@ -36,6 +36,7 @@ void SimulateShot(Unk20* shot) {
   g_SimulatedShot.minPositionStep[1] = 0;
   g_SimulatedShot.minPositionStep[2] = 0;
   g_SimulatedShot.unkB0Step = NO_STEP;
+
   /* The chained assignment is there to match */
   g_SimulatedShot.maxPosition[0] = g_SimulatedShot.minPosition[0] =
       g_SimulatedShot.startPosition[0] = g_CurrentShot.ballPosition[0];
@@ -72,41 +73,51 @@ void SimulateShot(Unk20* shot) {
       g_SimulatedShot.path[step][1] = simulation->position[1];
       g_SimulatedShot.path[step][2] = simulation->position[2];
     }
+
     if (simulation->unkB0 && g_SimulatedShot.unkB0Step == NO_STEP) {
       g_SimulatedShot.unkB0Step = step;
     }
+
     if (flags & STEP_FLAG_GROUND_HIT & !hasGroundHit) {
       hasGroundHit = TRUE;
     }
+
     if (flags & STEP_FLAG_HOLE_TRIANGLE_BOUNCE) {
       hasUnk40Flag = TRUE;
     }
+
     if (step < PATH_STEP_COUNT) {
       if (simulation->position[0] > g_SimulatedShot.maxPosition[0]) {
         g_SimulatedShot.maxPosition[0] = simulation->position[0];
         g_SimulatedShot.maxPositionStep[0] = step;
       }
+
       if (simulation->position[0] < g_SimulatedShot.minPosition[0]) {
         g_SimulatedShot.minPosition[0] = simulation->position[0];
         g_SimulatedShot.minPositionStep[0] = step;
       }
+
       if (simulation->position[1] > g_SimulatedShot.maxPosition[1]) {
         g_SimulatedShot.maxPosition[1] = simulation->position[1];
         g_SimulatedShot.maxPositionStep[1] = step;
       }
+
       if (simulation->position[1] < g_SimulatedShot.minPosition[1]) {
         g_SimulatedShot.minPosition[1] = simulation->position[1];
         g_SimulatedShot.minPositionStep[1] = step;
       }
+
       if (simulation->position[2] > g_SimulatedShot.maxPosition[2]) {
         g_SimulatedShot.maxPosition[2] = simulation->position[2];
         g_SimulatedShot.maxPositionStep[2] = step;
       }
+
       if (simulation->position[2] < g_SimulatedShot.minPosition[2]) {
         g_SimulatedShot.minPosition[2] = simulation->position[2];
         g_SimulatedShot.minPositionStep[2] = step;
       }
     }
+
     step++;
     if (step >= MAX_STEP_COUNT) {
       SetDebugTextHighlight(1);
@@ -114,6 +125,7 @@ void SimulateShot(Unk20* shot) {
       break;
     }
   }
+
   g_SimulatedShot.stepCount = step;
   g_SimulatedShot.endPosition[0] = simulation->position[0];
   g_SimulatedShot.endPosition[1] = simulation->position[1];
@@ -127,6 +139,7 @@ void SimulateShot(Unk20* shot) {
     isUnk2E41 =
         GetSurfaceInfo(simulation->surface)->kind != SURFACE_KIND_WATER_HAZARD;
   }
+
   g_SimulatedShot.unk2E41 = isUnk2E41;
   osSyncPrintf("\nWaterCut%d\n", isUnk2E41);
   unkA7Kind = GetSurfaceInfo(simulation->unkA7)->kind;
@@ -136,5 +149,6 @@ void SimulateShot(Unk20* shot) {
   } else {
     g_SimulatedShot.unk2E00 = FALSE;
   }
+
   g_SimulatedShot.unk2E18 = simulation->unkA7;
 }

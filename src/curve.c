@@ -51,6 +51,7 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
     position[2] = points[pointCount - 1][2];
     return 1;
   }
+
   if (f_PathPointIndex == 0 && f_PathStepIndex == 0) {
     switch (pace) {
       case 12:
@@ -90,12 +91,14 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
         f_PathStepsPerSegment = 16.0f;
         break;
     }
+
     f_PathPosition[0] = points[0][0];
     f_PathPosition[1] = points[0][1];
     f_PathPointIndex = 1;
     f_PathPosition[2] = points[0][2];
     f_PathProgressStep = 1.0f / f_PathStepsPerSegment;
   }
+
   if (f_PathStepIndex == 0) {
     f_PathSegment[0][0] = points[f_PathPointIndex][0];
     f_PathSegment[0][1] = points[f_PathPointIndex][1];
@@ -105,6 +108,7 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
     f_PathProgress = 0.0f;
     f_PathSegment[1][2] = points[f_PathPointIndex + 1][2];
   }
+
   stepsPerSegment = f_PathStepsPerSegment;
   catchUpFraction = (1.0f / stepsPerSegment) * f_PathCatchUp;
   progress = f_PathProgress;
@@ -139,6 +143,7 @@ s32 StepAlongPath(f32 points[][AXIS_COUNT], s32 pointCount, s32 pace,
     f_PathStepIndex = 0;
     f_PathPointIndex = nextPointIndex;
   }
+
   /* At most 0 here, since f_PathPointIndex is at least 1 */
   return 1 - f_PathPointIndex;
 }
@@ -163,10 +168,12 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     widths[index] = knotX[index + 1] - knotX[index];
     slopes[index] = (knotY[index + 1] - knotY[index]) / widths[index];
   }
+
   slopes[SPLINE_SEGMENT_COUNT] = slopes[0];
   for (index = 1; index != SPLINE_SEGMENT_COUNT; index++) {
     diagonal[index] = 2.0f * (knotX[index + 1] - knotX[index - 1]);
   }
+
   diagonal[SPLINE_SEGMENT_COUNT] =
       2.0f * (widths[SPLINE_SEGMENT_COUNT - 1] + widths[0]);
   /* This leaves coefficients[SPLINE_SEGMENT_COUNT] as it was, though it is read
@@ -174,6 +181,7 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
   for (index = 1; index != SPLINE_SEGMENT_COUNT; index++) {
     coefficients[index] = slopes[index] - slopes[index - 1];
   }
+
   /* slopes is reused from here as the column that the period adds, to match */
   slopes[1] = widths[0];
   slopes[SPLINE_SEGMENT_COUNT - 1] = widths[SPLINE_SEGMENT_COUNT - 1];
@@ -181,12 +189,14 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
   for (index = 2; index != SPLINE_SEGMENT_COUNT - 1; index++) {
     slopes[index] = 0.0f;
   }
+
   for (index = 1; index != SPLINE_SEGMENT_COUNT; index++) {
     ratio = widths[index] / diagonal[index];
     coefficients[index + 1] -= coefficients[index] * ratio;
     diagonal[index + 1] -= widths[index] * ratio;
     slopes[index + 1] -= slopes[index] * ratio;
   }
+
   slopes[0] = slopes[SPLINE_SEGMENT_COUNT];
   coefficients[0] = coefficients[SPLINE_SEGMENT_COUNT];
   for (index = SPLINE_SEGMENT_COUNT - 2; index >= 0; index--) {
@@ -194,6 +204,7 @@ void InitPeriodicSpline(f32 knotX[], f32 knotY[], f32 coefficients[]) {
     coefficients[index] -= coefficients[index + 1] * ratio;
     slopes[index] -= slopes[index + 1] * ratio;
   }
+
   ratio = coefficients[0] / slopes[0];
   coefficients[0] = ratio;
   coefficients[SPLINE_SEGMENT_COUNT] = ratio;
@@ -220,6 +231,7 @@ f32 EvaluatePeriodicSpline(
   while (x < knotX[0]) {
     x += period;
   }
+
   low = 0;
   high = SPLINE_SEGMENT_COUNT;
   while (low < high) {
@@ -230,9 +242,11 @@ f32 EvaluatePeriodicSpline(
       high = middle;
     }
   }
+
   if (low > 0) {
     low--;
   }
+
   width = knotX[low + 1] - knotX[low];
   offset = x - knotX[low];
   return ((((((coefficients[low + 1] - coefficients[low]) * offset / width) +

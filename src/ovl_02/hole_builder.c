@@ -239,6 +239,7 @@ static inline void ReadFileBytes(void* destination, s32 size) {
   while (source != end) {
     *byte++ = *source++;
   }
+
   f_ReadCursor = end;
 }
 
@@ -273,11 +274,13 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
     squares[row] =
         (f32)(row * row) * (OFFSET_DISTANCE_SCALE * OFFSET_DISTANCE_SCALE);
   }
+
   for (row = 0; row < span; row++) {
     for (column = 0; column < span; column++) {
       distances[(row * span) + column] = sqrtf(squares[column] + squares[row]);
     }
   }
+
   for (count = 0; count < maxCount;) {
     nearestDistance = BEYOND_ALL_DISTANCES;
     nearestIndex = 0;
@@ -287,9 +290,11 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
         nearestDistance = distances[column];
       }
     }
+
     if (nearestDistance >= span * OFFSET_DISTANCE_SCALE) {
       break;
     }
+
     nearestRow = nearestIndex / span;
     nearestColumn = nearestIndex % span;
     distances[nearestIndex] = LISTED_DISTANCE;
@@ -300,6 +305,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
     if (count >= maxCount) {
       break;
     }
+
     if (nearestColumn != 0) {
       offsets[count].column = -nearestColumn;
       offsets[count].row = nearestRow;
@@ -309,6 +315,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
         break;
       }
     }
+
     if (nearestRow != 0) {
       mirroredRow = -nearestRow;
       offsets[count].column = nearestColumn;
@@ -318,6 +325,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
       if (count >= maxCount) {
         break;
       }
+
       if (nearestColumn != 0) {
         offsets[count].column = -nearestColumn;
         offsets[count].row = mirroredRow;
@@ -329,6 +337,7 @@ s32 ListOffsetsByDistance(s32 span, GridOffset* offsets, s32 maxCount) {
       }
     }
   }
+
   return count;
 }
 #else
@@ -397,6 +406,7 @@ void DrawBandHeights(s16* heights, s32 band) {
       if (width < 0) {
         width = -width;
       }
+
       count = (width + HEIGHT_ROW_SPAN / 2) / HEIGHT_ROW_SPAN;
       direction = (fromX < toX) ? 1 : -1;
       if (count < HEIGHT_STEP_SCALE_COUNT) {
@@ -404,6 +414,7 @@ void DrawBandHeights(s16* heights, s32 band) {
       } else {
         texelHeightStep = ((toHeight - fromHeight) << 16) / count;
       }
+
       texelColumn = longX >> (HEIGHT_FRACTION_BITS + 4);
       texelRow = (texelRow >> 4) - band * HEIGHT_BAND_ROW_COUNT;
       if (texelRow >= 0 && texelRow < HEIGHT_BAND_ROW_COUNT) {
@@ -416,8 +427,10 @@ void DrawBandHeights(s16* heights, s32 band) {
             if (*texel != NO_HEIGHT) {
               value = (*texel + value) / 2;
             }
+
             *texel = value;
           }
+
           texelColumn += direction;
           texel += direction;
           height += texelHeightStep;
@@ -430,6 +443,7 @@ void DrawBandHeights(s16* heights, s32 band) {
       cachedSpan = totalSpan;
       cachedReciprocal = 1.0f / totalSpan;
     }
+
     longSlopeX = (corners[2]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
     longSlopeHeight =
         (corners[2]->v.ob[1] - corners[0]->v.ob[1]) * cachedReciprocal;
@@ -439,6 +453,7 @@ void DrawBandHeights(s16* heights, s32 band) {
         cachedSpan = span;
         cachedReciprocal = 1.0f / span;
       }
+
       shortSlopeX =
           (corners[1]->v.ob[0] - corners[0]->v.ob[0]) * cachedReciprocal;
       shortSlopeHeight =
@@ -460,12 +475,14 @@ void DrawBandHeights(s16* heights, s32 band) {
         shortHeight += shortHeightStep;
       }
     }
+
     lowerSpan = corners[2]->v.ob[2] - corners[1]->v.ob[2];
     if (lowerSpan != 0) {
       if (cachedSpan != lowerSpan) {
         cachedSpan = lowerSpan;
         cachedReciprocal = 1.0f / lowerSpan;
       }
+
       longX = ((s32)(longSlopeX * span) + corners[0]->v.ob[0])
           << HEIGHT_FRACTION_BITS;
       longHeight = ((s32)(longSlopeHeight * span) + corners[0]->v.ob[1])
@@ -500,6 +517,7 @@ void DrawBandHeights(s16* heights, s32 band) {
         column++) {
       ((f64*)heights)[column] = fill;
     }
+
     for (row = band * GROUND_TILE_POINT_SPAN;
         row < (band + 1) * GROUND_TILE_POINT_SPAN; row++) {
       for (column = 0; column < GROUND_POINT_COLUMN_COUNT - 1; column++) {
@@ -512,21 +530,25 @@ void DrawBandHeights(s16* heights, s32 band) {
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
+
         if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
           corners[4] = corners[1];
           corners[1] = corners[2];
           corners[2] = corners[4];
         }
+
         if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
+
         DrawTriangleHeights();
         corners[0] = GetGroundPoint(column, row);
         corners[1] = GetGroundPoint(column + 1, row);
         corners[2] = GetGroundPoint(column, row + 1);
         corners[3] = GetGroundPoint(column + 1, row + 1);
+
         /* The second triangle has the far corner in place of the first */
         corners[0] = corners[3];
         if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
@@ -534,19 +556,23 @@ void DrawBandHeights(s16* heights, s32 band) {
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
+
         if (corners[2]->v.ob[2] < corners[1]->v.ob[2]) {
           corners[4] = corners[1];
           corners[1] = corners[2];
           corners[2] = corners[4];
         }
+
         if (corners[1]->v.ob[2] < corners[0]->v.ob[2]) {
           corners[4] = corners[0];
           corners[0] = corners[1];
           corners[1] = corners[4];
         }
+
         DrawTriangleHeights();
       }
     }
+
     /* An empty loop; the original has it */
     for (column = 0; column < 0x2000; column++) {
     }
@@ -609,11 +635,13 @@ s32 PaintMainCourse(
         } else {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x4605;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -626,6 +654,7 @@ s32 PaintMainCourse(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE739;
@@ -647,11 +676,13 @@ s32 PaintMainCourse(
         } else {
           color = (x & 2) ? 0x3E42 : 0x3704;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -670,6 +701,7 @@ s32 PaintMainCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -706,11 +738,13 @@ s32 PaintPaleRoughCourse(
         } else {
           color = ((fairwayRandom & 3) << 11) | 0x658E;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x8615;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -722,6 +756,7 @@ s32 PaintPaleRoughCourse(
         color = 0xCE33;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE739;
@@ -738,8 +773,10 @@ s32 PaintPaleRoughCourse(
         } else {
           color = 0x94A5;
         }
+
         paintedCode = TERRAIN_CODE_CART_WAY;
       }
+
       break;
     case TERRAIN_CODE_GREEN:
       if (IsGreenEdge(code, nearestCode, nearestDistance)) {
@@ -751,11 +788,13 @@ s32 PaintPaleRoughCourse(
         } else {
           color = (x & 2) ? 0x3F02 : 0x3704;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -774,6 +813,7 @@ s32 PaintPaleRoughCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 #else
@@ -813,11 +853,13 @@ s32 PaintShyGuyDesert(
         } else {
           color = (((fairwayRandom & 3) + 14) << 11) | 0x5C6;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x9E89;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -830,6 +872,7 @@ s32 PaintShyGuyDesert(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE721;
@@ -851,11 +894,13 @@ s32 PaintShyGuyDesert(
         } else {
           color = (x & 2) ? 0x8E88 : 0x8606;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -874,6 +919,7 @@ s32 PaintShyGuyDesert(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -907,11 +953,13 @@ s32 PaintBooValley(
         } else {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x4605;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -924,6 +972,7 @@ s32 PaintBooValley(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE721;
@@ -945,11 +994,13 @@ s32 PaintBooValley(
         } else {
           color = (x & 2) ? 0x3E42 : 0x3704;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -968,6 +1019,7 @@ s32 PaintBooValley(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1000,11 +1052,13 @@ s32 PaintYoshisIsland(
         } else {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x590;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x4591;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -1017,6 +1071,7 @@ s32 PaintYoshisIsland(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xEF37;
@@ -1038,11 +1093,13 @@ s32 PaintYoshisIsland(
         } else {
           color = (x & 2) ? 0x3CC2 : 0x3584;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x26AF;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -1061,6 +1118,7 @@ s32 PaintYoshisIsland(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1096,11 +1154,13 @@ s32 PaintUnlistedCourse(
         } else {
           color = (((fairwayRandom & 3) + 7) << 11) | 0x584;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x4605;
         paintedCode = TERRAIN_CODE_SEMI_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_ROUGH:
       if (nearestCode != TERRAIN_CODE_FAIRWAY || nearestDistance > 0) {
@@ -1113,6 +1173,7 @@ s32 PaintUnlistedCourse(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE739;
@@ -1134,11 +1195,13 @@ s32 PaintUnlistedCourse(
         } else {
           color = (x & 2) ? 0x3E42 : 0x3704;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -1157,6 +1220,7 @@ s32 PaintUnlistedCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1193,11 +1257,13 @@ s32 PaintFirstMiniGolfCourse(
         } else {
           color = (x & 4) ? 0x650B : 0xCE72;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_OUT_OF_BOUNDS:
       color = 0x3CC;
@@ -1208,6 +1274,7 @@ s32 PaintFirstMiniGolfCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1242,11 +1309,13 @@ s32 PaintSecondMiniGolfCourse(
         } else {
           color = (x & 4) ? 0xBEB4 : 0x4C72;
         }
+
         paintedCode = TERRAIN_CODE_FAIRWAY;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_OUT_OF_BOUNDS:
       color = 0x55E;
@@ -1257,6 +1326,7 @@ s32 PaintSecondMiniGolfCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1288,8 +1358,10 @@ s32 PaintThirdMiniGolfCourse(
         } else {
           color = (x & 4) ? 0xCE72 : 0xDC60;
         }
+
         paintedCode = TERRAIN_CODE_CART_WAY;
       }
+
       break;
     case TERRAIN_CODE_OUT_OF_BOUNDS:
       color = 0x7B80;
@@ -1300,6 +1372,7 @@ s32 PaintThirdMiniGolfCourse(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1341,6 +1414,7 @@ s32 PaintDrivingRange(
         color = 0xC81;
         paintedCode = TERRAIN_CODE_ROUGH;
       }
+
       break;
     case TERRAIN_CODE_BUNKER:
       color = 0xE739;
@@ -1362,11 +1436,13 @@ s32 PaintDrivingRange(
         } else {
           color = (x & 2) ? 0x3E42 : 0x3704;
         }
+
         paintedCode = TERRAIN_CODE_GREEN;
       } else {
         color = 0x2689;
         paintedCode = TERRAIN_CODE_FAIRWAY;
       }
+
       break;
     case TERRAIN_CODE_CART_WAY:
       color = 0x7BDF;
@@ -1385,6 +1461,7 @@ s32 PaintDrivingRange(
       paintedCode = TERRAIN_CODE_OUT_OF_BOUNDS;
       break;
   }
+
   return (color << 16) | paintedCode;
 }
 
@@ -1405,15 +1482,19 @@ static inline u16 ReadMapTexel(s32 column, s32 row) {
   if (column < 0) {
     return 0;
   }
+
   if (column >= MAP_COLUMN_COUNT) {
     return 0;
   }
+
   if (row < 0) {
     return 0;
   }
+
   if (row >= MAP_ROW_COUNT) {
     return 0;
   }
+
   return *GetMapTexel(column, row);
 }
 
@@ -1448,15 +1529,19 @@ static inline void WriteMapTexel(s32 column, s32 row, u16 color) {
   if (column < 0) {
     return;
   }
+
   if (column >= MAP_COLUMN_COUNT) {
     return;
   }
+
   if (row < 0) {
     return;
   }
+
   if (row >= MAP_ROW_COUNT) {
     return;
   }
+
   *GetMapTexel(column, row) = color;
 }
 
@@ -1481,6 +1566,7 @@ void LoadCodeMap(char* path) {
       size == MAP_COLUMN_COUNT * MAP_ROW_COUNT) {
     f_BuildCursor = f_BuildBuffer;
   }
+
   for (tileIndex = 0; tileIndex < GROUND_TILE_COUNT; tileIndex++) {
     for (texelIndex = 0;
         texelIndex < GROUND_TILE_TEXEL_ROW_COUNT * GROUND_TILE_TEXEL_ROW_LENGTH;
@@ -1488,6 +1574,7 @@ void LoadCodeMap(char* path) {
       g_WorkArea.hole.tiles[tileIndex].texels[0][texelIndex] = 0;
     }
   }
+
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
       f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
@@ -1534,6 +1621,7 @@ static inline void FillCodeGap(
     s32 column, s32 row, s32 columnStep, s32 rowStep) {
   u8 code = GetCode(column, row);
   u8 previousCode = GetCode(column - columnStep, row - rowStep);
+
   /* The second read of the previous code is there to match */
   u8 rereadPreviousCode = GetCode(column - columnStep, row - rowStep);
   u8 nextCode = GetCode(column + columnStep, row + rowStep);
@@ -1566,12 +1654,14 @@ void CleanCodeMap(void) {
       *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
+
   for (; passCount != 0; passCount--) {
     for (row = 0; row < MAP_ROW_COUNT; row++) {
       for (column = 0; column < MAP_COLUMN_COUNT; column++) {
         if (column > 0 && column < MAP_COLUMN_COUNT - 1) {
           FillCodeGap(column, row, 1, 0);
         }
+
         if (row > 0 && row < MAP_ROW_COUNT - 1) {
           FillCodeGap(column, row, 0, 1);
         }
@@ -1644,6 +1734,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
   if (cell == code) {
     return;
   }
+
   if (cell == NO_CELL_TERRAIN_CODE) {
     *(s16*)((u8*)g_TerrainCodeCells + cellOffset) = code;
   } else if (cell >= 0) {
@@ -1658,6 +1749,7 @@ static inline void SetCellTerrainCode(u32 column, u32 row, s32 code) {
       for (i = 0; i < TERRAIN_CODE_BLOCK_WORD_COUNT; i++) {
         *word++ = fill;
       }
+
       /* Computing the offset again is there to match */
       cellOffset = GetCellOffset(column, row);
       *(s16*)((u8*)g_TerrainCodeCells + cellOffset) =
@@ -1719,12 +1811,14 @@ void PaintGroundTiles(void) {
   f_BuildCursor = codes;
   nextCode = f_BuildCursor;
   searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
+
   /* row is there to match */
   for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
     codePaintings[row] = paint(row, row, 0, 0, 0);
     g_TerrainCodeColors[codePaintings[row] & TERRAIN_CODE_MASK] =
         codePaintings[row] >> PAINTED_COLOR_SHIFT;
   }
+
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT;) {
       texel = &((u16*)&g_WorkArea.hole.tiles[(column / GROUND_TILE_TEXEL_SPAN) +
@@ -1737,14 +1831,17 @@ void PaintGroundTiles(void) {
         if (nearestDistance != 0) {
           if (nearestDistance < 0) {
             painting = codePaintings[code];
+
             /* The goto is there to match */
             goto PAINTED;
           }
+
           for (offsetIndex = 1; offsetIndex < offsetCount; offsetIndex++) {
             if (offsets[offsetIndex].distance >=
                 nearestDistance * OFFSET_DISTANCE_SCALE) {
               break;
             }
+
             neighborColumn = column + offsets[offsetIndex].column;
             neighborRow = row + offsets[offsetIndex].row;
             if (neighborColumn < MAP_COLUMN_COUNT &&
@@ -1756,9 +1853,11 @@ void PaintGroundTiles(void) {
               }
             }
           }
+
           nearestDistance =
               offsets[offsetIndex].distance / OFFSET_DISTANCE_SCALE;
         }
+
         painting = paint(code, nearestCode, nearestDistance, column, row);
 
 PAINTED:
@@ -1769,6 +1868,7 @@ PAINTED:
       }
     }
   }
+
   osSyncPrintf("Comp\n");
   f_BuildCursor = f_BuildBuffer;
 }
@@ -1836,18 +1936,22 @@ f32 MeasureGroundTiles(void) {
           if (point->v.ob[1] < lowest) {
             lowest = point->v.ob[1];
           }
+
           if (point->v.ob[1] > highest) {
             highest = point->v.ob[1];
           }
         }
       }
+
       heightRange = highest - lowest;
       if (heightRange != 0 && heightRange < MIN_GROUND_TILE_HEIGHT_RANGE) {
         heightRange = MIN_GROUND_TILE_HEIGHT_RANGE;
       }
+
       if (heightRange == 0) {
         heightRange = FLAT_GROUND_TILE_HEIGHT_RANGE;
       }
+
       g_GroundTileHeightRanges[tileIndex] = heightRange;
       g_WorkArea.hole.tiles[tileIndex].center[0] =
           sumX / GROUND_TILE_AVERAGED_POINT_COUNT;
@@ -1858,6 +1962,7 @@ f32 MeasureGroundTiles(void) {
       tileIndex++;
     }
   }
+
   return tileIndex;
 }
 
@@ -1880,17 +1985,20 @@ void ScaleMiniGolfHole(void) {
       SetGroundPoint(column, row, &point);
     }
   }
+
   for (index = 0; index < GROUND_TILE_COUNT; index++) {
     g_WorkArea.hole.tiles[index].center[AXIS_X] *= g_MiniGolfScale[AXIS_X];
     g_WorkArea.hole.tiles[index].center[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
     g_WorkArea.hole.tiles[index].center[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
   }
+
   for (index = 0; index < BILLBOARD_COUNT; index++) {
     if (g_Billboards[index].textureIndex >= 0) {
       g_Billboards[index].x *= g_MiniGolfScale[AXIS_X];
       g_Billboards[index].z *= g_MiniGolfScale[AXIS_Z];
     }
   }
+
   D_800BA9D8.teePosition[AXIS_X] *= g_MiniGolfScale[AXIS_X];
   D_800BA9D8.teePosition[AXIS_Y] *= g_MiniGolfScale[AXIS_Y];
   D_800BA9D8.teePosition[AXIS_Z] *= g_MiniGolfScale[AXIS_Z];
@@ -1921,6 +2029,7 @@ s32 GetCoursePaintLogic(s32 course) {
     case 8:
       return 12;
   }
+
   return 0;
 }
 
@@ -1946,28 +2055,33 @@ void BuildHole(s32 course, s32 hole) {
   } else {
     FillRandomGrid(0x60, 0xBE);
   }
+
   if (g_IsMiniGolf) {
     f_PaintLogic = g_CourseIndex;
     if (g_CourseIndex > LAST_MINI_GOLF_PAINT_LOGIC) {
       f_PaintLogic = LAST_MINI_GOLF_PAINT_LOGIC;
     }
+
     FillRandomGrid(0x40, 0xD2);
   } else if (IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     f_PaintLogic = f_HolePaintLogics[course][hole - 1];
     if (IsGameFlagSet(GAME_FLAG_UNK6A)) {
       f_PaintLogic++;
     }
+
     if (IsGameFlagSet(GAME_FLAG_UNK6B)) {
       f_PaintLogic++;
     }
   } else {
     f_PaintLogic = GetCoursePaintLogic(course);
   }
+
   osSyncPrintf("PaintLogic%d\n", f_PaintLogic);
   if (!IsGameFlagSet(GAME_FLAG_READ_HOST_HOLE)) {
     if (IsGameFlagSet(GAME_FLAG_UNK51) && hole == 0) {
       hole = COURSE_HOLE_COUNT;
     }
+
     ClearHoleBuild();
     OpenHoleAsset(course, hole, HOLE_ASSET_VERTICES);
     ReadGridVertices();
@@ -1981,13 +2095,16 @@ void BuildHole(s32 course, s32 hole) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].unk6, &asset);
       }
+
       ReadAssetFile(&D_800BA9D8, GetAssetFileSize(&asset), &asset);
     }
+
     if (g_GameMode == GAME_MODE_UNK12) {
       OpenAssetFile(UNK12_POINTS_ASSET, &asset);
     } else {
       OpenAssetFile(f_HoleAssetIds[course][hole].points, &asset);
     }
+
     pointsSize = GetAssetFileSize(&asset);
     ReadAssetFile(&g_HolePoints, pointsSize, &asset);
     osSyncPrintf("%d\n", pointsSize);
@@ -2004,6 +2121,7 @@ void BuildHole(s32 course, s32 hole) {
     PlaceBillboards();
     return;
   }
+
   ClearHoleBuild();
   if (IsGameFlagSet(GAME_FLAG_SKIP_HOST_HOLE_READ)) {
     ClearGameFlag(GAME_FLAG_SKIP_HOST_HOLE_READ);
@@ -2022,9 +2140,11 @@ void BuildHole(s32 course, s32 hole) {
     if (ReadHostFile(path, &size) == HOST_FILE_OK) {
       MoveRingsToEnd();
     }
+
     sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
     ReadHostFile(path, &size);
   }
+
   osSyncPrintf("@1\n");
   MeasureGroundTiles();
   f_IsCodeMapCleaned = TRUE;
@@ -2060,6 +2180,7 @@ void SaveHoleFiles(s32 course, s32 hole) {
     LoadBackupCodeMap();
     f_IsCodeMapCleaned = FALSE;
   }
+
   f_BuildCursor = HOLE_FILE_BUFFER;
   f_BuildBuffer = f_BuildCursor;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
@@ -2068,6 +2189,7 @@ void SaveHoleFiles(s32 course, s32 hole) {
       *f_BuildCursor = GetColorTerrainCode(ReadMapTexel(column, row));
     }
   }
+
   sprintf(path, "bin/course%d/hole%d%2.2d.att", course, course, hole);
   if (WriteHostFile(path, MAP_COLUMN_COUNT * MAP_ROW_COUNT) == HOST_FILE_OK) {
     f_BuildCursor = f_BuildBuffer;
@@ -2095,6 +2217,7 @@ void MoveRingsToEnd(void) {
         g_WorkArea.hole.triangles[slot] = g_WorkArea.hole.triangles[i];
         bzero(&g_WorkArea.hole.triangles[i], sizeof(HoleTriangle));
       }
+
       PrintDebugText("Change End", 19, 19);
       return;
     }
@@ -2124,6 +2247,7 @@ void ClearHolePoints(void) {
     D_800BA9D8.teePosition[AXIS_Y] = 0;
     D_800BA9D8.teePosition[AXIS_Z] = 0;
   }
+
   for (i = 0; i < CUP_POSITION_COUNT; i++) {
     g_HolePoints.cupPositions[i][AXIS_X] = 0;
     g_HolePoints.cupPositions[i][AXIS_Y] = 0;
@@ -2132,10 +2256,12 @@ void ClearHolePoints(void) {
     g_HolePoints.teePositions[i][AXIS_Y] = 0;
     g_HolePoints.teePositions[i][AXIS_Z] = 0;
   }
+
   for (i = 0; i < ARRAY_COUNT(g_HolePoints.unk60); i++) {
     g_HolePoints.unk60[i][AXIS_X] = 0;
     g_HolePoints.unk60[i][AXIS_Y] = 0;
     g_HolePoints.unk60[i][AXIS_Z] = 0;
+
     /* The dereference is there to match */
     *g_HolePoints.routePoints[i] = 0;
     g_HolePoints.routePoints[i][AXIS_Z] = 0;
@@ -2209,6 +2335,7 @@ void InitGridVertices(void) {
     if (x == (GROUND_TILE_COLUMN_COUNT + 1) * TILE_SPAN) {
       x = HALF_TILE_SPAN;
     }
+
     if (x == (GROUND_TILE_COLUMN_COUNT * TILE_SPAN) + HALF_TILE_SPAN) {
       x = 0;
       z += HALF_TILE_SPAN;
@@ -2277,6 +2404,7 @@ void InitTileMidpoints(void) {
       g_WorkArea.hole.midpoints[tile][i].v.cn[2] = 0;
       g_WorkArea.hole.midpoints[tile][i].v.cn[3] = 0;
     }
+
     x += TILE_SPAN;
     if (x == GROUND_TILE_COLUMN_COUNT * TILE_SPAN) {
       x = 0;
@@ -2305,23 +2433,27 @@ void ReadAttributeRuns(void) {
     if (count == 0) {
       break;
     }
+
     ReadFileBytes(&packed, sizeof(packed));
     runEnd = attribute + count;
     if (runEnd > end) {
       osSyncPrintf("ER1\n");
       break;
     }
+
     value = ((packed & 0xF0) << 4) | (packed & 0xF);
     while (attribute != runEnd) {
       *attribute++ = value;
     }
   }
+
   if (attribute != end) {
     osSyncPrintf("Whats?\n");
   }
   while (attribute < end) {
     *attribute++ = 0;
   }
+
   f_BuildCursor = f_BuildBuffer;
 }
 
@@ -2336,6 +2468,7 @@ void ReadBillboards(void) {
       osSyncPrintf("ER2\n");
       return;
     }
+
     ReadFileBytes(&g_Billboards[i].x, sizeof(s16));
     ReadFileBytes(&g_Billboards[i].y, sizeof(s16));
     ReadFileBytes(&g_Billboards[i].z, sizeof(s16));
@@ -2365,6 +2498,7 @@ void ReadHoleTriangles(void) {
       osSyncPrintf("ER3\n");
       return;
     }
+
     triangle = &g_WorkArea.hole.triangles[i];
     ReadFileBytes(&kind, sizeof(kind));
     triangle->kind = kind;
@@ -2399,16 +2533,19 @@ void ReadGridVertices(void) {
     if (flags == VERTEX_LIST_END) {
       break;
     }
+
     if (i >= GROUND_GRID_VERTEX_SLOT_COUNT) {
       osSyncPrintf("ER4\n");
       break;
     }
+
     if (!(flags & VERTEX_FLAG_SAME_X)) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.gridVertices[i].v.ob[AXIS_X] = x;
       g_WorkArea.hole.gridVertices[i].v.tc[0] =
           (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
+
     ReadVertexY(&y, flags);
     g_WorkArea.hole.gridVertices[i].v.ob[AXIS_Y] = y;
     if (!(flags & VERTEX_FLAG_SAME_Z)) {
@@ -2437,12 +2574,14 @@ void ReadTileMidpoints(void) {
     if (flags == VERTEX_LIST_END) {
       break;
     }
+
     if (!(flags & VERTEX_FLAG_SAME_X)) {
       ReadVertexX(&x, flags);
       g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_X] = x;
       g_WorkArea.hole.midpoints[tile][midpoint].v.tc[0] =
           (x * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
+
     ReadVertexY(&y, flags);
     g_WorkArea.hole.midpoints[tile][midpoint].v.ob[AXIS_Y] = y;
     if (!(flags & VERTEX_FLAG_SAME_Z)) {
@@ -2451,6 +2590,7 @@ void ReadTileMidpoints(void) {
       g_WorkArea.hole.midpoints[tile][midpoint].v.tc[1] =
           (z * GRID_TEXTURE_SCALE) + GRID_TEXTURE_BORDER;
     }
+
     midpoint++;
     if (midpoint >= TILE_MIDPOINT_COUNT) {
       midpoint = 0;
@@ -2549,6 +2689,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].vertices, &f_HoleAsset);
       }
+
       break;
     case HOLE_ASSET_MIDPOINTS:
       if (g_GameMode == GAME_MODE_UNK12) {
@@ -2556,6 +2697,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].midpoints, &f_HoleAsset);
       }
+
       break;
     case HOLE_ASSET_TREES:
       if (g_GameMode == GAME_MODE_UNK12) {
@@ -2563,6 +2705,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].trees, &f_HoleAsset);
       }
+
       break;
     case HOLE_ASSET_TRIANGLES:
       if (g_GameMode == GAME_MODE_UNK12) {
@@ -2570,6 +2713,7 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].triangles, &f_HoleAsset);
       }
+
       break;
     case HOLE_ASSET_ATTRIBUTES:
       if (g_GameMode == GAME_MODE_UNK12) {
@@ -2577,10 +2721,12 @@ void OpenHoleAsset(s32 course, s32 hole, s8 kind) {
       } else {
         OpenAssetFile(f_HoleAssetIds[course][hole].attributes, &f_HoleAsset);
       }
+
       GetAssetFileSize(&f_HoleAsset);
       LoadLzData(f_HoleAsset.romStart, f_BuildCursor, f_HoleAsset.size);
       return;
   }
+
   ReadAssetFile(f_ReadCursor, GetAssetFileSize(&f_HoleAsset), &f_HoleAsset);
 }
 
@@ -2684,6 +2830,7 @@ void CastBillboardShadows(void) {
   lastTextureIndex = -1;
   lightYaw = g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS;
   lightPitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+
   /* solidityCells is there to match */
   solidityCells = solidities[0];
   for (index = 0; index != BILLBOARD_COUNT; index++) {
@@ -2691,18 +2838,22 @@ void CastBillboardShadows(void) {
     if (g_Billboards[index].textureIndex < 0) {
       continue;
     }
+
     for (listIndex = 0;; listIndex++) {
       if (g_Billboards[index].textureIndex == f_ShadowlessTextures[listIndex]) {
         listIndex = -1;
         break;
       }
+
       if (f_ShadowlessTextures[listIndex] < 0) {
         break;
       }
     }
+
     if (listIndex < 0) {
       continue;
     }
+
     if (g_Billboards[index].textureIndex != lastTextureIndex) {
       for (row = 0; row <= BILLBOARD_MASK_SIZE; row++) {
         for (column = 0; column <= BILLBOARD_MASK_SIZE; column++) {
@@ -2712,8 +2863,10 @@ void CastBillboardShadows(void) {
                   row * (1.0f / BILLBOARD_MASK_SIZE));
         }
       }
+
       lastTextureIndex = g_Billboards[index].textureIndex;
     }
+
     width = g_Billboards[index].width;
     widthScale = 1.0f / width;
     height = g_Billboards[index].height;
@@ -2740,9 +2893,11 @@ void CastBillboardShadows(void) {
     if (row < 0) {
       row = 0;
     }
+
     if (rowEnd >= MAP_ROW_COUNT) {
       rowEnd = MAP_ROW_COUNT - 1;
     }
+
     for (; row < rowEnd; row++) {
       rowPoint[0] = (lightView[2][0] * row) + lightView[3][0];
       rowPoint[1] = (lightView[2][1] * row) + lightView[3][1];
@@ -2753,22 +2908,27 @@ void CastBillboardShadows(void) {
       if (column < 0) {
         column = 0;
       }
+
       if (columnEnd >= MAP_COLUMN_COUNT) {
         columnEnd = MAP_COLUMN_COUNT - 1;
       }
+
       for (; column < columnEnd; column++) {
         viewX = (lightView[0][0] * column) + rowPoint[0];
         if (width <= fabsf(viewX)) {
           if (!isRowInWidth) {
             continue;
           }
+
           break;
         }
+
         isRowInWidth = TRUE;
         viewY = (lightView[0][1] * column) + rowPoint[1];
         if (((-width <= viewY) & (viewY < height)) == 0) {
           continue;
         }
+
         litPercent = LIT_PERCENT_FULL;
         heightFraction = viewY * heightScale;
         widthFraction = fabsf(viewX) * widthScale;
@@ -2778,6 +2938,7 @@ void CastBillboardShadows(void) {
                            LIT_PERCENT_AT_BASE) +
               LIT_PERCENT_AT_BASE;
         }
+
         if (viewY >= 0.0f) {
           solidity = solidityCells[((s32)(heightFraction * BILLBOARD_MASK_SIZE)
                                        << SOLIDITY_ROW_SHIFT) +
@@ -2794,9 +2955,11 @@ void CastBillboardShadows(void) {
             }
           }
         }
+
         if (litPercent == LIT_PERCENT_FULL) {
           continue;
         }
+
         color = *GetShadowedTexel(column, row);
         red = color & TEXEL_RED_MASK;
         green = color & TEXEL_GREEN_MASK;
@@ -2805,9 +2968,11 @@ void CastBillboardShadows(void) {
         if (brightness < 0) {
           continue;
         }
+
         if (brightness > SHADOW_BRIGHTNESS_MAX) {
           brightness = SHADOW_BRIGHTNESS_MAX;
         }
+
         scale = SHADOW_SCALE_ONE -
             ((LIT_PERCENT_FULL - litPercent) * brightness *
                 SHADOW_DARKENING_SCALE);
@@ -2819,19 +2984,23 @@ void CastBillboardShadows(void) {
         } else {
           red &= TEXEL_RED_MASK;
         }
+
         if (green > TEXEL_GREEN_MASK) {
           green = TEXEL_GREEN_MASK;
         } else {
           green &= TEXEL_GREEN_MASK;
         }
+
         if (blue > TEXEL_BLUE_MASK) {
           blue = TEXEL_BLUE_MASK;
         } else {
           blue &= TEXEL_BLUE_MASK;
         }
+
         color = red | green | blue | (color & TEXEL_ALPHA_MASK);
         *GetShadowedTexel(column, row) = color;
       }
+
       if (isRowInWidth) {
         hasShadowStarted = TRUE;
       } else if (hasShadowStarted == TRUE) {
@@ -2871,6 +3040,7 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
     keyIndexes[0] = SCENE_COLOR_INDEX_ROUND_START;
     keyIndexes[1] = SCENE_COLOR_INDEX_DRIVING_RANGE;
   }
+
   for (i = 0; i < 2; i++) {
     switch (keyIndexes[i]) {
       default:
@@ -2908,12 +3078,14 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
       }
     }
   }
+
   if (keyIndexes[1] == keyIndexes[0]) {
     fraction = 0.0f;
   } else {
     fraction = (f32)((s32)g_HoleConditions.sceneColorIndex - keyIndexes[0]) /
         (f32)(keyIndexes[1] - keyIndexes[0]);
   }
+
   light->red = InterpolateChannel(keyLights[0].red, keyLights[1].red, fraction);
   light->green =
       InterpolateChannel(keyLights[0].green, keyLights[1].green, fraction);
@@ -3037,6 +3209,7 @@ void ShadeGroundTiles(void) {
   shade.green <<= TEXEL_GREEN_SHIFT;
   shade.blue <<= TEXEL_BLUE_SHIFT;
   pitch = g_HoleConditions.lightPitch * BINARY_ANGLE_TO_RADIANS;
+
   /* The light's pitch is unused */
   cosf(pitch);
   sinf(pitch);
@@ -3047,6 +3220,7 @@ void ShadeGroundTiles(void) {
     } else if (scale > LIGHT_SCALE_MAX) {
       scale = LIGHT_SCALE_MAX;
     }
+
     slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_RED] = light.red * scale;
     slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
@@ -3054,6 +3228,7 @@ void ShadeGroundTiles(void) {
     slopeLights[((slope - LIGHT_SLOPE_MIN) * SLOPE_LIGHT_WORD_COUNT) +
         SLOPE_LIGHT_BLUE] = light.blue * scale;
   }
+
   lightColumnOffset =
       cosf(g_HoleConditions.lightYaw * BINARY_ANGLE_TO_RADIANS) *
       LIGHT_OFFSET_LENGTH;
@@ -3068,9 +3243,11 @@ void ShadeGroundTiles(void) {
             bandRow / HEIGHT_BAND_ROW_COUNT);
       }
     }
+
     if (row < 0) {
       continue;
     }
+
     heights = heightRows[row & HEIGHT_RING_ROW_MASK];
     trailingHeights = heightRows[(row - lightRowOffset) & HEIGHT_RING_ROW_MASK];
     leadingHeights = heightRows[(row + lightRowOffset) & HEIGHT_RING_ROW_MASK];
@@ -3090,10 +3267,12 @@ void ShadeGroundTiles(void) {
                               [column - lightColumnOffset];
         leading = &leadingHeights[column + lightColumnOffset];
       }
+
       for (count = GROUND_TILE_TEXEL_SPAN; count != 0; count--) {
         if (isMapEdge) {
           trailingColumn = column - lightColumnOffset;
           leadingColumn = column + lightColumnOffset;
+
           /* Only one of the columns is clamped */
           if (trailingColumn < 0) {
             trailingColumn = 0;
@@ -3104,16 +3283,19 @@ void ShadeGroundTiles(void) {
           } else if (leadingColumn >= MAP_COLUMN_COUNT) {
             leadingColumn = MAP_COLUMN_COUNT - 1;
           }
+
           slope =
               trailingHeights[trailingColumn] - leadingHeights[leadingColumn];
         } else {
           slope = *trailing++ - *leading++;
         }
+
         if (slope < LIGHT_SLOPE_MIN) {
           slope = LIGHT_SLOPE_MIN;
         } else if (slope > LIGHT_SLOPE_MAX) {
           slope = LIGHT_SLOPE_MAX;
         }
+
         texelColor = *texel;
         if (*heights < 0) {
           color = ((shade.red + (texelColor >> TEXEL_RED_SHIFT)) *
@@ -3124,6 +3306,7 @@ void ShadeGroundTiles(void) {
           if (color > TEXEL_CHANNEL_MAX) {
             color = TEXEL_CHANNEL_MAX;
           }
+
           color <<= TEXEL_RED_SHIFT;
           channel = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
                         slopeLights[((slope - LIGHT_SLOPE_MIN) *
@@ -3134,6 +3317,7 @@ void ShadeGroundTiles(void) {
           if (channel > TEXEL_CHANNEL_MAX) {
             channel = TEXEL_CHANNEL_MAX;
           }
+
           color |= channel << TEXEL_GREEN_SHIFT;
           channel = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
                         slopeLights[((slope - LIGHT_SLOPE_MIN) *
@@ -3144,6 +3328,7 @@ void ShadeGroundTiles(void) {
           if (channel > TEXEL_CHANNEL_MAX) {
             channel = TEXEL_CHANNEL_MAX;
           }
+
           color |= channel << TEXEL_BLUE_SHIFT;
           *texel = color | (texelColor & TEXEL_ALPHA_MASK);
         } else {
@@ -3155,6 +3340,7 @@ void ShadeGroundTiles(void) {
           if ((shaded.red = red) > TEXEL_CHANNEL_MAX) {
             shaded.red = TEXEL_CHANNEL_MAX;
           }
+
           green = ((shade.green + (texelColor & TEXEL_GREEN_MASK)) *
                       slopeLights[((slope - LIGHT_SLOPE_MIN) *
                                       SLOPE_LIGHT_WORD_COUNT) +
@@ -3164,6 +3350,7 @@ void ShadeGroundTiles(void) {
           if ((shaded.green = green) > TEXEL_CHANNEL_MAX) {
             shaded.green = TEXEL_CHANNEL_MAX;
           }
+
           blue = ((shade.blue + (texelColor & TEXEL_BLUE_MASK)) *
                      slopeLights[((slope - LIGHT_SLOPE_MIN) *
                                      SLOPE_LIGHT_WORD_COUNT) +
@@ -3173,7 +3360,9 @@ void ShadeGroundTiles(void) {
           if ((shaded.blue = blue) > TEXEL_CHANNEL_MAX) {
             shaded.blue = TEXEL_CHANNEL_MAX;
           }
+
           shaded.alpha = texelColor & TEXEL_ALPHA_MASK;
+
           /* The height test is always true here; the original has it */
           if (*heights >= 0 && isHighGroundFaded) {
             fade = *heights * HEIGHT_FADE_SCALE;
@@ -3181,11 +3370,13 @@ void ShadeGroundTiles(void) {
               fadeLimit = HEIGHT_FADE_FULL;
             } else if (isFadeDisabled) {
               fade = 0.0f;
+
               /* The goto is there to match */
               goto FADED;
             } else {
               fadeLimit = HEIGHT_FADE_LIMIT;
             }
+
             if (fade >= fadeLimit) {
               fade = fadeLimit;
             }
@@ -3203,6 +3394,7 @@ FADED:
             } else {
               fadedRed &= TEXEL_RED_MASK;
             }
+
             fadedGreen =
                 ((fadedGreen * keptWeight) + (fadeColor.green * fadeWeight)) >>
                 (LIGHT_SCALE_FRACTION_BITS - TEXEL_GREEN_SHIFT);
@@ -3211,6 +3403,7 @@ FADED:
             } else {
               fadedGreen &= TEXEL_GREEN_MASK;
             }
+
             fadedBlue =
                 ((fadedBlue * keptWeight) + (fadeColor.blue * fadeWeight)) >>
                 (LIGHT_SCALE_FRACTION_BITS - TEXEL_BLUE_SHIFT);
@@ -3219,6 +3412,7 @@ FADED:
             } else {
               fadedBlue &= TEXEL_BLUE_MASK;
             }
+
             texelColor = fadedRed | fadedGreen | fadedBlue | shaded.alpha;
           } else {
             texelColor = shaded.alpha |
@@ -3226,8 +3420,10 @@ FADED:
                     (shaded.green << TEXEL_GREEN_SHIFT) |
                     (shaded.blue << TEXEL_BLUE_SHIFT));
           }
+
           *texel = texelColor;
         }
+
         column++;
         texel++;
         heights++;
@@ -3270,6 +3466,7 @@ static inline u16 ReadTileTexel(
     tileColumn = GROUND_TILE_COLUMN_COUNT - 1;
     texelColumn = -1;
   }
+
   if (tileRow < 0) {
     tileRow = 0;
     texelRow = 0;
@@ -3277,10 +3474,12 @@ static inline u16 ReadTileTexel(
     tileRow = GROUND_TILE_ROW_COUNT - 1;
     texelRow = -1;
   }
+
   tileIndex = (tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn;
   if (texelColumn > GROUND_TILE_TEXEL_SPAN) {
     texelColumn = GROUND_TILE_TEXEL_SPAN;
   }
+
   texelColumn = (texelColumn + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
   texelRow = (texelRow + GROUND_TILE_TEXEL_SPAN) & MAP_TILE_MASK;
   tile = &g_WorkArea.hole.tiles[tileIndex];
@@ -3292,6 +3491,7 @@ static inline u16 ReadTileTexel(
   } else {
     texel = &tile->texels[0][(texelRow * GROUND_TILE_TEXEL_SPAN) + texelColumn];
   }
+
   return *texel;
 }
 
@@ -3327,6 +3527,7 @@ void ToggleGroundTileBorders(void) {
                 ReadTileTexel(tileColumn, tileRow, texelColumn, texelRow);
           }
         }
+
         texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
               [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0;
         for (i = 0; i < BORDERED_TILE_TEXEL_COUNT; i++) {
@@ -3336,8 +3537,10 @@ void ToggleGroundTileBorders(void) {
         }
       }
     }
+
     return;
   }
+
   for (tileRow = 0; tileRow < GROUND_TILE_ROW_COUNT; tileRow++) {
     for (tileColumn = 0; tileColumn < GROUND_TILE_COLUMN_COUNT; tileColumn++) {
       texel = &texels[TILE_BORDER_BEFORE][TILE_BORDER_BEFORE];
@@ -3349,8 +3552,10 @@ void ToggleGroundTileBorders(void) {
             texelColumn++) {
           *texel++ = *tileTexel++;
         }
+
         texel += GROUND_TILE_TEXEL_ROW_LENGTH - GROUND_TILE_TEXEL_SPAN;
       }
+
       texel = texels[0];
       for (texelRow = -TILE_BORDER_BEFORE;
           texelRow < GROUND_TILE_TEXEL_ROW_COUNT - TILE_BORDER_BEFORE;
@@ -3370,6 +3575,7 @@ void ToggleGroundTileBorders(void) {
           }
         }
       }
+
       texels[GROUND_TILE_TEXEL_ROW_COUNT - 1]
             [GROUND_TILE_TEXEL_ROW_LENGTH - 1] = 0xFFFF;
       source = (f64*)texels;
@@ -3381,6 +3587,7 @@ void ToggleGroundTileBorders(void) {
         *destination++ = *source++;
         *destination++ = *source++;
       }
+
       g_WorkArea.hole.tiles[(tileRow * GROUND_TILE_COLUMN_COUNT) + tileColumn]
           .unk990 = 0;
     }
@@ -3405,6 +3612,7 @@ void SetMiniGolfTileTextureCoords(
                 << TEXTURE_COORD_FRACTION_BITS) +
         TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
+
     /* The second coordinate's two steps are there to match */
     coord = (vertex->ob[AXIS_Z] * MINI_GOLF_TEXTURE_SCALE_Z) -
         (row << TILE_ORIGIN_SHIFT);
@@ -3425,11 +3633,13 @@ void SetTileTextureCoords(s32 column, s32 row, Vtx_t* start, Vtx_t* end) {
     SetMiniGolfTileTextureCoords(column, row, start, end);
     return;
   }
+
   for (vertex = start; vertex < end; vertex++) {
     coord = ((vertex->ob[AXIS_X] - (column << TILE_ORIGIN_SHIFT))
                 << TEXTURE_COORD_FRACTION_BITS) +
         TILE_TEXTURE_ORIGIN;
     vertex->tc[0] = coord;
+
     /* The second coordinate's two steps are there to match */
     coord = vertex->ob[AXIS_Z] - (row << TILE_ORIGIN_SHIFT);
     coord = (coord << TEXTURE_COORD_FRACTION_BITS) + TILE_TEXTURE_ORIGIN;
@@ -3472,6 +3682,7 @@ void BuildGroundTileDisplayList(
     midpoint->cn[2] = (from->cn[2] + to->cn[2]) / 2;
     midpoint->cn[3] = (from->cn[3] + to->cn[3]) / 2;
   }
+
   Gfx* gfx = *gfxCursor;
   Vtx* vertex = *vertexCursor;
   s32 tileIndex = (row * GROUND_TILE_COLUMN_COUNT) + column;
@@ -3584,6 +3795,7 @@ void BuildGroundTileDisplayList(
       }
     }
   }
+
   gSPEndDisplayList(gfx++);
   SetTileTextureCoords(column, row, &(*vertexCursor)->v, &vertex->v);
   SetTileTextureCoords(
@@ -3609,6 +3821,7 @@ void BuildGroundDisplayLists(void) {
       BuildGroundTileDisplayList(column, row, &gfx, &vertices);
     }
   }
+
   if ((u32)gfx > (u32)GROUND_DISPLAY_LIST_END ||
       (u32)vertices > (u32)GROUND_VERTEX_END) {
     ReportDivisionError();

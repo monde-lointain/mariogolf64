@@ -215,6 +215,7 @@ void DrawShotLabels(Gfx** displayListHead) {
             1 << 10, 1 << 10);
         break;
     }
+
     gDPPipeSync(gfx++);
   }
 
@@ -246,11 +247,13 @@ void DrawShotLabels(Gfx** displayListHead) {
           D_800C308C != LETTERBOX_STATE_UNK5)) {
     players = SHOT_LABELS_OTHER_BALLS;
   }
+
   if (f_ShotLabelPlayers != players) {
     for (i = 0; i != MAX_PLAYER_COUNT; i++) {
       f_ShotLabels[i].corner = NO_CORNER;
     }
   }
+
   f_ShotLabelPlayers = players;
   if (players != SHOT_LABELS_NONE) {
     /* This projects the cup with its x for all three coordinates */
@@ -264,6 +267,7 @@ void DrawShotLabels(Gfx** displayListHead) {
     } else {
       cup.isHidden = SPOT_HIDDEN;
     }
+
     for (i = 0; i != g_PlayerCount; i++) {
       label = &f_ShotLabels[i];
       if (players == SHOT_LABELS_OTHER_BALLS &&
@@ -271,10 +275,12 @@ void DrawShotLabels(Gfx** displayListHead) {
         label->corner = NO_CORNER;
         continue;
       }
+
       if (g_Players[i].unk26 != 0) {
         label->corner = NO_CORNER;
         continue;
       }
+
       if (ProjectPoint(
               g_Players[i].ballPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
               g_Players[i].ballPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
@@ -283,6 +289,7 @@ void DrawShotLabels(Gfx** displayListHead) {
         label->corner = NO_CORNER;
         continue;
       }
+
       if (point.x < -TAG_SCREEN_MARGIN ||
           point.x > SCREEN_WIDTH + TAG_SCREEN_MARGIN ||
           point.y < -TAG_SCREEN_MARGIN ||
@@ -293,6 +300,7 @@ void DrawShotLabels(Gfx** displayListHead) {
         label->corner = NO_CORNER;
         continue;
       }
+
       if (label->corner == NO_CORNER) {
         if (players == SHOT_LABELS_OTHER_BALLS) {
           label->corner = (i & 1) + CORNER_UPPER_LEFT;
@@ -300,6 +308,7 @@ void DrawShotLabels(Gfx** displayListHead) {
           label->corner = i;
         }
       }
+
       label->x = point.x + f_TagOffsetsX[label->corner];
       label->y = point.y + f_TagOffsetsY[label->corner];
       label->depth = point.depth;
@@ -321,10 +330,12 @@ void DrawShotLabels(Gfx** displayListHead) {
               overlaps = TRUE;
             }
           }
+
           tries++;
           if (!overlaps) {
             break;
           }
+
           overlaps = FALSE;
           if (tries == CORNER_COUNT) {
             goto NEXT;
@@ -347,10 +358,12 @@ void DrawShotLabels(Gfx** displayListHead) {
             } else {
               f_ShotLabels[i].corner = CORNER_UPPER_LEFT;
             }
+
             f_ShotLabels[i].x = point.x + f_TagOffsetsX[f_ShotLabels[i].corner];
             f_ShotLabels[i].y = point.y + f_TagOffsetsY[f_ShotLabels[i].corner];
             goto NEXT;
           }
+
           for (j = 0; j != i; j++) {
             if (f_ShotLabels[j].corner != NO_CORNER &&
                 f_ShotLabels[j].x - TAG_WIDTH <
@@ -364,21 +377,25 @@ void DrawShotLabels(Gfx** displayListHead) {
               overlaps = TRUE;
             }
           }
+
           tries++;
           if (!overlaps) {
             break;
           }
+
           if (tries == UPPER_CORNER_COUNT) {
             goto NEXT;
           }
         }
       }
+
       f_ShotLabels[i].x = point.x + f_TagOffsetsX[corner];
       f_ShotLabels[i].y = point.y + f_TagOffsetsY[corner];
       f_ShotLabels[i].corner = corner;
 
 NEXT:;
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     if (players == SHOT_LABELS_OTHER_BALLS) {
@@ -392,6 +409,7 @@ NEXT:;
     } else {
       gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     }
+
     gDPPipeSync(gfx++);
     gDPSetAlphaCompare(gfx++, G_AC_THRESHOLD);
     gDPSetBlendColor(gfx++, 255, 255, 255, 1);
@@ -414,6 +432,7 @@ NEXT:;
             f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
       }
     }
+
     gDPPipeSync(gfx++);
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPPipeSync(gfx++);
@@ -429,6 +448,7 @@ NEXT:;
             g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
+
     /* Then translucent over what covers them, so that they show through */
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -449,6 +469,7 @@ NEXT:;
             f_ShotLabels[i].x, f_ShotLabels[i].y, f_ShotLabels[i].corner);
       }
     }
+
     gDPPipeSync(gfx++);
     gDPSetCombineLERP(gfx++, 0, 0, 0, TEXEL0, PRIMITIVE, 0, TEXEL0, 0, 0, 0, 0,
         TEXEL0, PRIMITIVE, 0, TEXEL0, 0);
@@ -466,8 +487,10 @@ NEXT:;
             g_Players[i].unk1E[0] ? i + COMPUTER_TAG_OFFSET : i);
       }
     }
+
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -504,6 +527,7 @@ void DrawAimGuides(CameraMatrices* matrices) {
   if (g_IsCupViewShown != 0) {
     return;
   }
+
   gDPPipeSync(g_DisplayListHead++);
   gDPSetTexturePersp(g_DisplayListHead++, G_TP_NONE);
   DrawShotLabels(&g_DisplayListHead);
@@ -523,20 +547,25 @@ void DrawAimGuides(CameraMatrices* matrices) {
       if (heightYards > MAX_HEIGHT_YARDS) {
         heightYards = MAX_HEIGHT_YARDS;
       }
+
       if (heightYards < -MAX_HEIGHT_YARDS) {
         heightYards = -MAX_HEIGHT_YARDS;
       }
+
       tintYards = heightYards;
       if (tintYards > MAX_TINT_YARDS) {
         tintYards = MAX_TINT_YARDS;
       }
+
       if (tintYards < -MAX_TINT_YARDS) {
         tintYards = -MAX_TINT_YARDS;
       }
+
       /* The sign fades with distance, except on PAUSE_SCREEN_UNK4 */
       if (g_PauseScreen == PAUSE_SCREEN_UNK4) {
         goto OPAQUE;
       }
+
       alpha = SIGN_MIN_ALPHA;
       if (depth >= SIGN_FADE_START_DEPTH) {
         if (depth >= SIGN_FADE_END_DEPTH) {
@@ -549,6 +578,7 @@ OPAQUE:
               SIGN_MIN_ALPHA;
         }
       }
+
       distance = GetSelectedShotDistance();
       gDPPipeSync(g_DisplayListHead++);
       gDPSetPrimDepth(g_DisplayListHead++, point.depth, 0);
@@ -603,6 +633,7 @@ OPAQUE:
       } else {
         sprintf(g_PrintBuffer + DISTANCE_TEXT_OFFSET, "%2dy", distance);
       }
+
       if (D_800C308C != LETTERBOX_STATE_UNK3 &&
           D_800C308C != LETTERBOX_STATE_UNK4) {
         gDPPipeSync(g_DisplayListHead++);
@@ -612,6 +643,7 @@ OPAQUE:
             point.y - SIGN_DISTANCE_TEXT_Y,
             g_PrintBuffer + DISTANCE_TEXT_OFFSET);
       }
+
       /* Uphill is tinted red and downhill blue */
       gDPPipeSync(g_DisplayListHead++);
       if (tintYards > 0) {
@@ -634,11 +666,13 @@ OPAQUE:
         gDPPipeSync(g_DisplayListHead++);
         sprintf(g_PrintBuffer, "FLAT");
       }
+
       if (D_800C308C != LETTERBOX_STATE_UNK3 &&
           D_800C308C != LETTERBOX_STATE_UNK4) {
         DrawCenteredShadowedText(&g_DisplayListHead, point.x,
             point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       }
+
       if (surfaceKind == SURFACE_KIND_UNK13 ||
           surfaceKind == SURFACE_KIND_UNK21) {
         gDPPipeSync(g_DisplayListHead++);
@@ -649,6 +683,7 @@ OPAQUE:
         DrawCenteredShadowedText(
             &g_DisplayListHead, point.x, point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
       }
+
       /* Then translucent, so that the text shows through what covers it */
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(g_DisplayListHead++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -672,6 +707,7 @@ OPAQUE:
             g_DisplayListHead++, 0, 0, 255, 255, 255, TEXT_SHADOW_ALPHA);
         gDPPipeSync(g_DisplayListHead++);
       }
+
       DrawCenteredShadowedText(&g_DisplayListHead, point.x,
           point.y - SIGN_HEIGHT_TEXT_Y, g_PrintBuffer);
       if (surfaceKind == SURFACE_KIND_UNK13 ||
@@ -684,6 +720,7 @@ OPAQUE:
         DrawCenteredShadowedText(
             &g_DisplayListHead, point.x, point.y - OUT_OF_BOUNDS_TEXT_Y, "OB!");
       }
+
       gDPPipeSync(g_DisplayListHead++);
       gDPSetPrimColor(
           g_DisplayListHead++, 0, 0, 255, 255, 255, TEXT_SHADOW_ALPHA);
@@ -692,9 +729,11 @@ OPAQUE:
           point.y - SIGN_DISTANCE_TEXT_Y, g_PrintBuffer + DISTANCE_TEXT_OFFSET);
     }
   }
+
   if (D_800C307C < PIN_FLAG_HIDE_FRAME) {
     D_800C307C++;
   }
+
   if (g_RoundHud.unk12 == 1) {
     position[AXIS_X] = D_800BA9D8.cupPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
     position[AXIS_Z] = g_CupPositionZ * COURSE_TO_WORLD_SCALE;
@@ -704,6 +743,7 @@ OPAQUE:
       position[AXIS_Y] =
           (g_CupPositionY - PIN_FLAG_DROP) * COURSE_TO_WORLD_SCALE;
     }
+
     if (ProjectPoint(
             position[AXIS_X], position[AXIS_Y], position[AXIS_Z], &point) < 0) {
       flagImage = PIN_FLAG_IMAGE;
@@ -738,6 +778,7 @@ OPAQUE:
             gDPSetRenderMode(g_DisplayListHead++, PIN_FLAG_RENDER_MODE,
                 PIN_FLAG_RENDER_MODE2);
           }
+
           if (point.y < PIN_FLAG_TOP_Y) {
             point.y = PIN_FLAG_TOP_Y;
           }
@@ -749,6 +790,7 @@ OPAQUE:
               g_DisplayListHead++, PIN_FLAG_RENDER_MODE, PIN_FLAG_RENDER_MODE2);
           point.y = PIN_FLAG_TOP_Y;
         }
+
         if (flagImage != PIN_FLAG_HIDDEN) {
           gDPPipeSync(g_DisplayListHead++);
           gDPLoadTLUT_pal16(g_DisplayListHead++, 0,
@@ -763,6 +805,7 @@ OPAQUE:
               G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK,
               G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
           gDPPipeSync(g_DisplayListHead++);
+
           /* The flag bobs down and back up as it waves */
           f_PinFlagWaveFrame = (f_PinFlagWaveFrame + 1) & PIN_FLAG_WAVE_MASK;
           if (f_PinFlagWaveFrame > PIN_FLAG_WAVE_HALF) {
@@ -771,6 +814,7 @@ OPAQUE:
           } else {
             point.y += f_PinFlagWaveFrame / PIN_FLAG_WAVE_TICKS;
           }
+
           gSPScisTextureRectangle(g_DisplayListHead++,
               (point.x - PIN_FLAG_LEFT) << 2,
               (point.y - PIN_FLAG_IMAGE_HEIGHT) << 2,
@@ -783,6 +827,7 @@ OPAQUE:
       }
     }
   }
+
   gDPPipeSync(g_DisplayListHead++);
   gDPSetDepthSource(g_DisplayListHead++, G_ZS_PIXEL);
   gDPPipeSync(g_DisplayListHead++);

@@ -52,6 +52,7 @@ void ResetGameBoyTransfer(s32 transferMode) {
       g_GameBoyCharacters[index].unk38 = -1;
       g_GameBoyTransfer.sourceIndices[index] = -1;
     }
+
     g_GameBoyTransfer.optionIndex = 0;
     g_GameBoyTransfer.listedCharacterIndex = 0;
     g_GameBoyTransfer.characterCount = 0;
@@ -98,6 +99,7 @@ void DetectGameBoyPaks(void) {
         break;
     }
   }
+
   nuContGBPakMgrRemove();
 }
 
@@ -121,6 +123,7 @@ void InitRumblePaks(void) {
       f_HasRumblePak[index] = TRUE;
     }
   }
+
   DetectGameBoyPaks();
 }
 

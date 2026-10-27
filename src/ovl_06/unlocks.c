@@ -80,6 +80,7 @@ void UnlockEverything(void) {
 /* Ends with func_8005C674, which rebuilds the character grid from the save */
 void GrantWinsStarsAndBadges(void) {
   SaveData* save = GetSaveData();
+
   /* The star and badge loops reuse these for the course and the hole, to match
    */
   s32 row;
@@ -92,16 +93,19 @@ void GrantWinsStarsAndBadges(void) {
       }
     }
   }
+
   for (row = 0; row != RING_SHOT_COURSE_COUNT; row++) {
     for (column = 0; column != RING_SHOT_HOLE_COUNT; column++) {
       save->hasRingShotStar[row][column] = TRUE;
     }
   }
+
   for (row = 0; row != COURSE_COUNT; row++) {
     for (column = 0; column != COURSE_HOLE_COUNT; column++) {
       save->unk990.birdieBadgeCounts[row][column] = 1;
     }
   }
+
   func_8005C674(1, 1);
 }
 
@@ -119,6 +123,7 @@ void GrantRingShotProgressAndPoints(void) {
       }
     }
   }
+
   if (save->coursePoints < GRANTED_COURSE_POINTS) {
     save->coursePoints = GRANTED_COURSE_POINTS;
   }
@@ -136,6 +141,7 @@ void GrantEveryTournamentPlace(void) {
       save->unkE98[courseIndex].hasPlace[place] = TRUE;
     }
   }
+
   TransferSaveData(save, TRUE);
 }
 
@@ -153,17 +159,20 @@ void UpdateUnusedButtonCode(void) {
       f_UnusedCodeEntered[f_UnusedCodeLength] = g_MenuRepeatButtons;
       f_UnusedCodeLength++;
     }
+
     for (; index != f_UnusedCodeLength; index++) {
       if (f_UnusedCodeButtons[index] != f_UnusedCodeEntered[index]) {
         break;
       }
     }
+
     if (index == f_UnusedCodeLength) {
       if (f_UnusedCodeLength == UNUSED_CODE_LENGTH) {
         f_UnusedCodeLength = 0;
         for (index = 0; index != UNUSED_CODE_LENGTH; index++) {
           f_UnusedCodeEntered[index] = NO_BUTTONS;
         }
+
         PlaySound(0x69, 0xD, 0x50);
         UnlockEverything();
       }

@@ -292,6 +292,7 @@ s32 SumCoursePointsNeeded(s32 courseIndex) {
   for (i = 1; i < courseIndex + 1; i++) {
     total += GetCoursePointsNeeded(i);
   }
+
   return total;
 }
 
@@ -302,6 +303,7 @@ void OpenRoundResults(s32 request) {
     FreeRoundResults();
     return;
   }
+
   LoadRoundResults();
   f_ResultsSlide = SCREEN_WIDTH;
   f_ResultsState = RESULTS_SLIDING_IN;
@@ -360,6 +362,7 @@ void LoadRoundResults(void) {
   if (f_AreResultsLoaded == TRUE) {
     return;
   }
+
   StopSound(RAIN_SOUND_CHANNEL);
   f_AreResultsLoaded = TRUE;
   f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
@@ -370,6 +373,7 @@ void LoadRoundResults(void) {
   if (IsGameFlagSet(GAME_FLAG_ADD_500_POINTS)) {
     g_Players[0].points += 500;
   }
+
   if (IsGameFlagSet(GAME_FLAG_ADD_9999_POINTS)) {
     g_Players[0].points += 9999;
   }
@@ -469,6 +473,7 @@ void LoadRoundResults(void) {
       f_HasBets = TRUE;
     }
   }
+
   for (i = 0; i != g_PlayerCount; i++) {
     f_PortraitAnimations[i] = 0;
     f_PortraitFrames[i] = -1;
@@ -488,6 +493,7 @@ void LoadRoundResults(void) {
           f_PlayerResults[i] =
               GetNetScoreToPar(GetFirstHoleIndex() + GetRoundHoleCount(), i);
         }
+
         for (i = 0; i != g_PlayerCount; i++) {
           rank = &f_PlayerRanks[i];
           *rank = 0;
@@ -497,6 +503,7 @@ void LoadRoundResults(void) {
             }
           }
         }
+
         AddRoundPoints(save);
         break;
       case GAME_MODE_MATCH_GAME:
@@ -513,6 +520,7 @@ void LoadRoundResults(void) {
             f_PlayerResults[1]++;
           }
         }
+
         if (f_PlayerResults[1] < f_PlayerResults[0]) {
           f_PlayerRanks[0] = MATCH_RANK_WON;
           f_PlayerRanks[1] = MATCH_RANK_LOST;
@@ -520,6 +528,7 @@ void LoadRoundResults(void) {
           f_PlayerRanks[0] = MATCH_RANK_LOST;
           f_PlayerRanks[1] = MATCH_RANK_WON;
         }
+
         f_PortraitImage = AllocMemory(OpenEncodedAsset(
             g_CharacterImageAssets[(s8)g_Players[1].characterIndex], &asset));
         ReadEncodedAsset(f_PortraitImage, &asset);
@@ -543,6 +552,7 @@ void LoadRoundResults(void) {
         for (i = 0; i != g_PlayerCount; i++) {
           f_PlayerResults[i] = g_RoundHud.skinsTotals[i];
         }
+
         for (i = 0; i != g_PlayerCount; i++) {
           rank = &f_PlayerRanks[i];
           *rank = 0;
@@ -552,6 +562,7 @@ void LoadRoundResults(void) {
             }
           }
         }
+
         AddRoundPoints(save);
         break;
       case GAME_MODE_TOURNAMENT:
@@ -567,6 +578,7 @@ void LoadRoundResults(void) {
             break;
           }
         }
+
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
           f_PrizePoints =
               f_TournamentPrizes[g_CourseIndex][f_PlayerRanks[0] - 1];
@@ -579,6 +591,7 @@ void LoadRoundResults(void) {
           f_PrizePoints =
               f_TournamentPrizes[g_CourseIndex][TROPHY_PLACE_COUNT + 2];
         }
+
         f_PrizeShown = f_PrizePoints;
         if (f_PlayerRanks[0] <= TROPHY_PLACE_COUNT) {
           f_TrophyImage = AllocMemory(
@@ -591,6 +604,7 @@ void LoadRoundResults(void) {
           f_TrophyPalette = AllocMemory(size);
           ReadAssetFile(f_TrophyPalette, size, &file);
         }
+
         f_PointsEarned = f_PlayerPoints[0] * f_CoursePointRates[g_CourseIndex];
         f_PointsShown = f_PointsEarned;
         f_OpenCourseCount = CountOpenCourses(save->coursePoints);
@@ -599,12 +613,14 @@ void LoadRoundResults(void) {
           f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
               save->coursePoints - f_PrizePoints - f_PointsEarned;
         }
+
         if (save->coursePoints + f_PrizePoints + f_PointsEarned >
             MAX_COURSE_POINTS) {
           save->coursePoints = MAX_COURSE_POINTS;
         } else {
           save->coursePoints += f_PrizePoints + f_PointsEarned;
         }
+
         break;
     }
   }
@@ -616,6 +632,7 @@ void LoadRoundResults(void) {
           g_Players[i].gameBoyCharacterIndex, f_PlayerPoints[i]);
     }
   }
+
   switch (g_GameMode) {
     case GAME_MODE_STROKE:
       PlaySong(RESULTS_SONG, 0);
@@ -679,6 +696,7 @@ void LoadUnlockNotice(s32 unlock) {
     courseIndex = unlock - UNLOCK_NOTICE_COURSES;
     f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_COURSE;
   }
+
   f_ResultsShineImage = AllocMemory(OpenEncodedAsset(SHINE_ASSET, &asset));
   ReadEncodedAsset(f_ResultsShineImage, &asset);
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
@@ -689,6 +707,7 @@ void LoadUnlockNotice(s32 unlock) {
         OpenEncodedAsset(f_CourseNoticeAssets[courseIndex], &asset));
     ReadEncodedAsset(f_ResultsCourseImage, &asset);
   }
+
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
     f_NoticeTitleImage = AllocMemory(OpenEncodedAsset(0x560, &asset));
     ReadEncodedAsset(f_NoticeTitleImage, &asset);
@@ -710,11 +729,13 @@ void FreeUnlockNotice(void) {
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_COURSE) {
     FreeMemory(&f_ResultsCourseImage);
   }
+
   if (f_UnlockNoticeKind == UNLOCK_NOTICE_KIND_CHARACTER) {
     FreeMemory(&f_NameplateImage);
     FreeMemory(&f_PortraitImage);
     FreeMemory(&f_PortraitPalette);
   }
+
   f_UnlockNoticeKind = UNLOCK_NOTICE_KIND_NONE;
 }
 
@@ -734,9 +755,11 @@ s32 UpdateUnlockNotice(void) {
         if (f_NoticeAngle > M_PI) {
           f_NoticeAngle = M_PI;
         }
+
         if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
           f_NoticeStage = 1;
         }
+
         break;
       case 1:
         f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
@@ -744,14 +767,18 @@ s32 UpdateUnlockNotice(void) {
         if (f_NoticeFrameCount < NOTICE_DONE_FRAME) {
           break;
         }
+
         return TRUE;
     }
+
     return FALSE;
   }
+
   f_NoticeTime++;
   if (f_IsNoticeHeld) {
     return FALSE;
   }
+
   if (f_NoticeTime > NOTICE_FACE_DELAY &&
       !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
       f_NoticeFaceIndex < NOTICE_LAST_FACE) {
@@ -761,16 +788,19 @@ s32 UpdateUnlockNotice(void) {
         &asset);
     ReadEncodedAsset(f_PortraitImage, &asset);
   }
+
   if (f_NoticeTime > NOTICE_LIFT_DELAY) {
     if (f_NoticeLift > -2) {
       f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
       f_NoticeLift += f_NoticeLift * 2 / 3;
     }
+
     if (f_NoticeLift < NOTICE_LIFT_EXIT) {
       return TRUE;
     }
   }
+
   return FALSE;
 }
 
@@ -801,10 +831,12 @@ void FreeRoundResults(void) {
       FreeMemory(&D_80225718_ovl_00);
       FreeMemory(&D_8022571C_ovl_00);
     }
+
     for (i = 0; i != g_PlayerCount; i++) {
       FreeMemory(&f_PlayerPortraitImages[i]);
       FreeMemory(&f_PlayerPortraitPalettes[i]);
     }
+
     if (!g_IsClubTournament) {
       if (g_GameMode == GAME_MODE_MATCH_GAME ||
           g_GameMode == GAME_MODE_GET_CHARACTER) {
@@ -815,6 +847,7 @@ void FreeRoundResults(void) {
       } else {
         FreeMemory(&f_ResultsPlacesImage);
       }
+
       switch (g_GameMode) {
         case GAME_MODE_STROKE:
         case GAME_MODE_UNK1:
@@ -837,6 +870,7 @@ void FreeRoundResults(void) {
             FreeMemory(&f_TrophyImage);
             FreeMemory(&f_TrophyPalette);
           }
+
           break;
       }
     }
@@ -886,9 +920,11 @@ void DrawResultsNumber(Gfx** displayListHead, s32 x, s32 y, s32 value) {
       do {
       } while (0);
     }
+
     c++;
     offset += RESULTS_DIGIT_WIDTH;
   }
+
   *displayListHead = gfx;
 }
 
@@ -940,6 +976,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
   for (c = g_PrintBuffer; *c != '\0'; c++) {
     width += PLACE_GLYPH_SPACING;
   }
+
   left = x + PLACE_NUMBER_X_OFFSET;
   left -= width / 2;
   width = 0;
@@ -949,12 +986,15 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
       glyph = character - '0';
       DRAW_PLACE_GLYPH(gfx, left + width, y, glyph);
     }
+
     width += PLACE_GLYPH_SPACING;
   }
+
   suffix = place;
   if (suffix > PLACES_PER_HUNDRED) {
     suffix %= PLACES_PER_HUNDRED;
   }
+
   suffix--;
   if (suffix > PLACE_SUFFIX_TH - 1) {
     if (suffix < PLACE_TEENS_END) {
@@ -968,6 +1008,7 @@ void DrawPlaceNumber(Gfx** displayListHead, s32 x, s32 y, s32 place) {
       }
     }
   }
+
   DRAW_PLACE_GLYPH(gfx, left + width, y, suffix + PLACE_SUFFIX_GLYPH_FIRST);
   *displayListHead = gfx;
 }
@@ -1041,6 +1082,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         suffix = PLACE_SUFFIX_TH;
       }
     }
+
     LoadLargePalette(&gfx, f_ResultsPlacesImage + IMAGE_HEADER_SIZE);
     LoadTextureBlock(&gfx,
         f_ResultsPlacesImage +
@@ -1059,6 +1101,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
       if (rank >= RANK_TENTH) {
         x -= PLACE_TWO_DIGIT_SHIFT;
       }
+
       for (i = 0; g_PrintBuffer[i] != '\0'; i++) {
         digit = g_PrintBuffer[i] - '0';
         digitX = (i * PLACE_DIGIT_SPACING) + PLACE_DIGIT_X;
@@ -1083,6 +1126,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
     } else {
       image = D_80225708_ovl_00;
     }
+
     LoadLargePalette(&gfx, image + IMAGE_HEADER_SIZE);
     for (i = 0, stripY = y, offset = LARGE_PALETTED_TEXELS_OFFSET;
         i != RANK_BANNER_STRIP_COUNT; i++) {
@@ -1110,6 +1154,7 @@ void DrawRank(Gfx** displayListHead, s32 x, s32 y, s32 rank) {
         TEXEL_STEP_ONE);
     DrawPlaceIcon(&gfx, x, y, rank);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -1192,9 +1237,11 @@ void UpdateCourseResultsNotice(void) {
       if (f_NoticeAngle > M_PI) {
         f_NoticeAngle = M_PI;
       }
+
       if (f_NoticeFrameCount >= NOTICE_SWING_FRAMES) {
         f_NoticeStage = 1;
       }
+
       break;
     case 1:
       f_NoticeSwing = -sinf(f_NoticeAngle) * NOTICE_SWING_HEIGHT;
@@ -1207,6 +1254,7 @@ void UpdateCourseResultsNotice(void) {
               GetCoursePointsNeeded(f_OpenCourseCount) - save->coursePoints;
         }
       }
+
       break;
   }
 }
@@ -1254,6 +1302,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+
   /* Once the swing settles the picture is drawn at full size, where point
    * sampling is sharper */
   if (f_NoticeAngle == M_PI) {
@@ -1263,6 +1312,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_BILERP);
   }
+
   LoadLargePalette(&gfx, f_ResultsCourseImage + IMAGE_HEADER_SIZE);
   for (i = 0; i != NOTICE_COURSE_STRIP_COUNT; i++) {
     size = (cosf(f_NoticeAngle) + NOTICE_COURSE_SCALE_BIAS) *
@@ -1279,6 +1329,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         (size + centreX) * 4, (top + size + f_NoticeUnk54) * 4, G_TX_RENDERTILE,
         0, 0, step, step);
   }
+
   LoadLargePalette(&gfx, f_NoticeTitleImage + IMAGE_HEADER_SIZE);
   for (i = 0; i != NOTICE_TITLE_STRIP_COUNT; i++) {
     lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
@@ -1295,6 +1346,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   /* The title again, into the depth buffer alone */
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PRIM);
@@ -1321,6 +1373,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
         (top + (f_NoticeUnk54 + NOTICE_TITLE_STRIP_HEIGHT)) * 4,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -1339,12 +1392,14 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
         NOTICE_SHINE_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
   }
+
   if (f_NoticeFrameCount == 2) {
     PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
         NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_RIGHT);
     PlaySound(NOTICE_CHEER_SOUND, NOTICE_CHEER_SOUND_CHANNEL,
         NOTICE_CHEER_SOUND_VOLUME);
   }
+
   /* The swing sound follows the notice across the screen */
   if (f_NoticeFrameCount >= NOTICE_PAN_START &&
       f_NoticeFrameCount < NOTICE_PAN_END) {
@@ -1353,11 +1408,14 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
     if (pan < 0) {
       pan = 0;
     }
+
     if (pan > NOTICE_PAN_MAX) {
       pan = NOTICE_PAN_MAX;
     }
+
     SetSoundPan(NOTICE_SWING_SOUND_CHANNEL, pan);
   }
+
   lift = -(s32)(cosf(f_NoticeAngle) * NOTICE_TITLE_LIFT);
   lift -= (s32)NOTICE_TITLE_LIFT;
   if (f_NoticeFrameCount >= NOTICE_SHINE_START) {
@@ -1373,6 +1431,7 @@ void DrawCourseResultsNotice(Gfx** displayListHead) {
           0, NOTICE_SHINE_DSDX, TEXEL_STEP_ONE);
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   *displayListHead = gfx;
@@ -1390,6 +1449,7 @@ void UpdateCharacterResultsNotice(void) {
   if (f_IsNoticeHeld) {
     return;
   }
+
   if (f_NoticeTime > NOTICE_FACE_DELAY &&
       !(f_NoticeTime & NOTICE_FACE_INTERVAL_MASK) &&
       f_NoticeFaceIndex < NOTICE_LAST_FACE) {
@@ -1399,12 +1459,14 @@ void UpdateCharacterResultsNotice(void) {
         &asset);
     ReadEncodedAsset(f_PortraitImage, &asset);
   }
+
   if (f_NoticeTime > NOTICE_LIFT_DELAY) {
     if (f_NoticeLift > -2) {
       f_NoticeLift -= NOTICE_LIFT_START_SPEED;
     } else {
       f_NoticeLift += f_NoticeLift * 2 / 3;
     }
+
     if (f_NoticeLift < NOTICE_LIFT_EXIT) {
       StartResultsNotice(UNLOCK_NOTICE_KIND_NONE);
     }
@@ -1459,6 +1521,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
   } else {
     angle = NOTICE_POP_SETTLE_ANGLE;
   }
+
   pop = sinf(angle);
   gSPDisplayList(gfx++, D_800C3FC0);
   gDPPipeSync(gfx++);
@@ -1479,6 +1542,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
   }
+
   size = pop * NOTICE_PORTRAIT_POP_SIZE;
   if (size > 0) {
     LoadLargePalette(&gfx, f_PortraitPalette);
@@ -1491,6 +1555,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
         (size + centreX) * 4, (size + centreY) * 4, G_TX_RENDERTILE, 0, 0, step,
         step);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   height = pop * NOTICE_CHARACTER_TITLE_POP_HEIGHT;
@@ -1515,6 +1580,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
+
     /* The title again, into the depth buffer alone, so that the shine behind it
      * only lights the letters */
     gDPPipeSync(gfx++);
@@ -1541,6 +1607,7 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           ((NOTICE_CHARACTER_TITLE_WIDTH / 2) << 10) / width,
           (NOTICE_TITLE_STRIP_HEIGHT << 10) / height);
     }
+
     gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -1560,14 +1627,17 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
           NOTICE_CHARACTER_VOICE, NOTICE_CHARACTER_VOICE_VOLUME,
           NOTICE_SOUND_PAN_CENTRE);
     }
+
     if (f_NoticeTime == NOTICE_SHINE_START) {
       PlaySoundWithEffects(NOTICE_SHINE_SOUND, NOTICE_SHINE_SOUND_CHANNEL,
           NOTICE_SHINE_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
     }
+
     if (f_NoticeTime == 2) {
       PlaySoundWithEffects(NOTICE_SWING_SOUND, NOTICE_SWING_SOUND_CHANNEL,
           NOTICE_SWING_SOUND_VOLUME, 0, NOTICE_SOUND_PAN_CENTRE);
     }
+
     if (f_NoticeTime >= NOTICE_SHINE_START) {
       if (f_NoticeTime < NOTICE_SHINE_END) {
         DrawTextureRect(&gfx, (f_NoticeLift + NOTICE_CHARACTER_SHINE_LEFT) * 4,
@@ -1585,9 +1655,11 @@ void DrawCharacterResultsNotice(Gfx** displayListHead) {
             0, NOTICE_CHARACTER_SHINE_DSDX, NOTICE_CHARACTER_SHINE_DTDY);
       }
     }
+
     gDPPipeSync(gfx++);
     gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -1607,6 +1679,7 @@ s32 UpdateRoundResults(void) {
         f_ResultsUnk7C = 0;
         break;
       }
+
       f_ResultsSlide += -f_ResultsSlide / 2;
       break;
     case RESULTS_SHOWN:
@@ -1632,15 +1705,18 @@ s32 UpdateRoundResults(void) {
             return FALSE;
         }
       }
+
       if (isDone) {
         f_ResultsState = RESULTS_CLOSING;
       }
+
       break;
     case RESULTS_CLOSING:
       WriteSaveData();
       OpenRoundResults(CLOSE_ROUND_RESULTS);
       return TRUE;
   }
+
   return FALSE;
 }
 
@@ -1759,6 +1835,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
       } else {
         f_BannerX += -f_BannerX / 2;
       }
+
       break;
     case BANNER_SLIDING_OUT:
       if (f_BannerX >= -1) {
@@ -1766,11 +1843,14 @@ void DrawResultsBanner(Gfx** displayListHead) {
       } else {
         f_BannerX += f_BannerX / 2;
       }
+
       if (f_BannerX < BANNER_GONE_X) {
         f_BannerState = BANNER_HIDDEN;
       }
+
       break;
   }
+
   switch (f_BannerKind) {
     case BANNER_KIND_UNK2:
     case BANNER_KIND_UNK4:
@@ -1802,6 +1882,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
           } else if (rank == PLACE_TWENTY_THIRD) {
             sprintf(g_PrintBuffer, "%drd", rank);
           }
+
           SetTextName(g_PrintBuffer);
           SetTextSlotValue(f_PrizeShown, BANNER_TEXT_SLOT, 1);
           SetTextSlot(f_BannerX + PRIZE_TEXT_X, f_BannerY + PRIZE_TEXT_Y,
@@ -1821,6 +1902,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             TEXT_FLAG_UNK20 | TEXT_FLAG_CENTERED, BANNER_TEXT_RED,
             BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       }
+
       break;
     case BANNER_KIND_UNK5:
       SetTextSlot(f_BannerX + BANNER_TEXT_X, f_BannerY + BANNER_TEXT_Y,
@@ -1829,9 +1911,11 @@ void DrawResultsBanner(Gfx** displayListHead) {
           BANNER_TEXT_GREEN, BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
       break;
   }
+
   if (f_BannerState == BANNER_HIDDEN) {
     return;
   }
+
   gDPPipeSync(gfx++);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_NONE);
@@ -1870,6 +1954,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, BANNER_CLOUD_DSDX, TEXEL_STEP_ONE);
     }
   }
+
   SetUpTextDrawing(&gfx);
   gDPSetPrimColor(gfx++, 0, 0, BANNER_TEXT_RED, BANNER_TEXT_GREEN,
       BANNER_TEXT_BLUE, BANNER_TEXT_ALPHA);
@@ -1886,9 +1971,11 @@ void DrawResultsBanner(Gfx** displayListHead) {
         if (f_TrophyFrame == f_TrophyAssets[course].frameCount) {
           f_TrophyFrame = 0;
         }
+
         OpenEncodedAsset(f_TrophyAssets[course].image + f_TrophyFrame, &asset);
         ReadEncodedAsset(f_TrophyImage, &asset);
       }
+
       gSPDisplayList(gfx++, D_800C3FC0);
       gDPPipeSync(gfx++);
       gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1922,6 +2009,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
+
       /* The trophy again, into the depth buffer alone */
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PRIM);
@@ -1959,6 +2047,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         top += f_TrophySizes[course][TROPHY_PART_HEIGHTS + i];
       }
+
       gDPSetPrimDepth(gfx++, NOTICE_SHINE_DEPTH, 0);
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -1979,6 +2068,7 @@ void DrawResultsBanner(Gfx** displayListHead) {
             TROPHY_SHINE_SOUND_VOLUME, TROPHY_SHINE_SOUND_REVERB,
             TROPHY_SHINE_SOUND_PAN);
       }
+
       if (f_TrophyShineFrame >= TROPHY_SHINE_START) {
         if (f_TrophyShineFrame < TROPHY_SHINE_CYCLE) {
           top = f_TrophySizes[course][TROPHY_PART_HEIGHTS] +
@@ -2002,10 +2092,12 @@ void DrawResultsBanner(Gfx** displayListHead) {
               0, TROPHY_SHINE_DSDX, TEXEL_STEP_ONE);
         }
       }
+
       gDPPipeSync(gfx++);
       gDPSetDepthSource(gfx++, G_ZS_PIXEL);
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2057,6 +2149,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
+
       switch (f_ResultsUnk78) {
         case TOURNAMENT_STEP_START:
           record = &GetSaveData()->unkE98[g_CourseIndex];
@@ -2066,6 +2159,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             PlaySound(SOUND_NEW_BEST_SCORE, NEW_BEST_SCORE_SOUND_CHANNEL,
                 TALLY_DONE_SOUND_VOLUME);
           }
+
           f_IsAwaitingConfirm = TRUE;
           break;
         case TOURNAMENT_STEP_SHOWN:
@@ -2076,6 +2170,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
                 SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_IN_PRIZE;
           }
+
           break;
         case TOURNAMENT_STEP_SLIDING_IN_PRIZE:
           if (GetBannerState() == 1) {
@@ -2086,6 +2181,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
                   CHARACTER_SOUND_WIN, TALLY_DONE_SOUND_VOLUME, WIN_SOUND_PAN);
             }
           }
+
           break;
         case TOURNAMENT_STEP_TALLYING_PRIZE:
           if (controller->buttons & A_BUTTON) {
@@ -2098,6 +2194,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             if (*points > 0) {
               PlayTallySound();
             }
+
             if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
               f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
@@ -2105,14 +2202,17 @@ s32 UpdateTournamentResults(ControllerState* controller) {
                 PlaySound(SOUND_TALLY_DONE, g_NextSoundChannel,
                     TALLY_DONE_SOUND_VOLUME);
               }
+
               break;
             }
+
             /* Stop on the points that open the next course, so that its notice
              * shows */
             overshoot = f_PointsToNextCourse + *points + f_PointsEarned;
             if (overshoot < 0) {
               *points -= overshoot;
             }
+
             if (*points < 0) {
               f_ResultsUnk78 = TOURNAMENT_STEP_PRIZE_TALLIED;
               *points = 0;
@@ -2123,6 +2223,7 @@ s32 UpdateTournamentResults(ControllerState* controller) {
               }
             }
           }
+
           break;
         case TOURNAMENT_STEP_PRIZE_TALLIED:
           if (controller->buttons & A_BUTTON) {
@@ -2132,10 +2233,12 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             f_IsAwaitingConfirm = FALSE;
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDE_OUT_PRIZE;
           }
+
           /* A debugging shortcut to the course notice */
           if ((controller->pressedButtons & B_BUTTON) && g_IsDebugEnabled) {
             StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
           }
+
           break;
         case TOURNAMENT_STEP_SLIDE_OUT_PRIZE:
           SetResultsBanner(4, 1);
@@ -2150,11 +2253,13 @@ s32 UpdateTournamentResults(ControllerState* controller) {
               f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
             }
           }
+
           break;
         case TOURNAMENT_STEP_SLIDING_IN_POINTS:
           if (GetBannerState() == 1) {
             f_ResultsUnk78 = TOURNAMENT_STEP_TALLYING_POINTS;
           }
+
           break;
         case TOURNAMENT_STEP_TALLYING_POINTS:
           if (controller->buttons & A_BUTTON) {
@@ -2166,10 +2271,12 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             if (*points > 0) {
               PlayTallySound();
             }
+
             *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
+
             if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
@@ -2179,12 +2286,14 @@ s32 UpdateTournamentResults(ControllerState* controller) {
               }
             }
           }
+
           if (f_PointsEarned == 0) {
             PlaySound(
                 SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
             f_ResultsUnk78 = TOURNAMENT_STEP_POINTS_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
+
           break;
         case TOURNAMENT_STEP_POINTS_TALLIED:
           if (controller->buttons & A_BUTTON) {
@@ -2193,12 +2302,14 @@ s32 UpdateTournamentResults(ControllerState* controller) {
             SetResultsBanner(4, 3);
             f_ResultsUnk78 = TOURNAMENT_STEP_SLIDING_OUT_POINTS;
           }
+
           break;
         case TOURNAMENT_STEP_SLIDING_OUT_POINTS:
           if (GetBannerState() == 3) {
             f_IsAwaitingConfirm = TRUE;
             f_ResultsUnk78 = TOURNAMENT_STEP_WAITING;
           }
+
           break;
         case TOURNAMENT_STEP_WAITING:
           f_IsAwaitingConfirm = TRUE;
@@ -2207,10 +2318,13 @@ s32 UpdateTournamentResults(ControllerState* controller) {
                 SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
             return TRUE;
           }
+
           break;
       }
+
       break;
   }
+
   return FALSE;
 }
 
@@ -2251,6 +2365,7 @@ s32 ShowScorePassword(ControllerState* controller) {
         OpenPrompt(PROMPT_SCORE_PASSWORD);
         PlaySound(SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
       }
+
       break;
     case SCORE_PASSWORD_STEP_ASKING:
       switch (UpdatePrompt(controller)) {
@@ -2262,11 +2377,13 @@ s32 ShowScorePassword(ControllerState* controller) {
           f_IsAwaitingConfirm = TRUE;
           break;
       }
+
       break;
     case SCORE_PASSWORD_STEP_DONE:
       f_IsAwaitingConfirm = FALSE;
       return TRUE;
   }
+
   return FALSE;
 }
 
@@ -2305,6 +2422,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         for (i = 0; i != g_PlayerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
+
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
@@ -2312,6 +2430,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
+
       switch (f_ResultsUnk78) {
         case POINTS_STEP_SHOWN:
           f_IsAwaitingConfirm = TRUE;
@@ -2321,6 +2440,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             PlaySound(
                 SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
           }
+
           break;
         case POINTS_STEP_START_TALLY:
           if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
@@ -2329,6 +2449,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
           } else {
             f_ResultsUnk78 = POINTS_STEP_WAITING;
           }
+
           for (i = 0; i != g_PlayerCount; i++) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
             for (j = 0; j != g_PlayerCount; j++) {
@@ -2337,11 +2458,13 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
               }
             }
           }
+
           break;
         case POINTS_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == 1) {
             f_ResultsUnk78 = POINTS_STEP_TALLYING;
           }
+
           break;
         case POINTS_STEP_TALLYING:
           if (controller->buttons & A_BUTTON) {
@@ -2353,10 +2476,12 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             if (*points > 0) {
               PlayTallySound();
             }
+
             *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
+
             if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
@@ -2368,6 +2493,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
               }
             }
           }
+
           if (f_PointsEarned == 0) {
             f_ResultsUnk7C = 0;
             PlaySound(
@@ -2375,6 +2501,7 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             f_ResultsUnk78 = POINTS_STEP_TALLIED;
             f_IsAwaitingConfirm = TRUE;
           }
+
           break;
         case POINTS_STEP_TALLIED:
           if (controller->buttons & A_BUTTON) {
@@ -2382,11 +2509,13 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             f_ResultsUnk78 = POINTS_STEP_SLIDING_OUT_TALLY;
             f_IsAwaitingConfirm = FALSE;
           }
+
           break;
         case POINTS_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == 3) {
             f_ResultsUnk78 = POINTS_STEP_WAITING;
           }
+
           break;
         case POINTS_STEP_WAITING:
           f_IsAwaitingConfirm = TRUE;
@@ -2396,10 +2525,13 @@ s32 UpdateCoursePointsResults(ControllerState* controller) {
             f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }
+
           break;
       }
+
       break;
   }
+
   return FALSE;
 }
 #else
@@ -2448,6 +2580,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
         for (i = 0; i != g_PlayerCount; i++) {
           StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, i);
         }
+
         StartResultsNotice(UNLOCK_NOTICE_KIND_COURSE);
         OpenEncodedAsset(D_800C2074[f_OpenCourseCount], &asset);
         ReadEncodedAsset(f_ResultsCourseImage, &asset);
@@ -2455,6 +2588,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
         ReadEncodedAsset(f_NoticeTitleImage, &asset);
         return FALSE;
       }
+
       switch (f_ResultsUnk78) {
         case MATCH_STEP_SHOWN:
           f_IsAwaitingConfirm = TRUE;
@@ -2464,6 +2598,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
             PlaySound(
                 SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
           }
+
           break;
         case MATCH_STEP_START_TALLY:
           if (f_PointsEarned > 0 && f_OpenCourseCount < COURSE_COUNT) {
@@ -2472,6 +2607,7 @@ s32 UpdateMatchResults(ControllerState* controller) {
           } else {
             f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
           }
+
           if (f_PlayerRanks[0] == MATCH_RANK_WON) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 0);
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 1);
@@ -2479,11 +2615,13 @@ s32 UpdateMatchResults(ControllerState* controller) {
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK1, 1);
             StartPortraitAnimation(PORTRAIT_ANIMATION_UNK4, 0);
           }
+
           break;
         case MATCH_STEP_SLIDING_IN_TALLY:
           if (GetBannerState() == 1) {
             f_ResultsUnk78 = MATCH_STEP_TALLYING;
           }
+
           break;
         case MATCH_STEP_TALLYING:
           if (controller->buttons & A_BUTTON) {
@@ -2495,10 +2633,12 @@ s32 UpdateMatchResults(ControllerState* controller) {
             if (*points > 0) {
               PlayTallySound();
             }
+
             *points -= f_TallySpeed;
             if (*points < 0) {
               *points = 0;
             }
+
             if (f_OpenCourseCount == COURSE_COUNT) {
               *points = 0;
             } else {
@@ -2510,11 +2650,13 @@ s32 UpdateMatchResults(ControllerState* controller) {
               }
             }
           }
+
           if (f_PointsEarned == 0) {
             f_ResultsUnk78 = MATCH_STEP_TALLIED;
             PlaySound(
                 SOUND_TALLY_DONE, g_NextSoundChannel, TALLY_DONE_SOUND_VOLUME);
           }
+
           break;
         case MATCH_STEP_TALLIED:
           f_IsAwaitingConfirm = TRUE;
@@ -2523,11 +2665,13 @@ s32 UpdateMatchResults(ControllerState* controller) {
             f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
             f_IsAwaitingConfirm = FALSE;
           }
+
           break;
         case MATCH_STEP_SLIDING_OUT_TALLY:
           if (GetBannerState() == 3) {
             f_ResultsUnk78 = MATCH_STEP_RECORD_RESULT;
           }
+
           break;
         case MATCH_STEP_RECORD_RESULT:
           f_ResultsUnk78 = MATCH_STEP_WAITING;
@@ -2546,9 +2690,11 @@ s32 UpdateMatchResults(ControllerState* controller) {
                 (s8)g_Players[1].characterIndex < CHARACTER_METAL_MARIO) {
               f_ResultsUnk78 = MATCH_STEP_SHOW_CHARACTER_NOTICE;
             }
+
             RecordComCharacterResult((s8)g_Players[0].characterIndex,
                 (s8)g_Players[1].characterIndex, GetMatchWinner(0, 1) == 1);
           }
+
           break;
         case MATCH_STEP_SHOW_CHARACTER_NOTICE: {
           EncodedAsset titleAsset;
@@ -2567,9 +2713,11 @@ s32 UpdateMatchResults(ControllerState* controller) {
           if (f_ResultsUnk7C == CHARACTER_NOTICE_WAIT_FRAMES) {
             f_ResultsUnk78 = MATCH_STEP_WAITING;
           }
+
           break;
         case MATCH_STEP_WAITING:
           f_IsAwaitingConfirm = TRUE;
+
           /* A debugging aid: up and down choose a character, and B shows its
            * notice */
           if (IsGameFlagSet(GAME_FLAG_CHOOSE_UNLOCK_NOTICE)) {
@@ -2577,10 +2725,12 @@ s32 UpdateMatchResults(ControllerState* controller) {
                 f_DebugUnlockCharacter > 0) {
               f_DebugUnlockCharacter--;
             }
+
             if ((g_ControllerStates[0].repeatedButtons & D_JPAD) &&
                 f_DebugUnlockCharacter < CHARACTER_COUNT - 1) {
               f_DebugUnlockCharacter++;
             }
+
             sprintf(g_PrintBuffer, "CHARA:%2d", f_DebugUnlockCharacter);
             PrintDebugText(g_PrintBuffer, 25, 5);
             if (controller->pressedButtons & B_BUTTON) {
@@ -2604,16 +2754,20 @@ s32 UpdateMatchResults(ControllerState* controller) {
               f_ResultsUnk78 = MATCH_STEP_SLIDING_OUT_TALLY;
             }
           }
+
           if (controller->buttons & A_BUTTON) {
             PlaySound(
                 SOUND_CONFIRM, CONFIRM_SOUND_CHANNEL, CONFIRM_SOUND_VOLUME);
             f_IsAwaitingConfirm = FALSE;
             return TRUE;
           }
+
           break;
       }
+
       break;
   }
+
   return FALSE;
 }
 
@@ -2646,6 +2800,7 @@ void DrawTournamentResults(Gfx** displayListHead) {
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
+
   LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -2655,6 +2810,7 @@ void DrawTournamentResults(Gfx** displayListHead) {
   } else {
     sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
+
   DrawDigitText(&gfx, f_ResultsSlide + 152, f_ResultsTop + 88, g_PrintBuffer);
   sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[0]);
   DrawDigitText(&gfx, f_ResultsSlide + 232, f_ResultsTop + 88, g_PrintBuffer);
@@ -2703,6 +2859,7 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
+
   LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -2712,6 +2869,7 @@ void DrawSpeedGolfResults(Gfx** displayListHead) {
   } else {
     sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[0]);
   }
+
   DrawDigitText(&gfx, f_ResultsSlide + 90, f_ResultsTop + 132, g_PrintBuffer);
   seconds = g_GameState.stopwatchFrameCount / FRAMES_PER_SECOND;
   hundredths = (s32)(g_GameState.stopwatchFrameCount *
@@ -2753,10 +2911,12 @@ void DrawPlayersResults(Gfx** displayListHead) {
     if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
+
     if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
       betShift = 0;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -2774,6 +2934,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
       }
+
       DrawPlayerPortrait(&gfx, f_ResultsSlide + 50,
           f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
           FALSE);
@@ -2789,11 +2950,13 @@ void DrawPlayersResults(Gfx** displayListHead) {
             f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT),
             f_PlayerRanks[i]);
       }
+
       DrawPlayerPortrait(&gfx, f_ResultsSlide + 96,
           f_ResultsTop + RESULTS_ICON_ROW_Y + (i * RESULTS_ROW_HEIGHT), i,
           FALSE);
     }
   }
+
   LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -2808,6 +2971,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 96,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
@@ -2820,6 +2984,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 242,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
@@ -2834,6 +2999,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, f_ScoreFormat, f_PlayerResults[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 152,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
@@ -2842,11 +3008,13 @@ void DrawPlayersResults(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 232,
           f_ResultsTop + RESULTS_TEXT_ROW_Y + (i * RESULTS_ROW_HEIGHT),
           g_PrintBuffer);
     }
   }
+
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 200,
         MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
@@ -2860,6 +3028,7 @@ void DrawPlayersResults(Gfx** displayListHead) {
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2898,10 +3067,12 @@ void DrawMatchResults(Gfx** displayListHead) {
     if (f_PlayerBetTotals[i] > FOUR_DIGIT_BET_MAX) {
       betShift = 0;
     }
+
     if (f_PlayerBetTotals[i] < FOUR_DIGIT_BET_MIN) {
       betShift = 0;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -2927,6 +3098,7 @@ void DrawMatchResults(Gfx** displayListHead) {
     DrawPlayerPortrait(&gfx, f_ResultsSlide + 78,
         f_ResultsTop + 76 + MATCH_ROW_HEIGHT, 1, FALSE);
   }
+
   LoadSmallPalette(&gfx, 0, f_MatchStandingWordsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_MatchStandingWordsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -2946,6 +3118,7 @@ void DrawMatchResults(Gfx** displayListHead) {
       }
     }
   }
+
   for (i = 0; i != g_PlayerCount; i++) {
     if (f_PlayerResults[i] > 0) {
       standingRow = STANDING_WORD_UP_ROW;
@@ -2954,6 +3127,7 @@ void DrawMatchResults(Gfx** displayListHead) {
     } else {
       standingRow = STANDING_WORD_EVEN_ROW;
     }
+
     if (f_HasBets) {
       DrawTextureRect(&gfx, (standingShift[i] + 80 + f_ResultsSlide) << 2,
           (f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT)) << 2,
@@ -2970,6 +3144,7 @@ void DrawMatchResults(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, standingRow << 5, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
+
   LoadSmallPalette(&gfx, 0, f_ResultsLargeDigitsImage + IMAGE_HEADER_SIZE);
   LoadNibbleTextureBlock(&gfx,
       f_ResultsLargeDigitsImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
@@ -2982,10 +3157,12 @@ void DrawMatchResults(Gfx** displayListHead) {
         if (holeCount < 0) {
           holeCount = -holeCount;
         }
+
         sprintf(g_PrintBuffer, "%2d", holeCount);
         DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 48,
             f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
       }
+
       sprintf(g_PrintBuffer, f_NumberFormat, f_PlayerBetTotals[i]);
       DrawDigitText(&gfx, betShift + 128 + f_ResultsSlide,
           f_ResultsTop + 92 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
@@ -2994,6 +3171,7 @@ void DrawMatchResults(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 234,
           f_ResultsTop + 92 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
     } else {
@@ -3002,19 +3180,23 @@ void DrawMatchResults(Gfx** displayListHead) {
         if (holeCount < 0) {
           holeCount = -holeCount;
         }
+
         sprintf(g_PrintBuffer, "%2d", holeCount);
         DrawDigitText(&gfx, standingShift[i] + f_ResultsSlide + 64,
             f_ResultsTop + 108 + (i * MATCH_ROW_HEIGHT), g_PrintBuffer);
       }
+
       if (f_PlayerPoints[i] < 0) {
         sprintf(g_PrintBuffer, f_NoPointsText, f_PlayerPoints[i]);
       } else {
         sprintf(g_PrintBuffer, f_PointsFormat, f_PlayerPoints[i]);
       }
+
       DrawDigitText(&gfx, f_ResultsSlide + 218, f_ResultsTop + 92 + (i * 64),
           g_PrintBuffer);
     }
   }
+
   if (f_OpenCourseCount == COURSE_COUNT) {
     SetTextSlot(f_ResultsSlide + 32, f_ResultsTop + 204,
         MESSAGE_ALL_COURSES_OPEN, RESULTS_TEXT_FONT, RESULTS_TEXT_SLOT, 0,
@@ -3028,6 +3210,7 @@ void DrawMatchResults(Gfx** displayListHead) {
         RESULTS_TEXT_RED, RESULTS_TEXT_GREEN, RESULTS_TEXT_BLUE,
         RESULTS_TEXT_ALPHA);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -3101,6 +3284,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
             4,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   detailsTop = CLUB_TOURNAMENT_DETAILS_TOP;
   if (isNintendo) {
     lineHeight = CLUB_TOURNAMENT_LINE_HEIGHT;
@@ -3125,6 +3309,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
     lineHeight = CLUB_TOURNAMENT_UNBADGED_LINE_HEIGHT;
     DrawPlayerPortrait(&gfx, f_ResultsSlide + 96, f_ResultsTop + 128, 0, TRUE);
   }
+
   DrawPlaceNumber(&gfx, f_ResultsSlide + 160, f_ResultsTop + detailsTop,
       GetClubTournamentNumber());
   SetUpTextDrawing(&gfx);
@@ -3152,6 +3337,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
         f_TextSlotColors[i - 1][1], f_TextSlotColors[i - 1][2], 255);
     DrawLargeTextSlot(&gfx, i);
   }
+
   SetUpGradientTextDrawing(&gfx, 0);
   sprintf(g_PrintBuffer, "Score");
   DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 144,
@@ -3163,6 +3349,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   } else {
     sprintf(g_PrintBuffer, "%+d", f_PlayerResults[0]);
   }
+
   DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 192,
       f_ResultsTop + detailsTop + (lineHeight * 4) + 8, g_PrintBuffer,
       CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
@@ -3186,9 +3373,11 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
         CLUB_TOURNAMENT_LABEL_ENV_COLOR, CLUB_TOURNAMENT_LABEL_PRIM_COLOR,
         TEXT_FLAG_FIXED_WIDTH);
   }
+
   for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
     g_PrintBuffer[i] = f_ScorePassword[i];
   }
+
   g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
   DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 116, f_ResultsTop + 182,
       g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR, SCORE_PASSWORD_PRIM_COLOR,
@@ -3196,6 +3385,7 @@ void DrawClubTournamentResults(Gfx** displayListHead) {
   for (i = 0; i != SCORE_PASSWORD_LINE_LENGTH; i++) {
     g_PrintBuffer[i] = f_ScorePassword[SCORE_PASSWORD_LINE_LENGTH + i];
   }
+
   g_PrintBuffer[SCORE_PASSWORD_LINE_LENGTH] = '\0';
   DrawLargeTextWithShadow(&gfx, f_ResultsSlide + 116, f_ResultsTop + 200,
       g_PrintBuffer, SCORE_PASSWORD_ENV_COLOR, SCORE_PASSWORD_PRIM_COLOR,
@@ -3259,6 +3449,7 @@ void DrawRoundResults(Gfx** displayListHead) {
   if (!f_AreResultsLoaded) {
     return;
   }
+
   gSPDisplayList(gfx++, D_800C3FC0);
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -3300,6 +3491,7 @@ void DrawRoundResults(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
+
   if (f_IsAwaitingConfirm == TRUE) {
     f_HandFrame = (f_HandFrame + 1) % (HAND_FRAME_COUNT * HAND_FRAME_DRAWS);
     LoadLargePalette(&gfx, f_ResultsHandImage + IMAGE_HEADER_SIZE);
@@ -3312,6 +3504,7 @@ void DrawRoundResults(Gfx** displayListHead) {
         (f_ResultsTop + 192 + HAND_SIZE) * 4, G_TX_RENDERTILE, 0, 0,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   if (g_IsClubTournament) {
     DrawClubTournamentResults(&gfx);
   } else {
@@ -3338,6 +3531,7 @@ void DrawRoundResults(Gfx** displayListHead) {
         break;
     }
   }
+
   if (!g_IsClubTournament) {
     titleX = (cosf(f_TitleBobAngle * 0.5f) * FINAL_RESULTS_TITLE_BOB) +
         FINAL_RESULTS_TITLE_X;
@@ -3361,6 +3555,7 @@ void DrawRoundResults(Gfx** displayListHead) {
       if (i == FINAL_RESULTS_TITLE_STRIP_COUNT - 1) {
         stripHeight = FINAL_RESULTS_TITLE_LAST_STRIP_HEIGHT;
       }
+
       LoadTextureBlock(&gfx,
           f_FinalResultsTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
               (i * FINAL_RESULTS_TITLE_WIDTH *
@@ -3376,6 +3571,7 @@ void DrawRoundResults(Gfx** displayListHead) {
           G_TX_RENDERTILE, textureS, textureT, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
+
   for (i = 0; i != g_PlayerCount; i++) {
     AssetFile file;
     s32 unused[4];
@@ -3399,6 +3595,7 @@ void DrawRoundResults(Gfx** displayListHead) {
             if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
               f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             }
+
             break;
           case PORTRAIT_ANIMATION_UNK4: {
             s32 unk4Faces[PORTRAIT_ANIMATION_FRAME_COUNT] = {0, 5, 6, 7, 8};
@@ -3412,13 +3609,16 @@ void DrawRoundResults(Gfx** displayListHead) {
             if (f_PortraitFrames[i] == PORTRAIT_ANIMATION_FRAME_COUNT) {
               f_PortraitFrames[i] = NO_PORTRAIT_FRAME;
             }
+
             break;
           }
         }
       }
+
       f_PortraitTimers[i]++;
     }
   }
+
   DrawResultsBanner(&gfx);
   *displayListHead = gfx;
 }
@@ -3441,5 +3641,6 @@ void DrawResultsNotice(Gfx** displayListHead) {
       DrawCharacterResultsNotice(&gfx);
       break;
   }
+
   *displayListHead = gfx;
 }

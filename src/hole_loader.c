@@ -184,6 +184,7 @@ s32 DecodeLzChunk(LzStream* stream) {
     input = stream->input;
     output = stream->output;
   }
+
   inputEnd = stream->inputEnd;
   hasMoreInput = !(stream->flags & LZ_STREAM_FLAG_LAST);
   while (TRUE) {
@@ -193,11 +194,13 @@ s32 DecodeLzChunk(LzStream* stream) {
         while (input < inputEnd) {
           *--copy = *--inputEnd;
         }
+
         stream->input = copy;
         stream->output = output;
         return -1;
       }
     }
+
     controlBits = *input++;
     if (controlBits == 0) {
       evenWord = input[0];
@@ -236,6 +239,7 @@ s32 DecodeLzChunk(LzStream* stream) {
       output += LZ_LITERAL_RUN_LENGTH;
       continue;
     }
+
     /* The bits are read from the top; the 1 below them marks their end */
     controlBits <<= 16;
     controlBits |= 0x8000;
@@ -244,14 +248,17 @@ s32 DecodeLzChunk(LzStream* stream) {
         *output++ = *input++;
         controlBits <<= 1;
       }
+
       controlBits <<= 1;
       if (controlBits == 0) {
         break;
       }
+
       reference = *input++;
       if (reference == 0) {
         return (u8*)output - (u8*)stream->outputStart;
       }
+
       source = output - (reference >> LZ_REFERENCE_DISTANCE_SHIFT);
       referenceEnd = output +
           ((reference & LZ_REFERENCE_LENGTH_MASK) + LZ_MIN_REFERENCE_LENGTH);
@@ -332,6 +339,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
     history = stream->history;
     goto DECODE;
   }
+
   output = stream->output;
   input = stream->input;
   window = stream->window;
@@ -346,6 +354,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
         while (input < inputEnd) {
           *--copy = *--inputEnd;
         }
+
         stream->input = copy;
         stream->windowIndex = windowIndex;
         stream->output = output;
@@ -354,6 +363,7 @@ s32 DecodePatchedLzChunk(LzStream* stream) {
         return -1;
       }
     }
+
     controlBits = *input++;
     controlBits <<= 16;
     controlBits |= 0x8000;
@@ -373,17 +383,22 @@ DECODE:
           *output++ = word;
           patchCount--;
         }
+
         controlBits <<= 1;
       }
+
       controlBits <<= 1;
       if (controlBits == 0) {
         break;
       }
+
       reference = *input++;
+
       /* The u16 casts are redundant, but they are needed to match */
       if ((u16)reference == 0) {
         return (u8*)output - (u8*)stream->outputStart;
       }
+
       length = reference & 0x1F;
       reference = (u16)reference >> LZ_REFERENCE_DISTANCE_SHIFT;
       length++;
@@ -400,9 +415,11 @@ DECODE:
           *output++ = word;
           patchCount--;
         }
+
         if (length == 0) {
           break;
         }
+
         length--;
       }
     }
@@ -446,6 +463,7 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
       if (size > LZ_CHUNK_SIZE) {
         chunkSize = LZ_CHUNK_SIZE;
       }
+
       ioMesgs[dmaIndex].hdr.pri = OS_MESG_PRI_NORMAL;
       ioMesgs[dmaIndex].hdr.retQueue = &queue;
       ioMesgs[dmaIndex].dramAddr = buffers[dmaIndex];
@@ -458,11 +476,13 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
       osEPiStartDma(nuPiCartHandle, &ioMesgs[dmaIndex], OS_READ);
       dmaIndex ^= 1;
     }
+
     if (osRecvMesg(&queue, &mesgs[receiveIndex], OS_MESG_NOBLOCK) != -1) {
       receiveIndex ^= 1;
       receivedCount++;
       pendingCount--;
     }
+
     if (receivedCount == 0) {
       if (pendingCount == LZ_BUFFER_COUNT || size == 0) {
         osRecvMesg(&queue, &mesgs[receiveIndex], OS_MESG_BLOCK);
@@ -470,10 +490,12 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
         receivedCount = 1;
         pendingCount--;
       }
+
       if (receivedCount == 0) {
         continue;
       }
     }
+
     otherIndex = receiveIndex ^ 1;
     osInvalDCache(buffers[otherIndex], ioMesgs[otherIndex].size);
     stream.nextInput = buffers[receiveIndex];
@@ -481,13 +503,16 @@ s32 LoadLzData(u32 romAddress, void* destination, u32 size) {
     if (pendingCount == 0 && size == 0) {
       stream.flags |= LZ_STREAM_FLAG_LAST;
     }
+
     result = DecodeLzChunk(&stream);
     receivedCount--;
     if (result >= 0) {
       break;
     }
+
     stream.flags &= ~LZ_STREAM_FLAG_FIRST;
   }
+
   osWritebackDCache(destination, result);
   return result;
 }
@@ -529,6 +554,7 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
       if (size > PATCHED_LZ_CHUNK_SIZE) {
         chunkSize = PATCHED_LZ_CHUNK_SIZE;
       }
+
       ioMesgs[dmaIndex].hdr.pri = OS_MESG_PRI_NORMAL;
       ioMesgs[dmaIndex].hdr.retQueue = &queue;
       ioMesgs[dmaIndex].dramAddr = buffers[dmaIndex];
@@ -541,11 +567,13 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
       osEPiStartDma(nuPiCartHandle, &ioMesgs[dmaIndex], OS_READ);
       dmaIndex ^= 1;
     }
+
     if (osRecvMesg(&queue, &mesgs[receiveIndex], OS_MESG_NOBLOCK) != -1) {
       receiveIndex ^= 1;
       receivedCount++;
       pendingCount--;
     }
+
     if (receivedCount == 0) {
       if (pendingCount == LZ_BUFFER_COUNT || size == 0) {
         osRecvMesg(&queue, &mesgs[receiveIndex], OS_MESG_BLOCK);
@@ -553,10 +581,12 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
         receivedCount = 1;
         pendingCount--;
       }
+
       if (receivedCount == 0) {
         continue;
       }
     }
+
     otherIndex = receiveIndex ^ 1;
     osInvalDCache(buffers[otherIndex], ioMesgs[otherIndex].size);
     stream.nextInput = buffers[receiveIndex];
@@ -565,13 +595,16 @@ s32 LoadPatchedLzData(u32 romAddress, void* destination, u32 size) {
     if (pendingCount == 0 && size == 0) {
       stream.flags |= LZ_STREAM_FLAG_LAST;
     }
+
     result = DecodePatchedLzChunk(&stream);
     receivedCount--;
     if (result >= 0) {
       break;
     }
+
     stream.flags &= ~LZ_STREAM_FLAG_FIRST;
   }
+
   osWritebackDCache(destination, result);
   return result;
 }
@@ -581,6 +614,7 @@ s32 GetHoleRandom(s32 seed, s32 holeIndex) {
   void SetHoleSeed(s32 value) {
     f_HoleSeed = value;
   }
+
   s32 NextHoleRandom(void) {
     return f_HoleSeed =
                f_HoleSeed * HOLE_RANDOM_MULTIPLIER + HOLE_RANDOM_INCREMENT;
@@ -605,6 +639,7 @@ void ShrinkMiniGolfHolePoints(void) {
         g_HolePoints.cupPositions[index][axis] *= g_MiniGolfScale[axis];
         g_HolePoints.teePositions[index][axis] *= g_MiniGolfScale[axis];
       }
+
       for (index = 0; index < ARRAY_COUNT(g_HolePoints.unk60); index++) {
         g_HolePoints.unk60[index][axis] *= g_MiniGolfScale[axis];
         g_HolePoints.routePoints[index][axis] *= g_MiniGolfScale[axis];
@@ -657,6 +692,7 @@ void ShrinkMiniGolfHole(void) {
         SetGroundPoint(column, row, &point);
       }
     }
+
     MeasureGroundTiles();
     for (index = 0; index < BILLBOARD_COUNT; index++) {
       if (g_Billboards[index].textureIndex >= 0) {
@@ -667,6 +703,7 @@ void ShrinkMiniGolfHole(void) {
         g_Billboards[index].height *= g_MiniGolfScale[AXIS_Y];
       }
     }
+
     for (index = 0; index < HOLE_TRIANGLE_COUNT; index++) {
       for (vertexIndex = 0; vertexIndex < HOLE_TRIANGLE_VERTEX_COUNT;
           vertexIndex++) {
@@ -684,6 +721,7 @@ void ShrinkMiniGolfHole(void) {
         }
       }
     }
+
     PrepareHoleTriangles();
     PlaceBillboards();
   }
@@ -704,9 +742,11 @@ void PrepareHoleScene(void) {
       unk = 1;
       break;
   }
+
   if (!IsGameFlagSet(GAME_FLAG_UNK11)) {
     func_80253234(unk);
   }
+
   D_800BB0E8 = 0;
   ToggleGroundTileBorders();
   SetCharacterLights();
@@ -734,11 +774,14 @@ s32 ChooseHoleConditions(void) {
     } else {
       D_800BA9D8 = D_800FEDD8;
     }
+
     return;
   }
+
   if (D_801B60B8 != 0) {
     return;
   }
+
   if (g_GameMode != GAME_MODE_UNK12 && g_GameMode != GAME_MODE_UNK13) {
     /* The first hole, mini-golf and GAME_MODE_TRAINING stay dry */
     if (g_GameState.holeIndex != 0 && g_GameMode != GAME_MODE_TRAINING &&
@@ -748,6 +791,7 @@ s32 ChooseHoleConditions(void) {
       } else {
         g_HoleConditions.isRaining = TRUE;
       }
+
       if (g_GameState.courseIndex == COURSE_SHY_GUY_DESERT &&
           (rand() & RAIN_DRAW_MASK) < DRY_DRAW_COUNT) {
         g_HoleConditions.isRaining = FALSE;
@@ -755,6 +799,7 @@ s32 ChooseHoleConditions(void) {
     } else {
       g_HoleConditions.isRaining = FALSE;
     }
+
     /* The first hole always has some wind */
     do {
       g_HoleConditions.windSpeed =
@@ -767,6 +812,7 @@ s32 ChooseHoleConditions(void) {
     if (g_GameState.isMiniGolf) {
       g_HoleConditions.windSpeed = 0;
     }
+
     g_HoleConditions.lightPitch = HOLE_LIGHT_PITCH;
     if (g_GameState.courseIndex == DRIVING_RANGE_COURSE_INDEX) {
       g_HoleConditions.windDirection = DRIVING_RANGE_WIND_DIRECTION;
@@ -784,17 +830,21 @@ s32 ChooseHoleConditions(void) {
         if (colorIndex > SCENE_COLOR_INDEX_ROUND_END) {
           colorIndex = SCENE_COLOR_INDEX_ROUND_END;
         }
+
         g_HoleConditions.sceneColorIndex = colorIndex;
         g_HoleConditions.lightYaw +=
             g_GameState.holeIndex * LIGHT_YAW_STEP_PER_HOLE;
       }
+
       if (g_IsMiniGolf) {
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_START;
       }
+
       if (g_IsSuddenDeath) {
         g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_SUDDEN_DEATH;
       }
     }
+
     courseRecordIndex = GetCourseRecordIndex();
     g_HolePar =
         g_CourseRecords[courseRecordIndex].holes[GetHoleRecordIndex()].par;
@@ -802,14 +852,17 @@ s32 ChooseHoleConditions(void) {
       g_HoleConditions.isRaining = FALSE;
       g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_DRIVING_RANGE;
     }
+
     if (IsGameFlagSet(GAME_FLAG_UNK7D)) {
       g_HoleConditions.isRaining = FALSE;
       g_HoleConditions.sceneColorIndex = SCENE_COLOR_INDEX_ROUND_END;
     }
   }
+
   if (D_801B60B8 != 0) {
     return;
   }
+
   attemptCount = 0;
   if (g_GameMode == GAME_MODE_RING_SHOT) {
     cupIndex = 0;
@@ -832,6 +885,7 @@ s32 ChooseHoleConditions(void) {
       cupIndex = 3;
     }
   }
+
   /* Holes leave unused cup positions at zero, so skip to one that is set */
   for (;;) {
     D_800BA9D8.cupPosition[AXIS_X] =
@@ -848,6 +902,7 @@ s32 ChooseHoleConditions(void) {
     if (attemptCount >= MAX_CUP_ATTEMPT_COUNT) {
       break;
     }
+
     if (D_800BA9D8.cupPosition[AXIS_X] != 0 &&
         D_800BA9D8.cupPosition[AXIS_Z] != 0 &&
         D_800BA9D8.teePosition[AXIS_X] != 0 &&
@@ -855,6 +910,7 @@ s32 ChooseHoleConditions(void) {
       break;
     }
   }
+
   f_NextCupIndex = cupIndex;
 }
 
@@ -871,6 +927,7 @@ void InitHoleState(void) {
     while (TRUE) {
     }
   }
+
   PlacePlayersOnTee();
   g_CurrentShot.surface = 0;
   osSyncPrintf("mp2sub1\n");
@@ -906,18 +963,22 @@ void RunLoaderThread(void) {
   while (TRUE) {
     while (g_HasLoaderFinished) {
     }
+
     courseRecordIndex = GetCourseRecordIndex();
     while (g_FrameCount - g_GroundDrawFrame < LOADER_FRAME_DELAY) {
     }
+
     osSyncPrintf("MPSTART\n");
     while (IsAnyCharacterSlotBusy()) {
       osSyncPrintf("Wow! Polychar is alive\n");
     }
+
     if (IsGameFlagSet(GAME_FLAG_UNK51) && g_HoleIndex == 0) {
       SetGameFlag(GAME_FLAG_UNK12);
     } else {
       ClearGameFlag(GAME_FLAG_UNK12);
     }
+
     ClearGameFlag(GAME_FLAG_HOLE_LOADED);
     if (courseRecordIndex == COURSE_RECORD_BOO_VALLEY) {
       SetGameFlag(GAME_FLAG_UNK12);
@@ -931,14 +992,17 @@ void RunLoaderThread(void) {
       } else {
         ClearGameFlag(GAME_FLAG_UNK12);
       }
+
       ClearGameFlag(GAME_FLAG_UNK60);
     }
+
     if (courseRecordIndex == COURSE_RECORD_KOOPA_PARK &&
         g_HoleIndex == KOOPA_PARK_UNK69_HOLE_INDEX) {
       SetGameFlag(GAME_FLAG_UNK69);
     } else {
       ClearGameFlag(GAME_FLAG_UNK69);
     }
+
     osSyncPrintf("MP1\n");
     LoadHole();
     osSyncPrintf("MP2\n");
@@ -955,6 +1019,7 @@ void RunLoaderThread(void) {
       while (TRUE) {
       }
     }
+
     g_HasLoaderFinished = TRUE;
     osDestroyThread(&f_LoaderThread);
   }

@@ -32,6 +32,7 @@ s32 func_80206680_ovl_05(u32 slotIndex, s32 character) {
     FreeCharacterSlot(slotIndex);
     return FALSE;
   }
+
   LoadCharacter(slotIndex, character, OTHER_CHARACTER_MODEL_KIND);
   SetCharacterAnimation(slotIndex, REACTION_ANIMATION_BIRDIE);
   SetAnimationSpeed(slotIndex, 1.0f);
@@ -49,6 +50,7 @@ static SurfaceInfo* GetSurfaceInfo(s32 surface) {
   if ((u32)surface >= SURFACE_COUNT) {
     surface = SURFACE_OUT_OF_BOUNDS;
   }
+
   return &D_8020B564_ovl_05[surface];
 }
 
@@ -129,6 +131,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       simulation->position[AXIS_Y] = groundHeight;
     }
   }
+
   simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
   simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X];
   simulation->unkC[AXIS_Y] = simulation->position[AXIS_Y];
@@ -143,6 +146,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   } else {
     simulation->playerIndex = 0;
   }
+
   club = &D_8020B9F8_ovl_05[shot->clubIndex];
   entry = &D_8020B86C_ovl_05[0][UNKC_ENTRY_LIMIT];
   rumbles = D_8020B86C_ovl_05[0][UNKC_ENTRY_LIMIT].unk5;
@@ -156,6 +160,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       speed = 10;
     }
   }
+
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     SurfaceInfo* info = GetSurfaceInfo(simulation->unkA2);
 
@@ -168,10 +173,12 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
 
     speed = speed * percent / 200;
   }
+
   pitch = (club->pitch + entry->unk2) * 0.017453294f;
   if (pitch >= 0.0f) {
     pitch = 0.0f;
   }
+
   simulation->unk38 = (((((sideSign * entry->unk3) + shot->unk10) * 2) +
                            ((club->sideSpin * 2) * sideSign)) *
                           speed) *
@@ -189,14 +196,18 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     if (spinLoss < 0.0f) {
       spinLoss = -spinLoss;
     }
+
     speed = speed - spinLoss;
   }
+
   if (speed < 0) {
     speed = 0;
   }
+
   if (speed <= 0) {
     speed = 10;
   }
+
   simulation->velocity[AXIS_Y] = sinf(pitch) * speed;
   simulation->velocity[AXIS_X] = cosf(yawRadians) * speed;
   simulation->velocity[AXIS_Z] = sinf(yawRadians) * speed;
@@ -210,6 +221,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   } else {
     simulation->isRunning = BALL_STATE_FLYING;
   }
+
   simulation->unk94 = 0;
   simulation->unk98 = 0;
   simulation->unk9C = -2;
@@ -218,12 +230,14 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
   for (index = 0; index < UNKA8_COUNT; index++) {
     simulation->unkA8[index] = 0;
   }
+
   simulation->windVelocityX = 0.0f;
   simulation->windVelocityZ = 0.0f;
   if (simulation->purpose == LAUNCH_PURPOSE_STROKE) {
     if (rumbles) {
       StartPlayerRumble(&g_Players[simulation->playerIndex]);
     }
+
     if (simulation->purpose == LAUNCH_PURPOSE_STROKE &&
         IsGameFlagSet(GAME_FLAG_SHOW_LAUNCH_VALUES)) {
       char text[128];
@@ -251,6 +265,7 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       PrintDebugText(text, 3, 14);
     }
   }
+
   return 0;
 }
 #else

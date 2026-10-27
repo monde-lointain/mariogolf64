@@ -131,10 +131,12 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
         MusHandleSetFreqOffset(*handle, 0.0f);
         MusHandleSetPan(*handle, FULL_SCALE);
       }
+
       if (g_NextSoundChannel == channel) {
         g_NextSoundChannel = channel ^ 1;
       }
     }
+
     osSetIntMask(mask);
     if (soundId < SOUND_COUNT) {
       for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
@@ -142,12 +144,14 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
           break;
         }
       }
+
       if (index < ECHOING_SOUND_COUNT) {
         if (f_EchoingSoundIds[index] == SOUND_ID_UNK9A) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);
         }
+
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
         if (soundId == SOUND_ID_UNK5A) {
@@ -180,6 +184,7 @@ void PlaySoundWithEffects(
         MusHandleStop(*handle, 0);
         MusHandleSetReverb(*handle, reverb);
       }
+
       *handle = StartSoundEffect(soundId);
       f_SoundHandleCopies[channel] = *handle;
       MusHandleSetFreqOffset(*handle, 0.0f);
@@ -189,6 +194,7 @@ void PlaySoundWithEffects(
         g_NextSoundChannel = channel ^ 1;
       }
     }
+
     osSetIntMask(mask);
     if (soundId < SOUND_COUNT) {
       for (index = 0; index != ECHOING_SOUND_COUNT; index++) {
@@ -196,12 +202,14 @@ void PlaySoundWithEffects(
           break;
         }
       }
+
       if (index < ECHOING_SOUND_COUNT) {
         if (f_EchoingSoundIds[index] == SOUND_ID_UNK9A) {
           SetSoundReverb(channel, NO_REVERB);
         } else {
           SetSoundReverb(channel, ECHO_REVERB);
         }
+
         SetSoundFrequencyOffset(channel, 0.0f);
       } else {
         if (soundId == SOUND_ID_UNK5A) {
@@ -220,6 +228,7 @@ void StopSound(s32 channel) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleStop(f_SoundHandles[channel], 0);
   }
+
   osSetIntMask(mask);
 }
 
@@ -229,6 +238,7 @@ void SetSoundPan(s32 channel, s32 pan) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleSetPan(f_SoundHandles[channel], pan);
   }
+
   osSetIntMask(mask);
 }
 
@@ -238,6 +248,7 @@ void SetSoundVolume(s32 channel, s32 volume) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleSetVolume(f_SoundHandles[channel], volume);
   }
+
   osSetIntMask(mask);
 }
 
@@ -247,6 +258,7 @@ void SetSoundReverb(s32 channel, s32 reverb) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleSetReverb(f_SoundHandles[channel], reverb);
   }
+
   osSetIntMask(mask);
 }
 
@@ -261,6 +273,7 @@ void SetSoundTempo(s32 channel, s32 tempo) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleSetTempo(f_SoundHandles[channel], tempo);
   }
+
   osSetIntMask(mask);
 }
 
@@ -293,41 +306,50 @@ static void UpdateCharacterSounds(void) {
             f_QueuedCharacterSounds[index].volume,
             f_QueuedCharacterSounds[index].pan);
       }
+
       if (f_QueuedCharacterSounds[index].delay >= 0) {
         f_QueuedCharacterSounds[index].delay--;
       }
     }
+
     return;
   }
+
   for (index = 0; index != CHARACTER_COUNT; index++) {
     if (f_PreviewSoundDelays[index] == 0) {
       PlayCharacterSound(index, index % QUEUED_CHARACTER_SOUND_COUNT,
           f_CharacterSoundIndexes[f_DelayEditorKind], FULL_SCALE, FULL_SCALE);
     }
+
     if (f_PreviewSoundDelays[index] >= 0) {
       f_PreviewSoundDelays[index]--;
     }
   }
+
   if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons &
           L_CBUTTONS) &&
       f_DelayEditorKind > 0) {
     f_DelayEditorKind--;
   }
+
   if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons &
           R_CBUTTONS) &&
       f_DelayEditorKind < CHARACTER_SOUND_KIND_COUNT - 1) {
     f_DelayEditorKind++;
   }
+
   if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & R_TRIG) {
     PreviewCharacterSound(
         f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
   }
+
   if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & A_BUTTON) {
     PreviewCharacterSound(
         f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
     PreviewCharacterSound(
         (f_DelayEditorCharacter + 1) % CHARACTER_COUNT, f_DelayEditorKind);
   }
+
   if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].pressedButtons & B_BUTTON) {
     PreviewCharacterSound(
         f_DelayEditorCharacter % CHARACTER_COUNT, f_DelayEditorKind);
@@ -338,28 +360,33 @@ static void UpdateCharacterSounds(void) {
     PreviewCharacterSound(
         (f_DelayEditorCharacter + 3) % CHARACTER_COUNT, f_DelayEditorKind);
   }
+
   PrintDebugText(" ", DELAY_EDITOR_COLUMN,
       f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
   if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & U_JPAD) &&
       f_DelayEditorCharacter > 0) {
     f_DelayEditorCharacter--;
   }
+
   if ((g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & D_JPAD) &&
       f_DelayEditorCharacter < CHARACTER_COUNT - 1) {
     f_DelayEditorCharacter++;
   }
+
   if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & R_JPAD) {
     if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] <
         MAX_CHARACTER_SOUND_DELAY) {
       f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]++;
     }
   }
+
   if (g_ControllerStates[DELAY_EDITOR_CONTROLLER].repeatedButtons & L_JPAD) {
     if (f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter] !=
         0) {
       f_CharacterSoundDelays[f_DelayEditorKind][f_DelayEditorCharacter]--;
     }
   }
+
   sprintf(g_PrintBuffer, "NO %3d ", f_DelayEditorKind);
   PrintDebugText(g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, DELAY_EDITOR_KIND_ROW);
   for (index = 0; index != CHARACTER_COUNT; index++) {
@@ -368,6 +395,7 @@ static void UpdateCharacterSounds(void) {
     PrintDebugText(
         g_PrintBuffer, DELAY_EDITOR_COLUMN + 1, index + DELAY_EDITOR_FIRST_ROW);
   }
+
   PrintDebugText(">", DELAY_EDITOR_COLUMN,
       f_DelayEditorCharacter + DELAY_EDITOR_FIRST_ROW);
 }
@@ -378,6 +406,7 @@ void SetSoundFrequencyOffset(s32 channel, f32 offset) {
   if (f_SoundHandles[channel] != NO_HANDLE) {
     MusHandleSetFreqOffset(f_SoundHandles[channel], offset);
   }
+
   osSetIntMask(mask);
 }
 
@@ -398,6 +427,7 @@ s32 UpdateAudio(void) {
         f_PendingSongChange.flags, f_PendingSongChange.delay);
     return;
   }
+
   f_LastAudioFrame = frame;
   for (channel = 0; channel != SOUND_CHANNEL_COUNT; channel++) {
     frameCount = f_SoundFadeFrameCounts[channel];
@@ -408,6 +438,7 @@ s32 UpdateAudio(void) {
       SetSoundVolume(channel, f_SoundVolumes[channel]);
     }
   }
+
   UpdateCharacterSounds();
   if (f_PendingSongChange.state != SONG_CHANGE_NONE &&
       f_PendingSongChange.delay != 0 && --f_PendingSongChange.delay == 0) {
@@ -421,6 +452,7 @@ s32 UpdateAudio(void) {
         f_SongId = NO_SONG;
         return;
       }
+
       f_PendingSongChange.state = SONG_CHANGE_NONE;
       f_SongId = NO_SONG;
       PlaySong(f_PendingSongChange.songId, f_PendingSongChange.flags);
@@ -432,6 +464,7 @@ s32 UpdateAudio(void) {
         f_SongHandle = NO_HANDLE;
         f_PendingSongChange.delay = 0;
       }
+
       f_PendingSongChange.state = SONG_CHANGE_NONE;
     }
   }
@@ -443,6 +476,7 @@ void StopSong(s32 fadeFrameCount) {
   if (f_SongHandle != NO_HANDLE) {
     MusHandleStop(f_SongHandle, fadeFrameCount);
   }
+
   osSetIntMask(mask);
 }
 
@@ -507,6 +541,7 @@ void PlaySong(s32 songId, s32 flags) {
       RequestSongStop();
       return;
     }
+
     if (f_SongHandle != NO_HANDLE) {
       if ((flags & SONG_FLAG_RESTART) || f_SongId != songId) {
         f_PendingSongChange.state = SONG_CHANGE_SWITCH;
@@ -524,6 +559,7 @@ void PlaySong(s32 songId, s32 flags) {
         if (songId > LAST_SONG_ID) {
           songId = LAST_SONG_ID;
         }
+
         LoadSong(f_SongRomBounds[songId * 2],
             f_SongRomBounds[(songId * 2) + 1] - f_SongRomBounds[songId * 2]);
         MusSetMasterVolume(MUSFLAG_SONGS, SONG_MASTER_VOLUME);
@@ -555,6 +591,7 @@ void InitAudio(void) {
     f_SoundHandles[channel] = 0;
     f_SoundFadeFrameCounts[channel] = 0;
   }
+
   ChangeCustomEffect(ECHO_EFFECT_INDEX);
 }
 

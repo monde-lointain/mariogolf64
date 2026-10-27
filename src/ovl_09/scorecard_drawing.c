@@ -222,8 +222,10 @@ void DrawMatchResult(Gfx** displayListHead) {
       SetTextColor(&gfx, 0x7F, 0x7F, 0xFF);
       DrawLargeText(&gfx, x, MATCH_RESULT_Y, f_LoseText);
     }
+
     x += MATCH_RESULT_SPACING;
   }
+
   UpdateAndDrawFireworks(&gfx);
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
@@ -234,9 +236,11 @@ void DrawMatchResult(Gfx** displayListHead) {
       LoadResultCharacters() == TRUE) {
     f_ResultCharactersLoadStep = RESULT_CHARACTERS_LOADED;
   }
+
   if (f_ResultCharactersLoadStep < RESULT_CHARACTERS_LOADING) {
     f_ResultCharactersLoadStep++;
   }
+
   if (f_ResultCharactersLoadStep == RESULT_CHARACTERS_LOADED) {
     Vec3 translation;
     Vec3 rotation;
@@ -265,8 +269,10 @@ void DrawMatchResult(Gfx** displayListHead) {
       *displayListHead = g_DisplayListHead;
       gfx = *displayListHead;
     }
+
     AnimateAllCharacters();
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -326,6 +332,7 @@ void DrawStandingsPage(Gfx** displayListHead) {
   for (i = 0; i < g_GameState.playerCount; i++) {
     scoresToPar[i] = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
   }
+
   /* Each player's place counts the players ahead of them */
   for (i = 0; i != g_GameState.playerCount; i++) {
     places[i] = 0;
@@ -345,11 +352,13 @@ void DrawStandingsPage(Gfx** displayListHead) {
     DrawScorecardFace(&gfx, shift + STANDINGS_FACE_LEFT + g_Scorecard.x,
         STANDINGS_ROW_TOP + (i * STANDINGS_ROW_SPACING), i);
   }
+
   for (i = 0; i != g_GameState.playerCount; i++) {
     DrawPlace(&gfx, shift + STANDINGS_PLACE_LEFT + g_Scorecard.x,
         STANDINGS_ROW_TOP + (i * STANDINGS_ROW_SPACING),
         places[i] & PLACE_MASK);
   }
+
   DrawScorecardLabel(&gfx, shift + STANDINGS_SCORE_LABEL_LEFT + g_Scorecard.x,
       STANDINGS_LABEL_TOP, SCORE_LABEL);
   if (g_Scorecard.hasBets) {
@@ -367,6 +376,7 @@ void DrawStandingsPage(Gfx** displayListHead) {
     } else {
       sprintf(g_PrintBuffer, f_ScoreToParFormat, scoresToPar[i]);
     }
+
     DrawDigitText(&gfx, shift + STANDINGS_SCORE_LEFT + g_Scorecard.x,
         STANDINGS_TEXT_TOP + (i * STANDINGS_ROW_SPACING), g_PrintBuffer);
     if (g_Scorecard.hasBets) {
@@ -375,15 +385,18 @@ void DrawStandingsPage(Gfx** displayListHead) {
           betTotal += g_BetTallies[i][j];
         }
       }
+
       if (betTotal >= WIDE_BET_TOTAL) {
         sprintf(g_PrintBuffer, f_WideTotalFormat, betTotal);
       } else {
         sprintf(g_PrintBuffer, f_TotalFormat, betTotal);
       }
+
       DrawDigitText(&gfx, g_Scorecard.x + STANDINGS_BET_TOTAL_LEFT,
           STANDINGS_TEXT_TOP + (i * STANDINGS_ROW_SPACING), g_PrintBuffer);
     }
   }
+
   *displayListHead = gfx;
 }
 
@@ -491,10 +504,12 @@ void DrawMatchPage(Gfx** displayListHead) {
   } else {
     winsNeeded = GetRoundHoleCount() + 2;
   }
+
   if (g_Scorecard.skinsCarryover.onLastHole > 0) {
     if (++g_Scorecard.skinsCarryover.onLastHole == MATCH_COUNT_TIME) {
       g_Scorecard.skinsCarryover.intoLastHole++;
     }
+
     if (g_Scorecard.skinsCarryover.onLastHole == MATCH_ANIMATION_TIME) {
       g_Scorecard.skinsCarryover.onLastHole = 0;
     }
@@ -515,6 +530,7 @@ void DrawMatchPage(Gfx** displayListHead) {
       halvedCount++;
     }
   }
+
   if (g_Scorecard.skinsCarryover.onLastHole == MATCH_COUNT_TIME &&
       g_Scorecard.content.isSuddenDeath == FALSE &&
       g_Scorecard.holeWinnerIndex == HOLE_WINNER_HALVED &&
@@ -522,10 +538,12 @@ void DrawMatchPage(Gfx** displayListHead) {
     PlaySoundWithEffects(SOUND_UNK61, TALLY_SOUND_CHANNEL,
         SCORECARD_SOUND_VOLUME, 0, MATCH_SOUND_PAN);
   }
+
   /* An even count of holes to share out can end level */
   if ((winsNeeded - 1) / 2 != (winsNeeded /= 2)) {
     canDraw = TRUE;
   }
+
   if (winsNeeded <= 0) {
     winsNeeded = 1;
   }
@@ -562,6 +580,7 @@ void DrawMatchPage(Gfx** displayListHead) {
         points[1]++;
       }
     }
+
     if (GetRoundHoleCount() - 1 < points[0] ||
         GetRoundHoleCount() - 1 < points[1]) {
       sprintf(g_PrintBuffer, "DORMIE");
@@ -781,6 +800,7 @@ void DrawMatchPage(Gfx** displayListHead) {
           G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
   }
+
   gDPPipeSync(gfx++);
   *head = gfx;
 }
@@ -861,6 +881,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
       skinCounts[i] = (s16)g_RoundHud.skinsTotals[i];
     }
   }
+
   /* Each player's place counts the players with more skins */
   for (i = 0; i != g_GameState.playerCount; i++) {
     places[i] = 0;
@@ -869,6 +890,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
         if (skinCounts[i] < skinCounts[j]) {
           places[i]++;
         }
+
         if (skinCounts[i] == skinCounts[j]) {
           places[i] |= PLACE_TIED;
         }
@@ -899,6 +921,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
     DrawScorecardFace(&gfx, g_Scorecard.x + SKINS_FACE_LEFT,
         SKINS_ROW_TOP + (i * SKINS_ROW_SPACING), i);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureLUT(gfx++, G_TT_RGBA16);
   gDPPipeSync(gfx++);
@@ -919,6 +942,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
         (SKIN_ICON_TOP + SKIN_ICON_SIZE + (i * SKINS_ROW_SPACING)) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   DrawTextureRect(&gfx, (g_Scorecard.x + CARRYOVER_ICON_LEFT) << 2,
       CARRYOVER_ICON_TOP << 2,
       (g_Scorecard.x + CARRYOVER_ICON_LEFT + SKIN_ICON_SIZE) << 2,
@@ -934,6 +958,7 @@ void DrawSkinsPage(Gfx** displayListHead) {
     DrawDigitText(&gfx, g_Scorecard.x + SKINS_COUNT_LEFT,
         SKINS_COUNT_TOP + (i * SKINS_ROW_SPACING), g_PrintBuffer);
   }
+
   sprintf(g_PrintBuffer, "* %d",
       (g_Scorecard.isTallied == TRUE)
           ? g_Scorecard.skinsCarryover.fromLastHole
@@ -1065,6 +1090,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, 0, GRID_TEXEL_LINE << TEXTURE_COORD_FRACTION_BITS,
         TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   for (i = 0, left = 0; i != GRID_COLUMN_COUNT;
       i++, left += BET_COLUMN_SPACING) {
     DrawTextureRect(&gfx, (g_Scorecard.x + left + GRID_COLUMN_LINE_LEFT) << 2,
@@ -1087,6 +1113,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         GRID_TEXEL_BOTTOM_END << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
         TEXEL_STEP_ONE);
   }
+
   /* Where the lines cross */
   for (i = 0, left = 0; i != GRID_COLUMN_COUNT;
       i++, left += BET_COLUMN_SPACING) {
@@ -1120,6 +1147,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         frame = f_BetBlinkFrame;
         gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
       }
+
       LoadSmallPalette(
           &gfx, 0, g_Scorecard.betImages[column][frame] + IMAGE_HEADER_SIZE);
       gDPLoadTextureTile_4b(gfx++,
@@ -1137,6 +1165,7 @@ void DrawBetsPage(Gfx** displayListHead) {
       left += BET_COLUMN_SPACING;
     }
   }
+
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   LoadSmallPalette(&gfx, 0, g_Scorecard.totalHeadingImage + IMAGE_HEADER_SIZE);
   gDPLoadTextureTile_4b(gfx++,
@@ -1167,6 +1196,7 @@ void DrawBetsPage(Gfx** displayListHead) {
         } else {
           SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
         }
+
         DrawTextureRect(&gfx, (g_Scorecard.x + left + BET_SUBTITLE_LEFT) << 2,
             BET_SUBTITLE_TOP << 2,
             (g_Scorecard.x + left + BET_SUBTITLE_LEFT + BET_SUBTITLE_WIDTH)
@@ -1176,6 +1206,7 @@ void DrawBetsPage(Gfx** displayListHead) {
                 << TEXTURE_COORD_FRACTION_BITS,
             TEXEL_STEP_ONE, TEXEL_STEP_ONE);
       }
+
       left += BET_COLUMN_SPACING;
     }
   }
@@ -1197,12 +1228,15 @@ void DrawBetsPage(Gfx** displayListHead) {
       } else {
         SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
       }
+
       DrawCenteredSmallText(&gfx, g_Scorecard.x + left + BET_NAME_LEFT,
           g_Scorecard.y + BET_NAME_TOP, f_BetNames[i]);
       left += BET_NAME_SPACING;
     }
   }
+
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
+
   /* Drawn a letter at a time, each at its own position */
   DrawSmallText(&gfx, g_Scorecard.x + 21, g_Scorecard.y + CARRY_OVER_TOP, "C");
   DrawSmallText(&gfx, g_Scorecard.x + 29, g_Scorecard.y + CARRY_OVER_TOP, "a");
@@ -1227,6 +1261,7 @@ void DrawBetsPage(Gfx** displayListHead) {
             g_Scorecard.x + (column * BET_COLUMN_SPACING) + BET_POT_LEFT,
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
       }
+
       if (i == BET_NEAREST_PIN) {
         sprintf(g_PrintBuffer, f_TotalFormat,
             g_NearestPinPot - g_GameState.betRates[BET_NEAREST_PIN]);
@@ -1234,6 +1269,7 @@ void DrawBetsPage(Gfx** displayListHead) {
             g_Scorecard.x + (column * BET_COLUMN_SPACING) + BET_POT_LEFT,
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
       }
+
       if (i == BET_UNK4) {
         sprintf(g_PrintBuffer, f_TotalFormat,
             g_HolePot - g_GameState.betRates[BET_UNK4]);
@@ -1241,6 +1277,7 @@ void DrawBetsPage(Gfx** displayListHead) {
             g_Scorecard.x + (column * BET_COLUMN_SPACING) + BET_POT_LEFT,
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
       }
+
       if (i == BET_UNK5) {
         sprintf(g_PrintBuffer, f_TotalFormat,
             g_HolePot - g_GameState.betRates[BET_UNK5]);
@@ -1249,6 +1286,7 @@ void DrawBetsPage(Gfx** displayListHead) {
             g_Scorecard.y + BET_POT_TOP, g_PrintBuffer);
       }
     }
+
     column += g_GameState.betRates[i] >= 0;
   }
 
@@ -1261,9 +1299,11 @@ void DrawBetsPage(Gfx** displayListHead) {
         DrawCondensedShadowedText(&gfx, g_Scorecard.x + left + BET_RATE_LEFT,
             g_Scorecard.y + BET_RATE_TOP, g_PrintBuffer);
       }
+
       left += BET_COLUMN_SPACING;
     }
   }
+
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (i = 0; i != g_PlayerCount; i++) {
     total = 0;
@@ -1285,12 +1325,14 @@ void DrawBetsPage(Gfx** displayListHead) {
         left += BET_COLUMN_SPACING;
       }
     }
+
     sprintf(g_PrintBuffer, f_WideTotalFormat, total);
     DrawCondensedShadowedText(&gfx,
         g_Scorecard.x + (column * BET_COLUMN_SPACING) + BETS_PAGE_TALLY_LEFT,
         g_Scorecard.y + (i * GRID_ROW_HEIGHT) + BETS_PAGE_TALLY_TOP,
         g_PrintBuffer);
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -1344,6 +1386,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
         (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_NUMBER_TOP),
         g_PrintBuffer, HOLE_NUMBER_ENV_COLOR, HOLE_NUMBER_PRIM_COLOR, 0);
   }
+
   sprintf(g_PrintBuffer, "Time");
   DrawLargeTextWithShadow(&gfx, g_Scorecard.x + ROUND_TOTAL_LABEL_LEFT,
       g_Scorecard.y + ROUND_TIME_TOP, g_PrintBuffer, HEADING_ENV_COLOR,
@@ -1364,10 +1407,12 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, "%02d:%02d:%02d", minutes, g_HoleTimeSeconds[i],
             g_HoleTimeHundredths[i]);
       }
+
       DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT,
           (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
           g_PrintBuffer);
     }
+
     if (i + NINE_HOLE_COUNT < shownHoleCount) {
       minutes = g_HoleTimeMinutes[i + NINE_HOLE_COUNT];
       if (minutes < 0) {
@@ -1377,6 +1422,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
             g_HoleTimeSeconds[i + NINE_HOLE_COUNT],
             g_HoleTimeHundredths[i + NINE_HOLE_COUNT]);
       }
+
       DrawMediumText(&gfx, g_Scorecard.x + HOLE_TIME_LEFT + BACK_NINE_SPACING,
           (i * HOLE_ROW_SPACING) + (g_Scorecard.y + HOLE_TIME_TOP),
           g_PrintBuffer);
@@ -1397,6 +1443,7 @@ void DrawSpeedGolfPage(Gfx** displayListHead) {
   } else {
     sprintf(g_PrintBuffer, "%+2d", scoreToPar);
   }
+
   DrawFixedWidthLargeText(&gfx, g_Scorecard.x + ROUND_TOTAL_LEFT,
       g_Scorecard.y + ROUND_SCORE_TOP, g_PrintBuffer);
   *displayListHead = gfx;
@@ -1424,6 +1471,7 @@ void FormatLeaderboardRow(char* row, TournamentStanding* standing) {
   } else {
     sprintf(row + LEADERBOARD_SCORE_COLUMN, "  %+3d   ", score);
   }
+
   holeCount = standing->holeCount;
   if (holeCount == 0) {
     sprintf(row + LEADERBOARD_HOLES_COLUMN, "  -");
@@ -1543,6 +1591,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       g_Scorecard.leaderboardRowImage + PALETTED_TEXELS_OFFSET, G_IM_FMT_CI,
       ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
+
   /* The rows behind the flaps */
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime) {
@@ -1556,6 +1605,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
     } else {
       shade = 0xFF;
     }
+
     gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
     DrawTextureRect(&gfx, (g_Scorecard.x + ROW_LEFT) << 2,
         (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP) << 2,
@@ -1565,6 +1615,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
   gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
@@ -1603,6 +1654,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         sprintf(g_PrintBuffer, f_StringFormat,
             g_ContestantNames[g_ContestantNameIndices[contestantId]]);
       }
+
       DrawLargeText(&gfx, g_Scorecard.x + ROW_NAME_LEFT,
           g_Scorecard.y + top + ROW_TEXT_TOP, g_PrintBuffer);
     }
@@ -1628,6 +1680,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       } else {
         rotation[0] = g_Scorecard.content.rowFlipAngles[i];
       }
+
       rotation[1] = 0;
       rotation[2] = 0;
       translation[0] = g_Scorecard.x;
@@ -1658,6 +1711,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       ROW_IMAGE_WIDTH, ROW_IMAGE_HEIGHT, 0, 0, 0, 0, 0, 0, 0);
   gDPPipeSync(gfx++);
   gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+
   /* The bottom flaps, which a top flap shades as it falls over them */
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
@@ -1668,6 +1722,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
                 FLAP_SHADE_RANGE);
       }
+
       gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
       DrawTextureRect(&gfx, (g_Scorecard.x + ROW_LEFT) << 2,
           (g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_TOP +
@@ -1682,6 +1737,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           TEXEL_STEP_ONE);
     }
   }
+
   LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (g_Scorecard.content.isRowFlipping[i] == TRUE) {
@@ -1692,6 +1748,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
             (sinf(g_Scorecard.content.rowFlipAngles[i] - FLAP_EDGE_ON_ANGLE) *
                 FLAP_SHADE_RANGE);
       }
+
       gDPSetPrimColor(gfx++, 0, 0, shade, shade, shade, 0xFF);
       LoadTextureBlock(&gfx,
           g_Scorecard.flapNameImages +
@@ -1736,9 +1793,11 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       } else {
         gSPVertex(gfx++, f_FlapVertices[FLAP_TOP_QUAD], QUAD_VERTEX_COUNT, 0);
       }
+
       gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     }
   }
+
   LoadLargePalette(&gfx, g_Scorecard.flapNameImages + IMAGE_HEADER_SIZE);
   for (i = 0; i != LEADERBOARD_ROW_COUNT; i++) {
     if (i * ROW_FLIP_STAGGER < g_Scorecard.content.flipTime &&
@@ -1782,6 +1841,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
               g_ContestantNames
                   [g_ContestantNameIndices[standing->contestantId]]);
         }
+
         PlaceGlyphGroup(group + 1, FONT_SIZE_LARGE,
             GLYPH_FLAG_LEFT_ALIGNED | GLYPH_FLAG_BOTTOM_PART, FLAP_NAME_X, 0,
             g_PrintBuffer);
@@ -1791,9 +1851,11 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
         DrawGlyphGroup(&gfx, group);
         DrawGlyphGroup(&gfx, group + 1);
       }
+
       group = (group + 2) % FLAP_GLYPH_GROUP_COUNT;
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetTextureFilter(gfx++, G_TF_POINT);
   gDPPipeSync(gfx++);
@@ -1846,8 +1908,10 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
           halfSize = (ARROW_PULSE_SIZE * sinf(f_ArrowPulseAngle)) +
               ROSE_ARROW_HALF_SIZE;
         }
+
         roundedHalfSize = halfSize + 0.5f;
         top = g_Scorecard.y + (i * LEADERBOARD_ROW_SPACING) + ROW_HINGE_TOP;
+
         /* Starts the texels part of a texel in, as far as the rect's rounding
          * moved its edge */
         texelStart = (ARROW_IMAGE_SIZE / 2) -
@@ -1865,6 +1929,7 @@ void DrawLeaderboardPage(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2112,6 +2177,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + LABEL_PANEL_TOP + LABEL_PANEL_HEIGHT) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
+
   if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_LEFT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING) << 2,
@@ -2120,6 +2186,7 @@ void DrawScoresPage(Gfx** displayListHead) {
             << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
+
   if (IS_MATCH_PLAY_MODE()) {
     if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + TOTAL_PANEL_LEFT) << 2,
@@ -2158,6 +2225,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
   if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
@@ -2168,6 +2236,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
         0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
+
   if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
     DrawTextureRect(&gfx, (g_Scorecard.x + LABEL_PANEL_RIGHT) << 2,
         (g_Scorecard.y + LABEL_PANEL_TOP + NINE_SPACING) << 2,
@@ -2177,6 +2246,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
         0, TEXEL_STEP_ONE, LABEL_PANEL_STEP);
   }
+
   if (IS_MATCH_PLAY_MODE()) {
     if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
       DrawTextureRect(&gfx, (g_Scorecard.x + MATCH_TOTAL_PANEL_RIGHT) << 2,
@@ -2229,6 +2299,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       handicapStrokes[i][hole] = 0;
     }
   }
+
   if (g_PlayerCount == 2 && !IS_MATCH_PLAY_MODE()) {
     for (i = 0; i != g_PlayerCount; i++) {
       for (hole = 0; hole != COURSE_HOLE_COUNT; hole++) {
@@ -2254,6 +2325,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       } else {
         gDPSetPrimColor(gfx++, 0, 0, 0, CELL_SHADE, 0, cellAlpha);
       }
+
       gDPPipeSync(gfx++);
       if (j & 1) {
         if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
@@ -2266,6 +2338,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
               TEXEL_STEP_ONE);
         }
+
         if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
@@ -2282,6 +2355,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
     }
   }
+
   gDPPipeSync(gfx++);
   LoadNibbleTextureBlock(&gfx, g_Scorecard.scoresPanelImage + IMAGE_HEADER_SIZE,
       G_IM_FMT_I, SCORES_PANEL_IMAGE_WIDTH, SCORES_PANEL_IMAGE_HEIGHT, 0, 0, 0,
@@ -2298,6 +2372,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         (g_Scorecard.y + TOTAL_PANEL_BOTTOM + NINE_SPACING) << 2,
         G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTileSize(gfx++, G_TX_RENDERTILE, 0, 0, PANEL_EDGE_TEXEL_RIGHT << 2,
       (SCORES_PANEL_IMAGE_HEIGHT - 1) << 2);
@@ -2311,12 +2386,14 @@ void DrawScoresPage(Gfx** displayListHead) {
         G_TX_RENDERTILE, PANEL_EDGE_TEXEL_LEFT << TEXTURE_COORD_FRACTION_BITS,
         0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
   }
+
   for (i = 0; i != CELL_ROW_COUNT; i++) {
     if (i & 1) {
       gDPSetPrimColor(gfx++, 0, 0, 0xBF, 0xFF, 0, cellAlpha);
     } else {
       gDPSetPrimColor(gfx++, 0, 0, 0x7F, 0xFF, 0, cellAlpha);
     }
+
     for (j = 0; j != HOLES_PER_NINE; j++) {
       if (!(j & 1)) {
         if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
@@ -2329,6 +2406,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               i * CELL_HEIGHT << TEXTURE_COORD_FRACTION_BITS, TEXEL_STEP_ONE,
               TEXEL_STEP_ONE);
         }
+
         if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
           DrawTextureRect(&gfx,
               (g_Scorecard.x + (j * CELL_WIDTH) + CELL_LEFT) << 2,
@@ -2433,6 +2511,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         rowSpacing = WIDE_PLAYER_ROW_SPACING;
         secondRow = 2;
       }
+
       if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
             frontTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
@@ -2444,6 +2523,7 @@ void DrawScoresPage(Gfx** displayListHead) {
                 SCORES_FACE_RISE + g_Scorecard.y,
             1, TRUE);
       }
+
       if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
         DrawSmallFace(&gfx, g_Scorecard.x + SCORES_FACE_LEFT,
             backTop + PLAYER_ROW_TOP - SCORES_FACE_RISE + g_Scorecard.y, 0,
@@ -2455,6 +2535,7 @@ void DrawScoresPage(Gfx** displayListHead) {
                 SCORES_FACE_RISE + g_Scorecard.y,
             1, TRUE);
       }
+
       break;
     case 1:
     case 3:
@@ -2473,6 +2554,7 @@ void DrawScoresPage(Gfx** displayListHead) {
                   SCORES_FACE_RISE + g_Scorecard.y,
               i, TRUE);
         }
+
         if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
           DrawSmallFace(&gfx,
               g_Scorecard.x + SCORES_FACE_LEFT +
@@ -2482,6 +2564,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               i, TRUE);
         }
       }
+
       break;
   }
 
@@ -2494,6 +2577,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     DrawLargeText(&gfx, g_Scorecard.x + HEADING_LEFT,
         frontTop + PAR_ROW_TOP + g_Scorecard.y, "PAR");
   }
+
   if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
     DrawLargeText(
         &gfx, g_Scorecard.x + HEADING_LEFT, backTop + g_Scorecard.y, "NO.");
@@ -2509,6 +2593,7 @@ void DrawScoresPage(Gfx** displayListHead) {
     isBadgesShown = g_GameMode == GAME_MODE_TOURNAMENT;
     isPuttsShown = !g_IsMiniGolf;
   }
+
   if (g_PlayerCount == 2 && !IS_MATCH_PLAY_MODE()) {
     if (g_IsMiniGolf) {
       isOverShown = TRUE;
@@ -2528,16 +2613,19 @@ void DrawScoresPage(Gfx** displayListHead) {
             "Putts");
         extraTop += PLAYER_ROW_SPACING;
       }
+
       if (isOverShown) {
         DrawSmallText(&gfx, g_Scorecard.x + OVER_LABEL_LEFT,
             frontTop + extraTop + (i * rowSpacing) + g_Scorecard.y, "Over");
         extraTop += PLAYER_ROW_SPACING;
       }
+
       if (isBadgesShown) {
         DrawSmallText(&gfx, g_Scorecard.x + BADGES_LABEL_LEFT,
             frontTop + extraTop + (i * rowSpacing) + g_Scorecard.y, "Badges");
       }
     }
+
     if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
       extraTop = EXTRA_ROW_TOP;
       if (isPuttsShown) {
@@ -2546,11 +2634,13 @@ void DrawScoresPage(Gfx** displayListHead) {
             "Putts");
         extraTop += PLAYER_ROW_SPACING;
       }
+
       if (isOverShown) {
         DrawSmallText(&gfx, g_Scorecard.x + OVER_LABEL_LEFT,
             backTop + extraTop + (i * rowSpacing) + g_Scorecard.y, "Over");
         extraTop += PLAYER_ROW_SPACING;
       }
+
       if (isBadgesShown) {
         DrawSmallText(&gfx, g_Scorecard.x + BADGES_LABEL_LEFT,
             backTop + extraTop + (i * rowSpacing) + g_Scorecard.y, "Badges");
@@ -2567,6 +2657,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           g_Scorecard.x + (j * CELL_WIDTH) + HOLE_NUMBERS_LEFT,
           frontTop + HOLE_NUMBERS_TOP + g_Scorecard.y, g_PrintBuffer);
     }
+
     if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
       sprintf(g_PrintBuffer, f_TwoDigitFormat, j + HOLES_PER_NINE + 1);
       DrawCondensedShadowedText(&gfx,
@@ -2574,6 +2665,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           backTop + HOLE_NUMBERS_TOP + g_Scorecard.y, g_PrintBuffer);
     }
   }
+
   SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
   for (j = 0; j != HOLES_PER_NINE; j++) {
     if (!(g_SkippedNines & FRONT_NINE_SKIPPED)) {
@@ -2583,6 +2675,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           g_Scorecard.x + (j * CELL_WIDTH) + PAR_LEFT,
           frontTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
+
     if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
       backPar += (s8)course->holes[j + HOLES_PER_NINE].par;
       sprintf(g_PrintBuffer, f_DecimalFormat,
@@ -2592,6 +2685,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           backTop + PAR_TOP + g_Scorecard.y, g_PrintBuffer);
     }
   }
+
   if (!IS_MATCH_PLAY_MODE() &&
       !(g_SkippedNines & (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
     sprintf(g_PrintBuffer, "%3d", frontPar);
@@ -2616,6 +2710,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         shownHoleCount =
             g_Scorecard.content.holeIndex + (g_Players[i ^ 1].unk26 != 0);
       }
+
       SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
       for (hole = firstHole; hole != shownHoleCount; hole++) {
         if (g_Players[i].holes[hole].strokes ==
@@ -2629,6 +2724,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           g_PrintBuffer[0] = HOLE_LOST_CODE;
           standing--;
         }
+
         sprintf(g_PrintBuffer + 1, "");
         if (hole < HOLES_PER_NINE) {
           DrawShadowedText(&gfx,
@@ -2643,6 +2739,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_PrintBuffer);
         }
       }
+
       if (standing == 0) {
         sprintf(g_PrintBuffer, " EVEN");
       } else if (standing > 0) {
@@ -2650,6 +2747,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       } else {
         sprintf(g_PrintBuffer, "%2dDOWN", -standing);
       }
+
       if (g_SkippedNines & BACK_NINE_SKIPPED) {
         DrawShadowedText(&gfx, g_Scorecard.x + MATCH_STANDING_LEFT,
             frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
@@ -2693,9 +2791,11 @@ void DrawScoresPage(Gfx** displayListHead) {
                 backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
                 g_PrintBuffer);
           }
+
           standing += g_Players[i].holes[hole].strokes;
         }
       }
+
       sprintf(g_PrintBuffer, "%2dP", standing);
       if (g_SkippedNines & BACK_NINE_SKIPPED) {
         DrawShadowedText(&gfx, g_Scorecard.x + SKINS_TOTAL_LEFT,
@@ -2715,6 +2815,7 @@ void DrawScoresPage(Gfx** displayListHead) {
         } else {
           backTotal += g_Players[i].holes[hole].strokes;
         }
+
         if ((overPar < -2 && course->holes[hole].par == PAR_FIVE) ||
             (overPar < -1 && course->holes[hole].par != PAR_FIVE)) {
           if (colorIndex != PULSING_COLOR) {
@@ -2745,6 +2846,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           colorIndex = DOUBLE_BOGEY_COLOR;
           SetTextColor(&gfx, 0x9F, 0xBF, 0xFF);
         }
+
         sprintf(
             g_PrintBuffer, f_TwoDigitFormat, g_Players[i].holes[hole].strokes);
         if (hole < HOLES_PER_NINE) {
@@ -2759,6 +2861,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               backTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         }
+
         extraTop = PUTTS_TOP;
         if (isPuttsShown) {
           if (g_Players[i].holes[hole].putts == UNCOUNTED_PUTTS) {
@@ -2794,6 +2897,7 @@ void DrawScoresPage(Gfx** displayListHead) {
             }
           }
         }
+
         if (isOverShown) {
           if (overPar == 0) {
             sprintf(g_PrintBuffer, "<0");
@@ -2802,6 +2906,7 @@ void DrawScoresPage(Gfx** displayListHead) {
           } else {
             sprintf(g_PrintBuffer, ";%d", -overPar);
           }
+
           if (hole < HOLES_PER_NINE) {
             DrawCenteredNarrowText(&gfx,
                 g_Scorecard.x + (hole * CELL_WIDTH) + OVER_LEFT,
@@ -2816,9 +2921,11 @@ void DrawScoresPage(Gfx** displayListHead) {
           }
         }
       }
+
       if (colorIndex != PAR_COLOR) {
         SetTextColor(&gfx, 0xFF, 0xFF, 0xFF);
       }
+
       if (!(g_SkippedNines & (FRONT_NINE_SKIPPED | BACK_NINE_SKIPPED))) {
         if (shownHoleCount > 0) {
           sprintf(g_PrintBuffer, "%3d", frontTotal);
@@ -2826,6 +2933,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
               g_PrintBuffer);
         }
+
         if (shownHoleCount > HOLES_PER_NINE) {
           sprintf(g_PrintBuffer, "%3d", backTotal);
           DrawCondensedShadowedText(&gfx, g_Scorecard.x + BACK_TOTAL_LEFT,
@@ -2833,12 +2941,14 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_PrintBuffer);
         }
       }
+
       overPar = GetNetScoreToPar(g_Scorecard.content.holeIndex, i);
       if (overPar == 0) {
         sprintf(g_PrintBuffer, f_ZeroToParFormat);
       } else {
         sprintf(g_PrintBuffer, f_ScoreToParFormat, overPar);
       }
+
       if (g_SkippedNines & BACK_NINE_SKIPPED) {
         DrawShadowedText(&gfx, g_Scorecard.x + NET_SCORE_LEFT,
             frontTop + (i * rowSpacing) + PLAYER_ROW_TOP + g_Scorecard.y,
@@ -2868,6 +2978,7 @@ void DrawScoresPage(Gfx** displayListHead) {
                   g_Scorecard.y,
               g_PrintBuffer);
         }
+
         if (handicapStrokes[i][j] < -1) {
           DrawShadowedText(&gfx,
               g_Scorecard.x + (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT,
@@ -2876,6 +2987,7 @@ void DrawScoresPage(Gfx** displayListHead) {
               g_PrintBuffer);
         }
       }
+
       if (!(g_SkippedNines & BACK_NINE_SKIPPED)) {
         if (handicapStrokes[i][j + HOLES_PER_NINE] < 0) {
           DrawShadowedText(&gfx,
@@ -2884,6 +2996,7 @@ void DrawScoresPage(Gfx** displayListHead) {
                   g_Scorecard.y,
               g_PrintBuffer);
         }
+
         if (handicapStrokes[i][j + HOLES_PER_NINE] < -1) {
           DrawShadowedText(&gfx,
               g_Scorecard.x + (j * CELL_WIDTH) + SECOND_HANDICAP_STROKE_LEFT,
@@ -2917,6 +3030,7 @@ void DrawScoresPage(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2985,8 +3099,10 @@ void DrawBetTallies(Gfx** displayListHead) {
               TEXEL_STEP_ONE, TEXEL_STEP_ONE);
         }
       }
+
       column += BET_TALLY_COLUMN_SPACING;
     }
+
     sprintf(g_PrintBuffer, f_DecimalFormat, total);
     for (text = g_PrintBuffer, left = BET_TOTAL_LEFT; *text != '\0';
         left += DIGIT_GLYPH_SIZE) {
@@ -3001,6 +3117,7 @@ void DrawBetTallies(Gfx** displayListHead) {
           TEXEL_STEP_ONE);
     }
   }
+
   *displayListHead = gfx;
 }
 #else

@@ -93,9 +93,12 @@ AssetFile* OpenPooledAssetFile(s32 assetId) {
       ReadAssetFileBounds(assetId, file);
       return file;
     }
+
     file++;
   }
+
   osSyncPrintf("ropen %d\n", assetId);
+
   /* "File number %d failed to open." */
   osSyncPrintf("%d番のファイルオープン失敗。\n", assetId);
   return NULL;
@@ -118,6 +121,7 @@ void ReadAssetFile(void* buffer, u32 size, AssetFile* file) {
     size = file->romEnd - file->cursor;
     osSyncPrintf("size error %d \n", f_LastOpenedAssetId);
   }
+
   nuPiReadRom(file->cursor, buffer, (size + 1) & ~1);
   file->cursor += size;
 }
@@ -129,6 +133,7 @@ s32 OpenEncodedAsset(u16 assetId, EncodedAsset* asset) {
   if (IsGameFlagSet(GAME_FLAG_LOG_ENCODED_ASSETS)) {
     osSyncPrintf("OP:%d\n", assetId);
   }
+
   OpenAssetFile(assetId, &asset->file);
   asset->encodedSize = GetAssetFileSize(&asset->file);
   ReadAssetFile(header, sizeof(*header), &asset->file);
@@ -179,10 +184,12 @@ void DecodeByteRuns(u8* buffer, EncodedAsset* asset) {
     if (count == 0) {
       break;
     }
+
     if (count > 0) {
       for (index = 0; index != count; index++) {
         *buffer++ = chunk[reader.position];
       }
+
       ADVANCE(chunk, reader.position, reader.remaining, asset);
     } else {
       count = -count;
@@ -214,6 +221,7 @@ void DecodeHalfwordRuns(u8* buffer, EncodedAsset* asset) {
     if (count == 0) {
       break;
     }
+
     if (count > 0) {
       high = chunk[reader.position];
       ADVANCE(chunk, reader.position, reader.remaining, asset);

@@ -95,9 +95,11 @@ void HandleAudioReset(NUScMsg type, s32 frame) {
       if (frame == RESET_FX_OFF_FRAME) {
         MusSetFxType(0);
       }
+
       if (frame == RESET_TASKS_OFF_FRAME) {
         f_IsAudioTaskEnabled = FALSE;
       }
+
       break;
   }
 }
@@ -117,6 +119,7 @@ void LoadSampleBank(u8* pointerBankRom, u32 pointerBankSize, u8* waveBankRom) {
       osSyncPrintf("\n");
     }
   }
+
   MusPtrBankInitialize(f_PointerBank, waveBankRom);
 }
 
@@ -125,6 +128,7 @@ void InitMusic(musConfig* config) {
   if (config == NULL) {
     config = &f_DefaultMusicConfig;
   }
+
   StartMusicPlayer(config);
   AllocSongBuffer(SONG_BUFFER_SIZE);
   AllocSoundEffectBuffer(SOUND_EFFECT_BUFFER_SIZE);
@@ -169,10 +173,12 @@ void WaitForAudioFrame(void) {
     if (*message == NU_SC_RETRACE_MSG) {
       break;
     }
+
     if (*message == NU_SC_PRENMI_MSG) {
       if (f_AudioEventCallback != NULL) {
         f_AudioEventCallback(NU_SC_PRENMI_MSG, f_ResetFrame);
       }
+
       f_ResetFrame++;
     }
   }
@@ -188,6 +194,7 @@ void RunAudioTask(musTask* task) {
     osSendMesg(&nusched.audioRequestMQ, &f_AudioTask, OS_MESG_BLOCK);
     osRecvMesg(&f_TaskDoneQueue, NULL, OS_MESG_BLOCK);
   }
+
   if (f_AudioEventCallback != NULL && f_ResetFrame != 0) {
     f_AudioEventCallback(NU_SC_RETRACE_MSG, f_ResetFrame);
     f_ResetFrame++;
@@ -225,6 +232,7 @@ void LoadSoundEffectBank(u8* rom, u32 size) {
   if (size > SOUND_EFFECT_BUFFER_SIZE) {
     osSyncPrintf("SE Seq. Buffer Over\n");
   }
+
   nuPiReadRom((u32)rom, f_SoundEffectBuffer, size);
   MusFxBankInitialize(f_SoundEffectBuffer);
 }

@@ -40,10 +40,12 @@ void RecordComCharacterResult(s32 row, s32 column, s32 isWin) {
     if (count < MAX_SAVED_COUNT) {
       count = (value & WIN_COUNT_MASK) + 1;
     }
+
     value = count | (value & UNKAF0_FLAG);
     if (!D_801B60C5) {
       value |= UNKAF0_FLAG;
     }
+
     newValue = value; /* Passed on unmasked, to match */
     unk990->unkAF0[row][column].unk1 = newValue;
     osSyncPrintf("Win Com Chara[%d]\n", newValue);
@@ -53,6 +55,7 @@ void RecordComCharacterResult(s32 row, s32 column, s32 isWin) {
       unk990->unkAF0[row][column].unk0 = MAX_SAVED_COUNT;
     }
   }
+
   TransferSaveData(GetSaveData(), TRUE);
 }
 #else
@@ -70,6 +73,7 @@ void AddBirdieBadge(void) {
         MAX_SAVED_COUNT) {
       unk990->birdieBadgeCounts[g_CourseIndex][g_HoleIndex] = MAX_SAVED_COUNT;
     }
+
     TransferSaveData(GetSaveData(), TRUE);
   }
 }
@@ -94,6 +98,7 @@ void ReportBirdieBadgeCount(void) {
             unk990->birdieBadgeCounts[courseIndex][holeIndex] != FALSE;
       }
     }
+
     ShowBirdieBadgeCount(badgeCount);
   }
 }
@@ -122,6 +127,7 @@ void RecordTournamentPlace(void) {
         break;
       }
     }
+
     switch (place) {
       case 1:
         placeFlag = &stats->hasPlace[FIRST_PLACE_INDEX];
@@ -136,9 +142,11 @@ void RecordTournamentPlace(void) {
         hasPlace = TRUE;
         break;
     }
+
     if (hasPlace) {
       *placeFlag = TRUE;
     }
+
     TransferSaveData(GetSaveData(), TRUE);
   }
 }

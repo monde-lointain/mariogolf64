@@ -361,6 +361,7 @@ s32 GetModeIconIndex(GameState* state) {
         break;
     }
   }
+
   return iconIndex;
 }
 
@@ -390,9 +391,11 @@ void OpenSaveMenu(s32 kind) {
   } else {
     func_8005D0D8();
   }
+
   if (kind == SAVE_MENU_GAMES) {
     SetSongVolume(SAVE_MENU_SONG_VOLUME);
   }
+
   ReadEncodedAsset(f_PanelImage = AllocMemory(
                        OpenEncodedAsset(SAVE_MENU_PANEL_IMAGE, &encodedAsset)),
       &encodedAsset);
@@ -412,6 +415,7 @@ void OpenSaveMenu(s32 kind) {
     ReadAssetFile(
         f_CharacterFiles[slot] = AllocMemory(fileSize), fileSize, &file);
   }
+
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
       if (save->savedGames[slot].isValid &&
@@ -429,6 +433,7 @@ void OpenSaveMenu(s32 kind) {
             &encodedAsset);
         frameId = g_ModeIconAnimations[0][1];
       }
+
       picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
       f_ModeIconImages[slot][1] = picture;
       ReadEncodedAsset(picture, &encodedAsset);
@@ -439,10 +444,12 @@ void OpenSaveMenu(s32 kind) {
                            f_ReplayLabelIds[slot], &encodedAsset)),
           &encodedAsset);
     }
+
     ReadEncodedAsset(f_CourseNumbersImage = AllocMemory(
                          OpenEncodedAsset(COURSE_NUMBERS_IMAGE, &encodedAsset)),
         &encodedAsset);
   }
+
   if (kind == SAVE_MENU_GAMES) {
     for (slot = 0; slot != SAVED_GAME_COUNT; slot++) {
       if (save->savedGames[slot].isValid) {
@@ -480,6 +487,7 @@ void OpenSaveMenu(s32 kind) {
       }
     }
   }
+
   f_IconImageIndex = 0;
   f_IconFrames[0] = 1;
   f_IconFrames[1] = 1;
@@ -501,6 +509,7 @@ void OpenSaveMenu(s32 kind) {
       }
     }
   }
+
   f_StateFrame = 0;
   f_MenuState = SAVE_MENU_STATE_OPENING;
   f_SlideOffsets[0] = SCREEN_WIDTH;
@@ -529,12 +538,15 @@ void CloseSaveMenu(void) {
     for (index = 0; index != REPLAY_LABEL_COUNT; index++) {
       FreeMemory(&f_ReplayLabelImages[index]);
     }
+
     FreeMemory(&f_CourseNumbersImage);
   }
+
   for (index = 0; index != CHARACTER_IMAGE_COUNT; index++) {
     FreeMemory(&f_CharacterImages[index]);
     FreeMemory(&f_CharacterFiles[index]);
   }
+
   f_MenuKind = SAVE_MENU_CLOSED;
   SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 0, 0, 0, 0, 0, 0);
   SetTextSlot(MESSAGE_CENTER_X, MESSAGE_CENTER_Y, NO_TEXT, 1, 1, 0, 0, 0, 0, 0);
@@ -565,12 +577,14 @@ void AnimateModeIcons(s32 isImmediate) {
       if (!save->savedGames[slot].isValid) {
         continue;
       }
+
       if (game->state.isMiniGolf) {
         if (f_CursorIndex == slot) {
           if (g_ModeIconAnimations[MODE_ICON_MINI_GOLF][++f_IconFrames[slot]] ==
               END_OF_ICON_FRAMES) {
             f_IconFrames[slot] = 0;
           }
+
           OpenEncodedAsset(
               g_ModeIconAnimations[MODE_ICON_MINI_GOLF][f_IconFrames[slot]],
               &encodedAsset);
@@ -583,6 +597,7 @@ void AnimateModeIcons(s32 isImmediate) {
                                 [++f_IconFrames[slot]] == END_OF_ICON_FRAMES) {
           f_IconFrames[slot] = 0;
         }
+
         OpenEncodedAsset(g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]]
                                              [f_IconFrames[slot]],
             &encodedAsset);
@@ -591,8 +606,10 @@ void AnimateModeIcons(s32 isImmediate) {
             g_ModeIconAnimations[f_ModeIcons[game->state.gameMode]][0],
             &encodedAsset);
       }
+
       ReadEncodedAsset(images[f_IconImageIndex], &encodedAsset);
     }
+
     f_IconImageIndex ^= 1;
   }
 }
@@ -610,6 +627,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
   Gfx* gfx;
   SaveData* save;
   s32 row;
+
   /* Counts rows, icon halves or golfers; sharing one variable is there to match
    */
   s32 index;
@@ -643,6 +661,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     gDPSetCombineMode(gfx++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+
     /* The wave's height is never used */
     sinf(f_PanelWaveAngle);
     f_PanelWaveAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
@@ -661,6 +680,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         stripHeight = GAME_PANEL_STRIP_HEIGHT;
         DrawTextureRect(&gfx, (f_SlideOffsets[index] + WIDE_PANEL_LEFT) << 2,
             (GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
@@ -674,6 +694,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
             (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
       }
+
       if (f_CursorIndex == index) {
         gDPSetPrimColor(gfx++, 0, 0, CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE,
             CHOSEN_PANEL_SHADE, CHOSEN_PANEL_SHADE);
@@ -681,6 +702,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
             OTHER_PANEL_SHADE, 0xFF);
       }
+
       stripHeight = END_GAME_PANEL_STRIP_HEIGHT;
       DrawTextureRect(&gfx, (f_SlideOffsets[index] + NARROW_PANEL_LEFT) << 2,
           (END_GAME_PANEL_MIDDLE + (index * GAME_ROW_SPACING) +
@@ -715,12 +737,14 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
     f_TitleSwayAngle += DEGREES_TO_RADIANS(SWAY_DEGREES_PER_FRAME);
     LoadLargePalette(&gfx, (u8*)f_SaveMenuTitleImage + IMAGE_HEADER_SIZE);
     imageLeft = TITLE_IMAGE_LEFT;
+
     /* The strips are counted with row; reusing it is there to match */
     for (row = 0; row != TITLE_STRIP_COUNT; row++) {
       drawnHeight = TITLE_STRIP_DRAWN_HEIGHT;
       if (row == TITLE_STRIP_COUNT - 1) {
         drawnHeight = TITLE_LAST_STRIP_HEIGHT;
       }
+
       gDPLoadTextureTile(gfx++,
           ((u32)f_SaveMenuTitleImage + LARGE_PALETTED_TEXELS_OFFSET +
               row * TITLE_STRIP_SIZE) &
@@ -737,6 +761,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           G_TX_RENDERTILE, titleTexelLeft + TEXEL_COORDINATE_ONE,
           titleTexelTop + TEXEL_COORDINATE_ONE, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
+
     gDPSetPrimColor(gfx++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
 
     /* Each saved game's mode icon, from the image not being loaded into */
@@ -752,6 +777,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         gDPPipeSync(gfx++);
         for (index = 0; index != MODE_ICON_PART_COUNT; index++) {
           LoadTextureBlock(&gfx,
@@ -795,6 +821,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         gDPPipeSync(gfx++);
         for (index = 0; index != state->playerCount; index++) {
           LoadLargePalette(
@@ -899,6 +926,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
             OTHER_PANEL_SHADE, 0xFF);
       }
+
       gDPPipeSync(gfx++);
       if (save->savedGames[row].isValid) {
         GameState* state = &save->savedGames[row].state;
@@ -928,6 +956,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
               break;
           }
         }
+
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
             MODE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer, 0xFFFF9300,
             0x44FF0000, 0);
@@ -937,26 +966,31 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             sprintf(g_PrintBuffer, "%s GREEN",
                 g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
+
           if (state->courseIndex ==
               LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_SLOW) {
             sprintf(g_PrintBuffer, "%s SLOW",
                 g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
+
           if (state->courseIndex ==
               LUIGIS_GARDEN_COURSE_INDEX + MINI_GOLF_FAST) {
             sprintf(g_PrintBuffer, "%s FAST",
                 g_CourseRecords[COURSE_RECORD_LUIGIS_GARDEN].name);
           }
+
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_GREEN) {
             sprintf(g_PrintBuffer, "%s GREEN",
                 g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
           }
+
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_SLOW) {
             sprintf(g_PrintBuffer, "%s SLOW",
                 g_CourseRecords[COURSE_RECORD_PEACHS_CASTLE].name);
           }
+
           if (state->courseIndex ==
               PEACHS_CASTLE_COURSE_INDEX + MINI_GOLF_FAST) {
             sprintf(g_PrintBuffer, "%s FAST",
@@ -968,6 +1002,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
           sprintf(
               g_PrintBuffer, "%s", g_CourseRecords[state->courseIndex].name);
         }
+
         MeasureText(g_PrintBuffer, COURSE_NAME_FONT_SIZE);
         DrawLargeTextWithShadow(&gfx, f_SlideOffsets[row] + MODE_TEXT_LEFT,
             COURSE_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer,
@@ -985,6 +1020,7 @@ void DrawGameSaveMenu(Gfx** displayListHead) {
             EMPTY_GAME_TEXT_TOP + (row * GAME_ROW_SPACING), g_PrintBuffer);
       }
     }
+
     gDPPipeSync(gfx++);
     DrawLargeTextWithShadow(&gfx,
         f_SlideOffsets[END_GAME_ROW] + END_GAME_TEXT_LEFT, END_GAME_TEXT_TOP,
@@ -1037,6 +1073,7 @@ void SaveGameToSlot(void) {
   } else {
     f_MenuState = SAVE_MENU_STATE_CHOOSING;
   }
+
   WriteSaveData();
 }
 
@@ -1069,6 +1106,7 @@ void SaveReplayToSlot(void) {
   } else {
     f_MenuState = SAVE_MENU_STATE_CHOOSING;
   }
+
   WriteSaveData();
 }
 
@@ -1096,14 +1134,17 @@ void UpdateGameSaveMenu(ControllerState* controller) {
           }
         }
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_CHOOSING;
       }
+
       break;
     case SAVE_MENU_STATE_CHOOSING:
       if (!IsPromptClosed()) {
         break;
       }
+
       if (controller->pressedButtons & B_BUTTON) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
@@ -1112,6 +1153,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
         f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
         break;
       }
+
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < SAVED_GAME_COUNT) {
           if (save->savedGames[f_CursorIndex].isValid) {
@@ -1127,8 +1169,10 @@ void UpdateGameSaveMenu(ControllerState* controller) {
           g_PauseScreen = PAUSE_SCREEN_UNK6;
           OpenPrompt(PROMPT_END_GAME);
         }
+
         break;
       }
+
       if (controller->repeatedButtons & U_JPAD) {
         f_CursorIndex--;
         AnimateModeIcons(TRUE);
@@ -1138,12 +1182,15 @@ void UpdateGameSaveMenu(ControllerState* controller) {
         AnimateModeIcons(TRUE);
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       }
+
       if (f_CursorIndex < 0) {
         f_CursorIndex = END_GAME_ROW;
       }
+
       if (f_CursorIndex > END_GAME_ROW) {
         f_CursorIndex = 0;
       }
+
       break;
     case SAVE_MENU_STATE_BACKING_OUT:
       for (row = 0; row != SLIDE_ROW_COUNT; row++) {
@@ -1155,13 +1202,16 @@ void UpdateGameSaveMenu(ControllerState* controller) {
           }
         }
       }
+
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_BACKED_OUT;
       }
+
       break;
     case SAVE_MENU_STATE_BACKED_OUT:
       CloseSaveMenu();
@@ -1184,6 +1234,7 @@ void UpdateGameSaveMenu(ControllerState* controller) {
         f_MenuState = SAVE_MENU_STATE_LEAVING;
         f_StateFrame = 0;
       }
+
       break;
     case SAVE_MENU_STATE_LEAVING:
       for (row = 0; row != SLIDE_ROW_COUNT; row++) {
@@ -1195,15 +1246,18 @@ void UpdateGameSaveMenu(ControllerState* controller) {
           }
         }
       }
+
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_SAVE_MENU_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, 0);
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         g_PauseScreen = PAUSE_SCREEN_NONE;
         CloseSaveMenu();
         func_80060358();
       }
+
       break;
   }
 }
@@ -1229,14 +1283,17 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
           }
         }
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_CHOOSING;
       }
+
       break;
     case SAVE_MENU_STATE_CHOOSING:
       if (!IsPromptClosed()) {
         break;
       }
+
       if (controller->pressedButtons & A_BUTTON) {
         if (f_CursorIndex >= 0 && f_CursorIndex < SAVE_RECORD_COUNT) {
           /* The pointer arithmetic is there to match */
@@ -1247,6 +1304,7 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
                 SOUND_MENU_CONFIRM, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
             return REPLAY_MENU_PROMPTING;
           }
+
           SaveReplayToSlot();
           PlaySound(SOUND_SAVED, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
         } else {
@@ -1264,18 +1322,22 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
         f_CursorIndex++;
         PlaySound(SOUND_MENU_MOVE, MENU_SOUND_CHANNEL, MENU_SOUND_VOLUME);
       }
+
       if (f_CursorIndex < 0) {
         f_CursorIndex = SKIP_REPLAY_ROW;
       }
+
       if (f_CursorIndex > SKIP_REPLAY_ROW) {
         f_CursorIndex = 0;
       }
+
       break;
     case SAVE_MENU_STATE_SAVED:
       if (f_StateFrame == SAVED_WAIT_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_LEAVING;
         f_StateFrame = 0;
       }
+
       break;
     case SAVE_MENU_STATE_LEAVING:
       for (row = 0; row != SLIDE_ROW_COUNT; row++) {
@@ -1287,12 +1349,15 @@ s32 UpdateReplaySaveMenu(ControllerState* controller) {
           }
         }
       }
+
       if (f_StateFrame == SAVED_WAIT_FRAMES) {
         CloseSaveMenu();
         return REPLAY_MENU_CLOSED;
       }
+
       break;
   }
+
   return REPLAY_MENU_OPEN;
 }
 
@@ -1307,6 +1372,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
   Gfx* gfx;
   SaveData* save;
   s32 row;
+
   /* Counts strips or records; sharing one variable is there to match */
   s32 index;
   s32 stripHeight;
@@ -1320,6 +1386,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
 
   save = GetSaveData();
   gfx = *displayListHead;
+
   /* Rows slide in pairs, the first of each pair from the left */
   for (row = 0; row != REPLAY_ROW_COUNT; row++) {
     slideOffset = f_SlideOffsets[row / 2];
@@ -1328,6 +1395,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
       rowOffsets[row] = -slideOffset;
     }
   }
+
   if (f_MenuKind == SAVE_MENU_REPLAYS) {
     SetUpTextDrawing(&gfx);
 
@@ -1360,6 +1428,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         DrawTextureRect(&gfx, (rowOffsets[row] + WIDE_PANEL_LEFT) << 2,
             (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
                 (index * stripHeight))
@@ -1371,6 +1440,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
             G_TX_RENDERTILE, 0, 0, (PANEL_IMAGE_WIDTH << 10) / WIDE_PANEL_WIDTH,
             (PANEL_IMAGE_HEIGHT << 10) / (stripHeight * PANEL_STRIP_COUNT));
       }
+
       stripHeight = HOLE_OUT_PANEL_STRIP_HEIGHT;
       gDPPipeSync(gfx++);
       if (f_CursorIndex == row) {
@@ -1380,6 +1450,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
             OTHER_PANEL_SHADE, 0xFF);
       }
+
       DrawTextureRect(&gfx, (rowOffsets[row] + NARROW_PANEL_LEFT) << 2,
           (FIRST_REPLAY_ROW_TOP + (row * REPLAY_ROW_SPACING) +
               (index * stripHeight))
@@ -1412,6 +1483,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         gDPPipeSync(gfx++);
         DrawTextureRect(&gfx, (rowOffsets[index] + COURSE_WORD_LEFT) << 2,
             (COURSE_TOP + (index * REPLAY_ROW_SPACING)) << 2,
@@ -1464,6 +1536,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         gDPPipeSync(gfx++);
         LoadSmallPalette(&gfx, 0,
             (u8*)f_ReplayLabelImages[rowLabels[index]] + IMAGE_HEADER_SIZE);
@@ -1493,6 +1566,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
           gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
               OTHER_PANEL_SHADE, 0xFF);
         }
+
         gDPPipeSync(gfx++);
         gDPPipeSync(gfx++);
         gDPSetTextureLUT(gfx++, G_TT_RGBA16);
@@ -1610,11 +1684,13 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         gDPSetPrimColor(gfx++, 0, 0, OTHER_PANEL_SHADE, OTHER_PANEL_SHADE,
             OTHER_PANEL_SHADE, 0xFF);
       }
+
       gDPPipeSync(gfx++);
       if (!(record->unk36 & RECORD_IN_USE)) {
         SetUpGradientTextDrawing(&gfx, 0);
         gDPSetEnvColor(gfx++, 0xFF, 0xFF, 0x2C, 0xFF);
         gDPSetPrimColor(gfx++, 0, 0, 0x40, 0xFF, 0x00, 0xFF);
+
         /* The saved-game message is printed but never drawn */
         sprintf(g_PrintBuffer, "%s", f_NoSavedGameText);
         DrawCenteredLargeText(&gfx, rowOffsets[index] + (SCREEN_WIDTH / 2),
@@ -1629,6 +1705,7 @@ void DrawReplaySaveMenu(Gfx** displayListHead) {
         DrawLargeTextSlot(&gfx, FIRST_RECORD_TEXT_SLOT + index);
       }
     }
+
     SetUpGradientTextDrawing(&gfx, 0);
     DrawLargeTextWithShadow(&gfx, rowOffsets[5] + HOLE_OUT_TEXT_LEFT,
         HOLE_OUT_TEXT_TOP, "HoleOut", 0xFF571300, 0xFFDB4C00, 0);
@@ -1655,6 +1732,7 @@ void OpenControlsScreen(void) {
     picture = AllocMemory(OpenEncodedAsset(CONTROLS_PICTURE, &encodedAsset));
     f_PanelImage = picture;
   }
+
   ReadEncodedAsset(picture, &encodedAsset);
   f_SlideOffsets[0] = SCREEN_HEIGHT;
   f_IsControlsShown = TRUE;
@@ -1708,6 +1786,7 @@ void DrawControlsScreen(Gfx** displayListHead) {
           ((strip * CONTROLS_STRIP_HEIGHT) - bottomRaise) << 2, G_TX_RENDERTILE,
           0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
     }
+
     *displayListHead = gfx;
   }
 }
@@ -1723,13 +1802,16 @@ void UpdateControlsScreen(ControllerState* controller) {
           f_SlideOffsets[0] += -f_SlideOffsets[0] / 2;
         }
       }
+
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_OPEN, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_CHOOSING;
       }
+
       break;
     case SAVE_MENU_STATE_CHOOSING:
       if (controller->pressedButtons & (A_BUTTON | B_BUTTON)) {
@@ -1737,6 +1819,7 @@ void UpdateControlsScreen(ControllerState* controller) {
         f_StateFrame = 0;
         f_MenuState = SAVE_MENU_STATE_BACKING_OUT;
       }
+
       break;
     case SAVE_MENU_STATE_BACKING_OUT:
       if (f_SlideOffsets[0] >= SLIDE_OUT_START_OFFSET) {
@@ -1744,13 +1827,16 @@ void UpdateControlsScreen(ControllerState* controller) {
       } else {
         f_SlideOffsets[0] += f_SlideOffsets[0] / 2;
       }
+
       if (f_StateFrame == SLIDE_SOUND_FRAME) {
         PlaySoundWithEffects(SOUND_CONTROLS_CLOSE, g_NextSoundChannel,
             MENU_SOUND_VOLUME, MENU_SOUND_REVERB, CONTROLS_SOUND_PAN);
       }
+
       if (f_StateFrame == SLIDE_FRAMES) {
         f_MenuState = SAVE_MENU_STATE_BACKED_OUT;
       }
+
       break;
     case SAVE_MENU_STATE_BACKED_OUT:
       CloseControlsScreen();

@@ -538,6 +538,7 @@ void PrepareHoleDisplay(void) {
             ARROW_CENTER_TEXEL_ROW)
         << TEXEL_COORDINATE_SHIFT;
   }
+
   BuildPinShadow();
   InitSkyColors();
 }
@@ -568,6 +569,7 @@ void InitRoundHud(void) {
       }
     }
   }
+
   for (grid = 0; grid != MATRIX_BUFFER_COUNT; grid++) {
     vertex = f_HoleFlagVertices[1][grid];
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
@@ -578,9 +580,11 @@ void InitRoundHud(void) {
       }
     }
   }
+
   for (column = 0; column != HOLE_FLAG_VERTEX_COUNT; column++) {
     f_HoleFlagShades[column] = HOLE_FLAG_START_SHADE;
   }
+
   guOrtho(&g_ScreenOrthoMatrix, -SCREEN_WIDTH / 2, SCREEN_WIDTH / 2,
       -SCREEN_HEIGHT / 2, SCREEN_HEIGHT / 2, SCREEN_ORTHO_NEAR,
       SCREEN_ORTHO_FAR, 1.0f);
@@ -636,6 +640,7 @@ void EndHoleIntro(void) {
   } else {
     FreeHoleIntroImages();
   }
+
   if (f_SceneryState == SCENERY_BILLBOARDS_READY) {
     LoadSceneryImages();
   }
@@ -653,6 +658,7 @@ void StartHoleIntro(void) {
   } else {
     StopSound(RAIN_SOUND_CHANNEL);
   }
+
   RevertBillboardManager();
   OpenEncodedAsset(
       f_HoleImageAssets[GetCourseRecordIndex()] + GetHoleIndexInRecord(),
@@ -671,10 +677,12 @@ void StartHoleIntro(void) {
       OpenEncodedAsset(ASSET_PAR_FIVE_IMAGE, &asset);
       break;
   }
+
   ReadEncodedAsset(f_ParImage, &asset);
   if (f_SceneryState == SCENERY_LOADED) {
     FreeSceneryImages();
   }
+
   if (g_GameMode == GAME_MODE_RING_SHOT) {
     if (f_IsCourseSelectLoaded == FALSE) {
       f_IsCourseSelectLoaded = TRUE;
@@ -853,6 +861,7 @@ void StartShotPanel(void) {
   } else {
     g_RoundHud.ballHeightYardsDirection = HEIGHT_BELOW;
   }
+
   if (g_RoundHud.ballHeightMeters < LEVEL_HEIGHT &&
       g_RoundHud.ballHeightMeters > -LEVEL_HEIGHT) {
     g_RoundHud.ballHeightMetersDirection = HEIGHT_LEVEL;
@@ -861,6 +870,7 @@ void StartShotPanel(void) {
   } else {
     g_RoundHud.ballHeightMetersDirection = HEIGHT_BELOW;
   }
+
   /* The direction in feet is taken from the height in meters */
   if (g_RoundHud.ballHeightFeet < LEVEL_HEIGHT &&
       g_RoundHud.ballHeightFeet > -LEVEL_HEIGHT) {
@@ -870,6 +880,7 @@ void StartShotPanel(void) {
   } else {
     g_RoundHud.ballHeightFeetDirection = HEIGHT_BELOW;
   }
+
   g_RoundHud.cupDistance = (f32)GetCupDistance(
       g_CurrentShot.ballPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
       g_CurrentShot.ballPosition[AXIS_Z] - g_CupPositionZ);
@@ -881,9 +892,11 @@ void StartShotPanel(void) {
     } else {
       f_ShotPanelOffsetY = 0;
     }
+
     OpenEncodedAsset(f_LieImageAsset, &asset);
     ReadEncodedAsset(f_LieImage, &asset);
   }
+
   if (D_801B60B9) {
     g_RoundHud.skinsTotals[0] = 0;
   } else {
@@ -896,6 +909,7 @@ void StartShotPanel(void) {
           g_RoundHud.skinsTotals[playerIndex] =
               GetNetScoreToPar(g_HoleIndex, playerIndex);
         }
+
         break;
       case GAME_MODE_MATCH_GAME:
       case GAME_MODE_GET_CHARACTER:
@@ -909,6 +923,7 @@ void StartShotPanel(void) {
             g_RoundHud.skinsTotals[0]++;
           }
         }
+
         g_RoundHud.skinsTotals[1] = -g_RoundHud.skinsTotals[0];
         break;
       case GAME_MODE_SKINS_MATCH:
@@ -917,6 +932,7 @@ void StartShotPanel(void) {
         break;
     }
   }
+
   f_ShotPanelOffsetX = SHOT_PANEL_START_OFFSET_X;
   ResetShotModeChange();
   LoadContactImages(&g_Players[g_RoundHud.unk87]);
@@ -954,6 +970,7 @@ void LoadRoundHud(void) {
     f_ShotOffsetMarkerXs[i] = 0;
     f_ShotOffsetMarkerYs[i] = 0;
   }
+
   g_HudScissor.left = HUD_MARGIN;
   g_HudScissor.top = HUD_MARGIN;
   g_HudScissor.right = SCREEN_WIDTH - HUD_MARGIN;
@@ -975,6 +992,7 @@ void LoadRoundHud(void) {
     g_PlayerFacePalettes[i] = AllocMemory(paletteSize);
     ReadAssetFile(g_PlayerFacePalettes[i], paletteSize, &file);
   }
+
   InitScreenLayers();
   LoadPinTextures();
   ClearEffects();
@@ -1052,6 +1070,7 @@ void DrawInsetViewFrame(void) {
             << 2,
         G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
   }
+
   gDPPipeSync(g_DisplayListHead++);
   gDPLoadTextureBlock_4b(g_DisplayListHead++, (u32)f_InsetFrameTexture & ~7,
       G_IM_FMT_I, INSET_FRAME_TEXTURE_WIDTH, INSET_FRAME_SIDE_TEXTURE_HEIGHT, 0,
@@ -1084,6 +1103,7 @@ void DrawInsetViewFrame(void) {
             << 2,
         G_TX_RENDERTILE, INSET_FRAME_SIDE_TEXEL << 5, 0, 1 << 10, 1 << 10);
   }
+
   gDPPipeSync(g_DisplayListHead++);
 }
 
@@ -1095,6 +1115,7 @@ void ScrollWindArrow(void) {
   for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
     f_Arrows[g_MatrixBufferIndex].body[i].v.tc[1] += step;
   }
+
   if (f_Arrows[g_MatrixBufferIndex].body[0].v.tc[1] >
       ARROW_TEXTURE_COORDINATE_LIMIT) {
     for (i = 0; i != ARROW_VERTEX_COUNT; i++) {
@@ -1119,10 +1140,12 @@ void StartLandingReaction(s32 reaction) {
     StartMovie(MOVIE_NONE);
     return;
   }
+
   previousReaction = f_LandingReaction;
   if (previousReaction != LANDING_REACTION_NONE) {
     return;
   }
+
   f_LandingReaction = reaction;
   switch ((u32)GetSurfaceInfo(g_BallSurface)->kind) {
     case SURFACE_KIND_OUT_OF_BOUNDS:
@@ -1184,6 +1207,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
       PlaceGlyphGroup(LANDING_GLYPH_GROUP_FIRST, FONT_SIZE_LARGE, 0, 0,
           LANDING_NAME_GLYPH_Y, surface->name);
     }
+
     if (f_LandingReaction == LANDING_REACTION_REST && !IsOnDrivingRange()) {
       distance = GetCupDistance(
           g_BallPosition[AXIS_X] - D_800BA9D8.cupPosition[AXIS_X],
@@ -1201,14 +1225,17 @@ void DrawLandingReaction(Gfx** displayListHead) {
             hundredths / HUNDREDTHS_PER_UNIT, hundredths % HUNDREDTHS_PER_UNIT,
             YARDS_GLYPH);
       }
+
       if (f_LandingReactionFrame == 1) {
         PlaceGlyphGroup(LANDING_GLYPH_GROUP_SECOND, FONT_SIZE_MEDIUM, 0, 0,
             LANDING_DISTANCE_GLYPH_Y, g_PrintBuffer);
       }
     }
+
     if (f_LandingReactionFrame < LANDING_REACTION_FRAME_COUNT) {
       f_LandingReactionFrame++;
     }
+
     gDPPipeSync(gfx++);
     gDPPipeSync(gfx++);
     gDPSetCycleType(gfx++, G_CYC_1CYCLE);
@@ -1227,10 +1254,12 @@ void DrawLandingReaction(Gfx** displayListHead) {
     if (angle > 2 * M_PI) {
       angle = 2 * M_PI;
     }
+
     size = f_LandingReactionFrame * LANDING_PANEL_GROWTH_PER_FRAME;
     if (size > 1.0f) {
       size = 1.0f;
     }
+
     rotation[AXIS_X] = 0.0f;
     rotation[AXIS_Y] = 0.0f;
     scale[AXIS_X] = size;
@@ -1241,6 +1270,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
     translation[AXIS_Y] = LANDING_PANEL_Y;
     translation[AXIS_Z] = LANDING_PANEL_Z;
     BuildTransformMatrix(matrix, rotation, translation, scale);
+
     /* Spins the panel around a point away from its center */
     guTranslateF(offset, LANDING_PANEL_PIVOT_X, LANDING_PANEL_PIVOT_Y, 0.0f);
     guMtxCatF(offset, matrix, matrix);
@@ -1270,6 +1300,7 @@ void DrawLandingReaction(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -1298,6 +1329,7 @@ u32 GetWarmthTint(s32 warmth, s32 alpha) {
     green = warmth + 0xFF;
     red = green;
   }
+
   return (red << 24) | (green << 16) | (blue << 8) | (alpha & 0xFF);
 }
 
@@ -1450,6 +1482,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
           g_GameState.unk0 != GAME_STATE_UNK11)) {
     return;
   }
+
   club = GetSelectedClub();
   yaw = (u16)g_CurrentShot.unk0 * BINARY_ANGLE_TO_RADIANS;
   distance = GetSelectedShotDistance();
@@ -1494,6 +1527,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
     rowCount = GREEN_GRID_LANDING_ROW_COUNT;
     columnSpacing = GREEN_GRID_LANDING_WIDTH / columnCount;
   }
+
   forwardX = -cosf(yaw);
   forwardZ = -sinf(yaw);
   sideAngle = yaw + (M_PI / 2);
@@ -1515,6 +1549,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       f_GreenGridScroll += 2.0f;
     }
   }
+
   scrollX = stepX * f_GreenGridScroll;
   scrollZ = stepZ * f_GreenGridScroll;
 
@@ -1526,6 +1561,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       if (row != 0) {
         rowPosition = row - 1;
       }
+
       if (isUnscrolledRow || (f_GreenGridScroll < 0.0f && row == 1)) {
         points[i][AXIS_X] =
             center[AXIS_X] + originX + (stepX * rowPosition) + (sideX * column);
@@ -1537,6 +1573,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         points[i][AXIS_Z] = center[AXIS_Z] + originZ + (stepZ * rowPosition) +
             (sideZ * column) + scrollZ;
       }
+
       if (g_RoundHud.greenGridState == GREEN_GRID_SHOWN) {
         D_800BB0E8 = 1;
         points[i][AXIS_Y] =
@@ -1546,6 +1583,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         points[i][AXIS_Y] = f_GreenGridHeights[i];
       }
     }
+
     if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
       rowStart += columnCount;
       row++;
@@ -1557,6 +1595,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       row += 2;
     }
   }
+
   /* Fills in the rows that were skipped from their neighbors */
   if (rowCount == GREEN_GRID_MAX_ROW_COUNT) {
     for (row = 1; row != rowCount - 1; row += 2) {
@@ -1576,6 +1615,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       }
     }
   }
+
   for (row = 0, rowStart = 0; row != rowCount; row++, rowStart += columnCount) {
     for (column = 0; column != columnCount; column++) {
       i = rowStart + column;
@@ -1590,6 +1630,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       } else {
         screenPoints[i].isVisible = FALSE;
       }
+
       height = points[i][AXIS_Y] - center[AXIS_Y];
       if (height < 0.0f) {
         slopes[i] = sqrtf(-height) * GREEN_GRID_SLOPE_SCALE;
@@ -1598,9 +1639,11 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
       } else {
         slopes[i] = 0;
       }
+
       if (slopes[i] > GREEN_GRID_MAX_SLOPE) {
         slopes[i] = GREEN_GRID_MAX_SLOPE;
       }
+
       if (slopes[i] < -GREEN_GRID_MAX_SLOPE) {
         slopes[i] = -GREEN_GRID_MAX_SLOPE;
       }
@@ -1636,6 +1679,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
   } else {
     f_GreenGridAlpha -= GREEN_GRID_FADE_STEP;
   }
+
   if (g_RoundHud.greenGridState != GREEN_GRID_HIDDEN) {
     /* The lines across the aim, one quad between each pair of points in a row
      */
@@ -1645,17 +1689,20 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         if (screenPoints[point].isVisible != TRUE) {
           continue;
         }
+
         if (!(column & 1)) {
           neighbor = point + 1;
         } else {
           neighbor = point - 1;
         }
+
         dx = screenPoints[point].x - screenPoints[neighbor].x;
         dy = screenPoints[point].y - screenPoints[neighbor].y;
         if (dx == 0.0f && dy == 0.0f) {
           screenPoints[point].isVisible = FALSE;
           continue;
         }
+
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
@@ -1677,6 +1724,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
             } else {
               gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
             }
+
             gDPPipeSync(gfx++);
             gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
           }
@@ -1697,11 +1745,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
             } else {
               gDPSetPrimDepth(gfx++, screenPoints[point - 1].depth, 0);
             }
+
             gDPPipeSync(gfx++);
             gSP2Triangles(gfx++, 2, 1, 0, 0, 3, 2, 0, 0);
           }
         }
       }
+
       if (rowCount != GREEN_GRID_MAX_ROW_COUNT) {
         rowStart += columnCount;
         row++;
@@ -1713,6 +1763,7 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         row += 2;
       }
     }
+
     /* The lines along the aim, one quad between each pair of points in a column
      */
     for (column = 0; column != columnCount; column++) {
@@ -1723,11 +1774,13 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
             screenPoints[point + columnCount].isVisible != TRUE) {
           continue;
         }
+
         dx = screenPoints[point].x - screenPoints[point + columnCount].x;
         dy = screenPoints[point].y - screenPoints[point + columnCount].y;
         if (dx == 0.0f && dy == 0.0f) {
           continue;
         }
+
         scale = GREEN_GRID_LINE_HALF_WIDTH / sqrtf((dx * dx) + (dy * dy));
         dx *= scale;
         dy *= scale;
@@ -1759,12 +1812,14 @@ void DrawGreenGrid(Gfx** displayListHead, CameraMatrices* matrices) {
         } else {
           gDPSetPrimDepth(gfx++, screenPoints[point + columnCount].depth, 0);
         }
+
         gDPPipeSync(gfx++);
         gSP2Triangles(gfx++, 1, 0, 2, 0, 1, 2, 3, 0);
         gDPPipeSync(gfx++);
       }
     }
   }
+
   gDPPipeSync(gfx++);
   gDPSetDepthSource(gfx++, G_ZS_PIXEL);
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
@@ -1845,6 +1900,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       if (++f_BallTrailHead == BALL_TRAIL_LENGTH) {
         f_BallTrailHead = 0;
       }
+
       f_BallTrail[f_BallTrailHead][AXIS_X] =
           g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE;
       f_BallTrail[f_BallTrailHead][AXIS_Y] =
@@ -1853,6 +1909,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
       f_BallTrail[f_BallTrailHead][AXIS_Z] =
           g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE;
     }
+
     if (g_IsCupViewShown != 1) {
       /* Projects the trail from its newest position back */
       index = f_BallTrailHead;
@@ -1860,6 +1917,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
         if (index == -1) {
           index = BALL_TRAIL_LENGTH - 1;
         }
+
         if (ProjectPoint(f_BallTrail[index][AXIS_X], f_BallTrail[index][AXIS_Y],
                 f_BallTrail[index][AXIS_Z], &point) < 0) {
           f_BallTrailPoints[i].x = point.x * 4;
@@ -1870,6 +1928,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           f_BallTrailPoints[i].depth = BALL_TRAIL_HIDDEN;
         }
       }
+
       guMtxIdent(&f_BallTrailMatrix);
       gDPPipeSync(gfx++);
       gDPPipeSync(gfx++);
@@ -1900,6 +1959,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
             f_BallTrailPoints[i + 1].depth != BALL_TRAIL_HIDDEN) {
           deltaX = f_BallTrailPoints[i].x - f_BallTrailPoints[i + 1].x;
           deltaY = f_BallTrailPoints[i].y - f_BallTrailPoints[i + 1].y;
+
           /* The empty branch for a segment of no length is there to match */
           if (deltaX == 0.0f & deltaY == 0.0f) {
           } else {
@@ -1934,6 +1994,7 @@ void DrawBallTrail(Gfx** displayListHead, CameraMatrices* matrices) {
           }
         }
       }
+
       gDPPipeSync(gfx++);
       gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&matrices->projection),
           G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -1986,6 +2047,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
       if (*text == ' ') {
         continue;
       }
+
       if (*text == 'm') {
         glyphS = WIND_METERS_GLYPH_S;
         glyphWidth = WIND_METERS_GLYPH_WIDTH;
@@ -1993,6 +2055,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
         glyphS = (*text - '0') * WIND_DIGIT_WIDTH;
         glyphWidth = WIND_DIGIT_WIDTH;
       }
+
       gSPScisTextureRectangle(gfx++, (textX + offsetX) << 2,
           (textY - WIND_TEXT_RAISE) << 2, (textX + offsetX + glyphWidth) << 2,
           (textY - WIND_TEXT_RAISE + WIND_FONT_HEIGHT) << 2, G_TX_RENDERTILE,
@@ -2008,15 +2071,18 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
   } else {
     halfWidth = sinf(f_WindIconPulseAngle) + WIND_ICON_NARROW_HALF_WIDTH;
   }
+
   halfHeight = sinf(f_WindIconPulseAngle) + WIND_ICON_HALF_HEIGHT;
   halfWidthRounded = halfWidth + 0.5f;
   halfHeightRounded = halfHeight + 0.5f;
   dsdx = (WIND_ICON_TEXTURE_WIDTH / 2 << 10) / halfWidth;
   dtdy = (WIND_ICON_TEXTURE_HEIGHT / 2 << 10) / halfHeight;
+
   /* Moves the texture by the rounding, in 10.5 fixed point, from half a texel
    * in */
   textureS = HALF_TEXEL - ((halfWidthRounded - halfWidth) * HALF_TEXEL);
   textureT = HALF_TEXEL - ((halfHeightRounded - halfHeight) * HALF_TEXEL);
+
   /* The centers are kept positive by WIND_POSITIVE_BIAS, so rounding by
    * truncation works */
   if (speed >= WIND_SPEED_TWO_DIGITS) {
@@ -2026,6 +2092,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
     centerX = (-sinf(g_SkyState.viewedWindAngles[0]) * WIND_NARROW_LEAN_X) +
         (x + WIND_OFFSET_X) + WIND_POSITIVE_BIAS;
   }
+
   centerY = (-cosf(g_SkyState.viewedWindAngles[0]) * WIND_LEAN_Y) +
       ((SCREEN_HEIGHT / 2) - y) - WIND_OFFSET_Y + WIND_POSITIVE_BIAS;
   gDPPipeSync(gfx++);
@@ -2096,6 +2163,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
     DrawWindSpeedText(centerX - WIND_POSITIVE_BIAS,
         centerY - WIND_POSITIVE_BIAS, g_PrintBuffer);
   }
+
   gDPPipeSync(gfx++);
   gDPSetTexturePersp(gfx++, G_TP_PERSP);
   if (g_RoundHud.areWindSpeedArrowsShown == 1) {
@@ -2107,6 +2175,7 @@ void DrawWindSpeed(Gfx** displayListHead, f32 x, f32 y) {
           centerY - WIND_ARROWS_OFFSET_Y, WIND_ARROWS_NARROW_GAP);
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -2158,6 +2227,7 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
           g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2)) {
     DrawWindSpeed(&gfx, x, y);
   }
+
   gDPPipeSync(gfx++);
   gDPSetRenderMode(gfx++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
   gDPPipeSync(gfx++);
@@ -2174,10 +2244,12 @@ void DrawWindIndicator(Gfx** displayListHead, f32 x, f32 y) {
     g_ModuleRdpRequestFrames[MODULE_UNK9] = g_FrameCount;
     gSPDisplayList(gfx++, D_80222400);
   }
+
   if (g_SkyState.viewedWindAngles[0] > M_PI / 2 &&
       g_SkyState.viewedWindAngles[0] < 3 * M_PI / 2) {
     DrawWindSpeed(&gfx, x, y);
   }
+
   *displayListHead = gfx;
 }
 
@@ -2188,9 +2260,11 @@ void AdjustHudOffset(void) {
     if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & U_CBUTTONS) {
       f_HudOffsetY--;
     }
+
     if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & D_CBUTTONS) {
       f_HudOffsetY++;
     }
+
     sprintf(g_PrintBuffer, "%3d", f_HudOffsetY);
     PrintDebugText(g_PrintBuffer, HUD_OFFSET_TEXT_COLUMN, HUD_OFFSET_TEXT_ROW);
   }
@@ -2275,6 +2349,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     DrawWindIndicator(&gfx, f_ShotPanelOffsetX + SHOT_PANEL_WIND_INDICATOR_X,
         SHOT_PANEL_WIND_INDICATOR_Y);
   }
+
   gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
       G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
   gDPPipeSync(gfx++);
@@ -2283,6 +2358,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
   if (g_IsCupViewShown == 0 && g_IsModuleAlive[MODULE_UNK25]) {
     DrawClubPanelIfShown(&gfx);
   }
+
   if (g_RoundHud.isClubHeadIconShown && g_IsCupViewShown == 0) {
     club = GetClub(
         g_Players[g_CurrentShot.playerIndex].clubs[g_CurrentShot.clubSlot]);
@@ -2296,10 +2372,12 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       OpenEncodedAsset(f_ClubNameAssets[g_CurrentShot.clubSlot], &asset);
       ReadEncodedAsset(f_ClubNameImages[f_ClubNameImageIndex], &asset);
     }
+
     clubHeadAngle = g_RoundHud.clubHeadTilt * BINARY_ANGLE_TO_RADIANS;
     if (clubHeadAngle > M_PI) {
       clubHeadAngle -= 2 * M_PI;
     }
+
     rotation[AXIS_X] = 0;
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = -clubHeadAngle * SHOT_PANEL_ICON_TILT;
@@ -2321,6 +2399,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
           SHOT_PANEL_ICON_DIM, 255);
     }
+
     gDPPipeSync(gfx++);
     gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
     gDPLoadTextureBlock(gfx++, ((u32)f_ClubHeadImage + IMAGE_HEADER_SIZE) & ~7,
@@ -2335,12 +2414,14 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     gSP2Triangles(gfx++, 0, 1, 2, 0, 0, 2, 3, 0);
     gDPPipeSync(gfx++);
   }
+
   if ((g_RoundHud.isLieIconShown || g_RoundHud.areLieArrowsShown) &&
       g_IsCupViewShown == 0) {
     lieAngle = g_RoundHud.lieTilt * BINARY_ANGLE_TO_RADIANS;
     if (lieAngle > M_PI) {
       lieAngle -= 2 * M_PI;
     }
+
     rotation[AXIS_X] = 0;
     rotation[AXIS_Y] = 0;
     rotation[AXIS_Z] = lieAngle * SHOT_PANEL_ICON_TILT;
@@ -2356,6 +2437,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
           (SCREEN_HEIGHT / 2) - g_LiePanelPosition[AXIS_Y],
           PAUSE_PANEL_ARROWS_GAP);
     }
+
     BuildRotationMatrix(matrix, rotation, translation);
     ConvertMatrixToFixed(matrix, &f_LieIconMatrices[g_MatrixBufferIndex]);
     if (g_RoundHud.flags & HUD_FLAG_ANIMATE_OFFSET_MARKER) {
@@ -2364,6 +2446,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
       gDPSetPrimColor(gfx++, 0, 0, SHOT_PANEL_ICON_DIM, SHOT_PANEL_ICON_DIM,
           SHOT_PANEL_ICON_DIM, 255);
     }
+
     gDPPipeSync(gfx++);
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
@@ -2390,6 +2473,7 @@ void DrawShotPanelIcons(Gfx** displayListHead, CameraView* view) {
     gSP2Triangles(gfx++, 4, 5, 6, 0, 4, 6, 7, 0);
     gDPPipeSync(gfx++);
   }
+
   *displayListHead = gfx;
 }
 
@@ -2443,6 +2527,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
           index + HOLE_FLAG_COLUMN_COUNT + 1, index + 1, 0);
     }
   }
+
   if (isBackDrawn == TRUE) {
     index = 0;
     vertex = f_HoleFlagVertices[0][g_MatrixBufferIndex];
@@ -2463,6 +2548,7 @@ void DrawHoleFlag(s32 isBackDrawn) {
                 HOLE_FLAG_START_SHADE);
       }
     }
+
     for (row = 0; row != HOLE_FLAG_ROW_COUNT - 1; row++) {
       for (column = 0; column != HOLE_FLAG_COLUMN_COUNT - 1; column++) {
         index = (row * HOLE_FLAG_COLUMN_COUNT) + column;
@@ -2523,6 +2609,7 @@ void StartShotEffect(s32 effect) {
     f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
     return;
   }
+
   if (effect == SHOT_EFFECT_LONG_SHOT) {
     contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
     if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
@@ -2535,6 +2622,7 @@ void StartShotEffect(s32 effect) {
           LONG_SHOT_SOUND_PAN);
     }
   }
+
   f_ShotEffect = effect;
   f_ShotEffectTime = 0.0f;
 }
@@ -2586,16 +2674,19 @@ void DrawShotEffect(Gfx** displayListHead) {
   if (f_ShotEffectTime < 0.0f) {
     return;
   }
+
   f_ShotEffectTime += SHOT_EFFECT_TIME_STEP;
   if (f_ShotEffectTime > M_PI) {
     f_ShotEffectTime = SHOT_EFFECT_TIME_OFF;
     return;
   }
+
   if (ProjectPoint(g_BallPosition[AXIS_X] * COURSE_TO_WORLD_SCALE,
           g_BallPosition[AXIS_Y] * COURSE_TO_WORLD_SCALE,
           g_BallPosition[AXIS_Z] * COURSE_TO_WORLD_SCALE, &point) >= 0) {
     return;
   }
+
   contactStyle = GetContactStyle(&g_Players[g_RoundHud.unk87]);
   if (contactStyle != CONTACT_STYLE_GAME_BOY_BALL_7 &
       contactStyle != CONTACT_STYLE_WARIO) {
@@ -2610,6 +2701,7 @@ void DrawShotEffect(Gfx** displayListHead) {
     f_ShotEffectRotation[AXIS_Y] = 0.0f;
     f_ShotEffectRotation[AXIS_Z] = (guRandom() % 360) * (M_PI / 180);
   }
+
   f_ShotEffectScale[AXIS_X] = scale;
   f_ShotEffectScale[AXIS_Y] = scale;
   f_ShotEffectScale[AXIS_Z] = scale;
@@ -2647,6 +2739,7 @@ void DrawShotEffect(Gfx** displayListHead) {
       gDPPipeSync(gfx++);
       gDPSetRenderMode(gfx++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
     }
+
     gDPPipeSync(gfx++);
     gSPMatrix(gfx++, OS_K0_TO_PHYSICAL(&g_ScreenOrthoMatrix),
         G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -2674,6 +2767,7 @@ void DrawShotEffect(Gfx** displayListHead) {
           &asset);
       f_HeavyLongShotBufferIndex ^= 1;
     }
+
     gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPPipeSync(gfx++);
     gDPSetTextureFilter(gfx++, G_TF_POINT);
@@ -2687,6 +2781,7 @@ void DrawShotEffect(Gfx** displayListHead) {
       gDPSetPrimColor(gfx++, 0, 0, 191, 0, 191, HEAVY_LONG_SHOT_ALPHA);
       gDPSetEnvColor(gfx++, 255, 255, 255, 255);
     }
+
     gDPSetCombineLERP(gfx++, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
         PRIMITIVE, 0, TEXEL0, 0, ENVIRONMENT, PRIMITIVE, TEXEL0, PRIMITIVE,
         PRIMITIVE, 0, TEXEL0, 0);
@@ -2708,6 +2803,7 @@ void DrawShotEffect(Gfx** displayListHead) {
       gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
           (i * 4) + 2, (i * 4) + 3, 0);
     }
+
     gDPPipeSync(gfx++);
     gDPLoadTextureBlock_4b(gfx++,
         ((u32)g_SharedEffectImages + HEAVY_LONG_SHOT_FRAMES_OFFSET +
@@ -2721,8 +2817,10 @@ void DrawShotEffect(Gfx** displayListHead) {
       gSP2Triangles(gfx++, i * 4, (i * 4) + 1, (i * 4) + 2, 0, i * 4,
           (i * 4) + 2, (i * 4) + 3, 0);
     }
+
     gDPPipeSync(gfx++);
   }
+
   gDPPipeSync(gfx++);
   *displayListHead = gfx;
 }
@@ -2764,13 +2862,16 @@ void WaveHoleFlag(void) {
       if (HOLE_FLAG_VERTEX(row, column).v.ob[0] < column * otherFactor) {
         HOLE_FLAG_VERTEX(row, column).v.ob[0] = column * otherFactor;
       }
+
       HOLE_FLAG_VERTEX(row, column).v.ob[1] =
           (-row * HOLE_FLAG_CELL_SIZE) - (column * factor);
     }
   }
+
   if (windSpeed > 0.0f && windSpeed < HOLE_FLAG_MIN_WIND_SPEED) {
     windSpeed = HOLE_FLAG_MIN_WIND_SPEED;
   }
+
   /* factor is how much of its neighbor's shade a vertex takes; otherFactor is
    * how much of its own it keeps */
   if (windSpeed < 1.0f) {
@@ -2785,6 +2886,7 @@ void WaveHoleFlag(void) {
         ((HOLE_FLAG_SPREAD_STEP_COUNT - windSpeed) * HOLE_FLAG_SPREAD_STEP) -
         HOLE_FLAG_SPREAD_STEP;
   }
+
   for (column = HOLE_FLAG_COLUMN_COUNT - 1; column != 0; column--) {
     for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
       /* Indexing the left neighbor as HOLE_FLAG_SHADE(row, column - 1) changes
@@ -2795,15 +2897,18 @@ void WaveHoleFlag(void) {
       HOLE_FLAG_SHADE(row, column) = shade;
     }
   }
+
   f_HoleFlagWavePhase += ((HOLE_FLAG_SWING_DEGREES_PER_SPEED * windSpeed) +
                              HOLE_FLAG_MIN_SWING_DEGREES) *
       DEGREES_TO_RADIANS(1);
   if (f_HoleFlagWavePhase > 2 * M_PI) {
     f_HoleFlagWavePhase -= 2 * M_PI;
   }
+
   if (f_HoleFlagWavePhase < 0.0f) {
     f_HoleFlagWavePhase += 2 * M_PI;
   }
+
   /* factor is the swing's amplitude here */
   factor = windSpeed + (rand() % HOLE_FLAG_SWING_JITTER_RANGE);
   shade = (s32)(sinf(f_HoleFlagWavePhase) * factor) + HOLE_FLAG_START_SHADE;
@@ -2816,8 +2921,10 @@ void WaveHoleFlag(void) {
               (rand() % (s32)(windSpeed * HOLE_FLAG_ROW_JITTER_PER_SPEED))) -
           (HOLE_FLAG_ROW_JITTER_PER_SPEED / 2 * windSpeed);
     }
+
     HOLE_FLAG_SHADE(row, 0) = rowShade;
   }
+
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     for (column = 1; column != HOLE_FLAG_COLUMN_COUNT; column++) {
       HOLE_FLAG_VERTEX(row, column).v.cn[0] = HOLE_FLAG_SHADE(row, column);
@@ -2825,6 +2932,7 @@ void WaveHoleFlag(void) {
       HOLE_FLAG_VERTEX(row, column).v.cn[2] = HOLE_FLAG_SHADE(row, column);
     }
   }
+
   /* Bulges are deeper toward the flag's free edge and its top */
   factor = (windSpeed * HOLE_FLAG_BULGE_PER_SPEED) + HOLE_FLAG_MIN_BULGE;
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
@@ -2837,6 +2945,7 @@ void WaveHoleFlag(void) {
           (f32)(HOLE_FLAG_BULGE_ROW_BASE - row) * HOLE_FLAG_BULGE_ROW_SCALE;
     }
   }
+
   for (row = 0; row != HOLE_FLAG_ROW_COUNT; row++) {
     pull = 0;
     for (column = HOLE_FLAG_FIRST_PULLED_COLUMN;
@@ -2845,6 +2954,7 @@ void WaveHoleFlag(void) {
       if (depth < 0) {
         depth = -depth;
       }
+
       pull += depth / HOLE_FLAG_DEPTH_PER_PULL;
       HOLE_FLAG_VERTEX(row, column).v.ob[0] =
           (column * HOLE_FLAG_CELL_SIZE) - pull;
@@ -2879,11 +2989,13 @@ void SetShotOffsetMarker(s32 x, s32 y) {
   } else {
     length = 0.0f;
   }
+
   if (length > SHOT_OFFSET_MAX_RADIUS) {
     scale = SHOT_OFFSET_MAX_RADIUS / length;
     x = x * scale;
     y = y * scale;
   }
+
   f_ShotOffsetMarkerXs[0] = x / SHOT_OFFSET_UNITS_PER_PIXEL;
   f_ShotOffsetMarkerYs[0] = -y / SHOT_OFFSET_UNITS_PER_PIXEL;
 }
@@ -2904,6 +3016,7 @@ void DrawShotOffsetMarker(void) {
     f_ShotOffsetMarkerTexelOffset =
         SHOT_OFFSET_MARKER_STILL_FRAME * SHOT_OFFSET_MARKER_FRAME_SIZE;
   }
+
   gDPLoadTextureBlock_4b(g_DisplayListHead++,
       ((u32)f_ShotOffsetMarkerImage + PALETTED_TEXELS_OFFSET +
           f_ShotOffsetMarkerTexelOffset) &
@@ -2975,6 +3088,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
       f_AnimatedIconY +=
           (ANIMATED_ICON_Y - f_AnimatedIconY) * ANIMATED_ICON_EASING;
     }
+
     if (++f_AnimatedIconFrameTime == ANIMATED_ICON_FRAME_LENGTH) {
       f_AnimatedIconFrameTime = 0;
       f_AnimatedIconFrame =
@@ -2982,6 +3096,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
       OpenEncodedAsset(f_AnimatedIconFrameAssets[f_AnimatedIconFrame], &asset);
       ReadEncodedAsset(f_AnimatedIconImages[f_AnimatedIconImageIndex], &asset);
     }
+
     gDPPipeSync(gfx++);
     gDPSetTextureLUT(gfx++, G_TT_RGBA16);
     gDPLoadTLUT_pal256(gfx++,
@@ -3013,6 +3128,7 @@ void DrawAnimatedIcon(Gfx** displayListHead, s32 mode) {
     } else {
       label = ANIMATED_ICON_LABEL_UNK2;
     }
+
     gDPLoadTLUT_pal16(gfx++, 0,
         (u32)f_AnimatedIconLabelImages[label] + IMAGE_HEADER_SIZE & ~7);
     gDPLoadTextureBlock_4b(gfx++,
@@ -3058,6 +3174,7 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
             (SCREEN_WIDTH - HUD_MARGIN) << 2, (SCREEN_HEIGHT - HUD_MARGIN) << 2,
             G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
       }
+
       gDPPipeSync(gfx++);
       height += LETTERBOX_GROWTH_STEP;
       if (height > LETTERBOX_MAX_HEIGHT) {
@@ -3067,6 +3184,7 @@ s32 DrawLetterbox(Gfx** gfxP, s32 height) {
       height = 0;
     }
   }
+
   *gfxP = gfx;
   return height;
 }
@@ -3105,11 +3223,13 @@ void DrawDistanceText(Gfx** gfxP, s32 x, s32 y, char* text) {
         glyphS = (*text - '0') * DISTANCE_DIGIT_WIDTH;
         break;
     }
+
     gSPTextureRectangle(gfx++, x << 2, y << 2, (x + width) << 2,
         (y + DISTANCE_GLYPH_HEIGHT) << 2, G_TX_RENDERTILE, glyphS << 5, 0,
         1 << 10, 1 << 10);
     x += width;
   }
+
   *gfxP = gfx;
 }
 
@@ -3129,6 +3249,7 @@ void DrawColorTest(Gfx** displayListHead) {
       f_TestColors[COLOR_TEST_ENV][1], f_TestColors[COLOR_TEST_ENV][2],
       COLOR_CHANNEL_MAX);
   gDPPipeSync(gfx++);
+
   /* The casts read only the low halves, as the target does */
   DrawCenteredLargeText(
       &gfx, (s16)f_TestTextX, (s16)f_TestTextY, f_ColorTestSampleText);
@@ -3140,43 +3261,56 @@ void DrawColorTest(Gfx** displayListHead) {
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & U_CBUTTONS) {
     f_TestColorIndex ^= 1;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & D_CBUTTONS) {
     f_TestColorIndex ^= 1;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & L_CBUTTONS) {
     f_TestChannelIndex = (f_TestChannelIndex + COLOR_TEST_CHANNEL_COUNT - 1) %
         COLOR_TEST_CHANNEL_COUNT;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].repeatedButtons & R_CBUTTONS) {
     f_TestChannelIndex = (f_TestChannelIndex + 1) % COLOR_TEST_CHANNEL_COUNT;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & A_BUTTON) {
     f_TestColors[f_TestColorIndex][f_TestChannelIndex] += COLOR_TEST_STEP;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & B_BUTTON) {
     f_TestColors[f_TestColorIndex][f_TestChannelIndex] -= COLOR_TEST_STEP;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].pressedButtons & R_TRIG) {
     f_IsTestGradientShown ^= 1;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & U_JPAD) {
     f_TestTextY -= COLOR_TEST_STEP;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & D_JPAD) {
     f_TestTextY += COLOR_TEST_STEP;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & L_JPAD) {
     f_TestTextX -= COLOR_TEST_STEP;
   }
+
   if (g_ControllerStates[COLOR_TEST_CONTROLLER].buttons & R_JPAD) {
     f_TestTextX += COLOR_TEST_STEP;
   }
+
   if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] > COLOR_CHANNEL_MAX) {
     f_TestColors[f_TestColorIndex][f_TestChannelIndex] = COLOR_CHANNEL_MAX;
   }
+
   if (f_TestColors[f_TestColorIndex][f_TestChannelIndex] < 0) {
     f_TestColors[f_TestColorIndex][f_TestChannelIndex] = 0;
   }
+
   sprintf(g_PrintBuffer, "%3d  %3d  %3d", f_TestColors[COLOR_TEST_PRIM][0],
       f_TestColors[COLOR_TEST_PRIM][1], f_TestColors[COLOR_TEST_PRIM][2]);
   PrintDebugText(g_PrintBuffer, COLOR_TEST_TEXT_COLUMN,
@@ -3337,6 +3471,7 @@ void DrawRoundHud(CameraView* view) {
   if (f_ShotPanelOffsetX > 0) {
     f_ShotPanelOffsetX -= SHOT_PANEL_SLIDE_STEP;
   }
+
   WaveHoleFlag();
   gDPPipeSync(g_DisplayListHead++);
   gDPPipeSync(g_DisplayListHead++);
@@ -3347,6 +3482,7 @@ void DrawRoundHud(CameraView* view) {
   gDPPipeSync(g_DisplayListHead++);
   gDPSetColorDither(g_DisplayListHead++, G_CD_MAGICSQ);
   f_LetterboxHeight = DrawLetterbox(&g_DisplayListHead, f_LetterboxHeight);
+
   /* The faces move out of the letterbox's way */
   scoreboardX = (f_LetterboxHeight * SCOREBOARD_LETTERBOX_SHIFT) +
       (SCOREBOARD_X + f_ShotPanelOffsetX);
@@ -3357,6 +3493,7 @@ void DrawRoundHud(CameraView* view) {
       break;
     }
   }
+
   gDPSetPrimColor(g_DisplayListHead++, 0, 0, 255, 255, 255, 128);
   gDPPipeSync(g_DisplayListHead++);
   gSPTexture(g_DisplayListHead++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
@@ -3419,11 +3556,14 @@ void DrawRoundHud(CameraView* view) {
             G_TX_RENDERTILE, 0, 0, SMALL_FACE_STEP, SMALL_FACE_STEP);
       }
     }
+
     gDPPipeSync(g_DisplayListHead++);
   }
+
   if (g_RoundHud.unk8 && !g_IsCupViewShown) {
     DrawHoleImageModel();
   }
+
   DrawShotPanelIcons(&g_DisplayListHead, view);
   DrawLandingReaction(&g_DisplayListHead);
   gDPPipeSync(g_DisplayListHead++);
@@ -3440,6 +3580,7 @@ void DrawRoundHud(CameraView* view) {
       !(club->surfaceMask & CLUB_SURFACE_GREEN)) {
     DrawShotOffsetMarker();
   }
+
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
     f_PinFlagTime = (f_PinFlagTime + 1) & (PIN_FLAG_TIME_COUNT - 1);
     gDPPipeSync(g_DisplayListHead++);
@@ -3472,6 +3613,7 @@ void DrawRoundHud(CameraView* view) {
         (REST_LABEL_Y + SHOT_PANEL_LABEL_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
+
     /* A putt's height is labelled by its height in meters, which the feet are
      * measured from */
     if ((club->surfaceMask & CLUB_SURFACE_GREEN)
@@ -3483,6 +3625,7 @@ void DrawRoundHud(CameraView* view) {
     } else {
       LOAD_SHOT_PANEL_LABEL(f_DownLabelImage);
     }
+
     gDPPipeSync(g_DisplayListHead++);
     gSPScisTextureRectangle(g_DisplayListHead++,
         (SHOT_PANEL_LABEL_X - f_ShotPanelOffsetX) << 2, HEIGHT_LABEL_Y << 2,
@@ -3494,6 +3637,7 @@ void DrawRoundHud(CameraView* view) {
       if (f_RingFrameTime++ % RING_FRAME_LENGTH == 0) {
         f_RingFrame = (f_RingFrame + 1) % RING_FRAME_COUNT;
       }
+
       gDPPipeSync(g_DisplayListHead++);
       gDPSetRenderMode(
           g_DisplayListHead++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
@@ -3517,6 +3661,7 @@ void DrawRoundHud(CameraView* view) {
       gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
     }
   }
+
   gDPLoadTLUT_pal16(
       g_DisplayListHead++, 0, ((u32)f_DistanceFont + IMAGE_HEADER_SIZE) & ~7);
   gDPLoadTextureBlock_4b(g_DisplayListHead++,
@@ -3533,6 +3678,7 @@ void DrawRoundHud(CameraView* view) {
     DrawDistanceText(&g_DisplayListHead, HOLE_YARDAGE_X - f_ShotPanelOffsetX,
         HOLE_YARDAGE_Y, g_PrintBuffer);
   }
+
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
     /* The shot panel's distances are white, rather than the font's yellow */
     gDPLoadTLUT_pal16(g_DisplayListHead++, 0, (u32)f_WhiteDistancePalette & ~7);
@@ -3542,10 +3688,12 @@ void DrawRoundHud(CameraView* view) {
       for (i = 0; i != RING_COUNT; i++) {
         ringCount += shooter->ringStates[i] == RING_STATE_SHOWN;
       }
+
       sprintf(g_PrintBuffer, "%d", ringCount);
       DrawDistanceText(&g_DisplayListHead, RING_COUNT_X - f_ShotPanelOffsetX,
           RING_COUNT_Y, g_PrintBuffer);
     }
+
     if (g_IsDebugEnabled &&
         (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons &
             D_CBUTTONS)) {
@@ -3554,6 +3702,7 @@ void DrawRoundHud(CameraView* view) {
         shooter->ringStates[i] = RING_STATE_NONE;
       }
     }
+
     if (club->surfaceMask & CLUB_SURFACE_GREEN) {
       hundredths = g_RoundHud.cupDistance *
           (FEET_PER_YARD * HUNDREDTHS_PER_UNIT) * YARDS_PER_UNIT;
@@ -3579,6 +3728,7 @@ void DrawRoundHud(CameraView* view) {
         if (height < 0) {
           height = -height;
         }
+
         sprintf(g_PrintBuffer, "%3dy", height);
         DrawDistanceText(&g_DisplayListHead,
             SHOT_PANEL_DISTANCE_X - f_ShotPanelOffsetX, HEIGHT_LABEL_Y,
@@ -3586,6 +3736,7 @@ void DrawRoundHud(CameraView* view) {
       }
     }
   }
+
   if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
     gDPPipeSync(g_DisplayListHead++);
     gDPSetRenderMode(g_DisplayListHead++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
@@ -3599,6 +3750,7 @@ void DrawRoundHud(CameraView* view) {
     if (g_IsModuleAlive[MODULE_UNK25]) {
       UpdateClubPanelImages();
     }
+
     gDPLoadTLUT_pal256(
         g_DisplayListHead++, ((u32)g_ClubPanelImage + IMAGE_HEADER_SIZE) & ~7);
     gDPLoadTextureBlock(g_DisplayListHead++,
@@ -3631,6 +3783,7 @@ void DrawRoundHud(CameraView* view) {
         0, 0, 1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
   }
+
   if (g_RoundHud.unk8 && !g_IsCupViewShown && !IsOnDrivingRange()) {
     gDPLoadTLUT_pal16(
         g_DisplayListHead++, 0, ((u32)f_ParImage + IMAGE_HEADER_SIZE) & ~7);
@@ -3647,10 +3800,12 @@ void DrawRoundHud(CameraView* view) {
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
   }
+
   if ((D_800C308C != 0 & D_800C308C != LETTERBOX_STATE_UNK5) &&
       g_RoundHud.isLetterboxShown) {
     DrawAnimatedIcon(&g_DisplayListHead, f_LetterboxHeight);
   }
+
   BeginShadowedText(&g_DisplayListHead);
   SetTextColor(&g_DisplayListHead, 255, 255, 255);
   SetTextColor(&g_DisplayListHead, 255, 255, 255);
@@ -3661,6 +3816,7 @@ void DrawRoundHud(CameraView* view) {
     DrawShadowedText(&g_DisplayListHead, f_ShotPanelOffsetX + LIE_PERCENT_X,
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
   }
+
   if (g_RoundHud.isClubHeadIconShown && !g_IsCupViewShown) {
     selectedClub = GetSelectedClub();
     player = &g_Players[g_RoundHud.unk87];
@@ -3670,6 +3826,7 @@ void DrawRoundHud(CameraView* view) {
     } else {
       sprintf(g_PrintBuffer, "%3dy", GetSelectedShotDistance());
     }
+
     DrawShadowedText(&g_DisplayListHead, CLUB_DISTANCE_X - f_ShotPanelOffsetX,
         f_HudOffsetY + SHOT_PANEL_TEXT_Y, g_PrintBuffer);
     if (g_CurrentShot.shotMode == SHOT_MODE_POWER &&
@@ -3681,6 +3838,7 @@ void DrawRoundHud(CameraView* view) {
           f_HudOffsetY + UNK28_TEXT_Y, g_PrintBuffer);
     }
   }
+
   if (g_RoundHud.unk13 && !g_IsCupViewShown) {
     player = &g_Players[g_RoundHud.unk87];
     shotLength =
@@ -3694,9 +3852,11 @@ void DrawRoundHud(CameraView* view) {
     } else {
       sprintf(g_PrintBuffer, "%5.2fy", shotLength * YARDS_PER_UNIT);
     }
+
     DrawShadowedText(
         &g_DisplayListHead, SHOT_LENGTH_X, SHOT_LENGTH_Y, g_PrintBuffer);
   }
+
   if (g_RoundHud.unkD && !g_IsCupViewShown && !IsOnDrivingRange()) {
     for (i = 0; i < g_PlayerCount; i++) {
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
@@ -3712,6 +3872,7 @@ void DrawRoundHud(CameraView* view) {
         DrawShadowedText(&g_DisplayListHead, scoreboardX + HANDICAP_X,
             SCOREBOARD_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       }
+
       SetTextColor(&g_DisplayListHead, 255, 230, 0);
       if (D_801B60B9 != 0) {
         sprintf(g_PrintBuffer, f_BlankText);
@@ -3726,6 +3887,7 @@ void DrawRoundHud(CameraView* view) {
             } else {
               sprintf(g_PrintBuffer, "%+d", (s16)g_RoundHud.skinsTotals[i]);
             }
+
             break;
           case GAME_MODE_MATCH_GAME:
           case GAME_MODE_GET_CHARACTER:
@@ -3736,6 +3898,7 @@ void DrawRoundHud(CameraView* view) {
             } else {
               sprintf(g_PrintBuffer, "%dDW", (s16)g_RoundHud.skinsTotals[i]);
             }
+
             break;
           case GAME_MODE_SKINS_MATCH:
           case GAME_MODE_CLUB_SLOTS:
@@ -3748,6 +3911,7 @@ void DrawRoundHud(CameraView* view) {
             break;
         }
       }
+
       DrawShadowedText(&g_DisplayListHead, scoreboardX + SCOREBOARD_TEXT_X,
           SCOREBOARD_SCORE_Y + (i * SCOREBOARD_ROW_HEIGHT), g_PrintBuffer);
       SetTextColor(&g_DisplayListHead, 255, 255, 255);
@@ -3761,11 +3925,13 @@ void DrawRoundHud(CameraView* view) {
             sprintf(
                 g_PrintBuffer, "%3dy", (s32)(contestDistance * YARDS_PER_UNIT));
           }
+
           DrawShadowedText(&g_DisplayListHead, scoreboardX + DRIVE_DISTANCE_X,
               SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
               g_PrintBuffer);
         }
       }
+
       if (g_GameState.betRates[BET_NEAREST_PIN] != UNSET_BET_RATE &&
           IsParThree(GetCourseRecordIndex(), g_HoleIndex)) {
         contestDistance = g_Players[i].pinDistance;
@@ -3779,6 +3945,7 @@ void DrawRoundHud(CameraView* view) {
                 hundredths / HUNDREDTHS_PER_UNIT,
                 hundredths % HUNDREDTHS_PER_UNIT, SHADOWED_FEET_GLYPH);
           }
+
           DrawShadowedText(&g_DisplayListHead, scoreboardX + PIN_DISTANCE_X,
               SCOREBOARD_CONTEST_Y + (i * SCOREBOARD_ROW_HEIGHT),
               g_PrintBuffer);
@@ -3786,6 +3953,7 @@ void DrawRoundHud(CameraView* view) {
       }
     }
   }
+
   if (g_RoundHud.unkD && !IsOnDrivingRange() &&
       g_GameMode == GAME_MODE_SPEED_GOLF && D_801B60B9 == 0) {
     hundredths = (s32)(g_GameState.stopwatchFrameCount *
@@ -3797,6 +3965,7 @@ void DrawRoundHud(CameraView* view) {
     DrawShadowedText(&g_DisplayListHead, PANEL_STOPWATCH_X - f_ShotPanelOffsetX,
         PANEL_STOPWATCH_Y, g_PrintBuffer);
   }
+
   DrawNothing(&g_DisplayListHead);
   SetUpTextDrawing(&g_DisplayListHead);
   DrawBirdieBadgeCount(&g_DisplayListHead);
@@ -3818,9 +3987,11 @@ void DrawRoundHud(CameraView* view) {
         1 << 10, 1 << 10);
     gDPPipeSync(g_DisplayListHead++);
   }
+
   if (g_IsModuleAlive[MODULE_UNK18]) {
     func_80217F54(&g_DisplayListHead);
   }
+
   /* A debugging aid: B changes the first player's character, and A plays the
    * contest winner's movie */
   if (IsGameFlagSet(GAME_FLAG_ADJUST_HUD_OFFSET)) {
@@ -3828,11 +3999,13 @@ void DrawRoundHud(CameraView* view) {
       g_Players[0].characterIndex =
           (g_Players[0].characterIndex + 1) % CHARACTER_COUNT;
     }
+
     if (g_ControllerStates[HUD_OFFSET_CONTROLLER].pressedButtons & A_BUTTON) {
       SetContestWinner(0);
       StartMovie(MOVIE_LONGEST_DRIVE);
     }
   }
+
   AdjustHudOffset();
 }
 #else
@@ -3868,6 +4041,7 @@ void LoadHoleIntroImages(void) {
     ReadEncodedAsset(f_HoleContestImage, &asset);
     f_LoadedHoleIntroImages |= HOLE_INTRO_CONTEST_IMAGE_LOADED;
   }
+
   if (g_GameMode == GAME_MODE_MATCH_GAME ||
       g_GameMode == GAME_MODE_GET_CHARACTER) {
     if (g_IsSuddenDeath) {
@@ -3893,9 +4067,11 @@ void FreeHoleIntroImages(void) {
   if (f_LoadedHoleIntroImages & HOLE_INTRO_CONTEST_IMAGE_LOADED) {
     FreeMemory(&f_HoleContestImage);
   }
+
   if (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED) {
     FreeMemory(&f_MatchStandingImage);
   }
+
   f_LoadedHoleIntroImages = 0;
 }
 
@@ -3949,6 +4125,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
           gDPPipeSync(gfx++);
         }
       }
+
       if ((g_GameMode == GAME_MODE_MATCH_GAME ||
               g_GameMode == GAME_MODE_GET_CHARACTER) &&
           (f_LoadedHoleIntroImages & HOLE_INTRO_MATCH_IMAGE_LOADED)) {
@@ -3974,6 +4151,7 @@ void DrawHoleIntroImages(Gfx** displayListHead) {
       }
     }
   }
+
   *displayListHead = gfx;
 }
 #else
@@ -4034,6 +4212,7 @@ void DrawHoleIntroText(Gfx** displayListHead) {
       gDPSetCycleType(gfx++, G_CYC_1CYCLE);
     }
   }
+
   *displayListHead = gfx;
 }
 #else

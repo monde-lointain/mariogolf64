@@ -26,6 +26,7 @@ void ResetCameraEditor(void) {
     g_CameraEditor.pointVelocities[i][0] = 0.0f;
     g_CameraEditor.pointVelocities[i][1] = 0.0f;
     g_CameraEditor.pointVelocities[i][2] = 0.0f;
+
     /* The game clears these twice */
     g_CameraEditor.pointVelocities[i][0] = 0.0f;
     g_CameraEditor.pointVelocities[i][1] = 0.0f;
@@ -36,6 +37,7 @@ void ResetCameraEditor(void) {
     g_CameraEditor.moveAxes[i] = 0;
     g_CameraEditor.flags[i] = 0;
   }
+
   g_CameraEditor.tiltBrakingAngle = 0.0f;
   g_CameraEditor.turnBrakingAngle = 0.0f;
   g_CameraEditor.zoomBrakingDistance = 0.0f;
@@ -138,6 +140,7 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
     g_CameraEditor.points[index][2] = z;
     return;
   }
+
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = distance / (frameCount - easeFrameCount);
@@ -148,6 +151,7 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
       if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE)) {
         g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
       }
+
       if (g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE) {
         g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
       }
@@ -156,13 +160,16 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
     if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_UNTIMED_MOVE)) {
       g_CameraEditor.flags[index] ^= EDITOR_FLAG_UNTIMED_MOVE;
     }
+
     if (g_CameraEditor.flags[index] & EDITOR_FLAG_TIMED_MOVE) {
       g_CameraEditor.flags[index] ^= EDITOR_FLAG_TIMED_MOVE;
     }
   }
+
   g_CameraEditor.targets[index][0] = x;
   g_CameraEditor.targets[index][1] = y;
   g_CameraEditor.targets[index][2] = z;
+
   /* The arguments become the offsets, and x the larger of the ground ones */
   x -= g_CameraEditor.points[index][0];
   y -= g_CameraEditor.points[index][1];
@@ -172,6 +179,7 @@ void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
     g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Z;
     x = z;
   }
+
   if (fabsf(x) < fabsf(y)) {
     g_CameraEditor.moveAxes[index] = EDITOR_MOVE_AXIS_Y;
   }
@@ -183,15 +191,19 @@ void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount) {
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_CARRYING)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_CARRYING;
   }
+
   if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_CARRYING) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_CARRYING;
   }
+
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
+
   MoveEditorPoint(index, x, y, z, frameCount);
 }
 
@@ -209,6 +221,7 @@ void TurnEditorCamera(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.heading += angle;
     return;
   }
+
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = angle / (frameCount - easeFrameCount);
@@ -216,16 +229,20 @@ void TurnEditorCamera(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.turnTopSpeed = speed;
     g_CameraEditor.turnAcceleration = speed / (easeFrameCount + 1);
   }
+
   g_CameraEditor.turnLeft = angle;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_TURNING) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_TURNING;
   }
+
   if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TURNING)) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TURNING;
   }
@@ -248,6 +265,7 @@ void TiltEditorCamera(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.pitch += angle;
     return;
   }
+
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = angle / (frameCount - easeFrameCount);
@@ -255,16 +273,20 @@ void TiltEditorCamera(s32 index, f32 angle, s32 frameCount) {
     g_CameraEditor.tiltTopSpeed = speed;
     g_CameraEditor.tiltAcceleration = speed / (easeFrameCount + 1);
   }
+
   g_CameraEditor.tiltLeft = angle;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_TILTING) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_TILTING;
   }
+
   if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_TILTING)) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_TILTING;
   }
@@ -288,6 +310,7 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     g_CameraEditor.distance = distance;
     return;
   }
+
   if (frameCount != 0) {
     easeFrameCount = frameCount / 4;
     speed = change / (frameCount - easeFrameCount);
@@ -295,16 +318,20 @@ void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount) {
     g_CameraEditor.zoomAcceleration = speed / (easeFrameCount + 1);
     g_CameraEditor.zoomBrakingDistance = fabsf(change) * 0.25;
   }
+
   g_CameraEditor.unk6C = change;
   if (!(g_CameraEditor.flags[index] & EDITOR_FLAG_PIVOT)) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_PIVOT) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_PIVOT;
   }
+
   if (g_CameraEditor.flags[index] & EDITOR_FLAG_ZOOMING) {
     g_CameraEditor.flags[index] ^= EDITOR_FLAG_ZOOMING;
   }
+
   if (!(g_CameraEditor.flags[index ^ 1] & EDITOR_FLAG_ZOOMING)) {
     g_CameraEditor.flags[index ^ 1] ^= EDITOR_FLAG_ZOOMING;
   }
@@ -318,6 +345,7 @@ s32 AreEditorMovesDone(void) {
   if (g_CameraEditor.flags[0] == 0 && g_CameraEditor.flags[1] == 0) {
     return TRUE;
   }
+
   return FALSE;
 }
 
@@ -326,6 +354,7 @@ s32 AreEditorFlagsClear(s32 mask) {
   if (!(g_CameraEditor.flags[0] & mask) && !(g_CameraEditor.flags[1] & mask)) {
     return TRUE;
   }
+
   return FALSE;
 }
 
@@ -340,6 +369,7 @@ void StopEditorMoves(void) {
     g_CameraEditor.pointVelocities[i][0] = 0.0f;
     g_CameraEditor.pointVelocities[i][1] = 0.0f;
     g_CameraEditor.pointVelocities[i][2] = 0.0f;
+
     /* The game clears these twice */
     g_CameraEditor.pointVelocities[i][0] = 0.0f;
     g_CameraEditor.pointVelocities[i][1] = 0.0f;
@@ -350,6 +380,7 @@ void StopEditorMoves(void) {
     g_CameraEditor.moveAxes[i] = 0;
     g_CameraEditor.flags[i] = 0;
   }
+
   g_CameraEditor.tiltBrakingAngle = 0.0f;
   g_CameraEditor.turnBrakingAngle = 0.0f;
   g_CameraEditor.zoomBrakingDistance = 0.0f;
