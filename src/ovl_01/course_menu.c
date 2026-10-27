@@ -49,6 +49,9 @@
 #define SIDE_ARROW_IMAGE_SIZE (SIDE_ARROW_SIZE * SIDE_ARROW_SIZE / 2)
 #define SIDE_ARROW_BLINK_STRIDE (4 * SIDE_ARROW_IMAGE_SIZE)
 #define SIDE_ARROW_BLINK_FRAME_COUNT 4
+/* func_80212FEC draws one of the four arrow images, in either blink state */
+#define ARROW_BLINK_STATE_COUNT 2
+#define ARROW_DIRECTION_COUNT 4
 
 /* The birdie badge icon of D_8023A810 and the count beside it */
 #define BADGE_ICON_X 222
@@ -474,4 +477,47 @@ void func_80212C54_ovl_01(Gfx **displayListHead, void *image, s32 *blinkFrame, s
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212C54_ovl_01);
 #endif
 
+/*
+ * Doesn't match: the original adds PALETTED_TEXELS_OFFSET to the blink offset
+ * before shifting the direction, rather than after.
+ */
+#ifdef NON_MATCHING
+void func_80212FEC_ovl_01(Gfx **displayListHead, void *image, s32 blinkFrame, s32 direction, s32 centerX,
+                          s32 centerY) {
+    Gfx *gfx = *displayListHead;
+    s32 top;
+    s32 left;
+
+    if (blinkFrame < 0) {
+        blinkFrame = 0;
+    }
+    if (blinkFrame >= ARROW_BLINK_STATE_COUNT) {
+        blinkFrame = ARROW_BLINK_STATE_COUNT - 1;
+    }
+    if (direction < 0) {
+        direction = 0;
+    }
+    if (direction >= ARROW_DIRECTION_COUNT) {
+        direction = ARROW_DIRECTION_COUNT - 1;
+    }
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    gDPLoadTextureTile_4b(gfx++,
+                          ((u32)image + (direction * SIDE_ARROW_IMAGE_SIZE +
+                                         (blinkFrame * SIDE_ARROW_BLINK_STRIDE + PALETTED_TEXELS_OFFSET))) &
+                              ~7,
+                          G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1, SIDE_ARROW_SIZE - 1,
+                          0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                          G_TX_NOLOD, G_TX_NOLOD);
+    gDPPipeSync(gfx++);
+    left = centerX - SIDE_ARROW_SIZE / 2;
+    top = centerY - SIDE_ARROW_SIZE / 2;
+    gSPScisTextureRectangle(gfx++, left << 2, top << 2,
+                            (centerX + SIDE_ARROW_SIZE / 2) << 2, (centerY + SIDE_ARROW_SIZE / 2) << 2,
+                            G_TX_RENDERTILE, 0, 0, TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212FEC_ovl_01);
+#endif
