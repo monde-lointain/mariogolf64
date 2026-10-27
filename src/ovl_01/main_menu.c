@@ -44,6 +44,16 @@ extern f32 sMenuBobPhase;
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801051F0;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
+/* The debug caddy select: its two caddies, and where it draws its title and names */
+#define CADDY_COUNT 2
+#define CADDY_SELECT_TITLE_X 64
+#define CADDY_SELECT_TITLE_Y 32
+#define CADDY_SELECT_NAME_X 96
+#define CADDY_SELECT_FIRST_Y 64
+#define CADDY_SELECT_LINE_HEIGHT 8
+
+extern char *D_8022C0D0_ovl_01[CADDY_COUNT];
+extern const char D_8023176C_ovl_01[];
 extern s8 D_801052E8;
 extern s32 D_800FE334;
 extern s32 D_801B609C;
@@ -434,7 +444,29 @@ const char D_802316FC_ovl_01[] = "Luigi's Garden";
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80206A68_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80207D08_ovl_01);
+void func_80207D08_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 caddyIndex;
+
+    func_801FB54C_ovl_01(&gfx, 61);
+    BeginShadowedText(&gfx);
+    SetTextColor(&gfx, 255, 255, 255);
+    DrawShadowedText(&gfx, CADDY_SELECT_TITLE_X, CADDY_SELECT_TITLE_Y, D_8023176C_ovl_01);
+    for (caddyIndex = 0; caddyIndex != CADDY_COUNT; caddyIndex++) {
+        if (g_MenuChoices.unk1 == caddyIndex) {
+            SetTextColor(&gfx, 255, 255, 0);
+        } else {
+            SetTextColor(&gfx, 255, 255, 255);
+        }
+        DrawShadowedText(&gfx, CADDY_SELECT_NAME_X, caddyIndex * CADDY_SELECT_LINE_HEIGHT + CADDY_SELECT_FIRST_Y,
+                         D_8022C0D0_ovl_01[caddyIndex]);
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+
+/* Defined after the function, as the INCLUDE_ASM before it leaves the assembler in .text */
+const char D_8023176C_ovl_01[] = "CADDY SELECT";
 
 void func_80207E18_ovl_01(Gfx **displayListHead) {
 }
