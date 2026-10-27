@@ -49,7 +49,7 @@
 #define PLAYER_STATS_BUFFER_UNK8 8
 #define PLAYER_STATS_BUFFER_GAME_LABELS 9
 #define PLAYER_STATS_BUFFER_PLAYER_LABELS 10
-#define PLAYER_STATS_BUFFER_UNK11 11
+#define PLAYER_STATS_BUFFER_BRICK_WALL 11
 #define PLAYER_STATS_BUFFER_UNK12 12
 #define PLAYER_STATS_BUFFER_UNK13 13
 #define PLAYER_STATS_ICON_COUNT 8
@@ -61,7 +61,7 @@
 #define GAME_LABEL_WIDTH 128
 #define GAME_LABEL_HEIGHT 20
 #define GAME_LABEL_IMAGE_SIZE (GAME_LABEL_WIDTH * GAME_LABEL_HEIGHT / 2)
-#define ASSET_PLAYER_STATS_UNK11 0x721
+#define ASSET_STATS_BRICK_WALL 0x721
 #define ASSET_PLAYER_STATS_UNK12 0x828
 #define ASSET_PLAYER_STATS_UNK13 0x829
 #define STATS_INDEX_COLUMN_COUNT 6
@@ -307,9 +307,9 @@ void func_802178B0_ovl_01(void *buffer, s16 bufferKind) {
             OpenEncodedAsset(ASSET_PLAYER_LABELS, &asset);
             ReadEncodedAsset(D_8023B368_ovl_01, &asset);
             break;
-        case PLAYER_STATS_BUFFER_UNK11:
+        case PLAYER_STATS_BUFFER_BRICK_WALL:
             D_8023B36C_ovl_01 = buffer;
-            OpenEncodedAsset(ASSET_PLAYER_STATS_UNK11, &asset);
+            OpenEncodedAsset(ASSET_STATS_BRICK_WALL, &asset);
             ReadEncodedAsset(D_8023B36C_ovl_01, &asset);
             break;
         case PLAYER_STATS_BUFFER_UNK12:
