@@ -11,6 +11,7 @@
 #define MENU_SCREEN_UNK6 6
 #define MENU_SCREEN_CLUBHOUSE 9
 #define MENU_SCREEN_UNK13 13
+#define MENU_SCREEN_HELP 17
 #define MENU_SCREEN_EXIT 19                  /* Loads what the chosen game needs and leaves the menu */
 #define MENU_SCREEN_UNK23 23
 #define MENU_SCREEN_CLUB_TOURNAMENT 27       /* A tournament entered with a code */

@@ -50,6 +50,18 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define MENU_LAYER_UNK8 (1 << 3)
 #define MENU_LAYER_UNK10 (1 << 4)
 
+/* The choices of the main menu without Transmit */
+#define MAIN_CHOICE_CLUBHOUSE 0
+#define MAIN_CHOICE_HELP 1
+#define MAIN_CHOICE_OPTIONS 2
+#define MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT 3
+
+/* Past func_80217B88's presets, so that it clears the values instead */
+#define MENU_UNKE_PRESET_NONE 10
+
+/* A byte of g_MapCamera that the menus set: the top of its view's mode */
+#define MAP_CAMERA_UNK4C 0x4C
+
 /* The choices of the list that func_801FAFEC runs, which no menu screen dispatches to */
 #define UNUSED_LIST_CHOICE_COUNT 21
 
@@ -74,10 +86,13 @@ extern s8 D_801323A0[];
 extern s32 D_8022BE0C_ovl_01;
 extern s32 D_801B7070;
 extern u8 D_801B9410;
+extern s8 D_800FF4C0;
+extern s8 D_801B5634;
 
 s32 GetClubTournamentCourse(void);
 s32 SaveOrContinueGameByMode(s32 isContinuing);
 s32 func_801F7660_ovl_01(s32, s32);
+void func_80217B88_ovl_01(s32 requestedPreset);
 void func_801FB54C_ovl_01(Gfx **displayListHead, s32);
 void func_801FC754_ovl_01(Gfx **displayListHead);
 void func_801FCB74_ovl_01(Gfx **displayListHead);
@@ -244,7 +259,56 @@ void func_801F9BCC_ovl_01(void) {
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F9C58_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F9E38_ovl_01);
+void func_801F9E38_ovl_01(void) {
+    s32 isDone = IsHudAnimationDone();
+
+    if (isDone == TRUE) {
+        if (g_MenuPressedButtons & A_BUTTON) {
+            switch (g_MenuChoices.mainChoiceWithoutTransmit) {
+                case MAIN_CHOICE_CLUBHOUSE:
+                    g_MenuScreen = MENU_SCREEN_CLUBHOUSE;
+                    break;
+                case MAIN_CHOICE_HELP:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_HELP;
+                    if (IsGameFlagSet(GAME_FLAG_UNK56)) {
+                        g_GameMode = GAME_MODE_GET_CHARACTER;
+                        g_PlayerCount = 2;
+                        D_800FF4C0 = 1;
+                        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 2;
+                        D_801B5634 = 0;
+                        func_80217B88_ovl_01(MENU_UNKE_PRESET_NONE);
+                    }
+                    break;
+                case MAIN_CHOICE_OPTIONS:
+                    StartHudAnimation(HUD_ANIMATION_SLIDE_APART);
+                    g_MenuScreen = MENU_SCREEN_OPTIONS;
+                    break;
+            }
+            PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            return;
+        }
+        if (g_MenuPressedButtons & B_BUTTON) {
+            PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+            g_MenuScreen = MENU_SCREEN_TITLE;
+            PlaySong(SONG_TITLE, 0);
+            return;
+        }
+        if (g_MenuRepeatButtons & U_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.mainChoiceWithoutTransmit--;
+        } else if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            g_MenuChoices.mainChoiceWithoutTransmit++;
+        }
+        if (g_MenuChoices.mainChoiceWithoutTransmit >= MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT) {
+            g_MenuChoices.mainChoiceWithoutTransmit = 0;
+        }
+        if (g_MenuChoices.mainChoiceWithoutTransmit < 0) {
+            g_MenuChoices.mainChoiceWithoutTransmit = MAIN_CHOICE_WITHOUT_TRANSMIT_COUNT - 1;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F9FF8_ovl_01);
 
@@ -417,8 +481,8 @@ void DrawMenuScreen(Gfx **displayListHead) {
         case MENU_SCREEN_OPTIONS:
             func_80206A68_ovl_01(&gfx);
             break;
-        case 17:
-            if (IsGameFlagSet(0x56)) {
+        case MENU_SCREEN_HELP:
+            if (IsGameFlagSet(GAME_FLAG_UNK56)) {
                 func_80201574_ovl_01(&gfx);
             } else {
                 DrawHelpBoard(&gfx);
