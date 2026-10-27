@@ -1,5 +1,6 @@
 #include "common.h"
 #include "terrain.h"
+#include "work_area.h"
 
 /* The points along a tile's edge, its corners included */
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
@@ -37,7 +38,22 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040582C_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80405870_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80405AF4_hole_editor);
+/*
+ * Toggles the unk992 bit of one cell of the ground. The cells are
+ * GROUND_TILE_POINT_SPAN a side in each tile.
+ */
+void func_80405AF4_hole_editor(s32 column, s32 row) {
+    s32 tileIndex;
+    s32 cellBits;
+
+    if (column < 0 || column >= GROUND_TILE_COLUMN_COUNT * GROUND_TILE_POINT_SPAN
+        || row >= GROUND_TILE_ROW_COUNT * GROUND_TILE_POINT_SPAN || row < 0) {
+        return;
+    }
+    tileIndex = (row >> 2) * GROUND_TILE_COLUMN_COUNT + column / GROUND_TILE_POINT_SPAN;
+    cellBits = g_WorkArea.hole.tiles[tileIndex].unk992;
+    g_WorkArea.hole.tiles[tileIndex].unk992 = cellBits ^ (1 << ((row & 3) * GROUND_TILE_POINT_SPAN + (column & 3)));
+}
 
 /* Sets the x and s of a column of points between grid vertices (column, row) and (column + 1, row) */
 void func_80405B80_hole_editor(Vtx *vertices, s32 column, s32 row, s32 weight) {
