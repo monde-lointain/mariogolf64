@@ -31,6 +31,12 @@
 #define CORNER_CAPTURE_HEIGHT 128
 #define CAPTURE_BYTES_PER_PIXEL 3
 /* The size of a whole-screen capture */
+/* The map capture covers every ground tile's texels, inside their borders */
+#define MAP_CAPTURE_WIDTH (GROUND_TILE_COLUMN_COUNT * GROUND_TILE_TEXEL_SPAN)
+#define MAP_CAPTURE_HEIGHT (GROUND_TILE_ROW_COUNT * GROUND_TILE_TEXEL_SPAN)
+#define MAP_CAPTURE_SIZE (CAPTURE_HEADER_SIZE + MAP_CAPTURE_WIDTH * MAP_CAPTURE_HEIGHT * CAPTURE_BYTES_PER_PIXEL)
+#define GROUND_TILE_TEXEL_BORDER 1
+#define CAPTURE_FILE_NAME_SIZE 0x80
 #define SCREEN_CAPTURE_SIZE (CAPTURE_HEADER_SIZE + SCREEN_WIDTH * SCREEN_HEIGHT * CAPTURE_BYTES_PER_PIXEL)
 /* Where the 5-bit channels sit in an RGBA16 pixel, and the shift that widens one to 8 bits */
 #define RGBA16_RED_SHIFT 11
@@ -64,8 +70,11 @@ extern Mtx D_8040CC98;
 extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 s32 GetTerrainCode(s32 column, s32 row);
+void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
 extern s32 sScreenCaptureNumber;
+extern s32 D_8040C6D0_hole_editor;
+extern u8 D_8040C6D4_hole_editor[CAPTURE_HEADER_SIZE];
 extern u8 D_8040C710_hole_editor[CAPTURE_HEADER_SIZE];
 extern u8 D_8040C748_hole_editor[CAPTURE_HEADER_SIZE];
 
@@ -330,9 +339,51 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80408170_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804083E0_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040BF64_hole_editor);
+/*
+ * Marks the billboards on the map, then writes the whole map image to
+ * the host as x:\usgolf64\capture\tempNN.bmp
+ */
+void func_8040BFC8_hole_editor(void) {
+    char fileName[CAPTURE_FILE_NAME_SIZE];
+    u8 *capture;
+    s32 byteIndex;
+    s32 row;
+    s32 column;
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_8040BFC8_hole_editor);
+    u16 GetMapTexel(u32 texelIndex) {
+        u32 column = texelIndex % MAP_CAPTURE_WIDTH;
+        u32 row = texelIndex / MAP_CAPTURE_WIDTH % MAP_CAPTURE_HEIGHT;
+
+        /* The game indexes the texels past the border as one run of rows */
+        return g_WorkArea.hole.tiles[column / GROUND_TILE_TEXEL_SPAN +
+                                     row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT]
+            .texels[GROUND_TILE_TEXEL_BORDER][GROUND_TILE_TEXEL_BORDER + column % GROUND_TILE_TEXEL_SPAN +
+                                              row % GROUND_TILE_TEXEL_SPAN * GROUND_TILE_TEXEL_ROW_LENGTH];
+    }
+
+    MarkBillboardsOnMap();
+    capture = AllocMemory(MAP_CAPTURE_SIZE);
+    for (byteIndex = 0; byteIndex != CAPTURE_HEADER_SIZE; byteIndex++) {
+        capture[byteIndex] = D_8040C6D4_hole_editor[byteIndex];
+    }
+    for (row = MAP_CAPTURE_HEIGHT - 1; row != -1; row--) {
+        for (column = 0; column != MAP_CAPTURE_WIDTH; column++) {
+            capture[byteIndex++] = ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >> RGBA16_BLUE_SHIFT) &
+                                    RGBA16_CHANNEL_MASK)
+                                   << RGBA16_CHANNEL_WIDEN_SHIFT;
+            capture[byteIndex++] = ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >> RGBA16_GREEN_SHIFT) &
+                                    RGBA16_CHANNEL_MASK)
+                                   << RGBA16_CHANNEL_WIDEN_SHIFT;
+            capture[byteIndex++] = ((GetMapTexel(row * MAP_CAPTURE_WIDTH + column) >> RGBA16_RED_SHIFT) &
+                                    RGBA16_CHANNEL_MASK)
+                                   << RGBA16_CHANNEL_WIDEN_SHIFT;
+        }
+    }
+    sprintf(fileName, "x:\\usgolf64\\capture\\temp%02d.bmp", D_8040C6D0_hole_editor);
+    WriteHostFile(fileName, MAP_CAPTURE_SIZE);
+    FreeMemory(&capture);
+    D_8040C6D0_hole_editor++;
+}
 
 /* Writes the whole frame to the host as the next numbered capture file */
 void func_8040C124_hole_editor(void) {
