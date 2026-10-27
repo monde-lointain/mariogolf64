@@ -267,6 +267,42 @@ extern u16 D_8022BE50_ovl_01[MAX_PLAYER_COUNT]; /* Each player's clubs, a bit pe
 extern s32 D_8022F8F4_ovl_01[];
 extern char D_8022BF70_ovl_01[][IMPORTED_CHARACTER_NAME_LENGTH];
 
+/*
+ * The mini-golf course select. A record's three courses lie on a disc that
+ * turns from one to the next through five frames, each two images, read
+ * into the buffers of D_801049A0 not shown; the courses face the screen at
+ * the middle frame. Changing record slides the screen across instead.
+ */
+#define MINI_GOLF_RECORD_COUNT 2
+#define MINI_GOLF_TURN_FRAME_COUNT 5
+#define MINI_GOLF_FACING_FRAME 2
+#define MINI_GOLF_TURN_FRAME_DURATION 2
+#define MINI_GOLF_DISC_IMAGE_COUNT 2
+/* D_8022F8DC values */
+#define MINI_GOLF_TURN_NONE 0
+#define MINI_GOLF_TURN_TO_PREVIOUS 1
+#define MINI_GOLF_TURN_TO_NEXT 2
+#define MINI_GOLF_RECORD_SLIDE 45
+#define MINI_GOLF_RECORD_SLIDE_STEP 9
+/* What g_MenuChoices.unk0 holds once the C buttons choose the holes to play */
+#define HOLES_CHOICE_FRONT_NINE 1
+#define HOLES_CHOICE_BACK_NINE 2
+#define HOLES_CHOICE_ALL 3
+/* D_8022BE88's value once the popup opened with C-up has finished */
+#define MENU_PHASE_UNK2 2
+#define SONG_UNK17 0x17
+#define SOUND_UNK6A 0x6A
+#define SOUND_HOLES_CHOSEN 0x45
+
+extern u16 D_800C2098[MINI_GOLF_COURSES_PER_RECORD * MINI_GOLF_DISC_IMAGE_COUNT][MINI_GOLF_TURN_FRAME_COUNT];
+extern void *D_801049A0[][MINI_GOLF_DISC_IMAGE_COUNT];
+extern s32 D_800C2BD0;
+extern u8 D_800C2BD5;
+extern s32 D_8022F8D4_ovl_01; /* The disc's frame */
+extern s32 D_8022F8D8_ovl_01; /* The calls that it has shown */
+extern u8 D_8022F8DC_ovl_01;  /* Which way it turns */
+extern u8 D_8022F8DD_ovl_01;  /* Which buffers it shows */
+
 s32 GetClubTournamentCourse(void);
 s32 GetClubTournamentGameMode(void);
 s32 func_8022BDC4_ovl_01(void);
@@ -793,7 +829,204 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F7D28_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F8BAC_ovl_01);
 
+/*
+ * Doesn't match: the original loads the -1 and 1 that the last sign test
+ * compares with before the test of the slide's sign, leaving 8 diff lines
+ * (4 opcodes).
+ */
+#ifdef NON_MATCHING
+void func_801F93D8_ovl_01(void) {
+    EncodedAsset asset;
+    s32 unused[4];
+    s32 isDone;
+    s32 course;
+    s32 direction;
+    s32 step;
+    void *(*buffers)[MINI_GOLF_DISC_IMAGE_COUNT];
+
+    isDone = IsHudAnimationDone();
+    if (isDone != TRUE) {
+        return;
+    }
+    if (D_8022F8DC_ovl_01 != MINI_GOLF_TURN_NONE) {
+        switch (D_8022F8DC_ovl_01) {
+            case MINI_GOLF_TURN_TO_PREVIOUS:
+                if (++D_8022F8D8_ovl_01 == MINI_GOLF_TURN_FRAME_DURATION) {
+                    D_8022F8D8_ovl_01 = 0;
+                    if (++D_8022F8D4_ovl_01 >= MINI_GOLF_TURN_FRAME_COUNT) {
+                        D_8022F8D4_ovl_01 = 0;
+                    }
+                    if (D_8022F8D4_ovl_01 >= 0 && D_8022F8D4_ovl_01 <= MINI_GOLF_FACING_FRAME) {
+                        course = g_MenuChoices.unk14 - 1;
+                        if (course < 0) {
+                            course = MINI_GOLF_COURSES_PER_RECORD - 1;
+                        }
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01], &asset);
+                        ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1][D_8022F8D4_ovl_01],
+                                         &asset);
+                        ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                    } else {
+                        course = g_MenuChoices.unk14;
+                        buffers = D_801049A0;
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01], &asset);
+                        ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1][D_8022F8D4_ovl_01],
+                                         &asset);
+                        ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                    }
+                    D_8022F8DD_ovl_01 ^= 1;
+                    if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
+                        if (--g_MenuChoices.unk14 < 0) {
+                            g_MenuChoices.unk14 = MINI_GOLF_COURSES_PER_RECORD - 1;
+                        }
+                        D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+                    }
+                }
+                break;
+            case MINI_GOLF_TURN_TO_NEXT:
+                if (++D_8022F8D8_ovl_01 == MINI_GOLF_TURN_FRAME_DURATION) {
+                    D_8022F8D8_ovl_01 = 0;
+                    if (--D_8022F8D4_ovl_01 < 0) {
+                        D_8022F8D4_ovl_01 = MINI_GOLF_TURN_FRAME_COUNT - 1;
+                    }
+                    if (D_8022F8D4_ovl_01 >= MINI_GOLF_FACING_FRAME && D_8022F8D4_ovl_01 < MINI_GOLF_TURN_FRAME_COUNT) {
+                        course = g_MenuChoices.unk14 + 1;
+                        if (course >= MINI_GOLF_COURSES_PER_RECORD) {
+                            course = 0;
+                        }
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01], &asset);
+                        ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1][D_8022F8D4_ovl_01],
+                                         &asset);
+                        ReadEncodedAsset(D_801049A0[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                    } else {
+                        course = g_MenuChoices.unk14;
+                        buffers = D_801049A0;
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT][D_8022F8D4_ovl_01], &asset);
+                        ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][0], &asset);
+                        OpenEncodedAsset(D_800C2098[course * MINI_GOLF_DISC_IMAGE_COUNT + 1][D_8022F8D4_ovl_01],
+                                         &asset);
+                        ReadEncodedAsset(buffers[D_8022F8DD_ovl_01 ^ 1][1], &asset);
+                    }
+                    D_8022F8DD_ovl_01 ^= 1;
+                    if (D_8022F8D4_ovl_01 == MINI_GOLF_FACING_FRAME) {
+                        if (++g_MenuChoices.unk14 >= MINI_GOLF_COURSES_PER_RECORD) {
+                            g_MenuChoices.unk14 = 0;
+                        }
+                        D_8022F8DC_ovl_01 = MINI_GOLF_TURN_NONE;
+                    }
+                }
+                break;
+        }
+        return;
+    }
+    if (D_8022BE88_ovl_01 == MENU_PHASE_UNK2) {
+        PlaySong(SONG_UNK17, 0);
+        g_MenuScreen = MENU_SCREEN_UNK22;
+        D_8022BE88_ovl_01 = 1;
+        D_8022BE89_ovl_01 = 0;
+        return;
+    }
+    if (D_8022BE89_ovl_01 != 0 || D_8022BE88_ovl_01 != 0) {
+        return;
+    }
+    if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
+        if (GetWipeProgress() == 0) {
+            g_MenuScreen = MENU_SCREEN_EXIT;
+        }
+        return;
+    }
+    isDone = IsHudAnimationDone();
+    if (isDone != TRUE) {
+        return;
+    }
+    if (g_MenuPressedButtons & A_BUTTON) {
+        if (g_MenuChoices.unk15 != 0) {
+            g_MenuChoices.unk15 = 0;
+            return;
+        }
+        if (g_MenuChoices.unk13 < D_800C2BD0) {
+            D_801B9410 = 0;
+            FreeAllCharacterSlots();
+            LoadWipeShape(g_MenuChoices.unk14 + g_MenuChoices.unk13 * MINI_GOLF_COURSES_PER_RECORD +
+                          MINI_GOLF_COURSE_INDEX);
+            StartWipe(WIPE_CLOSING);
+            D_801052E8 = 0;
+        }
+        PlaySound(SOUND_MENU_START, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+        return;
+    }
+    if (g_MenuPressedButtons & B_BUTTON) {
+        StartHudAnimation(HUD_ANIMATION_FAST_FADE_OUT);
+        g_MenuChoices.unk15 = 0;
+        PlaySound(SOUND_MENU_CANCEL, MENU_SOUND_CHANNEL, MENU_VOLUME_FULL);
+        g_IsMiniGolf = FALSE;
+        g_MenuScreen = MENU_SCREEN_UNK5;
+        ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] = 0;
+        D_800FE334 = 0;
+        StopLoaderThread();
+        FreeAllCharacterSlots();
+        return;
+    }
+    /* isDone is still TRUE, and the C-up test compares with it */
+    if (g_MenuChoices.unk15 == 0) {
+        if (g_MenuRepeatButtons & L_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            if (--g_MenuChoices.unk13 < 0) {
+                g_MenuChoices.unk13 = MINI_GOLF_RECORD_COUNT - 1;
+            }
+            g_MenuChoices.unk15 = MINI_GOLF_RECORD_SLIDE;
+        } else if (g_MenuRepeatButtons & R_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            if (++g_MenuChoices.unk13 >= MINI_GOLF_RECORD_COUNT) {
+                g_MenuChoices.unk13 = 0;
+            }
+            g_MenuChoices.unk15 = -MINI_GOLF_RECORD_SLIDE;
+        } else if (g_MenuRepeatButtons & U_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_PREVIOUS;
+        } else if (g_MenuRepeatButtons & D_JPAD) {
+            PlaySound(SOUND_MENU_CURSOR, MENU_SOUND_CHANNEL, MENU_VOLUME_MEDIUM);
+            D_8022F8DC_ovl_01 = MINI_GOLF_TURN_TO_NEXT;
+        } else if ((g_MenuRepeatButtons & U_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == isDone) {
+            if (D_800C2BD5 != ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C]) {
+                PlaySound(SOUND_UNK6A, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+                D_8022BE88_ovl_01 = 1;
+                D_8022BE89_ovl_01 = 1;
+            } else {
+                PlaySound(SOUND_MENU_BLOCKED, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            }
+        } else if ((g_MenuRepeatButtons & D_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_ALL;
+            g_SkippedNines = 0;
+            StartLoadingChosenHole();
+        } else if ((g_MenuRepeatButtons & L_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_FRONT_NINE;
+            g_SkippedNines = BACK_NINE_SKIPPED;
+            StartLoadingChosenHole();
+        } else if ((g_MenuRepeatButtons & R_CBUTTONS) && ((u8 *)&g_MapCamera)[MAP_CAMERA_UNK4C] == 1) {
+            PlaySound(SOUND_HOLES_CHOSEN, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
+            g_MenuChoices.unk0 = HOLES_CHOICE_BACK_NINE;
+            g_SkippedNines = FRONT_NINE_SKIPPED;
+            StartLoadingChosenHole();
+        }
+    }
+    if (ABS(g_MenuChoices.unk15) != 0) {
+        direction = g_MenuChoices.unk15 >= 0 ? 1 : -1;
+        step = MINI_GOLF_RECORD_SLIDE_STEP;
+        g_MenuChoices.unk15 -= direction * step;
+        /* Stop on reaching the record rather than sliding past it */
+        if ((g_MenuChoices.unk15 >= 0 ? 1 : -1) != direction) {
+            g_MenuChoices.unk15 = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801F93D8_ovl_01);
+#endif
 
 void func_801F9BCC_ovl_01(void) {
     if (IsHudAnimationDone() == TRUE) {
