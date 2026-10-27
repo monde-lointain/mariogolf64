@@ -385,4 +385,4 @@ s32 IsAnyBallInCup(void) {
     return isInCup;
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", func_801FE370_ovl_00);
+INCLUDE_ASM("asm/nonmatchings/ovl_00/golf_balls", DrawGolfBalls);

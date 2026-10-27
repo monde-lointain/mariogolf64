@@ -932,7 +932,7 @@ void func_801FA4EC(CameraMatrices *matrices, Gfx **displayListHead);
 void func_801FB198(Gfx **displayListHead);
 void DrawRoundResults(Gfx **displayListHead);
 void func_801FD578(Gfx **displayListHead);
-void func_801FE370(CameraMatrices *matrices);
+void DrawGolfBalls(CameraMatrices *matrices);
 void func_80200CBC(Gfx **displayListHead, s32);
 void DrawBanner(Gfx **displayListHead);
 void DrawFlipMessage(Gfx **displayListHead);
@@ -1536,7 +1536,7 @@ s32 DrawGame(void) {
                             mode = g_Cameras[viewIndex].view.mode;
                             if (mode != 8 && mode != 2) {
                                 if (!IsGameFlagSet(0x18) && g_IsModuleAlive[1]) {
-                                    func_801FE370(matrices);
+                                    DrawGolfBalls(matrices);
                                 }
                                 if (!IsGameFlagSet(0x19)) {
                                     for (playerIndex = 0; playerIndex < 4; playerIndex++) {
@@ -1621,7 +1621,7 @@ s32 DrawGame(void) {
                 DrawBillboards(matrices, viewIndex);
             }
             if (g_IsModuleAlive[1]) {
-                func_801FE370(matrices);
+                DrawGolfBalls(matrices);
             }
             if (IsGameFlagSet(0x50) && g_Scene != SCENE_FLAG_PANEL) {
                 func_8040C360(matrices, &g_DisplayListHead);
