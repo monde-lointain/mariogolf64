@@ -3207,6 +3207,7 @@ GetChosenCourseIndex = 0x801F4C34; // type:func segment:ovl_01
 GetOpenCourseCount = 0x80209478; // type:func segment:ovl_01
 D_8022F848_ovl_01 = 0x8022F848; // type:s32 size:0x3C segment:ovl_01
 D_8022F884_ovl_01 = 0x8022F884; // type:s32 size:0x3C segment:ovl_01
+D_8022F940_ovl_01 = 0x8022F940; // type:s32 size:0x38 segment:ovl_01
 D_8022FDF4_ovl_01 = 0x8022FDF4; // type:s32 size:0x20 segment:ovl_01
 D_8022FE14_ovl_01 = 0x8022FE14; // type:s32 size:0x18 segment:ovl_01
 D_8022FE2C_ovl_01 = 0x8022FE2C; // type:s32 size:0x40 segment:ovl_01
