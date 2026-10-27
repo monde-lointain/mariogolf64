@@ -1266,12 +1266,7 @@ INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", LoadResultCharacters);
 
 /*
  * Counts the last hole's result onto the scorecard. Returns TRUE once it is done.
- *
- * Doesn't match: the code matches, but this puts its jump table in .rodata
- * without the word of padding after it, which moves the rodata that follows
- * 4 bytes early.
  */
-#ifdef NON_MATCHING
 s32 TallyScorecardSkins(void) {
     switch (g_Scorecard.layout) {
         case SCORECARD_LAYOUT_STROKE:
@@ -1313,6 +1308,3 @@ s32 TallyScorecardSkins(void) {
     }
     return FALSE;
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_09/scorecard", TallyScorecardSkins);
-#endif
