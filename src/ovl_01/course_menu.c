@@ -428,8 +428,9 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_802123E0_ovl_01);
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_80212858_ovl_01);
 
 /*
- * Doesn't match: the original keeps the arrow top in a register only for the
- * lower edge, and needs one stack slot fewer.
+ * Doesn't match: the original spills displayListHead to its argument slot,
+ * keeps the arrow top in a register only for the lower edge, and needs one
+ * stack slot fewer.
  */
 #ifdef NON_MATCHING
 void func_80212C54_ovl_01(Gfx **displayListHead, void *image, s32 *blinkFrame, s32 *blinkTimer, s32 width,
@@ -437,6 +438,7 @@ void func_80212C54_ovl_01(Gfx **displayListHead, void *image, s32 *blinkFrame, s
     Gfx *gfx = *displayListHead;
     s32 left = 0;
     s32 arrowIndex;
+    s32 frameOffset;
 
     (*blinkTimer)++;
     if (*blinkTimer == SIDE_ARROW_BLINK_FRAME_COUNT) {
@@ -445,10 +447,11 @@ void func_80212C54_ovl_01(Gfx **displayListHead, void *image, s32 *blinkFrame, s
     }
     gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
     gDPLoadTLUT_pal16(gfx++, 0, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    frameOffset = *blinkFrame * SIDE_ARROW_BLINK_STRIDE + PALETTED_TEXELS_OFFSET;
     for (arrowIndex = 0; arrowIndex != SIDE_ARROW_COUNT; arrowIndex++) {
         gDPLoadTextureTile_4b(gfx++,
-                              ((u32)image + ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * SIDE_ARROW_IMAGE_SIZE +
-                                          (*blinkFrame * SIDE_ARROW_BLINK_STRIDE + PALETTED_TEXELS_OFFSET))) &
+                              ((u32)image +
+                               ((SIDE_ARROW_FIRST_IMAGE + arrowIndex) * SIDE_ARROW_IMAGE_SIZE + frameOffset)) &
                                   ~7,
                               G_IM_FMT_CI, SIDE_ARROW_SIZE, SIDE_ARROW_SIZE, 0, 0, SIDE_ARROW_SIZE - 1,
                               SIDE_ARROW_SIZE - 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
