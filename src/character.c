@@ -418,7 +418,8 @@ void WriteBallDistances(void) {
     }
   }
 
-  cursor = source = AllocMemory(BALL_DISTANCE_SOURCE_SIZE);
+  source = AllocMemory(BALL_DISTANCE_SOURCE_SIZE);
+  cursor = source;
   end = source + BALL_DISTANCE_SOURCE_SIZE;
   if (source == NULL) {
     ReportFailedAssertion(
@@ -825,8 +826,8 @@ void LoadCharacter(u32 slotIndex, s32 character, s32 kind) {
     if (IsGameFlagSet(GAME_FLAG_LOG_CHARACTER_SETUP)) {
       osSyncPrintf("complete2 anims_addr %x\n", ANIMATIONS(slot->model));
     }
-    slot->animationFrame = slot->animationStartFrame =
-        ANIMATIONS(slot->model)[D_800C1DF0].startFrame;
+    slot->animationStartFrame = ANIMATIONS(slot->model)[D_800C1DF0].startFrame;
+    slot->animationFrame = slot->animationStartFrame;
     slot->animationEndFrame = slot->animationStartFrame +
         ANIMATIONS(slot->model)[D_800C1DF0].frameCount;
     g_CurrentAnimationFrame = slot->animationFrame;
@@ -933,8 +934,9 @@ void SetCharacterAnimation(u32 slotIndex, s32 id) {
     if (ANIMATIONS(slot->model)[slot->animationIndex].events == NULL) {
       slot->animationIndex = 0;
     }
-    slot->animationFrame = slot->animationStartFrame =
+    slot->animationStartFrame =
         ANIMATIONS(slot->model)[slot->animationIndex].startFrame;
+    slot->animationFrame = slot->animationStartFrame;
     slot->animationEndFrame = slot->animationStartFrame +
         ANIMATIONS(slot->model)[slot->animationIndex].frameCount;
     joint = JOINT_ANIMATIONS(slot->model);
@@ -1855,9 +1857,11 @@ void DrawCharacterAndShadow(
       viewDirection[AXIS_X] *= SECOND_LIGHT_DIRECTION_LENGTH;
       viewDirection[AXIS_Y] *= SECOND_LIGHT_DIRECTION_LENGTH;
       viewDirection[AXIS_Z] *= SECOND_LIGHT_DIRECTION_LENGTH;
-      f_SecondLightDirectionX = lightDirection[AXIS_X] = -viewDirection[AXIS_Z];
+      lightDirection[AXIS_X] = -viewDirection[AXIS_Z];
+      f_SecondLightDirectionX = lightDirection[AXIS_X];
       f_SecondLightDirectionY = 0;
-      f_SecondLightDirectionZ = lightDirection[AXIS_Z] = viewDirection[AXIS_X];
+      lightDirection[AXIS_Z] = viewDirection[AXIS_X];
+      f_SecondLightDirectionZ = lightDirection[AXIS_Z];
       SetCharacterLights();
     }
     if (g_ImpactFlashState != IMPACT_FLASH_NONE) {

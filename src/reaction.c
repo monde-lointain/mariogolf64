@@ -177,12 +177,12 @@ void EaseReactionView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
       f_EasedView.eye[AXIS_Z] = eye[AXIS_Z];
       f_EasedView.isEyeEased = TRUE;
     }
-    f_EasedView.eye[AXIS_X] = eye[AXIS_X] =
-        BlendClamped(f_EasedView.eye[AXIS_X], eye[AXIS_X], rate);
-    f_EasedView.eye[AXIS_Y] = eye[AXIS_Y] =
-        BlendClamped(f_EasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
-    f_EasedView.eye[AXIS_Z] = eye[AXIS_Z] =
-        BlendClamped(f_EasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
+    eye[AXIS_X] = BlendClamped(f_EasedView.eye[AXIS_X], eye[AXIS_X], rate);
+    f_EasedView.eye[AXIS_X] = eye[AXIS_X];
+    eye[AXIS_Y] = BlendClamped(f_EasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
+    f_EasedView.eye[AXIS_Y] = eye[AXIS_Y];
+    eye[AXIS_Z] = BlendClamped(f_EasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
+    f_EasedView.eye[AXIS_Z] = eye[AXIS_Z];
   }
   if (easedParts & EASE_LOOK_AT) {
     if (!f_EasedView.isLookAtEased) {
@@ -191,12 +191,15 @@ void EaseReactionView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
       f_EasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
       f_EasedView.isLookAtEased = TRUE;
     }
-    f_EasedView.lookAt[AXIS_X] = lookAt[AXIS_X] =
+    lookAt[AXIS_X] =
         BlendClamped(f_EasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
-    f_EasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] =
+    f_EasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
+    lookAt[AXIS_Y] =
         BlendClamped(f_EasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
-    f_EasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] =
+    f_EasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
+    lookAt[AXIS_Z] =
         BlendClamped(f_EasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
+    f_EasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
   }
 }
 
@@ -1309,7 +1312,9 @@ void PlaceAtReactionSpot(Vec3 position, Vec3 rotation, Vec3 scale) {
     rotation[AXIS_X] = atan2(position[AXIS_Y] - spot[AXIS_Y], distance);
     pitch = (pitch + rotation[AXIS_X]) * 0.5f;
   }
-  scale[AXIS_Z] = scale[AXIS_Y] = scale[AXIS_X] = 1.0f;
+  scale[AXIS_X] = 1.0f;
+  scale[AXIS_Y] = scale[AXIS_X];
+  scale[AXIS_Z] = scale[AXIS_Y];
   rotation[AXIS_X] = 0.0f;
   rotation[AXIS_Z] = 0;
   rotation[AXIS_Y] =

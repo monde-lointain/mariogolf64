@@ -2070,7 +2070,8 @@ void DrawResetFade(void) {
   Gfx* displayList;
   s32 passIndex;
 
-  displayList = gfx = g_DisplayLists[g_DrawBufferIndex];
+  gfx = g_DisplayLists[g_DrawBufferIndex];
+  displayList = gfx;
   /* The original builds the frame in a loop that runs once */
   for (passIndex = 0; passIndex != 1; passIndex++) {
     AppendRcpInit(g_DrawBufferIndex, &gfx);

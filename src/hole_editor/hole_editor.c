@@ -1095,7 +1095,9 @@ void func_80402428_hole_editor(void) {
 
   editKind = TRIANGLE_EDIT_NONE;
   D_800C30D1 = FALSE;
-  stepUp = stepRight = stepY = 0.0f;
+  stepY = 0.0f;
+  stepRight = stepY;
+  stepUp = stepRight;
   if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
     editKind = TRIANGLE_EDIT_MOVE;
     stepUp = 1.0f;
@@ -1306,7 +1308,8 @@ void func_80402E1C_hole_editor(void) {
   D_800C30D1 = FALSE;
   sprintf(g_PrintBuffer, "EditNo : %d   ", f_RingTriangleIndex);
   PrintDebugText(g_PrintBuffer, RING_TEXT_COLUMN, RING_TEXT_ROW);
-  stepUp = stepRight = 0.0f;
+  stepRight = 0.0f;
+  stepUp = stepRight;
   if (!(g_ControllerData[EDITOR_PAD].button & Z_TRIG)) {
     if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
       editKind = TRIANGLE_EDIT_MOVE;
@@ -1558,7 +1561,9 @@ void func_80403A04_hole_editor(void) {
   editKind = TRIANGLE_EDIT_NONE;
   isDropping = FALSE;
   D_800C30D1 = FALSE;
-  stepUp = stepRight = stepY = 0.0f;
+  stepY = 0.0f;
+  stepRight = stepY;
+  stepUp = stepRight;
   if (g_ControllerData[EDITOR_PAD].button & U_CBUTTONS) {
     editKind = TRIANGLE_EDIT_MOVE;
     stepUp = 1.0f;
@@ -3084,12 +3089,12 @@ void func_804079B8_hole_editor(void) {
               nextRowCorner = GetGroundPoint(column, row + 1);
               oppositeCorner = GetGroundPoint(column + 1, row + 1);
               firstTriangle.corners[AXIS_Y][0] = corner->v.ob[AXIS_Y];
+              firstTriangle.corners[AXIS_Y][1] = nextColumnCorner->v.ob[AXIS_Y];
               secondTriangle.corners[AXIS_Y][0] =
-                  firstTriangle.corners[AXIS_Y][1] =
-                      nextColumnCorner->v.ob[AXIS_Y];
+                  firstTriangle.corners[AXIS_Y][1];
+              firstTriangle.corners[AXIS_Y][2] = nextRowCorner->v.ob[AXIS_Y];
               secondTriangle.corners[AXIS_Y][2] =
-                  firstTriangle.corners[AXIS_Y][2] =
-                      nextRowCorner->v.ob[AXIS_Y];
+                  firstTriangle.corners[AXIS_Y][2];
               secondTriangle.corners[AXIS_Y][1] = oppositeCorner->v.ob[AXIS_Y];
               firstTriangle.corners[AXIS_X][0] = corner->v.ob[AXIS_X];
               firstTriangle.corners[AXIS_X][1] = nextColumnCorner->v.ob[AXIS_X];

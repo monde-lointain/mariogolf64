@@ -890,6 +890,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[row & 3][column & 3]];
         point->v.ob[1] = height;
+        /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
@@ -900,6 +901,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[4][column & 3]];
         point->v.ob[1] = height;
+        /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
@@ -910,6 +912,7 @@ s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade) {
         midpoints = g_WorkArea.hole.midpoints[blockIndex];
         point = &midpoints[f_PointSlots[row & 3][4]];
         point->v.ob[1] = height;
+        /* The chained assignment is there to match */
         point->v.cn[0] = point->v.cn[1] = point->v.cn[2] = shade;
       }
     }
@@ -1221,8 +1224,12 @@ void PrepareHoleTriangles(void) {
 
   for (triangleIndex = 0; triangleIndex < HOLE_TRIANGLE_COUNT;
       triangleIndex++) {
-    lowest[0] = lowest[1] = lowest[2] = 0x20000000;
-    highest[0] = highest[1] = highest[2] = -0x20000000;
+    lowest[2] = 0x20000000;
+    lowest[1] = lowest[2];
+    lowest[0] = lowest[1];
+    highest[2] = -0x20000000;
+    highest[1] = highest[2];
+    highest[0] = highest[1];
     for (corner = 0; corner < 3; corner++) {
       vertex = &g_WorkArea.hole.triangles[triangleIndex].vertices[corner].v;
       if (vertex->ob[0] < lowest[0]) {

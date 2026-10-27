@@ -2988,8 +2988,8 @@ s32 TagCartridges(void) {
     }
     if (result == PAK_RESULT_OK) {
       for (index = 0; index != CARTRIDGE_TAG_SIZE; index++) {
-        transfer->cartridgeTags[controller][index] = tag[index] =
-            guRandom() % 256;
+        tag[index] = guRandom() % 256;
+        transfer->cartridgeTags[controller][index] = tag[index];
       }
       if (nuContGBPakFwrite(
               &file, CARTRIDGE_RAM_ADDRESS, tag, CARTRIDGE_TAG_SIZE) == 0 &&

@@ -126,7 +126,8 @@ void PlaySound(s32 soundId, s32 channel, s32 volume) {
       handle = &f_SoundHandles[channel];
       if (*handle != NO_HANDLE) {
         MusHandleStop(*handle, 0);
-        f_SoundHandleCopies[channel] = *handle = StartSoundEffect(soundId);
+        *handle = StartSoundEffect(soundId);
+        f_SoundHandleCopies[channel] = *handle;
         MusHandleSetVolume(*handle, volume);
         MusHandleSetFreqOffset(*handle, 0.0f);
         MusHandleSetPan(*handle, FULL_SCALE);
@@ -180,7 +181,8 @@ void PlaySoundWithEffects(
         MusHandleStop(*handle, 0);
         MusHandleSetReverb(*handle, reverb);
       }
-      f_SoundHandleCopies[channel] = *handle = StartSoundEffect(soundId);
+      *handle = StartSoundEffect(soundId);
+      f_SoundHandleCopies[channel] = *handle;
       MusHandleSetFreqOffset(*handle, 0.0f);
       MusHandleSetVolume(*handle, volume);
       MusHandleSetPan(*handle, pan);
@@ -526,7 +528,8 @@ void PlaySong(s32 songId, s32 flags) {
         LoadSong(f_SongRomBounds[songId * 2],
             f_SongRomBounds[(songId * 2) + 1] - f_SongRomBounds[songId * 2]);
         MusSetMasterVolume(MUSFLAG_SONGS, SONG_MASTER_VOLUME);
-        f_SongHandleCopy = f_SongHandle = StartLoadedSong();
+        f_SongHandle = StartLoadedSong();
+        f_SongHandleCopy = f_SongHandle;
         if (g_SoundOptionBits & OPTION_BIT_MONO) {
           MusSetStereo(FALSE);
         } else {

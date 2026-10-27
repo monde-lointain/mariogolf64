@@ -4121,10 +4121,12 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       break;
     case LOGO_FADE_WHITENING:
       g_ScreenFadeFramesLeft = f_LogoFadeFramesLeft;
-      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
+      g_ScreenFadeBlue =
           (s32)((LOGO_FADE_WHITENING_FRAMES - f_LogoFadeFramesLeft) *
               LOGO_FADE_WHITENING_STEP) +
           LOGO_FADE_GRAY_LEVEL;
+      g_ScreenFadeGreen = g_ScreenFadeBlue;
+      g_ScreenFadeRed = g_ScreenFadeGreen;
       f_LogoFadeFramesLeft--;
       if (f_LogoFadeFramesLeft == 0) {
         f_LogoFadeStage++;
@@ -4132,8 +4134,9 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       break;
     case LOGO_FADE_WHITE:
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
-      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
-          LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeBlue = LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeGreen = g_ScreenFadeBlue;
+      g_ScreenFadeRed = g_ScreenFadeGreen;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
       if (f_LogoState == LOGO_SHRINKING) {
@@ -4144,8 +4147,9 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
       g_ScreenFadeDuration = LOGO_FADE_WHITE_DURATION;
       g_ScreenFadeKind = FADE_OUT;
       g_ScreenFadeFramesLeft = 0;
-      g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
-          LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeBlue = LOGO_FADE_WHITE_LEVEL;
+      g_ScreenFadeGreen = g_ScreenFadeBlue;
+      g_ScreenFadeRed = g_ScreenFadeGreen;
       f_LogoLettersAlpha -= LOGO_FADE_OUT_STEP;
       f_LogoClubAlpha -= LOGO_FADE_OUT_STEP;
       if (f_LogoLettersAlpha < 0) {
@@ -4161,10 +4165,12 @@ void DrawOpeningLogo(Gfx** displayListHead, s32 isDrawn) {
     f_LogoLetters[LOGO_LETTER_M].x = LOGO_M_DROP_X;
     f_LogoLetters[LOGO_LETTER_M].y = f_LakituScreenPoint[1];
     f_LogoLetterStates[LOGO_LETTER_M] = LOGO_LETTER_FALLING;
-    g_ScreenFadeDuration = g_ScreenFadeFramesLeft = LOGO_GRAYING_DURATION;
+    g_ScreenFadeFramesLeft = LOGO_GRAYING_DURATION;
+    g_ScreenFadeDuration = g_ScreenFadeFramesLeft;
     g_ScreenFadeKind = FADE_OUT;
-    g_ScreenFadeRed = g_ScreenFadeGreen = g_ScreenFadeBlue =
-        LOGO_FADE_GRAY_LEVEL;
+    g_ScreenFadeBlue = LOGO_FADE_GRAY_LEVEL;
+    g_ScreenFadeGreen = g_ScreenFadeBlue;
+    g_ScreenFadeRed = g_ScreenFadeGreen;
     f_LogoFadeStage = LOGO_FADE_GRAYING;
     f_HasLogoStarted = 1;
   }

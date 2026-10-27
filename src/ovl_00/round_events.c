@@ -1636,9 +1636,11 @@ void DrawReadyGoMovie(Gfx** displayListHead) {
     if (alpha < 0) {
       alpha = 0;
     }
+    /* The chained assignment is there to match */
     rotation[0] = rotation[1] = rotation[2] = 0.0f;
-    scale[0] = scale[1] = scale[2] =
-        (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
+    scale[2] = (GO_GROWTH_PER_FRAME * (f_MovieDrawCount - GO_GROW_DRAW)) + 1.0f;
+    scale[1] = scale[2];
+    scale[0] = scale[1];
   } else {
     f_CurrentMovie = MOVIE_NONE;
     return;
@@ -2532,12 +2534,14 @@ void DrawContactEffect(Gfx** displayListHead, CameraMatrices* matrices) {
     }
   }
   if (f_ContactStyle == CONTACT_STYLE_MARIO) {
+    /* The chained assignment is there to match */
     translation[AXIS_X] = translation[AXIS_Y] = translation[AXIS_Z] = 0.0f;
     rotation[AXIS_X] = 0.0f;
     rotation[AXIS_Y] = 0.0f;
     rotation[AXIS_Z] = f_ContactSpinAngle += CONTACT_SPIN_DEGREES_PER_FRAME;
-    spinScale[AXIS_X] = spinScale[AXIS_Y] = spinScale[AXIS_Z] =
-        alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
+    spinScale[AXIS_Z] = alpha * CONTACT_SPIN_SCALE_PER_ALPHA;
+    spinScale[AXIS_Y] = spinScale[AXIS_Z];
+    spinScale[AXIS_X] = spinScale[AXIS_Y];
     BuildTransformMatrix(spin, rotation, translation, spinScale);
     ConvertMatrixToFixed(spin, &f_ContactSpinMatrices[g_MatrixBufferIndex]);
     gDPPipeSync(gfx++);

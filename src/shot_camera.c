@@ -278,9 +278,12 @@ void PlaceGolferAtBall(Vec3 position, Vec3 rotation, Vec3 scale) {
     if (position[AXIS_Y] - ballHeight > AbsoluteF32(distance)) {
       position[AXIS_Y] = AbsoluteF32(distance) + ballHeight;
     }
-    slope = rotation[AXIS_X] = atan2(position[AXIS_Y] - ballHeight, reach);
+    rotation[AXIS_X] = atan2(position[AXIS_Y] - ballHeight, reach);
+    slope = rotation[AXIS_X];
   }
-  scale[AXIS_X] = scale[AXIS_Y] = scale[AXIS_Z] = 1.0f;
+  scale[AXIS_Z] = 1.0f;
+  scale[AXIS_Y] = scale[AXIS_Z];
+  scale[AXIS_X] = scale[AXIS_Y];
   if (player->unk22) {
     scale[AXIS_Y] = -1.0f;
   }

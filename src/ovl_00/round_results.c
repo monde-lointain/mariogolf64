@@ -545,8 +545,8 @@ void LoadRoundResults(void) {
         }
         f_PointsEarned = f_PlayerPoints[0] * f_CoursePointRates[g_CourseIndex];
         f_PointsShown = f_PointsEarned;
-        f_TournamentOpenCourseCount = f_OpenCourseCount =
-            CountOpenCourses(save->coursePoints);
+        f_OpenCourseCount = CountOpenCourses(save->coursePoints);
+        f_TournamentOpenCourseCount = f_OpenCourseCount;
         if (f_OpenCourseCount < COURSE_COUNT) {
           f_PointsToNextCourse = GetCoursePointsNeeded(f_OpenCourseCount) -
               save->coursePoints - f_PrizePoints - f_PointsEarned;

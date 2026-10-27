@@ -501,9 +501,10 @@ HALVED:
         g_Scorecard.holeWinnerIndex = 1;
       }
       g_Scorecard.skinsCarryover.onLastHole = 0;
+      g_Scorecard.skinsCarryover.intoLastHole =
+          g_Scorecard.content.holeIndex - 1;
       g_Scorecard.skinsCarryover.fromLastHole =
-          g_Scorecard.skinsCarryover.intoLastHole =
-              g_Scorecard.content.holeIndex - 1;
+          g_Scorecard.skinsCarryover.intoLastHole;
       break;
     case SCORECARD_LAYOUT_SKINS:
       g_Scorecard.holeWinnerIndex = HOLE_WINNER_HALVED;

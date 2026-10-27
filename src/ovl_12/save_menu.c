@@ -430,8 +430,8 @@ void OpenSaveMenu(s32 kind) {
             &encodedAsset);
         frameId = g_ModeIconAnimations[0][1];
       }
-      f_ModeIconImages[slot][1] = picture =
-          AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+      picture = AllocMemory(OpenEncodedAsset(frameId, &encodedAsset));
+      f_ModeIconImages[slot][1] = picture;
       ReadEncodedAsset(picture, &encodedAsset);
     }
   } else {
@@ -1649,11 +1649,12 @@ void OpenControlsScreen(void) {
   void* picture;
 
   if (g_IsMiniGolf) {
-    f_PanelImage = picture = AllocMemory(
+    picture = AllocMemory(
         OpenEncodedAsset(MINI_GOLF_CONTROLS_PICTURE, &encodedAsset));
+    f_PanelImage = picture;
   } else {
-    f_PanelImage = picture =
-        AllocMemory(OpenEncodedAsset(CONTROLS_PICTURE, &encodedAsset));
+    picture = AllocMemory(OpenEncodedAsset(CONTROLS_PICTURE, &encodedAsset));
+    f_PanelImage = picture;
   }
   ReadEncodedAsset(picture, &encodedAsset);
   f_SlideOffsets[0] = SCREEN_HEIGHT;

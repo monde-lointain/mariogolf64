@@ -2760,9 +2760,11 @@ s32 GetCharacterPointModelPosition(u32 slotIndex, s32 pointId, f32* position) {
       position[2] *= MODEL_TO_WORLD_SCALE;
       return 0;
     }
+    /* The chained assignment is there to match */
     position[0] = position[1] = position[2] = 0.0f;
     return 1;
   }
+  /* The chained assignment is there to match */
   position[0] = position[1] = position[2] = 0.0f;
   return -1;
 }
@@ -2792,6 +2794,7 @@ s32 GetCharacterPointPosition(u32 slotIndex, s32 pointId, f32* position) {
 
   result = GetCharacterPointModelPosition(slotIndex, pointId, modelPosition);
   if (result < 0) {
+    /* The chained assignment is there to match */
     position[0] = position[1] = position[2] = 0.0f;
   } else {
     GetCharacterSlotMatrix(GetUsedCharacterSlot(slotIndex), matrix);

@@ -44,7 +44,8 @@ void ReadAssetFileBounds(s32 assetId, AssetFile* file) {
 
   nuPiReadRom((u32)&ASSET_TABLE[assetId].size, size, sizeof(*size));
   nuPiReadRom((u32)&ASSET_TABLE[assetId].offset, offset, sizeof(*offset));
-  file->cursor = file->romStart = (u32)g_AssetArchiveRomStart + *offset;
+  file->romStart = (u32)g_AssetArchiveRomStart + *offset;
+  file->cursor = file->romStart;
   file->romEnd = file->romStart + *size;
   file->size = *size;
   f_LastOpenedAssetId = assetId;

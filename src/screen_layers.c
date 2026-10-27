@@ -429,7 +429,8 @@ s32 HasScreenFadeEnded(void) {
 
 void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount) {
   g_ScreenFadeKind = FADE_OUT;
-  g_ScreenFadeFramesLeft = g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
   g_ScreenFadeRed = red;
   g_ScreenFadeGreen = green;
   g_ScreenFadeBlue = blue;
@@ -437,7 +438,8 @@ void StartScreenFadeOut(s32 red, s32 green, s32 blue, s32 frameCount) {
 
 void StartScreenFadeIn(s32 red, s32 green, s32 blue, s32 frameCount) {
   g_ScreenFadeKind = FADE_IN;
-  g_ScreenFadeFramesLeft = g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeDuration = frameCount;
+  g_ScreenFadeFramesLeft = g_ScreenFadeDuration;
   g_ScreenFadeRed = red;
   g_ScreenFadeGreen = green;
   g_ScreenFadeBlue = blue;

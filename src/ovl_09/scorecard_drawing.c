@@ -241,7 +241,8 @@ void DrawMatchResult(Gfx** displayListHead) {
           G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
       g_DisplayListHead = gfx;
       DrawCharacter(i);
-      gfx = *displayListHead = g_DisplayListHead;
+      *displayListHead = g_DisplayListHead;
+      gfx = *displayListHead;
     }
     AnimateAllCharacters();
   }

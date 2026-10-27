@@ -804,6 +804,7 @@ s32 StepBallSimulation(BallSimulation* simulation) {
           D_800BA9D8.cupPosition[AXIS_Y] + 0xC00) {
         f32 fallSpeed = velocity[AXIS_Y];
 
+        /* The chained assignment is there to match */
         velocity[AXIS_X] = velocity[AXIS_Z] = 0.0f;
         velocity[AXIS_Y] = (-fallSpeed * 0.5f) + 131.0f;
         if (velocity[AXIS_Y] > 0.0f) {
@@ -891,7 +892,8 @@ s32 StepBallSimulation(BallSimulation* simulation) {
         f32 squareZ;
 
         normalX = wall.corners[AXIS_X][0];
-        normalY = edgeY = 0.0f;
+        edgeY = 0.0f;
+        normalY = edgeY;
         normalZ = wall.corners[AXIS_Z][0];
         if (wall.corners[AXIS_X][0] == wall.corners[AXIS_X][1] &&
             wall.corners[AXIS_Z][0] == wall.corners[AXIS_Z][1]) {
@@ -1976,12 +1978,12 @@ s32 LaunchBallSimulation(BallSimulation* simulation, s32 purpose, Unk20* shot) {
     }
   }
   surface = simulation->surface;
-  simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X] =
-      simulation->position[AXIS_X];
-  simulation->startPosition[AXIS_Y] = simulation->unkC[AXIS_Y] =
-      simulation->position[AXIS_Y];
-  simulation->startPosition[AXIS_Z] = simulation->unkC[AXIS_Z] =
-      simulation->position[AXIS_Z];
+  simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
+  simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X];
+  simulation->unkC[AXIS_Y] = simulation->position[AXIS_Y];
+  simulation->startPosition[AXIS_Y] = simulation->unkC[AXIS_Y];
+  simulation->unkC[AXIS_Z] = simulation->position[AXIS_Z];
+  simulation->startPosition[AXIS_Z] = simulation->unkC[AXIS_Z];
   simulation->unkA2 = surface;
   simulation->unkA7 = surface;
   simulation->unkA1 = 0;

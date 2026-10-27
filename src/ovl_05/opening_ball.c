@@ -124,13 +124,14 @@ s32 func_8020A488_ovl_05(BallSimulation* simulation, s32 purpose, Unk20* shot) {
       simulation->position[AXIS_Y] = groundHeight;
     }
   }
-  simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X] =
-      simulation->position[AXIS_X];
-  simulation->startPosition[AXIS_Y] = simulation->unkC[AXIS_Y] =
-      simulation->position[AXIS_Y];
-  simulation->startPosition[AXIS_Z] = simulation->unkC[AXIS_Z] =
-      simulation->position[AXIS_Z];
-  simulation->unkA7 = simulation->unkA2 = simulation->surface;
+  simulation->unkC[AXIS_X] = simulation->position[AXIS_X];
+  simulation->startPosition[AXIS_X] = simulation->unkC[AXIS_X];
+  simulation->unkC[AXIS_Y] = simulation->position[AXIS_Y];
+  simulation->startPosition[AXIS_Y] = simulation->unkC[AXIS_Y];
+  simulation->unkC[AXIS_Z] = simulation->position[AXIS_Z];
+  simulation->startPosition[AXIS_Z] = simulation->unkC[AXIS_Z];
+  simulation->unkA2 = simulation->surface;
+  simulation->unkA7 = simulation->unkA2;
   simulation->unkA1 = 0;
   if (simulation->purpose != LAUNCH_PURPOSE_CLUB_TEST) {
     simulation->playerIndex = shot->unk18;

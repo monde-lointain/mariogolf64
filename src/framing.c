@@ -139,8 +139,10 @@ void FrameSpheres(f32 depthOffset) {
   f64 frontDistance;
   s32 i;
 
-  minX = minY = FAR_EXTENT;
-  maxX = maxY = -FAR_EXTENT;
+  minY = FAR_EXTENT;
+  minX = minY;
+  maxY = -FAR_EXTENT;
+  maxX = maxY;
   maxZ = -Z_MARGIN;
   rightAngle = g_Cameras[0].view.fieldOfView * 0.5f;
   leftAngle = -rightAngle;
@@ -215,8 +217,10 @@ void FrameSpheres(f32 depthOffset) {
     eyeZ = verticalEyeZ;
   }
 
-  minX = minY = FAR_EXTENT;
-  maxX = maxY = -FAR_EXTENT;
+  minY = FAR_EXTENT;
+  minX = minY;
+  maxY = -FAR_EXTENT;
+  maxX = maxY;
   guTranslateF(rotation, -eyeX, -eyeY, eyeZ);
   guMtxCatF(f_FramingRotation, rotation, rotation);
   for (i = 0; i < f_FramedSphereCount; i++) {

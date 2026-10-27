@@ -470,7 +470,8 @@ s32 UpdateRingShotSelect(s32 pressedButtons, u32 repeatedButtons) {
     memory->holeIndex = 0;
   }
   g_HoleIndex = memory->holeIndex;
-  f_NextCourse = g_CourseIndex = memory->courseIndex;
+  g_CourseIndex = memory->courseIndex;
+  f_NextCourse = g_CourseIndex;
   return result;
 }
 

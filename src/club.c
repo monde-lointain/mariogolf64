@@ -442,7 +442,8 @@ void WriteClubParameters(void) {
     }
   }
 
-  cursor = source = AllocMemory(CLUB_SOURCE_SIZE);
+  source = AllocMemory(CLUB_SOURCE_SIZE);
+  cursor = source;
   end = source + CLUB_SOURCE_SIZE;
   if (source == NULL) {
     ReportFailedAssertion("EX", "c:/usgolf64/club.c", CLUB_ASSERT_LINE);

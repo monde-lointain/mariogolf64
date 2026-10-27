@@ -737,12 +737,15 @@ void EaseStaffRollView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
       f_StaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z];
       f_StaffRollEasedView.isEyeEased = TRUE;
     }
-    f_StaffRollEasedView.eye[AXIS_X] = eye[AXIS_X] = BlendStaffRollClamped(
+    eye[AXIS_X] = BlendStaffRollClamped(
         f_StaffRollEasedView.eye[AXIS_X], eye[AXIS_X], rate);
-    f_StaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y] = BlendStaffRollClamped(
+    f_StaffRollEasedView.eye[AXIS_X] = eye[AXIS_X];
+    eye[AXIS_Y] = BlendStaffRollClamped(
         f_StaffRollEasedView.eye[AXIS_Y], eye[AXIS_Y], rate);
-    f_StaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z] = BlendStaffRollClamped(
+    f_StaffRollEasedView.eye[AXIS_Y] = eye[AXIS_Y];
+    eye[AXIS_Z] = BlendStaffRollClamped(
         f_StaffRollEasedView.eye[AXIS_Z], eye[AXIS_Z], rate);
+    f_StaffRollEasedView.eye[AXIS_Z] = eye[AXIS_Z];
   }
   if (easedParts & EASE_LOOK_AT) {
     if (!f_StaffRollEasedView.isLookAtEased) {
@@ -751,15 +754,15 @@ void EaseStaffRollView(f32* eye, f32* lookAt, f32 rate, s32 easedParts) {
       f_StaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
       f_StaffRollEasedView.isLookAtEased = TRUE;
     }
-    f_StaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X] =
-        BlendStaffRollClamped(
-            f_StaffRollEasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
-    f_StaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y] =
-        BlendStaffRollClamped(
-            f_StaffRollEasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
-    f_StaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z] =
-        BlendStaffRollClamped(
-            f_StaffRollEasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
+    lookAt[AXIS_X] = BlendStaffRollClamped(
+        f_StaffRollEasedView.lookAt[AXIS_X], lookAt[AXIS_X], rate);
+    f_StaffRollEasedView.lookAt[AXIS_X] = lookAt[AXIS_X];
+    lookAt[AXIS_Y] = BlendStaffRollClamped(
+        f_StaffRollEasedView.lookAt[AXIS_Y], lookAt[AXIS_Y], rate);
+    f_StaffRollEasedView.lookAt[AXIS_Y] = lookAt[AXIS_Y];
+    lookAt[AXIS_Z] = BlendStaffRollClamped(
+        f_StaffRollEasedView.lookAt[AXIS_Z], lookAt[AXIS_Z], rate);
+    f_StaffRollEasedView.lookAt[AXIS_Z] = lookAt[AXIS_Z];
   }
 }
 

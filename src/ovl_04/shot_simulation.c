@@ -33,12 +33,15 @@ void SimulateShot(Unk20* shot) {
   g_SimulatedShot.minPositionStep[1] = 0;
   g_SimulatedShot.minPositionStep[2] = 0;
   g_SimulatedShot.unkB0Step = NO_STEP;
+  /* The chained assignment is there to match */
   g_SimulatedShot.maxPosition[0] = g_SimulatedShot.minPosition[0] =
       g_SimulatedShot.startPosition[0] = g_CurrentShot.ballPosition[0];
-  g_SimulatedShot.maxPosition[1] = g_SimulatedShot.minPosition[1] =
-      g_SimulatedShot.startPosition[1] = g_CurrentShot.ballPosition[1];
-  g_SimulatedShot.maxPosition[2] = g_SimulatedShot.minPosition[2] =
-      g_SimulatedShot.startPosition[2] = g_CurrentShot.ballPosition[2];
+  g_SimulatedShot.startPosition[1] = g_CurrentShot.ballPosition[1];
+  g_SimulatedShot.minPosition[1] = g_SimulatedShot.startPosition[1];
+  g_SimulatedShot.maxPosition[1] = g_SimulatedShot.minPosition[1];
+  g_SimulatedShot.startPosition[2] = g_CurrentShot.ballPosition[2];
+  g_SimulatedShot.minPosition[2] = g_SimulatedShot.startPosition[2];
+  g_SimulatedShot.maxPosition[2] = g_SimulatedShot.minPosition[2];
   simulation->position[0] = g_CurrentShot.ballPosition[0];
   simulation->position[1] = g_CurrentShot.ballPosition[1];
   simulation->position[2] = g_CurrentShot.ballPosition[2];

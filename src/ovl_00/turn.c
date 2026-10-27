@@ -2141,9 +2141,11 @@ void StartPlayerShot(s32 playerIndex) {
 
   g_CurrentShot.playerIndex = playerIndex;
   g_CurrentShot.controllerIndex = player->controllerIndex;
-  g_CurrentShot.ballPosition[AXIS_X] = x = player->ballPosition[AXIS_X];
+  x = player->ballPosition[AXIS_X];
+  g_CurrentShot.ballPosition[AXIS_X] = x;
   g_CurrentShot.ballPosition[AXIS_Y] = player->ballPosition[AXIS_Y];
-  g_CurrentShot.ballPosition[AXIS_Z] = z = player->ballPosition[AXIS_Z];
+  z = player->ballPosition[AXIS_Z];
+  g_CurrentShot.ballPosition[AXIS_Z] = z;
   g_CurrentShot.surface = (s8)player->ballSurface;
   g_CurrentShot.unk18 = 0;
   g_CurrentShot.unk14 = 0;

@@ -2038,7 +2038,8 @@ s32 StepTrialShot(void) {
       velocityY = f_TrialSimulation.velocity[AXIS_Y];
       unk94 = f_TrialSimulation.unk94;
       f_TrialStepCount++;
-      stepFlags = flags = StepBallSimulation(&f_TrialSimulation);
+      flags = StepBallSimulation(&f_TrialSimulation);
+      stepFlags = flags;
       if (f_TrialStepCount >= MAX_STEP_COUNT) {
         SetDebugTextHighlight(TRUE);
         PrintDebugText(f_SimFaultText, 10, 12);

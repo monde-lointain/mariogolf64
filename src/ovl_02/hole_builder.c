@@ -428,8 +428,10 @@ void DrawBandHeights(s16* heights, s32 band) {
       shortXStep = shortSlopeX * HEIGHT_ROW_STEP_SCALE;
       longHeightStep = longSlopeHeight * HEIGHT_ROW_STEP_SCALE;
       shortHeightStep = shortSlopeHeight * HEIGHT_ROW_STEP_SCALE;
-      longX = shortX = corners[0]->v.ob[0] << HEIGHT_FRACTION_BITS;
-      longHeight = shortHeight = corners[0]->v.ob[1] << HEIGHT_FRACTION_BITS;
+      shortX = corners[0]->v.ob[0] << HEIGHT_FRACTION_BITS;
+      longX = shortX;
+      shortHeight = corners[0]->v.ob[1] << HEIGHT_FRACTION_BITS;
+      longHeight = shortHeight;
       for (z = 0; z < span + HEIGHT_ROW_SPAN / 2; z += HEIGHT_ROW_SPAN) {
         DrawHeightRow(
             longX, longHeight, shortX, shortHeight, corners[0]->v.ob[2] + z);
@@ -1415,7 +1417,8 @@ void EncodeCodeMap(void) {
   s32 column;
   s32 row;
 
-  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
       f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
@@ -1461,7 +1464,8 @@ void LoadCodeMap(char* path) {
   s32 row;
   u16 color;
 
-  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor;
   if (ReadHostFile(path, &size) == HOST_FILE_OK &&
       size == MAP_COLUMN_COUNT * MAP_ROW_COUNT) {
     f_BuildCursor = f_BuildBuffer;
@@ -1543,7 +1547,8 @@ void CleanCodeMap(void) {
   s32 column;
   s32 row;
 
-  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
       f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
@@ -1699,7 +1704,9 @@ void PaintGroundTiles(void) {
   offsetCount =
       ListOffsetsByDistance(PAINT_OFFSET_SPAN, offsets, PAINT_OFFSET_COUNT);
   osSyncPrintf("MakeTex..");
-  nextCode = f_BuildCursor = codes = f_BuildBuffer;
+  codes = f_BuildBuffer;
+  f_BuildCursor = codes;
+  nextCode = f_BuildCursor;
   searchSpans = f_PaintLogics[f_PaintLogic].searchSpans;
   /* row is there to match */
   for (row = 0; row < TERRAIN_CODE_COUNT; row++) {
@@ -1713,7 +1720,8 @@ void PaintGroundTiles(void) {
           (row / GROUND_TILE_TEXEL_SPAN * GROUND_TILE_COLUMN_COUNT)])
                   [(row & MAP_TILE_MASK) * GROUND_TILE_TEXEL_SPAN];
       for (texelIndex = 0; texelIndex < GROUND_TILE_TEXEL_SPAN; texelIndex++) {
-        nearestCode = code = *nextCode++;
+        nearestCode = *nextCode++;
+        code = nearestCode;
         nearestDistance = searchSpans[code];
         if (nearestDistance != 0) {
           if (nearestDistance < 0) {
@@ -2041,7 +2049,8 @@ void SaveHoleFiles(s32 course, s32 hole) {
     LoadBackupCodeMap();
     f_IsCodeMapCleaned = FALSE;
   }
-  f_BuildBuffer = f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildCursor = HOLE_FILE_BUFFER;
+  f_BuildBuffer = f_BuildCursor;
   for (row = 0; row < MAP_ROW_COUNT; row++) {
     for (column = 0; column < MAP_COLUMN_COUNT; column++) {
       f_BuildCursor = &f_BuildBuffer[(row * MAP_COLUMN_COUNT) + column];
@@ -2124,7 +2133,9 @@ void ClearHolePoints(void) {
 
 /* Points the build buffer and its cursor at the start of the file area */
 void ResetBuildBuffer(void) {
-  f_BuildCursor = f_BuildBuffer = f_BuildCursor = BUILD_BUFFER_START;
+  f_BuildCursor = BUILD_BUFFER_START;
+  f_BuildBuffer = f_BuildCursor;
+  f_BuildCursor = f_BuildBuffer;
 }
 
 /* Marks every billboard unused */
@@ -2843,7 +2854,8 @@ void GetGroundLightColors(GroundLightColor* light, GroundLightColor* shade) {
   }
 
   if (g_HoleConditions.sceneColorIndex == SCENE_COLOR_INDEX_UNK11) {
-    keyIndexes[1] = keyIndexes[0] = g_HoleConditions.sceneColorIndex;
+    keyIndexes[0] = g_HoleConditions.sceneColorIndex;
+    keyIndexes[1] = keyIndexes[0];
   } else if ((s32)g_HoleConditions.sceneColorIndex >=
       SCENE_COLOR_INDEX_DRIVING_RANGE) {
     keyIndexes[0] = SCENE_COLOR_INDEX_DRIVING_RANGE;

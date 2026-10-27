@@ -616,7 +616,8 @@ void func_80201574_ovl_01(Gfx** displayListHead) {
   gDPPipeSync(gfx++);
   g_DisplayListHead = gfx;
   DrawCharacter(D_8022FBB4_ovl_01);
-  gfx = *displayListHead = g_DisplayListHead;
+  *displayListHead = g_DisplayListHead;
+  gfx = *displayListHead;
 }
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_drawing", func_80202000_ovl_01);

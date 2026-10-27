@@ -140,7 +140,9 @@ void DrawPerformanceMeter(u32 extraFrameCount, u32 y, u32 cpuStartTime,
     scale = 2;
   }
 
+  /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[0] = f_MeterViewport.vp.vtrans[0] = 320 * 2 * scale;
+  /* The chained assignment is there to match */
   f_MeterViewport.vp.vscale[1] = f_MeterViewport.vp.vtrans[1] = 240 * 2 * scale;
   gSPViewport(gfx++, &f_MeterViewport);
   gSPDisplayList(gfx++, OS_K0_TO_PHYSICAL(f_InitRcpDisplayList));
