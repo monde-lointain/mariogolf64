@@ -431,17 +431,13 @@ void func_8021CFAC_ovl_01(void *buffer, s16 bufferKind) {
 
 s16 func_8021E468_ovl_01(void);
 
-/*
- * Doesn't match: the original holds the row in a0 and the table in a1 when
- * finding the chosen record. func_8021E340 is called without a prototype, as
- * the original's 16-bit extension of its result shows.
- */
-#ifdef NON_MATCHING
+/* func_8021E340 is called without a prototype; the original extends its result from 16 bits, not 8 */
 void func_8021D0B8_ovl_01(void) {
     SaveData *save = GetSaveData();
     MenuMemory *memory = func_8005AF74();
     s32 slot;
     s32 moved;
+    s32 column;
 
     if (IsHudAnimationDone() == TRUE) {
         if (GetWipeKind() != WIPE_NONE && D_801B9410 == 0) {
@@ -459,8 +455,8 @@ void func_8021D0B8_ovl_01(void) {
                 if (func_8021E468_ovl_01() != STATS_CELL_EMPTY) {
                     PlaySound(SOUND_CONFIRM, MENU_SOUND_CHANNEL, MENU_VOLUME_SOFT);
                     D_801B9410 = 0;
-                    LoadWipeShape(
-                        (s8)save->rankedRecords[D_8023B640_ovl_01[memory->unk3A][memory->unk39]].unk38);
+                    column = memory->unk39;
+                    LoadWipeShape((s8)save->rankedRecords[D_8023B640_ovl_01[memory->unk3A][column]].unk38);
                     StartWipe(WIPE_CLOSING);
                     D_801052E8 = 0;
                 }
@@ -500,9 +496,6 @@ void func_8021D0B8_ovl_01(void) {
         }
     }
 }
-#else
-INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D0B8_ovl_01);
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/player_stats", func_8021D3AC_ovl_01);
 
