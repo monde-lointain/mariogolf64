@@ -72,7 +72,17 @@ extern CameraEditor g_CameraEditor;
 /* The size of the box that marks the camera's look-at point */
 extern f32 g_LookAtMarkerScale;
 
+void PlaceEditorCamera(f32 eyeX, f32 eyeY, f32 eyeZ, f32 lookAtX, f32 lookAtY,
+                       f32 lookAtZ);
 void MeasureEditorCamera(void);
 void MoveEditorPoint(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
+void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
+void TurnEditorCamera(s32 index, f32 angle, s32 frameCount);
+void TiltEditorCamera(s32 index, f32 angle, s32 frameCount);
+void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount);
+s32 AreEditorMovesDone(void);
+void StopEditorMoves(void);
+void UpdateCameraEditor(void);
+void EditOpeningCamera(void);
 
 #endif

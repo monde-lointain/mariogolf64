@@ -931,16 +931,6 @@ extern s32 D_800B6808;
 void LaunchDrop(CoursePoint point);
 void SpawnRisingClumps(CoursePoint point);
 s32 IsDonkeyKongUnlocked(void);
-void MoveEditorCamera(s32 index, f32 x, f32 y, f32 z, s32 frameCount);
-void TurnEditorCamera(s32 index, f32 angle, s32 frameCount);
-void TiltEditorCamera(s32 index, f32 angle, s32 frameCount);
-void ZoomEditorCamera(s32 index, f32 distance, s32 frameCount);
-s32 AreEditorMovesDone(void);
-void StopEditorMoves(void);
-void UpdateCameraEditor(void);
-void EditOpeningCamera(void);
-void PlaceEditorCamera(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4,
-                       f32 arg5);
 void func_80206AA4_ovl_05(BallSimulation* simulation);
 void func_8020A488_ovl_05(BallSimulation* simulation, s32 arg1, Unk20* arg2);
 void LoadOpeningShotBall(void);
