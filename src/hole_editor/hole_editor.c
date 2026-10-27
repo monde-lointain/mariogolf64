@@ -37,6 +37,10 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_804077B0 blends heights over distances of this many units per falloff step */
+#define BLEND_DISTANCE_SCALE 512.0f
+#define BLENDED_POINT_SHADE 0xFF
+
 /* func_804066C8 rejects cell triangles whose cross product is below this */
 #define MIN_CELL_CROSS_PRODUCT 16
 
@@ -232,7 +236,11 @@ extern s32 sLastHeightEditKind; /* The last frame's HEIGHT_EDIT_* */
 
 extern s8 D_800C30D1;
 
-s32 SetGroundPointHeightAndShade(s32 column, s32 row, s32 height, s32 shade);
+/*
+ * Declared without a prototype, as func_804077B0 passes it a float height,
+ * which goes as a double
+ */
+s32 SetGroundPointHeightAndShade();
 
 /* func_80406818's menu */
 extern s32 sIsSavingHoleFiles;
@@ -1011,7 +1019,49 @@ void func_80406818_hole_editor(void) {
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80406C3C_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804077B0_hole_editor);
+/*
+ * Blends the ground points within a radius of a ground point toward its
+ * height: the farther a point, the more it keeps its own height, fully
+ * from BLEND_DISTANCE_SCALE / falloff away. Nothing calls it.
+ */
+void func_804077B0_hole_editor(u32 column, u32 row, s32 radius, s32 falloff) {
+    Vtx *center;
+    Vtx *point;
+    s32 rowOffset;
+    s32 columnOffset;
+    s32 halfWidth;
+    s32 radiusSquared;
+    f32 distance;
+    f32 weight;
+
+    center = GetGroundPoint(column, row);
+    radiusSquared = radius * radius;
+    for (rowOffset = -radius; rowOffset <= radius; rowOffset++) {
+        if (row + rowOffset < GROUND_POINT_ROW_COUNT) {
+            halfWidth = radiusSquared - rowOffset * rowOffset;
+            if (halfWidth < 0) {
+                halfWidth = 0;
+            }
+            halfWidth = sqrt(halfWidth);
+            for (columnOffset = -halfWidth; columnOffset <= halfWidth; columnOffset++) {
+                if (column + columnOffset < GROUND_POINT_COLUMN_COUNT) {
+                    point = GetGroundPoint(column + columnOffset, row + rowOffset);
+                    distance = (f32)IntLength2D(center->v.ob[AXIS_X] - point->v.ob[AXIS_X],
+                                                center->v.ob[AXIS_Z] - point->v.ob[AXIS_Z]) /
+                               BLEND_DISTANCE_SCALE;
+                    weight = distance * falloff;
+                    if (weight > 1.0f) {
+                        weight = 1.0f;
+                    }
+                    weight *= weight;
+                    SetGroundPointHeightAndShade(column + columnOffset, row + rowOffset,
+                                                 point->v.ob[AXIS_Y] * weight + center->v.ob[AXIS_Y] * (1.0f - weight),
+                                                 BLENDED_POINT_SHADE);
+                }
+            }
+        }
+    }
+}
 
 /*
  * Fills sTriangleSlopes from the ground. It goes over the cells in blocks
