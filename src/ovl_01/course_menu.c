@@ -1,16 +1,34 @@
 #include "common.h"
 #include "asset.h"
 #include "libc.h"
+#include "menu_memory.h"
+#include "save.h"
 #include "text.h"
 #include "variables.h"
 
 /* The images of D_800C2064 that the course menu reads */
 #define COURSE_MENU_IMAGE_COUNT 7
 
+/* The buffers that func_8020E0AC keeps, by the kind its caller gives */
+#define COURSE_BUFFER_FIRST 1
+#define COURSE_BUFFER_SECOND 2
+#define COURSE_BUFFER_LAST 3
+
+/* func_8020E0AC reads the chosen course's first image into two buffers, and its three files */
+#define COURSE_IMAGE_COPY_COUNT 2
+#define COURSE_IMAGE_COUNT 16
+#define COURSE_FILE_COUNT 3
+
 extern u16 D_800C2064[];
+extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
+extern s16 D_800C2278[][COURSE_FILE_COUNT];
+extern void *D_800FBE38[COURSE_FILE_COUNT];
 extern s32 D_802300A8_ovl_01;
 extern s32 D_802300AC_ovl_01;
 extern void *D_8023A810_ovl_01;
+extern void **D_8023A814_ovl_01;
+extern void **D_8023A818_ovl_01;
+extern void **D_8023A81C_ovl_01;
 extern void **D_8023A820_ovl_01;
 extern void *D_8023A824_ovl_01;
 extern void *D_8023A828_ovl_01;
@@ -32,7 +50,41 @@ void func_8020E010_ovl_01(void **buffers) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E0AC_ovl_01);
+void func_8020E0AC_ovl_01(void **buffers, s32 requestedKind) {
+    EncodedAsset asset;
+    AssetFile file;
+    s8 bufferKind = requestedKind;
+    MenuMemory *memory = func_8005AF74();
+    s16 index;
+
+    if ((s8)requestedKind < 0) {
+        bufferKind = COURSE_BUFFER_FIRST;
+    }
+    if (bufferKind > COURSE_BUFFER_LAST) {
+        bufferKind = COURSE_BUFFER_LAST;
+    }
+    switch (bufferKind) {
+        case COURSE_BUFFER_FIRST:
+            D_8023A814_ovl_01 = buffers;
+            break;
+        case COURSE_BUFFER_SECOND:
+            D_8023A818_ovl_01 = buffers;
+            break;
+        case COURSE_BUFFER_LAST:
+            D_8023A81C_ovl_01 = buffers;
+            break;
+    }
+    if (memory->unk30 != COURSE_COUNT) {
+        for (index = 0; index != COURSE_IMAGE_COPY_COUNT; index++) {
+            OpenEncodedAsset(D_800C21B8[memory->unk30][0], &asset);
+            ReadEncodedAsset(buffers[index], &asset);
+        }
+        for (index = 0; index != COURSE_FILE_COUNT; index++) {
+            OpenAssetFile(D_800C2278[memory->unk30][index], &file);
+            ReadAssetFile(D_800FBE38[index], GetAssetFileSize(&file), &file);
+        }
+    }
+}
 
 void func_8020E26C_ovl_01(void *buffer, s16 bufferKind) {
     EncodedAsset asset;
