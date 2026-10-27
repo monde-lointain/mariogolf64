@@ -8,6 +8,7 @@
 #include "hole_loader.h"
 #include "libc.h"
 #include "menu.h"
+#include "menu_memory.h"
 #include "overlay_manager.h"
 #include "save.h"
 #include "scene.h"
@@ -103,6 +104,11 @@ extern s16 D_8022BE92_ovl_01;
 extern s32 D_8022F8C8_ovl_01;
 extern s8 D_8022F8CD_ovl_01;
 extern u8 D_8022F8CE_ovl_01;
+extern s32 D_80105B68;
+extern s32 D_8022F8C0_ovl_01;
+extern u8 D_8022F8C4_ovl_01;
+extern s8 D_8022F8C5_ovl_01;
+extern void *D_8010526C[2];
 extern void *D_800FBE30[2];
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 /* The 24x24 icon that func_80207E28 animates, such as the birdie badge; each frame shows for two calls */
@@ -110,6 +116,16 @@ extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 #define ANIMATED_ICON_IMAGE_SIZE (ANIMATED_ICON_SIZE * ANIMATED_ICON_SIZE / 2)
 #define ANIMATED_ICON_FRAME_COUNT 6
 #define ANIMATED_ICON_FRAME_DURATION 2
+/* func_80200A40 draws the chosen mode's icon, 64x64 CI8, in two strips */
+#define MODE_ICON_WIDTH 64
+#define MODE_ICON_STRIP_HEIGHT 32
+#define MODE_ICON_STRIP_COUNT 2
+#define MODE_ICON_FRAME_DURATION 4
+/* The most modes the mode select offers for a player count */
+#define MODE_CHOICE_LIMIT 12
+
+extern u8 D_8022BEBC_ovl_01[MAX_PLAYER_COUNT][MODE_CHOICE_LIMIT];
+
 /* func_80208F8C draws a frame of the waving Toad (assets 0x710 onward), 48x51 CI8, in two strips */
 #define TOAD_WIDTH 48
 #define TOAD_STRIP_HEIGHT 30
@@ -948,7 +964,45 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FE4D0_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_802004A0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200A40_ovl_01);
+void func_80200A40_ovl_01(Gfx **displayListHead, s32 left, s32 top, s32 halfSize, s32 scale) {
+    Gfx *gfx = *displayListHead;
+    EncodedAsset asset;
+    s32 stripIndex;
+    void *image;
+    u8 iconIndex;
+
+    gDPPipeSync(gfx++);
+    image = D_8010526C[D_8022F8C4_ovl_01];
+    gDPLoadTLUT_pal256(gfx++, ((u32)image + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MODE_ICON_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)image + LARGE_PALETTED_TEXELS_OFFSET +
+                             stripIndex * MODE_ICON_WIDTH * MODE_ICON_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MODE_ICON_WIDTH, MODE_ICON_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        gSPScisTextureRectangle(gfx++, left << 2, (top + stripIndex * halfSize) << 2, (left + halfSize + halfSize) << 2,
+                                (top + halfSize + stripIndex * halfSize) << 2, G_TX_RENDERTILE, 0, 0, scale, scale);
+        gDPPipeSync(gfx++);
+    }
+    D_8022F8C5_ovl_01++;
+    if (D_8022F8C5_ovl_01 == MODE_ICON_FRAME_DURATION) {
+        iconIndex = D_8022BEBC_ovl_01[D_80105B68 - 1][((MenuMemory *)D_801323A0)->modeChoice];
+        D_8022F8C5_ovl_01 = 0;
+        D_8022F8C0_ovl_01++;
+        if (D_8022F8C0_ovl_01 >= MODE_ICON_FRAME_COUNT) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        if (g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01] == END_OF_ICON_FRAMES) {
+            D_8022F8C0_ovl_01 = 0;
+        }
+        D_8022F8C4_ovl_01 = D_8022F8C4_ovl_01 == 0;
+        OpenEncodedAsset(g_ModeIconAnimations[iconIndex][D_8022F8C0_ovl_01], &asset);
+        ReadEncodedAsset(D_8010526C[D_8022F8C4_ovl_01], &asset);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_80200EF0_ovl_01);
 
