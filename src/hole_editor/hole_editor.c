@@ -1,13 +1,17 @@
 #include "common.h"
+#include "billboard.h"
 #include "camera.h"
 #include "controller.h"
 #include "debug_text.h"
+#include "functions.h"
 #include "heap.h"
+#include "hole_loader.h"
 #include "host_file.h"
 #include "libc.h"
 #include "main.h"
 #include "scene.h"
 #include "screen.h"
+#include "sound.h"
 #include "terrain.h"
 #include "variables.h"
 #include "work_area.h"
@@ -16,6 +20,11 @@
 #define EDGE_POINT_COUNT (GROUND_TILE_POINT_SPAN + 1)
 /* An interpolation weight runs from 0, all the first end, to this, all the second */
 #define EDGE_WEIGHT_MAX 16
+
+#define EDITOR_SOUND_CHANNEL 15
+#define EDITOR_SOUND_VOLUME 127
+/* WORLD_TO_COURSE_SCALE as a shift */
+#define WORLD_TO_COURSE_SHIFT 10
 
 /* The ground cells, between neighbouring ground points */
 #define CELL_COLUMN_COUNT (GROUND_POINT_COLUMN_COUNT - 1)
@@ -171,7 +180,55 @@ INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80402E1C_hole_edito
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80403A04_hole_editor);
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_804045C0_hole_editor);
+/*
+ * Sets the billboards and the hole's points back on the ground, and
+ * copies the first cup and tee positions to D_800BA9D8. The billboards'
+ * first height comes from their x and z unscaled. The translation each
+ * billboard builds goes unused, and PlaceBillboards places them all again
+ * for each one.
+ */
+void func_804045C0_hole_editor(void) {
+    Mat4 translation;
+    Mat4 unusedMatrix; /* The game's frame has room for a second matrix */
+    s32 height;
+    s32 i;
+
+    PlaySound(SOUND_CONFIRM, EDITOR_SOUND_CHANNEL, EDITOR_SOUND_VOLUME);
+    for (i = 0; i < BILLBOARD_COUNT; i++) {
+        if (!g_Billboards[i].isNearCourseEdge) {
+            g_Billboards[i].y = GetGroundHeight(g_Billboards[i].x, g_Billboards[i].z) * COURSE_TO_WORLD_SCALE;
+            height = GetGroundHeight(g_Billboards[i].x << WORLD_TO_COURSE_SHIFT,
+                                     g_Billboards[i].z << WORLD_TO_COURSE_SHIFT) /
+                     (1 << WORLD_TO_COURSE_SHIFT);
+            guTranslateF(translation, g_Billboards[i].x, height + 1, g_Billboards[i].z);
+            PlaceBillboards();
+        }
+    }
+    for (i = 0; i < CUP_POSITION_COUNT; i++) {
+        if (g_HolePoints.cupPositions[i][AXIS_X] != 0 && g_HolePoints.cupPositions[i][AXIS_Z] != 0) {
+            g_HolePoints.cupPositions[i][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.cupPositions[i][AXIS_X], g_HolePoints.cupPositions[i][AXIS_Z]);
+            g_HolePoints.unk30[i][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.unk30[i][AXIS_X], g_HolePoints.unk30[i][AXIS_Z]);
+        }
+    }
+    D_800BA9D8.cupPosition[AXIS_X] = g_HolePoints.cupPositions[0][AXIS_X];
+    g_CupPositionY = g_HolePoints.cupPositions[0][AXIS_Y];
+    g_CupPositionZ = g_HolePoints.cupPositions[0][AXIS_Z];
+    g_TeePositionX = g_HolePoints.unk30[0][AXIS_X];
+    g_TeePositionY = g_HolePoints.unk30[0][AXIS_Y];
+    g_TeePositionZ = g_HolePoints.unk30[0][AXIS_Z];
+    for (i = 0; i < ROUTE_POINT_COUNT; i++) {
+        if (g_HolePoints.unk60[i][AXIS_X] != 0 && g_HolePoints.unk60[i][AXIS_Z] != 0) {
+            g_HolePoints.unk60[i][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.unk60[i][AXIS_X], g_HolePoints.unk60[i][AXIS_Z]);
+        }
+        if (g_HolePoints.routePoints[i][AXIS_X] != 0 && g_HolePoints.routePoints[i][AXIS_Z] != 0) {
+            g_HolePoints.routePoints[i][AXIS_Y] =
+                GetGroundHeight(g_HolePoints.routePoints[i][AXIS_X], g_HolePoints.routePoints[i][AXIS_Z]);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80404850_hole_editor);
 
