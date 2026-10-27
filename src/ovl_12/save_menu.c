@@ -227,9 +227,6 @@
 /* The same hole texts that the course select shows for Ring Shot */
 #define RING_SHOT_TEXT_FIRST_IMAGE 0x4B
 #define RING_SHOT_HOLE_COUNT 6
-/* An image header's width and height are halfwords; these are their low bytes */
-#define IMAGE_WIDTH_LOW_BYTE 3
-#define IMAGE_HEIGHT_LOW_BYTE 5
 
 /* Unk68.unk36's low bits: the kind of shot the record replays */
 #define RECORD_KIND_MASK 0xF
