@@ -19,12 +19,26 @@
 #define COURSE_IMAGE_COUNT 16
 #define COURSE_FILE_COUNT 3
 
+/* The course's statistics: the panel behind them, and the rows of it that show */
+#define STATS_COUNT 10
+#define STATS_SHOWN_ROW_COUNT 4
+#define STATS_PANEL_LEFT 24
+#define STATS_PANEL_TOP 138
+#define STATS_PANEL_RIGHT 302
+#define STATS_PANEL_BOTTOM 230
+#define STATS_LABEL_X 30
+#define STATS_FIRST_Y 154
+#define STATS_LINE_HEIGHT 16
+
 extern u16 D_800C2064[];
 extern u16 D_800C21B8[][COURSE_IMAGE_COUNT];
 extern s16 D_800C2278[][COURSE_FILE_COUNT];
 extern void *D_800FBE38[COURSE_FILE_COUNT];
+extern s16 D_802300A0_ovl_01;
 extern s32 D_802300A8_ovl_01;
 extern s32 D_802300AC_ovl_01;
+extern const char *D_802300B4_ovl_01[STATS_COUNT];
+extern const char D_802318A8_ovl_01[];
 extern void *D_8023A810_ovl_01;
 extern void **D_8023A814_ovl_01;
 extern void **D_8023A818_ovl_01;
@@ -35,6 +49,8 @@ extern void *D_8023A828_ovl_01;
 extern void *D_8023A82C_ovl_01;
 extern void *D_8023A830_ovl_01;
 
+s32 GetOpenCourseCount(void);
+void func_8020F9B8_ovl_01(Gfx **displayListHead, s16 statIndex, u8 row);
 void SetTextColor(Gfx **displayListHead, s32 red, s32 green, s32 blue);
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
@@ -134,7 +150,33 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F2D0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F794_ovl_01);
+void func_8020F794_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 row = 0;
+    s16 statIndex;
+
+    GetSaveData();
+    func_8005AF74();
+    GetOpenCourseCount();
+    gDPSetPrimColor(gfx++, 0, 0, 64, 64, 64, 191);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gfx++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPPipeSync(gfx++);
+    gSPTextureRectangle(gfx++, STATS_PANEL_LEFT << 2, STATS_PANEL_TOP << 2, STATS_PANEL_RIGHT << 2,
+                        STATS_PANEL_BOTTOM << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+    gDPPipeSync(gfx++);
+    for (statIndex = D_802300A0_ovl_01; statIndex != D_802300A0_ovl_01 + STATS_SHOWN_ROW_COUNT; statIndex++) {
+        SetUpTextDrawing(&gfx);
+        SetTextColor(&gfx, 255, 255, 255);
+        sprintf(g_PrintBuffer, D_802318A8_ovl_01, D_802300B4_ovl_01[statIndex]);
+        DrawLargeText(&gfx, STATS_LABEL_X, STATS_FIRST_Y + (s16)row * STATS_LINE_HEIGHT, g_PrintBuffer);
+        func_8020F9B8_ovl_01(&gfx, statIndex, row);
+        row++;
+    }
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020F9B8_ovl_01);
 
