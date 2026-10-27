@@ -364,8 +364,8 @@ void func_80228B60_ovl_01(void) {
     MenuMemory *memory = func_8005AF74();
     s32 charIndex;
 
-    memory->unk47 = 0;
-    memory->unk48 = 0;
+    memory->codeKeyColumn = 0;
+    memory->codeKeyRow = 0;
     D_80230F74_ovl_01 = 0;
     for (charIndex = 0; charIndex != CLUB_TOURNAMENT_CODE_LENGTH; charIndex++) {
         D_80230FD4_ovl_01[charIndex] = CLUB_CODE_NO_CHAR;
@@ -619,7 +619,7 @@ void func_8022B360_ovl_01(Gfx **displayListHead) {
 s32 func_8022B46C_ovl_01(void) {
     MenuMemory *memory = func_8005AF74();
     s32 result = CODE_KEY_RESULT_TYPING;
-    u8 key = D_80230F84_ovl_01[memory->unk48][memory->unk47];
+    u8 key = D_80230F84_ovl_01[memory->codeKeyRow][memory->codeKeyColumn];
 
     switch (key) {
         case CODE_KEY_BACK:
@@ -646,8 +646,8 @@ s32 func_8022B46C_ovl_01(void) {
                 D_80230FD4_ovl_01[D_80230F68_ovl_01] = key;
                 D_80230F68_ovl_01++;
                 if (D_80230F68_ovl_01 == CLUB_TOURNAMENT_CODE_LENGTH) {
-                    memory->unk47 = CODE_KEYBOARD_END_COLUMN;
-                    memory->unk48 = CODE_KEYBOARD_END_ROW;
+                    memory->codeKeyColumn = CODE_KEYBOARD_END_COLUMN;
+                    memory->codeKeyRow = CODE_KEYBOARD_END_ROW;
                 }
             } else {
                 D_80230FD4_ovl_01[D_80230F68_ovl_01 - 1] = key;

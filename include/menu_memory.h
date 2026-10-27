@@ -45,8 +45,8 @@ typedef struct MenuMemory {
     /* 0x43 */ s8 savedGameIndex;
     /* 0x44 */ u8 unk44[0x46 - 0x44];
     /* 0x46 */ u8 unk46;
-    /* 0x47 */ s8 unk47;
-    /* 0x48 */ s8 unk48;
+    /* 0x47 */ s8 codeKeyColumn; /* The club tournament code keyboard's chosen key */
+    /* 0x48 */ s8 codeKeyRow;
 } MenuMemory;
 
 MenuMemory *func_8005AF74(void);
