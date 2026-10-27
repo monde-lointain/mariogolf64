@@ -42,7 +42,10 @@ extern f32 sMenuBobPhase;
 /* Players whose D_800C1FF4 holds this never clash with the others */
 #define UNSHARED_SLOT_INDEX 4
 
-/* The 256 color image of D_801052BC that func_801FD7B0 draws, in strips that fit the texture memory */
+/*
+ * The 256 color images of D_801052BC and D_801B60D0 that func_801FD7B0 and
+ * func_801FCEF8 draw, in strips that fit the texture memory
+ */
 #define MENU_BANNER_PALETTE_SIZE (LARGE_PALETTE_COLOR_COUNT * PALETTE_COLOR_SIZE)
 #define MENU_BANNER_TEXELS_OFFSET (IMAGE_HEADER_SIZE + MENU_BANNER_PALETTE_SIZE)
 #define MENU_BANNER_WIDTH 200
@@ -50,10 +53,12 @@ extern f32 sMenuBobPhase;
 #define MENU_BANNER_STRIP_COUNT 3
 #define MENU_BANNER_LEFT 60
 #define MENU_BANNER_TOP 18
+#define UNUSED_BANNER_TOP 16
 
 extern s8 D_800C1FF4[MAX_PLAYER_COUNT];
 extern s32 D_801051F0;
 extern void *D_801052BC[2];
+extern void *D_801B60D0;
 extern s16 D_8022BE8C_ovl_01;
 extern u8 D_8022F8E0_ovl_01[MAX_PLAYER_COUNT + 1][MAX_PLAYER_COUNT];
 /* The parts of the menu backdrop that func_801FC60C draws */
@@ -699,7 +704,32 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FC754_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FCB74_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FCEF8_ovl_01);
+/* Nothing in the menu calls this; menu.c loads its image, asset 0x521 */
+void func_801FCEF8_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    s32 stripIndex;
+    s32 stripTop;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gDPLoadTLUT_pal256(gfx++, ((u32)D_801B60D0 + IMAGE_HEADER_SIZE) & ~7);
+    for (stripIndex = 0; stripIndex != MENU_BANNER_STRIP_COUNT; stripIndex++) {
+        gDPLoadTextureBlock(gfx++,
+                            ((u32)D_801B60D0 + MENU_BANNER_TEXELS_OFFSET +
+                             stripIndex * MENU_BANNER_WIDTH * MENU_BANNER_STRIP_HEIGHT) & ~7,
+                            G_IM_FMT_CI, G_IM_SIZ_8b, MENU_BANNER_WIDTH, MENU_BANNER_STRIP_HEIGHT, 0,
+                            G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                            G_TX_NOLOD, G_TX_NOLOD);
+        gDPPipeSync(gfx++);
+        stripTop = UNUSED_BANNER_TOP + stripIndex * MENU_BANNER_STRIP_HEIGHT;
+        gSPScisTextureRectangle(gfx++, MENU_BANNER_LEFT << 2, stripTop << 2,
+                                (MENU_BANNER_LEFT + MENU_BANNER_WIDTH) << 2,
+                                (stripTop + MENU_BANNER_STRIP_HEIGHT) << 2, G_TX_RENDERTILE, 0, 0,
+                                TEXEL_STEP_ONE, TEXEL_STEP_ONE);
+        gDPPipeSync(gfx++);
+    }
+    *displayListHead = gfx;
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/main_menu", func_801FD1B4_ovl_01);
 
