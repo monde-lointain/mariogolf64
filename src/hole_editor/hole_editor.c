@@ -37,6 +37,36 @@
 #define SLOPE_SHADE_OFFSET 0x40
 #define SLOPE_SHADE_MAX 0xFF
 
+/* func_80405DB0's ground shaping searches this many nearest offsets */
+#define SHAPE_OFFSET_COUNT 1600
+#define SHAPE_OFFSET_SPAN 20
+#define HOLE_EDITOR_SHAPE_ASSERT_LINE 2191
+/* The terrain code grid's columns and rows */
+#define CODE_GRID_COLUMN_COUNT (TERRAIN_CODE_CELL_COLUMN_COUNT * TERRAIN_CODE_CELL_SPAN)
+#define CODE_GRID_ROW_COUNT (TERRAIN_CODE_CELL_ROW_COUNT * TERRAIN_CODE_CELL_SPAN)
+#define GREEN_NOISE_MASK 3
+#define GROUND_NOISE_MASK 0xF
+/* A point's y changes by this per course unit between its code and the green's middle */
+#define HEIGHT_PER_COURSE_UNIT -0.00000390625f
+/* Bunker codes with no other code nearer than this get BUNKER_INNER_OFFSET added to y */
+#define BUNKER_INNER_DISTANCE 2
+#define BUNKER_INNER_OFFSET 45
+/* Rough codes take ROUGH_EDGE_OFFSET off y, or more with no other code nearer than this */
+#define ROUGH_INNER_DISTANCE 19
+#define ROUGH_EDGE_OFFSET 22
+#define ROUGH_INNER_OFFSET 120
+#define ROUGH_INNER_NOISE_MASK 0x1F
+#define SHAPED_POINT_SHADE 0xFF
+/* Trees go in rough this many code cells from its edge, at least TREE_SPACING units apart */
+#define TREE_MIN_DISTANCE 8
+#define TREE_MAX_DISTANCE 10
+#define TREE_SPACING 0x100
+#define TREE_TEXTURE_INDEX 2
+/* PlaceBillboards sets isNearCourseEdge and y again */
+#define TREE_NEAR_EDGE 0x100
+#define TREE_WIDTH 0x80
+#define TREE_HEIGHT 0x100
+
 /* func_804077B0 blends heights over distances of this many units per falloff step */
 #define BLEND_DISTANCE_SCALE 512.0f
 #define BLENDED_POINT_SHADE 0xFF
@@ -198,6 +228,7 @@ extern Mtx D_8040CC98;
 extern u8 D_80491A60[WAVE_TEXTURE_HEIGHT * WAVE_TEXTURE_WIDTH];
 
 s32 GetTerrainCode(s32 column, s32 row);
+void BuildAllTileMidpoints(void);
 s32 CrossProductXZ(s32 originX, s32 originZ, s32 firstX, s32 firstZ, s32 secondX, s32 secondZ);
 void MarkBillboardsOnMap(void);
 extern u8 D_8040C580_hole_editor[EDGE_POINT_COUNT][EDGE_POINT_COUNT];
@@ -849,7 +880,210 @@ void func_80405C94_hole_editor(Vtx *vertices, s32 column, s32 row, s32 weight) {
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/hole_editor/hole_editor", func_80405DB0_hole_editor);
+/*
+ * Shapes the ground from the terrain codes and plants trees. Each ground
+ * point's y follows its distance from the middle of the green, with
+ * noise; bunker and rough points move further, more so far inside them.
+ * The tile midpoints are then put back on the lines between their
+ * neighbors, and trees go in the rough TREE_MIN_DISTANCE to
+ * TREE_MAX_DISTANCE code cells from its edge. Nothing calls it.
+ */
+void func_80405DB0_hole_editor(void) {
+    Vtx *edgePoints[3];
+    s32 treePositions[BILLBOARD_COUNT][2];
+    GridOffset *offsets;
+    s32 offsetCount;
+    s32 offsetIndex;
+    s32 greenColumn;
+    s32 greenRow;
+    s32 greenCount;
+    s32 column;
+    s32 row;
+    s32 codeColumn;
+    s32 codeRow;
+    s32 edgeRow;
+    s32 edgeColumn;
+    s32 code;
+    s32 neighborCode;
+    s32 height;
+    s32 tileIndex;
+    s32 treeCount;
+    s32 treeIndex;
+    s32 billboardIndex;
+    s32 x;
+    s32 z;
+    Vtx *point;
+
+    offsets = AllocMemory(SHAPE_OFFSET_COUNT * sizeof(GridOffset));
+    EDITOR_ASSERT(offsets != NULL, HOLE_EDITOR_SHAPE_ASSERT_LINE);
+    offsetCount = ListOffsetsByDistance(SHAPE_OFFSET_SPAN, offsets, SHAPE_OFFSET_COUNT);
+    greenCount = 0;
+    greenRow = 0;
+    greenColumn = 0;
+    for (row = 0; row < CODE_GRID_ROW_COUNT; row++) {
+        for (column = 0; column < CODE_GRID_COLUMN_COUNT; column++) {
+            if (GetTerrainCode(column, row) == TERRAIN_CODE_GREEN) {
+                greenColumn += column;
+                greenRow += row;
+                greenCount++;
+            }
+        }
+    }
+    if (greenCount != 0) {
+        greenColumn /= greenCount;
+        greenRow /= greenCount;
+    }
+    BuildAllTileMidpoints();
+    for (row = 0; row < GROUND_POINT_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_POINT_COLUMN_COUNT; column++) {
+            if ((row & 1) != (column & 1)) {
+                continue;
+            }
+            codeColumn = (point = GetGroundPoint(column, row))->v.ob[AXIS_X] / VERTEX_UNITS_PER_CODE;
+            codeRow = point->v.ob[AXIS_Z] / VERTEX_UNITS_PER_CODE;
+            code = GetTerrainCode(codeColumn, codeRow);
+            if (code == TERRAIN_CODE_GREEN) {
+                height = rand() & GREEN_NOISE_MASK;
+            } else {
+                height = (f32)((s32)IntLength2D(codeColumn - greenColumn, codeRow - greenRow) << GROUND_TEXEL_SHIFT) *
+                         HEIGHT_PER_COURSE_UNIT;
+                height -= rand() & GROUND_NOISE_MASK;
+                if (code == TERRAIN_CODE_BUNKER) {
+                    neighborCode = code;
+                    for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
+                        neighborCode = GetTerrainCode(codeColumn + offsets[offsetIndex].column,
+                                                      codeRow + offsets[offsetIndex].row);
+                        if (neighborCode != TERRAIN_CODE_BUNKER ||
+                            offsets[offsetIndex].distance >= BUNKER_INNER_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                            break;
+                        }
+                    }
+                    if (neighborCode == TERRAIN_CODE_BUNKER) {
+                        height += BUNKER_INNER_OFFSET;
+                    }
+                } else if (code == TERRAIN_CODE_ROUGH) {
+                    for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
+                        if (GetTerrainCode(codeColumn + offsets[offsetIndex].column,
+                                           codeRow + offsets[offsetIndex].row) != TERRAIN_CODE_ROUGH ||
+                            offsets[offsetIndex].distance >= ROUGH_INNER_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                            break;
+                        }
+                    }
+                    if (offsets[offsetIndex].distance >= ROUGH_INNER_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                        height -= (rand() & ROUGH_INNER_NOISE_MASK) + ROUGH_INNER_OFFSET;
+                    } else {
+                        height -= ROUGH_EDGE_OFFSET;
+                    }
+                }
+            }
+            SetGroundPointHeightAndShade(column, row, height, SHAPED_POINT_SHADE);
+        }
+    }
+    /* row and column count tiles here */
+    for (row = 0; row < GROUND_TILE_ROW_COUNT; row++) {
+        for (column = 0; column < GROUND_TILE_COLUMN_COUNT; column++) {
+            tileIndex = row * GROUND_TILE_COLUMN_COUNT + column;
+            if (g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex < 0) {
+                continue;
+            }
+            g_WorkArea.hole.tiles[tileIndex].unk990 = 0;
+            for (edgeRow = 0; edgeRow < EDGE_POINT_COUNT; edgeRow++) {
+                for (edgeColumn = 0; edgeColumn < EDGE_POINT_COUNT; edgeColumn++) {
+                    if ((edgeRow & 1) == (edgeColumn & 1)) {
+                        continue;
+                    }
+                    if ((edgeRow & 1) == 0) {
+                        edgePoints[0] = GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn - 1,
+                                                       row * GROUND_TILE_POINT_SPAN + edgeRow);
+                        edgePoints[1] = &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
+                                                                  [D_8040C580_hole_editor[edgeRow][edgeColumn]];
+                        edgePoints[2] = GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn + 1,
+                                                       row * GROUND_TILE_POINT_SPAN + edgeRow);
+                        edgePoints[1]->v.ob[AXIS_Y] =
+                            edgePoints[0]->v.ob[AXIS_Y] +
+                            (edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
+                                (edgePoints[1]->v.ob[AXIS_X] - edgePoints[0]->v.ob[AXIS_X]) /
+                                (edgePoints[2]->v.ob[AXIS_X] - edgePoints[0]->v.ob[AXIS_X]);
+                    } else {
+                        edgePoints[0] = GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn,
+                                                       row * GROUND_TILE_POINT_SPAN + edgeRow - 1);
+                        edgePoints[1] = &g_WorkArea.hole.midpoints[g_WorkArea.hole.tiles[tileIndex].midpointBlockIndex]
+                                                                  [D_8040C580_hole_editor[edgeRow][edgeColumn]];
+                        edgePoints[2] = GetGroundPoint(column * GROUND_TILE_POINT_SPAN + edgeColumn,
+                                                       row * GROUND_TILE_POINT_SPAN + edgeRow + 1);
+                        edgePoints[1]->v.ob[AXIS_Y] =
+                            edgePoints[0]->v.ob[AXIS_Y] +
+                            (edgePoints[2]->v.ob[AXIS_Y] - edgePoints[0]->v.ob[AXIS_Y]) *
+                                (edgePoints[1]->v.ob[AXIS_Z] - edgePoints[0]->v.ob[AXIS_Z]) /
+                                (edgePoints[2]->v.ob[AXIS_Z] - edgePoints[0]->v.ob[AXIS_Z]);
+                    }
+                }
+            }
+        }
+    }
+    treeCount = 0;
+    for (row = 0; row < CODE_GRID_ROW_COUNT; row++) {
+        for (column = 0; column < CODE_GRID_COLUMN_COUNT; column++) {
+            if (GetTerrainCode(column, row) == TERRAIN_CODE_ROUGH) {
+                for (offsetIndex = 0; offsetIndex < offsetCount; offsetIndex++) {
+                    if (GetTerrainCode(column + offsets[offsetIndex].column, row + offsets[offsetIndex].row) !=
+                            TERRAIN_CODE_ROUGH ||
+                        offsets[offsetIndex].distance >= TREE_MAX_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                        break;
+                    }
+                }
+                if (offsets[offsetIndex].distance >= TREE_MIN_DISTANCE * OFFSET_DISTANCE_SCALE &&
+                    offsets[offsetIndex].distance < TREE_MAX_DISTANCE * OFFSET_DISTANCE_SCALE) {
+                    x = column * VERTEX_UNITS_PER_CODE;
+                    z = row * VERTEX_UNITS_PER_CODE;
+                    for (treeIndex = 0; treeIndex < treeCount; treeIndex++) {
+                        if (IntLength2D(x - treePositions[treeIndex][0], z - treePositions[treeIndex][1]) <
+                            TREE_SPACING) {
+                            break;
+                        }
+                    }
+                    if (treeIndex == treeCount) {
+                        treePositions[treeCount][0] = x;
+                        treePositions[treeCount][1] = z;
+                        treeCount++;
+                        /* The limit is checked at the end of each block; one check compiles differently */
+                        if (treeCount == BILLBOARD_COUNT) {
+                            goto planted;
+                        }
+                    }
+                    if (treeCount == BILLBOARD_COUNT) {
+                        goto planted;
+                    }
+                }
+                if (treeCount == BILLBOARD_COUNT) {
+                    goto planted;
+                }
+            }
+            if (treeCount == BILLBOARD_COUNT) {
+                goto planted;
+            }
+        }
+    }
+planted:
+    for (billboardIndex = 0; billboardIndex < treeCount; billboardIndex++) {
+        g_Billboards[billboardIndex].y = GetGroundHeight(treePositions[billboardIndex][0] << WORLD_TO_COURSE_SHIFT,
+                                                    treePositions[billboardIndex][1] << WORLD_TO_COURSE_SHIFT) /
+                                        (1 << WORLD_TO_COURSE_SHIFT) +
+                                    1;
+        g_Billboards[billboardIndex].x = treePositions[billboardIndex][0];
+        g_Billboards[billboardIndex].z = treePositions[billboardIndex][1];
+        g_Billboards[billboardIndex].textureIndex = TREE_TEXTURE_INDEX;
+        g_Billboards[billboardIndex].shapeIndex = 0;
+        g_Billboards[billboardIndex].isNearCourseEdge = TREE_NEAR_EDGE;
+        g_Billboards[billboardIndex].width = TREE_WIDTH;
+        g_Billboards[billboardIndex].height = TREE_HEIGHT;
+    }
+    for (billboardIndex = treeCount; billboardIndex < BILLBOARD_COUNT; billboardIndex++) {
+        g_Billboards[billboardIndex].textureIndex = -1;
+    }
+    PlaceBillboards();
+    FreeMemory(&offsets);
+}
 
 /*
  * Sets each ground tile's unk992 bits, one for each of its cells, to
