@@ -42,6 +42,17 @@ extern MenuChoices g_MenuChoices;
 /* An image buffer of the menu overlay */
 extern u8 g_MenuImageBuffer[];
 
+/* The states of the menus' popup window, which opens and closes by scaling */
+#define MENU_WINDOW_OPENING 0
+#define MENU_WINDOW_OPEN 1
+#define MENU_WINDOW_CLOSING 2
+#define MENU_WINDOW_CLOSED 3
+
+void ResetMenuWindow(void);
+void ShowMenuWindow(void);
+void CloseMenuWindow(void);
+void LoadMenuWindowImage(s32 imageIndex);
+
 /* The title screen's song */
 #define SONG_TITLE 0x27
 
