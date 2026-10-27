@@ -1,6 +1,7 @@
 #include "common.h"
 #include "asset.h"
 #include "course.h"
+#include "cpu_projection.h"
 #include "hole_display.h"
 #include "libc.h"
 #include "menu.h"
@@ -333,7 +334,162 @@ void func_8020E390_ovl_01(void) {
     }
 }
 
+/* func_8020E898 turns the open courses' 64 by 64 images and the totals image on a wheel, seen from above */
+#define COURSE_BOARD_KIND 11
+#define WHEEL_FIELD_OF_VIEW 120.0f
+#define WHEEL_ASPECT_RATIO (4.0f / 3.0f)
+#define WHEEL_NEAR_PLANE 10.0f
+#define WHEEL_FAR_PLANE 30000.0f
+#define WHEEL_EYE_HEIGHT 80.0f
+#define WHEEL_EYE_DISTANCE 120.0f
+#define WHEEL_RADIUS_X 104.0f
+#define WHEEL_RADIUS_Z 40.0f
+#define WHEEL_SLOT_LIMIT 8
+/* The images sit above the wheel's projected points, and each strip 12 pixels higher again */
+#define WHEEL_RAISE 32
+#define WHEEL_ICON_RAISE 12
+#define DEGREES_PER_TURN 360
+/* statsSpin counts steps of four degrees */
+#define DEGREES_PER_SPIN_STEP 4
+#define DEGREES_TO_RADIANS 0.017453292519943295
+#define COURSE_ICON_WIDTH 64
+#define COURSE_ICON_STRIP_HEIGHT 32
+#define COURSE_ICON_STRIP_COUNT 2
+#define COURSE_ICON_HALF_SIZE 32.0f
+#define COURSE_TOTALS_IMAGE COURSE_COUNT
+#define WHEEL_ARROW_WIDTH 32
+#define WHEEL_ARROW_X 160
+#define WHEEL_ARROW_Y 94
+
+extern Mat4 D_8023A790_ovl_01;
+extern Mat4 D_8023A7D0_ovl_01;
+extern f32 D_802300DC_ovl_01;
+
+/*
+ * Doesn't match: the original copies the wheel's slot count to a saved register after working out the spin's angle,
+ * where GCC copies it first (2 diff lines, no opcode differences). Putting the spin first in the angle's sum moves
+ * the copy but swaps two registers and the sum's operands.
+ */
+#ifdef NON_MATCHING
+void func_8020E898_ovl_01(Gfx **displayListHead) {
+    Gfx *gfx = *displayListHead;
+    u16 perspNorm;
+    f32 iconX[WHEEL_SLOT_LIMIT];
+    f32 iconY[WHEEL_SLOT_LIMIT];
+    f32 iconScale[WHEEL_SLOT_LIMIT];
+    s32 unusedSlots[WHEEL_SLOT_LIMIT];
+    s32 drawOrder[WHEEL_SLOT_LIMIT];
+    s32 unused[2];
+    MenuMemory *memory = func_8005AF74();
+    s32 courseCount;
+    s32 index;
+    s32 sortIndex;
+    s32 key;
+    s32 statsCourse;
+    s32 spin;
+    s32 angleStep;
+    f32 angle;
+    f32 wheelX;
+    s32 image;
+    s32 slot;
+    s32 halfSize;
+    s32 step;
+
+    func_801FB54C_ovl_01(&gfx, COURSE_BOARD_KIND);
+    guPerspectiveF(D_8023A790_ovl_01, &perspNorm, WHEEL_FIELD_OF_VIEW, WHEEL_ASPECT_RATIO, WHEEL_NEAR_PLANE,
+                   WHEEL_FAR_PLANE, 1.0f);
+    guLookAtF(D_8023A7D0_ovl_01, 0.0f, WHEEL_EYE_HEIGHT, WHEEL_EYE_DISTANCE, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    SetCpuProjectionF(D_8023A790_ovl_01, D_8023A7D0_ovl_01, g_Viewports);
+    gDPPipeSync(gfx++);
+    gDPSetCycleType(gfx++, G_CYC_1CYCLE);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPPipeSync(gfx++);
+    gDPSetRenderMode(gfx++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+    gDPPipeSync(gfx++);
+    gDPSetTextureFilter(gfx++, G_TF_BILERP);
+    gDPPipeSync(gfx++);
+    gDPSetTextureLUT(gfx++, G_TT_RGBA16);
+    gSPTexture(gfx++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gDPSetTexturePersp(gfx++, G_TP_NONE);
+    courseCount = GetOpenCourseCount();
+    if (courseCount <= 0) {
+        courseCount = 1;
+    }
+    if (courseCount > COURSE_COUNT) {
+        courseCount = COURSE_COUNT;
+    }
+    statsCourse = memory->statsCourse;
+    spin = memory->statsSpin;
+    angleStep = DEGREES_PER_TURN / (courseCount + 1);
+    for (index = 0; index != courseCount + 1; index++) {
+        ScreenPoint point;
+
+        angle = -((((statsCourse - index) % (courseCount + 1)) * angleStep + spin * DEGREES_PER_SPIN_STEP) *
+                  DEGREES_TO_RADIANS);
+        wheelX = sinf(angle) * WHEEL_RADIUS_X;
+        if (ProjectPoint(wheelX, 0.0f, cosf(angle) * WHEEL_RADIUS_Z, &point) < 0) {
+            iconX[index] = point.x;
+            iconY[index] = point.y - WHEEL_RAISE;
+            iconScale[index] = point.scaleX;
+        }
+    }
+    for (sortIndex = 0; sortIndex != courseCount + 1; sortIndex++) {
+        drawOrder[sortIndex] = sortIndex;
+    }
+    /* Draw the farthest images first, so the nearer ones cover them */
+    for (sortIndex = 1; sortIndex != courseCount + 1; sortIndex++) {
+        key = drawOrder[sortIndex];
+        for (index = sortIndex - 1; index >= 0 && iconY[drawOrder[index]] > iconY[key]; index--) {
+            drawOrder[index + 1] = drawOrder[index];
+        }
+        drawOrder[index + 1] = key;
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PRIM);
+    gDPSetCombineMode(gfx++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    /* Nothing here reads D_802300DC */
+    D_802300DC_ovl_01 += 0.1f;
+    for (index = 0; index != courseCount + 1; index++) {
+        slot = drawOrder[index];
+        image = (slot == courseCount) ? COURSE_TOTALS_IMAGE : slot;
+        halfSize = iconScale[slot] * COURSE_ICON_HALF_SIZE;
+        step = (f32)(COURSE_ICON_STRIP_HEIGHT << 10) / halfSize;
+        gDPLoadTLUT_pal256(gfx++, (u32)((u8 *)D_8023A820_ovl_01[image] + IMAGE_HEADER_SIZE) & ~7);
+        gDPPipeSync(gfx++);
+        gDPSetRenderMode(gfx++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+        for (sortIndex = 0; sortIndex != COURSE_ICON_STRIP_COUNT; sortIndex++) {
+            gDPLoadTextureBlock(gfx++,
+                                (u32)((u8 *)D_8023A820_ovl_01[image] + LARGE_PALETTED_TEXELS_OFFSET +
+                                      sortIndex * COURSE_ICON_WIDTH * COURSE_ICON_STRIP_HEIGHT) & ~7,
+                                G_IM_FMT_CI, G_IM_SIZ_8b, COURSE_ICON_WIDTH, COURSE_ICON_STRIP_HEIGHT, 0,
+                                G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOMASK,
+                                G_TX_NOLOD, G_TX_NOLOD);
+            gDPPipeSync(gfx++);
+            gSPScisTextureRectangle(gfx++, (s32)(iconX[slot] - halfSize) << 2,
+                                    ((s32)(iconY[slot] - halfSize + sortIndex * halfSize) - WHEEL_ICON_RAISE) << 2,
+                                    (s32)(iconX[slot] + halfSize) << 2,
+                                    ((s32)(iconY[slot] + sortIndex * halfSize) - WHEEL_ICON_RAISE) << 2,
+                                    G_TX_RENDERTILE, 0, 0, step, step);
+            gDPPipeSync(gfx++);
+        }
+    }
+    gDPPipeSync(gfx++);
+    gDPSetDepthSource(gfx++, G_ZS_PIXEL);
+    func_80212C54_ovl_01(&gfx, D_8023A830_ovl_01, &D_802300A8_ovl_01, &D_802300AC_ovl_01, WHEEL_ARROW_WIDTH,
+                         WHEEL_ARROW_X, WHEEL_ARROW_Y);
+    image = (memory->statsCourse == courseCount) ? COURSE_TOTALS_IMAGE : memory->statsCourse;
+    func_8020F2D0_ovl_01(&gfx, 0, image);
+    func_8020F794_ovl_01(&gfx);
+    func_8020FEF8_ovl_01(&gfx);
+    func_80210190_ovl_01(&gfx);
+    func_802104F0_ovl_01(&gfx);
+    gDPPipeSync(gfx++);
+    *displayListHead = gfx;
+}
+#else
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E898_ovl_01);
+#endif
 
 void func_8020F2D0_ovl_01(Gfx **displayListHead, u8 useCourseNames, s32 courseIndex) {
     Gfx *gfx = *displayListHead;
