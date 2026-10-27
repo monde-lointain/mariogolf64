@@ -13,7 +13,10 @@ extern void *D_8023B670_ovl_01;
 extern void *D_8023B674_ovl_01;
 extern void *D_8023B678_ovl_01;
 extern void *D_8023B67C_ovl_01;
-extern s16 D_8023B684_ovl_01[];
+/* The slots that the save menu steps through, which hold -1 when empty */
+#define SAVE_MENU_SLOT_COUNT 5
+
+extern s16 D_8023B684_ovl_01[SAVE_MENU_SLOT_COUNT];
 extern void *D_8023BD78_ovl_01;
 extern void *D_8023BD7C_ovl_01;
 
@@ -55,7 +58,36 @@ INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220A30_ovl_01);
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220BB0_ovl_01);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/save_menu", func_80220D68_ovl_01);
+s16 func_80220D68_ovl_01(s8 startSlot, u8 isForward) {
+    s32 slot = startSlot;
+    s32 step;
+    s32 tryCount;
+
+    if (slot < 0) {
+        return -1;
+    }
+    if (slot >= SAVE_MENU_SLOT_COUNT) {
+        return -1;
+    }
+    step = isForward ? 1 : -1;
+    slot += step;
+    for (tryCount = 0; tryCount != SAVE_MENU_SLOT_COUNT - 1; tryCount++) {
+        if (slot >= SAVE_MENU_SLOT_COUNT) {
+            slot = 0;
+        }
+        if (slot < 0) {
+            slot = SAVE_MENU_SLOT_COUNT - 1;
+        }
+        if (D_8023B684_ovl_01[slot] != -1) {
+            break;
+        }
+        slot += step;
+    }
+    if (tryCount == SAVE_MENU_SLOT_COUNT - 1) {
+        return -1;
+    }
+    return slot;
+}
 
 s16 func_80220DF8_ovl_01(void) {
     return D_8023B684_ovl_01[func_8005AF74()->unk42];

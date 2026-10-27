@@ -11,9 +11,24 @@
 #define TABLE_ROW_COUNT 18
 #define TABLE_SHOWN_ROW_COUNT 5
 
+/* The images of D_800C2064 that func_80213390 reads */
+#define MENU_SCENE_IMAGE_COUNT 6
+
+extern u16 D_800C2064[];
+extern void **D_8023AA40_ovl_01;
 extern void *D_8023AA44_ovl_01;
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/menu_scene", func_80213390_ovl_01);
+void func_80213390_ovl_01(void **buffers) {
+    EncodedAsset asset;
+
+    s16 imageIndex;
+
+    D_8023AA40_ovl_01 = buffers;
+    for (imageIndex = 0; imageIndex != MENU_SCENE_IMAGE_COUNT; imageIndex++) {
+        OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+        ReadEncodedAsset(D_8023AA40_ovl_01[imageIndex], &asset);
+    }
+}
 
 void func_8021342C_ovl_01(void *buffer) {
     EncodedAsset asset;

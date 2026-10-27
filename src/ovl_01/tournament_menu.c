@@ -21,6 +21,11 @@ extern void *D_80230E74_ovl_01;
 extern void *D_80230E78_ovl_01;
 extern void *D_80230E7C_ovl_01;
 extern void *D_80230E84_ovl_01;
+/* The table of images that func_802269AC picks from */
+#define TOURNAMENT_IMAGE_ROW_COUNT 15
+#define TOURNAMENT_IMAGE_COLUMN_COUNT 4
+
+extern s16 D_80230EC4_ovl_01[TOURNAMENT_IMAGE_ROW_COUNT][TOURNAMENT_IMAGE_COLUMN_COUNT];
 extern s16 D_80230F34_ovl_01;
 extern u8 D_80230F40_ovl_01;
 extern void *D_80230F44_ovl_01;
@@ -147,7 +152,24 @@ void LoadMenuWindowImage(s32 imageIndex) {
     ReadEncodedAsset(g_MenuWindowImage, &asset);
 }
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/tournament_menu", func_802269AC_ovl_01);
+void func_802269AC_ovl_01(s32 row, s32 column) {
+    AssetFile file;
+
+    if (row < 0) {
+        row = 0;
+    }
+    if (row >= TOURNAMENT_IMAGE_ROW_COUNT) {
+        row = TOURNAMENT_IMAGE_ROW_COUNT - 1;
+    }
+    if (column < 0) {
+        column = 0;
+    }
+    if (column >= TOURNAMENT_IMAGE_COLUMN_COUNT) {
+        column = TOURNAMENT_IMAGE_COLUMN_COUNT - 1;
+    }
+    OpenAssetFile(D_80230EC4_ovl_01[row][column], &file);
+    ReadAssetFile(D_80230E84_ovl_01, (s16)GetAssetFileSize(&file), &file);
+}
 
 void func_80226A34_ovl_01(void) {
     GetSaveData();

@@ -1,8 +1,25 @@
 #include "common.h"
+#include "asset.h"
+
+/* The images of D_800C2064 that the course menu reads */
+#define COURSE_MENU_IMAGE_COUNT 7
+
+extern u16 D_800C2064[];
+extern void **D_8023A820_ovl_01;
 
 void DrawMenuNumber(Gfx **displayListHead, s32 x, s32 y, s32 value, u8 arg4, u8 style);
 
-INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E010_ovl_01);
+void func_8020E010_ovl_01(void **buffers) {
+    EncodedAsset asset;
+    s32 unused[4];
+    s16 imageIndex;
+
+    D_8023A820_ovl_01 = buffers;
+    for (imageIndex = 0; imageIndex != COURSE_MENU_IMAGE_COUNT; imageIndex++) {
+        OpenEncodedAsset(D_800C2064[imageIndex], &asset);
+        ReadEncodedAsset(D_8023A820_ovl_01[imageIndex], &asset);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/ovl_01/course_menu", func_8020E0AC_ovl_01);
 
