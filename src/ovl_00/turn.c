@@ -286,7 +286,6 @@ extern s32 D_80223FF8_ovl_00;
 extern s32 D_801B60A8; /* g_GameState.unk20, the current player, under a symbol of its own */
 extern s8 D_800FBDB8; /* PlayContestMovies' state */
 extern s8 D_800C3098; /* Asks for the HUD to turn away when the next player is picked */
-extern u16 g_MergedController; /* The first controller's buttons, as play copies them each frame */
 extern s32 D_8022715C_ovl_00; /* How far from the meter's impact mark the swing was stopped */
 extern s32 D_80227154_ovl_00; /* The club slot that the golfer was last posed with */
 extern s32 D_80223E40_ovl_00;  /* Set once the shot preview has been built */
@@ -2352,7 +2351,7 @@ s32 IsBButtonHeld(void) {
     /* Stands in for the static chain that the original, nested in func_802088B0, saves */
     volatile s32 unused;
     s32 garbage;
-    s32 held = g_MergedController & B_BUTTON;
+    s32 held = g_MergedController.buttons & B_BUTTON;
 
     unused = garbage;
     return held != 0;

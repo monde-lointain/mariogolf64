@@ -48,6 +48,11 @@ extern s32 g_ControllerCount;
 extern s32 g_PlayerControllerPorts[MAXCONTROLLERS];
 /* The controller of the player whose turn it is, cleared for a computer player */
 extern ControllerState g_TurnController;
+/*
+ * The buttons of every human player's controller ORed together, or the first
+ * controller's if every player is a computer
+ */
+extern ControllerState g_MergedController;
 
 void ReadControllers(void);
 
